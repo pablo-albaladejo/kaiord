@@ -16,6 +16,8 @@ export const PLACEMENT_FAILURE_REASONS = [
   "library-push-failed",
   "no-export-route",
   "placement-interrupted",
+  /** A pace zone target the profile's zones cannot resolve to a range. */
+  "missing-pace-zones",
 ] as const;
 export type PlacementFailureReason = (typeof PLACEMENT_FAILURE_REASONS)[number];
 

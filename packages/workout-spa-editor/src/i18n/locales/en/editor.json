@@ -83,7 +83,8 @@
     "savedTitle": "Workout Saved",
     "savedDescription": "\"{{name}}\" has been saved as {{format}}",
     "exportFailedTitle": "Export Failed",
-    "exportFailedFallback": "Failed to export workout"
+    "exportFailedFallback": "Failed to export workout",
+    "missingPaceZones": "This workout uses pace zones. Set your threshold pace in Athlete to export it as GCN."
   },
   "saveError": {
     "title": "Save Failed",

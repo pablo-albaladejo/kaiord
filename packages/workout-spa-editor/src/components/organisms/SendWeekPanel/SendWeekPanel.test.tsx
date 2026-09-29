@@ -157,4 +157,17 @@ describe("SendWeekPanel", () => {
       expect(screen.getByText(label, { exact: false })).toBeInTheDocument();
     }
   );
+
+  it("should tell the athlete to set their threshold pace for a missing-pace-zones item", () => {
+    // Arrange
+    const outcome = item("w-1", failed("missing-pace-zones", false));
+
+    // Act
+    renderPanel([outcome]);
+
+    // Assert
+    expect(
+      screen.getByText("Failed (set your threshold pace in Athlete)")
+    ).toBeInTheDocument();
+  });
 });

@@ -4,8 +4,9 @@ import { pushWorkoutToGarminCalendar } from "../../../application/garmin-placeme
 import { useAnalytics, useGarminBridge } from "../../../contexts";
 import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
+import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { exportGcnWorkout } from "../../../utils/export-workout-formats";
+import { MissingPaceZonesError } from "../../../utils/garmin-pace-zones";
 import { garminPushReports } from "./garmin-push-reports";
 
 export type GarminPushOptions = {
@@ -57,7 +58,7 @@ export const useGarminPush = (
         });
       try {
         const deps = buildPlacementDeps(features, analytics);
-        const gcn = await exportGcnWorkout(workout.krd);
+        const gcn = await exportRecordGcn(workout.krd, workout.profileId);
         // A joiner's run is the owner's: only the owner reports it.
         return await pushWorkoutToGarminCalendar(
           deps,
@@ -76,6 +77,8 @@ export const useGarminPush = (
           )
         );
       } catch (error: unknown) {
+        if (error instanceof MissingPaceZonesError)
+          return failedEarly("missing-pace-zones");
         showError(error);
         return failedEarly();
       }

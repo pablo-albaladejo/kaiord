@@ -99,6 +99,7 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
   };
 });
 
+import { MissingPaceZonesError } from "../../../utils/garmin-pace-zones";
 import { useGarminPush } from "./useGarminPush";
 
 // A stub KRD payload that exportGcnWorkout will receive verbatim.
@@ -157,7 +158,7 @@ describe("useGarminPush", () => {
     });
 
     // Assert
-    expect(mockExportGcnWorkout).toHaveBeenCalledWith(KRD_STUB);
+    expect(mockExportGcnWorkout).toHaveBeenCalledWith(KRD_STUB, undefined);
     expect(mockPushWorkout).toHaveBeenCalledWith(gcn);
   });
 
@@ -254,6 +255,33 @@ describe("useGarminPush", () => {
         },
       ],
     ]);
+  });
+
+  it("should fail with missing-pace-zones, and push nothing, when the profile cannot resolve the pace zones", async () => {
+    // Arrange
+    mockExportGcnWorkout.mockRejectedValue(new MissingPaceZonesError());
+    const { result } = renderHook(() => useGarminPush(makeWorkout()));
+    let outcome: unknown;
+
+    // Act
+    await act(async () => {
+      outcome = await result.current.push();
+    });
+
+    // Assert
+    expect(outcome).toEqual({
+      kind: "failed",
+      reason: "missing-pace-zones",
+      retryable: false,
+    });
+    expect(mockPushWorkout).not.toHaveBeenCalled();
+    expect(mockSetPushing).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "error" })
+    );
+    expect(mockAnalyticsEvent).toHaveBeenCalledWith(
+      "garmin-calendar-placement",
+      expect.objectContaining({ reason: "missing-pace-zones" })
+    );
   });
 
   it("should set fallback error message when non-Error is thrown", async () => {

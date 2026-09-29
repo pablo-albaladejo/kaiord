@@ -1,9 +1,18 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
+import type { Profile } from "../../../types/profile";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
+import { MissingPaceZonesError } from "../../../utils/garmin-pace-zones";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { generateWorkoutFilename } from "./workout-filename";
+
+const exportErrorMessage = (err: unknown, t: Translate): string => {
+  if (!(err instanceof Error)) return t("save.exportFailedFallback");
+  return err.cause instanceof MissingPaceZonesError
+    ? t("save.missingPaceZones")
+    : err.message;
+};
 
 export function createSaveHandler(
   workout: KRD,
@@ -14,7 +23,8 @@ export function createSaveHandler(
   success: (title: string, description: string) => void,
   showError: (title: string, description: string) => void,
   onExported?: (format: string) => void,
-  t: Translate = getTranslate("editor")
+  t: Translate = getTranslate("editor"),
+  profile?: Profile | null
 ) {
   return async () => {
     setIsSaving(true);
@@ -27,7 +37,8 @@ export function createSaveHandler(
         selectedFormat,
         (progress) => {
           setExportProgress(progress);
-        }
+        },
+        profile
       );
 
       setExportProgress(100);
@@ -43,8 +54,7 @@ export function createSaveHandler(
       );
       onExported?.(selectedFormat);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : t("save.exportFailedFallback");
+      const errorMessage = exportErrorMessage(err, t);
       showError(t("save.exportFailedTitle"), errorMessage);
       setSaveErrors([
         {

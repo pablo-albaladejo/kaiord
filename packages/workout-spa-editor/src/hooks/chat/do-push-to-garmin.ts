@@ -3,8 +3,9 @@
  * Garmin calendar (`pushWorkoutToGarminCalendar`). Governed like every
  * export: no active, enabled export route to Garmin ⇒ a clear
  * `no_active_export_route` tool error. A library push that lost to a run
- * already in flight is `push_in_progress`, and one the bridge failed is
- * `push_failed`, so this never throws for either.
+ * already in flight is `push_in_progress`, one the bridge failed is
+ * `push_failed`, and a workout whose pace zone targets the profile cannot
+ * resolve is `missing_pace_zones`, so this never throws for any of them.
  *
  * Otherwise the result carries `calendar`: the placement's kind, an
  * app-authored enum, with a `failed` one's `reason`. Any exception on this
@@ -18,6 +19,11 @@ import type { PlacementResult } from "../../application/garmin-placement/placeme
 import { placeRecord } from "../garmin-place-record";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
 
+const MISSING_PACE_ZONES =
+  "The workout uses pace zone targets, but the athlete's profile has no " +
+  "pace zones for its sport. Ask the athlete to set their threshold pace " +
+  "in Athlete, then send it again.";
+
 /** The Phase 1 failures, as the tool's error codes. */
 const libraryError = (result: PlacementResult) => {
   if (result.kind !== "failed") return undefined;
@@ -27,6 +33,8 @@ const libraryError = (result: PlacementResult) => {
   }
   if (result.reason === "busy") return { error: "push_in_progress" };
   if (result.reason === "library-push-failed") return { error: "push_failed" };
+  if (result.reason === "missing-pace-zones")
+    return { error: "missing_pace_zones", message: MISSING_PACE_ZONES };
   return undefined;
 };
 

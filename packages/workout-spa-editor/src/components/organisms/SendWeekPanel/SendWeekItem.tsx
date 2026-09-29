@@ -6,7 +6,7 @@ import { Link } from "wouter";
 
 import type { BulkOutcome } from "../../../application/garmin-bulk/send-week-to-garmin";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
-import { useTranslate } from "../../../i18n/use-translate";
+import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
 import { formatDateLabel } from "../../molecules/TemplatePickerDialog/format-date-label";
 import { type SendWeekTone, statusTone } from "./send-week-status";
@@ -15,6 +15,16 @@ const TONE_CLASS: Record<SendWeekTone, string> = {
   plain: "text-ink-muted",
   warning: "text-ink-strong",
   danger: "text-[var(--danger-text)]",
+};
+
+/** Why an item was not sent, when the athlete can act on it. */
+const reasonOf = (outcome: BulkOutcome, t: Translate): string => {
+  if (outcome.notEligible)
+    return ` (${t(`sendWeek.notEligible.${outcome.notEligible}`)})`;
+  const { result } = outcome;
+  return result?.kind === "failed" && result.reason === "missing-pace-zones"
+    ? ` (${t("sendWeek.missingPaceZones")})`
+    : "";
 };
 
 export function SendWeekItem({
@@ -26,9 +36,7 @@ export function SendWeekItem({
 }) {
   const t = useTranslate("calendar");
   const locale = useActiveLocale();
-  const reason = outcome.notEligible
-    ? ` (${t(`sendWeek.notEligible.${outcome.notEligible}`)})`
-    : "";
+  const reason = reasonOf(outcome, t);
   return (
     <li className="flex items-center justify-between gap-3">
       <Link

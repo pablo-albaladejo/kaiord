@@ -5,8 +5,15 @@
  * chat tool (`doPushToGarmin`) and the bulk "Send week" runner, so both
  * record a push the same way. A missing record is `record-deleted`.
  */
+import type { Analytics } from "@kaiord/core";
+
 import type { BulkItemResult } from "../application/garmin-bulk/send-week-to-garmin";
 import {
+  PLACEMENT_EVENT,
+  placementEvent,
+} from "../application/garmin-placement/placement-analytics";
+import {
+  failed,
   type PlacementResult,
   recordDeleted,
 } from "../application/garmin-placement/placement-result";
@@ -17,8 +24,9 @@ import {
 import { recordGarminPush } from "../application/record-garmin-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 import type { PersistencePort } from "../ports/persistence-port";
-import { exportGcnWorkout } from "../utils/export-workout-formats";
+import { MissingPaceZonesError } from "../utils/garmin-pace-zones";
 import { garminPlacementRequest } from "./garmin-placement-request";
+import { exportRecordGcn } from "./garmin-record-gcn";
 
 export type PlacedRecord = {
   result: PlacementResult;
@@ -26,6 +34,21 @@ export type PlacedRecord = {
   garminPushId: string | null;
   /** The workout date placed: the record's date when its turn came. */
   date: string;
+};
+
+/** The GCN, or — pace zones the profile lacks — the failure it reports. */
+const buildGcn = async (
+  build: () => Promise<unknown>,
+  analytics: Analytics | undefined
+): Promise<{ gcn: unknown } | { failure: PlacementResult }> => {
+  try {
+    return { gcn: await build() };
+  } catch (error) {
+    if (!(error instanceof MissingPaceZonesError)) throw error;
+    const failure = failed("missing-pace-zones", false);
+    analytics?.event(PLACEMENT_EVENT, placementEvent(failure, 0, undefined));
+    return { failure };
+  }
 };
 
 export const placeRecord = async (
@@ -36,7 +59,14 @@ export const placeRecord = async (
 ): Promise<PlacedRecord | undefined> => {
   const record = await persistence.workouts.getById(workoutId);
   if (!record?.krd) return undefined;
-  const gcn = await exportGcnWorkout(record.krd);
+  const { krd, profileId } = record;
+  const built = await buildGcn(
+    () => exportRecordGcn(krd, profileId, persistence.profiles),
+    placementDeps.analytics
+  );
+  if ("failure" in built)
+    return { result: built.failure, garminPushId: null, date: record.date };
+  const { gcn } = built;
   const confirmed: { id?: string } = {};
   const result = await pushWorkoutToGarminCalendar(
     placementDeps,

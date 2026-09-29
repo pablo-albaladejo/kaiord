@@ -83,7 +83,8 @@
     "savedTitle": "Entreno guardado",
     "savedDescription": "«{{name}}» se ha guardado como {{format}}",
     "exportFailedTitle": "Error de exportación",
-    "exportFailedFallback": "No se pudo exportar el entreno"
+    "exportFailedFallback": "No se pudo exportar el entreno",
+    "missingPaceZones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN."
   },
   "saveError": {
     "title": "Error al guardar",

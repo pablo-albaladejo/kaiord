@@ -95,7 +95,8 @@
       "deadline-before-send": "La extensión agotó el tiempo antes de enviar. Inténtalo de nuevo.",
       "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
       "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Ajustes.",
-      "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar."
+      "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
+      "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo."
     }
   }
 }

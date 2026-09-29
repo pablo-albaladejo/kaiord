@@ -112,6 +112,7 @@
     "retry": "Retry",
     "retryIn": "Retry in {{seconds}} s",
     "close": "Close",
+    "missingPaceZones": "set your threshold pace in Athlete",
     "preflight": {
       "no-export-route": "Turn on sending workouts to Garmin in Connections, then send the week.",
       "no-bridge": "Install the Kaiord Garmin Bridge extension, then send the week.",
