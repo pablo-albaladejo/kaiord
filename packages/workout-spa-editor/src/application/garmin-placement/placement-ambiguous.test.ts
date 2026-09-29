@@ -12,6 +12,7 @@ import type { BridgeFailure } from "./garmin-calendar-port";
 import { POST_GATE_MS, SETTLE_MS } from "./placement-timing";
 
 const T0 = new Date("2026-10-01T08:00:00.000Z");
+const D3 = "2026-10-19";
 const PATHS: PushPath[] = ["C", "U", "S"];
 const AMBIGUOUS: Array<[string, BridgeFailure]> = [
   [
@@ -377,4 +378,33 @@ describe("leftover attempting from a closed tab (AC-29)", () => {
       "unschedule",
     ]);
   });
+
+  it.each([
+    ["the same library workout", "v1", "1700000"],
+    ["a re-created library workout", "v2", "1700001"],
+  ])(
+    "should place the desired date, not the leftover's, once absence is proven [%s]",
+    async (_name, content, workoutId) => {
+      // Arrange
+      const h = await leave(true);
+      const calls = h.calendar.calls.length;
+      vi.setSystemTime(T0.getTime() + POST_GATE_MS);
+
+      // Act
+      const result = await h.push(D3, content);
+
+      // Assert
+      const schedules = h.calendar.calls
+        .slice(calls)
+        .filter((c) => c.op === "schedule");
+      expect(result).toEqual({ kind: "moved" });
+      expect(schedules).toEqual([{ op: "schedule", workoutId, date: D3 }]);
+      expect((await h.row())?.placement).toMatchObject({
+        kind: "scheduled",
+        workoutId,
+        date: D3,
+      });
+      expect(h.calendar.items).toMatchObject([{ workoutId, date: D3 }]);
+    }
+  );
 });

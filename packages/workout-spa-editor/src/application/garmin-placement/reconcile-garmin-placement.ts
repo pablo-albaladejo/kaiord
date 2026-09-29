@@ -2,7 +2,8 @@
  * Phase 2 (design §3.3 steps 4–9) for a record whose library workout is
  * confirmed: claim, then post, resolve a leftover attempt, or resolve an
  * `uncertain` (T5). An adoption lands a `Placed` and the claim runs again,
- * so a leftover for another date becomes a move in the same run.
+ * so a leftover for another date becomes a move in the same run; a leftover
+ * proven absent goes back to its `previous` and the claim runs again too.
  */
 import { claimPlacement, type Uncertain } from "./placement-claim";
 import type { PlacementRun } from "./placement-deps";
@@ -15,6 +16,7 @@ import {
   type PlacementResult,
   recordDeleted,
 } from "./placement-result";
+import { restorePrevious } from "./placement-rollback";
 import { canConfirmAt } from "./placement-row";
 
 /** A leftover resolve, then the claim of the desired placement. */
@@ -56,8 +58,14 @@ export const reconcileGarminPlacement = async (
     }
     const resolved = await resolveAttempt(run, claim.attempt, false);
     if (resolved.kind === "done") return resolved.result;
-    if (resolved.kind === "repost")
-      return postAttempt(run, claim.attempt, undefined, leftBehind);
+    if (resolved.kind === "repost") {
+      // The leftover proved absent: it goes back to its `previous`, and the
+      // next claim takes the run's own desired placement with one POST.
+      const restored = await restorePrevious(run, claim.attempt);
+      if (restored === "absent") return recordDeleted();
+      if (restored === "changed") return failed("guard-failed", true);
+      continue;
+    }
     adopted = true;
     if (resolved.many) leftBehind.push(resolved.placed.date);
   }

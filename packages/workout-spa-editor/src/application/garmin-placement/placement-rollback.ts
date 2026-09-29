@@ -18,8 +18,8 @@ export type RestoreVerdict = "restored" | "absent" | "changed";
 export const restorePrevious = async (
   run: PlacementRun,
   attempt: Attempt,
-  written: Row | undefined,
-  preClaim: Row | undefined,
+  written?: Row,
+  preClaim?: Row,
   missing?: GarminWorkoutId
 ): Promise<RestoreVerdict> =>
   (
