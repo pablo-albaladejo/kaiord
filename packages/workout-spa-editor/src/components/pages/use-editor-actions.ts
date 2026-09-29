@@ -10,15 +10,15 @@
  * (per spa-workout-state-machine spec), not only on PUSHED→MODIFIED.
  */
 
-import type { Dexie } from "dexie";
 import { useCallback } from "react";
 
-import { db } from "../../adapters/dexie/dexie-database";
 import { recordGarminPush } from "../../application/record-garmin-push";
 import {
   onWorkoutMutation,
   transitionToReady,
 } from "../../application/workout-transitions";
+import { usePersistence } from "../../contexts/persistence-context";
+import type { PersistencePort } from "../../ports/persistence-port";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KRD } from "../../types/krd";
@@ -27,15 +27,13 @@ import type { KRD } from "../../types/krd";
    writer's fields (a coach move's date landing before the editor
    re-renders) are kept, and a workout deleted meanwhile stays deleted. */
 async function updateRecord(
+  persistence: PersistencePort,
   id: string,
   change: (fresh: WorkoutRecord) => WorkoutRecord
 ) {
-  const table = db.table<WorkoutRecord, string>("workouts");
-  // Plain Dexie: the typed tables tuple overflows TS's instantiation depth
-  // (the adapters' workaround).
-  await (db as unknown as Dexie).transaction("rw", db.tables, async () => {
-    const fresh = await table.get(id);
-    if (fresh) await table.put(change(fresh));
+  await persistence.transaction(async () => {
+    const fresh = await persistence.workouts.getById(id);
+    if (fresh) await persistence.workouts.put(change(fresh));
   });
 }
 
@@ -56,6 +54,7 @@ function readyForPush(record: WorkoutRecord): WorkoutRecord {
 }
 
 export function useEditorActions(record: WorkoutRecord | undefined) {
+  const persistence = usePersistence();
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
 
   const pushWorkout = useCallback(
@@ -68,14 +67,14 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
           : undefined;
       // An already-pushed record (a re-created library workout) only
       // records the new id: there is no transition left to take.
-      await updateRecord(record.id, (fresh) =>
+      await updateRecord(persistence, record.id, (fresh) =>
         recordGarminPush(
           readyForPush(saveEditedKrd(fresh, edited)),
           garminPushId
         )
       );
     },
-    [record, currentWorkout]
+    [persistence, record, currentWorkout]
   );
 
   return { pushWorkout };
