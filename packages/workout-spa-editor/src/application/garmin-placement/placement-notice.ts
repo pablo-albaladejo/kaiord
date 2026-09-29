@@ -3,11 +3,13 @@
  * `uncertain` and the dismissable entries are facts of the persisted ledger
  * row, so the row decides them — a row that is no longer `uncertain` never
  * shows one. An ambiguous POST stays `attempting{posted:true}`; with no run
- * holding the record's lock, that is the athlete's `uncertain` to answer. The last run's outcome (`failed`, `library-only`, a plain
- * success) is ephemeral and fills the rest.
+ * holding the record's lock, that is the athlete's `uncertain` to answer
+ * once its gate passes (`sendAfter`). The last run's outcome (`failed`,
+ * `library-only`, a plain success) is ephemeral and fills the rest.
  */
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
 import { dismissableEntries } from "./placement-dismiss";
+import { gateOf } from "./placement-resolve";
 import type { PlacementResult } from "./placement-result";
 import { canConfirmAt, type Row } from "./placement-row";
 
@@ -27,8 +29,9 @@ export const placementNotice = (
   const open = p?.kind === "attempting" && p.posted && !runInFlight;
   if (p?.kind === "uncertain" || open) {
     const canConfirm = canConfirmAt(row, p.workoutId, p.date);
+    const gate = p.kind === "attempting" ? { sendAfter: gateOf(p) } : {};
     return {
-      result: { kind: "uncertain", date: p.date, canConfirm },
+      result: { kind: "uncertain", date: p.date, canConfirm, ...gate },
       removable,
     };
   }

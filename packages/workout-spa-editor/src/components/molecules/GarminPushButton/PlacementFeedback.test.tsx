@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -20,6 +20,7 @@ vi.mock("../../../i18n/LocaleProvider", () => ({
 }));
 
 const DATE = "2026-10-05";
+const GATE_IN_MS = 12_000;
 const OLD_DATE = "2026-10-04";
 
 const ENTRY = {
@@ -158,5 +159,62 @@ describe("PlacementFeedback", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       /Garmin no confirmó la entrada/
     );
+  });
+
+  describe("an uncertain posted attempt before its gate", () => {
+    afterEach(() => vi.useRealTimers());
+
+    const beforeGate = (): PlacementResult => ({
+      kind: "uncertain",
+      date: DATE,
+      canConfirm: true,
+      sendAfter: Date.now() + GATE_IN_MS,
+    });
+
+    it("should disable both actions and count down to the gate", () => {
+      // Arrange
+      vi.useFakeTimers();
+
+      // Act
+      renderFeedback(beforeGate());
+
+      // Assert
+      expect(
+        screen.getByRole("button", { name: "It's in Garmin" })
+      ).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: "Send anyway" })
+      ).toBeDisabled();
+      expect(screen.getByText(/answer in 12 s/)).toBeVisible();
+    });
+
+    it("should enable both actions once the gate passes", () => {
+      // Arrange
+      vi.useFakeTimers();
+      renderFeedback(beforeGate());
+
+      // Act
+      act(() => vi.advanceTimersByTime(GATE_IN_MS));
+
+      // Assert
+      expect(
+        screen.getByRole("button", { name: "It's in Garmin" })
+      ).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Send anyway" })).toBeEnabled();
+      expect(screen.queryByText(/answer in/)).toBeNull();
+    });
+
+    it("should count down in Spanish when the active locale is es", async () => {
+      // Arrange
+      await setActiveLocale("es");
+      locale.active = "es";
+      vi.useFakeTimers();
+
+      // Act
+      renderFeedback(beforeGate());
+
+      // Assert
+      expect(screen.getByText(/responder en 12 s/)).toBeVisible();
+    });
   });
 });

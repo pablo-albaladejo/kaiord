@@ -4,10 +4,12 @@ import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
 import { placementNotice } from "./placement-notice";
 import { failed, type PlacementResult } from "./placement-result";
 import type { Row } from "./placement-row";
+import { POST_GATE_MS } from "./placement-timing";
 
 const D1 = "2026-10-04";
 const D2 = "2026-10-05";
 const WORKOUT = "9";
+const ATTEMPT_AT = "2026-10-01T08:00:00.000Z";
 
 const entry = (
   overrides: Partial<GarminRemovalEntry> = {}
@@ -30,7 +32,7 @@ const attempt = (posted: boolean) => ({
   kind: "attempting",
   workoutId: WORKOUT,
   date: D2,
-  at: "2026-10-01T08:00:00.000Z",
+  at: ATTEMPT_AT,
   posted,
   supersedes: [],
 });
@@ -124,7 +126,7 @@ describe("placementNotice", () => {
     expect(notice).toEqual({ removable: [] });
   });
 
-  it("should offer an unanswered posted attempt as uncertain once no run holds it", () => {
+  it("should offer an unanswered posted attempt as uncertain, answerable after its gate", () => {
     // Arrange
     const row = rowWith({ placement: attempt(true) } as Partial<Row>);
 
@@ -136,6 +138,7 @@ describe("placementNotice", () => {
       kind: "uncertain",
       date: D2,
       canConfirm: true,
+      sendAfter: Date.parse(ATTEMPT_AT) + POST_GATE_MS,
     });
   });
 

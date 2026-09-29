@@ -6,6 +6,7 @@ import { AttentionMark } from "../../atoms/AttentionMark";
 import { Button } from "../../atoms/Button";
 import { formatDateLabel } from "../TemplatePickerDialog/format-date-label";
 import { placementMessage, type PlacementTone } from "./placement-message";
+import { UncertainActions } from "./UncertainActions";
 
 export const GARMIN_BRIDGE_STORE_URL =
   "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe";
@@ -42,15 +43,12 @@ export const PlacementFeedback: React.FC<PlacementFeedbackProps> = (props) => {
     <div className="flex flex-wrap items-center gap-2 text-xs" role="status">
       {message.tone === "warning" && <AttentionMark size="xs" />}
       <span className={TONE_CLASS[message.tone]}>{text}</span>
-      {result.kind === "uncertain" && result.canConfirm && (
-        <Button size="sm" variant="secondary" onClick={onConfirm}>
-          {t("placement.confirm")}
-        </Button>
-      )}
       {result.kind === "uncertain" && (
-        <Button size="sm" variant="secondary" onClick={onSendAnyway}>
-          {t("placement.sendAnyway")}
-        </Button>
+        <UncertainActions
+          result={result}
+          onConfirm={onConfirm}
+          onSendAnyway={onSendAnyway}
+        />
       )}
       {result.kind === "library-only" &&
         result.reason === "bridge-outdated" && (

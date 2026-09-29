@@ -73,6 +73,7 @@
     "uncertain": "Garmin did not confirm the entry on {{date}}. Check your Garmin calendar before sending again.",
     "confirm": "It's in Garmin",
     "sendAnyway": "Send anyway",
+    "checking": "Still checking Garmin. You can answer in {{seconds}} s.",
     "removed": "I removed it ({{date}})",
     "libraryOnly": {
       "insecure-context": "In your Garmin library, with no date: placing it on the calendar needs a secure (https) page.",
