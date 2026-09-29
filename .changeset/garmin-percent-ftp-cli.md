@@ -2,4 +2,4 @@
 "@kaiord/cli": minor
 ---
 
-Add `--ftp <watts>` to `kaiord convert` and `kaiord garmin push`. Percent-of-FTP power targets written to GCN are resolved with it; without it the command exits with code 1 and suggests `--ftp` instead of writing percentages as watts.
+**Behaviour change:** `kaiord convert` to GCN and `kaiord garmin push` now require `--ftp <watts>` when the workout has percent-of-FTP power targets. Without it the command exits with code 1 (`MissingFtpError`) and suggests `--ftp`; previously it silently wrote the percentages as watts. Workouts with only watts, watt ranges or power zones are unaffected.
