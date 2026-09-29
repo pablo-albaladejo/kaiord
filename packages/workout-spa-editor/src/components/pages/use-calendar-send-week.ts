@@ -1,7 +1,8 @@
 /**
  * "Send week" for the visible week: offered only with an enabled Garmin
  * export route and at least one persisted workout (projected executions
- * have no record to send). Closes the panel when the week changes.
+ * have no record to send). A week change closes the panel and cancels a
+ * running send between items.
  */
 import { useEffect, useMemo } from "react";
 

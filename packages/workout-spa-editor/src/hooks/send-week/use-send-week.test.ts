@@ -31,6 +31,19 @@ const finish = (results: Record<string, unknown>) =>
     }
   );
 
+/** A run that stays in flight until `end` and exposes its handlers. */
+const holdRun = () => {
+  const held = { handlers: undefined as Handlers | undefined, end: () => {} };
+  mockRun.mockImplementationOnce(
+    (_c: unknown, _i: unknown, h: Handlers) =>
+      new Promise((resolve) => {
+        held.handlers = h;
+        held.end = () => resolve({ outcomes: [], cancelled: h.isCancelled() });
+      })
+  );
+  return held;
+};
+
 describe("useSendWeek", () => {
   it("should show a blocked pre-flight", async () => {
     // Arrange
@@ -93,5 +106,53 @@ describe("useSendWeek", () => {
       phase: "done",
       cancelled: true,
     });
+  });
+
+  it("should cancel the run and keep the panel closed when it closes", async () => {
+    // Arrange
+    const held = holdRun();
+    const { result } = renderHook(() => useSendWeek(ctx));
+    let running: Promise<void> | undefined;
+    act(() => void (running = result.current.start(WEEK)));
+
+    // Act
+    act(() => result.current.close());
+    await act(async () => {
+      held.handlers?.onOutcome({ ...WEEK[0], status: "scheduled" });
+      held.end();
+      await running;
+    });
+
+    // Assert
+    expect(held.handlers?.isCancelled()).toBe(true);
+    expect(result.current.state).toEqual({ phase: "idle" });
+  });
+
+  it("should keep a closed run cancelled when the next run starts", () => {
+    // Arrange
+    const first = holdRun();
+    holdRun();
+    const { result } = renderHook(() => useSendWeek(ctx));
+    act(() => void result.current.start(WEEK));
+    act(() => result.current.close());
+
+    // Act
+    act(() => void result.current.start(WEEK));
+
+    // Assert
+    expect(first.handlers?.isCancelled()).toBe(true);
+  });
+
+  it("should cancel the run on unmount", () => {
+    // Arrange
+    const held = holdRun();
+    const { result, unmount } = renderHook(() => useSendWeek(ctx));
+    act(() => void result.current.start(WEEK));
+
+    // Act
+    unmount();
+
+    // Assert
+    expect(held.handlers?.isCancelled()).toBe(true);
   });
 });
