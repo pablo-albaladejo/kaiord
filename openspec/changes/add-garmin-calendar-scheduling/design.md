@@ -195,6 +195,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - A failed DELETE leaves a visible duplicate until it clears or is dismissed.
 - Library workouts are never deleted.
 - A cross-device race can leave a duplicate, never a gap. The duplicate is untracked when a merge drops an ambiguous `attempting`.
+- Cross-device clock skew above ~38 s, or a sending device that sleeps with its POST in flight, can let the gate's re-POST duplicate an entry that lands late (§3.4, residual L1): a duplicate, never a gap.
 - The ledger gains `library`, `placement`, `removalQueue` and `forceRepush`, plus a shape normalizer and a merge hook.
 - Placement requires Web Locks, which exist only in secure contexts. Without them the push is library-only (today's behaviour).
 - Dexie v36 is a data-only bump (the store schema is v35's), but the snapshot manifest carries v36: a device still on v35 rejects the newer snapshot ("Snapshot schema v36 is newer than this app") until it updates. Release note: update every device.
@@ -210,6 +211,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - matching a coach's delete + recreate
 - cleaning up superseded library workouts
 - library duplicates from cross-device `[U]` pushes
+- a local-observation gate for the re-POST (time since this device first saw the `attempting{posted:true}`, not the writer's `at`), closing the clock-skew and sleeping-sender duplicate of §3.4 (L1)
 - a conditional write on cloud sync: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write, and `syncWithCloud` imports its merge before the push that may be rejected (`sync-with-cloud.ts:34-38`); an atomic `If-Match` closes the first; importing only after an accepted push closes the second, and that is the half that matters: one ordinary rejected push already reaches a crossed pair (§3.9)
 
 ## Design (normative)
@@ -385,6 +387,7 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 
 - An absence read that _started_ at or after `at + POST_GATE_MS` → re-POST (steps 5–7).
 - Otherwise → `failed{reason:"settling", retryable, retryAfter: at + POST_GATE_MS}`, with no POST.
+- Residual (accepted, L1): the gate compares the reader's clock with the writer's `at`. A reader whose clock runs more than ~38 s ahead of the writer's, or a sender whose device slept with its POST still in flight, can pass the gate before that POST lands and re-POST: a duplicate, never a gap. A local-observation gate (time since this device first saw the attempt) would close it and is a follow-up.
 
 **Read failure.** If the find read fails, the result is `uncertain`.
 
