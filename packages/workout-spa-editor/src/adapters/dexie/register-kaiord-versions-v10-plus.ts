@@ -21,6 +21,7 @@ import { applyV27Upgrade } from "./dexie-v27-migration";
 import { applyV28Upgrade } from "./dexie-v28-migration";
 import { applyV29Upgrade } from "./dexie-v29-migration";
 import { applyV33Upgrade } from "./dexie-v33-migration";
+import { applyV36Upgrade } from "./dexie-v36-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -174,4 +175,9 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // empty; profileId-leading indexes make isPerProfileTable auto-discover it
   // for the profile-delete cascade.
   db.version(35).stores(SCHEMAS.v35);
+  // v36 — Garmin calendar placement. Schema unchanged from v35 (the new
+  // ledger fields are unindexed); data-side upgrade only: Garmin workout
+  // ledger rows gain their explicit `library` state (normalizeGarminLedgerRow).
+  // Folded here (as v30).
+  db.version(36).stores(SCHEMAS.v35).upgrade(applyV36Upgrade);
 };

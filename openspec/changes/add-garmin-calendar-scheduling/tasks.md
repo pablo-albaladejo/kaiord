@@ -61,18 +61,19 @@
 
 ## 5. Ledger model and Phase 1 (T4, PR-2)
 
-- [ ] 5.1 Ledger types and branded ids (`GarminWorkoutId`,
-      `GarminScheduleId`) in `SPA/types/export-ledger.ts` (AC-16).
-- [ ] 5.2 `buildCommitPatch` as the only `commitByKey` patch on both paths;
+- [x] 5.1 Ledger types and branded ids (`GarminWorkoutId`,
+      `GarminScheduleId`) in `SPA/types/garmin-ledger.ts`, the optional fields
+      on `SPA/types/export-ledger.ts` (AC-16).
+- [x] 5.2 `buildCommitPatch` as the only `commitByKey` patch on both paths;
       `handleConstraintResult` checks `pending`, then `forceRepush`, then the
       hash (AC-10, AC-11).
-- [ ] 5.3 Stale-pending recovery (`PENDING_TTL_MS`), `pushQuiet`, and
+- [x] 5.3 Stale-pending recovery (`PENDING_TTL_MS`), `pushQuiet`, and
       `do-push-to-garmin` persisting only a confirmed id (AC-17).
-- [ ] 5.4 `normalizeGarminLedgerRow`, the Dexie v36 upgrade, and an optional
+- [x] 5.4 `normalizeGarminLedgerRow`, the Dexie v36 upgrade, and an optional
       `normalize` on `RowMergeHook` applied on import (AC-13, AC-14).
-- [ ] 5.5 `mergeGarminLedgerRows`, replacing the `exportLedger` entry of
+- [x] 5.5 `mergeGarminLedgerRows`, replacing the `exportLedger` entry of
       `ROW_MERGE_HOOKS`; symmetric, supersession before clock (AC-15).
-- [ ] 5.6 Verify `mutateByKey` stamping for the new fields (AC-12).
+- [x] 5.6 Verify `mutateByKey` stamping for the new fields (AC-12).
 
 ## 6. Placement pipeline, detection and stub (T5, PR-3)
 
@@ -84,9 +85,45 @@
 - [ ] 6.2 Wiring and UI: `garmin-calendar-operations` with the per-action
       timeout, detection `features`, `useGarminPush`, EditorPage,
       `do-push-to-garmin`, and the result / uncertain / dismiss UI in en and es
-      (AC-35).
+      (AC-35). Dismiss ("I removed it", writes `gone`) covers `abandoned`
+      entries only; a `held` entry is never dismissable (design §3.9).
+      Put the eligibility in a pure function (`abandoned` and not `gone`,
+      never `held`, never the current `Placed` or `previous`) and test that
+      a `held` entry is not eligible. An `unconfirmed`
+      commit records the claim's `supersedes` (design §3.3);
+      "It's in Garmin" and A3-false adoptions record `[]`.
 - [ ] 6.3 E2E stub: numeric ids, an in-memory calendar, `calendar-find`,
       `features`, failure injection and delays.
+- [ ] 6.4 Resolve `uncertain` through the ledger state lattice (design
+      §3.9): commits write the new id `keep` and the superseded one
+      `retire`; one `calendar-find` match is adopted `keep` (a `scheduled`
+      `previous` becomes `retire`), seen held ids stay `held`, unseen ones
+      `gone`; several matches →
+      `duplicate-left` with states unchanged; the drain sends only
+      `retire` ids and writes `gone` on 204 or a verified 404. The claim
+      records `supersedes` on `attempting` (the queue ids it reads) and an
+      id-less commit copies it. Test: a sync that imports another
+      device's adoption of the new entry between the POST and the commit
+      leaves that entry unlisted. "It's in Garmin" is offered only when no
+      non-`keep` entry shares the `uncertain`'s workout and date.
+- [ ] 6.5 Carried over from T4:
+  - AC-17's "0 schedule calls" half (a failed library push makes no
+    calendar call) needs this pipeline; test it here.
+  - `PENDING_TTL_MS` is 5 min: a quiet bulk push must never sit longer
+    than that between the pending claim and the commit, or it must refresh
+    the pending stamp, else another run recovers it and pushes twice.
+  - A legacy row with `library: unconfirmed` and an equal hash is
+    `skipped` forever; the placement path needs a way out (set
+    `forceRepush`, or treat `unconfirmed` as not pushed for placement).
+  - A rolled-back claim must not make a stale row newer: when a failed or
+    definite push restores the placement and queue to their pre-claim
+    value, restore the pre-claim `updatedAt` too, so the rollback is a
+    no-op for the merge order. PR-2's `mutateByKey` cannot express this:
+    its no-op (a row deep-equal to the current one) compares against the
+    claimed row, and any other result is stamped `now`. Extend the
+    contract here (for example, `fn` returns the captured pre-claim row
+    and the repository stores it verbatim when the current row is still
+    the claim it wrote).
 
 ## 7. Follow the coach (T6, PR-4)
 

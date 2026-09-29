@@ -4,6 +4,7 @@ import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ExportLedgerEntry } from "../../types/export-ledger";
+import { parseGarminWorkoutId } from "../../types/garmin-ledger";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
 
@@ -74,6 +75,61 @@ describe("createDexieExportLedgerRepository — mutateByKey", () => {
     };
     expect(after).toEqual(expected);
     expect(await db.table("exportLedger").toArray()).toEqual([expected]);
+  });
+
+  it("should stamp updatedAt when fn changes only the Garmin placement", async () => {
+    // Arrange
+    await db.table("exportLedger").add(row());
+    const repo = createDexieExportLedgerRepository(db);
+    const placement = {
+      kind: "unconfirmed" as const,
+      workoutId: parseGarminWorkoutId("1707805999")!,
+      date: "2026-09-29",
+    };
+
+    // Act
+    const after = await repo.mutateByKey(KEY, (current) =>
+      current ? { ...current, placement } : current
+    );
+
+    // Assert
+    expect(after?.placement).toEqual(placement);
+    expect(after?.updatedAt).toBe(T2.toISOString());
+  });
+
+  it("should leave a row carrying Garmin fields byte-identical on a no-op", async () => {
+    // Arrange
+    const seeded = {
+      ...row(),
+      library: { kind: "confirmed", workoutId: "1707805999" },
+      forceRepush: true,
+      placement: {
+        kind: "scheduled",
+        workoutScheduleId: "555",
+        workoutId: "1707805999",
+        date: "2026-09-29",
+      },
+      removalQueue: [
+        {
+          workoutScheduleId: "444",
+          workoutId: "1707805999",
+          date: "2026-09-28",
+          attempts: 1,
+          abandoned: false,
+        },
+      ],
+    };
+    await db.table("exportLedger").add(seeded);
+    const repo = createDexieExportLedgerRepository(db);
+
+    // Act
+    await repo.mutateByKey(
+      KEY,
+      (current) => current && structuredClone(current)
+    );
+
+    // Assert
+    expect(await db.table("exportLedger").get(seeded.id)).toStrictEqual(seeded);
   });
 
   it("should pass undefined for an absent row and insert what fn returns", async () => {
