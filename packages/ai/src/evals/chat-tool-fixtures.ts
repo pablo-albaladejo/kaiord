@@ -23,7 +23,7 @@ const routeFields = {
   direction: directionSchema,
 };
 
-const setDataRouteSchema = z.discriminatedUnion("action", [
+const strictSetDataRouteSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("enable_route"), ...routeFields }),
   z.object({ action: z.literal("disable_route"), ...routeFields }),
   z.object({
@@ -33,6 +33,20 @@ const setDataRouteSchema = z.discriminatedUnion("action", [
     sourceOrder: z.array(z.string()).optional(),
   }),
 ]);
+
+/** Provider-facing shape: one flat object (top-level JSON Schema
+    `type: "object"`, which Anthropic/OpenAI require), with the per-action
+    requirements of the strict union enforced by piping into it. */
+const setDataRouteSchema = z
+  .object({
+    action: z.enum(["enable_route", "disable_route", "set_source_policy"]),
+    dataType: z.enum(managedDataTypes),
+    integrationId: z.string().min(1).optional(),
+    direction: directionSchema.optional(),
+    mode: sourceModeSchema.optional(),
+    sourceOrder: z.array(z.string()).optional(),
+  })
+  .pipe(strictSetDataRouteSchema);
 
 /** Canned get_data_routes answer: planned-session imports actively from
     Train2Go — the fixture the "where do my planned sessions come from"
