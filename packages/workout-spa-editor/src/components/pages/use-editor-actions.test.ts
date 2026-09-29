@@ -184,3 +184,34 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     expect(persisted?.garminPushId).toBe("garmin-2");
   });
 });
+
+describe("useEditorActions — open editor during a coach move (R11)", () => {
+  beforeEach(async () => {
+    await db.table("workouts").clear();
+    useWorkoutStore.setState({ currentWorkout: null });
+  });
+
+  it("should save the coach's date when the coach moved the open workout", async () => {
+    // Arrange
+    const opened = makeRecord({ state: "ready", coachDate: "2026-04-20" });
+    const { result, rerender } = renderHook(
+      ({ record }) => useEditorActions(record),
+      { initialProps: { record: opened } }
+    );
+    const coachMoved = {
+      ...opened,
+      date: "2026-04-22",
+      coachDate: "2026-04-22",
+    };
+    await db.table("workouts").put(coachMoved);
+    rerender({ record: coachMoved });
+
+    // Act
+    await act(async () => {
+      await result.current.pushWorkout("garmin-1");
+    });
+
+    // Assert
+    expect((await loadPersisted(opened.id))?.date).toBe("2026-04-22");
+  });
+});
