@@ -3,11 +3,13 @@
  * it has just seen on Garmin, so every delete leaves a live entry whatever
  * a merge chose (the §3.9 clock-skew counterexample). A `Placed` the read
  * shows absent was deleted by someone: its id turns `gone` and the row
- * `uncertain`, in one guarded write. A failed or id-less read, A3 false or
- * an `unconfirmed` `Placed` (no id to see) verifies nothing.
+ * `uncertain`, in one guarded write. A failed read, an id-less entry on the
+ * `Placed`'s date, A3 false or an `unconfirmed` `Placed` (no id to see)
+ * verifies nothing.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import { entryOf } from "../sync/merge-garmin-removal-queue";
+import { provesAbsent } from "./placement-absence";
 import type { PlacementRun } from "./placement-deps";
 import { decide, holdsPlaced, withEntries } from "./placement-row";
 
@@ -32,8 +34,8 @@ export const verifyPlaced = async (
     return false;
   const read = await calendar.find(placed.workoutId, placed.date);
   if (!read.ok) return false;
-  const ids = read.entries.map((e) => e.workoutScheduleId);
-  if (ids.includes(placed.workoutScheduleId)) return true;
-  if (ids.every(Boolean)) await markDead(run, placed);
+  const id = placed.workoutScheduleId;
+  if (read.entries.some((e) => e.workoutScheduleId === id)) return true;
+  if (provesAbsent(read.entries, id, placed.date)) await markDead(run, placed);
   return false;
 };

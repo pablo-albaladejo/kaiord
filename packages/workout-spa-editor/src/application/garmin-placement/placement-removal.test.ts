@@ -30,6 +30,14 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
+/** An entry of the pushed workout that the read returns without an id. */
+const idless = (date: string) => ({
+  id: "9999999" as never,
+  workoutId: "1700000" as never,
+  date,
+  hideId: true,
+});
+
 const queueEntry = async (h: PlacementHarness, id: string) =>
   (await h.row())?.removalQueue?.find((e) => e.workoutScheduleId === id);
 
@@ -121,6 +129,21 @@ describe("removal queue (AC-24)", () => {
     // Assert
     expect(await queueEntry(h, oldId)).toMatchObject({ state: "gone" });
     expect(result).toEqual({ kind: "unchanged" });
+  });
+
+  it("should write gone for an abandoned entry despite an id-less entry on another date", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const oldId = await abandonOld(h);
+    const old = h.calendar.items.findIndex((i) => i.id === oldId);
+    h.calendar.items.splice(old, 1);
+    h.calendar.items.push(idless(D3));
+
+    // Act
+    await h.push(D2);
+
+    // Assert
+    expect(await queueEntry(h, oldId)).toMatchObject({ state: "gone" });
   });
 
   it("should dismiss an abandoned entry with 0 calls", async () => {
@@ -354,6 +377,36 @@ describe("verify before delete (design §3.5)", () => {
       state: "retire",
       attempts: 1,
     });
+  });
+
+  it("should turn a dead Placed gone despite an id-less entry on another date", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const { placedId } = await retireBehind(h);
+    h.calendar.items.splice(1, 1, idless(D3));
+
+    // Act
+    const result = await h.push(D2);
+
+    // Assert
+    expect(result).toMatchObject({ kind: "uncertain", date: D2 });
+    expect(await queueEntry(h, placedId)).toMatchObject({ state: "gone" });
+  });
+
+  it("should prove nothing from a read with an id-less entry on the Placed's date", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const { oldId, placedId, deletes } = await retireBehind(h);
+    h.calendar.items.splice(1, 1, idless(D2));
+
+    // Act
+    const result = await h.push(D2);
+
+    // Assert
+    expect(h.calendar.count("unschedule")).toBe(deletes);
+    expect(result).toEqual({ kind: "duplicate-left", dates: [D1] });
+    expect(await queueEntry(h, placedId)).toMatchObject({ state: "keep" });
+    expect(await queueEntry(h, oldId)).toMatchObject({ state: "retire" });
   });
 
   it("should delete nothing and count nothing when the verifying read fails", async () => {

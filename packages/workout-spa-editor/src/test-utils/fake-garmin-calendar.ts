@@ -2,7 +2,8 @@
  * An in-memory Garmin calendar behind GarminCalendarPort, with scripted
  * failures. Each queued `schedule` script decides the answer and whether
  * Garmin created the entry anyway (an ambiguous answer that committed);
- * `hideIds` makes `calendar-find` return no ids (A3 false). Every call is
+ * `hideIds` makes `calendar-find` return no ids (A3 false), and an item's
+ * own `hideId` hides only its id. Every call is
  * logged in order, and `beforeAnswer` runs after Garmin decided (and created
  * the entry, if it does) but before the pipeline hears the answer — the
  * window in which another writer can land.
@@ -22,6 +23,8 @@ export type CalendarItem = {
   id: GarminScheduleId;
   workoutId: GarminWorkoutId;
   date: string;
+  /** `calendar-find` returns this entry without its id. */
+  hideId?: boolean;
 };
 export type ScheduleScript = {
   answer?: BridgeFailure;
@@ -83,7 +86,7 @@ export const createFakeGarminCalendar = (firstId = 5000) => {
           (i) => i.workoutId === workoutId && month(i.date) === month(date)
         )
         .map((i) => ({
-          workoutScheduleId: state.hideIds ? null : i.id,
+          workoutScheduleId: state.hideIds || i.hideId ? null : i.id,
           date: i.date,
         }));
       return { ok: true, entries };
