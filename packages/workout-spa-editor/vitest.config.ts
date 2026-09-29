@@ -21,6 +21,10 @@ export default defineConfig({
       "./src/test-setup.ts",
     ],
     css: true,
+    // Must stay strictly above RTL's `asyncUtilTimeout` (5000, test-setup.ts).
+    // With equal limits vitest kills a slow `findBy*`/`waitFor` before RTL
+    // can report which query failed, leaving only a bare "Test timed out".
+    testTimeout: 10_000,
     onConsoleLog(log: string, type: "stdout" | "stderr"): false | void {
       // Suppress act() warnings from Radix UI components (false positives in Node 20.x)
       if (
