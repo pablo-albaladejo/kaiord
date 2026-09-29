@@ -16,8 +16,9 @@ const pushToGarminSchema = z.object({
 export const createPushToGarminTool = (ops: ChatActionOps): ChatTool => ({
   name: "push_to_garmin",
   description:
-    "Push a saved workout to Garmin Connect so it can be executed on the " +
-    "user's watch or device. Requires the user to confirm before running.",
+    "Push a saved workout to Garmin Connect and place it on its date in " +
+    "the user's Garmin calendar, so it can be executed on the user's watch " +
+    "or device. Requires the user to confirm before running.",
   inputSchema: pushToGarminSchema,
   requiresConfirmation: true,
   execute: (raw) => ops.pushToGarmin(pushToGarminSchema.parse(raw)),

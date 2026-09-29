@@ -41,21 +41,32 @@ export const isGarminWorkoutLedgerRow = (row: {
   row.dataType === "workout" &&
   row.destinationBridgeId === GARMIN_LEDGER_BRIDGE_ID;
 
+/** A `mutateByKey` result stored as it is, `updatedAt` included: the
+    rollback of a claim restores the pre-claim row, so the rollback is
+    invisible to the merge order (design "Pipeline details settled in T5"). */
+export type LedgerRestore = { readonly restore: ExportLedgerEntry };
+export const restoreLedgerRow = (row: ExportLedgerEntry): LedgerRestore => ({
+  restore: row,
+});
+export type LedgerMutation = ExportLedgerEntry | LedgerRestore | undefined;
+
 /**
  * The `mutateByKey` write rule shared by every ExportLedgerRepository: apply
  * `fn` to the current row (`undefined` when absent) and return the row to
- * store, stamped with `updatedAt: now`, or `undefined` when there is nothing
- * to write — `fn` returned `undefined`, or returned a row deep-equal to the
- * current one (a no-op must leave the row byte-identical, clock included).
+ * store, stamped with `updatedAt: now` (a `LedgerRestore` is stored verbatim),
+ * or `undefined` when there is nothing to write — `fn` returned `undefined`,
+ * or a row deep-equal to the current one (a no-op must leave the row
+ * byte-identical, clock included).
  */
 export const resolveLedgerMutation = (
   current: ExportLedgerEntry | undefined,
-  fn: (row: ExportLedgerEntry | undefined) => ExportLedgerEntry | undefined,
+  fn: (row: ExportLedgerEntry | undefined) => LedgerMutation,
   now: string
 ): ExportLedgerEntry | undefined => {
   const next = fn(current && structuredClone(current));
   if (next === undefined) return undefined;
-  if (current && canonicalHash(next) === canonicalHash(current))
+  const row = "restore" in next ? next.restore : next;
+  if (current && canonicalHash(row) === canonicalHash(current))
     return undefined;
-  return { ...next, updatedAt: now };
+  return "restore" in next ? row : { ...row, updatedAt: now };
 };

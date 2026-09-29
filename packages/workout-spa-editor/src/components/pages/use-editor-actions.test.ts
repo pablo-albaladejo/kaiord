@@ -162,4 +162,25 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     expect(persisted?.state).toBe("modified");
     expect(persisted?.modifiedAt).not.toBeNull();
   });
+
+  it("should persist a re-created library id on an already-pushed record without throwing", async () => {
+    // Arrange
+    const record = makeRecord({
+      state: "pushed",
+      krd: ORIGINAL_KRD,
+      garminPushId: "garmin-1",
+    });
+    useWorkoutStore.setState({ currentWorkout: ORIGINAL_KRD });
+    const { result } = renderHook(() => useEditorActions(record));
+
+    // Act
+    await act(async () => {
+      await result.current.pushWorkout("garmin-2");
+    });
+
+    // Assert
+    const persisted = await loadPersisted(record.id);
+    expect(persisted?.state).toBe("pushed");
+    expect(persisted?.garminPushId).toBe("garmin-2");
+  });
 });

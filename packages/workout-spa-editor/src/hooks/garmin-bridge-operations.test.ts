@@ -20,6 +20,7 @@ vi.mock("../store/garmin-extension-transport", () => ({
 }));
 
 const PUSH_TIMEOUT_MS = 15_000;
+const NON_STRING = 7;
 
 const mockedSend = vi.mocked(sendMessage);
 
@@ -49,7 +50,26 @@ describe("evaluatePingResult", () => {
       installed: true,
       session: true,
       error: null,
+      features: [],
     });
+  });
+
+  it.each([
+    [
+      ["calendar-write-v1", "calendar-find-v1"],
+      ["calendar-write-v1", "calendar-find-v1"],
+    ],
+    [["calendar-write-v1", NON_STRING, null], ["calendar-write-v1"]],
+    ["calendar-write-v1", []],
+  ])("should read the ping features %j as %j", (features, expected) => {
+    // Arrange
+    const data = { gcApi: { ok: true }, features };
+
+    // Act
+    const result = evaluatePingResult({ ok: true, protocolVersion: 1, data });
+
+    // Assert
+    expect(result).toMatchObject({ features: expected });
   });
 
   it.each([
@@ -68,6 +88,7 @@ describe("evaluatePingResult", () => {
         installed: true,
         session: false,
         error: "Update your Kaiord Garmin Bridge extension",
+        features: [],
       });
     }
   );
@@ -87,6 +108,7 @@ describe("evaluatePingResult", () => {
       installed: true,
       session: false,
       error: null,
+      features: [],
     });
   });
 });

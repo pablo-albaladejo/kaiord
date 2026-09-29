@@ -64,5 +64,38 @@
   "preview": {
     "region": "Workout preview",
     "bars": "Workout step bars"
+  },
+  "placement": {
+    "scheduled": "On your Garmin calendar on {{date}}",
+    "moved": "Moved on your Garmin calendar to {{date}}",
+    "unchanged": "Already on your Garmin calendar on {{date}}",
+    "duplicateLeft": "On your Garmin calendar on {{date}}, but an older entry is still on {{dates}}. Remove it in Garmin Connect.",
+    "uncertain": "Garmin did not confirm the entry on {{date}}. Check your Garmin calendar before sending again.",
+    "confirm": "It's in Garmin",
+    "sendAnyway": "Send anyway",
+    "checking": "Still checking Garmin. You can answer in {{seconds}} s.",
+    "removed": "I removed it ({{date}})",
+    "libraryOnly": {
+      "insecure-context": "In your Garmin library, with no date: placing it on the calendar needs a secure (https) page.",
+      "unsupported-browser": "In your Garmin library, with no date: this browser cannot place it on the calendar. An up-to-date browser can.",
+      "bridge-outdated": "In your Garmin library, with no date: update the Kaiord Garmin Bridge extension to place it on the calendar."
+    },
+    "updateExtension": "Update the extension",
+    "recordDeletedOn": "This workout was deleted while it was being sent. It may still be on your Garmin calendar on {{date}}: remove it in Garmin Connect.",
+    "failed": {
+      "busy": "This workout is already being sent. Try again once that send ends.",
+      "settling": "Garmin is still processing the last send. Try again in a minute.",
+      "record-deleted": "This workout was deleted while it was being sent.",
+      "guard-failed": "The workout changed while it was being sent. Try again.",
+      "library-missing": "The workout is no longer in your Garmin library. Send it again to re-create it.",
+      "library-id-unknown": "Garmin did not return the workout's id. Send it again.",
+      "schedule-endpoint": "Garmin's calendar did not accept the workout.",
+      "schedule-rejected": "Garmin rejected this date for the workout.",
+      "needs-reauth": "Sign in to Garmin Connect again, then retry.",
+      "deadline-before-send": "The extension timed out before sending. Try again.",
+      "library-push-failed": "The workout could not be sent to Garmin.",
+      "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Settings.",
+      "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish."
+    }
   }
 }

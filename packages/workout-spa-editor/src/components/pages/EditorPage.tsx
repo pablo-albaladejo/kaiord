@@ -41,7 +41,7 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
 
-  const { record, loading } = useWorkoutRecord(id);
+  const { record, placementRow, loading } = useWorkoutRecord(id);
   const { pushWorkout } = useEditorActions(record);
   const profileId = useActiveProfileLive()?.id ?? null;
   const sidebarData = useCoachingSidebar(profileId, id);
@@ -75,8 +75,10 @@ export default function EditorPage({ id }: EditorPageProps) {
       {record && (
         <EditorStateRibbon
           state={record.state}
+          recordId={record.id}
+          placementRow={placementRow}
           profileId={profileId ?? undefined}
-          onSent={() => void pushWorkout(`garmin-${Date.now()}`)}
+          onSent={(garminWorkoutId) => void pushWorkout(garminWorkoutId)}
         />
       )}
       {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}

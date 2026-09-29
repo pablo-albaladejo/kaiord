@@ -86,4 +86,30 @@ describe("resolveRibbonContent", () => {
     // Assert
     expect(contents).toEqual([null, null, null]);
   });
+
+  it("should keep a sent workout on screen while its calendar date needs the athlete", () => {
+    // Arrange
+    const state: WorkoutState = "pushed";
+
+    // Act
+    const content = resolveRibbonContent("ready", state, true);
+
+    // Assert
+    expect(content).toEqual({
+      headlineKey: "ribbon.placementHeadline",
+      detailKey: "ribbon.placementDetail",
+      tone: "attention",
+    });
+  });
+
+  it("should name the broken link when a placement answer cannot reach Garmin", () => {
+    // Arrange
+    const state: WorkoutState = "pushed";
+
+    // Act
+    const content = resolveRibbonContent("no-session", state, true);
+
+    // Assert
+    expect(content?.fixLabelKey).toBe("ribbon.noSessionAction");
+  });
 });

@@ -8,6 +8,8 @@ export type ExtensionResponse = {
   // the mytanita.eu login expired) by setting this on the error envelope so the
   // SPA can prompt a re-login instead of retrying. Emitted by bridge-envelope.js.
   needsReauth?: boolean;
+  /** `false` on a refusal nothing could have sent (bridge-envelope.js). */
+  retryable?: boolean;
   /**
    * Did the message reach the extension at all? `false` only for a delivery
    * failure — not installed, no listener, timeout, no chrome runtime. An

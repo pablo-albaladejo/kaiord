@@ -30,13 +30,17 @@ export function RibbonPanel({
 }: RibbonPanelProps) {
   return (
     <div
-      role="status"
-      aria-label={regionLabel}
       data-testid="editor-state-ribbon"
       data-gate-tone={content.tone}
       className={`flex flex-wrap items-center gap-4 rounded-xl border px-4 py-3.5 ${TONE_CLASSES[content.tone]}`}
     >
-      <div className="flex min-w-0 flex-[1_1_16rem] flex-col gap-1">
+      {/* The live region holds the words only: the actions (and a posted
+          attempt's per-second countdown) sit outside it, never announced. */}
+      <div
+        role="status"
+        aria-label={regionLabel}
+        className="flex min-w-0 flex-[1_1_16rem] flex-col gap-1"
+      >
         <p className="m-0 text-[13px] font-semibold text-ink-strong">
           {headline}
         </p>

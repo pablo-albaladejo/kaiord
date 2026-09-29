@@ -3,7 +3,14 @@ import { useEffect } from "react";
 
 import { useGarminBridge } from "../../../contexts";
 import type { PushState } from "../../../contexts";
+import type { GarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
 import { GarminPushButton } from "./GarminPushButton";
+
+/** No placement to report: the record has no ledger row yet. */
+const NO_NOTICE: GarminPlacementNotice = {
+  removable: [],
+  setLastRun: () => undefined,
+};
 
 const meta = {
   title: "Molecules/GarminPushButton",
@@ -17,6 +24,7 @@ const meta = {
       },
     },
   },
+  args: { notice: NO_NOTICE },
   tags: ["autodocs"],
 } satisfies Meta<typeof GarminPushButton>;
 
@@ -41,12 +49,12 @@ function WithPushState({ state }: { state: PushState }) {
   useEffect(() => {
     setPushing(state);
   }, [state, setPushing]);
-  return <GarminPushButton />;
+  return <GarminPushButton notice={NO_NOTICE} />;
 }
 
 export const Idle: Story = {
   name: "Idle (no workout persisted yet)",
-  render: () => <GarminPushButton />,
+  render: () => <GarminPushButton notice={NO_NOTICE} />,
 };
 
 export const Sending: Story = {

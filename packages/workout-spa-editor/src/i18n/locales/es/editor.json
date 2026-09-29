@@ -282,6 +282,8 @@
     "noSessionHeadline": "Garmin ha cerrado tu sesión, así que esto no puede llegar a tu reloj",
     "noSessionDetail": "La extensión usa tu sesión de Garmin Connect, y esa sesión ha terminado. Vuelve a iniciar sesión, o descarga el archivo e impórtalo a mano.",
     "noSessionAction": "Iniciar sesión en Garmin",
+    "placementHeadline": "Tu reloj tiene esta versión; falta revisar su fecha",
+    "placementDetail": "El entreno llegó a tu biblioteca de Garmin, pero su fecha en el calendario de Garmin necesita una revisión.",
     "region": "Estado de entrega del entreno"
   },
   "shape": {

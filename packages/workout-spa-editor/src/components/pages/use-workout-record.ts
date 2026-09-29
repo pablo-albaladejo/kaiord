@@ -1,21 +1,34 @@
 /**
  * useWorkoutRecord Hook
  *
- * Loads a workout record from Dexie by ID and hydrates the store.
+ * Loads a workout record from Dexie by ID and hydrates the store. The
+ * same live query reads the record's Garmin ledger row, the source of its
+ * placement notice, so the editor page keeps one query.
  */
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useRef } from "react";
 
 import { db } from "../../adapters/dexie/dexie-database";
+import { GARMIN_BRIDGE_ID, ledgerRepo } from "../../hooks/garmin-push-fn";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 
 export function useWorkoutRecord(id: string | undefined) {
-  const record = useLiveQuery(
-    () => (id ? db.table<WorkoutRecord>("workouts").get(id) : undefined),
+  const live = useLiveQuery(
+    async () =>
+      id
+        ? {
+            record: await db.table<WorkoutRecord>("workouts").get(id),
+            placementRow: await ledgerRepo.findByNaturalKey({
+              kaiordRecordId: id,
+              destinationBridgeId: GARMIN_BRIDGE_ID,
+            }),
+          }
+        : undefined,
     [id]
   );
+  const record = live?.record;
 
   const loadWorkout = useWorkoutStore((s) => s.loadWorkout);
   const loadedRef = useRef<string | null>(null);
@@ -27,5 +40,9 @@ export function useWorkoutRecord(id: string | undefined) {
     loadWorkout(record.krd);
   }, [record, id, loadWorkout]);
 
-  return { record, loading: record === undefined && id !== undefined };
+  return {
+    record,
+    placementRow: live?.placementRow,
+    loading: record === undefined && id !== undefined,
+  };
 }

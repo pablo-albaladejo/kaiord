@@ -19,6 +19,7 @@ export const GarminBridgeProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       extensionInstalled: state.extensionInstalled,
       sessionActive: state.sessionActive,
+      features: state.features,
       pushing: state.pushing,
       lastError: state.lastError,
       detectExtension: state.detectExtension,
@@ -29,6 +30,7 @@ export const GarminBridgeProvider = ({ children }: { children: ReactNode }) => {
     [
       state.extensionInstalled,
       state.sessionActive,
+      state.features,
       state.pushing,
       state.lastError,
       state.detectExtension,

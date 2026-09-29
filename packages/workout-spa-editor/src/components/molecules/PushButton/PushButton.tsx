@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useState } from "react";
 
+import { isPlacementSent } from "../../../application/garmin-placement/placement-result";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button, type ButtonSize } from "../../atoms/Button";
@@ -24,7 +25,8 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
     const handlePush = useCallback(async () => {
       setStatus("pushing");
       try {
-        setStatus((await push()) ? "done" : "idle");
+        const result = await push();
+        setStatus(result && isPlacementSent(result) ? "done" : "idle");
       } catch {
         setStatus("idle");
       }
