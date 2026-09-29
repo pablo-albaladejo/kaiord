@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useTranslate } from "../../../i18n/use-translate";
 import { adjustWithAiHref } from "../../../routing/adjust-with-ai-href";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { ExportLedgerEntry } from "../../../types/export-ledger";
 import { Button } from "../../atoms/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { PushButton } from "../../molecules/PushButton";
@@ -11,6 +12,7 @@ import { useTrainingPeaksGate } from "../../organisms/EditorStateRibbon/use-trai
 
 export type WorkoutDetailFooterProps = {
   workout: WorkoutRecord | undefined;
+  placementRow?: ExportLedgerEntry;
   onEdit: () => void;
 };
 
@@ -23,6 +25,7 @@ export type WorkoutDetailFooterProps = {
  */
 export function WorkoutDetailFooter({
   workout,
+  placementRow,
   onEdit,
 }: WorkoutDetailFooterProps) {
   const t = useTranslate("workout-detail");
@@ -44,7 +47,7 @@ export function WorkoutDetailFooter({
         </Button>
       )}
       <div className="flex-1">
-        <PushButton workout={workout} full />
+        <PushButton workout={workout} placementRow={placementRow} full />
       </div>
       {trainingPeaksGate === "ready" && (
         <div className="flex-1">

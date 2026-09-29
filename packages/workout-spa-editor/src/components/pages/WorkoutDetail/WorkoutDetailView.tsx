@@ -2,6 +2,7 @@ import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import type { ReviewModel } from "../../../lib/workout-review";
 import { hardestZone } from "../../../lib/workout-review/zone-emphasis";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { ExportLedgerEntry } from "../../../types/export-ledger";
 import type { SummaryItem } from "../../molecules/SummaryStrip";
 import { SummaryStrip } from "../../molecules/SummaryStrip";
 import { WorkoutDetailFooter } from "./WorkoutDetailFooter";
@@ -11,6 +12,7 @@ import { WorkoutDetailTitle } from "./WorkoutDetailTitle";
 
 export type WorkoutDetailViewProps = {
   record: WorkoutRecord;
+  placementRow?: ExportLedgerEntry;
   model: ReviewModel | null;
   onBack: () => void;
   onEdit: () => void;
@@ -44,6 +46,7 @@ const buildSummary = (
 /** Read-only workout detail sheet with header, summary, structure, and footer. */
 export function WorkoutDetailView({
   record,
+  placementRow,
   model,
   onBack,
   onEdit,
@@ -68,7 +71,11 @@ export function WorkoutDetailView({
         </>
       )}
       <div className="flex-1" />
-      <WorkoutDetailFooter workout={record} onEdit={onEdit} />
+      <WorkoutDetailFooter
+        workout={record}
+        placementRow={placementRow}
+        onEdit={onEdit}
+      />
     </div>
   );
 }
