@@ -35,6 +35,8 @@ vi.mock("../GarminPushButton/useGarminPlacementActions", () => ({
 
 const DATE = "2026-10-05";
 const WORKOUT = { id: "w1", date: DATE } as unknown as WorkoutRecord;
+const MOVED = { id: "w1", date: "2026-10-07" } as unknown as WorkoutRecord;
+const SENT_CLAIM = /On your Garmin calendar on/;
 const UNCERTAIN_ROW = {
   kaiordRecordId: "w1",
   placement: { kind: "uncertain", workoutId: "9", date: DATE },
@@ -143,5 +145,60 @@ describe("PushButton", () => {
 
     // Assert
     expect(screen.getByText("Send to Garmin")).toBeEnabled();
+  });
+
+  it("should reopen the send and keep naming the sent date after a date change", async () => {
+    // Arrange
+    const { rerender } = render(<PushButton workout={WORKOUT} />);
+    fireEvent.click(screen.getByText("Send to Garmin"));
+    deferred.resolve({ kind: "scheduled" });
+    await screen.findByText("On your Garmin");
+    const claim = screen.getByText(SENT_CLAIM).textContent;
+
+    // Act
+    rerender(<PushButton workout={MOVED} />);
+
+    // Assert
+    expect(screen.getByText("Send to Garmin")).toBeEnabled();
+    expect(screen.getByText(SENT_CLAIM).textContent).toBe(claim);
+  });
+
+  it("should not claim a date for a run the reopened page did not see", async () => {
+    // Arrange
+    const page = (workout: WorkoutRecord) => (
+      <PlacementOutcomeProvider>
+        <PushButton key={workout.date} workout={workout} />
+      </PlacementOutcomeProvider>
+    );
+    const { rerender } = render(page(WORKOUT));
+    fireEvent.click(screen.getByText("Send to Garmin"));
+    deferred.resolve({ kind: "scheduled" });
+    await screen.findByText("On your Garmin");
+
+    // Act
+    rerender(page(MOVED));
+
+    // Assert
+    expect(screen.getByText("Send to Garmin")).toBeEnabled();
+    expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
+  });
+
+  it("should keep a dateless warning on a reopened page", async () => {
+    // Arrange
+    const page = (key: string) => (
+      <PlacementOutcomeProvider>
+        <PushButton key={key} workout={WORKOUT} />
+      </PlacementOutcomeProvider>
+    );
+    const { rerender } = render(page("first"));
+    fireEvent.click(screen.getByText("Send to Garmin"));
+    deferred.resolve({ kind: "library-only", reason: "bridge-outdated" });
+    const warning = (await screen.findByRole("status")).textContent;
+
+    // Act
+    rerender(page("reopened"));
+
+    // Assert
+    expect(screen.getByRole("status").textContent).toBe(warning);
   });
 });
