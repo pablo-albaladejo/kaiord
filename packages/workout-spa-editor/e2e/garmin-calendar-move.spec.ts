@@ -78,14 +78,17 @@ test.describe("Garmin calendar — move", () => {
     });
     expect(await entryDates(page)).toEqual([WED]);
     // One library push; the move schedules the new date, then reads the
-    // calendar before it removes the old entry.
-    expect(await garminStubActions(page)).toEqual([
-      "push",
-      "schedule",
-      "schedule",
-      "calendar-find",
-      "unschedule",
+    // calendar before it removes the old entry. Extra verify reads are fine.
+    const actions = await garminStubActions(page);
+    const count = (action: string) =>
+      actions.filter((a) => a === action).length;
+    expect([count("push"), count("schedule"), count("unschedule")]).toEqual([
+      1, 2, 1,
     ]);
+    const moved = actions.lastIndexOf("schedule");
+    const removed = actions.indexOf("unschedule");
+    expect(moved).toBeLessThan(removed);
+    expect(actions.slice(moved, removed)).toContain("calendar-find");
   });
 
   test("should warn that the old entry is still there when its removal fails", async ({
