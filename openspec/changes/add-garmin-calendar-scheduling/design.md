@@ -414,13 +414,13 @@ A `Placed` whose id is absent was deleted by someone, so it cannot stand behind 
 
 **`unschedule` outcomes**
 
-| Outcome                              | Action                                                         |
-| ------------------------------------ | -------------------------------------------------------------- |
-| 204                                  | write `gone`                                                   |
-| 401, or no status with `needsReauth` | keep; do not count the attempt                                 |
-| 404, A3 true                         | `gone` if the id is absent from a find; otherwise `attempts++` |
-| 404, A3 false                        | inconclusive: `attempts++`                                     |
-| anything else, including ambiguous   | `attempts++`                                                   |
+| Outcome                              | Action                                                            |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| 204                                  | write `gone`                                                      |
+| 401, or no status with `needsReauth` | keep; do not count the attempt                                    |
+| 404, A3 true                         | `gone` if the id is absent from a find; otherwise `attempts++`    |
+| 404, A3 false                        | unreachable: an A3-false drain verifies nothing and sends nothing |
+| anything else, including ambiguous   | `attempts++`                                                      |
 
 **Abandoned entries**
 
