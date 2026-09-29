@@ -22,6 +22,8 @@
  * - post-late / land: a POST Garmin commits later (a sleeping sender): the
  *   answer is ambiguous with no entry, the run stops at its
  *   `attempting{posted:true}`, and `land` creates the entry on a later step.
+ * - resend: the push again at the device's current `Placed` date (no move:
+ *   the run only verifies and drains).
  * - drain: `drainQueue` for the device's current `Placed`.
  * - abandon: three drains with every DELETE failing.
  * - dismiss: the athlete removes the first dismissable entry by hand.
@@ -32,7 +34,8 @@
  * - sync-rejected: the upload is rejected; the device pulls the cloud row
  *   and the cloud keeps its own.
  *
- * After every step: no DELETE hit the device's own `Placed` or
+ * After every step: a push that reports a success leaves no `uncertain`
+ * row; no DELETE hit the device's own `Placed` or
  * `attempting.previous`, no step but a dismiss emptied a calendar that had
  * a live entry (never a gap), and a push whose POST answered ok and that
  * reports `scheduled` or `moved` left an entry on its desired date. At every node the devices sync and drain
@@ -68,6 +71,7 @@ import { finishPlacement } from "./placement-finish";
 import { drainQueue, protectedIds } from "./placement-removal-step";
 import { gateOf } from "./placement-resolve";
 import { resolveUncertain } from "./placement-resolve-uncertain";
+import type { PlacementResult } from "./placement-result";
 import { type PostOutcome, postSchedule } from "./placement-schedule-step";
 import { MAX_DELETE_ATTEMPTS } from "./placement-timing";
 import { reconcileGarminPlacement } from "./reconcile-garmin-placement";
@@ -175,6 +179,21 @@ const nextDate = (world: World, device: number) =>
 
 // ---- the steps ------------------------------------------------------------
 
+/** Results that tell the athlete the workout is placed. */
+const SUCCESSES = new Set([
+  "scheduled",
+  "moved",
+  "unchanged",
+  "duplicate-left",
+]);
+
+/** A success reported over a row the run left `uncertain`. */
+async function misreport(device: number, d: Device, result: PlacementResult) {
+  const row = await d.row();
+  if (SUCCESSES.has(result.kind) && row.placement?.kind === "uncertain")
+    return `${DEVICES[device]} reports ${result.kind} on an uncertain row`;
+}
+
 /** An op returns a safety violation, if it sees one. */
 type Op = (
   world: World,
@@ -197,7 +216,17 @@ const push =
     );
     if (okPost && placed && !onDate)
       return `${DEVICES[device]}'s ok push reports ${result.kind} with ${desired.date} empty`;
+    return misreport(device, d, result);
   };
+
+/** The athlete sends again without moving: the run only drains. */
+const resend: Op = async (_world, device, d) => {
+  const p = (await d.row()).placement;
+  if (!isGarminPlaced(p)) return;
+  const desired = { workoutId: W, date: p.date };
+  const result = await reconcileGarminPlacement({ ...d.run, desired });
+  return misreport(device, d, result);
+};
 
 const post =
   (script: ScheduleScript, late = false): Op =>
@@ -292,6 +321,7 @@ const OPS: Record<string, Op> = {
   "post-late": post({ answer: SERVER_ERROR }, true),
   land,
   commit,
+  resend,
   drain,
   abandon,
   dismiss,
@@ -382,6 +412,9 @@ type Scenario = {
   seed: () => Promise<World>;
   alphabet: Step[];
   depth: number;
+  /** About half the distinct states explored when written: a scenario
+      whose steps turn into no-ops fails here instead of passing empty. */
+  minVisited: number;
 };
 
 const steps = (ops: string[], devices = [0, 1, 2]): Step[] =>
@@ -421,7 +454,7 @@ async function explore(s: Scenario) {
     }
   };
   await visit(await s.seed(), []);
-  return { failures, pairs: [...pairs.values()] };
+  return { failures, pairs: [...pairs.values()], visited: seen.size };
 }
 
 // ---- scenarios ------------------------------------------------------------
@@ -546,6 +579,18 @@ const lateWorld = scripted([
   { device: 1, op: "post-late" },
 ]);
 
+/** The §3.9 skew counterexample, up to B's move to S104: C (a day ahead)
+    synced Placed S102, then moved to S103 without syncing; B adopted
+    S103 for its late POST, moved to S104 and deleted S103. */
+const skewWorld = scripted([
+  { device: 1, op: "push-ok" },
+  { device: 1, op: "post-late" },
+  { device: 2, op: "push-ok" },
+  { device: 2, op: "sync" },
+  { device: 2, op: "push-ok" },
+  { device: 1, op: "push-ok" },
+]);
+
 const PUSHES = [
   "push-ok",
   "push-no-id",
@@ -559,24 +604,28 @@ const SCENARIOS: Scenario[] = [
     seed: async () => world(),
     alphabet: steps(["push-ok", "sync", "drain"]),
     depth: 4,
+    minVisited: 500,
   },
   {
     name: "a stale offline device after moves and drains",
     seed: staleWorld,
     alphabet: steps(["push-ok", "sync", "drain"]),
     depth: 3,
+    minVisited: 95,
   },
   {
     name: "ambiguous and id-less pushes resolved by a read",
     seed: async () => world(),
     alphabet: [...steps(PUSHES, [0, 2]), ...steps(["sync"])],
     depth: 3,
+    minVisited: 430,
   },
   {
     name: "an id-less entry adopted by another device",
     seed: adoptedWorld,
     alphabet: steps(["push-ok", "sync", "drain"]),
     depth: 3,
+    minVisited: 115,
   },
   {
     name: "legacy rows resolved by T5",
@@ -586,6 +635,7 @@ const SCENARIOS: Scenario[] = [
       ...steps(["push-ok"], [2]),
     ],
     depth: 3,
+    minVisited: 60,
   },
   {
     name: "moves back to an earlier date",
@@ -598,12 +648,14 @@ const SCENARIOS: Scenario[] = [
       ...steps(["sync"]),
     ],
     depth: 4,
+    minVisited: 1750,
   },
   {
     name: "two id-less pushes for one date with different known ids",
     seed: unionWorld,
     alphabet: [...steps(["sync", "drain"]), ...steps(["push-no-id"], [1])],
     depth: 3,
+    minVisited: 34,
   },
   {
     name: "a sync between the POST and the commit",
@@ -614,6 +666,7 @@ const SCENARIOS: Scenario[] = [
       ...steps(["sync"], [0]),
     ],
     depth: 5,
+    minVisited: 310,
   },
   {
     name: "abandoned and dismissed entries",
@@ -623,6 +676,7 @@ const SCENARIOS: Scenario[] = [
       ...steps(["sync", "abandon", "dismiss"]),
     ],
     depth: 4,
+    minVisited: 245,
   },
   {
     name: "an old bridge without calendar-find",
@@ -633,6 +687,7 @@ const SCENARIOS: Scenario[] = [
       ...steps(["sync"]),
     ],
     depth: 4,
+    minVisited: 410,
   },
   {
     name: "a POST that lands after the reads, with a skewed reader",
@@ -645,6 +700,17 @@ const SCENARIOS: Scenario[] = [
       ...steps(["land"], [0]),
     ],
     depth: 4,
+    minVisited: 565,
+  },
+  {
+    name: "a stale Placed that wins the merge after its entry was deleted",
+    seed: skewWorld,
+    alphabet: [
+      ...steps(["sync", "resend", "push-ok"], [1, 2]),
+      ...steps(["land"], [0]),
+    ],
+    depth: 3,
+    minVisited: 80,
   },
 ];
 
@@ -664,14 +730,19 @@ describe("the placement pipeline over enumerated cross-device histories", () => 
     "should stay safe and converge on every interleaving of %s",
     (name) => {
       // Arrange
-      const { failures } = explored.find((e) => e.s.name === name)!;
+      const { s, failures, visited } = explored.find((e) => e.s.name === name)!;
       const sample = failures.slice(0, SAMPLE_SIZE);
 
       // Act
       const count = failures.length;
+      const explores = visited >= s.minVisited;
 
       // Assert
-      expect({ count, sample }).toEqual({ count: 0, sample: [] });
+      expect({ count, sample, explores }).toEqual({
+        count: 0,
+        sample: [],
+        explores: true,
+      });
     }
   );
 

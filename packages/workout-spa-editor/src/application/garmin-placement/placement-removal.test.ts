@@ -341,10 +341,11 @@ describe("verify before delete (design §3.5)", () => {
     h.calendar.items.splice(1, 1);
 
     // Act
-    await h.push(D2);
+    const result = await h.push(D2);
 
     // Assert
     const row = await h.row();
+    expect(result).toEqual({ kind: "uncertain", date: D2, canConfirm: false });
     expect(h.calendar.count("unschedule")).toBe(deletes);
     expect(h.calendar.items.map((i) => i.id)).toEqual([oldId]);
     expect(row?.placement).toMatchObject({ kind: "uncertain", date: D2 });
