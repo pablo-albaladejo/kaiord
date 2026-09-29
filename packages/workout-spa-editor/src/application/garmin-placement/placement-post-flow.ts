@@ -66,11 +66,8 @@ export const postAttempt = async (
   if (cls.kind === "definite")
     return definiteFailure(run, attempt, written, preClaim, cls.reason);
   await run.deps.sleep(SETTLE_MS);
-  const resolved = await resolveAttempt(run, attempt, true);
-  if (resolved.kind !== "adopted")
-    return resolved.kind === "done"
-      ? resolved.result
-      : failed("settling", true);
+  const resolved = await resolveAttempt(run, attempt);
+  if (resolved.kind === "done") return resolved.result;
   const behind = [
     ...leftBehind,
     ...(resolved.many ? [attempt.date] : []),

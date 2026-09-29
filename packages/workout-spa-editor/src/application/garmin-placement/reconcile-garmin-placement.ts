@@ -21,6 +21,7 @@ import { canConfirmAt } from "./placement-row";
 
 /** A leftover resolve, then the claim of the desired placement. */
 const MAX_ROUNDS = 3;
+const REPOST = () => ({ kind: "repost" }) as const;
 
 const stillUncertain = async (
   run: PlacementRun,
@@ -56,7 +57,7 @@ export const reconcileGarminPlacement = async (
       adopted = true;
       continue;
     }
-    const resolved = await resolveAttempt(run, claim.attempt, false);
+    const resolved = await resolveAttempt(run, claim.attempt, REPOST);
     if (resolved.kind === "done") return resolved.result;
     if (resolved.kind === "repost") {
       // The leftover proved absent: it goes back to its `previous`, and the

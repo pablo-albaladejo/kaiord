@@ -2,7 +2,8 @@
  * Resolves an `attempting{posted:true}` (design §3.4) — a leftover from an
  * earlier run, or this run's ambiguous POST after `SETTLE_MS`. The read
  * happens first; the decision is taken inside the guarded write, against
- * the re-read queue. `inRun`: this run already posted, so no re-POST.
+ * the re-read queue. `repost`: what proven absence means to a leftover's
+ * resolve; without it (this run already posted) there is no re-POST.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { PlacementRun } from "./placement-deps";
@@ -20,9 +21,8 @@ import {
 import { type Attempt, decide, isAttemptAt, placedRow } from "./placement-row";
 import { undecided } from "./placement-undecided";
 
-export type ResolveOutcome =
+export type Settled =
   | { kind: "adopted"; placed: GarminPlaced; many: boolean }
-  | { kind: "repost" }
   | { kind: "done"; result: PlacementResult };
 
 type Verdict = ResolveDecision | { kind: "absent" } | { kind: "changed" };
@@ -47,22 +47,22 @@ const decideInWrite = (
     return { write: placedRow(row, verdict.placed, attempt.previous), verdict };
   });
 
-export const resolveAttempt = async (
+export const resolveAttempt = async <R = never>(
   run: PlacementRun,
   attempt: Attempt,
-  inRun: boolean
-): Promise<ResolveOutcome> => {
-  if (!run.deps.canFind) return undecided(run, attempt, inRun);
+  repost?: () => R
+): Promise<Settled | R> => {
+  if (!run.deps.canFind) return undecided(run, attempt, repost);
   const readStartedAt = run.deps.now();
   const read = await run.deps.calendar.find(attempt.workoutId, attempt.date);
-  if (!read.ok) return undecided(run, attempt, inRun);
+  if (!read.ok) return undecided(run, attempt, repost);
   const { verdict } = await decideInWrite(
     run,
     attempt,
     read.entries,
     readStartedAt
   );
-  const done = (result: PlacementResult): ResolveOutcome => ({
+  const done = (result: PlacementResult): Settled => ({
     kind: "done",
     result,
   });
@@ -74,10 +74,10 @@ export const resolveAttempt = async (
     case "changed":
       return done(failed("guard-failed", true));
     case "uncertain":
-      return undecided(run, attempt, inRun);
+      return undecided(run, attempt, repost);
     case "settling":
       return done(settling(verdict.retryAfter));
     case "repost":
-      return inRun ? done(settling(gateOf(attempt))) : { kind: "repost" };
+      return repost ? repost() : done(settling(gateOf(attempt)));
   }
 };

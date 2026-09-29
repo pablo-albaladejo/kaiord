@@ -10,7 +10,7 @@ import { canonicalHash } from "@kaiord/core";
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { Uncertain } from "./placement-claim";
 import type { PlacementRun } from "./placement-deps";
-import type { ResolveOutcome } from "./placement-resolve-step";
+import type { Settled } from "./placement-resolve-step";
 import { type PlacementResult, recordDeleted } from "./placement-result";
 import {
   canConfirmAt,
@@ -22,7 +22,7 @@ import {
 import { readHeldMonths } from "./placement-t5-read";
 
 type Reads = NonNullable<Awaited<ReturnType<typeof readHeldMonths>>>;
-type Verdict = Exclude<ResolveOutcome, { kind: "repost" }> | "undecided";
+type Verdict = Settled | "undecided";
 
 const adoption = (u: Uncertain, row: Row, reads: Reads, a3: boolean) => {
   const dead = new Set(
