@@ -21,6 +21,12 @@ type Deferred = {
 let deferred: Deferred;
 const pushMock = vi.fn(() => deferred.promise);
 const confirmMock = vi.fn(async () => undefined);
+const bridge = { extensionInstalled: true, sessionActive: true };
+
+vi.mock("../../../contexts", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  useGarminBridge: () => bridge,
+}));
 
 vi.mock("../GarminPushButton/useGarminPush", () => ({
   useGarminPush: () => ({ push: pushMock }),
@@ -55,6 +61,24 @@ describe("PushButton", () => {
     pushMock.mockClear();
     confirmMock.mockClear();
     deferred = makeDeferred();
+    bridge.extensionInstalled = true;
+    bridge.sessionActive = true;
+  });
+
+  it.each([
+    ["the bridge is not detected", { extensionInstalled: false }],
+    ["Garmin is signed out", { sessionActive: false }],
+  ])("should keep the send disabled while %s", (_label, state) => {
+    // Arrange
+    Object.assign(bridge, state);
+
+    // Act
+    render(<PushButton workout={WORKOUT} />);
+
+    // Assert
+    expect(
+      screen.getByRole("button", { name: /Send to Garmin/ })
+    ).toBeDisabled();
   });
 
   it("should render the idle label", () => {

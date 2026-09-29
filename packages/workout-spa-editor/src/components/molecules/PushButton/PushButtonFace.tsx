@@ -11,13 +11,15 @@ type PushButtonFaceProps = {
   size: Extract<ButtonSize, "md" | "lg">;
   full: boolean;
   onPush: () => void;
+  /** Idle only: the bridge is not detected or Garmin is signed out. */
+  disabled?: boolean;
 };
 
 /** The send button's three looks: send, sending and sent. */
 export const PushButtonFace = forwardRef<
   HTMLButtonElement,
   PushButtonFaceProps
->(({ status, size, full, onPush }, ref) => {
+>(({ status, size, full, onPush, disabled = false }, ref) => {
   const t = useTranslate("workout-detail");
   const common = { ref, size, className: full ? "w-full" : "" };
 
@@ -41,7 +43,7 @@ export const PushButtonFace = forwardRef<
   }
 
   return (
-    <Button {...common} variant="primary" onClick={onPush}>
+    <Button {...common} variant="primary" disabled={disabled} onClick={onPush}>
       <Icon icon={ICON_MAP.watch} size="sm" color="inherit" />
       {t("footer.send")}
     </Button>

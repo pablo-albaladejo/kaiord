@@ -1,6 +1,7 @@
 import { forwardRef, useState } from "react";
 
 import { isPlacementSent } from "../../../application/garmin-placement/placement-result";
+import { useGarminBridge } from "../../../contexts";
 import { useGarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { ExportLedgerEntry } from "../../../types/export-ledger";
@@ -30,6 +31,7 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
       workout?.date
     );
     const placement = useGarminPlacement(workout, notice);
+    const { extensionInstalled, sessionActive } = useGarminBridge();
     const [ran, setRan] = useState(false);
     // A success whose date the workout left is dropped by the notice, so
     // the send reopens and nothing claims the new date.
@@ -54,6 +56,7 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
           size={size}
           full={full}
           onPush={() => void onPush()}
+          disabled={!extensionInstalled || !sessionActive}
         />
         {result && workout && (
           <PlacementFeedback
