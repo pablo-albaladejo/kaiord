@@ -15,15 +15,7 @@
  */
 import { NoActiveExportRouteError } from "../../application/export/execute-workout-push";
 import type { PlacementResult } from "../../application/garmin-placement/placement-result";
-import {
-  type PlacementPipelineDeps,
-  pushWorkoutToGarminCalendar,
-} from "../../application/garmin-placement/push-workout-to-garmin-calendar";
-import { recordGarminPush } from "../../application/record-garmin-push";
-import type { GarminPushOutcome } from "../../contexts/garmin-bridge-types";
-import type { PersistencePort } from "../../ports/persistence-port";
-import { exportGcnWorkout } from "../../utils/export-workout-formats";
-import { garminPlacementRequest } from "../garmin-placement-request";
+import { placeRecord } from "../garmin-place-record";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
 
 /** The Phase 1 failures, as the tool's error codes. */
@@ -45,35 +37,14 @@ const calendarOf = (result: PlacementResult) =>
     : { calendar: result.kind };
 
 const pushAndRecord = async (
-  persistence: PersistencePort,
-  pushWorkout: (gcn: unknown) => Promise<GarminPushOutcome>,
-  workoutId: string,
-  placementDeps: PlacementPipelineDeps
+  ...args: Parameters<typeof placeRecord>
 ): Promise<unknown> => {
-  const record = await persistence.workouts.getById(workoutId);
-  if (!record?.krd) return { error: "workout_not_found" };
-  const gcn = await exportGcnWorkout(record.krd);
-
-  const confirmed: { id?: string } = {};
-  const result = await pushWorkoutToGarminCalendar(
-    placementDeps,
-    garminPlacementRequest(
-      { record, gcn, ledgerRepo: placementDeps.ledgerRepo, pushWorkout },
-      { onLibraryConfirmed: (id) => (confirmed.id = id) }
-    )
-  );
-  const garminPushId = confirmed.id ?? null;
+  const placed = await placeRecord(...args);
+  if (!placed) return { error: "workout_not_found" };
+  const { result, garminPushId } = placed;
   const error = garminPushId === null ? libraryError(result) : undefined;
   if (error) return error;
-  const done = { workoutId: record.id, garminPushId, ...calendarOf(result) };
-  if (garminPushId === null) return done;
-  // Re-read before persisting so edits made while the push was in flight
-  // are not overwritten by the stale copy captured above.
-  const fresh = await persistence.workouts.getById(workoutId);
-  await persistence.workouts.put(
-    recordGarminPush(fresh ?? record, garminPushId)
-  );
-  return done;
+  return { workoutId: args[2], garminPushId, ...calendarOf(result) };
 };
 
 export const doPushToGarmin = async (

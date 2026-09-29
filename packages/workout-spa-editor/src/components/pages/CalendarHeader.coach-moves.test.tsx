@@ -8,6 +8,9 @@ import { CalendarHeader } from "./CalendarHeader";
 vi.mock("../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: () => ({ id: "p1" }),
 }));
+vi.mock("./use-calendar-send-week", () => ({
+  useCalendarSendWeek: () => ({ offered: false, state: { phase: "idle" } }),
+}));
 vi.mock("./CalendarEmptyBanners", () => ({ CalendarEmptyBanners: () => null }));
 vi.mock("../organisms/BatchCostConfirmation", () => ({
   BatchCostConfirmation: () => null,
