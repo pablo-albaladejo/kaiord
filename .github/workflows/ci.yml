@@ -680,9 +680,11 @@ jobs:
     runs-on: ubuntu-latest
     # The node 22.18.0 matrix leg runs ~50% slower than 24.x and the suite has
     # grown past the old 9-min cap (it hit the timeout on PR #790). Recalibrated
-    # from the slow leg: P95 ≈ 540s; ceil(P95 × 1.5 / 60) = 14; capped at
-    # test-family ceiling 30.
-    timeout-minutes: 14
+    # from the slow leg over its last 61 successful runs (2026-09-29): P95 ≈
+    # 825s; ceil(P95 × 1.5 / 60) = 21; capped at test-family ceiling 30. The
+    # previous cap of 14 came from P95 ≈ 540s and was hit on PR #1284 with
+    # every test passing (vitest itself took 771s).
+    timeout-minutes: 21
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
