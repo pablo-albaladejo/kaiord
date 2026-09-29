@@ -10,7 +10,7 @@ import { useCallback, useRef } from "react";
 
 import type { ChatMessageRecord } from "../types/chat/chat-message-record";
 import { approveAction, denyAction } from "./chat/chat-turn-resume";
-import { sendTurn } from "./chat/chat-turn-runner";
+import { retryTurn, sendTurn } from "./chat/chat-turn-runner";
 import type { ChatTurnCtx, ChatTurnState } from "./chat/chat-turn-types";
 
 export type ChatTurnActions = {
@@ -45,6 +45,10 @@ export const useChatTurnActions = (
   const deny = useCallback(() => {
     if (ctx && pendingAction) void denyAction(ctx, pendingAction);
   }, [ctx, pendingAction]);
-  const retry = useCallback(() => send(lastInputRef.current), [send]);
+  const retry = useCallback(() => {
+    const text = lastInputRef.current;
+    if (!ctx || state === "streaming" || !text.trim()) return;
+    void retryTurn(ctx, messages, text);
+  }, [ctx, state, messages]);
   return { send, approve, deny, retry };
 };
