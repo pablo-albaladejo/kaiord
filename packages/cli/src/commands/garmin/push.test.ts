@@ -1,7 +1,13 @@
 import type { KRD, Logger } from "@kaiord/core";
-import { ServiceApiError, ServiceAuthError } from "@kaiord/core";
+import {
+  createMissingFtpError,
+  ServiceApiError,
+  ServiceAuthError,
+} from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mapErrorToExitCode } from "../../utils/error-exit-code";
+import { getSuggestionForError } from "../../utils/error-suggestions";
 import { ExitCode } from "../../utils/exit-codes";
 
 vi.mock("./client-factory", () => ({
@@ -186,5 +192,29 @@ describe("pushCommand", () => {
     expect(logger.error).toHaveBeenCalledWith(
       "Garmin Connect request failed. Please retry later."
     );
+  });
+
+  it("should fail with exit code 1 and an --ftp hint when a %FTP workout has no --ftp", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const mockService = {
+      push: vi.fn().mockRejectedValue(createMissingFtpError("garmin")),
+    };
+    const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
+    vi.mocked(createCliGarminClient).mockResolvedValue({
+      auth: mockAuth,
+      service: mockService,
+    } as never);
+    vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
+
+    // Act
+    const error = await pushCommand({ input: "workout.zwo" }, logger).catch(
+      (thrown: Error) => thrown
+    );
+
+    // Assert
+    expect(mapErrorToExitCode(error)).toBe(ExitCode.INVALID_ARGUMENT);
+    expect(ExitCode.INVALID_ARGUMENT).toBe(1);
+    expect(getSuggestionForError(error as Error)?.join(" ")).toContain("--ftp");
   });
 });
