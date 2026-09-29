@@ -3,7 +3,10 @@ import "fake-indexeddb/auto";
 import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ExportLedgerEntry } from "../../types/export-ledger";
+import {
+  type ExportLedgerEntry,
+  restoreLedgerRow,
+} from "../../types/export-ledger";
 import { parseGarminWorkoutId } from "../../types/garmin-ledger";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
@@ -185,6 +188,37 @@ describe("createDexieExportLedgerRepository — mutateByKey", () => {
     expect(rows.map((r) => r.id)).toEqual([newId]);
     expect(after?.id).toBe(newId);
     expect(await db.table("tombstones").count()).toBe(0);
+  });
+
+  it("should store a restored row verbatim, its older updatedAt included", async () => {
+    // Arrange
+    const claimed = {
+      ...row(),
+      destinationExternalId: "garmin-2",
+      updatedAt: T2.toISOString(),
+    };
+    await db.table("exportLedger").add(claimed);
+    const repo = createDexieExportLedgerRepository(db);
+
+    // Act
+    const after = await repo.mutateByKey(KEY, () => restoreLedgerRow(row()));
+
+    // Assert
+    expect(after).toStrictEqual(row());
+    expect(await db.table("exportLedger").toArray()).toStrictEqual([row()]);
+  });
+
+  it("should write nothing when the restored row equals the current one", async () => {
+    // Arrange
+    await db.table("exportLedger").add(row());
+    const repo = createDexieExportLedgerRepository(db);
+    const put = vi.spyOn(db.table("exportLedger"), "put");
+
+    // Act
+    await repo.mutateByKey(KEY, () => restoreLedgerRow(row()));
+
+    // Assert
+    expect(put).not.toHaveBeenCalled();
   });
 });
 
