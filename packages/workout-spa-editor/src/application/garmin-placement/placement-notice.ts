@@ -19,6 +19,28 @@ export type PlacementNotice = {
   removable: GarminRemovalEntry[];
 };
 
+/** The results whose message states the workout's own date. */
+const namesWorkoutDate = (result: PlacementResult): boolean =>
+  result.kind === "scheduled" ||
+  result.kind === "moved" ||
+  result.kind === "unchanged" ||
+  result.kind === "duplicate-left";
+
+/**
+ * The last run, while it still describes the workout: a result naming the
+ * workout's date is dropped once the workout's date is no longer the one
+ * the run placed (the Garmin entry is still on that old date).
+ */
+export const currentRun = <
+  R extends { result: PlacementResult; date?: string },
+>(
+  run: R | undefined,
+  workoutDate: string | undefined
+): R | undefined =>
+  run && namesWorkoutDate(run.result) && run.date !== workoutDate
+    ? undefined
+    : run;
+
 export const placementNotice = (
   row: Row | undefined,
   lastRun: PlacementResult | undefined,

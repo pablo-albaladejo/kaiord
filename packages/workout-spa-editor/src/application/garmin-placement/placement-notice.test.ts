@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
-import { placementNotice } from "./placement-notice";
+import { currentRun, placementNotice } from "./placement-notice";
 import { failed, type PlacementResult } from "./placement-result";
 import type { Row } from "./placement-row";
 import { POST_GATE_MS } from "./placement-timing";
@@ -154,5 +154,46 @@ describe("placementNotice", () => {
 
     // Assert
     expect(notice).toEqual({ removable: [] });
+  });
+});
+
+describe("currentRun", () => {
+  it.each([
+    {
+      name: "a success on the workout's date",
+      kind: "scheduled",
+      date: D1,
+      kept: true,
+    },
+    {
+      name: "a success on a date the workout left",
+      kind: "moved",
+      date: D2,
+      kept: false,
+    },
+    {
+      name: "a left-behind warning on a date the workout left",
+      kind: "duplicate-left",
+      date: D2,
+      kept: false,
+    },
+    {
+      name: "a dateless outcome after a date change",
+      kind: "library-only",
+      date: D2,
+      kept: true,
+    },
+  ])("should keep $name: $kept", ({ kind, date, kept }) => {
+    // Arrange
+    const run = {
+      result: { kind, reason: "bridge-outdated", dates: [] } as PlacementResult,
+      date,
+    };
+
+    // Act
+    const current = currentRun(run, D1);
+
+    // Assert
+    expect(current).toBe(kept ? run : undefined);
   });
 });

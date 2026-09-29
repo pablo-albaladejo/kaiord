@@ -147,19 +147,33 @@ describe("PushButton", () => {
     expect(screen.getByText("Send to Garmin")).toBeEnabled();
   });
 
-  it("should reopen the send and keep naming the sent date after a date change", async () => {
+  it("should reopen the send and claim no date after a date change", async () => {
     // Arrange
     const { rerender } = render(<PushButton workout={WORKOUT} />);
     fireEvent.click(screen.getByText("Send to Garmin"));
     deferred.resolve({ kind: "scheduled" });
     await screen.findByText("On your Garmin");
-    const claim = screen.getByText(SENT_CLAIM).textContent;
 
     // Act
     rerender(<PushButton workout={MOVED} />);
 
     // Assert
     expect(screen.getByText("Send to Garmin")).toBeEnabled();
+    expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
+  });
+
+  it("should claim the sent date again once the workout is back on it", async () => {
+    // Arrange
+    const { rerender } = render(<PushButton workout={WORKOUT} />);
+    fireEvent.click(screen.getByText("Send to Garmin"));
+    deferred.resolve({ kind: "scheduled" });
+    const claim = (await screen.findByText(SENT_CLAIM)).textContent;
+    rerender(<PushButton workout={MOVED} />);
+
+    // Act
+    rerender(<PushButton workout={WORKOUT} />);
+
+    // Assert
     expect(screen.getByText(SENT_CLAIM).textContent).toBe(claim);
   });
 
