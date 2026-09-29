@@ -98,9 +98,15 @@ invoked — for all actions, not only snapshot actions.
 - **WHEN** a sender with origin `https://app.kaiord.com` sends an external message whose action is in the bridge's external allowlist
 - **THEN** the shared dispatch SHALL invoke the bridge's action handler and respond with the success envelope
 
+#### Scenario: Apex production origin dispatches
+
+- **GIVEN** the production SPA is served at `https://kaiord.com/app` (the apex origin, with `www` redirecting to it)
+- **WHEN** a sender with origin `https://kaiord.com` sends an external message whose action is in the bridge's external allowlist
+- **THEN** the shared dispatch SHALL invoke the bridge's action handler, and the origin of each bridge popup's `OPEN_EDITOR_URL` SHALL be accepted by the same guard
+
 #### Scenario: Disallowed origin is rejected identically across bridges
 
-- **WHEN** any bridge receives an external message from an origin other than `https://*.kaiord.com` or `http://localhost:5173/5174`
+- **WHEN** any bridge receives an external message from an origin other than `https://kaiord.com`, `https://*.kaiord.com` or `http://localhost:5173/5174`
 - **THEN** it SHALL respond `{ ok: false, protocolVersion, error, retryable: false }` via the shared guard, without invoking the bridge's action handler
 
 #### Scenario: Action outside the external allowlist is rejected
