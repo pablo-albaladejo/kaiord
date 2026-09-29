@@ -124,12 +124,21 @@ An `uncertain` placement SHALL be resolved by `calendar-find` for its workout ov
 
 A result that needs the athlete (every result except `scheduled`, `moved` and `unchanged`, plus any dismissable entry) SHALL stay on the editor after the workout becomes `pushed`: the editor's delivery ribbon SHALL show it in a compact panel, and plain results SHALL stay silent. `uncertain` and the dismissable entries SHALL be derived from the record's persisted ledger row (one live query per page), so they survive a reload and reach other devices through sync, and a row that is no longer `uncertain` SHALL never show one. The outcomes the ledger does not hold (`failed`, `library-only`) SHALL be kept in ephemeral per-record state that outlives the send control, never persisted. The ribbon's live region SHALL hold only its headline, detail and result message; its actions, the gate countdown included, SHALL sit outside every live region, so a ticking countdown is never re-announced.
 
+A sent outcome SHALL name the date it was sent for. Once the workout's date differs from that date, the send control SHALL offer a new send, and no message SHALL claim the new date is on the Garmin calendar.
+
 #### Scenario: An uncertain placement survives a reload
 
 - **GIVEN** a push that returned `uncertain` and a workout persisted as `pushed`
 - **WHEN** the athlete reloads the editor
 - **THEN** the ribbon SHALL show the `uncertain` result with "It's in Garmin" (when allowed) and "Send anyway"
 - **AND** once the row is no longer `uncertain`, the panel SHALL disappear with no call
+
+#### Scenario: A date change after a send reopens the send
+
+- **GIVEN** a push for D1 that returned `scheduled`
+- **WHEN** the workout's date changes to D2
+- **THEN** the send control SHALL be enabled again
+- **AND** no message SHALL say the workout is on the Garmin calendar on D2
 
 #### Scenario: A posted attempt is not answered before its gate
 
