@@ -17,6 +17,7 @@ import {
   D1,
   D2,
 } from "../test-utils/placement-harness";
+import { createTransactionLock } from "../test-utils/transaction-lock";
 import {
   buildCoachingActivityId,
   type CoachingActivityRecord,
@@ -67,29 +68,6 @@ const activity = (date: string): CoachingActivityRecord => ({
   fetchedAt: T0.toISOString(),
 });
 
-/** One writer at a time; `contended` resolves when a second one waits. */
-const createLock = () => {
-  let tail: Promise<void> = Promise.resolve();
-  let held = false;
-  let signal = () => undefined as void;
-  const contended = new Promise<void>((resolve) => (signal = resolve));
-  const transaction = async <T>(fn: () => Promise<T>): Promise<T> => {
-    if (held) signal();
-    const previous = tail;
-    let release = () => undefined as void;
-    tail = new Promise((resolve) => (release = resolve));
-    await previous;
-    held = true;
-    try {
-      return await fn();
-    } finally {
-      held = false;
-      release();
-    }
-  };
-  return { transaction, contended };
-};
-
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(T0);
@@ -99,7 +77,7 @@ afterEach(() => vi.useRealTimers());
 describe("placeRecord and applyCoachDateMoves on the same workout", () => {
   it("should keep both the coach's date and the push stamp", async () => {
     // Arrange
-    const lock = createLock();
+    const lock = createTransactionLock();
     const persistence: PersistencePort = {
       ...createInMemoryPersistence(),
       transaction: lock.transaction,
