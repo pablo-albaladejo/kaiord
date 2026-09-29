@@ -347,6 +347,18 @@ const SOLO_CASES = [
   ],
   [
     GARMIN,
+    "to check the calendar before removing an entry Kaiord replaced",
+    "to do other things",
+    "Garmin calendar read purposes named",
+  ],
+  [
+    GARMIN,
+    "deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them",
+    "deletes entries",
+    "Garmin calendar delete scoped to Kaiord-sent workouts and placed dates",
+  ],
+  [
+    GARMIN,
     "No data is shared with any third party",
     "Sharing happens sometimes",
     "Garmin no-third-party-sharing stated",
