@@ -10,6 +10,7 @@ const ENTRY = {
   workoutScheduleId: "5000",
   date: "2026-10-04",
 } as GarminRemovalEntry;
+const OTHER_DATE = "2026-10-03";
 const push = vi.fn();
 const actions = { confirm: vi.fn(), dismiss: vi.fn() };
 
@@ -118,5 +119,23 @@ describe("useGarminPlacement", () => {
     // Assert
     expect(actions.dismiss).toHaveBeenCalledWith(ENTRY.workoutScheduleId);
     expect(notice.setLastRun).toHaveBeenCalledWith(undefined);
+  });
+
+  it("should keep the left-behind warning for the dates still left after one dismissal", async () => {
+    // Arrange
+    const notice = noticeWith({
+      result: { kind: "duplicate-left", dates: [OTHER_DATE, ENTRY.date] },
+      removable: [ENTRY],
+    });
+    const { result } = renderHook(() => useGarminPlacement(WORKOUT, notice));
+
+    // Act
+    await act(() => result.current.dismiss(ENTRY.workoutScheduleId));
+
+    // Assert
+    expect(notice.setLastRun).toHaveBeenCalledExactlyOnceWith({
+      kind: "duplicate-left",
+      dates: [OTHER_DATE],
+    });
   });
 });

@@ -6,6 +6,15 @@ import type { WorkoutRecord } from "../../../types/calendar-record";
 import { useGarminPlacementActions } from "./useGarminPlacementActions";
 import { useGarminPush } from "./useGarminPush";
 
+const withoutDate = (
+  dates: string[],
+  date: string | undefined
+): PlacementResult | undefined => {
+  const at = date === undefined ? -1 : dates.indexOf(date);
+  const rest = dates.filter((_, i) => i !== at);
+  return rest.length > 0 ? { kind: "duplicate-left", dates: rest } : undefined;
+};
+
 /**
  * The send control's actions on a record's placement notice: send, the
  * answers to an `uncertain`, and "I removed it". Each run's outcome goes
@@ -37,11 +46,15 @@ export const useGarminPlacement = (
 
   const dismiss = useCallback(
     async (workoutScheduleId: string) => {
+      const entry = notice.removable.find(
+        (e) => e.workoutScheduleId === workoutScheduleId
+      );
       const done = await actions.dismiss(workoutScheduleId);
-      // The left-behind warning is answered; the row decides what remains.
-      if (done && result?.kind === "duplicate-left") setLastRun(undefined);
+      // The warning keeps the dates still left behind; none left clears it.
+      if (done && result?.kind === "duplicate-left")
+        setLastRun(withoutDate(result.dates, entry?.date));
     },
-    [actions, result, setLastRun]
+    [actions, notice.removable, result, setLastRun]
   );
 
   return {
