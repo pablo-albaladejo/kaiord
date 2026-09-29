@@ -94,5 +94,13 @@
     "headline_other": "{{count}} sesiones están listas pero no pueden llegar a tu reloj",
     "consequence": "Garmin no tiene API pública para entrenos, así que la extensión puente hace la entrega. Hasta instalarla, descargar el fichero e importarlo a mano es la única vía.",
     "cta": "Instalar el puente"
+  },
+  "coachMoves": {
+    "moved_one": "{{count}} sesión se ha movido a la nueva fecha del entrenador.",
+    "moved_other": "{{count}} sesiones se han movido a las nuevas fechas del entrenador.",
+    "overridden_one": "{{count}} de ellas sustituye un día que habías elegido.",
+    "overridden_other": "{{count}} de ellas sustituyen días que habías elegido.",
+    "sendHint": "Envía la semana para actualizar Garmin.",
+    "dismiss": "Descartar"
   }
 }

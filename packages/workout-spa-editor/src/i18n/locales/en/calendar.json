@@ -94,5 +94,13 @@
     "headline_other": "{{count}} sessions are ready but can't reach your watch",
     "consequence": "Garmin has no public API for workouts, so the bridge extension does the handover. Until it's installed, downloading the file and importing it by hand is the only route.",
     "cta": "Install the bridge"
+  },
+  "coachMoves": {
+    "moved_one": "{{count}} session moved to the coach's new date.",
+    "moved_other": "{{count}} sessions moved to the coach's new dates.",
+    "overridden_one": "{{count}} of them replaced a day you had chosen.",
+    "overridden_other": "{{count}} of them replaced days you had chosen.",
+    "sendHint": "Send the week to update Garmin.",
+    "dismiss": "Dismiss"
   }
 }

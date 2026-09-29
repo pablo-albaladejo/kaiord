@@ -7,6 +7,7 @@ import { attemptLink } from "../../application/coaching/attempt-link";
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import { syncWeek } from "../../application/coaching/sync-week";
 import type { PersistencePort } from "../../ports/persistence-port";
+import { useCoachMoveNoticeStore } from "../../store/coach-move-notice-store";
 import { emitLinkResult, emitSyncResult } from "./coaching-telemetry";
 import { shouldFanOutZones } from "./should-fan-out-zones";
 
@@ -38,6 +39,8 @@ export const useSyncCallback = (
         weekStart
       );
       emitSyncResult(a, t.source, result, Date.now() - startedAt);
+      if (result.ok)
+        useCoachMoveNoticeStore.getState().report(profileId, weekStart, result);
       if (
         result.ok &&
         runZonesSync &&

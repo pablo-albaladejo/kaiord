@@ -4,8 +4,14 @@
  * line cap.
  */
 
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
+import {
+  useCoachMoveNotice,
+  useCoachMoveNoticeStore,
+} from "../../store/coach-move-notice-store";
 import type { CalendarView } from "../../types/user-preferences";
+import { CoachMoveNotice } from "../molecules/CoachMoveNotice/CoachMoveNotice";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
 import { CalendarNavRow } from "./CalendarNavRow";
@@ -26,8 +32,17 @@ export function CalendarHeader({
   onViewChange,
 }: CalendarHeaderProps) {
   const latestDate = useLatestSessionDate(s.latestWorkout?.date);
+  const profileId = useActiveProfileLive()?.id ?? null;
+  const moves = useCoachMoveNotice(profileId, s.data.weekStart);
+  const dismissMoves = useCoachMoveNoticeStore((n) => n.dismiss);
   return (
     <>
+      {moves && profileId && (
+        <CoachMoveNotice
+          moves={moves}
+          onDismiss={() => dismissMoves(profileId, s.data.weekStart)}
+        />
+      )}
       <CalendarEmptyBanners
         weekId={s.data.weekId}
         hasAnyWorkouts={s.hasAnyWorkouts}
