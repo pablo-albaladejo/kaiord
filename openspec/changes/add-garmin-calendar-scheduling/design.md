@@ -680,6 +680,11 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   before any POST. An `uncertain` placement in a row comes only from the
   merge (rule 3) or legacy data; it holds no POST of this device, so "Send
   anyway" on it claims a fresh attempt at once (a duplicate at worst).
+- **No answer before the gate.** An `attempting{posted: true}` shown as
+  `uncertain` carries `sendAfter = at + POST_GATE_MS`. Before it, the editor
+  disables both actions and says it is still checking; "It's in Garmin"
+  refuses with `failed{settling, retryAfter}` and writes nothing, even when
+  called directly, since the POST may still land.
 - **One POST per run.** A run sends `schedule` at most once. The gate's
   re-POST (§3.4) happens only on a leftover `attempting{posted: true}` whose
   absence read started after `at + POST_GATE_MS`; an ambiguous answer in the

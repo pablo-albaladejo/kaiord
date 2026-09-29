@@ -97,6 +97,13 @@ A result that needs the athlete (every result except `scheduled`, `moved` and `u
 - **THEN** the ribbon SHALL show the `uncertain` result with "It's in Garmin" (when allowed) and "Send anyway"
 - **AND** once the row is no longer `uncertain`, the panel SHALL disappear with no call
 
+#### Scenario: A posted attempt is not answered before its gate
+
+- **GIVEN** a row holding `attempting{posted: true}` whose `at + POST_GATE_MS` is still in the future
+- **WHEN** the editor shows it as `uncertain`
+- **THEN** "It's in Garmin" and "Send anyway" SHALL be disabled, and the panel SHALL say Garmin is still being checked, with the seconds left
+- **AND** "It's in Garmin" invoked before the gate SHALL write nothing and return `failed{settling, retryAfter: at + POST_GATE_MS}`, because the POST may still land and a confirmation would retire and drain the `previous` of a workout that may not be in Garmin
+
 #### Scenario: An older bridge is detected
 
 - **GIVEN** a ping response with no `features`
