@@ -66,5 +66,40 @@
   "preview": {
     "region": "Vista previa del entrenamiento",
     "bars": "Barras de pasos del entrenamiento"
+  },
+  "placement": {
+    "scheduled": "En tu calendario de Garmin el {{date}}",
+    "moved": "Movido en tu calendario de Garmin al {{date}}",
+    "unchanged": "Ya está en tu calendario de Garmin el {{date}}",
+    "duplicateLeft": "En tu calendario de Garmin el {{date}}, pero queda una entrada anterior el {{dates}}. Bórrala en Garmin Connect.",
+    "uncertain": "Garmin no confirmó la entrada del {{date}}. Revisa tu calendario de Garmin antes de volver a enviar.",
+    "confirm": "Está en Garmin",
+    "sendAnyway": "Enviar igualmente",
+    "checking": "Aún comprobando Garmin. Podrás responder en {{seconds}} s.",
+    "removed": "Ya la borré ({{date}})",
+    "libraryOnly": {
+      "insecure-context": "En tu biblioteca de Garmin, sin fecha: colocarlo en el calendario requiere una página segura (https).",
+      "unsupported-browser": "En tu biblioteca de Garmin, sin fecha: este navegador no puede colocarlo en el calendario. Un navegador actualizado sí puede.",
+      "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la extensión Kaiord Garmin Bridge para colocarlo en el calendario."
+    },
+    "updateExtension": "Actualizar la extensión",
+    "recordDeletedOn": "Este entrenamiento se eliminó mientras se enviaba. Puede seguir en tu calendario de Garmin el {{date}}: elimínalo en Garmin Connect.",
+    "failed": {
+      "busy": "Este entrenamiento ya se está enviando. Inténtalo de nuevo cuando termine ese envío.",
+      "settling": "Garmin aún está procesando el último envío. Inténtalo de nuevo en un minuto.",
+      "record-deleted": "Este entrenamiento se eliminó mientras se enviaba.",
+      "guard-failed": "El entrenamiento cambió mientras se enviaba. Inténtalo de nuevo.",
+      "library-missing": "El entrenamiento ya no está en tu biblioteca de Garmin. Envíalo de nuevo para volver a crearlo.",
+      "library-id-unknown": "Garmin no devolvió el id del entrenamiento. Envíalo de nuevo.",
+      "schedule-endpoint": "El calendario de Garmin no aceptó el entrenamiento.",
+      "schedule-rejected": "Garmin rechazó esta fecha para el entrenamiento.",
+      "needs-reauth": "Vuelve a iniciar sesión en Garmin Connect y reinténtalo.",
+      "deadline-before-send": "La extensión agotó el tiempo antes de enviar. Inténtalo de nuevo.",
+      "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
+      "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Ajustes.",
+      "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
+      "missing-ftp": "Este entreno tiene objetivos de potencia en %FTP. Configura tu FTP en Atleta para convertirlos a vatios para Garmin.",
+      "sport-without-power-zones": "El deporte de este entreno no tiene zonas de potencia. Cambia su deporte a ciclismo o carrera para enviar sus objetivos de potencia en %FTP a Garmin."
+    }
   }
 }

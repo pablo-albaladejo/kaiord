@@ -18,18 +18,21 @@ export const getGarminExtensionId = (): string =>
 export type DetectSetters = {
   setExtensionInstalled: (v: boolean) => void;
   setSessionActive: (v: boolean) => void;
+  setFeatures: (v: readonly string[]) => void;
   setLastError: (v: string | null) => void;
 };
 
 export const runDetect = async ({
   setExtensionInstalled,
   setSessionActive,
+  setFeatures,
   setLastError,
 }: DetectSetters): Promise<void> => {
   const extensionId = getGarminExtensionId();
   if (!extensionId) {
     setExtensionInstalled(false);
     setSessionActive(false);
+    setFeatures([]);
     setLastError(null);
     return;
   }
@@ -37,6 +40,7 @@ export const runDetect = async ({
   const result = evaluatePingResult(res);
   setExtensionInstalled(result.installed);
   setSessionActive(result.installed && result.session);
+  setFeatures(result.installed ? result.features : []);
   setLastError(result.installed ? result.error : null);
 };
 

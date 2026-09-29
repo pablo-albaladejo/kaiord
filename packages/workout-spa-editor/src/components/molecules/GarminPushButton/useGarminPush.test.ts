@@ -14,11 +14,12 @@ const mockAnalyticsEvent = vi.fn();
 
 const garminState: Pick<
   GarminBridgeState,
-  "pushWorkout" | "setPushing" | "sessionActive"
+  "pushWorkout" | "setPushing" | "sessionActive" | "features"
 > = {
   pushWorkout: mockPushWorkout,
   setPushing: mockSetPushing,
   sessionActive: true,
+  features: ["calendar-write-v1", "calendar-find-v1"],
 };
 
 vi.mock("../../../contexts", () => ({
@@ -75,24 +76,31 @@ vi.mock(
   })
 );
 
-const { mockRecordExport } = vi.hoisted(() => ({
-  mockRecordExport: vi.fn(
-    async (
-      _deps: unknown,
-      input: {
-        postFn: (p: unknown) => Promise<{ externalId: string }>;
-        payload: unknown;
-      }
-    ) => {
-      const { externalId } = await input.postFn(input.payload);
-      return { ledgerId: "ledger-1", outcome: "created", externalId };
-    }
-  ),
-}));
-
-vi.mock("../../../application/export/record-export.use-case", () => ({
-  recordExport: mockRecordExport,
-}));
+// The real pipeline over in-memory ports: a fresh ledger and calendar each
+// time the hook builds its deps.
+vi.mock("../../../hooks/garmin-placement-deps", async () => {
+  const { createInMemoryExportLedgerRepository } =
+    await import("../../../test-utils/in-memory-export-ledger-repository");
+  const { createFakeGarminCalendar } =
+    await import("../../../test-utils/fake-garmin-calendar");
+  const { createInMemoryLockManager } =
+    await import("../../../test-utils/in-memory-record-lock");
+  const joins = new Map();
+  return {
+    buildPlacementDeps: (features: readonly string[], analytics: unknown) => ({
+      analytics,
+      ledgerRepo: createInMemoryExportLedgerRepository(),
+      calendar: createFakeGarminCalendar().port,
+      scheduleIdsInFind: true,
+      now: () => Date.now(),
+      sleep: async () => undefined,
+      features,
+      locks: createInMemoryLockManager().port(),
+      secureContext: true,
+      joins,
+    }),
+  };
+});
 
 import { useGarminPush } from "./useGarminPush";
 
@@ -137,7 +145,7 @@ describe("useGarminPush", () => {
     mockPolicies = [ENABLED_GARMIN_POLICY];
     mockPushWorkout.mockResolvedValue({
       success: true,
-      garminWorkoutId: "gw-123",
+      garminWorkoutId: "1707805999",
     });
     mockExportGcnWorkout.mockResolvedValue({ gcnWorkout: "data" });
     mockGet.mockResolvedValue(undefined);
@@ -162,6 +170,23 @@ describe("useGarminPush", () => {
     // Assert
     expect(mockExportGcnWorkout).toHaveBeenCalledWith(KRD_STUB, undefined);
     expect(mockPushWorkout).toHaveBeenCalledWith(gcn);
+  });
+
+  it("should resolve the placement and report the confirmed library id upward", async () => {
+    // Arrange
+    const onSent = vi.fn();
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout, onSent));
+    let outcome: unknown;
+
+    // Act
+    await act(async () => {
+      outcome = await result.current.push();
+    });
+
+    // Assert
+    expect(outcome).toEqual({ kind: "scheduled" });
+    expect(onSent).toHaveBeenCalledWith("1707805999");
   });
 
   it.each([
@@ -215,13 +240,17 @@ describe("useGarminPush", () => {
     const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
-    let pushed: boolean | undefined;
+    let placed: Awaited<ReturnType<typeof result.current.push>>;
     await act(async () => {
-      pushed = await result.current.push();
+      placed = await result.current.push();
     });
 
     // Assert
-    expect(pushed).toBe(false);
+    expect(placed).toEqual({
+      kind: "failed",
+      reason: "missing-ftp",
+      retryable: false,
+    });
     expect(mockPushWorkout).not.toHaveBeenCalled();
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
@@ -241,11 +270,17 @@ describe("useGarminPush", () => {
     const { result } = renderHook(() => useGarminPush(workout));
 
     // Act
+    let placed: Awaited<ReturnType<typeof result.current.push>>;
     await act(async () => {
-      await result.current.push();
+      placed = await result.current.push();
     });
 
     // Assert
+    expect(placed).toEqual({
+      kind: "failed",
+      reason: "sport-without-power-zones",
+      retryable: false,
+    });
     expect(mockPushWorkout).not.toHaveBeenCalled();
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
@@ -269,6 +304,38 @@ describe("useGarminPush", () => {
       status: "error",
       message: "Conversion failed",
     });
+  });
+
+  it.each([
+    ["the export throws before the pipeline starts", "export"],
+    ["the bridge push throws inside the pipeline", "push"],
+  ])("should emit exactly one placement event when %s", async (_n, where) => {
+    // Arrange
+    if (where === "export")
+      mockExportGcnWorkout.mockRejectedValue(new Error("x"));
+    else mockPushWorkout.mockRejectedValue(new Error("x"));
+    const { result } = renderHook(() => useGarminPush(makeWorkout()));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    const placements = mockAnalyticsEvent.mock.calls.filter(
+      ([name]) => name === "garmin-calendar-placement"
+    );
+    expect(placements).toEqual([
+      [
+        "garmin-calendar-placement",
+        {
+          result: "failed",
+          reason: "library-push-failed",
+          durationMs: expect.any(Number),
+          abandonedCount: 0,
+        },
+      ],
+    ]);
   });
 
   it("should set fallback error message when non-Error is thrown", async () => {
@@ -311,7 +378,7 @@ describe("useGarminPush", () => {
     // Arrange
     mockPushWorkout.mockResolvedValue({
       success: true,
-      garminWorkoutId: "gw-123",
+      garminWorkoutId: "1707805999",
     });
     const workout = makeWorkout();
     const { result } = renderHook(() => useGarminPush(workout));
@@ -325,6 +392,27 @@ describe("useGarminPush", () => {
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
       result: "success",
     });
+  });
+
+  it("should fire garmin-synced once when a second push joins the running one", async () => {
+    // Arrange
+    mockPushWorkout.mockResolvedValue({
+      success: true,
+      garminWorkoutId: "1707805999",
+    });
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await Promise.all([result.current.push(), result.current.push()]);
+    });
+
+    // Assert
+    const synced = mockAnalyticsEvent.mock.calls.filter(
+      ([name]) => name === "garmin-synced"
+    );
+    expect(synced).toEqual([["garmin-synced", { result: "success" }]]);
   });
 
   it("should fire garmin-synced failure event when the bridge reports a failed push (an outcome that never throws)", async () => {
@@ -354,7 +442,7 @@ describe("useGarminPush", () => {
     // Arrange
     mockPushWorkout.mockResolvedValue({
       success: true,
-      garminWorkoutId: "gw-123",
+      garminWorkoutId: "1707805999",
     });
     const workout = makeWorkout({ state: "ready" });
     const { result } = renderHook(() => useGarminPush(workout));
@@ -390,20 +478,20 @@ describe("useGarminPush", () => {
     mockPolicies = [];
     const workout = makeWorkout();
     const { result } = renderHook(() => useGarminPush(workout));
+    let outcome: unknown;
 
     // Act
     await act(async () => {
-      await result.current.push();
+      outcome = await result.current.push();
     });
 
     // Assert
     expect(mockPushWorkout).not.toHaveBeenCalled();
-    expect(mockSetPushing).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: "error",
-        message: expect.stringContaining("garmin-bridge"),
-      })
-    );
+    expect(outcome).toEqual({
+      kind: "failed",
+      reason: "no-export-route",
+      retryable: false,
+    });
   });
 
   it("should block the push when the only export policy is disabled", async () => {

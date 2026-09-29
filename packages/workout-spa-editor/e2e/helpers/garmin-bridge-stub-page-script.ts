@@ -7,7 +7,8 @@
  * per the transport probe rule (issue #553).
  *
  * Records calls on `window.__GARMIN_STUB_CALLS__` so tests can assert
- * which actions fired.
+ * which actions fired. The library and calendar actions are answered by
+ * `window.__GARMIN_STUB__` (see `garmin-calendar-stub-page-script`).
  */
 export type GarminStubScriptArgs = {
   extensionId: string;
@@ -15,6 +16,8 @@ export type GarminStubScriptArgs = {
   caps: readonly string[];
   /** Raw activity feed returned by the read-only `activities` action (F5). */
   activities?: readonly unknown[];
+  /** The ping's calendar features; `null` omits them (an older bridge). */
+  features: readonly string[] | null;
 };
 
 export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
@@ -28,16 +31,15 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
     protocolVersion: 1,
     capabilities: args.caps,
   };
-  const ann = {
-    type: "KAIORD_BRIDGE_ANNOUNCE",
-    bridgeId: args.bridgeId,
-    extensionId: args.extensionId,
-    ...m,
-  };
   const wrap = (data: unknown) => ({ ok: true, protocolVersion: 1, data });
+  const features = args.features ? { features: args.features } : {};
+  type Handled =
+    { response: unknown; delayMs: number; ready?: Promise<void> } | undefined;
+  const stub = (window as unknown as Record<string, unknown>)
+    .__GARMIN_STUB__ as
+    { handle: (a: string, m: unknown) => Handled } | undefined;
   const responses: Record<string, () => unknown> = {
-    ping: () => wrap({ ...m, gcApi: { ok: true } }),
-    push: () => wrap({ workoutId: "stub-garmin-id" }),
+    ping: () => wrap({ ...m, gcApi: { ok: true }, ...features }),
     "push-body-composition": () => wrap({ uploadId: "stub-body-composition" }),
     list: () => wrap([]),
     activities: () =>
@@ -57,23 +59,18 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
       ): void => {
         const action = String(msg?.action ?? "");
         calls.push({ action, payload: msg });
-        const r = responses[action]?.() ?? {
-          ok: false,
-          protocolVersion: 1,
-          error: `Unknown action: ${action}`,
-        };
-        if (cb) setTimeout(() => cb(r), 0);
+        const handled = stub?.handle(action, msg);
+        const r = handled
+          ? handled.response
+          : (responses[action]?.() ?? {
+              ok: false,
+              protocolVersion: 1,
+              error: `Unknown action: ${action}`,
+            });
+        const answer = () => setTimeout(() => cb?.(r), handled?.delayMs ?? 0);
+        if (handled?.ready) void handled.ready.then(answer);
+        else answer();
       },
     },
   };
-  const post = (): void => void window.postMessage(ann, "*");
-  window.addEventListener("message", (e: MessageEvent) => {
-    if (
-      e.source === window &&
-      (e.data as { type?: string } | null)?.type === "KAIORD_BRIDGE_DISCOVER"
-    )
-      post();
-  });
-  for (const delayMs of [0, 250, 500, 1000, 2000, 4000, 6000])
-    setTimeout(post, delayMs);
 };

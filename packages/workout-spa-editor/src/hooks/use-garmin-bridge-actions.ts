@@ -11,11 +11,18 @@ import {
 export const useGarminBridgeActions = () => {
   const [extensionInstalled, setExtensionInstalled] = useState(false);
   const [sessionActive, setSessionActive] = useState(false);
+  const [features, setFeatures] = useState<readonly string[]>([]);
   const [pushing, setPushing] = useState<PushState>(INITIAL_PUSH_STATE);
   const [lastError, setLastError] = useState<string | null>(null);
 
   const detectExtension = useCallback(
-    () => runDetect({ setExtensionInstalled, setSessionActive, setLastError }),
+    () =>
+      runDetect({
+        setExtensionInstalled,
+        setSessionActive,
+        setFeatures,
+        setLastError,
+      }),
     []
   );
 
@@ -39,6 +46,7 @@ export const useGarminBridgeActions = () => {
   return {
     extensionInstalled,
     sessionActive,
+    features,
     pushing,
     lastError,
     detectExtension,

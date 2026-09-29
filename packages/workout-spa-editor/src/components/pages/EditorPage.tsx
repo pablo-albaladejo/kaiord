@@ -31,9 +31,22 @@ import { useWorkoutRecord } from "./use-workout-record";
 
 export type EditorPageProps = { id?: string };
 
+type EditorPageBodyProps = EditorPageProps & { profileId: string | null };
+
 const NO_PROFILE: ActiveProfile = { id: null, profile: null };
 
+/** Runs the page's one active-profile live query; descendants (the GCN
+    export FTP) read the profile from `AthleteZonesProvider`. */
 export default function EditorPage({ id }: EditorPageProps) {
+  const { id: profileId, profile } = useActiveProfileLive() ?? NO_PROFILE;
+  return (
+    <AthleteZonesProvider profile={profile}>
+      <EditorPageBody id={id} profileId={profileId} />
+    </AthleteZonesProvider>
+  );
+}
+
+function EditorPageBody({ id, profileId }: EditorPageBodyProps) {
   useDeleteCleanup();
   const search = useSearch();
   const { dateParam, weekParam, origin, newWorkoutMode, coachingDraftId } =
@@ -47,11 +60,8 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
 
-  const { record, loading } = useWorkoutRecord(id);
+  const { record, placementRow, loading } = useWorkoutRecord(id);
   const { pushWorkout } = useEditorActions(record);
-  // The page's one active-profile live query; descendants (the GCN export
-  // FTP) read the profile from `AthleteZonesProvider` instead of their own.
-  const { id: profileId, profile } = useActiveProfileLive() ?? NO_PROFILE;
   const sidebarData = useCoachingSidebar(profileId, id);
 
   const workout = currentWorkout?.extensions?.structured_workout as
@@ -62,12 +72,10 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   if (!id && coachingDraftId)
     return (
-      <AthleteZonesProvider profile={profile}>
-        <CoachingDraftSurface
-          coachingDraftId={coachingDraftId}
-          onBack={handleBack ?? undefined}
-        />
-      </AthleteZonesProvider>
+      <CoachingDraftSurface
+        coachingDraftId={coachingDraftId}
+        onBack={handleBack ?? undefined}
+      />
     );
 
   const importComplete = newWorkoutMode === "import" && currentWorkout !== null;
@@ -76,29 +84,30 @@ export default function EditorPage({ id }: EditorPageProps) {
     id !== undefined || newWorkoutMode === undefined || importComplete;
 
   return (
-    <AthleteZonesProvider profile={profile}>
-      <div className="space-y-6">
-        <EditorPageHeader
-          mode={id ? "edit" : "new"}
-          onBack={handleBack ?? undefined}
+    <div className="space-y-6">
+      <EditorPageHeader
+        mode={id ? "edit" : "new"}
+        onBack={handleBack ?? undefined}
+      />
+      {!id && dateParam && <DateBanner date={dateParam} />}
+      {record && (
+        <EditorStateRibbon
+          state={record.state}
+          recordId={record.id}
+          placementRow={placementRow}
+          workoutDate={record.date}
+          profileId={profileId ?? undefined}
+          onSent={(garminWorkoutId) => void pushWorkout(garminWorkoutId)}
         />
-        {!id && dateParam && <DateBanner date={dateParam} />}
-        {record && (
-          <EditorStateRibbon
-            state={record.state}
-            profileId={profileId ?? undefined}
-            onSent={() => void pushWorkout(`garmin-${Date.now()}`)}
-          />
-        )}
-        {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
-        {showPopulatedBody && workout && currentWorkout && (
-          <EditorPopulatedBody
-            workout={workout}
-            currentWorkout={currentWorkout}
-            sidebar={sidebarData}
-          />
-        )}
-      </div>
-    </AthleteZonesProvider>
+      )}
+      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
+      {showPopulatedBody && workout && currentWorkout && (
+        <EditorPopulatedBody
+          workout={workout}
+          currentWorkout={currentWorkout}
+          sidebar={sidebarData}
+        />
+      )}
+    </div>
   );
 }
