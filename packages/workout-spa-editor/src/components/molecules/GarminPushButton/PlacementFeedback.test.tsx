@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -89,6 +89,23 @@ describe("PlacementFeedback", () => {
     // Assert
     expect(handlers.onConfirm).toHaveBeenCalledTimes(1);
     expect(handlers.onSendAnyway).toHaveBeenCalledTimes(1);
+  });
+
+  it("should announce only the message, never the actions", () => {
+    // Arrange
+    const result: PlacementResult = {
+      kind: "uncertain",
+      date: DATE,
+      canConfirm: true,
+    };
+
+    // Act
+    renderFeedback(result, [ENTRY]);
+
+    // Assert
+    const status = screen.getByRole("status");
+    expect(within(status).queryByRole("button")).toBeNull();
+    expect(status).toHaveTextContent(/Garmin did not confirm/);
   });
 
   it("should offer only send-anyway when the entry cannot be confirmed", () => {

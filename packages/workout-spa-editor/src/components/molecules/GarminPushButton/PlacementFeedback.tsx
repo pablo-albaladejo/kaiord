@@ -40,9 +40,11 @@ export const PlacementFeedback: React.FC<PlacementFeedbackProps> = (props) => {
     dates: (message.dates ?? []).map(day).join(", "),
   });
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs" role="status">
+    <div className="flex flex-wrap items-center gap-2 text-xs">
       {message.tone === "warning" && <AttentionMark size="xs" />}
-      <span className={TONE_CLASS[message.tone]}>{text}</span>
+      <span className={TONE_CLASS[message.tone]} role="status">
+        {text}
+      </span>
       {result.kind === "uncertain" && (
         <UncertainActions
           result={result}
