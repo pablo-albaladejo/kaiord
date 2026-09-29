@@ -117,6 +117,15 @@
       ribbon's live region excludes its actions and the countdown; an
       exception before the pipeline still emits one placement event; the
       laws simulator asserts a floor of visited states per scenario.
+- [x] 6.4d Round-2 architect review: a proof of absence counts only when
+      a second read `SETTLE_MS` later repeats it (the injected `sleep`);
+      the `Placed` of this run's own ok POST is never written `gone`;
+      the drain verifies before each `unschedule`; the crossed-pair
+      residual L2 and a Garmin-side move to another month are documented.
+      Regression: unit tests for the lagging read, both-reads-absent on
+      an adopted and on an own-POST `Placed`, and L2 as a documented
+      residual; the simulator's lagging-find op and a per-step "no live
+      id recorded `gone`" law.
 - [x] 6.5 Carried over from T4:
   - AC-17's "0 schedule calls" half (a failed library push makes no
     calendar call) needs this pipeline; test it here.
