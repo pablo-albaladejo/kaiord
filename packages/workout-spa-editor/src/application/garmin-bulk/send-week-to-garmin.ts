@@ -1,0 +1,69 @@
+/**
+ * The bulk "Send week" runner (design §3.7, AC-43/45): sequential, 500 ms
+ * between pushed items, each item through the same placement pipeline with
+ * its own per-record lock (`pushOne`). A failure — even a thrown one —
+ * never stops the run; a cancel stops it between items. `not-eligible`
+ * items are reported without a call.
+ */
+import type {
+  PlacementResult,
+  PlacementResultKind,
+} from "../garmin-placement/placement-result";
+import { failed } from "../garmin-placement/placement-result";
+import type {
+  NotEligibleReason,
+  WeekPushCandidate,
+} from "./select-week-push-candidates";
+
+export const BULK_ITEM_GAP_MS = 500;
+
+export type BulkStatus = PlacementResultKind | "not-eligible";
+
+export type BulkOutcome = {
+  workoutId: string;
+  date: string;
+  status: BulkStatus;
+  result?: PlacementResult;
+  notEligible?: NotEligibleReason;
+};
+
+export type SendWeekDeps = {
+  pushOne: (workoutId: string) => Promise<PlacementResult>;
+  sleep: (ms: number) => Promise<void>;
+  isCancelled: () => boolean;
+  onOutcome?: (outcome: BulkOutcome) => void;
+};
+
+export type BulkRun = { outcomes: BulkOutcome[]; cancelled: boolean };
+
+const pushSafely = async (deps: SendWeekDeps, workoutId: string) => {
+  try {
+    return await deps.pushOne(workoutId);
+  } catch {
+    return failed("library-push-failed", true);
+  }
+};
+
+export const sendWeekToGarmin = async (
+  deps: SendWeekDeps,
+  candidates: readonly WeekPushCandidate[]
+): Promise<BulkRun> => {
+  const outcomes: BulkOutcome[] = [];
+  const report = (outcome: BulkOutcome) => {
+    outcomes.push(outcome);
+    deps.onOutcome?.(outcome);
+  };
+  let pushed = 0;
+  for (const { workoutId, date, notEligible } of candidates) {
+    if (notEligible) {
+      report({ workoutId, date, status: "not-eligible", notEligible });
+      continue;
+    }
+    if (deps.isCancelled()) return { outcomes, cancelled: true };
+    if (pushed++ > 0) await deps.sleep(BULK_ITEM_GAP_MS);
+    if (deps.isCancelled()) return { outcomes, cancelled: true };
+    const result = await pushSafely(deps, workoutId);
+    report({ workoutId, date, status: result.kind, result });
+  }
+  return { outcomes, cancelled: false };
+};

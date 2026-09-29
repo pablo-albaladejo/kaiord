@@ -82,11 +82,11 @@ export const createPlacementHarness = (options: HarnessOptions = {}) => {
           : ({ kind: "confirmed", workoutId } as const),
     };
   };
-  const runLibraryPush = (content: string) => () =>
+  const runLibraryPush = (content: string, kaiordRecordId: string) => () =>
     recordExport(
       { ledgerRepo },
       {
-        kaiordRecordId: RECORD_ID,
+        kaiordRecordId,
         dataType: "workout",
         destinationBridgeId: GARMIN_LEDGER_BRIDGE_ID,
         payload: { workoutName: "Tempo", content },
@@ -102,7 +102,11 @@ export const createPlacementHarness = (options: HarnessOptions = {}) => {
     pushWorkoutToGarminCalendar(pipelineDeps, {
       kaiordRecordId: RECORD_ID,
       date,
-      runLibraryPush: runLibraryPush(content),
+      // `extra.kaiordRecordId` pushes another record (a bulk week).
+      runLibraryPush: runLibraryPush(
+        content,
+        extra.kaiordRecordId ?? RECORD_ID
+      ),
       ...extra,
     });
   const row = () => ledgerRepo.findByNaturalKey(LEDGER_KEY);
