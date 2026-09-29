@@ -707,10 +707,11 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   `fn` may return `restoreLedgerRow(row)` instead of a row. The repository
   then stores that row as it is, `updatedAt` included (no stamp; a row
   deep-equal to the current one is still a no-op). The pipeline returns it
-  only when the current row is byte-identical to the last row this run wrote,
-  so the rollback of a definite failure is invisible to the merge order;
-  otherwise (another writer touched the row) it restores `previous` with a
-  normal, stamped write. The restore of a leftover proven absent is always
+  only when the current row is byte-identical to the last row this run wrote
+  and that row differs from the pre-claim row only in `placement` and
+  `updatedAt`, so the rollback of a definite failure is invisible to the
+  merge order; otherwise (another writer touched the row, before or after
+  this run's writes) it restores `previous` with a normal, stamped write. The restore of a leftover proven absent is always
   a normal, stamped write. The port gains no method.
 - **The pending window.** Phase 1's `pending` row lives only across the
   library POST, whose SPA timeout (15 s) is far below `PENDING_TTL_MS`
