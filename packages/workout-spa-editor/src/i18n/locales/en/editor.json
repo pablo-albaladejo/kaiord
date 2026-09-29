@@ -282,6 +282,8 @@
     "noSessionHeadline": "Garmin signed you out, so this can't reach your watch",
     "noSessionDetail": "The bridge rides your Garmin Connect session, and that session has ended. Sign in again, or download the file and import it by hand.",
     "noSessionAction": "Sign in to Garmin",
+    "placementHeadline": "Your watch has this version; its calendar date needs you",
+    "placementDetail": "The workout reached your Garmin library, but its date on the Garmin calendar needs a look.",
     "region": "Workout delivery status"
   },
   "shape": {

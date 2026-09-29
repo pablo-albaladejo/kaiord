@@ -1,50 +1,52 @@
 import { useCallback, useState } from "react";
 
 import type { PlacementResult } from "../../../application/garmin-placement/placement-result";
+import type { GarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import type { GarminRemovalEntry } from "../../../types/garmin-removal-entry";
 import { useGarminPlacementActions } from "./useGarminPlacementActions";
 import { useGarminPush } from "./useGarminPush";
 
 /**
- * The editor's send control state: the last placement result, the entries
- * the athlete may dismiss, and the actions that answer an `uncertain`.
+ * The send control's actions on a record's placement notice: send, the
+ * answers to an `uncertain`, and "I removed it". Each run's outcome goes
+ * to the notice (it outlives this control); the ledger-derived parts
+ * refresh through the notice's live query.
  */
 export const useGarminPlacement = (
   workout: WorkoutRecord | undefined,
+  notice: GarminPlacementNotice,
   onSent?: (garminWorkoutId: string) => void
 ) => {
   const { push } = useGarminPush(workout, onSent);
   const actions = useGarminPlacementActions(workout?.id);
-  const [result, setResult] = useState<PlacementResult>();
-  const [removable, setRemovable] = useState<GarminRemovalEntry[]>([]);
   const [busy, setBusy] = useState(false);
+  const { setLastRun, result } = notice;
 
   const run = useCallback(
     async (action: () => Promise<PlacementResult | undefined>) => {
       setBusy(true);
       try {
         const next = await action();
-        setResult(next);
-        setRemovable(next ? await actions.dismissable() : []);
+        if (next) setLastRun(next);
       } finally {
         setBusy(false);
       }
     },
-    [actions]
+    [setLastRun]
   );
 
   const dismiss = useCallback(
     async (workoutScheduleId: string) => {
-      await actions.dismiss(workoutScheduleId);
-      setRemovable(await actions.dismissable());
+      const done = await actions.dismiss(workoutScheduleId);
+      // The left-behind warning is answered; the row decides what remains.
+      if (done && result?.kind === "duplicate-left") setLastRun(undefined);
     },
-    [actions]
+    [actions, result, setLastRun]
   );
 
   return {
     result,
-    removable,
+    removable: notice.removable,
     busy,
     send: () => run(() => push()),
     sendAnyway: () => run(() => push({ sendAnyway: true })),

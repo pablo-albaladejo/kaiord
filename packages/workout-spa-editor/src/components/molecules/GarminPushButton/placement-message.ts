@@ -4,6 +4,7 @@
  * in Garmin but needs the athlete (a duplicate, an unconfirmed entry, no
  * date) is a warning, never an error; only a failed run is danger.
  */
+import type { PlacementNotice } from "../../../application/garmin-placement/placement-notice";
 import type { PlacementResult } from "../../../application/garmin-placement/placement-result";
 
 export type PlacementTone = "plain" | "warning" | "danger";
@@ -41,3 +42,9 @@ export const placementMessage = (
       return { tone: "danger", key: `placement.failed.${result.reason}` };
   }
 };
+
+/** Silence is for plain results: anything else keeps the ribbon up. */
+export const needsAthlete = (notice: PlacementNotice): boolean =>
+  notice.removable.length > 0 ||
+  (notice.result !== undefined &&
+    placementMessage(notice.result, "").tone !== "plain");

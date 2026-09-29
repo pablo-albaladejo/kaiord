@@ -12,6 +12,7 @@ import {
   failed,
   type PlacementResult,
 } from "../../../application/garmin-placement/placement-result";
+import type { GarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
 import { GarminPushButton } from "./GarminPushButton";
 
 const mockState = {
@@ -28,6 +29,10 @@ const mockState = {
 const WORKOUT_ID = "1707805999";
 const push = vi.fn<() => Promise<PlacementResult | undefined>>();
 const hook: { onSent?: (garminWorkoutId: string) => void } = {};
+const NO_NOTICE: GarminPlacementNotice = {
+  removable: [],
+  setLastRun: () => undefined,
+};
 
 vi.mock("../../../contexts", () => ({
   useGarminBridge: () => ({ ...mockState }),
@@ -52,7 +57,6 @@ vi.mock("./useGarminPush", () => ({
 vi.mock("./useGarminPlacementActions", () => ({
   useGarminPlacementActions: () => ({
     confirm: vi.fn(),
-    dismissable: async () => [],
     dismiss: vi.fn(),
   }),
 }));
@@ -70,7 +74,7 @@ describe("GarminPushButton", () => {
 
   it("should render the one send verb", () => {
     // Arrange
-    render(<GarminPushButton />);
+    render(<GarminPushButton notice={NO_NOTICE} />);
 
     // Act
     const button = screen.getByTestId("send-to-garmin-button");
@@ -87,7 +91,7 @@ describe("GarminPushButton", () => {
       hook.onSent?.(WORKOUT_ID);
       return { kind: "scheduled" };
     });
-    render(<GarminPushButton onSent={onSent} />);
+    render(<GarminPushButton notice={NO_NOTICE} onSent={onSent} />);
 
     // Act
     await userEvent.click(screen.getByTestId("send-to-garmin-button"));
@@ -101,7 +105,7 @@ describe("GarminPushButton", () => {
     // Arrange
     const onSent = vi.fn();
     push.mockResolvedValue(failed("library-push-failed", true));
-    render(<GarminPushButton onSent={onSent} />);
+    render(<GarminPushButton notice={NO_NOTICE} onSent={onSent} />);
 
     // Act
     await userEvent.click(screen.getByTestId("send-to-garmin-button"));
@@ -115,7 +119,7 @@ describe("GarminPushButton", () => {
     mockState.pushing = { status: "loading" };
 
     // Act
-    render(<GarminPushButton />);
+    render(<GarminPushButton notice={NO_NOTICE} />);
 
     // Assert
     expect(screen.getByTestId("send-to-garmin-button")).toBeDisabled();
@@ -126,7 +130,7 @@ describe("GarminPushButton", () => {
     mockState.pushing = { status: "success" };
 
     // Act
-    render(<GarminPushButton />);
+    render(<GarminPushButton notice={NO_NOTICE} />);
 
     // Assert
     expect(screen.getByText("On your Garmin")).toBeInTheDocument();
@@ -137,7 +141,7 @@ describe("GarminPushButton", () => {
     mockState.pushing = { status: "error", message: "Push failed: 403" };
 
     // Act
-    render(<GarminPushButton />);
+    render(<GarminPushButton notice={NO_NOTICE} />);
 
     // Assert
     expect(screen.getByText("Push failed: 403")).toBeInTheDocument();

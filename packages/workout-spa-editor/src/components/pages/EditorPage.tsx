@@ -75,6 +75,7 @@ export default function EditorPage({ id }: EditorPageProps) {
       {record && (
         <EditorStateRibbon
           state={record.state}
+          recordId={record.id}
           profileId={profileId ?? undefined}
           onSent={(garminWorkoutId) => void pushWorkout(garminWorkoutId)}
         />

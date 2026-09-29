@@ -4,7 +4,7 @@ import {
   failed,
   type PlacementResult,
 } from "../../../application/garmin-placement/placement-result";
-import { placementMessage } from "./placement-message";
+import { needsAthlete, placementMessage } from "./placement-message";
 
 const DATE = "2026-10-05";
 const OTHER = "2026-10-04";
@@ -59,4 +59,29 @@ describe("placementMessage", () => {
     // Assert
     expect(tones).toEqual(["warning", "warning", "warning"]);
   });
+
+  it.each<[string, PlacementResult | undefined, number, boolean]>([
+    ["a plain success", { kind: "moved" }, 0, false],
+    ["no result", undefined, 0, false],
+    ["a plain success with an entry to dismiss", { kind: "moved" }, 1, true],
+    ["a failure", failed("busy", true), 0, true],
+    [
+      "an uncertain",
+      { kind: "uncertain", date: DATE, canConfirm: true },
+      0,
+      true,
+    ],
+  ])(
+    "should decide whether %s needs the athlete",
+    (_n, result, count, expected) => {
+      // Arrange
+      const removable = Array.from({ length: count }, () => ({}) as never);
+
+      // Act
+      const needed = needsAthlete({ result, removable });
+
+      // Assert
+      expect(needed).toBe(expected);
+    }
+  );
 });

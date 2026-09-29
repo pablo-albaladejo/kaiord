@@ -4,6 +4,7 @@ import { useParams } from "wouter";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { useGarminBridge } from "../../../contexts";
+import type { GarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
@@ -20,11 +21,13 @@ import { useGarminPlacement } from "./useGarminPlacement";
  * common failure off the screen.
  *
  * `onSent` fires with the Garmin library workout id iff the library push
- * is confirmed; the calendar placement's outcome is shown next to it.
+ * is confirmed; the record's placement notice (its ledger row and the last
+ * run's outcome, owned by the ribbon) is shown next to it.
  */
 export const GarminPushButton: React.FC<{
+  notice: GarminPlacementNotice;
   onSent?: (garminWorkoutId: string) => void;
-}> = ({ onSent }) => {
+}> = ({ notice, onSent }) => {
   const t = useTranslate("common");
   const { pushing, setPushing } = useGarminBridge();
   const { id } = useParams<{ id?: string }>();
@@ -32,7 +35,7 @@ export const GarminPushButton: React.FC<{
     () => (id ? db.table<WorkoutRecord>("workouts").get(id) : undefined),
     [id]
   );
-  const placement = useGarminPlacement(workout, onSent);
+  const placement = useGarminPlacement(workout, notice, onSent);
   const isLoading = placement.busy || pushing.status === "loading";
 
   return (
