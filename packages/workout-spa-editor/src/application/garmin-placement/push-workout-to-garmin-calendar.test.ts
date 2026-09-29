@@ -337,21 +337,24 @@ describe("pushWorkoutToGarminCalendar — lock and pre-flight (AC-30, AC-34)", (
     expect(h.calendar.count("schedule")).toBe(0);
   });
 
-  it("should push the library only, without Web Locks", async () => {
-    // Arrange
-    const h = createPlacementHarness({ locks: null });
+  it.each([
+    ["an insecure page", false, "insecure-context"],
+    ["a secure page in a browser without them", true, "unsupported-browser"],
+  ])(
+    "should push the library only, without Web Locks on %s",
+    async (_name, secureContext, reason) => {
+      // Arrange
+      const h = createPlacementHarness({ locks: null, secureContext });
 
-    // Act
-    const result = await h.push(D1);
+      // Act
+      const result = await h.push(D1);
 
-    // Assert
-    expect(result).toEqual({
-      kind: "library-only",
-      reason: "insecure-context",
-    });
-    expect(h.library.pushes).toBe(1);
-    expect(h.calendar.calls).toEqual([]);
-  });
+      // Assert
+      expect(result).toEqual({ kind: "library-only", reason });
+      expect(h.library.pushes).toBe(1);
+      expect(h.calendar.calls).toEqual([]);
+    }
+  );
 
   it("should push the library only on a bridge without calendar-write, then place after the update", async () => {
     // Arrange

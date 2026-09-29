@@ -28,6 +28,7 @@ export const buildPlacementDeps = (
   sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   features,
   locks: createWebLocksRecordLock(),
+  secureContext: globalThis.isSecureContext !== false,
   joins,
   analytics,
 });

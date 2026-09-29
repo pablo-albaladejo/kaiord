@@ -36,8 +36,10 @@ export const ALL_FEATURES = [CALENDAR_WRITE_FEATURE, CALENDAR_FIND_FEATURE];
 
 export type HarnessOptions = {
   features?: readonly string[];
-  /** `null`: no Web Locks (a non-secure context). */
+  /** `null`: no Web Locks. */
   locks?: RecordLockPort | null;
+  /** `isSecureContext` (default `true`). */
+  secureContext?: boolean;
   scheduleIdsInFind?: boolean;
   analytics?: Analytics;
   /** Another repository (Dexie over fake-indexeddb, or a wrapper). */
@@ -63,6 +65,7 @@ export const createPlacementHarness = (options: HarnessOptions = {}) => {
       options.locks === null
         ? undefined
         : (options.locks ?? lockManager.port()),
+    secureContext: options.secureContext ?? true,
     joins: new Map(),
     analytics: options.analytics,
   };

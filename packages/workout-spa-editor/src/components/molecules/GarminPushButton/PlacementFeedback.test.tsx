@@ -140,6 +140,22 @@ describe("PlacementFeedback", () => {
     ).toHaveAttribute("href", GARMIN_BRIDGE_STORE_URL);
   });
 
+  it("should blame neither the page nor the athlete in a browser without Web Locks", () => {
+    // Arrange
+    const result: PlacementResult = {
+      kind: "library-only",
+      reason: "unsupported-browser",
+    };
+
+    // Act
+    renderFeedback(result);
+
+    // Assert
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /this browser cannot place it on the calendar/
+    );
+  });
+
   it("should let the athlete dismiss an entry they removed", async () => {
     // Arrange
     const handlers = renderFeedback({ kind: "scheduled" }, [ENTRY]);

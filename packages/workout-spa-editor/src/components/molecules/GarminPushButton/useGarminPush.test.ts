@@ -92,6 +92,7 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
       sleep: async () => undefined,
       features,
       locks: createInMemoryLockManager().port(),
+      secureContext: true,
       joins,
     }),
   };

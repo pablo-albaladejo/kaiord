@@ -17,11 +17,9 @@ import {
   type PlacementRequest,
   runPhaseOne,
 } from "./placement-phase-one";
+import { libraryOnlyReason } from "./placement-preflight";
 import { failed, type PlacementResult } from "./placement-result";
-import {
-  CALENDAR_FIND_FEATURE,
-  CALENDAR_WRITE_FEATURE,
-} from "./placement-timing";
+import { CALENDAR_FIND_FEATURE } from "./placement-timing";
 import { reconcileGarminPlacement } from "./reconcile-garmin-placement";
 import { placementLockName, type RecordLockPort } from "./record-lock-port";
 
@@ -30,8 +28,10 @@ export type { PlacementRequest };
 export type PlacementPipelineDeps = Omit<PlacementDeps, "canFind"> & {
   /** The bridge's ping `features`. */
   features: readonly string[];
-  /** Web Locks; `undefined` in a non-secure context. */
+  /** Web Locks; `undefined` in a non-secure context or an old browser. */
   locks: RecordLockPort | undefined;
+  /** `isSecureContext`: tells an insecure page from an old browser. */
+  secureContext: boolean;
   /** In-tab runs by record id, shared by every caller of the tab. */
   joins: Map<string, PlacementJoin>;
   analytics?: Analytics;
@@ -49,9 +49,8 @@ const place = async (
   const key = keyOf(request.kaiordRecordId);
   const phaseOne = await runPhaseOne(deps, key, request);
   if (isPhaseOneResult(phaseOne)) return phaseOne;
-  if (!deps.locks) return { kind: "library-only", reason: "insecure-context" };
-  if (!deps.features.includes(CALENDAR_WRITE_FEATURE))
-    return { kind: "library-only", reason: "bridge-outdated" };
+  const libraryOnly = libraryOnlyReason(deps);
+  if (libraryOnly) return libraryOnly;
   try {
     const workoutId = await guardLibrary(deps, key);
     if (typeof workoutId !== "string") return workoutId;

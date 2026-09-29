@@ -19,7 +19,8 @@ export const PLACEMENT_FAILURE_REASONS = [
 ] as const;
 export type PlacementFailureReason = (typeof PLACEMENT_FAILURE_REASONS)[number];
 
-export type LibraryOnlyReason = "insecure-context" | "bridge-outdated";
+export type LibraryOnlyReason =
+  "insecure-context" | "unsupported-browser" | "bridge-outdated";
 
 export type PlacementResult =
   | { kind: "scheduled" }

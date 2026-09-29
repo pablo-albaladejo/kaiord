@@ -57,6 +57,7 @@ const makeDeps = () => {
     sleep: async () => undefined,
     features: ALL_FEATURES,
     locks: lockManager.port(),
+    secureContext: true,
     joins: new Map(),
   };
   return { deps, ledgerRepo, calendar, lockManager };

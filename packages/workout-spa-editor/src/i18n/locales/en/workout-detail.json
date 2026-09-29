@@ -77,6 +77,7 @@
     "removed": "I removed it ({{date}})",
     "libraryOnly": {
       "insecure-context": "In your Garmin library, with no date: placing it on the calendar needs a secure (https) page.",
+      "unsupported-browser": "In your Garmin library, with no date: this browser cannot place it on the calendar. An up-to-date browser can.",
       "bridge-outdated": "In your Garmin library, with no date: update the Kaiord Garmin Bridge extension to place it on the calendar."
     },
     "updateExtension": "Update the extension",
