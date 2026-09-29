@@ -4,7 +4,10 @@
  * context and survives a reload.
  *
  * - AC-30: a second tab pushing the same workout gets `busy` with 0 calls.
- * - AC-29: a reload during a delayed schedule never schedules twice.
+ * - AC-29: a reload during an unanswered schedule never schedules twice.
+ *
+ * The in-flight windows are held by the stub, not timed: a held action
+ * commits and answers only when the test releases it.
  * - AC-34: an older bridge is library-only; a bridge without `calendar-find`
  *   answers an ambiguous schedule with `uncertain`, which the editor keeps
  *   across a reload until the athlete answers it.
@@ -18,6 +21,7 @@ import {
   type GarminStubOptions,
   installGarminBridgeStub,
   readGarminStubState,
+  releaseGarminStub,
 } from "./helpers/garmin-bridge-stub";
 import { seedEnabledGarminExportPolicy } from "./helpers/garmin-ready-gate";
 import {
@@ -31,9 +35,10 @@ import {
 
 const GARMIN_BRIDGE_STORE_URL =
   "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe";
-const PUSH_DELAY_MS = 4_000;
-const SCHEDULE_DELAY_MS = 8_000;
 const PLACEMENT_TIMEOUT_MS = 20_000;
+/** The SPA's `SETTLE_MS` and `POST_GATE_MS`, passed on the page clock. */
+const SETTLE_MS = 3_000;
+const POST_GATE_MS = 38_000;
 const AMBIGUOUS_500 = {
   response: {
     ok: false,
@@ -90,17 +95,20 @@ test.describe("Garmin calendar placement", () => {
     page,
   }) => {
     // Arrange
+    await page.clock.install();
     await openReadyWorkout(page, page, {
       features: ["calendar-write-v1"],
       failures: { schedule: [AMBIGUOUS_500] },
     });
     await page.getByTestId("send-to-garmin-button").click();
-    await expect(ribbon(page)).toContainText("Garmin did not confirm", {
-      timeout: PLACEMENT_TIMEOUT_MS,
-    });
+    await expect.poll(() => garminStubActions(page)).toContain("schedule");
+    await page.clock.fastForward(SETTLE_MS);
+    await expect(ribbon(page)).toContainText("Garmin did not confirm");
 
     // Act
     await page.reload();
+    await expect(ribbon(page)).toContainText("Still checking Garmin");
+    await page.clock.fastForward(POST_GATE_MS);
     await ribbon(page).getByRole("button", { name: "It's in Garmin" }).click();
 
     // Assert
@@ -115,7 +123,7 @@ test.describe("Garmin calendar placement", () => {
   }) => {
     // Arrange
     const workoutId = await openReadyWorkout(page, context, {
-      delays: { push: PUSH_DELAY_MS },
+      holds: ["push"],
     });
     const second = await context.newPage();
     await second.goto(appUrl(`/workout/${workoutId}`));
@@ -128,18 +136,20 @@ test.describe("Garmin calendar placement", () => {
 
     // Assert
     await expect(ribbon(second)).toContainText("already being sent");
+    expect(await garminStubActions(page)).toEqual(["push"]);
+    await releaseGarminStub(page);
     await expect
       .poll(() => garminStubActions(page), { timeout: PLACEMENT_TIMEOUT_MS })
       .toEqual(["push", "schedule"]);
     expect((await readGarminStubState(page))?.entries).toHaveLength(1);
   });
 
-  test("should never schedule twice after a reload during a delayed schedule (AC-29)", async ({
+  test("should never schedule twice after a reload during an unanswered schedule (AC-29)", async ({
     page,
   }) => {
     // Arrange
     const workoutId = await openReadyWorkout(page, page, {
-      delays: { schedule: SCHEDULE_DELAY_MS },
+      holds: ["schedule"],
     });
     await page.getByTestId("send-to-garmin-button").click();
     await expect.poll(() => garminStubActions(page)).toContain("schedule");

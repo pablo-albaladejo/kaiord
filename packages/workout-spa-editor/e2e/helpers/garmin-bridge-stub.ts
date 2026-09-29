@@ -11,6 +11,7 @@ import type { BrowserContext, Page } from "@playwright/test";
 import { installGarminAnnounceScript } from "./garmin-announce-page-script";
 import { installGarminStubScript } from "./garmin-bridge-stub-page-script";
 import {
+  GARMIN_STUB_RELEASE_KEY,
   GARMIN_STUB_STATE_KEY,
   type GarminStubState,
   installGarminCalendarStubScript,
@@ -39,6 +40,8 @@ export type GarminStubOptions = {
   failures?: Record<string, StubFailure[]>;
   /** Milliseconds before an action answers (it commits on receipt). */
   delays?: Record<string, number>;
+  /** Actions that commit on receipt but answer only after `releaseGarminStub`. */
+  holds?: readonly string[];
 };
 
 /**
@@ -54,6 +57,7 @@ export const installGarminBridgeStub = async (
   await target.addInitScript(installGarminCalendarStubScript, {
     failures: options.failures ?? {},
     delays: options.delays ?? {},
+    holds: options.holds ?? [],
   });
   await target.addInitScript(installGarminStubScript, {
     extensionId: GARMIN_EXTENSION_ID,
@@ -77,6 +81,13 @@ export const readGarminStubState = async (
   page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key) ?? "null"),
     GARMIN_STUB_STATE_KEY
+  );
+
+/** Lets every held action answer, in every page of the context. */
+export const releaseGarminStub = async (page: Page): Promise<void> =>
+  page.evaluate(
+    (key) => localStorage.setItem(key, "1"),
+    GARMIN_STUB_RELEASE_KEY
   );
 
 /** The actions the shared Garmin account received, across pages. */

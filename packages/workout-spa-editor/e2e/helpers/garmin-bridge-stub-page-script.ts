@@ -33,7 +33,8 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
   };
   const wrap = (data: unknown) => ({ ok: true, protocolVersion: 1, data });
   const features = args.features ? { features: args.features } : {};
-  type Handled = { response: unknown; delayMs: number } | undefined;
+  type Handled =
+    { response: unknown; delayMs: number; ready?: Promise<void> } | undefined;
   const stub = (window as unknown as Record<string, unknown>)
     .__GARMIN_STUB__ as
     { handle: (a: string, m: unknown) => Handled } | undefined;
@@ -66,7 +67,9 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
               protocolVersion: 1,
               error: `Unknown action: ${action}`,
             });
-        if (cb) setTimeout(() => cb(r), handled?.delayMs ?? 0);
+        const answer = () => setTimeout(() => cb?.(r), handled?.delayMs ?? 0);
+        if (handled?.ready) void handled.ready.then(answer);
+        else answer();
       },
     },
   };

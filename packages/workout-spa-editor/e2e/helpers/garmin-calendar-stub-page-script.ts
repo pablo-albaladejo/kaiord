@@ -6,7 +6,9 @@
  * one Garmin account and a reload keeps it — what two tabs (AC-30) and a
  * reload mid-schedule (AC-29) need. An action commits on receipt, before
  * its delay, like a POST whose answer never came back. An injected failure
- * answers instead of the action; with `commit` the action lands first.
+ * answers instead of the action; with `commit` the action lands first. A
+ * held action commits too, but answers only once the test releases it
+ * (`releaseGarminStub`), in whichever page sent it.
  */
 import type {
   StubCalendar,
@@ -21,6 +23,7 @@ export type StubFailure = {
 export type GarminCalendarStubArgs = {
   failures: Record<string, StubFailure[]>;
   delays: Record<string, number>;
+  holds: readonly string[];
 };
 
 export type GarminStubState = StubCalendar & {
@@ -31,6 +34,7 @@ export type GarminStubState = StubCalendar & {
 export type { StubEntry };
 
 export const GARMIN_STUB_STATE_KEY = "__GARMIN_STUB_STATE__";
+export const GARMIN_STUB_RELEASE_KEY = "__GARMIN_STUB_RELEASED__";
 
 export const installGarminCalendarStubScript = (
   args: GarminCalendarStubArgs
@@ -38,6 +42,16 @@ export const installGarminCalendarStubScript = (
   type Msg = Record<string, unknown>;
   type Action = (s: GarminStubState, m: Msg) => unknown;
   const KEY = "__GARMIN_STUB_STATE__";
+  const RELEASE_KEY = "__GARMIN_STUB_RELEASED__";
+  const RELEASE_POLL_MS = 50;
+  const released = () =>
+    new Promise<void>((resolve) => {
+      const timer = setInterval(() => {
+        if (!localStorage.getItem(RELEASE_KEY)) return;
+        clearInterval(timer);
+        resolve();
+      }, RELEASE_POLL_MS);
+    });
   const load = (): GarminStubState =>
     (JSON.parse(
       localStorage.getItem(KEY) ?? "null"
@@ -59,7 +73,8 @@ export const installGarminCalendarStubScript = (
       const answer = !failure || failure.commit ? run(s, msg) : undefined;
       localStorage.setItem(KEY, JSON.stringify(s));
       const response = failure ? failure.response : answer;
-      return { response, delayMs: args.delays[action] ?? 0 };
+      const ready = args.holds.includes(action) ? released() : undefined;
+      return { response, delayMs: args.delays[action] ?? 0, ready };
     },
   };
 };
