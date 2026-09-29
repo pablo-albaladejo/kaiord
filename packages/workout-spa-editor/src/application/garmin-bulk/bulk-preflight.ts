@@ -25,6 +25,17 @@ export const bulkPreflight = (input: {
   if (!input.routeActive) return "no-export-route";
   if (!input.bridgeInstalled) return "no-bridge";
   if (!input.sessionActive) return "no-session";
-  return libraryOnlyReason({ ...input, features: [CALENDAR_WRITE_FEATURE] })
-    ?.reason as BulkPreflightFailure | undefined;
+  // Only the Web Locks half of the single-push check applies here: an
+  // outdated bridge is not a pre-flight failure (see above).
+  const noLocks = libraryOnlyReason({
+    ...input,
+    features: [CALENDAR_WRITE_FEATURE],
+  });
+  switch (noLocks?.reason) {
+    case "insecure-context":
+    case "unsupported-browser":
+      return noLocks.reason;
+    default:
+      return undefined;
+  }
 };

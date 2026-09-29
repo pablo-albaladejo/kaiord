@@ -1,13 +1,9 @@
 /**
- * syncWeek — application use case
- *
- * Pulls a week of coaching activities for a specific (profile, source) pair,
- * upserts to the persisted store, deletes orphaned local rows for the same
- * window (coach-removed activities), and updates the staleness gate
- * UNCONDITIONALLY on success — including zero-activity responses.
- *
- * Window scoping is critical: deletion is bounded to weekStart..weekEnd
- * for the same source, never to the whole profile.
+ * syncWeek: pulls a week of coaching activities for one (profile, source)
+ * pair, upserts them, deletes orphaned local rows of the same window
+ * (coach-removed activities), and updates the staleness gate
+ * UNCONDITIONALLY on success, zero-activity responses included. Deletion is
+ * bounded to weekStart..weekEnd for the same source, never the profile.
  */
 
 import type {
