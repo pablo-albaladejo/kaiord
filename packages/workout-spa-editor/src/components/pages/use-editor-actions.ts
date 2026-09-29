@@ -3,7 +3,7 @@
  *
  * Transition functions for the editor-calendar integration:
  * push (structured|ready|modified -> pushed; pushed keeps its state and
- * records the new id) and modify (pushed->modified).
+ * records the new id).
  *
  * All KRD-carrying persistence paths route through `onWorkoutMutation`
  * so `modifiedAt` advances on every user edit in STRUCTURED / READY
@@ -17,7 +17,6 @@ import { db } from "../../adapters/dexie/dexie-database";
 import { recordGarminPush } from "../../application/record-garmin-push";
 import {
   onWorkoutMutation,
-  transitionToModified,
   transitionToReady,
 } from "../../application/workout-transitions";
 import { useWorkoutStore } from "../../store/workout-store";
@@ -79,15 +78,5 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
     [record, currentWorkout]
   );
 
-  const markModified = useCallback(
-    async (krd: KRD) => {
-      if (!record) return;
-      await updateRecord(record.id, (fresh) =>
-        transitionToModified(fresh, krd)
-      );
-    },
-    [record]
-  );
-
-  return { pushWorkout, markModified };
+  return { pushWorkout };
 }

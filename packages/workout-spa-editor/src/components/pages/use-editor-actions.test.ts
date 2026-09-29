@@ -144,32 +144,6 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     expect(persisted?.modifiedAt).not.toBeNull();
   });
 
-  it("should bump modifiedAt via markModified on PUSHED (regression check)", async () => {
-    // Arrange
-
-    const record = makeRecord({
-      state: "pushed",
-      krd: ORIGINAL_KRD,
-      garminPushId: "garmin-1",
-    });
-    await db.table("workouts").put(record);
-    useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
-
-    const { result } = renderHook(() => useEditorActions(record));
-    await act(async () => {
-      await result.current.markModified(EDITED_KRD);
-    });
-
-    // Act
-
-    const persisted = await loadPersisted(record.id);
-
-    // Assert
-
-    expect(persisted?.state).toBe("modified");
-    expect(persisted?.modifiedAt).not.toBeNull();
-  });
-
   it("should persist a re-created library id on an already-pushed record without throwing", async () => {
     // Arrange
     const record = makeRecord({
@@ -243,27 +217,6 @@ describe("useEditorActions — open editor during a coach move (R11)", () => {
       coachDate: "2026-04-22",
       state: "pushed",
       garminPushId: "garmin-1",
-    });
-  });
-
-  it("should keep the coach's move when the editor marks the workout modified", async () => {
-    // Arrange
-    const opened = makeRecord({ state: "pushed", coachDate: "2026-04-20" });
-    await db.table("workouts").put(opened);
-    const { result } = renderHook(() => useEditorActions(opened));
-    await db
-      .table("workouts")
-      .put({ ...opened, date: "2026-04-22", coachDate: "2026-04-22" });
-
-    // Act
-    await act(async () => {
-      await result.current.markModified(EDITED_KRD);
-    });
-
-    // Assert
-    expect(await loadPersisted(opened.id)).toMatchObject({
-      date: "2026-04-22",
-      state: "modified",
     });
   });
 
