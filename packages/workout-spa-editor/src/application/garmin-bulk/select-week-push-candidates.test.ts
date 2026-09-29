@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { KRD } from "../../types/krd";
 import { makeWorkoutRecord } from "../test-helpers";
 import { selectWeekPushCandidates } from "./select-week-push-candidates";
 
@@ -7,7 +8,7 @@ const workout = (
   id: string,
   date: string,
   state: Parameters<typeof makeWorkoutRecord>[0]["state"]
-) => makeWorkoutRecord({ id, date, state });
+) => makeWorkoutRecord({ id, date, state, krd: {} as KRD });
 
 describe("selectWeekPushCandidates", () => {
   it("should list every workout of the week in calendar order", () => {
@@ -46,6 +47,19 @@ describe("selectWeekPushCandidates", () => {
       });
     }
   );
+
+  it("should report a workout with no KRD as not eligible, not deleted", () => {
+    // Arrange
+    const week = [
+      makeWorkoutRecord({ id: "w-1", date: "2026-10-05", state: "ready" }),
+    ];
+
+    // Act
+    const [candidate] = selectWeekPushCandidates(week);
+
+    // Assert
+    expect(candidate.notEligible).toBe("no-krd");
+  });
 
   it.each(["structured", "ready", "pushed", "modified"] as const)(
     "should treat a %s workout as eligible",

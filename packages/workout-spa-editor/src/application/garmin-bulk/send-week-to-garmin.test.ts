@@ -87,7 +87,12 @@ describe("sendWeekToGarmin", () => {
     // Assert
     expect(calls).toEqual(["w-1"]);
     expect(run).toMatchObject({ cancelled: true });
-    expect(run.outcomes).toHaveLength(1);
+    expect(run.outcomes.map((o) => [o.workoutId, o.notEligible])).toEqual([
+      ["w-1", undefined],
+      ["w-2", "stopped"],
+      ["w-3", "stopped"],
+    ]);
+    expect(deps.sleep).not.toHaveBeenCalled();
   });
 
   it("should stop when cancelled during the gap", async () => {

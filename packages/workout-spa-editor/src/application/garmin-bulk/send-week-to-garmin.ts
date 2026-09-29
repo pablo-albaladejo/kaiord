@@ -2,8 +2,9 @@
  * The bulk "Send week" runner (design §3.7, AC-43/45): sequential, 500 ms
  * between pushed items, each item through the same placement pipeline with
  * its own per-record lock (`pushOne`). A failure — even a thrown one —
- * never stops the run; a cancel stops it between items. `not-eligible`
- * items are reported without a call.
+ * never stops the run; a cancel stops it between items, and the items it
+ * kept from running are reported `not-eligible{stopped}`, so the run still
+ * lists the whole week. `not-eligible` items are reported without a call.
  */
 import type {
   PlacementResult,
@@ -54,16 +55,25 @@ export const sendWeekToGarmin = async (
     deps.onOutcome?.(outcome);
   };
   let pushed = 0;
+  let cancelled = false;
+  const stop = () => (cancelled ||= deps.isCancelled());
   for (const { workoutId, date, notEligible } of candidates) {
     if (notEligible) {
       report({ workoutId, date, status: "not-eligible", notEligible });
       continue;
     }
-    if (deps.isCancelled()) return { outcomes, cancelled: true };
-    if (pushed++ > 0) await deps.sleep(BULK_ITEM_GAP_MS);
-    if (deps.isCancelled()) return { outcomes, cancelled: true };
+    if (!stop() && pushed++ > 0) await deps.sleep(BULK_ITEM_GAP_MS);
+    if (stop()) {
+      report({
+        workoutId,
+        date,
+        status: "not-eligible",
+        notEligible: "stopped",
+      });
+      continue;
+    }
     const result = await pushSafely(deps, workoutId);
     report({ workoutId, date, status: result.kind, result });
   }
-  return { outcomes, cancelled: false };
+  return { outcomes, cancelled };
 };

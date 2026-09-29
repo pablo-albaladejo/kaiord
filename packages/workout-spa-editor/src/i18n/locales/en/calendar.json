@@ -132,7 +132,9 @@
     "notEligible": {
       "raw": "not processed yet",
       "skipped": "skipped",
-      "stale": "coach change to resolve first"
+      "stale": "coach change to resolve first",
+      "no-krd": "no structured workout",
+      "stopped": "stopped"
     },
     "summary": {
       "placed": "Placed: {{count}}",

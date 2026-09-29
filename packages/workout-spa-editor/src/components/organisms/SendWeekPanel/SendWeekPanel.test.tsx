@@ -135,4 +135,26 @@ describe("SendWeekPanel", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("0 of 3 handled.");
   });
+
+  it.each([
+    { reason: "stopped", label: "Not sent (stopped)" },
+    { reason: "no-krd", label: "Not sent (no structured workout)" },
+  ] as const)(
+    "should explain a $reason item as $label",
+    ({ reason, label }) => {
+      // Arrange
+      const outcome: BulkOutcome = {
+        workoutId: "w-1",
+        date: "2026-10-05",
+        status: "not-eligible",
+        notEligible: reason,
+      };
+
+      // Act
+      renderPanel([outcome]);
+
+      // Assert
+      expect(screen.getByText(label, { exact: false })).toBeInTheDocument();
+    }
+  );
 });

@@ -132,7 +132,9 @@
     "notEligible": {
       "raw": "aún sin procesar",
       "skipped": "omitido",
-      "stale": "primero resuelve el cambio del entrenador"
+      "stale": "primero resuelve el cambio del entrenador",
+      "no-krd": "sin entrenamiento estructurado",
+      "stopped": "detenido"
     },
     "summary": {
       "placed": "Colocados: {{count}}",

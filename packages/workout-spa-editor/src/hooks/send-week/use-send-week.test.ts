@@ -155,4 +155,40 @@ describe("useSendWeek", () => {
     // Assert
     expect(held.handlers?.isCancelled()).toBe(true);
   });
+
+  it("should keep the whole week's total when retrying after Stop", async () => {
+    // Arrange
+    mockRun.mockImplementationOnce(
+      async (_c: unknown, items: typeof WEEK, h: Handlers) => {
+        h.onOutcome({
+          ...items[0],
+          status: "failed",
+          result: failed("needs-reauth", true),
+        });
+        h.onOutcome({
+          ...items[1],
+          status: "not-eligible",
+          notEligible: "stopped",
+        });
+        return { outcomes: [], cancelled: true };
+      }
+    );
+    const { result } = renderHook(() => useSendWeek(ctx));
+    await act(() => result.current.start(WEEK));
+    finish({ "w-1": { kind: "scheduled" } });
+
+    // Act
+    await act(() => result.current.retry());
+
+    // Assert
+    expect(mockRun.mock.lastCall?.[1]).toEqual([WEEK[0]]);
+    expect(result.current.state).toMatchObject({
+      phase: "done",
+      total: WEEK.length,
+      outcomes: [
+        { workoutId: "w-1", status: "scheduled" },
+        { workoutId: "w-2", notEligible: "stopped" },
+      ],
+    });
+  });
 });
