@@ -53,20 +53,16 @@ export const moveWorkoutDate = async (
 };
 
 /**
- * Opens a workout's detail page once the bridge and its Garmin session are
- * detected. The detail page's send button is always shown, and a send
- * before detection is a no-op; the editor shows its send button only once
- * the gate is ready. Going back is in-app, so detection is kept.
+ * Opens a workout's detail page and waits for its send button to be
+ * enabled, which happens once the bridge and its Garmin session are
+ * detected.
  */
 export const openDetailWhenReady = async (
   page: Page,
   workoutId: string
 ): Promise<void> => {
   await page.goto(`/workout/view/${workoutId}`);
-  await page.getByRole("button", { name: "Edit" }).click();
-  await expect(page.getByTestId("send-to-garmin-button")).toBeVisible();
-  await page.goBack();
   await expect(
     page.getByRole("button", { name: "Send to Garmin" })
-  ).toBeVisible();
+  ).toBeEnabled();
 };

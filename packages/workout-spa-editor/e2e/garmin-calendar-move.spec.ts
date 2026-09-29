@@ -1,8 +1,10 @@
 /**
  * Moving a pushed workout (T5, T6) end to end through the bridge stub's
  * in-memory Garmin account: the next push schedules the new date and
- * removes the old entry (sent from the workout detail page) — one entry, never a gap. When Garmin refuses the
- * removal, the athlete is told an older entry is still there.
+ * removes the old entry (sent from the workout detail page) — one entry,
+ * never a gap. The date changes while the page is open, as a coach sync
+ * does. When Garmin refuses the removal, the athlete is told an older entry
+ * is still there.
  */
 import type { Page } from "@playwright/test";
 
@@ -30,6 +32,8 @@ const UNSCHEDULE_500 = {
   },
 };
 
+const SENT_CLAIM = "On your Garmin calendar on";
+
 const send = (page: Page) =>
   page.getByRole("button", { name: "Send to Garmin" }).click();
 
@@ -49,8 +53,13 @@ const pushThenMove = async (page: Page, options: GarminStubOptions = {}) => {
   await expect
     .poll(() => entryDates(page), { timeout: PLACEMENT_TIMEOUT_MS })
     .toEqual([MON]);
+  await expect(page.getByText(SENT_CLAIM)).toBeVisible();
+  // In-app: the open page sees the new date with no reload.
   await moveWorkoutDate(page, workoutId, WED);
-  await openDetailWhenReady(page, workoutId);
+  await expect(page.getByText(SENT_CLAIM)).toBeHidden();
+  await expect(
+    page.getByRole("button", { name: "Send to Garmin" })
+  ).toBeEnabled();
 };
 
 test.describe("Garmin calendar — move", () => {
@@ -68,9 +77,15 @@ test.describe("Garmin calendar — move", () => {
       timeout: PLACEMENT_TIMEOUT_MS,
     });
     expect(await entryDates(page)).toEqual([WED]);
-    const actions = await garminStubActions(page);
-    expect(actions.filter((a) => a === "push")).toHaveLength(1);
-    expect(actions.filter((a) => a === "unschedule")).toHaveLength(1);
+    // One library push; the move schedules the new date, then reads the
+    // calendar before it removes the old entry.
+    expect(await garminStubActions(page)).toEqual([
+      "push",
+      "schedule",
+      "schedule",
+      "calendar-find",
+      "unschedule",
+    ]);
   });
 
   test("should warn that the old entry is still there when its removal fails", async ({
