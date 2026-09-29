@@ -4,9 +4,9 @@
 
 The calendar header SHALL offer a "Send week" action that places every workout of the visible week on the Garmin calendar, past days included. It SHALL be offered only when a `workout` export route to `garmin-bridge` is enabled.
 
-- **Candidates**: every workout in the visible week. `raw`, `skipped` and `stale` workouts SHALL be reported `not-eligible`, each with its reason (a `stale` workout needs the coach's change resolved first).
+- **Candidates**: every workout in the visible week. `raw`, `skipped` and `stale` workouts, and a workout without a structured workout (no KRD), SHALL be reported `not-eligible`, each with its reason (a `stale` workout needs the coach's change resolved first).
 - **Pre-flight, once per run**: the export route, the Garmin Bridge installed, an active Garmin session, and Web Locks. A pre-flight failure SHALL show one message and make 0 calls. A bridge without `calendar-write-v1` SHALL NOT stop the run: every eligible item still reaches the library and ends `library-only{reason:"bridge-outdated"}`.
-- **Runner**: sequential, 500 ms between items, each item through the same `pushWorkoutToGarminCalendar` pipeline with its own per-record lock, using the quiet push that never sets the global push state. A failure SHALL NOT stop the run. The run SHALL be cancellable between items. Changing the visible week or leaving the calendar SHALL cancel the run: the item in flight finishes, no further item starts, and the old run's panel SHALL NOT reappear.
+- **Runner**: sequential, 500 ms between items, each item through the same `pushWorkoutToGarminCalendar` pipeline with its own per-record lock, using the quiet push that never sets the global push state. A failure SHALL NOT stop the run. The run SHALL be cancellable between items. After "Stop", every item the run did not start SHALL be listed `not-eligible` "Not sent (stopped)", so the summary keeps the whole week's total; "Retry" SHALL NOT pick them up. Choosing "Send week" again sends them, because the items already placed end `unchanged` with no calendar change; there are no other retry semantics for stopped items. Changing the visible week or leaving the calendar SHALL cancel the run: the item in flight finishes, no further item starts, and the old run's panel SHALL NOT reappear.
 - **Statuses**: `scheduled`, `moved`, `unchanged`, `duplicate-left`, `uncertain`, `library-only`, `not-eligible`, `failed`. `library-only` SHALL be shown in the warning tone, counted apart from the failures, and explained by ONE notice per run (not one per item) with one action that opens the extension's store page. Only `bridge-outdated` can reach it, because the pre-flight requires Web Locks.
 - **Retry**: SHALL re-run only the retryable failures whose `retryAfter` has passed and, once the bridge reports `calendar-write-v1`, the `library-only{reason:"bridge-outdated"}` items. It SHALL make 0 calls for any other item. While a retryable failure's `retryAfter` is still ahead, "Retry" SHALL be disabled and show a countdown to the earliest one.
 - **Panel**: each item SHALL link to its workout page, where an `uncertain` or `duplicate-left` item is answered; the bulk panel SHALL NOT offer per-entry answers.
@@ -31,6 +31,13 @@ The calendar header SHALL offer a "Send week" action that places every workout o
 - **WHEN** the athlete opens week B
 - **THEN** no further item of week A SHALL start after the one in flight
 - **AND** week B SHALL NOT show week A's panel
+
+#### Scenario: Stop lists the unsent items and Send week picks them up
+
+- **GIVEN** a run of 3 eligible workouts stopped after the first one
+- **WHEN** the panel is shown
+- **THEN** the other 2 SHALL be listed "Not sent (stopped)" and the summary SHALL count all 3
+- **AND** choosing "Send week" again SHALL place the 2 stopped workouts and leave the first `unchanged`
 
 #### Scenario: A missing Garmin session stops the run before any call
 
