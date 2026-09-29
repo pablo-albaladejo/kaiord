@@ -80,6 +80,7 @@
       "bridge-outdated": "In your Garmin library, with no date: update the Kaiord Garmin Bridge extension to place it on the calendar."
     },
     "updateExtension": "Update the extension",
+    "recordDeletedOn": "This workout was deleted while it was being sent. It may still be on your Garmin calendar on {{date}}: remove it in Garmin Connect.",
     "failed": {
       "busy": "This workout is already being sent. Try again once that send ends.",
       "settling": "Garmin is still processing the last send. Try again in a minute.",

@@ -80,6 +80,7 @@
       "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la extensión Kaiord Garmin Bridge para colocarlo en el calendario."
     },
     "updateExtension": "Actualizar la extensión",
+    "recordDeletedOn": "Este entrenamiento se eliminó mientras se enviaba. Puede seguir en tu calendario de Garmin el {{date}}: elimínalo en Garmin Connect.",
     "failed": {
       "busy": "Este entrenamiento ya se está enviando. Inténtalo de nuevo cuando termine ese envío.",
       "settling": "Garmin aún está procesando el último envío. Inténtalo de nuevo en un minuto.",

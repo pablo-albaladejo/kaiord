@@ -39,7 +39,14 @@ export const placementMessage = (
     case "library-only":
       return { tone: "warning", key: `placement.libraryOnly.${result.reason}` };
     case "failed":
-      return { tone: "danger", key: `placement.failed.${result.reason}` };
+      // A deletion mid-run may leave an entry in Garmin on `date`.
+      return result.reason === "record-deleted" && result.date
+        ? {
+            tone: "danger",
+            key: "placement.recordDeletedOn",
+            date: result.date,
+          }
+        : { tone: "danger", key: `placement.failed.${result.reason}` };
   }
 };
 

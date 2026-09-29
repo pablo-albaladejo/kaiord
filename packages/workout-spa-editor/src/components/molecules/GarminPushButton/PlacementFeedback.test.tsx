@@ -147,6 +147,19 @@ describe("PlacementFeedback", () => {
     ).toHaveClass("text-[var(--danger-text)]");
   });
 
+  it("should name the date an entry may remain on after a deletion", () => {
+    // Arrange
+    const result = { ...failed("record-deleted", false), date: OLD_DATE };
+
+    // Act
+    renderFeedback(result);
+
+    // Assert
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /may still be on your Garmin calendar on .*4/
+    );
+  });
+
   it("should speak Spanish when the active locale is es", async () => {
     // Arrange
     await setActiveLocale("es");

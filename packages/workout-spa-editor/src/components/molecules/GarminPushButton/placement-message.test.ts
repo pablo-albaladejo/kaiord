@@ -34,6 +34,11 @@ describe("placementMessage", () => {
       failed("needs-reauth", false),
       { tone: "danger", key: "placement.failed.needs-reauth" },
     ],
+    [
+      "record-deleted with an entry maybe left",
+      { ...failed("record-deleted", false), date: OTHER },
+      { tone: "danger", key: "placement.recordDeletedOn", date: OTHER },
+    ],
   ])("should word a %s result", (_name, result, expected) => {
     // Arrange
     const date = DATE;
