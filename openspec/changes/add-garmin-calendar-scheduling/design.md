@@ -461,12 +461,12 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 - `push()` returns a `PlacementResult`.
 - `onSent` fires iff the library push is confirmed.
 - EditorPage persists the confirmed `workoutId` as the push id.
-- The chat tool's result adds only an app-authored `calendar` enum.
+- The chat tool's result adds only app-authored enums: `calendar` (the result kind) and, for a `failed` one, its `reason`. Any exception on the chat path becomes an app-authored error code, never an exception's text.
 
 **Analytics** (no ids, dates or names)
 
 - `garmin-synced` counts as a success when the result is neither `failed` nor `uncertain`.
-- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, schedule-rejected, needs-reauth, library-push-failed, no-export-route, deadline-before-send (a `failed` result), and bridge-outdated, insecure-context (a `library-only` one); see "Pipeline details settled in T5".
+- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, schedule-rejected, needs-reauth, library-push-failed, no-export-route, deadline-before-send, placement-interrupted (a `failed` result), and bridge-outdated, insecure-context (a `library-only` one); see "Pipeline details settled in T5".
 - `garmin-calendar-bulk{counts}`
 
 ### 3.9 Normalization and merge (on top of T0c, delivered by #1265)
@@ -726,7 +726,10 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   `deadline-before-send`, and three §3.3 left unnamed: `schedule-rejected`
   (Garmin 400, 403 or 409, or a bridge refusal with `retryable: false`),
   `needs-reauth` (a `needsReauth` answer) and `library-push-failed` (Phase 1
-  failed), plus `no-export-route` (Phase 1 found no active route). The
+  failed), plus `no-export-route` (Phase 1 found no active route) and
+  `placement-interrupted` (an exception after Phase 1 succeeded — a Dexie
+  error in the claim, commit or drain, or a thrown port: the workout is in
+  the library, the date may not be placed, and a re-send finishes it). The
   `library-only` reasons stay `insecure-context` and `bridge-outdated`.
 - **`duplicate-left`** is returned when the run ends with a `retire` entry
   still in the queue (a failed or abandoned delete), when a resolve adopted
