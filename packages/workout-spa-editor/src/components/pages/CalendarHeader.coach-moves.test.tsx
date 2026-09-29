@@ -1,8 +1,11 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { useCoachMoveNoticeStore } from "../../store/coach-move-notice-store";
+import {
+  CoachMoveNoticeProvider,
+  useCoachMoveNoticeActions,
+} from "../../contexts/coach-move-notice-context";
 import { CalendarHeader } from "./CalendarHeader";
 
 vi.mock("../../hooks/use-active-profile-live", () => ({
@@ -27,18 +30,26 @@ const coaching = { syncSources: [] } as unknown as Parameters<
   typeof CalendarHeader
 >[0]["coaching"];
 
-beforeEach(() => {
-  useCoachMoveNoticeStore.setState({ notices: {}, dismissed: {} });
-});
+/** Hands the test the provider's actions, as a sync would use them. */
+const actions = {
+  report: (() => {}) as ReturnType<typeof useCoachMoveNoticeActions>["report"],
+};
+const Sync = () => {
+  actions.report = useCoachMoveNoticeActions().report;
+  return null;
+};
 
 describe("CalendarHeader coach-move notice", () => {
   it("should show the synced week's coach moves until dismissed", async () => {
     // Arrange
-    render(<CalendarHeader state={state} coaching={coaching} />);
+    render(
+      <CoachMoveNoticeProvider>
+        <CalendarHeader state={state} coaching={coaching} />
+        <Sync />
+      </CoachMoveNoticeProvider>
+    );
     act(() =>
-      useCoachMoveNoticeStore
-        .getState()
-        .report("p1", WEEK, { coachMoves: 1, overriddenLocalMoves: 0 })
+      actions.report("p1", WEEK, { coachMoves: 1, overriddenLocalMoves: 0 })
     );
     const status = screen.getByRole("status");
 

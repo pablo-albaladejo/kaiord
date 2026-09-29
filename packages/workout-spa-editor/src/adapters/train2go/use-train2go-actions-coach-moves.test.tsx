@@ -4,10 +4,14 @@
  */
 import type { Analytics } from "@kaiord/core";
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import { useCoachMoveNoticeStore } from "../../store/coach-move-notice-store";
+import {
+  CoachMoveNoticeProvider,
+  useCoachMoveNotice,
+} from "../../contexts/coach-move-notice-context";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 
 const WEEK = "2026-10-05";
@@ -21,9 +25,17 @@ import { useSyncCallback } from "./use-train2go-actions";
 const transport = { source: "train2go" } as CoachingTransport;
 const analytics = { event: vi.fn() } as unknown as Analytics;
 
-beforeEach(() => {
-  useCoachMoveNoticeStore.setState({ notices: {}, dismissed: {} });
-});
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <CoachMoveNoticeProvider>{children}</CoachMoveNoticeProvider>
+);
+const renderSync = () =>
+  renderHook(
+    () => ({
+      sync: useSyncCallback(createInMemoryPersistence(), transport, analytics),
+      notice: useCoachMoveNotice("p1", WEEK),
+    }),
+    { wrapper }
+  );
 
 describe("useSyncCallback coach moves", () => {
   it("should report a successful sync's moves for its week", async () => {
@@ -35,32 +47,27 @@ describe("useSyncCallback coach moves", () => {
       coachMoves: 1,
       overriddenLocalMoves: 1,
     });
-    const p = createInMemoryPersistence();
-    const { result } = renderHook(() =>
-      useSyncCallback(p, transport, analytics)
-    );
+    const { result } = renderSync();
 
     // Act
-    await act(() => result.current("p1", WEEK));
+    await act(() => result.current.sync("p1", WEEK));
 
     // Assert
-    expect(useCoachMoveNoticeStore.getState().notices["p1:2026-10-05"]).toEqual(
-      { coachMoves: 1, overriddenLocalMoves: 1, seq: 1 }
-    );
+    expect(result.current.notice).toMatchObject({
+      coachMoves: 1,
+      overriddenLocalMoves: 1,
+    });
   });
 
   it("should report nothing for a failed sync", async () => {
     // Arrange
     mockSyncWeek.mockResolvedValue({ ok: false, reason: "not-linked" });
-    const p = createInMemoryPersistence();
-    const { result } = renderHook(() =>
-      useSyncCallback(p, transport, analytics)
-    );
+    const { result } = renderSync();
 
     // Act
-    await act(() => result.current("p1", WEEK));
+    await act(() => result.current.sync("p1", WEEK));
 
     // Assert
-    expect(useCoachMoveNoticeStore.getState().notices).toEqual({});
+    expect(result.current.notice).toBeUndefined();
   });
 });

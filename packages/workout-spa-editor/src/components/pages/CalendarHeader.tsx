@@ -4,12 +4,12 @@
  * line cap.
  */
 
-import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
-import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import {
   useCoachMoveNotice,
-  useCoachMoveNoticeStore,
-} from "../../store/coach-move-notice-store";
+  useCoachMoveNoticeActions,
+} from "../../contexts/coach-move-notice-context";
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
+import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import type { CalendarView } from "../../types/user-preferences";
 import { CoachMoveNotice } from "../molecules/CoachMoveNotice/CoachMoveNotice";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
@@ -36,7 +36,7 @@ export function CalendarHeader({
   const latestDate = useLatestSessionDate(s.latestWorkout?.date);
   const profileId = useActiveProfileLive()?.id ?? null;
   const moves = useCoachMoveNotice(profileId, s.data.weekStart);
-  const dismissMoves = useCoachMoveNoticeStore((n) => n.dismiss);
+  const { dismiss: dismissMoves } = useCoachMoveNoticeActions();
   const send = useCalendarSendWeek(
     profileId,
     s.data.weekId,

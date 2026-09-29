@@ -6,8 +6,8 @@ import { useCallback, useRef } from "react";
 import { attemptLink } from "../../application/coaching/attempt-link";
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import { syncWeek } from "../../application/coaching/sync-week";
+import { useCoachMoveNoticeActions } from "../../contexts/coach-move-notice-context";
 import type { PersistencePort } from "../../ports/persistence-port";
-import { useCoachMoveNoticeStore } from "../../store/coach-move-notice-store";
 import { emitLinkResult, emitSyncResult } from "./coaching-telemetry";
 import { shouldFanOutZones } from "./should-fan-out-zones";
 
@@ -18,8 +18,9 @@ export const useSyncCallback = (
   t: CoachingTransport,
   a: Analytics,
   runZonesSync?: (profileId: string) => Promise<void>
-) =>
-  useCallback(
+) => {
+  const { report } = useCoachMoveNoticeActions();
+  return useCallback(
     async (profileId: string, weekStart: string) => {
       a.event("coaching.sync.invoked", {
         source: t.source,
@@ -40,8 +41,7 @@ export const useSyncCallback = (
         weekStart
       );
       emitSyncResult(a, t.source, result, Date.now() - startedAt);
-      if (result.ok)
-        useCoachMoveNoticeStore.getState().report(profileId, weekStart, result);
+      if (result.ok) report(profileId, weekStart, result);
       if (
         result.ok &&
         runZonesSync &&
@@ -50,8 +50,9 @@ export const useSyncCallback = (
         await runZonesSync(profileId).catch(() => undefined);
       }
     },
-    [p, t, a, runZonesSync]
+    [p, t, a, runZonesSync, report]
   );
+};
 
 export const useConnectCallback = (
   p: PersistencePort,
