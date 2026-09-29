@@ -21,7 +21,7 @@ import {
   CALENDAR_WRITE_FEATURE,
 } from "./placement-timing";
 import { reconcileGarminPlacement } from "./reconcile-garmin-placement";
-import type { RecordLockPort } from "./record-lock-port";
+import { placementLockName, type RecordLockPort } from "./record-lock-port";
 
 export type { PlacementRequest };
 
@@ -67,7 +67,7 @@ const lockedPlace = async (
 ): Promise<PlacementResult> => {
   if (!deps.locks) return place(deps, request);
   const lock = await deps.locks.tryRun(
-    `garmin-place:${request.kaiordRecordId}`,
+    placementLockName(request.kaiordRecordId),
     () => place(deps, request)
   );
   return lock.acquired ? lock.value : failed("busy", true);

@@ -5,8 +5,10 @@ import {
   placementNotice,
 } from "../application/garmin-placement/placement-notice";
 import type { PlacementResult } from "../application/garmin-placement/placement-result";
+import { placementLockName } from "../application/garmin-placement/record-lock-port";
 import { usePlacementOutcome } from "../contexts/placement-outcome-context";
 import { GARMIN_BRIDGE_ID, ledgerRepo } from "./garmin-push-fn";
+import { useRecordLockHeld } from "./use-record-lock-held";
 
 export type GarminPlacementNotice = PlacementNotice & {
   /** Records the last run's outcome for this record. */
@@ -15,7 +17,9 @@ export type GarminPlacementNotice = PlacementNotice & {
 
 /**
  * The record's placement notice: its ledger row, read live (one query per
- * page), joined with the last run's ephemeral outcome.
+ * page), joined with the last run's ephemeral outcome. A posted attempt is
+ * watched through the record's lock, so a live run is never shown as an
+ * `uncertain` to answer.
  */
 export const useGarminPlacementNotice = (
   recordId: string | undefined
@@ -31,5 +35,11 @@ export const useGarminPlacementNotice = (
     [recordId]
   );
   const [lastRun, setLastRun] = usePlacementOutcome(recordId);
-  return { ...placementNotice(row, lastRun), setLastRun };
+  const p = row?.placement;
+  const posted = recordId && p?.kind === "attempting" && p.posted ? p : null;
+  const inFlight = useRecordLockHeld(
+    posted ? placementLockName(recordId!) : undefined,
+    `${posted?.at}:${lastRun?.kind}`
+  );
+  return { ...placementNotice(row, lastRun, inFlight), setLastRun };
 };

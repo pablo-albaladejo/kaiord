@@ -9,6 +9,7 @@ import { dismissRemovalEntry } from "./placement-dismiss";
 import { failed, type PlacementResult } from "./placement-result";
 import { CALENDAR_FIND_FEATURE } from "./placement-timing";
 import type { PlacementPipelineDeps } from "./push-workout-to-garmin-calendar";
+import { placementLockName } from "./record-lock-port";
 
 const keyOf = (kaiordRecordId: string) => ({
   kaiordRecordId,
@@ -21,7 +22,7 @@ const underLock = async <T>(
   run: () => Promise<T>
 ): Promise<{ acquired: true; value: T } | { acquired: false }> =>
   deps.locks
-    ? deps.locks.tryRun(`garmin-place:${kaiordRecordId}`, run)
+    ? deps.locks.tryRun(placementLockName(kaiordRecordId), run)
     : { acquired: true, value: await run() };
 
 export const confirmGarminPlacement = async (

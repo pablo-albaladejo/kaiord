@@ -26,6 +26,14 @@ const rowWith = (fields: Partial<Row>): Row =>
   ({ id: "row-1", kaiordRecordId: "record-1", ...fields }) as Row;
 
 const UNCERTAIN = { kind: "uncertain", workoutId: WORKOUT, date: D2 };
+const attempt = (posted: boolean) => ({
+  kind: "attempting",
+  workoutId: WORKOUT,
+  date: D2,
+  at: "2026-10-01T08:00:00.000Z",
+  posted,
+  supersedes: [],
+});
 
 describe("placementNotice", () => {
   it("should derive uncertain from the ledger row, over any last run", () => {
@@ -111,6 +119,35 @@ describe("placementNotice", () => {
 
     // Act
     const notice = placementNotice(row, undefined);
+
+    // Assert
+    expect(notice).toEqual({ removable: [] });
+  });
+
+  it("should offer an unanswered posted attempt as uncertain once no run holds it", () => {
+    // Arrange
+    const row = rowWith({ placement: attempt(true) } as Partial<Row>);
+
+    // Act
+    const notice = placementNotice(row, undefined, false);
+
+    // Assert
+    expect(notice.result).toEqual({
+      kind: "uncertain",
+      date: D2,
+      canConfirm: true,
+    });
+  });
+
+  it.each([
+    ["a posted attempt a live run holds", true, true],
+    ["an attempt not yet posted", false, false],
+  ])("should say nothing about %s", (_n, posted, inFlight) => {
+    // Arrange
+    const row = rowWith({ placement: attempt(posted) } as Partial<Row>);
+
+    // Act
+    const notice = placementNotice(row, undefined, inFlight);
 
     // Assert
     expect(notice).toEqual({ removable: [] });

@@ -9,3 +9,7 @@ export type LockOutcome<T> = { acquired: true; value: T } | { acquired: false };
 export type RecordLockPort = {
   tryRun: <T>(name: string, run: () => Promise<T>) => Promise<LockOutcome<T>>;
 };
+
+/** The lock a record's placement runs and answers take. */
+export const placementLockName = (kaiordRecordId: string) =>
+  `garmin-place:${kaiordRecordId}`;
