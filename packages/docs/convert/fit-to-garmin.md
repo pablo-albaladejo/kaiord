@@ -72,7 +72,7 @@ highest-fidelity conversions Kaiord does.
 
 **% FTP power targets need your FTP.** A FIT workout can store power as % FTP,
 but Garmin Connect workouts store watts, so those targets are converted with
-your FTP (watts = round(% × FTP)). Set your FTP in **Athlete** in the Editor, or
+your FTP (watts = round(% / 100 × FTP)). Set your FTP in **Athlete** in the Editor, or
 pass `--ftp <watts>` to `kaiord convert` / `kaiord garmin push`. Without one the
 conversion stops with an error rather than guessing.
 

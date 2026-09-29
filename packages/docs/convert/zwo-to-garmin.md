@@ -63,7 +63,7 @@ await writeFile("workout.gcn", gcn);
 ## Gotchas
 
 **Watts vs. % FTP.** Zwift stores power as % FTP; Garmin Connect stores watts,
-so every % FTP target is converted with **your** FTP: watts = round(% × FTP).
+so every % FTP target is converted with **your** FTP: watts = round(% / 100 × FTP).
 There is no assumed default — without an FTP the conversion stops with an error
 instead of writing wrong watts.
 
