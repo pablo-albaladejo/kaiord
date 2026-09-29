@@ -1,4 +1,4 @@
-import { PROVIDER_MODELS } from "@kaiord/ai/providers";
+import { isRetiredModel, PROVIDER_MODELS } from "@kaiord/ai/providers";
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
@@ -61,6 +61,15 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
+      )}
+      {isRetiredModel(type, value) && (
+        <p
+          role="alert"
+          data-testid="model-picker-retired"
+          className="mt-1 text-xs text-danger-text"
+        >
+          {t("models.retired")}
+        </p>
       )}
     </div>
   );

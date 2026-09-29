@@ -4,7 +4,10 @@
  * cancelable signal. `canImport` mirrors the settings model resolution so the
  * section can disable itself when no lab-extraction model is configured.
  */
-import { resolveModelForPurpose } from "@kaiord/ai/providers";
+import {
+  isModelNotFoundError,
+  resolveModelForPurpose,
+} from "@kaiord/ai/providers";
 import { useMemo, useRef, useState } from "react";
 
 import { createDexiePersistence } from "../../../../adapters/dexie/dexie-persistence-adapter";
@@ -21,6 +24,8 @@ import { type LabDraft, mapExtractionToDraft } from "./map-extraction-to-draft";
 const TOO_LARGE_MSG = "File is too large — use a file under 10 MB";
 const RUN_FAILED_MSG = "Could not extract the lab report — please retry";
 const NO_PROVIDER_MSG = "No lab-extraction model is configured";
+const MODEL_UNAVAILABLE_MSG =
+  "This model is no longer available — pick another in Settings → AI";
 
 export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const toast = useToastContext();
@@ -57,8 +62,10 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
       });
       if (!result.ok) toast.error(NO_PROVIDER_MSG);
       else onDraft(mapExtractionToDraft(result.extraction, { locale }));
-    } catch {
-      if (!controller.signal.aborted) toast.error(RUN_FAILED_MSG);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      if (isModelNotFoundError(error)) toast.error(MODEL_UNAVAILABLE_MSG);
+      else toast.error(RUN_FAILED_MSG);
     } finally {
       setIsRunning(false);
       controllerRef.current = null;

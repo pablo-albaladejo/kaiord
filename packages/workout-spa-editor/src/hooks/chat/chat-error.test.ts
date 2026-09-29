@@ -14,6 +14,21 @@ describe("categorizeChatError", () => {
     expect(category).toBe("auth");
   });
 
+  it("should map a retired-model 404 to the model category", () => {
+    // Arrange
+    const error = Object.assign(new Error("Not Found"), {
+      statusCode: 404,
+      responseBody:
+        '{"type":"error","error":{"type":"not_found_error","message":"model: claude-3-haiku-20240307"}}',
+    });
+
+    // Act
+    const category = categorizeChatError(error);
+
+    // Assert
+    expect(category).toBe("model");
+  });
+
   it("should map rate/quota failures to a fixed category", () => {
     // Arrange
     const error = new Error("429 rate limit exceeded");

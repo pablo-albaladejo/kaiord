@@ -55,4 +55,43 @@ describe("ModelPicker", () => {
       "my-custom-model"
     );
   });
+
+  it("should warn when the saved model has been retired by the provider", () => {
+    // Arrange
+    const retired = "claude-3-haiku-20240307";
+
+    // Act
+    render(<ModelPicker type="anthropic" value={retired} onChange={vi.fn()} />);
+
+    // Assert
+    expect(screen.getByTestId("model-picker-retired")).toHaveTextContent(
+      "no longer available"
+    );
+  });
+
+  it("should not offer a retired model as a catalog option", () => {
+    // Arrange
+    const retired = "claude-3-haiku-20240307";
+
+    // Act
+    render(<ModelPicker type="anthropic" value="" onChange={vi.fn()} />);
+
+    // Assert
+    expect(
+      screen.queryByRole("option", { name: retired })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should not warn for a current catalog model", () => {
+    // Arrange
+    const current = PROVIDER_MODELS.anthropic[0]!.id;
+
+    // Act
+    render(<ModelPicker type="anthropic" value={current} onChange={vi.fn()} />);
+
+    // Assert
+    expect(
+      screen.queryByTestId("model-picker-retired")
+    ).not.toBeInTheDocument();
+  });
 });

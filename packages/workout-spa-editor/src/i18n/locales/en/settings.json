@@ -81,6 +81,7 @@
     "hint": "Add at least one provider and select an active profile to choose models.",
     "model": "Model",
     "custom": "Custom…",
+    "retired": "This model is no longer available — pick another.",
     "customModelIdAriaLabel": "Custom model id",
     "customModelIdPlaceholder": "Enter a model id",
     "reset": "Reset"

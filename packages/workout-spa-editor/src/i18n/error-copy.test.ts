@@ -104,6 +104,22 @@ describe("localizeAiError", () => {
       expected: "Provider timeout",
     },
     {
+      name: "point a retired model at Settings → AI",
+      error: Object.assign(new Error("Not Found"), {
+        statusCode: 404,
+        responseBody: '{"error":{"type":"not_found_error"}}',
+      }),
+      locale: "en" as const,
+      expected:
+        "This model is no longer available — pick another in Settings → AI",
+    },
+    {
+      name: "point a retired model at Settings → AI in Spanish",
+      error: Object.assign(new Error("Not Found"), { statusCode: 404 }),
+      locale: "es" as const,
+      expected: "Este modelo ya no está disponible: elige otro en Ajustes → IA",
+    },
+    {
       name: "return the generic generation-failed copy for a non-error",
       error: "weird failure",
       locale: "es" as const,
