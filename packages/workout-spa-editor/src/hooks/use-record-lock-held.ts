@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 
-const POLL_MS = 1_000;
+export const LOCK_POLL_MS = 1_000;
+
+const isHeld = async (locks: LockManager, name: string) => {
+  try {
+    const { held = [] } = await locks.query();
+    return held.some((lock) => lock.name === name);
+  } catch {
+    return false;
+  }
+};
 
 /**
- * Whether any tab holds the Web Lock `name`, polled until it is released.
- * `watchKey` restarts the watch (a new attempt under the same lock). No
- * `name`, or no Web Locks, answers `false`; until the first answer, `true`,
- * so a live run never flashes as settled.
+ * Whether any tab holds the Web Lock `name`, polled for as long as it is
+ * watched: a run that takes the lock again after a release (another tab,
+ * or the chat tool in this one) shows within one poll. `watchKey` restarts
+ * the watch (a new attempt under the same lock). No `name`, no Web Locks,
+ * or a failed query answers `false`; each new watch answers `true` until
+ * its first answer, so a live run never flashes as settled.
  */
 export const useRecordLockHeld = (
   name: string | undefined,
@@ -19,14 +30,14 @@ export const useRecordLockHeld = (
       setHeld(false);
       return;
     }
+    setHeld(true);
     let stopped = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const check = async () => {
-      const { held: list = [] } = await locks.query();
+      const now = await isHeld(locks, name);
       if (stopped) return;
-      const now = list.some((lock) => lock.name === name);
       setHeld(now);
-      if (now) timer = setTimeout(() => void check(), POLL_MS);
+      timer = setTimeout(() => void check(), LOCK_POLL_MS);
     };
     void check();
     return () => {
