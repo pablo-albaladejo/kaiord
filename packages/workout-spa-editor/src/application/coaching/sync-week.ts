@@ -14,24 +14,26 @@ import type {
   CoachingRepository,
   CoachingSyncStateRepository,
   ProfileRepository,
+  WorkoutRepository,
 } from "../../ports/persistence-port";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import { addDaysIso } from "../shared/date-utils";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { hasEnabledPlannedSessionImportRoute } from "./planned-session-import-route";
-import { persistSyncedWeek } from "./sync-week-persist";
+import { type PersistedWeek, persistSyncedWeek } from "./sync-week-persist";
 
 export type SyncWeekDeps = {
   profiles: ProfileRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
+  workouts: WorkoutRepository;
   integrationPolicy: IntegrationPolicyRepository;
   transport: CoachingTransport;
   now?: () => string;
 };
 
 export type SyncWeekResult =
-  | { ok: true; activityCount: number; orphansDeleted: number }
+  | ({ ok: true; activityCount: number } & PersistedWeek)
   | {
       ok: false;
       reason:
@@ -85,14 +87,15 @@ export const syncWeek = async (
     return { ok: false, reason: "transport-error", error };
   }
 
-  const orphansDeleted = await persistSyncedWeek(
+  const persisted = await persistSyncedWeek(
     {
       coaching: deps.coaching,
       coachingSyncState: deps.coachingSyncState,
+      workouts: deps.workouts,
       now: deps.now,
     },
     { profileId, source: deps.transport.source, fetched, localSameSource }
   );
 
-  return { ok: true, activityCount: fetched.length, orphansDeleted };
+  return { ok: true, activityCount: fetched.length, ...persisted };
 };

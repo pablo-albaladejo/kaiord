@@ -31,6 +31,7 @@ export const useSyncCallback = (
           coaching: p.coaching,
           transport: t,
           coachingSyncState: p.coachingSyncState,
+          workouts: p.workouts,
           integrationPolicy: p.integrationPolicy,
         },
         profileId,

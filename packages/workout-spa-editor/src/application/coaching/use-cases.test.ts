@@ -14,9 +14,11 @@ import type { LinkedCoachingAccount } from "../../types/coaching-account";
 import {
   buildCoachingActivityId,
   type CoachingActivityRecord,
+  namespaceSourceId,
 } from "../../types/coaching-activity-record";
 import type { Profile } from "../../types/profile";
 import { ProfileNotFoundError } from "../profile/errors";
+import { makeWorkoutRecord } from "../test-helpers";
 import { attemptLink } from "./attempt-link";
 import type {
   CoachingPingResult,
@@ -188,6 +190,8 @@ const plannedImportPolicy = (profileId: string, enabled: boolean) => ({
   updatedAt: NOW,
 });
 
+const NO_MOVES = { coachMoves: 0, overriddenLocalMoves: 0 };
+
 describe("syncWeek", () => {
   let deps: Parameters<typeof syncWeek>[0];
 
@@ -201,6 +205,7 @@ describe("syncWeek", () => {
       coaching: createInMemoryCoachingRepository(),
       coachingSyncState: createInMemoryCoachingSyncStateRepository(),
       integrationPolicy,
+      workouts: createInMemoryWorkoutRepository(),
       transport: makeTransport(),
       now: () => NOW,
     };
@@ -270,7 +275,12 @@ describe("syncWeek", () => {
     });
     deps = { ...deps, transport: t };
     const result = await syncWeek(deps, "p1", "2026-04-13");
-    expect(result).toEqual({ ok: true, activityCount: 1, orphansDeleted: 0 });
+    expect(result).toEqual({
+      ok: true,
+      activityCount: 1,
+      ...NO_MOVES,
+      orphansDeleted: 0,
+    });
     const stored = await deps.coaching.getByProfileAndDateRange(
       "p1",
       "2026-04-13",
@@ -291,7 +301,12 @@ describe("syncWeek", () => {
   it("should update lastSyncedAt UNCONDITIONALLY on zero-activity responses", async () => {
     // Arrange
     const result = await syncWeek(deps, "p1", "2026-04-13");
-    expect(result).toEqual({ ok: true, activityCount: 0, orphansDeleted: 0 });
+    expect(result).toEqual({
+      ok: true,
+      activityCount: 0,
+      ...NO_MOVES,
+      orphansDeleted: 0,
+    });
 
     // Act
     const sync = await deps.coachingSyncState.getBySourceAndProfile(
@@ -329,6 +344,38 @@ describe("syncWeek", () => {
 
     // Assert
     expect(ids).toEqual(["kept", "other-week"]);
+  });
+
+  it("should move a converted workout the coach moved and count it", async () => {
+    // Arrange
+    await deps.coaching.upsertMany([makeRecord({ sourceId: "7" })]);
+    await deps.workouts.put(
+      makeWorkoutRecord({
+        id: "w-7",
+        profileId: "p1",
+        date: "2026-04-13",
+        sourceId: namespaceSourceId("p1", "7"),
+      })
+    );
+    const moved = makeRecord({ sourceId: "7", date: "2026-04-16" });
+    deps = {
+      ...deps,
+      transport: makeTransport({ readWeek: vi.fn(async () => [moved]) }),
+    };
+
+    // Act
+    const result = await syncWeek(deps, "p1", "2026-04-13");
+
+    // Assert
+    expect(result).toMatchObject({
+      ok: true,
+      coachMoves: 1,
+      overriddenLocalMoves: 0,
+    });
+    expect(await deps.workouts.getById("w-7")).toMatchObject({
+      date: "2026-04-16",
+      coachDate: "2026-04-16",
+    });
   });
 
   it("should surface session-expired distinctly from transport errors", async () => {
@@ -442,6 +489,7 @@ describe("convertCoachingActivity", () => {
     // Assert
     expect(w?.state).toBe("raw");
     expect(w?.sourceId).toBe("p1:12345");
+    expect(w?.coachDate).toBe(activity.date);
   });
 
   it("should be idempotent within the same profile", async () => {
