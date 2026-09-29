@@ -352,20 +352,20 @@ describe("a bridge with calendar-write but no find (AC-34)", () => {
     expect(h.calendar.count("schedule")).toBe(2);
   });
 
-  it("should count a DELETE 404 as an attempt without a find", async () => {
+  it("should delete nothing and count nothing without a find", async () => {
     // Arrange
     const h = writeOnly();
     await h.push(D1);
     const oldId = h.calendar.items[0]!.id;
-    h.calendar.items.splice(0, 1);
 
     // Act
     await h.push(D2);
 
     // Assert
+    expect(h.calendar.count("unschedule")).toBe(0);
     expect(
       (await h.row())?.removalQueue?.find((e) => e.workoutScheduleId === oldId)
-    ).toMatchObject({ state: "retire", attempts: 1 });
+    ).toMatchObject({ state: "retire", attempts: 0 });
     expect(h.calendar.count("find")).toBe(0);
     expect(ALL_FEATURES).toContain(CALENDAR_WRITE_FEATURE);
   });

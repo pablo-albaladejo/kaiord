@@ -144,7 +144,7 @@ describe("ambiguous schedule, A3 false (AC-26)", () => {
   );
 
   it.each(PATHS)(
-    "should adopt one id-less entry as unconfirmed with supersedes [] [%s]",
+    "should adopt one id-less entry as unconfirmed with supersedes [] and delete nothing behind it [%s]",
     async (path) => {
       // Arrange
       const h = createPlacementHarness();
@@ -158,8 +158,14 @@ describe("ambiguous schedule, A3 false (AC-26)", () => {
       // Act
       const result = await h.push(date, content);
 
-      // Assert
-      expect(result).toEqual({ kind: expectedKind(path) });
+      // Assert: an unconfirmed Placed cannot be verified, so a previous
+      // entry stays behind undeleted (verify before delete).
+      expect(result).toEqual(
+        path === "C"
+          ? { kind: "scheduled" }
+          : { kind: "duplicate-left", dates: [D1] }
+      );
+      expect(h.calendar.count("unschedule")).toBe(0);
       expect((await h.row())?.placement).toMatchObject({
         kind: "unconfirmed",
         date,
@@ -342,7 +348,7 @@ describe("leftover attempting from a closed tab (AC-29)", () => {
     return h;
   };
 
-  it("should re-claim a posted:false leftover with 1 schedule and no read", async () => {
+  it("should re-claim a posted:false leftover with 1 schedule and no leftover read", async () => {
     // Arrange
     const h = await leave(false);
     const calls = h.calendar.calls.length;
@@ -354,6 +360,7 @@ describe("leftover attempting from a closed tab (AC-29)", () => {
     expect(result).toEqual({ kind: "moved" });
     expect(h.calendar.calls.slice(calls).map((c) => c.op)).toEqual([
       "schedule",
+      "find",
       "unschedule",
     ]);
   });
@@ -375,6 +382,7 @@ describe("leftover attempting from a closed tab (AC-29)", () => {
       "find",
       "find",
       "schedule",
+      "find",
       "unschedule",
     ]);
   });

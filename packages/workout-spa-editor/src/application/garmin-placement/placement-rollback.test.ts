@@ -13,7 +13,7 @@ import type { PlacementResult } from "./placement-result";
 
 const T0 = new Date("2026-10-01T08:00:00.000Z");
 const MINUTE_MS = 60_000;
-const LAST_TWO = 2;
+const LAST_THREE = 3;
 const PATHS: PushPath[] = ["C", "U", "S"];
 const DEFINITE: Array<[BridgeFailure, PlacementResult]> = [
   [
@@ -194,8 +194,9 @@ describe("schedule 404 (AC-32)", () => {
     expect(result).toEqual({ kind: "moved" });
     expect(h.library.pushes).toBe(2);
     expect((await h.row())?.forceRepush).toBeUndefined();
-    expect(h.calendar.calls.slice(-LAST_TWO).map((c) => c.op)).toEqual([
+    expect(h.calendar.calls.slice(-LAST_THREE).map((c) => c.op)).toEqual([
       "schedule",
+      "find",
       "unschedule",
     ]);
   });

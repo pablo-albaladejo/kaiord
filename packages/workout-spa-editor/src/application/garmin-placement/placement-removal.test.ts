@@ -166,20 +166,21 @@ describe("removal queue (AC-24)", () => {
     }
   );
 
-  it("should count a 404 without A3 as an attempt", async () => {
+  it("should send nothing and count nothing without A3", async () => {
     // Arrange
     const h = createPlacementHarness({ scheduleIdsInFind: false });
     await h.push(D1);
     const oldId = h.calendar.items[0]!.id;
-    h.calendar.items.splice(0, 1);
 
     // Act
-    await h.push(D2);
+    const result = await h.push(D2);
 
     // Assert
+    expect(h.calendar.count("unschedule")).toBe(0);
+    expect(result).toEqual({ kind: "duplicate-left", dates: [D1] });
     expect(await queueEntry(h, oldId)).toMatchObject({
       state: "retire",
-      attempts: 1,
+      attempts: 0,
     });
   });
 
@@ -222,6 +223,7 @@ describe("removal queue (AC-24)", () => {
     // Assert
     expect(h.calendar.calls.slice(calls).map((c) => c.op)).toEqual([
       "schedule",
+      "find",
       "unschedule",
     ]);
     expect(await queueEntry(h, oldId)).toMatchObject({
@@ -318,5 +320,56 @@ describe("dismiss eligibility (spec 6.2)", () => {
     // Assert
     expect(asPlaced).toEqual([]);
     expect(asPrevious).toEqual([]);
+  });
+});
+
+describe("verify before delete (design §3.5)", () => {
+  /** S_a on D1 retired behind S_b on D2, its first DELETE failed. */
+  const retireBehind = async (h: PlacementHarness) => {
+    await h.push(D1);
+    const oldId = h.calendar.items[0]!.id;
+    h.calendar.scripts.unschedule.push({ ok: false, status: 500 });
+    await h.push(D2);
+    const placedId = h.calendar.items[1]!.id;
+    return { oldId, placedId, deletes: h.calendar.count("unschedule") };
+  };
+
+  it("should turn a Placed absent from Garmin gone and uncertain, deleting nothing", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const { oldId, placedId, deletes } = await retireBehind(h);
+    h.calendar.items.splice(1, 1);
+
+    // Act
+    await h.push(D2);
+
+    // Assert
+    const row = await h.row();
+    expect(h.calendar.count("unschedule")).toBe(deletes);
+    expect(h.calendar.items.map((i) => i.id)).toEqual([oldId]);
+    expect(row?.placement).toMatchObject({ kind: "uncertain", date: D2 });
+    expect(await queueEntry(h, placedId)).toMatchObject({ state: "gone" });
+    expect(await queueEntry(h, oldId)).toMatchObject({
+      state: "retire",
+      attempts: 1,
+    });
+  });
+
+  it("should delete nothing and count nothing when the verifying read fails", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const { oldId, deletes } = await retireBehind(h);
+    h.calendar.scripts.find.push({ ok: false, status: 500 });
+
+    // Act
+    const result = await h.push(D2);
+
+    // Assert
+    expect(h.calendar.count("unschedule")).toBe(deletes);
+    expect(result).toEqual({ kind: "duplicate-left", dates: [D1] });
+    expect(await queueEntry(h, oldId)).toMatchObject({
+      state: "retire",
+      attempts: 1,
+    });
   });
 });

@@ -7,7 +7,9 @@
  * same laws on a hand model of the pipeline; this one has no model.
  *
  * A world is the calendar, three devices (C's clock a day ahead, so its
- * writes always look newer) and the cloud row. Every order of a scenario's
+ * writes always look newer and its reads always pass another device's
+ * gate: the skewed reader of residual L1) and the cloud row. Each step
+ * moves the clock `TICK_MS`, so a history meets both sides of a gate. Every order of a scenario's
  * steps is enumerated up to a bounded depth (depth-first, the world cloned
  * at each node), so no interleaving is hand-picked:
  *
@@ -17,16 +19,23 @@
  *   every DELETE of the run failing (delete-fails).
  * - post-* / commit: the same push split at the POST (claim + post, then
  *   commit + finish), so a sync or another device lands in between.
+ * - post-late / land: a POST Garmin commits later (a sleeping sender): the
+ *   answer is ambiguous with no entry, the run stops at its
+ *   `attempting{posted:true}`, and `land` creates the entry on a later step.
  * - drain: `drainQueue` for the device's current `Placed`.
  * - abandon: three drains with every DELETE failing.
  * - dismiss: the athlete removes the first dismissable entry by hand.
  * - t5 / t5-read-fails: `resolveUncertain` on a legacy `uncertain`.
- * - confirm: "It's in Garmin" on an unresolved placement.
+ * - confirm: "It's in Garmin" on an unresolved placement: blind before the
+ *   attempt's gate, else only when its date shows an entry.
  * - sync: `syncWithCloud` through the `exportLedger` hook.
+ * - sync-rejected: the upload is rejected; the device pulls the cloud row
+ *   and the cloud keeps its own.
  *
  * After every step: no DELETE hit the device's own `Placed` or
- * `attempting.previous`, and no step but a dismiss emptied a calendar that
- * had a live entry (never a gap). At every node the devices sync and drain
+ * `attempting.previous`, no step but a dismiss emptied a calendar that had
+ * a live entry (never a gap), and a push whose POST answered ok and that
+ * reports `scheduled` or `moved` left an entry on its desired date. At every node the devices sync and drain
  * until nothing changes and must converge on one row whose `Placed`, if
  * any, is live, and in which no entry recorded `gone` is still on Garmin.
  * The rows met form the pool for symmetry, idempotence and
@@ -57,6 +66,7 @@ import type { PlacementRun } from "./placement-deps";
 import { dismissableEntries, dismissRemovalEntry } from "./placement-dismiss";
 import { finishPlacement } from "./placement-finish";
 import { drainQueue, protectedIds } from "./placement-removal-step";
+import { gateOf } from "./placement-resolve";
 import { resolveUncertain } from "./placement-resolve-uncertain";
 import { type PostOutcome, postSchedule } from "./placement-schedule-step";
 import { MAX_DELETE_ATTEMPTS } from "./placement-timing";
@@ -78,6 +88,8 @@ type World = {
   canFind: boolean[];
   /** A device's POST that has not committed yet. */
   inflight: (Answered | null)[];
+  /** Dates of POSTs Garmin has accepted but not created yet. */
+  late: string[];
 };
 type Step = { device: number; op: string };
 type Device =
@@ -87,7 +99,8 @@ const W = "1707805999" as GarminWorkoutId;
 const DATES = ["2026-09-29", "2026-09-30", "2026-10-01"];
 const DEVICES = ["A", "B", "C"];
 const DAY_MS = 86_400_000;
-const MINUTE_MS = 60_000;
+/** Under `POST_GATE_MS`: a gate passes after a few steps, never one. */
+const TICK_MS = 10_000;
 const SAMPLE_SIZE = 5;
 const EXPLORE_TIMEOUT_MS = 60_000;
 const SKEW_MS = [0, 0, DAY_MS];
@@ -154,7 +167,7 @@ async function closeDevice(world: World, device: number, d: Device) {
   world.items = structuredClone(d.calendar.items);
   // Each POST mints at most one id; an unused id is never reused.
   world.nextId += d.calendar.count("schedule");
-  world.clock = Date.now() - SKEW_MS[device] + MINUTE_MS;
+  world.clock = Date.now() - SKEW_MS[device] + TICK_MS;
 }
 
 const nextDate = (world: World, device: number) =>
@@ -162,7 +175,12 @@ const nextDate = (world: World, device: number) =>
 
 // ---- the steps ------------------------------------------------------------
 
-type Op = (world: World, device: number, d: Device) => Promise<void>;
+/** An op returns a safety violation, if it sees one. */
+type Op = (
+  world: World,
+  device: number,
+  d: Device
+) => Promise<string | undefined | void>;
 
 const push =
   (script: ScheduleScript, deletesFail = false): Op =>
@@ -171,11 +189,18 @@ const push =
     d.calendar.scripts.schedule.push(script);
     if (deletesFail)
       d.calendar.scripts.unschedule.push(...Array(FAILING).fill(SERVER_ERROR));
-    await reconcileGarminPlacement({ ...d.run, desired });
+    const result = await reconcileGarminPlacement({ ...d.run, desired });
+    const okPost = !script.answer && d.calendar.count("schedule") > 0;
+    const placed = result.kind === "scheduled" || result.kind === "moved";
+    const onDate = d.calendar.items.some(
+      (i) => i.workoutId === W && i.date === desired.date
+    );
+    if (okPost && placed && !onDate)
+      return `${DEVICES[device]}'s ok push reports ${result.kind} with ${desired.date} empty`;
   };
 
 const post =
-  (script: ScheduleScript): Op =>
+  (script: ScheduleScript, late = false): Op =>
   async (world, device, d) => {
     if (world.inflight[device]) return;
     const run = { ...d.run, desired: { workoutId: W, date: "" } };
@@ -184,8 +209,19 @@ const post =
     if (claim.kind !== "claimed") return;
     d.calendar.scripts.schedule.push(script);
     const posted = await postSchedule(run, claim.attempt);
-    if (posted.kind === "answered") world.inflight[device] = posted;
+    if (posted.kind !== "answered") return;
+    if (late) world.late.push(run.desired.date);
+    else world.inflight[device] = posted;
   };
+
+/** The oldest late POST lands on Garmin. */
+const land: Op = async (world, _device, d) => {
+  const date = world.late.shift();
+  if (!date) return;
+  d.calendar.mint(W, date);
+  // The late POST's id: `closeDevice` counts only this step's POSTs.
+  world.nextId++;
+};
 
 /** The rest of an ok POST: commit, then drain (`postAttempt`'s ok path). */
 const commit: Op = async (world, device, d) => {
@@ -236,8 +272,13 @@ const t5 =
     await resolveUncertain(d.run, placement);
   };
 
+/** The athlete answers blind only while the POST may still land (the
+    hazard the gate refuses); after it, only on an entry they can see. */
 const confirm: Op = async (_world, _device, d) => {
-  await confirmInGarmin(d.run);
+  const p = (await d.row()).placement;
+  const early = p?.kind === "attempting" && Date.now() < gateOf(p);
+  const seen = d.calendar.items.some((i) => i.date === p?.date);
+  if (early || seen) await confirmInGarmin(d.run);
 };
 
 const OPS: Record<string, Op> = {
@@ -248,6 +289,8 @@ const OPS: Record<string, Op> = {
   "push-ambiguous-lost": push({ answer: SERVER_ERROR }),
   "post-ok": post({}),
   "post-no-id": post({ noId: true }),
+  "post-late": post({ answer: SERVER_ERROR }, true),
+  land,
   commit,
   drain,
   abandon,
@@ -264,6 +307,11 @@ function sync(world: World, device: number) {
   world.cloud = snapshot;
 }
 
+function pull(world: World, device: number) {
+  if (world.cloud)
+    world.devices[device] = hookMerge(world.devices[device], world.cloud);
+}
+
 /** Runs one step; returns a safety violation, if any. */
 async function apply(world: World, step: Step): Promise<string | undefined> {
   const { device, op } = step;
@@ -271,15 +319,20 @@ async function apply(world: World, step: Step): Promise<string | undefined> {
     sync(world, device);
     return;
   }
+  if (op === "sync-rejected") {
+    pull(world, device);
+    return;
+  }
   const hadLive = world.items.length > 0;
   const d = await openDevice(world, device);
-  await OPS[op](world, device, d);
+  const seen = await OPS[op](world, device, d);
   const own = protectedIds(await d.row());
   await closeDevice(world, device, d);
   const hit = d.calendar.calls.find(
     (c) => c.op === "unschedule" && own.has(c.id)
   );
   const name = DEVICES[device];
+  if (seen) return seen;
   if (hit?.op === "unschedule")
     return `${name} deletes its own Placed ${hit.id}`;
   if (op !== "dismiss" && hadLive && world.items.length === 0)
@@ -389,6 +442,7 @@ const world = (seed: Seed = {}): World => ({
   dates: seed.dates ?? DATES.length,
   canFind: seed.canFind ?? [true, true, true],
   inflight: [null, null, null],
+  late: [],
 });
 
 /** A fresh world with `script` already applied. */
@@ -486,6 +540,12 @@ const legacyWorld = async () =>
     ] as CalendarItem[],
   });
 
+/** B moves its workout to D2 with a POST Garmin commits only later. */
+const lateWorld = scripted([
+  { device: 1, op: "push-ok" },
+  { device: 1, op: "post-late" },
+]);
+
 const PUSHES = [
   "push-ok",
   "push-no-id",
@@ -571,6 +631,18 @@ const SCENARIOS: Scenario[] = [
       ...steps(["push-ambiguous", "push-ok", "confirm"], [1]),
       ...steps(["push-ok"], [0]),
       ...steps(["sync"]),
+    ],
+    depth: 4,
+  },
+  {
+    name: "a POST that lands after the reads, with a skewed reader",
+    seed: lateWorld,
+    alphabet: [
+      ...steps(["sync"], [1, 2]),
+      ...steps(["sync-rejected"], [2]),
+      ...steps(["confirm", "push-ok"], [1]),
+      ...steps(["push-ok", "post-ok", "commit"], [2]),
+      ...steps(["land"], [0]),
     ],
     depth: 4,
   },
