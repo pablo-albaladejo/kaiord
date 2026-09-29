@@ -5,6 +5,8 @@
  * never stops the run; a cancel stops it between items, and the items it
  * kept from running are reported `not-eligible{stopped}`, so the run still
  * lists the whole week. `not-eligible` items are reported without a call.
+ * An item is reported on the date it was placed for, which may differ from
+ * its date at selection (a coach move in between).
  */
 import type {
   PlacementResult,
@@ -28,8 +30,11 @@ export type BulkOutcome = {
   notEligible?: NotEligibleReason;
 };
 
+/** One item's result, with the workout date it was placed for. */
+export type BulkItemResult = { result: PlacementResult; date?: string };
+
 export type SendWeekDeps = {
-  pushOne: (workoutId: string) => Promise<PlacementResult>;
+  pushOne: (workoutId: string) => Promise<BulkItemResult>;
   sleep: (ms: number) => Promise<void>;
   isCancelled: () => boolean;
   onOutcome?: (outcome: BulkOutcome) => void;
@@ -37,11 +42,14 @@ export type SendWeekDeps = {
 
 export type BulkRun = { outcomes: BulkOutcome[]; cancelled: boolean };
 
-const pushSafely = async (deps: SendWeekDeps, workoutId: string) => {
+const pushSafely = async (
+  deps: SendWeekDeps,
+  workoutId: string
+): Promise<BulkItemResult> => {
   try {
     return await deps.pushOne(workoutId);
   } catch {
-    return failed("library-push-failed", true);
+    return { result: failed("library-push-failed", true) };
   }
 };
 
@@ -72,8 +80,8 @@ export const sendWeekToGarmin = async (
       });
       continue;
     }
-    const result = await pushSafely(deps, workoutId);
-    report({ workoutId, date, status: result.kind, result });
+    const { result, date: placed = date } = await pushSafely(deps, workoutId);
+    report({ workoutId, date: placed, status: result.kind, result });
   }
   return { outcomes, cancelled };
 };

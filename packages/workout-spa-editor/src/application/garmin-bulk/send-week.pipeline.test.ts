@@ -37,8 +37,14 @@ const runWeek = (
 ) =>
   sendWeekToGarmin(
     {
-      pushOne: (id) =>
-        h.push(dateOf(id) ?? "", "v1", { kaiordRecordId: id }, deps),
+      pushOne: async (id) => ({
+        result: await h.push(
+          dateOf(id) ?? "",
+          "v1",
+          { kaiordRecordId: id },
+          deps
+        ),
+      }),
       sleep: h.deps.sleep,
       isCancelled: () => false,
     },

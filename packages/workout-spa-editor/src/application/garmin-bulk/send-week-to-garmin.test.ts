@@ -8,6 +8,7 @@ import {
 } from "./send-week-to-garmin";
 
 const DATE = "2026-10-05";
+const MOVED = "2026-10-07";
 const week = (...ids: string[]) =>
   ids.map((workoutId) => ({ workoutId, date: DATE }));
 
@@ -16,7 +17,7 @@ const makeDeps = (overrides: Partial<SendWeekDeps> = {}) => {
   const deps: SendWeekDeps = {
     pushOne: vi.fn(async (id: string) => {
       calls.push(id);
-      return { kind: "scheduled" as const };
+      return { result: { kind: "scheduled" as const } };
     }),
     sleep: vi.fn(async () => undefined),
     isCancelled: () => false,
@@ -57,8 +58,10 @@ describe("sendWeekToGarmin", () => {
       ["w-2", Promise.reject(new Error("export failed"))],
     ]);
     const { deps } = makeDeps({
-      pushOne: async (id) =>
-        results.get(id) ?? Promise.resolve({ kind: "unchanged" as const }),
+      pushOne: async (id) => ({
+        result: await (results.get(id) ??
+          Promise.resolve({ kind: "unchanged" as const })),
+      }),
     });
 
     // Act
@@ -111,5 +114,18 @@ describe("sendWeekToGarmin", () => {
     // Assert
     expect(calls).toEqual(["w-1"]);
     expect(run.cancelled).toBe(true);
+  });
+
+  it("should report the date the item was placed for, not its date at selection", async () => {
+    // Arrange
+    const { deps } = makeDeps({
+      pushOne: async () => ({ result: { kind: "scheduled" }, date: MOVED }),
+    });
+
+    // Act
+    const run = await sendWeekToGarmin(deps, week("w-1"));
+
+    // Assert
+    expect(run.outcomes[0].date).toBe(MOVED);
   });
 });

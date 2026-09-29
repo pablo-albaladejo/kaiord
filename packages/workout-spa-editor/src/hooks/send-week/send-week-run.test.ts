@@ -4,7 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import { BULK_EVENT } from "../../application/garmin-bulk/bulk-analytics";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 
-const mockPlace = vi.fn(async () => ({ kind: "scheduled" as const }));
+const mockPlace = vi.fn(async () => ({
+  result: { kind: "scheduled" as const },
+}));
 const mockDeps = vi.fn();
 vi.mock("../garmin-place-record", () => ({
   placeRecordResult: (...args: unknown[]) => mockPlace(...args),

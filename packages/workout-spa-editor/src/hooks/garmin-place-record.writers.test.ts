@@ -24,7 +24,7 @@ import {
   namespaceSourceId,
 } from "../types/coaching-activity-record";
 import type { KRD } from "../types/krd";
-import { placeRecord } from "./garmin-place-record";
+import { placeRecord, placeRecordResult } from "./garmin-place-record";
 
 vi.mock("../utils/export-workout-formats", () => ({
   exportGcnWorkout: async () => ({}),
@@ -149,5 +149,37 @@ describe("placeRecord on a workout deleted during its push", () => {
 
     // Assert
     expect(await persistence.workouts.getById("w-9")).toBeUndefined();
+  });
+});
+
+describe("placeRecord on a workout moved after the week was selected", () => {
+  it("should return the date it placed, the record's date at its turn", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.workouts.put(
+      makeWorkoutRecord({
+        id: "w-5",
+        profileId: PROFILE,
+        date: D2,
+        krd: {} as KRD,
+      })
+    );
+    const h = createPlacementHarness();
+    const pushWorkout = async () => ({
+      success: true,
+      garminWorkoutId: GARMIN_ID,
+    });
+
+    // Act
+    const item = await placeRecordResult(
+      persistence,
+      pushWorkout,
+      "w-5",
+      h.deps
+    );
+
+    // Assert
+    expect(item).toEqual({ result: { kind: "scheduled" }, date: D2 });
+    expect(h.calendar.items.map((i) => i.date)).toEqual([D2]);
   });
 });

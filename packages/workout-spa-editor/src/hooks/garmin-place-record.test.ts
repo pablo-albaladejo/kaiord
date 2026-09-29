@@ -21,7 +21,7 @@ describe("placeRecordResult", () => {
     );
 
     // Assert
-    expect(result).toEqual(recordDeleted());
+    expect(result).toEqual({ result: recordDeleted() });
     expect(pushWorkout).not.toHaveBeenCalled();
   });
 });

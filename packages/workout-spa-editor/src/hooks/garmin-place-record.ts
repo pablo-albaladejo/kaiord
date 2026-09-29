@@ -5,6 +5,7 @@
  * chat tool (`doPushToGarmin`) and the bulk "Send week" runner, so both
  * record a push the same way. A missing record is `record-deleted`.
  */
+import type { BulkItemResult } from "../application/garmin-bulk/send-week-to-garmin";
 import {
   type PlacementResult,
   recordDeleted,
@@ -23,6 +24,8 @@ export type PlacedRecord = {
   result: PlacementResult;
   /** The confirmed Garmin workout id, persisted as the push id. */
   garminPushId: string | null;
+  /** The workout date placed: the record's date when its turn came. */
+  date: string;
 };
 
 export const placeRecord = async (
@@ -51,11 +54,16 @@ export const placeRecord = async (
       if (fresh)
         await persistence.workouts.put(recordGarminPush(fresh, garminPushId));
     });
-  return { result, garminPushId };
+  return { result, garminPushId, date: record.date };
 };
 
-/** The bulk runner's `pushOne`: a vanished workout is `record-deleted`. */
+/** The bulk runner's `pushOne`: the result with the date placed; a
+    vanished workout is `record-deleted`. */
 export const placeRecordResult = async (
   ...args: Parameters<typeof placeRecord>
-): Promise<PlacementResult> =>
-  (await placeRecord(...args))?.result ?? recordDeleted();
+): Promise<BulkItemResult> => {
+  const placed = await placeRecord(...args);
+  return placed
+    ? { result: placed.result, date: placed.date }
+    : { result: recordDeleted() };
+};
