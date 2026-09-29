@@ -135,6 +135,10 @@
 
 - [ ] 8.1 `select-week-push-candidates`, `send-week-to-garmin`, the hook, the
       organism, the `CalendarHeader` action and locales (AC-42..AC-45).
+- [ ] 8.2 Carried over from T5: the workout detail page's `PushButton`
+      shows only sent / idle. Reuse the editor's placement panel there
+      (the ledger-derived `uncertain` and dismissable entries, and the
+      ephemeral `failed` / `library-only` outcome).
 
 ## 9. Docs, e2e, gates and manual validation (T8, PR-4)
 

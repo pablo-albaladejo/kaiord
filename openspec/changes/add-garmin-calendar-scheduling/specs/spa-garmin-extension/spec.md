@@ -88,6 +88,15 @@ An `uncertain` placement SHALL be resolved by `calendar-find` for its workout ov
 
 `DetectionResult` and `GarminBridgeState` SHALL carry the bridge's `features`, parsed from the ping data and defaulting to `[]` when absent. `push()` SHALL return a `PlacementResult`; `onSent` SHALL fire if and only if the library push is confirmed; EditorPage SHALL persist the confirmed library `workoutId` as the push id, never a synthetic one. Placement analytics SHALL carry only enum values and counts: `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}` with a closed `reason` enum, and no ids, dates or names.
 
+A result that needs the athlete (every result except `scheduled`, `moved` and `unchanged`, plus any dismissable entry) SHALL stay on the editor after the workout becomes `pushed`: the editor's delivery ribbon SHALL show it in a compact panel, and plain results SHALL stay silent. `uncertain` and the dismissable entries SHALL be derived from the record's persisted ledger row (one live query per page), so they survive a reload and reach other devices through sync, and a row that is no longer `uncertain` SHALL never show one. The outcomes the ledger does not hold (`failed`, `library-only`) SHALL be kept in ephemeral per-record state that outlives the send control, never persisted.
+
+#### Scenario: An uncertain placement survives a reload
+
+- **GIVEN** a push that returned `uncertain` and a workout persisted as `pushed`
+- **WHEN** the athlete reloads the editor
+- **THEN** the ribbon SHALL show the `uncertain` result with "It's in Garmin" (when allowed) and "Send anyway"
+- **AND** once the row is no longer `uncertain`, the panel SHALL disappear with no call
+
 #### Scenario: An older bridge is detected
 
 - **GIVEN** a ping response with no `features`
