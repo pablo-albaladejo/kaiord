@@ -274,7 +274,10 @@ Repository port changes:
 
 **1. Lock**
 
-- A second caller in the same tab joins the running promise, via an in-tab `Map<kaiordRecordId, Promise>`.
+- A second caller in the same tab joins the running run, via an in-tab `Map<kaiordRecordId, join>`.
+  - Every joined caller's `onLibraryConfirmed` receives the confirmed library id, whenever it joined.
+  - A joiner's `date` and `sendAnyway` are dropped: the run places the owner's request. A joiner that asked for another date gets `failed:busy` (the athlete retries once the run ends); one for the same date gets the owner's result.
+  - Run-level side effects (`garmin-synced`) fire once, from the owning run (`onSettled`), never from a joiner.
 - Otherwise, take `locks.request("garmin-place:"+id, {ifAvailable:true}, run)`.
   - A `null` lock → `failed:busy`, retryable.
   - Steps 2–8 run inside `run`. The lock is released when `run` settles.
