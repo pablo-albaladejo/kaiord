@@ -8,7 +8,11 @@
 
 import { useSearch } from "wouter";
 
-import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
+import { AthleteZonesProvider } from "../../contexts/athlete-zones-context";
+import {
+  type ActiveProfile,
+  useActiveProfileLive,
+} from "../../hooks/use-active-profile-live";
 import { useDeleteCleanup } from "../../hooks/use-delete-cleanup";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
@@ -27,6 +31,8 @@ import { useWorkoutRecord } from "./use-workout-record";
 
 export type EditorPageProps = { id?: string };
 
+const NO_PROFILE: ActiveProfile = { id: null, profile: null };
+
 export default function EditorPage({ id }: EditorPageProps) {
   useDeleteCleanup();
   const search = useSearch();
@@ -43,7 +49,9 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   const { record, loading } = useWorkoutRecord(id);
   const { pushWorkout } = useEditorActions(record);
-  const profileId = useActiveProfileLive()?.id ?? null;
+  // The page's one active-profile live query; descendants (the GCN export
+  // FTP) read the profile from `AthleteZonesProvider` instead of their own.
+  const { id: profileId, profile } = useActiveProfileLive() ?? NO_PROFILE;
   const sidebarData = useCoachingSidebar(profileId, id);
 
   const workout = currentWorkout?.extensions?.structured_workout as
@@ -54,10 +62,12 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   if (!id && coachingDraftId)
     return (
-      <CoachingDraftSurface
-        coachingDraftId={coachingDraftId}
-        onBack={handleBack ?? undefined}
-      />
+      <AthleteZonesProvider profile={profile}>
+        <CoachingDraftSurface
+          coachingDraftId={coachingDraftId}
+          onBack={handleBack ?? undefined}
+        />
+      </AthleteZonesProvider>
     );
 
   const importComplete = newWorkoutMode === "import" && currentWorkout !== null;
@@ -66,27 +76,29 @@ export default function EditorPage({ id }: EditorPageProps) {
     id !== undefined || newWorkoutMode === undefined || importComplete;
 
   return (
-    <div className="space-y-6">
-      <EditorPageHeader
-        mode={id ? "edit" : "new"}
-        onBack={handleBack ?? undefined}
-      />
-      {!id && dateParam && <DateBanner date={dateParam} />}
-      {record && (
-        <EditorStateRibbon
-          state={record.state}
-          profileId={profileId ?? undefined}
-          onSent={() => void pushWorkout(`garmin-${Date.now()}`)}
+    <AthleteZonesProvider profile={profile}>
+      <div className="space-y-6">
+        <EditorPageHeader
+          mode={id ? "edit" : "new"}
+          onBack={handleBack ?? undefined}
         />
-      )}
-      {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
-      {showPopulatedBody && workout && currentWorkout && (
-        <EditorPopulatedBody
-          workout={workout}
-          currentWorkout={currentWorkout}
-          sidebar={sidebarData}
-        />
-      )}
-    </div>
+        {!id && dateParam && <DateBanner date={dateParam} />}
+        {record && (
+          <EditorStateRibbon
+            state={record.state}
+            profileId={profileId ?? undefined}
+            onSent={() => void pushWorkout(`garmin-${Date.now()}`)}
+          />
+        )}
+        {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
+        {showPopulatedBody && workout && currentWorkout && (
+          <EditorPopulatedBody
+            workout={workout}
+            currentWorkout={currentWorkout}
+            sidebar={sidebarData}
+          />
+        )}
+      </div>
+    </AthleteZonesProvider>
   );
 }

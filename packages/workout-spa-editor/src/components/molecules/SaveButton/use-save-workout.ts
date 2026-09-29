@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts";
-import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useAthleteZones } from "../../../contexts/athlete-zones-context";
 import { useToast } from "../../../hooks/use-toast";
 import { useTranslate } from "../../../i18n/use-translate";
 import { ftpForWorkout } from "../../../lib/athlete";
@@ -24,7 +24,9 @@ export function useSaveWorkout(workout: KRD) {
   const { success, error: showError } = toast;
   const analytics = useAnalytics();
   const t = useTranslate("editor");
-  const activeProfile = useActiveProfileLive();
+  // From the page's single live query (EditorPage). Null while it loads or
+  // outside a provider, so a %FTP export fails closed with MissingFtpError.
+  const profile = useAthleteZones();
 
   const handleSave = createSaveHandler(
     workout,
@@ -36,7 +38,7 @@ export function useSaveWorkout(workout: KRD) {
     showError,
     (format) => analytics.event("workout-exported", { format }),
     t,
-    ftpForWorkout(activeProfile?.profile, workout)
+    ftpForWorkout(profile, workout)
   );
 
   const clearErrors = () => setSaveErrors(null);
