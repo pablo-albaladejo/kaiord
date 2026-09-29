@@ -8,10 +8,13 @@ import { describe, expect, it } from "vitest";
 import {
   chatModelIds,
   parseModelIds,
+  renderCatalogModule,
 } from "../../scripts/model-catalog-extract.mjs";
 
 const OPENAI_DTS =
   "type OpenAIChatModelId = 'gpt-4o' | 'gpt-4o-audio-preview' | 'gpt-5' | (string & {});";
+const ANTHROPIC_DTS =
+  "type AnthropicModelId = 'claude-3-haiku-20240307' | 'claude-opus-4-0' | 'claude-haiku-4-5' | (string & {});";
 const GOOGLE_DTS =
   "type GoogleGenerativeAIModelId = 'gemini-2.5-pro' | 'gemini-2.5-flash-image' | 'gemini-embedding-001' | (string & {});";
 
@@ -51,5 +54,36 @@ describe("chatModelIds", () => {
 
     // Assert
     expect(ids).toEqual(expected);
+  });
+});
+
+describe("retired and deprecated models", () => {
+  it("should drop retired and deprecated anthropic ids from the catalog", () => {
+    // Arrange
+    const dts = ANTHROPIC_DTS;
+
+    // Act
+    const ids = chatModelIds("anthropic", dts);
+
+    // Assert
+    expect(ids).toEqual(["claude-haiku-4-5"]);
+  });
+
+  it("should emit the retired ids so saved choices can be healed", () => {
+    // Arrange
+    const catalog = { anthropic: [], openai: [], google: [] };
+
+    // Act
+    const text = renderCatalogModule(catalog, {
+      anthropic: ["claude-3-haiku-20240307"],
+      openai: [],
+      google: [],
+    });
+
+    // Assert
+    expect(text).toContain(
+      'anthropic: [\n    "claude-3-haiku-20240307",\n  ],'
+    );
+    expect(text).toContain("openai: [],");
   });
 });
