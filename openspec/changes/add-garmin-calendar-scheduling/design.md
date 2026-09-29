@@ -43,18 +43,19 @@ Measured facts:
 The calendar **read** (`calendar-find`, task group 4) rests on assumptions
 that were first observed only in the web app. T0b captured them live on
 2026-09-28 (evidence below): A1–A5 hold, so `calendar-find` stays. A6 is
-checked in the manual E2E; A7 and A8 remain unverified.
+checked in the manual E2E; A5b, A7 and A8 remain unverified.
 
-| #   | Assumption                                                                                              | If false                                                                                                                                                                                                                                                                                                      |
-| --- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Items from `GET /calendar-service/year/{Y}/month/{M}` carry the library `workoutId`.                    | Drop `calendar-find`. Resolution falls back to a human; a DELETE 404 becomes inconclusive.                                                                                                                                                                                                                    |
-| A2  | Items carry a `YYYY-MM-DD` date.                                                                        | Map the field that T0b records.                                                                                                                                                                                                                                                                               |
-| A3  | Some item field equals the `workoutScheduleId`.                                                         | Use the conservative count rules in §3.4: a count of 0 ⇒ `uncertain`.                                                                                                                                                                                                                                         |
-| A4  | The month parameter is 0-based.                                                                         | Flip the constant (unit-tested).                                                                                                                                                                                                                                                                              |
-| A5  | A write is visible to a read within `SETTLE_MS`.                                                        | Raise `SETTLE_MS`; the gate still holds.                                                                                                                                                                                                                                                                      |
-| A6  | Train2Go keeps the `sourceId` when a coach moves a session.                                             | The move arrives as delete + create; document it as a limitation.                                                                                                                                                                                                                                             |
-| A7  | A DELETE on an already-deleted entry returns 404.                                                       | The read disambiguates.                                                                                                                                                                                                                                                                                       |
-| A8  | A 401 on the schedule POST means Garmin did not process it. **Unverified live; T0b does not cover it.** | A 401 could hide a created entry. The bridge would have to stop treating a 401 write as not sent, so a hung re-mint after it answers `deadline-exceeded` (ambiguous) and a `needsReauth` after a 401 retry becomes ambiguous too; the SPA then resolves with `calendar-find` instead of restoring `previous`. |
+| #   | Assumption                                                                                                                                            | If false                                                                                                                                                                                                                                                                                                      |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Items from `GET /calendar-service/year/{Y}/month/{M}` carry the library `workoutId`.                                                                  | Drop `calendar-find`. Resolution falls back to a human; a DELETE 404 becomes inconclusive.                                                                                                                                                                                                                    |
+| A2  | Items carry a `YYYY-MM-DD` date.                                                                                                                      | Map the field that T0b records.                                                                                                                                                                                                                                                                               |
+| A3  | Some item field equals the `workoutScheduleId`.                                                                                                       | Use the conservative count rules in §3.4: a count of 0 ⇒ `uncertain`.                                                                                                                                                                                                                                         |
+| A4  | The month parameter is 0-based.                                                                                                                       | Flip the constant (unit-tested).                                                                                                                                                                                                                                                                              |
+| A5  | A write is visible to a read within `SETTLE_MS`.                                                                                                      | Raise `SETTLE_MS`; the gate still holds.                                                                                                                                                                                                                                                                      |
+| A5b | Reads are monotonic: once a `calendar-find` shows an id, later reads keep showing it until it is deleted. **Unverified live; T0b does not cover it.** | The `gone` judgement of an adopted or T5 `Placed` (two reads that miss it, §3.5) can record a live id `gone`: the row turns `uncertain`, and "Send anyway" leaves an unreported duplicate (residual L3). Never a gap.                                                                                         |
+| A6  | Train2Go keeps the `sourceId` when a coach moves a session.                                                                                           | The move arrives as delete + create; document it as a limitation.                                                                                                                                                                                                                                             |
+| A7  | A DELETE on an already-deleted entry returns 404.                                                                                                     | The read disambiguates.                                                                                                                                                                                                                                                                                       |
+| A8  | A 401 on the schedule POST means Garmin did not process it. **Unverified live; T0b does not cover it.**                                               | A 401 could hide a created entry. The bridge would have to stop treating a 401 write as not sent, so a hung re-mint after it answers `deadline-exceeded` (ambiguous) and a `needsReauth` after a 401 retry becomes ambiguous too; the SPA then resolves with `calendar-find` instead of restoring `previous`. |
 
 ### T0b evidence (live capture, 2026-09-28)
 
@@ -195,12 +196,16 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - A failed DELETE leaves a visible duplicate until it clears or is dismissed.
 - Library workouts are never deleted.
 - A cross-device race can leave a duplicate, never a gap. The duplicate is untracked when a merge drops an ambiguous `attempting`.
+- Cross-device clock skew above ~38 s, or a sending device that sleeps with its POST in flight, can let the gate's re-POST duplicate an entry that lands late (§3.4, residual L1): a duplicate, never a gap.
 - The ledger gains `library`, `placement`, `removalQueue` and `forceRepush`, plus a shape normalizer and a merge hook.
 - Placement requires Web Locks, which exist only in secure contexts. Without them the push is library-only (today's behaviour).
 - Dexie v36 is a data-only bump (the store schema is v35's), but the snapshot manifest carries v36: a device still on v35 rejects the newer snapshot ("Snapshot schema v36 is newer than this app") until it updates. Release note: update every device.
 - A cross-device conflict whose `Placed`s are all tainted resolves to `uncertain` with no state change: every entry stays on the calendar (a duplicate at worst) until the next push resolves it with `calendar-find`.
 - The removal queue is a grow-only map of tombstones: an entry is never removed, only its state rises. It grows by a handful of ids per record (one per move plus adoptions), which is accepted.
 - Legacy queue entries without a state are normalized to `held` (§3.9), so they are never drained until a `calendar-find` verifies them: duplicates at worst.
+- If Garmin's reads flicker (A5b false: an id seen once, then missed by two reads `SETTLE_MS` apart), the drain records a live adopted or T5 `Placed` `gone` and turns the row `uncertain`; "Send anyway" then leaves the flickering entry as an unreported duplicate (residual L3). Never a gap: nothing is deleted behind a `Placed` the drain did not see. The run's own POST is exempt (§3.5); ids merely seen earlier in the run are not.
+- Two devices draining a crossed pair at the same moment can still empty the calendar (§3.9, residual L2): the verifying read and the delete are not atomic. A crossed pair needs one of the sync residuals of §3.9; the conditional-sync follow-up removes it.
+- An entry the athlete moves to another month inside Garmin reads as deleted: the record turns `uncertain` and needs "Send anyway", which leaves the moved entry as a duplicate (§3.5).
 
 ### Follow-ups
 
@@ -210,7 +215,9 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - matching a coach's delete + recreate
 - cleaning up superseded library workouts
 - library duplicates from cross-device `[U]` pushes
-- a conditional write on cloud sync: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write, and `syncWithCloud` imports its merge before the push that may be rejected (`sync-with-cloud.ts:34-38`); an atomic `If-Match` closes the first; importing only after an accepted push closes the second, and that is the half that matters: one ordinary rejected push already reaches a crossed pair (§3.9)
+- verify-before-delete makes each `unschedule` one `calendar-find` dearer (two when the first read lags); batching the verification with the drain's 404 re-checks is a possible optimisation
+- a local-observation gate for the re-POST (time since this device first saw the `attempting{posted:true}`, not the writer's `at`), closing the clock-skew and sleeping-sender duplicate of §3.4 (L1)
+- a conditional write on cloud sync: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write, and `syncWithCloud` imports its merge before the push that may be rejected (`sync-with-cloud.ts:34-38`); an atomic `If-Match` closes the first; importing only after an accepted push closes the second, and that is the half that matters: one ordinary rejected push already reaches a crossed pair (§3.9), and closing it also removes residual L2
 
 ## Design (normative)
 
@@ -269,12 +276,15 @@ Repository port changes:
 
 **0. Pre-flight** (0 calls if it fails)
 
-- No `navigator.locks` → **library-only**. Phase 1 runs exactly as it does today, placement is skipped, and the result is `library-only{reason:"insecure-context"}` (not `failed`). The UI names the reason: the calendar needs HTTPS or a supported browser. Web Locks exist only in secure contexts, so plain-HTTP LAN dev keeps today's library push.
+- No `navigator.locks` → **library-only**. Phase 1 runs exactly as it does today, placement is skipped, and the result is `library-only{reason:"insecure-context"}` when `!isSecureContext`, else `library-only{reason:"unsupported-browser"}` (a secure page in a browser without Web Locks, such as an old Safari); neither is `failed`. The UI names the reason: the calendar needs HTTPS, or a browser that supports it (neutral copy). Web Locks exist only in secure contexts, so plain-HTTP LAN dev keeps today's library push.
 - No `calendar-write-v1` capability → **library-only**, reason `bridge-outdated`. Phase 1 runs and placement is skipped, as above. Failing the push would throw away work that can be done, and in bulk it would fill the summary with red for something that is neither the athlete's fault nor the workout's; a silent library push would break the promise that the workout is on its date. So the UI shows the workout in the warning tone as "in your library, no date", with one action to update the extension (one notice per bulk run). Chrome updates extensions on its own within hours, so this state is rare and short-lived and gets no further UI. After the update, a re-push finds the content hash unchanged, makes 0 library pushes and only places the date.
 
 **1. Lock**
 
-- A second caller in the same tab joins the running promise, via an in-tab `Map<kaiordRecordId, Promise>`.
+- A second caller in the same tab joins the running run, via an in-tab `Map<kaiordRecordId, join>`.
+  - Every joined caller's `onLibraryConfirmed` receives the confirmed library id, whenever it joined.
+  - A joiner's `date` and `sendAnyway` are dropped: the run places the owner's request. A joiner that asked for another date gets `failed:busy` (the athlete retries once the run ends); one for the same date gets the owner's result.
+  - Run-level side effects (`garmin-synced`) fire once, from the owning run (`onSettled`), never from a joiner.
 - Otherwise, take `locks.request("garmin-place:"+id, {ifAvailable:true}, run)`.
   - A `null` lock → `failed:busy`, retryable.
   - Steps 2–8 run inside `run`. The lock is released when `run` settles.
@@ -337,7 +347,7 @@ When the guard fails, the outcome depends on what happened to the row:
 
 - If T0c cannot deliver this, the fallback residual is an untracked duplicate, never a gap: the skip rule applies and `previous` is deleted only after a new `Placed` commits. It is recorded in R4.
 
-**9. Result:** `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason: insecure-context | bridge-outdated} | failed{reason, retryable, retryAfter?}`.
+**9. Result:** `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason: insecure-context | unsupported-browser | bridge-outdated} | failed{reason, retryable, retryAfter?}`.
 
 ### 3.4 Deadline, classifier and resolve
 
@@ -382,6 +392,7 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 
 - An absence read that _started_ at or after `at + POST_GATE_MS` → re-POST (steps 5–7).
 - Otherwise → `failed{reason:"settling", retryable, retryAfter: at + POST_GATE_MS}`, with no POST.
+- Residual (accepted, L1): the gate compares the reader's clock with the writer's `at`. A reader whose clock runs more than ~38 s ahead of the writer's, or a sender whose device slept with its POST still in flight, can pass the gate before that POST lands and re-POST: a duplicate, never a gap. A local-observation gate (time since this device first saw the attempt) would close it and is a follow-up.
 
 **Read failure.** If the find read fails, the result is `uncertain`.
 
@@ -394,15 +405,29 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 
 **Drainable = `retire`.** Only `retire` entries are sent to `unschedule`; `held`, `keep` and `gone` never are (§3.9). **Skip rule** (defence in depth): an entry whose id equals the current `Placed` or `attempting.previous` is never sent to `unschedule`, whatever its state. No entry is ever removed from the queue.
 
+**Verify before delete** (the drain precondition). Before each `unschedule` it sends, a drain reads the calendar: one `calendar-find` for the current `Placed`'s workout at its date. It sends only when that read shows the `Placed`'s own schedule id. One read that proves the id absent is not trusted: A5 promises a new entry only within `SETTLE_MS`, so the drain waits `SETTLE_MS` and reads again, and only a second proof of absence counts. Otherwise it sends nothing:
+
+| Reads                                                                                         | Action                                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the `Placed` id is present (on the first or the second read)                                  | send this entry, then verify again before the next                                                                                                                                                                              |
+| A3 true, absent on both reads, a `Placed` this run did not POST (adopted, T5, an earlier run) | in one guarded write: the id `gone`, the placement `uncertain` for its workout and date; nothing is drained, the run reports `uncertain{date, canConfirm}` (never a success), and the next push resolves it (T5, "Send anyway") |
+| A3 true, absent on both reads, the `Placed` of this run's own ok POST                         | nothing sent and nothing written; the run reports `duplicate-left` for its `retire` dates                                                                                                                                       |
+| either read failed or unreadable, or A3 false                                                 | drain nothing this run; every entry keeps its state and `attempts`                                                                                                                                                              |
+| the `Placed` is `unconfirmed` (no id to verify)                                               | no read and no drain while it stays `unconfirmed`: its `retire` entries wait, reported as `duplicate-left`                                                                                                                      |
+
+A `Placed` whose id is absent was deleted by someone, so it cannot stand behind a delete: draining a loser behind it is exactly the gap of §3.9's skew counterexample. The exception is the `Placed` of this run's own ok POST: Garmin returned that id moments ago, and no merge can have deleted it before this drain, so its absence is a read that still lags, never a death; writing it `gone` would put a live id at the top of the lattice, where T5 never matches it and "Send anyway" leaves a silent duplicate. This `gone` judgement for an adopted or T5 `Placed` rests on A5b (monotonic reads); a Garmin read that flickers costs an unreported duplicate, never a gap (residual L3). The abandoned-entry re-checks send nothing and need no verification. The verification costs one `calendar-find` per `unschedule` (two when the first read lags); reading before each delete, not once per drain, shrinks the window between the check and the delete to one round trip. It does not close it (§3.9, residual L2).
+
+A `Placed` the athlete moved inside Garmin to another month is absent from the read of its own date's month, so the drain treats it as deleted: the row turns `uncertain`, and since the athlete no longer sees an entry on that date, the answer is "Send anyway", which places a new entry on the Kaiord date and leaves the moved one (a duplicate). A move within the same month is still seen (the read covers the month, and the id matches). Following the athlete's move is out of scope (follow-up: a liveness GET).
+
 **`unschedule` outcomes**
 
-| Outcome                              | Action                                                         |
-| ------------------------------------ | -------------------------------------------------------------- |
-| 204                                  | write `gone`                                                   |
-| 401, or no status with `needsReauth` | keep; do not count the attempt                                 |
-| 404, A3 true                         | `gone` if the id is absent from a find; otherwise `attempts++` |
-| 404, A3 false                        | inconclusive: `attempts++`                                     |
-| anything else, including ambiguous   | `attempts++`                                                   |
+| Outcome                              | Action                                                            |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| 204                                  | write `gone`                                                      |
+| 401, or no status with `needsReauth` | keep; do not count the attempt                                    |
+| 404, A3 true                         | `gone` if the id is absent from a find; otherwise `attempts++`    |
+| 404, A3 false                        | unreachable: an A3-false drain verifies nothing and sends nothing |
+| anything else, including ambiguous   | `attempts++`                                                      |
 
 **Abandoned entries**
 
@@ -458,12 +483,12 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 - `push()` returns a `PlacementResult`.
 - `onSent` fires iff the library push is confirmed.
 - EditorPage persists the confirmed `workoutId` as the push id.
-- The chat tool's result adds only an app-authored `calendar` enum.
+- The chat tool's result adds only app-authored enums: `calendar` (the result kind) and, for a `failed` one, its `reason`. Any exception on the chat path becomes an app-authored error code, never an exception's text.
 
 **Analytics** (no ids, dates or names)
 
 - `garmin-synced` counts as a success when the result is neither `failed` nor `uncertain`.
-- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, bridge-outdated, deadline-before-send, insecure-context.
+- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, schedule-rejected, needs-reauth, library-push-failed, no-export-route, deadline-before-send, placement-interrupted (a `failed` result), and bridge-outdated, insecure-context, unsupported-browser (a `library-only` one); see "Pipeline details settled in T5".
 - `garmin-calendar-bulk{counts}`
 
 ### 3.9 Normalization and merge (on top of T0c, delivered by #1265)
@@ -551,7 +576,9 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 - **Only a committed POST lists ids.** An adoption ("It's in Garmin", or an A3-false `calendar-find` adoption) may be adopting a known entry, so it records `supersedes: []`; a legacy `unconfirmed` normalizes to `[]`. Both are the conservative round-2 rule.
 - **Why the union on merge is safe.** Two `unconfirmed` rows for the same workout and date stand for one or more entries, each listed by nobody who created it. Take the latest-created of those entries: every list was taken before its creator's POST, so no list — and therefore not the union — contains it. If the union placement is untainted, that entry is `keep` or absent, so no device drains it and the merged `Placed` stands for a live entry. The union only grows, so a re-merge reproduces it (absorbing), and a row whose list is a subset is tainted whenever the union is (monotone).
 
-**Absent id = free** (P3b). A stale device C, newer by clock skew, holds `Placed S100` (`keep`) and meets a live S5 whose row never saw S100. Both are candidates; C's row is newer, so S100 wins and S5 retires. That is no gap: if S100 is live, it remains. If S100 is dead, some device deleted it, and a device deletes only a `retire` id, written in the same write as the `keep` of the replacement it committed. That replacement stays live (only `retire` is drained), and once its row syncs, S100 is `gone` there, so S100 is tainted and the replacement wins.
+**Absent id = free** (P3b). A stale device C, newer by clock skew, holds `Placed S100` (`keep`) and meets a live S5 whose row never saw S100. Both are candidates; C's row is newer, so S100 wins and S5 retires. If S100 is live, it remains. If S100 is dead, some device deleted it, and a device deletes only a `retire` id, written in the same write as the `keep` of the replacement it committed; once that replacement's row syncs, S100 is `gone` there, so S100 is tainted and the replacement wins.
+
+That argument alone does **not** close the gap under clock skew: the replacement can change hands without its history. Counterexample (found by the placement-world simulator, C's clock a day ahead): C places S102 on D0 and syncs; C moves to S103 on D1, deleting S102, and does not sync. B, holding a leftover `attempting{posted:true}` for D1, reads D1, adopts S103 as its own POST (an id it does not know), moves to S104 and drains S103. B never saw S102 `gone`; the cloud's `Placed S102` looks a day newer, so it wins the merge and S104 retires. Without a check, B's drain deletes S104 and the calendar is empty. **Verify before delete** (§3.5) closes it: B's drain reads D0 first, finds S102 absent, writes S102 `gone` and the row `uncertain`, and sends nothing. S104 stays live. In general, a drain deletes an entry only right after it has seen its `Placed` on Garmin, so a merge that crowns a dead `Placed` no longer turns a drain into a gap; skew can still cost a duplicate (residual L1). One window stays open, because the read and the delete are two calls, not one (residual L2): two devices holding a crossed pair (A: `Placed` Y with X `retire`; B: `Placed` X with Y `retire`) that drain at the same moment both see their `Placed`, both delete, and the calendar is empty. A crossed pair forms only through the sync residuals named below. Verifying before each `unschedule` narrows the window to one round trip; the conditional-sync follow-up, which stops crossed pairs from forming, closes it.
 
 **Legacy entries → `held`** (fail-safe). A stateless entry cannot be proven superseded by a verified live entry, so it is never drained until `calendar-find` verifies it; the cost is a duplicate until T5. Mapping them to `retire` instead would drain an id whose superseder may be dead (the round-2 `normal < keep` repro: an old device drains S1 while another device's newer, verified S1 wins the merge). In production no row carries a `removalQueue` yet — T4 is the first writer — so both choices are equivalent there; `held` is the default for anything unproven.
 
@@ -665,3 +692,100 @@ These refine §3.4 and §3.6 where the plan met the real code.
   `capabilities` is a closed enum in the SPA's `bridgeManifestSchema`. The
   calendar flags are a separate list the SPA reads from the ping data;
   `capabilities` and `bridge-identity.js` do not change.
+
+## Pipeline details settled in T5
+
+These fill gaps the plan left open, each by the rule "never a gap, worst case
+a duplicate". None changes an invariant of §3.3–§3.9.
+
+- **An unresolved attempt stays `attempting{posted: true}`.** When the
+  resolve of §3.4 ends without an adoption (no `calendar-find-v1`, a failed
+  read, an A3-false count of 0), the result is `uncertain` but the row keeps
+  `attempting{posted: true, at}`: that is the exact state (a POST may exist,
+  sent at `at`), the merge already ranks it with `uncertain` (§3.9 rule 4),
+  and "Send anyway" needs `at` for its gate. The next push resolves it again
+  before any POST. An `uncertain` placement in a row comes only from the
+  merge (rule 3) or legacy data; it holds no POST of this device, so "Send
+  anyway" on it claims a fresh attempt at once (a duplicate at worst).
+- **No answer before the gate.** An `attempting{posted: true}` shown as
+  `uncertain` carries `sendAfter = at + POST_GATE_MS`. Before it, the editor
+  disables both actions and says it is still checking, with a countdown that
+  sits outside the ribbon's live region (only the headline, detail and
+  result message are announced); "It's in Garmin"
+  refuses with `failed{settling, retryAfter}` and writes nothing, even when
+  called directly, since the POST may still land.
+- **One POST per run.** A run sends `schedule` at most once. The gate's
+  re-POST (§3.4) happens only on a leftover `attempting{posted: true}` whose
+  absence read started after `at + POST_GATE_MS`; an ambiguous answer in the
+  same run is never followed by a second POST.
+- **A leftover attempt for another date** (the workout moved while an attempt
+  was pending) is resolved first; a resolution that lands a `Placed` is then
+  claimed again for the desired date in the same run, a move. A leftover
+  proven absent after the gate is restored to its `previous` under the
+  attempt guard, and the claim runs again: the gate's re-POST is the run's
+  own claim of the desired workout and date, with a fresh `supersedes`,
+  never a re-send of the leftover's workout id or date.
+- **The library guard is the way out of a legacy `unconfirmed` library.** A
+  row whose `library` is not `confirmed` (legacy `unconfirmed`, whose equal
+  hash Phase 1 would skip forever) returns
+  `failed{library-id-unknown, retryable: true}` with 0 calendar calls and
+  sets `forceRepush` in the same guarded write, so the next push re-creates
+  the library workout through the ledger's `updated` path (1 library push, a
+  library duplicate at worst).
+- **A rolled-back claim restores the pre-claim row verbatim.** `mutateByKey`'s
+  `fn` may return `restoreLedgerRow(row)` instead of a row. The repository
+  then stores that row as it is, `updatedAt` included (no stamp; a row
+  deep-equal to the current one is still a no-op). The pipeline returns it
+  only when the current row is byte-identical to the last row this run wrote
+  and that row differs from the pre-claim row only in `placement` and
+  `updatedAt`, so the rollback of a definite failure is invisible to the
+  merge order; otherwise (another writer touched the row, before or after
+  this run's writes) it restores `previous` with a normal, stamped write. The restore of a leftover proven absent is always
+  a normal, stamped write. The port gains no method.
+- **The pending window.** Phase 1's `pending` row lives only across the
+  library POST, whose SPA timeout (15 s) is far below `PENDING_TTL_MS`
+  (5 min); placement starts after the library commit, so no wait of Phase 2
+  (the lock, `SETTLE_MS`, the gate) ever holds a `pending` row.
+- **The `reason` enum**, closed: `busy`, `settling`, `record-deleted`,
+  `guard-failed` (the row changed after a failed or ambiguous POST),
+  `library-missing`, `library-id-unknown`, `schedule-endpoint`,
+  `deadline-before-send`, and three §3.3 left unnamed: `schedule-rejected`
+  (Garmin 400, 403 or 409, or a bridge refusal with `retryable: false`),
+  `needs-reauth` (a `needsReauth` answer) and `library-push-failed` (Phase 1
+  failed), plus `no-export-route` (Phase 1 found no active route) and
+  `placement-interrupted` (an exception after Phase 1 succeeded — a Dexie
+  error in the claim, commit or drain, or a thrown port: the workout is in
+  the library, the date may not be placed, and a re-send finishes it). The
+  `library-only` reasons are `insecure-context` (`!isSecureContext`),
+  `unsupported-browser` (a secure page without Web Locks) and
+  `bridge-outdated`.
+- **`duplicate-left`** is returned when the run ends with a `retire` entry
+  still in the queue (a failed or abandoned delete), when a resolve adopted
+  the lowest of several candidates, or when a move superseded an
+  `unconfirmed` `Placed` (its entry has no id to delete). The result names
+  the dates of the entries left behind.
+- **Drain order.** The drain sends each non-abandoned `retire` entry once per
+  run, in ascending id order, and stops at the first answer that needs
+  re-authentication. An abandoned entry is never sent again: it is re-checked
+  by `calendar-find` and written `gone` only when an A3 read of its date
+  lacks its id.
+- **The T5 read** calls `calendar-find` once per distinct (workout, month)
+  among the `uncertain` and its `held` entries; any failed read fails the
+  whole resolution (no state change). An entry with no id counts as a match
+  but proves nothing: a single id-less match is adopted as `unconfirmed`
+  with `supersedes: []` under the "It's in Garmin" guard, and no `held` id
+  is written `gone` from a read that lacks ids.
+- **Record-deleted warning.** `failed{record-deleted}` carries the attempted
+  date when the POST succeeded or was ambiguous, so the UI can say an entry
+  may remain in Garmin on that date.
+- **How the SPA knows A3.** A read of 0 entries cannot show whether Garmin
+  exposes schedule ids, so A3 is not inferred from a count. It is a
+  constant of the pipeline, `SCHEDULE_IDS_IN_FIND`, true per the T0b
+  capture, and a read that returns an entry with no id at the date being
+  judged is taken as A3 false for that date (an id-less entry elsewhere in
+  the month cannot be the entry in question, so it does not block the
+  verify-before-delete or abandoned-entry absence proofs). The absence rules (the gate, the 404 check, the
+  abandoned re-check, T5's `gone`) apply only when both hold; otherwise the
+  count rules of §3.4 apply. A wrong `true` can at worst re-POST after the
+  gate (a duplicate); it can never delete an entry the read did not see
+  without an id.

@@ -63,34 +63,9 @@ export async function executeList(
   };
 }
 
-export type DetectionResult =
-  | { installed: false }
-  | { installed: true; session: false; error: string }
-  | { installed: true; session: boolean; error: null };
-
-const SUPPORTED_PROTOCOLS = [1];
-
-export function evaluatePingResult(res: {
-  ok: boolean;
-  protocolVersion?: number;
-  data?: unknown;
-}): DetectionResult {
-  if (!res.ok) return { installed: false };
-  if (
-    !res.protocolVersion ||
-    !SUPPORTED_PROTOCOLS.includes(res.protocolVersion)
-  )
-    return {
-      installed: true,
-      session: false,
-      error: "Update your Kaiord Garmin Bridge extension",
-    };
-  const data = res.data as { gcApi?: { ok: boolean } } | undefined;
-  return {
-    installed: true,
-    session: data?.gcApi?.ok === true,
-    error: null,
-  };
-}
+export {
+  type DetectionResult,
+  evaluatePingResult,
+} from "./garmin-ping-evaluation";
 
 export const INITIAL_PUSH_STATE: PushState = { status: "idle" };

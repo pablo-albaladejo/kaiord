@@ -77,12 +77,12 @@
 
 ## 6. Placement pipeline, detection and stub (T5, PR-3)
 
-- [ ] 6.1 Pipeline core and ports: `classify-bridge-write`,
+- [x] 6.1 Pipeline core and ports: `classify-bridge-write`,
       `placement-{claim,resolve,schedule-step,commit,removal-step}`,
       `reconcile-garmin-placement`, `push-workout-to-garmin-calendar`,
       `garmin-calendar-port`, `record-lock-port` with a Web Locks adapter and
       an in-memory fake (AC-18..AC-34).
-- [ ] 6.2 Wiring and UI: `garmin-calendar-operations` with the per-action
+- [x] 6.2 Wiring and UI: `garmin-calendar-operations` with the per-action
       timeout, detection `features`, `useGarminPush`, EditorPage,
       `do-push-to-garmin`, and the result / uncertain / dismiss UI in en and es
       (AC-35). Dismiss ("I removed it", writes `gone`) covers `abandoned`
@@ -92,9 +92,9 @@
       a `held` entry is not eligible. An `unconfirmed`
       commit records the claim's `supersedes` (design §3.3);
       "It's in Garmin" and A3-false adoptions record `[]`.
-- [ ] 6.3 E2E stub: numeric ids, an in-memory calendar, `calendar-find`,
+- [x] 6.3 E2E stub: numeric ids, an in-memory calendar, `calendar-find`,
       `features`, failure injection and delays.
-- [ ] 6.4 Resolve `uncertain` through the ledger state lattice (design
+- [x] 6.4 Resolve `uncertain` through the ledger state lattice (design
       §3.9): commits write the new id `keep` and the superseded one
       `retire`; one `calendar-find` match is adopted `keep` (a `scheduled`
       `previous` becomes `retire`), seen held ids stay `held`, unseen ones
@@ -106,7 +106,27 @@
       device's adoption of the new entry between the POST and the commit
       leaves that entry unlisted. "It's in Garmin" is offered only when no
       non-`keep` entry shares the `uncertain`'s workout and date.
-- [ ] 6.5 Carried over from T4:
+- [x] 6.4b Verify before delete (design §3.5, §3.9 skew counterexample):
+      a drain with a `retire` to send first reads the `Placed`'s date and
+      sends only when the `Placed` id is there; absent (A3) → the id `gone`
+      and the row `uncertain`, nothing sent; a failed read, A3 false or an
+      `unconfirmed` `Placed` → nothing sent. Regression: the simulator's
+      skew path, and unit tests for each row of the table.
+- [x] 6.4c Round-2 review: a drain that finds its `Placed` dead reports
+      `uncertain`; the A3 id-less check is scoped to the judged date; the
+      ribbon's live region excludes its actions and the countdown; an
+      exception before the pipeline still emits one placement event; the
+      laws simulator asserts a floor of visited states per scenario.
+- [x] 6.4d Round-2 architect review: a proof of absence counts only when
+      a second read `SETTLE_MS` later repeats it (the injected `sleep`);
+      the `Placed` of this run's own ok POST is never written `gone`;
+      the drain verifies before each `unschedule`; the crossed-pair
+      residual L2 and a Garmin-side move to another month are documented.
+      Regression: unit tests for the lagging read, both-reads-absent on
+      an adopted and on an own-POST `Placed`, and L2 as a documented
+      residual; the simulator's lagging-find op and a per-step "no live
+      id recorded `gone`" law.
+- [x] 6.5 Carried over from T4:
   - AC-17's "0 schedule calls" half (a failed library push makes no
     calendar call) needs this pipeline; test it here.
   - `PENDING_TTL_MS` is 5 min: a quiet bulk push must never sit longer
@@ -135,6 +155,10 @@
 
 - [ ] 8.1 `select-week-push-candidates`, `send-week-to-garmin`, the hook, the
       organism, the `CalendarHeader` action and locales (AC-42..AC-45).
+- [ ] 8.2 Carried over from T5: the workout detail page's `PushButton`
+      shows only sent / idle. Reuse the editor's placement panel there
+      (the ledger-derived `uncertain` and dismissable entries, and the
+      ephemeral `failed` / `library-only` outcome).
 
 ## 9. Docs, e2e, gates and manual validation (T8, PR-4)
 

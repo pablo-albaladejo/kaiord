@@ -5,7 +5,10 @@
  * insertPending maps Dexie ConstraintError to a typed result so use
  * cases never import Dexie error types (R-AppDexieImport rule).
  */
-import type { ExportLedgerEntry } from "../../types/export-ledger";
+import type {
+  ExportLedgerEntry,
+  LedgerMutation,
+} from "../../types/export-ledger";
 
 export type InsertPendingResult =
   { ok: true } | { ok: false; reason: "constraint" };
@@ -23,12 +26,13 @@ export type ExportLedgerRepository = {
    * id). No owner, no compare-and-swap. `fn` receives `undefined` when the
    * row is absent and returns the row to store, or `undefined` to write
    * nothing. `updatedAt` is stamped only when `fn` actually changed the row
-   * (deep-equal); a no-op leaves it byte-identical. Resolves to the row held
-   * afterwards.
+   * (deep-equal); a no-op leaves it byte-identical. `fn` may instead return
+   * `restoreLedgerRow(row)`: that row is stored verbatim, clock included.
+   * Resolves to the row held afterwards.
    */
   mutateByKey: (
     key: { kaiordRecordId: string; destinationBridgeId: string },
-    fn: (row: ExportLedgerEntry | undefined) => ExportLedgerEntry | undefined
+    fn: (row: ExportLedgerEntry | undefined) => LedgerMutation
   ) => Promise<ExportLedgerEntry | undefined>;
   /**
    * Failed-POST rollback: deletes (and tombstones) the row with `id` only if
