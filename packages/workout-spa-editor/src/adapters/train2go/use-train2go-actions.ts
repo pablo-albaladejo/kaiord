@@ -9,6 +9,7 @@ import { syncWeek } from "../../application/coaching/sync-week";
 import { useCoachMoveNoticeActions } from "../../contexts/coach-move-notice-context";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { emitLinkResult, emitSyncResult } from "./coaching-telemetry";
+import { seedTrain2GoRoutes } from "./seed-train2go-routes";
 import { shouldFanOutZones } from "./should-fan-out-zones";
 
 export { useExpandCallback } from "./use-expand-callback";
@@ -72,11 +73,9 @@ export const useConnectCallback = (
         ctrl.signal
       );
       emitLinkResult(a, t.source, r);
-      if (
-        r.ok &&
-        runZonesSync &&
-        (await shouldFanOutZones(p, t.source, profileId))
-      ) {
+      if (!r.ok) return;
+      await seedTrain2GoRoutes(p, profileId);
+      if (runZonesSync && (await shouldFanOutZones(p, t.source, profileId))) {
         await runZonesSync(profileId).catch(() => undefined);
       }
     },
