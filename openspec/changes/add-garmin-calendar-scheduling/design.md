@@ -210,6 +210,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 ### Follow-ups
 
 - a liveness GET
+- snapshot writers of a workout's row outside a transaction: the batch processor (`batch-process-one.ts:51`) and the process dialog's skip and unskip (`use-dialog-handlers.ts:64,79`) `put` a copy read earlier, so a coach move or a push stamp that lands in between is rolled back. They predate this change and do not touch the Garmin placement; the fix is the re-read-and-write-in-one-transaction pattern that the editor save, `applyCoachDateMoves`, `placeRecord` and `rescheduleWorkout` now use
 - unscheduling when a workout is deleted in Kaiord
 - following the coach for session-matched workouts
 - matching a coach's delete + recreate
