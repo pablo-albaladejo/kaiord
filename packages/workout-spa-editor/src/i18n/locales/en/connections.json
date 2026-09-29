@@ -149,5 +149,9 @@
     "strain": "Strain",
     "vitals": "Vitals",
     "heart-rate-series": "Heart Rate Series"
+  },
+  "profileLink": {
+    "notLinked": "{{name}} is signed in on this browser but not linked to this athlete profile, so nothing syncs yet.",
+    "link": "Link to this profile"
   }
 }

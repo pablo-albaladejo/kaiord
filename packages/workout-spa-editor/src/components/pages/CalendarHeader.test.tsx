@@ -26,12 +26,18 @@ vi.mock("../molecules/WorkoutCard/WeekNavigation", () => ({
 vi.mock("../molecules/CoachingCard/CoachingSyncButton", () => ({
   CoachingSyncButton: ({
     label,
+    connected,
     onSync,
   }: {
     label: string;
+    connected: boolean;
     onSync: () => void;
   }) => (
-    <button data-testid={`mock-sync-${label}`} onClick={onSync}>
+    <button
+      data-testid={`mock-sync-${label}`}
+      data-connected={String(connected)}
+      onClick={onSync}
+    >
       {label}
     </button>
   ),
@@ -88,7 +94,7 @@ describe("CalendarHeader", () => {
     expect(screen.getByTestId("mock-week-nav")).toHaveTextContent("2026-W16");
   });
 
-  it("should render a sync button per LINKED coaching source (gates on linked)", () => {
+  it("should render a control per available source, connect-only while unlinked", () => {
     // Arrange
 
     const coaching = {
@@ -132,10 +138,19 @@ describe("CalendarHeader", () => {
 
     // Assert
 
-    expect(screen.getByTestId("mock-sync-Garmin")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-sync-Train2Go")).toBeInTheDocument();
-    // The unlinked source must NOT render a Sync button.
-    expect(screen.queryByTestId("mock-sync-Unlinked")).not.toBeInTheDocument();
+    expect(screen.getByTestId("mock-sync-Garmin")).toHaveAttribute(
+      "data-connected",
+      "true"
+    );
+    expect(screen.getByTestId("mock-sync-Train2Go")).toHaveAttribute(
+      "data-connected",
+      "false"
+    );
+    // An unlinked source renders its "Connect to" state, never a Sync button.
+    expect(screen.getByTestId("mock-sync-Unlinked")).toHaveAttribute(
+      "data-connected",
+      "false"
+    );
   });
 
   it("should bypass staleness gate via Manual Sync button", async () => {
@@ -178,7 +193,7 @@ describe("CalendarHeader", () => {
     expect(sync).toHaveBeenCalledWith(weekStart);
   });
 
-  it("should hide the Sync button when active profile has no linked accounts", () => {
+  it("should turn the Sync button into Connect when the active profile has no link", () => {
     // Models switching from a Train2Go-linked profile to one with no linked
     // accounts via two distinct mounts (D4 in design.md): avoids relying on
     // useLiveQuery / useActiveProfile flush ordering on rerender.
@@ -207,7 +222,10 @@ describe("CalendarHeader", () => {
 
     // Assert
 
-    expect(screen.getByTestId("mock-sync-Train2Go")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-sync-Train2Go")).toHaveAttribute(
+      "data-connected",
+      "true"
+    );
 
     unmount();
 
@@ -216,7 +234,7 @@ describe("CalendarHeader", () => {
         {
           id: "train2go",
           linked: false,
-          connected: false,
+          connected: true,
           loading: false,
           error: null,
           sync: vi.fn(),
@@ -227,7 +245,10 @@ describe("CalendarHeader", () => {
     } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
     render(<CalendarHeader state={baseState} coaching={unlinkedCoaching} />);
 
-    expect(screen.queryByTestId("mock-sync-Train2Go")).not.toBeInTheDocument();
+    expect(screen.getByTestId("mock-sync-Train2Go")).toHaveAttribute(
+      "data-connected",
+      "false"
+    );
   });
 
   it("should pass batch.pending presence to the cost confirmation's open prop", () => {
