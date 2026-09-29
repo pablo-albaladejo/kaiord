@@ -734,3 +734,12 @@ a duplicate". None changes an invariant of §3.3–§3.9.
 - **Record-deleted warning.** `failed{record-deleted}` carries the attempted
   date when the POST succeeded or was ambiguous, so the UI can say an entry
   may remain in Garmin on that date.
+- **How the SPA knows A3.** A read of 0 entries cannot show whether Garmin
+  exposes schedule ids, so A3 is not inferred from a count. It is a
+  constant of the pipeline, `SCHEDULE_IDS_IN_FIND`, true per the T0b
+  capture, and any single read that returns an entry with no id is taken as
+  A3 false for that read. The absence rules (the gate, the 404 check, the
+  abandoned re-check, T5's `gone`) apply only when both hold; otherwise the
+  count rules of §3.4 apply. A wrong `true` can at worst re-POST after the
+  gate (a duplicate); it can never delete an entry the read did not see
+  without an id.
