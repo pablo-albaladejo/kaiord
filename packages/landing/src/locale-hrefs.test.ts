@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import indexHtml from "../index.html?raw";
 import { applyLocaleHrefs } from "../scripts/build-locales.mjs";
 
-const ATHLETE_GUIDES = 3;
+const ATHLETE_GUIDES = [
+  "ai-planning-byok",
+  "whoop-recovery-in-plan",
+  "kaiord-vs-trainingpeaks-intervals-garmin",
+];
+
+const slugs = (hrefs: string[]) =>
+  [...new Set(hrefs.map((href) => href.split("/guide/")[1]))].sort();
 
 const guideLinks = (lang: "en" | "es") => {
   const doc = new DOMParser().parseFromString(indexHtml, "text/html");
@@ -23,7 +30,7 @@ describe("landing locale hrefs", () => {
     const { doc, hrefs } = guideLinks(lang);
 
     // Assert
-    expect(hrefs.length).toBeGreaterThanOrEqual(ATHLETE_GUIDES);
+    expect(slugs(hrefs)).toEqual([...ATHLETE_GUIDES].sort());
     expect(hrefs.every((href) => href.includes("/docs/es/guide/"))).toBe(true);
     expect(doc.querySelector("[data-es-href]")).toBeNull();
   });
@@ -36,7 +43,7 @@ describe("landing locale hrefs", () => {
     const { doc, hrefs } = guideLinks(lang);
 
     // Assert
-    expect(hrefs.length).toBeGreaterThanOrEqual(ATHLETE_GUIDES);
+    expect(slugs(hrefs)).toEqual([...ATHLETE_GUIDES].sort());
     expect(hrefs.some((href) => href.includes("/docs/es/"))).toBe(false);
     expect(doc.querySelector("[data-es-href]")).toBeNull();
   });
