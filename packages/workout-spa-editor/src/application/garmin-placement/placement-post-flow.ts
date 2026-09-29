@@ -61,7 +61,7 @@ export const postAttempt = async (
       ...leftBehind,
       ...unconfirmedLeftBehind(attempt.previous, placed),
     ];
-    return finishPlacement(run, placed, kind, behind);
+    return finishPlacement(run, placed, kind, behind, true);
   }
   if (cls.kind === "definite")
     return definiteFailure(run, attempt, written, preClaim, cls.reason);

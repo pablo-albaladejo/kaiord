@@ -4,8 +4,9 @@
  * `attempting.previous` (skip rule), and only while the row still carries
  * this run's `Placed`. Each outcome writes only its own entry's state on the
  * re-read row, so concurrent queue additions survive. A reauth answer ends
- * the drain, abandoned-entry re-checks included. Nothing is sent unless the
- * `Placed` was first seen on Garmin (`verifyPlaced`, verify before delete).
+ * the drain, abandoned-entry re-checks included. No entry is sent unless
+ * the `Placed` was seen on Garmin right before it (`verifyPlaced`, verify
+ * before delete); `ownPost` marks this run's own ok POST.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
@@ -65,13 +66,16 @@ const stillOurs = async (
   );
 };
 
-export const drainQueue = async (run: PlacementRun, guard: GarminPlaced) => {
+export const drainQueue = async (
+  run: PlacementRun,
+  guard: GarminPlaced,
+  ownPost = false
+) => {
   const row = await run.deps.ledgerRepo.findByNaturalKey(run.key);
   if (!holdsPlaced(row, guard)) return;
-  const toSend = drainable(row, false);
-  if (toSend.length > 0 && !(await verifyPlaced(run, guard))) return;
-  for (const entry of toSend) {
+  for (const entry of drainable(row, false)) {
     if (!(await stillOurs(run, guard, entry.workoutScheduleId))) return;
+    if (!(await verifyPlaced(run, guard, ownPost))) return;
     const outcome = await sendOne(run, entry);
     if (outcome === "reauth") return;
     if (!(await recordDrain(run, guard, entry.workoutScheduleId, outcome)))

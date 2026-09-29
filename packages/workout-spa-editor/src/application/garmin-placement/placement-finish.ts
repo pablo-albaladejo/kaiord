@@ -5,7 +5,8 @@
  * superseded entry with no id to delete (design "Pipeline details settled
  * in T5"); a row deleted meanwhile is `record-deleted` with the date. A
  * drain that found the `Placed` dead left the row `uncertain` (verify
- * before delete, §3.5): the run reports that, never a success.
+ * before delete, §3.5): the run reports that, never a success. `ownPost`:
+ * `placed` is this run's own ok POST, never judged dead by a drain.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { PlacementRun } from "./placement-deps";
@@ -19,9 +20,10 @@ export const finishPlacement = async (
   run: PlacementRun,
   placed: GarminPlaced,
   kind: Placed,
-  leftBehind: readonly string[]
+  leftBehind: readonly string[],
+  ownPost = false
 ): Promise<PlacementResult> => {
-  await drainQueue(run, placed);
+  await drainQueue(run, placed, ownPost);
   const row = await run.deps.ledgerRepo.findByNaturalKey(run.key);
   if (!row) return recordDeleted(placed.date);
   const p = row.placement;

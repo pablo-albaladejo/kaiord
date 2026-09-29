@@ -3,7 +3,8 @@
  * failures. Each queued `schedule` script decides the answer and whether
  * Garmin created the entry anyway (an ambiguous answer that committed);
  * `hideIds` makes `calendar-find` return no ids (A3 false), and an item's
- * own `hideId` hides only its id. Every call is
+ * own `hideId` hides only its id; with `lagMs`, `calendar-find` omits an
+ * entry POSTed less than `lagMs` ago (A5 visibility lag). Every call is
  * logged in order, and `beforeAnswer` runs after Garmin decided (and created
  * the entry, if it does) but before the pipeline hears the answer — the
  * window in which another writer can land.
@@ -25,6 +26,8 @@ export type CalendarItem = {
   date: string;
   /** `calendar-find` returns this entry without its id. */
   hideId?: boolean;
+  /** When the POST created it (set only while `lagMs` is on). */
+  postedAt?: number;
 };
 export type ScheduleScript = {
   answer?: BridgeFailure;
@@ -51,11 +54,13 @@ export const createFakeGarminCalendar = (firstId = 5000) => {
   };
   const state = {
     hideIds: false,
+    lagMs: 0,
     beforeAnswer: undefined as undefined | (() => Promise<void>),
   };
   const mint = (workoutId: GarminWorkoutId, date: string) => {
     const id = parseGarminScheduleId(String(nextId++)) as GarminScheduleId;
-    items.push({ id, workoutId, date });
+    const lag = state.lagMs > 0 ? { postedAt: Date.now() } : {};
+    items.push({ id, workoutId, date, ...lag });
     return id;
   };
   const port: GarminCalendarPort = {
@@ -81,9 +86,14 @@ export const createFakeGarminCalendar = (firstId = 5000) => {
       calls.push({ op: "find", workoutId, date });
       const failure = scripts.find.shift();
       if (failure) return failure;
+      const visible = (i: CalendarItem) =>
+        i.postedAt === undefined || Date.now() - i.postedAt >= state.lagMs;
       const entries: CalendarEntry[] = items
         .filter(
-          (i) => i.workoutId === workoutId && month(i.date) === month(date)
+          (i) =>
+            i.workoutId === workoutId &&
+            month(i.date) === month(date) &&
+            visible(i)
         )
         .map((i) => ({
           workoutScheduleId: state.hideIds || i.hideId ? null : i.id,

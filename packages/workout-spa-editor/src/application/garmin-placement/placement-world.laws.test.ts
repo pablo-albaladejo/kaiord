@@ -22,6 +22,8 @@
  * - post-late / land: a POST Garmin commits later (a sleeping sender): the
  *   answer is ambiguous with no entry, the run stops at its
  *   `attempting{posted:true}`, and `land` creates the entry on a later step.
+ * - push-ok-lag: push-ok, but a find within `SETTLE_MS` of the POST does
+ *   not see the new entry yet (A5 promises it only after that).
  * - resend: the push again at the device's current `Placed` date (no move:
  *   the run only verifies and drains).
  * - drain: `drainQueue` for the device's current `Placed`.
@@ -38,9 +40,10 @@
  * row; no DELETE hit the device's own `Placed` or
  * `attempting.previous`, no step but a dismiss emptied a calendar that had
  * a live entry (never a gap), and a push whose POST answered ok and that
- * reports `scheduled` or `moved` left an entry on its desired date. At every node the devices sync and drain
- * until nothing changes and must converge on one row whose `Placed`, if
- * any, is live, and in which no entry recorded `gone` is still on Garmin.
+ * reports `scheduled` or `moved` left an entry on its desired date, and no
+ * row records `gone` an entry still on Garmin. At every node the devices
+ * sync and drain until nothing changes and must converge on one row whose
+ * `Placed`, if any, is live.
  * The rows met form the pool for symmetry, idempotence and
  * absorption.
  */
@@ -73,7 +76,7 @@ import { gateOf } from "./placement-resolve";
 import { resolveUncertain } from "./placement-resolve-uncertain";
 import type { PlacementResult } from "./placement-result";
 import { type PostOutcome, postSchedule } from "./placement-schedule-step";
-import { MAX_DELETE_ATTEMPTS } from "./placement-timing";
+import { MAX_DELETE_ATTEMPTS, SETTLE_MS } from "./placement-timing";
 import { reconcileGarminPlacement } from "./reconcile-garmin-placement";
 
 type Row = ExportLedgerEntry;
@@ -169,6 +172,8 @@ async function openDevice(world: World, device: number) {
 async function closeDevice(world: World, device: number, d: Device) {
   world.devices[device] = await d.row();
   world.items = structuredClone(d.calendar.items);
+  // A lag lasts one step: the next step is `TICK_MS` > `SETTLE_MS` later.
+  for (const item of world.items) delete item.postedAt;
   // Each POST mints at most one id; an unused id is never reused.
   world.nextId += d.calendar.count("schedule");
   world.clock = Date.now() - SKEW_MS[device] + TICK_MS;
@@ -219,6 +224,12 @@ const push =
     return misreport(device, d, result);
   };
 
+/** A push whose new entry a find sees only `SETTLE_MS` after the POST. */
+const pushLagging: Op = async (world, device, d) => {
+  d.calendar.state.lagMs = SETTLE_MS;
+  return push({})(world, device, d);
+};
+
 /** The athlete sends again without moving: the run only drains. */
 const resend: Op = async (_world, device, d) => {
   const p = (await d.row()).placement;
@@ -265,7 +276,7 @@ const commit: Op = async (world, device, d) => {
     done.written
   );
   if (verdict === "committed")
-    await finishPlacement(d.run, placed, "scheduled", []);
+    await finishPlacement(d.run, placed, "scheduled", [], true);
 };
 
 const drain: Op = async (_world, _device, d) => {
@@ -312,6 +323,7 @@ const confirm: Op = async (_world, _device, d) => {
 
 const OPS: Record<string, Op> = {
   "push-ok": push({}),
+  "push-ok-lag": pushLagging,
   "push-no-id": push({ noId: true }),
   "push-delete-fails": push({}, true),
   "push-ambiguous": push({ answer: SERVER_ERROR, create: true }),
@@ -342,16 +354,26 @@ function pull(world: World, device: number) {
     world.devices[device] = hookMerge(world.devices[device], world.cloud);
 }
 
+/** A row that records `gone` an entry still on Garmin (a hidden duplicate
+    T5 never matches). */
+function goneButLive(world: World): string | undefined {
+  const live = new Set(world.items.map((i) => i.id));
+  for (const [device, row] of world.devices.entries()) {
+    const lie = row.removalQueue?.find(
+      (e) => e.state === "gone" && live.has(e.workoutScheduleId)
+    );
+    if (lie)
+      return `${DEVICES[device]} records a live entry gone ${lie.workoutScheduleId}`;
+  }
+}
+
 /** Runs one step; returns a safety violation, if any. */
 async function apply(world: World, step: Step): Promise<string | undefined> {
   const { device, op } = step;
-  if (op === "sync") {
-    sync(world, device);
-    return;
-  }
-  if (op === "sync-rejected") {
-    pull(world, device);
-    return;
+  if (op === "sync" || op === "sync-rejected") {
+    if (op === "sync") sync(world, device);
+    else pull(world, device);
+    return goneButLive(world);
   }
   const hadLive = world.items.length > 0;
   const d = await openDevice(world, device);
@@ -367,6 +389,7 @@ async function apply(world: World, step: Step): Promise<string | undefined> {
     return `${name} deletes its own Placed ${hit.id}`;
   if (op !== "dismiss" && hadLive && world.items.length === 0)
     return `${name}'s ${op} empties the calendar`;
+  return goneButLive(world);
 }
 
 // ---- enumeration ----------------------------------------------------------
@@ -701,6 +724,16 @@ const SCENARIOS: Scenario[] = [
     ],
     depth: 4,
     minVisited: 565,
+  },
+  {
+    name: "a find that lags a fresh POST",
+    seed: async () => world(),
+    alphabet: [
+      ...steps(["push-ok", "push-ok-lag", "push-delete-fails"], [0, 2]),
+      ...steps(["sync", "resend"], [0, 2]),
+    ],
+    depth: 3,
+    minVisited: 75,
   },
   {
     name: "a stale Placed that wins the merge after its entry was deleted",
