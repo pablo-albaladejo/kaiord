@@ -10,6 +10,7 @@
  * (per spa-workout-state-machine spec), not only on PUSHED→MODIFIED.
  */
 
+import type { Dexie } from "dexie";
 import { useCallback } from "react";
 
 import { db } from "../../adapters/dexie/dexie-database";
@@ -23,8 +24,20 @@ import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KRD } from "../../types/krd";
 
-async function persistRecord(record: WorkoutRecord) {
-  await db.table("workouts").put(record);
+/* Applies a change to the row as stored, in one transaction: a concurrent
+   writer's fields (a coach move's date landing before the editor
+   re-renders) are kept, and a workout deleted meanwhile stays deleted. */
+async function updateRecord(
+  id: string,
+  change: (fresh: WorkoutRecord) => WorkoutRecord
+) {
+  const table = db.table<WorkoutRecord, string>("workouts");
+  // Plain Dexie: the typed tables tuple overflows TS's instantiation depth
+  // (the adapters' workaround).
+  await (db as unknown as Dexie).transaction("rw", db.tables, async () => {
+    const fresh = await table.get(id);
+    if (fresh) await table.put(change(fresh));
+  });
 }
 
 function saveEditedKrd(
@@ -49,11 +62,19 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
   const pushWorkout = useCallback(
     async (garminPushId: string) => {
       if (!record) return;
-      const withEdits = saveEditedKrd(record, currentWorkout ?? undefined);
+      // The editor's own edit is judged against the copy it opened.
+      const edited =
+        currentWorkout && currentWorkout !== record.krd
+          ? currentWorkout
+          : undefined;
       // An already-pushed record (a re-created library workout) only
       // records the new id: there is no transition left to take.
-      const updated = recordGarminPush(readyForPush(withEdits), garminPushId);
-      await persistRecord(updated);
+      await updateRecord(record.id, (fresh) =>
+        recordGarminPush(
+          readyForPush(saveEditedKrd(fresh, edited)),
+          garminPushId
+        )
+      );
     },
     [record, currentWorkout]
   );
@@ -61,8 +82,9 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
   const markModified = useCallback(
     async (krd: KRD) => {
       if (!record) return;
-      const updated = transitionToModified(record, krd);
-      await persistRecord(updated);
+      await updateRecord(record.id, (fresh) =>
+        transitionToModified(fresh, krd)
+      );
     },
     [record]
   );
