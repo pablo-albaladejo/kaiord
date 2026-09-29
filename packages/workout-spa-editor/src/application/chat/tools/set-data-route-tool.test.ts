@@ -110,4 +110,33 @@ describe("createSetDataRouteTool", () => {
     // Assert
     expect(parsed.success).toBe(false);
   });
+
+  it("should reject set_source_policy input missing the mode field", () => {
+    // Arrange
+    const tool = createSetDataRouteTool(makeOps());
+
+    // Act
+    const parsed = tool.inputSchema.safeParse({
+      action: "set_source_policy",
+      dataType: "sleep",
+    });
+
+    // Assert
+    expect(parsed.success).toBe(false);
+  });
+
+  it("should reject a priority policy with no sourceOrder at the input schema", () => {
+    // Arrange
+    const tool = createSetDataRouteTool(makeOps());
+
+    // Act
+    const parsed = tool.inputSchema.safeParse({
+      action: "set_source_policy",
+      dataType: "sleep",
+      mode: "priority",
+    });
+
+    // Assert
+    expect(parsed.success).toBe(false);
+  });
 });
