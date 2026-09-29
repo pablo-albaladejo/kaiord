@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { logGarminPushFailure } from "../../../application/garmin-placement/log-garmin-push-failure";
 import { pushWorkoutToGarminCalendar } from "../../../application/garmin-placement/push-workout-to-garmin-calendar";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
 import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
@@ -79,6 +80,7 @@ export const useGarminPush = (
       } catch (error: unknown) {
         if (error instanceof MissingPaceZonesError)
           return failedEarly("missing-pace-zones");
+        logGarminPushFailure(error);
         showError(error);
         return failedEarly();
       }

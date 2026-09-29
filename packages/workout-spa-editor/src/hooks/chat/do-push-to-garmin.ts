@@ -15,6 +15,7 @@
  * sentinel nor `"pending"` ever becomes a push id.
  */
 import { NoActiveExportRouteError } from "../../application/export/execute-workout-push";
+import { logGarminPushFailure } from "../../application/garmin-placement/log-garmin-push-failure";
 import type { PlacementResult } from "../../application/garmin-placement/placement-result";
 import { placeRecord } from "../garmin-place-record";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
@@ -60,8 +61,9 @@ export const doPushToGarmin = async (
 ): Promise<unknown> => {
   try {
     return await pushAndRecord(...args);
-  } catch {
-    // An exception's text never reaches the model.
+  } catch (error) {
+    // An exception's text never reaches the model; it is only logged.
+    logGarminPushFailure(error);
     return { error: "push_failed" };
   }
 };
