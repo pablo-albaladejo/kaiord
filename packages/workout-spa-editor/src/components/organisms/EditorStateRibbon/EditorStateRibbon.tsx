@@ -22,8 +22,9 @@ const CONNECTIONS_ROUTE = "/settings/connections";
 export type EditorStateRibbonProps = {
   state: WorkoutState;
   profileId?: string;
-  /** Persists the state transition once the bridge confirms the send. */
-  onSent: () => void;
+  /** Persists the state transition with the Garmin library workout id,
+      once the library push is confirmed. */
+  onSent: (garminWorkoutId: string) => void;
 };
 
 export function EditorStateRibbon({

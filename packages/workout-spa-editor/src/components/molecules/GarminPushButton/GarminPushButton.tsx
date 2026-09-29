@@ -7,8 +7,9 @@ import { useGarminBridge } from "../../../contexts";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button } from "../../atoms/Button";
+import { PlacementFeedback } from "./PlacementFeedback";
 import { PushFeedback } from "./PushFeedback";
-import { useGarminPush } from "./useGarminPush";
+import { useGarminPlacement } from "./useGarminPlacement";
 
 /**
  * The editor's single send control.
@@ -17,10 +18,13 @@ import { useGarminPush } from "./useGarminPush";
  * that, and `EditorStateRibbon` only mounts this button once the chain is
  * intact. Returning `null` on a missing extension is what kept the most
  * common failure off the screen.
+ *
+ * `onSent` fires with the Garmin library workout id iff the library push
+ * is confirmed; the calendar placement's outcome is shown next to it.
  */
-export const GarminPushButton: React.FC<{ onSent?: () => void }> = ({
-  onSent,
-}) => {
+export const GarminPushButton: React.FC<{
+  onSent?: (garminWorkoutId: string) => void;
+}> = ({ onSent }) => {
   const t = useTranslate("common");
   const { pushing, setPushing } = useGarminBridge();
   const { id } = useParams<{ id?: string }>();
@@ -28,19 +32,15 @@ export const GarminPushButton: React.FC<{ onSent?: () => void }> = ({
     () => (id ? db.table<WorkoutRecord>("workouts").get(id) : undefined),
     [id]
   );
-  const { push } = useGarminPush(workout);
-  const isLoading = pushing.status === "loading";
-
-  const handleSend = async () => {
-    if (await push()) onSent?.();
-  };
+  const placement = useGarminPlacement(workout, onSent);
+  const isLoading = placement.busy || pushing.status === "loading";
 
   return (
     <div className="flex items-center gap-2">
       <Button
         size="sm"
         variant="cta"
-        onClick={handleSend}
+        onClick={() => void placement.send()}
         loading={isLoading}
         disabled={isLoading}
         data-testid="send-to-garmin-button"
@@ -48,10 +48,21 @@ export const GarminPushButton: React.FC<{ onSent?: () => void }> = ({
         <Upload className="h-4 w-4" />
         {t("verbs.send")}
       </Button>
-      <PushFeedback
-        push={pushing}
-        onReset={() => setPushing({ status: "idle" })}
-      />
+      {placement.result && workout ? (
+        <PlacementFeedback
+          result={placement.result}
+          date={workout.date}
+          removable={placement.removable}
+          onConfirm={() => void placement.confirm()}
+          onSendAnyway={() => void placement.sendAnyway()}
+          onDismiss={(id) => void placement.dismiss(id)}
+        />
+      ) : (
+        <PushFeedback
+          push={pushing}
+          onReset={() => setPushing({ status: "idle" })}
+        />
+      )}
     </div>
   );
 };

@@ -53,3 +53,7 @@ export const recordDeleted = (date?: string): PlacementResult =>
 /** Absence inside the POST gate: no POST until `retryAfter`. */
 export const settling = (retryAfter: number): PlacementResult =>
   failed("settling", true, { retryAfter });
+
+/** `garmin-synced` success (design §3.8): neither `failed` nor `uncertain`. */
+export const isPlacementSent = (result: PlacementResult): boolean =>
+  result.kind !== "failed" && result.kind !== "uncertain";

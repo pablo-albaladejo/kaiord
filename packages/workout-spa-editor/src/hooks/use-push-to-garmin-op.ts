@@ -1,9 +1,10 @@
 import { useCallback } from "react";
 
 import type { PushToGarminInput } from "../application/chat/tools/chat-tool-deps";
-import { useGarminBridge } from "../contexts";
+import { useAnalytics, useGarminBridge } from "../contexts";
 import { usePersistence } from "../contexts/persistence-context";
 import { doPushToGarmin } from "./chat/do-push-to-garmin";
+import { buildPlacementDeps } from "./garmin-placement-deps";
 
 /**
  * Binds the confirmation-gated push_to_garmin chat action: contexts are
@@ -11,10 +12,16 @@ import { doPushToGarmin } from "./chat/do-push-to-garmin";
  */
 export const usePushToGarminOp = () => {
   const persistence = usePersistence();
-  const { pushWorkout } = useGarminBridge();
+  const { pushWorkout, features } = useGarminBridge();
+  const analytics = useAnalytics();
   return useCallback(
     (input: PushToGarminInput) =>
-      doPushToGarmin(persistence, pushWorkout, input.workoutId),
-    [persistence, pushWorkout]
+      doPushToGarmin(
+        persistence,
+        pushWorkout,
+        input.workoutId,
+        buildPlacementDeps(features, analytics)
+      ),
+    [persistence, pushWorkout, features, analytics]
   );
 };

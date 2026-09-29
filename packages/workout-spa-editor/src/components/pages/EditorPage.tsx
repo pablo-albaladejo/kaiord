@@ -76,7 +76,7 @@ export default function EditorPage({ id }: EditorPageProps) {
         <EditorStateRibbon
           state={record.state}
           profileId={profileId ?? undefined}
-          onSent={() => void pushWorkout(`garmin-${Date.now()}`)}
+          onSent={(garminWorkoutId) => void pushWorkout(garminWorkoutId)}
         />
       )}
       {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}

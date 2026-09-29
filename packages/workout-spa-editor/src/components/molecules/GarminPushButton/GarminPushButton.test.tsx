@@ -8,6 +8,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  failed,
+  type PlacementResult,
+} from "../../../application/garmin-placement/placement-result";
 import { GarminPushButton } from "./GarminPushButton";
 
 const mockState = {
@@ -21,7 +25,9 @@ const mockState = {
   setPushing: vi.fn(),
 };
 
-const push = vi.fn<() => Promise<boolean>>();
+const WORKOUT_ID = "1707805999";
+const push = vi.fn<() => Promise<PlacementResult | undefined>>();
+const hook: { onSent?: (garminWorkoutId: string) => void } = {};
 
 vi.mock("../../../contexts", () => ({
   useGarminBridge: () => ({ ...mockState }),
@@ -37,7 +43,18 @@ vi.mock("../../../adapters/dexie/dexie-database", () => ({
 }));
 
 vi.mock("./useGarminPush", () => ({
-  useGarminPush: () => ({ push }),
+  useGarminPush: (_w: unknown, onSent?: (id: string) => void) => {
+    hook.onSent = onSent;
+    return { push };
+  },
+}));
+
+vi.mock("./useGarminPlacementActions", () => ({
+  useGarminPlacementActions: () => ({
+    confirm: vi.fn(),
+    dismissable: async () => [],
+    dismiss: vi.fn(),
+  }),
 }));
 
 vi.mock("wouter", () => ({
@@ -48,7 +65,7 @@ describe("GarminPushButton", () => {
   beforeEach(() => {
     mockState.pushing = { status: "idle" };
     push.mockReset();
-    push.mockResolvedValue(true);
+    push.mockResolvedValue({ kind: "scheduled" });
   });
 
   it("should render the one send verb", () => {
@@ -66,7 +83,10 @@ describe("GarminPushButton", () => {
   it("should report the send upward only once the bridge confirms it", async () => {
     // Arrange
     const onSent = vi.fn();
-    push.mockResolvedValue(true);
+    push.mockImplementation(async () => {
+      hook.onSent?.(WORKOUT_ID);
+      return { kind: "scheduled" };
+    });
     render(<GarminPushButton onSent={onSent} />);
 
     // Act
@@ -74,12 +94,13 @@ describe("GarminPushButton", () => {
 
     // Assert
     expect(onSent).toHaveBeenCalledTimes(1);
+    expect(onSent).toHaveBeenCalledWith(WORKOUT_ID);
   });
 
   it("should not report a send the bridge rejected", async () => {
     // Arrange
     const onSent = vi.fn();
-    push.mockResolvedValue(false);
+    push.mockResolvedValue(failed("library-push-failed", true));
     render(<GarminPushButton onSent={onSent} />);
 
     // Act

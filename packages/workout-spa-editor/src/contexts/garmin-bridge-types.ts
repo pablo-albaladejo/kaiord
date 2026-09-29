@@ -13,6 +13,8 @@ export type GarminPushOutcome = {
 export type GarminBridgeState = {
   extensionInstalled: boolean;
   sessionActive: boolean;
+  /** The bridge's ping `features` (`[]` for a bridge that predates them). */
+  features: readonly string[];
   pushing: PushState;
   lastError: string | null;
   detectExtension: () => Promise<void>;
