@@ -158,6 +158,22 @@ describe("createGarminWorkoutService", () => {
     expect(httpClient.post).not.toHaveBeenCalled();
   });
 
+  it("should rethrow a MissingFtpError from another @kaiord/core copy unwrapped", async () => {
+    // Arrange
+    const foreign = Object.assign(new Error("needs an FTP"), {
+      name: "MissingFtpError",
+    });
+    const httpClient = createMockHttpClient();
+    vi.mocked(httpClient.post).mockRejectedValue(foreign);
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    // Act
+    const push = service.push(sampleKrd);
+
+    // Assert
+    await expect(push).rejects.toBe(foreign);
+  });
+
   it("should throw a ServiceApiError when push fails", async () => {
     // Arrange
     const httpClient = createMockHttpClient();

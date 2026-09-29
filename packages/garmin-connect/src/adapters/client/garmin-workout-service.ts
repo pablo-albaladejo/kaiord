@@ -27,6 +27,9 @@ import { removeWorkout } from "./remove-workout";
 
 export type GarminWorkoutClient = WorkoutService;
 
+const isNamedMissingFtp = (error: unknown): boolean =>
+  error instanceof Error && error.name === "MissingFtpError";
+
 const pushWorkout = async (
   krd: KRD,
   httpClient: GarminHttpClient,
@@ -52,7 +55,10 @@ const pushWorkout = async (
       url: garminWorkoutWebUrl(result.workoutId),
     };
   } catch (error) {
-    if (error instanceof MissingFtpError) throw error;
+    // Name check too: a second copy of @kaiord/core breaks `instanceof`.
+    if (error instanceof MissingFtpError || isNamedMissingFtp(error)) {
+      throw error;
+    }
     throw createServiceApiError("Failed to push workout", undefined, error);
   }
 };
