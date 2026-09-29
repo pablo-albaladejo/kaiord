@@ -269,7 +269,7 @@ Repository port changes:
 
 **0. Pre-flight** (0 calls if it fails)
 
-- No `navigator.locks` → **library-only**. Phase 1 runs exactly as it does today, placement is skipped, and the result is `library-only{reason:"insecure-context"}` (not `failed`). The UI names the reason: the calendar needs HTTPS or a supported browser. Web Locks exist only in secure contexts, so plain-HTTP LAN dev keeps today's library push.
+- No `navigator.locks` → **library-only**. Phase 1 runs exactly as it does today, placement is skipped, and the result is `library-only{reason:"insecure-context"}` when `!isSecureContext`, else `library-only{reason:"unsupported-browser"}` (a secure page in a browser without Web Locks, such as an old Safari); neither is `failed`. The UI names the reason: the calendar needs HTTPS, or a browser that supports it (neutral copy). Web Locks exist only in secure contexts, so plain-HTTP LAN dev keeps today's library push.
 - No `calendar-write-v1` capability → **library-only**, reason `bridge-outdated`. Phase 1 runs and placement is skipped, as above. Failing the push would throw away work that can be done, and in bulk it would fill the summary with red for something that is neither the athlete's fault nor the workout's; a silent library push would break the promise that the workout is on its date. So the UI shows the workout in the warning tone as "in your library, no date", with one action to update the extension (one notice per bulk run). Chrome updates extensions on its own within hours, so this state is rare and short-lived and gets no further UI. After the update, a re-push finds the content hash unchanged, makes 0 library pushes and only places the date.
 
 **1. Lock**
@@ -340,7 +340,7 @@ When the guard fails, the outcome depends on what happened to the row:
 
 - If T0c cannot deliver this, the fallback residual is an untracked duplicate, never a gap: the skip rule applies and `previous` is deleted only after a new `Placed` commits. It is recorded in R4.
 
-**9. Result:** `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason: insecure-context | bridge-outdated} | failed{reason, retryable, retryAfter?}`.
+**9. Result:** `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason: insecure-context | unsupported-browser | bridge-outdated} | failed{reason, retryable, retryAfter?}`.
 
 ### 3.4 Deadline, classifier and resolve
 
@@ -466,7 +466,7 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 **Analytics** (no ids, dates or names)
 
 - `garmin-synced` counts as a success when the result is neither `failed` nor `uncertain`.
-- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, schedule-rejected, needs-reauth, library-push-failed, no-export-route, deadline-before-send, placement-interrupted (a `failed` result), and bridge-outdated, insecure-context (a `library-only` one); see "Pipeline details settled in T5".
+- `garmin-calendar-placement{result, reason?, durationMs, abandonedCount}`. `reason` is a closed enum: busy, settling, record-deleted, guard-failed, library-missing, library-id-unknown, schedule-endpoint, schedule-rejected, needs-reauth, library-push-failed, no-export-route, deadline-before-send, placement-interrupted (a `failed` result), and bridge-outdated, insecure-context, unsupported-browser (a `library-only` one); see "Pipeline details settled in T5".
 - `garmin-calendar-bulk{counts}`
 
 ### 3.9 Normalization and merge (on top of T0c, delivered by #1265)
@@ -730,7 +730,9 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   `placement-interrupted` (an exception after Phase 1 succeeded — a Dexie
   error in the claim, commit or drain, or a thrown port: the workout is in
   the library, the date may not be placed, and a re-send finishes it). The
-  `library-only` reasons stay `insecure-context` and `bridge-outdated`.
+  `library-only` reasons are `insecure-context` (`!isSecureContext`),
+  `unsupported-browser` (a secure page without Web Locks) and
+  `bridge-outdated`.
 - **`duplicate-left`** is returned when the run ends with a `retire` entry
   still in the queue (a failed or abandoned delete), when a resolve adopted
   the lowest of several candidates, or when a move superseded an

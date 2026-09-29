@@ -6,9 +6,9 @@ Every Garmin push entry point SHALL call `pushWorkoutToGarminCalendar(deps, reco
 
 Phase 2 SHALL diff the desired placement (library workout id, workout date) against the persisted one and, when they differ: persist `attempting{posted, at, previous}`; mark it `posted` and call `schedule`; commit the returned `workoutScheduleId` as `keep` and the superseded id as `retire` in the same write; and only then `unschedule` the superseded entry. A superseded entry SHALL be deleted only after its replacement has committed (create first, delete after), so a failure leaves a duplicate and never a gap. The pipeline SHALL NOT delete any Garmin library workout.
 
-A pre-flight SHALL run before any call. Without `navigator.locks` (a non-secure context) the push SHALL run Phase 1 exactly as today, skip placement, and return `library-only{reason:"insecure-context"}`. Without the `calendar-write-v1` feature it SHALL do the same and return `library-only{reason:"bridge-outdated"}`. Neither is a failure: the UI SHALL show the workout as in the library with no date, in the warning tone and never the error tone, and for `bridge-outdated` SHALL offer one action that opens the extension's store page.
+A pre-flight SHALL run before any call. Without `navigator.locks` the push SHALL run Phase 1 exactly as today, skip placement, and return `library-only{reason:"insecure-context"}` when the page is not a secure context (`!isSecureContext`), or `library-only{reason:"unsupported-browser"}` in a secure context whose browser lacks Web Locks (an old Safari), with neutral copy that blames neither the page nor the athlete. Without the `calendar-write-v1` feature it SHALL do the same and return `library-only{reason:"bridge-outdated"}`. Neither is a failure: the UI SHALL show the workout as in the library with no date, in the warning tone and never the error tone, and for `bridge-outdated` SHALL offer one action that opens the extension's store page.
 
-The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason} | failed{reason, retryable, retryAfter?}`, with `library-only` reasons `insecure-context | bridge-outdated`.
+The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplicate-left | uncertain | library-only{reason} | failed{reason, retryable, retryAfter?}`, with `library-only` reasons `insecure-context | unsupported-browser | bridge-outdated`.
 
 #### Scenario: A date-only move places first and removes after
 
@@ -31,7 +31,7 @@ The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplic
 
 - **GIVEN** `navigator.locks` is unavailable
 - **WHEN** the athlete pushes
-- **THEN** the pipeline SHALL make 1 library push and 0 calendar calls and return `library-only{reason:"insecure-context"}`
+- **THEN** the pipeline SHALL make 1 library push and 0 calendar calls and return `library-only{reason:"insecure-context"}` on a non-secure page, or `library-only{reason:"unsupported-browser"}` on a secure one
 
 ### Requirement: One Web Lock per record serializes placement across tabs
 
