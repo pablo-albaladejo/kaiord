@@ -24,7 +24,8 @@ export type GarminPlacementNotice = PlacementNotice & {
  * its own live query (one query per page), joined with the last run's
  * ephemeral outcome. A posted attempt is watched through the record's
  * lock, so a live run is never shown as an `uncertain` to answer. A run
- * that placed another date than the workout's is not shown.
+ * that placed another date than the workout's, or than the ledger's, is
+ * not shown.
  */
 export const useGarminPlacementNotice = (
   recordId: string | undefined,
@@ -32,7 +33,7 @@ export const useGarminPlacementNotice = (
   workoutDate: string | undefined
 ): GarminPlacementNotice => {
   const [lastRun, setOutcome] = usePlacementOutcome(recordId);
-  const run = currentRun(lastRun, workoutDate);
+  const run = currentRun(lastRun, workoutDate, row);
   const p = row?.placement;
   const posted = recordId && p?.kind === "attempting" && p.posted ? p : null;
   const inFlight = useRecordLockHeld(

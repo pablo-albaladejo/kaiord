@@ -186,6 +186,40 @@ describe("PushButton", () => {
     expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
   });
 
+  it("should reopen the send when the workout returns to a date Garmin no longer holds", async () => {
+    // Arrange
+    const placedOn = (date: string) =>
+      ({
+        kaiordRecordId: "w1",
+        placement: {
+          kind: "scheduled",
+          workoutScheduleId: "5001",
+          workoutId: "9",
+          date,
+        },
+      }) as unknown as ExportLedgerEntry;
+    const { rerender } = render(
+      <PushButton workout={WORKOUT} placementRow={placedOn(DATE)} />
+    );
+    fireEvent.click(screen.getByText("Send to Garmin"));
+    deferred.resolve({ kind: "scheduled" });
+    await screen.findByText(SENT_CLAIM);
+    // The coach moves it; Send week places the new date.
+    rerender(
+      <PushButton workout={MOVED} placementRow={placedOn(MOVED.date)} />
+    );
+
+    // Act
+    // The coach moves it back.
+    rerender(
+      <PushButton workout={WORKOUT} placementRow={placedOn(MOVED.date)} />
+    );
+
+    // Assert
+    expect(screen.getByText("Send to Garmin")).toBeEnabled();
+    expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
+  });
+
   it("should claim the sent date again once the workout is back on it", async () => {
     // Arrange
     const { rerender } = render(<PushButton workout={WORKOUT} />);

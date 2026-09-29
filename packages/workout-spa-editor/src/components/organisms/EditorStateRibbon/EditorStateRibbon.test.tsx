@@ -146,4 +146,45 @@ describe("EditorStateRibbon", () => {
     // Assert
     expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
   });
+
+  it("should drop a sent claim on a date Garmin no longer holds", async () => {
+    // Arrange
+    gate.current = "ready";
+    live.date = DATE;
+    push.mockResolvedValueOnce({ kind: "scheduled" });
+    const placedOn = (date: string) =>
+      ({
+        kaiordRecordId: RECORD_ID,
+        placement: {
+          kind: "scheduled",
+          workoutScheduleId: "5001",
+          workoutId: "9",
+          date,
+        },
+      }) as unknown as ExportLedgerEntry;
+    const ribbon = (date: string, placed: string) => (
+      <EditorStateRibbon
+        state="modified"
+        recordId={RECORD_ID}
+        workoutDate={date}
+        placementRow={placedOn(placed)}
+        onSent={vi.fn()}
+      />
+    );
+    const { rerender } = render(ribbon(DATE, DATE));
+    fireEvent.click(screen.getByTestId("send-to-garmin-button"));
+    await screen.findByText(SENT_CLAIM);
+    // The coach moves it; Send week places the new date.
+    live.date = MOVED;
+    rerender(ribbon(MOVED, MOVED));
+
+    // Act
+    // The coach moves it back.
+    live.date = DATE;
+    rerender(ribbon(DATE, MOVED));
+
+    // Assert
+    expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
+    expect(screen.getByTestId("send-to-garmin-button")).toBeEnabled();
+  });
 });

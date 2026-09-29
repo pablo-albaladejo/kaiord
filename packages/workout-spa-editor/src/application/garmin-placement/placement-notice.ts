@@ -7,6 +7,7 @@
  * once its gate passes (`sendAfter`). The last run's outcome (`failed`,
  * `library-only`, a plain success) is ephemeral and fills the rest.
  */
+import { isGarminPlaced } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
 import { dismissableEntries } from "./placement-dismiss";
 import { gateOf } from "./placement-resolve";
@@ -29,17 +30,21 @@ const namesWorkoutDate = (result: PlacementResult): boolean =>
 /**
  * The last run, while it still describes the workout: a result naming the
  * workout's date is dropped once the workout's date is no longer the one
- * the run placed (the Garmin entry is still on that old date).
+ * the run placed, or once the ledger holds the workout on another date (a
+ * later send, such as Send week, placed it elsewhere).
  */
 export const currentRun = <
   R extends { result: PlacementResult; date?: string },
 >(
   run: R | undefined,
-  workoutDate: string | undefined
-): R | undefined =>
-  run && namesWorkoutDate(run.result) && run.date !== workoutDate
-    ? undefined
-    : run;
+  workoutDate: string | undefined,
+  row?: Row
+): R | undefined => {
+  if (!run || !namesWorkoutDate(run.result)) return run;
+  const placed = row?.placement;
+  const placedElsewhere = isGarminPlaced(placed) && placed.date !== run.date;
+  return run.date !== workoutDate || placedElsewhere ? undefined : run;
+};
 
 export const placementNotice = (
   row: Row | undefined,
