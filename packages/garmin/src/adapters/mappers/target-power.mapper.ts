@@ -17,5 +17,5 @@ export const resolvePercentFtpToWatts = (
   if (value.unit !== "percent_ftp") return value;
   if (!isUsableFtp(ftpWatts)) throw createMissingFtpError("garmin");
   if (value.value === undefined) return { unit: "watts" };
-  return { unit: "watts", value: Math.round((value.value / 100) * ftpWatts) };
+  return { unit: "watts", value: Math.round((value.value * ftpWatts) / 100) };
 };

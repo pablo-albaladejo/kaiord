@@ -39,6 +39,21 @@ describe("convertKrdTargetToGarmin percent_ftp power", () => {
     expect(result.targetValueTwo).toBe(F.HALF_OF_ODD_FTP_W);
   });
 
+  it.each(F.BOUNDARY_CASES)(
+    "should resolve $pct % of $ftpWatts W to $watts W at the half-watt boundary",
+    ({ pct, ftpWatts, watts }) => {
+      // Arrange
+      const target = percentFtp(pct);
+
+      // Act
+      const result = convertKrdTargetToGarmin(target, { ftpWatts });
+
+      // Assert
+      expect(result.targetValueOne).toBe(watts);
+      expect(result.targetValueTwo).toBe(watts);
+    }
+  );
+
   it("should throw MissingFtpError when no FTP is provided", () => {
     // Arrange
     const target = percentFtp(F.SWEET_SPOT_PCT);

@@ -88,4 +88,10 @@ export const FTP_RESOLUTION = {
   STEADY_W: 240,
   RANGE_LOW_W: 125,
   RANGE_HIGH_W: 188,
+  // Half-watt boundaries where `pct / 100 * ftp` lands a hair below .5
+  // in floating point and would round down; `pct * ftp / 100` does not.
+  BOUNDARY_CASES: [
+    { pct: 35, ftpWatts: 330, watts: 116 },
+    { pct: 57, ftpWatts: 150, watts: 86 },
+  ],
 } as const;
