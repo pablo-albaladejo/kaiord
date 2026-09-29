@@ -1,5 +1,6 @@
 /**
- * Which sources MAY send one data type, and whether each is switched on.
+ * Which sources MAY send one data type (or, for `export`, which destinations
+ * MAY receive it), and whether each is switched on.
  *
  * This is a different question from `source-of-truth-options`, and conflating
  * them is what left the capability unreachable: that module ranks the sources
@@ -23,7 +24,10 @@ import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
 
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
-import type { IntegrationPolicy } from "../../types/integration-policy";
+import type {
+  IntegrationPolicy,
+  IntegrationPolicyDirection,
+} from "../../types/integration-policy";
 import type { BridgeRouteSignals } from "./bridge-route-types";
 
 export type DataTypeRouteToggle = {
@@ -41,9 +45,10 @@ export const buildRouteToggles = (
   dataType: ManagedDataType,
   integrations: readonly IntegrationRegistryEntry[],
   routes: readonly IntegrationPolicy[],
-  signals: RouteToggleSignals
+  signals: RouteToggleSignals,
+  direction: IntegrationPolicyDirection = "import"
 ): DataTypeRouteToggle[] => {
-  const token = MANAGED_DATA_REGISTRY[dataType].capabilities.import;
+  const token = MANAGED_DATA_REGISTRY[dataType].capabilities[direction];
   if (token === undefined) return [];
   const on = new Set(
     routes.filter((route) => route.enabled).map((route) => route.bridgeId)
@@ -51,7 +56,7 @@ export const buildRouteToggles = (
   return integrations.flatMap((entry) => {
     const bridgeId = entry.bridgeId;
     if (entry.mechanism !== "bridge" || bridgeId === null) return [];
-    if (!signals.supportsRoute(bridgeId, dataType, "import")) return [];
+    if (!signals.supportsRoute(bridgeId, dataType, direction)) return [];
     const enabled = on.has(bridgeId);
     const offerable =
       signals.isBridgeConnected(bridgeId) && signals.announces(bridgeId, token);

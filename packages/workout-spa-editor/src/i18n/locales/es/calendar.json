@@ -112,8 +112,9 @@
     "retry": "Reintentar",
     "retryIn": "Reintentar en {{seconds}} s",
     "close": "Cerrar",
+    "openConnections": "Abrir Conexiones",
     "preflight": {
-      "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones y vuelve a enviar la semana.",
+      "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones (Entrenamiento → También se envía a) y vuelve a enviar la semana.",
       "no-bridge": "Instala la extensión Kaiord Garmin Bridge y vuelve a enviar la semana.",
       "no-session": "Inicia sesión en Garmin Connect en este navegador y vuelve a enviar la semana.",
       "insecure-context": "El calendario de Garmin necesita una página segura (HTTPS). No se ha enviado nada.",

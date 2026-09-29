@@ -95,6 +95,7 @@
     "from": "De",
     "sentTo": "También se envía a",
     "nowhere": "A ningún sitio",
+    "exportSwitches": "Destinos que reciben {{type}}",
     "noSource": "Sin fuente",
     "manySources": "{{count}} fuentes",
     "unrankedNote": "se guardan a la vez, ninguna tiene prioridad",

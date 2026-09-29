@@ -95,6 +95,7 @@
     "from": "From",
     "sentTo": "Also sent to",
     "nowhere": "Nowhere",
+    "exportSwitches": "Destinations that receive {{type}}",
     "noSource": "No source",
     "manySources": "{{count}} sources",
     "unrankedNote": "kept side by side, none ranked first",
