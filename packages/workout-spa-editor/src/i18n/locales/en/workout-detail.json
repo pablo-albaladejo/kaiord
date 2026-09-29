@@ -81,7 +81,7 @@
     },
     "updateExtension": "Update the extension",
     "failed": {
-      "busy": "This workout is being sent from another tab. Try again in a moment.",
+      "busy": "This workout is already being sent. Try again once that send ends.",
       "settling": "Garmin is still processing the last send. Try again in a minute.",
       "record-deleted": "This workout was deleted while it was being sent.",
       "guard-failed": "The workout changed while it was being sent. Try again.",

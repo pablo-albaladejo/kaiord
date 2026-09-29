@@ -20,6 +20,8 @@ export type PlacementRequest = {
   runLibraryPush: () => Promise<RecordExportResult>;
   onLibraryConfirmed?: (workoutId: GarminWorkoutId) => void;
   sendAnyway?: boolean;
+  /** The run's result, for the owning caller only (never a joiner). */
+  onSettled?: (result: PlacementResult) => void;
 };
 
 export type PhaseOne = { minted: boolean; row: Row } | PlacementResult;

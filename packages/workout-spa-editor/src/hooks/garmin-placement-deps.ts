@@ -7,14 +7,14 @@
 import type { Analytics } from "@kaiord/core";
 
 import { createWebLocksRecordLock } from "../adapters/locks/web-locks-record-lock";
-import type { PlacementResult } from "../application/garmin-placement/placement-result";
+import type { PlacementJoin } from "../application/garmin-placement/placement-join";
 import { SCHEDULE_IDS_IN_FIND } from "../application/garmin-placement/placement-timing";
 import type { PlacementPipelineDeps } from "../application/garmin-placement/push-workout-to-garmin-calendar";
 import { createGarminCalendarPort } from "./garmin-calendar-operations";
 import { ledgerRepo } from "./garmin-push-fn";
 import { getGarminExtensionId } from "./use-garmin-bridge-action-helpers";
 
-const joins = new Map<string, Promise<PlacementResult>>();
+const joins = new Map<string, PlacementJoin>();
 const calendar = createGarminCalendarPort(getGarminExtensionId);
 
 export const buildPlacementDeps = (

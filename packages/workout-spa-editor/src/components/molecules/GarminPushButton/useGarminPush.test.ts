@@ -82,6 +82,7 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
     await import("../../../test-utils/fake-garmin-calendar");
   const { createInMemoryLockManager } =
     await import("../../../test-utils/in-memory-record-lock");
+  const joins = new Map();
   return {
     buildPlacementDeps: (features: readonly string[]) => ({
       ledgerRepo: createInMemoryExportLedgerRepository(),
@@ -91,7 +92,7 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
       sleep: async () => undefined,
       features,
       locks: createInMemoryLockManager().port(),
-      joins: new Map(),
+      joins,
     }),
   };
 });
@@ -275,6 +276,27 @@ describe("useGarminPush", () => {
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
       result: "success",
     });
+  });
+
+  it("should fire garmin-synced once when a second push joins the running one", async () => {
+    // Arrange
+    mockPushWorkout.mockResolvedValue({
+      success: true,
+      garminWorkoutId: "1707805999",
+    });
+    const workout = makeWorkout();
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await Promise.all([result.current.push(), result.current.push()]);
+    });
+
+    // Assert
+    const synced = mockAnalyticsEvent.mock.calls.filter(
+      ([name]) => name === "garmin-synced"
+    );
+    expect(synced).toEqual([["garmin-synced", { result: "success" }]]);
   });
 
   it("should fire garmin-synced failure event when the bridge reports a failed push (an outcome that never throws)", async () => {

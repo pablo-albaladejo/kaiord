@@ -57,11 +57,15 @@ export const useGarminPush = (
           showError(error);
           throw error;
         });
-      let result: PlacementResult;
+      const synced = (result: PlacementResult) =>
+        analytics.event("garmin-synced", {
+          result: isPlacementSent(result) ? "success" : "failure",
+        });
       try {
         const deps = buildPlacementDeps(features, analytics);
         const gcn = await exportGcnWorkout(workout.krd);
-        result = await pushWorkoutToGarminCalendar(
+        // A joiner's run is the owner's: only the owner reports it.
+        return await pushWorkoutToGarminCalendar(
           deps,
           garminPlacementRequest(
             {
@@ -70,16 +74,19 @@ export const useGarminPush = (
               ledgerRepo: deps.ledgerRepo,
               pushWorkout: guardedPush,
             },
-            { onLibraryConfirmed: onSent, sendAnyway: options.sendAnyway }
+            {
+              onLibraryConfirmed: onSent,
+              sendAnyway: options.sendAnyway,
+              onSettled: synced,
+            }
           )
         );
       } catch (error: unknown) {
         showError(error);
-        result = failed("library-push-failed", true);
+        const result = failed("library-push-failed", true);
+        synced(result);
+        return result;
       }
-      const outcome = isPlacementSent(result) ? "success" : "failure";
-      analytics.event("garmin-synced", { result: outcome });
-      return result;
     },
     [
       workout,

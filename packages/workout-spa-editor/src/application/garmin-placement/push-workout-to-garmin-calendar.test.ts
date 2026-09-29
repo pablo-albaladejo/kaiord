@@ -217,6 +217,56 @@ describe("pushWorkoutToGarminCalendar — lock and pre-flight (AC-30, AC-34)", (
     expect(h.calendar.count("schedule")).toBe(1);
   });
 
+  it("should report the confirmed id to every caller that joined the run", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    h.calendar.state.beforeAnswer = () => gate;
+    const [onOwner, onEarly, onLate] = [vi.fn(), vi.fn(), vi.fn()];
+    const owner = h.push(D1, "v1", { onLibraryConfirmed: onOwner });
+    const early = h.push(D1, "v1", { onLibraryConfirmed: onEarly });
+    await vi.waitFor(() => expect(h.calendar.count("schedule")).toBe(1));
+
+    // Act
+    const late = h.push(D1, "v1", { onLibraryConfirmed: onLate });
+    release();
+    await Promise.all([owner, early, late]);
+
+    // Assert
+    for (const listener of [onOwner, onEarly, onLate])
+      expect(listener).toHaveBeenCalledExactlyOnceWith("1700000");
+  });
+
+  it("should settle only the owning run, never a joiner", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const [onOwner, onJoiner] = [vi.fn(), vi.fn()];
+
+    // Act
+    await Promise.all([
+      h.push(D1, "v1", { onSettled: onOwner }),
+      h.push(D1, "v1", { onSettled: onJoiner }),
+    ]);
+
+    // Assert
+    expect(onOwner).toHaveBeenCalledExactlyOnceWith({ kind: "scheduled" });
+    expect(onJoiner).not.toHaveBeenCalled();
+  });
+
+  it("should answer busy to a joiner that asked for another date", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+
+    // Act
+    const [owner, joiner] = await Promise.all([h.push(D1), h.push(D2)]);
+
+    // Assert
+    expect(owner).toEqual({ kind: "scheduled" });
+    expect(joiner).toEqual({ kind: "failed", reason: "busy", retryable: true });
+    expect(h.calendar.items).toMatchObject([{ date: D1 }]);
+  });
+
   it("should refuse a second tab with busy and 0 calls, library included", async () => {
     // Arrange
     const h = createPlacementHarness();

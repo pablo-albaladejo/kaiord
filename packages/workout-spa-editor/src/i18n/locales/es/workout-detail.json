@@ -81,7 +81,7 @@
     },
     "updateExtension": "Actualizar la extensión",
     "failed": {
-      "busy": "Este entrenamiento se está enviando desde otra pestaña. Inténtalo de nuevo en un momento.",
+      "busy": "Este entrenamiento ya se está enviando. Inténtalo de nuevo cuando termine ese envío.",
       "settling": "Garmin aún está procesando el último envío. Inténtalo de nuevo en un minuto.",
       "record-deleted": "Este entrenamiento se eliminó mientras se enviaba.",
       "guard-failed": "El entrenamiento cambió mientras se enviaba. Inténtalo de nuevo.",

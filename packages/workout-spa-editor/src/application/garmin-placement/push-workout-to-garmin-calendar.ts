@@ -2,13 +2,15 @@
  * The single entry point of every Garmin push (design §3.3): Phase 1 (the
  * library push), then Phase 2 (the calendar placement), under one Web Lock
  * per record. A second push of the record in the same tab joins the running
- * one; a lock held by another tab is `failed:busy` with 0 calls.
+ * one (`placement-join`); a lock held by another tab is `failed:busy` with
+ * 0 calls.
  */
 import type { Analytics } from "@kaiord/core";
 
 import { GARMIN_LEDGER_BRIDGE_ID } from "../../types/export-ledger";
 import { measuredPlacement } from "./placement-analytics";
 import type { PlacementDeps } from "./placement-deps";
+import { joinRun, ownJoin, type PlacementJoin } from "./placement-join";
 import { guardLibrary } from "./placement-library-guard";
 import {
   isPhaseOneResult,
@@ -31,7 +33,7 @@ export type PlacementPipelineDeps = Omit<PlacementDeps, "canFind"> & {
   /** Web Locks; `undefined` in a non-secure context. */
   locks: RecordLockPort | undefined;
   /** In-tab runs by record id, shared by every caller of the tab. */
-  joins: Map<string, Promise<PlacementResult>>;
+  joins: Map<string, PlacementJoin>;
   analytics?: Analytics;
 };
 
@@ -77,11 +79,14 @@ export const pushWorkoutToGarminCalendar = (
   deps: PlacementPipelineDeps,
   request: PlacementRequest
 ): Promise<PlacementResult> => {
-  const running = deps.joins.get(request.kaiordRecordId);
-  if (running) return running;
-  const run = measuredPlacement(deps, keyOf(request.kaiordRecordId), () =>
-    lockedPlace(deps, request)
-  ).finally(() => deps.joins.delete(request.kaiordRecordId));
-  deps.joins.set(request.kaiordRecordId, run);
-  return run;
+  const id = request.kaiordRecordId;
+  const running = deps.joins.get(id);
+  if (running) return joinRun(running, request);
+  const join = ownJoin(request, (owned) =>
+    measuredPlacement(deps, keyOf(id), () => lockedPlace(deps, owned)).finally(
+      () => deps.joins.delete(id)
+    )
+  );
+  deps.joins.set(id, join);
+  return join.result;
 };
