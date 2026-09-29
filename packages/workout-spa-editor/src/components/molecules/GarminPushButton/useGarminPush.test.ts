@@ -84,7 +84,8 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
     await import("../../../test-utils/in-memory-record-lock");
   const joins = new Map();
   return {
-    buildPlacementDeps: (features: readonly string[]) => ({
+    buildPlacementDeps: (features: readonly string[], analytics: unknown) => ({
+      analytics,
       ledgerRepo: createInMemoryExportLedgerRepository(),
       calendar: createFakeGarminCalendar().port,
       scheduleIdsInFind: true,
@@ -221,6 +222,38 @@ describe("useGarminPush", () => {
       status: "error",
       message: "Conversion failed",
     });
+  });
+
+  it.each([
+    ["the export throws before the pipeline starts", "export"],
+    ["the bridge push throws inside the pipeline", "push"],
+  ])("should emit exactly one placement event when %s", async (_n, where) => {
+    // Arrange
+    if (where === "export")
+      mockExportGcnWorkout.mockRejectedValue(new Error("x"));
+    else mockPushWorkout.mockRejectedValue(new Error("x"));
+    const { result } = renderHook(() => useGarminPush(makeWorkout()));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    const placements = mockAnalyticsEvent.mock.calls.filter(
+      ([name]) => name === "garmin-calendar-placement"
+    );
+    expect(placements).toEqual([
+      [
+        "garmin-calendar-placement",
+        {
+          result: "failed",
+          reason: "library-push-failed",
+          durationMs: expect.any(Number),
+          abandonedCount: 0,
+        },
+      ],
+    ]);
   });
 
   it("should set fallback error message when non-Error is thrown", async () => {
