@@ -1,80 +1,74 @@
-import { forwardRef, useCallback, useState } from "react";
+import { forwardRef, useState } from "react";
 
 import { isPlacementSent } from "../../../application/garmin-placement/placement-result";
-import { useTranslate } from "../../../i18n/use-translate";
+import { useGarminBridge } from "../../../contexts";
+import { useGarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { Button, type ButtonSize } from "../../atoms/Button";
-import { Icon, ICON_MAP } from "../../atoms/Icon";
-import { useGarminPush } from "../GarminPushButton/useGarminPush";
-
-type PushStatus = "idle" | "pushing" | "done";
+import type { ExportLedgerEntry } from "../../../types/export-ledger";
+import type { ButtonSize } from "../../atoms/Button";
+import { PlacementFeedback } from "../GarminPushButton/PlacementFeedback";
+import { useGarminPlacement } from "../GarminPushButton/useGarminPlacement";
+import { PushButtonFace, type PushStatus } from "./PushButtonFace";
 
 export type PushButtonProps = {
   workout: WorkoutRecord | undefined;
+  /** The workout's Garmin ledger row, read by the page's live query. */
+  placementRow?: ExportLedgerEntry;
   full?: boolean;
   size?: Extract<ButtonSize, "md" | "lg">;
 };
 
+/**
+ * The detail page's send control. It shares the editor's placement
+ * notice: the ledger-derived `uncertain` and dismissable entries, and the
+ * last run's ephemeral outcome (`failed`, `library-only`, a success).
+ */
 export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
-  ({ workout, full = false, size = "md" }, ref) => {
-    const t = useTranslate("workout-detail");
-    const { push } = useGarminPush(workout);
-    const [status, setStatus] = useState<PushStatus>("idle");
-    const widthClass = full ? "w-full" : "";
+  ({ workout, placementRow, full = false, size = "md" }, ref) => {
+    const notice = useGarminPlacementNotice(
+      workout?.id,
+      placementRow,
+      workout?.date
+    );
+    const placement = useGarminPlacement(workout, notice);
+    const { extensionInstalled, sessionActive } = useGarminBridge();
+    const [ran, setRan] = useState(false);
+    // A success whose date the workout left is dropped by the notice, so
+    // the send reopens and nothing claims the new date.
+    const { result } = placement;
+    const sent = ran && result !== undefined && isPlacementSent(result);
+    const status: PushStatus = placement.busy
+      ? "pushing"
+      : sent
+        ? "done"
+        : "idle";
 
-    const handlePush = useCallback(async () => {
-      setStatus("pushing");
-      try {
-        const result = await push();
-        setStatus(result && isPlacementSent(result) ? "done" : "idle");
-      } catch {
-        setStatus("idle");
-      }
-    }, [push]);
-
-    // Done is stated, not coloured: the emerald pill borrowed a hue that
-    // belongs to zone 3, and success is not part of this palette.
-    if (status === "done") {
-      return (
-        <Button
-          ref={ref}
-          size={size}
-          variant="secondary"
-          disabled
-          className={widthClass}
-        >
-          <Icon icon={ICON_MAP.check} size="sm" color="inherit" />
-          {t("footer.sent")}
-        </Button>
-      );
-    }
-
-    if (status === "pushing") {
-      return (
-        <Button
-          ref={ref}
-          size={size}
-          variant="primary"
-          loading
-          disabled
-          className={widthClass}
-        >
-          {t("footer.sending")}
-        </Button>
-      );
-    }
+    const onPush = async () => {
+      await placement.send().catch(() => undefined);
+      setRan(true);
+    };
 
     return (
-      <Button
-        ref={ref}
-        size={size}
-        variant="primary"
-        onClick={handlePush}
-        className={widthClass}
-      >
-        <Icon icon={ICON_MAP.watch} size="sm" color="inherit" />
-        {t("footer.send")}
-      </Button>
+      <div className={`flex flex-col gap-2 ${full ? "w-full" : ""}`}>
+        <PushButtonFace
+          ref={ref}
+          status={status}
+          size={size}
+          full={full}
+          onPush={() => void onPush()}
+          disabled={!extensionInstalled || !sessionActive}
+        />
+        {result && workout && (
+          <PlacementFeedback
+            result={result}
+            date={workout.date}
+            removable={placement.removable}
+            onConfirm={() => void placement.confirm()}
+            onSendAnyway={() => void placement.sendAnyway()}
+            onDismiss={(id) => void placement.dismiss(id)}
+          />
+        )}
+      </div>
     );
   }
 );

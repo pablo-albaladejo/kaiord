@@ -2,6 +2,8 @@
  * Week navigation, the view switch and the per-source sync buttons — the row
  * that stays on screen whatever the week's status banners are doing.
  */
+import type { ReactNode } from "react";
+
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import type { CalendarView } from "../../types/user-preferences";
 import { formatWeekLabel } from "../../utils/format-week-label";
@@ -24,6 +26,8 @@ export type CalendarNavRowProps = {
   coaching: ReturnType<typeof useCoachingActivities>;
   view?: CalendarView;
   onViewChange?: (next: CalendarView) => void;
+  /** Week-level actions, before "create workout" (e.g. "Send week"). */
+  actions?: ReactNode;
 };
 
 export function CalendarNavRow({
@@ -32,6 +36,7 @@ export function CalendarNavRow({
   coaching,
   view,
   onViewChange,
+  actions,
 }: CalendarNavRowProps) {
   return (
     <div className="flex items-center justify-between">
@@ -40,6 +45,7 @@ export function CalendarNavRow({
         {view && onViewChange && (
           <CalendarViewToggle view={view} onToggle={onViewChange} />
         )}
+        {actions}
         <CreateWorkoutCta origin="calendar" week={weekId} />
         {coaching.syncSources
           .filter((src) => src.linked)

@@ -28,6 +28,8 @@ export type EditorStateRibbonProps = {
       it: the source of its placement notice. */
   recordId?: string;
   placementRow?: ExportLedgerEntry;
+  /** The workout's date: a success naming another date is not shown. */
+  workoutDate?: string;
   profileId?: string;
   /** Persists the state transition with the Garmin library workout id,
       once the library push is confirmed. */
@@ -38,13 +40,14 @@ export function EditorStateRibbon({
   state,
   recordId,
   placementRow,
+  workoutDate,
   profileId,
   onSent,
 }: EditorStateRibbonProps) {
   const t = useTranslate("editor");
   const [, navigate] = useLocation();
   const gate = useGarminGate(profileId);
-  const notice = useGarminPlacementNotice(recordId, placementRow);
+  const notice = useGarminPlacementNotice(recordId, placementRow, workoutDate);
   const content = resolveRibbonContent(gate, state, needsAthlete(notice));
 
   if (!content) return null;

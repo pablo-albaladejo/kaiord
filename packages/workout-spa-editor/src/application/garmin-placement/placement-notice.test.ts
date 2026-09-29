@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
-import { placementNotice } from "./placement-notice";
+import { currentRun, placementNotice } from "./placement-notice";
 import { failed, type PlacementResult } from "./placement-result";
 import type { Row } from "./placement-row";
 import { POST_GATE_MS } from "./placement-timing";
@@ -154,5 +154,110 @@ describe("placementNotice", () => {
 
     // Assert
     expect(notice).toEqual({ removable: [] });
+  });
+});
+
+describe("currentRun", () => {
+  it.each([
+    {
+      name: "a success on the workout's date",
+      kind: "scheduled",
+      date: D1,
+      kept: true,
+    },
+    {
+      name: "a success on a date the workout left",
+      kind: "moved",
+      date: D2,
+      kept: false,
+    },
+    {
+      name: "a left-behind warning on a date the workout left",
+      kind: "duplicate-left",
+      date: D2,
+      kept: false,
+    },
+    {
+      name: "a dateless outcome after a date change",
+      kind: "library-only",
+      date: D2,
+      kept: true,
+    },
+  ])("should keep $name: $kept", ({ kind, date, kept }) => {
+    // Arrange
+    const run = {
+      result: { kind, reason: "bridge-outdated", dates: [] } as PlacementResult,
+      date,
+    };
+
+    // Act
+    const current = currentRun(run, D1);
+
+    // Assert
+    expect(current).toBe(kept ? run : undefined);
+  });
+});
+
+describe("currentRun against the ledger", () => {
+  const SCHEDULED = { kind: "scheduled", workoutScheduleId: "5001" };
+  const UNCONFIRMED = { kind: "unconfirmed", supersedes: [] };
+
+  it.each([
+    {
+      name: "a ledger scheduled elsewhere",
+      placement: SCHEDULED,
+      date: D2,
+      kept: false,
+    },
+    {
+      name: "a ledger unconfirmed elsewhere",
+      placement: UNCONFIRMED,
+      date: D2,
+      kept: false,
+    },
+    {
+      name: "a ledger on the run's date",
+      placement: SCHEDULED,
+      date: D1,
+      kept: true,
+    },
+    {
+      name: "an uncertain ledger elsewhere",
+      placement: { kind: "uncertain" },
+      date: D2,
+      kept: true,
+    },
+  ])(
+    "should keep a sent run with $name: $kept",
+    ({ placement, date, kept }) => {
+      // Arrange
+      const run = {
+        result: { kind: "scheduled" } as PlacementResult,
+        date: D1,
+      };
+      const row = rowWith({
+        placement: { ...placement, workoutId: WORKOUT, date },
+      } as Partial<Row>);
+
+      // Act
+      const current = currentRun(run, D1, row);
+
+      // Assert
+      expect(current).toBe(kept ? run : undefined);
+    }
+  );
+
+  it("should keep a dateless run whatever the ledger holds", () => {
+    // Arrange
+    const run = { result: failed("library-push-failed", true), date: D1 };
+    const row = rowWith({
+      placement: { ...SCHEDULED, workoutId: WORKOUT, date: D2 },
+    } as Partial<Row>);
+
+    // Act
+    const current = currentRun(run, D1, row);
+
+    // Assert
+    expect(current).toBe(run);
   });
 });

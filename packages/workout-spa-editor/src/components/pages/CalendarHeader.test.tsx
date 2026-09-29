@@ -4,6 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import { CalendarHeader } from "./CalendarHeader";
 
+vi.mock("./use-calendar-send-week", () => ({
+  useCalendarSendWeek: () => ({ offered: false, state: { phase: "idle" } }),
+}));
 vi.mock("./CalendarEmptyBanners", () => ({
   CalendarEmptyBanners: () => <div data-testid="mock-empty-banners" />,
 }));

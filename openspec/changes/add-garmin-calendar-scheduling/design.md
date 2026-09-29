@@ -210,6 +210,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 ### Follow-ups
 
 - a liveness GET
+- snapshot writers of a workout's row outside a transaction: the batch processor (`batch-process-one.ts:51`) and the process dialog's skip and unskip (`use-dialog-handlers.ts:64,79`) `put` a copy read earlier, so a coach move or a push stamp that lands in between is rolled back. They predate this change and do not touch the Garmin placement; the fix is the re-read-and-write-in-one-transaction pattern that the editor save, `applyCoachDateMoves`, `placeRecord` and `rescheduleWorkout` now use
 - unscheduling when a workout is deleted in Kaiord
 - following the coach for session-matched workouts
 - matching a coach's delete + recreate
@@ -471,11 +472,13 @@ A `Placed` the athlete moved inside Garmin to another month is absent from the r
 - Takes the lock separately for each item.
 - Can be cancelled between items.
 
-**Pre-flight (once per run):** export route, Web Locks. A missing `calendar-write-v1` does not stop the run: each eligible item ends `library-only{bridge-outdated}`.
+**Pre-flight (once per run):** export route, the bridge installed, an active Garmin session, Web Locks. A missing `calendar-write-v1` does not stop the run: each eligible item ends `library-only{bridge-outdated}`.
 
-**Statuses (8):** `scheduled`, `moved`, `unchanged`, `duplicate-left`, `uncertain`, `library-only`, `not-eligible`, `failed`. `library-only` can only be `bridge-outdated` in bulk, because the bulk pre-flight requires Web Locks. It is shown in the warning tone, counted apart from the failures, and explained by one notice per run.
+**Statuses (8):** `scheduled`, `moved`, `unchanged`, `duplicate-left`, `uncertain`, `library-only`, `not-eligible`, `failed`. `library-only` can only be `bridge-outdated` in bulk, because the bulk pre-flight requires Web Locks. Each item links to its workout page (no per-entry answers in the panel), and "Retry" stays disabled with a countdown until the earliest `retryAfter` has passed. It is shown in the warning tone, counted apart from the failures, and explained by one notice per run.
 
 **"Retry"** re-runs only the retryable failures whose `retryAfter` has passed and, once the bridge reports `calendar-write-v1`, the `library-only{bridge-outdated}` items.
+
+**Workout state:** a bulk item records a confirmed push id with `recordGarminPush`, as the chat tool does (`ready`/`modified` → `pushed`, other states keep theirs). The editor's path, which first moves `structured` to `ready` ("sending implies accepting"), differs on purpose: bulk never implies accepting a draft.
 
 ### 3.8 Entry points and UI
 
@@ -643,6 +646,7 @@ Known residuals, both breaking the atomic-sync assumption: the Drive adapter che
 - Each write re-reads the record and bumps `updatedAt`.
 - It leaves `modifiedAt` and `state` untouched.
 - `SyncWeekResult` gains the two counters, shown with static en/es copy.
+- **Notice:** a dismissible banner on the synced week after a manual or automatic sync with moves. A sync never pushes: Garmin is re-placed on the next push (AC-41). Dismissal is per week and per sync result.
 
 ## Bridge contract details settled in T2
 

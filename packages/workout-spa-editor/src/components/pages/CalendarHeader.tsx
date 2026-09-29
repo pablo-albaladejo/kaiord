@@ -4,11 +4,19 @@
  * line cap.
  */
 
+import {
+  useCoachMoveNotice,
+  useCoachMoveNoticeActions,
+} from "../../contexts/coach-move-notice-context";
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import type { CalendarView } from "../../types/user-preferences";
+import { CoachMoveNotice } from "../molecules/CoachMoveNotice/CoachMoveNotice";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
 import { CalendarNavRow } from "./CalendarNavRow";
+import { SendWeekButton, SendWeekSection } from "./CalendarSendWeek";
+import { useCalendarSendWeek } from "./use-calendar-send-week";
 import type { useCalendarState } from "./use-calendar-state";
 import { useLatestSessionDate } from "./use-latest-session-date";
 
@@ -26,8 +34,22 @@ export function CalendarHeader({
   onViewChange,
 }: CalendarHeaderProps) {
   const latestDate = useLatestSessionDate(s.latestWorkout?.date);
+  const profileId = useActiveProfileLive()?.id ?? null;
+  const moves = useCoachMoveNotice(profileId, s.data.weekStart);
+  const { dismiss: dismissMoves } = useCoachMoveNoticeActions();
+  const send = useCalendarSendWeek(
+    profileId,
+    s.data.weekId,
+    s.data.workoutsByDay
+  );
   return (
     <>
+      {moves && profileId && (
+        <CoachMoveNotice
+          moves={moves}
+          onDismiss={() => dismissMoves(profileId, s.data.weekStart)}
+        />
+      )}
       <CalendarEmptyBanners
         weekId={s.data.weekId}
         hasAnyWorkouts={s.hasAnyWorkouts}
@@ -58,7 +80,9 @@ export function CalendarHeader({
         coaching={coaching}
         view={view}
         onViewChange={onViewChange}
+        actions={<SendWeekButton send={send} />}
       />
+      <SendWeekSection send={send} weekId={s.data.weekId} />
     </>
   );
 }

@@ -24,13 +24,16 @@ const buildRaw = (activity: CoachingActivityRecord): WorkoutRecord["raw"] => ({
   rawHash: "",
 });
 
-export type StructuredCoachingWorkoutInput = {
+export type RawCoachingWorkoutInput = {
   id: string;
   activity: CoachingActivityRecord;
   namespacedSourceId: string;
+  now: string;
+};
+
+export type StructuredCoachingWorkoutInput = RawCoachingWorkoutInput & {
   krd: KRD;
   aiMeta: AiMeta | null;
-  now: string;
   // Resolved KRD sport (NOT the raw Train2Go key on activity.sport) so the
   // record carries the same sport as its KRD instead of collapsing to a raw
   // key the calendar/filters cannot interpret.
@@ -38,24 +41,18 @@ export type StructuredCoachingWorkoutInput = {
   subSport?: SubSport;
 };
 
-export const buildStructuredCoachingWorkout = (
-  input: StructuredCoachingWorkoutInput
-): WorkoutRecord => ({
+/** The fields both builders share: identity, dates, source and stamps. */
+const baseRecord = (input: RawCoachingWorkoutInput) => ({
   id: input.id,
   profileId: input.activity.profileId,
   date: input.activity.date,
-  sport: input.sport,
+  coachDate: input.activity.date,
   source: input.activity.source,
   sourceId: input.namespacedSourceId,
   planId: null,
-  state: "structured",
   raw: buildRaw(input.activity),
-  // Coach description is the canonical workout-level note (krd-format); also
-  // mirrored into raw.description above for the sidebar.
-  krd: withCoachNotes(input.krd, input.activity.description),
   lastProcessingError: null,
   feedback: null,
-  aiMeta: input.aiMeta,
   garminPushId: null,
   tags: [],
   previousState: null,
@@ -64,12 +61,17 @@ export const buildStructuredCoachingWorkout = (
   updatedAt: input.now,
 });
 
-export type RawCoachingWorkoutInput = {
-  id: string;
-  activity: CoachingActivityRecord;
-  namespacedSourceId: string;
-  now: string;
-};
+export const buildStructuredCoachingWorkout = (
+  input: StructuredCoachingWorkoutInput
+): WorkoutRecord => ({
+  ...baseRecord(input),
+  sport: input.sport,
+  state: "structured",
+  // Coach description is the canonical workout-level note (krd-format); also
+  // mirrored into raw.description for the sidebar.
+  krd: withCoachNotes(input.krd, input.activity.description),
+  aiMeta: input.aiMeta,
+});
 
 /**
  * Raw-only coaching workout (no structured KRD). Used for non-trainable
@@ -78,23 +80,9 @@ export type RawCoachingWorkoutInput = {
 export const buildRawCoachingWorkout = (
   input: RawCoachingWorkoutInput
 ): WorkoutRecord => ({
-  id: input.id,
-  profileId: input.activity.profileId,
-  date: input.activity.date,
+  ...baseRecord(input),
   sport: input.activity.sport,
-  source: input.activity.source,
-  sourceId: input.namespacedSourceId,
-  planId: null,
   state: "raw",
-  raw: buildRaw(input.activity),
   krd: null,
-  lastProcessingError: null,
-  feedback: null,
   aiMeta: null,
-  garminPushId: null,
-  tags: [],
-  previousState: null,
-  createdAt: input.now,
-  modifiedAt: null,
-  updatedAt: input.now,
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createInMemoryWorkoutRepository } from "../test-utils/in-memory-workout-repository";
+import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../types/calendar-record";
 import { rescheduleWorkout, WorkoutNotFoundError } from "./reschedule-workout";
 
@@ -31,11 +31,12 @@ const makeWorkout = (id: string, date: string): WorkoutRecord => ({
 describe("rescheduleWorkout", () => {
   it("should update the workout's date to the target day", async () => {
     // Arrange
-    const repo = createInMemoryWorkoutRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.workouts;
     await repo.put(makeWorkout("w1", "2026-04-13"));
 
     // Act
-    await rescheduleWorkout(repo, "w1", "2026-04-20");
+    await rescheduleWorkout(persistence, "w1", "2026-04-20");
 
     // Assert
     const updated = await repo.getById("w1");
@@ -44,12 +45,13 @@ describe("rescheduleWorkout", () => {
 
   it("should preserve every non-date field on the workout", async () => {
     // Arrange
-    const repo = createInMemoryWorkoutRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.workouts;
     const original = makeWorkout("w1", "2026-04-13");
     await repo.put(original);
 
     // Act
-    await rescheduleWorkout(repo, "w1", "2026-04-20");
+    await rescheduleWorkout(persistence, "w1", "2026-04-20");
 
     // Assert
     const updated = await repo.getById("w1");
@@ -58,13 +60,13 @@ describe("rescheduleWorkout", () => {
 
   it("should throw WorkoutNotFoundError when the workout does not exist", async () => {
     // Arrange
-    const repo = createInMemoryWorkoutRepository();
+    const persistence = createInMemoryPersistence();
 
     // Act
 
     // Assert
     await expect(
-      rescheduleWorkout(repo, "missing", "2026-04-20")
+      rescheduleWorkout(persistence, "missing", "2026-04-20")
     ).rejects.toBeInstanceOf(WorkoutNotFoundError);
   });
 });

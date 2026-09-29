@@ -58,7 +58,11 @@ describe("reconciliation deletes", () => {
 
     // Act
     const deleted = await persistSyncedWeek(
-      { coaching: port.coaching, coachingSyncState: port.coachingSyncState },
+      {
+        coaching: port.coaching,
+        coachingSyncState: port.coachingSyncState,
+        workouts: port.workouts,
+      },
       {
         profileId: PROFILE_ID,
         source: SOURCE,
@@ -68,7 +72,7 @@ describe("reconciliation deletes", () => {
     );
 
     // Assert
-    expect(deleted).toBe(1);
+    expect(deleted.orphansDeleted).toBe(1);
     expect(await port.coaching.getById(orphan.id)).toBeUndefined();
     expect(await port.tombstones.list()).toEqual([]);
   });

@@ -26,6 +26,9 @@ export const workoutRecordSchema = z.object({
   sport: z.string(),
   source: z.string(),
   sourceId: z.string().nullable(),
+  // The coach's date for a coaching-built workout: the baseline a later
+  // coach move is detected against (follow the coach). Never athlete-edited.
+  coachDate: z.iso.date().optional(),
   planId: z.string().nullable(),
   state: workoutStateSchema,
   raw: workoutRawSchema.nullable(),

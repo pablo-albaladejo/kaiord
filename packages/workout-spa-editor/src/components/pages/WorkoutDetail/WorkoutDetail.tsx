@@ -18,7 +18,7 @@ export default function WorkoutDetail({ id }: WorkoutDetailProps) {
   const params = new URLSearchParams(search);
   const origin = parseBackOrigin(params.get("from"));
   const weekParam = params.get("week");
-  const { record, loading } = useWorkoutDetailRecord(id);
+  const { record, placementRow, loading } = useWorkoutDetailRecord(id);
   const model = useWorkoutDetailModel(record);
 
   const onBack = useCallback(
@@ -36,6 +36,7 @@ export default function WorkoutDetail({ id }: WorkoutDetailProps) {
   return (
     <WorkoutDetailView
       record={record}
+      placementRow={placementRow}
       model={model}
       onBack={onBack}
       onEdit={onEdit}

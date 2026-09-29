@@ -23,6 +23,7 @@ import {
   readGarminStubState,
   releaseGarminStub,
 } from "./helpers/garmin-bridge-stub";
+import { openDetailWhenReady } from "./helpers/garmin-calendar-seed";
 import { seedEnabledGarminExportPolicy } from "./helpers/garmin-ready-gate";
 import {
   clearDexie,
@@ -156,11 +157,13 @@ test.describe("Garmin calendar placement", () => {
     await page.reload();
 
     // Act
-    await page.goto(`/workout/view/${workoutId}`);
+    await openDetailWhenReady(page, workoutId);
     await page.getByRole("button", { name: /send to garmin/i }).click();
 
     // Assert
-    await expect(page.getByText("On your Garmin")).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "On your Garmin" })
+    ).toBeVisible({
       timeout: PLACEMENT_TIMEOUT_MS,
     });
     const actions = await garminStubActions(page);

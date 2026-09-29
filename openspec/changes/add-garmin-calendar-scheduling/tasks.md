@@ -147,25 +147,26 @@
 
 ## 7. Follow the coach (T6, PR-4)
 
-- [ ] 7.1 `coachDate` set by all three builders (AC-36).
-- [ ] 7.2 `applyCoachDateMoves` in `persistSyncedWeek`, the decision table,
+- [x] 7.1 `coachDate` set by all three builders (AC-36).
+- [x] 7.2 `applyCoachDateMoves` in `persistSyncedWeek`, the decision table,
       the two `SyncWeekResult` counters and their copy (AC-37..AC-41).
 
 ## 8. Send week (T7, PR-4)
 
-- [ ] 8.1 `select-week-push-candidates`, `send-week-to-garmin`, the hook, the
+- [x] 8.1 `select-week-push-candidates`, `send-week-to-garmin`, the hook, the
       organism, the `CalendarHeader` action and locales (AC-42..AC-45).
-- [ ] 8.2 Carried over from T5: the workout detail page's `PushButton`
+- [x] 8.2 Carried over from T5: the workout detail page's `PushButton`
       shows only sent / idle. Reuse the editor's placement panel there
       (the ledger-derived `uncertain` and dismissable entries, and the
       ephemeral `failed` / `library-only` outcome).
 
 ## 9. Docs, e2e, gates and manual validation (T8, PR-4)
 
-- [ ] 9.1 Privacy policy: calendar read (filtered on the device), write and
+- [x] 9.1 Privacy policy: calendar read (filtered on the device), write and
       delete; the privacy-policy check passes (AC-46).
-- [ ] 9.2 `packages/garmin/docs/API-FINDINGS.md`: the schedule calls.
-- [ ] 9.3 `e2e/garmin-calendar-{bulk,move,ambiguity}.spec.ts`.
+- [x] 9.2 `packages/garmin/docs/API-FINDINGS.md`: the schedule calls.
+- [x] 9.3 `e2e/garmin-calendar-{bulk,move,ambiguity}.spec.ts`.
 - [ ] 9.4 Manual E2E on a real Train2Go week (AC-47); evidence here, without
-      tokens, and test entities removed afterwards.
-- [ ] 9.5 `pnpm -r test && pnpm -r build && pnpm lint` pass (AC-48).
+      tokens, and test entities removed afterwards. Steps, evidence and
+      cleanup: `manual-e2e.md`.
+- [x] 9.5 `pnpm -r test && pnpm -r build && pnpm lint` pass (AC-48).

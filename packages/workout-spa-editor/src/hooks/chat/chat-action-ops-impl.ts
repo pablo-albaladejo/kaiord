@@ -48,6 +48,8 @@ export const doSyncCoaching = async (
       coaching: persistence.coaching,
       transport,
       coachingSyncState: persistence.coachingSyncState,
+      workouts: persistence.workouts,
+      transaction: persistence.transaction,
       integrationPolicy: persistence.integrationPolicy,
     },
     profileId,

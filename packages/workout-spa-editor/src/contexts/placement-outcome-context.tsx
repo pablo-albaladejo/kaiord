@@ -15,9 +15,12 @@ import {
 
 import type { PlacementResult } from "../application/garmin-placement/placement-result";
 
+/** A run's outcome and the workout date it ran for. */
+export type LastRun = { result: PlacementResult; date?: string };
+
 type Outcomes = {
-  get: (recordId: string) => PlacementResult | undefined;
-  set: (recordId: string, result: PlacementResult | undefined) => void;
+  get: (recordId: string) => LastRun | undefined;
+  set: (recordId: string, run: LastRun | undefined) => void;
 };
 
 const PlacementOutcomeContext = createContext<Outcomes | null>(null);
@@ -27,14 +30,14 @@ export const PlacementOutcomeProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [outcomes, setOutcomes] = useState<
-    ReadonlyMap<string, PlacementResult>
-  >(new Map());
+  const [outcomes, setOutcomes] = useState<ReadonlyMap<string, LastRun>>(
+    new Map()
+  );
   const set = useCallback(
-    (recordId: string, result: PlacementResult | undefined) =>
+    (recordId: string, run: LastRun | undefined) =>
       setOutcomes((prev) => {
         const next = new Map(prev);
-        if (result) next.set(recordId, result);
+        if (run) next.set(recordId, run);
         else next.delete(recordId);
         return next;
       }),
@@ -54,10 +57,10 @@ export const PlacementOutcomeProvider = ({
 /** Outside a provider the outcome is local to the caller. */
 export const usePlacementOutcome = (recordId: string | undefined) => {
   const shared = useContext(PlacementOutcomeContext);
-  const [local, setLocal] = useState<PlacementResult>();
+  const [local, setLocal] = useState<LastRun>();
   const result = shared && recordId ? shared.get(recordId) : local;
   const set = useCallback(
-    (next: PlacementResult | undefined) =>
+    (next: LastRun | undefined) =>
       shared && recordId ? shared.set(recordId, next) : setLocal(next),
     [shared, recordId]
   );

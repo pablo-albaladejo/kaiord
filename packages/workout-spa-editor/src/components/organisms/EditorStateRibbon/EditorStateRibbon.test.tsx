@@ -4,16 +4,21 @@
  * per-second countdown of a posted attempt's gate.
  */
 
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { PlacementOutcomeProvider } from "../../../contexts/placement-outcome-context";
 import type { ExportLedgerEntry } from "../../../types/export-ledger";
 import type { GarminGate } from "./use-garmin-gate";
 
 const gate = vi.hoisted(() => ({ current: "ready" as GarminGate }));
+const live = vi.hoisted(() => ({ date: "2026-10-05" }));
+const push = vi.hoisted(() => vi.fn());
 
 const RECORD_ID = "record-1";
 const DATE = "2026-10-05";
+const MOVED = "2026-10-07";
+const SENT_CLAIM = /On your Garmin calendar on/;
 const MS_BEFORE_GATE = 5_000;
 
 vi.mock("./use-garmin-gate", () => ({
@@ -30,7 +35,7 @@ vi.mock("../../../contexts", () => ({
 }));
 
 vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: () => ({ id: "record-1", date: "2026-10-05" }),
+  useLiveQuery: () => ({ id: "record-1", date: live.date }),
 }));
 
 vi.mock("../../../adapters/dexie/dexie-database", () => ({
@@ -42,7 +47,7 @@ vi.mock("../../../hooks/use-record-lock-held", () => ({
 }));
 
 vi.mock("../../molecules/GarminPushButton/useGarminPush", () => ({
-  useGarminPush: () => ({ push: vi.fn() }),
+  useGarminPush: () => ({ push }),
 }));
 
 vi.mock("../../molecules/GarminPushButton/useGarminPlacementActions", () => ({
@@ -112,5 +117,74 @@ describe("EditorStateRibbon", () => {
     );
     expect(within(region).queryAllByRole("button")).toEqual([]);
     expect(screen.getByRole("button")).toBeInTheDocument();
+  });
+
+  it("should drop a sent claim once the workout's date moved, across a reopen", async () => {
+    // Arrange
+    gate.current = "ready";
+    live.date = DATE;
+    push.mockResolvedValueOnce({ kind: "scheduled" });
+    const page = (date: string) => (
+      <PlacementOutcomeProvider>
+        <EditorStateRibbon
+          key={date}
+          state="modified"
+          recordId={RECORD_ID}
+          workoutDate={date}
+          onSent={vi.fn()}
+        />
+      </PlacementOutcomeProvider>
+    );
+    const { rerender } = render(page(DATE));
+    fireEvent.click(screen.getByTestId("send-to-garmin-button"));
+    await screen.findByText(SENT_CLAIM);
+
+    // Act
+    live.date = MOVED;
+    rerender(page(MOVED));
+
+    // Assert
+    expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
+  });
+
+  it("should drop a sent claim on a date Garmin no longer holds", async () => {
+    // Arrange
+    gate.current = "ready";
+    live.date = DATE;
+    push.mockResolvedValueOnce({ kind: "scheduled" });
+    const placedOn = (date: string) =>
+      ({
+        kaiordRecordId: RECORD_ID,
+        placement: {
+          kind: "scheduled",
+          workoutScheduleId: "5001",
+          workoutId: "9",
+          date,
+        },
+      }) as unknown as ExportLedgerEntry;
+    const ribbon = (date: string, placed: string) => (
+      <EditorStateRibbon
+        state="modified"
+        recordId={RECORD_ID}
+        workoutDate={date}
+        placementRow={placedOn(placed)}
+        onSent={vi.fn()}
+      />
+    );
+    const { rerender } = render(ribbon(DATE, DATE));
+    fireEvent.click(screen.getByTestId("send-to-garmin-button"));
+    await screen.findByText(SENT_CLAIM);
+    // The coach moves it; Send week places the new date.
+    live.date = MOVED;
+    rerender(ribbon(MOVED, MOVED));
+
+    // Act
+    // The coach moves it back.
+    live.date = DATE;
+    rerender(ribbon(DATE, MOVED));
+
+    // Assert
+    expect(screen.queryByText(SENT_CLAIM)).not.toBeInTheDocument();
+    expect(screen.getByTestId("send-to-garmin-button")).toBeEnabled();
   });
 });
