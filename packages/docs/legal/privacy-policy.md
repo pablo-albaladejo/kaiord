@@ -7,7 +7,7 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-09-28
+**Last updated:** 2026-09-29
 
 This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
@@ -32,6 +32,8 @@ The Kaiord Garmin Bridge Chrome extension connects the Kaiord workout editor to 
 - **OAuth Token**: The extension mints an OAuth token by reusing your existing Garmin single-sign-on session — it exchanges that session for a short-lived service ticket, then for an OAuth token — and stores the token in `chrome.storage.local` so it can call Garmin's API on your behalf across service-worker restarts. The token is sent only to Garmin (as a Bearer credential) and never leaves your device otherwise.
 - **No Password**: The extension never reads, stores, or transmits your Garmin Connect password, and never sees it. Authentication reuses the session you already established by signing in to Garmin Connect in your browser.
 - **Body-Composition Upload**: When you choose to sync a measurement, the extension uploads a body-composition record (your weight plus derived metrics such as body-fat percentage) to Garmin Connect as a FIT file, using the `write:body` capability. It only ever sends the data you supply from the editor; it never reads your Garmin body-composition history.
+- **Calendar Placement**: When you push or send workouts from the editor, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete); it never deletes calendar entries Kaiord did not place, and never deletes library workouts.
+- **Calendar Read, Filtered on Your Device**: To confirm a placement Garmin did not clearly confirm, the extension reads that month of your Garmin Connect calendar. The read is filtered inside the extension's service worker: only the entries of the workout being placed — each entry's schedule id and date — reach the Kaiord editor. The rest of your calendar (activities, other workouts, titles, metrics) is discarded on your device, and nothing is sent to a Kaiord-operated server.
 - **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with Garmin (`sso.garmin.com`, `connectapi.garmin.com`, `connect.garmin.com`) and allowed Kaiord origins (to exchange workout and body-composition data with the editor).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 

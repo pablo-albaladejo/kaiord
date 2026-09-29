@@ -103,7 +103,7 @@ export const BRIDGE_REGISTRY = {
 // its 13 rules with the guard silent — a floor with no regression power,
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
-  [GARMIN_SECTION]: 9,
+  [GARMIN_SECTION]: 12,
   [TRAIN2GO_SECTION]: 8,
   [TANITA_SECTION]: 11,
   [TRAININGPEAKS_SECTION]: 13,
@@ -234,6 +234,21 @@ export const REQUIRED_RULES = [
     label: "Garmin write scope disclosed (write:body upload)",
     section: GARMIN_SECTION,
     re: /`write:body`/,
+  },
+  {
+    label: "Garmin calendar write disclosed",
+    section: GARMIN_SECTION,
+    re: /places each workout on its date in your Garmin Connect calendar/i,
+  },
+  {
+    label: "Garmin calendar delete limited to superseded Kaiord-placed entries",
+    section: GARMIN_SECTION,
+    re: /deletes the old entry that Kaiord itself placed and has since superseded[\s\S]*?never deletes library workouts/i,
+  },
+  {
+    label: "Garmin calendar read filtered on the device",
+    section: GARMIN_SECTION,
+    re: /filtered inside the extension's service worker[\s\S]*?nothing is sent to a Kaiord-operated server/i,
   },
   {
     label: "Garmin no-third-party-sharing stated",
