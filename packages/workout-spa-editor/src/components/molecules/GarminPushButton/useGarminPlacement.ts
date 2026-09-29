@@ -29,19 +29,20 @@ export const useGarminPlacement = (
   const { push } = useGarminPush(workout, onSent);
   const actions = useGarminPlacementActions(workout?.id);
   const [busy, setBusy] = useState(false);
-  const { setLastRun, result } = notice;
+  const { setLastRun, result, placedDate } = notice;
+  const date = workout?.date;
 
   const run = useCallback(
     async (action: () => Promise<PlacementResult | undefined>) => {
       setBusy(true);
       try {
         const next = await action();
-        if (next) setLastRun(next);
+        if (next) setLastRun(next, date);
       } finally {
         setBusy(false);
       }
     },
-    [setLastRun]
+    [setLastRun, date]
   );
 
   const dismiss = useCallback(
@@ -52,9 +53,9 @@ export const useGarminPlacement = (
       const done = await actions.dismiss(workoutScheduleId);
       // The warning keeps the dates still left behind; none left clears it.
       if (done && result?.kind === "duplicate-left")
-        setLastRun(withoutDate(result.dates, entry?.date));
+        setLastRun(withoutDate(result.dates, entry?.date), placedDate);
     },
-    [actions, notice.removable, result, setLastRun]
+    [actions, notice.removable, result, placedDate, setLastRun]
   );
 
   return {

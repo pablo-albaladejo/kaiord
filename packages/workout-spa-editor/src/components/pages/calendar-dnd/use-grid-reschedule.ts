@@ -14,7 +14,7 @@
 import { useCallback } from "react";
 
 import { db } from "../../../adapters/dexie/dexie-database";
-import { createDexieWorkoutRepository } from "../../../adapters/dexie/dexie-workout-repository";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
 import { rescheduleWorkout } from "../../../application/reschedule-workout";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -26,8 +26,8 @@ export function useGridReschedule() {
 
   const onDrop = useCallback(
     (workoutId: string, targetDayISO: string): void => {
-      const repo = createDexieWorkoutRepository(db);
-      rescheduleWorkout(repo, workoutId, targetDayISO).catch(() => {
+      const persistence = createDexiePersistence(db);
+      rescheduleWorkout(persistence, workoutId, targetDayISO).catch(() => {
         toast.error(t("reschedule.moveFailed"));
       });
     },

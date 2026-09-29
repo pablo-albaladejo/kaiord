@@ -77,6 +77,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           state={record.state}
           recordId={record.id}
           placementRow={placementRow}
+          workoutDate={record.date}
           profileId={profileId ?? undefined}
           onSent={(garminWorkoutId) => void pushWorkout(garminWorkoutId)}
         />

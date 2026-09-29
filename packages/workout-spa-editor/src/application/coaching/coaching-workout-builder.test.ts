@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { KRD } from "../../types/schemas";
 import { getStructuredWorkout } from "../../utils/structured-workout";
-import { buildStructuredCoachingWorkout } from "./coaching-workout-builder";
+import {
+  buildRawCoachingWorkout,
+  buildStructuredCoachingWorkout,
+} from "./coaching-workout-builder";
 
 const activity = (description?: string): CoachingActivityRecord => ({
   id: "p1:train2go:42",
@@ -57,5 +60,29 @@ describe("buildStructuredCoachingWorkout coach notes", () => {
 
     // Assert
     expect(getStructuredWorkout(record.krd as KRD)?.notes).toBeUndefined();
+  });
+});
+
+describe("coaching workout builders coach date", () => {
+  it("should stamp the coach date on a structured workout", () => {
+    // Arrange
+    const input = baseInput();
+
+    // Act
+    const record = buildStructuredCoachingWorkout(input);
+
+    // Assert
+    expect(record.coachDate).toBe(input.activity.date);
+  });
+
+  it("should stamp the coach date on a raw workout", () => {
+    // Arrange
+    const input = baseInput();
+
+    // Act
+    const record = buildRawCoachingWorkout(input);
+
+    // Assert
+    expect(record.coachDate).toBe(input.activity.date);
   });
 });

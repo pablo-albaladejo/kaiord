@@ -94,5 +94,54 @@
     "headline_other": "{{count}} sesiones están listas pero no pueden llegar a tu reloj",
     "consequence": "Garmin no tiene API pública para entrenos, así que la extensión puente hace la entrega. Hasta instalarla, descargar el fichero e importarlo a mano es la única vía.",
     "cta": "Instalar el puente"
+  },
+  "coachMoves": {
+    "moved_one": "{{count}} sesión se ha movido a la nueva fecha del entrenador.",
+    "moved_other": "{{count}} sesiones se han movido a las nuevas fechas del entrenador.",
+    "overridden_one": "{{count}} de ellas sustituye un día que habías elegido.",
+    "overridden_other": "{{count}} de ellas sustituyen días que habías elegido.",
+    "sendHint": "Envía la semana para actualizar Garmin.",
+    "dismiss": "Descartar"
+  },
+  "sendWeek": {
+    "action": "Enviar semana",
+    "title": "Enviar semana a Garmin",
+    "progress": "{{done}} de {{total}} procesadas.",
+    "stopped": "Detenido antes del resto de la semana.",
+    "stop": "Detener",
+    "retry": "Reintentar",
+    "retryIn": "Reintentar en {{seconds}} s",
+    "close": "Cerrar",
+    "preflight": {
+      "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones y vuelve a enviar la semana.",
+      "no-bridge": "Instala la extensión Kaiord Garmin Bridge y vuelve a enviar la semana.",
+      "no-session": "Inicia sesión en Garmin Connect en este navegador y vuelve a enviar la semana.",
+      "insecure-context": "El calendario de Garmin necesita una página segura (HTTPS). No se ha enviado nada.",
+      "unsupported-browser": "El calendario de Garmin necesita un navegador con Web Locks. No se ha enviado nada."
+    },
+    "status": {
+      "scheduled": "En su fecha",
+      "moved": "Movido a su fecha",
+      "unchanged": "Ya estaba en su fecha",
+      "duplicate-left": "En su fecha, queda una entrada de más",
+      "uncertain": "Necesita revisión",
+      "library-only": "Solo en tu biblioteca",
+      "not-eligible": "No enviado",
+      "failed": "Error"
+    },
+    "notEligible": {
+      "raw": "aún sin procesar",
+      "skipped": "omitido",
+      "stale": "primero resuelve el cambio del entrenador",
+      "no-krd": "sin entrenamiento estructurado",
+      "stopped": "detenido"
+    },
+    "summary": {
+      "placed": "Colocados: {{count}}",
+      "libraryOnly": "Solo en biblioteca: {{count}}",
+      "attention": "Necesitan atención: {{count}}"
+    },
+    "outdated": "Tu extensión Garmin Bridge aún no puede usar el calendario, así que estos solo llegaron a tu biblioteca. Actualízala y reintenta.",
+    "updateExtension": "Actualizar la extensión"
   }
 }

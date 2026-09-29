@@ -3,7 +3,7 @@
  *
  * Transition functions for the editor-calendar integration:
  * push (structured|ready|modified -> pushed; pushed keeps its state and
- * records the new id) and modify (pushed->modified).
+ * records the new id).
  *
  * All KRD-carrying persistence paths route through `onWorkoutMutation`
  * so `modifiedAt` advances on every user edit in STRUCTURED / READY
@@ -12,19 +12,29 @@
 
 import { useCallback } from "react";
 
-import { db } from "../../adapters/dexie/dexie-database";
 import { recordGarminPush } from "../../application/record-garmin-push";
 import {
   onWorkoutMutation,
-  transitionToModified,
   transitionToReady,
 } from "../../application/workout-transitions";
+import { usePersistence } from "../../contexts/persistence-context";
+import type { PersistencePort } from "../../ports/persistence-port";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KRD } from "../../types/krd";
 
-async function persistRecord(record: WorkoutRecord) {
-  await db.table("workouts").put(record);
+/* Applies a change to the row as stored, in one transaction: a concurrent
+   writer's fields (a coach move's date landing before the editor
+   re-renders) are kept, and a workout deleted meanwhile stays deleted. */
+async function updateRecord(
+  persistence: PersistencePort,
+  id: string,
+  change: (fresh: WorkoutRecord) => WorkoutRecord
+) {
+  await persistence.transaction(async () => {
+    const fresh = await persistence.workouts.getById(id);
+    if (fresh) await persistence.workouts.put(change(fresh));
+  });
 }
 
 function saveEditedKrd(
@@ -44,28 +54,28 @@ function readyForPush(record: WorkoutRecord): WorkoutRecord {
 }
 
 export function useEditorActions(record: WorkoutRecord | undefined) {
+  const persistence = usePersistence();
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
 
   const pushWorkout = useCallback(
     async (garminPushId: string) => {
       if (!record) return;
-      const withEdits = saveEditedKrd(record, currentWorkout ?? undefined);
+      // The editor's own edit is judged against the copy it opened.
+      const edited =
+        currentWorkout && currentWorkout !== record.krd
+          ? currentWorkout
+          : undefined;
       // An already-pushed record (a re-created library workout) only
       // records the new id: there is no transition left to take.
-      const updated = recordGarminPush(readyForPush(withEdits), garminPushId);
-      await persistRecord(updated);
+      await updateRecord(persistence, record.id, (fresh) =>
+        recordGarminPush(
+          readyForPush(saveEditedKrd(fresh, edited)),
+          garminPushId
+        )
+      );
     },
-    [record, currentWorkout]
+    [persistence, record, currentWorkout]
   );
 
-  const markModified = useCallback(
-    async (krd: KRD) => {
-      if (!record) return;
-      const updated = transitionToModified(record, krd);
-      await persistRecord(updated);
-    },
-    [record]
-  );
-
-  return { pushWorkout, markModified };
+  return { pushWorkout };
 }

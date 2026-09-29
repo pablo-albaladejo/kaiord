@@ -61,6 +61,7 @@ describe("convertCoachingActivityWithAi", () => {
     expect(stored?.krd).not.toBeNull();
     expect(stored?.aiMeta).not.toBeNull();
     expect(stored?.raw?.description).toBe(activity.description);
+    expect(stored?.coachDate).toBe(activity.date);
     const match = await deps.sessionMatches.getByActivityId("p1", activity.id);
     expect(match?.workoutId).toBe("w-new");
   });

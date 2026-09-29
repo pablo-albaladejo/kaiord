@@ -24,7 +24,8 @@ export const installGarminStubActionsScript = (): void => {
       const id = s.nextId++;
       const [workoutId, date] = [String(m.workoutId), String(m.date)];
       s.entries.push({ id, workoutId, date });
-      return ok({ workoutScheduleId: id });
+      // The bridge sends schedule ids as decimal strings (`toScheduleId`).
+      return ok({ workoutScheduleId: String(id) });
     },
     unschedule: (s, m) => {
       const at = s.entries.findIndex((e) => String(e.id) === m.scheduleId);

@@ -19,7 +19,8 @@ vi.mock("./useGarminPlacementActions", () => ({
   useGarminPlacementActions: () => actions,
 }));
 
-const WORKOUT = { id: "workout-1" } as WorkoutRecord;
+const PLACED = "2026-10-05";
+const WORKOUT = { id: "workout-1", date: PLACED } as WorkoutRecord;
 
 const noticeWith = (
   overrides: Partial<GarminPlacementNotice> = {}
@@ -46,10 +47,10 @@ describe("useGarminPlacement", () => {
     await act(() => result.current.send());
 
     // Assert
-    expect(notice.setLastRun).toHaveBeenCalledWith({
-      kind: "library-only",
-      reason: "bridge-outdated",
-    });
+    expect(notice.setLastRun).toHaveBeenCalledWith(
+      { kind: "library-only", reason: "bridge-outdated" },
+      PLACED
+    );
     expect(result.current.busy).toBe(false);
   });
 
@@ -89,7 +90,10 @@ describe("useGarminPlacement", () => {
     await act(() => result.current.confirm());
 
     // Assert
-    expect(notice.setLastRun).toHaveBeenCalledWith({ kind: "scheduled" });
+    expect(notice.setLastRun).toHaveBeenCalledWith(
+      { kind: "scheduled" },
+      PLACED
+    );
   });
 
   it("should keep the last outcome when nothing was pushed", async () => {
@@ -109,6 +113,7 @@ describe("useGarminPlacement", () => {
     // Arrange
     const notice = noticeWith({
       result: { kind: "duplicate-left", dates: [ENTRY.date] },
+      placedDate: PLACED,
       removable: [ENTRY],
     });
     const { result } = renderHook(() => useGarminPlacement(WORKOUT, notice));
@@ -118,13 +123,14 @@ describe("useGarminPlacement", () => {
 
     // Assert
     expect(actions.dismiss).toHaveBeenCalledWith(ENTRY.workoutScheduleId);
-    expect(notice.setLastRun).toHaveBeenCalledWith(undefined);
+    expect(notice.setLastRun).toHaveBeenCalledWith(undefined, PLACED);
   });
 
   it("should keep the left-behind warning for the dates still left after one dismissal", async () => {
     // Arrange
     const notice = noticeWith({
       result: { kind: "duplicate-left", dates: [OTHER_DATE, ENTRY.date] },
+      placedDate: PLACED,
       removable: [ENTRY],
     });
     const { result } = renderHook(() => useGarminPlacement(WORKOUT, notice));
@@ -133,9 +139,9 @@ describe("useGarminPlacement", () => {
     await act(() => result.current.dismiss(ENTRY.workoutScheduleId));
 
     // Assert
-    expect(notice.setLastRun).toHaveBeenCalledExactlyOnceWith({
-      kind: "duplicate-left",
-      dates: [OTHER_DATE],
-    });
+    expect(notice.setLastRun).toHaveBeenCalledExactlyOnceWith(
+      { kind: "duplicate-left", dates: [OTHER_DATE] },
+      PLACED
+    );
   });
 });

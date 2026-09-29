@@ -6,7 +6,7 @@
  * transitions").
  *
  * Exercises `useEditorActions` against an in-memory Dexie (fake-
- * indexeddb) and a pre-seeded workout-store to simulate the flow:
+ * indexeddb) through the persistence port and a pre-seeded workout-store to simulate the flow:
  *   load → edit in Zustand → send → persist.
  *
  * Sending from STRUCTURED also covers the folded-in `structured → ready`
@@ -17,9 +17,12 @@
 import "fake-indexeddb/auto";
 
 import { act, renderHook } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { PersistenceProvider } from "../../contexts/persistence-context";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KRD } from "../../types/krd";
@@ -61,6 +64,12 @@ function makeRecord(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   };
 }
 
+const wrapper = ({ children }: { children: ReactNode }) =>
+  createElement(PersistenceProvider, {
+    persistence: createDexiePersistence(db),
+    children,
+  });
+
 async function loadPersisted(id: string): Promise<WorkoutRecord | undefined> {
   return db.table<WorkoutRecord>("workouts").get(id);
 }
@@ -75,9 +84,11 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     // Arrange
 
     const record = makeRecord({ state: "structured" });
+
+    await db.table("workouts").put(record);
     useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
 
-    const { result } = renderHook(() => useEditorActions(record));
+    const { result } = renderHook(() => useEditorActions(record), { wrapper });
     await act(async () => {
       await result.current.pushWorkout("garmin-abc");
     });
@@ -97,10 +108,12 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     // Arrange
 
     const record = makeRecord({ state: "structured" });
+
+    await db.table("workouts").put(record);
     // currentWorkout matches the record's KRD — no edit.
     useWorkoutStore.setState({ currentWorkout: ORIGINAL_KRD });
 
-    const { result } = renderHook(() => useEditorActions(record));
+    const { result } = renderHook(() => useEditorActions(record), { wrapper });
     await act(async () => {
       await result.current.pushWorkout("garmin-abc");
     });
@@ -119,9 +132,11 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     // Arrange
 
     const record = makeRecord({ state: "ready", krd: ORIGINAL_KRD });
+
+    await db.table("workouts").put(record);
     useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
 
-    const { result } = renderHook(() => useEditorActions(record));
+    const { result } = renderHook(() => useEditorActions(record), { wrapper });
     await act(async () => {
       await result.current.pushWorkout("garmin-xyz");
     });
@@ -138,31 +153,6 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     expect(persisted?.modifiedAt).not.toBeNull();
   });
 
-  it("should bump modifiedAt via markModified on PUSHED (regression check)", async () => {
-    // Arrange
-
-    const record = makeRecord({
-      state: "pushed",
-      krd: ORIGINAL_KRD,
-      garminPushId: "garmin-1",
-    });
-    useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
-
-    const { result } = renderHook(() => useEditorActions(record));
-    await act(async () => {
-      await result.current.markModified(EDITED_KRD);
-    });
-
-    // Act
-
-    const persisted = await loadPersisted(record.id);
-
-    // Assert
-
-    expect(persisted?.state).toBe("modified");
-    expect(persisted?.modifiedAt).not.toBeNull();
-  });
-
   it("should persist a re-created library id on an already-pushed record without throwing", async () => {
     // Arrange
     const record = makeRecord({
@@ -170,8 +160,9 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
       krd: ORIGINAL_KRD,
       garminPushId: "garmin-1",
     });
+    await db.table("workouts").put(record);
     useWorkoutStore.setState({ currentWorkout: ORIGINAL_KRD });
-    const { result } = renderHook(() => useEditorActions(record));
+    const { result } = renderHook(() => useEditorActions(record), { wrapper });
 
     // Act
     await act(async () => {
@@ -182,5 +173,73 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     const persisted = await loadPersisted(record.id);
     expect(persisted?.state).toBe("pushed");
     expect(persisted?.garminPushId).toBe("garmin-2");
+  });
+});
+
+describe("useEditorActions — open editor during a coach move (R11)", () => {
+  beforeEach(async () => {
+    await db.table("workouts").clear();
+    useWorkoutStore.setState({ currentWorkout: null });
+  });
+
+  it("should save the coach's date when the coach moved the open workout", async () => {
+    // Arrange
+    const opened = makeRecord({ state: "ready", coachDate: "2026-04-20" });
+    const { result, rerender } = renderHook(
+      ({ record }) => useEditorActions(record),
+      { initialProps: { record: opened }, wrapper }
+    );
+    const coachMoved = {
+      ...opened,
+      date: "2026-04-22",
+      coachDate: "2026-04-22",
+    };
+    await db.table("workouts").put(coachMoved);
+    rerender({ record: coachMoved });
+
+    // Act
+    await act(async () => {
+      await result.current.pushWorkout("garmin-1");
+    });
+
+    // Assert
+    expect((await loadPersisted(opened.id))?.date).toBe("2026-04-22");
+  });
+
+  it("should keep the coach's move that lands before the editor re-renders", async () => {
+    // Arrange
+    const opened = makeRecord({ state: "ready", coachDate: "2026-04-20" });
+    await db.table("workouts").put(opened);
+    const { result } = renderHook(() => useEditorActions(opened), { wrapper });
+    await db
+      .table("workouts")
+      .put({ ...opened, date: "2026-04-22", coachDate: "2026-04-22" });
+
+    // Act
+    await act(async () => {
+      await result.current.pushWorkout("garmin-1");
+    });
+
+    // Assert
+    expect(await loadPersisted(opened.id)).toMatchObject({
+      date: "2026-04-22",
+      coachDate: "2026-04-22",
+      state: "pushed",
+      garminPushId: "garmin-1",
+    });
+  });
+
+  it("should not recreate a workout deleted before the send finished", async () => {
+    // Arrange
+    const opened = makeRecord({ state: "ready" });
+    const { result } = renderHook(() => useEditorActions(opened), { wrapper });
+
+    // Act
+    await act(async () => {
+      await result.current.pushWorkout("garmin-1");
+    });
+
+    // Assert
+    expect(await loadPersisted(opened.id)).toBeUndefined();
   });
 });

@@ -12,6 +12,7 @@ const OUTDATED: PlacementResult = {
   kind: "library-only",
   reason: "bridge-outdated",
 };
+const RUN = { result: OUTDATED, date: "2026-10-05" };
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <PlacementOutcomeProvider>{children}</PlacementOutcomeProvider>
@@ -30,10 +31,10 @@ describe("usePlacementOutcome", () => {
     );
 
     // Act
-    act(() => result.current.sender[1](OUTDATED));
+    act(() => result.current.sender[1](RUN));
 
     // Assert
-    expect(result.current.reader[0]).toEqual(OUTDATED);
+    expect(result.current.reader[0]).toEqual(RUN);
     expect(result.current.other[0]).toBeUndefined();
   });
 
@@ -42,7 +43,7 @@ describe("usePlacementOutcome", () => {
     const { result } = renderHook(() => usePlacementOutcome("record-1"), {
       wrapper,
     });
-    act(() => result.current[1](OUTDATED));
+    act(() => result.current[1](RUN));
 
     // Act
     act(() => result.current[1](undefined));
@@ -56,9 +57,9 @@ describe("usePlacementOutcome", () => {
     const { result } = renderHook(() => usePlacementOutcome("record-1"));
 
     // Act
-    act(() => result.current[1](OUTDATED));
+    act(() => result.current[1](RUN));
 
     // Assert
-    expect(result.current[0]).toEqual(OUTDATED);
+    expect(result.current[0]).toEqual(RUN);
   });
 });
