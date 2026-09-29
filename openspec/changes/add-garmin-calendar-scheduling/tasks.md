@@ -112,6 +112,11 @@
       and the row `uncertain`, nothing sent; a failed read, A3 false or an
       `unconfirmed` `Placed` → nothing sent. Regression: the simulator's
       skew path, and unit tests for each row of the table.
+- [x] 6.4c Round-2 review: a drain that finds its `Placed` dead reports
+      `uncertain`; the A3 id-less check is scoped to the judged date; the
+      ribbon's live region excludes its actions and the countdown; an
+      exception before the pipeline still emits one placement event; the
+      laws simulator asserts a floor of visited states per scenario.
 - [x] 6.5 Carried over from T4:
   - AC-17's "0 schedule calls" half (a failed library push makes no
     calendar call) needs this pipeline; test it here.

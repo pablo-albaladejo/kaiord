@@ -403,12 +403,12 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 
 **Verify before delete** (the drain precondition). A drain with at least one `retire` to send first reads the calendar: one `calendar-find` for the current `Placed`'s workout at its date. It sends `unschedule` only when that read shows the `Placed`'s own schedule id. Otherwise it sends nothing:
 
-| Read                                            | Action                                                                                                                                                         |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| the `Placed` id is present                      | drain as below                                                                                                                                                 |
-| A3 true and the id is absent                    | in one guarded write: the id `gone`, the placement `uncertain` for its workout and date; nothing is drained, and the next push resolves it (T5, "Send anyway") |
-| failed, unreadable, or A3 false                 | drain nothing this run; every entry keeps its state and `attempts`                                                                                             |
-| the `Placed` is `unconfirmed` (no id to verify) | no read and no drain while it stays `unconfirmed`: its `retire` entries wait, reported as `duplicate-left`                                                     |
+| Read                                            | Action                                                                                                                                                                                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the `Placed` id is present                      | drain as below                                                                                                                                                                                                                  |
+| A3 true and the id is absent                    | in one guarded write: the id `gone`, the placement `uncertain` for its workout and date; nothing is drained, the run reports `uncertain{date, canConfirm}` (never a success), and the next push resolves it (T5, "Send anyway") |
+| failed, unreadable, or A3 false                 | drain nothing this run; every entry keeps its state and `attempts`                                                                                                                                                              |
+| the `Placed` is `unconfirmed` (no id to verify) | no read and no drain while it stays `unconfirmed`: its `retire` entries wait, reported as `duplicate-left`                                                                                                                      |
 
 A `Placed` whose id is absent was deleted by someone, so it cannot stand behind a delete: draining a loser behind it is exactly the gap of §3.9's skew counterexample. The read costs one `calendar-find` per drain that has something to send; the abandoned-entry re-checks send nothing and need no verification.
 
@@ -702,7 +702,9 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   anyway" on it claims a fresh attempt at once (a duplicate at worst).
 - **No answer before the gate.** An `attempting{posted: true}` shown as
   `uncertain` carries `sendAfter = at + POST_GATE_MS`. Before it, the editor
-  disables both actions and says it is still checking; "It's in Garmin"
+  disables both actions and says it is still checking, with a countdown that
+  sits outside the ribbon's live region (only the headline, detail and
+  result message are announced); "It's in Garmin"
   refuses with `failed{settling, retryAfter}` and writes nothing, even when
   called directly, since the POST may still land.
 - **One POST per run.** A run sends `schedule` at most once. The gate's
@@ -772,8 +774,10 @@ a duplicate". None changes an invariant of §3.3–§3.9.
 - **How the SPA knows A3.** A read of 0 entries cannot show whether Garmin
   exposes schedule ids, so A3 is not inferred from a count. It is a
   constant of the pipeline, `SCHEDULE_IDS_IN_FIND`, true per the T0b
-  capture, and any single read that returns an entry with no id is taken as
-  A3 false for that read. The absence rules (the gate, the 404 check, the
+  capture, and a read that returns an entry with no id at the date being
+  judged is taken as A3 false for that date (an id-less entry elsewhere in
+  the month cannot be the entry in question, so it does not block the
+  verify-before-delete or abandoned-entry absence proofs). The absence rules (the gate, the 404 check, the
   abandoned re-check, T5's `gone`) apply only when both hold; otherwise the
   count rules of §3.4 apply. A wrong `true` can at worst re-POST after the
   gate (a duplicate); it can never delete an entry the read did not see
