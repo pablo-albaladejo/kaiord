@@ -127,7 +127,7 @@ test.describe("Garmin calendar placement", () => {
     await second.getByTestId("send-to-garmin-button").click();
 
     // Assert
-    await expect(ribbon(second)).toContainText("from another tab");
+    await expect(ribbon(second)).toContainText("already being sent");
     await expect
       .poll(() => garminStubActions(page), { timeout: PLACEMENT_TIMEOUT_MS })
       .toEqual(["push", "schedule"]);
