@@ -3,7 +3,8 @@
  * sent, once per run in ascending id order, never the current `Placed` or
  * `attempting.previous` (skip rule), and only while the row still carries
  * this run's `Placed`. Each outcome writes only its own entry's state on the
- * re-read row, so concurrent queue additions survive.
+ * re-read row, so concurrent queue additions survive. A reauth answer ends
+ * the drain, abandoned-entry re-checks included.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
@@ -68,7 +69,7 @@ export const drainQueue = async (run: PlacementRun, guard: GarminPlaced) => {
   for (const entry of drainable(row, false)) {
     if (!(await stillOurs(run, guard, entry.workoutScheduleId))) return;
     const outcome = await sendOne(run, entry);
-    if (outcome === "reauth") break;
+    if (outcome === "reauth") return;
     if (!(await recordDrain(run, guard, entry.workoutScheduleId, outcome)))
       return;
   }

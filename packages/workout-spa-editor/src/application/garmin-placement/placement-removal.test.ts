@@ -13,6 +13,7 @@ import { dismissGarminRemovalEntry } from "./garmin-placement-actions";
 import { dismissableEntries, isDismissable } from "./placement-dismiss";
 
 const T0 = new Date("2026-10-01T08:00:00.000Z");
+const D3 = "2026-10-19";
 const MOVES = [
   ["S", D2, "v1"],
   ["U", D2, "v2"],
@@ -202,6 +203,31 @@ describe("removal queue (AC-24)", () => {
       attempts: 0,
     });
     expect(result).toEqual({ kind: "duplicate-left", dates: [D1] });
+  });
+
+  it("should re-check no abandoned entry after a 401", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const oldId = await abandonOld(h);
+    h.calendar.scripts.unschedule.push({
+      ok: false,
+      status: 401,
+      needsReauth: true,
+    });
+    const calls = h.calendar.calls.length;
+
+    // Act
+    await h.push(D3);
+
+    // Assert
+    expect(h.calendar.calls.slice(calls).map((c) => c.op)).toEqual([
+      "schedule",
+      "unschedule",
+    ]);
+    expect(await queueEntry(h, oldId)).toMatchObject({
+      state: "retire",
+      abandoned: true,
+    });
   });
 
   it("should never send the current Placed to unschedule, whatever its state", async () => {
