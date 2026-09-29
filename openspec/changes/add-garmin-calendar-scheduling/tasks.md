@@ -106,6 +106,12 @@
       device's adoption of the new entry between the POST and the commit
       leaves that entry unlisted. "It's in Garmin" is offered only when no
       non-`keep` entry shares the `uncertain`'s workout and date.
+- [x] 6.4b Verify before delete (design §3.5, §3.9 skew counterexample):
+      a drain with a `retire` to send first reads the `Placed`'s date and
+      sends only when the `Placed` id is there; absent (A3) → the id `gone`
+      and the row `uncertain`, nothing sent; a failed read, A3 false or an
+      `unconfirmed` `Placed` → nothing sent. Regression: the simulator's
+      skew path, and unit tests for each row of the table.
 - [x] 6.5 Carried over from T4:
   - AC-17's "0 schedule calls" half (a failed library push makes no
     calendar call) needs this pipeline; test it here.

@@ -68,7 +68,7 @@ A `schedule` 404 for a library id from an earlier push SHALL set `forceRepush` a
 
 ### Requirement: Removal queue for superseded calendar entries
 
-Every schedule id the pipeline learns SHALL be written to the ledger row's `removalQueue` with a state on `held < keep < retire < gone` (spa-persistence-port), and no entry SHALL ever be removed or lowered. A commit SHALL write the new id `keep` and a superseded `scheduled` `previous` `retire`, in the same write; the claim SHALL record on `attempting` a `supersedes` list of every id in the queue it reads, sorted, and a commit with no id returned SHALL write `unconfirmed` with that list. An id first learned between the claim and the commit SHALL never be listed. Only `retire` entries SHALL be drained, after every commit. `unschedule` outcomes: 204 writes `gone`; 401, or an answer with no status and `needsReauth`, keeps the entry without counting the attempt; 404 writes `gone` only when a `calendar-find` shows the id absent (otherwise `attempts++`); anything else, ambiguous included, is `attempts++`. After 3 attempts an entry SHALL be `abandoned`, re-checked on each push of its record, and dismissible by the athlete ("I removed it", which writes `gone`) with 0 calls. A `held` entry SHALL never be dismissable; it leaves only through the calendar-verified resolution of `uncertain`. An id equal to the current `Placed` or to `attempting.previous` SHALL never be sent to `unschedule`. A `held`, `keep` or `gone` entry SHALL never be sent to `unschedule`.
+Every schedule id the pipeline learns SHALL be written to the ledger row's `removalQueue` with a state on `held < keep < retire < gone` (spa-persistence-port), and no entry SHALL ever be removed or lowered. A commit SHALL write the new id `keep` and a superseded `scheduled` `previous` `retire`, in the same write; the claim SHALL record on `attempting` a `supersedes` list of every id in the queue it reads, sorted, and a commit with no id returned SHALL write `unconfirmed` with that list. An id first learned between the claim and the commit SHALL never be listed. Only `retire` entries SHALL be drained, after every commit. `unschedule` outcomes: 204 writes `gone`; 401, or an answer with no status and `needsReauth`, keeps the entry without counting the attempt; 404 writes `gone` only when a `calendar-find` shows the id absent (otherwise `attempts++`); anything else, ambiguous included, is `attempts++`. After 3 attempts an entry SHALL be `abandoned`, re-checked on each push of its record, and dismissible by the athlete ("I removed it", which writes `gone`) with 0 calls. A `held` entry SHALL never be dismissable; it leaves only through the calendar-verified resolution of `uncertain`. An id equal to the current `Placed` or to `attempting.previous` SHALL never be sent to `unschedule`. A `held`, `keep` or `gone` entry SHALL never be sent to `unschedule`. Before a drain sends any `unschedule`, it SHALL read the calendar (`calendar-find` for the current `Placed`'s workout at its date) and SHALL send only when the read shows the `Placed`'s schedule id. When the read (A3 true) shows that id absent, the drain SHALL write, in one guarded write, the id `gone` and the placement `uncertain` for its workout and date, and send nothing. When the read fails, is unreadable, or A3 is false, the drain SHALL send nothing and leave every state and attempt count unchanged. While the `Placed` is `unconfirmed`, no `unschedule` SHALL be sent.
 
 An `uncertain` placement SHALL be resolved by `calendar-find` for its workout over the dates of the `uncertain` and of its `held` entries. Exactly one match SHALL be adopted as the `Placed` and written `keep`; a `scheduled` `previous` of the `uncertain` SHALL be written `retire`; `held` ids that the read sees SHALL stay `held` (never drained); `held` ids it does not see SHALL be written `gone`. Several matches SHALL return `duplicate-left` with every state unchanged. No match or a failed read SHALL take the normal `uncertain` path with every state unchanged.
 
@@ -77,6 +77,20 @@ An `uncertain` placement SHALL be resolved by `calendar-find` for its workout ov
 - **GIVEN** a queue that, after a merge, holds the id of the current `Placed` or of `attempting.previous`
 - **WHEN** the queue is drained
 - **THEN** that id SHALL not be sent to `unschedule`, whatever its state
+
+#### Scenario: A drain never deletes behind a dead placement
+
+- **GIVEN** device C, its clock a day ahead, synced `Placed S102` and then moved to S103 without syncing, and device B adopted S103, moved to S104 and deleted S103
+- **AND** B's sync merges the cloud's newer `Placed S102` over its S104, so S104 is `retire`
+- **WHEN** B drains its queue
+- **THEN** B SHALL read the calendar at S102's date, find S102 absent, and write S102 `gone` and the placement `uncertain`
+- **AND** no id SHALL be sent to `unschedule`, so S104 stays on the calendar
+
+#### Scenario: A drain that cannot verify its placement sends nothing
+
+- **GIVEN** a `Placed` S2 with S1 `retire`
+- **WHEN** the drain's read fails, or A3 is false, or the `Placed` is `unconfirmed`
+- **THEN** no id SHALL be sent to `unschedule` and S1 SHALL stay `retire` with its attempt count unchanged
 
 #### Scenario: Held ids are resolved by reading the calendar
 

@@ -211,6 +211,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - matching a coach's delete + recreate
 - cleaning up superseded library workouts
 - library duplicates from cross-device `[U]` pushes
+- verify-before-delete makes each drain one `calendar-find` dearer; batching the verification with the drain's 404 re-checks is a possible optimisation
 - a local-observation gate for the re-POST (time since this device first saw the `attempting{posted:true}`, not the writer's `at`), closing the clock-skew and sleeping-sender duplicate of §3.4 (L1)
 - a conditional write on cloud sync: the Drive adapter checks `headRevisionId` and then PATCHes (`drive-rest.ts:66`), a check-then-write, and `syncWithCloud` imports its merge before the push that may be rejected (`sync-with-cloud.ts:34-38`); an atomic `If-Match` closes the first; importing only after an accepted push closes the second, and that is the half that matters: one ordinary rejected push already reaches a crossed pair (§3.9)
 
@@ -400,6 +401,17 @@ Two bridge rules make the definite rows safe. The bridge sets `needsReauth` only
 
 **Drainable = `retire`.** Only `retire` entries are sent to `unschedule`; `held`, `keep` and `gone` never are (§3.9). **Skip rule** (defence in depth): an entry whose id equals the current `Placed` or `attempting.previous` is never sent to `unschedule`, whatever its state. No entry is ever removed from the queue.
 
+**Verify before delete** (the drain precondition). A drain with at least one `retire` to send first reads the calendar: one `calendar-find` for the current `Placed`'s workout at its date. It sends `unschedule` only when that read shows the `Placed`'s own schedule id. Otherwise it sends nothing:
+
+| Read                                            | Action                                                                                                                                                         |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| the `Placed` id is present                      | drain as below                                                                                                                                                 |
+| A3 true and the id is absent                    | in one guarded write: the id `gone`, the placement `uncertain` for its workout and date; nothing is drained, and the next push resolves it (T5, "Send anyway") |
+| failed, unreadable, or A3 false                 | drain nothing this run; every entry keeps its state and `attempts`                                                                                             |
+| the `Placed` is `unconfirmed` (no id to verify) | no read and no drain while it stays `unconfirmed`: its `retire` entries wait, reported as `duplicate-left`                                                     |
+
+A `Placed` whose id is absent was deleted by someone, so it cannot stand behind a delete: draining a loser behind it is exactly the gap of §3.9's skew counterexample. The read costs one `calendar-find` per drain that has something to send; the abandoned-entry re-checks send nothing and need no verification.
+
 **`unschedule` outcomes**
 
 | Outcome                              | Action                                                         |
@@ -557,7 +569,9 @@ Garmin schedule ids are unique and never reused, so one monotone state per id is
 - **Only a committed POST lists ids.** An adoption ("It's in Garmin", or an A3-false `calendar-find` adoption) may be adopting a known entry, so it records `supersedes: []`; a legacy `unconfirmed` normalizes to `[]`. Both are the conservative round-2 rule.
 - **Why the union on merge is safe.** Two `unconfirmed` rows for the same workout and date stand for one or more entries, each listed by nobody who created it. Take the latest-created of those entries: every list was taken before its creator's POST, so no list — and therefore not the union — contains it. If the union placement is untainted, that entry is `keep` or absent, so no device drains it and the merged `Placed` stands for a live entry. The union only grows, so a re-merge reproduces it (absorbing), and a row whose list is a subset is tainted whenever the union is (monotone).
 
-**Absent id = free** (P3b). A stale device C, newer by clock skew, holds `Placed S100` (`keep`) and meets a live S5 whose row never saw S100. Both are candidates; C's row is newer, so S100 wins and S5 retires. That is no gap: if S100 is live, it remains. If S100 is dead, some device deleted it, and a device deletes only a `retire` id, written in the same write as the `keep` of the replacement it committed. That replacement stays live (only `retire` is drained), and once its row syncs, S100 is `gone` there, so S100 is tainted and the replacement wins.
+**Absent id = free** (P3b). A stale device C, newer by clock skew, holds `Placed S100` (`keep`) and meets a live S5 whose row never saw S100. Both are candidates; C's row is newer, so S100 wins and S5 retires. If S100 is live, it remains. If S100 is dead, some device deleted it, and a device deletes only a `retire` id, written in the same write as the `keep` of the replacement it committed; once that replacement's row syncs, S100 is `gone` there, so S100 is tainted and the replacement wins.
+
+That argument alone does **not** close the gap under clock skew: the replacement can change hands without its history. Counterexample (found by the placement-world simulator, C's clock a day ahead): C places S102 on D0 and syncs; C moves to S103 on D1, deleting S102, and does not sync. B, holding a leftover `attempting{posted:true}` for D1, reads D1, adopts S103 as its own POST (an id it does not know), moves to S104 and drains S103. B never saw S102 `gone`; the cloud's `Placed S102` looks a day newer, so it wins the merge and S104 retires. Without a check, B's drain deletes S104 and the calendar is empty. **Verify before delete** (§3.5) closes it: B's drain reads D0 first, finds S102 absent, writes S102 `gone` and the row `uncertain`, and sends nothing. S104 stays live. In general, a drain deletes only behind a `Placed` it has just seen on Garmin, so every delete leaves a live entry, whatever the merge chose. Skew can still cost a duplicate (residual L1), never a gap.
 
 **Legacy entries → `held`** (fail-safe). A stateless entry cannot be proven superseded by a verified live entry, so it is never drained until `calendar-find` verifies it; the cost is a duplicate until T5. Mapping them to `retire` instead would drain an id whose superseder may be dead (the round-2 `normal < keep` repro: an old device drains S1 while another device's newer, verified S1 wins the merge). In production no row carries a `removalQueue` yet — T4 is the first writer — so both choices are equivalent there; `held` is the default for anything unproven.
 
