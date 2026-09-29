@@ -25,8 +25,17 @@ export type RunTurnParams = {
  * Single seam over the AI SDK. Runs the multi-step tool loop (read tools
  * auto-execute; an action tool with no `execute` halts the loop), streams
  * text deltas to `onTextDelta`, then resolves the normalized turn.
+ *
+ * A provider failure arrives as a stream `error` part, not a thrown error:
+ * the SDK hands it to `onError` and then rejects the result promises with a
+ * generic `NoOutputGeneratedError` ("No output generated. Check the stream
+ * for errors."), dropping the `APICallError` and its `statusCode`. The first
+ * stream error is captured here and rethrown in its place so callers can
+ * classify the real failure. Capturing it also replaces the SDK's default
+ * `onError` (`console.error`), which would log the request body.
  */
 export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
+  let streamError: unknown;
   const result = streamText({
     model: params.model,
     system: params.system,
@@ -36,17 +45,25 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
     // We own retries at the call-site; disable the SDK's internal layer so a
     // retryable error costs one HTTP call per turn, not N.
     maxRetries: 0,
+    onError: ({ error }) => {
+      streamError ??= error;
+    },
   });
 
-  for await (const delta of result.textStream) params.onTextDelta?.(delta);
-
-  const [text, toolCalls, finishReason, usage, response] = await Promise.all([
-    result.text,
-    result.toolCalls,
-    result.finishReason,
-    result.usage,
-    result.response,
-  ]);
+  const settled = async () => {
+    for await (const delta of result.textStream) params.onTextDelta?.(delta);
+    return Promise.all([
+      result.text,
+      result.toolCalls,
+      result.finishReason,
+      result.usage,
+      result.response,
+    ]);
+  };
+  const [text, toolCalls, finishReason, usage, response] =
+    await settled().catch((e: unknown) => {
+      throw streamError ?? e;
+    });
 
   return {
     text,
