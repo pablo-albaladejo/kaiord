@@ -206,6 +206,7 @@ describe("syncWeek", () => {
       coachingSyncState: createInMemoryCoachingSyncStateRepository(),
       integrationPolicy,
       workouts: createInMemoryWorkoutRepository(),
+      transaction: (fn) => fn(),
       transport: makeTransport(),
       now: () => NOW,
     };

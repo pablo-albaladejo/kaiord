@@ -95,6 +95,7 @@ const makePersistence = (record: WorkoutRecord | undefined) => {
   const put = vi.fn();
   const persistence = {
     workouts: { getById: vi.fn().mockResolvedValue(record), put },
+    transaction: <T>(fn: () => Promise<T>) => fn(),
   } as unknown as PersistencePort;
   return { persistence, put };
 };

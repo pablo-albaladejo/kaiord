@@ -13,6 +13,7 @@
 import type {
   CoachingRepository,
   CoachingSyncStateRepository,
+  PersistencePort,
   ProfileRepository,
   WorkoutRepository,
 } from "../../ports/persistence-port";
@@ -27,6 +28,7 @@ export type SyncWeekDeps = {
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
   workouts: WorkoutRepository;
+  transaction: PersistencePort["transaction"];
   integrationPolicy: IntegrationPolicyRepository;
   transport: CoachingTransport;
   now?: () => string;
@@ -81,9 +83,8 @@ export const syncWeek = async (
     );
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err);
-    if (error === "Session expired") {
+    if (error === "Session expired")
       return { ok: false, reason: "session-expired" };
-    }
     return { ok: false, reason: "transport-error", error };
   }
 
@@ -92,6 +93,7 @@ export const syncWeek = async (
       coaching: deps.coaching,
       coachingSyncState: deps.coachingSyncState,
       workouts: deps.workouts,
+      transaction: deps.transaction,
       now: deps.now,
     },
     { profileId, source: deps.transport.source, fetched, localSameSource }

@@ -43,13 +43,14 @@ export const placeRecord = async (
     )
   );
   const garminPushId = confirmed.id ?? null;
-  if (garminPushId !== null) {
-    // Re-read so edits made while the push was in flight are kept.
-    const fresh = await persistence.workouts.getById(workoutId);
-    await persistence.workouts.put(
-      recordGarminPush(fresh ?? record, garminPushId)
-    );
-  }
+  if (garminPushId !== null)
+    // Re-read and write in one transaction, so a concurrent writer's fields
+    // (a coach move's date) are kept. A workout deleted meanwhile stays so.
+    await persistence.transaction(async () => {
+      const fresh = await persistence.workouts.getById(workoutId);
+      if (fresh)
+        await persistence.workouts.put(recordGarminPush(fresh, garminPushId));
+    });
   return { result, garminPushId };
 };
 

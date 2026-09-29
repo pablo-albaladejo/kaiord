@@ -3,10 +3,13 @@
  * activities, each workout converted from one of them follows the coach's
  * date. The baseline is the workout's `coachDate`, else the activity's
  * pre-upsert date; with neither, the fetched date becomes the baseline.
- * Each write re-reads the workout, bumps `updatedAt` and leaves
+ * Each write re-reads the workout in a transaction, bumps `updatedAt` and leaves
  * `modifiedAt` and `state` alone. A never-converted activity writes nothing.
  */
-import type { WorkoutRepository } from "../../ports/persistence-port";
+import type {
+  PersistencePort,
+  WorkoutRepository,
+} from "../../ports/persistence-port";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import {
   type CoachingActivityRecord,
@@ -41,32 +44,45 @@ export const coachDateVerdict = (
   return { ...moved, count: "overriddenLocalMoves" };
 };
 
+export type CoachDateMoveDeps = {
+  workouts: WorkoutRepository;
+  now: () => string;
+  /** Read and write in one transaction, so no other writer's fields are lost. */
+  transaction: PersistencePort["transaction"];
+};
+
+const moveOne = (
+  deps: CoachDateMoveDeps,
+  activity: CoachingActivityRecord,
+  preUpsertDate: string | undefined
+) =>
+  deps.transaction(async () => {
+    const sourceId = namespaceSourceId(activity.profileId, activity.sourceId);
+    const workout = await deps.workouts.getBySourceId(
+      activity.source,
+      sourceId
+    );
+    if (!workout) return undefined;
+    const verdict = coachDateVerdict(workout, preUpsertDate, activity.date);
+    if (!verdict.write) return undefined;
+    await deps.workouts.put({
+      ...workout,
+      ...verdict.write,
+      updatedAt: deps.now(),
+    });
+    return verdict.count;
+  });
+
 export const applyCoachDateMoves = async (
-  deps: { workouts: WorkoutRepository; now: () => string },
+  deps: CoachDateMoveDeps,
   fetched: readonly CoachingActivityRecord[],
   preUpsert: readonly CoachingActivityRecord[]
 ): Promise<CoachDateMoves> => {
   const counts: CoachDateMoves = { coachMoves: 0, overriddenLocalMoves: 0 };
   const before = new Map(preUpsert.map((r) => [r.id, r.date]));
   for (const activity of fetched) {
-    const sourceId = namespaceSourceId(activity.profileId, activity.sourceId);
-    const workout = await deps.workouts.getBySourceId(
-      activity.source,
-      sourceId
-    );
-    if (!workout) continue;
-    const verdict = coachDateVerdict(
-      workout,
-      before.get(activity.id),
-      activity.date
-    );
-    if (!verdict.write) continue;
-    await deps.workouts.put({
-      ...workout,
-      ...verdict.write,
-      updatedAt: deps.now(),
-    });
-    if (verdict.count) counts[verdict.count]++;
+    const count = await moveOne(deps, activity, before.get(activity.id));
+    if (count) counts[count]++;
   }
   return counts;
 };

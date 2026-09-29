@@ -7,6 +7,7 @@
 import type {
   CoachingRepository,
   CoachingSyncStateRepository,
+  PersistencePort,
   WorkoutRepository,
 } from "../../ports/persistence-port";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
@@ -20,6 +21,7 @@ export type PersistSyncedWeekDeps = {
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
   workouts: WorkoutRepository;
+  transaction: PersistencePort["transaction"];
   now?: () => string;
 };
 
@@ -44,7 +46,7 @@ export const persistSyncedWeek = async (
   }));
   await deps.coaching.upsertMany(stamped);
   const moves = await applyCoachDateMoves(
-    { workouts: deps.workouts, now },
+    { workouts: deps.workouts, now, transaction: deps.transaction },
     input.fetched,
     input.localSameSource
   );

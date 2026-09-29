@@ -109,7 +109,11 @@ describe("applyCoachDateMoves", () => {
   const setup = async (workout?: ReturnType<typeof converted>) => {
     const workouts = createInMemoryWorkoutRepository();
     if (workout) await workouts.put(workout);
-    return { workouts, now: () => NOW };
+    return {
+      workouts,
+      now: () => NOW,
+      transaction: <T>(fn: () => Promise<T>) => fn(),
+    };
   };
 
   it("should write nothing for an activity that was never converted", async () => {
