@@ -418,6 +418,66 @@ Server assigns `childStepId` to link nested steps to parent repeat blocks.
 
 ---
 
+## Calendar Scheduling
+
+Placing a library workout on a date is a separate call from creating it.
+Captured live on 2026-09-28 (T0b of the `add-garmin-calendar-scheduling`
+change) through the web app's `/gc-api` mapping of connectapi; the Garmin
+Bridge makes the same calls on `connectapi.garmin.com` with its Bearer token.
+
+### Endpoints
+
+| Call       | Request                                                                   | Answer                                               |
+| ---------- | ------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Schedule   | `POST /workout-service/schedule/{workoutId}` with `{"date":"YYYY-MM-DD"}` | 200 with `workoutScheduleId` (the calendar entry id) |
+| Unschedule | `DELETE /workout-service/schedule/{workoutScheduleId}`                    | 204                                                  |
+| Month read | `GET /calendar-service/year/{Y}/month/{M}`                                | `{ calendarItems: [...] }`                           |
+
+- **Months are 0-based:** October 2026 is `month/9`.
+- **Ids are JSON numbers.** `id`, `workoutId` and `workoutScheduleId` arrive
+  as numbers; Kaiord stores digit strings, so the bridge converts them
+  before comparing or returning them.
+- **One schedule, one entry.** Scheduling the same workout twice creates two
+  calendar entries; the POST is not idempotent. Moving a workout is a new
+  POST on the new date and a DELETE of the old entry.
+- **The library workout survives.** Unscheduling removes only the calendar
+  entry, never the workout.
+
+### Month read items
+
+An item has about 70 keys, most of them for activities, races, badges and
+training plans. A redacted workout item:
+
+```json
+{
+  "id": 1792409369,
+  "itemType": "workout",
+  "date": "2026-10-06",
+  "sportTypeKey": "running",
+  "workoutId": 1711500235
+}
+```
+
+- The item's `id` equals the `workoutScheduleId` the POST returned.
+- `date` is `YYYY-MM-DD`.
+- The bridge keeps only `itemType === "workout"` items of the requested
+  `workoutId`, and only their `id` and `date`; everything else stays in the
+  service worker.
+
+### Timing
+
+- A new entry was visible to the month read 294 ms after the POST answered.
+  Kaiord waits 3 s (`SETTLE_MS`) before trusting an absence.
+
+### Not verified live
+
+- **Read monotonicity:** once a read shows an entry, later reads keep it
+  until it is deleted.
+- **DELETE of a deleted entry** is expected to answer 404.
+- **A 401 on the schedule POST** is assumed to mean nothing was created.
+- **Train2Go coach moves** are assumed to keep the session's `sourceId`
+  (checked in the manual end-to-end run).
+
 ## Implementation Guidelines
 
 ### Input Schema (Flexible)

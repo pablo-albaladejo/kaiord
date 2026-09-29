@@ -47,6 +47,7 @@ describe("convertCoachingActivityManual", () => {
     expect(stored?.state).toBe("structured");
     expect(stored?.aiMeta).toBeNull();
     expect(stored?.raw?.description).toBe(activity.description);
+    expect(stored?.coachDate).toBe(activity.date);
     const workout = stored?.krd?.extensions?.structured_workout as
       { steps: Array<unknown> } | undefined;
     expect(workout?.steps).toHaveLength(1);

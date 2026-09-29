@@ -39,3 +39,19 @@ Each write SHALL re-read the record, bump `updatedAt`, and leave `modifiedAt` an
 - **GIVEN** `coachDate` D1 and `date` D3
 - **WHEN** a sync fetches the activity on D2
 - **THEN** `date` SHALL become D2, `overriddenLocalMoves` SHALL be 1, and the notice SHALL show
+
+### Requirement: Coach-move notice
+
+After a week sync, manual or automatic, whose `coachMoves + overriddenLocalMoves` is greater than 0, the calendar SHALL show a dismissible banner on the synced week. Its static en/es copy SHALL say how many sessions followed the coach's new dates and, only when `overriddenLocalMoves` is greater than 0, that many of the athlete's own moves were replaced by the coach's date. It SHALL hint that sending the week updates Garmin: a sync SHALL NOT push, and the Garmin entry is re-placed only on the athlete's next push. The banner is not an error surface: auto-sync stays silent about errors. Only its text SHALL carry `role="status"`. Dismissal SHALL be kept per week and per sync result, for the session, so a later sync that brings new moves shows it again.
+
+#### Scenario: A sync with coach moves shows the notice
+
+- **GIVEN** the visible week synced with `coachMoves` 2 and `overriddenLocalMoves` 0
+- **WHEN** the calendar renders that week
+- **THEN** the banner SHALL say 2 sessions followed the coach, SHALL NOT mention overridden moves, and SHALL NOT have pushed anything
+
+#### Scenario: Dismissal lasts until a sync brings new moves
+
+- **GIVEN** the athlete dismissed the notice for a week
+- **WHEN** a later sync of that week reports 0 moves, and then another reports 1
+- **THEN** the banner SHALL stay hidden after the first and show again after the second

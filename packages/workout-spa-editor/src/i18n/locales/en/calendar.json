@@ -94,5 +94,54 @@
     "headline_other": "{{count}} sessions are ready but can't reach your watch",
     "consequence": "Garmin has no public API for workouts, so the bridge extension does the handover. Until it's installed, downloading the file and importing it by hand is the only route.",
     "cta": "Install the bridge"
+  },
+  "coachMoves": {
+    "moved_one": "{{count}} session moved to the coach's new date.",
+    "moved_other": "{{count}} sessions moved to the coach's new dates.",
+    "overridden_one": "{{count}} of them replaced a day you had chosen.",
+    "overridden_other": "{{count}} of them replaced days you had chosen.",
+    "sendHint": "Send the week to update Garmin.",
+    "dismiss": "Dismiss"
+  },
+  "sendWeek": {
+    "action": "Send week",
+    "title": "Send week to Garmin",
+    "progress": "{{done}} of {{total}} handled.",
+    "stopped": "Stopped before the rest of the week.",
+    "stop": "Stop",
+    "retry": "Retry",
+    "retryIn": "Retry in {{seconds}} s",
+    "close": "Close",
+    "preflight": {
+      "no-export-route": "Turn on sending workouts to Garmin in Connections, then send the week.",
+      "no-bridge": "Install the Kaiord Garmin Bridge extension, then send the week.",
+      "no-session": "Sign in to Garmin Connect in this browser, then send the week.",
+      "insecure-context": "The Garmin calendar needs a secure (HTTPS) page. Nothing was sent.",
+      "unsupported-browser": "The Garmin calendar needs a browser with Web Locks. Nothing was sent."
+    },
+    "status": {
+      "scheduled": "On its date",
+      "moved": "Moved to its date",
+      "unchanged": "Already on its date",
+      "duplicate-left": "On its date, extra entry left",
+      "uncertain": "Needs a look",
+      "library-only": "In your library only",
+      "not-eligible": "Not sent",
+      "failed": "Failed"
+    },
+    "notEligible": {
+      "raw": "not processed yet",
+      "skipped": "skipped",
+      "stale": "coach change to resolve first",
+      "no-krd": "no structured workout",
+      "stopped": "stopped"
+    },
+    "summary": {
+      "placed": "Placed: {{count}}",
+      "libraryOnly": "Library only: {{count}}",
+      "attention": "Needs attention: {{count}}"
+    },
+    "outdated": "Your Garmin Bridge extension can't use the calendar yet, so these reached your library only. Update it, then retry.",
+    "updateExtension": "Update the extension"
   }
 }

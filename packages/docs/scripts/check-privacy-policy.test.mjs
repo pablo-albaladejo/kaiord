@@ -329,6 +329,36 @@ const SOLO_CASES = [
   [GARMIN, "`write:body`", "`some`", "Garmin write scope disclosed"],
   [
     GARMIN,
+    "places each workout on its date",
+    "may do something",
+    "Garmin calendar write disclosed",
+  ],
+  [
+    GARMIN,
+    "Kaiord itself placed and has since superseded",
+    "someone placed",
+    "Garmin calendar delete limited to superseded Kaiord-placed entries",
+  ],
+  [
+    GARMIN,
+    "filtered inside the extension's service worker",
+    "processed somewhere",
+    "Garmin calendar read filtered on the device",
+  ],
+  [
+    GARMIN,
+    "to check the calendar before removing an entry Kaiord replaced",
+    "to do other things",
+    "Garmin calendar read purposes named",
+  ],
+  [
+    GARMIN,
+    "deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them",
+    "deletes entries",
+    "Garmin calendar delete scoped to Kaiord-sent workouts and placed dates",
+  ],
+  [
+    GARMIN,
     "No data is shared with any third party",
     "Sharing happens sometimes",
     "Garmin no-third-party-sharing stated",

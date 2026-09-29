@@ -47,6 +47,7 @@ const buildRawWorkout = (
   id,
   profileId: activity.profileId,
   date: activity.date,
+  coachDate: activity.date,
   sport: activity.sport,
   source: activity.source,
   sourceId: namespacedSourceId,

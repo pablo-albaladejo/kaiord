@@ -1,71 +1,95 @@
 import { useCallback } from "react";
 
-import { executeWorkoutPush } from "../../../application/export/execute-workout-push";
+import { pushWorkoutToGarminCalendar } from "../../../application/garmin-placement/push-workout-to-garmin-calendar";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
-import {
-  BridgePushFailedError,
-  buildGarminPushFn,
-  GARMIN_BRIDGE_ID,
-  ledgerRepo,
-  policyRepo,
-} from "../../../hooks/garmin-push-fn";
+import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
+import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
+import { garminPushReports } from "./garmin-push-reports";
+
+export type GarminPushOptions = {
+  /** The athlete chose "Send anyway" on an `uncertain` result. */
+  sendAnyway?: boolean;
+};
+
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "Conversion failed";
 
 /**
- * Pushes a persisted workout to Garmin Connect.
+ * Pushes a persisted workout to Garmin Connect and places it on its date
+ * in the Garmin calendar (`pushWorkoutToGarminCalendar`), resolving with
+ * the `PlacementResult`, or `undefined` when there is nothing to push (no
+ * workout, or no Garmin session).
  *
  * The hook accepts the persisted Dexie `WorkoutRecord` directly; it does NOT
  * read from the editor's Zustand draft store. Callers MUST pass the
  * Dexie-backed record (read via `useLiveQuery`), not the in-memory editor
  * draft.
  *
- * This hook sends the workout and reports the outcome; it does NOT persist
- * the `pushed` state transition — that stays owned by `useEditorActions`
- * (spa-workout-state-machine), so a quick push from the detail footer or
- * the coaching dialog does not flip state out from under an open editor.
+ * It does NOT persist the `pushed` state transition — that stays owned by
+ * `useEditorActions`, which `onSent` feeds: it fires with the Garmin
+ * library workout id iff the library push is confirmed.
  *
- * The push is governed by `executeWorkoutPush`: no active, enabled export
- * route to Garmin ⇒ the push never reaches the bridge (fail-closed,
- * visible cause in `pushing.message`). On success it's recorded in the
- * export ledger (idempotent re-push).
- *
- * Callers:
- * - `GarminPushButton.tsx` — reads the workout via `useLiveQuery` and passes
- *   the record. The editor pushes the last-persisted state.
- * - `CoachingActivityDialog.tsx` — reads the workout via the same Dexie path
- *   and passes the record from the matched session.
+ * Governed like every export: no active, enabled export route to Garmin
+ * ⇒ `failed{no-export-route}` and no bridge call. A throw before the
+ * pipeline starts still emits its one `garmin-calendar-placement` event.
  */
-export const useGarminPush = (workout: WorkoutRecord | undefined) => {
-  const { pushWorkout, setPushing, sessionActive } = useGarminBridge();
+export const useGarminPush = (
+  workout: WorkoutRecord | undefined,
+  onSent?: (garminWorkoutId: string) => void
+) => {
+  const { pushWorkout, setPushing, sessionActive, features } =
+    useGarminBridge();
   const analytics = useAnalytics();
 
-  const push = useCallback(async (): Promise<boolean> => {
-    if (!workout?.krd || !sessionActive) return false;
-
-    try {
-      const gcn = await exportGcnWorkout(workout.krd);
-      await executeWorkoutPush(
-        { policyRepo, ledgerRepo },
-        {
-          profileId: workout.profileId,
-          kaiordRecordId: workout.id,
-          destinationBridgeId: GARMIN_BRIDGE_ID,
-          payload: gcn as Record<string, unknown>,
-          pushFn: buildGarminPushFn(pushWorkout),
-        }
-      );
-      analytics.event("garmin-synced", { result: "success" });
-      return true;
-    } catch (error: unknown) {
-      analytics.event("garmin-synced", { result: "failure" });
-      if (error instanceof BridgePushFailedError) return false;
-      const message =
-        error instanceof Error ? error.message : "Conversion failed";
-      setPushing({ status: "error", message });
-      return false;
-    }
-  }, [workout, sessionActive, pushWorkout, setPushing, analytics]);
+  const push = useCallback(
+    async (options: GarminPushOptions = {}) => {
+      if (!workout?.krd || !sessionActive) return undefined;
+      const { synced, failedEarly } = garminPushReports(analytics, Date.now());
+      const showError = (error: unknown) =>
+        setPushing({ status: "error", message: errorMessage(error) });
+      // Phase 1 folds a thrown push into `failed`; surface its message first.
+      const guardedPush = (gcn: unknown) =>
+        pushWorkout(gcn).catch((error: unknown) => {
+          showError(error);
+          throw error;
+        });
+      try {
+        const deps = buildPlacementDeps(features, analytics);
+        const gcn = await exportGcnWorkout(workout.krd);
+        // A joiner's run is the owner's: only the owner reports it.
+        return await pushWorkoutToGarminCalendar(
+          deps,
+          garminPlacementRequest(
+            {
+              record: workout,
+              gcn,
+              ledgerRepo: deps.ledgerRepo,
+              pushWorkout: guardedPush,
+            },
+            {
+              onLibraryConfirmed: onSent,
+              sendAnyway: options.sendAnyway,
+              onSettled: synced,
+            }
+          )
+        );
+      } catch (error: unknown) {
+        showError(error);
+        return failedEarly();
+      }
+    },
+    [
+      workout,
+      sessionActive,
+      features,
+      pushWorkout,
+      setPushing,
+      analytics,
+      onSent,
+    ]
+  );
 
   return { push };
 };

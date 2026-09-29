@@ -15,8 +15,10 @@ import {
   GarminBridgeProvider,
   ThemeProvider,
 } from "./contexts";
+import { CoachMoveNoticeProvider } from "./contexts/coach-move-notice-context";
 import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
 import { PersistenceProvider } from "./contexts/persistence-context";
+import { PlacementOutcomeProvider } from "./contexts/placement-outcome-context";
 import { SyncProvider } from "./contexts/sync-context";
 import { UnitsProvider } from "./contexts/units-context";
 import { LocaleProvider } from "./i18n/LocaleProvider";
@@ -56,15 +58,19 @@ createRoot(document.getElementById("root")!).render(
         >
           <ThemeProvider defaultTheme="dark">
             <GarminBridgeProvider>
-              <CoachingRegistryBootstrap>
-                <LocaleProvider>
-                  <UnitsProvider>
-                    <Router hook={useFragmentLocation}>
-                      <App />
-                    </Router>
-                  </UnitsProvider>
-                </LocaleProvider>
-              </CoachingRegistryBootstrap>
+              <PlacementOutcomeProvider>
+                <CoachMoveNoticeProvider>
+                  <CoachingRegistryBootstrap>
+                    <LocaleProvider>
+                      <UnitsProvider>
+                        <Router hook={useFragmentLocation}>
+                          <App />
+                        </Router>
+                      </UnitsProvider>
+                    </LocaleProvider>
+                  </CoachingRegistryBootstrap>
+                </CoachMoveNoticeProvider>
+              </PlacementOutcomeProvider>
             </GarminBridgeProvider>
           </ThemeProvider>
         </SyncProvider>
