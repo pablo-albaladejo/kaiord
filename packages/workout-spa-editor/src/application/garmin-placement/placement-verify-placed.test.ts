@@ -163,7 +163,7 @@ describe("a verifying read before each delete (N2)", () => {
     expect(h.calendar.items.map((i) => i.date)).toEqual([D3]);
   });
 
-  it("should still let two concurrent drains of a crossed pair empty the calendar (known residual L2, design §3.9)", async () => {
+  it("should still let two concurrent drains of a crossed pair empty the calendar (known residual L2, until conditional sync lands; design §3.9)", async () => {
     // Arrange
     // A holds Placed Y with X retire; B holds Placed X with Y retire. A
     // crossed pair forms only through the sync residuals of §3.9;
