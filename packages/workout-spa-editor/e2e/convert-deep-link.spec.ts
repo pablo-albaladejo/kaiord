@@ -62,7 +62,12 @@ async function uploadAndDownload(page: Page, name: string, buffer: Buffer) {
   return (await download).suggestedFilename();
 }
 
-type Counts = { workouts: number; templates: number };
+type Counts = {
+  workouts: number;
+  templates: number;
+  plannedSessions: number;
+  activities: number;
+};
 
 const dexieCounts = (page: Page): Promise<Counts> =>
   page.evaluate(async () => {
@@ -72,6 +77,8 @@ const dexieCounts = (page: Page): Promise<Counts> =>
     return {
       workouts: await db.table("workouts").count(),
       templates: await db.table("templates").count(),
+      plannedSessions: await db.table("plannedSessions").count(),
+      activities: await db.table("activities").count(),
     };
   });
 

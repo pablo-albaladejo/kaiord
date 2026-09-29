@@ -46,7 +46,10 @@ export default function ConvertPage() {
       {pair ? (
         <ConvertFlow key={`${pair.from}-${pair.to}`} pair={pair} />
       ) : (
-        <ConvertFormatPicker initial={partialConvertParams(search)} />
+        <ConvertFormatPicker
+          key={search}
+          initial={partialConvertParams(search)}
+        />
       )}
     </div>
   );
