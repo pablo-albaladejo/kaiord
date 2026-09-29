@@ -121,6 +121,50 @@ describe("definite failures roll the claim back", () => {
       new Date(T0.getTime() + MINUTE_MS).toISOString()
     );
   });
+  it("should keep a write that landed between the claim and the POST", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    await h.push(D1);
+    const placed = (await h.row())?.placement;
+    h.calendar.scripts.schedule.push({ answer: { ok: false, status: 400 } });
+    const mutate = h.ledgerRepo.mutateByKey.bind(h.ledgerRepo);
+    let injected = false;
+    h.ledgerRepo.mutateByKey = async (key, fn) => {
+      const after = await mutate(key, fn);
+      const claimed =
+        after?.placement?.kind === "attempting" && !after.placement.posted;
+      if (!claimed || injected) return after;
+      injected = true;
+      return mutate(
+        key,
+        (row) =>
+          row && {
+            ...row,
+            removalQueue: [
+              ...(row.removalQueue ?? []),
+              {
+                workoutScheduleId: "77" as never,
+                workoutId: "1700000" as never,
+                date: "2026-10-30",
+                attempts: 0,
+                abandoned: false,
+                state: "held",
+              },
+            ],
+          }
+      );
+    };
+    vi.setSystemTime(T0.getTime() + MINUTE_MS);
+
+    // Act
+    await h.push(D2);
+
+    // Assert
+    const row = await h.row();
+    expect(injected).toBe(true);
+    expect(row?.placement).toEqual(placed);
+    expect(row?.removalQueue?.map((e) => e.workoutScheduleId)).toContain("77");
+  });
 });
 
 describe("schedule 404 (AC-32)", () => {
