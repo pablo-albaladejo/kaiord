@@ -11,13 +11,18 @@ import {
   policyRepo,
   profileRepo,
 } from "../../../hooks/garmin-push-fn";
-import { useTranslate } from "../../../i18n/use-translate";
-import { ftpForWorkout } from "../../../lib/athlete";
+import { type Translate, useTranslate } from "../../../i18n/use-translate";
+import { ftpForWorkout, missingFtpReason } from "../../../lib/athlete";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { KRD } from "../../../types/krd";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
 
-const pushErrorMessage = (error: unknown, missingFtp: string): string => {
-  if (error instanceof MissingFtpError) return missingFtp;
+const pushErrorMessage = (error: unknown, krd: KRD, t: Translate): string => {
+  if (error instanceof MissingFtpError) {
+    return missingFtpReason(krd) === "no-ftp"
+      ? t("footer.missingFtp")
+      : t("footer.missingFtpSport");
+  }
   return error instanceof Error ? error.message : "Conversion failed";
 };
 
@@ -72,7 +77,7 @@ export const useGarminPush = (workout: WorkoutRecord | undefined) => {
     } catch (error: unknown) {
       analytics.event("garmin-synced", { result: "failure" });
       if (error instanceof BridgePushFailedError) return false;
-      const message = pushErrorMessage(error, t("footer.missingFtp"));
+      const message = pushErrorMessage(error, workout.krd, t);
       setPushing({ status: "error", message });
       return false;
     }

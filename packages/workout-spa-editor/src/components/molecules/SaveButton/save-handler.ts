@@ -1,6 +1,7 @@
 import { MissingFtpError } from "@kaiord/core";
 
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
+import { missingFtpReason } from "../../../lib/athlete";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
@@ -11,8 +12,16 @@ const isMissingFtp = (err: unknown): boolean =>
   err instanceof MissingFtpError ||
   (err instanceof Error && err.cause instanceof MissingFtpError);
 
-const exportErrorMessage = (err: unknown, t: Translate): string => {
-  if (isMissingFtp(err)) return t("save.missingFtp");
+const exportErrorMessage = (
+  err: unknown,
+  t: Translate,
+  workout: KRD
+): string => {
+  if (isMissingFtp(err)) {
+    return missingFtpReason(workout) === "no-ftp"
+      ? t("save.missingFtp")
+      : t("save.missingFtpSport");
+  }
   return err instanceof Error ? err.message : t("save.exportFailedFallback");
 };
 
@@ -56,7 +65,7 @@ export function createSaveHandler(
       );
       onExported?.(selectedFormat);
     } catch (err) {
-      const errorMessage = exportErrorMessage(err, t);
+      const errorMessage = exportErrorMessage(err, t, workout);
       showError(t("save.exportFailedTitle"), errorMessage);
       setSaveErrors([
         {

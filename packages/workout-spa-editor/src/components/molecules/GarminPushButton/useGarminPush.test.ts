@@ -229,6 +229,30 @@ describe("useGarminPush", () => {
     });
   });
 
+  it("should explain the sport, not the FTP, when the workout's sport has no power zones", async () => {
+    // Arrange
+    mockExportGcnWorkout.mockRejectedValue(createMissingFtpError("garmin"));
+    const genericKrd = {
+      ...(CYCLING_KRD as object),
+      metadata: { created: "2026-05-14T08:00:00.000Z", sport: "generic" },
+      extensions: { structured_workout: { sport: "generic", steps: [] } },
+    } as unknown as WorkoutRecord["krd"];
+    const workout = makeWorkout({ krd: genericKrd });
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockPushWorkout).not.toHaveBeenCalled();
+    expect(mockSetPushing).toHaveBeenCalledWith({
+      status: "error",
+      message: getTranslate("workout-detail")("footer.missingFtpSport"),
+    });
+  });
+
   it("should set error when exportGcnWorkout throws an Error", async () => {
     // Arrange
     mockExportGcnWorkout.mockRejectedValue(new Error("Conversion failed"));

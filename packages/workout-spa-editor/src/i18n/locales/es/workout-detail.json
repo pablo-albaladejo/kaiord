@@ -29,7 +29,8 @@
     "sent": "En tu Garmin",
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
-    "missingFtp": "Este entreno tiene objetivos de potencia en %FTP. Configura tu FTP en Atleta para convertirlos a vatios para Garmin."
+    "missingFtp": "Este entreno tiene objetivos de potencia en %FTP. Configura tu FTP en Atleta para convertirlos a vatios para Garmin.",
+    "missingFtpSport": "El deporte de este entreno no tiene zonas de potencia. Cambia su deporte a ciclismo o carrera para enviar sus objetivos de potencia en %FTP a Garmin."
   },
   "summary": {
     "duration": "Duración",

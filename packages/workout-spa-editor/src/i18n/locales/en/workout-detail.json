@@ -29,7 +29,8 @@
     "sent": "On your Garmin",
     "sendToTrainingPeaks": "Send to TrainingPeaks",
     "sentToTrainingPeaks": "On TrainingPeaks",
-    "missingFtp": "This workout has %FTP power targets. Set your FTP in Athlete to convert them to watts for Garmin."
+    "missingFtp": "This workout has %FTP power targets. Set your FTP in Athlete to convert them to watts for Garmin.",
+    "missingFtpSport": "This workout's sport has no power zones. Change its sport to cycling or running to send its %FTP power targets to Garmin."
   },
   "summary": {
     "duration": "Duration",

@@ -250,7 +250,8 @@ describe("doPushToGarmin", () => {
     vi.mocked(exportGcnWorkout).mockRejectedValueOnce(
       createMissingFtpError("garmin")
     );
-    const { persistence, put } = makePersistence(makeRecord());
+    const record = makeRecord({ krd: CYCLING_KRD });
+    const { persistence, put } = makePersistence(record);
     const pushWorkout = vi.fn();
 
     // Act
@@ -261,6 +262,34 @@ describe("doPushToGarmin", () => {
       expect.objectContaining({
         error: "missing_ftp",
         message: expect.stringContaining("FTP"),
+      })
+    );
+    expect(pushWorkout).not.toHaveBeenCalled();
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it("should report sport_without_power_zones when the workout's sport holds no FTP", async () => {
+    // Arrange
+    vi.mocked(exportGcnWorkout).mockRejectedValueOnce(
+      createMissingFtpError("garmin")
+    );
+    const genericKrd = {
+      metadata: { sport: "generic" },
+      extensions: { structured_workout: { sport: "generic", steps: [] } },
+    } as unknown as WorkoutRecord["krd"];
+    const { persistence, put } = makePersistence(
+      makeRecord({ krd: genericKrd })
+    );
+    const pushWorkout = vi.fn();
+
+    // Act
+    const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
+
+    // Assert
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: "sport_without_power_zones",
+        message: expect.stringContaining("cycling or running"),
       })
     );
     expect(pushWorkout).not.toHaveBeenCalled();

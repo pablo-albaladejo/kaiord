@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSaveHandler } from "./save-handler";
 
 const FTP_W = 250;
+const workoutFor = (sport: string) => ({
+  metadata: { sport },
+  extensions: { structured_workout: { name: "Test", sport, steps: [] } },
+});
 const mockDownloadWorkout = vi.fn();
 const mockExportWorkout = vi.fn();
 const mockGenerateWorkoutFilename = vi.fn(() => "workout.fit");
@@ -100,8 +104,9 @@ describe("createSaveHandler — analytics call-site", () => {
     );
     const showError = vi.fn();
     const t = (key: string) => key;
+    const cyclingWorkout = workoutFor("cycling");
     const handler = createSaveHandler(
-      fakeWorkout as never,
+      cyclingWorkout as never,
       "gcn",
       noop,
       noop,
@@ -121,6 +126,36 @@ describe("createSaveHandler — analytics call-site", () => {
       "save.missingFtp"
     );
   });
+
+  it.each(["generic", "swimming"])(
+    "should point at the %s sport instead of the FTP when it has no power zones",
+    async (sport) => {
+      // Arrange
+      mockExportWorkout.mockRejectedValue(createMissingFtpError("garmin"));
+      const showError = vi.fn();
+      const t = (key: string) => key;
+      const handler = createSaveHandler(
+        workoutFor(sport) as never,
+        "gcn",
+        noop,
+        noop,
+        noop,
+        noop,
+        showError,
+        undefined,
+        t
+      );
+
+      // Act
+      await handler();
+
+      // Assert
+      expect(showError).toHaveBeenCalledWith(
+        "save.exportFailedTitle",
+        "save.missingFtpSport"
+      );
+    }
+  );
 
   it("should pass the profile FTP through to the export", async () => {
     // Arrange

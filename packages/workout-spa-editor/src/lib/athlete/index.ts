@@ -15,4 +15,8 @@ export {
 } from "./threshold-disagreement";
 export { thresholdsForSport } from "./threshold-for-sport";
 export { type ThresholdProvenance } from "./threshold-provenance";
-export { ftpForWorkout } from "./workout-ftp";
+export {
+  ftpForWorkout,
+  type MissingFtpReason,
+  missingFtpReason,
+} from "./workout-ftp";

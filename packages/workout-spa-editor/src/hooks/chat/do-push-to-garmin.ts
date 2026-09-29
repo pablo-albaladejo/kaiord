@@ -10,7 +10,8 @@
  * id so the calendar lifecycle badge reflects the push; an unconfirmed
  * push (no Garmin-shaped id) or a lost race persists nothing, so neither
  * a sentinel nor `"pending"` ever becomes a push id. A workout with %FTP
- * power targets whose owner has no FTP returns `missing_ftp` unpushed.
+ * power targets whose owner has no FTP returns `missing_ftp` unpushed, or
+ * `sport_without_power_zones` when its sport can never hold an FTP.
  */
 import { MissingFtpError } from "@kaiord/core";
 
@@ -20,7 +21,7 @@ import {
 } from "../../application/export/execute-workout-push";
 import { recordGarminPush } from "../../application/record-garmin-push";
 import type { GarminPushOutcome } from "../../contexts/garmin-bridge-types";
-import { ftpForWorkout } from "../../lib/athlete";
+import { ftpForWorkout, missingFtpReason } from "../../lib/athlete";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { exportGcnWorkout } from "../../utils/export-workout-formats";
 import {
@@ -30,8 +31,17 @@ import {
   policyRepo,
 } from "../garmin-push-fn";
 
-const MISSING_FTP_MESSAGE =
-  "The workout has %FTP power targets and the athlete profile has no FTP for its sport. Ask the user to set their FTP in Athlete.";
+const MISSING_FTP = {
+  error: "missing_ftp",
+  message:
+    "The workout has %FTP power targets and the athlete profile has no FTP for its sport. Ask the user to set their FTP in Athlete.",
+} as const;
+
+const SPORT_WITHOUT_POWER = {
+  error: "sport_without_power_zones",
+  message:
+    "The workout has %FTP power targets but its sport has no power zones, so no FTP applies. Ask the user to change its sport to cycling or running.",
+} as const;
 
 export const doPushToGarmin = async (
   persistence: PersistencePort,
@@ -49,7 +59,9 @@ export const doPushToGarmin = async (
     );
   } catch (error) {
     if (error instanceof MissingFtpError) {
-      return { error: "missing_ftp", message: MISSING_FTP_MESSAGE };
+      return missingFtpReason(record.krd) === "no-ftp"
+        ? MISSING_FTP
+        : SPORT_WITHOUT_POWER;
     }
     throw error;
   }
