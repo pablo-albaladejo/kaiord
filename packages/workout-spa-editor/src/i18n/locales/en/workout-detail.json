@@ -92,7 +92,8 @@
       "needs-reauth": "Sign in to Garmin Connect again, then retry.",
       "deadline-before-send": "The extension timed out before sending. Try again.",
       "library-push-failed": "The workout could not be sent to Garmin.",
-      "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Settings."
+      "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Settings.",
+      "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish."
     }
   }
 }

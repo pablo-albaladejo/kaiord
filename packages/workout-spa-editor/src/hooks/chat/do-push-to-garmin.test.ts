@@ -220,6 +220,7 @@ describe("doPushToGarmin", () => {
       workoutId: "workout-1",
       garminPushId: null,
       calendar: "failed",
+      reason: "library-id-unknown",
     });
     expect(put).not.toHaveBeenCalled();
   });
@@ -288,6 +289,7 @@ describe("doPushToGarmin", () => {
       workoutId: "workout-1",
       garminPushId: null,
       calendar: "failed",
+      reason: "library-id-unknown",
     });
     expect(put).not.toHaveBeenCalled();
   });
@@ -339,5 +341,55 @@ describe("doPushToGarmin", () => {
     );
     expect(pushWorkout).not.toHaveBeenCalled();
     expect(put).not.toHaveBeenCalled();
+  });
+
+  it("should return the failed reason with calendar failed when the placement is interrupted", async () => {
+    // Arrange
+    const { deps, calendar } = makeDeps();
+    calendar.port.schedule = async () => {
+      throw new Error("C:\\Users\\athlete\\secret");
+    };
+    const { persistence } = makePersistence(makeRecord());
+    const pushWorkout = vi
+      .fn()
+      .mockResolvedValue({ success: true, garminWorkoutId: "1707805999" });
+
+    // Act
+    const result = await doPushToGarmin(
+      persistence,
+      pushWorkout,
+      "workout-1",
+      deps
+    );
+
+    // Assert
+    expect(result).toEqual({
+      workoutId: "workout-1",
+      garminPushId: "1707805999",
+      calendar: "failed",
+      reason: "placement-interrupted",
+    });
+  });
+
+  it("should return an app-authored code, never the exception text, when the chat path throws", async () => {
+    // Arrange
+    const { deps } = makeDeps();
+    const { persistence } = makePersistence(makeRecord());
+    vi.mocked(persistence.workouts.getById).mockRejectedValue(
+      new Error("athlete-private-detail")
+    );
+    const pushWorkout = vi.fn();
+
+    // Act
+    const result = await doPushToGarmin(
+      persistence,
+      pushWorkout,
+      "workout-1",
+      deps
+    );
+
+    // Assert
+    expect(result).toEqual({ error: "push_failed" });
+    expect(JSON.stringify(result)).not.toContain("athlete-private-detail");
   });
 });

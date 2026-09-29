@@ -293,7 +293,7 @@ describe("pushWorkoutToGarminCalendar — lock and pre-flight (AC-30, AC-34)", (
     expect(h.lockManager.held.size).toBe(0);
   });
 
-  it("should release the lock when the run throws", async () => {
+  it("should report an interrupted placement and release the lock when a port throws", async () => {
     // Arrange
     const h = createPlacementHarness();
     h.calendar.port.schedule = async () => {
@@ -301,11 +301,40 @@ describe("pushWorkoutToGarminCalendar — lock and pre-flight (AC-30, AC-34)", (
     };
 
     // Act
-    const run = h.push(D1);
+    const result = await h.push(D1);
 
     // Assert
-    await expect(run).rejects.toThrow("port broke");
+    expect(result).toEqual({
+      kind: "failed",
+      reason: "placement-interrupted",
+      retryable: true,
+    });
     expect(h.lockManager.held.size).toBe(0);
+  });
+
+  it("should report an interrupted placement, not a failed library push, on a ledger error after Phase 1", async () => {
+    // Arrange
+    const h = createPlacementHarness();
+    const mutate = h.ledgerRepo.mutateByKey.bind(h.ledgerRepo);
+    h.ledgerRepo.mutateByKey = async (key, fn) => {
+      const after = await mutate(key, fn);
+      if (after?.placement?.kind === "attempting")
+        throw new Error("DatabaseClosedError");
+      return after;
+    };
+    const onLibraryConfirmed = vi.fn();
+
+    // Act
+    const result = await h.push(D1, "v1", { onLibraryConfirmed });
+
+    // Assert
+    expect(result).toEqual({
+      kind: "failed",
+      reason: "placement-interrupted",
+      retryable: true,
+    });
+    expect(onLibraryConfirmed).toHaveBeenCalledWith("1700000");
+    expect(h.calendar.count("schedule")).toBe(0);
   });
 
   it("should push the library only, without Web Locks", async () => {

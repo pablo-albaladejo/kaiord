@@ -92,7 +92,8 @@
       "needs-reauth": "Vuelve a iniciar sesión en Garmin Connect y reinténtalo.",
       "deadline-before-send": "La extensión agotó el tiempo antes de enviar. Inténtalo de nuevo.",
       "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
-      "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Ajustes."
+      "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Ajustes.",
+      "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar."
     }
   }
 }

@@ -15,6 +15,7 @@ export const PLACEMENT_FAILURE_REASONS = [
   "deadline-before-send",
   "library-push-failed",
   "no-export-route",
+  "placement-interrupted",
 ] as const;
 export type PlacementFailureReason = (typeof PLACEMENT_FAILURE_REASONS)[number];
 

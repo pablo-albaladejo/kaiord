@@ -52,15 +52,20 @@ const place = async (
   if (!deps.locks) return { kind: "library-only", reason: "insecure-context" };
   if (!deps.features.includes(CALENDAR_WRITE_FEATURE))
     return { kind: "library-only", reason: "bridge-outdated" };
-  const workoutId = await guardLibrary(deps, key);
-  if (typeof workoutId !== "string") return workoutId;
-  return reconcileGarminPlacement({
-    deps: { ...deps, canFind: deps.features.includes(CALENDAR_FIND_FEATURE) },
-    key,
-    desired: { workoutId, date: request.date },
-    minted: phaseOne.minted,
-    sendAnyway: request.sendAnyway ?? false,
-  });
+  try {
+    const workoutId = await guardLibrary(deps, key);
+    if (typeof workoutId !== "string") return workoutId;
+    return await reconcileGarminPlacement({
+      deps: { ...deps, canFind: deps.features.includes(CALENDAR_FIND_FEATURE) },
+      key,
+      desired: { workoutId, date: request.date },
+      minted: phaseOne.minted,
+      sendAnyway: request.sendAnyway ?? false,
+    });
+  } catch {
+    // The library push succeeded: a re-send places the date.
+    return failed("placement-interrupted", true);
+  }
 };
 
 const lockedPlace = async (

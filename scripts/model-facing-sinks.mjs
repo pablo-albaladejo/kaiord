@@ -92,7 +92,7 @@ export const SINKS = [
     tool: "push_to_garmin",
     status: "clean",
     provenance:
-      "garminPushId is the Garmin-confirmed library workout id (parsed to ^[1-9]\\d*$ at the source) or null; calendar is the PlacementResult kind, an app-authored literal enum; error codes are app-authored literals; message is NoActiveExportRouteError's app-authored text",
+      "garminPushId is the Garmin-confirmed library workout id (parsed to ^[1-9]\\d*$ at the source) or null; calendar is the PlacementResult kind and reason is a failed PlacementResult's reason, both app-authored literal enums; error codes are app-authored literals, and any exception on the path becomes push_failed, never its text; message is NoActiveExportRouteError's app-authored text",
   },
   {
     tool: "set_data_route",

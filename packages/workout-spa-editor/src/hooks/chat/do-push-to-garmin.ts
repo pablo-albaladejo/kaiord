@@ -7,7 +7,8 @@
  * `push_failed`, so this never throws for either.
  *
  * Otherwise the result carries `calendar`: the placement's kind, an
- * app-authored enum. When Garmin confirmed the library workout id, the
+ * app-authored enum, with a `failed` one's `reason`. Any exception on this
+ * path is `push_failed`, never the exception's text. When Garmin confirmed the library workout id, the
  * record is re-persisted with that id so the calendar lifecycle badge
  * reflects the push; an unconfirmed push persists nothing, so neither a
  * sentinel nor `"pending"` ever becomes a push id.
@@ -37,7 +38,13 @@ const libraryError = (result: PlacementResult) => {
   return undefined;
 };
 
-export const doPushToGarmin = async (
+/** The placement's kind, and a `failed` one's reason (both app-authored). */
+const calendarOf = (result: PlacementResult) =>
+  result.kind === "failed"
+    ? { calendar: result.kind, reason: result.reason }
+    : { calendar: result.kind };
+
+const pushAndRecord = async (
   persistence: PersistencePort,
   pushWorkout: (gcn: unknown) => Promise<GarminPushOutcome>,
   workoutId: string,
@@ -58,7 +65,7 @@ export const doPushToGarmin = async (
   const garminPushId = confirmed.id ?? null;
   const error = garminPushId === null ? libraryError(result) : undefined;
   if (error) return error;
-  const done = { workoutId: record.id, garminPushId, calendar: result.kind };
+  const done = { workoutId: record.id, garminPushId, ...calendarOf(result) };
   if (garminPushId === null) return done;
   // Re-read before persisting so edits made while the push was in flight
   // are not overwritten by the stale copy captured above.
@@ -67,4 +74,15 @@ export const doPushToGarmin = async (
     recordGarminPush(fresh ?? record, garminPushId)
   );
   return done;
+};
+
+export const doPushToGarmin = async (
+  ...args: Parameters<typeof pushAndRecord>
+): Promise<unknown> => {
+  try {
+    return await pushAndRecord(...args);
+  } catch {
+    // An exception's text never reaches the model.
+    return { error: "push_failed" };
+  }
 };
