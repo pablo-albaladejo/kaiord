@@ -686,7 +686,11 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   same run is never followed by a second POST.
 - **A leftover attempt for another date** (the workout moved while an attempt
   was pending) is resolved first; a resolution that lands a `Placed` is then
-  claimed again for the desired date in the same run, a move.
+  claimed again for the desired date in the same run, a move. A leftover
+  proven absent after the gate is restored to its `previous` under the
+  attempt guard, and the claim runs again: the gate's re-POST is the run's
+  own claim of the desired workout and date, with a fresh `supersedes`,
+  never a re-send of the leftover's workout id or date.
 - **The library guard is the way out of a legacy `unconfirmed` library.** A
   row whose `library` is not `confirmed` (legacy `unconfirmed`, whose equal
   hash Phase 1 would skip forever) returns
@@ -701,8 +705,8 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   only when the current row is byte-identical to the last row this run wrote,
   so the rollback of a definite failure is invisible to the merge order;
   otherwise (another writer touched the row) it restores `previous` with a
-  normal, stamped write. The gate's re-POST has no pre-claim row and always
-  restores normally. The port gains no method.
+  normal, stamped write. The restore of a leftover proven absent is always
+  a normal, stamped write. The port gains no method.
 - **The pending window.** Phase 1's `pending` row lives only across the
   library POST, whose SPA timeout (15 s) is far below `PENDING_TTL_MS`
   (5 min); placement starts after the library commit, so no wait of Phase 2
