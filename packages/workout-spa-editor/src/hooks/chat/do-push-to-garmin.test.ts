@@ -41,16 +41,20 @@ vi.mock(
   })
 );
 
+// When set, the ledger resolves this outcome without pushing (a race).
+let mockLedgerOutcome: Record<string, unknown> | undefined;
+
 vi.mock("../../application/export/record-export.use-case", () => ({
   recordExport: async (
     _deps: unknown,
     input: {
-      postFn: (p: unknown) => Promise<{ externalId: string }>;
+      postFn: (p: unknown) => Promise<Record<string, unknown>>;
       payload: unknown;
     }
   ) => {
-    const { externalId } = await input.postFn(input.payload);
-    return { ledgerId: "ledger-1", outcome: "created", externalId };
+    if (mockLedgerOutcome) return mockLedgerOutcome;
+    const pushed = await input.postFn(input.payload);
+    return { ledgerId: "ledger-1", outcome: "created", ...pushed };
   },
 }));
 
@@ -89,23 +93,56 @@ const CYCLING_KRD = {
 describe("doPushToGarmin", () => {
   beforeEach(() => {
     mockPolicies = [ENABLED_GARMIN_POLICY];
+    mockLedgerOutcome = undefined;
   });
 
-  it("should push the workout and persist the Garmin-assigned id", async () => {
+  it("should push the workout and persist the confirmed Garmin-assigned id", async () => {
     // Arrange
     const { persistence, put } = makePersistence(makeRecord());
     const pushWorkout = vi
       .fn()
-      .mockResolvedValue({ success: true, garminWorkoutId: "gw-9" });
+      .mockResolvedValue({ success: true, garminWorkoutId: "1707805999" });
 
     // Act
     const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
 
     // Assert
-    expect(result).toEqual({ workoutId: "workout-1", garminPushId: "gw-9" });
+    expect(result).toEqual({
+      workoutId: "workout-1",
+      garminPushId: "1707805999",
+    });
     expect(put).toHaveBeenCalledWith(
-      expect.objectContaining({ state: "pushed", garminPushId: "gw-9" })
+      expect.objectContaining({ state: "pushed", garminPushId: "1707805999" })
     );
+  });
+
+  it("should report push_in_progress and persist nothing when the push lost a race to a pending row", async () => {
+    // Arrange
+    mockLedgerOutcome = { ledgerId: "ledger-1", outcome: "lost-race" };
+    const { persistence, put } = makePersistence(makeRecord());
+    const pushWorkout = vi.fn();
+
+    // Act
+    const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
+
+    // Assert
+    expect(result).toEqual({ error: "push_in_progress" });
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it('should never persist "pending" as the push id when the bridge echoes it', async () => {
+    // Arrange
+    const { persistence, put } = makePersistence(makeRecord());
+    const pushWorkout = vi
+      .fn()
+      .mockResolvedValue({ success: true, garminWorkoutId: "pending" });
+
+    // Act
+    const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
+
+    // Assert
+    expect(result).toEqual({ workoutId: "workout-1", garminPushId: null });
+    expect(put).not.toHaveBeenCalled();
   });
 
   it("should report workout_not_found when the record is missing", async () => {
@@ -138,7 +175,7 @@ describe("doPushToGarmin", () => {
     expect(put).not.toHaveBeenCalled();
   });
 
-  it("should persist a stable sentinel id when the response carries none", async () => {
+  it("should persist no push id when the response carries no confirmed id", async () => {
     // Arrange
     mockPolicies = [ENABLED_GARMIN_POLICY];
     const { persistence, put } = makePersistence(makeRecord());
@@ -147,11 +184,11 @@ describe("doPushToGarmin", () => {
       .mockResolvedValue({ success: true, garminWorkoutId: null });
 
     // Act
-    await doPushToGarmin(persistence, pushWorkout, "workout-1");
+    const result = await doPushToGarmin(persistence, pushWorkout, "workout-1");
 
     // Assert
-    const persisted = put.mock.calls[0]?.[0] as { garminPushId: string };
-    expect(persisted.garminPushId).toBe("garmin-unconfirmed");
+    expect(result).toEqual({ workoutId: "workout-1", garminPushId: null });
+    expect(put).not.toHaveBeenCalled();
   });
 
   it("should report no_active_export_route with a clear message and never call pushWorkout when no export route is active", async () => {

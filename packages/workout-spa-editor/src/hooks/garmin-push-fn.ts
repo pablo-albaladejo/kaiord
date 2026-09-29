@@ -9,6 +9,9 @@ import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-expor
 import { createDexieProfileRepository } from "../adapters/dexie/dexie-profile-repository";
 import type { ExecuteWorkoutPushInput } from "../application/export/execute-workout-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
+import { parseGarminWorkoutId } from "../types/garmin-ledger";
+import { executePush } from "./garmin-bridge-operations";
+import { getGarminExtensionId } from "./use-garmin-bridge-action-helpers";
 
 export { policyRepo } from "./integration-policy-repo";
 export const ledgerRepo = createDexieExportLedgerRepository(db);
@@ -18,14 +21,20 @@ export const GARMIN_BRIDGE_ID = "garmin-bridge";
 
 const UNCONFIRMED_EXTERNAL_ID = "garmin-unconfirmed";
 
-/** The bridge echoes this id back from Garmin's response, and it travels on:
-    it is persisted as `garminPushId` and returned to the model by the
-    `push_to_garmin` chat tool. Nothing upstream constrains it, so anything
-    that is not id-shaped is treated as no id at all rather than forwarded. */
+/** The bridge echoes this id back from Garmin's response and it becomes the
+    ledger's `destinationExternalId`. Nothing upstream constrains it, so
+    anything that is not id-shaped is treated as no id at all, and so is the
+    ledger's own `"pending"` marker: stored as an external id it would read
+    as an in-flight POST forever. Only a Garmin-shaped id (`library:
+    confirmed`) is ever persisted as `garminPushId` or returned to the model
+    by `push_to_garmin`. */
 const ID_SHAPE = /^[A-Za-z0-9_-]{1,64}$/;
+const PENDING_MARKER = "pending";
 
 const asExternalId = (id: string | null | undefined): string =>
-  id && ID_SHAPE.test(id) ? id : UNCONFIRMED_EXTERNAL_ID;
+  id && id !== PENDING_MARKER && ID_SHAPE.test(id)
+    ? id
+    : UNCONFIRMED_EXTERNAL_ID;
 
 /** Marks a bridge-reported push failure (never rejects on its own): the
     caller's `pushWorkout` resolves `{ success: false }` and records its own
@@ -35,14 +44,33 @@ export class BridgePushFailedError extends Error {}
 
 /** Wraps a bridge's `pushWorkout` into `executeWorkoutPush`'s `pushFn`
     contract. Falls back to a stable sentinel id when the bridge doesn't
-    echo one back — or echoes one that is not id-shaped — so neither a
-    missing id nor a malformed one breaks idempotent re-push keying. */
+    echo one back — or echoes one that is not id-shaped, or `"pending"` —
+    so neither breaks idempotent re-push keying.
+    `library` is the explicit verdict on the echo: `confirmed` only for a
+    Garmin-shaped workout id, `unconfirmed` for anything else. */
 export const buildGarminPushFn = (
   pushWorkout: (gcn: unknown) => Promise<GarminPushOutcome>
 ): ExecuteWorkoutPushInput["pushFn"] => {
   return async (payload) => {
     const outcome = await pushWorkout(payload);
     if (!outcome.success) throw new BridgePushFailedError();
-    return { externalId: asExternalId(outcome.garminWorkoutId) };
+    const workoutId = parseGarminWorkoutId(outcome.garminWorkoutId);
+    return {
+      externalId: asExternalId(outcome.garminWorkoutId),
+      library: workoutId
+        ? { kind: "confirmed", workoutId }
+        : { kind: "unconfirmed" },
+    };
   };
+};
+
+/** A `pushWorkout` for bulk sends: maps the bridge push to a
+    `GarminPushOutcome` without touching the global push UI state
+    (`setPushing`), which belongs to the single-workout push button. */
+export const pushQuiet = async (gcn: unknown): Promise<GarminPushOutcome> => {
+  const result = await executePush(getGarminExtensionId(), gcn);
+  if (result.status !== "success") {
+    return { success: false, garminWorkoutId: null };
+  }
+  return { success: true, garminWorkoutId: result.garminWorkoutId };
 };
