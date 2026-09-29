@@ -272,6 +272,7 @@ describe("a bridge with calendar-write but no find (AC-34)", () => {
     });
     await h.push(D1);
     const calls = h.calendar.calls.length;
+    vi.setSystemTime(T0.getTime() + POST_GATE_MS);
 
     // Act
     const result = await confirmGarminPlacement(
@@ -288,6 +289,34 @@ describe("a bridge with calendar-write but no find (AC-34)", () => {
       supersedes: [],
     });
     expect(h.calendar.calls.length).toBe(calls);
+  });
+
+  it("should refuse It's in Garmin before the gate of a posted attempt and write nothing", async () => {
+    // Arrange
+    const h = writeOnly();
+    await h.push(D1);
+    h.calendar.scripts.schedule.push({ answer: { ok: false, status: 500 } });
+    const movedAt = Date.now();
+    await h.push(D2);
+    const before = await h.row();
+    const calls = h.calendar.calls.length;
+
+    // Act
+    const result = await confirmGarminPlacement(
+      h.deps,
+      LEDGER_KEY.kaiordRecordId
+    );
+
+    // Assert
+    expect(result).toEqual({
+      kind: "failed",
+      reason: "settling",
+      retryable: true,
+      retryAfter: movedAt + POST_GATE_MS,
+    });
+    expect(await h.row()).toEqual(before);
+    expect(h.calendar.calls.length).toBe(calls);
+    expect(h.calendar.items).toMatchObject([{ date: D1 }]);
   });
 
   it("should refuse It's in Garmin while a non-keep entry shares the workout and date", async () => {

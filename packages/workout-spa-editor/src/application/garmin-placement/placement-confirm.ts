@@ -3,15 +3,18 @@
  * unresolved `attempting{posted:true}`) as `unconfirmed` with
  * `supersedes: []` — the entry they see may be a known id. Offered only
  * when no non-`keep` entry shares its workout and date; a `scheduled`
- * previous is retired and drained, as after a commit.
+ * previous is retired and drained, as after a commit. A posted attempt
+ * before its gate is refused with no write: its POST may still land.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { PlacementRun } from "./placement-deps";
 import { finishPlacement, unconfirmedLeftBehind } from "./placement-finish";
+import { gateOf } from "./placement-resolve";
 import {
   failed,
   type PlacementResult,
   recordDeleted,
+  settling,
 } from "./placement-result";
 import { canConfirmAt, decide, placedRow } from "./placement-row";
 
@@ -31,6 +34,8 @@ export const confirmInGarmin = async (
       return {
         verdict: { kind: "result", result: failed("guard-failed", true) },
       };
+    if (p.kind === "attempting" && run.deps.now() < gateOf(p))
+      return { verdict: { kind: "result", result: settling(gateOf(p)) } };
     if (!canConfirmAt(row, p.workoutId, p.date)) {
       const result: PlacementResult = {
         kind: "uncertain",
