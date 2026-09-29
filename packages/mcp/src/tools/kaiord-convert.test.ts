@@ -11,9 +11,29 @@ import { loadKrdFixtureRaw } from "../tests/helpers/test-fixtures";
 
 const FTP_W = 250;
 const SWEET_SPOT_W = 213;
-const PERCENT_FTP_ZWO = `<workout_file><name>ftp test</name><sportType>bike</sportType><workout>
-<SteadyState Duration="600" Power="0.85"/>
-</workout></workout_file>`;
+// KRD input, not ZWO: ZWO input is XSD-validated by spawning a JVM per
+// call (xsd-schema-validator), which alone can exceed the 5 s test budget
+// on a cold CI runner. These tests cover the `ftp` parameter, not parsing.
+const PERCENT_FTP_KRD = JSON.stringify({
+  version: "1.0",
+  type: "structured_workout",
+  metadata: { created: "2026-01-01T00:00:00.000Z", sport: "cycling" },
+  extensions: {
+    structured_workout: {
+      name: "ftp test",
+      sport: "cycling",
+      steps: [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 600 },
+          targetType: "power",
+          target: { type: "power", value: { unit: "percent_ftp", value: 85 } },
+        },
+      ],
+    },
+  },
+});
 
 type GcnStep = { targetValueOne: number; targetValueTwo: number };
 
@@ -115,8 +135,8 @@ describe("kaiord_convert", () => {
     const result = (await client.callTool({
       name: "kaiord_convert",
       arguments: {
-        input_content: PERCENT_FTP_ZWO,
-        input_format: "zwo",
+        input_content: PERCENT_FTP_KRD,
+        input_format: "krd",
         output_format: "gcn",
         ftp: FTP_W,
       },
@@ -140,8 +160,8 @@ describe("kaiord_convert", () => {
     const result = (await client.callTool({
       name: "kaiord_convert",
       arguments: {
-        input_content: PERCENT_FTP_ZWO,
-        input_format: "zwo",
+        input_content: PERCENT_FTP_KRD,
+        input_format: "krd",
         output_format: "gcn",
       },
     })) as McpToolResult & {
