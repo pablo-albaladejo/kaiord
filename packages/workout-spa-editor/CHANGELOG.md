@@ -1,5 +1,35 @@
 # @kaiord/workout-spa-editor
 
+## 1.5.0
+
+### Minor Changes
+
+- e7bc658: Send to Garmin now places the workout on its date in the Garmin Connect calendar, not only in the library. Moving the workout moves its calendar entry, and an entry Kaiord placed earlier is deleted only after the new one has been seen on Garmin, so a slow or skewed device can leave a duplicate but never an empty day. When a write's outcome is unknown the editor says so, waits out the window in which it could still land, and then lets the athlete answer "It's in Garmin" or "Send anyway". Duplicates left behind can be dismissed once the athlete has removed them.
+
+### Patch Changes
+
+- 1f473a1: Stop sending per-person identifiers to Umami: no analytics event carries `profileId` any more (the Umami adapter also strips it as a safety net), and page views of a workout or chat submit the route pattern (`/workout/:id`, `/chat/:conversationId`) instead of the record id.
+- fb2d94c: Chat errors are classified by HTTP status and provider error type first, with word-boundary text matching only as a fallback, so a 400 invalid request is no longer reported as "Rate limit or quota reached".
+- 97dfd05: The chat error classifier reads provider errors through the shared `readProviderError` reader and decides "model" inside its structured step, after auth and rate and before the generic fallback. A 400 whose message only echoes "not_found_error ... model" is no longer shown as a retired model, and a bare 404 stays generic.
+- fb2d94c: Chat error classification also recognises provider codes such as `insufficient_quota`, `quota_exceeded` and `overloaded_error` (including Anthropic's mid-stream error chunks), treats HTTP 503 as "try again shortly", and reads the message of non-`Error` error objects.
+- 97dfd05: A chat conversation started under a since-retired model no longer fails every turn with a 404: the stored model heals to its successor, and the chat shows "X was retired by the provider — using Y instead". Switching a conversation's provider no longer stores a retired model as its override. Settings → AI names the successor of a retired model and warns about deprecated ones. The lab-import "model unavailable" message is now translated.
+- fb2d94c: Retrying a failed chat turn re-runs it without appending the user's message again, so the message is no longer persisted and sent once per retry. The replay only happens when the stored conversation ends with that exact message; otherwise the text is sent normally. A retry is counted with its own count-only `chat-turn-retried` analytics event instead of a second `chat-message-sent`.
+- fb2d94c: The chat's `set_data_route` tool tells the model, on its `action` field, which fields each action requires, so it emits fewer calls that fail validation.
+- fb2d94c: Fix the in-app chat failing every request with Anthropic (`tools.11.custom.input_schema.type: Field required`): the `set_data_route` tool now sends a single top-level `type: "object"` input schema to the provider, keeping its per-action validation.
+- dded57a: Converter pages link the editor at `kaiord.com/app/` instead of the legacy `/editor/` path, and docs breadcrumbs link only pages that exist. The SPA gains a route-segment registry, kept in parity with its router, which the new site-link checker uses to validate `/app/#/<route>` links.
+- 738d24f: Workouts with pace zone targets can be sent to Garmin again. Garmin Connect has no pace zone numbers, so each pace zone is now written as an m/s range, on every path that builds a Garmin payload (Send to Garmin, Send week, the chat tool and the GCN file download). The ranges are the ones the Athlete page shows: pace zones the athlete edited (or a coach sync wrote) win, otherwise Z1–Z5 derive from the threshold pace with the zone map's model, and the open ends of Z1 and Z5 get a bound 25% beyond the known one. The distance a pace is per comes from the workout's sport (1 km running, 100 m swimming). When the zones cannot be resolved, the send fails with a specific message (set your threshold pace, complete your pace zones, or pace zones only in running or swimming) instead of the generic "could not be sent", and an unexpected push failure now logs its (scrubbed) cause.
+- 42453e3: A new profile can now get from install to "Send week" without help. Connections switches workout export destinations on and off, keeps "Nowhere" beside the switches until one is on, and does not yet offer the unverified TrainingPeaks push. The "no export route" messages link there. Linking a source opens the routes its bridge's import actually writes: Train2Go opens planned sessions and training zones, with zones set to manual when the profile already has thresholds so nothing is overwritten; WHOOP opens its seven types (HRV, sleep, strain, vitals, heart-rate series, stress, activity) and no scale routes. Reconnecting from Connections restores the routes Disconnect switched off, such as Garmin's activity import and workout export, and leaves the ones you switched off yourself alone. Routes that a Disconnect switched off before this release carry no record of it, so they stay off on reconnect; switch them back on in Connections. A route already on for a type its bridge no longer feeds (such as a WHOOP weight import) stays listed so it can be switched off. The calendar offers "Connect to Train2Go" when the profile is not linked, and the Connections card asks you to sign in first when there is no session. The first-run guide ticks the steps already done, shows only to a profile with no workouts or coach plans in any week, and makes way for a week of coach plans.
+- 9c4b3bf: Load the Health and new-workout route dispatchers and the Google Drive cloud sync lazily, and budget the SPA's initial JS in CI. The docs now ship one self-hosted Inter file (the preloaded `/docs/fonts/inter-var-latin.woff2`, which was a 404) instead of the 16 Inter subsets bundled by VitePress.
+- 97dfd05: The model catalog no longer offers models the provider has retired or deprecated (`claude-3-haiku-20240307`, `claude-opus-4-1`, `claude-opus-4-0`, `claude-sonnet-4-0` and their dated ids), and the default model per provider is a curated current model (`claude-sonnet-5`, `gpt-5-mini`, `gemini-2.5-flash`) instead of the catalog's oldest entry. A saved choice pointing at a retired model resolves to its same-tier successor, `isModelNotFoundError` detects a provider rejecting the model, and the SPA shows "This model is no longer available — pick another in Settings → AI" instead of a generic failure.
+- Updated dependencies [fb2d94c]
+- Updated dependencies [fb2d94c]
+- Updated dependencies [fb2d94c]
+- Updated dependencies [fb2d94c]
+- Updated dependencies [97dfd05]
+- Updated dependencies [97dfd05]
+- Updated dependencies [97dfd05]
+  - @kaiord/ai@9.4.0
+
 ## 1.4.0
 
 ### Minor Changes
