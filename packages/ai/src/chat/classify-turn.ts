@@ -6,6 +6,8 @@ import type { RawTurn } from "./run-turn";
  * history so `messages` is always the full, resume-ready conversation.
  *
  * - An unanswered action-tool call → `pending_action` (awaiting confirmation).
+ *   The last one wins: the loop halts on the step that produced it, so an
+ *   earlier action call was already answered (e.g. by a tool-error).
  * - Otherwise a `tool-calls` finish reason means the step cap halted the loop
  *   while the model still wanted tools → `step_limit`.
  * - Anything else → `complete`.
@@ -16,7 +18,9 @@ export const classifyTurn = (
   actionNames: Set<string>
 ): ChatTurnResult => {
   const messages = [...history, ...raw.messages];
-  const actionCall = raw.toolCalls.find((c) => actionNames.has(c.toolName));
+  const actionCall = [...raw.toolCalls]
+    .reverse()
+    .find((c) => actionNames.has(c.toolName));
 
   if (actionCall) {
     return {
