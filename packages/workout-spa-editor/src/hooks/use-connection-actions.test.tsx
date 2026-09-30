@@ -1,14 +1,17 @@
 import { renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { PersistenceProvider } from "../contexts/persistence-context";
+import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import type { IntegrationPolicy } from "../types/integration-policy";
 import { useConnectionActions } from "./use-connection-actions";
 
 const PROFILE_ID = "00000000-0000-4000-8000-0000000000b2";
 
 const state = vi.hoisted(() => ({
-  rows: [] as IntegrationPolicy[],
   connect: vi.fn(async () => undefined),
+  logError: vi.fn(),
 }));
 
 vi.mock("../adapters/connections/create-connection-provider", () => ({
@@ -22,38 +25,44 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
         : null,
   },
 }));
-vi.mock("./integration-policy-repo", () => ({
-  policyRepo: {
-    findByNaturalKey: async (key: Omit<IntegrationPolicy, "id">) =>
-      state.rows.find(
-        (r) =>
-          r.profileId === key.profileId &&
-          r.dataType === key.dataType &&
-          r.direction === key.direction &&
-          r.bridgeId === key.bridgeId
-      ),
-    put: async (row: IntegrationPolicy) => {
-      state.rows = [...state.rows.filter((r) => r.id !== row.id), row];
-    },
-  },
+vi.mock("../utils/logger", () => ({
+  logger: { error: state.logError },
 }));
+
+const setup = () => {
+  const persistence = createInMemoryPersistence();
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <PersistenceProvider persistence={persistence}>
+      {children}
+    </PersistenceProvider>
+  );
+  const { result } = renderHook(() => useConnectionActions(PROFILE_ID), {
+    wrapper,
+  });
+  const rows = async (dataType: IntegrationPolicy["dataType"]) =>
+    persistence.integrationPolicy.findByProfileDirection({
+      profileId: PROFILE_ID,
+      dataType,
+      direction: "import",
+    });
+  return { persistence, actions: result.current, rows };
+};
 
 describe("useConnectionActions connect", () => {
   beforeEach(() => {
-    state.rows = [];
     vi.clearAllMocks();
   });
 
   it("should open the activity import route when Garmin reconnects without one", async () => {
     // Arrange
-    const { result } = renderHook(() => useConnectionActions(PROFILE_ID));
+    const { actions, rows } = setup();
 
     // Act
-    await result.current.connect("garmin", "bridge");
+    await actions.connect("garmin", "bridge");
 
     // Assert
     expect(state.connect).toHaveBeenCalledOnce();
-    expect(state.rows).toMatchObject([
+    expect(await rows("activity")).toMatchObject([
       {
         dataType: "activity",
         direction: "import",
@@ -66,8 +75,9 @@ describe("useConnectionActions connect", () => {
 
   it("should leave an activity import route the user switched off disabled", async () => {
     // Arrange
+    const { persistence, actions, rows } = setup();
     const off: IntegrationPolicy = {
-      id: "off",
+      id: "00000000-0000-4000-8000-0000000000c1",
       profileId: PROFILE_ID,
       dataType: "activity",
       direction: "import",
@@ -76,24 +86,38 @@ describe("useConnectionActions connect", () => {
       enabled: false,
       updatedAt: "2026-01-01T00:00:00.000Z",
     };
-    state.rows = [off];
-    const { result } = renderHook(() => useConnectionActions(PROFILE_ID));
+    await persistence.integrationPolicy.put(off);
 
     // Act
-    await result.current.connect("garmin", "bridge");
+    await actions.connect("garmin", "bridge");
 
     // Assert
-    expect(state.rows).toEqual([off]);
+    expect(await rows("activity")).toEqual([off]);
   });
 
   it("should open no route for a source without a bridge", async () => {
     // Arrange
-    const { result } = renderHook(() => useConnectionActions(PROFILE_ID));
+    const { actions, rows } = setup();
 
     // Act
-    await result.current.connect("manual", "manual");
+    await actions.connect("manual", "manual");
 
     // Assert
-    expect(state.rows).toEqual([]);
+    expect(await rows("activity")).toEqual([]);
+  });
+
+  it("should log a failed route seed instead of rejecting the reconnect", async () => {
+    // Arrange
+    const { persistence, actions } = setup();
+    vi.spyOn(persistence.integrationPolicy, "put").mockRejectedValue(
+      new Error("quota")
+    );
+
+    // Act
+    const outcome = actions.connect("garmin", "bridge");
+
+    // Assert
+    await expect(outcome).resolves.toBeUndefined();
+    expect(state.logError).toHaveBeenCalledExactlyOnceWith(expect.any(String));
   });
 });

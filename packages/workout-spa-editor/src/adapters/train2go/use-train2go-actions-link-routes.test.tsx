@@ -15,6 +15,7 @@ import type { Profile } from "../../types/profile";
 
 const PROFILE_ID = "22222222-2222-4222-8222-222222222222";
 const mockAttempt = vi.fn();
+const mockLogError = vi.hoisted(() => vi.fn());
 
 vi.mock("../../application/coaching/attempt-link", () => ({
   attemptLink: (...args: unknown[]) => mockAttempt(...args),
@@ -26,6 +27,10 @@ vi.mock("../bridge/bridge-discovery", () => ({
         ? ["read:training-plan", "read:training-zones"]
         : null,
   },
+}));
+
+vi.mock("../../utils/logger", () => ({
+  logger: { error: mockLogError },
 }));
 
 import { useConnectCallback } from "./use-train2go-actions";
@@ -137,5 +142,20 @@ describe("useConnectCallback route seeding", () => {
 
     // Assert
     expect(await importRows(persistence, "planned-session")).toEqual([]);
+  });
+
+  it("should log a failed route seed instead of dropping it silently", async () => {
+    // Arrange
+    const { persistence, connect } = await setup();
+    vi.spyOn(persistence.integrationPolicy, "put").mockRejectedValue(
+      new Error("quota")
+    );
+
+    // Act
+    const outcome = connect(PROFILE_ID);
+
+    // Assert
+    await expect(outcome).resolves.toBeUndefined();
+    expect(mockLogError).toHaveBeenCalledExactlyOnceWith(expect.any(String));
   });
 });
