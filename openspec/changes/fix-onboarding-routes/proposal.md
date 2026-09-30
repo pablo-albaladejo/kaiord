@@ -59,9 +59,11 @@ dead end:
   reads rows by cast rather than by schema, and `integrationPolicySchema` is a
   non-strict `z.object` that only ever parses the upsert's explicit input. The
   one gap is that an older build's upsert spreads the existing row and so keeps
-  the marker: a route an older tab switched on and off again after a
-  Disconnect would be restored by this build's next reconnect. The SPA is one
-  deployed site, so that window closes when the old tab reloads.
+  the marker: a route that an older tab or device switched on and off again
+  after a Disconnect keeps it, and once that snapshot reaches this build, the
+  next reconnect may switch the route back on. This mixed-version edge is
+  accepted: the SPA is one deployed site, so it closes when the old tab
+  reloads.
 - A route that a Disconnect switched off before this change carries no marker,
   so it is indistinguishable from the user's own "off" and stays off on
   reconnect; the user switches it back on in Connections.
