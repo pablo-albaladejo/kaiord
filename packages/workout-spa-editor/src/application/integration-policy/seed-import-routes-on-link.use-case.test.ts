@@ -52,6 +52,7 @@ describe("seedImportRoutesOnLink", () => {
         profileId: PROFILE_ID,
         bridgeId: "train2go-bridge",
         capabilities: T2G_CAPS,
+        hasThresholds: false,
       }
     );
 
@@ -73,6 +74,7 @@ describe("seedImportRoutesOnLink", () => {
         profileId: PROFILE_ID,
         bridgeId: "garmin-bridge",
         capabilities: GARMIN_CAPS,
+        hasThresholds: false,
       }
     );
 
@@ -102,6 +104,7 @@ describe("seedImportRoutesOnLink", () => {
         profileId: PROFILE_ID,
         bridgeId: "train2go-bridge",
         capabilities: T2G_CAPS,
+        hasThresholds: false,
       }
     );
 
@@ -117,7 +120,12 @@ describe("seedImportRoutesOnLink", () => {
     // Act
     const seeded = await seedImportRoutesOnLink(
       { policyRepo: repo },
-      { profileId: PROFILE_ID, bridgeId: "train2go-bridge", capabilities: [] }
+      {
+        profileId: PROFILE_ID,
+        bridgeId: "train2go-bridge",
+        capabilities: [],
+        hasThresholds: false,
+      }
     );
 
     // Assert
@@ -147,11 +155,38 @@ describe("seedImportRoutesOnLink", () => {
         profileId: PROFILE_ID,
         bridgeId: "train2go-bridge",
         capabilities: T2G_CAPS,
+        hasThresholds: false,
       }
     );
 
     // Assert
     expect(store.get("cut")).toMatchObject({ enabled: true, mode: "auto" });
     expect(store.get("cut")).not.toHaveProperty("disabledBy");
+  });
+
+  it("should seed zones for manual sync when the profile already has thresholds", async () => {
+    // Arrange
+    const { repo, store } = makeRepo();
+
+    // Act
+    await seedImportRoutesOnLink(
+      { policyRepo: repo },
+      {
+        profileId: PROFILE_ID,
+        bridgeId: "train2go-bridge",
+        capabilities: T2G_CAPS,
+        hasThresholds: true,
+      }
+    );
+
+    // Assert
+    const rows = [...store.values()];
+    expect(rows.find((r) => r.dataType === "training-zones")).toMatchObject({
+      mode: "manual",
+      enabled: true,
+    });
+    expect(rows.find((r) => r.dataType === "planned-session")).toMatchObject({
+      mode: "auto",
+    });
   });
 });

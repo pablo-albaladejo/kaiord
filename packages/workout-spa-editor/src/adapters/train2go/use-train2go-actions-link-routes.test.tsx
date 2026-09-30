@@ -12,6 +12,10 @@ import type { CoachingTransport } from "../../application/coaching/coaching-tran
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { Profile } from "../../types/profile";
+import {
+  DEFAULT_HEART_RATE_ZONES,
+  DEFAULT_POWER_ZONES,
+} from "../../types/profile-defaults";
 
 const PROFILE_ID = "22222222-2222-4222-8222-222222222222";
 const mockAttempt = vi.fn();
@@ -61,9 +65,9 @@ const PROFILE: Profile = {
   updatedAt: "2026-04-01T00:00:00.000Z",
 };
 
-const setup = async () => {
+const setup = async (profile: Profile = PROFILE) => {
   const persistence = createInMemoryPersistence();
-  await persistence.profiles.put(PROFILE);
+  await persistence.profiles.put(profile);
   const runZonesSync = vi.fn(async () => undefined);
   const wrapper = ({ children }: { children: ReactNode }) => (
     <PersistenceProvider persistence={persistence}>
@@ -157,5 +161,28 @@ describe("useConnectCallback route seeding", () => {
     // Assert
     await expect(outcome).resolves.toBeUndefined();
     expect(mockLogError).toHaveBeenCalledExactlyOnceWith(expect.any(String));
+  });
+
+  it("should not overwrite tuned zones on link: zones import waits for an explicit sync", async () => {
+    // Arrange
+    const tuned: Profile = {
+      ...PROFILE,
+      sportZones: {
+        cycling: {
+          thresholds: { ftp: 270 },
+          heartRateZones: { method: "default", zones: DEFAULT_HEART_RATE_ZONES },
+          powerZones: { method: "default", zones: DEFAULT_POWER_ZONES },
+        },
+      },
+    };
+    const { persistence, runZonesSync, connect } = await setup(tuned);
+
+    // Act
+    await connect(PROFILE_ID);
+
+    // Assert
+    const zones = await importRows(persistence, "training-zones");
+    expect(zones).toMatchObject([{ mode: "manual", enabled: true }]);
+    expect(runZonesSync).not.toHaveBeenCalled();
   });
 });

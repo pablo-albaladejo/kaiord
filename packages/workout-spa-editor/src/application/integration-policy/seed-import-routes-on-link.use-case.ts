@@ -16,6 +16,7 @@ import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
 
 import { eligibleBridgeIds } from "../../integrations/integration-registry";
+import type { IntegrationPolicyMode } from "../../types/integration-policy";
 import type { IntegrationPolicyDeps } from "./integration-policy-deps";
 import { restoreDisconnectedRoutes } from "./restore-disconnected-routes.use-case";
 import { upsertIntegrationPolicy } from "./upsert-integration-policy.use-case";
@@ -24,13 +25,24 @@ export type SeedImportRoutesInput = {
   readonly profileId: string;
   readonly bridgeId: string;
   readonly capabilities: readonly string[];
+  /** The profile already holds thresholds (`hasAnyThreshold`). */
+  readonly hasThresholds: boolean;
 };
+
+/* Filling an empty profile's zones destroys nothing, so that runs by itself.
+   Tuned zones must not be overwritten on every sync: `manual` keeps the route
+   on but leaves the import to an explicit, conflict-aware sync. */
+const seedMode = (
+  dataType: ManagedDataType,
+  hasThresholds: boolean
+): IntegrationPolicyMode =>
+  dataType === "training-zones" && hasThresholds ? "manual" : "auto";
 
 const DATA_TYPES = Object.keys(MANAGED_DATA_REGISTRY) as ManagedDataType[];
 
 export const seedImportRoutesOnLink = async (
   deps: IntegrationPolicyDeps,
-  { profileId, bridgeId, capabilities }: SeedImportRoutesInput
+  { profileId, bridgeId, capabilities, hasThresholds }: SeedImportRoutesInput
 ): Promise<ManagedDataType[]> => {
   await restoreDisconnectedRoutes(deps, { profileId, bridgeId });
   const capabilitiesFor = (id: string) => (id === bridgeId ? capabilities : []);
@@ -43,7 +55,7 @@ export const seedImportRoutesOnLink = async (
     if (await deps.policyRepo.findByNaturalKey(key)) continue;
     await upsertIntegrationPolicy(deps, {
       ...key,
-      mode: "auto",
+      mode: seedMode(dataType, hasThresholds),
       enabled: true,
     });
     seeded.push(dataType);

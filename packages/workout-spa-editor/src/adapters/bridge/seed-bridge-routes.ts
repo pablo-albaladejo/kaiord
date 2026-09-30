@@ -7,6 +7,7 @@
  * never left behind.
  */
 import { seedImportRoutesOnLink } from "../../application/integration-policy/seed-import-routes-on-link.use-case";
+import { hasAnyThreshold } from "../../lib/setup-checklist";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { logger } from "../../utils/logger";
 import { bridgeDiscovery } from "./bridge-discovery";
@@ -19,16 +20,18 @@ export const seedBridgeRoutes = async (
   bridgeId: string
 ): Promise<void> => {
   try {
-    await p.transaction(() =>
-      seedImportRoutesOnLink(
+    await p.transaction(async () => {
+      const profile = (await p.profiles.getById(profileId)) ?? null;
+      await seedImportRoutesOnLink(
         { policyRepo: p.integrationPolicy },
         {
           profileId,
           bridgeId,
           capabilities: bridgeDiscovery.getCapabilities(bridgeId) ?? [],
+          hasThresholds: hasAnyThreshold(profile),
         }
-      )
-    );
+      );
+    });
   } catch {
     logger.error(SEED_FAILED);
   }
