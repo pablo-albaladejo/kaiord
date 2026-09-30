@@ -2,21 +2,30 @@
  * useConnectionActions — connect/disconnect orchestration for the Athlete
  * Connections UI. `disconnect` is the real account-unlink (#714, D3): it clears
  * the provider's connection record/credential AND disables that provider's
- * integration-policy flows. Credentials are encrypted with a device-bound key.
+ * integration-policy flows, marking each so a reconnect restores exactly what
+ * the disconnect switched off. Credentials are encrypted with a device-bound key.
  */
 import { useCallback, useMemo } from "react";
 
+import { seedBridgeRoutes } from "../adapters/bridge/seed-bridge-routes";
 import { createConnectionProvider } from "../adapters/connections/create-connection-provider";
 import { createDexieConnectionRepository } from "../adapters/dexie/dexie-connection-repository";
 import { db } from "../adapters/dexie/dexie-database";
+import { disableRoutesOnDisconnect } from "../application/integration-policy/disable-routes-on-disconnect.use-case";
+import { usePersistence } from "../contexts/persistence-context";
+import { INTEGRATION_REGISTRY } from "../integrations/integration-registry";
 import { getDeviceId } from "../lib/cloud-sync/device-id";
 import { createConnectionCredentials } from "../lib/connections/connection-credentials";
 import type { ConnectionMechanism } from "../types/connection";
 import type { IntegrationPolicy } from "../types/integration-policy";
-import { usePolicyToggle } from "./connections/use-policy-toggle";
+
+/* An explicit (re)connect opens the routes the bridge feeds (see
+   `seedBridgeRoutes`); a source with no bridge has none to open. */
+const bridgeIdOf = (providerId: string): string | null =>
+  INTEGRATION_REGISTRY.find((e) => e.id === providerId)?.bridgeId ?? null;
 
 export function useConnectionActions(profileId: string | null) {
-  const { disableBridge } = usePolicyToggle();
+  const persistence = usePersistence();
   const deps = useMemo(
     () => ({
       repository: createDexieConnectionRepository(db),
@@ -35,8 +44,10 @@ export function useConnectionActions(profileId: string | null) {
       if (!profileId) return;
       const provider = createConnectionProvider(providerId, mechanism, deps);
       await provider.connect({ profileId, credential });
+      const bridgeId = bridgeIdOf(providerId);
+      if (bridgeId) await seedBridgeRoutes(persistence, profileId, bridgeId);
     },
-    [profileId, deps]
+    [profileId, deps, persistence]
   );
 
   const disconnect = useCallback(
@@ -48,9 +59,12 @@ export function useConnectionActions(profileId: string | null) {
       if (!profileId) return;
       const provider = createConnectionProvider(providerId, mechanism, deps);
       await provider.disconnect(profileId);
-      await disableBridge(policies);
+      await disableRoutesOnDisconnect(
+        { policyRepo: persistence.integrationPolicy },
+        policies
+      );
     },
-    [profileId, deps, disableBridge]
+    [profileId, deps, persistence]
   );
 
   return { connect, disconnect };

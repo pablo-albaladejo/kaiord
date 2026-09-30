@@ -5,6 +5,7 @@
  * consistent.
  *
  * - AbortError → "ai-cancelled" (the user pressed Cancel / Escape)
+ * - provider rejects the model as unknown → "ai-model-unavailable"
  * - timeout-shaped errors → "ai-timeout"
  * - KRD validation / Zod errors → "ai-invalid-krd"
  * - network / fetch errors → "transport-error"
@@ -12,11 +13,13 @@
  *   inline error banner without having to special-case provider
  *   adapters)
  */
+import { isModelNotFoundError } from "@kaiord/ai/providers";
 import type { Analytics } from "@kaiord/core";
 import { KrdValidationError } from "@kaiord/core";
 
 export type AiFailureReason =
   | "ai-error"
+  | "ai-model-unavailable"
   | "ai-cancelled"
   | "ai-timeout"
   | "ai-invalid-krd"
@@ -50,6 +53,7 @@ const isInvalidKrd = (err: unknown): boolean => {
 
 export const classifyAiFailure = (err: unknown): AiFailureReason => {
   if (isAbort(err)) return "ai-cancelled";
+  if (isModelNotFoundError(err)) return "ai-model-unavailable";
   if (isTimeout(err)) return "ai-timeout";
   if (isInvalidKrd(err)) return "ai-invalid-krd";
   if (isTransport(err)) return "transport-error";

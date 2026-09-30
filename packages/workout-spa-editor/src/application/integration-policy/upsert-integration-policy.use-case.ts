@@ -4,6 +4,8 @@
  *
  * If a row already exists for that composite key, updates mode/enabled/
  * updatedAt in place. If not, inserts a new row with a fresh id.
+ * Every upsert is a decision about the route, so it drops a Disconnect
+ * marker (`disabledBy`) — the route is no longer "whatever Disconnect left".
  * Validates input against the integrationPolicySchema (minus id/updatedAt)
  * so callers receive a ZodError for invalid dataType/direction/mode values.
  */
@@ -37,6 +39,7 @@ export const upsertIntegrationPolicy = async (
       enabled: input.enabled,
       updatedAt: now,
     };
+    delete updated.disabledBy;
     await deps.policyRepo.put(updated);
 
     const action =

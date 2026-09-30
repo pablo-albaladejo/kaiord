@@ -4,7 +4,10 @@
  * cancelable signal. `canImport` mirrors the settings model resolution so the
  * section can disable itself when no lab-extraction model is configured.
  */
-import { resolveModelForPurpose } from "@kaiord/ai/providers";
+import {
+  isModelNotFoundError,
+  resolveModelForPurpose,
+} from "@kaiord/ai/providers";
 import { useMemo, useRef, useState } from "react";
 
 import { createDexiePersistence } from "../../../../adapters/dexie/dexie-persistence-adapter";
@@ -15,6 +18,7 @@ import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live"
 import { useAiModelBindingsLive } from "../../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../../hooks/use-ai-providers-live";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
+import { useTranslate } from "../../../../i18n/use-translate";
 import { validateFileSize } from "../../../molecules/FileUpload/file-upload-constants";
 import { type LabDraft, mapExtractionToDraft } from "./map-extraction-to-draft";
 
@@ -25,6 +29,7 @@ const NO_PROVIDER_MSG = "No lab-extraction model is configured";
 export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const toast = useToastContext();
   const locale = useActiveLocale();
+  const t = useTranslate("errors");
   const providers = useAiProvidersLive() ?? [];
   const active = useActiveProfileLive();
   const bindings = useAiModelBindingsLive(active?.id ?? null) ?? [];
@@ -57,8 +62,10 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
       });
       if (!result.ok) toast.error(NO_PROVIDER_MSG);
       else onDraft(mapExtractionToDraft(result.extraction, { locale }));
-    } catch {
-      if (!controller.signal.aborted) toast.error(RUN_FAILED_MSG);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      if (isModelNotFoundError(error)) toast.error(t("ai.modelUnavailable"));
+      else toast.error(RUN_FAILED_MSG);
     } finally {
       setIsRunning(false);
       controllerRef.current = null;

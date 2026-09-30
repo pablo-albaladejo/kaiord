@@ -81,6 +81,7 @@
       "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la extensión Kaiord Garmin Bridge para colocarlo en el calendario."
     },
     "updateExtension": "Actualizar la extensión",
+    "openConnections": "Abrir Conexiones",
     "recordDeletedOn": "Este entrenamiento se eliminó mientras se enviaba. Puede seguir en tu calendario de Garmin el {{date}}: elimínalo en Garmin Connect.",
     "failed": {
       "busy": "Este entrenamiento ya se está enviando. Inténtalo de nuevo cuando termine ese envío.",
@@ -94,7 +95,7 @@
       "needs-reauth": "Vuelve a iniciar sesión en Garmin Connect y reinténtalo.",
       "deadline-before-send": "La extensión agotó el tiempo antes de enviar. Inténtalo de nuevo.",
       "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
-      "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Ajustes.",
+      "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Conexiones, en Entrenamiento → También se envía a.",
       "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
       "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo.",
       "incomplete-pace-zones": "Este entrenamiento usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para enviarlo.",

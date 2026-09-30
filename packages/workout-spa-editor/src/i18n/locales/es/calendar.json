@@ -58,6 +58,7 @@
     "body": "Kaiord no guarda tu entrenamiento. Lo lee de tus fuentes, lo estructura y lo devuelve a tu reloj. Tres cosas tienen que ser ciertas antes de que esta semana se llene sola.",
     "manual": "¿No quieres conectar nada aún? Escribe una sesión a mano: todo lo demás sigue funcionando.",
     "addWorkout": "Añadir entreno",
+    "done": "Hecho",
     "steps": {
       "sources": {
         "title": "Conecta de dónde viene tu entrenamiento",
@@ -117,8 +118,9 @@
       "incomplete-pace-zones": "completa tus zonas de ritmo en Atleta",
       "unsupported-pace-zone-sport": "zonas de ritmo solo en carrera o natación"
     },
+    "openConnections": "Abrir Conexiones",
     "preflight": {
-      "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones y vuelve a enviar la semana.",
+      "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones (Entrenamiento → También se envía a) y vuelve a enviar la semana.",
       "no-bridge": "Instala la extensión Kaiord Garmin Bridge y vuelve a enviar la semana.",
       "no-session": "Inicia sesión en Garmin Connect en este navegador y vuelve a enviar la semana.",
       "insecure-context": "El calendario de Garmin necesita una página segura (HTTPS). No se ha enviado nada.",

@@ -7,6 +7,7 @@
   },
   "ai": {
     "generationFailed": "No se pudo generar",
+    "modelUnavailable": "Este modelo ya no está disponible: elige otro en Ajustes → IA",
     "input_empty": "El texto de entrada está vacío",
     "input_too_long": "El texto supera los {{maxLength}} caracteres (introducidos {{actualLength}})"
   }

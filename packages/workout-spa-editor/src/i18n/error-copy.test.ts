@@ -104,6 +104,27 @@ describe("localizeAiError", () => {
       expected: "Provider timeout",
     },
     {
+      name: "point a retired model at Settings → AI",
+      error: Object.assign(new Error("Not Found"), {
+        statusCode: 404,
+        responseBody:
+          '{"type":"error","error":{"type":"not_found_error","message":"model: claude-3-haiku-20240307"}}',
+      }),
+      locale: "en" as const,
+      expected:
+        "This model is no longer available — pick another in Settings → AI",
+    },
+    {
+      name: "point a retired model at Settings → AI in Spanish",
+      error: Object.assign(new Error("Not Found"), {
+        statusCode: 404,
+        responseBody:
+          '{"error":{"code":404,"message":"models/gemini-legacy is not found for API version v1beta","status":"NOT_FOUND"}}',
+      }),
+      locale: "es" as const,
+      expected: "Este modelo ya no está disponible: elige otro en Ajustes → IA",
+    },
+    {
       name: "return the generic generation-failed copy for a non-error",
       error: "weird failure",
       locale: "es" as const,
