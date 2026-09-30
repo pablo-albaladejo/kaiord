@@ -33,8 +33,13 @@ const tools = buildChatTools({
 
 describe("chat tool provider-facing input schemas", () => {
   it("should register at least one tool to guard", () => {
-    // Arrange / Act / Assert
-    expect(tools.length).toBeGreaterThan(0);
+    // Arrange
+
+    // Act
+    const count = tools.length;
+
+    // Assert
+    expect(count).toBeGreaterThan(0);
   });
 
   it.each(tools.map((t) => [t.name, t] as const))(
