@@ -118,6 +118,10 @@
       "incomplete-pace-zones": "complete your pace zones in Athlete",
       "unsupported-pace-zone-sport": "pace zones only in running or swimming"
     },
+    "ftp": {
+      "missing-ftp": "set your FTP in Athlete",
+      "sport-without-power-zones": "power zones only in cycling or running"
+    },
     "openConnections": "Open Connections",
     "preflight": {
       "no-export-route": "Turn on sending workouts to Garmin in Connections (Workout → Also sent to), then send the week.",
@@ -149,10 +153,6 @@
       "attention": "Needs attention: {{count}}"
     },
     "outdated": "Your Garmin Bridge extension can't use the calendar yet, so these reached your library only. Update it, then retry.",
-    "updateExtension": "Update the extension",
-    "ftp": {
-      "missing-ftp": "set your FTP in Athlete",
-      "sport-without-power-zones": "power zones only in cycling or running"
-    }
+    "updateExtension": "Update the extension"
   }
 }

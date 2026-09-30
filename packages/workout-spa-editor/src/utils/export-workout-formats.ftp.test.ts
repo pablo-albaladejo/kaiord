@@ -68,6 +68,19 @@ describe("exportGcnWorkout — %FTP targets", () => {
     }
   );
 
+  it("should refuse a %FTP swimming workout even when its profile stores a swimming FTP", async () => {
+    // Arrange
+    const profile = profileWith("swimming", { ftp: FTP_W });
+
+    // Act
+    const run = exportGcnWorkout(percentFtpKrd("swimming"), profile);
+
+    // Assert
+    await expect(run).rejects.toMatchObject({
+      reason: "sport-without-power-zones",
+    });
+  });
+
   it("should carry the reason as the cause of a GCN file export", async () => {
     // Arrange
     const krd = percentFtpKrd("cycling");

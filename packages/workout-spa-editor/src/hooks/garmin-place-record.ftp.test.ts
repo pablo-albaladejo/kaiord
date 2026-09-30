@@ -38,6 +38,9 @@ vi.mock(
 const PROFILE = "00000000-0000-0000-0000-000000000000";
 const FTP_W = 250;
 const SWEET_SPOT_W = 213;
+const OTHER_PROFILE = "00000000-0000-0000-0000-000000000009";
+/** 85 % of it is 255 W, so the other profile's FTP would show. */
+const OTHER_FTP_W = 300;
 
 const percentFtpKrd = (sport: string): KRD => ({
   version: "1.0",
@@ -85,6 +88,29 @@ describe("placeRecordResult with %FTP power targets", () => {
   it("should push the watts from the owner's FTP", async () => {
     // Arrange
     const { persistence, pushWorkout } = await setup("cycling", FTP_W);
+
+    // Act
+    await placeRecordResult(
+      persistence,
+      pushWorkout,
+      "w-1",
+      createPlacementHarness().deps
+    );
+
+    // Assert
+    const step = firstStep(pushWorkout.mock.calls[0]?.[0]);
+    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+  });
+
+  it("should push the owner's watts when another profile with its own FTP is active", async () => {
+    // Arrange
+    const { persistence, pushWorkout } = await setup("cycling", FTP_W);
+    const other = profileWith("cycling", { ftp: OTHER_FTP_W }, undefined, {
+      id: OTHER_PROFILE,
+    });
+    await persistence.profiles.put(other);
+    await persistence.profiles.setActiveId(OTHER_PROFILE);
 
     // Act
     await placeRecordResult(

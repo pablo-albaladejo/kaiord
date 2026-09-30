@@ -36,6 +36,17 @@ describe("ftpForWorkout", () => {
     expect(result).toBeUndefined();
   });
 
+  it("should ignore an FTP stored on a sport without power zones", () => {
+    // Arrange
+    const profile = profileWith("swimming", { ftp: FTP });
+
+    // Act
+    const result = ftpForWorkout(profile, workoutFor("swimming"));
+
+    // Assert
+    expect(result).toBeUndefined();
+  });
+
   it("should return undefined when there is no profile", () => {
     // Arrange
 

@@ -10,16 +10,23 @@ import { thresholdsForSport } from "./threshold-for-sport";
 const workoutSport = (krd: KRD): string | undefined =>
   getStructuredWorkout(krd)?.sport ?? krd.metadata?.sport;
 
+/** Whether the sport has power zones, so an FTP can apply to it. */
+const holdsPower = (sport: string | undefined): sport is string =>
+  sport !== undefined &&
+  Object.hasOwn(SPORT_ZONE_CAPABILITIES, sport) &&
+  SPORT_ZONE_CAPABILITIES[sport as keyof typeof SPORT_ZONE_CAPABILITIES].power;
+
 /** The profile's FTP for the workout's sport, used to resolve `percent_ftp`
     power targets when exporting to formats that store watts (Garmin).
-    `undefined` when the profile, the sport or its FTP is missing — the
-    writer then refuses instead of guessing. */
+    `undefined` when the profile, the sport or its FTP is missing, or the
+    sport has no power zones (an FTP stored on swimming never applies) —
+    the writer then refuses instead of guessing. */
 export function ftpForWorkout(
   profile: Profile | null | undefined,
   krd: KRD
 ): number | undefined {
   const sport = workoutSport(krd);
-  if (!profile?.sportZones || !sport) return undefined;
+  if (!profile?.sportZones || !holdsPower(sport)) return undefined;
   return thresholdsForSport(profile, sport).ftp;
 }
 
@@ -30,13 +37,7 @@ export function ftpForWorkout(
 export type MissingFtpReason = "no-ftp" | "sport-without-power";
 
 export function missingFtpReason(krd: KRD): MissingFtpReason {
-  const sport = workoutSport(krd);
-  const holdsPower =
-    sport !== undefined &&
-    Object.hasOwn(SPORT_ZONE_CAPABILITIES, sport) &&
-    SPORT_ZONE_CAPABILITIES[sport as keyof typeof SPORT_ZONE_CAPABILITIES]
-      .power;
-  return holdsPower ? "no-ftp" : "sport-without-power";
+  return holdsPower(workoutSport(krd)) ? "no-ftp" : "sport-without-power";
 }
 
 /** Runs a watts-only write, turning its MissingFtpError into an
