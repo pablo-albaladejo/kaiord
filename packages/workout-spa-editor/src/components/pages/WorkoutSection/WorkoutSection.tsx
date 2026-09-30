@@ -10,7 +10,6 @@ import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlo
 import { CoachMarkHost } from "../../organisms/CoachMark/CoachMarkHost";
 import { CanvasShapeHead } from "./CanvasShapeHead";
 import { EditorCanvas } from "./EditorCanvas";
-import { useDiscardConfirmation } from "./use-discard-confirmation";
 import { useWorkoutSectionFocus } from "./use-workout-section-focus";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutActions } from "./WorkoutActions";
@@ -35,6 +34,8 @@ export type WorkoutSectionProps = {
   /** Forwarded to `WorkoutHeader` so scratch mode pre-opens
    *  `MetadataEditMode` for sport/name commit on first mount. */
   startInEditMode?: boolean;
+  /** The profile owning the persisted record, for the file download. */
+  ownerProfileId?: string;
 };
 
 /* One canvas, not five cards. The chart indexes the rows beneath it, the
@@ -52,7 +53,6 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
 
   const { editorRootRef, addStepButtonRef, titleRef } =
     useWorkoutSectionFocus();
-  const handleDiscard = useDiscardConfirmation();
 
   const renderStepForm = (itemId: string) => (
     <WorkoutSectionEditor
@@ -88,7 +88,7 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
           renderStepForm={renderStepForm}
         />
       </EditorCanvas>
-      <WorkoutActions krd={props.krd} onDiscard={handleDiscard} />
+      <WorkoutActions krd={props.krd} ownerProfileId={props.ownerProfileId} />
       <CreateRepetitionBlockDialog
         stepCount={state.blockStepCount}
         onConfirm={state.handleConfirmCreateBlock}

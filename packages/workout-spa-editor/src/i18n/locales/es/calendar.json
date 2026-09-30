@@ -113,6 +113,11 @@
     "retry": "Reintentar",
     "retryIn": "Reintentar en {{seconds}} s",
     "close": "Cerrar",
+    "paceZones": {
+      "missing-pace-zones": "configura tu ritmo umbral en Atleta",
+      "incomplete-pace-zones": "completa tus zonas de ritmo en Atleta",
+      "unsupported-pace-zone-sport": "zonas de ritmo solo en carrera o natación"
+    },
     "openConnections": "Abrir Conexiones",
     "preflight": {
       "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones (Entrenamiento → También se envía a) y vuelve a enviar la semana.",

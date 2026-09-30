@@ -177,7 +177,8 @@ describe("SaveButton", () => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
           "krd",
-          expect.any(Function)
+          expect.any(Function),
+          null
         );
         expect(downloadWorkout).toHaveBeenCalledWith(
           mockBuffer,
@@ -285,7 +286,8 @@ describe("SaveButton", () => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
           "fit",
-          expect.any(Function)
+          expect.any(Function),
+          null
         );
         expect(downloadWorkout).toHaveBeenCalledWith(
           mockBuffer,
@@ -319,7 +321,8 @@ describe("SaveButton", () => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
           "tcx",
-          expect.any(Function)
+          expect.any(Function),
+          null
         );
         expect(downloadWorkout).toHaveBeenCalledWith(
           mockBuffer,
@@ -353,7 +356,8 @@ describe("SaveButton", () => {
         expect(exportWorkout).toHaveBeenCalledWith(
           mockKRD,
           "zwo",
-          expect.any(Function)
+          expect.any(Function),
+          null
         );
         expect(downloadWorkout).toHaveBeenCalledWith(
           mockBuffer,

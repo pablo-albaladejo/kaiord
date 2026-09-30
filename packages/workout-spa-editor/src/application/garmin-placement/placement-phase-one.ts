@@ -3,8 +3,10 @@
  * `onLibraryConfirmed` fires iff the row then holds a confirmed library id.
  */
 import type { GarminWorkoutId } from "../../types/garmin-ledger";
+import { PaceZonesUnavailableError } from "../../types/pace-zones-unavailable-error";
 import { NoActiveExportRouteError } from "../export/execute-workout-push";
 import type { RecordExportResult } from "../export/record-export.use-case";
+import { logGarminPushFailure } from "./log-garmin-push-failure";
 import type { LedgerKey, PlacementDeps } from "./placement-deps";
 import {
   failed,
@@ -35,9 +37,12 @@ export const runPhaseOne = async (
   try {
     outcome = (await request.runLibraryPush()).outcome;
   } catch (error) {
-    return error instanceof NoActiveExportRouteError
-      ? failed("no-export-route", false)
-      : failed("library-push-failed", true);
+    if (error instanceof NoActiveExportRouteError)
+      return failed("no-export-route", false);
+    if (error instanceof PaceZonesUnavailableError)
+      return failed(error.reason, false);
+    logGarminPushFailure(error);
+    return failed("library-push-failed", true);
   }
   if (outcome === "lost-race") return failed("busy", true);
   const row = await deps.ledgerRepo.findByNaturalKey(key);

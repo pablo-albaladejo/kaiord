@@ -1,11 +1,13 @@
 import { useCallback } from "react";
 
+import { logGarminPushFailure } from "../../../application/garmin-placement/log-garmin-push-failure";
 import { pushWorkoutToGarminCalendar } from "../../../application/garmin-placement/push-workout-to-garmin-calendar";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
 import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
+import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { exportGcnWorkout } from "../../../utils/export-workout-formats";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { garminPushReports } from "./garmin-push-reports";
 
 export type GarminPushOptions = {
@@ -57,14 +59,20 @@ export const useGarminPush = (
         });
       try {
         const deps = buildPlacementDeps(features, analytics);
-        const gcn = await exportGcnWorkout(workout.krd);
+        const { krd, profileId } = workout;
+        // Phase 1 folds a failed conversion into `failed`: surface it first.
+        const buildGcn = () =>
+          exportRecordGcn(krd, profileId).catch((error: unknown) => {
+            if (!(error instanceof PaceZonesUnavailableError)) showError(error);
+            throw error;
+          });
         // A joiner's run is the owner's: only the owner reports it.
         return await pushWorkoutToGarminCalendar(
           deps,
           garminPlacementRequest(
             {
               record: workout,
-              gcn,
+              buildGcn,
               ledgerRepo: deps.ledgerRepo,
               pushWorkout: guardedPush,
             },
@@ -76,6 +84,7 @@ export const useGarminPush = (
           )
         );
       } catch (error: unknown) {
+        logGarminPushFailure(error);
         showError(error);
         return failedEarly();
       }

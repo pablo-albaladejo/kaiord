@@ -17,14 +17,15 @@ import {
 
 export type GarminPlacementInput = {
   record: WorkoutRecord;
-  /** The workout's GCN export (`exportGcnWorkout`). */
-  gcn: unknown;
+  /** Builds the workout's GCN export (`exportRecordGcn`) inside Phase 1,
+      after the lock and the route check, so their refusals win. */
+  buildGcn: () => Promise<unknown>;
   ledgerRepo: ExportLedgerRepository;
   pushWorkout: (gcn: unknown) => Promise<GarminPushOutcome>;
 };
 
 export const garminPlacementRequest = (
-  { record, gcn, ledgerRepo, pushWorkout }: GarminPlacementInput,
+  { record, buildGcn, ledgerRepo, pushWorkout }: GarminPlacementInput,
   extra: Partial<PlacementRequest> = {}
 ): PlacementRequest => ({
   kaiordRecordId: record.id,
@@ -36,7 +37,7 @@ export const garminPlacementRequest = (
         profileId: record.profileId,
         kaiordRecordId: record.id,
         destinationBridgeId: GARMIN_BRIDGE_ID,
-        payload: gcn as Record<string, unknown>,
+        payload: async () => (await buildGcn()) as Record<string, unknown>,
         pushFn: buildGarminPushFn(pushWorkout),
       }
     ),
