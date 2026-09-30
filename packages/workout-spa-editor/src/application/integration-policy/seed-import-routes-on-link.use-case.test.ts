@@ -124,4 +124,34 @@ describe("seedImportRoutesOnLink", () => {
     expect(seeded).toEqual([]);
     expect(store.size).toBe(0);
   });
+
+  it("should switch back on a route a disconnect switched off", async () => {
+    // Arrange
+    const disconnected: IntegrationPolicy = {
+      id: "cut",
+      profileId: PROFILE_ID,
+      dataType: "planned-session",
+      direction: "import",
+      bridgeId: "train2go-bridge",
+      mode: "auto",
+      enabled: false,
+      disabledBy: "disconnect",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    };
+    const { repo, store } = makeRepo([disconnected]);
+
+    // Act
+    await seedImportRoutesOnLink(
+      { policyRepo: repo },
+      {
+        profileId: PROFILE_ID,
+        bridgeId: "train2go-bridge",
+        capabilities: T2G_CAPS,
+      }
+    );
+
+    // Assert
+    expect(store.get("cut")).toMatchObject({ enabled: true, mode: "auto" });
+    expect(store.get("cut")).not.toHaveProperty("disabledBy");
+  });
 });

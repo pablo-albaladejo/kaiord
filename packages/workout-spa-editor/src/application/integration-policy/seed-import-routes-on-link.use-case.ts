@@ -7,14 +7,17 @@
  * why. Which routes to open comes from the registry: every data type whose
  * import token the bridge announces and the SPA actually serves.
  *
- * Seed-only: a row that already exists — above all a disabled one, which is
- * the user's explicit "off" — is never touched.
+ * First it restores what a Disconnect of this bridge switched off (every
+ * direction, see `restoreDisconnectedRoutes`). Past that it only seeds: a row
+ * that already exists — above all a disabled one without the Disconnect
+ * marker, which is the user's explicit "off" — is never touched.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
 
 import { eligibleBridgeIds } from "../../integrations/integration-registry";
 import type { IntegrationPolicyDeps } from "./integration-policy-deps";
+import { restoreDisconnectedRoutes } from "./restore-disconnected-routes.use-case";
 import { upsertIntegrationPolicy } from "./upsert-integration-policy.use-case";
 
 export type SeedImportRoutesInput = {
@@ -29,6 +32,7 @@ export const seedImportRoutesOnLink = async (
   deps: IntegrationPolicyDeps,
   { profileId, bridgeId, capabilities }: SeedImportRoutesInput
 ): Promise<ManagedDataType[]> => {
+  await restoreDisconnectedRoutes(deps, { profileId, bridgeId });
   const capabilitiesFor = (id: string) => (id === bridgeId ? capabilities : []);
   const seeded: ManagedDataType[] = [];
   for (const dataType of DATA_TYPES) {
