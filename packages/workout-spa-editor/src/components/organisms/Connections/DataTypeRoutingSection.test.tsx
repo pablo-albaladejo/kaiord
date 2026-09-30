@@ -669,4 +669,33 @@ describe("DataTypeRoutingSection", () => {
     ).not.toBeInTheDocument();
     expect(row).toHaveTextContent("Nowhere");
   });
+
+  it("should keep reporting Nowhere beside the switches until one is on", () => {
+    // Arrange
+    // The spec's "sent nowhere" report is what the row says while no route
+    // is on; an off switch alone would leave the reader to infer it.
+    online("garmin-bridge", "write:workouts");
+
+    // Act
+    renderSection();
+
+    // Assert
+    expect(screen.getByTestId("routing-nowhere-workout")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("routing-export-workout-garmin")
+    ).toBeInTheDocument();
+  });
+
+  it("should stop reporting Nowhere once a destination is on", () => {
+    // Arrange
+    online("garmin-bridge", "write:workouts");
+
+    // Act
+    renderSection(flows({ workout: { export: [route("garmin-bridge")] } }));
+
+    // Assert
+    expect(
+      screen.queryByTestId("routing-nowhere-workout")
+    ).not.toBeInTheDocument();
+  });
 });

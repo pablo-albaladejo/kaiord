@@ -16,7 +16,8 @@ type Props = {
 
 /**
  * Rendered only for the types the registry gives an export capability.
- * "Nowhere" here means a route the user has not switched on; on the other
+ * "Nowhere" here means a route the user has not switched on, and it stays
+ * next to the destination switches until one of them is on; on the other
  * types it would mean a route that cannot be created, which is why the caller
  * omits this whole block rather than passing an empty list.
  *
@@ -45,6 +46,16 @@ export function RoutingExportTargets({
       <span className="text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
         {t("routing.sentTo")}
       </span>
+      {/* "Nowhere" stays beside the switches until one is on: a switch alone
+          does not say that nothing is being sent yet. */}
+      {sentTo.length === 0 && (
+        <span
+          className="text-[12.5px] text-ink-muted"
+          data-testid={`routing-nowhere-${dataType}`}
+        >
+          {t("routing.nowhere")}
+        </span>
+      )}
       {toggles.length > 0 ? (
         <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
           {toggles.map((toggle) => (
@@ -57,13 +68,6 @@ export function RoutingExportTargets({
             />
           ))}
         </div>
-      ) : sentTo.length === 0 ? (
-        <span
-          className="text-[12.5px] text-ink-muted"
-          data-testid={`routing-nowhere-${dataType}`}
-        >
-          {t("routing.nowhere")}
-        </span>
       ) : (
         sentTo.map((id) => (
           <Pill key={id} tone="neutral">
