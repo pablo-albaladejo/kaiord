@@ -1,7 +1,13 @@
 import type { KRD, Logger } from "@kaiord/core";
-import { ServiceApiError, ServiceAuthError } from "@kaiord/core";
+import {
+  createMissingFtpError,
+  ServiceApiError,
+  ServiceAuthError,
+} from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mapErrorToExitCode } from "../../utils/error-exit-code";
+import { getSuggestionForError } from "../../utils/error-suggestions";
 import { ExitCode } from "../../utils/exit-codes";
 
 vi.mock("./client-factory", () => ({
@@ -24,6 +30,7 @@ const createMockLogger = (): Logger => ({
 });
 
 const HTTP_SERVICE_UNAVAILABLE = 503;
+const FTP_W = 250;
 
 const mockKrd = { version: "1.0" } as unknown as KRD;
 const mockPushResult = {
@@ -58,7 +65,9 @@ describe("pushCommand", () => {
       undefined,
       logger
     );
-    expect(mockService.push).toHaveBeenCalledWith(mockKrd);
+    expect(mockService.push).toHaveBeenCalledWith(mockKrd, {
+      ftpWatts: undefined,
+    });
     expect(logger.info).toHaveBeenCalledWith(
       "Workout pushed to Garmin Connect",
       {
@@ -67,6 +76,30 @@ describe("pushCommand", () => {
         url: "https://connect.garmin.com/modern/workout/123",
       }
     );
+  });
+
+  it("should forward --ftp to the push as ftpWatts", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const mockService = { push: vi.fn().mockResolvedValue(mockPushResult) };
+    const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
+    vi.mocked(createCliGarminClient).mockResolvedValue({
+      auth: mockAuth,
+      service: mockService,
+    } as never);
+    vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
+
+    // Act
+    const result = await pushCommand(
+      { input: "workout.zwo", ftp: FTP_W },
+      logger
+    );
+
+    // Assert
+    expect(result).toBe(ExitCode.SUCCESS);
+    expect(mockService.push).toHaveBeenCalledWith(mockKrd, {
+      ftpWatts: FTP_W,
+    });
   });
 
   it("should output JSON when --json flag is set", async () => {
@@ -159,5 +192,29 @@ describe("pushCommand", () => {
     expect(logger.error).toHaveBeenCalledWith(
       "Garmin Connect request failed. Please retry later."
     );
+  });
+
+  it("should fail with exit code 1 and an --ftp hint when a %FTP workout has no --ftp", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const mockService = {
+      push: vi.fn().mockRejectedValue(createMissingFtpError("garmin")),
+    };
+    const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
+    vi.mocked(createCliGarminClient).mockResolvedValue({
+      auth: mockAuth,
+      service: mockService,
+    } as never);
+    vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
+
+    // Act
+    const error = await pushCommand({ input: "workout.zwo" }, logger).catch(
+      (thrown: Error) => thrown
+    );
+
+    // Assert
+    expect(mapErrorToExitCode(error)).toBe(ExitCode.INVALID_ARGUMENT);
+    expect(ExitCode.INVALID_ARGUMENT).toBe(1);
+    expect(getSuggestionForError(error as Error)?.join(" ")).toContain("--ftp");
   });
 });

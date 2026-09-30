@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
 import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { createSaveHandler } from "./save-handler";
 
@@ -180,6 +181,38 @@ describe("createSaveHandler — analytics call-site", () => {
       expect(showError).toHaveBeenCalledWith(
         "save.exportFailedTitle",
         `save.paceZones.${reason}`
+      );
+    }
+  );
+
+  it.each(["missing-ftp", "sport-without-power-zones"] as const)(
+    "should explain a %FTP workout that fails with %s",
+    async (reason) => {
+      // Arrange
+      const cause = new FtpUnavailableError(reason);
+      mockExportWorkout.mockRejectedValue(
+        Object.assign(new Error("Failed to export workout as GCN"), { cause })
+      );
+      const showError = vi.fn();
+      const handler = createSaveHandler(
+        fakeWorkout as never,
+        "gcn",
+        noop,
+        noop,
+        noop,
+        noop,
+        showError,
+        undefined,
+        (key) => key
+      );
+
+      // Act
+      await handler();
+
+      // Assert
+      expect(showError).toHaveBeenCalledWith(
+        "save.exportFailedTitle",
+        `save.ftp.${reason}`
       );
     }
   );

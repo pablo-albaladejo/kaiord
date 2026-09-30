@@ -59,7 +59,10 @@ const mapSteps = (
   options: GarminWriterOptions
 ): GarminWorkoutStepInput[] => {
   const counter = { value: 1 };
-  const targetOpts: TargetMapperOptions = { paceZones: options.paceZones };
+  const targetOpts: TargetMapperOptions = {
+    paceZones: options.paceZones,
+    ftpWatts: options.ftpWatts,
+  };
   return workout.steps.map((step) =>
     isRepetitionBlock(step)
       ? mapRepetitionBlock(step, counter, targetOpts, options.logger)

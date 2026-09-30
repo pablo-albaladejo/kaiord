@@ -2,6 +2,7 @@ import {
   createFitParsingError,
   createGarminParsingError,
   createKrdValidationError,
+  createMissingFtpError,
   createServiceApiError,
   createServiceAuthError,
   ToleranceExceededError,
@@ -104,6 +105,17 @@ describe("mapErrorToExitCode", () => {
 
     // Assert
     expect(code).toBe(ExitCode.DIRECTORY_CREATE_ERROR);
+  });
+
+  it("should map MissingFtpError to INVALID_ARGUMENT", () => {
+    // Arrange
+    const error = createMissingFtpError("garmin");
+
+    // Act
+    const code = mapErrorToExitCode(error);
+
+    // Assert
+    expect(code).toBe(ExitCode.INVALID_ARGUMENT);
   });
 
   it("should map EnvironmentError to ENVIRONMENT_ERROR", () => {

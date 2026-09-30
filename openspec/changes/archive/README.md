@@ -9,6 +9,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | ---- | ------ | ------- |
 | 2026-09-28 | [`docs-indexing-hygiene`](./2026-09-28-docs-indexing-hygiene/) | Index only the docs pages worth indexing, and date them from git |
 | 2026-09-28 | [`fix-legacy-editor-links`](./2026-09-28-fix-legacy-editor-links/) | Stop linking the legacy /editor/ path, and serve it a 200 page |
+| 2026-09-28 | [`garmin-percent-ftp-to-watts`](./2026-09-28-garmin-percent-ftp-to-watts/) | Resolve percent-of-FTP power targets to watts in the GCN writer |
 | 2026-09-28 | [`perf-app-initial-js`](./2026-09-28-perf-app-initial-js/) | SPA initial-JS budget and a single docs font |
 | 2026-09-28 | [`seo-measurement-loop`](./2026-09-28-seo-measurement-loop/) | Close the SEO/GEO measurement loop |
 | 2026-09-27 | [`analytics-redact-identifiers`](./2026-09-27-analytics-redact-identifiers/) | Keep per-person identifiers out of Umami |

@@ -4,6 +4,7 @@ import {
   buildPaceTargetType,
   resolvePaceZone,
 } from "../mappers/target-pace.mapper";
+import { resolvePercentFtpToWatts } from "../mappers/target-power.mapper";
 import { TargetTypeId } from "../schemas/common";
 import type {
   GarminTargetInfo,
@@ -23,7 +24,7 @@ export const convertKrdTargetToGarmin = (
     case "power":
       return mapZoneOrRange(
         buildTargetType(TargetTypeId.POWER_ZONE, "power.zone", 2),
-        target.value,
+        resolvePercentFtpToWatts(target.value, options?.ftpWatts),
         true
       );
     case "heart_rate":

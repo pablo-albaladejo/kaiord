@@ -118,6 +118,10 @@
       "incomplete-pace-zones": "completa tus zonas de ritmo en Atleta",
       "unsupported-pace-zone-sport": "zonas de ritmo solo en carrera o natación"
     },
+    "ftp": {
+      "missing-ftp": "configura tu FTP en Atleta",
+      "sport-without-power-zones": "zonas de potencia solo en ciclismo o carrera"
+    },
     "openConnections": "Abrir Conexiones",
     "preflight": {
       "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones (Entrenamiento → También se envía a) y vuelve a enviar la semana.",

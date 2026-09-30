@@ -17,7 +17,8 @@
       "output": "Output file path",
       "outputDir": "Output directory for batch conversion",
       "inputFormat": "Override input format detection",
-      "outputFormat": "Override output format detection"
+      "outputFormat": "Override output format detection",
+      "ftp": "Athlete FTP in watts, used to write %FTP power targets as watts (required for GCN output of %FTP workouts)"
     },
     "validate": {
       "input": "Input file path",
@@ -47,7 +48,8 @@
     },
     "garminPush": {
       "input": "Input workout file path",
-      "inputFormat": "Override input format detection"
+      "inputFormat": "Override input format detection",
+      "ftp": "Athlete FTP in watts, used to write %FTP power targets as watts"
     },
     "global": {
       "verbose": "Enable verbose logging",
@@ -75,5 +77,8 @@
     "workoutExtracted": "Workout extracted successfully",
     "mustSpecifyCommand": "You must specify a command",
     "specifyGarminSubcommand": "Specify a garmin subcommand"
+  },
+  "errors": {
+    "ftpInvalid": "--ftp must be a positive number of watts"
   }
 }

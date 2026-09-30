@@ -14,6 +14,7 @@ type ConversionParams = {
   outputFile: string;
   inputFormat: string;
   outputFormat: string;
+  ftpWatts?: number;
 };
 
 export const convertSingleFile = async (
@@ -21,7 +22,12 @@ export const convertSingleFile = async (
   logger: Logger
 ): Promise<void> => {
   const krd = await loadFileAsKrd(params.inputFile, params.inputFormat, logger);
-  const outputData = await convertFromKrd(krd, params.outputFormat, logger);
+  const outputData = await convertFromKrd(
+    krd,
+    params.outputFormat,
+    logger,
+    params.ftpWatts
+  );
   await writeFile(
     params.outputFile,
     outputData,
@@ -53,6 +59,7 @@ export const executeSingleFileConversion = async (
         outputFile: output,
         inputFormat,
         outputFormat,
+        ftpWatts: options.ftp,
       },
       logger
     );
@@ -67,9 +74,7 @@ export const executeSingleFileConversion = async (
       logger,
     });
   } catch (error) {
-    if (spinner) {
-      spinner.fail("Conversion failed");
-    }
+    spinner?.fail("Conversion failed");
     throw error;
   }
 };

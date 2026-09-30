@@ -19,6 +19,7 @@ export type PaceZoneTable = PaceZoneEntry[];
 
 export type TargetMapperOptions = {
   paceZones?: PaceZoneTable;
+  ftpWatts?: number;
 };
 
 type TargetTypeKey = z.infer<typeof targetTypeKeySchema>;

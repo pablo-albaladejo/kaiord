@@ -75,6 +75,7 @@ export {
   createFitParsingError,
   createGarminParsingError,
   createKrdValidationError,
+  createMissingFtpError,
   createSchemaValidator,
   createServiceApiError,
   createServiceAuthError,
@@ -123,6 +124,7 @@ export {
   lengthUnitSchema,
   macroNutrientsSchema,
   mealSlotSchema,
+  MissingFtpError,
   percentFtpToZone,
   plannedSessionSchema,
   plannedSessionStatusSchema,
@@ -186,6 +188,7 @@ export type { Logger, LogLevel } from "./ports/logger";
 export type { TokenStore } from "./ports/token-store";
 export type {
   ListOptions,
+  PushOptions,
   PushResult,
   WorkoutService,
   WorkoutSummary,

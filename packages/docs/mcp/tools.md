@@ -47,8 +47,20 @@ Add to your MCP configuration:
 
 Convert between FIT, TCX, ZWO, GCN, and KRD formats.
 
-- **Input**: source format, target format, file content (base64 for binary)
+- **Input**: source format, target format, file content (base64 for binary),
+  optional `ftp` (athlete FTP in watts)
 - **Output**: converted file content
+
+GCN output stores power in watts, so a workout with % FTP power targets needs
+`ftp`; without it the tool fails with the `missing-ftp` error type.
+
+### kaiord_garmin_push
+
+Push a KRD workout to Garmin Connect (after `kaiord_garmin_login`).
+
+- **Input**: KRD JSON (file or inline), optional `ftp` (athlete FTP in watts,
+  required when the workout has % FTP power targets)
+- **Output**: the created Garmin Connect workout id, name, and URL
 
 ### kaiord_validate
 

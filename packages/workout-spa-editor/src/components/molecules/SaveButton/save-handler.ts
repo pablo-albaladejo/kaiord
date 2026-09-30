@@ -1,4 +1,5 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
+import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import type { Profile } from "../../../types/profile";
@@ -9,9 +10,11 @@ import { generateWorkoutFilename } from "./workout-filename";
 
 const exportErrorMessage = (err: unknown, t: Translate): string => {
   if (!(err instanceof Error)) return t("save.exportFailedFallback");
-  return err.cause instanceof PaceZonesUnavailableError
-    ? t(`save.paceZones.${err.cause.reason}`)
-    : err.message;
+  if (err.cause instanceof PaceZonesUnavailableError)
+    return t(`save.paceZones.${err.cause.reason}`);
+  if (err.cause instanceof FtpUnavailableError)
+    return t(`save.ftp.${err.cause.reason}`);
+  return err.message;
 };
 
 export function createSaveHandler(

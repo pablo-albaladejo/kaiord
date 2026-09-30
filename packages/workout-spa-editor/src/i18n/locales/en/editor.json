@@ -88,6 +88,10 @@
       "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to export it as GCN.",
       "incomplete-pace-zones": "This workout uses a pace zone your profile doesn't define. Complete your pace zones in Athlete to export it as GCN.",
       "unsupported-pace-zone-sport": "Pace zones can only be exported as GCN in running or swimming workouts."
+    },
+    "ftp": {
+      "missing-ftp": "This workout has %FTP power targets. Set your FTP in Athlete to export it as GCN.",
+      "sport-without-power-zones": "This workout's sport has no power zones. Change its sport to cycling or running to export its %FTP power targets as GCN."
     }
   },
   "saveError": {
