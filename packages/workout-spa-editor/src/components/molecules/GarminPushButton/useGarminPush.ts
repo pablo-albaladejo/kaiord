@@ -7,7 +7,7 @@ import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
 import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { garminPushReports } from "./garmin-push-reports";
 
 export type GarminPushOptions = {

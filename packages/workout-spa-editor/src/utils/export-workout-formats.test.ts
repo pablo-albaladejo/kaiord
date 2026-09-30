@@ -7,9 +7,9 @@ import {
   RUN_THRESHOLD,
   withThreshold,
 } from "../test-utils/pace-zone-fixtures";
+import { PaceZonesUnavailableError } from "../types/pace-zones-unavailable-error";
 import { exportGcnFile, exportGcnWorkout } from "./export-workout-formats";
 import { garminPaceZonesFor } from "./garmin-pace-zones";
-import { PaceZonesUnavailableError } from "./pace-zones-unavailable-error";
 
 type GcnStep = {
   targetType?: { workoutTargetTypeKey: string };

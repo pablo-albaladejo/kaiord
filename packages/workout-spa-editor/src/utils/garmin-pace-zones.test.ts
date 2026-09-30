@@ -19,10 +19,10 @@ import {
   withEditedZones,
   withThreshold,
 } from "../test-utils/pace-zone-fixtures";
+import { PaceZonesUnavailableError } from "../types/pace-zones-unavailable-error";
 import type { Profile } from "../types/profile";
 import { garminPaceZonesFor } from "./garmin-pace-zones";
 import { OPEN_END_FACTOR, thresholdZoneTable } from "./pace-zone-table";
-import { PaceZonesUnavailableError } from "./pace-zones-unavailable-error";
 
 const KM = 1000;
 const HUNDRED_M = 100;

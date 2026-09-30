@@ -18,7 +18,7 @@
 import { NoActiveExportRouteError } from "../../application/export/execute-workout-push";
 import { logGarminPushFailure } from "../../application/garmin-placement/log-garmin-push-failure";
 import type { PlacementResult } from "../../application/garmin-placement/placement-result";
-import { isPaceZonesReason } from "../../utils/pace-zones-unavailable-error";
+import { isPaceZonesReason } from "../../types/pace-zones-unavailable-error";
 import { placeRecord } from "../garmin-place-record";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
 

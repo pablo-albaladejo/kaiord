@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { createSaveHandler } from "./save-handler";
 
 const mockDownloadWorkout = vi.fn();

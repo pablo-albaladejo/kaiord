@@ -1,9 +1,9 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import type { Profile } from "../../../types/profile";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
-import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { generateWorkoutFilename } from "./workout-filename";
 

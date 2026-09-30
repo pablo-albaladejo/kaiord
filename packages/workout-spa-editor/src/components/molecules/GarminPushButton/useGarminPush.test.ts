@@ -99,7 +99,7 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
   };
 });
 
-import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { useGarminPush } from "./useGarminPush";
 
 // A stub KRD payload that exportGcnWorkout will receive verbatim.

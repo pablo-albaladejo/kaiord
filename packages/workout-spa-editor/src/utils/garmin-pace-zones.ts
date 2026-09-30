@@ -15,10 +15,10 @@ import type { PaceZoneTable } from "@kaiord/garmin";
 
 import { isFormulaId } from "../application/coaching/zone-table-classifier-detectors";
 import type { KRD } from "../types/krd";
+import { PaceZonesUnavailableError } from "../types/pace-zones-unavailable-error";
 import type { Profile } from "../types/profile";
 import type { PaceZone, SportZoneConfig } from "../types/sport-zones";
 import { storedZoneTable, thresholdZoneTable } from "./pace-zone-table";
-import { PaceZonesUnavailableError } from "./pace-zones-unavailable-error";
 import { referencedPaceZones } from "./referenced-pace-zones";
 import { getStructuredWorkout } from "./structured-workout";
 

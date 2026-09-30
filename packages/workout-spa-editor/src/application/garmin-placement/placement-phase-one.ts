@@ -3,7 +3,7 @@
  * `onLibraryConfirmed` fires iff the row then holds a confirmed library id.
  */
 import type { GarminWorkoutId } from "../../types/garmin-ledger";
-import { PaceZonesUnavailableError } from "../../utils/pace-zones-unavailable-error";
+import { PaceZonesUnavailableError } from "../../types/pace-zones-unavailable-error";
 import { NoActiveExportRouteError } from "../export/execute-workout-push";
 import type { RecordExportResult } from "../export/record-export.use-case";
 import { logGarminPushFailure } from "./log-garmin-push-failure";
