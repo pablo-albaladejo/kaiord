@@ -77,5 +77,8 @@
     "workoutExtracted": "Workout extracted successfully",
     "mustSpecifyCommand": "You must specify a command",
     "specifyGarminSubcommand": "Specify a garmin subcommand"
+  },
+  "errors": {
+    "ftpInvalid": "--ftp must be a positive number of watts"
   }
 }

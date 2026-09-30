@@ -77,5 +77,8 @@
     "workoutExtracted": "Entrenamiento extraído correctamente",
     "mustSpecifyCommand": "Debes especificar un comando",
     "specifyGarminSubcommand": "Especifica un subcomando de garmin"
+  },
+  "errors": {
+    "ftpInvalid": "--ftp debe ser un número positivo de vatios"
   }
 }

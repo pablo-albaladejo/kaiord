@@ -87,3 +87,35 @@ describe("convert --ftp (ZWO to GCN)", () => {
     }
   );
 });
+
+describe("--ftp validation", () => {
+  const CASES = [
+    ["convert", "0"],
+    ["convert", "-5"],
+    ["convert", "abc"],
+    ["garmin push", "0"],
+    ["garmin push", "-5"],
+    ["garmin push", "abc"],
+  ] as const;
+
+  it.each(CASES)(
+    "should reject %s --ftp %s before doing any work",
+    { timeout: 30_000 },
+    async (command, ftp) => {
+      // Arrange
+      const args = [...command.split(" "), "-i", "missing.zwo", "--ftp", ftp];
+
+      // Act
+      const result = await execa("tsx", [cliPath, ...args], {
+        reject: false,
+        env: { KAIORD_LANG: "en" },
+      });
+
+      // Assert
+      expect(result.exitCode).not.toBe(ExitCode.SUCCESS);
+      expect(stripAnsi(result.stderr)).toContain(
+        "--ftp must be a positive number of watts"
+      );
+    }
+  );
+});
