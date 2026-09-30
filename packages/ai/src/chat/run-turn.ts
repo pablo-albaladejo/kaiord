@@ -27,11 +27,13 @@ export type RunTurnParams = {
  * text deltas to `onTextDelta`, then resolves the normalized turn.
  *
  * A provider failure arrives as a stream `error` part, not a thrown error:
- * the SDK hands it to `onError` and then rejects the result promises with a
- * generic `NoOutputGeneratedError` ("No output generated. Check the stream
- * for errors."), dropping the `APICallError` and its `statusCode`. The first
- * stream error is captured here and rethrown in its place so callers can
- * classify the real failure. Capturing it also replaces the SDK's default
+ * the SDK hands it to `onError`. With no completed step it then rejects the
+ * result promises with a generic `NoOutputGeneratedError`, dropping the
+ * `APICallError` and its `statusCode`; after a completed step it resolves
+ * with that step's data and the failure is lost. The first stream error is
+ * captured here and rethrown in both cases, so callers see and can classify
+ * the real failure. (Tool failures are `tool-error` parts, not `error` parts,
+ * and stay in the loop.) Capturing it also replaces the SDK's default
  * `onError` (`console.error`), which would log the request body.
  */
 export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
@@ -64,6 +66,7 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
     await settled().catch((e: unknown) => {
       throw streamError ?? e;
     });
+  if (streamError !== undefined) throw streamError;
 
   return {
     text,
