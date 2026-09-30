@@ -3,7 +3,7 @@
 // chat/text models minus the retired/deprecated ids listed in the script.
 // Regenerate with `pnpm generate:model-catalog` after bumping @ai-sdk/*.
 // A free-text field in the UI covers ids newer than the pin.
-import type { LlmProviderType, ModelOption } from "../types";
+import type { LlmProviderType, ModelDeprecation, ModelOption } from "../types";
 
 export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
   anthropic: [
@@ -109,12 +109,31 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
   ],
 };
 
-export const RETIRED_MODELS: Record<LlmProviderType, string[]> = {
-  anthropic: [
-    "claude-3-haiku-20240307",
-    "claude-opus-4-1",
-    "claude-opus-4-1-20250805",
-  ],
-  openai: [],
-  google: [],
+/** Retired id -> same-tier successor. The provider answers 404 for these. */
+export const RETIRED_MODELS: Record<
+  LlmProviderType,
+  Record<string, string>
+> = {
+  anthropic: {
+    "claude-3-haiku-20240307": "claude-haiku-4-5",
+    "claude-opus-4-1": "claude-opus-5",
+    "claude-opus-4-1-20250805": "claude-opus-5",
+  },
+  openai: {},
+  google: {},
+};
+
+/** Deprecated id -> successor + retirement date (null while undated). */
+export const DEPRECATED_MODELS: Record<
+  LlmProviderType,
+  Record<string, ModelDeprecation>
+> = {
+  anthropic: {
+    "claude-opus-4-0": { successor: "claude-opus-5", retiresOn: null },
+    "claude-opus-4-20250514": { successor: "claude-opus-5", retiresOn: null },
+    "claude-sonnet-4-0": { successor: "claude-sonnet-5", retiresOn: null },
+    "claude-sonnet-4-20250514": { successor: "claude-sonnet-5", retiresOn: null },
+  },
+  openai: {},
+  google: {},
 };

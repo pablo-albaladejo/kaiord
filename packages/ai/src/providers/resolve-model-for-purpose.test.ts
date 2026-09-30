@@ -105,7 +105,7 @@ describe("resolveModelForPurpose", () => {
     });
   });
 
-  it("should heal a binding that points at a retired model", () => {
+  it("should heal a retired binding to its same-tier successor", () => {
     // Arrange
     const providers = [provider({ type: "anthropic" })];
     const bindings = [binding({ modelId: "claude-3-haiku-20240307" })];
@@ -114,11 +114,10 @@ describe("resolveModelForPurpose", () => {
     const resolved = resolveModelForPurpose("chat", providers, bindings);
 
     // Assert
-    expect(resolved?.modelId).not.toBe("claude-3-haiku-20240307");
-    expect(resolved?.modelId).toBe(getDefaultModel("anthropic"));
+    expect(resolved?.modelId).toBe("claude-haiku-4-5");
   });
 
-  it("should heal a provider's stored retired model", () => {
+  it("should heal a provider's stored retired model to its successor", () => {
     // Arrange
     const providers = [provider({ model: "claude-3-haiku-20240307" })];
 
@@ -126,8 +125,7 @@ describe("resolveModelForPurpose", () => {
     const resolved = resolveModelForPurpose("chat", providers, []);
 
     // Assert
-    expect(resolved?.modelId).not.toBe("claude-3-haiku-20240307");
-    expect(resolved?.modelId).toBe(getDefaultModel("anthropic"));
+    expect(resolved?.modelId).toBe("claude-haiku-4-5");
   });
 
   it("should skip a binding whose provider no longer exists", () => {

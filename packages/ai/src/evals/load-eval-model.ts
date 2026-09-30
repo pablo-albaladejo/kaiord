@@ -15,10 +15,6 @@ const API_KEY_ENV: Record<LlmProviderType, string> = {
   google: "GOOGLE_GENERATIVE_AI_API_KEY",
 };
 
-const DEFAULT_MODEL: Partial<Record<LlmProviderType, string>> = {
-  anthropic: "claude-sonnet-4-5-20250929",
-};
-
 /**
  * Shared model loader for the eval CLIs. Reads `EVAL_PROVIDER`
  * (default `anthropic`) and `EVAL_MODEL`, building the model through
@@ -32,10 +28,9 @@ export const loadEvalModel = async (): Promise<LoadedModel> => {
   const apiKey = envKey ? process.env[envKey] : undefined;
   if (!apiKey) throw new Error(`Set ${envKey ?? "the provider"} env variable`);
 
-  const modelName =
-    process.env.EVAL_MODEL ??
-    DEFAULT_MODEL[provider] ??
-    getDefaultModel(provider);
+  // Coupled to `.github/workflows/eval.yml`'s `model` default: both are the
+  // catalog default, so a manual dispatch and a local run grade one model.
+  const modelName = process.env.EVAL_MODEL ?? getDefaultModel(provider);
   const model = await createLanguageModel(
     { type: provider, apiKey },
     modelName

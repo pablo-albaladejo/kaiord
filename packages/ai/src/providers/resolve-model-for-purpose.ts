@@ -3,12 +3,12 @@
  * else the `default` binding, else the default provider paired with its stored
  * model (transitional back-compat) or the catalog's default model, else null.
  * A binding whose provider no longer exists is skipped, and a model the
- * provider has retired resolves to the catalog default instead of a certain
- * 404. The single resolution
+ * provider has retired resolves to its same-tier successor instead of a
+ * certain 404. The single resolution
  * path shared by chat, generation, coaching, and batch. Generic over the
  * concrete provider record so callers keep their full provider type.
  */
-import { getDefaultModel, usableModel } from "./provider-models";
+import { modelForProvider, usableModel } from "./provider-models";
 import type {
   AiModelBinding,
   AiModelPurpose,
@@ -34,13 +34,7 @@ const fromDefaultProvider = <P extends ResolvableProvider>(
   if (!provider) return undefined;
   // Prefer the provider's stored model (a migrated/legacy choice) over the
   // catalog default while a stored model is still carried.
-  return {
-    provider,
-    modelId:
-      provider.model === undefined
-        ? getDefaultModel(provider.type)
-        : usableModel(provider.type, provider.model),
-  };
+  return { provider, modelId: modelForProvider(provider) };
 };
 
 export const resolveModelForPurpose = <P extends ResolvableProvider>(

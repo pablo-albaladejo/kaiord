@@ -10,7 +10,7 @@ on:
     inputs:
       model:
         description: "Model to evaluate"
-        default: "claude-sonnet-4-5-20250929"
+        default: "claude-sonnet-5" # = getDefaultModel("anthropic")
         type: string
 
 permissions:

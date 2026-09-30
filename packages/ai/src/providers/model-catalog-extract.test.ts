@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  assertSuccessorsInCatalog,
   chatModelIds,
   parseModelIds,
   renderCatalogModule,
@@ -69,21 +70,49 @@ describe("retired and deprecated models", () => {
     expect(ids).toEqual(["claude-haiku-4-5"]);
   });
 
-  it("should emit the retired ids so saved choices can be healed", () => {
+  it("should emit retired successors and deprecations so the UI can heal and warn", () => {
     // Arrange
     const catalog = { anthropic: [], openai: [], google: [] };
+    const none = { anthropic: {}, openai: {}, google: {} };
 
     // Act
-    const text = renderCatalogModule(catalog, {
-      anthropic: ["claude-3-haiku-20240307"],
-      openai: [],
-      google: [],
-    });
+    const text = renderCatalogModule(
+      catalog,
+      { ...none, anthropic: { "claude-3-haiku-20240307": "claude-haiku-4-5" } },
+      {
+        ...none,
+        anthropic: {
+          "claude-sonnet-4-0": {
+            successor: "claude-sonnet-5",
+            retiresOn: null,
+          },
+        },
+      }
+    );
 
     // Assert
     expect(text).toContain(
-      'anthropic: [\n    "claude-3-haiku-20240307",\n  ],'
+      'anthropic: {\n    "claude-3-haiku-20240307": "claude-haiku-4-5",\n  },'
     );
-    expect(text).toContain("openai: [],");
+    expect(text).toContain(
+      '"claude-sonnet-4-0": { successor: "claude-sonnet-5", retiresOn: null },'
+    );
+    expect(text).toContain("openai: {},");
+  });
+
+  it("should throw when a successor is not in the catalog", () => {
+    // Arrange
+    const catalog = {
+      anthropic: [{ id: "claude-haiku-4-5", label: "claude-haiku-4-5" }],
+      openai: [],
+      google: [],
+    };
+    const retired = { anthropic: { "claude-old": "claude-gone" } };
+
+    // Act
+    const act = () => assertSuccessorsInCatalog(catalog, retired, {});
+
+    // Assert
+    expect(act).toThrow(/claude-gone/);
   });
 });
