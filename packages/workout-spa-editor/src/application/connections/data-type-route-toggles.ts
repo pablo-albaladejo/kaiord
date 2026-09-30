@@ -30,6 +30,13 @@ import type {
 } from "../../types/integration-policy";
 import type { BridgeRouteSignals } from "./bridge-route-types";
 
+/* Export destinations whose push has never been verified end to end
+   (TrainingPeaks: the push program closed without its manual E2E). They are
+   not offered to switch ON; a route already on stays listed, as above. */
+const UNVERIFIED_EXPORT_BRIDGES: ReadonlySet<string> = new Set([
+  "trainingpeaks-bridge",
+]);
+
 export type DataTypeRouteToggle = {
   readonly bridgeId: string;
   /** The connection-record key, so copy names the source the cards name. */
@@ -59,7 +66,9 @@ export const buildRouteToggles = (
     if (!signals.supportsRoute(bridgeId, dataType, direction)) return [];
     const enabled = on.has(bridgeId);
     const offerable =
-      signals.isBridgeConnected(bridgeId) && signals.announces(bridgeId, token);
+      signals.isBridgeConnected(bridgeId) &&
+      signals.announces(bridgeId, token) &&
+      !(direction === "export" && UNVERIFIED_EXPORT_BRIDGES.has(bridgeId));
     if (!enabled && !offerable) return [];
     return [{ bridgeId, integrationId: entry.id, enabled }];
   });
