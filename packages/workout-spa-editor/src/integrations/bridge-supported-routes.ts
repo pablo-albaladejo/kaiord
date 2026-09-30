@@ -23,6 +23,18 @@ const SUPPORTED_IMPORT_TYPES: Record<string, readonly ManagedDataType[]> = {
   // consolidatedtimedmetrics maps the weight channel (type 9) only; pulse /
   // HRV / sleep / spo2 remain deferred in @kaiord/trainingpeaks.
   "trainingpeaks-bridge": ["weight"],
+  // Exactly what `runWhoopImport` writes: cycles (hrv, sleep, strain, vitals),
+  // the heart-rate series, stress and workouts → activity. WHOOP has no scale,
+  // so weight, daily-wellness and body-composition would be phantom routes.
+  "whoop-bridge": [
+    "hrv",
+    "sleep",
+    "strain",
+    "vitals",
+    "heart-rate-series",
+    "stress",
+    "activity",
+  ],
 };
 
 /**

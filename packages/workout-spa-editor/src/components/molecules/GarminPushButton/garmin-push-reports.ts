@@ -1,8 +1,7 @@
 /**
  * What one send reports (design §3.8): `garmin-synced` once per run, and —
  * for a send that throws before the pipeline could measure it — its one
- * `garmin-calendar-placement` event, as a failed library push (or the
- * given failure, e.g. `missing-ftp`).
+ * `garmin-calendar-placement` event, as a failed library push.
  */
 import type { Analytics } from "@kaiord/core";
 
@@ -18,9 +17,8 @@ export const garminPushReports = (analytics: Analytics, startedAt: number) => {
     analytics.event("garmin-synced", {
       result: isPlacementSent(result) ? "success" : "failure",
     });
-  const failedEarly = (
-    result: PlacementResult = failed("library-push-failed", true)
-  ): PlacementResult => {
+  const failedEarly = (): PlacementResult => {
+    const result = failed("library-push-failed", true);
     const durationMs = Date.now() - startedAt;
     analytics.event(
       "garmin-calendar-placement",

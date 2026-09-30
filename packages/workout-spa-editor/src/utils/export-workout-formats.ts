@@ -7,8 +7,11 @@
 import type { KRD } from "@kaiord/core";
 import { toBinary, toText } from "@kaiord/core";
 
+import { ftpForWorkout, refuseMissingFtp } from "../lib/athlete/workout-ftp";
+import type { Profile } from "../types/profile";
 import type { ExportProgressCallback } from "./export-workout";
 import { ExportError } from "./export-workout";
+import { garminPaceZonesFor } from "./garmin-pace-zones";
 
 export const exportKrdFile = async (
   krd: KRD,
@@ -64,25 +67,32 @@ export const exportZwoFile = async (
   return buffer;
 };
 
-/** `ftpWatts` resolves `percent_ftp` power targets; without it such a
-    workout rejects with `MissingFtpError` rather than writing % as watts. */
+/**
+ * The one GCN writer every Garmin payload goes through (single push, Send
+ * week, chat, file export): pace zone and %FTP power targets resolved from
+ * `profile`. Either one it cannot resolve is refused, never guessed.
+ */
+const writeGcn = async (krd: KRD, profile: Profile | null | undefined) => {
+  const paceZones = garminPaceZonesFor(krd, profile);
+  const ftpWatts = ftpForWorkout(profile, krd);
+  const { createGarminWriter } = await import("@kaiord/garmin");
+  return refuseMissingFtp(krd, () =>
+    toText(krd, createGarminWriter({ paceZones, ftpWatts }))
+  );
+};
+
 export const exportGcnWorkout = async (
   krd: KRD,
-  ftpWatts?: number
-): Promise<unknown> => {
-  const { createGarminWriter } = await import("@kaiord/garmin");
-  const gcnString = await toText(krd, createGarminWriter({ ftpWatts }));
-  return JSON.parse(gcnString) as unknown;
-};
+  profile: Profile | null | undefined
+): Promise<unknown> => JSON.parse(await writeGcn(krd, profile)) as unknown;
 
 export const exportGcnFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback,
-  ftpWatts?: number
+  profile?: Profile | null
 ): Promise<Uint8Array> => {
   onProgress?.(50);
-  const { createGarminWriter } = await import("@kaiord/garmin");
-  const gcnString = await toText(krd, createGarminWriter({ ftpWatts }));
+  const gcnString = await writeGcn(krd, profile);
   const buffer = new TextEncoder().encode(gcnString);
   onProgress?.(100);
   return buffer;

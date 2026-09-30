@@ -95,6 +95,7 @@
     "from": "From",
     "sentTo": "Also sent to",
     "nowhere": "Nowhere",
+    "exportSwitches": "Destinations that receive {{type}}",
     "noSource": "No source",
     "manySources": "{{count}} sources",
     "unrankedNote": "kept side by side, none ranked first",
@@ -148,5 +149,11 @@
     "strain": "Strain",
     "vitals": "Vitals",
     "heart-rate-series": "Heart Rate Series"
+  },
+  "profileLink": {
+    "notLinked": "{{name}} is signed in on this browser but not linked to this athlete profile, so nothing syncs yet.",
+    "link": "Link to this profile",
+    "signIn": "{{name}} is not linked to this athlete profile. Sign in to {{name}} in this browser first, then link it here.",
+    "linking": "Linking…"
   }
 }

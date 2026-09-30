@@ -1,3 +1,6 @@
+import { MissingFtpError } from "@kaiord/core";
+
+import { FtpUnavailableError } from "../../types/ftp-unavailable-error";
 import type { KRD } from "../../types/krd";
 import type { Profile } from "../../types/profile";
 import { SPORT_ZONE_CAPABILITIES } from "../../types/sport-zones";
@@ -35,3 +38,21 @@ export function missingFtpReason(krd: KRD): MissingFtpReason {
       .power;
   return holdsPower ? "no-ftp" : "sport-without-power";
 }
+
+/** Runs a watts-only write, turning its MissingFtpError into an
+    FtpUnavailableError that names the fix for this workout. */
+export const refuseMissingFtp = async <T>(
+  krd: KRD,
+  write: () => Promise<T>
+): Promise<T> => {
+  try {
+    return await write();
+  } catch (error) {
+    if (!(error instanceof MissingFtpError)) throw error;
+    throw new FtpUnavailableError(
+      missingFtpReason(krd) === "no-ftp"
+        ? "missing-ftp"
+        : "sport-without-power-zones"
+    );
+  }
+};

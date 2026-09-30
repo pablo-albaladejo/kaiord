@@ -1,11 +1,9 @@
-import { createMissingFtpError } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { profileWith } from "../../lib/athlete/test-profile";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { WorkoutRecord } from "../../types/calendar-record";
+import { FtpUnavailableError } from "../../types/ftp-unavailable-error";
 import type { IntegrationPolicy } from "../../types/integration-policy";
-import type { Profile } from "../../types/profile";
 import { exportGcnWorkout } from "../../utils/export-workout-formats";
 
 vi.mock("../../utils/export-workout-formats", () => ({
@@ -95,25 +93,15 @@ const makeRecord = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
     ...overrides,
   }) as unknown as WorkoutRecord;
 
-const makePersistence = (
-  record: WorkoutRecord | undefined,
-  profile?: Profile
-) => {
+const makePersistence = (record: WorkoutRecord | undefined) => {
   const put = vi.fn();
   const persistence = {
     workouts: { getById: vi.fn().mockResolvedValue(record), put },
-    profiles: { getById: vi.fn().mockResolvedValue(profile) },
+    profiles: { getById: vi.fn().mockResolvedValue(undefined) },
     transaction: <T>(fn: () => Promise<T>) => fn(),
   } as unknown as PersistencePort;
   return { persistence, put };
 };
-
-const FTP_W = 250;
-const krdFor = (sport: string) =>
-  ({
-    metadata: { sport },
-    extensions: { structured_workout: { sport, steps: [] } },
-  }) as unknown as WorkoutRecord["krd"];
 
 describe("doPushToGarmin", () => {
   beforeEach(() => {
@@ -410,42 +398,22 @@ describe("doPushToGarmin", () => {
     expect(JSON.stringify(result)).not.toContain("athlete-private-detail");
   });
 
-  it("should export with the workout owner's FTP for its sport", async () => {
-    // Arrange
-    const { deps } = makeDeps();
-    const krd = krdFor("cycling");
-    const profile = profileWith("cycling", { ftp: FTP_W });
-    const { persistence } = makePersistence(makeRecord({ krd }), profile);
-    const pushWorkout = vi
-      .fn()
-      .mockResolvedValue({ success: true, garminWorkoutId: "1707805999" });
-
-    // Act
-    await doPushToGarmin(persistence, pushWorkout, "workout-1", deps);
-
-    // Assert
-    expect(persistence.profiles.getById).toHaveBeenCalledWith("profile-1");
-    expect(exportGcnWorkout).toHaveBeenCalledWith(krd, FTP_W);
-  });
-
   it.each([
-    { sport: "cycling", error: "missing_ftp", hint: "Athlete" },
+    { reason: "missing-ftp", error: "missing_ftp", hint: "Athlete" },
     {
-      sport: "generic",
+      reason: "sport-without-power-zones",
       error: "sport_without_power_zones",
       hint: "cycling or running",
     },
-  ])(
-    "should report $error and never push a %FTP $sport workout without an FTP",
-    async ({ sport, error, hint }) => {
+  ] as const)(
+    "should report $error and never push a %FTP workout without an FTP",
+    async ({ reason, error, hint }) => {
       // Arrange
       vi.mocked(exportGcnWorkout).mockRejectedValueOnce(
-        createMissingFtpError("garmin")
+        new FtpUnavailableError(reason)
       );
       const { deps, calendar } = makeDeps();
-      const { persistence, put } = makePersistence(
-        makeRecord({ krd: krdFor(sport) })
-      );
+      const { persistence, put } = makePersistence(makeRecord());
       const pushWorkout = vi.fn();
 
       // Act

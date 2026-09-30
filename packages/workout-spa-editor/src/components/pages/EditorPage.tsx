@@ -8,11 +8,7 @@
 
 import { useSearch } from "wouter";
 
-import { AthleteZonesProvider } from "../../contexts/athlete-zones-context";
-import {
-  type ActiveProfile,
-  useActiveProfileLive,
-} from "../../hooks/use-active-profile-live";
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useDeleteCleanup } from "../../hooks/use-delete-cleanup";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
@@ -31,22 +27,7 @@ import { useWorkoutRecord } from "./use-workout-record";
 
 export type EditorPageProps = { id?: string };
 
-type EditorPageBodyProps = EditorPageProps & { profileId: string | null };
-
-const NO_PROFILE: ActiveProfile = { id: null, profile: null };
-
-/** Runs the page's one active-profile live query; descendants (the GCN
-    export FTP) read the profile from `AthleteZonesProvider`. */
 export default function EditorPage({ id }: EditorPageProps) {
-  const { id: profileId, profile } = useActiveProfileLive() ?? NO_PROFILE;
-  return (
-    <AthleteZonesProvider profile={profile}>
-      <EditorPageBody id={id} profileId={profileId} />
-    </AthleteZonesProvider>
-  );
-}
-
-function EditorPageBody({ id, profileId }: EditorPageBodyProps) {
   useDeleteCleanup();
   const search = useSearch();
   const { dateParam, weekParam, origin, newWorkoutMode, coachingDraftId } =
@@ -62,6 +43,7 @@ function EditorPageBody({ id, profileId }: EditorPageBodyProps) {
 
   const { record, placementRow, loading } = useWorkoutRecord(id);
   const { pushWorkout } = useEditorActions(record);
+  const profileId = useActiveProfileLive()?.id ?? null;
   const sidebarData = useCoachingSidebar(profileId, id);
 
   const workout = currentWorkout?.extensions?.structured_workout as
@@ -106,6 +88,7 @@ function EditorPageBody({ id, profileId }: EditorPageBodyProps) {
           workout={workout}
           currentWorkout={currentWorkout}
           sidebar={sidebarData}
+          ownerProfileId={record?.profileId}
         />
       )}
     </div>

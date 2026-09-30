@@ -78,4 +78,25 @@ describe("classifyTurn", () => {
     // Assert
     expect(result.status).toBe("complete");
   });
+
+  it("should pick the last action call when a turn holds several", () => {
+    // Arrange
+    const raw = rawTurn({
+      finishReason: "tool-calls",
+      toolCalls: [
+        { toolName: "set_data_route", toolCallId: "early", input: {} },
+        { toolName: "query_workouts", toolCallId: "read", input: {} },
+        { toolName: "set_data_route", toolCallId: "late", input: {} },
+      ],
+    });
+
+    // Act
+    const result = classifyTurn(history, raw, new Set(["set_data_route"]));
+
+    // Assert
+    expect(result.status).toBe("pending_action");
+    if (result.status === "pending_action") {
+      expect(result.pendingAction.toolCallId).toBe("late");
+    }
+  });
 });

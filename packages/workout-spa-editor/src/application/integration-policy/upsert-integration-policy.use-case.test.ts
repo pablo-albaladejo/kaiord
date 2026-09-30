@@ -136,4 +136,26 @@ describe("upsertIntegrationPolicy", () => {
     // Assert
     expect(error).toBeDefined();
   });
+
+  it("should drop the Disconnect marker when the user decides the route", async () => {
+    // Arrange
+    const repo = makeRepo();
+    const deps = { policyRepo: repo };
+    const inserted = await upsertIntegrationPolicy(deps, baseInput);
+    repo.store.set(inserted.id, {
+      ...inserted,
+      enabled: false,
+      disabledBy: "disconnect",
+    });
+
+    // Act
+    const result = await upsertIntegrationPolicy(deps, {
+      ...baseInput,
+      enabled: false,
+    });
+
+    // Assert
+    expect(result).not.toHaveProperty("disabledBy");
+    expect(repo.store.get(inserted.id)).not.toHaveProperty("disabledBy");
+  });
 });

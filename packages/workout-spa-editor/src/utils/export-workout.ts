@@ -8,6 +8,7 @@
 import type { KRD } from "@kaiord/core";
 
 import { stripIds } from "../store/strip-ids";
+import type { Profile } from "../types/profile";
 import {
   exportFitFile,
   exportGcnFile,
@@ -36,7 +37,8 @@ export const exportWorkout = async (
   krd: KRD,
   format: WorkoutFileFormat,
   onProgress?: ExportProgressCallback,
-  ftpWatts?: number
+  /** Resolves a GCN export's pace zone targets. */
+  profile?: Profile | null
 ): Promise<Uint8Array> => {
   try {
     onProgress?.(10);
@@ -56,7 +58,7 @@ export const exportWorkout = async (
     } else if (format === "zwo") {
       buffer = await exportZwoFile(portable, onProgress);
     } else if (format === "gcn") {
-      buffer = await exportGcnFile(portable, onProgress, ftpWatts);
+      buffer = await exportGcnFile(portable, onProgress, profile);
     } else {
       throw new ExportError(`Unsupported format: ${format}`, format);
     }

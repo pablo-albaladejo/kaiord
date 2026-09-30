@@ -50,6 +50,19 @@ describe("SendWeekPanel", () => {
     );
   });
 
+  it("should point a missing export route at Connections", () => {
+    // Arrange
+    const state = { phase: "blocked", failure: "no-export-route" } as const;
+
+    // Act
+    renderPanel([], { state });
+
+    // Assert
+    expect(
+      screen.getByRole("link", { name: "Open Connections" })
+    ).toHaveAttribute("href", "/settings/connections");
+  });
+
   it("should link each item to its workout page with its status", () => {
     // Arrange
     const outcomes = [item("w-1", { kind: "scheduled" }), item("w-2")];
@@ -159,22 +172,19 @@ describe("SendWeekPanel", () => {
   );
 
   it.each([
-    { reason: "missing-ftp", text: "Set your FTP in Athlete" },
-    {
-      reason: "sport-without-power-zones",
-      text: "Change its sport to cycling or running",
-    },
-  ] as const)(
-    "should say why a $reason item was not sent",
-    ({ reason, text }) => {
-      // Arrange
-      const outcomes = [item("w-1", failed(reason, false))];
+    ["missing-pace-zones", "set your threshold pace in Athlete"],
+    ["incomplete-pace-zones", "complete your pace zones in Athlete"],
+    ["unsupported-pace-zone-sport", "pace zones only in running or swimming"],
+    ["missing-ftp", "set your FTP in Athlete"],
+    ["sport-without-power-zones", "power zones only in cycling or running"],
+  ] as const)("should tell the athlete how to fix a %s item", (reason, fix) => {
+    // Arrange
+    const outcome = item("w-1", failed(reason, false));
 
-      // Act
-      renderPanel(outcomes);
+    // Act
+    renderPanel([outcome]);
 
-      // Assert
-      expect(screen.getByText(text, { exact: false })).toBeInTheDocument();
-    }
-  );
+    // Assert
+    expect(screen.getByText(`Failed (${fix})`)).toBeInTheDocument();
+  });
 });

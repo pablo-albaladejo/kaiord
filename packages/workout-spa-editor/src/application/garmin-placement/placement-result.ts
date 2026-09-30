@@ -16,6 +16,12 @@ export const PLACEMENT_FAILURE_REASONS = [
   "library-push-failed",
   "no-export-route",
   "placement-interrupted",
+  /** Pace zone targets the profile cannot resolve to ranges: no zones
+      and no threshold pace, a referenced zone undefined, or a sport
+      without pace zones (`PaceZonesUnavailableReason`). */
+  "missing-pace-zones",
+  "incomplete-pace-zones",
+  "unsupported-pace-zone-sport",
   /** %FTP power targets and no FTP: nothing is exported or pushed. */
   "missing-ftp",
   /** %FTP power targets on a sport with no power zones: never pushed. */

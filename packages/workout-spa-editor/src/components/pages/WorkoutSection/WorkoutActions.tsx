@@ -5,10 +5,14 @@ import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToLibraryButton";
+import { useDiscardConfirmation } from "./use-discard-confirmation";
 
 type WorkoutActionsProps = Readonly<{
   krd: KRD;
-  onDiscard: () => void;
+  /** The profile owning the persisted record the editor shows, if any. */
+  ownerProfileId?: string;
+  /** Defaults to the editor's discard confirmation (`useDiscardConfirmation`). */
+  onDiscard?: () => void;
 }>;
 
 /**
@@ -16,17 +20,22 @@ type WorkoutActionsProps = Readonly<{
  * one control on this screen can reach the watch, and it is not here.
  * Undo/redo moved up beside the title, where the thing they act on is.
  */
-export function WorkoutActions({ krd, onDiscard }: WorkoutActionsProps) {
+export function WorkoutActions({
+  krd,
+  ownerProfileId,
+  onDiscard,
+}: WorkoutActionsProps) {
   const t = useTranslate("editor");
+  const confirmDiscard = useDiscardConfirmation();
   return (
     <div className="flex flex-wrap items-center gap-2.5">
       <SaveToLibraryButton workout={krd} />
-      <SaveButton workout={krd} />
+      <SaveButton workout={krd} ownerProfileId={ownerProfileId} />
       <span className="hidden flex-1 sm:block" />
       <Button
         variant="tertiary"
         size="sm"
-        onClick={onDiscard}
+        onClick={onDiscard ?? confirmDiscard}
         aria-label={t("actions.discardAria")}
         data-testid="discard-workout-button"
         className="text-ink-muted hover:text-[var(--danger-text)]"

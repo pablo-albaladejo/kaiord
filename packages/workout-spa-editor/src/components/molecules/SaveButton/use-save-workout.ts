@@ -1,18 +1,18 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts";
-import { useAthleteZones } from "../../../contexts/athlete-zones-context";
+import { resolveExportProfile } from "../../../hooks/resolve-export-profile";
 import { useToast } from "../../../hooks/use-toast";
 import { useTranslate } from "../../../i18n/use-translate";
-import { ftpForWorkout } from "../../../lib/athlete";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { createSaveHandler } from "./save-handler";
 
 /**
- * Custom hook for save functionality with format selection
+ * Custom hook for save functionality with format selection.
+ * `ownerProfileId`: the profile owning the persisted record, if any.
  */
-export function useSaveWorkout(workout: KRD) {
+export function useSaveWorkout(workout: KRD, ownerProfileId?: string) {
   const [saveErrors, setSaveErrors] = useState<Array<ValidationError> | null>(
     null
   );
@@ -24,9 +24,6 @@ export function useSaveWorkout(workout: KRD) {
   const { success, error: showError } = toast;
   const analytics = useAnalytics();
   const t = useTranslate("editor");
-  // From the page's single live query (EditorPage). Null while it loads or
-  // outside a provider, so a %FTP export fails closed with MissingFtpError.
-  const profile = useAthleteZones();
 
   const handleSave = createSaveHandler(
     workout,
@@ -38,7 +35,7 @@ export function useSaveWorkout(workout: KRD) {
     showError,
     (format) => analytics.event("workout-exported", { format }),
     t,
-    ftpForWorkout(profile, workout)
+    () => resolveExportProfile(ownerProfileId)
   );
 
   const clearErrors = () => setSaveErrors(null);

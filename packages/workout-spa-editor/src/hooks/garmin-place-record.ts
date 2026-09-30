@@ -3,9 +3,7 @@
  * push and place it, and — when Garmin confirmed the library workout id —
  * re-read the record and persist that id (`recordGarminPush`). Shared by the
  * chat tool (`doPushToGarmin`) and the bulk "Send week" runner, so both
- * record a push the same way. A missing record is `record-deleted`; a
- * %FTP workout without an FTP is `missing-ftp` (or
- * `sport-without-power-zones`), exported with nothing sent.
+ * record a push the same way. A missing record is `record-deleted`.
  */
 import type { BulkItemResult } from "../application/garmin-bulk/send-week-to-garmin";
 import {
@@ -19,8 +17,8 @@ import {
 import { recordGarminPush } from "../application/record-garmin-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 import type { PersistencePort } from "../ports/persistence-port";
-import { exportForPlacement } from "./garmin-placement-export";
 import { garminPlacementRequest } from "./garmin-placement-request";
+import { exportRecordGcn } from "./garmin-record-gcn";
 
 export type PlacedRecord = {
   result: PlacementResult;
@@ -38,19 +36,18 @@ export const placeRecord = async (
 ): Promise<PlacedRecord | undefined> => {
   const record = await persistence.workouts.getById(workoutId);
   if (!record?.krd) return undefined;
-  const exported = await exportForPlacement(
-    persistence,
-    record.profileId,
-    record.krd
-  );
-  if ("failure" in exported)
-    return { result: exported.failure, garminPushId: null, date: record.date };
-  const { gcn } = exported;
+  const { krd, profileId } = record;
+  const buildGcn = () => exportRecordGcn(krd, profileId, persistence.profiles);
   const confirmed: { id?: string } = {};
   const result = await pushWorkoutToGarminCalendar(
     placementDeps,
     garminPlacementRequest(
-      { record, gcn, ledgerRepo: placementDeps.ledgerRepo, pushWorkout },
+      {
+        record,
+        buildGcn,
+        ledgerRepo: placementDeps.ledgerRepo,
+        pushWorkout,
+      },
       { onLibraryConfirmed: (id) => (confirmed.id = id) }
     )
   );

@@ -10,6 +10,7 @@ import { managedDataTypes } from "@kaiord/core";
 import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
+import type { IntegrationPolicyDirection } from "../../types/integration-policy";
 import {
   buildRouteToggles,
   type DataTypeRouteToggle,
@@ -44,7 +45,8 @@ export const optionsByType = (
 export const togglesByType = (
   byDataType: DataFlowsByType,
   integrations: readonly IntegrationRegistryEntry[],
-  signals: RouteToggleSignals
+  signals: RouteToggleSignals,
+  direction: IntegrationPolicyDirection = "import"
 ): ReadonlyMap<ManagedDataType, readonly DataTypeRouteToggle[]> =>
   new Map(
     managedDataTypes.map((dataType) => [
@@ -52,8 +54,9 @@ export const togglesByType = (
       buildRouteToggles(
         dataType,
         integrations,
-        byDataType.get(dataType)?.import ?? [],
-        signals
+        byDataType.get(dataType)?.[direction] ?? [],
+        signals,
+        direction
       ),
     ])
   );

@@ -1,13 +1,9 @@
-import { createMissingFtpError } from "@kaiord/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { createSaveHandler } from "./save-handler";
 
-const FTP_W = 250;
-const workoutFor = (sport: string) => ({
-  metadata: { sport },
-  extensions: { structured_workout: { name: "Test", sport, steps: [] } },
-});
 const mockDownloadWorkout = vi.fn();
 const mockExportWorkout = vi.fn();
 const mockGenerateWorkoutFilename = vi.fn(() => "workout.fit");
@@ -96,70 +92,38 @@ describe("createSaveHandler — analytics call-site", () => {
     await expect(result).resolves.toBeUndefined();
   });
 
-  it("should show the localized missing-FTP message when the export needs an FTP", async () => {
+  it("should download a KRD file without reading the profile", async () => {
     // Arrange
-    const cause = createMissingFtpError("garmin");
-    mockExportWorkout.mockRejectedValue(
-      Object.assign(new Error("Failed to export workout as GCN"), { cause })
-    );
-    const showError = vi.fn();
-    const t = (key: string) => key;
-    const cyclingWorkout = workoutFor("cycling");
+    const resolveProfile = vi.fn(() => Promise.reject(new Error("db down")));
     const handler = createSaveHandler(
-      cyclingWorkout as never,
-      "gcn",
+      fakeWorkout as never,
+      "krd",
       noop,
       noop,
       noop,
       noop,
-      showError,
+      noop,
       undefined,
-      t
+      (key) => key,
+      resolveProfile
     );
 
     // Act
     await handler();
 
     // Assert
-    expect(showError).toHaveBeenCalledWith(
-      "save.exportFailedTitle",
-      "save.missingFtp"
+    expect(resolveProfile).not.toHaveBeenCalled();
+    expect(mockExportWorkout).toHaveBeenCalledWith(
+      fakeWorkout,
+      "krd",
+      expect.any(Function),
+      null
     );
   });
 
-  it.each(["generic", "swimming"])(
-    "should point at the %s sport instead of the FTP when it has no power zones",
-    async (sport) => {
-      // Arrange
-      mockExportWorkout.mockRejectedValue(createMissingFtpError("garmin"));
-      const showError = vi.fn();
-      const t = (key: string) => key;
-      const handler = createSaveHandler(
-        workoutFor(sport) as never,
-        "gcn",
-        noop,
-        noop,
-        noop,
-        noop,
-        showError,
-        undefined,
-        t
-      );
-
-      // Act
-      await handler();
-
-      // Assert
-      expect(showError).toHaveBeenCalledWith(
-        "save.exportFailedTitle",
-        "save.missingFtpSport"
-      );
-    }
-  );
-
-  it("should pass the profile FTP through to the export", async () => {
+  it("should pass the profile read at click time to the export so a GCN file resolves its pace zones", async () => {
     // Arrange
-    const t = (key: string) => key;
+    const profile = { id: "p1" };
     const handler = createSaveHandler(
       fakeWorkout as never,
       "gcn",
@@ -169,8 +133,8 @@ describe("createSaveHandler — analytics call-site", () => {
       noop,
       noop,
       undefined,
-      t,
-      FTP_W
+      (key) => key,
+      async () => profile as never
     );
 
     // Act
@@ -181,7 +145,75 @@ describe("createSaveHandler — analytics call-site", () => {
       fakeWorkout,
       "gcn",
       expect.any(Function),
-      FTP_W
+      profile
     );
   });
+
+  it.each([
+    "missing-pace-zones",
+    "incomplete-pace-zones",
+    "unsupported-pace-zone-sport",
+  ] as const)(
+    "should explain a pace zone workout that fails with %s",
+    async (reason) => {
+      // Arrange
+      const cause = new PaceZonesUnavailableError(reason);
+      mockExportWorkout.mockRejectedValue(
+        Object.assign(new Error("Failed to export workout as GCN"), { cause })
+      );
+      const showError = vi.fn();
+      const handler = createSaveHandler(
+        fakeWorkout as never,
+        "gcn",
+        noop,
+        noop,
+        noop,
+        noop,
+        showError,
+        undefined,
+        (key) => key
+      );
+
+      // Act
+      await handler();
+
+      // Assert
+      expect(showError).toHaveBeenCalledWith(
+        "save.exportFailedTitle",
+        `save.paceZones.${reason}`
+      );
+    }
+  );
+
+  it.each(["missing-ftp", "sport-without-power-zones"] as const)(
+    "should explain a %FTP workout that fails with %s",
+    async (reason) => {
+      // Arrange
+      const cause = new FtpUnavailableError(reason);
+      mockExportWorkout.mockRejectedValue(
+        Object.assign(new Error("Failed to export workout as GCN"), { cause })
+      );
+      const showError = vi.fn();
+      const handler = createSaveHandler(
+        fakeWorkout as never,
+        "gcn",
+        noop,
+        noop,
+        noop,
+        noop,
+        showError,
+        undefined,
+        (key) => key
+      );
+
+      // Act
+      await handler();
+
+      // Assert
+      expect(showError).toHaveBeenCalledWith(
+        "save.exportFailedTitle",
+        `save.ftp.${reason}`
+      );
+    }
+  );
 });

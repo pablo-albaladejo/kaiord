@@ -47,21 +47,22 @@ export function CalendarNavRow({
         )}
         {actions}
         <CreateWorkoutCta origin="calendar" week={weekId} />
-        {coaching.syncSources
-          .filter((src) => src.linked)
-          .map((src) => (
-            <CoachingSyncButton
-              key={src.id}
-              connected={src.connected}
-              loading={src.loading}
-              error={src.error}
-              onSync={() => syncFromFirstDay(src.sync, days)}
-              onConnect={src.connect}
-              label={src.label}
-              lastSyncedAt={src.lastSyncedAt}
-              routeInactive={src.routeActive === false}
-            />
-          ))}
+        {/* An installed but unlinked source offers "Connect to <Label>": the
+            bridge session alone says nothing about THIS profile, and hiding
+            the button left a new user no way to link from the calendar. */}
+        {coaching.syncSources.map((src) => (
+          <CoachingSyncButton
+            key={src.id}
+            connected={src.linked && src.connected}
+            loading={src.loading}
+            error={src.error}
+            onSync={() => syncFromFirstDay(src.sync, days)}
+            onConnect={src.connect}
+            label={src.label}
+            lastSyncedAt={src.lastSyncedAt}
+            routeInactive={src.routeActive === false}
+          />
+        ))}
       </div>
     </div>
   );

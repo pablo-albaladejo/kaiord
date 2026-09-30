@@ -1,28 +1,20 @@
-import { MissingFtpError } from "@kaiord/core";
-
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
-import { missingFtpReason } from "../../../lib/athlete";
+import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
 import type { KRD, ValidationError } from "../../../types/krd";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
+import type { Profile } from "../../../types/profile";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { generateWorkoutFilename } from "./workout-filename";
 
-const isMissingFtp = (err: unknown): boolean =>
-  err instanceof MissingFtpError ||
-  (err instanceof Error && err.cause instanceof MissingFtpError);
-
-const exportErrorMessage = (
-  err: unknown,
-  t: Translate,
-  workout: KRD
-): string => {
-  if (isMissingFtp(err)) {
-    return missingFtpReason(workout) === "no-ftp"
-      ? t("save.missingFtp")
-      : t("save.missingFtpSport");
-  }
-  return err instanceof Error ? err.message : t("save.exportFailedFallback");
+const exportErrorMessage = (err: unknown, t: Translate): string => {
+  if (!(err instanceof Error)) return t("save.exportFailedFallback");
+  if (err.cause instanceof PaceZonesUnavailableError)
+    return t(`save.paceZones.${err.cause.reason}`);
+  if (err.cause instanceof FtpUnavailableError)
+    return t(`save.ftp.${err.cause.reason}`);
+  return err.message;
 };
 
 export function createSaveHandler(
@@ -35,7 +27,8 @@ export function createSaveHandler(
   showError: (title: string, description: string) => void,
   onExported?: (format: string) => void,
   t: Translate = getTranslate("editor"),
-  ftpWatts?: number
+  /** Reads a GCN export's profile at click time (`resolveExportProfile`). */
+  resolveProfile: () => Promise<Profile | null> = async () => null
 ) {
   return async () => {
     setIsSaving(true);
@@ -49,7 +42,7 @@ export function createSaveHandler(
         (progress) => {
           setExportProgress(progress);
         },
-        ftpWatts
+        selectedFormat === "gcn" ? await resolveProfile() : null
       );
 
       setExportProgress(100);
@@ -65,7 +58,7 @@ export function createSaveHandler(
       );
       onExported?.(selectedFormat);
     } catch (err) {
-      const errorMessage = exportErrorMessage(err, t, workout);
+      const errorMessage = exportErrorMessage(err, t);
       showError(t("save.exportFailedTitle"), errorMessage);
       setSaveErrors([
         {

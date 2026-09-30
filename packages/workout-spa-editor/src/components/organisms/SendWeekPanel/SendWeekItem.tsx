@@ -6,27 +6,30 @@ import { Link } from "wouter";
 
 import type { BulkOutcome } from "../../../application/garmin-bulk/send-week-to-garmin";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
-import { useTranslate } from "../../../i18n/use-translate";
+import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
+import { isFtpReason } from "../../../types/ftp-unavailable-error";
+import { isPaceZonesReason } from "../../../types/pace-zones-unavailable-error";
 import { formatDateLabel } from "../../molecules/TemplatePickerDialog/format-date-label";
 import { type SendWeekTone, statusTone } from "./send-week-status";
-
-/** Failures only the athlete can fix, so their cause is spelled out. */
-const EXPLAINED_FAILURES: ReadonlySet<string> = new Set([
-  "missing-ftp",
-  "sport-without-power-zones",
-]);
-
-const explainedFailure = (outcome: BulkOutcome): string | undefined =>
-  outcome.result?.kind === "failed" &&
-  EXPLAINED_FAILURES.has(outcome.result.reason)
-    ? outcome.result.reason
-    : undefined;
 
 const TONE_CLASS: Record<SendWeekTone, string> = {
   plain: "text-ink-muted",
   warning: "text-ink-strong",
   danger: "text-[var(--danger-text)]",
+};
+
+/** Why an item was not sent, when the athlete can act on it. */
+const reasonOf = (outcome: BulkOutcome, t: Translate): string => {
+  if (outcome.notEligible)
+    return ` (${t(`sendWeek.notEligible.${outcome.notEligible}`)})`;
+  const { result } = outcome;
+  if (result?.kind !== "failed") return "";
+  if (isPaceZonesReason(result.reason))
+    return ` (${t(`sendWeek.paceZones.${result.reason}`)})`;
+  return isFtpReason(result.reason)
+    ? ` (${t(`sendWeek.ftp.${result.reason}`)})`
+    : "";
 };
 
 export function SendWeekItem({
@@ -37,14 +40,8 @@ export function SendWeekItem({
   weekId: string;
 }) {
   const t = useTranslate("calendar");
-  const detail = useTranslate("workout-detail");
   const locale = useActiveLocale();
-  const failure = explainedFailure(outcome);
-  const reason = outcome.notEligible
-    ? ` (${t(`sendWeek.notEligible.${outcome.notEligible}`)})`
-    : failure
-      ? ` (${detail(`placement.failed.${failure}`)})`
-      : "";
+  const reason = reasonOf(outcome, t);
   return (
     <li className="flex items-center justify-between gap-3">
       <Link

@@ -1,22 +1,28 @@
 import { useCallback } from "react";
 
+import { logGarminPushFailure } from "../../../application/garmin-placement/log-garmin-push-failure";
 import { pushWorkoutToGarminCalendar } from "../../../application/garmin-placement/push-workout-to-garmin-calendar";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
 import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
-import { useTranslate } from "../../../i18n/use-translate";
+import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import {
-  earlyFailure,
-  exportWithOwnerFtp,
-  pushErrorMessage,
-} from "./garmin-push-ftp";
+import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { garminPushReports } from "./garmin-push-reports";
+
+/** A failure the placement result names itself (PlacementFeedback). */
+const explainedByResult = (error: unknown) =>
+  error instanceof PaceZonesUnavailableError ||
+  error instanceof FtpUnavailableError;
 
 export type GarminPushOptions = {
   /** The athlete chose "Send anyway" on an `uncertain` result. */
   sendAnyway?: boolean;
 };
+
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "Conversion failed";
 
 /**
  * Pushes a persisted workout to Garmin Connect and places it on its date
@@ -44,18 +50,13 @@ export const useGarminPush = (
   const { pushWorkout, setPushing, sessionActive, features } =
     useGarminBridge();
   const analytics = useAnalytics();
-  const t = useTranslate("workout-detail");
 
   const push = useCallback(
     async (options: GarminPushOptions = {}) => {
       if (!workout?.krd || !sessionActive) return undefined;
       const { synced, failedEarly } = garminPushReports(analytics, Date.now());
-      const krd = workout.krd;
       const showError = (error: unknown) =>
-        setPushing({
-          status: "error",
-          message: pushErrorMessage(error, krd, t),
-        });
+        setPushing({ status: "error", message: errorMessage(error) });
       // Phase 1 folds a thrown push into `failed`; surface its message first.
       const guardedPush = (gcn: unknown) =>
         pushWorkout(gcn).catch((error: unknown) => {
@@ -64,14 +65,20 @@ export const useGarminPush = (
         });
       try {
         const deps = buildPlacementDeps(features, analytics);
-        const gcn = await exportWithOwnerFtp(workout.profileId, krd);
+        const { krd, profileId } = workout;
+        // Phase 1 folds a failed conversion into `failed`: surface it first.
+        const buildGcn = () =>
+          exportRecordGcn(krd, profileId).catch((error: unknown) => {
+            if (!explainedByResult(error)) showError(error);
+            throw error;
+          });
         // A joiner's run is the owner's: only the owner reports it.
         return await pushWorkoutToGarminCalendar(
           deps,
           garminPlacementRequest(
             {
               record: workout,
-              gcn,
+              buildGcn,
               ledgerRepo: deps.ledgerRepo,
               pushWorkout: guardedPush,
             },
@@ -83,8 +90,9 @@ export const useGarminPush = (
           )
         );
       } catch (error: unknown) {
+        logGarminPushFailure(error);
         showError(error);
-        return failedEarly(earlyFailure(error, krd));
+        return failedEarly();
       }
     },
     [
@@ -95,7 +103,6 @@ export const useGarminPush = (
       setPushing,
       analytics,
       onSent,
-      t,
     ]
   );
 
