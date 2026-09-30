@@ -24,7 +24,8 @@ export function createSaveHandler(
   showError: (title: string, description: string) => void,
   onExported?: (format: string) => void,
   t: Translate = getTranslate("editor"),
-  profile?: Profile | null
+  /** Reads the export's profile at click time (`resolveExportProfile`). */
+  resolveProfile: () => Promise<Profile | null> = async () => null
 ) {
   return async () => {
     setIsSaving(true);
@@ -38,7 +39,7 @@ export function createSaveHandler(
         (progress) => {
           setExportProgress(progress);
         },
-        profile
+        await resolveProfile()
       );
 
       setExportProgress(100);

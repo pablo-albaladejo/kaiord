@@ -23,7 +23,7 @@ import { useSaveWorkout } from "./use-save-workout";
 
 export type SaveButtonProps = {
   workout: KRD;
-  /** The profile owning the persisted record, if any (see `useExportProfile`). */
+  /** The profile owning the persisted record, if any (see `resolveExportProfile`). */
   ownerProfileId?: string;
   disabled?: boolean;
   className?: string;

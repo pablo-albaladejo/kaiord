@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts";
-import { useExportProfile } from "../../../hooks/use-export-profile";
+import { resolveExportProfile } from "../../../hooks/resolve-export-profile";
 import { useToast } from "../../../hooks/use-toast";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
@@ -24,7 +24,6 @@ export function useSaveWorkout(workout: KRD, ownerProfileId?: string) {
   const { success, error: showError } = toast;
   const analytics = useAnalytics();
   const t = useTranslate("editor");
-  const profile = useExportProfile(ownerProfileId);
 
   const handleSave = createSaveHandler(
     workout,
@@ -36,7 +35,7 @@ export function useSaveWorkout(workout: KRD, ownerProfileId?: string) {
     showError,
     (format) => analytics.event("workout-exported", { format }),
     t,
-    profile
+    () => resolveExportProfile(ownerProfileId)
   );
 
   const clearErrors = () => setSaveErrors(null);

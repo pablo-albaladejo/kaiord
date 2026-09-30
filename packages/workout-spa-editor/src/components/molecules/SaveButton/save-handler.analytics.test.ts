@@ -91,7 +91,7 @@ describe("createSaveHandler — analytics call-site", () => {
     await expect(result).resolves.toBeUndefined();
   });
 
-  it("should pass the profile to the export so a GCN file resolves its pace zones", async () => {
+  it("should pass the profile read at click time to the export so a GCN file resolves its pace zones", async () => {
     // Arrange
     const profile = { id: "p1" };
     const handler = createSaveHandler(
@@ -104,7 +104,7 @@ describe("createSaveHandler — analytics call-site", () => {
       noop,
       undefined,
       (key) => key,
-      profile as never
+      async () => profile as never
     );
 
     // Act

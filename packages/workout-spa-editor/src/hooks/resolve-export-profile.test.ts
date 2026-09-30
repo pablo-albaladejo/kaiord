@@ -3,7 +3,6 @@
  * profile that owns the record — the one its Garmin push uses — not the
  * profile that happens to be active.
  */
-import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
@@ -16,7 +15,7 @@ import {
 } from "../test-utils/pace-zone-fixtures";
 import { exportGcnFile } from "../utils/export-workout-formats";
 import { exportRecordGcn } from "./garmin-record-gcn";
-import { useExportProfile } from "./use-export-profile";
+import { resolveExportProfile } from "./resolve-export-profile";
 
 const OTHER_THRESHOLD = 240;
 
@@ -37,7 +36,7 @@ const seed = async () => {
   return { persistence, owner, active };
 };
 
-describe("useExportProfile", () => {
+describe("resolveExportProfile", () => {
   beforeEach(clear);
   afterEach(clear);
 
@@ -46,10 +45,10 @@ describe("useExportProfile", () => {
     const { owner } = await seed();
 
     // Act
-    const { result } = renderHook(() => useExportProfile(owner.id));
+    const profile = await resolveExportProfile(owner.id);
 
     // Assert
-    await waitFor(() => expect(result.current?.id).toBe(owner.id));
+    expect(profile?.id).toBe(owner.id);
   });
 
   it("should resolve the active profile for a workout without a record", async () => {
@@ -57,21 +56,23 @@ describe("useExportProfile", () => {
     const { active } = await seed();
 
     // Act
-    const { result } = renderHook(() => useExportProfile(undefined));
+    const profile = await resolveExportProfile(undefined);
 
     // Assert
-    await waitFor(() => expect(result.current?.id).toBe(active.id));
+    expect(profile?.id).toBe(active.id);
   });
 
   it("should download the same GCN the Garmin push of the record sends", async () => {
     // Arrange
     const { persistence, owner } = await seed();
     const krd = paceZoneKrd();
-    const { result } = renderHook(() => useExportProfile(owner.id));
-    await waitFor(() => expect(result.current?.id).toBe(owner.id));
 
     // Act
-    const bytes = await exportGcnFile(krd, undefined, result.current);
+    const bytes = await exportGcnFile(
+      krd,
+      undefined,
+      await resolveExportProfile(owner.id)
+    );
 
     // Assert
     const downloaded = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
