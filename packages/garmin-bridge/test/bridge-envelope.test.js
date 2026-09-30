@@ -4,6 +4,7 @@
  * Master: packages/_shared/bridge-core/test/bridge-envelope.test.js.
  * Never edit a vendored copy — edit the master and run `pnpm bridge:sync`.
  */
+import { readFileSync } from "node:fs";
 import { describe, it, expect, vi } from "vitest";
 
 const {
@@ -27,6 +28,39 @@ describe("bridge-envelope (vendored)", () => {
 
       // Assert
       expect(allowed).toEqual([true, true]);
+    });
+
+    it("should accept the apex production origin and www", () => {
+      // Arrange
+      const senders = [
+        { origin: "https://kaiord.com" },
+        { origin: "https://www.kaiord.com" },
+      ];
+
+      // Act
+      const allowed = senders.map(isAllowedSenderOrigin);
+
+      // Assert
+      expect(allowed).toEqual([true, true]);
+    });
+
+    it("should accept the origin the popup opens the editor at", () => {
+      // Arrange
+      const popupSource = readFileSync(
+        new URL("../popup.js", import.meta.url),
+        "utf8"
+      );
+      const [, editorUrl] = popupSource.match(
+        /const OPEN_EDITOR_URL = "([^"]+)";/
+      );
+
+      // Act
+      const allowed = isAllowedSenderOrigin({
+        origin: new URL(editorUrl).origin,
+      });
+
+      // Assert
+      expect(allowed).toBe(true);
     });
 
     it("should accept localhost dev ports 5173 and 5174", () => {
@@ -60,13 +94,18 @@ describe("bridge-envelope (vendored)", () => {
         { origin: "https://attacker.example" },
         { origin: "http://localhost:9999" },
         { origin: "http://app.kaiord.com" },
+        { origin: "https://evil.com" },
+        { origin: "https://xkaiord.com" },
+        { origin: "https://kaiord.com.evil.com" },
+        { origin: "http://kaiord.com" },
+        { origin: "https://kaiord.com:8443" },
       ];
 
       // Act
       const allowed = senders.map(isAllowedSenderOrigin);
 
       // Assert
-      expect(allowed).toEqual([false, false, false]);
+      expect(allowed).toEqual(senders.map(() => false));
     });
   });
 
