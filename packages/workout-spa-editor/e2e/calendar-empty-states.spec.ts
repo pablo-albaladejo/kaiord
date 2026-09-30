@@ -14,6 +14,7 @@ import {
 } from "./helpers/seed-dexie";
 
 const TWO_WEEKS_AGO = -2;
+const PLAN_DAY_INDEX = 2;
 
 // Post-redesign the week calendar lives at /calendar/:weekId (bare
 // /calendar is the Today page). Empty-state assertions target the
@@ -113,5 +114,56 @@ test.describe("Calendar Empty States", () => {
     await expect(banner).toBeVisible();
     await banner.getByRole("button", { name: /Add workout/i }).click();
     await page.waitForURL(/\/workout\/new/);
+  });
+  test("should hand a week of coach plans to the missing-key banner, not the guide", async ({
+    page,
+  }) => {
+    // Arrange
+    // A synced coaching plan is not a workout until it is structured, so a
+    // new user whose first sync filled the week had zero workouts and still
+    // saw "Nothing here yet" above their coach's sessions.
+    const day = getWeekDates(0)[PLAN_DAY_INDEX];
+    await page.evaluate(
+      async ({ day }) => {
+        type Db = {
+          table: (n: string) => { put: (r: unknown) => Promise<unknown> };
+        };
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as Db;
+        const ts = new Date().toISOString();
+        await db.table("profiles").put({
+          id: "plans-profile",
+          name: "Plans",
+          sportZones: {},
+          linkedAccounts: [{ source: "train2go", externalId: "t2g-1" }],
+          createdAt: ts,
+          updatedAt: ts,
+        });
+        await db
+          .table("meta")
+          .put({ key: "activeProfileId", value: "plans-profile" });
+        await db.table("coachingActivities").put({
+          id: "plans-profile:train2go:plan-1",
+          profileId: "plans-profile",
+          source: "train2go",
+          sourceId: "plan-1",
+          date: day,
+          sport: "running",
+          title: "Tempo intervals",
+          status: "pending",
+          description: "4 x 8 min at threshold",
+          fetchedAt: ts,
+        });
+      },
+      { day }
+    );
+
+    // Act
+    await page.reload();
+
+    // Assert
+    await expect(page.getByTestId("no-ai-provider-state")).toBeVisible();
+    await expect(page.getByTestId("first-run-guide")).not.toBeAttached();
+    await expect(page.getByTestId("empty-week-state")).not.toBeAttached();
   });
 });

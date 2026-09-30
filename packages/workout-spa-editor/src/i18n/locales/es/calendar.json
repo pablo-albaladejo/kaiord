@@ -58,6 +58,7 @@
     "body": "Kaiord no guarda tu entrenamiento. Lo lee de tus fuentes, lo estructura y lo devuelve a tu reloj. Tres cosas tienen que ser ciertas antes de que esta semana se llene sola.",
     "manual": "¿No quieres conectar nada aún? Escribe una sesión a mano: todo lo demás sigue funcionando.",
     "addWorkout": "Añadir entreno",
+    "done": "Hecho",
     "steps": {
       "sources": {
         "title": "Conecta de dónde viene tu entrenamiento",

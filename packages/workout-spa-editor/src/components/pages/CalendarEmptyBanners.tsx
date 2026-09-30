@@ -4,11 +4,12 @@
  * Two rules govern what renders:
  *
  * 1. **A profile with no workouts at all gets the first-run guide and nothing
- *    else.** Every branch below it is gated on data existing, so before this
- *    the emptiest possible state rendered nothing at all — the bug. The guide
- *    already names all three dependencies, so repeating them underneath would
- *    say the same thing four times.
- * 2. **The raw sessions get exactly one banner.** With a provider configured
+ *    else** — unless the coach's plans already fill the week: then the user is
+ *    past the first run, and the guide would contradict the cards below it.
+ *    The guide already names all three dependencies (ticking the ones already
+ *    true), so repeating them underneath would say the same thing four times.
+ * 2. **The raw sessions get exactly one banner.** The coach's unstructured
+ *    plans count as raw here: without a key they are stuck as prose too. With a provider configured
  *    that is the batch action; without one it is the banner that names what
  *    the raw sessions cannot do. They are two readings of the same fact, and
  *    only one of them can be acted on.
@@ -23,6 +24,7 @@ import {
   NoAiProviderState,
   NoBridgesState,
 } from "../molecules/CalendarEmptyStates";
+import type { FirstRunProgress } from "../molecules/CalendarEmptyStates/first-run-steps";
 
 export type CalendarEmptyBannersProps = {
   /** Rendered week's id, threaded to EmptyWeekState's back-origin. */
@@ -33,6 +35,10 @@ export type CalendarEmptyBannersProps = {
   hasAiProvider: boolean;
   extensionInstalled: boolean;
   rawCount: number;
+  /** The week's coaching plans no workout answers yet (unstructured prose). */
+  planCount?: number;
+  /** The active profile has a coaching source linked. */
+  sourceLinked?: boolean;
   /** Formatted date of the latest session anywhere, when there is one. */
   latestDate?: string;
   onGoToLatest?: () => void;
@@ -44,20 +50,30 @@ export type CalendarEmptyBannersProps = {
   onBatchCancel: () => void;
 };
 
-export function CalendarEmptyBanners(p: CalendarEmptyBannersProps) {
-  if (!p.hasAnyWorkouts) return <FirstRunGuide weekId={p.weekId} />;
+const progress = (p: CalendarEmptyBannersProps): FirstRunProgress => ({
+  sources: p.sourceLinked === true,
+  aiKey: p.hasAiProvider,
+  bridge: p.extensionInstalled,
+});
 
-  const rawNeedsKey = p.rawCount > 0 && !p.hasAiProvider;
+export function CalendarEmptyBanners(p: CalendarEmptyBannersProps) {
+  const planCount = p.planCount ?? 0;
+  if (!p.hasAnyWorkouts && planCount === 0) {
+    return <FirstRunGuide weekId={p.weekId} done={progress(p)} />;
+  }
+
+  const proseCount = p.rawCount + planCount;
+  const rawNeedsKey = proseCount > 0 && !p.hasAiProvider;
   return (
     <>
-      {!p.hasWeekWorkouts && (
+      {!p.hasWeekWorkouts && planCount === 0 && (
         <EmptyWeekState
           weekId={p.weekId}
           latestDate={p.latestDate}
           onGoToLatest={p.onGoToLatest}
         />
       )}
-      {rawNeedsKey && <NoAiProviderState rawCount={p.rawCount} />}
+      {rawNeedsKey && <NoAiProviderState rawCount={proseCount} />}
       {p.readyCount > 0 && !p.extensionInstalled && (
         <NoBridgesState readyCount={p.readyCount} />
       )}

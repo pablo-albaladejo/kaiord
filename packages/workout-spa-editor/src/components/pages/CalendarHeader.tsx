@@ -13,6 +13,7 @@ import type { useCoachingActivities } from "../../hooks/use-coaching-activities"
 import type { CalendarView } from "../../types/user-preferences";
 import { CoachMoveNotice } from "../molecules/CoachMoveNotice/CoachMoveNotice";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
+import { calendarEmptyBannerProps } from "./calendar-empty-banner-props";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
 import { CalendarNavRow } from "./CalendarNavRow";
 import { SendWeekButton, SendWeekSection } from "./CalendarSendWeek";
@@ -25,6 +26,8 @@ export type CalendarHeaderProps = {
   coaching: ReturnType<typeof useCoachingActivities>;
   view?: CalendarView;
   onViewChange?: (next: CalendarView) => void;
+  /** The week's coaching plans no workout answers yet. */
+  planCount?: number;
 };
 
 export function CalendarHeader({
@@ -32,6 +35,7 @@ export function CalendarHeader({
   coaching,
   view,
   onViewChange,
+  planCount,
 }: CalendarHeaderProps) {
   const latestDate = useLatestSessionDate(s.latestWorkout?.date);
   const profileId = useActiveProfileLive()?.id ?? null;
@@ -51,21 +55,7 @@ export function CalendarHeader({
         />
       )}
       <CalendarEmptyBanners
-        weekId={s.data.weekId}
-        hasAnyWorkouts={s.hasAnyWorkouts}
-        hasWeekWorkouts={s.hasWeekWorkouts}
-        readyCount={s.readyCount}
-        hasAiProvider={s.hasAiProvider}
-        extensionInstalled={s.extensionInstalled}
-        rawCount={s.data.rawCount}
-        latestDate={latestDate}
-        onGoToLatest={s.latestWorkout ? s.handleGoToLatest : undefined}
-        batchMessage={s.batch.message}
-        onDismissBatch={s.batch.dismissMessage}
-        batchIsProcessing={s.batch.isProcessing}
-        batchProgress={s.batch.progress}
-        onBatchProcess={s.batch.requestStart}
-        onBatchCancel={s.batch.cancel}
+        {...calendarEmptyBannerProps(s, coaching, latestDate, planCount)}
       />
       <BatchCostConfirmation
         open={s.batch.pending !== null}

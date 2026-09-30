@@ -58,6 +58,7 @@
     "body": "Kaiord doesn't hold your training. It reads it from your sources, structures it, and sends it back to your watch. Three things have to be true before this week fills itself.",
     "manual": "Not ready to connect anything? Write a session by hand — everything else still works.",
     "addWorkout": "Add workout",
+    "done": "Done",
     "steps": {
       "sources": {
         "title": "Connect where your training comes from",

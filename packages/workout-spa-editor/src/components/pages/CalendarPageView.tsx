@@ -37,6 +37,7 @@ export function CalendarPageView({
           coaching={coaching}
           view={view}
           onViewChange={onViewChange}
+          planCount={Object.values(buckets.soloPlansByDay).flat().length}
         />
         {suggestions.length > 0 && (
           <AutoMatchBanner
