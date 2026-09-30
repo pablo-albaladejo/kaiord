@@ -1,0 +1,47 @@
+## Why
+
+A brand-new user, on a fresh browser profile with the bridges installed, could
+not reach "Send week" on kaiord.com without developer help. Four separate gaps
+stood between a fresh profile and a working week, and each looked like a
+dead end:
+
+- The workout export route to Garmin could not be switched on anywhere. The
+  seed migration only covered profiles that existed when it ran, and the
+  Connections row that names where workouts are "also sent" was display-only.
+  The Send week preflight and the push feedback said "no export route" with no
+  path to one.
+- Linking Train2Go did not open its import routes. The planned-session route
+  was seeded only for profiles linked before the migration ran, so a profile
+  linked afterwards synced nothing (`route-inactive`).
+- The calendar hid "Connect to Train2Go" whenever the profile was not linked,
+  which is exactly the state that needs it. The Connections card said
+  "Connected" from the bridge session alone, whatever the active profile had
+  linked.
+- The first-run guide was static and keyed on the workout count, so a user
+  whose first sync filled the week with coaching plans still read "Nothing here
+  yet" above them.
+
+## What Changes
+
+- The "Also sent to" part of a data type's routing row switches each connected
+  destination whose bridge announces the export capability on or off. Switching
+  preserves the stored mode. The no-export-route messages link to Connections.
+- An explicit link of a source (the Train2Go link flow, or a Connections
+  reconnect) seeds every import route that source feeds, as the registry
+  derives it. It only seeds, so an existing row, disabled or not, is left
+  unchanged.
+- The calendar renders every available coaching source. A source the active
+  profile has not linked offers "Connect to <Label>". A coaching card on
+  Connections says when the source is not linked to the active profile, and
+  offers the link.
+- The first-run guide ticks the steps that are already true and moves its
+  emphasis to the first step still missing. It yields when the week holds
+  coaching plans: without an AI key those plans get the missing-key banner, and
+  the week is not called empty.
+
+## Impact
+
+- `packages/workout-spa-editor`: Connections routing row, Send week preflight,
+  placement feedback, Train2Go connect action, connection actions, calendar nav
+  row, calendar empty banners, first-run guide, and EN/ES locales.
+- No schema change and no Dexie migration.
