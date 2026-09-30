@@ -17,7 +17,7 @@ type ConvertExportProps = { workout: KRD; format: WorkoutFileFormat };
 export function ConvertExport({ workout, format }: ConvertExportProps) {
   const verbs = useTranslate("common");
   const t = useTranslate("editor");
-  const save = useSaveWorkout(workout, format);
+  const save = useSaveWorkout(workout, undefined, format);
   const { toasts, dismiss } = save.toast;
 
   return (

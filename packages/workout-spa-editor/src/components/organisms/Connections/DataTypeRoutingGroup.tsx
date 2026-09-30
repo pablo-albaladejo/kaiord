@@ -14,6 +14,7 @@ type Props = {
   lastSyncedAt: ReadonlyMap<string, string | undefined>;
   options: ReadonlyMap<ManagedDataType, SourceOfTruthOptions>;
   toggles: ReadonlyMap<ManagedDataType, readonly DataTypeRouteToggle[]>;
+  exportToggles: ReadonlyMap<ManagedDataType, readonly DataTypeRouteToggle[]>;
 };
 
 const NO_TOGGLES: readonly DataTypeRouteToggle[] = [];
@@ -25,6 +26,7 @@ export function DataTypeRoutingGroup({
   lastSyncedAt,
   options,
   toggles,
+  exportToggles,
 }: Props) {
   const t = useTranslate("connections");
   const rows = group.types.flatMap((dataType) => byType.get(dataType) ?? []);
@@ -43,6 +45,7 @@ export function DataTypeRoutingGroup({
             lastSyncedAt={lastSyncedAt}
             options={options.get(row.dataType)}
             toggles={toggles.get(row.dataType) ?? NO_TOGGLES}
+            exportToggles={exportToggles.get(row.dataType) ?? NO_TOGGLES}
           />
         ))}
       </div>

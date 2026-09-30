@@ -17,8 +17,8 @@ import {
 import { recordGarminPush } from "../application/record-garmin-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 import type { PersistencePort } from "../ports/persistence-port";
-import { exportGcnWorkout } from "../utils/export-workout-formats";
 import { garminPlacementRequest } from "./garmin-placement-request";
+import { exportRecordGcn } from "./garmin-record-gcn";
 
 export type PlacedRecord = {
   result: PlacementResult;
@@ -36,12 +36,18 @@ export const placeRecord = async (
 ): Promise<PlacedRecord | undefined> => {
   const record = await persistence.workouts.getById(workoutId);
   if (!record?.krd) return undefined;
-  const gcn = await exportGcnWorkout(record.krd);
+  const { krd, profileId } = record;
+  const buildGcn = () => exportRecordGcn(krd, profileId, persistence.profiles);
   const confirmed: { id?: string } = {};
   const result = await pushWorkoutToGarminCalendar(
     placementDeps,
     garminPlacementRequest(
-      { record, gcn, ledgerRepo: placementDeps.ledgerRepo, pushWorkout },
+      {
+        record,
+        buildGcn,
+        ledgerRepo: placementDeps.ledgerRepo,
+        pushWorkout,
+      },
       { onLibraryConfirmed: (id) => (confirmed.id = id) }
     )
   );

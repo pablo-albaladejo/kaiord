@@ -18,10 +18,8 @@ type Props = { profileId: string; byDataType: DataFlowsByType };
  */
 export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
   const t = useTranslate("connections");
-  const { rows, lastSyncedAt, options, toggles } = useDataTypeRouting(
-    profileId,
-    byDataType
-  );
+  const { rows, lastSyncedAt, options, toggles, exportToggles } =
+    useDataTypeRouting(profileId, byDataType);
   const byType = useMemo(
     () =>
       new Map<ManagedDataType, (typeof rows)[number]>(
@@ -50,6 +48,7 @@ export function DataTypeRoutingSection({ profileId, byDataType }: Props) {
             lastSyncedAt={lastSyncedAt}
             options={options}
             toggles={toggles}
+            exportToggles={exportToggles}
           />
         ))}
       </div>

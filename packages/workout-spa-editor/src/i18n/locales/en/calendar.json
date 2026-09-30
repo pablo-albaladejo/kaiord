@@ -58,6 +58,7 @@
     "body": "Kaiord doesn't hold your training. It reads it from your sources, structures it, and sends it back to your watch. Three things have to be true before this week fills itself.",
     "manual": "Not ready to connect anything? Write a session by hand — everything else still works.",
     "addWorkout": "Add workout",
+    "done": "Done",
     "steps": {
       "sources": {
         "title": "Connect where your training comes from",
@@ -112,8 +113,14 @@
     "retry": "Retry",
     "retryIn": "Retry in {{seconds}} s",
     "close": "Close",
+    "paceZones": {
+      "missing-pace-zones": "set your threshold pace in Athlete",
+      "incomplete-pace-zones": "complete your pace zones in Athlete",
+      "unsupported-pace-zone-sport": "pace zones only in running or swimming"
+    },
+    "openConnections": "Open Connections",
     "preflight": {
-      "no-export-route": "Turn on sending workouts to Garmin in Connections, then send the week.",
+      "no-export-route": "Turn on sending workouts to Garmin in Connections (Workout → Also sent to), then send the week.",
       "no-bridge": "Install the Kaiord Garmin Bridge extension, then send the week.",
       "no-session": "Sign in to Garmin Connect in this browser, then send the week.",
       "insecure-context": "The Garmin calendar needs a secure (HTTPS) page. Nothing was sent.",

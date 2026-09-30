@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import { approveAction, denyAction } from "./chat-turn-resume";
-import { sendTurn } from "./chat-turn-runner";
+import { retryTurn, sendTurn } from "./chat-turn-runner";
 import type { ChatTurnCtx, ChatTurnState } from "./chat-turn-types";
 
 const fakeAgent = { sendTurn: vi.fn(), resume: vi.fn() };
@@ -189,5 +189,76 @@ describe("chat-turn-runner", () => {
     // Assert
     expect(states.at(-1)).toBe("error");
     expect(errors.at(-1)).toBe("auth");
+  });
+
+  it("should not duplicate the user message when a failed turn is retried twice", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx, states } = makeCtx(persistence);
+    const failure = new Error("400 invalid_request_error");
+    const SEND_PLUS_TWO_RETRIES = 3;
+    fakeAgent.sendTurn
+      .mockRejectedValueOnce(failure)
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValueOnce({
+        status: "complete",
+        text: "hola!",
+        messages: [],
+      });
+    const history = () => persistence.chatMessages.listByProfile("p1");
+    await sendTurn(ctx, [], "hola");
+
+    // Act
+    await retryTurn(ctx, await history(), "hola");
+    await retryTurn(ctx, await history(), "hola");
+
+    // Assert
+    const userTurns = (await history()).filter((m) => m.role === "user");
+    expect(userTurns.map((m) => m.content)).toEqual(["hola"]);
+    for (const [sent] of fakeAgent.sendTurn.mock.calls)
+      expect(sent).toEqual([{ role: "user", content: "hola" }]);
+    expect(fakeAgent.sendTurn).toHaveBeenCalledTimes(SEND_PLUS_TWO_RETRIES);
+    expect(states.at(-1)).toBe("idle");
+  });
+
+  it("should send the text when the failure happened before the user message was persisted", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence);
+    fakeAgent.sendTurn.mockResolvedValueOnce({
+      status: "complete",
+      text: "hi",
+      messages: [],
+    });
+
+    // Act
+    await retryTurn(ctx, [], "hola");
+
+    // Assert
+    expect(fakeAgent.sendTurn).toHaveBeenCalledWith([
+      { role: "user", content: "hola" },
+    ]);
+    const stored = await persistence.chatMessages.listByProfile("p1");
+    expect(stored.filter((m) => m.role === "user")).toHaveLength(1);
+  });
+
+  it("should send the text when the persisted last user message differs from it", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence);
+    fakeAgent.sendTurn
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce({ status: "complete", text: "ok", messages: [] });
+    await sendTurn(ctx, [], "first");
+    const history = await persistence.chatMessages.listByProfile("p1");
+
+    // Act
+    await retryTurn(ctx, history, "second");
+
+    // Assert
+    expect(fakeAgent.sendTurn).toHaveBeenLastCalledWith([
+      { role: "user", content: "first" },
+      { role: "user", content: "second" },
+    ]);
   });
 });

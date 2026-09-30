@@ -1,3 +1,5 @@
+import { Link } from "wouter";
+
 import type { PlacementResult } from "../../../application/garmin-placement/placement-result";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -7,6 +9,8 @@ import { Button } from "../../atoms/Button";
 import { formatDateLabel } from "../TemplatePickerDialog/format-date-label";
 import { placementMessage, type PlacementTone } from "./placement-message";
 import { UncertainActions } from "./UncertainActions";
+
+const CONNECTIONS_HREF = "/settings/connections";
 
 export const GARMIN_BRIDGE_STORE_URL =
   "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe";
@@ -63,6 +67,11 @@ export const PlacementFeedback: React.FC<PlacementFeedbackProps> = (props) => {
             {t("placement.updateExtension")}
           </a>
         )}
+      {result.kind === "failed" && result.reason === "no-export-route" && (
+        <Link className="underline" href={CONNECTIONS_HREF}>
+          {t("placement.openConnections")}
+        </Link>
+      )}
       {removable.map((e) => (
         <Button
           key={e.workoutScheduleId}

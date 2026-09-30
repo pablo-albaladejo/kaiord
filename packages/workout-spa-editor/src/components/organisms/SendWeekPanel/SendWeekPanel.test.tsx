@@ -50,6 +50,19 @@ describe("SendWeekPanel", () => {
     );
   });
 
+  it("should point a missing export route at Connections", () => {
+    // Arrange
+    const state = { phase: "blocked", failure: "no-export-route" } as const;
+
+    // Act
+    renderPanel([], { state });
+
+    // Assert
+    expect(
+      screen.getByRole("link", { name: "Open Connections" })
+    ).toHaveAttribute("href", "/settings/connections");
+  });
+
   it("should link each item to its workout page with its status", () => {
     // Arrange
     const outcomes = [item("w-1", { kind: "scheduled" }), item("w-2")];
@@ -157,4 +170,19 @@ describe("SendWeekPanel", () => {
       expect(screen.getByText(label, { exact: false })).toBeInTheDocument();
     }
   );
+
+  it.each([
+    ["missing-pace-zones", "set your threshold pace in Athlete"],
+    ["incomplete-pace-zones", "complete your pace zones in Athlete"],
+    ["unsupported-pace-zone-sport", "pace zones only in running or swimming"],
+  ] as const)("should tell the athlete how to fix a %s item", (reason, fix) => {
+    // Arrange
+    const outcome = item("w-1", failed(reason, false));
+
+    // Act
+    renderPanel([outcome]);
+
+    // Assert
+    expect(screen.getByText(`Failed (${fix})`)).toBeInTheDocument();
+  });
 });

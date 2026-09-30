@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts";
+import { resolveExportProfile } from "../../../hooks/resolve-export-profile";
 import { useToast } from "../../../hooks/use-toast";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
@@ -9,11 +10,13 @@ import { createSaveHandler } from "./save-handler";
 
 /**
  * Custom hook for save functionality with format selection.
+ * `ownerProfileId`: the profile owning the persisted record, if any.
  * `initialFormat` preselects the export format (the converter deep link
  * passes its `to`); the user can still change it.
  */
 export function useSaveWorkout(
   workout: KRD,
+  ownerProfileId?: string,
   initialFormat: WorkoutFileFormat = "krd"
 ) {
   const [saveErrors, setSaveErrors] = useState<Array<ValidationError> | null>(
@@ -37,7 +40,8 @@ export function useSaveWorkout(
     success,
     showError,
     (format) => analytics.event("workout-exported", { format }),
-    t
+    t,
+    () => resolveExportProfile(ownerProfileId)
   );
 
   const clearErrors = () => setSaveErrors(null);

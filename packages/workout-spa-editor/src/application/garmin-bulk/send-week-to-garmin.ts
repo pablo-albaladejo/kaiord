@@ -8,6 +8,7 @@
  * An item is reported on the date it was placed for, which may differ from
  * its date at selection (a coach move in between).
  */
+import { logGarminPushFailure } from "../garmin-placement/log-garmin-push-failure";
 import type {
   PlacementResult,
   PlacementResultKind,
@@ -48,7 +49,8 @@ const pushSafely = async (
 ): Promise<BulkItemResult> => {
   try {
     return await deps.pushOne(workoutId);
-  } catch {
+  } catch (error) {
+    logGarminPushFailure(error);
     return { result: failed("library-push-failed", true) };
   }
 };

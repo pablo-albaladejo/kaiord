@@ -5,6 +5,7 @@
  * directly (no react-i18next), so it defaults to English outside a provider
  * and keeps `en`-mode assertions unchanged.
  */
+import { isModelNotFoundError } from "@kaiord/ai/providers";
 import type { Locale } from "@kaiord/i18n";
 
 import enErrors from "./locales/en/errors.json";
@@ -51,6 +52,7 @@ type AiErrorLike = {
 /**
  * Localized copy for an AI failure by its stable `reason` (e.g. from
  * `@kaiord/ai`'s `AiParsingError`), interpolating any structured `details`.
+ * A provider rejecting the model as unknown points the user at Settings → AI.
  * Falls back to the upstream English message, then to a generic string.
  */
 export function localizeAiError(error: unknown, locale: Locale = "en"): string {
@@ -58,6 +60,7 @@ export function localizeAiError(error: unknown, locale: Locale = "en"): string {
   const message = typeof err.message === "string" ? err.message : undefined;
   const reason = typeof err.reason === "string" ? err.reason : undefined;
   const generic = ERRORS[locale].ai.generationFailed;
+  if (isModelNotFoundError(error)) return ERRORS[locale].ai.modelUnavailable;
   if (!reason) return message ?? generic;
   const table = ERRORS[locale].ai as Record<string, string>;
   const enTable = ERRORS.en.ai as Record<string, string>;
