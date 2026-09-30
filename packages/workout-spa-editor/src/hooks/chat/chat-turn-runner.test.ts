@@ -241,4 +241,24 @@ describe("chat-turn-runner", () => {
     const stored = await persistence.chatMessages.listByProfile("p1");
     expect(stored.filter((m) => m.role === "user")).toHaveLength(1);
   });
+
+  it("should send the text when the persisted last user message differs from it", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence);
+    fakeAgent.sendTurn
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce({ status: "complete", text: "ok", messages: [] });
+    await sendTurn(ctx, [], "first");
+    const history = await persistence.chatMessages.listByProfile("p1");
+
+    // Act
+    await retryTurn(ctx, history, "second");
+
+    // Assert
+    expect(fakeAgent.sendTurn).toHaveBeenLastCalledWith([
+      { role: "user", content: "first" },
+      { role: "user", content: "second" },
+    ]);
+  });
 });

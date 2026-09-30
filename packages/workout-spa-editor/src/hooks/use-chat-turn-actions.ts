@@ -48,7 +48,8 @@ export const useChatTurnActions = (
   const retry = useCallback(() => {
     const text = lastInputRef.current;
     if (!ctx || state === "streaming" || !text.trim()) return;
+    analytics.event("chat-turn-retried");
     void retryTurn(ctx, messages, text);
-  }, [ctx, state, messages]);
+  }, [ctx, state, messages, analytics]);
   return { send, approve, deny, retry };
 };

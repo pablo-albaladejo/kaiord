@@ -104,7 +104,7 @@ describe("useChatTurn analytics", () => {
     expect(mockApproveAction).toHaveBeenCalledTimes(1);
   });
 
-  it("should retry through retryTurn without re-sending or re-counting the message", () => {
+  it("should retry through retryTurn and count it as a retry, not a new message", () => {
     // Arrange
     const { result } = renderHook(() => useChatTurn(args));
     act(() => result.current.send("hola"));
@@ -115,6 +115,7 @@ describe("useChatTurn analytics", () => {
     // Assert
     expect(mockSendTurn).toHaveBeenCalledTimes(1);
     expect(mockRetryTurn).toHaveBeenCalledWith(expect.anything(), [], "hola");
-    expect(mockEvent).toHaveBeenCalledTimes(1);
+    expect(mockEvent).toHaveBeenCalledTimes(2);
+    expect(mockEvent).toHaveBeenLastCalledWith("chat-turn-retried");
   });
 });

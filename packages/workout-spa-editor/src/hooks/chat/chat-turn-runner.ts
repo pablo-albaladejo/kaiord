@@ -61,8 +61,8 @@ export const sendTurn = async (
  * Retries the last turn. A failed `sendTurn` has usually already persisted
  * the user message, so it is part of `history` — re-sending it through
  * `sendTurn` would append (and send) it a second time. When the replayable
- * history already ends with that user message, re-run the agent on it as-is;
- * otherwise (the failure happened before the append) fall back to a send.
+ * history already ends with that exact user message, re-run the agent on it
+ * as-is; otherwise (the failure happened before the append) send it.
  */
 export const retryTurn = async (
   ctx: ChatTurnCtx,
@@ -70,6 +70,8 @@ export const retryTurn = async (
   text: string
 ): Promise<void> => {
   const replay = recordsToModelMessages(history);
-  if (replay.at(-1)?.role !== "user") return sendTurn(ctx, history, text);
+  const last = replay.at(-1);
+  if (last?.role !== "user" || last.content !== text)
+    return sendTurn(ctx, history, text);
   await runAgent(ctx, () => buildAndSend(ctx, replay));
 };
