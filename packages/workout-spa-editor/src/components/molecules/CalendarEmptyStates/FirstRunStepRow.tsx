@@ -1,30 +1,31 @@
-import { useLocation } from "wouter";
-
 import { useTranslate } from "../../../i18n/use-translate";
 import type { FirstRunStep } from "./first-run-steps";
+import { FirstRunStepCta } from "./FirstRunStepCta";
 
 export type FirstRunStepRowProps = {
   step: FirstRunStep;
   ordinal: number;
-  /** The first step is the one that unblocks the rest, so it carries the ink. */
+  /** The first step still missing unblocks the rest, so it carries the ink. */
   primary: boolean;
+  /** Already true for this profile: the row reads as settled, not as a task. */
+  done: boolean;
 };
 
 const ROW = "flex flex-wrap items-center gap-3 rounded-xl border p-4";
-const CTA = "shrink-0 rounded-lg px-3.5 py-2.5 text-[13px] font-medium";
 
 export function FirstRunStepRow({
   step,
   ordinal,
   primary,
+  done,
 }: FirstRunStepRowProps) {
   const t = useTranslate("calendar");
-  const [, navigate] = useLocation();
   const base = `firstRun.steps.${step.key}`;
 
   return (
     <li
       data-testid={`first-run-step-${step.key}`}
+      data-done={done}
       className={`${ROW} ${primary ? "border-edge bg-surface-elevated" : "border-edge-soft bg-surface-page"}`}
     >
       <span
@@ -47,28 +48,7 @@ export function FirstRunStepRow({
           {t(`${base}.consequence`)}
         </span>
       </div>
-      {step.external ? (
-        <a
-          href={step.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${CTA} border border-edge text-ink-body hover:border-edge-strong hover:text-ink-strong`}
-        >
-          {t(`${base}.cta`)}
-        </a>
-      ) : (
-        <button
-          type="button"
-          onClick={() => navigate(step.href)}
-          className={
-            primary
-              ? `${CTA} bg-accent text-surface hover:opacity-90`
-              : `${CTA} border border-edge text-ink-body hover:border-edge-strong hover:text-ink-strong`
-          }
-        >
-          {t(`${base}.cta`)}
-        </button>
-      )}
+      <FirstRunStepCta step={step} primary={primary} done={done} />
     </li>
   );
 }

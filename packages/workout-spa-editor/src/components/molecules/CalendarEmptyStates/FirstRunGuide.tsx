@@ -12,17 +12,21 @@ import { useLocation } from "wouter";
 import { useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
-import { FIRST_RUN_STEPS } from "./first-run-steps";
+import { FIRST_RUN_STEPS, type FirstRunProgress } from "./first-run-steps";
 import { FirstRunStepRow } from "./FirstRunStepRow";
 
 export type FirstRunGuideProps = {
   /** The rendered week's id, carried on `?week=` so Back returns here. */
   weekId: string;
+  /** Steps already true; a done step shows a check instead of its CTA. */
+  done?: FirstRunProgress;
 };
 
-export function FirstRunGuide({ weekId }: FirstRunGuideProps) {
+export function FirstRunGuide({ weekId, done = {} }: FirstRunGuideProps) {
   const t = useTranslate("calendar");
   const [, navigate] = useLocation();
+  // The ink goes to the first step still missing, not always to step one.
+  const next = FIRST_RUN_STEPS.findIndex((step) => !done[step.key]);
 
   return (
     <section
@@ -43,7 +47,8 @@ export function FirstRunGuide({ weekId }: FirstRunGuideProps) {
             key={step.key}
             step={step}
             ordinal={index + 1}
-            primary={index === 0}
+            primary={index === next}
+            done={done[step.key] === true}
           />
         ))}
       </ol>

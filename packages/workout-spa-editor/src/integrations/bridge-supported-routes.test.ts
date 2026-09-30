@@ -13,6 +13,12 @@ describe("bridgeSupportsRoute", () => {
       expected: true,
     },
     {
+      bridgeId: "whoop-bridge",
+      dataType: "weight" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+      expected: false,
+    },
+    {
       bridgeId: "tanita-bridge",
       dataType: "weight" as ManagedDataType,
       direction: "import" as IntegrationPolicyDirection,

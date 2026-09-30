@@ -129,17 +129,18 @@ describe("eligibleBridgeIds", () => {
       direction: "export" as IntegrationPolicyDirection,
       expected: ["garmin-bridge"],
     },
-    // `read:body` is shared, so trainingpeaks-bridge announces it too — but it
-    // only serves the weight channel, so it must stay out of body-composition.
+    // `read:body` is shared, so trainingpeaks-bridge and whoop-bridge announce
+    // it too — but TrainingPeaks only serves the weight channel and WHOOP has
+    // no scale, so neither may be offered body-composition, nor WHOOP weight.
     {
       dataType: "body-composition" as ManagedDataType,
       direction: "import" as IntegrationPolicyDirection,
-      expected: ["tanita-bridge", "whoop-bridge"],
+      expected: ["tanita-bridge"],
     },
     {
       dataType: "weight" as ManagedDataType,
       direction: "import" as IntegrationPolicyDirection,
-      expected: ["tanita-bridge", "trainingpeaks-bridge", "whoop-bridge"],
+      expected: ["tanita-bridge", "trainingpeaks-bridge"],
     },
     // "planned-session" declares no export token at all.
     {

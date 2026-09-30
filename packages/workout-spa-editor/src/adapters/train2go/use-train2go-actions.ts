@@ -8,10 +8,13 @@ import type { CoachingTransport } from "../../application/coaching/coaching-tran
 import { syncWeek } from "../../application/coaching/sync-week";
 import { useCoachMoveNoticeActions } from "../../contexts/coach-move-notice-context";
 import type { PersistencePort } from "../../ports/persistence-port";
+import { seedBridgeRoutes } from "../bridge/seed-bridge-routes";
 import { emitLinkResult, emitSyncResult } from "./coaching-telemetry";
 import { shouldFanOutZones } from "./should-fan-out-zones";
 
 export { useExpandCallback } from "./use-expand-callback";
+
+const TRAIN2GO_BRIDGE = "train2go-bridge";
 
 export const useSyncCallback = (
   p: PersistencePort,
@@ -72,11 +75,9 @@ export const useConnectCallback = (
         ctrl.signal
       );
       emitLinkResult(a, t.source, r);
-      if (
-        r.ok &&
-        runZonesSync &&
-        (await shouldFanOutZones(p, t.source, profileId))
-      ) {
+      if (!r.ok) return;
+      await seedBridgeRoutes(p, profileId, TRAIN2GO_BRIDGE);
+      if (runZonesSync && (await shouldFanOutZones(p, t.source, profileId))) {
         await runZonesSync(profileId).catch(() => undefined);
       }
     },

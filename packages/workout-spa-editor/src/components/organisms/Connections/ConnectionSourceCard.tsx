@@ -8,6 +8,7 @@ import { ConnectionBridgeLine } from "./ConnectionBridgeLine";
 import { ConnectionCardAction } from "./ConnectionCardAction";
 import { ConnectionCardHeader } from "./ConnectionCardHeader";
 import { ConnectionManagePanel } from "./ConnectionManagePanel";
+import { ConnectionProfileLink } from "./ConnectionProfileLink";
 import { ConnectionRouteChips } from "./ConnectionRouteChips";
 
 type Props = {
@@ -47,6 +48,10 @@ export function ConnectionSourceCard({ source, profileId, byDataType }: Props) {
         }
       />
       <ConnectionBridgeLine source={source} />
+      {/* Planned sessions are the one per-profile-linked flow (coaching). */}
+      {source.importTypes.includes("planned-session") && (
+        <ConnectionProfileLink sourceId={source.id} name={source.name} />
+      )}
       <ConnectionRouteChips source={source} />
       {open && manageable && (
         <ConnectionManagePanel

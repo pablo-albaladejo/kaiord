@@ -317,13 +317,15 @@ describe("DataTypeRoutingSection", () => {
 
   it("should store a ranked order led by the picked source", () => {
     // Arrange
-    // Writer: two Data Hub weight import cells (WHOOP and Tanita both announce
-    // read:body and both serve weight), union by default. Tanita is picked
-    // second on purpose: an order stored in candidate sequence would still
-    // look correct if the pick already happened to lead it.
+    // Writer: two Data Hub weight import cells (TrainingPeaks and Tanita both
+    // announce read:body and both serve weight), union by default. Tanita is
+    // picked second on purpose: an order stored in candidate sequence would
+    // still look correct if the pick already happened to lead it.
     renderSection(
       flows({
-        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
+        weight: {
+          import: [route("trainingpeaks-bridge"), route("tanita-bridge")],
+        },
       })
     );
     fireEvent.click(screen.getByTestId("routing-change-weight"));
@@ -338,7 +340,7 @@ describe("DataTypeRoutingSection", () => {
       profileId: PROFILE_ID,
       dataType: "weight",
       mode: "priority",
-      sourceOrder: ["tanita-bridge", "whoop-bridge", "manual"],
+      sourceOrder: ["tanita-bridge", "trainingpeaks-bridge", "manual"],
     });
   });
 
@@ -592,6 +594,110 @@ describe("DataTypeRoutingSection", () => {
     expect(row).not.toHaveTextContent("Change");
     expect(
       screen.queryByTestId("routing-change-sleep")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should offer a connected Garmin a switch to start receiving workouts", async () => {
+    // Arrange
+    // A brand-new profile never ran the seed migration, so no export policy
+    // exists: before this control the row read "Nowhere" with no way out and
+    // "Send week" was never offered.
+    online("garmin-bridge", "write:workouts");
+    renderSection();
+    const toggle = screen.getByTestId("routing-export-workout-garmin");
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+
+    // Act
+    fireEvent.click(toggle);
+
+    // Assert
+    await waitFor(() => expect(state.policyPut).toHaveBeenCalled());
+    expect(state.policyPut).toHaveBeenCalledWith(
+      expect.objectContaining({
+        profileId: PROFILE_ID,
+        dataType: "workout",
+        bridgeId: "garmin-bridge",
+        direction: "export",
+        mode: "auto",
+        enabled: true,
+      })
+    );
+  });
+
+  it("should switch an export route off and keep its stored mode", async () => {
+    // Arrange
+    online("garmin-bridge", "write:workouts");
+    state.findByNaturalKey = vi.fn(async () => ({
+      id: "00000000-0000-4000-8000-0000000000b2",
+      profileId: PROFILE_ID,
+      dataType: "workout",
+      bridgeId: "garmin-bridge",
+      direction: "export",
+      mode: "manual",
+      enabled: true,
+      updatedAt: "2026-09-01T00:00:00.000Z",
+    }));
+    renderSection(flows({ workout: { export: [route("garmin-bridge")] } }));
+    const toggle = screen.getByTestId("routing-export-workout-garmin");
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+
+    // Act
+    fireEvent.click(toggle);
+
+    // Assert
+    await waitFor(() => expect(state.policyPut).toHaveBeenCalled());
+    expect(state.policyPut).toHaveBeenCalledWith(
+      expect.objectContaining({
+        direction: "export",
+        mode: "manual",
+        enabled: false,
+      })
+    );
+  });
+
+  it("should not offer an export switch to a bridge that cannot export", () => {
+    // Arrange
+    // Train2Go announces only its read token; offering it as a workout
+    // destination would claim a route the registry says cannot exist.
+    online("train2go-bridge", "read:planned-sessions");
+    renderSection();
+
+    // Act
+    const row = screen.getByTestId("routing-row-workout");
+
+    // Assert
+    expect(
+      screen.queryByTestId("routing-export-workout-train2go")
+    ).not.toBeInTheDocument();
+    expect(row).toHaveTextContent("Nowhere");
+  });
+
+  it("should keep reporting Nowhere beside the switches until one is on", () => {
+    // Arrange
+    // The spec's "sent nowhere" report is what the row says while no route
+    // is on; an off switch alone would leave the reader to infer it.
+    online("garmin-bridge", "write:workouts");
+
+    // Act
+    renderSection();
+
+    // Assert
+    expect(screen.getByTestId("routing-nowhere-workout")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("routing-export-workout-garmin")
+    ).toBeInTheDocument();
+  });
+
+  it("should stop reporting Nowhere once a destination is on", () => {
+    // Arrange
+    online("garmin-bridge", "write:workouts");
+
+    // Act
+    renderSection(flows({ workout: { export: [route("garmin-bridge")] } }));
+
+    // Assert
+    expect(
+      screen.queryByTestId("routing-nowhere-workout")
     ).not.toBeInTheDocument();
   });
 });

@@ -81,6 +81,7 @@
       "bridge-outdated": "In your Garmin library, with no date: update the Kaiord Garmin Bridge extension to place it on the calendar."
     },
     "updateExtension": "Update the extension",
+    "openConnections": "Open Connections",
     "recordDeletedOn": "This workout was deleted while it was being sent. It may still be on your Garmin calendar on {{date}}: remove it in Garmin Connect.",
     "failed": {
       "busy": "This workout is already being sent. Try again once that send ends.",
@@ -94,7 +95,7 @@
       "needs-reauth": "Sign in to Garmin Connect again, then retry.",
       "deadline-before-send": "The extension timed out before sending. Try again.",
       "library-push-failed": "The workout could not be sent to Garmin.",
-      "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Settings.",
+      "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Connections, under Workout → Also sent to.",
       "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish."
     }
   }

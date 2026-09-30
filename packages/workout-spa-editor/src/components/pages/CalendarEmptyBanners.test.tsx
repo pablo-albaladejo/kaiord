@@ -10,6 +10,7 @@ import {
 
 const RAW_COUNT = 2;
 const READY_COUNT = 3;
+const PLAN_COUNT = 3;
 
 const props = (
   overrides: Partial<CalendarEmptyBannersProps> = {}
@@ -21,6 +22,7 @@ const props = (
   hasAiProvider: true,
   extensionInstalled: true,
   rawCount: 0,
+  hasAnyPlans: false,
   batchMessage: null,
   onDismissBatch: vi.fn(),
   batchIsProcessing: false,
@@ -115,5 +117,100 @@ describe("CalendarEmptyBanners", () => {
 
     // Assert
     expect(screen.getByTestId("no-bridges-state")).toBeInTheDocument();
+  });
+  it("should hand a first run whose week has coach plans to the missing-key banner", () => {
+    // Arrange
+
+    // Act
+    renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      hasAiProvider: false,
+      planCount: PLAN_COUNT,
+      hasAnyPlans: true,
+    });
+
+    // Assert
+    expect(screen.queryByTestId("first-run-guide")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("empty-week-state")).not.toBeInTheDocument();
+    expect(screen.getByTestId("no-ai-provider-state")).toHaveTextContent(
+      "3 sessions arrived as prose"
+    );
+  });
+
+  it("should not call a week of coach plans empty once a key exists", () => {
+    // Arrange
+
+    // Act
+    const { container } = renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      planCount: PLAN_COUNT,
+      hasAnyPlans: true,
+    });
+
+    // Assert
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("should tick the first-run steps that are already true", () => {
+    // Arrange
+
+    // Act
+    renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      sourceLinked: true,
+      hasAiProvider: false,
+      extensionInstalled: true,
+    });
+
+    // Assert
+    expect(screen.getByTestId("first-run-step-sources")).toHaveAttribute(
+      "data-done",
+      "true"
+    );
+    expect(screen.getByTestId("first-run-step-aiKey")).toHaveAttribute(
+      "data-done",
+      "false"
+    );
+    expect(
+      screen.getByTestId("first-run-step-bridge-done")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Add a key" })
+    ).toBeInTheDocument();
+  });
+
+  it("should not greet a coached profile with the guide on a week without plans", () => {
+    // Arrange
+    // The coach's plans sit in another week: the user is past the first run,
+    // and this week is simply empty.
+
+    // Act
+    renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      planCount: 0,
+      hasAnyPlans: true,
+    });
+
+    // Assert
+    expect(screen.queryByTestId("first-run-guide")).not.toBeInTheDocument();
+    expect(screen.getByTestId("empty-week-state")).toBeInTheDocument();
+  });
+
+  it("should render nothing while it cannot yet tell whether the profile has plans", () => {
+    // Arrange
+
+    // Act
+    const { container } = renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      hasAnyPlans: undefined,
+    });
+
+    // Assert
+    expect(container).toBeEmptyDOMElement();
   });
 });

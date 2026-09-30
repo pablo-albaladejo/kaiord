@@ -32,3 +32,21 @@ export function useLatestWorkoutLive(
 export function useAiProviderCountLive(): number {
   return useLiveQuery(() => db.table("aiProviders").count(), []) ?? 0;
 }
+
+/** Whether the profile holds any coaching plan at all, in any week; undefined
+    while the query loads, so callers can wait rather than guess. */
+export function useHasCoachingPlansLive(
+  profileId: string | null
+): boolean | undefined {
+  return useLiveQuery(
+    async () =>
+      profileId
+        ? (await db
+            .table("coachingActivities")
+            .where("[profileId+date]")
+            .between([profileId, ""], [profileId, "\uffff"])
+            .count()) > 0
+        : false,
+    [profileId]
+  );
+}

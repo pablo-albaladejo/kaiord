@@ -124,6 +124,19 @@ describe("PlacementFeedback", () => {
     expect(screen.getByRole("button", { name: "Send anyway" })).toBeVisible();
   });
 
+  it("should link to Connections when sending to Garmin is switched off", () => {
+    // Arrange
+    const result = failed("no-export-route", false);
+
+    // Act
+    renderFeedback(result);
+
+    // Assert
+    expect(
+      screen.getByRole("link", { name: "Open Connections" })
+    ).toHaveAttribute("href", "/settings/connections");
+  });
+
   it("should link to the store when the bridge is outdated", () => {
     // Arrange
     const result: PlacementResult = {

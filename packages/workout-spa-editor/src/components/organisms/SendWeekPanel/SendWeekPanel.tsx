@@ -8,6 +8,7 @@ import type { SendWeekState } from "../../../hooks/send-week/use-send-week";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 import { SendWeekItem } from "./SendWeekItem";
+import { SendWeekPreflight } from "./SendWeekPreflight";
 import { SendWeekSummary } from "./SendWeekSummary";
 import { useRetryCountdown } from "./use-retry-countdown";
 
@@ -35,7 +36,7 @@ export function SendWeekPanel(p: SendWeekPanelProps) {
       className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-surface p-3.5 text-[13px] text-ink-body"
     >
       {p.state.phase === "blocked" ? (
-        <p role="status">{t(`sendWeek.preflight.${p.state.failure}`)}</p>
+        <SendWeekPreflight failure={p.state.failure} />
       ) : (
         <>
           <p role="status">

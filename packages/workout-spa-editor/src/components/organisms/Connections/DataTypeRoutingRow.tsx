@@ -13,6 +13,7 @@ type Props = {
   lastSyncedAt: ReadonlyMap<string, string | undefined>;
   options: SourceOfTruthOptions | undefined;
   toggles: readonly DataTypeRouteToggle[];
+  exportToggles: readonly DataTypeRouteToggle[];
 };
 
 /* Raised rather than tinted, for the same reason the source card is: a row
@@ -33,6 +34,7 @@ export function DataTypeRoutingRow({
   lastSyncedAt,
   options,
   toggles,
+  exportToggles,
 }: Props) {
   const t = useTranslate("connections");
   const stalled = row.origin.kind === "rankedUnavailable";
@@ -64,7 +66,12 @@ export function DataTypeRoutingRow({
       />
 
       {row.exportable && (
-        <RoutingExportTargets dataType={row.dataType} sentTo={row.sentTo} />
+        <RoutingExportTargets
+          dataType={row.dataType}
+          profileId={profileId}
+          sentTo={row.sentTo}
+          toggles={exportToggles}
+        />
       )}
 
       {canChange && options !== undefined && (

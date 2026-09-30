@@ -47,6 +47,11 @@ export type DataTypeRouting = {
     ManagedDataType,
     readonly DataTypeRouteToggle[]
   >;
+  /** Which destinations MAY receive each type, and whether each is on. */
+  readonly exportToggles: ReadonlyMap<
+    ManagedDataType,
+    readonly DataTypeRouteToggle[]
+  >;
 };
 
 export const useDataTypeRouting = (
@@ -82,5 +87,10 @@ export const useDataTypeRouting = (
     [byDataType, signals]
   );
 
-  return { rows, lastSyncedAt, options, toggles };
+  const exportToggles = useMemo(
+    () => togglesByType(byDataType, INTEGRATION_REGISTRY, signals, "export"),
+    [byDataType, signals]
+  );
+
+  return { rows, lastSyncedAt, options, toggles, exportToggles };
 };

@@ -5,6 +5,7 @@
  */
 
 import { expect, test } from "./fixtures/base";
+import { seedLinkedProfileWithPlans } from "./helpers/seed-coaching-plans";
 import {
   clearDexie,
   getWeekDates,
@@ -14,6 +15,8 @@ import {
 } from "./helpers/seed-dexie";
 
 const TWO_WEEKS_AGO = -2;
+const PLAN_DAY_INDEX = 2;
+const PLANS_PROFILE_ID = "plans-profile";
 
 // Post-redesign the week calendar lives at /calendar/:weekId (bare
 // /calendar is the Today page). Empty-state assertions target the
@@ -113,5 +116,45 @@ test.describe("Calendar Empty States", () => {
     await expect(banner).toBeVisible();
     await banner.getByRole("button", { name: /Add workout/i }).click();
     await page.waitForURL(/\/workout\/new/);
+  });
+
+  test("should hand a week of coach plans to the missing-key banner, not the guide", async ({
+    page,
+  }) => {
+    // Arrange
+    // A synced coaching plan is not a workout until it is structured, so a
+    // new user whose first sync filled the week had zero workouts and still
+    // saw "Nothing here yet" above their coach's sessions.
+    await seedLinkedProfileWithPlans(page, {
+      profileId: PLANS_PROFILE_ID,
+      dates: [getWeekDates(0)[PLAN_DAY_INDEX]],
+    });
+
+    // Act
+    await page.reload();
+
+    // Assert
+    await expect(page.getByTestId("no-ai-provider-state")).toBeVisible();
+    await expect(page.getByTestId("first-run-guide")).not.toBeAttached();
+    await expect(page.getByTestId("empty-week-state")).not.toBeAttached();
+  });
+
+  test("should not show the guide to a coached profile on a week without plans", async ({
+    page,
+  }) => {
+    // Arrange
+    // The coach's plans sit two weeks back: the user is past the first run,
+    // so the current week reads as empty rather than as a fresh start.
+    await seedLinkedProfileWithPlans(page, {
+      profileId: PLANS_PROFILE_ID,
+      dates: [getWeekDates(TWO_WEEKS_AGO)[PLAN_DAY_INDEX]],
+    });
+
+    // Act
+    await page.reload();
+
+    // Assert
+    await expect(page.getByTestId("empty-week-state")).toBeVisible();
+    await expect(page.getByTestId("first-run-guide")).not.toBeAttached();
   });
 });

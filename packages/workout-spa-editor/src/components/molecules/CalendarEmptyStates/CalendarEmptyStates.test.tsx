@@ -65,6 +65,36 @@ describe("FirstRunGuide", () => {
     // Assert
     expect(history.at(-1)).toContain("/workout/new");
   });
+
+  it("should emphasise the bridge link when it is the first step still missing", () => {
+    // Arrange
+    const done = { sources: true, aiKey: true };
+
+    // Act
+    render(withRouter(<FirstRunGuide weekId="2026-W23" done={done} />));
+
+    // Assert
+    const bridge = screen.getByRole("link", { name: "Install" });
+    const aiKey = screen.getByTestId("first-run-step-aiKey-done");
+    expect(bridge).toHaveClass("bg-accent");
+    expect(aiKey).toBeInTheDocument();
+  });
+
+  it("should not emphasise the bridge link while an earlier step is missing", () => {
+    // Arrange
+    const done = { sources: true };
+
+    // Act
+    render(withRouter(<FirstRunGuide weekId="2026-W23" done={done} />));
+
+    // Assert
+    expect(screen.getByRole("link", { name: "Install" })).not.toHaveClass(
+      "bg-accent"
+    );
+    expect(screen.getByRole("button", { name: "Add a key" })).toHaveClass(
+      "bg-accent"
+    );
+  });
 });
 
 describe("EmptyWeekState", () => {

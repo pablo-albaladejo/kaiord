@@ -50,6 +50,19 @@ describe("SendWeekPanel", () => {
     );
   });
 
+  it("should point a missing export route at Connections", () => {
+    // Arrange
+    const state = { phase: "blocked", failure: "no-export-route" } as const;
+
+    // Act
+    renderPanel([], { state });
+
+    // Assert
+    expect(
+      screen.getByRole("link", { name: "Open Connections" })
+    ).toHaveAttribute("href", "/settings/connections");
+  });
+
   it("should link each item to its workout page with its status", () => {
     // Arrange
     const outcomes = [item("w-1", { kind: "scheduled" }), item("w-2")];
