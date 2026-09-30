@@ -84,7 +84,11 @@
     "savedDescription": "«{{name}}» se ha guardado como {{format}}",
     "exportFailedTitle": "Error de exportación",
     "exportFailedFallback": "No se pudo exportar el entreno",
-    "missingPaceZones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN."
+    "paceZones": {
+      "missing-pace-zones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN.",
+      "incomplete-pace-zones": "Este entreno usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",
+      "unsupported-pace-zone-sport": "Solo se pueden exportar zonas de ritmo como GCN en entrenos de carrera o natación."
+    }
   },
   "saveError": {
     "title": "Error al guardar",

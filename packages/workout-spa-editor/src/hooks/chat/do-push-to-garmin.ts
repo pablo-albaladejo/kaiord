@@ -5,7 +5,8 @@
  * `no_active_export_route` tool error. A library push that lost to a run
  * already in flight is `push_in_progress`, one the bridge failed is
  * `push_failed`, and a workout whose pace zone targets the profile cannot
- * resolve is `missing_pace_zones`, so this never throws for any of them.
+ * resolve is `missing_pace_zones`, `incomplete_pace_zones` or
+ * `unsupported_pace_zone_sport`, so this never throws for any of them.
  *
  * Otherwise the result carries `calendar`: the placement's kind, an
  * app-authored enum, with a `failed` one's `reason`. Any exception on this
@@ -17,13 +18,32 @@
 import { NoActiveExportRouteError } from "../../application/export/execute-workout-push";
 import { logGarminPushFailure } from "../../application/garmin-placement/log-garmin-push-failure";
 import type { PlacementResult } from "../../application/garmin-placement/placement-result";
+import { isPaceZonesReason } from "../../utils/pace-zones-unavailable-error";
 import { placeRecord } from "../garmin-place-record";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
 
-const MISSING_PACE_ZONES =
-  "The workout uses pace zone targets, but the athlete's profile has no " +
-  "pace zones for its sport. Ask the athlete to set their threshold pace " +
-  "in Athlete, then send it again.";
+const PACE_ZONE_ERRORS = {
+  "missing-pace-zones": {
+    error: "missing_pace_zones",
+    message:
+      "The workout uses pace zone targets, but the athlete's profile has " +
+      "neither pace zones nor a threshold pace for its sport. Ask the " +
+      "athlete to set their threshold pace in Athlete, then send it again.",
+  },
+  "incomplete-pace-zones": {
+    error: "incomplete_pace_zones",
+    message:
+      "The workout uses a pace zone the athlete's own pace zones do not " +
+      "define. Ask the athlete to complete their pace zones in Athlete, " +
+      "then send it again.",
+  },
+  "unsupported-pace-zone-sport": {
+    error: "unsupported_pace_zone_sport",
+    message:
+      "Pace zone targets can only be sent to Garmin in a running or " +
+      "swimming workout. Use pace ranges instead of zones for this sport.",
+  },
+} as const;
 
 /** The Phase 1 failures, as the tool's error codes. */
 const libraryError = (result: PlacementResult) => {
@@ -34,8 +54,7 @@ const libraryError = (result: PlacementResult) => {
   }
   if (result.reason === "busy") return { error: "push_in_progress" };
   if (result.reason === "library-push-failed") return { error: "push_failed" };
-  if (result.reason === "missing-pace-zones")
-    return { error: "missing_pace_zones", message: MISSING_PACE_ZONES };
+  if (isPaceZonesReason(result.reason)) return PACE_ZONE_ERRORS[result.reason];
   return undefined;
 };
 

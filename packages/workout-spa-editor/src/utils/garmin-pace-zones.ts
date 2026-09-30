@@ -1,79 +1,69 @@
 /**
- * The pace zones a Garmin export needs. Garmin Connect has no pace zone
- * numbers: a `pace` target in zone units must be written as its m/s range,
- * resolved from the profile's pace zones for the workout's sport. A workout
- * that references a pace zone the profile cannot resolve is refused with
- * `MissingPaceZonesError`, never exported with a guessed range.
+ * The pace zones a Garmin export needs, resolved as the athlete sees them
+ * on the Athlete page: zones the athlete (or a coach sync) set win; else
+ * Z1–Z5 derive from the threshold pace with the zone map's own model.
+ * The distance a pace is per comes from the workout's sport (running: 1 km,
+ * swimming: 100 m), never from a zone's stored unit, which the zone editor
+ * writes as per-km for every sport. A workout that references a zone the
+ * profile cannot resolve is refused with `PaceZonesUnavailableError`,
+ * never exported with a guessed range.
  */
 import type { PaceZoneTable } from "@kaiord/garmin";
 
 import type { KRD } from "../types/krd";
 import type { Profile } from "../types/profile";
-import type { PaceZone } from "../types/sport-zones";
+import type { PaceZone, SportZoneConfig } from "../types/sport-zones";
+import { calculatePaceZones } from "./calculate-pace-zones";
+import { storedZoneTable, thresholdZoneTable } from "./pace-zone-table";
+import { PaceZonesUnavailableError } from "./pace-zones-unavailable-error";
+import { referencedPaceZones } from "./referenced-pace-zones";
 import { getStructuredWorkout } from "./structured-workout";
 
-export class MissingPaceZonesError extends Error {
-  constructor() {
-    super("This workout uses pace zones the profile does not define.");
-    this.name = "MissingPaceZonesError";
-  }
-}
+/** Metres a pace is per, by the workout's sport. */
+const METRES_BY_SPORT = { running: 1000, swimming: 100 } as const;
 
-/** Metres per pace unit: `minPace`/`maxPace` are seconds per this distance. */
-const METRES: Record<PaceZone["unit"], number> = {
-  min_per_km: 1000,
-  min_per_100m: 100,
+type PaceSport = keyof typeof METRES_BY_SPORT;
+
+const isPaceSport = (sport: string | undefined): sport is PaceSport =>
+  sport === "running" || sport === "swimming";
+
+const isSet = (z: PaceZone) => z.minPace > 0 || z.maxPace > 0;
+
+/** Zones a method computed from the current threshold, untouched since. */
+const isMethodOutput = ({ thresholds, paceZones }: SportZoneConfig) => {
+  if (!paceZones || !thresholds.thresholdPace || !thresholds.paceUnit)
+    return false;
+  const computed = calculatePaceZones(
+    thresholds.thresholdPace,
+    thresholds.paceUnit,
+    paceZones.method
+  );
+  return (
+    computed.length === paceZones.zones.length &&
+    computed.every(
+      (z, i) =>
+        z.minPace === paceZones.zones[i]?.minPace &&
+        z.maxPace === paceZones.zones[i]?.maxPace
+    )
+  );
 };
 
-const paceSport = (sport: string | undefined) =>
-  sport === "running" || sport === "swimming" ? sport : undefined;
-
-type Node = { target?: unknown; steps?: unknown };
-
-const paceZoneOf = (target: unknown): number | undefined => {
-  if (!target || typeof target !== "object") return undefined;
-  const { type, value } = target as { type?: unknown; value?: unknown };
-  if (type !== "pace" || !value || typeof value !== "object") return undefined;
-  const v = value as { unit?: unknown; value?: unknown };
-  if (v.unit !== "zone") return undefined;
-  // A zone target without a number resolves to no zone: never defined.
-  return typeof v.value === "number" ? v.value : 0;
+const zoneTableFor = (
+  config: SportZoneConfig | undefined,
+  metres: number
+): PaceZoneTable => {
+  if (!config) return [];
+  const stored = config.paceZones?.zones ?? [];
+  if (stored.some(isSet) && !isMethodOutput(config))
+    return storedZoneTable(stored, metres);
+  const pace = config.thresholds.thresholdPace;
+  return pace ? thresholdZoneTable(pace, metres) : [];
 };
-
-const collectZones = (steps: unknown, out: Set<number>): Set<number> => {
-  if (!Array.isArray(steps)) return out;
-  for (const step of steps as Node[]) {
-    if (!step || typeof step !== "object") continue;
-    const zone = paceZoneOf(step.target);
-    if (zone !== undefined) out.add(zone);
-    collectZones(step.steps, out);
-  }
-  return out;
-};
-
-/** The pace zone numbers the workout's targets reference (blocks too). */
-export const referencedPaceZones = (krd: KRD): Set<number> =>
-  collectZones(getStructuredWorkout(krd)?.steps, new Set());
-
-/** Seconds-per-distance zones → m/s; a zone with an unset bound is skipped. */
-export const toPaceZoneTable = (zones: readonly PaceZone[]): PaceZoneTable =>
-  zones
-    .filter((z) => z.minPace > 0 && z.maxPace > 0)
-    .map((z) => {
-      const metres = METRES[z.unit];
-      // Fewer seconds per distance is faster: the lower pace bound is maxMps.
-      return {
-        zone: z.zone,
-        minMps: metres / Math.max(z.minPace, z.maxPace),
-        maxMps: metres / Math.min(z.minPace, z.maxPace),
-      };
-    });
 
 /**
- * The pace zone table the Garmin writer needs for `krd`, from `profile`'s
- * zones for the workout's sport. `undefined` when the workout references
- * no pace zone; throws `MissingPaceZonesError` when it references one the
- * profile does not define.
+ * The pace zone table the Garmin writer needs for `krd`. `undefined` when
+ * the workout references no pace zone; throws `PaceZonesUnavailableError`
+ * when it references one the profile cannot resolve for its sport.
  */
 export const garminPaceZonesFor = (
   krd: KRD,
@@ -81,11 +71,16 @@ export const garminPaceZonesFor = (
 ): PaceZoneTable | undefined => {
   const needed = referencedPaceZones(krd);
   if (needed.size === 0) return undefined;
-  const sport = paceSport(getStructuredWorkout(krd)?.sport);
-  const zones = sport && profile?.sportZones[sport]?.paceZones?.zones;
-  const table = toPaceZoneTable(zones || []);
+  const sport = getStructuredWorkout(krd)?.sport;
+  if (!isPaceSport(sport))
+    throw new PaceZonesUnavailableError("unsupported-pace-zone-sport");
+  const config = profile?.sportZones[sport];
+  const table = zoneTableFor(config, METRES_BY_SPORT[sport]);
+  if (table.length === 0)
+    throw new PaceZonesUnavailableError("missing-pace-zones");
   const defined = new Set(table.map((z) => z.zone));
   for (const zone of needed)
-    if (!defined.has(zone)) throw new MissingPaceZonesError();
+    if (!defined.has(zone))
+      throw new PaceZonesUnavailableError("incomplete-pace-zones");
   return table;
 };

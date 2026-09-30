@@ -99,7 +99,7 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
   };
 });
 
-import { MissingPaceZonesError } from "../../../utils/garmin-pace-zones";
+import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
 import { useGarminPush } from "./useGarminPush";
 
 // A stub KRD payload that exportGcnWorkout will receive verbatim.
@@ -259,7 +259,9 @@ describe("useGarminPush", () => {
 
   it("should fail with missing-pace-zones, and push nothing, when the profile cannot resolve the pace zones", async () => {
     // Arrange
-    mockExportGcnWorkout.mockRejectedValue(new MissingPaceZonesError());
+    mockExportGcnWorkout.mockRejectedValue(
+      new PaceZonesUnavailableError("missing-pace-zones")
+    );
     const { result } = renderHook(() => useGarminPush(makeWorkout()));
     let outcome: unknown;
 

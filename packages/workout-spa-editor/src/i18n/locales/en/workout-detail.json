@@ -96,7 +96,9 @@
       "library-push-failed": "The workout could not be sent to Garmin.",
       "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Settings.",
       "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish.",
-      "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to send it."
+      "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to send it.",
+      "incomplete-pace-zones": "This workout uses a pace zone your profile doesn't define. Complete your pace zones in Athlete to send it.",
+      "unsupported-pace-zone-sport": "Pace zones can only be sent to Garmin in running or swimming workouts."
     }
   }
 }

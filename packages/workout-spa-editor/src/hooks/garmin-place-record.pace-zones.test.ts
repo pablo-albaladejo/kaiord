@@ -1,25 +1,37 @@
 /**
  * A workout with pace ZONE targets through the real GCN export, on the two
  * paths that share `placeRecord`: the bulk "Send week" runner and the chat
- * tool. Its zones resolve from the owning profile's pace zones; without
- * them, the run fails with `missing-pace-zones` and nothing reaches Garmin.
+ * tool. Its zones resolve from the owning profile as the Athlete page shows
+ * them; when they cannot, the run fails with the reason and nothing
+ * reaches Garmin.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { makeWorkoutRecord } from "../application/test-helpers";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import {
+  freshProfile,
   MPS_DIGITS,
-  paceProfile,
   paceZoneKrd,
-  PROFILE_ID,
-  RUNNING_PACE_ZONES,
-  RUNNING_Z1_MPS,
+  RUN_THRESHOLD,
+  withThreshold,
 } from "../test-utils/pace-zone-fixtures";
 import { createPlacementHarness, D1 } from "../test-utils/placement-harness";
 import type { Profile } from "../types/profile";
+import { garminPaceZonesFor } from "../utils/garmin-pace-zones";
 import { doPushToGarmin } from "./chat/do-push-to-garmin";
 import { placeRecordResult } from "./garmin-place-record";
+
+const GARMIN_POLICY = {
+  id: "00000000-0000-0000-0000-000000000001",
+  dataType: "workout",
+  bridgeId: "garmin-bridge",
+  direction: "export",
+  mode: "manual",
+  enabled: true,
+  updatedAt: "2026-05-01T00:00:00.000Z",
+};
+const policies = vi.hoisted(() => ({ list: [] as unknown[] }));
 
 vi.mock("../adapters/dexie/dexie-database", () => ({ db: {} }));
 vi.mock("../adapters/dexie/dexie-integration-policy-repository", () => ({
@@ -27,20 +39,7 @@ vi.mock("../adapters/dexie/dexie-integration-policy-repository", () => ({
 }));
 vi.mock(
   "../application/integration-policy/resolve-export-policies.use-case",
-  () => ({
-    resolveExportPolicies: async () => [
-      {
-        id: "00000000-0000-0000-0000-000000000001",
-        profileId: "11111111-1111-4111-8111-111111111111",
-        dataType: "workout",
-        bridgeId: "garmin-bridge",
-        direction: "export",
-        mode: "manual",
-        enabled: true,
-        updatedAt: "2026-05-01T00:00:00.000Z",
-      },
-    ],
-  })
+  () => ({ resolveExportPolicies: async () => policies.list })
 );
 
 const WORKOUT_ID = "w-pace";
@@ -53,12 +52,13 @@ type GcnStep = {
 };
 
 const setup = async (profile: Profile) => {
+  policies.list = [{ ...GARMIN_POLICY, profileId: profile.id }];
   const persistence = createInMemoryPersistence();
   await persistence.profiles.put(profile);
   await persistence.workouts.put(
     makeWorkoutRecord({
       id: WORKOUT_ID,
-      profileId: PROFILE_ID,
+      profileId: profile.id,
       date: D1,
       state: "ready",
       krd: paceZoneKrd(),
@@ -79,11 +79,15 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe("placeRecordResult with pace zone targets", () => {
-  it("should push the pace zones of the profile as m/s ranges", async () => {
+  it("should push the zones of a fresh profile's threshold pace as m/s ranges", async () => {
     // Arrange
-    const { persistence, deps, pushWorkout } = await setup(
-      paceProfile(RUNNING_PACE_ZONES)
+    const profile = await withThreshold(
+      freshProfile(),
+      "running",
+      RUN_THRESHOLD
     );
+    const [z1] = garminPaceZonesFor(paceZoneKrd(), profile) ?? [];
+    const { persistence, deps, pushWorkout } = await setup(profile);
 
     // Act
     const item = await placeRecordResult(
@@ -100,20 +104,14 @@ describe("placeRecordResult with pace zone targets", () => {
     };
     const warmUp = gcn.workoutSegments[0].workoutSteps[0];
     expect(warmUp.targetType?.workoutTargetTypeKey).toBe("pace.zone");
-    expect(warmUp.targetValueOne).toBeCloseTo(
-      RUNNING_Z1_MPS.maxMps,
-      MPS_DIGITS
-    );
-    expect(warmUp.targetValueTwo).toBeCloseTo(
-      RUNNING_Z1_MPS.minMps,
-      MPS_DIGITS
-    );
+    expect(warmUp.targetValueOne).toBeCloseTo(z1!.maxMps, MPS_DIGITS);
+    expect(warmUp.targetValueTwo).toBeCloseTo(z1!.minMps, MPS_DIGITS);
   });
 
   it("should fail with missing-pace-zones, and push nothing, when the profile has no pace zones", async () => {
     // Arrange
     const { persistence, deps, pushWorkout, analytics } =
-      await setup(paceProfile());
+      await setup(freshProfile());
 
     // Act
     const item = await placeRecordResult(
@@ -145,7 +143,7 @@ describe("placeRecordResult with pace zone targets", () => {
 describe("doPushToGarmin with pace zone targets", () => {
   it("should report missing_pace_zones, not push_failed, when the profile has no pace zones", async () => {
     // Arrange
-    const { persistence, deps, pushWorkout } = await setup(paceProfile());
+    const { persistence, deps, pushWorkout } = await setup(freshProfile());
 
     // Act
     const result = await doPushToGarmin(

@@ -96,7 +96,9 @@
       "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
       "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Ajustes.",
       "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
-      "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo."
+      "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo.",
+      "incomplete-pace-zones": "Este entrenamiento usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para enviarlo.",
+      "unsupported-pace-zone-sport": "Solo se pueden enviar zonas de ritmo a Garmin en entrenamientos de carrera o natación."
     }
   }
 }

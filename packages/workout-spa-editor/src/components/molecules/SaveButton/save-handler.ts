@@ -3,14 +3,14 @@ import type { KRD, ValidationError } from "../../../types/krd";
 import type { Profile } from "../../../types/profile";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
-import { MissingPaceZonesError } from "../../../utils/garmin-pace-zones";
+import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { generateWorkoutFilename } from "./workout-filename";
 
 const exportErrorMessage = (err: unknown, t: Translate): string => {
   if (!(err instanceof Error)) return t("save.exportFailedFallback");
-  return err.cause instanceof MissingPaceZonesError
-    ? t("save.missingPaceZones")
+  return err.cause instanceof PaceZonesUnavailableError
+    ? t(`save.paceZones.${err.cause.reason}`)
     : err.message;
 };
 

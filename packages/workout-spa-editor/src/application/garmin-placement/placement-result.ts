@@ -16,8 +16,12 @@ export const PLACEMENT_FAILURE_REASONS = [
   "library-push-failed",
   "no-export-route",
   "placement-interrupted",
-  /** A pace zone target the profile's zones cannot resolve to a range. */
+  /** Pace zone targets the profile cannot resolve to ranges: no zones
+      and no threshold pace, a referenced zone undefined, or a sport
+      without pace zones (`PaceZonesUnavailableReason`). */
   "missing-pace-zones",
+  "incomplete-pace-zones",
+  "unsupported-pace-zone-sport",
 ] as const;
 export type PlacementFailureReason = (typeof PLACEMENT_FAILURE_REASONS)[number];
 

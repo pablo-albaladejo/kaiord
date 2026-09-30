@@ -24,7 +24,7 @@ import {
 import { recordGarminPush } from "../application/record-garmin-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 import type { PersistencePort } from "../ports/persistence-port";
-import { MissingPaceZonesError } from "../utils/garmin-pace-zones";
+import { PaceZonesUnavailableError } from "../utils/pace-zones-unavailable-error";
 import { garminPlacementRequest } from "./garmin-placement-request";
 import { exportRecordGcn } from "./garmin-record-gcn";
 
@@ -44,8 +44,8 @@ const buildGcn = async (
   try {
     return { gcn: await build() };
   } catch (error) {
-    if (!(error instanceof MissingPaceZonesError)) throw error;
-    const failure = failed("missing-pace-zones", false);
+    if (!(error instanceof PaceZonesUnavailableError)) throw error;
+    const failure = failed(error.reason, false);
     analytics?.event(PLACEMENT_EVENT, placementEvent(failure, 0, undefined));
     return { failure };
   }

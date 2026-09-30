@@ -112,7 +112,11 @@
     "retry": "Reintentar",
     "retryIn": "Reintentar en {{seconds}} s",
     "close": "Cerrar",
-    "missingPaceZones": "configura tu ritmo umbral en Atleta",
+    "paceZones": {
+      "missing-pace-zones": "configura tu ritmo umbral en Atleta",
+      "incomplete-pace-zones": "completa tus zonas de ritmo en Atleta",
+      "unsupported-pace-zone-sport": "zonas de ritmo solo en carrera o natación"
+    },
     "preflight": {
       "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones y vuelve a enviar la semana.",
       "no-bridge": "Instala la extensión Kaiord Garmin Bridge y vuelve a enviar la semana.",

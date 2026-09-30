@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { MissingPaceZonesError } from "../../../utils/garmin-pace-zones";
+import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
 import { createSaveHandler } from "./save-handler";
 
 const mockDownloadWorkout = vi.fn();
@@ -119,32 +119,39 @@ describe("createSaveHandler — analytics call-site", () => {
     );
   });
 
-  it("should explain a pace zone workout the profile cannot resolve", async () => {
-    // Arrange
-    const cause = new MissingPaceZonesError();
-    mockExportWorkout.mockRejectedValue(
-      Object.assign(new Error("Failed to export workout as GCN"), { cause })
-    );
-    const showError = vi.fn();
-    const handler = createSaveHandler(
-      fakeWorkout as never,
-      "gcn",
-      noop,
-      noop,
-      noop,
-      noop,
-      showError,
-      undefined,
-      (key) => key
-    );
+  it.each([
+    "missing-pace-zones",
+    "incomplete-pace-zones",
+    "unsupported-pace-zone-sport",
+  ] as const)(
+    "should explain a pace zone workout that fails with %s",
+    async (reason) => {
+      // Arrange
+      const cause = new PaceZonesUnavailableError(reason);
+      mockExportWorkout.mockRejectedValue(
+        Object.assign(new Error("Failed to export workout as GCN"), { cause })
+      );
+      const showError = vi.fn();
+      const handler = createSaveHandler(
+        fakeWorkout as never,
+        "gcn",
+        noop,
+        noop,
+        noop,
+        noop,
+        showError,
+        undefined,
+        (key) => key
+      );
 
-    // Act
-    await handler();
+      // Act
+      await handler();
 
-    // Assert
-    expect(showError).toHaveBeenCalledWith(
-      "save.exportFailedTitle",
-      "save.missingPaceZones"
-    );
-  });
+      // Assert
+      expect(showError).toHaveBeenCalledWith(
+        "save.exportFailedTitle",
+        `save.paceZones.${reason}`
+      );
+    }
+  );
 });

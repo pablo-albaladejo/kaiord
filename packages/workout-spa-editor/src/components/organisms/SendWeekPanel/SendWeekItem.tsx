@@ -8,6 +8,7 @@ import type { BulkOutcome } from "../../../application/garmin-bulk/send-week-to-
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
+import { isPaceZonesReason } from "../../../utils/pace-zones-unavailable-error";
 import { formatDateLabel } from "../../molecules/TemplatePickerDialog/format-date-label";
 import { type SendWeekTone, statusTone } from "./send-week-status";
 
@@ -22,8 +23,8 @@ const reasonOf = (outcome: BulkOutcome, t: Translate): string => {
   if (outcome.notEligible)
     return ` (${t(`sendWeek.notEligible.${outcome.notEligible}`)})`;
   const { result } = outcome;
-  return result?.kind === "failed" && result.reason === "missing-pace-zones"
-    ? ` (${t("sendWeek.missingPaceZones")})`
+  return result?.kind === "failed" && isPaceZonesReason(result.reason)
+    ? ` (${t(`sendWeek.paceZones.${result.reason}`)})`
     : "";
 };
 

@@ -158,16 +158,18 @@ describe("SendWeekPanel", () => {
     }
   );
 
-  it("should tell the athlete to set their threshold pace for a missing-pace-zones item", () => {
+  it.each([
+    ["missing-pace-zones", "set your threshold pace in Athlete"],
+    ["incomplete-pace-zones", "complete your pace zones in Athlete"],
+    ["unsupported-pace-zone-sport", "pace zones only in running or swimming"],
+  ] as const)("should tell the athlete how to fix a %s item", (reason, fix) => {
     // Arrange
-    const outcome = item("w-1", failed("missing-pace-zones", false));
+    const outcome = item("w-1", failed(reason, false));
 
     // Act
     renderPanel([outcome]);
 
     // Assert
-    expect(
-      screen.getByText("Failed (set your threshold pace in Athlete)")
-    ).toBeInTheDocument();
+    expect(screen.getByText(`Failed (${fix})`)).toBeInTheDocument();
   });
 });

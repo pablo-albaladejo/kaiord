@@ -7,7 +7,7 @@ import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
 import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { MissingPaceZonesError } from "../../../utils/garmin-pace-zones";
+import { PaceZonesUnavailableError } from "../../../utils/pace-zones-unavailable-error";
 import { garminPushReports } from "./garmin-push-reports";
 
 export type GarminPushOptions = {
@@ -78,8 +78,8 @@ export const useGarminPush = (
           )
         );
       } catch (error: unknown) {
-        if (error instanceof MissingPaceZonesError)
-          return failedEarly("missing-pace-zones");
+        if (error instanceof PaceZonesUnavailableError)
+          return failedEarly(error.reason);
         logGarminPushFailure(error);
         showError(error);
         return failedEarly();

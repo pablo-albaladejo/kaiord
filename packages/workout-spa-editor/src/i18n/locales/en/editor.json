@@ -84,7 +84,11 @@
     "savedDescription": "\"{{name}}\" has been saved as {{format}}",
     "exportFailedTitle": "Export Failed",
     "exportFailedFallback": "Failed to export workout",
-    "missingPaceZones": "This workout uses pace zones. Set your threshold pace in Athlete to export it as GCN."
+    "paceZones": {
+      "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to export it as GCN.",
+      "incomplete-pace-zones": "This workout uses a pace zone your profile doesn't define. Complete your pace zones in Athlete to export it as GCN.",
+      "unsupported-pace-zone-sport": "Pace zones can only be exported as GCN in running or swimming workouts."
+    }
   },
   "saveError": {
     "title": "Save Failed",
