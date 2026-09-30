@@ -75,6 +75,7 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
           providers={providers}
           provider={model.provider}
           modelId={model.modelId}
+          requestedModelId={model.requestedModelId}
           generationProvider={fallback.generationProvider}
           generationModelId={fallback.generationModelId}
           search={search}
