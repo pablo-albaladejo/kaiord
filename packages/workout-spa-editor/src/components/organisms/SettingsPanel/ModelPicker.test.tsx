@@ -56,7 +56,7 @@ describe("ModelPicker", () => {
     );
   });
 
-  it("should warn when the saved model has been retired by the provider", () => {
+  it("should name the successor used in place of a retired saved model", () => {
     // Arrange
     const retired = "claude-3-haiku-20240307";
 
@@ -65,8 +65,26 @@ describe("ModelPicker", () => {
 
     // Assert
     expect(screen.getByTestId("model-picker-retired")).toHaveTextContent(
-      "no longer available"
+      "claude-3-haiku-20240307 was retired by the provider — using claude-haiku-4-5 instead."
     );
+  });
+
+  it("should hint at the successor of a deprecated saved model", () => {
+    // Arrange
+    const deprecated = "claude-sonnet-4-0";
+
+    // Act
+    render(
+      <ModelPicker type="anthropic" value={deprecated} onChange={vi.fn()} />
+    );
+
+    // Assert
+    expect(screen.getByTestId("model-picker-deprecated")).toHaveTextContent(
+      "claude-sonnet-4-0 is deprecated and will be retired — consider claude-sonnet-5."
+    );
+    expect(
+      screen.queryByTestId("model-picker-retired")
+    ).not.toBeInTheDocument();
   });
 
   it("should not offer a retired model as a catalog option", () => {
@@ -92,6 +110,9 @@ describe("ModelPicker", () => {
     // Assert
     expect(
       screen.queryByTestId("model-picker-retired")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("model-picker-deprecated")
     ).not.toBeInTheDocument();
   });
 });

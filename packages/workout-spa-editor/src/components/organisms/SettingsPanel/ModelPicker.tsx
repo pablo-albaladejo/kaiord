@@ -1,8 +1,9 @@
-import { isRetiredModel, PROVIDER_MODELS } from "@kaiord/ai/providers";
+import { PROVIDER_MODELS } from "@kaiord/ai/providers";
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderType } from "../../../store/ai-store-types";
+import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
 
 const CUSTOM_SENTINEL = "__custom__";
 
@@ -62,15 +63,11 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
           onChange={(e) => onChange(e.target.value)}
         />
       )}
-      {isRetiredModel(type, value) && (
-        <p
-          role="alert"
-          data-testid="model-picker-retired"
-          className="mt-1 text-xs text-danger-text"
-        >
-          {t("models.retired")}
-        </p>
-      )}
+      <ModelStatusNotice
+        type={type}
+        modelId={value}
+        testIdPrefix="model-picker"
+      />
     </div>
   );
 };
