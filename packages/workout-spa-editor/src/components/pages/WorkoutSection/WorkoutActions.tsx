@@ -5,12 +5,14 @@ import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToLibraryButton";
+import { useDiscardConfirmation } from "./use-discard-confirmation";
 
 type WorkoutActionsProps = Readonly<{
   krd: KRD;
   /** The profile owning the persisted record the editor shows, if any. */
   ownerProfileId?: string;
-  onDiscard: () => void;
+  /** Defaults to the editor's discard confirmation (`useDiscardConfirmation`). */
+  onDiscard?: () => void;
 }>;
 
 /**
@@ -24,6 +26,7 @@ export function WorkoutActions({
   onDiscard,
 }: WorkoutActionsProps) {
   const t = useTranslate("editor");
+  const confirmDiscard = useDiscardConfirmation();
   return (
     <div className="flex flex-wrap items-center gap-2.5">
       <SaveToLibraryButton workout={krd} />
@@ -32,7 +35,7 @@ export function WorkoutActions({
       <Button
         variant="tertiary"
         size="sm"
-        onClick={onDiscard}
+        onClick={onDiscard ?? confirmDiscard}
         aria-label={t("actions.discardAria")}
         data-testid="discard-workout-button"
         className="text-ink-muted hover:text-[var(--danger-text)]"

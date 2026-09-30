@@ -10,7 +10,6 @@ import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlo
 import { CoachMarkHost } from "../../organisms/CoachMark/CoachMarkHost";
 import { CanvasShapeHead } from "./CanvasShapeHead";
 import { EditorCanvas } from "./EditorCanvas";
-import { useDiscardConfirmation } from "./use-discard-confirmation";
 import { useWorkoutSectionFocus } from "./use-workout-section-focus";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutActions } from "./WorkoutActions";
@@ -54,7 +53,6 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
 
   const { editorRootRef, addStepButtonRef, titleRef } =
     useWorkoutSectionFocus();
-  const handleDiscard = useDiscardConfirmation();
 
   const renderStepForm = (itemId: string) => (
     <WorkoutSectionEditor
@@ -90,7 +88,7 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
           renderStepForm={renderStepForm}
         />
       </EditorCanvas>
-      <WorkoutActions {...props} onDiscard={handleDiscard} />
+      <WorkoutActions krd={props.krd} ownerProfileId={props.ownerProfileId} />
       <CreateRepetitionBlockDialog
         stepCount={state.blockStepCount}
         onConfirm={state.handleConfirmCreateBlock}
