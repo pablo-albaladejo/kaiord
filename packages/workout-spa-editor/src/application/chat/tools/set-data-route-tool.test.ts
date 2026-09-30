@@ -1,3 +1,4 @@
+import { asSchema } from "ai";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ChatActionOps } from "./chat-tool-deps";
@@ -138,5 +139,20 @@ describe("createSetDataRouteTool", () => {
 
     // Assert
     expect(parsed.success).toBe(false);
+  });
+
+  it("should tell the model which fields each action requires", async () => {
+    // Arrange
+    const tool = createSetDataRouteTool(makeOps());
+
+    // Act
+    const jsonSchema = (await asSchema(tool.inputSchema).jsonSchema) as {
+      properties: Record<string, { description?: string }>;
+    };
+
+    // Assert
+    expect(jsonSchema.properties.action?.description).toMatch(
+      /integrationId.*direction.*mode/s
+    );
   });
 });

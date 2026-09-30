@@ -46,7 +46,13 @@ const strictSetDataRouteSchema = z
 
 export const setDataRouteInputSchema = z
   .object({
-    action: z.enum(["enable_route", "disable_route", "set_source_policy"]),
+    action: z
+      .enum(["enable_route", "disable_route", "set_source_policy"])
+      .describe(
+        "enable_route / disable_route require integrationId and " +
+          "direction; set_source_policy requires mode (and a non-empty " +
+          "sourceOrder when mode is priority)."
+      ),
     dataType: z.enum(managedDataTypes),
     integrationId: z
       .string()
