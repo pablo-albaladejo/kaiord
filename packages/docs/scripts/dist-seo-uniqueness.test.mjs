@@ -5,7 +5,9 @@
 //   none missing, none that do not exist;
 // - with REQUIRE_FULL_HISTORY=1, every sitemap URL has a `<lastmod>`, the
 //   dates are not all the same (the signature of a shallow clone), and the
-//   dated pages carry `dateModified` in their TechArticle.
+//   dated pages carry `dateModified` in their TechArticle;
+// - `<html lang>` is "es" under `es/` and "en" everywhere else, and every
+//   page of an EN/ES pair links both languages plus x-default.
 //
 // Reads the build, so it skips unless REQUIRE_DOCS_DIST=1 (set in the CI
 // `build` job and in deploy, after the docs build): a stale local dist would
@@ -17,7 +19,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
-import { isNoindexPath } from "../.vitepress/indexing.mjs";
+import { hreflangPair, isNoindexPath } from "../.vitepress/indexing.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, "..", ".vitepress", "dist");
@@ -41,6 +43,21 @@ function htmlFiles(dir) {
 
 const attr = (html, re) => html.match(re)?.[1];
 
+const docsUrlOf = (path) =>
+  DOCS_URL +
+  path.replace(/(^|\/)index\.(html|md)$/, "$1").replace(/\.(html|md)$/, "");
+
+/**
+ * Each alternate a page must declare, as `"<hreflang>=<href>"`: `es` points
+ * at the Spanish twin, `en` and `x-default` at the English page.
+ */
+export function expectedHreflangs(pagePath) {
+  const pair = hreflangPair(pagePath.replace(/\.html$/, ".md"));
+  if (!pair) return [];
+  const en = docsUrlOf(pair.en);
+  return [`en=${en}`, `es=${docsUrlOf(pair.es)}`, `x-default=${en}`];
+}
+
 /** One record per built page (VitePress's 404 page is not a page). */
 export function readPages(dist) {
   return htmlFiles(dist)
@@ -50,13 +67,18 @@ export function readPages(dist) {
       const html = readFileSync(join(dist, path), "utf8");
       return {
         path,
-        url:
-          DOCS_URL +
-          path.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, ""),
+        url: docsUrlOf(path),
         noindex: /<meta name="robots" content="noindex/.test(html),
         title: attr(html, /<title>([^<]*)<\/title>/),
         description: attr(html, /<meta name="description" content="([^"]*)"/),
         dateModified: attr(html, /"dateModified":"([^"]+)"/),
+        lang: attr(html, /<html[^>]* lang="([^"]*)"/),
+        hreflangs: [...html.matchAll(/<link [^>]*hreflang="[^"]*"[^>]*>/g)]
+          .map(([link]) => {
+            const lang = attr(link, /hreflang="([^"]*)"/);
+            return `${lang}=${attr(link, / href="([^"]*)"/)}`;
+          })
+          .sort(),
       };
     });
 }
@@ -100,6 +122,20 @@ export function indexingProblems(pages, sitemap, { requireHistory }) {
     }
     for (const [value, paths] of duplicates(indexable, key)) {
       problems.push(`duplicate ${key} "${value}": ${paths.join(", ")}`);
+    }
+  }
+  for (const page of pages) {
+    const lang = page.path.startsWith("es/") ? "es" : "en";
+    if (page.lang !== lang) {
+      problems.push(
+        `${page.path}: <html lang="${page.lang}">, expected "${lang}"`
+      );
+    }
+    const expected = expectedHreflangs(page.path);
+    if (page.hreflangs.join() !== expected.join()) {
+      problems.push(
+        `${page.path}: hreflang [${page.hreflangs}], expected [${expected}]`
+      );
     }
   }
   const byUrl = new Map(pages.map((page) => [page.url, page]));
@@ -165,6 +201,8 @@ const page = (path, extra = {}) => ({
   title: `Title of ${path}`,
   description: `Description of ${path}`,
   dateModified: "2026-09-01T00:00:00.000Z",
+  lang: path.startsWith("es/") ? "es" : "en",
+  hreflangs: expectedHreflangs(path),
   ...extra,
 });
 const site = Array.from({ length: MIN_INDEXABLE }, (_, i) =>
@@ -283,4 +321,78 @@ test("guard fails on missing or all-identical lastmods when history is required"
   assert.match(same.join("\n"), /lastmods are identical/);
   assert.match(missing.join("\n"), /has no <lastmod>/);
   assert.match(undated.join("\n"), /guide\/new\.html: no dateModified/);
+});
+
+test("guard passes a translated EN/ES pair with lang and hreflang", () => {
+  const pages = [
+    ...site,
+    page("guide/whoop-recovery-in-plan.html"),
+    page("es/guide/whoop-recovery-in-plan.html"),
+  ];
+
+  const problems = indexingProblems(pages, sitemapOf(pages), {
+    requireHistory: false,
+  });
+
+  assert.deepEqual(problems, []);
+});
+
+test("guard fails when a page declares the wrong <html lang>", () => {
+  const pages = [
+    ...site,
+    page("guide/quick-start.html", { lang: "es" }),
+    page("es/guide/whoop-recovery-in-plan.html", { lang: "en" }),
+  ];
+
+  const problems = indexingProblems(pages, sitemapOf(pages), {
+    requireHistory: false,
+  });
+
+  assert.match(problems.join("\n"), /quick-start\.html: <html lang="es">/);
+  assert.match(
+    problems.join("\n"),
+    /es\/guide\/whoop-recovery-in-plan\.html: <html lang="en">/
+  );
+});
+
+test("guard fails when a paired page lacks hreflang, or an unpaired one has it", () => {
+  const pages = [
+    ...site,
+    page("es/guide/whoop-recovery-in-plan.html", { hreflangs: ["en"] }),
+    page("guide/quick-start.html", { hreflangs: ["en", "es", "x-default"] }),
+  ];
+
+  const problems = indexingProblems(pages, sitemapOf(pages), {
+    requireHistory: false,
+  });
+
+  assert.match(
+    problems.join("\n"),
+    /whoop-recovery-in-plan\.html: hreflang \[en\]/
+  );
+  assert.match(
+    problems.join("\n"),
+    /quick-start\.html: hreflang \[en,es,x-default\], expected \[\]/
+  );
+});
+
+test("guard fails when an alternate link points at the wrong page", () => {
+  const [en, , xDefault] = expectedHreflangs(
+    "guide/whoop-recovery-in-plan.html"
+  );
+  const pages = [
+    ...site,
+    page("guide/whoop-recovery-in-plan.html", {
+      hreflangs: [en, en.replace("en=", "es="), xDefault],
+    }),
+  ];
+
+  const problems = indexingProblems(pages, sitemapOf(pages), {
+    requireHistory: false,
+  });
+
+  assert.match(
+    problems.join("\n"),
+    /whoop-recovery-in-plan\.html: hreflang .*es=https:\/\/kaiord\.com\/docs\/guide\/whoop-recovery-in-plan,.*expected .*es=https:\/\/kaiord\.com\/docs\/es\/guide\/whoop-recovery-in-plan/
+  );
 });

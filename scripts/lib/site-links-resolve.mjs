@@ -46,6 +46,18 @@ export function editorHrefsIn(html) {
   return [...html.matchAll(ROOT_RELATIVE_EDITOR_HREF)].map((m) => m[1]);
 }
 
+// VitePress's language switcher renders root-relative anchors carrying
+// `hreflang` (`<a href="/docs/es/" rel="alternate" hreflang="es">`); the
+// absolute-URL scan never sees them, and "/es/<same path>" is a 404 on any
+// page that has no translation.
+const SWITCHER_ANCHOR = /<a\b[^>]*\bhreflang=["'][^"']+["'][^>]*>/g;
+
+export function switcherHrefsIn(html) {
+  return [...html.matchAll(SWITCHER_ANCHOR)]
+    .map((m) => m[0].match(/\bhref=["'](\/[^"']*)["']/)?.[1])
+    .filter(Boolean);
+}
+
 const trimTrailingPunctuation = (url) => url.replace(/[.,;:!?]+$/, "");
 
 export function linksIn(text) {

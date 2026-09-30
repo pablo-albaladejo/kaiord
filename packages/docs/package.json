@@ -16,6 +16,7 @@
     "spellcheck": "cspell --no-progress \"**/*.md\" --exclude api/"
   },
   "devDependencies": {
+    "@cspell/dict-es-es": "^3.0.8",
     "@kaiord/cli": "workspace:*",
     "@kaiord/core": "workspace:*",
     "@kaiord/fit": "workspace:*",
