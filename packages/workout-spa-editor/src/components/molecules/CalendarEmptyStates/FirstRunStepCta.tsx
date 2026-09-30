@@ -12,11 +12,13 @@ export type FirstRunStepCtaProps = {
 
 const CTA = "shrink-0 rounded-lg px-3.5 py-2.5 text-[13px] font-medium";
 const SECONDARY = `${CTA} border border-edge text-ink-body hover:border-edge-strong hover:text-ink-strong`;
+const PRIMARY = `${CTA} bg-accent text-surface hover:opacity-90`;
 
 export function FirstRunStepCta({ step, primary, done }: FirstRunStepCtaProps) {
   const t = useTranslate("calendar");
   const [, navigate] = useLocation();
   const label = t(`firstRun.steps.${step.key}.cta`);
+  const className = primary ? PRIMARY : SECONDARY;
 
   if (done) {
     return (
@@ -35,7 +37,7 @@ export function FirstRunStepCta({ step, primary, done }: FirstRunStepCtaProps) {
         href={step.href}
         target="_blank"
         rel="noopener noreferrer"
-        className={SECONDARY}
+        className={className}
       >
         {label}
       </a>
@@ -45,9 +47,7 @@ export function FirstRunStepCta({ step, primary, done }: FirstRunStepCtaProps) {
     <button
       type="button"
       onClick={() => navigate(step.href)}
-      className={
-        primary ? `${CTA} bg-accent text-surface hover:opacity-90` : SECONDARY
-      }
+      className={className}
     >
       {label}
     </button>
