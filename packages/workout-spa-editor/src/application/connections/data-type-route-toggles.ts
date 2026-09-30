@@ -63,9 +63,9 @@ export const buildRouteToggles = (
   return integrations.flatMap((entry) => {
     const bridgeId = entry.bridgeId;
     if (entry.mechanism !== "bridge" || bridgeId === null) return [];
-    if (!signals.supportsRoute(bridgeId, dataType, direction)) return [];
     const enabled = on.has(bridgeId);
     const offerable =
+      signals.supportsRoute(bridgeId, dataType, direction) &&
       signals.isBridgeConnected(bridgeId) &&
       signals.announces(bridgeId, token) &&
       !(direction === "export" && UNVERIFIED_EXPORT_BRIDGES.has(bridgeId));

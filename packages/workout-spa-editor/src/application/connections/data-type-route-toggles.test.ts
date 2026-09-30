@@ -244,4 +244,38 @@ describe("buildRouteToggles", () => {
       },
     ]);
   });
+
+  it("should keep a WHOOP weight import that is already on switchable off", () => {
+    // Arrange
+    // Seeded before WHOOP was narrowed to the types its import writes: the
+    // route can no longer be offered, but it must still be switchable off.
+    const routes = [route("whoop-bridge", true)];
+
+    // Act
+    const ids = bridgeIds(
+      "weight",
+      INTEGRATION_REGISTRY,
+      routes,
+      signals({ "whoop-bridge": ["read:body"] })
+    );
+
+    // Assert
+    expect(ids).toContain("whoop-bridge");
+  });
+
+  it("should not offer a switched-off WHOOP weight import", () => {
+    // Arrange
+    const routes = [route("whoop-bridge", false)];
+
+    // Act
+    const ids = bridgeIds(
+      "weight",
+      INTEGRATION_REGISTRY,
+      routes,
+      signals({ "whoop-bridge": ["read:body"] })
+    );
+
+    // Assert
+    expect(ids).not.toContain("whoop-bridge");
+  });
 });
