@@ -67,11 +67,16 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
 
   return {
     text,
-    toolCalls: toolCalls.map((c) => ({
-      toolName: c.toolName,
-      toolCallId: c.toolCallId,
-      input: c.input,
-    })),
+    // A call whose input failed its schema is marked `invalid`: the SDK
+    // already answered it with a tool-error and the loop moved on, so it must
+    // never be offered for confirmation.
+    toolCalls: toolCalls
+      .filter((c) => !("invalid" in c && c.invalid))
+      .map((c) => ({
+        toolName: c.toolName,
+        toolCallId: c.toolCallId,
+        input: c.input,
+      })),
     finishReason,
     usage: usage
       ? {
