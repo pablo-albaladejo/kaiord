@@ -170,7 +170,10 @@ describe("useConnectCallback route seeding", () => {
       sportZones: {
         cycling: {
           thresholds: { ftp: 270 },
-          heartRateZones: { method: "default", zones: DEFAULT_HEART_RATE_ZONES },
+          heartRateZones: {
+            method: "default",
+            zones: DEFAULT_HEART_RATE_ZONES,
+          },
           powerZones: { method: "default", zones: DEFAULT_POWER_ZONES },
         },
       },
