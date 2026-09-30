@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback } from "react";
 
+import { upsertIntegrationPolicy } from "../../application/integration-policy/upsert-integration-policy.use-case";
 import { policyRepo } from "../integration-policy-repo";
 
 const TRAINING_ZONES = "training-zones" as const;
@@ -23,7 +24,8 @@ export type ZonesAutoImport = {
  *
  * `enabled` is left alone: turning this off means "never overwrite what I
  * typed", not "stop importing zones at all" — an import the user asks for
- * explicitly still runs.
+ * explicitly still runs. It goes through the upsert because a mode change is
+ * a decision about the route, which drops a Disconnect marker.
  */
 export function useZonesAutoImport(profileId: string): ZonesAutoImport {
   const policies = useLiveQuery(
@@ -43,11 +45,20 @@ export function useZonesAutoImport(profileId: string): ZonesAutoImport {
         dataType: TRAINING_ZONES,
         direction: "import",
       });
-      const now = new Date().toISOString();
       const mode = next ? "auto" : "manual";
       for (const policy of current) {
         if (policy.mode === mode) continue;
-        await policyRepo.put({ ...policy, mode, updatedAt: now });
+        await upsertIntegrationPolicy(
+          { policyRepo },
+          {
+            profileId: policy.profileId,
+            dataType: policy.dataType,
+            direction: policy.direction,
+            bridgeId: policy.bridgeId,
+            mode,
+            enabled: policy.enabled,
+          }
+        );
       }
     },
     [profileId]
