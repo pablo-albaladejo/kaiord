@@ -209,4 +209,68 @@ describe("categorizeChatError", () => {
       expect(category).toBe("rate");
     });
   });
+
+  describe("provider codes, stream chunks and plain objects", () => {
+    it.each([
+      ["insufficient_quota: billing"],
+      ["quota_exceeded for this key"],
+      ["model overload, retry later"],
+    ])("should map the provider code in %s to rate", (text) => {
+      // Arrange
+      const error = new Error(text);
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("rate");
+    });
+
+    it("should not read 'quotation' as a quota", () => {
+      // Arrange
+      const error = new Error("unterminated quotation in tool input");
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("generic");
+    });
+
+    it("should map a 503 service-unavailable to rate", () => {
+      // Arrange
+      const HTTP_SERVICE_UNAVAILABLE = 503;
+      const error = Object.assign(new Error("Service Unavailable"), {
+        statusCode: HTTP_SERVICE_UNAVAILABLE,
+      });
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("rate");
+    });
+
+    it("should map an Anthropic mid-stream overloaded_error chunk to rate", () => {
+      // Arrange
+      const error = { type: "overloaded_error", message: "Server busy" };
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("rate");
+    });
+
+    it("should read the message of a plain error object", () => {
+      // Arrange
+      const error = { message: "401 Unauthorized" };
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("auth");
+    });
+  });
 });

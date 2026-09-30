@@ -30,13 +30,19 @@ const readErrorType = (body: unknown): string | undefined => {
 };
 
 /** Reads status/type from the error, or from the error it wraps (`cause`,
-    or a RetryError's `lastError`). */
+    or a RetryError's `lastError`). A provider stream error chunk (e.g.
+    Anthropic's mid-stream `{ type: "overloaded_error" }`) carries the type
+    directly. */
 const readStructured = (error: unknown, depth = 0): Structured => {
   if (typeof error !== "object" || error === null || depth > 3) return {};
   const e = error as Record<string, unknown>;
   const statusCode =
     typeof e.statusCode === "number" ? e.statusCode : undefined;
-  const errorType = readErrorType(e.responseBody);
+  const ownType =
+    typeof e.type === "string" && e.type.endsWith("_error")
+      ? e.type
+      : undefined;
+  const errorType = readErrorType(e.responseBody) ?? ownType;
   if (statusCode !== undefined || errorType !== undefined)
     return { statusCode, errorType };
   return readStructured(e.lastError ?? e.cause, depth + 1);
@@ -49,20 +55,35 @@ const fromStructured = ({
   if (errorType && AUTH_TYPES.has(errorType)) return "auth";
   if (errorType && RATE_TYPES.has(errorType)) return "rate";
   if (statusCode === 401 || statusCode === 403) return "auth";
-  if (statusCode === 429 || statusCode === 529) return "rate";
+  // 503/529 mean "unavailable / overloaded, retry soon" — same advice as 429.
+  if (statusCode === 429 || statusCode === 503 || statusCode === 529)
+    return "rate";
   if (statusCode !== undefined || errorType !== undefined) return "generic";
   return undefined;
+};
+
+// Word-bounded; `_` also delimits so provider codes such as
+// `insufficient_quota` or `overloaded_error` match while "generated" does not.
+const AUTH_TEXT = /\b401\b|\bunauthori[sz]ed\b|\bapi[_\s-]?key\b/i;
+const RATE_TEXT =
+  /\b429\b|\brate[_\s-]?limit|(?:\b|_)(?:quota|overload(?:ed)?)(?:\b|_)/i;
+const NETWORK_TEXT = /\b(network|fetch|cors|timeout|timed out)\b/i;
+
+const messageOf = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const message = (error as { message?: unknown }).message;
+    return typeof message === "string" ? message : "";
+  }
+  return String(error);
 };
 
 export const categorizeChatError = (error: unknown): ChatErrorCategory => {
   const structured = fromStructured(readStructured(error));
   if (structured) return structured;
-  const message = error instanceof Error ? error.message : String(error);
-  if (/\b401\b|\bunauthori[sz]ed\b|\bapi[_\s-]?key\b/i.test(message))
-    return "auth";
-  if (/\b429\b|\brate[_\s-]?limit|\bquota\b|\boverloaded\b/i.test(message))
-    return "rate";
-  if (/\b(network|fetch|cors|timeout|timed out)\b/i.test(message))
-    return "network";
+  const message = messageOf(error);
+  if (AUTH_TEXT.test(message)) return "auth";
+  if (RATE_TEXT.test(message)) return "rate";
+  if (NETWORK_TEXT.test(message)) return "network";
   return "generic";
 };
