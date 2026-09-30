@@ -14,8 +14,10 @@
  * the action handler runs (spec: bridge-core).
  */
 
+// The production SPA is served from the apex (https://kaiord.com/app;
+// www 301s to the apex), so the subdomain label is optional.
 const ALLOWED_ORIGIN_REGEX =
-  /^(https:\/\/[a-z0-9-]+\.kaiord\.com|http:\/\/localhost:(5173|5174))$/;
+  /^(https:\/\/([a-z0-9-]+\.)?kaiord\.com|http:\/\/localhost:(5173|5174))$/;
 
 const isAllowedSenderOrigin = (sender) =>
   typeof sender?.origin === "string" &&
