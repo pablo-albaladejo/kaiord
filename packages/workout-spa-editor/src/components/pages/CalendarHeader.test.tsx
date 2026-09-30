@@ -1,14 +1,27 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { ActiveProfile } from "../../hooks/use-active-profile-live";
+import type { CalendarEmptyBannersProps } from "./CalendarEmptyBanners";
 import { CalendarHeader } from "./CalendarHeader";
 
+const header = vi.hoisted(() => ({
+  live: undefined as ActiveProfile | undefined,
+  bannerProps: null as CalendarEmptyBannersProps | null,
+}));
+
+vi.mock("../../hooks/use-active-profile-live", () => ({
+  useActiveProfileLive: () => header.live,
+}));
 vi.mock("./use-calendar-send-week", () => ({
   useCalendarSendWeek: () => ({ offered: false, state: { phase: "idle" } }),
 }));
 vi.mock("./CalendarEmptyBanners", () => ({
-  CalendarEmptyBanners: () => <div data-testid="mock-empty-banners" />,
+  CalendarEmptyBanners: (props: CalendarEmptyBannersProps) => {
+    header.bannerProps = props;
+    return <div data-testid="mock-empty-banners" />;
+  },
 }));
 
 vi.mock("../organisms/BatchCostConfirmation", () => ({
@@ -71,6 +84,10 @@ const baseState = {
 } as unknown as Parameters<typeof CalendarHeader>[0]["state"];
 
 describe("CalendarHeader", () => {
+  afterEach(() => {
+    header.live = undefined;
+  });
+
   it("should render empty banners, cost confirmation, and week navigation", () => {
     // Arrange
 
@@ -283,5 +300,26 @@ describe("CalendarHeader", () => {
     expect(screen.getByTestId("mock-cost-confirmation").dataset.open).toBe(
       "true"
     );
+  });
+
+  it("should tick the guide's sources step from the profile's links, not the available sources", () => {
+    // Arrange
+    // The account is linked, but its extension is not available in this
+    // browser, so no coaching source reports it: the step is still done.
+    header.live = {
+      id: "p1",
+      profile: {
+        linkedAccounts: [{ source: "train2go" }],
+      } as unknown as ActiveProfile["profile"],
+    };
+    const coaching = {
+      syncSources: [],
+    } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
+
+    // Act
+    render(<CalendarHeader state={baseState} coaching={coaching} />);
+
+    // Assert
+    expect(header.bannerProps?.sourceLinked).toBe(true);
   });
 });

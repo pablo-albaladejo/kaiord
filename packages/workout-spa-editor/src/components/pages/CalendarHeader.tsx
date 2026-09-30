@@ -17,6 +17,7 @@ import { calendarEmptyBannerProps } from "./calendar-empty-banner-props";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
 import { CalendarNavRow } from "./CalendarNavRow";
 import { SendWeekButton, SendWeekSection } from "./CalendarSendWeek";
+import { useHasCoachingPlansLive } from "./use-calendar-live-queries";
 import { useCalendarSendWeek } from "./use-calendar-send-week";
 import type { useCalendarState } from "./use-calendar-state";
 import { useLatestSessionDate } from "./use-latest-session-date";
@@ -38,7 +39,9 @@ export function CalendarHeader({
   planCount,
 }: CalendarHeaderProps) {
   const latestDate = useLatestSessionDate(s.latestWorkout?.date);
-  const profileId = useActiveProfileLive()?.id ?? null;
+  const live = useActiveProfileLive();
+  const profileId = live?.id ?? null;
+  const hasAnyPlans = useHasCoachingPlansLive(profileId);
   const moves = useCoachMoveNotice(profileId, s.data.weekStart);
   const { dismiss: dismissMoves } = useCoachMoveNoticeActions();
   const send = useCalendarSendWeek(
@@ -55,7 +58,12 @@ export function CalendarHeader({
         />
       )}
       <CalendarEmptyBanners
-        {...calendarEmptyBannerProps(s, coaching, latestDate, planCount)}
+        {...calendarEmptyBannerProps(s, {
+          latestDate,
+          planCount,
+          hasAnyPlans,
+          sourceLinked: (live?.profile?.linkedAccounts.length ?? 0) > 0,
+        })}
       />
       <BatchCostConfirmation
         open={s.batch.pending !== null}

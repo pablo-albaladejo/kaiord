@@ -22,6 +22,7 @@ const props = (
   hasAiProvider: true,
   extensionInstalled: true,
   rawCount: 0,
+  hasAnyPlans: false,
   batchMessage: null,
   onDismissBatch: vi.fn(),
   batchIsProcessing: false,
@@ -126,6 +127,7 @@ describe("CalendarEmptyBanners", () => {
       hasWeekWorkouts: false,
       hasAiProvider: false,
       planCount: PLAN_COUNT,
+      hasAnyPlans: true,
     });
 
     // Assert
@@ -144,6 +146,7 @@ describe("CalendarEmptyBanners", () => {
       hasAnyWorkouts: false,
       hasWeekWorkouts: false,
       planCount: PLAN_COUNT,
+      hasAnyPlans: true,
     });
 
     // Assert
@@ -177,5 +180,37 @@ describe("CalendarEmptyBanners", () => {
     expect(
       screen.getByRole("button", { name: "Add a key" })
     ).toBeInTheDocument();
+  });
+
+  it("should not greet a coached profile with the guide on a week without plans", () => {
+    // Arrange
+    // The coach's plans sit in another week: the user is past the first run,
+    // and this week is simply empty.
+
+    // Act
+    renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      planCount: 0,
+      hasAnyPlans: true,
+    });
+
+    // Assert
+    expect(screen.queryByTestId("first-run-guide")).not.toBeInTheDocument();
+    expect(screen.getByTestId("empty-week-state")).toBeInTheDocument();
+  });
+
+  it("should render nothing while it cannot yet tell whether the profile has plans", () => {
+    // Arrange
+
+    // Act
+    const { container } = renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      hasAnyPlans: undefined,
+    });
+
+    // Assert
+    expect(container).toBeEmptyDOMElement();
   });
 });
