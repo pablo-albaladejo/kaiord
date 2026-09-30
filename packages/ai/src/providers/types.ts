@@ -37,3 +37,10 @@ export type ResolvedModel<P extends ResolvableProvider = ResolvableProvider> = {
 };
 
 export type ModelOption = { id: string; label: string };
+
+/** A model still served but announced for retirement. */
+export type ModelDeprecation = {
+  successor: string;
+  /** ISO date the provider retires it, or null while undated. */
+  retiresOn: string | null;
+};

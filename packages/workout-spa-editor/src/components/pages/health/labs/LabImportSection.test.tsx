@@ -128,6 +128,8 @@ const pdfFile = () =>
 
 const AFFORDANCE = "Upload a PDF or image";
 const RUN_FAILED = "Could not extract the lab report — please retry";
+const MODEL_UNAVAILABLE =
+  "This model is no longer available — pick another in Settings → AI";
 const NO_PROVIDER_HINT =
   "Configure a lab-extraction model in Settings to import from a file.";
 
@@ -187,6 +189,26 @@ describe("LabImportSection", () => {
     // Assert
     await waitFor(() =>
       expect(screen.getByText(RUN_FAILED)).toBeInTheDocument()
+    );
+  });
+
+  it("should point a model the provider no longer serves at Settings", async () => {
+    // Arrange
+    mockRunLabExtraction.mockRejectedValue(
+      Object.assign(new Error("model: claude-gone"), {
+        statusCode: 404,
+        responseBody:
+          '{"type":"error","error":{"type":"not_found_error","message":"model: claude-gone"}}',
+      })
+    );
+    renderWithI18n(<LabImportSection onDraft={vi.fn()} />);
+
+    // Act
+    await userEvent.upload(screen.getByLabelText(AFFORDANCE), pdfFile());
+
+    // Assert
+    await waitFor(() =>
+      expect(screen.getByText(MODEL_UNAVAILABLE)).toBeInTheDocument()
     );
   });
 
