@@ -152,6 +152,8 @@
   },
   "profileLink": {
     "notLinked": "{{name}} tiene sesión en este navegador pero no está vinculado a este perfil de atleta, así que todavía no se sincroniza nada.",
-    "link": "Vincular a este perfil"
+    "link": "Vincular a este perfil",
+    "signIn": "{{name}} no está vinculado a este perfil de atleta. Inicia sesión en {{name}} en este navegador y luego vincúlalo aquí.",
+    "linking": "Vinculando…"
   }
 }
