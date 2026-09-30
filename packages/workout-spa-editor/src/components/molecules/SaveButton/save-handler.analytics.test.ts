@@ -91,6 +91,35 @@ describe("createSaveHandler — analytics call-site", () => {
     await expect(result).resolves.toBeUndefined();
   });
 
+  it("should download a KRD file without reading the profile", async () => {
+    // Arrange
+    const resolveProfile = vi.fn(() => Promise.reject(new Error("db down")));
+    const handler = createSaveHandler(
+      fakeWorkout as never,
+      "krd",
+      noop,
+      noop,
+      noop,
+      noop,
+      noop,
+      undefined,
+      (key) => key,
+      resolveProfile
+    );
+
+    // Act
+    await handler();
+
+    // Assert
+    expect(resolveProfile).not.toHaveBeenCalled();
+    expect(mockExportWorkout).toHaveBeenCalledWith(
+      fakeWorkout,
+      "krd",
+      expect.any(Function),
+      null
+    );
+  });
+
   it("should pass the profile read at click time to the export so a GCN file resolves its pace zones", async () => {
     // Arrange
     const profile = { id: "p1" };

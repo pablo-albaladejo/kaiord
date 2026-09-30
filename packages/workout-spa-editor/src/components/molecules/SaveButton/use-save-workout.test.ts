@@ -41,6 +41,8 @@ describe("useSaveWorkout", () => {
     await createDexiePersistence(db).profiles.put(owner);
     const { result } = renderHook(() => useSaveWorkout(KRD_STUB, owner.id));
 
+    act(() => result.current.setSelectedFormat("gcn"));
+
     // Act
     await act(async () => {
       await result.current.handleSave();
@@ -49,7 +51,7 @@ describe("useSaveWorkout", () => {
     // Assert
     expect(mockExportWorkout).toHaveBeenCalledWith(
       KRD_STUB,
-      "krd",
+      "gcn",
       expect.any(Function),
       owner
     );
@@ -67,6 +69,8 @@ describe("useSaveWorkout", () => {
     await persistence.profiles.setActiveId(active.id);
     const { result } = renderHook(() => useSaveWorkout(KRD_STUB));
 
+    act(() => result.current.setSelectedFormat("gcn"));
+
     // Act
     await act(async () => {
       await result.current.handleSave();
@@ -75,7 +79,7 @@ describe("useSaveWorkout", () => {
     // Assert
     expect(mockExportWorkout).toHaveBeenCalledWith(
       KRD_STUB,
-      "krd",
+      "gcn",
       expect.any(Function),
       active
     );

@@ -24,7 +24,7 @@ export function createSaveHandler(
   showError: (title: string, description: string) => void,
   onExported?: (format: string) => void,
   t: Translate = getTranslate("editor"),
-  /** Reads the export's profile at click time (`resolveExportProfile`). */
+  /** Reads a GCN export's profile at click time (`resolveExportProfile`). */
   resolveProfile: () => Promise<Profile | null> = async () => null
 ) {
   return async () => {
@@ -39,7 +39,7 @@ export function createSaveHandler(
         (progress) => {
           setExportProgress(progress);
         },
-        await resolveProfile()
+        selectedFormat === "gcn" ? await resolveProfile() : null
       );
 
       setExportProgress(100);
