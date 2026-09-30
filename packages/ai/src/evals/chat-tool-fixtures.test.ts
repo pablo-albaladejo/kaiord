@@ -59,4 +59,37 @@ describe("hub chat-tool fixtures", () => {
     expect(missingDirection?.success).toBe(false);
     expect(valid?.success).toBe(true);
   });
+
+  it("should reject a priority policy without a sourceOrder, like the SPA tool", () => {
+    // Arrange
+    const tool = createHubChatToolFixtures().find(
+      (t) => t.name === "set_data_route"
+    );
+
+    // Act
+    const parsed = tool?.inputSchema.safeParse({
+      action: "set_source_policy",
+      dataType: "sleep",
+      mode: "priority",
+    });
+
+    // Assert
+    expect(parsed?.success).toBe(false);
+  });
+
+  it("should tell the model which fields each action requires", async () => {
+    // Arrange
+    const tool = buildSdkTools(createHubChatToolFixtures()).set_data_route;
+
+    // Act
+    const jsonSchema = (await asSchema(tool?.inputSchema).jsonSchema) as {
+      properties: Record<string, { description?: string }>;
+    };
+
+    // Assert
+    expect(jsonSchema.properties.action?.description).toMatch(
+      /integrationId.*direction.*mode/s
+    );
+    expect(jsonSchema.properties.direction?.description).toMatch(/Required/);
+  });
 });

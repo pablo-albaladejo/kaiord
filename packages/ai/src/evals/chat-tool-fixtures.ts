@@ -23,28 +23,65 @@ const routeFields = {
   direction: directionSchema,
 };
 
-const strictSetDataRouteSchema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("enable_route"), ...routeFields }),
-  z.object({ action: z.literal("disable_route"), ...routeFields }),
-  z.object({
-    action: z.literal("set_source_policy"),
-    dataType: z.enum(managedDataTypes),
-    mode: sourceModeSchema,
-    sourceOrder: z.array(z.string()).optional(),
-  }),
-]);
+const strictSetDataRouteSchema = z
+  .discriminatedUnion("action", [
+    z.object({ action: z.literal("enable_route"), ...routeFields }),
+    z.object({ action: z.literal("disable_route"), ...routeFields }),
+    z.object({
+      action: z.literal("set_source_policy"),
+      dataType: z.enum(managedDataTypes),
+      mode: sourceModeSchema,
+      sourceOrder: z.array(z.string()).optional(),
+    }),
+  ])
+  .refine(
+    (v) =>
+      v.action !== "set_source_policy" ||
+      v.mode !== "priority" ||
+      (v.sourceOrder?.length ?? 0) > 0,
+    {
+      path: ["sourceOrder"],
+      message: "priority mode requires a non-empty sourceOrder",
+    }
+  );
 
 /** Provider-facing shape: one flat object (top-level JSON Schema
     `type: "object"`, which Anthropic/OpenAI require), with the per-action
-    requirements of the strict union enforced by piping into it. */
+    requirements of the strict union enforced by piping into it. Field
+    descriptions match the SPA tool, which is what the model sees there. */
 const setDataRouteSchema = z
   .object({
-    action: z.enum(["enable_route", "disable_route", "set_source_policy"]),
+    action: z
+      .enum(["enable_route", "disable_route", "set_source_policy"])
+      .describe(
+        "enable_route / disable_route require integrationId and " +
+          "direction; set_source_policy requires mode (and a non-empty " +
+          "sourceOrder when mode is priority)."
+      ),
     dataType: z.enum(managedDataTypes),
-    integrationId: z.string().min(1).optional(),
-    direction: directionSchema.optional(),
-    mode: sourceModeSchema.optional(),
-    sourceOrder: z.array(z.string()).optional(),
+    integrationId: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+        "Integration id, e.g. garmin, whoop, train2go, manual. Required " +
+          "for enable_route / disable_route."
+      ),
+    direction: directionSchema
+      .optional()
+      .describe("Required for enable_route / disable_route."),
+    mode: sourceModeSchema
+      .optional()
+      .describe("Required for set_source_policy."),
+    sourceOrder: z
+      .array(z.string())
+      .optional()
+      .describe(
+        "Integration ids in priority order, most preferred first. Only " +
+          "used by set_source_policy when mode is priority; a single id " +
+          "means read only from that source (e.g. 'read sleep only from " +
+          "Whoop' -> mode priority, sourceOrder ['whoop'])."
+      ),
   })
   .pipe(strictSetDataRouteSchema);
 
