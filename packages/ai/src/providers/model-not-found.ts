@@ -1,43 +1,43 @@
 /**
  * Detects a provider rejecting the requested model as unknown (retired or
- * misspelled). A 404 alone is not enough: the error text must name a model in
- * one provider's documented shape — Anthropic `not_found_error` whose message
- * names the model, OpenAI `model_not_found` / "The model `x` does not
- * exist", Google `NOT_FOUND` / "models/x is not found". The status is not
- * required, so a wrapped error that kept only the body still matches. Walks
- * `cause` and `lastError` (the AI SDK's retry wrapper) a bounded depth.
+ * misspelled). A 404 alone is not enough: the provider must name a model.
+ * Structured fields win, read through the shared `readProviderError` (the
+ * only cause/lastError walker):
+ * Anthropic `not_found_error` whose message names a model, OpenAI
+ * `model_not_found`, Google `NOT_FOUND` on a `models/...` path. Only when no
+ * structured field exists does the top-level message decide ("The model `x`
+ * does not exist", "models/x is not found").
  */
-type ErrorLike = {
-  message?: unknown;
-  responseBody?: unknown;
-  cause?: unknown;
-  lastError?: unknown;
+import {
+  type ProviderErrorInfo,
+  readProviderError,
+} from "./read-provider-error";
+
+const MODEL_WORD = /\bmodel\b/i;
+const MODEL_PATH = /\bmodels\//;
+const MISSING_MODEL_TEXT =
+  /\bthe model `[^`]+` does not exist|\bmodels\/[\w.-]+ is not found|model_not_found/i;
+
+/** True when the structured fields say the requested model does not exist. */
+export const namesMissingModel = (info: ProviderErrorInfo): boolean => {
+  const message = info.errorMessage ?? "";
+  if (info.errorType === "not_found_error") return MODEL_WORD.test(message);
+  if (info.errorCode === "model_not_found") return true;
+  if (info.errorStatus === "NOT_FOUND") return MODEL_PATH.test(message);
+  return false;
 };
 
-const NAMES_A_MODEL: ReadonlyArray<(text: string) => boolean> = [
-  (t) => /not_found_error/.test(t) && /\bmodel\b/i.test(t),
-  (t) => /model_not_found/.test(t),
-  (t) => /\bthe model `[^`]+` does not exist/i.test(t),
-  (t) => /\bmodels\/[\w.-]+ is not found/i.test(t),
-  (t) => /NOT_FOUND/.test(t) && /\bmodels\//.test(t),
-];
-
-const MAX_DEPTH = 4;
-
-const textOf = (err: ErrorLike): string =>
-  [err.message, err.responseBody]
-    .filter((v): v is string => typeof v === "string")
-    .join("\n");
-
-const matches = (error: unknown, depth: number): boolean => {
-  if (depth > MAX_DEPTH || typeof error !== "object" || error === null) {
-    return false;
-  }
-  const err = error as ErrorLike;
-  const text = textOf(err);
-  if (NAMES_A_MODEL.some((names) => names(text))) return true;
-  return matches(err.cause, depth + 1) || matches(err.lastError, depth + 1);
+const messageOf = (error: unknown): string => {
+  if (typeof error !== "object" || error === null) return "";
+  const message = (error as { message?: unknown }).message;
+  return typeof message === "string" ? message : "";
 };
 
-export const isModelNotFoundError = (error: unknown): boolean =>
-  matches(error, 0);
+export const isModelNotFoundError = (error: unknown): boolean => {
+  const info = readProviderError(error);
+  if (namesMissingModel(info)) return true;
+  // A body that names its failure is authoritative; only body-less errors
+  // fall back to the message.
+  if (info.errorType || info.errorCode || info.errorStatus) return false;
+  return MISSING_MODEL_TEXT.test(messageOf(error));
+};

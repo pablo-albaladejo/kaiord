@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_SERVICE_OVERLOADED,
   HTTP_STATUS_UNAUTHORIZED,
 } from "../test-utils/constants";
@@ -70,6 +71,22 @@ describe("isModelNotFoundError", () => {
     expect(result).toBe(true);
   });
 
+  it("should read the model rejection through a RetryError's lastError", () => {
+    // Arrange
+    const error = Object.assign(new Error("Failed after 3 attempts"), {
+      lastError: apiCallError(
+        404,
+        '{"type":"error","error":{"type":"not_found_error","message":"model: claude-3-haiku-20240307"}}'
+      ),
+    });
+
+    // Act
+    const result = isModelNotFoundError(error);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it.each([
     {
       name: "auth",
@@ -96,6 +113,13 @@ describe("isModelNotFoundError", () => {
     {
       name: "wrapped bare 404",
       error: new Error("Generation failed", { cause: apiCallError(404, "") }),
+    },
+    {
+      name: "400 whose typed body only echoes model-not-found text",
+      error: apiCallError(
+        HTTP_STATUS_BAD_REQUEST,
+        '{"type":"error","error":{"type":"invalid_request_error","message":"tool_result not_found_error: model lookup failed"}}'
+      ),
     },
     { name: "plain", error: new Error("Failed to fetch") },
     { name: "non-error", error: "boom" },

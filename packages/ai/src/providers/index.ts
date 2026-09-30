@@ -2,7 +2,7 @@ export {
   createLanguageModel,
   type CreateLanguageModelOptions,
 } from "./create-language-model";
-export { isModelNotFoundError } from "./model-not-found";
+export { isModelNotFoundError, namesMissingModel } from "./model-not-found";
 export {
   DEPRECATED_MODELS,
   deprecationOf,
@@ -16,6 +16,10 @@ export {
   retiredSuccessor,
   usableModel,
 } from "./provider-models";
+export {
+  type ProviderErrorInfo,
+  readProviderError,
+} from "./read-provider-error";
 export { resolveModelForPurpose } from "./resolve-model-for-purpose";
 export type {
   AiModelBinding,
