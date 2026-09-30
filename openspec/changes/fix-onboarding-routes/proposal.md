@@ -52,5 +52,16 @@ dead end:
   row, calendar empty banners, first-run guide, and EN/ES locales.
 - `IntegrationPolicy` gains an optional, non-indexed `disabledBy: "disconnect"`
   marker, so a reconnect can tell a route Disconnect switched off from one the
-  user switched off. No index changes, so no Dexie version bump or migration;
-  the table is not synced to Drive.
+  user switched off. No index changes, so no Dexie version bump or migration.
+  The table rides the cloud snapshot, so the marker travels with the row. An
+  older build tolerates it: the restore path bulk-puts snapshot rows without
+  validating them (`importTables` in `dexie-snapshot-port.ts`), the repository
+  reads rows by cast rather than by schema, and `integrationPolicySchema` is a
+  non-strict `z.object` that only ever parses the upsert's explicit input. The
+  one gap is that an older build's upsert spreads the existing row and so keeps
+  the marker: a route an older tab switched on and off again after a
+  Disconnect would be restored by this build's next reconnect. The SPA is one
+  deployed site, so that window closes when the old tab reloads.
+- A route that a Disconnect switched off before this change carries no marker,
+  so it is indistinguishable from the user's own "off" and stays off on
+  reconnect; the user switches it back on in Connections.
