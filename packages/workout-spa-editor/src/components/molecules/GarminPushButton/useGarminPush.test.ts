@@ -286,6 +286,29 @@ describe("useGarminPush", () => {
     );
   });
 
+  it("should refuse with no-export-route, before building the payload, when the route is off", async () => {
+    // Arrange
+    mockPolicies = [];
+    mockExportGcnWorkout.mockRejectedValue(
+      new PaceZonesUnavailableError("missing-pace-zones")
+    );
+    const { result } = renderHook(() => useGarminPush(makeWorkout()));
+    let outcome: unknown;
+
+    // Act
+    await act(async () => {
+      outcome = await result.current.push();
+    });
+
+    // Assert
+    expect(outcome).toEqual({
+      kind: "failed",
+      reason: "no-export-route",
+      retryable: false,
+    });
+    expect(mockExportGcnWorkout).not.toHaveBeenCalled();
+  });
+
   it("should set fallback error message when non-Error is thrown", async () => {
     // Arrange
     mockExportGcnWorkout.mockRejectedValue("string error");

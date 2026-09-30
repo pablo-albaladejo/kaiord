@@ -2,8 +2,8 @@
  * A workout with pace ZONE targets through the real GCN export, on the two
  * paths that share `placeRecord`: the bulk "Send week" runner and the chat
  * tool. Its zones resolve from the owning profile as the Athlete page shows
- * them; when they cannot, the run fails with the reason and nothing
- * reaches Garmin.
+ * them; when they cannot, the run fails with the reason, nothing reaches
+ * Garmin, and a refused export route still wins over that reason.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -137,6 +137,30 @@ describe("placeRecordResult with pace zone targets", () => {
       durationMs: 0,
       abandonedCount: 0,
     });
+  });
+});
+
+describe("placeRecordResult ordering", () => {
+  it("should report no-export-route, not missing-pace-zones, when the route is off", async () => {
+    // Arrange
+    const { persistence, deps, pushWorkout } = await setup(freshProfile());
+    policies.list = [];
+
+    // Act
+    const item = await placeRecordResult(
+      persistence,
+      pushWorkout,
+      WORKOUT_ID,
+      deps
+    );
+
+    // Assert
+    expect(item.result).toEqual({
+      kind: "failed",
+      reason: "no-export-route",
+      retryable: false,
+    });
+    expect(pushWorkout).not.toHaveBeenCalled();
   });
 });
 

@@ -59,14 +59,20 @@ export const useGarminPush = (
         });
       try {
         const deps = buildPlacementDeps(features, analytics);
-        const gcn = await exportRecordGcn(workout.krd, workout.profileId);
+        const { krd, profileId } = workout;
+        // Phase 1 folds a failed conversion into `failed`: surface it first.
+        const buildGcn = () =>
+          exportRecordGcn(krd, profileId).catch((error: unknown) => {
+            if (!(error instanceof PaceZonesUnavailableError)) showError(error);
+            throw error;
+          });
         // A joiner's run is the owner's: only the owner reports it.
         return await pushWorkoutToGarminCalendar(
           deps,
           garminPlacementRequest(
             {
               record: workout,
-              gcn,
+              buildGcn,
               ledgerRepo: deps.ledgerRepo,
               pushWorkout: guardedPush,
             },
@@ -78,8 +84,6 @@ export const useGarminPush = (
           )
         );
       } catch (error: unknown) {
-        if (error instanceof PaceZonesUnavailableError)
-          return failedEarly(error.reason);
         logGarminPushFailure(error);
         showError(error);
         return failedEarly();

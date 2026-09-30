@@ -3,6 +3,7 @@
  * `onLibraryConfirmed` fires iff the row then holds a confirmed library id.
  */
 import type { GarminWorkoutId } from "../../types/garmin-ledger";
+import { PaceZonesUnavailableError } from "../../utils/pace-zones-unavailable-error";
 import { NoActiveExportRouteError } from "../export/execute-workout-push";
 import type { RecordExportResult } from "../export/record-export.use-case";
 import { logGarminPushFailure } from "./log-garmin-push-failure";
@@ -38,6 +39,8 @@ export const runPhaseOne = async (
   } catch (error) {
     if (error instanceof NoActiveExportRouteError)
       return failed("no-export-route", false);
+    if (error instanceof PaceZonesUnavailableError)
+      return failed(error.reason, false);
     logGarminPushFailure(error);
     return failed("library-push-failed", true);
   }
