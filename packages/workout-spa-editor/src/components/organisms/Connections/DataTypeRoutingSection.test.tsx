@@ -317,13 +317,15 @@ describe("DataTypeRoutingSection", () => {
 
   it("should store a ranked order led by the picked source", () => {
     // Arrange
-    // Writer: two Data Hub weight import cells (WHOOP and Tanita both announce
-    // read:body and both serve weight), union by default. Tanita is picked
-    // second on purpose: an order stored in candidate sequence would still
-    // look correct if the pick already happened to lead it.
+    // Writer: two Data Hub weight import cells (TrainingPeaks and Tanita both
+    // announce read:body and both serve weight), union by default. Tanita is
+    // picked second on purpose: an order stored in candidate sequence would
+    // still look correct if the pick already happened to lead it.
     renderSection(
       flows({
-        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
+        weight: {
+          import: [route("trainingpeaks-bridge"), route("tanita-bridge")],
+        },
       })
     );
     fireEvent.click(screen.getByTestId("routing-change-weight"));
@@ -338,7 +340,7 @@ describe("DataTypeRoutingSection", () => {
       profileId: PROFILE_ID,
       dataType: "weight",
       mode: "priority",
-      sourceOrder: ["tanita-bridge", "whoop-bridge", "manual"],
+      sourceOrder: ["tanita-bridge", "trainingpeaks-bridge", "manual"],
     });
   });
 

@@ -1,3 +1,4 @@
+import { managedDataTypes } from "@kaiord/core";
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -26,9 +27,10 @@ vi.mock("../adapters/connections/create-connection-provider", () => ({
 vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: {
     getCapabilities: (id: string) =>
-      id === "garmin-bridge"
-        ? ["write:workouts", "read:activities", "write:body"]
-        : null,
+      ({
+        "garmin-bridge": ["write:workouts", "read:activities", "write:body"],
+        "whoop-bridge": ["read:body", "read:sleep", "read:activities"],
+      })[id] ?? null,
   },
 }));
 // Any write through the app-wide repository lands in the same store the test
@@ -179,5 +181,38 @@ describe("useConnectionActions connect", () => {
     expect(await rows("activity")).toMatchObject([{ enabled: true }]);
     expect(exports).toMatchObject([{ enabled: true }]);
     expect(exports[0]).not.toHaveProperty("disabledBy");
+  });
+
+  it("should open only the routes WHOOP's import writes, never a scale's", async () => {
+    // Arrange
+    // WHOOP announces the shared `read:body` token, which also names weight,
+    // daily wellness and body composition; seeding those would open routes
+    // that nothing ever fills.
+    const { persistence, actions } = setup();
+
+    // Act
+    await actions.connect("whoop", "bridge");
+
+    // Assert
+    const seeded: string[] = [];
+    for (const dataType of managedDataTypes) {
+      const found = await persistence.integrationPolicy.findByProfileDirection({
+        profileId: PROFILE_ID,
+        dataType,
+        direction: "import",
+      });
+      if (found.length) seeded.push(dataType);
+    }
+    expect(seeded.sort()).toEqual(
+      [
+        "activity",
+        "heart-rate-series",
+        "hrv",
+        "sleep",
+        "strain",
+        "stress",
+        "vitals",
+      ].sort()
+    );
   });
 });
