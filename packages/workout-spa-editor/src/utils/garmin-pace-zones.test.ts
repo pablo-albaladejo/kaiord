@@ -1,6 +1,7 @@
 import type { PaceZoneTable } from "@kaiord/garmin";
 import { describe, expect, it } from "vitest";
 
+import { writeThreshold } from "../application/coaching/sync-zones-threshold-fields";
 import { deriveZoneMap } from "../lib/athlete/derive-zone-map";
 import { formatPace } from "../lib/athlete/format";
 import {
@@ -20,7 +21,7 @@ import {
 } from "../test-utils/pace-zone-fixtures";
 import type { Profile } from "../types/profile";
 import { garminPaceZonesFor } from "./garmin-pace-zones";
-import { OPEN_END_FACTOR } from "./pace-zone-table";
+import { OPEN_END_FACTOR, thresholdZoneTable } from "./pace-zone-table";
 import { PaceZonesUnavailableError } from "./pace-zones-unavailable-error";
 
 const KM = 1000;
@@ -30,6 +31,7 @@ const SLOW = 420;
 const SWIM_FAST = 95;
 const SWIM_SLOW = 110;
 const BEYOND_THE_MODEL = 6;
+const NEW_THRESHOLD = 270;
 
 /** The table's ranges written the way the Athlete page's zone map is. */
 const shown = (table: PaceZoneTable | undefined, metres: number) =>
@@ -98,6 +100,30 @@ describe("garminPaceZonesFor", () => {
     expect(profile.sportZones.running?.paceZones?.zones).toEqual(
       danielsZones(RUN_THRESHOLD)
     );
+    expect(shown(table, KM)).toEqual(displayed(profile, "running"));
+  });
+
+  it("should follow a coach-synced threshold that left a formula method's zones stale", async () => {
+    // Arrange
+    const daniels = await withDaniels(freshProfile(), "running");
+    const before = await withThreshold(daniels, "running", RUN_THRESHOLD);
+    const profile = writeThreshold(
+      before,
+      "running.thresholds.thresholdPaceSecPerKm",
+      NEW_THRESHOLD
+    );
+
+    // Act
+    const table = garminPaceZonesFor(
+      paceZoneKrd("running", ALL_ZONES),
+      profile
+    );
+
+    // Assert
+    expect(profile.sportZones.running?.paceZones?.zones).toEqual(
+      danielsZones(RUN_THRESHOLD)
+    );
+    expect(table).toEqual(thresholdZoneTable(NEW_THRESHOLD, KM));
     expect(shown(table, KM)).toEqual(displayed(profile, "running"));
   });
 

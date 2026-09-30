@@ -1,7 +1,10 @@
 /**
- * The pace zones a Garmin export needs, resolved as the athlete sees them
- * on the Athlete page: zones the athlete (or a coach sync) set win; else
- * Z1–Z5 derive from the threshold pace with the zone map's own model.
+ * The pace zones a Garmin export needs. Stored zones the athlete edited
+ * (method "user" or "custom") or a coach sync wrote ("train2go") win when
+ * any bound is set; zones of a formula method (e.g. "daniels-5") never do,
+ * since a coach threshold sync leaves them computed from an old threshold.
+ * Otherwise Z1–Z5 derive from the threshold pace with the Athlete page's
+ * zone-map model (`PACE_MODEL`).
  * The distance a pace is per comes from the workout's sport (running: 1 km,
  * swimming: 100 m), never from a zone's stored unit, which the zone editor
  * writes as per-km for every sport. A workout that references a zone the
@@ -10,10 +13,10 @@
  */
 import type { PaceZoneTable } from "@kaiord/garmin";
 
+import { isFormulaId } from "../application/coaching/zone-table-classifier-detectors";
 import type { KRD } from "../types/krd";
 import type { Profile } from "../types/profile";
 import type { PaceZone, SportZoneConfig } from "../types/sport-zones";
-import { calculatePaceZones } from "./calculate-pace-zones";
 import { storedZoneTable, thresholdZoneTable } from "./pace-zone-table";
 import { PaceZonesUnavailableError } from "./pace-zones-unavailable-error";
 import { referencedPaceZones } from "./referenced-pace-zones";
@@ -29,24 +32,11 @@ const isPaceSport = (sport: string | undefined): sport is PaceSport =>
 
 const isSet = (z: PaceZone) => z.minPace > 0 || z.maxPace > 0;
 
-/** Zones a method computed from the current threshold, untouched since. */
-const isMethodOutput = ({ thresholds, paceZones }: SportZoneConfig) => {
-  if (!paceZones || !thresholds.thresholdPace || !thresholds.paceUnit)
-    return false;
-  const computed = calculatePaceZones(
-    thresholds.thresholdPace,
-    thresholds.paceUnit,
-    paceZones.method
-  );
-  return (
-    computed.length === paceZones.zones.length &&
-    computed.every(
-      (z, i) =>
-        z.minPace === paceZones.zones[i]?.minPace &&
-        z.maxPace === paceZones.zones[i]?.maxPace
-    )
-  );
-};
+/** A formula method's zones are a function of the threshold, which a coach
+    sync can change without recomputing them: derive, never trust them.
+    "custom" is listed among the pace methods but holds the athlete's own. */
+const isFormulaMethod = (method: string | undefined) =>
+  method !== undefined && method !== "custom" && isFormulaId(method);
 
 const zoneTableFor = (
   config: SportZoneConfig | undefined,
@@ -54,7 +44,7 @@ const zoneTableFor = (
 ): PaceZoneTable => {
   if (!config) return [];
   const stored = config.paceZones?.zones ?? [];
-  if (stored.some(isSet) && !isMethodOutput(config))
+  if (stored.some(isSet) && !isFormulaMethod(config.paceZones?.method))
     return storedZoneTable(stored, metres);
   const pace = config.thresholds.thresholdPace;
   return pace ? thresholdZoneTable(pace, metres) : [];
