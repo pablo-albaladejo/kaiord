@@ -25,17 +25,23 @@ dead end:
 
 - The "Also sent to" part of a data type's routing row switches each connected
   destination whose bridge announces the export capability on or off. Switching
-  preserves the stored mode. The no-export-route messages link to Connections.
+  preserves the stored mode. "Nowhere" stays beside the switches until one is
+  on. The unverified TrainingPeaks push is not offered. The no-export-route
+  messages link to Connections.
 - An explicit link of a source (the Train2Go link flow, or a Connections
   reconnect) seeds every import route that source feeds, as the registry
-  derives it. It only seeds, so an existing row, disabled or not, is left
-  unchanged.
+  derives it, narrowed to what the bridge's import writes (WHOOP: seven types,
+  no scale routes). Training zones are seeded manual on a profile that already
+  holds a threshold. Disconnect marks the routes it switches off, and the next
+  link restores them; any other existing row, disabled or not, is left
+  unchanged. A failed seed is logged and never fails the link.
 - The calendar renders every available coaching source. A source the active
   profile has not linked offers "Connect to <Label>". A coaching card on
   Connections says when the source is not linked to the active profile, and
-  offers the link.
+  offers the link while the source has a session, or asks for a sign-in first.
 - The first-run guide ticks the steps that are already true and moves its
-  emphasis to the first step still missing. It yields when the week holds
+  emphasis to the first step still missing. It shows only while the profile
+  holds no workout and no coaching plan in any week. It yields when the week holds
   coaching plans: without an AI key those plans get the missing-key banner, and
   the week is not called empty.
 
@@ -44,4 +50,7 @@ dead end:
 - `packages/workout-spa-editor`: Connections routing row, Send week preflight,
   placement feedback, Train2Go connect action, connection actions, calendar nav
   row, calendar empty banners, first-run guide, and EN/ES locales.
-- No schema change and no Dexie migration.
+- `IntegrationPolicy` gains an optional, non-indexed `disabledBy: "disconnect"`
+  marker, so a reconnect can tell a route Disconnect switched off from one the
+  user switched off. No index changes, so no Dexie version bump or migration;
+  the table is not synced to Drive.
