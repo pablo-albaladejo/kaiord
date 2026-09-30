@@ -88,6 +88,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           workout={workout}
           currentWorkout={currentWorkout}
           sidebar={sidebarData}
+          ownerProfileId={record?.profileId}
         />
       )}
     </div>

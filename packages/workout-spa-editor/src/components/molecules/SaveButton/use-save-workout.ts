@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts";
+import { resolveExportProfile } from "../../../hooks/resolve-export-profile";
 import { useToast } from "../../../hooks/use-toast";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
@@ -8,9 +9,10 @@ import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { createSaveHandler } from "./save-handler";
 
 /**
- * Custom hook for save functionality with format selection
+ * Custom hook for save functionality with format selection.
+ * `ownerProfileId`: the profile owning the persisted record, if any.
  */
-export function useSaveWorkout(workout: KRD) {
+export function useSaveWorkout(workout: KRD, ownerProfileId?: string) {
   const [saveErrors, setSaveErrors] = useState<Array<ValidationError> | null>(
     null
   );
@@ -32,7 +34,8 @@ export function useSaveWorkout(workout: KRD) {
     success,
     showError,
     (format) => analytics.event("workout-exported", { format }),
-    t
+    t,
+    () => resolveExportProfile(ownerProfileId)
   );
 
   const clearErrors = () => setSaveErrors(null);
