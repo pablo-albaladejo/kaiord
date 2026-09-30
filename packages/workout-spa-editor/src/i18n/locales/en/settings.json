@@ -81,6 +81,9 @@
     "hint": "Add at least one provider and select an active profile to choose models.",
     "model": "Model",
     "custom": "Custom…",
+    "retired": "{{model}} was retired by the provider — using {{successor}} instead.",
+    "deprecated": "{{model}} is deprecated and will be retired — consider {{successor}}.",
+    "deprecatedOn": "{{model}} is deprecated and will be retired on {{date}} — consider {{successor}}.",
     "customModelIdAriaLabel": "Custom model id",
     "customModelIdPlaceholder": "Enter a model id",
     "reset": "Reset"

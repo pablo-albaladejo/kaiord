@@ -60,6 +60,7 @@
   "errors": {
     "retry": "Reintentar",
     "auth": "Error de autenticación: comprueba tu clave de API en los ajustes.",
+    "model": "Este modelo ya no está disponible: elige otro en Ajustes → IA.",
     "rate": "Se alcanzó el límite de peticiones o la cuota: inténtalo de nuevo en breve.",
     "network": "Error de red al contactar con el proveedor: inténtalo de nuevo.",
     "generic": "El asistente tuvo un error. Inténtalo de nuevo."

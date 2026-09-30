@@ -1,4 +1,7 @@
-import { resolveModelForPurpose } from "@kaiord/ai/providers";
+import {
+  isModelNotFoundError,
+  resolveModelForPurpose,
+} from "@kaiord/ai/providers";
 import type { KRD } from "@kaiord/core";
 import { useCallback, useState } from "react";
 import { useSearch } from "wouter";
@@ -56,9 +59,10 @@ export function useCreateWorkout() {
       });
       setGeneratedKrd(krd);
       setPhase("result");
-    } catch {
+    } catch (error) {
       setPhase("input");
-      toast.error(t("toast.generationFailed"));
+      if (isModelNotFoundError(error)) toast.error(t("toast.modelUnavailable"));
+      else toast.error(t("toast.generationFailed"));
     }
   }, [promptText, resolved, active, sport, customPrompt, toast, t]);
 

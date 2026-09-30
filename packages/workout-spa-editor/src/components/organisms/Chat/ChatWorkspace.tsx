@@ -4,6 +4,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { ChatConversationRecord } from "../../../types/chat/chat-conversation-record";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
+import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
 import { ChatConversation } from "./ChatConversation";
 import { ChatModelPicker } from "./ChatModelPicker";
 import { ConversationSidebar } from "./ConversationSidebar";
@@ -16,6 +17,8 @@ export type ChatWorkspaceProps = {
   providers: LlmProviderConfig[];
   provider: LlmProviderConfig | null;
   modelId: string | null;
+  /** The stored model id before retirement healing, for the notice. */
+  requestedModelId: string | null;
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
   search: UseChatSearchPanel;
@@ -52,6 +55,13 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
           value={props.provider?.id ?? null}
           onChange={props.onModelChange}
         />
+        {props.provider && (
+          <ModelStatusNotice
+            type={props.provider.type}
+            modelId={props.requestedModelId}
+            testIdPrefix="chat-model"
+          />
+        )}
         {props.activeId ? (
           <ChatConversation
             profileId={props.profileId}

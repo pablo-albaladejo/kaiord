@@ -41,6 +41,7 @@
   "aiError": {
     "heading": "AI processing failed",
     "ai-error": "AI returned an error",
+    "ai-model-unavailable": "This model is no longer available — pick another in Settings → AI",
     "ai-cancelled": "AI request was cancelled",
     "ai-timeout": "AI request timed out",
     "ai-invalid-krd": "AI returned an invalid workout structure",

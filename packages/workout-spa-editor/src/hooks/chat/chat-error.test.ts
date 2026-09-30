@@ -15,6 +15,21 @@ describe("categorizeChatError", () => {
     expect(category).toBe("auth");
   });
 
+  it("should map a retired-model 404 to the model category", () => {
+    // Arrange
+    const error = Object.assign(new Error("Not Found"), {
+      statusCode: 404,
+      responseBody:
+        '{"type":"error","error":{"type":"not_found_error","message":"model: claude-3-haiku-20240307"}}',
+    });
+
+    // Act
+    const category = categorizeChatError(error);
+
+    // Assert
+    expect(category).toBe("model");
+  });
+
   it("should map rate/quota failures to a fixed category", () => {
     // Arrange
     const error = new Error("429 rate limit exceeded");
@@ -148,6 +163,77 @@ describe("categorizeChatError", () => {
 
       // Assert
       expect(category).toBe("auth");
+    });
+
+    it("should classify by error type even when the message echoes a missing model", () => {
+      // Arrange
+      const error = apiError(
+        HTTP_BAD_REQUEST,
+        "invalid_request_error",
+        "tool_result not_found_error: model lookup failed"
+      );
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("generic");
+    });
+
+    it("should map a Google NOT_FOUND model body behind a RetryError to model", () => {
+      // Arrange
+      const HTTP_NOT_FOUND = 404;
+      const last = new APICallError({
+        message: "models/gemini-legacy is not found for API version v1beta",
+        url: "https://generativelanguage.googleapis.com/v1beta",
+        requestBodyValues: {},
+        statusCode: HTTP_NOT_FOUND,
+        responseBody: JSON.stringify({
+          error: {
+            code: HTTP_NOT_FOUND,
+            message: "models/gemini-legacy is not found for API version v1beta",
+            status: "NOT_FOUND",
+          },
+        }),
+      });
+      const error = new RetryError({
+        message: "Failed after 3 attempts",
+        reason: "maxRetriesExceeded",
+        errors: [last],
+      });
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("model");
+    });
+
+    it("should not read a bare 404 as a missing model", () => {
+      // Arrange
+      const HTTP_NOT_FOUND = 404;
+      const error = Object.assign(new Error("Not Found"), {
+        statusCode: HTTP_NOT_FOUND,
+      });
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("generic");
+    });
+
+    it("should map a body-less error whose message names a missing model to model", () => {
+      // Arrange
+      const error = new Error(
+        "The model `gpt-legacy` does not exist or you do not have access to it."
+      );
+
+      // Act
+      const category = categorizeChatError(error);
+
+      // Assert
+      expect(category).toBe("model");
     });
 
     it("should read the status through a RetryError's lastError", () => {

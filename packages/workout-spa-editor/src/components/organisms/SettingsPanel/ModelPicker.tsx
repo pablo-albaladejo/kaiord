@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderType } from "../../../store/ai-store-types";
+import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
 
 const CUSTOM_SENTINEL = "__custom__";
 
@@ -62,6 +63,11 @@ export const ModelPicker: React.FC<ModelPickerProps> = ({
           onChange={(e) => onChange(e.target.value)}
         />
       )}
+      <ModelStatusNotice
+        type={type}
+        modelId={value}
+        testIdPrefix="model-picker"
+      />
     </div>
   );
 };

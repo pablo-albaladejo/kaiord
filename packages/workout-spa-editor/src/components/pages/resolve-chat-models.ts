@@ -3,10 +3,11 @@
  * `selectedProviderId` override from the ModelSelector. When a provider is
  * explicitly selected it wins as the provider; the model keeps the chat
  * resolution only if that provider matches, otherwise it falls back to the
- * provider type's catalog default. Generation always uses the
+ * provider's stored model (healed past retirement) or the type's catalog
+ * default. Generation always uses the
  * `workout_generation` resolution untouched by the selector.
  */
-import { getDefaultModel, resolveModelForPurpose } from "@kaiord/ai/providers";
+import { modelForProvider, resolveModelForPurpose } from "@kaiord/ai/providers";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { AiModelBinding } from "../../types/ai-model-binding";
@@ -39,7 +40,7 @@ export const resolveChatModels = (
   const modelId =
     chat && chat.provider.id === selected.id
       ? chat.modelId
-      : (selected.model ?? getDefaultModel(selected.type));
+      : modelForProvider(selected);
   return {
     provider: selected,
     modelId,

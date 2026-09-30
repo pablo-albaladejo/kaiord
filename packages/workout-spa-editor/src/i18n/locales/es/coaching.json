@@ -41,6 +41,7 @@
   "aiError": {
     "heading": "El procesamiento con IA falló",
     "ai-error": "La IA devolvió un error",
+    "ai-model-unavailable": "Este modelo ya no está disponible: elige otro en Ajustes → IA",
     "ai-cancelled": "Se canceló la petición a la IA",
     "ai-timeout": "La petición a la IA agotó el tiempo de espera",
     "ai-invalid-krd": "La IA devolvió una estructura de entreno no válida",

@@ -34,7 +34,7 @@ The eval suite validates LLM output quality against a curated set of workout des
 # Set your API key
 export ANTHROPIC_API_KEY=sk-ant-...
 
-# Run with default model (claude-sonnet-4-5-20250929)
+# Run with default model (claude-sonnet-5, the catalog default)
 pnpm --filter @kaiord/ai eval
 
 # Run with a specific model

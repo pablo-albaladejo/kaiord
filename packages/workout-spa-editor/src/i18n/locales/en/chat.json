@@ -60,6 +60,7 @@
   "errors": {
     "retry": "Retry",
     "auth": "Authentication failed — check your API key in settings.",
+    "model": "This model is no longer available — pick another in Settings → AI.",
     "rate": "Rate limit or quota reached — try again shortly.",
     "network": "Network error reaching the provider — try again.",
     "generic": "The assistant hit an error. Try again."

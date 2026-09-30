@@ -4,7 +4,7 @@
  * volatile runtime selection so the page-level resolver reflects it until the
  * first message persists the conversation.
  */
-import { getDefaultModel } from "@kaiord/ai/providers";
+import { modelForProvider } from "@kaiord/ai/providers";
 import { useCallback } from "react";
 
 import { setConversationModel } from "../application/chat/set-conversation-model";
@@ -41,7 +41,7 @@ export const useChatModelSelection = ({
         profileId,
         activeId,
         providerId,
-        provider.model ?? getDefaultModel(provider.type)
+        modelForProvider(provider)
       ).catch((error: unknown) => {
         logger.error("Failed to persist chat conversation model override", {
           error,

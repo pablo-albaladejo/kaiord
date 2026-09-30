@@ -11,6 +11,7 @@ import type { Analytics } from "@kaiord/core";
 import type { MutableRefObject } from "react";
 
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
+import { classifyAiFailure } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import type { PersistencePort } from "../../../ports/persistence-port";
 import { withOrigin } from "../../../routing/with-origin";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
@@ -76,7 +77,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   } catch (error) {
     if (ctx.abortRef.current === controller) {
       ctx.setFailure({
-        reason: "ai-error",
+        reason: classifyAiFailure(error),
         error: error instanceof Error ? error.message : String(error),
       });
       ctx.onFailureToast();

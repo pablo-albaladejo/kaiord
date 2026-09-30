@@ -15,11 +15,18 @@
  * Not looking is not a pass: an unreadable file, a scanned set of zero files,
  * and a catalog that parses to zero ids are all faults.
  *
+ * Second check, same concern (a model id that answers 404): code must pick a
+ * provider's model through `modelForProvider` from `@kaiord/ai/providers`,
+ * never the raw `provider.model ?? getDefaultModel(type)`. The raw form skips
+ * the retired-model healing, so a saved retired id reaches the provider and
+ * 404s — or is re-persisted as a fresh choice. Only the healer itself may
+ * spell it.
+ *
  * Modes:
  *   --dry-run    Emit violations as JSON on stdout; exit 0.
  *   (default)    Print a human-readable report; exit non-zero on any.
  */
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,6 +36,13 @@ const SCANNED = [
   "packages/ai/AGENTS.md",
   ".github/workflows/eval.yml",
 ];
+
+const SOURCE_DIRS = ["packages"];
+const SOURCE_FILE = /\.(?:ts|tsx|mts|js|mjs)$/;
+const SKIPPED_DIRS = new Set(["node_modules", "dist", "coverage", ".turbo"]);
+const RAW_DEFAULT = /\.model\s*\?\?\s*getDefaultModel\(/;
+/** The one file allowed to combine a stored model with the default. */
+export const HEALER = "packages/ai/src/providers/provider-models.ts";
 
 /** Ids kept on purpose although the catalog no longer carries them. */
 export const HISTORICAL = Object.freeze({});
@@ -72,9 +86,35 @@ export const runCheck = ({ root, files = SCANNED, catalog = CATALOG }) => {
   return violations;
 };
 
+const sourceFiles = (root, dir) =>
+  readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) => {
+    const rel = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) {
+      return SKIPPED_DIRS.has(entry.name) ? [] : sourceFiles(root, rel);
+    }
+    return SOURCE_FILE.test(entry.name) ? [rel] : [];
+  });
+
+/** Files that pair a stored model with the default without healing it. */
+export const runRawDefaultCheck = ({ root, dirs = SOURCE_DIRS }) => {
+  let files;
+  try {
+    files = dirs.flatMap((dir) => sourceFiles(root, dir));
+  } catch (error) {
+    return [{ kind: "scan-failed", detail: `sources: ${error.message}` }];
+  }
+  if (files.length === 0) {
+    return [{ kind: "scan-empty", detail: "no source files to scan" }];
+  }
+  return files
+    .filter((file) => file !== HEALER)
+    .filter((file) => RAW_DEFAULT.test(readFileSync(join(root, file), "utf8")))
+    .map((file) => ({ kind: "raw-model-default", file }));
+};
+
 const main = () => {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-  const violations = runCheck({ root });
+  const violations = [...runCheck({ root }), ...runRawDefaultCheck({ root })];
   if (process.argv.includes("--dry-run")) {
     console.log(JSON.stringify(violations, null, 2));
     return;
@@ -90,7 +130,9 @@ const main = () => {
   }
   console.error(
     `\nA model id in prose must exist in ${CATALOG}, or be listed in\n` +
-      "HISTORICAL in scripts/check-model-ids-fresh.mjs with a reason."
+      "HISTORICAL in scripts/check-model-ids-fresh.mjs with a reason.\n" +
+      "A raw-model-default site must call modelForProvider(provider) from\n" +
+      "@kaiord/ai/providers so a retired stored model is healed."
   );
   process.exit(1);
 };

@@ -51,6 +51,7 @@ Architecture:
 Common operations:
 
 - **Add a new provider**: Extend `src/providers/`; regenerate the catalog with `pnpm generate:model-catalog` after bumping `@ai-sdk/*`. Do not hand-edit `src/providers/generated/model-catalog.ts`
+- **A provider retires a model**: add the id to `retired` (answers 404) or `deprecated` (still answers, retirement announced) under its provider in `scripts/model-catalog-extract.mjs`, then regenerate. Retired ids leave the catalog and resolve to `getDefaultModel(type)`, which reads the curated `PREFERRED_DEFAULT_MODELS` — never the catalog's first entry, which is the oldest SDK id
 - **Tweak the system prompt**: Edit `src/prompts/parse-workout.md` and test via `pnpm --filter @kaiord/ai test`
 - **Add benchmark**: Edit `src/evals/benchmarks.json` following the `Benchmark` schema in `src/evals/types.ts`; the fixture's own invariants are asserted keylessly
 - **Send a new externally-authored field to the model**: fence it with `fenceUntrusted(...)`. `check-untrusted-fields-fenced.mjs` fails on a recognized field that is not

@@ -5,7 +5,13 @@ import { join, resolve, dirname } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { runCheck, catalogIds, idsIn } from "./check-model-ids-fresh.mjs";
+import {
+  runCheck,
+  runRawDefaultCheck,
+  catalogIds,
+  idsIn,
+  HEALER,
+} from "./check-model-ids-fresh.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -106,4 +112,49 @@ test("catalogIds reads the generated shape", () => {
 
 test("idsIn does not match ordinary prose", () => {
   assert.deepEqual([...idsIn("the model is fast and cheap to run")], []);
+});
+
+test("the live tree has no raw model default outside the healer", () => {
+  assert.deepEqual(runRawDefaultCheck({ root: ROOT }), []);
+});
+
+test("it catches the raw default that re-persisted a retired model", () => {
+  // use-chat-model-selection.ts stored `provider.model ?? getDefaultModel(..)`
+  // as the conversation override, so a retired id survived the heal.
+  const dir = sandbox({
+    "src/a.ts": "const m = provider.model ?? getDefaultModel(provider.type);\n",
+    "src/b.tsx":
+      "const m = selected.model\n  ?? getDefaultModel(selected.type);\n",
+    "src/ok.ts": "const m = modelForProvider(provider);\n",
+  });
+  const violations = runRawDefaultCheck({ root: dir, dirs: ["src"] });
+  rmSync(dir, { recursive: true, force: true });
+  assert.deepEqual(
+    violations.map((v) => [v.kind, v.file]),
+    [
+      ["raw-model-default", "src/a.ts"],
+      ["raw-model-default", "src/b.tsx"],
+    ]
+  );
+});
+
+test("the healer itself may pair the stored model with the default", () => {
+  const dir = sandbox({
+    [HEALER]: "usableModel(t, provider.model ?? getDefaultModel(t));\n",
+  });
+  const violations = runRawDefaultCheck({ root: dir });
+  rmSync(dir, { recursive: true, force: true });
+  assert.deepEqual(violations, []);
+});
+
+test("scanning zero source files is a fault, not a pass", () => {
+  const dir = sandbox({ "src/readme.md": "nothing to scan\n" });
+  const violations = runRawDefaultCheck({ root: dir, dirs: ["src"] });
+  rmSync(dir, { recursive: true, force: true });
+  assert.equal(violations[0].kind, "scan-empty");
+});
+
+test("an unreadable source dir is a fault, not a pass", () => {
+  const violations = runRawDefaultCheck({ root: ROOT, dirs: ["nope"] });
+  assert.equal(violations[0].kind, "scan-failed");
 });
