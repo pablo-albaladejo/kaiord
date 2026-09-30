@@ -25,8 +25,19 @@ export type RunTurnParams = {
  * Single seam over the AI SDK. Runs the multi-step tool loop (read tools
  * auto-execute; an action tool with no `execute` halts the loop), streams
  * text deltas to `onTextDelta`, then resolves the normalized turn.
+ *
+ * A provider failure arrives as a stream `error` part, not a thrown error:
+ * the SDK hands it to `onError`. With no completed step it then rejects the
+ * result promises with a generic `NoOutputGeneratedError`, dropping the
+ * `APICallError` and its `statusCode`; after a completed step it resolves
+ * with that step's data and the failure is lost. The first stream error is
+ * captured here and rethrown in both cases, so callers see and can classify
+ * the real failure. (Tool failures are `tool-error` parts, not `error` parts,
+ * and stay in the loop.) Capturing it also replaces the SDK's default
+ * `onError` (`console.error`), which would log the request body.
  */
 export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
+  let streamError: unknown;
   const result = streamText({
     model: params.model,
     system: params.system,
@@ -36,25 +47,39 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
     // We own retries at the call-site; disable the SDK's internal layer so a
     // retryable error costs one HTTP call per turn, not N.
     maxRetries: 0,
+    onError: ({ error }) => {
+      streamError ??= error;
+    },
   });
 
-  for await (const delta of result.textStream) params.onTextDelta?.(delta);
-
-  const [text, toolCalls, finishReason, usage, response] = await Promise.all([
-    result.text,
-    result.toolCalls,
-    result.finishReason,
-    result.usage,
-    result.response,
-  ]);
+  const settled = async () => {
+    for await (const delta of result.textStream) params.onTextDelta?.(delta);
+    return Promise.all([
+      result.text,
+      result.toolCalls,
+      result.finishReason,
+      result.usage,
+      result.response,
+    ]);
+  };
+  const [text, toolCalls, finishReason, usage, response] =
+    await settled().catch((e: unknown) => {
+      throw streamError ?? e;
+    });
+  if (streamError !== undefined) throw streamError;
 
   return {
     text,
-    toolCalls: toolCalls.map((c) => ({
-      toolName: c.toolName,
-      toolCallId: c.toolCallId,
-      input: c.input,
-    })),
+    // A call whose input failed its schema is marked `invalid`: the SDK
+    // already answered it with a tool-error and the loop moved on, so it must
+    // never be offered for confirmation.
+    toolCalls: toolCalls
+      .filter((c) => !("invalid" in c && c.invalid))
+      .map((c) => ({
+        toolName: c.toolName,
+        toolCallId: c.toolCallId,
+        input: c.input,
+      })),
     finishReason,
     usage: usage
       ? {

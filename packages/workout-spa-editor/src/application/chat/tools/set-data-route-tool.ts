@@ -8,54 +8,9 @@
  * — no new write path.
  */
 import type { ChatTool } from "@kaiord/ai";
-import { managedDataTypes } from "@kaiord/core";
-import { z } from "zod";
 
-import { dataTypeSourceModeSchema } from "../../../types/data-type-source-policy";
-import { integrationPolicyDirectionSchema } from "../../../types/integration-policy";
 import type { ChatActionOps } from "./chat-tool-deps";
-
-const routeFields = {
-  dataType: z.enum(managedDataTypes),
-  integrationId: z
-    .string()
-    .min(1)
-    .describe("Integration id, e.g. garmin, whoop, train2go, manual"),
-  direction: integrationPolicyDirectionSchema,
-};
-
-const setDataRouteInputSchema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("enable_route"), ...routeFields }),
-  z.object({ action: z.literal("disable_route"), ...routeFields }),
-  z.object({
-    action: z.literal("set_source_policy"),
-    dataType: z.enum(managedDataTypes),
-    mode: dataTypeSourceModeSchema,
-    sourceOrder: z
-      .array(z.string())
-      .optional()
-      .describe(
-        "Integration ids in priority order, most preferred first. Only " +
-          "used when mode is priority; a single id means read only from " +
-          "that source (e.g. 'read sleep only from Whoop' -> mode " +
-          "priority, sourceOrder ['whoop'])."
-      ),
-  }),
-]);
-
-const setDataRouteSchema = setDataRouteInputSchema.superRefine((value, ctx) => {
-  if (
-    value.action === "set_source_policy" &&
-    value.mode === "priority" &&
-    (value.sourceOrder?.length ?? 0) === 0
-  ) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["sourceOrder"],
-      message: "priority mode requires a non-empty sourceOrder",
-    });
-  }
-});
+import { setDataRouteInputSchema } from "./set-data-route-schema";
 
 export const createSetDataRouteTool = (ops: ChatActionOps): ChatTool => ({
   name: "set_data_route",
@@ -68,5 +23,5 @@ export const createSetDataRouteTool = (ops: ChatActionOps): ChatTool => ({
     "the result reflects the new persisted state.",
   inputSchema: setDataRouteInputSchema,
   requiresConfirmation: true,
-  execute: (raw) => ops.setDataRoute(setDataRouteSchema.parse(raw)),
+  execute: (raw) => ops.setDataRoute(setDataRouteInputSchema.parse(raw)),
 });
