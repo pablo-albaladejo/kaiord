@@ -8,6 +8,8 @@ import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToL
 
 type WorkoutActionsProps = Readonly<{
   krd: KRD;
+  /** The profile owning the persisted record the editor shows, if any. */
+  ownerProfileId?: string;
   onDiscard: () => void;
 }>;
 
@@ -16,12 +18,16 @@ type WorkoutActionsProps = Readonly<{
  * one control on this screen can reach the watch, and it is not here.
  * Undo/redo moved up beside the title, where the thing they act on is.
  */
-export function WorkoutActions({ krd, onDiscard }: WorkoutActionsProps) {
+export function WorkoutActions({
+  krd,
+  ownerProfileId,
+  onDiscard,
+}: WorkoutActionsProps) {
   const t = useTranslate("editor");
   return (
     <div className="flex flex-wrap items-center gap-2.5">
       <SaveToLibraryButton workout={krd} />
-      <SaveButton workout={krd} />
+      <SaveButton workout={krd} ownerProfileId={ownerProfileId} />
       <span className="hidden flex-1 sm:block" />
       <Button
         variant="tertiary"

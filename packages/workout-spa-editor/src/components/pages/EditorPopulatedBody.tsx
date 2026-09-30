@@ -13,12 +13,15 @@ export type EditorPopulatedBodyProps = {
   workout: Workout;
   currentWorkout: KRD;
   sidebar: ReturnType<typeof useCoachingSidebar>;
+  /** The profile owning the persisted record, if any. */
+  ownerProfileId?: string;
 };
 
 export function EditorPopulatedBody({
   workout,
   currentWorkout,
   sidebar,
+  ownerProfileId,
 }: EditorPopulatedBodyProps) {
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
   const reorderStep = useWorkoutStore((s) => s.reorderStep);
@@ -34,6 +37,7 @@ export function EditorPopulatedBody({
         onStepSelect={handleStepSelect}
         onStepReorder={reorderStep}
         onReorderStepsInBlock={reorderStepsInBlock}
+        ownerProfileId={ownerProfileId}
       />
     </EditorBody>
   );

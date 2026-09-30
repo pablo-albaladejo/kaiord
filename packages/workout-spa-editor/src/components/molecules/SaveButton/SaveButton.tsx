@@ -23,11 +23,18 @@ import { useSaveWorkout } from "./use-save-workout";
 
 export type SaveButtonProps = {
   workout: KRD;
+  /** The profile owning the persisted record, if any (see `useExportProfile`). */
+  ownerProfileId?: string;
   disabled?: boolean;
   className?: string;
 };
 
-export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
+export function SaveButton({
+  workout,
+  ownerProfileId,
+  disabled,
+  className,
+}: SaveButtonProps) {
   const t = useTranslate("editor");
   // The verb itself lives in `common` — this button is one of three call
   // sites for it, and they must not be allowed to drift apart again.
@@ -40,9 +47,8 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
     clearErrors,
     selectedFormat,
     setSelectedFormat,
-    toast,
-  } = useSaveWorkout(workout);
-  const { toasts, dismiss } = toast;
+    toast: { toasts, dismiss },
+  } = useSaveWorkout(workout, ownerProfileId);
   const isDisabled = disabled || isSaving;
   const showProgress = isSaving && exportProgress > 0 && exportProgress < 100;
   const icon = isSaving ? (

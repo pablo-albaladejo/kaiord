@@ -35,6 +35,8 @@ export type WorkoutSectionProps = {
   /** Forwarded to `WorkoutHeader` so scratch mode pre-opens
    *  `MetadataEditMode` for sport/name commit on first mount. */
   startInEditMode?: boolean;
+  /** The profile owning the persisted record, for the file download. */
+  ownerProfileId?: string;
 };
 
 /* One canvas, not five cards. The chart indexes the rows beneath it, the
@@ -88,7 +90,7 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
           renderStepForm={renderStepForm}
         />
       </EditorCanvas>
-      <WorkoutActions krd={props.krd} onDiscard={handleDiscard} />
+      <WorkoutActions {...props} onDiscard={handleDiscard} />
       <CreateRepetitionBlockDialog
         stepCount={state.blockStepCount}
         onConfirm={state.handleConfirmCreateBlock}
