@@ -1,0 +1,67 @@
+# The MCP server's container image is built outside this repo — Glama builds
+# it to introspect the tool surface and to let people deploy the server — so
+# nothing here would notice it rotting. This workflow is the notice: it builds
+# the image and then drives the server inside it over stdio, on every change
+# that can reach the image.
+#
+# The two `paths:` lists are duplicated on purpose: GitHub Actions does not
+# resolve YAML anchors, so a shared alias would parse locally and be ignored
+# by the runner. Keep them in sync.
+name: MCP Container
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "scripts/mcp-container-smoke.mjs"
+      - ".github/workflows/mcp-container.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      # The workspace packages `pnpm deploy --filter @kaiord/mcp` pulls in.
+      - "packages/mcp/**"
+      - "packages/core/**"
+      - "packages/fit/**"
+      - "packages/tcx/**"
+      - "packages/zwo/**"
+      - "packages/garmin/**"
+      - "packages/garmin-connect/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "scripts/mcp-container-smoke.mjs"
+      - ".github/workflows/mcp-container.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "packages/mcp/**"
+      - "packages/core/**"
+      - "packages/fit/**"
+      - "packages/tcx/**"
+      - "packages/zwo/**"
+      - "packages/garmin/**"
+      - "packages/garmin-connect/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-smoke:
+    name: Build the image and drive it over stdio
+    runs-on: ubuntu-latest
+    # 0 successful runs → fall back to build-family ceiling 20.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: Build the image
+        run: docker build -t kaiord-mcp:ci .
+
+      - name: Drive the server over MCP stdio
+        run: node scripts/mcp-container-smoke.mjs
