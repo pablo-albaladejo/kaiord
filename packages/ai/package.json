@@ -46,13 +46,13 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "zod": "^4.5.4"
+    "zod": "^4.6.5"
   },
   "peerDependencies": {
-    "@ai-sdk/anthropic": "^4.0.49",
-    "@ai-sdk/google": "^4.0.63",
-    "@ai-sdk/openai": "^4.0.58",
-    "ai": "^7.0.92"
+    "@ai-sdk/anthropic": "^4.0.63",
+    "@ai-sdk/google": "^4.0.80",
+    "@ai-sdk/openai": "^4.0.75",
+    "ai": "^7.0.114"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -66,16 +66,16 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^4.0.49",
-    "@ai-sdk/google": "^4.0.63",
-    "@ai-sdk/openai": "^4.0.58",
-    "@types/node": "^26.4.1",
-    "@vitest/coverage-v8": "^5.0.0",
-    "ai": "^7.0.92",
+    "@ai-sdk/anthropic": "^4.0.63",
+    "@ai-sdk/google": "^4.0.80",
+    "@ai-sdk/openai": "^4.0.75",
+    "@types/node": "^26.6.2",
+    "@vitest/coverage-v8": "^5.0.2",
+    "ai": "^7.0.114",
     "tsdown": "^0.23.0",
-    "tsx": "^4.23.13",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.2"
   },
   "repository": {
     "type": "git",
