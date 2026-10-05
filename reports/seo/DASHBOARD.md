@@ -1,17 +1,17 @@
 # SEO/GEO Dashboard — kaiord.com
 
-_Generated 2026-09-28 19:00 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
+_Generated 2026-10-05 16:27 UTC by `scripts/geo/seo-dashboard.mjs`. Do not edit by hand._
 
 ## KPIs
 
 | Metric | Current | Target | Source |
 | --- | --- | --- | --- |
-| Pages indexed on Google | 24/40 (-13) | all pages | gsc.jsonl |
-| Google impressions (7d) | 60 (+16) | growing | gsc.jsonl |
-| Google clicks (7d) | 7 (=) | growing | gsc.jsonl |
-| Google avg position | 6.8 (-0.5) | top 10 on 3+ non-brand queries | gsc.jsonl |
+| Pages indexed on Google | 25/40 (+1) | all pages | gsc.jsonl |
+| Google impressions (7d) | 44 (-16) | growing | gsc.jsonl |
+| Google clicks (7d) | 1 (-6) | growing | gsc.jsonl |
+| Google avg position | 3.9 (+2.9) | top 10 on 3+ non-brand queries | gsc.jsonl |
 | Bing pages in index | — | all pages | bing.jsonl |
-| Bing impressions (7d) | 10 (-10) | growing | bing.jsonl |
+| Bing impressions (7d) | 21 (+11) | growing | bing.jsonl |
 | Tracked queries where site appears (DDG/Bing proxy) | 0/12 (=) | 12/12 | serp.jsonl |
 | AI answer-engine mention rate (core 5 prompts) | perplexity 0.2 | growing | ai-visibility.jsonl |
 
@@ -42,21 +42,19 @@ _Mentioned_ means the answer text **or one of its cited URLs** names kaiord (the
 
 | Query | Clicks | Impressions | Position |
 | --- | --- | --- | --- |
-| fit file format | 0 | 1 | 80 |
-| fit format | 0 | 1 | 25 |
-| is it free? | 0 | 1 | 1 |
-| keyord1 | 0 | 1 | 71 |
+| garmin tcx | 0 | 1 | 7 |
 
 ## AI answer-engine visibility (GEO end-goal)
 
 | Provider | Date | Mentions | Rate | Core rate | Cited | Top competitors |
 | --- | --- | --- | --- | --- | --- | --- |
-| perplexity | 2026-09-28 | 2/23 | 0.09 | 0.2 | 0 | fit-file-parser (3), Garmin FIT SDK (2), GoldenCheetah (2) |
+| perplexity | 2026-10-05 | 5/23 | 0.22 | 0.2 | 3 | GoldenCheetah (3), Garmin FIT SDK (1), fit-file-parser (1), sports-lib (1) |
 
 ## Monthly AI visibility
 
 | Month | Provider | Runs | Mentions | Rate | Cited | EN | ES |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-10 | perplexity | 1 | 5/23 | 0.22 | 3 | 4/14 | 1/9 |
 | 2026-09 | perplexity | 4 | 4/38 | 0.11 | 0 | 4/29 | 0/9 |
 | 2026-08 | perplexity | 4 | 2/20 | 0.1 | 0 | 2/20 | — |
 | 2026-07 | perplexity | 3 | 0/15 | 0 | 0 | 0/15 | — |
