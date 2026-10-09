@@ -21,7 +21,7 @@ export const pushCommand = async (
     }
 
     const krd = await loadFileAsKrd(options.input, options.inputFormat, logger);
-    const result = await service.push(krd);
+    const result = await service.push(krd, { ftpWatts: options.ftp });
 
     if (options.json) {
       console.log(JSON.stringify(result, null, 2));

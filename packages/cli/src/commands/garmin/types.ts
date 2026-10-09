@@ -19,6 +19,7 @@ export const listOptionsSchema = z.object({
 export const pushOptionsSchema = z.object({
   input: z.string(),
   inputFormat: z.string().optional(),
+  ftp: z.number().positive().optional(),
   verbose: z.boolean().optional(),
   quiet: z.boolean().optional(),
   json: z.boolean().optional(),

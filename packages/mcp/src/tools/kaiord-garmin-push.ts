@@ -10,6 +10,13 @@ import { resolveTextInput } from "../utils/resolve-input";
 const pushSchema = {
   input_file: z.string().optional().describe("Path to KRD JSON file"),
   input_content: z.string().optional().describe("Inline KRD JSON content"),
+  ftp: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      "Athlete FTP in watts. Required when the workout has %FTP power targets (Garmin stores watts)"
+    ),
 };
 
 export const registerGarminPushTool = (
@@ -36,7 +43,7 @@ export const registerGarminPushTool = (
           args.input_content
         );
         const krd = validateKrd(JSON.parse(text) as unknown);
-        const result = await service.push(krd);
+        const result = await service.push(krd, { ftpWatts: args.ftp });
 
         return formatSuccess(JSON.stringify(result, null, 2));
       } catch (error) {

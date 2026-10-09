@@ -28,15 +28,21 @@ kaiord convert -i workout.fit -o workout.krd
 kaiord convert -i workout.krd -o workout.tcx
 kaiord convert -i "workouts/*.fit" --output-dir converted/
 kaiord convert -i data.bin --input-format fit -o workout.krd
+kaiord convert -i workout.zwo -o workout.gcn --ftp 250
 ```
 
-| Option            | Alias | Description                                               |
-| ----------------- | ----- | --------------------------------------------------------- |
-| `--input`         | `-i`  | Input file path or glob pattern (required)                |
-| `--output`        | `-o`  | Output file path                                          |
-| `--output-dir`    |       | Output directory for batch conversion                     |
-| `--input-format`  |       | Override input format: `fit`, `gcn`, `krd`, `tcx`, `zwo`  |
-| `--output-format` |       | Override output format: `fit`, `gcn`, `krd`, `tcx`, `zwo` |
+Garmin Connect (`gcn`) stores power targets in watts. A workout with % FTP
+power targets (Zwift ZWO, or FIT in % FTP) needs `--ftp`; without it the
+command exits with code 1 instead of writing percentages as watts.
+
+| Option            | Alias | Description                                                          |
+| ----------------- | ----- | -------------------------------------------------------------------- |
+| `--input`         | `-i`  | Input file path or glob pattern (required)                           |
+| `--output`        | `-o`  | Output file path                                                     |
+| `--output-dir`    |       | Output directory for batch conversion                                |
+| `--input-format`  |       | Override input format: `fit`, `gcn`, `krd`, `tcx`, `zwo`             |
+| `--output-format` |       | Override output format: `fit`, `gcn`, `krd`, `tcx`, `zwo`            |
+| `--ftp`           |       | Athlete FTP in watts; required to write % FTP power targets to `gcn` |
 
 ## validate
 
@@ -147,12 +153,14 @@ kaiord garmin list --limit 50 --offset 20
 ```bash
 kaiord garmin push -i workout.krd
 kaiord garmin push -i workout.fit --input-format fit
+kaiord garmin push -i workout.zwo --ftp 250
 ```
 
-| Option           | Alias | Description                        |
-| ---------------- | ----- | ---------------------------------- |
-| `--input`        | `-i`  | Input workout file path (required) |
-| `--input-format` |       | Override format detection          |
+| Option           | Alias | Description                                            |
+| ---------------- | ----- | ------------------------------------------------------ |
+| `--input`        | `-i`  | Input workout file path (required)                     |
+| `--input-format` |       | Override format detection                              |
+| `--ftp`          |       | Athlete FTP in watts; required for % FTP power targets |
 
 ## Global options
 

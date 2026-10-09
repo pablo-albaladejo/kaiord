@@ -3,6 +3,7 @@ import type { Argv } from "yargs";
 import { t } from "../../i18n/index.js";
 import { ExitCode } from "../../utils/exit-codes";
 import { FORMAT_CODES } from "../../utils/format-registry";
+import { ftpOption } from "../../utils/ftp-option";
 import { createLogger } from "../../utils/logger-factory";
 import { listCommand } from "./list";
 import { loginCommand } from "./login";
@@ -88,7 +89,8 @@ export const pushSubcommand = {
         type: "string" as const,
         choices: FORMAT_CODES,
         description: t("options.garminPush.inputFormat"),
-      }),
+      })
+      .option("ftp", ftpOption(t("options.garminPush.ftp"))),
   handler: async (argv: Record<string, unknown>) => {
     const logger = await buildLogger(argv);
     const exitCode = await pushCommand(argv, logger);

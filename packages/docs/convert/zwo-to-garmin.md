@@ -10,10 +10,11 @@ Converts structured workouts (steps and targets), not recorded activities.
 See [Workouts vs. activities](/convert/#workouts-vs-activities).
 :::
 
-::: warning Known issue: power targets
-Power targets in % FTP currently arrive in Garmin Connect as watts with the
-same number (85 % FTP becomes 85 W). Every ZWO power target is in % FTP, so
-this affects every Zwift workout. The fix is tracked in
+::: warning Known issue: ramps
+Steady-state and interval power targets are converted from % FTP to watts with
+your FTP. Ramps (`Warmup`, `Cooldown`, `Ramp`) are not yet: their % FTP bounds
+arrive in Garmin Connect as watts with the same numbers (a 50–75 % warm-up
+becomes 50–75 W). The fix is tracked in
 [issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279).
 :::
 
@@ -63,22 +64,36 @@ await writeFile("workout.gcn", gcn);
 
 ## What survives the conversion
 
-| Data                | ZWO (Zwift)                    | Garmin Connect (GCN) | Result                                                                                                         |
-| ------------------- | ------------------------------ | -------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Step order & names  | blocks                         | workout steps        | Preserved                                                                                                      |
-| Time durations      | `Duration` seconds             | time durations       | Preserved (±1 s)                                                                                               |
-| Power targets       | % FTP (`Power` fraction)       | watts                | Known issue: the % value is written as watts ([#1279](https://github.com/pablo-albaladejo/kaiord/issues/1279)) |
-| Ramps               | `Warmup` / `Cooldown` / `Ramp` | ranged target        | Preserved as a power range                                                                                     |
-| Repeats / intervals | `IntervalsT`                   | repeat blocks        | Preserved                                                                                                      |
-| Free-ride segments  | `FreeRide`                     | open step            | Preserved as an untargeted step                                                                                |
+| Data                | ZWO (Zwift)                    | Garmin Connect (GCN) | Result                                  |
+| ------------------- | ------------------------------ | -------------------- | --------------------------------------- |
+| Step order & names  | blocks                         | workout steps        | Preserved                               |
+| Time durations      | `Duration` seconds             | time durations       | Preserved (±1 s)                        |
+| Power targets       | % FTP (`Power` fraction)       | watts                | Converted using your FTP (see below)    |
+| Ramps               | `Warmup` / `Cooldown` / `Ramp` | ranged target        | Not converted correctly yet (see below) |
+| Repeats / intervals | `IntervalsT`                   | repeat blocks        | Preserved                               |
+| Free-ride segments  | `FreeRide`                     | open step            | Preserved as an untargeted step         |
 
 ## Gotchas
 
-**Watts vs. % FTP.** Zwift stores power as % FTP; Garmin Connect stores watts.
-Kaiord does not yet convert one into the other for this direction: a 0.85
-(85 % FTP) target is written as 85 W. Until [issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279) is fixed,
-check the power targets in Garmin Connect before riding, or convert to
-[FIT](/convert/zwo-to-fit), which keeps % FTP.
+**Watts vs. % FTP.** Zwift stores power as % FTP; Garmin Connect stores watts,
+so every % FTP target is converted with **your** FTP: watts = round(% / 100 × FTP).
+There is no assumed default — without an FTP the conversion stops with an error
+instead of writing wrong watts.
+
+- **Editor**: set your FTP in **Athlete**; export and "Send to Garmin" use the
+  FTP of the workout's sport from your profile.
+- **CLI**: pass it with `--ftp`, e.g.
+  `kaiord convert -i workout.zwo -o workout.gcn --ftp 250` or
+  `kaiord garmin push -i workout.zwo --ftp 250`.
+- **SDK**: `createGarminWriter({ ftpWatts: 250 })` instead of `garminWriter`.
+- **MCP**: pass `ftp` to `kaiord_convert` or `kaiord_garmin_push`.
+
+At an FTP of 250 W, `Power="0.85"` becomes a 213 W target.
+
+**Ramps.** Zwift ramps (`Warmup`, `Cooldown`, `Ramp`) are not yet resolved
+against your FTP: their % FTP bounds reach Garmin Connect as if they were watts
+(a 50–75 % warm-up arrives as 50–75 W). Steady-state blocks and intervals are
+converted correctly.
 
 **How does it get on my watch?** A `.gcn` file is Garmin Connect's JSON, not a
 device file. Push it to your account with `kaiord garmin push` (via

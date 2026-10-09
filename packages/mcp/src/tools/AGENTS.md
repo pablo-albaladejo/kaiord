@@ -63,9 +63,10 @@ Promise<KRD>`. Resolves the format (explicit arg → path extension), then
   branches to `readBinaryInput` (FIT path or base64 inline) or
   `readTextInput`, instantiating the right reader from `FORMAT_REGISTRY`.
 - `convert-from-krd.ts` — `convertFromKrd(krd, outputFormat, outputFile?,
-logger): Promise<{content, writtenTo}>`. Branches binary vs text writer;
-  binary output requires `outputFile`; text output is also written to disk
-  when `outputFile` is provided.
+{ logger, ftpWatts? }): Promise<{content, writtenTo}>`. Branches binary vs
+  text writer; binary output requires `outputFile`; text output is also
+  written to disk when `outputFile` is provided. `ftpWatts` reaches the GCN
+  writer to resolve `percent_ftp` power targets to watts.
 - `build-inspect-summary.ts` — `buildInspectSummary(krd): string`. Joins
   metadata, data counts (sessions/laps/records/events), and structured
   workout info into the human-readable string returned by `kaiord_inspect`.
