@@ -55,6 +55,7 @@ exclude_path = [
   "packages/docs/convert",
   "packages/docs/mcp",
   "packages/docs/legal",
+  "packages/docs/es",
   "packages/docs/index.md",
   # Per-package garmin docs use root-relative links for
   # cross-referencing project docs from a draft proposal directory.

@@ -75,7 +75,32 @@
     "TANITASESS",
     "trainingpeaks",
     "tpapi",
-    "tpAuth"
+    "tpAuth",
+    "MSSD",
+    "tpwb",
+    "ivgc",
+    "gcwb",
+    "gcsend",
+    "gcapp"
   ],
-  "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
+  "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"],
+  "import": ["@cspell/dict-es-es/cspell-ext.json"],
+  "overrides": [
+    {
+      "filename": "es/**",
+      "language": "es,en",
+      "words": ["biomarcadores", "ciclocomputador", "conversor"]
+    }
+  ],
+  "patterns": [
+    {
+      "name": "es-crosslink",
+      "pattern": "/_Leer en español: .*_/"
+    },
+    {
+      "name": "footnote-label",
+      "pattern": "/\\[\\^[a-z0-9-]+\\]/"
+    }
+  ],
+  "ignoreRegExpList": ["es-crosslink", "footnote-label"]
 }

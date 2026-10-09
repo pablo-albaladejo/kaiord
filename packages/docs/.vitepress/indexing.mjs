@@ -120,3 +120,26 @@ export function apiSourcePaths(url, packages) {
     ...NON_CONTENT_PATHSPECS,
   ];
 }
+
+// Pages published in both English and Spanish. Only these carry hreflang
+// alternates: every other page exists in English alone, and an hreflang to a
+// page that does not exist is ignored by engines at best.
+export const HREFLANG_PAIRS = [
+  "guide/ai-planning-byok",
+  "guide/whoop-recovery-in-plan",
+  "guide/kaiord-vs-trainingpeaks-intervals-garmin",
+].map((path) => ({ en: `${path}.md`, es: `es/${path}.md` }));
+
+/**
+ * The EN/ES pair a page belongs to, or null when it has no translation.
+ *
+ * @param {string} relativePath a docs page path relative to the docs root
+ * @returns {{ en: string, es: string } | null}
+ */
+export function hreflangPair(relativePath) {
+  return (
+    HREFLANG_PAIRS.find(
+      (pair) => pair.en === relativePath || pair.es === relativePath
+    ) ?? null
+  );
+}

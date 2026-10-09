@@ -7,6 +7,7 @@ import {
   apiSourcePaths,
   gitLastmod,
   hasFullHistory,
+  hreflangPair,
   isNoindexPath,
   isNoindexUrl,
 } from "./indexing.mjs";
@@ -156,8 +157,55 @@ function sitemapItems(items: SitemapItem[]): SitemapItem[] {
   });
 }
 
+const ATHLETE_GUIDES = [
+  ["ai-planning-byok", "AI planning with your key", "IA con tu propia clave"],
+  ["whoop-recovery-in-plan", "WHOOP recovery", "Recuperación de WHOOP"],
+  [
+    "kaiord-vs-trainingpeaks-intervals-garmin",
+    "Kaiord vs TrainingPeaks, intervals.icu, Garmin",
+    "Kaiord frente a otras plataformas",
+  ],
+] as const;
+
 const config = {
   lang: "en",
+
+  // Only the four athlete guides are translated. `i18nRouting: false` makes
+  // the language switcher link to each locale's root instead of "/es/<same
+  // path>", which would be a 404 on every untranslated page.
+  locales: {
+    root: { label: "English", lang: "en" },
+    es: {
+      label: "Español",
+      lang: "es",
+      link: "/es/",
+      themeConfig: {
+        nav: [
+          { text: "Guías", link: "/es/" },
+          { text: "Convertir", link: "/convert/" },
+        ],
+        sidebar: [
+          {
+            text: "Guías",
+            items: [
+              { text: "Inicio", link: "/es/" },
+              ...ATHLETE_GUIDES.map(([slug, , es]) => ({
+                text: es,
+                link: `/es/guide/${slug}`,
+              })),
+            ],
+          },
+        ],
+        outline: { level: [2, 3], label: "En esta página" },
+        lastUpdated: { text: "Última actualización" },
+        editLink: {
+          pattern:
+            "https://github.com/pablo-albaladejo/kaiord/edit/main/packages/docs/:path",
+          text: "Editar esta página en GitHub",
+        },
+      },
+    },
+  },
   title: "Kaiord",
   description:
     "Open-source health & fitness data framework for TypeScript. Convert FIT, TCX, ZWO, and GCN formats.",
@@ -196,6 +244,7 @@ const config = {
   themeConfig: {
     logo: { light: "/logo-light.svg", dark: "/logo-dark.svg" },
     siteTitle: "Kaiord",
+    i18nRouting: false,
 
     nav: [
       { text: "Quick Start", link: "/guide/quick-start" },
@@ -212,6 +261,14 @@ const config = {
           { text: "Why Kaiord?", link: "/guide/why-kaiord" },
           { text: "Installation", link: "/guide/getting-started" },
         ],
+      },
+      {
+        text: "For athletes",
+        collapsed: false,
+        items: ATHLETE_GUIDES.map(([slug, en]) => ({
+          text: en,
+          link: `/guide/${slug}`,
+        })),
       },
       {
         text: "Guides",
@@ -344,6 +401,20 @@ const config = {
       "link",
       { rel: "canonical", href: pageCanonicalUrl(pageData.relativePath) },
     ]);
+
+    const pair = hreflangPair(pageData.relativePath);
+    if (pair) {
+      for (const [hreflang, path] of [
+        ["en", pair.en],
+        ["es", pair.es],
+        ["x-default", pair.en],
+      ]) {
+        head.push([
+          "link",
+          { rel: "alternate", hreflang, href: pageCanonicalUrl(path) },
+        ]);
+      }
+    }
 
     if (isNoindexPath(pageData.relativePath)) {
       head.push(["meta", { name: "robots", content: "noindex,follow" }]);

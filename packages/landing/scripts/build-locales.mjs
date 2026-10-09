@@ -172,11 +172,22 @@ const assertDocumentStructure = (html, outFile) => {
   }
 };
 
+// A link whose target has a Spanish page carries it in `data-es-href`: the
+// Spanish build points there, the English build keeps `href`. Neither page
+// ships the attribute.
+export const applyLocaleHrefs = (root, lang) => {
+  for (const el of root.querySelectorAll("[data-es-href]")) {
+    if (lang === "es") el.setAttribute("href", el.getAttribute("data-es-href"));
+    el.removeAttribute("data-es-href");
+  }
+};
+
 const buildEnglish = (rawHtml) => {
   const root = parseHtml(rawHtml);
   const before = collectText(root);
   injectHreflang(root);
   injectSwitchers(root, SWITCH.en);
+  applyLocaleHrefs(root, "en");
   assertEnglishCopyUnchanged(before, collectText(root), SWITCH.en);
   const out = root.toString();
   assertDocumentStructure(out, EN_HTML);
@@ -191,6 +202,7 @@ const buildSpanish = (rawHtml, meta, translations, inventory) => {
     if (typeof next === "string" && next.length > 0) apply(next);
   });
   rewriteHead(root, meta);
+  applyLocaleHrefs(root, "es");
   const outDir = resolve(DIST, "es");
   mkdirSync(outDir, { recursive: true });
   const outFile = resolve(outDir, "index.html");
@@ -220,4 +232,4 @@ const main = () => {
   console.log(`build-locales: wrote ${esFile} (es + hreflang + switcher)`);
 };
 
-main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();

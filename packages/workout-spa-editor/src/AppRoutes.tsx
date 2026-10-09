@@ -9,6 +9,7 @@ import {
   AthletePage,
   CalendarPage,
   ChatPage,
+  ConvertPage,
   DailyPage,
   EditorPage,
   HealthSubRouter,
@@ -71,6 +72,9 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
             `/settings/extensions`) redirect to Connections from inside the
             page — see `retiredSectionTarget`. */}
         <Route path="/settings/:section?">{guard(<SettingsPage />)}</Route>
+        {/* Converter deep link from the docs (`?from=&to=` in the fragment
+            query). Isolated from the editor: nothing is stored. */}
+        <Route path="/convert">{guard(<ConvertPage />)}</Route>
         <Route path="/health/*?">
           {guard(<HealthSubRouter analytics={analytics} />)}
         </Route>

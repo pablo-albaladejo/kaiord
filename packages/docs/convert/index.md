@@ -5,9 +5,14 @@ description: "Free, in-browser converter for FIT, TCX, ZWO, and Garmin Connect w
 
 # Workout file converter — FIT, TCX, ZWO & Garmin
 
+::: info Scope
+Converts structured workouts (steps and targets), not recorded activities.
+See [Workouts vs. activities](#workouts-vs-activities).
+:::
+
 Convert workout files between **FIT**, **TCX**, **ZWO** (Zwift), and **Garmin
 Connect** formats — free, in your browser, with no account and no file upload.
-Drop a file into the [Kaiord Editor](https://kaiord.com/app/) and download
+Choose a file in the [Kaiord Editor](https://kaiord.com/app/#/convert) and download
 the result. Developers can script the same conversions with the
 [CLI](/cli/commands) or the [TypeScript SDK](/guide/quick-start).
 
@@ -30,12 +35,25 @@ format is detected from the file extension.
 
 ## Three ways to convert
 
-1. **Editor** — [kaiord.com/app](https://kaiord.com/app/). Drag & drop a
+1. **Editor** — [kaiord.com/app](https://kaiord.com/app/#/convert). Choose a
    file, pick the target format, download. Nothing leaves your browser.
 2. **CLI** — `kaiord convert -i workout.fit -o workout.zwo`. Formats are
    detected from the extensions. See the [CLI reference](/cli/commands#convert).
 3. **SDK** — `@kaiord/core` plus the reader/writer for each format. See the
    [Quick Start](/guide/quick-start).
+
+## Workouts vs. activities
+
+A **workout** is the plan: an ordered list of steps, each with a duration
+(time, distance, open…) and a target (power, heart rate, pace, cadence). It is
+what you load on a watch or head unit before a session. An **activity** is the
+recording of a session you already did: the samples, laps and totals your
+device logged.
+
+These converters move **workouts** between formats. FIT and TCX can also hold
+activities, and the Kaiord app can import a recorded activity onto your
+calendar, but these pages do not turn a recorded ride or run into a workout,
+and a converted file carries no recorded data.
 
 ## What is lossless?
 
@@ -50,6 +68,10 @@ and the gotchas that matter for that direction. In short:
   native equivalent.
 - **Garmin Connect (GCN)** covers power, heart rate, speed, and cadence in
   watts/bpm/rpm, plus calorie durations.
+  Known issue: power targets in % FTP (every ZWO target, and FIT targets
+  stored as % FTP) currently arrive in Garmin Connect as watts with the same
+  number; the fix is tracked in
+  [issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279).
 
 Format-specific data that has no target-side equivalent is preserved under the
 KRD `extensions` object so it can survive a later round-trip.
