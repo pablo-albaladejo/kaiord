@@ -4,8 +4,8 @@ import {
   buildPaceTargetType,
   resolvePaceZone,
 } from "../mappers/target-pace.mapper";
-import { resolvePercentFtpToWatts } from "../mappers/target-power.mapper";
 import { TargetTypeId } from "../schemas/common";
+import { resolvePercentFtpToWatts } from "./target-power.converter";
 import type {
   GarminTargetInfo,
   PaceZoneTable,
