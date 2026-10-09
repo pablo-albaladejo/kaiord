@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-09-28 | [`converter-deep-link-and-guides`](./2026-09-28-converter-deep-link-and-guides/) | Converter deep link and athlete guides |
 | 2026-09-28 | [`docs-indexing-hygiene`](./2026-09-28-docs-indexing-hygiene/) | Index only the docs pages worth indexing, and date them from git |
 | 2026-09-28 | [`fix-legacy-editor-links`](./2026-09-28-fix-legacy-editor-links/) | Stop linking the legacy /editor/ path, and serve it a 200 page |
 | 2026-09-28 | [`garmin-percent-ftp-to-watts`](./2026-09-28-garmin-percent-ftp-to-watts/) | Resolve percent-of-FTP power targets to watts in the GCN writer |

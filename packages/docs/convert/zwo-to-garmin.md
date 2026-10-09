@@ -5,20 +5,33 @@ description: "Convert a Zwift ZWO workout to Garmin Connect format and push it t
 
 # Convert ZWO to Garmin
 
+::: info Scope
+Converts structured workouts (steps and targets), not recorded activities.
+See [Workouts vs. activities](/convert/#workouts-vs-activities).
+:::
+
+::: warning Known issue: ramps
+Steady-state and interval power targets are converted from % FTP to watts with
+your FTP. Ramps (`Warmup`, `Cooldown`, `Ramp`) are not yet: their % FTP bounds
+arrive in Garmin Connect as watts with the same numbers (a 50–75 % warm-up
+becomes 50–75 W). The fix is tracked in
+[issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279).
+:::
+
 Take a **Zwift ZWO** workout into **Garmin Connect** so you can run a session you
 built in Zwift on your Garmin watch or head unit. Kaiord converts ZWO to the
 Garmin Connect workout format (GCN JSON) — free and in-browser in the
-[Kaiord Editor](https://kaiord.com/app/) (no account, no upload), or via the
+[Kaiord Editor](https://kaiord.com/app/#/convert?from=zwo&to=garmin) (no account, no upload), or via the
 [CLI](/cli/commands#convert) and [TypeScript SDK](/guide/quick-start).
 Conversions go through Kaiord's canonical [KRD format](/formats/krd) and stay
-within round-trip tolerances (time ±1 s, power ±1 W or ±1 % FTP).
+within round-trip tolerances (time ±1 s), except for the power issue above.
 
 ## Three ways to convert
 
-### 1. Editor (drag & drop)
+### 1. Editor (in the browser)
 
-Open [kaiord.com/app](https://kaiord.com/app/), drop your `.zwo` file,
-choose **Garmin (GCN)** as the export format, and download the result. To send
+Open [kaiord.com/app](https://kaiord.com/app/#/convert?from=zwo&to=garmin), choose your `.zwo` file
+(**GCN** is already selected as the export format), and download the result. To send
 it straight to your watch, use the Editor's Garmin sync (backed by the
 `garmin-bridge` extension).
 

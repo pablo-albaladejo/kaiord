@@ -32,6 +32,8 @@ import { gzipSync } from "node:zlib";
 // - `src/adapters/cloud-sync/create-app-cloud-sync.ts` (behind `createLazyCloudSync`, loaded from `main.tsx`)
 // - `src/components/pages/health/health-routes.tsx` (`HealthSubRouter`)
 // - `src/new-workout-route.tsx` (`NewWorkoutRoute`)
+// - `src/components/pages/ConvertPage/ConvertPage.tsx` (`ConvertPage`, the
+//   docs' converter deep link; every other route must not pay for it)
 //
 // Usage: node scripts/check-spa-initial-js.mjs <spa-dist> [--report]
 // Exit 1 when <spa-dist>/index.html is missing, has no recognisable entry
@@ -44,6 +46,7 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/adapters/cloud-sync/create-app-cloud-sync.ts",
   "src/components/pages/health/health-routes.tsx",
   "src/new-workout-route.tsx",
+  "src/components/pages/ConvertPage/ConvertPage.tsx",
 ];
 
 // The entry chunk MUST have a sourcemap: a static import of a seam gets
