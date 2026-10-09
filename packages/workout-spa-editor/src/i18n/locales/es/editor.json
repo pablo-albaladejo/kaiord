@@ -309,5 +309,18 @@
     "countAria": "Número de repeticiones",
     "ungroup": "Desagrupar",
     "deleteShort": "Eliminar"
+  },
+  "convert": {
+    "heading": "Convertir {{from}} a {{to}}",
+    "pickerHeading": "Convertir un archivo de entrenamiento",
+    "pickerIntro": "Elige el formato que tienes y el que necesitas.",
+    "scope": "Convierte entrenamientos estructurados (pasos y objetivos), no actividades registradas. El archivo no sale de tu navegador y no se guarda nada en tu calendario ni en tu biblioteca.",
+    "from": "De",
+    "to": "A",
+    "continue": "Continuar",
+    "chooseFile": "1. Elige tu archivo {{from}}",
+    "download": "2. Descárgalo (cambia el formato si lo necesitas)",
+    "sameFormat": "Elige dos formatos distintos.",
+    "wrongFormat": "Ese archivo no es {{from}}. Elige un archivo {{from}} o cambia de formato."
   }
 }
