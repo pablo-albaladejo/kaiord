@@ -21,15 +21,18 @@ describe("fenceUntrusted", () => {
     expect(result).toBe(`${UNTRUSTED_OPEN}coach note${UNTRUSTED_CLOSE}`);
   });
 
-  it("should return an empty string for null or undefined", () => {
-    // Arrange
+  it.each([null, undefined])(
+    "should return an empty string for %s",
+    (nullish) => {
+      // Arrange
 
-    // Act
-    const result = fenceUntrusted(null);
+      // Act
+      const result = fenceUntrusted(nullish);
 
-    // Assert
-    expect(result).toBe("");
-  });
+      // Assert
+      expect(result).toBe("");
+    }
+  );
 
   it("should cap the fenced content at 500 characters", () => {
     // Arrange
@@ -85,17 +88,6 @@ describe("fenceUntrusted", () => {
 });
 
 describe("fenceUntrusted absence semantics", () => {
-  it("should return an empty string for an absent field", () => {
-    // Arrange
-    const absent = undefined;
-
-    // Act
-    const result = fenceUntrusted(absent);
-
-    // Assert
-    expect(result).toBe("");
-  });
-
   it("should return an empty fence for a present but empty field", () => {
     // Arrange
     const present = "";
