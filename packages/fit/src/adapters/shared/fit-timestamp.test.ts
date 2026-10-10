@@ -16,7 +16,7 @@ describe("fitTimestampToIso", () => {
     expect(result).toBe("2024-01-02T03:04:05.000Z");
   });
 
-  it("should treat a number as FIT epoch seconds scaled by 1000", () => {
+  it("should treat a number as Unix epoch seconds scaled by 1000", () => {
     // Arrange
     const epochSeconds = 1_704_164_645;
 
@@ -42,7 +42,7 @@ describe("fitTimestampToIso", () => {
 });
 
 describe("isoToFitTimestampSeconds", () => {
-  it("should convert an ISO string back to floored FIT epoch seconds", () => {
+  it("should convert an ISO string back to floored Unix epoch seconds", () => {
     // Arrange
     const iso = "2024-01-02T03:04:05.999Z";
 

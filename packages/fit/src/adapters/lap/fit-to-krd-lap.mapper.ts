@@ -1,20 +1,29 @@
 import type { KRDLap } from "@kaiord/core";
-import { FIT_TO_SWIM_STROKE } from "@kaiord/core";
+import { FIT_TO_SWIM_STROKE, swimStrokeSchema } from "@kaiord/core";
 
 import type { FitLap } from "../schemas/fit-lap";
+import { fitTimestampToIso } from "../shared/fit-timestamp";
 import { mapSportToKrd } from "../sport/sport.mapper";
 import { mapSubSportToKrd } from "../sub-sport/sub-sport";
 import { mapFitLapTriggerToKrd } from "./lap-trigger.mapper";
+
+const mapFitSwimStrokeToKrd = (
+  value: FitLap["swimStroke"]
+): KRDLap["swimStroke"] => {
+  if (typeof value === "number") return FIT_TO_SWIM_STROKE[value];
+  const parsed = swimStrokeSchema.safeParse(value);
+  return parsed.success ? parsed.data : undefined;
+};
 
 /**
  * Maps FIT LAP fields to KRD lap fields.
  * Thin translation layer - no complex logic.
  */
 export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
-  // Timing - convert ms to seconds
-  startTime: new Date(fit.startTime * 1000).toISOString(),
-  totalElapsedTime: fit.totalElapsedTime / 1000,
-  totalTimerTime: fit.totalTimerTime / 1000,
+  // Timing - the SDK Decoder already applies the profile scale (seconds)
+  startTime: fitTimestampToIso(fit.startTime),
+  totalElapsedTime: fit.totalElapsedTime,
+  totalTimerTime: fit.totalTimerTime,
 
   // Distance
   totalDistance: fit.totalDistance,
@@ -53,8 +62,5 @@ export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
 
   // Swimming
   numLengths: fit.numLengths,
-  swimStroke:
-    fit.swimStroke !== undefined
-      ? FIT_TO_SWIM_STROKE[fit.swimStroke]
-      : undefined,
+  swimStroke: mapFitSwimStrokeToKrd(fit.swimStroke),
 });

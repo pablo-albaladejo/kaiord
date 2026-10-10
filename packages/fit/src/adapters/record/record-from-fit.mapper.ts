@@ -2,6 +2,7 @@ import type { KRDRecord } from "@kaiord/core";
 
 import type { FitRecord } from "../schemas/fit-record";
 import { semicirclesToDegrees } from "../shared/coordinate.converter";
+import { fitTimestampToIso } from "../shared/fit-timestamp";
 
 const mapFitPosition = (
   fit: FitRecord
@@ -52,7 +53,7 @@ const mapFitRunningDynamics = (fit: FitRecord, record: KRDRecord): void => {
  */
 export const mapFitRecordToKrd = (fit: FitRecord): KRDRecord => {
   const record: KRDRecord = {
-    timestamp: new Date(fit.timestamp * 1000).toISOString(),
+    timestamp: fitTimestampToIso(fit.timestamp),
   };
 
   const position = mapFitPosition(fit);

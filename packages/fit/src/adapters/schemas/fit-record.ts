@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { fitDateTimeSchema } from "./fit-date-time";
 /**
  * FIT RECORD message schema (Message ID: 20).
  *
@@ -7,7 +8,7 @@ import { z } from "zod";
  * Coordinates are in semicircles (signed 32-bit integer).
  */
 export const fitRecordSchema = z.object({
-  timestamp: z.number(),
+  timestamp: fitDateTimeSchema,
   positionLat: z.number().optional(),
   positionLong: z.number().optional(),
   altitude: z.number().optional(),

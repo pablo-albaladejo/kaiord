@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { fitDateTimeSchema } from "./fit-date-time";
 import { fitSportSchema } from "./fit-sport";
 import { fitSubSportSchema } from "./fit-sub-sport";
 
@@ -9,8 +10,8 @@ import { fitSubSportSchema } from "./fit-sub-sport";
  * Contains aggregate statistics for the entire workout/activity.
  */
 export const fitSessionSchema = z.object({
-  timestamp: z.number(),
-  startTime: z.number(),
+  timestamp: fitDateTimeSchema,
+  startTime: fitDateTimeSchema,
   totalElapsedTime: z.number(),
   totalTimerTime: z.number(),
   totalDistance: z.number().optional(),

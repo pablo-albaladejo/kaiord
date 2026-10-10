@@ -23,8 +23,8 @@ describe("convertFitToKrdSession", () => {
     const fitSession = {
       timestamp: 1704067200,
       startTime: 1704067200,
-      totalElapsedTime: 3600000,
-      totalTimerTime: 3500000,
+      totalElapsedTime: 3600,
+      totalTimerTime: 3500,
       sport: "cycling",
       subSport: "indoorCycling",
     };
@@ -45,8 +45,8 @@ describe("convertFitToKrdSession", () => {
     const fitSession = {
       timestamp: 1704067200,
       startTime: 1704067200,
-      totalElapsedTime: 3600000,
-      totalTimerTime: 3600000,
+      totalElapsedTime: 3600,
+      totalTimerTime: 3600,
       sport: "cycling",
       avgHeartRate: 145,
       maxHeartRate: 175,
@@ -75,8 +75,8 @@ describe("convertFitToKrdSession", () => {
     const fitSession = {
       timestamp: 1704067200,
       startTime: 1704067200,
-      totalElapsedTime: 3600000,
-      totalTimerTime: 3600000,
+      totalElapsedTime: 3600,
+      totalTimerTime: 3600,
       sport: "running",
       avgSpeed: 3.0,
       maxSpeed: 4.0,
@@ -97,8 +97,8 @@ describe("convertFitToKrdSession", () => {
     const fitSession = {
       timestamp: 1704067200,
       startTime: 1704067200,
-      totalElapsedTime: 3600000,
-      totalTimerTime: 3600000,
+      totalElapsedTime: 3600,
+      totalTimerTime: 3600,
       sport: "running",
       avgSpeed: 3.0,
       maxSpeed: 4.0,
@@ -117,8 +117,8 @@ describe("convertFitToKrdSession", () => {
     const fitSession = {
       timestamp: 1704067200,
       startTime: 1704067200,
-      totalElapsedTime: 3600000,
-      totalTimerTime: 3600000,
+      totalElapsedTime: 3600,
+      totalTimerTime: 3600,
       sport: "cycling",
       totalAscent: 500,
       totalDescent: 450,
