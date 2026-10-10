@@ -1,42 +1,59 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useState } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
-import { useSetUserPreferenceFields } from "../../../hooks/use-set-user-preference-fields";
-import { useUserPreferences } from "../../../hooks/use-user-preferences";
-import { logger } from "../../../utils/logger";
 
-export const DEFAULT_PROFILE_NOTICE_ID = "default-profile-notice";
+export const DEFAULT_PROFILE_NOTICE_STORAGE_KEY =
+  "kaiord.defaultProfileNotice.dismissed";
+
+const readDismissed = (): string[] => {
+  try {
+    const raw = localStorage.getItem(DEFAULT_PROFILE_NOTICE_STORAGE_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((id): id is string => typeof id === "string")
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeDismissed = (ids: string[]): void => {
+  try {
+    localStorage.setItem(
+      DEFAULT_PROFILE_NOTICE_STORAGE_KEY,
+      JSON.stringify(ids)
+    );
+  } catch {
+    // Storage may be unavailable (private mode); the dismissal still holds
+    // for this session.
+  }
+};
 
 /**
  * Visible while the active profile is the unclaimed default one and the
- * notice was not dismissed. Dismissal is a preference write, never a
- * profile edit, so it does not claim the profile.
+ * notice was not dismissed on this device. Dismissal is device-local on
+ * purpose: the default profile itself never leaves the device, and a
+ * synced preferences write would carry a fresh `updatedAt` that, once the
+ * profile is re-keyed onto a synced one, wins LWW over that profile's whole
+ * preferences row. It is not a profile edit either, so it does not claim.
  */
 export function useDefaultProfileNotice() {
   const active = useActiveProfileLive();
   const profileId = active?.id ?? null;
-  const prefs = useUserPreferences({ profileId, defaultView: "grid" });
-  const setPrefs = useSetUserPreferenceFields(profileId);
-  const dismissed = useMemo(
-    () => prefs?.dismissedCoachMarks ?? [],
-    [prefs?.dismissedCoachMarks]
-  );
+  const [dismissed, setDismissed] = useState(readDismissed);
   const visible =
     active?.profile?.origin === "auto" &&
-    prefs !== undefined &&
-    !dismissed.includes(DEFAULT_PROFILE_NOTICE_ID);
+    profileId !== null &&
+    !dismissed.includes(profileId);
 
   const dismiss = useCallback(() => {
-    void setPrefs({
-      dismissedCoachMarks: [
-        ...new Set([...dismissed, DEFAULT_PROFILE_NOTICE_ID]),
-      ],
-    }).catch((error: unknown) => {
-      logger.warn("Failed to persist default-profile notice dismissal", {
-        error,
-      });
+    if (profileId === null) return;
+    setDismissed((ids) => {
+      const next = [...new Set([...ids, profileId])];
+      writeDismissed(next);
+      return next;
     });
-  }, [setPrefs, dismissed]);
+  }, [profileId]);
 
   return { visible, dismiss };
 }

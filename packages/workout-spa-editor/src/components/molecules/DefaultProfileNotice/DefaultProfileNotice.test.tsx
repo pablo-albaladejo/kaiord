@@ -1,14 +1,14 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../../adapters/dexie/dexie-database";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { Profile } from "../../../types/profile";
 import type { UserPreferences } from "../../../types/user-preferences";
 import { DefaultProfileNotice } from "./DefaultProfileNotice";
-import { DEFAULT_PROFILE_NOTICE_ID } from "./use-default-profile-notice";
 
 const PROFILE_ID = "auto-1";
 
@@ -21,6 +21,13 @@ async function seedProfile(origin: Profile["origin"]): Promise<void> {
   };
   await db.table<Profile>("profiles").put(profile);
   await db.table("meta").put({ key: "activeProfileId", value: PROFILE_ID });
+}
+
+function ActiveProfileProbe() {
+  const active = useActiveProfileLive();
+  return active?.profile ? (
+    <span>{`active:${active.profile.origin}`}</span>
+  ) : null;
 }
 
 function renderNotice() {
@@ -38,6 +45,7 @@ describe("DefaultProfileNotice", () => {
     await db.table("profiles").clear();
     await db.table("meta").clear();
     await db.table("userPreferences").clear();
+    localStorage.clear();
   });
 
   it("should show the notice with a link to the athlete page for an auto profile", async () => {
@@ -68,7 +76,7 @@ describe("DefaultProfileNotice", () => {
     );
   });
 
-  it("should hide on dismiss and record it in preferences without claiming the profile", async () => {
+  it("should hide on dismiss without writing preferences or claiming the profile", async () => {
     // Arrange
     await seedProfile("auto");
     renderNotice();
@@ -83,11 +91,39 @@ describe("DefaultProfileNotice", () => {
     await waitFor(() =>
       expect(screen.queryByTestId("default-profile-notice")).toBeNull()
     );
+    // A preferences row written here would carry a fresh `updatedAt` and,
+    // once the profile is re-keyed onto a synced one, win LWW over that
+    // profile's whole preferences row.
     const prefs = await db
       .table<UserPreferences>("userPreferences")
       .get(PROFILE_ID);
-    expect(prefs?.dismissedCoachMarks).toContain(DEFAULT_PROFILE_NOTICE_ID);
+    expect(prefs).toBeUndefined();
     const profile = await db.table<Profile>("profiles").get(PROFILE_ID);
     expect(profile?.origin).toBe("auto");
+  });
+
+  it("should stay dismissed on this device after a remount", async () => {
+    // Arrange
+    await seedProfile("auto");
+    renderNotice();
+    const notice = await screen.findByTestId("default-profile-notice");
+    const dismiss = notice.querySelector("button");
+    if (!dismiss) throw new Error("dismiss button missing");
+    await userEvent.click(dismiss);
+    cleanup();
+
+    // Act
+    render(
+      <>
+        <ActiveProfileProbe />
+        <DefaultProfileNotice />
+      </>
+    );
+
+    // Assert
+    // The probe reads the same live profile the notice does, so once it
+    // shows, the notice has rendered with the profile loaded.
+    await screen.findByText("active:auto");
+    expect(screen.queryByTestId("default-profile-notice")).toBeNull();
   });
 });
