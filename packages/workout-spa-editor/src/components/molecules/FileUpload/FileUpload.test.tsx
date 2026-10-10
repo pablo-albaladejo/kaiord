@@ -114,6 +114,55 @@ describe("FileUpload", () => {
     });
   });
 
+  it("should report reader warnings through onWarnings after the load", async () => {
+    // Arrange
+    const { importWorkout } = await import("../../../utils/import-workout");
+    vi.mocked(importWorkout).mockImplementation(
+      async (_file, _onProgress, _signal, onWarning) => {
+        onWarning?.("Step has no valid duration, skipping");
+        return mockKRD;
+      }
+    );
+    const onFileLoad = vi.fn();
+    const onWarnings = vi.fn();
+    const user = userEvent.setup();
+    render(<FileUpload onFileLoad={onFileLoad} onWarnings={onWarnings} />);
+    const fileInput = screen.getByLabelText(/upload workout file/i);
+    const file = new File(["<xml/>"], "workout.tcx", { type: "text/xml" });
+
+    // Act
+    await user.upload(fileInput, file);
+
+    // Assert
+    await waitFor(() => {
+      expect(onWarnings).toHaveBeenCalledWith([
+        "Step has no valid duration, skipping",
+      ]);
+    });
+    expect(onFileLoad).toHaveBeenCalledWith(mockKRD);
+  });
+
+  it("should not call onWarnings for a clean import", async () => {
+    // Arrange
+    const { importWorkout } = await import("../../../utils/import-workout");
+    vi.mocked(importWorkout).mockResolvedValue(mockKRD);
+    const onFileLoad = vi.fn();
+    const onWarnings = vi.fn();
+    const user = userEvent.setup();
+    render(<FileUpload onFileLoad={onFileLoad} onWarnings={onWarnings} />);
+    const fileInput = screen.getByLabelText(/upload workout file/i);
+    const file = new File(["<xml/>"], "workout.tcx", { type: "text/xml" });
+
+    // Act
+    await user.upload(fileInput, file);
+
+    // Assert
+    await waitFor(() => {
+      expect(onFileLoad).toHaveBeenCalledWith(mockKRD);
+    });
+    expect(onWarnings).not.toHaveBeenCalled();
+  });
+
   it("should call onError with invalid file", async () => {
     // Arrange
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useAnalytics } from "../../../contexts/analytics-context";
+import { useImportWarningsToast } from "../../../hooks/use-import-warnings-toast";
 import { useTranslate } from "../../../i18n/use-translate";
 import { acceptFor, type ConvertPair } from "../../../routing/convert-params";
 import type { KRD } from "../../../types/krd";
@@ -21,6 +22,7 @@ export function ConvertFlow({ pair }: ConvertFlowProps) {
   const analytics = useAnalytics();
   const [krd, setKrd] = useState<KRD | null>(null);
   const [wrongFormat, setWrongFormat] = useState(false);
+  const onWarnings = useImportWarningsToast();
 
   // Fires right after `onFileLoad` in the same tick, so React batches both.
   const checkImported = (format: string) => {
@@ -41,6 +43,7 @@ export function ConvertFlow({ pair }: ConvertFlowProps) {
           onFileLoad={setKrd}
           onError={() => setKrd(null)}
           onImported={checkImported}
+          onWarnings={onWarnings}
         />
         {wrongFormat && (
           <p
