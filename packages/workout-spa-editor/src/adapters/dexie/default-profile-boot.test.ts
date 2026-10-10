@@ -6,7 +6,7 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { defaultProfileName } from "../../i18n/default-profile-name";
 import type { Profile } from "../../types/profile";
@@ -85,6 +85,44 @@ describe("registerDefaultProfileBoot", () => {
     await db.open();
 
     // Assert
+    expect(await db.table("profiles").count()).toBe(1);
+    db.close();
+  });
+
+  it("should recreate the default profile when a reopen finds none", async () => {
+    // Arrange
+    const db = bootedDb("en-US");
+    await db.open();
+    await db.table("profiles").clear();
+    db.close();
+
+    // Act
+    await db.open();
+
+    // Assert
+    const profiles = await db.table<Profile>("profiles").toArray();
+    expect(profiles).toEqual([expect.objectContaining({ origin: "auto" })]);
+    db.close();
+  });
+
+  it("should not resolve the name when a profile already exists", async () => {
+    // Arrange
+    const name = `kaiord-test-boot-profile-${Date.now()}-${Math.random()}`;
+    names.push(name);
+    const seed = new KaiordDatabase(name);
+    await seed
+      .table<Profile>("profiles")
+      .put({ id: "real", name: "Real", linkedAccounts: [] });
+    seed.close();
+    const db = new KaiordDatabase(name);
+    const resolveName = vi.fn(() => "unused");
+    registerDefaultProfileBoot(db, createAppPersistence(db), resolveName);
+
+    // Act
+    await db.open();
+
+    // Assert
+    expect(resolveName).not.toHaveBeenCalled();
     expect(await db.table("profiles").count()).toBe(1);
     db.close();
   });

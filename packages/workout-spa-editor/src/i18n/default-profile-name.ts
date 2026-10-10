@@ -1,30 +1,19 @@
 /**
  * Name of the first-run default profile in the browser's language
- * ("My profile" / "Mi perfil"). Non-English catalogs are code-split, so the
- * name may need their chunk; any failure falls back to the bundled English.
+ * ("My profile" / "Mi perfil"). Bundled per locale instead of read from the
+ * code-split catalogs: it is needed while the database opens, with every
+ * other database operation held behind it, so it must never wait on a
+ * network fetch.
  */
 
-import { DEFAULT_LOCALE } from "@kaiord/i18n";
+import type { Locale } from "@kaiord/i18n";
 
 import { resolveLocale } from "../application/resolve-locale";
-import { appI18n } from "./i18n";
-import { loadLocaleNamespaces } from "./resources";
 
-const englishName = (): string =>
-  appI18n.t("athlete:defaultProfile.name", { lng: DEFAULT_LOCALE });
-
-type AthleteCatalog = { defaultProfile?: { name?: string } } | undefined;
-
-export const defaultProfileName = async (
-  navigatorLanguage: string
-): Promise<string> => {
-  const locale = resolveLocale(undefined, navigatorLanguage);
-  if (locale === DEFAULT_LOCALE) return englishName();
-  try {
-    const catalog = await loadLocaleNamespaces(locale);
-    const athlete = catalog.athlete as AthleteCatalog;
-    return athlete?.defaultProfile?.name ?? englishName();
-  } catch {
-    return englishName();
-  }
+export const DEFAULT_PROFILE_NAMES: Readonly<Record<Locale, string>> = {
+  en: "My profile",
+  es: "Mi perfil",
 };
+
+export const defaultProfileName = (navigatorLanguage: string): string =>
+  DEFAULT_PROFILE_NAMES[resolveLocale(undefined, navigatorLanguage)];
