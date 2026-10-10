@@ -105,6 +105,8 @@ test.describe("Default local profile on a clean browser", () => {
     // Arrange
     await page.goto("/nutrition");
     const logger = page.getByTestId("intake-logger");
+    // The "create a profile" card is only a fail-open state now.
+    await expect(page.getByTestId("nutrition-empty")).toHaveCount(0);
 
     // Act
     await logger.getByLabel("Energy (kcal)").fill("500");
