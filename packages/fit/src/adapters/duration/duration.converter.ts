@@ -25,9 +25,13 @@ export type FitDurationData = {
   durationDistance?: number;
   durationHr?: number;
   durationStep?: number;
-  repeatHr?: number;
   durationCalories?: number;
   durationPower?: number;
+  repeatTime?: number;
+  repeatDistance?: number;
+  repeatCalories?: number;
+  repeatHr?: number;
+  repeatPower?: number;
 };
 
 const DURATION_CONVERTERS: Record<
