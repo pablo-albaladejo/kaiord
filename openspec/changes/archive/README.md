@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-11 | [`fix-core-compare-krds-steps`](./2026-10-11-fix-core-compare-krds-steps/) | Compare structured workout steps in round-trip validation |
 | 2026-10-10 | [`fix-fit-activity-import`](./2026-10-10-fix-fit-activity-import/) | Import activity FIT files from the decoder's real message shape |
 | 2026-10-10 | [`fix-fit-workout-roundtrip`](./2026-10-10-fix-fit-workout-roundtrip/) | Round-trip structured workouts through the FIT SDK encoder |
 | 2026-10-10 | [`fix-spa-fit-import-profile`](./2026-10-10-fix-spa-fit-import-profile/) | FIT import works in the SPA production bundle |
