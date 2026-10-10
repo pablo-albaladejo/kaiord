@@ -4,8 +4,6 @@
 export const TIME_TOLERANCE_MS = 1000 as const;
 export const ONE_MIN_MS = 60000 as const;
 export const FIFTY_FIVE_SEC_MS = 55000 as const;
-export const TEN_MIN_MS = 600000 as const;
-export const NINE_MIN_FORTY_SEC_MS = 580000 as const;
 export const NINE_MIN_FIFTY_SEC_MS = 590000 as const;
 export const TEN_MIN_SEC = 600 as const;
 export const NINE_MIN_FORTY_SEC = 580 as const;
@@ -133,8 +131,6 @@ export const FIT_TARGET_POWER_RANGE_HIGH = 250 as const;
 
 // === Session conversion samples ===
 export const FIT_SESSION_TIMESTAMP_SEC = 1704067200 as const;
-export const FIT_SESSION_TOTAL_ELAPSED_MS = 3600000 as const;
-export const FIT_SESSION_TOTAL_TIMER_MS = 3500000 as const;
 export const FIT_SESSION_TOTAL_ELAPSED_SEC = 3600 as const;
 export const FIT_SESSION_TOTAL_TIMER_SEC = 3500 as const;
 export const FIT_SESSION_AVG_HR = 145 as const;

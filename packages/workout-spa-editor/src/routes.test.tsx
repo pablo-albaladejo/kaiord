@@ -1,6 +1,6 @@
 import { waitFor } from "@testing-library/react";
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
@@ -38,7 +38,22 @@ function renderAtPath(path: string) {
   return { ...view, location };
 }
 
+// Every route below mounts a React.lazy page. The first test to await a
+// given chunk used to pay its cold transform inside its own 5 s budget,
+// which timed out under CPU contention. Warm them all once, up front.
+const COLD_IMPORT_TIMEOUT_MS = 30_000;
+
 describe("Routing", () => {
+  beforeAll(async () => {
+    await Promise.all([
+      import("./components/pages/Daily"),
+      import("./components/pages/LibraryPage"),
+      import("./new-workout-route"),
+      import("./components/pages/CreateWorkout/CreateWorkout"),
+      import("./components/pages/CalendarPage"),
+    ]);
+  }, COLD_IMPORT_TIMEOUT_MS);
+
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,

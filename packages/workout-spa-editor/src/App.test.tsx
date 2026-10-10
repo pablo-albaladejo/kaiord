@@ -7,14 +7,16 @@ import type { KRD, Workout, WorkoutStep } from "./types/krd";
 
 const STEP3_POWER_WATTS = 300;
 
+// CalendarPage is React.lazy. Its first render cold-transforms ~290 modules,
+// which under CPU contention (pre-commit, parallel workers) ate the whole
+// 5 s budget of whichever test mounted it first. Pay that once here, under
+// an explicit hook timeout, so every test starts from a warm module cache.
+const COLD_IMPORT_TIMEOUT_MS = 30_000;
+
 describe("App", () => {
-  // The first render of the default route resolves the lazy CalendarPage
-  // chunk; under vitest that means transforming its whole module graph
-  // (~3.7s cold), which is module compilation, not App behaviour. Load it
-  // once up front so the cases time only what they assert.
   beforeAll(async () => {
     await import("./components/pages/CalendarPage");
-  });
+  }, COLD_IMPORT_TIMEOUT_MS);
 
   beforeEach(() => {
     // Reset store state before each test

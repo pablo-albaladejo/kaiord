@@ -13,6 +13,7 @@ import { createConsoleLogger, createFitParsingError } from "@kaiord/core";
 import { convertKrdToWeightScaleUploadMessages } from "./health/body-composition/krd-to-weight-scale-fit.converter";
 import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
 import { mapMessagesToKRD } from "./messages/messages.mapper";
+import { orderFieldsByProfile } from "./shared/canonical-field-order";
 import type { FitMessages } from "./shared/types";
 
 /**
@@ -26,12 +27,11 @@ export const encodeFitMessages = (
 ): Uint8Array => {
   const encoder = new Encoder();
   for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
+    const message = messages[i] as Record<string, unknown>;
+    const mesgNum = message.mesgNum as number;
     try {
-      logger.debug(`Writing message ${i + 1}/${messages.length}`, {
-        mesgNum: (message as { mesgNum?: number }).mesgNum,
-      });
-      encoder.writeMesg(message);
+      logger.debug(`Writing message ${i + 1}/${messages.length}`, { mesgNum });
+      encoder.writeMesg(orderFieldsByProfile(mesgNum, message));
     } catch (error) {
       logger.error(`Failed to write message ${i + 1}`, {
         message: JSON.stringify(message, null, 2),

@@ -5,10 +5,10 @@ import type { FitDurationData } from "./duration.converter";
 export const convertRepeatUntilTime = (
   data: FitDurationData
 ): Duration | null => {
-  if (data.durationTime !== undefined && data.durationStep !== undefined) {
+  if (data.repeatTime !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeSchema.enum.repeat_until_time,
-      seconds: data.durationTime,
+      seconds: data.repeatTime,
       repeatFrom: data.durationStep,
     };
   }
@@ -18,10 +18,10 @@ export const convertRepeatUntilTime = (
 export const convertRepeatUntilDistance = (
   data: FitDurationData
 ): Duration | null => {
-  if (data.durationDistance !== undefined && data.durationStep !== undefined) {
+  if (data.repeatDistance !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeSchema.enum.repeat_until_distance,
-      meters: data.durationDistance,
+      meters: data.repeatDistance,
       repeatFrom: data.durationStep,
     };
   }
@@ -31,10 +31,10 @@ export const convertRepeatUntilDistance = (
 export const convertRepeatUntilCalories = (
   data: FitDurationData
 ): Duration | null => {
-  if (data.durationCalories !== undefined && data.durationStep !== undefined) {
+  if (data.repeatCalories !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeSchema.enum.repeat_until_calories,
-      calories: data.durationCalories,
+      calories: data.repeatCalories,
       repeatFrom: data.durationStep,
     };
   }
@@ -44,10 +44,10 @@ export const convertRepeatUntilCalories = (
 export const convertRepeatUntilHrLessThan = (
   data: FitDurationData
 ): Duration | null => {
-  if (data.durationHr !== undefined && data.durationStep !== undefined) {
+  if (data.repeatHr !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeSchema.enum.repeat_until_heart_rate_less_than,
-      bpm: data.durationHr,
+      bpm: data.repeatHr,
       repeatFrom: data.durationStep,
     };
   }
@@ -57,10 +57,10 @@ export const convertRepeatUntilHrLessThan = (
 export const convertRepeatUntilPowerLessThan = (
   data: FitDurationData
 ): Duration | null => {
-  if (data.durationPower !== undefined && data.durationStep !== undefined) {
+  if (data.repeatPower !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeSchema.enum.repeat_until_power_less_than,
-      watts: data.durationPower,
+      watts: data.repeatPower,
       repeatFrom: data.durationStep,
     };
   }
@@ -70,10 +70,10 @@ export const convertRepeatUntilPowerLessThan = (
 export const convertRepeatUntilPowerGreaterThan = (
   data: FitDurationData
 ): Duration | null => {
-  if (data.durationPower !== undefined && data.durationStep !== undefined) {
+  if (data.repeatPower !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeSchema.enum.repeat_until_power_greater_than,
-      watts: data.durationPower,
+      watts: data.repeatPower,
       repeatFrom: data.durationStep,
     };
   }

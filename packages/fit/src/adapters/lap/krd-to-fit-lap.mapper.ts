@@ -12,19 +12,16 @@ import { mapKrdLapTriggerToFit } from "./lap-trigger.mapper";
  */
 export const mapKrdLapToFit = (krd: KRDLap): Partial<FitLap> => {
   const startTimeSeconds = Math.floor(new Date(krd.startTime).getTime() / 1000);
-  const elapsedTimeMs = krd.totalElapsedTime * 1000;
+  // Durations stay in seconds: the SDK Encoder applies the profile scale.
   // Preserve zero totalTimerTime, default to elapsed time if undefined
-  const timerTimeMs =
-    krd.totalTimerTime !== undefined
-      ? krd.totalTimerTime * 1000
-      : elapsedTimeMs;
+  const timerTime = krd.totalTimerTime ?? krd.totalElapsedTime;
 
   return {
     // Timing
     timestamp: startTimeSeconds + Math.floor(krd.totalElapsedTime),
     startTime: startTimeSeconds,
-    totalElapsedTime: elapsedTimeMs,
-    totalTimerTime: timerTimeMs,
+    totalElapsedTime: krd.totalElapsedTime,
+    totalTimerTime: timerTime,
 
     // Distance
     totalDistance: krd.totalDistance,
