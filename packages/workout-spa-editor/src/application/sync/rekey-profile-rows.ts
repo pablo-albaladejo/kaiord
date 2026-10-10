@@ -38,8 +38,20 @@ export const rekeyRow = (row: Row, rekey: ProfileRekey): Row =>
 const ownedBySource = (row: Row, rekey: ProfileRekey): boolean =>
   typeof row.profileId === "string" && rekey.from.includes(row.profileId);
 
-const keyOf = (rule: RekeyRule, row: Row): string =>
-  (rule.key ?? ["id"]).map((f) => String(row[f] ?? "")).join("\u0000");
+const primaryKey = (rule: RekeyRule): ReadonlyArray<string> =>
+  rule.key ?? ["id"];
+
+/** Every unique key the row carries, tagged by key so two never alias. */
+const keysOf = (rule: RekeyRule, row: Row): string[] => {
+  const primary = primaryKey(rule).map((f) => String(row[f] ?? ""));
+  const natural = (rule.uniqueKeys ?? [])
+    .filter((fields) => fields.every((f) => row[f] != null && row[f] !== ""))
+    .map(
+      (fields, i) =>
+        `${i + 1}\u0001${fields.map((f) => String(row[f])).join("\u0000")}`
+    );
+  return [`0\u0001${primary.join("\u0000")}`, ...natural];
+};
 
 const sourceWins = (rule: RekeyRule, incoming: Row, existing: Row): boolean => {
   if (rule.onCollision !== "lww") return false;
@@ -47,6 +59,12 @@ const sourceWins = (rule: RekeyRule, incoming: Row, existing: Row): boolean => {
   const b = recordClock(existing);
   return a > 0 && b > 0 && a > b;
 };
+
+/** The winning auto row takes the target row's identity, so it updates it. */
+const asTarget = (rule: RekeyRule, row: Row, existing: Row): Row => ({
+  ...row,
+  ...Object.fromEntries(primaryKey(rule).map((f) => [f, existing[f]])),
+});
 
 export function rekeyTableRows(
   table: string,
@@ -57,17 +75,25 @@ export function rekeyTableRows(
   const all = rows as ReadonlyArray<Row>;
   const out = all.filter((r) => !ownedBySource(r, rekey));
   if (rule.onCollision === "drop") return out;
-  const index = new Map(out.map((r, i) => [keyOf(rule, r), i]));
+  const index = new Map<string, number>();
+  const indexRow = (at: number) => {
+    for (const k of keysOf(rule, out[at] as Row)) index.set(k, at);
+  };
+  out.forEach((_, at) => indexRow(at));
   for (const raw of all.filter((r) => ownedBySource(r, rekey))) {
     const row = rekeyRow(raw, rekey);
-    const k = keyOf(rule, row);
-    const at = index.get(k);
-    const existing = at === undefined ? undefined : out[at];
-    if (at === undefined || existing === undefined) {
-      index.set(k, out.push(row) - 1);
-    } else if (sourceWins(rule, row, existing)) {
-      out[at] = row;
+    const hits = new Set(keysOf(rule, row).flatMap((k) => index.get(k) ?? []));
+    if (hits.size === 0) {
+      indexRow(out.push(row) - 1);
+      continue;
     }
+    const [at] = [...hits];
+    const existing = at === undefined ? undefined : out[at];
+    if (hits.size > 1 || at === undefined || existing === undefined) continue;
+    if (!sourceWins(rule, row, existing)) continue;
+    for (const k of keysOf(rule, existing)) index.delete(k);
+    out[at] = asTarget(rule, row, existing);
+    indexRow(at);
   }
   return out;
 }
