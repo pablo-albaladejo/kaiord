@@ -20,6 +20,8 @@ import { useToastContext } from "../../../contexts/ToastContext";
 
 const TOAST_WELLNESS_SAVED = "Wellness saved";
 const TOAST_WELLNESS_SAVE_FAILED = "Could not save — please retry";
+const TOAST_WELLNESS_NO_PROFILE =
+  "No athlete profile — select or create one to save wellness";
 
 export type WellnessValues = Partial<Record<ManualHealthMetric, number>>;
 
@@ -43,7 +45,7 @@ export function useSaveWellness(day: string): UseSaveWellnessResult {
     try {
       const profileId = await persistence.profiles.getActiveId();
       if (!profileId) {
-        toast.error(TOAST_WELLNESS_SAVE_FAILED);
+        toast.error(TOAST_WELLNESS_NO_PROFILE);
         return false;
       }
       let savedCount = 0;
