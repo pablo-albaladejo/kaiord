@@ -6,25 +6,22 @@
  * exercised without IndexedDB.
  */
 
-import {
-  AUTO_PROFILE_REKEY_RULES,
-  DEVICE_LOCAL_REKEY_TABLES,
-} from "../application/sync/auto-profile-rekey-rules";
 import type { SnapshotPort } from "../ports/snapshot-port";
 import type { SnapshotTables, Tombstone } from "../types/snapshot";
+import { DEVICE_LOCAL_TABLES, PER_PROFILE_TABLES } from "./per-profile-tables";
 
 export type InMemorySnapshotState = {
   schemaVersion: number;
   tables: Record<string, unknown[]>;
   tombstones: Tombstone[];
-  /** Per-profile table names; defaults to every re-key rule table. */
+  /** Per-profile table names; defaults to the schema's snapshot tables. */
   perProfileTables?: string[];
   /** Device-local rows, kept outside `tables` like the Dexie adapter does. */
   deviceLocal?: Record<string, unknown[]>;
 };
 
-const DEFAULT_PER_PROFILE = Object.keys(AUTO_PROFILE_REKEY_RULES).filter(
-  (t) => !DEVICE_LOCAL_REKEY_TABLES.includes(t)
+const DEFAULT_PER_PROFILE = PER_PROFILE_TABLES.filter(
+  (t) => !DEVICE_LOCAL_TABLES.includes(t)
 );
 
 export function createInMemorySnapshotPort(

@@ -1,6 +1,6 @@
 /**
  * Default-profile guarantees that need a real IndexedDB: the re-key rule
- * coverage over the live schema, the atomicity of the import plus the
+ * coverage over the live schema, checked against a hand-written table list, the atomicity of the import plus the
  * device-local re-key, and the two-tab creation race.
  */
 import "fake-indexeddb/auto";
@@ -16,10 +16,14 @@ import {
 import { exportSnapshot } from "../../application/sync/export-snapshot";
 import { importReconciledSnapshot } from "../../application/sync/import-reconciled-snapshot";
 import { rekeySnapshot } from "../../application/sync/rekey-snapshot";
+import {
+  DEVICE_LOCAL_TABLES,
+  PER_PROFILE_TABLES,
+  PROVENANCE_TABLES,
+} from "../../test-utils/per-profile-tables";
 import { createAppPersistence } from "../create-app-persistence";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
-import { isPerProfileTable } from "./is-per-profile-table";
 
 const names: string[] = [];
 const freshName = () => {
@@ -33,25 +37,54 @@ afterEach(async () => {
 });
 
 describe("default profile on Dexie", () => {
-  it("should have a re-key rule for every per-profile and device-local table", async () => {
+  it("should classify exactly the hand-listed tables as per-profile", async () => {
     // Arrange
     const db = new KaiordDatabase(freshName());
     await db.open();
 
     // Act
     const perProfile = createDexieSnapshotPort(db).perProfileTables();
-    const needed = new Set([...perProfile, ...DEVICE_LOCAL_REKEY_TABLES]);
-    const missing = [...needed].filter((t) => !(t in AUTO_PROFILE_REKEY_RULES));
     db.close();
 
     // Assert
-    expect(perProfile).toEqual(
-      db.tables.filter(isPerProfileTable).map((t) => t.name)
-    );
-    expect(perProfile).toEqual(
-      expect.arrayContaining(["workouts", "coachingDayNotes", "intakeEntries"])
-    );
+    expect([...perProfile].sort()).toEqual(PER_PROFILE_TABLES);
+    expect([...DEVICE_LOCAL_REKEY_TABLES].sort()).toEqual(DEVICE_LOCAL_TABLES);
+  });
+
+  it("should have a re-key rule for every hand-listed per-profile table", () => {
+    // Arrange
+    const needed = PER_PROFILE_TABLES;
+
+    // Act
+    const missing = needed.filter((t) => !(t in AUTO_PROFILE_REKEY_RULES));
+
+    // Assert
     expect(missing).toEqual([]);
+  });
+
+  it("should give every provenance-indexed table a provenance natural key", async () => {
+    // Arrange
+    const db = new KaiordDatabase(freshName());
+    await db.open();
+    const provenance = ["profileId", "sourceBridgeId", "externalId"];
+
+    // Act
+    const indexed = db.tables
+      .filter((t) =>
+        t.schema.indexes.some((i) => i.name === `[${provenance.join("+")}]`)
+      )
+      .map((t) => t.name);
+    db.close();
+    const unkeyed = indexed.filter(
+      (t) =>
+        !AUTO_PROFILE_REKEY_RULES[t]?.uniqueKeys?.some(
+          (k) => k.join() === provenance.join()
+        )
+    );
+
+    // Assert
+    expect([...indexed].sort()).toEqual(PROVENANCE_TABLES);
+    expect(unkeyed).toEqual([]);
   });
 
   it("should roll back both the import and the device-local re-key when a step after them throws", async () => {
