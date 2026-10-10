@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import App from "./App";
 import { useWorkoutStore } from "./store/workout-store";
@@ -8,6 +8,14 @@ import type { KRD, Workout, WorkoutStep } from "./types/krd";
 const STEP3_POWER_WATTS = 300;
 
 describe("App", () => {
+  // The first render of the default route resolves the lazy CalendarPage
+  // chunk; under vitest that means transforming its whole module graph
+  // (~3.7s cold), which is module compilation, not App behaviour. Load it
+  // once up front so the cases time only what they assert.
+  beforeAll(async () => {
+    await import("./components/pages/CalendarPage");
+  });
+
   beforeEach(() => {
     // Reset store state before each test
     useWorkoutStore.setState({

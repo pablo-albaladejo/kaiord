@@ -24,6 +24,11 @@ test.describe("Settings Panel", () => {
     await page.waitForURL(/\/settings\/ai/);
     const settingsPage = page.getByTestId("settings-page");
     await expect(settingsPage).toBeVisible({ timeout: 5000 });
+    // Provider names also appear as options of the active profile's
+    // per-purpose model selects, so every row assertion targets the list.
+    const providers = settingsPage.getByRole("list", {
+      name: "Configured LLM providers",
+    });
 
     // Should start with "No providers configured"
     await expect(
@@ -37,9 +42,9 @@ test.describe("Settings Panel", () => {
 
     // First provider should be default automatically
     await expect(
-      settingsPage.getByText("My Claude", { exact: true })
+      providers.getByText("My Claude", { exact: true })
     ).toBeVisible();
-    await expect(settingsPage.getByText("Default")).toBeVisible();
+    await expect(providers.getByText("Default")).toBeVisible();
 
     // Add second provider (OpenAI)
     const providerSelect = settingsPage.locator("select").first();
@@ -49,18 +54,18 @@ test.describe("Settings Panel", () => {
     await settingsPage.getByRole("button", { name: /add provider/i }).click();
 
     // Second provider should be visible but not default
-    await expect(settingsPage.getByText("My GPT")).toBeVisible();
+    await expect(providers.getByText("My GPT")).toBeVisible();
 
     // Set second as default
-    await settingsPage.getByRole("button", { name: /set default/i }).click();
+    await providers.getByRole("button", { name: /set default/i }).click();
 
     // Wait for the flip to fully settle. The two-step persistence
     // (Claude flips off, then GPT flips on) is observable from the
     // DOM as: Claude row now exposes its own Set Default button AND
     // GPT no longer does. Gating here guarantees both puts have
     // committed before the following remove fires.
-    const claudeRow = settingsPage
-      .locator("div.rounded-lg.border")
+    const claudeRow = providers
+      .getByRole("listitem")
       .filter({ hasText: "My Claude" });
     await expect(
       claudeRow.getByRole("button", { name: /set default/i })
@@ -72,9 +77,9 @@ test.describe("Settings Panel", () => {
 
     // Should only have GPT remaining
     await expect(
-      settingsPage.getByText("My Claude", { exact: true })
+      providers.getByText("My Claude", { exact: true })
     ).not.toBeVisible();
-    await expect(settingsPage.getByText("My GPT")).toBeVisible();
+    await expect(providers.getByText("My GPT")).toBeVisible();
   });
 
   test("8.8: Connections is reachable from the settings index", async ({
