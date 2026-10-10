@@ -272,6 +272,9 @@ describe("convertFitToKrdLap", () => {
   });
 });
 
+const FIRST_LAP_TIMER_SECONDS = 580;
+const SECOND_LAP_TIMER_SECONDS = 590;
+
 describe("convertFitToKrdLaps", () => {
   it("should batch convert multiple laps", () => {
     // Arrange
@@ -280,13 +283,13 @@ describe("convertFitToKrdLaps", () => {
         timestamp: 1704067800,
         startTime: 1704067200,
         totalElapsedTime: 600,
-        totalTimerTime: 580,
+        totalTimerTime: FIRST_LAP_TIMER_SECONDS,
       },
       {
         timestamp: 1704068400,
         startTime: 1704067800,
         totalElapsedTime: 600,
-        totalTimerTime: 590000,
+        totalTimerTime: SECOND_LAP_TIMER_SECONDS,
       },
     ];
 
@@ -297,6 +300,8 @@ describe("convertFitToKrdLaps", () => {
     expect(results).toHaveLength(2);
     expect(results[0].startTime).toBe("2024-01-01T00:00:00.000Z");
     expect(results[1].startTime).toBe("2024-01-01T00:10:00.000Z");
+    expect(results[0].totalTimerTime).toBe(FIRST_LAP_TIMER_SECONDS);
+    expect(results[1].totalTimerTime).toBe(SECOND_LAP_TIMER_SECONDS);
   });
 
   it("should return empty array for empty input", () => {

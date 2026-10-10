@@ -33,7 +33,7 @@ const keepTimestampedRecords = (
   recordMsgs: Record<string, unknown>[],
   logger: Logger
 ): Record<string, unknown>[] => {
-  const timestamped = recordMsgs.filter((r) => r.timestamp !== undefined);
+  const timestamped = recordMsgs.filter((r) => r.timestamp != null);
   const dropped = recordMsgs.length - timestamped.length;
   if (dropped > 0) {
     logger.warn("Dropping FIT records without timestamp", { dropped });
