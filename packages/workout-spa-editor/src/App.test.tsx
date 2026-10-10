@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import App from "./App";
 import { useWorkoutStore } from "./store/workout-store";
@@ -7,7 +7,17 @@ import type { KRD, Workout, WorkoutStep } from "./types/krd";
 
 const STEP3_POWER_WATTS = 300;
 
+// CalendarPage is React.lazy. Its first render cold-transforms ~290 modules,
+// which under CPU contention (pre-commit, parallel workers) ate the whole
+// 5 s budget of whichever test mounted it first. Pay that once here, under
+// an explicit hook timeout, so every test starts from a warm module cache.
+const COLD_IMPORT_TIMEOUT_MS = 30_000;
+
 describe("App", () => {
+  beforeAll(async () => {
+    await import("./components/pages/CalendarPage");
+  }, COLD_IMPORT_TIMEOUT_MS);
+
   beforeEach(() => {
     // Reset store state before each test
     useWorkoutStore.setState({
