@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-10 | [`fix-fit-activity-import`](./2026-10-10-fix-fit-activity-import/) | Import activity FIT files from the decoder's real message shape |
 | 2026-10-10 | [`fix-fit-workout-roundtrip`](./2026-10-10-fix-fit-workout-roundtrip/) | Round-trip structured workouts through the FIT SDK encoder |
 | 2026-10-10 | [`fix-spa-fit-import-profile`](./2026-10-10-fix-spa-fit-import-profile/) | FIT import works in the SPA production bundle |
 | 2026-09-28 | [`converter-deep-link-and-guides`](./2026-09-28-converter-deep-link-and-guides/) | Converter deep link and athlete guides |
