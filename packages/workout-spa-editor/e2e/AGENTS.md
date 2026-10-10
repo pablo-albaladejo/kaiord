@@ -30,6 +30,7 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 - `settings.spec.ts`, `onboarding.spec.ts` — settings + onboarding.
 - `button-improvements.spec.ts`, `modal-interactions.spec.ts`, `error-handling.spec.ts` — UX guardrails.
 - `spa-route-refresh.spec.ts` — F5/hard-reload preservation.
+- `fit-import-prod-bundle.spec.ts` — `@prod-bundle`: FIT import (workout, the app's own export, health) through the built bundle served like the static host. Gated behind `E2E_PROD_BASE=1`; the dev server pre-bundles `@garmin/fitsdk`, so only a built artifact exercises what the build does to the FIT SDK.
 
 ## Subdirectories
 

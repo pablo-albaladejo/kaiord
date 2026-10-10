@@ -140,6 +140,8 @@ jobs:
         run: node --test packages/docs/scripts/dist-seo-uniqueness.test.mjs packages/docs/scripts/single-font.test.mjs
 
       - name: Merge dist outputs
+        env:
+          BUILD_SHA: ${{ github.sha }}
         run: |
           mkdir -p merged-dist
 
@@ -150,6 +152,9 @@ jobs:
           # SPA at /app/
           mkdir -p merged-dist/app
           cp -r packages/workout-spa-editor/dist/* merged-dist/app/
+          # The commit this bundle was built from, so a check against the live
+          # site can tell which deploy it is looking at.
+          printf '{"sha":"%s"}\n' "$BUILD_SHA" > merged-dist/app/version.json
 
           # Docs at /docs/
           mkdir -p merged-dist/docs
@@ -169,6 +174,7 @@ jobs:
           test -f merged-dist/index.html          || { echo "❌ Missing landing index.html"; exit 1; }
           test -f merged-dist/es/index.html       || { echo "❌ Missing landing es/index.html"; exit 1; }
           test -f merged-dist/app/index.html       || { echo "❌ Missing app index.html"; exit 1; }
+          test -f merged-dist/app/version.json     || { echo "❌ Missing app version.json"; exit 1; }
           test -f merged-dist/docs/index.html      || { echo "❌ Missing docs index.html"; exit 1; }
           test -f merged-dist/CNAME                || { echo "❌ Missing CNAME"; exit 1; }
           test -f merged-dist/.nojekyll            || { echo "❌ Missing .nojekyll"; exit 1; }
