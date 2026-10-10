@@ -7,6 +7,11 @@ import { convertTcxStep } from "./step.converter";
 // substitution is announced as a lossy conversion.
 const FALLBACK_REPEAT_COUNT = 1;
 
+// Unrolling multiplies steps by each nested `Repetitions`, so a few bytes of
+// TCX could otherwise materialise millions of steps. A nested repeat whose
+// copies would push the block past this budget is imported once instead.
+export const MAX_UNROLLED_STEPS = 1000;
+
 const REPEAT_STEP_TYPE = "Repeat_t";
 
 const toArray = (value: unknown): Array<Record<string, unknown>> => {
@@ -56,12 +61,16 @@ const collectLeafSteps = (
       continue;
     }
     const count = readRepeatCount(child, logger);
+    const inner = collectLeafSteps(child, index, sport, logger);
+    const passes =
+      leaves.length + count * inner.length > MAX_UNROLLED_STEPS ? 1 : count;
     logger.warn(
-      "Lossy conversion: nested TCX repeat unrolled into its parent block",
+      passes === count
+        ? "Lossy conversion: nested TCX repeat unrolled into its parent block"
+        : "Lossy conversion: nested TCX repeat too large to unroll, importing its steps once",
       { stepIndex: index, repetitions: count }
     );
-    const inner = collectLeafSteps(child, index, sport, logger);
-    for (let pass = 0; pass < count; pass++) leaves.push(...inner);
+    for (let pass = 0; pass < passes; pass++) leaves.push(...inner);
   }
   return leaves;
 };

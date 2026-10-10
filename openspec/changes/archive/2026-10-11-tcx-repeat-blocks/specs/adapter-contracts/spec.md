@@ -2,7 +2,7 @@
 
 ### Requirement: TCX adapter reads and writes repetition blocks
 
-The `@kaiord/tcx` reader SHALL map a TCX `Repeat_t` step to a KRD repetition block whose `repeatCount` is the `Repetitions` value and whose steps are the converted `Child` steps, in order. A `Repeat_t` nested inside another SHALL be unrolled into its parent block (its children emitted `Repetitions` times); a `Repeat_t` without a valid `Repetitions` SHALL be imported with `repeatCount` 1; a `Repeat_t` with no convertible child SHALL be dropped. Each of those three cases SHALL emit a `Lossy conversion:` warning. The writer SHALL emit each KRD repetition block as a `Repeat_t`, so a TCX → KRD → TCX → KRD round trip yields identical workout steps.
+The `@kaiord/tcx` reader SHALL map a TCX `Repeat_t` step to a KRD repetition block whose `repeatCount` is the `Repetitions` value and whose steps are the converted `Child` steps, in order. A `Repeat_t` nested inside another SHALL be unrolled into its parent block (its children emitted `Repetitions` times), except that a nested repeat whose copies would take its parent block past 1000 steps SHALL be imported once; a `Repeat_t` without a valid `Repetitions` SHALL be imported with `repeatCount` 1; a `Repeat_t` with no convertible child SHALL be dropped. Each of those cases SHALL emit a `Lossy conversion:` warning. The writer SHALL emit each KRD repetition block as a `Repeat_t`, so a TCX → KRD → TCX → KRD round trip yields identical workout steps.
 
 #### Scenario: Repeat block fixture
 

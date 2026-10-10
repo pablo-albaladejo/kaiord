@@ -1,7 +1,11 @@
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
-import { convertTcxRepeat, isTcxRepeat } from "./repeat-block.converter";
+import {
+  convertTcxRepeat,
+  isTcxRepeat,
+  MAX_UNROLLED_STEPS,
+} from "./repeat-block.converter";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),
@@ -120,6 +124,38 @@ describe("convertTcxRepeat", () => {
     expect(logger.warn).toHaveBeenCalledWith(
       "Lossy conversion: nested TCX repeat unrolled into its parent block",
       { stepIndex: NESTED_START + 1, repetitions: INNER_REPEATS }
+    );
+  });
+
+  it("should import a nested repeat once when unrolling it exceeds the step budget", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const hugeRepetitions = MAX_UNROLLED_STEPS * MAX_UNROLLED_STEPS;
+    const tcxRepeat = {
+      "@_xsi:type": "Repeat_t",
+      Repetitions: OUTER_REPEATS,
+      Child: [
+        timeStep("A"),
+        {
+          "@_xsi:type": "Repeat_t",
+          Repetitions: hugeRepetitions,
+          Child: [
+            timeStep("B", INNER_B_SECONDS),
+            timeStep("C", INNER_C_SECONDS),
+          ],
+        },
+      ],
+    };
+
+    // Act
+    const block = convertTcxRepeat(tcxRepeat, 0, "running", logger);
+
+    // Assert
+    expect(block?.repeatCount).toBe(OUTER_REPEATS);
+    expect(block?.steps.map((s) => s.name)).toStrictEqual(["A", "B", "C"]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      "Lossy conversion: nested TCX repeat too large to unroll, importing its steps once",
+      { stepIndex: 1, repetitions: hugeRepetitions }
     );
   });
 
