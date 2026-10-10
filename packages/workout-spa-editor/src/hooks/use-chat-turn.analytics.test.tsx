@@ -11,6 +11,7 @@ import { useChatTurn } from "./use-chat-turn";
 
 const mockEvent = vi.fn();
 const mockSendTurn = vi.fn();
+const mockRetryTurn = vi.fn();
 const mockApproveAction = vi.fn();
 
 vi.mock("../contexts/analytics-context", () => ({
@@ -24,6 +25,7 @@ vi.mock("./use-chat-action-ops", () => ({
 }));
 vi.mock("./chat/chat-turn-runner", () => ({
   sendTurn: (...args: unknown[]) => mockSendTurn(...args),
+  retryTurn: (...args: unknown[]) => mockRetryTurn(...args),
 }));
 vi.mock("./chat/chat-turn-resume", () => ({
   approveAction: (...args: unknown[]) => mockApproveAction(...args),
@@ -100,5 +102,20 @@ describe("useChatTurn analytics", () => {
       tool: "create_workout",
     });
     expect(mockApproveAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("should retry through retryTurn and count it as a retry, not a new message", () => {
+    // Arrange
+    const { result } = renderHook(() => useChatTurn(args));
+    act(() => result.current.send("hola"));
+
+    // Act
+    act(() => result.current.retry());
+
+    // Assert
+    expect(mockSendTurn).toHaveBeenCalledTimes(1);
+    expect(mockRetryTurn).toHaveBeenCalledWith(expect.anything(), [], "hola");
+    expect(mockEvent).toHaveBeenCalledTimes(2);
+    expect(mockEvent).toHaveBeenLastCalledWith("chat-turn-retried");
   });
 });

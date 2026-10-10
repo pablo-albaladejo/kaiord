@@ -1,11 +1,16 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   apiSourcePaths,
   gitHistoryStatus,
   gitLastmod,
   hasFullHistory,
+  HREFLANG_PAIRS,
+  hreflangPair,
   isNoindexPath,
   isNoindexUrl,
 } from "../.vitepress/indexing.mjs";
@@ -156,4 +161,33 @@ test("gitLastmod passes the test/story exclusions through to git log", () => {
     ":(exclude,glob)**/*.test.*",
     ":(exclude,glob)**/*.stories.*",
   ]);
+});
+
+const DOCS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+test("should find both pages of every hreflang pair on disk", () => {
+  // Arrange
+  const paths = HREFLANG_PAIRS.flatMap((pair) => [pair.en, pair.es]);
+
+  // Act
+  const missing = paths.filter((path) => !existsSync(resolve(DOCS_ROOT, path)));
+
+  // Assert
+  assert.ok(HREFLANG_PAIRS.length >= 3, "the athlete guides are paired");
+  assert.deepEqual(missing, []);
+});
+
+test("should resolve a pair from either language and none for other pages", () => {
+  // Arrange
+  const [first] = HREFLANG_PAIRS;
+
+  // Act
+  const fromEn = hreflangPair(first.en);
+  const fromEs = hreflangPair(first.es);
+  const other = hreflangPair("guide/quick-start.md");
+
+  // Assert
+  assert.equal(fromEn, first);
+  assert.equal(fromEs, first);
+  assert.equal(other, null);
 });

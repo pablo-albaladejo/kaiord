@@ -1,67 +1,88 @@
 /**
- * Pushes a persisted workout to Garmin through the injected bridge push
- * function. Governed by `executeWorkoutPush`: no active, enabled export
- * route to Garmin ⇒ a clear `no_active_export_route` tool error instead
- * of silently attempting the push. Returns a tool-result payload; a
- * bridge-reported failure is carried as `push_failed`, and a push of the
- * same workout already in flight (the ledger's `lost-race`) as
- * `push_in_progress`, so this never throws for either. When Garmin confirmed the library workout id, the record is
- * re-persisted with that id so the calendar lifecycle badge reflects the
- * push; an unconfirmed push (no Garmin-shaped id) or a lost race persists
- * nothing, so neither a sentinel nor `"pending"` ever becomes a push id.
+ * Pushes a persisted workout to Garmin and places it on its date in the
+ * Garmin calendar (`pushWorkoutToGarminCalendar`). Governed like every
+ * export: no active, enabled export route to Garmin ⇒ a clear
+ * `no_active_export_route` tool error. A library push that lost to a run
+ * already in flight is `push_in_progress`, one the bridge failed is
+ * `push_failed`, and a workout whose pace zone targets the profile cannot
+ * resolve is `missing_pace_zones`, `incomplete_pace_zones` or
+ * `unsupported_pace_zone_sport`, so this never throws for any of them.
+ *
+ * Otherwise the result carries `calendar`: the placement's kind, an
+ * app-authored enum, with a `failed` one's `reason`. Any exception on this
+ * path is `push_failed`, never the exception's text. When Garmin confirmed the library workout id, the
+ * record is re-persisted with that id so the calendar lifecycle badge
+ * reflects the push; an unconfirmed push persists nothing, so neither a
+ * sentinel nor `"pending"` ever becomes a push id.
  */
-import {
-  executeWorkoutPush,
-  NoActiveExportRouteError,
-} from "../../application/export/execute-workout-push";
-import { recordGarminPush } from "../../application/record-garmin-push";
-import type { GarminPushOutcome } from "../../contexts/garmin-bridge-types";
-import type { PersistencePort } from "../../ports/persistence-port";
-import { exportGcnWorkout } from "../../utils/export-workout-formats";
-import {
-  buildGarminPushFn,
-  GARMIN_BRIDGE_ID,
-  ledgerRepo,
-  policyRepo,
-} from "../garmin-push-fn";
+import { NoActiveExportRouteError } from "../../application/export/execute-workout-push";
+import { logGarminPushFailure } from "../../application/garmin-placement/log-garmin-push-failure";
+import type { PlacementResult } from "../../application/garmin-placement/placement-result";
+import { isPaceZonesReason } from "../../types/pace-zones-unavailable-error";
+import { placeRecord } from "../garmin-place-record";
+import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
+
+const PACE_ZONE_ERRORS = {
+  "missing-pace-zones": {
+    error: "missing_pace_zones",
+    message:
+      "The workout uses pace zone targets, but the athlete's profile has " +
+      "neither pace zones nor a threshold pace for its sport. Ask the " +
+      "athlete to set their threshold pace in Athlete, then send it again.",
+  },
+  "incomplete-pace-zones": {
+    error: "incomplete_pace_zones",
+    message:
+      "The workout uses a pace zone the athlete's own pace zones do not " +
+      "define. Ask the athlete to complete their pace zones in Athlete, " +
+      "then send it again.",
+  },
+  "unsupported-pace-zone-sport": {
+    error: "unsupported_pace_zone_sport",
+    message:
+      "Pace zone targets can only be sent to Garmin in a running or " +
+      "swimming workout. Use pace ranges instead of zones for this sport.",
+  },
+} as const;
+
+/** The Phase 1 failures, as the tool's error codes. */
+const libraryError = (result: PlacementResult) => {
+  if (result.kind !== "failed") return undefined;
+  if (result.reason === "no-export-route") {
+    const { message } = new NoActiveExportRouteError(GARMIN_BRIDGE_ID);
+    return { error: "no_active_export_route", message };
+  }
+  if (result.reason === "busy") return { error: "push_in_progress" };
+  if (result.reason === "library-push-failed") return { error: "push_failed" };
+  if (isPaceZonesReason(result.reason)) return PACE_ZONE_ERRORS[result.reason];
+  return undefined;
+};
+
+/** The placement's kind, and a `failed` one's reason (both app-authored). */
+const calendarOf = (result: PlacementResult) =>
+  result.kind === "failed"
+    ? { calendar: result.kind, reason: result.reason }
+    : { calendar: result.kind };
+
+const pushAndRecord = async (
+  ...args: Parameters<typeof placeRecord>
+): Promise<unknown> => {
+  const placed = await placeRecord(...args);
+  if (!placed) return { error: "workout_not_found" };
+  const { result, garminPushId } = placed;
+  const error = garminPushId === null ? libraryError(result) : undefined;
+  if (error) return error;
+  return { workoutId: args[2], garminPushId, ...calendarOf(result) };
+};
 
 export const doPushToGarmin = async (
-  persistence: PersistencePort,
-  pushWorkout: (gcn: unknown) => Promise<GarminPushOutcome>,
-  workoutId: string
+  ...args: Parameters<typeof pushAndRecord>
 ): Promise<unknown> => {
-  const record = await persistence.workouts.getById(workoutId);
-  if (!record?.krd) return { error: "workout_not_found" };
-  const gcn = await exportGcnWorkout(record.krd);
-
-  let garminPushId: string | null;
   try {
-    const result = await executeWorkoutPush(
-      { policyRepo, ledgerRepo },
-      {
-        profileId: record.profileId,
-        kaiordRecordId: record.id,
-        destinationBridgeId: GARMIN_BRIDGE_ID,
-        payload: gcn as Record<string, unknown>,
-        pushFn: buildGarminPushFn(pushWorkout),
-      }
-    );
-    if (result.outcome === "lost-race") return { error: "push_in_progress" };
-    garminPushId =
-      result.library?.kind === "confirmed" ? result.library.workoutId : null;
+    return await pushAndRecord(...args);
   } catch (error) {
-    if (error instanceof NoActiveExportRouteError) {
-      return { error: "no_active_export_route", message: error.message };
-    }
+    // An exception's text never reaches the model; it is only logged.
+    logGarminPushFailure(error);
     return { error: "push_failed" };
   }
-
-  if (garminPushId === null) return { workoutId: record.id, garminPushId };
-  // Re-read before persisting so edits made while the push was in flight
-  // are not overwritten by the stale copy captured above.
-  const fresh = await persistence.workouts.getById(workoutId);
-  await persistence.workouts.put(
-    recordGarminPush(fresh ?? record, garminPushId)
-  );
-  return { workoutId: record.id, garminPushId };
 };

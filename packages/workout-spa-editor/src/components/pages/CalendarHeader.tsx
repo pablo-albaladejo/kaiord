@@ -4,11 +4,21 @@
  * line cap.
  */
 
+import {
+  useCoachMoveNotice,
+  useCoachMoveNoticeActions,
+} from "../../contexts/coach-move-notice-context";
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import type { CalendarView } from "../../types/user-preferences";
+import { CoachMoveNotice } from "../molecules/CoachMoveNotice/CoachMoveNotice";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
+import { calendarEmptyBannerProps } from "./calendar-empty-banner-props";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
 import { CalendarNavRow } from "./CalendarNavRow";
+import { SendWeekButton, SendWeekSection } from "./CalendarSendWeek";
+import { useHasCoachingPlansLive } from "./use-calendar-live-queries";
+import { useCalendarSendWeek } from "./use-calendar-send-week";
 import type { useCalendarState } from "./use-calendar-state";
 import { useLatestSessionDate } from "./use-latest-session-date";
 
@@ -17,6 +27,8 @@ export type CalendarHeaderProps = {
   coaching: ReturnType<typeof useCoachingActivities>;
   view?: CalendarView;
   onViewChange?: (next: CalendarView) => void;
+  /** The week's coaching plans no workout answers yet. */
+  planCount?: number;
 };
 
 export function CalendarHeader({
@@ -24,26 +36,34 @@ export function CalendarHeader({
   coaching,
   view,
   onViewChange,
+  planCount,
 }: CalendarHeaderProps) {
   const latestDate = useLatestSessionDate(s.latestWorkout?.date);
+  const live = useActiveProfileLive();
+  const profileId = live?.id ?? null;
+  const hasAnyPlans = useHasCoachingPlansLive(profileId);
+  const moves = useCoachMoveNotice(profileId, s.data.weekStart);
+  const { dismiss: dismissMoves } = useCoachMoveNoticeActions();
+  const send = useCalendarSendWeek(
+    profileId,
+    s.data.weekId,
+    s.data.workoutsByDay
+  );
   return (
     <>
+      {moves && profileId && (
+        <CoachMoveNotice
+          moves={moves}
+          onDismiss={() => dismissMoves(profileId, s.data.weekStart)}
+        />
+      )}
       <CalendarEmptyBanners
-        weekId={s.data.weekId}
-        hasAnyWorkouts={s.hasAnyWorkouts}
-        hasWeekWorkouts={s.hasWeekWorkouts}
-        readyCount={s.readyCount}
-        hasAiProvider={s.hasAiProvider}
-        extensionInstalled={s.extensionInstalled}
-        rawCount={s.data.rawCount}
-        latestDate={latestDate}
-        onGoToLatest={s.latestWorkout ? s.handleGoToLatest : undefined}
-        batchMessage={s.batch.message}
-        onDismissBatch={s.batch.dismissMessage}
-        batchIsProcessing={s.batch.isProcessing}
-        batchProgress={s.batch.progress}
-        onBatchProcess={s.batch.requestStart}
-        onBatchCancel={s.batch.cancel}
+        {...calendarEmptyBannerProps(s, {
+          latestDate,
+          planCount,
+          hasAnyPlans,
+          sourceLinked: (live?.profile?.linkedAccounts.length ?? 0) > 0,
+        })}
       />
       <BatchCostConfirmation
         open={s.batch.pending !== null}
@@ -58,7 +78,9 @@ export function CalendarHeader({
         coaching={coaching}
         view={view}
         onViewChange={onViewChange}
+        actions={<SendWeekButton send={send} />}
       />
+      <SendWeekSection send={send} weekId={s.data.weekId} />
     </>
   );
 }

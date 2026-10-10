@@ -76,6 +76,7 @@
   },
   "toast": {
     "generationFailed": "Workout generation failed",
+    "modelUnavailable": "This model is no longer available — pick another in Settings → AI",
     "savedAndPushed": "Sent to Garmin",
     "savedOnly": "Workout saved"
   }

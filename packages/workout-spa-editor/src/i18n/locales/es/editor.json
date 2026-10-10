@@ -83,7 +83,12 @@
     "savedTitle": "Entreno guardado",
     "savedDescription": "«{{name}}» se ha guardado como {{format}}",
     "exportFailedTitle": "Error de exportación",
-    "exportFailedFallback": "No se pudo exportar el entreno"
+    "exportFailedFallback": "No se pudo exportar el entreno",
+    "paceZones": {
+      "missing-pace-zones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN.",
+      "incomplete-pace-zones": "Este entreno usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",
+      "unsupported-pace-zone-sport": "Solo se pueden exportar zonas de ritmo como GCN en entrenos de carrera o natación."
+    }
   },
   "saveError": {
     "title": "Error al guardar",
@@ -282,6 +287,8 @@
     "noSessionHeadline": "Garmin ha cerrado tu sesión, así que esto no puede llegar a tu reloj",
     "noSessionDetail": "La extensión usa tu sesión de Garmin Connect, y esa sesión ha terminado. Vuelve a iniciar sesión, o descarga el archivo e impórtalo a mano.",
     "noSessionAction": "Iniciar sesión en Garmin",
+    "placementHeadline": "Tu reloj tiene esta versión; falta revisar su fecha",
+    "placementDetail": "El entreno llegó a tu biblioteca de Garmin, pero su fecha en el calendario de Garmin necesita una revisión.",
     "region": "Estado de entrega del entreno"
   },
   "shape": {
@@ -302,5 +309,18 @@
     "countAria": "Número de repeticiones",
     "ungroup": "Desagrupar",
     "deleteShort": "Eliminar"
+  },
+  "convert": {
+    "heading": "Convertir {{from}} a {{to}}",
+    "pickerHeading": "Convertir un archivo de entrenamiento",
+    "pickerIntro": "Elige el formato que tienes y el que necesitas.",
+    "scope": "Convierte entrenamientos estructurados (pasos y objetivos), no actividades registradas. El archivo no sale de tu navegador y no se guarda nada en tu calendario ni en tu biblioteca.",
+    "from": "De",
+    "to": "A",
+    "continue": "Continuar",
+    "chooseFile": "1. Elige tu archivo {{from}}",
+    "download": "2. Descárgalo (cambia el formato si lo necesitas)",
+    "sameFormat": "Elige dos formatos distintos.",
+    "wrongFormat": "Ese archivo no es {{from}}. Elige un archivo {{from}} o cambia de formato."
   }
 }

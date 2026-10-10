@@ -105,7 +105,6 @@ export const BOUNDARIES_ALLOWLIST = Object.freeze(
     ["src/components/pages/use-calendar-live-queries.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-coaching-draft.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-dialog-handlers.ts", REASON.LIVE_QUERY],
-    ["src/components/pages/use-editor-actions.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-schedule-template.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-workout-record.ts", REASON.LIVE_QUERY],
 
@@ -151,7 +150,7 @@ export const ALLOWLIST_PACKAGE_ROOT = "packages/workout-spa-editor";
  * High-water mark. The allowlist may shrink below this, never grow past it.
  * Lower this number whenever entries are removed so the ratchet keeps tightening.
  */
-export const BOUNDARIES_ALLOWLIST_MAX = 28;
+export const BOUNDARIES_ALLOWLIST_MAX = 27;
 
 /** Repo-root-relative globs, for `ignores` in eslint.config.js. */
 export const boundariesAllowlistPaths = () =>

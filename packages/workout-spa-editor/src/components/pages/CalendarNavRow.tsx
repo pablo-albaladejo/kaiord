@@ -2,6 +2,8 @@
  * Week navigation, the view switch and the per-source sync buttons — the row
  * that stays on screen whatever the week's status banners are doing.
  */
+import type { ReactNode } from "react";
+
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import type { CalendarView } from "../../types/user-preferences";
 import { formatWeekLabel } from "../../utils/format-week-label";
@@ -24,6 +26,8 @@ export type CalendarNavRowProps = {
   coaching: ReturnType<typeof useCoachingActivities>;
   view?: CalendarView;
   onViewChange?: (next: CalendarView) => void;
+  /** Week-level actions, before "create workout" (e.g. "Send week"). */
+  actions?: ReactNode;
 };
 
 export function CalendarNavRow({
@@ -32,6 +36,7 @@ export function CalendarNavRow({
   coaching,
   view,
   onViewChange,
+  actions,
 }: CalendarNavRowProps) {
   return (
     <div className="flex items-center justify-between">
@@ -40,22 +45,24 @@ export function CalendarNavRow({
         {view && onViewChange && (
           <CalendarViewToggle view={view} onToggle={onViewChange} />
         )}
+        {actions}
         <CreateWorkoutCta origin="calendar" week={weekId} />
-        {coaching.syncSources
-          .filter((src) => src.linked)
-          .map((src) => (
-            <CoachingSyncButton
-              key={src.id}
-              connected={src.connected}
-              loading={src.loading}
-              error={src.error}
-              onSync={() => syncFromFirstDay(src.sync, days)}
-              onConnect={src.connect}
-              label={src.label}
-              lastSyncedAt={src.lastSyncedAt}
-              routeInactive={src.routeActive === false}
-            />
-          ))}
+        {/* An installed but unlinked source offers "Connect to <Label>": the
+            bridge session alone says nothing about THIS profile, and hiding
+            the button left a new user no way to link from the calendar. */}
+        {coaching.syncSources.map((src) => (
+          <CoachingSyncButton
+            key={src.id}
+            connected={src.linked && src.connected}
+            loading={src.loading}
+            error={src.error}
+            onSync={() => syncFromFirstDay(src.sync, days)}
+            onConnect={src.connect}
+            label={src.label}
+            lastSyncedAt={src.lastSyncedAt}
+            routeInactive={src.routeActive === false}
+          />
+        ))}
       </div>
     </div>
   );

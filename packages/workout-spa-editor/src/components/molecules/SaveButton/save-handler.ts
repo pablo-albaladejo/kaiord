@@ -1,9 +1,18 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
+import type { Profile } from "../../../types/profile";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { generateWorkoutFilename } from "./workout-filename";
+
+const exportErrorMessage = (err: unknown, t: Translate): string => {
+  if (!(err instanceof Error)) return t("save.exportFailedFallback");
+  return err.cause instanceof PaceZonesUnavailableError
+    ? t(`save.paceZones.${err.cause.reason}`)
+    : err.message;
+};
 
 export function createSaveHandler(
   workout: KRD,
@@ -14,7 +23,9 @@ export function createSaveHandler(
   success: (title: string, description: string) => void,
   showError: (title: string, description: string) => void,
   onExported?: (format: string) => void,
-  t: Translate = getTranslate("editor")
+  t: Translate = getTranslate("editor"),
+  /** Reads a GCN export's profile at click time (`resolveExportProfile`). */
+  resolveProfile: () => Promise<Profile | null> = async () => null
 ) {
   return async () => {
     setIsSaving(true);
@@ -27,7 +38,8 @@ export function createSaveHandler(
         selectedFormat,
         (progress) => {
           setExportProgress(progress);
-        }
+        },
+        selectedFormat === "gcn" ? await resolveProfile() : null
       );
 
       setExportProgress(100);
@@ -43,8 +55,7 @@ export function createSaveHandler(
       );
       onExported?.(selectedFormat);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : t("save.exportFailedFallback");
+      const errorMessage = exportErrorMessage(err, t);
       showError(t("save.exportFailedTitle"), errorMessage);
       setSaveErrors([
         {

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { createSaveHandler } from "./save-handler";
 
 const mockDownloadWorkout = vi.fn();
@@ -89,4 +90,97 @@ describe("createSaveHandler — analytics call-site", () => {
     // Assert
     await expect(result).resolves.toBeUndefined();
   });
+
+  it("should download a KRD file without reading the profile", async () => {
+    // Arrange
+    const resolveProfile = vi.fn(() => Promise.reject(new Error("db down")));
+    const handler = createSaveHandler(
+      fakeWorkout as never,
+      "krd",
+      noop,
+      noop,
+      noop,
+      noop,
+      noop,
+      undefined,
+      (key) => key,
+      resolveProfile
+    );
+
+    // Act
+    await handler();
+
+    // Assert
+    expect(resolveProfile).not.toHaveBeenCalled();
+    expect(mockExportWorkout).toHaveBeenCalledWith(
+      fakeWorkout,
+      "krd",
+      expect.any(Function),
+      null
+    );
+  });
+
+  it("should pass the profile read at click time to the export so a GCN file resolves its pace zones", async () => {
+    // Arrange
+    const profile = { id: "p1" };
+    const handler = createSaveHandler(
+      fakeWorkout as never,
+      "gcn",
+      noop,
+      noop,
+      noop,
+      noop,
+      noop,
+      undefined,
+      (key) => key,
+      async () => profile as never
+    );
+
+    // Act
+    await handler();
+
+    // Assert
+    expect(mockExportWorkout).toHaveBeenCalledWith(
+      fakeWorkout,
+      "gcn",
+      expect.any(Function),
+      profile
+    );
+  });
+
+  it.each([
+    "missing-pace-zones",
+    "incomplete-pace-zones",
+    "unsupported-pace-zone-sport",
+  ] as const)(
+    "should explain a pace zone workout that fails with %s",
+    async (reason) => {
+      // Arrange
+      const cause = new PaceZonesUnavailableError(reason);
+      mockExportWorkout.mockRejectedValue(
+        Object.assign(new Error("Failed to export workout as GCN"), { cause })
+      );
+      const showError = vi.fn();
+      const handler = createSaveHandler(
+        fakeWorkout as never,
+        "gcn",
+        noop,
+        noop,
+        noop,
+        noop,
+        showError,
+        undefined,
+        (key) => key
+      );
+
+      // Act
+      await handler();
+
+      // Assert
+      expect(showError).toHaveBeenCalledWith(
+        "save.exportFailedTitle",
+        `save.paceZones.${reason}`
+      );
+    }
+  );
 });

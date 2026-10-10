@@ -83,7 +83,12 @@
     "savedTitle": "Workout Saved",
     "savedDescription": "\"{{name}}\" has been saved as {{format}}",
     "exportFailedTitle": "Export Failed",
-    "exportFailedFallback": "Failed to export workout"
+    "exportFailedFallback": "Failed to export workout",
+    "paceZones": {
+      "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to export it as GCN.",
+      "incomplete-pace-zones": "This workout uses a pace zone your profile doesn't define. Complete your pace zones in Athlete to export it as GCN.",
+      "unsupported-pace-zone-sport": "Pace zones can only be exported as GCN in running or swimming workouts."
+    }
   },
   "saveError": {
     "title": "Save Failed",
@@ -282,6 +287,8 @@
     "noSessionHeadline": "Garmin signed you out, so this can't reach your watch",
     "noSessionDetail": "The bridge rides your Garmin Connect session, and that session has ended. Sign in again, or download the file and import it by hand.",
     "noSessionAction": "Sign in to Garmin",
+    "placementHeadline": "Your watch has this version; its calendar date needs you",
+    "placementDetail": "The workout reached your Garmin library, but its date on the Garmin calendar needs a look.",
     "region": "Workout delivery status"
   },
   "shape": {
@@ -302,5 +309,18 @@
     "countAria": "Repeat count",
     "ungroup": "Ungroup",
     "deleteShort": "Delete"
+  },
+  "convert": {
+    "heading": "Convert {{from}} to {{to}}",
+    "pickerHeading": "Convert a workout file",
+    "pickerIntro": "Pick the format you have and the one you need.",
+    "scope": "Converts structured workouts (steps and targets), not recorded activities. The file never leaves your browser, and nothing is saved to your calendar or library.",
+    "from": "From",
+    "to": "To",
+    "continue": "Continue",
+    "chooseFile": "1. Choose your {{from}} file",
+    "download": "2. Download it (change the format if you need to)",
+    "sameFormat": "Pick two different formats.",
+    "wrongFormat": "That is not a {{from}} file. Choose a {{from}} file, or pick another format."
   }
 }

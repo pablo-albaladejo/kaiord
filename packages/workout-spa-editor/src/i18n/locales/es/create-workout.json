@@ -76,6 +76,7 @@
   },
   "toast": {
     "generationFailed": "No se pudo generar el entreno",
+    "modelUnavailable": "Este modelo ya no está disponible: elige otro en Ajustes → IA",
     "savedAndPushed": "Enviado a Garmin",
     "savedOnly": "Entreno guardado"
   }

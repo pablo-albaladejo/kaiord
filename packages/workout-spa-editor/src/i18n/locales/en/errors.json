@@ -7,6 +7,7 @@
   },
   "ai": {
     "generationFailed": "Generation failed",
+    "modelUnavailable": "This model is no longer available — pick another in Settings → AI",
     "input_empty": "Input text is empty",
     "input_too_long": "Input text exceeds {{maxLength}} characters (got {{actualLength}})"
   }

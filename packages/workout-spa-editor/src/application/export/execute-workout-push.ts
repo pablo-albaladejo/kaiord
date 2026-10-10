@@ -46,7 +46,9 @@ export type ExecuteWorkoutPushInput = {
   profileId: string;
   kaiordRecordId: string;
   destinationBridgeId: string;
-  payload: Record<string, unknown>;
+  /** Or its builder, run only once the route check passed, so a refusal
+      of the export route wins over a payload that cannot be built. */
+  payload: Record<string, unknown> | (() => Promise<Record<string, unknown>>);
   /** Resolves `{externalId, library?}`; a Garmin push reports `library`. */
   pushFn: ExportPushFn;
 };
@@ -71,7 +73,7 @@ export const executeWorkoutPush = async (
     kaiordRecordId,
     dataType: WORKOUT_DATA_TYPE,
     destinationBridgeId,
-    payload,
+    payload: typeof payload === "function" ? await payload() : payload,
     postFn: pushFn,
   });
 };

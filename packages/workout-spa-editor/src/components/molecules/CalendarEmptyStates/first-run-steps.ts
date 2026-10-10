@@ -15,6 +15,11 @@ export type FirstRunStep = {
   external?: boolean;
 };
 
+/** Which steps are already true for the active profile, read from live state. */
+export type FirstRunProgress = Readonly<
+  Partial<Record<FirstRunStep["key"], boolean>>
+>;
+
 export const FIRST_RUN_STEPS: ReadonlyArray<FirstRunStep> = [
   { key: "sources", href: "/settings/connections" },
   { key: "aiKey", href: "/settings/ai" },

@@ -63,11 +63,20 @@ const SENDABLE: Partial<Record<WorkoutState, RibbonContent>> = {
   },
 };
 
+/** A sent workout whose calendar placement needs the athlete's answer. */
+const PLACEMENT: RibbonContent = {
+  headlineKey: "ribbon.placementHeadline",
+  detailKey: "ribbon.placementDetail",
+  tone: "attention",
+};
+
 export function resolveRibbonContent(
   gate: GarminGate,
-  state: WorkoutState
+  state: WorkoutState,
+  placementNeedsAthlete = false
 ): RibbonContent | null {
-  const sendable = SENDABLE[state];
+  const sendable =
+    SENDABLE[state] ?? (placementNeedsAthlete ? PLACEMENT : undefined);
   if (!sendable) return null;
   if (gate === "ready") return sendable;
   return GATE_CONTENT[gate];

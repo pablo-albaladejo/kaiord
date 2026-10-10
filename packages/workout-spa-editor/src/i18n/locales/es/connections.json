@@ -95,6 +95,7 @@
     "from": "De",
     "sentTo": "También se envía a",
     "nowhere": "A ningún sitio",
+    "exportSwitches": "Destinos que reciben {{type}}",
     "noSource": "Sin fuente",
     "manySources": "{{count}} fuentes",
     "unrankedNote": "se guardan a la vez, ninguna tiene prioridad",
@@ -148,5 +149,11 @@
     "strain": "Esfuerzo",
     "vitals": "Constantes vitales",
     "heart-rate-series": "Serie de frecuencia cardiaca"
+  },
+  "profileLink": {
+    "notLinked": "{{name}} tiene sesión en este navegador pero no está vinculado a este perfil de atleta, así que todavía no se sincroniza nada.",
+    "link": "Vincular a este perfil",
+    "signIn": "{{name}} no está vinculado a este perfil de atleta. Inicia sesión en {{name}} en este navegador y luego vincúlalo aquí.",
+    "linking": "Vinculando…"
   }
 }

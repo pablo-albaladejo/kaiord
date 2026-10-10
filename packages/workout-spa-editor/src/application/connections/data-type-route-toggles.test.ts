@@ -195,4 +195,87 @@ describe("buildRouteToggles", () => {
     // Assert
     expect(toggles.map((toggle) => toggle.integrationId)).toEqual(["whoop"]);
   });
+
+  it("should not offer TrainingPeaks as a workout destination to switch on", () => {
+    // Arrange
+    // Its push was never verified end to end, while Garmin's was: only
+    // Garmin is offered, although both are connected and announce the token.
+    const announced = {
+      "garmin-bridge": ["write:workouts"],
+      "trainingpeaks-bridge": ["write:workouts"],
+    };
+
+    // Act
+    const ids = bridgeIds(
+      "workout",
+      INTEGRATION_REGISTRY,
+      [],
+      signals(announced),
+      "export"
+    );
+
+    // Assert
+    expect(ids).toEqual(["garmin-bridge"]);
+  });
+
+  it("should keep a TrainingPeaks workout export that is already on switchable off", () => {
+    // Arrange
+    const on = {
+      bridgeId: "trainingpeaks-bridge",
+      enabled: true,
+      direction: "export",
+    } as IntegrationPolicy;
+
+    // Act
+    const toggles = buildRouteToggles(
+      "workout",
+      INTEGRATION_REGISTRY,
+      [on],
+      signals({ "trainingpeaks-bridge": ["write:workouts"] }),
+      "export"
+    );
+
+    // Assert
+    expect(toggles).toEqual([
+      {
+        bridgeId: "trainingpeaks-bridge",
+        integrationId: "trainingpeaks",
+        enabled: true,
+      },
+    ]);
+  });
+
+  it("should keep a WHOOP weight import that is already on switchable off", () => {
+    // Arrange
+    // Seeded before WHOOP was narrowed to the types its import writes: the
+    // route can no longer be offered, but it must still be switchable off.
+    const routes = [route("whoop-bridge", true)];
+
+    // Act
+    const ids = bridgeIds(
+      "weight",
+      INTEGRATION_REGISTRY,
+      routes,
+      signals({ "whoop-bridge": ["read:body"] })
+    );
+
+    // Assert
+    expect(ids).toContain("whoop-bridge");
+  });
+
+  it("should not offer a switched-off WHOOP weight import", () => {
+    // Arrange
+    const routes = [route("whoop-bridge", false)];
+
+    // Act
+    const ids = bridgeIds(
+      "weight",
+      INTEGRATION_REGISTRY,
+      routes,
+      signals({ "whoop-bridge": ["read:body"] })
+    );
+
+    // Assert
+    expect(ids).not.toContain("whoop-bridge");
+  });
 });

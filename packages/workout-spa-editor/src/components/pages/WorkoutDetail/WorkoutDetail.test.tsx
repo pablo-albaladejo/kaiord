@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ReviewModel } from "../../../lib/workout-review";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { ExportLedgerEntry } from "../../../types/export-ledger";
 import WorkoutDetail from "./WorkoutDetail";
 
 let mockRecord: WorkoutRecord | undefined;
@@ -16,9 +17,13 @@ vi.mock("wouter", () => ({
   useSearch: () => mockSearch,
 }));
 
+const PLACEMENT_ROW = { kaiordRecordId: "w1" } as unknown as ExportLedgerEntry;
+const pushButtonProps = vi.fn();
+
 vi.mock("./use-workout-detail-record", () => ({
   useWorkoutDetailRecord: () => ({
     record: mockRecord,
+    placementRow: PLACEMENT_ROW,
     loading: mockLoading,
   }),
 }));
@@ -28,7 +33,10 @@ vi.mock("./use-workout-detail-model", () => ({
 }));
 
 vi.mock("../../molecules/PushButton", () => ({
-  PushButton: () => <button type="button">Send to Garmin</button>,
+  PushButton: (props: unknown) => {
+    pushButtonProps(props);
+    return <button type="button">Send to Garmin</button>;
+  },
 }));
 
 const ZONE_COUNT = 5;
@@ -132,5 +140,17 @@ describe("WorkoutDetail", () => {
     // Assert
 
     expect(navigateMock).toHaveBeenCalledWith("/daily");
+  });
+
+  it("should hand the workout's ledger row to the send control", () => {
+    // Arrange
+
+    // Act
+    render(<WorkoutDetail id="w1" />);
+
+    // Assert
+    expect(pushButtonProps).toHaveBeenCalledWith(
+      expect.objectContaining({ workout: RECORD, placementRow: PLACEMENT_ROW })
+    );
   });
 });

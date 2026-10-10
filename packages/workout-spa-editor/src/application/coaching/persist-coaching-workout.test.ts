@@ -47,6 +47,7 @@ describe("persistCoachingWorkout", () => {
     };
     expect(workout.name).toBe("EDITED TITLE");
     expect(stored?.sport).toBe("cycling");
+    expect(stored?.coachDate).toBe(activity.date);
   });
 
   it("should write a SessionMatch pointing to the new workout", async () => {
