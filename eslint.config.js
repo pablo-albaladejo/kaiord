@@ -72,6 +72,10 @@ export default tseslint.config(
       "**/*.config.js",
       "**/*.config.ts",
       "**/scripts/**",
+      // verify:prod drives the deployed SPA; it is linted by its own block below.
+      "!packages/workout-spa-editor/scripts/",
+      "!packages/workout-spa-editor/scripts/verify-prod/",
+      "!packages/workout-spa-editor/scripts/verify-prod/**",
       // Test files are NOT globally ignored anymore — they fall
       // through to the test-files override block at lines ~145+
       // which applies relaxed test-specific rules + the vitest
@@ -221,6 +225,41 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    // verify:prod: plain Node ESM that drives the deployed SPA with Playwright.
+    // Outside every tsconfig project, so no type-aware rules; the size limits
+    // mirror the SPA's own.
+    files: ["packages/workout-spa-editor/scripts/verify-prod/**/*.mjs"],
+    plugins: { "simple-import-sort": simpleImportSort },
+    languageOptions: {
+      sourceType: "module",
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        fetch: "readonly",
+        URL: "readonly",
+        window: "readonly",
+        document: "readonly",
+        CanvasRenderingContext2D: "readonly",
+      },
+    },
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 80, skipBlankLines: true, skipComments: true },
+      ],
+      "max-lines-per-function": [
+        "error",
+        { max: 60, skipBlankLines: true, skipComments: true },
+      ],
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
+    },
+  },
+  {
+    files: ["packages/workout-spa-editor/scripts/verify-prod/**/*.test.mjs"],
+    rules: { "max-lines": "off", "max-lines-per-function": "off" },
   },
   {
     // Playwright e2e fixtures: the `use` parameter is the Playwright
