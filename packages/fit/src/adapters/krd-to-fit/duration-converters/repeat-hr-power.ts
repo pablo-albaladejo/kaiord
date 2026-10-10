@@ -12,7 +12,7 @@ export const convertRepeatHrPowerDuration = (
     durationTypeSchema.enum.repeat_until_heart_rate_greater_than
   ) {
     message.durationType = fitDurationTypeSchema.enum.repeatUntilHrGreaterThan;
-    message.durationHr = duration.bpm;
+    message.repeatHr = duration.bpm;
     message.durationStep = duration.repeatFrom;
     return true;
   }
@@ -21,14 +21,14 @@ export const convertRepeatHrPowerDuration = (
     duration.type === durationTypeSchema.enum.repeat_until_heart_rate_less_than
   ) {
     message.durationType = fitDurationTypeSchema.enum.repeatUntilHrLessThan;
-    message.durationHr = duration.bpm;
+    message.repeatHr = duration.bpm;
     message.durationStep = duration.repeatFrom;
     return true;
   }
 
   if (duration.type === durationTypeSchema.enum.repeat_until_power_less_than) {
     message.durationType = fitDurationTypeSchema.enum.repeatUntilPowerLessThan;
-    message.durationPower = duration.watts;
+    message.repeatPower = duration.watts;
     message.durationStep = duration.repeatFrom;
     return true;
   }
@@ -38,7 +38,7 @@ export const convertRepeatHrPowerDuration = (
   ) {
     message.durationType =
       fitDurationTypeSchema.enum.repeatUntilPowerGreaterThan;
-    message.durationPower = duration.watts;
+    message.repeatPower = duration.watts;
     message.durationStep = duration.repeatFrom;
     return true;
   }

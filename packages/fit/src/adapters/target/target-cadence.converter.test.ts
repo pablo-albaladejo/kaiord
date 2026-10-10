@@ -162,4 +162,23 @@ describe("convertCadenceTarget", () => {
       expect(result).toStrictEqual({ type: "open" });
     });
   });
+
+  describe("single value written as an equal range", () => {
+    it("should read an equal custom cadence range back as rpm", () => {
+      // Arrange
+      const data: FitTargetData = {
+        customTargetCadenceLow: 90,
+        customTargetCadenceHigh: 90,
+      };
+
+      // Act
+      const result = convertCadenceTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "cadence",
+        value: { unit: "rpm", value: 90 },
+      });
+    });
+  });
 });

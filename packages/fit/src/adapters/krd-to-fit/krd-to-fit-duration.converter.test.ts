@@ -64,7 +64,7 @@ describe("convertDuration", () => {
 
     // Assert
     expect(message.durationType).toBe("repeatUntilDistance");
-    expect(message.durationDistance).toBe(DISTANCE_METERS);
+    expect(message.repeatDistance).toBe(DISTANCE_METERS);
     expect(message.durationStep).toBe(1);
   });
 
@@ -85,7 +85,7 @@ describe("convertDuration", () => {
 
     // Assert
     expect(message.durationType).toBe("repeatUntilPowerGreaterThan");
-    expect(message.durationPower).toBe(POWER_WATTS);
+    expect(message.repeatPower).toBe(POWER_WATTS);
     expect(message.durationStep).toBe(0);
   });
 

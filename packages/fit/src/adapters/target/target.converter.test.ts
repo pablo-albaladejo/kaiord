@@ -70,7 +70,7 @@ describe("convertFitTarget (dispatcher)", () => {
     // Arrange
     const data = buildFitTargetData.build({
       targetType: "swimStroke",
-      targetSwimStroke: 0,
+      targetStrokeType: 0,
     });
 
     // Act

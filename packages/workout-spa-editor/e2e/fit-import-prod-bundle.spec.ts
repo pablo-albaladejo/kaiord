@@ -167,6 +167,37 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
     await expectImported(page, hasStepCards(page, steps));
   });
 
+  test("should keep the repeat block and targets when re-importing an exported FIT", async ({
+    page,
+  }) => {
+    // Arrange
+    const { file, steps, blocks } = REPEAT_WORKOUT;
+    await uploadFit(page, dist, { name: file, buffer: fixture(file) });
+    await expectImported(page, hasStepCards(page, steps));
+    const original = await page.getByTestId("step-card").allInnerTexts();
+    await page.getByTestId("export-format-selector-button").click();
+    await page.getByTestId("export-format-option-fit").click();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: /download a file/i }).click();
+    const exported = readFileSync(await (await download).path());
+    // A fresh page, so no card left over from the first import can satisfy
+    // the assertions below.
+    const fresh = await page.context().newPage();
+
+    // Act
+    await uploadFit(fresh, dist, { name: "exported.fit", buffer: exported });
+
+    // Assert
+    await expectImported(fresh, hasStepCards(fresh, steps));
+    await expect(fresh.getByTestId("repetition-block-card")).toHaveCount(
+      blocks
+    );
+    // Each card renders its step's duration and target.
+    expect(await fresh.getByTestId("step-card").allInnerTexts()).toEqual(
+      original
+    );
+  });
+
   for (const health of [
     { file: "HealthHrvOvernight.fit", store: "healthHrv", route: "recovery" },
     {

@@ -17,7 +17,7 @@ describe("convertStrokeTypeTarget", () => {
       ({ value }) => {
         // Arrange
         const data: FitTargetData = {
-          targetSwimStroke: value,
+          targetStrokeType: value,
         };
 
         // Act
@@ -33,7 +33,7 @@ describe("convertStrokeTypeTarget", () => {
   });
 
   describe("open target fallback", () => {
-    it("should return open target when targetSwimStroke is undefined", () => {
+    it("should return open target when targetStrokeType is undefined", () => {
       // Arrange
       const data: FitTargetData = {};
 
@@ -43,5 +43,42 @@ describe("convertStrokeTypeTarget", () => {
       // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
+  });
+
+  describe("decoder enum names", () => {
+    it.each([
+      { name: "freestyle", value: 0 },
+      { name: "breaststroke", value: 2 },
+      { name: "mixed", value: 5 },
+    ])(
+      "should map the decoded stroke name $name to $value",
+      ({ name, value }) => {
+        // Arrange
+        const data: FitTargetData = { targetStrokeType: name };
+
+        // Act
+        const result = convertStrokeTypeTarget(data);
+
+        // Assert
+        expect(result).toStrictEqual({
+          type: "stroke_type",
+          value: { unit: "swim_stroke", value },
+        });
+      }
+    );
+
+    it.each(["doggy_paddle", "im"])(
+      "should return open target for stroke %s, outside the KRD stroke codes",
+      (name) => {
+        // Arrange
+        const data: FitTargetData = { targetStrokeType: name };
+
+        // Act
+        const result = convertStrokeTypeTarget(data);
+
+        // Assert
+        expect(result).toStrictEqual({ type: "open" });
+      }
+    );
   });
 });

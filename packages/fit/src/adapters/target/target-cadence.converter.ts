@@ -16,33 +16,33 @@ export const convertCadenceTarget = (data: FitTargetData): Target => {
   return { type: targetTypeSchema.enum.open };
 };
 
+// The writer encodes a single rpm value as a custom range with
+// low === high (FIT has no single-value custom field), so an equal
+// range reads back as the single value it was written from.
+const buildRange = (min: number, max: number): Target => ({
+  type: targetTypeSchema.enum.cadence,
+  value:
+    min === max
+      ? { unit: targetUnitSchema.enum.rpm, value: min }
+      : { unit: targetUnitSchema.enum.range, min, max },
+});
+
 const buildCadenceRangeTarget = (data: FitTargetData): Target | null => {
   if (
     data.customTargetCadenceLow !== undefined &&
     data.customTargetCadenceHigh !== undefined
   ) {
-    return {
-      type: targetTypeSchema.enum.cadence,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: data.customTargetCadenceLow,
-        max: data.customTargetCadenceHigh,
-      },
-    };
+    return buildRange(
+      data.customTargetCadenceLow,
+      data.customTargetCadenceHigh
+    );
   }
 
   if (
     data.customTargetValueLow !== undefined &&
     data.customTargetValueHigh !== undefined
   ) {
-    return {
-      type: targetTypeSchema.enum.cadence,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: data.customTargetValueLow,
-        max: data.customTargetValueHigh,
-      },
-    };
+    return buildRange(data.customTargetValueLow, data.customTargetValueHigh);
   }
 
   return null;

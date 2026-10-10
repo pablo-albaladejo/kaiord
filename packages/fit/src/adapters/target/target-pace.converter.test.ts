@@ -224,4 +224,23 @@ describe("convertPaceTarget", () => {
       expect(result).toStrictEqual({ type: "open" });
     });
   });
+
+  describe("single value written as an equal range", () => {
+    it("should read an equal custom speed range back as mps", () => {
+      // Arrange
+      const data: FitTargetData = {
+        customTargetSpeedLow: 3.5,
+        customTargetSpeedHigh: 3.5,
+      };
+
+      // Act
+      const result = convertPaceTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "pace",
+        value: { unit: "mps", value: 3.5 },
+      });
+    });
+  });
 });
