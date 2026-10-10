@@ -10,6 +10,7 @@ Package-local maintenance scripts. The monorepo's repo-wide scripts (archive lin
 ## Key Files
 
 - `generate-og-image.mjs` — renders the SPA's Open Graph image.
+- `verify-prod/` — Playwright checks that drive the deployed SPA (default `https://kaiord.com/app`) through the UI, one script per audit work package under `checks/`. Each check seeds its own data in a fresh browser context. The deployed SHA comes from `version.json` and is reported as "unknown" when that file is missing. Run via `pnpm verify:prod [--base <url>] [--only a,b]`. The pure helpers (`lib.mjs`, `checks/i18n-terms.mjs`) have `node:test` suites wired into the root `pnpm test:scripts`.
 
 ## For AI Agents
 
