@@ -16,6 +16,7 @@
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import type { Snapshot } from "../../types/snapshot";
+import { isAutoProfile } from "../profile/helpers/claim-profile";
 import { exportSnapshot } from "./export-snapshot";
 import { importReconciledSnapshot } from "./import-reconciled-snapshot";
 import { mergeSnapshots } from "./merge-snapshots";
@@ -37,6 +38,16 @@ export type SyncWithCloudDeps = {
 export type SyncWithCloudResult =
   | { revision: string; needsChoice?: undefined }
   | { revision: null; needsChoice: ProfileChoice[] };
+
+/** Last line of defence: nothing imported or pushed carries an auto profile. */
+const assertNoAutoProfile = (snapshot: Snapshot): void => {
+  const profiles = (snapshot.tables.profiles ?? []) as Array<{
+    origin?: unknown;
+  }>;
+  if (profiles.some(isAutoProfile)) {
+    throw new Error("invariant: an origin:auto profile reached cloud.push");
+  }
+};
 
 const storedChoice = (local: Snapshot): string | null => {
   const rows = (local.tables.meta ?? []) as Array<Record<string, unknown>>;
@@ -60,6 +71,7 @@ async function attempt(deps: SyncWithCloudDeps): Promise<SyncWithCloudResult> {
   if (reconciled.kind === "needsChoice")
     return { revision: null, needsChoice: reconciled.candidates };
   const { snapshot, deviceLocalRekey } = reconciled;
+  assertNoAutoProfile(snapshot);
   await importReconciledSnapshot({
     port: snapshotPort,
     snapshot,

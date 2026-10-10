@@ -42,8 +42,9 @@ export function createInMemoryCloudSyncPort(
     },
 
     push: async (snapshot, expectedRevision) => {
-      // An encrypted envelope carries no plaintext tables; the invariant is
-      // asserted on the plaintext snapshot by the layer that encrypts it.
+      // An encrypted envelope carries no plaintext tables, so this fake can
+      // only check plaintext pushes. The production guard is in
+      // `syncWithCloud`, on the plaintext snapshot before import and push.
       const tables = snapshot.tables as typeof snapshot.tables | undefined;
       const profiles = (tables?.profiles ?? []) as Array<{
         origin?: unknown;
