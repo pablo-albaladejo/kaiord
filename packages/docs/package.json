@@ -16,7 +16,7 @@
     "spellcheck": "cspell --no-progress \"**/*.md\" --exclude api/"
   },
   "devDependencies": {
-    "@cspell/dict-es-es": "^3.0.8",
+    "@cspell/dict-es-es": "^3.0.9",
     "@kaiord/cli": "workspace:*",
     "@kaiord/core": "workspace:*",
     "@kaiord/fit": "workspace:*",
@@ -25,14 +25,14 @@
     "@kaiord/mcp": "workspace:*",
     "@kaiord/tcx": "workspace:*",
     "@kaiord/zwo": "workspace:*",
-    "@shikijs/vitepress-twoslash": "^4.4.3",
-    "cspell": "^10.2.2",
-    "oxc-minify": "^0.148.0",
+    "@shikijs/vitepress-twoslash": "^4.5.0",
+    "cspell": "^10.3.6",
+    "oxc-minify": "^0.153.0",
     "typedoc": "^0.28.20",
-    "typedoc-plugin-markdown": "^4.13.0",
+    "typedoc-plugin-markdown": "^4.13.1",
     "typescript": "^6.0.3",
     "vitepress": "2.0.0-alpha.20",
-    "vitepress-plugin-llms": "^1.13.5",
-    "vue": "^3.5.42"
+    "vitepress-plugin-llms": "^1.14.0",
+    "vue": "^3.5.43"
   }
 }
