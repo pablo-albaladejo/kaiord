@@ -5,6 +5,10 @@
  * and a monotonic revision, enforcing the same optimistic-concurrency
  * contract the Drive adapter does (a push with a stale `expectedRevision`
  * is rejected). Lets `syncWithCloud` be exercised without any network.
+ *
+ * It also enforces the default-profile invariant for every sync test: a
+ * pushed snapshot carrying an `origin: "auto"` profile is rejected loudly,
+ * so a regression cannot pass any test that pushes through this fake.
  */
 
 import type { RemoteSnapshot, Snapshot } from "../types/snapshot";
@@ -38,6 +42,15 @@ export function createInMemoryCloudSyncPort(
     },
 
     push: async (snapshot, expectedRevision) => {
+      // An encrypted envelope carries no plaintext tables; the invariant is
+      // asserted on the plaintext snapshot by the layer that encrypts it.
+      const tables = snapshot.tables as typeof snapshot.tables | undefined;
+      const profiles = (tables?.profiles ?? []) as Array<{
+        origin?: unknown;
+      }>;
+      if (profiles.some((p) => p.origin === "auto")) {
+        throw new Error("invariant: an origin:auto profile reached cloud.push");
+      }
       if (expectedRevision !== state.revision) {
         throw new Error(
           `cloud-sync revision conflict: expected ${expectedRevision}, ` +

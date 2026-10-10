@@ -100,7 +100,12 @@
     "connectedNotSynced": "Connected — not synced yet",
     "encryption": "End-to-end encryption for sync snapshots",
     "passphrase": "Passphrase",
-    "plaintextWarning": "Your saved AI API keys will be uploaded without end-to-end encryption. Enable encryption below to protect them."
+    "plaintextWarning": "Your saved AI API keys will be uploaded without end-to-end encryption. Enable encryption below to protect them.",
+    "profileChoice": {
+      "title": "Which profile is this device for?",
+      "body": "Your Google Drive already holds several profiles. Pick the one that should receive what you recorded on this device; nothing is synced until you choose.",
+      "unnamed": "Unnamed profile"
+    }
   },
   "privacy": {
     "information": "Privacy Information",

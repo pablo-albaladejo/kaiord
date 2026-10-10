@@ -17,6 +17,7 @@
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import type { SnapshotTables, Tombstone } from "../../types/snapshot";
 import type { KaiordDatabase } from "./dexie-database";
+import { createDexieSnapshotProfileOps } from "./dexie-snapshot-profile-ops";
 
 const TOMBSTONES = "tombstones";
 // Device-local; never exported to / imported from a remote snapshot.
@@ -56,6 +57,7 @@ export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
   const scoped = db as unknown as { transaction: DexieTxScope };
 
   return {
+    ...createDexieSnapshotProfileOps(db),
     // One transaction over every table. The inner `importTables` /
     // `replaceTombstones` / read calls below open Dexie transactions on
     // subsets of this scope, which Dexie nests into (joins) this one — so
