@@ -16,6 +16,20 @@ export default defineConfig({
       bundleName: "workout-spa-editor",
       uploadToken: process.env.CODECOV_TOKEN ?? "",
     }),
+    // Trim @garmin/fitsdk's profile.js: the SDK ships a 904K static dict
+    // of every FIT message type. KAIORD touches 9 messages; we vendor a
+    // 256K trim and intercept the SDK's internal `import "./profile.js"`
+    // resolutions at resolveId time. See scripts/generate-fitsdk-minimal.mjs.
+    {
+      name: "kaiord-fitsdk-profile-trim",
+      enforce: "pre",
+      async resolveId(source, importer) {
+        if (!source.endsWith("profile.js")) return null;
+        if (!importer || !importer.includes("@garmin")) return null;
+        if (!importer.includes("fitsdk/src/")) return null;
+        return path.resolve(__dirname, "./src/lib/fitsdk-minimal/profile.js");
+      },
+    },
   ],
   resolve: {
     // LOAD-BEARING aliases: these two stubs are a bundle-size optimization
