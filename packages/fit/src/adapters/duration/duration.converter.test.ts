@@ -50,7 +50,7 @@ describe("convertFitDuration", () => {
         "repeatUntilTime",
         {
           durationType: "repeatUntilTime",
-          durationTime: 1800,
+          repeatTime: 1800,
           durationStep: 0,
         },
         { type: "repeat_until_time", seconds: 1800, repeatFrom: 0 },
@@ -59,7 +59,7 @@ describe("convertFitDuration", () => {
         "repeatUntilDistance",
         {
           durationType: "repeatUntilDistance",
-          durationDistance: 5000,
+          repeatDistance: 5000,
           durationStep: 1,
         },
         { type: "repeat_until_distance", meters: 5000, repeatFrom: 1 },
@@ -68,7 +68,7 @@ describe("convertFitDuration", () => {
         "repeatUntilCalories",
         {
           durationType: "repeatUntilCalories",
-          durationCalories: 1000,
+          repeatCalories: 1000,
           durationStep: 2,
         },
         { type: "repeat_until_calories", calories: 1000, repeatFrom: 2 },
@@ -77,7 +77,7 @@ describe("convertFitDuration", () => {
         "repeatUntilHrLessThan",
         {
           durationType: "repeatUntilHrLessThan",
-          durationHr: 120,
+          repeatHr: 120,
           durationStep: 2,
         },
         { type: "repeat_until_heart_rate_less_than", bpm: 120, repeatFrom: 2 },
@@ -99,7 +99,7 @@ describe("convertFitDuration", () => {
         "repeatUntilPowerLessThan",
         {
           durationType: "repeatUntilPowerLessThan",
-          durationPower: 180,
+          repeatPower: 180,
           durationStep: 3,
         },
         { type: "repeat_until_power_less_than", watts: 180, repeatFrom: 3 },
@@ -108,7 +108,7 @@ describe("convertFitDuration", () => {
         "repeatUntilPowerGreaterThan",
         {
           durationType: "repeatUntilPowerGreaterThan",
-          durationPower: 300,
+          repeatPower: 300,
           durationStep: 1,
         },
         { type: "repeat_until_power_greater_than", watts: 300, repeatFrom: 1 },
@@ -136,23 +136,23 @@ describe("convertFitDuration", () => {
       ],
       [
         "repeatUntilCalories without durationStep",
-        { durationType: "repeatUntilCalories", durationCalories: 800 },
+        { durationType: "repeatUntilCalories", repeatCalories: 800 },
       ],
       [
         "repeatUntilTime without durationStep",
-        { durationType: "repeatUntilTime", durationTime: 600 },
+        { durationType: "repeatUntilTime", repeatTime: 600 },
       ],
       [
         "repeatUntilDistance without durationStep",
-        { durationType: "repeatUntilDistance", durationDistance: 3000 },
+        { durationType: "repeatUntilDistance", repeatDistance: 3000 },
       ],
       [
         "repeatUntilHrLessThan without durationStep",
-        { durationType: "repeatUntilHrLessThan", durationHr: 130 },
+        { durationType: "repeatUntilHrLessThan", repeatHr: 130 },
       ],
       [
         "repeatUntilPowerLessThan without durationStep",
-        { durationType: "repeatUntilPowerLessThan", durationPower: 150 },
+        { durationType: "repeatUntilPowerLessThan", repeatPower: 150 },
       ],
       [
         "repeatUntilHrGreaterThan without durationStep",
