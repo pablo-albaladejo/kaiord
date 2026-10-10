@@ -3,16 +3,18 @@
  * their source rows onto the target (`rekeyTableRows`), the source profiles
  * are removed WITHOUT a tombstone (they never left the device, so no other
  * device can hold them), `meta.activeProfileId` follows them to the target,
- * and tombstones naming a source row are re-keyed with it. Pure.
+ * and the source profiles' own tombstones are dropped. Pure.
+ *
+ * Tombstones are dropped, not re-keyed: an auto profile never synced, so no
+ * other device holds the rows they name. Re-keying one would aim it at the
+ * target's namespace instead — `auto:train2go:D` deleted on this device
+ * would become `R:train2go:D` and delete the target's own live row
+ * everywhere. Tombstones with a random id stay as they are; they cannot name
+ * another profile's row.
  */
 
 import type { Snapshot, Tombstone } from "../../types/snapshot";
-import { unionTombstones } from "./merge-tombstones";
-import {
-  type ProfileRekey,
-  rekeyRow,
-  rekeyTableRows,
-} from "./rekey-profile-rows";
+import { type ProfileRekey, rekeyTableRows } from "./rekey-profile-rows";
 
 type Row = Record<string, unknown>;
 
@@ -25,6 +27,12 @@ const rekeyMeta = (rows: ReadonlyArray<Row>, rekey: ProfileRekey): Row[] =>
     rekey.from.includes(row.value)
       ? { ...row, value: rekey.to }
       : row
+  );
+
+const namesSource = (t: Tombstone, rekey: ProfileRekey): boolean =>
+  rekey.from.some(
+    (from) =>
+      t.profileId === from || t.id === from || t.id.startsWith(`${from}:`)
   );
 
 const rekeyTable = (
@@ -49,12 +57,9 @@ export function rekeySnapshot(
   for (const [name, rows] of Object.entries(snapshot.tables)) {
     tables[name] = rekeyTable(name, rows, rekey, perProfile);
   }
-  const tombstones = snapshot.tombstones.map(
-    (t) => rekeyRow(t as unknown as Row, rekey) as unknown as Tombstone
-  );
   return {
     manifest: snapshot.manifest,
     tables,
-    tombstones: unionTombstones(tombstones, []),
+    tombstones: snapshot.tombstones.filter((t) => !namesSource(t, rekey)),
   };
 }

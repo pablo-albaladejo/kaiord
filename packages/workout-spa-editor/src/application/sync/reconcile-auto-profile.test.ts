@@ -89,18 +89,15 @@ describe("reconcileAutoProfile", () => {
     expect(out.deviceLocalRekey).toEqual({ from: [AUTO], to: R1 });
   });
 
-  it("should re-key tombstones naming an auto row", () => {
+  it("should drop the auto profile's tombstones instead of re-keying them onto the target", () => {
     // Arrange
     const remote = snap({ profiles: [real(R1)] });
+    const deletedAt = "2026-10-09T00:00:00.000Z";
     const input = {
       ...merged([real(R1)]),
       tombstones: [
-        {
-          table: "coachingActivities",
-          id: `${AUTO}:train2go:9`,
-          deletedAt: "2026-10-09T00:00:00.000Z",
-          profileId: AUTO,
-        },
+        { table: "coachingActivities", id: `${AUTO}:train2go:9`, deletedAt },
+        { table: "coachingDayNotes", id: "n-1", deletedAt, profileId: AUTO },
       ],
     };
 
@@ -109,14 +106,56 @@ describe("reconcileAutoProfile", () => {
 
     // Assert
     if (out.kind !== "ready") throw new Error("expected ready");
-    expect(out.snapshot.tombstones).toEqual([
-      {
-        table: "coachingActivities",
-        id: `${R1}:train2go:9`,
-        deletedAt: "2026-10-09T00:00:00.000Z",
-        profileId: R1,
+    expect(out.snapshot.tombstones).toEqual([]);
+  });
+
+  it("should keep the target's own row when the auto profile deleted the same natural row", () => {
+    // Arrange
+    const remote = snap({ profiles: [real(R1)] });
+    const targetRow = { id: `${R1}:train2go:9`, profileId: R1 };
+    const input = {
+      ...merged([real(R1)]),
+      tables: {
+        ...merged([real(R1)]).tables,
+        coachingActivities: [targetRow],
       },
+      tombstones: [
+        {
+          table: "coachingActivities",
+          id: `${AUTO}:train2go:9`,
+          deletedAt: "2026-10-09T00:00:00.000Z",
+        },
+      ],
+    };
+
+    // Act
+    const out = reconcileAutoProfile(input, remote, [
+      ...PER_PROFILE,
+      "coachingActivities",
     ]);
+
+    // Assert
+    if (out.kind !== "ready") throw new Error("expected ready");
+    expect(out.snapshot.tables.coachingActivities).toEqual([targetRow]);
+    expect(out.snapshot.tombstones).toEqual([]);
+  });
+
+  it("should keep tombstones unrelated to the auto profile unchanged", () => {
+    // Arrange
+    const remote = snap({ profiles: [real(R1)] });
+    const kept = {
+      table: "workouts",
+      id: "w-gone",
+      deletedAt: "2026-10-09T00:00:00.000Z",
+    };
+    const input = { ...merged([real(R1)]), tombstones: [kept] };
+
+    // Act
+    const out = reconcileAutoProfile(input, remote, PER_PROFILE);
+
+    // Assert
+    if (out.kind !== "ready") throw new Error("expected ready");
+    expect(out.snapshot.tombstones).toEqual([kept]);
   });
 
   it("should ask for a choice when the remote has several real profiles", () => {
