@@ -24,8 +24,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
     };
 
     // Act
@@ -42,8 +42,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       avgHeartRate: 145,
       maxHeartRate: 165,
       avgCadence: 90,
@@ -71,8 +71,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       avgSpeed: 5.0,
       maxSpeed: 7.0,
       enhancedAvgSpeed: 5.5,
@@ -92,8 +92,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       avgSpeed: 5.0,
       maxSpeed: 7.0,
     };
@@ -111,8 +111,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       totalAscent: 150,
       totalDescent: 80,
     };
@@ -130,8 +130,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       totalCalories: 250,
     };
 
@@ -147,8 +147,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       lapTrigger: "manual",
     };
 
@@ -175,8 +175,8 @@ describe("convertFitToKrdLap", () => {
       const fitLap = {
         timestamp: 1704067800,
         startTime: 1704067200,
-        totalElapsedTime: 600000,
-        totalTimerTime: 580000,
+        totalElapsedTime: 600,
+        totalTimerTime: 580,
         lapTrigger: trigger,
       };
 
@@ -191,8 +191,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       lapTrigger: "sessionEnd",
     };
 
@@ -227,8 +227,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       wktStepIndex: 3,
     };
 
@@ -244,8 +244,8 @@ describe("convertFitToKrdLap", () => {
     const fitLap = {
       timestamp: 1704067800,
       startTime: 1704067200,
-      totalElapsedTime: 600000,
-      totalTimerTime: 580000,
+      totalElapsedTime: 600,
+      totalTimerTime: 580,
       sport: "cycling",
       subSport: "indoorCycling",
     };
@@ -279,13 +279,13 @@ describe("convertFitToKrdLaps", () => {
       {
         timestamp: 1704067800,
         startTime: 1704067200,
-        totalElapsedTime: 600000,
-        totalTimerTime: 580000,
+        totalElapsedTime: 600,
+        totalTimerTime: 580,
       },
       {
         timestamp: 1704068400,
         startTime: 1704067800,
-        totalElapsedTime: 600000,
+        totalElapsedTime: 600,
         totalTimerTime: 590000,
       },
     ];
@@ -316,8 +316,8 @@ describe("convertFitToKrdLaps", () => {
       {
         timestamp: 1704067800,
         startTime: 1704067200,
-        totalElapsedTime: 600000,
-        totalTimerTime: 580000,
+        totalElapsedTime: 600,
+        totalTimerTime: 580,
         totalDistance: 5000,
       },
     ];

@@ -25,6 +25,22 @@ const buildKrdMetadata = (
 const toOptionalArray = <T>(items: T[]): T[] | undefined =>
   items.length > 0 ? items : undefined;
 
+/**
+ * A RECORD without a timestamp cannot be placed on the activity timeline
+ * (KRD records require one), so it is dropped instead of failing the import.
+ */
+const keepTimestampedRecords = (
+  recordMsgs: Record<string, unknown>[],
+  logger: Logger
+): Record<string, unknown>[] => {
+  const timestamped = recordMsgs.filter((r) => r.timestamp !== undefined);
+  const dropped = recordMsgs.length - timestamped.length;
+  if (dropped > 0) {
+    logger.warn("Dropping FIT records without timestamp", { dropped });
+  }
+  return timestamped;
+};
+
 const toOptionalSingle = <T>(item: T | undefined): T[] | undefined =>
   item !== undefined ? [item] : undefined;
 
@@ -52,7 +68,9 @@ export const mapActivityFileToKRD = (
     sessionMsgs.length > 0
       ? convertFitToKrdSession(sessionMsgs[0]!)
       : undefined;
-  const records = convertFitToKrdRecords(recordMsgs);
+  const records = convertFitToKrdRecords(
+    keepTimestampedRecords(recordMsgs, logger)
+  );
   const events = convertFitToKrdEvents(eventMsgs);
   const laps = convertFitToKrdLaps(lapMsgs);
   const fitExtensions = extractFitExtensions(messages, logger);
