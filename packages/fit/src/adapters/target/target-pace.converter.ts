@@ -20,33 +20,30 @@ export const convertPaceTarget = (data: FitTargetData): Target => {
   return { type: targetTypeSchema.enum.open };
 };
 
+// The writer encodes a single mps value as a custom range with
+// low === high (FIT has no single-value custom field), so an equal
+// range reads back as the single value it was written from.
+const buildRange = (min: number, max: number): Target => ({
+  type: targetTypeSchema.enum.pace,
+  value:
+    min === max
+      ? { unit: targetUnitSchema.enum.mps, value: min }
+      : { unit: targetUnitSchema.enum.range, min, max },
+});
+
 const buildPaceRangeTarget = (data: FitTargetData): Target | null => {
   if (
     data.customTargetSpeedLow !== undefined &&
     data.customTargetSpeedHigh !== undefined
   ) {
-    return {
-      type: targetTypeSchema.enum.pace,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: data.customTargetSpeedLow,
-        max: data.customTargetSpeedHigh,
-      },
-    };
+    return buildRange(data.customTargetSpeedLow, data.customTargetSpeedHigh);
   }
 
   if (
     data.customTargetValueLow !== undefined &&
     data.customTargetValueHigh !== undefined
   ) {
-    return {
-      type: targetTypeSchema.enum.pace,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: data.customTargetValueLow,
-        max: data.customTargetValueHigh,
-      },
-    };
+    return buildRange(data.customTargetValueLow, data.customTargetValueHigh);
   }
 
   return null;

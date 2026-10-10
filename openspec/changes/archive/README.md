@@ -9,6 +9,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | ---- | ------ | ------- |
 | 2026-10-11 | [`tcx-repeat-blocks`](./2026-10-11-tcx-repeat-blocks/) | TCX import reads repetition blocks |
 | 2026-10-10 | [`fix-fit-activity-import`](./2026-10-10-fix-fit-activity-import/) | Import activity FIT files from the decoder's real message shape |
+| 2026-10-10 | [`fix-fit-workout-roundtrip`](./2026-10-10-fix-fit-workout-roundtrip/) | Round-trip structured workouts through the FIT SDK encoder |
 | 2026-10-10 | [`fix-spa-fit-import-profile`](./2026-10-10-fix-spa-fit-import-profile/) | FIT import works in the SPA production bundle |
 | 2026-09-28 | [`converter-deep-link-and-guides`](./2026-09-28-converter-deep-link-and-guides/) | Converter deep link and athlete guides |
 | 2026-09-28 | [`docs-indexing-hygiene`](./2026-09-28-docs-indexing-hygiene/) | Index only the docs pages worth indexing, and date them from git |

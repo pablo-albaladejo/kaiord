@@ -17,7 +17,7 @@ describe("convertRepeatDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "repeatUntilTime",
-      durationTime: 600,
+      repeatTime: 600,
       durationStep: 2,
     });
   });
@@ -36,7 +36,7 @@ describe("convertRepeatDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "repeatUntilDistance",
-      durationDistance: 5000,
+      repeatDistance: 5000,
       durationStep: 0,
     });
   });
@@ -55,7 +55,7 @@ describe("convertRepeatDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "repeatUntilCalories",
-      durationCalories: 400,
+      repeatCalories: 400,
       durationStep: 1,
     });
   });
