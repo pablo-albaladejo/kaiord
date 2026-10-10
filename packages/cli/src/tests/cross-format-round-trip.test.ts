@@ -14,6 +14,16 @@ const flattenSteps = (
 ): Array<WorkoutStep> =>
   steps.flatMap((step) => ("repeatCount" in step ? step.steps : [step]));
 
+const repeatShape = (steps: Array<WorkoutStep | RepetitionBlock>) =>
+  steps.map((step) =>
+    "repeatCount" in step
+      ? {
+          repeatCount: step.repeatCount,
+          steps: step.steps.map((child) => child.duration),
+        }
+      : step.duration
+  );
+
 const TARGET_CHECKERS = {
   heart_rate: { scalar: "bpm", check: "checkHeartRate" },
   cadence: { scalar: "rpm", check: "checkCadence" },
@@ -165,6 +175,24 @@ describe("Cross-format round-trip: FIT → KRD → TCX → KRD", () => {
     expect(tcxXml).toContain(
       `<Repetitions>${repeatBlock?.repeatCount}</Repetitions>`
     );
+  });
+
+  it("should read FIT repeat blocks back from TCX with count and children intact", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const fitReader = createFitReader(logger);
+    const tcxWriter = createTcxWriter(logger);
+    const tcxReader = createTcxReader(logger);
+    const fitBuffer = loadFitFixture("WorkoutRepeatSteps.fit");
+
+    // Act
+    const krdFromFit = await fitReader(fitBuffer);
+    const krdFromTcx = await tcxReader(await tcxWriter(krdFromFit));
+
+    // Assert
+    const shapeA = repeatShape(extractWorkout(krdFromFit).steps);
+    expect(shapeA.some((step) => "repeatCount" in step)).toBe(true);
+    expect(repeatShape(extractWorkout(krdFromTcx).steps)).toStrictEqual(shapeA);
   });
 
   it("should keep representable target values within round-trip tolerances", async () => {
