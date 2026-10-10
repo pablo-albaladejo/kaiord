@@ -26,8 +26,4 @@ export {
   TargetTypeId,
   targetTypeKeySchema,
 } from "./target-type.schema";
-export {
-  garminUnitInputSchema,
-  garminUnitSchema,
-  unitKeySchema,
-} from "./unit.schema";
+export { garminUnitInputSchema } from "./unit.schema";
