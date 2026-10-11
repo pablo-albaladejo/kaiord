@@ -105,11 +105,9 @@ test.describe("Import/Export Multiple Formats", () => {
     });
 
     const fitOption = page.getByTestId("export-format-option-fit");
-    await fitOption.click();
-
-    // Save workout
+    // Picking the format is the download.
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await fitOption.click();
     const download = await downloadPromise;
 
     // Assert - Correct filename and extension
@@ -140,11 +138,9 @@ test.describe("Import/Export Multiple Formats", () => {
     });
 
     const tcxOption = page.getByTestId("export-format-option-tcx");
-    await tcxOption.click();
-
-    // Save workout
+    // Picking the format is the download.
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await tcxOption.click();
     const download = await downloadPromise;
 
     // Assert - Correct filename and extension
@@ -183,11 +179,9 @@ test.describe("Import/Export Multiple Formats", () => {
     });
 
     const zwoOption = page.getByTestId("export-format-option-zwo");
-    await zwoOption.click();
-
-    // Save workout
+    // Picking the format is the download.
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await zwoOption.click();
     const download = await downloadPromise;
 
     // Assert - Correct filename and extension
@@ -237,9 +231,10 @@ test.describe("Import/Export Multiple Formats", () => {
       timeout: 5000,
     });
 
-    // Export as KRD
+    // Export as KRD: picking the format is the download.
+    await page.getByTestId("export-format-selector-button").click();
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await page.getByTestId("export-format-option-krd").click();
     const download = await downloadPromise;
 
     // Assert - Verify edited value persists
@@ -311,10 +306,10 @@ test.describe("Import/Export Multiple Formats", () => {
       timeout: 10000,
     });
 
-    // Act - Click save button
+    // Act - Download as KRD
+    await page.getByTestId("export-format-selector-button").click();
     const downloadPromise = page.waitForEvent("download");
-    const saveButton = page.getByRole("button", { name: /download a file/i });
-    await saveButton.click();
+    await page.getByTestId("export-format-option-krd").click();
 
     // Assert - Button shows loading state (may be brief)
     // Note: This might be too fast to catch in tests, but the functionality exists
@@ -359,11 +354,9 @@ test.describe("Import/Export Multiple Formats", () => {
       });
 
       const option = page.getByTestId(`export-format-option-${formatValue}`);
-      await option.click();
-
-      // Save and verify extension
+      // Picking the format is the download.
       const downloadPromise = page.waitForEvent("download");
-      await page.getByRole("button", { name: /download a file/i }).click();
+      await option.click();
       const download = await downloadPromise;
 
       expect(download.suggestedFilename()).toMatch(
@@ -425,9 +418,12 @@ test.describe("Import/Export Multiple Formats", () => {
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
 
-    // Focus on save button and press Enter
-    const saveButton = page.getByRole("button", { name: /download a file/i });
+    // Enter opens the download menu on the current format (KRD); Enter again
+    // downloads it.
+    const saveButton = page.getByTestId("export-format-selector-button");
     await saveButton.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("export-format-option-krd")).toBeFocused();
 
     const downloadPromise = page.waitForEvent("download");
     await page.keyboard.press("Enter");
@@ -518,11 +514,9 @@ test.describe("Import/Export Mobile Flow", () => {
     });
 
     const tcxOption = page.getByTestId("export-format-option-tcx");
-    await tcxOption.click();
-
-    // Save workout
+    // Picking the format is the download.
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await tcxOption.click();
     const download = await downloadPromise;
 
     // Assert - Correct format on mobile

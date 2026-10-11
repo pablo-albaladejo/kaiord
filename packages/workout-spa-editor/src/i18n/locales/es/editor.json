@@ -80,8 +80,8 @@
   "save": {
     "saving": "Guardando...",
     "exportProgress": "Progreso de exportación: {{progress}}%",
-    "savedTitle": "Entreno guardado",
-    "savedDescription": "«{{name}}» se ha guardado como {{format}}",
+    "savedTitle": "Archivo descargado",
+    "savedDescription": "Descargado como {{filename}}",
     "exportFailedTitle": "Error de exportación",
     "exportFailedFallback": "No se pudo exportar el entreno",
     "paceZones": {

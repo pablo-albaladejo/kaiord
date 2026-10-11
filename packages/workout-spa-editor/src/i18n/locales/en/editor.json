@@ -80,8 +80,8 @@
   "save": {
     "saving": "Saving...",
     "exportProgress": "Export progress: {{progress}}%",
-    "savedTitle": "Workout Saved",
-    "savedDescription": "\"{{name}}\" has been saved as {{format}}",
+    "savedTitle": "File downloaded",
+    "savedDescription": "Downloaded as {{filename}}",
     "exportFailedTitle": "Export Failed",
     "exportFailedFallback": "Failed to export workout",
     "paceZones": {

@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { type FormatOption } from "./format-options";
 import { FormatDropdownButton } from "./FormatDropdownButton";
@@ -11,6 +13,7 @@ type FormatDropdownProps = {
   onToggle: () => void;
   onFormatSelect: (format: WorkoutFileFormat) => void;
   disabled: boolean;
+  label?: ReactNode;
 };
 
 export function FormatDropdown({
@@ -20,6 +23,7 @@ export function FormatDropdown({
   onToggle,
   onFormatSelect,
   disabled,
+  label,
 }: FormatDropdownProps) {
   const { focusedIndex, optionRefs, handleKeyDown } = useKeyboardNavigation({
     isOpen,
@@ -42,6 +46,7 @@ export function FormatDropdown({
         isOpen={isOpen}
         onToggle={onToggle}
         disabled={disabled}
+        label={label}
       />
 
       {isOpen && (

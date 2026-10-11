@@ -34,9 +34,9 @@ async function addPaceStep(page: Page, index: number): Promise<void> {
 
 async function exportFit(page: Page): Promise<Buffer> {
   await page.getByTestId("export-format-selector-button").click();
-  await page.getByTestId("export-format-option-fit").click();
+  // Picking the format is the download.
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: /download a file/i }).click();
+  await page.getByTestId("export-format-option-fit").click();
   return readFileSync(await (await download).path());
 }
 

@@ -7,7 +7,7 @@
  * - Requirement 12.6: Provide format selection options (FIT, TCX, ZWO, KRD)
  */
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
@@ -22,6 +22,11 @@ export type ExportFormatSelectorProps = {
   workout?: KRD;
   disabled?: boolean;
   className?: string;
+  /**
+   * Labels the trigger instead of the current format. Pass it when picking
+   * a format is itself the action (the editor's single download control).
+   */
+  label?: ReactNode;
 };
 
 /**
@@ -33,6 +38,7 @@ export function ExportFormatSelector({
   workout,
   disabled = false,
   className = "",
+  label,
 }: ExportFormatSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
@@ -66,6 +72,7 @@ export function ExportFormatSelector({
         onToggle={handleToggle}
         onFormatSelect={handleFormatSelect}
         disabled={disabled}
+        label={label}
       />
       <FormatWarnings
         format={currentFormat}
