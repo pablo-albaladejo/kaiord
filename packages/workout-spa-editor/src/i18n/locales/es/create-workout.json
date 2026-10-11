@@ -33,6 +33,7 @@
   },
   "startFrom": {
     "divider": "o empieza desde",
+    "lead": "Empieza desde",
     "template": "Plantilla",
     "blank": "En blanco",
     "import": "Importar archivo"
