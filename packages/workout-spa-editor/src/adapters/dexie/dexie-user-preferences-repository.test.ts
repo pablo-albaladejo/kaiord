@@ -1,9 +1,9 @@
 import "fake-indexeddb/auto";
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { UserPreferences } from "../../types/user-preferences";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieUserPreferencesRepository } from "./dexie-user-preferences-repository";
 
 const baseRow = (
@@ -16,11 +16,7 @@ const baseRow = (
 });
 
 describe("DexieUserPreferencesRepository", () => {
-  let db: KaiordDatabase;
-
-  beforeEach(() => {
-    db = new KaiordDatabase(`kaiord-prefs-test-${Date.now()}-${Math.random()}`);
-  });
+  const db = sharedKaiordDatabase("prefs");
 
   it("should return undefined from get when no row exists", async () => {
     // Arrange

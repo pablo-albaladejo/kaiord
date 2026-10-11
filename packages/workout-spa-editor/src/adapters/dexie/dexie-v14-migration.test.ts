@@ -12,16 +12,13 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import {
   type UserPreferences,
   userPreferencesSchema,
 } from "../../types/user-preferences";
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v14-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V13 = 13;
 const NOW = "2026-05-08T10:00:00.000Z";
@@ -42,15 +39,8 @@ const seedV13 = async (
 };
 
 describe("Dexie v13 → v14 migration (userPreferences calendar rename)", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("rename");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v14");
+  const { name } = db;
 
   it.each([{ density: "comfortable" }, { density: "compact" }])(
     "should rewrite a $density row to calendarView=grid and drop calendarDensity",
@@ -61,7 +51,7 @@ describe("Dexie v13 → v14 migration (userPreferences calendar rename)", () => 
       ]);
 
       // Act
-      const v14 = new KaiordDatabase(name);
+      const v14 = db;
       await v14.open();
       const migrated = (await v14
         .table("userPreferences")
@@ -87,7 +77,7 @@ describe("Dexie v13 → v14 migration (userPreferences calendar rename)", () => 
     ]);
 
     // Act
-    const v14 = new KaiordDatabase(name);
+    const v14 = db;
     await v14.open();
     const all = (await v14
       .table("userPreferences")
@@ -110,7 +100,7 @@ describe("Dexie v13 → v14 migration (userPreferences calendar rename)", () => 
     await seedV13(name, []);
 
     // Act
-    const v14 = new KaiordDatabase(name);
+    const v14 = db;
     await v14.open();
     const all = await v14.table("userPreferences").toArray();
 

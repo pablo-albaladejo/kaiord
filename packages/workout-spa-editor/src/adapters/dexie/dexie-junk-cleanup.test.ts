@@ -9,14 +9,10 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { runJunkCleanupOnce } from "./dexie-junk-cleanup";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-junk-cleanup-${suffix}-${Date.now()}-${Math.random()}`;
 
 const NOW = "2026-01-01T10:00:00.000Z";
 const YEAR_MONTH_LENGTH = 7;
@@ -87,18 +83,7 @@ const makeSessionMatch = (workoutId: string, id = "sm-1") => ({
 });
 
 describe("runJunkCleanupOnce", () => {
-  let name: string;
-  let db: KaiordDatabase;
-
-  beforeEach(() => {
-    name = dbName("apply");
-    db = new KaiordDatabase(name);
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("junk-cleanup");
 
   it("should remove an untouched coaching template and its session match on first run", async () => {
     // Arrange

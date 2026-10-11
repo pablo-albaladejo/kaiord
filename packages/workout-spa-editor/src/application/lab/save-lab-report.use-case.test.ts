@@ -8,14 +8,11 @@
 import "fake-indexeddb/auto";
 
 import type { LabReport, LabValue } from "@kaiord/core";
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { KaiordDatabase } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { saveLabReport } from "./save-lab-report.use-case";
-
-const dbName = () => `kaiord-test-savelab-${Date.now()}-${Math.random()}`;
 
 const REPORT: LabReport = {
   id: "r1",
@@ -42,18 +39,10 @@ const value = (id: string, parameterKey: string): LabValue => ({
 const VALUES = [value("v1", "glucose"), value("v2", "ldl")];
 
 describe("saveLabReport", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("save-lab");
 
   beforeEach(async () => {
-    name = dbName();
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should persist the report and all its values in one commit", async () => {
