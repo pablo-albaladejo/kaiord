@@ -98,6 +98,36 @@ describe("CreateInputPhase", () => {
     expect(screen.getByText(/configure an ai provider/i)).toBeInTheDocument();
   });
 
+  it("should put the non-AI starts before the AI setup when no provider is set", () => {
+    // Arrange
+    const ui = <CreateInputPhase {...baseProps} provider={null} />;
+
+    // Act
+    render(withRouter(ui));
+
+    // Assert
+    const blank = screen.getByRole("button", { name: "Blank" });
+    const aiSetup = screen.getByText(/configure an ai provider/i);
+    expect(
+      blank.compareDocumentPosition(aiSetup) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("should keep the AI prompt first when a provider is set", () => {
+    // Arrange
+    const ui = <CreateInputPhase {...baseProps} />;
+
+    // Act
+    render(withRouter(ui));
+
+    // Assert
+    const blank = screen.getByRole("button", { name: "Blank" });
+    const generate = screen.getByRole("button", { name: /generate workout/i });
+    expect(
+      generate.compareDocumentPosition(blank) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it("should name the threshold the generation writes against", () => {
     // Arrange
     const ui = <CreateInputPhase {...baseProps} />;

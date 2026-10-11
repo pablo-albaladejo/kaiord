@@ -17,7 +17,7 @@ export function DefaultProfileNotice() {
       data-testid="default-profile-notice"
       className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-edge-soft bg-surface p-3.5 text-[13px] text-ink-body"
     >
-      <p className="flex-1">{t("defaultProfile.notice")}</p>
+      <p className="m-0 flex-1 basis-60">{t("defaultProfile.notice")}</p>
       <Link
         href="/athlete"
         className="text-xs font-medium text-ink-strong underline underline-offset-2"

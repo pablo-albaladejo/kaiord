@@ -44,7 +44,7 @@ export default function CreateWorkout({
   return (
     <div
       data-testid="create-workout"
-      className="mx-auto min-h-screen w-full max-w-md bg-surface-deep p-4"
+      className="mx-auto min-h-screen w-full max-w-md bg-surface-deep sm:p-4"
     >
       {/* Eager route heading (D5): the route-heading marker lives on a stable
           element so every phase — including `generating`, whose body has no

@@ -1,8 +1,10 @@
 import type { CSSProperties } from "react";
 
-/** Exact glass blur from the redesign handoff. */
+/** Exact glass blur from the redesign handoff. Geometry comes from the
+    `--bottom-nav-*` tokens in index.css, which page padding also reads. */
 export const BAR_STYLE: CSSProperties = {
-  height: 64,
+  height: "var(--bottom-nav-height)",
+  bottom: "calc(var(--bottom-nav-gap) + env(safe-area-inset-bottom))",
   backgroundColor: "var(--glass-bg)",
   backdropFilter: "blur(20px) saturate(180%)",
   WebkitBackdropFilter: "blur(20px) saturate(180%)",
@@ -15,6 +17,7 @@ export const BAR_STYLE: CSSProperties = {
  * was painted the colour that means "easy endurance".
  */
 export const FAB_STYLE: CSSProperties = {
+  top: "calc(var(--bottom-nav-fab-rise) * -1)",
   width: 58,
   height: 58,
   background: "var(--control)",

@@ -33,6 +33,7 @@
   },
   "startFrom": {
     "divider": "or start from",
+    "lead": "Start from",
     "template": "Template",
     "blank": "Blank",
     "import": "Import file"

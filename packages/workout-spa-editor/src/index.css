@@ -53,6 +53,18 @@
 
   /* Track color for progress rings (ReadinessRing, MacroRing). */
   --ring-track: var(--bg-sunken);
+
+  /* Mobile bottom nav geometry. The bar floats --bottom-nav-gap above the
+     safe area and its FAB rises --bottom-nav-fab-rise above the bar. The
+     body already pads the safe area, so in-flow content clears the bar with
+     --bottom-nav-clearance. Read these instead of restating the numbers. */
+  --bottom-nav-height: 64px;
+  --bottom-nav-gap: 14px;
+  --bottom-nav-fab-rise: 11px;
+  --bottom-nav-clearance: calc(
+    var(--bottom-nav-gap) + var(--bottom-nav-height) +
+      var(--bottom-nav-fab-rise) + 1.5rem
+  );
 }
 
 @theme {

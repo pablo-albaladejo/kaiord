@@ -22,6 +22,8 @@
   "empty": {
     "title": "Tu biblioteca está vacía",
     "message": "Guarda un entrenamiento en tu biblioteca para empezar.",
+    "create": "Nuevo entreno",
+    "import": "Importar archivo",
     "createMessage": "Crea tu primer entrenamiento y guárdalo en tu biblioteca para empezar.",
     "filteredTitle": "No se encontraron entrenamientos",
     "filteredMessage": "Ningún entrenamiento coincide con tus filtros actuales."

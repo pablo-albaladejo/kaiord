@@ -22,6 +22,8 @@
   "empty": {
     "title": "Your library is empty",
     "message": "Save a workout to your library to get started.",
+    "create": "New workout",
+    "import": "Import file",
     "createMessage": "Create your first workout and save it to your library to get started.",
     "filteredTitle": "No workouts found",
     "filteredMessage": "No workouts match your current filters."
