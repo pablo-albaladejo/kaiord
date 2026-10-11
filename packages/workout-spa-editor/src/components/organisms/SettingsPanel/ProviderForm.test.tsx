@@ -65,6 +65,25 @@ describe("ProviderForm", () => {
     );
   });
 
+  it("should lock the fields while the key is being checked", async () => {
+    // Arrange
+    let finish: (outcome: KeySaveOutcome) => void = () => {};
+    const onAdd = vi.fn(
+      () => new Promise<KeySaveOutcome>((resolve) => (finish = resolve))
+    );
+    renderWithProviders(<ProviderForm onAdd={onAdd} />);
+
+    // Act
+    await fillAndSubmit();
+
+    // Assert
+    expect(screen.getByLabelText("Provider")).toBeDisabled();
+    expect(screen.getByLabelText("Label")).toBeDisabled();
+    expect(screen.getByLabelText("API Key")).toBeDisabled();
+    finish("saved");
+    expect(await screen.findByLabelText("API Key")).toBeEnabled();
+  });
+
   it("should not submit until both the label and the key are filled", async () => {
     // Arrange
     const onAdd = renderForm("saved");

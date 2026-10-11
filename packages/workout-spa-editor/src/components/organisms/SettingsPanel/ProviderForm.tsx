@@ -39,6 +39,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         label={t("providers.provider")}
         variant="select"
         value={type}
+        disabled={checking}
         onChange={(e) => setType(e.target.value as LlmProviderType)}
         options={[
           { value: "anthropic", label: "Anthropic (Claude)" },
@@ -50,6 +51,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         label={t("providers.label")}
         placeholder={t("providers.labelPlaceholder")}
         value={label}
+        disabled={checking}
         onChange={(e) => setLabel(e.target.value)}
       />
       <Input
@@ -57,6 +59,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         type="password"
         placeholder="sk-..."
         value={apiKey}
+        disabled={checking}
         onChange={(e) => setApiKey(e.target.value)}
       />
       <Button
