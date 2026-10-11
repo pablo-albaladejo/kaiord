@@ -110,13 +110,12 @@ test.describe("Library-Calendar Integration", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test('Empty day "+" opens the Create overlay whose Template tile routes to the Library', async ({
+  test('Empty day "+" opens the Create overlay whose Template tile picks from the Library', async ({
     page,
   }) => {
     // Post-redesign, the empty-day "+" routes to the AI-first Create
-    // overlay; its "Template" tile navigates to the Library (the legacy
-    // inline TemplatePickerDialog was removed). See the e2e redesign
-    // report flag on the lost "+"-to-date scheduling path.
+    // overlay; its "Template" tile opens the Library in template-picker
+    // mode for that day (the legacy inline TemplatePickerDialog was removed).
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -138,7 +137,9 @@ test.describe("Library-Calendar Integration", () => {
     await expect(page.getByTestId("create-workout")).toBeVisible();
 
     await page.getByRole("button", { name: "Template" }).click();
-    await page.waitForURL(/\/library$/);
+    await page.waitForURL(
+      new RegExp(`/library\\?source=template-picker&date=${dates[1]}`)
+    );
     await expect(page.getByTestId("library-page")).toBeVisible();
     await expect(page.getByText("Z2 Ride", { exact: true })).toBeVisible();
   });

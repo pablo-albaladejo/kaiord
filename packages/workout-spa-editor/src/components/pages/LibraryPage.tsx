@@ -13,11 +13,12 @@
  * (SPA navigation) so the in-memory editor state is preserved; a hard
  * reload would drop the just-loaded workout from Zustand.
  *
- * When entered with `?source=template-picker&date=YYYY-MM-DD`, the
- * schedule click bypasses the explicit `ScheduleDateDialog` and
- * dispatches `scheduleTemplate` directly with the URL's date. Invalid
- * or absent `?date=` uses the explicit dialog flow — see
- * `useLibrarySchedule` for the branch.
+ * When entered from the "New session" sheet (`?source=template-picker`)
+ * the page says it is picking. With a valid `?date=` the schedule click
+ * bypasses the explicit `ScheduleDateDialog` and dispatches
+ * `scheduleTemplate` directly (see `useLibrarySchedule`), and a loaded
+ * template keeps the date; otherwise the dialog proposes the sheet's
+ * week (or today).
  *
  * The `<h1>` marked with `[data-route-heading]` is rendered eagerly
  * (even while templates load) so the `useFocusOnRouteChange` hook
@@ -38,6 +39,8 @@ import type { WorkoutTemplate } from "../../types/workout-library";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
 import { LibraryContent } from "./Library/LibraryContent";
 import { LibraryHeader } from "./Library/LibraryHeader";
+import { LibraryPickerHint } from "./Library/LibraryPickerHint";
+import { useTemplatePicker } from "./Library/use-template-picker";
 import { useLibrarySchedule } from "./use-library-schedule";
 import { useScheduleTemplate } from "./use-schedule-template";
 
@@ -53,6 +56,7 @@ export default function LibraryPage() {
   const loadWorkout = useLoadWorkout();
   const [, navigate] = useLocation();
   const hasCurrentWorkout = currentWorkout !== null;
+  const picker = useTemplatePicker();
 
   const handleDelete = async (id: string) => {
     try {
@@ -78,7 +82,7 @@ export default function LibraryPage() {
     // survives the route transition. Hard reload would drop Zustand.
     // `?source=scratch` mounts the editor directly with the
     // workout that's now in the store.
-    navigate(withOrigin("/workout/new?source=scratch", "library"));
+    navigate(withOrigin(picker.loadHref, "library"));
   };
 
   return (
@@ -87,6 +91,7 @@ export default function LibraryPage() {
           set by useFocusOnRouteChange survives the loading→loaded swap;
           a per-branch header would unmount and drop focus to <body>. */}
       <LibraryHeader count={templates?.length ?? 0} />
+      {picker.picking && <LibraryPickerHint date={picker.date} />}
       {templates === undefined ? (
         <div className="flex items-center justify-center p-8 text-ink-muted">
           {t("page.loading")}
@@ -103,6 +108,7 @@ export default function LibraryPage() {
           <ScheduleDateDialog
             open={scheduling !== null}
             templateName={scheduling?.name ?? ""}
+            defaultDate={picker.defaultDate}
             onConfirm={confirmSchedule}
             onCancel={closeScheduler}
           />

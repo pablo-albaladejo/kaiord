@@ -42,6 +42,15 @@ const renderDialog = (
     </ToastContextProvider>
   );
 
+const retype = async (
+  user: ReturnType<typeof userEvent.setup>,
+  name: string
+) => {
+  const input = screen.getByLabelText(/workout name/i);
+  await user.clear(input);
+  await user.type(input, name);
+};
+
 describe("SaveToLibraryDialog", () => {
   const mockKRD: KRD = {
     version: "1.0",
@@ -132,7 +141,7 @@ describe("SaveToLibraryDialog", () => {
       renderDialog({ workout, open: true, onOpenChange });
 
       // Act
-      await user.type(screen.getByLabelText(/workout name/i), "Test Workout");
+      await retype(user, "Test Workout");
       await user.click(screen.getByRole("button", { name: /^save$/i }));
 
       // Assert
@@ -158,7 +167,7 @@ describe("SaveToLibraryDialog", () => {
       renderDialog({ workout, open: true, onOpenChange });
 
       // Act
-      await user.type(screen.getByLabelText(/workout name/i), "Test Workout");
+      await retype(user, "Test Workout");
       await user.type(screen.getByLabelText(/tags/i), "intervals, endurance");
       await user.selectOptions(screen.getByLabelText(/difficulty/i), "hard");
       await user.type(screen.getByLabelText(/notes/i), "Great workout");
@@ -189,7 +198,7 @@ describe("SaveToLibraryDialog", () => {
       renderDialog({ workout, open: true, onOpenChange });
 
       // Act
-      await user.type(screen.getByLabelText(/workout name/i), "Test Workout");
+      await retype(user, "Test Workout");
       await user.click(screen.getByRole("button", { name: /^save$/i }));
 
       // Assert
@@ -214,17 +223,87 @@ describe("SaveToLibraryDialog", () => {
     });
   });
 
-  describe("validation", () => {
-    it("should disable save button when name is empty", () => {
+  describe("name", () => {
+    it("should propose the workout's own name", () => {
       // Arrange
       const workout = mockKRD;
 
       // Act
+      renderDialog({ workout, open: true, onOpenChange: vi.fn() });
+
+      // Assert
+      expect(screen.getByLabelText(/workout name/i)).toHaveValue(
+        "Test Workout"
+      );
+      expect(screen.getByRole("button", { name: /^save$/i })).toBeEnabled();
+    });
+
+    it("should propose the current name each time it opens", () => {
+      // Arrange
+      const props = { workout: mockKRD, onOpenChange: vi.fn() };
+      const { rerender } = renderDialog({ ...props, open: false });
+      const renamed: KRD = {
+        ...mockKRD,
+        extensions: {
+          structured_workout: { name: "Renamed", sport: "cycling", steps: [] },
+        },
+      };
+
+      // Act
+      rerender(
+        <ToastContextProvider>
+          <PersistenceProvider persistence={createInMemoryPersistence()}>
+            <SaveToLibraryDialog {...props} workout={renamed} open />
+          </PersistenceProvider>
+        </ToastContextProvider>
+      );
+
+      // Assert
+      expect(screen.getByLabelText(/workout name/i)).toHaveValue("Renamed");
+    });
+  });
+
+  describe("name edits", () => {
+    it("should keep the user's edit when the workout changes while open", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const props = { workout: mockKRD, onOpenChange: vi.fn(), open: true };
+      const { rerender } = renderDialog(props);
+      await retype(user, "My edit");
+      const renamed: KRD = {
+        ...mockKRD,
+        extensions: {
+          structured_workout: { name: "Renamed", sport: "cycling", steps: [] },
+        },
+      };
+
+      // Act
+      rerender(
+        <ToastContextProvider>
+          <PersistenceProvider persistence={createInMemoryPersistence()}>
+            <SaveToLibraryDialog {...props} workout={renamed} />
+          </PersistenceProvider>
+        </ToastContextProvider>
+      );
+
+      // Assert
+      expect(screen.getByLabelText(/workout name/i)).toHaveValue("My edit");
+    });
+  });
+
+  describe("validation", () => {
+    it("should disable save button when name is empty", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const workout = mockKRD;
       renderDialog({
         workout,
         open: true,
         onOpenChange: vi.fn(),
       });
+
+      // Act
+      await user.clear(screen.getByLabelText(/workout name/i));
 
       // Assert
       const saveButton = screen.getByRole("button", { name: /^save$/i });
@@ -239,7 +318,7 @@ describe("SaveToLibraryDialog", () => {
       renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
-      await user.type(screen.getByLabelText(/workout name/i), "Test");
+      await retype(user, "Test");
 
       // Assert
       const saveButton = screen.getByRole("button", { name: /^save$/i });
@@ -270,7 +349,7 @@ describe("SaveToLibraryDialog", () => {
       renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
-      await user.type(screen.getByLabelText(/workout name/i), "Test");
+      await retype(user, "Test");
       await user.type(screen.getByLabelText(/tags/i), "tag1, tag2, tag3");
       await user.click(screen.getByRole("button", { name: /^save$/i }));
 
@@ -296,7 +375,7 @@ describe("SaveToLibraryDialog", () => {
       renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
-      await user.type(screen.getByLabelText(/workout name/i), "Test");
+      await retype(user, "Test");
       await user.type(screen.getByLabelText(/tags/i), "  tag1  ,  tag2  ");
       await user.click(screen.getByRole("button", { name: /^save$/i }));
 
@@ -322,7 +401,7 @@ describe("SaveToLibraryDialog", () => {
       renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
-      await user.type(screen.getByLabelText(/workout name/i), "Test");
+      await retype(user, "Test");
       await user.type(screen.getByLabelText(/tags/i), "tag1,,tag2,  ,tag3");
       await user.click(screen.getByRole("button", { name: /^save$/i }));
 

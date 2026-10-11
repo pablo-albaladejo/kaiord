@@ -14,11 +14,10 @@ import { useDiscardConfirmation } from "./WorkoutSection/use-discard-confirmatio
  * Builds the `onBack` callback for the editor's `EditorPageHeader`.
  * Returns `null` when no back affordance should render.
  *
- * Two distinct paths share this hook:
- *  - an explicit `?from=<origin>` resolves a back target via the pure
- *    resolver and yields a plain `navigate` (no draft to discard);
- *  - the legacy in-picker fallback (`scratch`/`import` with no origin)
- *    stays discard-aware so an unsaved draft prompts confirmation.
+ * An explicit `?from=<origin>` resolves the target via the pure resolver;
+ * without one, `scratch`/`import` fall back to the picker. A new-workout
+ * draft is discard-aware (an unsaved draft prompts confirmation) unless it
+ * is a library template loaded into the editor: the library keeps it.
  *
  * Edit-mode (`?id`) with an origin now yields a back button (#19);
  * edit-mode with no origin still yields `null`. In edit mode `detailId`
@@ -50,7 +49,7 @@ export function useBackHandler(
     : isInPicker
       ? buildPickerHref(dateParam)
       : null;
-  const isDiscardAware = isInPicker && !origin;
+  const isDiscardAware = isInPicker && origin !== "library";
 
   const onAfterConfirm = useCallback(() => {
     if (backTarget) navigate(backTarget);

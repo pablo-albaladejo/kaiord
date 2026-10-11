@@ -37,7 +37,7 @@ export function SaveToLibraryDialog({
     setNotes,
     isSaving,
     handleSave,
-  } = useSaveToLibrary(workout, () => onOpenChange(false));
+  } = useSaveToLibrary(workout, () => onOpenChange(false), open);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

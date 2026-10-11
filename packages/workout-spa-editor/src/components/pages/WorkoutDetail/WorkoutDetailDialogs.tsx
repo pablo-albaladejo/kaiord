@@ -37,7 +37,7 @@ export function WorkoutDetailDialogs(props: WorkoutDetailDialogsProps) {
         <ScheduleDateDialog
           open
           templateName={props.title}
-          initialDate={record.date}
+          defaultDate={record.date}
           copy={{
             title: t("move.title"),
             description: t("move.description"),

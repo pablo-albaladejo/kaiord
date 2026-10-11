@@ -1,7 +1,7 @@
 /**
  * Reads the LibraryPage URL params (`?source=` + `?date=`) and returns
  * a short-circuit date when entered from the new-workout picker with a
- * valid ISO date. Pairs with `usePickerSchedule` in `LibraryPage` to
+ * real calendar date. Pairs with `usePickerSchedule` in `LibraryPage` to
  * bypass `ScheduleDateDialog` on a single template-card click.
  *
  * Invalid or absent `?date=`, or a different `?source=`, returns `null`
@@ -10,7 +10,8 @@
 
 import { useSearch } from "wouter";
 
-const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+import { isValidCalendarDate } from "../../utils/is-valid-calendar-date";
+
 const TEMPLATE_PICKER_SOURCE = "template-picker";
 
 export function useLibraryShortCircuitDate(): string | null {
@@ -19,6 +20,6 @@ export function useLibraryShortCircuitDate(): string | null {
   const source = params.get("source");
   const dateParam = params.get("date");
   if (source !== TEMPLATE_PICKER_SOURCE) return null;
-  if (dateParam === null || !ISO_DATE_REGEX.test(dateParam)) return null;
+  if (dateParam === null || !isValidCalendarDate(dateParam)) return null;
   return dateParam;
 }
