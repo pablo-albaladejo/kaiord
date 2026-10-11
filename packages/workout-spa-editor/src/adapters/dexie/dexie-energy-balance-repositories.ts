@@ -1,8 +1,7 @@
 /**
  * Dexie implementations of the energy-balance repositories (v25 stores
- * `intakeEntries`, `intakePresets`, `energyTargets`). All three are
- * device-local PII (excluded from the cloud snapshot) and per-profile, so
- * each exposes `deleteByProfile` for the profile-delete cascade.
+ * `intakeEntries`, `intakePresets`, `energyTargets`), synced and per-profile,
+ * so each exposes `deleteByProfile` for the profile-delete cascade.
  */
 import type {
   EnergyBalanceRepositories,
@@ -22,9 +21,15 @@ const entriesOfProfile = (db: KaiordDatabase, profileId: string) =>
     .where("[profileId+date]")
     .between([profileId, ""], [profileId, "\uffff"]);
 
+const presetsOfProfile = (db: KaiordDatabase, profileId: string) =>
+  db.table("intakePresets").where("profileId").equals(profileId);
+
 const createIntakeEntryRepository = (
   db: KaiordDatabase
 ): IntakeEntryRepository => ({
+  getById: async (id) =>
+    (await db.table("intakeEntries").get(id)) as IntakeEntryRecord | undefined,
+
   getByProfileAndDate: async (profileId, date) =>
     (await db
       .table("intakeEntries")
@@ -51,12 +56,11 @@ const createIntakeEntryRepository = (
 const createIntakePresetRepository = (
   db: KaiordDatabase
 ): IntakePresetRepository => ({
+  getById: async (id) =>
+    (await db.table("intakePresets").get(id)) as IntakePresetRecord | undefined,
+
   getByProfile: async (profileId) =>
-    (await db
-      .table("intakePresets")
-      .where("profileId")
-      .equals(profileId)
-      .toArray()) as IntakePresetRecord[],
+    (await presetsOfProfile(db, profileId).toArray()) as IntakePresetRecord[],
 
   put: async (record) => {
     await db.table("intakePresets").put(record);
@@ -67,11 +71,7 @@ const createIntakePresetRepository = (
   },
 
   deleteByProfile: async (profileId) => {
-    await db
-      .table("intakePresets")
-      .where("profileId")
-      .equals(profileId)
-      .delete();
+    await presetsOfProfile(db, profileId).delete();
   },
 });
 

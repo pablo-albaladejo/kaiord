@@ -110,6 +110,16 @@ async function deleteWorkout(page: Page, id: string) {
     .toContain(id);
 }
 
+async function deleteIntake(page: Page) {
+  await open(page, "/nutrition");
+  const row = page.getByTestId("intake-entry-row");
+  await row.getByRole("button", { name: "Delete entry" }).click();
+  await expect(row).toHaveCount(0);
+  await expect
+    .poll(async () => (await readTable(page, "tombstones")).map((t) => t.table))
+    .toContain("intakeEntries");
+}
+
 test.describe("Import backup", () => {
   test("should restore a backup from one clean browser into another", async ({
     page,
@@ -196,5 +206,25 @@ test.describe("Import backup", () => {
     );
     await open(page, "/calendar");
     await expect(page.getByTestId(`workout-card-${id}`)).toHaveCount(0);
+  });
+
+  test("should keep an intake deleted after the backup deleted", async ({
+    page,
+  }) => {
+    // Arrange
+    await page.goto("/calendar");
+    await waitForDexieReady(page);
+    await logIntake(page, KCAL_A);
+    const file = await exportData(page);
+    await deleteIntake(page);
+
+    // Act
+    const summary = await importData(page, file);
+
+    // Assert
+    expect(summary).toContain("1 deleted after the backup (not restored)");
+    expect(await readTable(page, "intakeEntries")).toEqual([]);
+    await open(page, "/nutrition");
+    await expect(page.getByTestId("intake-entry-row")).toHaveCount(0);
   });
 });

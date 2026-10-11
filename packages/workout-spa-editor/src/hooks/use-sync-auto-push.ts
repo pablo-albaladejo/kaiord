@@ -20,14 +20,17 @@ import { buildChangeToken, type TableSignal } from "./sync-change-token";
 import { useAutoPush } from "./use-auto-push";
 
 // [table, indexed timestamp column]. workouts/templates/profiles index
-// `updatedAt` (Dexie v23); aiProviders has an indexed numeric `createdAt`
-// (insertion order) and tombstones an indexed `deletedAt`.
+// `updatedAt` (Dexie v23), the nutrition stores since v37; aiProviders has an
+// indexed numeric `createdAt` (insertion order), tombstones `deletedAt`.
 const SYNCED_TABLES: ReadonlyArray<readonly [string, string]> = [
   ["workouts", "updatedAt"],
   ["templates", "updatedAt"],
   ["profiles", "updatedAt"],
   ["aiProviders", "createdAt"],
   ["tombstones", "deletedAt"],
+  ["intakeEntries", "updatedAt"],
+  ["intakePresets", "updatedAt"],
+  ["energyTargets", "updatedAt"],
 ];
 
 // Real tokens always contain ":", so an empty string is a safe sentinel for

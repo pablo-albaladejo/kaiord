@@ -1,10 +1,11 @@
 /**
  * IntakePresetRecord — a reusable quick-log intake preset.
  *
- * Stored in the device-local `intakePresets` Dexie table (v25), keyed on a
- * nanoid `id` with a `profileId` index for the per-profile preset list.
- * Applying a preset creates an `IntakeEntryRecord` from its values. PII;
- * excluded from the cloud snapshot.
+ * Stored in the `intakePresets` Dexie table (v26), keyed on a nanoid `id`
+ * with a `profileId` index for the per-profile preset list. Applying a preset
+ * creates an `IntakeEntryRecord` from its values. It rides the cloud
+ * snapshot; `updatedAt` is its last-write-wins clock (v37 backfilled it from
+ * `createdAt`).
  */
 
 import { mealSlotSchema } from "@kaiord/core";
@@ -23,6 +24,7 @@ export const intakePresetRecordSchema = z
     fatG: nonNegative,
     defaultMealSlot: mealSlotSchema.optional(),
     createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 

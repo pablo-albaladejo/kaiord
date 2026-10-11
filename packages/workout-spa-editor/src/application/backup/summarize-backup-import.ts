@@ -17,10 +17,7 @@ export type BackupImportCounts = {
   notRestored: number;
 };
 
-export type BackupImportSummary = BackupImportCounts & {
-  /** Nutrition has no delete markers yet: rows deleted after the backup return. */
-  nutritionMayReappear: boolean;
-};
+export type BackupImportSummary = BackupImportCounts;
 
 const byKey = (table: string, rows: ReadonlyArray<unknown> = []) =>
   new Map((rows as Row[]).map((row) => [rowMergeKey(table, row), row]));

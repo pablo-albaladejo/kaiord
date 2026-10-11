@@ -90,7 +90,7 @@
     "reset": "Reset"
   },
   "sync": {
-    "description": "Sync your workouts and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved.",
+    "description": "Sync your workouts, health and nutrition data (intake log, presets and goal) and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved. If two devices each hold a nutrition goal for the same profile, the most recently saved one is kept.",
     "syncNow": "Sync now",
     "disconnect": "Disconnect",
     "connect": "Connect Google account",
@@ -130,7 +130,6 @@
     "importChooseProfile": "This backup holds several profiles. Which one should this browser's data join?",
     "importConfirm": "Import",
     "importSummary": "Backup imported: {{added}} added, {{updated}} updated, {{notRestored}} deleted after the backup (not restored).",
-    "importNutritionWarning": "Nutrition entries and presets you deleted after this backup may have come back.",
     "importInvalid": "This file is not a Kaiord backup.",
     "importNewerApp": "This backup was made by a newer version of Kaiord. Update the app and try again.",
     "importFailed": "Could not import the backup — please retry.",

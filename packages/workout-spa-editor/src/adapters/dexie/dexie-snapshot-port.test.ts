@@ -21,14 +21,14 @@ const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 const PASSPHRASE = "kaiord-spa-v1";
 // Current head version KaiordDatabase opens at; v24 added the device-local
 // `connections` store (excluded from the snapshot), v25 added chatConversations
-// + the conversationId FK, v26 added the device-local energy-balance stores
-// (`intakeEntries`, `intakePresets`, `energyTargets`), also excluded, v31 added
+// + the conversationId FK, v26 added the energy-balance stores
+// (`intakeEntries`, `intakePresets`, `energyTargets`; included since v37), v31 added
 // the lab-analytics stores (`labReports`, `labValues`, included), v33 dropped
 // the legacy `usage` store, making `usageEvents` the synced usage source, v34
 // added the healthStrain + healthVitals stores (included), v35 added the
-// healthHeartRateSeries store (included), and v36 normalized Garmin ledger rows
-// (no store change).
-const SCHEMA_HEAD = 36;
+// healthHeartRateSeries store (included), v36 normalized Garmin ledger rows
+// (no store change), and v37 backfilled the nutrition `updatedAt` sync clock.
+const SCHEMA_HEAD = 37;
 
 describe("createDexieSnapshotPort", () => {
   let name: string;
@@ -67,44 +67,6 @@ describe("createDexieSnapshotPort", () => {
         status: "connected",
         mechanism: "api-key",
         updatedAt: "2026-06-19T00:00:00.000Z",
-      },
-    },
-    {
-      store: "intakeEntries",
-      row: {
-        id: "i-1",
-        profileId: "p-1",
-        date: "2026-06-21",
-        loggedAt: "2026-06-21T08:00:00.000Z",
-        kcal: 600,
-        proteinG: 40,
-        carbG: 60,
-        fatG: 20,
-      },
-    },
-    {
-      store: "intakePresets",
-      row: {
-        id: "pre-1",
-        profileId: "p-1",
-        label: "breakfast",
-        kcal: 400,
-        proteinG: 20,
-        carbG: 50,
-        fatG: 10,
-        createdAt: "2026-06-21T08:00:00.000Z",
-      },
-    },
-    {
-      store: "energyTargets",
-      row: {
-        profileId: "p-1",
-        goalType: "fat_loss",
-        startWeightKg: 80,
-        targetWeightKg: 75,
-        targetDate: "2026-09-01",
-        createdAt: "2026-06-21T08:00:00.000Z",
-        updatedAt: "2026-06-21T08:00:00.000Z",
       },
     },
   ])(
@@ -160,6 +122,46 @@ describe("createDexieSnapshotPort", () => {
         title: "Cycling",
         createdAt: "2026-06-13T10:00:00.000Z",
         updatedAt: "2026-06-13T10:00:00.000Z",
+      },
+    },
+    {
+      store: "intakeEntries",
+      row: {
+        id: "i-1",
+        profileId: "p-1",
+        date: "2026-06-21",
+        loggedAt: "2026-06-21T08:00:00.000Z",
+        updatedAt: "2026-06-21T08:00:00.000Z",
+        kcal: 600,
+        proteinG: 40,
+        carbG: 60,
+        fatG: 20,
+      },
+    },
+    {
+      store: "intakePresets",
+      row: {
+        id: "pre-1",
+        profileId: "p-1",
+        label: "breakfast",
+        kcal: 400,
+        proteinG: 20,
+        carbG: 50,
+        fatG: 10,
+        createdAt: "2026-06-21T08:00:00.000Z",
+        updatedAt: "2026-06-21T08:00:00.000Z",
+      },
+    },
+    {
+      store: "energyTargets",
+      row: {
+        profileId: "p-1",
+        goalType: "fat_loss",
+        startWeightKg: 80,
+        targetWeightKg: 75,
+        targetDate: "2026-09-01",
+        createdAt: "2026-06-21T08:00:00.000Z",
+        updatedAt: "2026-06-21T08:00:00.000Z",
       },
     },
   ])(

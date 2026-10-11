@@ -14,6 +14,7 @@ import { parseBackup } from "../../application/backup/parse-backup";
 import { createProfile } from "../../application/profile/create-profile";
 import { ensureDefaultProfile } from "../../application/profile/ensure-default-profile";
 import type { SnapshotPort } from "../../ports/snapshot-port";
+import { BACKUP_FORMAT } from "../../types/backup";
 import { createAppPersistence } from "../create-app-persistence";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
@@ -36,6 +37,7 @@ const intake = (id: string, profileId: string) => ({
   profileId,
   date: "2026-10-09",
   loggedAt: "2026-10-09T08:00:00.000Z",
+  updatedAt: "2026-10-09T08:00:00.000Z",
   kcal: 437,
   proteinG: 30,
   carbG: 50,
@@ -43,7 +45,7 @@ const intake = (id: string, profileId: string) => ({
 });
 
 /** Device B: a real profile with a workout, an intake and a keyed provider. */
-const backupFromB = async (): Promise<{ file: string; target: string }> => {
+const backupFromB = async () => {
   const b = await open("b");
   const { id } = await createProfile(b.persistence, "Ana");
   await b.db.table("workouts").put({
@@ -62,10 +64,9 @@ const backupFromB = async (): Promise<{ file: string; target: string }> => {
   });
   const backup = await exportBackup({
     port: b.snapshotPort,
-    nutrition: b.persistence,
     deviceId: "dev-b",
   });
-  return { file: JSON.stringify(backup), target: id };
+  return { ...b, file: JSON.stringify(backup), target: id };
 };
 
 /** Device A: a clean browser whose default profile already holds a row. */
@@ -155,5 +156,46 @@ describe("backup round trip", () => {
     // Assert
     await expect(attempt).rejects.toThrow("device-local write failed");
     expect(await dump(a.db)).toEqual(before);
+  });
+
+  it("should keep an intake deleted after the backup deleted when that backup is imported", async () => {
+    // Arrange
+    const b = await backupFromB();
+    await b.persistence.intakeEntries.delete("i-b");
+
+    // Act
+    const result = await runImport(b.snapshotPort, b.file);
+
+    // Assert
+    expect(await b.db.table("intakeEntries").get("i-b")).toBeUndefined();
+    expect(
+      await b.db.table("tombstones").get(["intakeEntries", "i-b"])
+    ).toEqual(expect.objectContaining({ table: "intakeEntries", id: "i-b" }));
+    expect(result).toMatchObject({ summary: { notRestored: 1 } });
+  });
+
+  it("should keep an intake deleted after a version 1 backup deleted when that backup is imported", async () => {
+    // Arrange
+    const b = await backupFromB();
+    const legacyEntry: Record<string, unknown> = intake("i-b", b.target);
+    delete legacyEntry.updatedAt;
+    const legacy = JSON.stringify({
+      ...JSON.parse(b.file),
+      format: BACKUP_FORMAT,
+      version: 1,
+      tables: { profiles: JSON.parse(b.file).tables.profiles },
+      nutrition: {
+        intakeEntries: [legacyEntry],
+        intakePresets: [],
+        energyTargets: [],
+      },
+    });
+    await b.persistence.intakeEntries.delete("i-b");
+
+    // Act
+    await runImport(b.snapshotPort, legacy);
+
+    // Assert
+    expect(await b.db.table("intakeEntries").get("i-b")).toBeUndefined();
   });
 });

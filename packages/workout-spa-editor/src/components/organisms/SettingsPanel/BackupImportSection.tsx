@@ -51,20 +51,13 @@ export const BackupImportSection: React.FC = () => {
         />
       )}
       {state.kind === "done" && (
-        <div role="status" className="mt-2 space-y-1 text-sm text-ink-body">
-          <p>
-            {t("privacy.importSummary", {
-              added: state.summary.added,
-              updated: state.summary.updated,
-              notRestored: state.summary.notRestored,
-            })}
-          </p>
-          {state.summary.nutritionMayReappear && (
-            <p className="text-xs text-ink-muted">
-              {t("privacy.importNutritionWarning")}
-            </p>
-          )}
-        </div>
+        <p role="status" className="mt-2 text-sm text-ink-body">
+          {t("privacy.importSummary", {
+            added: state.summary.added,
+            updated: state.summary.updated,
+            notRestored: state.summary.notRestored,
+          })}
+        </p>
       )}
       {state.kind === "error" && (
         <p role="alert" className="mt-2 text-sm text-danger-text">

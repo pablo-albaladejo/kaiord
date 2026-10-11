@@ -12,6 +12,7 @@ const VALID = {
   fatG: 10,
   defaultMealSlot: "breakfast" as const,
   createdAt: "2026-06-21T08:00:00.000Z",
+  updatedAt: "2026-06-21T08:00:00.000Z",
 };
 
 describe("intakePresetRecordSchema", () => {
@@ -26,6 +27,18 @@ describe("intakePresetRecordSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("should reject a preset without the updatedAt sync clock", () => {
+    // Arrange
+    const input: Record<string, unknown> = { ...VALID };
+    delete input.updatedAt;
+
+    // Act
+    const result = intakePresetRecordSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(false);
+  });
+
   it("should accept a preset without a default meal slot", () => {
     // Arrange
     const input = {
@@ -37,6 +50,7 @@ describe("intakePresetRecordSchema", () => {
       carbG: VALID.carbG,
       fatG: VALID.fatG,
       createdAt: VALID.createdAt,
+      updatedAt: VALID.updatedAt,
     };
 
     // Act

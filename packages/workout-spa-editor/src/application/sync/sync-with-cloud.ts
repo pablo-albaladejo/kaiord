@@ -4,6 +4,7 @@
  * A pure application use case: pulls the remote snapshot, exports the
  * local one, merges them last-write-wins (`mergeSnapshots`), reconciles the
  * unclaimed default profile against the remote (`reconcileAutoProfile`),
+ * drops the rows of explicitly deleted profiles (`dropDeletedProfileRows`),
  * imports the result locally, then pushes it back under optimistic
  * concurrency. When the remote holds several real profiles and the user has
  * not picked one, the attempt stops before importing or pushing and reports
@@ -17,6 +18,7 @@ import type { CloudSyncPort } from "../../ports/cloud-sync-port";
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import type { Snapshot } from "../../types/snapshot";
 import { isAutoProfile } from "../profile/helpers/claim-profile";
+import { dropDeletedProfileRows } from "./drop-deleted-profile-rows";
 import { exportSnapshot } from "./export-snapshot";
 import { importReconciledSnapshot } from "./import-reconciled-snapshot";
 import { mergeSnapshots } from "./merge-snapshots";
@@ -62,20 +64,23 @@ async function attempt(deps: SyncWithCloudDeps): Promise<SyncWithCloudResult> {
   const merged: Snapshot = remote
     ? mergeSnapshots(local, remote.snapshot)
     : local;
+  const perProfile = snapshotPort.perProfileTables();
   const reconciled = reconcileAutoProfile(
     merged,
     remote?.snapshot ?? null,
-    snapshotPort.perProfileTables(),
+    perProfile,
     { choice: storedChoice(local), now }
   );
   if (reconciled.kind === "needsChoice")
     return { revision: null, needsChoice: reconciled.candidates };
-  const { snapshot, deviceLocalRekey } = reconciled;
+  const { deviceLocalRekey } = reconciled;
+  const snapshot = dropDeletedProfileRows(reconciled.snapshot, perProfile);
   assertNoAutoProfile(snapshot);
   await importReconciledSnapshot({
     port: snapshotPort,
     snapshot,
     deviceLocalRekey,
+    exported: local.tables,
     now,
   });
   const revision = await cloud.push(snapshot, remote?.headRevisionId ?? null);

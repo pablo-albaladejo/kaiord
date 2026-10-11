@@ -85,13 +85,13 @@ test.describe("Export my data", () => {
     for (const needle of ["apiKey", FAKE_KEY, "syncState", '"origin":"auto"'])
       expect(body).not.toContain(needle);
     const backup = JSON.parse(body);
-    expect(backup).toMatchObject({ format: "kaiord-backup", version: 1 });
+    expect(backup).toMatchObject({ format: "kaiord-backup", version: 2 });
     expect(backup.tables.workouts.map((w: Row) => w.id)).toContain(workoutId);
     expect(backup.tables.healthWeight).toHaveLength(1);
     expect(backup.tables.aiProviders).toEqual([
       expect.objectContaining({ label: "E2E provider" }),
     ]);
-    expect(backup.nutrition.intakeEntries).toEqual([
+    expect(backup.tables.intakeEntries).toEqual([
       expect.objectContaining({ kcal: INTAKE_KCAL }),
     ]);
     expect(backup.tables.profiles).toEqual([

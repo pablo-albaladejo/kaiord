@@ -99,6 +99,9 @@ describe("default profile on Dexie", () => {
     const from = auto?.id ?? "";
     await db.table("workouts").put({ id: "w-1", profileId: from });
     await db.table("intakeEntries").put({ id: "i-1", profileId: from });
+    await db
+      .table("connections")
+      .put({ profileId: from, providerId: "intervals", status: "connected" });
     const rekey = { from: [from], to: "22222222-2222-4222-8222-222222222222" };
     const local = await exportSnapshot({ port, deviceId: "dev-a" });
     const snapshot = rekeySnapshot(local, rekey, port.perProfileTables());
@@ -127,6 +130,9 @@ describe("default profile on Dexie", () => {
     expect(await db.table("intakeEntries").get("i-1")).toMatchObject({
       profileId: from,
     });
+    expect(await db.table("connections").toArray()).toEqual([
+      expect.objectContaining({ profileId: from }),
+    ]);
     expect(await db.table("profiles").get(from)).toBeDefined();
     db.close();
   });

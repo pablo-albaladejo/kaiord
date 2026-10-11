@@ -31,7 +31,7 @@ describe("applyBackupTablePolicy", () => {
     expect(tables).toEqual({});
   });
 
-  it("should drop the nutrition tables, which travel through their repositories", () => {
+  it("should keep the nutrition tables, which ride the snapshot", () => {
     // Arrange
     const input = {
       intakeEntries: [{ id: "i-1" }],
@@ -43,7 +43,7 @@ describe("applyBackupTablePolicy", () => {
     const tables = applyBackupTablePolicy(input);
 
     // Assert
-    expect(tables).toEqual({});
+    expect(tables).toEqual(input);
   });
 
   it("should drop a table the policy does not classify", () => {

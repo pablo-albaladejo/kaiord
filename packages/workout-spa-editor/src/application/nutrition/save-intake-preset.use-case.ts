@@ -2,8 +2,9 @@
  * saveIntakePreset — persists a reusable quick-log intake preset.
  *
  * Validates against `intakePresetRecordSchema` (non-negative energy + macros,
- * non-empty label), mints a fresh id, and stamps `createdAt` from the injected
- * clock. Returns the stored record, or `undefined` on validation failure.
+ * non-empty label), mints a fresh id, and stamps `createdAt` and the
+ * `updatedAt` sync clock from the injected clock. Returns the stored
+ * record, or `undefined` on validation failure.
  */
 import type { MealSlot } from "@kaiord/core";
 
@@ -33,6 +34,7 @@ export const saveIntakePreset = async (
   deps: SaveIntakePresetDeps,
   input: SaveIntakePresetInput
 ): Promise<IntakePresetRecord | undefined> => {
+  const now = deps.now?.() ?? new Date().toISOString();
   const candidate = {
     id: deps.newId?.() ?? crypto.randomUUID(),
     profileId: deps.profileId,
@@ -42,7 +44,8 @@ export const saveIntakePreset = async (
     carbG: input.carbG,
     fatG: input.fatG,
     defaultMealSlot: input.defaultMealSlot,
-    createdAt: deps.now?.() ?? new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
   };
   const parsed = intakePresetRecordSchema.safeParse(candidate);
   if (!parsed.success) return undefined;

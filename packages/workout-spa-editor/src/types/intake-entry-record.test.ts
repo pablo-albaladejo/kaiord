@@ -7,6 +7,7 @@ const VALID = {
   profileId: "p-1",
   date: "2026-06-21",
   loggedAt: "2026-06-21T08:00:00.000Z",
+  updatedAt: "2026-06-21T08:00:00.000Z",
   label: "Lunch",
   mealSlot: "lunch" as const,
   kcal: 600,
@@ -34,6 +35,7 @@ describe("intakeEntryRecordSchema", () => {
       profileId: VALID.profileId,
       date: VALID.date,
       loggedAt: VALID.loggedAt,
+      updatedAt: VALID.updatedAt,
       kcal: VALID.kcal,
       proteinG: VALID.proteinG,
       carbG: VALID.carbG,
@@ -45,6 +47,18 @@ describe("intakeEntryRecordSchema", () => {
 
     // Assert
     expect(result.success).toBe(true);
+  });
+
+  it("should reject an entry without the updatedAt sync clock", () => {
+    // Arrange
+    const input: Record<string, unknown> = { ...VALID };
+    delete input.updatedAt;
+
+    // Act
+    const result = intakeEntryRecordSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(false);
   });
 
   it("should reject a negative kcal value", () => {

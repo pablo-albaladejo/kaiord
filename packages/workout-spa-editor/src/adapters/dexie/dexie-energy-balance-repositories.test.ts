@@ -1,6 +1,6 @@
 /**
  * Dexie energy-balance repositories — exercised against a real (fake-indexeddb)
- * Dexie instance at head schema (v25), focusing on the per-profile reads and
+ * Dexie instance at head schema, focusing on the per-profile reads and
  * the cascade `deleteByProfile` range-delete on the compound intake index.
  */
 import "fake-indexeddb/auto";
@@ -20,6 +20,7 @@ const entry = (id: string, profileId: string, date: string) => ({
   profileId,
   date,
   loggedAt: "2026-06-21T08:00:00.000Z",
+  updatedAt: "2026-06-21T08:00:00.000Z",
   kcal: 500,
   proteinG: 30,
   carbG: 50,
@@ -123,6 +124,7 @@ describe("createDexieEnergyBalanceRepositories", () => {
       carbG: 40,
       fatG: 10,
       createdAt: "2026-06-21T08:00:00.000Z",
+      updatedAt: "2026-06-21T08:00:00.000Z",
     };
     await repos.intakePresets.put(preset);
     await repos.intakePresets.put({ ...preset, id: "pre-2", profileId: "p-2" });
@@ -132,5 +134,43 @@ describe("createDexieEnergyBalanceRepositories", () => {
 
     // Assert
     expect(rows.map((r) => r.id)).toEqual(["pre-1"]);
+  });
+
+  it("should read one intake entry by id and miss an unknown one", async () => {
+    // Arrange
+    const repos = createDexieEnergyBalanceRepositories(db);
+    await repos.intakeEntries.put(entry("i-1", "p-1", "2026-06-21"));
+
+    // Act
+    const found = await repos.intakeEntries.getById("i-1");
+    const missing = await repos.intakeEntries.getById("nope");
+
+    // Assert
+    expect(found?.id).toBe("i-1");
+    expect(missing).toBeUndefined();
+  });
+
+  it("should read one intake preset by id and miss an unknown one", async () => {
+    // Arrange
+    const repos = createDexieEnergyBalanceRepositories(db);
+    await repos.intakePresets.put({
+      id: "pre-1",
+      profileId: "p-1",
+      label: "breakfast",
+      kcal: 400,
+      proteinG: 20,
+      carbG: 40,
+      fatG: 10,
+      createdAt: "2026-06-21T08:00:00.000Z",
+      updatedAt: "2026-06-21T08:00:00.000Z",
+    });
+
+    // Act
+    const found = await repos.intakePresets.getById("pre-1");
+    const missing = await repos.intakePresets.getById("nope");
+
+    // Assert
+    expect(found?.id).toBe("pre-1");
+    expect(missing).toBeUndefined();
   });
 });

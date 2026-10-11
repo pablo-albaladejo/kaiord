@@ -6,7 +6,6 @@
  *
  * - `include`: the snapshot rows, as they are.
  * - `exclude`: never in the file (secrets, integration cursors, device state).
- * - `repository`: read through its repository, outside the snapshot tables.
  * - a function: the snapshot rows, rewritten row by row.
  */
 
@@ -15,8 +14,7 @@ import { isAutoProfile } from "../profile/helpers/claim-profile";
 
 type Row = Record<string, unknown>;
 
-export type BackupTableRule =
-  "include" | "exclude" | "repository" | ((row: Row) => Row);
+export type BackupTableRule = "include" | "exclude" | ((row: Row) => Row);
 
 // The key is encrypted with a passphrase shipped in the bundle, so a file
 // holding it would hold the key. The rest of the provider config is kept.
@@ -41,7 +39,7 @@ export const BACKUP_TABLE_POLICY: Readonly<Record<string, BackupTableRule>> = {
   coachingSyncState: "exclude", // integration cursor: restoring it skips syncs
   connections: "exclude", // bridge linkage and credentials of this device
   dataTypeSourcePolicy: "include",
-  energyTargets: "repository",
+  energyTargets: "include",
   exportLedger: "include",
   healthBodyComposition: "include",
   healthDaily: "include",
@@ -52,8 +50,8 @@ export const BACKUP_TABLE_POLICY: Readonly<Record<string, BackupTableRule>> = {
   healthStress: "include",
   healthVitals: "include",
   healthWeight: "include",
-  intakeEntries: "repository",
-  intakePresets: "repository",
+  intakeEntries: "include",
+  intakePresets: "include",
   integrationPolicies: "include",
   labReports: "include",
   labValues: "include",

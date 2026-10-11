@@ -12,8 +12,9 @@ Defines the body-composition goal engine: a deficit/surplus daily kcal delta der
 
 The system SHALL let a user define an energy goal with a `goalType`
 (`fat_loss` | `muscle_gain` | `maintain`), a `startWeightKg`, a `targetWeightKg`,
-and a `targetDate`. The goal SHALL be persisted device-locally per profile and
-excluded from the cloud snapshot.
+and a `targetDate`. The goal SHALL be persisted per profile and SHALL travel in
+the cloud snapshot; when two devices hold a goal for the same profile, the one
+with the newest `updatedAt` SHALL be kept.
 
 #### Scenario: Defining a fat-loss goal
 

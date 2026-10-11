@@ -21,7 +21,8 @@
  */
 
 import type { LiveRowMerge } from "../../ports/snapshot-port";
-import type { Tombstone } from "../../types/snapshot";
+import type { SnapshotTables, Tombstone } from "../../types/snapshot";
+import { mergePostExportWrites } from "./live-post-export-merge";
 import {
   mergeRow,
   rowClock,
@@ -70,14 +71,26 @@ export function mergeTableRows(
 /**
  * Build the `SnapshotPort.importTables` live merge: tables with a hook merge
  * their live rows with the incoming snapshot rows, so a live row absent from
- * the snapshot is kept unless one of `tombstones` deletes it. Tables without
- * a hook get `undefined` and are replaced wholesale.
+ * the snapshot is kept unless one of `tombstones` deletes it. Given the rows
+ * the sync `exported`, every other table keeps the live rows written since
+ * that read (`mergePostExportWrites`); without it they are replaced wholesale.
  */
 export const createLiveRowMerge =
-  (tombstones: ReadonlyArray<Tombstone>): LiveRowMerge =>
+  (
+    tombstones: ReadonlyArray<Tombstone>,
+    exported?: SnapshotTables
+  ): LiveRowMerge =>
   (table) => {
-    if (rowMergeHookFor(table) === undefined) return undefined;
     const deletes = tombstoneClocks(tombstones);
+    if (rowMergeHookFor(table) === undefined) {
+      if (!exported) return undefined;
+      const merge = mergePostExportWrites(
+        table,
+        (exported[table] ?? []) as Row[],
+        deletes
+      );
+      return (live, incoming) => merge(live as Row[], incoming as Row[]);
+    }
     return (live, incoming) =>
       mergeTableRows(table, [...live, ...incoming] as Row[], deletes);
   };

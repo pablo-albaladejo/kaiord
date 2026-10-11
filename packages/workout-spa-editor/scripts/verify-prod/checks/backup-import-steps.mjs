@@ -43,6 +43,17 @@ export async function exportFile(session) {
   return download.path();
 }
 
+// Deletes the one logged intake through the nutrition page. The toast shows
+// once the delete (and its tombstone) has committed; nothing may reload first.
+export async function deleteIntake(session) {
+  const { page, go } = session;
+  await go("nutrition");
+  await page.getByRole("button", { name: "Eliminar entrada" }).first().click();
+  await page.getByText("Entrada eliminada", { exact: true }).waitFor({
+    timeout: TIMEOUT,
+  });
+}
+
 // Imports `file` and returns the summary the page shows once the import has
 // written: nothing may reload before it appears (#1335).
 export async function importFile(session, file) {

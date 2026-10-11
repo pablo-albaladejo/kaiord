@@ -3,6 +3,7 @@ import { expect } from "@playwright/test";
 import { isoDate, mainText, TIMEOUT } from "../browser.mjs";
 import { expectOk } from "../steps.mjs";
 import {
+  deleteIntake,
   exportFile,
   IMPORT_CONTROL,
   importFile,
@@ -13,7 +14,7 @@ import { INTAKE_KCAL, seed } from "./export-seed.mjs";
 import { deleteOnce } from "./scheduled-lifecycle-steps.mjs";
 
 const NOT_RESTORED =
-  /1 borrados? después de la copia|1 deleted after the backup/;
+  /2 borrados después de la copia|2 deleted after the backup/;
 
 async function assertRestored(rec, target, workoutName) {
   const profiles = await readStore(target.page, "profiles");
@@ -46,22 +47,24 @@ async function assertRestored(rec, target, workoutName) {
 
 async function deleteThenImport(rec, source, file, id) {
   await deleteOnce(source.page, source.go, id);
+  await deleteIntake(source);
   const summary = await importFile(source, file);
   rec.assert(
     NOT_RESTORED.test(summary),
-    "the summary counts the workout deleted after the backup",
+    "the summary counts the workout and the intake deleted after the backup",
     summary
   );
   const workouts = await readStore(source.page, "workouts");
+  const intakes = await readStore(source.page, "intakeEntries");
   rec.assert(
-    !workouts.some((w) => w.id === id),
-    "a workout deleted after the backup stays deleted",
-    `ids=${workouts.map((w) => w.id).join(",")}`
+    !workouts.some((w) => w.id === id) && intakes.length === 0,
+    "a workout and an intake deleted after the backup stay deleted",
+    `ids=${workouts.map((w) => w.id).join(",")} intakes=${intakes.length}`
   );
 }
 
 // F-41 (import half): a backup file restores into a clean browser, and a
-// delete made after the backup survives importing it.
+// workout and an intake deleted after the backup stay deleted on import.
 export default async function backupImport({ rec, open }) {
   const target = await open();
   const control = await findDataControl(target.page, target.go, IMPORT_CONTROL);

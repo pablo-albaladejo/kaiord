@@ -12,11 +12,17 @@ const LOCAL_KCAL = 900;
 const NOW = new Date("2026-10-11T09:00:00.000Z");
 const BACKUP_AT = "2026-10-10T08:00:00.000Z";
 
-const intake = (id: string, profileId: string, kcal = 500) => ({
+const intake = (
+  id: string,
+  profileId: string,
+  kcal = 500,
+  updatedAt = "2026-10-09T08:00:00.000Z"
+) => ({
   id,
   profileId,
   date: "2026-10-09",
   loggedAt: "2026-10-09T08:00:00.000Z",
+  updatedAt,
   kcal,
   proteinG: 30,
   carbG: 50,
@@ -35,7 +41,7 @@ const backupOf = (
   extra: Partial<KaiordBackup> = {}
 ): KaiordBackup => ({
   format: "kaiord-backup",
-  version: 1,
+  version: 2,
   manifest: {
     schemaVersion: 40,
     deviceId: "dev-b",
@@ -44,7 +50,6 @@ const backupOf = (
   },
   tables,
   tombstones: [],
-  nutrition: { intakeEntries: [], intakePresets: [], energyTargets: [] },
   ...extra,
 });
 
@@ -78,26 +83,19 @@ const freshDevice = () =>
     {
       profiles: [auto],
       workouts: [workout("w-auto", "p-auto", "2026-10-11T07:00:00.000Z")],
+      intakeEntries: [intake("i-auto", "p-auto")],
       meta: [{ key: "activeProfileId", value: "p-auto" }],
     },
-    { intakeEntries: [intake("i-auto", "p-auto")] }
+    { connections: [{ profileId: "p-auto", providerId: "whoop" }] }
   );
 
 const anaBackup = () =>
-  backupOf(
-    {
-      profiles: [ana],
-      workouts: [workout("w-1", "p-ana", BACKUP_AT)],
-      meta: [{ key: "activeProfileId", value: "p-ana" }],
-    },
-    {
-      nutrition: {
-        intakeEntries: [intake("i-1", "p-ana")],
-        intakePresets: [],
-        energyTargets: [],
-      },
-    }
-  );
+  backupOf({
+    profiles: [ana],
+    workouts: [workout("w-1", "p-ana", BACKUP_AT)],
+    intakeEntries: [intake("i-1", "p-ana")],
+    meta: [{ key: "activeProfileId", value: "p-ana" }],
+  });
 
 describe("importBackup", () => {
   it("should fold a fresh device's default profile into the backup's single profile", async () => {
@@ -117,12 +115,15 @@ describe("importBackup", () => {
         expect.objectContaining({ id: "w-auto", profileId: "p-ana" }),
       ])
     );
-    expect(deviceLocal.intakeEntries).toEqual(
+    expect(tables.intakeEntries).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: "i-1", profileId: "p-ana" }),
         expect.objectContaining({ id: "i-auto", profileId: "p-ana" }),
       ])
     );
+    expect(deviceLocal.connections).toEqual([
+      { profileId: "p-ana", providerId: "whoop" },
+    ]);
     expect(tables.meta).toEqual([{ key: "activeProfileId", value: "p-ana" }]);
     expect(JSON.stringify(device.state)).not.toContain("p-auto");
   });
@@ -259,32 +260,62 @@ describe("importBackup", () => {
     expect(imported).not.toHaveProperty("apiKey");
   });
 
-  it("should bring back an intake deleted after the backup and warn about it", async () => {
+  it("should keep an intake deleted after the backup deleted and count it", async () => {
     // Arrange
-    const device = deviceWith({ profiles: [ana] }, { intakeEntries: [] });
+    const deleted: Tombstone = {
+      table: "intakeEntries",
+      id: "i-1",
+      deletedAt: "2026-10-11T06:00:00.000Z",
+    };
+    const device = deviceWith({ profiles: [ana], intakeEntries: [] }, {}, [
+      deleted,
+    ]);
 
     // Act
     const result = await run(device, anaBackup());
 
     // Assert
-    expect(device.state.deviceLocal.intakeEntries).toEqual([
-      intake("i-1", "p-ana"),
-    ]);
-    expect(result).toMatchObject({
-      summary: { added: 2, nutritionMayReappear: true },
+    expect(device.state.tables.intakeEntries).toEqual([]);
+    expect(device.state.tombstones).toEqual([deleted]);
+    expect(result).toEqual({
+      kind: "imported",
+      summary: { added: 1, updated: 0, notRestored: 1 },
     });
   });
 
-  it("should keep the local intake when the backup holds the same entry", async () => {
+  it("should keep the local intake when it is newer than the backup's copy", async () => {
     // Arrange
-    const local = intake("i-1", "p-ana", LOCAL_KCAL);
-    const device = deviceWith({ profiles: [ana] }, { intakeEntries: [local] });
+    const local = intake(
+      "i-1",
+      "p-ana",
+      LOCAL_KCAL,
+      "2026-10-11T07:00:00.000Z"
+    );
+    const device = deviceWith({ profiles: [ana], intakeEntries: [local] });
 
     // Act
     await run(device, anaBackup());
 
     // Assert
-    expect(device.state.deviceLocal.intakeEntries).toEqual([local]);
+    expect(device.state.tables.intakeEntries).toEqual([local]);
+  });
+
+  it("should restore the backup's intake when it is newer than the local copy", async () => {
+    // Arrange
+    const local = intake(
+      "i-1",
+      "p-ana",
+      LOCAL_KCAL,
+      "2026-10-01T07:00:00.000Z"
+    );
+    const device = deviceWith({ profiles: [ana], intakeEntries: [local] });
+
+    // Act
+    const result = await run(device, anaBackup());
+
+    // Assert
+    expect(device.state.tables.intakeEntries).toEqual([intake("i-1", "p-ana")]);
+    expect(result).toMatchObject({ summary: { updated: 1 } });
   });
 
   it("should ask which profile to join when the file has several, changing nothing", async () => {
@@ -323,8 +354,11 @@ describe("importBackup", () => {
     expect(tables.workouts).toEqual([
       expect.objectContaining({ id: "w-auto", profileId: "p-bea" }),
     ]);
-    expect(deviceLocal.intakeEntries).toEqual([
+    expect(tables.intakeEntries).toEqual([
       expect.objectContaining({ id: "i-auto", profileId: "p-bea" }),
+    ]);
+    expect(deviceLocal.connections).toEqual([
+      { profileId: "p-bea", providerId: "whoop" },
     ]);
     expect(tables.meta).toEqual([{ key: "activeProfileId", value: "p-bea" }]);
   });
@@ -374,7 +408,29 @@ describe("importBackup", () => {
 
     // Assert
     expect(device.state.tables.profiles).toEqual([]);
-    expect(device.state.deviceLocal.intakeEntries ?? []).toEqual([]);
+    expect(device.state.tables.intakeEntries ?? []).toEqual([]);
+  });
+
+  it("should not import the health rows of a profile deleted after the backup", async () => {
+    // Arrange
+    const gone: Tombstone = {
+      table: "profiles",
+      id: "p-ana",
+      deletedAt: "2026-10-11T06:00:00.000Z",
+    };
+    const device = deviceWith({ profiles: [] }, {}, [gone]);
+    const backup = backupOf({
+      profiles: [ana],
+      healthWeight: [{ id: "hw-1", profileId: "p-ana", updatedAt: BACKUP_AT }],
+      workouts: [workout("w-ana", "p-ana", BACKUP_AT)],
+    });
+
+    // Act
+    await run(device, backup);
+
+    // Assert
+    expect(device.state.tables.healthWeight ?? []).toEqual([]);
+    expect(device.state.tables.workouts ?? []).toEqual([]);
   });
 
   it("should keep the profile when a browser imports its own backup", async () => {
@@ -396,13 +452,13 @@ describe("importBackup", () => {
     expect(device.state.tables.workouts).toEqual([
       expect.objectContaining({ id: "w-auto", profileId: "p-auto" }),
     ]);
-    expect(device.state.deviceLocal.intakeEntries).toEqual([
+    expect(device.state.tables.intakeEntries).toEqual([
       expect.objectContaining({ id: "i-auto", profileId: "p-auto" }),
     ]);
     expect(result).toMatchObject({ summary: { added: 0, notRestored: 0 } });
   });
 
-  it("should keep one energy target per profile when merging the backup's", async () => {
+  it("should keep the newest energy target of each profile when merging the backup's", async () => {
     // Arrange
     const target = (profileId: string, updatedAt: string) => ({
       profileId,
@@ -415,28 +471,25 @@ describe("importBackup", () => {
     });
     const mine = { id: "p-mine", name: "Mine", origin: "local" };
     const ownTarget = target("p-mine", "2026-10-01T00:00:00.000Z");
-    const device = deviceWith(
-      { profiles: [mine] },
-      { energyTargets: [ownTarget] }
-    );
-    const backup = backupOf(
-      { profiles: [ana] },
-      {
-        nutrition: {
-          intakeEntries: [],
-          intakePresets: [],
-          energyTargets: [target("p-ana", BACKUP_AT)],
-        },
-      }
-    );
+    const device = deviceWith({
+      profiles: [mine, ana],
+      energyTargets: [ownTarget, target("p-ana", "2026-10-11T00:00:00.000Z")],
+    });
+    const backup = backupOf({
+      profiles: [mine, ana],
+      energyTargets: [
+        target("p-mine", BACKUP_AT),
+        target("p-ana", "2026-10-02T00:00:00.000Z"),
+      ],
+    });
 
     // Act
     await run(device, backup);
 
     // Assert
-    expect(device.state.deviceLocal.energyTargets).toEqual([
-      ownTarget,
-      target("p-ana", BACKUP_AT),
+    expect(device.state.tables.energyTargets).toEqual([
+      target("p-mine", BACKUP_AT),
+      target("p-ana", "2026-10-11T00:00:00.000Z"),
     ]);
   });
 });
