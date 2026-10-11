@@ -11,7 +11,9 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
+import { openHeaderAction } from "./helpers/mobile-menu";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const NAME = "E2E lifecycle";
@@ -27,11 +29,6 @@ const otherDayOfWeek = (today: Date): string => {
   return toLocalDateString(other);
 };
 
-const cardIn = (page: Page, date: string) =>
-  page
-    .getByTestId(`day-column-${date}`)
-    .locator('[data-testid^="workout-card-"]');
-
 async function scheduleToday(page: Page, today: string): Promise<string> {
   await page.goto(`/workout/new?source=scratch&date=${today}`);
   await page.getByTestId("edit-metadata-button").click();
@@ -39,7 +36,7 @@ async function scheduleToday(page: Page, today: string): Promise<string> {
   await page.getByTestId("save-metadata-button").click();
   await page.getByTestId("add-first-step-button").click();
   await page.getByTestId("scratch-schedule-button").click();
-  const card = cardIn(page, today);
+  const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
   await expect(card).toContainText(NAME);
   return (await card.getAttribute("data-testid"))!.replace("workout-card-", "");
@@ -89,7 +86,7 @@ test.describe("Scheduled workout lifecycle", () => {
     const id = await scheduleToday(page, today);
 
     // Act + Assert: the card opens the detail, the edit survives a reload.
-    await cardIn(page, today).click();
+    await workoutCardsOn(page, today).click();
     await expect(page).toHaveURL(new RegExp(`/workout/view/${id}`));
     await page.getByRole("button", { name: "Edit" }).click();
     await expect(page.locator('[data-testid="step-card"]')).toHaveCount(1);
@@ -114,18 +111,18 @@ test.describe("Scheduled workout lifecycle", () => {
       page.getByText("Workout moved", { exact: true })
     ).toBeVisible();
     await page.goto("/calendar");
-    await expect(cardIn(page, moved)).toHaveCount(1);
-    await expect(cardIn(page, today)).toHaveCount(0);
+    await expect(workoutCardsOn(page, moved)).toHaveCount(1);
+    await expect(workoutCardsOn(page, today)).toHaveCount(0);
 
     // Act + Assert: delete, then Undo brings the card back.
-    await deleteFromDetail(page, cardIn(page, moved));
+    await deleteFromDetail(page, workoutCardsOn(page, moved));
     await page.getByRole("button", { name: "Undo" }).click();
-    await expect(cardIn(page, moved)).toHaveCount(1);
+    await expect(workoutCardsOn(page, moved)).toHaveCount(1);
     await page.reload();
-    await expect(cardIn(page, moved)).toHaveCount(1);
+    await expect(workoutCardsOn(page, moved)).toHaveCount(1);
 
     // Act + Assert: a delete with no Undo holds after a reload.
-    await deleteFromDetail(page, cardIn(page, moved));
+    await deleteFromDetail(page, workoutCardsOn(page, moved));
     await page.reload();
     await expect(page.getByTestId(`workout-card-${id}`)).toHaveCount(0);
   });
@@ -138,7 +135,7 @@ test.describe("Scheduled workout lifecycle", () => {
       // record lookup and not a cold dev-server compile of the page chunk.
       await page.goto(`${route}${WARMUP_ID}`);
       await expect(page.getByText("Workout not found")).toBeVisible();
-      await page.getByRole("button", { name: "Go to calendar" }).click();
+      await openHeaderAction(page, "Go to calendar", /^Calendar$/);
       await expect(page.getByText("Workout not found")).toHaveCount(0);
 
       // Act
