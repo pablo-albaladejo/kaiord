@@ -63,7 +63,6 @@
       "weight": "Peso",
       "steps": "Pasos"
     },
-    "seriesLegendNote": "Las series se distinguen por luminosidad y etiqueta, no por tono: los cinco tonos de esta app pertenecen a las zonas de entrenamiento, y un gráfico de salud no es una zona.",
     "range": {
       "d30": "30d",
       "d90": "90d",

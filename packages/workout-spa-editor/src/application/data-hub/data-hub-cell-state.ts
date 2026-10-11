@@ -92,7 +92,7 @@ export const cellState = (
   switch (entry.mechanism) {
     case "manual":
       // Only types with a REAL manual-entry code path (MANUAL_ENTRY_TYPES) —
-      // not every importable token; planned-session has no manual authoring.
+      // not every importable token; wearable-computed types stay "na".
       return direction === "import" && MANUAL_ENTRY_TYPES.has(dataType)
         ? "manual"
         : "na";

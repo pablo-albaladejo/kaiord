@@ -184,4 +184,24 @@ describe("TrendSingleChartCard", () => {
     expect(chart).toHaveAttribute("data-width", "880");
     expect(chart).toHaveAttribute("data-height", "360");
   });
+
+  it("should not narrate its own design to the user", () => {
+    // Arrange
+    const selected = selectedOf("sleep");
+
+    // Act
+    render(
+      <TrendSingleChartCard
+        selected={selected}
+        series={POINTS}
+        rangeDays={30}
+      />,
+      { wrapper: ThemeProvider }
+    );
+
+    // Assert
+    expect(screen.getByTestId("trend-single-chart-card")).not.toHaveTextContent(
+      /hue|lightness/i
+    );
+  });
 });

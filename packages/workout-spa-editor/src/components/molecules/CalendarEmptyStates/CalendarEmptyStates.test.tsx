@@ -19,34 +19,40 @@ function withRouter(ui: React.ReactNode, path = "/calendar") {
 }
 
 describe("FirstRunGuide", () => {
-  it("should state the three things that have to be true", () => {
+  it("should lead with the three starts that need no integration", () => {
+    // Arrange
+
+    // Act
+    render(
+      withRouter(<FirstRunGuide weekId="2026-W23" onLogWellness={vi.fn()} />)
+    );
+
+    // Assert
+    expect(screen.getByTestId("first-run-add-workout")).toHaveClass(
+      "bg-accent"
+    );
+    expect(screen.getByTestId("first-run-import")).toBeInTheDocument();
+    expect(screen.getByTestId("first-run-log-wellness")).toBeInTheDocument();
+  });
+
+  it("should present the integrations as optional, not as requirements", () => {
     // Arrange
 
     // Act
     render(withRouter(<FirstRunGuide weekId="2026-W23" />));
 
     // Assert
-    expect(screen.getByTestId("first-run-guide")).toBeInTheDocument();
+    expect(screen.getByText(/Optional/)).toBeInTheDocument();
     expect(screen.getAllByRole("listitem")).toHaveLength(
       FIRST_RUN_STEPS.length
     );
+    expect(screen.queryByText(/the week stays empty/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/nothing will appear/)).not.toBeInTheDocument();
+    for (const button of screen.getAllByRole("listitem"))
+      expect(button.querySelector(".bg-accent")).toBeNull();
   });
 
-  it("should name the consequence of each missing dependency", () => {
-    // Arrange
-
-    // Act
-    render(withRouter(<FirstRunGuide weekId="2026-W23" />));
-
-    // Assert
-    expect(screen.getByText(/the week stays empty/)).toBeInTheDocument();
-    expect(screen.getByText(/Your key, your bill/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/you can still download the file/)
-    ).toBeInTheDocument();
-  });
-
-  it("should offer the manual path that needs none of the three", async () => {
+  it("should open the editor from Create workout", async () => {
     // Arrange
     const user = userEvent.setup();
     const { hook, history } = memoryLocation({
@@ -66,7 +72,46 @@ describe("FirstRunGuide", () => {
     expect(history.at(-1)).toContain("/workout/new");
   });
 
-  it("should emphasise the bridge link when it is the first step still missing", () => {
+  it("should open the file import from Import a file", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const { hook, history } = memoryLocation({
+      path: "/calendar",
+      record: true,
+    });
+    render(
+      <Router hook={hook}>
+        <FirstRunGuide weekId="2026-W23" />
+      </Router>
+    );
+
+    // Act
+    await user.click(screen.getByTestId("first-run-import"));
+
+    // Assert
+    expect(history.at(-1)).toMatch(
+      /^\/workout\/new\?action=import&from=calendar/
+    );
+  });
+
+  it("should open the wellness entry from Log wellness", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const onLogWellness = vi.fn();
+    render(
+      withRouter(
+        <FirstRunGuide weekId="2026-W23" onLogWellness={onLogWellness} />
+      )
+    );
+
+    // Act
+    await user.click(screen.getByTestId("first-run-log-wellness"));
+
+    // Assert
+    expect(onLogWellness).toHaveBeenCalledTimes(1);
+  });
+
+  it("should tick an optional integration that is already set up", () => {
     // Arrange
     const done = { sources: true, aiKey: true };
 
@@ -74,24 +119,8 @@ describe("FirstRunGuide", () => {
     render(withRouter(<FirstRunGuide weekId="2026-W23" done={done} />));
 
     // Assert
-    const bridge = screen.getByRole("link", { name: "Install" });
-    const aiKey = screen.getByTestId("first-run-step-aiKey-done");
-    expect(bridge).toHaveClass("bg-accent");
-    expect(aiKey).toBeInTheDocument();
-  });
-
-  it("should not emphasise the bridge link while an earlier step is missing", () => {
-    // Arrange
-    const done = { sources: true };
-
-    // Act
-    render(withRouter(<FirstRunGuide weekId="2026-W23" done={done} />));
-
-    // Assert
+    expect(screen.getByTestId("first-run-step-aiKey-done")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Install" })).not.toHaveClass(
-      "bg-accent"
-    );
-    expect(screen.getByRole("button", { name: "Add a key" })).toHaveClass(
       "bg-accent"
     );
   });
@@ -149,6 +178,18 @@ describe("EmptyWeekState", () => {
       screen.getByText(/your last session was 12 Jul/)
     ).toBeInTheDocument();
     expect(screen.getByText("Go to 12 Jul")).toBeInTheDocument();
+  });
+
+  it("should not assume the athlete has a coach", () => {
+    // Arrange
+
+    // Act
+    render(withRouter(<EmptyWeekState weekId="2026-W23" />));
+
+    // Assert
+    expect(screen.getByTestId("empty-week-state")).not.toHaveTextContent(
+      /coach/i
+    );
   });
 
   it("should not offer a date it does not have", () => {

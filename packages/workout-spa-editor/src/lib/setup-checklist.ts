@@ -2,7 +2,9 @@
  * Pure model behind the "Getting set up" checklist.
  *
  * Four onboarding steps, each derived from real persisted state rather than
- * from a "seen the tour" flag. The hook layer (`use-setup-checklist`) reads
+ * from a "seen the tour" flag. Every step is reachable by hand in this
+ * browser alone: integrations are optional, so a step that only a bridge or
+ * a provider could tick would leave the checklist forever short of 100%. The hook layer (`use-setup-checklist`) reads
  * the state; this module owns the item vocabulary, the hrefs and the
  * threshold predicate, so all of it is unit-testable without Dexie.
  */
@@ -11,7 +13,7 @@ import { withOrigin } from "../routing/with-origin";
 import type { Profile } from "../types/profile";
 
 export type SetupChecklistItemId =
-  "create-workout" | "set-thresholds" | "connect-source" | "push-session";
+  "create-workout" | "set-thresholds" | "log-wellness" | "save-to-library";
 
 export type SetupChecklistItem = {
   readonly id: SetupChecklistItemId;
@@ -24,8 +26,8 @@ export type SetupChecklistItem = {
 export type SetupChecklistSignals = {
   readonly hasWorkout: boolean;
   readonly hasThreshold: boolean;
-  readonly hasSource: boolean;
-  readonly hasPush: boolean;
+  readonly hasWellness: boolean;
+  readonly hasTemplate: boolean;
 };
 
 /**
@@ -67,17 +69,17 @@ export const buildSetupChecklistItems = (
     href: "/athlete",
   },
   {
-    id: "connect-source",
-    titleKey: "items.connectSource.title",
-    hintKey: "items.connectSource.hint",
-    done: signals.hasSource,
-    href: "/athlete",
+    id: "log-wellness",
+    titleKey: "items.logWellness.title",
+    hintKey: "items.logWellness.hint",
+    done: signals.hasWellness,
+    href: "/health",
   },
   {
-    id: "push-session",
-    titleKey: "items.pushSession.title",
-    hintKey: "items.pushSession.hint",
-    done: signals.hasPush,
-    href: "/calendar",
+    id: "save-to-library",
+    titleKey: "items.saveToLibrary.title",
+    hintKey: "items.saveToLibrary.hint",
+    done: signals.hasTemplate,
+    href: "/library",
   },
 ];

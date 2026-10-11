@@ -12,7 +12,6 @@
   "noThresholds": "Añade tus umbrales de {{sport}}",
   "zonesReason": "Derivadas de {{metric}} {{value}}. Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
   "zonesReasonNoThreshold": "Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
-  "zonesEncoding": "El ancho es el rango de la zona; la altura, su intensidad. Quita el color y la rampa se sigue leyendo.",
   "provenance": {
     "synced": "{{source}} · {{when}}",
     "manual": "A mano",

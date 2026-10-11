@@ -36,7 +36,7 @@ export const availableSources = (
   // UNCONDITIONALLY. Giving a type a manual entry path without adding it here
   // makes this set and the resolver disagree silently. Widening it to every
   // type is not the fix — it would claim a source for types with no way to
-  // enter one (`planned-session` has no manual authoring path at all).
+  // enter one (`strain` is computed by a wearable, never typed in).
   if (MANUAL_ENTRY_TYPES.has(dataType)) sources.push(MANUAL_SOURCE_ID);
   return sources;
 };

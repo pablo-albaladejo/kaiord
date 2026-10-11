@@ -54,7 +54,7 @@ export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
           </p>
         </div>
         {zones ? (
-          <ZoneMap zones={zones} caption={t("zonesEncoding")} />
+          <ZoneMap zones={zones} />
         ) : (
           <p className="text-[13px] text-ink-muted">
             {t("noThreshold", { sport: sportLabel.toLowerCase() })}
