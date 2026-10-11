@@ -102,6 +102,22 @@ describe("BackupImportSection", () => {
     );
   });
 
+  it("should not take a second file while the first is still being read", async () => {
+    // Arrange
+    const device = freshDevice();
+    renderWithProviders(<BackupImportSection />, { snapshotPort: device.port });
+    const reading = backupFile([ana]);
+    reading.text = () => new Promise<string>(() => {});
+
+    // Act
+    await upload(reading);
+
+    // Assert
+    expect(
+      screen.getByRole("button", { name: "Import backup" })
+    ).toBeDisabled();
+  });
+
   it("should ask which profile to join and import into the one picked", async () => {
     // Arrange
     const device = freshDevice();

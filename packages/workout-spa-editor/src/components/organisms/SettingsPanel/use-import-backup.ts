@@ -52,6 +52,7 @@ export function useImportBackup() {
 
   const importFile = useCallback(
     async (file: File) => {
+      setState({ kind: "busy" });
       try {
         await run(parseBackup(await file.text()), null);
       } catch (error) {
