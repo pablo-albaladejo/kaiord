@@ -77,9 +77,7 @@ describe("verifyProviderKey", () => {
   it.each<[LlmProviderType, number, string]>([
     ["anthropic", UNAUTHORIZED, "{}"],
     ["openai", UNAUTHORIZED, "{}"],
-    ["openai", FORBIDDEN, "{}"],
     ["google", 400, GOOGLE_BAD_KEY],
-    ["google", FORBIDDEN, "{}"],
   ])("should call a %s key invalid on HTTP %i", async (type, status, body) => {
     // Arrange
     const fetchImpl = respond(status, body);
@@ -96,6 +94,11 @@ describe("verifyProviderKey", () => {
     ["openai", 500],
     ["google", 400],
     ["anthropic", OVERLOADED],
+    // A restricted OpenAI project key (Models: None) and a Google project
+    // with the API disabled both answer 403 for a key that works.
+    ["openai", FORBIDDEN],
+    ["google", FORBIDDEN],
+    ["anthropic", FORBIDDEN],
   ])(
     "should leave a %s key unverified on HTTP %i, which says nothing about the key",
     async (type, status) => {

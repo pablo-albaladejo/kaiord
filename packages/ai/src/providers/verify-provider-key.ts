@@ -31,17 +31,17 @@ const PROBES: Record<LlmProviderType, (apiKey: string) => Probe> = {
 };
 
 const HTTP_UNAUTHORIZED = 401;
-const HTTP_FORBIDDEN = 403;
 const HTTP_BAD_REQUEST = 400;
 
 /** A provider that accepts the connection and never answers is "unverified". */
 export const PROBE_TIMEOUT_MS = 10_000;
 
 // Google answers a malformed or unknown key with 400 API_KEY_INVALID rather
-// than 401, so a 400 counts only when the body names the key.
+// than 401, so a 400 counts only when the body names the key. A 403 is not
+// "invalid": a restricted OpenAI project key without model access, or a
+// Google project with the API disabled, answers 403 for a key that works.
 const isInvalid = async (response: Response): Promise<boolean> => {
   if (response.status === HTTP_UNAUTHORIZED) return true;
-  if (response.status === HTTP_FORBIDDEN) return true;
   if (response.status !== HTTP_BAD_REQUEST) return false;
   const body = await response.text().catch(() => "");
   return body.includes("API_KEY_INVALID");

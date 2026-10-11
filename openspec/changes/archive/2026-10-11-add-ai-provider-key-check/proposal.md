@@ -34,7 +34,9 @@ unhandled. It was red on 7.0.92 and is green on the new floor.
 - `@kaiord/ai` exports `verifyProviderKey(credential, fetch?)`. It calls the
   provider's list-models endpoint, which spends no tokens, and returns
   `valid`, `invalid` or `unverified`:
-  - 401 and 403 are `invalid`, and so is a Google 400 `API_KEY_INVALID`.
+  - 401 is `invalid`, and so is a Google 400 `API_KEY_INVALID`. A 403 is
+    `unverified`: a restricted OpenAI project key without model access and a
+    Google project with the API disabled both answer 403 for a working key.
   - A network error, a timeout or any other status is `unverified`.
 - Settings → AI checks the key before it saves:
   - A rejected key is not saved. The form keeps the input and shows an
