@@ -72,7 +72,10 @@
     "setDefault": "Establecer predeterminado",
     "remove": "Eliminar",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "checking": "Comprobando la clave…",
+    "keyInvalid": "El proveedor ha rechazado esta clave. Revísala y vuelve a intentarlo.",
+    "keyUnverified": "Guardado, pero no se pudo comprobar la clave (sin conexión o el proveedor está ocupado)."
   },
   "models": {
     "default": "Modelo predeterminado",

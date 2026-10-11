@@ -31,7 +31,7 @@ export const ModelSelector: React.FC = () => {
       >
         {providers.map((p) => (
           <option key={p.id} value={p.id}>
-            {p.label} ({p.model})
+            {p.label}
           </option>
         ))}
       </select>

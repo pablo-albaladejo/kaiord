@@ -4,15 +4,16 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { ProviderEditRow } from "./ProviderEditRow";
 import { ProviderRow } from "./ProviderRow";
+import type { KeySaveOutcome } from "./save-with-key-check";
 
 type ProviderListProps = {
   providers: Array<LlmProviderConfig>;
   onRemove: (id: string) => void;
   onSetDefault: (id: string) => void;
   onUpdate: (
-    id: string,
-    updates: Partial<Omit<LlmProviderConfig, "id">>
-  ) => void;
+    provider: LlmProviderConfig,
+    updates: { label: string; apiKey: string }
+  ) => Promise<KeySaveOutcome>;
 };
 
 export const ProviderList: React.FC<ProviderListProps> = ({
@@ -39,9 +40,10 @@ export const ProviderList: React.FC<ProviderListProps> = ({
           {editingId === p.id ? (
             <ProviderEditRow
               provider={p}
-              onSave={(id, updates) => {
-                onUpdate(id, updates);
-                setEditingId(null);
+              onSave={async (updates) => {
+                const outcome = await onUpdate(p, updates);
+                if (outcome === "saved") setEditingId(null);
+                return outcome;
               }}
               onCancel={() => setEditingId(null)}
             />

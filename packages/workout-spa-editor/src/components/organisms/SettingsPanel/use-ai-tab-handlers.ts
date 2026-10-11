@@ -17,6 +17,8 @@ import type { UpdateProviderInput } from "../../../application/ai/update-provide
 import { updateProvider } from "../../../application/ai/update-provider";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import type { LlmProviderConfig } from "../../../store/ai-store-types";
+import { type KeySaveOutcome, saveWithKeyCheck } from "./save-with-key-check";
 
 const ADD_TOAST = "Failed to add AI provider — please retry.";
 const REMOVE_TOAST = "Failed to remove AI provider — please retry.";
@@ -39,18 +41,33 @@ export const useAiTabHandlers = () => {
   const toast = useToastContext();
 
   return {
-    onAdd: (config: AddProviderInput) => {
-      void addProvider(persistence, config).catch(() => toast.error(ADD_TOAST));
+    onAdd: async (config: AddProviderInput): Promise<KeySaveOutcome> => {
+      const outcome = await saveWithKeyCheck({
+        credential: config,
+        save: () => addProvider(persistence, config),
+      });
+      if (outcome === "failed") toast.error(ADD_TOAST);
+      return outcome;
     },
     onRemove: (id: string) => {
       void removeProvider(persistence, id).catch(() =>
         toast.error(REMOVE_TOAST)
       );
     },
-    onUpdate: (id: string, updates: UpdateProviderInput) => {
-      void updateProvider(persistence, id, updates).catch(() =>
-        toast.error(UPDATE_TOAST)
-      );
+    onUpdate: async (
+      provider: LlmProviderConfig,
+      updates: UpdateProviderInput
+    ): Promise<KeySaveOutcome> => {
+      const key = updates.apiKey;
+      const outcome = await saveWithKeyCheck({
+        credential:
+          key !== undefined && key !== provider.apiKey
+            ? { type: provider.type, apiKey: key }
+            : undefined,
+        save: () => updateProvider(persistence, provider.id, updates),
+      });
+      if (outcome === "failed") toast.error(UPDATE_TOAST);
+      return outcome;
     },
     onSetDefault: (id: string) => {
       void setDefaultProvider(persistence, id).catch(() =>

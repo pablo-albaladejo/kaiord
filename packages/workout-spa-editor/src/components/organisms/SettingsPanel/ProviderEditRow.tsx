@@ -4,10 +4,15 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
+import { KeyCheckMessage, type KeyCheckStatus } from "./KeyCheckMessage";
+import type { KeySaveOutcome } from "./save-with-key-check";
 
 type ProviderEditRowProps = {
   provider: LlmProviderConfig;
-  onSave: (id: string, updates: Partial<Omit<LlmProviderConfig, "id">>) => void;
+  onSave: (updates: {
+    label: string;
+    apiKey: string;
+  }) => Promise<KeySaveOutcome>;
   onCancel: () => void;
 };
 
@@ -19,6 +24,12 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
   const t = useTranslate("settings");
   const [label, setLabel] = useState(provider.label);
   const [apiKey, setApiKey] = useState(provider.apiKey);
+  const [status, setStatus] = useState<KeyCheckStatus>("idle");
+
+  const handleSave = async () => {
+    setStatus("checking");
+    setStatus(await onSave({ label, apiKey }));
+  };
 
   return (
     <div className="space-y-2 rounded-lg border border-edge-strong p-3">
@@ -36,8 +47,8 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
       <div className="flex gap-2">
         <Button
           size="sm"
-          onClick={() => onSave(provider.id, { label, apiKey })}
-          disabled={!label || !apiKey}
+          onClick={() => void handleSave()}
+          disabled={status === "checking" || !label || !apiKey}
         >
           {t("providers.save")}
         </Button>
@@ -45,6 +56,7 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
           {t("providers.cancel")}
         </Button>
       </div>
+      <KeyCheckMessage status={status} />
     </div>
   );
 };

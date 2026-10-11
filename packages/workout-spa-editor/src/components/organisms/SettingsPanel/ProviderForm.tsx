@@ -4,13 +4,15 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderType } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
+import { KeyCheckMessage, type KeyCheckStatus } from "./KeyCheckMessage";
+import type { KeySaveOutcome } from "./save-with-key-check";
 
 type ProviderFormProps = {
   onAdd: (config: {
     type: LlmProviderType;
     apiKey: string;
     label: string;
-  }) => void;
+  }) => Promise<KeySaveOutcome>;
 };
 
 export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
@@ -18,10 +20,15 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
   const [type, setType] = useState<LlmProviderType>("anthropic");
   const [apiKey, setApiKey] = useState("");
   const [label, setLabel] = useState("");
+  const [status, setStatus] = useState<KeyCheckStatus>("idle");
+  const checking = status === "checking";
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!apiKey || !label) return;
-    onAdd({ type, apiKey, label });
+    setStatus("checking");
+    const outcome = await onAdd({ type, apiKey, label });
+    setStatus(outcome);
+    if (outcome === "invalid" || outcome === "failed") return;
     setApiKey("");
     setLabel("");
   };
@@ -52,9 +59,14 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
       />
-      <Button size="sm" onClick={handleSubmit} disabled={!apiKey || !label}>
+      <Button
+        size="sm"
+        onClick={() => void handleSubmit()}
+        disabled={checking || !apiKey || !label}
+      >
         {t("providers.addProvider")}
       </Button>
+      <KeyCheckMessage status={status} />
     </div>
   );
 };
