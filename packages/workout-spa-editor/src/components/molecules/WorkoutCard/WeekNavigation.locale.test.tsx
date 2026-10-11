@@ -7,7 +7,9 @@ import { appI18n, setActiveLocale } from "../../../i18n/i18n";
 import { DayColumnAddButton } from "./DayColumnAddButton";
 import { WeekNavigation } from "./WeekNavigation";
 
-vi.mock("../../../i18n/LocaleProvider", () => ({ useActiveLocale: () => "es" }));
+vi.mock("../../../i18n/LocaleProvider", () => ({
+  useActiveLocale: () => "es",
+}));
 
 describe("calendar week controls in Spanish", () => {
   beforeAll(() => setActiveLocale("es"));
@@ -25,8 +27,12 @@ describe("calendar week controls in Spanish", () => {
     );
 
     // Assert
-    expect(screen.getByRole("button", { name: "Semana anterior" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Semana siguiente" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Semana anterior" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Semana siguiente" })
+    ).toBeVisible();
     expect(screen.getByRole("button", { name: "Hoy" })).toBeVisible();
   });
 

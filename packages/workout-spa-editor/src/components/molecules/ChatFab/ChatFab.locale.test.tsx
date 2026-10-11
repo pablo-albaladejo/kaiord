@@ -5,7 +5,9 @@ import { appI18n, setActiveLocale } from "../../../i18n/i18n";
 import { ChatFab } from "./ChatFab";
 
 vi.mock("wouter", () => ({ useLocation: () => ["/calendar", vi.fn()] }));
-vi.mock("../../../i18n/LocaleProvider", () => ({ useActiveLocale: () => "es" }));
+vi.mock("../../../i18n/LocaleProvider", () => ({
+  useActiveLocale: () => "es",
+}));
 
 describe("ChatFab in Spanish", () => {
   beforeAll(() => setActiveLocale("es"));

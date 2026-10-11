@@ -109,7 +109,10 @@ describe("BottomNav", () => {
     // Assert
     // Five tabs put the bar's center inside Library; centering the FAB on
     // the bar covered that tab (F-44). The notch is the FAB's own slot.
-    expect(fab.parentElement).toHaveAttribute("data-testid", "bottom-nav-notch");
+    expect(fab.parentElement).toHaveAttribute(
+      "data-testid",
+      "bottom-nav-notch"
+    );
   });
 
   it("should mark the Library tab active on the library route", () => {

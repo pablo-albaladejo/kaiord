@@ -15,7 +15,10 @@ describe("localizeSourceNames", () => {
   it("should name manual entry in the active locale and keep brand names", () => {
     // Arrange
     const t = getTranslate("connections", "es");
-    const sources = [source("garmin", "Garmin"), source("manual", "Manual Entry")];
+    const sources = [
+      source("garmin", "Garmin"),
+      source("manual", "Manual Entry"),
+    ];
 
     // Act
     const names = localizeSourceNames(sources, t).map((s) => s.name);
