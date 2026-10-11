@@ -1,5 +1,7 @@
 import { type Duration, durationTypeSchema } from "@kaiord/core";
 
+import { interpretWorkoutHeartRate } from "../target/heart-rate-helpers";
+import { interpretWorkoutPower } from "../target/power-helpers";
 import type { FitDurationData } from "./duration.converter";
 
 export const convertTimeDuration = (data: FitDurationData): Duration | null => {
@@ -30,7 +32,7 @@ export const convertHeartRateLessThan = (
   if (data.durationHr !== undefined) {
     return {
       type: durationTypeSchema.enum.heart_rate_less_than,
-      bpm: data.durationHr,
+      bpm: interpretWorkoutHeartRate(data.durationHr).value,
     };
   }
   return null;
@@ -42,7 +44,7 @@ export const convertHeartRateGreaterThan = (
   if (data.repeatHr !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeSchema.enum.repeat_until_heart_rate_greater_than,
-      bpm: data.repeatHr,
+      bpm: interpretWorkoutHeartRate(data.repeatHr).value,
       repeatFrom: data.durationStep,
     };
   }
@@ -67,7 +69,7 @@ export const convertPowerLessThan = (
   if (data.durationPower !== undefined) {
     return {
       type: durationTypeSchema.enum.power_less_than,
-      watts: data.durationPower,
+      watts: interpretWorkoutPower(data.durationPower).value,
     };
   }
   return null;
@@ -79,7 +81,7 @@ export const convertPowerGreaterThan = (
   if (data.durationPower !== undefined) {
     return {
       type: durationTypeSchema.enum.power_greater_than,
-      watts: data.durationPower,
+      watts: interpretWorkoutPower(data.durationPower).value,
     };
   }
   return null;

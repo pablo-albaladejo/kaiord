@@ -98,6 +98,9 @@ describe("Round-trip: sport field (snake↔camel mapper)", () => {
   });
 });
 
+// FIT workoutPower stores absolute watts +1000.
+const FIT_WATTS_OFFSET = 1000;
+
 describe("Round-trip: power range target (targetValue:0 sentinel)", () => {
   it("should preserve a power range through KRD encode then FIT decode", () => {
     // Arrange
@@ -142,8 +145,12 @@ describe("Round-trip: power range target (targetValue:0 sentinel)", () => {
 
     // Assert
     expect(stepMsg.targetValue).toBe(0);
-    expect(stepMsg.customTargetPowerLow).toBe(FIT_TARGET_POWER_RANGE_LOW);
-    expect(stepMsg.customTargetPowerHigh).toBe(FIT_TARGET_POWER_RANGE_HIGH);
+    expect(stepMsg.customTargetPowerLow).toBe(
+      FIT_TARGET_POWER_RANGE_LOW + FIT_WATTS_OFFSET
+    );
+    expect(stepMsg.customTargetPowerHigh).toBe(
+      FIT_TARGET_POWER_RANGE_HIGH + FIT_WATTS_OFFSET
+    );
     expect(decodedTarget).toStrictEqual({
       type: "power",
       value: {

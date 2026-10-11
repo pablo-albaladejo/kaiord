@@ -10,7 +10,7 @@
  */
 import type { Analytics } from "@kaiord/core";
 import { render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
@@ -46,7 +46,27 @@ const renderAtPath = (path: string) => {
   );
 };
 
+// Every Health page is React.lazy. The first test to mount one paid its cold
+// transform (LabEntryPage alone ~2.4 s) inside its own 5 s budget, which ran
+// out when the full suite shared the CPU. Warm them once, in the first
+// beforeEach: the chart pages load uPlot, which reads window.matchMedia at
+// module load, and test-setup only defines matchMedia in its own beforeEach.
+const COLD_IMPORT_TIMEOUT_MS = 30_000;
+let warmPages: Promise<unknown> | undefined;
+
 describe("Health Hub routes (§8.1)", () => {
+  beforeEach(async () => {
+    warmPages ??= Promise.all([
+      import("./HealthDashboardPage"),
+      import("./HealthSleepPage"),
+      import("./HealthWeightPage"),
+      import("./HealthRecoveryPage"),
+      import("./HealthActivityPage"),
+      import("./labs/LabEntryPage"),
+    ]);
+    await warmPages;
+  }, COLD_IMPORT_TIMEOUT_MS);
+
   it("should mount HealthDashboardPage for /health", async () => {
     // Arrange
     renderAtPath("/health");

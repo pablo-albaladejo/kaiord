@@ -73,7 +73,7 @@
           "durationType": "heart_rate_less_than",
           "duration": {
             "type": "heart_rate_less_than",
-            "bpm": 225
+            "bpm": 125
           },
           "targetType": "power",
           "target": {

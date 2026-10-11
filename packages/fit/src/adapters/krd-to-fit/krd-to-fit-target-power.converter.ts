@@ -3,6 +3,7 @@ import { targetTypeSchema } from "@kaiord/core";
 import { targetUnitSchema } from "@kaiord/core";
 
 import { fitTargetTypeSchema } from "../schemas/fit-target";
+import { encodeWorkoutPower } from "../target/power-helpers";
 
 export const convertPowerTarget = (
   step: WorkoutStep,
@@ -16,11 +17,10 @@ export const convertPowerTarget = (
     message.targetPowerZone = value.value;
   } else if (value.unit === targetUnitSchema.enum.range) {
     message.targetValue = 0;
-    message.customTargetPowerLow = value.min;
-    message.customTargetPowerHigh = value.max;
+    message.customTargetPowerLow = encodeWorkoutPower(value.min);
+    message.customTargetPowerHigh = encodeWorkoutPower(value.max);
   } else if (value.unit === targetUnitSchema.enum.watts) {
-    // Garmin encoding: Absolute watts need +1000 offset
-    message.targetValue = value.value + 1000;
+    message.targetValue = encodeWorkoutPower(value.value);
   } else if (value.unit === targetUnitSchema.enum.percent_ftp) {
     // Garmin encoding: Percentage FTP has no offset
     message.targetValue = value.value;

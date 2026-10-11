@@ -1,4 +1,12 @@
 /**
+ * FIT `workoutPower` offset (`Profile.types.workoutPower = {1000: wattsOffset}`):
+ * absolute watts are stored +1000 so they cannot collide with 0-1000 %FTP.
+ * Used by `targetValue`, the custom power range and the power duration and
+ * repeat conditions, in both directions.
+ */
+const WATTS_OFFSET = 1000;
+
+/**
  * Interprets a workoutPower value from FIT SDK
  * - Values 0-999: Percentage of FTP (direct)
  * - Values >= 1000: Absolute watts (value - 1000)
@@ -6,10 +14,10 @@
 export const interpretWorkoutPower = (
   value: number
 ): { type: "watts" | "percentage"; value: number } => {
-  if (value >= 1000) {
+  if (value >= WATTS_OFFSET) {
     return {
       type: "watts",
-      value: value - 1000,
+      value: value - WATTS_OFFSET,
     };
   }
   return {
@@ -25,10 +33,10 @@ export const interpretWorkoutPower = (
  * - Values 0-1000: Percentage of FTP
  */
 export const convertPowerValue = (value: number) => {
-  if (value > 1000) {
+  if (value > WATTS_OFFSET) {
     return {
       unit: "watts" as const,
-      value: value - 1000,
+      value: value - WATTS_OFFSET,
     };
   }
 
@@ -41,3 +49,7 @@ export const convertPowerValue = (value: number) => {
 
   return null;
 };
+
+/** Encodes absolute watts to their FIT `workoutPower` representation. */
+export const encodeWorkoutPower = (watts: number): number =>
+  watts + WATTS_OFFSET;

@@ -45,8 +45,8 @@
             "type": "power",
             "value": {
               "unit": "range",
-              "min": 1300,
-              "max": 1310
+              "min": 300,
+              "max": 310
             }
           },
           "intensity": "active"
@@ -64,8 +64,8 @@
             "type": "power",
             "value": {
               "unit": "range",
-              "min": 1260,
-              "max": 1270
+              "min": 260,
+              "max": 270
             }
           },
           "intensity": "active"
@@ -76,15 +76,15 @@
           "durationType": "heart_rate_less_than",
           "duration": {
             "type": "heart_rate_less_than",
-            "bpm": 225
+            "bpm": 125
           },
           "targetType": "power",
           "target": {
             "type": "power",
             "value": {
               "unit": "range",
-              "min": 1220,
-              "max": 1230
+              "min": 220,
+              "max": 230
             }
           },
           "intensity": "cooldown"

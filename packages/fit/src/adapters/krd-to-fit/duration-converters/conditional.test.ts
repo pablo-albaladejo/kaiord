@@ -17,7 +17,7 @@ describe("convertConditionalDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "hrLessThan",
-      durationHr: 120,
+      durationHr: 220,
     });
   });
 
@@ -35,7 +35,7 @@ describe("convertConditionalDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "powerLessThan",
-      durationPower: 150,
+      durationPower: 1150,
     });
   });
 
@@ -53,7 +53,7 @@ describe("convertConditionalDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "powerGreaterThan",
-      durationPower: 300,
+      durationPower: 1300,
     });
   });
 
