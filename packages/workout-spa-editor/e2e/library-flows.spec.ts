@@ -74,14 +74,13 @@ test.describe("Library flows", () => {
     await expect(page.getByTestId("daily-page")).toBeVisible();
   });
 
-  test("Test B: empty-day + opens the Create overlay whose Template tile routes to the Library", async ({
+  test("Test B: empty-day + opens the Create overlay whose Template tile schedules on that day", async ({
     page,
   }) => {
     // Post-redesign, the empty-day "+" routes to /workout/new?date=,
     // which renders the AI-first Create overlay. Its "Template" tile
-    // navigates to the Library (the legacy inline TemplatePickerDialog
-    // and one-click date scheduling were removed — see the e2e redesign
-    // report flag on the lost "+"-to-date scheduling path).
+    // opens the Library in template-picker mode for that day, where one
+    // click on "Schedule" puts the template on the day.
     const dates = getWeekDates();
     const targetDate = dates[1]; // Tuesday — guaranteed empty
     const weekId = getWeekId(targetDate);
@@ -102,9 +101,22 @@ test.describe("Library flows", () => {
     await expect(page.getByTestId("create-workout")).toBeVisible();
 
     await page.getByRole("button", { name: "Template" }).click();
-    await page.waitForURL(/\/library$/);
+    await page.waitForURL(
+      new RegExp(`/library\\?source=template-picker&date=${targetDate}`)
+    );
     await expect(page.getByTestId("library-page")).toBeVisible();
     await expect(page.getByText("Tempo Ride", { exact: true })).toBeVisible();
+
+    await page
+      .getByRole("button", { name: /^Schedule$/ })
+      .first()
+      .click();
+    await page.waitForURL(new RegExp(`/calendar/${weekId}$`));
+    await expect(
+      page
+        .getByTestId(`day-column-${targetDate}`)
+        .locator('[data-testid^="workout-card-"]')
+    ).toHaveCount(1);
   });
 
   test("Test B-back: browser back unmounts the Create overlay", async ({
