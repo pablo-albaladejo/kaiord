@@ -118,6 +118,23 @@ describe("CreateInputPhase", () => {
     ).toBeTruthy();
   });
 
+  it.each([
+    ["Blank", "/workout/new?source=scratch"],
+    ["Import file", "/workout/new?action=import"],
+    ["Template", "/library"],
+  ])("should open %s from the sheet without a provider", async (name, path) => {
+    // Arrange
+    const loc = memoryLocation({ path: "/workout/new", record: true });
+    const ui = <CreateInputPhase {...baseProps} provider={null} />;
+    render(<Router hook={loc.hook}>{ui}</Router>);
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name }));
+
+    // Assert
+    expect(loc.history.at(-1)).toBe(path);
+  });
+
   it("should name the threshold the generation writes against", () => {
     // Arrange
     const ui = <CreateInputPhase {...baseProps} />;
