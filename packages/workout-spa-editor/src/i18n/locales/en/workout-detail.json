@@ -28,7 +28,11 @@
     "sending": "Sending…",
     "sent": "On your Garmin",
     "sendToTrainingPeaks": "Send to TrainingPeaks",
-    "sentToTrainingPeaks": "On TrainingPeaks"
+    "sentToTrainingPeaks": "On TrainingPeaks",
+    "sendDisabled": {
+      "noExtension": "Install the Kaiord Garmin Bridge extension to send this workout.",
+      "signedOut": "Sign in to Garmin Connect in this browser to send this workout."
+    }
   },
   "summary": {
     "duration": "Duration",
