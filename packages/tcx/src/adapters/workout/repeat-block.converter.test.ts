@@ -159,6 +159,34 @@ describe("convertTcxRepeat", () => {
     );
   });
 
+  it("should drop a nested repeat with no importable child without iterating its count", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const hugeRepetitions = MAX_UNROLLED_STEPS ** OUTER_REPEATS;
+    const tcxRepeat = {
+      "@_xsi:type": "Repeat_t",
+      Repetitions: OUTER_REPEATS,
+      Child: [
+        timeStep("A"),
+        {
+          "@_xsi:type": "Repeat_t",
+          Repetitions: hugeRepetitions,
+          Child: { "@_xsi:type": "Step_t", Target: { "@_xsi:type": "None_t" } },
+        },
+      ],
+    };
+
+    // Act
+    const block = convertTcxRepeat(tcxRepeat, 0, "running", logger);
+
+    // Assert
+    expect(block?.steps.map((s) => s.name)).toStrictEqual(["A"]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      "Lossy conversion: nested TCX repeat has no importable steps, dropping it",
+      { stepIndex: 1, repetitions: hugeRepetitions }
+    );
+  });
+
   it("should import the children once when Repetitions is invalid", () => {
     // Arrange
     const logger = createMockLogger();

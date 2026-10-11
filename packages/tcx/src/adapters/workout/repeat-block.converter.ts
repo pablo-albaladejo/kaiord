@@ -62,6 +62,13 @@ const collectLeafSteps = (
     }
     const count = readRepeatCount(child, logger);
     const inner = collectLeafSteps(child, index, sport, logger);
+    if (inner.length === 0) {
+      logger.warn(
+        "Lossy conversion: nested TCX repeat has no importable steps, dropping it",
+        { stepIndex: index, repetitions: count }
+      );
+      continue;
+    }
     const passes =
       leaves.length + count * inner.length > MAX_UNROLLED_STEPS ? 1 : count;
     logger.warn(
