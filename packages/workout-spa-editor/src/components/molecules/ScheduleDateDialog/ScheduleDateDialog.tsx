@@ -63,7 +63,8 @@ export function ScheduleDateDialog({
             </Dialog.Close>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            {copy?.description ?? t("scheduleDialog.description", { name: templateName })}
+            {copy?.description ??
+              t("scheduleDialog.description", { name: templateName })}
           </p>
           <ScheduleDateField value={date} invalid={invalid} onChange={change} />
           <div className="flex justify-end gap-2">
