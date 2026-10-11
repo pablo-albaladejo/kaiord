@@ -20,7 +20,11 @@ export default function HealthActivityPage() {
   const loading = record === undefined;
   return (
     <section data-testid="health-activity">
-      <HealthPageHeader title={t("activity.title")} subtitle={today} />
+      <HealthPageHeader
+        title={t("activity.title")}
+        subtitle={today}
+        addMetric="daily-wellness"
+      />
       {loading && (
         <p className="text-sm text-ink-muted">{t("activity.empty")}</p>
       )}
