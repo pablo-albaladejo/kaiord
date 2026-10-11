@@ -97,11 +97,61 @@ describe("reloadOnceForChunkError", () => {
     expect(second).toBe(false);
     expect(reload).toHaveBeenCalledTimes(1);
   });
+});
+
+describe("reloadOnceForChunkError while a lazy import is in flight", () => {
+  const reload = vi.fn();
+
+  // Fresh modules per test: both the reload guard and the leave mark live
+  // in module state.
+  const loadModules = async () => {
+    vi.resetModules();
+    const reloadMod = await import("./chunk-reload");
+    const leaveMod = await import("./leave-tracking");
+    return {
+      reloadOnceForChunkError: reloadMod.reloadOnceForChunkError,
+      trackLeaveDuring: leaveMod.trackLeaveDuring,
+    };
+  };
+  const pendingImport = () => new Promise<never>(() => undefined);
+  const leave = (prompt: boolean) => {
+    const event = new Event("beforeunload", { cancelable: true });
+    if (prompt) event.preventDefault();
+    window.dispatchEvent(event);
+  };
+
+  beforeEach(() => {
+    reload.mockClear();
+    sessionStorage.clear();
+    vi.stubGlobal("location", { reload });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should register no beforeunload listener when the module loads", async () => {
+    // Arrange
+    const add = vi.spyOn(window, "addEventListener");
+
+    // Act
+    await loadModules();
+
+    // Assert
+    expect(add).not.toHaveBeenCalledWith(
+      "beforeunload",
+      expect.anything(),
+      expect.anything()
+    );
+    expect(add).not.toHaveBeenCalledWith("beforeunload", expect.anything());
+    add.mockRestore();
+  });
 
   it("should not reload while the page is being left", async () => {
     // Arrange
-    const reloadOnceForChunkError = await loadFn();
-    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    const { reloadOnceForChunkError, trackLeaveDuring } = await loadModules();
+    void trackLeaveDuring(pendingImport);
+    leave(false);
 
     // Act
     const triggered = reloadOnceForChunkError();
@@ -111,27 +161,26 @@ describe("reloadOnceForChunkError", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it("should reload when the leave was held by an unsaved-changes prompt", async () => {
+  it("should not reload when the user confirmed an unsaved-changes prompt", async () => {
     // Arrange
-    const reloadOnceForChunkError = await loadFn();
-    const prompt = (event: Event) => event.preventDefault();
-    window.addEventListener("beforeunload", prompt);
-    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
-    window.removeEventListener("beforeunload", prompt);
+    const { reloadOnceForChunkError, trackLeaveDuring } = await loadModules();
+    void trackLeaveDuring(pendingImport);
+    leave(true);
 
     // Act
     const triggered = reloadOnceForChunkError();
 
     // Assert
-    expect(triggered).toBe(true);
-    expect(reload).toHaveBeenCalledTimes(1);
+    expect(triggered).toBe(false);
+    expect(reload).not.toHaveBeenCalled();
   });
 
-  it("should reload when the page came back from the back/forward cache", async () => {
+  it("should reload once the user interacts with a page that stayed", async () => {
     // Arrange
-    const reloadOnceForChunkError = await loadFn();
-    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
-    window.dispatchEvent(new Event("pageshow"));
+    const { reloadOnceForChunkError, trackLeaveDuring } = await loadModules();
+    void trackLeaveDuring(pendingImport);
+    leave(true);
+    window.dispatchEvent(new Event("pointerdown"));
 
     // Act
     const triggered = reloadOnceForChunkError();

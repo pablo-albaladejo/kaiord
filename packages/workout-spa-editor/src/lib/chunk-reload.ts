@@ -10,6 +10,8 @@
  * genuinely unfetchable (offline / persistent 404): after one reload we let
  * the error surface to the route boundary instead of reloading again.
  */
+import { isLeaving } from "./leave-tracking";
+
 const RELOAD_AT_KEY = "kaiord:chunk-reload-at";
 const RELOAD_COOLDOWN_MS = 10_000;
 
@@ -24,31 +26,13 @@ export const isChunkLoadError = (error: unknown): boolean => {
 
 /**
  * Reload the page once to recover from a stale chunk. Returns `true` if a
- * reload was triggered, `false` if suppressed by the cooldown (loop guard).
+ * reload was triggered, `false` if suppressed by the cooldown (loop guard) or
+ * because the page is being left (see `leave-tracking`).
  */
 // In-memory guard: prevents repeated reloads within a single page load even
 // when `sessionStorage` is unavailable (private mode), so a flurry of chunk
 // errors (multiple preloadError events / boundary catches) cannot loop.
 let reloadedThisLoad = false;
-
-// Leaving the page also fails pending imports: Firefox cancels a document's
-// in-flight requests as soon as a navigation away starts, while the document
-// keeps running, and the rejection reads exactly like a stale chunk. A reload
-// then would replace the navigation the user asked for. `beforeunload` marks
-// the leave; one whose prompt was shown (`defaultPrevented`) may have been
-// cancelled, so it does not count, and `pageshow` clears a leave the page
-// came back from (back/forward cache).
-let leaveEvent: Event | null = null;
-if (typeof window !== "undefined") {
-  window.addEventListener("beforeunload", (event) => {
-    leaveEvent = event;
-  });
-  window.addEventListener("pageshow", () => {
-    leaveEvent = null;
-  });
-}
-const isLeaving = (): boolean =>
-  leaveEvent !== null && !leaveEvent.defaultPrevented;
 
 export const reloadOnceForChunkError = (): boolean => {
   if (reloadedThisLoad || isLeaving()) return false;
