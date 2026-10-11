@@ -12,7 +12,7 @@ import { CanvasShapeHead } from "./CanvasShapeHead";
 import { EditorCanvas } from "./EditorCanvas";
 import { useWorkoutSectionFocus } from "./use-workout-section-focus";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
-import { WorkoutActions } from "./WorkoutActions";
+import { type EditDiscard, WorkoutActions } from "./WorkoutActions";
 import { WorkoutHeader } from "./WorkoutHeader";
 import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsListBinding } from "./WorkoutStepsListBinding";
@@ -31,11 +31,10 @@ export type WorkoutSectionProps = {
   /** Optional telemetry provider. Defaults to a no-op. Production deployments
    *  pass a Sentry/Datadog adapter here without touching focus-rule call sites. */
   focusTelemetry?: FocusTelemetry;
-  /** Forwarded to `WorkoutHeader` so scratch mode pre-opens
-   *  `MetadataEditMode` for sport/name commit on first mount. */
-  startInEditMode?: boolean;
   /** The profile owning the persisted record, for the file download. */
   ownerProfileId?: string;
+  /** A persisted workout: Discard drops unsaved edits instead. */
+  editDiscard?: EditDiscard;
 };
 
 /* One canvas, not five cards. The chart indexes the rows beneath it, the
@@ -71,7 +70,6 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
         workout={props.workout}
         krd={props.krd}
         titleRef={titleRef}
-        startInEditMode={props.startInEditMode}
       />
       <EditorCanvas>
         <CanvasShapeHead
@@ -88,7 +86,7 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
           renderStepForm={renderStepForm}
         />
       </EditorCanvas>
-      <WorkoutActions krd={props.krd} ownerProfileId={props.ownerProfileId} />
+      <WorkoutActions {...props} />
       <CreateRepetitionBlockDialog
         stepCount={state.blockStepCount}
         onConfirm={state.handleConfirmCreateBlock}

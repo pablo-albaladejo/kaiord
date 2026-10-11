@@ -1,4 +1,5 @@
 import { PenLine } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { useTranslate } from "../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
@@ -7,6 +8,8 @@ import { BackButton } from "../atoms/BackButton/BackButton";
 export type EditorPageHeaderProps = {
   mode: "new" | "edit";
   onBack?: () => void;
+  /** Trailing control of the title row (the edit mode's "Save changes"). */
+  action?: ReactNode;
 };
 
 const COPY = {
@@ -20,7 +23,11 @@ const COPY = {
   },
 } as const;
 
-export function EditorPageHeader({ mode, onBack }: EditorPageHeaderProps) {
+export function EditorPageHeader({
+  mode,
+  onBack,
+  action,
+}: EditorPageHeaderProps) {
   const t = useTranslate("editor");
   const { title, description } = COPY[mode];
 
@@ -36,6 +43,7 @@ export function EditorPageHeader({ mode, onBack }: EditorPageHeaderProps) {
         >
           {t(title)}
         </h1>
+        {action}
       </div>
       <p className="text-sm text-ink-muted">{t(description)}</p>
     </div>

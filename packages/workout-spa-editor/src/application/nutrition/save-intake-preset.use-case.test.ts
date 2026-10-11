@@ -34,6 +34,7 @@ describe("saveIntakePreset / listIntakePresets", () => {
     // Assert
     const listed = await listIntakePresets(d);
     expect(preset?.id).toBe("preset-1");
+    expect(preset?.updatedAt).toBe(preset?.createdAt);
     expect(listed).toHaveLength(1);
     expect(listed[0]?.label).toBe("my usual breakfast");
   });

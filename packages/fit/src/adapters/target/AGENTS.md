@@ -34,6 +34,7 @@ None.
 - **KRD target:** Union type (PowerTarget | HeartRateTarget | CadenceTarget | PaceTarget | SwimStrokeTarget).
 - **Zone indices:** FIT zones are numeric (1-7); KRD zones are string enums (e.g., "z1", "z2", ..., "z7").
 - **Custom ranges:** FIT allows low/high bounds for custom zones; KRD exposes these in target objects.
+- **workoutHr / workoutPower offsets:** custom HR/power range bounds and HR/power duration and repeat conditions store absolute bpm +100 and watts +1000 (`heart-rate-helpers.ts`, `power-helpers.ts` own both directions). KRD ranges and conditions are absolute.
 - **Power scaling:** Watts and %FTP are interchangeable; conversion requires FTP value (stored in KRD metadata or activity context).
 
 ### Testing Requirements

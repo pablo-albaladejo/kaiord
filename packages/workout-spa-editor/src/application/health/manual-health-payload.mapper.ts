@@ -1,6 +1,6 @@
 /**
  * Pure builders for minimal valid KRD v2.0 health payloads entered by
- * hand. Every metric derives its timestamp from the clicked `day`
+ * hand (sleep has its own converter). Every metric derives its timestamp from the clicked `day`
  * (YYYY-MM-DD) at noon UTC, sidestepping timezone-boundary drift.
  *
  * Steps is the only merge-preserving builder: a prior daily row (e.g.
@@ -11,7 +11,6 @@
 import type {
   DailyWellness,
   HrvSummary,
-  SleepRecord,
   WeightMeasurement,
 } from "@kaiord/core";
 
@@ -28,19 +27,6 @@ export const buildWeightPayload = (
   measuredAt: noonOf(day),
   weightKilograms,
 });
-
-export const buildSleepPayload = (score: number, day: string): SleepRecord => {
-  const at = noonOf(day);
-  return {
-    kind: "sleep",
-    version: KRD_VERSION,
-    startTime: at,
-    endTime: at,
-    totalDurationSeconds: 0,
-    stages: [],
-    score,
-  };
-};
 
 export const buildHrvPayload = (rMSSD: number, day: string): HrvSummary => ({
   kind: "hrv",

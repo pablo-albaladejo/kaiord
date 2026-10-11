@@ -1,11 +1,14 @@
 import { expect } from "@playwright/test";
 
 import { exact, isoDate, mondayOf, TIMEOUT } from "../browser.mjs";
-import { addTimedStep } from "../editor.mjs";
+import { addTimedStep, openMetadata } from "../editor.mjs";
 import { ensureProfile, expectOk } from "../steps.mjs";
+import { otherExits } from "./new-session-entries.mjs";
 
 // F-27/F-08 the chosen day is lost, F-07 the chosen sport is lost,
-// F-43 "Cerrar" on a dated sheet does not close it.
+// F-43 "Cerrar" on a dated sheet does not close it. The other exits and
+// the library dialogs (F-17, F-19, F-20, journey 6) live in
+// new-session-entries.mjs.
 const RUNNING = /^(Running|Carrera)$/;
 
 async function startFromMonday(session, monday) {
@@ -19,7 +22,7 @@ async function startFromMonday(session, monday) {
   await page.getByTestId("add-entry-choose-workout").click();
   await page.getByRole("radio", { name: RUNNING }).click();
   await page.getByRole("button", { name: exact("En blanco") }).click();
-  await page.getByTestId("workout-name-input").waitFor();
+  await openMetadata(page);
 }
 
 async function scheduleAndFind(page, go) {
@@ -78,4 +81,5 @@ export default async function newSession({ rec, open }) {
     `landed in ${column}`
   );
   await closeDatedSheet(rec, session, monday);
+  await otherExits(rec, open, monday);
 }

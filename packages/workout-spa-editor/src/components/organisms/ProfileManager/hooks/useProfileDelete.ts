@@ -4,7 +4,8 @@
  * Profile deletion with full cascade fan-out. The cascade clears all
  * profile-scoped persistence (workouts, coaching activities, coaching
  * sync state, session matches, auto-match dismissals, user preferences)
- * BEFORE the profile row itself is removed via `deleteProfile`. The
+ * BEFORE the profile row itself is removed via `deleteProfile`; when it
+ * was the last profile, a fresh default profile replaces it. The
  * whole flow runs
  * inside `persistence.transaction(...)` so a mid-cascade crash leaves the
  * database in the pre-delete state. `deletedProfileId` is captured at
@@ -19,8 +20,10 @@
 
 import { deleteProfile } from "../../../../application/profile/delete-profile";
 import { deleteProfileWithCascade } from "../../../../application/profile/delete-profile-with-cascade";
+import { ensureDefaultProfile } from "../../../../application/profile/ensure-default-profile";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
+import { defaultProfileName } from "../../../../i18n/default-profile-name";
 
 type UseProfileDeleteParams = {
   setDeleteConfirmId: (id: string | null) => void;
@@ -66,6 +69,12 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
             id
           );
           await deleteProfile(persistence, id);
+          // Deleting the last profile leaves a fresh default one, as on
+          // first run, so a profile always exists.
+          await ensureDefaultProfile(
+            persistence,
+            defaultProfileName(navigator.language)
+          );
         });
         setDeleteConfirmId(null);
       } catch {

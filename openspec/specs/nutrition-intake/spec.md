@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Defines manual nutrition intake logging: per-entry energy and protein/carb/fat with an optional meal slot, plus reusable presets. Intake is persisted device-locally and excluded from the cloud snapshot.
+Defines manual nutrition intake logging: per-entry energy and protein/carb/fat with an optional meal slot, plus reusable presets. Intake is persisted locally and syncs through the cloud snapshot, with tombstones for deletes.
 
 ## Requirements
 
@@ -40,13 +40,12 @@ from it in one action.
 - **WHEN** the user applies the preset to today
 - **THEN** an intake entry is created for today with the preset's values
 
-### Requirement: Device-local intake persistence
+### Requirement: Synced intake persistence
 
-Intake entries and presets SHALL be persisted device-locally and SHALL be excluded
-from the cloud snapshot.
+Intake entries and presets SHALL be persisted locally and SHALL travel in the cloud snapshot and the backup, each carrying an `updatedAt` clock so the newest edit wins, and a delete SHALL record a tombstone so it propagates.
 
-#### Scenario: Intake excluded from snapshot
+#### Scenario: Intake included in snapshot
 
 - **GIVEN** intake entries and presets exist for a profile
 - **WHEN** a cloud snapshot is produced
-- **THEN** the snapshot contains no intake entries or presets
+- **THEN** the snapshot contains them, each with its `updatedAt`

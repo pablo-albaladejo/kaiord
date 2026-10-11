@@ -6,7 +6,11 @@ import { Icon, ICON_MAP } from "../../atoms/Icon";
 
 const ATHLETE_HREF = "/athlete";
 
-/** Shown when no athlete profile is active; intake needs a profile to log to. */
+/**
+ * Shown when no athlete profile is active; intake needs a profile to log to.
+ * The first-run default profile means this only appears when creating that
+ * profile failed, so it is kept as the fail-open state.
+ */
 export function NutritionEmptyState() {
   const t = useTranslate("nutrition");
   return (

@@ -48,7 +48,8 @@
     "paceValue": "Pace Value",
     "cadenceRpm": "Cadence (RPM)",
     "cadenceValue": "Cadence Value",
-    "value": "Value"
+    "value": "Value",
+    "paceClock": "Pace ({{unit}})"
   },
   "placeholder": {
     "powerWatts": "e.g., 250",
@@ -60,7 +61,8 @@
     "paceMps": "e.g., 3.5",
     "paceZone": "1-5",
     "cadenceRpm": "e.g., 90",
-    "enterValue": "Enter value"
+    "enterValue": "Enter value",
+    "paceClock": "e.g., 4:30"
   },
   "validation": {
     "valueRequired": "Value is required",
@@ -80,6 +82,7 @@
     "valuesMustBeValidNumbers": "Values must be valid numbers",
     "valuesMustBeGreaterThanZero": "Values must be greater than 0",
     "minLessThanMax": "Minimum must be less than maximum",
-    "invalidTargetType": "Invalid target type"
+    "invalidTargetType": "Invalid target type",
+    "paceClock": "Enter a pace as m:ss, e.g. 4:30"
   }
 }

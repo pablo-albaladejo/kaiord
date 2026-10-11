@@ -739,6 +739,11 @@ Each health type's payload lives in `extensions.health.<metric>`:
 }
 ```
 
+In `sleep`, `stages: []` means the stages were not recorded. In that case
+no stage-sum check applies. An absent `totalDurationSeconds` means the
+duration was not recorded, for example when a sleep score was entered by
+hand. It is never written as `0`.
+
 Sub-schema definitions are in
 `packages/core/src/domain/schemas/health/`. Each sub-schema declares a
 `version` field constrained by `z.string().regex(/^2\.\d+$/)` so future

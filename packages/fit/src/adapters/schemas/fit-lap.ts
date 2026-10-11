@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { fitDateTimeSchema } from "./fit-date-time";
 import { fitLapTriggerSchema } from "./fit-lap-trigger";
 import { fitSportSchema } from "./fit-sport";
 import { fitSubSportSchema } from "./fit-sub-sport";
@@ -12,10 +13,10 @@ import { fitSubSportSchema } from "./fit-sub-sport";
 export const fitLapSchema = z.object({
   // Identifiers
   messageIndex: z.number().optional(),
-  timestamp: z.number(),
+  timestamp: fitDateTimeSchema,
 
   // Timing
-  startTime: z.number(),
+  startTime: fitDateTimeSchema,
   totalElapsedTime: z.number(),
   totalTimerTime: z.number(),
 
@@ -55,7 +56,8 @@ export const fitLapSchema = z.object({
 
   // Swimming
   numLengths: z.number().optional(),
-  swimStroke: z.number().optional(),
+  // Decoder yields the profile name ("freestyle"); KRD -> FIT emits the number.
+  swimStroke: z.union([z.number(), z.string()]).optional(),
 
   // Workout reference
   wktStepIndex: z.number().optional(),

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  NINE_MIN_FORTY_SEC_MS,
+  NINE_MIN_FORTY_SEC,
   SAMPLE_CADENCE,
   SAMPLE_DISTANCE_M,
   SAMPLE_ELEVATION,
@@ -11,7 +11,6 @@ import {
   SAMPLE_TIMESTAMP_2024_01_01_PLUS_10MIN_SEC,
   SAMPLE_TIMESTAMP_2024_01_01_SEC,
   SAMPLE_WORKOUT_STEP_INDEX,
-  TEN_MIN_MS,
   TEN_MIN_SEC,
   TIME_TOLERANCE_MS,
 } from "../../test-utils/constants";
@@ -35,8 +34,8 @@ describe("convertKrdToFitLap", () => {
 
     // Assert
     expect(result.startTime).toBe(SAMPLE_TIMESTAMP_2024_01_01_SEC);
-    expect(result.totalElapsedTime).toBe(TEN_MIN_MS);
-    expect(result.totalTimerTime).toBe(NINE_MIN_FORTY_SEC_MS);
+    expect(result.totalElapsedTime).toBe(TEN_MIN_SEC);
+    expect(result.totalTimerTime).toBe(NINE_MIN_FORTY_SEC);
     expect(result.timestamp).toBe(
       SAMPLE_TIMESTAMP_2024_01_01_SEC + TEN_MIN_SEC
     );
@@ -53,7 +52,7 @@ describe("convertKrdToFitLap", () => {
     const result = convertKrdToFitLap(krdLap);
 
     // Assert
-    expect(result.totalTimerTime).toBe(TEN_MIN_MS);
+    expect(result.totalTimerTime).toBe(TEN_MIN_SEC);
   });
 
   it("should preserve zero totalTimerTime", () => {

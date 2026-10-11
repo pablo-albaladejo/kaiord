@@ -13,14 +13,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { syncWithCloud } from "../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../ports/cloud-sync-port";
 import type { SnapshotPort } from "../ports/snapshot-port";
-import {
-  PUSH_DEBOUNCE_MS,
-  type SyncEngine,
-  type SyncStatus,
-} from "./sync-engine-types";
+import { PUSH_DEBOUNCE_MS, type SyncEngine } from "./sync-engine-types";
+import { useSyncCycle } from "./use-sync-cycle";
 
 export type UseSyncEngineDeps = {
   cloud: CloudSyncPort;
@@ -29,10 +25,9 @@ export type UseSyncEngineDeps = {
 };
 
 export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
-  const { cloud, snapshotPort, deviceId } = deps;
-  const [status, setStatus] = useState<SyncStatus>("idle");
-  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { cloud } = deps;
+  const cycle = useSyncCycle(deps);
+  const { syncNow } = cycle;
   const [connected, setConnected] = useState<boolean>(() =>
     cloud.isAuthenticated()
   );
@@ -40,21 +35,6 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
   // rather than the value captured at the render that scheduled them.
   const connectedRef = useRef<boolean>(connected);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const syncNow = useCallback(async (): Promise<boolean> => {
-    setStatus("syncing");
-    setError(null);
-    try {
-      await syncWithCloud({ cloud, snapshotPort, deviceId });
-      setLastSyncedAt(new Date().toISOString());
-      setStatus("idle");
-      return true;
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Sync failed");
-      setStatus("error");
-      return false;
-    }
-  }, [cloud, snapshotPort, deviceId]);
 
   const requestPush = useCallback(() => {
     if (!connectedRef.current) return;
@@ -83,14 +63,5 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
   // Cancel a pending debounced push if the host unmounts (no fire-after-unmount).
   useEffect(() => () => clearTimeout(timer.current ?? undefined), []);
 
-  return {
-    status,
-    lastSyncedAt,
-    error,
-    connected,
-    syncNow,
-    requestPush,
-    connect,
-    disconnect,
-  };
+  return { ...cycle, connected, requestPush, connect, disconnect };
 }

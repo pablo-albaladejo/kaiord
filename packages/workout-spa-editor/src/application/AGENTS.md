@@ -27,6 +27,7 @@ Use cases. Pure functions and small orchestrators that take a `PersistencePort` 
 
 ## Subdirectories
 
+- `backup/` — "export my data": the backup table policy (every Dexie table classified; `apiKey` stripped, cursors excluded) `exportBackup` (snapshot + policy; nutrition rides the snapshot since v37), and `importBackup`, its inverse: `parseBackup` validates the file (folding a version 1 file's separate `nutrition` field into its tables), then local snapshot → merge with the policy-filtered file → reconcile the default profile → `importSnapshot` + the device-local re-key of `connections`, in one read-write transaction (never replaces local data; API keys are restored from this device only).
 - `ai/` — AI provider config use cases (add/remove/update/clear/set-default + custom prompt).
 - `chat/` — in-app AI chat assistant: the tool registry (`tools/` — read tools over `PersistencePort` + confirmation-gated action tools), versioned system prompt, record↔`ModelMessage` mapper, conversation use cases (`ensure-conversation`, `rename-conversation`, `delete-conversation`, `set-conversation-model`, `derive-conversation-title`), the `append-turn-messages` transcript writer, and `record-chat-usage`. The provider-agnostic turn engine lives in `@kaiord/ai` (`createChatAgent`).
 - `coaching/` — coaching domain use cases (link/unlink, convert, zones sync, expand-day, heal-id-shape).

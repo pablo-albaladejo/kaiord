@@ -113,7 +113,12 @@ async function addTestProvider(
 
   await settingsPage.getByRole("button", { name: /add provider/i }).click();
 
-  await expect(settingsPage.getByText(label, { exact: true })).toBeVisible({
+  // Scope to the provider list: with an active profile the per-purpose
+  // model selects on the same page also list the provider as an option.
+  const providerList = settingsPage.getByRole("list", {
+    name: "Configured LLM providers",
+  });
+  await expect(providerList.getByText(label, { exact: true })).toBeVisible({
     timeout: 3000,
   });
 

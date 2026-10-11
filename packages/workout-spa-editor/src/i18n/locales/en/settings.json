@@ -67,6 +67,7 @@
     "labelPlaceholder": "e.g., My Claude",
     "addProvider": "Add Provider",
     "default": "Default",
+    "missingKey": "Missing key",
     "edit": "Edit",
     "setDefault": "Set Default",
     "remove": "Remove",
@@ -89,7 +90,7 @@
     "reset": "Reset"
   },
   "sync": {
-    "description": "Sync your workouts and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved.",
+    "description": "Sync your workouts, health and nutrition data (intake log, presets and goal) and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved. If two devices each hold a nutrition goal for the same profile, the most recently saved one is kept.",
     "syncNow": "Sync now",
     "disconnect": "Disconnect",
     "connect": "Connect Google account",
@@ -100,7 +101,12 @@
     "connectedNotSynced": "Connected — not synced yet",
     "encryption": "End-to-end encryption for sync snapshots",
     "passphrase": "Passphrase",
-    "plaintextWarning": "Your saved AI API keys will be uploaded without end-to-end encryption. Enable encryption below to protect them."
+    "plaintextWarning": "Your saved AI API keys will be uploaded without end-to-end encryption. Enable encryption below to protect them.",
+    "profileChoice": {
+      "title": "Which profile is this device for?",
+      "body": "Your Google Drive already holds several profiles. Pick the one that should receive what you recorded on this device; nothing is synced until you choose.",
+      "unnamed": "Unnamed profile"
+    }
   },
   "privacy": {
     "information": "Privacy Information",
@@ -115,6 +121,18 @@
     "analyticsLink": "Umami",
     "analyticsOutro": "to track aggregate usage (page views, workout generation, exports). No cookies are set and no personal data is collected.",
     "dataManagement": "Data Management",
+    "exportData": "Export my data",
+    "exportHint": "Downloads your workouts, health, nutrition and settings data as a JSON file, unencrypted. API keys, linked integrations and sync state are not included. Keep the file somewhere safe.",
+    "exportFailed": "Could not export your data — please retry.",
+    "importData": "Import backup",
+    "importFileLabel": "Backup file",
+    "importHint": "Merges a Kaiord backup file into this browser without deleting anything here: the newer copy of each record wins, and what you deleted after the backup stays deleted. API keys are not in the file — add them again in the AI settings.",
+    "importChooseProfile": "This backup holds several profiles. Which one should this browser's data join?",
+    "importConfirm": "Import",
+    "importSummary": "Backup imported: {{added}} added, {{updated}} updated, {{notRestored}} deleted after the backup (not restored).",
+    "importInvalid": "This file is not a Kaiord backup.",
+    "importNewerApp": "This backup was made by a newer version of Kaiord. Update the app and try again.",
+    "importFailed": "Could not import the backup — please retry.",
     "clearAllApiKeys": "Clear All API Keys",
     "clearAllHint": "This removes all stored API keys from your browser. Keys already uploaded to your Google Drive by cross-device sync are not deleted by this action."
   },

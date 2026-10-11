@@ -16,10 +16,13 @@ import type { IntakePresetRecord } from "../types/intake-preset-record";
 const createIntakeEntryRepository = (
   store: Map<string, IntakeEntryRecord>
 ): IntakeEntryRepository => ({
+  getById: async (id) => store.get(id),
   getByProfileAndDate: async (profileId, date) =>
     [...store.values()].filter(
       (r) => r.profileId === profileId && r.date === date
     ),
+  listByProfile: async (profileId) =>
+    [...store.values()].filter((r) => r.profileId === profileId),
   put: async (record) => {
     store.set(record.id, record);
   },
@@ -35,6 +38,7 @@ const createIntakeEntryRepository = (
 const createIntakePresetRepository = (
   store: Map<string, IntakePresetRecord>
 ): IntakePresetRepository => ({
+  getById: async (id) => store.get(id),
   getByProfile: async (profileId) =>
     [...store.values()].filter((r) => r.profileId === profileId),
   put: async (record) => {

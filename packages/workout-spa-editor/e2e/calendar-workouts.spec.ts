@@ -159,7 +159,9 @@ test.describe("Calendar Workouts", () => {
     await expect(dialog.getByText("2K z1 + 3K z3 + 2K z1")).toBeVisible();
   });
 
-  test("Click STRUCTURED card navigates to /workout/{id}", async ({ page }) => {
+  test("Click STRUCTURED card navigates to /workout/view/{id}", async ({
+    page,
+  }) => {
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
     const workoutId = crypto.randomUUID();
@@ -170,7 +172,7 @@ test.describe("Calendar Workouts", () => {
     await page.goto(`/calendar/${weekId}`);
 
     await page.locator('[data-testid^="workout-card-"]').first().click();
-    await page.waitForURL(new RegExp(`/workout/${workoutId}`));
+    await page.waitForURL(new RegExp(`/workout/view/${workoutId}`));
   });
 
   test('Click "+" on empty day navigates to /workout/new?date=X (Create overlay)', async ({
@@ -204,9 +206,7 @@ test.describe("Calendar Workouts", () => {
     page,
   }) => {
     // The redesign's Create overlay "Blank" tile routes to the scratch
-    // editor (?source=scratch). Note: the empty-day date is NOT carried
-    // through the overlay tiles — see the e2e redesign report flag on the
-    // lost "+"-to-date scheduling path.
+    // editor (?source=scratch), carrying the empty day's date.
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -220,16 +220,17 @@ test.describe("Calendar Workouts", () => {
 
     await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
     await page.getByRole("button", { name: "Blank" }).click();
-    await page.waitForURL(/\/workout\/new\?source=scratch/);
+    await page.waitForURL(
+      new RegExp(`/workout/new\\?source=scratch&date=${dates[0]}`)
+    );
     await expect(page.getByTestId("add-step-button")).toBeVisible();
   });
 
-  test('Create overlay "Template" tile navigates to the Library', async ({
+  test('Create overlay "Template" tile opens the Library to pick for the day', async ({
     page,
   }) => {
-    // The redesign's Create overlay "Template" tile closes the overlay
-    // and routes to /library (the legacy inline TemplatePickerDialog on
-    // the picker was removed).
+    // The redesign's Create overlay "Template" tile routes to /library in
+    // template-picker mode, carrying the empty day's date.
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -243,7 +244,9 @@ test.describe("Calendar Workouts", () => {
     await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
 
     await page.getByRole("button", { name: "Template" }).click();
-    await page.waitForURL(/\/library$/);
+    await page.waitForURL(
+      new RegExp(`/library\\?source=template-picker&date=${dates[0]}`)
+    );
     await expect(page.getByTestId("library-page")).toBeVisible();
   });
 

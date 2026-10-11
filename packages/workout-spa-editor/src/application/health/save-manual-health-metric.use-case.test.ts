@@ -9,6 +9,7 @@ const DAY = "2026-05-23";
 const SAMPLE_WEIGHT_KG = 75;
 const SAMPLE_WEIGHT_KG_2 = 80;
 const SAMPLE_SLEEP_SCORE = 88;
+const SEVEN_THIRTY = 27000;
 const SAMPLE_RMSSD = 45;
 const PRIOR_STEPS = 1000;
 const NEW_STEPS = 8000;
@@ -249,7 +250,7 @@ describe("saveManualHealthMetric", () => {
     // Act
     await saveManualHealthMetric(
       { persistence, profileId: PROFILE_ID },
-      { metric: "sleep", day: DAY, value: SAMPLE_SLEEP_SCORE }
+      { metric: "sleep", day: DAY, sleep: { score: SAMPLE_SLEEP_SCORE } }
     );
 
     // Assert
@@ -259,6 +260,26 @@ describe("saveManualHealthMetric", () => {
       DAY
     );
     expect(rows[0]?.krd.score).toBe(SAMPLE_SLEEP_SCORE);
+    expect(rows[0]?.krd).not.toHaveProperty("totalDurationSeconds");
+  });
+
+  it("should persist the hours slept as the sleep duration", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "sleep", day: DAY, sleep: { durationSeconds: SEVEN_THIRTY } }
+    );
+
+    // Assert
+    const rows = await persistence.healthSleep.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(rows[0]?.krd.totalDurationSeconds).toBe(SEVEN_THIRTY);
   });
 
   it("should set hrv measurementWindow to a valid enum value", async () => {
@@ -309,7 +330,7 @@ describe("saveManualHealthMetric", () => {
       // Act
       const result = await saveManualHealthMetric(
         { persistence, profileId: PROFILE_ID },
-        { metric: "sleep", day: DAY, value }
+        { metric: "sleep", day: DAY, sleep: { score: value } }
       );
 
       // Assert

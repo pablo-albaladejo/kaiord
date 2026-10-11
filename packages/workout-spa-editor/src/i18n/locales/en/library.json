@@ -22,6 +22,8 @@
   "empty": {
     "title": "Your library is empty",
     "message": "Save a workout to your library to get started.",
+    "create": "New workout",
+    "import": "Import file",
     "createMessage": "Create your first workout and save it to your library to get started.",
     "filteredTitle": "No workouts found",
     "filteredMessage": "No workouts match your current filters."
@@ -112,5 +114,18 @@
     "title": "Anything you keep from the editor lands here",
     "body": "With its zones and structure intact, ready to drop onto any date.",
     "action": "Write a new one"
+  },
+  "scheduleDialog": {
+    "title": "Schedule Workout",
+    "description": "Pick a date for \"{{name}}\"",
+    "dateLabel": "Date",
+    "cancel": "Cancel",
+    "confirm": "Schedule",
+    "close": "Close",
+    "invalidDate": "Pick a valid date to schedule this workout."
+  },
+  "picker": {
+    "hintDated": "Choose a template to schedule on {{date}}.",
+    "hint": "Choose a template to schedule."
   }
 }

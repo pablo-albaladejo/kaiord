@@ -26,7 +26,8 @@ export function useTargetPickerBasicHandlers(params: BasicHandlersParams) {
     params.unit,
     params.onChange,
     params.setTargetValue,
-    params.setValidationError
+    params.setValidationError,
+    params.paceBase
   );
 
   return {

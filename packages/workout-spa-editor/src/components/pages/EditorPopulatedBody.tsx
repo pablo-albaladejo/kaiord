@@ -7,6 +7,7 @@ import { useWorkoutStore } from "../../store/workout-store";
 import type { KRD, Workout } from "../../types/krd";
 import type { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorBody } from "./EditorBody";
+import type { EditDiscard } from "./WorkoutSection/WorkoutActions";
 import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
 export type EditorPopulatedBodyProps = {
@@ -15,6 +16,8 @@ export type EditorPopulatedBodyProps = {
   sidebar: ReturnType<typeof useCoachingSidebar>;
   /** The profile owning the persisted record, if any. */
   ownerProfileId?: string;
+  /** A persisted workout: Discard drops unsaved edits instead. */
+  editDiscard?: EditDiscard;
 };
 
 export function EditorPopulatedBody({
@@ -22,6 +25,7 @@ export function EditorPopulatedBody({
   currentWorkout,
   sidebar,
   ownerProfileId,
+  editDiscard,
 }: EditorPopulatedBodyProps) {
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
   const reorderStep = useWorkoutStore((s) => s.reorderStep);
@@ -38,6 +42,7 @@ export function EditorPopulatedBody({
         onStepReorder={reorderStep}
         onReorderStepsInBlock={reorderStepsInBlock}
         ownerProfileId={ownerProfileId}
+        editDiscard={editDiscard}
       />
     </EditorBody>
   );

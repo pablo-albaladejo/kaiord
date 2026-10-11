@@ -52,9 +52,10 @@ export function useCalendarState() {
       ) {
         setSelectedWorkout(workout);
       } else {
+        // A card opens the read-only detail; editing is one tap further.
         // Carry the originating week so Back returns to THIS grid.
         navigate(
-          withOrigin(`/workout/${workout.id}`, "calendar", {
+          withOrigin(`/workout/view/${workout.id}`, "calendar", {
             week: data.weekId,
           })
         );

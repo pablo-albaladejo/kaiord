@@ -4,7 +4,9 @@ import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 import { SETTINGS_SECTION_ATTR } from "../../pages/SettingsPage/settings-section";
+import { BackupImportSection } from "./BackupImportSection";
 import { PrivacyInformationSection } from "./PrivacyInformationSection";
+import { useExportBackup } from "./use-export-backup";
 
 const SECURE_STORAGE_PREFIX = "kaiord_secure_";
 const CLEAR_FAILED_TOAST = "Failed to clear API keys — please retry.";
@@ -19,6 +21,7 @@ export const PrivacyTab: React.FC = () => {
   const t = useTranslate("settings");
   const persistence = usePersistence();
   const toast = useToastContext();
+  const exportData = useExportBackup();
 
   const handleClearAll = async () => {
     try {
@@ -58,6 +61,13 @@ export const PrivacyTab: React.FC = () => {
         <h3 className="mb-3 text-sm font-semibold text-ink-body">
           {t("privacy.dataManagement")}
         </h3>
+        <Button variant="secondary" size="sm" onClick={exportData}>
+          {t("privacy.exportData")}
+        </Button>
+        <p className="mb-4 mt-2 text-xs text-ink-muted">
+          {t("privacy.exportHint")}
+        </p>
+        <BackupImportSection />
         <Button variant="danger" size="sm" onClick={handleClearAll}>
           {t("privacy.clearAllApiKeys")}
         </Button>

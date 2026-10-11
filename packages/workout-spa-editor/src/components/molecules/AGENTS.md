@@ -36,7 +36,7 @@ Compositions of atoms with one focused responsibility. Each molecule may know ab
 - `RepetitionBlockCard/` — repetition-block card in the editor's main list.
 - `SaveButton/`, `SaveErrorDialog/` — save flow + error recovery.
 - `SaveToLibraryButton/` — promotes the current workout into a Library template.
-- `ScheduleDateDialog/` — pick a date when scheduling a template.
+- `ScheduleDateDialog/` — pick a date when scheduling a template or an undated draft; proposes `defaultDate` (else today) on every open and explains an invalid date inline.
 - `SelectionIndicator/` — multi-select highlight.
 - `StaleConflictDialog/` — surfaces stale-detection conflicts from `application/stale-detection`.
 - `StepCard/` — main step card in the editor.

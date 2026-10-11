@@ -9,7 +9,7 @@ const DELETE_ITEM = /^(Borrar|Eliminar)( entreno)?$/;
 const CONFIRM = /^(Borrar|Eliminar)$/;
 const NOT_FOUND = /no encontrado|no existe|not found/i;
 
-async function deleteOnce(page, go, id) {
+export async function deleteOnce(page, go, id) {
   await go(`workout/view/${id}`);
   await page.getByRole("button", { name: "Más opciones" }).click();
   await page.getByRole("menuitem", { name: DELETE_ITEM }).click();
@@ -18,9 +18,21 @@ async function deleteOnce(page, go, id) {
     .or(page.getByRole("dialog"))
     .getByRole("button", { name: CONFIRM })
     .click();
+  // The detail leaves only after the delete has committed; reloading before
+  // that would abort the IndexedDB write.
+  await expect(page).not.toHaveURL(/#\/workout\/view\//, { timeout: TIMEOUT });
 }
 
-// F-30: "Más opciones" is permanently disabled, so nothing can delete.
+// Changes the route in-app, without a reload, so a pending write survives.
+export async function showCalendarInApp(page) {
+  await page.evaluate(() => {
+    window.location.hash = "#/calendar";
+  });
+  await page.getByTestId("calendar-week-grid").waitFor({ timeout: TIMEOUT });
+}
+
+// F-30: the detail's "Más opciones" deletes after a confirm; "Deshacer"
+// brings the card back, and a delete with no Undo holds after a reload.
 export async function deleteWithUndo(rec, session, id) {
   const { page, go } = session;
   await go(`workout/view/${id}`);
@@ -39,8 +51,14 @@ export async function deleteWithUndo(rec, session, id) {
   const card = page.getByTestId(`workout-card-${id}`);
   await deleteOnce(page, go, id);
   await page.getByRole("button", { name: /^Deshacer$/ }).click();
-  await go("calendar");
+  // Undo writes the row back asynchronously: see it land in-app first, then
+  // reload to prove it persisted.
+  await showCalendarInApp(page);
   await expectOk(rec, "F-30: Undo brings the card back", () =>
+    expect(card).toBeVisible({ timeout: TIMEOUT })
+  );
+  await go("calendar");
+  await expectOk(rec, "F-30: the undone delete holds after a reload", () =>
     expect(card).toBeVisible({ timeout: TIMEOUT })
   );
   await deleteOnce(page, go, id);

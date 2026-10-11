@@ -21,15 +21,16 @@ export function DurationValueInput({
 }: DurationValueInputProps) {
   return (
     <Input
-      variant="number"
+      variant={durationType === "time" ? "text" : "number"}
+      inputMode={durationType === "time" ? "numeric" : "decimal"}
       label={getValueLabel(durationType)}
       value={value}
       onChange={onChange}
       disabled={disabled}
       error={error}
       placeholder={getValuePlaceholder(durationType)}
-      min="0"
-      step={durationType === "time" ? "1" : "0.01"}
+      min={durationType === "time" ? undefined : "0"}
+      step={durationType === "time" ? undefined : "0.01"}
       aria-label={getValueLabel(durationType)}
       aria-invalid={Boolean(error)}
       aria-describedby={error ? "duration-error" : undefined}

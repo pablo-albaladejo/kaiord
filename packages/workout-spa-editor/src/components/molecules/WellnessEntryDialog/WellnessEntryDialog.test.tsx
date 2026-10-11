@@ -96,4 +96,28 @@ describe("WellnessEntryDialog", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
+
+  it("should open on the field of the metric it was opened for", async () => {
+    // Arrange
+    const persistence = await setup();
+    const { hook } = memoryLocation({ path: "/health/sleep", record: true });
+
+    // Act
+    renderWithProviders(
+      <Router hook={hook}>
+        <WellnessEntryDialog
+          open
+          onOpenChange={vi.fn()}
+          date={DAY}
+          focusMetric="sleep"
+        />
+      </Router>,
+      { persistence }
+    );
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByLabelText("Sleep hours (h:mm)")).toHaveFocus();
+    });
+  });
 });

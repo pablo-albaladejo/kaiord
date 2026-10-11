@@ -226,7 +226,7 @@ test.describe("Create → Save & schedule → calendar landing", () => {
     const today = toLocalDateString(new Date());
     const weekId = getWeekId(today);
 
-    // Act — author a scratch workout without a date (defaults to today) and save
+    // Act — author a scratch workout without a date; the prompt proposes today
     await seedEmptyWorkout(
       page,
       buildStructuredCyclingKrd(new Date().toISOString())
@@ -234,6 +234,11 @@ test.describe("Create → Save & schedule → calendar landing", () => {
     const scheduleButton = page.getByTestId("scratch-schedule-button");
     await expect(scheduleButton).toBeEnabled({ timeout: 10000 });
     await scheduleButton.click();
+    await expect(page.getByTestId("schedule-date-input")).toHaveValue(today);
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Schedule" })
+      .click();
 
     // Assert — back on the calendar week containing today, new card visible
     await expect(page).toHaveURL(new RegExp(`/calendar/${weekId}$`));

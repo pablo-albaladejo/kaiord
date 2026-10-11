@@ -30,6 +30,9 @@ const FIT_CHUNK = new RegExp(`${APP_BASE}assets/kaiord-fit-[\\w-]+\\.js$`);
 const REPEAT_WORKOUT = { file: "WorkoutRepeatSteps.fit", steps: 4, blocks: 1 };
 // WorkoutIndividualSteps.fit: four plain steps.
 const PLAIN_WORKOUT = { file: "WorkoutIndividualSteps.fit", steps: 4 };
+// Activity.fit: a recorded activity (session, lap, records) from 2021-07-20.
+// The `date` query is what makes the import persist it as an activity row.
+const ACTIVITY = { file: "Activity.fit", date: "2021-07-20" };
 
 const fixture = (name: string): Buffer =>
   readFileSync(
@@ -85,16 +88,41 @@ async function expectImported(
 const hasStepCards = (page: Page, steps: number) => async () =>
   (await page.getByTestId("step-card").count()) === steps;
 
-/** Health imports are filed under the active profile. */
-async function createProfile(page: Page, dist: MergedDist): Promise<void> {
-  await page.goto(dist.routeUrl("/athlete"));
-  await page.getByRole("button", { name: "Create profile" }).click();
-  await page.getByRole("textbox", { name: "Name" }).fill("FIT import athlete");
-  await page.getByRole("button", { name: "Create Profile" }).click();
-  // The first profile is activated on creation.
-  await expect(
-    page.getByRole("heading", { name: "Saved Profiles (1)" })
-  ).toBeVisible({ timeout: IMPORT_TIMEOUT_MS });
+/** Origins of every stored profile, read without the app's dev-only hooks. */
+const profileOrigins = (page: Page): Promise<(string | null)[]> =>
+  page.evaluate(
+    () =>
+      new Promise<(string | null)[]>((resolve, reject) => {
+        const open = indexedDB.open("kaiord-spa");
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const db = open.result;
+          const rows = db
+            .transaction("profiles")
+            .objectStore("profiles")
+            .getAll();
+          rows.onerror = () => reject(rows.error);
+          rows.onsuccess = () => {
+            db.close();
+            resolve(rows.result.map((row) => row.origin ?? null));
+          };
+        };
+      })
+  );
+
+/**
+ * Health imports are filed under the active profile. A fresh install gets
+ * one without any setup: the default, unclaimed profile the app creates on
+ * first open, so no profile is created here.
+ */
+async function expectDefaultProfile(
+  page: Page,
+  dist: MergedDist
+): Promise<void> {
+  await page.goto(dist.routeUrl("/calendar"));
+  await expect
+    .poll(() => profileOrigins(page), { timeout: IMPORT_TIMEOUT_MS })
+    .toEqual(["auto"]);
 }
 
 /** Row count of an IndexedDB store, read without the app's dev-only hooks. */
@@ -164,6 +192,37 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
     await expectImported(page, hasStepCards(page, steps));
   });
 
+  test("should keep the repeat block and targets when re-importing an exported FIT", async ({
+    page,
+  }) => {
+    // Arrange
+    const { file, steps, blocks } = REPEAT_WORKOUT;
+    await uploadFit(page, dist, { name: file, buffer: fixture(file) });
+    await expectImported(page, hasStepCards(page, steps));
+    const original = await page.getByTestId("step-card").allInnerTexts();
+    await page.getByTestId("export-format-selector-button").click();
+    await page.getByTestId("export-format-option-fit").click();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: /download a file/i }).click();
+    const exported = readFileSync(await (await download).path());
+    // A fresh page, so no card left over from the first import can satisfy
+    // the assertions below.
+    const fresh = await page.context().newPage();
+
+    // Act
+    await uploadFit(fresh, dist, { name: "exported.fit", buffer: exported });
+
+    // Assert
+    await expectImported(fresh, hasStepCards(fresh, steps));
+    await expect(fresh.getByTestId("repetition-block-card")).toHaveCount(
+      blocks
+    );
+    // Each card renders its step's duration and target.
+    expect(await fresh.getByTestId("step-card").allInnerTexts()).toEqual(
+      original
+    );
+  });
+
   for (const health of [
     { file: "HealthHrvOvernight.fit", store: "healthHrv", route: "recovery" },
     {
@@ -176,7 +235,7 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
       page,
     }) => {
       // Arrange
-      await createProfile(page, dist);
+      await expectDefaultProfile(page, dist);
       const file = { name: health.file, buffer: fixture(health.file) };
 
       // Act
@@ -189,4 +248,25 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
       expect(await storeCount(page, health.store)).toBe(1);
     });
   }
+
+  test("should store the activity row from Activity.fit", async ({ page }) => {
+    // Arrange
+    await expectDefaultProfile(page, dist);
+    await page.goto(
+      dist.routeUrl(`/workout/new?action=import&date=${ACTIVITY.date}`)
+    );
+
+    // Act
+    await page.getByTestId("file-upload-input").setInputFiles({
+      name: ACTIVITY.file,
+      mimeType: "application/octet-stream",
+      buffer: fixture(ACTIVITY.file),
+    });
+
+    // Assert
+    await expectImported(page, async () =>
+      new URL(page.url()).hash.startsWith("#/calendar")
+    );
+    expect(await storeCount(page, "activities")).toBe(1);
+  });
 });

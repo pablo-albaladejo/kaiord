@@ -8,6 +8,7 @@ type TargetPickerRangeInputProps = {
   placeholder: string;
   ariaLabel: string;
   hasError: boolean;
+  clock?: boolean;
 };
 
 export function TargetPickerRangeInput({
@@ -18,17 +19,19 @@ export function TargetPickerRangeInput({
   placeholder,
   ariaLabel,
   hasError,
+  clock = false,
 }: TargetPickerRangeInputProps) {
   return (
     <Input
-      variant="number"
+      variant={clock ? "text" : "number"}
+      inputMode={clock ? "numeric" : "decimal"}
       label={label}
       value={value}
       onChange={onChange}
       disabled={disabled}
       placeholder={placeholder}
-      min="0"
-      step="0.01"
+      min={clock ? undefined : "0"}
+      step={clock ? undefined : "0.01"}
       aria-label={ariaLabel}
       aria-invalid={hasError}
     />

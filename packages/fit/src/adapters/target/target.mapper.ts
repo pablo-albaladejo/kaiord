@@ -1,12 +1,31 @@
 import { type Target, type TargetType, targetTypeSchema } from "@kaiord/core";
 
+import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
 import type { FitWorkoutStep } from "../shared/types";
 import { convertFitTarget } from "./target.converter";
 
-export const mapTarget = (step: FitWorkoutStep): Target => {
-  return convertFitTarget(step);
-};
+const D = fitDurationTypeSchema.enum;
+
+// A repeat-until step stores its repeat condition in `targetValue`
+// (the profile's `repeat*` sub-fields), so that field is not a target.
+const REPEAT_UNTIL_DURATIONS: ReadonlySet<string> = new Set([
+  D.repeatUntilTime,
+  D.repeatUntilDistance,
+  D.repeatUntilCalories,
+  D.repeatUntilHrLessThan,
+  D.repeatUntilHrGreaterThan,
+  D.repeatUntilPowerLessThan,
+  D.repeatUntilPowerGreaterThan,
+]);
+
+const hasTarget = (step: FitWorkoutStep): boolean =>
+  !REPEAT_UNTIL_DURATIONS.has(step.durationType ?? "");
+
+export const mapTarget = (step: FitWorkoutStep): Target =>
+  hasTarget(step)
+    ? convertFitTarget(step)
+    : { type: targetTypeSchema.enum.open };
 
 export const mapTargetType = (
   fitTargetType: string | undefined
@@ -23,3 +42,6 @@ export const mapTargetType = (
     return targetTypeSchema.enum.stroke_type;
   return targetTypeSchema.enum.open;
 };
+
+export const mapStepTargetType = (step: FitWorkoutStep): TargetType =>
+  hasTarget(step) ? mapTargetType(step.targetType) : targetTypeSchema.enum.open;

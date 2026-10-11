@@ -261,7 +261,7 @@ test.describe("Delete with Undo Flow", () => {
     // Verify the first step (200W warmup) is back at index 0
     const restoredFirstStep = stepCards.nth(0);
     await expect(restoredFirstStep).toContainText("200");
-    await expect(restoredFirstStep).toContainText("warmup");
+    await expect(restoredFirstStep).toContainText("Warm-up");
   });
 
   test("should keep undo option available when performing other actions", async ({

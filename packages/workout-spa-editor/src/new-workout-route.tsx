@@ -2,15 +2,14 @@ import { useLocation, useSearch } from "wouter";
 
 import { CreateWorkout, EditorPage } from "./lazy-pages";
 import { calendarWeekHref } from "./routing/calendar-week-href";
-import { buildPickerHref } from "./routing/picker-href";
+import { sheetCloseHref } from "./routing/new-session-href";
 
 /**
  * Dispatches `/workout/new`: the import/scratch query params open the editor
  * directly; otherwise the AI Create overlay is shown.
  *
- * `onClose` is context-aware (#5): when the route carries a `?date=` (entered
- * from a dated calendar day) it returns to the dated picker so the date is
- * preserved; otherwise it falls back to the calendar home.
+ * `onClose` leaves the sheet for the surface it was opened from: the
+ * calendar week holding `?date=` / `?week=`, or the `?from=` origin.
  *
  * `onSaved` lands on the calendar week containing the saved record so the
  * new workout is visible on arrival.
@@ -23,8 +22,11 @@ export function NewWorkoutRoute() {
   const hasSource = params.get("source") === "scratch";
   const hasCoachingDraft = params.get("coaching") !== null;
   if (hasAction || hasSource || hasCoachingDraft) return <EditorPage />;
-  const date = params.get("date");
-  const closeTarget = date ? buildPickerHref(date) : "/calendar";
+  const closeTarget = sheetCloseHref({
+    date: params.get("date"),
+    week: params.get("week"),
+    from: params.get("from"),
+  });
   return (
     <CreateWorkout
       onClose={() => navigate(closeTarget)}

@@ -9,17 +9,23 @@
  * The `connections` store is deliberately EXCLUDED (device-local): it holds
  * provider account linkage + encrypted credentials that must never be written
  * to remote snapshot storage (#714, design D5). The energy-balance stores
- * (`intakeEntries`, `intakePresets`, `energyTargets`) are likewise EXCLUDED:
- * nutrition intake, presets, and the deficit/surplus goal are device-local
- * PII that must never reach remote snapshot storage (energy-balance-tracking).
+ * (`intakeEntries`, `intakePresets`, `energyTargets`) ride the snapshot since
+ * v37: nutrition syncs across devices like the other health data, merged
+ * last-write-wins on `updatedAt` with tombstoned deletes.
  */
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import type { SnapshotTables, Tombstone } from "../../types/snapshot";
 import type { KaiordDatabase } from "./dexie-database";
+import { createDexieSnapshotProfileOps } from "./dexie-snapshot-profile-ops";
 
 const TOMBSTONES = "tombstones";
 // Device-local; never exported to / imported from a remote snapshot.
+//
+// The energy-balance stores are NOT listed: since v37 they sync. A device on
+// an older build still treats them as device-local, so its snapshots carry
+// no nutrition tables; the merge unions table names, so a missing table is
+// "no information" and the rows other devices synced survive its push.
 //
 // The v27 `activities` store (executed sessions) is intentionally NOT listed
 // here: it rides the cloud snapshot like `workouts`, `plannedSessions`, and
@@ -34,13 +40,7 @@ const TOMBSTONES = "tombstones";
 // 12-month tombstoning prune bounds its growth (see prune-usage-events).
 // Exported so the tombstone-coverage guard can tell a table that never leaves
 // the device (no tombstone needed) from one that rides the snapshot.
-export const DEVICE_LOCAL = new Set([
-  TOMBSTONES,
-  "connections",
-  "intakeEntries",
-  "intakePresets",
-  "energyTargets",
-]);
+export const DEVICE_LOCAL = new Set([TOMBSTONES, "connections"]);
 
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive
 // transaction overloads (TS2589). Same pattern as dexie-persistence-adapter.
@@ -56,6 +56,7 @@ export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
   const scoped = db as unknown as { transaction: DexieTxScope };
 
   return {
+    ...createDexieSnapshotProfileOps(db),
     // One transaction over every table. The inner `importTables` /
     // `replaceTombstones` / read calls below open Dexie transactions on
     // subsets of this scope, which Dexie nests into (joins) this one — so

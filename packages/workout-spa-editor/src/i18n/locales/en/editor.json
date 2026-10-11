@@ -101,7 +101,8 @@
     "invalidTitle": "Invalid date",
     "invalidDescription": "Could not schedule — the date is not a valid calendar day.",
     "saveFailedTitle": "Save failed",
-    "saveFailedDescription": "Could not schedule the workout — please retry."
+    "saveFailedDescription": "Could not schedule the workout — please retry.",
+    "noProfileReason": "Select or create an athlete profile to schedule this workout."
   },
   "raw": {
     "dialogDescription": "Raw workout details with coach description, comment selection, and actions to process or skip.",
@@ -145,7 +146,9 @@
     "save": "Done",
     "saveAria": "Close the step form",
     "fixErrorsTitle": "Fix validation errors first",
-    "saveTitle": "Close the step form"
+    "saveTitle": "Close the step form",
+    "intensityLabel": "Intensity",
+    "intensityAria": "Select step intensity"
   },
   "firstTimeHints": {
     "dismiss": "Dismiss hints",
@@ -308,7 +311,8 @@
     "editCount": "Edit count",
     "countAria": "Repeat count",
     "ungroup": "Ungroup",
-    "deleteShort": "Delete"
+    "deleteShort": "Delete",
+    "actionsAria": "Block actions"
   },
   "convert": {
     "heading": "Convert {{from}} to {{to}}",
@@ -322,5 +326,55 @@
     "download": "2. Download it (change the format if you need to)",
     "sameFormat": "Pick two different formats.",
     "wrongFormat": "That is not a {{from}} file. Choose a {{from}} file, or pick another format."
+  },
+  "edits": {
+    "save": "Save changes",
+    "unsaved": "Unsaved changes",
+    "saved": "Changes saved",
+    "notFound": "This workout no longer exists, so the changes were not saved.",
+    "discardAction": "Discard changes",
+    "discardTitle": "Discard changes",
+    "discardMessage": "Discard the changes you have not saved? The saved workout stays as it is.",
+    "discardConfirm": "Discard changes",
+    "keepEditing": "Keep editing"
+  },
+  "notFound": {
+    "title": "Workout not found",
+    "body": "It may have been deleted, or the link is out of date.",
+    "backToCalendar": "Back to calendar"
+  },
+  "intensity": {
+    "warmup": "Warm-up",
+    "active": "Active",
+    "cooldown": "Cool-down",
+    "rest": "Rest",
+    "recovery": "Recovery",
+    "interval": "Interval",
+    "other": "Other"
+  },
+  "durationPicker": {
+    "typeLabel": "Duration type",
+    "typeAria": "Select duration type",
+    "timeLabel": "Duration (mm:ss)",
+    "timePlaceholder": "e.g. 5:00",
+    "distanceLabel": "Distance (meters)",
+    "distancePlaceholder": "e.g. 1000 (1 km)",
+    "openHint": "Open-ended: press lap to finish the step",
+    "required": "Value is required",
+    "invalidClock": "Enter a time as m:ss, e.g. 5:00",
+    "invalidNumber": "Must be a valid number",
+    "positive": "Must be greater than 0",
+    "maxTime": "Duration cannot exceed 24 hours",
+    "maxDistance": "Distance cannot exceed 1000 km"
+  },
+  "notes": {
+    "label": "Notes & Coaching Cues",
+    "placeholder": "Add coaching cues or notes for this step...",
+    "count": "{{n}} / {{max}} characters",
+    "over": "({{n}} over limit)"
+  },
+  "paste": {
+    "label": "Paste Step",
+    "aria": "Paste step from clipboard"
   }
 }

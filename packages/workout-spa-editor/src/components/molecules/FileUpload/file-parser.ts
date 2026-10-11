@@ -23,9 +23,10 @@ export type ImportProgressCallback = (progress: number) => void;
 export const parseFile = async (
   file: File,
   onProgress?: ImportProgressCallback,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onWarning?: (message: string) => void
 ): Promise<KRD> => {
-  return await importWorkout(file, onProgress, signal);
+  return await importWorkout(file, onProgress, signal, onWarning);
 };
 
 export const createParseError = (error: unknown): ErrorState => {

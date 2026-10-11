@@ -15,6 +15,23 @@ export {
   formatPowerTarget,
 };
 
+const TARGET_KEYS: Record<string, string> = {
+  power: "target.power",
+  heart_rate: "target.heartRate",
+  cadence: "target.cadence",
+  pace: "target.pace",
+  open: "target.open",
+};
+
+/** The localized name of a target type, e.g. "heart_rate" → "Heart rate". */
+export const targetTypeLabel = (
+  targetType: string,
+  t: Translate = getTranslate("editor")
+): string => {
+  const key = TARGET_KEYS[targetType];
+  return key ? t(key) : targetType.replace(/_/g, " ");
+};
+
 /** Top-level target formatter used by StepCard. */
 export const formatTarget = (
   step: WorkoutStep,
@@ -23,7 +40,7 @@ export const formatTarget = (
 ): string => {
   const { target, targetType } = step;
   if (targetType === "open") return t("target.open");
-  if (!("value" in target)) return targetType.replace(/_/g, " ");
+  if (!("value" in target)) return targetTypeLabel(targetType, t);
   const value = target.value;
   switch (targetType) {
     case "power":
@@ -35,6 +52,6 @@ export const formatTarget = (
     case "pace":
       return formatPaceTarget(value, units, t);
     default:
-      return targetType.replace(/_/g, " ");
+      return targetTypeLabel(targetType, t);
   }
 };

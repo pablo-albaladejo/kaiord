@@ -157,7 +157,7 @@ describe("convertTcxWorkout", () => {
     expect(result.extensions).toBeUndefined();
   });
 
-  it("should skip Repeat_t steps", () => {
+  it("should convert Repeat_t steps into repetition blocks", () => {
     // Arrange
     const logger = createMockLogger();
     const tcxWorkout = {
@@ -173,6 +173,20 @@ describe("convertTcxWorkout", () => {
         {
           "@_xsi:type": "Repeat_t",
           Repetitions: 3,
+          Child: [
+            {
+              "@_xsi:type": "Step_t",
+              Duration: { "@_xsi:type": "Time_t", Seconds: 60 },
+              Target: { "@_xsi:type": "None_t" },
+              Intensity: "Active",
+            },
+            {
+              "@_xsi:type": "Step_t",
+              Duration: { "@_xsi:type": "Time_t", Seconds: 30 },
+              Target: { "@_xsi:type": "None_t" },
+              Intensity: "Resting",
+            },
+          ],
         },
         {
           "@_xsi:type": "Step_t",
@@ -187,7 +201,18 @@ describe("convertTcxWorkout", () => {
     const result = convertTcxWorkout(tcxWorkout, logger);
 
     // Assert
-    expect(result.steps).toHaveLength(2);
+    const topLevelEntries = 3;
+    expect(result.steps).toHaveLength(topLevelEntries);
+    const [warmup, block, cooldown] = result.steps;
+    expect(warmup).toMatchObject({ stepIndex: 0, intensity: "warmup" });
+    expect(block).toMatchObject({
+      repeatCount: 3,
+      steps: [
+        { stepIndex: 1, intensity: "active" },
+        { stepIndex: 2, intensity: "rest" },
+      ],
+    });
+    expect(cooldown).toMatchObject({ stepIndex: 3, intensity: "cooldown" });
   });
 
   it("should handle missing name", () => {

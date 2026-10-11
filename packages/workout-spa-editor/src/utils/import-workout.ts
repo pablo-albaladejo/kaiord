@@ -9,12 +9,12 @@ import type { KRD } from "@kaiord/core";
 
 import type { WorkoutFileFormat } from "./file-format-detector";
 import { detectFormat } from "./file-format-detector";
+import { importTcxFile } from "./import-tcx-file";
 import { transformError } from "./import-workout-errors";
 import {
   importFitFile,
   importGcnFile,
   importKrdFile,
-  importTcxFile,
   importZwoFile,
 } from "./import-workout-formats";
 
@@ -36,10 +36,15 @@ export class ImportError extends Error {
 
 export type ImportProgressCallback = (progress: number) => void;
 
+/** Receives each loss the reader announced (a step it skipped, a target it
+ * could not map) so the UI can tell the user the import is not exact. */
+export type ImportWarningCallback = (message: string) => void;
+
 export const importWorkout = async (
   file: File,
   onProgress?: ImportProgressCallback,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onWarning?: ImportWarningCallback
 ): Promise<KRD> => {
   signal?.throwIfAborted();
 
@@ -66,7 +71,7 @@ export const importWorkout = async (
     } else if (format === "fit") {
       return await importFitFile(uint8Array, onProgress, signal);
     } else if (format === "tcx") {
-      return await importTcxFile(uint8Array, onProgress, signal);
+      return await importTcxFile(uint8Array, onProgress, signal, onWarning);
     } else if (format === "zwo") {
       return await importZwoFile(uint8Array, onProgress, signal);
     } else if (format === "gcn") {
