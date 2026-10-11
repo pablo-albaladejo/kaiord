@@ -323,5 +323,21 @@
     "download": "2. Descárgalo (cambia el formato si lo necesitas)",
     "sameFormat": "Elige dos formatos distintos.",
     "wrongFormat": "Ese archivo no es {{from}}. Elige un archivo {{from}} o cambia de formato."
+  },
+  "edits": {
+    "save": "Guardar cambios",
+    "unsaved": "Cambios sin guardar",
+    "saved": "Cambios guardados",
+    "notFound": "Este entreno ya no existe, así que los cambios no se guardaron.",
+    "discardAction": "Descartar cambios",
+    "discardTitle": "Descartar cambios",
+    "discardMessage": "¿Descartar los cambios sin guardar? El entreno guardado se queda como está.",
+    "discardConfirm": "Descartar cambios",
+    "keepEditing": "Seguir editando"
+  },
+  "notFound": {
+    "title": "Entreno no encontrado",
+    "body": "Puede que se haya borrado o que el enlace esté desactualizado.",
+    "backToCalendar": "Volver al calendario"
   }
 }

@@ -1,13 +1,21 @@
 import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import {
+  WorkoutDetailMenu,
+  type WorkoutDetailMenuProps,
+} from "./WorkoutDetailMenu";
 
-export type WorkoutDetailHeaderProps = {
+export type WorkoutDetailHeaderProps = WorkoutDetailMenuProps & {
   onBack: () => void;
 };
 
-/** Sheet header: back chevron, the route-heading title, and an inert dots menu. */
-export function WorkoutDetailHeader({ onBack }: WorkoutDetailHeaderProps) {
+/** Sheet header: back chevron, the route-heading title, and the dots menu. */
+export function WorkoutDetailHeader({
+  onBack,
+  onMove,
+  onDelete,
+}: WorkoutDetailHeaderProps) {
   const t = useTranslate("workout-detail");
   return (
     <div className="flex items-center justify-between">
@@ -27,14 +35,7 @@ export function WorkoutDetailHeader({ onBack }: WorkoutDetailHeaderProps) {
       >
         {t("header.title")}
       </h1>
-      <button
-        type="button"
-        aria-label={t("header.moreOptions")}
-        disabled
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink-muted"
-      >
-        <Icon icon={ICON_MAP.dots} size="md" color="inherit" />
-      </button>
+      <WorkoutDetailMenu onMove={onMove} onDelete={onDelete} />
     </div>
   );
 }

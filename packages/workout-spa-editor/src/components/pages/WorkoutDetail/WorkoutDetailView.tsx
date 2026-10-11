@@ -16,6 +16,8 @@ export type WorkoutDetailViewProps = {
   model: ReviewModel | null;
   onBack: () => void;
   onEdit: () => void;
+  onMove: () => void;
+  onDelete: () => void;
 };
 
 /* The third metric is the hardest zone the session reaches, said with a swatch
@@ -50,6 +52,8 @@ export function WorkoutDetailView({
   model,
   onBack,
   onEdit,
+  onMove,
+  onDelete,
 }: WorkoutDetailViewProps) {
   const t = useTranslate("workout-detail");
   const tZones = useTranslate("zones");
@@ -58,7 +62,11 @@ export function WorkoutDetailView({
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-4 bg-surface-deep p-4">
-      <WorkoutDetailHeader onBack={onBack} />
+      <WorkoutDetailHeader
+        onBack={onBack}
+        onMove={onMove}
+        onDelete={onDelete}
+      />
       <WorkoutDetailTitle sport={record.sport} title={title} tag={tag} />
       {model && (
         <>
