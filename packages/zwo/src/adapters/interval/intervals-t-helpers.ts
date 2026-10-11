@@ -6,7 +6,7 @@ import { convertOriginalZwiftDuration } from "../duration/original-duration.conv
 import { convertZwiftCadenceTarget } from "../target/pace-cadence.converter";
 import { convertZwiftPowerTarget } from "../target/power.converter";
 import type { ZwiftTextEvent } from "./index";
-import { extractTextEvents } from "./index";
+import { extractTextEvents, splitIntervalsTTextEvents } from "./index";
 
 export type ZwiftIntervalsTData = {
   Repeat: number;
@@ -19,7 +19,17 @@ export type ZwiftIntervalsTData = {
   durationType?: "time" | "distance";
   stepIndex: number;
   textevent?: ZwiftTextEvent | Array<ZwiftTextEvent>;
+  "kaiord:textEventSplit"?: number;
 };
+
+const sideTextEvents = (data: ZwiftIntervalsTData, side: "on" | "off") =>
+  extractTextEvents(
+    splitIntervalsTTextEvents(
+      data.textevent,
+      data["kaiord:textEventSplit"],
+      data.OnDuration
+    )[side]
+  );
 
 export const createOnStep = (data: ZwiftIntervalsTData): WorkoutStep => {
   const onDurationData: ZwiftDurationData = {
@@ -37,7 +47,7 @@ export const createOnStep = (data: ZwiftIntervalsTData): WorkoutStep => {
     onTarget = { type: targetTypeSchema.enum.open };
   }
 
-  const textEventData = extractTextEvents(data.textevent);
+  const textEventData = sideTextEvents(data, "on");
 
   const onStep: WorkoutStep = {
     stepIndex: data.stepIndex,
@@ -52,6 +62,7 @@ export const createOnStep = (data: ZwiftIntervalsTData): WorkoutStep => {
   if (data.OnPower !== undefined && data.Cadence !== undefined) {
     onStep.extensions = {
       zwift: {
+        ...((onStep.extensions?.zwift ?? {}) as object),
         cadence: data.Cadence,
       },
     };
@@ -83,11 +94,13 @@ export const createOffStep = (data: ZwiftIntervalsTData): WorkoutStep => {
     targetType: offTarget.type,
     target: offTarget,
     intensity: intensitySchema.enum.recovery,
+    ...sideTextEvents(data, "off"),
   };
 
   if (data.OffPower !== undefined && data.CadenceResting !== undefined) {
     offStep.extensions = {
       zwift: {
+        ...((offStep.extensions?.zwift ?? {}) as object),
         cadence: data.CadenceResting,
       },
     };
