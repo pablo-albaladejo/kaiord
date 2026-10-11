@@ -943,6 +943,11 @@ jobs:
           E2E_PROD_BASE: "1"
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle'
 
+      # The global setup above left an /app/ build in dist/. Every absolute
+      # url() in its CSS must name a file that build serves (R-CssAssetUrls).
+      - name: Check CSS asset URLs resolve under /app/
+        run: node scripts/check-css-asset-urls.mjs --dist packages/workout-spa-editor/dist --base /app/
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v7
