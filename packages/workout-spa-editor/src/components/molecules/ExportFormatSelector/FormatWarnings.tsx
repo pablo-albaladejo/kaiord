@@ -1,11 +1,12 @@
 import { AlertCircle } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFormatWarnings } from "./format-helpers";
 
 type FormatWarningsProps = {
-  readonly format: WorkoutFileFormat;
+  readonly format: WorkoutFileFormat | null;
   readonly workout?: KRD;
   readonly validationErrors: readonly ValidationError[];
 };
@@ -15,7 +16,8 @@ export function FormatWarnings({
   workout,
   validationErrors,
 }: FormatWarningsProps) {
-  const warning = getFormatWarnings(format, workout);
+  const t = useTranslate("editor");
+  const warning = format ? getFormatWarnings(format, workout, t) : null;
 
   return (
     <>
@@ -29,7 +31,7 @@ export function FormatWarnings({
       {validationErrors.length > 0 && (
         <div className="mt-2 p-3 bg-danger-bg border border-danger-border rounded-lg">
           <p className="text-sm font-semibold text-danger-text mb-1">
-            Cannot export structured workout:
+            {t("exportFormat.cannotExport")}
           </p>
           <ul className="text-sm text-danger-text list-disc list-inside">
             {validationErrors.map((error) => {

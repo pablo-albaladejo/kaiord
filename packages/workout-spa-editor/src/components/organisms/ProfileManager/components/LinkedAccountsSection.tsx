@@ -6,6 +6,7 @@
  * manages the connect AbortController so leaving the panel cancels.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 import { LinkedAccountRow } from "./LinkedAccountRow";
 import type { SourceMeta } from "./use-linked-account-row";
@@ -17,9 +18,12 @@ export type LinkedAccountsSectionProps = {
 };
 
 export function LinkedAccountsSection({ profile }: LinkedAccountsSectionProps) {
+  const t = useTranslate("athlete");
   return (
     <div data-testid="linked-accounts-section" className="space-y-3">
-      <h3 className="text-sm font-semibold">Linked Coaching Accounts</h3>
+      <h3 className="text-sm font-semibold">
+        {t("profileManager.linkedTitle")}
+      </h3>
       {SUPPORTED_SOURCES.map((src) => (
         <LinkedAccountRow key={src.id} profile={profile} sourceMeta={src} />
       ))}

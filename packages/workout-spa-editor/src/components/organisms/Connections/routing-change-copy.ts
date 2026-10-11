@@ -3,8 +3,8 @@ import type { SourceOfTruthOptions } from "../../../application/connections/sour
 import type { Translate } from "../../../i18n/use-translate";
 import { sourceName } from "./routing-copy";
 
-export const choiceLabel = (sourceId: string): string =>
-  sourceName(toIntegrationId(sourceId));
+export const choiceLabel = (sourceId: string, t: Translate): string =>
+  sourceName(toIntegrationId(sourceId), t);
 
 /**
  * What the panel says BEFORE either button is reachable.
@@ -36,7 +36,7 @@ export const pickerIntro = (
   return [
     t("routing.change.ranked", {
       type,
-      name: choiceLabel(options.current),
+      name: choiceLabel(options.current, t),
     }),
   ];
 };

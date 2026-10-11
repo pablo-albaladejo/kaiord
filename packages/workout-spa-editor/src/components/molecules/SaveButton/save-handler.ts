@@ -4,7 +4,6 @@ import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable
 import type { Profile } from "../../../types/profile";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
-import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { generateWorkoutFilename } from "./workout-filename";
 
 const exportErrorMessage = (err: unknown, t: Translate): string => {
@@ -47,12 +46,7 @@ export function createSaveHandler(
       const filename = generateWorkoutFilename(workout, selectedFormat);
       downloadWorkout(buffer, filename, selectedFormat);
 
-      const workoutName = getStructuredWorkout(workout)?.name || "workout";
-      const formatLabel = selectedFormat.toUpperCase();
-      success(
-        t("save.savedTitle"),
-        t("save.savedDescription", { name: workoutName, format: formatLabel })
-      );
+      success(t("save.savedTitle"), t("save.savedDescription", { filename }));
       onExported?.(selectedFormat);
     } catch (err) {
       const errorMessage = exportErrorMessage(err, t);

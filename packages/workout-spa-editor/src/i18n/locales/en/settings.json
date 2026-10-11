@@ -97,7 +97,9 @@
     "deprecatedOn": "{{model}} is deprecated and will be retired on {{date}} — consider {{successor}}.",
     "customModelIdAriaLabel": "Custom model id",
     "customModelIdPlaceholder": "Enter a model id",
-    "reset": "Reset"
+    "reset": "Reset",
+    "setFailed": "Failed to set the model — please retry.",
+    "resetFailed": "Failed to reset the model — please retry."
   },
   "sync": {
     "description": "Sync your workouts, health and nutrition data (intake log, presets and goal) and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved. If two devices each hold a nutrition goal for the same profile, the most recently saved one is kept.",
@@ -116,7 +118,10 @@
       "title": "Which profile is this device for?",
       "body": "Your Google Drive already holds several profiles. Pick the one that should receive what you recorded on this device; nothing is synced until you choose.",
       "unnamed": "Unnamed profile"
-    }
+    },
+    "connectFailed": "Could not connect Google account — please retry.",
+    "syncFailed": "Sync failed — your data is safe and stays local.",
+    "synced": "Sync complete."
   },
   "privacy": {
     "information": "Privacy Information",
@@ -144,7 +149,8 @@
     "importNewerApp": "This backup was made by a newer version of Kaiord. Update the app and try again.",
     "importFailed": "Could not import the backup — please retry.",
     "clearAllApiKeys": "Clear All API Keys",
-    "clearAllHint": "This removes all stored API keys from your browser. Keys already uploaded to your Google Drive by cross-device sync are not deleted by this action."
+    "clearAllHint": "This removes all stored API keys from your browser. Keys already uploaded to your Google Drive by cross-device sync are not deleted by this action.",
+    "clearKeysFailed": "Failed to clear API keys — please retry."
   },
   "usage": {
     "title": "AI Usage",

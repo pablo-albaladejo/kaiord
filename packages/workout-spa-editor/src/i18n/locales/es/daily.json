@@ -30,13 +30,35 @@
     "gatedPrompt": "Completa tu perfil para estimar la energía",
     "intake": "Ingesta",
     "net": "Neto",
-    "target": "Objetivo"
+    "target": "Objetivo",
+    "source": {
+      "measured": "Medido",
+      "predicted": "Estimado",
+      "mixed": "Mixto"
+    },
+    "untracked": "Sin registrar",
+    "deficit": "Déficit de {{value}} kcal",
+    "surplus": "Superávit de {{value}} kcal",
+    "balanced": "equilibrado",
+    "capWarning": "Objetivo limitado a un ritmo seguro — ajusta la fecha objetivo si quieres avanzar más rápido.",
+    "capOverridden": "El objetivo supera el ritmo seguro — has elegido ignorar el límite."
   },
   "weekStrip": {
     "previousDay": "Día anterior",
     "nextDay": "Día siguiente",
     "openInCalendar": "Abrir la semana en el calendario",
-    "calendar": "Calendario"
+    "calendar": "Calendario",
+    "day": {
+      "today": " (hoy)",
+      "empty": "Ver {{day}}{{today}}, nada planificado",
+      "planned": "Ver {{day}}{{today}}, {{count}} planificadas{{intensity}}{{duration}}",
+      "intensity": {
+        "easy": "suave",
+        "moderate": "moderada",
+        "hard": "intensa"
+      },
+      "estimated": "{{intensity}} estimada"
+    }
   },
   "trends": {
     "title": "Tendencias"

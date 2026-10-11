@@ -53,7 +53,7 @@ describe("CreateWorkoutCta", () => {
     );
   });
 
-  it("should stay hidden below md, where the create FAB covers it", () => {
+  it("should stay on screen at every width, labelled, so a phone can start a session from the week", () => {
     // Arrange
 
     // Act
@@ -61,6 +61,7 @@ describe("CreateWorkoutCta", () => {
     const button = screen.getByTestId("create-workout-cta");
 
     // Assert
-    expect(button).toHaveClass("hidden", "md:inline-flex");
+    expect(button).not.toHaveClass("hidden");
+    expect(button).toHaveTextContent("New workout");
   });
 });

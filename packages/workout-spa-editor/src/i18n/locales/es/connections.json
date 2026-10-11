@@ -155,5 +155,8 @@
     "link": "Vincular a este perfil",
     "signIn": "{{name}} no está vinculado a este perfil de atleta. Inicia sesión en {{name}} en este navegador y luego vincúlalo aquí.",
     "linking": "Vinculando…"
+  },
+  "sourceName": {
+    "manual": "Entrada manual"
   }
 }

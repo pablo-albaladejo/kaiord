@@ -17,6 +17,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | 2026-10-11 | [`fix-spa-manual-first-editor`](./2026-10-11-fix-spa-manual-first-editor/) | Manual use is the main path, and the editor speaks the athlete's units |
 | 2026-10-11 | [`fix-spa-manual-sleep`](./2026-10-11-fix-spa-manual-sleep/) | Manual sleep records hours, not a 0 h night |
 | 2026-10-11 | [`fix-spa-new-session-context`](./2026-10-11-fix-spa-new-session-context/) | The "New session" sheet keeps the day it was opened for |
+| 2026-10-11 | [`fix-spa-polish-i18n-mobile`](./2026-10-11-fix-spa-polish-i18n-mobile/) | A Spanish, phone-sized and polished SPA, with a guard on untranslated text |
 | 2026-10-11 | [`harden-spa-nutrition-sync`](./2026-10-11-harden-spa-nutrition-sync/) | Close the gaps review found in nutrition sync |
 | 2026-10-11 | [`sync-spa-nutrition`](./2026-10-11-sync-spa-nutrition/) | Nutrition syncs with Drive and has tombstones |
 | 2026-10-11 | [`tcx-repeat-blocks`](./2026-10-11-tcx-repeat-blocks/) | TCX import reads repetition blocks |

@@ -4,6 +4,7 @@
  * and component under the line cap.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { ActivityLevel, BiologicalSex } from "../../../../types/profile";
 import { Input } from "../../../atoms/Input/Input";
 import type { ProfileFormData } from "../types";
@@ -13,31 +14,34 @@ type PhysiologySelectsProps = {
   onChange: (data: ProfileFormData) => void;
 };
 
-const SEX_OPTIONS = [
-  { value: "", label: "Not set" },
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-];
+const SEX_VALUES = ["", "male", "female"] as const;
 
-const ACTIVITY_OPTIONS = [
-  { value: "", label: "Not set" },
-  { value: "sedentary", label: "Sedentary" },
-  { value: "light", label: "Light" },
-  { value: "moderate", label: "Moderate" },
-  { value: "active", label: "Active" },
-  { value: "very_active", label: "Very active" },
-];
+const ACTIVITY_VALUES = [
+  "",
+  "sedentary",
+  "light",
+  "moderate",
+  "active",
+  "very_active",
+] as const;
+
+// The empty value is "not set" in both selects.
+const optionKey = (group: string, value: string) =>
+  `profileManager.personal.${value ? `${group}.${value}` : "notSet"}`;
 
 export function PhysiologySelects({
   formData,
   onChange,
 }: PhysiologySelectsProps) {
+  const t = useTranslate("athlete");
+  const options = (group: string, values: ReadonlyArray<string>) =>
+    values.map((value) => ({ value, label: t(optionKey(group, value)) }));
   return (
     <>
       <Input
-        label="Sex"
+        label={t("profileManager.personal.sex")}
         variant="select"
-        options={SEX_OPTIONS}
+        options={options("sexes", SEX_VALUES)}
         value={formData.sex ?? ""}
         onChange={(e) =>
           onChange({
@@ -47,9 +51,9 @@ export function PhysiologySelects({
         }
       />
       <Input
-        label="Activity Level"
+        label={t("profileManager.personal.activityLevel")}
         variant="select"
-        options={ACTIVITY_OPTIONS}
+        options={options("activityLevels", ACTIVITY_VALUES)}
         value={formData.activityLevel ?? ""}
         onChange={(e) =>
           onChange({

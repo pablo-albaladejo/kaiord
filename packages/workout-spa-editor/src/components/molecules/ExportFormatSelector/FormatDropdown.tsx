@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { type FormatOption } from "./format-options";
 import { FormatDropdownButton } from "./FormatDropdownButton";
@@ -11,6 +13,9 @@ type FormatDropdownProps = {
   onToggle: () => void;
   onFormatSelect: (format: WorkoutFileFormat) => void;
   disabled: boolean;
+  label?: ReactNode;
+  /** The lossy-format warning for an option, shown before it is picked. */
+  warningFor?: (format: WorkoutFileFormat) => string | null;
 };
 
 export function FormatDropdown({
@@ -20,6 +25,8 @@ export function FormatDropdown({
   onToggle,
   onFormatSelect,
   disabled,
+  label,
+  warningFor,
 }: FormatDropdownProps) {
   const { focusedIndex, optionRefs, handleKeyDown } = useKeyboardNavigation({
     isOpen,
@@ -42,6 +49,7 @@ export function FormatDropdown({
         isOpen={isOpen}
         onToggle={onToggle}
         disabled={disabled}
+        label={label}
       />
 
       {isOpen && (
@@ -63,6 +71,7 @@ export function FormatDropdown({
                 isFocused={isFocused}
                 onSelect={() => onFormatSelect(option.value)}
                 disabled={disabled}
+                warning={warningFor?.(option.value)}
               />
             );
           })}

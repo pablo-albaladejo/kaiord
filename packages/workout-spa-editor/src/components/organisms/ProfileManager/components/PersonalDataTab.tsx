@@ -6,6 +6,7 @@
  * that feed basal-metabolic-rate estimation.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { Input } from "../../../atoms/Input/Input";
 import type { ProfileFormData } from "../types";
 import { PhysiologyFields } from "./PhysiologyFields";
@@ -16,10 +17,11 @@ type PersonalDataTabProps = {
 };
 
 export function PersonalDataTab({ formData, onChange }: PersonalDataTabProps) {
+  const t = useTranslate("athlete");
   return (
     <div className="grid max-w-md grid-cols-1 gap-4 sm:grid-cols-2">
       <Input
-        label="Body Weight (kg)"
+        label={t("profileManager.personal.bodyWeight")}
         variant="number"
         value={formData.bodyWeight?.toString() ?? ""}
         onChange={(e) =>

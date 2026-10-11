@@ -1,43 +1,35 @@
 /**
- * Human-readable week label: "Apr 27 – May 3 · W18".
+ * Human-readable week label in the active locale: "Apr 27 – May 3 · W18",
+ * "27 abr – 3 may · S18".
  *
- * Same-month weeks abbreviate the second month; cross-year weeks include
- * both years to disambiguate. Falls back to the raw weekId when the
- * input is malformed (the calendar's invalid-week handling redirects
- * before reaching this function in production).
+ * Cross-year weeks include both years to disambiguate. Falls back to the
+ * raw weekId when the input is malformed (the calendar's invalid-week
+ * handling redirects before reaching this function in production).
  */
 
+import { DEFAULT_LOCALE, type Locale } from "@kaiord/i18n";
+
+import { getTranslate } from "../i18n/use-translate";
 import { parseWeekId } from "./week-utils";
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+const format = (date: string, locale: Locale, withYear: boolean): string =>
+  new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    ...(withYear ? { year: "numeric" } : {}),
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00Z`));
 
-const fmt = (yyyymmdd: string): { y: number; m: string; d: number } => {
-  const [y, m, d] = yyyymmdd.split("-").map(Number) as [number, number, number];
-  return { y, m: MONTHS[m - 1] ?? "", d };
-};
-
-export function formatWeekLabel(weekId: string): string {
+export function formatWeekLabel(
+  weekId: string,
+  locale: Locale = DEFAULT_LOCALE
+): string {
   const range = parseWeekId(weekId);
   if (!range) return weekId;
-  const start = fmt(range.start);
-  const end = fmt(range.end);
-  const weekNum = weekId.split("-W")[1] ?? "";
-
-  if (start.y !== end.y) {
-    return `${start.m} ${start.d}, ${start.y} – ${end.m} ${end.d}, ${end.y} · W${weekNum}`;
-  }
-  return `${start.m} ${start.d} – ${end.m} ${end.d} · W${weekNum}`;
+  const crossesYear = range.start.slice(0, 4) !== range.end.slice(0, 4);
+  const start = format(range.start, locale, crossesYear);
+  const end = format(range.end, locale, crossesYear);
+  const n = weekId.split("-W")[1] ?? "";
+  const week = getTranslate("calendar", locale)("weekNav.weekNumber", { n });
+  return `${start} – ${end} · ${week}`;
 }

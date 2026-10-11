@@ -12,11 +12,9 @@ import { useRef, useState } from "react";
 
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
 import { energyTargetRecordSchema } from "../../../types/energy-target-record";
 import type { GoalFormDraft } from "./goal-form-model";
-
-const TOAST_GOAL_SAVED = "Goal saved";
-const TOAST_GOAL_SAVE_FAILED = "Could not save goal — please retry";
 
 export type UseSaveEnergyGoalResult = {
   submit: (draft: GoalFormDraft) => Promise<boolean>;
@@ -26,6 +24,7 @@ export type UseSaveEnergyGoalResult = {
 export function useSaveEnergyGoal(profileId: string): UseSaveEnergyGoalResult {
   const persistence = usePersistence();
   const toast = useToastContext();
+  const t = useTranslate("nutrition");
   const inFlight = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -47,10 +46,10 @@ export function useSaveEnergyGoal(profileId: string): UseSaveEnergyGoalResult {
         updatedAt: now,
       });
       await persistence.energyTargets.put(record);
-      toast.success(TOAST_GOAL_SAVED);
+      toast.success(t("toast.goalSaved"));
       return true;
     } catch {
-      toast.error(TOAST_GOAL_SAVE_FAILED);
+      toast.error(t("toast.goalSaveFailed"));
       return false;
     } finally {
       inFlight.current = false;

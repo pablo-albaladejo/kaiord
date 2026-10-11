@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { appI18n, setActiveLocale } from "../i18n/i18n";
 import { formatWeekLabel } from "./format-week-label";
 
 describe("formatWeekLabel", () => {
+  beforeAll(() => setActiveLocale("es"));
+  afterAll(() => appI18n.changeLanguage("en"));
+
   it("should format a same-month week", () => {
     // Arrange
 
@@ -39,5 +43,27 @@ describe("formatWeekLabel", () => {
 
     // Assert
     expect(formatWeekLabel("not-a-week")).toBe("not-a-week");
+  });
+
+  it("should name the days and the week in Spanish", () => {
+    // Arrange
+    const weekId = "2026-W41";
+
+    // Act
+    const label = formatWeekLabel(weekId, "es");
+
+    // Assert
+    expect(label).toBe("5 oct – 11 oct · S41");
+  });
+
+  it("should give both years in Spanish when the week crosses a year", () => {
+    // Arrange
+    const weekId = "2026-W01";
+
+    // Act
+    const label = formatWeekLabel(weekId, "es");
+
+    // Assert
+    expect(label).toBe("29 dic 2025 – 4 ene 2026 · S01");
   });
 });

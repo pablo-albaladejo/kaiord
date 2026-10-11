@@ -1,5 +1,7 @@
 import { ChevronDown } from "lucide-react";
+import type { ReactNode } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { type FormatOption, getFileExtensionForFormat } from "./format-options";
 
@@ -9,6 +11,8 @@ type FormatDropdownButtonProps = {
   readonly isOpen: boolean;
   readonly onToggle: () => void;
   readonly disabled: boolean;
+  /** Shown instead of the current format when the menu itself is the action. */
+  readonly label?: ReactNode;
 };
 
 export function FormatDropdownButton({
@@ -17,7 +21,9 @@ export function FormatDropdownButton({
   isOpen,
   onToggle,
   disabled,
+  label,
 }: FormatDropdownButtonProps) {
+  const t = useTranslate("editor");
   return (
     <button
       type="button"
@@ -32,17 +38,19 @@ export function FormatDropdownButton({
         disabled:opacity-60 disabled:cursor-not-allowed
         transition-colors whitespace-nowrap
       `}
-      aria-label="Select export format"
+      aria-label={label ? undefined : t("exportFormat.selectAria")}
       aria-expanded={isOpen}
       aria-haspopup="menu"
       data-testid="export-format-selector-button"
     >
-      <span className="flex items-center gap-2">
-        <span className="font-semibold">{currentOption?.label}</span>
-        <span className="text-gray-500 dark:text-gray-400">
-          (.{getFileExtensionForFormat(currentFormat)})
+      {label ?? (
+        <span className="flex items-center gap-2">
+          <span className="font-semibold">{currentOption?.label}</span>
+          <span className="text-gray-500 dark:text-gray-400">
+            (.{getFileExtensionForFormat(currentFormat)})
+          </span>
         </span>
-      </span>
+      )}
       <ChevronDown
         className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
       />

@@ -16,10 +16,18 @@ const fmt = (b) =>
     ? `${Math.round(b.x)},${Math.round(b.y)} ${Math.round(b.width)}x${Math.round(b.height)}`
     : "none";
 
+// A phone renders the week as a list; the seven-column grid only appears
+// from 768 px up, so the check reads whichever view the device renders.
+const weekView = (page) =>
+  page
+    .getByTestId("calendar-week-list")
+    .or(page.getByTestId("calendar-week-grid"))
+    .first();
+
 export default async function mobile({ rec, open }) {
   const { page, go, failedRequests } = await open({ mobile: true });
   await go("calendar");
-  await page.getByTestId("calendar-week-grid").waitFor();
+  await weekView(page).waitFor();
   const width = page.viewportSize().width;
   const height = page.viewportSize().height;
   const nav = page.getByTestId("bottom-nav");
@@ -44,11 +52,11 @@ export default async function mobile({ rec, open }) {
     "F-46: 'Nuevo entreno' fits inside the viewport",
     `cta=${fmt(cta)} viewport=${width}`
   );
-  const grid = await page.getByTestId("calendar-week-grid").boundingBox();
+  const week = await weekView(page).boundingBox();
   rec.assert(
-    grid && grid.y < height,
+    week && week.y < height,
     "F-46: the week starts on the first screen",
-    `grid=${fmt(grid)} viewportHeight=${height}`
+    `week=${fmt(week)} viewportHeight=${height}`
   );
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth

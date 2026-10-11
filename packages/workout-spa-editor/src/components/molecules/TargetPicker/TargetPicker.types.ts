@@ -10,7 +10,6 @@ export type TargetPickerProps = {
 
 export type TargetTypeOption = {
   value: "power" | "heart_rate" | "pace" | "cadence" | "open";
-  label: string;
 };
 
 export type TargetUnitOption = {

@@ -19,6 +19,7 @@
  */
 import { Minus } from "lucide-react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { DayWellness } from "../../../../types/health/day-wellness";
 import { WELLNESS_BADGE_DEFS } from "./wellness-badge-defs";
 import { WellnessBadge } from "./WellnessBadge";
@@ -36,6 +37,7 @@ export function WellnessBand({
   wellness,
   resolved = false,
 }: WellnessBandProps) {
+  const t = useTranslate("calendar");
   if (!wellness) {
     if (!resolved) return null;
     return (
@@ -43,7 +45,7 @@ export function WellnessBand({
         <Minus
           className="h-3 w-3 shrink-0"
           role="img"
-          aria-label="No readiness data"
+          aria-label={t("wellnessBand.empty")}
         />
       </div>
     );

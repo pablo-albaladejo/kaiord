@@ -155,5 +155,8 @@
     "link": "Link to this profile",
     "signIn": "{{name}} is not linked to this athlete profile. Sign in to {{name}} in this browser first, then link it here.",
     "linking": "Linking…"
+  },
+  "sourceName": {
+    "manual": "Manual Entry"
   }
 }

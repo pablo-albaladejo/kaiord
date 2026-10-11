@@ -4,9 +4,14 @@ import type uPlot from "uplot";
 import type { Units } from "../../../../lib/units/units";
 import { themedAxis } from "../../../charts/uplot-base/chart-theme";
 import { seriesStroke } from "../../../charts/uplot-base/series-strokes";
-import { timeXScale } from "../../../charts/uplot-base/uplot-base";
 import { formatPaneValue } from "./format-pane-value";
 import type { TrendMetricDef } from "./trend-metrics";
+import {
+  type TrendWindow,
+  trendXAxis,
+  trendXScale,
+  trendXSeries,
+} from "./trend-x-axis";
 
 const tickFormatter =
   (metric: TrendMetricDef, units: Units, locale: Locale) =>
@@ -24,9 +29,10 @@ const legendFormatter =
 const buildTrendSeries = (
   metrics: ReadonlyArray<TrendMetricDef>,
   units: Units,
-  locale: Locale
+  locale: Locale,
+  window?: TrendWindow
 ): uPlot.Series[] => {
-  const series: uPlot.Series[] = [{}];
+  const series: uPlot.Series[] = [trendXSeries(locale, window)];
   for (const m of metrics)
     series.push({
       label: m.label,
@@ -41,12 +47,13 @@ const buildTrendSeries = (
 export const buildTrendChartOptions = (
   metrics: ReadonlyArray<TrendMetricDef>,
   units: Units = "metric",
-  locale: Locale = "en"
+  locale: Locale = "en",
+  window?: TrendWindow
 ): uPlot.Options => {
-  const scales: uPlot.Scales = timeXScale();
+  const scales: uPlot.Scales = trendXScale(window);
   for (const m of metrics) scales[m.key] = { auto: true };
 
-  const axes: uPlot.Axis[] = [themedAxis()];
+  const axes: uPlot.Axis[] = [trendXAxis(locale)];
   for (const m of metrics)
     axes.push(
       themedAxis({
@@ -57,7 +64,7 @@ export const buildTrendChartOptions = (
       })
     );
 
-  const series = buildTrendSeries(metrics, units, locale);
+  const series = buildTrendSeries(metrics, units, locale, window);
 
   return {
     width: 0,

@@ -61,3 +61,28 @@ export const validateIntakeForm = (
     },
   };
 };
+
+export type PresetCandidate = { entry: IntakeLoggerEntry; label: string };
+
+/**
+ * What "Save preset" would save. A valid form wins; with the number fields
+ * still empty, the entry just added is kept on offer, so the preset does not
+ * have to be saved before the entry is added (F-38). The label is the typed
+ * one, else the entry's own; without either there is nothing to name.
+ */
+export const presetCandidate = (
+  fields: IntakeLoggerFields,
+  result: IntakeLoggerResult,
+  justLogged: IntakeLoggerEntry | null
+): PresetCandidate | null => {
+  const numbersEmpty = [
+    fields.kcal,
+    fields.proteinG,
+    fields.carbG,
+    fields.fatG,
+  ].every((raw) => raw.trim() === "");
+  const entry =
+    "entry" in result ? result.entry : numbersEmpty ? justLogged : null;
+  const label = fields.label.trim() || entry?.label || "";
+  return entry && label !== "" ? { entry: { ...entry, label }, label } : null;
+};

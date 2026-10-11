@@ -22,7 +22,7 @@ export function StatusHeader() {
   return (
     <nav
       aria-label={t("a11y.mainNavigation")}
-      className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm md:gap-x-2 lg:justify-end"
+      className="flex flex-wrap items-center justify-end gap-x-1 gap-y-1.5 text-sm md:justify-center md:gap-x-2 lg:justify-end"
       data-testid="status-header"
     >
       <HeaderNavBar />

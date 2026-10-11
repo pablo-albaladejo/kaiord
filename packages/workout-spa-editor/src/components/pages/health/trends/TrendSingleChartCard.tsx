@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import { useTheme } from "../../../../contexts/ThemeContext";
 import { useUnits } from "../../../../contexts/units-context";
+import type { HealthDateRange } from "../../../../hooks/health/health-live-query";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { type Translate, useTranslate } from "../../../../i18n/use-translate";
 import {
@@ -45,12 +46,15 @@ export type TrendSingleChartCardProps = {
   selected: ReadonlySet<TrendMetricKey>;
   series: TrendSeriesByMetric;
   rangeDays: number;
+  /** The requested window; the x axis spans it whatever the data covers. */
+  range: HealthDateRange;
 };
 
 export const TrendSingleChartCard = ({
   selected,
   series,
   rangeDays,
+  range,
 }: TrendSingleChartCardProps) => {
   const t = useTranslate("health");
   const units = useUnits();
@@ -59,6 +63,7 @@ export const TrendSingleChartCard = ({
   const selectedKeys = TREND_METRICS.map((m) => m.key).filter((k) =>
     selected.has(k)
   );
+  const dateLabel = t("trends.date");
   const anyLoading = selectedKeys.some((k) => series[k].loading);
   const presentKeys = selectedKeys.filter((k) => series[k].points.length > 0);
 
@@ -71,10 +76,14 @@ export const TrendSingleChartCard = ({
     [presentKeys, series]
   );
   const options = useMemo(
-    () => buildTrendChartOptions(metrics, units, locale),
+    () =>
+      buildTrendChartOptions(metrics, units, locale, {
+        range,
+        label: dateLabel,
+      }),
     // resolvedTheme forces a rebuild so axis/grid/series colors follow .dark.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [metrics, units, locale, resolvedTheme]
+    [metrics, units, locale, range, dateLabel, resolvedTheme]
   );
   const data = useMemo(
     () => buildTrendChartData(presentKeys, seriesByKey),

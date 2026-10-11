@@ -180,9 +180,9 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
     await uploadFit(page, dist, { name: file, buffer: fixture(file) });
     await expectImported(page, hasStepCards(page, steps));
     await page.getByTestId("export-format-selector-button").click();
-    await page.getByTestId("export-format-option-fit").click();
+    // Picking the format is the download.
     const download = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await page.getByTestId("export-format-option-fit").click();
     const exported = readFileSync(await (await download).path());
 
     // Act
@@ -201,9 +201,9 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
     await expectImported(page, hasStepCards(page, steps));
     const original = await page.getByTestId("step-card").allInnerTexts();
     await page.getByTestId("export-format-selector-button").click();
-    await page.getByTestId("export-format-option-fit").click();
+    // Picking the format is the download.
     const download = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await page.getByTestId("export-format-option-fit").click();
     const exported = readFileSync(await (await download).path());
     // A fresh page, so no card left over from the first import can satisfy
     // the assertions below.

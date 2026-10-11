@@ -152,9 +152,9 @@ test.describe("@umami-smoke Umami analytics smoke", () => {
 
     // Act — export to FIT (fires workout-exported)
     await page.getByTestId("export-format-selector-button").click();
-    await page.getByTestId("export-format-option-fit").click();
+    // Picking the format is the download.
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await page.getByTestId("export-format-option-fit").click();
     await downloadPromise;
 
     // Assert — workout-exported posted with format=fit

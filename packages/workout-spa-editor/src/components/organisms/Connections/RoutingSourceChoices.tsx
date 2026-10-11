@@ -44,7 +44,7 @@ export function RoutingSourceChoices({
           key={sourceId}
           testId={`routing-choice-${dataType}-${sourceId}`}
           selected={options.current === sourceId}
-          label={choiceLabel(sourceId)}
+          label={choiceLabel(sourceId, t)}
           onClick={() => onPick(sourceId)}
         />
       ))}

@@ -69,7 +69,9 @@
     "entryRejected": "No se pudo registrar la entrada: revisa los valores",
     "presetSaved": "Preajuste guardado",
     "presetApplied": "Preajuste aplicado",
-    "deleted": "Entrada eliminada"
+    "deleted": "Entrada eliminada",
+    "goalSaved": "Objetivo guardado",
+    "goalSaveFailed": "No se pudo guardar el objetivo. Inténtalo de nuevo."
   },
   "trends": {
     "title": "Tendencias",
@@ -97,6 +99,32 @@
       "steps": "Pasos",
       "sleep": "Sueño",
       "training": "Entrenamiento semanal (min)"
+    }
+  },
+  "goalSetup": {
+    "title": "Fijar objetivo de energía",
+    "goalType": "Tipo de objetivo",
+    "types": {
+      "fat_loss": "Perder grasa",
+      "muscle_gain": "Ganar músculo",
+      "maintain": "Mantener"
+    },
+    "startWeight": "Peso inicial (kg)",
+    "targetWeight": "Peso objetivo (kg)",
+    "targetDate": "Fecha objetivo",
+    "save": "Guardar objetivo",
+    "deficit": "Déficit de {{value}} kcal / día",
+    "surplus": "Superávit de {{value}} kcal / día",
+    "maintenance": "Mantenimiento (sin diferencia)",
+    "target": "Objetivo {{value}} kcal",
+    "capWarning": "Este ritmo supera el límite seguro; el plan se ha ajustado a un ritmo seguro.",
+    "capOverridden": "Este ritmo supera el límite seguro; has elegido ignorarlo.",
+    "override": "Ignorar el límite de seguridad y usar mi ritmo",
+    "errors": {
+      "startWeight": "Introduce un peso inicial válido.",
+      "targetWeight": "Introduce un peso objetivo válido.",
+      "targetDate": "Introduce una fecha objetivo (AAAA-MM-DD).",
+      "pastDate": "La fecha objetivo debe ser futura."
     }
   }
 }

@@ -142,6 +142,19 @@ describe("LayoutHeader", () => {
   });
 
   describe("retired help surfaces", () => {
+    it("should keep the brand and the nav on one row on a phone", () => {
+      // Arrange
+
+      // Act
+      renderWithProviders(<LayoutHeader />);
+      const row = screen.getByTestId("layout-header-row");
+
+      // Assert
+      expect(row).toHaveClass("flex-row");
+      expect(row).not.toHaveClass("flex-col");
+      expect(row).toHaveClass("md:flex-col", "lg:flex-row");
+    });
+
     it("should not render a help entry button", () => {
       // Arrange
 

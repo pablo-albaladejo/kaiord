@@ -8,6 +8,12 @@ import vitest from "@vitest/eslint-plugin";
 import path from "node:path";
 
 import { boundariesAllowlistPaths } from "./scripts/boundaries-allowlist.mjs";
+import {
+  JSX_LITERAL_ALLOW,
+  JSX_LITERAL_FILES,
+  JSX_LITERAL_IGNORES,
+} from "./scripts/eslint-rules/jsx-literal-scope.mjs";
+import noJsxLiteralText from "./scripts/eslint-rules/no-jsx-literal-text.mjs";
 import noNarrativeComments from "./scripts/eslint-rules/no-narrative-comments.mjs";
 
 /**
@@ -573,9 +579,23 @@ export default tseslint.config(
     // and `.omc/plans/ralplan-no-narrative-comments.md`.
     files: ["packages/**/*.{ts,tsx}"],
     plugins: {
-      local: { rules: { "no-narrative-comments": noNarrativeComments } },
+      local: {
+        rules: {
+          "no-narrative-comments": noNarrativeComments,
+          "no-jsx-literal-text": noJsxLiteralText,
+        },
+      },
     },
     rules: { "local/no-narrative-comments": "error" },
+  },
+  {
+    // i18n guard: user-facing copy in the translated SPA surfaces comes from
+    // `t(...)`. The scope and the allow list live in jsx-literal-scope.mjs.
+    files: JSX_LITERAL_FILES,
+    ignores: JSX_LITERAL_IGNORES,
+    rules: {
+      "local/no-jsx-literal-text": ["error", { allow: JSX_LITERAL_ALLOW }],
+    },
   },
   {
     // Held-out path: Dexie migration adapters document the immutable

@@ -31,18 +31,25 @@ export function useSaveWorkout(
   const analytics = useAnalytics();
   const t = useTranslate("editor");
 
-  const handleSave = createSaveHandler(
-    workout,
-    selectedFormat,
-    setIsSaving,
-    setSaveErrors,
-    setExportProgress,
-    success,
-    showError,
-    (format) => analytics.event("workout-exported", { format }),
-    t,
-    () => resolveExportProfile(ownerProfileId)
-  );
+  const handlerFor = (format: WorkoutFileFormat) =>
+    createSaveHandler(
+      workout,
+      format,
+      setIsSaving,
+      setSaveErrors,
+      setExportProgress,
+      success,
+      showError,
+      (exported) => analytics.event("workout-exported", { format: exported }),
+      t,
+      () => resolveExportProfile(ownerProfileId)
+    );
+  const handleSave = handlerFor(selectedFormat);
+  /** Picks the format and downloads it in one step. */
+  const downloadAs = (format: WorkoutFileFormat) => {
+    setSelectedFormat(format);
+    return handlerFor(format)();
+  };
 
   const clearErrors = () => setSaveErrors(null);
 
@@ -51,6 +58,7 @@ export function useSaveWorkout(
     isSaving,
     exportProgress,
     handleSave,
+    downloadAs,
     clearErrors,
     selectedFormat,
     setSelectedFormat,

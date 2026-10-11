@@ -54,6 +54,7 @@
     "fallbackActive": "Reserva activa"
   },
   "trends": {
+    "date": "Fecha",
     "metricsLegend": "Métricas",
     "rangeAria": "Intervalo de fechas",
     "selectMetric": "Selecciona al menos una métrica para ver su tendencia.",

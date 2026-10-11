@@ -4,6 +4,7 @@
  * Section displaying the list of saved profiles.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 import { ProfileList } from "../ProfileList";
 
@@ -24,10 +25,11 @@ export function ProfileListSection({
   onExport,
   onDelete,
 }: ProfileListSectionProps) {
+  const t = useTranslate("athlete");
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-        Saved Profiles ({profiles.length})
+        {t("profileManager.saved", { count: profiles.length })}
       </h3>
       <ProfileList
         profiles={profiles}

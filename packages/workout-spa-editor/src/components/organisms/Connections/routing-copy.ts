@@ -6,8 +6,11 @@ const NAMES: ReadonlyMap<string, string> = new Map(
   INTEGRATION_REGISTRY.map((entry) => [entry.id, entry.name])
 );
 
-export const sourceName = (integrationId: string): string =>
-  NAMES.get(integrationId) ?? integrationId;
+/** Brand names stay as they are; manual entry is ours, so it is translated. */
+export const sourceName = (integrationId: string, t: Translate): string =>
+  integrationId === "manual"
+    ? t("sourceName.manual")
+    : (NAMES.get(integrationId) ?? integrationId);
 
 /**
  * The one source a row's freshness may be attributed to — undefined when no
@@ -35,7 +38,7 @@ export const originLabel = (origin: RoutingOrigin, t: Translate): string => {
     case "rankedUnavailable":
       return t("routing.noUsableSource");
     default:
-      return sourceName(origin.sourceId);
+      return sourceName(origin.sourceId, t);
   }
 };
 

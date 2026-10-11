@@ -1,64 +1,57 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 
-type FormatWarning = {
-  format: WorkoutFileFormat;
-  message: string;
-};
+const WARNED_FORMATS: ReadonlySet<WorkoutFileFormat> = new Set([
+  "fit",
+  "tcx",
+  "zwo",
+  "gcn",
+]);
 
 /**
- * Gets format-specific warnings based on workout content
+ * Gets the format-specific warning for a workout, in the active locale
  */
 export const getFormatWarnings = (
   format: WorkoutFileFormat,
-  workout?: KRD
+  workout?: KRD,
+  t: Translate = getTranslate("editor")
 ): string | null => {
-  if (!workout) return null;
-
-  const warnings: FormatWarning[] = [
-    {
-      format: "fit",
-      message: "FIT format may not support all workout features",
-    },
-    {
-      format: "tcx",
-      message: "TCX format has limited support for advanced targets",
-    },
-    {
-      format: "zwo",
-      message: "ZWO format only supports cycling workouts",
-    },
-    {
-      format: "gcn",
-      message:
-        "GCN format is designed for the Garmin Connect API and may not preserve all features",
-    },
-  ];
-
-  const warning = warnings.find((w) => w.format === format);
-  return warning?.message || null;
+  if (!workout || !WARNED_FORMATS.has(format)) return null;
+  return t(`exportFormat.warnings.${format}`);
 };
 
 /**
  * Validates workout before export
  */
-export const validateWorkoutForExport = (workout?: KRD): ValidationError[] => {
+export const validateWorkoutForExport = (
+  workout?: KRD,
+  t: Translate = getTranslate("editor")
+): ValidationError[] => {
   if (!workout) {
-    return [{ path: ["workout"], message: "No workout to export" }];
+    return [
+      { path: ["workout"], message: t("exportFormat.invalid.noWorkout") },
+    ];
   }
 
   const errors: ValidationError[] = [];
 
   if (!workout.version) {
-    errors.push({ path: ["version"], message: "Missing version" });
+    errors.push({
+      path: ["version"],
+      message: t("exportFormat.invalid.version"),
+    });
   }
 
   if (!workout.type) {
-    errors.push({ path: ["type"], message: "Missing type" });
+    errors.push({ path: ["type"], message: t("exportFormat.invalid.type") });
   }
 
   if (!workout.metadata) {
-    errors.push({ path: ["metadata"], message: "Missing metadata" });
+    errors.push({
+      path: ["metadata"],
+      message: t("exportFormat.invalid.metadata"),
+    });
   }
 
   return errors;

@@ -1,7 +1,8 @@
 /**
  * SaveButton Component
  *
- * Button with integrated save functionality and error handling.
+ * The editor's one download control: it opens the format menu, and picking
+ * a format downloads the workout in it.
  *
  * Requirements:
  * - Requirement 6: Save workout as KRD file
@@ -14,7 +15,6 @@ import { Download } from "lucide-react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD } from "../../../types/krd";
-import { Button } from "../../atoms/Button/Button";
 import { ExportFormatSelector } from "../ExportFormatSelector/ExportFormatSelector";
 import { SaveErrorDialog } from "../SaveErrorDialog/SaveErrorDialog";
 import { ProgressBar } from "./ProgressBar";
@@ -43,10 +43,9 @@ export function SaveButton({
     saveErrors,
     isSaving,
     exportProgress,
-    handleSave,
+    downloadAs,
     clearErrors,
     selectedFormat,
-    setSelectedFormat,
     toast: { toasts, dismiss },
   } = useSaveWorkout(workout, ownerProfileId);
   const isDisabled = disabled || isSaving;
@@ -61,25 +60,19 @@ export function SaveButton({
     <div
       className={["flex flex-col gap-2", className].filter(Boolean).join(" ")}
     >
-      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-        <ExportFormatSelector
-          currentFormat={selectedFormat}
-          onFormatChange={setSelectedFormat}
-          workout={workout}
-          disabled={isDisabled}
-          className="w-full sm:w-auto"
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleSave}
-          disabled={isDisabled}
-          className="w-full sm:w-auto"
-        >
-          {icon}
-          {isSaving ? t("save.saving") : verbs("verbs.download")}
-        </Button>
-      </div>
+      <ExportFormatSelector
+        currentFormat={selectedFormat}
+        onFormatChange={(format) => void downloadAs(format)}
+        workout={workout}
+        disabled={isDisabled}
+        className="w-full sm:w-auto"
+        label={
+          <span className="flex items-center gap-2">
+            {icon}
+            {isSaving ? t("save.saving") : verbs("verbs.download")}
+          </span>
+        }
+      />
 
       {showProgress && <ProgressBar progress={exportProgress} />}
 
