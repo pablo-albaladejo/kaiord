@@ -1,11 +1,12 @@
 import { ChevronDown, Sparkles } from "lucide-react";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { useLocation } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { lazyPage } from "../../../lazy-page";
 import { useAiBannerState } from "./use-ai-banner-state";
 
-const AiWorkoutInput = lazy(() =>
+const AiWorkoutInput = lazyPage(() =>
   import("../../organisms/AiWorkoutInput/AiWorkoutInput").then((m) => ({
     default: m.AiWorkoutInput,
   }))

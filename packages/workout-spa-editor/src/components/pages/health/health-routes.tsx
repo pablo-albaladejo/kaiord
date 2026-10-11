@@ -7,17 +7,17 @@
  * `/health/...` URLs redirect to the Health dashboard.
  */
 import type { Analytics } from "@kaiord/core";
-import { lazy } from "react";
 import { Redirect, useLocation } from "wouter";
 
+import { lazyPage } from "../../../lazy-page";
 import { RouteErrorBoundary } from "../../molecules/RouteErrorBoundary";
 
-const HealthDashboardPage = lazy(() => import("./HealthDashboardPage"));
-const HealthSleepPage = lazy(() => import("./HealthSleepPage"));
-const HealthWeightPage = lazy(() => import("./HealthWeightPage"));
-const HealthRecoveryPage = lazy(() => import("./HealthRecoveryPage"));
-const HealthActivityPage = lazy(() => import("./HealthActivityPage"));
-const LabEntryPage = lazy(() => import("./labs/LabEntryPage"));
+const HealthDashboardPage = lazyPage(() => import("./HealthDashboardPage"));
+const HealthSleepPage = lazyPage(() => import("./HealthSleepPage"));
+const HealthWeightPage = lazyPage(() => import("./HealthWeightPage"));
+const HealthRecoveryPage = lazyPage(() => import("./HealthRecoveryPage"));
+const HealthActivityPage = lazyPage(() => import("./HealthActivityPage"));
+const LabEntryPage = lazyPage(() => import("./labs/LabEntryPage"));
 
 const normalize = (pathname: string): string =>
   pathname.length > 1 && pathname.endsWith("/")
