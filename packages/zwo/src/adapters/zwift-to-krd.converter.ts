@@ -58,7 +58,7 @@ export const convertZwiftToKRD = (
     workoutFile.durationType === "distance" ? "distance" : "time";
 
   const intervals = extractIntervals(workoutFile.workout, intervalOrder);
-  const steps = processIntervals(intervals, durationType);
+  const steps = processIntervals(intervals, durationType, logger);
 
   const metadata = extractMetadata(workoutFile, sport);
   const fitExtensions = extractFitExtensions(workoutFile);

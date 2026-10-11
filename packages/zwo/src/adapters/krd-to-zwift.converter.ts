@@ -34,13 +34,13 @@ const buildXmlString = (workoutFile: Record<string, unknown>): string => {
     ...workoutFile,
   };
 
-  return builder.build([
+  return `${builder.build([
     {
       "?xml": [{ "#text": "" }],
       ":@": { "@_version": "1.0", "@_encoding": "UTF-8" },
     },
     toOrderedNode("workout_file", workoutFileWithNamespace),
-  ]) as string;
+  ])}\n`;
 };
 
 export const convertKRDToZwift = (krd: KRD, logger: Logger): string => {

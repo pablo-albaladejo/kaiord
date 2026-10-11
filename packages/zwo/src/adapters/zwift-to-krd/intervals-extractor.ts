@@ -64,12 +64,20 @@ export const extractIntervals = (
     INTERVAL_TYPES.flatMap((type) => byType.get(type)!.map(() => type));
   const cursors = new Map<string, number>();
 
-  return sequence.flatMap((type) => {
+  const ordered = sequence.flatMap((type) => {
     const index = cursors.get(type) ?? 0;
     cursors.set(type, index + 1);
     const data = byType.get(type)?.[index];
     return data === undefined ? [] : [{ type, data }];
   });
+  // Never drop an interval the order missed: append it after the rest.
+  const leftovers = INTERVAL_TYPES.flatMap((type) =>
+    byType
+      .get(type)!
+      .slice(cursors.get(type) ?? 0)
+      .map((data) => ({ type, data }))
+  );
+  return [...ordered, ...leftovers];
 };
 
 export const extractTags = (

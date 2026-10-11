@@ -25,6 +25,40 @@ const sideAttributes = (
   return attributes;
 };
 
+// Zwift's Cadence attribute doubles as a target when a side has no power, so
+// a side whose real target travels in kaiord:* must be rebuilt from those.
+const carriesTarget = (
+  attributes: Record<string, unknown>,
+  step: WorkoutStep
+): boolean =>
+  step.target.type === "open" ||
+  Object.keys(attributes).some(
+    (key) => key === "kaiord:powerUnit" || key.startsWith("kaiord:hrTarget")
+  );
+
+// A side without power exposes its cadence as the target; once the real target
+// is restored, the cadence goes back to the zwift extension it came from.
+const restoreSideExtras = (
+  restored: WorkoutStep,
+  steady: ZwiftSteadyStateData,
+  data: ZwiftIntervalsTData,
+  side: Side
+): void => {
+  const cadence = side === "on" ? data.Cadence : data.CadenceResting;
+  if (restored.target.type !== "cadence" && cadence !== undefined) {
+    const zwift = restored.extensions?.zwift as
+      Record<string, unknown> | undefined;
+    restored.extensions = {
+      ...restored.extensions,
+      zwift: { ...zwift, cadence },
+    };
+  }
+  if (steady["kaiord:name"]) restored.name = steady["kaiord:name"];
+  if (steady["kaiord:equipment"]) {
+    restored.equipment = steady["kaiord:equipment"] as WorkoutStep["equipment"];
+  }
+};
+
 export const restoreIntervalsTStep = (
   step: WorkoutStep,
   data: ZwiftIntervalsTData,
@@ -43,10 +77,9 @@ export const restoreIntervalsTStep = (
   } as ZwiftSteadyStateData;
 
   const duration = convertOriginalZwiftDuration(steady, logger);
-  const target =
-    steady["kaiord:powerUnit"] !== undefined || step.target.type === "open"
-      ? restoreSteadyStateTarget(steady)
-      : step.target;
+  const target = carriesTarget(attributes, step)
+    ? restoreSteadyStateTarget(steady)
+    : step.target;
   const restored: WorkoutStep = {
     ...step,
     durationType: duration.type,
@@ -59,9 +92,6 @@ export const restoreIntervalsTStep = (
       step.intensity
     ),
   };
-  if (steady["kaiord:name"]) restored.name = steady["kaiord:name"];
-  if (steady["kaiord:equipment"]) {
-    restored.equipment = steady["kaiord:equipment"] as WorkoutStep["equipment"];
-  }
+  restoreSideExtras(restored, steady, data, side);
   return restored;
 };

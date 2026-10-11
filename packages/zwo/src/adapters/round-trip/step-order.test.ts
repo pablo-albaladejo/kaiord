@@ -205,6 +205,44 @@ describe("ZWO IntervalsT step fidelity", () => {
   });
 });
 
+describe("ZWO IntervalsT heart-rate sides", () => {
+  it("should keep a heart-rate target on a side that also carries a Zwift cadence", async () => {
+    // Arrange
+    const writer = createFastXmlZwiftWriter(mockLogger, validator);
+    const reader = createFastXmlZwiftReader(mockLogger, validator);
+    const onStep: WorkoutStep = {
+      ...timeStep(0, 60, {
+        type: "heart_rate",
+        value: { unit: "bpm", value: 150 },
+      }),
+      extensions: { zwift: { cadence: 85 } },
+    };
+    const offStep = timeStep(1, 60);
+    const krd = makeKrd([{ repeatCount: 2, steps: [onStep, offStep] }]);
+
+    // Act
+    const [block] = stepsOf(
+      await reader(await writer(krd))
+    ) as Array<RepetitionBlock>;
+
+    // Assert
+    expect(block!.steps[0]).toStrictEqual(onStep);
+  });
+});
+
+describe("ZWO writer output", () => {
+  it("should end the document with a newline", async () => {
+    // Arrange
+    const writer = createFastXmlZwiftWriter(mockLogger, validator);
+
+    // Act
+    const xml = await writer(makeKrd([timeStep(0, 60)]));
+
+    // Assert
+    expect(xml.endsWith("</workout_file>\n")).toBe(true);
+  });
+});
+
 describe("ZWO FreeRide XSD conformance", () => {
   it("should write an open-target step carrying kaiord round-trip attributes as valid ZWO", async () => {
     // Arrange
