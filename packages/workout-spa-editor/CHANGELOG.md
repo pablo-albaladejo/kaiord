@@ -1,5 +1,73 @@
 # @kaiord/workout-spa-editor
 
+## 1.5.0
+
+### Minor Changes
+
+- 5a5a95d: Add a converter deep link (`/app/#/convert?from=<format>&to=<format>`) that converts one file without touching the open workout or storage; link it from every converter page with a scope note on workouts vs. activities; publish three athlete guides in English and Spanish with hreflang; and link the guides from the landing page and `llms.txt`.
+- e7bc658: Send to Garmin now places the workout on its date in the Garmin Connect calendar, not only in the library. Moving the workout moves its calendar entry, and an entry Kaiord placed earlier is deleted only after the new one has been seen on Garmin, so a slow or skewed device can leave a duplicate but never an empty day. When a write's outcome is unknown the editor says so, waits out the window in which it could still land, and then lets the athlete answer "It's in Garmin" or "Send anyway". Duplicates left behind can be dismissed once the athlete has removed them.
+- ed7f8fe: Settings → Privacy can now export all your data: "Export my data" downloads one JSON file with your workouts, wellness, health, nutrition and settings. The file is not encrypted and carries no API key (AI providers keep their configuration only) and no integration sync cursors. Exporting does not change your default profile, so it still is not uploaded to Drive until you claim it.
+- b95db6d: Settings → Privacy can now import a backup made with "Export my data". The file is merged into this browser without deleting anything here: the newer copy of each record wins, and records you deleted after the backup stay deleted (nutrition entries are the exception for now and may come back; the summary says so). A clean browser adopts the backup's profile; a backup with several profiles asks which one to join. API keys are never in the file: restored AI providers show "Missing key" until you enter one, and no AI feature uses them meanwhile.
+- 97db768: Nutrition syncs with Google Drive: the intake log, intake presets and nutrition goal now travel in the cloud snapshot and the backup file, with an `updatedAt` clock (backfilled by Dexie v37) and delete tombstones, so a deleted intake stays deleted on every device and after importing an older backup. Logging nutrition now triggers the automatic Drive push, an entry logged while a sync is running is no longer lost, and a deleted profile's records no longer come back from Drive or appear in an exported backup. Backups move to version 2; version 1 files still import.
+- c5951c7: Look after a scheduled workout: save edits explicitly (no Garmin needed), move it to another day or delete it from its detail view with a 10 s Undo, open a calendar card's detail, see why "Send to Garmin" is disabled, and get "Workout not found" for an unknown id. Calendar cards now show the workout's name, its origin in words and its duration.
+
+### Patch Changes
+
+- 1f473a1: Stop sending per-person identifiers to Umami: no analytics event carries `profileId` any more (the Umami adapter also strips it as a safety net), and page views of a workout or chat submit the route pattern (`/workout/:id`, `/chat/:conversationId`) instead of the record id.
+- fb2d94c: Chat errors are classified by HTTP status and provider error type first, with word-boundary text matching only as a fallback, so a 400 invalid request is no longer reported as "Rate limit or quota reached".
+- 97dfd05: The chat error classifier reads provider errors through the shared `readProviderError` reader and decides "model" inside its structured step, after auth and rate and before the generic fallback. A 400 whose message only echoes "not_found_error ... model" is no longer shown as a retired model, and a bare 404 stays generic.
+- fb2d94c: Chat error classification also recognises provider codes such as `insufficient_quota`, `quota_exceeded` and `overloaded_error` (including Anthropic's mid-stream error chunks), treats HTTP 503 as "try again shortly", and reads the message of non-`Error` error objects.
+- 97dfd05: A chat conversation started under a since-retired model no longer fails every turn with a 404: the stored model heals to its successor, and the chat shows "X was retired by the provider — using Y instead". Switching a conversation's provider no longer stores a retired model as its override. Settings → AI names the successor of a retired model and warns about deprecated ones. The lab-import "model unavailable" message is now translated.
+- fb2d94c: Retrying a failed chat turn re-runs it without appending the user's message again, so the message is no longer persisted and sent once per retry. The replay only happens when the stored conversation ends with that exact message; otherwise the text is sent normally. A retry is counted with its own count-only `chat-turn-retried` analytics event instead of a second `chat-message-sent`.
+- fb2d94c: The chat's `set_data_route` tool tells the model, on its `action` field, which fields each action requires, so it emits fewer calls that fail validation.
+- fb2d94c: Fix the in-app chat failing every request with Anthropic (`tools.11.custom.input_schema.type: Field required`): the `set_data_route` tool now sends a single top-level `type: "object"` input schema to the provider, keeping its per-action validation.
+- da9969e: The Units, Language and Notifications preferences and the editor's "Send to Garmin" button stay disabled until the record they write to has loaded. Before, a tap that landed first, which is likely on a slow phone, looked accepted but was dropped: the preference never saved and nothing was sent to Garmin.
+- f27ad8c: A clean browser now starts with a default local profile ("My profile"), so scheduling, wellness, nutrition and preferences work without visiting the athlete page first. The profile is not uploaded to Drive until it is claimed: editing it, syncing against an empty Drive, or (when Drive already holds one profile) merging its data into that profile. With several profiles in Drive, sync asks which one this device belongs to. Source-policy rows no longer collapse into one row on every sync; rows already lost to that collapse before this fix cannot be recovered.
+- dded57a: Converter pages link the editor at `kaiord.com/app/` instead of the legacy `/editor/` path, and docs breadcrumbs link only pages that exist. The SPA gains a route-segment registry, kept in parity with its router, which the new site-link checker uses to validate `/app/#/<route>` links.
+- 738d24f: Workouts with pace zone targets can be sent to Garmin again. Garmin Connect has no pace zone numbers, so each pace zone is now written as an m/s range, on every path that builds a Garmin payload (Send to Garmin, Send week, the chat tool and the GCN file download). The ranges are the ones the Athlete page shows: pace zones the athlete edited (or a coach sync wrote) win, otherwise Z1–Z5 derive from the threshold pace with the zone map's model, and the open ends of Z1 and Z5 get a bound 25% beyond the known one. The distance a pace is per comes from the workout's sport (1 km running, 100 m swimming). When the zones cannot be resolved, the send fails with a specific message (set your threshold pace, complete your pace zones, or pace zones only in running or swimming) instead of the generic "could not be sent", and an unexpected push failure now logs its (scrubbed) cause.
+- 42453e3: A new profile can now get from install to "Send week" without help. Connections switches workout export destinations on and off, keeps "Nowhere" beside the switches until one is on, and does not yet offer the unverified TrainingPeaks push. The "no export route" messages link there. Linking a source opens the routes its bridge's import actually writes: Train2Go opens planned sessions and training zones, with zones set to manual when the profile already has thresholds so nothing is overwritten; WHOOP opens its seven types (HRV, sleep, strain, vitals, heart-rate series, stress, activity) and no scale routes. Reconnecting from Connections restores the routes Disconnect switched off, such as Garmin's activity import and workout export, and leaves the ones you switched off yourself alone. Routes that a Disconnect switched off before this release carry no record of it, so they stay off on reconnect; switch them back on in Connections. A route already on for a type its bridge no longer feeds (such as a WHOOP weight import) stays listed so it can be switched off. The calendar offers "Connect to Train2Go" when the profile is not linked, and the Connections card asks you to sign in first when there is no session. The first-run guide ticks the steps already done, shows only to a profile with no workouts or coach plans in any week, and makes way for a week of coach plans.
+- 9c4b3bf: Load the Health and new-workout route dispatchers and the Google Drive cloud sync lazily, and budget the SPA's initial JS in CI. The docs now ship one self-hosted Inter file (the preloaded `/docs/fonts/inter-var-latin.woff2`, which was a 404) instead of the 16 Inter subsets bundled by VitePress.
+- 97dfd05: The model catalog no longer offers models the provider has retired or deprecated (`claude-3-haiku-20240307`, `claude-opus-4-1`, `claude-opus-4-0`, `claude-sonnet-4-0` and their dated ids), and the default model per provider is a curated current model (`claude-sonnet-5`, `gpt-5-mini`, `gemini-2.5-flash`) instead of the catalog's oldest entry. A saved choice pointing at a retired model resolves to its same-tier successor, `isModelNotFoundError` detects a provider rejecting the model, and the SPA shows "This model is no longer available — pick another in Settings → AI" instead of a generic failure.
+- 7478406: Settings → AI checks a provider's key before saving it: a key the provider rejects is not saved, and one that cannot be checked is saved with a note. The chat explains a missing profile or a provider restored without its key, never offers a keyless provider, and its model picker no longer shows empty parentheses. A failed chat turn no longer throws an uncaught `No output generated` page error.
+- 51e9c9d: The empty library now offers "New workout" and "Import file". On a phone, the New session sheet without an AI key shows Template, Blank and Import file first, above the bottom navigation, and every page's end clears the floating nav through one set of bottom-nav geometry tokens.
+- 891f6e6: Importing a TCX workout keeps its repeat blocks, and an import that could not be converted exactly (a step the reader had to skip, a target it could not map, a nested repeat it unrolled) now shows an "Imported with warnings" toast in the editor and the converter, instead of only logging to the browser console.
+- d047515: Leaving the editor while a page is still loading now leaves. In Firefox, starting a navigation away cancels the page's pending downloads, and the stale-build recovery mistook that for an outdated deploy and reloaded the app instead of following the navigation.
+- e43c3b2: Manual use is the main path. The first run leads with creating, importing and logging wellness, and the setup checklist completes without integrations. The readiness card offers manual entry, and scheduling by hand counts as a planned-session source. The step editor takes duration as m:ss and pace as min/km (min/100 m in the pool) and has an intensity selector; metadata opens read-only, and the FTP line shows only when a target uses FTP. The threshold dialog opens on the active sport, leads with pace and LTHR in running, shows the method actually applied and says when it saved. Library cards no longer show "0 TSS".
+- 8119609: Manual sleep entry now records hours slept. The wellness dialog asks for hours (h:mm), an optional score, and an optional bedtime and wake time:
+
+  - A score on its own is stored without a duration. It was previously stored as a 0 h 0 min night.
+  - Older entries saved that way now read "Duration not recorded".
+  - The chat tool stores its sleep value as hours slept.
+
+  The Daily readiness rationale now names only the inputs it used, and says when the sleep score was entered by hand. The Sleep, Weight, Recovery and Activity pages each have an "Add data" action that opens the dialog on that metric. Their date windows now use the local calendar day.
+
+- 277f3ac: The "New session" sheet keeps the day it was opened for. Blank keeps the day and the chosen sport. Import file imports onto that day. Template opens the Library in picking mode for that day. Close returns to the day's week instead of reopening the sheet. The schedule dialog proposes a date, explains an empty one and speaks Spanish. "Keep in library" proposes the workout's name.
+- 95f8666: The calendar, daily, goal, wellness and profile surfaces speak the active locale, with dates formatted by `Intl`, and lint fails on untranslated JSX text there. On a phone the "+" and chat buttons no longer cover navigation or content, the header is one row and the first run keeps "New workout" and the week on screen. The Inter font loads under `/app/`. A workout downloads from one control under a readable filename, "Save preset" stays available after adding an entry, trends span the requested window and a swim step shows pace per 100 m.
+- Updated dependencies [fb2d94c]
+- Updated dependencies [fb2d94c]
+- Updated dependencies [fb2d94c]
+- Updated dependencies [7478406]
+- Updated dependencies [fb2d94c]
+- Updated dependencies [791740f]
+- Updated dependencies [28c51e2]
+- Updated dependencies [1f39d02]
+- Updated dependencies [0baa275]
+- Updated dependencies [97dfd05]
+- Updated dependencies [97dfd05]
+- Updated dependencies [97dfd05]
+- Updated dependencies [8119609]
+- Updated dependencies [891f6e6]
+- Updated dependencies [1c0e653]
+- Updated dependencies [9199ae8]
+  - @kaiord/ai@9.4.0
+  - @kaiord/core@10.3.0
+  - @kaiord/fit@10.3.0
+  - @kaiord/tcx@10.3.0
+  - @kaiord/zwo@10.3.0
+  - @kaiord/tanita@10.3.0
+  - @kaiord/trainingpeaks@10.3.0
+  - @kaiord/whoop@10.3.0
+
 ## 1.4.0
 
 ### Minor Changes
