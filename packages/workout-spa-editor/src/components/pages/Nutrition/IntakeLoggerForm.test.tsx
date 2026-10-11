@@ -68,4 +68,41 @@ describe("IntakeLoggerForm", () => {
       "Yogurt"
     );
   });
+
+  it("should keep the preset available right after adding the entry", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const { savePreset } = setup();
+    await user.type(screen.getByLabelText("Energy (kcal)"), "300");
+    await user.type(screen.getByLabelText("Label"), "Yogurt");
+    await user.click(screen.getByTestId("intake-log-submit"));
+
+    // Act
+    await user.click(screen.getByTestId("intake-save-preset"));
+
+    // Assert
+    expect(savePreset).toHaveBeenCalledWith(
+      expect.objectContaining({ kcal: 300, label: "Yogurt" }),
+      "Yogurt"
+    );
+  });
+
+  it("should name the just-added entry's preset with a label typed afterwards", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const { savePreset } = setup();
+    await user.type(screen.getByLabelText("Energy (kcal)"), "450");
+    await user.click(screen.getByTestId("intake-log-submit"));
+    expect(screen.getByTestId("intake-save-preset")).toBeDisabled();
+
+    // Act
+    await user.type(screen.getByLabelText("Label"), "Oats");
+    await user.click(screen.getByTestId("intake-save-preset"));
+
+    // Assert
+    expect(savePreset).toHaveBeenCalledWith(
+      expect.objectContaining({ kcal: 450, label: "Oats" }),
+      "Oats"
+    );
+  });
 });
