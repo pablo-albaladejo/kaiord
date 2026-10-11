@@ -34,6 +34,11 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
             {t("providers.default")}
           </span>
         )}
+        {p.apiKeyMissing && (
+          <span className="ml-2 rounded-full border border-danger-border bg-danger-bg px-2.5 py-0.5 text-xs font-medium text-danger-text">
+            {t("providers.missingKey")}
+          </span>
+        )}
       </div>
       <div className="flex gap-2">
         <Button size="sm" variant="secondary" onClick={onEdit}>

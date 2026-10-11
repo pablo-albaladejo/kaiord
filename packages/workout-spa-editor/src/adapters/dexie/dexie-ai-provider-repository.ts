@@ -23,15 +23,19 @@ const PASSPHRASE = "kaiord-spa-v1";
 // pass-through when there is no transaction in scope. Required since these
 // repos are called from inside `PersistencePort.transaction` — e.g. the
 // `withTombstones` existence probe before a provider delete.
-async function encryptProvider(
-  p: LlmProviderConfig
-): Promise<LlmProviderConfig> {
-  return { ...p, apiKey: await Dexie.waitFor(encrypt(p.apiKey, PASSPHRASE)) };
+// A provider restored from a backup is stored without `apiKey` until the
+// user enters one; entering one clears `apiKeyMissing`.
+type StoredProvider = Omit<LlmProviderConfig, "apiKey"> & { apiKey?: string };
+
+async function encryptProvider(p: LlmProviderConfig): Promise<StoredProvider> {
+  const { apiKey, apiKeyMissing, ...rest } = p;
+  if (!apiKey && apiKeyMissing) return { ...rest, apiKeyMissing };
+  return { ...rest, apiKey: await Dexie.waitFor(encrypt(apiKey, PASSPHRASE)) };
 }
 
-async function decryptProvider(
-  p: LlmProviderConfig
-): Promise<LlmProviderConfig> {
+async function decryptProvider(p: StoredProvider): Promise<LlmProviderConfig> {
+  if (typeof p.apiKey !== "string")
+    return { ...p, apiKey: "", apiKeyMissing: true };
   return { ...p, apiKey: await Dexie.waitFor(decrypt(p.apiKey, PASSPHRASE)) };
 }
 

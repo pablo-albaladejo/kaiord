@@ -9,7 +9,7 @@ import { useAiTabHandlers } from "./use-ai-tab-handlers";
 
 export const AiTab: React.FC = () => {
   const t = useTranslate("settings");
-  const providers = useAiProvidersLive() ?? [];
+  const providers = useAiProvidersLive({ includeKeyless: true }) ?? [];
   const customPrompt = useAiCustomPromptLive() ?? "";
   const { onAdd, onRemove, onUpdate, onSetDefault, onPromptChange } =
     useAiTabHandlers();

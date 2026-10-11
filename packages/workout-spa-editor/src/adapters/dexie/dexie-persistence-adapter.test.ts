@@ -491,6 +491,41 @@ describe("DexieAiProviderRepository", () => {
     // Assert
     expect(result.map((p) => p.label)).toEqual(["First", "Second"]);
   });
+
+  it("should read a provider stored without a key as missing its key", async () => {
+    // Arrange
+    const { aiProviders } = createDexiePersistence(testDb);
+    const keyless: Partial<LlmProviderConfig> = makeProvider({ id: "ai-1" });
+    delete keyless.apiKey;
+    await testDb.table("aiProviders").put(keyless);
+
+    // Act
+    const result = await aiProviders.getAll();
+
+    // Assert
+    expect(result).toEqual([
+      expect.objectContaining({ id: "ai-1", apiKey: "", apiKeyMissing: true }),
+    ]);
+  });
+
+  it("should store a keyless provider without a key until one is entered", async () => {
+    // Arrange
+    const { aiProviders } = createDexiePersistence(testDb);
+    const keyless = makeProvider({ apiKey: "", apiKeyMissing: true });
+    await aiProviders.put(keyless);
+    const stored = await testDb.table("aiProviders").get("ai-1");
+
+    // Act
+    await aiProviders.put({ ...keyless, apiKey: "sk-new" });
+
+    // Assert
+    expect(stored).not.toHaveProperty("apiKey");
+    const raw = await testDb.table("aiProviders").get("ai-1");
+    expect(raw).not.toHaveProperty("apiKeyMissing");
+    expect(await aiProviders.getById("ai-1")).toMatchObject({
+      apiKey: "sk-new",
+    });
+  });
 });
 
 // --- SyncStateRepository ---
