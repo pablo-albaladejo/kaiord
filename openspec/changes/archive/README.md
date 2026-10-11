@@ -11,6 +11,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | 2026-10-11 | [`fix-core-compare-krds-steps`](./2026-10-11-fix-core-compare-krds-steps/) | Compare structured workout steps in round-trip validation |
 | 2026-10-11 | [`fix-fit-workout-hr-power-offsets`](./2026-10-11-fix-fit-workout-hr-power-offsets/) | Apply the FIT workoutHr and workoutPower offsets to workout ranges and conditions |
 | 2026-10-11 | [`fix-scheduled-workout-lifecycle`](./2026-10-11-fix-scheduled-workout-lifecycle/) | Fix the lifecycle of a scheduled workout |
+| 2026-10-11 | [`fix-spa-empty-states-mobile`](./2026-10-11-fix-spa-empty-states-mobile/) | Empty states and the phone layout say what to do next |
 | 2026-10-11 | [`fix-spa-manual-sleep`](./2026-10-11-fix-spa-manual-sleep/) | Manual sleep records hours, not a 0 h night |
 | 2026-10-11 | [`tcx-repeat-blocks`](./2026-10-11-tcx-repeat-blocks/) | TCX import reads repetition blocks |
 | 2026-10-10 | [`default-local-profile`](./2026-10-10-default-local-profile/) | A default local profile that stays sync-inert until it is claimed |
