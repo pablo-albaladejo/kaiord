@@ -34,6 +34,9 @@ const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN = 403;
 const HTTP_BAD_REQUEST = 400;
 
+/** A provider that accepts the connection and never answers is "unverified". */
+export const PROBE_TIMEOUT_MS = 10_000;
+
 // Google answers a malformed or unknown key with 400 API_KEY_INVALID rather
 // than 401, so a 400 counts only when the body names the key.
 const isInvalid = async (response: Response): Promise<boolean> => {
@@ -49,14 +52,19 @@ export const verifyProviderKey = async (
   fetchImpl: typeof fetch = fetch
 ): Promise<ProviderKeyCheck> => {
   const probe = PROBES[credential.type](credential.apiKey);
+  const deadline = new AbortController();
+  const timer = setTimeout(() => deadline.abort(), PROBE_TIMEOUT_MS);
   try {
     const response = await fetchImpl(probe.url, {
       method: "GET",
       headers: probe.headers,
+      signal: deadline.signal,
     });
     if (response.ok) return "valid";
     return (await isInvalid(response)) ? "invalid" : "unverified";
   } catch {
     return "unverified";
+  } finally {
+    clearTimeout(timer);
   }
 };

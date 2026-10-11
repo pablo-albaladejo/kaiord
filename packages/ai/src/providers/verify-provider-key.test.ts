@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderType } from "./types";
-import { verifyProviderKey } from "./verify-provider-key";
+import { PROBE_TIMEOUT_MS, verifyProviderKey } from "./verify-provider-key";
 
 const respond = (status: number, body = "{}") =>
   vi.fn(async () => new Response(body, { status }));
@@ -121,6 +121,31 @@ describe("verifyProviderKey", () => {
       { type: "openai", apiKey: "k" },
       fetchImpl
     );
+
+    // Assert
+    expect(result).toBe("unverified");
+  });
+
+  it("should leave the key unverified when the provider never answers", async () => {
+    // Arrange
+    vi.useFakeTimers();
+    const stalled = vi.fn(
+      (_url: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(init.signal?.reason)
+          );
+        })
+    );
+
+    // Act
+    const pending = verifyProviderKey(
+      { type: "anthropic", apiKey: "k" },
+      stalled
+    );
+    await vi.advanceTimersByTimeAsync(PROBE_TIMEOUT_MS);
+    const result = await pending;
+    vi.useRealTimers();
 
     // Assert
     expect(result).toBe("unverified");
