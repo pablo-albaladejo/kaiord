@@ -7,6 +7,7 @@ import type {
 
 import { convertStepsToZwiftIntervals } from "./intervals-encoder";
 import { addKrdMetadata } from "./metadata-builder";
+import { withOrderedChildren } from "./ordered-xml";
 import { addWorkoutProperties, mapSportType } from "./workout-properties";
 
 type WorkoutData = {
@@ -50,7 +51,7 @@ export const buildWorkoutFile = ({
     workoutData.steps || [],
     logger
   );
-  workoutFile.workout = intervals;
+  workoutFile.workout = withOrderedChildren(intervals);
 
   addKrdMetadata(workoutFile, metadata, fitExtensions);
 

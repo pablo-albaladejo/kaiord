@@ -42,7 +42,11 @@ const mapZwiftSport = (sportType?: string): string =>
       ? "running"
       : "generic";
 
-export const convertZwiftToKRD = (zwiftData: unknown, logger: Logger): KRD => {
+export const convertZwiftToKRD = (
+  zwiftData: unknown,
+  logger: Logger,
+  intervalOrder?: Array<string>
+): KRD => {
   logger.debug("Converting Zwift to KRD");
 
   const workoutFile = (zwiftData as { workout_file: unknown })
@@ -53,7 +57,7 @@ export const convertZwiftToKRD = (zwiftData: unknown, logger: Logger): KRD => {
   const durationType: "time" | "distance" =
     workoutFile.durationType === "distance" ? "distance" : "time";
 
-  const intervals = extractIntervals(workoutFile.workout);
+  const intervals = extractIntervals(workoutFile.workout, intervalOrder);
   const steps = processIntervals(intervals, durationType);
 
   const metadata = extractMetadata(workoutFile, sport);

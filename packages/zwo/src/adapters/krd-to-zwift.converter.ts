@@ -2,6 +2,7 @@ import type { KRD, Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import { createZwiftParsingError } from "@kaiord/core";
 import { XMLBuilder } from "fast-xml-parser";
 
+import { toOrderedNode } from "./krd-to-zwift/ordered-xml";
 import { buildWorkoutFile } from "./krd-to-zwift/workout-file-builder";
 
 const extractWorkoutData = (krd: KRD) => {
@@ -20,6 +21,7 @@ const extractWorkoutData = (krd: KRD) => {
 
 const buildXmlString = (workoutFile: Record<string, unknown>): string => {
   const builder = new XMLBuilder({
+    preserveOrder: true,
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
     format: true,
@@ -32,15 +34,13 @@ const buildXmlString = (workoutFile: Record<string, unknown>): string => {
     ...workoutFile,
   };
 
-  const xmlObj = {
-    "?xml": {
-      "@_version": "1.0",
-      "@_encoding": "UTF-8",
+  return builder.build([
+    {
+      "?xml": [{ "#text": "" }],
+      ":@": { "@_version": "1.0", "@_encoding": "UTF-8" },
     },
-    workout_file: workoutFileWithNamespace,
-  };
-
-  return builder.build(xmlObj) as string;
+    toOrderedNode("workout_file", workoutFileWithNamespace),
+  ]) as string;
 };
 
 export const convertKRDToZwift = (krd: KRD, logger: Logger): string => {

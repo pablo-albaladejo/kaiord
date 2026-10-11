@@ -14,6 +14,7 @@ import {
   validateZwiftStructure,
 } from "./xml-validator-helpers";
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
+import { extractIntervalOrder } from "./zwift-to-krd/intervals-extractor";
 
 const parseZwiftXml = (xmlString: string, logger: Logger): unknown => {
   logger.debug("Parsing Zwift file");
@@ -40,7 +41,11 @@ export const createFastXmlZwiftReader =
     validateZwiftStructure(zwiftData, logger);
 
     logger.info("Zwift file parsed successfully");
-    return convertZwiftToKRD(zwiftData, logger);
+    return convertZwiftToKRD(
+      zwiftData,
+      logger,
+      extractIntervalOrder(xmlString)
+    );
   };
 
 export const createFastXmlZwiftWriter =

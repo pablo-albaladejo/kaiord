@@ -94,7 +94,7 @@ describe("encodeIntervalsT", () => {
     expect(result["@_OffPower"]).toBe(0.5);
   });
 
-  it("should not set @_OnPower when on-step power unit is watts", () => {
+  it("should encode on-step watts as %FTP and keep the original watts per side", () => {
     // Arrange
     const onStep = makeStep({
       targetType: "power",
@@ -107,7 +107,32 @@ describe("encodeIntervalsT", () => {
     const result = encodeIntervalsT(block);
 
     // Assert
-    expect(result["@_OnPower"]).toBeUndefined();
+    expect(result["@_OnPower"]).toBe(1.2);
+    expect(result["@_kaiord:onPowerUnit"]).toBe("watts");
+    expect(result["@_kaiord:onOriginalWatts"]).toBe(300);
+    expect(result["@_OffPower"]).toBeUndefined();
+  });
+
+  it("should encode power zones as %FTP and keep the zone per side", () => {
+    // Arrange
+    const onStep = makeStep({
+      targetType: "power",
+      target: { type: "power", value: { unit: "zone", value: 5 } },
+    });
+    const offStep = makeStep({
+      targetType: "power",
+      target: { type: "power", value: { unit: "zone", value: 3 } },
+    });
+    const block = makeBlock(onStep, offStep);
+
+    // Act
+    const result = encodeIntervalsT(block);
+
+    // Assert
+    expect(result["@_OnPower"]).toBe(1.2);
+    expect(result["@_kaiord:onPowerZone"]).toBe(5);
+    expect(result["@_OffPower"]).toBe(0.9);
+    expect(result["@_kaiord:offPowerZone"]).toBe(3);
   });
 
   it("should encode rpm cadence from on-step as @_Cadence", () => {
