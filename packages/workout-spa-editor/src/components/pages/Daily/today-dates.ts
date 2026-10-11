@@ -19,13 +19,10 @@ const PAD = 2;
 
 export type WeekDay = {
   iso: string;
-  letter: string;
   dayNumber: number;
   isFocused: boolean;
   isRealToday: boolean;
 };
-
-const WEEKDAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"] as const;
 
 export function toIsoDate(date: Date): string {
   const year = date.getFullYear();
@@ -70,7 +67,6 @@ export function weekDays(focus: Date, realTodayIso: string): WeekDay[] {
     const iso = toIsoDate(date);
     return {
       iso,
-      letter: WEEKDAY_LETTERS[index]!,
       dayNumber: date.getDate(),
       isFocused: iso === focusIso,
       isRealToday: iso === realTodayIso,

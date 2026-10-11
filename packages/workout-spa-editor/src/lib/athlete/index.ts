@@ -7,6 +7,7 @@ export {
   type ActiveSport,
   ATHLETE_SPORTS,
   type AthleteSportOption,
+  athleteSportOptions,
   isActiveSport,
 } from "./sports";
 export {

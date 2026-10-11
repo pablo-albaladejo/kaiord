@@ -8,6 +8,7 @@
 import type { GoalType } from "@kaiord/core";
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { type GoalFormFields, validateGoalForm } from "./goal-form-model";
 import { previewGoal } from "./goal-preview";
 import { GoalCapOverrideToggle } from "./GoalCapOverrideToggle";
@@ -35,6 +36,7 @@ export function GoalSetupForm({
   today,
   onSaved,
 }: GoalSetupFormProps) {
+  const t = useTranslate("nutrition");
   const baseline = useGoalBaseline(profileId, today);
   const [fields, setFields] = useState<GoalFormFields>(
     initialFields("", "fat_loss")
@@ -74,7 +76,7 @@ export function GoalSetupForm({
       )}
       {"error" in validation && (
         <p role="alert" className="m-0 text-[12px] text-danger-text">
-          {validation.error}
+          {t(`goalSetup.errors.${validation.error}`)}
         </p>
       )}
       <button
@@ -84,7 +86,7 @@ export function GoalSetupForm({
         data-testid="goal-save"
         className="mt-1 rounded bg-primary-600 text-white hover:bg-primary-700 disabled:bg-primary-300 px-4 py-2 text-sm font-medium disabled:opacity-50"
       >
-        Save goal
+        {t("goalSetup.save")}
       </button>
     </div>
   );

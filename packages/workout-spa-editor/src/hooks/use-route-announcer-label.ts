@@ -9,10 +9,6 @@
  * query-string changes are ignored at the hook boundary because
  * `useLocation()` returns the path without the search component.
  *
- * Localisation: labels are English-only, consistent with the rest
- * of the SPA copy today. If the project later adopts an i18n
- * framework, wrap each return value in `t(...)`.
- *
  * Disambiguation: each label is suffixed with " page" / equivalent
  * so it does NOT collide with the page's `<h1>` text. Without the
  * suffix, screen readers would read both ("Library Library") when
@@ -21,9 +17,12 @@
 
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../i18n/use-translate";
+
 export function useRouteAnnouncerLabel(): string {
   const [pathname] = useLocation();
-  return labelForPathname(pathname);
+  const t = useTranslate("nav");
+  return t(`announce.${announceKey(pathname)}`);
 }
 
 function normalizePath(pathname: string): string {
@@ -31,23 +30,26 @@ function normalizePath(pathname: string): string {
   return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
 
-function labelForPathname(rawPathname: string): string {
+const EXACT: Record<string, string> = {
+  "/library": "library",
+  "/chat": "chat",
+  "/athlete": "athlete",
+  "/workout/new": "newWorkout",
+  "/health": "trends",
+  "/health/sleep": "sleep",
+  "/health/weight": "weight",
+  "/health/recovery": "recovery",
+  "/health/activity": "activity",
+  "/nutrition": "nutrition",
+  "/daily": "daily",
+};
+
+function announceKey(rawPathname: string): string {
   const pathname = normalizePath(rawPathname);
-  if (pathname === "/library") return "Library page";
-  if (pathname === "/chat") return "Chat page";
-  if (pathname === "/athlete") return "Athlete page";
-  if (pathname === "/workout/new") return "New workout";
-  if (pathname.startsWith("/workout/view/")) return "Workout page";
-  if (pathname.startsWith("/workout/")) return "Edit workout";
-  if (pathname === "/health") return "Trends page";
-  if (pathname === "/health/sleep") return "Sleep page";
-  if (pathname === "/health/weight") return "Weight page";
-  if (pathname === "/health/recovery") return "Recovery page";
-  if (pathname === "/health/activity") return "Activity page";
-  if (pathname.startsWith("/settings")) return "Settings page";
-  if (pathname === "/nutrition") return "Nutrition page";
-  if (pathname === "/daily") return "Daily page";
-  if (pathname === "/" || pathname.startsWith("/calendar"))
-    return "Calendar page";
-  return "Calendar page";
+  const exact = EXACT[pathname];
+  if (exact) return exact;
+  if (pathname.startsWith("/workout/view/")) return "workout";
+  if (pathname.startsWith("/workout/")) return "editWorkout";
+  if (pathname.startsWith("/settings")) return "settings";
+  return "calendar";
 }

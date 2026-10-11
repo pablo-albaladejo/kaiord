@@ -173,5 +173,19 @@
     "trainingpeaks": "TrainingPeaks",
     "coach": "Coach",
     "ai": "AI"
+  },
+  "weekNav": {
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today",
+    "weekNumber": "W{{n}}"
+  },
+  "wellnessBand": {
+    "empty": "No readiness data",
+    "sleep": "Sleep",
+    "hrv": "HRV",
+    "weight": "Weight",
+    "steps": "Steps",
+    "net": "Net"
   }
 }

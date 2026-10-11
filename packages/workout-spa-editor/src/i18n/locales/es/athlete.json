@@ -41,5 +41,38 @@
     "notice": "Hemos creado «Mi perfil» para que empieces ya. Añade tus umbrales y tu peso para tener zonas y estimaciones personales.",
     "complete": "Completar perfil",
     "dismiss": "Entendido"
+  },
+  "title": "Atleta",
+  "sports": {
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swimming": "Natación"
+  },
+  "profileManager": {
+    "title": "Gestor de perfiles",
+    "intro": "Gestiona tus perfiles de entrenamiento con zonas y datos personales.",
+    "profileName": "Nombre del perfil",
+    "newName": "Nombre del nuevo perfil",
+    "name": "Nombre",
+    "create": "Crear perfil",
+    "import": "Importar perfil",
+    "importFile": "Importar archivo de perfil",
+    "saved": "Perfiles guardados ({{count}})",
+    "empty": "Aún no hay perfiles. Crea uno para empezar.",
+    "setActive": "Activar",
+    "edit": "Editar",
+    "export": "Exportar perfil",
+    "delete": "Eliminar perfil",
+    "backToList": "Volver a la lista",
+    "deleteTitle": "Eliminar perfil",
+    "deleteBody": "¿Seguro que quieres eliminar este perfil? Esta acción no se puede deshacer.",
+    "cancel": "Cancelar",
+    "confirmDelete": "Eliminar",
+    "linkedTitle": "Cuentas de entrenador vinculadas",
+    "connectedAs": "Conectado como",
+    "notConnected": "Sin conectar",
+    "connect": "Conectar {{source}}",
+    "connecting": "Conectando…",
+    "disconnect": "Desconectar"
   }
 }

@@ -15,10 +15,10 @@ export function ZonePreview({ zone, profile }: ZonePreviewProps) {
   const ftp = profile.sportZones.cycling?.thresholds.ftp;
   if (!ftp) return null;
 
+  const watts = (percent: number) => Math.round((ftp * percent) / 100);
   return (
     <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-      {Math.round((ftp * zone.minPercent) / 100)}W -{" "}
-      {Math.round((ftp * zone.maxPercent) / 100)}W
+      {`${watts(zone.minPercent)}W - ${watts(zone.maxPercent)}W`}
     </div>
   );
 }

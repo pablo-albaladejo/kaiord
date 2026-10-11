@@ -17,6 +17,10 @@ export type GoalFormDraft = {
   overrideCap: boolean;
 };
 
+/** Key under `nutrition:goalSetup.errors` naming the first invalid field. */
+export type GoalFormError =
+  "startWeight" | "targetWeight" | "targetDate" | "pastDate";
+
 export type GoalFormFields = {
   goalType: GoalType;
   startWeightKg: string;
@@ -35,15 +39,13 @@ const parsePositive = (raw: string): number | null => {
 export const validateGoalForm = (
   fields: GoalFormFields,
   today: string
-): { draft: GoalFormDraft } | { error: string } => {
+): { draft: GoalFormDraft } | { error: GoalFormError } => {
   const startWeightKg = parsePositive(fields.startWeightKg);
-  if (startWeightKg === null) return { error: "Enter a valid start weight." };
+  if (startWeightKg === null) return { error: "startWeight" };
   const targetWeightKg = parsePositive(fields.targetWeightKg);
-  if (targetWeightKg === null) return { error: "Enter a valid target weight." };
-  if (!DATE_RE.test(fields.targetDate))
-    return { error: "Enter a target date (YYYY-MM-DD)." };
-  if (fields.targetDate <= today)
-    return { error: "Target date must be in the future." };
+  if (targetWeightKg === null) return { error: "targetWeight" };
+  if (!DATE_RE.test(fields.targetDate)) return { error: "targetDate" };
+  if (fields.targetDate <= today) return { error: "pastDate" };
   return {
     draft: {
       goalType: fields.goalType,
