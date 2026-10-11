@@ -16,7 +16,7 @@ import { SCHEMAS } from "./dexie-schemas";
 const dbName = () => `kaiord-test-v36-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 35;
-const SCHEMA_HEAD = 36;
+const SCHEMA_HEAD = 37;
 
 const row = (
   id: string,

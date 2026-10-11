@@ -108,8 +108,8 @@ const CORE_V25 = {
     "id, profileId, conversationId, [profileId+createdAt], [profileId+conversationId+createdAt]",
 };
 
-// v26 — additive device-local energy-balance stores (`intakeEntries`,
-// `intakePresets`, `energyTargets`); built in `dexie-schemas-late.ts`.
+// v26 — additive energy-balance stores (`intakeEntries`, `intakePresets`,
+// `energyTargets`, synced since v37); built in `dexie-schemas-late.ts`.
 const CORE_V26 = buildCoreV26(CORE_V25);
 
 // v27 — Data Hub domain tables (`plannedSessions`, `activities`); built in
