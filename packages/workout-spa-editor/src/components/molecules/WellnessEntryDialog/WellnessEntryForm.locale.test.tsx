@@ -29,8 +29,8 @@ describe("WellnessEntryForm toasts", () => {
     );
 
     // Act
-    await user.type(screen.getByLabelText("Weight (kg)"), "72");
-    await user.click(screen.getByRole("button", { name: "Save" }));
+    await user.type(screen.getByLabelText("Peso (kg)"), "72");
+    await user.click(screen.getByRole("button", { name: "Guardar" }));
 
     // Assert
     expect(
@@ -55,8 +55,8 @@ describe("WellnessEntryForm toasts", () => {
     );
 
     // Act
-    await user.type(screen.getByLabelText("Weight (kg)"), "72");
-    await user.click(screen.getByRole("button", { name: "Save" }));
+    await user.type(screen.getByLabelText("Peso (kg)"), "72");
+    await user.click(screen.getByRole("button", { name: "Guardar" }));
 
     // Assert
     expect(await screen.findByText("Bienestar guardado")).toBeInTheDocument();

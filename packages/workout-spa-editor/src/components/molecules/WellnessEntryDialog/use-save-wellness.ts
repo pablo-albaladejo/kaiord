@@ -13,13 +13,25 @@
  */
 import { useRef, useState } from "react";
 
-import type { ManualHealthMetric } from "../../../application/health/manual-health-metric";
-import { saveManualHealthMetric } from "../../../application/health/save-manual-health-metric.use-case";
+import {
+  saveManualHealthMetric,
+  type SaveManualHealthMetricInput,
+} from "../../../application/health/save-manual-health-metric.use-case";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
+import type { WellnessValues } from "./collect-wellness";
 
-export type WellnessValues = Partial<Record<ManualHealthMetric, number>>;
+const toInputs = (
+  values: WellnessValues,
+  day: string
+): SaveManualHealthMetricInput[] => {
+  const { sleep, ...numbers } = values;
+  const inputs: SaveManualHealthMetricInput[] = Object.entries(numbers).map(
+    ([metric, value]) => ({ metric, day, value }) as SaveManualHealthMetricInput
+  );
+  return sleep ? [...inputs, { metric: "sleep", day, sleep }] : inputs;
+};
 
 export type UseSaveWellnessResult = {
   submit: (values: WellnessValues) => Promise<boolean>;
@@ -35,7 +47,7 @@ export function useSaveWellness(day: string): UseSaveWellnessResult {
 
   const submit = async (values: WellnessValues): Promise<boolean> => {
     if (inFlight.current) return false;
-    const entries = Object.entries(values) as [ManualHealthMetric, number][];
+    const entries = toInputs(values, day);
     if (entries.length === 0) return false;
     inFlight.current = true;
     setIsSaving(true);
@@ -46,10 +58,10 @@ export function useSaveWellness(day: string): UseSaveWellnessResult {
         return false;
       }
       let savedCount = 0;
-      for (const [metric, value] of entries) {
+      for (const input of entries) {
         const result = await saveManualHealthMetric(
           { persistence, profileId },
-          { metric, day, value }
+          input
         );
         if (result) savedCount += 1;
       }

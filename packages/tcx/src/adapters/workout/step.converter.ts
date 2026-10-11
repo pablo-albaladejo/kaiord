@@ -49,12 +49,6 @@ export const convertTcxStep = (
 ): WorkoutStep | null => {
   logger.debug("Converting TCX step", { stepIndex });
 
-  const stepType = tcxStep["@_xsi:type"] as string | undefined;
-  if (stepType === "Repeat_t") {
-    logger.warn("Repetition blocks not yet supported", { stepIndex });
-    return null;
-  }
-
   const extensions = extractExtensions(tcxStep, logger);
   const resolved = resolveDurationAndTarget({
     tcxStep,

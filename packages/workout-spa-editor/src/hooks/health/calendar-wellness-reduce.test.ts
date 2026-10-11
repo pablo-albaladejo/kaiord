@@ -92,6 +92,17 @@ describe("formatSleep", () => {
     // Assert
     expect(result).toBe("8.0h");
   });
+
+  it("should render nothing when neither a score nor a duration was recorded", () => {
+    // Arrange
+    const krd = sleep("2026-05-19", { totalDurationSeconds: 0 }).krd;
+
+    // Act
+    const result = formatSleep(krd);
+
+    // Assert
+    expect(result).toBeUndefined();
+  });
 });
 
 describe("reduceWellnessByDay", () => {

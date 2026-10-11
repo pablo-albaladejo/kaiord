@@ -31,6 +31,7 @@ export default function HealthRecoveryPage() {
           end: range.end,
           today,
         })}
+        addMetric="hrv"
       />
       <h2 className={SECTION_CAPTION}>{t("recovery.hrvHistory")}</h2>
       <HrvHistoryList loading={hrv === undefined} records={hrv} />

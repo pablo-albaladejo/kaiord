@@ -16,6 +16,8 @@ export type IntakeEntryRepository = {
     profileId: string,
     date: string
   ) => Promise<IntakeEntryRecord[]>;
+  /** Every entry of the profile, all dates (the backup export). */
+  listByProfile: (profileId: string) => Promise<IntakeEntryRecord[]>;
   put: (record: IntakeEntryRecord) => Promise<void>;
   delete: (id: string) => Promise<void>;
   /** Profile-delete cascade: remove every intake entry for the profile. */

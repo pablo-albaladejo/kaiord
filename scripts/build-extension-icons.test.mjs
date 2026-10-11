@@ -1,7 +1,15 @@
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { copyFileSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,6 +17,12 @@ import sharp from "sharp";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = dirname(HERE);
+// Build into a private root: other script tests run concurrently under
+// `node --test`, and the tracked PNGs under packages/*/icons must never be
+// rewritten (or tampered with) by a test.
+const ICONS_ROOT = mkdtempSync(join(tmpdir(), "kaiord-icons-"));
+const ENV = { ...process.env, KAIORD_ICONS_ROOT: ICONS_ROOT };
+after(() => rmSync(ICONS_ROOT, { recursive: true, force: true }));
 const BUILD = join(HERE, "build-extension-icons.mjs");
 const MASTER = join(REPO, "packages/_shared/extension-icon/master.svg");
 
@@ -22,11 +36,11 @@ const BRIDGES = [
 const SIZES = [16, 48, 128];
 
 const iconPath = (bridge, size) =>
-  join(REPO, "packages", bridge, "icons", `icon${size}.png`);
+  join(ICONS_ROOT, "packages", bridge, "icons", `icon${size}.png`);
 
 describe("build-extension-icons", () => {
   it("produces a PNG per bridge and size at expected dimensions", async () => {
-    execFileSync("node", [BUILD], { cwd: REPO });
+    execFileSync("node", [BUILD], { cwd: REPO, env: ENV });
 
     for (const bridge of BRIDGES) {
       for (const size of SIZES) {
@@ -42,7 +56,7 @@ describe("build-extension-icons", () => {
   });
 
   it("substitutes the per-bridge accent into the rendered output", async () => {
-    execFileSync("node", [BUILD], { cwd: REPO });
+    execFileSync("node", [BUILD], { cwd: REPO, env: ENV });
 
     const garmin = await sharp(iconPath("garmin-bridge", 128))
       .ensureAlpha()

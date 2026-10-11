@@ -9,6 +9,7 @@ import type {
   CreateWorkoutInput,
   LogHealthMetricInput,
 } from "../../application/chat/tools/chat-tool-deps";
+import { toManualHealthInput } from "../../application/chat/tools/log-health-metric-input";
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import type { SyncWeekResult } from "../../application/coaching/sync-week";
 import { syncWeek } from "../../application/coaching/sync-week";
@@ -90,7 +91,7 @@ export const doLogHealthMetric = async (
 ): Promise<unknown> => {
   const result = await saveManualHealthMetric(
     { persistence, profileId },
-    { metric: input.metric, day: input.day, value: input.value }
+    toManualHealthInput(input)
   );
   return result ?? { error: "invalid_value" };
 };

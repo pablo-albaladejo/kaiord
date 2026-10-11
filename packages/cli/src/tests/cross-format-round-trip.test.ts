@@ -4,8 +4,12 @@ import type {
   WorkoutStep,
 } from "@kaiord/core";
 import { createToleranceChecker, extractWorkout } from "@kaiord/core";
-import { createMockLogger, loadFitFixture } from "@kaiord/core/test-utils";
-import { createFitReader } from "@kaiord/fit";
+import {
+  createMockLogger,
+  loadFitFixture,
+  loadTcxFixture,
+} from "@kaiord/core/test-utils";
+import { createFitReader, createFitWriter } from "@kaiord/fit";
 import { createTcxReader, createTcxWriter } from "@kaiord/tcx";
 import { describe, expect, it } from "vitest";
 
@@ -13,6 +17,24 @@ const flattenSteps = (
   steps: Array<WorkoutStep | RepetitionBlock>
 ): Array<WorkoutStep> =>
   steps.flatMap((step) => ("repeatCount" in step ? step.steps : [step]));
+
+const repeatShape = (steps: Array<WorkoutStep | RepetitionBlock>) =>
+  steps.map((step) =>
+    "repeatCount" in step
+      ? {
+          repeatCount: step.repeatCount,
+          steps: step.steps.map((child) => child.duration),
+        }
+      : step.duration
+  );
+
+const TCX_REPEAT_BLOCK = {
+  repeatCount: 5,
+  steps: [
+    { type: "time", seconds: 240 },
+    { type: "time", seconds: 120 },
+  ],
+};
 
 const TARGET_CHECKERS = {
   heart_rate: { scalar: "bpm", check: "checkHeartRate" },
@@ -167,6 +189,24 @@ describe("Cross-format round-trip: FIT → KRD → TCX → KRD", () => {
     );
   });
 
+  it("should read FIT repeat blocks back from TCX with count and children intact", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const fitReader = createFitReader(logger);
+    const tcxWriter = createTcxWriter(logger);
+    const tcxReader = createTcxReader(logger);
+    const fitBuffer = loadFitFixture("WorkoutRepeatSteps.fit");
+
+    // Act
+    const krdFromFit = await fitReader(fitBuffer);
+    const krdFromTcx = await tcxReader(await tcxWriter(krdFromFit));
+
+    // Assert
+    const shapeA = repeatShape(extractWorkout(krdFromFit).steps);
+    expect(shapeA.some((step) => "repeatCount" in step)).toBe(true);
+    expect(repeatShape(extractWorkout(krdFromTcx).steps)).toStrictEqual(shapeA);
+  });
+
   it("should keep representable target values within round-trip tolerances", async () => {
     // Arrange
     const logger = createMockLogger();
@@ -190,5 +230,25 @@ describe("Cross-format round-trip: FIT → KRD → TCX → KRD", () => {
       if (!stepA || !stepB) continue;
       assertTargetWithinTolerance(stepA.target, stepB.target, toleranceChecker);
     }
+  });
+});
+
+describe("Cross-format round-trip: TCX → KRD → FIT → KRD", () => {
+  it("should carry TCX repeat blocks through FIT and back", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const tcxReader = createTcxReader(logger);
+    const fitWriter = createFitWriter(logger);
+    const fitReader = createFitReader(logger);
+    const tcxXml = loadTcxFixture("WorkoutRepeatBlocks.tcx");
+
+    // Act
+    const krdFromTcx = await tcxReader(tcxXml);
+    const krdFromFit = await fitReader(await fitWriter(krdFromTcx));
+
+    // Assert
+    const shapeA = repeatShape(extractWorkout(krdFromTcx).steps);
+    expect(shapeA[1]).toStrictEqual(TCX_REPEAT_BLOCK);
+    expect(repeatShape(extractWorkout(krdFromFit).steps)).toStrictEqual(shapeA);
   });
 });

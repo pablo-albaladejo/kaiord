@@ -24,6 +24,11 @@ export type SleepStage = z.infer<typeof sleepStageSchema>;
  * session with REM/deep/light/awake stages, total duration, and optional
  * sleep score / resting heart rate.
  *
+ * `stages: []` means the stages were not recorded (e.g. a hand-entered
+ * night), so the stage-sum check only applies when stages are present.
+ * An absent `totalDurationSeconds` means the duration was not recorded
+ * (e.g. only a score was entered); it is never stored as `0`.
+ *
  * `version` is constrained to `2.x` so future additive evolution within
  * the v2 line is accepted without bumping the canonical KRD version.
  */
@@ -33,7 +38,7 @@ export const sleepRecordSchema = z
     version: healthVersionSchema,
     startTime: z.iso.datetime(),
     endTime: z.iso.datetime(),
-    totalDurationSeconds: z.number().int().nonnegative(),
+    totalDurationSeconds: z.number().int().nonnegative().optional(),
     stages: z.array(sleepStageSchema),
     score: z.number().int().min(0).max(100).optional(),
     restingHeartRate: z.number().int().positive().optional(),
@@ -42,6 +47,15 @@ export const sleepRecordSchema = z
     externalId: z.string().optional(),
   })
   .superRefine((value, ctx) => {
+    if (value.stages.length === 0) return;
+    if (value.totalDurationSeconds === undefined) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Sleep stages require totalDurationSeconds.",
+        path: ["totalDurationSeconds"],
+      });
+      return;
+    }
     const stagesSum = value.stages.reduce(
       (acc, stage) => acc + stage.durationSeconds,
       0

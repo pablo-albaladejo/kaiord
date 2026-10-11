@@ -23,6 +23,7 @@ type FileUploadActionsParams = {
   onFileLoad: (krd: KRD) => void;
   onError?: (error: string, validationErrors?: Array<ValidationError>) => void;
   onImported?: (format: string) => void;
+  onWarnings?: (warnings: Array<string>) => void;
 };
 
 export function useFileUploadActions({
@@ -36,6 +37,7 @@ export function useFileUploadActions({
   onFileLoad,
   onError,
   onImported,
+  onWarnings,
 }: FileUploadActionsParams) {
   const handleError = createErrorHandler(
     setError,
@@ -54,7 +56,8 @@ export function useFileUploadActions({
     onFileLoad,
     handleError,
     createAbortController,
-    onImported
+    onImported,
+    onWarnings
   );
 
   const triggerFileInput = () => {

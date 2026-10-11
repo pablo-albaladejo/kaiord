@@ -122,4 +122,43 @@ describe("sleepRecordSchema", () => {
     // Assert
     expect(result.success).toBe(false);
   });
+
+  it("should accept a duration without recorded stages", () => {
+    // Arrange
+    const input = { ...baseSleep, totalDurationSeconds: 27000, stages: [] };
+
+    // Act
+    const result = sleepRecordSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(true);
+  });
+
+  it("should accept a score without a recorded duration", () => {
+    // Arrange
+    const input: Partial<typeof baseSleep> & { score: number } = {
+      ...baseSleep,
+      stages: [],
+      score: 81,
+    };
+    delete input.totalDurationSeconds;
+
+    // Act
+    const result = sleepRecordSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(true);
+  });
+
+  it("should reject stages without a totalDurationSeconds", () => {
+    // Arrange
+    const input: Partial<typeof baseSleep> = { ...baseSleep };
+    delete input.totalDurationSeconds;
+
+    // Act
+    const result = sleepRecordSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(false);
+  });
 });

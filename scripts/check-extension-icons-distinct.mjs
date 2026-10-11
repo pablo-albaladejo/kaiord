@@ -12,7 +12,8 @@
  *       accent that could pass (a) without being recognisable.
  *
  * Runs against the produced PNGs at packages/<bridge>/icons/, not the
- * SVG master, so it catches rasteriser drift too.
+ * SVG master, so it catches rasteriser drift too. KAIORD_ICONS_ROOT
+ * (optional) reads <root>/packages/<bridge>/icons/ instead, for tests.
  */
 
 import { readFileSync } from "node:fs";
@@ -21,7 +22,9 @@ import { fileURLToPath } from "node:url";
 
 import sharp from "sharp";
 
-const REPO_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
+const ICONS_ROOT =
+  process.env.KAIORD_ICONS_ROOT ||
+  dirname(dirname(fileURLToPath(import.meta.url)));
 
 const BRIDGES = [
   { name: "garmin-bridge", accent: "#007cc3" },
@@ -106,7 +109,7 @@ const main = async () => {
   for (const size of SIZES) {
     const raws = await Promise.all(
       BRIDGES.map(({ name }) =>
-        loadRaw(join(REPO_ROOT, "packages", name, "icons", `icon${size}.png`))
+        loadRaw(join(ICONS_ROOT, "packages", name, "icons", `icon${size}.png`))
       )
     );
     for (let i = 0; i < BRIDGES.length; i += 1) {
@@ -124,7 +127,7 @@ const main = async () => {
   // load-bearing at 16x16 where toolbar identity matters.
   for (const bridge of BRIDGES) {
     const raw = await loadRaw(
-      join(REPO_ROOT, "packages", bridge.name, "icons", "icon16.png")
+      join(ICONS_ROOT, "packages", bridge.name, "icons", "icon16.png")
     );
     const pct = accentMassPct(raw, bridge.accent);
     if (pct < ACCENT_MASS_THRESHOLD_PCT) {
