@@ -14,8 +14,12 @@ import {
   validateZwiftStructure,
 } from "./xml-validator-helpers";
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
+import { extractIntervalOrder } from "./zwift-to-krd/intervals-extractor";
 
-const parseZwiftXml = (xmlString: string, logger: Logger): unknown => {
+const parseZwiftXml = (
+  xmlString: string,
+  logger: Logger
+): { zwiftData: unknown; intervalOrder: Array<string> } => {
   logger.debug("Parsing Zwift file");
 
   try {
@@ -25,7 +29,10 @@ const parseZwiftXml = (xmlString: string, logger: Logger): unknown => {
       parseAttributeValue: true,
     });
 
-    return parser.parse(xmlString);
+    return {
+      zwiftData: parser.parse(xmlString),
+      intervalOrder: extractIntervalOrder(xmlString),
+    };
   } catch (error) {
     logger.error("Failed to parse Zwift XML", { error });
     throw createZwiftParsingError("Failed to parse Zwift file", error);
@@ -36,11 +43,11 @@ export const createFastXmlZwiftReader =
   (logger: Logger, validator: ZwiftValidator): TextReader =>
   async (xmlString: string): Promise<KRD> => {
     await validateInputZwiftXml(xmlString, validator, logger);
-    const zwiftData = parseZwiftXml(xmlString, logger);
+    const { zwiftData, intervalOrder } = parseZwiftXml(xmlString, logger);
     validateZwiftStructure(zwiftData, logger);
 
     logger.info("Zwift file parsed successfully");
-    return convertZwiftToKRD(zwiftData, logger);
+    return convertZwiftToKRD(zwiftData, logger, intervalOrder);
   };
 
 export const createFastXmlZwiftWriter =

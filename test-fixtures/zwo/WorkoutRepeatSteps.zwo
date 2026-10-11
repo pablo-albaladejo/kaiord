@@ -4,7 +4,7 @@
   <sportType>bike</sportType>
   <workout>
     <SteadyState Duration="60" kaiord:hrTargetZone="2" kaiord:name="_A_" kaiord:intensity="warmup"></SteadyState>
-    <SteadyState Duration="300" kaiord:originalDurationType="heart_rate_less_than" kaiord:originalDurationBpm="225" kaiord:powerUnit="zone" kaiord:powerZone="1" Power="0.55" kaiord:name="_C_" kaiord:intensity="cooldown"></SteadyState>
-    <IntervalsT Repeat="3" OnDuration="500" OffDuration="500"></IntervalsT>
+    <IntervalsT Repeat="3" OnDuration="500" OnPower="1.2" kaiord:onOriginalDurationType="distance" kaiord:onOriginalDurationMeters="500" kaiord:onPowerUnit="zone" kaiord:onPowerZone="5" kaiord:onName="B1_" kaiord:onIntensity="active" OffDuration="500" OffPower="0.9" kaiord:offOriginalDurationType="distance" kaiord:offOriginalDurationMeters="500" kaiord:offPowerUnit="zone" kaiord:offPowerZone="3" kaiord:offName="B2_" kaiord:offIntensity="active"></IntervalsT>
+    <SteadyState Duration="300" kaiord:originalDurationType="heart_rate_less_than" kaiord:originalDurationBpm="125" kaiord:powerUnit="zone" kaiord:powerZone="1" Power="0.55" kaiord:name="_C_" kaiord:intensity="cooldown"></SteadyState>
   </workout>
 </workout_file>
