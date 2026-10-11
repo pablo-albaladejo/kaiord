@@ -14,8 +14,9 @@ KRD → ZWO XML encoders. Orchestrates conversion of KRD domain (WorkoutStep, me
 | `workout-file-builder.ts` | Orchestrates full ZWO file structure from KRD                  |
 | `metadata-builder.ts`     | Builds ZWO metadata (author, name, sport, tags) from KRD       |
 | `metadata-encoder.ts`     | Encodes KRD metadata into ZWO attributes                       |
-| `intervals-encoder.ts`    | Encodes KRD WorkoutSteps into ZWO interval elements            |
+| `intervals-encoder.ts`    | Encodes KRD WorkoutSteps into ZWO interval elements, in order  |
 | `intervals-t-encoder.ts`  | Encodes structured intervals (IntervalsT)                      |
+| `ordered-xml.ts`          | Converts the grouped XML object model to preserveOrder nodes   |
 | `duration-encoder.ts`     | Encodes duration (time vs. distance)                           |
 | `step-encoder.ts`         | Encodes individual WorkoutStep into ZWO step element           |
 | `target-encoder.ts`       | Encodes KRD target (power/pace/HR/cadence) into ZWO attributes |
@@ -36,6 +37,8 @@ None.
 - **Round-trip preservation**: Kaiord namespace attributes (`@_kaiord:*`) embedded in ZWO for FIT metadata (timeCreated, manufacturer, product, serialNumber) to survive round-trip.
 - **Power encoding**: FTP-relative power encoded as percentage; absolute power as watts. Fallback logic handles missing FTP.
 - **Target validation**: Targets encoded only if present; missing targets result in omitted ZWO attributes (ZWO-compliant).
+- **Step order**: `<workout>` children are written in KRD step order through fast-xml-parser's `preserveOrder` model (`ordered-xml.ts`); the default object model groups siblings by tag and would reorder them.
+- **Repetition blocks**: a two-step block of constant targets becomes one `IntervalsT`, with each side's `kaiord:*` attributes namespaced as `kaiord:on*` / `kaiord:off*`. Any other block is unrolled `repeatCount` times with a `Lossy conversion:` warning.
 
 ### Testing Requirements
 

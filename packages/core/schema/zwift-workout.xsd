@@ -100,6 +100,7 @@
     <xs:attribute name="Duration" type="xs:decimal" use="required"/>
     <xs:attribute name="Cadence" type="xs:int" use="optional"/>
     <xs:attribute name="FlatRoad" type="xs:int" use="optional"/>
+    <xs:anyAttribute namespace="##any" processContents="lax"/>
   </xs:complexType>
 
   <!-- Text event (coaching cue) -->

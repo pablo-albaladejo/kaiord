@@ -18,6 +18,7 @@ ZWO interval type mappers and extraction helpers. Handles conversion between ZWO
 | `free-ride.mapper.ts`            | FreeRide (unstructured) → KRD WorkoutStep mapper              |
 | `interval-type-detector.ts`      | Detects ZWO interval type and delegates to appropriate mapper |
 | `intervals-t-helpers.ts`         | Helpers for IntervalsT repeat/step expansion                  |
+| `intervals-t-restoration.ts`     | Restores IntervalsT on/off steps from `kaiord:on*`/`off*`     |
 | `ramp-helpers.ts`                | Helpers for ramp slope calculation and interpolation          |
 | `steady-state-target.helpers.ts` | SteadyState target parsing (power, HR, pace, cadence)         |
 | `target-restoration.ts`          | HR target recovery from step-level targets in IntervalsT      |
@@ -50,7 +51,7 @@ None.
 
 - **Mapper re-exports**: All mappers exported from `index.ts` for use by `zwift-to-krd.converter`.
 - **Target extraction**: Targets extracted from `@_power`, `@_pace`, `@_cadence`, `@_hr` attributes and mapped to KRD target schema.
-- **Repeat expansion**: IntervalsT `Repeat` blocks expanded into flat WorkoutStep arrays (with repeat count tracked in extensions).
+- **Repeat blocks**: IntervalsT maps to a KRD RepetitionBlock (`repeatCount` = `Repeat`) with an on and an off step; `kaiord:on*` / `kaiord:off*` attributes restore each step's zone/watts/HR target, name, intensity and non-time duration.
 - **HR restoration**: When HR targets missing from outer interval, inferred from IntervalsT step targets.
 
 ## Dependencies
