@@ -7,6 +7,9 @@ const TIME_SECONDS = 60;
 const HR_BPM = 130;
 const DISTANCE_METERS = 2000;
 const POWER_WATTS = 280;
+// FIT workoutHr/workoutPower store absolute values offset by +100/+1000.
+const FIT_BPM_OFFSET = 100;
+const FIT_WATTS_OFFSET = 1000;
 
 const baseStep = (overrides: Partial<WorkoutStep>): WorkoutStep => ({
   stepIndex: 0,
@@ -44,7 +47,7 @@ describe("convertDuration", () => {
 
     // Assert
     expect(message.durationType).toBe("hrLessThan");
-    expect(message.durationHr).toBe(HR_BPM);
+    expect(message.durationHr).toBe(HR_BPM + FIT_BPM_OFFSET);
   });
 
   it("should dispatch a repeat until distance duration", () => {
@@ -85,7 +88,7 @@ describe("convertDuration", () => {
 
     // Assert
     expect(message.durationType).toBe("repeatUntilPowerGreaterThan");
-    expect(message.repeatPower).toBe(POWER_WATTS);
+    expect(message.repeatPower).toBe(POWER_WATTS + FIT_WATTS_OFFSET);
     expect(message.durationStep).toBe(0);
   });
 

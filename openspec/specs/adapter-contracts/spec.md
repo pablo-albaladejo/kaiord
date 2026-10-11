@@ -205,6 +205,28 @@ The `@kaiord/fit` writer SHALL produce workout step messages whose durations, ta
 - **WHEN** it is written to FIT and read back
 - **THEN** the step has the same duration type, seconds and `repeatFrom`
 
+### Requirement: FIT workout heart-rate and power values use the profile offsets
+
+The `@kaiord/fit` adapter SHALL encode and decode every workout step field of FIT type `workoutHr` or `workoutPower` with the profile's offsets: an absolute heart rate is stored as bpm + 100 and an absolute power as watts + 1000. This covers the custom heart-rate and power target ranges, the `hrLessThan`, `powerLessThan` and `powerGreaterThan` duration conditions, and the `repeatHr` and `repeatPower` repeat conditions. KRD ranges and conditions are absolute, so the writer SHALL add the offset and the reader SHALL remove it from a value above the offset. Because a repeat-until step carries its repeat condition in `targetValue`, the reader SHALL give such a step an open target.
+
+#### Scenario: Garmin heart-rate condition reads as bpm
+
+- **GIVEN** `test-fixtures/fit/WorkoutCustomTargetValues.fit`, whose step 3 has `durationType` `hrLessThan` and raw `durationHr` 225
+- **WHEN** it is read to KRD
+- **THEN** step 3 has duration `heart_rate_less_than` with `bpm` 125
+
+#### Scenario: Absolute power range is written with the watts offset
+
+- **GIVEN** a KRD step with a power target range of 200-250 W
+- **WHEN** it is written to FIT and decoded by the SDK decoder
+- **THEN** the step's `customTargetPowerLow` is 1200 and `customTargetPowerHigh` is 1250
+
+#### Scenario: Repeat-until heart-rate value is not read as a target
+
+- **GIVEN** `test-fixtures/fit/WorkoutRepeatGreaterThanStep.fit`, whose step 3 is `repeatUntilHrGreaterThan` with `targetValue` 80
+- **WHEN** it is read to KRD
+- **THEN** step 3 has an open target
+
 ### Requirement: Adapter Coverage Matrix Documented As Normative Artefact
 
 The `@kaiord/core` package SHALL ship a documentation file (`packages/core/docs/ADAPTER-COVERAGE.md`) that records the canonical coverage matrix of every supported KRD `type` against every adapter in the monorepo. Each cell SHALL be exactly one of: `read+write`, `read-only`, `write-only`, `reject`, or `n/a` (the type does not apply to the format). When an adapter is added or extended, this document SHALL be updated in the same change so the matrix stays accurate.
@@ -316,3 +338,25 @@ The `@kaiord/fit` reader SHALL map activity FIT files from the messages as the `
 - **GIVEN** `DeveloperData.fit`, whose three `record` messages carry no `timestamp`
 - **WHEN** the FIT reader is invoked
 - **THEN** it returns a `recorded_activity` KRD with no records and logs a warning naming the dropped count
+
+### Requirement: Round-trip comparison covers structured workout steps
+
+`compareKRDs` in `@kaiord/core`, and `validateRoundTrip` through it, SHALL compare the structured workout steps of two KRDs in addition to sessions, laps and records. The step count of every step list SHALL match exactly, each node SHALL keep its kind (step or repeat block), and each repeat block SHALL keep its `repeatCount` and its nested steps. Each step SHALL keep its duration type, target type, target unit and intensity. Duration and target values SHALL stay within the round-trip tolerances: time ±1 s, distance ±1 m, power ±1 W, %FTP ±1, heart rate ±1 bpm, cadence ±1 rpm; zones, swim strokes, calories, repeat counts and `repeatFrom` SHALL match exactly. A categorical mismatch SHALL be reported as a violation with `tolerance` 0 and the two values in `expectedValue` and `actualValue`. The comparison SHALL NOT be loosened to make an adapter pass; a lossy adapter is fixed or its gap is reported.
+
+#### Scenario: A dropped step fails the round-trip
+
+- **GIVEN** a workout KRD with two steps and a converted KRD with one
+- **WHEN** `compareKRDs` compares them
+- **THEN** it reports `structured_workout.steps.length` with expected 2, actual 1 and tolerance 0
+
+#### Scenario: A duration that changed type is reported by value
+
+- **GIVEN** a step whose duration is `time` 300 s and the same step converted to an `open` duration
+- **WHEN** `compareKRDs` compares them
+- **THEN** it reports `structured_workout.steps[0].duration.type` with `expectedValue` `time` and `actualValue` `open`
+
+#### Scenario: A drift within tolerance passes
+
+- **GIVEN** a step of 300 s and the same step converted to 301 s
+- **WHEN** `compareKRDs` compares them
+- **THEN** it reports no violation

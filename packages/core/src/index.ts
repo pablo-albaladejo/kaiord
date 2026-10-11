@@ -255,6 +255,7 @@ export type { ComputePeriodizedTargetInput } from "./application/energy/periodiz
 export { computePeriodizedTarget } from "./application/energy/periodized-target";
 
 // Round-Trip Validation
+export { compareKRDs } from "./application/round-trip/compare-krds";
 export type { ValidateRoundTrip } from "./application/round-trip/validate-round-trip";
 export { validateRoundTrip } from "./application/round-trip/validate-round-trip";
 
