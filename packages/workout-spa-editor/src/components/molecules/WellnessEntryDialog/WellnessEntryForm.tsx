@@ -35,7 +35,6 @@ export function WellnessEntryForm({ date, onSaved }: WellnessEntryFormProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p>Log today</p>
       <WellnessMetricField
         label={t("wellnessEntry.weight")}
         unit="kg"
