@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Toast } from "./Toast";
 import { variantIcons } from "./Toast.styles";
@@ -226,60 +226,67 @@ describe("Toast", () => {
   });
 
   describe("auto-dismiss", () => {
-    it("should auto-dismiss after default duration", async () => {
+    // The dismiss timer runs on fake time, advanced to the exact instant it
+    // is due. On real time the verdict hung on scheduling: a worker
+    // descheduled across the dismiss ran the expired poll, the dismiss and
+    // the expired waitFor deadline in one batch, in that order, and nothing
+    // re-checked in between (a controlled toast never mutates the DOM).
+    const DEFAULT_DURATION_MS = 5000;
+    const CUSTOM_DURATION_MS = 50;
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should auto-dismiss after default duration", () => {
       // Arrange
-
       const handleOpenChange = vi.fn();
-
-      // Act
-
       render(
         <ToastProvider>
           <Toast
             title="Auto dismiss"
             open={true}
             onOpenChange={handleOpenChange}
-            duration={100}
           />
         </ToastProvider>
       );
-
-      // Assert
-
-      await waitFor(
-        () => {
-          expect(handleOpenChange).toHaveBeenCalledWith(false);
-        },
-        { timeout: 200 }
-      );
-    });
-
-    it("should respect custom duration", async () => {
-      // Arrange
-
-      const handleOpenChange = vi.fn();
+      act(() => vi.advanceTimersByTime(DEFAULT_DURATION_MS - 1));
+      const callsBeforeDue = handleOpenChange.mock.calls.length;
 
       // Act
+      act(() => vi.advanceTimersByTime(1));
 
+      // Assert
+      expect(callsBeforeDue).toBe(0);
+      expect(handleOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it("should respect custom duration", () => {
+      // Arrange
+      const handleOpenChange = vi.fn();
       render(
         <ToastProvider>
           <Toast
             title="Custom duration"
             open={true}
             onOpenChange={handleOpenChange}
-            duration={50}
+            duration={CUSTOM_DURATION_MS}
           />
         </ToastProvider>
       );
+      act(() => vi.advanceTimersByTime(CUSTOM_DURATION_MS - 1));
+      const callsBeforeDue = handleOpenChange.mock.calls.length;
+
+      // Act
+      act(() => vi.advanceTimersByTime(1));
 
       // Assert
-
-      await waitFor(
-        () => {
-          expect(handleOpenChange).toHaveBeenCalledWith(false);
-        },
-        { timeout: 100 }
-      );
+      expect(callsBeforeDue).toBe(0);
+      expect(handleOpenChange).toHaveBeenCalledWith(false);
     });
   });
 
