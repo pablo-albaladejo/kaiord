@@ -376,5 +376,28 @@
   "paste": {
     "label": "Paste Step",
     "aria": "Paste step from clipboard"
+  },
+  "exportFormat": {
+    "selectAria": "Select export format",
+    "cannotExport": "Cannot export structured workout:",
+    "warnings": {
+      "fit": "FIT format may not support all workout features",
+      "tcx": "TCX format has limited support for advanced targets",
+      "zwo": "ZWO format only supports cycling workouts",
+      "gcn": "GCN format is designed for the Garmin Connect API and may not preserve all features"
+    },
+    "descriptions": {
+      "fit": "Garmin FIT format - Binary format for fitness devices",
+      "tcx": "Training Center XML - Garmin's XML workout format",
+      "zwo": "Zwift Workout - XML format for Zwift platform",
+      "gcn": "Garmin Connect JSON - Structured workout for Garmin Connect API",
+      "krd": "Kaiord format - JSON-based canonical workout format"
+    },
+    "invalid": {
+      "noWorkout": "No workout to export",
+      "version": "Missing version",
+      "type": "Missing type",
+      "metadata": "Missing metadata"
+    }
   }
 }

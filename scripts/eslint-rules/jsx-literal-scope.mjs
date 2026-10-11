@@ -18,6 +18,7 @@ const TREES = [
   "components/molecules/ChatFab",
   "components/molecules/DefaultProfileNotice",
   "components/molecules/DurationPicker",
+  "components/molecules/ExportFormatSelector",
   "components/molecules/GoalSetupDialog",
   "components/molecules/PasteButton",
   "components/molecules/ProfileChoiceBanner",

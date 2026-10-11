@@ -9,6 +9,7 @@
 
 import { type ReactNode, useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFormatWarnings, validateWorkoutForExport } from "./format-helpers";
@@ -40,13 +41,14 @@ export function ExportFormatSelector({
   className = "",
   label,
 }: ExportFormatSelectorProps) {
+  const t = useTranslate("editor");
   const [isOpen, setIsOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
     []
   );
 
   const handleFormatSelect = (format: WorkoutFileFormat) => {
-    const errors = validateWorkoutForExport(workout);
+    const errors = validateWorkoutForExport(workout, t);
     if (errors.length > 0) {
       setValidationErrors(errors);
       return;
@@ -73,7 +75,7 @@ export function ExportFormatSelector({
         onFormatSelect={handleFormatSelect}
         disabled={disabled}
         label={label}
-        warningFor={(format) => getFormatWarnings(format, workout)}
+        warningFor={(format) => getFormatWarnings(format, workout, t)}
       />
       <FormatWarnings
         // As the download control, a format is read in its option before

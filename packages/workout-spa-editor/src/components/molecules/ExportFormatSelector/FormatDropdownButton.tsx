@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { type FormatOption, getFileExtensionForFormat } from "./format-options";
 
@@ -22,6 +23,7 @@ export function FormatDropdownButton({
   disabled,
   label,
 }: FormatDropdownButtonProps) {
+  const t = useTranslate("editor");
   return (
     <button
       type="button"
@@ -36,7 +38,7 @@ export function FormatDropdownButton({
         disabled:opacity-60 disabled:cursor-not-allowed
         transition-colors whitespace-nowrap
       `}
-      aria-label={label ? undefined : "Select export format"}
+      aria-label={label ? undefined : t("exportFormat.selectAria")}
       aria-expanded={isOpen}
       aria-haspopup="menu"
       data-testid="export-format-selector-button"

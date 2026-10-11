@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { forwardRef } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { type FormatOption, getFileExtensionForFormat } from "./format-options";
 import { FormatOptionWarning } from "./FormatOptionWarning";
 
@@ -21,6 +22,7 @@ export const FormatOptionItem = forwardRef<
   { option, isSelected, isFocused, onSelect, disabled, warning },
   ref
 ) {
+  const t = useTranslate("editor");
   const warningId = `export-format-warning-${option.value}`;
   return (
     <button
@@ -54,7 +56,7 @@ export const FormatOptionItem = forwardRef<
             </span>
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-            {option.description}
+            {t(option.descriptionKey)}
           </p>
           {warning && <FormatOptionWarning id={warningId} warning={warning} />}
           <div className="flex flex-wrap gap-1">
