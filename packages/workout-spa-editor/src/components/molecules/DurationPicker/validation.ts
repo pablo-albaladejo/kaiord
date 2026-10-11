@@ -1,8 +1,8 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { Duration } from "../../../types/krd";
 import {
+  validateClockDuration,
   validateDistanceDuration,
-  validateNumericInput,
-  validateTimeDuration,
 } from "./validation-helpers";
 
 export type ValidationResult = {
@@ -13,32 +13,10 @@ export type ValidationResult = {
 
 export const validateDurationValue = (
   type: "time" | "distance" | "open",
-  value: string
+  value: string,
+  t: Translate = getTranslate("editor")
 ): ValidationResult => {
-  if (type === "open") {
-    return {
-      isValid: true,
-      duration: { type: "open" },
-    };
-  }
-
-  const inputValidation = validateNumericInput(value);
-  if (!inputValidation.isValid) {
-    return inputValidation;
-  }
-
-  const numericValue = Number(value);
-
-  if (type === "time") {
-    return validateTimeDuration(numericValue);
-  }
-
-  if (type === "distance") {
-    return validateDistanceDuration(numericValue);
-  }
-
-  return {
-    isValid: false,
-    error: "Invalid duration type",
-  };
+  if (type === "open") return { isValid: true, duration: { type: "open" } };
+  if (type === "time") return validateClockDuration(value, t);
+  return validateDistanceDuration(value, t);
 };

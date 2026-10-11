@@ -104,7 +104,7 @@ describe("ScratchEditorSurface", () => {
     });
   });
 
-  it("should render the AI banner closed and the metadata editor open", async () => {
+  it("should render the AI banner closed and the metadata read-only", async () => {
     // Arrange
 
     // Act
@@ -120,8 +120,11 @@ describe("ScratchEditorSurface", () => {
       screen.getByRole("button", { name: /generate with ai/i })
     ).toHaveAttribute("aria-expanded", "false");
     expect(
-      await screen.findByRole("form", { name: /edit workout metadata/i })
+      await screen.findByRole("button", { name: /edit workout metadata/i })
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("form", { name: /edit workout metadata/i })
+    ).not.toBeInTheDocument();
   });
 
   it("should NOT overwrite a pre-populated currentWorkout (library template path)", async () => {

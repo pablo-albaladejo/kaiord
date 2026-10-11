@@ -1,6 +1,8 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutStep } from "../../../types/krd";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
+import { targetTypeLabel } from "./format-target";
 import { getTargetIcon } from "./icons";
 
 export type StepCardFooterProps = {
@@ -8,6 +10,7 @@ export type StepCardFooterProps = {
 };
 
 export function StepCardFooter({ step }: StepCardFooterProps) {
+  const t = useTranslate("editor");
   const targetIcon = getTargetIcon(step.targetType);
 
   return (
@@ -18,7 +21,7 @@ export function StepCardFooter({ step }: StepCardFooterProps) {
           size="sm"
           icon={<Icon icon={targetIcon} size="xs" />}
         >
-          {step.targetType.replace(/_/g, " ")}
+          {targetTypeLabel(step.targetType, t)}
         </Badge>
       </div>
 

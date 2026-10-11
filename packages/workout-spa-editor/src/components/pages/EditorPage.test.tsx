@@ -470,7 +470,7 @@ describe("EditorPage", () => {
     expect(screen.getByTestId("editor-back-button")).toBeInTheDocument();
   });
 
-  it("should render AiBanner closed and the editor in MetadataEditMode when mounted with ?source=scratch", async () => {
+  it("should render AiBanner closed and the metadata read-only when mounted with ?source=scratch", async () => {
     // Arrange
 
     // Act
@@ -486,10 +486,11 @@ describe("EditorPage", () => {
       screen.getByRole("button", { name: /generate with ai/i })
     ).toHaveAttribute("aria-expanded", "false");
     await waitFor(() => {
-      expect(
-        screen.getByRole("form", { name: /edit workout metadata/i })
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("edit-metadata-button")).toBeInTheDocument();
     });
+    expect(
+      screen.queryByRole("form", { name: /edit workout metadata/i })
+    ).toBeNull();
     expect(
       screen.queryByRole("heading", { name: /getting started/i })
     ).toBeNull();

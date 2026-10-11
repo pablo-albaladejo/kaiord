@@ -2,6 +2,8 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { TargetPickerRangeInput } from "./TargetPickerRangeInput";
 
 type TargetPickerRangeFieldsProps = {
+  /** Pace ends are typed as m:ss. */
+  clock?: boolean;
   minValue: string;
   maxValue: string;
   displayError: string;
@@ -11,6 +13,7 @@ type TargetPickerRangeFieldsProps = {
 };
 
 export const TargetPickerRangeFields = ({
+  clock = false,
   minValue,
   maxValue,
   displayError,
@@ -31,6 +34,7 @@ export const TargetPickerRangeFields = ({
         placeholder={t("range.minPlaceholder")}
         ariaLabel={t("range.minAria")}
         hasError={hasError}
+        clock={clock}
       />
       <TargetPickerRangeInput
         label={t("range.maxLabel")}
@@ -40,6 +44,7 @@ export const TargetPickerRangeFields = ({
         placeholder={t("range.maxPlaceholder")}
         ariaLabel={t("range.maxAria")}
         hasError={hasError}
+        clock={clock}
       />
       {displayError && (
         <p

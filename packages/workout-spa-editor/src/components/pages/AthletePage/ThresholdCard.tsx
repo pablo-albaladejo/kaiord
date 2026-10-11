@@ -75,6 +75,7 @@ export function ThresholdCard({
       <ThresholdEditDialog
         open={editing}
         profileId={profileId}
+        sport={sport}
         onClose={() => setEditing(false)}
       />
     </div>

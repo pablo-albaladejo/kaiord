@@ -4,6 +4,7 @@ export type BasicHandlersParams = Pick<
   UseTargetPickerHandlersParams,
   | "targetType"
   | "unit"
+  | "paceBase"
   | "onChange"
   | "setTargetType"
   | "setValidationError"
