@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { test } from "node:test";
 
 import { ESLint } from "eslint";
+
+import { JSX_LITERAL_FILES } from "./jsx-literal-scope.mjs";
 
 const SPA = "packages/workout-spa-editor/src/components";
 const IN_SCOPE = `${SPA}/molecules/WellnessEntryDialog/WellnessEntryForm.tsx`;
@@ -67,4 +70,19 @@ test("should skip test files inside the scope", async () => {
 
   // Assert
   assert.equal(messages.length, 0);
+});
+
+test("should name only directories that exist in the scope", () => {
+  // Arrange
+  // A misspelled or moved directory matches no file, so the rule would
+  // silently stop guarding it.
+  const dirs = JSX_LITERAL_FILES.map((glob) =>
+    glob.replace(/\/(\*\*\/)?\*\.tsx$/, "")
+  );
+
+  // Act
+  const missing = dirs.filter((dir) => !existsSync(dir));
+
+  // Assert
+  assert.deepEqual(missing, []);
 });
