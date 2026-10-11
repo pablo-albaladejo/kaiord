@@ -6,15 +6,28 @@ export async function openBlankEditor(session, { date, sport } = {}) {
   await go(`workout/new${query}`);
   if (sport) await page.getByRole("radio", { name: sport }).click();
   await page.getByRole("button", { name: exact("En blanco") }).click();
-  await page.getByTestId("workout-name-input").waitFor();
+  await page.getByTestId("edit-metadata-button").waitFor();
+}
+
+// The header starts read-only (F-10): metadata opens on demand.
+export async function openMetadata(page) {
+  const input = page.getByTestId("workout-name-input");
+  if (!(await input.isVisible()))
+    await page.getByTestId("edit-metadata-button").click();
+  await input.waitFor();
 }
 
 export async function nameWorkout(page, name, sport = "running") {
+  await openMetadata(page);
   await page.getByTestId("workout-name-input").fill(name);
   await page.getByTestId("workout-sport-select").selectOption(sport);
   await page.getByTestId("save-metadata-button").click();
 }
 
+const clock = (seconds) =>
+  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+
+// Duration is typed as mm:ss (F-11), so the seconds are written as a clock.
 export async function addTimedStep(page, seconds) {
   const first = page.getByTestId("add-first-step-button");
   if (await first.isVisible()) await first.click();
@@ -27,9 +40,9 @@ export async function addTimedStep(page, seconds) {
     .getByLabel(/Select duration type|Tipo de duración/)
     .selectOption("time");
   await page
-    .getByLabel(/Duration \(seconds\)|Duración/)
+    .getByLabel(/Duration \(mm:ss\)|Duración \(mm:ss\)/)
     .first()
-    .fill(String(seconds));
+    .fill(clock(seconds));
   await page
     .getByRole("button", { name: /Cerrar el formulario del paso|^Hecho$/ })
     .click();

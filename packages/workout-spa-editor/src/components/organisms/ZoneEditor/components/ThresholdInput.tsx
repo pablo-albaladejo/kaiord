@@ -12,6 +12,8 @@ type ThresholdInputProps = {
   value: number | undefined;
   onChange: (value: number | undefined) => void;
   disabled?: boolean;
+  /** Shown as "optional" — a threshold the sport's zones do not need. */
+  optional?: boolean;
 };
 
 export function ThresholdInput({
@@ -20,6 +22,7 @@ export function ThresholdInput({
   value,
   onChange,
   disabled = false,
+  optional = false,
 }: ThresholdInputProps) {
   const t = useTranslate("zones");
   return (
@@ -38,6 +41,14 @@ export function ThresholdInput({
         className="w-24 rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-50"
       />
       <span className="text-xs text-gray-500 dark:text-gray-400">{unit}</span>
+      {optional && (
+        <span
+          className="text-xs italic text-gray-500 dark:text-gray-400"
+          data-testid={`threshold-optional-${label}`}
+        >
+          {t("threshold.optional")}
+        </span>
+      )}
     </div>
   );
 }

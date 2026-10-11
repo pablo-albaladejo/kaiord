@@ -1,10 +1,11 @@
 import { isoDate, settledText } from "../browser.mjs";
 import { scheduleOn } from "../editor.mjs";
 import { ensureProfile } from "../steps.mjs";
-import { editorChecks, thresholdTab } from "./manual-first-editor.mjs";
+import { editorChecks, libraryCard } from "./manual-first-editor.mjs";
+import { thresholdChecks } from "./manual-first-zones.mjs";
 
 // P2 orientation: F-01, F-04, F-33, F-32, F-40 (plus the editor and
-// threshold findings in manual-first-editor.mjs).
+// threshold findings in manual-first-editor.mjs and manual-first-zones.mjs).
 const REQUIREMENTS =
   /nada aparecerá solo|Tres cosas tienen que ser ciertas|Sin esto, la semana se queda vacía/;
 const IMPOSSIBLE_STEPS = /Conecta una fuente|Envía una sesión a tu reloj/;
@@ -71,6 +72,7 @@ export default async function manualFirst({ rec, open }) {
   await ensureProfile(session);
   await daily(rec, session.page, session.go);
   await plannedSource(rec, session);
-  await thresholdTab(rec, session);
+  await thresholdChecks(rec, session);
   await editorChecks(rec, session);
+  await libraryCard(rec, session);
 }

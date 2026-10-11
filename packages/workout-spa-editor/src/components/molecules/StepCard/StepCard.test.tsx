@@ -45,7 +45,7 @@ describe("StepCard", () => {
 
     // Assert
 
-    expect(screen.getByText("warmup")).toBeInTheDocument();
+    expect(screen.getByText("Warm-up")).toBeInTheDocument();
   });
 
   it("should render duration", () => {
@@ -81,7 +81,7 @@ describe("StepCard", () => {
 
     // Assert
 
-    expect(screen.getByText("power")).toBeInTheDocument();
+    expect(screen.getByText("Power")).toBeInTheDocument();
   });
 
   it("should render step name when provided", () => {
@@ -286,7 +286,7 @@ describe("StepCard", () => {
 
     // Assert
 
-    expect(screen.getByText("Open")).toBeInTheDocument();
+    expect(screen.getAllByText("Open")).toHaveLength(2);
   });
 
   it("should handle open duration type", () => {

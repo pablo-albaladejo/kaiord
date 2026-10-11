@@ -1,3 +1,5 @@
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
+import { formatClock } from "../../../lib/units/clock";
 import type { Duration } from "../../../types/krd";
 
 export const getDurationTypeFromValue = (
@@ -14,23 +16,29 @@ export const getDurationTypeFromValue = (
   return "time";
 };
 
+/** The input's text: a time reads as m:ss, a distance in meters. */
 export const getDurationValueString = (value: Duration | null): string => {
   if (!value) return "";
-  if (value.type === "time") return value.seconds.toString();
+  if (value.type === "time") return formatClock(value.seconds);
   if (value.type === "distance") return value.meters.toString();
   return "";
 };
 
-export const getValueLabel = (durationType: "time" | "distance" | "open") => {
-  if (durationType === "time") return "Duration (seconds)";
-  if (durationType === "distance") return "Distance (meters)";
+export const getValueLabel = (
+  durationType: "time" | "distance" | "open",
+  t: Translate = getTranslate("editor")
+) => {
+  if (durationType === "time") return t("durationPicker.timeLabel");
+  if (durationType === "distance") return t("durationPicker.distanceLabel");
   return "";
 };
 
 export const getValuePlaceholder = (
-  durationType: "time" | "distance" | "open"
+  durationType: "time" | "distance" | "open",
+  t: Translate = getTranslate("editor")
 ) => {
-  if (durationType === "time") return "e.g., 300 (5 minutes)";
-  if (durationType === "distance") return "e.g., 1000 (1 km)";
+  if (durationType === "time") return t("durationPicker.timePlaceholder");
+  if (durationType === "distance")
+    return t("durationPicker.distancePlaceholder");
   return "";
 };

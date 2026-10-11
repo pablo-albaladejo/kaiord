@@ -23,17 +23,12 @@ const DEFAULT_SCRATCH_SPORT: Sport = "cycling";
  * overwriting a template just written by `LibraryPage` before its
  * `navigate("/workout/new?source=scratch")` (see plan A8).
  *
- * The returned `startInEditMode` is wired to `autoCreatedRef`: only the
- * auto-init path opens `WorkoutHeader.MetadataEditMode` so a fresh scratch
- * user commits sport/name inline. Pre-populated workouts (library template
- * load, e2e seeds) already have sport/name and render in view mode.
- *
  * The initial sport is the one picked on the "New session" sheet (`?sport=`),
  * else `userPreferences.lastScratchSport` for the active profile when set; the on-save effect writes the current sport back so
  * the next scratch session pre-selects it. Both reads/writes are gated on
  * `autoCreatedRef.current` so library / e2e-seeded workouts never leak.
  */
-export function useScratchAutoSeed(t: Translate): { startInEditMode: boolean } {
+export function useScratchAutoSeed(t: Translate): void {
   const currentWorkout = useCurrentWorkout();
   const createEmpty = useCreateEmptyWorkout();
   const activeProfile = useActiveProfileLive();
@@ -81,6 +76,4 @@ export function useScratchAutoSeed(t: Translate): { startInEditMode: boolean } {
     initialSportRef.current = currentSport;
     void setPrefs({ lastScratchSport: currentSport });
   }, [currentSport, setPrefs]);
-
-  return { startInEditMode: autoCreatedRef.current };
 }

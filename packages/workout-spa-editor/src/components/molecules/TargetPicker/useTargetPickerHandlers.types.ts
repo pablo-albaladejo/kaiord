@@ -1,8 +1,11 @@
+import type { PaceInputBase } from "../../../lib/units/pace-input";
 import type { Target } from "../../../types/krd";
 
 export type UseTargetPickerHandlersParams = {
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open";
   unit: string;
+  /** Where a pace is typed per (km, mile, 100 m…); absent = raw m/s. */
+  paceBase?: PaceInputBase;
   maxValue: string;
   minValue: string;
   onChange: (target: Target | null) => void;

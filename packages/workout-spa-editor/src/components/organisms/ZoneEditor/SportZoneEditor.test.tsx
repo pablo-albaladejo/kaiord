@@ -17,12 +17,14 @@ import { createProfile } from "../../../application/profile/create-profile";
 import { updateSportThresholds } from "../../../application/profile/zones/update-sport-thresholds";
 import { renderWithProviders } from "../../../test-utils";
 import type { Profile } from "../../../types/profile";
+import type { SportKey } from "../../../types/sport-zones";
 import { SportZoneEditor } from "./SportZoneEditor";
 
-const renderEditor = (profileId: string) =>
-  renderWithProviders(<SportZoneEditor profileId={profileId} />, {
-    persistence: createDexiePersistence(db),
-  });
+const renderEditor = (profileId: string, initialSport?: SportKey) =>
+  renderWithProviders(
+    <SportZoneEditor profileId={profileId} initialSport={initialSport} />,
+    { persistence: createDexiePersistence(db) }
+  );
 
 const seedProfile = async (): Promise<Profile> => {
   const persistence = createDexiePersistence(db);
@@ -60,6 +62,19 @@ describe("SportZoneEditor", () => {
       expect(screen.getByRole("tab", { name: "Running" })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: "Swimming" })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: "Generic" })).toBeInTheDocument();
+    });
+
+    it("should open on the sport the athlete is looking at", async () => {
+      // Arrange
+      const profile = await seedProfile();
+
+      // Act
+      renderEditor(profile.id, "running");
+
+      // Assert
+      expect(
+        await screen.findByRole("tab", { name: "Running" })
+      ).toHaveAttribute("aria-selected", "true");
     });
 
     it("should default to cycling tab", async () => {

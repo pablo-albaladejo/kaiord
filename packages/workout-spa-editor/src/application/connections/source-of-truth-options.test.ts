@@ -208,19 +208,17 @@ describe("canChooseSource", () => {
 
   it("should offer no choice on a ranked row that has no source left at all", () => {
     // Arrange
-    // Writers, in order: chat `set_source_policy planned-session priority
-    // ["train2go"]`, then Disconnect on the Train2Go card, which switches off
-    // every policy on the bridge. `planned-session` has no manual path, so
-    // nothing remains. Both modes read nothing here, and the row already says
+    // Writers, in order: chat `set_source_policy strain priority
+    // ["whoop-bridge"]`, then Disconnect on the WHOOP card, which switches off
+    // every policy on the bridge. `strain` has no manual path, so nothing
+    // remains. Both modes read nothing here, and the row already says
     // "No source" — a panel could only describe a ranking problem it does not
     // have.
     // Act
     const options = optionsFor(
-      "planned-session",
-      flows({
-        "planned-session": { import: [route("train2go-bridge", false)] },
-      }),
-      priority("planned-session", ["train2go-bridge"])
+      "strain",
+      flows({ strain: { import: [route("whoop-bridge", false)] } }),
+      priority("strain", ["whoop-bridge"])
     );
 
     // Assert

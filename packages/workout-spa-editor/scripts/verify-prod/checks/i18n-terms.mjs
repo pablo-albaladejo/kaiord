@@ -18,7 +18,7 @@ export const BLACKLIST = [
 export const ALLOWLIST = [
   "Kaiord", "Garmin Connect", "Garmin", "Train2Go", "TrainingPeaks", "WHOOP",
   "Google Drive", "Umami", "Zwift", "MyTANITA", "Tanita", "Claude", "OpenAI",
-  "Gemini", "Anthropic", "Chrome Web Store",
+  "Gemini", "Anthropic", "Chrome Web Store", "British Cycling",
 ];
 
 export const PATTERNS = [

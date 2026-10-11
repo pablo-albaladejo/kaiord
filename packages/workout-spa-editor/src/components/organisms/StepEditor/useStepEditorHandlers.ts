@@ -1,4 +1,9 @@
-import type { Duration, Target, WorkoutStep } from "../../../types/krd";
+import type {
+  Duration,
+  Intensity,
+  Target,
+  WorkoutStep,
+} from "../../../types/krd";
 import {
   createUpdatedStep,
   resetEditorState,
@@ -9,11 +14,13 @@ type UseStepEditorHandlersParams = {
   duration: Duration;
   target: Target;
   notes: string;
+  intensity: Intensity;
   durationError: string;
   targetError: string;
   setDuration: (duration: Duration) => void;
   setTarget: (target: Target) => void;
   setNotes: (notes: string) => void;
+  setIntensity: (intensity: Intensity) => void;
   setDurationError: (error: string) => void;
   setTargetError: (error: string) => void;
   onSave: (step: WorkoutStep) => void;
@@ -25,11 +32,13 @@ export const useStepEditorHandlers = ({
   duration,
   target,
   notes,
+  intensity,
   durationError,
   targetError,
   setDuration,
   setTarget,
   setNotes,
+  setIntensity,
   setDurationError,
   setTargetError,
   onSave,
@@ -49,10 +58,11 @@ export const useStepEditorHandlers = ({
 
   const handleSave = () => {
     if (durationError || targetError || !step) return;
-    onSave(createUpdatedStep(step, duration, target, notes));
+    onSave(createUpdatedStep(step, duration, target, notes, intensity));
   };
 
   const handleCancel = () => {
+    setIntensity(step?.intensity ?? "active");
     resetEditorState(
       step,
       setDuration,

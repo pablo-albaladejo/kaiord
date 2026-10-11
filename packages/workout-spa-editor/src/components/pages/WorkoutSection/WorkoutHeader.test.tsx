@@ -52,7 +52,7 @@ describe("WorkoutHeader", () => {
       // Assert
       expect(screen.getByText("Test Workout")).toBeInTheDocument();
       expect(
-        screen.getByText(/Sport: Cycling • Indoor Cycling/)
+        screen.getByText(/Sport: Cycling • Indoor cycling/)
       ).toBeInTheDocument();
     });
 
@@ -183,20 +183,19 @@ describe("WorkoutHeader", () => {
     });
   });
 
-  describe("startInEditMode", () => {
-    it("should mount in MetadataEditMode when startInEditMode is true", () => {
+  describe("initial mode", () => {
+    it("should mount read-only, with metadata editing one click away", () => {
       // Arrange
 
       // Act
-
-      render(
-        <WorkoutHeader workout={mockWorkout} krd={mockKrd} startInEditMode />
-      );
+      render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Assert
-
       expect(
-        screen.getByRole("form", { name: /edit workout metadata/i })
+        screen.queryByRole("form", { name: /edit workout metadata/i })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /edit workout metadata/i })
       ).toBeInTheDocument();
     });
   });

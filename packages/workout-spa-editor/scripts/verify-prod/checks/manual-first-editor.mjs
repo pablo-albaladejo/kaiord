@@ -1,78 +1,77 @@
-import { mainText } from "../browser.mjs";
-import { nameWorkout, openBlankEditor } from "../editor.mjs";
+import { exact, mainText } from "../browser.mjs";
+import { addTimedStep, nameWorkout, openBlankEditor } from "../editor.mjs";
+import { findEnglish } from "./i18n-terms.mjs";
 
-const RUNNING = /^(Running|Carrera)$/;
+const CLOSE_STEP = /Cerrar el formulario del paso|^Hecho$/;
 
-// F-24: thresholds open on Cycling even when Running is the active sport.
-export async function thresholdTab(rec, session) {
-  const { page, go } = session;
-  await go("athlete");
-  const running = page.locator("main").getByRole("radio", { name: RUNNING });
-  await running.click();
-  const checked = await running.getAttribute("aria-checked");
-  await page
-    .locator("main")
-    .getByRole("button", { name: "Editar", exact: true })
-    .click();
-  const tab = page.getByRole("dialog").getByRole("tab", { selected: true });
-  await tab.waitFor();
-  const selected = await tab.innerText();
-  rec.assert(
-    /Carrera|Running/.test(selected),
-    "F-24: thresholds open on the active sport (Running)",
-    `pageRadioChecked=${checked} dialogTab=${selected}`
-  );
-  await page.keyboard.press("Escape");
-}
-
-// F-10 metadata opens in edit mode, F-11 raw seconds and m/s, F-12 no
-// intensity, F-14 the FTP banner shows for a pace-only running workout.
-export async function editorChecks(rec, session) {
-  const { page } = session;
-  await openBlankEditor(session);
-  const editing = await page.getByTestId("save-metadata-button").isVisible();
-  rec.assert(
-    !editing,
-    "F-10: workout metadata starts read-only",
-    `metadataSaveVisible=${editing}`
-  );
-  await nameWorkout(page, "VP pace", "running");
+async function openFirstStep(page) {
   await page.getByTestId("add-first-step-button").click();
   await page
     .getByText(/^(Step|Paso) \d+$/)
     .last()
     .click();
-  await page
-    .getByLabel(/Select duration type|Tipo de duración/)
-    .selectOption("time");
-  const seconds = await page.getByLabel(/Duration \(seconds\)/).count();
+  return page.getByTestId("step-editor");
+}
+
+// F-10 metadata starts read-only, F-11 duration in mm:ss and pace in min/km,
+// F-12 an intensity selector that starts the session with a warm-up, F-13
+// a Spanish step editor, F-14 no FTP line for a pace-only running workout.
+export async function editorChecks(rec, session) {
+  const { page } = session;
+  await openBlankEditor(session);
+  const editing = await page.getByTestId("save-metadata-button").isVisible();
+  rec.assert(!editing, "F-10: workout metadata starts read-only", editing);
+  await nameWorkout(page, "VP pace", "running");
+  const form = await openFirstStep(page);
+  const intensity = await form
+    .getByLabel("Selecciona la intensidad del paso")
+    .inputValue();
   rec.assert(
-    seconds === 0,
-    "F-11: duration is typed as mm:ss, not raw seconds",
-    "field 'Duration (seconds)' present"
+    intensity === "warmup",
+    "F-12: the first step is a warm-up",
+    intensity
   );
-  await page.getByLabel("Seleccionar tipo de objetivo").selectOption("pace");
-  const ms = await page.getByLabel(/Ritmo \(m\/s\)/).count();
+  await form.getByLabel("Tipo de duración").selectOption("time");
+  await form.getByLabel("Duración (mm:ss)").fill("3:00");
+  await form.getByLabel("Seleccionar tipo de objetivo").selectOption("pace");
+  await form.getByLabel("Ritmo (min/km)").fill("4:30");
+  const english = findEnglish(await form.innerText());
   rec.assert(
-    ms === 0,
-    "F-11: pace is typed as min/km, not m/s",
-    "field 'Ritmo (m/s)' present"
+    english.length === 0,
+    "F-13: the step editor is in Spanish",
+    english.join(", ")
   );
-  const intensity = await page.getByLabel(/Intensidad|Intensity/).count();
+  await page.getByRole("button", { name: CLOSE_STEP }).click();
+  const card = await page.getByTestId("step-card").first().innerText();
   rec.assert(
-    intensity > 0,
-    "F-12: the step editor has an intensity selector",
-    `intensityFields=${intensity}`
+    /3 min/.test(card) && /4:30 min\/km/.test(card),
+    "F-11: 3:00 at 4:30/km reads back as typed",
+    card.replace(/\s+/g, " ")
   );
-  await page.getByLabel(/Ritmo/).first().fill("3.2");
-  await page
-    .getByRole("button", { name: /Cerrar el formulario del paso|^Hecho$/ })
-    .click();
+  const banner = await page.getByTestId("canvas-ftp-provenance").count();
+  rec.assert(banner === 0, "F-14: no FTP line for a pace-only workout", banner);
+}
+
+// F-18: a session without targets has no load to report, so its library
+// card shows the duration and no "0 TSS".
+export async function libraryCard(rec, session) {
+  const { page, go } = session;
+  await openBlankEditor(session);
+  await nameWorkout(page, "VP no load");
+  await addTimedStep(page, 600);
+  await page.getByRole("button", { name: "Guardar en la biblioteca" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel(/Nombre del entrenamiento/).fill("VP no load");
+  await dialog.getByRole("button", { name: exact("Guardar") }).click();
+  await dialog.waitFor({ state: "detached" });
+  await go("library");
+  const card = page.locator("main").getByText("VP no load").first();
+  await card.waitFor();
   const text = await mainText(page);
-  const banner = text.match(/Sin FTP para[^\n]*/)?.[0];
+  const row = text.match(/VP no load[^\n]*\n?[^\n]*/)?.[0] ?? text;
   rec.assert(
-    !banner,
-    "F-14: no FTP warning for a pace-only running workout",
-    banner
+    /10m/.test(row) && !/\b0 TSS/.test(row),
+    "F-18: the library card shows the duration and no zero load",
+    row
   );
 }

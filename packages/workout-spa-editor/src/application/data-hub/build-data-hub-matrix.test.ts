@@ -96,8 +96,12 @@ describe("buildDataHubMatrix", () => {
     // Assert
     expect(cell(rows, "weight", "manual", "import")?.state).toBe("manual");
     expect(cell(rows, "workout", "manual", "import")?.state).toBe("manual");
-    // No manual authoring path for a coach session, and export never manual.
-    expect(cell(rows, "planned-session", "manual", "import")?.state).toBe("na");
+    // Scheduling by hand is planning; a wearable's strain is never typed in,
+    // and export is never manual.
+    expect(cell(rows, "planned-session", "manual", "import")?.state).toBe(
+      "manual"
+    );
+    expect(cell(rows, "strain", "manual", "import")?.state).toBe("na");
     expect(cell(rows, "workout", "manual", "export")?.state).toBe("na");
   });
 

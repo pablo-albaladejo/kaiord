@@ -1,5 +1,6 @@
 import { ClipboardPaste } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 
 type PasteButtonProps = {
@@ -8,6 +9,7 @@ type PasteButtonProps = {
 };
 
 export function PasteButton({ onPaste, className = "" }: PasteButtonProps) {
+  const t = useTranslate("editor");
   const handlePaste = (e: React.MouseEvent) => {
     e.stopPropagation();
     onPaste();
@@ -17,12 +19,12 @@ export function PasteButton({ onPaste, className = "" }: PasteButtonProps) {
     <Button
       variant="secondary"
       onClick={handlePaste}
-      aria-label="Paste step from clipboard"
+      aria-label={t("paste.aria")}
       data-testid="paste-step-button"
       className={className}
     >
       <ClipboardPaste className="mr-2 h-4 w-4" />
-      Paste Step
+      {t("paste.label")}
     </Button>
   );
 }
