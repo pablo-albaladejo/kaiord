@@ -86,6 +86,7 @@
     "importHint": "Los archivos importados usan su propia fecha.",
     "error": {
       "invalidHours": "Escribe las horas dormidas como h:mm, por ejemplo 7:30.",
+      "invalidScore": "Escribe una puntuación de sueño de 0 a 100.",
       "needsDuration": "Escribe las horas dormidas, o la hora de acostarte y la de despertar.",
       "mismatch": "Las horas dormidas no cuadran con la hora de acostarte y la de despertar."
     }

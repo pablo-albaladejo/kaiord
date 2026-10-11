@@ -186,19 +186,19 @@ describe("WellnessEntryForm", () => {
     renderForm(persistence, onSaved);
 
     // Act
-    await fillAndSave(user, { "Sleep score": "150" });
+    await fillAndSave(user, { "HRV (ms)": "-5" });
 
     // Assert
     expect(
       await screen.findByText("Could not save — please retry")
     ).toBeInTheDocument();
     expect(onSaved).not.toHaveBeenCalled();
-    const sleep = await persistence.healthSleep.getByProfileAndDateRange(
+    const hrv = await persistence.healthHrv.getByProfileAndDateRange(
       PROFILE_ID,
       DAY,
       DAY
     );
-    expect(sleep).toHaveLength(0);
+    expect(hrv).toHaveLength(0);
   });
 
   it("should treat a partial save as failure and keep the dialog open", async () => {
@@ -209,19 +209,19 @@ describe("WellnessEntryForm", () => {
     renderForm(persistence, onSaved);
 
     // Act
-    await fillAndSave(user, { "Weight (kg)": "72", "Sleep score": "150" });
+    await fillAndSave(user, { "Weight (kg)": "72", "HRV (ms)": "-5" });
 
     // Assert
     expect(
       await screen.findByText("Could not save — please retry")
     ).toBeInTheDocument();
     expect(onSaved).not.toHaveBeenCalled();
-    const sleep = await persistence.healthSleep.getByProfileAndDateRange(
+    const hrv = await persistence.healthHrv.getByProfileAndDateRange(
       PROFILE_ID,
       DAY,
       DAY
     );
-    expect(sleep).toHaveLength(0);
+    expect(hrv).toHaveLength(0);
   });
 
   it("should disable the Save button while isSaving", async () => {
@@ -372,4 +372,30 @@ describe("WellnessEntryForm", () => {
     );
     expect(onSaved).not.toHaveBeenCalled();
   });
+
+  it.each(["150", "81.5", "-1"])(
+    "should explain a sleep score of %s and write nothing",
+    async (score) => {
+      // Arrange
+      const persistence = await setup();
+      const user = userEvent.setup();
+      const onSaved = vi.fn();
+      renderForm(persistence, onSaved);
+
+      // Act
+      await fillAndSave(user, { "Sleep score": score });
+
+      // Assert
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Enter a sleep score from 0 to 100."
+      );
+      expect(onSaved).not.toHaveBeenCalled();
+      const rows = await persistence.healthSleep.getByProfileAndDateRange(
+        PROFILE_ID,
+        DAY,
+        DAY
+      );
+      expect(rows).toHaveLength(0);
+    }
+  );
 });

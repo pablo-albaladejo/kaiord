@@ -86,6 +86,7 @@
     "importHint": "Imported files use their own date.",
     "error": {
       "invalidHours": "Enter the hours slept as h:mm, for example 7:30.",
+      "invalidScore": "Enter a sleep score from 0 to 100.",
       "needsDuration": "Enter the hours slept, or both bedtime and wake time.",
       "mismatch": "The hours slept don't match the bedtime and wake time."
     }

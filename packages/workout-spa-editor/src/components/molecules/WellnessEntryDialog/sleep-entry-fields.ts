@@ -8,7 +8,8 @@ export type SleepFields = {
   wakeTime: string;
 };
 
-export type SleepFieldsError = "invalidHours" | "needsDuration" | "mismatch";
+export type SleepFieldsError =
+  "invalidHours" | "invalidScore" | "needsDuration" | "mismatch";
 
 export type SleepFieldsResult =
   { entry?: ManualSleepEntry } | { error: SleepFieldsError };
@@ -16,6 +17,7 @@ export type SleepFieldsResult =
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
 const NOON_HOUR = 12;
+const MAX_SCORE = 100;
 const MAX_SLEEP_SECONDS = 24 * SECONDS_PER_HOUR;
 const HOURS_PATTERN = /^(\d{1,2})(?::([0-5]\d))?$/;
 
@@ -28,6 +30,9 @@ export const parseSleepHours = (raw: string): number | null => {
     Number(match[1]) * SECONDS_PER_HOUR + minutes * SECONDS_PER_MINUTE;
   return seconds > 0 && seconds <= MAX_SLEEP_SECONDS ? seconds : null;
 };
+
+const isValidScore = (score: number): boolean =>
+  Number.isInteger(score) && score >= 0 && score <= MAX_SCORE;
 
 /** A local clock time on `day`, or on the day before. */
 const localIso = (day: string, time: string, dayBefore: boolean): string => {
@@ -59,6 +64,8 @@ export const collectSleepFields = (
   const durationSeconds = hours === "" ? undefined : parseSleepHours(hours);
   if (durationSeconds === null) return { error: "invalidHours" };
   const score = fields.score.trim() === "" ? undefined : Number(fields.score);
+  if (score !== undefined && !isValidScore(score))
+    return { error: "invalidScore" };
   const { bedtime, wakeTime } = fields;
   if (durationSeconds === undefined && (bedtime === "") !== (wakeTime === ""))
     return { error: "needsDuration" };
