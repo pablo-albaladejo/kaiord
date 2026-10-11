@@ -55,8 +55,10 @@ export function FirstRunGuide({
         data-testid="first-run-optional"
         className="flex flex-col gap-2.5 border-t border-edge-soft pt-4"
       >
-        <summary className="cursor-pointer text-[13px] font-semibold text-ink-strong">
-          {t("firstRun.optionalHeading")}
+        <summary className="cursor-pointer text-ink-strong">
+          <h3 className="m-0 inline text-[13px] font-semibold text-ink-strong">
+            {t("firstRun.optionalHeading")}
+          </h3>
         </summary>
         <p className="m-0 mt-1 mb-2.5 max-w-[64ch] text-xs leading-relaxed text-ink-muted text-pretty">
           {t("firstRun.optionalBody")}

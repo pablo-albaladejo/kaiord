@@ -43,4 +43,21 @@ describe("FirstRunGuide on a phone", () => {
     // Assert
     expect(screen.getByTestId("first-run-optional")).toHaveAttribute("open");
   });
+
+  it("should keep the optional integrations heading a level-3 heading", () => {
+    // Arrange
+
+    // Act
+    renderAt(PHONE_WIDTH);
+
+    // Assert
+    const summary = screen
+      .getByTestId("first-run-optional")
+      .querySelector("summary");
+    const heading = screen.getByRole("heading", {
+      level: 3,
+      name: "Optional: connect your tools",
+    });
+    expect(summary).toContainElement(heading);
+  });
 });
