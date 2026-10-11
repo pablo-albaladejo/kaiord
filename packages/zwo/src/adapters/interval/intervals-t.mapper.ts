@@ -1,7 +1,8 @@
-import type { RepetitionBlock } from "@kaiord/core";
+import type { Logger, RepetitionBlock } from "@kaiord/core";
 
 import type { ZwiftIntervalsTData } from "./intervals-t-helpers";
 import { createOffStep, createOnStep } from "./intervals-t-helpers";
+import { restoreIntervalsTStep } from "./intervals-t-restoration";
 
 export type { ZwiftIntervalsTData };
 
@@ -10,10 +11,14 @@ export type { ZwiftIntervalsTData };
  * IntervalsT represents repeated intervals with distinct "on" and "off" phases
  */
 export const mapIntervalsTToKrd = (
-  data: ZwiftIntervalsTData
+  data: ZwiftIntervalsTData,
+  logger?: Logger
 ): RepetitionBlock => {
   return {
     repeatCount: data.Repeat,
-    steps: [createOnStep(data), createOffStep(data)],
+    steps: [
+      restoreIntervalsTStep(createOnStep(data), data, "on", logger),
+      restoreIntervalsTStep(createOffStep(data), data, "off", logger),
+    ],
   };
 };
