@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/trainingpeaks",
-  "version": "10.2.0",
+  "version": "10.3.0",
   "description": "TrainingPeaks body-composition/metrics health adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",

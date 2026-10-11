@@ -1,5 +1,20 @@
 # @kaiord/landing
 
+## 4.3.0
+
+### Minor Changes
+
+- 723b346: Track Chrome Web Store install clicks as `extension-install-clicked` with only the listing slug, and publish an IndexNow key at the site root so each deploy submits the URLs it changed.
+
+### Patch Changes
+
+- 5a5a95d: Add a converter deep link (`/app/#/convert?from=<format>&to=<format>`) that converts one file without touching the open workout or storage; link it from every converter page with a scope note on workouts vs. activities; publish three athlete guides in English and Spanish with hreflang; and link the guides from the landing page and `llms.txt`.
+- 30817bf: Docs: API symbol pages are `noindex,follow` and leave the sitemap (374 → 37 URLs), the root README and CHANGELOG are no longer built as pages, and pages show a git "Last updated" date with `dateModified`. Landing: `sitemap-landing.xml` is generated at build with git `<lastmod>`, and the EN/ES descriptions fit in 160 characters.
+- 1f473a1: Privacy policy now discloses the cookie-less, anonymous Umami analytics used on the website, docs and web editor, replacing the false "no analytics" statement. kaiord.com/privacy/ now forwards to the single docs policy instead of carrying a stale copy.
+- Updated dependencies [791740f]
+- Updated dependencies [8119609]
+  - @kaiord/core@10.3.0
+
 ## 4.2.2
 
 ### Patch Changes
