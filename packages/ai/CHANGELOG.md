@@ -1,5 +1,23 @@
 # @kaiord/ai
 
+## 9.4.0
+
+### Minor Changes
+
+- 97dfd05: A retired model now heals to its same-tier successor instead of the provider default (`claude-3-haiku-20240307` → `claude-haiku-4-5`, `claude-opus-4-1` → `claude-opus-5`): `RETIRED_MODELS` maps each retired id to its successor, and the new `DEPRECATED_MODELS` lists models still served but announced for retirement, with successor and date. New helpers `modelForProvider`, `retiredSuccessor` and `deprecationOf` are exported from `@kaiord/ai/providers`. The Anthropic default is now `claude-sonnet-5`, and `getDefaultModel` returns the curated default with no silent fallback. `isModelNotFoundError` now requires an error body that names a model, so a 404 with an unrelated body is no longer treated as a missing model.
+- 97dfd05: New `readProviderError` in `@kaiord/ai/providers` reads a provider failure's structured fields (status code, body `type`/`code`/`status`/`message`) through `lastError`/`cause` wrappers, and `namesMissingModel` classifies them. `isModelNotFoundError` is built on both: a typed body is authoritative, so a 400 whose message merely echoes "not_found_error ... model" is no longer read as a missing model; the message text is consulted only for body-less errors.
+
+### Patch Changes
+
+- fb2d94c: A chat action-tool call whose input fails the tool's schema is no longer offered for confirmation. The SDK already answers such a call with a tool error and continues the loop, so `runTurn` drops it and the turn pauses on the last valid action call instead.
+- fb2d94c: The `set_data_route` chat-tool eval fixture now carries the production tool's field descriptions, including which fields each action requires, and its priority-needs-`sourceOrder` rule, so evals grade the model against the schema it actually sees.
+- fb2d94c: The `set_data_route` chat-tool eval fixture now serialises to a top-level `type: "object"` input schema, which Anthropic and OpenAI require, mirroring the SPA tool.
+- fb2d94c: `runTurn` now rethrows the provider's own error (an `APICallError` with its `statusCode`) whenever a chat turn's stream fails: in place of the SDK's generic `NoOutputGeneratedError` when no step completed, and instead of silently returning the earlier step's partial result when a later step fails. It also no longer lets the SDK log the failed request to the console. Tool failures are unaffected; they stay tool results inside the loop.
+- 97dfd05: The model catalog no longer offers models the provider has retired or deprecated (`claude-3-haiku-20240307`, `claude-opus-4-1`, `claude-opus-4-0`, `claude-sonnet-4-0` and their dated ids), and the default model per provider is a curated current model (`claude-sonnet-5`, `gpt-5-mini`, `gemini-2.5-flash`) instead of the catalog's oldest entry. A saved choice pointing at a retired model resolves to its same-tier successor, `isModelNotFoundError` detects a provider rejecting the model, and the SPA shows "This model is no longer available — pick another in Settings → AI" instead of a generic failure.
+- Updated dependencies [791740f]
+- Updated dependencies [8119609]
+  - @kaiord/core@10.3.0
+
 ## 9.3.2
 
 ### Patch Changes

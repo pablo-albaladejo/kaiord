@@ -1,5 +1,16 @@
 # @kaiord/fit
 
+## 10.3.0
+
+### Patch Changes
+
+- 28c51e2: Activity FIT files import again. The FIT reader rejected every recorded activity (`Activity.fit`, pool swims, multisport, files with developer data) with a ZodError, because the session, lap, record and event schemas expected `timestamp` and `startTime` as numbers while the Garmin SDK decoder returns them as `Date`. Session and lap durations were also divided by 1000 although the decoder already returns seconds (a one-hour activity came out as 3.6 s), and a lap's swim stroke, which the decoder returns as a name such as `freestyle`, was rejected. Records that carry no timestamp cannot be placed on the timeline, so they are now dropped with a warning instead of failing the whole import.
+- 1f39d02: FIT workouts now use the profile's heart-rate and power offsets (absolute bpm + 100, absolute watts + 1000) for custom HR and power target ranges, for `hrLessThan`/`powerLessThan`/`powerGreaterThan` conditions and for repeat-until HR and power conditions. Before this fix, the writer emitted these values without the offset, so a Garmin device read a 200-250 W range as 200-250 % FTP and a 130 bpm condition as 130 %. The reader kept the raw value for HR ranges and every HR and power condition, so Garmin's `hrLessThan` 225 was read as 225 bpm instead of 125 bpm. A repeat-until step's `targetValue` holds its repeat condition, and the reader no longer reads that value as a target.
+- 0baa275: FIT workouts written by kaiord keep their durations, targets and repeat blocks. The Garmin SDK encoder writes only main fields, so values the writer set under sub-field names (`durationDistance`, `targetPowerZone`, `repeatSteps`, custom target ranges) were silently dropped, and a re-imported workout lost its distances, targets and repeats. Messages are now written with their main fields filled and in profile field order (the encoder otherwise put values in the wrong slots when it reused a definition). Repeat-until conditions (time, distance, calories, heart rate, power) are written and read through the profile's `repeat*` sub-fields, a swim stroke target is read from the decoder's stroke name, and a single cadence or pace value reads back as a value rather than an equal range.
+- Updated dependencies [791740f]
+- Updated dependencies [8119609]
+  - @kaiord/core@10.3.0
+
 ## 10.2.0
 
 ### Patch Changes
