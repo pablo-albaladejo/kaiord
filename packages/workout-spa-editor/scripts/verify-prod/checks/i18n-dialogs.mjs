@@ -20,7 +20,9 @@ function dialogCopy(root) {
 
 async function scanDialog(rec, dialog, label, pieces) {
   const copy = await settledText(dialog.page(), dialogCopy, dialog);
-  const hits = [...findEnglish(copy), ...englishLeaks(copy, pieces)];
+  const hits = [
+    ...new Set([...findEnglish(copy), ...englishLeaks(copy, pieces)]),
+  ];
   rec.assert(
     hits.length === 0,
     `no English UI terms in ${label}`,
@@ -28,17 +30,14 @@ async function scanDialog(rec, dialog, label, pieces) {
   );
 }
 
-const PERSONAL = { bodyWeight: "70", height: "175", birthDate: "1990-01-01" };
-
+// Fields by type and order, not by label: a label that regressed to English
+// must reach the scan and be reported, not stop the check before it.
 async function fillPersonal(dialog) {
-  for (const [key, value] of Object.entries(PERSONAL)) {
-    await dialog
-      .getByLabel(es("athlete", `profileManager.personal.${key}`))
-      .fill(value);
-  }
-  await dialog
-    .getByLabel(es("athlete", "profileManager.personal.sex"))
-    .selectOption("male");
+  const numbers = dialog.locator('input[type="number"]');
+  await numbers.nth(0).fill("70");
+  await numbers.nth(1).fill("175");
+  await dialog.locator('input[type="date"]').fill("1990-01-01");
+  await dialog.locator("select").first().selectOption("male");
 }
 
 // F-46b: every tab of the Profile Manager, the personal data filled in so
@@ -78,10 +77,9 @@ export async function goalDialog(rec, { page }) {
   const dialog = page.getByTestId("goal-setup-dialog");
   const soon = new Date();
   soon.setDate(soon.getDate() + 14);
-  await dialog.getByLabel(es("nutrition", "goalSetup.targetWeight")).fill("60");
-  await dialog
-    .getByLabel(es("nutrition", "goalSetup.targetDate"))
-    .fill(isoDate(soon));
+  // Start weight, then target weight; the date is the only date input.
+  await dialog.locator('input[type="number"]').nth(1).fill("60");
+  await dialog.locator('input[type="date"]').fill(isoDate(soon));
   await dialog.getByTestId("goal-cap-warning").waitFor();
   await scanDialog(
     rec,
