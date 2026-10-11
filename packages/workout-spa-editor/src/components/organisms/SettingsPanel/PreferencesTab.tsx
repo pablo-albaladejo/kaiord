@@ -15,6 +15,10 @@ export const PreferencesTab: React.FC = () => {
   const profileId = active?.id ?? null;
   const prefs = useUserPreferences({ profileId, defaultView: "grid" });
   const setPrefs = useSetUserPreferenceFields(profileId);
+  // The setter drops a write with no profile: until one resolves (the
+  // live query's first read, or the first-run default profile's seed),
+  // a tap would look accepted and be lost.
+  const unresolved = profileId === null;
   const units: Units = prefs?.units ?? "metric";
   const locale: LocalePreference = prefs?.locale ?? "auto";
   const unitOptions: SegmentedOption<Units>[] = [
@@ -49,14 +53,20 @@ export const PreferencesTab: React.FC = () => {
           value={units}
           onChange={handleUnits}
           ariaLabel={t("preferences.units")}
+          disabled={unresolved}
         />
       </section>
-      <LanguageRow value={locale} onChange={handleLocale} />
+      <LanguageRow
+        value={locale}
+        onChange={handleLocale}
+        disabled={unresolved}
+      />
       <section>
         <SectionHead title={t("preferences.notifications")} />
         <NotificationsRow
           enabled={prefs?.notificationsEnabled ?? false}
           onChange={handleNotifications}
+          disabled={unresolved}
         />
       </section>
     </div>

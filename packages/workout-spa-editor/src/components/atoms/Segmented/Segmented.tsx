@@ -12,6 +12,8 @@ export type SegmentedProps<T extends string> = {
   onChange: (value: T) => void;
   ariaLabel: string;
   className?: string;
+  /** Nothing to write the choice to yet: a click would be dropped. */
+  disabled?: boolean;
 };
 
 /* Segmented single-select control (tabs-in-a-pill). Accessible as a
@@ -23,6 +25,7 @@ export function Segmented<T extends string>({
   onChange,
   ariaLabel,
   className = "",
+  disabled = false,
 }: SegmentedProps<T>) {
   return (
     <div
@@ -43,9 +46,10 @@ export function Segmented<T extends string>({
             type="button"
             role="radio"
             aria-checked={active}
+            disabled={disabled}
             onClick={() => onChange(option.value)}
             className={[
-              "flex flex-1 items-center justify-center gap-[7px] rounded-lg px-1.5 py-[9px] text-[13px] font-medium transition-colors duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+              "flex flex-1 items-center justify-center gap-[7px] rounded-lg px-1.5 py-[9px] text-[13px] font-medium transition-colors duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-60",
               active
                 ? "bg-accent text-surface"
                 : "bg-transparent text-ink-muted",

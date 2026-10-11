@@ -14,6 +14,7 @@ import type { Page } from "@playwright/test";
 
 import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
+import { calendarDay, workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
@@ -31,7 +32,7 @@ const readLocalProfiles = (page: Page): Promise<Row[]> =>
   });
 
 async function enterRecords(page: Page, today: string): Promise<string> {
-  await page.getByTestId(`empty-day-${today}`).click();
+  await calendarDay(page, today).add.click();
   await page.getByTestId("add-entry-choose-wellness").click();
   const dialog = page.getByTestId("wellness-entry-dialog");
   await dialog.getByLabel("Weight (kg)").fill("70.4");
@@ -40,9 +41,7 @@ async function enterRecords(page: Page, today: string): Promise<string> {
 
   await page.goto(`/workout/new?source=scratch&date=${today}`);
   await page.getByTestId("scratch-schedule-button").click();
-  const card = page
-    .getByTestId(`day-column-${today}`)
-    .locator('[data-testid^="workout-card-"]');
+  const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
   const workoutId = (await card.getAttribute("data-testid"))!.replace(
     "workout-card-",

@@ -39,8 +39,10 @@ vi.mock("../../../contexts", () => ({
   useAnalytics: () => ({ event: vi.fn(), pageView: vi.fn() }),
 }));
 
+const record = vi.hoisted(() => ({ value: undefined as unknown }));
+
 vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: () => undefined,
+  useLiveQuery: () => record.value,
 }));
 
 vi.mock("../../../adapters/dexie/dexie-database", () => ({
@@ -67,6 +69,7 @@ vi.mock("wouter", () => ({
 
 describe("GarminPushButton", () => {
   beforeEach(() => {
+    record.value = { id: "workout-1", date: "2026-10-12" };
     mockState.pushing = { status: "idle" };
     push.mockReset();
     push.mockResolvedValue({ kind: "scheduled" });
@@ -145,5 +148,16 @@ describe("GarminPushButton", () => {
 
     // Assert
     expect(screen.getByText("Push failed: 403")).toBeInTheDocument();
+  });
+
+  it("should keep the send disabled until the workout record has loaded", () => {
+    // Arrange
+    record.value = undefined;
+
+    // Act
+    render(<GarminPushButton notice={NO_NOTICE} />);
+
+    // Assert
+    expect(screen.getByTestId("send-to-garmin-button")).toBeDisabled();
   });
 });

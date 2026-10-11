@@ -7,11 +7,13 @@ import { SectionHead } from "../../molecules/SectionHead";
 type LanguageRowProps = {
   value: LocalePreference;
   onChange: (next: LocalePreference) => void;
+  disabled?: boolean;
 };
 
 export const LanguageRow: React.FC<LanguageRowProps> = ({
   value,
   onChange,
+  disabled,
 }) => {
   const { t } = useTranslation("common");
   const options: SegmentedOption<LocalePreference>[] = [
@@ -28,6 +30,7 @@ export const LanguageRow: React.FC<LanguageRowProps> = ({
         value={value}
         onChange={onChange}
         ariaLabel={t("language.label")}
+        disabled={disabled}
       />
     </section>
   );

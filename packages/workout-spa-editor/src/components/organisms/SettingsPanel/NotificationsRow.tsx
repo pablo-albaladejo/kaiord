@@ -5,11 +5,13 @@ import { useNotificationPermission } from "./use-notification-permission";
 export type NotificationsRowProps = {
   enabled: boolean;
   onChange: (enabled: boolean) => void;
+  disabled?: boolean;
 };
 
 export const NotificationsRow = ({
   enabled,
   onChange,
+  disabled,
 }: NotificationsRowProps) => {
   const t = useTranslate("settings");
   const { permission, request } = useNotificationPermission();
@@ -40,6 +42,7 @@ export const NotificationsRow = ({
           checked={checked}
           onCheckedChange={(next) => void handleChange(next)}
           aria-label={t("notifications.enable")}
+          disabled={disabled}
         />
       </div>
       {permission === "denied" && (
