@@ -74,3 +74,23 @@ describe("mergePostExportWrites", () => {
     expect(result).toEqual([]);
   });
 });
+
+describe("mergePostExportWrites — energy goal keyed by profile id", () => {
+  it("should drop a goal written after the export that a newer profile-id tombstone deletes", () => {
+    // Arrange
+    const deletes = new Map([
+      [
+        tombstoneKey("energyTargets", "p-1"),
+        Date.parse("2026-10-12T00:00:00Z"),
+      ],
+    ]);
+    const merge = mergePostExportWrites("energyTargets", [], deletes);
+    const goal = { profileId: "p-1", updatedAt: "2026-10-11T00:00:00Z" };
+
+    // Act
+    const result = merge([goal], []);
+
+    // Assert
+    expect(result).toEqual([]);
+  });
+});

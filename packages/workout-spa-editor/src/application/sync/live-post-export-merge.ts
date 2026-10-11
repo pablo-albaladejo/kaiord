@@ -8,14 +8,15 @@
  * profile re-key and the orphan filters still decide what survives. Pure.
  */
 
-import { recordClock, recordKey } from "./merge-record-key";
+import { recordClock, recordKey, tombstoneIdOf } from "./merge-record-key";
 import { tombstoneKey } from "./merge-tombstones";
 
 type Row = Record<string, unknown>;
 
 const isDeleted = (table: string, row: Row, deletes: Map<string, number>) => {
-  if (typeof row.id !== "string") return false;
-  const deletedAt = deletes.get(tombstoneKey(table, row.id));
+  const id = tombstoneIdOf(table, row);
+  if (id === undefined) return false;
+  const deletedAt = deletes.get(tombstoneKey(table, id));
   return deletedAt !== undefined && recordClock(row) <= deletedAt;
 };
 
