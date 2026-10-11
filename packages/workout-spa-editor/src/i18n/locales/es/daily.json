@@ -8,7 +8,8 @@
     "ready": "LISTO",
     "noData": "SIN DATOS",
     "noDataYet": "Aún no hay datos de preparación",
-    "rationaleNoData": "Conecta Garmin para sincronizar la VFC y el sueño.",
+    "rationaleNoData": "Registra tu VFC y tu sueño a mano, o conecta un dispositivo para sincronizarlos.",
+    "logManually": "Registrar VFC y sueño",
     "rationale": "Según tu VFC nocturna y tu sueño.",
     "headlinePushToday": "Buen día para exigirte",
     "headlinePush": "Bien para exigirte",
@@ -16,7 +17,11 @@
     "headlineEasy": "Tómatelo con calma",
     "hrv": "VFC",
     "sleep": "Sueño",
-    "battery": "Batería"
+    "battery": "Batería",
+    "rationaleHrv": "Según tu VFC nocturna.",
+    "rationaleSleep": "Según tu puntuación de sueño.",
+    "rationaleSleepManual": "Según la puntuación de sueño que has anotado.",
+    "rationaleHrvSleepManual": "Según tu VFC nocturna y la puntuación de sueño que has anotado."
   },
   "energyBalance": {
     "title": "Balance energético",

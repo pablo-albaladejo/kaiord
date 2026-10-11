@@ -103,9 +103,6 @@ export const TrendSingleChartCard = ({
         width={CHART_WIDTH}
         height={CHART_HEIGHT}
       />
-      <p className="m-0 text-xs leading-relaxed text-pretty text-ink-muted">
-        {t("trends.seriesLegendNote")}
-      </p>
     </div>
   );
 };

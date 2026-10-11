@@ -25,11 +25,13 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 - `coaching-dialog-{redesign,train2go}.spec.ts` — coaching dialog flows.
 - `advanced-workouts.spec.ts`, `repetition-blocks.spec.ts` — block + advanced-step flows.
 - `import-export-formats.spec.ts` — round-trip across FIT / TCX / ZWO / KRD / GCN.
+- `tcx-repeat-import.spec.ts` — imports `test-fixtures/tcx/WorkoutRepeatBlocks.tcx` through the editor and asserts its 5× repetition block renders.
 - `ai-generate-workout.spec.ts` — AI generation (stubbed LLM responses via `fixtures/llm-responses.ts`).
 - `profiles.spec.ts`, `zones-sync.spec.ts` — profile + Train2Go zone sync flows.
 - `settings.spec.ts`, `onboarding.spec.ts` — settings + onboarding.
 - `button-improvements.spec.ts`, `modal-interactions.spec.ts`, `error-handling.spec.ts` — UX guardrails.
 - `spa-route-refresh.spec.ts` — F5/hard-reload preservation.
+- `fit-import-prod-bundle.spec.ts` — `@prod-bundle`: FIT import (workout, the app's own export, health) through the built bundle served like the static host. Gated behind `E2E_PROD_BASE=1`; the dev server pre-bundles `@garmin/fitsdk`, so only a built artifact exercises what the build does to the FIT SDK.
 
 ## Subdirectories
 

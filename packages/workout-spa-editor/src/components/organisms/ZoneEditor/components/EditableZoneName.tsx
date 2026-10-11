@@ -6,6 +6,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
+import { zoneNameLabel } from "../../../../lib/zone-name-label";
+
 type EditableZoneNameProps = {
   name: string;
   onSave: (name: string) => void;
@@ -17,16 +20,18 @@ export function EditableZoneName({
   onSave,
   ariaLabel,
 }: EditableZoneNameProps) {
+  const t = useTranslate("zones");
+  const shown = zoneNameLabel(name, t);
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(name);
+  const [draft, setDraft] = useState(shown);
   const inputRef = useRef<HTMLInputElement>(null);
   const cancelledRef = useRef(false);
 
   const startEdit = useCallback(() => {
     cancelledRef.current = false;
-    setDraft(name);
+    setDraft(shown);
     setEditing(true);
-  }, [name]);
+  }, [shown]);
 
   // Select the field's contents once editing begins so the name can be
   // overtyped. Using an effect (not requestAnimationFrame) keeps this
@@ -40,8 +45,8 @@ export function EditableZoneName({
     setEditing(false);
     if (cancelledRef.current) return;
     const trimmed = draft.trim();
-    if (trimmed && trimmed !== name) onSave(trimmed);
-  }, [draft, name, onSave]);
+    if (trimmed && trimmed !== shown) onSave(trimmed);
+  }, [draft, shown, onSave]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -61,7 +66,7 @@ export function EditableZoneName({
         className="flex-1 cursor-pointer text-left text-sm
           text-gray-800 hover:underline dark:text-gray-200"
       >
-        {name}
+        {shown}
       </button>
     );
   }

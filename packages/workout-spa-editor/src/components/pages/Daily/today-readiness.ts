@@ -20,6 +20,7 @@ import {
   SCORE_MAX,
   sleepValue,
 } from "./readiness-metrics";
+import { readinessRationale } from "./readiness-rationale";
 
 function readyHeadline(
   ready: boolean,
@@ -77,10 +78,7 @@ export function buildReadinessModel(
       score === null
         ? t("readiness.noDataYet")
         : readyHeadline(ready, isFocusToday, t),
-    rationale:
-      score === null
-        ? t("readiness.rationaleNoData")
-        : t("readiness.rationale"),
+    rationale: readinessRationale(hrv, sleep, sleepSource?.sourceBridgeId, t),
     hrv: {
       label: t("readiness.hrv"),
       value: hrv ? `${Math.round(hrv.rMSSD)}` : EM_DASH,

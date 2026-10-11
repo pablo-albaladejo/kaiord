@@ -56,6 +56,10 @@ export type ToleranceViolation = {
   actual: number;
   /** Absolute deviation from expected value */
   deviation: number;
-  /** Maximum allowed tolerance */
+  /** Maximum allowed tolerance (0 when the value must match exactly) */
   tolerance: number;
+  /** Original value of a categorical field (a duration type, a target unit) */
+  expectedValue?: string;
+  /** Round-tripped value of a categorical field */
+  actualValue?: string;
 };

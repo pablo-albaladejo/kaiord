@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { fitDateTimeSchema } from "./fit-date-time";
 /**
  * FIT event types (what kind of event occurred).
  */
@@ -67,7 +68,7 @@ export type FitEventType = z.infer<typeof fitEventTypeSchema>;
  * Captures workout events like start, stop, pause, markers.
  */
 export const fitEventMessageSchema = z.object({
-  timestamp: z.number(),
+  timestamp: fitDateTimeSchema,
   event: fitEventSchema,
   eventType: fitEventTypeSchema,
   eventGroup: z.number().optional(),

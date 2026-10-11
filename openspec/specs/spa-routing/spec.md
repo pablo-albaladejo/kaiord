@@ -264,16 +264,20 @@ When the user activates the `+` add-entry affordance on any calendar day cell (g
 
 ### Requirement: Manual wellness entry
 
-The wellness entry surface SHALL offer a manual entry form with labeled fields for **weight**, **sleep score**, **HRV**, and **steps**, and an **"Import a file"** action for FIT health files. The form SHALL have a single Save button that persists every filled field in one submission; empty fields SHALL write nothing. When a metric value is saved, the SPA SHALL persist a schema-valid KRD record for the active profile and the clicked day; the live wellness query SHALL cause the corresponding badge to appear on that calendar day after it refreshes. No user-entered metric value SHALL appear in any toast message.
+The wellness entry surface SHALL offer a manual entry form with labeled fields for **weight**, **sleep hours** (h:mm), **sleep score**, **bedtime**, **wake time**, **HRV**, and **steps**, and an **"Import a file"** action for FIT health files. Its copy SHALL be localized. The form SHALL have a single Save button that persists every filled field in one submission; empty fields SHALL write nothing. When a metric value is saved, the SPA SHALL persist a schema-valid KRD record for the active profile and the clicked day; the live wellness query SHALL cause the corresponding badge to appear on that calendar day after it refreshes. No user-entered metric value SHALL appear in any toast message.
 
 When the user saves a metric for a day that already has a record for that metric, the prior record SHALL be replaced — exactly one record remains for that date and metric. For **steps specifically**, only the `steps` value is replaced; any prior `activeCalories`, `restingCalories`, and `intensityMinutes` fields in the existing daily-wellness record are preserved (merge-preserve, not clobber).
+
+A sleep entry SHALL take its duration from the hours slept, or from bedtime → wake time when only those are given; the wake time falls on the entry's day and the bedtime on the evening before when it is not earlier than the wake time. A sleep score alone SHALL be stored without a duration. The SPA SHALL NOT write a sleep record of zero length: malformed hours, a single clock time without hours, or hours that disagree with bedtime → wake time by more than 60 s SHALL show an inline error and write nothing. A sleep record whose duration is absent or `0` SHALL be shown as "duration not recorded", never as 0 h.
+
+Each per-metric health page (`/health/sleep`, `/health/weight`, `/health/recovery`, `/health/activity`) SHALL offer an "Add data" action that opens the same wellness entry surface for today (the local calendar day), focused on that page's metric (sleep hours, weight, HRV, steps). The health pages' date windows SHALL use local calendar days.
 
 When the user uses "Import a file", the imported health record SHALL be dated by the FIT file's own date — NOT the clicked day — and the user SHALL land on the corresponding Health Hub page. Empty fields write nothing to persistence.
 
 #### Scenario: Wellness surface offers a manual form and an import action
 
 - **WHEN** the wellness entry surface opens for a given day
-- **THEN** it shows labeled input fields for weight, sleep score, HRV, and steps, a single Save button, and an "Import a file" action
+- **THEN** it shows labeled input fields for weight, sleep hours, sleep score, bedtime, wake time, HRV, and steps, a single Save button, and an "Import a file" action
 
 #### Scenario: Saving a metric value persists a KRD record and shows a badge
 
@@ -313,6 +317,26 @@ When the user uses "Import a file", the imported health record SHALL be dated by
 
 - **WHEN** the user chooses "Import a file" from the wellness entry surface and imports a FIT health file whose internal date is different from the clicked calendar day
 - **THEN** the persisted record is dated by the FIT file's own date, the user lands on the corresponding Health Hub page, and no record is written for the clicked day's date
+
+#### Scenario: Hours slept are stored as the night's duration
+
+- **WHEN** the user enters sleep hours `7:30` and a sleep score `81` and saves
+- **THEN** the persisted sleep record has `totalDurationSeconds: 27000` and `score: 81`, and `/health/sleep` shows the night as 7 h 30 min
+
+#### Scenario: A sleep score alone is not a 0 h night
+
+- **WHEN** the user enters only a sleep score `81` and saves
+- **THEN** the persisted sleep record has `score: 81` and no `totalDurationSeconds`, and `/health/sleep` shows "duration not recorded" with the score
+
+#### Scenario: Hours that disagree with the clock times are refused
+
+- **WHEN** the user enters sleep hours `8:00`, bedtime `23:00` and wake time `06:30` and saves
+- **THEN** an inline error explains the mismatch and no sleep record is written
+
+#### Scenario: Health pages open manual entry on their metric
+
+- **WHEN** the user activates "Add data" on `/health/recovery`
+- **THEN** the wellness entry surface opens for today with focus on the HRV field
 
 ### Requirement: FIT import flow routes health files to the health pipeline
 
@@ -546,3 +570,101 @@ The SPA SHALL serve a `/convert` route whose parameters come from the URL fragme
 
 - **WHEN** a visitor opens `#/convert?from=bogus`
 - **THEN** a picker to choose the source and target formats is shown, with no redirect
+
+### Requirement: Daily readiness names the inputs it was built from
+
+The Daily readiness card SHALL derive its composite score only from the HRV score and the sleep score that are present, and its rationale SHALL name exactly those inputs: overnight HRV and sleep, HRV alone, or the sleep score alone. When the sleep record's source is manual entry, the rationale SHALL say the sleep score was entered by the user, and SHALL NOT attribute the score to overnight HRV when no HRV score contributed. The sleep stat SHALL show "—" when the night's duration was not recorded.
+
+#### Scenario: A typed-in sleep score alone is not credited to HRV
+
+- **GIVEN** the day has a manual sleep record with `score: 81` and no HRV score
+- **WHEN** Daily renders the readiness card for that day
+- **THEN** the score is 81 and the rationale reads "Based on the sleep score you entered." and does not mention overnight HRV
+
+#### Scenario: Device HRV and a typed-in sleep score are both named
+
+- **GIVEN** the day has a device HRV score and a manual sleep score
+- **WHEN** Daily renders the readiness card for that day
+- **THEN** the rationale reads "Based on your overnight HRV and the sleep score you entered."
+
+### Requirement: The New session sheet keeps its context
+
+When the "New session" sheet is opened with a context — a `date`, a `week`, an origin (`from`) and a sport picked on the sheet — every exit SHALL carry that context. **Blank** SHALL open the scratch editor with the date and the sport, and the editor SHALL seed the workout with that sport before the last-used sport and the default. **Import file** SHALL import onto that date and return to that date's calendar week. **Template** SHALL open the Library in picking mode for that date (`/library?source=template-picker&date=<day>`). The Library SHALL say it is picking for that day, and scheduling a template from it SHALL propose that day. A template loaded into the editor from the Library SHALL NOT trigger the draft-discard prompt meant for sheet-started drafts. **Close** on a dated sheet SHALL return to that date's calendar week and SHALL NOT reopen the sheet. A non-calendar origin SHALL be returned to instead.
+
+#### Scenario: Blank keeps the day and the sport
+
+- **GIVEN** the sheet was opened from a calendar day that is not today and the user picked Running
+- **WHEN** the user chooses Blank, names the workout and clicks "Save & schedule"
+- **THEN** the workout is stored on the chosen day with sport `running` and its card appears in that day's column
+
+#### Scenario: Import file keeps the day
+
+- **GIVEN** the sheet was opened from a calendar day
+- **WHEN** the user chooses Import file and uploads an activity
+- **THEN** the activity is stored on that day and the SPA returns to that day's calendar week
+
+#### Scenario: Template picks for the day
+
+- **GIVEN** the sheet was opened from a calendar day
+- **WHEN** the user chooses Template and clicks Schedule on a template
+- **THEN** the Library showed a hint naming that day, and the template is scheduled on that day
+
+#### Scenario: Close returns to the week
+
+- **GIVEN** the sheet was opened from a calendar day
+- **WHEN** the user closes the sheet
+- **THEN** the SPA shows that day's calendar week and the sheet is gone
+
+### Requirement: Schedule and keep dialogs propose a value
+
+The schedule dialog SHALL propose a date each time it opens: the caller's context date, otherwise the first day of the week in context when that week does not contain today, otherwise today. Confirming an empty or invalid date SHALL write nothing and SHALL explain why inline, with the field marked invalid. "Save & schedule" on a draft with no date SHALL open this dialog instead of writing on today. The dialog's copy SHALL be localized. The "Keep in library" dialog SHALL propose the workout's name each time it opens.
+
+#### Scenario: An empty date is explained
+
+- **GIVEN** the schedule dialog is open
+- **WHEN** the user clears the date and confirms
+- **THEN** an inline alert explains that a valid date is needed, the field is `aria-invalid`, and nothing is scheduled
+
+#### Scenario: Keep in library proposes the name
+
+- **GIVEN** a draft named "Tempo Tuesday"
+- **WHEN** the user opens "Keep in library"
+- **THEN** the name field holds "Tempo Tuesday"
+
+### Requirement: The empty library offers a way to fill it
+
+When the workout library holds no templates, its empty state SHALL offer "New workout", which opens the New session sheet at `/workout/new`, and "Import file", which opens the file import at `/workout/new?action=import`. When templates exist but the search or sport filter matches none, the empty state SHALL offer neither, since the library is not empty.
+
+#### Scenario: First run opens the library
+
+- **GIVEN** a library with no templates
+- **WHEN** the athlete opens `#/library`
+- **THEN** the page SHALL show "New workout" and "Import file", and choosing them SHALL navigate to `/workout/new` and `/workout/new?action=import` respectively
+
+#### Scenario: A filter matches nothing
+
+- **GIVEN** a library with templates and a search that matches none of them
+- **WHEN** the empty result is shown
+- **THEN** it SHALL offer no create or import action
+
+### Requirement: Phone content clears the bottom navigation
+
+Below the `md` breakpoint the floating bottom navigation SHALL cover no actionable content. Its geometry SHALL be defined once, as the `--bottom-nav-*` tokens, and the page's end padding SHALL be derived from them, so the last control of any page lands above the bar when scrolled to the end. In the New session sheet without a configured AI provider, the "Start from" options (Template, Blank, Import file) SHALL come before the AI setup prompt; with a provider the AI prompt SHALL come first.
+
+#### Scenario: New session on a phone without an AI key
+
+- **GIVEN** a 390×664 viewport, no AI provider, and the default-profile notice shown
+- **WHEN** the athlete opens `#/workout/new`
+- **THEN** "Template", "Blank" and "Import file" SHALL end above the bottom navigation without scrolling
+
+#### Scenario: New session with an AI key
+
+- **GIVEN** a configured AI provider
+- **WHEN** the New session sheet opens
+- **THEN** the AI prompt SHALL come before "or start from"
+
+#### Scenario: A page taller than the screen
+
+- **GIVEN** a 390×664 viewport and the detail view of a scheduled workout
+- **WHEN** the athlete scrolls to the end
+- **THEN** its footer actions SHALL end above the bottom navigation

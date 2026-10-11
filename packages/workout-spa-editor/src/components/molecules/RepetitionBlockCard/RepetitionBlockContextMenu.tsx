@@ -10,6 +10,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { MoreVertical } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { RepetitionBlockMenuContent } from "./RepetitionBlockMenuContent";
 
 export type RepetitionBlockContextMenuProps = {
@@ -25,12 +26,13 @@ export function RepetitionBlockContextMenu({
   onUngroup,
   onDelete,
 }: RepetitionBlockContextMenuProps) {
+  const t = useTranslate("editor");
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button
           className="rounded p-1 transition-colors hover:bg-[var(--bg-sunken)] motion-reduce:transition-none"
-          aria-label="Block actions"
+          aria-label={t("block.actionsAria")}
           data-testid="block-actions-trigger"
         >
           <MoreVertical className="h-5 w-5 text-ink-muted" />

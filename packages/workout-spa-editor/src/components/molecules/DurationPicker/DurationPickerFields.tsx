@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { DurationTypeSelect } from "./DurationTypeSelect";
 import { DurationValueInput } from "./DurationValueInput";
 
@@ -22,6 +23,7 @@ export const DurationPickerFields = ({
   getValueLabel,
   getValuePlaceholder,
 }: DurationPickerFieldsProps) => {
+  const t = useTranslate("editor");
   return (
     <>
       <DurationTypeSelect
@@ -44,7 +46,7 @@ export const DurationPickerFields = ({
 
       {durationType === "open" && (
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Open-ended duration (manual lap button)
+          {t("durationPicker.openHint")}
         </p>
       )}
     </>

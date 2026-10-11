@@ -30,9 +30,9 @@ export const buildCoreV24 = (prev: Stores): Stores => ({
 // `intakeEntries` keys on a nanoid `id` with a `[profileId+date]` index for the
 // per-day intake roll-up; `intakePresets` keys on `id` with a `profileId` index
 // for the per-profile preset list; `energyTargets` keys on `profileId` so there
-// is exactly one active goal per profile. All three are device-local PII,
-// auto-created empty on upgrade, and excluded from the cloud snapshot (see
-// dexie-snapshot-port DEVICE_LOCAL).
+// is exactly one active goal per profile. All three are auto-created empty on
+// upgrade. They were device-local until v37, which made them ride the cloud
+// snapshot (see dexie-v37-migration and dexie-snapshot-port DEVICE_LOCAL).
 export const buildCoreV26 = (prev: Stores): Stores => ({
   ...prev,
   intakeEntries: "id, [profileId+date]",

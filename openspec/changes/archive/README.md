@@ -7,6 +7,22 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-11 | [`add-spa-data-export`](./2026-10-11-add-spa-data-export/) | Export my data from Settings → Privacy |
+| 2026-10-11 | [`add-spa-data-import`](./2026-10-11-add-spa-data-import/) | Import a backup from Settings → Privacy |
+| 2026-10-11 | [`fix-core-compare-krds-steps`](./2026-10-11-fix-core-compare-krds-steps/) | Compare structured workout steps in round-trip validation |
+| 2026-10-11 | [`fix-fit-workout-hr-power-offsets`](./2026-10-11-fix-fit-workout-hr-power-offsets/) | Apply the FIT workoutHr and workoutPower offsets to workout ranges and conditions |
+| 2026-10-11 | [`fix-scheduled-workout-lifecycle`](./2026-10-11-fix-scheduled-workout-lifecycle/) | Fix the lifecycle of a scheduled workout |
+| 2026-10-11 | [`fix-spa-empty-states-mobile`](./2026-10-11-fix-spa-empty-states-mobile/) | Empty states and the phone layout say what to do next |
+| 2026-10-11 | [`fix-spa-manual-first-editor`](./2026-10-11-fix-spa-manual-first-editor/) | Manual use is the main path, and the editor speaks the athlete's units |
+| 2026-10-11 | [`fix-spa-manual-sleep`](./2026-10-11-fix-spa-manual-sleep/) | Manual sleep records hours, not a 0 h night |
+| 2026-10-11 | [`fix-spa-new-session-context`](./2026-10-11-fix-spa-new-session-context/) | The "New session" sheet keeps the day it was opened for |
+| 2026-10-11 | [`harden-spa-nutrition-sync`](./2026-10-11-harden-spa-nutrition-sync/) | Close the gaps review found in nutrition sync |
+| 2026-10-11 | [`sync-spa-nutrition`](./2026-10-11-sync-spa-nutrition/) | Nutrition syncs with Drive and has tombstones |
+| 2026-10-11 | [`tcx-repeat-blocks`](./2026-10-11-tcx-repeat-blocks/) | TCX import reads repetition blocks |
+| 2026-10-10 | [`default-local-profile`](./2026-10-10-default-local-profile/) | A default local profile that stays sync-inert until it is claimed |
+| 2026-10-10 | [`fix-fit-activity-import`](./2026-10-10-fix-fit-activity-import/) | Import activity FIT files from the decoder's real message shape |
+| 2026-10-10 | [`fix-fit-workout-roundtrip`](./2026-10-10-fix-fit-workout-roundtrip/) | Round-trip structured workouts through the FIT SDK encoder |
+| 2026-10-10 | [`fix-spa-fit-import-profile`](./2026-10-10-fix-spa-fit-import-profile/) | FIT import works in the SPA production bundle |
 | 2026-09-28 | [`converter-deep-link-and-guides`](./2026-09-28-converter-deep-link-and-guides/) | Converter deep link and athlete guides |
 | 2026-09-28 | [`docs-indexing-hygiene`](./2026-09-28-docs-indexing-hygiene/) | Index only the docs pages worth indexing, and date them from git |
 | 2026-09-28 | [`fix-legacy-editor-links`](./2026-09-28-fix-legacy-editor-links/) | Stop linking the legacy /editor/ path, and serve it a 200 page |

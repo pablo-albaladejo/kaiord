@@ -19,6 +19,12 @@ import { ZoneProfileBar } from "../ZoneProfileBar/ZoneProfileBar";
 import { deriveWorkoutLifecycle } from "./session-lifecycle";
 import { SessionLifecycleBadges } from "./SessionLifecycleBadges";
 import { useSessionZones } from "./use-session-zones";
+import {
+  cardDurationSeconds,
+  cardTitle,
+  originLabel,
+  sportLabel,
+} from "./workout-card-labels";
 import { formatDuration, lifecycleTone } from "./workout-card-utils";
 
 export type WorkoutCardProps = {
@@ -29,8 +35,9 @@ export type WorkoutCardProps = {
 
 export function WorkoutCard({ workout, view, onClick }: WorkoutCardProps) {
   const t = useTranslate("calendar");
-  const title = workout.raw?.title ?? workout.sport;
-  const duration = workout.raw?.duration;
+  const sport = sportLabel(t, workout.sport);
+  const title = cardTitle(workout) ?? sport;
+  const duration = cardDurationSeconds(workout);
   const lifecycle = deriveWorkoutLifecycle(workout);
   const zones = useSessionZones(workout);
   const stateLabel = t(`lifecycle.${workout.state}`);
@@ -38,10 +45,10 @@ export function WorkoutCard({ workout, view, onClick }: WorkoutCardProps) {
   return (
     <CardShell
       borderClass={zoneBorderClass(zones.dominant)}
-      ariaLabel={`${title}, ${workout.sport}, ${stateLabel}`}
+      ariaLabel={`${title}, ${sport}, ${stateLabel}`}
       onClick={() => onClick(workout)}
       testId={`workout-card-${workout.id}`}
-      originChip={workout.source}
+      originChip={originLabel(t, workout.source)}
       titleRow={
         <>
           <span className="min-w-0 flex-1 line-clamp-2 wrap-anywhere">
@@ -62,8 +69,8 @@ export function WorkoutCard({ workout, view, onClick }: WorkoutCardProps) {
       }
       metadataRow={
         <>
-          <span>{workout.sport}</span>
-          {duration && <span>{formatDuration(duration.value)}</span>}
+          <span>{sport}</span>
+          {duration ? <span>{formatDuration(duration)}</span> : null}
           <SessionLifecycleBadges flags={lifecycle} />
         </>
       }

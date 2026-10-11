@@ -10,12 +10,11 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
-  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, test } from "node:test";
 
@@ -289,46 +288,30 @@ describe("check-no-pii-leakage", () => {
   });
 
   test("allowlisted file with a template literal passes (test-injected)", () => {
-    // Use a hidden-prefix path within the real SPA tree so the script's
-    // file-walk picks it up but the name is unlikely to collide with
-    // tracked source. If a file at this path already exists for any
-    // reason, snapshot its bytes and restore them in the finally block
-    // so the test can never clobber tracked content.
-    const target =
-      "packages/workout-spa-editor/src/components/__alw_pii_guard_fixture.ts";
-    const realFile = join(REPO_ROOT, target);
-    const hadPriorContent = existsSync(realFile);
-    const priorContent = hadPriorContent
-      ? readFileSync(realFile, "utf8")
-      : null;
-
-    mkdirSync(dirname(realFile), { recursive: true });
-    writeFileSync(
-      realFile,
+    // The fixture lives in the sandbox, never in the real SPA tree: other
+    // script tests scan that tree concurrently under `node --test`, and a
+    // file that appears then vanishes mid-walk fails them with ENOENT.
+    // The allowlist is keyed by the repo-relative path the script derives.
+    write(
+      "components/allowlisted.ts",
       "import { useToastContext } from '../x';\n" +
         "export function f(err: Error) {\n" +
         "  const { error } = useToastContext();\n" +
         "  error(`Failed: ${err.message}`);\n" +
-        "}\n",
-      "utf8"
+        "}\n"
     );
-    ALLOWLIST.add(target);
+    const key = relative(
+      REPO_ROOT,
+      join(componentsDir, "allowlisted.ts")
+    ).replaceAll("\\", "/");
+    ALLOWLIST.add(key);
 
     try {
-      const violations = runCheck();
+      const violations = sandboxRun();
 
-      assert.equal(
-        violations.find((v) => v.file === target),
-        undefined,
-        "allowlisted file must not be flagged"
-      );
+      assert.deepEqual(violations, [], "allowlisted file must not be flagged");
     } finally {
-      ALLOWLIST.delete(target);
-      if (hadPriorContent && priorContent !== null) {
-        writeFileSync(realFile, priorContent, "utf8");
-      } else {
-        rmSync(realFile, { force: true });
-      }
+      ALLOWLIST.delete(key);
     }
   });
 

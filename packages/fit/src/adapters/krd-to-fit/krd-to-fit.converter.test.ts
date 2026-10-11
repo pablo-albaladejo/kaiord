@@ -948,7 +948,7 @@ describe("convertKRDToMessages", () => {
       expect(stepMsg).toMatchObject({
         messageIndex: 1,
         durationType: fitDurationTypeSchema.enum.repeatUntilTime,
-        durationTime: 1800,
+        repeatTime: 1800,
         durationStep: 0,
       });
     });

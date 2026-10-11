@@ -44,11 +44,11 @@ async function seedLastScratchSport(
   await db.table<UserPreferences>("userPreferences").put(row);
 }
 
-function renderSurface(date: string | null = null) {
-  const loc = memoryLocation({
-    path: "/workout/new?source=scratch",
-    record: true,
-  });
+function renderSurface(
+  date: string | null = null,
+  path = "/workout/new?source=scratch"
+) {
+  const loc = memoryLocation({ path, record: true });
   const utils = render(
     <PersistenceProvider persistence={createDexiePersistence(db)}>
       <GarminBridgeProvider>
@@ -104,7 +104,7 @@ describe("ScratchEditorSurface", () => {
     });
   });
 
-  it("should render the AI banner closed and the metadata editor open", async () => {
+  it("should render the AI banner closed and the metadata read-only", async () => {
     // Arrange
 
     // Act
@@ -120,8 +120,11 @@ describe("ScratchEditorSurface", () => {
       screen.getByRole("button", { name: /generate with ai/i })
     ).toHaveAttribute("aria-expanded", "false");
     expect(
-      await screen.findByRole("form", { name: /edit workout metadata/i })
+      await screen.findByRole("button", { name: /edit workout metadata/i })
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("form", { name: /edit workout metadata/i })
+    ).not.toBeInTheDocument();
   });
 
   it("should NOT overwrite a pre-populated currentWorkout (library template path)", async () => {
@@ -285,7 +288,7 @@ describe("ScratchEditorSurface", () => {
     ).toBeInTheDocument();
   });
 
-  it("should render the schedule control without a date, defaulting to today", async () => {
+  it("should render the schedule control without a date", async () => {
     // Arrange
 
     // Act
@@ -298,22 +301,78 @@ describe("ScratchEditorSurface", () => {
     expect(screen.getByTestId("scratch-schedule-button")).toBeInTheDocument();
   });
 
-  it("should persist on today's date when entered without a date", async () => {
+  it("should ask for the date, proposing today, when entered without one", async () => {
     // Arrange
     const user = userEvent.setup();
     await seedActiveProfile();
     const put = vi.spyOn(db.table("workouts"), "put");
-
-    // Act
     renderSurface(null);
     const button = await screen.findByTestId("scratch-schedule-button");
     await waitFor(() => expect(button).toBeEnabled());
+
+    // Act
     await user.click(button);
+    const input = await screen.findByTestId("schedule-date-input");
+    const proposed = (input as HTMLInputElement).value;
+    await user.click(screen.getByRole("button", { name: "Schedule" }));
 
     // Assert
+    expect(proposed).toBe(todayIsoDate());
     await waitFor(() => {
       expect(put).toHaveBeenCalledWith(
         expect.objectContaining({ date: todayIsoDate(), source: "scratch" })
+      );
+    });
+  });
+
+  it("should propose the first day of the originating week when it is not this week", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    await seedActiveProfile();
+    const path = "/workout/new?source=scratch&from=calendar&week=2020-W02";
+    renderSurface(null, path);
+    const button = await screen.findByTestId("scratch-schedule-button");
+    await waitFor(() => expect(button).toBeEnabled());
+
+    // Act
+    await user.click(button);
+
+    // Assert
+    expect(await screen.findByTestId("schedule-date-input")).toHaveValue(
+      "2020-01-06"
+    );
+  });
+
+  it("should seed the sport chosen on the New session sheet", async () => {
+    // Arrange
+    await seedActiveProfile();
+    await seedLastScratchSport("cycling");
+    const path = "/workout/new?source=scratch&date=2026-10-05&sport=running";
+
+    // Act
+    renderSurface("2026-10-05", path);
+
+    // Assert
+    await waitFor(() => {
+      const state = useWorkoutStore.getState();
+      expect(state.currentWorkout?.extensions?.structured_workout?.sport).toBe(
+        "running"
+      );
+    });
+  });
+
+  it("should ignore a sport the editor does not know", async () => {
+    // Arrange
+    const path = "/workout/new?source=scratch&sport=curling";
+
+    // Act
+    renderSurface(null, path);
+
+    // Assert
+    await waitFor(() => {
+      const state = useWorkoutStore.getState();
+      expect(state.currentWorkout?.extensions?.structured_workout?.sport).toBe(
+        "cycling"
       );
     });
   });
@@ -325,7 +384,26 @@ describe("ScratchEditorSurface", () => {
     renderSurface("2026-06-01");
 
     // Assert
-    expect(await screen.findByTestId("scratch-schedule-button")).toBeDisabled();
+    const button = await screen.findByTestId("scratch-schedule-button");
+    expect(button).toBeDisabled();
+    await waitFor(() =>
+      expect(button).toHaveAccessibleDescription(
+        /select or create an athlete profile/i
+      )
+    );
+  });
+
+  it("should not show the missing-profile reason when a profile is active", async () => {
+    // Arrange
+    await seedActiveProfile();
+
+    // Act
+    renderSurface("2026-06-01");
+
+    // Assert
+    const button = await screen.findByTestId("scratch-schedule-button");
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(button).not.toHaveAttribute("aria-describedby");
   });
 
   it("should persist on the route date and land on its calendar week when scheduled", async () => {

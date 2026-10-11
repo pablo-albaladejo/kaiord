@@ -9,6 +9,7 @@ import {
   convertWorkoutMetadata,
 } from "./krd-to-fit-metadata.converter";
 import { convertWorkoutSteps } from "./krd-to-fit-workout.converter";
+import { addWorkoutStepMainFields } from "./workout-step-main-fields.converter";
 
 /**
  * Safely converts unknown to Record<string, unknown>.
@@ -69,7 +70,7 @@ export const convertKRDToMessages = (
   for (const stepMessage of workoutStepMessages) {
     messages.push({
       mesgNum: FIT_MESSAGE_NUMBERS.WORKOUT_STEP,
-      ...toRecord(stepMessage),
+      ...addWorkoutStepMainFields(toRecord(stepMessage)),
     });
   }
 

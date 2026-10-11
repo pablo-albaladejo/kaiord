@@ -938,10 +938,10 @@ jobs:
         with:
           browser: chromium
 
-      - name: Run production-base SPA route refresh e2e
+      - name: Run production-base SPA e2e (route refresh, prod bundle)
         env:
           E2E_PROD_BASE: "1"
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh'
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle'
 
       - name: Upload Playwright report
         if: always()

@@ -50,16 +50,11 @@ Leaf libraries: small, focused, mostly-pure modules used across the SPA. No Reac
 
 - `merge-refs.ts` — combine multiple refs onto a single ref slot (used inside the editor's atoms).
 
-### Generated / static
-
-- `fitsdk-minimal/profile.js` — generated minimal FIT SDK profile (see `../scripts/generate-fitsdk-minimal.mjs`).
-
 ## Subdirectories
 
 - `athlete/` — thresholds per sport, the fixed 5-zone display models and the zone-map builder.
 - `focus/` — overlay-observer + fallback-chain helpers used by `hooks/focus/`.
 - `profile-snapshot/` — `profile-to-snapshot` mapper (used by `use-profile-snapshot-push`).
-- `fitsdk-minimal/` — generated FIT SDK profile.
 - `workout-review/` — everything derived from a structured KRD: `classifyTargetZone` (step → Z1..Z5), `timeInZone` (normalised distribution), `zoneSegments` (the session's shape over time, contiguous runs merged), `dominantZone` (argmax, ties to the harder zone), TSS estimation and the review view-model. One classifier, four readers — do not add a second.
 
 ## For AI Agents
@@ -72,7 +67,7 @@ Leaf libraries: small, focused, mostly-pure modules used across the SPA. No Reac
 
 ### Testing Requirements
 
-- One `.test.ts` per non-trivial file. Generated files (`fitsdk-minimal/profile.js`) are excluded.
+- One `.test.ts` per non-trivial file.
 
 ### Common Patterns
 

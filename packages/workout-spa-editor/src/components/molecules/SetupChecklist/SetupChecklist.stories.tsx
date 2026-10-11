@@ -6,7 +6,7 @@ import { SetupChecklist } from "./SetupChecklist";
  * SetupChecklist takes no props. Its four rows, progress caption, and the
  * hidden dismissed/complete states are all derived from `useSetupChecklist`,
  * which reads the active profile and Dexie-persisted facts (workout count,
- * thresholds, connections, pushes). Storybook's IndexedDB is empty and
+ * thresholds, wellness records, library templates). Storybook's IndexedDB is empty and
  * unseeded, so it always resolves to the same real state: no active profile,
  * nothing done yet, checklist not dismissed. That is a genuine, reachable
  * state — the card a brand-new install actually shows — but the other three

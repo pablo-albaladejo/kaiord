@@ -73,4 +73,49 @@ describe("withTombstones", () => {
     // Assert
     expect(tombstone).toMatchObject({ table: "templates", id: "t-1" });
   });
+
+  it.each([
+    {
+      table: "intakeEntries" as const,
+      row: {
+        id: "i-1",
+        profileId: "p-1",
+        date: "2026-10-10",
+        loggedAt: "2026-10-10T08:00:00.000Z",
+        updatedAt: "2026-10-10T08:00:00.000Z",
+        kcal: 500,
+        proteinG: 30,
+        carbG: 60,
+        fatG: 15,
+      },
+    },
+    {
+      table: "intakePresets" as const,
+      row: {
+        id: "i-1",
+        profileId: "p-1",
+        label: "Oats",
+        kcal: 350,
+        proteinG: 12,
+        carbG: 55,
+        fatG: 7,
+        createdAt: "2026-10-01T08:00:00.000Z",
+        updatedAt: "2026-10-01T08:00:00.000Z",
+      },
+    },
+  ])(
+    "should record a tombstone when an $table row is deleted",
+    async ({ table, row }) => {
+      // Arrange
+      const port = withTombstones(createInMemoryPersistence());
+      await port[table].put(row as never);
+
+      // Act
+      await port[table].delete("i-1");
+      const tombstone = await port.tombstones.get(table, "i-1");
+
+      // Assert
+      expect(tombstone).toMatchObject({ table, id: "i-1" });
+    }
+  );
 });

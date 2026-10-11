@@ -13,6 +13,7 @@ import {
   type ToleranceChecker,
   type ToleranceConfig,
   toleranceConfigSchema,
+  toleranceViolationSchema,
 } from "./tolerance-checker";
 
 type IntegerMetricCase = readonly [keyof ToleranceChecker, string];
@@ -204,6 +205,48 @@ describe("createToleranceChecker", () => {
 
       // Assert
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe("checkPercentFtp", () => {
+    it("should flag a %FTP drift beyond the FTP tolerance", () => {
+      // Arrange
+      const checker = createToleranceChecker();
+      const expected = 85;
+      const actual = 87;
+
+      // Act
+      const result = checker.checkPercentFtp?.(expected, actual);
+
+      // Assert
+      expect(result).toStrictEqual({
+        field: "percentFtp",
+        expected: 85,
+        actual: 87,
+        deviation: 2,
+        tolerance: 1,
+      });
+    });
+  });
+
+  describe("toleranceViolationSchema", () => {
+    it("should accept an exact categorical violation carrying both values", () => {
+      // Arrange
+      const violation = {
+        field: "structured_workout.steps[0].duration.type",
+        expected: 0,
+        actual: 1,
+        deviation: 1,
+        tolerance: 0,
+        expectedValue: "time",
+        actualValue: "open",
+      };
+
+      // Act
+      const result = toleranceViolationSchema.safeParse(violation);
+
+      // Assert
+      expect(result.success).toBe(true);
     });
   });
 });

@@ -1,94 +1,79 @@
 /**
- * WellnessEntryForm — four ephemeral number fields (weight / sleep score
- * / HRV / steps) and ONE Save button. On submit it collects every FILLED
- * field into a `{metric → number}` set and hands the whole set to a
- * single `submit(values)` call (NOT one save per field). Empty/blank
- * fields are excluded; an all-empty submit is a no-op.
+ * WellnessEntryForm — weight, sleep (hours, score, bedtime/wake time), HRV
+ * and steps, with ONE Save button. On submit every FILLED field is collected
+ * and handed to a single `submit(values)` call (NOT one save per field).
+ * Blank fields are excluded; an all-blank submit is a no-op.
  */
 import { useState } from "react";
 
-import type { ManualHealthMetric } from "../../../application/health/manual-health-metric";
-import { useSaveWellness, type WellnessValues } from "./use-save-wellness";
+import { useTranslate } from "../../../i18n/use-translate";
+import { collectWellness } from "./collect-wellness";
+import type { SleepFieldsError } from "./sleep-entry-fields";
+import { useSaveWellness } from "./use-save-wellness";
+import { useWellnessFields } from "./use-wellness-fields";
 import { WellnessMetricField } from "./WellnessMetricField";
+import { WellnessSleepFields } from "./WellnessSleepFields";
 
 export type WellnessEntryFormProps = {
   date: string;
   onSaved: () => void;
 };
 
-type Fields = Record<ManualHealthMetric, string>;
-
-const EMPTY_FIELDS: Fields = {
-  weight: "",
-  sleep: "",
-  hrv: "",
-  "daily-wellness": "",
-};
-
-const collectFilled = (fields: Fields): WellnessValues => {
-  const values: WellnessValues = {};
-  for (const [metric, raw] of Object.entries(fields)) {
-    if (raw.trim() === "") continue;
-    const parsed = Number(raw);
-    if (Number.isFinite(parsed)) values[metric as ManualHealthMetric] = parsed;
-  }
-  return values;
-};
-
 export function WellnessEntryForm({ date, onSaved }: WellnessEntryFormProps) {
-  const [fields, setFields] = useState<Fields>(EMPTY_FIELDS);
+  const t = useTranslate("health");
+  const { fields, setField, setSleepField } = useWellnessFields();
+  const [error, setError] = useState<SleepFieldsError | null>(null);
   const { submit, isSaving } = useSaveWellness(date);
 
-  const setField = (metric: ManualHealthMetric) => (value: string) =>
-    setFields((prev) => ({ ...prev, [metric]: value }));
-
   const handleSubmit = async () => {
-    const values = collectFilled(fields);
-    if (Object.keys(values).length === 0) return;
-    const ok = await submit(values);
-    if (ok) onSaved();
+    const collected = collectWellness(fields, date);
+    setError("error" in collected ? collected.error : null);
+    if ("error" in collected) return;
+    if (Object.keys(collected.values).length === 0) return;
+    if (await submit(collected.values)) onSaved();
   };
 
   return (
     <div className="flex flex-col gap-3">
       <WellnessMetricField
-        label="Weight"
+        label={t("wellnessEntry.weight")}
         unit="kg"
+        focusKey="weight"
         value={fields.weight}
         onChange={setField("weight")}
         min={0.1}
         step={0.1}
       />
+      <WellnessSleepFields fields={fields.sleep} onChange={setSleepField} />
       <WellnessMetricField
-        label="Sleep score"
-        value={fields.sleep}
-        onChange={setField("sleep")}
-        min={0}
-        max={100}
-        step={1}
-      />
-      <WellnessMetricField
-        label="HRV"
+        label={t("wellnessEntry.hrv")}
         unit="ms"
+        focusKey="hrv"
         value={fields.hrv}
         onChange={setField("hrv")}
         min={0.1}
         step={0.1}
       />
       <WellnessMetricField
-        label="Steps"
-        value={fields["daily-wellness"]}
-        onChange={setField("daily-wellness")}
+        label={t("wellnessEntry.steps")}
+        focusKey="daily-wellness"
+        value={fields.steps}
+        onChange={setField("steps")}
         min={0}
         step={1}
       />
+      {error && (
+        <p role="alert" className="m-0 text-sm text-danger-text">
+          {t(`wellnessEntry.error.${error}`)}
+        </p>
+      )}
       <button
         type="button"
         disabled={isSaving}
         onClick={handleSubmit}
         className="mt-2 rounded bg-primary-600 text-white hover:bg-primary-700 disabled:bg-primary-300 px-4 py-2 text-sm font-medium disabled:opacity-50"
       >
-        Save
+        {t("wellnessEntry.save")}
       </button>
     </div>
   );

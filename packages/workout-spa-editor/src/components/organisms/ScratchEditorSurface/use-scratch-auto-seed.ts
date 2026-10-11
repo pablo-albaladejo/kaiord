@@ -1,9 +1,11 @@
 import { useEffect, useRef } from "react";
+import { useSearch } from "wouter";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useSetUserPreferenceFields } from "../../../hooks/use-set-user-preference-fields";
 import { useUserPreferences } from "../../../hooks/use-user-preferences";
 import type { Translate } from "../../../i18n/use-translate";
+import { isActiveSport } from "../../../lib/athlete";
 import {
   useCreateEmptyWorkout,
   useCurrentWorkout,
@@ -21,17 +23,12 @@ const DEFAULT_SCRATCH_SPORT: Sport = "cycling";
  * overwriting a template just written by `LibraryPage` before its
  * `navigate("/workout/new?source=scratch")` (see plan A8).
  *
- * The returned `startInEditMode` is wired to `autoCreatedRef`: only the
- * auto-init path opens `WorkoutHeader.MetadataEditMode` so a fresh scratch
- * user commits sport/name inline. Pre-populated workouts (library template
- * load, e2e seeds) already have sport/name and render in view mode.
- *
- * The initial sport is sourced from `userPreferences.lastScratchSport` for the
- * active profile when set; the on-save effect writes the current sport back so
+ * The initial sport is the one picked on the "New session" sheet (`?sport=`),
+ * else `userPreferences.lastScratchSport` for the active profile when set; the on-save effect writes the current sport back so
  * the next scratch session pre-selects it. Both reads/writes are gated on
  * `autoCreatedRef.current` so library / e2e-seeded workouts never leak.
  */
-export function useScratchAutoSeed(t: Translate): { startInEditMode: boolean } {
+export function useScratchAutoSeed(t: Translate): void {
   const currentWorkout = useCurrentWorkout();
   const createEmpty = useCreateEmptyWorkout();
   const activeProfile = useActiveProfileLive();
@@ -41,6 +38,8 @@ export function useScratchAutoSeed(t: Translate): { startInEditMode: boolean } {
   const autoCreatedRef = useRef(false);
   const initialSportRef = useRef<Sport | null>(null);
   const untitledName = t("scratch.untitledName");
+  const routeSport = new URLSearchParams(useSearch()).get("sport");
+  const chosenSport = isActiveSport(routeSport) ? routeSport : null;
 
   useEffect(() => {
     if (currentWorkout !== null) return;
@@ -52,7 +51,8 @@ export function useScratchAutoSeed(t: Translate): { startInEditMode: boolean } {
     if (activeProfile === undefined) return;
     if (profileId !== null && prefs === undefined) return;
     autoCreatedRef.current = true;
-    const sport = prefs?.lastScratchSport ?? DEFAULT_SCRATCH_SPORT;
+    const sport =
+      chosenSport ?? prefs?.lastScratchSport ?? DEFAULT_SCRATCH_SPORT;
     initialSportRef.current = sport;
     createEmpty(untitledName, sport);
   }, [
@@ -62,6 +62,7 @@ export function useScratchAutoSeed(t: Translate): { startInEditMode: boolean } {
     profileId,
     activeProfile,
     untitledName,
+    chosenSport,
   ]);
 
   const currentSport = (
@@ -75,6 +76,4 @@ export function useScratchAutoSeed(t: Translate): { startInEditMode: boolean } {
     initialSportRef.current = currentSport;
     void setPrefs({ lastScratchSport: currentSport });
   }, [currentSport, setPrefs]);
-
-  return { startInEditMode: autoCreatedRef.current };
 }

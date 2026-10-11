@@ -260,14 +260,16 @@ test.describe("Athlete page", () => {
 test.describe("Profile route redirect", () => {
   test("should redirect /settings/profile to /athlete", async ({ page }) => {
     // Arrange & Act — the legacy Settings Profile tab now redirects to
-    // the Athlete page. No profile is seeded, so the Athlete page renders
-    // its empty state.
+    // the Athlete page. No profile is seeded, so the Athlete page shows the
+    // first-run default profile the app creates on a clean browser.
     await page.goto("/settings/profile");
 
     // Assert
     await page.waitForURL(/\/athlete$/);
-    await expect(page.getByText(/no athlete profile yet/i)).toBeVisible({
-      timeout: 10_000,
-    });
+    // Exact: the first-run notice also quotes the name ("We created “My
+    // profile”…"), so a substring match is ambiguous once both have rendered.
+    await expect(
+      page.getByRole("main").getByText("My profile", { exact: true })
+    ).toBeVisible({ timeout: 10_000 });
   });
 });

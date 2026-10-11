@@ -13,15 +13,25 @@
  */
 import { useRef, useState } from "react";
 
-import type { ManualHealthMetric } from "../../../application/health/manual-health-metric";
-import { saveManualHealthMetric } from "../../../application/health/save-manual-health-metric.use-case";
+import {
+  saveManualHealthMetric,
+  type SaveManualHealthMetricInput,
+} from "../../../application/health/save-manual-health-metric.use-case";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
+import type { WellnessValues } from "./collect-wellness";
 
-const TOAST_WELLNESS_SAVED = "Wellness saved";
-const TOAST_WELLNESS_SAVE_FAILED = "Could not save — please retry";
-
-export type WellnessValues = Partial<Record<ManualHealthMetric, number>>;
+const toInputs = (
+  values: WellnessValues,
+  day: string
+): SaveManualHealthMetricInput[] => {
+  const { sleep, ...numbers } = values;
+  const inputs: SaveManualHealthMetricInput[] = Object.entries(numbers).map(
+    ([metric, value]) => ({ metric, day, value }) as SaveManualHealthMetricInput
+  );
+  return sleep ? [...inputs, { metric: "sleep", day, sleep }] : inputs;
+};
 
 export type UseSaveWellnessResult = {
   submit: (values: WellnessValues) => Promise<boolean>;
@@ -31,26 +41,27 @@ export type UseSaveWellnessResult = {
 export function useSaveWellness(day: string): UseSaveWellnessResult {
   const persistence = usePersistence();
   const toast = useToastContext();
+  const t = useTranslate("calendar");
   const inFlight = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const submit = async (values: WellnessValues): Promise<boolean> => {
     if (inFlight.current) return false;
-    const entries = Object.entries(values) as [ManualHealthMetric, number][];
+    const entries = toInputs(values, day);
     if (entries.length === 0) return false;
     inFlight.current = true;
     setIsSaving(true);
     try {
       const profileId = await persistence.profiles.getActiveId();
       if (!profileId) {
-        toast.error(TOAST_WELLNESS_SAVE_FAILED);
+        toast.error(t("wellnessToast.noProfile"));
         return false;
       }
       let savedCount = 0;
-      for (const [metric, value] of entries) {
+      for (const input of entries) {
         const result = await saveManualHealthMetric(
           { persistence, profileId },
-          { metric, day, value }
+          input
         );
         if (result) savedCount += 1;
       }
@@ -58,13 +69,13 @@ export function useSaveWellness(day: string): UseSaveWellnessResult {
       // an out-of-range value) must keep the dialog open so the entry is
       // not silently lost behind a success toast.
       if (savedCount < entries.length) {
-        toast.error(TOAST_WELLNESS_SAVE_FAILED);
+        toast.error(t("wellnessToast.saveFailed"));
         return false;
       }
-      toast.success(TOAST_WELLNESS_SAVED);
+      toast.success(t("wellnessToast.saved"));
       return true;
     } catch {
-      toast.error(TOAST_WELLNESS_SAVE_FAILED);
+      toast.error(t("wellnessToast.saveFailed"));
       return false;
     } finally {
       inFlight.current = false;

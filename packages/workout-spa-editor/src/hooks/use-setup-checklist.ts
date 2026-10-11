@@ -2,12 +2,9 @@
  * useSetupChecklist — the live "Getting set up" checklist.
  *
  * Composes the aggregate Dexie read (`use-setup-checklist-facts`) with the
- * existing profile and bridge-discovery hooks, and folds them into the four
- * onboarding items. Nothing here polls: bridge presence comes from the
- * discovery singleton that `use-store-hydration` already bootstraps, and
- * connection records come from the v24 `connections` store. Session liveness
- * is deliberately NOT consulted — the question is "has this user connected
- * anything at all", not "is a session valid right now".
+ * live profile, and folds them into the four onboarding items. Every item is
+ * something the user can do by hand; integrations are deliberately NOT
+ * consulted, so a user who never connects anything can still reach 100%.
  *
  * `complete` is what hides the card once every item ticks, so a finished
  * checklist needs no explicit dismissal.
@@ -22,7 +19,6 @@ import {
 } from "../lib/setup-checklist";
 import { logger } from "../utils/logger";
 import { useActiveProfileLive } from "./use-active-profile-live";
-import { useDiscoveredBridges } from "./use-discovered-bridges";
 import { useSetUserPreferenceFields } from "./use-set-user-preference-fields";
 import { useSetupChecklistFacts } from "./use-setup-checklist-facts";
 
@@ -39,7 +35,6 @@ export function useSetupChecklist(): SetupChecklist {
   const active = useActiveProfileLive();
   const profile = active?.profile ?? null;
   const facts = useSetupChecklistFacts(active?.id ?? null);
-  const bridges = useDiscoveredBridges();
   const setPrefs = useSetUserPreferenceFields(active?.id ?? null);
 
   const items = useMemo(
@@ -47,10 +42,10 @@ export function useSetupChecklist(): SetupChecklist {
       buildSetupChecklistItems({
         hasWorkout: facts.workoutCount > 0,
         hasThreshold: hasAnyThreshold(profile),
-        hasSource: bridges.length > 0 || facts.connectedCount > 0,
-        hasPush: facts.pushCount > 0,
+        hasWellness: facts.wellnessCount > 0,
+        hasTemplate: facts.templateCount > 0,
       }),
-    [facts, profile, bridges]
+    [facts, profile]
   );
 
   const dismiss = useCallback(() => {

@@ -18,6 +18,8 @@ const PRIMARY_KEYS: Readonly<Record<string, ReadonlyArray<string>>> = {
   coachingSyncState: ["source", "profileId"],
   bridges: ["extensionId"],
   aiModelBindings: ["profileId", "purpose"],
+  dataTypeSourcePolicy: ["profileId", "dataType"],
+  energyTargets: ["profileId"],
 };
 
 type Row = Record<string, unknown>;

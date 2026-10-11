@@ -39,6 +39,7 @@ describe("logIntakeEntry", () => {
     const stored = await listIntakeForDate(d, DATE);
     expect(entry?.id).toBe(FIXED_ID);
     expect(entry?.loggedAt).toBe(LOGGED_AT);
+    expect(entry?.updatedAt).toBe(LOGGED_AT);
     expect(stored).toHaveLength(1);
     expect(stored[0]?.kcal).toBe(LUNCH_KCAL);
   });

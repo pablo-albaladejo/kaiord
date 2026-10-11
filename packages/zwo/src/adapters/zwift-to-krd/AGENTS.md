@@ -25,7 +25,7 @@ None.
 
 - **Extractor pattern**: Extract metadata and intervals from parsed ZWO XML object. Delegates to interval mappers in `../interval/` for type-specific handling.
 - **Metadata extraction**: Reads ZWO `author`, `name`, `description`, `sportType`, `durationType`, `thresholdSecPerKm`. Restores FIT attributes from kaiord namespace.
-- **Interval extraction**: Iterates ZWO `workout` element, detects interval type, invokes corresponding mapper from `../interval/`.
+- **Interval extraction**: Iterates ZWO `workout` children in document order (read from a second `preserveOrder` parse, since the default parse groups siblings by tag), invokes corresponding mapper from `../interval/`.
 - **Tags extraction**: ZWO `tags` → KRD `extensions.zwift.tags` array.
 - **Post-processing**: Intervals processor handles final cleanup and validation before returning to converter.
 

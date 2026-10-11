@@ -76,13 +76,9 @@
             "bpm": 80,
             "repeatFrom": 1
           },
-          "targetType": "heart_rate",
+          "targetType": "open",
           "target": {
-            "type": "heart_rate",
-            "value": {
-              "unit": "percent_max",
-              "value": 80
-            }
+            "type": "open"
           },
           "intensity": "active"
         },
@@ -92,7 +88,7 @@
           "durationType": "heart_rate_less_than",
           "duration": {
             "type": "heart_rate_less_than",
-            "bpm": 225
+            "bpm": 125
           },
           "targetType": "power",
           "target": {

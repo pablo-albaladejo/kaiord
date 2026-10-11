@@ -14,20 +14,27 @@ import { useDiscardConfirmation } from "./WorkoutSection/use-discard-confirmatio
  * Builds the `onBack` callback for the editor's `EditorPageHeader`.
  * Returns `null` when no back affordance should render.
  *
- * Two distinct paths share this hook:
- *  - an explicit `?from=<origin>` resolves a back target via the pure
- *    resolver and yields a plain `navigate` (no draft to discard);
- *  - the legacy in-picker fallback (`scratch`/`import` with no origin)
- *    stays discard-aware so an unsaved draft prompts confirmation.
+ * An explicit `?from=<origin>` resolves the target via the pure resolver;
+ * without one, `scratch`/`import` fall back to the picker. A new-workout
+ * draft is discard-aware (an unsaved draft prompts confirmation) unless it
+ * is a library template loaded into the editor: the library keeps it.
  *
  * Edit-mode (`?id`) with an origin now yields a back button (#19);
- * edit-mode with no origin still yields `null`.
+ * edit-mode with no origin still yields `null`. In edit mode `detailId`
+ * names the workout a `detail` origin returns to, and `confirmLeave` runs
+ * before the navigation (it asks first while there are unsaved edits).
  */
+export type BackHandlerEditMode = {
+  detailId?: string;
+  confirmLeave?: (leave: () => void) => void;
+};
+
 export function useBackHandler(
   newWorkoutMode: NewWorkoutMode | undefined,
   dateParam: string | null,
   origin: BackOrigin | null,
-  weekParam: string | null = null
+  weekParam: string | null = null,
+  { detailId, confirmLeave }: BackHandlerEditMode = {}
 ): (() => void) | null {
   const [, navigate] = useLocation();
   const clearWorkout = useClearWorkout();
@@ -38,11 +45,11 @@ export function useBackHandler(
   const isInPicker =
     newWorkoutMode === "scratch" || newWorkoutMode === "import";
   const backTarget = origin
-    ? resolveBackTarget({ origin, date: dateParam, week: weekParam })
+    ? resolveBackTarget({ origin, date: dateParam, week: weekParam, detailId })
     : isInPicker
       ? buildPickerHref(dateParam)
       : null;
-  const isDiscardAware = isInPicker && !origin;
+  const isDiscardAware = isInPicker && origin !== "library";
 
   const onAfterConfirm = useCallback(() => {
     if (backTarget) navigate(backTarget);
@@ -60,8 +67,11 @@ export function useBackHandler(
   }, [backTarget, stepsLength, openDiscardModal, clearWorkout, navigate]);
 
   const plainBack = useCallback(() => {
-    if (backTarget) navigate(backTarget);
-  }, [backTarget, navigate]);
+    if (!backTarget) return;
+    const leave = () => navigate(backTarget);
+    if (confirmLeave) confirmLeave(leave);
+    else leave();
+  }, [backTarget, navigate, confirmLeave]);
 
   if (!backTarget) return null;
   return isDiscardAware ? handleBack : plainBack;

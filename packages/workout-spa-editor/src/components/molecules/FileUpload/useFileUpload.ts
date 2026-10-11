@@ -11,12 +11,18 @@ type UseFileUploadProps = {
    * analytics; not invoked on failure or when format detection fails.
    */
   onImported?: (format: string) => void;
+  /**
+   * Called after a successful import whose reader announced losses (steps
+   * skipped, targets it could not map), with one message per loss.
+   */
+  onWarnings?: (warnings: Array<string>) => void;
 };
 
 export const useFileUpload = ({
   onFileLoad,
   onError,
   onImported,
+  onWarnings,
 }: UseFileUploadProps) => {
   const state = useFileUploadState();
   const actions = useFileUploadActions({
@@ -24,6 +30,7 @@ export const useFileUpload = ({
     onFileLoad,
     onError,
     onImported,
+    onWarnings,
   });
 
   return {

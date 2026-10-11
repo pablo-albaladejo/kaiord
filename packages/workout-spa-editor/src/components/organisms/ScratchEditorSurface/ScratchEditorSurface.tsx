@@ -3,7 +3,6 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { useCurrentWorkout } from "../../../store/selectors";
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { Workout } from "../../../types/krd";
-import { todayIsoDate } from "../../../utils/today-iso-date";
 import { AiBanner } from "../../molecules/AiBanner/AiBanner";
 import { useCoachingSidebar } from "../../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorBody } from "../../pages/EditorBody";
@@ -16,7 +15,9 @@ import { useScratchAutoSeed } from "./use-scratch-auto-seed";
  *
  * Composes the collapsed `AiBanner` above the editor body. The scratch
  * auto-init lifecycle (mount seeding + sport-preference writeback) lives in
- * `useScratchAutoSeed`, which returns `startInEditMode` for the auto-init path.
+ * `useScratchAutoSeed`. The header starts read-only: the seeded workout
+ * already carries a sport and a name, and the only Save on screen should be
+ * the one that saves the workout.
  */
 export function ScratchEditorSurface({ date }: { date: string | null }) {
   const t = useTranslate("editor");
@@ -26,7 +27,7 @@ export function ScratchEditorSurface({ date }: { date: string | null }) {
   const reorderStepsInBlock = useWorkoutStore((s) => s.reorderStepsInBlock);
   const { handleStepSelect } = useAppHandlers();
   const sidebarData = useCoachingSidebar(null, undefined);
-  const { startInEditMode } = useScratchAutoSeed(t);
+  useScratchAutoSeed(t);
 
   const workout = currentWorkout?.extensions?.structured_workout as
     Workout | undefined;
@@ -34,7 +35,7 @@ export function ScratchEditorSurface({ date }: { date: string | null }) {
   return (
     <div className="space-y-6">
       <AiBanner />
-      <ScratchScheduleButton date={date ?? todayIsoDate()} />
+      <ScratchScheduleButton date={date} />
       {workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection
@@ -44,7 +45,6 @@ export function ScratchEditorSurface({ date }: { date: string | null }) {
             onStepSelect={handleStepSelect}
             onStepReorder={reorderStep}
             onReorderStepsInBlock={reorderStepsInBlock}
-            startInEditMode={startInEditMode}
           />
         </EditorBody>
       )}

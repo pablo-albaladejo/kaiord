@@ -9,8 +9,8 @@ import {
   FIT_SESSION_ROUND_TRIP_TOLERANCE_MS,
   FIT_SESSION_TIMESTAMP_SEC,
   FIT_SESSION_TOTAL_DESCENT,
-  FIT_SESSION_TOTAL_ELAPSED_MS,
-  FIT_SESSION_TOTAL_TIMER_MS,
+  FIT_SESSION_TOTAL_ELAPSED_SEC,
+  FIT_SESSION_TOTAL_TIMER_SEC,
   FIT_SESSION_TSS,
 } from "../../test-utils/constants";
 import { convertFitToKrdSession } from "./fit-to-krd-session.converter";
@@ -30,8 +30,8 @@ describe("convertKrdToFitSession", () => {
 
     // Assert
     expect(result.startTime).toBe(FIT_SESSION_TIMESTAMP_SEC);
-    expect(result.totalElapsedTime).toBe(FIT_SESSION_TOTAL_ELAPSED_MS);
-    expect(result.totalTimerTime).toBe(FIT_SESSION_TOTAL_ELAPSED_MS);
+    expect(result.totalElapsedTime).toBe(FIT_SESSION_TOTAL_ELAPSED_SEC);
+    expect(result.totalTimerTime).toBe(FIT_SESSION_TOTAL_ELAPSED_SEC);
   });
 
   it("should convert KRD session with timer time", () => {
@@ -47,7 +47,7 @@ describe("convertKrdToFitSession", () => {
     const result = convertKrdToFitSession(krdSession);
 
     // Assert
-    expect(result.totalTimerTime).toBe(FIT_SESSION_TOTAL_TIMER_MS);
+    expect(result.totalTimerTime).toBe(FIT_SESSION_TOTAL_TIMER_SEC);
   });
 
   it("should convert KRD session with performance metrics", () => {

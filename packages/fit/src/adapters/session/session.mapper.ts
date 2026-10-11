@@ -1,6 +1,7 @@
 import type { KRDSession } from "@kaiord/core";
 
 import type { FitSession } from "../schemas/fit-session";
+import { fitTimestampToIso } from "../shared/fit-timestamp";
 import { mapSportToFit, mapSportToKrd } from "../sport/sport.mapper";
 import { mapSubSportToFit, mapSubSportToKrd } from "../sub-sport/sub-sport";
 
@@ -9,10 +10,10 @@ import { mapSubSportToFit, mapSubSportToKrd } from "../sub-sport/sub-sport";
  * Thin translation layer - no complex logic.
  */
 export const mapFitSessionToKrd = (fit: FitSession): KRDSession => ({
-  startTime: new Date(fit.startTime * 1000).toISOString(),
-  totalElapsedTime: fit.totalElapsedTime / 1000,
-  totalTimerTime:
-    fit.totalTimerTime !== undefined ? fit.totalTimerTime / 1000 : undefined,
+  startTime: fitTimestampToIso(fit.startTime),
+  // The SDK Decoder already applies the profile scale: durations are seconds.
+  totalElapsedTime: fit.totalElapsedTime,
+  totalTimerTime: fit.totalTimerTime,
   totalDistance: fit.totalDistance,
   sport: mapSportToKrd(fit.sport),
   subSport: fit.subSport ? mapSubSportToKrd(fit.subSport) : undefined,
@@ -38,18 +39,15 @@ export const mapFitSessionToKrd = (fit: FitSession): KRDSession => ({
  */
 export const mapKrdSessionToFit = (krd: KRDSession): Partial<FitSession> => {
   const startTimeSeconds = Math.floor(new Date(krd.startTime).getTime() / 1000);
-  const elapsedTimeMs = krd.totalElapsedTime * 1000;
+  // Durations stay in seconds: the SDK Encoder applies the profile scale.
   // Preserve zero totalTimerTime, default to elapsed time if undefined
-  const timerTimeMs =
-    krd.totalTimerTime !== undefined
-      ? krd.totalTimerTime * 1000
-      : elapsedTimeMs;
+  const timerTime = krd.totalTimerTime ?? krd.totalElapsedTime;
 
   return {
     timestamp: startTimeSeconds + Math.floor(krd.totalElapsedTime),
     startTime: startTimeSeconds,
-    totalElapsedTime: elapsedTimeMs,
-    totalTimerTime: timerTimeMs,
+    totalElapsedTime: krd.totalElapsedTime,
+    totalTimerTime: timerTime,
     totalDistance: krd.totalDistance,
     sport: mapSportToFit(krd.sport),
     subSport: krd.subSport ? mapSubSportToFit(krd.subSport) : undefined,
