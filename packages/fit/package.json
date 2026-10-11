@@ -22,7 +22,8 @@
     "test:watch": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check src",
     "lint:fix": "eslint . --fix && prettier --write src",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "bench": "vitest bench --run"
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.214.0",
