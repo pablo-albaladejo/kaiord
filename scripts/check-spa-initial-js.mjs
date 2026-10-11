@@ -13,7 +13,9 @@ import { gzipSync } from "node:zlib";
 // into the entry graph fails CI instead of silently costing Lighthouse
 // points. Lazy route chunks are not counted: they load on navigation.
 //
-// Budget: 272.1 kB measured after the perf-app-initial-js change, x 1.05.
+// Budget: 286.2 kB measured after the leave-tracking fix for lazy imports
+// cancelled by a navigation (#1362), x 1.05. The previous budget was
+// 272.1 kB measured after the perf-app-initial-js change, x 1.05.
 // Raise it only with evidence (docs/seo-observatory.md, "SPA initial-JS
 // budget").
 //
@@ -40,7 +42,7 @@ import { gzipSync } from "node:zlib";
 // script, a forbidden lazy-seam source shows up in an initial file, or the
 // total is over budget.
 
-export const SPA_INITIAL_JS_BUDGET_KB = 286;
+export const SPA_INITIAL_JS_BUDGET_KB = 300.5;
 
 export const FORBIDDEN_LAZY_SOURCES = [
   "src/adapters/cloud-sync/create-app-cloud-sync.ts",
