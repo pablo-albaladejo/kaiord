@@ -4,7 +4,7 @@ import { createZwiftParsingError } from "@kaiord/core";
 import { encodeDuration } from "./duration-encoder";
 import { encodeHeartRateTarget, encodeMetadata } from "./metadata-encoder";
 import { encodeSteadyStatePowerTarget } from "./power-encoder";
-import { encodeTextEvents } from "./text-events-encoder";
+import { encodeIntervalsTTextEvents } from "./text-events-encoder";
 
 type Side = "on" | "off";
 
@@ -91,10 +91,7 @@ export const encodeIntervalsT = (
   encodeSide(offStep, "off", intervalsT, logger);
   encodeCadenceTargets(onStep, offStep, intervalsT);
 
-  const textEvents = encodeTextEvents(onStep);
-  if (textEvents) {
-    intervalsT.textevent = textEvents;
-  }
+  encodeIntervalsTTextEvents(onStep, offStep, intervalsT);
 
   return intervalsT;
 };
