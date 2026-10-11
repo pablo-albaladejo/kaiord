@@ -69,7 +69,9 @@
     "entryRejected": "Could not log entry — check the values",
     "presetSaved": "Preset saved",
     "presetApplied": "Preset applied",
-    "deleted": "Entry removed"
+    "deleted": "Entry removed",
+    "goalSaved": "Goal saved",
+    "goalSaveFailed": "Could not save goal — please retry"
   },
   "trends": {
     "title": "Trends",
@@ -97,6 +99,32 @@
       "steps": "Steps",
       "sleep": "Sleep",
       "training": "Weekly training (min)"
+    }
+  },
+  "goalSetup": {
+    "title": "Set energy goal",
+    "goalType": "Goal type",
+    "types": {
+      "fat_loss": "Fat loss",
+      "muscle_gain": "Muscle gain",
+      "maintain": "Maintain"
+    },
+    "startWeight": "Start weight (kg)",
+    "targetWeight": "Target weight (kg)",
+    "targetDate": "Target date",
+    "save": "Save goal",
+    "deficit": "{{value}} kcal / day deficit",
+    "surplus": "{{value}} kcal / day surplus",
+    "maintenance": "Maintenance (no delta)",
+    "target": "Target {{value}} kcal",
+    "capWarning": "This pace exceeds the safe cap; the plan was clamped to a safe rate.",
+    "capOverridden": "This pace exceeds the safe cap; you chose to override it.",
+    "override": "Override the safety cap and use my pace",
+    "errors": {
+      "startWeight": "Enter a valid start weight.",
+      "targetWeight": "Enter a valid target weight.",
+      "targetDate": "Enter a target date (YYYY-MM-DD).",
+      "pastDate": "Target date must be in the future."
     }
   }
 }

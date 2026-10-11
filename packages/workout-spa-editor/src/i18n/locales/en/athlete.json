@@ -41,5 +41,63 @@
     "notice": "We created “My profile” so you can start right away. Add your thresholds and weight to get personal zones and estimates.",
     "complete": "Complete profile",
     "dismiss": "Got it"
+  },
+  "title": "Athlete",
+  "sports": {
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swim"
+  },
+  "profileManager": {
+    "title": "Profile Manager",
+    "intro": "Manage your training profiles with zones and personal data.",
+    "profileName": "Profile name",
+    "newName": "New profile name",
+    "name": "Name",
+    "create": "Create Profile",
+    "import": "Import Profile",
+    "importFile": "Import profile file",
+    "saved": "Saved Profiles ({{count}})",
+    "empty": "No profiles yet. Create one to get started.",
+    "setActive": "Set Active",
+    "edit": "Edit",
+    "export": "Export profile",
+    "delete": "Delete profile",
+    "backToList": "Back to List",
+    "deleteTitle": "Delete Profile",
+    "deleteBody": "Are you sure you want to delete this profile? This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirmDelete": "Delete",
+    "linkedTitle": "Linked Coaching Accounts",
+    "connectedAs": "Connected as",
+    "notConnected": "Not connected",
+    "connect": "Connect {{source}}",
+    "connecting": "Connecting…",
+    "disconnect": "Disconnect",
+    "tabs": {
+      "zones": "Training Zones",
+      "personal": "Personal Data",
+      "linkedAccounts": "Linked Accounts"
+    },
+    "personal": {
+      "bodyWeight": "Body Weight (kg)",
+      "height": "Height (cm)",
+      "birthDate": "Birth Date",
+      "restingHeartRate": "Resting Heart Rate (bpm)",
+      "sex": "Sex",
+      "activityLevel": "Activity Level",
+      "notSet": "Not set",
+      "sexes": {
+        "male": "Male",
+        "female": "Female"
+      },
+      "activityLevels": {
+        "sedentary": "Sedentary",
+        "light": "Light",
+        "moderate": "Moderate",
+        "active": "Active",
+        "very_active": "Very active"
+      }
+    }
   }
 }

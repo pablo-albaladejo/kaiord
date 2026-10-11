@@ -1,4 +1,5 @@
 /** Static label + connection summary cell for `LinkedAccountRow`. */
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { LinkedCoachingAccount } from "../../../../types/coaching-account";
 
 export const RowInfo = ({
@@ -7,17 +8,21 @@ export const RowInfo = ({
 }: {
   label: string;
   linked: LinkedCoachingAccount | undefined;
-}) => (
-  <div className="text-sm">
-    <div className="font-medium">{label}</div>
-    <div className="text-xs text-muted-foreground">
-      {linked ? (
-        <>
-          Connected as <strong>{linked.externalUserName}</strong>
-        </>
-      ) : (
-        "Not connected"
-      )}
+}) => {
+  const t = useTranslate("athlete");
+  return (
+    <div className="text-sm">
+      <div className="font-medium">{label}</div>
+      <div className="text-xs text-muted-foreground">
+        {linked ? (
+          <>
+            {t("profileManager.connectedAs")}{" "}
+            <strong>{linked.externalUserName}</strong>
+          </>
+        ) : (
+          t("profileManager.notConnected")
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};

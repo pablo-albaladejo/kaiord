@@ -86,7 +86,7 @@ FIT format adapter for the Kaiord health & fitness data framework. Uses Garmin F
   - Unit tests for mappers and converters (pure functions).
   - Integration tests for end-to-end FIT→KRD and KRD→FIT pipelines.
   - Round-trip tests (FIT file → KRD → FIT file → compare) in `adapters/round-trip/`.
-  - Performance test (`perf-record-batch.test.ts`) for 10k-record batches (budget: 500ms).
+  - Throughput bench (`adapters/record/fit-to-krd-record.converter.bench.ts`, `pnpm bench`) for 10k-record batches (target: 500ms); not a pass/fail gate.
 - **Fixture patterns:**
   - Domain fixtures: `tests/fixtures/fit-duration.fixtures.ts`, `fit-target.fixtures.ts` (rosie factory builders).
   - Test constants: `test-utils/constants.ts` (time, power, HR, coordinates).
@@ -97,7 +97,7 @@ FIT format adapter for the Kaiord health & fitness data framework. Uses Garmin F
 2. **Duration conversion:** FIT step duration is a tuple `(durationType, durationValue, durationTime, durationDistance, etc.)`. Each type (time, distance, HR, power) maps to KRD `StepDuration` via `duration.converter.ts`.
 3. **Target conversion:** FIT target is a tuple `(targetType, targetValue, targetHrZone, targetPowerZone, etc.)`. Dispatcher in `target.converter.ts` routes to type-specific converter.
 4. **Workout step assembly:** KRD steps may contain repetitions (e.g., 5x [warmup, main, cooldown]). `repetition.builder.ts` expands these into flat FIT step arrays.
-5. **Record (time-series) batching:** Activity files contain 1000s of records. Mapper iterates in batches for performance; tests validate 10k-record batch ≤500ms.
+5. **Record (time-series) batching:** Activity files contain 1000s of records. Mapper iterates in batches for performance; the bench tracks 10k-record batches against a 500ms target.
 6. **Extension fields:** Unknown FIT developer fields extracted via `extensions.extractor.ts`; preserved in `KRD.extensions` for round-trip fidelity.
 
 ## Dependencies

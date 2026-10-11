@@ -11,6 +11,7 @@ export default defineConfig({
         "node_modules/**",
         "dist/**",
         "**/*.test.ts",
+        "**/*.bench.ts",
         "**/*.config.ts",
         "**/*.mapper.ts",
       ],

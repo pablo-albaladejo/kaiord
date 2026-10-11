@@ -32,7 +32,7 @@ export function EnergyBalanceCard({ profileId, date }: EnergyBalanceCardProps) {
   if (result === undefined) return null;
   if (result.gated) return <EnergyBalanceGated />;
 
-  const vm = toEnergyBalanceViewModel(result.balance, result.goal);
+  const vm = toEnergyBalanceViewModel(result.balance, result.goal, t);
   const hasMacros =
     result.balance.macro_actuals !== undefined ||
     result.balance.macro_targets !== undefined;

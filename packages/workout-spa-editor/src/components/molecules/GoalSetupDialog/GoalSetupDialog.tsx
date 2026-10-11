@@ -6,6 +6,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useId } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import {
   DIALOG_CONTENT_CLASSES,
   DIALOG_OVERLAY_CLASSES,
@@ -26,6 +27,7 @@ export function GoalSetupDialog({
   today,
 }: GoalSetupDialogProps) {
   const titleId = useId();
+  const t = useTranslate("nutrition");
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -40,7 +42,7 @@ export function GoalSetupDialog({
             id={titleId}
             className="mb-4 text-lg font-semibold text-gray-900 dark:text-white"
           >
-            Set energy goal
+            {t("goalSetup.title")}
           </Dialog.Title>
           <GoalSetupForm
             profileId={profileId}

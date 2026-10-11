@@ -54,6 +54,7 @@
     "fallbackActive": "Fallback active"
   },
   "trends": {
+    "date": "Date",
     "metricsLegend": "Metrics",
     "rangeAria": "Date range",
     "selectMetric": "Select at least one metric to see its trend.",

@@ -32,5 +32,23 @@
     "more": "More destinations",
     "account": "Account menu ({{name}})",
     "accountEmpty": "Account menu (no active profile)"
-  }
+  },
+  "announce": {
+    "library": "Library page",
+    "chat": "Chat page",
+    "athlete": "Athlete page",
+    "newWorkout": "New workout",
+    "workout": "Workout page",
+    "editWorkout": "Edit workout",
+    "trends": "Trends page",
+    "sleep": "Sleep page",
+    "weight": "Weight page",
+    "recovery": "Recovery page",
+    "activity": "Activity page",
+    "settings": "Settings page",
+    "nutrition": "Nutrition page",
+    "daily": "Daily page",
+    "calendar": "Calendar page"
+  },
+  "chatAssistant": "Chat assistant"
 }

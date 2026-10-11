@@ -42,6 +42,12 @@
     "stale": "Desactualizada",
     "skipped": "Omitida"
   },
+  "lifecycleBadge": {
+    "fromCoach": "Del plan del entrenador",
+    "aiAssisted": "Asistido por IA",
+    "pushedToGarmin": "Enviado a Garmin",
+    "executedAndMatched": "Realizado y emparejado"
+  },
   "weekStatus": {
     "heading": "Cómo va la semana",
     "waiting_one": "{{count}} esperando para ir al reloj",
@@ -177,5 +183,19 @@
     "trainingpeaks": "TrainingPeaks",
     "coach": "Entrenador",
     "ai": "IA"
+  },
+  "weekNav": {
+    "previousWeek": "Semana anterior",
+    "nextWeek": "Semana siguiente",
+    "today": "Hoy",
+    "weekNumber": "S{{n}}"
+  },
+  "wellnessBand": {
+    "empty": "Sin datos de preparación",
+    "sleep": "Sueño",
+    "hrv": "VFC",
+    "weight": "Peso",
+    "steps": "Pasos",
+    "net": "Neto"
   }
 }

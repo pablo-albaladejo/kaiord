@@ -1,16 +1,20 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { I18nextProvider } from "react-i18next";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { appI18n } from "../../../i18n/i18n";
 import { PreferencesTab } from "./PreferencesTab";
 
 const setPrefs = vi.fn().mockResolvedValue(undefined);
 const prefsMock = vi.hoisted(() => ({ value: undefined as unknown }));
+const activeMock = vi.hoisted(() => ({
+  value: { id: "p1", profile: null } as
+    { id: string | null; profile: null } | undefined,
+}));
 
 vi.mock("../../../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p1", profile: null }),
+  useActiveProfileLive: () => activeMock.value,
 }));
 
 vi.mock("../../../hooks/use-user-preferences", () => ({
@@ -25,6 +29,14 @@ const renderTab = (ui: ReactElement) =>
   render(<I18nextProvider i18n={appI18n}>{ui}</I18nextProvider>);
 
 describe("PreferencesTab", () => {
+  beforeEach(() => {
+    activeMock.value = { id: "p1", profile: null };
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("should reflect the persisted metric units as the active segment", () => {
     // Arrange
     prefsMock.value = {
@@ -93,5 +105,47 @@ describe("PreferencesTab", () => {
 
     // Assert
     expect(setPrefs).toHaveBeenCalledWith({ locale: "es" });
+  });
+
+  it("should keep the units and language controls disabled until the active profile resolves", () => {
+    // Arrange
+    activeMock.value = undefined;
+    prefsMock.value = undefined;
+
+    // Act
+    renderTab(<PreferencesTab />);
+
+    // Assert
+    expect(screen.getByRole("radio", { name: "Imperial" })).toBeDisabled();
+    expect(screen.getByRole("radio", { name: "Spanish" })).toBeDisabled();
+  });
+
+  it("should enable the units control once the active profile resolves", () => {
+    // Arrange
+    prefsMock.value = { profileId: "p1", calendarView: "grid" };
+
+    // Act
+    renderTab(<PreferencesTab />);
+
+    // Assert
+    expect(screen.getByRole("radio", { name: "Imperial" })).toBeEnabled();
+  });
+
+  it("should keep the notifications switch disabled until the active profile resolves", () => {
+    // Arrange
+    vi.stubGlobal("Notification", {
+      permission: "default",
+      requestPermission: vi.fn(),
+    });
+    activeMock.value = undefined;
+    prefsMock.value = undefined;
+
+    // Act
+    renderTab(<PreferencesTab />);
+
+    // Assert
+    expect(
+      screen.getByRole("switch", { name: /enable notifications/i })
+    ).toBeDisabled();
   });
 });

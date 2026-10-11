@@ -10,7 +10,9 @@
 
 import type { Browser, Page } from "@playwright/test";
 
+import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { appUrl, expect, test } from "./fixtures/base";
+import { calendarDay, workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
@@ -46,9 +48,7 @@ async function open(page: Page, route: string) {
 async function scheduleToday(page: Page, today: string): Promise<string> {
   await open(page, `/workout/new?source=scratch&date=${today}`);
   await page.getByTestId("scratch-schedule-button").click();
-  const card = page
-    .getByTestId(`day-column-${today}`)
-    .locator('[data-testid^="workout-card-"]');
+  const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
   return (await card.getAttribute("data-testid"))!.replace("workout-card-", "");
 }
@@ -63,7 +63,7 @@ async function logIntake(page: Page, kcal: number) {
 
 async function saveWellness(page: Page, today: string) {
   await open(page, "/calendar");
-  await page.getByTestId(`empty-day-${today}`).click();
+  await calendarDay(page, today).add.click();
   await page.getByTestId("add-entry-choose-wellness").click();
   const dialog = page.getByTestId("wellness-entry-dialog");
   await dialog.getByLabel("Weight (kg)").fill("70.4");
@@ -72,6 +72,8 @@ async function saveWellness(page: Page, today: string) {
 }
 
 async function addProvider(page: Page) {
+  // Adding a provider checks its key against the provider; answer locally.
+  await mockLlmSuccess(page);
   await open(page, "/settings/ai");
   await page.getByLabel("Label").fill("E2E provider");
   await page.getByLabel("API Key").fill("sk-e2e-fake-import-key");

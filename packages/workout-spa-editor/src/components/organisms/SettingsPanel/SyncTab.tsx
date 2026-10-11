@@ -6,10 +6,6 @@ import { Button } from "../../atoms/Button";
 import { EncryptionSection } from "./EncryptionSection";
 import { SyncStatusLine } from "./SyncStatusLine";
 
-const CONNECT_FAILED_TOAST = "Could not connect Google account — please retry.";
-const SYNC_FAILED_TOAST = "Sync failed — your data is safe and stays local.";
-const SYNC_OK_TOAST = "Sync complete.";
-
 export const SyncTab: React.FC = () => {
   const t = useTranslate("settings");
   const sync = useSync();
@@ -21,14 +17,14 @@ export const SyncTab: React.FC = () => {
     try {
       await sync.connect();
     } catch {
-      toast.error(CONNECT_FAILED_TOAST);
+      toast.error(t("sync.connectFailed"));
     }
   };
 
   const handleSyncNow = async () => {
     const outcome = await sync.syncNow();
-    if (outcome === "synced") toast.success(SYNC_OK_TOAST);
-    else if (outcome === "failed") toast.error(SYNC_FAILED_TOAST);
+    if (outcome === "synced") toast.success(t("sync.synced"));
+    else if (outcome === "failed") toast.error(t("sync.syncFailed"));
   };
 
   return (

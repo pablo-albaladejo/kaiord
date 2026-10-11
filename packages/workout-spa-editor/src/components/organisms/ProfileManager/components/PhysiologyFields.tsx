@@ -6,6 +6,7 @@
  * empty values clear the field rather than persisting a zero.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import { Input } from "../../../atoms/Input/Input";
 import type { ProfileFormData } from "../types";
 import { PhysiologySelects } from "./PhysiologySelects";
@@ -22,10 +23,11 @@ export function PhysiologyFields({
   formData,
   onChange,
 }: PhysiologyFieldsProps) {
+  const t = useTranslate("athlete");
   return (
     <>
       <Input
-        label="Height (cm)"
+        label={t("profileManager.personal.height")}
         variant="number"
         value={formData.height?.toString() ?? ""}
         onChange={(e) =>
@@ -34,7 +36,7 @@ export function PhysiologyFields({
         placeholder="175"
       />
       <Input
-        label="Birth Date"
+        label={t("profileManager.personal.birthDate")}
         type="date"
         value={formData.birthDate ?? ""}
         onChange={(e) =>
@@ -42,7 +44,7 @@ export function PhysiologyFields({
         }
       />
       <Input
-        label="Resting Heart Rate (bpm)"
+        label={t("profileManager.personal.restingHeartRate")}
         variant="number"
         value={formData.restingHeartRate?.toString() ?? ""}
         onChange={(e) =>

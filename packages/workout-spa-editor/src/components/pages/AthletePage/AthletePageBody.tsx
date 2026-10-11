@@ -5,7 +5,7 @@ import { useUserPreferences } from "../../../hooks/use-user-preferences";
 import { useTranslate } from "../../../i18n/use-translate";
 import {
   type ActiveSport,
-  ATHLETE_SPORTS,
+  athleteSportOptions,
   isActiveSport,
 } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
@@ -48,14 +48,14 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
     });
   };
 
-  const sportLabel =
-    ATHLETE_SPORTS.find((option) => option.value === sport)?.label ?? "";
+  const options = athleteSportOptions(t);
+  const sportLabel = options.find((o) => o.value === sport)?.label ?? "";
 
   return (
     <div className="flex flex-col gap-5 px-4 py-4">
       <AthleteIdentity profile={profile} sport={sport} />
       <Segmented
-        options={[...ATHLETE_SPORTS]}
+        options={options}
         value={sport}
         onChange={handleSportChange}
         ariaLabel={t("sportAria")}

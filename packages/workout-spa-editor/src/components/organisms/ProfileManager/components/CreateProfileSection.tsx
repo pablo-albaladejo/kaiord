@@ -4,6 +4,8 @@
  * Inline form for creating a new profile.
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
+
 type CreateProfileSectionProps = {
   formData: { name: string };
   setFormData: (d: { name: string }) => void;
@@ -15,6 +17,7 @@ export function CreateProfileSection({
   setFormData,
   onCreate,
 }: CreateProfileSectionProps) {
+  const t = useTranslate("athlete");
   return (
     <form
       className="mb-4 flex gap-2"
@@ -27,8 +30,8 @@ export function CreateProfileSection({
         type="text"
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        placeholder="New profile name"
-        aria-label="Name"
+        placeholder={t("profileManager.newName")}
+        aria-label={t("profileManager.name")}
         className="flex-1 rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
       />
       <button
@@ -36,7 +39,7 @@ export function CreateProfileSection({
         disabled={!formData.name.trim()}
         className="rounded bg-primary-600 text-white hover:bg-primary-700 disabled:bg-primary-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
       >
-        Create Profile
+        {t("profileManager.create")}
       </button>
     </form>
   );
