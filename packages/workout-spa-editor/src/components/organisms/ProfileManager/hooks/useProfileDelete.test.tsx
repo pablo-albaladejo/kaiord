@@ -67,6 +67,9 @@ describe("useProfileDelete", () => {
         name: "Doomed",
       });
       await persistence.profiles.put(profile);
+      await persistence.profiles.put(
+        makeProfile({ id: "00000000-0000-4000-8000-0000000000d4" })
+      );
       await persistence.profiles.setActiveId(profile.id);
       const setDeleteConfirmId = vi.fn();
 
@@ -87,6 +90,39 @@ describe("useProfileDelete", () => {
       expect(await persistence.profiles.getActiveId()).toBeNull();
       expect(setDeleteConfirmId).toHaveBeenCalledWith(null);
       expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it("should leave a fresh active default profile when the last profile is deleted", async () => {
+      // Arrange
+      errorSpy.mockReset();
+      const persistence = createInMemoryPersistence();
+      const profile = makeProfile({
+        id: "00000000-0000-4000-8000-0000000000d5",
+        name: "Last",
+      });
+      await persistence.profiles.put(profile);
+      await persistence.profiles.setActiveId(profile.id);
+      const setDeleteConfirmId = vi.fn();
+
+      const { result } = renderHook(
+        () => useProfileDelete({ setDeleteConfirmId }),
+        { wrapper: wrap(persistence) }
+      );
+
+      // Act
+      act(() => {
+        result.current.confirmDelete(profile.id);
+      });
+
+      // Assert
+      await waitFor(() => {
+        expect(setDeleteConfirmId).toHaveBeenCalledWith(null);
+      });
+      const remaining = await persistence.profiles.getAll();
+      expect(remaining).toEqual([
+        expect.objectContaining({ name: "My profile", origin: "auto" }),
+      ]);
+      expect(await persistence.profiles.getActiveId()).toBe(remaining[0]?.id);
     });
 
     it("should do nothing when no confirm id is provided", () => {

@@ -14,6 +14,7 @@ import { SPORT_ZONE_CAPABILITIES } from "../../../types/sport-zones";
 import { calculateHrZones } from "../../../utils/calculate-hr-zones";
 import { calculatePaceZones } from "../../../utils/calculate-pace-zones";
 import { calculatePowerZones } from "../../../utils/calculate-power-zones";
+import { claimProfile } from "./claim-profile";
 
 export function recalculateZones(
   config: SportZoneConfig,
@@ -70,5 +71,9 @@ export function updateSportConfig(
   if (!config) return profile;
 
   sportZones[sport] = updater(config);
-  return { ...profile, sportZones, updatedAt: new Date().toISOString() };
+  return claimProfile({
+    ...profile,
+    sportZones,
+    updatedAt: new Date().toISOString(),
+  });
 }

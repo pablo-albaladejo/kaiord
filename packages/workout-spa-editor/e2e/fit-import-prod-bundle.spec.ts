@@ -88,16 +88,41 @@ async function expectImported(
 const hasStepCards = (page: Page, steps: number) => async () =>
   (await page.getByTestId("step-card").count()) === steps;
 
-/** Health imports are filed under the active profile. */
-async function createProfile(page: Page, dist: MergedDist): Promise<void> {
-  await page.goto(dist.routeUrl("/athlete"));
-  await page.getByRole("button", { name: "Create profile" }).click();
-  await page.getByRole("textbox", { name: "Name" }).fill("FIT import athlete");
-  await page.getByRole("button", { name: "Create Profile" }).click();
-  // The first profile is activated on creation.
-  await expect(
-    page.getByRole("heading", { name: "Saved Profiles (1)" })
-  ).toBeVisible({ timeout: IMPORT_TIMEOUT_MS });
+/** Origins of every stored profile, read without the app's dev-only hooks. */
+const profileOrigins = (page: Page): Promise<(string | null)[]> =>
+  page.evaluate(
+    () =>
+      new Promise<(string | null)[]>((resolve, reject) => {
+        const open = indexedDB.open("kaiord-spa");
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const db = open.result;
+          const rows = db
+            .transaction("profiles")
+            .objectStore("profiles")
+            .getAll();
+          rows.onerror = () => reject(rows.error);
+          rows.onsuccess = () => {
+            db.close();
+            resolve(rows.result.map((row) => row.origin ?? null));
+          };
+        };
+      })
+  );
+
+/**
+ * Health imports are filed under the active profile. A fresh install gets
+ * one without any setup: the default, unclaimed profile the app creates on
+ * first open, so no profile is created here.
+ */
+async function expectDefaultProfile(
+  page: Page,
+  dist: MergedDist
+): Promise<void> {
+  await page.goto(dist.routeUrl("/calendar"));
+  await expect
+    .poll(() => profileOrigins(page), { timeout: IMPORT_TIMEOUT_MS })
+    .toEqual(["auto"]);
 }
 
 /** Row count of an IndexedDB store, read without the app's dev-only hooks. */
@@ -210,7 +235,7 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
       page,
     }) => {
       // Arrange
-      await createProfile(page, dist);
+      await expectDefaultProfile(page, dist);
       const file = { name: health.file, buffer: fixture(health.file) };
 
       // Act
@@ -226,7 +251,7 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
 
   test("should store the activity row from Activity.fit", async ({ page }) => {
     // Arrange
-    await createProfile(page, dist);
+    await expectDefaultProfile(page, dist);
     await page.goto(
       dist.routeUrl(`/workout/new?action=import&date=${ACTIVITY.date}`)
     );
