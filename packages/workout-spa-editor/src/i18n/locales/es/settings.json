@@ -87,7 +87,9 @@
     "deprecatedOn": "{{model}} está obsoleto y se retirará el {{date}}: considera {{successor}}.",
     "customModelIdAriaLabel": "ID de modelo personalizado",
     "customModelIdPlaceholder": "Introduce un ID de modelo",
-    "reset": "Restablecer"
+    "reset": "Restablecer",
+    "setFailed": "No se pudo establecer el modelo. Inténtalo de nuevo.",
+    "resetFailed": "No se pudo restablecer el modelo. Inténtalo de nuevo."
   },
   "sync": {
     "description": "Sincroniza tus entrenamientos, tus datos de salud y nutrición (registro de ingestas, plantillas y objetivo) y tus ajustes entre dispositivos a través de tu propio Google Drive. Los datos residen en tu Drive; no interviene ningún servidor de Kaiord. Si dos dispositivos tienen cada uno un objetivo de nutrición para el mismo perfil, se conserva el guardado más recientemente.",
@@ -106,7 +108,10 @@
       "title": "¿Para qué perfil es este dispositivo?",
       "body": "Tu Google Drive ya tiene varios perfiles. Elige el que debe recibir lo que registraste en este dispositivo; no se sincroniza nada hasta que elijas.",
       "unnamed": "Perfil sin nombre"
-    }
+    },
+    "connectFailed": "No se pudo conectar la cuenta de Google. Inténtalo de nuevo.",
+    "syncFailed": "La sincronización falló. Tus datos están a salvo en este dispositivo.",
+    "synced": "Sincronización completada."
   },
   "privacy": {
     "information": "Información de privacidad",
@@ -134,7 +139,8 @@
     "importNewerApp": "Esta copia es de una versión más nueva de Kaiord. Actualiza la aplicación y vuelve a intentarlo.",
     "importFailed": "No se pudo importar la copia; vuelve a intentarlo.",
     "clearAllApiKeys": "Borrar todas las claves de API",
-    "clearAllHint": "Esto elimina todas las claves de API almacenadas de tu navegador. Las claves que la sincronización entre dispositivos ya haya subido a tu Google Drive no se eliminan con esta acción."
+    "clearAllHint": "Esto elimina todas las claves de API almacenadas de tu navegador. Las claves que la sincronización entre dispositivos ya haya subido a tu Google Drive no se eliminan con esta acción.",
+    "clearKeysFailed": "No se pudieron borrar las claves de API. Inténtalo de nuevo."
   },
   "usage": {
     "title": "Uso de IA",

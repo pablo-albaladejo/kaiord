@@ -69,7 +69,9 @@
     "entryRejected": "No se pudo registrar la entrada: revisa los valores",
     "presetSaved": "Preajuste guardado",
     "presetApplied": "Preajuste aplicado",
-    "deleted": "Entrada eliminada"
+    "deleted": "Entrada eliminada",
+    "goalSaved": "Objetivo guardado",
+    "goalSaveFailed": "No se pudo guardar el objetivo. Inténtalo de nuevo."
   },
   "trends": {
     "title": "Tendencias",

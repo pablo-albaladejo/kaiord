@@ -25,7 +25,8 @@ import { AI_TAB_TOAST_MESSAGES } from "./use-ai-tab-handlers";
 
 const CONSUMER_FILES = ["use-ai-tab-handlers.ts", "PrivacyTab.tsx"];
 
-const TOAST_CALL_REGEX = /toast\.error\(([^)]*)\)/g;
+// One level of nested parentheses, so `t("key")` is captured whole.
+const TOAST_CALL_REGEX = /toast\.error\(((?:[^()]|\([^()]*\))*)\)/g;
 
 describe("AI tab toast PII / secret audit", () => {
   it("should expose a finite allowlist of error messages", () => {
@@ -58,11 +59,11 @@ describe("AI tab toast PII / secret audit", () => {
         const trimmed = arg.trim();
         // Ban any backtick-templated argument outright.
         expect(trimmed).not.toContain("`");
-        // Require a SCREAMING_SNAKE_CASE identifier so the argument
-        // resolves to a top-level const at audit time. Inline string
-        // literals would still be safe today but lower the bar for
-        // future drift toward `\`...${error.message}\`` style.
-        expect(trimmed).toMatch(/^[A-Z_][A-Z0-9_]*$/);
+        // Require a SCREAMING_SNAKE_CASE constant or `t("literal.key")`
+        // with no parameters, so the text is fixed at audit time.
+        // Inline string literals would still be safe today but lower the
+        // bar for future drift toward `\`...${error.message}\`` style.
+        expect(trimmed).toMatch(/^(?:[A-Z_][A-Z0-9_]*|t\("[a-zA-Z.]+"\))$/);
       }
     }
   );

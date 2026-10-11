@@ -69,7 +69,9 @@
     "entryRejected": "Could not log entry — check the values",
     "presetSaved": "Preset saved",
     "presetApplied": "Preset applied",
-    "deleted": "Entry removed"
+    "deleted": "Entry removed",
+    "goalSaved": "Goal saved",
+    "goalSaveFailed": "Could not save goal — please retry"
   },
   "trends": {
     "title": "Trends",

@@ -9,7 +9,6 @@ import { PrivacyInformationSection } from "./PrivacyInformationSection";
 import { useExportBackup } from "./use-export-backup";
 
 const SECURE_STORAGE_PREFIX = "kaiord_secure_";
-const CLEAR_FAILED_TOAST = "Failed to clear API keys — please retry.";
 
 const clearSecureStorage = (): void => {
   Object.keys(localStorage)
@@ -28,7 +27,7 @@ export const PrivacyTab: React.FC = () => {
       await clearAllProviders(persistence);
       clearSecureStorage();
     } catch {
-      toast.error(CLEAR_FAILED_TOAST);
+      toast.error(t("privacy.clearKeysFailed"));
     }
   };
 
