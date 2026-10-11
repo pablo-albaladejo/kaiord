@@ -2,6 +2,8 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP, type IconName } from "../../atoms/Icon";
 
 export type CreateStartFromProps = {
+  /** First block of the sheet (no AI provider): drop the "or". */
+  lead?: boolean;
   onTemplate: () => void;
   onBlank: () => void;
   onImport: () => void;
@@ -13,6 +15,7 @@ const TILE_CLASS =
   "flex flex-1 flex-col items-center gap-2 rounded-[14px] border border-edge bg-surface-deep px-3 py-4 text-ink-body transition-colors hover:border-edge-strong";
 
 export function CreateStartFrom({
+  lead = false,
   onTemplate,
   onBlank,
   onImport,
@@ -41,10 +44,10 @@ export function CreateStartFrom({
 
   return (
     <div>
-      <div className="my-5 flex items-center gap-3">
+      <div className={`${lead ? "mb-3" : "my-5"} flex items-center gap-3`}>
         <span className="h-px flex-1 bg-edge" />
         <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
-          {t("startFrom.divider")}
+          {lead ? t("startFrom.lead") : t("startFrom.divider")}
         </span>
         <span className="h-px flex-1 bg-edge" />
       </div>
