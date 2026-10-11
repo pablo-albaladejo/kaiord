@@ -73,4 +73,43 @@ describe("useAiProvidersLive", () => {
       expect(result.current?.[0].apiKey).toBe("sk-second");
     });
   });
+
+  it("should leave out a provider restored without its key, so no AI feature can pick it", async () => {
+    // Arrange
+    const persistence = createDexiePersistence(db);
+    await persistence.aiProviders.put(makeProvider("p1", "sk-usable"));
+    await persistence.aiProviders.put({
+      ...makeProvider("p2", "", false, 1),
+      apiKeyMissing: true,
+    });
+
+    // Act
+    const { result } = renderHook(() => useAiProvidersLive());
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current?.map((p) => p.id)).toEqual(["p1"]);
+    });
+  });
+
+  it("should list a provider missing its key when asked to include it", async () => {
+    // Arrange
+    const persistence = createDexiePersistence(db);
+    await persistence.aiProviders.put({
+      ...makeProvider("p2", "", false, 1),
+      apiKeyMissing: true,
+    });
+
+    // Act
+    const { result } = renderHook(() =>
+      useAiProvidersLive({ includeKeyless: true })
+    );
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current).toEqual([
+        expect.objectContaining({ id: "p2", apiKeyMissing: true }),
+      ]);
+    });
+  });
 });

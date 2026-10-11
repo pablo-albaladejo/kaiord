@@ -9,7 +9,7 @@ const DELETE_ITEM = /^(Borrar|Eliminar)( entreno)?$/;
 const CONFIRM = /^(Borrar|Eliminar)$/;
 const NOT_FOUND = /no encontrado|no existe|not found/i;
 
-async function deleteOnce(page, go, id) {
+export async function deleteOnce(page, go, id) {
   await go(`workout/view/${id}`);
   await page.getByRole("button", { name: "Más opciones" }).click();
   await page.getByRole("menuitem", { name: DELETE_ITEM }).click();

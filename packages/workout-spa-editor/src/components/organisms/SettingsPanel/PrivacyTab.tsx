@@ -4,6 +4,7 @@ import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 import { SETTINGS_SECTION_ATTR } from "../../pages/SettingsPage/settings-section";
+import { BackupImportSection } from "./BackupImportSection";
 import { PrivacyInformationSection } from "./PrivacyInformationSection";
 import { useExportBackup } from "./use-export-backup";
 
@@ -66,6 +67,7 @@ export const PrivacyTab: React.FC = () => {
         <p className="mb-4 mt-2 text-xs text-ink-muted">
           {t("privacy.exportHint")}
         </p>
+        <BackupImportSection />
         <Button variant="danger" size="sm" onClick={handleClearAll}>
           {t("privacy.clearAllApiKeys")}
         </Button>
