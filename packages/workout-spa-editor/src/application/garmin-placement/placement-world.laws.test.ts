@@ -129,16 +129,66 @@ const baseRow = (device: number, garmin: Partial<Row> = {}): Row => ({
   ...garmin,
 });
 
-/** Memoized: the enumeration repeats the same merges many times over. */
+/**
+ * Rows, calendar items and in-flight answers are values: no step writes
+ * into one, it replaces it. So the worlds of a branch share them instead of
+ * deep-cloning them at every node, and each is frozen before it is shared:
+ * a step (or a production module) that wrote into one would throw instead of
+ * leaking the write into a sibling history.
+ */
+const frozen = <T>(value: T): T => {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const child of Object.values(value)) frozen(child);
+  }
+  return value;
+};
+
+/** A copy of a world whose arrays a step may write into; the values in
+    them are shared, frozen. (`cloud` is left to the spread: setting it here
+    would move the key, and the visited-state keys are its JSON.) */
+const fork = (w: World): World => {
+  frozen(w.cloud);
+  return {
+    ...w,
+    items: w.items.map(frozen),
+    devices: w.devices.map(frozen),
+    pushes: [...w.pushes],
+    canFind: [...w.canFind],
+    inflight: w.inflight.map(frozen),
+    late: [...w.late],
+  };
+};
+
+/** A small number per distinct JSON: two values get the same one exactly
+    when their JSON is equal. Stored per object only once it is frozen. */
+const ids = new Map<string, number>();
+const idsByObject = new WeakMap<object, number>();
+const idOf = (value: object | undefined): number => {
+  if (value === undefined) return -1;
+  let id = idsByObject.get(value);
+  if (id === undefined) {
+    const json = JSON.stringify(value);
+    id = ids.get(json);
+    if (id === undefined) ids.set(json, (id = ids.size));
+    if (Object.isFrozen(value)) idsByObject.set(value, id);
+  }
+  return id;
+};
+
+/** Memoized: the enumeration repeats the same merges many times over. The
+    merged row is shared (frozen), never copied. */
 const merges = new Map<string, Row>();
 const hookMerge = (x: Row, y: Row): Row => {
-  const key = JSON.stringify([x, y]);
+  const key = `${idOf(x)},${idOf(y)}`;
   let merged = merges.get(key);
   if (!merged) {
-    merged = mergeTableRows("exportLedger", [x, y], new Map())[0] as Row;
+    merged = frozen(
+      mergeTableRows("exportLedger", [x, y], new Map())[0] as Row
+    );
     merges.set(key, merged);
   }
-  return structuredClone(merged);
+  return merged;
 };
 
 // ---- a device: the real modules over its ledger and the shared calendar --
@@ -146,9 +196,9 @@ const hookMerge = (x: Row, y: Row): Row => {
 async function openDevice(world: World, device: number) {
   vi.setSystemTime(world.clock + SKEW_MS[device]);
   const ledgerRepo = createInMemoryExportLedgerRepository();
-  await ledgerRepo.insertPending(structuredClone(world.devices[device]));
+  await ledgerRepo.insertPending(frozen(world.devices[device]));
   const calendar = createFakeGarminCalendar(world.nextId);
-  calendar.items.push(...structuredClone(world.items));
+  calendar.items.push(...world.items.map(frozen));
   const run: PlacementRun = {
     deps: {
       ledgerRepo,
@@ -170,14 +220,20 @@ async function openDevice(world: World, device: number) {
 }
 
 async function closeDevice(world: World, device: number, d: Device) {
-  world.devices[device] = await d.row();
-  world.items = structuredClone(d.calendar.items);
-  // A lag lasts one step: the next step is `TICK_MS` > `SETTLE_MS` later.
-  for (const item of world.items) delete item.postedAt;
+  world.devices[device] = frozen(await d.row());
+  world.items = d.calendar.items.map((item) => frozen(settledItem(item)));
   // Each POST mints at most one id; an unused id is never reused.
   world.nextId += d.calendar.count("schedule");
   world.clock = Date.now() - SKEW_MS[device] + TICK_MS;
 }
+
+/** A lag lasts one step: the next step is `TICK_MS` > `SETTLE_MS` later. */
+const settledItem = (item: CalendarItem): CalendarItem => {
+  if (!("postedAt" in item)) return item;
+  const copy = { ...item };
+  delete copy.postedAt;
+  return copy;
+};
 
 const nextDate = (world: World, device: number) =>
   DATES[world.pushes[device]++ % world.dates];
@@ -367,8 +423,38 @@ function goneButLive(world: World): string | undefined {
   }
 }
 
+/** A world's identity: equal exactly when the worlds' JSON is. */
+const keyOf = (w: World) =>
+  JSON.stringify([
+    w.clock,
+    w.nextId,
+    w.pushes,
+    w.dates,
+    w.canFind,
+    w.late,
+    [...w.devices, w.cloud, ...w.inflight.map((a) => a ?? undefined)].map(idOf),
+    w.items.map(idOf),
+  ]);
+
+/** Memoized: a step's outcome depends on its world alone (the clock is the
+    world's and the modules keep no state), and about half the steps the
+    enumeration takes, it has already taken from an equal world. */
+const outcomes = new Map<string, { after: World; violation?: string }>();
+
 /** Runs one step; returns a safety violation, if any. */
 async function apply(world: World, step: Step): Promise<string | undefined> {
+  const key = `${step.device}:${step.op}\u0000${keyOf(world)}`;
+  let outcome = outcomes.get(key);
+  if (outcome) Object.assign(world, fork(outcome.after));
+  else {
+    const violation = await runStep(world, step);
+    outcome = { after: fork(world), violation };
+    outcomes.set(key, outcome);
+  }
+  return outcome.violation;
+}
+
+async function runStep(world: World, step: Step): Promise<string | undefined> {
   const { device, op } = step;
   if (op === "sync" || op === "sync-rejected") {
     if (op === "sync") sync(world, device);
@@ -396,16 +482,20 @@ async function apply(world: World, step: Step): Promise<string | undefined> {
 
 const MAX_SETTLE_ROUNDS = 6;
 
+/** The rows and the calendar, equal exactly when their JSON is. */
+const stateOf = (w: World) =>
+  [...w.devices, w.cloud, ...w.items].map(idOf).join();
+
 /** Every device syncs and drains, round after round, until nothing moves. */
 async function settle(world: World): Promise<string | undefined> {
   for (let round = 0; round < MAX_SETTLE_ROUNDS; round++) {
-    const before = JSON.stringify([world.devices, world.cloud, world.items]);
+    const before = stateOf(world);
     for (let device = 0; device < DEVICES.length; device++) {
       sync(world, device);
       const violation = await apply(world, { device, op: "drain" });
       if (violation) return `${violation} while settling`;
     }
-    const after = JSON.stringify([world.devices, world.cloud, world.items]);
+    const after = stateOf(world);
     if (after === before) return converged(world);
   }
   return "never converges";
@@ -415,7 +505,7 @@ async function settle(world: World): Promise<string | undefined> {
     duplicate); the `Placed`, if any, is live. */
 function converged(world: World): string | undefined {
   const [first] = world.devices;
-  if (world.devices.some((r) => JSON.stringify(r) !== JSON.stringify(first)))
+  if (world.devices.some((r) => idOf(r) !== idOf(first)))
     return "devices disagree after settling";
   const live = new Set(world.items.map((i) => i.id));
   const lie = first.removalQueue?.find(
@@ -446,6 +536,17 @@ const steps = (ops: string[], devices = [0, 1, 2]): Step[] =>
 const label = (path: Step[]) =>
   path.map((s) => `${DEVICES[s.device]}:${s.op}`).join(" ");
 
+/** Normalized once per shared row. */
+const normals = new WeakMap<Row, Row>();
+const normalized = (raw: Row): Row => {
+  let row = normals.get(raw);
+  if (!row) {
+    row = frozen(normalizeGarminLedgerRow(raw) as Row);
+    if (Object.isFrozen(raw)) normals.set(raw, row);
+  }
+  return row;
+};
+
 /** Explores every path; returns the failures and the row pairs met. */
 async function explore(s: Scenario) {
   const failures: string[] = [];
@@ -453,10 +554,10 @@ async function explore(s: Scenario) {
   /** Every pair of rows that co-exist in one world. */
   const collect = (w: World) => {
     const rows = [...w.devices, w.cloud].flatMap((raw) =>
-      raw ? [normalizeGarminLedgerRow(raw) as Row] : []
+      raw ? [normalized(raw)] : []
     );
     for (const x of rows)
-      for (const y of rows) pairs.set(JSON.stringify([x, y]), [x, y]);
+      for (const y of rows) pairs.set(`${idOf(x)},${idOf(y)}`, [x, y]);
   };
   const seen = new Set<string>();
   const visit = async (world: World, path: Step[]) => {
@@ -464,13 +565,13 @@ async function explore(s: Scenario) {
     if (seen.has(key)) return;
     seen.add(key);
     collect(world);
-    const settled = structuredClone(world);
+    const settled = fork(world);
     const end = await settle(settled);
     collect(settled);
     if (end) failures.push(`${label(path)} → ${end}`);
     if (path.length === s.depth) return;
     for (const step of s.alphabet) {
-      const next = structuredClone(world);
+      const next = fork(world);
       const violation = await apply(next, step);
       if (violation) failures.push(`${label([...path, step])} → ${violation}`);
       else await visit(next, [...path, step]);
