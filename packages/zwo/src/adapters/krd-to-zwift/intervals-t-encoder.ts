@@ -1,42 +1,42 @@
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
+import type { Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import { createZwiftParsingError } from "@kaiord/core";
 
+import { encodeDuration } from "./duration-encoder";
+import { encodeHeartRateTarget, encodeMetadata } from "./metadata-encoder";
+import { encodeSteadyStatePowerTarget } from "./power-encoder";
 import { encodeTextEvents } from "./text-events-encoder";
 
-const encodeDurations = (
-  onStep: WorkoutStep,
-  offStep: WorkoutStep,
-  intervalsT: Record<string, unknown>
-): void => {
-  if (onStep.duration.type === "time") {
-    intervalsT["@_OnDuration"] = onStep.duration.seconds;
-  } else if (onStep.duration.type === "distance") {
-    intervalsT["@_OnDuration"] = onStep.duration.meters;
-  }
+type Side = "on" | "off";
 
-  if (offStep.duration.type === "time") {
-    intervalsT["@_OffDuration"] = offStep.duration.seconds;
-  } else if (offStep.duration.type === "distance") {
-    intervalsT["@_OffDuration"] = offStep.duration.meters;
-  }
-};
+const KAIORD_PREFIX = "@_kaiord:";
 
-const encodePowerTargets = (
-  onStep: WorkoutStep,
-  offStep: WorkoutStep,
-  intervalsT: Record<string, unknown>
+// kaiord:* attributes carry KRD concepts Zwift's schema cannot express so a
+// Zwift round-trip is lossless even though native readers ignore them. Each
+// half of the pair is encoded like a SteadyState, then its attributes are
+// namespaced per side (kaiord:powerZone → kaiord:onPowerZone) because
+// IntervalsT holds both steps on one element.
+const encodeSide = (
+  step: WorkoutStep,
+  side: Side,
+  intervalsT: Record<string, unknown>,
+  logger?: Logger
 ): void => {
-  if (
-    onStep.target.type === "power" &&
-    onStep.target.value.unit === "percent_ftp"
-  ) {
-    intervalsT["@_OnPower"] = onStep.target.value.value / 100;
+  const encoded: Record<string, unknown> = {};
+  encodeDuration(step, encoded, logger);
+  encodeSteadyStatePowerTarget(step, encoded, logger);
+  encodeHeartRateTarget(step, encoded, logger);
+  encodeMetadata(step, encoded);
+
+  const label = side === "on" ? "On" : "Off";
+  intervalsT[`@_${label}Duration`] = encoded["@_Duration"];
+  if (encoded["@_Power"] !== undefined) {
+    intervalsT[`@_${label}Power`] = encoded["@_Power"];
   }
-  if (
-    offStep.target.type === "power" &&
-    offStep.target.value.unit === "percent_ftp"
-  ) {
-    intervalsT["@_OffPower"] = offStep.target.value.value / 100;
+  for (const [key, value] of Object.entries(encoded)) {
+    if (!key.startsWith(KAIORD_PREFIX)) continue;
+    const name = key.slice(KAIORD_PREFIX.length);
+    const sideName = `${side}${name[0]!.toUpperCase()}${name.slice(1)}`;
+    intervalsT[`${KAIORD_PREFIX}${sideName}`] = value;
   }
 };
 
@@ -73,7 +73,8 @@ const encodeCadenceTargets = (
 };
 
 export const encodeIntervalsT = (
-  repetitionBlock: RepetitionBlock
+  repetitionBlock: RepetitionBlock,
+  logger?: Logger
 ): Record<string, unknown> => {
   const [onStep, offStep] = repetitionBlock.steps;
   if (!onStep || !offStep) {
@@ -86,8 +87,8 @@ export const encodeIntervalsT = (
     "@_Repeat": repetitionBlock.repeatCount,
   };
 
-  encodeDurations(onStep, offStep, intervalsT);
-  encodePowerTargets(onStep, offStep, intervalsT);
+  encodeSide(onStep, "on", intervalsT, logger);
+  encodeSide(offStep, "off", intervalsT, logger);
   encodeCadenceTargets(onStep, offStep, intervalsT);
 
   const textEvents = encodeTextEvents(onStep);
