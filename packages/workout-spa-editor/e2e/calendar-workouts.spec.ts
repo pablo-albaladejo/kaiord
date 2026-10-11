@@ -159,7 +159,9 @@ test.describe("Calendar Workouts", () => {
     await expect(dialog.getByText("2K z1 + 3K z3 + 2K z1")).toBeVisible();
   });
 
-  test("Click STRUCTURED card navigates to /workout/{id}", async ({ page }) => {
+  test("Click STRUCTURED card navigates to /workout/view/{id}", async ({
+    page,
+  }) => {
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
     const workoutId = crypto.randomUUID();
@@ -170,7 +172,7 @@ test.describe("Calendar Workouts", () => {
     await page.goto(`/calendar/${weekId}`);
 
     await page.locator('[data-testid^="workout-card-"]').first().click();
-    await page.waitForURL(new RegExp(`/workout/${workoutId}`));
+    await page.waitForURL(new RegExp(`/workout/view/${workoutId}`));
   });
 
   test('Click "+" on empty day navigates to /workout/new?date=X (Create overlay)', async ({

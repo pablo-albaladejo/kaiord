@@ -1,3 +1,11 @@
+/**
+ * Schedule Date Dialog
+ *
+ * Simple date picker dialog for scheduling a template to a date. The
+ * optional copy and `defaultDate` let the workout detail reuse it to move a
+ * scheduled workout to another day.
+ */
+
 import * as Dialog from "@radix-ui/react-dialog";
 import { Calendar, X } from "lucide-react";
 
@@ -13,6 +21,12 @@ type ScheduleDateDialogProps = {
   defaultDate?: string;
   onConfirm: (date: string) => void;
   onCancel: () => void;
+  copy?: {
+    title: string;
+    description: string;
+    confirm: string;
+    cancel: string;
+  };
 };
 
 export function ScheduleDateDialog({
@@ -21,6 +35,7 @@ export function ScheduleDateDialog({
   defaultDate,
   onConfirm,
   onCancel,
+  copy,
 }: ScheduleDateDialogProps) {
   const t = useTranslate("library");
   const { date, invalid, change, confirm } = useScheduleDate(
@@ -39,7 +54,7 @@ export function ScheduleDateDialog({
         >
           <div className="flex items-center justify-between mb-4">
             <Dialog.Title className="text-lg font-semibold">
-              {t("scheduleDialog.title")}
+              {copy?.title ?? t("scheduleDialog.title")}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button aria-label={t("scheduleDialog.close")}>
@@ -48,16 +63,16 @@ export function ScheduleDateDialog({
             </Dialog.Close>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            {t("scheduleDialog.description", { name: templateName })}
+            {copy?.description ?? t("scheduleDialog.description", { name: templateName })}
           </p>
           <ScheduleDateField value={date} invalid={invalid} onChange={change} />
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={onCancel}>
-              {t("scheduleDialog.cancel")}
+              {copy?.cancel ?? t("scheduleDialog.cancel")}
             </Button>
             <Button onClick={confirm}>
               <Calendar className="mr-2 h-4 w-4" />
-              {t("scheduleDialog.confirm")}
+              {copy?.confirm ?? t("scheduleDialog.confirm")}
             </Button>
           </div>
         </Dialog.Content>

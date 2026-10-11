@@ -66,11 +66,34 @@ describe("PushButton", () => {
   });
 
   it.each([
-    ["the bridge is not detected", { extensionInstalled: false }],
-    ["Garmin is signed out", { sessionActive: false }],
-  ])("should keep the send disabled while %s", (_label, state) => {
+    [
+      "the bridge is not detected",
+      { extensionInstalled: false },
+      "Install the Kaiord Garmin Bridge extension to send this workout.",
+    ],
+    [
+      "Garmin is signed out",
+      { sessionActive: false },
+      "Sign in to Garmin Connect in this browser to send this workout.",
+    ],
+  ])(
+    "should keep the send disabled and say why while %s",
+    (_label, state, why) => {
+      // Arrange
+      Object.assign(bridge, state);
+
+      // Act
+      render(<PushButton workout={WORKOUT} />);
+
+      // Assert
+      const send = screen.getByRole("button", { name: /Send to Garmin/ });
+      expect(send).toBeDisabled();
+      expect(send).toHaveAccessibleDescription(why);
+    }
+  );
+
+  it("should give no reason while the send is available", () => {
     // Arrange
-    Object.assign(bridge, state);
 
     // Act
     render(<PushButton workout={WORKOUT} />);
@@ -78,7 +101,7 @@ describe("PushButton", () => {
     // Assert
     expect(
       screen.getByRole("button", { name: /Send to Garmin/ })
-    ).toBeDisabled();
+    ).not.toHaveAccessibleDescription();
   });
 
   it("should render the idle label", () => {
