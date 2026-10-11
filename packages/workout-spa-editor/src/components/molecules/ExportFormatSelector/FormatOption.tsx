@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { forwardRef } from "react";
 
 import { type FormatOption, getFileExtensionForFormat } from "./format-options";
+import { FormatOptionWarning } from "./FormatOptionWarning";
 
 type FormatOptionProps = {
   readonly option: FormatOption;
@@ -9,15 +10,18 @@ type FormatOptionProps = {
   readonly isFocused: boolean;
   readonly onSelect: () => void;
   readonly disabled: boolean;
+  /** Shown inside the option, so it is read before the format is picked. */
+  readonly warning?: string | null;
 };
 
 export const FormatOptionItem = forwardRef<
   HTMLButtonElement,
   FormatOptionProps
 >(function FormatOptionItem(
-  { option, isSelected, isFocused, onSelect, disabled },
+  { option, isSelected, isFocused, onSelect, disabled, warning },
   ref
 ) {
+  const warningId = `export-format-warning-${option.value}`;
   return (
     <button
       ref={ref}
@@ -35,6 +39,7 @@ export const FormatOptionItem = forwardRef<
       role="menuitem"
       aria-current={isSelected || undefined}
       aria-label={option.label}
+      aria-describedby={warning ? warningId : undefined}
       tabIndex={isFocused ? 0 : -1}
       data-testid={`export-format-option-${option.value}`}
     >
@@ -51,6 +56,7 @@ export const FormatOptionItem = forwardRef<
           <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
             {option.description}
           </p>
+          {warning && <FormatOptionWarning id={warningId} warning={warning} />}
           <div className="flex flex-wrap gap-1">
             {option.compatibility.map((platform) => (
               <span

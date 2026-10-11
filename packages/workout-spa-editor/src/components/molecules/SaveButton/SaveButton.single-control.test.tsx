@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -56,5 +56,32 @@ describe("SaveButton with the real format menu", () => {
     expect(
       await screen.findByText("Downloaded as rodaje_auditoria.fit")
     ).toBeInTheDocument();
+  });
+
+  it("should show a lossy format's warning in its option before any download", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    vi.mocked(downloadWorkout).mockClear();
+    render(
+      <ToastProvider>
+        <SaveButton workout={workout} />
+      </ToastProvider>
+    );
+
+    // Act
+    await user.click(screen.getByRole("button", { name: /download a file/i }));
+
+    // Assert
+    const fit = screen.getByTestId("export-format-option-fit");
+    expect(
+      within(fit).getByText("FIT format may not support all workout features")
+    ).toBeVisible();
+    expect(fit).toHaveAccessibleDescription(
+      /FIT format may not support all workout features/
+    );
+    expect(
+      within(screen.getByTestId("export-format-option-krd")).queryByRole("note")
+    ).not.toBeInTheDocument();
+    expect(downloadWorkout).not.toHaveBeenCalled();
   });
 });

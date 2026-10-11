@@ -11,7 +11,7 @@ import { type ReactNode, useState } from "react";
 
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
-import { validateWorkoutForExport } from "./format-helpers";
+import { getFormatWarnings, validateWorkoutForExport } from "./format-helpers";
 import { formatOptions } from "./format-options";
 import { FormatDropdown } from "./FormatDropdown";
 import { FormatWarnings } from "./FormatWarnings";
@@ -73,9 +73,12 @@ export function ExportFormatSelector({
         onFormatSelect={handleFormatSelect}
         disabled={disabled}
         label={label}
+        warningFor={(format) => getFormatWarnings(format, workout)}
       />
       <FormatWarnings
-        format={currentFormat}
+        // As the download control, a format is read in its option before
+        // the click; repeating it after the download would come too late.
+        format={label ? null : currentFormat}
         workout={workout}
         validationErrors={validationErrors}
       />

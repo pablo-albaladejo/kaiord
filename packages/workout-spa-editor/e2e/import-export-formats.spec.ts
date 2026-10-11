@@ -365,7 +365,9 @@ test.describe("Import/Export Multiple Formats", () => {
     }
   });
 
-  test("should display format-specific warnings", async ({ page }) => {
+  test("should show a format's warning before it downloads", async ({
+    page,
+  }) => {
     // Arrange - Load workout
     await seedEmptyWorkout(page);
     const fileInput = page.getByTestId("file-upload-input");
@@ -379,22 +381,21 @@ test.describe("Import/Export Multiple Formats", () => {
       timeout: 10000,
     });
 
-    // Act - Select FIT format
-    const formatSelector = page.getByTestId("export-format-selector-button");
-    await formatSelector.click();
-
-    // Wait for dropdown to open
-    await expect(page.getByTestId("export-format-option-fit")).toBeVisible({
-      timeout: 2000,
+    let downloaded = false;
+    page.on("download", () => {
+      downloaded = true;
     });
 
-    const fitOption = page.getByTestId("export-format-option-fit");
-    await fitOption.click();
+    // Act - Open the download menu without picking a format
+    await page.getByTestId("export-format-selector-button").click();
 
-    // Assert - Warning message displayed
+    // Assert - The FIT option carries its warning before anything downloads
+    const fitOption = page.getByTestId("export-format-option-fit");
+    await expect(fitOption).toBeVisible({ timeout: 2000 });
     await expect(
-      page.getByText(/FIT format may not support all workout features/i)
+      fitOption.getByText(/FIT format may not support all workout features/i)
     ).toBeVisible();
+    expect(downloaded).toBe(false);
   });
 
   test("should handle keyboard shortcuts for import/export", async ({

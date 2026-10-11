@@ -5,7 +5,7 @@ import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFormatWarnings } from "./format-helpers";
 
 type FormatWarningsProps = {
-  readonly format: WorkoutFileFormat;
+  readonly format: WorkoutFileFormat | null;
   readonly workout?: KRD;
   readonly validationErrors: readonly ValidationError[];
 };
@@ -15,7 +15,7 @@ export function FormatWarnings({
   workout,
   validationErrors,
 }: FormatWarningsProps) {
-  const warning = getFormatWarnings(format, workout);
+  const warning = format ? getFormatWarnings(format, workout) : null;
 
   return (
     <>
