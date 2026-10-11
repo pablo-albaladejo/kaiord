@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 
 import { TIMEOUT } from "../browser.mjs";
 import { expectOk } from "../steps.mjs";
+import { showCalendarInApp } from "./scheduled-lifecycle-steps.mjs";
 
 const MAX_PRESSES = 12;
 
@@ -34,13 +35,18 @@ export async function moveByKeyboard(rec, session, id, date) {
   const confirm = page.getByRole("button", { name: /^Mover$/ });
   await pressUntilFocused(page, "Tab", confirm);
   await page.keyboard.press("Enter");
-  await go("calendar");
+  const moved = () =>
+    expect(
+      page.getByTestId(`day-column-${date}`).getByTestId(`workout-card-${id}`)
+    ).toBeVisible({ timeout: TIMEOUT });
+  // The move writes asynchronously: see it land in-app before reloading, so
+  // the reload cannot abort the IndexedDB write.
+  await showCalendarInApp(page);
   await expectOk(
     rec,
     "Journey 15: a keyboard move puts the card on the new day",
-    () =>
-      expect(
-        page.getByTestId(`day-column-${date}`).getByTestId(`workout-card-${id}`)
-      ).toBeVisible({ timeout: TIMEOUT })
+    moved
   );
+  await go("calendar");
+  await expectOk(rec, "Journey 15: the move holds after a reload", moved);
 }

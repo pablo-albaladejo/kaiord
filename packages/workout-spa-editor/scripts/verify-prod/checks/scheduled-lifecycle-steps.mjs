@@ -18,6 +18,17 @@ async function deleteOnce(page, go, id) {
     .or(page.getByRole("dialog"))
     .getByRole("button", { name: CONFIRM })
     .click();
+  // The detail leaves only after the delete has committed; reloading before
+  // that would abort the IndexedDB write.
+  await expect(page).not.toHaveURL(/#\/workout\/view\//, { timeout: TIMEOUT });
+}
+
+// Changes the route in-app, without a reload, so a pending write survives.
+export async function showCalendarInApp(page) {
+  await page.evaluate(() => {
+    window.location.hash = "#/calendar";
+  });
+  await page.getByTestId("calendar-week-grid").waitFor({ timeout: TIMEOUT });
 }
 
 // F-30: the detail's "Más opciones" deletes after a confirm; "Deshacer"
@@ -40,8 +51,14 @@ export async function deleteWithUndo(rec, session, id) {
   const card = page.getByTestId(`workout-card-${id}`);
   await deleteOnce(page, go, id);
   await page.getByRole("button", { name: /^Deshacer$/ }).click();
-  await go("calendar");
+  // Undo writes the row back asynchronously: see it land in-app first, then
+  // reload to prove it persisted.
+  await showCalendarInApp(page);
   await expectOk(rec, "F-30: Undo brings the card back", () =>
+    expect(card).toBeVisible({ timeout: TIMEOUT })
+  );
+  await go("calendar");
+  await expectOk(rec, "F-30: the undone delete holds after a reload", () =>
     expect(card).toBeVisible({ timeout: TIMEOUT })
   );
   await deleteOnce(page, go, id);
