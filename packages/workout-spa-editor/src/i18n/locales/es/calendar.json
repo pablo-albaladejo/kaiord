@@ -150,5 +150,10 @@
     },
     "outdated": "Tu extensión Garmin Bridge aún no puede usar el calendario, así que estos solo llegaron a tu biblioteca. Actualízala y reintenta.",
     "updateExtension": "Actualizar la extensión"
+  },
+  "wellnessToast": {
+    "saved": "Bienestar guardado",
+    "saveFailed": "No se pudo guardar — vuelve a intentarlo",
+    "noProfile": "No hay perfil de atleta: selecciona o crea uno para guardar el bienestar"
   }
 }

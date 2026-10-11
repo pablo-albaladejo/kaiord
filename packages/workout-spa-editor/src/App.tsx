@@ -4,6 +4,8 @@ import { useLocation } from "wouter";
 import { AppRoutes } from "./AppRoutes";
 import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { MigrationBoot } from "./components/MigrationBoot";
+import { DefaultProfileNotice } from "./components/molecules/DefaultProfileNotice/DefaultProfileNotice";
+import { ProfileChoiceBanner } from "./components/molecules/ProfileChoiceBanner/ProfileChoiceBanner";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
@@ -35,6 +37,8 @@ function App() {
       <MigrationBoot />
       <AppKeyboardShortcuts />
       <MainLayout>
+        <ProfileChoiceBanner />
+        <DefaultProfileNotice />
         <AppRoutes analytics={analytics} />
       </MainLayout>
     </AppToastProvider>

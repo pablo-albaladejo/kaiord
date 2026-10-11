@@ -150,5 +150,10 @@
     },
     "outdated": "Your Garmin Bridge extension can't use the calendar yet, so these reached your library only. Update it, then retry.",
     "updateExtension": "Update the extension"
+  },
+  "wellnessToast": {
+    "saved": "Wellness saved",
+    "saveFailed": "Could not save — please retry",
+    "noProfile": "No athlete profile — select or create one to save wellness"
   }
 }

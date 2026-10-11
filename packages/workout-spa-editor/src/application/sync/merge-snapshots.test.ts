@@ -304,3 +304,30 @@ describe("mergeSnapshots — tombstone × pairwise merge order", () => {
     ]);
   });
 });
+
+describe("mergeSnapshots — composite-key tables without an id", () => {
+  it("should keep one dataTypeSourcePolicy row per profile and data type", () => {
+    // Arrange
+    const policy = (profileId: string, dataType: string) => ({
+      profileId,
+      dataType,
+      mode: "union",
+      sourceOrder: [],
+    });
+    const local = snap("2026-05-20T00:00:00Z", {
+      dataTypeSourcePolicy: [policy("p-1", "sleep"), policy("p-1", "weight")],
+    });
+    const remote = snap("2026-05-19T00:00:00Z", {
+      dataTypeSourcePolicy: [policy("p-2", "sleep")],
+    });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    const keys = rows("dataTypeSourcePolicy", merged)
+      .map((r) => `${String(r.profileId)}/${String(r.dataType)}`)
+      .sort();
+    expect(keys).toEqual(["p-1/sleep", "p-1/weight", "p-2/sleep"]);
+  });
+});

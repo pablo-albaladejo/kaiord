@@ -26,9 +26,9 @@ export const SyncTab: React.FC = () => {
   };
 
   const handleSyncNow = async () => {
-    const ok = await sync.syncNow();
-    if (ok) toast.success(SYNC_OK_TOAST);
-    else toast.error(SYNC_FAILED_TOAST);
+    const outcome = await sync.syncNow();
+    if (outcome === "synced") toast.success(SYNC_OK_TOAST);
+    else if (outcome === "failed") toast.error(SYNC_FAILED_TOAST);
   };
 
   return (

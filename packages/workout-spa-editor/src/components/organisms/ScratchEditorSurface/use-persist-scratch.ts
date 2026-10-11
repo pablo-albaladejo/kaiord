@@ -14,6 +14,8 @@ const DEFAULT_SPORT = "cycling";
 
 export type UsePersistScratch = {
   canSchedule: boolean;
+  /** True once the profile lookup resolved to no active profile. */
+  missingProfile: boolean;
   schedule: () => Promise<void>;
 };
 
@@ -26,7 +28,8 @@ export type UsePersistScratch = {
 export function usePersistScratch(date: string): UsePersistScratch {
   const t = useTranslate("editor");
   const currentWorkout = useCurrentWorkout();
-  const profileId = useActiveProfileLive()?.id ?? null;
+  const active = useActiveProfileLive();
+  const profileId = active?.id ?? null;
   const persistence = usePersistence();
   const [, navigate] = useLocation();
   const toast = useToastContext();
@@ -58,5 +61,9 @@ export function usePersistScratch(date: string): UsePersistScratch {
     }
   };
 
-  return { canSchedule, schedule };
+  return {
+    canSchedule,
+    missingProfile: active !== undefined && !profileId,
+    schedule,
+  };
 }

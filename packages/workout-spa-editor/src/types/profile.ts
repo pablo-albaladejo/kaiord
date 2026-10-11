@@ -55,8 +55,19 @@ export const biologicalSexSchema = z.enum(["male", "female"]);
 
 export type BiologicalSex = z.infer<typeof biologicalSexSchema>;
 
+/**
+ * `auto` marks the default profile created on first run. It stays inert for
+ * cloud sync and backup until claimed (edited, exported, or synced against a
+ * remote without real profiles), which flips it to `local`. Absent means a
+ * real profile created before the flag existed. Not indexed.
+ */
+export const profileOriginSchema = z.enum(["auto", "local"]);
+
+export type ProfileOrigin = z.infer<typeof profileOriginSchema>;
+
 export const profileSchema = z.object({
   id: z.uuid(),
+  origin: profileOriginSchema.optional(),
   name: z.string().min(1).max(100),
   bodyWeight: z.number().positive().optional(),
   maxHeartRate: z.number().int().positive().max(250).optional(),

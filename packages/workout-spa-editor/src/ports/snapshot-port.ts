@@ -52,4 +52,17 @@ export type SnapshotPort = {
   listTombstones: () => Promise<Tombstone[]>;
   /** Clear the tombstones table, then write the provided tombstones. */
   replaceTombstones: (tombstones: ReadonlyArray<Tombstone>) => Promise<void>;
+  /** Names of the tables whose rows belong to a single profile. */
+  perProfileTables: () => string[];
+  /**
+   * Rewrite the device-local tables that never ride the snapshot
+   * (`connections`, `intakeEntries`, `intakePresets`, `energyTargets`):
+   * `transform` receives every row of each and returns the rows to keep.
+   * Joins an enclosing `transaction("rw", ...)`.
+   */
+  updateDeviceLocal: (
+    transform: (tables: SnapshotTables) => SnapshotTables
+  ) => Promise<void>;
+  /** Write one `meta` row (`{ key, value }`). */
+  writeMeta: (key: string, value: unknown) => Promise<void>;
 };

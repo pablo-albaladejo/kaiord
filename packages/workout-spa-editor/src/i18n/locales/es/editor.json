@@ -101,7 +101,8 @@
     "invalidTitle": "Fecha no válida",
     "invalidDescription": "No se pudo programar — la fecha no es un día válido del calendario.",
     "saveFailedTitle": "Error al guardar",
-    "saveFailedDescription": "No se pudo programar el entreno — inténtalo de nuevo."
+    "saveFailedDescription": "No se pudo programar el entreno — inténtalo de nuevo.",
+    "noProfileReason": "Selecciona o crea un perfil de atleta para programar este entreno."
   },
   "raw": {
     "dialogDescription": "Detalles del entreno en bruto con la descripción del entrenador, la selección de comentarios y acciones para procesar o saltar.",

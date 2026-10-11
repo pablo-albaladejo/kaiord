@@ -101,7 +101,8 @@
     "invalidTitle": "Invalid date",
     "invalidDescription": "Could not schedule — the date is not a valid calendar day.",
     "saveFailedTitle": "Save failed",
-    "saveFailedDescription": "Could not schedule the workout — please retry."
+    "saveFailedDescription": "Could not schedule the workout — please retry.",
+    "noProfileReason": "Select or create an athlete profile to schedule this workout."
   },
   "raw": {
     "dialogDescription": "Raw workout details with coach description, comment selection, and actions to process or skip.",
