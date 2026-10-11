@@ -1,6 +1,6 @@
 /**
- * WellnessMetricField — one labeled number input for a single wellness
- * metric. The `<label>` is associated to the input via `useId` so the
+ * WellnessMetricField — one labeled input (number, h:mm text or clock time)
+ * for a single wellness value. The `<label>` is associated to the input via `useId` so the
  * field has an accessible name (SR users hear the metric + unit).
  */
 import { useId } from "react";
@@ -13,6 +13,10 @@ export type WellnessMetricFieldProps = {
   min?: number;
   max?: number;
   step?: number;
+  type?: "number" | "text" | "time";
+  placeholder?: string;
+  /** Marks the field the dialog focuses when opened for a metric. */
+  focusKey?: string;
 };
 
 export function WellnessMetricField({
@@ -23,6 +27,9 @@ export function WellnessMetricField({
   min,
   max,
   step,
+  type = "number",
+  placeholder,
+  focusKey,
 }: WellnessMetricFieldProps) {
   const inputId = useId();
   const labelText = unit ? `${label} (${unit})` : label;
@@ -37,8 +44,10 @@ export function WellnessMetricField({
       </label>
       <input
         id={inputId}
-        type="number"
-        inputMode="decimal"
+        type={type}
+        inputMode={type === "number" ? "decimal" : undefined}
+        placeholder={placeholder}
+        data-wellness-focus={focusKey}
         value={value}
         aria-label={labelText}
         min={min}

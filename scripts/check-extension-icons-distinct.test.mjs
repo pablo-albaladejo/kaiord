@@ -1,7 +1,14 @@
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,18 +16,24 @@ import sharp from "sharp";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = dirname(HERE);
+// Build into a private root: other script tests run concurrently under
+// `node --test`, and the tracked PNGs under packages/*/icons must never be
+// rewritten (or tampered with) by a test.
+const ICONS_ROOT = mkdtempSync(join(tmpdir(), "kaiord-icons-"));
+const ENV = { ...process.env, KAIORD_ICONS_ROOT: ICONS_ROOT };
+after(() => rmSync(ICONS_ROOT, { recursive: true, force: true }));
 const GUARD = join(HERE, "check-extension-icons-distinct.mjs");
 const BUILD = join(HERE, "build-extension-icons.mjs");
 
 const ICON = (bridge, size) =>
-  join(REPO, "packages", bridge, "icons", `icon${size}.png`);
+  join(ICONS_ROOT, "packages", bridge, "icons", `icon${size}.png`);
 
 const runGuard = () =>
-  spawnSync("node", [GUARD], { cwd: REPO, encoding: "utf8" });
+  spawnSync("node", [GUARD], { cwd: REPO, encoding: "utf8", env: ENV });
 
 describe("check-extension-icons-distinct", () => {
   it("passes against the produced PNGs", () => {
-    execFileSync("node", [BUILD], { cwd: REPO });
+    execFileSync("node", [BUILD], { cwd: REPO, env: ENV });
 
     const result = runGuard();
 
@@ -29,7 +42,7 @@ describe("check-extension-icons-distinct", () => {
   });
 
   it("fails when the two bridges share an identical icon", async () => {
-    execFileSync("node", [BUILD], { cwd: REPO });
+    execFileSync("node", [BUILD], { cwd: REPO, env: ENV });
     const original = readFileSync(ICON("train2go-bridge", 16));
 
     // Overwrite t2g 16x16 with garmin's bytes — guaranteed identical
@@ -46,7 +59,7 @@ describe("check-extension-icons-distinct", () => {
   });
 
   it("fails when a bridge icon's accent occupies <25% of pixel mass at 16x16", async () => {
-    execFileSync("node", [BUILD], { cwd: REPO });
+    execFileSync("node", [BUILD], { cwd: REPO, env: ENV });
     const original = readFileSync(ICON("train2go-bridge", 16));
 
     // Make a near-all-dark icon: keep the navy bg, drop accent — so the

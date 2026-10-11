@@ -16,7 +16,11 @@
     "headlineEasy": "Take it easy",
     "hrv": "HRV",
     "sleep": "Sleep",
-    "battery": "Battery"
+    "battery": "Battery",
+    "rationaleHrv": "Based on your overnight HRV.",
+    "rationaleSleep": "Based on your sleep score.",
+    "rationaleSleepManual": "Based on the sleep score you entered.",
+    "rationaleHrvSleepManual": "Based on your overnight HRV and the sleep score you entered."
   },
   "energyBalance": {
     "title": "Energy balance",

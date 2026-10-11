@@ -5,6 +5,7 @@ import { buildReadinessModel } from "./today-readiness";
 
 const EXPECTED_COMPOSITE = 75;
 const EXPECTED_BATTERY = 65;
+const TYPED_SCORE = 81;
 
 const HRV: HrvSummary = {
   kind: "hrv",
@@ -144,5 +145,100 @@ describe("buildReadinessModel", () => {
     expect(model.hrv.usedFallback).toBeUndefined();
     expect(model.sleep.source).toBeUndefined();
     expect(model.sleep.usedFallback).toBeUndefined();
+  });
+
+  it("should name both inputs when device HRV and sleep scores drive it", () => {
+    // Arrange
+    const sleepSource = {
+      sourceBridgeId: "garmin-bridge",
+      usedFallback: false,
+    };
+
+    // Act
+    const model = buildReadinessModel(
+      HRV,
+      SLEEP,
+      undefined,
+      true,
+      undefined,
+      sleepSource
+    );
+
+    // Assert
+    expect(model.rationale).toBe("Based on your overnight HRV and sleep.");
+  });
+
+  it("should not credit HRV when only a typed-in sleep score drives it", () => {
+    // Arrange
+    const manualSleep: SleepRecord = { ...SLEEP, score: TYPED_SCORE };
+    const sleepSource = { sourceBridgeId: "manual", usedFallback: false };
+
+    // Act
+    const model = buildReadinessModel(
+      undefined,
+      manualSleep,
+      undefined,
+      true,
+      undefined,
+      sleepSource
+    );
+
+    // Assert
+    expect(model.score).toBe(TYPED_SCORE);
+    expect(model.rationale).toBe("Based on the sleep score you entered.");
+  });
+
+  it("should say a typed-in sleep score was combined with device HRV", () => {
+    // Arrange
+    const sleepSource = { sourceBridgeId: "manual", usedFallback: false };
+
+    // Act
+    const model = buildReadinessModel(
+      HRV,
+      SLEEP,
+      undefined,
+      true,
+      undefined,
+      sleepSource
+    );
+
+    // Assert
+    expect(model.rationale).toBe(
+      "Based on your overnight HRV and the sleep score you entered."
+    );
+  });
+
+  it("should credit HRV alone when sleep has no score", () => {
+    // Arrange
+    const unscoredSleep: SleepRecord = { ...SLEEP, score: undefined };
+
+    // Act
+    const model = buildReadinessModel(HRV, unscoredSleep, undefined, true);
+
+    // Assert
+    expect(model.rationale).toBe("Based on your overnight HRV.");
+  });
+
+  it("should show no sleep hours when the duration was not recorded", () => {
+    // Arrange
+    const scoreOnly: SleepRecord = { ...SLEEP };
+    delete scoreOnly.totalDurationSeconds;
+
+    // Act
+    const model = buildReadinessModel(undefined, scoreOnly, undefined, true);
+
+    // Assert
+    expect(model.sleep.value).toBe("—");
+  });
+
+  it("should not show a legacy zero-hour entry as 0.0h", () => {
+    // Arrange
+    const legacy: SleepRecord = { ...SLEEP, totalDurationSeconds: 0 };
+
+    // Act
+    const model = buildReadinessModel(undefined, legacy, undefined, true);
+
+    // Assert
+    expect(model.sleep.value).toBe("—");
   });
 });

@@ -4,6 +4,7 @@ import { useSearch } from "wouter";
 
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { useAppHandlers } from "../../../hooks/use-app-handlers";
+import { useImportWarningsToast } from "../../../hooks/use-import-warnings-toast";
 import { useTranslate } from "../../../i18n/use-translate";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { FileUpload } from "../../molecules/FileUpload/FileUpload";
@@ -31,6 +32,7 @@ export function ImportDropzoneOverlay() {
   const date = params.get("date");
   const from = params.get("from");
   const onFileLoad = useImportOnLoad(date, from);
+  const onWarnings = useImportWarningsToast();
   const clearWorkout = useWorkoutStore((s) => s.clearWorkout);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const mountInitializedRef = useRef(false);
@@ -72,6 +74,7 @@ export function ImportDropzoneOverlay() {
           onFileLoad={onFileLoad}
           onError={handleFileError}
           onImported={handleImported}
+          onWarnings={onWarnings}
           inputRef={inputRef}
         />
       </div>

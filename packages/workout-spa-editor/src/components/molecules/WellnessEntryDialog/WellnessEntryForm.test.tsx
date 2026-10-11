@@ -21,6 +21,8 @@ import { WellnessEntryForm } from "./WellnessEntryForm";
 
 const DAY = "2026-05-04";
 const PROFILE_ID = "00000000-0000-4000-8000-0000000000a1";
+const SEVEN_THIRTY = 27000;
+const SCORE = 81;
 
 const setup = async (): Promise<PersistencePort> => {
   const persistence = createInMemoryPersistence();
@@ -184,19 +186,19 @@ describe("WellnessEntryForm", () => {
     renderForm(persistence, onSaved);
 
     // Act
-    await fillAndSave(user, { "Sleep score": "150" });
+    await fillAndSave(user, { "HRV (ms)": "-5" });
 
     // Assert
     expect(
       await screen.findByText("Could not save — please retry")
     ).toBeInTheDocument();
     expect(onSaved).not.toHaveBeenCalled();
-    const sleep = await persistence.healthSleep.getByProfileAndDateRange(
+    const hrv = await persistence.healthHrv.getByProfileAndDateRange(
       PROFILE_ID,
       DAY,
       DAY
     );
-    expect(sleep).toHaveLength(0);
+    expect(hrv).toHaveLength(0);
   });
 
   it("should treat a partial save as failure and keep the dialog open", async () => {
@@ -207,19 +209,19 @@ describe("WellnessEntryForm", () => {
     renderForm(persistence, onSaved);
 
     // Act
-    await fillAndSave(user, { "Weight (kg)": "72", "Sleep score": "150" });
+    await fillAndSave(user, { "Weight (kg)": "72", "HRV (ms)": "-5" });
 
     // Assert
     expect(
       await screen.findByText("Could not save — please retry")
     ).toBeInTheDocument();
     expect(onSaved).not.toHaveBeenCalled();
-    const sleep = await persistence.healthSleep.getByProfileAndDateRange(
+    const hrv = await persistence.healthHrv.getByProfileAndDateRange(
       PROFILE_ID,
       DAY,
       DAY
     );
-    expect(sleep).toHaveLength(0);
+    expect(hrv).toHaveLength(0);
   });
 
   it("should disable the Save button while isSaving", async () => {
@@ -247,4 +249,153 @@ describe("WellnessEntryForm", () => {
     });
     release?.();
   });
+
+  it("should ask for the hours slept next to the sleep score", async () => {
+    // Arrange
+    const persistence = await setup();
+
+    // Act
+    renderForm(persistence);
+
+    // Assert
+    expect(screen.getByLabelText("Sleep hours (h:mm)")).toBeInTheDocument();
+    expect(screen.getByLabelText("Bedtime")).toBeInTheDocument();
+    expect(screen.getByLabelText("Wake time")).toBeInTheDocument();
+  });
+
+  it("should save 7:30 and a score as a 7 h 30 min night with that score", async () => {
+    // Arrange
+    const persistence = await setup();
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    renderForm(persistence, onSaved);
+
+    // Act
+    await fillAndSave(user, {
+      "Sleep hours (h:mm)": "7:30",
+      "Sleep score": "81",
+    });
+
+    // Assert
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const [row] = await persistence.healthSleep.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(row?.krd.totalDurationSeconds).toBe(SEVEN_THIRTY);
+    expect(row?.krd.score).toBe(SCORE);
+  });
+
+  it("should save a score alone without a zero-hour night", async () => {
+    // Arrange
+    const persistence = await setup();
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    renderForm(persistence, onSaved);
+
+    // Act
+    await fillAndSave(user, { "Sleep score": "81" });
+
+    // Assert
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const [row] = await persistence.healthSleep.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(row?.krd.score).toBe(SCORE);
+    expect(row?.krd).not.toHaveProperty("totalDurationSeconds");
+  });
+
+  it("should derive the night from bedtime and wake time", async () => {
+    // Arrange
+    const persistence = await setup();
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    renderForm(persistence, onSaved);
+
+    // Act
+    await fillAndSave(user, { Bedtime: "23:00", "Wake time": "06:30" });
+
+    // Assert
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const [row] = await persistence.healthSleep.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(row?.krd.totalDurationSeconds).toBe(SEVEN_THIRTY);
+    expect(row?.krd.endTime).toBe(new Date(`${DAY}T06:30:00`).toISOString());
+  });
+
+  it("should explain malformed hours and write nothing", async () => {
+    // Arrange
+    const persistence = await setup();
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    renderForm(persistence, onSaved);
+
+    // Act
+    await fillAndSave(user, { "Sleep hours (h:mm)": "7h30" });
+
+    // Assert
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Enter the hours slept as h:mm, for example 7:30."
+    );
+    expect(onSaved).not.toHaveBeenCalled();
+    const rows = await persistence.healthSleep.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(rows).toHaveLength(0);
+  });
+
+  it("should refuse hours that disagree with bedtime and wake time", async () => {
+    // Arrange
+    const persistence = await setup();
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    renderForm(persistence, onSaved);
+
+    // Act
+    await fillAndSave(user, {
+      "Sleep hours (h:mm)": "8:00",
+      Bedtime: "23:00",
+      "Wake time": "06:30",
+    });
+
+    // Assert
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "The hours slept don't match the bedtime and wake time."
+    );
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  it.each(["150", "81.5", "-1"])(
+    "should explain a sleep score of %s and write nothing",
+    async (score) => {
+      // Arrange
+      const persistence = await setup();
+      const user = userEvent.setup();
+      const onSaved = vi.fn();
+      renderForm(persistence, onSaved);
+
+      // Act
+      await fillAndSave(user, { "Sleep score": score });
+
+      // Assert
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Enter a sleep score from 0 to 100."
+      );
+      expect(onSaved).not.toHaveBeenCalled();
+      const rows = await persistence.healthSleep.getByProfileAndDateRange(
+        PROFILE_ID,
+        DAY,
+        DAY
+      );
+      expect(rows).toHaveLength(0);
+    }
+  );
 });

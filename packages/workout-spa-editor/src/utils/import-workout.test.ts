@@ -356,6 +356,68 @@ describe("importWorkout", () => {
     );
   });
 
+  describe("TCX import warnings", () => {
+    const tcxWorkout = (steps: string) =>
+      `<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Workouts><Workout Sport="Running"><Name>W</Name>${steps}</Workout></Workouts>
+</TrainingCenterDatabase>`;
+    const STEP_SECONDS = 60;
+    const timeStep = (id: number, tag = "Step", seconds = STEP_SECONDS) =>
+      `<${tag} xsi:type="Step_t"><StepId>${id}</StepId><Duration xsi:type="Time_t"><Seconds>${seconds}</Seconds></Duration><Intensity>Active</Intensity><Target xsi:type="None_t"/></${tag}>`;
+
+    it("should import a TCX repeat as a repetition block without warnings", async () => {
+      // Arrange
+      const xml = tcxWorkout(
+        `<Step xsi:type="Repeat_t"><StepId>1</StepId><Repetitions>4</Repetitions>${timeStep(2, "Child")}</Step>`
+      );
+      const onWarning = vi.fn();
+
+      // Act
+      const krd = await importWorkout(
+        createMockFile(xml, "repeat.tcx"),
+        undefined,
+        undefined,
+        onWarning
+      );
+
+      // Assert
+      const steps = (
+        krd.extensions?.structured_workout as { steps: Array<object> }
+      ).steps;
+      expect(steps).toStrictEqual([
+        expect.objectContaining({ repeatCount: 4 }),
+      ]);
+      expect(onWarning).not.toHaveBeenCalled();
+    });
+
+    it("should report each step the TCX reader had to skip", async () => {
+      // Arrange
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const skipped = `<Step xsi:type="Step_t"><StepId>2</StepId><Duration xsi:type="CaloriesBurned_t"><Calories>100</Calories></Duration><Intensity>Active</Intensity><Target xsi:type="None_t"/></Step>`;
+      const xml = tcxWorkout(timeStep(1) + skipped);
+      const onWarning = vi.fn();
+
+      // Act
+      const krd = await importWorkout(
+        createMockFile(xml, "lossy.tcx"),
+        undefined,
+        undefined,
+        onWarning
+      );
+
+      // Assert
+      const steps = (
+        krd.extensions?.structured_workout as { steps: Array<object> }
+      ).steps;
+      expect(steps).toHaveLength(1);
+      expect(onWarning).toHaveBeenCalledWith(
+        "Step has no valid duration, skipping"
+      );
+      warn.mockRestore();
+    });
+  });
+
   describe("abort signal support", () => {
     it("should abort KRD import when signal is aborted", async () => {
       // Arrange

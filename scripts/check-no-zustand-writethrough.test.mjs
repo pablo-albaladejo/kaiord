@@ -20,7 +20,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, test } from "node:test";
 
-import { runCheck } from "./check-no-zustand-writethrough.mjs";
+import { ALLOWLIST, runCheck } from "./check-no-zustand-writethrough.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
@@ -79,29 +79,22 @@ describe("check-no-zustand-writethrough", () => {
   });
 
   test("R-DexieImport: alias path (@/...) flags the file via tsconfig paths", () => {
-    // Arrange — the alias map is loaded from the production tsconfig,
-    // so drop a synthetic file under the real SPA src tree.
-    const aliasFile = join(REAL_SPA_SRC, "store", "__alias-fixture-leak.ts");
-    mkdirSync(dirname(aliasFile), { recursive: true });
-    writeFileSync(
-      aliasFile,
-      'import { db } from "@/adapters/dexie/dexie-database";\nexport const x = db;\n',
-      "utf8"
+    // Arrange — the alias map comes from the production tsconfig, so
+    // `@/adapters/dexie/dexie-database` resolves into the real SPA src.
+    // Only the importing fixture is synthetic, and it stays in the
+    // sandbox: other script tests walk the real tree concurrently.
+    write(
+      "store/alias-leak-store.ts",
+      'import { db } from "@/adapters/dexie/dexie-database";\nexport const x = db;\n'
     );
 
-    try {
-      // Act
-      const violations = runCheck();
+    // Act
+    const violations = sandboxRun();
 
-      // Assert
-      const hit = violations.find((v) =>
-        v.file.endsWith("__alias-fixture-leak.ts")
-      );
-      assert.ok(hit, "expected the alias fixture to be flagged");
-      assert.equal(hit.rule, "R-DexieImport");
-    } finally {
-      rmSync(aliasFile, { force: true });
-    }
+    // Assert
+    assert.equal(violations.length, 1);
+    assert.equal(violations[0].rule, "R-DexieImport");
+    assert.match(violations[0].file, /alias-leak-store\.ts$/);
   });
 
   test("R-DexieImport: barrel re-export flags the file", () => {
@@ -192,45 +185,28 @@ describe("check-no-zustand-writethrough", () => {
     assert.match(hit.file, /namespace-persist-store\.ts$/);
   });
 
-  test("allowlist exemption: an allowlisted store file with a dexie-database import passes", async () => {
-    const ALLOWLIST_FILE = "store/workout-store-actions.ts";
+  test("allowlist exemption: an allowlisted store file with a dexie-database import passes", () => {
+    // Arrange — the allowlist is keyed by the repo-relative path the
+    // script derives, so key the sandbox fixture the same way instead of
+    // dropping a file into the real SPA tree.
     write(
-      ALLOWLIST_FILE,
+      "store/allowlisted-actions.ts",
       'import { db } from "../adapters/dexie/dexie-database";\nexport const noop = () => db;\n'
     );
-
-    // The production allowlist key is `packages/workout-spa-editor/src/store/...`.
-    // Mirror the fixture under that exact path so the allowlist matches.
-    const realAllowlistFile = join(
-      REAL_SPA_SRC,
-      "store",
-      "__allowlist-fixture-actions.ts"
-    );
-    mkdirSync(dirname(realAllowlistFile), { recursive: true });
-    writeFileSync(
-      realAllowlistFile,
-      'import { db } from "../adapters/dexie/dexie-database";\nexport const noop = () => db;\n',
-      "utf8"
-    );
-
-    // Patch the allowlist for the duration of this assertion so the
-    // synthetic fixture sits under the entry we control.
-    const { ALLOWLIST } = await import(
-      // Re-import to grab the live Set; ESM caches by URL so the same Set is shared.
-      "./check-no-zustand-writethrough.mjs"
-    );
-    const allowlistKey = relative(REPO_ROOT, realAllowlistFile).replaceAll(
-      "\\",
-      "/"
-    );
+    const allowlistKey = relative(
+      REPO_ROOT,
+      join(storeDir, "allowlisted-actions.ts")
+    ).replaceAll("\\", "/");
     ALLOWLIST.add(allowlistKey);
+
     try {
-      const violations = runCheck();
-      const hit = violations.find((v) => v.file === allowlistKey);
-      assert.equal(hit, undefined, "allowlisted file must not be flagged");
+      // Act
+      const violations = sandboxRun();
+
+      // Assert
+      assert.deepEqual(violations, [], "allowlisted file must not be flagged");
     } finally {
       ALLOWLIST.delete(allowlistKey);
-      rmSync(realAllowlistFile, { force: true });
     }
   });
 
