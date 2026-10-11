@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
-import { mainText } from "../browser.mjs";
+import { isoDate, mainText } from "../browser.mjs";
+import { INTAKE_KCAL, seed } from "./export-seed.mjs";
 
 // F-41: there is no way to export "all my data" from Settings → Privacy.
 export const EXPORT_CONTROL =
@@ -16,8 +17,37 @@ export async function findDataControl(page, go, pattern) {
   return (await control.count()) > 0 ? control.first() : null;
 }
 
+function assertFile(rec, body, workoutName) {
+  for (const needle of FORBIDDEN) {
+    rec.assert(!body.includes(needle), `export file has no ${needle}`);
+  }
+  const backup = JSON.parse(body);
+  rec.assert(
+    backup.format === "kaiord-backup" && backup.version === 1,
+    "export file declares format kaiord-backup, version 1",
+    body.slice(0, 200)
+  );
+  const profiles = backup.tables?.profiles ?? [];
+  rec.assert(
+    profiles.length > 0 && profiles.every((p) => p.origin !== "auto"),
+    "every exported profile is a real one",
+    JSON.stringify(profiles)
+  );
+  rec.assert(
+    JSON.stringify(backup.tables?.workouts ?? []).includes(workoutName),
+    "export file contains the scheduled workout",
+    `workouts=${backup.tables?.workouts?.length ?? 0}`
+  );
+  rec.assert(
+    (backup.nutrition?.intakeEntries ?? []).some((e) => e.kcal === INTAKE_KCAL),
+    "export file contains the logged intake",
+    JSON.stringify(backup.nutrition?.intakeEntries ?? [])
+  );
+}
+
 export default async function exportData({ rec, open }) {
-  const { page, go } = await open();
+  const session = await open();
+  const { page, go } = session;
   const control = await findDataControl(page, go, EXPORT_CONTROL);
   const buttons = await page.locator("main button").allInnerTexts();
   if (
@@ -29,21 +59,13 @@ export default async function exportData({ rec, open }) {
   ) {
     return;
   }
+  const workoutName = `verify export ${Date.now()}`;
+  await seed(session, isoDate(new Date()), workoutName);
+  const exportControl = await findDataControl(page, go, EXPORT_CONTROL);
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    control.click(),
+    exportControl.click(),
   ]);
   const body = await readFile(await download.path(), "utf8");
-  for (const needle of FORBIDDEN) {
-    rec.assert(
-      !body.includes(needle),
-      `export file has no ${needle}`,
-      `file=${download.suggestedFilename()}`
-    );
-  }
-  rec.assert(
-    body.includes("kaiord-backup"),
-    "export file declares format kaiord-backup",
-    body.slice(0, 200)
-  );
+  assertFile(rec, body, workoutName);
 }
