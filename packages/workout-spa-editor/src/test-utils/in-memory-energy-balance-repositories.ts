@@ -20,6 +20,8 @@ const createIntakeEntryRepository = (
     [...store.values()].filter(
       (r) => r.profileId === profileId && r.date === date
     ),
+  listByProfile: async (profileId) =>
+    [...store.values()].filter((r) => r.profileId === profileId),
   put: async (record) => {
     store.set(record.id, record);
   },

@@ -266,8 +266,10 @@ test.describe("Profile route redirect", () => {
 
     // Assert
     await page.waitForURL(/\/athlete$/);
-    await expect(page.getByRole("main").getByText("My profile")).toBeVisible({
-      timeout: 10_000,
-    });
+    // Exact: the first-run notice also quotes the name ("We created “My
+    // profile”…"), so a substring match is ambiguous once both have rendered.
+    await expect(
+      page.getByRole("main").getByText("My profile", { exact: true })
+    ).toBeVisible({ timeout: 10_000 });
   });
 });

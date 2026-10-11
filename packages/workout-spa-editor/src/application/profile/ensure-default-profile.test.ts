@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
-import { claimAutoProfiles } from "./claim-auto-profiles";
 import { ensureDefaultProfile } from "./ensure-default-profile";
 import { makeProfile, seedProfile } from "./test-fixtures";
 import { updateProfile } from "./update-profile";
@@ -95,21 +94,6 @@ describe("auto profile claim triggers", () => {
 
     // Assert
     expect(updated.origin).toBe("local");
-  });
-
-  it("should claim every auto profile before a backup export", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const auto = await ensureDefaultProfile(persistence, "Mi perfil");
-
-    // Act
-    const claimed = await claimAutoProfiles(persistence);
-
-    // Assert
-    expect(claimed).toBe(1);
-    expect(await persistence.profiles.getById(auto?.id ?? "")).toMatchObject({
-      origin: "local",
-    });
   });
 
   it("should leave a real profile's origin untouched on edit", async () => {

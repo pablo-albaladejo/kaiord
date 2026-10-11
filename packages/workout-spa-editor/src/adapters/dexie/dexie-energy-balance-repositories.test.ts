@@ -57,6 +57,20 @@ describe("createDexieEnergyBalanceRepositories", () => {
     expect(rows.map((r) => r.id)).toEqual(["i-1"]);
   });
 
+  it("should list every intake entry of one profile across dates", async () => {
+    // Arrange
+    const repos = createDexieEnergyBalanceRepositories(db);
+    await repos.intakeEntries.put(entry("i-1", "p-1", "2026-06-21"));
+    await repos.intakeEntries.put(entry("i-2", "p-1", "2026-06-20"));
+    await repos.intakeEntries.put(entry("i-3", "p-2", "2026-06-21"));
+
+    // Act
+    const rows = await repos.intakeEntries.listByProfile("p-1");
+
+    // Assert
+    expect(rows.map((r) => r.id).sort()).toEqual(["i-1", "i-2"]);
+  });
+
   it("should cascade-delete only the target profile's intake entries", async () => {
     // Arrange
     const repos = createDexieEnergyBalanceRepositories(db);
