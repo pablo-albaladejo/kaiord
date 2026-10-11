@@ -42,6 +42,12 @@
     "stale": "Stale",
     "skipped": "Skipped"
   },
+  "lifecycleBadge": {
+    "fromCoach": "From coach plan",
+    "aiAssisted": "AI-assisted",
+    "pushedToGarmin": "Pushed to Garmin",
+    "executedAndMatched": "Executed & matched"
+  },
   "weekStatus": {
     "heading": "Where the week stands",
     "waiting_one": "{{count}} waiting to go to your watch",

@@ -42,6 +42,12 @@
     "stale": "Desactualizada",
     "skipped": "Omitida"
   },
+  "lifecycleBadge": {
+    "fromCoach": "Del plan del entrenador",
+    "aiAssisted": "Asistido por IA",
+    "pushedToGarmin": "Enviado a Garmin",
+    "executedAndMatched": "Realizado y emparejado"
+  },
   "weekStatus": {
     "heading": "Cómo va la semana",
     "waiting_one": "{{count}} esperando para ir al reloj",
