@@ -12,7 +12,10 @@
 import type { PersistencePort } from "../ports/persistence-port";
 import type { WorkoutRecord } from "../types/calendar-record";
 
-type Restorer = Pick<PersistencePort, "workouts" | "tombstones" | "transaction">;
+type Restorer = Pick<
+  PersistencePort,
+  "workouts" | "tombstones" | "transaction"
+>;
 
 export async function restoreDeletedWorkout(
   persistence: Restorer,

@@ -75,14 +75,15 @@ const useEditor = () => {
 
 const stepCount = () =>
   (
-    useWorkoutStore.getState().currentWorkout?.extensions?.structured_workout as
-      | { steps: unknown[] }
-      | undefined
+    useWorkoutStore.getState().currentWorkout?.extensions
+      ?.structured_workout as { steps: unknown[] } | undefined
   )?.steps.length;
 
 const renderLoaded = async () => {
   const view = renderHook(useEditor, { wrapper });
-  await waitFor(() => expect(view.result.current.loaded.baselineKrd).not.toBe(null));
+  await waitFor(() =>
+    expect(view.result.current.loaded.baselineKrd).not.toBe(null)
+  );
   return view;
 };
 
@@ -114,7 +115,9 @@ describe("useEditorSave", () => {
     expect(result.current.isDirty).toBe(false);
     expect(prompts()).toBe(false);
     const saved = await db.table<WorkoutRecord>("workouts").get(ID);
-    const steps = (saved?.krd?.extensions?.structured_workout as { steps: unknown[] }).steps;
+    const steps = (
+      saved?.krd?.extensions?.structured_workout as { steps: unknown[] }
+    ).steps;
     expect(steps).toHaveLength(2);
   });
 
