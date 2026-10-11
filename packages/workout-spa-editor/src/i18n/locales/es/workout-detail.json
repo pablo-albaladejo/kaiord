@@ -101,5 +101,26 @@
       "incomplete-pace-zones": "Este entrenamiento usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para enviarlo.",
       "unsupported-pace-zone-sport": "Solo se pueden enviar zonas de ritmo a Garmin en entrenamientos de carrera o natación."
     }
+  },
+  "menu": {
+    "move": "Mover a otro día",
+    "delete": "Borrar entreno"
+  },
+  "delete": {
+    "title": "¿Borrar este entreno?",
+    "message": "Sale de tu calendario. Puedes deshacerlo durante unos segundos.",
+    "messageGarmin": "Sale de tu calendario de Kaiord pero no de Garmin: no se borrará en Garmin Connect, bórralo también allí.",
+    "confirm": "Borrar",
+    "cancel": "Cancelar",
+    "done": "Entreno borrado",
+    "undo": "Deshacer"
+  },
+  "move": {
+    "title": "Mover entreno",
+    "description": "Elige el nuevo día para este entreno.",
+    "confirm": "Mover",
+    "cancel": "Cancelar",
+    "done": "Entreno movido",
+    "notFound": "Este entreno ya no existe."
   }
 }

@@ -101,5 +101,26 @@
       "incomplete-pace-zones": "This workout uses a pace zone your profile doesn't define. Complete your pace zones in Athlete to send it.",
       "unsupported-pace-zone-sport": "Pace zones can only be sent to Garmin in running or swimming workouts."
     }
+  },
+  "menu": {
+    "move": "Move to another day",
+    "delete": "Delete workout"
+  },
+  "delete": {
+    "title": "Delete this workout?",
+    "message": "It leaves your calendar. You can undo it for a few seconds.",
+    "messageGarmin": "It leaves your Kaiord calendar but not Garmin: it won't be deleted in Garmin Connect, remove it there too.",
+    "confirm": "Delete",
+    "cancel": "Cancel",
+    "done": "Workout deleted",
+    "undo": "Undo"
+  },
+  "move": {
+    "title": "Move workout",
+    "description": "Pick the new day for this workout.",
+    "confirm": "Move",
+    "cancel": "Cancel",
+    "done": "Workout moved",
+    "notFound": "This workout no longer exists."
   }
 }
