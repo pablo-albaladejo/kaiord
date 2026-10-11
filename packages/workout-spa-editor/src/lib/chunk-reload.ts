@@ -31,8 +31,27 @@ export const isChunkLoadError = (error: unknown): boolean => {
 // errors (multiple preloadError events / boundary catches) cannot loop.
 let reloadedThisLoad = false;
 
+// Leaving the page also fails pending imports: Firefox cancels a document's
+// in-flight requests as soon as a navigation away starts, while the document
+// keeps running, and the rejection reads exactly like a stale chunk. A reload
+// then would replace the navigation the user asked for. `beforeunload` marks
+// the leave; one whose prompt was shown (`defaultPrevented`) may have been
+// cancelled, so it does not count, and `pageshow` clears a leave the page
+// came back from (back/forward cache).
+let leaveEvent: Event | null = null;
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", (event) => {
+    leaveEvent = event;
+  });
+  window.addEventListener("pageshow", () => {
+    leaveEvent = null;
+  });
+}
+const isLeaving = (): boolean =>
+  leaveEvent !== null && !leaveEvent.defaultPrevented;
+
 export const reloadOnceForChunkError = (): boolean => {
-  if (reloadedThisLoad) return false;
+  if (reloadedThisLoad || isLeaving()) return false;
   try {
     const last = Number(sessionStorage.getItem(RELOAD_AT_KEY) ?? "0");
     if (Date.now() - last < RELOAD_COOLDOWN_MS) return false;

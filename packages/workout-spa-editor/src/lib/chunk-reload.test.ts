@@ -97,4 +97,47 @@ describe("reloadOnceForChunkError", () => {
     expect(second).toBe(false);
     expect(reload).toHaveBeenCalledTimes(1);
   });
+
+  it("should not reload while the page is being left", async () => {
+    // Arrange
+    const reloadOnceForChunkError = await loadFn();
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+
+    // Act
+    const triggered = reloadOnceForChunkError();
+
+    // Assert
+    expect(triggered).toBe(false);
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("should reload when the leave was held by an unsaved-changes prompt", async () => {
+    // Arrange
+    const reloadOnceForChunkError = await loadFn();
+    const prompt = (event: Event) => event.preventDefault();
+    window.addEventListener("beforeunload", prompt);
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    window.removeEventListener("beforeunload", prompt);
+
+    // Act
+    const triggered = reloadOnceForChunkError();
+
+    // Assert
+    expect(triggered).toBe(true);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("should reload when the page came back from the back/forward cache", async () => {
+    // Arrange
+    const reloadOnceForChunkError = await loadFn();
+    window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    window.dispatchEvent(new Event("pageshow"));
+
+    // Act
+    const triggered = reloadOnceForChunkError();
+
+    // Assert
+    expect(triggered).toBe(true);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
 });
