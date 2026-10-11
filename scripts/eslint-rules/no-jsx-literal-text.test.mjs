@@ -28,6 +28,10 @@ test("should report literal UI copy in JSX and leave translated copy alone", () 
       { code: 'const a = <div className={"text-sm"} />;' },
       { code: 'const a = <img alt="" />;' },
       { code: "const a = <p>{label}</p>;" },
+      { code: 'const a = <option label="kg" />;', options: [{ allow: ["kg"] }] },
+      { code: 'const a = <input label="Weight" />;' },
+      { code: 'const a = <Input label={t("weight")} heading={h} />;' },
+      { code: 'const a = <Card variant="Outline" />;' },
       {
         code: "const a = <p>Garmin Connect</p>;",
         options: [{ allow: ["Garmin Connect"] }],
@@ -42,6 +46,10 @@ test("should report literal UI copy in JSX and leave translated copy alone", () 
       { code: 'const a = <button title={"Chat"} />;', errors: literal },
       { code: 'const a = <input placeholder="sk-..." />;', errors: literal },
       { code: 'const a = <img alt="Logo" />;', errors: literal },
+      { code: 'const a = <Input label="Weight (kg)" />;', errors: literal },
+      { code: 'const a = <Field description={"Resting"} />;', errors: literal },
+      { code: 'const a = <Section heading="Profile" />;', errors: literal },
+      { code: 'const a = <Ui.Dialog title="Edit" />;', errors: literal },
     ],
   };
 

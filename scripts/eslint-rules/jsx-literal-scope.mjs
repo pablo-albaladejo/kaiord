@@ -68,7 +68,8 @@ export const JSX_LITERAL_IGNORES = [
 
 /**
  * Copy that is the same in every language: the product name, an API-key
- * shape, units, the zone prefix ("Z3"), the remove glyph and a time format.
+ * shape, units, the zone prefix ("Z3"), the remove glyph, a time format and
+ * the threshold acronyms ("LTHR", "FTP") that coaches use untranslated.
  */
 export const JSX_LITERAL_ALLOW = [
   "Kaiord Editor",
@@ -78,4 +79,6 @@ export const JSX_LITERAL_ALLOW = [
   "Z",
   "x",
   "mm:ss",
+  "LTHR",
+  "FTP",
 ];

@@ -8,7 +8,10 @@
  * - a string literal rendered as a child (`<p>{"Today"}</p>`);
  * - a string literal in a copy attribute (`aria-label`, `title`,
  *   `placeholder`, `alt`, `aria-description`, `aria-roledescription`),
- *   bare or wrapped in an expression container.
+ *   bare or wrapped in an expression container;
+ * - a string literal in a component's copy prop (`label`, `description`,
+ *   `title`, `heading`) on a capitalized element (`<Input label="…" />`,
+ *   `<Ui.Dialog title="…" />`), where the component renders it as text.
  *
  * Text without a letter (`·`, `+`, `—`, `42`) is not copy. Proper nouns that
  * stay in every language are passed in the `allow` option.
@@ -22,7 +25,24 @@ const COPY_ATTRS = new Set([
   "placeholder",
   "alt",
 ]);
+const COMPONENT_COPY_PROPS = new Set([
+  "label",
+  "description",
+  "title",
+  "heading",
+]);
 const LETTER = /\p{L}/u;
+
+const isComponent = (name) => {
+  if (name.type === "JSXMemberExpression") return true;
+  return name.type === "JSXIdentifier" && /^[A-Z]/.test(name.name);
+};
+
+const isCopyAttribute = (node) => {
+  const prop = node.name.name;
+  if (COPY_ATTRS.has(prop)) return true;
+  return COMPONENT_COPY_PROPS.has(prop) && isComponent(node.parent.name);
+};
 
 const stringOf = (node) => {
   if (!node) return null;
@@ -67,7 +87,7 @@ const noJsxLiteralText = {
       },
       JSXAttribute(node) {
         if (node.name.type !== "JSXIdentifier") return;
-        if (!COPY_ATTRS.has(node.name.name)) return;
+        if (!isCopyAttribute(node)) return;
         const value =
           node.value?.type === "JSXExpressionContainer"
             ? node.value.expression
