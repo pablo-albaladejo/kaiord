@@ -65,6 +65,15 @@
     var(--bottom-nav-gap) + var(--bottom-nav-height) +
       var(--bottom-nav-fab-rise) + 1.5rem
   );
+
+  /* Floating chat button (md and up): it sits --chat-fab-offset from the
+     viewport's bottom-right corner, and in-flow content pads
+     --chat-fab-clearance at the bottom so nothing ends underneath it. */
+  --chat-fab-offset: 1.5rem;
+  --chat-fab-size: 3.5rem;
+  --chat-fab-clearance: calc(
+    var(--chat-fab-offset) + var(--chat-fab-size) + 1rem
+  );
 }
 
 @theme {
