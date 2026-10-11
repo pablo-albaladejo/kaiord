@@ -63,18 +63,30 @@ describe("Zwift Round-trip: KRD → ZWO → KRD compared step by step", () => {
   );
 });
 
-describe("Zwift fixture WorkoutRepeatSteps.zwo", () => {
-  it("should hold the same steps, in the same order, as the FIT-derived KRD", async () => {
-    // Arrange
-    const logger = createMockLogger();
-    const reader = createFastXmlZwiftReader(logger, validator);
-    const expected = loadKrdFixture("WorkoutRepeatSteps.krd");
+// Each ZWO fixture is the writer's output for the FIT fixture of the same name.
+// Reading it back must give the FIT-derived KRD, so a stale fixture (for
+// example one written before the FIT workoutHr offset fix) fails here.
+describe("Zwift fixtures derived from FIT", () => {
+  it.each(Object.keys(FORMAT_LIMITS))(
+    "should hold the same steps, in the same order, as the FIT-derived %s",
+    async (fixture) => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createFastXmlZwiftReader(logger, validator);
+      const expected = loadKrdFixture(fixture);
+      const limits = FORMAT_LIMITS[fixture]!;
 
-    // Act
-    const actual = await reader(loadZwoFixture("WorkoutRepeatSteps.zwo"));
+      // Act
+      const actual = await reader(
+        loadZwoFixture(fixture.replace(/\.krd$/, ".zwo"))
+      );
 
-    // Assert
-    const checker = createToleranceChecker();
-    expect(compareKRDs(expected, actual, checker, logger)).toStrictEqual([]);
-  });
+      // Assert
+      const checker = createToleranceChecker();
+      const violations = compareKRDs(expected, actual, checker, logger);
+      expect(violations.map((v) => v.field)).toStrictEqual(
+        limits.map((limit) => limit.field)
+      );
+    }
+  );
 });
