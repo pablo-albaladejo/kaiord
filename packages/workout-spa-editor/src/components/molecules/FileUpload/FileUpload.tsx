@@ -16,6 +16,8 @@ export type FileUploadProps = {
    * analytics event without coupling the upload component to any port.
    */
   onImported?: (format: string) => void;
+  /** Called after a successful but lossy import, one message per loss. */
+  onWarnings?: (warnings: Array<string>) => void;
   accept?: string;
   className?: string;
   disabled?: boolean;
@@ -31,12 +33,18 @@ export const FileUpload = ({
   onFileLoad,
   onError,
   onImported,
+  onWarnings,
   accept = ".fit,.tcx,.zwo,.krd,.json,.gcn",
   className = "",
   disabled = false,
   inputRef,
 }: FileUploadProps) => {
-  const upload = useFileUpload({ onFileLoad, onError, onImported });
+  const upload = useFileUpload({
+    onFileLoad,
+    onError,
+    onImported,
+    onWarnings,
+  });
 
   useEffect(() => {
     if (!inputRef) return;

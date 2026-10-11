@@ -10,7 +10,10 @@ import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistenc
 import { AnalyticsProvider } from "../../../contexts";
 import { GarminBridgeProvider } from "../../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
-import { ToastContextProvider } from "../../../contexts/ToastContext";
+import {
+  ToastContextProvider,
+  useToastContext,
+} from "../../../contexts/ToastContext";
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { KRD } from "../../../types/krd";
@@ -60,6 +63,18 @@ const mockKrd: KRD = {
   },
 };
 
+/** Lists the queued toast titles; the app's renderer is not mounted here. */
+function ToastTitles() {
+  const { toasts } = useToastContext();
+  return (
+    <ul data-testid="toast-titles">
+      {toasts.map((toast) => (
+        <li key={toast.id}>{toast.title}</li>
+      ))}
+    </ul>
+  );
+}
+
 function renderOverlay(
   analytics: Analytics,
   path = "/workout/new?action=import"
@@ -74,6 +89,7 @@ function renderOverlay(
               <Router hook={hook}>
                 <ImportDropzoneOverlay />
               </Router>
+              <ToastTitles />
             </ToastContextProvider>
           </ToastProvider>
         </GarminBridgeProvider>
@@ -181,6 +197,36 @@ describe("ImportDropzoneOverlay", () => {
       expect(analytics.event).toHaveBeenCalledWith("workout-imported", {
         format: "krd",
       });
+    });
+  });
+
+  it("should warn the user with a toast when the import was lossy", async () => {
+    // Arrange
+    const { importWorkout } = await import("../../../utils/import-workout");
+    vi.mocked(importWorkout).mockImplementation(
+      async (_file, _onProgress, _signal, onWarning) => {
+        onWarning?.("Step has no valid duration, skipping");
+        return mockKrd;
+      }
+    );
+    const analytics: Analytics = { pageView: vi.fn(), event: vi.fn() };
+    const user = userEvent.setup();
+    renderOverlay(analytics);
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+
+    // Act
+    await user.upload(
+      input,
+      new File(["<xml/>"], "lossy.tcx", { type: "text/xml" })
+    );
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByTestId("toast-titles")).toHaveTextContent(
+        "Imported with warnings"
+      );
     });
   });
 

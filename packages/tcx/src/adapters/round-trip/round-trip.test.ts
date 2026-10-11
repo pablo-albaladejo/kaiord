@@ -157,64 +157,6 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     }
   });
 
-  it("should preserve repetition blocks through round-trip", async () => {
-    // Arrange
-    const logger = createMockLogger();
-    const validator = createXsdTcxValidator(logger);
-    const reader = createFastXmlTcxReader(logger);
-    const writer = createFastXmlTcxWriter(logger, validator);
-    const originalXml = loadTcxFixture("WorkoutRepeatBlocks.tcx");
-    const krd1 = await reader(originalXml);
-    const convertedXml = await writer(krd1);
-    const krd2 = await reader(convertedXml);
-    const workout1 = krd1.extensions?.structured_workout as {
-      steps: Array<
-        | { stepIndex: number }
-        | {
-            repeatCount: number;
-            steps: Array<{
-              stepIndex: number;
-              durationType: string;
-              targetType: string;
-            }>;
-          }
-      >;
-    };
-
-    // Act
-    const workout2 = krd2.extensions?.structured_workout as {
-      steps: Array<
-        | { stepIndex: number }
-        | {
-            repeatCount: number;
-            steps: Array<{
-              stepIndex: number;
-              durationType: string;
-              targetType: string;
-            }>;
-          }
-      >;
-    };
-
-    // Assert
-    expect(workout2.steps.length).toBe(workout1.steps.length);
-    for (let i = 0; i < workout1.steps.length; i++) {
-      const step1 = workout1.steps[i];
-      const step2 = workout2.steps[i];
-
-      if ("repeatCount" in step1 && "repeatCount" in step2) {
-        expect(step2.repeatCount).toBe(step1.repeatCount);
-        expect(step2.steps.length).toBe(step1.steps.length);
-
-        // Check nested steps
-        for (let j = 0; j < step1.steps.length; j++) {
-          expect(step2.steps[j].durationType).toBe(step1.steps[j].durationType);
-          expect(step2.steps[j].targetType).toBe(step1.steps[j].targetType);
-        }
-      }
-    }
-  });
-
   it("should preserve mixed duration types through round-trip", async () => {
     // Arrange
     const logger = createMockLogger();

@@ -45,21 +45,6 @@ export const importFitFile = async (
   return krd;
 };
 
-export const importTcxFile = async (
-  buffer: Uint8Array,
-  onProgress?: ImportProgressCallback,
-  signal?: AbortSignal
-): Promise<KRD> => {
-  signal?.throwIfAborted();
-  const text = new TextDecoder().decode(buffer);
-  onProgress?.(50);
-  signal?.throwIfAborted();
-  const { tcxReader } = await import("@kaiord/tcx");
-  const krd = await fromText(text, tcxReader);
-  onProgress?.(100);
-  return krd;
-};
-
 export const importZwoFile = async (
   buffer: Uint8Array,
   onProgress?: ImportProgressCallback,

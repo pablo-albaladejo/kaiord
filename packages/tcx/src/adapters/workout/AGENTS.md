@@ -15,6 +15,7 @@ TCX Workout ↔ KRD conversion. Maps TCX workout structure (exercises, steps wit
 | `tcx.converter.ts`                 | Top-level KRD → TCX entry point. Converts KRD workout structure back to TCX format.                     |
 | `workout.converter.ts`             | Converts individual TCX Workout to KRD Workout. Iterates steps, extracts metadata and extensions.       |
 | `step.converter.ts`                | Converts individual TCX Step to KRD WorkoutStep. Maps duration, target, intensity, and extensions.      |
+| `repeat-block.converter.ts`        | Converts a TCX `Repeat_t` to a KRD repetition block; unrolls nested repeats (KRD blocks hold leaves).   |
 | `metadata-builder.ts`              | Extracts KRD metadata (name, description, sport) from TCX Workout.                                      |
 | `step-helpers.ts`                  | Utility functions for step conversion: extract intensity, extensions, repeat count.                     |
 | `target-with-extensions.helper.ts` | Maps TCX Target to KRD Target, preserving extensions (e.g., Garmin custom targets).                     |

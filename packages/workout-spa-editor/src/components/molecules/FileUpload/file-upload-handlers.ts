@@ -1,7 +1,7 @@
 import type { KRD, ValidationError } from "../../../types/krd";
-import { detectFormat } from "../../../utils/file-format-detector";
 import { createParseError, parseFile } from "./file-parser";
 import { validateFileSize } from "./file-upload-constants";
+import { reportImported } from "./report-imported";
 
 type ErrorState = {
   title: string;
@@ -32,15 +32,6 @@ export function createErrorHandler(
   };
 }
 
-function reportImported(
-  filename: string,
-  onImported?: (format: string) => void
-) {
-  if (!onImported) return;
-  const detection = detectFormat(filename);
-  if (detection.success) onImported(detection.format);
-}
-
 export function createFileChangeHandler(
   setFileName: (name: string | null) => void,
   setIsLoading: (loading: boolean) => void,
@@ -49,7 +40,8 @@ export function createFileChangeHandler(
   onFileLoad: (krd: KRD) => void,
   handleError: (errorState: ErrorState) => void,
   createAbortController: () => AbortController,
-  onImported?: (format: string) => void
+  onImported?: (format: string) => void,
+  onWarnings?: (warnings: Array<string>) => void
 ) {
   return async (file: File | undefined) => {
     if (!file) return;
@@ -66,11 +58,13 @@ export function createFileChangeHandler(
     setConversionProgress(0);
     setError(null);
 
+    const warnings: Array<string> = [];
     try {
       const krd = await parseFile(
         file,
         (progress) => setConversionProgress(progress),
-        controller.signal
+        controller.signal,
+        (message) => warnings.push(message)
       );
       setError(null);
       setConversionProgress(100);
@@ -85,5 +79,6 @@ export function createFileChangeHandler(
     // Fire analytics outside the parse try so a throwing callback cannot
     // pollute the error-handling path.
     reportImported(file.name, onImported);
+    if (warnings.length > 0) onWarnings?.(warnings);
   };
 }

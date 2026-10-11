@@ -18,5 +18,9 @@
   "dropzone": {
     "title": "Suelta un archivo FIT, TCX, ZWO, GCN o KRD",
     "hint": "O haz clic abajo para elegir uno de tu dispositivo."
+  },
+  "warnings": {
+    "title": "Importado con avisos",
+    "description": "Algunas partes de este archivo no se han podido importar con exactitud. Revisa el entrenamiento antes de usarlo."
   }
 }

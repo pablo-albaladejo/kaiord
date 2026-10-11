@@ -1,6 +1,13 @@
-import type { Logger, Sport, Workout, WorkoutStep } from "@kaiord/core";
+import type {
+  Logger,
+  RepetitionBlock,
+  Sport,
+  Workout,
+  WorkoutStep,
+} from "@kaiord/core";
 
 import { TCX_TO_KRD_SPORT, tcxSportSchema } from "../schemas/tcx-sport";
+import { convertTcxRepeat, isTcxRepeat } from "./repeat-block.converter";
 import { convertTcxStep } from "./step.converter";
 
 const extractSport = (tcxWorkout: Record<string, unknown>): Sport => {
@@ -29,21 +36,26 @@ const convertSteps = (
   tcxSteps: unknown,
   sport: Sport,
   logger: Logger
-): Array<WorkoutStep> => {
-  const steps: Array<WorkoutStep> = [];
+): Array<WorkoutStep | RepetitionBlock> => {
+  const steps: Array<WorkoutStep | RepetitionBlock> = [];
 
   if (!tcxSteps) return steps;
 
-  const stepArray = Array.isArray(tcxSteps) ? tcxSteps : [tcxSteps];
+  const stepArray = (Array.isArray(tcxSteps) ? tcxSteps : [tcxSteps]) as Array<
+    Record<string, unknown>
+  >;
   let stepIndex = 0;
 
   for (const tcxStep of stepArray) {
-    const step = convertTcxStep(
-      tcxStep as Record<string, unknown>,
-      stepIndex,
-      sport,
-      logger
-    );
+    if (isTcxRepeat(tcxStep)) {
+      const block = convertTcxRepeat(tcxStep, stepIndex, sport, logger);
+      if (block) {
+        steps.push(block);
+        stepIndex += block.steps.length;
+      }
+      continue;
+    }
+    const step = convertTcxStep(tcxStep, stepIndex, sport, logger);
     if (step) {
       steps.push(step);
       stepIndex++;
