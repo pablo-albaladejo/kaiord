@@ -91,6 +91,22 @@ describe("parseBackup", () => {
     expect(backup).toEqual(valid);
   });
 
+  it("should ignore a version 2 file's nutrition stub, whatever it holds", () => {
+    // Arrange
+    const stub = {
+      intakeEntries: [legacyEntry],
+      intakePresets: [],
+      energyTargets: [],
+    };
+    const text = JSON.stringify({ ...valid, nutrition: stub });
+
+    // Act
+    const backup = parseBackup(text);
+
+    // Assert
+    expect(backup).toEqual(valid);
+  });
+
   it("should reject text that is not JSON as an invalid file", () => {
     // Arrange
     const text = "not json {";

@@ -22,7 +22,7 @@ import { applyV28Upgrade } from "./dexie-v28-migration";
 import { applyV29Upgrade } from "./dexie-v29-migration";
 import { applyV33Upgrade } from "./dexie-v33-migration";
 import { applyV36Upgrade } from "./dexie-v36-migration";
-import { applyV37Upgrade } from "./dexie-v37-migration";
+import { applyV37Upgrade, V37_STORES } from "./dexie-v37-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -181,7 +181,7 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // ledger rows gain their explicit `library` state (normalizeGarminLedgerRow).
   // Folded here (as v30).
   db.version(36).stores(SCHEMAS.v35).upgrade(applyV36Upgrade);
-  // v37 — nutrition joins the snapshot; schema as v35, the upgrade backfills
-  // the intake `updatedAt` clock (dexie-v37-migration). Folded here (as v30).
-  db.version(37).stores(SCHEMAS.v35).upgrade(applyV37Upgrade);
+  // v37 — nutrition joins the snapshot: `updatedAt` indexes on its stores and
+  // a backfill of the intake clock (dexie-v37-migration). Folded here (v30).
+  db.version(37).stores(V37_STORES).upgrade(applyV37Upgrade);
 };

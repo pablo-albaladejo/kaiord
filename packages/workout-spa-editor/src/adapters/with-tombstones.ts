@@ -16,11 +16,10 @@
  *    sites use dedicated repository methods (`deleteMirrorOrphan`,
  *    `deleteLocalOrphan`) that this decorator does not touch.
  * 2. Profile-cascade deletes (`deleteByProfile`, session-match cascade
- *    hooks), the nutrition stores' included. Nothing re-runs that cascade on the other devices — the merge
- *    has no profile-cascade — so after a profile delete the profile row
- *    stays deleted (it IS tombstoned, via `profiles`) while its per-profile
- *    rows come back from the remote as orphans of a dead profile. Closing
- *    that gap needs a profile-aware merge, not a per-row tombstone storm.
+ *    hooks), the nutrition stores' included. The profile row IS tombstoned
+ *    (via `profiles`), and the sync and the backup drop every per-profile
+ *    row of a tombstoned profile (`dropDeletedProfileRows`), so a profile
+ *    delete needs one tombstone, not a per-row tombstone storm.
  */
 
 import type { PersistencePort } from "../ports/persistence-port";

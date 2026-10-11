@@ -64,6 +64,21 @@ describe("exportBackup", () => {
     });
   });
 
+  it("should write an empty nutrition stub so an older app reports an unsupported version", async () => {
+    // Arrange
+    const deps = setup();
+
+    // Act
+    const backup = await run(deps);
+
+    // Assert
+    expect(backup.nutrition).toEqual({
+      intakeEntries: [],
+      intakePresets: [],
+      energyTargets: [],
+    });
+  });
+
   it("should carry the user's records and tombstones through the table policy", async () => {
     // Arrange
     const deps = setup();
@@ -147,6 +162,36 @@ describe("exportBackup", () => {
     expect(backup.tables.intakeEntries).toEqual(deps.tables.intakeEntries);
     expect(backup.tables.intakePresets).toEqual([preset]);
     expect(backup.tables.energyTargets).toEqual([target]);
-    expect(backup).not.toHaveProperty("nutrition");
+    expect(Object.values(backup.nutrition ?? {}).flat()).toEqual([]);
+  });
+
+  it("should leave out the rows of a deleted profile that came back from Drive", async () => {
+    // Arrange
+    const deps = setup();
+    deps.tables.intakeEntries = [
+      intake("i-kept", "p-real", "2026-10-10"),
+      intake("i-orphan", "p-gone", "2026-10-10"),
+      intake("i-late", "p-late", "2026-10-10"),
+    ];
+    deps.tables.healthWeight = [
+      { id: "hw-1", profileId: "p-gone", updatedAt: "2026-10-10" },
+    ];
+    const port = createInMemorySnapshotPort({
+      schemaVersion: 40,
+      tables: deps.tables,
+      tombstones: [
+        { table: "profiles", id: "p-gone", deletedAt: "2026-10-11T00:00:00Z" },
+      ],
+    });
+
+    // Act
+    const backup = await run({ ...deps, port });
+
+    // Assert
+    const ids = backup.tables.intakeEntries?.map(
+      (r) => (r as { id: string }).id
+    );
+    expect(ids).toEqual(["i-kept", "i-late"]);
+    expect(backup.tables.healthWeight).toEqual([]);
   });
 });

@@ -3,7 +3,8 @@
  *
  * Validates against `intakePresetRecordSchema` (non-negative energy + macros,
  * non-empty label), mints a fresh id, and stamps `createdAt` and the
- * `updatedAt` sync clock from the injected clock. Returns the stored record, or `undefined` on validation failure.
+ * `updatedAt` sync clock from the injected clock. Returns the stored
+ * record, or `undefined` on validation failure.
  */
 import type { MealSlot } from "@kaiord/core";
 

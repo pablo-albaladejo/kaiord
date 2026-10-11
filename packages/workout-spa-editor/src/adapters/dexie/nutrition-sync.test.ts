@@ -14,6 +14,7 @@ import { parseBackup } from "../../application/backup/parse-backup";
 import { createProfile } from "../../application/profile/create-profile";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
+import type { SnapshotPort } from "../../ports/snapshot-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import { createAppPersistence } from "../create-app-persistence";
@@ -71,6 +72,28 @@ const twoDevices = async () => {
   const b = await open("b");
   await sync(cloud, b, "dev-b");
   return { cloud, a, b, profileId };
+};
+
+/**
+ * Runs `write` after the sync's export read and before its import
+ * transaction: the first read-write transaction the sync opens is the import.
+ */
+const writeBeforeImport = (
+  port: SnapshotPort,
+  write: () => Promise<void>
+): SnapshotPort => {
+  let pending: (() => Promise<void>) | null = write;
+  return {
+    ...port,
+    transaction: async (mode, scope) => {
+      if (mode === "rw" && pending) {
+        const run = pending;
+        pending = null;
+        await run();
+      }
+      return port.transaction(mode, scope);
+    },
+  };
 };
 
 afterEach(async () => {
@@ -163,5 +186,42 @@ describe("nutrition sync between two devices", () => {
     // Assert
     expect(await b.persistence.intakeEntries.getById("i-1")).toBeUndefined();
     expect(await a.persistence.intakeEntries.getById("i-1")).toBeUndefined();
+  });
+
+  it("should keep an intake logged while a sync is between its export and its import", async () => {
+    // Arrange
+    const { cloud, a, profileId } = await twoDevices();
+    const logged = entry(profileId, 500, "2026-10-11T08:00:00.000Z");
+    const racing = writeBeforeImport(a.snapshotPort, () =>
+      a.persistence.intakeEntries.put(logged)
+    );
+
+    // Act
+    await syncWithCloud({ cloud, snapshotPort: racing, deviceId: "dev-a" });
+    await sync(cloud, a, "dev-a");
+
+    // Assert
+    expect(await a.persistence.intakeEntries.getById("i-1")).toEqual(logged);
+    const pushed = cloud.state.snapshot?.tables.intakeEntries ?? [];
+    expect(pushed).toEqual([logged]);
+  });
+
+  it("should keep an intake edited while a sync is between its export and its import", async () => {
+    // Arrange
+    const { cloud, a, profileId } = await twoDevices();
+    await a.persistence.intakeEntries.put(
+      entry(profileId, 500, "2026-10-10T08:00:00.000Z")
+    );
+    await sync(cloud, a, "dev-a");
+    const edited = entry(profileId, NEWER_KCAL, "2026-10-11T08:00:00.000Z");
+    const racing = writeBeforeImport(a.snapshotPort, () =>
+      a.persistence.intakeEntries.put(edited)
+    );
+
+    // Act
+    await syncWithCloud({ cloud, snapshotPort: racing, deviceId: "dev-a" });
+
+    // Assert
+    expect(await a.persistence.intakeEntries.getById("i-1")).toEqual(edited);
   });
 });

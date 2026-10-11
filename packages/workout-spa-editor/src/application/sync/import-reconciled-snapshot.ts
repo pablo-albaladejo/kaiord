@@ -15,6 +15,7 @@ export type ImportReconciledDeps = {
   port: SnapshotPort;
   snapshot: Snapshot;
   deviceLocalRekey: ProfileRekey | null;
+  exported?: SnapshotTables;
   now?: () => Date;
 };
 
@@ -32,10 +33,11 @@ export async function importReconciledSnapshot({
   port,
   snapshot,
   deviceLocalRekey,
+  exported,
   now,
 }: ImportReconciledDeps): Promise<void> {
   await port.transaction("rw", async () => {
-    await importSnapshot({ port, snapshot, now });
+    await importSnapshot({ port, snapshot, exported, now });
     if (deviceLocalRekey)
       await port.updateDeviceLocal(rekeyDeviceLocal(deviceLocalRekey));
   });

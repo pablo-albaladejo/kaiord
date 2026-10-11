@@ -411,6 +411,28 @@ describe("importBackup", () => {
     expect(device.state.tables.intakeEntries ?? []).toEqual([]);
   });
 
+  it("should not import the health rows of a profile deleted after the backup", async () => {
+    // Arrange
+    const gone: Tombstone = {
+      table: "profiles",
+      id: "p-ana",
+      deletedAt: "2026-10-11T06:00:00.000Z",
+    };
+    const device = deviceWith({ profiles: [] }, {}, [gone]);
+    const backup = backupOf({
+      profiles: [ana],
+      healthWeight: [{ id: "hw-1", profileId: "p-ana", updatedAt: BACKUP_AT }],
+      workouts: [workout("w-ana", "p-ana", BACKUP_AT)],
+    });
+
+    // Act
+    await run(device, backup);
+
+    // Assert
+    expect(device.state.tables.healthWeight ?? []).toEqual([]);
+    expect(device.state.tables.workouts ?? []).toEqual([]);
+  });
+
   it("should keep the profile when a browser imports its own backup", async () => {
     // Arrange
     const device = freshDevice();
