@@ -184,4 +184,62 @@ describe("LibraryPage short-circuit scheduling", () => {
     const workouts = await db.table("workouts").toArray();
     expect(workouts).toHaveLength(0);
   });
+
+  it("should say it is picking a template for the sheet's day", async () => {
+    // Arrange
+    const path = `/library?source=template-picker&date=${TARGET_DATE}`;
+
+    // Act
+    renderLibrary(path);
+
+    // Assert
+    expect(await screen.findByTestId("library-picker-hint")).toHaveTextContent(
+      "Choose a template to schedule on Monday, June 1, 2026."
+    );
+  });
+
+  it("should not show the picking hint on the plain library", async () => {
+    // Arrange
+    renderLibrary("/library");
+
+    // Act
+    await screen.findByText("Easy Ride");
+
+    // Assert
+    expect(screen.queryByTestId("library-picker-hint")).not.toBeInTheDocument();
+  });
+
+  it("should propose the originating week's first day when the sheet had no day", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    renderLibrary(
+      "/library?source=template-picker&week=2020-W02&from=calendar"
+    );
+    await screen.findByText("Easy Ride");
+
+    // Act
+    await user.click(screen.getByRole("button", { name: /schedule/i }));
+
+    // Assert
+    expect(await screen.findByTestId("schedule-date-input")).toHaveValue(
+      "2020-01-06"
+    );
+  });
+
+  it("should open a picked template in the editor on the sheet's day", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const { location } = renderLibrary(
+      `/library?source=template-picker&date=${TARGET_DATE}&from=calendar-day`
+    );
+    await screen.findByText("Easy Ride");
+
+    // Act
+    await user.click(screen.getByText("Easy Ride"));
+
+    // Assert
+    expect(location.history.at(-1)).toBe(
+      `/workout/new?source=scratch&date=${TARGET_DATE}&from=library`
+    );
+  });
 });
