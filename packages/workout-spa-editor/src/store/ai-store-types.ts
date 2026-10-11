@@ -6,6 +6,9 @@ export type LlmProviderConfig = {
   id: string;
   type: LlmProviderType;
   apiKey: string;
+  // Set on a provider restored from a backup, which never carries keys: its
+  // `apiKey` is empty until the user enters one, and no AI feature uses it.
+  apiKeyMissing?: boolean;
   // Deprecated: model now lives in aiModelBindings; kept one release for migration.
   model?: string;
   label: string;

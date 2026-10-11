@@ -11,7 +11,7 @@ export async function seed(session, date, workoutName) {
   await wellness.getByLabel(/Weight \(kg\)|Peso \(kg\)/).fill("69.4");
   await wellness.getByRole("button", { name: SAVE }).click();
   await wellness.waitFor({ state: "hidden" });
-  await scheduleOn(session, date, workoutName);
+  const scheduled = await scheduleOn(session, date, workoutName);
   await go("nutrition");
   await page.getByLabel("Energía (kcal)").fill(String(INTAKE_KCAL));
   await page.getByTestId("intake-log-submit").click();
@@ -21,4 +21,5 @@ export async function seed(session, date, workoutName) {
   await page.getByLabel("Clave de API").fill("sk-verify-prod-fake");
   await page.getByRole("button", { name: "Añadir proveedor" }).click();
   await page.getByText("verify-prod").first().waitFor();
+  return scheduled;
 }

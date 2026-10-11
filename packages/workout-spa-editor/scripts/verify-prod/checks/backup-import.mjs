@@ -1,51 +1,82 @@
 import { expect } from "@playwright/test";
 
 import { isoDate, mainText, TIMEOUT } from "../browser.mjs";
-import { ensureProfile, expectOk } from "../steps.mjs";
-import { saveWellness } from "../wellness.mjs";
-import { EXPORT_CONTROL, findDataControl } from "./export.mjs";
+import { expectOk } from "../steps.mjs";
+import {
+  exportFile,
+  IMPORT_CONTROL,
+  importFile,
+  readStore,
+} from "./backup-import-steps.mjs";
+import { findDataControl } from "./export.mjs";
+import { INTAKE_KCAL, seed } from "./export-seed.mjs";
+import { deleteOnce } from "./scheduled-lifecycle-steps.mjs";
 
-// F-41 (import half): there is no way to restore a backup file.
-const IMPORT_CONTROL =
-  /Importar (mis datos|copia|una copia|datos)|Restaurar( copia)?|Import (backup|my data)/i;
+const NOT_RESTORED =
+  /1 borrados? después de la copia|1 deleted after the backup/;
 
-async function exportFrom(session, date) {
-  await ensureProfile(session);
-  await saveWellness(session, date, { "Weight (kg)": "68.9" });
-  const control = await findDataControl(
-    session.page,
-    session.go,
-    EXPORT_CONTROL
+async function assertRestored(rec, target, workoutName) {
+  const profiles = await readStore(target.page, "profiles");
+  rec.assert(
+    profiles.length === 1 && profiles[0].origin !== "auto",
+    "a clean browser ends with the backup's one real profile",
+    JSON.stringify(profiles)
   );
-  if (!control) throw new Error("no export control to produce a backup");
-  const [download] = await Promise.all([
-    session.page.waitForEvent("download"),
-    control.click(),
-  ]);
-  return download.path();
+  const workouts = await readStore(target.page, "workouts");
+  rec.assert(
+    workouts.some((w) => JSON.stringify(w).includes(workoutName)),
+    "the scheduled workout is restored",
+    `workouts=${workouts.length}`
+  );
+  const intakes = await readStore(target.page, "intakeEntries");
+  rec.assert(
+    intakes.some((e) => e.kcal === INTAKE_KCAL),
+    "the logged intake is restored",
+    JSON.stringify(intakes)
+  );
+  const weights = await readStore(target.page, "healthWeight");
+  rec.assert(weights.length === 1, "the wellness value is restored", weights);
+  await target.go("settings/ai");
+  await expectOk(rec, "the restored AI provider asks for its key", () =>
+    expect(target.page.getByText("Falta la clave")).toBeVisible({
+      timeout: TIMEOUT,
+    })
+  );
 }
 
+async function deleteThenImport(rec, source, file, id) {
+  await deleteOnce(source.page, source.go, id);
+  const summary = await importFile(source, file);
+  rec.assert(
+    NOT_RESTORED.test(summary),
+    "the summary counts the workout deleted after the backup",
+    summary
+  );
+  const workouts = await readStore(source.page, "workouts");
+  rec.assert(
+    !workouts.some((w) => w.id === id),
+    "a workout deleted after the backup stays deleted",
+    `ids=${workouts.map((w) => w.id).join(",")}`
+  );
+}
+
+// F-41 (import half): a backup file restores into a clean browser, and a
+// delete made after the backup survives importing it.
 export default async function backupImport({ rec, open }) {
   const target = await open();
-  const { page, go } = target;
-  const control = await findDataControl(page, go, IMPORT_CONTROL);
-  const buttons = await page.locator("main button").allInnerTexts();
+  const control = await findDataControl(target.page, target.go, IMPORT_CONTROL);
   const found = rec.assert(
     control,
     "F-41: Settings → Privacy has an 'import backup' control",
-    `buttons=[${buttons.join(" | ")}] text=${await mainText(page)}`
+    `text=${await mainText(target.page)}`
   );
   if (!found) return;
-  const date = isoDate(new Date());
-  const file = await exportFrom(await open(), date);
-  await findDataControl(page, go, IMPORT_CONTROL);
-  await page.locator("main input[type=file]").first().setInputFiles(file);
-  await go("calendar");
-  const cell = page.getByTestId(`day-column-${date}`);
-  await expectOk(
-    rec,
-    "round-trip: wellness from the backup appears in a fresh browser",
-    () => expect(cell).toContainText("68.9", { timeout: TIMEOUT }),
-    () => cell.innerText()
-  );
+  const source = await open();
+  const workoutName = `verify import ${Date.now()}`;
+  const { id } = await seed(source, isoDate(new Date()), workoutName);
+  const file = await exportFile(source);
+  const summary = await importFile(target, file);
+  rec.assert(true, `the import reports a summary: ${summary}`);
+  await assertRestored(rec, target, workoutName);
+  await deleteThenImport(rec, source, file, id);
 }
