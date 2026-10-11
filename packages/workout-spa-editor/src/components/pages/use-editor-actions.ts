@@ -3,7 +3,7 @@
  *
  * Transition functions for the editor-calendar integration:
  * push (structured|ready|modified -> pushed; pushed keeps its state and
- * records the new id).
+ * records the new id) and save (`saveWorkoutEdits`: pushed -> modified).
  *
  * All KRD-carrying persistence paths route through `onWorkoutMutation`
  * so `modifiedAt` advances on every user edit in STRUCTURED / READY
@@ -14,36 +14,15 @@ import { useCallback } from "react";
 
 import { recordGarminPush } from "../../application/record-garmin-push";
 import {
-  onWorkoutMutation,
-  transitionToReady,
-} from "../../application/workout-transitions";
+  applyEditedKrd,
+  saveWorkoutEdits,
+  updateWorkoutRecord,
+} from "../../application/save-workout-edits";
+import { transitionToReady } from "../../application/workout-transitions";
 import { usePersistence } from "../../contexts/persistence-context";
-import type { PersistencePort } from "../../ports/persistence-port";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KRD } from "../../types/krd";
-
-/* Applies a change to the row as stored, in one transaction: a concurrent
-   writer's fields (a coach move's date landing before the editor
-   re-renders) are kept, and a workout deleted meanwhile stays deleted. */
-async function updateRecord(
-  persistence: PersistencePort,
-  id: string,
-  change: (fresh: WorkoutRecord) => WorkoutRecord
-) {
-  await persistence.transaction(async () => {
-    const fresh = await persistence.workouts.getById(id);
-    if (fresh) await persistence.workouts.put(change(fresh));
-  });
-}
-
-function saveEditedKrd(
-  record: WorkoutRecord,
-  editedKrd: KRD | undefined
-): WorkoutRecord {
-  if (!editedKrd || editedKrd === record.krd) return record;
-  return onWorkoutMutation(record, { krd: editedKrd });
-}
 
 /* Sending implies accepting. `structured → ready` used to be a separate
    button ("Accept Workout") on a bar that never showed it beside the push,
@@ -67,9 +46,9 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
           : undefined;
       // An already-pushed record (a re-created library workout) only
       // records the new id: there is no transition left to take.
-      await updateRecord(persistence, record.id, (fresh) =>
+      await updateWorkoutRecord(persistence, record.id, (fresh) =>
         recordGarminPush(
-          readyForPush(saveEditedKrd(fresh, edited)),
+          readyForPush(applyEditedKrd(fresh, edited)),
           garminPushId
         )
       );
@@ -77,5 +56,15 @@ export function useEditorActions(record: WorkoutRecord | undefined) {
     [persistence, record, currentWorkout]
   );
 
-  return { pushWorkout };
+  /* "Save changes": the edit lands on the row as stored. `false` when the
+     workout was deleted meanwhile — it stays deleted. */
+  const saveEdits = useCallback(
+    (edited: KRD) =>
+      record
+        ? saveWorkoutEdits(persistence, record.id, edited)
+        : Promise.resolve(false),
+    [persistence, record]
+  );
+
+  return { pushWorkout, saveEdits };
 }

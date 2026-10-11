@@ -134,6 +134,22 @@ describe("CalendarPage", () => {
     expect(await screen.findByTestId("workout-card-w-mon")).toBeInTheDocument();
   });
 
+  it("should open a structured workout's detail view from its card", async () => {
+    // Arrange
+    const workout = makeWorkout({ id: "w-structured", state: "structured" });
+    await db.table("workouts").add(workout);
+    const user = userEvent.setup();
+
+    // Act
+    const { history } = renderCalendar();
+    await user.click(await screen.findByTestId("workout-card-w-structured"));
+
+    // Assert
+    expect(history.at(-1)).toBe(
+      "/workout/view/w-structured?from=calendar&week=2026-W15"
+    );
+  });
+
   it("should replace the batch action with its blocker when no provider exists", async () => {
     // Arrange
 
