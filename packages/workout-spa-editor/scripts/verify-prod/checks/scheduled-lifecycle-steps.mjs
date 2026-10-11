@@ -20,7 +20,8 @@ async function deleteOnce(page, go, id) {
     .click();
 }
 
-// F-30: "Más opciones" is permanently disabled, so nothing can delete.
+// F-30: the detail's "Más opciones" deletes after a confirm; "Deshacer"
+// brings the card back, and a delete with no Undo holds after a reload.
 export async function deleteWithUndo(rec, session, id) {
   const { page, go } = session;
   await go(`workout/view/${id}`);
