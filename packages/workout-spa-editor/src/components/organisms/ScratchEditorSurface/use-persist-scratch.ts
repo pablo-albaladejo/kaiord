@@ -6,7 +6,7 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { calendarWeekHref } from "../../../routing/calendar-week-href";
 import { useCurrentWorkout } from "../../../store/selectors/workout-selectors";
-import type { Workout } from "../../../types/krd";
+import type { KRD, Workout } from "../../../types/krd";
 import { isValidCalendarDate } from "../../../utils/is-valid-calendar-date";
 import { persistScratchWorkout } from "./persist-scratch-workout";
 
@@ -16,16 +16,18 @@ export type UsePersistScratch = {
   canSchedule: boolean;
   /** True once the profile lookup resolved to no active profile. */
   missingProfile: boolean;
-  schedule: () => Promise<void>;
+  /** The draft being scheduled, for prompts that name it. */
+  workout: KRD | null;
+  schedule: (date: string) => Promise<void>;
 };
 
 /**
  * Scratch-local "Save & schedule" wiring: persists `currentWorkout` onto
- * the target `date` as a new scratch WorkoutRecord, then lands on the
- * calendar week containing it so the new card is visible on arrival.
+ * `date` as a new scratch WorkoutRecord, then lands on the calendar week
+ * containing it so the new card is visible on arrival.
  * D6-rejects calendar-impossible dates (toast, no persist/nav).
  */
-export function usePersistScratch(date: string): UsePersistScratch {
+export function usePersistScratch(): UsePersistScratch {
   const t = useTranslate("editor");
   const currentWorkout = useCurrentWorkout();
   const active = useActiveProfileLive();
@@ -36,7 +38,7 @@ export function usePersistScratch(date: string): UsePersistScratch {
 
   const canSchedule = profileId !== null && currentWorkout !== null;
 
-  const schedule = async (): Promise<void> => {
+  const schedule = async (date: string): Promise<void> => {
     if (!currentWorkout || !profileId) return;
     if (!isValidCalendarDate(date)) {
       toast.error(t("scratch.invalidTitle"), t("scratch.invalidDescription"));
@@ -64,6 +66,7 @@ export function usePersistScratch(date: string): UsePersistScratch {
   return {
     canSchedule,
     missingProfile: active !== undefined && !profileId,
+    workout: currentWorkout,
     schedule,
   };
 }
