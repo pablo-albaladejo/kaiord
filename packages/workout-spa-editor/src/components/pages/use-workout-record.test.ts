@@ -42,4 +42,16 @@ describe("useWorkoutRecord", () => {
     );
     expect(result.current.record?.id).toBe(ID);
   });
+
+  it("should report an unknown id as not found instead of loading", async () => {
+    // Arrange
+    const unknown = "550e8400-e29b-41d4-a716-446655440099";
+
+    // Act
+    const { result } = renderHook(() => useWorkoutRecord(unknown));
+
+    // Assert
+    await waitFor(() => expect(result.current.notFound).toBe(true));
+    expect(result.current.loading).toBe(false);
+  });
 });

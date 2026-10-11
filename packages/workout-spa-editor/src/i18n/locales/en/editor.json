@@ -323,5 +323,21 @@
     "download": "2. Download it (change the format if you need to)",
     "sameFormat": "Pick two different formats.",
     "wrongFormat": "That is not a {{from}} file. Choose a {{from}} file, or pick another format."
+  },
+  "edits": {
+    "save": "Save changes",
+    "unsaved": "Unsaved changes",
+    "saved": "Changes saved",
+    "notFound": "This workout no longer exists, so the changes were not saved.",
+    "discardAction": "Discard changes",
+    "discardTitle": "Discard changes",
+    "discardMessage": "Discard the changes you have not saved? The saved workout stays as it is.",
+    "discardConfirm": "Discard changes",
+    "keepEditing": "Keep editing"
+  },
+  "notFound": {
+    "title": "Workout not found",
+    "body": "It may have been deleted, or the link is out of date.",
+    "backToCalendar": "Back to calendar"
   }
 }

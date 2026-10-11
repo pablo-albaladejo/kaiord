@@ -1,7 +1,9 @@
 /**
  * Schedule Date Dialog
  *
- * Simple date picker dialog for scheduling a template to a date.
+ * Simple date picker dialog for scheduling a template to a date. The
+ * optional copy and `initialDate` let the workout detail reuse it to move a
+ * scheduled workout to another day.
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
@@ -16,6 +18,13 @@ type ScheduleDateDialogProps = {
   templateName: string;
   onConfirm: (date: string) => void;
   onCancel: () => void;
+  initialDate?: string;
+  copy?: {
+    title: string;
+    description: string;
+    confirm: string;
+    cancel: string;
+  };
 };
 
 export function ScheduleDateDialog({
@@ -23,8 +32,10 @@ export function ScheduleDateDialog({
   templateName,
   onConfirm,
   onCancel,
+  initialDate,
+  copy,
 }: ScheduleDateDialogProps) {
-  const [date, setDate] = useState(() => todayIsoDate());
+  const [date, setDate] = useState(() => initialDate ?? todayIsoDate());
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onCancel()}>
@@ -36,7 +47,7 @@ export function ScheduleDateDialog({
         >
           <div className="flex items-center justify-between mb-4">
             <Dialog.Title className="text-lg font-semibold">
-              Schedule Workout
+              {copy?.title ?? "Schedule Workout"}
             </Dialog.Title>
             <Dialog.Close asChild>
               <button aria-label="Close">
@@ -45,7 +56,7 @@ export function ScheduleDateDialog({
             </Dialog.Close>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            Pick a date for &quot;{templateName}&quot;
+            {copy?.description ?? `Pick a date for "${templateName}"`}
           </p>
           <input
             type="date"
@@ -56,11 +67,11 @@ export function ScheduleDateDialog({
           />
           <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={onCancel}>
-              Cancel
+              {copy?.cancel ?? "Cancel"}
             </Button>
             <Button onClick={() => onConfirm(date)}>
               <Calendar className="mr-2 h-4 w-4" />
-              Schedule
+              {copy?.confirm ?? "Schedule"}
             </Button>
           </div>
         </Dialog.Content>

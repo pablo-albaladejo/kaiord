@@ -6,50 +6,34 @@
  * workouts mount the `CoachingSidebar` (design D4).
  */
 
-import { useSearch } from "wouter";
-
-import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
-import { useDeleteCleanup } from "../../hooks/use-delete-cleanup";
-import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
-import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorStateRibbon } from "../organisms/EditorStateRibbon";
 import { CoachingDraftSurface } from "./CoachingDraftSurface";
 import { DateBanner } from "./DateBanner";
-import { parseEditorRouteParams } from "./editor-route-params";
-import { EditorLoading, EditorNoData } from "./EditorLoadingState";
+import {
+  EditorLoading,
+  EditorNoData,
+  EditorNotFound,
+} from "./EditorLoadingState";
 import { EditorPageHeader } from "./EditorPageHeader";
 import { EditorPopulatedBody } from "./EditorPopulatedBody";
+import { EditorSaveChanges } from "./EditorSaveChanges";
 import { renderNewWorkoutSurface } from "./render-new-workout-surface";
-import { useBackHandler } from "./use-back-handler";
-import { useEditorActions } from "./use-editor-actions";
-import { useWorkoutRecord } from "./use-workout-record";
+import { useEditorPage } from "./use-editor-page";
 
 export type EditorPageProps = { id?: string };
 
 export default function EditorPage({ id }: EditorPageProps) {
-  useDeleteCleanup();
-  const search = useSearch();
-  const { dateParam, weekParam, origin, newWorkoutMode, coachingDraftId } =
-    parseEditorRouteParams(search);
-  const handleBack = useBackHandler(
-    newWorkoutMode,
-    dateParam,
-    origin,
-    weekParam
-  );
-
-  const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
-
-  const { record, placementRow, loading } = useWorkoutRecord(id);
-  const { pushWorkout } = useEditorActions(record);
-  const profileId = useActiveProfileLive()?.id ?? null;
-  const sidebarData = useCoachingSidebar(profileId, id);
+  const page = useEditorPage(id);
+  const { currentWorkout, profileId, sidebarData, handleBack } = page;
+  const { dateParam, newWorkoutMode, coachingDraftId } = page.route;
+  const { record, placementRow, loading, notFound, ...edit } = page.edit;
 
   const workout = currentWorkout?.extensions?.structured_workout as
     Workout | undefined;
 
   if (id && loading) return <EditorLoading />;
+  if (id && notFound) return <EditorNotFound />;
   if (id && record && !record.krd) return <EditorNoData />;
 
   if (!id && coachingDraftId)
@@ -70,6 +54,7 @@ export default function EditorPage({ id }: EditorPageProps) {
       <EditorPageHeader
         mode={id ? "edit" : "new"}
         onBack={handleBack ?? undefined}
+        action={record?.krd && <EditorSaveChanges edits={edit.edits} />}
       />
       {!id && dateParam && <DateBanner date={dateParam} />}
       {record && (
@@ -79,7 +64,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           placementRow={placementRow}
           workoutDate={record.date}
           profileId={profileId ?? undefined}
-          onSent={(garminWorkoutId) => void pushWorkout(garminWorkoutId)}
+          onSent={(garminWorkoutId) => void edit.pushWorkout(garminWorkoutId)}
         />
       )}
       {showNewSurface && renderNewWorkoutSurface(newWorkoutMode, dateParam)}
@@ -89,6 +74,7 @@ export default function EditorPage({ id }: EditorPageProps) {
           currentWorkout={currentWorkout}
           sidebar={sidebarData}
           ownerProfileId={record?.profileId}
+          editDiscard={edit.editDiscard}
         />
       )}
     </div>

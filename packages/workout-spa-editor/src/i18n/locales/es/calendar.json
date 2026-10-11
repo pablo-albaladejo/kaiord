@@ -155,5 +155,20 @@
     "saved": "Bienestar guardado",
     "saveFailed": "No se pudo guardar — vuelve a intentarlo",
     "noProfile": "No hay perfil de atleta: selecciona o crea uno para guardar el bienestar"
+  },
+  "sport": {
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swimming": "Natación",
+    "strength": "Fuerza"
+  },
+  "origin": {
+    "kaiord": "Kaiord",
+    "manual": "Manual",
+    "train2go": "Train2Go",
+    "garmin": "Garmin",
+    "trainingpeaks": "TrainingPeaks",
+    "coach": "Entrenador",
+    "ai": "IA"
   }
 }

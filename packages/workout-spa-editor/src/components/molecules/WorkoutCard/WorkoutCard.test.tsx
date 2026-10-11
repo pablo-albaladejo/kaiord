@@ -54,7 +54,7 @@ describe("WorkoutCard", () => {
     // Assert
 
     expect(screen.getByText("Easy run")).toBeInTheDocument();
-    expect(screen.getByText("running")).toBeInTheDocument();
+    expect(screen.getByText("Running")).toBeInTheDocument();
   });
 
   it("should say the lifecycle in a word, not a coloured glyph", () => {
@@ -116,7 +116,65 @@ describe("WorkoutCard", () => {
 
     // Assert
 
-    expect(screen.getByText("· train2go")).toBeInTheDocument();
+    expect(screen.getByText("· Train2Go")).toBeInTheDocument();
+  });
+
+  it("should title a structured workout by the name in its KRD", () => {
+    // Arrange
+    const workout = makeWorkout({
+      state: "structured",
+      raw: null,
+      krd: structuredKrd(THRESHOLD_STEPS),
+    });
+
+    // Act
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Assert
+    expect(screen.getByText("Fixture")).toBeInTheDocument();
+  });
+
+  it("should fall back to the sport's name when nothing names the workout", () => {
+    // Arrange
+    const workout = makeWorkout({ raw: null, krd: null });
+
+    // Act
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Assert
+    expect(
+      screen.getByRole("button", { name: /^Running, Running, Raw$/ })
+    ).toBeInTheDocument();
+  });
+
+  it("should name a workout made in Kaiord in words, not by its source id", () => {
+    // Arrange
+    const workout = makeWorkout({ source: "scratch" });
+
+    // Act
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Assert
+    expect(screen.getByText("· Kaiord")).toBeInTheDocument();
+    expect(screen.queryByText(/scratch/)).not.toBeInTheDocument();
+  });
+
+  it("should take the duration from the KRD when the raw import has none", () => {
+    // Arrange
+    const workout = makeWorkout({
+      state: "structured",
+      raw: null,
+      krd: structuredKrd([
+        { percentFtp: 60, seconds: 600 },
+        { percentFtp: 90, seconds: 600 },
+      ]),
+    });
+
+    // Act
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    // Assert
+    expect(screen.getByText("20m")).toBeInTheDocument();
   });
 
   it("should leave a session with no structure on the neutral edge", () => {
@@ -186,7 +244,7 @@ describe("WorkoutCard", () => {
     // Assert
 
     expect(
-      screen.getByRole("button", { name: /Easy run, running, Raw/ })
+      screen.getByRole("button", { name: /Easy run, Running, Raw/ })
     ).toBeInTheDocument();
   });
 

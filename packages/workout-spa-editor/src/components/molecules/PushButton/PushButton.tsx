@@ -56,7 +56,13 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
           size={size}
           full={full}
           onPush={() => void onPush()}
-          disabled={!extensionInstalled || !sessionActive}
+          disabledReason={
+            !extensionInstalled
+              ? "noExtension"
+              : !sessionActive
+                ? "signedOut"
+                : undefined
+          }
         />
         {result && workout && (
           <PlacementFeedback

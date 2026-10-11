@@ -155,5 +155,20 @@
     "saved": "Wellness saved",
     "saveFailed": "Could not save — please retry",
     "noProfile": "No athlete profile — select or create one to save wellness"
+  },
+  "sport": {
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swimming",
+    "strength": "Strength"
+  },
+  "origin": {
+    "kaiord": "Kaiord",
+    "manual": "Manual",
+    "train2go": "Train2Go",
+    "garmin": "Garmin",
+    "trainingpeaks": "TrainingPeaks",
+    "coach": "Coach",
+    "ai": "AI"
   }
 }

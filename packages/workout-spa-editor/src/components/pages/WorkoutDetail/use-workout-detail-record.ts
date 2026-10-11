@@ -27,9 +27,12 @@ export function useWorkoutDetailRecord(id: string | undefined) {
   );
   const record = live?.record;
 
+  // `live` is `undefined` until the first query result; after that a
+  // missing record is a settled "not found", never an endless load.
   return {
     record,
     placementRow: live?.placementRow,
-    loading: record === undefined && id !== undefined,
+    loading: live === undefined && id !== undefined,
+    notFound: live !== undefined && record === undefined,
   };
 }
