@@ -38,12 +38,7 @@ export const PER_PROFILE_TABLES: ReadonlyArray<string> = [
 ];
 
 /** Per-profile tables that never travel in the snapshot. */
-export const DEVICE_LOCAL_TABLES: ReadonlyArray<string> = [
-  "connections",
-  "energyTargets",
-  "intakeEntries",
-  "intakePresets",
-];
+export const DEVICE_LOCAL_TABLES: ReadonlyArray<string> = ["connections"];
 
 /** Imported-record tables, unique by `[profileId+sourceBridgeId+externalId]`. */
 export const PROVENANCE_TABLES: ReadonlyArray<string> = [

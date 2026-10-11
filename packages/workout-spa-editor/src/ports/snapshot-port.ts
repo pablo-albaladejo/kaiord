@@ -56,7 +56,7 @@ export type SnapshotPort = {
   perProfileTables: () => string[];
   /**
    * Rewrite the device-local tables that never ride the snapshot
-   * (`connections`, `intakeEntries`, `intakePresets`, `energyTargets`):
+   * (`connections`):
    * `transform` receives every row of each and returns the rows to keep.
    * Joins an enclosing `transaction("rw", ...)`.
    */

@@ -75,6 +75,14 @@ const firstBoot = async () => {
     date: "2026-10-05",
     kcal: 500,
   });
+  await a.db.table("energyTargets").put({
+    profileId: p,
+    goalType: "maintain",
+    updatedAt: "2026-10-05T08:00:00.000Z",
+  });
+  await a.db
+    .table("connections")
+    .put({ profileId: p, providerId: "intervals", status: "connected" });
   await a.db.table("coachingSyncState").put({
     source: "train2go",
     profileId: p,
@@ -121,10 +129,24 @@ describe("default profile sync", () => {
     expect(await a.db.table("intakeEntries").get("i-1")).toMatchObject({
       profileId: target,
     });
+    expect(await a.db.table("energyTargets").get(target)).toMatchObject({
+      goalType: "maintain",
+    });
+    expect(await a.db.table("connections").toArray()).toEqual([
+      expect.objectContaining({ profileId: target, providerId: "intervals" }),
+    ]);
     expect(await a.db.table("coachingSyncState").count()).toBe(0);
     expect(await a.db.table("meta").get("activeProfileId")).toMatchObject({
       value: target,
     });
+    const pushed = cloud.state.snapshot?.tables ?? {};
+    expect(pushed.intakeEntries).toEqual([
+      expect.objectContaining({ id: "i-1", profileId: target }),
+    ]);
+    expect(pushed.energyTargets).toEqual([
+      expect.objectContaining({ profileId: target }),
+    ]);
+    expect(pushed).not.toHaveProperty("connections");
     expect(JSON.stringify(await dump(a.db))).not.toContain(a.autoId);
     expect(JSON.stringify(cloud.state.snapshot)).not.toContain(a.autoId);
   });

@@ -125,6 +125,9 @@ const OFF_PORT_TABLES: Record<string, string> = {
     "composite PK (untombstonable — see design.md gap); user delete via " +
     "clearModelBinding resurrects, tracked not fixed here",
   autoMatchDismissals: "composite PK; cascade-only delete",
+  // On the port, but its PK is `profileId` and it has no delete(id): a goal
+  // is overwritten, never deleted, except by the profile cascade.
+  energyTargets: "non-`id` primary key (profileId); cascade-only delete",
   coachingSyncState: "composite PK; cascade-only delete",
   dataTypeSourcePolicy: "composite PK; cascade-only delete",
   // Legacy and write-dead: the only writer left is the v6 migration backfill

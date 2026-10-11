@@ -67,8 +67,8 @@ export type DeleteProfileWithCascadeDeps = {
   aiModelBindings: AiModelBindingRepository;
   // Per-profile provider connections (#714); device-local, bulk delete.
   connections: ConnectionRepository;
-  // Per-profile energy-balance stores (energy-balance-tracking); device-local,
-  // bulk delete on profile removal.
+  // Per-profile energy-balance stores, synced since v37: bulk-deleted without
+  // per-row tombstones (the cascade exception, see adapters/with-tombstones).
   intakeEntries: IntakeEntryRepository;
   intakePresets: IntakePresetRepository;
   energyTargets: EnergyTargetRepository;

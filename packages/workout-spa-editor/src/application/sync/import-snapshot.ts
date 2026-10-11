@@ -3,14 +3,15 @@
  *
  * Restores a `Snapshot` into the database through `SnapshotPort`,
  * replacing every table's rows (natural-key tables merge with the live rows
- * instead — see `SnapshotPort.importTables`) and setting the tombstones to
+ * instead, and given the caller's `exported` rows every other table keeps
+ * the live rows written since — see `createLiveRowMerge`) and setting the tombstones to
  * the snapshot's unioned with the live ones. Tombstones older
  * than the retention window are pruned on import. Pure: depends only on
  * the port, never on `dexie-database` (guard R-AppDexieImport).
  */
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
-import type { Snapshot } from "../../types/snapshot";
+import type { Snapshot, SnapshotTables } from "../../types/snapshot";
 import { createLiveRowMerge } from "./merge-table-rows";
 import { unionTombstones } from "./merge-tombstones";
 import { pruneTombstones } from "./prune-tombstones";
@@ -18,6 +19,11 @@ import { pruneTombstones } from "./prune-tombstones";
 export type ImportSnapshotDeps = {
   port: SnapshotPort;
   snapshot: Snapshot;
+  /**
+   * The rows this import's caller exported before merging, read in an
+   * earlier transaction: live rows that changed since are kept, not wiped.
+   */
+  exported?: SnapshotTables;
   /** Injected clock for the tombstone retention prune (test-deterministic). */
   now?: () => Date;
 };
@@ -25,6 +31,7 @@ export type ImportSnapshotDeps = {
 export async function importSnapshot({
   port,
   snapshot,
+  exported,
   now = () => new Date(),
 }: ImportSnapshotDeps): Promise<void> {
   const localVersion = await port.schemaVersion();
@@ -45,7 +52,7 @@ export async function importSnapshot({
       unionTombstones(snapshot.tombstones, await port.listTombstones()),
       now()
     );
-    const liveMerge = createLiveRowMerge(tombstones);
+    const liveMerge = createLiveRowMerge(tombstones, exported);
     await port.importTables(snapshot.tables, { liveMerge });
     await port.replaceTombstones(tombstones);
   });
