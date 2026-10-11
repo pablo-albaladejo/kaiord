@@ -25,6 +25,7 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 - `coaching-dialog-{redesign,train2go}.spec.ts` — coaching dialog flows.
 - `advanced-workouts.spec.ts`, `repetition-blocks.spec.ts` — block + advanced-step flows.
 - `import-export-formats.spec.ts` — round-trip across FIT / TCX / ZWO / KRD / GCN.
+- `tcx-repeat-import.spec.ts` — imports `test-fixtures/tcx/WorkoutRepeatBlocks.tcx` through the editor and asserts its 5× repetition block renders.
 - `ai-generate-workout.spec.ts` — AI generation (stubbed LLM responses via `fixtures/llm-responses.ts`).
 - `profiles.spec.ts`, `zones-sync.spec.ts` — profile + Train2Go zone sync flows.
 - `settings.spec.ts`, `onboarding.spec.ts` — settings + onboarding.

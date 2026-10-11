@@ -92,4 +92,18 @@ describe("Round-trip: workout fixtures through the real encoder", () => {
       },
     });
   });
+
+  it("should not read the repeat-until-HR value of WorkoutRepeatGreaterThanStep.fit as a target", async () => {
+    // Arrange
+    const fixture = loadFitFixture("WorkoutRepeatGreaterThanStep.fit");
+
+    // Act
+    const krd = await read(fixture);
+
+    // Assert
+    expect((stepsOf(krd) as Array<unknown>)[3]).toMatchObject({
+      targetType: "open",
+      target: { type: "open" },
+    });
+  });
 });

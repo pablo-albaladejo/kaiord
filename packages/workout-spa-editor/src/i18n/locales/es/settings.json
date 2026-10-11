@@ -100,7 +100,12 @@
     "connectedNotSynced": "Conectado — aún sin sincronizar",
     "encryption": "Cifrado de extremo a extremo de las copias de sincronización",
     "passphrase": "Frase de contraseña",
-    "plaintextWarning": "Tus claves de API de IA guardadas se subirán sin cifrado de extremo a extremo. Activa el cifrado abajo para protegerlas."
+    "plaintextWarning": "Tus claves de API de IA guardadas se subirán sin cifrado de extremo a extremo. Activa el cifrado abajo para protegerlas.",
+    "profileChoice": {
+      "title": "¿Para qué perfil es este dispositivo?",
+      "body": "Tu Google Drive ya tiene varios perfiles. Elige el que debe recibir lo que registraste en este dispositivo; no se sincroniza nada hasta que elijas.",
+      "unnamed": "Perfil sin nombre"
+    }
   },
   "privacy": {
     "information": "Información de privacidad",
