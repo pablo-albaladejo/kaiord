@@ -7,12 +7,11 @@
  * the one that fails when the page's own wiring breaks. It replaces the
  * content coverage the retired `data-hub.spec.ts` carried.
  *
- * `planned-session` is the row under test on purpose: it is the one managed
- * type with NO manual-entry path, so with nothing linked it genuinely has no
- * source, and Train2Go is the only bridge that announces `read:training-plan`.
- * That makes it the reachable shape of "an extension installed after the
- * seeding migrations already ran" — the case with no route to create until the
- * row offers one.
+ * `planned-session` is the row under test on purpose: scheduling by hand makes
+ * manual entry its one source with nothing linked, and Train2Go is the only
+ * bridge that announces `read:training-plan`. That makes it the reachable shape
+ * of "an extension installed after the seeding migrations already ran" — a
+ * second source with no route to create until the row offers one.
  *
  * Playwright Chromium runs without extension runtimes, so the bridge is
  * injected via addInitScript before page.goto (see helpers/).
@@ -77,15 +76,15 @@ test.describe("Connections page content", () => {
     const routing = page.getByTestId("data-type-routing");
 
     // Assert — the discovered bridge has a card, and the routing section
-    // reports the type it feeds as having no source until a route is created.
+    // reports the type it feeds as planned by hand until a route is created.
     await expect(card).toBeVisible({ timeout: 15_000 });
     await expect(card).toContainText("Train2Go");
     await expect(routing).toBeVisible();
     await expect(
       page.getByTestId("routing-row-planned-session")
-    ).toHaveAttribute("data-origin", "none");
+    ).toHaveAttribute("data-origin", "only");
     await expect(page.getByTestId("routing-from-planned-session")).toHaveText(
-      "No source"
+      "Manual Entry"
     );
   });
 
@@ -107,18 +106,18 @@ test.describe("Connections page content", () => {
     // Act
     await toggle.click();
 
-    // Assert — the live query re-reads the committed policy: the row now names
-    // the source it is read from.
-    await expect(pill).toHaveText("Train2Go", { timeout: 10_000 });
-    await expect(row).toHaveAttribute("data-origin", "only");
+    // Assert — the live query re-reads the committed policy: the coach's plan
+    // joins the hand-scheduled one as a second source.
+    await expect(pill).toHaveText("2 sources", { timeout: 10_000 });
+    await expect(row).toHaveAttribute("data-origin", "unranked");
     await expect(toggle).toHaveAttribute("aria-pressed", "true");
 
     // Act — the same control must be the way back, not a one-way door.
     await toggle.click();
 
     // Assert
-    await expect(pill).toHaveText("No source", { timeout: 10_000 });
-    await expect(row).toHaveAttribute("data-origin", "none");
+    await expect(pill).toHaveText("Manual Entry", { timeout: 10_000 });
+    await expect(row).toHaveAttribute("data-origin", "only");
   });
 
   test("should keep an enabled route switchable off once its extension is gone", async ({
@@ -133,7 +132,7 @@ test.describe("Connections page content", () => {
     });
     await toggle.click();
     await expect(page.getByTestId("routing-from-planned-session")).toHaveText(
-      "Train2Go",
+      "2 sources",
       { timeout: 10_000 }
     );
 
@@ -167,7 +166,7 @@ test.describe("Connections page content", () => {
 
     // Assert
     await expect(gone.getByTestId("routing-from-planned-session")).toHaveText(
-      "No source",
+      "Manual Entry",
       { timeout: 10_000 }
     );
     await gone.close();
