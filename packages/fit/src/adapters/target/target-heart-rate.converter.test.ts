@@ -3,13 +3,14 @@ import { describe, expect, it } from "vitest";
 import type { FitTargetData } from "./target.types";
 import { convertHeartRateTarget } from "./target-heart-rate.converter";
 
+// Custom range fields are raw FIT `workoutHr`: absolute bpm is stored +100.
 describe("convertHeartRateTarget", () => {
   describe("range target using specific HR fields", () => {
     it("should return HR range when customTargetHeartRateLow and High are set", () => {
       // Arrange
       const data: FitTargetData = {
-        customTargetHeartRateLow: 120,
-        customTargetHeartRateHigh: 160,
+        customTargetHeartRateLow: 220,
+        customTargetHeartRateHigh: 260,
       };
 
       // Act
@@ -27,8 +28,8 @@ describe("convertHeartRateTarget", () => {
     it("should return HR range when customTargetValueLow and High are set", () => {
       // Arrange
       const data: FitTargetData = {
-        customTargetValueLow: 110,
-        customTargetValueHigh: 150,
+        customTargetValueLow: 210,
+        customTargetValueHigh: 250,
       };
 
       // Act
@@ -46,10 +47,10 @@ describe("convertHeartRateTarget", () => {
     it("should prefer specific HR fields over generic custom fields", () => {
       // Arrange
       const data: FitTargetData = {
-        customTargetHeartRateLow: 120,
-        customTargetHeartRateHigh: 160,
-        customTargetValueLow: 110,
-        customTargetValueHigh: 150,
+        customTargetHeartRateLow: 220,
+        customTargetHeartRateHigh: 260,
+        customTargetValueLow: 210,
+        customTargetValueHigh: 250,
       };
 
       // Act
@@ -241,8 +242,8 @@ describe("convertHeartRateTarget", () => {
     it("should prefer range over zone", () => {
       // Arrange
       const data: FitTargetData = {
-        customTargetHeartRateLow: 120,
-        customTargetHeartRateHigh: 160,
+        customTargetHeartRateLow: 220,
+        customTargetHeartRateHigh: 260,
         targetHrZone: 3,
         targetValue: 225,
       };
@@ -290,7 +291,7 @@ describe("convertHeartRateTarget", () => {
     it("should return open when only low custom value is set (no high)", () => {
       // Arrange
       const data: FitTargetData = {
-        customTargetHeartRateLow: 120,
+        customTargetHeartRateLow: 220,
       };
 
       // Act

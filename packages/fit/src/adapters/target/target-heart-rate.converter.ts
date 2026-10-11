@@ -31,8 +31,8 @@ const buildHeartRateRangeTarget = (data: FitTargetData): Target | null => {
       type: targetTypeSchema.enum.heart_rate,
       value: {
         unit: targetUnitSchema.enum.range,
-        min: data.customTargetHeartRateLow,
-        max: data.customTargetHeartRateHigh,
+        min: interpretWorkoutHeartRate(data.customTargetHeartRateLow).value,
+        max: interpretWorkoutHeartRate(data.customTargetHeartRateHigh).value,
       },
     };
   }
@@ -45,8 +45,8 @@ const buildHeartRateRangeTarget = (data: FitTargetData): Target | null => {
       type: targetTypeSchema.enum.heart_rate,
       value: {
         unit: targetUnitSchema.enum.range,
-        min: data.customTargetValueLow,
-        max: data.customTargetValueHigh,
+        min: interpretWorkoutHeartRate(data.customTargetValueLow).value,
+        max: interpretWorkoutHeartRate(data.customTargetValueHigh).value,
       },
     };
   }

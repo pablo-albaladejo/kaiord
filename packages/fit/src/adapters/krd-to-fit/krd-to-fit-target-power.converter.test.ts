@@ -28,7 +28,7 @@ describe("convertPowerTarget", () => {
     });
   });
 
-  it("should convert power range target", () => {
+  it("should convert power range target with the watts offset", () => {
     // Arrange
     const step: WorkoutStep = {
       stepIndex: 0,
@@ -49,8 +49,8 @@ describe("convertPowerTarget", () => {
     expect(message).toStrictEqual({
       targetType: "power",
       targetValue: 0,
-      customTargetPowerLow: 200,
-      customTargetPowerHigh: 250,
+      customTargetPowerLow: 1200,
+      customTargetPowerHigh: 1250,
     });
   });
 
