@@ -28,6 +28,18 @@ const repeatShape = (steps: Array<WorkoutStep | RepetitionBlock>) =>
       : step.duration
   );
 
+const findRepeatBlock = (
+  steps: Array<WorkoutStep | RepetitionBlock>
+): RepetitionBlock | undefined =>
+  steps.find((step): step is RepetitionBlock => "repeatCount" in step);
+
+const repeatChildren = (block: RepetitionBlock | undefined) =>
+  block?.steps.map(({ duration, target, intensity }) => ({
+    duration,
+    target,
+    intensity,
+  }));
+
 const TCX_REPEAT_BLOCK = {
   repeatCount: 5,
   steps: [
@@ -250,5 +262,66 @@ describe("Cross-format round-trip: TCX → KRD → FIT → KRD", () => {
     const shapeA = repeatShape(extractWorkout(krdFromTcx).steps);
     expect(shapeA[1]).toStrictEqual(TCX_REPEAT_BLOCK);
     expect(repeatShape(extractWorkout(krdFromFit).steps)).toStrictEqual(shapeA);
+  });
+
+  it("should keep repeat count, child durations, targets and intensities across TCX to FIT", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const tcxReader = createTcxReader(logger);
+    const fitWriter = createFitWriter(logger);
+    const fitReader = createFitReader(logger);
+    const tcxXml = loadTcxFixture("WorkoutRepeatBlocks.tcx");
+
+    // Act
+    const krdFromTcx = await tcxReader(tcxXml);
+    const fitBytes = await fitWriter(krdFromTcx);
+    const krdFromFit = await fitReader(fitBytes);
+
+    // Assert
+    const blockA = findRepeatBlock(extractWorkout(krdFromTcx).steps);
+    const blockB = findRepeatBlock(extractWorkout(krdFromFit).steps);
+    expect(blockA?.repeatCount).toBe(TCX_REPEAT_BLOCK.repeatCount);
+    expect(blockB?.repeatCount).toBe(TCX_REPEAT_BLOCK.repeatCount);
+    expect(repeatChildren(blockB)).toHaveLength(2);
+    expect(repeatChildren(blockB)).toStrictEqual(repeatChildren(blockA));
+  });
+});
+
+describe("Cross-format round-trip: FIT → KRD → FIT → KRD", () => {
+  it("should keep repeat count, child durations, targets and intensities across FIT to FIT", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const fitReader = createFitReader(logger);
+    const fitWriter = createFitWriter(logger);
+    const fitBuffer = loadFitFixture("WorkoutRepeatSteps.fit");
+
+    // Act
+    const krdFirst = await fitReader(fitBuffer);
+    const krdSecond = await fitReader(await fitWriter(krdFirst));
+
+    // Assert
+    const blockA = findRepeatBlock(extractWorkout(krdFirst).steps);
+    const blockB = findRepeatBlock(extractWorkout(krdSecond).steps);
+    expect(blockA).toBeDefined();
+    expect(blockB?.repeatCount).toBe(blockA?.repeatCount);
+    expect(repeatChildren(blockB)).toHaveLength(2);
+    expect(repeatChildren(blockB)).toStrictEqual(repeatChildren(blockA));
+  });
+
+  it("should keep the steps around a repeat block in order across FIT to FIT", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const fitReader = createFitReader(logger);
+    const fitWriter = createFitWriter(logger);
+    const fitBuffer = loadFitFixture("WorkoutRepeatSteps.fit");
+
+    // Act
+    const krdFirst = await fitReader(fitBuffer);
+    const krdSecond = await fitReader(await fitWriter(krdFirst));
+
+    // Assert
+    expect(repeatShape(extractWorkout(krdSecond).steps)).toStrictEqual(
+      repeatShape(extractWorkout(krdFirst).steps)
+    );
   });
 });
