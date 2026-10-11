@@ -5,6 +5,7 @@
 import type { ReactNode } from "react";
 
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
+import { useActiveLocale } from "../../i18n/LocaleProvider";
 import type { CalendarView } from "../../types/user-preferences";
 import { formatWeekLabel } from "../../utils/format-week-label";
 import { CalendarViewToggle } from "../molecules/CalendarViewToggle/CalendarViewToggle";
@@ -38,10 +39,14 @@ export function CalendarNavRow({
   onViewChange,
   actions,
 }: CalendarNavRowProps) {
+  const locale = useActiveLocale();
   return (
-    <div className="flex items-center justify-between">
-      <WeekNavigation weekId={weekId} weekLabel={formatWeekLabel(weekId)} />
-      <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <WeekNavigation
+        weekId={weekId}
+        weekLabel={formatWeekLabel(weekId, locale)}
+      />
+      <div className="flex flex-wrap items-center gap-2">
         {view && onViewChange && (
           <CalendarViewToggle view={view} onToggle={onViewChange} />
         )}

@@ -30,13 +30,35 @@
     "gatedPrompt": "Complete your profile to estimate energy",
     "intake": "Intake",
     "net": "Net",
-    "target": "Target"
+    "target": "Target",
+    "source": {
+      "measured": "Measured",
+      "predicted": "Predicted",
+      "mixed": "Mixed"
+    },
+    "untracked": "Untracked",
+    "deficit": "{{value}} kcal deficit",
+    "surplus": "{{value}} kcal surplus",
+    "balanced": "balanced",
+    "capWarning": "Goal capped to a safe rate — adjust the target date if you want faster progress.",
+    "capOverridden": "Goal exceeds the safe rate — you chose to override the cap."
   },
   "weekStrip": {
     "previousDay": "Previous day",
     "nextDay": "Next day",
     "openInCalendar": "Open week in calendar",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "day": {
+      "today": " (today)",
+      "empty": "Focus {{day}}{{today}}, nothing planned",
+      "planned": "Focus {{day}}{{today}}, {{count}} planned{{intensity}}{{duration}}",
+      "intensity": {
+        "easy": "easy",
+        "moderate": "moderate",
+        "hard": "hard"
+      },
+      "estimated": "{{intensity}} estimated"
+    }
   },
   "trends": {
     "title": "Trends"

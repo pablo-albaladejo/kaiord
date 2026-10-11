@@ -32,5 +32,23 @@
     "more": "Más destinos",
     "account": "Menú de cuenta ({{name}})",
     "accountEmpty": "Menú de cuenta (sin perfil activo)"
-  }
+  },
+  "announce": {
+    "library": "Página de biblioteca",
+    "chat": "Página de chat",
+    "athlete": "Página de atleta",
+    "newWorkout": "Nuevo entreno",
+    "workout": "Página del entreno",
+    "editWorkout": "Editar entreno",
+    "trends": "Página de tendencias",
+    "sleep": "Página de sueño",
+    "weight": "Página de peso",
+    "recovery": "Página de recuperación",
+    "activity": "Página de actividad",
+    "settings": "Página de ajustes",
+    "nutrition": "Página de nutrición",
+    "daily": "Página diaria",
+    "calendar": "Página del calendario"
+  },
+  "chatAssistant": "Asistente de chat"
 }

@@ -191,6 +191,7 @@ jobs:
           KEY=$(node scripts/geo/indexnow.mjs key)
           [ "$(cat "merged-dist/$KEY.txt" 2>/dev/null)" = "$KEY" ] || { echo "❌ Missing IndexNow key file $KEY.txt"; exit 1; }
           echo "✅ All required files present in merged artifact"
+          node scripts/check-css-asset-urls.mjs --dist merged-dist/app --base /app/
 
       - name: Inject SPA route fallback
         run: node scripts/inject-spa-fallback.mjs merged-dist

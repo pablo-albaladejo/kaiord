@@ -7,6 +7,7 @@
 import { useState } from "react";
 
 import { useProfileByIdLive } from "../../../../hooks/use-profile-by-id-live";
+import { useTranslate } from "../../../../i18n/use-translate";
 import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import type { ProfileFormData } from "../types";
 import { LinkedAccountsSection } from "./LinkedAccountsSection";
@@ -28,6 +29,7 @@ export function ProfileEditView({
   onChange,
   onCancel,
 }: ProfileEditViewProps) {
+  const t = useTranslate("athlete");
   const [activeTab, setActiveTab] = useState<ProfileTab>("zones");
   // Live read from Dexie via useLiveQuery — `undefined` covers both
   // loading (first mount) and "no row for this id" (deleted between
@@ -51,7 +53,7 @@ export function ProfileEditView({
           onClick={onCancel}
           className="rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         >
-          Back to List
+          {t("profileManager.backToList")}
         </button>
       </div>
     </>

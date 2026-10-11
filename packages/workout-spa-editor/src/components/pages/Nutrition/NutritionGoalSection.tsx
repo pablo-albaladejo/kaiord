@@ -24,9 +24,10 @@ export function NutritionGoalSection({
 }: NutritionGoalSectionProps) {
   const [goalOpen, setGoalOpen] = useState(false);
   const t = useTranslate("nutrition");
+  const tDaily = useTranslate("daily");
   const vm =
     result && !result.gated
-      ? toEnergyBalanceViewModel(result.balance, result.goal)
+      ? toEnergyBalanceViewModel(result.balance, result.goal, tDaily)
       : null;
   return (
     <Card className="border-edge bg-surface p-4" data-testid="nutrition-goal">

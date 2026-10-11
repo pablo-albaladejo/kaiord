@@ -4,6 +4,7 @@
  * Renders the connect/disconnect button. The SyncZonesToggle has been
  * removed in PR 5; the Data Flows section (PR 6) is the replacement.
  */
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 import { RowInfo } from "./RowInfo";
 import type { SourceMeta } from "./use-linked-account-row";
@@ -16,6 +17,7 @@ export function LinkedAccountRow({
   profile: Profile;
   sourceMeta: SourceMeta;
 }) {
+  const t = useTranslate("athlete");
   const linked = profile.linkedAccounts.find((a) => a.source === sourceMeta.id);
   const { busy, handleConnect, handleDisconnect } = useLinkedAccountRow(
     profile,
@@ -36,7 +38,7 @@ export function LinkedAccountRow({
             onClick={handleDisconnect}
             className="rounded-md border border-edge px-3 py-1 text-sm hover:bg-gray-50 disabled:opacity-50 dark:hover:bg-gray-800"
           >
-            Disconnect
+            {t("profileManager.disconnect")}
           </button>
         ) : (
           <button
@@ -45,7 +47,9 @@ export function LinkedAccountRow({
             onClick={handleConnect}
             className="rounded-md bg-danger px-3 py-1 text-sm text-white hover:bg-danger disabled:opacity-50"
           >
-            {busy ? "Connecting…" : `Connect ${sourceMeta.label}`}
+            {busy
+              ? t("profileManager.connecting")
+              : t("profileManager.connect", { source: sourceMeta.label })}
           </button>
         )}
       </div>

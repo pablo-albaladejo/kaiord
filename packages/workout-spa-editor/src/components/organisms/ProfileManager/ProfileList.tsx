@@ -4,6 +4,7 @@
  * Displays list of saved profiles with actions.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Profile } from "../../../types/profile";
 import { ProfileListItem } from "./components/ProfileListItem";
 
@@ -24,10 +25,11 @@ export function ProfileList({
   onExport,
   onDelete,
 }: ProfileListProps) {
+  const t = useTranslate("athlete");
   if (profiles.length === 0) {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        No profiles yet. Create one to get started.
+        {t("profileManager.empty")}
       </p>
     );
   }

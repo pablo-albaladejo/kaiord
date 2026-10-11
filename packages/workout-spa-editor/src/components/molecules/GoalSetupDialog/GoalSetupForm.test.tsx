@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { saveManualHealthMetric } from "../../../application/health/save-manual-health-metric.use-case";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { GoalSetupForm } from "./GoalSetupForm";
@@ -14,6 +15,7 @@ import { GoalSetupForm } from "./GoalSetupForm";
 const PROFILE_ID = "p1";
 const TODAY = "2026-06-21";
 const TARGET_WEIGHT_KG = 67;
+const LOGGED_WEIGHT_KG = 72.4;
 
 const wrap = ({ children }: { children: ReactNode }) => (
   <ToastContextProvider>
@@ -115,6 +117,28 @@ describe("GoalSetupForm", () => {
       expect(
         (await db.table("energyTargets").get(PROFILE_ID))?.overrideCap
       ).toBe(true)
+    );
+  });
+
+  it("should start from the latest logged weigh-in, not the profile weight", async () => {
+    // Arrange
+    await seedProfile();
+    await saveManualHealthMetric(
+      { persistence: createDexiePersistence(db), profileId: PROFILE_ID },
+      { metric: "weight", day: TODAY, value: LOGGED_WEIGHT_KG }
+    );
+
+    // Act
+    render(
+      <GoalSetupForm profileId={PROFILE_ID} today={TODAY} onSaved={() => {}} />,
+      { wrapper: wrap }
+    );
+
+    // Assert
+    await waitFor(() =>
+      expect(screen.getByLabelText("Start weight (kg)")).toHaveValue(
+        LOGGED_WEIGHT_KG
+      )
     );
   });
 });
