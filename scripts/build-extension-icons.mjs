@@ -9,6 +9,9 @@
  * packages/_shared/extension-icon/master.svg and rasterises to PNG
  * at three sizes (16, 48, 128) into packages/<bridge>/icons/.
  *
+ * KAIORD_ICONS_ROOT (optional) redirects the output to
+ * <root>/packages/<bridge>/icons/ so tests never rewrite tracked PNGs.
+ *
  * Source-of-truth: the SVG master. Hand-editing the produced PNGs is
  * forbidden; the privacy-surface guard does NOT cover icons, but the
  * distinctness guard at scripts/check-extension-icons-distinct.mjs
@@ -16,7 +19,7 @@
  * inter-bridge / accent-mass thresholds.
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,6 +27,7 @@ import sharp from "sharp";
 
 const REPO_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const MASTER = join(REPO_ROOT, "packages/_shared/extension-icon/master.svg");
+const OUT_ROOT = process.env.KAIORD_ICONS_ROOT || REPO_ROOT;
 
 const BRIDGES = [
   { name: "garmin-bridge", accent: "#007cc3" },
@@ -42,8 +46,9 @@ const renderBridge = async ({ name, accent }) => {
       .resize(size, size, { fit: "fill" })
       .png()
       .toBuffer();
-    const out = join(REPO_ROOT, "packages", name, "icons", `icon${size}.png`);
-    writeFileSync(out, buffer);
+    const dir = join(OUT_ROOT, "packages", name, "icons");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, `icon${size}.png`), buffer);
     console.log(`  ✓ ${name}/icons/icon${size}.png (${buffer.length} bytes)`);
   }
 };
