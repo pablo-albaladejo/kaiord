@@ -6,7 +6,9 @@
  * key, a cursor or a connection. `meta` stays this device's, except that the
  * file's active profile is adopted when this device has no valid one. The
  * unclaimed default profile is reconciled against the file's profiles exactly
- * as a Drive sync reconciles it against the remote. Pure.
+ * as a Drive sync reconciles it against the remote. Nutrition rows of a
+ * profile that does not exist after the import (deleted after the backup) are
+ * left out rather than restored as orphans. Pure.
  */
 
 import type { KaiordBackup } from "../../types/backup";
@@ -24,6 +26,7 @@ import { restoreProviderKeys } from "./restore-provider-keys";
 type Row = Record<string, unknown>;
 
 const ACTIVE = "activeProfileId";
+const NUTRITION = ["intakeEntries", "intakePresets", "energyTargets"];
 
 const rowsOf = (s: Snapshot, table: string): Row[] =>
   (s.tables[table] ?? []) as Row[];
@@ -63,6 +66,15 @@ const adoptActiveProfile = (snapshot: Snapshot, file: Snapshot): Snapshot => {
   return { ...snapshot, tables: { ...snapshot.tables, meta: next } };
 };
 
+const dropOrphanNutrition = (snapshot: Snapshot): Snapshot => {
+  const ids = new Set(rowsOf(snapshot, "profiles").map((p) => p.id));
+  const tables = { ...snapshot.tables };
+  for (const name of NUTRITION)
+    if (tables[name])
+      tables[name] = rowsOf(snapshot, name).filter((r) => ids.has(r.profileId));
+  return { ...snapshot, tables };
+};
+
 export function prepareBackupSnapshot(
   local: Snapshot,
   backup: KaiordBackup,
@@ -82,5 +94,6 @@ export function prepareBackupSnapshot(
       ? ({ kind: "ready", snapshot: merged, deviceLocalRekey: null } as const)
       : reconcileAutoProfile(merged, file, perProfileTables, options);
   if (result.kind === "needsChoice") return result;
-  return { ...result, snapshot: adoptActiveProfile(result.snapshot, file) };
+  const snapshot = dropOrphanNutrition(result.snapshot);
+  return { ...result, snapshot: adoptActiveProfile(snapshot, file) };
 }

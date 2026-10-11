@@ -16,7 +16,7 @@
  *    sites use dedicated repository methods (`deleteMirrorOrphan`,
  *    `deleteLocalOrphan`) that this decorator does not touch.
  * 2. Profile-cascade deletes (`deleteByProfile`, session-match cascade
- *    hooks). Nothing re-runs that cascade on the other devices — the merge
+ *    hooks), the nutrition stores' included. Nothing re-runs that cascade on the other devices — the merge
  *    has no profile-cascade — so after a profile delete the profile row
  *    stays deleted (it IS tombstoned, via `profiles`) while its per-profile
  *    rows come back from the remote as orphans of a dead profile. Closing
@@ -41,6 +41,8 @@ export const TOMBSTONED_TABLES = {
   // Retention prune deletes old usage events by id; the tombstone suppresses
   // them in merge so a dormant device cannot resurrect them (see D5).
   usageEvents: "usageEvents",
+  intakeEntries: "intakeEntries",
+  intakePresets: "intakePresets",
 } as const;
 
 type TombstonedRepoKey = keyof typeof TOMBSTONED_TABLES;

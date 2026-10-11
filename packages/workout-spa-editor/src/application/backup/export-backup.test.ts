@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { createInMemoryEnergyBalanceRepositories } from "../../test-utils/in-memory-energy-balance-repositories";
 import { createInMemorySnapshotPort } from "../../test-utils/in-memory-snapshot-port";
 import { exportBackup } from "./export-backup";
 
@@ -14,6 +13,7 @@ const intake = (id: string, profileId: string, date: string) => ({
   profileId,
   date,
   loggedAt: "2026-10-10T08:00:00.000Z",
+  updatedAt: "2026-10-10T08:00:00.000Z",
   kcal: 500,
   proteinG: 30,
   carbG: 50,
@@ -35,14 +35,12 @@ const setup = () => {
       { table: "workouts", id: "w-0", deletedAt: "2026-10-01T00:00:00.000Z" },
     ],
   });
-  const nutrition = createInMemoryEnergyBalanceRepositories();
-  return { tables, port, nutrition };
+  return { tables, port };
 };
 
 const run = (deps: ReturnType<typeof setup>) =>
   exportBackup({
     port: deps.port,
-    nutrition: deps.nutrition,
     deviceId: "dev-1",
     now: () => NOW,
   });
@@ -57,7 +55,7 @@ describe("exportBackup", () => {
 
     // Assert
     expect(backup.format).toBe("kaiord-backup");
-    expect(backup.version).toBe(1);
+    expect(backup.version).toBe(2);
     expect(backup.manifest).toEqual({
       schemaVersion: 40,
       deviceId: "dev-1",
@@ -112,19 +110,10 @@ describe("exportBackup", () => {
     expect(local.profiles).toContainEqual(autoProfile);
   });
 
-  it("should carry every profile's nutrition through its repositories", async () => {
+  it("should carry every profile's nutrition in its tables", async () => {
     // Arrange
     const deps = setup();
-    await deps.nutrition.intakeEntries.put(
-      intake("i-1", "p-auto", "2026-10-10")
-    );
-    await deps.nutrition.intakeEntries.put(
-      intake("i-2", "p-auto", "2026-10-09")
-    );
-    await deps.nutrition.intakeEntries.put(
-      intake("i-3", "p-real", "2026-10-10")
-    );
-    await deps.nutrition.intakePresets.put({
+    const preset = {
       id: "ip-1",
       profileId: "p-real",
       label: "Oats",
@@ -133,7 +122,8 @@ describe("exportBackup", () => {
       carbG: 50,
       fatG: 5,
       createdAt: "2026-10-01T00:00:00.000Z",
-    });
+      updatedAt: "2026-10-01T00:00:00.000Z",
+    };
     const target = {
       profileId: "p-auto",
       goalType: "fat_loss" as const,
@@ -143,18 +133,20 @@ describe("exportBackup", () => {
       createdAt: "2026-10-01T00:00:00.000Z",
       updatedAt: "2026-10-01T00:00:00.000Z",
     };
-    await deps.nutrition.energyTargets.put(target);
+    deps.tables.intakeEntries = [
+      intake("i-1", "p-auto", "2026-10-10"),
+      intake("i-2", "p-real", "2026-10-09"),
+    ];
+    deps.tables.intakePresets = [preset];
+    deps.tables.energyTargets = [target];
 
     // Act
-    const { nutrition } = await run(deps);
+    const backup = await run(deps);
 
     // Assert
-    expect(nutrition.intakeEntries.map((e) => e.id).sort()).toEqual([
-      "i-1",
-      "i-2",
-      "i-3",
-    ]);
-    expect(nutrition.intakePresets.map((p) => p.id)).toEqual(["ip-1"]);
-    expect(nutrition.energyTargets).toEqual([target]);
+    expect(backup.tables.intakeEntries).toEqual(deps.tables.intakeEntries);
+    expect(backup.tables.intakePresets).toEqual([preset]);
+    expect(backup.tables.energyTargets).toEqual([target]);
+    expect(backup).not.toHaveProperty("nutrition");
   });
 });

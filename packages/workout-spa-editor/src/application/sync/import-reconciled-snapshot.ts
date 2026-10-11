@@ -1,6 +1,6 @@
 /**
  * Imports a reconciled snapshot and, when the default profile was re-keyed,
- * moves its device-local rows (`connections`, nutrition) onto the target in
+ * moves its device-local rows (`connections`) onto the target in
  * the SAME read-write transaction: a failure after either step rolls both
  * back, so the database never holds rows re-keyed in one place only.
  */

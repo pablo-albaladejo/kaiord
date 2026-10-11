@@ -83,10 +83,8 @@ export const AUTO_PROFILE_REKEY_RULES: Readonly<Record<string, RekeyRule>> = {
   coachingSyncState: { onCollision: "drop" },
 };
 
-/** Device-local tables: re-keyed in place, never part of the snapshot. */
-export const DEVICE_LOCAL_REKEY_TABLES: ReadonlyArray<string> = [
-  "connections",
-  "intakeEntries",
-  "intakePresets",
-  "energyTargets",
-];
+/**
+ * Device-local tables: re-keyed in place, never part of the snapshot. The
+ * nutrition stores sync since v37 and are re-keyed inside the snapshot.
+ */
+export const DEVICE_LOCAL_REKEY_TABLES: ReadonlyArray<string> = ["connections"];

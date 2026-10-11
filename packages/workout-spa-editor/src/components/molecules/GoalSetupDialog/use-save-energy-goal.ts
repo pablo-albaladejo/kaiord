@@ -1,6 +1,6 @@
 /**
- * use-save-energy-goal — UI hook bridging the goal form to the device-local
- * `energyTargets` store. Writes the single active `EnergyTargetRecord` for the
+ * use-save-energy-goal — UI hook bridging the goal form to the synced
+ * `energyTargets` store (one row per profile, last write wins across devices). Writes the single active `EnergyTargetRecord` for the
  * profile (a new goal overwrites the prior one) and surfaces a PII-safe toast.
  *
  * A `useRef` in-flight lock (set synchronously before the first `await`) drops

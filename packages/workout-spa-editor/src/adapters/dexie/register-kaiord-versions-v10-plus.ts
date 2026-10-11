@@ -22,6 +22,7 @@ import { applyV28Upgrade } from "./dexie-v28-migration";
 import { applyV29Upgrade } from "./dexie-v29-migration";
 import { applyV33Upgrade } from "./dexie-v33-migration";
 import { applyV36Upgrade } from "./dexie-v36-migration";
+import { applyV37Upgrade } from "./dexie-v37-migration";
 
 type DexieVersionHost = Pick<Dexie, "version">;
 
@@ -121,8 +122,8 @@ export const registerV25 = (db: DexieVersionHost): void => {
   // `conversationId` on `chatMessages`. The upgrade buckets prior messages
   // into one seeded "Conversation 1" per profile and backfills the FK.
   db.version(25).stores(SCHEMAS.v25).upgrade(applyV25Upgrade);
-  // v26 — additive energy-balance device-local stores (`intakeEntries`,
-  // `intakePresets`, `energyTargets`); auto-created empty, no upgrade fn.
+  // v26 — additive energy-balance stores (`intakeEntries`, `intakePresets`,
+  // `energyTargets`; device-local until v37); auto-created empty, no upgrade.
   db.version(26).stores(SCHEMAS.v26);
 };
 
@@ -180,4 +181,7 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // ledger rows gain their explicit `library` state (normalizeGarminLedgerRow).
   // Folded here (as v30).
   db.version(36).stores(SCHEMAS.v35).upgrade(applyV36Upgrade);
+  // v37 — nutrition joins the snapshot; schema as v35, the upgrade backfills
+  // the intake `updatedAt` clock (dexie-v37-migration). Folded here (as v30).
+  db.version(37).stores(SCHEMAS.v35).upgrade(applyV37Upgrade);
 };
