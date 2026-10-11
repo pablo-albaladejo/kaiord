@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-11 | [`add-spa-data-export`](./2026-10-11-add-spa-data-export/) | Export my data from Settings → Privacy |
 | 2026-10-11 | [`fix-core-compare-krds-steps`](./2026-10-11-fix-core-compare-krds-steps/) | Compare structured workout steps in round-trip validation |
 | 2026-10-11 | [`fix-fit-workout-hr-power-offsets`](./2026-10-11-fix-fit-workout-hr-power-offsets/) | Apply the FIT workoutHr and workoutPower offsets to workout ranges and conditions |
 | 2026-10-10 | [`default-local-profile`](./2026-10-10-default-local-profile/) | A default local profile that stays sync-inert until it is claimed |
