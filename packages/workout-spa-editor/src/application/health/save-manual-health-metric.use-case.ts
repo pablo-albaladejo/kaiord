@@ -27,10 +27,13 @@ import type { ManualHealthMetric } from "./manual-health-metric";
 import { repoForMetric, schemaForMetric } from "./manual-health-metric";
 import {
   buildHrvPayload,
-  buildSleepPayload,
   buildStepsPayload,
   buildWeightPayload,
 } from "./manual-health-payload.mapper";
+import {
+  buildSleepPayload,
+  type ManualSleepEntry,
+} from "./manual-sleep-payload.converter";
 
 const MANUAL_SOURCE_BRIDGE_ID = "manual";
 
@@ -40,29 +43,29 @@ export type SaveManualHealthMetricDeps = {
   newId?: () => string;
 };
 
-export type SaveManualHealthMetricInput = {
-  metric: ManualHealthMetric;
-  day: string;
-  value: number;
-};
+export type SaveManualHealthMetricInput =
+  | { metric: Exclude<ManualHealthMetric, "sleep">; day: string; value: number }
+  | { metric: "sleep"; day: string; sleep: ManualSleepEntry };
 
 export type SaveManualHealthMetricResult = { recordId: string };
 
 const buildPayload = (
-  metric: ManualHealthMetric,
-  value: number,
-  day: string,
+  input: SaveManualHealthMetricInput,
   prior: HealthRecord<unknown> | undefined
 ): unknown => {
-  switch (metric) {
+  switch (input.metric) {
     case "weight":
-      return buildWeightPayload(value, day);
+      return buildWeightPayload(input.value, input.day);
     case "sleep":
-      return buildSleepPayload(value, day);
+      return buildSleepPayload(input.sleep, input.day);
     case "hrv":
-      return buildHrvPayload(value, day);
+      return buildHrvPayload(input.value, input.day);
     case "daily-wellness":
-      return buildStepsPayload(value, day, prior?.krd as DailyWellness);
+      return buildStepsPayload(
+        input.value,
+        input.day,
+        prior?.krd as DailyWellness
+      );
   }
 };
 
@@ -71,7 +74,7 @@ export const saveManualHealthMetric = async (
   input: SaveManualHealthMetricInput
 ): Promise<SaveManualHealthMetricResult | undefined> => {
   // Defensive guard: a non-finite value is a no-op (no write).
-  if (!Number.isFinite(input.value)) return undefined;
+  if ("value" in input && !Number.isFinite(input.value)) return undefined;
   const { persistence, profileId } = deps;
   const repo = repoForMetric(persistence, input.metric);
   return persistence.transaction(async () => {
@@ -82,7 +85,7 @@ export const saveManualHealthMetric = async (
       input.day
     );
     const id = rows[0]?.id ?? deps.newId?.() ?? crypto.randomUUID();
-    const krd = buildPayload(input.metric, input.value, input.day, rows[0]);
+    const krd = buildPayload(input, rows[0]);
     const parsed = schemaForMetric(input.metric).safeParse(krd);
     if (!parsed.success) return undefined;
     const provenance = stampProvenance(

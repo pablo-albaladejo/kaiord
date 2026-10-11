@@ -9,10 +9,12 @@
  */
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
 
 export function WellnessImportAction() {
   const [, navigate] = useLocation();
+  const t = useTranslate("health");
 
   return (
     <div className="flex flex-col gap-1">
@@ -23,10 +25,10 @@ export function WellnessImportAction() {
         }
         className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-900 dark:border-gray-600 dark:text-white"
       >
-        Import a file
+        {t("wellnessEntry.importFile")}
       </button>
       <p className="text-xs text-muted-foreground">
-        Imported files use their own date.
+        {t("wellnessEntry.importHint")}
       </p>
     </div>
   );

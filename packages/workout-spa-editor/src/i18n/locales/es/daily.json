@@ -16,7 +16,11 @@
     "headlineEasy": "Tómatelo con calma",
     "hrv": "VFC",
     "sleep": "Sueño",
-    "battery": "Batería"
+    "battery": "Batería",
+    "rationaleHrv": "Según tu VFC nocturna.",
+    "rationaleSleep": "Según tu puntuación de sueño.",
+    "rationaleSleepManual": "Según la puntuación de sueño que has anotado.",
+    "rationaleHrvSleepManual": "Según tu VFC nocturna y la puntuación de sueño que has anotado."
   },
   "energyBalance": {
     "title": "Balance energético",
