@@ -120,6 +120,9 @@
     "analyticsLink": "Umami",
     "analyticsOutro": "to track aggregate usage (page views, workout generation, exports). No cookies are set and no personal data is collected.",
     "dataManagement": "Data Management",
+    "exportData": "Export my data",
+    "exportHint": "Downloads every record in this browser as a JSON file, unencrypted. API keys are not included. Keep the file somewhere safe.",
+    "exportFailed": "Could not export your data — please retry.",
     "clearAllApiKeys": "Clear All API Keys",
     "clearAllHint": "This removes all stored API keys from your browser. Keys already uploaded to your Google Drive by cross-device sync are not deleted by this action."
   },

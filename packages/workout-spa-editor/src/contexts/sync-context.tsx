@@ -14,6 +14,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useRef,
 } from "react";
 
@@ -23,6 +24,11 @@ import type { CloudSyncPort } from "../ports/cloud-sync-port";
 import type { SnapshotPort } from "../ports/snapshot-port";
 
 const SyncContext = createContext<SyncEngine | null>(null);
+
+/** The local database snapshot, for readers outside the sync cycle (backup). */
+export type SnapshotSource = { snapshotPort: SnapshotPort; deviceId: string };
+
+const SnapshotSourceContext = createContext<SnapshotSource | null>(null);
 
 export type SyncProviderProps = {
   cloud: CloudSyncPort;
@@ -47,13 +53,30 @@ export const SyncProvider = ({
     void syncNow();
   }, [connected, syncNow]);
 
-  return <SyncContext.Provider value={engine}>{children}</SyncContext.Provider>;
+  const source = useMemo(
+    () => ({ snapshotPort, deviceId }),
+    [snapshotPort, deviceId]
+  );
+
+  return (
+    <SnapshotSourceContext.Provider value={source}>
+      <SyncContext.Provider value={engine}>{children}</SyncContext.Provider>
+    </SnapshotSourceContext.Provider>
+  );
 };
 
 export const useSync = (): SyncEngine => {
   const ctx = useContext(SyncContext);
   if (!ctx) {
     throw new Error("useSync must be used within SyncProvider");
+  }
+  return ctx;
+};
+
+export const useSnapshotSource = (): SnapshotSource => {
+  const ctx = useContext(SnapshotSourceContext);
+  if (!ctx) {
+    throw new Error("useSnapshotSource must be used within SyncProvider");
   }
   return ctx;
 };
