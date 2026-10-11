@@ -56,6 +56,19 @@ export function CreateInputPhase({
   const [, navigate] = useLocation();
   const context = { ...sheetContext(useSearch()), sport };
   const clearWorkout = useClearWorkout();
+  const startFrom = (
+    <CreateStartFrom
+      lead={!provider}
+      onTemplate={() => navigate(buildNewSessionHref("template", context))}
+      onBlank={() => {
+        // "Blank" means blank: a draft left in the store would otherwise
+        // be reopened and the scratch seed (and its sport) skipped.
+        clearWorkout();
+        navigate(buildNewSessionHref("blank", context));
+      }}
+      onImport={() => navigate(buildNewSessionHref("import", context))}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -67,26 +80,24 @@ export function CreateInputPhase({
         ariaLabel={t("sport")}
       />
       {provider ? (
-        <CreateInputHero
-          sport={sport}
-          profile={profile}
-          promptText={promptText}
-          onPromptChange={onPromptChange}
-          onGenerate={onGenerate}
-        />
+        <>
+          <CreateInputHero
+            sport={sport}
+            profile={profile}
+            promptText={promptText}
+            onPromptChange={onPromptChange}
+            onGenerate={onGenerate}
+          />
+          {startFrom}
+        </>
       ) : (
-        <CreateProvidersEmpty />
+        // Without a provider the AI block is only a setup prompt, so the
+        // paths that work right now come first and stay above the fold.
+        <>
+          {startFrom}
+          <CreateProvidersEmpty />
+        </>
       )}
-      <CreateStartFrom
-        onTemplate={() => navigate(buildNewSessionHref("template", context))}
-        onBlank={() => {
-          // "Blank" means blank: a draft left in the store would otherwise
-          // be reopened and the scratch seed (and its sport) skipped.
-          clearWorkout();
-          navigate(buildNewSessionHref("blank", context));
-        }}
-        onImport={() => navigate(buildNewSessionHref("import", context))}
-      />
     </div>
   );
 }

@@ -25,6 +25,26 @@ const readProfiles = (page: Page): Promise<StoredProfile[]> =>
     return (await db.table("profiles").toArray()) as StoredProfile[];
   });
 
+/**
+ * A clean browser has no stored view preference, so the calendar picks its
+ * default from the viewport: grid from 768px up, list below (the phone case).
+ * Resolve the day surface the device actually renders instead of forcing one.
+ */
+const GRID_MIN_WIDTH = 768;
+
+const dayView = (page: Page, date: string) => {
+  const isGrid = (page.viewportSize()?.width ?? 0) >= GRID_MIN_WIDTH;
+  return isGrid
+    ? {
+        day: page.getByTestId(`day-column-${date}`),
+        add: page.getByTestId(`empty-day-${date}`),
+      }
+    : {
+        day: page.getByTestId(`calendar-list-day-${date}`),
+        add: page.getByTestId(`calendar-list-add-${date}`),
+      };
+};
+
 async function expectOneUnclaimedProfile(page: Page): Promise<void> {
   const profiles = await readProfiles(page);
   expect(profiles).toHaveLength(1);
@@ -70,9 +90,7 @@ test.describe("Default local profile on a clean browser", () => {
     // Assert
     await expect(page).toHaveURL(new RegExp(`/calendar/${getWeekId(today)}$`));
     await expect(
-      page
-        .getByTestId(`day-column-${today}`)
-        .locator('[data-testid^="workout-card-"]')
+      dayView(page, today).day.locator('[data-testid^="workout-card-"]')
     ).toHaveCount(1);
     await expectOneUnclaimedProfile(page);
   });
@@ -80,7 +98,7 @@ test.describe("Default local profile on a clean browser", () => {
   test("should save a wellness entry from the calendar", async ({ page }) => {
     // Arrange
     const today = toLocalDateString(new Date());
-    await page.getByTestId(`empty-day-${today}`).click();
+    await dayView(page, today).add.click();
     await page.getByTestId("add-entry-choose-wellness").click();
     const dialog = page.getByTestId("wellness-entry-dialog");
 
@@ -94,9 +112,7 @@ test.describe("Default local profile on a clean browser", () => {
     ).toBeVisible();
     await page.reload();
     await expect(
-      page
-        .getByTestId(`day-column-${today}`)
-        .getByTestId("wellness-badge-weight")
+      dayView(page, today).day.getByTestId("wellness-badge-weight")
     ).toBeVisible();
     await expectOneUnclaimedProfile(page);
   });
