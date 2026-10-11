@@ -47,24 +47,23 @@ const toEvents = (
   !textevent ? [] : Array.isArray(textevent) ? textevent : [textevent];
 
 // The writer lists on-step events first and records how many in
-// kaiord:textEventSplit, timing the off-step ones from the start of the pair.
+// kaiord:textEventSplit, offsetting the off-step ones from the start of the
+// pair (seconds by OnDuration, meters by the on-step distance).
 // Without the split (native ZWO) every event stays on the on-step.
 export const splitIntervalsTTextEvents = (
   textevent: ZwiftTextEvent | Array<ZwiftTextEvent> | undefined,
   split: number | undefined,
-  onDuration = 0
+  onShift: { seconds?: number; meters?: number } = {}
 ): { on: Array<ZwiftTextEvent>; off: Array<ZwiftTextEvent> } => {
   const events = toEvents(textevent);
   if (split === undefined) return { on: events, off: [] };
-  const unshift = (offset?: number) =>
-    offset === undefined ? undefined : offset - onDuration;
   const off = events.slice(split).map((event) => {
     const restored: ZwiftTextEvent = { message: event.message };
     if (event.timeoffset !== undefined) {
-      restored.timeoffset = unshift(event.timeoffset);
+      restored.timeoffset = event.timeoffset - (onShift.seconds ?? 0);
     }
     if (event.distoffset !== undefined) {
-      restored.distoffset = unshift(event.distoffset);
+      restored.distoffset = event.distoffset - (onShift.meters ?? 0);
     }
     return restored;
   });

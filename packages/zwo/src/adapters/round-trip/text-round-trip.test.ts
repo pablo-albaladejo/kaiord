@@ -167,6 +167,38 @@ describe("Zwift Round-trip: text fields", () => {
     }
   );
 
+  it.each([
+    {
+      onDuration: { type: "time" as const, seconds: 60 },
+      expected: 'message="Ease off" timeoffset="65" distoffset="100"',
+    },
+    {
+      onDuration: { type: "distance" as const, meters: 500 },
+      expected: 'message="Ease off" timeoffset="505" distoffset="600"',
+    },
+  ])(
+    "should shift off-step offsets only by the on-step length in their own unit ($onDuration.type)",
+    { timeout: 30_000 },
+    async ({ onDuration, expected }) => {
+      // Arrange
+      const offEvents = [
+        { message: "Ease off", timeoffset: 5, distoffset: 100 },
+      ];
+      const krd = repeatStepsWith(({ on, off }) => ({
+        on: { ...on, durationType: onDuration.type, duration: onDuration },
+        off: withTextEvents(off, offEvents),
+      }));
+
+      // Act
+      const xml = await writer(krd);
+      const steps = stepsOf(await reader(xml));
+
+      // Assert
+      expect(xml).toContain(expected);
+      expect(textEventsOf(steps.off)).toStrictEqual(offEvents);
+    }
+  );
+
   it(
     "should keep IntervalsT text events next to a cadence on the same side",
     { timeout: 30_000 },

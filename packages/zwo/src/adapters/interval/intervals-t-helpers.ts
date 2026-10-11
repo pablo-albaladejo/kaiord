@@ -20,15 +20,15 @@ export type ZwiftIntervalsTData = {
   stepIndex: number;
   textevent?: ZwiftTextEvent | Array<ZwiftTextEvent>;
   "kaiord:textEventSplit"?: number;
+  "kaiord:onOriginalDurationMeters"?: number;
 };
 
 const sideTextEvents = (data: ZwiftIntervalsTData, side: "on" | "off") =>
   extractTextEvents(
-    splitIntervalsTTextEvents(
-      data.textevent,
-      data["kaiord:textEventSplit"],
-      data.OnDuration
-    )[side]
+    splitIntervalsTTextEvents(data.textevent, data["kaiord:textEventSplit"], {
+      seconds: data.OnDuration,
+      meters: data["kaiord:onOriginalDurationMeters"],
+    })[side]
   );
 
 export const createOnStep = (data: ZwiftIntervalsTData): WorkoutStep => {

@@ -8,13 +8,17 @@ const textEventsOf = (step: WorkoutStep): Array<TextEvent> => {
   return (stepExtensions?.textEvents as Array<TextEvent> | undefined) ?? [];
 };
 
-const encodeEvent = (event: TextEvent, shift = 0): TextEvent => {
+const encodeEvent = (
+  event: TextEvent,
+  timeShift = 0,
+  distanceShift = 0
+): TextEvent => {
   const encoded: TextEvent = { "@_message": event.message };
   if (event.timeoffset !== undefined) {
-    encoded["@_timeoffset"] = (event.timeoffset as number) + shift;
+    encoded["@_timeoffset"] = (event.timeoffset as number) + timeShift;
   }
   if (event.distoffset !== undefined) {
-    encoded["@_distoffset"] = (event.distoffset as number) + shift;
+    encoded["@_distoffset"] = (event.distoffset as number) + distanceShift;
   }
   return encoded;
 };
@@ -29,9 +33,11 @@ export const encodeTextEvents = (
 };
 
 // One IntervalsT element holds the events of both steps. Off-step events are
-// timed from the start of the pair (shifted by OnDuration) so native Zwift
-// shows them after the on-step; kaiord:textEventSplit counts the on-step
-// events so the reader can hand each event back to its own step.
+// offset from the start of the pair so native Zwift shows them after the
+// on-step: timeoffset by OnDuration (the seconds Zwift plays, whatever the
+// KRD duration was) and distoffset by the on-step meters, if it has any.
+// kaiord:textEventSplit counts the on-step events so the reader can hand each
+// event back to its own step.
 export const encodeIntervalsTTextEvents = (
   onStep: WorkoutStep,
   offStep: WorkoutStep,
@@ -41,10 +47,12 @@ export const encodeIntervalsTTextEvents = (
   const offEvents = textEventsOf(offStep);
   if (onEvents.length + offEvents.length === 0) return;
 
-  const onDuration = intervalsT["@_OnDuration"] as number;
+  const onSeconds = intervalsT["@_OnDuration"] as number;
+  const onMeters =
+    onStep.duration.type === "distance" ? onStep.duration.meters : 0;
   const encoded = [
     ...onEvents.map((event) => encodeEvent(event)),
-    ...offEvents.map((event) => encodeEvent(event, onDuration)),
+    ...offEvents.map((event) => encodeEvent(event, onSeconds, onMeters)),
   ];
   intervalsT.textevent = encoded.length === 1 ? encoded[0] : encoded;
   if (offEvents.length > 0) {
