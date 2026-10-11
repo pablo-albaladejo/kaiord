@@ -77,6 +77,13 @@
     "keyInvalid": "The provider rejected this key. Check it and try again.",
     "keyUnverified": "Saved, but the key could not be checked (no connection, or the provider is busy)."
   },
+  "aiToast": {
+    "addFailed": "Failed to add AI provider — please retry.",
+    "removeFailed": "Failed to remove AI provider — please retry.",
+    "updateFailed": "Failed to update AI provider — please retry.",
+    "setDefaultFailed": "Failed to set default provider — please retry.",
+    "promptFailed": "Failed to save custom prompt — please retry."
+  },
   "models": {
     "default": "Default model",
     "chat": "Chat",
