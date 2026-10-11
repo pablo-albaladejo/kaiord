@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "../../../../contexts/ThemeContext";
+import { isoDateToSeconds } from "../../../charts/uplot-base/uplot-base";
 import type { TrendMetricKey } from "./trend-metrics";
 import { TrendSingleChartCard } from "./TrendSingleChartCard";
 import type { TrendSeriesByMetric } from "./use-trend-series";
@@ -30,6 +31,7 @@ vi.mock("./UplotChart", () => ({
 
 beforeEach(() => uplotMock.mockClear());
 
+const RANGE = { start: "2026-07-14", end: "2026-10-11" };
 const X_FIRST = 100;
 const X_SECOND = 200;
 const Y_SLEEP_FIRST = 80;
@@ -77,6 +79,7 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={EMPTY_SERIES}
         rangeDays={30}
+        range={RANGE}
       />,
       { wrapper: ThemeProvider }
     );
@@ -102,6 +105,7 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={loadingSeries}
         rangeDays={30}
+        range={RANGE}
       />,
       { wrapper: ThemeProvider }
     );
@@ -121,6 +125,7 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={30}
+        range={RANGE}
       />,
       { wrapper: ThemeProvider }
     );
@@ -132,6 +137,7 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={90}
+        range={RANGE}
       />
     );
 
@@ -152,6 +158,7 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={30}
+        range={RANGE}
       />,
       { wrapper: ThemeProvider }
     );
@@ -175,6 +182,7 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={30}
+        range={RANGE}
       />,
       { wrapper: ThemeProvider }
     );
@@ -195,6 +203,7 @@ describe("TrendSingleChartCard", () => {
         selected={selected}
         series={POINTS}
         rangeDays={30}
+        range={RANGE}
       />,
       { wrapper: ThemeProvider }
     );
@@ -203,5 +212,29 @@ describe("TrendSingleChartCard", () => {
     expect(screen.getByTestId("trend-single-chart-card")).not.toHaveTextContent(
       /hue|lightness/i
     );
+  });
+
+  it("should span the requested window and name the date series", () => {
+    // Arrange
+    const selected = selectedOf("sleep");
+
+    // Act
+    render(
+      <TrendSingleChartCard
+        selected={selected}
+        series={POINTS}
+        rangeDays={90}
+        range={RANGE}
+      />,
+      { wrapper: ThemeProvider }
+    );
+
+    // Assert
+    const { options } = uplotMock.mock.calls[0]![0];
+    expect(options.scales?.x?.range).toEqual([
+      isoDateToSeconds(RANGE.start),
+      isoDateToSeconds(RANGE.end),
+    ]);
+    expect(options.series?.[0]?.label).toBe("Date");
   });
 });
