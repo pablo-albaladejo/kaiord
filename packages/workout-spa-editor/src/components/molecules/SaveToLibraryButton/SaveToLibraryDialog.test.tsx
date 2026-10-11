@@ -263,6 +263,34 @@ describe("SaveToLibraryDialog", () => {
     });
   });
 
+  describe("name edits", () => {
+    it("should keep the user's edit when the workout changes while open", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const props = { workout: mockKRD, onOpenChange: vi.fn(), open: true };
+      const { rerender } = renderDialog(props);
+      await retype(user, "My edit");
+      const renamed: KRD = {
+        ...mockKRD,
+        extensions: {
+          structured_workout: { name: "Renamed", sport: "cycling", steps: [] },
+        },
+      };
+
+      // Act
+      rerender(
+        <ToastContextProvider>
+          <PersistenceProvider persistence={createInMemoryPersistence()}>
+            <SaveToLibraryDialog {...props} workout={renamed} />
+          </PersistenceProvider>
+        </ToastContextProvider>
+      );
+
+      // Assert
+      expect(screen.getByLabelText(/workout name/i)).toHaveValue("My edit");
+    });
+  });
+
   describe("validation", () => {
     it("should disable save button when name is empty", async () => {
       // Arrange

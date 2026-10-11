@@ -165,6 +165,37 @@ describe("LibraryPage short-circuit scheduling", () => {
     expect(workouts).toHaveLength(0);
   });
 
+  it("should fall through to ScheduleDateDialog when ?date= is not a real day", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    renderLibrary("/library?source=template-picker&date=2026-02-31");
+    await screen.findByText("Easy Ride");
+
+    // Act
+    await user.click(screen.getByRole("button", { name: /schedule/i }));
+
+    // Assert
+    expect(await screen.findByText("Schedule Workout")).toBeInTheDocument();
+    expect(await db.table("workouts").toArray()).toHaveLength(0);
+  });
+
+  it("should open a picked template without a day that is not a real one", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const { location } = renderLibrary(
+      "/library?source=template-picker&date=2026-02-31"
+    );
+    await screen.findByText("Easy Ride");
+
+    // Act
+    await user.click(screen.getByText("Easy Ride"));
+
+    // Assert
+    expect(location.history.at(-1)).toBe(
+      "/workout/new?source=scratch&from=library"
+    );
+  });
+
   it("should fall through to ScheduleDateDialog when ?source is not template-picker", async () => {
     // Arrange
     const user = userEvent.setup();
