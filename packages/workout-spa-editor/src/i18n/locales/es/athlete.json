@@ -73,6 +73,31 @@
     "notConnected": "Sin conectar",
     "connect": "Conectar {{source}}",
     "connecting": "Conectando…",
-    "disconnect": "Desconectar"
+    "disconnect": "Desconectar",
+    "tabs": {
+      "zones": "Zonas de entrenamiento",
+      "personal": "Datos personales",
+      "linkedAccounts": "Cuentas vinculadas"
+    },
+    "personal": {
+      "bodyWeight": "Peso corporal (kg)",
+      "height": "Altura (cm)",
+      "birthDate": "Fecha de nacimiento",
+      "restingHeartRate": "Frecuencia cardiaca en reposo (ppm)",
+      "sex": "Sexo",
+      "activityLevel": "Nivel de actividad",
+      "notSet": "Sin indicar",
+      "sexes": {
+        "male": "Hombre",
+        "female": "Mujer"
+      },
+      "activityLevels": {
+        "sedentary": "Sedentario",
+        "light": "Ligero",
+        "moderate": "Moderado",
+        "active": "Activo",
+        "very_active": "Muy activo"
+      }
+    }
   }
 }

@@ -6,6 +6,8 @@
  * exclusively on the Connections page (/settings/connections).
  */
 
+import { useTranslate } from "../../../../i18n/use-translate";
+
 type ProfileTab = "zones" | "personal" | "linked-accounts";
 
 type ProfileTabsProps = {
@@ -13,13 +15,14 @@ type ProfileTabsProps = {
   onTabChange: (tab: ProfileTab) => void;
 };
 
-const TABS: Array<{ id: ProfileTab; label: string }> = [
-  { id: "zones", label: "Training Zones" },
-  { id: "personal", label: "Personal Data" },
-  { id: "linked-accounts", label: "Linked Accounts" },
+const TABS: Array<{ id: ProfileTab; labelKey: string }> = [
+  { id: "zones", labelKey: "profileManager.tabs.zones" },
+  { id: "personal", labelKey: "profileManager.tabs.personal" },
+  { id: "linked-accounts", labelKey: "profileManager.tabs.linkedAccounts" },
 ];
 
 export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
+  const t = useTranslate("athlete");
   return (
     <div
       role="tablist"
@@ -38,7 +41,7 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
               : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
-          {tab.label}
+          {t(tab.labelKey)}
         </button>
       ))}
     </div>
