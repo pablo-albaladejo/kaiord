@@ -50,7 +50,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
         <StorageAvailabilityBanner />
       </div>
-      <main className="mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 py-6 pb-28 sm:px-6 lg:px-8 md:pb-6">
+      <main className="mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 py-6 pb-(--bottom-nav-clearance) sm:px-6 lg:px-8 md:pb-6">
         {children}
       </main>
       <ChatFab />

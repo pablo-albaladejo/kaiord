@@ -40,6 +40,17 @@ export function CreateInputPhase({
 }: CreateInputPhaseProps) {
   const t = useTranslate("create-workout");
   const [, navigate] = useLocation();
+  const startFrom = (
+    <CreateStartFrom
+      lead={!provider}
+      onTemplate={() => {
+        onClose();
+        navigate("/library");
+      }}
+      onBlank={() => navigate("/workout/new?source=scratch")}
+      onImport={() => navigate("/workout/new?action=import")}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,24 +62,24 @@ export function CreateInputPhase({
         ariaLabel={t("sport")}
       />
       {provider ? (
-        <CreateInputHero
-          sport={sport}
-          profile={profile}
-          promptText={promptText}
-          onPromptChange={onPromptChange}
-          onGenerate={onGenerate}
-        />
+        <>
+          <CreateInputHero
+            sport={sport}
+            profile={profile}
+            promptText={promptText}
+            onPromptChange={onPromptChange}
+            onGenerate={onGenerate}
+          />
+          {startFrom}
+        </>
       ) : (
-        <CreateProvidersEmpty />
+        // Without a provider the AI block is only a setup prompt, so the
+        // paths that work right now come first and stay above the fold.
+        <>
+          {startFrom}
+          <CreateProvidersEmpty />
+        </>
       )}
-      <CreateStartFrom
-        onTemplate={() => {
-          onClose();
-          navigate("/library");
-        }}
-        onBlank={() => navigate("/workout/new?source=scratch")}
-        onImport={() => navigate("/workout/new?action=import")}
-      />
     </div>
   );
 }
