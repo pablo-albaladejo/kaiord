@@ -10,6 +10,8 @@ import { convertFitDuration } from "../duration/duration.converter";
 // own the value-mapping proof: each row is one (type present -> mapped value)
 // equivalence class, and the absent table is the (type present, value missing ->
 // open) equivalence class. The dispatch-table block proves the routing/fallback.
+// HR and power values are raw FIT `workoutHr`/`workoutPower` (absolute bpm +100,
+// absolute watts +1000).
 
 type FitDurationFields = Parameters<typeof buildFitDurationData.build>[0];
 
@@ -28,7 +30,7 @@ describe("convertFitDuration", () => {
       ],
       [
         "hrLessThan",
-        { durationType: "hrLessThan", durationHr: 140 },
+        { durationType: "hrLessThan", durationHr: 240 },
         { type: "heart_rate_less_than", bpm: 140 },
       ],
       [
@@ -38,12 +40,12 @@ describe("convertFitDuration", () => {
       ],
       [
         "powerLessThan",
-        { durationType: "powerLessThan", durationPower: 200 },
+        { durationType: "powerLessThan", durationPower: 1200 },
         { type: "power_less_than", watts: 200 },
       ],
       [
         "powerGreaterThan",
-        { durationType: "powerGreaterThan", durationPower: 250 },
+        { durationType: "powerGreaterThan", durationPower: 1250 },
         { type: "power_greater_than", watts: 250 },
       ],
       [
@@ -77,7 +79,7 @@ describe("convertFitDuration", () => {
         "repeatUntilHrLessThan",
         {
           durationType: "repeatUntilHrLessThan",
-          repeatHr: 120,
+          repeatHr: 220,
           durationStep: 2,
         },
         { type: "repeat_until_heart_rate_less_than", bpm: 120, repeatFrom: 2 },
@@ -86,7 +88,7 @@ describe("convertFitDuration", () => {
         "repeatUntilHrGreaterThan",
         {
           durationType: "repeatUntilHrGreaterThan",
-          repeatHr: 160,
+          repeatHr: 260,
           durationStep: 0,
         },
         {
@@ -99,7 +101,7 @@ describe("convertFitDuration", () => {
         "repeatUntilPowerLessThan",
         {
           durationType: "repeatUntilPowerLessThan",
-          repeatPower: 180,
+          repeatPower: 1180,
           durationStep: 3,
         },
         { type: "repeat_until_power_less_than", watts: 180, repeatFrom: 3 },
@@ -108,7 +110,7 @@ describe("convertFitDuration", () => {
         "repeatUntilPowerGreaterThan",
         {
           durationType: "repeatUntilPowerGreaterThan",
-          repeatPower: 300,
+          repeatPower: 1300,
           durationStep: 1,
         },
         { type: "repeat_until_power_greater_than", watts: 300, repeatFrom: 1 },
