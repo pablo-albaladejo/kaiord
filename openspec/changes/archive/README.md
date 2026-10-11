@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-11 | [`add-ai-provider-key-check`](./2026-10-11-add-ai-provider-key-check/) | Check an AI key when it is saved, and gate the chat on what it needs |
 | 2026-10-11 | [`add-spa-data-export`](./2026-10-11-add-spa-data-export/) | Export my data from Settings → Privacy |
 | 2026-10-11 | [`add-spa-data-import`](./2026-10-11-add-spa-data-import/) | Import a backup from Settings → Privacy |
 | 2026-10-11 | [`fix-core-compare-krds-steps`](./2026-10-11-fix-core-compare-krds-steps/) | Compare structured workout steps in round-trip validation |
