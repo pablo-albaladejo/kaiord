@@ -114,5 +114,18 @@
     "title": "Anything you keep from the editor lands here",
     "body": "With its zones and structure intact, ready to drop onto any date.",
     "action": "Write a new one"
+  },
+  "scheduleDialog": {
+    "title": "Schedule Workout",
+    "description": "Pick a date for \"{{name}}\"",
+    "dateLabel": "Date",
+    "cancel": "Cancel",
+    "confirm": "Schedule",
+    "close": "Close",
+    "invalidDate": "Pick a valid date to schedule this workout."
+  },
+  "picker": {
+    "hintDated": "Choose a template to schedule on {{date}}.",
+    "hint": "Choose a template to schedule."
   }
 }

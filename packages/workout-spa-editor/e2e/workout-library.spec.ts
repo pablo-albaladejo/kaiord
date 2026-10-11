@@ -71,6 +71,8 @@ test.describe("Workout Library", () => {
 
       await page.getByRole("button", { name: /keep in library/i }).click();
       await page.getByRole("dialog").waitFor({ state: "visible" });
+      // The dialog proposes the workout's name; emptying it blocks saving.
+      await page.getByRole("dialog").getByLabel("Workout Name").clear();
 
       const saveButton = page
         .getByRole("dialog")

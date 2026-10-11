@@ -114,5 +114,18 @@
     "title": "Todo lo que guardes desde el editor aterriza aquí",
     "body": "Con sus zonas y su estructura intactas, listo para soltarlo en cualquier fecha.",
     "action": "Escribe uno nuevo"
+  },
+  "scheduleDialog": {
+    "title": "Programar entreno",
+    "description": "Elige una fecha para «{{name}}»",
+    "dateLabel": "Fecha",
+    "cancel": "Cancelar",
+    "confirm": "Programar",
+    "close": "Cerrar",
+    "invalidDate": "Elige una fecha válida para programar este entreno."
+  },
+  "picker": {
+    "hintDated": "Elige una plantilla para programarla el {{date}}.",
+    "hint": "Elige una plantilla para programarla."
   }
 }

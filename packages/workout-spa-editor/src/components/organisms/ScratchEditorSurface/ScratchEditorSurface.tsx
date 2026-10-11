@@ -3,7 +3,6 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { useCurrentWorkout } from "../../../store/selectors";
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { Workout } from "../../../types/krd";
-import { todayIsoDate } from "../../../utils/today-iso-date";
 import { AiBanner } from "../../molecules/AiBanner/AiBanner";
 import { useCoachingSidebar } from "../../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorBody } from "../../pages/EditorBody";
@@ -34,7 +33,7 @@ export function ScratchEditorSurface({ date }: { date: string | null }) {
   return (
     <div className="space-y-6">
       <AiBanner />
-      <ScratchScheduleButton date={date ?? todayIsoDate()} />
+      <ScratchScheduleButton date={date} />
       {workout && currentWorkout && (
         <EditorBody sidebar={sidebarData}>
           <WorkoutSection

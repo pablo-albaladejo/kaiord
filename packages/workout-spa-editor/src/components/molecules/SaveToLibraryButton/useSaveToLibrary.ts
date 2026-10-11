@@ -19,20 +19,25 @@ import {
   buildAddTemplateOptions,
   extractSportFromWorkout,
 } from "./save-to-library-helpers";
+import { useProposedName } from "./use-proposed-name";
 
-export function useSaveToLibrary(workout: KRD, onClose: () => void) {
+export function useSaveToLibrary(
+  workout: KRD,
+  onClose: () => void,
+  open: boolean
+) {
   const persistence = usePersistence();
   const { success, error: showError } = useToastContext();
   const t = useTranslate("library");
 
-  const [name, setName] = useState("");
+  const [name, setName] = useProposedName(workout, open);
   const [tags, setTags] = useState("");
   const [difficulty, setDifficulty] = useState<DifficultyLevel | "">("");
   const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // The name is re-proposed on the next open (useProposedName).
   const resetForm = () => {
-    setName("");
     setTags("");
     setDifficulty("");
     setNotes("");
