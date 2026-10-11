@@ -34,7 +34,7 @@ None.
 
 - **Coordinate constants:** Cities worldwide (Barcelona, Madrid, London, Sydney, Tokyo) with precise lat/lon for coordinate conversion tests.
 - **Time constants:** Milliseconds for duration, seconds for FIT timestamps.
-- **Tolerance constants:** `TIME_TOLERANCE_MS`, `COORD_PRECISION_5`, `PERF_RECORD_BUDGET_MS`.
+- **Tolerance constants:** `TIME_TOLERANCE_MS`, `COORD_PRECISION_5`.
 
 ## Dependencies
 

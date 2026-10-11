@@ -84,9 +84,8 @@ export const SAMPLE_WORKOUT_STEP_INDEX = 3 as const;
 export const SAMPLE_NUM_LENGTHS = 4 as const;
 export const SAMPLE_SWIM_STROKE_BREASTSTROKE = 2 as const;
 
-// === Performance budget (record batch perf test) ===
+// === Activity-scale record batch (unit test + bench) ===
 export const PERF_RECORD_BATCH_SIZE = 10000 as const;
-export const PERF_RECORD_BUDGET_MS = 500 as const;
 
 // === Event-converter sample data ===
 export const SAMPLE_EVENT_DATA = 42 as const;

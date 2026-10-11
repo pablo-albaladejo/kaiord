@@ -5,7 +5,6 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { exportBackup } from "../../application/backup/export-backup";
@@ -24,11 +23,18 @@ import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 const NEWER_KCAL = 750;
 const OLDER_KCAL = 600;
 
-const names: string[] = [];
-const open = async (label: string) => {
-  const name = `kaiord-test-nutrition-${label}-${Date.now()}-${Math.random()}`;
-  names.push(name);
-  const db = new KaiordDatabase(name);
+// One Dexie instance per device for the whole file: constructing a
+// KaiordDatabase registers every schema version, and Dexie re-parses all
+// earlier versions on each `stores()` call, so construction costs ~45 ms of
+// CPU — most of each test's work. Each test still gets a brand-new database:
+// `open()` creates it from scratch and `delete()` in afterEach drops it.
+const suffix = `${Date.now()}-${Math.random()}`;
+const databases = {
+  a: new KaiordDatabase(`kaiord-test-nutrition-a-${suffix}`),
+  b: new KaiordDatabase(`kaiord-test-nutrition-b-${suffix}`),
+};
+const open = async (label: keyof typeof databases) => {
+  const db = databases[label];
   await db.open();
   return {
     db,
@@ -97,7 +103,7 @@ const writeBeforeImport = (
 };
 
 afterEach(async () => {
-  for (const name of names.splice(0)) await Dexie.delete(name);
+  for (const db of Object.values(databases)) await db.delete();
 });
 
 describe("nutrition sync between two devices", () => {
