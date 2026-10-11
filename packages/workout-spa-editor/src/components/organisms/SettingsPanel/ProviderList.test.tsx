@@ -67,6 +67,21 @@ describe("ProviderList", () => {
     );
   });
 
+  it("should close the edit row and note an unchecked key when the check is inconclusive", async () => {
+    // Arrange
+    renderList("unverified");
+
+    // Act
+    await editKey("sk-new");
+
+    // Assert
+    expect(screen.queryByLabelText("API Key")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "the key could not be checked"
+    );
+  });
+
   it("should leave the edit row without saving on cancel", async () => {
     // Arrange
     const onUpdate = renderList("saved");
