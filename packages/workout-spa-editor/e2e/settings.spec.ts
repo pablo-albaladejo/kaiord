@@ -1,3 +1,4 @@
+import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
 import { openHeaderAction } from "./helpers/mobile-menu";
 
@@ -13,6 +14,8 @@ test.describe("Settings Panel", () => {
     await page.addInitScript(() => {
       localStorage.clear();
     });
+    // Adding a provider checks its key against the provider; answer locally.
+    await mockLlmSuccess(page);
     await page.goto("/workout/new?source=scratch");
   });
 
