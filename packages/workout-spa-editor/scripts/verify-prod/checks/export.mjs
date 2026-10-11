@@ -23,8 +23,8 @@ function assertFile(rec, body, workoutName) {
   }
   const backup = JSON.parse(body);
   rec.assert(
-    backup.format === "kaiord-backup" && backup.version === 1,
-    "export file declares format kaiord-backup, version 1",
+    backup.format === "kaiord-backup" && backup.version === 2,
+    "export file declares format kaiord-backup, version 2",
     body.slice(0, 200)
   );
   const profiles = backup.tables?.profiles ?? [];
@@ -39,9 +39,9 @@ function assertFile(rec, body, workoutName) {
     `workouts=${backup.tables?.workouts?.length ?? 0}`
   );
   rec.assert(
-    (backup.nutrition?.intakeEntries ?? []).some((e) => e.kcal === INTAKE_KCAL),
-    "export file contains the logged intake",
-    JSON.stringify(backup.nutrition?.intakeEntries ?? [])
+    (backup.tables?.intakeEntries ?? []).some((e) => e.kcal === INTAKE_KCAL),
+    "export file contains the logged intake in its tables",
+    JSON.stringify(backup.tables?.intakeEntries ?? [])
   );
 }
 

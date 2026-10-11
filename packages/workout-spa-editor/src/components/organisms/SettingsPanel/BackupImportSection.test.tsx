@@ -24,7 +24,7 @@ const backupFile = (profiles: Row[], extra: Row = {}) =>
     [
       JSON.stringify({
         format: "kaiord-backup",
-        version: 1,
+        version: 2,
         manifest: {
           schemaVersion: 40,
           deviceId: "dev-b",
@@ -42,7 +42,6 @@ const backupFile = (profiles: Row[], extra: Row = {}) =>
           ],
         },
         tombstones: [],
-        nutrition: { intakeEntries: [], intakePresets: [], energyTargets: [] },
         ...extra,
       }),
     ],
@@ -94,7 +93,7 @@ describe("BackupImportSection", () => {
     renderWithProviders(<BackupImportSection />, { snapshotPort: device.port });
 
     // Act
-    await upload(backupFile([ana], { version: 2 }));
+    await upload(backupFile([ana], { version: 3 }));
 
     // Assert
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -133,5 +132,35 @@ describe("BackupImportSection", () => {
     expect(device.state.tables.meta).toEqual([
       { key: "activeProfileId", value: "p-bea" },
     ]);
+  });
+
+  it("should not warn that deleted nutrition may come back", async () => {
+    // Arrange
+    const device = freshDevice();
+    renderWithProviders(<BackupImportSection />, { snapshotPort: device.port });
+    const intakeEntries = [
+      {
+        id: "i-1",
+        profileId: "p-ana",
+        date: "2026-10-10",
+        loggedAt: "2026-10-10T08:00:00.000Z",
+        updatedAt: "2026-10-10T08:00:00.000Z",
+        kcal: 500,
+        proteinG: 30,
+        carbG: 60,
+        fatG: 15,
+      },
+    ];
+
+    // Act
+    await upload(
+      backupFile([ana], { tables: { profiles: [ana], intakeEntries } })
+    );
+
+    // Assert
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Backup imported: 2 added, 0 updated, 0 deleted after the backup (not restored)."
+    );
+    expect(screen.queryByText(/may have come back/)).not.toBeInTheDocument();
   });
 });

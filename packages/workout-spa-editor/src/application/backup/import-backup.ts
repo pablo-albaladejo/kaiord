@@ -1,8 +1,9 @@
 /**
  * importBackup — merges a `kaiord-backup` file into this device, never
  * replacing it: `exportSnapshot(local) → merge with the file → reconcile the
- * default profile → importSnapshot`, then the device-local rewrite (default
- * profile's rows re-keyed, the file's nutrition merged in). Everything runs in
+ * default profile → importSnapshot`, plus the device-local re-key of the
+ * default profile's `connections`. Nutrition rides the snapshot, so a row
+ * deleted after the backup stays deleted like any other. Everything runs in
  * one read-write transaction, so a failure leaves the database as it was and
  * no write can land between the read and the import. When the file holds
  * several profiles and this device only has its unclaimed default profile,
@@ -11,11 +12,9 @@
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import type { KaiordBackup } from "../../types/backup";
-import type { SnapshotTables } from "../../types/snapshot";
 import { exportSnapshot } from "../sync/export-snapshot";
-import { importSnapshot } from "../sync/import-snapshot";
+import { importReconciledSnapshot } from "../sync/import-reconciled-snapshot";
 import type { ProfileChoice } from "../sync/reconcile-auto-profile";
-import { mergeBackupNutrition, ownedNutrition } from "./merge-backup-nutrition";
 import { BackupFileError } from "./parse-backup";
 import {
   backupSnapshot,
@@ -59,34 +58,12 @@ export const importBackup = ({
     );
     if (prepared.kind === "needsChoice") return prepared;
     const { snapshot, deviceLocalRekey } = prepared;
-    await importSnapshot({ port, snapshot, now });
-    const merge = {
-      rekey: deviceLocalRekey,
-      nutrition: backup.nutrition,
-      profileIds: new Set(
-        (snapshot.tables.profiles ?? []).map((p) => (p as { id: string }).id)
-      ),
-    };
-    let nutritionBefore: SnapshotTables = {};
-    let nutritionAfter: SnapshotTables = {};
-    await port.updateDeviceLocal((tables) => {
-      nutritionBefore = tables;
-      nutritionAfter = mergeBackupNutrition(merge)(tables);
-      return nutritionAfter;
-    });
-    const counts = countImport(
-      countImport(
-        emptyCounts(),
-        backupSnapshot(backup).tables,
-        local.tables,
-        snapshot.tables
-      ),
-      ownedNutrition(merge),
-      nutritionBefore,
-      nutritionAfter
+    await importReconciledSnapshot({ port, snapshot, deviceLocalRekey, now });
+    const summary = countImport(
+      emptyCounts(),
+      backupSnapshot(backup).tables,
+      local.tables,
+      snapshot.tables
     );
-    const { intakeEntries, intakePresets } = backup.nutrition;
-    const nutritionMayReappear =
-      intakeEntries.length + intakePresets.length > 0;
-    return { kind: "imported", summary: { ...counts, nutritionMayReappear } };
+    return { kind: "imported", summary };
   });

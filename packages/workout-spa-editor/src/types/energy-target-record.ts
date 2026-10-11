@@ -1,9 +1,10 @@
 /**
  * EnergyTargetRecord — the single active deficit/surplus goal for a profile.
  *
- * Stored in the device-local `energyTargets` Dexie table (v25), keyed on
- * `profileId` so there is exactly one active goal per profile (a new goal
- * overwrites the prior one). PII; excluded from the cloud snapshot.
+ * Stored in the `energyTargets` Dexie table (v25), keyed on `profileId` so
+ * there is exactly one active goal per profile (a new goal overwrites the
+ * prior one). Rides the cloud snapshot since v37; two devices holding a goal
+ * for one profile keep the newest `updatedAt`.
  *
  * Reuses the core `goalTypeSchema` value object so the SPA and core agree on
  * the goal-type enum (`fat_loss` | `muscle_gain` | `maintain`).

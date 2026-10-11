@@ -100,7 +100,7 @@
     "reset": "Restablecer"
   },
   "sync": {
-    "description": "Sincroniza tus entrenamientos y ajustes entre dispositivos a través de tu propio Google Drive. Los datos residen en tu Drive; no interviene ningún servidor de Kaiord.",
+    "description": "Sincroniza tus entrenamientos, tus datos de salud y nutrición (registro de ingestas, plantillas y objetivo) y tus ajustes entre dispositivos a través de tu propio Google Drive. Los datos residen en tu Drive; no interviene ningún servidor de Kaiord. Si dos dispositivos tienen cada uno un objetivo de nutrición para el mismo perfil, se conserva el guardado más recientemente.",
     "syncNow": "Sincronizar ahora",
     "disconnect": "Desconectar",
     "connect": "Conectar cuenta de Google",
@@ -140,7 +140,6 @@
     "importChooseProfile": "Esta copia tiene varios perfiles. ¿A cuál deben unirse los datos de este navegador?",
     "importConfirm": "Importar",
     "importSummary": "Copia importada: {{added}} añadidos, {{updated}} actualizados, {{notRestored}} borrados después de la copia (no restaurados).",
-    "importNutritionWarning": "Las ingestas y plantillas de nutrición que borraste después de la copia pueden haber vuelto.",
     "importInvalid": "Este fichero no es una copia de Kaiord.",
     "importNewerApp": "Esta copia es de una versión más nueva de Kaiord. Actualiza la aplicación y vuelve a intentarlo.",
     "importFailed": "No se pudo importar la copia; vuelve a intentarlo.",

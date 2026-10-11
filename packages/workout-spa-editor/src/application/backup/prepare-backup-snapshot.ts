@@ -6,12 +6,15 @@
  * key, a cursor or a connection. `meta` stays this device's, except that the
  * file's active profile is adopted when this device has no valid one. The
  * unclaimed default profile is reconciled against the file's profiles exactly
- * as a Drive sync reconciles it against the remote. Pure.
+ * as a Drive sync reconciles it against the remote. The rows of a profile
+ * deleted after the backup (its `profiles` tombstone holds) are left out
+ * rather than restored as orphans, in every per-profile table. Pure.
  */
 
 import type { KaiordBackup } from "../../types/backup";
 import type { Snapshot } from "../../types/snapshot";
 import { isAutoProfile } from "../profile/helpers/claim-profile";
+import { dropDeletedProfileRows } from "../sync/drop-deleted-profile-rows";
 import { mergeSnapshots } from "../sync/merge-snapshots";
 import {
   reconcileAutoProfile,
@@ -82,5 +85,6 @@ export function prepareBackupSnapshot(
       ? ({ kind: "ready", snapshot: merged, deviceLocalRekey: null } as const)
       : reconcileAutoProfile(merged, file, perProfileTables, options);
   if (result.kind === "needsChoice") return result;
-  return { ...result, snapshot: adoptActiveProfile(result.snapshot, file) };
+  const snapshot = dropDeletedProfileRows(result.snapshot, perProfileTables);
+  return { ...result, snapshot: adoptActiveProfile(snapshot, file) };
 }

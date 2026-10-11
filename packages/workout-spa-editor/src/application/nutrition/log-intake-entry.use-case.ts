@@ -4,7 +4,8 @@
  *
  * Validates the energy + macro values against `intakeEntryRecordSchema`
  * (non-negative; negatives are rejected), mints a fresh id, and stamps
- * `loggedAt` from the injected clock so the entry is reproducible in tests.
+ * `loggedAt` and the `updatedAt` sync clock from the injected clock so the
+ * entry is reproducible in tests.
  * The day-level roll-up is computed downstream by `buildDayEnergyBalance`.
  */
 import type { MealSlot } from "@kaiord/core";
@@ -41,11 +42,13 @@ export const logIntakeEntry = async (
   input: LogIntakeEntryInput
 ): Promise<IntakeEntryRecord | undefined> => {
   const { persistence, profileId } = deps;
+  const now = deps.now?.() ?? new Date().toISOString();
   const candidate = {
     id: deps.newId?.() ?? crypto.randomUUID(),
     profileId,
     date: input.date,
-    loggedAt: deps.now?.() ?? new Date().toISOString(),
+    loggedAt: now,
+    updatedAt: now,
     label: input.label,
     mealSlot: input.mealSlot,
     kcal: input.kcal,
