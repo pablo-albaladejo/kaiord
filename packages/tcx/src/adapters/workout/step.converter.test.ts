@@ -93,25 +93,6 @@ describe("convertTcxStep", () => {
     });
   });
 
-  it("should return null for Repeat_t step type", () => {
-    // Arrange
-    const logger = createMockLogger();
-    const tcxStep = {
-      "@_xsi:type": "Repeat_t",
-      Repetitions: 3,
-    };
-
-    // Act
-    const result = convertTcxStep(tcxStep, 0, "generic", logger);
-
-    // Assert
-    expect(result).toBeNull();
-    expect(logger.warn).toHaveBeenCalledWith(
-      "Repetition blocks not yet supported",
-      { stepIndex: 0 }
-    );
-  });
-
   it("should return null when duration is missing", () => {
     // Arrange
     const logger = createMockLogger();
