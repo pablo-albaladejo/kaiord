@@ -37,5 +37,10 @@
     "running": "Runner",
     "swimming": "Swimmer",
     "fallback": "Athlete"
+  },
+  "defaultProfile": {
+    "notice": "We created “My profile” so you can start right away. Add your thresholds and weight to get personal zones and estimates.",
+    "complete": "Complete profile",
+    "dismiss": "Got it"
   }
 }
