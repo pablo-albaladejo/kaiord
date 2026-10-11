@@ -325,7 +325,26 @@ describe("ScratchEditorSurface", () => {
     renderSurface("2026-06-01");
 
     // Assert
-    expect(await screen.findByTestId("scratch-schedule-button")).toBeDisabled();
+    const button = await screen.findByTestId("scratch-schedule-button");
+    expect(button).toBeDisabled();
+    await waitFor(() =>
+      expect(button).toHaveAccessibleDescription(
+        /select or create an athlete profile/i
+      )
+    );
+  });
+
+  it("should not show the missing-profile reason when a profile is active", async () => {
+    // Arrange
+    await seedActiveProfile();
+
+    // Act
+    renderSurface("2026-06-01");
+
+    // Assert
+    const button = await screen.findByTestId("scratch-schedule-button");
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(button).not.toHaveAttribute("aria-describedby");
   });
 
   it("should persist on the route date and land on its calendar week when scheduled", async () => {
