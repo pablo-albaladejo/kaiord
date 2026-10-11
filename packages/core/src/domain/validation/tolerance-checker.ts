@@ -22,12 +22,20 @@ export const DEFAULT_TOLERANCES: ToleranceConfig = {
   paceTolerance: 0.01,
 };
 
+/**
+ * A round-trip drift. `tolerance` 0 marks a value that must match exactly
+ * (a count, a zone). A categorical mismatch (a duration type, a target unit)
+ * carries `expectedValue`/`actualValue`; its numeric fields are then the
+ * fixed sentinel `expected 0, actual 1, deviation 1, tolerance 0`.
+ */
 export const toleranceViolationSchema = z.object({
   field: z.string(),
   expected: z.number(),
   actual: z.number(),
   deviation: z.number().nonnegative(),
-  tolerance: z.number().positive(),
+  tolerance: z.number().nonnegative(),
+  expectedValue: z.string().optional(),
+  actualValue: z.string().optional(),
 });
 
 export type ToleranceViolation = z.infer<typeof toleranceViolationSchema>;
@@ -45,6 +53,11 @@ export type ToleranceChecker = {
   ) => ToleranceViolation | null;
   checkCadence: (expected: number, actual: number) => ToleranceViolation | null;
   checkPace: (expected: number, actual: number) => ToleranceViolation | null;
+  /** Percentage-of-FTP check; comparers fall back to `checkPower` when absent. */
+  checkPercentFtp?: (
+    expected: number,
+    actual: number
+  ) => ToleranceViolation | null;
 };
 
 const check = (
@@ -74,4 +87,6 @@ export const createToleranceChecker = (
     check("cadence", expected, actual, config.cadenceTolerance),
   checkPace: (expected, actual) =>
     check("pace", expected, actual, config.paceTolerance),
+  checkPercentFtp: (expected, actual) =>
+    check("percentFtp", expected, actual, config.ftpTolerance),
 });

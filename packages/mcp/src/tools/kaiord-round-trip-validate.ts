@@ -15,12 +15,15 @@ const inputSchema = {
   input_file: z.string().describe("Path to a FIT file to validate"),
 };
 
-const formatViolations = (violations: Array<ToleranceViolation>): string => {
+export const formatViolations = (
+  violations: Array<ToleranceViolation>
+): string => {
   const header = `Round-trip validation failed with ${violations.length} violation(s):\n`;
-  const lines = violations.map(
-    (v) =>
-      `  ${v.field}: expected ${v.expected}, got ${v.actual} ` +
-      `(deviation: ${v.deviation}, tolerance: ${v.tolerance})`
+  const lines = violations.map((v) =>
+    v.expectedValue === undefined
+      ? `  ${v.field}: expected ${v.expected}, got ${v.actual} ` +
+        `(deviation: ${v.deviation}, tolerance: ${v.tolerance})`
+      : `  ${v.field}: expected ${v.expectedValue}, got ${v.actualValue}`
   );
   return header + lines.join("\n");
 };

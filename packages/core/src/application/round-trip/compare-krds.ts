@@ -7,6 +7,7 @@ import type { Logger } from "../../ports/logger";
 import { compareLaps } from "./compare-laps";
 import { compareRecords } from "./compare-records";
 import { compareSessions } from "./compare-sessions";
+import { compareWorkoutSteps } from "./compare-workout-steps";
 
 export const compareKRDs = (
   krd1: KRD,
@@ -20,6 +21,7 @@ export const compareKRDs = (
   violations.push(...compareSessions(krd1, krd2, toleranceChecker));
   violations.push(...compareLaps(krd1, krd2, toleranceChecker));
   violations.push(...compareRecords(krd1, krd2, toleranceChecker));
+  violations.push(...compareWorkoutSteps(krd1, krd2, toleranceChecker));
 
   return violations;
 };

@@ -54,9 +54,18 @@ export const formatToleranceViolations = (
       ? chalk.yellow(violation.field)
       : violation.field;
     const bullet = useColors ? chalk.red("\u2022") : "\u2022";
-    const { expected, actual, tolerance } = violation;
+    const { expected, actual, tolerance, expectedValue, actualValue } =
+      violation;
     const deviation = Math.abs(violation.deviation);
 
+    // A categorical mismatch (type, unit, intensity) carries its values as
+    // strings; its numeric fields are a fixed sentinel, not a measurement.
+    if (expectedValue !== undefined) {
+      lines.push(
+        `  ${bullet} ${fieldPath}: expected ${expectedValue}, got ${actualValue}`
+      );
+      continue;
+    }
     lines.push(
       `  ${bullet} ${fieldPath}: expected ${expected}, got ${actual} ` +
         `(deviation: ${deviation}, tolerance: \u00B1${tolerance})`

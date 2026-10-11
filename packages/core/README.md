@@ -152,28 +152,28 @@ const fitBuffer = await providers.convertKrdToFit({ krd });
 - `KrdValidationError` - When KRD data is invalid
 - `FitParsingError` - When FIT encoding fails
 
-#### `validateRoundTrip({ fitBuffer })`
+#### `validateRoundTrip(reader, writer, checker, logger)`
 
-Validates that FIT → KRD → FIT conversion preserves data within tolerances.
+Validates that a binary → KRD → binary round-trip preserves data within
+tolerances. It compares sessions, laps, records and structured workout steps
+(step count, repeat blocks, durations, targets and intensity) and returns the
+violations found; an empty array means the round-trip is lossless.
 
 ```typescript
-import { validateRoundTrip, createToleranceChecker } from "@kaiord/core";
+import { createToleranceChecker, validateRoundTrip } from "@kaiord/core";
 
-const checker = createToleranceChecker();
-await validateRoundTrip(
+const violations = await validateRoundTrip(
   fitReader,
   fitWriter,
-  validator,
-  checker,
+  createToleranceChecker(),
   logger
-)({
-  fitBuffer,
-});
+).validateBinaryRoundTrip({ originalBinary: fitBuffer });
 ```
 
-**Throws:**
-
-- `ToleranceExceededError` - When round-trip conversion exceeds tolerances
+`compareKRDs(krd1, krd2, checker, logger)` runs the same comparison on two
+KRDs, for a round-trip through a text format. A categorical mismatch, such as a
+duration that changed type, has `tolerance: 0` and carries the two values in
+`expectedValue` and `actualValue`.
 
 ### Schema Exports
 
@@ -366,30 +366,23 @@ try {
 
 #### `ToleranceExceededError`
 
-Thrown when round-trip conversion exceeds defined tolerances.
+Carries the violations of a round-trip that exceeded the tolerances.
+`validateRoundTrip` returns its violations rather than throwing, so a caller
+that wants to fail throws this error itself.
 
 ```typescript
 import { ToleranceExceededError } from "@kaiord/core";
 
 try {
-  await validateRoundTrip(
-    fitReader,
-    fitWriter,
-    validator,
-    checker,
-    logger
-  )({
-    fitBuffer,
-  });
+  await runConversionThatThrowsOnViolations();
 } catch (error) {
   if (error instanceof ToleranceExceededError) {
     console.error("Round-trip validation failed:");
     for (const violation of error.violations) {
+      const expected = violation.expectedValue ?? violation.expected;
+      const actual = violation.actualValue ?? violation.actual;
       console.error(
-        `  - ${violation.field}: expected ${violation.expected}, got ${violation.actual}`
-      );
-      console.error(
-        `    Deviation: ${violation.deviation}, tolerance: ${violation.tolerance}`
+        `  - ${violation.field}: expected ${expected}, got ${actual}`
       );
     }
   }

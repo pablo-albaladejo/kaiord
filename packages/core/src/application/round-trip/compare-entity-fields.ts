@@ -10,7 +10,7 @@ type NumericCheck = (
 ) => ToleranceViolation | null;
 
 type CheckerMethod = {
-  [K in keyof ToleranceChecker]: ToleranceChecker[K] extends NumericCheck
+  [K in keyof ToleranceChecker]-?: ToleranceChecker[K] extends NumericCheck
     ? K
     : never;
 }[keyof ToleranceChecker];
