@@ -10,6 +10,8 @@
  * genuinely unfetchable (offline / persistent 404): after one reload we let
  * the error surface to the route boundary instead of reloading again.
  */
+import { isLeaving } from "./leave-tracking";
+
 const RELOAD_AT_KEY = "kaiord:chunk-reload-at";
 const RELOAD_COOLDOWN_MS = 10_000;
 
@@ -24,7 +26,8 @@ export const isChunkLoadError = (error: unknown): boolean => {
 
 /**
  * Reload the page once to recover from a stale chunk. Returns `true` if a
- * reload was triggered, `false` if suppressed by the cooldown (loop guard).
+ * reload was triggered, `false` if suppressed by the cooldown (loop guard) or
+ * because the page is being left (see `leave-tracking`).
  */
 // In-memory guard: prevents repeated reloads within a single page load even
 // when `sessionStorage` is unavailable (private mode), so a flurry of chunk
@@ -32,7 +35,7 @@ export const isChunkLoadError = (error: unknown): boolean => {
 let reloadedThisLoad = false;
 
 export const reloadOnceForChunkError = (): boolean => {
-  if (reloadedThisLoad) return false;
+  if (reloadedThisLoad || isLeaving()) return false;
   try {
     const last = Number(sessionStorage.getItem(RELOAD_AT_KEY) ?? "0");
     if (Date.now() - last < RELOAD_COOLDOWN_MS) return false;

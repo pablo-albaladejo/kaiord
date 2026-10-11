@@ -1,16 +1,17 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 
+import { lazyPage } from "../../../lazy-page";
 import { StatusHeader } from "../../molecules/StatusHeader/StatusHeader";
 import { HeaderLogo } from "./components/HeaderLogo";
 import { useHeaderOverlays } from "./use-header-overlays";
 
-const ShortcutSheet = lazy(() =>
+const ShortcutSheet = lazyPage(() =>
   import("../../organisms/ShortcutSheet/ShortcutSheet").then((m) => ({
     default: m.ShortcutSheet,
   }))
 );
 
-const CommandPalette = lazy(() =>
+const CommandPalette = lazyPage(() =>
   import("../../organisms/CommandPalette/CommandPalette").then((m) => ({
     default: m.CommandPalette,
   }))

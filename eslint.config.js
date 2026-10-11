@@ -227,6 +227,12 @@ export default tseslint.config(
               message: "Use dynamic import() for code splitting.",
               allowTypeImports: true,
             },
+            {
+              name: "react",
+              importNames: ["lazy"],
+              message:
+                "Use lazyPage from src/lazy-page: stale-chunk recovery must see when an import is cancelled by leaving the page.",
+            },
           ],
         },
       ],
