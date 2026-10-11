@@ -3,7 +3,7 @@
  * optional, the method on screen being the one the zones were built with,
  * and a word once the change is stored.
  */
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -115,7 +115,10 @@ describe("SportZoneEditor for a runner", () => {
     await user.type(lthr, NEW_LTHR);
 
     // Assert
-    expect(await screen.findByRole("status")).toHaveTextContent("Saved");
+    // The live region is always mounted; it only speaks once the write lands.
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent("Saved");
+    });
   });
 
   it("should name zones and methods in Spanish", async () => {

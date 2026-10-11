@@ -77,6 +77,7 @@ test.describe("Phone layout above the bottom nav", () => {
     const today = toLocalDateString(new Date());
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(`/workout/new?source=scratch&date=${today}`);
+    await page.getByTestId("edit-metadata-button").click();
     await page.getByTestId("workout-name-input").fill("E2E footer");
     await page.getByTestId("save-metadata-button").click();
     await page.getByTestId("add-first-step-button").click();
