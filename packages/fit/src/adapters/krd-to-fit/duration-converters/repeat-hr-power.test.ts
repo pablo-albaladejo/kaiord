@@ -17,7 +17,7 @@ describe("convertRepeatHrPowerDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "repeatUntilHrGreaterThan",
-      repeatHr: 160,
+      repeatHr: 260,
       durationStep: 1,
     });
   });
@@ -36,7 +36,7 @@ describe("convertRepeatHrPowerDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "repeatUntilHrLessThan",
-      repeatHr: 120,
+      repeatHr: 220,
       durationStep: 0,
     });
   });
@@ -55,7 +55,7 @@ describe("convertRepeatHrPowerDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "repeatUntilPowerLessThan",
-      repeatPower: 180,
+      repeatPower: 1180,
       durationStep: 3,
     });
   });
@@ -74,7 +74,7 @@ describe("convertRepeatHrPowerDuration", () => {
     expect(handled).toBe(true);
     expect(message).toStrictEqual({
       durationType: "repeatUntilPowerGreaterThan",
-      repeatPower: 320,
+      repeatPower: 1320,
       durationStep: 2,
     });
   });

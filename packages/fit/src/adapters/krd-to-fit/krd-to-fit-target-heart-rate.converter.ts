@@ -17,8 +17,8 @@ export const convertHeartRateTarget = (
     message.targetHrZone = value.value;
   } else if (value.unit === targetUnitSchema.enum.range) {
     message.targetValue = 0;
-    message.customTargetHeartRateLow = value.min;
-    message.customTargetHeartRateHigh = value.max;
+    message.customTargetHeartRateLow = encodeWorkoutHeartRate(value.min);
+    message.customTargetHeartRateHigh = encodeWorkoutHeartRate(value.max);
   } else if (value.unit === targetUnitSchema.enum.bpm) {
     // FIT absolute-bpm offset rule (see target/heart-rate-helpers.ts)
     message.targetValue = encodeWorkoutHeartRate(value.value);
