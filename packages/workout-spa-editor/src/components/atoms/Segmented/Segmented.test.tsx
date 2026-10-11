@@ -68,4 +68,26 @@ describe("Segmented", () => {
     // Assert
     expect(onChange).toHaveBeenCalledWith("swimming");
   });
+
+  it("should disable every option and ignore a click while disabled", () => {
+    // Arrange
+    const onChange = vi.fn();
+    render(
+      <Segmented
+        options={OPTIONS}
+        value="cycling"
+        onChange={onChange}
+        ariaLabel="Sport"
+        disabled
+      />
+    );
+
+    // Act
+    fireEvent.click(screen.getByRole("radio", { name: /swim/i }));
+
+    // Assert
+    for (const radio of screen.getAllByRole("radio"))
+      expect(radio).toBeDisabled();
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
