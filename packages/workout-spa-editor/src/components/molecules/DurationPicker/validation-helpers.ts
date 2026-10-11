@@ -1,66 +1,36 @@
+import type { Translate } from "../../../i18n/use-translate";
+import { parseClock } from "../../../lib/units/clock";
 import type { ValidationResult } from "./validation";
 
-export const validateNumericInput = (value: string): ValidationResult => {
-  if (!value || value.trim() === "") {
-    return {
-      isValid: false,
-      error: "Value is required",
-    };
-  }
+const MAX_SECONDS = 86400;
+const MAX_METERS = 1000000;
 
-  const numericValue = Number(value);
+const invalid = (error: string): ValidationResult => ({
+  isValid: false,
+  error,
+});
 
-  if (isNaN(numericValue)) {
-    return {
-      isValid: false,
-      error: "Must be a valid number",
-    };
-  }
-
-  if (numericValue <= 0) {
-    return {
-      isValid: false,
-      error: "Must be greater than 0",
-    };
-  }
-
-  return { isValid: true };
-};
-
-export const validateTimeDuration = (
-  numericValue: number
+/** A time typed as m:ss (or h:mm:ss, or bare minutes), kept in seconds. */
+export const validateClockDuration = (
+  value: string,
+  t: Translate
 ): ValidationResult => {
-  if (numericValue > 86400) {
-    return {
-      isValid: false,
-      error: "Duration cannot exceed 24 hours (86400 seconds)",
-    };
-  }
-
-  return {
-    isValid: true,
-    duration: {
-      type: "time",
-      seconds: numericValue,
-    },
-  };
+  if (value.trim() === "") return invalid(t("durationPicker.required"));
+  const seconds = parseClock(value);
+  if (seconds === null) return invalid(t("durationPicker.invalidClock"));
+  if (seconds <= 0) return invalid(t("durationPicker.positive"));
+  if (seconds > MAX_SECONDS) return invalid(t("durationPicker.maxTime"));
+  return { isValid: true, duration: { type: "time", seconds } };
 };
 
 export const validateDistanceDuration = (
-  numericValue: number
+  value: string,
+  t: Translate
 ): ValidationResult => {
-  if (numericValue > 1000000) {
-    return {
-      isValid: false,
-      error: "Distance cannot exceed 1000 km (1,000,000 meters)",
-    };
-  }
-
-  return {
-    isValid: true,
-    duration: {
-      type: "distance",
-      meters: numericValue,
-    },
-  };
+  if (value.trim() === "") return invalid(t("durationPicker.required"));
+  const meters = Number(value);
+  if (Number.isNaN(meters)) return invalid(t("durationPicker.invalidNumber"));
+  if (meters <= 0) return invalid(t("durationPicker.positive"));
+  if (meters > MAX_METERS) return invalid(t("durationPicker.maxDistance"));
+  return { isValid: true, duration: { type: "distance", meters } };
 };

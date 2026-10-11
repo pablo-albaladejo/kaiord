@@ -34,6 +34,7 @@ const cardIn = (page: Page, date: string) =>
 
 async function scheduleToday(page: Page, today: string): Promise<string> {
   await page.goto(`/workout/new?source=scratch&date=${today}`);
+  await page.getByTestId("edit-metadata-button").click();
   await page.getByTestId("workout-name-input").fill(NAME);
   await page.getByTestId("save-metadata-button").click();
   await page.getByTestId("add-first-step-button").click();

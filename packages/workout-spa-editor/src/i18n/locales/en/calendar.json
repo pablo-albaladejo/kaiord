@@ -54,33 +54,36 @@
     "needsStructure_other": "{{count}} need structure"
   },
   "firstRun": {
-    "heading": "Nothing here yet — and nothing will appear on its own",
-    "body": "Kaiord doesn't hold your training. It reads it from your sources, structures it, and sends it back to your watch. Three things have to be true before this week fills itself.",
-    "manual": "Not ready to connect anything? Write a session by hand — everything else still works.",
-    "addWorkout": "Add workout",
+    "heading": "Start here — everything works by hand",
+    "body": "Write a session, import a file you already have, or log how you slept. Nothing needs to be connected for the calendar, the editor or your zones to work.",
+    "addWorkout": "Create a workout",
     "done": "Done",
     "steps": {
       "sources": {
         "title": "Connect where your training comes from",
-        "consequence": "Train2Go for your coach's plan, Garmin for what you actually rode. Without this, the week stays empty.",
+        "consequence": "Garmin, Train2Go or WHOOP fill the week for you instead of you typing it.",
         "cta": "Connect a source"
       },
       "aiKey": {
         "title": "Add your own AI key",
-        "consequence": "A coach's note in prose becomes steps and targets. Your key, your bill, stored in this browser.",
+        "consequence": "Turns a session written in prose into steps and targets. Your key, your bill, stored in this browser.",
         "cta": "Add a key"
       },
       "bridge": {
         "title": "Install the bridge extension",
-        "consequence": "Garmin has no public API for workouts, so the handover to your watch happens in your browser. Skip it and you can still download the file.",
+        "consequence": "Sends sessions straight to your Garmin watch. Without it you download the file and import it yourself.",
         "cta": "Install"
       }
-    }
+    },
+    "importFile": "Import a file",
+    "logWellness": "Log wellness",
+    "optionalHeading": "Optional: connect your tools",
+    "optionalBody": "Each one saves typing. Skip any of them and Kaiord keeps working by hand."
   },
   "emptyWeek": {
     "headline": "Nothing this week",
     "headlineWithDate": "Nothing this week — your last session was {{date}}",
-    "consequence": "Either you're between blocks, or your coach hasn't published. Nothing is broken.",
+    "consequence": "Nothing is broken. Add a session by hand, or move to another week.",
     "goToLatest": "Go to {{date}}",
     "addWorkout": "Add workout"
   },

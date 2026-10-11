@@ -74,6 +74,7 @@ test.describe("New session keeps its context", () => {
 
     // Act
     await page.getByRole("button", { name: "Blank" }).click();
+    await page.getByTestId("edit-metadata-button").click();
     await expect(page.getByTestId("workout-sport-select")).toHaveValue(
       "running"
     );
@@ -179,6 +180,7 @@ test.describe("New session keeps its context", () => {
     // Arrange
     await openSheetFor(page, chosenDay());
     await page.getByRole("button", { name: "Blank" }).click();
+    await page.getByTestId("edit-metadata-button").click();
     await page.getByTestId("workout-name-input").fill("Tempo Tuesday");
     await page.getByTestId("save-metadata-button").click();
 

@@ -45,7 +45,9 @@ export function buildLibraryCardModel(
     title: template.name,
     sportLabel,
     duration: review.duration,
-    tss: review.tss,
+    // No target means no intensity to load against: zero would read as a
+    // measured "no effort", so the card says nothing about load instead.
+    tss: review.tss > 0 ? review.tss : undefined,
     dist: review.dist,
     tag,
   };

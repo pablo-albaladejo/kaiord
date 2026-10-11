@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 
 import { exact, isoDate, mondayOf, TIMEOUT } from "../browser.mjs";
-import { addTimedStep } from "../editor.mjs";
+import { addTimedStep, openMetadata } from "../editor.mjs";
 import { ensureProfile, expectOk } from "../steps.mjs";
 import { otherExits } from "./new-session-entries.mjs";
 
@@ -22,7 +22,7 @@ async function startFromMonday(session, monday) {
   await page.getByTestId("add-entry-choose-workout").click();
   await page.getByRole("radio", { name: RUNNING }).click();
   await page.getByRole("button", { name: exact("En blanco") }).click();
-  await page.getByTestId("workout-name-input").waitFor();
+  await openMetadata(page);
 }
 
 async function scheduleAndFind(page, go) {

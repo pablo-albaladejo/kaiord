@@ -1,4 +1,5 @@
 import type { CalendarEmptyBannersProps } from "./CalendarEmptyBanners";
+import { todayIso } from "./health/health-date-windows";
 import type { useCalendarState } from "./use-calendar-state";
 
 export type CalendarEmptyBannerExtras = {
@@ -25,6 +26,7 @@ export const calendarEmptyBannerProps = (
   rawCount: s.data.rawCount,
   ...extras,
   onGoToLatest: s.latestWorkout ? s.handleGoToLatest : undefined,
+  onLogWellness: () => s.setWellnessDate(todayIso()),
   batchMessage: s.batch.message,
   onDismissBatch: s.batch.dismissMessage,
   batchIsProcessing: s.batch.isProcessing,

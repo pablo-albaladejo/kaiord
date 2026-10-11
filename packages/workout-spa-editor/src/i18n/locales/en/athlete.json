@@ -12,7 +12,6 @@
   "noThresholds": "Add your {{sport}} thresholds",
   "zonesReason": "Derived from {{metric}} {{value}}. These five bands are what the AI writes workouts against and what your watch receives as targets.",
   "zonesReasonNoThreshold": "These five bands are what the AI writes workouts against and what your watch receives as targets.",
-  "zonesEncoding": "Width is the zone range; height is its intensity. Take the colour away and the ramp still reads.",
   "provenance": {
     "synced": "{{source}} · {{when}}",
     "manual": "By hand",

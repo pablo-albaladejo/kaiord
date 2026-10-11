@@ -32,19 +32,22 @@ export const TargetValueInput = ({
   getValuePlaceholder,
 }: TargetValueInputProps) => {
   const zoneInfo = useZoneInfo(targetType, unit, value, activeProfile);
+  // A pace is typed as m:ss, which a number input cannot hold.
+  const clock = targetType === "pace" && unit === "mps";
 
   return (
     <div className="space-y-1">
       <Input
-        variant="number"
+        variant={clock ? "text" : "number"}
+        inputMode={clock ? "numeric" : "decimal"}
         label={getValueLabel(targetType, unit)}
         value={value}
         onChange={onChange}
         disabled={disabled}
         error={error}
         placeholder={getValuePlaceholder(targetType, unit)}
-        min="0"
-        step={unit === "zone" ? "1" : "0.01"}
+        min={clock ? undefined : "0"}
+        step={clock ? undefined : unit === "zone" ? "1" : "0.01"}
         aria-label={getValueLabel(targetType, unit)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? "target-error" : undefined}

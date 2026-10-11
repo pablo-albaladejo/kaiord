@@ -1,13 +1,20 @@
-import type { Duration, Target, WorkoutStep } from "../../../types/krd";
+import type {
+  Duration,
+  Intensity,
+  Target,
+  WorkoutStep,
+} from "../../../types/krd";
 
 export function createUpdatedStep(
   step: WorkoutStep,
   duration: Duration,
   target: Target,
-  notes: string
+  notes: string,
+  intensity: Intensity
 ): WorkoutStep {
   return {
     ...step,
+    intensity,
     duration,
     durationType: duration.type,
     target,

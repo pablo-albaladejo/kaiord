@@ -122,7 +122,7 @@
   },
   "dataTypeHints": {
     "workout": "Completed structured sessions",
-    "planned-session": "What your coach scheduled",
+    "planned-session": "What you or your coach scheduled",
     "activity": "Unstructured rides, runs and walks",
     "training-zones": "FTP, threshold HR, max HR",
     "weight": "Scale readings",

@@ -5,6 +5,7 @@
  */
 
 import { useTranslate } from "../../../i18n/use-translate";
+import type { SportKey } from "../../../types/sport-zones";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal/ConfirmationModal";
 import { SportZoneSections } from "./components/SportZoneSections";
 import { SportZoneTabs } from "./components/SportZoneTabs";
@@ -13,13 +14,19 @@ import { useSportZoneEditor } from "./hooks/useSportZoneEditor";
 
 type SportZoneEditorProps = {
   profileId: string;
+  /** The tab to open on — the sport the athlete was looking at. */
+  initialSport?: SportKey;
 };
 
-export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
+export function SportZoneEditor({
+  profileId,
+  initialSport,
+}: SportZoneEditorProps) {
   const t = useTranslate("zones");
   const {
     activeSport,
     setActiveSport,
+    saved,
     sportConfig,
     capabilities,
     confirmMethod,
@@ -29,7 +36,7 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
     updateSportThresholds,
     handleZonesChange,
     handleAddZone,
-  } = useSportZoneEditor(profileId);
+  } = useSportZoneEditor(profileId, initialSport);
 
   if (!sportConfig) {
     return <p className="text-sm text-gray-500">{t("empty.noSportConfig")}</p>;
@@ -51,6 +58,9 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
         onAddZone={handleAddZone}
         ftp={sportConfig.thresholds.ftp}
       />
+      <p role="status" className="text-xs text-ink-muted">
+        {saved ? t("status.saved") : ""}
+      </p>
       <ConfirmationModal
         isOpen={!!confirmMethod}
         title={t("method.confirmTitle")}
