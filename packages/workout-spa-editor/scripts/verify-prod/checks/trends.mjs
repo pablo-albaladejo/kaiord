@@ -1,4 +1,5 @@
 import { isoDate } from "../browser.mjs";
+import { windowDayOffsets } from "../dates.mjs";
 import { ensureProfile } from "../steps.mjs";
 import { saveWellness } from "../wellness.mjs";
 
@@ -17,23 +18,7 @@ function recordCanvasText() {
 
 const WINDOW_DAYS = 90;
 const EDGE_DAYS = 31;
-const DAY_MS = 86_400_000;
 const DATE_TICK = /^\d{1,2} \p{L}{3,5}\.?$/u;
-
-// Every day of the window as the app labels its ticks (es, UTC midnights),
-// mapped to its offset from the window's first day.
-function windowDays(today) {
-  const format = new Intl.DateTimeFormat("es", {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  });
-  const end = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-  const days = new Map();
-  for (let i = 0; i < WINDOW_DAYS; i++)
-    days.set(format.format(end - (WINDOW_DAYS - 1 - i) * DAY_MS), i);
-  return days;
-}
 
 async function drawWeightChart(session, today) {
   const { page, go } = session;
@@ -59,7 +44,7 @@ export default async function trends({ rec, open }) {
   const today = new Date();
   const chart = await drawWeightChart(session, today);
   const drawn = await session.page.evaluate(() => window.__vpDrawn);
-  const days = windowDays(today);
+  const days = await windowDayOffsets(session.page, today, WINDOW_DAYS);
   const ticks = drawn.filter((t) => DATE_TICK.test(t));
   const offsets = ticks.map((t) => days.get(t));
   const inside = offsets.filter((o) => o !== undefined);
