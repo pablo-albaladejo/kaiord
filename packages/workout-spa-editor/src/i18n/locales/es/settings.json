@@ -120,6 +120,9 @@
     "analyticsLink": "Umami",
     "analyticsOutro": "para hacer un seguimiento del uso agregado (visitas de página, generación de entrenamientos, exportaciones). No se establecen cookies ni se recopilan datos personales.",
     "dataManagement": "Gestión de datos",
+    "exportData": "Exportar mis datos",
+    "exportHint": "Descarga en un fichero JSON, sin cifrar, todos los registros de este navegador. No incluye las claves de API. Guarda el fichero en un sitio seguro.",
+    "exportFailed": "No se pudieron exportar tus datos; vuelve a intentarlo.",
     "clearAllApiKeys": "Borrar todas las claves de API",
     "clearAllHint": "Esto elimina todas las claves de API almacenadas de tu navegador. Las claves que la sincronización entre dispositivos ya haya subido a tu Google Drive no se eliminan con esta acción."
   },

@@ -15,6 +15,13 @@ import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import type { IntakePresetRecord } from "../../types/intake-preset-record";
 import type { KaiordDatabase } from "./dexie-database";
 
+// Every date of one profile on the `[profileId+date]` index.
+const entriesOfProfile = (db: KaiordDatabase, profileId: string) =>
+  db
+    .table("intakeEntries")
+    .where("[profileId+date]")
+    .between([profileId, ""], [profileId, "\uffff"]);
+
 const createIntakeEntryRepository = (
   db: KaiordDatabase
 ): IntakeEntryRepository => ({
@@ -25,6 +32,9 @@ const createIntakeEntryRepository = (
       .equals([profileId, date])
       .toArray()) as IntakeEntryRecord[],
 
+  listByProfile: async (profileId) =>
+    (await entriesOfProfile(db, profileId).toArray()) as IntakeEntryRecord[],
+
   put: async (record) => {
     await db.table("intakeEntries").put(record);
   },
@@ -34,11 +44,7 @@ const createIntakeEntryRepository = (
   },
 
   deleteByProfile: async (profileId) => {
-    await db
-      .table("intakeEntries")
-      .where("[profileId+date]")
-      .between([profileId, ""], [profileId, "￿"])
-      .delete();
+    await entriesOfProfile(db, profileId).delete();
   },
 });
 
