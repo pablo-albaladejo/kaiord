@@ -9,6 +9,7 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
   anthropic: [
     { id: "claude-haiku-4-5-20251001", label: "claude-haiku-4-5-20251001" },
     { id: "claude-haiku-4-5", label: "claude-haiku-4-5" },
+    { id: "claude-haiku-5-5", label: "claude-haiku-5-5" },
     { id: "claude-opus-4-5", label: "claude-opus-4-5" },
     { id: "claude-opus-4-5-20251101", label: "claude-opus-4-5-20251101" },
     { id: "claude-sonnet-4-5-20250929", label: "claude-sonnet-4-5-20250929" },
@@ -18,9 +19,11 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
     { id: "claude-opus-4-7", label: "claude-opus-4-7" },
     { id: "claude-opus-4-8", label: "claude-opus-4-8" },
     { id: "claude-opus-5", label: "claude-opus-5" },
+    { id: "claude-opus-5-5", label: "claude-opus-5-5" },
     { id: "claude-fable-5", label: "claude-fable-5" },
     { id: "claude-fable-5-1", label: "claude-fable-5-1" },
     { id: "claude-sonnet-5", label: "claude-sonnet-5" },
+    { id: "claude-sonnet-5-5", label: "claude-sonnet-5-5" },
   ],
   openai: [
     { id: "o1", label: "o1" },
@@ -77,6 +80,10 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
     { id: "gpt-5.6-luna", label: "gpt-5.6-luna" },
     { id: "gpt-5.6-sol", label: "gpt-5.6-sol" },
     { id: "gpt-5.6-terra", label: "gpt-5.6-terra" },
+    { id: "gpt-6-astra", label: "gpt-6-astra" },
+    { id: "gpt-6.1-sol", label: "gpt-6.1-sol" },
+    { id: "gpt-6-luna", label: "gpt-6-luna" },
+    { id: "gpt-6-sol", label: "gpt-6-sol" },
   ],
   google: [
     { id: "gemini-2.0-flash", label: "gemini-2.0-flash" },
