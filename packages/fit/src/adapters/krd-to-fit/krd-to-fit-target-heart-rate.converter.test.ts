@@ -28,7 +28,7 @@ describe("convertHeartRateTarget", () => {
     });
   });
 
-  it("should convert heart rate range target", () => {
+  it("should convert heart rate range target with the bpm offset", () => {
     // Arrange
     const step: WorkoutStep = {
       stepIndex: 0,
@@ -49,8 +49,8 @@ describe("convertHeartRateTarget", () => {
     expect(message).toStrictEqual({
       targetType: "heartRate",
       targetValue: 0,
-      customTargetHeartRateLow: 140,
-      customTargetHeartRateHigh: 160,
+      customTargetHeartRateLow: 240,
+      customTargetHeartRateHigh: 260,
     });
   });
 

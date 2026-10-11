@@ -191,4 +191,28 @@ describe("formatToleranceViolations", () => {
     expect(stripped).toContain("power");
     expect(stripped).toContain("expected 250, got 252");
   });
+
+  it("should print a categorical mismatch by its values, without deviation", () => {
+    // Arrange
+    const violations: Array<ToleranceViolation> = [
+      {
+        field: "structured_workout.steps[0].duration.type",
+        expected: 0,
+        actual: 1,
+        deviation: 1,
+        tolerance: 0,
+        expectedValue: "time",
+        actualValue: "open",
+      },
+    ];
+
+    // Act
+    const stripped = stripAnsi(formatToleranceViolations(violations));
+
+    // Assert
+    expect(stripped).toContain(
+      "structured_workout.steps[0].duration.type: expected time, got open"
+    );
+    expect(stripped).not.toContain("deviation");
+  });
 });
