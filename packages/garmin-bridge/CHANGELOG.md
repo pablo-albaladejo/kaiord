@@ -1,5 +1,15 @@
 # @kaiord/garmin-bridge
 
+## 10.3.0
+
+### Minor Changes
+
+- cb4bc1d: Add the `schedule` and `unschedule` actions, which place a library workout on a Garmin Connect calendar date and remove a calendar entry Kaiord placed. Each runs under a 25-second deadline that also bounds the wait for a token, starts no write after 15 seconds, and reports `deadline-before-send` or `deadline-exceeded` so the editor can tell a write that never left from one whose outcome is unknown. Add the read-only `calendar-find` action, which reads one month of the Garmin calendar and returns only the entries of one workout, as `{ workoutScheduleId, date }`; nothing else in the calendar leaves the extension. `ping` now reports `features: ["calendar-write-v1", "calendar-find-v1"]`.
+
+### Patch Changes
+
+- cb65d56: Accept external messages from the apex production origin `https://kaiord.com`. The editor is served at `https://kaiord.com/app`, but the sender allowlist required a subdomain, so every message from production was refused with "Origin or action not permitted" and the editor detected no installed bridge. Subdomains of kaiord.com and the localhost dev ports are still accepted; any other origin is still refused.
+
 ## 10.1.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @kaiord/whoop-bridge
 
+## 10.3.0
+
+### Patch Changes
+
+- cb65d56: Accept external messages from the apex production origin `https://kaiord.com`. The editor is served at `https://kaiord.com/app`, but the sender allowlist required a subdomain, so every message from production was refused with "Origin or action not permitted" and the editor detected no installed bridge. Subdomains of kaiord.com and the localhost dev ports are still accepted; any other origin is still refused.
+
 ## 10.1.1
 
 ### Patch Changes
