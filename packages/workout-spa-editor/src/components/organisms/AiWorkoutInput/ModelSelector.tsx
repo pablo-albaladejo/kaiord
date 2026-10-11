@@ -1,3 +1,5 @@
+import { modelForProvider } from "@kaiord/ai/providers";
+
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
@@ -31,7 +33,7 @@ export const ModelSelector: React.FC = () => {
       >
         {providers.map((p) => (
           <option key={p.id} value={p.id}>
-            {p.label} ({p.model})
+            {p.model ? `${p.label} (${modelForProvider(p)})` : p.label}
           </option>
         ))}
       </select>

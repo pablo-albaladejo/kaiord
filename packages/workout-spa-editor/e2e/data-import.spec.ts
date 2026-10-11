@@ -10,6 +10,7 @@
 
 import type { Browser, Page } from "@playwright/test";
 
+import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { appUrl, expect, test } from "./fixtures/base";
 import { toLocalDateString } from "./helpers/local-date";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -72,6 +73,8 @@ async function saveWellness(page: Page, today: string) {
 }
 
 async function addProvider(page: Page) {
+  // Adding a provider checks its key against the provider; answer locally.
+  await mockLlmSuccess(page);
   await open(page, "/settings/ai");
   await page.getByLabel("Label").fill("E2E provider");
   await page.getByLabel("API Key").fill("sk-e2e-fake-import-key");

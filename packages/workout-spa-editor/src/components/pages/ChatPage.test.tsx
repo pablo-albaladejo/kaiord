@@ -8,7 +8,7 @@ import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
 import ChatPage from "./ChatPage";
 
 vi.mock("../../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p1", profile: null }),
+  useActiveProfileLive: vi.fn(() => ({ id: "p1", profile: null })),
 }));
 vi.mock("../../hooks/use-ai-providers-live", () => ({
   useAiProvidersLive: vi.fn(),
@@ -23,12 +23,15 @@ vi.mock("../../hooks/use-chat-conversations-live", () => ({
   useChatConversationsLive: vi.fn(),
 }));
 
+const { useActiveProfileLive } =
+  await import("../../hooks/use-active-profile-live");
 const { useAiProvidersLive } =
   await import("../../hooks/use-ai-providers-live");
 const { useChatMessagesLive } =
   await import("../../hooks/use-chat-messages-live");
 const { useChatConversationsLive } =
   await import("../../hooks/use-chat-conversations-live");
+const mockActive = vi.mocked(useActiveProfileLive);
 const mockProviders = vi.mocked(useAiProvidersLive);
 const mockMessages = vi.mocked(useChatMessagesLive);
 const mockConversations = vi.mocked(useChatConversationsLive);
@@ -61,7 +64,10 @@ const message = (id: string, content: string): ChatMessageRecord => ({
 });
 
 describe("ChatPage", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockActive.mockReturnValue({ id: "p1", profile: null });
+  });
 
   it("should render the route heading with the route-heading attribute", () => {
     // Arrange
@@ -131,5 +137,42 @@ describe("ChatPage", () => {
 
     // Assert
     expect(screen.getByText(/Select a conversation/i)).toBeInTheDocument();
+  });
+
+  it("should send a user without a profile to create one", () => {
+    // Arrange
+    mockActive.mockReturnValue({ id: null, profile: null });
+    mockProviders.mockReturnValue([provider]);
+    mockConversations.mockReturnValue([]);
+    mockMessages.mockReturnValue([]);
+
+    // Act
+    renderWithProviders(<ChatPage />);
+
+    // Assert
+    const gate = screen.getByTestId("chat-gate-noProfile");
+    expect(gate).toHaveTextContent("needs an athlete profile");
+    expect(
+      screen.getByRole("button", { name: "Create a profile" })
+    ).toBeVisible();
+    expect(screen.queryByLabelText("Message")).not.toBeInTheDocument();
+  });
+
+  it("should name the provider whose key is missing instead of offering it", () => {
+    // Arrange
+    mockProviders.mockReturnValue([
+      { ...provider, apiKey: "", apiKeyMissing: true, label: "Restored" },
+    ]);
+    mockConversations.mockReturnValue([]);
+    mockMessages.mockReturnValue([]);
+
+    // Act
+    renderWithProviders(<ChatPage />);
+
+    // Assert
+    const gate = screen.getByTestId("chat-gate-missingKey");
+    expect(gate).toHaveTextContent("“Restored” came from a backup");
+    expect(screen.getByRole("button", { name: "Add the key" })).toBeVisible();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
 });

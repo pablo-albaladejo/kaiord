@@ -12,6 +12,7 @@ import { readFile } from "node:fs/promises";
 
 import type { Page } from "@playwright/test";
 
+import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
 import { toLocalDateString } from "./helpers/local-date";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -54,6 +55,8 @@ async function enterRecords(page: Page, today: string): Promise<string> {
   await logger.getByTestId("intake-log-submit").click();
   await expect(page.getByText("Entry logged", { exact: true })).toBeVisible();
 
+  // Adding a provider checks its key against the provider; answer locally.
+  await mockLlmSuccess(page);
   await page.goto("/settings/ai");
   await page.getByLabel("Label").fill("E2E provider");
   await page.getByLabel("API Key").fill(FAKE_KEY);

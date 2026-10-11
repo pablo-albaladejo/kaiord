@@ -72,7 +72,17 @@
     "setDefault": "Establecer predeterminado",
     "remove": "Eliminar",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "checking": "Comprobando la clave…",
+    "keyInvalid": "El proveedor ha rechazado esta clave. Revísala y vuelve a intentarlo.",
+    "keyUnverified": "Guardado, pero no se pudo comprobar la clave (sin conexión o el proveedor está ocupado)."
+  },
+  "aiToast": {
+    "addFailed": "No se pudo añadir el proveedor de IA. Inténtalo de nuevo.",
+    "removeFailed": "No se pudo eliminar el proveedor de IA. Inténtalo de nuevo.",
+    "updateFailed": "No se pudo actualizar el proveedor de IA. Inténtalo de nuevo.",
+    "setDefaultFailed": "No se pudo establecer el proveedor predeterminado. Inténtalo de nuevo.",
+    "promptFailed": "No se pudo guardar el prompt personalizado. Inténtalo de nuevo."
   },
   "models": {
     "default": "Modelo predeterminado",

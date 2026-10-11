@@ -29,8 +29,7 @@ export type ChatWorkspaceProps = {
   onDelete: (id: string) => void;
 };
 
-/** Two-column chat surface: the conversation list and the active thread (or a
- * prompt to pick/start one when no thread is selected). */
+/** Conversation list beside the active thread, or a prompt to start one. */
 export function ChatWorkspace(props: ChatWorkspaceProps) {
   const t = useTranslate("chat");
   const prefill = useChatPrefill();
@@ -50,11 +49,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
         onDelete={props.onDelete}
       />
       <div className="flex flex-col gap-3">
-        <ChatModelPicker
-          providers={props.providers}
-          value={props.provider?.id ?? null}
-          onChange={props.onModelChange}
-        />
+        <ChatModelPicker {...props} />
         {props.provider && (
           <ModelStatusNotice
             type={props.provider.type}
