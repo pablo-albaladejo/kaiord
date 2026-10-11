@@ -122,7 +122,7 @@
   },
   "dataTypeHints": {
     "workout": "Sesiones estructuradas completadas",
-    "planned-session": "Lo que ha programado tu entrenador",
+    "planned-session": "Lo que has programado tú o tu entrenador",
     "activity": "Salidas, carreras y paseos sin estructura",
     "training-zones": "FTP, FC de umbral, FC máxima",
     "weight": "Lecturas de la báscula",

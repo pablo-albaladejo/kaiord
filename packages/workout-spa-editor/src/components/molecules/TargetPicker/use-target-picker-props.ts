@@ -10,7 +10,8 @@ export function useTargetPickerProps(
 ) {
   const t = useTranslate("targets");
   const displayError = error || state.validationError;
-  const unitOptions = getUnitOptions(state.targetType, activeProfile, t) || [];
+  const unitOptions =
+    getUnitOptions(state.targetType, activeProfile, t, state.paceBase) || [];
 
   return {
     targetType: state.targetType,
@@ -23,11 +24,11 @@ export function useTargetPickerProps(
     getValueLabel: (
       type: "power" | "heart_rate" | "pace" | "cadence" | "open",
       unit: string
-    ) => getValueLabel(type, unit, t),
+    ) => getValueLabel(type, unit, t, state.paceBase),
     getValuePlaceholder: (
       type: "power" | "heart_rate" | "pace" | "cadence" | "open",
       unit: string
-    ) => getValuePlaceholder(type, unit, t),
+    ) => getValuePlaceholder(type, unit, t, state.paceBase),
     activeProfile,
   };
 }

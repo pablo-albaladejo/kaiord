@@ -32,8 +32,8 @@ describe("DurationPicker", () => {
 
       // Assert
       expect(
-        screen.getByRole("spinbutton", { name: /duration \(seconds\)/i })
-      ).toBeInTheDocument();
+        screen.getByRole("textbox", { name: /duration \(mm:ss\)/i })
+      ).toHaveValue("5:00");
     });
 
     it("should render distance input when type is distance", () => {
@@ -60,7 +60,7 @@ describe("DurationPicker", () => {
 
       // Assert
       expect(
-        screen.getByText(/open-ended duration \(manual lap button\)/i)
+        screen.getByText(/open-ended: press lap to finish the step/i)
       ).toBeInTheDocument();
     });
   });
@@ -104,11 +104,11 @@ describe("DurationPicker", () => {
 
       // Act
       render(<DurationPicker value={null} onChange={onChange} />);
-      const input = screen.getByRole("spinbutton", {
-        name: /duration \(seconds\)/i,
+      const input = screen.getByRole("textbox", {
+        name: /duration \(mm:ss\)/i,
       });
       await user.clear(input);
-      await user.type(input, "600");
+      await user.type(input, "10:00");
 
       // Assert
       expect(onChange).toHaveBeenLastCalledWith({
@@ -124,14 +124,16 @@ describe("DurationPicker", () => {
 
       // Act
       render(<DurationPicker value={null} onChange={onChange} />);
-      const input = screen.getByRole("spinbutton", {
-        name: /duration \(seconds\)/i,
+      const input = screen.getByRole("textbox", {
+        name: /duration \(mm:ss\)/i,
       });
       await user.clear(input);
       await user.type(input, "-10");
 
       // Assert
-      expect(screen.getByText(/must be greater than 0/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/enter a time as m:ss, e\.g\. 5:00/i)
+      ).toBeInTheDocument();
       expect(onChange).toHaveBeenLastCalledWith(null);
     });
 
@@ -142,8 +144,8 @@ describe("DurationPicker", () => {
 
       // Act
       render(<DurationPicker value={null} onChange={onChange} />);
-      const input = screen.getByRole("spinbutton", {
-        name: /duration \(seconds\)/i,
+      const input = screen.getByRole("textbox", {
+        name: /duration \(mm:ss\)/i,
       });
       await user.clear(input);
       await user.type(input, "0");
@@ -159,11 +161,11 @@ describe("DurationPicker", () => {
 
       // Act
       render(<DurationPicker value={null} onChange={onChange} />);
-      const input = screen.getByRole("spinbutton", {
-        name: /duration \(seconds\)/i,
+      const input = screen.getByRole("textbox", {
+        name: /duration \(mm:ss\)/i,
       });
       await user.clear(input);
-      await user.type(input, "90000");
+      await user.type(input, "25:00:00");
 
       // Assert
       expect(
@@ -254,8 +256,8 @@ describe("DurationPicker", () => {
 
       // Act
       render(<DurationPicker value={null} onChange={onChange} error={error} />);
-      const input = screen.getByRole("spinbutton", {
-        name: /duration \(seconds\)/i,
+      const input = screen.getByRole("textbox", {
+        name: /duration \(mm:ss\)/i,
       });
       await user.clear(input);
       await user.type(input, "-10");
@@ -263,7 +265,7 @@ describe("DurationPicker", () => {
       // Assert
       expect(screen.getByText(error)).toBeInTheDocument();
       expect(
-        screen.queryByText(/must be greater than 0/i)
+        screen.queryByText(/enter a time as m:ss/i)
       ).not.toBeInTheDocument();
     });
   });
@@ -281,7 +283,7 @@ describe("DurationPicker", () => {
         screen.getByRole("combobox", { name: /duration type/i })
       ).toBeDisabled();
       expect(
-        screen.getByRole("spinbutton", { name: /duration \(seconds\)/i })
+        screen.getByRole("textbox", { name: /duration \(mm:ss\)/i })
       ).toBeDisabled();
     });
   });

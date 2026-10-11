@@ -41,7 +41,8 @@
   },
   "threshold": {
     "pace": "Ritmo umbral",
-    "ariaLabel": "umbral {{label}}"
+    "ariaLabel": "umbral {{label}}",
+    "optional": "opcional"
   },
   "section": {
     "heartRate": "Zonas de frecuencia cardíaca",
@@ -73,5 +74,45 @@
     "ftp": "FTP",
     "thresholdPace": "Ritmo de umbral",
     "cssPace": "Ritmo CSS"
+  },
+  "defaultName": {
+    "recovery": "Recuperación",
+    "aerobic": "Aeróbica",
+    "tempo": "Tempo",
+    "threshold": "Umbral",
+    "vo2_max": "VO₂ máx",
+    "extensive_endurance": "Resistencia extensiva",
+    "intensive_endurance": "Resistencia intensiva",
+    "aerobic_capacity": "Capacidad aeróbica",
+    "low_intensity": "Intensidad baja",
+    "high_intensity": "Intensidad alta",
+    "endurance": "Resistencia",
+    "active_recovery": "Recuperación activa",
+    "foundation": "Base",
+    "anaerobic": "Anaeróbica",
+    "anaerobic_capacity": "Capacidad anaeróbica",
+    "lactate_threshold": "Umbral láctico",
+    "neuromuscular": "Neuromuscular",
+    "neuromuscular_power": "Potencia neuromuscular",
+    "subthreshold": "Subumbral",
+    "superthreshold": "Supraumbral",
+    "easy": "Suave",
+    "zone_n": "Zona {{n}}"
+  },
+  "methodName": {
+    "polarized-hr-3": "Polarizado 3 zonas",
+    "karvonen-5": "Karvonen 5 zonas",
+    "friel-hr-5": "Friel 5 zonas",
+    "custom": "Personalizado",
+    "polarized-3": "Polarizado 3 zonas",
+    "classic-5": "Clásico 5 zonas",
+    "british-cycling-6": "British Cycling 6 zonas",
+    "coggan-7": "Coggan 7 zonas",
+    "friel-7": "Friel 7 zonas",
+    "daniels-5": "Daniels 5 zonas",
+    "own": "Tus propias zonas"
+  },
+  "status": {
+    "saved": "Guardado"
   }
 }

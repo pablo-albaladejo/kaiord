@@ -52,6 +52,22 @@ describe("CalendarEmptyBanners", () => {
     expect(screen.getByTestId("first-run-guide")).toBeInTheDocument();
   });
 
+  it("should let the first-run guide open the wellness entry", () => {
+    // Arrange
+    const onLogWellness = vi.fn();
+    renderBanners({
+      hasAnyWorkouts: false,
+      hasWeekWorkouts: false,
+      onLogWellness,
+    });
+
+    // Act
+    screen.getByTestId("first-run-log-wellness").click();
+
+    // Assert
+    expect(onLogWellness).toHaveBeenCalledTimes(1);
+  });
+
   it("should not repeat the dependencies the first-run guide already names", () => {
     // Arrange
 

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import type { PaceInputBase } from "../../../lib/units/pace-input";
 import type { Target } from "../../../types/krd";
 import { validateTargetValue } from "./validation";
 
@@ -9,7 +10,8 @@ export const useValueChange = (
   unit: string,
   onChange: (target: Target | null) => void,
   setValue: (value: string) => void,
-  setValidationError: (error: string) => void
+  setValidationError: (error: string) => void,
+  paceBase?: PaceInputBase
 ) => {
   const t = useTranslate("targets");
 
@@ -24,7 +26,8 @@ export const useValueChange = (
         newValue,
         undefined,
         undefined,
-        t
+        t,
+        paceBase
       );
 
       if (result.isValid && result.target) {
@@ -35,7 +38,7 @@ export const useValueChange = (
         onChange(null);
       }
     },
-    [targetType, unit, onChange, setValue, setValidationError, t]
+    [targetType, unit, onChange, setValue, setValidationError, t, paceBase]
   );
 };
 
@@ -43,7 +46,8 @@ export const useRangeChange = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
   unit: string,
   onChange: (target: Target | null) => void,
-  setValidationError: (error: string) => void
+  setValidationError: (error: string) => void,
+  paceBase?: PaceInputBase
 ) => {
   const t = useTranslate("targets");
 
@@ -55,7 +59,8 @@ export const useRangeChange = (
         "",
         minValue,
         maxValue,
-        t
+        t,
+        paceBase
       );
 
       if (result.isValid && result.target) {
@@ -66,6 +71,6 @@ export const useRangeChange = (
         onChange(null);
       }
     },
-    [targetType, unit, onChange, setValidationError, t]
+    [targetType, unit, onChange, setValidationError, t, paceBase]
   );
 };

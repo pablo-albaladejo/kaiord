@@ -244,18 +244,16 @@ describe("DataTypeRoutingSection", () => {
   it("should date a row by its source rather than by the data type", () => {
     // Arrange
     // `coachingSyncState` is keyed by (source, profile) and holds no data
-    // type, so the only true sentence names the source. Train2Go is a
-    // single-source row: `planned-session` has no manual path to add a second.
-    state.syncedAt = new Map([["train2go", new Date().toISOString()]]);
-    renderSection(
-      flows({ "planned-session": { import: [route("train2go-bridge")] } })
-    );
+    // type, so the only true sentence names the source. WHOOP is a
+    // single-source row: `strain` has no manual path to add a second.
+    state.syncedAt = new Map([["whoop", new Date().toISOString()]]);
+    renderSection(flows({ strain: { import: [route("whoop-bridge")] } }));
 
     // Act
-    const row = screen.getByTestId("routing-row-planned-session");
+    const row = screen.getByTestId("routing-row-strain");
 
     // Assert
-    expect(row).toHaveTextContent("Train2Go last sent data just now");
+    expect(row).toHaveTextContent("WHOOP last sent data just now");
   });
 
   it("should show no time for a source that has never written a sync row", () => {

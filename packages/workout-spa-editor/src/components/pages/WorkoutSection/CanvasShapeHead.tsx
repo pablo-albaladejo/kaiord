@@ -1,9 +1,10 @@
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useTranslate } from "../../../i18n/use-translate";
-import { humanizeSport } from "../../../lib/format-sport";
+import { sportLabel } from "../../../lib/format-sport";
 import type { Workout } from "../../../types/krd";
 import { WorkoutPreview } from "../../molecules/WorkoutPreview";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
+import { workoutDependsOnFtp } from "./workout-ftp-dependency";
 import { buildFtpProvenance } from "./workout-ftp-provenance";
 
 type CanvasShapeHeadProps = {
@@ -15,7 +16,8 @@ type CanvasShapeHeadProps = {
 /**
  * The canvas head: the shape of the session, and the number every target in
  * it derives from. The reason goes above what it justifies (principle 8), so
- * the FTP line sits over the chart rather than under the list.
+ * the FTP line sits over the chart rather than under the list. A workout
+ * with no FTP-relative target derives nothing from FTP, so it gets no line.
  */
 export function CanvasShapeHead({
   workout,
@@ -28,7 +30,7 @@ export function CanvasShapeHead({
   const provenance = buildFtpProvenance(
     profile,
     workout.sport,
-    humanizeSport(workout.sport),
+    sportLabel(workout.sport, t),
     t,
     commonT,
     new Date()
@@ -40,12 +42,14 @@ export function CanvasShapeHead({
         <h3 className="m-0 text-xs font-semibold uppercase tracking-[0.08em] text-ink-muted">
           {t("shape.heading")}
         </h3>
-        <p
-          className="m-0 text-[12.5px] text-ink-muted"
-          data-testid="canvas-ftp-provenance"
-        >
-          {provenance}
-        </p>
+        {workoutDependsOnFtp(workout) && (
+          <p
+            className="m-0 text-[12.5px] text-ink-muted"
+            data-testid="canvas-ftp-provenance"
+          >
+            {provenance}
+          </p>
+        )}
       </div>
       <WorkoutPreview
         workout={workout}

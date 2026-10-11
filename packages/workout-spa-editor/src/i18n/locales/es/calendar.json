@@ -54,33 +54,36 @@
     "needsStructure_other": "{{count}} sin estructura"
   },
   "firstRun": {
-    "heading": "Aquí no hay nada todavía — y nada aparecerá solo",
-    "body": "Kaiord no guarda tu entrenamiento. Lo lee de tus fuentes, lo estructura y lo devuelve a tu reloj. Tres cosas tienen que ser ciertas antes de que esta semana se llene sola.",
-    "manual": "¿No quieres conectar nada aún? Escribe una sesión a mano: todo lo demás sigue funcionando.",
-    "addWorkout": "Añadir entreno",
+    "heading": "Empieza por aquí — todo funciona a mano",
+    "body": "Escribe una sesión, importa un archivo que ya tengas o anota cómo has dormido. No necesitas conectar nada para que funcionen el calendario, el editor o tus zonas.",
+    "addWorkout": "Crear un entreno",
     "done": "Hecho",
     "steps": {
       "sources": {
         "title": "Conecta de dónde viene tu entrenamiento",
-        "consequence": "Train2Go para el plan de tu entrenador, Garmin para lo que rodaste de verdad. Sin esto, la semana se queda vacía.",
+        "consequence": "Garmin, Train2Go o WHOOP llenan la semana por ti en lugar de escribirla tú.",
         "cta": "Conectar una fuente"
       },
       "aiKey": {
         "title": "Añade tu propia clave de IA",
-        "consequence": "La nota en prosa de tu entrenador se convierte en pasos y objetivos. Tu clave, tu factura, guardada en este navegador.",
+        "consequence": "Convierte una sesión escrita en prosa en pasos y objetivos. Tu clave, tu factura, guardada en este navegador.",
         "cta": "Añadir una clave"
       },
       "bridge": {
         "title": "Instala la extensión puente",
-        "consequence": "Garmin no tiene API pública para entrenos, así que la entrega a tu reloj ocurre en tu navegador. Si la omites, todavía puedes descargar el fichero.",
+        "consequence": "Envía las sesiones directamente a tu reloj Garmin. Sin ella, descargas el archivo y lo importas tú.",
         "cta": "Instalar"
       }
-    }
+    },
+    "importFile": "Importar un archivo",
+    "logWellness": "Registrar bienestar",
+    "optionalHeading": "Opcional: conecta tus herramientas",
+    "optionalBody": "Cada una te ahorra escribir. Si te saltas alguna, Kaiord sigue funcionando a mano."
   },
   "emptyWeek": {
     "headline": "Nada esta semana",
     "headlineWithDate": "Nada esta semana — tu última sesión fue el {{date}}",
-    "consequence": "O estás entre bloques, o tu entrenador no ha publicado. No hay nada roto.",
+    "consequence": "No hay nada roto. Añade una sesión a mano o pasa a otra semana.",
     "goToLatest": "Ir al {{date}}",
     "addWorkout": "Añadir entreno"
   },

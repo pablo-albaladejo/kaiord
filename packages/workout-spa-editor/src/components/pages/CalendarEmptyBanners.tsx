@@ -6,8 +6,8 @@
  * 1. **A profile with no workouts and no coaching plans at all gets the
  *    first-run guide and nothing else.** A coach's plans in any week mean the
  *    user is past the first run, and the guide would contradict them.
- *    The guide already names all three dependencies (ticking the ones already
- *    true), so repeating them underneath would say the same thing four times.
+ *    The guide already lists the optional integrations (ticking the ones
+ *    already set up), so repeating them underneath would say it twice.
  * 2. **The raw sessions get exactly one banner.** The coach's unstructured
  *    plans count as raw here: without a key they are stuck as prose too. With
  *    a provider configured that is the batch action; without one it is the
@@ -44,6 +44,8 @@ export type CalendarEmptyBannersProps = {
   /** Formatted date of the latest session anywhere, when there is one. */
   latestDate?: string;
   onGoToLatest?: () => void;
+  /** Opens the wellness entry dialog for today (first-run guide). */
+  onLogWellness?: () => void;
   batchMessage: string | null;
   onDismissBatch: () => void;
   batchIsProcessing: boolean;
@@ -64,7 +66,13 @@ export function CalendarEmptyBanners(p: CalendarEmptyBannersProps) {
     // Wait for the plans query rather than flash the guide at a coached user.
     if (p.hasAnyPlans === undefined) return null;
     if (!p.hasAnyPlans) {
-      return <FirstRunGuide weekId={p.weekId} done={progress(p)} />;
+      return (
+        <FirstRunGuide
+          weekId={p.weekId}
+          done={progress(p)}
+          onLogWellness={p.onLogWellness}
+        />
+      );
     }
   }
 

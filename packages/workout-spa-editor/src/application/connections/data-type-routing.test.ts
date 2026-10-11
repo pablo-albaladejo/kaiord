@@ -57,15 +57,26 @@ describe("buildDataTypeRoutingRows", () => {
     expect(origin).toEqual({ kind: "only", sourceId: "manual" });
   });
 
-  it("should report no source only for a type with no manual path", () => {
+  it("should count sessions planned by hand as a source", () => {
     // Arrange
-    // Same empty profile. `planned-session` is deliberately absent from
-    // MANUAL_ENTRY_TYPES (there is no way to author a coach session by hand),
-    // so it is one of the four types where "No source" is reachable at all.
+    // Same empty profile. Scheduling a workout on the calendar IS planning,
+    // so `planned-session` is never sourceless just because no coach is linked.
     const rows = buildDataTypeRoutingRows(flows({}), []);
 
     // Act
     const origin = rowFor(rows, "planned-session").origin;
+
+    // Assert
+    expect(origin).toEqual({ kind: "only", sourceId: "manual" });
+  });
+
+  it("should report no source only for a type with no manual path", () => {
+    // Arrange
+    // `strain` is computed by a wearable; nobody types it in.
+    const rows = buildDataTypeRoutingRows(flows({}), []);
+
+    // Act
+    const origin = rowFor(rows, "strain").origin;
 
     // Assert
     expect(origin).toEqual({ kind: "none" });

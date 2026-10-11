@@ -51,7 +51,7 @@ export default function Daily() {
           onWorkoutClick={open.handleWorkoutClick}
           onActivityClick={open.handleActivityClick}
         />
-        <ReadinessCard readiness={readiness} />
+        <ReadinessCard readiness={readiness} date={focusIso} />
         <EnergyBalanceCard profileId={profile?.id ?? null} date={focusIso} />
         <TrendsCard />
         <CalendarDialogs

@@ -11,7 +11,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
 import type { ConnectionRecord } from "../types/connection";
-import type { ExportLedgerEntry } from "../types/export-ledger";
 import type { Profile } from "../types/profile";
 import {
   DEFAULT_HEART_RATE_ZONES,
@@ -21,9 +20,8 @@ import type { UserPreferences } from "../types/user-preferences";
 import type { DiscoveredBridge } from "./use-discovered-bridges";
 import { useSetupChecklist } from "./use-setup-checklist";
 
-// The discovery singleton is an in-memory store with no seeding surface, so
-// the `bridges.length > 0` branch of the source item is only reachable through
-// a mock. Every test but one runs with an empty snapshot.
+// The discovery singleton is an in-memory store with no seeding surface; it is
+// mocked so one test can prove a bridge no longer ticks anything.
 const useDiscoveredBridges = vi.hoisted(() => vi.fn());
 
 vi.mock("./use-discovered-bridges", () => ({ useDiscoveredBridges }));
@@ -65,6 +63,11 @@ const TABLES = [
   "connections",
   "exportLedger",
   "userPreferences",
+  "healthWeight",
+  "healthSleep",
+  "healthHrv",
+  "healthDaily",
+  "templates",
 ];
 
 const clearTables = async (): Promise<void> => {
@@ -186,9 +189,61 @@ describe("useSetupChecklist", () => {
     expect(itemById(result.current, "create-workout")).toBe(false);
   });
 
-  it("should tick the source item from a connected connection record", async () => {
+  it("should tick the wellness item from a manual health record", async () => {
     // Arrange
     await seedProfile();
+    await db.table("healthWeight").put({
+      id: "hw1",
+      profileId: PROFILE_ID,
+      date: "2026-07-28",
+    });
+
+    // Act
+    const { result } = renderHook(() => useSetupChecklist());
+
+    // Assert
+    await waitFor(() => {
+      expect(itemById(result.current, "log-wellness")).toBe(true);
+    });
+  });
+
+  it("should NOT tick the wellness item for another profile's records", async () => {
+    // Arrange
+    await seedProfile();
+    await db.table("healthDaily").put({
+      id: "hd1",
+      profileId: "other-profile",
+      date: "2026-07-28",
+    });
+
+    // Act
+    const { result } = renderHook(() => useSetupChecklist());
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current.dismissed).toBe(false);
+    });
+    expect(itemById(result.current, "log-wellness")).toBe(false);
+  });
+
+  it("should tick the library item from a saved template", async () => {
+    // Arrange
+    await seedProfile();
+    await db.table("templates").put({ id: "t1", sport: "running", tags: [] });
+
+    // Act
+    const { result } = renderHook(() => useSetupChecklist());
+
+    // Assert
+    await waitFor(() => {
+      expect(itemById(result.current, "save-to-library")).toBe(true);
+    });
+  });
+
+  it("should not let a bridge or a connection tick anything", async () => {
+    // Arrange
+    await seedProfile();
+    useDiscoveredBridges.mockReturnValue(ONE_BRIDGE);
     const record: ConnectionRecord = {
       profileId: PROFILE_ID,
       providerId: "garmin",
@@ -203,45 +258,9 @@ describe("useSetupChecklist", () => {
 
     // Assert
     await waitFor(() => {
-      expect(itemById(result.current, "connect-source")).toBe(true);
-    });
-  });
-
-  it("should tick the source item from a discovered bridge alone", async () => {
-    // Arrange
-    await seedProfile();
-    useDiscoveredBridges.mockReturnValue(ONE_BRIDGE);
-
-    // Act
-    const { result } = renderHook(() => useSetupChecklist());
-
-    // Assert
-    await waitFor(() => {
-      expect(itemById(result.current, "connect-source")).toBe(true);
-    });
-    expect(await db.table("connections").count()).toBe(0);
-  });
-
-  it("should NOT tick the source item for a disconnected connection record", async () => {
-    // Arrange
-    await seedProfile();
-    const record: ConnectionRecord = {
-      profileId: PROFILE_ID,
-      providerId: "garmin",
-      status: "disconnected",
-      mechanism: "bridge",
-      updatedAt: "2026-07-28T00:00:00.000Z",
-    };
-    await db.table<ConnectionRecord>("connections").put(record);
-
-    // Act
-    const { result } = renderHook(() => useSetupChecklist());
-
-    // Assert
-    await waitFor(() => {
       expect(result.current.dismissed).toBe(false);
     });
-    expect(itemById(result.current, "connect-source")).toBe(false);
+    expect(result.current.doneCount).toBe(0);
   });
 
   it("should tick an item written after mount, without a re-render from the caller", async () => {
@@ -261,29 +280,6 @@ describe("useSetupChecklist", () => {
     // Assert
     await waitFor(() => {
       expect(itemById(result.current, "create-workout")).toBe(true);
-    });
-  });
-
-  it("should tick the push item from a workout export-ledger entry", async () => {
-    // Arrange
-    await seedProfile();
-    const entry: ExportLedgerEntry = {
-      id: "11111111-1111-1111-1111-111111111111",
-      kaiordRecordId: "22222222-2222-2222-2222-222222222222",
-      dataType: "workout",
-      destinationBridgeId: "garmin-bridge",
-      destinationExternalId: "gc-1",
-      contentHash: "hash",
-      exportedAt: "2026-07-28T00:00:00.000Z",
-    };
-    await db.table<ExportLedgerEntry>("exportLedger").put(entry);
-
-    // Act
-    const { result } = renderHook(() => useSetupChecklist());
-
-    // Assert
-    await waitFor(() => {
-      expect(itemById(result.current, "push-session")).toBe(true);
     });
   });
 
@@ -343,28 +339,18 @@ describe("useSetupChecklist", () => {
     expect(result.current.dismissed).toBe(true);
   });
 
-  it("should report complete once every item is done", async () => {
+  it("should reach 100% by hand, with no integration at all", async () => {
     // Arrange
     await seedProfile(PROFILE_WITH_FTP);
     await db
       .table("workouts")
       .put({ id: "w3", profileId: PROFILE_ID, date: "2026-07-28" });
-    await db.table("connections").put({
+    await db.table("healthSleep").put({
+      id: "hs1",
       profileId: PROFILE_ID,
-      providerId: "garmin",
-      status: "connected",
-      mechanism: "bridge",
-      updatedAt: "2026-07-28T00:00:00.000Z",
+      date: "2026-07-28",
     });
-    await db.table("exportLedger").put({
-      id: "44444444-4444-4444-4444-444444444444",
-      kaiordRecordId: "55555555-5555-5555-5555-555555555555",
-      dataType: "workout",
-      destinationBridgeId: "garmin-bridge",
-      destinationExternalId: "gc-2",
-      contentHash: "hash",
-      exportedAt: "2026-07-28T00:00:00.000Z",
-    });
+    await db.table("templates").put({ id: "t2", sport: "cycling", tags: [] });
 
     // Act
     const { result } = renderHook(() => useSetupChecklist());
@@ -374,5 +360,7 @@ describe("useSetupChecklist", () => {
       expect(result.current.complete).toBe(true);
     });
     expect(result.current.doneCount).toBe(TOTAL_ITEMS);
+    expect(await db.table("connections").count()).toBe(0);
+    expect(await db.table("exportLedger").count()).toBe(0);
   });
 });

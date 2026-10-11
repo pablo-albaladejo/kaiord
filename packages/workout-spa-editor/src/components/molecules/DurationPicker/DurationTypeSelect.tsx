@@ -1,11 +1,7 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { Input } from "../../atoms/Input/Input";
-import type { DurationTypeOption } from "./DurationPicker.types";
 
-const DURATION_TYPE_OPTIONS: Array<DurationTypeOption> = [
-  { value: "time", label: "Time" },
-  { value: "distance", label: "Distance" },
-  { value: "open", label: "Open" },
-];
+const DURATION_TYPES = ["time", "distance", "open"] as const;
 
 type DurationTypeSelectProps = {
   value: "time" | "distance" | "open";
@@ -18,18 +14,19 @@ export function DurationTypeSelect({
   onChange,
   disabled,
 }: DurationTypeSelectProps) {
+  const t = useTranslate("editor");
   return (
     <Input
       variant="select"
-      label="Duration Type"
+      label={t("durationPicker.typeLabel")}
       value={value}
       onChange={onChange}
       disabled={disabled}
-      options={DURATION_TYPE_OPTIONS.map((opt) => ({
-        value: opt.value,
-        label: opt.label,
+      options={DURATION_TYPES.map((type) => ({
+        value: type,
+        label: t(`duration.${type}`),
       }))}
-      aria-label="Select duration type"
+      aria-label={t("durationPicker.typeAria")}
     />
   );
 }

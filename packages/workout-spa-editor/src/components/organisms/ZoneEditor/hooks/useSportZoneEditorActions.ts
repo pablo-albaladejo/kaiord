@@ -7,7 +7,7 @@
  * top-level hook signature.
  */
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { addCustomZone } from "../../../../application/profile/zones/add-custom-zone";
 import { setZoneMethod } from "../../../../application/profile/zones/set-zone-method";
@@ -26,10 +26,16 @@ export function useSportZoneEditorActions(
 ) {
   const persistence = usePersistence();
   const toast = useToastContext();
+  // Every edit autosaves; the athlete is told once the write has landed.
+  const [saved, setSaved] = useState(false);
 
   const surface = useCallback(
     (run: () => Promise<unknown>) => {
-      void run().catch(() => toast.error(TOAST_ERROR));
+      setSaved(false);
+      void run().then(
+        () => setSaved(true),
+        () => toast.error(TOAST_ERROR)
+      );
     },
     [toast]
   );
@@ -72,6 +78,7 @@ export function useSportZoneEditorActions(
   };
 
   return {
+    saved,
     applyMethod,
     handleZonesChange,
     handleAddCustom,

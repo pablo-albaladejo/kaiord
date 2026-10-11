@@ -48,6 +48,7 @@ The component supports three duration types:
 ### Time Duration
 
 - **Type**: `{ type: "time", seconds: number }`
+- **Input**: typed as `m:ss` or `h:mm:ss` (a bare number is whole minutes); stored in seconds
 - **Validation**: Must be positive, max 24 hours (86400 seconds)
 - **Example**: `{ type: "time", seconds: 300 }` (5 minutes)
 

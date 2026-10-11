@@ -146,7 +146,9 @@
     "save": "Hecho",
     "saveAria": "Cerrar el formulario del paso",
     "fixErrorsTitle": "Corrige primero los errores de validación",
-    "saveTitle": "Cerrar el formulario del paso"
+    "saveTitle": "Cerrar el formulario del paso",
+    "intensityLabel": "Intensidad",
+    "intensityAria": "Selecciona la intensidad del paso"
   },
   "firstTimeHints": {
     "dismiss": "Descartar sugerencias",
@@ -309,7 +311,8 @@
     "editCount": "Editar repeticiones",
     "countAria": "Número de repeticiones",
     "ungroup": "Desagrupar",
-    "deleteShort": "Eliminar"
+    "deleteShort": "Eliminar",
+    "actionsAria": "Acciones del bloque"
   },
   "convert": {
     "heading": "Convertir {{from}} a {{to}}",
@@ -339,5 +342,39 @@
     "title": "Entreno no encontrado",
     "body": "Puede que se haya borrado o que el enlace esté desactualizado.",
     "backToCalendar": "Volver al calendario"
+  },
+  "intensity": {
+    "warmup": "Calentamiento",
+    "active": "Activo",
+    "cooldown": "Vuelta a la calma",
+    "rest": "Descanso",
+    "recovery": "Recuperación",
+    "interval": "Intervalo",
+    "other": "Otro"
+  },
+  "durationPicker": {
+    "typeLabel": "Tipo de duración",
+    "typeAria": "Tipo de duración",
+    "timeLabel": "Duración (mm:ss)",
+    "timePlaceholder": "p. ej. 5:00",
+    "distanceLabel": "Distancia (metros)",
+    "distancePlaceholder": "p. ej. 1000 (1 km)",
+    "openHint": "Abierta: pulsa vuelta para terminar el paso",
+    "required": "Hace falta un valor",
+    "invalidClock": "Escribe un tiempo como m:ss, p. ej. 5:00",
+    "invalidNumber": "Tiene que ser un número",
+    "positive": "Tiene que ser mayor que 0",
+    "maxTime": "La duración no puede pasar de 24 horas",
+    "maxDistance": "La distancia no puede pasar de 1000 km"
+  },
+  "notes": {
+    "label": "Notas e indicaciones",
+    "placeholder": "Añade indicaciones o notas para este paso...",
+    "count": "{{n}} / {{max}} caracteres",
+    "over": "({{n}} por encima del límite)"
+  },
+  "paste": {
+    "label": "Pegar paso",
+    "aria": "Pegar paso del portapapeles"
   }
 }

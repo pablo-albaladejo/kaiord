@@ -12,7 +12,8 @@ export const useTargetPickerHandlers = (
     params.targetType,
     params.unit,
     params.onChange,
-    params.setValidationError
+    params.setValidationError,
+    params.paceBase
   );
 
   const rangeHandlers = useTargetPickerRangeHandlers(

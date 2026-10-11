@@ -21,24 +21,9 @@ export function SportZoneThresholds({
   onChange,
 }: SportZoneThresholdsProps) {
   const t = useTranslate("zones");
+  // Pace sports (running, swimming) are paced first; their power is optional.
   return (
     <div className="mb-4 flex flex-wrap gap-4">
-      {capabilities.hr && (
-        <ThresholdInput
-          label="LTHR"
-          unit="bpm"
-          value={thresholds.lthr}
-          onChange={(v) => onChange({ ...thresholds, lthr: v })}
-        />
-      )}
-      {capabilities.power && (
-        <ThresholdInput
-          label="FTP"
-          unit="watts"
-          value={thresholds.ftp}
-          onChange={(v) => onChange({ ...thresholds, ftp: v })}
-        />
-      )}
       {capabilities.pace && (
         <PaceInput
           label={t("threshold.pace")}
@@ -51,6 +36,23 @@ export function SportZoneThresholds({
               paceUnit: thresholds.paceUnit ?? "min_per_km",
             })
           }
+        />
+      )}
+      {capabilities.hr && (
+        <ThresholdInput
+          label="LTHR"
+          unit="bpm"
+          value={thresholds.lthr}
+          onChange={(v) => onChange({ ...thresholds, lthr: v })}
+        />
+      )}
+      {capabilities.power && (
+        <ThresholdInput
+          label="FTP"
+          unit="W"
+          optional={capabilities.pace}
+          value={thresholds.ftp}
+          onChange={(v) => onChange({ ...thresholds, ftp: v })}
         />
       )}
     </div>

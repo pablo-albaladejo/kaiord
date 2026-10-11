@@ -28,8 +28,8 @@ const stateWith = (
   const items = buildSetupChecklistItems({
     hasWorkout: done[0],
     hasThreshold: done[1],
-    hasSource: done[2],
-    hasPush: done[3],
+    hasWellness: done[2],
+    hasTemplate: done[3],
   });
   const doneCount = items.filter((item) => item.done).length;
   return {
@@ -91,10 +91,12 @@ describe("SetupChecklist", () => {
 
     // Assert
     expect(screen.getByText("Create your first workout")).toBeInTheDocument();
-    expect(screen.getByText("Set your FTP and zones")).toBeInTheDocument();
-    expect(screen.getByText("Connect a source")).toBeInTheDocument();
     expect(
-      screen.getByText("Push a session to your watch")
+      screen.getByText("Set your thresholds and zones")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Log how you feel today")).toBeInTheDocument();
+    expect(
+      screen.getByText("Save a workout to your library")
     ).toBeInTheDocument();
   });
 
@@ -107,10 +109,14 @@ describe("SetupChecklist", () => {
 
     // Assert
     expect(
-      screen.getByText("Garmin, Train2Go or WHOOP — 2 minutes")
+      screen.getByText(
+        "Weight, sleep, HRV or a wellness check-in, typed by hand"
+      )
     ).toBeInTheDocument();
     expect(
-      screen.queryByText("Open a planned session and send it to your device")
+      screen.queryByText(
+        "Keep a session you'll repeat, ready to schedule again"
+      )
     ).not.toBeInTheDocument();
   });
 

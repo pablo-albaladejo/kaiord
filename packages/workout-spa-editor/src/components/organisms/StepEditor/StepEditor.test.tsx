@@ -181,4 +181,27 @@ describe("StepEditor", () => {
       "heart_rate"
     );
   });
+
+  it("should let the user set the step's intensity", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const onSave = vi.fn();
+    render(<StepEditor step={mockStep} onSave={onSave} onCancel={vi.fn()} />);
+    const select = screen.getByLabelText("Select step intensity");
+    expect(select).toHaveValue("active");
+
+    // Act
+    await user.selectOptions(select, "cooldown");
+    await user.click(
+      screen.getByRole("button", { name: /close the step form/i })
+    );
+
+    // Assert
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ intensity: "cooldown" })
+    );
+    expect(
+      screen.getByRole("option", { name: "Cool-down" })
+    ).toBeInTheDocument();
+  });
 });

@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-import type { Duration, Target, WorkoutStep } from "../../../types/krd";
+import type {
+  Duration,
+  Intensity,
+  Target,
+  WorkoutStep,
+} from "../../../types/krd";
 
 export const useStepEditorState = (step: WorkoutStep | null) => {
   const [duration, setDuration] = useState<Duration>(
@@ -10,6 +15,9 @@ export const useStepEditorState = (step: WorkoutStep | null) => {
     step?.target || { type: "open" }
   );
   const [notes, setNotes] = useState<string>(step?.notes || "");
+  const [intensity, setIntensity] = useState<Intensity>(
+    step?.intensity ?? "active"
+  );
   const [durationError, setDurationError] = useState<string>("");
   const [targetError, setTargetError] = useState<string>("");
 
@@ -20,6 +28,8 @@ export const useStepEditorState = (step: WorkoutStep | null) => {
     setTarget,
     notes,
     setNotes,
+    intensity,
+    setIntensity,
     durationError,
     setDurationError,
     targetError,

@@ -39,6 +39,7 @@ export function TargetPickerFieldsValue({
   if (unit === "range") {
     return (
       <TargetPickerRangeFields
+        clock={targetType === "pace"}
         minValue={minValue}
         maxValue={maxValue}
         displayError={displayError}

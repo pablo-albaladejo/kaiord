@@ -1,4 +1,6 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { zoneBgClass } from "../../../lib/zone-colors";
+import { zoneNameLabel } from "../../../lib/zone-name-label";
 import type { ZoneMapEntry } from "./ZoneMap";
 
 type ZoneMapLegendProps = {
@@ -7,6 +9,7 @@ type ZoneMapLegendProps = {
 };
 
 export function ZoneMapLegend({ zones, className = "" }: ZoneMapLegendProps) {
+  const t = useTranslate("zones");
   return (
     <div
       className={["flex flex-col gap-[2px]", className]
@@ -31,7 +34,7 @@ export function ZoneMapLegend({ zones, className = "" }: ZoneMapLegendProps) {
               ].join(" ")}
             />
             <span className="w-[86px] shrink-0 text-[15px] font-medium text-ink-strong">
-              {z.name}
+              {zoneNameLabel(z.name, t)}
             </span>
             <span className="flex-1 text-[13px] text-ink-muted tabular-nums">
               {z.pct}

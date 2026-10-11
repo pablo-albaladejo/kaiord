@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { Icon } from "../../atoms/Icon/Icon";
 import type { RepetitionBlockStepsProps } from "./repetition-block-steps.types";
@@ -22,6 +23,7 @@ import { StepList } from "./StepList";
 
 export const RepetitionBlockSteps = (props: RepetitionBlockStepsProps) => {
   const { steps, onReorderSteps, onAddStep, blockIndex } = props;
+  const t = useTranslate("editor");
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, {
@@ -61,7 +63,7 @@ export const RepetitionBlockSteps = (props: RepetitionBlockStepsProps) => {
           data-testid="add-step-button"
         >
           <Icon icon={Plus} size="sm" />
-          Add Step
+          {t("actions.addStep")}
         </Button>
       )}
     </div>

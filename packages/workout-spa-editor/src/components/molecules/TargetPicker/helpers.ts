@@ -1,4 +1,8 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
+import {
+  type PaceInputBase,
+  paceInputSuffix,
+} from "../../../lib/units/pace-input";
 import type { Target } from "../../../types/krd";
 import type { Profile } from "../../../types/profile";
 import { getValueLabel, getValuePlaceholder } from "./helpers-labels";
@@ -14,24 +18,14 @@ export { getValueLabel, getValuePlaceholder };
 
 export const getTargetTypeFromValue = (
   value: Target | null
-): "power" | "heart_rate" | "pace" | "cadence" | "open" => {
-  if (!value) return "open";
-  if (
-    value.type === "power" ||
-    value.type === "heart_rate" ||
-    value.type === "pace" ||
-    value.type === "cadence" ||
-    value.type === "open"
-  ) {
-    return value.type;
-  }
-  return "open";
-};
+): "power" | "heart_rate" | "pace" | "cadence" | "open" =>
+  !value || value.type === "stroke_type" ? "open" : value.type;
 
 export const getUnitOptions = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
   activeProfile?: Profile | null,
-  t: Translate = getTranslate("targets")
+  t: Translate = getTranslate("targets"),
+  paceBase?: PaceInputBase
 ): Array<TargetUnitOption> => {
   switch (targetType) {
     case "power":
@@ -58,7 +52,10 @@ export const getUnitOptions = (
       ];
     case "pace":
       return [
-        { value: "mps", label: t("unit.mps") },
+        {
+          value: "mps",
+          label: paceBase ? paceInputSuffix(paceBase) : t("unit.mps"),
+        },
         { value: "zone", label: t("unit.paceZone") },
         { value: "range", label: t("unit.range") },
       ];

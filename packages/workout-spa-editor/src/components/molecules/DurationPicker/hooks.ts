@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Duration } from "../../../types/krd";
 import { validateDurationValue } from "./validation";
 
@@ -33,12 +34,13 @@ export const useValueChange = (
   setDurationValue: (value: string) => void,
   setValidationError: (error: string) => void
 ) => {
+  const t = useTranslate("editor");
   return useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setDurationValue(newValue);
 
-      const validation = validateDurationValue(durationType, newValue);
+      const validation = validateDurationValue(durationType, newValue, t);
 
       if (validation.isValid && validation.duration) {
         setValidationError("");
@@ -48,6 +50,6 @@ export const useValueChange = (
         onChange(null);
       }
     },
-    [durationType, onChange, setDurationValue, setValidationError]
+    [durationType, onChange, setDurationValue, setValidationError, t]
   );
 };

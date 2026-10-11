@@ -7,7 +7,7 @@ import { SetupChecklistRow } from "./SetupChecklistRow";
 
 /**
  * The "Getting set up" card: four onboarding steps that tick themselves from
- * real persisted state. Deliberately NOT a modal — it sits in the page flow,
+ * real persisted state, every one of them doable by hand. Deliberately NOT a modal — it sits in the page flow,
  * never blocks anything, and disappears for good once every item is done or
  * the user dismisses it.
  */
@@ -55,9 +55,6 @@ export function SetupChecklist() {
           />
         ))}
       </ul>
-      <p className="border-edge text-ink-muted m-0 mt-3 border-t pt-3 text-[12px]">
-        {t("checklist.footnote")}
-      </p>
     </Card>
   );
 }

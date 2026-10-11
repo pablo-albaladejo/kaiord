@@ -7,8 +7,3 @@ export type DurationPickerProps = {
   disabled?: boolean;
   className?: string;
 };
-
-export type DurationTypeOption = {
-  value: "time" | "distance" | "open";
-  label: string;
-};

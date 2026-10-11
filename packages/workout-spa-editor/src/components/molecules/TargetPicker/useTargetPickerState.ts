@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import type { PaceInputBase } from "../../../lib/units/pace-input";
 import type { Target } from "../../../types/krd";
 import {
   getCurrentUnit,
@@ -16,6 +17,7 @@ export type TargetPickerState = {
   ) => void;
   unit: string;
   setUnit: (value: string) => void;
+  paceBase?: PaceInputBase;
   targetValue: string;
   setTargetValue: (value: string) => void;
   minValue: string;
@@ -27,15 +29,22 @@ export type TargetPickerState = {
 };
 
 export const useTargetPickerState = (
-  value: Target | null
+  value: Target | null,
+  paceBase?: PaceInputBase
 ): TargetPickerState => {
   const [targetType, setTargetType] = useState<
     "power" | "heart_rate" | "pace" | "cadence" | "open"
   >(getTargetTypeFromValue(value));
   const [unit, setUnit] = useState<string>(getCurrentUnit(value));
-  const [targetValue, setTargetValue] = useState<string>(getValueString(value));
-  const [minValue, setMinValue] = useState<string>(getRangeMinString(value));
-  const [maxValue, setMaxValue] = useState<string>(getRangeMaxString(value));
+  const [targetValue, setTargetValue] = useState<string>(
+    getValueString(value, paceBase)
+  );
+  const [minValue, setMinValue] = useState<string>(
+    getRangeMinString(value, paceBase)
+  );
+  const [maxValue, setMaxValue] = useState<string>(
+    getRangeMaxString(value, paceBase)
+  );
   const [validationError, setValidationError] = useState<string>("");
 
   return {
@@ -43,6 +52,7 @@ export const useTargetPickerState = (
     setTargetType,
     unit,
     setUnit,
+    paceBase,
     targetValue,
     setTargetValue,
     minValue,

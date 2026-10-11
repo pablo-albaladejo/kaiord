@@ -18,8 +18,11 @@ import { buildDefaultZone } from "../utils/default-zone";
 import { useMethodSwitch } from "./useMethodSwitch";
 import { useSportZoneEditorActions } from "./useSportZoneEditorActions";
 
-export function useSportZoneEditor(profileId: string) {
-  const [activeSport, setActiveSport] = useState<SportKey>("cycling");
+export function useSportZoneEditor(
+  profileId: string,
+  initialSport: SportKey = "cycling"
+) {
+  const [activeSport, setActiveSport] = useState<SportKey>(initialSport);
   const profile = useProfileByIdLive(profileId);
   const sportConfig = profile?.sportZones?.[activeSport];
   const capabilities = SPORT_ZONE_CAPABILITIES[activeSport];
@@ -37,6 +40,7 @@ export function useSportZoneEditor(profileId: string) {
   return {
     activeSport,
     setActiveSport,
+    saved: actions.saved,
     sportConfig,
     capabilities,
     confirmMethod: methodSwitch.confirmMethod,

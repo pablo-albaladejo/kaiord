@@ -1,7 +1,6 @@
 /**
- * The three conditions a week needs before it fills itself, in the order they
- * have to become true. Each carries its own destination; the copy — including
- * what stays broken while the step is not done — lives in `calendar.firstRun`.
+ * The three optional integrations, each with its own destination; the copy —
+ * including what each one adds — lives in `calendar.firstRun`.
  *
  * `href` is external for the bridge because a web page cannot install an
  * extension; the other two are in-app settings sections.

@@ -1,11 +1,13 @@
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import type { ActiveSport } from "../../../lib/athlete";
 import { SportZoneEditor } from "../../organisms/ZoneEditor";
 
 type ThresholdEditDialogProps = {
   open: boolean;
   profileId: string;
+  sport: ActiveSport;
   onClose: () => void;
 };
 
@@ -14,6 +16,7 @@ type ThresholdEditDialogProps = {
 export function ThresholdEditDialog({
   open,
   profileId,
+  sport,
   onClose,
 }: ThresholdEditDialogProps) {
   const t = useTranslate("athlete");
@@ -23,7 +26,7 @@ export function ThresholdEditDialog({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[85vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-edge bg-surface p-4 shadow-lg">
           <Dialog.Title className="sr-only">{t("editThresholds")}</Dialog.Title>
-          <SportZoneEditor profileId={profileId} />
+          <SportZoneEditor profileId={profileId} initialSport={sport} />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -797,7 +797,7 @@ describe("useWorkoutStore", () => {
       expect(newStep).toEqual({
         id: expect.any(String),
         stepIndex: 1,
-        name: "Step 2",
+        intensity: "active",
         durationType: "open",
         duration: { type: "open" },
         targetType: "open",
@@ -859,7 +859,9 @@ describe("useWorkoutStore", () => {
       expect(workout?.steps).toHaveLength(1);
       expect(workout?.steps[0]).toMatchObject({
         stepIndex: 0,
+        intensity: "warmup",
       });
+      expect(workout?.steps[0]).not.toHaveProperty("name");
     });
 
     it("should do nothing when no workout is loaded", () => {

@@ -47,8 +47,11 @@ test.describe("Calendar Empty States", () => {
 
     await expect(page.getByTestId("first-run-guide")).toBeVisible();
     await expect(
-      page.getByText("Nothing here yet — and nothing will appear on its own")
+      page.getByText("Start here — everything works by hand")
     ).toBeVisible();
+    await expect(page.getByTestId("first-run-add-workout")).toBeVisible();
+    await expect(page.getByTestId("first-run-import")).toBeVisible();
+    await expect(page.getByTestId("first-run-log-wellness")).toBeVisible();
     await expect(page.getByTestId("first-visit-state")).not.toBeAttached();
     await expect(page.getByTestId("calendar-week-grid")).toBeVisible();
   });

@@ -1,13 +1,20 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
+import {
+  type PaceInputBase,
+  paceInputSuffix,
+} from "../../../lib/units/pace-input";
 
 export const getValueLabel = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
   unit: string,
-  t: Translate = getTranslate("targets")
+  t: Translate = getTranslate("targets"),
+  paceBase?: PaceInputBase
 ): string => {
   if (unit === "range") {
     return t("valueLabel.range");
   }
+  if (targetType === "pace" && unit === "mps" && paceBase)
+    return t("valueLabel.paceClock", { unit: paceInputSuffix(paceBase) });
 
   switch (targetType) {
     case "power":
@@ -35,11 +42,14 @@ export const getValueLabel = (
 export const getValuePlaceholder = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
   unit: string,
-  t: Translate = getTranslate("targets")
+  t: Translate = getTranslate("targets"),
+  paceBase?: PaceInputBase
 ): string => {
   if (unit === "range") {
     return "";
   }
+  if (targetType === "pace" && unit === "mps" && paceBase)
+    return t("placeholder.paceClock");
 
   switch (targetType) {
     case "power":

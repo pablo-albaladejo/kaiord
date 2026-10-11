@@ -1,32 +1,31 @@
 /**
  * What a brand-new profile sees.
  *
- * `CalendarEmptyBanners` used to render nothing here: every one of its five
- * children was gated on data existing, so with an empty database the emptiest
- * possible state was the one that said least. This is the fix — the three
- * things that have to be true, in order, each naming what stays broken while
- * it is not, plus the path that needs none of them.
+ * Manual use is the main path, not a footnote: the guide leads with the three
+ * starts that work in this browser alone — write a session, import a file,
+ * log wellness — and lists the integrations below as optional, each naming
+ * what it adds rather than what stays broken without it.
  */
-import { useLocation } from "wouter";
-
 import { useTranslate } from "../../../i18n/use-translate";
-import { withOrigin } from "../../../routing/with-origin";
-import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { FIRST_RUN_STEPS, type FirstRunProgress } from "./first-run-steps";
+import { FirstRunManualStarts } from "./FirstRunManualStarts";
 import { FirstRunStepRow } from "./FirstRunStepRow";
 
 export type FirstRunGuideProps = {
   /** The rendered week's id, carried on `?week=` so Back returns here. */
   weekId: string;
-  /** Steps already true; a done step shows a check instead of its CTA. */
+  /** Integrations already set up; a done one shows a check instead of its CTA. */
   done?: FirstRunProgress;
+  /** Opens the wellness entry dialog for today. */
+  onLogWellness?: () => void;
 };
 
-export function FirstRunGuide({ weekId, done = {} }: FirstRunGuideProps) {
+export function FirstRunGuide({
+  weekId,
+  done = {},
+  onLogWellness,
+}: FirstRunGuideProps) {
   const t = useTranslate("calendar");
-  const [, navigate] = useLocation();
-  // The ink goes to the first step still missing, not always to step one.
-  const next = FIRST_RUN_STEPS.findIndex((step) => !done[step.key]);
 
   return (
     <section
@@ -41,32 +40,27 @@ export function FirstRunGuide({ weekId, done = {} }: FirstRunGuideProps) {
           {t("firstRun.body")}
         </p>
       </div>
-      <ol className="flex list-none flex-col gap-2.5 p-0">
-        {FIRST_RUN_STEPS.map((step, index) => (
-          <FirstRunStepRow
-            key={step.key}
-            step={step}
-            ordinal={index + 1}
-            primary={index === next}
-            done={done[step.key] === true}
-          />
-        ))}
-      </ol>
-      <div className="flex flex-wrap items-center gap-2.5 border-t border-edge-soft pt-4">
-        <span className="min-w-0 flex-1 basis-48 text-xs leading-relaxed text-ink-muted text-pretty">
-          {t("firstRun.manual")}
-        </span>
-        <button
-          type="button"
-          data-testid="first-run-add-workout"
-          onClick={() =>
-            navigate(withOrigin("/workout/new", "calendar", { week: weekId }))
-          }
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-edge px-3.5 py-2 text-[13px] font-medium text-ink-body hover:border-edge-strong hover:text-ink-strong"
-        >
-          <Icon icon={ICON_MAP.plus} size="sm" color="inherit" />
-          {t("firstRun.addWorkout")}
-        </button>
+      <FirstRunManualStarts weekId={weekId} onLogWellness={onLogWellness} />
+      <div className="flex flex-col gap-2.5 border-t border-edge-soft pt-4">
+        <div className="flex max-w-[64ch] flex-col gap-1">
+          <h3 className="m-0 text-[13px] font-semibold text-ink-strong">
+            {t("firstRun.optionalHeading")}
+          </h3>
+          <p className="m-0 text-xs leading-relaxed text-ink-muted text-pretty">
+            {t("firstRun.optionalBody")}
+          </p>
+        </div>
+        <ol className="flex list-none flex-col gap-2.5 p-0">
+          {FIRST_RUN_STEPS.map((step, index) => (
+            <FirstRunStepRow
+              key={step.key}
+              step={step}
+              ordinal={index + 1}
+              primary={false}
+              done={done[step.key] === true}
+            />
+          ))}
+        </ol>
       </div>
     </section>
   );

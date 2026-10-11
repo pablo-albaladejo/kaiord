@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { DurationPickerProps } from "./DurationPicker.types";
 import { DurationPickerFields } from "./DurationPickerFields";
 import {
@@ -17,6 +18,7 @@ export const DurationPicker = ({
   disabled = false,
   className = "",
 }: DurationPickerProps) => {
+  const t = useTranslate("editor");
   const [durationType, setDurationType] = useState<
     "time" | "distance" | "open"
   >(getDurationTypeFromValue(value));
@@ -50,8 +52,8 @@ export const DurationPicker = ({
         disabled={disabled}
         onTypeChange={handleTypeChange}
         onValueChange={handleValueChange}
-        getValueLabel={getValueLabel}
-        getValuePlaceholder={getValuePlaceholder}
+        getValueLabel={(type) => getValueLabel(type, t)}
+        getValuePlaceholder={(type) => getValuePlaceholder(type, t)}
       />
     </div>
   );

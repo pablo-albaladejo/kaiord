@@ -63,7 +63,6 @@
       "weight": "Weight",
       "steps": "Steps"
     },
-    "seriesLegendNote": "Series are told apart by lightness and label, not hue — the five hues in this app belong to training zones, and a health chart is not a zone.",
     "range": {
       "d30": "30d",
       "d90": "90d",

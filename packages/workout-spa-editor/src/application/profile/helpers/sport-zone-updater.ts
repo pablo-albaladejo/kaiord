@@ -15,6 +15,7 @@ import { calculateHrZones } from "../../../utils/calculate-hr-zones";
 import { calculatePaceZones } from "../../../utils/calculate-pace-zones";
 import { calculatePowerZones } from "../../../utils/calculate-power-zones";
 import { claimProfile } from "./claim-profile";
+import { methodToApply } from "./zone-method-to-apply";
 
 export function recalculateZones(
   config: SportZoneConfig,
@@ -24,38 +25,29 @@ export function recalculateZones(
   const caps = SPORT_ZONE_CAPABILITIES[sport];
   const updated = { ...config, thresholds };
 
-  if (caps.hr && thresholds.lthr) {
-    const method = updated.heartRateZones.method;
-    if (method !== "custom") {
-      updated.heartRateZones = {
-        method,
-        zones: calculateHrZones(thresholds.lthr, method),
-      };
-    }
+  const hrMethod = methodToApply("hr", updated.heartRateZones);
+  if (caps.hr && thresholds.lthr && hrMethod) {
+    updated.heartRateZones = {
+      method: hrMethod,
+      zones: calculateHrZones(thresholds.lthr, hrMethod),
+    };
   }
 
-  if (caps.power && updated.powerZones && thresholds.ftp) {
-    const method = updated.powerZones.method;
-    if (method !== "custom") {
-      updated.powerZones = {
-        method,
-        zones: calculatePowerZones(method),
-      };
-    }
+  const powerMethod = methodToApply("power", updated.powerZones);
+  if (caps.power && updated.powerZones && thresholds.ftp && powerMethod) {
+    updated.powerZones = {
+      method: powerMethod,
+      zones: calculatePowerZones(powerMethod),
+    };
   }
 
-  if (caps.pace && thresholds.thresholdPace && thresholds.paceUnit) {
-    const method = updated.paceZones?.method ?? "daniels-5";
-    if (method !== "custom") {
-      updated.paceZones = {
-        method,
-        zones: calculatePaceZones(
-          thresholds.thresholdPace,
-          thresholds.paceUnit,
-          method
-        ),
-      };
-    }
+  const paceMethod = methodToApply("pace", updated.paceZones);
+  const { thresholdPace, paceUnit } = thresholds;
+  if (caps.pace && thresholdPace && paceUnit && paceMethod) {
+    updated.paceZones = {
+      method: paceMethod,
+      zones: calculatePaceZones(thresholdPace, paceUnit, paceMethod),
+    };
   }
 
   return updated;

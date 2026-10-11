@@ -2,7 +2,7 @@ import { Edit2 } from "lucide-react";
 import type { RefObject } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
-import { humanizeSport } from "../../../lib/format-sport";
+import { sportLabel } from "../../../lib/format-sport";
 import type { Workout } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 
@@ -41,8 +41,9 @@ export function WorkoutTitle({ workout, onEdit, titleRef }: WorkoutTitleProps) {
         </Button>
       </div>
       <p className="mt-1 text-sm text-ink-muted">
-        {t("section.sport")} {humanizeSport(workout.sport)}
-        {workout.subSport && ` • ${humanizeSport(workout.subSport)}`}
+        {t("section.sport")} {sportLabel(workout.sport, t)}
+        {workout.subSport &&
+          ` • ${sportLabel(workout.subSport, t, "subSport")}`}
       </p>
     </div>
   );

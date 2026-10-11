@@ -48,7 +48,8 @@
     "paceValue": "Valor de ritmo",
     "cadenceRpm": "Cadencia (RPM)",
     "cadenceValue": "Valor de cadencia",
-    "value": "Valor"
+    "value": "Valor",
+    "paceClock": "Ritmo ({{unit}})"
   },
   "placeholder": {
     "powerWatts": "p. ej., 250",
@@ -60,7 +61,8 @@
     "paceMps": "p. ej., 3.5",
     "paceZone": "1-5",
     "cadenceRpm": "p. ej., 90",
-    "enterValue": "Introduce un valor"
+    "enterValue": "Introduce un valor",
+    "paceClock": "p. ej., 4:30"
   },
   "validation": {
     "valueRequired": "El valor es obligatorio",
@@ -80,6 +82,7 @@
     "valuesMustBeValidNumbers": "Los valores deben ser números válidos",
     "valuesMustBeGreaterThanZero": "Los valores deben ser mayores que 0",
     "minLessThanMax": "El mínimo debe ser menor que el máximo",
-    "invalidTargetType": "Tipo de objetivo no válido"
+    "invalidTargetType": "Tipo de objetivo no válido",
+    "paceClock": "Escribe un ritmo como m:ss, p. ej. 4:30"
   }
 }

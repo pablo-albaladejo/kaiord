@@ -41,7 +41,8 @@
   },
   "threshold": {
     "pace": "Threshold Pace",
-    "ariaLabel": "{{label}} threshold"
+    "ariaLabel": "{{label}} threshold",
+    "optional": "optional"
   },
   "section": {
     "heartRate": "Heart Rate Zones",
@@ -73,5 +74,45 @@
     "ftp": "FTP",
     "thresholdPace": "Threshold pace",
     "cssPace": "CSS pace"
+  },
+  "defaultName": {
+    "recovery": "Recovery",
+    "aerobic": "Aerobic",
+    "tempo": "Tempo",
+    "threshold": "Threshold",
+    "vo2_max": "VO₂ Max",
+    "extensive_endurance": "Extensive Endurance",
+    "intensive_endurance": "Intensive Endurance",
+    "aerobic_capacity": "Aerobic Capacity",
+    "low_intensity": "Low Intensity",
+    "high_intensity": "High Intensity",
+    "endurance": "Endurance",
+    "active_recovery": "Active Recovery",
+    "foundation": "Foundation",
+    "anaerobic": "Anaerobic",
+    "anaerobic_capacity": "Anaerobic Capacity",
+    "lactate_threshold": "Lactate Threshold",
+    "neuromuscular": "Neuromuscular",
+    "neuromuscular_power": "Neuromuscular Power",
+    "subthreshold": "SubThreshold",
+    "superthreshold": "SuperThreshold",
+    "easy": "Easy",
+    "zone_n": "Zone {{n}}"
+  },
+  "methodName": {
+    "polarized-hr-3": "Polarized 3-zone",
+    "karvonen-5": "Karvonen 5-zone",
+    "friel-hr-5": "Friel 5-zone",
+    "custom": "Custom",
+    "polarized-3": "Polarized 3-zone",
+    "classic-5": "Classic 5-zone",
+    "british-cycling-6": "British Cycling 6-zone",
+    "coggan-7": "Coggan 7-zone",
+    "friel-7": "Friel 7-zone",
+    "daniels-5": "Daniels 5-zone",
+    "own": "Your own zones"
+  },
+  "status": {
+    "saved": "Saved"
   }
 }

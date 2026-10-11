@@ -2,6 +2,10 @@
  * Create Step Action
  *
  * Action for creating a new workout step with default values.
+ *
+ * A workout starts with a warm-up, so the first step is one; every later
+ * step is active work until the user says otherwise. No name is stored: the
+ * card labels an unnamed step in the user's language ("Step 2" / "Paso 2").
  */
 
 import type { KRD, WorkoutStep } from "../../types/krd";
@@ -26,7 +30,7 @@ export const createStepAction = (
   const newStep: WorkoutStep & { id: ItemId } = {
     id: defaultIdProvider(),
     stepIndex: newStepIndex,
-    name: `Step ${newStepIndex + 1}`,
+    intensity: newStepIndex === 0 ? "warmup" : "active",
     durationType: "open" as const,
     duration: { type: "open" as const },
     targetType: "open" as const,

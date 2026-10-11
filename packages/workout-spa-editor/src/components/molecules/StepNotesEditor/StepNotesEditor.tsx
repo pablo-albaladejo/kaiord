@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { getCharacterCountClasses, getTextareaClasses } from "./styles";
 
 export type StepNotesEditorProps = {
@@ -17,6 +18,7 @@ export const StepNotesEditor = ({
   disabled = false,
   className = "",
 }: StepNotesEditorProps) => {
+  const t = useTranslate("editor");
   const [localValue, setLocalValue] = useState(value);
   const characterCount = localValue.length;
   const isOverLimit = characterCount > MAX_CHARACTERS;
@@ -33,14 +35,14 @@ export const StepNotesEditor = ({
         htmlFor="step-notes"
         className="block text-sm font-medium text-gray-700 dark:text-gray-300"
       >
-        Notes & Coaching Cues
+        {t("notes.label")}
       </label>
       <textarea
         id="step-notes"
         value={localValue}
         onChange={handleChange}
         disabled={disabled}
-        placeholder="Add coaching cues or notes for this step..."
+        placeholder={t("notes.placeholder")}
         rows={3}
         className={getTextareaClasses(isOverLimit)}
         aria-describedby="character-count"
@@ -52,10 +54,10 @@ export const StepNotesEditor = ({
         role="status"
         aria-live="polite"
       >
-        {characterCount} / {MAX_CHARACTERS} characters
+        {t("notes.count", { n: characterCount, max: MAX_CHARACTERS })}
         {isOverLimit && (
           <span className="ml-2">
-            ({characterCount - MAX_CHARACTERS} over limit)
+            {t("notes.over", { n: characterCount - MAX_CHARACTERS })}
           </span>
         )}
       </div>
