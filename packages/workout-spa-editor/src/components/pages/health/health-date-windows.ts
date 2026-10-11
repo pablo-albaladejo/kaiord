@@ -4,35 +4,33 @@
  * Real date pickers come later; for now each page surfaces a
  * pragmatic "recent" window so the live hooks fire against a
  * meaningful range without the user having to pick one.
+ *
+ * Days are LOCAL calendar days, like the calendar and Daily: a record
+ * entered for "today" after local midnight must fall inside the window.
  */
-const ISO_DATE_LENGTH = 10;
+const PAD = 2;
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_QUARTER = 90;
 
-const isoDate = (date: Date): string =>
-  date.toISOString().slice(0, ISO_DATE_LENGTH);
-
-const today = (): Date => new Date();
+const localIsoDate = (date: Date): string => {
+  const month = String(date.getMonth() + 1).padStart(PAD, "0");
+  const day = String(date.getDate()).padStart(PAD, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+};
 
 const daysAgo = (n: number): Date => {
-  const d = today();
-  d.setUTCDate(d.getUTCDate() - n);
+  const d = new Date();
+  d.setDate(d.getDate() - n);
   return d;
 };
 
-export const todayIso = (): string => isoDate(today());
-
-export const lastSevenDays = () => ({
-  start: isoDate(daysAgo(DAYS_IN_WEEK - 1)),
-  end: todayIso(),
-});
-
-export const lastNinetyDays = () => ({
-  start: isoDate(daysAgo(DAYS_IN_QUARTER - 1)),
-  end: todayIso(),
-});
+export const todayIso = (): string => localIsoDate(new Date());
 
 export const lastNDays = (days: number) => ({
-  start: isoDate(daysAgo(days - 1)),
+  start: localIsoDate(daysAgo(days - 1)),
   end: todayIso(),
 });
+
+export const lastSevenDays = () => lastNDays(DAYS_IN_WEEK);
+
+export const lastNinetyDays = () => lastNDays(DAYS_IN_QUARTER);

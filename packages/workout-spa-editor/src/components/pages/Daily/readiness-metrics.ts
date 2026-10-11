@@ -5,6 +5,8 @@
  */
 import type { HrvSummary, SleepRecord, StressEpisode } from "@kaiord/core";
 
+import { recordedSleepSeconds } from "../../../application/health/recorded-sleep-duration";
+
 export const EM_DASH = "—";
 export const SCORE_MAX = 100;
 const SCORE_MIN = 0;
@@ -24,9 +26,9 @@ export function compositeScore(
 }
 
 export function sleepValue(sleep: SleepRecord | undefined): string {
-  if (!sleep) return EM_DASH;
-  const hours = sleep.totalDurationSeconds / SECONDS_PER_HOUR;
-  return `${hours.toFixed(1)}h`;
+  const seconds = sleep ? recordedSleepSeconds(sleep) : undefined;
+  if (seconds === undefined) return EM_DASH;
+  return `${(seconds / SECONDS_PER_HOUR).toFixed(1)}h`;
 }
 
 export function hrvTrend(hrv: HrvSummary | undefined): string | undefined {

@@ -24,7 +24,9 @@
   "sleep": {
     "title": "Sueño",
     "empty": "No hay registros de sueño de los últimos 7 días.",
-    "duration": "{{hours}} h {{minutes}} min"
+    "duration": "{{hours}} h {{minutes}} min",
+    "durationNotRecorded": "Duración no registrada",
+    "score": "Puntuación {{score}}"
   },
   "weight": {
     "title": "Peso",
@@ -66,6 +68,27 @@
       "d30": "30d",
       "d90": "90d",
       "d365": "1a"
+    }
+  },
+  "addData": "Añadir dato",
+  "wellnessEntry": {
+    "title": "Añadir bienestar: {{date}}",
+    "titleNoDate": "Añadir bienestar",
+    "weight": "Peso",
+    "sleepHours": "Horas de sueño",
+    "sleepScore": "Puntuación de sueño",
+    "bedtime": "Hora de acostarte",
+    "wakeTime": "Hora de despertar",
+    "hrv": "VFC",
+    "steps": "Pasos",
+    "save": "Guardar",
+    "importFile": "Importar un archivo",
+    "importHint": "Los archivos importados usan su propia fecha.",
+    "error": {
+      "invalidHours": "Escribe las horas dormidas como h:mm, por ejemplo 7:30.",
+      "invalidScore": "Escribe una puntuación de sueño de 0 a 100.",
+      "needsDuration": "Escribe las horas dormidas, o la hora de acostarte y la de despertar.",
+      "mismatch": "Las horas dormidas no cuadran con la hora de acostarte y la de despertar."
     }
   }
 }

@@ -24,7 +24,9 @@
   "sleep": {
     "title": "Sleep",
     "empty": "No sleep records yet for the last 7 days.",
-    "duration": "{{hours}} h {{minutes}} m"
+    "duration": "{{hours}} h {{minutes}} m",
+    "durationNotRecorded": "Duration not recorded",
+    "score": "Score {{score}}"
   },
   "weight": {
     "title": "Weight",
@@ -66,6 +68,27 @@
       "d30": "30d",
       "d90": "90d",
       "d365": "1y"
+    }
+  },
+  "addData": "Add data",
+  "wellnessEntry": {
+    "title": "Add wellness for {{date}}",
+    "titleNoDate": "Add wellness",
+    "weight": "Weight",
+    "sleepHours": "Sleep hours",
+    "sleepScore": "Sleep score",
+    "bedtime": "Bedtime",
+    "wakeTime": "Wake time",
+    "hrv": "HRV",
+    "steps": "Steps",
+    "save": "Save",
+    "importFile": "Import a file",
+    "importHint": "Imported files use their own date.",
+    "error": {
+      "invalidHours": "Enter the hours slept as h:mm, for example 7:30.",
+      "invalidScore": "Enter a sleep score from 0 to 100.",
+      "needsDuration": "Enter the hours slept, or both bedtime and wake time.",
+      "mismatch": "The hours slept don't match the bedtime and wake time."
     }
   }
 }

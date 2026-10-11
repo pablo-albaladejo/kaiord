@@ -7,6 +7,7 @@
  * metric field is set only when its source value exists. Days/metrics
  * with no data are omitted (never present-but-empty).
  */
+import { recordedSleepSeconds } from "../../application/health/recorded-sleep-duration";
 import type { DayWellness } from "../../types/health/day-wellness";
 import type {
   HealthDailyRecord,
@@ -17,10 +18,15 @@ import type {
 
 const SECONDS_PER_HOUR = 3600;
 
-export const formatSleep = (krd: HealthSleepRecord["krd"]): string =>
-  typeof krd.score === "number"
-    ? `${krd.score}`
-    : `${(krd.totalDurationSeconds / SECONDS_PER_HOUR).toFixed(1)}h`;
+export const formatSleep = (
+  krd: HealthSleepRecord["krd"]
+): string | undefined => {
+  if (typeof krd.score === "number") return `${krd.score}`;
+  const seconds = recordedSleepSeconds(krd);
+  return seconds === undefined
+    ? undefined
+    : `${(seconds / SECONDS_PER_HOUR).toFixed(1)}h`;
+};
 
 const set = (
   map: Map<string, DayWellness>,
@@ -41,7 +47,10 @@ export const reduceWellnessByDay = (
   scans: WellnessScans
 ): Record<string, DayWellness> => {
   const map = new Map<string, DayWellness>();
-  for (const r of scans.sleep) set(map, r.date, { sleep: formatSleep(r.krd) });
+  for (const r of scans.sleep) {
+    const sleep = formatSleep(r.krd);
+    if (sleep !== undefined) set(map, r.date, { sleep });
+  }
   for (const r of scans.hrv)
     set(map, r.date, { hrv: `${Math.round(r.krd.rMSSD)}` });
   for (const r of scans.weight)

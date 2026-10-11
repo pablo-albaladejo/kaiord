@@ -21,6 +21,7 @@ export default function HealthSleepPage() {
       <HealthPageHeader
         title={t("sleep.title")}
         subtitle={`${range.start} → ${range.end}`}
+        addMetric="sleep"
       />
       {loading && (
         <p className="text-sm text-ink-muted">{t("common.loading")}</p>

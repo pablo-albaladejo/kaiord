@@ -27,6 +27,7 @@ export default function HealthWeightPage() {
       <HealthPageHeader
         title={t("weight.title")}
         subtitle={`${range.start} → ${range.end}`}
+        addMetric="weight"
       />
       {composition && (
         <div className="mb-4 rounded-2xl border border-edge bg-surface-elevated p-3 text-sm">
