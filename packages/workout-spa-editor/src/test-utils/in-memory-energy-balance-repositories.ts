@@ -57,8 +57,12 @@ const createEnergyTargetRepository = (
   store: Map<string, EnergyTargetRecord>
 ): EnergyTargetRepository => ({
   get: async (profileId) => store.get(profileId),
+  getById: async (profileId) => store.get(profileId),
   put: async (record) => {
     store.set(record.profileId, record);
+  },
+  delete: async (profileId) => {
+    store.delete(profileId);
   },
   deleteByProfile: async (profileId) => {
     store.delete(profileId);

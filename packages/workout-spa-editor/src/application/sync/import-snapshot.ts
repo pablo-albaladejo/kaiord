@@ -11,7 +11,7 @@
  */
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
-import type { Snapshot, SnapshotTables } from "../../types/snapshot";
+import type { Snapshot, SnapshotTables, Tombstone } from "../../types/snapshot";
 import { createLiveRowMerge } from "./merge-table-rows";
 import { unionTombstones } from "./merge-tombstones";
 import { pruneTombstones } from "./prune-tombstones";
@@ -33,7 +33,7 @@ export async function importSnapshot({
   snapshot,
   exported,
   now = () => new Date(),
-}: ImportSnapshotDeps): Promise<void> {
+}: ImportSnapshotDeps): Promise<ReadonlyArray<Tombstone>> {
   const localVersion = await port.schemaVersion();
   if (snapshot.manifest.schemaVersion > localVersion) {
     throw new Error(
@@ -44,16 +44,20 @@ export async function importSnapshot({
   // Single read-write transaction so tables and tombstones are restored
   // atomically: a failure mid-restore rolls the whole database back rather
   // than leaving tables replaced but tombstones stale (or vice versa).
+  let live: ReadonlyArray<Tombstone> = [];
   await port.transaction("rw", async () => {
     // Union with the LIVE tombstones read inside this transaction: a delete
     // made after the snapshot was exported must neither be wiped from the
     // tombstone set nor let its row come back from the snapshot.
+    live = await port.listTombstones();
     const tombstones = pruneTombstones(
-      unionTombstones(snapshot.tombstones, await port.listTombstones()),
+      unionTombstones(snapshot.tombstones, live),
       now()
     );
     const liveMerge = createLiveRowMerge(tombstones, exported);
     await port.importTables(snapshot.tables, { liveMerge });
     await port.replaceTombstones(tombstones);
   });
+  // The caller pushes `snapshot`; these let it carry a delete made meanwhile.
+  return live;
 }

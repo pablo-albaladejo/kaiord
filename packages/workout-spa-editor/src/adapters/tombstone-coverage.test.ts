@@ -47,6 +47,7 @@ const SNAPSHOT_TABLE_BY_REPO: Record<string, string> = {
   userPreferences: "userPreferences",
   intakeEntries: "intakeEntries",
   intakePresets: "intakePresets",
+  energyTargets: "energyTargets",
 };
 
 /**
@@ -63,13 +64,14 @@ const REVIEWED_EXCEPTIONS: Record<string, string> = {
   // Hand-tombstoned in `deleteIntegrationPolicy`: the repo's delete is
   // `deleteById`, outside the decorator's `delete(id)` shape.
   integrationPolicy: "hand-tombstoned by deleteIntegrationPolicy",
-  // Structurally untombstonable: PK is `source`, not `id`. Tombstones are
-  // `[table+id]` and the merge only suppresses rows whose `row.id` is a
-  // string. Fixing it needs a tombstone-schema + merge change.
-  syncState: "non-`id` primary key (source)",
-  // Structurally untombstonable: PK is `profileId`, not `id`. Also purely
-  // profile-scoped, so it travels with the profile-delete cascade.
-  userPreferences: "non-`id` primary key (profileId)",
+  // PK is `source`, not `id`, and no production code calls its delete, so no
+  // tombstone is written. Not a drop-in: its rows have no `updatedAt` or
+  // `createdAt` (clock 0), so a `[syncState+source]` tombstone would also
+  // hide every later copy of that source until it is pruned.
+  syncState: "non-`id` primary key (source); delete unused in production",
+  // PK is `profileId`, not `id`. Purely profile-scoped, so it travels with
+  // the profile-delete cascade (the `profiles` tombstone).
+  userPreferences: "non-`id` primary key (profileId); cascade-only delete",
 };
 
 /**
@@ -125,9 +127,6 @@ const OFF_PORT_TABLES: Record<string, string> = {
     "composite PK (untombstonable — see design.md gap); user delete via " +
     "clearModelBinding resurrects, tracked not fixed here",
   autoMatchDismissals: "composite PK; cascade-only delete",
-  // On the port, but its PK is `profileId` and it has no delete(id): a goal
-  // is overwritten, never deleted, except by the profile cascade.
-  energyTargets: "non-`id` primary key (profileId); cascade-only delete",
   coachingSyncState: "composite PK; cascade-only delete",
   dataTypeSourcePolicy: "composite PK; cascade-only delete",
   // Legacy and write-dead: the only writer left is the v6 migration backfill

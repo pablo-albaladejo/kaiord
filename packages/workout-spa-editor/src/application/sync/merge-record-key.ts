@@ -30,6 +30,18 @@ export function recordKey(table: string, row: Row): string {
   return fields.map((f) => String(row[f] ?? "")).join("\u0000");
 }
 
+/**
+ * The id a tombstone files a row under: its single-field primary key (`id`,
+ * or `profileId` for `energyTargets`). A composite key has none, so those
+ * rows are never suppressed.
+ */
+export function tombstoneIdOf(table: string, row: Row): string | undefined {
+  const [field, ...rest] = PRIMARY_KEYS[table] ?? ["id"];
+  if (field === undefined || rest.length > 0) return undefined;
+  const id = row[field];
+  return typeof id === "string" ? id : undefined;
+}
+
 /** Comparison clock for a row: `updatedAt` else `createdAt` else epoch 0. */
 export function recordClock(row: Row): number {
   const stamp = row.updatedAt ?? row.createdAt;
