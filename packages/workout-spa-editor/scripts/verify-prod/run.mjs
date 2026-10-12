@@ -23,6 +23,7 @@ const CHECKS = [
   "i18n-scan",
   "mobile",
   "trends",
+  "intake-preset",
 ];
 
 async function runCheck(browser, base, name) {
