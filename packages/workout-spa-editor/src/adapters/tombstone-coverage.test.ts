@@ -64,9 +64,10 @@ const REVIEWED_EXCEPTIONS: Record<string, string> = {
   // Hand-tombstoned in `deleteIntegrationPolicy`: the repo's delete is
   // `deleteById`, outside the decorator's `delete(id)` shape.
   integrationPolicy: "hand-tombstoned by deleteIntegrationPolicy",
-  // PK is `source`, not `id`. The merge suppresses a row by its single-field
-  // primary key, so a `[syncState+source]` tombstone would work, but no
-  // production code calls its delete.
+  // PK is `source`, not `id`, and no production code calls its delete, so no
+  // tombstone is written. Not a drop-in: its rows have no `updatedAt` or
+  // `createdAt` (clock 0), so a `[syncState+source]` tombstone would also
+  // hide every later copy of that source until it is pruned.
   syncState: "non-`id` primary key (source); delete unused in production",
   // PK is `profileId`, not `id`. Purely profile-scoped, so it travels with
   // the profile-delete cascade (the `profiles` tombstone).
