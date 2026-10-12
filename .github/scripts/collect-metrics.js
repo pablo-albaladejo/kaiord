@@ -63,8 +63,21 @@ function collectTestResults() {
   for (const pkg of packages) {
     // Vitest 5 writes the JSON report to a file instead of stdout.
     const file = path.join(dir, `${pkg}.json`);
+    // `pnpm exec` puts a *relative* ./node_modules/.bin on PATH, which tests
+    // that spawn `tsx` from another cwd (cli) cannot resolve. Add the absolute
+    // bin dirs, as `pnpm run` does.
+    const bins = [
+      path.resolve("packages", pkg, "node_modules/.bin"),
+      path.resolve("node_modules/.bin"),
+    ].join(path.delimiter);
     run(
-      `pnpm --filter @kaiord/${pkg} exec vitest --run --reporter=json --outputFile=${file} 2>&1`
+      `pnpm --filter @kaiord/${pkg} exec vitest --run --reporter=json --outputFile=${file} 2>&1`,
+      {
+        env: {
+          ...process.env,
+          PATH: `${bins}${path.delimiter}${process.env.PATH}`,
+        },
+      }
     );
     results[pkg] = readVitestReport(file);
   }
