@@ -9,12 +9,9 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v27-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_SEED = 26;
 const SCHEMA_HEAD = 37;
@@ -80,22 +77,14 @@ const seed = async (name: string): Promise<void> => {
 };
 
 describe("Dexie Data Hub (v27) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v27");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -109,7 +98,6 @@ describe("Dexie Data Hub (v27) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const planned = await db.table("plannedSessions").toArray();
     db.close();
@@ -126,7 +114,6 @@ describe("Dexie Data Hub (v27) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const count = await db.table("coachingActivities").count();
     db.close();
@@ -140,7 +127,6 @@ describe("Dexie Data Hub (v27) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const policies = await db.table("integrationPolicies").toArray();
     db.close();
@@ -155,7 +141,6 @@ describe("Dexie Data Hub (v27) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const rewritten = await db.table("integrationPolicies").get("pol-2");
     const untouched = await db.table("integrationPolicies").get("pol-3");

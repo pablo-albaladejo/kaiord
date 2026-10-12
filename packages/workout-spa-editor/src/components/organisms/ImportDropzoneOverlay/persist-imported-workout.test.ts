@@ -7,11 +7,10 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { sharedKaiordDatabase } from "../../../test-utils/shared-kaiord-database";
 import type { KRD } from "../../../types/krd";
 import { persistImportedWorkout } from "./persist-imported-workout";
 
@@ -41,18 +40,10 @@ const structuredKrd = (): KRD =>
   }) as KRD;
 
 describe("persistImportedWorkout", () => {
-  let db: KaiordDatabase;
-  let name: string;
+  const db = sharedKaiordDatabase("persist-import");
 
   beforeEach(async () => {
-    name = `kaiord-persist-${Date.now()}-${Math.random()}`;
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should write only an activity row with provenance and no twin for an execution", async () => {

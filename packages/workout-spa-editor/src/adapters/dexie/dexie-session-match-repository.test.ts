@@ -1,10 +1,10 @@
 import "fake-indexeddb/auto";
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { SessionMatch } from "../../types/session-match";
 import { SessionAlreadyMatchedError } from "../../types/session-match-errors";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieSessionMatchRepository } from "./dexie-session-match-repository";
 
 const makeMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
@@ -19,11 +19,7 @@ const makeMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
 });
 
 describe("DexieSessionMatchRepository", () => {
-  let db: KaiordDatabase;
-
-  beforeEach(() => {
-    db = new KaiordDatabase(`kaiord-match-test-${Date.now()}-${Math.random()}`);
-  });
+  const db = sharedKaiordDatabase("match");
 
   it("should round-trip via put-and-get on getByActivityId", async () => {
     // Arrange

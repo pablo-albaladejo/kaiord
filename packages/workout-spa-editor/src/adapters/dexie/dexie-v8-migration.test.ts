@@ -10,12 +10,10 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import {
-  KaiordDatabase,
-  makeBackfillAiProviderCreatedAt,
-} from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import { makeBackfillAiProviderCreatedAt } from "./dexie-database";
 
 const DEXIE_V7_VERSION = 7;
 
@@ -24,8 +22,6 @@ const ONE_MINUTE_MS = 60_000;
 const CANONICAL_EPOCH_MS_2023_11 = 1_700_000_000_000;
 
 const EXISTING_CREATED_AT_SENTINEL = 42;
-
-const dbName = (suffix: string) => `kaiord-test-v8-${suffix}-${Date.now()}`;
 
 const seedV7 = async (name: string): Promise<void> => {
   const v7 = new Dexie(name);
@@ -54,20 +50,13 @@ const seedV7 = async (name: string): Promise<void> => {
 };
 
 describe("Dexie v7 → v8 migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("backfill");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v8");
+  const { name } = db;
 
   it("should backfill createdAt as a number on every legacy aiProvider row", async () => {
     // Arrange
     await seedV7(name);
-    const v8 = new KaiordDatabase(name);
+    const v8 = db;
     await v8.open();
     const rows = await v8.table("aiProviders").toArray();
 
@@ -85,7 +74,7 @@ describe("Dexie v7 → v8 migration", () => {
   it("should preserve all pre-existing fields verbatim", async () => {
     // Arrange
     await seedV7(name);
-    const v8 = new KaiordDatabase(name);
+    const v8 = db;
     await v8.open();
     const claude = await v8.table("aiProviders").get("legacy-anthropic");
 
@@ -106,7 +95,7 @@ describe("Dexie v7 → v8 migration", () => {
   it("should order legacy rows before any post-upgrade insertion via the new index", async () => {
     // Arrange
     await seedV7(name);
-    const v8 = new KaiordDatabase(name);
+    const v8 = db;
     await v8.open();
     await v8.table("aiProviders").put({
       id: "fresh",
