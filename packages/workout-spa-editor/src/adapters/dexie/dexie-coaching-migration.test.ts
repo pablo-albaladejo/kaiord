@@ -10,7 +10,7 @@ import "fake-indexeddb/auto";
 import Dexie from "dexie";
 import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const DEXIE_V3 = 3;
 
@@ -46,11 +46,13 @@ const seedV3 = async (dbName: string) => {
 };
 
 describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
+  const db = sharedKaiordDatabase("coaching-v4");
+  const { name: dbName } = db;
+
   it("should backfill linkedAccounts: [] on existing profile rows", async () => {
     // Arrange
-    const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
-    const v4 = new KaiordDatabase(dbName);
+    const v4 = db;
     await v4.open();
     const profile = await v4
       .table<{ id: string; linkedAccounts: unknown[] }>("profiles")
@@ -67,9 +69,8 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     "should create an empty %s table",
     async (tableName) => {
       // Arrange
-      const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
       await seedV3(dbName);
-      const v4 = new KaiordDatabase(dbName);
+      const v4 = db;
       await v4.open();
       const count = await v4.table(tableName).count();
 
@@ -83,9 +84,8 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
 
   it("should leave bridge-discovery syncState rows byte-identically unchanged", async () => {
     // Arrange
-    const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
-    const v4 = new KaiordDatabase(dbName);
+    const v4 = db;
     await v4.open();
     const row = await v4.table("syncState").get("garmin-bridge");
 
@@ -104,9 +104,8 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
 
   it("should have syncState store schema string equal 'source' byte-identically (no compound index added)", async () => {
     // Arrange
-    const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
-    const v4 = new KaiordDatabase(dbName);
+    const v4 = db;
     await v4.open();
     const schema = v4.table("syncState").schema;
 
@@ -120,9 +119,8 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
 
   it("should have coachingSyncState store schema string equal '[source+profileId], source, profileId' byte-identically", async () => {
     // Arrange
-    const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
-    const v4 = new KaiordDatabase(dbName);
+    const v4 = db;
     await v4.open();
     const schema = v4.table("coachingSyncState").schema;
     const indexNames = schema.indexes.map((i) => i.name).sort();
@@ -137,9 +135,8 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
 
   it("should keep a v4-migrated profile row readable under v3 schema (forward-tolerance)", async () => {
     // Arrange
-    const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
-    const v4 = new KaiordDatabase(dbName);
+    const v4 = db;
     await v4.open();
     await v4.table("profiles").put({
       id: "00000000-0000-0000-0000-000000000002",

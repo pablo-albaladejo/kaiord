@@ -1,14 +1,13 @@
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import {
   type ExportLedgerEntry,
   restoreLedgerRow,
 } from "../../types/export-ledger";
 import { parseGarminWorkoutId } from "../../types/garmin-ledger";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
 
 const T1 = new Date("2026-09-10T08:00:00.000Z");
@@ -29,20 +28,17 @@ const row = (): ExportLedgerEntry => ({
 });
 
 describe("createDexieExportLedgerRepository — mutateByKey", () => {
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("ledger-repo");
 
   beforeEach(async () => {
     // Fake only `Date`: Dexie and fake-indexeddb schedule on real timers.
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(T2);
-    db = new KaiordDatabase(`kaiord-test-ledger-repo-${Math.random()}`);
     await db.open();
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     vi.useRealTimers();
-    db.close();
-    await Dexie.delete(db.name);
   });
 
   it("should leave the row byte-identical when fn changes nothing", async () => {
@@ -223,19 +219,16 @@ describe("createDexieExportLedgerRepository — mutateByKey", () => {
 });
 
 describe("createDexieExportLedgerRepository — rollbackPending", () => {
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("ledger-rollback");
 
   beforeEach(async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(T2);
-    db = new KaiordDatabase(`kaiord-test-ledger-rollback-${Math.random()}`);
     await db.open();
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     vi.useRealTimers();
-    db.close();
-    await Dexie.delete(db.name);
   });
 
   it("should leave a committed row with the same id untouched", async () => {

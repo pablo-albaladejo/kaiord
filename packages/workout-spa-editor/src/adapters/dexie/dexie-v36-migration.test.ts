@@ -7,13 +7,12 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ExportLedgerEntry } from "../../types/export-ledger";
-import { KaiordDatabase } from "./dexie-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
-
-const dbName = () => `kaiord-test-v36-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 35;
 const SCHEMA_HEAD = 37;
@@ -68,8 +67,7 @@ const seedV35 = async (name: string): Promise<void> => {
   older.close();
 };
 
-const upgrade = async (name: string) => {
-  const db = new KaiordDatabase(name);
+const upgrade = async (db: KaiordDatabase) => {
   await db.open();
   const rows = (await db
     .table("exportLedger")
@@ -80,22 +78,15 @@ const upgrade = async (name: string) => {
 };
 
 describe("Dexie Garmin ledger (v36) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName();
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v36");
+  const { name } = db;
 
   it("should confirm the library of a row whose external id is Garmin-shaped", async () => {
     // Arrange
     await seedV35(name);
 
     // Act
-    const { version, byId } = await upgrade(name);
+    const { version, byId } = await upgrade(db);
 
     // Assert
     expect(version).toBe(SCHEMA_HEAD);
@@ -115,7 +106,7 @@ describe("Dexie Garmin ledger (v36) migration", () => {
       await seedV35(name);
 
       // Act
-      const { byId } = await upgrade(name);
+      const { byId } = await upgrade(db);
 
       // Assert
       expect(byId.get(seeded.id)?.library).toEqual({ kind: "unconfirmed" });
@@ -131,7 +122,7 @@ describe("Dexie Garmin ledger (v36) migration", () => {
     await seedV35(name);
 
     // Act
-    const { byId } = await upgrade(name);
+    const { byId } = await upgrade(db);
 
     // Assert
     expect(byId.get(seeded.id)).toStrictEqual(seeded);
@@ -142,7 +133,7 @@ describe("Dexie Garmin ledger (v36) migration", () => {
     await seedV35(name);
 
     // Act
-    const { version, byId } = await upgrade(name);
+    const { version, byId } = await upgrade(db);
 
     // Assert
     expect(version).toBe(SCHEMA_HEAD);

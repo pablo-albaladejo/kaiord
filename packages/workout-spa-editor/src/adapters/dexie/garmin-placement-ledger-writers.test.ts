@@ -1,6 +1,5 @@
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ExportLedgerRepository } from "../../application/export/export-ledger-repository.port";
@@ -12,8 +11,8 @@ import {
   preparePath,
   type PushPath,
 } from "../../test-utils/placement-harness";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ExportLedgerEntry } from "../../types/export-ledger";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
 
 const T0 = new Date("2026-10-01T08:00:00.000Z");
@@ -22,17 +21,14 @@ const PATHS: PushPath[] = ["C", "U", "S"];
 const FOREIGN_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const OTHER_ENTRY = "9000";
 
-let db: KaiordDatabase;
+const db = sharedKaiordDatabase("placement");
 beforeEach(async () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(T0);
-  db = new KaiordDatabase(`kaiord-test-placement-${Math.random()}`);
   await db.open();
 });
-afterEach(async () => {
+afterEach(() => {
   vi.useRealTimers();
-  db.close();
-  await Dexie.delete(db.name);
 });
 
 const ledger = () => db.table<ExportLedgerEntry>("exportLedger");

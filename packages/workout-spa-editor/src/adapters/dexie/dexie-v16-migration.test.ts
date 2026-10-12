@@ -12,12 +12,9 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v16-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_V15 = 15;
 const SCHEMA_V16 = 16;
@@ -62,15 +59,8 @@ const seedV15 = async (
 };
 
 describe("Dexie v15 → v16 migration (health-domain stores)", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v16");
+  const { name } = db;
 
   it("should preserve a v15 userPreferences row untouched after upgrading to v16", async () => {
     // Arrange
@@ -83,7 +73,6 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
     ]);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const row = (await db.table("userPreferences").get(PROFILE_ID)) as
       { calendarView?: string } | undefined;
@@ -98,7 +87,6 @@ describe("Dexie v15 → v16 migration (health-domain stores)", () => {
     async (storeName) => {
       // Arrange
       await seedV15(name, []);
-      const db = new KaiordDatabase(name);
       await db.open();
 
       // Act

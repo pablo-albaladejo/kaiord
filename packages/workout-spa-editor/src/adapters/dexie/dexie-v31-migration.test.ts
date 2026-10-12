@@ -8,13 +8,11 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v31-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 30;
 const SCHEMA_HEAD = 37;
@@ -41,22 +39,14 @@ const indexKeyPaths = (db: KaiordDatabase, store: string): string[] =>
     );
 
 describe("Dexie lab-analytics (v31) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v31");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seedV30(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -70,7 +60,6 @@ describe("Dexie lab-analytics (v31) migration", () => {
     await seedV30(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const counts = {
       labReports: await db.table("labReports").count(),
@@ -87,7 +76,6 @@ describe("Dexie lab-analytics (v31) migration", () => {
     await seedV30(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const profile = await db.table("profiles").get("p-1");
     const policyCount = await db.table("dataTypeSourcePolicy").count();
@@ -111,7 +99,6 @@ describe("Dexie lab-analytics (v31) migration", () => {
       await seedV30(name);
 
       // Act
-      const db = new KaiordDatabase(name);
       await db.open();
       const primKey = db.table(store).schema.primKey.keyPath;
       const indexes = indexKeyPaths(db, store);

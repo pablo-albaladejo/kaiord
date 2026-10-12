@@ -8,13 +8,11 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v33-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 32;
 const SCHEMA_HEAD = 37;
@@ -71,22 +69,14 @@ const migratedEvents = async (db: KaiordDatabase) =>
   );
 
 describe("Dexie usage-accounting cutover (v33) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v33");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seedV32(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -100,7 +90,6 @@ describe("Dexie usage-accounting cutover (v33) migration", () => {
     await seedV32(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const tableNames = db.tables.map((t) => t.name);
     db.close();
@@ -114,7 +103,6 @@ describe("Dexie usage-accounting cutover (v33) migration", () => {
     await seedV32(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const migrated = await migratedEvents(db);
     db.close();
@@ -152,7 +140,6 @@ describe("Dexie usage-accounting cutover (v33) migration", () => {
     older.close();
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const all = await db.table("usageEvents").toArray();
     db.close();
@@ -171,7 +158,6 @@ describe("Dexie usage-accounting cutover (v33) migration", () => {
     await seedV32(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const prior = await db.table("usageEvents").get(PRIOR_EVENT.id);
     db.close();
@@ -197,7 +183,6 @@ describe("Dexie usage-accounting cutover (v33) migration", () => {
     older.close();
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const migrated = await migratedEvents(db);
     db.close();
@@ -215,12 +200,12 @@ describe("Dexie usage-accounting cutover (v33) migration", () => {
   it("should not double-migrate when reopened at head", async () => {
     // Arrange
     await seedV32(name);
-    const first = new KaiordDatabase(name);
+    const first = db;
     await first.open();
     first.close();
 
     // Act
-    const second = new KaiordDatabase(name);
+    const second = db;
     await second.open();
     const migrated = await migratedEvents(second);
     second.close();

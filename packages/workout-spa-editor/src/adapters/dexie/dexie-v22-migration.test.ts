@@ -7,12 +7,9 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v22-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_SEED = 19;
 const SCHEMA_HEAD = 37;
@@ -58,22 +55,14 @@ const PROVIDER_OTHER = {
 };
 
 describe("Dexie aiModelBindings (v22) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v22");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name, { profiles: [PROFILE], aiProviders: [PROVIDER_DEFAULT] });
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -90,7 +79,6 @@ describe("Dexie aiModelBindings (v22) migration", () => {
     });
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const binding = await db.table("aiModelBindings").get(["p-1", "default"]);
     db.close();
@@ -109,7 +97,6 @@ describe("Dexie aiModelBindings (v22) migration", () => {
     await seed(name, { profiles: [PROFILE], aiProviders: [] });
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const count = await db.table("aiModelBindings").count();
     db.close();

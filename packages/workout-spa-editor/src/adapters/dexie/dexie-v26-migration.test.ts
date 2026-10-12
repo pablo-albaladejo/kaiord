@@ -7,12 +7,10 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v26-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 
 const SCHEMA_SEED = 19;
 const SCHEMA_HEAD = 37;
@@ -37,22 +35,14 @@ const indexKeyPaths = (db: KaiordDatabase, store: string): string[] =>
     );
 
 describe("Dexie energy-balance (v26) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v26");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -66,7 +56,6 @@ describe("Dexie energy-balance (v26) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const counts = {
       intakeEntries: await db.table("intakeEntries").count(),
@@ -93,7 +82,6 @@ describe("Dexie energy-balance (v26) migration", () => {
       await seed(name);
 
       // Act
-      const db = new KaiordDatabase(name);
       await db.open();
       const schema = db.table(store).schema;
       const indexes = indexKeyPaths(db, store);
@@ -110,7 +98,6 @@ describe("Dexie energy-balance (v26) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const schema = db.table("energyTargets").schema;
     db.close();
@@ -122,7 +109,6 @@ describe("Dexie energy-balance (v26) migration", () => {
   it("should persist an intake entry retrievable by the [profileId+date] index", async () => {
     // Arrange
     await seed(name);
-    const db = new KaiordDatabase(name);
     await db.open();
     await db.table("intakeEntries").add({
       id: "i-1",

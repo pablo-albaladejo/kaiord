@@ -5,15 +5,11 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
 import { createDexieChatMessageRepository } from "./dexie-chat-message-repository";
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-chat-repo-${suffix}-${Date.now()}-${Math.random()}`;
 
 const PROFILE_A = "p-A";
 const PROFILE_B = "p-B";
@@ -33,18 +29,10 @@ const seed = (
 });
 
 describe("createDexieChatMessageRepository", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("chat-messages");
 
   beforeEach(async () => {
-    name = dbName("apply");
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should round-trip append and list in chronological order", async () => {

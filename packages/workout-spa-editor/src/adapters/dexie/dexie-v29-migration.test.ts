@@ -8,12 +8,10 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v29-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 
 const SCHEMA_SEED = 28;
 const SCHEMA_HEAD = 37;
@@ -103,22 +101,14 @@ const workoutExport = (db: KaiordDatabase, p: string) =>
   route(db, p, "workout", "export", "garmin-bridge");
 
 describe("Dexie fail-open seeding (v29) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v29");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -132,7 +122,6 @@ describe("Dexie fail-open seeding (v29) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const routes = await plannedImport(db, "p-t2g");
     db.close();
@@ -151,7 +140,6 @@ describe("Dexie fail-open seeding (v29) migration", () => {
       await seed(name);
 
       // Act
-      const db = new KaiordDatabase(name);
       await db.open();
       const routes = await workoutExport(db, profileId);
       db.close();
@@ -167,7 +155,6 @@ describe("Dexie fail-open seeding (v29) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const planned = await plannedImport(db, "p-both");
     const exported = await workoutExport(db, "p-both");
@@ -183,7 +170,6 @@ describe("Dexie fail-open seeding (v29) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const none = await db
       .table("integrationPolicies")
@@ -201,12 +187,11 @@ describe("Dexie fail-open seeding (v29) migration", () => {
   it("should be a no-op on a second open (idempotent)", async () => {
     // Arrange
     await seed(name);
-    const first = new KaiordDatabase(name);
+    const first = db;
     await first.open();
     first.close();
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const planned = await plannedImport(db, "p-both");
     const exported = await workoutExport(db, "p-both");
