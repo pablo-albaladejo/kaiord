@@ -11,7 +11,10 @@
  */
 
 import fs from "fs";
+import os from "os";
+import path from "path";
 import { execSync } from "child_process";
+import { readVitestReport, summarizeTestResults } from "./test-results.mjs";
 
 const output = process.env.METRICS_OUTPUT || "current";
 
@@ -55,40 +58,18 @@ function collectTestResults() {
     "mcp",
   ];
   const results = {};
-  let totalPassed = 0;
-  let totalFailed = 0;
-  let totalSkipped = 0;
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kaiord-vitest-"));
 
   for (const pkg of packages) {
-    const result = run(
-      `pnpm --filter @kaiord/${pkg} exec vitest --run --reporter=json 2>&1`
+    // Vitest 5 writes the JSON report to a file instead of stdout.
+    const file = path.join(dir, `${pkg}.json`);
+    run(
+      `pnpm --filter @kaiord/${pkg} exec vitest --run --reporter=json --outputFile=${file} 2>&1`
     );
-    try {
-      const lines = result.split("\n");
-      const jsonLine = lines.find((l) => l.trim().startsWith("{"));
-      if (jsonLine) {
-        const data = JSON.parse(jsonLine);
-        const passed = data.numPassedTests || 0;
-        const failed = data.numFailedTests || 0;
-        const skipped = data.numPendingTests || 0;
-        results[pkg] = { passed, failed, skipped };
-        totalPassed += passed;
-        totalFailed += failed;
-        totalSkipped += skipped;
-      }
-    } catch {
-      results[pkg] = { passed: 0, failed: 0, skipped: 0, error: true };
-    }
+    results[pkg] = readVitestReport(file);
   }
 
-  const total = totalPassed + totalFailed;
-  const passRate = total > 0 ? (totalPassed / total) * 100 : 0;
-
-  return {
-    packages: results,
-    total: { passed: totalPassed, failed: totalFailed, skipped: totalSkipped },
-    passRate: Math.round(passRate * 100) / 100,
-  };
+  return summarizeTestResults(results);
 }
 
 function parseCoverageFile(covPath) {
