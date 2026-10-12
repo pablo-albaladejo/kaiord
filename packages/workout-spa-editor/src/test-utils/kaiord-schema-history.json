@@ -1,0 +1,275 @@
+{
+  "about": [
+    "Frozen history of every Dexie version KaiordDatabase has ever declared (v1..v37), as of the schema-pruning change.",
+    "Each entry holds only the stores that version changed (Dexie merges stores() declarations table by table, so this is equivalent to the full declaration) and whether it carried an upgrade function.",
+    "Never edit an existing entry. Append one entry per new version. Tests in src/adapters/dexie/kaiord-schema-history*.test.ts read it."
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "upgrade": false,
+      "stores": {
+        "workouts": "id, date, [date+state], [source+sourceId], sport, *tags",
+        "templates": "id, sport, *tags",
+        "profiles": "id",
+        "aiProviders": "id",
+        "syncState": "source",
+        "usage": "yearMonth",
+        "meta": "key"
+      }
+    },
+    {
+      "version": 2,
+      "upgrade": false,
+      "stores": {
+        "bridges": "extensionId, status, lastSeen"
+      }
+    },
+    {
+      "version": 3,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 4,
+      "upgrade": true,
+      "stores": {
+        "coachingActivities": "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
+        "coachingSyncState": "[source+profileId], source, profileId"
+      }
+    },
+    {
+      "version": 5,
+      "upgrade": false,
+      "stores": {
+        "sessionMatches": "id, [profileId+coachingActivityId], [profileId+workoutId], [profileId+date], coachingActivityId, workoutId, profileId",
+        "userPreferences": "profileId",
+        "autoMatchDismissals": "[profileId+weekStart], profileId"
+      }
+    },
+    {
+      "version": 6,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 7,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 8,
+      "upgrade": true,
+      "stores": {
+        "aiProviders": "id, createdAt"
+      }
+    },
+    {
+      "version": 9,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 10,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 11,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 12,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 13,
+      "upgrade": true,
+      "stores": {
+        "workouts": "id, profileId, [profileId+date], date, [date+state], [source+sourceId], sport, *tags"
+      }
+    },
+    {
+      "version": 14,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 15,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 16,
+      "upgrade": false,
+      "stores": {
+        "healthSleep": "id, profileId, [profileId+date], date",
+        "healthWeight": "id, profileId, [profileId+date], date",
+        "healthHrv": "id, profileId, [profileId+date], date",
+        "healthDaily": "id, profileId, [profileId+date], date",
+        "healthBodyComposition": "id, profileId, [profileId+date], date",
+        "healthStress": "id, profileId, [profileId+date], date"
+      }
+    },
+    {
+      "version": 17,
+      "upgrade": true,
+      "stores": {
+        "healthSleep": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]",
+        "healthWeight": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]",
+        "healthHrv": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]",
+        "healthDaily": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]",
+        "healthBodyComposition": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]",
+        "healthStress": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]",
+        "integrationPolicies": "id, [profileId+dataType+direction], &[profileId+dataType+direction+bridgeId], profileId",
+        "exportLedger": "id, &[kaiordRecordId+destinationBridgeId], kaiordRecordId, destinationBridgeId"
+      }
+    },
+    {
+      "version": 18,
+      "upgrade": false,
+      "stores": {
+        "exportLedger": "id, &[kaiordRecordId+destinationBridgeId], kaiordRecordId, destinationBridgeId, dataType"
+      }
+    },
+    {
+      "version": 19,
+      "upgrade": false,
+      "stores": {
+        "tombstones": "[table+id], table, deletedAt"
+      }
+    },
+    {
+      "version": 20,
+      "upgrade": false,
+      "stores": {
+        "coachingDayNotes": "id, [profileId+date]"
+      }
+    },
+    {
+      "version": 21,
+      "upgrade": false,
+      "stores": {
+        "chatMessages": "id, profileId, [profileId+createdAt]"
+      }
+    },
+    {
+      "version": 22,
+      "upgrade": true,
+      "stores": {
+        "aiModelBindings": "[profileId+purpose], profileId"
+      }
+    },
+    {
+      "version": 23,
+      "upgrade": false,
+      "stores": {
+        "workouts": "id, profileId, [profileId+date], date, [date+state], [source+sourceId], sport, *tags, updatedAt",
+        "templates": "id, sport, *tags, updatedAt",
+        "profiles": "id, updatedAt"
+      }
+    },
+    {
+      "version": 24,
+      "upgrade": false,
+      "stores": {
+        "connections": "[profileId+providerId], profileId"
+      }
+    },
+    {
+      "version": 25,
+      "upgrade": true,
+      "stores": {
+        "chatMessages": "id, profileId, conversationId, [profileId+createdAt], [profileId+conversationId+createdAt]",
+        "chatConversations": "id, profileId, [profileId+updatedAt]"
+      }
+    },
+    {
+      "version": 26,
+      "upgrade": false,
+      "stores": {
+        "intakeEntries": "id, [profileId+date]",
+        "intakePresets": "id, profileId",
+        "energyTargets": "profileId"
+      }
+    },
+    {
+      "version": 27,
+      "upgrade": true,
+      "stores": {
+        "plannedSessions": "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
+        "activities": "id, [profileId+date], [profileId+sourceBridgeId+externalId]"
+      }
+    },
+    {
+      "version": 28,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 29,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 30,
+      "upgrade": false,
+      "stores": {
+        "dataTypeSourcePolicy": "[profileId+dataType], profileId"
+      }
+    },
+    {
+      "version": 31,
+      "upgrade": false,
+      "stores": {
+        "labReports": "id, [profileId+date]",
+        "labValues": "id, [profileId+parameterKey+date], [profileId+reportId]"
+      }
+    },
+    {
+      "version": 32,
+      "upgrade": false,
+      "stores": {
+        "usageEvents": "id, [yearMonth+purpose]"
+      }
+    },
+    {
+      "version": 33,
+      "upgrade": true,
+      "stores": {
+        "usage": null
+      }
+    },
+    {
+      "version": 34,
+      "upgrade": false,
+      "stores": {
+        "healthStrain": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]",
+        "healthVitals": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]"
+      }
+    },
+    {
+      "version": 35,
+      "upgrade": false,
+      "stores": {
+        "healthHeartRateSeries": "id, profileId, [profileId+date], date, sourceBridgeId, externalId, [profileId+sourceBridgeId+externalId]"
+      }
+    },
+    {
+      "version": 36,
+      "upgrade": true,
+      "stores": {}
+    },
+    {
+      "version": 37,
+      "upgrade": true,
+      "stores": {
+        "intakeEntries": "id, [profileId+date], updatedAt",
+        "intakePresets": "id, profileId, updatedAt",
+        "energyTargets": "profileId, updatedAt"
+      }
+    }
+  ]
+}

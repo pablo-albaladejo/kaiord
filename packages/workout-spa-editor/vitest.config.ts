@@ -58,6 +58,7 @@ export default defineConfig({
         "**/__tests__/**",
         "**/*.test.ts",
         "**/*.test.tsx",
+        "**/*.bench.ts",
         "**/test-setup.ts",
         "**/types/**",
         "**/*.d.ts",

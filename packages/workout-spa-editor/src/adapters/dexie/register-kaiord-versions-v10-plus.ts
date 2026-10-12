@@ -38,7 +38,7 @@ export const registerV10ToV12 = (db: DexieVersionHost): void => {
   db.version(12).stores(SCHEMAS.v8).upgrade(applyV12Upgrade);
 };
 
-export const registerV13ToV16 = (db: DexieVersionHost): void => {
+export const registerV13ToV15 = (db: DexieVersionHost): void => {
   // v13 — workouts become profile-scoped 1–1. Adds `profileId` +
   // `[profileId+date]` indexes on `workouts` and backfills every legacy
   // row from `meta.activeProfileId`. The upgrade throws when workouts
@@ -54,11 +54,9 @@ export const registerV13ToV16 = (db: DexieVersionHost): void => {
   // editor can pre-populate the scratch sport picker and persist the
   // AI banner accordion state across sessions. Schema unchanged.
   db.version(15).stores(SCHEMAS.v13).upgrade(applyV15Upgrade);
-  // v16 — KRD v2.0 health-domain stores: sleep, weight, hrv, daily,
-  // body composition, stress. Purely additive — Dexie auto-creates the
-  // new stores empty on upgrade so no data migration is needed.
-  db.version(16).stores(SCHEMAS.v16);
 };
+// v16 — KRD v2.0 health-domain stores. Schema only: pruned, restated by
+// v17's SCHEMAS.v17.
 
 export const registerV17 = (db: DexieVersionHost): void => {
   // v17 — integrationPolicies + exportLedger stores; health stores gain
@@ -70,31 +68,9 @@ export const registerV17 = (db: DexieVersionHost): void => {
   db.version(17).stores(SCHEMAS.v17).upgrade(applyV17Upgrade);
 };
 
-export const registerV18 = (db: DexieVersionHost): void => {
-  // v18 — add dataType index to exportLedger for countByDataType analytics.
-  db.version(18).stores(SCHEMAS.v18);
-};
-
-export const registerV19 = (db: DexieVersionHost): void => {
-  // v19 — additive `tombstones` table for cross-device delete
-  // propagation. Dexie auto-creates the new store empty on upgrade, so
-  // no data migration is needed and existing tables are untouched.
-  db.version(19).stores(SCHEMAS.v19);
-};
-
-export const registerV20 = (db: DexieVersionHost): void => {
-  // v20 — additive `coachingDayNotes` table for Train2Go day comment
-  // threads. Dexie auto-creates the store empty on upgrade; no data
-  // migration, existing tables untouched.
-  db.version(20).stores(SCHEMAS.v20);
-};
-
-export const registerV21 = (db: DexieVersionHost): void => {
-  // v21 — additive `chatMessages` store for the AI chat transcript.
-  // Dexie auto-creates the new store empty on upgrade, so no data
-  // migration is needed and existing tables are untouched.
-  db.version(21).stores(SCHEMAS.v21);
-};
+// v18 (exportLedger `dataType` index), v19 (`tombstones`), v20
+// (`coachingDayNotes`) and v21 (`chatMessages`) are schema-only: pruned,
+// restated by v22's SCHEMAS.v22.
 
 export const registerV22 = (db: DexieVersionHost): void => {
   // v22 — additive `aiModelBindings` store + default-binding backfill from the
@@ -103,28 +79,17 @@ export const registerV22 = (db: DexieVersionHost): void => {
   db.version(22).stores(SCHEMAS.v22).upgrade(applyV22Upgrade);
 };
 
-export const registerV23 = (db: DexieVersionHost): void => {
-  // v23 — index `updatedAt` on workouts/templates/profiles so the auto-push
-  // change token reads max(updatedAt) via an index (#725). Index-only: Dexie
-  // rebuilds the indexes on upgrade, no data migration, tables untouched.
-  db.version(23).stores(SCHEMAS.v23);
-};
-
-export const registerV24 = (db: DexieVersionHost): void => {
-  // v24 — additive `connections` store for Athlete account linkage (#714).
-  // Dexie auto-creates the store empty on upgrade; no data migration, existing
-  // tables untouched.
-  db.version(24).stores(SCHEMAS.v24);
-};
+// v23 (`updatedAt` indexes on workouts/templates/profiles, #725) and v24
+// (`connections`, #714) are schema-only: pruned, restated by v25's
+// SCHEMAS.v25.
 
 export const registerV25 = (db: DexieVersionHost): void => {
   // v25 — multi-conversation chat: additive `chatConversations` store +
   // `conversationId` on `chatMessages`. The upgrade buckets prior messages
   // into one seeded "Conversation 1" per profile and backfills the FK.
   db.version(25).stores(SCHEMAS.v25).upgrade(applyV25Upgrade);
-  // v26 — additive energy-balance stores (`intakeEntries`, `intakePresets`,
-  // `energyTargets`; device-local until v37); auto-created empty, no upgrade.
-  db.version(26).stores(SCHEMAS.v26);
+  // v26 — additive energy-balance stores. Schema only: pruned, restated by
+  // v27's SCHEMAS.v27.
 };
 
 export const registerV27 = (db: DexieVersionHost): void => {
@@ -149,39 +114,21 @@ export const registerV29 = (db: DexieVersionHost): void => {
   // export) so a working profile survives the governance gates.
   // Idempotent superset of v28 — see dexie-v29-migration.
   db.version(29).stores(SCHEMAS.v27).upgrade(applyV29Upgrade);
-  // v30 — additive `dataTypeSourcePolicy` companion table. Dexie auto-creates
-  // the store empty on upgrade; no data migration, no rows to seed (absent
-  // row means the implicit "union" default). Folded into this function
-  // rather than a standalone registerV30.
-  db.version(30).stores(SCHEMAS.v30);
-  // v31 — additive lab-analytics stores (`labReports`, `labValues`) for the
-  // health-labs feature. Auto-created empty on upgrade; existing tables
-  // untouched. Their profileId-leading indexes make `isPerProfileTable`
-  // auto-discover them for the profile-delete cascade. Folded here (as v30).
-  db.version(31).stores(SCHEMAS.v31);
-  // v32 — additive `usageEvents` telemetry log (redaction-safe per-run usage).
-  // Auto-created empty on upgrade; existing tables untouched. No profileId, so
-  // it is not a profile-delete cascade target (mirrors `usage`). Folded here.
-  db.version(32).stores(SCHEMAS.v32);
+  // v30 (`dataTypeSourcePolicy`), v31 (`labReports`, `labValues`) and v32
+  // (`usageEvents`) are schema-only: pruned, restated by v33's SCHEMAS.v33.
   // v33 — usage-accounting cutover. `applyV33Upgrade` folds each `usage` row's
   // `entries[]` into `usageEvents` (chat events, cost carried), then the v33
   // schema drops the store (`usage: null`). The fold runs before the drop within
   // the same upgrade (Dexie keeps the deleted table readable in the callback).
   db.version(33).stores(SCHEMAS.v33).upgrade(applyV33Upgrade);
-  // v34 — additive health stores healthStrain + healthVitals (WHOOP wave 2).
-  // Auto-created empty; profileId-leading indexes make isPerProfileTable
-  // auto-discover them for the profile-delete cascade.
-  db.version(34).stores(SCHEMAS.v34);
-  // v35 — additive healthHeartRateSeries store, WHOOP wave 3a. Auto-created
-  // empty; profileId-leading indexes make isPerProfileTable auto-discover it
-  // for the profile-delete cascade.
-  db.version(35).stores(SCHEMAS.v35);
+  // v34 (`healthStrain`, `healthVitals`) and v35 (`healthHeartRateSeries`)
+  // are schema-only: pruned, restated by v36's SCHEMAS.v35.
   // v36 — Garmin calendar placement. Schema unchanged from v35 (the new
   // ledger fields are unindexed); data-side upgrade only: Garmin workout
   // ledger rows gain their explicit `library` state (normalizeGarminLedgerRow).
-  // Folded here (as v30).
   db.version(36).stores(SCHEMAS.v35).upgrade(applyV36Upgrade);
   // v37 — nutrition joins the snapshot: `updatedAt` indexes on its stores and
-  // a backfill of the intake clock (dexie-v37-migration). Folded here (v30).
+  // a backfill of the intake clock (dexie-v37-migration). V37_STORES is a
+  // delta: Dexie carries every other store over from v36, which is kept.
   db.version(37).stores(V37_STORES).upgrade(applyV37Upgrade);
 };

@@ -1,10 +1,21 @@
 /**
  * Kaiord Dexie Version Registration
  *
- * Wires every schema version + upgrade onto a Dexie instance. Extracted
+ * Wires the schema versions + upgrades onto a Dexie instance. Extracted
  * from `KaiordDatabase` so the constructor stays under the per-function
  * line cap. v10+ registrations live in `register-kaiord-versions-v10-plus.ts`
  * so this file stays under the per-file line cap as history grows.
+ *
+ * Pruned history: only versions with an upgrade function, plus the head, are
+ * declared. Dexie >= 3 diffs from the INSTALLED schema to each declared
+ * version above the user's one (dexie.mjs `updateTablesAndIndexes`), so a
+ * user on a schema-only version that is no longer declared (1, 2, 5, 16,
+ * 18–21, 23, 24, 26, 30–32, 34, 35) goes straight to the next kept version,
+ * whose declaration restates every store in full. Dexie re-parses every
+ * earlier version on each `stores()` call, so each declaration costs startup
+ * time. Rules: never remove or edit a version with an upgrade function; a
+ * schema-only version may be pruned once a later kept version restates it.
+ * `kaiord-schema-history*.test.ts` enforces both against a frozen history.
  */
 
 import type Dexie from "dexie";
@@ -19,15 +30,9 @@ import {
 import { SCHEMAS } from "./dexie-schemas";
 import {
   registerV10ToV12,
-  registerV13ToV16,
+  registerV13ToV15,
   registerV17,
-  registerV18,
-  registerV19,
-  registerV20,
-  registerV21,
   registerV22,
-  registerV23,
-  registerV24,
   registerV25,
   registerV27,
   registerV28,
@@ -40,9 +45,9 @@ import {
 // `KaiordDatabase`/`Dexie` instance.
 type DexieVersionHost = Pick<Dexie, "version">;
 
-const registerV1ToV3 = (db: DexieVersionHost): void => {
-  db.version(1).stores(SCHEMAS.v1);
-  db.version(2).stores(SCHEMAS.v2);
+const registerV3 = (db: DexieVersionHost): void => {
+  // v1 (base stores) and v2 (`bridges`) are schema-only: pruned, restated
+  // by v3's SCHEMAS.v2.
   db.version(3)
     .stores(SCHEMAS.v2)
     .upgrade(async (tx) => {
@@ -58,8 +63,8 @@ const registerV4ToV6 = (db: DexieVersionHost): void => {
     .upgrade(async (tx) => {
       await tx.table("profiles").toCollection().modify(backfillLinkedAccounts);
     });
-  // v5 — session-match + user-preferences + auto-match-dismissals.
-  db.version(5).stores(SCHEMAS.v5);
+  // v5 — session-match + user-preferences + auto-match-dismissals. Schema
+  // only: pruned, restated by v6's SCHEMAS.v5.
   // v6 — bridge profile-snapshot push: backfills snapshot-pusher state.
   db.version(6)
     .stores(SCHEMAS.v5)
@@ -87,19 +92,13 @@ const registerV7ToV9 = (db: DexieVersionHost): void => {
 };
 
 export const registerKaiordVersions = (db: DexieVersionHost): void => {
-  registerV1ToV3(db);
+  registerV3(db);
   registerV4ToV6(db);
   registerV7ToV9(db);
   registerV10ToV12(db);
-  registerV13ToV16(db);
+  registerV13ToV15(db);
   registerV17(db);
-  registerV18(db);
-  registerV19(db);
-  registerV20(db);
-  registerV21(db);
   registerV22(db);
-  registerV23(db);
-  registerV24(db);
   registerV25(db);
   registerV27(db);
   registerV28(db);
