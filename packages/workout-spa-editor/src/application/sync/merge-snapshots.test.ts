@@ -331,3 +331,43 @@ describe("mergeSnapshots — composite-key tables without an id", () => {
     expect(keys).toEqual(["p-1/sleep", "p-1/weight", "p-2/sleep"]);
   });
 });
+
+describe("mergeSnapshots — tombstones on a non-id single-field key", () => {
+  const goal = (updatedAt: string) => ({ profileId: "p-1", updatedAt });
+  const cleared: Tombstone = {
+    table: "energyTargets",
+    id: "p-1",
+    deletedAt: "2026-05-15T00:00:00Z",
+  };
+
+  it("should suppress an energy goal older than its profile-id tombstone", () => {
+    // Arrange
+    const local = snap("2026-05-20T00:00:00Z", { energyTargets: [] }, [
+      cleared,
+    ]);
+    const remote = snap("2026-05-19T00:00:00Z", {
+      energyTargets: [goal("2026-05-10T00:00:00Z")],
+    });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    expect(rows("energyTargets", merged)).toEqual([]);
+  });
+
+  it("should keep an energy goal saved after its profile-id tombstone", () => {
+    // Arrange
+    const local = snap("2026-05-20T00:00:00Z", { energyTargets: [] }, [
+      cleared,
+    ]);
+    const resaved = goal("2026-05-16T00:00:00Z");
+    const remote = snap("2026-05-19T00:00:00Z", { energyTargets: [resaved] });
+
+    // Act
+    const merged = mergeSnapshots(local, remote);
+
+    // Assert
+    expect(rows("energyTargets", merged)).toEqual([resaved]);
+  });
+});

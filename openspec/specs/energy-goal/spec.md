@@ -14,7 +14,8 @@ The system SHALL let a user define an energy goal with a `goalType`
 (`fat_loss` | `muscle_gain` | `maintain`), a `startWeightKg`, a `targetWeightKg`,
 and a `targetDate`. The goal SHALL be persisted per profile and SHALL travel in
 the cloud snapshot; when two devices hold a goal for the same profile, the one
-with the newest `updatedAt` SHALL be kept.
+with the newest `updatedAt` SHALL be kept. Clearing a goal SHALL record a tombstone
+filed under its `profileId`, so another device's older copy does not restore it.
 
 #### Scenario: Defining a fat-loss goal
 

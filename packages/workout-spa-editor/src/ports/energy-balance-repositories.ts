@@ -3,8 +3,9 @@
  *
  * Nutrition intake entries, reusable intake presets, and the single active
  * deficit/surplus goal per profile. All three ride the cloud snapshot; an
- * entry or preset delete is tombstoned through `getById` + `delete` (see
- * `adapters/with-tombstones`). Each repository exposes a `deleteByProfile` so
+ * entry, preset or goal delete is tombstoned through `getById` + `delete`
+ * (see `adapters/with-tombstones`); the goal's tombstone id is its
+ * `profileId` primary key. Each repository exposes a `deleteByProfile` so
  * the profile-delete cascade can clear it (all three are per-profile tables).
  */
 
@@ -37,7 +38,14 @@ export type IntakePresetRepository = {
 
 export type EnergyTargetRepository = {
   get: (profileId: string) => Promise<EnergyTargetRecord | undefined>;
+  /** Same lookup as `get`: the tombstone decorator's existence probe. */
+  getById: (profileId: string) => Promise<EnergyTargetRecord | undefined>;
   put: (record: EnergyTargetRecord) => Promise<void>;
+  /**
+   * Clear the profile's goal. Tombstoned as `[energyTargets+profileId]` by
+   * `withTombstones`, so the clear holds against another device's copy.
+   */
+  delete: (profileId: string) => Promise<void>;
   /** Profile-delete cascade: remove the goal for the profile. */
   deleteByProfile: (profileId: string) => Promise<void>;
 };

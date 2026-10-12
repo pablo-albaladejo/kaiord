@@ -230,4 +230,23 @@ describe("nutrition sync between two devices", () => {
     // Assert
     expect(await a.persistence.intakeEntries.getById("i-1")).toEqual(edited);
   });
+
+  it("should keep an intake deleted while a sync is between its export and its import deleted", async () => {
+    // Arrange
+    const { cloud, a, profileId } = await twoDevices();
+    await a.persistence.intakeEntries.put(
+      entry(profileId, 500, "2026-10-10T08:00:00.000Z")
+    );
+    await sync(cloud, a, "dev-a");
+    const racing = writeBeforeImport(a.snapshotPort, () =>
+      a.persistence.intakeEntries.delete("i-1")
+    );
+
+    // Act
+    await syncWithCloud({ cloud, snapshotPort: racing, deviceId: "dev-a" });
+
+    // Assert
+    expect(await a.persistence.intakeEntries.getById("i-1")).toBeUndefined();
+    expect(cloud.state.snapshot?.tables.intakeEntries ?? []).toEqual([]);
+  });
 });

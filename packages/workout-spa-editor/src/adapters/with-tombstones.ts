@@ -19,7 +19,13 @@
  *    hooks), the nutrition stores' included. The profile row IS tombstoned
  *    (via `profiles`), and the sync and the backup drop every per-profile
  *    row of a tombstoned profile (`dropDeletedProfileRows`), so a profile
- *    delete needs one tombstone, not a per-row tombstone storm.
+ *    delete needs one tombstone, not a per-row tombstone storm. Per-row
+ *    tombstones would also cover less: a device that never saw the delete
+ *    can edit or add a row of that profile later, and that row's clock
+ *    beats any per-row tombstone, while the drop goes by `profileId`.
+ *
+ * A tombstone's id is the row's single-field primary key: `id`, or
+ * `profileId` for `energyTargets` (one goal per profile).
  */
 
 import type { PersistencePort } from "../ports/persistence-port";
@@ -42,6 +48,8 @@ export const TOMBSTONED_TABLES = {
   usageEvents: "usageEvents",
   intakeEntries: "intakeEntries",
   intakePresets: "intakePresets",
+  // Keyed by `profileId`: the tombstone id is the goal's profile id.
+  energyTargets: "energyTargets",
 } as const;
 
 type TombstonedRepoKey = keyof typeof TOMBSTONED_TABLES;

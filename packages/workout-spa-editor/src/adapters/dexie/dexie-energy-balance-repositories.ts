@@ -5,14 +5,13 @@
  */
 import type {
   EnergyBalanceRepositories,
-  EnergyTargetRepository,
   IntakeEntryRepository,
   IntakePresetRepository,
 } from "../../ports/energy-balance-repositories";
-import type { EnergyTargetRecord } from "../../types/energy-target-record";
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import type { IntakePresetRecord } from "../../types/intake-preset-record";
 import type { KaiordDatabase } from "./dexie-database";
+import { createEnergyTargetRepository } from "./dexie-energy-target-repository";
 
 // Every date of one profile on the `[profileId+date]` index.
 const entriesOfProfile = (db: KaiordDatabase, profileId: string) =>
@@ -72,22 +71,6 @@ const createIntakePresetRepository = (
 
   deleteByProfile: async (profileId) => {
     await presetsOfProfile(db, profileId).delete();
-  },
-});
-
-const createEnergyTargetRepository = (
-  db: KaiordDatabase
-): EnergyTargetRepository => ({
-  get: async (profileId) =>
-    (await db.table("energyTargets").get(profileId)) as
-      EnergyTargetRecord | undefined,
-
-  put: async (record) => {
-    await db.table("energyTargets").put(record);
-  },
-
-  deleteByProfile: async (profileId) => {
-    await db.table("energyTargets").delete(profileId);
   },
 });
 
