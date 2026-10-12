@@ -14,6 +14,7 @@ import { useContext, useEffect, useState } from "react";
 
 import { FocusRegistryContext } from "../../contexts/focus-registry-context";
 import { asItemId } from "../../store/providers/item-id";
+import { prefersReducedMotion } from "../focus/apply-focus-to-element";
 
 export function useElementHighlight(
   open: boolean,
@@ -32,7 +33,10 @@ export function useElementHighlight(
     const element = registry.getItem(asItemId(itemId)) ?? null;
     setHighlightedElement(element);
     if (element && typeof element.scrollIntoView === "function") {
-      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      element.scrollIntoView({
+        behavior: prefersReducedMotion() ? "auto" : "smooth",
+        block: "center",
+      });
     }
 
     return () => {

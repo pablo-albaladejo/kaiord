@@ -85,6 +85,31 @@ describe("useElementHighlight", () => {
     });
   });
 
+  it("should scroll without animation when reduced motion is requested", () => {
+    // Arrange
+    const element = document.createElement("div");
+    const scrollIntoView = vi.fn();
+    element.scrollIntoView = scrollIntoView;
+    const matchMedia = vi.fn().mockReturnValue({ matches: true });
+    vi.stubGlobal("matchMedia", matchMedia);
+    window.matchMedia = matchMedia;
+
+    // Act
+    renderProbe({
+      open: true,
+      itemId: "step-1",
+      registerAs: "step-1",
+      element,
+    });
+
+    // Assert
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      behavior: "auto",
+      block: "center",
+    });
+    vi.unstubAllGlobals();
+  });
+
   it("should resolve to null for an id nothing registered", () => {
     // Arrange
     const element = document.createElement("div");
