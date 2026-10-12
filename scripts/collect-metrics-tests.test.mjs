@@ -46,6 +46,17 @@ test("readVitestReport flags unparseable output as an error", () => {
   assert.equal(readVitestReport(file).error, true);
 });
 
+test("readVitestReport rejects valid JSON without count fields", () => {
+  assert.equal(readVitestReport(tmpReport("{}")).error, true);
+});
+
+test("readVitestReport counts failed suites when no test failed", () => {
+  const file = tmpReport(
+    JSON.stringify({ ...report(5, 0), numFailedTestSuites: 1 })
+  );
+  assert.equal(readVitestReport(file).failed, 1);
+});
+
 test("summarizeTestResults computes the real pass rate", () => {
   const s = summarizeTestResults({
     core: { passed: 90, failed: 0, skipped: 0 },
@@ -60,6 +71,17 @@ test("summarizeTestResults reflects failures", () => {
     core: { passed: 3, failed: 1, skipped: 0 },
   });
   assert.equal(s.passRate, 75);
+});
+
+test("summarizeTestResults throws if any package has no report", () => {
+  assert.throws(
+    () =>
+      summarizeTestResults({
+        core: { passed: 10, failed: 0, skipped: 0 },
+        zwo: { passed: 0, failed: 0, skipped: 0, error: true },
+      }),
+    /zwo/
+  );
 });
 
 test("summarizeTestResults throws when no package produced a report", () => {

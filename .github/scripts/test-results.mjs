@@ -8,19 +8,35 @@ import fs from "fs";
  * report is an error, never "zero tests".
  */
 export function readVitestReport(file) {
+  const error = { passed: 0, failed: 0, skipped: 0, error: true };
   try {
     const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    const counts = [
+      data.numPassedTests,
+      data.numFailedTests,
+      data.numPendingTests,
+    ];
+    if (!counts.every((n) => Number.isInteger(n) && n >= 0)) return error;
+    // A suite that fails before running its tests has no failed tests.
+    const suiteFailures = data.numFailedTestSuites || 0;
     return {
-      passed: data.numPassedTests || 0,
-      failed: data.numFailedTests || 0,
-      skipped: data.numPendingTests || 0,
+      passed: data.numPassedTests,
+      failed: data.numFailedTests || suiteFailures,
+      skipped: data.numPendingTests,
     };
   } catch {
-    return { passed: 0, failed: 0, skipped: 0, error: true };
+    return error;
   }
 }
 
 export function summarizeTestResults(results) {
+  const broken = Object.keys(results).filter((k) => results[k].error);
+  if (broken.length > 0) {
+    throw new Error(
+      `No test results for: ${broken.join(", ")}; refusing to report a pass rate`
+    );
+  }
+
   let passed = 0;
   let failed = 0;
   let skipped = 0;
