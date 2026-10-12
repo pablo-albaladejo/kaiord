@@ -28,6 +28,11 @@ Nutrition sync left two delete paths unverified:
   device that never saw the delete, which per-row tombstones would not. The
   spec now says why, and corrects a stale chat scenario that still described
   the rows coming back as orphans.
+- A row deleted while a sync sits between its export read and its import
+  stays deleted: the import drops incoming rows a live tombstone deletes,
+  and the pushed snapshot carries that tombstone without the row.
+- The spec lists one more known gap: an older build keeps re-pushing a
+  cleared goal, which comes back once its tombstone is pruned.
 
 ## Impact
 
