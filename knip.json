@@ -71,6 +71,7 @@
       "project": ["src/**/*.{ts,tsx}"],
       "ignore": [
         "src/**/*.test.{ts,tsx}",
+        "src/**/*.bench.ts",
         "src/**/*.stories.tsx",
         "src/test-utils/**",
         "src/test-setup.ts"
