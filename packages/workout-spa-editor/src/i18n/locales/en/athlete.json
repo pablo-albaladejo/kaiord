@@ -57,6 +57,8 @@
     "create": "Create Profile",
     "import": "Import Profile",
     "importFile": "Import profile file",
+    "importFailed": "Import failed: {{message}}",
+    "importInvalid": "Invalid profile file",
     "saved": "Saved Profiles ({{count}})",
     "empty": "No profiles yet. Create one to get started.",
     "setActive": "Set Active",
