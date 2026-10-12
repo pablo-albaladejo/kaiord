@@ -45,5 +45,5 @@ export async function importReconciledSnapshot({
     if (deviceLocalRekey)
       await port.updateDeviceLocal(rekeyDeviceLocal(deviceLocalRekey));
   });
-  return suppressLiveDeletes(snapshot, live);
+  return suppressLiveDeletes(snapshot, live, port.perProfileTables());
 }

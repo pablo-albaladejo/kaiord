@@ -11,8 +11,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createProfile } from "../../application/profile/create-profile";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
-import type { SnapshotPort } from "../../ports/snapshot-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { writeAfterExport } from "../../test-utils/write-after-export";
 import type { EnergyTargetRecord } from "../../types/energy-target-record";
 import { createAppPersistence } from "../create-app-persistence";
 import { KaiordDatabase } from "./dexie-database";
@@ -68,25 +68,6 @@ const goalOnBothDevices = async () => {
   const b = await open("b");
   await sync(cloud, b, "dev-b");
   return { cloud, a, b, profileId };
-};
-
-/** Runs `write` after the sync's export read, before its import transaction. */
-const writeBeforeImport = (
-  port: SnapshotPort,
-  write: () => Promise<void>
-): SnapshotPort => {
-  let pending: (() => Promise<void>) | null = write;
-  return {
-    ...port,
-    transaction: async (mode, scope) => {
-      if (mode === "rw" && pending) {
-        const run = pending;
-        pending = null;
-        await run();
-      }
-      return port.transaction(mode, scope);
-    },
-  };
 };
 
 afterEach(async () => {
@@ -146,7 +127,7 @@ describe("energy goal sync between two devices", () => {
   it("should keep a goal cleared while a sync is between its export and its import cleared", async () => {
     // Arrange
     const { cloud, a, profileId } = await goalOnBothDevices();
-    const racing = writeBeforeImport(a.snapshotPort, () =>
+    const racing = writeAfterExport(a.snapshotPort, () =>
       a.persistence.energyTargets.delete(profileId)
     );
 
@@ -156,5 +137,8 @@ describe("energy goal sync between two devices", () => {
     // Assert
     expect(await a.persistence.energyTargets.get(profileId)).toBeUndefined();
     expect(cloud.state.snapshot?.tables.energyTargets ?? []).toEqual([]);
+    expect(cloud.state.snapshot?.tombstones).toContainEqual(
+      expect.objectContaining({ table: "energyTargets", id: profileId })
+    );
   });
 });
