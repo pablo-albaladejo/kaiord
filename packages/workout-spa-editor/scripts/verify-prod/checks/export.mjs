@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 import { isoDate, mainText } from "../browser.mjs";
+import { workoutDownload } from "./export-download.mjs";
 import { INTAKE_KCAL, seed } from "./export-seed.mjs";
 
 // F-41: there is no way to export "all my data" from Settings → Privacy.
@@ -45,7 +46,7 @@ function assertFile(rec, body, workoutName) {
   );
 }
 
-export default async function exportData({ rec, open }) {
+async function exportData({ rec, open }) {
   const session = await open();
   const { page, go } = session;
   const control = await findDataControl(page, go, EXPORT_CONTROL);
@@ -68,4 +69,9 @@ export default async function exportData({ rec, open }) {
   ]);
   const body = await readFile(await download.path(), "utf8");
   assertFile(rec, body, workoutName);
+}
+
+export default async function exportCheck(ctx) {
+  await exportData(ctx);
+  await workoutDownload(ctx);
 }

@@ -63,12 +63,17 @@ export function mondayOf(d) {
 }
 
 // Dexie live queries render after the route's heading, so read until two
-// snapshots taken 400 ms apart agree.
-export async function settledText(page, read = () => document.body.innerText) {
-  let previous = await page.evaluate(read);
+// snapshots taken 400 ms apart agree. With a locator as `target`, `read`
+// receives its element.
+export async function settledText(
+  page,
+  read = () => document.body.innerText,
+  target = page
+) {
+  let previous = await target.evaluate(read);
   for (let i = 0; i < 20; i++) {
     await page.waitForTimeout(400);
-    const current = await page.evaluate(read);
+    const current = await target.evaluate(read);
     if (current === previous) return current;
     previous = current;
   }
