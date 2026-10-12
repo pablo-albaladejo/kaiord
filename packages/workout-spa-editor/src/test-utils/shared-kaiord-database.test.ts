@@ -1,9 +1,10 @@
 /**
  * Leak guard for `sharedKaiordDatabase`. Every case checks that it starts
- * from a database that does not exist yet and has empty tables, then dirties
- * every table and leaves the instance in a different state (open, closed,
- * never opened). Run in any order (`--sequence.shuffle`), whichever case runs
- * after another fails if a row, a connection or a closed state survived.
+ * from a database that does not exist yet. The "open" and "closed" cases also
+ * check that every table is empty, then dirty every table and leave the
+ * instance open or closed; the "unopened" case never touches the database.
+ * Run in any order (`--sequence.shuffle`), whichever case runs after another
+ * fails if a database, a row, a connection or a closed state survived.
  */
 import "fake-indexeddb/auto";
 
@@ -53,15 +54,16 @@ describe("sharedKaiordDatabase", () => {
       const existedBefore = await Dexie.exists(db.name);
 
       // Act
-      if (endState !== "unopened") await db.open();
-      const counts = await rowCounts(db);
-      await dirtyEveryTable(db);
+      const touched = endState !== "unopened";
+      const counts = touched ? await rowCounts(db) : {};
+      if (touched) await dirtyEveryTable(db);
       if (endState === "closed") db.close();
 
       // Assert
       expect(existedBefore).toBe(false);
       expect(db.tables.length).toBeGreaterThan(30);
       expect(Object.values(counts).every((n) => n === 0)).toBe(true);
+      expect(db.isOpen()).toBe(endState === "open");
     }
   );
 });
