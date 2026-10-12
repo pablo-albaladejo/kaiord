@@ -1,6 +1,7 @@
 import { isoDate, settledText } from "../browser.mjs";
 import { ensureProfile } from "../steps.mjs";
 import { openWellnessDialog } from "../wellness.mjs";
+import { goalDialog, profileManager } from "./i18n-dialogs.mjs";
 import { DESIGN_NOTES, findEnglish } from "./i18n-terms.mjs";
 
 const ROUTES = [
@@ -62,6 +63,8 @@ export default async function i18nScan({ rec, open }) {
     await scan(rec, page, `#/${route}`, designHits);
   }
   await wellnessDialog(rec, session, designHits);
+  await profileManager(rec, session);
+  await goalDialog(rec, session);
   rec.assert(
     designHits.size === 0,
     "F-26: no internal design notes in the UI",
