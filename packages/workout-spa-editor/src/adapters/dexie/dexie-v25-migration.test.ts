@@ -8,13 +8,10 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { seededConversationId } from "./dexie-v25-migration";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v25-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_SEED = 23;
 const SCHEMA_HEAD = 37;
@@ -45,22 +42,14 @@ const seed = async (name: string, messages: ReadonlyArray<Row>) => {
 };
 
 describe("Dexie chatConversations (v25) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v25");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name, []);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -78,7 +67,6 @@ describe("Dexie chatConversations (v25) migration", () => {
     ]);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const conversations = await db.table("chatConversations").toArray();
     const messages = await db.table("chatMessages").toArray();
@@ -112,7 +100,6 @@ describe("Dexie chatConversations (v25) migration", () => {
     await seed(name, seeded);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const count = await db.table("chatMessages").count();
     db.close();
@@ -126,7 +113,6 @@ describe("Dexie chatConversations (v25) migration", () => {
     await seed(name, [msg("a", "p-1", "2026-06-10T10:00:00.000Z")]);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const conversations = await db.table("chatConversations").toArray();
     db.close();

@@ -5,15 +5,11 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ChatConversationRecord } from "../../types/chat/chat-conversation-record";
 import { createDexieChatConversationRepository } from "./dexie-chat-conversation-repository";
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-conv-repo-${suffix}-${Date.now()}-${Math.random()}`;
 
 const PROFILE_A = "p-A";
 
@@ -30,18 +26,10 @@ const conv = (
 });
 
 describe("createDexieChatConversationRepository", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("chat-conversations");
 
   beforeEach(async () => {
-    name = dbName("apply");
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should list a profile's conversations most-recently-updated first", async () => {

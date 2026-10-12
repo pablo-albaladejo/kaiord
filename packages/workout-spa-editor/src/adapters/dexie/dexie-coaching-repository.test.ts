@@ -1,13 +1,13 @@
 import "fake-indexeddb/auto";
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import {
   buildCoachingActivityId,
   type CoachingActivityRecord,
 } from "../../types/coaching-activity-record";
 import { createDexieCoachingRepository } from "./dexie-coaching-repository";
-import { KaiordDatabase } from "./dexie-database";
 
 const makeRecord = (
   overrides: Partial<CoachingActivityRecord> = {}
@@ -30,12 +30,7 @@ const makeRecord = (
 };
 
 describe("DexieCoachingRepository", () => {
-  let db: KaiordDatabase;
-  beforeEach(() => {
-    db = new KaiordDatabase(
-      `kaiord-coaching-test-${Date.now()}-${Math.random()}`
-    );
-  });
+  const db = sharedKaiordDatabase("coaching");
 
   it("should upsert via composite primary key (idempotent)", async () => {
     // Arrange

@@ -5,12 +5,9 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v17-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_V16 = 16;
 // Current head version KaiordDatabase opens at; later versions add stores
@@ -60,22 +57,14 @@ const seedV16 = async (
 };
 
 describe("Dexie v16 → v17 migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v17");
+  const { name } = db;
 
   it("should bump database schema to the current head version", async () => {
     // Arrange
     await seedV16(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -89,7 +78,6 @@ describe("Dexie v16 → v17 migration", () => {
     await seedV16(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const policy = {
       id: crypto.randomUUID(),
@@ -117,7 +105,6 @@ describe("Dexie v16 → v17 migration", () => {
     await seedV16(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const entry = {
       id: crypto.randomUUID(),
@@ -139,7 +126,6 @@ describe("Dexie v16 → v17 migration", () => {
   it("should add sourceBridgeId, externalId, and unique [profileId+sourceBridgeId+externalId] index to each health store", async () => {
     // Arrange
     await seedV16(name);
-    const db = new KaiordDatabase(name);
     await db.open();
 
     // Act
@@ -172,7 +158,6 @@ describe("Dexie v16 → v17 migration", () => {
     });
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const row = (await db.table("healthSleep").get("r-1")) as
       Record<string, unknown> | undefined;
@@ -192,22 +177,20 @@ describe("Dexie v16 → v17 migration", () => {
         { id: "r-1", profileId: PROFILE_ID, date: SAMPLE_DATE, value: 7.5 },
       ],
     });
-    const db1 = new KaiordDatabase(name);
-    await db1.open();
-    const row1 = (await db1.table("healthSleep").get("r-1")) as Record<
+    await db.open();
+    const row1 = (await db.table("healthSleep").get("r-1")) as Record<
       string,
       unknown
     >;
-    db1.close();
+    db.close();
 
     // Act
-    const db2 = new KaiordDatabase(name);
-    await db2.open();
-    const row2 = (await db2.table("healthSleep").get("r-1")) as Record<
+    await db.open();
+    const row2 = (await db.table("healthSleep").get("r-1")) as Record<
       string,
       unknown
     >;
-    db2.close();
+    db.close();
 
     // Assert
     expect(row2?.externalId).toBe(row1?.externalId);
@@ -226,7 +209,6 @@ describe("Dexie v16 → v17 migration", () => {
     });
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const policies = await db
       .table("integrationPolicies")
@@ -260,19 +242,17 @@ describe("Dexie v16 → v17 migration", () => {
         },
       ],
     });
-    const db1 = new KaiordDatabase(name);
-    await db1.open();
-    db1.close();
+    await db.open();
+    db.close();
 
     // Act
-    const db2 = new KaiordDatabase(name);
-    await db2.open();
-    const policies = await db2
+    await db.open();
+    const policies = await db
       .table("integrationPolicies")
       .where("profileId")
       .equals(PROFILE_ID)
       .toArray();
-    db2.close();
+    db.close();
 
     // Assert
     // Scope to the v17 training-zones policy (v28 adds a planned-session one).
@@ -292,7 +272,6 @@ describe("Dexie v16 → v17 migration", () => {
     });
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const profile = (await db.table("profiles").get(PROFILE_ID)) as {
       linkedAccounts?: Array<{ source: string; syncZones?: boolean }>;

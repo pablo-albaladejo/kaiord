@@ -8,12 +8,10 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v28-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 
 const SCHEMA_SEED = 27;
 const SCHEMA_HEAD = 37;
@@ -69,22 +67,14 @@ const plannedImportPolicies = async (db: KaiordDatabase, profileId: string) =>
     .toArray();
 
 describe("Dexie provenance backfill + seeding (v28) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v28");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -98,7 +88,6 @@ describe("Dexie provenance backfill + seeding (v28) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const legacy = await db.table("healthSleep").get("h-legacy");
     const sourced = await db.table("healthSleep").get("h-sourced");
@@ -114,7 +103,6 @@ describe("Dexie provenance backfill + seeding (v28) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const policies = await plannedImportPolicies(db, "p-1");
     db.close();
@@ -129,7 +117,6 @@ describe("Dexie provenance backfill + seeding (v28) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const policies = await plannedImportPolicies(db, "p-2");
     db.close();
@@ -143,7 +130,6 @@ describe("Dexie provenance backfill + seeding (v28) migration", () => {
     await seed(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const policies = await plannedImportPolicies(db, "p-3");
     db.close();
@@ -156,12 +142,11 @@ describe("Dexie provenance backfill + seeding (v28) migration", () => {
   it("should be a no-op on a second open (idempotent)", async () => {
     // Arrange
     await seed(name);
-    const first = new KaiordDatabase(name);
+    const first = db;
     await first.open();
     first.close();
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const p1 = await plannedImportPolicies(db, "p-1");
     const legacy = await db.table("healthSleep").get("h-legacy");

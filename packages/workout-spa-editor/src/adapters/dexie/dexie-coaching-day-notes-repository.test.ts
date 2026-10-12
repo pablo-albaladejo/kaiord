@@ -1,13 +1,13 @@
 import "fake-indexeddb/auto";
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import {
   buildCoachingDayNotesId,
   type CoachingDayNotesRecord,
 } from "../../types/coaching-day-notes-record";
 import { createDexieCoachingDayNotesRepository } from "./dexie-coaching-day-notes-repository";
-import { KaiordDatabase } from "./dexie-database";
 
 const makeRecord = (
   overrides: Partial<CoachingDayNotesRecord> = {}
@@ -34,12 +34,7 @@ const makeRecord = (
 };
 
 describe("DexieCoachingDayNotesRepository", () => {
-  let db: KaiordDatabase;
-  beforeEach(() => {
-    db = new KaiordDatabase(
-      `kaiord-daynotes-test-${Date.now()}-${Math.random()}`
-    );
-  });
+  const db = sharedKaiordDatabase("day-notes");
 
   it("should fetch a stored thread by profile, source and date", async () => {
     // Arrange
