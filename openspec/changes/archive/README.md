@@ -8,6 +8,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | Date | Change | Summary |
 | ---- | ------ | ------- |
 | 2026-10-12 | [`close-nutrition-tombstone-gaps`](./2026-10-12-close-nutrition-tombstone-gaps/) | Close the nutrition sync tombstone gaps |
+| 2026-10-12 | [`drop-profile-rows-deleted-mid-sync`](./2026-10-12-drop-profile-rows-deleted-mid-sync/) | Drop the rows of a profile deleted mid-sync |
 | 2026-10-11 | [`add-ai-provider-key-check`](./2026-10-11-add-ai-provider-key-check/) | Check an AI key when it is saved, and gate the chat on what it needs |
 | 2026-10-11 | [`add-spa-data-export`](./2026-10-11-add-spa-data-export/) | Export my data from Settings → Privacy |
 | 2026-10-11 | [`add-spa-data-import`](./2026-10-11-add-spa-data-import/) | Import a backup from Settings → Privacy |

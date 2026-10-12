@@ -14,6 +14,7 @@ import { deleteProfileWithCascade } from "../../application/profile/delete-profi
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { writeAfterExport } from "../../test-utils/write-after-export";
 import type { Snapshot } from "../../types/snapshot";
 import { createAppPersistence } from "../create-app-persistence";
 import { KaiordDatabase } from "./dexie-database";
@@ -63,8 +64,14 @@ const weight = (id: string, profileId: string) => ({
   updatedAt: STAMP,
 });
 
-/** A deletes profile P, which both devices hold with its rows on Drive. */
-const deletedOnA = async () => {
+const deleteOn = (device: Device, profileId: string) =>
+  device.persistence.transaction(async () => {
+    await deleteProfileWithCascade(device.persistence, profileId);
+    await deleteProfile(device.persistence, profileId);
+  });
+
+/** Both devices hold profile P with its rows, synced through Drive. */
+const profileOnBothDevices = async () => {
   const cloud = createInMemoryCloudSyncPort({
     authenticated: true,
     snapshot: null,
@@ -79,11 +86,14 @@ const deletedOnA = async () => {
   await sync(cloud, a, "dev-a");
   const b = await open("b");
   await sync(cloud, b, "dev-b");
-  await a.persistence.transaction(async () => {
-    await deleteProfileWithCascade(a.persistence, deleted);
-    await deleteProfile(a.persistence, deleted);
-  });
   return { cloud, a, b, deleted };
+};
+
+/** A deletes profile P, which both devices hold with its rows on Drive. */
+const deletedOnA = async () => {
+  const devices = await profileOnBothDevices();
+  await deleteOn(devices.a, devices.deleted);
+  return devices;
 };
 
 /** A clock later than the profile tombstone A just wrote. */
@@ -120,6 +130,22 @@ describe("a deleted profile's rows across a sync", () => {
     await sync(cloud, a, "dev-a");
 
     // Assert
+    for (const table of ["intakeEntries", "healthWeight"]) {
+      expect(await rowsOf(a, table, deleted)).toEqual([]);
+      expect(pushedRows(cloud, table, deleted)).toEqual([]);
+    }
+  });
+
+  it("should neither restore nor push the rows of a profile deleted while a sync is between its export and its import", async () => {
+    // Arrange
+    const { cloud, a, deleted } = await profileOnBothDevices();
+    const racing = writeAfterExport(a.snapshotPort, () => deleteOn(a, deleted));
+
+    // Act
+    await syncWithCloud({ cloud, snapshotPort: racing, deviceId: "dev-a" });
+
+    // Assert
+    expect(await a.persistence.profiles.getById(deleted)).toBeUndefined();
     for (const table of ["intakeEntries", "healthWeight"]) {
       expect(await rowsOf(a, table, deleted)).toEqual([]);
       expect(pushedRows(cloud, table, deleted)).toEqual([]);

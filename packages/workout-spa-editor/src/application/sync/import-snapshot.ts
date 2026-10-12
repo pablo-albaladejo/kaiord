@@ -15,6 +15,7 @@ import type { Snapshot, SnapshotTables, Tombstone } from "../../types/snapshot";
 import { createLiveRowMerge } from "./merge-table-rows";
 import { unionTombstones } from "./merge-tombstones";
 import { pruneTombstones } from "./prune-tombstones";
+import { suppressLiveDeletes } from "./suppress-live-deletes";
 
 export type ImportSnapshotDeps = {
   port: SnapshotPort;
@@ -55,7 +56,13 @@ export async function importSnapshot({
       now()
     );
     const liveMerge = createLiveRowMerge(tombstones, exported);
-    await port.importTables(snapshot.tables, { liveMerge });
+    // A profile deleted since the export took its rows without tombstones.
+    const { tables } = suppressLiveDeletes(
+      snapshot,
+      live,
+      port.perProfileTables()
+    );
+    await port.importTables(tables, { liveMerge });
     await port.replaceTombstones(tombstones);
   });
   // The caller pushes `snapshot`; these let it carry a delete made meanwhile.

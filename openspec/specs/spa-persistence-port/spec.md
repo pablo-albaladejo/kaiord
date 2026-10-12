@@ -541,7 +541,7 @@ Deletes through `PersistencePort` that express USER INTENT SHALL record a tombst
 
 The port composition the application actually runs SHALL apply the `withTombstones` decorator over the Dexie adapter, and SHALL be expressed as one shared factory that both the application entry point and the tests consume, so the decorator/merge join is verifiable as behaviour.
 
-The profile-delete cascade removes per-profile rows without per-row tombstones; the cross-device delete is the `profiles` tombstone. After `reconcileAutoProfile`, the sync SHALL drop every row of a per-profile table whose `profileId` has a `profiles` tombstone and no live profile row in the merged snapshot, before importing or pushing, and the backup export and import SHALL apply the same step. A row whose profile is merely absent, with no tombstone, SHALL be kept, because that profile may not have arrived yet. Per-row tombstones SHALL NOT be added to the cascade: the drop goes by `profileId`, so it also removes a row that a device which never saw the delete edits or adds afterwards, whose clock would beat any per-row tombstone; and it costs one tombstone per profile delete instead of one per row, every one of them carried in each snapshot for the 90-day retention. A profile row edited after its delete beats the `profiles` tombstone, and its rows then come back with it, whole.
+The profile-delete cascade removes per-profile rows without per-row tombstones; the cross-device delete is the `profiles` tombstone. After `reconcileAutoProfile`, the sync SHALL drop every row of a per-profile table whose `profileId` has a `profiles` tombstone and no live profile row in the merged snapshot, before importing or pushing, and the backup export and import SHALL apply the same step. A row whose profile is merely absent, with no tombstone, SHALL be kept, because that profile may not have arrived yet. A profile deleted on the device after a sync's export read and before its import SHALL lose its rows the same way: the import SHALL NOT write them back, and the pushed snapshot SHALL omit them along with the profile. Per-row tombstones SHALL NOT be added to the cascade: the drop goes by `profileId`, so it also removes a row that a device which never saw the delete edits or adds afterwards, whose clock would beat any per-row tombstone; and it costs one tombstone per profile delete instead of one per row, every one of them carried in each snapshot for the 90-day retention. A profile row edited after its delete beats the `profiles` tombstone, and its rows then come back with it, whole.
 
 Where a repository's delete does not fit the decorator's single-argument `delete(id)` shape, the owning use case SHALL write the equivalent tombstone itself inside the same transaction.
 
@@ -606,6 +606,13 @@ Known gaps, not closed by this requirement: composite-primary-key tables (`aiMod
 - **GIVEN** two devices synced to a snapshot holding profile P with an intake and a wellness value
 - **WHEN** device A deletes P and syncs, then device B syncs
 - **THEN** neither device nor the pushed snapshot SHALL hold P's intake or wellness value
+
+#### Scenario: A profile deleted during a sync keeps its rows deleted
+
+- **GIVEN** a sync that has read the local snapshot and not yet opened its import
+- **WHEN** the user deletes a profile in that window
+- **THEN** neither the profile nor any of its per-profile rows SHALL be in the database after the import
+- **AND** the snapshot that sync pushes SHALL hold the `profiles` tombstone and none of those rows
 
 #### Scenario: A profile that has not arrived yet keeps its rows
 
