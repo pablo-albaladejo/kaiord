@@ -3,8 +3,9 @@
  * import transaction. A live row that differs from what the export read (a
  * new key, or a changed row) was written inside that window: it is kept
  * over its incoming counterpart unless that counterpart is newer by clock,
- * and dropped only when a tombstone at least as new deletes it. Every other
- * live row is replaced by the incoming snapshot, so the merge, the default
+ * and dropped only when a tombstone at least as new deletes it. An incoming
+ * row such a tombstone deletes is dropped too. Every other live row is
+ * replaced by the incoming snapshot, so the merge, the default
  * profile re-key and the orphan filters still decide what survives. Pure.
  */
 
@@ -29,11 +30,14 @@ export const mergePostExportWrites = (
     exported.map((row) => [recordKey(table, row), JSON.stringify(row)])
   );
   return (live: ReadonlyArray<Row>, incoming: ReadonlyArray<Row>): Row[] => {
+    // `deletes` holds the LIVE tombstones too: a row deleted after the export
+    // read is still in the merged snapshot and must not be written back.
+    const kept = incoming.filter((row) => !isDeleted(table, row, deletes));
     const fresh = live.filter(
       (row) => before.get(recordKey(table, row)) !== JSON.stringify(row)
     );
-    if (fresh.length === 0) return [...incoming];
-    const byKey = new Map(incoming.map((row) => [recordKey(table, row), row]));
+    if (fresh.length === 0) return kept;
+    const byKey = new Map(kept.map((row) => [recordKey(table, row), row]));
     for (const row of fresh) {
       if (isDeleted(table, row, deletes)) continue;
       const key = recordKey(table, row);

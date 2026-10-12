@@ -3,13 +3,16 @@
  * moves its device-local rows (`connections`) onto the target in
  * the SAME read-write transaction: a failure after either step rolls both
  * back, so the database never holds rows re-keyed in one place only.
+ * Returns the snapshot to push: `snapshot` with any delete this device made
+ * since its export applied (`suppressLiveDeletes`).
  */
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
-import type { Snapshot, SnapshotTables } from "../../types/snapshot";
+import type { Snapshot, SnapshotTables, Tombstone } from "../../types/snapshot";
 import { DEVICE_LOCAL_REKEY_TABLES } from "./auto-profile-rekey-rules";
 import { importSnapshot } from "./import-snapshot";
 import { type ProfileRekey, rekeyTableRows } from "./rekey-profile-rows";
+import { suppressLiveDeletes } from "./suppress-live-deletes";
 
 export type ImportReconciledDeps = {
   port: SnapshotPort;
@@ -35,10 +38,12 @@ export async function importReconciledSnapshot({
   deviceLocalRekey,
   exported,
   now,
-}: ImportReconciledDeps): Promise<void> {
+}: ImportReconciledDeps): Promise<Snapshot> {
+  let live: ReadonlyArray<Tombstone> = [];
   await port.transaction("rw", async () => {
-    await importSnapshot({ port, snapshot, exported, now });
+    live = await importSnapshot({ port, snapshot, exported, now });
     if (deviceLocalRekey)
       await port.updateDeviceLocal(rekeyDeviceLocal(deviceLocalRekey));
   });
+  return suppressLiveDeletes(snapshot, live);
 }

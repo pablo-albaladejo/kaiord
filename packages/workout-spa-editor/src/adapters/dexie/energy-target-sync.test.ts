@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createProfile } from "../../application/profile/create-profile";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
+import type { SnapshotPort } from "../../ports/snapshot-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
 import type { EnergyTargetRecord } from "../../types/energy-target-record";
 import { createAppPersistence } from "../create-app-persistence";
@@ -69,6 +70,25 @@ const goalOnBothDevices = async () => {
   return { cloud, a, b, profileId };
 };
 
+/** Runs `write` after the sync's export read, before its import transaction. */
+const writeBeforeImport = (
+  port: SnapshotPort,
+  write: () => Promise<void>
+): SnapshotPort => {
+  let pending: (() => Promise<void>) | null = write;
+  return {
+    ...port,
+    transaction: async (mode, scope) => {
+      if (mode === "rw" && pending) {
+        const run = pending;
+        pending = null;
+        await run();
+      }
+      return port.transaction(mode, scope);
+    },
+  };
+};
+
 afterEach(async () => {
   for (const db of Object.values(databases)) await db.delete();
 });
@@ -121,5 +141,20 @@ describe("energy goal sync between two devices", () => {
     // Assert
     expect(await a.persistence.energyTargets.get(profileId)).toEqual(resaved);
     expect(await b.persistence.energyTargets.get(profileId)).toEqual(resaved);
+  });
+
+  it("should keep a goal cleared while a sync is between its export and its import cleared", async () => {
+    // Arrange
+    const { cloud, a, profileId } = await goalOnBothDevices();
+    const racing = writeBeforeImport(a.snapshotPort, () =>
+      a.persistence.energyTargets.delete(profileId)
+    );
+
+    // Act
+    await syncWithCloud({ cloud, snapshotPort: racing, deviceId: "dev-a" });
+
+    // Assert
+    expect(await a.persistence.energyTargets.get(profileId)).toBeUndefined();
+    expect(cloud.state.snapshot?.tables.energyTargets ?? []).toEqual([]);
   });
 });
