@@ -43,6 +43,12 @@
     "dismiss": "Entendido"
   },
   "title": "Atleta",
+  "body": {
+    "title": "Cuerpo",
+    "saved": "Guardado",
+    "maxHeartRate": "Frecuencia cardiaca máxima (ppm)",
+    "maxHeartRateRange": "Introduce un número entero entre 1 y 250."
+  },
   "sports": {
     "cycling": "Ciclismo",
     "running": "Carrera",
