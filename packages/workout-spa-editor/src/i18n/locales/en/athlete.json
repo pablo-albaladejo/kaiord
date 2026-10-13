@@ -52,7 +52,7 @@
     "fallback": "Athlete"
   },
   "defaultProfile": {
-    "notice": "We created “My athlete” so you can start right away. Add your thresholds and weight to get personal zones and estimates.",
+    "notice": "We created “{{name}}” so you can start right away. Add your thresholds and weight to get personal zones and estimates.",
     "complete": "Complete details",
     "dismiss": "Got it"
   },

@@ -55,5 +55,5 @@ export function useDefaultProfileNotice() {
     });
   }, [profileId]);
 
-  return { visible, dismiss };
+  return { visible, dismiss, name: active?.profile?.name ?? "" };
 }

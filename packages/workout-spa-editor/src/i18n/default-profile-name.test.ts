@@ -30,16 +30,19 @@ describe("defaultProfileName", () => {
     ["en", en.defaultProfile.notice],
     ["es", es.defaultProfile.notice],
   ] as const)(
-    "should name the same profile the %s notice announces",
+    "should quote the stored athlete name in the %s notice, not a fixed one",
     (locale, notice) => {
       // Arrange
-      const name = DEFAULT_PROFILE_NAMES[locale];
+      const fixedName = DEFAULT_PROFILE_NAMES[locale];
 
       // Act
-      const announced = notice.includes(name);
+      const quoted = {
+        placeholder: notice.includes("{{name}}"),
+        fixedName: notice.includes(fixedName),
+      };
 
       // Assert
-      expect(announced).toBe(true);
+      expect(quoted).toEqual({ placeholder: true, fixedName: false });
     }
   );
 });

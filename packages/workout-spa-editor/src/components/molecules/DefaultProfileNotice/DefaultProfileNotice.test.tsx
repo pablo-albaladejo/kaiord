@@ -12,10 +12,13 @@ import { DefaultProfileNotice } from "./DefaultProfileNotice";
 
 const PROFILE_ID = "auto-1";
 
-async function seedProfile(origin: Profile["origin"]): Promise<void> {
+async function seedProfile(
+  origin: Profile["origin"],
+  name = "My athlete"
+): Promise<void> {
   const profile: Profile = {
     id: PROFILE_ID,
-    name: "My profile",
+    name,
     linkedAccounts: [],
     origin,
   };
@@ -62,6 +65,18 @@ describe("DefaultProfileNotice", () => {
       "href",
       "/athlete?section=body"
     );
+  });
+
+  it("should quote the stored name of a default athlete created before the rename", async () => {
+    // Arrange
+    await seedProfile("auto", "My profile");
+
+    // Act
+    renderNotice();
+
+    // Assert
+    const notice = await screen.findByTestId("default-profile-notice");
+    expect(notice).toHaveTextContent("We created “My profile” so");
   });
 
   it("should hide the notice once the profile is claimed", async () => {
