@@ -1,4 +1,10 @@
+import { useUnits } from "../../../contexts/units-context";
 import { useTranslate } from "../../../i18n/use-translate";
+import {
+  weightFromDisplay,
+  weightToDisplay,
+} from "../../../lib/units/body-measures";
+import { weightUnitLabel } from "../../../lib/units/units";
 import type { Profile } from "../../../types/profile";
 import { Card } from "../../atoms/Card";
 import { Input } from "../../atoms/Input/Input";
@@ -19,6 +25,7 @@ type BodyCardProps = {
  */
 export function BodyCard({ profileId, profile }: BodyCardProps) {
   const t = useTranslate("athlete");
+  const units = useUnits();
   const { form, saved, save, handleForm, commit, handleKeyDown } = useBodyForm(
     profileId,
     profile
@@ -34,13 +41,18 @@ export function BodyCard({ profileId, profile }: BodyCardProps) {
           onKeyDown={handleKeyDown}
         >
           <Input
-            label={t("profileManager.personal.bodyWeight")}
+            label={t("profileManager.personal.bodyWeight", {
+              unit: weightUnitLabel(units),
+            })}
             variant="number"
-            value={form.bodyWeight?.toString() ?? ""}
+            value={weightToDisplay(form.bodyWeight, units)?.toString() ?? ""}
             onChange={(e) =>
               handleForm({
                 ...form,
-                bodyWeight: e.target.value ? Number(e.target.value) : undefined,
+                bodyWeight: weightFromDisplay(
+                  e.target.value ? Number(e.target.value) : undefined,
+                  units
+                ),
               })
             }
             placeholder="70"
