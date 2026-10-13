@@ -19,6 +19,7 @@ import {
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAppHandlers } from "../../../hooks/use-app-handlers";
+import { useTranslate } from "../../../i18n/use-translate";
 import { parseBackOrigin } from "../../../routing/back-origin";
 import { calendarWeekHref } from "../../../routing/calendar-week-href";
 import { withOrigin } from "../../../routing/with-origin";
@@ -40,13 +41,16 @@ export function useImportOnLoad(date: string | null, from: string | null) {
   const persistence = usePersistence();
   const [, navigate] = useLocation();
   const toast = useToastContext();
+  const t = useTranslate("import");
+  const noActiveAthlete = () =>
+    toast.error(t("noActiveAthlete.title"), t("noActiveAthlete.description"));
 
   return (krd: KRD) => {
     if (isHealthFileType(krd.type)) {
       void persistence.profiles
         .getActiveId()
         .then(async (profileId) => {
-          if (!profileId) return;
+          if (!profileId) return noActiveAthlete();
           await importHealthFitFile({ persistence, profileId }, krd);
           navigate(healthDestinationFor(krd.type));
         })
@@ -62,7 +66,7 @@ export function useImportOnLoad(date: string | null, from: string | null) {
     void persistence.profiles
       .getActiveId()
       .then(async (profileId) => {
-        if (!profileId) return;
+        if (!profileId) return noActiveAthlete();
         const result = await persistImportedWorkout(persistence, {
           krd,
           date,
