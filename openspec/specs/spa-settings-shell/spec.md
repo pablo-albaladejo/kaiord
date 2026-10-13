@@ -450,7 +450,7 @@ The Data & backup section SHALL offer to delete all of the reader's data in this
 browser. The confirm control SHALL stay disabled until the reader types a
 confirmation word in the UI's language, and while a sync is in flight.
 
-Confirming SHALL stop sync, then empty every store of the local database in one
+Confirming SHALL stop sync and wait for any sync cycle already running to finish, then empty every store of the local database in one
 transaction — enumerating the stores the database has rather than a list in
 code — then clear this origin's localStorage and sessionStorage, then reload
 into first run. It SHALL write no tombstone, so a later sync re-imports the

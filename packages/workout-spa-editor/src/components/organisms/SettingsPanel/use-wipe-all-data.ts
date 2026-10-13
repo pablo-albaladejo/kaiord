@@ -7,14 +7,14 @@ import { clearDeviceStorage, reloadToFirstRun } from "../../../lib/wipe-device";
 /** Deletes everything in this browser, then starts the app from scratch. */
 export function useWipeAllData(): () => Promise<void> {
   const { snapshotPort } = useSnapshotSource();
-  const { disconnect } = useSync();
+  const { stop } = useSync();
 
   return useCallback(async () => {
     await wipeAllData({
       snapshotPort,
-      stopSync: disconnect,
+      stopSync: stop,
       clearDeviceStorage,
     });
     reloadToFirstRun();
-  }, [snapshotPort, disconnect]);
+  }, [snapshotPort, stop]);
 }

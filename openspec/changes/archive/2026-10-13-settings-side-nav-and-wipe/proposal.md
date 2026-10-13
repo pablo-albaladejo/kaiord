@@ -23,7 +23,7 @@ only destructive control cleared API keys (P-12).
   `general`, `usage` to `ai?section=usage`, `extensions` and `data-hub` to
   `connections`, `privacy?section=data-management` to `data`.
 - Data & backup gains "Delete all my data": a typed, localized confirmation word;
-  it stops sync, empties every IndexedDB store by enumerating the database
+  it stops sync, waits for a running sync cycle, empties every IndexedDB store by enumerating the database
   (writing no tombstone), clears this origin's localStorage and sessionStorage,
   and reloads into first run. The Google Drive copy is kept and the dialog says
   so.

@@ -54,7 +54,7 @@ describe("wipeAllData", () => {
     // Act
     await wipeAllData({
       snapshotPort,
-      stopSync: () => undefined,
+      stopSync: async () => undefined,
       clearDeviceStorage: () => undefined,
     });
 
@@ -80,12 +80,42 @@ describe("wipeAllData", () => {
     // Act
     await wipeAllData({
       snapshotPort,
-      stopSync: () => calls.push("stopSync"),
+      stopSync: async () => {
+        calls.push("stopSync");
+      },
       clearDeviceStorage: () => calls.push("clearDeviceStorage"),
     });
 
     // Assert
     expect(calls).toEqual(["stopSync", "clearAllTables", "clearDeviceStorage"]);
+  });
+
+  it("should wait for a running sync to finish before the database is touched", async () => {
+    // Arrange
+    const port = createInMemorySnapshotPort(seededState());
+    let cleared = false;
+    let finishSync: () => void = () => undefined;
+    const snapshotPort = {
+      ...port,
+      clearAllTables: async () => {
+        cleared = true;
+      },
+    };
+
+    // Act
+    const run = wipeAllData({
+      snapshotPort,
+      stopSync: () => new Promise<void>((resolve) => (finishSync = resolve)),
+      clearDeviceStorage: () => undefined,
+    });
+    await Promise.resolve();
+    const clearedWhileSyncing = cleared;
+    finishSync();
+    await run;
+
+    // Assert
+    expect(clearedWhileSyncing).toBe(false);
+    expect(cleared).toBe(true);
   });
 
   it("should keep device storage when the database wipe fails", async () => {
@@ -100,7 +130,7 @@ describe("wipeAllData", () => {
     // Act
     const run = wipeAllData({
       snapshotPort,
-      stopSync: () => undefined,
+      stopSync: async () => undefined,
       clearDeviceStorage: () => {
         storageCleared = true;
       },
@@ -123,7 +153,7 @@ describe("wipeAllData", () => {
     });
     await wipeAllData({
       snapshotPort,
-      stopSync: () => undefined,
+      stopSync: async () => undefined,
       clearDeviceStorage: () => undefined,
     });
 
