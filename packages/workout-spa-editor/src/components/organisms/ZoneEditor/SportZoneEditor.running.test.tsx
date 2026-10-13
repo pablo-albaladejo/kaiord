@@ -1,10 +1,9 @@
 /**
- * Running thresholds the way a runner sets them: pace and LTHR first, power
- * optional, the method on screen being the one the zones were built with,
- * and a word once the change is stored.
+ * A runner's zones: the method on screen is the one the zones were built
+ * with, the athlete's own bands are not dressed up as a preset, and zones
+ * are named in the active language.
  */
-import { screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
@@ -23,7 +22,6 @@ vi.mock("../../../i18n/LocaleProvider", () => ({
 }));
 
 const LTHR = 170;
-const NEW_LTHR = "172";
 
 const persistence = () => createDexiePersistence(db);
 
@@ -49,27 +47,6 @@ describe("SportZoneEditor for a runner", () => {
   afterEach(async () => {
     locale.active = "en";
     await appI18n.changeLanguage("en");
-  });
-
-  it("should lead with pace and LTHR and mark power optional", async () => {
-    // Arrange
-    const id = await seedRunner();
-
-    // Act
-    renderRunning(id);
-
-    // Assert
-    const lthr = await screen.findByLabelText("LTHR threshold");
-    const inputs = screen.getAllByLabelText(/threshold$/);
-    expect(inputs.map((input) => input.getAttribute("aria-label"))).toEqual([
-      "Threshold Pace threshold",
-      "LTHR threshold",
-      "FTP threshold",
-    ]);
-    expect(lthr).toHaveValue(LTHR);
-    expect(screen.getByTestId("threshold-optional-FTP")).toHaveTextContent(
-      "optional"
-    );
   });
 
   it("should show the method the heart-rate zones were built with", async () => {
@@ -101,24 +78,6 @@ describe("SportZoneEditor for a runner", () => {
     expect(await screen.findByLabelText("hr zone method")).toHaveDisplayValue(
       "Your own zones"
     );
-  });
-
-  it("should say when a threshold change is stored", async () => {
-    // Arrange
-    const id = await seedRunner();
-    const user = userEvent.setup();
-    renderRunning(id);
-    const lthr = await screen.findByLabelText("LTHR threshold");
-
-    // Act
-    await user.clear(lthr);
-    await user.type(lthr, NEW_LTHR);
-
-    // Assert
-    // The live region is always mounted; it only speaks once the write lands.
-    await waitFor(() => {
-      expect(screen.getByRole("status")).toHaveTextContent("Saved");
-    });
   });
 
   it("should name zones and methods in Spanish", async () => {

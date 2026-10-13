@@ -5,6 +5,7 @@ import {
   deriveThresholdMetrics,
   deriveZoneMap,
 } from "../../../lib/athlete";
+import { athleteZonesHref } from "../../../routing/athlete-zones-href";
 import type { Profile } from "../../../types/profile";
 import { Card } from "../../atoms/Card";
 import { Icon, STATUS_ICON } from "../../atoms/Icon";
@@ -38,7 +39,11 @@ export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
 
   return (
     <div>
-      <SectionHead title={t("zonesTitle", { sport: sportLabel })} />
+      <SectionHead
+        title={t("zonesTitle", { sport: sportLabel })}
+        action={t("adjustZones")}
+        actionHref={athleteZonesHref(sport)}
+      />
       <Card className="flex flex-col gap-4 p-4">
         {/* Principle 8: the reason goes above what it justifies. */}
         <div className="flex items-start gap-2.5 rounded-xl border border-edge-soft bg-surface-elevated px-3.5 py-3">

@@ -15,6 +15,7 @@ import { setZoneMethod } from "../application/profile/zones/set-zone-method";
 import { updateSportThresholds } from "../application/profile/zones/update-sport-thresholds";
 import { updateSportZones } from "../application/profile/zones/update-sport-zones";
 import { buildDefaultZone } from "../components/organisms/ZoneEditor/utils/default-zone";
+import { sportPaceBase } from "../lib/athlete";
 import type { Profile } from "../types/profile";
 import type { PaceZone } from "../types/sport-zones";
 import { calculatePaceZones } from "../utils/calculate-pace-zones";
@@ -61,8 +62,8 @@ const persisted = async (profile: Profile) => {
   return persistence;
 };
 
-/** Threshold pace set as the Athlete page does: `SportZoneThresholds`
-    writes `paceUnit ?? "min_per_km"`, for swimming too. */
+/** Threshold pace set as the Athlete page does: `useThresholdWrites`
+    writes `paceUnit ?? sportPaceBase(sport)` (per 100 m for swimming). */
 export const withThreshold = async (
   profile: Profile,
   sport: PaceSport,
@@ -70,7 +71,7 @@ export const withThreshold = async (
 ): Promise<Profile> =>
   updateSportThresholds(await persisted(profile), profile.id, sport, {
     thresholdPace,
-    paceUnit: "min_per_km",
+    paceUnit: sportPaceBase(sport),
   });
 
 /** The Daniels method chosen in the zone editor (before any threshold). */

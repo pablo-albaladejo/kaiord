@@ -34,7 +34,7 @@ describe("deriveInitials", () => {
 });
 
 describe("deriveTagline", () => {
-  it("should join sport nouns for sports that have a config", () => {
+  it("should join sport nouns for sports that have a threshold", () => {
     // Arrange
     const profile = profileWith("cycling", { ftp: CYCLING_FTP });
 
@@ -52,6 +52,34 @@ describe("deriveTagline", () => {
 
     // Act
     const tagline = deriveTagline(empty);
+
+    // Assert
+    expect(tagline).toBe("Athlete");
+  });
+
+  // P-20: a new profile carries an empty config for every sport, so a config
+  // alone says nothing about what the athlete does.
+  it("should not name a sport whose config has no threshold", () => {
+    // Arrange
+    const profile = profileWith("cycling", { ftp: CYCLING_FTP });
+    profile.sportZones.running = {
+      thresholds: {},
+      heartRateZones: { method: "custom", zones: [] },
+    };
+
+    // Act
+    const tagline = deriveTagline(profile);
+
+    // Assert
+    expect(tagline).toBe("Cyclist");
+  });
+
+  it("should fall back to Athlete when no sport has a threshold", () => {
+    // Arrange
+    const profile = profileWith("cycling", {});
+
+    // Act
+    const tagline = deriveTagline(profile);
 
     // Assert
     expect(tagline).toBe("Athlete");
@@ -78,7 +106,7 @@ describe("deriveTagline", () => {
     const tagline = deriveTagline(profile, "cycling", "metric", t, CURRENT_KG);
 
     // Assert
-    expect(tagline).toBe("Cyclist · 71.4 kg");
+    expect(tagline).toBe("Athlete · 71.4 kg");
   });
 
   it("should omit the parts the profile does not carry", () => {
@@ -89,6 +117,6 @@ describe("deriveTagline", () => {
     const tagline = deriveTagline(profile, "cycling");
 
     // Assert
-    expect(tagline).toBe("Cyclist");
+    expect(tagline).toBe("Athlete");
   });
 });

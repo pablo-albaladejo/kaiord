@@ -32,6 +32,7 @@ describe("useRouteAnnouncerLabel", () => {
     ["/calendar/2026-W18", "Calendar page"],
     ["/library", "Library page"],
     ["/athlete", "Athlete page"],
+    ["/athlete/zones/cycling", "Zones page"],
     ["/workout/new", "New workout"],
     ["/workout/view/abc-123", "Workout page"],
     ["/workout/abc-123", "Edit workout"],

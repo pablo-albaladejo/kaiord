@@ -1,7 +1,7 @@
 /**
  * A11y regression for the Athlete-page wrapper dialogs.
  *
- * These reuse shared content (ProfileManagerDialog / SportZoneEditor) and
+ * These reuse shared content (ProfileManagerDialog) and
  * previously set only `aria-label` on `Dialog.Content`, which does NOT satisfy
  * Radix's Dialog.Title requirement — opening them logged "DialogContent
  * requires a DialogTitle". Each now renders a visually-hidden `Dialog.Title`,
@@ -17,7 +17,6 @@ import { renderWithProviders } from "../../../test-utils";
 import type { Profile } from "../../../types/profile";
 import { CreateProfileDialog } from "./CreateProfileDialog";
 import { ProfileEditDialog } from "./ProfileEditDialog";
-import { ThresholdEditDialog } from "./ThresholdEditDialog";
 
 const PROFILE_ID = "11111111-1111-1111-1111-111111111111";
 
@@ -73,22 +72,6 @@ describe("Athlete dialog accessible titles", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("dialog", { name: "Create athlete profile" })
-      ).toBeInTheDocument();
-    });
-  });
-
-  it("should give the threshold-edit dialog an accessible title", async () => {
-    // Arrange
-
-    // Act
-    renderDialog(
-      <ThresholdEditDialog open profileId={PROFILE_ID} onClose={vi.fn()} />
-    );
-
-    // Assert
-    await waitFor(() => {
-      expect(
-        screen.getByRole("dialog", { name: "Edit thresholds" })
       ).toBeInTheDocument();
     });
   });

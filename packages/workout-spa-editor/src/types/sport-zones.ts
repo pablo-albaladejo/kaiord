@@ -49,6 +49,17 @@ export type SportZoneConfig = {
 
 export type SportKey = "cycling" | "running" | "swimming" | "generic";
 
+const SPORT_KEYS: ReadonlySet<string> = new Set<SportKey>([
+  "cycling",
+  "running",
+  "swimming",
+  "generic",
+]);
+
+/** Type guard for route segments and other untrusted sport names. */
+export const isSportKey = (value: string): value is SportKey =>
+  SPORT_KEYS.has(value);
+
 export const SPORT_ZONE_CAPABILITIES: Record<
   SportKey,
   { hr: boolean; power: boolean; pace: boolean }

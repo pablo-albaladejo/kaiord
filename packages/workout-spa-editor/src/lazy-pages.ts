@@ -3,6 +3,10 @@ import { lazyPage } from "./lazy-page";
 export const AthletePage = lazyPage(
   () => import("./components/pages/AthletePage")
 );
+// The athlete's zone editor, /athlete/zones/:sport.
+export const ZonesPage = lazyPage(
+  () => import("./components/pages/AthleteZonesPage")
+);
 export const ChatPage = lazyPage(() => import("./components/pages/ChatPage"));
 export const CalendarPage = lazyPage(
   () => import("./components/pages/CalendarPage")

@@ -6,7 +6,6 @@ import { SectionHead } from "../../molecules/SectionHead";
 import { PhysiologyFields } from "../../organisms/ProfileManager/components/PhysiologyFields";
 import { BODY_SECTION_ATTRS, BODY_SECTION_ID } from "./body-section";
 import { CurrentWeightField } from "./CurrentWeightField";
-import { MaxHeartRateField } from "./MaxHeartRateField";
 import { useBodyForm } from "./use-body-form";
 
 type BodyCardProps = {
@@ -16,13 +15,13 @@ type BodyCardProps = {
 
 /**
  * Inline editor for the athlete's body: the current weight (an edit records
- * today's weigh-in), the physiology fields and the cross-sport max heart rate.
- * Autosaves, and says so.
+ * today's weigh-in) and the physiology fields. The max heart rate bounds the
+ * HR zones, so it is edited with the thresholds. Autosaves, and says so.
  */
 export function BodyCard({ profileId, profile }: BodyCardProps) {
   const t = useTranslate("athlete");
   const currentWeightKg = useCurrentWeightKg(profileId, profile);
-  const { form, saved, save, recordWeight, handleForm, commit, handleKeyDown } =
+  const { form, saved, recordWeight, handleForm, commit, handleKeyDown } =
     useBodyForm(profileId, profile);
 
   return (
@@ -39,10 +38,6 @@ export function BodyCard({ profileId, profile }: BodyCardProps) {
             onSave={recordWeight}
           />
           <PhysiologyFields formData={form} onChange={handleForm} />
-          <MaxHeartRateField
-            initial={profile.maxHeartRate}
-            onSave={(maxHeartRate) => save({ maxHeartRate })}
-          />
         </div>
         <p role="status" className="m-0 mt-3 h-4 text-[13px] text-ink-muted">
           {saved ? t("body.saved") : ""}

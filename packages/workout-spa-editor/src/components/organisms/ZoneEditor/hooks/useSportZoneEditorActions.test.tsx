@@ -1,5 +1,3 @@
-/* eslint-disable no-magic-numbers -- test fixtures use literal BPM/FTP/zone values for clarity */
-
 /**
  * useSportZoneEditorActions hook tests.
  *
@@ -192,44 +190,6 @@ describe("useSportZoneEditorActions - handleAddCustom", () => {
     result.current.actions.handleAddCustom("powerZones", {
       zone: 1,
       name: "x",
-    });
-
-    // Assert
-    await waitFor(() => {
-      expect(result.current.toast.toasts.length).toBeGreaterThan(0);
-    });
-  });
-});
-
-describe("useSportZoneEditorActions - handleUpdateThresholds", () => {
-  it("should propagate threshold updates via updateSportThresholds", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const profile = seedProfile(persistence, "p-thr");
-    const { result } = renderActions(persistence, profile.id);
-
-    // Act
-    result.current.actions.handleUpdateThresholds(profile.id, "cycling", {
-      ftp: 275,
-      lthr: 175,
-    });
-
-    // Assert
-    await waitFor(async () => {
-      const updated = await persistence.profiles.getById(profile.id);
-      expect(updated?.sportZones?.cycling?.thresholds.ftp).toBe(275);
-      expect(updated?.sportZones?.cycling?.thresholds.lthr).toBe(175);
-    });
-  });
-
-  it("should surface a toast when updateSportThresholds rejects", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const { result } = renderActions(persistence, "p-thr-fail");
-
-    // Act
-    result.current.actions.handleUpdateThresholds("no-id", "cycling", {
-      ftp: 200,
     });
 
     // Assert

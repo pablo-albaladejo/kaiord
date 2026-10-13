@@ -1,14 +1,14 @@
 /**
  * ProfileEditView Component
  *
- * View shown when editing a profile, with Training Zones and Personal Data tabs.
+ * View shown when editing a profile, with Personal Data and Linked Accounts
+ * tabs. Zones are edited on /athlete/zones/:sport, not here.
  */
 
 import { useState } from "react";
 
 import { useProfileByIdLive } from "../../../../hooks/use-profile-by-id-live";
 import { useTranslate } from "../../../../i18n/use-translate";
-import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import type { ProfileFormData } from "../types";
 import { LinkedAccountsSection } from "./LinkedAccountsSection";
 import { PersonalDataTab } from "./PersonalDataTab";
@@ -30,7 +30,7 @@ export function ProfileEditView({
   onCancel,
 }: ProfileEditViewProps) {
   const t = useTranslate("athlete");
-  const [activeTab, setActiveTab] = useState<ProfileTab>("zones");
+  const [activeTab, setActiveTab] = useState<ProfileTab>("personal");
   // Live read from Dexie via useLiveQuery — `undefined` covers both
   // loading (first mount) and "no row for this id" (deleted between
   // dialog open and now). Both cases hide the linked-accounts section,
@@ -40,7 +40,6 @@ export function ProfileEditView({
   return (
     <>
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      {activeTab === "zones" && <SportZoneEditor profileId={profileId} />}
       {activeTab === "personal" && (
         <PersonalDataTab formData={formData} onChange={onChange} />
       )}

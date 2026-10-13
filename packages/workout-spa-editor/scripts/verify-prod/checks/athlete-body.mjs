@@ -3,8 +3,9 @@ import { expect } from "@playwright/test";
 import { mainText, TIMEOUT } from "../browser.mjs";
 import { expectOk } from "../steps.mjs";
 
-// P-02/P-03/P-19: /athlete shows the editable Body section (current weight,
-// personal data and max heart rate), and the deep link from Daily lands on it. Read-only: a
+// P-02/P-03/P-19: /athlete shows the editable Body section (current weight
+// and personal data), the max heart rate next to the thresholds, and the
+// deep link from Daily lands on Body. Read-only: a
 // clean browser already has its default profile, so nothing is written.
 export default async function athleteBody({ rec, open }) {
   const { page, go } = await open();
@@ -22,11 +23,13 @@ export default async function athleteBody({ rec, open }) {
   );
   await expectOk(
     rec,
-    "P-19: the Body section has a max heart rate field",
+    "P-19: the thresholds card has a max heart rate field",
     () =>
-      expect(body.getByLabel(/^Frecuencia cardiaca máxima/)).toBeVisible({
-        timeout: TIMEOUT,
-      }),
+      expect(
+        page
+          .getByTestId("athlete-thresholds")
+          .getByLabel(/^Frecuencia cardiaca máxima/)
+      ).toBeVisible({ timeout: TIMEOUT }),
     () => mainText(page)
   );
   await expectOk(

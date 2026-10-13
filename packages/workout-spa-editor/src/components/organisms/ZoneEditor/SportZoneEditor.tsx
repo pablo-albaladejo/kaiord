@@ -1,26 +1,35 @@
 /**
  * SportZoneEditor Component
  *
- * Sport-specific zone editor with tabs, thresholds, and zone sections.
+ * Sport-specific zone editor with tabs and zone sections. Thresholds are
+ * not edited here: they have one home, the Athlete page; the caller passes
+ * what to show for them in `thresholds`.
  */
+
+import type { ReactNode } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { SportKey } from "../../../types/sport-zones";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal/ConfirmationModal";
 import { SportZoneSections } from "./components/SportZoneSections";
 import { SportZoneTabs } from "./components/SportZoneTabs";
-import { SportZoneThresholds } from "./components/SportZoneThresholds";
 import { useSportZoneEditor } from "./hooks/useSportZoneEditor";
 
 type SportZoneEditorProps = {
   profileId: string;
   /** The tab to open on — the sport the athlete was looking at. */
   initialSport?: SportKey;
+  /** Told when the athlete picks another sport's tab. */
+  onSportChange?: (sport: SportKey) => void;
+  /** What the zones derive from, shown above them. */
+  thresholds?: ReactNode;
 };
 
 export function SportZoneEditor({
   profileId,
   initialSport,
+  onSportChange,
+  thresholds,
 }: SportZoneEditorProps) {
   const t = useTranslate("zones");
   const {
@@ -33,31 +42,36 @@ export function SportZoneEditor({
     handleMethodChange,
     confirmMethodSwitch,
     cancelMethodSwitch,
-    updateSportThresholds,
     handleZonesChange,
     handleAddZone,
   } = useSportZoneEditor(profileId, initialSport);
 
-  if (!sportConfig) {
-    return <p className="text-sm text-gray-500">{t("empty.noSportConfig")}</p>;
-  }
+  const handleSportChange = (sport: SportKey) => {
+    setActiveSport(sport);
+    onSportChange?.(sport);
+  };
 
+  // A sport with no config yet keeps its tabs and thresholds, so it is not
+  // a dead end: setting a threshold creates the config.
   return (
     <div className="space-y-4">
-      <SportZoneTabs activeSport={activeSport} onSportChange={setActiveSport} />
-      <SportZoneThresholds
-        thresholds={sportConfig.thresholds}
-        capabilities={capabilities}
-        onChange={(t) => updateSportThresholds(profileId, activeSport, t)}
+      <SportZoneTabs
+        activeSport={activeSport}
+        onSportChange={handleSportChange}
       />
-      <SportZoneSections
-        config={sportConfig}
-        capabilities={capabilities}
-        onMethodChange={handleMethodChange}
-        onZonesChange={handleZonesChange}
-        onAddZone={handleAddZone}
-        ftp={sportConfig.thresholds.ftp}
-      />
+      {thresholds}
+      {sportConfig ? (
+        <SportZoneSections
+          config={sportConfig}
+          capabilities={capabilities}
+          onMethodChange={handleMethodChange}
+          onZonesChange={handleZonesChange}
+          onAddZone={handleAddZone}
+          ftp={sportConfig.thresholds.ftp}
+        />
+      ) : (
+        <p className="text-sm text-ink-muted">{t("empty.noSportConfig")}</p>
+      )}
       <p role="status" className="text-xs text-ink-muted">
         {saved ? t("status.saved") : ""}
       </p>

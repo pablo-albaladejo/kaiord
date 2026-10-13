@@ -107,23 +107,6 @@ describe("SportZoneEditor", () => {
       expect(await screen.findByText("Heart Rate Zones")).toBeInTheDocument();
     });
 
-    it("should show threshold inputs for cycling", async () => {
-      // Arrange
-
-      const profile = await seedProfile();
-
-      // Act
-
-      renderEditor(profile.id);
-
-      // Assert
-
-      expect(
-        await screen.findByLabelText("LTHR threshold")
-      ).toBeInTheDocument();
-      expect(screen.getByLabelText("FTP threshold")).toBeInTheDocument();
-    });
-
     it("should show zone method dropdown", async () => {
       // Arrange
 
@@ -143,7 +126,7 @@ describe("SportZoneEditor", () => {
   });
 
   describe("tab switching", () => {
-    it("should switch to running tab and show pace input", async () => {
+    it("should switch to running tab and show pace zones", async () => {
       // Arrange
 
       const profile = await seedProfile();
@@ -161,9 +144,7 @@ describe("SportZoneEditor", () => {
         "aria-selected",
         "true"
       );
-      expect(
-        screen.getByLabelText("Threshold Pace threshold")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Pace Zones")).toBeInTheDocument();
     });
 
     it("should switch to generic tab showing only HR zones", async () => {
