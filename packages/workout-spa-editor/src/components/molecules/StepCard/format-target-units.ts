@@ -34,17 +34,18 @@ export const formatPowerTarget = (
 
 export const formatHeartRateTarget = (
   value: unknown,
-  t: Translate = getTranslate("editor")
+  t: Translate = getTranslate("editor"),
+  hrUnit: string = getTranslate("common")("units.hr")
 ): string => {
   const v = asRecord(value);
   if (!v || !("unit" in v)) return t("target.heartRate");
-  if (v.unit === "bpm" && isValidNumber(v.value)) return `${v.value} bpm`;
+  if (v.unit === "bpm" && isValidNumber(v.value)) return `${v.value} ${hrUnit}`;
   if (v.unit === "percent_max" && isValidNumber(v.value))
     return `${v.value}% max`;
   if (v.unit === "zone" && isValidNumber(v.value))
     return t("target.zone", { n: v.value });
   if (v.unit === "range" && isValidNumber(v.min) && isValidNumber(v.max))
-    return `${v.min}-${v.max} bpm`;
+    return `${v.min}-${v.max} ${hrUnit}`;
   return t("target.heartRate");
 };
 

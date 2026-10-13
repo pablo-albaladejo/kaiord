@@ -76,3 +76,18 @@ describe("englishLeaks", () => {
     assert.deepEqual(leaks, []);
   });
 });
+
+describe("the heart-rate unit", () => {
+  it("should be ppm in Spanish and bpm in English", () => {
+    // Arrange
+    const key = "units.hr";
+
+    // Act
+    const es = localeText("es", "common", key);
+    const en = localeText("en", "common", key);
+
+    // Assert
+    assert.equal(es, "ppm");
+    assert.equal(en, "bpm");
+  });
+});
