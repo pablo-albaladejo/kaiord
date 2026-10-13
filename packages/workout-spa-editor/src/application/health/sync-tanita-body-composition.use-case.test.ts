@@ -8,16 +8,13 @@
 import "fake-indexeddb/auto";
 
 import { tanitaCsvToKrd } from "@kaiord/tanita";
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { KaiordDatabase } from "../../adapters/dexie/dexie-database";
 import { createDexieExportLedgerRepository } from "../../adapters/dexie/dexie-export-ledger-repository";
 import { createDexieIntegrationPolicyRepository } from "../../adapters/dexie/dexie-integration-policy-repository";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import { syncTanitaBodyComposition } from "./sync-tanita-body-composition.use-case";
-
-const dbName = () => `test-tanita-sync-${Date.now()}-${Math.random()}`;
 
 const PROFILE_ID = "11111111-1111-4111-8111-111111111111";
 const CSV = [
@@ -46,18 +43,10 @@ const seedExportPolicy = async (
 };
 
 describe("syncTanitaBodyComposition", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("tanita-sync");
 
   beforeEach(async () => {
-    name = dbName();
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   const makeDeps = () => ({

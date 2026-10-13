@@ -5,13 +5,10 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { createDexieEnergyBalanceRepositories } from "./dexie-energy-balance-repositories";
-
-const dbName = () => `kaiord-test-energy-${Date.now()}-${Math.random()}`;
 
 const UPDATED_TARGET_WEIGHT_KG = 70;
 
@@ -28,18 +25,10 @@ const entry = (id: string, profileId: string, date: string) => ({
 });
 
 describe("createDexieEnergyBalanceRepositories", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("energy-balance");
 
   beforeEach(async () => {
-    name = dbName();
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should read intake entries for a profile and date", async () => {
