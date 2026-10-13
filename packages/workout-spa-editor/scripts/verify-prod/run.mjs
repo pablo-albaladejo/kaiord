@@ -26,6 +26,7 @@ const CHECKS = [
   "mobile",
   "trends",
   "intake-preset",
+  "athlete-body",
 ];
 
 async function runCheck(browser, base, name) {

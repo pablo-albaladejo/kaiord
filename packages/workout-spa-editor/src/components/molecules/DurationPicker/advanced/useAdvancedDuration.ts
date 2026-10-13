@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Duration } from "../../../../types/krd";
 import { buildDuration, validateRepeatFrom } from "./duration-builder";
 import {
@@ -21,6 +22,7 @@ export function useAdvancedDuration(
   value: Duration | null,
   onChange: (duration: Duration | null) => void
 ) {
+  const tCommon = useTranslate("common");
   const [durationType, setDurationType] = useState<AdvancedDurationType>(
     getDurationTypeFromValue(value)
   );
@@ -50,7 +52,7 @@ export function useAdvancedDuration(
 
   const handleValueChange = (newValue: string) => {
     setDurationValue(newValue);
-    const validation = validateValue(durationType, newValue);
+    const validation = validateValue(durationType, newValue, tCommon);
     if (!validation.isValid) {
       setValidationError(validation.error || "");
       onChange(null);

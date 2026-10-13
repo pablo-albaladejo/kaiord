@@ -7,6 +7,7 @@
  */
 
 import { act, render, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
@@ -79,6 +80,35 @@ describe("useFocusOnSectionChange", () => {
     await waitFor(() => {
       expect(focusedSection()).toBe("custom-instructions");
     });
+  });
+
+  it("should focus the section when mounted under StrictMode with the query already set", async () => {
+    // Arrange
+    // A deferred frame whose cancellation really cancels, as in a browser;
+    // StrictMode runs the effect, cleans it up, then runs it again.
+    const frames = new Map<number, FrameRequestCallback>();
+    let next = 0;
+    globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      frames.set(++next, cb);
+      return next;
+    }) as typeof requestAnimationFrame;
+    globalThis.cancelAnimationFrame = ((id: number) => {
+      frames.delete(id);
+    }) as typeof cancelAnimationFrame;
+    const loc = memoryLocation({ path: "/settings/ai?section=providers" });
+
+    // Act
+    render(
+      <StrictMode>
+        <Router hook={loc.hook} searchHook={loc.searchHook}>
+          <Harness />
+        </Router>
+      </StrictMode>
+    );
+    act(() => frames.forEach((cb) => cb(0)));
+
+    // Assert
+    expect(focusedSection()).toBe("providers");
   });
 
   it("should no-op when the section query is absent", () => {
