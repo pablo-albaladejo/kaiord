@@ -6,6 +6,7 @@ import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsExtensionBanner } from "./ConnectionsExtensionBanner";
 import { ConnectionsHealth } from "./ConnectionsHealth";
 import { ConnectionSourceCard } from "./ConnectionSourceCard";
+import { ConnectionsScope } from "./ConnectionsScope";
 import { ConnectionsUnsupported } from "./ConnectionsUnsupported";
 import { DataTypeRoutingSection } from "./DataTypeRoutingSection";
 
@@ -34,6 +35,7 @@ export const ConnectionsTab: React.FC = () => {
 
   return (
     <div className="space-y-5" data-testid="connections-tab">
+      <ConnectionsScope athleteName={active?.profile?.name} sources={sources} />
       <ConnectionsHealth sources={sources} byDataType={byDataType} />
       <ConnectionsExtensionBanner sources={sources} />
       <section className="space-y-3">

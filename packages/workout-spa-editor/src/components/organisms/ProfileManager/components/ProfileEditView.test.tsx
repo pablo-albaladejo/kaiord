@@ -41,4 +41,24 @@ describe("ProfileEditView", () => {
       activityLevel: "moderate",
     });
   });
+
+  // P-07: external accounts have one home, Connections.
+  it("should not offer a Linked Accounts tab", () => {
+    // Arrange
+
+    // Act
+    renderWithProviders(
+      <ProfileEditView
+        profileId={PROFILE_ID}
+        formData={{ name: "Athlete" }}
+        onChange={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(
+      screen.queryByRole("tab", { name: "Linked Accounts" })
+    ).not.toBeInTheDocument();
+  });
 });

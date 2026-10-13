@@ -6,7 +6,6 @@ import type { Profile } from "../../../types/profile";
 import { CreateProfileSection } from "./components/CreateProfileSection";
 import { ProfileItemActions } from "./components/ProfileItemActions";
 import { ProfileListSection } from "./components/ProfileListSection";
-import { RowInfo } from "./components/RowInfo";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { ImportExportActions } from "./ImportExportActions";
 
@@ -85,15 +84,5 @@ describe("ProfileManager in Spanish", () => {
     expect(
       screen.getByText("Aún no hay perfiles. Crea uno para empezar.")
     ).toBeInTheDocument();
-  });
-
-  it("should say a coaching account is not connected in Spanish", () => {
-    // Arrange
-
-    // Act
-    render(<RowInfo label="Train2Go" linked={undefined} />);
-
-    // Assert
-    expect(screen.getByText("Sin conectar")).toBeInTheDocument();
   });
 });

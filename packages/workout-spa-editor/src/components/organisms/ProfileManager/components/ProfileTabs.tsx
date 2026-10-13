@@ -1,14 +1,13 @@
 /**
  * ProfileTabs Component
  *
- * Top-level tab selector: Training Zones | Personal Data | Linked Accounts.
- * The former "Data Flows" tab was retired (F4.2): routing now lives
- * exclusively on the Connections page (/settings/connections).
+ * Top-level tab selector: Training Zones | Personal Data. External accounts
+ * live on the Connections page (/connections), not here.
  */
 
 import { useTranslate } from "../../../../i18n/use-translate";
 
-type ProfileTab = "zones" | "personal" | "linked-accounts";
+type ProfileTab = "zones" | "personal";
 
 type ProfileTabsProps = {
   activeTab: ProfileTab;
@@ -18,7 +17,6 @@ type ProfileTabsProps = {
 const TABS: Array<{ id: ProfileTab; labelKey: string }> = [
   { id: "zones", labelKey: "profileManager.tabs.zones" },
   { id: "personal", labelKey: "profileManager.tabs.personal" },
-  { id: "linked-accounts", labelKey: "profileManager.tabs.linkedAccounts" },
 ];
 
 export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {

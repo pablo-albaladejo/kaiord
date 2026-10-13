@@ -49,9 +49,11 @@ export function ConnectionSourceCard({ source, profileId, byDataType }: Props) {
       />
       <ConnectionBridgeLine source={source} />
       {/* Planned sessions are the one per-profile-linked flow (coaching). */}
-      {source.importTypes.includes("planned-session") && (
-        <ConnectionProfileLink sourceId={source.id} name={source.name} />
-      )}
+      <ConnectionProfileLink
+        sourceId={source.id}
+        name={source.name}
+        canLink={source.importTypes.includes("planned-session")}
+      />
       <ConnectionRouteChips source={source} />
       {open && manageable && (
         <ConnectionManagePanel

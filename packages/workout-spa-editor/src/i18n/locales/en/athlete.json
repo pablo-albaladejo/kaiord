@@ -28,7 +28,8 @@
     "hint": "Off means nothing overwrites a number you typed yourself."
   },
   "connections": {
-    "fedBy": "This profile is fed by {{source}}",
+    "title": "Connections",
+    "none": "No connections yet",
     "manage": "Manage in Connections"
   },
   "tagline": {
@@ -78,16 +79,9 @@
     "deleteBody": "Are you sure you want to delete this profile? This action cannot be undone.",
     "cancel": "Cancel",
     "confirmDelete": "Delete",
-    "linkedTitle": "Linked Coaching Accounts",
-    "connectedAs": "Connected as",
-    "notConnected": "Not connected",
-    "connect": "Connect {{source}}",
-    "connecting": "Connecting…",
-    "disconnect": "Disconnect",
     "tabs": {
       "zones": "Training Zones",
-      "personal": "Personal Data",
-      "linkedAccounts": "Linked Accounts"
+      "personal": "Personal Data"
     },
     "personal": {
       "height": "Height ({{unit}})",
@@ -113,10 +107,7 @@
       "switched": "Switched to profile: {{name}}",
       "createFailed": "Failed to create profile — please retry.",
       "saveFailed": "Failed to save profile — please retry.",
-      "deleteFailed": "Failed to delete profile — please retry.",
-      "accountLinked": "Coaching account linked",
-      "accountDisconnected": "Coaching account disconnected",
-      "extensionMissing": "The Kaiord extension is not installed in this browser. Install it to connect {{source}}."
+      "deleteFailed": "Failed to delete profile — please retry."
     },
     "ftp": "FTP: {{value}}W",
     "lthr": "LTHR: {{value}} bpm"

@@ -36,9 +36,6 @@ describe("ProfileEditView in Spanish", () => {
     expect(
       screen.getByRole("tab", { name: "Zonas de entrenamiento" })
     ).toBeVisible();
-    expect(
-      screen.getByRole("tab", { name: "Cuentas vinculadas" })
-    ).toBeVisible();
     for (const label of [
       "Altura (cm)",
       "Fecha de nacimiento",

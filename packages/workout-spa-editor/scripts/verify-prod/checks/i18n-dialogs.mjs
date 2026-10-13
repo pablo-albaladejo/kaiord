@@ -55,9 +55,10 @@ export async function profileManager(rec, { page, go }) {
   await tabs.first().waitFor();
   const pieces = englishPieces("athlete", "profileManager");
   const count = await tabs.count();
+  // Linked Accounts left for #/connections (P-07), which i18n-scan covers.
   rec.assert(
-    count === 3,
-    "F-46b: the Profile Manager shows its three tabs",
+    count === 2,
+    "F-46b: the Profile Manager shows its two tabs",
     `tabs=${count}`
   );
   for (let i = 0; i < count; i++) {

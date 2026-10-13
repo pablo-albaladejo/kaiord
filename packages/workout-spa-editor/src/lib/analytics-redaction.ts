@@ -17,6 +17,7 @@ const STATIC_PATHS: ReadonlySet<string> = new Set([
   "/workout/new",
   "/settings",
   "/settings/profile",
+  "/connections",
   "/health",
   "/health/sleep",
   "/health/weight",

@@ -2,11 +2,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { SectionHead } from "../../molecules/SectionHead/SectionHead";
 import { GeneralTab } from "../../organisms/SettingsPanel/GeneralTab";
 import type { SettingsRowDef } from "./settings-group-types";
-import {
-  SETTINGS_CONNECTIONS_ROW,
-  SETTINGS_PAGE_ROWS,
-  SETTINGS_VERSION_LABEL,
-} from "./settings-groups";
+import { SETTINGS_PAGE_ROWS, SETTINGS_VERSION_LABEL } from "./settings-groups";
 import { SettingsRow } from "./SettingsRow";
 import { useSettingsRowValues } from "./use-settings-row-values";
 
@@ -47,7 +43,6 @@ export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
         <GeneralTab />
       </section>
       {card(SETTINGS_PAGE_ROWS)}
-      {card([SETTINGS_CONNECTIONS_ROW])}
       <p className="px-4 text-center text-xs text-ink-muted">
         {SETTINGS_VERSION_LABEL}
       </p>

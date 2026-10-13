@@ -60,7 +60,7 @@ describe("SendWeekPanel", () => {
     // Assert
     expect(
       screen.getByRole("link", { name: "Open Connections" })
-    ).toHaveAttribute("href", "/settings/connections");
+    ).toHaveAttribute("href", "/connections");
   });
 
   it("should link each item to its workout page with its status", () => {

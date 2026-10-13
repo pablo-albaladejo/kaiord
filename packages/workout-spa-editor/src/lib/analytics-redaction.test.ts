@@ -38,6 +38,7 @@ describe("redactAnalyticsPath", () => {
     "/health/sleep",
     "/settings/privacy",
     "/settings/profile",
+    "/connections",
     "/health",
     "/daily",
     "/",

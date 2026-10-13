@@ -114,8 +114,8 @@ test.describe("Athlete page", () => {
     await expect(
       page.getByRole("heading", { name: /cycling zones/i })
     ).toBeVisible();
-    // The Connections section was retired into /settings/connections; with
-    // no linked account the Athlete page does not even link there.
+    // The Connections section was retired into /connections; the Athlete
+    // page only links there, it does not grow a second list.
     await expect(
       page.getByRole("heading", { name: /connections/i })
     ).toHaveCount(0);

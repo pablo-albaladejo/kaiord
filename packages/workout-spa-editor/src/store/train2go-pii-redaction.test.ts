@@ -4,7 +4,7 @@
  * Asserts that no Train2Go credentials surface in:
  *   (a) console.error / structured-log paths from the transport adapter
  *   (b) the store's `lastError` string written on failure paths
- *   (c) toast strings emitted by LinkedAccountsSection / dialog
+ *   (c) toast strings emitted by the Connections profile link / dialog
  *
  * This test runs realistic failure scenarios (session expired, transport
  * not available, ping rejection) and asserts that `externalUserName`,

@@ -6,11 +6,9 @@
 
 import { useState } from "react";
 
-import { useProfileByIdLive } from "../../../../hooks/use-profile-by-id-live";
 import { useTranslate } from "../../../../i18n/use-translate";
 import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import type { ProfileFormData } from "../types";
-import { LinkedAccountsSection } from "./LinkedAccountsSection";
 import { PersonalDataTab } from "./PersonalDataTab";
 import type { ProfileTab } from "./ProfileTabs";
 import { ProfileTabs } from "./ProfileTabs";
@@ -31,11 +29,6 @@ export function ProfileEditView({
 }: ProfileEditViewProps) {
   const t = useTranslate("athlete");
   const [activeTab, setActiveTab] = useState<ProfileTab>("zones");
-  // Live read from Dexie via useLiveQuery — `undefined` covers both
-  // loading (first mount) and "no row for this id" (deleted between
-  // dialog open and now). Both cases hide the linked-accounts section,
-  // matching legacy behavior.
-  const profile = useProfileByIdLive(profileId);
 
   return (
     <>
@@ -43,9 +36,6 @@ export function ProfileEditView({
       {activeTab === "zones" && <SportZoneEditor profileId={profileId} />}
       {activeTab === "personal" && (
         <PersonalDataTab formData={formData} onChange={onChange} />
-      )}
-      {activeTab === "linked-accounts" && profile && (
-        <LinkedAccountsSection profile={profile} />
       )}
       <div className="mt-4 flex justify-end">
         <button

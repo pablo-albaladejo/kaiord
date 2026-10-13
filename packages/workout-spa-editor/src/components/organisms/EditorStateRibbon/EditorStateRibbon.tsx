@@ -20,7 +20,7 @@ import { resolveRibbonContent } from "./ribbon-content";
 import { RibbonPanel } from "./RibbonPanel";
 import { useGarminGate } from "./use-garmin-gate";
 
-const CONNECTIONS_ROUTE = "/settings/connections";
+const CONNECTIONS_ROUTE = "/connections";
 
 export type EditorStateRibbonProps = {
   state: WorkoutState;

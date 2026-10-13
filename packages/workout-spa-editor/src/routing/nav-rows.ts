@@ -1,4 +1,5 @@
 import type { IconName } from "../components/atoms/Icon/icon-map";
+import { CONNECTIONS_PATH } from "./constants";
 
 /**
  * Which chrome a destination is reachable from. Spelled as a code so the
@@ -49,7 +50,7 @@ export const NAV_ROWS: readonly NavRow[] = [
   ["new", "/workout/new", undefined, "plus", "page", false],
   [
     "connections",
-    "/settings/connections",
+    CONNECTIONS_PATH,
     "Open connections",
     "link",
     "account",
