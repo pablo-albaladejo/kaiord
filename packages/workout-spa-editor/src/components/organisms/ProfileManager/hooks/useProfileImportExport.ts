@@ -1,13 +1,15 @@
 /**
  * useProfileImportExport Hook
  *
- * Profile import/export. Import uses the `createProfile` application
- * use case (so persistence rejection surfaces a user-visible error and
- * the I1 invariant — first profile becomes active — is preserved).
+ * Profile import/export. Import uses the `importProfile` application
+ * use case (every validated field kept under a fresh identity), so
+ * persistence rejection surfaces a user-visible error and the I1
+ * invariant — first profile becomes active — is preserved.
  */
 
-import { createProfile } from "../../../../application/profile/create-profile";
+import { importProfile } from "../../../../application/profile/import-profile";
 import { usePersistence } from "../../../../contexts/persistence-context";
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 import { profileSchema } from "../../../../types/profile";
 
@@ -18,6 +20,7 @@ type UseProfileImportExportParams = {
 export function useProfileImportExport(params: UseProfileImportExportParams) {
   const { setImportError } = params;
   const persistence = usePersistence();
+  const t = useTranslate("athlete");
 
   const handleExport = (profile: Profile) => {
     const dataStr = JSON.stringify(profile, null, 2);
@@ -36,18 +39,26 @@ export function useProfileImportExport(params: UseProfileImportExportParams) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      const validatedProfile = profileSchema.parse(data);
+    const failed = (message: string) =>
+      setImportError(t("profileManager.importFailed", { message }));
 
-      await createProfile(persistence, validatedProfile.name, {
-        bodyWeight: validatedProfile.bodyWeight,
-      });
+    let validatedProfile: Profile;
+    try {
+      validatedProfile = profileSchema.parse(JSON.parse(await file.text()));
+    } catch {
+      failed(t("profileManager.importInvalid"));
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      await importProfile(persistence, validatedProfile);
       setImportError(null);
     } catch (error) {
-      setImportError(
-        `Import failed: ${error instanceof Error ? error.message : "Invalid profile file"}`
+      failed(
+        error instanceof Error
+          ? error.message
+          : t("profileManager.importInvalid")
       );
     }
 

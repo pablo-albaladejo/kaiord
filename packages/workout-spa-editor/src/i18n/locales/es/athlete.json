@@ -57,6 +57,8 @@
     "create": "Crear perfil",
     "import": "Importar perfil",
     "importFile": "Importar archivo de perfil",
+    "importFailed": "Error al importar: {{message}}",
+    "importInvalid": "Archivo de perfil no válido",
     "saved": "Perfiles guardados ({{count}})",
     "empty": "Aún no hay perfiles. Crea uno para empezar.",
     "setActive": "Activar",
