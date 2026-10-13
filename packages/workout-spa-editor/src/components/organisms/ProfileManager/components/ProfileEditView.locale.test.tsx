@@ -9,8 +9,6 @@ vi.mock("../../../../i18n/LocaleProvider", () => ({
   useActiveLocale: () => "es",
 }));
 
-const PROFILE_ID = "00000000-0000-4000-8000-0000000000a2";
-
 describe("ProfileEditView in Spanish", () => {
   beforeAll(() => setActiveLocale("es"));
   afterAll(() => appI18n.changeLanguage("en"));
@@ -20,7 +18,6 @@ describe("ProfileEditView in Spanish", () => {
     const formData: ProfileFormData = { name: "Atleta" };
     renderWithProviders(
       <ProfileEditView
-        profileId={PROFILE_ID}
         formData={formData}
         onChange={vi.fn()}
         onCancel={vi.fn()}
@@ -37,8 +34,9 @@ describe("ProfileEditView in Spanish", () => {
       screen.queryByRole("tab", { name: "Zonas de entrenamiento" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("tab", { name: "Cuentas vinculadas" })
-    ).toBeVisible();
+      screen.queryByRole("tab", { name: "Cuentas vinculadas" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Datos personales" })).toBeVisible();
     for (const label of [
       "Altura (cm)",
       "Fecha de nacimiento",

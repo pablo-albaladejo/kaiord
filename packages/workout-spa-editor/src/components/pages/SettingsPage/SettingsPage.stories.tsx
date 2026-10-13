@@ -44,15 +44,6 @@ export const AiSection: Story = {
   parameters: { route: "/settings/ai" },
 };
 
-/**
- * The Connections tab is where synced-source provenance lives — bridge
- * discovery state resolves for real here, there is just nothing connected
- * under Storybook, which is the honest first-run reading of this panel.
- */
-export const ConnectionsSection: Story = {
-  parameters: { route: "/settings/connections" },
-};
-
 /** General: language, units, notifications and theme for this device. */
 export const GeneralSection: Story = {
   parameters: { route: "/settings/general" },

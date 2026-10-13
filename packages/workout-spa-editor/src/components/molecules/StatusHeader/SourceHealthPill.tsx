@@ -7,7 +7,7 @@ import { ICON_MAP } from "../../atoms/Icon/icon-map";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "./header-menu-styles";
 import type { HeaderAttention } from "./use-header-attention";
 
-const CONNECTIONS_PATH = "/settings/connections";
+const CONNECTIONS_PATH = "/connections";
 
 /**
  * No amber. Amber is Z4 — a warning painted in it competes with the

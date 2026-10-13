@@ -41,7 +41,8 @@
     "hint": "Apagado significa que nada sobrescribe un número que escribiste tú."
   },
   "connections": {
-    "fedBy": "Este perfil se alimenta de {{source}}",
+    "title": "Conexiones",
+    "none": "Sin conexiones todavía",
     "manage": "Gestionar en Conexiones"
   },
   "tagline": {
@@ -89,15 +90,8 @@
     "deleteBody": "¿Seguro que quieres eliminar este perfil? Esta acción no se puede deshacer.",
     "cancel": "Cancelar",
     "confirmDelete": "Eliminar",
-    "linkedTitle": "Cuentas de entrenador vinculadas",
-    "connectedAs": "Conectado como",
-    "notConnected": "Sin conectar",
-    "connect": "Conectar {{source}}",
-    "connecting": "Conectando…",
-    "disconnect": "Desconectar",
     "tabs": {
-      "personal": "Datos personales",
-      "linkedAccounts": "Cuentas vinculadas"
+      "personal": "Datos personales"
     },
     "personal": {
       "height": "Altura ({{unit}})",
@@ -123,10 +117,7 @@
       "switched": "Perfil activo: {{name}}",
       "createFailed": "No se pudo crear el perfil. Inténtalo de nuevo.",
       "saveFailed": "No se pudo guardar el perfil. Inténtalo de nuevo.",
-      "deleteFailed": "No se pudo eliminar el perfil. Inténtalo de nuevo.",
-      "accountLinked": "Cuenta de entrenador vinculada",
-      "accountDisconnected": "Cuenta de entrenador desvinculada",
-      "extensionMissing": "La extensión de Kaiord no está instalada en este navegador. Instálala para conectar {{source}}."
+      "deleteFailed": "No se pudo eliminar el perfil. Inténtalo de nuevo."
     },
     "ftp": "FTP: {{value}}W",
     "lthr": "FC umbral: {{value}} ppm"

@@ -23,7 +23,9 @@ const ROUTES = [
   "settings/data",
   "settings/privacy",
   "settings/about",
-  "settings/connections",
+  // Connections left Settings (P-07); it also carries the Train2Go link the
+  // Profile Manager's former "Cuentas vinculadas" tab showed.
+  "connections",
   "workout/new",
   "workout/new?source=scratch",
 ];

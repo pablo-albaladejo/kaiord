@@ -55,9 +55,11 @@ export async function profileManager(rec, { page, go }) {
   await tabs.first().waitFor();
   const pieces = englishPieces("athlete", "profileManager");
   const count = await tabs.count();
+  // Zones left for #/athlete/zones/<sport> and Linked Accounts for
+  // #/connections; i18n-scan covers both routes. Personal Data remains.
   rec.assert(
-    count === 2,
-    "F-46b: the Profile Manager shows its two tabs",
+    count === 1,
+    "F-46b: the Profile Manager shows its one tab, Personal Data",
     `tabs=${count}`
   );
   for (let i = 0; i < count; i++) {

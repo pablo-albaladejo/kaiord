@@ -25,22 +25,6 @@ import { sourceNeedsAttention } from "./connection-source";
 export const needsAttention = sourceNeedsAttention;
 
 /**
- * The one field `countDetected` reads. Declared here rather than imported so
- * this layer stays adapter-free; `BridgeConnectionState` satisfies it
- * structurally, the same arrangement `connection-source-status` uses.
- */
-export type DiscoverySignal = { readonly discovered: boolean };
-
-/**
- * How many bridges answered. A page cannot enumerate installed extensions:
- * `discovered` means the extension announced itself and its last probe
- * reached it, which is why the copy says detected rather than installed.
- */
-export const countDetected = (
-  connections: readonly DiscoverySignal[]
-): number => connections.filter((entry) => entry.discovered).length;
-
-/**
  * Why the affected sources are affected, ranked by what the reader can do
  * about it: an instruction outranks a date. Both instructions routinely
  * coexist with a `lastSyncAt` — you only get a re-auth demand for an account

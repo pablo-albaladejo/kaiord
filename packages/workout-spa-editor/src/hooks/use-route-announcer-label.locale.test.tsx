@@ -21,7 +21,8 @@ describe("useRouteAnnouncerLabel in Spanish", () => {
   afterAll(() => appI18n.changeLanguage("en"));
 
   it.each([
-    ["/settings/connections", "Página de ajustes"],
+    ["/settings/sync", "Página de ajustes"],
+    ["/connections", "Página de conexiones"],
     ["/athlete", "Página de atleta"],
     ["/workout/new", "Nuevo entreno"],
     ["/health", "Página de tendencias"],
