@@ -1,6 +1,7 @@
 import { isoDate, settledText } from "../browser.mjs";
 import { englishLeaks, englishPieces, localeText } from "../locale.mjs";
 import { findEnglish } from "./i18n-terms.mjs";
+import { recordWeight } from "./record-weight.mjs";
 
 const es = (ns, key) => localeText("es", ns, key);
 
@@ -31,11 +32,12 @@ async function scanDialog(rec, dialog, label, pieces) {
 }
 
 // Fields by type and order, not by label: a label that regressed to English
-// must reach the scan and be reported, not stop the check before it.
+// must reach the scan and be reported, not stop the check before it. The tab
+// has no weight field (P-03): its numbers are height, then resting HR.
 async function fillPersonal(dialog) {
   const numbers = dialog.locator('input[type="number"]');
-  await numbers.nth(0).fill("70");
-  await numbers.nth(1).fill("175");
+  await numbers.nth(0).fill("175");
+  await numbers.nth(1).fill("55");
   await dialog.locator('input[type="date"]').fill("1990-01-01");
   await dialog.locator("select").first().selectOption("male");
 }
@@ -69,9 +71,11 @@ export async function profileManager(rec, { page, go }) {
 }
 
 // F-39: the goal dialog with a goal steep enough to show the preview and the
-// safety-cap warning. The preview needs the personal data saved above, so
-// its appearance is also the signal that those writes landed.
+// safety-cap warning. The preview needs the personal data saved above and a
+// current weight, so its appearance is also the signal that those writes
+// landed.
 export async function goalDialog(rec, { page }) {
+  await recordWeight(page);
   await page.evaluate(() => (window.location.hash = "#/nutrition"));
   await page.getByTestId("nutrition-set-goal").click();
   const dialog = page.getByTestId("goal-setup-dialog");
