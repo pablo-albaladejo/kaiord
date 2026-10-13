@@ -3,14 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import { UnitsProvider, useUnits } from "./units-context";
 
-vi.mock("../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p1", profile: null }),
-}));
+const prefsMock = vi.hoisted(() => ({ value: {} as unknown }));
 
-const prefsMock = vi.hoisted(() => ({ value: undefined as unknown }));
-
-vi.mock("../hooks/use-user-preferences", () => ({
-  useUserPreferences: () => prefsMock.value,
+vi.mock("../hooks/use-device-preferences", () => ({
+  useDevicePreferences: () => ({
+    prefs: prefsMock.value,
+    ready: true,
+    update: vi.fn(),
+  }),
 }));
 
 const Probe = () => <span data-testid="units">{useUnits()}</span>;
@@ -18,7 +18,7 @@ const Probe = () => <span data-testid="units">{useUnits()}</span>;
 describe("useUnits", () => {
   it("should default to metric outside a provider", () => {
     // Arrange
-    prefsMock.value = undefined;
+    prefsMock.value = {};
 
     // Act
     render(<Probe />);
@@ -29,7 +29,7 @@ describe("useUnits", () => {
 
   it("should default to metric when the preference is absent", () => {
     // Arrange
-    prefsMock.value = { profileId: "p1", calendarView: "grid" };
+    prefsMock.value = {};
 
     // Act
     render(
@@ -44,11 +44,7 @@ describe("useUnits", () => {
 
   it("should expose the persisted imperial preference", () => {
     // Arrange
-    prefsMock.value = {
-      profileId: "p1",
-      calendarView: "grid",
-      units: "imperial",
-    };
+    prefsMock.value = { units: "imperial" };
 
     // Act
     render(

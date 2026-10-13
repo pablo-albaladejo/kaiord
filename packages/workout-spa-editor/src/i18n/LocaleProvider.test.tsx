@@ -7,15 +7,11 @@ const prefsMock = vi.hoisted(() => ({
   locale: undefined as string | undefined,
 }));
 
-vi.mock("../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p1", profile: null }),
-}));
-
-vi.mock("../hooks/use-user-preferences", () => ({
-  useUserPreferences: () => ({
-    profileId: "p1",
-    calendarView: "grid",
-    locale: prefsMock.locale,
+vi.mock("../hooks/use-device-preferences", () => ({
+  useDevicePreferences: () => ({
+    prefs: { locale: prefsMock.locale },
+    ready: true,
+    update: vi.fn(),
   }),
 }));
 
@@ -40,6 +36,24 @@ describe("LocaleProvider", () => {
       expect(screen.getByTestId("loc")).toHaveTextContent("es")
     );
     expect(document.documentElement.lang).toBe("es");
+  });
+
+  it("should follow the browser language when the device has no locale set", async () => {
+    // Arrange
+    prefsMock.locale = undefined;
+    vi.spyOn(navigator, "language", "get").mockReturnValue("es-ES");
+
+    // Act
+    render(
+      <LocaleProvider>
+        <Probe />
+      </LocaleProvider>
+    );
+
+    // Assert
+    await waitFor(() =>
+      expect(screen.getByTestId("loc")).toHaveTextContent("es")
+    );
   });
 
   it("should default useActiveLocale to en outside a provider", () => {
