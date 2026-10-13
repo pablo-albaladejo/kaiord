@@ -104,7 +104,7 @@ export const withEditedZones = async (
 /** A zone added in the zone editor, then given bounds: `buildDefaultZone`
     stamps "min_per_km" whatever the sport. */
 export const editorZone = (zone: number, minPace: number, maxPace: number) => ({
-  ...(buildDefaultZone("paceZones", zone) as PaceZone),
+  ...(buildDefaultZone("paceZones", zone, `Zone ${zone}`) as PaceZone),
   minPace,
   maxPace,
 });

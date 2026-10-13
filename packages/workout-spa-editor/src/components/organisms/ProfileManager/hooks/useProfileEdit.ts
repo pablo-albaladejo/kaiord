@@ -10,6 +10,7 @@
 import { updateProfile } from "../../../../application/profile/update-profile";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 import type { ProfileFormData } from "../types";
 
@@ -20,12 +21,11 @@ type UseProfileEditParams = {
   setEditingProfile: (profile: Profile | null) => void;
 };
 
-const TOAST_ERROR = "Failed to save profile — please retry.";
-
 export function useProfileEdit(params: UseProfileEditParams) {
   const { formData, editingProfile, setFormData, setEditingProfile } = params;
   const persistence = usePersistence();
   const toast = useToastContext();
+  const t = useTranslate("athlete");
 
   const handleEdit = (profile: Profile) => {
     setEditingProfile(profile);
@@ -59,7 +59,7 @@ export function useProfileEdit(params: UseProfileEditParams) {
           activityLevel: data.activityLevel,
         });
       } catch {
-        toast.error(TOAST_ERROR);
+        toast.error(t("profileManager.toast.saveFailed"));
       }
     })();
   };
