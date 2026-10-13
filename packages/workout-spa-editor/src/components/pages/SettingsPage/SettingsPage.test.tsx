@@ -501,9 +501,7 @@ describe("SettingsPage", () => {
       const { memory } = renderAtPath("/settings/ai");
 
       // Act
-      await user.click(
-        screen.getByRole("button", { name: "Open connections" })
-      );
+      await user.click(screen.getByRole("link", { name: "Open connections" }));
 
       // Assert
       await waitFor(() => {

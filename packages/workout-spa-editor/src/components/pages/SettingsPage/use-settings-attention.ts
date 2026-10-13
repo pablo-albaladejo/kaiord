@@ -36,6 +36,7 @@ export const useSettingsAttention = (): SettingsAttentionModel | null => {
     action: {
       label: t("attention.action"),
       onSelect: () => navigate(CONNECTIONS_PATH),
+      href: CONNECTIONS_PATH,
     },
   };
 };

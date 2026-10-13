@@ -114,4 +114,25 @@ describe("SettingsAttention", () => {
     // Assert
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
+
+  it("should render the chip action as a real link when it has a destination", () => {
+    // Arrange
+    const attention = {
+      title: "1 connection needs attention",
+      action: {
+        label: "Open connections",
+        onSelect: vi.fn(),
+        href: "/connections",
+      },
+    };
+
+    // Act
+    render(<SettingsAttention attention={attention} variant="chip" />);
+
+    // Assert
+    expect(
+      screen.getByRole("link", { name: "Open connections" })
+    ).toHaveAttribute("href", "/connections");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
 });

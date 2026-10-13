@@ -72,7 +72,11 @@ describe("useSettingsAttention", () => {
     expect(result.current).toEqual({
       title: "1 connection needs attention",
       detail: "No new data since 2026-07-20",
-      action: { label: "Open connections", onSelect: expect.any(Function) },
+      action: {
+        label: "Open connections",
+        onSelect: expect.any(Function),
+        href: "/connections",
+      },
     });
   });
 
