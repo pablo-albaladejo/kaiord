@@ -47,8 +47,9 @@ export function createRecorder(name) {
   };
 }
 
-export function formatSummary(results, { sha, base }) {
+export function formatSummary(results, { sha, base, entry }) {
   const lines = [`verify:prod  base=${base}  sha=${sha}`];
+  if (entry) lines.push(`entry=${entry}`);
   for (const r of results) {
     const ok = r.failed.length === 0 && r.passed.length > 0;
     lines.push(`${ok ? "PASS" : "FAIL"}  ${r.name}`);
@@ -56,6 +57,7 @@ export function formatSummary(results, { sha, base }) {
       lines.push("    x no assertion ran");
     }
     for (const f of r.failed) lines.push(`    x ${f}`);
+    if (r.failed.length > 0 && r.evidence) lines.push(r.evidence);
     for (const p of r.passed) lines.push(`    ok ${p}`);
     for (const n of r.notes) lines.push(`    - ${n}`);
   }

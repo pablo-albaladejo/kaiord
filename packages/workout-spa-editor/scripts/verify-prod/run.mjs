@@ -1,6 +1,8 @@
 import { stripVTControlCharacters } from "node:util";
 
 import { launchBrowser, openSession } from "./browser.mjs";
+import { readEntryScript } from "./evidence.mjs";
+import { formatEvidence } from "./evidence-format.mjs";
 import {
   createRecorder,
   formatSummary,
@@ -29,8 +31,9 @@ const CHECKS = [
 async function runCheck(browser, base, name) {
   const rec = createRecorder(name);
   const sessions = [];
+  const startedAt = Date.now();
   const open = async (opts) => {
-    const session = await openSession(browser, base, opts);
+    const session = await openSession(browser, base, { ...opts, startedAt });
     sessions.push(session);
     return session;
   };
@@ -47,6 +50,12 @@ async function runCheck(browser, base, name) {
       for (const e of pageErrors) rec.note(e);
       await s.ctx.close();
     }
+    if (rec.result.failed.length > 0 || rec.result.passed.length === 0) {
+      rec.result.evidence = formatEvidence(
+        name,
+        sessions.map((s) => s.evidence)
+      );
+    }
   }
   return rec.result;
 }
@@ -54,7 +63,8 @@ async function runCheck(browser, base, name) {
 const args = parseArgs(process.argv.slice(2));
 const names = selectChecks(CHECKS, args.only);
 const sha = await readDeployedSha(args.base);
-console.log(`verify:prod against ${args.base} (sha=${sha})`);
+const entry = await readEntryScript(args.base);
+console.log(`verify:prod against ${args.base} (sha=${sha} entry=${entry})`);
 const browser = await launchBrowser();
 const results = [];
 try {
@@ -66,6 +76,6 @@ try {
 } finally {
   await browser.close();
 }
-const summary = formatSummary(results, { sha, base: args.base });
+const summary = formatSummary(results, { sha, base: args.base, entry });
 console.log(`\n${summary.text}`);
 process.exitCode = summary.exitCode;
