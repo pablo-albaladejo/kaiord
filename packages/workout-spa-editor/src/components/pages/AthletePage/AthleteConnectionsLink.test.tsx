@@ -1,10 +1,12 @@
 import { render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
+import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-settled";
+import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import type { Profile } from "../../../types/profile";
 import { AthleteConnectionsLink } from "./AthleteConnectionsLink";
 
@@ -55,6 +57,7 @@ const renderLink = (p: Profile) => {
 
 describe("AthleteConnectionsLink", () => {
   beforeEach(() => {
+    resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS);
     vi.mocked(useConnectionSources).mockReturnValue([
       source(),
       source({ id: "train2go", name: "Train2Go", bridgeId: "train2go-bridge" }),
@@ -129,5 +132,37 @@ describe("AthleteConnectionsLink", () => {
     expect(
       within(link).queryByTestId(/^athlete-connection-chip-/)
     ).not.toBeInTheDocument();
+  });
+
+  afterEach(() => {
+    resetDiscoveryClock();
+  });
+
+  it("should not claim there are no connections while discovery is still opening", () => {
+    // Arrange
+    // A reload with extensions installed: every bridge reads available until
+    // it announces, so "No connections yet" would be a lie for seconds.
+    resetDiscoveryClock(Date.now());
+
+    // Act
+    renderLink(profile());
+
+    // Assert
+    expect(
+      screen.getByTestId("athlete-connections-link")
+    ).not.toHaveTextContent("No connections yet");
+  });
+
+  it("should still chip a linked account while discovery is opening", () => {
+    // Arrange
+    resetDiscoveryClock(Date.now());
+
+    // Act
+    renderLink(profile(["train2go"]));
+
+    // Assert
+    expect(
+      screen.getByTestId("athlete-connection-chip-train2go")
+    ).toBeInTheDocument();
   });
 });
