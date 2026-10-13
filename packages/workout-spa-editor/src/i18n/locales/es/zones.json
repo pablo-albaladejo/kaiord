@@ -5,7 +5,7 @@
     "powerDescription": "Configura {{count}} zonas de potencia según el FTP{{suffix}}",
     "heartRateDescription": "Configura {{count}} zonas de frecuencia cardíaca según el LTHR{{suffix}}",
     "ftpSuffix": " ({{ftp}} W)",
-    "lthrSuffix": " ({{lthr}} bpm)"
+    "lthrSuffix": " ({{lthr}} ppm)"
   },
   "actions": {
     "cancel": "Cancelar",
@@ -15,8 +15,8 @@
     "namePlaceholder": "Nombre de la zona",
     "minPercent": "Mín %",
     "maxPercent": "Máx %",
-    "minBpm": "Mín BPM",
-    "maxBpm": "Máx BPM"
+    "minBpm": "Mín ppm",
+    "maxBpm": "Máx ppm"
   },
   "method": {
     "ariaLabel": "método de zona {{type}}",

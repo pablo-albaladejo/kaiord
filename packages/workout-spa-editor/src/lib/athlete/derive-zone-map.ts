@@ -1,4 +1,5 @@
 import type { ZoneMapEntry } from "../../components/organisms/ZoneMap";
+import { getTranslate } from "../../i18n/use-translate";
 import type { Profile } from "../../types/profile";
 import type { Units } from "../units/units";
 import { paceSecondsFactor, paceUnitLabelFor } from "../units/units";
@@ -13,7 +14,8 @@ import { HR_MODEL, PACE_MODEL, POWER_MODEL } from "./zone-models";
 export function deriveZoneMap(
   profile: Profile,
   sport: ActiveSport,
-  units: Units = "metric"
+  units: Units = "metric",
+  hrUnit: string = getTranslate("common")("units.hr")
 ): ZoneMapEntry[] | null {
   const thresholds = profile.sportZones[sport]?.thresholds;
   if (!thresholds) return null;
@@ -31,6 +33,7 @@ export function deriveZoneMap(
       ` ${paceUnitLabelFor(base, units)}`
     );
   }
-  if (thresholds.lthr) return buildZoneMap(HR_MODEL, thresholds.lthr, " bpm");
+  if (thresholds.lthr)
+    return buildZoneMap(HR_MODEL, thresholds.lthr, ` ${hrUnit}`);
   return null;
 }
