@@ -20,7 +20,8 @@ type ZoneMapCardProps = {
 export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
   const t = useTranslate("athlete");
   const units = useUnits();
-  const zones = deriveZoneMap(profile, sport, units);
+  const hrUnit = useTranslate("common")("units.hr");
+  const zones = deriveZoneMap(profile, sport, units, hrUnit);
   // The zone map derives from the sport's primary threshold, which is the
   // first metric the same candidate order yields — naming it here is what
   // makes the reason a reason rather than a slogan.
