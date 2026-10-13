@@ -58,7 +58,7 @@ describe("HeaderNavBar", () => {
     const athlete = screen.getByTestId("status-header-athlete-button");
 
     // Assert
-    expect(athlete).toHaveAccessibleName("Open athlete profile");
+    expect(athlete).toHaveAccessibleName("Open athlete");
   });
 
   it("should keep Settings out of the nav bar", () => {

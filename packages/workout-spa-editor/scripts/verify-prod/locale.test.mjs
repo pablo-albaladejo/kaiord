@@ -6,26 +6,26 @@ import { englishLeaks, englishPieces, localeText } from "./locale.mjs";
 describe("localeText", () => {
   it("should read a nested key from the SPA's locale files", () => {
     // Arrange
-    const key = "profileManager.tabs.personal";
+    const key = "body.sex";
 
     // Act
     const es = localeText("es", "athlete", key);
     const en = localeText("en", "athlete", key);
 
     // Assert
-    assert.equal(es, "Datos personales");
-    assert.equal(en, "Personal Data");
+    assert.equal(es, "Sexo");
+    assert.equal(en, "Sex");
   });
 
   it("should throw on a key the locale file lacks", () => {
     // Arrange
-    const key = "profileManager.noSuchKey";
+    const key = "body.noSuchKey";
 
     // Act
     const read = () => localeText("es", "athlete", key);
 
     // Assert
-    assert.throws(read, /athlete:profileManager\.noSuchKey/);
+    assert.throws(read, /athlete:body\.noSuchKey/);
   });
 });
 

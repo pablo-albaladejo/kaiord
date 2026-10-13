@@ -46,7 +46,7 @@ export const NAV_ROWS: readonly NavRow[] = [
   ["trends", "/health", "Open wellness trends", "trend", "overflow", false],
   ["labs", "/health/labs", "Open labs", "labs", "nested", false, "trends"],
   ["chat", "/chat", "Open chat assistant", "chat", "overflow", false],
-  ["athlete", "/athlete", "Open athlete profile", "athlete", "bar", true],
+  ["athlete", "/athlete", "Open athlete", "athlete", "bar", true],
   ["new", "/workout/new", undefined, "plus", "page", false],
   [
     "connections",

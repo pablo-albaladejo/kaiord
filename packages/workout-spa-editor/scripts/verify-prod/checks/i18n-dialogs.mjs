@@ -32,44 +32,64 @@ async function scanDialog(rec, dialog, label, pieces) {
 }
 
 // Fields by type and order, not by label: a label that regressed to English
-// must reach the scan and be reported, not stop the check before it. The tab
-// has no weight field (P-03): its numbers are height, then resting HR.
-async function fillPersonal(dialog) {
-  const numbers = dialog.locator('input[type="number"]');
-  await numbers.nth(0).fill("175");
-  await numbers.nth(1).fill("55");
-  await dialog.locator('input[type="date"]').fill("1990-01-01");
-  await dialog.locator("select").first().selectOption("male");
+// must reach the scan and be reported, not stop the check before it. The
+// Body section's numbers are the current weight (recorded on its own, see
+// record-weight.mjs), then height, then resting HR. Numbers commit on Enter.
+async function fillPersonal(body) {
+  const numbers = body.locator('input[type="number"]');
+  for (const [index, value] of [
+    [1, "175"],
+    [2, "55"],
+  ]) {
+    await numbers.nth(index).fill(value);
+    await numbers.nth(index).press("Enter");
+  }
+  await body.locator('input[type="date"]').fill("1990-01-01");
+  await body.locator("select").first().selectOption("male");
 }
 
-// F-46b: every tab of the Profile Manager, the personal data filled in so
-// the physiology selects show a chosen value, not only "not set". The zone
-// editor is its own page now (#/athlete/zones/<sport>, scanned as a route).
-export async function profileManager(rec, { page, go }) {
-  await go("athlete");
-  await page
-    .getByRole("button", { name: es("athlete", "editProfile") })
-    .click();
-  const dialog = page.getByRole("dialog");
-  const tabs = dialog.getByRole("tablist").getByRole("tab");
-  await tabs.first().waitFor();
-  const pieces = englishPieces("athlete", "profileManager");
-  const count = await tabs.count();
-  // Zones left for #/athlete/zones/<sport> and Linked Accounts for
-  // #/connections; i18n-scan covers both routes. Personal Data remains.
+// F-46b: the personal data the Profile Manager's tab held now lives in the
+// Body section of #/athlete (P-15), filled in so the physiology selects show
+// a chosen value, not only "not set". No dialog opens on the way.
+export async function bodySection(rec, { page, go }) {
+  await go("athlete?section=body");
+  const body = page.locator("#body");
+  await body.locator("select").first().waitFor();
+  const fields = {
+    numbers: await body.locator('input[type="number"]').count(),
+    dates: await body.locator('input[type="date"]').count(),
+    selects: await body.locator("select").count(),
+  };
   rec.assert(
-    count === 1,
-    "F-46b: the Profile Manager shows its one tab, Personal Data",
-    `tabs=${count}`
+    fields.numbers === 3 && fields.dates === 1 && fields.selects === 2,
+    "F-46b: #/athlete's Body section holds weight, height, resting HR, birth date, sex and activity level",
+    JSON.stringify(fields)
   );
-  for (let i = 0; i < count; i++) {
-    await tabs.nth(i).click();
-    const name = (await tabs.nth(i).innerText()).trim();
-    if (i === 0) await fillPersonal(dialog);
-    await scanDialog(rec, dialog, `the Profile Manager tab "${name}"`, pieces);
-  }
-  await page.keyboard.press("Escape");
-  await dialog.waitFor({ state: "hidden" });
+  await fillPersonal(body);
+  await scanDialog(
+    rec,
+    body,
+    "the Body section with its data filled in",
+    englishPieces("athlete", "body")
+  );
+  rec.assert(
+    (await page.getByRole("dialog").count()) === 0,
+    "P-15: editing the personal data opens no dialog"
+  );
+}
+
+// P-15: the athletes list is a page now; its own copy is checked against
+// the English locale, beyond the generic route scan.
+export async function athletesPage(rec, { page, go }) {
+  await go("athletes");
+  const main = page.getByTestId("athletes-page");
+  await main.locator("li").first().waitFor();
+  await scanDialog(
+    rec,
+    main,
+    "#/athletes",
+    englishPieces("athlete", "athletes")
+  );
 }
 
 // F-39: the goal dialog with a goal steep enough to show the preview and the

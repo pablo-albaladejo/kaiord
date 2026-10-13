@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { screen, userEvent, waitFor } from "storybook/test";
 
 import AthletePage from "./AthletePage";
 
@@ -20,19 +19,3 @@ type Story = StoryObj<typeof meta>;
  * a fake one, and it is the only state this page can show without props.
  */
 export const NoActiveProfile: Story = {};
-
-/**
- * The empty state's "Create profile" CTA opens the real `CreateProfileDialog`
- * in place, so the entry point into the first-run flow gets its own story.
- */
-export const CreateProfileDialogOpen: Story = {
-  play: async () => {
-    const button = await waitFor(() =>
-      screen.getByRole("button", { name: "Create profile" })
-    );
-    await userEvent.click(button);
-    await waitFor(() =>
-      screen.getByRole("dialog", { name: "Create athlete profile" })
-    );
-  },
-};
