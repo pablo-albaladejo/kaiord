@@ -36,9 +36,7 @@ describe("ProfileEditView in Spanish", () => {
     expect(
       screen.queryByRole("tab", { name: "Cuentas vinculadas" })
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("tab", { name: "Datos personales" })
-    ).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Datos personales" })).toBeVisible();
     for (const label of [
       "Altura (cm)",
       "Fecha de nacimiento",
