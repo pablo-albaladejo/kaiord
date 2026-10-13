@@ -17,20 +17,29 @@ export function useThresholdWrites(profileId: string, sport: SportKey) {
   const t = useTranslate("zones");
   const [saved, setSaved] = useState(false);
 
-  const track = (write: Promise<unknown>) => {
+  /* Resolves to whether the write landed; a failure is toasted, never
+     rejected, so the field can offer the same value again. */
+  const track = (write: Promise<unknown>): Promise<boolean> => {
     setSaved(false);
-    void write.then(
-      () => setSaved(true),
-      () => toast.error(t("toast.updateFailed"))
+    return write.then(
+      () => {
+        setSaved(true);
+        return true;
+      },
+      () => {
+        toast.error(t("toast.updateFailed"));
+        return false;
+      }
     );
   };
 
   const write = (id: ThresholdFieldId, value: number | undefined) => {
     if (id === "maxHeartRate") {
-      track(updateProfile(persistence, profileId, { maxHeartRate: value }));
-      return;
+      return track(
+        updateProfile(persistence, profileId, { maxHeartRate: value })
+      );
     }
-    track(
+    return track(
       updateSportThresholds(persistence, profileId, sport, (current) => ({
         ...current,
         ...(id === "thresholdPace" && {

@@ -12,8 +12,9 @@ type ThresholdFieldProps = {
   /** The stored value as text, in the active units. */
   shown: string;
   parse: (raw: string) => ParsedThreshold;
-  /** Called with a valid value, or `undefined` when the field is cleared. */
-  onSave: (value: number | undefined) => void;
+  /** Called with a valid value, or `undefined` when the field is cleared;
+      resolves to whether the write landed. */
+  onSave: (value: number | undefined) => Promise<boolean>;
   invalidMessage: string;
   placeholder: string;
   numeric: boolean;
@@ -54,7 +55,10 @@ export function ThresholdField(props: ThresholdFieldProps) {
     setInvalid(value === null);
     if (value === null) return;
     setCommitted(raw);
-    onSave(value);
+    // A failed write leaves the text, and the same value can be retried.
+    void onSave(value).then((ok) => {
+      if (!ok) setCommitted((current) => (current === raw ? null : current));
+    });
   };
 
   return (
@@ -69,7 +73,8 @@ export function ThresholdField(props: ThresholdFieldProps) {
         onChange={(e: ChangeEvent<HTMLInputElement>) => setRaw(e.target.value)}
         onBlur={commit}
         onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-          if (e.key === "Enter") commit();
+          // The Enter that confirms an IME candidate is not a commit.
+          if (e.key === "Enter" && !e.nativeEvent.isComposing) commit();
         }}
         placeholder={props.placeholder}
       />

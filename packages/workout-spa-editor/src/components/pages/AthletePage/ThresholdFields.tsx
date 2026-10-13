@@ -17,7 +17,10 @@ import { ThresholdField } from "./ThresholdField";
 type ThresholdFieldsProps = {
   profile: Profile;
   sport: ActiveSport;
-  onSave: (spec: ThresholdFieldSpec, value: number | undefined) => void;
+  onSave: (
+    spec: ThresholdFieldSpec,
+    value: number | undefined
+  ) => Promise<boolean>;
 };
 
 const INVALID_KEY = {
