@@ -52,7 +52,7 @@
     "fallback": "Athlete"
   },
   "defaultProfile": {
-    "notice": "We created “My profile” so you can start right away. Add your thresholds and weight to get personal zones and estimates.",
+    "notice": "We created “My athlete” so you can start right away. Add your thresholds and weight to get personal zones and estimates.",
     "complete": "Complete details",
     "dismiss": "Got it"
   },
@@ -103,6 +103,7 @@
     "backupLink": "Open Data and backup",
     "importFailed": "Import failed: {{message}}",
     "importInvalid": "This file is not a Kaiord athlete file.",
+    "importSaveFailed": "Couldn't save the imported athlete. Please try again.",
     "list": "Athletes ({{count}})",
     "active": "Active",
     "setActive": "Make active",
@@ -124,7 +125,8 @@
       "switched": "Active athlete: {{name}}",
       "createFailed": "Couldn't create the athlete. Please try again.",
       "saveFailed": "Couldn't save the athlete. Please try again.",
-      "deleteFailed": "Couldn't delete the athlete. Please try again."
+      "deleteFailed": "Couldn't delete the athlete. Please try again.",
+      "imported": "Athlete imported."
     }
   }
 }

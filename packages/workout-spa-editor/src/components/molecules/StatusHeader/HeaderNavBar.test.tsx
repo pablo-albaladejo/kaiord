@@ -24,6 +24,7 @@ describe("HeaderNavBar", () => {
     { route: "/library", testId: "status-header-library-button" },
     { route: "/nutrition", testId: "status-header-nutrition-button" },
     { route: "/athlete", testId: "status-header-athlete-button" },
+    { route: "/athletes", testId: "status-header-athlete-button" },
     { route: "/chat", testId: "status-header-chat-button" },
     { route: "/health/sleep", testId: "status-header-trends-button" },
   ])("should mark the matching entry active on $route", ({ route, testId }) => {

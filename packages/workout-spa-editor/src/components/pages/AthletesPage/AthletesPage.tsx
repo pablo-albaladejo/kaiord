@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useProfilesLive } from "../../../hooks/use-profiles-live";
@@ -19,6 +19,8 @@ export default function AthletesPage() {
   const activeId = useActiveProfileLive()?.id ?? null;
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [status, setStatus] = useState("");
+  const listHead = useRef<HTMLDivElement>(null);
   const files = useProfileImportExport({ setImportError });
   const deleting = profiles.find((p) => p.id === deleteId) ?? null;
 
@@ -36,11 +38,16 @@ export default function AthletesPage() {
           {t("athletes.title")}
         </h1>
         <p className="m-0 text-[13px] text-ink-muted">{t("athletes.intro")}</p>
+        <p role="status" className="m-0 text-[13px] text-ink-body">
+          {status}
+        </p>
       </div>
       <CreateAthleteForm />
       <AthletesList
         profiles={profiles}
         activeId={activeId}
+        headRef={listHead}
+        onSwitched={setStatus}
         onExport={files.handleExport}
         onDelete={setDeleteId}
       />
@@ -48,6 +55,7 @@ export default function AthletesPage() {
       <DeleteAthleteDialog
         profile={deleting}
         onDone={() => setDeleteId(null)}
+        onDeleted={() => listHead.current?.focus()}
       />
     </div>
   );

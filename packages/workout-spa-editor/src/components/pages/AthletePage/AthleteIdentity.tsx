@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { useUnits } from "../../../contexts/units-context";
 import { useCurrentWeightKg } from "../../../hooks/health/use-current-weight";
 import { useRenameAthlete } from "../../../hooks/use-rename-athlete";
@@ -9,6 +7,7 @@ import type { Profile } from "../../../types/profile";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { AvatarRing } from "../../molecules/AvatarRing";
 import { InlineNameEdit } from "../../molecules/InlineNameEdit";
+import { useInlineRename } from "../../molecules/InlineNameEdit/use-inline-rename";
 import { deriveInitials, deriveTagline } from "./athlete-identity-helpers";
 
 const AVATAR_SIZE = 56;
@@ -24,7 +23,7 @@ export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
   const t = useTranslate("athlete");
   const units = useUnits();
   const rename = useRenameAthlete();
-  const [renaming, setRenaming] = useState(false);
+  const { renaming, pencilRef, start, done } = useInlineRename();
   const currentWeightKg = useCurrentWeightKg(profile.id, profile);
 
   return (
@@ -35,7 +34,7 @@ export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
           value={profile.name}
           label={t("nameLabel")}
           onSave={(name) => rename(profile.id, name)}
-          onDone={() => setRenaming(false)}
+          onDone={done}
         />
       ) : (
         <>
@@ -48,9 +47,10 @@ export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
             </div>
           </div>
           <button
+            ref={pencilRef}
             type="button"
             aria-label={t("rename")}
-            onClick={() => setRenaming(true)}
+            onClick={start}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-edge bg-transparent text-ink-body transition-colors duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] hover:border-edge-strong hover:text-ink-strong"
           >
             <Icon

@@ -2,13 +2,14 @@
  * useProfileImportExport Hook
  *
  * Profile import/export. Import uses the `importProfile` application
- * use case (every validated field kept under a fresh identity), so
- * persistence rejection surfaces a user-visible error and the I1
- * invariant — first profile becomes active — is preserved.
+ * use case (every validated field kept under a fresh identity) and
+ * confirms success with a toast. A persistence rejection surfaces a
+ * translated error, never the storage layer's own English message.
  */
 
 import { importProfile } from "../../../../application/profile/import-profile";
 import { usePersistence } from "../../../../contexts/persistence-context";
+import { useToastContext } from "../../../../contexts/ToastContext";
 import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 import { profileSchema } from "../../../../types/profile";
@@ -20,6 +21,7 @@ type UseProfileImportExportParams = {
 export function useProfileImportExport(params: UseProfileImportExportParams) {
   const { setImportError } = params;
   const persistence = usePersistence();
+  const toast = useToastContext();
   const t = useTranslate("athlete");
 
   const handleExport = (profile: Profile) => {
@@ -54,10 +56,9 @@ export function useProfileImportExport(params: UseProfileImportExportParams) {
     try {
       await importProfile(persistence, validatedProfile);
       setImportError(null);
-    } catch (error) {
-      failed(
-        error instanceof Error ? error.message : t("athletes.importInvalid")
-      );
+      toast.success(t("athletes.toast.imported"));
+    } catch {
+      failed(t("athletes.importSaveFailed"));
     }
 
     event.target.value = "";

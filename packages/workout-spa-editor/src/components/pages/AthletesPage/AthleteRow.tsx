@@ -1,10 +1,9 @@
-import { useState } from "react";
-
 import { useRenameAthlete } from "../../../hooks/use-rename-athlete";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { Profile } from "../../../types/profile";
 import { Pill } from "../../atoms/Pill";
 import { InlineNameEdit } from "../../molecules/InlineNameEdit";
+import { useInlineRename } from "../../molecules/InlineNameEdit/use-inline-rename";
 import { AthleteRowActions } from "./AthleteRowActions";
 import { AthleteSummary } from "./AthleteSummary";
 
@@ -12,6 +11,7 @@ type AthleteRowProps = {
   profile: Profile;
   isActive: boolean;
   isOnly: boolean;
+  onSwitched: (message: string) => void;
   onExport: (profile: Profile) => void;
   onDelete: (profileId: string) => void;
 };
@@ -19,7 +19,7 @@ type AthleteRowProps = {
 export function AthleteRow({ profile, isActive, ...actions }: AthleteRowProps) {
   const t = useTranslate("athlete");
   const rename = useRenameAthlete();
-  const [renaming, setRenaming] = useState(false);
+  const { renaming, pencilRef, start, done } = useInlineRename();
 
   return (
     <li
@@ -35,7 +35,7 @@ export function AthleteRow({ profile, isActive, ...actions }: AthleteRowProps) {
           value={profile.name}
           label={t("athletes.rename", { name: profile.name })}
           onSave={(name) => rename(profile.id, name)}
-          onDone={() => setRenaming(false)}
+          onDone={done}
         />
       ) : (
         <>
@@ -49,7 +49,8 @@ export function AthleteRow({ profile, isActive, ...actions }: AthleteRowProps) {
           <AthleteRowActions
             profile={profile}
             isActive={isActive}
-            onRename={() => setRenaming(true)}
+            renameRef={pencilRef}
+            onRename={start}
             {...actions}
           />
         </>

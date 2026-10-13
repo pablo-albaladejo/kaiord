@@ -59,7 +59,7 @@ describe("useProfileSwitch", () => {
     const profiles: ReadonlyArray<Profile> = [PROFILE_A, PROFILE_B];
 
     const { result } = renderHook(
-      () => useProfileSwitch({ profiles, setSwitchNotification }),
+      () => useProfileSwitch({ profiles, onSwitched: setSwitchNotification }),
       { wrapper: wrap(persistence) }
     );
 
@@ -75,35 +75,26 @@ describe("useProfileSwitch", () => {
     expect(setSwitchNotification).toHaveBeenCalledWith("Active athlete: Bob");
   });
 
-  it("should clear the switch notification after the 3000ms timeout", async () => {
+  it("should switch without a callback and leave no timer behind", async () => {
     // Arrange
     vi.useFakeTimers();
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(PROFILE_A);
-    const setSwitchNotification = vi.fn();
     const profiles: ReadonlyArray<Profile> = [PROFILE_A];
-
-    const { result } = renderHook(
-      () => useProfileSwitch({ profiles, setSwitchNotification }),
-      { wrapper: wrap(persistence) }
-    );
+    const { result } = renderHook(() => useProfileSwitch({ profiles }), {
+      wrapper: wrap(persistence),
+    });
 
     // Act
     await act(async () => {
       result.current.handleSwitchProfile(PROFILE_A.id);
       await vi.advanceTimersByTimeAsync(0);
     });
-    await act(async () => {
-      // eslint-disable-next-line no-magic-numbers -- fake clock tick matching production debounce, not a domain constant
-      await vi.advanceTimersByTimeAsync(3000);
-    });
 
     // Assert
-    expect(setSwitchNotification).toHaveBeenNthCalledWith(
-      1,
-      "Active athlete: Alice"
-    );
-    expect(setSwitchNotification).toHaveBeenNthCalledWith(2, null);
+    expect(await persistence.profiles.getActiveId()).toBe(PROFILE_A.id);
+    expect(errorSpy).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it("should do nothing when the profile id is not present in the profiles array", () => {
@@ -114,7 +105,7 @@ describe("useProfileSwitch", () => {
     const profiles: ReadonlyArray<Profile> = [PROFILE_A];
 
     const { result } = renderHook(
-      () => useProfileSwitch({ profiles, setSwitchNotification }),
+      () => useProfileSwitch({ profiles, onSwitched: setSwitchNotification }),
       { wrapper: wrap(persistence) }
     );
 
@@ -138,7 +129,7 @@ describe("useProfileSwitch", () => {
     const profiles: ReadonlyArray<Profile> = [PROFILE_A];
 
     const { result } = renderHook(
-      () => useProfileSwitch({ profiles, setSwitchNotification }),
+      () => useProfileSwitch({ profiles, onSwitched: setSwitchNotification }),
       { wrapper: wrap(persistence) }
     );
 

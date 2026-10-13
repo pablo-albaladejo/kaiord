@@ -224,9 +224,9 @@ test.describe("Profile route redirect", () => {
     // Assert
     await page.waitForURL(/\/athlete$/);
     // Exact: the first-run notice also quotes the name ("We created “My
-    // profile”…"), so a substring match is ambiguous once both have rendered.
+    // athlete”…"), so a substring match is ambiguous once both have rendered.
     await expect(
-      page.getByRole("main").getByText("My profile", { exact: true })
+      page.getByRole("main").getByText("My athlete", { exact: true })
     ).toBeVisible({ timeout: 10_000 });
   });
 });

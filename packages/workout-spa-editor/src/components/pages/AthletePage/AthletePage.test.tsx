@@ -125,6 +125,11 @@ describe("AthletePage", () => {
     expect(await screen.findByText("Ana Gomez")).toBeInTheDocument();
     const stored = await db.table<Profile>("profiles").get(PROFILE_ID);
     expect(stored?.name).toBe("Ana Gomez");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Rename athlete" })
+      ).toHaveFocus()
+    );
   });
 
   it("should render the empty state when no profile is active", async () => {

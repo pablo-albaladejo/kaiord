@@ -1,3 +1,4 @@
+import { ATHLETE_PATH, ATHLETES_PATH } from "../../../routing/constants";
 import { NAV_DESTINATIONS } from "../../../routing/nav-destinations";
 import type { IconName } from "../../atoms/Icon";
 
@@ -30,6 +31,8 @@ export const BOTTOM_NAV_TABS: readonly BottomNavTab[] = NAV_DESTINATIONS.filter(
  * - Daily: exact `/daily`.
  * - Calendar: the index route `/` (default view — it replace-redirects to
  *   the current week), bare `/calendar`, or any `/calendar/:weekId` path.
+ * - Athlete: `/athlete`, its sub-pages (`/athlete/zones/:sport`) and the
+ *   list of athletes, `/athletes`.
  * - Others: exact match. (Settings left the bottom-nav with the /daily
  *   split — it remains reachable from the header.)
  */
@@ -42,6 +45,13 @@ export function isTabActive(tabPath: string, location: string): boolean {
       location === "/" ||
       location === "/calendar" ||
       location.startsWith("/calendar/")
+    );
+  }
+  if (tabPath === ATHLETE_PATH) {
+    return (
+      location === ATHLETE_PATH ||
+      location === ATHLETES_PATH ||
+      location.startsWith(`${ATHLETE_PATH}/`)
     );
   }
   return location === tabPath;

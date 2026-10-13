@@ -58,7 +58,7 @@ describe("useProfileDelete", () => {
   });
 
   describe("confirmDelete", () => {
-    it("should remove the profile and clear the confirm id on success", async () => {
+    it("should remove the active profile, activate the remaining one and clear the confirm id", async () => {
       // Arrange
       errorSpy.mockReset();
       const persistence = createInMemoryPersistence();
@@ -87,7 +87,9 @@ describe("useProfileDelete", () => {
       await waitFor(async () => {
         expect(await persistence.profiles.getById(profile.id)).toBeUndefined();
       });
-      expect(await persistence.profiles.getActiveId()).toBeNull();
+      expect(await persistence.profiles.getActiveId()).toBe(
+        "00000000-0000-4000-8000-0000000000d4"
+      );
       expect(setDeleteConfirmId).toHaveBeenCalledWith(null);
       expect(errorSpy).not.toHaveBeenCalled();
     });
@@ -120,7 +122,7 @@ describe("useProfileDelete", () => {
       });
       const remaining = await persistence.profiles.getAll();
       expect(remaining).toEqual([
-        expect.objectContaining({ name: "My profile", origin: "auto" }),
+        expect.objectContaining({ name: "My athlete", origin: "auto" }),
       ]);
       expect(await persistence.profiles.getActiveId()).toBe(remaining[0]?.id);
     });

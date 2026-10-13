@@ -65,8 +65,7 @@ describe("athlete hooks in Spanish", () => {
     await persistence.profiles.put(alice);
     const notify = vi.fn();
     const { result } = renderHook(
-      () =>
-        useProfileSwitch({ profiles: [alice], setSwitchNotification: notify }),
+      () => useProfileSwitch({ profiles: [alice], onSwitched: notify }),
       { wrapper: wrap(persistence) }
     );
 
@@ -83,8 +82,7 @@ describe("athlete hooks in Spanish", () => {
     // Arrange
     const alice = makeProfile({ id: "a1", name: "Alice" });
     const { result } = renderHook(
-      () =>
-        useProfileSwitch({ profiles: [alice], setSwitchNotification: vi.fn() }),
+      () => useProfileSwitch({ profiles: [alice], onSwitched: vi.fn() }),
       { wrapper: wrap(failing()) }
     );
 

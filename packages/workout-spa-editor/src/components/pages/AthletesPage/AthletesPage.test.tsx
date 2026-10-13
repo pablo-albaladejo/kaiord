@@ -147,7 +147,7 @@ describe("AthletesPage", () => {
     // Assert
     expect(
       await screen.findByRole("button", { name: "Delete Solo" })
-    ).toBeDisabled();
+    ).toHaveAttribute("aria-disabled", "true");
   });
 
   it("should import an athlete file as a new athlete", async () => {

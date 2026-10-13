@@ -30,7 +30,6 @@ export function AthleteSwitcher() {
   const activeId = useActiveProfileLive()?.id ?? "";
   const { handleSwitchProfile } = useProfileSwitch({
     profiles,
-    setSwitchNotification: () => undefined,
   });
 
   return (

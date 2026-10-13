@@ -7,7 +7,7 @@ The athletes stored in this browser SHALL be managed on a routed page,
 the active one, and SHALL let the user create an athlete, rename one in place,
 make another one active, export one athlete as a file, import an athlete file
 as a new athlete, and delete an athlete only after a confirmation. The only
-remaining athlete SHALL NOT be deletable. The page SHALL point to the full
+remaining athlete SHALL NOT be deletable, and deleting the active athlete SHALL make a remaining one active. The page SHALL point to the full
 backup in Settings for copying everything. The account menu's "Manage
 athletes…" entry and the Athlete page's empty state SHALL lead to `/athletes`.
 
@@ -26,6 +26,12 @@ SHALL be edited in the Body section, so no field needs a dialog.
 - **GIVEN** the user is on `/athletes` with two athletes
 - **WHEN** they choose to delete one
 - **THEN** a confirmation names the athlete, and the athlete is deleted only once they confirm
+
+#### Scenario: Deleting the active athlete keeps one active
+
+- **GIVEN** the user has two athletes and the first is active
+- **WHEN** they delete the first one
+- **THEN** the other athlete is active
 
 #### Scenario: The last athlete stays
 

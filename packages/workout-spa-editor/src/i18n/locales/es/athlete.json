@@ -52,7 +52,7 @@
     "fallback": "Atleta"
   },
   "defaultProfile": {
-    "notice": "Hemos creado «Mi perfil» para que empieces ya. Añade tus umbrales y tu peso para tener zonas y estimaciones personales.",
+    "notice": "Hemos creado «Mi atleta» para que empieces ya. Añade tus umbrales y tu peso para tener zonas y estimaciones personales.",
     "complete": "Completar datos",
     "dismiss": "Entendido"
   },
@@ -103,6 +103,7 @@
     "backupLink": "Abrir Datos y copia de seguridad",
     "importFailed": "Error al importar: {{message}}",
     "importInvalid": "Este archivo no es un archivo de atleta de Kaiord.",
+    "importSaveFailed": "No se pudo guardar el atleta importado. Inténtalo de nuevo.",
     "list": "Atletas ({{count}})",
     "active": "Activo",
     "setActive": "Activar",
@@ -124,7 +125,8 @@
       "switched": "Atleta activo: {{name}}",
       "createFailed": "No se pudo crear el atleta. Inténtalo de nuevo.",
       "saveFailed": "No se pudo guardar el atleta. Inténtalo de nuevo.",
-      "deleteFailed": "No se pudo eliminar el atleta. Inténtalo de nuevo."
+      "deleteFailed": "No se pudo eliminar el atleta. Inténtalo de nuevo.",
+      "imported": "Atleta importado."
     }
   }
 }

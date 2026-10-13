@@ -1,9 +1,10 @@
 /**
  * useProfileSwitch Hook
  *
- * Profile switching with notification. Reads the profiles list via the
- * live hook and dispatches `setActiveProfile` use case via
- * `usePersistence`; surfaces failures through the toast context.
+ * Makes a profile active through the `setActiveProfile` use case. On
+ * success it hands the translated "Active athlete: …" message to
+ * `onSwitched`, when given, for the caller to show or announce; failures
+ * surface through the toast context.
  */
 
 import { setActiveProfile } from "../application/profile/set-active-profile";
@@ -14,11 +15,11 @@ import type { Profile } from "../types/profile";
 
 type UseProfileSwitchParams = {
   profiles: ReadonlyArray<Profile>;
-  setSwitchNotification: (message: string | null) => void;
+  onSwitched?: (message: string) => void;
 };
 
 export function useProfileSwitch(params: UseProfileSwitchParams) {
-  const { profiles, setSwitchNotification } = params;
+  const { profiles, onSwitched } = params;
   const persistence = usePersistence();
   const toast = useToastContext();
   const t = useTranslate("athlete");
@@ -29,10 +30,7 @@ export function useProfileSwitch(params: UseProfileSwitchParams) {
     void (async () => {
       try {
         await setActiveProfile(persistence, profileId);
-        setSwitchNotification(
-          t("athletes.toast.switched", { name: profile.name })
-        );
-        setTimeout(() => setSwitchNotification(null), 3000);
+        onSwitched?.(t("athletes.toast.switched", { name: profile.name }));
       } catch {
         toast.error(t("athletes.toast.switchFailed"));
       }

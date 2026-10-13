@@ -64,7 +64,7 @@ test.describe("Athletes page", () => {
     await expect(main.getByText(DEFAULT_NAME)).toHaveCount(0);
     await expect(
       main.getByRole("button", { name: "Delete Club U21" })
-    ).toBeDisabled();
+    ).toHaveAttribute("aria-disabled", "true");
   });
 
   test("should export an athlete as a JSON file", async ({ page }) => {

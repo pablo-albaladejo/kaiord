@@ -9,11 +9,11 @@ import es from "./locales/es/athlete.json";
 
 describe("defaultProfileName", () => {
   it.each([
-    ["en-US", "My profile"],
-    ["es-ES", "Mi perfil"],
-    ["fr-FR", "My profile"],
+    ["en-US", "My athlete"],
+    ["es-ES", "Mi atleta"],
+    ["fr-FR", "My athlete"],
   ])(
-    "should name the profile for %s without loading a catalog",
+    "should name the athlete for %s without loading a catalog",
     (language, expected) => {
       // Arrange
       const navigatorLanguage = language;

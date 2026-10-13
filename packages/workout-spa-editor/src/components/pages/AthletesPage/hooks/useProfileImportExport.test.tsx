@@ -18,6 +18,11 @@ import { createInMemoryPersistence } from "../../../../test-utils/in-memory-pers
 import type { Profile } from "../../../../types/profile";
 import { useProfileImportExport } from "./useProfileImportExport";
 
+const successSpy = vi.fn();
+vi.mock("../../../../contexts/ToastContext", () => ({
+  useToastContext: () => ({ success: successSpy, error: vi.fn() }),
+}));
+
 const wrap = (persistence: PersistencePort) => {
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <PersistenceProvider persistence={persistence}>
@@ -155,6 +160,49 @@ describe("useProfileImportExport", () => {
       expect(all[0]?.name).toBe("Imported");
       expect(setImportError).toHaveBeenCalledWith(null);
       expect(event.target.value).toBe("");
+    });
+
+    it("should confirm a successful import", async () => {
+      // Arrange
+      successSpy.mockReset();
+      const persistence = createInMemoryPersistence();
+      const profile = makeProfile({ name: "Imported" });
+      const file: FakeFile = {
+        text: () => Promise.resolve(JSON.stringify(profile)),
+      };
+      const { result } = renderHook(
+        () => useProfileImportExport({ setImportError: vi.fn() }),
+        { wrapper: wrap(persistence) }
+      );
+
+      // Act
+      await result.current.handleImport(fakeChangeEvent(file));
+
+      // Assert
+      expect(successSpy).toHaveBeenCalledWith("Athlete imported.");
+    });
+
+    it("should report a failed save in the user's words, not the raw error", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      persistence.profiles.put = () =>
+        Promise.reject(new Error("ConstraintError: Key already exists"));
+      const setImportError = vi.fn();
+      const file: FakeFile = {
+        text: () => Promise.resolve(JSON.stringify(makeProfile())),
+      };
+      const { result } = renderHook(
+        () => useProfileImportExport({ setImportError }),
+        { wrapper: wrap(persistence) }
+      );
+
+      // Act
+      await result.current.handleImport(fakeChangeEvent(file));
+
+      // Assert
+      expect(setImportError).toHaveBeenLastCalledWith(
+        "Import failed: Couldn't save the imported athlete. Please try again."
+      );
     });
 
     it("should silently no-op when no file is selected", async () => {
