@@ -43,28 +43,29 @@ async function fillPersonal(dialog) {
 }
 
 // F-46b: every tab of the Profile Manager, the personal data filled in so
-// the physiology selects show a chosen value, not only "not set".
+// the physiology selects show a chosen value, not only "not set". The zone
+// editor is its own page now (#/athlete/zones/<sport>, scanned as a route).
 export async function profileManager(rec, { page, go }) {
   await go("athlete");
   await page
     .getByRole("button", { name: es("athlete", "editProfile") })
     .click();
   const dialog = page.getByRole("dialog");
-  // The zone editor nests its own sport tabs; the manager's come first.
-  const tabs = dialog.getByRole("tablist").first().getByRole("tab");
+  const tabs = dialog.getByRole("tablist").getByRole("tab");
   await tabs.first().waitFor();
   const pieces = englishPieces("athlete", "profileManager");
   const count = await tabs.count();
-  // Linked Accounts left for #/connections (P-07), which i18n-scan covers.
+  // Zones left for #/athlete/zones/<sport> and Linked Accounts for
+  // #/connections; i18n-scan covers both routes. Personal Data remains.
   rec.assert(
-    count === 2,
-    "F-46b: the Profile Manager shows its two tabs",
+    count === 1,
+    "F-46b: the Profile Manager shows its one tab, Personal Data",
     `tabs=${count}`
   );
   for (let i = 0; i < count; i++) {
     await tabs.nth(i).click();
     const name = (await tabs.nth(i).innerText()).trim();
-    if (i === 1) await fillPersonal(dialog);
+    if (i === 0) await fillPersonal(dialog);
     await scanDialog(rec, dialog, `the Profile Manager tab "${name}"`, pieces);
   }
   await page.keyboard.press("Escape");

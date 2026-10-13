@@ -40,7 +40,6 @@ export function ProfileManagerDialog(props: ProfileManagerDialogProps) {
       />
       {editingProfile ? (
         <ProfileEditView
-          profileId={editingProfile.id}
           formData={formData}
           onChange={handleEditFieldChange}
           onCancel={props.handleCancel}

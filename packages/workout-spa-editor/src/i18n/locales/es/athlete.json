@@ -3,13 +3,26 @@
   "createProfile": "Crear perfil",
   "createProfileTitle": "Crear perfil de atleta",
   "editProfile": "Editar perfil",
-  "edit": "Editar",
   "editThresholds": "Editar umbrales",
   "thresholdsTitle": "Umbrales de {{sport}}",
+  "thresholds": {
+    "ftp": "FTP (W)",
+    "lthr": "LTHR ({{unit}})",
+    "pace": "Ritmo umbral ({{unit}})",
+    "cssPace": "Ritmo CSS ({{unit}})",
+    "maxHeartRate": "Frecuencia cardiaca máxima ({{unit}})",
+    "optional": "Opcional en carrera",
+    "saved": "Guardado",
+    "invalid": {
+      "whole": "Introduce un número entero mayor que 0.",
+      "heartRate": "Introduce un número entero entre 1 y 250.",
+      "pace": "Usa minutos y segundos, por ejemplo 4:30."
+    }
+  },
   "sportAria": "Deporte",
   "zonesTitle": "Zonas de {{sport}}",
+  "adjustZones": "Ajustar zonas",
   "noThreshold": "Establece un umbral de {{sport}} para ver tus zonas",
-  "noThresholds": "Añade tus umbrales de {{sport}}",
   "zonesReason": "Derivadas de {{metric}} {{value}}. Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
   "zonesReasonNoThreshold": "Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
   "provenance": {
@@ -48,9 +61,7 @@
     "title": "Cuerpo",
     "saved": "Guardado",
     "currentWeight": "Peso actual ({{unit}})",
-    "currentWeightHint": "Se guarda como la pesada de hoy.",
-    "maxHeartRate": "Frecuencia cardiaca máxima (ppm)",
-    "maxHeartRateRange": "Introduce un número entero entre 1 y 250."
+    "currentWeightHint": "Se guarda como la pesada de hoy."
   },
   "sports": {
     "cycling": "Ciclismo",
@@ -80,7 +91,6 @@
     "cancel": "Cancelar",
     "confirmDelete": "Eliminar",
     "tabs": {
-      "zones": "Zonas de entrenamiento",
       "personal": "Datos personales"
     },
     "personal": {
@@ -111,5 +121,11 @@
     },
     "ftp": "FTP: {{value}}W",
     "lthr": "FC umbral: {{value}} ppm"
+  },
+  "zonesPage": {
+    "back": "Atleta",
+    "thresholds": "Umbrales: {{list}}",
+    "thresholdItem": "{{label}} {{value}}",
+    "noThresholds": "Aún no hay umbrales. Las zonas siguen a los umbrales que pongas en la página de Atleta."
   }
 }

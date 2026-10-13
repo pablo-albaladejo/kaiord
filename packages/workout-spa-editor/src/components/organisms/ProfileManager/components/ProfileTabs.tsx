@@ -1,13 +1,14 @@
 /**
  * ProfileTabs Component
  *
- * Top-level tab selector: Training Zones | Personal Data. External accounts
- * live on the Connections page (/connections), not here.
+ * Top-level tab selector: Personal Data. Zones are edited on
+ * /athlete/zones/:sport and external accounts live on the Connections page
+ * (/connections), not here.
  */
 
 import { useTranslate } from "../../../../i18n/use-translate";
 
-type ProfileTab = "zones" | "personal";
+type ProfileTab = "personal";
 
 type ProfileTabsProps = {
   activeTab: ProfileTab;
@@ -15,7 +16,6 @@ type ProfileTabsProps = {
 };
 
 const TABS: Array<{ id: ProfileTab; labelKey: string }> = [
-  { id: "zones", labelKey: "profileManager.tabs.zones" },
   { id: "personal", labelKey: "profileManager.tabs.personal" },
 ];
 

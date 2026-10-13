@@ -49,6 +49,7 @@ function announceKey(rawPathname: string): string {
   const pathname = normalizePath(rawPathname);
   const exact = EXACT[pathname];
   if (exact) return exact;
+  if (pathname.startsWith("/athlete/zones/")) return "zones";
   if (pathname.startsWith("/workout/view/")) return "workout";
   if (pathname.startsWith("/workout/")) return "editWorkout";
   if (pathname.startsWith("/settings")) return "settings";

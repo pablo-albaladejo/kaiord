@@ -19,6 +19,7 @@ import {
   NutritionPage,
   SettingsPage,
   WorkoutDetail,
+  ZonesPage,
 } from "./lazy-pages";
 import { LegacyTodayRedirect } from "./routing/legacy-today-redirect";
 import { getCurrentWeekId } from "./utils/week-utils";
@@ -39,9 +40,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         </Route>
         <Route path="/daily">{guard(<DailyPage />)}</Route>
         {/* Legacy alias: the page was renamed /today → /daily; preserve ?date=. */}
-        <Route path="/today">
-          <LegacyTodayRedirect />
-        </Route>
+        <Route path="/today" component={LegacyTodayRedirect} />
         {/* Bare /calendar is intentionally a non-durable alias for the
             CURRENT week: one URL family, one view (consensus plan, ADR).
             `replace` avoids a back-button re-bounce trap. */}
@@ -50,6 +49,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         </Route>
         <Route path="/calendar/:weekId">{guard(<CalendarPage />)}</Route>
         <Route path="/athlete">{guard(<AthletePage />)}</Route>
+        <Route path="/athlete/zones/:sport">{guard(<ZonesPage />)}</Route>
         <Route path="/nutrition">{guard(<NutritionPage />)}</Route>
         <Route path="/chat/:conversationId?">
           {(params) =>

@@ -51,7 +51,8 @@
     "connections": "Connections page",
     "nutrition": "Nutrition page",
     "daily": "Daily page",
-    "calendar": "Calendar page"
+    "calendar": "Calendar page",
+    "zones": "Zones page"
   },
   "chatAssistant": "Chat assistant"
 }

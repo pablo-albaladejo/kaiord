@@ -1,20 +1,19 @@
 /**
  * ProfileEditView Component
  *
- * View shown when editing a profile, with Training Zones and Personal Data tabs.
+ * View shown when editing a profile: Personal Data. Zones are edited on
+ * /athlete/zones/:sport and external accounts on /connections, not here.
  */
 
 import { useState } from "react";
 
 import { useTranslate } from "../../../../i18n/use-translate";
-import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import type { ProfileFormData } from "../types";
 import { PersonalDataTab } from "./PersonalDataTab";
 import type { ProfileTab } from "./ProfileTabs";
 import { ProfileTabs } from "./ProfileTabs";
 
 type ProfileEditViewProps = {
-  profileId: string;
   formData: ProfileFormData;
   /** Updates form state AND persists in place (see ProfileManagerDialog). */
   onChange: (data: ProfileFormData) => void;
@@ -22,18 +21,16 @@ type ProfileEditViewProps = {
 };
 
 export function ProfileEditView({
-  profileId,
   formData,
   onChange,
   onCancel,
 }: ProfileEditViewProps) {
   const t = useTranslate("athlete");
-  const [activeTab, setActiveTab] = useState<ProfileTab>("zones");
+  const [activeTab, setActiveTab] = useState<ProfileTab>("personal");
 
   return (
     <>
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      {activeTab === "zones" && <SportZoneEditor profileId={profileId} />}
       {activeTab === "personal" && (
         <PersonalDataTab formData={formData} onChange={onChange} />
       )}
