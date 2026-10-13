@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-13 | [`single-current-weight`](./2026-10-13-single-current-weight/) | One current weight |
 | 2026-10-12 | [`close-nutrition-tombstone-gaps`](./2026-10-12-close-nutrition-tombstone-gaps/) | Close the nutrition sync tombstone gaps |
 | 2026-10-12 | [`drop-profile-rows-deleted-mid-sync`](./2026-10-12-drop-profile-rows-deleted-mid-sync/) | Drop the rows of a profile deleted mid-sync |
 | 2026-10-12 | [`move-display-preferences-to-device`](./2026-10-12-move-display-preferences-to-device/) | Language, units and notifications belong to the device |

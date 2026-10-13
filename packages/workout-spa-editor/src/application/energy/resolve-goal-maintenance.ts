@@ -13,8 +13,7 @@
 
 import { computeBmr, neatFactorForActivityLevel } from "@kaiord/core";
 
-import type { HealthWeightRecord } from "../../types/health/health-records";
-import type { Profile } from "../../types/profile";
+import { resolveBmrInputs } from "./bmr-inputs";
 import { deriveAge, toBodyFatFraction } from "./day-energy-balance-inputs";
 import type { DayEnergySources } from "./load-day-energy-sources";
 
@@ -23,36 +22,13 @@ export type GoalMaintenance = {
   currentWeightKg: number;
 };
 
-const hasBmrInputs = (
-  profile: Profile | undefined
-): profile is Profile & {
-  height: number;
-  birthDate: string;
-  sex: NonNullable<Profile["sex"]>;
-  bodyWeight: number;
-} =>
-  profile?.height !== undefined &&
-  profile.birthDate !== undefined &&
-  profile.sex !== undefined &&
-  profile.bodyWeight !== undefined;
-
-/** Latest weigh-in (kg) up to the day, falling back to the profile weight. */
-export const resolveCurrentWeightKg = (
-  latestWeight: HealthWeightRecord | undefined,
-  fallbackKg: number
-): number => latestWeight?.krd.weightKilograms ?? fallbackKg;
-
 export const resolveGoalMaintenance = (
   sources: DayEnergySources,
-  latestWeight: HealthWeightRecord | undefined,
   date: string
 ): GoalMaintenance | null => {
-  const profile = sources.profile;
-  if (!hasBmrInputs(profile)) return null;
-  const currentWeightKg = resolveCurrentWeightKg(
-    latestWeight,
-    profile.bodyWeight
-  );
+  const inputs = resolveBmrInputs(sources);
+  if (!inputs) return null;
+  const { profile, weightKg: currentWeightKg } = inputs;
   const bmr = computeBmr({
     weightKg: currentWeightKg,
     heightCm: profile.height,

@@ -28,7 +28,9 @@ export type DayEnergySources = {
   target: EnergyTargetRecord | undefined;
 };
 
-const latestUpTo = <T extends { date: string }>(records: T[]): T | undefined =>
+export const latestUpTo = <T extends { date: string }>(
+  records: T[]
+): T | undefined =>
   records.reduce<T | undefined>(
     (latest, record) =>
       latest && latest.date >= record.date ? latest : record,

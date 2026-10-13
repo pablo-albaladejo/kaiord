@@ -1,6 +1,7 @@
 /**
  * Audit P-02: the personal data that unlocks Daily's energy card lives in a
  * "Body" section on /athlete, reachable by deep link from the gated card.
+ * Audit P-03: its weight is the current weight, and an edit records a weigh-in.
  */
 
 import { expect, test } from "./fixtures/base";
@@ -28,7 +29,7 @@ test.describe("Athlete Body section", () => {
     await expect(body).toBeVisible();
     await expect(body).toBeFocused();
     await expect(body).toBeInViewport();
-    await body.getByLabel("Body Weight (kg)").fill("72");
+    await body.getByLabel("Current weight (kg)").fill("72");
     await body.getByLabel("Height (cm)").fill("178");
     await body.getByLabel("Birth Date").fill("1990-05-17");
     await body.getByLabel("Sex").selectOption("male");
@@ -38,5 +39,27 @@ test.describe("Athlete Body section", () => {
     // Assert
     await expect(page.getByTestId("energy-balance-card")).toBeVisible();
     await expect(page.getByTestId("energy-balance-gated")).toHaveCount(0);
+  });
+
+  test("records an edited weight as one weigh-in for today, even when re-edited", async ({
+    page,
+  }) => {
+    // Arrange
+    await page.goto("/athlete");
+    const weight = page.locator("#body").getByLabel("Current weight (kg)");
+
+    // Act
+    await weight.fill("71.9");
+    await weight.press("Enter");
+    await expect(weight).toHaveValue("71.9");
+    await weight.fill("71.5");
+    await weight.press("Enter");
+    await expect(page.locator("#body").getByRole("status")).toHaveText("Saved");
+    await page.goto("/health/weight");
+
+    // Assert
+    const rows = page.getByTestId("health-weight").getByRole("listitem");
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText("71.5 kg");
   });
 });
