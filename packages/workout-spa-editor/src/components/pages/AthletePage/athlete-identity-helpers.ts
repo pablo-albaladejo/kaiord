@@ -21,10 +21,19 @@ export function deriveInitials(name: string): string {
   return letters.join("") || "?";
 }
 
+// A new profile carries an empty config for every sport, so only a sport
+// with a threshold says what the athlete does (audit P-20).
+const hasThreshold = (profile: Profile, sport: ActiveSport): boolean => {
+  const thresholds = profile.sportZones[sport]?.thresholds;
+  return [thresholds?.ftp, thresholds?.lthr, thresholds?.thresholdPace].some(
+    (value) => value !== undefined
+  );
+};
+
 const sportNouns = (profile: Profile, t: Translate): string[] =>
-  ATHLETE_SPORTS.filter(
-    (sport) => profile.sportZones[sport.value] !== undefined
-  ).map((sport) => t(`tagline.${sport.value}`));
+  ATHLETE_SPORTS.filter((sport) => hasThreshold(profile, sport.value)).map(
+    (sport) => t(`tagline.${sport.value}`)
+  );
 
 /**
  * Who this athlete is, in one line: the sports they have configured, the

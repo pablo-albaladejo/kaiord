@@ -41,4 +41,26 @@ describe("ProfileEditView", () => {
       activityLevel: "moderate",
     });
   });
+
+  // Zones have one editor, on /athlete/zones/:sport (audit P-01).
+  it("should open on Personal Data without a Training Zones tab", () => {
+    // Arrange
+    // Act
+    renderWithProviders(
+      <ProfileEditView
+        profileId={PROFILE_ID}
+        formData={{ name: "Athlete" }}
+        onChange={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Assert
+    const tabs = screen.getAllByRole("tab").map((tab) => tab.textContent);
+    expect(tabs).toEqual(["Personal Data", "Linked Accounts"]);
+    expect(screen.getByRole("tab", { name: "Personal Data" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+  });
 });
