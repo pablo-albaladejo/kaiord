@@ -3,8 +3,7 @@ import { Link } from "wouter";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Card } from "../../atoms/Card";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
-
-const PROFILE_HREF = "/settings/profile";
+import { BODY_SECTION_HREF } from "../AthletePage/body-section";
 
 /**
  * Shown when the day has no measured wellness and the profile lacks the
@@ -15,7 +14,7 @@ export function EnergyBalanceGated() {
   const t = useTranslate("daily");
   return (
     <Link
-      href={PROFILE_HREF}
+      href={BODY_SECTION_HREF}
       data-testid="energy-balance-gated"
       className="block"
     >

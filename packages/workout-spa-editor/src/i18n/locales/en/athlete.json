@@ -43,6 +43,12 @@
     "dismiss": "Got it"
   },
   "title": "Athlete",
+  "body": {
+    "title": "Body",
+    "saved": "Saved",
+    "maxHeartRate": "Max Heart Rate (bpm)",
+    "maxHeartRateRange": "Enter a whole number between 1 and 250."
+  },
   "sports": {
     "cycling": "Cycling",
     "running": "Running",

@@ -58,7 +58,10 @@ describe("DefaultProfileNotice", () => {
     // Assert
     const notice = await screen.findByTestId("default-profile-notice");
     expect(notice).toBeInTheDocument();
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/athlete");
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/athlete?section=body"
+    );
   });
 
   it("should hide the notice once the profile is claimed", async () => {
