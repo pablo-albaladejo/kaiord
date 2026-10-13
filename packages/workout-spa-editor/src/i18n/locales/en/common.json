@@ -57,5 +57,12 @@
     "send": "Send to Garmin",
     "keep": "Keep in library",
     "download": "Download a file"
+  },
+  "units": {
+    "hr": "bpm"
+  },
+  "durationPicker": {
+    "maxHeartRate": "Maximum {{max}} {{unit}}",
+    "heartRateLabel": "Heart Rate ({{unit}})"
   }
 }
