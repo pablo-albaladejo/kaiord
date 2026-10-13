@@ -7,6 +7,7 @@ import { memoryLocation } from "wouter/memory-location";
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
 import { createProfile } from "../../../application/profile/create-profile";
+import { setActiveProfile } from "../../../application/profile/set-active-profile";
 import { renderWithProviders } from "../../../test-utils";
 import { AccountMenu } from "./AccountMenu";
 
@@ -122,10 +123,10 @@ describe("AccountMenu", () => {
     ).toBeInTheDocument();
   });
 
-  it("should claim only that the account is local, never that it is encrypted", async () => {
+  it("should not claim anything about the account under the menu", async () => {
     // Arrange
-    // Records in this browser are not encrypted at rest; only sync snapshots
-    // are, and only before upload.
+    // The old header looked clickable and claimed "Local account"; records
+    // are not encrypted at rest, so no line says otherwise either.
     const user = userEvent.setup();
     renderMenu();
 
@@ -134,7 +135,85 @@ describe("AccountMenu", () => {
     const menu = await screen.findByTestId("account-menu");
 
     // Assert
-    expect(menu).toHaveTextContent("Local account");
+    expect(menu).not.toHaveTextContent("Local account");
     expect(menu).not.toHaveTextContent(/encrypt/i);
+  });
+
+  describe("athlete switcher", () => {
+    async function seedTwo() {
+      const persistence = createDexiePersistence(db);
+      const first = await createProfile(persistence, "Pablo");
+      await createProfile(persistence, "Laura");
+      await setActiveProfile(persistence, first.id);
+      return persistence;
+    }
+
+    function renderWith(
+      persistence: ReturnType<typeof createDexiePersistence>
+    ) {
+      const loc = memoryLocation({ path: "/daily", record: true });
+      renderWithProviders(
+        <Router hook={loc.hook}>
+          <AccountMenu attention={false} />
+        </Router>,
+        { persistence }
+      );
+    }
+
+    it("should list every profile as a radio with the active one checked", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      renderWith(await seedTwo());
+      await screen.findByLabelText("Account menu (Pablo)");
+
+      // Act
+      await user.click(screen.getByTestId("status-header-account-button"));
+
+      // Assert
+      const group = await screen.findByRole("group", { name: "Athlete" });
+      expect(group).toBeInTheDocument();
+      expect(
+        await screen.findByRole("menuitemradio", { name: "Pablo" })
+      ).toBeChecked();
+      expect(
+        screen.getByRole("menuitemradio", { name: "Laura" })
+      ).not.toBeChecked();
+    });
+
+    it("should switch the active profile when another athlete is selected", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      renderWith(await seedTwo());
+      await screen.findByLabelText("Account menu (Pablo)");
+      await user.click(screen.getByTestId("status-header-account-button"));
+
+      // Act
+      await user.click(
+        await screen.findByRole("menuitemradio", { name: "Laura" })
+      );
+
+      // Assert
+      expect(
+        await screen.findByLabelText("Account menu (Laura)")
+      ).toBeInTheDocument();
+    });
+
+    it("should open the profile manager from Manage athletes", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      renderWith(await seedTwo());
+      await user.click(screen.getByTestId("status-header-account-button"));
+
+      // Act
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Manage athletes…" })
+      );
+
+      // Assert
+      expect(
+        await screen.findByRole("dialog", { name: "Manage athletes" })
+      ).toBeInTheDocument();
+      expect(screen.getByText("Saved Profiles (2)")).toBeInTheDocument();
+    });
   });
 });
