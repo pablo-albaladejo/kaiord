@@ -57,6 +57,8 @@
     "create": "Create Profile",
     "import": "Import Profile",
     "importFile": "Import profile file",
+    "importFailed": "Import failed: {{message}}",
+    "importInvalid": "Invalid profile file",
     "saved": "Saved Profiles ({{count}})",
     "empty": "No profiles yet. Create one to get started.",
     "setActive": "Set Active",
@@ -80,8 +82,8 @@
       "linkedAccounts": "Linked Accounts"
     },
     "personal": {
-      "bodyWeight": "Body Weight (kg)",
-      "height": "Height (cm)",
+      "bodyWeight": "Body Weight ({{unit}})",
+      "height": "Height ({{unit}})",
       "birthDate": "Birth Date",
       "restingHeartRate": "Resting Heart Rate (bpm)",
       "sex": "Sex",
@@ -98,6 +100,18 @@
         "active": "Active",
         "very_active": "Very active"
       }
-    }
+    },
+    "toast": {
+      "switchFailed": "Failed to switch profile — please retry.",
+      "switched": "Switched to profile: {{name}}",
+      "createFailed": "Failed to create profile — please retry.",
+      "saveFailed": "Failed to save profile — please retry.",
+      "deleteFailed": "Failed to delete profile — please retry.",
+      "accountLinked": "Coaching account linked",
+      "accountDisconnected": "Coaching account disconnected",
+      "extensionMissing": "The Kaiord extension is not installed in this browser. Install it to connect {{source}}."
+    },
+    "ftp": "FTP: {{value}}W",
+    "lthr": "LTHR: {{value}} bpm"
   }
 }

@@ -114,5 +114,8 @@
   },
   "status": {
     "saved": "Guardado"
+  },
+  "toast": {
+    "updateFailed": "No se pudieron actualizar las zonas. Inténtalo de nuevo."
   }
 }

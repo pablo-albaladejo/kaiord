@@ -12,7 +12,9 @@
   "connections": "Connections",
   "more": "More",
   "helpDocs": "Help & docs",
-  "localAccount": "Local account",
+  "athleteSection": "Athlete",
+  "manageAthletes": "Manage athletes…",
+  "manageAthletesTitle": "Manage athletes",
   "alert": {
     "title_one": "{{count}} source down",
     "title_other": "{{count}} sources down",
