@@ -1,4 +1,4 @@
-> Synced: 2026-10-13 (settings-side-nav-and-wipe)
+> Synced: 2026-10-13 (connections-single-home)
 
 # SPA Settings Shell
 
@@ -69,8 +69,13 @@ a string the open panel renders.
 While a section is open, the shell SHALL render a rail of the sections
 themselves, one entry per section, and SHALL NOT render the index's row list
 alongside the panel. The sections are General, AI, Sync, Data & backup, Privacy
-and About, followed by Connections, set apart from them. Rail entries SHALL be
-named by the section, using the same names the page heading uses.
+and About. Rail entries SHALL be named by the section, using the same names the
+page heading uses.
+
+Connections SHALL NOT be a Settings section. External accounts are managed on
+their own page (see `spa-connections-page`), so neither the rail nor the index
+SHALL offer a Connections entry: one concept has one home, and a second way in
+from Settings would be a second place to look for it.
 
 The index SHALL list the same sections, in the same order and under the same
 names, one row per section, each with an icon no other row uses. No two rows
@@ -100,6 +105,11 @@ being shown.
 
 - **WHEN** the index renders, and then any section is opened
 - **THEN** the General heading followed by the index row names SHALL equal the rail entry names, in order
+
+#### Scenario: Connections is not a section
+
+- **WHEN** the index renders, and then any section is opened
+- **THEN** neither the index nor the rail SHALL offer an entry for Connections
 
 #### Scenario: The index keeps its values
 
@@ -191,6 +201,10 @@ The banner SHALL carry the model's action when it declares one; the chip SHALL
 NOT, being a summary rather than a control. A model MAY decline to declare an
 action, and SHALL do so while no surface can act on the attention it reports.
 
+Connection attention is fixed on the Connections page, which is not a Settings
+section, so the reader cannot reach it from the rail. The connection attention
+model SHALL therefore declare an action that opens the Connections page.
+
 #### Scenario: No attention renders no surface
 
 - **GIVEN** an absent attention model
@@ -208,6 +222,12 @@ action, and SHALL do so while no surface can act on the attention it reports.
 - **GIVEN** an attention model declaring an action
 - **WHEN** the chip renders
 - **THEN** the action SHALL NOT be rendered
+
+#### Scenario: The banner leads to where the attention is fixed
+
+- **GIVEN** a connection that needs attention
+- **WHEN** the reader invokes the banner's action on the Settings index
+- **THEN** the Connections page SHALL open
 
 #### Scenario: The index announces attention on the banner
 
@@ -333,71 +353,6 @@ the reader's calendar day rather than the UTC one.
 - **WHEN** the consequence line is built
 - **THEN** the date SHALL be omitted rather than rendered as an invalid value
 
-### Requirement: The connections row counts a total it can reach, once it can count
-
-The Settings index row leading to the connection surfaces SHALL answer itself
-with how many known bridges are answering in this browser, out of all known
-bridges. It SHALL count detected bridges rather than live sessions, because at
-least one bridge is never probed and a session count could therefore never
-equal its own denominator — a counter fixed one short of completion reads as a
-defect rather than as a state.
-
-The count SHALL be described as detected rather than installed: a page cannot
-enumerate installed extensions, only those that announced themselves and
-answered this page-life.
-
-The row SHALL render no value until bridge discovery has had the opportunity to
-hear from the extensions, and SHALL apply the same gate as every other surface
-counting detected bridges, so two surfaces counting the same thing cannot
-disagree while both are settling.
-
-The completion of a connection refresh pass SHALL NOT be treated as that
-opportunity. Nothing asks the extensions anything — they announce themselves
-when injected — so a pass over a browser where nothing has yet announced
-completes almost immediately having sent no message, and a row gated on it
-states a confident zero to a fully equipped reader for as long as discovery
-actually takes.
-
-The row SHALL NOT withhold its value indefinitely: once the grace period has
-elapsed it SHALL state the count even when nothing was detected, because a
-reader with no extensions installed has to be told so.
-
-<!-- The prior requirement also said the row renders no value "when no bridge
-is known at all, rather than a zero-of-zero count". That condition is removed:
-the snapshot reader synthesises one row per known bridge from the first render,
-so the empty list it guards cannot occur in the application. It was a guard on
-an unreachable state standing next to the reachable one it was mistaken for. -->
-
-#### Scenario: The row states detected out of known
-
-- **GIVEN** discovery has settled and two of five known bridges answered
-- **WHEN** the Settings index renders
-- **THEN** the connections row SHALL state two of five detected
-
-#### Scenario: The count reaches its denominator
-
-- **GIVEN** every known bridge answered, including one that is never probed
-- **WHEN** the Settings index renders
-- **THEN** the connections row SHALL state the full count of detected bridges out of the same total
-
-#### Scenario: A cold load claims nothing
-
-- **GIVEN** discovery has just begun listening and no bridge has been detected
-- **WHEN** the Settings index renders
-- **THEN** the connections row SHALL render no count
-
-#### Scenario: A detection answers immediately
-
-- **GIVEN** at least one bridge has been detected, within the grace period
-- **WHEN** the Settings index renders
-- **THEN** the connections row SHALL state its count without waiting for the period to elapse
-
-#### Scenario: An empty browser is eventually told so
-
-- **GIVEN** no bridge was detected and the grace period has elapsed
-- **WHEN** the Settings index renders
-- **THEN** the connections row SHALL state that none of the known bridges were detected
-
 ### Requirement: The connection store runs for the session, not for a page
 
 The connection store SHALL be started once per application boot by the app's
@@ -429,15 +384,21 @@ consumer can distinguish "not asked yet" from "not there".
 ### Requirement: Retired section links land on their new home
 
 A Settings link written for a section that no longer exists SHALL open the
-section that now holds that content, replacing the history entry so Back does
-not return to the retired address. `preferences` SHALL lead to `general`,
-`usage` to the usage part of `ai`, `extensions` and `data-hub` to
-`connections`, and the data-management part of `privacy` to `data`.
+section or page that now holds that content, replacing the history entry so
+Back does not return to the retired address. `preferences` SHALL lead to
+`general`, `usage` to the usage part of `ai`, the data-management part of
+`privacy` to `data`, `profile` to the Athlete page, and `connections`,
+`extensions` and `data-hub` to the Connections page.
 
 #### Scenario: An old preferences link opens General
 
 - **WHEN** the route is entered with the `preferences` section
 - **THEN** the shell SHALL render the General panel, and the history SHALL hold only the General address
+
+#### Scenario: An old connections link opens the Connections page
+
+- **WHEN** the route is entered with the `connections`, `extensions` or `data-hub` section
+- **THEN** the Connections page SHALL render, and the history SHALL hold only the Connections address
 
 #### Scenario: An old data-management link opens Data & backup
 

@@ -1,4 +1,4 @@
-> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
+> Synced: 2026-10-13 (connections-single-home)
 
 # athlete-connections Specification
 
@@ -6,7 +6,7 @@
 
 Define honest connect/disconnect semantics for a provider account link. The
 Athlete-page section this capability was named for has been retired into
-`/settings/connections` (see `spa-connections-page`); the record contract below
+`/connections` (see `spa-connections-page`); the record contract below
 is what survived it and is surface-independent. Connection state is tracked per
 `(profileId, providerId)` independently of integration-policy flows; each
 provider declares a connect mechanism (`bridge`, `api-key`, `manual`, or

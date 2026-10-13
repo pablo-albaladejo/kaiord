@@ -1,4 +1,4 @@
-> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
+> Synced: 2026-10-13 (connections-single-home)
 
 # SPA Persistence Port
 
@@ -218,7 +218,7 @@ While the underlying query is loading on first mount, `useLiveQuery` returns `un
 
 #### Scenario: Connect Train2Go updates the calendar header in real time
 
-- **WHEN** the user clicks "Connect Train2Go" in Profile Settings, the `linkAccount` use case persists the link via `PersistencePort.profiles.put`, and the toast confirming success fires after the use case's promise resolves
+- **WHEN** the user links Train2Go from its card on the Connections page, the `linkAccount` use case persists the link via `PersistencePort.profiles.put`, and the toast confirming success fires after the use case's promise resolves
 - **THEN** the calendar header's per-source Sync button SHALL appear without a manual remount or page refresh — the test verifies via `waitFor` against the rendered button
 
 #### Scenario: Profiles, templates, and AI providers survive a page refresh

@@ -1,4 +1,4 @@
-> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
+> Synced: 2026-10-13 (connections-single-home)
 
 # spa-whoop-extension Specification
 
@@ -104,7 +104,7 @@ path are shared across all of them.
 
 ### Requirement: WHOOP connect and disconnect via the bridge
 
-The Connections page (`/settings/connections`, see `spa-connections-page`) SHALL
+The Connections page (`/connections`, see `spa-connections-page`) SHALL
 treat WHOOP as a `bridge` provider: its card SHALL reflect the bridge's
 discovered session status, and "Disconnect" SHALL clear the local WHOOP bridge
 linkage, set the connection record to `disconnected`, and disable WHOOP's

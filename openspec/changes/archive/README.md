@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-13 | [`connections-single-home`](./2026-10-13-connections-single-home/) | Connections as the single home |
 | 2026-10-13 | [`settings-side-nav-and-wipe`](./2026-10-13-settings-side-nav-and-wipe/) | The Settings index is the side nav, and Data offers a full wipe |
 | 2026-10-13 | [`single-current-weight`](./2026-10-13-single-current-weight/) | One current weight |
 | 2026-10-12 | [`close-nutrition-tombstone-gaps`](./2026-10-12-close-nutrition-tombstone-gaps/) | Close the nutrition sync tombstone gaps |
