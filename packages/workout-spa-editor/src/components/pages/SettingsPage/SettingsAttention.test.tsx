@@ -94,20 +94,24 @@ describe("SettingsAttention", () => {
     );
   });
 
-  it("should omit the action on the chip", () => {
+  it("should run the action from the chip, so the rail is not a dead end", async () => {
     // Arrange
-    const attention = {
-      title: "1 connection needs attention",
-      action: { label: "Fix", onSelect: vi.fn() },
-    };
+    const onSelect = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <SettingsAttention
+        attention={{
+          title: "1 connection needs attention",
+          action: { label: "Open connections", onSelect },
+        }}
+        variant="chip"
+      />
+    );
 
     // Act
-    render(<SettingsAttention attention={attention} variant="chip" />);
+    await user.click(screen.getByRole("button", { name: "Open connections" }));
 
     // Assert
-    expect(screen.getByTestId("settings-attention-chip")).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("settings-attention-action")
-    ).not.toBeInTheDocument();
+    expect(onSelect).toHaveBeenCalledTimes(1);
   });
 });

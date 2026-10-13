@@ -6,7 +6,7 @@ export type SettingsAttentionModel = {
   title: string;
   /** One line naming the consequence of it being broken. */
   detail?: string;
-  /** Omitted on the sidebar chip, which is not itself actionable. */
+  /** Rendered on both variants: the rail chip is the only way on from a section. */
   action?: { label: string; onSelect: () => void };
 };
 
@@ -58,7 +58,7 @@ export const SettingsAttention = ({
           </p>
         )}
       </div>
-      {variant === "banner" && attention.action !== undefined && (
+      {attention.action !== undefined && (
         <Button
           variant="secondary"
           size="sm"

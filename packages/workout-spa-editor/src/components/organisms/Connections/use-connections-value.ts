@@ -18,7 +18,12 @@ export const useConnectionsValue = (
 ): string | undefined => {
   const t = useTranslate("connections");
   const count = sources.filter(sourceIsConnected).length;
-  const settled = useDiscoverySettled(count);
+  // Record-backed sources (an API key) are "connected" without ever
+  // announcing, so only detected bridges are evidence that announcements are
+  // arriving; the displayed count stays the full one.
+  const settled = useDiscoverySettled(
+    sources.filter((source) => source.bridgeDetected).length
+  );
 
   if (!settled) return undefined;
   if (count === 0) return t("count.none");

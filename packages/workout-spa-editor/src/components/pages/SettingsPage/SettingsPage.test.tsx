@@ -494,6 +494,23 @@ describe("SettingsPage", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("should take the reader from the rail chip to Connections", async () => {
+      // Arrange
+      connections.value = broken();
+      const user = userEvent.setup();
+      const { memory } = renderAtPath("/settings/ai");
+
+      // Act
+      await user.click(
+        screen.getByRole("button", { name: "Open connections" })
+      );
+
+      // Assert
+      await waitFor(() => {
+        expect(memory.history.at(-1)).toBe("/connections");
+      });
+    });
+
     // Connections left Settings (P-07), so the banner is the one place on
     // this page that can still take the reader to what needs them.
     it("should take the reader from the index banner to Connections", async () => {
