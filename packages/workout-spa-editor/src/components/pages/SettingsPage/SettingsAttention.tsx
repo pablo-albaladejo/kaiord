@@ -1,3 +1,5 @@
+import { Link } from "wouter";
+
 import { AttentionMark } from "../../atoms/AttentionMark";
 import { Button } from "../../atoms/Button/Button";
 
@@ -6,8 +8,8 @@ export type SettingsAttentionModel = {
   title: string;
   /** One line naming the consequence of it being broken. */
   detail?: string;
-  /** Omitted on the sidebar chip, which is not itself actionable. */
-  action?: { label: string; onSelect: () => void };
+  /** Rendered on both variants: the rail chip is the only way on from a section. */
+  action?: { label: string; onSelect: () => void; href?: string };
 };
 
 export type SettingsAttentionProps = {
@@ -58,16 +60,26 @@ export const SettingsAttention = ({
           </p>
         )}
       </div>
-      {variant === "banner" && attention.action !== undefined && (
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={attention.action.onSelect}
+      {variant === "chip" && attention.action?.href !== undefined && (
+        <Link
+          href={attention.action.href}
+          className="shrink-0 text-sm font-medium text-ink-strong underline"
           data-testid="settings-attention-action"
         >
           {attention.action.label}
-        </Button>
+        </Link>
       )}
+      {(variant === "banner" || attention.action?.href === undefined) &&
+        attention.action !== undefined && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={attention.action.onSelect}
+            data-testid="settings-attention-action"
+          >
+            {attention.action.label}
+          </Button>
+        )}
     </div>
   );
 };

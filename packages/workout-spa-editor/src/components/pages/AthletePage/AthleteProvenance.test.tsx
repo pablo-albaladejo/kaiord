@@ -6,6 +6,8 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-settled";
+import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import { syncedAccount } from "../../../lib/athlete/test-profile";
 import { renderWithProviders } from "../../../test-utils";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
@@ -68,8 +70,14 @@ async function clearTables(): Promise<void> {
 }
 
 describe("AthletePage provenance", () => {
-  beforeEach(clearTables);
-  afterEach(clearTables);
+  beforeEach(async () => {
+    resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS);
+    await clearTables();
+  });
+  afterEach(async () => {
+    resetDiscoveryClock();
+    await clearTables();
+  });
 
   it("should name the source a threshold came from", async () => {
     // Arrange

@@ -6,6 +6,8 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-settled";
+import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import { renderWithProviders } from "../../../test-utils";
 import type { Profile } from "../../../types/profile";
 import AthletePage from "./AthletePage";
@@ -44,8 +46,14 @@ async function clearTables(): Promise<void> {
 }
 
 describe("AthletePage", () => {
-  beforeEach(clearTables);
-  afterEach(clearTables);
+  beforeEach(async () => {
+    resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS);
+    await clearTables();
+  });
+  afterEach(async () => {
+    resetDiscoveryClock();
+    await clearTables();
+  });
 
   it("should render the route heading and the active profile name", async () => {
     // Arrange

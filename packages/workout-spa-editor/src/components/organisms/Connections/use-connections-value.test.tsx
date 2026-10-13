@@ -20,7 +20,7 @@ const source = (
   mechanism,
   bridgeId: mechanism === "bridge" ? `${id}-bridge` : null,
   status,
-  bridgeDetected: status !== "available",
+  bridgeDetected: mechanism === "bridge" && status !== "available",
   disconnected: false,
   needsReauth: false,
   outdated: false,
@@ -156,5 +156,39 @@ describe("useConnectionsValue", () => {
 
     // Assert
     expect(result.current).toBe("1 connected");
+  });
+
+  // intervals.icu is record-backed: it is "connected" from a stored key and
+  // never announces, so it must not be taken as proof extensions are arriving.
+  it("should wait out the window when only a record-backed source is connected", () => {
+    // Arrange
+    discoveryJustStarted();
+    const sources = page().map((s) =>
+      s.id === "intervals"
+        ? { ...s, status: "connected" as const, bridgeDetected: false }
+        : s
+    );
+
+    // Act
+    const { result } = renderHook(() => useConnectionsValue(sources));
+
+    // Assert
+    expect(result.current).toBeUndefined();
+  });
+
+  it("should show the full count, record-backed sources included, once settled", () => {
+    // Arrange
+    discoveryJustStarted();
+    const sources = page({ garmin: "connected" }).map((s) =>
+      s.id === "intervals"
+        ? { ...s, status: "connected" as const, bridgeDetected: false }
+        : s
+    );
+
+    // Act
+    const { result } = renderHook(() => useConnectionsValue(sources));
+
+    // Assert
+    expect(result.current).toBe("2 connected");
   });
 });

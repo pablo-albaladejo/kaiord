@@ -160,7 +160,8 @@
     "linked": "Vinculado a este atleta como {{user}}. A diferencia del resto de esta página, el vínculo se guarda con el atleta, no solo en este navegador.",
     "unlink": "Desvincular",
     "unlinking": "Desvinculando…",
-    "unlinked": "Desvinculado de este atleta"
+    "unlinked": "Desvinculado de este atleta",
+    "unlinkFailed": "No se pudo desvincular de este atleta"
   },
   "sourceName": {
     "manual": "Entrada manual"

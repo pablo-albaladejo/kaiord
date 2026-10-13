@@ -26,6 +26,8 @@ export function ConnectionProfileLinked({ profile, link }: Props) {
       await unlinkAccount(persistence.profiles, profile.id, link.source);
       toasts.info(t("profileLink.unlinked"));
       analytics.event("coaching.unlink.success", { source: link.source });
+    } catch {
+      toasts.error(t("profileLink.unlinkFailed"));
     } finally {
       setBusy(false);
     }
