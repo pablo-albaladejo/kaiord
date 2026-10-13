@@ -2,7 +2,7 @@
  * E2E: "Import backup" restores a file written by "Export my data".
  *
  * Nothing is seeded: every record is entered through the UI of a clean
- * browser, exported, and imported through Settings → Privacy, into a second
+ * browser, exported, and imported through Settings → Data & backup, into a second
  * clean browser (its own first-run default profile) or back into the same
  * one. What the import kept is read from IndexedDB, after the summary the
  * page shows once the import has written.
@@ -82,7 +82,7 @@ async function addProvider(page: Page) {
 }
 
 async function exportData(page: Page): Promise<string> {
-  await open(page, "/settings/privacy");
+  await open(page, "/settings/data");
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     page.getByRole("button", { name: "Export my data" }).click(),
@@ -91,7 +91,7 @@ async function exportData(page: Page): Promise<string> {
 }
 
 async function importData(page: Page, file: string): Promise<string> {
-  await open(page, "/settings/privacy");
+  await open(page, "/settings/data");
   await page.getByLabel("Backup file").setInputFiles(file);
   const status = page.getByRole("status").filter({ hasText: SUMMARY });
   await expect(status).toBeVisible();

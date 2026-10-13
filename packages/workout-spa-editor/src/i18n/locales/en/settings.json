@@ -2,26 +2,6 @@
   "title": "Settings",
   "back": "Settings",
   "sectionsNav": "Settings sections",
-  "groups": {
-    "yourData": "Your data",
-    "ai": "AI",
-    "preferences": "Preferences",
-    "about": "About"
-  },
-  "rows": {
-    "connections": "Connections",
-    "provider": "Provider & models",
-    "customInstructions": "Custom instructions",
-    "googleDriveSync": "Cross-device sync",
-    "units": "Units",
-    "language": "Language",
-    "notifications": "Notifications",
-    "dataPrivacy": "Privacy & data",
-    "manageYourData": "Manage your data",
-    "usage": "Usage",
-    "helpDocs": "Help & docs",
-    "replayTips": "Show tips again"
-  },
   "values": {
     "connections": {
       "detected": "{{found}} of {{total}} detected"
@@ -29,26 +9,24 @@
     "sync": {
       "connected": "Drive · {{relative}}"
     },
-    "usage": {
-      "tokens": "{{tokens}} tokens · {{month}}"
-    },
-    "notifications": {
-      "on": "On",
-      "off": "Off",
-      "blocked": "Blocked",
-      "unsupported": "Unsupported"
-    },
-    "privacy": {
+    "data": {
       "localFirst": "Stored in this browser"
     }
   },
   "tabs": {
+    "general": "General",
     "ai": "AI",
     "sync": "Sync",
-    "connections": "Connections",
-    "usage": "Usage",
+    "data": "Data & backup",
     "privacy": "Privacy",
-    "preferences": "Preferences"
+    "about": "About",
+    "connections": "Connections"
+  },
+  "general": {
+    "theme": "Theme",
+    "themeSystem": "Auto",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "ai": {
     "llmProviders": "LLM Providers",
@@ -135,7 +113,6 @@
     "analyticsIntro": "This editor uses",
     "analyticsLink": "Umami",
     "analyticsOutro": "to track aggregate usage (page views, workout generation, exports). No cookies are set and no personal data is collected.",
-    "dataManagement": "Data Management",
     "exportData": "Export my data",
     "exportHint": "Downloads your workouts, health, nutrition and settings data as a JSON file, unencrypted. API keys, linked integrations and sync state are not included. Keep the file somewhere safe.",
     "exportFailed": "Could not export your data — please retry.",
@@ -151,6 +128,29 @@
     "clearAllApiKeys": "Clear All API Keys",
     "clearAllHint": "This removes all stored API keys from your browser. Keys already uploaded to your Google Drive by cross-device sync are not deleted by this action.",
     "clearKeysFailed": "Failed to clear API keys — please retry."
+  },
+  "data": {
+    "backup": "Backup",
+    "syncLink": "Keep a copy in your Google Drive with Sync",
+    "dangerZone": "Danger zone",
+    "wipe": "Delete all my data",
+    "wipeHint": "Deletes everything Kaiord keeps in this browser and starts again from scratch.",
+    "wipeFailed": "Could not delete your data. Nothing was deleted; please retry.",
+    "wipeDialog": {
+      "title": "Delete all my data?",
+      "body": "This deletes every athlete, workout, health and nutrition record, connection, AI key and setting stored in this browser. It cannot be undone: export a backup first if you may want any of it back.",
+      "drive": "Your copy in Google Drive is not deleted. Sync is turned off in this browser; if you connect it again, that copy comes back here.",
+      "confirmWord": "DELETE",
+      "typeLabel": "Type {{word}} to confirm",
+      "syncing": "Wait for the sync in progress to finish.",
+      "confirm": "Delete everything",
+      "cancel": "Cancel"
+    }
+  },
+  "about": {
+    "helpDocs": "Help & docs",
+    "replayTips": "Show tips again",
+    "replayTipsHint": "Shows again the tips you already dismissed."
   },
   "usage": {
     "title": "AI Usage",

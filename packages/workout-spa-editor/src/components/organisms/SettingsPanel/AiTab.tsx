@@ -5,6 +5,7 @@ import { SETTINGS_SECTION_ATTR } from "../../pages/SettingsPage/settings-section
 import { ModelsSection } from "./ModelsSection";
 import { ProviderForm } from "./ProviderForm";
 import { ProviderList } from "./ProviderList";
+import { UsageTab } from "./UsageTab";
 import { useAiTabHandlers } from "./use-ai-tab-handlers";
 
 export const AiTab: React.FC = () => {
@@ -64,6 +65,10 @@ export const AiTab: React.FC = () => {
           value={customPrompt}
           onChange={(e) => onPromptChange(e.target.value)}
         />
+      </section>
+
+      <section tabIndex={-1} {...{ [SETTINGS_SECTION_ATTR]: "usage" }}>
+        <UsageTab />
       </section>
     </div>
   );
