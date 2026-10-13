@@ -21,10 +21,7 @@ export type UserPreferenceFieldsPatch = Partial<
     | "lastScratchSport"
     | "activeSport"
     | "aiBannerExpanded"
-    | "units"
-    | "notificationsEnabled"
     | "labDashboardParams"
-    | "locale"
     | "setupChecklistDismissed"
     | "dismissedCoachMarks"
   >
@@ -56,6 +53,9 @@ export async function setUserPreferenceFields(
     lastScratchSport: existing?.lastScratchSport,
     activeSport: existing?.activeSport,
     aiBannerExpanded: existing?.aiBannerExpanded,
+    // Legacy: units, locale and notifications moved to the device
+    // (lib/device-preferences). Kept as-is so older devices syncing the
+    // same snapshot still read the values they wrote.
     units: existing?.units,
     notificationsEnabled: existing?.notificationsEnabled,
     labDashboardParams: existing?.labDashboardParams,

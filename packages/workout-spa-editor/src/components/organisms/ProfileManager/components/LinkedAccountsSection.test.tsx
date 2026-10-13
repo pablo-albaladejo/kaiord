@@ -27,6 +27,12 @@ vi.mock("../../../../adapters/train2go/use-train2go-source", () => ({
   }),
 }));
 
+vi.mock("../../../../hooks/use-discovered-bridges", () => ({
+  useDiscoveredBridges: () => [
+    { bridgeId: "train2go-bridge", extensionId: "ext-id" },
+  ],
+}));
+
 import { LinkedAccountsSection } from "./LinkedAccountsSection";
 
 const T2G_LINK: LinkedCoachingAccount = {

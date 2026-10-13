@@ -5,26 +5,17 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { BACKUP_TABLE_POLICY } from "../../application/backup/backup-table-policy";
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { DEVICE_LOCAL } from "./dexie-snapshot-port";
 
 describe("backup table policy coverage", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("backupcover");
 
   beforeEach(async () => {
-    name = `kaiord-test-backupcover-${Date.now()}-${Math.random()}`;
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should classify every table of the live schema", () => {

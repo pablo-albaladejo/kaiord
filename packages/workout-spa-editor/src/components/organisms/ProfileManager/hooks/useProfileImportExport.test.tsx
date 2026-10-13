@@ -203,6 +203,72 @@ describe("useProfileImportExport", () => {
       expect(event.target.value).toBe("");
     });
 
+    it("should keep thresholds, zones and personal data on an export-import round trip", async () => {
+      // Arrange
+      const FTP = 250;
+      const MAX_HR = 190;
+      const persistence = createInMemoryPersistence();
+      const base = makeProfile({ name: "Round Trip", bodyWeight: 70 });
+      const source: Profile = {
+        ...base,
+        maxHeartRate: MAX_HR,
+        sex: "male",
+        birthDate: "1985-03-02",
+        sportZones: {
+          ...base.sportZones,
+          cycling: {
+            ...base.sportZones.cycling!,
+            thresholds: { ftp: FTP, lthr: 170 },
+          },
+        },
+      };
+      const file: FakeFile = {
+        text: () => Promise.resolve(JSON.stringify(source)),
+      };
+      const { result } = renderHook(
+        () => useProfileImportExport({ setImportError: vi.fn() }),
+        { wrapper: wrap(persistence) }
+      );
+
+      // Act
+      await result.current.handleImport(fakeChangeEvent(file));
+
+      // Assert
+      await waitFor(async () => {
+        expect(await persistence.profiles.getAll()).toHaveLength(1);
+      });
+      const [imported] = await persistence.profiles.getAll();
+      expect(imported?.sportZones.cycling?.thresholds).toEqual({
+        ftp: FTP,
+        lthr: 170,
+      });
+      expect(imported?.maxHeartRate).toBe(MAX_HR);
+      expect(imported?.sex).toBe("male");
+      expect(imported?.birthDate).toBe("1985-03-02");
+      expect(imported?.id).not.toBe(source.id);
+    });
+
+    it("should show the translated invalid-file message for malformed JSON", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const setImportError = vi.fn();
+      const event = fakeChangeEvent({
+        text: () => Promise.resolve("not json"),
+      });
+      const { result } = renderHook(
+        () => useProfileImportExport({ setImportError }),
+        { wrapper: wrap(persistence) }
+      );
+
+      // Act
+      await result.current.handleImport(event);
+
+      // Assert
+      expect(setImportError).toHaveBeenCalledWith(
+        "Import failed: Invalid profile file"
+      );
+    });
+
     it("should report a schema-validation error when the JSON is shaped wrong", async () => {
       // Arrange
       const persistence = createInMemoryPersistence();
