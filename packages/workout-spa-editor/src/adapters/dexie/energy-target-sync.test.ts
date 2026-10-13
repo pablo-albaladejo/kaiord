@@ -6,24 +6,21 @@
  */
 import "fake-indexeddb/auto";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { createProfile } from "../../application/profile/create-profile";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { writeAfterExport } from "../../test-utils/write-after-export";
 import type { EnergyTargetRecord } from "../../types/energy-target-record";
 import { createAppPersistence } from "../create-app-persistence";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
-// One Dexie instance per device for the whole file (construction costs
-// ~45 ms); each test still opens a brand-new database and afterEach drops it.
-const suffix = `${Date.now()}-${Math.random()}`;
 const databases = {
-  a: new KaiordDatabase(`kaiord-test-goal-a-${suffix}`),
-  b: new KaiordDatabase(`kaiord-test-goal-b-${suffix}`),
+  a: sharedKaiordDatabase("goal-a"),
+  b: sharedKaiordDatabase("goal-b"),
 };
 const open = async (label: keyof typeof databases) => {
   const db = databases[label];
@@ -69,10 +66,6 @@ const goalOnBothDevices = async () => {
   await sync(cloud, b, "dev-b");
   return { cloud, a, b, profileId };
 };
-
-afterEach(async () => {
-  for (const db of Object.values(databases)) await db.delete();
-});
 
 describe("energy goal sync between two devices", () => {
   it("should keep a goal cleared on device A cleared on both devices", async () => {

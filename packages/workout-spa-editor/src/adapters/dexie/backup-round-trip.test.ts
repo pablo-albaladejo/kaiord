@@ -5,8 +5,7 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { exportBackup } from "../../application/backup/export-backup";
 import { importBackup } from "../../application/backup/import-backup";
@@ -14,16 +13,18 @@ import { parseBackup } from "../../application/backup/parse-backup";
 import { createProfile } from "../../application/profile/create-profile";
 import { ensureDefaultProfile } from "../../application/profile/ensure-default-profile";
 import type { SnapshotPort } from "../../ports/snapshot-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { BACKUP_FORMAT } from "../../types/backup";
 import { createAppPersistence } from "../create-app-persistence";
-import { KaiordDatabase } from "./dexie-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
-const names: string[] = [];
-const open = async (label: string) => {
-  const name = `kaiord-test-backup-${label}-${Date.now()}-${Math.random()}`;
-  names.push(name);
-  const db = new KaiordDatabase(name);
+const databases = {
+  a: sharedKaiordDatabase("backup-a"),
+  b: sharedKaiordDatabase("backup-b"),
+};
+const open = async (label: keyof typeof databases) => {
+  const db = databases[label];
   await db.open();
   return {
     db,
@@ -91,10 +92,6 @@ const dump = async (db: KaiordDatabase) => {
 
 const runImport = (port: SnapshotPort, file: string) =>
   importBackup({ port, deviceId: "dev-a", backup: parseBackup(file) });
-
-afterEach(async () => {
-  for (const name of names.splice(0)) await Dexie.delete(name);
-});
 
 describe("backup round trip", () => {
   it("should restore every record into a clean browser under one profile", async () => {

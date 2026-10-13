@@ -10,12 +10,12 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { recordExport } from "../../application/export/record-export.use-case";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ExportLedgerEntry } from "../../types/export-ledger";
 import {
   type GarminPlacement,
@@ -23,7 +23,7 @@ import {
   parseGarminWorkoutId,
 } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
-import { KaiordDatabase } from "./dexie-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
@@ -53,9 +53,6 @@ const entry = (
   abandoned: false,
   state,
 });
-
-const dbName = (device: string) =>
-  `kaiord-test-garmin-ledger-sync-${device}-${Date.now()}-${Math.random()}`;
 
 type Path = "created" | "updated";
 
@@ -87,22 +84,17 @@ const pushAndPlace = async (
 };
 
 describe("Garmin export-ledger cross-device sync", () => {
-  let dbA: KaiordDatabase;
-  let dbB: KaiordDatabase;
+  const dbA = sharedKaiordDatabase("garminledgersync-a");
+  const dbB = sharedKaiordDatabase("garminledgersync-b");
 
   beforeEach(async () => {
     // Fake only `Date`: Dexie and fake-indexeddb schedule on real timers.
     vi.useFakeTimers({ toFake: ["Date"] });
-    dbA = new KaiordDatabase(dbName("a"));
-    dbB = new KaiordDatabase(dbName("b"));
     await Promise.all([dbA.open(), dbB.open()]);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     vi.useRealTimers();
-    dbA.close();
-    dbB.close();
-    await Promise.all([Dexie.delete(dbA.name), Dexie.delete(dbB.name)]);
   });
 
   it.each<Path>(["created", "updated"])(

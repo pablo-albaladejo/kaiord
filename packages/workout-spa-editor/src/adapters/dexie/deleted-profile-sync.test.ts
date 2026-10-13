@@ -6,7 +6,7 @@
  */
 import "fake-indexeddb/auto";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { createProfile } from "../../application/profile/create-profile";
 import { deleteProfile } from "../../application/profile/delete-profile";
@@ -14,18 +14,15 @@ import { deleteProfileWithCascade } from "../../application/profile/delete-profi
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { writeAfterExport } from "../../test-utils/write-after-export";
 import type { Snapshot } from "../../types/snapshot";
 import { createAppPersistence } from "../create-app-persistence";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
-// One Dexie instance per device for the whole file (construction costs
-// ~45 ms); each test still opens a brand-new database and afterEach drops it.
-const suffix = `${Date.now()}-${Math.random()}`;
 const databases = {
-  a: new KaiordDatabase(`kaiord-test-deleted-a-${suffix}`),
-  b: new KaiordDatabase(`kaiord-test-deleted-b-${suffix}`),
+  a: sharedKaiordDatabase("deleted-a"),
+  b: sharedKaiordDatabase("deleted-b"),
 };
 const open = async (label: keyof typeof databases) => {
   const db = databases[label];
@@ -116,10 +113,6 @@ const pushedRows = (cloud: CloudSyncPort, table: string, profileId: string) =>
     ((cloud as unknown as { state: { snapshot: Snapshot } }).state.snapshot
       .tables[table] ?? []) as Array<{ profileId?: unknown }>
   ).filter((row) => row.profileId === profileId);
-
-afterEach(async () => {
-  for (const db of Object.values(databases)) await db.delete();
-});
 
 describe("a deleted profile's rows across a sync", () => {
   it("should neither restore nor push the per-profile rows of a profile deleted on this device", async () => {
