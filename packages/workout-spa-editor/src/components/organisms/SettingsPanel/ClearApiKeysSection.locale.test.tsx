@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { appI18n, setActiveLocale } from "../../../i18n/i18n";
-import { PrivacyTab } from "./PrivacyTab";
+import { ClearApiKeysSection } from "./ClearApiKeysSection";
 
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 
@@ -19,17 +19,15 @@ vi.mock("../../../contexts/persistence-context", () => ({
 vi.mock("../../../application/ai/clear-all-providers", () => ({
   clearAllProviders: () => Promise.reject(new Error("quota")),
 }));
-vi.mock("./use-export-backup", () => ({ useExportBackup: () => vi.fn() }));
-vi.mock("./BackupImportSection", () => ({ BackupImportSection: () => null }));
 
-describe("PrivacyTab toasts in Spanish", () => {
+describe("ClearApiKeysSection toasts in Spanish", () => {
   beforeAll(() => setActiveLocale("es"));
   afterAll(() => appI18n.changeLanguage("en"));
 
   it("should report failing to clear the API keys in Spanish", async () => {
     // Arrange
     const user = userEvent.setup();
-    render(<PrivacyTab />);
+    render(<ClearApiKeysSection />);
 
     // Act
     await user.click(

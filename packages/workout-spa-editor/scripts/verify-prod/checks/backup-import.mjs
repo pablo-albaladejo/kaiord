@@ -70,7 +70,7 @@ export default async function backupImport({ rec, open }) {
   const control = await findDataControl(target.page, target.go, IMPORT_CONTROL);
   const found = rec.assert(
     control,
-    "F-41: Settings → Privacy has an 'import backup' control",
+    "F-41: Settings → Data & backup has an 'import backup' control",
     `text=${await mainText(target.page)}`
   );
   if (!found) return;

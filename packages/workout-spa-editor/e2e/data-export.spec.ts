@@ -73,7 +73,7 @@ test.describe("Export my data", () => {
     await page.goto("/calendar");
     await waitForDexieReady(page);
     const workoutId = await enterRecords(page, today);
-    await page.goto("/settings/privacy");
+    await page.goto("/settings/data");
 
     // Act
     const [download] = await Promise.all([

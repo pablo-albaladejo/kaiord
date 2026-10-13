@@ -32,7 +32,10 @@ export const SettingsRowBody = ({
       <span className={TILE_CLASS}>
         <Icon icon={ICON_MAP[icon]} size="sm" color="inherit" />
       </span>
-      <span className="min-w-0 flex-1 truncate text-sm text-ink-strong">
+      <span
+        className="min-w-0 flex-1 truncate text-sm text-ink-strong"
+        data-settings-row-label=""
+      >
         {label}
       </span>
       {detail !== undefined && (

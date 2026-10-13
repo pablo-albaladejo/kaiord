@@ -1,2 +1,2 @@
 export type SettingsTab =
-  "ai" | "sync" | "connections" | "usage" | "privacy" | "preferences";
+  "general" | "ai" | "sync" | "data" | "privacy" | "about" | "connections";

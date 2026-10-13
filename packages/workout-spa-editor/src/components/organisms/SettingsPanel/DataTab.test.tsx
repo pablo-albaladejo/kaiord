@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "../../../test-utils";
 import { createInMemorySnapshotPort } from "../../../test-utils/in-memory-snapshot-port";
-import { PrivacyTab } from "./PrivacyTab";
+import { DataTab } from "./DataTab";
 
 const download = vi.hoisted(() => vi.fn());
 
@@ -26,11 +26,11 @@ const snapshotPort = () =>
     tombstones: [],
   });
 
-describe("PrivacyTab", () => {
+describe("DataTab", () => {
   it("should download every record as a kaiord-backup file without secrets", async () => {
     // Arrange
     download.mockClear();
-    renderWithProviders(<PrivacyTab />, { snapshotPort: snapshotPort() });
+    renderWithProviders(<DataTab />, { snapshotPort: snapshotPort() });
 
     // Act
     await userEvent.click(

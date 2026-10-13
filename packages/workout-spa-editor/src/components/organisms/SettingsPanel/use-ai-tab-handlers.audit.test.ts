@@ -33,7 +33,7 @@ const textOf = (catalogue: unknown, key: string): unknown =>
       catalogue
     );
 
-const CONSUMER_FILES = ["use-ai-tab-handlers.ts", "PrivacyTab.tsx"];
+const CONSUMER_FILES = ["use-ai-tab-handlers.ts", "ClearApiKeysSection.tsx"];
 
 // One level of nested parentheses, so `t("key")` is captured whole.
 const TOAST_CALL_REGEX = /toast\.error\(((?:[^()]|\([^()]*\))*)\)/g;

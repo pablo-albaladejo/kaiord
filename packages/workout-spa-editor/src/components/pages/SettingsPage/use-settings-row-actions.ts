@@ -1,8 +1,7 @@
 /**
- * Resolves every settings row that runs something instead of navigating.
- * Mirrors `useSettingsRowValues`: the row registry only names a
- * `SettingsActionKey`, and the behaviour stays behind the surface that owns
- * the state it touches.
+ * Resolves the Settings actions that run in place instead of navigating
+ * ("Show tips again" on About), keeping the behaviour behind the surface
+ * that owns the state it touches.
  */
 
 import { useCallback } from "react";

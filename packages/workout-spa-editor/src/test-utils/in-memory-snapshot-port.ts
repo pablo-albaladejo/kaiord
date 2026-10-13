@@ -78,5 +78,12 @@ export function createInMemorySnapshotPort(
         { key, value },
       ];
     },
+
+    clearAllTables: async () => {
+      for (const name of Object.keys(state.tables)) state.tables[name] = [];
+      const deviceLocal = state.deviceLocal ?? {};
+      for (const name of Object.keys(deviceLocal)) deviceLocal[name] = [];
+      state.tombstones = [];
+    },
   };
 }

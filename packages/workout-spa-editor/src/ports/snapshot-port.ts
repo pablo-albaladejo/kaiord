@@ -65,4 +65,11 @@ export type SnapshotPort = {
   ) => Promise<void>;
   /** Write one `meta` row (`{ key, value }`). */
   writeMeta: (key: string, value: unknown) => Promise<void>;
+  /**
+   * Empty every store in one read-write transaction: the snapshot tables,
+   * the device-local ones and the tombstones. Enumerates the stores the
+   * database actually has, so a store added later is emptied too. Writes no
+   * tombstone: nothing it removes is a delete a later sync could replay.
+   */
+  clearAllTables: () => Promise<void>;
 };

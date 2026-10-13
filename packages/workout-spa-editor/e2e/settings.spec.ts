@@ -23,7 +23,7 @@ test.describe("Settings Panel", () => {
     // Open the grouped settings index, then enter the AI Provider section.
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings$/);
-    await page.getByTestId("settings-row-provider").click();
+    await page.getByTestId("settings-row-ai").click();
     await page.waitForURL(/\/settings\/ai/);
     const settingsPage = page.getByTestId("settings-page");
     await expect(settingsPage).toBeVisible({ timeout: 5000 });
@@ -120,6 +120,30 @@ test.describe("Settings Panel", () => {
         await expect(
           page.getByTestId("settings-panel-connections")
         ).toBeVisible();
+      });
+    }
+
+    const moved = [
+      { from: "preferences", to: /\/settings\/general$/, panel: "general" },
+      { from: "usage", to: /\/settings\/ai\?section=usage$/, panel: "ai" },
+      {
+        from: "privacy?section=data-management",
+        to: /\/settings\/data$/,
+        panel: "data",
+      },
+    ];
+    for (const { from, to, panel } of moved) {
+      test(`8.11: /settings/${from} lands on its new page`, async ({
+        page,
+      }) => {
+        // Arrange
+
+        // Act
+        await page.goto(`/settings/${from}`);
+
+        // Assert
+        await expect(page).toHaveURL(to, { timeout: 8000 });
+        await expect(page.getByTestId(`settings-panel-${panel}`)).toBeVisible();
       });
     }
 
