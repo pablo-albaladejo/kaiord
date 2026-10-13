@@ -6,7 +6,8 @@ import { expectOk } from "../steps.mjs";
 import { openWellnessDialog, SAVE } from "../wellness.mjs";
 
 // F-09/F-23/F-06: a clean browser has no profile and every write is gated.
-const PROFILE_GATE = /perfil de atleta|crea un perfil|create a profile/i;
+const PROFILE_GATE =
+  /crea un atleta|crear un atleta|necesita un atleta|create an athlete|needs an athlete/i;
 
 async function scheduling(rec, session) {
   const { page } = session;

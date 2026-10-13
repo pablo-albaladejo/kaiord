@@ -3,7 +3,7 @@
  * "Adjust zones" on the Athlete page opens it on the active sport, its
  * sport tabs are part of the address (so a reload or a shared link keeps
  * the sport), and an edit made there survives a reload. It replaces the
- * Profile Manager's former "Training Zones" tab.
+ * former Profile Manager modal's "Training Zones" tab.
  */
 
 import type { Page } from "@playwright/test";

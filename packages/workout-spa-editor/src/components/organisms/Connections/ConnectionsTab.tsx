@@ -1,8 +1,8 @@
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
+import { useDataFlows } from "../../../hooks/connections/use-data-flows";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useTranslate } from "../../../i18n/use-translate";
-import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsExtensionBanner } from "./ConnectionsExtensionBanner";
 import { ConnectionsHealth } from "./ConnectionsHealth";
 import { ConnectionSourceCard } from "./ConnectionSourceCard";

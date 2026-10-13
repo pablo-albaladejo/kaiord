@@ -36,7 +36,7 @@ describe("AccountMenu", () => {
     const trigger = screen.getByTestId("status-header-account-button");
 
     // Assert
-    expect(trigger).toHaveAccessibleName("Account menu (no active profile)");
+    expect(trigger).toHaveAccessibleName("Account menu (no active athlete)");
   });
 
   it("should name itself for the active profile once Dexie hydrates", async () => {
@@ -198,10 +198,17 @@ describe("AccountMenu", () => {
       ).toBeInTheDocument();
     });
 
-    it("should open the profile manager from Manage athletes", async () => {
+    it("should go to the Athletes page from Manage athletes", async () => {
       // Arrange
       const user = userEvent.setup();
-      renderWith(await seedTwo());
+      const persistence = await seedTwo();
+      const loc = memoryLocation({ path: "/daily", record: true });
+      renderWithProviders(
+        <Router hook={loc.hook}>
+          <AccountMenu attention={false} />
+        </Router>,
+        { persistence }
+      );
       await user.click(screen.getByTestId("status-header-account-button"));
 
       // Act
@@ -210,10 +217,8 @@ describe("AccountMenu", () => {
       );
 
       // Assert
-      expect(
-        await screen.findByRole("dialog", { name: "Manage athletes" })
-      ).toBeInTheDocument();
-      expect(screen.getByText("Saved Profiles (2)")).toBeInTheDocument();
+      expect(loc.history).toContain("/athletes");
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
   });
 });

@@ -34,7 +34,7 @@ describe("ZoneIndicator", () => {
 
     // Assert
 
-    expect(await screen.findByText(/no profile selected/i)).toBeInTheDocument();
+    expect(await screen.findByText(/no athlete selected/i)).toBeInTheDocument();
   });
 
   it("should show profile name when no sport is selected", async () => {

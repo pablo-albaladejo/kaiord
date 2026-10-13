@@ -65,6 +65,20 @@ describe("BottomNav", () => {
     expect(history.at(-1)).toBe("/nutrition");
   });
 
+  it.each(["/athletes", "/athlete/zones/cycling"])(
+    "should mark the Athlete tab active on %s",
+    (route) => {
+      // Arrange
+      renderAt(route);
+
+      // Act
+      const athlete = screen.getByRole("button", { name: "Athlete" });
+
+      // Assert
+      expect(athlete).toHaveAttribute("aria-current", "page");
+    }
+  );
+
   it("should mark the Daily tab active on the daily route", () => {
     // Arrange
     renderAt("/daily");

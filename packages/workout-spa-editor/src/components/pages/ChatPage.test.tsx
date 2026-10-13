@@ -151,9 +151,9 @@ describe("ChatPage", () => {
 
     // Assert
     const gate = screen.getByTestId("chat-gate-noProfile");
-    expect(gate).toHaveTextContent("needs an athlete profile");
+    expect(gate).toHaveTextContent("needs an athlete");
     expect(
-      screen.getByRole("button", { name: "Create a profile" })
+      screen.getByRole("button", { name: "Create an athlete" })
     ).toBeVisible();
     expect(screen.queryByLabelText("Message")).not.toBeInTheDocument();
   });

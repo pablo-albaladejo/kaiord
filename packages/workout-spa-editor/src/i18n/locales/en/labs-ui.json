@@ -5,7 +5,7 @@
     "title": "Lab analytics",
     "subtitle": "Add a new lab report",
     "loading": "Loading…",
-    "noProfile": "Create an athlete profile first to log lab analytics.",
+    "noProfile": "Create an athlete first to log lab analytics.",
     "typedNote": "Labs are the one health surface with no source to sync from — every value here was typed, so it carries the date you entered it rather than a bridge name."
   },
   "form": {

@@ -112,7 +112,7 @@ describe("EnergyBalanceCard", () => {
       expect(screen.getByTestId("energy-balance-gated")).toBeInTheDocument()
     );
     expect(
-      screen.getByText("Complete your profile to estimate energy")
+      screen.getByText("Complete your athlete details to estimate energy")
     ).toBeInTheDocument();
   });
 });

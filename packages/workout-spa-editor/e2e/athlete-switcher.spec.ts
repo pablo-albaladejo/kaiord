@@ -1,6 +1,6 @@
 /**
  * Avatar-menu athlete switcher (audit P-06): switching profile is one open
- * plus one pick instead of four clicks inside the Profile Manager modal.
+ * plus one pick; "Manage athletes…" leads to the Athletes page.
  *
  * Opens the menu through the shared `openAccountMenu` helper (it waits for
  * the content to be visible) and picks with a plain click, so no step races
@@ -85,7 +85,7 @@ test.describe("Avatar menu athlete switcher", () => {
     await expect(page.getByText(SECOND_NAME, { exact: true })).toBeVisible();
   });
 
-  test("opens the profile manager from Manage athletes", async ({ page }) => {
+  test("opens the Athletes page from Manage athletes", async ({ page }) => {
     await openAccountMenu(page);
 
     await page
@@ -93,8 +93,8 @@ test.describe("Avatar menu athlete switcher", () => {
       .getByRole("menuitem", { name: "Manage athletes…" })
       .click();
 
-    const dialog = page.getByRole("dialog", { name: "Manage athletes" });
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByText("Saved Profiles (2)")).toBeVisible();
+    await expect(page).toHaveURL(/#\/athletes$/);
+    await expect(page.getByText("Athletes (2)")).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 });

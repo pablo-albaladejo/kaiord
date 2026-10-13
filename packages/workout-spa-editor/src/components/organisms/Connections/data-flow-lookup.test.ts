@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
-import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import { bridgePolicies } from "./data-flow-lookup";
 
 const BRIDGE = "garmin-bridge";

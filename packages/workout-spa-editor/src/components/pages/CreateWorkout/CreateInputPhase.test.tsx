@@ -137,7 +137,7 @@ describe("CreateInputPhase", () => {
 
     // Assert
     expect(screen.getByText(/FTP 268 W/)).toBeInTheDocument();
-    expect(screen.getByText(/athlete profile/i)).toBeInTheDocument();
+    expect(screen.getByText(/athlete data/i)).toBeInTheDocument();
   });
 
   it("should omit the threshold line when the sport has none set", () => {
@@ -150,7 +150,7 @@ describe("CreateInputPhase", () => {
     render(withRouter(ui));
 
     // Assert
-    expect(screen.queryByText(/athlete profile/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/athlete data/i)).not.toBeInTheDocument();
   });
 
   it("should open the blank editor on the sheet's day with the chosen sport", async () => {

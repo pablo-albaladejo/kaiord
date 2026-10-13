@@ -1,7 +1,7 @@
 {
   "title": "Connections",
   "intro": "Every source you have linked, what it is sending right now, and which one wins when two sources report the same thing.",
-  "noProfile": "Create an athlete profile to link a data source.",
+  "noProfile": "Create an athlete to add a connection.",
   "sources": "Sources",
   "sourcesHint": "The Kaiord extension and permissions live inside each connection",
   "unsupported": "Not available yet",
@@ -153,9 +153,9 @@
     "heart-rate-series": "Heart Rate Series"
   },
   "profileLink": {
-    "notLinked": "{{name}} is signed in on this browser but not linked to this athlete profile, so nothing syncs yet.",
-    "link": "Link to this profile",
-    "signIn": "{{name}} is not linked to this athlete profile. Sign in to {{name}} in this browser first, then link it here.",
+    "notLinked": "{{name}} is signed in on this browser but not linked to this athlete, so nothing syncs yet.",
+    "link": "Link to this athlete",
+    "signIn": "{{name}} is not linked to this athlete. Sign in to {{name}} in this browser first, then link it here.",
     "linking": "Linking…",
     "linked": "Linked to this athlete as {{user}}. Unlike the rest of this page, the link is saved with the athlete, not just in this browser.",
     "unlink": "Unlink",

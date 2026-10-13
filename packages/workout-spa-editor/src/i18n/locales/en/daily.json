@@ -27,7 +27,7 @@
     "title": "Energy balance",
     "setGoal": "Set goal",
     "logNutrition": "Log nutrition",
-    "gatedPrompt": "Complete your profile to estimate energy",
+    "gatedPrompt": "Complete your athlete details to estimate energy",
     "intake": "Intake",
     "net": "Net",
     "target": "Target",

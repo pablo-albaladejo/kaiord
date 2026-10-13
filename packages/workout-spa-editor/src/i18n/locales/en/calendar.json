@@ -163,7 +163,7 @@
   "wellnessToast": {
     "saved": "Wellness saved",
     "saveFailed": "Could not save — please retry",
-    "noProfile": "No athlete profile — select or create one to save wellness"
+    "noProfile": "No athlete — select or create one to save wellness"
   },
   "sport": {
     "cycling": "Cycling",

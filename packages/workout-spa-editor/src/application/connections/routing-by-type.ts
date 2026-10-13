@@ -7,7 +7,7 @@
 import type { ManagedDataType } from "@kaiord/core";
 import { managedDataTypes } from "@kaiord/core";
 
-import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
+import type { DataFlowsByType } from "../../hooks/connections/use-data-flows";
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicyDirection } from "../../types/integration-policy";

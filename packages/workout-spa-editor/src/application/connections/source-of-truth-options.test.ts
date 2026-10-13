@@ -1,7 +1,7 @@
 import type { ManagedDataType } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
+import type { DataFlowsByType } from "../../hooks/connections/use-data-flows";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 import { buildDataTypeRoutingRows } from "./data-type-routing";

@@ -8,7 +8,7 @@
     "describe": "Describe it in plain words",
     "placeholder": "e.g. 4×4 VO₂ max intervals with a long warm-up…",
     "generate": "Generate workout",
-    "writtenAgainst": "Written against {{threshold}} — from your athlete profile, {{relative}}."
+    "writtenAgainst": "Written against {{threshold}} — from your athlete data, {{relative}}."
   },
   "examples": {
     "enduranceRide": "45 min Z2 endurance ride",
@@ -68,9 +68,9 @@
     "generic": "Generic"
   },
   "zoneIndicator": {
-    "noProfile": "No profile selected. Set up a profile to include training zones.",
+    "noProfile": "No athlete selected. Set up an athlete to include training zones.",
     "noZones": "No {{sport}} zones configured for {{name}}.",
-    "profile": "Profile: {{name}}"
+    "profile": "Athlete: {{name}}"
   },
   "banner": {
     "toggle": "Generate with AI"

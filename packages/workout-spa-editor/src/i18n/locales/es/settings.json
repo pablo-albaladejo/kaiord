@@ -63,7 +63,7 @@
     "chat": "Chat",
     "workoutGeneration": "Generación de entrenamientos",
     "labExtraction": "Extracción de laboratorio",
-    "hint": "Añade al menos un proveedor y selecciona un perfil activo para elegir modelos.",
+    "hint": "Añade al menos un proveedor y selecciona un atleta activo para elegir modelos.",
     "model": "Modelo",
     "custom": "Personalizado…",
     "retired": "El proveedor retiró {{model}}: se usa {{successor}} en su lugar.",
@@ -76,7 +76,7 @@
     "resetFailed": "No se pudo restablecer el modelo. Inténtalo de nuevo."
   },
   "sync": {
-    "description": "Sincroniza tus entrenamientos, tus datos de salud y nutrición (registro de ingestas, plantillas y objetivo) y tus ajustes entre dispositivos a través de tu propio Google Drive. Los datos residen en tu Drive; no interviene ningún servidor de Kaiord. Si dos dispositivos tienen cada uno un objetivo de nutrición para el mismo perfil, se conserva el guardado más recientemente.",
+    "description": "Sincroniza tus entrenamientos, tus datos de salud y nutrición (registro de ingestas, plantillas y objetivo) y tus ajustes entre dispositivos a través de tu propio Google Drive. Los datos residen en tu Drive; no interviene ningún servidor de Kaiord. Si dos dispositivos tienen cada uno un objetivo de nutrición para el mismo atleta, se conserva el guardado más recientemente.",
     "syncNow": "Sincronizar ahora",
     "disconnect": "Desconectar",
     "connect": "Conectar cuenta de Google",
@@ -89,9 +89,9 @@
     "passphrase": "Frase de contraseña",
     "plaintextWarning": "Tus claves de API de IA guardadas se subirán sin cifrado de extremo a extremo. Activa el cifrado abajo para protegerlas.",
     "profileChoice": {
-      "title": "¿Para qué perfil es este dispositivo?",
-      "body": "Tu Google Drive ya tiene varios perfiles. Elige el que debe recibir lo que registraste en este dispositivo; no se sincroniza nada hasta que elijas.",
-      "unnamed": "Perfil sin nombre"
+      "title": "¿Para qué atleta es este dispositivo?",
+      "body": "Tu Google Drive ya tiene varios atletas. Elige el que debe recibir lo que registraste en este dispositivo; no se sincroniza nada hasta que elijas.",
+      "unnamed": "Atleta sin nombre"
     },
     "connectFailed": "No se pudo conectar la cuenta de Google. Inténtalo de nuevo.",
     "syncFailed": "La sincronización falló. Tus datos están a salvo en este dispositivo.",
@@ -100,8 +100,8 @@
   "privacy": {
     "information": "Información de privacidad",
     "infoNoServer": "Tus registros están en este navegador, sin cifrar: si borras los datos del sitio, los borras. Kaiord no opera ningún servidor que guarde una copia. Lo único que sale es lo que enrutas a una conexión, lo que envías a tu proveedor de IA y las copias en Drive si activas la sincronización entre dispositivos.",
-    "infoGarmin": "La integración con Garmin usa una extensión del navegador que se apoya en tu sesión existente de Garmin Connect. Ninguna credencial sale de tu navegador.",
-    "infoTrain2go": "La importación de Train2Go usa una extensión del navegador que lee el plan de entrenamiento mostrado en las páginas de Train2Go que ya estás viendo. No lee tu contraseña ni tus tokens de autenticación.",
+    "infoExtension": "Garmin, Train2Go, WHOOP, Tanita y TrainingPeaks se conectan con la extensión de Kaiord, que aprovecha la sesión que ya tienes abierta en cada sitio. Tus contraseñas nunca salen de tu navegador.",
+    "infoApiKey": "intervals.icu se conecta con una clave de API que pegas tú. Se guarda cifrada en este navegador y solo se envía a intervals.icu.",
     "infoLlmKeys": "Las claves de API de LLM se envían directamente al proveedor (Anthropic, OpenAI o Google) — Kaiord no recibe ni retransmite estos datos.",
     "infoNotResponsible": "No nos hacemos responsables de la seguridad de las credenciales en tu dispositivo.",
     "privacyPolicyLink": "Lee la política de privacidad completa",
@@ -110,12 +110,12 @@
     "analyticsLink": "Umami",
     "analyticsOutro": "para hacer un seguimiento del uso agregado (visitas de página, generación de entrenamientos, exportaciones). No se establecen cookies ni se recopilan datos personales.",
     "exportData": "Exportar mis datos",
-    "exportHint": "Descarga en un fichero JSON, sin cifrar, tus entrenamientos, datos de salud, nutrición y ajustes. No incluye las claves de API, las integraciones conectadas ni el estado de sincronización. Guarda el fichero en un sitio seguro.",
+    "exportHint": "Descarga en un fichero JSON, sin cifrar, tus entrenamientos, datos de salud, nutrición y ajustes. No incluye las claves de API, las conexiones ni el estado de sincronización. Guarda el fichero en un sitio seguro.",
     "exportFailed": "No se pudieron exportar tus datos; vuelve a intentarlo.",
     "importData": "Importar una copia",
     "importFileLabel": "Fichero de copia",
     "importHint": "Fusiona un fichero de copia de Kaiord con este navegador sin borrar nada de aquí: de cada registro gana la versión más reciente, y lo que borraste después de la copia sigue borrado. El fichero no lleva claves de API: vuelve a añadirlas en los ajustes de IA.",
-    "importChooseProfile": "Esta copia tiene varios perfiles. ¿A cuál deben unirse los datos de este navegador?",
+    "importChooseProfile": "Esta copia tiene varios atletas. ¿A cuál deben unirse los datos de este navegador?",
     "importConfirm": "Importar",
     "importSummary": "Copia importada: {{added}} añadidos, {{updated}} actualizados, {{notRestored}} borrados después de la copia (no restaurados).",
     "importInvalid": "Este fichero no es una copia de Kaiord.",
@@ -151,7 +151,7 @@
   "usage": {
     "title": "Uso de IA",
     "heading": "Uso de IA — últimos {{count}} meses",
-    "empty": "Aún no hay uso de IA registrado en los últimos {{count}} meses. El panel se rellenará automáticamente tras tu primera ejecución por lotes.",
+    "empty": "Aún no hay uso de IA registrado en los últimos {{count}} meses. Se rellena en cuanto uses el asistente de IA o crees un entreno con IA.",
     "month": "Mes",
     "input": "Entrada",
     "output": "Salida",

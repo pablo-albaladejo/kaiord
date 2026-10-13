@@ -388,7 +388,7 @@ describe("ScratchEditorSurface", () => {
     expect(button).toBeDisabled();
     await waitFor(() =>
       expect(button).toHaveAccessibleDescription(
-        /select or create an athlete profile/i
+        /select or create an athlete to schedule/i
       )
     );
   });

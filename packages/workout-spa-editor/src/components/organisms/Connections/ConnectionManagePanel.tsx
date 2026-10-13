@@ -2,9 +2,9 @@ import { useState } from "react";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { useBridgeImport } from "../../../hooks/connections/use-bridge-import";
+import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import { useConnectionActions } from "../../../hooks/use-connection-actions";
 import { useTranslate } from "../../../i18n/use-translate";
-import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import { ConnectionBodyExport } from "./ConnectionBodyExport";
 import { ConnectionRouteList } from "./ConnectionRouteList";
 import { ConnectionSyncButton } from "./ConnectionSyncButton";

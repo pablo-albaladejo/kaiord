@@ -5,7 +5,24 @@ import { deleteProfile } from "./delete-profile";
 import { makeProfile, seedProfile } from "./test-fixtures";
 
 describe("deleteProfile", () => {
-  it("should remove the profile and clears the active id when it matched", async () => {
+  it("should make the other athlete active when the active one is deleted", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const a = makeProfile({ id: "00000000-0000-4000-8000-0000000000e1" });
+    const b = makeProfile({ id: "00000000-0000-4000-8000-0000000000e2" });
+    await seedProfile(persistence, a);
+    await seedProfile(persistence, b);
+    await persistence.profiles.setActiveId(a.id);
+
+    // Act
+    await deleteProfile(persistence, a.id);
+
+    // Assert
+    expect(await persistence.profiles.getActiveId()).toBe(b.id);
+    expect(await persistence.profiles.getById(a.id)).toBeUndefined();
+  });
+
+  it("should remove the last profile and clear the active id", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();

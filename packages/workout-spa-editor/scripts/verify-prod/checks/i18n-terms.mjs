@@ -9,7 +9,8 @@ export const BLACKLIST = [
   "Recovery", "Aerobic", "Threshold", "Pick a date", "Set energy goal",
   "Wellness", "Import a file", "Paste Step", "Coaching Cues", "Time",
   "Running", "Cycling", "Swim", "New workout", "Block actions", "Focus",
-  "Loading", "Delete", "Edit", "Close", "Settings", "Generic",
+  "Loading", "Delete", "Edit", "Close", "Settings", "Generic", "Athletes",
+  "Make active",
 ];
 
 // Proper nouns and format names that legitimately stay in English. They are

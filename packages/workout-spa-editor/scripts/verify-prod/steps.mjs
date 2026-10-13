@@ -15,21 +15,20 @@ export async function expectOk(rec, msg, assertion, observe) {
   }
 }
 
+// A clean browser already has its default athlete; one with none gets one
+// from #/athletes, where athletes are created now (P-15).
 export async function ensureProfile(session) {
   const { page, go } = session;
   await go("athlete");
-  const create = page.getByRole("button", { name: "Crear perfil" });
-  const existing = page.getByRole("button", { name: /Editar perfil/ });
-  await create.or(existing).first().waitFor();
-  if (!(await create.isVisible())) return "existing";
-  await create.click();
-  await page.getByLabel(/^(Name|Nombre)$/).fill("verify-prod");
-  await page
-    .getByRole("button", { name: /Create Profile|Crear perfil/ })
-    .last()
-    .click();
-  await page.keyboard.press("Escape");
-  await existing.first().waitFor();
+  const identity = page.getByTestId("athlete-identity");
+  const empty = page.getByRole("link", { name: "Crear atleta" });
+  await identity.or(empty).first().waitFor();
+  if (await identity.isVisible()) return "existing";
+  await go("athletes");
+  await page.getByRole("textbox", { name: "Nombre" }).fill("verify-prod");
+  await page.getByRole("button", { name: "Crear atleta" }).click();
+  await go("athlete");
+  await identity.waitFor();
   return "created";
 }
 

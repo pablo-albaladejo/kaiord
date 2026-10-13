@@ -89,9 +89,9 @@
   },
   "gate": {
     "noProfile": {
-      "title": "The assistant needs an athlete profile",
-      "body": "It answers from the workouts and health data kept in your profile.",
-      "action": "Create a profile"
+      "title": "The assistant needs an athlete",
+      "body": "It answers from the workouts and health data of the active athlete.",
+      "action": "Create an athlete"
     },
     "missingKey": {
       "title": "Your AI provider has no API key",

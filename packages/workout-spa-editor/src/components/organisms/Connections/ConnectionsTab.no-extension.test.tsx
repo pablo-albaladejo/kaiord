@@ -5,12 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
+import { useDataFlows } from "../../../hooks/connections/use-data-flows";
 import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-settled";
 import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { BRIDGE_DOCS_URL } from "../../molecules/CalendarEmptyStates/first-run-steps";
-import { useDataFlows } from "../ProfileManager/components/useDataFlows";
 import { ConnectionsTab } from "./ConnectionsTab";
 
 const render = (ui: ReactElement) =>
@@ -29,7 +29,7 @@ vi.mock("../../../hooks/connections/use-connections-refresh", () => ({
 vi.mock("../../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: vi.fn(),
 }));
-vi.mock("../ProfileManager/components/useDataFlows", () => ({
+vi.mock("../../../hooks/connections/use-data-flows", () => ({
   useDataFlows: vi.fn(),
 }));
 vi.mock("../../../hooks/use-connection-actions", () => ({

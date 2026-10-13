@@ -35,7 +35,7 @@ describe("WellnessEntryForm toasts", () => {
     // Assert
     expect(
       await screen.findByText(
-        "No hay perfil de atleta: selecciona o crea uno para guardar el bienestar"
+        "No hay atleta: selecciona o crea uno para guardar el bienestar"
       )
     ).toBeInTheDocument();
   });

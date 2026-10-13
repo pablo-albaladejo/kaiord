@@ -31,7 +31,6 @@ Leaf libraries: small, focused, mostly-pure modules used across the SPA. No Reac
 ### Crypto + storage
 
 - `crypto.ts` / `.test.ts` — AES-GCM encrypt/decrypt for Garmin creds.
-- `secure-storage.ts` / `.test.ts` — keychain-style wrapper over crypto + `localStorage`.
 - `raw-hash.ts` / `.test.ts` — content-hash helper for fingerprinting (idempotency keys, profile-snapshot dedup).
 
 ### Routing + errors

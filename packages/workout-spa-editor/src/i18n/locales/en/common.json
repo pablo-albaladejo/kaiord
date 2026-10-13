@@ -17,7 +17,7 @@
     "offline": "Offline",
     "conflict": "Conflict",
     "synced": "Synced",
-    "noProfile": "No profile"
+    "noProfile": "No athlete"
   },
   "a11y": {
     "mainNavigation": "Main navigation",
@@ -26,8 +26,8 @@
     "loadingPage": "Loading page",
     "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
-    "openAthleteProfile": "Open athlete profile (active profile: {{name}})",
-    "openAthleteProfileEmpty": "Open athlete profile (no active profile)"
+    "openAthleteProfile": "Open athlete (active: {{name}})",
+    "openAthleteProfileEmpty": "Open athlete (no active athlete)"
   },
   "bridge": {
     "garmin": "Garmin: {{label}}",

@@ -3,8 +3,8 @@
  *
  * Importing an exported profile file used to keep only the name and body
  * weight: FTP, LTHR, zones and personal data were silently dropped. The
- * file is imported through the profile manager list (Athlete → Edit → Back to
- * List), and the FTP must survive into the new profile.
+ * file is imported on the Athletes page, and the FTP must survive into the
+ * new athlete.
  */
 
 import { expect, test } from "./fixtures/base";
@@ -34,14 +34,12 @@ const exportedProfile = () => {
 
 test.describe("Athlete profile import", () => {
   test("should keep the FTP of an exported profile", async ({ page }) => {
-    // Arrange — open the profile manager list from the Athlete page
-    await page.goto("/athlete");
+    // Arrange — the Athletes page holds the import
+    await page.goto("/athletes");
     await waitForDexieReady(page);
-    await page.getByRole("button", { name: "Edit profile" }).click();
-    await page.getByRole("button", { name: "Back to List" }).click();
 
     // Act
-    await page.getByLabel("Import profile file").setInputFiles({
+    await page.getByLabel("Athlete file").setInputFiles({
       name: "profile.json",
       mimeType: "application/json",
       buffer: Buffer.from(JSON.stringify(exportedProfile())),
@@ -49,6 +47,6 @@ test.describe("Athlete profile import", () => {
 
     // Assert — the imported athlete is listed with its FTP intact
     await expect(page.getByText("Imported Athlete")).toBeVisible();
-    await expect(page.getByText(`FTP: ${FTP}W`)).toBeVisible();
+    await expect(page.getByText(`FTP ${FTP} W`)).toBeVisible();
   });
 });
