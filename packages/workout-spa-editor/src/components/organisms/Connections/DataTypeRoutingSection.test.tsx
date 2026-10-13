@@ -4,10 +4,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { BridgeConnectionState } from "../../../adapters/bridge/bridge-connection-types";
+import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import type { ConnectionRecord } from "../../../types/connection";
 import type { DataTypeSourcePolicy } from "../../../types/data-type-source-policy";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
-import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import { DataTypeRoutingSection } from "./DataTypeRoutingSection";
 
 // A real UUID: `upsertIntegrationPolicy` validates the profile id, so the

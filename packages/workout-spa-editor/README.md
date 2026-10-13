@@ -46,7 +46,7 @@ The application has a fully functional MVP with all core features:
 
 - **Per-sport zone configs** - Separate HR, power, and pace zones for Cycling, Running, Swimming, and Generic
 - **Auto/manual modes** - Auto-calculate zones from thresholds (LTHR, FTP, threshold pace) or set manually
-- **Zone editor** - Tabbed UI in Profile Manager for editing sport-specific zones
+- **Zone editor** - Per-sport zone editor page at `/athlete/zones/:sport`
 - **AI zone context** - Zone indicator in AI workout form; formatter sends sport-specific zones to LLM
 - **Pace zones** - mm:ss format for running (min/km) and swimming (min/100m)
 - **Profile migration** - Legacy profiles auto-migrate to the sport-zones structure

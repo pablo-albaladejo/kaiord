@@ -2,7 +2,7 @@ import type { ManagedDataType } from "@kaiord/core";
 import { managedDataTypes } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
+import type { DataFlowsByType } from "../../hooks/connections/use-data-flows";
 import { MANUAL_ENTRY_TYPES } from "../../integrations/manual-entry-types";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 import { buildConnectionCoverage } from "./connection-coverage";

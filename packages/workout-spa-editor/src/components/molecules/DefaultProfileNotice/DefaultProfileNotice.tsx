@@ -1,6 +1,6 @@
 /**
  * One-time, dismissible hint shown while the active profile is the
- * first-run default ("My profile"): everything already works, and the link
+ * first-run default ("My athlete"): everything already works, and the link
  * leads to the athlete page to add thresholds and weight.
  */
 import { Link } from "wouter";

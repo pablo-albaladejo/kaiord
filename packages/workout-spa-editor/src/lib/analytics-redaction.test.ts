@@ -43,6 +43,7 @@ describe("redactAnalyticsPath", () => {
     "/settings/privacy",
     "/settings/profile",
     "/connections",
+    "/athletes",
     "/athlete/zones/running",
     "/health",
     "/daily",

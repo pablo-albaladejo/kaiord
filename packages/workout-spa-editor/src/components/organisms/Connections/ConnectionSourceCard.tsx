@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
-import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
+import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import { canDisconnect } from "./connection-card-copy";
 import { ConnectionApiKeyPanel } from "./ConnectionApiKeyPanel";
 import { ConnectionBridgeLine } from "./ConnectionBridgeLine";

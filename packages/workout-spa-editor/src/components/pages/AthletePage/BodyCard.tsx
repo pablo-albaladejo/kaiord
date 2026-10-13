@@ -3,9 +3,9 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { Profile } from "../../../types/profile";
 import { Card } from "../../atoms/Card";
 import { SectionHead } from "../../molecules/SectionHead";
-import { PhysiologyFields } from "../../organisms/ProfileManager/components/PhysiologyFields";
 import { BODY_SECTION_ATTRS, BODY_SECTION_ID } from "./body-section";
 import { CurrentWeightField } from "./CurrentWeightField";
+import { PhysiologyFields } from "./PhysiologyFields";
 import { useBodyForm } from "./use-body-form";
 
 type BodyCardProps = {

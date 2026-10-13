@@ -14,7 +14,6 @@
   "helpDocs": "Help & docs",
   "athleteSection": "Athlete",
   "manageAthletes": "Manage athletes…",
-  "manageAthletesTitle": "Manage athletes",
   "alert": {
     "title_one": "{{count}} source down",
     "title_other": "{{count}} sources down",
@@ -25,7 +24,7 @@
     "calendar": "Go to calendar",
     "library": "Open workout library",
     "nutrition": "Open nutrition",
-    "athlete": "Open athlete profile",
+    "athlete": "Open athlete",
     "trends": "Open wellness trends",
     "labs": "Open lab analytics",
     "chat": "Open chat assistant",
@@ -33,12 +32,13 @@
     "connections": "Open connections",
     "more": "More destinations",
     "account": "Account menu ({{name}})",
-    "accountEmpty": "Account menu (no active profile)"
+    "accountEmpty": "Account menu (no active athlete)"
   },
   "announce": {
     "library": "Library page",
     "chat": "Chat page",
     "athlete": "Athlete page",
+    "athletes": "Athletes page",
     "newWorkout": "New workout",
     "workout": "Workout page",
     "editWorkout": "Edit workout",

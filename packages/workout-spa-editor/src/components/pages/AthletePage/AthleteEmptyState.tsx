@@ -1,22 +1,21 @@
+import { Link } from "wouter";
+
 import { useTranslate } from "../../../i18n/use-translate";
-import { Button } from "../../atoms/Button";
+import { ATHLETES_PATH } from "../../../routing/constants";
 
-type AthleteEmptyStateProps = {
-  onCreate: () => void;
-};
-
-/* No active profile yet. Opens the profile-creation surface in place
-   (CreateProfileDialog, lifted into AthletePage) rather than navigating
-   away — creating the first profile auto-activates it, swapping this page
-   to the populated body. */
-export function AthleteEmptyState({ onCreate }: AthleteEmptyStateProps) {
+/* No active athlete. Athletes are created on the Athletes page; creating
+   the first one makes it active, so coming back here shows its body. */
+export function AthleteEmptyState() {
   const t = useTranslate("athlete");
   return (
     <div className="flex flex-col items-center gap-4 py-16 text-center">
       <p className="text-[15px] text-ink-body">{t("emptyTitle")}</p>
-      <Button variant="primary" onClick={onCreate}>
-        {t("createProfile")}
-      </Button>
+      <Link
+        href={ATHLETES_PATH}
+        className="rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+      >
+        {t("createAthlete")}
+      </Link>
     </div>
   );
 }

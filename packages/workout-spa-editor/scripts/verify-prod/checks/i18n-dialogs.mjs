@@ -1,9 +1,7 @@
 import { isoDate, settledText } from "../browser.mjs";
-import { englishLeaks, englishPieces, localeText } from "../locale.mjs";
+import { englishLeaks, englishPieces } from "../locale.mjs";
 import { findEnglish } from "./i18n-terms.mjs";
 import { recordWeight } from "./record-weight.mjs";
-
-const es = (ns, key) => localeText("es", ns, key);
 
 // innerText skips a closed <select>'s options and every attribute, so both
 // are read on their own.
@@ -19,7 +17,7 @@ function dialogCopy(root) {
   return [root.innerText, ...attrs, ...options].join("\n");
 }
 
-async function scanDialog(rec, dialog, label, pieces) {
+export async function scanDialog(rec, dialog, label, pieces) {
   const copy = await settledText(dialog.page(), dialogCopy, dialog);
   const hits = [
     ...new Set([...findEnglish(copy), ...englishLeaks(copy, pieces)]),
@@ -29,47 +27,6 @@ async function scanDialog(rec, dialog, label, pieces) {
     `no English UI terms in ${label}`,
     hits.join(", ")
   );
-}
-
-// Fields by type and order, not by label: a label that regressed to English
-// must reach the scan and be reported, not stop the check before it. The tab
-// has no weight field (P-03): its numbers are height, then resting HR.
-async function fillPersonal(dialog) {
-  const numbers = dialog.locator('input[type="number"]');
-  await numbers.nth(0).fill("175");
-  await numbers.nth(1).fill("55");
-  await dialog.locator('input[type="date"]').fill("1990-01-01");
-  await dialog.locator("select").first().selectOption("male");
-}
-
-// F-46b: every tab of the Profile Manager, the personal data filled in so
-// the physiology selects show a chosen value, not only "not set". The zone
-// editor is its own page now (#/athlete/zones/<sport>, scanned as a route).
-export async function profileManager(rec, { page, go }) {
-  await go("athlete");
-  await page
-    .getByRole("button", { name: es("athlete", "editProfile") })
-    .click();
-  const dialog = page.getByRole("dialog");
-  const tabs = dialog.getByRole("tablist").getByRole("tab");
-  await tabs.first().waitFor();
-  const pieces = englishPieces("athlete", "profileManager");
-  const count = await tabs.count();
-  // Zones left for #/athlete/zones/<sport> and Linked Accounts for
-  // #/connections; i18n-scan covers both routes. Personal Data remains.
-  rec.assert(
-    count === 1,
-    "F-46b: the Profile Manager shows its one tab, Personal Data",
-    `tabs=${count}`
-  );
-  for (let i = 0; i < count; i++) {
-    await tabs.nth(i).click();
-    const name = (await tabs.nth(i).innerText()).trim();
-    if (i === 0) await fillPersonal(dialog);
-    await scanDialog(rec, dialog, `the Profile Manager tab "${name}"`, pieces);
-  }
-  await page.keyboard.press("Escape");
-  await dialog.waitFor({ state: "hidden" });
 }
 
 // F-39: the goal dialog with a goal steep enough to show the preview and the
