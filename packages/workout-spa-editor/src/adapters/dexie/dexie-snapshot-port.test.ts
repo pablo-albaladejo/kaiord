@@ -5,18 +5,15 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { exportSnapshot } from "../../application/sync/export-snapshot";
 import { importSnapshot } from "../../application/sync/import-snapshot";
 import { mergeSnapshots } from "../../application/sync/merge-snapshots";
 import { decrypt, encrypt } from "../../lib/crypto";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { Snapshot } from "../../types/snapshot";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
-
-const dbName = () => `kaiord-test-snapshot-${Date.now()}-${Math.random()}`;
 
 const PASSPHRASE = "kaiord-spa-v1";
 // Current head version KaiordDatabase opens at; v24 added the device-local
@@ -31,19 +28,10 @@ const PASSPHRASE = "kaiord-spa-v1";
 const SCHEMA_HEAD = 37;
 
 describe("createDexieSnapshotPort", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName();
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("snapshot");
 
   it("should export every table including the schema version", async () => {
     // Arrange
-    const db = new KaiordDatabase(name);
     await db.open();
     await db.table("workouts").add({ id: "w-1", profileId: "p-1" });
     const port = createDexieSnapshotPort(db);
@@ -73,7 +61,6 @@ describe("createDexieSnapshotPort", () => {
     "should exclude the device-local $store store from the export",
     async ({ store, row }) => {
       // Arrange
-      const db = new KaiordDatabase(name);
       await db.open();
       await db.table(store).add(row);
       const port = createDexieSnapshotPort(db);
@@ -168,7 +155,6 @@ describe("createDexieSnapshotPort", () => {
     "should include the $store store in the export",
     async ({ store, row }) => {
       // Arrange
-      const db = new KaiordDatabase(name);
       await db.open();
       await db.table(store).add(row);
       const port = createDexieSnapshotPort(db);
@@ -184,7 +170,6 @@ describe("createDexieSnapshotPort", () => {
 
   it("should round-trip a cleared database back to its original rows", async () => {
     // Arrange
-    const db = new KaiordDatabase(name);
     await db.open();
     await db.table("workouts").add({ id: "w-1", profileId: "p-1" });
     await db.table("templates").add({ id: "t-1", sport: "cycling" });
@@ -206,7 +191,6 @@ describe("createDexieSnapshotPort", () => {
 
   it("should preserve an encrypted aiProviders key that decrypts after import", async () => {
     // Arrange
-    const db = new KaiordDatabase(name);
     await db.open();
     const encryptedKey = await encrypt("sk-secret-123", PASSPHRASE);
     await db.table("aiProviders").add({ id: "ai-1", encryptedKey });
@@ -228,7 +212,6 @@ describe("createDexieSnapshotPort", () => {
 
   it("should roll the whole import back when a later phase fails (atomic)", async () => {
     // Arrange
-    const db = new KaiordDatabase(name);
     await db.open();
     await db.table("workouts").add({ id: "original", profileId: "p-1" });
     const base = createDexieSnapshotPort(db);
@@ -258,7 +241,6 @@ describe("createDexieSnapshotPort", () => {
 
   it("should round-trip tombstones via the dedicated tombstone methods", async () => {
     // Arrange
-    const db = new KaiordDatabase(name);
     await db.open();
     const port = createDexieSnapshotPort(db);
     await port.replaceTombstones([
@@ -309,18 +291,10 @@ const snapshotAt = (
 });
 
 describe("createDexieSnapshotPort Garmin ledger normalization", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("snapshot-ledger");
 
   beforeEach(async () => {
-    name = dbName();
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   const importAndRead = async (snapshot: Snapshot) => {

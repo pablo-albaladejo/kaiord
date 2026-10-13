@@ -2,7 +2,7 @@
   "intro": "Cada fuente que has vinculado, lo que está enviando ahora mismo y cuál gana cuando dos fuentes informan de lo mismo.",
   "noProfile": "Crea un perfil de atleta para vincular una fuente de datos.",
   "sources": "Fuentes",
-  "sourcesHint": "Los puentes y los permisos viven dentro de cada fuente",
+  "sourcesHint": "La extensión de Kaiord y los permisos están dentro de cada conexión",
   "unsupported": "Todavía no disponibles",
   "unsupportedHint": "Conectarlas necesita un servidor que Kaiord no tiene.",
   "summary": {
@@ -22,7 +22,7 @@
   },
   "banner": {
     "one": "Kaiord no puede leer de {{name}}",
-    "oneOutdated": "El puente de navegador de {{name}} está desactualizado",
+    "oneOutdated": "La extensión de Kaiord de {{name}} está desactualizada",
     "many": "{{count}} fuentes necesitan atención",
     "paused": "Ahora mismo ninguna fuente está enviando {{types}}.",
     "covered": "No se ha parado nada: cada tipo afectado tiene otra fuente activada.",
@@ -42,16 +42,14 @@
     "installed": "Esta extensión se anunció al cargar la página. Kaiord no puede volver a comprobarla sin descargar tu exportación completa, así que puede que se haya eliminado desde entonces.",
     "checking": "Preguntando a la extensión si todavía tiene sesión.",
     "noAccess": "Kaiord no pudo leer de esta fuente. Volver a iniciar sesión en su web puede restaurar el acceso; si ya has iniciado sesión, puede que la fuente no esté disponible temporalmente.",
-    "outdated": "El puente de esta extensión está desactualizado. Actualiza la extensión para reanudar; volver a iniciar sesión no servirá de nada.",
-    "notDetected": "La extensión del navegador no se está ejecutando en este navegador.",
+    "outdated": "Esta extensión de Kaiord está desactualizada. Actualiza la extensión para reanudar: volver a iniciar sesión no ayudará.",
     "disconnected": "Desconectaste esta fuente en Kaiord. Puede que la extensión siga instalada.",
     "manual": "Todo lo que escribes tú mismo en Kaiord. Nunca se desactiva.",
     "unsupported": "Kaiord todavía no puede conectar esta cuenta."
   },
   "fixAtSource": "Inicia sesión en {{name}} ↗",
-  "bridgeDetected": "Puente de navegador de {{name}} · detectado",
-  "bridgeAnnounced": "Puente de navegador de {{name}} · detectado al cargar",
-  "bridgeMissing": "Puente de navegador de {{name}} · no detectado",
+  "bridgeDetected": "Extensión de Kaiord de {{name}} · detectada",
+  "bridgeAnnounced": "Extensión de Kaiord de {{name}} · detectada al cargar",
   "lastSync": "Últimos datos recibidos {{when}}",
   "neverSynced": "Todavía no se han recibido datos",
   "chips": {
@@ -87,7 +85,10 @@
     "disconnectMessage": "Esto desvincula la fuente en Kaiord y apaga todas las rutas que alimenta. La extensión del navegador sigue instalada.",
     "reconnect": "Volver a conectar",
     "connect": "Conectar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "apiKey": "Clave de API",
+    "connecting": "Conectando…",
+    "connectFailed": "No se pudo conectar"
   },
   "routing": {
     "title": "De dónde viene cada tipo de dato",
@@ -158,5 +159,11 @@
   },
   "sourceName": {
     "manual": "Entrada manual"
+  },
+  "ext": {
+    "requires": "Requiere la extensión de Kaiord",
+    "install": "Instalar la extensión de Kaiord",
+    "bannerTitle": "La extensión de Kaiord no está instalada",
+    "bannerDetail": "Garmin, Train2Go, WHOOP, Tanita y TrainingPeaks se conectan mediante la extensión de Kaiord. Instálala en este navegador para conectarlos."
   }
 }

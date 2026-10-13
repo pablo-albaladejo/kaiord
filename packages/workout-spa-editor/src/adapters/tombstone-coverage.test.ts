@@ -6,11 +6,10 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
-import { KaiordDatabase } from "./dexie/dexie-database";
+import { sharedKaiordDatabase } from "../test-utils/shared-kaiord-database";
 import { DEVICE_LOCAL } from "./dexie/dexie-snapshot-port";
 import { TOMBSTONED_TABLES } from "./with-tombstones";
 
@@ -199,18 +198,10 @@ describe("tombstone coverage", () => {
 });
 
 describe("tombstone table names", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("tombcover");
 
   beforeEach(async () => {
-    name = `kaiord-test-tombcover-${Date.now()}-${Math.random()}`;
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should file every tombstone under a real snapshot table name", () => {

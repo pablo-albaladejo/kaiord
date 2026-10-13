@@ -12,7 +12,9 @@
   "connections": "Conexiones",
   "more": "Más",
   "helpDocs": "Ayuda y documentación",
-  "localAccount": "Cuenta local",
+  "athleteSection": "Atleta",
+  "manageAthletes": "Gestionar atletas…",
+  "manageAthletesTitle": "Gestionar atletas",
   "alert": {
     "title_one": "{{count}} fuente caída",
     "title_other": "{{count}} fuentes caídas",

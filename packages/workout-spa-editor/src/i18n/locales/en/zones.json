@@ -114,5 +114,8 @@
   },
   "status": {
     "saved": "Saved"
+  },
+  "toast": {
+    "updateFailed": "Failed to update zones — please retry."
   }
 }
