@@ -1,4 +1,4 @@
-> Synced: 2026-10-11 (fix-spa-manual-first-editor)
+> Synced: 2026-10-13 (connections-single-home)
 
 # SPA Calendar
 
@@ -239,7 +239,7 @@ When the active profile has at least one linked coaching account, the `CoachingS
 - Under `prefers-reduced-motion: reduce`, the spinner SHALL NOT animate; the visual cue SHALL be a static "syncing" icon (e.g., a non-spinning loader glyph) and the tooltip text remains the canonical signal.
 - Color tokens MUST be slate-based (`border-slate-300`, `text-slate-700`, `hover:bg-slate-100`) — not the prior rose treatment that competed with the status palette.
 
-The not-connected state ("hint pointing to Profile Settings → Linked Accounts" per `spa-coaching-integration` "Calendar Sync button gated on linked account") is unchanged by this requirement.
+The not-connected state ("hint pointing to the Connections page" per `spa-coaching-integration` "Calendar Sync button gated on linked account") is unchanged by this requirement.
 
 #### Scenario: Connected button renders icon-only with relative-time tooltip
 

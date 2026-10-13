@@ -5,7 +5,7 @@ import type { SettingsTab } from "../../organisms/SettingsPanel/types";
  * Identifies a live value rendered inline on a settings row. Every key is
  * resolved by `useSettingsRowValues`; a row without one renders no value.
  */
-export type SettingsValueKey = "connections" | "ai" | "sync" | "data";
+export type SettingsValueKey = "ai" | "sync" | "data";
 
 /** Identifies an action resolved by `useSettingsRowActions`. */
 export type SettingsActionKey = "replayCoachMarks";

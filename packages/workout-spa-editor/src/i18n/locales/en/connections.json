@@ -1,4 +1,5 @@
 {
+  "title": "Connections",
   "intro": "Every source you have linked, what it is sending right now, and which one wins when two sources report the same thing.",
   "noProfile": "Create an athlete profile to link a data source.",
   "sources": "Sources",
@@ -155,7 +156,11 @@
     "notLinked": "{{name}} is signed in on this browser but not linked to this athlete profile, so nothing syncs yet.",
     "link": "Link to this profile",
     "signIn": "{{name}} is not linked to this athlete profile. Sign in to {{name}} in this browser first, then link it here.",
-    "linking": "Linking…"
+    "linking": "Linking…",
+    "linked": "Linked to this athlete as {{user}}. Unlike the rest of this page, the link is saved with the athlete, not just in this browser.",
+    "unlink": "Unlink",
+    "unlinking": "Unlinking…",
+    "unlinked": "Unlinked from this athlete"
   },
   "sourceName": {
     "manual": "Manual Entry"
@@ -165,5 +170,15 @@
     "install": "Install Kaiord extension",
     "bannerTitle": "The Kaiord extension is not installed",
     "bannerDetail": "Garmin, Train2Go, WHOOP, Tanita and TrainingPeaks connect through the Kaiord extension. Install it in this browser to connect them."
+  },
+  "scope": {
+    "title": "{{name}}'s connections · in this browser",
+    "titleNoName": "Connections · in this browser",
+    "hint": "They are kept for this athlete in this browser only and don't sync to your other devices."
+  },
+  "count": {
+    "none": "None connected",
+    "connected_one": "{{count}} connected",
+    "connected_other": "{{count}} connected"
   }
 }

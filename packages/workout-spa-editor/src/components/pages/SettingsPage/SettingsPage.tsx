@@ -42,8 +42,7 @@ export default function SettingsPage() {
   // `replace`: a retired path must not sit in history between the section
   // the user landed on and wherever they came from, or Back re-bounces.
   const retired = retiredSectionTarget(section, search);
-  if (retired !== undefined)
-    return <Redirect to={`${SETTINGS_ROOT}/${retired}`} replace />;
+  if (retired !== undefined) return <Redirect to={retired} replace />;
   const open = isSettingsTab(section) ? section : undefined;
   if (section !== undefined && open === undefined)
     return <Redirect to={SETTINGS_ROOT} />;

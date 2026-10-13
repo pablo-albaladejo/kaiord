@@ -353,4 +353,48 @@ describe("ConnectionsTab", () => {
     // Assert
     expect(screen.getByTestId("connections-refresh")).toBeInTheDocument();
   });
+
+  // P-14: `connections` is per athlete AND device-local — excluded from the
+  // sync snapshot — so the page has to say whose it is and where it lives.
+  it("should say whose connections these are and that they stay in this browser", () => {
+    // Arrange
+    vi.mocked(useActiveProfileLive).mockReturnValue({
+      id: "p1",
+      profile: { name: "Ana", linkedAccounts: [] },
+    } as unknown as ReturnType<typeof useActiveProfileLive>);
+    setSources([source()]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    const scope = screen.getByTestId("connections-scope");
+    expect(scope).toHaveTextContent("Ana's connections · in this browser");
+    expect(scope).toHaveTextContent("don't sync to your other devices");
+  });
+
+  // P-09: every connectable source counts, not only the five extensions.
+  it("should count every connected source in the scope line", () => {
+    // Arrange
+    setSources([
+      source(),
+      source({
+        id: "intervals",
+        name: "intervals.icu",
+        mechanism: "api-key",
+        bridgeId: null,
+        bridgeDetected: false,
+      }),
+      source({ id: "whoop", status: "available", bridgeDetected: false }),
+      source({ id: "manual", status: "manual", mechanism: "manual" }),
+    ]);
+
+    // Act
+    render(<ConnectionsTab />);
+
+    // Assert
+    expect(screen.getByTestId("connections-count")).toHaveTextContent(
+      "2 connected"
+    );
+  });
 });

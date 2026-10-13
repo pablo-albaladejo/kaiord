@@ -34,6 +34,7 @@ const EXACT: Record<string, string> = {
   "/library": "library",
   "/chat": "chat",
   "/athlete": "athlete",
+  "/connections": "connections",
   "/workout/new": "newWorkout",
   "/health": "trends",
   "/health/sleep": "sleep",

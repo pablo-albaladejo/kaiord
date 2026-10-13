@@ -65,7 +65,7 @@ describe("SourceHealthPill", () => {
     expect(menu).toHaveTextContent(
       "Kaiord cannot read from a source — signing in again may restore it"
     );
-    expect(loc.history).toContain("/settings/connections");
+    expect(loc.history).toContain("/connections");
   });
 
   it("should offer no Reconnect action it cannot perform", async () => {

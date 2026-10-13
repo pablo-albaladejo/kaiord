@@ -7,7 +7,7 @@ import { expect, test } from "./fixtures/base";
 import { seedDefaultProfile } from "./helpers/seed-profile";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
-const ROUTE = "/settings/connections";
+const ROUTE = "/connections";
 const BRIDGE_CARDS = ["garmin", "train2go", "whoop", "tanita", "trainingpeaks"];
 const INSTALL = "Install Kaiord extension";
 

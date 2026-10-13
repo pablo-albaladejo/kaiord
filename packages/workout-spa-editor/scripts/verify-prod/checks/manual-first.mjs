@@ -55,7 +55,7 @@ async function plannedSource(rec, session) {
     "F-32: an empty week does not assume a coach",
     week.slice(0, 260)
   );
-  await go("settings/connections");
+  await go("connections");
   const text = await settledText(page, mainCopy);
   const row =
     text.match(/Sesión planificada[\s\S]{0,90}/)?.[0] ?? "(row missing)";

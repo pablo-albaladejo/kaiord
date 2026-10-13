@@ -12,8 +12,6 @@ import { renderWithProviders, screen, userEvent } from "../../../../test-utils";
 import type { ProfileFormData } from "../types";
 import { ProfileEditView } from "./ProfileEditView";
 
-const PROFILE_ID = "00000000-0000-4000-8000-0000000000a1";
-
 describe("ProfileEditView", () => {
   it("should forward a Personal Data edit to the persisting onChange", async () => {
     // Arrange
@@ -21,7 +19,6 @@ describe("ProfileEditView", () => {
     const formData: ProfileFormData = { name: "Athlete", bodyWeight: 70 };
     renderWithProviders(
       <ProfileEditView
-        profileId={PROFILE_ID}
         formData={formData}
         onChange={onChange}
         onCancel={vi.fn()}
@@ -42,13 +39,14 @@ describe("ProfileEditView", () => {
     });
   });
 
-  // Zones have one editor, on /athlete/zones/:sport (audit P-01).
-  it("should open on Personal Data without a Training Zones tab", () => {
+  // Zones have one editor, on /athlete/zones/:sport (audit P-01), and
+  // external accounts have one home, Connections (audit P-14).
+  it("should open on Personal Data as its only tab", () => {
     // Arrange
+
     // Act
     renderWithProviders(
       <ProfileEditView
-        profileId={PROFILE_ID}
         formData={{ name: "Athlete" }}
         onChange={vi.fn()}
         onCancel={vi.fn()}
@@ -57,7 +55,7 @@ describe("ProfileEditView", () => {
 
     // Assert
     const tabs = screen.getAllByRole("tab").map((tab) => tab.textContent);
-    expect(tabs).toEqual(["Personal Data", "Linked Accounts"]);
+    expect(tabs).toEqual(["Personal Data"]);
     expect(screen.getByRole("tab", { name: "Personal Data" })).toHaveAttribute(
       "aria-selected",
       "true"

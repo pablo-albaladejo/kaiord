@@ -1,4 +1,4 @@
-> Synced: 2026-06-13 (train2go-links-and-day-comments)
+> Synced: 2026-10-13 (connections-single-home)
 
 # SPA Coaching Integration
 
@@ -25,7 +25,7 @@ Linking SHALL be performed by an explicit application-layer use case `linkAccoun
 
 #### Scenario: Linking a coaching source
 
-- **WHEN** the user links a Train2Go account to Profile P via the Linked Accounts panel
+- **WHEN** the user links a Train2Go account to Profile P from the Train2Go card on the Connections page
 - **THEN** `linkAccount(P, { source: "train2go", externalUserId, externalUserName, linkedAt })` is invoked and P gains exactly that entry in `linkedAccounts`
 
 #### Scenario: Linking a second source on the same profile
@@ -45,7 +45,7 @@ Linking SHALL be performed by an explicit application-layer use case `linkAccoun
 
 #### Scenario: Unlinking a coaching source
 
-- **WHEN** the user clicks "Disconnect" on a linked account in Profile Settings for Profile P
+- **WHEN** the user unlinks the Train2Go account from its card on the Connections page while Profile P is active
 - **THEN** `unlinkAccount(P, "train2go")` is invoked and the entry is removed from P's `linkedAccounts`
 
 #### Scenario: linkAccount on a deleted profile fails cleanly
@@ -589,7 +589,7 @@ The sidebar is read-only; it never mutates `activity.description` or any other f
 
 The calendar header SHALL render a "Sync <Label>" button for each linked coaching account on the active profile. If the active profile has no linked account for a given source, no Sync button for that source SHALL appear.
 
-When the active profile has zero linked accounts, the calendar SHALL display a contextual hint pointing to **Profile Settings → Linked Accounts** as the place to connect — never an inline Connect action.
+When the active profile has zero linked accounts, the calendar SHALL display a contextual hint pointing to the **Connections page** as the place to connect — never an inline Connect action.
 
 #### Scenario: Profile with linked Train2Go shows Sync button
 
@@ -599,7 +599,7 @@ When the active profile has zero linked accounts, the calendar SHALL display a c
 #### Scenario: Profile with no linked accounts hides Sync buttons
 
 - **WHEN** the active profile has `linkedAccounts: []`
-- **THEN** the calendar header shows no Sync buttons but instead surfaces a hint linking to Profile Settings → Linked Accounts
+- **THEN** the calendar header shows no Sync buttons but instead surfaces a hint linking to the Connections page
 
 #### Scenario: Profile switch updates Sync buttons
 

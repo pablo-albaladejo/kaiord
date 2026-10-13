@@ -159,7 +159,6 @@ describe("SettingsPage", () => {
       { row: "data", destination: "/settings/data" },
       { row: "privacy", destination: "/settings/privacy" },
       { row: "about", destination: "/settings/about" },
-      { row: "connections", destination: "/settings/connections" },
     ])(
       "should navigate to $destination when clicking the $row row",
       async ({ row, destination }) => {
@@ -211,8 +210,10 @@ describe("SettingsPage", () => {
     );
 
     it.each([
-      { from: "/settings/extensions", to: "/settings/connections" },
-      { from: "/settings/data-hub", to: "/settings/connections" },
+      { from: "/settings/profile", to: "/athlete" },
+      { from: "/settings/connections", to: "/connections" },
+      { from: "/settings/extensions", to: "/connections" },
+      { from: "/settings/data-hub", to: "/connections" },
       { from: "/settings/preferences", to: "/settings/general" },
       { from: "/settings/usage", to: "/settings/ai?section=usage" },
       {
@@ -261,21 +262,6 @@ describe("SettingsPage", () => {
         expect(screen.getAllByText(content)[0]).toBeInTheDocument();
       }
     );
-
-    it("should render the connections tab content at /settings/connections", async () => {
-      // Arrange
-
-      // Act
-      renderAtPath("/settings/connections");
-
-      // Assert
-      expect(
-        await screen.findByTestId("settings-panel-connections")
-      ).toBeInTheDocument();
-      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-        "Settings · Connections"
-      );
-    });
 
     it("should render the AI usage inside the AI page", async () => {
       // Arrange
@@ -357,15 +343,7 @@ describe("SettingsPage", () => {
 
     it("should render one rail entry per section", () => {
       // Arrange
-      const sections = [
-        "general",
-        "ai",
-        "sync",
-        "data",
-        "privacy",
-        "about",
-        "connections",
-      ];
+      const sections = ["general", "ai", "sync", "data", "privacy", "about"];
 
       // Act
       renderAtPath("/settings/ai");
@@ -434,7 +412,7 @@ describe("SettingsPage", () => {
       expect(screen.getAllByTestId("settings-general")).toHaveLength(1);
     });
 
-    it.each([{ path: "/settings" }, { path: "/settings/connections" }])(
+    it.each([{ path: "/settings" }, { path: "/settings/sync" }])(
       "should expose exactly one route heading at $path",
       ({ path }) => {
         // Arrange
@@ -516,79 +494,55 @@ describe("SettingsPage", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should count the detected bridges on the connections row", () => {
+    // Connections left Settings (P-07), so the banner is the one place on
+    // this page that can still take the reader to what needs them.
+    it("should take the reader from the index banner to Connections", async () => {
       // Arrange
-      connections.value = KNOWN_BRIDGES.map((id, index) =>
-        bridgeConnection(id, { discovered: index < 2 })
-      );
+      connections.value = broken();
+      const user = userEvent.setup();
+      const { memory } = renderAtPath("/settings");
 
       // Act
-      renderAtPath("/settings");
+      await user.click(screen.getByTestId("settings-attention-action"));
 
       // Assert
-      expect(screen.getByTestId("settings-row-connections")).toHaveTextContent(
-        "2 of 5 detected"
-      );
-    });
-
-    // Fails on the reachable regression: a reader with five working
-    // extensions opens Settings before any has announced and is told "0 of 5".
-    it("should leave the connections row bare while discovery has its window", () => {
-      // Arrange — cold load: five rows, none discovered, discovery just began.
-      resetDiscoveryClock(Date.now());
-
-      // Act
-      renderAtPath("/settings");
-
-      // Assert
-      expect(
-        screen.getByTestId("settings-row-connections")
-      ).not.toHaveTextContent("of 5");
-    });
-
-    // The companion: without it the test above would also pass if the gate
-    // never opened, leaving a reader with no extensions permanently blank.
-    it("should state a zero count once discovery's window has closed", () => {
-      // Arrange
-      resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS - 1);
-
-      // Act
-      renderAtPath("/settings");
-
-      // Assert
-      expect(screen.getByTestId("settings-row-connections")).toHaveTextContent(
-        "0 of 5 detected"
-      );
+      await waitFor(() => {
+        expect(memory.history.at(-1)).toBe("/connections");
+      });
     });
   });
 
   describe("retired sections", () => {
     // Entering at the OLD path is the whole point: rendering the new one and
-    // asserting it works would pass with the redirect deleted.
-    it.each([{ section: "data-hub" }, { section: "extensions" }])(
-      "should land a visitor to /settings/$section on Connections",
-      async ({ section }) => {
+    // asserting it works would pass with the redirect deleted. Connections
+    // left Settings for its own top-level page (P-07).
+    it.each([
+      { section: "connections" },
+      { section: "data-hub" },
+      { section: "extensions" },
+    ])(
+      "should replace /settings/$section with /connections so Back does not bounce onto it",
+      ({ section }) => {
         // Arrange
 
         // Act
         const { memory } = renderAtPath(`/settings/${section}`);
 
         // Assert
-        expect(
-          await screen.findByTestId("settings-panel-connections")
-        ).toBeInTheDocument();
-        expect(memory.history.at(-1)).toBe("/settings/connections");
+        expect(memory.history).toEqual(["/connections"]);
       }
     );
 
-    it("should replace the retired entry so Back does not bounce onto it", () => {
+    it("should drop Connections from the index and the rail", () => {
       // Arrange
 
       // Act
-      const { memory } = renderAtPath("/settings/extensions");
+      renderAtPath("/settings");
 
       // Assert
-      expect(memory.history).toEqual(["/settings/connections"]);
+      expect(
+        screen.queryByTestId("settings-row-connections")
+      ).not.toBeInTheDocument();
     });
 
     it("should keep a genuinely unknown section falling back to the index", () => {

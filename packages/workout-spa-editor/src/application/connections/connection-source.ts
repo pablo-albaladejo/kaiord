@@ -59,6 +59,22 @@ export type ConnectionSource = {
 export const sourceNeedsAttention = (source: ConnectionSource): boolean =>
   source.status === "attention";
 
+const CONNECTED: ReadonlySet<ConnectionSourceStatus> = new Set([
+  "connected",
+  "installed",
+  "checking",
+  "attention",
+]);
+
+/**
+ * Is this source linked for the athlete, whatever shape it is in? A source
+ * that needs attention or is still being checked is connected — what it needs
+ * is a fix, not a connect. Manual entry is always on and the unsupported
+ * brands never connect, so neither is counted.
+ */
+export const sourceIsConnected = (source: ConnectionSource): boolean =>
+  CONNECTED.has(source.status);
+
 /**
  * Card order: what is working, then what needs a decision, then what is not
  * there. Manual entry and the unsupported brands sit last because neither is

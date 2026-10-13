@@ -85,26 +85,26 @@ test.describe("Settings Panel", () => {
     await expect(providers.getByText("My GPT")).toBeVisible();
   });
 
-  test("8.8: Connections is reachable from the settings index", async ({
+  // Connections left Settings for its own page (P-07): the account menu
+  // reaches it, and the settings index no longer lists it.
+  test("8.8: Connections is its own page, reached from the account menu", async ({
     page,
   }) => {
     // Arrange
-    await openHeaderAction(page, /open settings/i);
-    await page.waitForURL(/\/settings$/);
 
     // Act
-    await page.getByTestId("settings-row-connections").click();
+    await openHeaderAction(page, /open connections/i);
 
     // Assert
-    await page.waitForURL(/\/settings\/connections$/);
-    await expect(page.getByTestId("settings-panel-connections")).toBeVisible();
+    await page.waitForURL(/#\/connections$/);
+    await expect(page.getByTestId("connections-page")).toBeVisible();
+    await expect(page.getByTestId("connections-scope")).toBeVisible();
   });
 
-  // Entering at the OLD url is the assertion. Navigating to
-  // /settings/connections and checking it renders would pass with the
-  // redirect deleted.
+  // Entering at the OLD url is the assertion. Navigating to /connections and
+  // checking it renders would pass with the redirect deleted.
   test.describe("retired sections", () => {
-    for (const retired of ["extensions", "data-hub"]) {
+    for (const retired of ["connections", "extensions", "data-hub"]) {
       test(`8.9: /settings/${retired} lands on Connections`, async ({
         page,
       }) => {
@@ -114,12 +114,8 @@ test.describe("Settings Panel", () => {
         await page.goto(`/settings/${retired}`);
 
         // Assert
-        await expect(page).toHaveURL(/\/settings\/connections$/, {
-          timeout: 8000,
-        });
-        await expect(
-          page.getByTestId("settings-panel-connections")
-        ).toBeVisible();
+        await expect(page).toHaveURL(/#\/connections$/, { timeout: 8000 });
+        await expect(page.getByTestId("connections-page")).toBeVisible();
       });
     }
 
@@ -160,6 +156,7 @@ test.describe("Settings Panel", () => {
       await expect(page.getByTestId("settings-group-list")).toBeVisible();
       await expect(page.getByTestId("settings-row-extensions")).toHaveCount(0);
       await expect(page.getByTestId("settings-row-dataHub")).toHaveCount(0);
+      await expect(page.getByTestId("settings-row-connections")).toHaveCount(0);
     });
   });
 });

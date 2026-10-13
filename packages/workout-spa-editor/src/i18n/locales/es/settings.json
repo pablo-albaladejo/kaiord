@@ -3,9 +3,6 @@
   "back": "Ajustes",
   "sectionsNav": "Secciones de ajustes",
   "values": {
-    "connections": {
-      "detected": "{{found}} de {{total}} detectadas"
-    },
     "sync": {
       "connected": "Drive · {{relative}}"
     },
@@ -19,8 +16,7 @@
     "sync": "Sincronización",
     "data": "Datos y copia de seguridad",
     "privacy": "Privacidad",
-    "about": "Acerca de",
-    "connections": "Conexiones"
+    "about": "Acerca de"
   },
   "general": {
     "theme": "Tema",
@@ -183,6 +179,7 @@
   },
   "attention": {
     "title_one": "{{count}} conexión requiere atención",
-    "title_other": "{{count}} conexiones requieren atención"
+    "title_other": "{{count}} conexiones requieren atención",
+    "action": "Abrir conexiones"
   }
 }

@@ -1,4 +1,4 @@
-> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
+> Synced: 2026-10-13 (connections-single-home)
 
 # SPA Train2Go Extension
 
@@ -111,7 +111,7 @@ Detection results SHALL continue to be cached for 30 seconds via `lastDetectionT
 
 The SPA SHALL provide a mechanism (the calendar header "Sync <Label>" button and an auto-sync trigger from `spa-coaching-integration`) to fetch the current week's training plan from Train2Go. The fetch SHALL:
 
-1. Resolve the `userId` from the active profile's `linkedAccounts` (source `"train2go"`). If absent, route the user to the connect flow in Profile Settings instead of attempting the fetch.
+1. Resolve the `userId` from the active profile's `linkedAccounts` (source `"train2go"`). If absent, route the user to the connect flow on the Connections page instead of attempting the fetch.
 2. Call `read-week` with the currently viewed week's Monday date and the resolved `userId`.
 3. Map each parsed activity to a `CoachingActivityRecord` with `profileId` set to the active profile's id and `fetchedAt` set to the current ISO timestamp.
 4. Upsert the records via `CoachingRepository.upsertMany`.
@@ -149,12 +149,12 @@ The `read-day` response typically contains every activity for that day, not only
 #### Scenario: Fetch fails due to expired session
 
 - **WHEN** the extension returns `{ ok: false, error: "Session expired" }`
-- **THEN** the SPA updates `sessionActive: false` and shows a "Reconnect to Train2Go" prompt routing to Profile Settings → Linked Accounts
+- **THEN** the SPA updates `sessionActive: false` and shows a "Reconnect to Train2Go" prompt routing to the Connections page
 
 #### Scenario: Fetch fails due to no linked profile (defensive)
 
 - **WHEN** Sync is invoked but the active profile has no `train2go` linked account (e.g., a defensive/programmatic call or a UI desync — under normal use the Sync button is gated by the coaching integration spec and does not appear)
-- **THEN** the SPA does not send any extension message and instead surfaces a hint pointing to Profile Settings → Linked Accounts
+- **THEN** the SPA does not send any extension message and instead surfaces a hint pointing to the Connections page
 
 ### Requirement: Calendar integration
 
@@ -196,9 +196,9 @@ Sport icons SHALL be mapped from Train2Go sport identifiers to SPA icon keys via
 
 ### Requirement: Session connection flow
 
-The connect flow for Train2Go SHALL live in **Profile Settings → Linked Accounts** (a new UI surface), not on the calendar.
+The connect flow for Train2Go SHALL live on the **Train2Go card of the Connections page** (`/connections`, see `spa-connections-page`), not on the calendar. The profile manager SHALL NOT carry a Linked Accounts surface.
 
-When a profile has no `train2go` linked account, the Linked Accounts panel SHALL show a "Connect Train2Go" button. Clicking it SHALL invoke the application-layer use case `attemptLink(targetProfileId, signal)`. The handler SHALL:
+When a profile has no `train2go` linked account and the extension is present, the Train2Go card SHALL offer to link it. Clicking it SHALL invoke the application-layer use case `attemptLink(targetProfileId, signal)`. The handler SHALL:
 
 1. Capture `targetProfileId = activeProfileId` synchronously at click time.
 2. Create an `AbortController` and pass its signal to `attemptLink(targetProfileId, signal)`.
@@ -211,17 +211,21 @@ If the active profile changes during the poll, the link still completes against 
 
 The poll SHALL be aborted (and no link written) when:
 
-- The Linked Accounts panel/section unmounts (user navigates away from Profile Settings).
-- The user clicks "Disconnect" on the same source while the poll is in flight (concurrent intent reversal).
+- The surface hosting the connect flow unmounts.
 - The user explicitly cancels the connect flow.
+
+<!-- The prior list also aborted the poll when the user disconnected the same
+source mid-poll. On the Connections card the unlink control is offered only
+once a link exists, and the poll runs only while none does, so that state is
+unreachable and its scenario is removed with it. -->
 
 On abort, no toast is shown and `lastError` is not set — abort is a silent, intentional state.
 
-The calendar SHALL NOT host a Connect button. If the active profile has no linked accounts and the user attempts a sync, the calendar SHALL surface a hint pointing to Profile Settings.
+The calendar SHALL NOT host a Connect button. If the active profile has no linked accounts and the user attempts a sync, the calendar SHALL surface a hint pointing to the Connections page.
 
 #### Scenario: One-click Train2Go connection
 
-- **WHEN** the user clicks "Connect Train2Go" inside Profile Settings
+- **WHEN** the user links Train2Go from its card on the Connections page
 - **THEN** the extension opens a Train2Go tab, the SPA polls until the session is active, and the active profile gains a `train2go` entry in `linkedAccounts`
 
 #### Scenario: Connection polling times out
@@ -234,24 +238,19 @@ The calendar SHALL NOT host a Connect button. If the active profile has no linke
 - **WHEN** the user clicks "Connect Train2Go" while Profile A is active, then switches to Profile B before polling completes successfully
 - **THEN** the link is written to Profile A (the captured `targetProfileId`), Profile B's `linkedAccounts` is untouched, and a toast surfaces "Linked Train2Go to <Profile A name>"
 
-#### Scenario: Connect aborted by leaving Profile Settings
+#### Scenario: Connect aborted by leaving the surface
 
-- **WHEN** the user clicks "Connect Train2Go" and then navigates away from Profile Settings (closing the section/panel) before polling succeeds
+- **WHEN** the user starts linking Train2Go and the surface hosting the connect flow unmounts before polling succeeds
 - **THEN** the `AbortSignal` fires, polling stops, no `linkAccount` is invoked, no toast is shown, and `lastError` remains unchanged
-
-#### Scenario: Connect aborted by concurrent disconnect
-
-- **WHEN** a connect poll is in flight for source `train2go` and the user clicks "Disconnect" on the same source
-- **THEN** the poll is aborted, no `linkAccount` is written, and the disconnect proceeds (the user's most recent intent wins)
 
 #### Scenario: Connect on deleted profile fails cleanly
 
 - **WHEN** Profile A is the connect target, Profile A is deleted in another tab during the poll, and the poll then succeeds
 - **THEN** `linkAccount(A, ...)` throws `ProfileNotFoundError`; a single toast surfaces "Profile no longer exists; not linked"; no `linkedAccounts` row exists anywhere
 
-#### Scenario: Disconnect from profile settings
+#### Scenario: Unlink from the Connections card
 
-- **WHEN** the user clicks "Disconnect" on a linked account in Profile Settings
+- **WHEN** the user unlinks the Train2Go account from its card on the Connections page
 - **THEN** the entry is removed from `linkedAccounts`. Persisted `coachingActivities` rows for that profile remain on disk (they are coach-owned data, retained until explicit profile deletion).
 
 #### Scenario: Disconnect retains historical coaching activities
@@ -262,7 +261,7 @@ The calendar SHALL NOT host a Connect button. If the active profile has no linke
 ### Requirement: Train2Go's status is presented with every other source
 
 Train2Go's status SHALL be presented on the Connections page
-(`/settings/connections`, see `spa-connections-page`) as one source card among
+(`/connections`, see `spa-connections-page`) as one source card among
 every registered source, carrying that page's status vocabulary and its stated
 consequence rather than a bridge-table row of its own. The single refresh
 control on that page SHALL re-check every known bridge, Train2Go included. The
@@ -291,7 +290,7 @@ verified — Train2Go has no prober, so its card may not claim a live session.
 
 ### Requirement: Platform-inclusive copy in empty states
 
-The calendar empty states SHALL use platform-inclusive copy that references multiple bridge platforms, not just Garmin. This ensures users are aware of all integration options. Connect CTAs in empty states SHALL route to **Profile Settings → Linked Accounts**, never to a calendar-local connect action.
+The calendar empty states SHALL use platform-inclusive copy that references multiple bridge platforms, not just Garmin. This ensures users are aware of all integration options. Connect CTAs in empty states SHALL route to the **Connections page**, never to a calendar-local connect action.
 
 #### Scenario: FirstVisitState mentions multiple platforms
 
@@ -303,10 +302,10 @@ The calendar empty states SHALL use platform-inclusive copy that references mult
 - **WHEN** the calendar shows the no-bridges-detected banner
 - **THEN** the banner SHALL say "Install a bridge extension (e.g., Garmin Connect, Train2Go) to sync workouts."
 
-#### Scenario: Connect CTA routes to Profile Settings
+#### Scenario: Connect CTA routes to the Connections page
 
 - **WHEN** the user clicks the "Connect" button on `FirstVisitState` or `NoBridgesState`
-- **THEN** the SPA navigates to Profile Settings → Linked Accounts (NOT to a calendar-local connect action or modal)
+- **THEN** the SPA navigates to the Connections page (NOT to a calendar-local connect action or modal)
 
 ### Requirement: `CoachingTransport` exposes an optional `readZones` capability
 
@@ -352,7 +351,7 @@ The Train2Go transport's `readZones` implementation SHALL go through the existin
 
 ### Requirement: `LinkedAccountRow` exposes the `Sync zones` toggle
 
-This requirement is superseded. The `LinkedAccountRow` SHALL NOT expose a `Sync zones` toggle. Zone-sync configuration MUST be performed via the Data Flows section in ProfileManager (see ADDED Requirement: Data Flows configuration for training-zones import below). The `syncZones` field SHALL be removed from `linkedCoachingAccountSchema` at the Zod schema layer; the Dexie column remains nullable in v17 as a rollback buffer and is dropped in v18 (F-4).
+This requirement is superseded. The `LinkedAccountRow` has been removed with the profile manager's Linked Accounts tab, and the linked-account notice that replaced it on the Connections card SHALL NOT expose a `Sync zones` toggle. Zone-sync configuration MUST be performed via the Data Flows section in ProfileManager (see ADDED Requirement: Data Flows configuration for training-zones import below). The `syncZones` field SHALL be removed from `linkedCoachingAccountSchema` at the Zod schema layer; the Dexie column remains nullable in v17 as a rollback buffer and is dropped in v18 (F-4).
 
 Profiles that previously had `syncZones: true` SHALL be migrated to an enabled `IntegrationPolicy` row (`dataType: 'training-zones'`, `bridgeId: 'train2go-bridge'`, `direction: 'import'`, `mode: 'auto'`, `enabled: true`) by the Dexie v17 upgrade. No user action is required.
 
@@ -362,11 +361,11 @@ Profiles that previously had `syncZones: true` SHALL be migrated to an enabled `
 - **WHEN** the SPA mounts and the Train2Go bridge is VERIFIED
 - **THEN** the zones import fires once per SPA mount, deduplicating via the natural-key upsert (C-3), with no user-visible change in behavior relative to the prior `syncZones=true` state
 
-#### Scenario: No syncZones toggle in LinkedAccountRow
+#### Scenario: No syncZones toggle on the linked account
 
-- **WHEN** the user opens Profile Manager and views a linked Train2Go account
-- **THEN** the `LinkedAccountRow` SHALL NOT show a `Sync zones` checkbox or switch
-- **AND** authentication / identity / unlink controls SHALL remain unchanged (A-7)
+- **WHEN** the user views a linked Train2Go account on its Connections card
+- **THEN** the card SHALL NOT show a `Sync zones` checkbox or switch
+- **AND** the linked identity and its unlink control SHALL be shown (A-7)
 
 ### Requirement: Data Flows configuration for training-zones import
 

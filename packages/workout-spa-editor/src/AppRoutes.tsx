@@ -9,6 +9,7 @@ import {
   AthletePage,
   CalendarPage,
   ChatPage,
+  ConnectionsPage,
   ConvertPage,
   DailyPage,
   EditorPage,
@@ -63,9 +64,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         <Route path="/workout/:id">
           {(params) => guard(<EditorPage id={params.id} />)}
         </Route>
-        <Route path="/settings/profile">
-          <Redirect to="/athlete" />
-        </Route>
+        <Route path="/connections">{guard(<ConnectionsPage />)}</Route>
         {/* One URL family for the whole Settings shell: the bare path is the
             index, a section segment opens that section's panel (beside the
             index on desktop). Retired sections (`/settings/data-hub`,

@@ -2,30 +2,43 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useCoachingActivities } from "../../../hooks/use-coaching-activities";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Pill } from "../../atoms/Pill";
+import { ConnectionProfileLinked } from "./ConnectionProfileLinked";
 
-type Props = { sourceId: string; name: string };
+type Props = {
+  sourceId: string;
+  name: string;
+  /** The card can offer a new link only while the source's extension is
+      here and serves planned sessions; an existing link is shown regardless. */
+  canLink: boolean;
+};
 
 const NO_DAYS: string[] = [];
 
 /**
  * A coaching source is linked per athlete profile, not per browser: the card's
- * "Connected" only says the extension is present. When the active profile has
- * no link yet, say so and offer the link here — the calendar is otherwise the
- * only place it can be made.
+ * "Connected" only says the extension is present. A link is stored on the
+ * profile and syncs with it, so it is stated — and can be undone — even where
+ * the extension is missing. Without one, say so and offer the link here.
  *
- * The linked check reads the profile alone, so the common, linked case never
- * mounts the coaching source; only the notice does, for the source's session
- * state and its connect, which is the calendar's own link flow.
+ * The linked check reads the profile alone, so the linked case never mounts
+ * the coaching source; only the notice does, for the source's session state
+ * and its connect, which is the calendar's own link flow.
  */
-export function ConnectionProfileLink({ sourceId, name }: Props) {
+export function ConnectionProfileLink({ sourceId, name, canLink }: Props) {
   const live = useActiveProfileLive();
   const profile = live?.profile;
   if (!profile) return null;
-  if (profile.linkedAccounts.some((a) => a.source === sourceId)) return null;
+  const linked = profile.linkedAccounts.find((a) => a.source === sourceId);
+  if (linked)
+    return <ConnectionProfileLinked profile={profile} link={linked} />;
+  if (!canLink) return null;
   return <UnlinkedProfileNotice sourceId={sourceId} name={name} />;
 }
 
-function UnlinkedProfileNotice({ sourceId, name }: Props) {
+function UnlinkedProfileNotice({
+  sourceId,
+  name,
+}: Pick<Props, "sourceId" | "name">) {
   const t = useTranslate("connections");
   const { syncSources } = useCoachingActivities(NO_DAYS);
   const source = syncSources.find((s) => s.id === sourceId);

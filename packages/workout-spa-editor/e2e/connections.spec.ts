@@ -1,5 +1,5 @@
 /**
- * Connections page CONTENT — `/settings/connections` with a real profile and a
+ * Connections page CONTENT — `/connections` with a real profile and a
  * discoverable bridge.
  *
  * The shell tests in `settings.spec.ts` assert the route and the panel
@@ -25,7 +25,7 @@ import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 /* A real UUID: `upsertIntegrationPolicy` validates the profile id, so the
    route write below is refused outright for the shared `e2e-default-profile`. */
 const PROFILE_ID = "00000000-0000-4000-8000-0000000000c7";
-const CONNECTIONS_ROUTE = "/settings/connections";
+const CONNECTIONS_ROUTE = "/connections";
 
 type DexieDb = {
   table: (n: string) => { put: (r: unknown) => Promise<void> };

@@ -30,6 +30,9 @@ export const WorkoutDetail = lazyPage(
 export const CreateWorkout = lazyPage(
   () => import("./components/pages/CreateWorkout/CreateWorkout")
 );
+export const ConnectionsPage = lazyPage(
+  () => import("./components/pages/ConnectionsPage/ConnectionsPage")
+);
 export const SettingsPage = lazyPage(
   () => import("./components/pages/SettingsPage/SettingsPage")
 );

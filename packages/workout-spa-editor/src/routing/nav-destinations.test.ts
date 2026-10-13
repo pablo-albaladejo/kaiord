@@ -114,4 +114,16 @@ describe("NAV_DESTINATIONS", () => {
     ]);
     expect(duplicated).toEqual([]);
   });
+
+  // Connections is the athlete's external accounts, not app settings (P-07):
+  // its home is a top-level page, and `/settings/connections` only redirects.
+  it("should route Connections to its own top-level page", () => {
+    // Arrange
+
+    // Act
+    const connections = NAV_DESTINATIONS.find((d) => d.id === "connections");
+
+    // Assert
+    expect(connections?.path).toBe("/connections");
+  });
 });

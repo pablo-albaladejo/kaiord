@@ -3,9 +3,6 @@
   "back": "Settings",
   "sectionsNav": "Settings sections",
   "values": {
-    "connections": {
-      "detected": "{{found}} of {{total}} detected"
-    },
     "sync": {
       "connected": "Drive · {{relative}}"
     },
@@ -19,8 +16,7 @@
     "sync": "Sync",
     "data": "Data & backup",
     "privacy": "Privacy",
-    "about": "About",
-    "connections": "Connections"
+    "about": "About"
   },
   "general": {
     "theme": "Theme",
@@ -183,6 +179,7 @@
   },
   "attention": {
     "title_one": "{{count}} connection needs attention",
-    "title_other": "{{count}} connections need attention"
+    "title_other": "{{count}} connections need attention",
+    "action": "Open connections"
   }
 }

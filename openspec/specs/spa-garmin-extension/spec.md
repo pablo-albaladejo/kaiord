@@ -1,4 +1,4 @@
-> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
+> Synced: 2026-10-13 (connections-single-home)
 
 # SPA Garmin Extension
 
@@ -53,7 +53,7 @@ If the browser is not Chrome-based (no `chrome.runtime.sendMessage` available), 
 ### Requirement: The Garmin bridge's status is presented with every other source
 
 The Garmin bridge SHALL have no Settings surface of its own. Its status SHALL be
-presented on the Connections page (`/settings/connections`, see
+presented on the Connections page (`/connections`, see
 `spa-connections-page`) as one card among every registered source, so no surface
 is named after one vendor and no bridge can be reachable from a place the others
 are not. The `/settings/extensions` table this requirement previously described
