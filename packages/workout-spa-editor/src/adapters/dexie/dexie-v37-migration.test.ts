@@ -8,14 +8,13 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { intakeEntryRecordSchema } from "../../types/intake-entry-record";
 import { intakePresetRecordSchema } from "../../types/intake-preset-record";
-import { KaiordDatabase } from "./dexie-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
-
-const dbName = () => `kaiord-test-v37-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 36;
 const SCHEMA_HEAD = 37;
@@ -67,8 +66,7 @@ const seedV36 = async (name: string): Promise<void> => {
   older.close();
 };
 
-const upgrade = async (name: string) => {
-  const db = new KaiordDatabase(name);
+const upgrade = async (db: KaiordDatabase) => {
   await db.open();
   const read = async (table: string, key: string) => db.table(table).get(key);
   const out = {
@@ -83,22 +81,15 @@ const upgrade = async (name: string) => {
 };
 
 describe("Dexie nutrition sync clock (v37) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName();
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v37");
+  const { name } = db;
 
   it("should backfill an intake entry's updatedAt from loggedAt", async () => {
     // Arrange
     await seedV36(name);
 
     // Act
-    const { version, entry } = await upgrade(name);
+    const { version, entry } = await upgrade(db);
 
     // Assert
     expect(version).toBe(SCHEMA_HEAD);
@@ -111,7 +102,7 @@ describe("Dexie nutrition sync clock (v37) migration", () => {
     await seedV36(name);
 
     // Act
-    const { preset } = await upgrade(name);
+    const { preset } = await upgrade(db);
 
     // Assert
     expect(preset).toStrictEqual({ ...PRESET, updatedAt: PRESET.createdAt });
@@ -123,7 +114,7 @@ describe("Dexie nutrition sync clock (v37) migration", () => {
     await seedV36(name);
 
     // Act
-    const { clocked, target } = await upgrade(name);
+    const { clocked, target } = await upgrade(db);
 
     // Assert
     expect(clocked).toStrictEqual(CLOCKED_ENTRY);

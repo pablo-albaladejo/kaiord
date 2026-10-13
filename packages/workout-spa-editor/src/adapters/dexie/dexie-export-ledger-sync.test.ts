@@ -8,7 +8,6 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { recordExport } from "../../application/export/record-export.use-case";
@@ -23,8 +22,9 @@ import { importSnapshot } from "../../application/sync/import-snapshot";
 import { mergeSnapshots } from "../../application/sync/merge-snapshots";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ExportLedgerEntry } from "../../types/export-ledger";
-import { KaiordDatabase } from "./dexie-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
@@ -35,9 +35,6 @@ const B_WRITES_AT = new Date("2026-09-10T08:00:00.000Z");
 const A_WRITES_AT = new Date("2026-09-10T09:00:00.000Z");
 const LATE_WRITE_AT = new Date("2026-09-10T10:00:00.000Z");
 const WEIGHT_ID = measurementRecordId("2026-09-01T07:00:00.000Z");
-
-const dbName = (device: string) =>
-  `kaiord-test-ledger-sync-${device}-${Date.now()}-${Math.random()}`;
 
 const exportBoth = async (db: KaiordDatabase, externalId: string) => {
   const deps = { ledgerRepo: createDexieExportLedgerRepository(db) };
@@ -64,22 +61,17 @@ const naturalKeys = (rows: ExportLedgerEntry[]) =>
   rows.map((r) => `${r.kaiordRecordId}:${r.destinationBridgeId}`).sort();
 
 describe("export-ledger cross-device sync", () => {
-  let dbA: KaiordDatabase;
-  let dbB: KaiordDatabase;
+  const dbA = sharedKaiordDatabase("ledgersync-a");
+  const dbB = sharedKaiordDatabase("ledgersync-b");
 
   beforeEach(async () => {
     // Fake only `Date`: Dexie and fake-indexeddb schedule on real timers.
     vi.useFakeTimers({ toFake: ["Date"] });
-    dbA = new KaiordDatabase(dbName("a"));
-    dbB = new KaiordDatabase(dbName("b"));
     await Promise.all([dbA.open(), dbB.open()]);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     vi.useRealTimers();
-    dbA.close();
-    dbB.close();
-    await Promise.all([Dexie.delete(dbA.name), Dexie.delete(dbB.name)]);
   });
 
   it("should converge on one ledger row per natural key on both devices", async () => {
