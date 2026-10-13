@@ -6,15 +6,11 @@ import { useTranslate } from "./use-translate";
 
 const prefsMock = vi.hoisted(() => ({ locale: "es" as string | undefined }));
 
-vi.mock("../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p1", profile: null }),
-}));
-
-vi.mock("../hooks/use-user-preferences", () => ({
-  useUserPreferences: () => ({
-    profileId: "p1",
-    calendarView: "grid",
-    locale: prefsMock.locale,
+vi.mock("../hooks/use-device-preferences", () => ({
+  useDevicePreferences: () => ({
+    prefs: { locale: prefsMock.locale },
+    ready: true,
+    update: vi.fn(),
   }),
 }));
 

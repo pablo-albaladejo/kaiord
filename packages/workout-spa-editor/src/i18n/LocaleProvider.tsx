@@ -2,7 +2,7 @@
  * Root i18n provider. Exposes the app's react-i18next instance (for `t()`),
  * publishes the active resolved `Locale` through a context that defaults to
  * English outside a provider (so unwrapped component tests stay in `en`), and
- * keeps both in sync with the persisted per-profile locale preference.
+ * keeps both in sync with this device's persisted locale preference.
  */
 import { DEFAULT_LOCALE, type Locale } from "@kaiord/i18n";
 import {
@@ -15,8 +15,7 @@ import {
 import { I18nextProvider } from "react-i18next";
 
 import { resolveLocale } from "../application/resolve-locale";
-import { useActiveProfileLive } from "../hooks/use-active-profile-live";
-import { useUserPreferences } from "../hooks/use-user-preferences";
+import { useDevicePreferences } from "../hooks/use-device-preferences";
 import { appI18n, setActiveLocale } from "./i18n";
 
 const LocaleContext = createContext<Locale>(DEFAULT_LOCALE);
@@ -28,12 +27,8 @@ const readNavigatorLanguage = (): string =>
   typeof navigator !== "undefined" ? navigator.language : DEFAULT_LOCALE;
 
 const LocaleSync = ({ children }: { children: ReactNode }) => {
-  const active = useActiveProfileLive();
-  const prefs = useUserPreferences({
-    profileId: active?.id ?? null,
-    defaultView: "grid",
-  });
-  const locale = resolveLocale(prefs?.locale, readNavigatorLanguage());
+  const { prefs } = useDevicePreferences();
+  const locale = resolveLocale(prefs.locale, readNavigatorLanguage());
   // Hold the previous locale until the target's catalog is loaded and live, so
   // the subtree never renders the active locale before its strings exist (it
   // falls back to English meanwhile). Lazy locales load a code-split chunk.
