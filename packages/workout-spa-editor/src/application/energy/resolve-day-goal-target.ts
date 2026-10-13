@@ -35,11 +35,7 @@ export const resolveDayGoalTarget = (
   adaptive: AdaptiveTdeeResult | null = null
 ): DayGoalDerivation | null => {
   if (!sources.target) return null;
-  const maintenance = resolveGoalMaintenance(
-    sources,
-    sources.latestWeight,
-    today
-  );
+  const maintenance = resolveGoalMaintenance(sources, today);
   if (!maintenance) return null;
   const chosen = pickMaintenance(maintenance.maintenanceKcal, adaptive);
   return deriveGoalTarget({
