@@ -2,26 +2,6 @@
   "title": "Ajustes",
   "back": "Ajustes",
   "sectionsNav": "Secciones de ajustes",
-  "groups": {
-    "yourData": "Tus datos",
-    "ai": "IA",
-    "preferences": "Preferencias",
-    "about": "Acerca de"
-  },
-  "rows": {
-    "connections": "Conexiones",
-    "provider": "Proveedor y modelos",
-    "customInstructions": "Instrucciones personalizadas",
-    "googleDriveSync": "Sincronización entre dispositivos",
-    "units": "Unidades",
-    "language": "Idioma",
-    "notifications": "Notificaciones",
-    "dataPrivacy": "Privacidad y datos",
-    "manageYourData": "Gestiona tus datos",
-    "usage": "Uso",
-    "helpDocs": "Ayuda y documentación",
-    "replayTips": "Mostrar consejos otra vez"
-  },
   "values": {
     "connections": {
       "detected": "{{found}} de {{total}} detectadas"
@@ -29,26 +9,24 @@
     "sync": {
       "connected": "Drive · {{relative}}"
     },
-    "usage": {
-      "tokens": "{{tokens}} tokens · {{month}}"
-    },
-    "notifications": {
-      "on": "Activadas",
-      "off": "Desactivadas",
-      "blocked": "Bloqueadas",
-      "unsupported": "No compatible"
-    },
-    "privacy": {
+    "data": {
       "localFirst": "Guardado en este navegador"
     }
   },
   "tabs": {
+    "general": "General",
     "ai": "IA",
     "sync": "Sincronización",
-    "connections": "Conexiones",
-    "usage": "Uso",
+    "data": "Datos y copia de seguridad",
     "privacy": "Privacidad",
-    "preferences": "Preferencias"
+    "about": "Acerca de",
+    "connections": "Conexiones"
+  },
+  "general": {
+    "theme": "Tema",
+    "themeSystem": "Automático",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro"
   },
   "ai": {
     "llmProviders": "Proveedores LLM",
@@ -135,7 +113,6 @@
     "analyticsIntro": "Este editor usa",
     "analyticsLink": "Umami",
     "analyticsOutro": "para hacer un seguimiento del uso agregado (visitas de página, generación de entrenamientos, exportaciones). No se establecen cookies ni se recopilan datos personales.",
-    "dataManagement": "Gestión de datos",
     "exportData": "Exportar mis datos",
     "exportHint": "Descarga en un fichero JSON, sin cifrar, tus entrenamientos, datos de salud, nutrición y ajustes. No incluye las claves de API, las integraciones conectadas ni el estado de sincronización. Guarda el fichero en un sitio seguro.",
     "exportFailed": "No se pudieron exportar tus datos; vuelve a intentarlo.",
@@ -151,6 +128,29 @@
     "clearAllApiKeys": "Borrar todas las claves de API",
     "clearAllHint": "Esto elimina todas las claves de API almacenadas de tu navegador. Las claves que la sincronización entre dispositivos ya haya subido a tu Google Drive no se eliminan con esta acción.",
     "clearKeysFailed": "No se pudieron borrar las claves de API. Inténtalo de nuevo."
+  },
+  "data": {
+    "backup": "Copia de seguridad",
+    "syncLink": "Guarda una copia en tu Google Drive con la sincronización",
+    "dangerZone": "Zona de peligro",
+    "wipe": "Borrar todos mis datos",
+    "wipeHint": "Borra todo lo que Kaiord guarda en este navegador y empieza de cero.",
+    "wipeFailed": "No se pudieron borrar tus datos. No se ha borrado nada; inténtalo de nuevo.",
+    "wipeDialog": {
+      "title": "¿Borrar todos mis datos?",
+      "body": "Se borran todos los atletas, entrenamientos, registros de salud y nutrición, conexiones, claves de IA y ajustes guardados en este navegador. No se puede deshacer: exporta antes una copia de seguridad si quieres poder recuperar algo.",
+      "drive": "Tu copia en Google Drive no se borra. La sincronización se desactiva en este navegador; si vuelves a conectarla, esa copia vuelve aquí.",
+      "confirmWord": "BORRAR",
+      "typeLabel": "Escribe {{word}} para confirmar",
+      "syncing": "Espera a que termine la sincronización en curso.",
+      "confirm": "Borrar todo",
+      "cancel": "Cancelar"
+    }
+  },
+  "about": {
+    "helpDocs": "Ayuda y documentación",
+    "replayTips": "Mostrar consejos otra vez",
+    "replayTipsHint": "Vuelve a mostrar los consejos que ya cerraste."
   },
   "usage": {
     "title": "Uso de IA",

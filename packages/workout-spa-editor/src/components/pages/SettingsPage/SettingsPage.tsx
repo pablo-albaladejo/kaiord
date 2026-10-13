@@ -1,4 +1,4 @@
-import { Redirect, useLocation, useParams } from "wouter";
+import { Redirect, useLocation, useParams, useSearch } from "wouter";
 
 import { useFocusOnSectionChange } from "../../../hooks/use-focus-on-section-change";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -38,15 +38,15 @@ export default function SettingsPage() {
   useFocusOnSectionChange();
   useSectionScrollReset(section);
 
+  const search = useSearch();
+  // `replace`: a retired path must not sit in history between the section
+  // the user landed on and wherever they came from, or Back re-bounces.
+  const retired = retiredSectionTarget(section, search);
+  if (retired !== undefined)
+    return <Redirect to={`${SETTINGS_ROOT}/${retired}`} replace />;
   const open = isSettingsTab(section) ? section : undefined;
-  if (section !== undefined && open === undefined) {
-    // `replace`: a retired path must not sit in history between the section
-    // the user landed on and wherever they came from, or Back re-bounces.
-    const retired = retiredSectionTarget(section);
-    if (retired !== undefined)
-      return <Redirect to={`${SETTINGS_ROOT}/${retired}`} replace />;
+  if (section !== undefined && open === undefined)
     return <Redirect to={SETTINGS_ROOT} />;
-  }
 
   const ActiveView = open === undefined ? null : SETTINGS_TAB_VIEWS[open];
   const heading =
