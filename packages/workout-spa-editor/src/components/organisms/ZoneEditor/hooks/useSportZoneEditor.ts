@@ -53,7 +53,6 @@ export function useSportZoneEditor(
     handleMethodChange: methodSwitch.handleMethodChange,
     confirmMethodSwitch: methodSwitch.confirmMethodSwitch,
     cancelMethodSwitch: methodSwitch.cancelMethodSwitch,
-    updateSportThresholds: actions.handleUpdateThresholds,
     handleZonesChange: actions.handleZonesChange,
     handleAddZone,
   };

@@ -11,13 +11,12 @@ import { useCallback, useState } from "react";
 
 import { addCustomZone } from "../../../../application/profile/zones/add-custom-zone";
 import { setZoneMethod } from "../../../../application/profile/zones/set-zone-method";
-import { updateSportThresholds } from "../../../../application/profile/zones/update-sport-thresholds";
 import { updateSportZones } from "../../../../application/profile/zones/update-sport-zones";
 import type { ZoneType } from "../../../../application/profile/zones/zone-types";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { useTranslate } from "../../../../i18n/use-translate";
-import type { SportKey, SportThresholds } from "../../../../types/sport-zones";
+import type { SportKey } from "../../../../types/sport-zones";
 
 export function useSportZoneEditorActions(
   profileId: string,
@@ -69,19 +68,10 @@ export function useSportZoneEditorActions(
     );
   };
 
-  const handleUpdateThresholds = (
-    pid: string,
-    sport: SportKey,
-    thresholds: SportThresholds
-  ) => {
-    surface(() => updateSportThresholds(persistence, pid, sport, thresholds));
-  };
-
   return {
     saved,
     applyMethod,
     handleZonesChange,
     handleAddCustom,
-    handleUpdateThresholds,
   };
 }

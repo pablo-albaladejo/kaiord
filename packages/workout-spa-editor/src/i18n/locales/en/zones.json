@@ -39,11 +39,6 @@
     "swimming": "Swimming",
     "generic": "Generic"
   },
-  "threshold": {
-    "pace": "Threshold Pace",
-    "ariaLabel": "{{label}} threshold",
-    "optional": "optional"
-  },
   "section": {
     "heartRate": "Heart Rate Zones",
     "power": "Power Zones",

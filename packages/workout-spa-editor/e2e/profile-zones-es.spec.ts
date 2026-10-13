@@ -1,7 +1,7 @@
 /**
- * E2E: the Profile Manager's zones tab speaks Spanish for the heart-rate
- * unit. "bpm" is English; Spanish writes "ppm" (pulsaciones por minuto).
- * `verify:prod`'s i18n scan reads the same tab on production.
+ * E2E: the athlete's zone editor speaks Spanish for the heart-rate unit.
+ * "bpm" is English; Spanish writes "ppm" (pulsaciones por minuto).
+ * `verify:prod`'s i18n scan reads the same page on production.
  */
 
 import { expect, test } from "./fixtures/base";
@@ -12,7 +12,7 @@ const LTHR = 168;
 
 test.use({ locale: "es-ES" });
 
-test.describe("Profile Manager zones tab in Spanish", () => {
+test.describe("Zone editor in Spanish", () => {
   test("should show ppm and never bpm", async ({ page }) => {
     // Arrange
     await page.goto("/athlete");
@@ -53,15 +53,13 @@ test.describe("Profile Manager zones tab in Spanish", () => {
       },
       { profileId: PROFILE_ID, lthr: LTHR }
     );
-    await page.goto("/athlete");
 
     // Act
-    await page.getByRole("button", { name: "Editar perfil" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByRole("tab", { name: "Zonas de entrenamiento" }).click();
+    await page.goto("/athlete/zones/cycling");
 
     // Assert
-    await expect(dialog.getByText("ppm").first()).toBeVisible();
-    await expect(dialog).not.toContainText(/\bbpm\b/);
+    const main = page.locator("main");
+    await expect(main.getByText("ppm").first()).toBeVisible();
+    await expect(main).not.toContainText(/\bbpm\b/);
   });
 });

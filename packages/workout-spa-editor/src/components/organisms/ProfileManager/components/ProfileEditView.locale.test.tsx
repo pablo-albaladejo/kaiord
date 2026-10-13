@@ -34,8 +34,8 @@ describe("ProfileEditView in Spanish", () => {
 
     // Assert
     expect(
-      screen.getByRole("tab", { name: "Zonas de entrenamiento" })
-    ).toBeVisible();
+      screen.queryByRole("tab", { name: "Zonas de entrenamiento" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("tab", { name: "Cuentas vinculadas" })
     ).toBeVisible();

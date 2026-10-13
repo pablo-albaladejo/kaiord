@@ -3,13 +3,26 @@
   "createProfile": "Create profile",
   "createProfileTitle": "Create athlete profile",
   "editProfile": "Edit profile",
-  "edit": "Edit",
   "editThresholds": "Edit thresholds",
   "thresholdsTitle": "{{sport}} thresholds",
+  "thresholds": {
+    "ftp": "FTP (W)",
+    "lthr": "LTHR ({{unit}})",
+    "pace": "Threshold pace ({{unit}})",
+    "cssPace": "CSS pace ({{unit}})",
+    "maxHeartRate": "Max Heart Rate ({{unit}})",
+    "optional": "Optional for running",
+    "saved": "Saved",
+    "invalid": {
+      "whole": "Enter a whole number above 0.",
+      "heartRate": "Enter a whole number between 1 and 250.",
+      "pace": "Use minutes and seconds, for example 4:30."
+    }
+  },
   "sportAria": "Sport",
   "zonesTitle": "{{sport}} zones",
+  "adjustZones": "Adjust zones",
   "noThreshold": "Set a {{sport}} threshold to see your zones",
-  "noThresholds": "Add your {{sport}} thresholds",
   "zonesReason": "Derived from {{metric}} {{value}}. These five bands are what the AI writes workouts against and what your watch receives as targets.",
   "zonesReasonNoThreshold": "These five bands are what the AI writes workouts against and what your watch receives as targets.",
   "provenance": {
@@ -47,9 +60,7 @@
     "title": "Body",
     "saved": "Saved",
     "currentWeight": "Current weight ({{unit}})",
-    "currentWeightHint": "Saved as today's weigh-in.",
-    "maxHeartRate": "Max Heart Rate (bpm)",
-    "maxHeartRateRange": "Enter a whole number between 1 and 250."
+    "currentWeightHint": "Saved as today's weigh-in."
   },
   "sports": {
     "cycling": "Cycling",
@@ -85,7 +96,6 @@
     "connecting": "Connecting…",
     "disconnect": "Disconnect",
     "tabs": {
-      "zones": "Training Zones",
       "personal": "Personal Data",
       "linkedAccounts": "Linked Accounts"
     },
@@ -120,5 +130,11 @@
     },
     "ftp": "FTP: {{value}}W",
     "lthr": "LTHR: {{value}} bpm"
+  },
+  "zonesPage": {
+    "back": "Athlete",
+    "thresholds": "Thresholds: {{list}}",
+    "thresholdItem": "{{label}} {{value}}",
+    "noThresholds": "No thresholds yet. Zones follow the thresholds you set on the Athlete page."
   }
 }

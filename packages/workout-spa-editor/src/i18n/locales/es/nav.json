@@ -50,7 +50,8 @@
     "settings": "Página de ajustes",
     "nutrition": "Página de nutrición",
     "daily": "Página diaria",
-    "calendar": "Página del calendario"
+    "calendar": "Página del calendario",
+    "zones": "Página de zonas"
   },
   "chatAssistant": "Asistente de chat"
 }
