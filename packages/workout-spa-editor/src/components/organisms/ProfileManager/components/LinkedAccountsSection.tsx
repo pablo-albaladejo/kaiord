@@ -11,7 +11,9 @@ import type { Profile } from "../../../../types/profile";
 import { LinkedAccountRow } from "./LinkedAccountRow";
 import type { SourceMeta } from "./use-linked-account-row";
 
-const SUPPORTED_SOURCES: SourceMeta[] = [{ id: "train2go", label: "Train2Go" }];
+const SUPPORTED_SOURCES: SourceMeta[] = [
+  { id: "train2go", label: "Train2Go", bridgeId: "train2go-bridge" },
+];
 
 export type LinkedAccountsSectionProps = {
   profile: Profile;

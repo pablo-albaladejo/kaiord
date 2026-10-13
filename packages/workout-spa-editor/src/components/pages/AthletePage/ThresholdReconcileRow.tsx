@@ -22,6 +22,7 @@ export function ThresholdReconcileRow({
   onKeep,
 }: ThresholdReconcileRowProps) {
   const t = useTranslate("athlete");
+  const tConnections = useTranslate("connections");
   const locale = useActiveLocale();
 
   const withUnit = (value: string): string =>
@@ -36,7 +37,7 @@ export function ThresholdReconcileRow({
       <div className="flex min-w-0 flex-1 basis-[200px] flex-col gap-[3px]">
         <span className="text-[13px] font-medium text-ink-strong tabular-nums">
           {t("reconcile.title", {
-            source: sourceDisplayName(disagreement.source),
+            source: sourceDisplayName(disagreement.source, tConnections),
             value: withUnit(disagreement.incoming),
             date: recordedOn,
           })}

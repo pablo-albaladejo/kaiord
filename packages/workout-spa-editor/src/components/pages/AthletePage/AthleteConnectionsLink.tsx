@@ -19,8 +19,9 @@ export function AthleteConnectionsLink({
   profile,
 }: AthleteConnectionsLinkProps) {
   const t = useTranslate("athlete");
+  const tConnections = useTranslate("connections");
   const sources = profile.linkedAccounts.map((account) =>
-    sourceDisplayName(account.source)
+    sourceDisplayName(account.source, tConnections)
   );
   if (sources.length === 0) return null;
 

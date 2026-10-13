@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal";
 
 type DisconnectConfirmationProps = {
@@ -14,13 +15,14 @@ export function DisconnectConfirmation({
   onCancel,
   onConfirm,
 }: DisconnectConfirmationProps) {
+  const t = useTranslate("connections");
   return (
     <ConfirmationModal
       isOpen={isOpen}
-      title="Disconnect"
+      title={t("manage.disconnect")}
       message={message}
-      confirmLabel="Disconnect"
-      cancelLabel="Cancel"
+      confirmLabel={t("manage.disconnect")}
+      cancelLabel={t("manage.cancel")}
       variant="destructive"
       onCancel={onCancel}
       onConfirm={onConfirm}

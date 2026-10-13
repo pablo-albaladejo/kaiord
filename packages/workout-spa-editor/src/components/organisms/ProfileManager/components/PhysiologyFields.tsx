@@ -6,7 +6,13 @@
  * empty values clear the field rather than persisting a zero.
  */
 
+import { useUnits } from "../../../../contexts/units-context";
 import { useTranslate } from "../../../../i18n/use-translate";
+import {
+  heightFromDisplay,
+  heightToDisplay,
+  heightUnitLabel,
+} from "../../../../lib/units/body-measures";
 import { Input } from "../../../atoms/Input/Input";
 import type { ProfileFormData } from "../types";
 import { PhysiologySelects } from "./PhysiologySelects";
@@ -24,14 +30,20 @@ export function PhysiologyFields({
   onChange,
 }: PhysiologyFieldsProps) {
   const t = useTranslate("athlete");
+  const units = useUnits();
   return (
     <>
       <Input
-        label={t("profileManager.personal.height")}
+        label={t("profileManager.personal.height", {
+          unit: heightUnitLabel(units),
+        })}
         variant="number"
-        value={formData.height?.toString() ?? ""}
+        value={heightToDisplay(formData.height, units)?.toString() ?? ""}
         onChange={(e) =>
-          onChange({ ...formData, height: numberOrUndefined(e.target.value) })
+          onChange({
+            ...formData,
+            height: heightFromDisplay(numberOrUndefined(e.target.value), units),
+          })
         }
         placeholder="175"
       />

@@ -20,6 +20,7 @@ export function ThresholdProvenanceLine({
   provenance,
 }: ThresholdProvenanceLineProps) {
   const t = useTranslate("athlete");
+  const tConnections = useTranslate("connections");
   const tCommon = useTranslate("common");
   const locale = useActiveLocale();
 
@@ -31,7 +32,7 @@ export function ThresholdProvenanceLine({
   const text = (): string => {
     if (provenance.kind === "synced") {
       return t("provenance.synced", {
-        source: sourceDisplayName(provenance.source),
+        source: sourceDisplayName(provenance.source, tConnections),
         when: when(provenance.at),
       });
     }

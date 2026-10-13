@@ -12,6 +12,7 @@ import { useState } from "react";
 
 import type { ZoneType } from "../../../../application/profile/zones/zone-types";
 import { useProfileByIdLive } from "../../../../hooks/use-profile-by-id-live";
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { SportKey } from "../../../../types/sport-zones";
 import { SPORT_ZONE_CAPABILITIES } from "../../../../types/sport-zones";
 import { buildDefaultZone } from "../utils/default-zone";
@@ -22,6 +23,7 @@ export function useSportZoneEditor(
   profileId: string,
   initialSport: SportKey = "cycling"
 ) {
+  const t = useTranslate("zones");
   const [activeSport, setActiveSport] = useState<SportKey>(initialSport);
   const profile = useProfileByIdLive(profileId);
   const sportConfig = profile?.sportZones?.[activeSport];
@@ -33,7 +35,11 @@ export function useSportZoneEditor(
   const handleAddZone = (zoneType: ZoneType) => {
     const current = sportConfig?.[zoneType];
     const nextNum = (current?.zones.length ?? 0) + 1;
-    const zone = buildDefaultZone(zoneType, nextNum);
+    const zone = buildDefaultZone(
+      zoneType,
+      nextNum,
+      t("defaultName.zone_n", { n: nextNum })
+    );
     actions.handleAddCustom(zoneType, zone);
   };
 

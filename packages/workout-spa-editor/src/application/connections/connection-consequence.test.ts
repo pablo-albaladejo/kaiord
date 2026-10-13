@@ -142,7 +142,7 @@ describe("buildConnectionConsequence", () => {
     expect(consequence?.detail).not.toMatch(/Invalid Date/);
   });
 
-  it("should tell the reader to update an out-of-date bridge, not to sign in", () => {
+  it("should tell the reader to update an out-of-date extension, not to sign in", () => {
     // Arrange
     // The probe SUCCEEDED and answered in a protocol version this build cannot
     // read. Signing in again fixes nothing, so the sign-in line would send the
@@ -153,7 +153,7 @@ describe("buildConnectionConsequence", () => {
     const consequence = buildConnectionConsequence(sources, coverage([]), t);
 
     // Assert
-    expect(consequence?.title).toBe("WHOOP's browser bridge is out of date");
+    expect(consequence?.title).toBe("WHOOP's Kaiord extension is out of date");
   });
 
   it("should not name a cause that holds for only one of several sources", () => {

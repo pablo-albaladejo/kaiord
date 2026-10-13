@@ -10,15 +10,15 @@ import { unlinkAccount } from "../../../../application/coaching/unlink-account";
 import { useAnalytics } from "../../../../contexts";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
+import { useDiscoveredBridges } from "../../../../hooks/use-discovered-bridges";
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 
 export type SourceMeta = {
   id: string;
   label: string;
+  bridgeId: string;
 };
-
-const ACCOUNT_LINKED_TOAST = "Coaching account linked";
-const ACCOUNT_DISCONNECTED_TOAST = "Coaching account disconnected";
 
 export const useLinkedAccountRow = (
   profile: Profile,
@@ -27,6 +27,10 @@ export const useLinkedAccountRow = (
   const persistence = usePersistence();
   const toasts = useToastContext();
   const analytics = useAnalytics();
+  const t = useTranslate("athlete");
+  const extensionMissing = !useDiscoveredBridges().some(
+    (bridge) => bridge.bridgeId === sourceMeta.bridgeId
+  );
   const t2gSource = useTrain2GoSource(profile.id, []);
   const [busy, setBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -35,6 +39,12 @@ export const useLinkedAccountRow = (
 
   const handleConnect = useCallback(async () => {
     abortRef.current?.abort();
+    if (extensionMissing) {
+      toasts.error(
+        t("profileManager.toast.extensionMissing", { source: sourceMeta.label })
+      );
+      return;
+    }
     setBusy(true);
     try {
       await t2gSource.connect(profile.id);
@@ -43,23 +53,31 @@ export const useLinkedAccountRow = (
         (a) => a.source === sourceMeta.id
       );
       if (!linked) return;
-      toasts.success(ACCOUNT_LINKED_TOAST);
+      toasts.success(t("profileManager.toast.accountLinked"));
     } finally {
       setBusy(false);
     }
-  }, [t2gSource, persistence, profile, sourceMeta, toasts]);
+  }, [
+    t2gSource,
+    persistence,
+    profile,
+    sourceMeta,
+    toasts,
+    extensionMissing,
+    t,
+  ]);
 
   const handleDisconnect = useCallback(async () => {
     abortRef.current?.abort();
     setBusy(true);
     try {
       await unlinkAccount(persistence.profiles, profile.id, sourceMeta.id);
-      toasts.info(ACCOUNT_DISCONNECTED_TOAST);
+      toasts.info(t("profileManager.toast.accountDisconnected"));
       analytics.event("coaching.unlink.success", { source: sourceMeta.id });
     } finally {
       setBusy(false);
     }
-  }, [persistence, profile, sourceMeta, toasts, analytics]);
+  }, [persistence, profile, sourceMeta, toasts, analytics, t]);
 
-  return { busy, handleConnect, handleDisconnect };
+  return { busy, extensionMissing, handleConnect, handleDisconnect };
 };

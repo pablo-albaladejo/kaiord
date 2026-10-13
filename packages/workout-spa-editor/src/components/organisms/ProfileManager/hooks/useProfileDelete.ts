@@ -24,17 +24,17 @@ import { ensureDefaultProfile } from "../../../../application/profile/ensure-def
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { defaultProfileName } from "../../../../i18n/default-profile-name";
+import { useTranslate } from "../../../../i18n/use-translate";
 
 type UseProfileDeleteParams = {
   setDeleteConfirmId: (id: string | null) => void;
 };
 
-const TOAST_ERROR = "Failed to delete profile — please retry.";
-
 export function useProfileDelete(params: UseProfileDeleteParams) {
   const { setDeleteConfirmId } = params;
   const persistence = usePersistence();
   const toast = useToastContext();
+  const t = useTranslate("athlete");
 
   const handleDelete = (profileId: string) => {
     setDeleteConfirmId(profileId);
@@ -78,7 +78,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
         });
         setDeleteConfirmId(null);
       } catch {
-        toast.error(TOAST_ERROR);
+        toast.error(t("profileManager.toast.deleteFailed"));
         // Keep the confirm dialog open so the user can retry.
       }
     })();

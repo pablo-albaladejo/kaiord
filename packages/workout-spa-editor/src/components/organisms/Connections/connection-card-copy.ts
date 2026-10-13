@@ -66,8 +66,7 @@ export type DetailKey =
   | "detail.checking"
   | "detail.manual"
   | "detail.unsupported"
-  | "detail.disconnected"
-  | "detail.notDetected";
+  | "detail.disconnected";
 
 /**
  * `needsReauth` has no branch of its own on purpose. Its only producer is
@@ -110,10 +109,9 @@ export const detailKeyFor = (source: ConnectionSource): DetailKey | null => {
     case "unsupported":
       return "detail.unsupported";
     case "available":
-      if (source.mechanism !== "bridge") return null;
-      return source.bridgeDetected
-        ? "detail.disconnected"
-        : "detail.notDetected";
+      // A missing extension is said once, by the extension line on the card.
+      if (source.mechanism !== "bridge" || !source.bridgeDetected) return null;
+      return "detail.disconnected";
     default:
       return null;
   }

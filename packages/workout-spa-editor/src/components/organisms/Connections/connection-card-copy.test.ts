@@ -70,7 +70,7 @@ describe("detailKeyFor", () => {
     expect(key).toBe("detail.noAccess");
   });
 
-  it("should say an absent extension is absent rather than disconnected", () => {
+  it("should leave an absent extension to the extension line rather than say disconnected", () => {
     // Arrange
     // Both are true of a source the user unlinked and then uninstalled; the
     // blocking one is the missing extension, which is the one with no control.
@@ -83,6 +83,6 @@ describe("detailKeyFor", () => {
     const key = detailKeyFor(gone);
 
     // Assert
-    expect(key).toBe("detail.notDetected");
+    expect(key).toBeNull();
   });
 });

@@ -6,6 +6,7 @@
 
 import { User } from "lucide-react";
 
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
 
 type ProfileItemInfoProps = {
@@ -13,6 +14,7 @@ type ProfileItemInfoProps = {
 };
 
 export function ProfileItemInfo({ profile }: ProfileItemInfoProps) {
+  const t = useTranslate("athlete");
   const cycling = profile.sportZones.cycling;
   const ftp = cycling?.thresholds.ftp;
   const lthr = cycling?.thresholds.lthr;
@@ -25,9 +27,9 @@ export function ProfileItemInfo({ profile }: ProfileItemInfoProps) {
           {profile.name}
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          {ftp && `FTP: ${ftp}W`}
+          {ftp && t("profileManager.ftp", { value: ftp })}
           {ftp && lthr && " - "}
-          {lthr && `LTHR: ${lthr} bpm`}
+          {lthr && t("profileManager.lthr", { value: lthr })}
         </p>
       </div>
     </div>

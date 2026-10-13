@@ -1,17 +1,17 @@
 /**
  * Default zone builder
  *
- * Creates a default zone object for adding custom zones.
+ * Creates a default zone object for adding custom zones. The caller supplies
+ * the already-translated display name.
  */
 
 import type { ZoneType } from "../../../../application/profile/zones/zone-types";
 
 export function buildDefaultZone(
   zoneType: ZoneType,
-  zoneNumber: number
+  zoneNumber: number,
+  name: string
 ): unknown {
-  const name = `Zone ${zoneNumber}`;
-
   if (zoneType === "heartRateZones") {
     return { zone: zoneNumber, name, minBpm: 0, maxBpm: 0 };
   }

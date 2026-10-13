@@ -242,9 +242,9 @@ describe("ConnectionsTab", () => {
     render(<ConnectionsTab />);
 
     // Assert
-    expect(
-      screen.getByText(/extension is not running in this browser/i)
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("connection-bridge-garmin")).toHaveTextContent(
+      "Requires the Kaiord extension"
+    );
     expect(
       screen.queryByTestId("connection-reconnect-garmin")
     ).not.toBeInTheDocument();
