@@ -30,6 +30,8 @@ export type SyncEngine = {
   connect: () => Promise<void>;
   /** Stop sync triggers without deleting local data. */
   disconnect: () => void;
+  /** Disconnect, then resolve once no sync cycle is still running. */
+  stop: () => Promise<void>;
   /**
    * Remote profiles to pick from when the cloud holds several real ones and
    * this device still has its unclaimed default profile; null otherwise.

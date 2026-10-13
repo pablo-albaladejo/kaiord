@@ -5,7 +5,7 @@
  * the cycle again, so the re-key goes through the same sync pipeline.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import {
   AUTO_PROFILE_CHOICE_KEY,
@@ -34,7 +34,9 @@ export function useSyncCycle({
     null
   );
 
-  const syncNow = useCallback(async (): Promise<SyncOutcome> => {
+  const running = useRef<Promise<SyncOutcome> | null>(null);
+
+  const runCycle = useCallback(async (): Promise<SyncOutcome> => {
     setStatus("syncing");
     setError(null);
     try {
@@ -51,6 +53,20 @@ export function useSyncCycle({
     }
   }, [cloud, snapshotPort, deviceId]);
 
+  const syncNow = useCallback((): Promise<SyncOutcome> => {
+    const cycle = runCycle();
+    running.current = cycle;
+    void cycle.finally(() => {
+      if (running.current === cycle) running.current = null;
+    });
+    return cycle;
+  }, [runCycle]);
+
+  /** Resolves once no cycle is running, waiting for any that starts meanwhile. */
+  const settled = useCallback(async (): Promise<void> => {
+    while (running.current !== null) await running.current;
+  }, []);
+
   const chooseProfile = useCallback(
     async (profileId: string): Promise<SyncOutcome> => {
       await snapshotPort.writeMeta(AUTO_PROFILE_CHOICE_KEY, profileId);
@@ -66,5 +82,6 @@ export function useSyncCycle({
     profileChoice,
     syncNow,
     chooseProfile,
+    settled,
   };
 }

@@ -181,4 +181,48 @@ describe("useSyncEngine", () => {
     expect(cloud.state.pushCount).toBe(0);
     expect(result.current.connected).toBe(false);
   });
+
+  it("should resolve stop only after the cycle already running has finished", async () => {
+    // Arrange
+    const cloud = createInMemoryCloudSyncPort({
+      authenticated: true,
+      snapshot: null,
+      revision: null,
+      pushCount: 0,
+    });
+    let releasePull: () => void = () => undefined;
+    const pull = cloud.pull;
+    cloud.pull = async () => {
+      await new Promise<void>((resolve) => (releasePull = resolve));
+      return pull();
+    };
+    const snapshotPort = createInMemorySnapshotPort(makeSnapshotState());
+    const { result } = renderHook(() =>
+      useSyncEngine({ cloud, snapshotPort, deviceId: DEVICE_ID })
+    );
+    let cycle: Promise<unknown> = Promise.resolve();
+    act(() => {
+      cycle = result.current.syncNow();
+    });
+
+    // Act
+    let stopped = false;
+    const stop = result.current.stop().then(() => {
+      stopped = true;
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const stoppedWhileRunning = stopped;
+    await act(async () => {
+      releasePull();
+      await cycle;
+      await stop;
+    });
+
+    // Assert
+    expect(stoppedWhileRunning).toBe(false);
+    expect(stopped).toBe(true);
+    expect(result.current.connected).toBe(false);
+  });
 });

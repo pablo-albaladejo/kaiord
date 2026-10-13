@@ -27,7 +27,7 @@ export type UseSyncEngineDeps = {
 export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
   const { cloud } = deps;
   const cycle = useSyncCycle(deps);
-  const { syncNow } = cycle;
+  const { syncNow, settled, ...state } = cycle;
   const [connected, setConnected] = useState<boolean>(() =>
     cloud.isAuthenticated()
   );
@@ -60,8 +60,21 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
     setConnected(false);
   }, []);
 
+  const stop = useCallback(async () => {
+    disconnect();
+    await settled();
+  }, [disconnect, settled]);
+
   // Cancel a pending debounced push if the host unmounts (no fire-after-unmount).
   useEffect(() => () => clearTimeout(timer.current ?? undefined), []);
 
-  return { ...cycle, connected, requestPush, connect, disconnect };
+  return {
+    ...state,
+    syncNow,
+    connected,
+    requestPush,
+    connect,
+    disconnect,
+    stop,
+  };
 }

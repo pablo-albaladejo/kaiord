@@ -26,8 +26,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * "Every row answers itself" — the index groups every setting into four
- * sections (Your data · AI · Preferences · About) and each row carries its
+ * The index edits General (language, units, notifications, theme) in place,
+ * then lists one row per page in the rail's order, each carrying its
  * current value on the right, not just a label. No Dexie seed is needed:
  * this is the real shell, reading its own live values.
  */
@@ -53,7 +53,12 @@ export const ConnectionsSection: Story = {
   parameters: { route: "/settings/connections" },
 };
 
-/** Preferences groups units, language and notifications behind one row. */
-export const PreferencesSection: Story = {
-  parameters: { route: "/settings/preferences" },
+/** General: language, units, notifications and theme for this device. */
+export const GeneralSection: Story = {
+  parameters: { route: "/settings/general" },
+};
+
+/** Data & backup: export, import, and deleting everything in this browser. */
+export const DataSection: Story = {
+  parameters: { route: "/settings/data" },
 };

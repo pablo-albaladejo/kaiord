@@ -1,35 +1,9 @@
-import { clearAllProviders } from "../../../application/ai/clear-all-providers";
-import { usePersistence } from "../../../contexts/persistence-context";
-import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
-import { Button } from "../../atoms/Button";
-import { SETTINGS_SECTION_ATTR } from "../../pages/SettingsPage/settings-section";
-import { BackupImportSection } from "./BackupImportSection";
 import { PrivacyInformationSection } from "./PrivacyInformationSection";
-import { useExportBackup } from "./use-export-backup";
 
-const SECURE_STORAGE_PREFIX = "kaiord_secure_";
-
-const clearSecureStorage = (): void => {
-  Object.keys(localStorage)
-    .filter((k) => k.startsWith(SECURE_STORAGE_PREFIX))
-    .forEach((k) => localStorage.removeItem(k));
-};
-
+/** Information only: what leaves this browser and what is measured. */
 export const PrivacyTab: React.FC = () => {
   const t = useTranslate("settings");
-  const persistence = usePersistence();
-  const toast = useToastContext();
-  const exportData = useExportBackup();
-
-  const handleClearAll = async () => {
-    try {
-      await clearAllProviders(persistence);
-      clearSecureStorage();
-    } catch {
-      toast.error(t("privacy.clearKeysFailed"));
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -50,28 +24,6 @@ export const PrivacyTab: React.FC = () => {
             {t("privacy.analyticsLink")}
           </a>{" "}
           {t("privacy.analyticsOutro")}
-        </p>
-      </section>
-
-      <section
-        tabIndex={-1}
-        {...{ [SETTINGS_SECTION_ATTR]: "data-management" }}
-      >
-        <h3 className="mb-3 text-sm font-semibold text-ink-body">
-          {t("privacy.dataManagement")}
-        </h3>
-        <Button variant="secondary" size="sm" onClick={exportData}>
-          {t("privacy.exportData")}
-        </Button>
-        <p className="mb-4 mt-2 text-xs text-ink-muted">
-          {t("privacy.exportHint")}
-        </p>
-        <BackupImportSection />
-        <Button variant="danger" size="sm" onClick={handleClearAll}>
-          {t("privacy.clearAllApiKeys")}
-        </Button>
-        <p className="mt-2 text-xs text-ink-muted">
-          {t("privacy.clearAllHint")}
         </p>
       </section>
     </div>

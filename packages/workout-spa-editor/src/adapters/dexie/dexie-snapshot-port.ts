@@ -16,6 +16,7 @@
 
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import type { SnapshotTables, Tombstone } from "../../types/snapshot";
+import { createDexieClearAllTables } from "./dexie-clear-all-tables";
 import type { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotProfileOps } from "./dexie-snapshot-profile-ops";
 
@@ -57,6 +58,7 @@ export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
 
   return {
     ...createDexieSnapshotProfileOps(db),
+    clearAllTables: createDexieClearAllTables(db),
     // One transaction over every table. The inner `importTables` /
     // `replaceTombstones` / read calls below open Dexie transactions on
     // subsets of this scope, which Dexie nests into (joins) this one — so

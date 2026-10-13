@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Link } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
@@ -24,10 +25,9 @@ const ENTRY_CLASS =
 const ACTIVE_ENTRY_CLASS = `${ENTRY_CLASS} bg-surface-elevated text-ink-strong`;
 
 /**
- * The split's section rail. Entries are the sections themselves, not the
- * index's rows: three index rows lead to `preferences` and two to `ai`, so a
- * row-shaped rail would mark several rows current for one open section and
- * would repeat the panel's own headings word for word.
+ * The split's section rail: the same sections, in the same order and under
+ * the same names, as the index's rows (P-10). Connections sits apart, as it
+ * does on the index, until it moves out of Settings.
  */
 export const SettingsSectionRail = ({
   activeSection,
@@ -46,15 +46,19 @@ export const SettingsSectionRail = ({
         {SETTINGS_TAB_ORDER.map((section) => {
           const active = section === activeSection;
           return (
-            <Link
-              key={section}
-              href={`/settings/${section}`}
-              aria-current={active ? "page" : undefined}
-              className={active ? ACTIVE_ENTRY_CLASS : ENTRY_CLASS}
-              data-testid={`settings-section-${section}`}
-            >
-              {t(`tabs.${section}`)}
-            </Link>
+            <Fragment key={section}>
+              {section === "connections" && (
+                <hr className="!my-3 border-edge-soft" aria-hidden="true" />
+              )}
+              <Link
+                href={`/settings/${section}`}
+                aria-current={active ? "page" : undefined}
+                className={active ? ACTIVE_ENTRY_CLASS : ENTRY_CLASS}
+                data-testid={`settings-section-${section}`}
+              >
+                {t(`tabs.${section}`)}
+              </Link>
+            </Fragment>
           );
         })}
       </div>
