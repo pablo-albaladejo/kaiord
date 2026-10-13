@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useUnits } from "../../../contexts/units-context";
+import { useCurrentWeightKg } from "../../../hooks/health/use-current-weight";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
@@ -20,6 +21,7 @@ export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
   const t = useTranslate("athlete");
   const units = useUnits();
   const [editing, setEditing] = useState(false);
+  const currentWeightKg = useCurrentWeightKg(profile.id, profile);
 
   return (
     <div className="flex items-center gap-3.5">
@@ -29,7 +31,7 @@ export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
           {profile.name}
         </div>
         <div className="text-[13px] text-ink-muted tabular-nums">
-          {deriveTagline(profile, sport, units, t)}
+          {deriveTagline(profile, sport, units, t, currentWeightKg)}
         </div>
       </div>
       <button

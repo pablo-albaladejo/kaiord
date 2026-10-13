@@ -47,7 +47,7 @@ describe("BodyCard", () => {
 
     // Assert
     expect(container.querySelector("#body")).not.toBeNull();
-    expect(screen.getByLabelText("Body Weight (kg)")).toHaveValue(WEIGHT);
+    expect(screen.getByLabelText("Current weight (kg)")).toHaveValue(WEIGHT);
   });
 
   it("should persist an edited height and show the saved feedback", async () => {

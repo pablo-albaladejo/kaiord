@@ -1,17 +1,19 @@
 import { type KeyboardEvent, useRef, useState } from "react";
 
+import { saveManualHealthMetric } from "../../../application/health/save-manual-health-metric.use-case";
 import { updateProfile } from "../../../application/profile/update-profile";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import type { Profile } from "../../../types/profile";
+import { todayIsoDate } from "../../../utils/today-iso-date";
 import type { ProfileFormData } from "../../organisms/ProfileManager/types";
 
-const NUMERIC_KEYS = ["bodyWeight", "height", "restingHeartRate"] as const;
+// Weight is not here: it is the current weight, recorded as a weigh-in.
+const NUMERIC_KEYS = ["height", "restingHeartRate"] as const;
 const SAVE_ERROR = "Failed to save profile — please retry.";
 
 const toFormData = (profile: Profile): ProfileFormData => ({
   name: profile.name,
-  bodyWeight: profile.bodyWeight,
   height: profile.height,
   birthDate: profile.birthDate,
   sex: profile.sex,
@@ -28,17 +30,30 @@ export function useBodyForm(profileId: string, profile: Profile) {
   const [saved, setSaved] = useState(false);
   const dirty = useRef(false);
 
-  const save = (patch: ProfilePatch) => {
+  const track = (write: Promise<unknown>) => {
     setSaved(false);
-    void updateProfile(persistence, profileId, patch).then(
+    void write.then(
       () => setSaved(true),
       () => toast.error(SAVE_ERROR)
     );
   };
 
+  const save = (patch: ProfilePatch) =>
+    track(updateProfile(persistence, profileId, patch));
+
+  // Same-day re-edits update today's weigh-in (the use case upserts by day).
+  const recordWeight = (kg: number) =>
+    track(
+      saveManualHealthMetric(
+        { persistence, profileId },
+        { metric: "weight", day: todayIsoDate(), value: kg }
+      ).then((result) => {
+        if (!result) throw new Error("Invalid weight");
+      })
+    );
+
   const saveForm = (data: ProfileFormData) =>
     save({
-      bodyWeight: data.bodyWeight,
       height: data.height,
       birthDate: data.birthDate,
       sex: data.sex,
@@ -69,5 +84,13 @@ export function useBodyForm(profileId: string, profile: Profile) {
     if (e.key === "Enter") commit();
   };
 
-  return { form, saved, save, handleForm, commit, handleKeyDown };
+  return {
+    form,
+    saved,
+    save,
+    recordWeight,
+    handleForm,
+    commit,
+    handleKeyDown,
+  };
 }

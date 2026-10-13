@@ -40,7 +40,6 @@ describe("ProfileEditView in Spanish", () => {
       screen.getByRole("tab", { name: "Cuentas vinculadas" })
     ).toBeVisible();
     for (const label of [
-      "Peso corporal (kg)",
       "Altura (cm)",
       "Fecha de nacimiento",
       "Frecuencia cardiaca en reposo (ppm)",

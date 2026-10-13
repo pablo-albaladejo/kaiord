@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import { getTranslate } from "../../../i18n/use-translate";
 import { profileWith } from "../../../lib/athlete/test-profile";
 import { deriveInitials, deriveTagline } from "./athlete-identity-helpers";
 
 const CYCLING_FTP = 250;
-const BODY_WEIGHT_KG = 71.4;
+const CURRENT_KG = 71.4;
+const PROFILE_KG = 72.5;
+const t = getTranslate("athlete");
 
 describe("deriveInitials", () => {
   it("should take first letters of up to two words uppercased", () => {
@@ -54,17 +57,28 @@ describe("deriveTagline", () => {
     expect(tagline).toBe("Athlete");
   });
 
-  it("should name the active sport's primary threshold and the body weight", () => {
+  it("should name the active sport's primary threshold and the current weight", () => {
     // Arrange
-    const profile = profileWith("cycling", { ftp: CYCLING_FTP }, undefined, {
-      bodyWeight: BODY_WEIGHT_KG,
-    });
+    const profile = profileWith("cycling", { ftp: CYCLING_FTP });
 
     // Act
-    const tagline = deriveTagline(profile, "cycling");
+    const tagline = deriveTagline(profile, "cycling", "metric", t, CURRENT_KG);
 
     // Assert
     expect(tagline).toBe("Cyclist · 250 W FTP · 71.4 kg");
+  });
+
+  it("should state the current weight it is given, not profile.bodyWeight", () => {
+    // Arrange
+    const profile = profileWith("cycling", {}, undefined, {
+      bodyWeight: PROFILE_KG,
+    });
+
+    // Act
+    const tagline = deriveTagline(profile, "cycling", "metric", t, CURRENT_KG);
+
+    // Assert
+    expect(tagline).toBe("Cyclist · 71.4 kg");
   });
 
   it("should omit the parts the profile does not carry", () => {

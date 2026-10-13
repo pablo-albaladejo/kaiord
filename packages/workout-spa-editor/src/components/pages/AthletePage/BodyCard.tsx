@@ -1,16 +1,11 @@
-import { useUnits } from "../../../contexts/units-context";
+import { useCurrentWeightKg } from "../../../hooks/health/use-current-weight";
 import { useTranslate } from "../../../i18n/use-translate";
-import {
-  weightFromDisplay,
-  weightToDisplay,
-} from "../../../lib/units/body-measures";
-import { weightUnitLabel } from "../../../lib/units/units";
 import type { Profile } from "../../../types/profile";
 import { Card } from "../../atoms/Card";
-import { Input } from "../../atoms/Input/Input";
 import { SectionHead } from "../../molecules/SectionHead";
 import { PhysiologyFields } from "../../organisms/ProfileManager/components/PhysiologyFields";
 import { BODY_SECTION_ATTRS, BODY_SECTION_ID } from "./body-section";
+import { CurrentWeightField } from "./CurrentWeightField";
 import { MaxHeartRateField } from "./MaxHeartRateField";
 import { useBodyForm } from "./use-body-form";
 
@@ -20,16 +15,15 @@ type BodyCardProps = {
 };
 
 /**
- * Inline editor for the personal data the modal's "Personal Data" tab holds,
- * plus the cross-sport max heart rate. Autosaves like the modal, but says so.
+ * Inline editor for the athlete's body: the current weight (an edit records
+ * today's weigh-in), the physiology fields and the cross-sport max heart rate.
+ * Autosaves, and says so.
  */
 export function BodyCard({ profileId, profile }: BodyCardProps) {
   const t = useTranslate("athlete");
-  const units = useUnits();
-  const { form, saved, save, handleForm, commit, handleKeyDown } = useBodyForm(
-    profileId,
-    profile
-  );
+  const currentWeightKg = useCurrentWeightKg(profileId, profile);
+  const { form, saved, save, recordWeight, handleForm, commit, handleKeyDown } =
+    useBodyForm(profileId, profile);
 
   return (
     <section id={BODY_SECTION_ID} {...BODY_SECTION_ATTRS} tabIndex={-1}>
@@ -40,22 +34,9 @@ export function BodyCard({ profileId, profile }: BodyCardProps) {
           onBlur={commit}
           onKeyDown={handleKeyDown}
         >
-          <Input
-            label={t("profileManager.personal.bodyWeight", {
-              unit: weightUnitLabel(units),
-            })}
-            variant="number"
-            value={weightToDisplay(form.bodyWeight, units)?.toString() ?? ""}
-            onChange={(e) =>
-              handleForm({
-                ...form,
-                bodyWeight: weightFromDisplay(
-                  e.target.value ? Number(e.target.value) : undefined,
-                  units
-                ),
-              })
-            }
-            placeholder="70"
+          <CurrentWeightField
+            currentKg={currentWeightKg}
+            onSave={recordWeight}
           />
           <PhysiologyFields formData={form} onChange={handleForm} />
           <MaxHeartRateField

@@ -46,6 +46,8 @@
   "body": {
     "title": "Cuerpo",
     "saved": "Guardado",
+    "currentWeight": "Peso actual ({{unit}})",
+    "currentWeightHint": "Se guarda como la pesada de hoy.",
     "maxHeartRate": "Frecuencia cardiaca máxima (ppm)",
     "maxHeartRateRange": "Introduce un número entero entre 1 y 250."
   },
@@ -88,7 +90,6 @@
       "linkedAccounts": "Cuentas vinculadas"
     },
     "personal": {
-      "bodyWeight": "Peso corporal ({{unit}})",
       "height": "Altura ({{unit}})",
       "birthDate": "Fecha de nacimiento",
       "restingHeartRate": "Frecuencia cardiaca en reposo (ppm)",

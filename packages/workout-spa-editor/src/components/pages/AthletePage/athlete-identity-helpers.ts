@@ -28,15 +28,16 @@ const sportNouns = (profile: Profile, t: Translate): string[] =>
 
 /**
  * Who this athlete is, in one line: the sports they have configured, the
- * threshold the active sport's zones derive from, and their body weight.
- * Each part is omitted when the profile does not carry it — the line states
- * what is known and claims nothing else.
+ * threshold the active sport's zones derive from, and their current weight
+ * (the caller resolves it with `getCurrentWeightKg`). Each part is omitted
+ * when unknown — the line states what is known and claims nothing else.
  */
 export function deriveTagline(
   profile: Profile,
   sport?: ActiveSport,
   units: Units = "metric",
-  t: Translate = getTranslate("athlete")
+  t: Translate = getTranslate("athlete"),
+  currentWeightKg?: number
 ): string {
   const parts = sportNouns(profile, t);
   if (parts.length === 0) parts.push(t("tagline.fallback"));
@@ -50,8 +51,8 @@ export function deriveTagline(
       : primary.value;
     parts.push(`${value} ${primary.label}`);
   }
-  if (profile.bodyWeight !== undefined) {
-    parts.push(formatWeightKg(profile.bodyWeight, units));
+  if (currentWeightKg !== undefined) {
+    parts.push(formatWeightKg(currentWeightKg, units));
   }
   return parts.join(" · ");
 }

@@ -68,4 +68,20 @@ describe("PersonalDataTab", () => {
       activityLevel: undefined,
     });
   });
+
+  it("should not offer a weight field, since the Athlete page owns the current weight", () => {
+    // Arrange
+    const onChange = vi.fn();
+
+    // Act
+    render(
+      <PersonalDataTab
+        formData={{ ...BASE, bodyWeight: 70 }}
+        onChange={onChange}
+      />
+    );
+
+    // Assert
+    expect(screen.queryByLabelText(/weight/i)).not.toBeInTheDocument();
+  });
 });

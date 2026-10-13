@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
 import { renderWithProviders } from "../../../test-utils";
+import type { HealthWeightRecord } from "../../../types/health/health-records";
 import type { Profile } from "../../../types/profile";
 import { BodyCard } from "./BodyCard";
 
@@ -27,7 +28,7 @@ const PROFILE: Profile = {
   updatedAt: "2024-01-01T00:00:00.000Z",
 };
 
-const stored = () => db.table<Profile>("profiles").get(PROFILE_ID);
+const weighIns = () => db.table<HealthWeightRecord>("healthWeight").toArray();
 
 function renderCard() {
   return renderWithProviders(
@@ -39,9 +40,13 @@ function renderCard() {
 describe("BodyCard with imperial units", () => {
   beforeEach(async () => {
     await db.table("profiles").clear();
+    await db.table("healthWeight").clear();
     await db.table<Profile>("profiles").put(PROFILE);
   });
-  afterEach(() => db.table("profiles").clear());
+  afterEach(async () => {
+    await db.table("profiles").clear();
+    await db.table("healthWeight").clear();
+  });
 
   it("should label and show weight and height in pounds and inches", () => {
     // Arrange
@@ -49,14 +54,14 @@ describe("BodyCard with imperial units", () => {
     renderCard();
 
     // Assert
-    expect(screen.getByLabelText("Body Weight (lb)")).toHaveValue(154.3);
+    expect(screen.getByLabelText("Current weight (lb)")).toHaveValue(154.3);
     expect(screen.getByLabelText("Height (in)")).toHaveValue(68.9);
   });
 
-  it("should store a committed pound value as kilograms", async () => {
+  it("should record a committed pound value as a weigh-in in kilograms", async () => {
     // Arrange
     renderCard();
-    const weight = screen.getByLabelText("Body Weight (lb)");
+    const weight = screen.getByLabelText("Current weight (lb)");
 
     // Act
     await userEvent.clear(weight);
@@ -65,7 +70,7 @@ describe("BodyCard with imperial units", () => {
 
     // Assert
     await waitFor(async () =>
-      expect((await stored())?.bodyWeight).toBeCloseTo(90.72, 1)
+      expect((await weighIns())[0]?.krd.weightKilograms).toBeCloseTo(90.72, 1)
     );
   });
 });

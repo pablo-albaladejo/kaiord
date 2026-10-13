@@ -8,13 +8,12 @@
  */
 
 import type { PersistencePort } from "../../ports/persistence-port";
+import { getCurrentWeightKg } from "../health/current-weight";
 import { estimateDayActivityKcal } from "./estimate-day-activity-kcal";
 import type { DayEnergySources } from "./load-day-energy-sources";
 
 export const resolveDayWeightKg = (sources: DayEnergySources): number | null =>
-  sources.latestWeight?.krd.weightKilograms ??
-  sources.profile?.bodyWeight ??
-  null;
+  getCurrentWeightKg(sources.profile, sources.latestWeight) ?? null;
 
 export const resolveDayActivityKcal = async (
   persistence: PersistencePort,

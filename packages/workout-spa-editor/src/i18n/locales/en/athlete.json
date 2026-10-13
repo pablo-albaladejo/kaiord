@@ -46,6 +46,8 @@
   "body": {
     "title": "Body",
     "saved": "Saved",
+    "currentWeight": "Current weight ({{unit}})",
+    "currentWeightHint": "Saved as today's weigh-in.",
     "maxHeartRate": "Max Heart Rate (bpm)",
     "maxHeartRateRange": "Enter a whole number between 1 and 250."
   },
@@ -88,7 +90,6 @@
       "linkedAccounts": "Linked Accounts"
     },
     "personal": {
-      "bodyWeight": "Body Weight ({{unit}})",
       "height": "Height ({{unit}})",
       "birthDate": "Birth Date",
       "restingHeartRate": "Resting Heart Rate (bpm)",
