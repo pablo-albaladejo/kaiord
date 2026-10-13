@@ -6,6 +6,8 @@
  */
 import { useTranslate } from "../../../../i18n/use-translate";
 import type { Profile } from "../../../../types/profile";
+import { Button } from "../../../atoms/Button";
+import { ExtensionInstallLink } from "../../Connections/ExtensionInstallLink";
 import { RowInfo } from "./RowInfo";
 import type { SourceMeta } from "./use-linked-account-row";
 import { useLinkedAccountRow } from "./use-linked-account-row";
@@ -18,11 +20,10 @@ export function LinkedAccountRow({
   sourceMeta: SourceMeta;
 }) {
   const t = useTranslate("athlete");
+  const tConnections = useTranslate("connections");
   const linked = profile.linkedAccounts.find((a) => a.source === sourceMeta.id);
-  const { busy, handleConnect, handleDisconnect } = useLinkedAccountRow(
-    profile,
-    sourceMeta
-  );
+  const { busy, extensionMissing, handleConnect, handleDisconnect } =
+    useLinkedAccountRow(profile, sourceMeta);
 
   return (
     <div
@@ -41,18 +42,27 @@ export function LinkedAccountRow({
             {t("profileManager.disconnect")}
           </button>
         ) : (
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="primary"
             disabled={busy}
             onClick={handleConnect}
-            className="rounded-md bg-danger px-3 py-1 text-sm text-white hover:bg-danger disabled:opacity-50"
           >
             {busy
               ? t("profileManager.connecting")
               : t("profileManager.connect", { source: sourceMeta.label })}
-          </button>
+          </Button>
         )}
       </div>
+      {!linked && extensionMissing && (
+        <p
+          data-testid={`linked-account-extension-${sourceMeta.id}`}
+          className="flex flex-wrap items-center gap-x-3 text-xs text-ink-muted"
+        >
+          {tConnections("ext.requires")}
+          <ExtensionInstallLink />
+        </p>
+      )}
     </div>
   );
 }

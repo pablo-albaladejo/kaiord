@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 
@@ -13,6 +14,7 @@ export function ApiKeyConnectForm({
   onConnect,
   onCancel,
 }: ApiKeyConnectFormProps) {
+  const t = useTranslate("connections");
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -23,7 +25,9 @@ export function ApiKeyConnectForm({
     try {
       await onConnect(apiKey.trim());
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not connect");
+      setError(
+        caught instanceof Error ? caught.message : t("manage.connectFailed")
+      );
     } finally {
       setBusy(false);
     }
@@ -33,7 +37,7 @@ export function ApiKeyConnectForm({
     <div className="mt-3 space-y-2">
       <Input
         type="password"
-        label="API key"
+        label={t("manage.apiKey")}
         autoComplete="off"
         value={apiKey}
         error={error ?? undefined}
@@ -46,10 +50,10 @@ export function ApiKeyConnectForm({
           disabled={busy || apiKey.trim() === ""}
           onClick={() => void submit()}
         >
-          {busy ? "Connecting…" : "Connect"}
+          {busy ? t("manage.connecting") : t("manage.connect")}
         </Button>
         <Button size="sm" variant="tertiary" disabled={busy} onClick={onCancel}>
-          Cancel
+          {t("manage.cancel")}
         </Button>
       </div>
     </div>

@@ -82,8 +82,8 @@
       "linkedAccounts": "Cuentas vinculadas"
     },
     "personal": {
-      "bodyWeight": "Peso corporal (kg)",
-      "height": "Altura (cm)",
+      "bodyWeight": "Peso corporal ({{unit}})",
+      "height": "Altura ({{unit}})",
       "birthDate": "Fecha de nacimiento",
       "restingHeartRate": "Frecuencia cardiaca en reposo (ppm)",
       "sex": "Sexo",
@@ -100,6 +100,18 @@
         "active": "Activo",
         "very_active": "Muy activo"
       }
-    }
+    },
+    "toast": {
+      "switchFailed": "No se pudo cambiar de perfil. Inténtalo de nuevo.",
+      "switched": "Perfil activo: {{name}}",
+      "createFailed": "No se pudo crear el perfil. Inténtalo de nuevo.",
+      "saveFailed": "No se pudo guardar el perfil. Inténtalo de nuevo.",
+      "deleteFailed": "No se pudo eliminar el perfil. Inténtalo de nuevo.",
+      "accountLinked": "Cuenta de entrenador vinculada",
+      "accountDisconnected": "Cuenta de entrenador desvinculada",
+      "extensionMissing": "La extensión de Kaiord no está instalada en este navegador. Instálala para conectar {{source}}."
+    },
+    "ftp": "FTP: {{value}}W",
+    "lthr": "FC umbral: {{value}} ppm"
   }
 }

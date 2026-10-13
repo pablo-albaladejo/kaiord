@@ -9,6 +9,7 @@
 import { createProfile } from "../../../../application/profile/create-profile";
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
+import { useTranslate } from "../../../../i18n/use-translate";
 import type { ProfileFormData } from "../types";
 
 type UseProfileCreateParams = {
@@ -16,12 +17,11 @@ type UseProfileCreateParams = {
   setFormData: (data: ProfileFormData) => void;
 };
 
-const TOAST_ERROR = "Failed to create profile — please retry.";
-
 export function useProfileCreate(params: UseProfileCreateParams) {
   const { formData, setFormData } = params;
   const persistence = usePersistence();
   const toast = useToastContext();
+  const t = useTranslate("athlete");
 
   const handleCreate = () => {
     if (!formData.name.trim()) return;
@@ -32,7 +32,7 @@ export function useProfileCreate(params: UseProfileCreateParams) {
         });
         setFormData({ name: "" });
       } catch {
-        toast.error(TOAST_ERROR);
+        toast.error(t("profileManager.toast.createFailed"));
       }
     })();
   };
