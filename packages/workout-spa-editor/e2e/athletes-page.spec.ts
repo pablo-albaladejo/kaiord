@@ -72,9 +72,7 @@ test.describe("Athletes page", () => {
     const download = page.waitForEvent("download");
 
     // Act
-    await page
-      .getByRole("button", { name: `Export ${DEFAULT_NAME}` })
-      .click();
+    await page.getByRole("button", { name: `Export ${DEFAULT_NAME}` }).click();
 
     // Assert
     expect((await download).suggestedFilename()).toBe(

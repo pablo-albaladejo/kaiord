@@ -89,9 +89,9 @@
   },
   "gate": {
     "noProfile": {
-      "title": "El asistente necesita un perfil de atleta",
-      "body": "Responde a partir de los entrenamientos y datos de salud de tu perfil.",
-      "action": "Crear un perfil"
+      "title": "El asistente necesita un atleta",
+      "body": "Responde a partir de los entrenamientos y datos de salud del atleta activo.",
+      "action": "Crear un atleta"
     },
     "missingKey": {
       "title": "Tu proveedor de IA no tiene clave de API",

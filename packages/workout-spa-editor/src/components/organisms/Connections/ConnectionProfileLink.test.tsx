@@ -92,7 +92,7 @@ describe("ConnectionProfileLink", () => {
 
     // Act
     await userEvent.click(
-      screen.getByRole("button", { name: "Link to this profile" })
+      screen.getByRole("button", { name: "Link to this athlete" })
     );
 
     // Assert

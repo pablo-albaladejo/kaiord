@@ -79,7 +79,7 @@ describe("LayoutHeader", () => {
       // Assert
       expect(
         screen.getByTestId("status-header-account-button")
-      ).toHaveAccessibleName("Account menu (no active profile)");
+      ).toHaveAccessibleName("Account menu (no active athlete)");
     });
 
     it("should name the account menu for the active profile once Dexie hydrates", async () => {

@@ -1,7 +1,8 @@
 import { isoDate, settledText } from "../browser.mjs";
 import { ensureProfile } from "../steps.mjs";
 import { openWellnessDialog } from "../wellness.mjs";
-import { athletesPage, bodySection, goalDialog } from "./i18n-dialogs.mjs";
+import { athletesPage, bodySection } from "./i18n-athlete.mjs";
+import { goalDialog } from "./i18n-dialogs.mjs";
 import { DESIGN_NOTES, findEnglish } from "./i18n-terms.mjs";
 
 const ROUTES = [

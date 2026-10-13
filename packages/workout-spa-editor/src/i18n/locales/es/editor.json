@@ -86,7 +86,7 @@
     "exportFailedFallback": "No se pudo exportar el entreno",
     "paceZones": {
       "missing-pace-zones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN.",
-      "incomplete-pace-zones": "Este entreno usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",
+      "incomplete-pace-zones": "Este entreno usa una zona de ritmo que el atleta no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",
       "unsupported-pace-zone-sport": "Solo se pueden exportar zonas de ritmo como GCN en entrenos de carrera o natación."
     }
   },
@@ -102,7 +102,7 @@
     "invalidDescription": "No se pudo programar — la fecha no es un día válido del calendario.",
     "saveFailedTitle": "Error al guardar",
     "saveFailedDescription": "No se pudo programar el entreno — inténtalo de nuevo.",
-    "noProfileReason": "Selecciona o crea un perfil de atleta para programar este entreno."
+    "noProfileReason": "Selecciona o crea un atleta para programar este entreno."
   },
   "raw": {
     "dialogDescription": "Detalles del entreno en bruto con la descripción del entrenador, la selección de comentarios y acciones para procesar o saltar.",

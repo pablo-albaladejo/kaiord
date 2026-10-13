@@ -5,7 +5,7 @@
     "title": "Analíticas",
     "subtitle": "Añadir un nuevo informe de laboratorio",
     "loading": "Cargando…",
-    "noProfile": "Crea primero un perfil de atleta para registrar analíticas.",
+    "noProfile": "Crea primero un atleta para registrar analíticas.",
     "typedNote": "Las analíticas son la única superficie de salud sin fuente que sincronizar: cada valor de aquí se escribió a mano, así que lleva la fecha en que lo introdujiste en lugar del nombre de un puente."
   },
   "form": {
