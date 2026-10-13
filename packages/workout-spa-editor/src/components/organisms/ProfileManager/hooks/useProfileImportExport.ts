@@ -39,21 +39,26 @@ export function useProfileImportExport(params: UseProfileImportExportParams) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      const validatedProfile = profileSchema.parse(data);
+    const failed = (message: string) =>
+      setImportError(t("profileManager.importFailed", { message }));
 
+    let validatedProfile: Profile;
+    try {
+      validatedProfile = profileSchema.parse(JSON.parse(await file.text()));
+    } catch {
+      failed(t("profileManager.importInvalid"));
+      event.target.value = "";
+      return;
+    }
+
+    try {
       await importProfile(persistence, validatedProfile);
       setImportError(null);
     } catch (error) {
-      setImportError(
-        t("profileManager.importFailed", {
-          message:
-            error instanceof Error
-              ? error.message
-              : t("profileManager.importInvalid"),
-        })
+      failed(
+        error instanceof Error
+          ? error.message
+          : t("profileManager.importInvalid")
       );
     }
 

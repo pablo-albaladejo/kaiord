@@ -248,6 +248,27 @@ describe("useProfileImportExport", () => {
       expect(imported?.id).not.toBe(source.id);
     });
 
+    it("should show the translated invalid-file message for malformed JSON", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const setImportError = vi.fn();
+      const event = fakeChangeEvent({
+        text: () => Promise.resolve("not json"),
+      });
+      const { result } = renderHook(
+        () => useProfileImportExport({ setImportError }),
+        { wrapper: wrap(persistence) }
+      );
+
+      // Act
+      await result.current.handleImport(event);
+
+      // Assert
+      expect(setImportError).toHaveBeenCalledWith(
+        "Import failed: Invalid profile file"
+      );
+    });
+
     it("should report a schema-validation error when the JSON is shaped wrong", async () => {
       // Arrange
       const persistence = createInMemoryPersistence();
