@@ -5,8 +5,7 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { createProfile } from "../../application/profile/create-profile";
 import { ensureDefaultProfile } from "../../application/profile/ensure-default-profile";
@@ -15,15 +14,17 @@ import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { createAppPersistence } from "../create-app-persistence";
-import { KaiordDatabase } from "./dexie-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
-const names: string[] = [];
-const open = async (label: string) => {
-  const name = `kaiord-test-autoprofile-${label}-${Date.now()}-${Math.random()}`;
-  names.push(name);
-  const db = new KaiordDatabase(name);
+const databases = {
+  a: sharedKaiordDatabase("autoprofile-a"),
+  b: sharedKaiordDatabase("autoprofile-b"),
+};
+const open = async (label: keyof typeof databases) => {
+  const db = databases[label];
   await db.open();
   return {
     db,
@@ -100,10 +101,6 @@ const remoteWith = async (cloud: CloudSyncPort, count: number) => {
   await sync(cloud, b.snapshotPort, "dev-b");
   return ids;
 };
-
-afterEach(async () => {
-  for (const name of names.splice(0)) await Dexie.delete(name);
-});
 
 describe("default profile sync", () => {
   it("should re-key every auto row onto the single remote profile and never push the auto", async () => {

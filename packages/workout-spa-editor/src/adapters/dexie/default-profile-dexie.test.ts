@@ -5,8 +5,7 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { ensureDefaultProfile } from "../../application/profile/ensure-default-profile";
 import {
@@ -21,25 +20,16 @@ import {
   PER_PROFILE_TABLES,
   PROVENANCE_TABLES,
 } from "../../test-utils/per-profile-tables";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { createAppPersistence } from "../create-app-persistence";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
-const names: string[] = [];
-const freshName = () => {
-  const name = `kaiord-test-autoprofile-dexie-${Date.now()}-${Math.random()}`;
-  names.push(name);
-  return name;
-};
-
-afterEach(async () => {
-  for (const name of names.splice(0)) await Dexie.delete(name);
-});
-
 describe("default profile on Dexie", () => {
+  const db = sharedKaiordDatabase("autoprofile-dexie");
+
   it("should classify exactly the hand-listed tables as per-profile", async () => {
     // Arrange
-    const db = new KaiordDatabase(freshName());
     await db.open();
 
     // Act
@@ -64,7 +54,6 @@ describe("default profile on Dexie", () => {
 
   it("should give every provenance-indexed table a provenance natural key", async () => {
     // Arrange
-    const db = new KaiordDatabase(freshName());
     await db.open();
     const provenance = ["profileId", "sourceBridgeId", "externalId"];
 
@@ -89,7 +78,6 @@ describe("default profile on Dexie", () => {
 
   it("should roll back both the import and the device-local re-key when a step after them throws", async () => {
     // Arrange
-    const db = new KaiordDatabase(freshName());
     await db.open();
     const port = createDexieSnapshotPort(db);
     const auto = await ensureDefaultProfile(
@@ -139,9 +127,9 @@ describe("default profile on Dexie", () => {
 
   it("should create exactly one default profile when two tabs boot at once", async () => {
     // Arrange
-    const name = freshName();
-    const tabA = new KaiordDatabase(name);
-    const tabB = new KaiordDatabase(name);
+    // A second instance on the same database is the other tab.
+    const tabA = db;
+    const tabB = new KaiordDatabase(db.name);
     await tabA.open();
     await tabB.open();
 
