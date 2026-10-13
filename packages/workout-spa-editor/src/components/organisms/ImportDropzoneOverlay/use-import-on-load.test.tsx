@@ -14,7 +14,10 @@ import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { PersistenceProvider } from "../../../contexts/persistence-context";
-import { ToastContextProvider } from "../../../contexts/ToastContext";
+import {
+  ToastContextProvider,
+  useToastContext,
+} from "../../../contexts/ToastContext";
 import type { PersistencePort } from "../../../ports/persistence-port";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { ToastProvider } from "../../atoms/Toast";
@@ -166,4 +169,39 @@ describe("useImportOnLoad (§9.3 dispatch)", () => {
       expect(history.at(-1)).toMatch(/^\/workout\/[0-9a-f-]+\?from=calendar$/);
     });
   });
+
+  it.each([
+    ["health", makeSleepKrd(), null],
+    ["workout", makeWorkoutKrd(), "2026-06-01"],
+  ])(
+    "should show a no-active-athlete toast and not navigate when a %s import has no active profile",
+    async (_kind, krd, date) => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { hook, history } = memoryLocation({
+        path: "/workout/new",
+        record: true,
+      });
+      const { result } = renderHook(
+        () => ({
+          importer: useImportOnLoad(date, null),
+          toast: useToastContext(),
+        }),
+        { wrapper: makeWrapper(persistence, hook) }
+      );
+      const error = vi.spyOn(result.current.toast, "error");
+
+      // Act
+      result.current.importer(krd);
+
+      // Assert
+      await waitFor(() => {
+        expect(error).toHaveBeenCalledWith(
+          "No active athlete",
+          "Select or create an athlete before importing a file."
+        );
+      });
+      expect(history).toHaveLength(1);
+    }
+  );
 });

@@ -22,5 +22,9 @@
   "warnings": {
     "title": "Importado con avisos",
     "description": "Algunas partes de este archivo no se han podido importar con exactitud. Revisa el entrenamiento antes de usarlo."
+  },
+  "noActiveAthlete": {
+    "title": "Ningún atleta activo",
+    "description": "Selecciona o crea un atleta antes de importar un archivo."
   }
 }
