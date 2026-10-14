@@ -125,7 +125,7 @@ describe("mergeDailyWellnessDay", () => {
     expect(merged?.krd.restingCalories).toBe(LEGACY.resting);
   });
 
-  it("should let a newer imported row beat a legacy manual row's calories in union", () => {
+  it("should take a newer imported row's calories and a legacy manual row's typed steps in union", () => {
     // Arrange
     const legacy = row("legacy", "manual", LEGACY);
     const days = [
@@ -137,13 +137,15 @@ describe("mergeDailyWellnessDay", () => {
     const readings = days.map((rows) => mergeDailyWellnessDay(rows));
 
     // Assert
-    expect(readings.map((r) => r?.sourceBridgeId)).toEqual([
-      "fit-import",
-      "whoop-bridge",
-    ]);
-    expect(readings.map((r) => r?.krd.activeCalories)).toEqual([
-      FIT.active,
-      WHOOP.active,
+    expect(
+      readings.map((r) => [
+        r?.sourceBridgeId,
+        r?.krd.steps,
+        r?.krd.activeCalories,
+      ])
+    ).toEqual([
+      ["fit-import", LEGACY.steps, FIT.active],
+      ["whoop-bridge", LEGACY.steps, WHOOP.active],
     ]);
   });
 
@@ -163,7 +165,7 @@ describe("mergeDailyWellnessDay", () => {
     }
   });
 
-  it("should not give a legacy manual row the manual slot of a priority order", () => {
+  it("should read a legacy manual row's steps in manual's priority slot but not its calories", () => {
     // Arrange
     const legacy = row("legacy", "manual", LEGACY);
     const policy = priority(["manual", "whoop-bridge"]);
@@ -174,8 +176,23 @@ describe("mergeDailyWellnessDay", () => {
 
     // Assert
     expect(withWhoop?.sourceBridgeId).toBe("whoop-bridge");
+    expect(withWhoop?.krd.steps).toBe(LEGACY.steps);
     expect(withWhoop?.krd.activeCalories).toBe(WHOOP.active);
+    expect(alone?.krd.steps).toBe(LEGACY.steps);
     expect(alone?.krd.activeCalories).toBe(LEGACY.active);
+  });
+
+  it("should let a listed source beat a legacy manual row's steps when the priority order leaves manual out", () => {
+    // Arrange
+    const legacy = row("legacy", "manual", LEGACY);
+    const policy = priority(["whoop-bridge"]);
+
+    // Act
+    const merged = mergeDailyWellnessDay([legacy, whoop], policy);
+
+    // Assert
+    expect(merged?.krd.steps).toBe(WHOOP.steps);
+    expect(merged?.krd.activeCalories).toBe(WHOOP.active);
   });
 
   it("should give the same reading whatever order the rows come in", () => {

@@ -187,11 +187,16 @@ it SHALL be read as a full record (its calories count). A new manual steps
 save on that day SHALL keep its measured values and replace only `steps`; this
 also covers a device that syncs such a record back after the change.
 
-A legacy manual record SHALL rank after every other record of the day, in both
-"union" and "priority": it is a stale copy of imported data, so a record its
-source still stamps is fresher, and it SHALL NOT take the slot of `manual` in
-the order. It is the head only when the day has no other record that is not a
-pure manual record, and a pure manual record's steps still replace its steps.
+A legacy manual record has two roles. As a full record it SHALL rank after
+every other record of the day, in both "union" and "priority": its calories
+are a stale copy of imported data, so a record its source still stamps is
+fresher. It is the head only when the day has no other record that is not a
+pure manual record. Its `steps` are the steps the athlete typed (a record only
+became legacy through a manual steps save), so they SHALL compete as manual
+steps in the slot of `manual`, after a pure manual record's steps: they
+replace the head's steps when that slot ranks above the head, and lose like
+pure manual steps when a "priority" order leaves `manual` out. A steps save
+on that day updates the legacy record, so it changes the reading.
 
 Under "priority", records of a bridge whose import policy for daily wellness is
 disabled SHALL be dropped. A source with no import policy at all (a FIT file
@@ -248,12 +253,13 @@ dropping them would leave every FIT-imported day blank under priority.
 - **WHEN** the day is read, and when the user saves 12000 steps for that day
 - **THEN** the reading has 640 + 1720 kcal, and after the save the record holds 12000 steps with the same calories
 
-#### Scenario: A newer imported record beats a legacy manual record
+#### Scenario: A newer imported record beats a legacy manual record's calories, not its steps
 
 - **GIVEN** no "priority" policy for daily wellness
-- **AND** a legacy manual daily record with 640 active kcal and a WHOOP daily record with 700 active kcal for the same day
+- **AND** a legacy manual daily record with 9500 steps and 640 active kcal and a WHOOP daily record with 5000 steps and 700 active kcal for the same day
 - **WHEN** the day is read
-- **THEN** the reading is the WHOOP record, with 700 active kcal
+- **THEN** the reading has the WHOOP record's provenance, 700 active kcal and 9500 steps
+- **AND** after the user saves 12000 steps for that day, the reading has 12000 steps and 700 active kcal
 
 #### Scenario: Manual steps still win over a legacy manual record
 
@@ -261,12 +267,13 @@ dropping them would leave every FIT-imported day blank under priority.
 - **WHEN** the day is read
 - **THEN** the reading has 9000 steps and the WHOOP record's calories and provenance
 
-#### Scenario: A legacy manual record does not take manual's priority slot
+#### Scenario: Under priority a legacy manual record's steps hold manual's slot
 
 - **GIVEN** a "priority" policy with `sourceOrder` `manual`, `whoop-bridge` and an enabled WHOOP import
-- **AND** a legacy manual daily record and a WHOOP daily record of the same day
+- **AND** a legacy manual daily record with 9500 steps and 640 active kcal and a WHOOP daily record with 5000 steps and 700 active kcal for the same day
 - **WHEN** the day is read
-- **THEN** the reading is the WHOOP record
+- **THEN** the reading has the WHOOP record's provenance, 700 active kcal and 9500 steps
+- **AND** with `sourceOrder` `whoop-bridge` only, the reading has 5000 steps
 
 #### Scenario: A manual-only day is predicted, not measured as 0 kcal
 

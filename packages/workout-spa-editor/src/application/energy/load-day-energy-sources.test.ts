@@ -161,7 +161,7 @@ describe("loadDayEnergySources daily wellness", () => {
     expect(sources.wellness?.krd.restingCalories).toBe(IMPORTED_RESTING_KCAL);
   });
 
-  it("should read a newer imported row's calories over a legacy manual row's", async () => {
+  it("should read a newer imported row's calories and a legacy manual row's steps, and a steps save changes them", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.healthDaily.put({
@@ -171,10 +171,18 @@ describe("loadDayEnergySources daily wellness", () => {
     await persistence.healthDaily.put(whoopRow);
 
     // Act
-    const sources = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
+    const before = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
+    await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "daily-wellness", day: DATE, value: MANUAL_STEPS }
+    );
+    const after = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
 
     // Assert
-    expect(sources.wellness?.sourceBridgeId).toBe(WHOOP_BRIDGE);
-    expect(sources.wellness?.krd.activeCalories).toBe(WHOOP_ACTIVE_KCAL);
+    expect(before.wellness?.sourceBridgeId).toBe(WHOOP_BRIDGE);
+    expect(before.wellness?.krd.steps).toBe(IMPORTED_STEPS);
+    expect(before.wellness?.krd.activeCalories).toBe(WHOOP_ACTIVE_KCAL);
+    expect(after.wellness?.krd.steps).toBe(MANUAL_STEPS);
+    expect(after.wellness?.krd.activeCalories).toBe(WHOOP_ACTIVE_KCAL);
   });
 });

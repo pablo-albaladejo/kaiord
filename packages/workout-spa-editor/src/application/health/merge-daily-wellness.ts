@@ -9,10 +9,11 @@
  * is the first full row and is read whole, as the resolver reads priority.
  * The one exception is a pure manual row (steps only): ranked above the
  * head, its steps replace the head's. A legacy manual row, an imported row
- * an older save re-stamped `manual`, holds measured values and is read as
- * a full row, ranked last in both modes: it is a stale copy of imported
- * data, so a row its source still stamps is fresher, and it never takes
- * manual's slot. Under priority, rows of a bridge whose import is disabled
+ * an older steps save re-stamped `manual`, has two roles. As a full row it
+ * ranks last in both modes: its calories are a stale copy of imported data,
+ * so a row its source still stamps is fresher. Its steps are the ones the
+ * athlete typed, so they compete in manual's slot, after a pure manual
+ * row's. Under priority, rows of a bridge whose import is disabled
  * are dropped; a source with no import policy (a FIT import) stays as a
  * fallback after the listed ones.
  */
@@ -31,12 +32,18 @@ const isManual = (row: HealthDailyRecord): boolean =>
 const isPureManual = (row: HealthDailyRecord): boolean =>
   isManual(row) && !isLegacyManualRow(row);
 
-const rankIn = (order: readonly string[], row: HealthDailyRecord): number => {
-  if (isLegacyManualRow(row)) return order.length + 2;
+/** The rank of a row's steps: a legacy row's steps hold manual's slot. */
+const stepsRankIn = (
+  order: readonly string[],
+  row: HealthDailyRecord
+): number => {
   const listed = order.indexOf(row.sourceBridgeId ?? "");
   if (listed >= 0) return listed;
   return order.length + (isManual(row) ? 0 : 1);
 };
+
+const rankIn = (order: readonly string[], row: HealthDailyRecord): number =>
+  isLegacyManualRow(row) ? order.length + 2 : stepsRankIn(order, row);
 
 const compareText = (a: string, b: string): number =>
   a === b ? 0 : a < b ? -1 : 1;
@@ -57,16 +64,15 @@ export const mergeDailyWellnessDay = (
   rows: readonly HealthDailyRecord[],
   policy?: PriorityReadPolicy
 ): HealthDailyRecord | undefined => {
+  const order = policy?.order ?? [];
   const ranked = rows
     .filter((row) => !policy?.disabled.has(row.sourceBridgeId ?? ""))
-    .sort(byRank(policy?.order ?? []));
-  const headAt = ranked.findIndex((row) => !isPureManual(row));
-  const manualAt = ranked.findIndex(isPureManual);
-  const head = ranked[headAt];
-  const manual = ranked[manualAt];
-  if (!head) return manual && stepsOnly(manual);
-  if (!manual || manualAt > headAt) return head;
-  return { ...head, krd: { ...head.krd, steps: manual.krd.steps } };
+    .sort(byRank(order));
+  const head = ranked.find((row) => !isPureManual(row));
+  const typed = ranked.find(isPureManual) ?? ranked.find(isManual);
+  if (!head) return typed && stepsOnly(typed);
+  if (!typed || stepsRankIn(order, typed) >= rankIn(order, head)) return head;
+  return { ...head, krd: { ...head.krd, steps: typed.krd.steps } };
 };
 
 export const mergeDailyWellnessByDay = (
