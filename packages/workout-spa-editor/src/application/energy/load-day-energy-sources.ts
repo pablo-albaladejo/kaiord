@@ -1,7 +1,8 @@
 /**
  * Loads every persisted source `buildDayEnergyBalance` needs for one day:
- * the profile, that day's daily-wellness record, the latest body-composition
- * record up to the date, the day's intake entries, and the active goal.
+ * the profile, that day's daily-wellness reading (combined across sources),
+ * the latest body-composition record up to the date, the day's intake
+ * entries, and the active goal.
  *
  * All reads go through the `PersistencePort` so the use-case never touches
  * Dexie directly and stays adapter-agnostic (Dexie in the app, in-memory in
@@ -16,6 +17,7 @@ import type { EnergyTargetRecord } from "../../types/energy-target-record";
 import type { HealthWeightRecord } from "../../types/health/health-records";
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import type { Profile } from "../../types/profile";
+import { loadDailyWellness } from "../health/load-daily-wellness";
 
 const EARLIEST_DATE = "0000-01-01";
 
@@ -61,7 +63,7 @@ export const loadDayEnergySources = async (
     target,
   ] = await Promise.all([
     persistence.profiles.getById(profileId),
-    persistence.healthDaily.getByProfileAndDateRange(profileId, date, date),
+    loadDailyWellness(persistence, profileId, { start: date, end: date }),
     persistence.healthBodyComposition.getByProfileAndDateRange(
       profileId,
       EARLIEST_DATE,

@@ -258,19 +258,22 @@ describe("saveManualHealthMetric", () => {
     });
   });
 
-  it("should preserve prior calories and intensity when overwriting steps", async () => {
+  it("should leave an imported daily row untouched when steps are entered by hand", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    await persistence.healthDaily.put({
+    const imported = {
       id: "imported-daily",
       profileId: PROFILE_ID,
       date: DAY,
+      sourceBridgeId: "garmin-bridge",
+      externalId: "garmin-daily-1",
       krd: priorDaily(),
-    });
+    };
+    await persistence.healthDaily.put(imported);
 
     // Act
     await saveManualHealthMetric(
-      { persistence, profileId: PROFILE_ID },
+      { persistence, profileId: PROFILE_ID, newId: () => "manual-daily" },
       { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
     );
 
@@ -280,9 +283,48 @@ describe("saveManualHealthMetric", () => {
       DAY,
       DAY
     );
-    expect(rows[0]?.krd.steps).toBe(NEW_STEPS);
-    expect(rows[0]?.krd.activeCalories).toBe(PRIOR_ACTIVE_KCAL);
-    expect(rows[0]?.krd.intensityMinutes.moderate).toBe(PRIOR_MODERATE_MIN);
+    expect(rows).toHaveLength(2);
+    expect(rows.find((r) => r.id === "imported-daily")).toEqual(imported);
+    const manual = rows.find((r) => r.id === "manual-daily");
+    expect(manual?.sourceBridgeId).toBe("manual");
+    expect(manual?.krd.steps).toBe(NEW_STEPS);
+  });
+
+  it("should update the day's manual steps row when steps are saved again", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.healthDaily.put({
+      id: "imported-daily",
+      profileId: PROFILE_ID,
+      date: DAY,
+      sourceBridgeId: "whoop-bridge",
+      krd: priorDaily(),
+    });
+    const deps = { persistence, profileId: PROFILE_ID, newId: sequentialNewId };
+    const first = await saveManualHealthMetric(deps, {
+      metric: "daily-wellness",
+      day: DAY,
+      value: PRIOR_STEPS,
+    });
+
+    // Act
+    const second = await saveManualHealthMetric(deps, {
+      metric: "daily-wellness",
+      day: DAY,
+      value: NEW_STEPS,
+    });
+
+    // Assert
+    const rows = await persistence.healthDaily.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    const manual = rows.filter((r) => r.sourceBridgeId === "manual");
+    expect(second?.recordId).toBe(first?.recordId);
+    expect(manual).toHaveLength(1);
+    expect(manual[0]?.krd.steps).toBe(NEW_STEPS);
+    expect(rows).toHaveLength(2);
   });
 
   it("should zero-fill calories and intensity when saving steps for a day with no prior daily row", async () => {

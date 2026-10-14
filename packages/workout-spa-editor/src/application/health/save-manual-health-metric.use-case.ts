@@ -7,11 +7,10 @@
  * mints a fresh id — the find-then-reuse upsert that keeps exactly one
  * manual record per day per metric on AWAITED saves. A bridge's row of the
  * same day (Tanita, Train2Go…) is never reused: sources do not overwrite
- * each other, and the read policy chooses between them. Steps is the one
- * exception: its builder merges into the day's daily row (whatever its
- * source) so imported calories survive, and the energy balance reads that
- * single row. The read+put run
- * inside `persistence.transaction(...)`; note this alone is NOT
+ * each other, and the read policy chooses between them (for daily
+ * wellness, `loadDailyWellness` combines the rows per field, so imported
+ * calories survive a manual steps entry). The read+put run inside
+ * `persistence.transaction(...)`; note this alone is NOT
  * concurrency-safe (the in-memory transaction has no mutual exclusion),
  * so the form-submit lock in Phase 2 closes the un-awaited race.
  *
@@ -22,10 +21,8 @@
  * insert-or-ignore, which would turn a value edit (e.g. 70kg -> 71kg)
  * into a silent no-op instead of an update.
  */
-import type { DailyWellness } from "@kaiord/core";
 import { canonicalHash } from "@kaiord/core";
 
-import type { HealthRecord } from "../../ports/health-record-repository";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { stampProvenance } from "../import/stamp-provenance";
 import type { ManualHealthMetric } from "./manual-health-metric";
@@ -54,10 +51,7 @@ export type SaveManualHealthMetricInput =
 
 export type SaveManualHealthMetricResult = { recordId: string };
 
-const buildPayload = (
-  input: SaveManualHealthMetricInput,
-  prior: HealthRecord<unknown> | undefined
-): unknown => {
+const buildPayload = (input: SaveManualHealthMetricInput): unknown => {
   switch (input.metric) {
     case "weight":
       return buildWeightPayload(input.value, input.day);
@@ -66,11 +60,7 @@ const buildPayload = (
     case "hrv":
       return buildHrvPayload(input.value, input.day);
     case "daily-wellness":
-      return buildStepsPayload(
-        input.value,
-        input.day,
-        prior?.krd as DailyWellness
-      );
+      return buildStepsPayload(input.value, input.day);
   }
 };
 
@@ -89,12 +79,9 @@ export const saveManualHealthMetric = async (
       input.day,
       input.day
     );
-    const own =
-      input.metric === "daily-wellness"
-        ? rows[0]
-        : rows.find((r) => r.sourceBridgeId === MANUAL_SOURCE_BRIDGE_ID);
+    const own = rows.find((r) => r.sourceBridgeId === MANUAL_SOURCE_BRIDGE_ID);
     const id = own?.id ?? deps.newId?.() ?? crypto.randomUUID();
-    const krd = buildPayload(input, own);
+    const krd = buildPayload(input);
     const parsed = schemaForMetric(input.metric).safeParse(krd);
     if (!parsed.success) return undefined;
     const provenance = stampProvenance(

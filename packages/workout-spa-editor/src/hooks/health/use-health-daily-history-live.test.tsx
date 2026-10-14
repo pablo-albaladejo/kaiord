@@ -51,4 +51,27 @@ describe("useHealthDailyHistoryLive", () => {
     });
     expect(result.current?.[0].id).toBe("d-1");
   });
+
+  it("should give one reading per day when several sources wrote that day", async () => {
+    // Arrange
+    const persistence = createDexiePersistence(db);
+    await persistence.healthDaily.put({
+      ...makeRecord("d-imported", "2026-05-10"),
+      sourceBridgeId: "whoop-bridge",
+    });
+    await persistence.healthDaily.put({
+      ...makeRecord("d-manual", "2026-05-10"),
+      sourceBridgeId: "manual",
+    });
+
+    // Act
+    const { result } = renderHook(() =>
+      useHealthDailyHistoryLive(PROFILE_ID, RANGE)
+    );
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current).toHaveLength(1);
+    });
+  });
 });

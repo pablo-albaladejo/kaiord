@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-14 | [`manual-steps-own-row`](./2026-10-14-manual-steps-own-row/) | Manual steps keep their own row |
 | 2026-10-14 | [`t2g-weight-is-current-weight`](./2026-10-14-t2g-weight-is-current-weight/) | Train2Go's weight is the current weight |
 | 2026-10-13 | [`athlete-zones-editor`](./2026-10-13-athlete-zones-editor/) | Thresholds in place, one zone editor at /athlete/zones |
 | 2026-10-13 | [`athletes-page`](./2026-10-13-athletes-page/) | The Athletes page replaces the Profile Manager |

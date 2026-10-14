@@ -6,10 +6,9 @@
  * recent measurement is the current weight and several sources can weigh in
  * on the same day.
  *
- * Steps is the only merge-preserving builder: a prior daily row (e.g.
- * imported) keeps its calorie/intensity fields; only `steps` is
- * overridden. With no prior row the non-entered required fields are
- * deterministically zero-filled.
+ * Steps fills the daily row's other required fields with zeros: the manual
+ * row only carries what the athlete entered, and the daily-wellness read
+ * takes nothing but `steps` from it.
  */
 import type {
   DailyWellness,
@@ -43,17 +42,13 @@ export const buildHrvPayload = (rMSSD: number, day: string): HrvSummary => ({
 
 export const buildStepsPayload = (
   steps: number,
-  day: string,
-  prior?: DailyWellness
-): DailyWellness =>
-  prior
-    ? { ...prior, steps }
-    : {
-        kind: "daily",
-        version: KRD_VERSION,
-        date: day,
-        steps,
-        activeCalories: 0,
-        restingCalories: 0,
-        intensityMinutes: { moderate: 0, vigorous: 0 },
-      };
+  day: string
+): DailyWellness => ({
+  kind: "daily",
+  version: KRD_VERSION,
+  date: day,
+  steps,
+  activeCalories: 0,
+  restingCalories: 0,
+  intensityMinutes: { moderate: 0, vigorous: 0 },
+});

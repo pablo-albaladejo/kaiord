@@ -1,21 +1,19 @@
 /**
- * useHealthDailyHistoryLive — reactive read of daily-wellness records
- * for a profile across an arbitrary date range (steps trend source).
+ * useHealthDailyHistoryLive — reactive read of daily-wellness readings
+ * (one per day, combined across sources) for a profile across an arbitrary
+ * date range (steps trend source).
  */
 import { useLiveQuery } from "dexie-react-hooks";
 
 import type { HealthDailyRecord } from "../../types/health/health-records";
-import {
-  type HealthDateRange,
-  queryHealthRangeAsync,
-} from "./health-live-query";
+import { queryDailyWellnessRangeAsync } from "./daily-wellness-live-query";
+import type { HealthDateRange } from "./health-live-query";
 
 export const useHealthDailyHistoryLive = (
   profileId: string,
   range: HealthDateRange
 ): HealthDailyRecord[] | undefined =>
   useLiveQuery<HealthDailyRecord[]>(
-    () =>
-      queryHealthRangeAsync<HealthDailyRecord>("healthDaily", profileId, range),
+    () => queryDailyWellnessRangeAsync(profileId, range),
     [profileId, range.start, range.end]
   );

@@ -266,7 +266,7 @@ When the user activates the `+` add-entry affordance on any calendar day cell (g
 
 The wellness entry surface SHALL offer a manual entry form with labeled fields for **weight**, **sleep hours** (h:mm), **sleep score**, **bedtime**, **wake time**, **HRV**, and **steps**, and an **"Import a file"** action for FIT health files. Its copy SHALL be localized. The form SHALL have a single Save button that persists every filled field in one submission; empty fields SHALL write nothing. When a metric value is saved, the SPA SHALL persist a schema-valid KRD record for the active profile and the clicked day; the live wellness query SHALL cause the corresponding badge to appear on that calendar day after it refreshes. No user-entered metric value SHALL appear in any toast message.
 
-When the user saves a metric for a day that already has a record for that metric, the prior record SHALL be replaced — exactly one record remains for that date and metric. For **steps specifically**, only the `steps` value is replaced; any prior `activeCalories`, `restingCalories`, and `intensityMinutes` fields in the existing daily-wellness record are preserved (merge-preserve, not clobber).
+When the user saves a metric for a day that already has a manual record for that metric, that record SHALL be replaced — exactly one manual record remains for that date and metric. A manual save SHALL NOT reuse, overwrite or re-stamp another source's record of the same day; this includes **steps**, which SHALL be written to the day's own manual daily-wellness record while an imported daily-wellness record of that day keeps its values and its source. The day's steps and calories are then read as one combined reading (see energy-expenditure, "One daily-wellness reading per day").
 
 A sleep entry SHALL take its duration from the hours slept, or from bedtime → wake time when only those are given; the wake time falls on the entry's day and the bedtime on the evening before when it is not earlier than the wake time. A sleep score alone SHALL be stored without a duration. The SPA SHALL NOT write a sleep record of zero length: malformed hours, a single clock time without hours, or hours that disagree with bedtime → wake time by more than 60 s SHALL show an inline error and write nothing. A sleep record whose duration is absent or `0` SHALL be shown as "duration not recorded", never as 0 h.
 
@@ -290,11 +290,17 @@ When the user uses "Import a file", the imported health record SHALL be dated by
 - **WHEN** the user enters a new weight value and saves
 - **THEN** exactly one weight record remains for that date and the displayed value reflects the new entry
 
-#### Scenario: Saving steps preserves prior calories and intensity
+#### Scenario: Saving steps leaves an imported daily record untouched
 
-- **GIVEN** a daily-wellness record exists for a day with `activeCalories: 300` and `intensityMinutes.moderate: 20` (from a prior import or save)
-- **WHEN** the user enters a new steps value and saves
-- **THEN** the persisted record has the new steps value AND retains `activeCalories: 300` and `intensityMinutes.moderate: 20`
+- **GIVEN** a `garmin-bridge` daily-wellness record exists for a day with `activeCalories: 300` and `intensityMinutes.moderate: 20`
+- **WHEN** the user enters a steps value and saves
+- **THEN** a separate manual daily-wellness record holds the steps, the Garmin record is unchanged and still stamped `garmin-bridge`, and the day reads the new steps with `activeCalories: 300`
+
+#### Scenario: Re-saving steps updates the manual record
+
+- **GIVEN** the user saved steps for a day that also has an imported daily-wellness record
+- **WHEN** the user saves a new steps value for that day
+- **THEN** exactly one manual daily-wellness record remains for that day, holding the new value
 
 #### Scenario: Empty fields write nothing
 
