@@ -61,7 +61,7 @@ export const probeGarminSession = (
 ): Promise<SessionProbeResult> =>
   probeByPing(
     extensionId,
-    "Update your Kaiord Garmin Bridge extension",
+    "Update your Kaiord extension for Garmin",
     (data) => data.gcApi?.ok === true
   );
 
