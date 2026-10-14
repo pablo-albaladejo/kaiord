@@ -3,6 +3,7 @@ import type { Profile } from "../../types/profile";
 import type { Units } from "../units/units";
 import { snapshotThresholdsFor } from "./snapshot-thresholds";
 import type { ActiveSport } from "./sports";
+import type { ThresholdLabelKey } from "./threshold-candidate-builders";
 import {
   type ThresholdCandidate,
   thresholdCandidates,
@@ -10,7 +11,7 @@ import {
 
 export type ThresholdDisagreement = {
   field: ThresholdFieldKey;
-  label: string;
+  labelKey: ThresholdLabelKey;
   unit?: string;
   source: string;
   at: string;
@@ -52,14 +53,16 @@ const firstMismatch = (
 export function deriveThresholdDisagreement(
   profile: Profile,
   sport: ActiveSport,
-  units: Units = "metric"
+  units: Units = "metric",
+  hrUnit?: string
 ): ThresholdDisagreement | null {
   const stored = profile.sportZones[sport]?.thresholds;
   const current = thresholdCandidates(
     sport,
     stored,
     profile.maxHeartRate,
-    units
+    units,
+    hrUnit
   );
 
   for (const account of profile.linkedAccounts) {
@@ -69,13 +72,14 @@ export function deriveThresholdDisagreement(
       sport,
       snapshotThresholdsFor(sport, snapshot),
       snapshot.maxHeartRate,
-      units
+      units,
+      hrUnit
     );
     const hit = firstMismatch(current, incoming);
     if (!hit) continue;
     return {
       field: hit.incoming.field,
-      label: hit.incoming.label,
+      labelKey: hit.incoming.labelKey,
       unit: hit.incoming.unit,
       source: account.source,
       at: snapshot.syncedAt,
