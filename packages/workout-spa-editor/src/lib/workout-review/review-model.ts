@@ -5,6 +5,7 @@ import { estimateTss } from "./estimate-tss";
 import { formatHms } from "./format-duration";
 import { getStructuredWorkout } from "./get-workout";
 import { loadLabel } from "./load-label";
+import { type ReviewCopy, reviewCopyFor } from "./review-copy";
 import type { ReviewStepItem } from "./step-items";
 import { toStepItems } from "./step-items";
 import { timeInZone } from "./time-in-zone";
@@ -22,7 +23,8 @@ export type ReviewModel = {
 export function buildReviewModel(
   krd: KRD,
   thresholds: SportThresholds,
-  fallbackTitle: string
+  fallbackTitle: string,
+  copy: ReviewCopy = reviewCopyFor()
 ): ReviewModel | null {
   const workout = getStructuredWorkout(krd);
   if (!workout) return null;
@@ -36,6 +38,6 @@ export function buildReviewModel(
     tss,
     load: loadLabel(tss),
     dist: timeInZone(workout, thresholds),
-    steps: toStepItems(workout, thresholds),
+    steps: toStepItems(workout, thresholds, copy),
   };
 }

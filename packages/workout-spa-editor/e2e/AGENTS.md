@@ -43,7 +43,7 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 
 ### Working In This Directory
 
-1. **`pnpm dev` is the server.** Playwright's `webServer` config starts it; tests run against `http://localhost:5173`.
+1. **`pnpm dev` is the server.** Playwright's `webServer` config starts it; tests run against `http://localhost:5173` unless `PLAYWRIGHT_PORT` is set (use it when another worktree's dev server holds 5173; it also disables server reuse).
 2. **Dexie state is seeded via `helpers/seed-dexie.ts`** which talks to the dev-mode `window.__KAIORD_DB__` hook exposed by `adapters/dexie/dexie-database.ts`.
 3. **Zustand state is seeded via `helpers/seed-stores.ts`.**
 4. **Bridge tests stub the extension** via `helpers/train2go-bridge-stub.ts` (Page-script injection from `train2go-bridge-stub-page-script.ts`).
