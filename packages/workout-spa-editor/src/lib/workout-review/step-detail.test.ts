@@ -1,6 +1,8 @@
 import type { Target, WorkoutStep } from "@kaiord/core";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { appI18n, setActiveLocale } from "../../i18n/i18n";
+import { type ReviewCopy, reviewCopyFor } from "./review-copy";
 import { stepDetail, stepKind } from "./step-detail";
 
 describe("stepKind", () => {
@@ -207,5 +209,60 @@ describe("stepDetail", () => {
 
     // Assert
     expect(detail).toBe("Easy");
+  });
+});
+
+describe("step wording in Spanish", () => {
+  let es: ReviewCopy;
+  beforeAll(async () => {
+    await setActiveLocale("es");
+    es = reviewCopyFor("es");
+  });
+  afterAll(async () => {
+    await appI18n.changeLanguage("en");
+  });
+  const ENGLISH =
+    /\b(warm up|cool down|recovery|rest|interval|active|work|stroke|easy|max|bpm)\b/i;
+
+  it("should name every intensity without English words", () => {
+    // Arrange
+    const intensities = [
+      "warmup",
+      "cooldown",
+      "recovery",
+      "rest",
+      "interval",
+      "active",
+      "other",
+    ] as const;
+
+    // Act
+    const kinds = intensities.map((intensity) =>
+      stepKind({ intensity } as WorkoutStep, es)
+    );
+    const unnamed = stepKind({} as WorkoutStep, es);
+
+    // Assert
+    for (const kind of [...kinds, unnamed]) expect(kind).not.toMatch(ENGLISH);
+    expect(kinds[0]).toBe("Calentamiento");
+  });
+
+  it("should word every target without English words", () => {
+    // Arrange
+    const targets = [
+      { type: "heart_rate", value: { unit: "bpm", value: 160 } },
+      { type: "heart_rate", value: { unit: "percent_max", value: 90 } },
+      { type: "heart_rate", value: { unit: "range", min: 140, max: 160 } },
+      { type: "stroke_type" },
+      { type: "open" },
+    ] as Target[];
+
+    // Act
+    const details = targets.map((target) => stepDetail(target, es));
+
+    // Assert
+    for (const detail of details) expect(detail).not.toMatch(ENGLISH);
+    expect(details[0]).toBe("@ 160 ppm");
+    expect(details[1]).toBe("@ 90% máx");
   });
 });

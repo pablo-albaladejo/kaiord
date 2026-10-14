@@ -1,4 +1,5 @@
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useReviewCopy } from "../../../hooks/use-review-copy";
 import { useTranslate } from "../../../i18n/use-translate";
 import { thresholdsForSport } from "../../../lib/athlete";
 import {
@@ -16,6 +17,7 @@ export function useWorkoutDetailModel(
   record: WorkoutRecord | undefined
 ): ReviewModel | null {
   const t = useTranslate("workout-detail");
+  const copy = useReviewCopy();
   const profile = useActiveProfileLive()?.profile;
   if (!record?.krd) return null;
 
@@ -24,5 +26,5 @@ export function useWorkoutDetailModel(
     (record.raw as { description?: string } | null)?.description ??
     t("fallbackTitle");
 
-  return buildReviewModel(record.krd, thresholds, fallback);
+  return buildReviewModel(record.krd, thresholds, fallback, copy);
 }

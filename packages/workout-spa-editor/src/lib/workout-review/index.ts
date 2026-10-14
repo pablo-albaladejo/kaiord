@@ -1,5 +1,6 @@
 export { formatHms } from "./format-duration";
 export { getStructuredWorkout } from "./get-workout";
+export { type ReviewCopy, reviewCopyFor } from "./review-copy";
 export { buildReviewModel, type ReviewModel } from "./review-model";
 export { timeInZone } from "./time-in-zone";
 export { dominantZone } from "./zone-emphasis";

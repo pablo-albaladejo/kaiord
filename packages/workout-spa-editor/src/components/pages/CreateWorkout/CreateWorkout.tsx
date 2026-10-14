@@ -1,3 +1,4 @@
+import { useReviewCopy } from "../../../hooks/use-review-copy";
 import { useTranslate } from "../../../i18n/use-translate";
 import { thresholdsForSport } from "../../../lib/athlete";
 import { buildReviewModel } from "../../../lib/workout-review";
@@ -20,14 +21,14 @@ export default function CreateWorkout({
 }: CreateWorkoutProps) {
   const t = useTranslate("create-workout");
   const FALLBACK_TITLE = t("fallbackTitle");
+  const copy = useReviewCopy();
   const create = useCreateWorkout();
-  const { phase, sport, profile, activeProfileId, generatedKrd, promptText } =
-    create;
-  const { dateParam } = create;
+  const { phase, sport, profile, activeProfileId } = create;
+  const { generatedKrd, promptText, dateParam } = create;
 
   const thresholds = thresholdsForSport(profile, sport);
   const model = generatedKrd
-    ? buildReviewModel(generatedKrd, thresholds, FALLBACK_TITLE)
+    ? buildReviewModel(generatedKrd, thresholds, FALLBACK_TITLE, copy)
     : null;
   const title = model?.title ?? FALLBACK_TITLE;
 

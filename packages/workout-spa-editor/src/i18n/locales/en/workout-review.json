@@ -1,0 +1,16 @@
+{
+  "kind": {
+    "warmup": "Warm up",
+    "cooldown": "Cool down",
+    "recovery": "Recovery",
+    "rest": "Rest",
+    "interval": "Interval",
+    "active": "Active",
+    "other": "Work"
+  },
+  "target": {
+    "percentMax": "@ {{value}}% max",
+    "stroke": "Stroke",
+    "easy": "Easy"
+  }
+}

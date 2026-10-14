@@ -1,0 +1,16 @@
+{
+  "kind": {
+    "warmup": "Calentamiento",
+    "cooldown": "Vuelta a la calma",
+    "recovery": "Recuperación",
+    "rest": "Descanso",
+    "interval": "Intervalo",
+    "active": "Activo",
+    "other": "Trabajo"
+  },
+  "target": {
+    "percentMax": "@ {{value}}% máx",
+    "stroke": "Estilo",
+    "easy": "Suave"
+  }
+}
