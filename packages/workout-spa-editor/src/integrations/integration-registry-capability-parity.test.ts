@@ -12,6 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { ManagedDataType } from "@kaiord/core";
+import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import type { IntegrationPolicyDirection } from "../types/integration-policy";
@@ -77,6 +78,11 @@ describe("integration registry — real bridge manifest parity", () => {
       direction: "import" as IntegrationPolicyDirection,
     },
     {
+      bridgeId: "train2go-bridge",
+      dataType: "weight" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+    },
+    {
       bridgeId: "trainingpeaks-bridge",
       dataType: "weight" as ManagedDataType,
       direction: "import" as IntegrationPolicyDirection,
@@ -108,5 +114,23 @@ describe("integration registry — real bridge manifest parity", () => {
     // Assert
     expect(result).not.toContain("train2go-bridge");
     expect(train2goCaps).not.toContain("read:activities");
+  });
+
+  it("should offer train2go-bridge no read:body type but weight — Train2Go has no scale or wearable", () => {
+    // Arrange
+    const bodyTypes = managedDataTypes.filter(
+      (t) => MANAGED_DATA_REGISTRY[t].capabilities.import === "read:body"
+    );
+
+    // Act
+    const eligible = bodyTypes.filter((t) =>
+      eligibleBridgeIds(t, "import", capabilitiesFor).includes(
+        "train2go-bridge"
+      )
+    );
+
+    // Assert
+    expect(train2goCaps).toContain("read:body");
+    expect(eligible).toEqual(["weight"]);
   });
 });

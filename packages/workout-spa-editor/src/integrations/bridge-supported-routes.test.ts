@@ -31,6 +31,36 @@ describe("bridgeSupportsRoute", () => {
       expected: false,
     },
     {
+      bridgeId: "train2go-bridge",
+      dataType: "weight" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+      expected: true,
+    },
+    {
+      bridgeId: "train2go-bridge",
+      dataType: "planned-session" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+      expected: true,
+    },
+    {
+      bridgeId: "train2go-bridge",
+      dataType: "training-zones" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+      expected: true,
+    },
+    {
+      bridgeId: "train2go-bridge",
+      dataType: "body-composition" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+      expected: false,
+    },
+    {
+      bridgeId: "train2go-bridge",
+      dataType: "hrv" as ManagedDataType,
+      direction: "import" as IntegrationPolicyDirection,
+      expected: false,
+    },
+    {
       bridgeId: "trainingpeaks-bridge",
       dataType: "weight" as ManagedDataType,
       direction: "import" as IntegrationPolicyDirection,

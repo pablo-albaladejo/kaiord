@@ -83,7 +83,11 @@ describe("background service worker (SW-direct)", () => {
         name: "Kaiord Train2Go Bridge",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:training-plan", "read:training-zones"],
+        capabilities: [
+          "read:training-plan",
+          "read:training-zones",
+          "read:body",
+        ],
       };
 
       // Act
@@ -206,7 +210,8 @@ describe("background service worker (SW-direct)", () => {
 
     it("should allow GET daily with user and source params", () => {
       // Arrange
-      const path = "/api/v2/workplan/daily/2026-04-13?user=28035&source=sidebar";
+      const path =
+        "/api/v2/workplan/daily/2026-04-13?user=28035&source=sidebar";
 
       // Act
       const allowed = isAllowed("GET", path);
@@ -254,7 +259,11 @@ describe("background service worker (SW-direct)", () => {
       const res = await train2goFetch("/api/v2/profile/ping");
 
       // Assert
-      expect(res).toEqual({ ok: true, status: HTTP_OK, data: { success: true } });
+      expect(res).toEqual({
+        ok: true,
+        status: HTTP_OK,
+        data: { success: true },
+      });
       const [url, init] = fetch.mock.calls[0];
       expect(url).toBe(`${TRAIN2GO_ORIGIN}/api/v2/profile/ping`);
       expect(init.credentials).toBe("include");
@@ -355,7 +364,11 @@ describe("background service worker (SW-direct)", () => {
       expect(result).toMatchObject({
         id: "train2go-bridge",
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:training-plan", "read:training-zones"],
+        capabilities: [
+          "read:training-plan",
+          "read:training-zones",
+          "read:body",
+        ],
         userId: USER_ID,
         userName: "Pablo",
         sessionActive: true,
@@ -373,7 +386,11 @@ describe("background service worker (SW-direct)", () => {
       expect(result).toMatchObject({
         id: "train2go-bridge",
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:training-plan", "read:training-zones"],
+        capabilities: [
+          "read:training-plan",
+          "read:training-zones",
+          "read:body",
+        ],
         sessionActive: false,
       });
     });
@@ -406,7 +423,11 @@ describe("background service worker (SW-direct)", () => {
         name: "Kaiord Train2Go Bridge",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
-        capabilities: ["read:training-plan", "read:training-zones"],
+        capabilities: [
+          "read:training-plan",
+          "read:training-zones",
+          "read:body",
+        ],
         sessionActive: true,
         userId: USER_ID,
         userName: "Pablo",

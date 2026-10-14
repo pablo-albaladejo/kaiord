@@ -52,8 +52,11 @@ const seedProfile = async (page: Page): Promise<void> => {
   }, PROFILE_ID);
 };
 
-const openWithBridge = async (page: Page): Promise<void> => {
-  await installTrain2GoBridgeStub(page);
+const openWithBridge = async (
+  page: Page,
+  capabilities?: readonly string[]
+): Promise<void> => {
+  await installTrain2GoBridgeStub(page, { capabilities });
   await page.goto(CONNECTIONS_ROUTE);
   await waitForDexieReady(page);
   await seedProfile(page);
@@ -190,5 +193,40 @@ test.describe("Connections page content", () => {
     await expect(
       page.getByTestId("routing-change-training-zones")
     ).toBeVisible();
+  });
+
+  test("should offer Train2Go as a weight source once its extension announces read:body", async ({
+    page,
+  }) => {
+    // Arrange
+    await openWithBridge(page, [
+      "read:training-plan",
+      "read:training-zones",
+      "read:body",
+    ]);
+
+    // Act
+    await page.getByTestId("routing-change-weight").click();
+
+    // Assert — weight is offered, and no other body type is.
+    await expect(
+      page.getByTestId("routing-route-weight-train2go")
+    ).toHaveAttribute("aria-pressed", "false", { timeout: 15_000 });
+    await expect(page.getByTestId("routing-change-hrv")).toHaveCount(0);
+  });
+
+  test("should offer no Train2Go weight route to an extension that does not announce read:body", async ({
+    page,
+  }) => {
+    // Arrange
+    // The default stub is an extension released before the weight route.
+    await openWithBridge(page);
+
+    // Act
+    const weightRow = page.getByTestId("routing-row-weight");
+
+    // Assert
+    await expect(weightRow).toBeVisible();
+    await expect(page.getByTestId("routing-change-weight")).toHaveCount(0);
   });
 });

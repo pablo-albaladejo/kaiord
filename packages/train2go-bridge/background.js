@@ -21,7 +21,7 @@ const BRIDGE_MANIFEST = {
   name: "Kaiord Train2Go Bridge",
   version: "10.3.0",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["read:training-plan", "read:training-zones"],
+  capabilities: ["read:training-plan", "read:training-zones", "read:body"],
 };
 
 // ── Swallowed-error telemetry ──

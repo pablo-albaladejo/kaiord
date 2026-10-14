@@ -2,6 +2,7 @@ import type { ManagedDataType } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import type { DataFlowsByType } from "../../hooks/connections/use-data-flows";
+import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 import { buildDataTypeRoutingRows } from "./data-type-routing";
@@ -60,6 +61,28 @@ const optionsFor = (
   );
 
 describe("buildSourceOfTruthOptions", () => {
+  it("should let Train2Go's weight be ranked first once its extension announces read:body", async () => {
+    // Arrange
+    const byDataType = flows({
+      weight: { import: [route("tanita-bridge"), route("train2go-bridge")] },
+    });
+    const real: SourceCapabilitySignals = {
+      capabilitiesFor: (bridgeId) =>
+        bridgeId === "train2go-bridge"
+          ? ["read:training-plan", "read:training-zones", "read:body"]
+          : ["read:body"],
+      supportsRoute: bridgeSupportsRoute,
+    };
+    const ranked = priority("weight", ["train2go-bridge", "tanita-bridge"]);
+
+    // Act
+    const options = optionsFor("weight", byDataType, ranked, real);
+
+    // Assert
+    expect(options.choices).toContain("train2go-bridge");
+    expect(options.current).toBe("train2go-bridge");
+  });
+
   it("should offer every source the row already reads from, manual included", () => {
     // Arrange
     // WHOOP is the only bridge announcing `read:sleep`; the Data Hub

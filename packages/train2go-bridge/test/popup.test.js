@@ -145,6 +145,7 @@ describe("Train2Go popup", () => {
     expect(chips.textContent).toContain("Feeds Kaiord");
     expect(chips.textContent).toContain("Planned Session");
     expect(chips.textContent).toContain("Training Zones");
+    expect(chips.textContent).toContain("Weight");
     expect(chips.querySelectorAll(".chip--muted").length).toBe(0);
     expect(dom.window.document.querySelector(".cta-primary").textContent).toBe(
       "Open Kaiord editor"
@@ -213,7 +214,7 @@ describe("Train2Go popup", () => {
     );
     expect(
       doc.getElementById("chips-region").querySelectorAll(".chip--muted").length
-    ).toBe(2);
+    ).toBe(3);
   });
 
   it("does not accumulate a retry button or CTA set across failure cycles", async () => {

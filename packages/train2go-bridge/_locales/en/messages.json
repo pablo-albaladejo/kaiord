@@ -75,6 +75,10 @@
     "message": "Training Zones",
     "description": "Capability chip for the Training Zones data type imported into Kaiord."
   },
+  "typeWeight": {
+    "message": "Weight",
+    "description": "Capability chip for the Weight data type imported into Kaiord."
+  },
   "profileStale": {
     "message": "Profile snapshot is stale. Open Kaiord to refresh.",
     "description": "Athlete-card placeholder when the cached snapshot is stale."
