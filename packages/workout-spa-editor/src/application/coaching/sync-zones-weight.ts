@@ -4,6 +4,11 @@
  * `profile.bodyWeight` is never touched. A weight Train2Go already reported
  * (its own latest weigh-in) is not news: re-syncing it records nothing and
  * raises no conflict, even when another source weighed in since.
+ *
+ * The weight route (weight · import · train2go-bridge) governs both: switched
+ * off, the weight is neither recorded nor asked about. No route at all — an
+ * extension that does not announce `read:body`, or a link made before it did —
+ * keeps the weight flowing as it did before the route existed.
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
@@ -32,6 +37,19 @@ export const splitWeight = (
   return { weightKg: incoming.get(WEIGHT_FIELD), rest };
 };
 
+const weightRouteOff = async (
+  persistence: PersistencePort,
+  profileId: string
+): Promise<boolean> => {
+  const route = await persistence.integrationPolicy.findByNaturalKey({
+    profileId,
+    dataType: "weight",
+    direction: "import",
+    bridgeId: TRAIN2GO_BRIDGE_ID,
+  });
+  return route !== undefined && !route.enabled;
+};
+
 export const reconcileWeight = async (
   persistence: PersistencePort,
   profile: Profile,
@@ -39,6 +57,7 @@ export const reconcileWeight = async (
   today: string
 ): Promise<{ applied: WrittenField[]; conflicts: ConflictItem[] }> => {
   if (incomingKg === undefined) return NOTHING;
+  if (await weightRouteOff(persistence, profile.id)) return NOTHING;
   const rows = await persistence.healthWeight.getByProfileAndDateRange(
     profile.id,
     EARLIEST_DATE,
@@ -68,5 +87,6 @@ export const recordSyncedWeight = async (
   kg: number,
   today: string
 ): Promise<void> => {
+  if (await weightRouteOff(persistence, profileId)) return;
   await recordTrain2GoWeighIn(persistence, profileId, kg, today);
 };

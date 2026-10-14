@@ -36,7 +36,7 @@ export function buildReviewModel(
     title: workout.name ?? fallbackTitle,
     duration: formatHms(stats.totalDuration ?? 0),
     tss,
-    load: loadLabel(tss),
+    load: loadLabel(tss, copy),
     dist: timeInZone(workout, thresholds),
     steps: toStepItems(workout, thresholds, copy),
   };

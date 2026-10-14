@@ -41,6 +41,29 @@ const makeRepo = (seed: IntegrationPolicy[] = []) => {
 };
 
 describe("seedImportRoutesOnLink", () => {
+  it("should open the weight route, and no other body route, for a Train2Go announcing read:body", async () => {
+    // Arrange
+    const { repo } = makeRepo();
+
+    // Act
+    const seeded = await seedImportRoutesOnLink(
+      { policyRepo: repo },
+      {
+        profileId: PROFILE_ID,
+        bridgeId: "train2go-bridge",
+        capabilities: [...T2G_CAPS, "read:body"],
+        hasThresholds: false,
+      }
+    );
+
+    // Assert
+    expect(seeded.sort()).toEqual([
+      "planned-session",
+      "training-zones",
+      "weight",
+    ]);
+  });
+
   it("should open every import route a freshly linked Train2Go feeds", async () => {
     // Arrange
     const { repo, store } = makeRepo();

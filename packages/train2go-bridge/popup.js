@@ -53,6 +53,7 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   captionFeeds: "Feeds Kaiord",
   typePlannedSession: "Planned Session",
   typeTrainingZones: "Training Zones",
+  typeWeight: "Weight",
   profileStale: "Profile snapshot is stale. Open Kaiord to refresh.",
   noProfile: "No profile yet. Open Kaiord to set FTP, pace, and HR.",
   noThresholds:
@@ -84,7 +85,7 @@ globalThis.KAIORD_POPUP_MESSAGES = {
 
 // Managed data types this bridge imports, named exactly as the Connections
 // page names them (@kaiord/core MANAGED_DATA_REGISTRY labels).
-const FEED_KEYS = ["typePlannedSession", "typeTrainingZones"];
+const FEED_KEYS = ["typePlannedSession", "typeTrainingZones", "typeWeight"];
 
 // Every region any resolved state fills, so the checking layout is the
 // resolved layout's height.

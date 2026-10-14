@@ -27,7 +27,7 @@ export const buildMatchedCoachingRecords = (seed: MatchedCoachingSeed) => {
       updatedAt: seed.ts,
     },
     meta: { key: "activeProfileId", value: seed.profileId },
-    dummy: buildDummyWorkout(seed.ts),
+    dummy: buildDummyWorkout(seed.ts, seed.profileId),
     activity: {
       id: compositeId,
       profileId: seed.profileId,
