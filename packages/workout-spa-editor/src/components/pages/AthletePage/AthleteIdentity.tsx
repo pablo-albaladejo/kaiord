@@ -22,6 +22,7 @@ type AthleteIdentityProps = {
 export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
   const t = useTranslate("athlete");
   const units = useUnits();
+  const hrUnit = useTranslate("common")("units.hr");
   const rename = useRenameAthlete();
   const { renaming, pencilRef, start, done } = useInlineRename();
   const currentWeightKg = useCurrentWeightKg(profile.id, profile);
@@ -43,7 +44,7 @@ export function AthleteIdentity({ profile, sport }: AthleteIdentityProps) {
               {profile.name}
             </div>
             <div className="text-[13px] text-ink-muted tabular-nums">
-              {deriveTagline(profile, sport, units, t, currentWeightKg)}
+              {deriveTagline(profile, sport, units, t, currentWeightKg, hrUnit)}
             </div>
           </div>
           <button

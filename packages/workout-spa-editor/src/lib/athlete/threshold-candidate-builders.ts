@@ -5,10 +5,14 @@ import { paceSecondsFactor, paceUnitLabelFor } from "../units/units";
 import { formatPace } from "./format";
 import type { ActiveSport } from "./sports";
 
+export type ThresholdLabelKey =
+  "ftp" | "thresholdPace" | "cssPace" | "thresholdHr" | "maxHr";
+
 export type ThresholdCandidate = {
   value: string | undefined;
   unit?: string;
-  label: string;
+  /** Key under `athlete` `metric.*`; the name is translated where shown. */
+  labelKey: ThresholdLabelKey;
   /** Logical identity of the value, for provenance lookup. */
   field: ThresholdFieldKey;
   /** The stored number behind `value`, before any unit conversion. */
@@ -26,13 +30,14 @@ export function hrCandidates(
   sport: ActiveSport,
   thresholds: SportThresholds | undefined,
   maxHeartRate: number | undefined,
-  includeMax: boolean
+  includeMax: boolean,
+  hrUnit: string
 ): ThresholdCandidate[] {
   const items: ThresholdCandidate[] = [
     {
       value: thresholds?.lthr?.toString(),
-      unit: "bpm",
-      label: "Threshold HR",
+      unit: hrUnit,
+      labelKey: "thresholdHr",
       field: LTHR_FIELD[sport],
       raw: thresholds?.lthr,
     },
@@ -40,8 +45,8 @@ export function hrCandidates(
   if (includeMax) {
     items.push({
       value: maxHeartRate?.toString(),
-      unit: "bpm",
-      label: "Max HR",
+      unit: hrUnit,
+      labelKey: "maxHr",
       field: "heartRate.max",
       raw: maxHeartRate,
     });
@@ -53,7 +58,7 @@ export function hrCandidates(
 export function paceCandidate(
   thresholds: SportThresholds | undefined,
   fallbackUnit: SportThresholds["paceUnit"],
-  label: string,
+  labelKey: ThresholdLabelKey,
   units: Units,
   field: ThresholdFieldKey
 ): ThresholdCandidate {
@@ -65,7 +70,7 @@ export function paceCandidate(
         ? undefined
         : formatPace(pace * paceSecondsFactor(base, units)),
     unit: paceUnitLabelFor(base, units),
-    label,
+    labelKey,
     field,
     raw: pace,
   };
