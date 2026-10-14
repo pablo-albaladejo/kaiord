@@ -63,6 +63,8 @@ function collectTestResults() {
   try {
     for (const pkg of packages) {
       // Vitest 5 writes the JSON report to a file instead of stdout.
+      // `--coverage` writes coverage/coverage-final.json in the same pass, so
+      // collectCoverage() reads it instead of running every suite a second time.
       const file = path.join(dir, `${pkg}.json`);
       // `pnpm exec` puts a *relative* ./node_modules/.bin on PATH, which tests
       // that spawn `tsx` from another cwd (cli) cannot resolve. Add the absolute
@@ -72,7 +74,7 @@ function collectTestResults() {
         path.resolve("node_modules/.bin"),
       ].join(path.delimiter);
       run(
-        `pnpm --filter @kaiord/${pkg} exec vitest --run --reporter=json --outputFile=${file} 2>&1`,
+        `pnpm --filter @kaiord/${pkg} exec vitest --run --coverage --reporter=json --outputFile=${file} 2>&1`,
         {
           env: {
             ...process.env,
@@ -141,6 +143,10 @@ function collectCoverage() {
 }
 
 function checkBuild() {
+  // The Metrics Gate workflow builds in its own step (which fails the job on
+  // a broken build) and passes the outcome here, so the tree is not rebuilt.
+  const outcome = process.env.METRICS_BUILD_OUTCOME;
+  if (outcome) return { success: outcome === "success" };
   const result = run("pnpm -r build 2>&1");
   const success = !result.includes("ERR_PNPM") && !result.includes("FAIL");
   return { success };

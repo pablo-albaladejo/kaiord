@@ -230,8 +230,14 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    # P95 = 134s; ceil(P95 × 1.5 / 60) = 4; capped at lint-family ceiling 10.
-    timeout-minutes: 4
+    # Budget = ceil(2 × measured max / 60), so one runner at half speed still
+    # finishes and a hang dies within ~3 minutes of a normal run. The old
+    # 4 min came from 1.5 × an earlier P95 of 134s; runtimes then grew until
+    # the max (226s) sat 14s under it, so one slow runner got cancelled.
+    # Measured 2026-10-14 (PR #1440, after cutting redundant work), job wall
+    # time: n=10, p50=160s, max=168s → 6. Before: n=156, p50=182s,
+    # p95=215s, max=226s. Lint-family ceiling 10.
+    timeout-minutes: 6
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
