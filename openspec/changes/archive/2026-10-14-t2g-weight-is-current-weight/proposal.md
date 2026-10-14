@@ -17,9 +17,18 @@ weight written behind the weigh-ins.
 
 - The sync reads the weight through `getCurrentWeightKg`, so a conflict
   compares Train2Go against the weight the athlete actually sees.
-- A silent fill and an accepted conflict record today's weigh-in through
-  `saveManualHealthMetric`, the path the Athlete page uses: a same-day write
-  updates that weigh-in, and re-syncing the same weight records nothing.
+- A silent fill and an accepted conflict record a weigh-in for today stamped
+  `sourceBridgeId: "train2go-bridge"`, the bridge id every other bridge's
+  health rows use, so the Data Hub and future dedup never mistake it for a
+  typed-in weigh-in. `sourceBridgeId` is a free string column, so no schema
+  change is needed.
+- Sources never overwrite each other's rows (the multi-source read policy,
+  union or priority, decides between them): a same-day write updates only
+  Train2Go's own weigh-in of that day and leaves a manual weigh-in untouched.
+- A weight equal to Train2Go's own latest weigh-in is not news: re-syncing it
+  records nothing and raises no conflict, even if another source weighed in
+  since.
+- The health source badge names `train2go-bridge` "Train2Go".
 - `profile.bodyWeight` is no longer written by `syncZones` or
   `commitConflictResolution`; the threshold accessors drop it.
 - `syncZones` and `commitConflictResolution` take the persistence port instead

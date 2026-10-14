@@ -1,9 +1,9 @@
 /**
- * Train2Go's weight is the athlete's current weight, so it is read through
- * `getCurrentWeightKg` and written as today's weigh-in, the way the Athlete
- * page records it; `profile.bodyWeight` is never touched. Re-syncing the same
- * weight finds it equal to the current weight and records nothing, and a
- * same-day write updates that day's weigh-in instead of adding one.
+ * Train2Go's weight is the athlete's current weight, so it is compared through
+ * `getCurrentWeightKg` and written as a Train2Go weigh-in for today;
+ * `profile.bodyWeight` is never touched. A weight Train2Go already reported
+ * (its own latest weigh-in) is not news: re-syncing it records nothing and
+ * raises no conflict, even when another source weighed in since.
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
@@ -13,14 +13,17 @@ import type {
 } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import { todayIsoDate } from "../../utils/today-iso-date";
+import { latestUpTo } from "../energy/load-day-energy-sources";
+import { getCurrentWeightKg } from "../health/current-weight";
 import {
-  getCurrentWeightKg,
-  loadLatestWeighIn,
-} from "../health/current-weight";
-import { saveManualHealthMetric } from "../health/save-manual-health-metric.use-case";
+  recordTrain2GoWeighIn,
+  TRAIN2GO_BRIDGE_ID,
+} from "./record-train2go-weigh-in";
 import type { IncomingMap } from "./sync-zones-payload-mapper";
 
 export const WEIGHT_FIELD: FieldKey = "bodyWeight";
+const EARLIEST_DATE = "0000-01-01";
+const NOTHING = { applied: [], conflicts: [] };
 
 export const splitWeight = (
   incoming: IncomingMap
@@ -35,20 +38,24 @@ export const reconcileWeight = async (
   profile: Profile,
   incomingKg: number | undefined
 ): Promise<{ applied: WrittenField[]; conflicts: ConflictItem[] }> => {
-  if (incomingKg === undefined) return { applied: [], conflicts: [] };
-  const latest = await loadLatestWeighIn(
-    persistence,
+  if (incomingKg === undefined) return NOTHING;
+  const rows = await persistence.healthWeight.getByProfileAndDateRange(
     profile.id,
+    EARLIEST_DATE,
     todayIsoDate()
   );
-  const current = getCurrentWeightKg(profile, latest);
+  const reported = latestUpTo(
+    rows.filter((r) => r.sourceBridgeId === TRAIN2GO_BRIDGE_ID)
+  );
+  if (reported?.krd.weightKilograms === incomingKg) return NOTHING;
+  const current = getCurrentWeightKg(profile, latestUpTo(rows));
   if (current === undefined) {
     return {
       applied: [{ field: WEIGHT_FIELD, value: incomingKg }],
       conflicts: [],
     };
   }
-  if (current === incomingKg) return { applied: [], conflicts: [] };
+  if (current === incomingKg) return NOTHING;
   return {
     applied: [],
     conflicts: [{ field: WEIGHT_FIELD, current, incoming: incomingKg }],
@@ -60,8 +67,5 @@ export const recordSyncedWeight = async (
   profileId: string,
   kg: number
 ): Promise<void> => {
-  await saveManualHealthMetric(
-    { persistence, profileId },
-    { metric: "weight", day: todayIsoDate(), value: kg }
-  );
+  await recordTrain2GoWeighIn(persistence, profileId, kg, todayIsoDate());
 };

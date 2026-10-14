@@ -293,13 +293,14 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       };
     }, PROFILE_ID);
 
-    // The weight is the athlete's current weight: one weigh-in for today,
-    // written with the profile, and never profile.bodyWeight.
+    // The weight is the athlete's current weight: one Train2Go weigh-in for
+    // today, written with the profile, and never profile.bodyWeight.
     expect(profile.bodyWeight).toBeUndefined();
     expect(await readWeighIns(page)).toEqual([
       {
         date: await localToday(page),
         kg: FIXTURE_ZONES_PAYLOAD.physiological.weight,
+        source: "train2go-bridge",
       },
     ]);
     expect(profile.maxHeartRate).toBe(
@@ -1012,11 +1013,12 @@ type ProfileSnapshot = {
 
 const readWeighIns = async (
   page: Page
-): Promise<Array<{ date: string; kg: number }>> =>
+): Promise<Array<{ date: string; kg: number; source?: string }>> =>
   page.evaluate(async (profileId) => {
     type Row = {
       profileId: string;
       date: string;
+      sourceBridgeId?: string;
       krd: { weightKilograms: number };
     };
     type Db = { table: (n: string) => { toArray: () => Promise<Row[]> } };
@@ -1025,7 +1027,11 @@ const readWeighIns = async (
     const rows = await db.table("healthWeight").toArray();
     return rows
       .filter((r) => r.profileId === profileId)
-      .map((r) => ({ date: r.date, kg: r.krd.weightKilograms }));
+      .map((r) => ({
+        date: r.date,
+        kg: r.krd.weightKilograms,
+        source: r.sourceBridgeId,
+      }));
   }, PROFILE_ID);
 
 // The browser's local calendar day, the day the SPA stamps a weigh-in with.

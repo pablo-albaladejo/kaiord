@@ -1,4 +1,4 @@
-> Tasks: 4 completed, 0 deferred
+> Tasks: 5 completed, 0 deferred
 
 # Tasks
 
@@ -6,3 +6,4 @@
 - [x] 2. Red first: an accepted weight conflict updates today's weigh-in once, however often it is committed; a rejected one records nothing.
 - [x] 3. `syncZones` and `commitConflictResolution` route the weight through `sync-zones-weight.ts`; the profile threshold accessors no longer touch `bodyWeight`.
 - [x] 4. E2E: the empty-profile auto-sync records one weigh-in for today and leaves `profile.bodyWeight` unset.
+- [x] 5. Red first: the weigh-in is stamped `train2go-bridge`, a same-day manual weigh-in is kept, Train2Go's own row of the day is updated in place, and a weight Train2Go already reported raises no conflict; the source badge names it.

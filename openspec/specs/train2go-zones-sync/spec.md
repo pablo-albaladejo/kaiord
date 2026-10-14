@@ -525,7 +525,7 @@ Standalone (non-coupled) cycling-power band groups MAY preserve per-band display
 
 ### Requirement: Train2Go's weight is the athlete's current weight
 
-The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's current weight, never as `profile.bodyWeight`. It SHALL compare the incoming weight against the current weight (the latest weigh-in on or before today, else `profile.bodyWeight`, through `getCurrentWeightKg`) under the same fill / no-op / conflict rules as every other field. A silent fill, and an accepted weight conflict, SHALL record the weight as today's weigh-in through `saveManualHealthMetric`, the same path the Athlete page uses, so a same-day write updates that day's weigh-in instead of adding one. Neither `syncZones` nor `commitConflictResolution` SHALL write `profile.bodyWeight`. Re-syncing a weight equal to the current weight SHALL record nothing.
+The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's current weight, never as `profile.bodyWeight`. It SHALL compare the incoming weight against the current weight (the latest weigh-in on or before today, else `profile.bodyWeight`, through `getCurrentWeightKg`) under the same fill / no-op / conflict rules as every other field. A silent fill, and an accepted weight conflict, SHALL record the weight as a weigh-in for today stamped `sourceBridgeId: "train2go-bridge"` (the Train2Go bridge id, like every other bridge's health rows), never as `"manual"`. Sources SHALL NOT overwrite each other's rows: a same-day write SHALL update only Train2Go's own weigh-in of that day, and a manual weigh-in of the same day SHALL stay untouched, leaving the choice between them to the multi-source read policy. Neither `syncZones` nor `commitConflictResolution` SHALL write `profile.bodyWeight`. A weight equal to Train2Go's own latest weigh-in, or to the current weight, SHALL record nothing and raise no conflict.
 
 #### Scenario: An unknown weight is recorded as today's weigh-in
 
@@ -533,7 +533,7 @@ The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's cu
 - **AND** Train2Go reports `physiological.weight = 83`
 - **WHEN** `syncZones` runs
 - **THEN** `applied` SHALL contain `{ field: "bodyWeight", value: 83 }`
-- **AND** one weigh-in of 83 kg dated today SHALL exist
+- **AND** one weigh-in of 83 kg dated today, stamped `train2go-bridge`, SHALL exist
 - **AND** `profile.bodyWeight` SHALL stay unset
 
 #### Scenario: Re-syncing the same weight records no second weigh-in
@@ -549,9 +549,16 @@ The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's cu
 - **WHEN** `syncZones` runs and Train2Go reports 83
 - **THEN** no conflict SHALL be returned for `bodyWeight`
 
-#### Scenario: An accepted weight conflict updates today's weigh-in
+#### Scenario: An accepted weight conflict keeps today's manual weigh-in
 
-- **GIVEN** today's weigh-in is 75 kg and Train2Go reports 83
+- **GIVEN** today's manual weigh-in is 75 kg and Train2Go reports 83
 - **WHEN** `commitConflictResolution` is called twice with `{ "bodyWeight": "accept" }`
-- **THEN** exactly one weigh-in dated today SHALL exist, at 83 kg
+- **THEN** the manual weigh-in of 75 kg SHALL be unchanged
+- **AND** exactly one `train2go-bridge` weigh-in dated today SHALL exist, at 83 kg
 - **AND** `profile.bodyWeight` SHALL be unchanged
+
+#### Scenario: A weight Train2Go already reported raises no conflict again
+
+- **GIVEN** today has a manual weigh-in of 75 kg and a `train2go-bridge` weigh-in of 83 kg
+- **WHEN** `syncZones` runs and Train2Go still reports 83
+- **THEN** `applied` and `conflicts` SHALL be empty and no weigh-in SHALL be added

@@ -24,6 +24,8 @@ const EARLIEST = "0000-01-01";
 const LATEST = "9999-12-31";
 const PAST_DAY = "2026-01-05";
 const WEIGHT_FIELD = "bodyWeight" as FieldKey;
+const MANUAL = "manual";
+const TRAIN2GO_BRIDGE = "train2go-bridge";
 
 const makeProfile = (bodyWeight?: number): Profile => ({
   id: PROFILE_ID,
@@ -42,10 +44,16 @@ const makeProfile = (bodyWeight?: number): Profile => ({
   updatedAt: IDS.now,
 });
 
-const weighIn = (date: string, kg: number): HealthWeightRecord => ({
-  id: `w-${date}`,
+const weighIn = (
+  date: string,
+  kg: number,
+  sourceBridgeId = MANUAL
+): HealthWeightRecord => ({
+  id: `w-${sourceBridgeId}-${date}`,
   profileId: PROFILE_ID,
   date,
+  sourceBridgeId,
+  externalId: `${sourceBridgeId}:${date}`,
   krd: {
     kind: "weight",
     version: "2.0",
@@ -125,9 +133,9 @@ describe("syncZones — the weight is the current weight", () => {
     if (!result.ok) throw new Error("expected ok");
     expect(result.applied).toEqual([{ field: WEIGHT_FIELD, value: T2G_KG }]);
     const records = await allWeighIns(persistence);
-    expect(records.map((r) => [r.date, r.krd.weightKilograms])).toEqual([
-      [todayIsoDate(), T2G_KG],
-    ]);
+    expect(
+      records.map((r) => [r.date, r.krd.weightKilograms, r.sourceBridgeId])
+    ).toEqual([[todayIsoDate(), T2G_KG, TRAIN2GO_BRIDGE]]);
     expect((await persistence.profiles.getById(PROFILE_ID))?.bodyWeight).toBe(
       undefined
     );
@@ -155,7 +163,7 @@ describe("commitConflictResolution — an accepted weight is a weigh-in", () => 
     ConflictDecision
   >;
 
-  it("should update today's weigh-in once, however often it is committed", async () => {
+  it("should keep today's manual weigh-in and add one Train2Go weigh-in, however often it is committed", async () => {
     // Arrange
     const today = todayIsoDate();
     const persistence = await seed(PROFILE_KG, [weighIn(today, WEIGH_IN_KG)]);
@@ -165,13 +173,52 @@ describe("commitConflictResolution — an accepted weight is a weigh-in", () => 
     await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
 
     // Assert
-    const records = await allWeighIns(persistence);
-    expect(records.map((r) => [r.date, r.krd.weightKilograms])).toEqual([
-      [today, T2G_KG],
+    const bySource = (await allWeighIns(persistence))
+      .map((r) => [r.sourceBridgeId, r.date, r.krd.weightKilograms])
+      .sort();
+    expect(bySource).toEqual([
+      [MANUAL, today, WEIGH_IN_KG],
+      [TRAIN2GO_BRIDGE, today, T2G_KG],
     ]);
     expect((await persistence.profiles.getById(PROFILE_ID))?.bodyWeight).toBe(
       PROFILE_KG
     );
+  });
+
+  it("should update the Train2Go weigh-in of the day when Train2Go's weight changes", async () => {
+    // Arrange
+    const today = todayIsoDate();
+    const persistence = await seed(undefined, [
+      weighIn(today, WEIGH_IN_KG, TRAIN2GO_BRIDGE),
+    ]);
+
+    // Act
+    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
+
+    // Assert
+    const records = await allWeighIns(persistence);
+    expect(
+      records.map((r) => [r.id, r.sourceBridgeId, r.krd.weightKilograms])
+    ).toEqual([[`w-${TRAIN2GO_BRIDGE}-${today}`, TRAIN2GO_BRIDGE, T2G_KG]]);
+  });
+
+  it("should not raise the conflict again once Train2Go's weight is recorded", async () => {
+    // Arrange
+    // A manual weigh-in of the same day stays; Train2Go has not changed.
+    const today = todayIsoDate();
+    const persistence = await seed(undefined, [
+      weighIn(today, WEIGH_IN_KG),
+      weighIn(today, T2G_KG, TRAIN2GO_BRIDGE),
+    ]);
+
+    // Act
+    const again = await syncZones(PROFILE_ID, transport, persistence);
+
+    // Assert
+    if (!again.ok) throw new Error("expected ok");
+    expect(again.applied).toEqual([]);
+    expect(again.conflicts).toEqual([]);
+    expect(await allWeighIns(persistence)).toHaveLength(2);
   });
 
   it("should record nothing when the weight is rejected", async () => {
