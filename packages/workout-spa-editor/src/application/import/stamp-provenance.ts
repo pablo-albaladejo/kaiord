@@ -8,6 +8,9 @@
  * content-hash of the payload for FIT, a hash of metric+day for manual)
  * and pass the result here to get the shared, uniform shape.
  */
+/** The `sourceBridgeId` of every hand-entered record. */
+export const MANUAL_SOURCE_BRIDGE_ID = "manual";
+
 export type Provenance = {
   sourceBridgeId: string;
   externalId: string;

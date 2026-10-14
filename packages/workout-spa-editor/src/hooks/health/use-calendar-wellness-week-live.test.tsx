@@ -182,6 +182,33 @@ describe("useCalendarWellnessWeekLive", () => {
     expect(result.current?.["2026-05-20"]).toEqual({ weight: "72.4" });
   });
 
+  it("should show the manual steps when an imported row covers the same day", async () => {
+    // Arrange
+    const persistence = createDexiePersistence(db);
+    const manual = daily("a-manual", "2026-05-19");
+    await persistence.healthDaily.put({
+      ...manual,
+      sourceBridgeId: "manual",
+      krd: { kind: "daily", version: "2.0", date: "2026-05-19", steps: 12000 },
+    });
+    await persistence.healthDaily.put({
+      ...daily("z-imported", "2026-05-19"),
+      sourceBridgeId: "fit-import",
+    });
+
+    // Act
+    const { result } = renderHook(
+      () => useCalendarWellnessWeekLive(PROFILE_ID, WEEK_START, WEEK_END),
+      { wrapper: wrap }
+    );
+
+    // Assert
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
+    expect(result.current?.["2026-05-19"]?.steps).toBe("12000");
+  });
+
   it("should omit days that have no wellness records", async () => {
     // Arrange
     const persistence = createDexiePersistence(db);

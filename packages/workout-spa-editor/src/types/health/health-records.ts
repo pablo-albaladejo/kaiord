@@ -8,7 +8,6 @@
  */
 import type {
   BodyComposition,
-  DailyWellness,
   HeartRateSeries,
   HrvSummary,
   SleepRecord,
@@ -19,11 +18,12 @@ import type {
 } from "@kaiord/core";
 
 import type { HealthRecord } from "../../ports/health-record-repository";
+import type { StoredDailyWellness } from "./stored-daily-wellness";
 
 export type HealthSleepRecord = HealthRecord<SleepRecord>;
 export type HealthWeightRecord = HealthRecord<WeightMeasurement>;
 export type HealthHrvRecord = HealthRecord<HrvSummary>;
-export type HealthDailyRecord = HealthRecord<DailyWellness>;
+export type HealthDailyRecord = HealthRecord<StoredDailyWellness>;
 export type HealthBodyCompositionRecord = HealthRecord<BodyComposition>;
 export type HealthStressRecord = HealthRecord<StressEpisode>;
 export type HealthStrainRecord = HealthRecord<StrainSummary>;

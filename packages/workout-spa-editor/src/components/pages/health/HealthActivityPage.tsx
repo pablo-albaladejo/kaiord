@@ -11,6 +11,8 @@ import { todayIso } from "./health-date-windows";
 import { HealthPageHeader } from "./HealthPageHeader";
 
 const NUTRITION_HREF = "/nutrition";
+// A day with only manual steps has no measured calories.
+const NOT_MEASURED = "—";
 
 export default function HealthActivityPage() {
   const t = useTranslate("health");
@@ -60,13 +62,13 @@ export default function HealthActivityPage() {
   );
 }
 
-const Stat = ({ label, value }: { label: string; value: number }) => (
+const Stat = ({ label, value }: { label: string; value?: number }) => (
   <div className="rounded-2xl border border-edge-soft bg-surface p-4">
     <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-muted">
       {label}
     </dt>
     <dd className="m-0 mt-1 text-2xl font-semibold tracking-[-0.026em] tabular-nums slashed-zero text-ink-strong">
-      {value}
+      {value ?? NOT_MEASURED}
     </dd>
   </div>
 );

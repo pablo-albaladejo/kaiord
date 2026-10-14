@@ -23,8 +23,7 @@ import type { ManagedDataType } from "@kaiord/core";
 
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import type { DataTypeSourcePolicyRepository } from "./data-type-source-policy-repository.port";
-
-const MANUAL_SOURCE_BRIDGE_ID = "manual";
+import { effectiveSourceOrder } from "./effective-source-order";
 
 export type SourcedRecord<T> = {
   sourceBridgeId: string;
@@ -89,12 +88,9 @@ export const resolveEffectiveSource = async <T>(
     dataType,
     direction: "import",
   });
-  const enabledBridgeIds = new Set(
-    importPolicies.filter((p) => p.enabled).map((p) => p.bridgeId)
-  );
-  const effectiveOrder = (sourcePolicy?.sourceOrder ?? []).filter(
-    (bridgeId) =>
-      bridgeId === MANUAL_SOURCE_BRIDGE_ID || enabledBridgeIds.has(bridgeId)
+  const effectiveOrder = effectiveSourceOrder(
+    sourcePolicy?.sourceOrder ?? [],
+    importPolicies
   );
 
   return resolvePriority(effectiveOrder, recordsForDay);
