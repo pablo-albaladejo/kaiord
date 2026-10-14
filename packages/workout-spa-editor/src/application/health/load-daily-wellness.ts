@@ -5,7 +5,7 @@
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { HealthDailyRecord } from "../../types/health/health-records";
-import { loadEffectiveSourceOrder } from "../data-source-policy/effective-source-order";
+import { loadPriorityReadPolicy } from "../data-source-policy/effective-source-order";
 import { mergeDailyWellnessByDay } from "./merge-daily-wellness";
 
 export type DailyWellnessReadDeps = Pick<
@@ -18,13 +18,13 @@ export const loadDailyWellness = async (
   profileId: string,
   range: { start: string; end: string }
 ): Promise<HealthDailyRecord[]> => {
-  const [rows, sourceOrder] = await Promise.all([
+  const [rows, policy] = await Promise.all([
     deps.healthDaily.getByProfileAndDateRange(
       profileId,
       range.start,
       range.end
     ),
-    loadEffectiveSourceOrder(
+    loadPriorityReadPolicy(
       {
         sourcePolicyRepo: deps.dataTypeSourcePolicy,
         policyRepo: deps.integrationPolicy,
@@ -32,5 +32,5 @@ export const loadDailyWellness = async (
       { profileId, dataType: "daily-wellness" }
     ),
   ]);
-  return mergeDailyWellnessByDay(rows, sourceOrder);
+  return mergeDailyWellnessByDay(rows, policy);
 };

@@ -265,8 +265,8 @@ describe("saveManualHealthMetric", () => {
       id: "imported-daily",
       profileId: PROFILE_ID,
       date: DAY,
-      sourceBridgeId: "garmin-bridge",
-      externalId: "garmin-daily-1",
+      sourceBridgeId: "fit-import",
+      externalId: "fit-daily-1",
       krd: priorDaily(),
     };
     await persistence.healthDaily.put(imported);
@@ -297,7 +297,7 @@ describe("saveManualHealthMetric", () => {
       id: "imported-daily",
       profileId: PROFILE_ID,
       date: DAY,
-      sourceBridgeId: "whoop-bridge",
+      sourceBridgeId: "fit-import",
       krd: priorDaily(),
     });
     const deps = { persistence, profileId: PROFILE_ID, newId: sequentialNewId };
@@ -327,7 +327,35 @@ describe("saveManualHealthMetric", () => {
     expect(rows).toHaveLength(2);
   });
 
-  it("should zero-fill calories and intensity when saving steps for a day with no prior daily row", async () => {
+  it("should keep the calories of a legacy manual row when steps are saved again", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.healthDaily.put({
+      id: "legacy-daily",
+      profileId: PROFILE_ID,
+      date: DAY,
+      sourceBridgeId: "manual",
+      krd: priorDaily(),
+    });
+
+    // Act
+    const result = await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
+    );
+
+    // Assert
+    const rows = await persistence.healthDaily.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    expect(result?.recordId).toBe("legacy-daily");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.krd).toEqual({ ...priorDaily(), steps: NEW_STEPS });
+  });
+
+  it("should store only the entered steps in the manual daily row", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
@@ -343,9 +371,12 @@ describe("saveManualHealthMetric", () => {
       DAY,
       DAY
     );
-    expect(rows[0]?.krd.steps).toBe(NEW_STEPS);
-    expect(rows[0]?.krd.activeCalories).toBe(0);
-    expect(rows[0]?.krd.intensityMinutes).toEqual({ moderate: 0, vigorous: 0 });
+    expect(rows[0]?.krd).toEqual({
+      kind: "daily",
+      version: "2.0",
+      date: DAY,
+      steps: NEW_STEPS,
+    });
   });
 
   it("should persist a valid in-range sleep score", async () => {

@@ -1,77 +1,84 @@
 /**
  * One daily-wellness reading per day out of the rows the sources wrote for
- * it (an imported Garmin/WHOOP/Tanita row, a manual steps row…). Rows are
- * never rewritten to combine them, so each keeps its provenance.
+ * it (FIT imports, manual steps…). The reading is not a stored row: it is
+ * the head row's record, with the head's id and provenance, and no row is
+ * ever rewritten to produce it.
  *
- * Per field, the first ranked row that provides it wins. A manual row
- * provides only `steps`: its calories and intensity are zero-fill, not
- * values the athlete entered, so imported calories survive a manual entry.
- * Ranking: the policy's `sourceOrder` first; then manual (the athlete's own
- * word, by default); then source id, then row id. Never row order, so the
- * reading is the same whatever order the rows were written in.
+ * Rows are ranked by the priority order (listed sources first), then
+ * manual, then source id, then row id — never by storage order. The head
+ * is the first full row and is read whole, as the resolver reads priority.
+ * The one exception is a pure manual row (steps only): ranked above the
+ * head, its steps replace the head's. A legacy manual row, an imported row
+ * an older save re-stamped `manual`, holds measured values and is read as
+ * a full row. Under priority, rows of a bridge whose import is disabled
+ * are dropped; a source with no import policy (a FIT import) stays as a
+ * fallback after the listed ones.
  */
 import type { HealthDailyRecord } from "../../types/health/health-records";
+import { MANUAL_SOURCE_BRIDGE_ID } from "../import/stamp-provenance";
+import { isLegacyManualRow } from "./manual-steps-row";
 
-const MANUAL_SOURCE_BRIDGE_ID = "manual";
-
-const FIELDS = [
-  "steps",
-  "activeCalories",
-  "restingCalories",
-  "intensityMinutes",
-  "floorsClimbed",
-] as const;
-type Field = (typeof FIELDS)[number];
-
-const MANUAL_FIELDS: ReadonlySet<Field> = new Set<Field>(["steps"]);
+export type PriorityReadPolicy = {
+  order: readonly string[];
+  disabled: ReadonlySet<string>;
+};
 
 const isManual = (row: HealthDailyRecord): boolean =>
   row.sourceBridgeId === MANUAL_SOURCE_BRIDGE_ID;
 
-const provides = (row: HealthDailyRecord, field: Field): boolean =>
-  row.krd[field] !== undefined && (!isManual(row) || MANUAL_FIELDS.has(field));
+const isPureManual = (row: HealthDailyRecord): boolean =>
+  isManual(row) && !isLegacyManualRow(row);
 
-const rankIn = (sourceOrder: readonly string[], row: HealthDailyRecord) => {
-  const listed = sourceOrder.indexOf(row.sourceBridgeId ?? "");
+const rankIn = (order: readonly string[], row: HealthDailyRecord): number => {
+  const listed = order.indexOf(row.sourceBridgeId ?? "");
   if (listed >= 0) return listed;
-  return sourceOrder.length + (isManual(row) ? 0 : 1);
+  return order.length + (isManual(row) ? 0 : 1);
 };
 
 const compareText = (a: string, b: string): number =>
   a === b ? 0 : a < b ? -1 : 1;
 
 const byRank =
-  (sourceOrder: readonly string[]) =>
+  (order: readonly string[]) =>
   (a: HealthDailyRecord, b: HealthDailyRecord): number =>
-    rankIn(sourceOrder, a) - rankIn(sourceOrder, b) ||
+    rankIn(order, a) - rankIn(order, b) ||
     compareText(a.sourceBridgeId ?? "", b.sourceBridgeId ?? "") ||
     compareText(a.id, b.id);
 
+const stepsOnly = (row: HealthDailyRecord): HealthDailyRecord => {
+  const { kind, version, date, steps } = row.krd;
+  return { ...row, krd: { kind, version, date, steps } };
+};
+
 export const mergeDailyWellnessDay = (
   rows: readonly HealthDailyRecord[],
-  sourceOrder: readonly string[] = []
+  policy?: PriorityReadPolicy
 ): HealthDailyRecord | undefined => {
-  const ranked = [...rows].sort(byRank(sourceOrder));
-  const base = ranked.find((row) => !isManual(row)) ?? ranked[0];
-  if (!base) return undefined;
-  const krd = { ...base.krd };
-  for (const field of FIELDS) {
-    const from = ranked.find((row) => provides(row, field));
-    if (from) Object.assign(krd, { [field]: from.krd[field] });
-  }
-  return { ...base, krd };
+  const ranked = rows
+    .filter((row) => !policy?.disabled.has(row.sourceBridgeId ?? ""))
+    .sort(byRank(policy?.order ?? []));
+  const headAt = ranked.findIndex((row) => !isPureManual(row));
+  const manualAt = ranked.findIndex(isPureManual);
+  const head = ranked[headAt];
+  const manual = ranked[manualAt];
+  if (!head) return manual && stepsOnly(manual);
+  if (!manual || manualAt > headAt) return head;
+  return { ...head, krd: { ...head.krd, steps: manual.krd.steps } };
 };
 
 export const mergeDailyWellnessByDay = (
   rows: readonly HealthDailyRecord[],
-  sourceOrder: readonly string[] = []
+  policy?: PriorityReadPolicy
 ): HealthDailyRecord[] => {
   const byDay = new Map<string, HealthDailyRecord[]>();
-  for (const row of rows)
-    byDay.set(row.date, [...(byDay.get(row.date) ?? []), row]);
+  for (const row of rows) {
+    const day = byDay.get(row.date);
+    if (day) day.push(row);
+    else byDay.set(row.date, [row]);
+  }
   return [...byDay.keys()]
     .sort()
     .flatMap(
-      (day) => mergeDailyWellnessDay(byDay.get(day) ?? [], sourceOrder) ?? []
+      (day) => mergeDailyWellnessDay(byDay.get(day) ?? [], policy) ?? []
     );
 };

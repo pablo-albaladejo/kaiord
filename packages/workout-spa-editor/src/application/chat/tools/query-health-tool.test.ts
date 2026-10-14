@@ -57,7 +57,7 @@ describe("createQueryHealthTool", () => {
       id: "d-imported",
       profileId: "p1",
       date: "2026-06-10",
-      sourceBridgeId: "garmin-bridge",
+      sourceBridgeId: "fit-import",
       krd: krd(IMPORTED_STEPS, IMPORTED_ACTIVE_KCAL),
     });
     await persistence.healthDaily.put({
@@ -65,7 +65,12 @@ describe("createQueryHealthTool", () => {
       profileId: "p1",
       date: "2026-06-10",
       sourceBridgeId: "manual",
-      krd: krd(MANUAL_STEPS, 0),
+      krd: {
+        kind: "daily",
+        version: "2.0",
+        date: "2026-06-10",
+        steps: MANUAL_STEPS,
+      },
     });
     const tool = createQueryHealthTool({
       persistence,

@@ -12,6 +12,9 @@ const IMPORTED_ACTIVE_KCAL = 650;
 const IMPORTED_RESTING_KCAL = 1750;
 const IMPORTED_STEPS = 4000;
 const MANUAL_STEPS = 12000;
+const WHOOP_BRIDGE = "whoop-bridge";
+const WHOOP_STEPS = 7000;
+const WHOOP_ACTIVE_KCAL = 720;
 
 const daily = (
   id: string,
@@ -34,7 +37,7 @@ const daily = (
   },
 });
 
-const imported = daily("imported", "garmin-bridge", IMPORTED_STEPS, {
+const imported = daily("imported", "fit-import", IMPORTED_STEPS, {
   active: IMPORTED_ACTIVE_KCAL,
   resting: IMPORTED_RESTING_KCAL,
 });
@@ -42,6 +45,32 @@ const manual = daily("manual-row", "manual", MANUAL_STEPS, {
   active: 0,
   resting: 0,
 });
+const whoopRow = daily("whoop-row", WHOOP_BRIDGE, WHOOP_STEPS, {
+  active: WHOOP_ACTIVE_KCAL,
+  resting: IMPORTED_RESTING_KCAL,
+});
+
+const setPolicies = async (
+  persistence: PersistencePort,
+  { whoopEnabled }: { whoopEnabled: boolean }
+) => {
+  await persistence.integrationPolicy.put({
+    id: "00000000-0000-4000-8000-000000000001",
+    profileId: PROFILE_ID,
+    dataType: "daily-wellness",
+    bridgeId: WHOOP_BRIDGE,
+    direction: "import",
+    mode: "auto",
+    enabled: whoopEnabled,
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  });
+  await persistence.dataTypeSourcePolicy.put({
+    profileId: PROFILE_ID,
+    dataType: "daily-wellness",
+    mode: "priority",
+    sourceOrder: [WHOOP_BRIDGE, "manual"],
+  });
+};
 
 const wellnessAfterWriting = async (rows: HealthDailyRecord[]) => {
   const persistence: PersistencePort = createInMemoryPersistence();
@@ -84,32 +113,51 @@ describe("loadDayEnergySources daily wellness", () => {
     expect(readings[0]?.activeCalories).toBe(IMPORTED_ACTIVE_KCAL);
   });
 
-  it("should rank the day's rows by the data type's priority sourceOrder", async () => {
+  it("should read the whole record of the first source of a priority sourceOrder", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.healthDaily.put(imported);
+    await persistence.healthDaily.put(whoopRow);
     await persistence.healthDaily.put(manual);
-    await persistence.integrationPolicy.put({
-      id: "00000000-0000-4000-8000-000000000001",
-      profileId: PROFILE_ID,
-      dataType: "daily-wellness",
-      bridgeId: "garmin-bridge",
-      direction: "import",
-      mode: "auto",
-      enabled: true,
-      updatedAt: "2026-06-01T00:00:00.000Z",
-    });
-    await persistence.dataTypeSourcePolicy.put({
-      profileId: PROFILE_ID,
-      dataType: "daily-wellness",
-      mode: "priority",
-      sourceOrder: ["garmin-bridge", "manual"],
+    await setPolicies(persistence, { whoopEnabled: true });
+
+    // Act
+    const sources = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
+
+    // Assert
+    expect(sources.wellness?.sourceBridgeId).toBe(WHOOP_BRIDGE);
+    expect(sources.wellness?.krd.steps).toBe(WHOOP_STEPS);
+    expect(sources.wellness?.krd.activeCalories).toBe(WHOOP_ACTIVE_KCAL);
+  });
+
+  it("should not read a bridge whose import is disabled under priority", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.healthDaily.put(imported);
+    await persistence.healthDaily.put(whoopRow);
+    await setPolicies(persistence, { whoopEnabled: false });
+
+    // Act
+    const sources = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
+
+    // Assert
+    expect(sources.wellness?.sourceBridgeId).toBe("fit-import");
+    expect(sources.wellness?.krd.activeCalories).toBe(IMPORTED_ACTIVE_KCAL);
+  });
+
+  it("should read a legacy manual row's calories when it is the day's only row", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.healthDaily.put({
+      ...imported,
+      sourceBridgeId: "manual",
     });
 
     // Act
     const sources = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
 
     // Assert
-    expect(sources.wellness?.krd.steps).toBe(IMPORTED_STEPS);
+    expect(sources.wellness?.krd.activeCalories).toBe(IMPORTED_ACTIVE_KCAL);
+    expect(sources.wellness?.krd.restingCalories).toBe(IMPORTED_RESTING_KCAL);
   });
 });

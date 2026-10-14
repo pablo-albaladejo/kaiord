@@ -9,12 +9,15 @@
  * tests).
  */
 
-import type { BodyComposition, DailyWellness } from "@kaiord/core";
+import type { BodyComposition } from "@kaiord/core";
 
 import type { HealthRecord } from "../../ports/health-record-repository";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { EnergyTargetRecord } from "../../types/energy-target-record";
-import type { HealthWeightRecord } from "../../types/health/health-records";
+import type {
+  HealthDailyRecord,
+  HealthWeightRecord,
+} from "../../types/health/health-records";
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import type { Profile } from "../../types/profile";
 import { loadDailyWellness } from "../health/load-daily-wellness";
@@ -23,7 +26,7 @@ const EARLIEST_DATE = "0000-01-01";
 
 export type DayEnergySources = {
   profile: Profile | undefined;
-  wellness: HealthRecord<DailyWellness> | undefined;
+  wellness: HealthDailyRecord | undefined;
   bodyComposition: HealthRecord<BodyComposition> | undefined;
   latestWeight: HealthWeightRecord | undefined;
   intakeEntries: IntakeEntryRecord[];

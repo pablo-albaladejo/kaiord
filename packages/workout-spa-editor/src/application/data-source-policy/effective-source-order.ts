@@ -6,10 +6,9 @@
 import type { ManagedDataType } from "@kaiord/core";
 
 import type { IntegrationPolicy } from "../../types/integration-policy";
+import { MANUAL_SOURCE_BRIDGE_ID } from "../import/stamp-provenance";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import type { DataTypeSourcePolicyRepository } from "./data-type-source-policy-repository.port";
-
-const MANUAL_SOURCE_BRIDGE_ID = "manual";
 
 export const effectiveSourceOrder = (
   sourceOrder: readonly string[],
@@ -28,16 +27,22 @@ export type SourceOrderDeps = {
   policyRepo: IntegrationPolicyRepository;
 };
 
-/** The consulted order for a "priority" policy; empty under "union". */
-export const loadEffectiveSourceOrder = async (
+/** The order a "priority" read consults and the bridges whose import is
+    disabled; `undefined` under "union". */
+export const loadPriorityReadPolicy = async (
   deps: SourceOrderDeps,
   input: { profileId: string; dataType: ManagedDataType }
-): Promise<string[]> => {
+): Promise<{ order: string[]; disabled: Set<string> } | undefined> => {
   const policy = await deps.sourcePolicyRepo.findByProfileAndType(input);
-  if (policy?.mode !== "priority") return [];
+  if (policy?.mode !== "priority") return undefined;
   const importPolicies = await deps.policyRepo.findByProfileDirection({
     ...input,
     direction: "import",
   });
-  return effectiveSourceOrder(policy.sourceOrder, importPolicies);
+  return {
+    order: effectiveSourceOrder(policy.sourceOrder, importPolicies),
+    disabled: new Set(
+      importPolicies.filter((p) => !p.enabled).map((p) => p.bridgeId)
+    ),
+  };
 };

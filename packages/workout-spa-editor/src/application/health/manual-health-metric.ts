@@ -11,7 +11,6 @@
  * ManagedDataType in @kaiord/core. All callers updated accordingly.
  */
 import {
-  dailyWellnessSchema,
   hrvSummarySchema,
   type ManagedDataType,
   sleepRecordSchema,
@@ -24,6 +23,7 @@ import type {
   HealthRecordRepository,
 } from "../../ports/health-record-repository";
 import type { PersistencePort } from "../../ports/persistence-port";
+import { storedDailyWellnessSchema } from "../../types/health/stored-daily-wellness";
 
 export type ManualHealthMetric = Extract<
   ManagedDataType,
@@ -52,7 +52,7 @@ export const schemaForMetric = (
     weight: weightMeasurementSchema,
     sleep: sleepRecordSchema,
     hrv: hrvSummarySchema,
-    "daily-wellness": dailyWellnessSchema,
+    "daily-wellness": storedDailyWellnessSchema,
   };
   return byMetric[metric];
 };

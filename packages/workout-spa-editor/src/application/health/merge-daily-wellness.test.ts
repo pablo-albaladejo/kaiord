@@ -4,42 +4,55 @@ import type { HealthDailyRecord } from "../../types/health/health-records";
 import {
   mergeDailyWellnessByDay,
   mergeDailyWellnessDay,
+  type PriorityReadPolicy,
 } from "./merge-daily-wellness";
 
 const DAY = "2026-05-23";
 const NEXT_DAY = "2026-05-24";
-const GARMIN = { steps: 4000, active: 600, resting: 1700 };
+const FIT = { steps: 4000, active: 600, resting: 1700 };
 const WHOOP = { steps: 5000, active: 700, resting: 1800 };
 const MANUAL_STEPS = 9000;
-const NEXT_DAY_GARMIN = { steps: 3000, active: 500, resting: 1600 };
+const LEGACY = { steps: 9500, active: 640, resting: 1720 };
+const NEXT_DAY_FIT = { steps: 3000, active: 500, resting: 1600 };
+const FLOORS = 12;
+
+type Values = {
+  steps: number;
+  active?: number;
+  resting?: number;
+  floors?: number;
+  date?: string;
+};
 
 const row = (
   id: string,
   sourceBridgeId: string,
-  values: { steps: number; active: number; resting: number; date?: string }
-): HealthDailyRecord => ({
-  id,
-  profileId: "p-1",
-  date: values.date ?? DAY,
-  sourceBridgeId,
-  krd: {
+  values: Values
+): HealthDailyRecord => {
+  const date = values.date ?? DAY;
+  const krd: HealthDailyRecord["krd"] = {
     kind: "daily",
     version: "2.0",
-    date: values.date ?? DAY,
+    date,
     steps: values.steps,
-    activeCalories: values.active,
-    restingCalories: values.resting,
-    intensityMinutes: { moderate: 0, vigorous: 0 },
-  },
-});
+  };
+  if (values.active !== undefined) {
+    krd.activeCalories = values.active;
+    krd.restingCalories = values.resting ?? 0;
+    krd.intensityMinutes = { moderate: 0, vigorous: 0 };
+  }
+  if (values.floors !== undefined) krd.floorsClimbed = values.floors;
+  return { id, profileId: "p-1", date, sourceBridgeId, krd };
+};
 
-const garmin = row("g", "garmin-bridge", GARMIN);
+const fit = row("f", "fit-import", FIT);
 const whoop = row("w", "whoop-bridge", WHOOP);
-const manual = row("m", "manual", {
-  steps: MANUAL_STEPS,
-  active: 0,
-  resting: 0,
-});
+const manual = row("m", "manual", { steps: MANUAL_STEPS });
+
+const priority = (
+  order: string[],
+  disabled: string[] = []
+): PriorityReadPolicy => ({ order, disabled: new Set(disabled) });
 
 const permutations = <T>(items: T[]): T[][] =>
   items.length <= 1
@@ -53,40 +66,68 @@ const permutations = <T>(items: T[]): T[][] =>
 describe("mergeDailyWellnessDay", () => {
   it("should return undefined for a day with no rows", () => {
     // Arrange
+    const rows: HealthDailyRecord[] = [];
 
     // Act
-    const merged = mergeDailyWellnessDay([]);
+    const merged = mergeDailyWellnessDay(rows);
 
     // Assert
     expect(merged).toBeUndefined();
   });
 
-  it("should take the manual steps and keep the imported calories", () => {
+  it("should take the manual steps and the imported row's calories and provenance", () => {
     // Arrange
+    const rows = [fit, manual];
 
     // Act
-    const merged = mergeDailyWellnessDay([garmin, manual]);
+    const merged = mergeDailyWellnessDay(rows);
 
     // Assert
     expect(merged?.krd.steps).toBe(MANUAL_STEPS);
-    expect(merged?.krd.activeCalories).toBe(GARMIN.active);
-    expect(merged?.krd.restingCalories).toBe(GARMIN.resting);
+    expect(merged?.krd.activeCalories).toBe(FIT.active);
+    expect(merged?.krd.restingCalories).toBe(FIT.resting);
+    expect(merged?.id).toBe("f");
+    expect(merged?.sourceBridgeId).toBe("fit-import");
   });
 
-  it("should keep a manual-only day as entered", () => {
+  it("should read only the steps of a manual-only day", () => {
     // Arrange
+    const zeroFilled = row("m0", "manual", {
+      steps: MANUAL_STEPS,
+      active: 0,
+      resting: 0,
+    });
 
     // Act
-    const merged = mergeDailyWellnessDay([manual]);
+    const readings = [manual, zeroFilled].map((r) =>
+      mergeDailyWellnessDay([r])
+    );
 
     // Assert
-    expect(merged?.krd.steps).toBe(MANUAL_STEPS);
-    expect(merged?.sourceBridgeId).toBe("manual");
+    for (const reading of readings) {
+      expect(reading?.krd.steps).toBe(MANUAL_STEPS);
+      expect(reading?.krd.activeCalories).toBeUndefined();
+      expect(reading?.krd.restingCalories).toBeUndefined();
+      expect(reading?.krd.intensityMinutes).toBeUndefined();
+    }
+  });
+
+  it("should keep the calories of a legacy manual row that holds imported values", () => {
+    // Arrange
+    const legacy = row("legacy", "manual", LEGACY);
+
+    // Act
+    const merged = mergeDailyWellnessDay([legacy]);
+
+    // Assert
+    expect(merged?.krd.steps).toBe(LEGACY.steps);
+    expect(merged?.krd.activeCalories).toBe(LEGACY.active);
+    expect(merged?.krd.restingCalories).toBe(LEGACY.resting);
   });
 
   it("should give the same reading whatever order the rows come in", () => {
     // Arrange
-    const orders = permutations([garmin, whoop, manual]);
+    const orders = permutations([fit, whoop, manual]);
 
     // Act
     const readings = orders.map((rows) => mergeDailyWellnessDay(rows));
@@ -95,46 +136,88 @@ describe("mergeDailyWellnessDay", () => {
     for (const reading of readings) expect(reading).toEqual(readings[0]);
   });
 
-  it("should follow the priority sourceOrder when one is set", () => {
+  it("should read the whole record of the first source under priority", () => {
     // Arrange
-    const order = ["whoop-bridge", "manual", "garmin-bridge"];
+    const fitWithFloors = row("f", "fit-import", { ...FIT, floors: FLOORS });
+    const policy = priority(["whoop-bridge", "fit-import"]);
 
     // Act
-    const merged = mergeDailyWellnessDay([garmin, manual, whoop], order);
+    const merged = mergeDailyWellnessDay([fitWithFloors, whoop], policy);
 
     // Assert
+    expect(merged?.sourceBridgeId).toBe("whoop-bridge");
     expect(merged?.krd.steps).toBe(WHOOP.steps);
     expect(merged?.krd.activeCalories).toBe(WHOOP.active);
+    expect(merged?.krd.floorsClimbed).toBeUndefined();
   });
 
-  it("should let the manual steps win over every imported source by default", () => {
+  it("should let manual steps win when the priority order ranks manual first", () => {
     // Arrange
+    const policy = priority(["manual", "whoop-bridge"]);
 
     // Act
-    const merged = mergeDailyWellnessDay([whoop, garmin, manual]);
+    const merged = mergeDailyWellnessDay([whoop, manual], policy);
 
     // Assert
     expect(merged?.krd.steps).toBe(MANUAL_STEPS);
+    expect(merged?.krd.activeCalories).toBe(WHOOP.active);
+  });
+
+  it("should let the listed source beat manual when the priority order leaves manual out", () => {
+    // Arrange
+    const policy = priority(["whoop-bridge"]);
+
+    // Act
+    const merged = mergeDailyWellnessDay([manual, whoop], policy);
+
+    // Assert
+    expect(merged?.krd.steps).toBe(WHOOP.steps);
+  });
+
+  it("should fall back to an unlisted source without an import policy under priority", () => {
+    // Arrange
+    const policy = priority(["whoop-bridge"]);
+
+    // Act
+    const merged = mergeDailyWellnessDay([fit], policy);
+
+    // Assert
+    expect(merged?.sourceBridgeId).toBe("fit-import");
+    expect(merged?.krd.activeCalories).toBe(FIT.active);
+  });
+
+  it("should drop a bridge whose import is disabled under priority", () => {
+    // Arrange
+    const policy = priority(["fit-import"], ["whoop-bridge"]);
+
+    // Act
+    const alone = mergeDailyWellnessDay([whoop], policy);
+    const withManual = mergeDailyWellnessDay([whoop, manual], policy);
+
+    // Assert
+    expect(alone).toBeUndefined();
+    expect(withManual?.sourceBridgeId).toBe("manual");
+    expect(withManual?.krd.activeCalories).toBeUndefined();
   });
 });
 
 describe("mergeDailyWellnessByDay", () => {
   it("should return one reading per day, in date order", () => {
     // Arrange
-    const nextDay = row("g2", "garmin-bridge", {
-      ...NEXT_DAY_GARMIN,
+    const nextDay = row("f2", "fit-import", {
+      ...NEXT_DAY_FIT,
       date: NEXT_DAY,
     });
 
     // Act
-    const merged = mergeDailyWellnessByDay([nextDay, manual, garmin]);
+    const merged = mergeDailyWellnessByDay([nextDay, manual, fit]);
 
     // Assert
     expect(
       merged.map((r) => [r.date, r.krd.steps, r.krd.activeCalories])
     ).toEqual([
-      [DAY, MANUAL_STEPS, GARMIN.active],
-      [NEXT_DAY, NEXT_DAY_GARMIN.steps, NEXT_DAY_GARMIN.active],
+      [DAY, MANUAL_STEPS, FIT.active],
+      [NEXT_DAY, NEXT_DAY_FIT.steps, NEXT_DAY_FIT.active],
     ]);
   });
 });

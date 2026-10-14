@@ -57,11 +57,12 @@ describe("useHealthDailyHistoryLive", () => {
     const persistence = createDexiePersistence(db);
     await persistence.healthDaily.put({
       ...makeRecord("d-imported", "2026-05-10"),
-      sourceBridgeId: "whoop-bridge",
+      sourceBridgeId: "fit-import",
     });
     await persistence.healthDaily.put({
       ...makeRecord("d-manual", "2026-05-10"),
       sourceBridgeId: "manual",
+      krd: { kind: "daily", version: "2.0", date: "2026-05-10", steps: 9000 },
     });
 
     // Act

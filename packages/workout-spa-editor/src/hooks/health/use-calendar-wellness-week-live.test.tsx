@@ -189,11 +189,11 @@ describe("useCalendarWellnessWeekLive", () => {
     await persistence.healthDaily.put({
       ...manual,
       sourceBridgeId: "manual",
-      krd: { ...manual.krd, steps: 12000 },
+      krd: { kind: "daily", version: "2.0", date: "2026-05-19", steps: 12000 },
     });
     await persistence.healthDaily.put({
       ...daily("z-imported", "2026-05-19"),
-      sourceBridgeId: "garmin-bridge",
+      sourceBridgeId: "fit-import",
     });
 
     // Act
