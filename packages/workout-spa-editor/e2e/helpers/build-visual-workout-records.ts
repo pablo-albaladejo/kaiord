@@ -8,8 +8,11 @@ type WorkoutSeed = {
   ts: string;
 };
 
-export const buildDummyWorkout = (ts: string) => ({
+// Owned by the profile: the calendar only counts the active profile's
+// workouts, so an unowned dummy would leave the first-run guide on screen.
+export const buildDummyWorkout = (ts: string, profileId: string) => ({
   id: "visual-dummy-out-of-week",
+  profileId,
   date: "2020-01-01",
   state: "raw",
   sport: "cycling",

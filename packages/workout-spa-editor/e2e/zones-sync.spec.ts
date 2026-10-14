@@ -621,37 +621,39 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
   }) => {
     // Arrange: pre-seed a profile already in `train2go-synced-clean`
     // state (zones match snapshot exactly) with a recent
-    // coachingSyncState row so auto-sync skips on mount. This
-    // isolates the test to the (manual sync click on synced
-    // profile) path — no race with a parallel auto-sync orchestrator.
+    // coachingSyncState row, so the week sync skips on mount. The zones
+    // import still runs once per mount (it is gated only on the
+    // training-zones policy) and issues its own read-details.
     await seedTrain2GoSyncedProfile(page);
     await navigateToWeek(page);
     await waitForSyncButton(page);
 
+    // That mount-time read-details is the barrier: once it is recorded,
+    // the import has spent its one run for this mount, so every later
+    // read-details comes from the click.
+    await waitForBridgeAction(page, "read-details");
     const before = await readProfile(page);
-
-    // Snapshot the read-details count BEFORE the click so we can
-    // wait for a strictly-greater count after — a `some()` check
-    // would false-pass on any pre-existing call from earlier in the
-    // test scaffolding (defense-in-depth even though the current
-    // pre-seed shape doesn't fire one).
-    const detailsCallsBefore = await countReadDetails(page);
+    const weekCallsBefore = await countBridgeAction(page, "read-week");
+    const detailsCallsBefore = await countBridgeAction(page, "read-details");
 
     // Act: trigger sync via the manual button.
     await page.getByRole("button", { name: /^sync train2go$/i }).click();
 
-    // Wait for the click-induced read-details to fire (count
-    // strictly increases past the snapshotted baseline).
+    // Wait for the click's own sync: only the manual sync reads the week
+    // (the mount skipped it), and it then fans out to the zones sync.
     await page.waitForFunction(
-      ({ baseline }) => {
+      ({ weekBaseline, detailsBaseline }) => {
         const calls =
           ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
             { action: string }[] | undefined) ?? [];
+        const count = (name: string) =>
+          calls.filter((c) => c.action === name).length;
         return (
-          calls.filter((c) => c.action === "read-details").length > baseline
+          count("read-week") > weekBaseline &&
+          count("read-details") > detailsBaseline
         );
       },
-      { baseline: detailsCallsBefore },
+      { weekBaseline: weekCallsBefore, detailsBaseline: detailsCallsBefore },
       { timeout: 10_000 }
     );
     // One extra tick so the orchestrator's repo.put (if any) settles.
@@ -1125,13 +1127,13 @@ const localToday = async (page: Page): Promise<string> =>
     return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   });
 
-const countReadDetails = async (page: Page): Promise<number> =>
-  page.evaluate(() => {
+const countBridgeAction = async (page: Page, action: string): Promise<number> =>
+  page.evaluate((name) => {
     const calls =
       ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
         { action: string }[] | undefined) ?? [];
-    return calls.filter((c) => c.action === "read-details").length;
-  });
+    return calls.filter((c) => c.action === name).length;
+  }, action);
 
 const readProfile = async (page: Page): Promise<ProfileSnapshot> =>
   page.evaluate(async (id) => {
