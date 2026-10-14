@@ -12,5 +12,11 @@
     "percentMax": "@ {{value}}% max",
     "stroke": "Stroke",
     "easy": "Easy"
+  },
+  "load": {
+    "recovery": "Recovery",
+    "moderate": "Moderate",
+    "hard": "Hard",
+    "veryHard": "Very Hard"
   }
 }
