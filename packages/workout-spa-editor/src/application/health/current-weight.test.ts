@@ -104,3 +104,62 @@ describe("loadLatestWeighIn", () => {
     expect(latest).toBeUndefined();
   });
 });
+
+describe("loadLatestWeighIn — two weigh-ins on the same day", () => {
+  const DAY = "2026-10-14";
+  const sameDay = (kg: number, time: string): HealthWeightRecord => ({
+    id: crypto.randomUUID(),
+    profileId: PROFILE_ID,
+    date: DAY,
+    krd: {
+      kind: "weight",
+      version: "2.0",
+      measuredAt: `${DAY}T${time}.000Z`,
+      weightKilograms: kg,
+    },
+  });
+  const earlier = sameDay(OLDER_KG, "07:00:00");
+  const later = sameDay(WEIGH_IN_KG, "18:30:00");
+
+  it.each([
+    { order: "earlier first", rows: [earlier, later] },
+    { order: "later first", rows: [later, earlier] },
+  ])(
+    "should pick the most recent measurement whatever the row order ($order)",
+    async ({ rows }) => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      for (const row of rows) await persistence.healthWeight.put(row);
+
+      // Act
+      const latest = await loadLatestWeighIn(persistence, PROFILE_ID, DAY);
+
+      // Assert
+      expect(latest?.krd.weightKilograms).toBe(WEIGH_IN_KG);
+    }
+  );
+
+  it.each([
+    { order: "a first", ids: ["a", "b"] },
+    { order: "b first", ids: ["b", "a"] },
+  ])(
+    "should break a full tie by id, the same way in any order ($order)",
+    async ({ ids }) => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      for (const id of ids) {
+        const kg = id === "a" ? OLDER_KG : WEIGH_IN_KG;
+        await persistence.healthWeight.put({
+          ...sameDay(kg, "07:00:00"),
+          id,
+        });
+      }
+
+      // Act
+      const latest = await loadLatestWeighIn(persistence, PROFILE_ID, DAY);
+
+      // Assert
+      expect(latest?.id).toBe("b");
+    }
+  );
+});

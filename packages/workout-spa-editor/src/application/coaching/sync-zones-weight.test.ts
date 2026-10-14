@@ -3,7 +3,7 @@
  * sync reads it through `getCurrentWeightKg` and records an incoming value as
  * today's weigh-in, never as `profile.bodyWeight`.
  */
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
@@ -11,6 +11,11 @@ import type { ConflictDecision, FieldKey } from "../../types/coaching-zones";
 import type { HealthWeightRecord } from "../../types/health/health-records";
 import type { Profile } from "../../types/profile";
 import { todayIsoDate } from "../../utils/today-iso-date";
+import {
+  getCurrentWeightKg,
+  loadLatestWeighIn,
+} from "../health/current-weight";
+import { saveManualHealthMetric } from "../health/save-manual-health-metric.use-case";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { commitConflictResolution } from "./commit-conflict-resolution";
 import { syncZones } from "./sync-zones";
@@ -26,6 +31,18 @@ const PAST_DAY = "2026-01-05";
 const WEIGHT_FIELD = "bodyWeight" as FieldKey;
 const MANUAL = "manual";
 const TRAIN2GO_BRIDGE = "train2go-bridge";
+// A fixed clock: the weigh-in's day and time never depend on when CI runs.
+const SYNC_AT = "2026-10-14T09:00:00.000Z";
+const LATER = "2026-10-14T10:00:00.000Z";
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(SYNC_AT));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 const makeProfile = (bodyWeight?: number): Profile => ({
   id: PROFILE_ID,
@@ -83,6 +100,14 @@ const seed = async (
   return persistence;
 };
 
+const currentWeight = async (
+  persistence: ReturnType<typeof createInMemoryPersistence>
+) =>
+  getCurrentWeightKg(
+    await persistence.profiles.getById(PROFILE_ID),
+    await loadLatestWeighIn(persistence, PROFILE_ID, todayIsoDate())
+  );
+
 const allWeighIns = async (
   persistence: ReturnType<typeof createInMemoryPersistence>
 ) =>
@@ -120,6 +145,22 @@ describe("syncZones — the weight is the current weight", () => {
     expect(result.conflicts).toEqual([
       { field: WEIGHT_FIELD, current: WEIGH_IN_KG, incoming: T2G_KG },
     ]);
+  });
+
+  it("should compare against profile.bodyWeight when there is no weigh-in", async () => {
+    // Arrange
+    const persistence = await seed(PROFILE_KG);
+
+    // Act
+    const result = await syncZones(PROFILE_ID, transport, persistence);
+
+    // Assert
+    if (!result.ok) throw new Error("expected ok");
+    expect(result.applied).toEqual([]);
+    expect(result.conflicts).toEqual([
+      { field: WEIGHT_FIELD, current: PROFILE_KG, incoming: T2G_KG },
+    ]);
+    expect(await allWeighIns(persistence)).toEqual([]);
   });
 
   it("should record an unknown weight as today's weigh-in, not on the profile", async () => {
@@ -183,6 +224,52 @@ describe("commitConflictResolution — an accepted weight is a weigh-in", () => 
     expect((await persistence.profiles.getById(PROFILE_ID))?.bodyWeight).toBe(
       PROFILE_KG
     );
+  });
+
+  it("should make an accepted weight the current weight over an earlier manual weigh-in", async () => {
+    // Arrange
+    // Manual row first, then Train2Go's (minted with a real UUID).
+    const persistence = await seed(PROFILE_KG, [
+      weighIn(todayIsoDate(), WEIGH_IN_KG),
+    ]);
+
+    // Act
+    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
+
+    // Assert
+    expect(await currentWeight(persistence)).toBe(T2G_KG);
+  });
+
+  it("should make an accepted weight current when Train2Go's row was stored first", async () => {
+    // Arrange
+    // Train2Go's earlier row of the day comes first, the manual one after.
+    const today = todayIsoDate();
+    const persistence = await seed(undefined, [
+      weighIn(today, PROFILE_KG, TRAIN2GO_BRIDGE),
+      weighIn(today, WEIGH_IN_KG),
+    ]);
+
+    // Act
+    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
+
+    // Assert
+    expect(await currentWeight(persistence)).toBe(T2G_KG);
+  });
+
+  it("should let a later manual edit win over the Train2Go weigh-in", async () => {
+    // Arrange
+    const persistence = await seed();
+    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
+    vi.setSystemTime(new Date(LATER));
+
+    // Act
+    await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "weight", day: todayIsoDate(), value: WEIGH_IN_KG }
+    );
+
+    // Assert
+    expect(await currentWeight(persistence)).toBe(WEIGH_IN_KG);
   });
 
   it("should update the Train2Go weigh-in of the day when Train2Go's weight changes", async () => {

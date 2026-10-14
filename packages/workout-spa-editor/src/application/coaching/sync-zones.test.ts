@@ -398,6 +398,29 @@ describe("syncZones — silent fills and conflicts", () => {
   });
 });
 
+describe("syncZones — a profile edit made during the fetch", () => {
+  it("should keep an edit saved while Train2Go was being read", async () => {
+    // Arrange
+    const RENAMED = "Renamed while syncing";
+    const persistence = createInMemoryPersistence();
+    await persistence.profiles.put(makeProfile());
+    const transport = makeTransport(async () => {
+      await persistence.profiles.put(makeProfile({ name: RENAMED }));
+      return PAYLOAD_FULL;
+    });
+
+    // Act
+    await syncZones(PROFILE_ID, transport, persistence);
+
+    // Assert
+    const after = await persistence.profiles.getById(PROFILE_ID);
+    expect(after?.name).toBe(RENAMED);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ4Upper
+    );
+  });
+});
+
 describe("commitConflictResolution", () => {
   const conflictPayload: ZonesPayload = {
     paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },

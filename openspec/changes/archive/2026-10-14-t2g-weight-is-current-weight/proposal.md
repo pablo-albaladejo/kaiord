@@ -28,6 +28,21 @@ weight written behind the weigh-ins.
 - A weight equal to Train2Go's own latest weigh-in is not news: re-syncing it
   records nothing and raises no conflict, even if another source weighed in
   since.
+- The current weight is the most recent measurement: `latestUpTo` orders
+  same-day weigh-ins by `measuredAt`, then by id, instead of by storage order
+  (Dexie returns same-day rows by random UUID, so an accepted Train2Go weight
+  lost to an earlier manual weigh-in about half the time). The Train2Go
+  weigh-in and today's manual weigh-in carry the real time they were taken; a
+  past day's manual weigh-in keeps noon.
+- A manual save reuses only the day's manual row and never re-stamps another
+  source's row as manual. Steps stays the exception: it merges into the day's
+  daily row so imported calories survive.
+- `syncZones` and `commitConflictResolution` read the profile inside the
+  transaction that writes it, so an edit saved during the Train2Go fetch is
+  kept.
+- The Data Hub offers no `weight ← train2go-bridge` route: Train2Go announces
+  no `read:body` capability, and the supported-route table only narrows a
+  bridge's tokens, it cannot add one. The zones-sync toggle is the only gate.
 - The health source badge names `train2go-bridge` "Train2Go".
 - `profile.bodyWeight` is no longer written by `syncZones` or
   `commitConflictResolution`; the threshold accessors drop it.

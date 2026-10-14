@@ -12,7 +12,6 @@ import type {
   WrittenField,
 } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
-import { todayIsoDate } from "../../utils/today-iso-date";
 import { latestUpTo } from "../energy/load-day-energy-sources";
 import { getCurrentWeightKg } from "../health/current-weight";
 import {
@@ -36,13 +35,14 @@ export const splitWeight = (
 export const reconcileWeight = async (
   persistence: PersistencePort,
   profile: Profile,
-  incomingKg: number | undefined
+  incomingKg: number | undefined,
+  today: string
 ): Promise<{ applied: WrittenField[]; conflicts: ConflictItem[] }> => {
   if (incomingKg === undefined) return NOTHING;
   const rows = await persistence.healthWeight.getByProfileAndDateRange(
     profile.id,
     EARLIEST_DATE,
-    todayIsoDate()
+    today
   );
   const reported = latestUpTo(
     rows.filter((r) => r.sourceBridgeId === TRAIN2GO_BRIDGE_ID)
@@ -65,7 +65,8 @@ export const reconcileWeight = async (
 export const recordSyncedWeight = async (
   persistence: PersistencePort,
   profileId: string,
-  kg: number
+  kg: number,
+  today: string
 ): Promise<void> => {
-  await recordTrain2GoWeighIn(persistence, profileId, kg, todayIsoDate());
+  await recordTrain2GoWeighIn(persistence, profileId, kg, today);
 };

@@ -64,7 +64,13 @@ The `syncZones(profileId, transport, persistence): Promise<SyncZonesResult>` use
 
 Reconciliation operates at TWO granularities: (a) **threshold scalars** (`cycling.thresholds.ftp`, etc.) — one FieldKey per scalar, identical to the original change; (b) **zone bands** (`cycling.heartRateZones.z2.maxBpm`, etc.) — one FieldKey per band-bound, where each Z1-Z5 of each sport-kind table can independently land in `applied` or `conflicts`.
 
-The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictItem[], payload: ZonesPayload }`. The `payload` field is the validated bridge response, returned so the UI can pass it back into `commitConflictResolution` without re-fetching. Conflicting values MUST NOT be written to the profile by `syncZones` itself — they are returned to the caller (the UI) for presentation. Silent fills ARE written eagerly during `syncZones` execution.
+The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictItem[], payload: ZonesPayload }`. The `payload` field is the validated bridge response, returned so the UI can pass it back into `commitConflictResolution` without re-fetching. Conflicting values MUST NOT be written to the profile by `syncZones` itself — they are returned to the caller (the UI) for presentation. Silent fills ARE written eagerly during `syncZones` execution. `syncZones` SHALL re-read the profile inside the transaction that writes the fills, so an edit saved while Train2Go was being read is kept, not overwritten by the profile read before the fetch.
+
+#### Scenario: A profile edit saved during the fetch is kept
+
+- **GIVEN** the athlete renames their profile while `syncZones` is reading Train2Go
+- **WHEN** `syncZones` writes its silent fills
+- **THEN** the profile SHALL keep the new name and gain the silent fills
 
 #### Scenario: Triathlete profile gets per-sport LTHR (silent fills)
 
@@ -525,7 +531,7 @@ Standalone (non-coupled) cycling-power band groups MAY preserve per-band display
 
 ### Requirement: Train2Go's weight is the athlete's current weight
 
-The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's current weight, never as `profile.bodyWeight`. It SHALL compare the incoming weight against the current weight (the latest weigh-in on or before today, else `profile.bodyWeight`, through `getCurrentWeightKg`) under the same fill / no-op / conflict rules as every other field. A silent fill, and an accepted weight conflict, SHALL record the weight as a weigh-in for today stamped `sourceBridgeId: "train2go-bridge"` (the Train2Go bridge id, like every other bridge's health rows), never as `"manual"`. Sources SHALL NOT overwrite each other's rows: a same-day write SHALL update only Train2Go's own weigh-in of that day, and a manual weigh-in of the same day SHALL stay untouched, leaving the choice between them to the multi-source read policy. Neither `syncZones` nor `commitConflictResolution` SHALL write `profile.bodyWeight`. A weight equal to Train2Go's own latest weigh-in, or to the current weight, SHALL record nothing and raise no conflict.
+The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's current weight, never as `profile.bodyWeight`. It SHALL compare the incoming weight against the current weight (the latest weigh-in on or before today, else `profile.bodyWeight`, through `getCurrentWeightKg`) under the same fill / no-op / conflict rules as every other field. A silent fill, and an accepted weight conflict, SHALL record the weight as a weigh-in for today stamped `sourceBridgeId: "train2go-bridge"` (the Train2Go bridge id, like every other bridge's health rows), never as `"manual"`. Sources SHALL NOT overwrite each other's rows: a same-day write SHALL update only Train2Go's own weigh-in of that day, and a manual weigh-in of the same day SHALL stay untouched, The Train2Go weigh-in SHALL carry `measuredAt` = the moment it is recorded, so the current weight is the most recent measurement: of two weigh-ins on the same day, the one measured later SHALL win, whatever order the rows are stored in. The weigh-in is gated only by the zones-sync toggle: Train2Go announces no `read:body` capability, so the Data Hub offers no `weight ← train2go-bridge` route, and under a priority source policy the Train2Go weigh-in is skipped like any source without an enabled import route. Neither `syncZones` nor `commitConflictResolution` SHALL write `profile.bodyWeight`. A weight equal to Train2Go's own latest weigh-in, or to the current weight, SHALL record nothing and raise no conflict.
 
 #### Scenario: An unknown weight is recorded as today's weigh-in
 
@@ -556,6 +562,18 @@ The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's cu
 - **THEN** the manual weigh-in of 75 kg SHALL be unchanged
 - **AND** exactly one `train2go-bridge` weigh-in dated today SHALL exist, at 83 kg
 - **AND** `profile.bodyWeight` SHALL be unchanged
+
+#### Scenario: An accepted weight becomes the current weight over an earlier manual weigh-in
+
+- **GIVEN** today's manual weigh-in of 75 kg was measured at 07:00 and Train2Go reports 83
+- **WHEN** the weight conflict is accepted at 09:00
+- **THEN** the current weight SHALL be 83 kg, whichever order the two rows are stored in
+
+#### Scenario: A later manual edit wins over the Train2Go weigh-in
+
+- **GIVEN** Train2Go's weigh-in of 83 kg was recorded today at 09:00
+- **WHEN** the athlete enters 75 kg by hand at 10:00
+- **THEN** the current weight SHALL be 75 kg and the Train2Go weigh-in SHALL be unchanged
 
 #### Scenario: A weight Train2Go already reported raises no conflict again
 

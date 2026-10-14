@@ -18,6 +18,7 @@ import type {
   ZonesPayload,
 } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
+import { todayIsoDate } from "../../utils/today-iso-date";
 import { ProfileNotFoundError } from "../profile/errors";
 import { applyBandTableDecisions } from "./commit-conflict-band-tables";
 import { partitionDecisions } from "./commit-conflict-partition";
@@ -53,32 +54,25 @@ export const commitConflictResolution = async (
   source = "train2go"
 ): Promise<void> => {
   const repo = persistence.profiles;
-  const profile = await repo.getById(profileId);
-  if (!profile) throw new ProfileNotFoundError(profileId);
   const { weightKg, rest: incoming } = splitWeight(
     mapPayloadToIncoming(transportPayload)
   );
   const { thresholdKeys, bandTableKeys } = partitionDecisions(decisions);
-  let next = applyThresholdDecisions(
-    profile,
-    thresholdKeys,
-    decisions,
-    incoming
-  );
-  next = applyBandTableDecisions(
-    next,
-    bandTableKeys,
-    decisions,
-    incoming,
-    source
-  );
-  const acceptWeight =
-    decisions[WEIGHT_FIELD] === "accept" && weightKg !== undefined;
+  const today = todayIsoDate();
   await persistence.transaction(async () => {
+    const profile = await repo.getById(profileId);
+    if (!profile) throw new ProfileNotFoundError(profileId);
+    const next = applyBandTableDecisions(
+      applyThresholdDecisions(profile, thresholdKeys, decisions, incoming),
+      bandTableKeys,
+      decisions,
+      incoming,
+      source
+    );
     if (next !== profile) {
       await repo.put({ ...next, updatedAt: new Date().toISOString() });
     }
-    if (acceptWeight)
-      await recordSyncedWeight(persistence, profileId, weightKg);
+    if (decisions[WEIGHT_FIELD] === "accept" && weightKg !== undefined)
+      await recordSyncedWeight(persistence, profileId, weightKg, today);
   });
 };
