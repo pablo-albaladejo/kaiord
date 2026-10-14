@@ -7,8 +7,9 @@
  * 10 solo actual) under CDP CPU throttle 4× on Chromium:
  *
  *   1. Render cost. Showing the 30-card week costs at most
- *      RENDER_COST_RATIO_BUDGET times showing a 3-card week (1 / 1 / 1)
- *      measured in the same page, the same run and the same throttle.
+ *      RENDER_COST_RATIO_BUDGET times showing a 3-card week (1 / 1 / 1),
+ *      fastest against fastest over interleaved pairs measured in the same
+ *      page, the same run and the same throttle.
  *   2. The `useMatchedSessions` slice, on a steady-state re-fire.
  *
  * Why a ratio and not an absolute first contentful paint: on the Vite dev
@@ -28,8 +29,8 @@
  *      row carries the profileId: the calendar reads the active profile's
  *      rows only.
  *   3. Set CDP CPU throttling to factor 4×, reload on an empty week.
- *   4. Prove both weeks render every seeded card, then time each arm
- *      RENDER_SAMPLES times, interleaved, from the empty week.
+ *   4. Prove both weeks render every seeded card, then time RENDER_SAMPLES
+ *      interleaved pairs of the two weeks, each from the empty week.
  *
  * Reproduction:
  *   pnpm --filter @kaiord/workout-spa-editor test:e2e \
@@ -43,16 +44,18 @@ import type { CardCounts } from "./helpers/calendar-perf-rows";
 import { seedPerfWeeks, showWeek } from "./helpers/calendar-perf-week";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
-// Fastest 30-card render over fastest 3-card render, both from the empty
-// week. Healthy chromium measured 1.12-1.46 at throttle 4×, 8× and 12× on a
-// loaded machine (absolute floors 100 ms to 1150 ms), and up to 1.71 with
-// three runs in parallel, so the ratio carries the runner's speed out. One extra millisecond per card render already
-// measured 2.37-4.03.
-const RENDER_COST_RATIO_BUDGET = 2;
-// Interleaved samples per arm; the minimum is the arm's own-work floor (a
-// transient stall only ever adds time) and interleaving exposes both arms
-// to the same machine load.
-const RENDER_SAMPLES = 5;
+// Fastest 30-card time over fastest 3-card time, both shown from the empty
+// week. Each arm is bimodal (a fast mode and one 2-3x slower when another
+// live-query emission lands in the window), and the two arms pick their mode
+// independently, so a per-pair ratio swings 0.5-4.3 and its median overlaps
+// a regression; the minimum of each arm is its fast mode, stable across runs.
+// Healthy chromium measured 1.05-1.74 over 24 runs (throttle 4x, 8x and 12x,
+// three runs in parallel, Mobile Chrome); one extra millisecond per card
+// render measured 3.10-3.94 over 12 runs. The budget sits between the two.
+const RENDER_COST_RATIO_BUDGET = 2.3;
+// Interleaved pairs per run, alternating which arm goes first, so both arms
+// see the same machine load.
+const RENDER_SAMPLES = 7;
 const RENDER_TIMEOUT_MS = 20_000;
 // Aspirational per-hook slice from design D16. NOT asserted directly:
 // the measure wraps an async useLiveQuery span whose steady-state
@@ -128,6 +131,9 @@ const parkOnEmptyWeek = async (page: Page) => {
   );
   await nextFrames(page);
 };
+
+const BIG_ARM = [BIG_WEEK, BIG] as const;
+const SMALL_ARM = [SMALL_WEEK, SMALL] as const;
 
 const timeArm = async (
   page: Page,
@@ -234,26 +240,34 @@ test.describe("CalendarPage render-cost budget", () => {
       await parkOnEmptyWeek(page);
     }
 
-    // 5. Interleaved samples, alternating which arm goes first.
-    const bigMs: number[] = [];
-    const smallMs: number[] = [];
+    // 5. Interleaved pairs, alternating which arm goes first.
+    const pairs: { big: number; small: number }[] = [];
     for (let i = 0; i < RENDER_SAMPLES; i += 1) {
-      if (i % 2 === 0) bigMs.push(await timeArm(page, BIG_WEEK, BIG));
-      smallMs.push(await timeArm(page, SMALL_WEEK, SMALL));
-      if (i % 2 === 1) bigMs.push(await timeArm(page, BIG_WEEK, BIG));
+      const bigFirst = i % 2 === 0;
+      const first = await timeArm(page, ...(bigFirst ? BIG_ARM : SMALL_ARM));
+      const second = await timeArm(page, ...(bigFirst ? SMALL_ARM : BIG_ARM));
+      pairs.push(
+        bigFirst ? { big: first, small: second } : { big: second, small: first }
+      );
     }
-    const bigFloor = Math.min(...bigMs);
-    const smallFloor = Math.min(...smallMs);
-    const ratio = bigFloor / smallFloor;
-    const samples = `30 cards [${bigMs.map((m) => m.toFixed(0)).join(", ")}] ms, 3 cards [${smallMs.map((m) => m.toFixed(0)).join(", ")}] ms`;
+    const bigMin = Math.min(...pairs.map((p) => p.big));
+    const smallMin = Math.min(...pairs.map((p) => p.small));
+    const ratio = bigMin / smallMin;
+    const report = [
+      `ratio ${ratio.toFixed(2)} (budget ${RENDER_COST_RATIO_BUDGET})`,
+      `30 cards [${pairs.map((p) => p.big.toFixed(0)).join(", ")}] ms`,
+      `3 cards [${pairs.map((p) => p.small.toFixed(0)).join(", ")}] ms`,
+      `project ${testInfo.project.name}`,
+    ].join("; ");
+    // Logged on every run, so each CI log records the real margin.
+    console.log(`calendar render cost: ${report}`);
     testInfo.annotations.push({
       type: "calendar render cost",
-      description: `ratio ${ratio.toFixed(2)}; ${samples}`,
+      description: report,
     });
-    expect(
-      ratio,
-      `30-card week took ${ratio.toFixed(2)}x the 3-card week (budget ${RENDER_COST_RATIO_BUDGET}x; ${samples}; project: ${testInfo.project.name})`
-    ).toBeLessThanOrEqual(RENDER_COST_RATIO_BUDGET);
+    expect(ratio, `30-card week vs 3-card week: ${report}`).toBeLessThanOrEqual(
+      RENDER_COST_RATIO_BUDGET
+    );
 
     // Back on the 30-card week for the hook measurement.
     await showWeek(page, {
