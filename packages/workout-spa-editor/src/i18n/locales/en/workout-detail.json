@@ -30,7 +30,7 @@
     "sendToTrainingPeaks": "Send to TrainingPeaks",
     "sentToTrainingPeaks": "On TrainingPeaks",
     "sendDisabled": {
-      "noExtension": "Install the Kaiord Garmin Bridge extension to send this workout.",
+      "noExtension": "Install the Kaiord extension for Garmin to send this workout.",
       "signedOut": "Sign in to Garmin Connect in this browser to send this workout."
     }
   },
@@ -82,7 +82,7 @@
     "libraryOnly": {
       "insecure-context": "In your Garmin library, with no date: placing it on the calendar needs a secure (https) page.",
       "unsupported-browser": "In your Garmin library, with no date: this browser cannot place it on the calendar. An up-to-date browser can.",
-      "bridge-outdated": "In your Garmin library, with no date: update the Kaiord Garmin Bridge extension to place it on the calendar."
+      "bridge-outdated": "In your Garmin library, with no date: update the Kaiord extension for Garmin to place it on the calendar."
     },
     "updateExtension": "Update the extension",
     "openConnections": "Open Connections",

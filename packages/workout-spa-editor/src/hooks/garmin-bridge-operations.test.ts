@@ -87,7 +87,7 @@ describe("evaluatePingResult", () => {
       expect(result).toEqual({
         installed: true,
         session: false,
-        error: "Update your Kaiord Garmin Bridge extension",
+        error: "Update your Kaiord extension for Garmin",
         features: [],
       });
     }

@@ -30,7 +30,7 @@
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
     "sendDisabled": {
-      "noExtension": "Instala la extensión Kaiord Garmin Bridge para enviar este entreno.",
+      "noExtension": "Instala la Extensión de Kaiord para Garmin para enviar este entreno.",
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."
     }
   },
@@ -82,7 +82,7 @@
     "libraryOnly": {
       "insecure-context": "En tu biblioteca de Garmin, sin fecha: colocarlo en el calendario requiere una página segura (https).",
       "unsupported-browser": "En tu biblioteca de Garmin, sin fecha: este navegador no puede colocarlo en el calendario. Un navegador actualizado sí puede.",
-      "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la extensión Kaiord Garmin Bridge para colocarlo en el calendario."
+      "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la Extensión de Kaiord para Garmin para colocarlo en el calendario."
     },
     "updateExtension": "Actualizar la extensión",
     "openConnections": "Abrir Conexiones",

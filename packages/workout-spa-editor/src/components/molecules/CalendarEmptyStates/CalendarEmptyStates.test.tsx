@@ -256,7 +256,7 @@ describe("NoBridgesState", () => {
 
     // Act
 
-    const link = screen.getByText("Install the bridge");
+    const link = screen.getByText("Install the Kaiord extension");
 
     // Assert
 

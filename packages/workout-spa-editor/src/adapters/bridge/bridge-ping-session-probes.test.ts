@@ -77,7 +77,7 @@ describe("probeGarminSession", () => {
     expect(result).toEqual({
       reachable: true,
       sessionActive: false,
-      error: "Update your Kaiord Garmin Bridge extension",
+      error: "Update your Kaiord extension for Garmin",
       needsReauth: false,
       outdated: true,
     });
