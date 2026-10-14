@@ -199,7 +199,9 @@ describe("EditorPage", () => {
       )
     ).toBeInTheDocument();
     expect(
-      within(ribbon).getByRole("button", { name: /install the kaiord extension/i })
+      within(ribbon).getByRole("button", {
+        name: /install the kaiord extension/i,
+      })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();
     expect(user).toBeDefined();
@@ -247,7 +249,9 @@ describe("EditorPage", () => {
     const ribbon = await screen.findByTestId("editor-state-ribbon");
 
     expect(
-      within(ribbon).getByRole("button", { name: /install the kaiord extension/i })
+      within(ribbon).getByRole("button", {
+        name: /install the kaiord extension/i,
+      })
     ).toBeInTheDocument();
     expect(user).toBeDefined();
   });
