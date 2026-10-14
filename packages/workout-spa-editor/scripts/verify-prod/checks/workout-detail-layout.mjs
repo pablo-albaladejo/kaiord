@@ -25,6 +25,9 @@ export async function detailLayout(rec, page) {
     `the workout detail is at least ${MIN_SHEET_WIDTH} px wide on a desktop`,
     `sheet=${fmt(sheet)}`
   );
+  // "On the first screen" holds only because `scheduleOn` builds a one-step
+  // workout: a longer structure legitimately pushes the actions below the
+  // fold, so grow that workout and this assertion has to change.
   const edit = await boxOf(page.getByRole("button", { name: /^Editar$/ }));
   const { height } = page.viewportSize();
   rec.assert(

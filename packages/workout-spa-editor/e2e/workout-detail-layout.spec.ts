@@ -81,6 +81,9 @@ for (const { width, height } of DESKTOP_VIEWPORTS) {
       expect(sheet.width).toBeGreaterThanOrEqual(MIN_DESKTOP_SHEET_WIDTH);
     });
 
+    // "On the first screen" holds only because `openScheduledDetail` builds a
+    // one-step workout: a longer structure legitimately pushes the actions
+    // below the fold, so grow the seed and this assertion has to change.
     test("should show one-line actions without scrolling", async ({ page }) => {
       const edit = await box(page.getByRole("button", { name: "Editar" }));
       const viewport = page.viewportSize()!;
