@@ -19,7 +19,12 @@ jobs:
   gate:
     name: Quality Metrics Gate
     runs-on: ubuntu-latest
-    # P95 = 335s; ceil(P95 × 1.5 / 60) = 9; capped at test-family ceiling 30.
+    # Budget = ceil(2 × measured max / 60), so one runner at half speed still
+    # finishes and a hang dies within ~5 minutes of a normal run.
+    # Measured 2026-10-14 (PR #1440, after collect-metrics stopped running
+    # every suite twice and rebuilding), job wall time: n=4, p50=264s,
+    # max=270s → 9. Before: n=77, p50=414s, p95=452s, max=479s (the same 9
+    # minutes was then only 1.13 × max). Test-family ceiling 30.
     timeout-minutes: 9
     if: github.actor != 'github-actions[bot]'
     steps:
