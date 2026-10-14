@@ -45,7 +45,7 @@ import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 // Fastest 30-card render over fastest 3-card render, both from the empty
 // week. Healthy chromium measured 1.12-1.46 at throttle 4×, 8× and 12× on a
-// loaded machine (absolute floors 100 ms to 1150 ms), and up to 1.55 with
+// loaded machine (absolute floors 100 ms to 1150 ms), and up to 1.71 with
 // three runs in parallel, so the ratio carries the runner's speed out. One extra millisecond per card render already
 // measured 2.37-4.03.
 const RENDER_COST_RATIO_BUDGET = 2;
