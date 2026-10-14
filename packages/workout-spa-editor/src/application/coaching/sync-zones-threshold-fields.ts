@@ -1,18 +1,19 @@
 /**
- * Threshold-scalar FieldKey accessors (the legacy 7 keys). Band-level
- * keys are handled separately in `sync-zones-band-fields.ts` /
- * `sync-zones-band-writes.ts`.
+ * Threshold-scalar FieldKey accessors. Band-level keys are handled
+ * separately in `sync-zones-band-fields.ts` / `sync-zones-band-writes.ts`.
+ * The weight is not a profile field here: it is the current weight
+ * (`sync-zones-weight.ts`).
  */
 import type { ThresholdFieldKey } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 
+export type ProfileThresholdKey = Exclude<ThresholdFieldKey, "bodyWeight">;
+
 export const readThreshold = (
   profile: Profile,
-  field: ThresholdFieldKey
+  field: ProfileThresholdKey
 ): number | undefined => {
   switch (field) {
-    case "bodyWeight":
-      return profile.bodyWeight;
     case "heartRate.max":
       return profile.maxHeartRate;
     case "cycling.thresholds.ftp":
@@ -48,12 +49,10 @@ const setSportThreshold = (
 
 export const writeThreshold = (
   profile: Profile,
-  field: ThresholdFieldKey,
+  field: ProfileThresholdKey,
   value: number
 ): Profile => {
   switch (field) {
-    case "bodyWeight":
-      return { ...profile, bodyWeight: value };
     case "heartRate.max":
       return { ...profile, maxHeartRate: value };
     case "cycling.thresholds.ftp":

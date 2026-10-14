@@ -11,43 +11,24 @@
  * Idempotent — calling twice with the same `decisions` produces the
  * same final state.
  */
-import type { ProfileRepository } from "../../ports/persistence-port";
+import type { PersistencePort } from "../../ports/persistence-port";
 import type {
   ConflictDecision,
   FieldKey,
   ZonesPayload,
 } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
+import { todayIsoDate } from "../../utils/today-iso-date";
 import { ProfileNotFoundError } from "../profile/errors";
 import { applyBandTableDecisions } from "./commit-conflict-band-tables";
+import { partitionDecisions } from "./commit-conflict-partition";
 import { mapPayloadToIncoming } from "./sync-zones-payload-mapper";
 import { writeField } from "./sync-zones-profile-fields";
-import { tableKeyOfField } from "./sync-zones-snapshot";
-
-const partitionDecisions = (
-  decisions: Record<FieldKey, ConflictDecision>
-): {
-  thresholdKeys: FieldKey[];
-  bandTableKeys: Map<string, FieldKey[]>;
-} => {
-  const thresholdKeys: FieldKey[] = [];
-  const bandTableKeys = new Map<string, FieldKey[]>();
-  for (const key of Object.keys(decisions) as FieldKey[]) {
-    const tk = tableKeyOfField(key);
-    if (!tk) {
-      thresholdKeys.push(key);
-      continue;
-    }
-    const slot = `${tk.sport}.${tk.kind}`;
-    let entry = bandTableKeys.get(slot);
-    if (!entry) {
-      entry = [];
-      bandTableKeys.set(slot, entry);
-    }
-    entry.push(key);
-  }
-  return { thresholdKeys, bandTableKeys };
-};
+import {
+  recordSyncedWeight,
+  splitWeight,
+  WEIGHT_FIELD,
+} from "./sync-zones-weight";
 
 const applyThresholdDecisions = (
   profile: Profile,
@@ -68,28 +49,30 @@ const applyThresholdDecisions = (
 export const commitConflictResolution = async (
   profileId: string,
   decisions: Record<FieldKey, ConflictDecision>,
-  repo: ProfileRepository,
+  persistence: PersistencePort,
   transportPayload: ZonesPayload,
   source = "train2go"
 ): Promise<void> => {
-  const profile = await repo.getById(profileId);
-  if (!profile) throw new ProfileNotFoundError(profileId);
-  const incoming = mapPayloadToIncoming(transportPayload);
+  const repo = persistence.profiles;
+  const { weightKg, rest: incoming } = splitWeight(
+    mapPayloadToIncoming(transportPayload)
+  );
   const { thresholdKeys, bandTableKeys } = partitionDecisions(decisions);
-  let next = applyThresholdDecisions(
-    profile,
-    thresholdKeys,
-    decisions,
-    incoming
-  );
-  next = applyBandTableDecisions(
-    next,
-    bandTableKeys,
-    decisions,
-    incoming,
-    source
-  );
-  if (next !== profile) {
-    await repo.put({ ...next, updatedAt: new Date().toISOString() });
-  }
+  const today = todayIsoDate();
+  await persistence.transaction(async () => {
+    const profile = await repo.getById(profileId);
+    if (!profile) throw new ProfileNotFoundError(profileId);
+    const next = applyBandTableDecisions(
+      applyThresholdDecisions(profile, thresholdKeys, decisions, incoming),
+      bandTableKeys,
+      decisions,
+      incoming,
+      source
+    );
+    if (next !== profile) {
+      await repo.put({ ...next, updatedAt: new Date().toISOString() });
+    }
+    if (decisions[WEIGHT_FIELD] === "accept" && weightKg !== undefined)
+      await recordSyncedWeight(persistence, profileId, weightKg, today);
+  });
 };

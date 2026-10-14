@@ -293,7 +293,16 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       };
     }, PROFILE_ID);
 
-    expect(profile.bodyWeight).toBe(FIXTURE_ZONES_PAYLOAD.physiological.weight);
+    // The weight is the athlete's current weight: one Train2Go weigh-in for
+    // today, written with the profile, and never profile.bodyWeight.
+    expect(profile.bodyWeight).toBeUndefined();
+    expect(await readWeighIns(page)).toEqual([
+      {
+        date: await localToday(page),
+        kg: FIXTURE_ZONES_PAYLOAD.physiological.weight,
+        source: "train2go-bridge",
+      },
+    ]);
     expect(profile.maxHeartRate).toBe(
       FIXTURE_ZONES_PAYLOAD.physiological.bpmMax
     );
@@ -1001,6 +1010,37 @@ type ProfileSnapshot = {
   };
   linkedAccounts?: { lastSyncedZonesSnapshot?: { syncedAt?: string } }[];
 };
+
+const readWeighIns = async (
+  page: Page
+): Promise<Array<{ date: string; kg: number; source?: string }>> =>
+  page.evaluate(async (profileId) => {
+    type Row = {
+      profileId: string;
+      date: string;
+      sourceBridgeId?: string;
+      krd: { weightKilograms: number };
+    };
+    type Db = { table: (n: string) => { toArray: () => Promise<Row[]> } };
+    const db = (window as unknown as Record<string, unknown>)
+      .__KAIORD_DB__ as Db;
+    const rows = await db.table("healthWeight").toArray();
+    return rows
+      .filter((r) => r.profileId === profileId)
+      .map((r) => ({
+        date: r.date,
+        kg: r.krd.weightKilograms,
+        source: r.sourceBridgeId,
+      }));
+  }, PROFILE_ID);
+
+// The browser's local calendar day, the day the SPA stamps a weigh-in with.
+const localToday = async (page: Page): Promise<string> =>
+  page.evaluate(() => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  });
 
 const countReadDetails = async (page: Page): Promise<number> =>
   page.evaluate(() => {

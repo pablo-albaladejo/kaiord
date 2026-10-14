@@ -190,7 +190,7 @@ describe("useZonesSyncOrchestrator", () => {
     expect(mockCommit).toHaveBeenCalledWith(
       "p1",
       { "cycling.ftp": "accept" },
-      persistence.profiles,
+      persistence,
       samplePayload
     );
     expect(result.current.pending).toBeNull();

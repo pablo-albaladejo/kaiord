@@ -6,7 +6,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
+import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { LastSyncedZonesSnapshot } from "../../types/coaching-account";
 import type {
   ConflictDecision,
@@ -82,7 +82,8 @@ describe("syncZones method-aware — first-sync (3.4a)", () => {
     // Arrange
     // Fresh profile: cycling has Coggan-7 power; cycling/running/
     // swimming heartRateZones are seeded with all-zero HR.
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -116,7 +117,7 @@ describe("syncZones method-aware — first-sync (3.4a)", () => {
     );
 
     // Act
-    const result = await syncZones(PROFILE_ID, makeTransport(), repo);
+    const result = await syncZones(PROFILE_ID, makeTransport(), persistence);
 
     // Assert
     expect(result.ok).toBe(true);
@@ -142,7 +143,8 @@ describe("syncZones method-aware — re-sync stability (3.4b)", () => {
   it("should produce zero conflicts AND zero applied entries on re-sync of unchanged data", async () => {
     // Arrange
     // First sync establishes baseline.
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -156,11 +158,11 @@ describe("syncZones method-aware — re-sync stability (3.4b)", () => {
         },
       })
     );
-    await syncZones(PROFILE_ID, makeTransport(), repo);
+    await syncZones(PROFILE_ID, makeTransport(), persistence);
 
     // Act
     // Second sync against same data.
-    const result = await syncZones(PROFILE_ID, makeTransport(), repo);
+    const result = await syncZones(PROFILE_ID, makeTransport(), persistence);
 
     // Assert
     expect(result.ok).toBe(true);
@@ -175,7 +177,8 @@ describe("commitConflictResolution method-aware — accept-all (3.4g)", () => {
     // Arrange
     // Profile already user-customized; conflicts emitted; user
     // accepts all 5 cycling-HR band-bound conflicts.
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -204,7 +207,7 @@ describe("commitConflictResolution method-aware — accept-all (3.4g)", () => {
     } as Record<FieldKey, ConflictDecision>;
 
     // Act
-    await commitConflictResolution(PROFILE_ID, decisions, repo, PAYLOAD);
+    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
@@ -221,7 +224,8 @@ describe("commitConflictResolution method-aware — mixed accept/reject (3.4f)",
   it("should set method = 'user' when SOME but NOT ALL band conflicts are accepted", async () => {
     // Arrange
     // User accepts Z1 (both bounds) and Z2.maxBpm; rejects Z4.maxBpm and Z5.minBpm.
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -250,7 +254,7 @@ describe("commitConflictResolution method-aware — mixed accept/reject (3.4f)",
     } as Record<FieldKey, ConflictDecision>;
 
     // Act
-    await commitConflictResolution(PROFILE_ID, decisions, repo, PAYLOAD);
+    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
@@ -269,7 +273,8 @@ describe("commitConflictResolution method-aware — mixed accept/reject (3.4f)",
 describe("commitConflictResolution method-aware — all-reject (3.4d)", () => {
   it("should leave method and snapshot untouched when ALL band decisions are reject", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     const preSnapshot: LastSyncedZonesSnapshot = {
       syncedAt: "2025-01-01T00:00:00.000Z",
       cyclingHr: [],
@@ -314,7 +319,7 @@ describe("commitConflictResolution method-aware — all-reject (3.4d)", () => {
     } as Record<FieldKey, ConflictDecision>;
 
     // Act
-    await commitConflictResolution(PROFILE_ID, decisions, repo, PAYLOAD);
+    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);

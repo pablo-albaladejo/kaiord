@@ -67,7 +67,7 @@ export const useZonesSyncOrchestrator = (
 
   const runSync = useCallback(
     async (profileId: string) => {
-      const r = await syncZones(profileId, transport, persistence.profiles);
+      const r = await syncZones(profileId, transport, persistence);
       if (!r.ok) {
         handleFailure(r.reason, toasts);
         return;
@@ -85,7 +85,7 @@ export const useZonesSyncOrchestrator = (
       await commitConflictResolution(
         pending.profileId,
         decisions,
-        persistence.profiles,
+        persistence,
         pending.payload
       );
       setPending(null);
