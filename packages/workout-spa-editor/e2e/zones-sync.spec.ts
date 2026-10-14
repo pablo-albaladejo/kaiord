@@ -53,10 +53,11 @@ type CyclingFtp = number | undefined;
 const seedProfile = async (
   page: Page,
   syncZones: SyncZonesFlag,
-  ftp: CyclingFtp
+  ftp: CyclingFtp,
+  weightRouteEnabled?: boolean
 ): Promise<void> => {
   await page.evaluate(
-    async ({ profileId, ts, syncZonesFlag, cyclingFtp }) => {
+    async ({ profileId, ts, syncZonesFlag, cyclingFtp, weightRoute }) => {
       type Db = {
         table: (n: string) => {
           put: (r: unknown) => Promise<unknown>;
@@ -97,6 +98,20 @@ const seedProfile = async (
       // any prior policy, then mirror the test's syncZones intent onto a
       // policy so the auto-sync fan-out fires (or not) accordingly.
       await db.table("integrationPolicies").clear();
+      // Written before the zones route below: that route is what lets the
+      // mounted calendar start a sync, which must already see this one.
+      if (weightRoute !== undefined) {
+        await db.table("integrationPolicies").put({
+          id: "zones-sync-weight-route",
+          profileId,
+          dataType: "weight",
+          bridgeId: "train2go-bridge",
+          direction: "import",
+          mode: "auto",
+          enabled: weightRoute,
+          updatedAt: ts,
+        });
+      }
       // Coaching sync (read-week) is governed by an enabled planned-session
       // import route (F1.3). Seed it so the Sync button is active and
       // syncWeek proceeds; the syncZones flag only gates the zones fan-out.
@@ -162,6 +177,7 @@ const seedProfile = async (
       ts: NOW_ISO,
       syncZonesFlag: syncZones,
       cyclingFtp: ftp,
+      weightRoute: weightRouteEnabled,
     }
   );
 };
@@ -322,6 +338,47 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     expect(profile.sportZones.swimming?.thresholds.thresholdPace).toBe(
       FIXTURE_SWIMMING_THRESHOLD_PACE_S
     );
+  });
+
+  test("(b2) weight route switched off — the zones sync, the weight is not recorded", async ({
+    page,
+  }) => {
+    // Arrange: the same empty profile as (b), with the Train2Go weight route
+    // switched off in the Data Hub.
+    await seedProfile(page, true, undefined, false);
+
+    // Act
+    await navigateToWeek(page);
+    await waitForSyncButton(page);
+    await waitForBridgeAction(page, "read-details");
+    // The profile and the weigh-in are written in one transaction, so once the
+    // FTP is visible the weigh-in would be too.
+    await page.waitForFunction(
+      ({ profileId, expectedFtp }) => {
+        type Db = {
+          table: (n: string) => {
+            get: (id: string) => Promise<
+              | {
+                  sportZones?: { cycling?: { thresholds?: { ftp?: number } } };
+                }
+              | undefined
+            >;
+          };
+        };
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as Db;
+        return db
+          .table("profiles")
+          .get(profileId)
+          .then((p) => p?.sportZones?.cycling?.thresholds?.ftp === expectedFtp);
+      },
+      { profileId: PROFILE_ID, expectedFtp: FIXTURE_CYCLING_FTP },
+      { timeout: 10_000 }
+    );
+
+    // Assert
+    await expect(page.getByTestId("zones-conflict-dialog")).not.toBeVisible();
+    expect(await readWeighIns(page)).toEqual([]);
   });
 
   test("(c) toggle-on with manual FTP — conflict dialog opens", async ({
