@@ -17,13 +17,13 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { usePersistence } from "../../contexts/persistence-context";
 import type { DayWellness } from "../../types/health/day-wellness";
 import type {
-  HealthDailyRecord,
   HealthHrvRecord,
   HealthSleepRecord,
   HealthWeightRecord,
 } from "../../types/health/health-records";
 import { buildNetByWeek } from "./calendar-net-week";
 import { mergeNetByDay, reduceWellnessByDay } from "./calendar-wellness-reduce";
+import { queryDailyWellnessRangeAsync } from "./daily-wellness-live-query";
 import { queryHealthRangeAsync } from "./health-live-query";
 
 export const useCalendarWellnessWeekLive = (
@@ -43,7 +43,7 @@ export const useCalendarWellnessWeekLive = (
         profileId,
         range
       ),
-      queryHealthRangeAsync<HealthDailyRecord>("healthDaily", profileId, range),
+      queryDailyWellnessRangeAsync(profileId, range),
       buildNetByWeek(persistence, profileId, weekStart, weekEnd),
     ]);
     return mergeNetByDay(

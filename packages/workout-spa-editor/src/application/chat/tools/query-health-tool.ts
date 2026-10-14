@@ -2,6 +2,7 @@ import type { ChatTool } from "@kaiord/ai";
 import { z } from "zod";
 
 import type { PersistencePort } from "../../../ports/persistence-port";
+import { loadDailyWellness } from "../../health/load-daily-wellness";
 import type { ReadToolDeps } from "./chat-tool-deps";
 import { clampRange } from "./clamp-range";
 import { summarizeHealth } from "./summarize-health";
@@ -31,13 +32,12 @@ type HealthMetric = (typeof HEALTH_METRICS)[number];
 // known-present property, not an index-signature lookup — required under the
 // build's `noUncheckedIndexedAccess`.
 const REPO_BY_METRIC: Record<
-  HealthMetric,
+  Exclude<HealthMetric, "daily-wellness">,
   (p: PersistencePort) => HealthReader
 > = {
   sleep: (p) => p.healthSleep,
   weight: (p) => p.healthWeight,
   hrv: (p) => p.healthHrv,
-  "daily-wellness": (p) => p.healthDaily,
   "body-composition": (p) => p.healthBodyComposition,
   stress: (p) => p.healthStress,
 };
@@ -62,12 +62,16 @@ export const createQueryHealthTool = (deps: ReadToolDeps): ChatTool => ({
   execute: async (raw) => {
     const input = inputSchema.parse(raw);
     const range = clampRange(input, deps.today);
-    const repo = REPO_BY_METRIC[input.metric](deps.persistence);
-    const records = await repo.getByProfileAndDateRange(
-      deps.profileId,
-      range.from,
-      range.to
-    );
+    // Daily wellness is one reading per day combined across sources.
+    const records =
+      input.metric === "daily-wellness"
+        ? await loadDailyWellness(deps.persistence, deps.profileId, {
+            start: range.from,
+            end: range.to,
+          })
+        : await REPO_BY_METRIC[input.metric](
+            deps.persistence
+          ).getByProfileAndDateRange(deps.profileId, range.from, range.to);
     return {
       range_used: range,
       metric: input.metric,
