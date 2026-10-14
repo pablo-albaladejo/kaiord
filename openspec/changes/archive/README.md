@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-14 | [`legacy-manual-row-ranks-last`](./2026-10-14-legacy-manual-row-ranks-last/) | A legacy manual row ranks last |
 | 2026-10-14 | [`manual-steps-own-row`](./2026-10-14-manual-steps-own-row/) | Manual steps keep their own row |
 | 2026-10-14 | [`t2g-weight-is-current-weight`](./2026-10-14-t2g-weight-is-current-weight/) | Train2Go's weight is the current weight |
 | 2026-10-14 | [`train2go-weight-route`](./2026-10-14-train2go-weight-route/) | Train2Go is a weight source with its own route |

@@ -125,6 +125,76 @@ describe("mergeDailyWellnessDay", () => {
     expect(merged?.krd.restingCalories).toBe(LEGACY.resting);
   });
 
+  it("should take a newer imported row's calories and a legacy manual row's typed steps in union", () => {
+    // Arrange
+    const legacy = row("legacy", "manual", LEGACY);
+    const days = [
+      [legacy, fit],
+      [legacy, whoop],
+    ];
+
+    // Act
+    const readings = days.map((rows) => mergeDailyWellnessDay(rows));
+
+    // Assert
+    expect(
+      readings.map((r) => [
+        r?.sourceBridgeId,
+        r?.krd.steps,
+        r?.krd.activeCalories,
+      ])
+    ).toEqual([
+      ["fit-import", LEGACY.steps, FIT.active],
+      ["whoop-bridge", LEGACY.steps, WHOOP.active],
+    ]);
+  });
+
+  it("should keep genuine manual steps over a legacy manual row and an imported row", () => {
+    // Arrange
+    const legacy = row("legacy", "manual", LEGACY);
+    const orders = permutations([legacy, whoop, manual]);
+
+    // Act
+    const readings = orders.map((rows) => mergeDailyWellnessDay(rows));
+
+    // Assert
+    for (const reading of readings) {
+      expect(reading?.sourceBridgeId).toBe("whoop-bridge");
+      expect(reading?.krd.steps).toBe(MANUAL_STEPS);
+      expect(reading?.krd.activeCalories).toBe(WHOOP.active);
+    }
+  });
+
+  it("should read a legacy manual row's steps in manual's priority slot but not its calories", () => {
+    // Arrange
+    const legacy = row("legacy", "manual", LEGACY);
+    const policy = priority(["manual", "whoop-bridge"]);
+
+    // Act
+    const withWhoop = mergeDailyWellnessDay([legacy, whoop], policy);
+    const alone = mergeDailyWellnessDay([legacy], policy);
+
+    // Assert
+    expect(withWhoop?.sourceBridgeId).toBe("whoop-bridge");
+    expect(withWhoop?.krd.steps).toBe(LEGACY.steps);
+    expect(withWhoop?.krd.activeCalories).toBe(WHOOP.active);
+    expect(alone?.krd.steps).toBe(LEGACY.steps);
+    expect(alone?.krd.activeCalories).toBe(LEGACY.active);
+  });
+
+  it("should let a listed source beat a legacy manual row's steps when the priority order leaves manual out", () => {
+    // Arrange
+    const legacy = row("legacy", "manual", LEGACY);
+    const policy = priority(["whoop-bridge"]);
+
+    // Act
+    const merged = mergeDailyWellnessDay([legacy, whoop], policy);
+
+    // Assert
+    expect(merged?.krd.steps).toBe(WHOOP.steps);
+    expect(merged?.krd.activeCalories).toBe(WHOOP.active);
+  });
+
   it("should give the same reading whatever order the rows come in", () => {
     // Arrange
     const orders = permutations([fit, whoop, manual]);
