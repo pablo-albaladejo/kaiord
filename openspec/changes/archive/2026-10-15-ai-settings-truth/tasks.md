@@ -1,4 +1,4 @@
-> Tasks: 7 completed, 0 deferred
+> Tasks: 10 completed, 0 deferred
 
 # Tasks
 
@@ -9,3 +9,6 @@
 - [x] 5. Red first: the Settings index names the account the main model runs on.
 - [x] 6. E2E with every provider host blocked (keys saved unverified): running model, one main model, no blank model stored, masked key, confirmed removal that takes its bindings.
 - [x] 7. Changesets: patch for `@kaiord/ai` and `@kaiord/workout-spa-editor`.
+- [x] 8. Red first: clearing a binding or removing its provider records an `aiModelBindings` tombstone `<profileId>:<purpose>`; a cross-device merge or import does not bring the binding back, and a later re-set still wins.
+- [x] 9. Red first: the workout generator's model select shows what generation runs and stores the `workout_generation` binding (unit + e2e 8.10).
+- [x] 10. Red first: a key of four characters or fewer shows only the mask.

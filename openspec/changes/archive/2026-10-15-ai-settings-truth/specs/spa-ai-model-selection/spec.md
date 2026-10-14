@@ -111,7 +111,9 @@ commits only a non-blank id), and SHALL display the effective resolution from
 `resolveModelForPurpose`, never the first provider or the first catalog option. A purpose
 without its own binding SHALL display "Same as main model (<model> · <account>)", and
 choosing that option SHALL clear the purpose's binding. The Settings index SHALL name the
-account the athlete's main model runs on.
+account the athlete's main model runs on. The workout generator's model select SHALL be the
+same select for the `workout_generation` purpose: it SHALL show what generation runs, and a
+choice there SHALL be stored as the athlete's `workout_generation` binding.
 
 #### Scenario: Rows show what runs before any choice
 
@@ -132,9 +134,18 @@ account the athlete's main model runs on.
 - **THEN** the binding SHALL be written with that option's account and model in one write,
   and no write SHALL carry a blank model
 
+#### Scenario: The generator shows and stores the model generation runs
+
+- **GIVEN** an athlete whose main model runs on an account without `isDefault`
+- **WHEN** the workout generator's model select renders
+- **THEN** it SHALL show that main model and account, not the `isDefault` account
+- **AND** choosing another model there SHALL store the `workout_generation` binding, which
+  the AI settings then show
+
 ### Requirement: Provider keys are not shown back and removal is confirmed
 
-A provider row SHALL show only the last four characters of its key behind a mask. The edit
+A provider row SHALL show only the last four characters of its key behind a mask, and only
+the mask when the key is four characters or shorter. The edit
 form SHALL open its key field empty and SHALL keep the stored key when the field is left
 empty; the stored key SHALL never be rendered into the DOM. Removing a provider SHALL ask
 for confirmation naming the provider, and cancelling SHALL keep it.
@@ -145,6 +156,12 @@ for confirmation naming the provider, and cancelling SHALL keep it.
 - **WHEN** its row renders, and when its edit form opens
 - **THEN** the row SHALL show `••••abcd`, the key field SHALL be empty, and the full key SHALL
   appear nowhere in the page
+
+#### Scenario: A short key shows only the mask
+
+- **GIVEN** a provider whose whole key is `abcd`
+- **WHEN** its row renders
+- **THEN** the row SHALL show `••••` and `abcd` SHALL appear nowhere in the page
 
 #### Scenario: Removal is confirmed
 

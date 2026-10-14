@@ -57,6 +57,21 @@ describe("ProviderRow", () => {
     expect(document.body.innerHTML).not.toContain("sk-ant-secret");
   });
 
+  it.each(["abcd", "xyz"])(
+    "should show only the mask when the whole key is %s",
+    (apiKey) => {
+      // Arrange
+      const shortKey = provider({ apiKey });
+
+      // Act
+      renderRow(shortKey);
+
+      // Assert
+      expect(screen.getByText("••••")).toBeInTheDocument();
+      expect(document.body.innerHTML).not.toContain(apiKey);
+    }
+  );
+
   it("should offer no provider-level default, which the main model replaces", () => {
     // Arrange
     const flagged = provider({ isDefault: true });

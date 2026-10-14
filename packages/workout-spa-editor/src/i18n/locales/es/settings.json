@@ -65,7 +65,6 @@
     "workoutGeneration": "Generación de entrenamientos",
     "labExtraction": "Extracción de laboratorio",
     "hint": "Añade al menos un proveedor y selecciona un atleta activo para elegir modelos.",
-    "model": "Modelo",
     "custom": "Personalizado…",
     "inherit": "Igual que el principal ({{model}})",
     "retired": "El proveedor retiró {{model}}: se usa {{successor}} en su lugar.",

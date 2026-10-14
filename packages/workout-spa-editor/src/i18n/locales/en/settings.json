@@ -65,7 +65,6 @@
     "workoutGeneration": "Workout generation",
     "labExtraction": "Lab extraction",
     "hint": "Add at least one provider and select an active athlete to choose models.",
-    "model": "Model",
     "custom": "Custom…",
     "inherit": "Same as main model ({{model}})",
     "retired": "{{model}} was retired by the provider — using {{successor}} instead.",

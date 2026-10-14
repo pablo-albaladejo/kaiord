@@ -1,7 +1,7 @@
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
-import { keyHint } from "./key-hint";
+import { keyHint, keyLastFour } from "./key-hint";
 import { RemoveProviderButton } from "./RemoveProviderButton";
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -36,7 +36,11 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
         ) : (
           <span
             className="ml-2 font-mono text-xs text-ink-muted"
-            title={t("providers.keyHint", { last4: p.apiKey.slice(-4) })}
+            title={
+              keyLastFour(p.apiKey)
+                ? t("providers.keyHint", { last4: keyLastFour(p.apiKey) })
+                : undefined
+            }
           >
             {keyHint(p.apiKey)}
           </span>

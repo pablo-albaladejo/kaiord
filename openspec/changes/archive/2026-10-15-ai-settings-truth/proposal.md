@@ -18,6 +18,11 @@ things that were not true:
 4. Editing a provider put the decrypted API key back into the DOM as the
    value of the password field.
 5. Removing a provider asked nothing and left its bindings behind.
+6. A binding cleared ("Same as main model") or removed with its provider came
+   back from another device on the next sync: composite-key bindings had no
+   tombstone.
+7. The workout generator's model select showed the `isDefault` account, while
+   generation ran the athlete's binding, and its choice was never read.
 
 ## What Changes
 
@@ -37,10 +42,14 @@ things that were not true:
 - Remove asks for confirmation, and removing a provider deletes every
   athlete's bindings that pointed at it.
 - The Settings index names the account the athlete's main model runs on.
+- Deleting a binding records a tombstone `<profileId>:<purpose>`, so the merge
+  and the sync's import stop resurrecting it; a later re-set still wins.
+- The workout generator's model select is the same select for the
+  `workout_generation` purpose: it shows what runs and stores the choice.
 
 ## Impact
 
 - `@kaiord/ai`: `resolveModelForPurpose` heals blank bound models (patch).
-- `@kaiord/workout-spa-editor`: AI settings tab, `setModelBinding`,
-  `removeProvider`; `setDefaultProvider` is removed (no caller is left).
+- `@kaiord/workout-spa-editor`: AI settings tab, workout generator model
+  select, `setModelBinding`, `removeProvider`, binding tombstones; `setDefaultProvider` is removed (no caller is left).
 - No Dexie schema change. The layout redesign is a separate change.
