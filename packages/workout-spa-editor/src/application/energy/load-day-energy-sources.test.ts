@@ -160,4 +160,21 @@ describe("loadDayEnergySources daily wellness", () => {
     expect(sources.wellness?.krd.activeCalories).toBe(IMPORTED_ACTIVE_KCAL);
     expect(sources.wellness?.krd.restingCalories).toBe(IMPORTED_RESTING_KCAL);
   });
+
+  it("should read a newer imported row's calories over a legacy manual row's", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.healthDaily.put({
+      ...imported,
+      sourceBridgeId: "manual",
+    });
+    await persistence.healthDaily.put(whoopRow);
+
+    // Act
+    const sources = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
+
+    // Assert
+    expect(sources.wellness?.sourceBridgeId).toBe(WHOOP_BRIDGE);
+    expect(sources.wellness?.krd.activeCalories).toBe(WHOOP_ACTIVE_KCAL);
+  });
 });

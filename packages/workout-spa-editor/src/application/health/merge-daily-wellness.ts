@@ -10,7 +10,9 @@
  * The one exception is a pure manual row (steps only): ranked above the
  * head, its steps replace the head's. A legacy manual row, an imported row
  * an older save re-stamped `manual`, holds measured values and is read as
- * a full row. Under priority, rows of a bridge whose import is disabled
+ * a full row, ranked last in both modes: it is a stale copy of imported
+ * data, so a row its source still stamps is fresher, and it never takes
+ * manual's slot. Under priority, rows of a bridge whose import is disabled
  * are dropped; a source with no import policy (a FIT import) stays as a
  * fallback after the listed ones.
  */
@@ -30,6 +32,7 @@ const isPureManual = (row: HealthDailyRecord): boolean =>
   isManual(row) && !isLegacyManualRow(row);
 
 const rankIn = (order: readonly string[], row: HealthDailyRecord): number => {
+  if (isLegacyManualRow(row)) return order.length + 2;
   const listed = order.indexOf(row.sourceBridgeId ?? "");
   if (listed >= 0) return listed;
   return order.length + (isManual(row) ? 0 : 1);

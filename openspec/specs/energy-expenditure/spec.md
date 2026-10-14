@@ -187,6 +187,12 @@ it SHALL be read as a full record (its calories count). A new manual steps
 save on that day SHALL keep its measured values and replace only `steps`; this
 also covers a device that syncs such a record back after the change.
 
+A legacy manual record SHALL rank after every other record of the day, in both
+"union" and "priority": it is a stale copy of imported data, so a record its
+source still stamps is fresher, and it SHALL NOT take the slot of `manual` in
+the order. It is the head only when the day has no other record that is not a
+pure manual record, and a pure manual record's steps still replace its steps.
+
 Under "priority", records of a bridge whose import policy for daily wellness is
 disabled SHALL be dropped. A source with no import policy at all (a FIT file
 import, `fit-import`) SHALL stay as a fallback ranked after the listed sources.
@@ -241,6 +247,26 @@ dropping them would leave every FIT-imported day blank under priority.
 - **GIVEN** a manual daily record with 9500 steps, 640 active and 1720 resting kcal, written by a save before this change
 - **WHEN** the day is read, and when the user saves 12000 steps for that day
 - **THEN** the reading has 640 + 1720 kcal, and after the save the record holds 12000 steps with the same calories
+
+#### Scenario: A newer imported record beats a legacy manual record
+
+- **GIVEN** no "priority" policy for daily wellness
+- **AND** a legacy manual daily record with 640 active kcal and a WHOOP daily record with 700 active kcal for the same day
+- **WHEN** the day is read
+- **THEN** the reading is the WHOOP record, with 700 active kcal
+
+#### Scenario: Manual steps still win over a legacy manual record
+
+- **GIVEN** a legacy manual daily record, a WHOOP daily record and a manual steps entry of 9000 steps for the same day
+- **WHEN** the day is read
+- **THEN** the reading has 9000 steps and the WHOOP record's calories and provenance
+
+#### Scenario: A legacy manual record does not take manual's priority slot
+
+- **GIVEN** a "priority" policy with `sourceOrder` `manual`, `whoop-bridge` and an enabled WHOOP import
+- **AND** a legacy manual daily record and a WHOOP daily record of the same day
+- **WHEN** the day is read
+- **THEN** the reading is the WHOOP record
 
 #### Scenario: A manual-only day is predicted, not measured as 0 kcal
 
