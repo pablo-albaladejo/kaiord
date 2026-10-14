@@ -29,7 +29,7 @@ export function evaluatePingResult(res: {
     return {
       installed: true,
       session: false,
-      error: "Update your Kaiord Garmin Bridge extension",
+      error: "Update your Kaiord extension for Garmin",
       features,
     };
   const data = res.data as { gcApi?: { ok: boolean } } | undefined;
