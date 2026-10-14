@@ -31,15 +31,24 @@ export function recordKey(table: string, row: Row): string {
 }
 
 /**
+ * Composite-key tables whose user deletes ARE tombstoned: the tombstone id
+ * joins the key fields with `:`, profile first, so a re-keyed auto profile's
+ * tombstones are dropped like its other `<profileId>:`-prefixed ones.
+ */
+const COMPOSITE_TOMBSTONED: ReadonlySet<string> = new Set(["aiModelBindings"]);
+
+/**
  * The id a tombstone files a row under: its single-field primary key (`id`,
- * or `profileId` for `energyTargets`). A composite key has none, so those
+ * or `profileId` for `energyTargets`), or the `:`-joined composite key of a
+ * `COMPOSITE_TOMBSTONED` table. Any other composite key has none, so those
  * rows are never suppressed.
  */
 export function tombstoneIdOf(table: string, row: Row): string | undefined {
-  const [field, ...rest] = PRIMARY_KEYS[table] ?? ["id"];
-  if (field === undefined || rest.length > 0) return undefined;
-  const id = row[field];
-  return typeof id === "string" ? id : undefined;
+  const fields = PRIMARY_KEYS[table] ?? ["id"];
+  if (fields.length > 1 && !COMPOSITE_TOMBSTONED.has(table)) return undefined;
+  const parts = fields.map((f) => row[f]);
+  if (!parts.every((v) => typeof v === "string")) return undefined;
+  return parts.join(":");
 }
 
 /** Comparison clock for a row: `updatedAt` else `createdAt` else epoch 0. */
