@@ -3,8 +3,14 @@ import { defineConfig, devices } from "@playwright/test";
 // Another worktree's dev server on 5173 would otherwise be silently reused and
 // the specs would run against its code. Setting PLAYWRIGHT_PORT moves this
 // run to its own port and refuses to adopt a server that is already there.
-const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 5173);
-const CUSTOM_PORT = process.env.PLAYWRIGHT_PORT !== undefined;
+const RAW_PORT = process.env.PLAYWRIGHT_PORT?.trim() || undefined;
+const CUSTOM_PORT = RAW_PORT !== undefined;
+const PORT = CUSTOM_PORT ? Number(RAW_PORT) : 5173;
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  throw new Error(
+    `PLAYWRIGHT_PORT must be an integer between 1 and 65535, got "${RAW_PORT}"`
+  );
+}
 const BASE_URL = `http://localhost:${PORT}`;
 
 /**
