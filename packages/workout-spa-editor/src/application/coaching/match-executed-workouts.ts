@@ -41,7 +41,10 @@ const buildAppendsForMatch = (
   matchCanonical: string
 ): string[] => {
   const refs = refsByDate.get(match.date) ?? [];
-  const taken = new Set<string>([match.workoutId, ...match.executedWorkoutIds]);
+  const taken = new Set<string>([
+    match.workoutId,
+    ...(match.executedWorkoutIds ?? []),
+  ]);
   const toAppend: string[] = [];
   for (const ref of refs) {
     if (taken.has(ref.id)) continue;

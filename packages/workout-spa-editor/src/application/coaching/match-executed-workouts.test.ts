@@ -106,6 +106,28 @@ describe("matchExecutedWorkouts", () => {
     expect(result).toEqual([]);
   });
 
+  it("should treat a match row without executedWorkoutIds as having none", () => {
+    // Arrange
+    const structured = workout({ id: "w-structured-1" });
+    const executed = activity({ id: "a-exec-1" });
+    // A restored backup row is only checked to be an object, so the field can
+    // be missing even though the schema defaults it.
+    const legacy: Partial<SessionMatch> = baseMatch();
+    delete legacy.executedWorkoutIds;
+    const input = {
+      sessionMatches: [legacy as SessionMatch],
+      workouts: [structured],
+      activities: [executed],
+      canonicalSport: canonical,
+    };
+
+    // Act
+    const result = matchExecutedWorkouts(input);
+
+    // Assert
+    expect(result).toEqual([{ matchId: "m-1", toAppend: ["a-exec-1"] }]);
+  });
+
   it("should never append the match's own structured workoutId", () => {
     // Arrange
     // An activity whose renderable id collides with the structured slot
