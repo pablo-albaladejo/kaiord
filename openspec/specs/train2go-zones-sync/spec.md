@@ -54,7 +54,7 @@ When `syncZones` is `true` for a linked account, the SPA SHALL invoke the zones-
 
 ### Requirement: `syncZones` returns conflicts unwritten, silent fills are committed eagerly
 
-The `syncZones(profileId, transport, repo): Promise<SyncZonesResult>` use case SHALL reconcile each Train2Go field against the persisted Kaiord profile under the following rules:
+The `syncZones(profileId, transport, persistence): Promise<SyncZonesResult>` use case SHALL reconcile each Train2Go field against the persisted Kaiord profile under the following rules:
 
 | Kaiord field state             | Action                                                        |
 | ------------------------------ | ------------------------------------------------------------- |
@@ -126,7 +126,7 @@ The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictI
 
 ### Requirement: `commitConflictResolution` applies user decisions
 
-The `commitConflictResolution(profileId, decisions, repo, transportPayload): Promise<void>` use case SHALL accept a `decisions: Record<FieldKey, 'accept' | 'reject'>` map and apply per-row decisions. For threshold scalars (FieldKeys ending in `.thresholds.<name>`, plus `bodyWeight` and `heartRate.max`), `accept` writes the T2G scalar and `reject` is a no-op. For band-level FieldKeys (`<sport>.<kind>.z<N>.<bound>`), the decisions are grouped by `<sport>.<kind>` and applied via the per-band merge rule defined in the band-level requirement above: the persisted `zones` array becomes the merge of the user's pre-sync values (for rejected bands) and the T2G values (for accepted bands). The function SHALL be idempotent — calling it twice with the same decisions produces the same final state. The SPA SHALL open a single confirmation dialog listing every conflicting field with both values (`Field: Kaiord-value → Train2Go-value`); the user SHALL be able to accept or reject each row independently. Cancelling the dialog SHALL discard only the conflicting writes; previously-committed silent fills (returned in `applied` from `syncZones`) SHALL remain.
+The `commitConflictResolution(profileId, decisions, persistence, transportPayload): Promise<void>` use case SHALL accept a `decisions: Record<FieldKey, 'accept' | 'reject'>` map and apply per-row decisions. For threshold scalars (FieldKeys ending in `.thresholds.<name>`, plus `heartRate.max`), `accept` writes the T2G scalar and `reject` is a no-op. For `bodyWeight`, `accept` records the T2G weight as today's weigh-in (see "Train2Go's weight is the athlete's current weight") and `reject` is a no-op. For band-level FieldKeys (`<sport>.<kind>.z<N>.<bound>`), the decisions are grouped by `<sport>.<kind>` and applied via the per-band merge rule defined in the band-level requirement above: the persisted `zones` array becomes the merge of the user's pre-sync values (for rejected bands) and the T2G values (for accepted bands). The function SHALL be idempotent — calling it twice with the same decisions produces the same final state. The SPA SHALL open a single confirmation dialog listing every conflicting field with both values (`Field: Kaiord-value → Train2Go-value`); the user SHALL be able to accept or reject each row independently. Cancelling the dialog SHALL discard only the conflicting writes; previously-committed silent fills (returned in `applied` from `syncZones`) SHALL remain.
 
 #### Scenario: User rejects an FTP conflict; LTHR conflict accepted
 
@@ -139,10 +139,10 @@ The `commitConflictResolution(profileId, decisions, repo, transportPayload): Pro
 
 #### Scenario: User cancels the conflict dialog entirely
 
-- **GIVEN** the profile pre-sync has `bodyWeight = undefined`, `cycling.thresholds.ftp = 200`, `running.thresholds.lthr = 150`
+- **GIVEN** the athlete has no current weight (no weigh-in, no `profile.bodyWeight`), and the profile pre-sync has `cycling.thresholds.ftp = 200`, `running.thresholds.lthr = 150`
 - **AND** `syncZones` produced one silent fill (`bodyWeight = 72` from T2G physio.weight) and two conflicts (FTP 200→270, LTHR 150→168)
 - **WHEN** the user closes the conflict dialog without confirming any row (no `commitConflictResolution` call)
-- **THEN** the profile SHALL retain the silently-filled `bodyWeight = 72` (already committed by `syncZones`)
+- **THEN** today's weigh-in of 72 kg SHALL remain (already recorded by `syncZones`)
 - **AND** `cycling.thresholds.ftp` SHALL stay at 200
 - **AND** `running.thresholds.lthr` SHALL stay at 150
 
@@ -522,3 +522,36 @@ Standalone (non-coupled) cycling-power band groups MAY preserve per-band display
 - **WHEN** the dialog renders
 - **THEN** the FTP conflict SHALL render as a standalone row (the existing per-row scalar UI), NOT a coupled group
 - **AND** the testid `zones-conflict-row-cycling.thresholds.ftp` SHALL be present (existing test selector unchanged)
+
+### Requirement: Train2Go's weight is the athlete's current weight
+
+The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's current weight, never as `profile.bodyWeight`. It SHALL compare the incoming weight against the current weight (the latest weigh-in on or before today, else `profile.bodyWeight`, through `getCurrentWeightKg`) under the same fill / no-op / conflict rules as every other field. A silent fill, and an accepted weight conflict, SHALL record the weight as today's weigh-in through `saveManualHealthMetric`, the same path the Athlete page uses, so a same-day write updates that day's weigh-in instead of adding one. Neither `syncZones` nor `commitConflictResolution` SHALL write `profile.bodyWeight`. Re-syncing a weight equal to the current weight SHALL record nothing.
+
+#### Scenario: An unknown weight is recorded as today's weigh-in
+
+- **GIVEN** the athlete has no weigh-in and no `profile.bodyWeight`
+- **AND** Train2Go reports `physiological.weight = 83`
+- **WHEN** `syncZones` runs
+- **THEN** `applied` SHALL contain `{ field: "bodyWeight", value: 83 }`
+- **AND** one weigh-in of 83 kg dated today SHALL exist
+- **AND** `profile.bodyWeight` SHALL stay unset
+
+#### Scenario: Re-syncing the same weight records no second weigh-in
+
+- **GIVEN** a previous sync recorded today's weigh-in of 83 kg
+- **WHEN** `syncZones` runs again and Train2Go still reports 83
+- **THEN** `applied` and `conflicts` SHALL be empty
+- **AND** exactly one weigh-in SHALL exist
+
+#### Scenario: The comparison reads the latest weigh-in, not the profile field
+
+- **GIVEN** `profile.bodyWeight = 80` and the latest weigh-in is 83 kg
+- **WHEN** `syncZones` runs and Train2Go reports 83
+- **THEN** no conflict SHALL be returned for `bodyWeight`
+
+#### Scenario: An accepted weight conflict updates today's weigh-in
+
+- **GIVEN** today's weigh-in is 75 kg and Train2Go reports 83
+- **WHEN** `commitConflictResolution` is called twice with `{ "bodyWeight": "accept" }`
+- **THEN** exactly one weigh-in dated today SHALL exist, at 83 kg
+- **AND** `profile.bodyWeight` SHALL be unchanged

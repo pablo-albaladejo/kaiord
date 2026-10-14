@@ -4,7 +4,7 @@
  * (`sync-zones-band-fields.ts`/`sync-zones-band-writes.ts`) based on
  * the FieldKey shape.
  */
-import type { FieldKey, ThresholdFieldKey } from "../../types/coaching-zones";
+import type { FieldKey } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import {
   readHrBand,
@@ -18,6 +18,7 @@ import {
   writePaceBand,
   writePowerBand,
 } from "./sync-zones-band-writes";
+import type { ProfileThresholdKey } from "./sync-zones-threshold-fields";
 import { readThreshold, writeThreshold } from "./sync-zones-threshold-fields";
 
 const readBandField = (
@@ -53,7 +54,7 @@ export const readField = (
 ): number | undefined => {
   const parsed = parseBandKey(field);
   if (parsed) return readBandField(profile, parsed);
-  return readThreshold(profile, field as ThresholdFieldKey);
+  return readThreshold(profile, field as ProfileThresholdKey);
 };
 
 export const writeField = (
@@ -63,5 +64,5 @@ export const writeField = (
 ): Profile => {
   const parsed = parseBandKey(field);
   if (parsed) return writeBandField(profile, parsed, value);
-  return writeThreshold(profile, field as ThresholdFieldKey, value);
+  return writeThreshold(profile, field as ProfileThresholdKey, value);
 };

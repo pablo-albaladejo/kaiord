@@ -17,11 +17,16 @@
  * the strings are static (no template interpolation reaches a toast or
  * a `console.*` first-arg).
  */
-import type { ProfileRepository } from "../../ports/persistence-port";
+import type { PersistencePort } from "../../ports/persistence-port";
 import type { SyncZonesResult, ZonesPayload } from "../../types/coaching-zones";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { reconcile } from "./sync-zones-helpers";
 import { mapPayloadToIncoming } from "./sync-zones-payload-mapper";
+import {
+  reconcileWeight,
+  recordSyncedWeight,
+  splitWeight,
+} from "./sync-zones-weight";
 
 export const TOAST_ZONES_FETCH_FAILED =
   "Couldn't fetch zones from Train2Go — try again later";
@@ -36,8 +41,9 @@ const errorMessage = (e: unknown): string =>
 export const syncZones = async (
   profileId: string,
   transport: CoachingTransport,
-  repo: ProfileRepository
+  persistence: PersistencePort
 ): Promise<SyncZonesResult> => {
+  const repo = persistence.profiles;
   if (!transport.readZones) {
     return { ok: false, reason: "unsupported" };
   }
@@ -60,21 +66,27 @@ export const syncZones = async (
   if (!payload) {
     return { ok: false, reason: "shape-mismatch" };
   }
-  const incoming = mapPayloadToIncoming(payload);
-  const result = reconcile(profile, incoming, transport.source);
-  // Persist whenever reconcile mutated the profile — covers silent-fills
-  // (applied), method-flips on default-template/method-derived tables,
-  // and snapshot-write on train2go-synced-clean re-syncs (per D-MA4).
-  if (result.profile !== profile) {
-    await repo.put({
-      ...result.profile,
-      updatedAt: new Date().toISOString(),
-    });
-  }
+  const { weightKg, rest } = splitWeight(mapPayloadToIncoming(payload));
+  const weight = await reconcileWeight(persistence, profile, weightKg);
+  const result = reconcile(profile, rest, transport.source);
+  await persistence.transaction(async () => {
+    // Persist whenever reconcile mutated the profile — covers silent-fills
+    // (applied), method-flips on default-template/method-derived tables,
+    // and snapshot-write on train2go-synced-clean re-syncs (per D-MA4).
+    if (result.profile !== profile) {
+      await repo.put({
+        ...result.profile,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    for (const { value } of weight.applied) {
+      await recordSyncedWeight(persistence, profileId, value);
+    }
+  });
   return {
     ok: true,
-    applied: result.applied,
-    conflicts: result.conflicts,
+    applied: [...weight.applied, ...result.applied],
+    conflicts: [...weight.conflicts, ...result.conflicts],
     payload,
   };
 };
