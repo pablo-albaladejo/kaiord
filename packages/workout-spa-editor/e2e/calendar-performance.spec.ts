@@ -1,66 +1,67 @@
 /**
  * Calendar Performance Budget — design D16 of
  * calendar-coaching-redesign-completion / spec spa-calendar
- * "CalendarPage performance budget".
+ * "CalendarPage render-cost budget".
  *
- * Asserts that the redesigned CalendarPage renders its first contentful
- * paint within the CI-calibrated envelope on the project's reference
- * baseline (Linux ubuntu-latest runner with CDP CPU throttling factor 4×)
- * when the visible week contains 30 cards distributed as 10 matched /
- * 10 solo plan / 10 solo actual. The `useMatchedSessions` hook
- * contributes no more than 60 ms to that budget.
+ * Guards two things on a week of 30 cards (10 matched / 10 solo plan /
+ * 10 solo actual) under CDP CPU throttle 4× on Chromium:
+ *
+ *   1. Render cost. Showing the 30-card week costs at most
+ *      RENDER_COST_RATIO_BUDGET times showing a 3-card week (1 / 1 / 1)
+ *      measured in the same page, the same run and the same throttle.
+ *   2. The `useMatchedSessions` slice, on a steady-state re-fire.
+ *
+ * Why a ratio and not an absolute first contentful paint: on the Vite dev
+ * server FCP is the time to fetch and evaluate the app's module graph. The
+ * page shell paints before any IndexedDB read resolves, so FCP does not
+ * depend on the cards, and it scales with the runner's speed. Both arms of
+ * the ratio take the same path — in-app route change, the week's live
+ * queries, the match join, the render — and differ only in the number of
+ * cards, so runner speed cancels out while a per-card cost (a slow card, a
+ * quadratic join, a re-render per card) is multiplied by 30 in one arm and
+ * by 3 in the other.
  *
  * Seed flow:
  *   1. Goto /calendar to let the SPA boot (Dexie initialises the schema
  *      and exposes the db on `window.__KAIORD_DB__`).
- *   2. Bootstrap a perf-test profile in the meta + profiles tables so
- *      `useActiveProfileLive` resolves deterministically.
- *   3. Seed 30 rows (10 matched + 10 solo plans + 10 solo actuals) for
- *      the visible week via the exposed db.
- *   4. Set CDP CPU throttling to factor 4×.
- *   5. Navigate to /calendar/<weekId> — this is the perf measurement
- *      navigation. FCP and useMatchedSessions measures are read off
- *      that document.
+ *   2. Seed the active profile, the 30-card week and the 3-card week. Every
+ *      row carries the profileId: the calendar reads the active profile's
+ *      rows only.
+ *   3. Set CDP CPU throttling to factor 4×, reload on an empty week.
+ *   4. Prove both weeks render every seeded card, then time each arm
+ *      RENDER_SAMPLES times, interleaved, from the empty week.
  *
  * Reproduction:
  *   pnpm --filter @kaiord/workout-spa-editor test:e2e \
- *     --grep "CalendarPage performance budget"
+ *     --grep "CalendarPage render-cost budget"
  */
 
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures/base";
+import type { CardCounts } from "./helpers/calendar-perf-rows";
+import { seedPerfWeeks, showWeek } from "./helpers/calendar-perf-week";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
-// FCP budget is the CI-calibrated envelope (ubuntu-latest runner with
-// CDP throttle 4×). The archived design D11 named 200ms as the
-// reference-device aspirational target (Moto G Power 2022); CI hardware
-// is a different baseline so the assertion here uses a regression-
-// detection envelope (~1.8s) rather than the aspirational figure. The
-// architecturally meaningful guardrail is the per-hook slice
-// (USE_MATCHED_SESSIONS_BUDGET_MS); FCP stays measured to catch broad
-// regressions but does not enforce the reference-device target.
-//
-// Both budgets apply uniformly to all chromium-engine projects (desktop
-// chromium + Mobile Chrome). The test is already skipped on firefox /
-// webkit / Mobile Safari via `test.skip(browserName !== "chromium")`
-// below, so there is no need for a per-project branch. GH Actions
-// ubuntu-latest runners exhibit consistent CPU contention across both
-// chromium projects: worst-measure useMatchedSessions samples of
-// 40.4 / 41.1 / 44.1 / 49.2ms and FCP samples of 1548 / 1576ms were
-// observed on desktop chromium post-merge of PRs #648, #650, #654, and
-// #655. PR #651 relaxed Mobile Chrome to 60ms but desktop chromium hit
-// the same envelope, so both projects now share the same ceiling.
-// 1828ms was observed on a healthy-CPU runner (run 27011820399) and
-// 2080ms on another (run 28632653937), so the envelope carries headroom
-// over both while still catching broad regressions.
-const FCP_BUDGET_MS = 2400;
+// Fastest 30-card render over fastest 3-card render, both from the empty
+// week. Healthy chromium measured 1.12-1.46 at throttle 4×, 8× and 12× on a
+// loaded machine (absolute floors 100 ms to 1150 ms), and up to 1.55 with
+// three runs in parallel, so the ratio carries the runner's speed out. One extra millisecond per card render already
+// measured 2.37-4.03.
+const RENDER_COST_RATIO_BUDGET = 2;
+// Interleaved samples per arm; the minimum is the arm's own-work floor (a
+// transient stall only ever adds time) and interleaving exposes both arms
+// to the same machine load.
+const RENDER_SAMPLES = 5;
+const RENDER_TIMEOUT_MS = 20_000;
 // Aspirational per-hook slice from design D16. NOT asserted directly:
 // the measure wraps an async useLiveQuery span whose steady-state
 // wall-clock is dominated by ~20+ sequential IndexedDB round-trips,
 // and CI disk latency puts healthy-CPU samples at 128-157ms (run
-// 27011820399, calibration factor 1.00). Like FCP above, the assertion
-// uses a CI regression-detection envelope instead of the aspirational
-// figure — a structural regression (e.g. a quadratic join at 30 cards)
-// lands far above it.
+// 27011820399, calibration factor 1.00). The assertion uses a CI
+// regression-detection envelope instead of the aspirational figure — a
+// structural regression (e.g. a quadratic join at 30 cards) lands far
+// above it.
 const USE_MATCHED_SESSIONS_BUDGET_MS = 60;
 const USE_MATCHED_SESSIONS_CI_ENVELOPE_MS = 250;
 // The steady-state re-fire span is bimodal — mostly the healthy
@@ -91,148 +92,95 @@ const CALIBRATION_LOOP_MODULUS = 9973;
 // 40-49ms healthy worst-measure samples documented above).
 const CALIBRATION_REFERENCE_MS = 80;
 const CALIBRATION_MAX_FACTOR = 12;
-const WEEK_ID = "2026-W18";
-const VISIBLE_DAY = "2026-04-29";
 const NOW = "2026-04-29T10:00:00.000Z";
 const PERF_PROFILE = "11111111-1111-4111-8111-111111111111";
 
-const SEED = { matched: 10, soloPlans: 10, soloActuals: 10 };
+const BIG_WEEK = { weekId: "2026-W18", day: "2026-04-29" };
+const SMALL_WEEK = { weekId: "2026-W20", day: "2026-05-13" };
+const EMPTY_WEEK = { weekId: "2026-W19", day: "2026-05-06" };
+const BIG: CardCounts = { matched: 10, soloPlans: 10, soloActuals: 10 };
+const SMALL: CardCounts = { matched: 1, soloPlans: 1, soloActuals: 1 };
+const NONE: CardCounts = { matched: 0, soloPlans: 0, soloActuals: 0 };
 
-test.describe("CalendarPage performance budget", () => {
+const nextFrames = (page: Page) =>
+  page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      })
+  );
+
+// Back to the empty week, and wait until its match query has answered so
+// the next measured arm starts from a quiescent page.
+const parkOnEmptyWeek = async (page: Page) => {
+  const seen = await page.evaluate(
+    () => performance.getEntriesByName("useMatchedSessions").length
+  );
+  await showWeek(page, {
+    ...EMPTY_WEEK,
+    counts: NONE,
+    timeoutMs: RENDER_TIMEOUT_MS,
+  });
+  await page.waitForFunction(
+    (prev) => performance.getEntriesByName("useMatchedSessions").length > prev,
+    seen,
+    { timeout: RENDER_TIMEOUT_MS }
+  );
+  await nextFrames(page);
+};
+
+const timeArm = async (
+  page: Page,
+  week: typeof BIG_WEEK,
+  counts: CardCounts
+) => {
+  const ms = await showWeek(page, {
+    ...week,
+    counts,
+    timeoutMs: RENDER_TIMEOUT_MS,
+  });
+  await parkOnEmptyWeek(page);
+  return ms;
+};
+
+test.describe("CalendarPage render-cost budget", () => {
   test.use({ storageState: undefined });
 
   // Playwright exposes `newCDPSession` on Chromium only — firefox,
   // webkit and Mobile Safari (WebKit) raise "CDP session is only
-  // available in Chromium" before the test even starts measuring.
-  // Skip on those engines so CI reports green; the calibrated FCP
-  // budget is meaningful only when both the throttle and the
-  // measurement entries come from the same engine.
+  // available in Chromium" before the test even starts measuring. The
+  // ratio needs the throttle, not just the engine: unthrottled, both arms
+  // finish in two or three frames and the trailing frame wait quantizes
+  // them (firefox and unthrottled chromium measured 17-140 ms per arm,
+  // ratio up to 1.79 with nothing regressed).
   test.skip(
     ({ browserName }) => browserName !== "chromium",
     "CDP CPU throttle is Chromium-only (newCDPSession is unavailable on firefox/webkit)"
   );
 
-  test("FCP and useMatchedSessions stay within the CI envelopes with a 30-card week", async ({
+  test("a 30-card week renders within its cost ratio and useMatchedSessions within its CI envelope", async ({
     page,
   }, testInfo) => {
-    // 1. Boot the SPA (no throttling — only the calendar nav is measured).
+    // 1. Boot the SPA (no throttling).
     await page.goto("/calendar");
     await waitForDexieReady(page);
 
-    // 2/3. Bootstrap a perf profile + seed the 30-card week.
-    await page.evaluate(
-      async ({ seed, visibleDay, now, profileId }) => {
-        type Db = {
-          table: (n: string) => {
-            put: (r: unknown) => Promise<unknown>;
-            bulkPut: (r: unknown[]) => Promise<unknown>;
-          };
-        };
-        const db = (window as unknown as Record<string, unknown>)
-          .__KAIORD_DB__ as Db;
+    // 2. Seed the active profile and both weeks.
+    await seedPerfWeeks(page, {
+      profileId: PERF_PROFILE,
+      now: NOW,
+      weeks: [
+        { prefix: "perf", ...BIG_WEEK, ...BIG },
+        { prefix: "base", ...SMALL_WEEK, ...SMALL },
+      ],
+    });
 
-        await db.table("profiles").put({
-          id: profileId,
-          name: "Perf",
-          sportZones: {},
-          linkedAccounts: [],
-          createdAt: now,
-          updatedAt: now,
-        });
-        await db.table("meta").put({
-          key: "activeProfileId",
-          value: profileId,
-        });
-
-        const matchedActivities: unknown[] = [];
-        const matchedWorkouts: unknown[] = [];
-        const sessionMatches: unknown[] = [];
-        const makeWorkoutRow = (id: string) => ({
-          id,
-          date: visibleDay,
-          state: "raw",
-          sport: "cycling",
-          source: "manual",
-          sourceId: id,
-          planId: null,
-          raw: {
-            description: "x",
-            duration: { value: 3600, unit: "s" },
-          },
-          krd: null,
-          lastProcessingError: null,
-          feedback: null,
-          aiMeta: null,
-          garminPushId: null,
-          tags: [],
-          previousState: null,
-          createdAt: now,
-          modifiedAt: null,
-          updatedAt: now,
-        });
-        for (let i = 0; i < seed.matched; i += 1) {
-          const aid = `perf-act-matched-${i}`;
-          const wid = `perf-w-matched-${i}`;
-          matchedActivities.push({
-            id: aid,
-            profileId,
-            source: "train2go",
-            sourceId: `m-${i}`,
-            date: visibleDay,
-            sport: "cycling",
-            title: `M ${i}`,
-            status: "completed",
-            fetchedAt: now,
-          });
-          matchedWorkouts.push(makeWorkoutRow(wid));
-          sessionMatches.push({
-            id: `perf-match-${i}`,
-            profileId,
-            coachingActivityId: aid,
-            workoutId: wid,
-            date: visibleDay,
-            createdAt: now,
-            source: "manual",
-          });
-        }
-        const soloPlans = Array.from({ length: seed.soloPlans }, (_, i) => ({
-          id: `perf-act-solo-${i}`,
-          profileId,
-          source: "train2go",
-          sourceId: `sp-${i}`,
-          date: visibleDay,
-          sport: "cycling",
-          title: `SP ${i}`,
-          status: "pending",
-          fetchedAt: now,
-        }));
-        const soloActuals = Array.from({ length: seed.soloActuals }, (_, i) =>
-          makeWorkoutRow(`perf-w-solo-${i}`)
-        );
-
-        await db
-          .table("coachingActivities")
-          .bulkPut([...matchedActivities, ...soloPlans]);
-        await db
-          .table("workouts")
-          .bulkPut([...matchedWorkouts, ...soloActuals]);
-        await db.table("sessionMatches").bulkPut(sessionMatches);
-      },
-      {
-        seed: SEED,
-        visibleDay: VISIBLE_DAY,
-        now: NOW,
-        profileId: PERF_PROFILE,
-      }
-    );
-
-    // 4. Throttle CPU before the measurement nav.
+    // 3. Throttle CPU, then reload on the empty week.
     const cdp = await page.context().newCDPSession(page);
     await cdp.send("Emulation.setCPUThrottlingRate", {
       rate: CPU_THROTTLE_RATE,
     });
-
-    // 4b. Calibrate runner speed under the same throttle (median of N).
+    // 3b. Calibrate runner speed under the same throttle (median of N).
     const calibrationMs = await page.evaluate(
       ({ runs, iterations, modulus }) => {
         const samples: number[] = [];
@@ -259,20 +207,60 @@ test.describe("CalendarPage performance budget", () => {
     const useMatchedBudgetMs =
       USE_MATCHED_SESSIONS_CI_ENVELOPE_MS * slowdownFactor;
 
-    // 5. Measurement navigation.
-    await page.goto(`/calendar/${WEEK_ID}`);
+    await page.goto(`/calendar/${EMPTY_WEEK.weekId}`);
     await page
       .getByTestId("calendar-page")
       .waitFor({ state: "visible", timeout: 30_000 });
 
-    const fcpMs = await page.evaluate(() => {
-      const entry = performance.getEntriesByName("first-contentful-paint")[0];
-      return entry ? entry.startTime : Number.POSITIVE_INFINITY;
+    // 4. Every seeded card renders, in both weeks. This first visit of each
+    // week also loads the card modules, so it stays out of the samples.
+    for (const [week, counts] of [
+      [BIG_WEEK, BIG],
+      [SMALL_WEEK, SMALL],
+    ] as const) {
+      await showWeek(page, { ...week, counts, timeoutMs: RENDER_TIMEOUT_MS });
+      const day = page.locator(
+        `[data-testid="day-column-${week.day}"],[data-testid="calendar-list-day-${week.day}"]`
+      );
+      await expect(day.locator('[data-testid^="matched-card-"]')).toHaveCount(
+        counts.matched
+      );
+      await expect(day.locator('[data-testid^="coaching-card-"]')).toHaveCount(
+        counts.soloPlans
+      );
+      await expect(day.locator('[data-testid^="workout-card-"]')).toHaveCount(
+        counts.soloActuals
+      );
+      await parkOnEmptyWeek(page);
+    }
+
+    // 5. Interleaved samples, alternating which arm goes first.
+    const bigMs: number[] = [];
+    const smallMs: number[] = [];
+    for (let i = 0; i < RENDER_SAMPLES; i += 1) {
+      if (i % 2 === 0) bigMs.push(await timeArm(page, BIG_WEEK, BIG));
+      smallMs.push(await timeArm(page, SMALL_WEEK, SMALL));
+      if (i % 2 === 1) bigMs.push(await timeArm(page, BIG_WEEK, BIG));
+    }
+    const bigFloor = Math.min(...bigMs);
+    const smallFloor = Math.min(...smallMs);
+    const ratio = bigFloor / smallFloor;
+    const samples = `30 cards [${bigMs.map((m) => m.toFixed(0)).join(", ")}] ms, 3 cards [${smallMs.map((m) => m.toFixed(0)).join(", ")}] ms`;
+    testInfo.annotations.push({
+      type: "calendar render cost",
+      description: `ratio ${ratio.toFixed(2)}; ${samples}`,
     });
     expect(
-      fcpMs,
-      `CalendarPage FCP ${fcpMs.toFixed(1)}ms exceeds the ${FCP_BUDGET_MS}ms budget`
-    ).toBeLessThanOrEqual(FCP_BUDGET_MS);
+      ratio,
+      `30-card week took ${ratio.toFixed(2)}x the 3-card week (budget ${RENDER_COST_RATIO_BUDGET}x; ${samples}; project: ${testInfo.project.name})`
+    ).toBeLessThanOrEqual(RENDER_COST_RATIO_BUDGET);
+
+    // Back on the 30-card week for the hook measurement.
+    await showWeek(page, {
+      ...BIG_WEEK,
+      counts: BIG,
+      timeoutMs: RENDER_TIMEOUT_MS,
+    });
 
     // 6. Steady-state hook measurement. The boot-window span is NOT a
     // faithful hook-cost signal: the measure wraps an async useLiveQuery
