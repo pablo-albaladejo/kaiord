@@ -28,7 +28,7 @@ describe("deriveThresholdDisagreement", () => {
     // Assert
     expect(disagreement).toStrictEqual({
       field: "heartRate.max",
-      label: "Max HR",
+      labelKey: "maxHr",
       unit: "bpm",
       source: "train2go",
       at: SYNCED_AT,

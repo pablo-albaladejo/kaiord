@@ -26,11 +26,17 @@ export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
   // The zone map derives from the sport's primary threshold, which is the
   // first metric the same candidate order yields — naming it here is what
   // makes the reason a reason rather than a slogan.
-  const primary = deriveThresholdMetrics(profile, sport, units)[0];
+  const primary = deriveThresholdMetrics(
+    profile,
+    sport,
+    units,
+    undefined,
+    hrUnit
+  )[0];
 
   const reason = primary
     ? t("zonesReason", {
-        metric: primary.label,
+        metric: t(`metric.${primary.labelKey}`),
         value: primary.unit
           ? `${primary.value} ${primary.unit}`
           : primary.value,

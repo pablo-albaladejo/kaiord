@@ -6,7 +6,7 @@
     "subtitle": "Add a new lab report",
     "loading": "Loading…",
     "noProfile": "Create an athlete first to log lab analytics.",
-    "typedNote": "Labs are the one health surface with no source to sync from — every value here was typed, so it carries the date you entered it rather than a bridge name."
+    "typedNote": "Labs are the one health surface with no source to sync from — every value here was typed, so it carries the date you entered it rather than a source name."
   },
   "form": {
     "addParameter": "Add parameter",

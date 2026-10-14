@@ -69,7 +69,7 @@ describe("PushButton", () => {
     [
       "the bridge is not detected",
       { extensionInstalled: false },
-      "Install the Kaiord Garmin Bridge extension to send this workout.",
+      "Install the Kaiord extension for Garmin to send this workout.",
     ],
     [
       "Garmin is signed out",
