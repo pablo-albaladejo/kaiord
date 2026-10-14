@@ -30,12 +30,14 @@ jobs:
         uses: ./.github/actions/setup-pnpm
 
       - name: Build all packages
+        id: build
         run: pnpm -r build
 
       - name: Collect current metrics
         run: node .github/scripts/collect-metrics.js
         env:
           METRICS_OUTPUT: current
+          METRICS_BUILD_OUTCOME: ${{ steps.build.outcome }}
 
       # On push to main: save metrics as cached baseline
       - name: Cache main metrics
