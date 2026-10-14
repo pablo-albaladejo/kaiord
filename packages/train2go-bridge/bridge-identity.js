@@ -10,5 +10,5 @@
 globalThis.KAIORD_BRIDGE_IDENTITY = {
   id: "train2go-bridge",
   name: "Kaiord Train2Go Bridge",
-  capabilities: ["read:training-plan", "read:training-zones"],
+  capabilities: ["read:training-plan", "read:training-zones", "read:body"],
 };
