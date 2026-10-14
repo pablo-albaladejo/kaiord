@@ -110,12 +110,28 @@ pnpm test:e2e:report
 Configuration is in `playwright.config.ts`:
 
 - **Test Directory**: `./e2e`
-- **Base URL**: `http://localhost:5173`
+- **Base URL**: `http://localhost:5173`, or `http://localhost:$PLAYWRIGHT_PORT` when that variable is set (see below)
 - **Browsers**: Chromium, Firefox, WebKit
 - **Mobile Devices**: Pixel 5, iPhone 12
 - **Retries**: 2 in CI, 0 locally
 - **Trace**: On first retry
 - **Screenshots**: On failure only
+
+### Running beside another worktree
+
+Locally the config reuses whatever server answers on 5173, so a dev server
+left running in another worktree is adopted silently and the specs run against
+its code. Check `lsof -iTCP:5173 -sTCP:LISTEN` first, or give the run its own
+port:
+
+```bash
+PLAYWRIGHT_PORT=5199 pnpm test:e2e e2e/some.spec.ts
+```
+
+With `PLAYWRIGHT_PORT` set, Vite starts with `--strictPort` and an occupied
+port fails the run instead of being reused. Unset, behaviour is unchanged
+(5173, reuse locally, never in CI). Origin-gated bridge extensions only accept
+5173 and 5174, so real-extension checks must stay on those ports.
 
 ## CI/CD Integration
 

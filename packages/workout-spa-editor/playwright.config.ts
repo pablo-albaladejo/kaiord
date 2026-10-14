@@ -1,5 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Another worktree's dev server on 5173 would otherwise be silently reused and
+// the specs would run against its code. Setting PLAYWRIGHT_PORT moves this
+// run to its own port and refuses to adopt a server that is already there.
+const RAW_PORT = process.env.PLAYWRIGHT_PORT?.trim() || undefined;
+const CUSTOM_PORT = RAW_PORT !== undefined;
+const PORT = CUSTOM_PORT ? Number(RAW_PORT) : 5173;
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  throw new Error(
+    `PLAYWRIGHT_PORT must be an integer between 1 and 65535, got "${RAW_PORT}"`
+  );
+}
+const BASE_URL = `http://localhost:${PORT}`;
+
 /**
  * Playwright configuration for E2E tests
  * @see https://playwright.dev/docs/test-configuration
@@ -22,7 +35,7 @@ export default defineConfig({
     : [["html", { open: "never" }], ["list"]],
 
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: BASE_URL,
     // Pin the browser locale so `navigator.language` is deterministic: the
     // SPA's `auto` locale preference resolves to English regardless of the
     // runner's system locale, keeping the English UI assertions stable.
@@ -87,9 +100,9 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
+    command: `pnpm dev --port ${PORT} --strictPort`,
+    url: BASE_URL,
+    reuseExistingServer: !process.env.CI && !CUSTOM_PORT,
     timeout: 120 * 1000,
   },
 });

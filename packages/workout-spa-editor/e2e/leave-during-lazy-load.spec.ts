@@ -22,11 +22,14 @@
 
 import { expect, test } from "./fixtures/base";
 
-const DESTINATION = "http://localhost:5173/__leave-destination.html";
+const DESTINATION_PATH = "/__leave-destination.html";
 const DESTINATION_DELAY_MS = 1500;
 
 test.describe("leaving during a lazy route load", () => {
-  test.beforeEach(async ({ page }) => {
+  let DESTINATION = "";
+
+  test.beforeEach(async ({ page, baseURL }) => {
+    DESTINATION = new URL(DESTINATION_PATH, baseURL).href;
     await page.route(DESTINATION, async (route) => {
       await new Promise((resolve) => setTimeout(resolve, DESTINATION_DELAY_MS));
       await route.fulfill({
