@@ -1,3 +1,4 @@
+import { getTranslate } from "../../i18n/use-translate";
 import type { SportThresholds } from "../../types/sport-zones";
 import type { Units } from "../units/units";
 import type { ActiveSport } from "./sports";
@@ -16,30 +17,31 @@ export function thresholdCandidates(
   sport: ActiveSport,
   thresholds: SportThresholds | undefined,
   maxHeartRate: number | undefined,
-  units: Units = "metric"
+  units: Units = "metric",
+  hrUnit: string = getTranslate("common")("units.hr")
 ): ThresholdCandidate[] {
   if (sport === "cycling") {
     return [
       {
         value: thresholds?.ftp?.toString(),
         unit: "W",
-        label: "FTP",
+        labelKey: "ftp",
         field: "cycling.thresholds.ftp",
         raw: thresholds?.ftp,
       },
-      ...hrCandidates(sport, thresholds, maxHeartRate, true),
+      ...hrCandidates(sport, thresholds, maxHeartRate, true, hrUnit),
     ];
   }
   if (sport === "running") {
     const field = "running.thresholds.thresholdPaceSecPerKm";
     return [
-      paceCandidate(thresholds, "min_per_km", "Threshold pace", units, field),
-      ...hrCandidates(sport, thresholds, maxHeartRate, true),
+      paceCandidate(thresholds, "min_per_km", "thresholdPace", units, field),
+      ...hrCandidates(sport, thresholds, maxHeartRate, true, hrUnit),
     ];
   }
   const field = "swimming.thresholds.cssPaceSecPer100m";
   return [
-    paceCandidate(thresholds, "min_per_100m", "CSS pace", units, field),
-    ...hrCandidates(sport, thresholds, maxHeartRate, false),
+    paceCandidate(thresholds, "min_per_100m", "cssPace", units, field),
+    ...hrCandidates(sport, thresholds, maxHeartRate, false, hrUnit),
   ];
 }

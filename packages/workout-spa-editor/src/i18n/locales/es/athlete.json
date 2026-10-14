@@ -25,6 +25,13 @@
   "noThreshold": "Establece un umbral de {{sport}} para ver tus zonas",
   "zonesReason": "Derivadas de {{metric}} {{value}}. Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
   "zonesReasonNoThreshold": "Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
+  "metric": {
+    "ftp": "FTP",
+    "thresholdPace": "Ritmo umbral",
+    "cssPace": "Ritmo CSS",
+    "thresholdHr": "FC umbral",
+    "maxHr": "FC máxima"
+  },
   "provenance": {
     "synced": "{{source}} · {{when}}",
     "manual": "A mano",

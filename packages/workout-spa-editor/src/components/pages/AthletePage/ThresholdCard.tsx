@@ -36,10 +36,16 @@ export function ThresholdCard({
   // dismissal lives exactly as long as the claim it answers: this session.
   const [dismissed, setDismissed] = useState<string | null>(null);
   const units = useUnits();
+  const hrUnit = useTranslate("common")("units.hr");
   const applyThreshold = useApplyThreshold(profileId, sport);
   const { saved, write } = useThresholdWrites(profileId, sport);
 
-  const disagreement = deriveThresholdDisagreement(profile, sport, units);
+  const disagreement = deriveThresholdDisagreement(
+    profile,
+    sport,
+    units,
+    hrUnit
+  );
   // Keyed by field AND sync, so keeping one number does not also silence a
   // second disagreement that arrived in the same snapshot.
   const key = disagreement && `${disagreement.field}@${disagreement.at}`;

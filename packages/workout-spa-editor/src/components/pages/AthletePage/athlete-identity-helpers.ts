@@ -46,19 +46,20 @@ export function deriveTagline(
   sport?: ActiveSport,
   units: Units = "metric",
   t: Translate = getTranslate("athlete"),
-  currentWeightKg?: number
+  currentWeightKg?: number,
+  hrUnit?: string
 ): string {
   const parts = sportNouns(profile, t);
   if (parts.length === 0) parts.push(t("tagline.fallback"));
 
   const primary = sport
-    ? deriveThresholdMetrics(profile, sport, units)[0]
+    ? deriveThresholdMetrics(profile, sport, units, undefined, hrUnit)[0]
     : undefined;
   if (primary) {
     const value = primary.unit
       ? `${primary.value} ${primary.unit}`
       : primary.value;
-    parts.push(`${value} ${primary.label}`);
+    parts.push(`${value} ${t(`metric.${primary.labelKey}`)}`);
   }
   if (currentWeightKg !== undefined) {
     parts.push(formatWeightKg(currentWeightKg, units));

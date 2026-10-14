@@ -1,6 +1,7 @@
 import type { Profile } from "../../types/profile";
 import type { Units } from "../units/units";
 import type { ActiveSport } from "./sports";
+import type { ThresholdLabelKey } from "./threshold-candidate-builders";
 import {
   type ThresholdCandidate,
   thresholdCandidates,
@@ -13,7 +14,8 @@ import {
 export type ThresholdMetric = {
   value: string;
   unit?: string;
-  label: string;
+  /** Key under `athlete` `metric.*`. */
+  labelKey: ThresholdLabelKey;
   provenance: ThresholdProvenance;
 };
 
@@ -31,15 +33,22 @@ export function deriveThresholdMetrics(
   profile: Profile,
   sport: ActiveSport,
   units: Units = "metric",
-  now: Date = new Date()
+  now: Date = new Date(),
+  hrUnit?: string
 ): ThresholdMetric[] {
   const thresholds = profile.sportZones[sport]?.thresholds;
-  return thresholdCandidates(sport, thresholds, profile.maxHeartRate, units)
+  return thresholdCandidates(
+    sport,
+    thresholds,
+    profile.maxHeartRate,
+    units,
+    hrUnit
+  )
     .filter(isPresent)
     .map((candidate) => ({
       value: candidate.value,
       unit: candidate.unit,
-      label: candidate.label,
+      labelKey: candidate.labelKey,
       provenance: deriveThresholdProvenance(
         profile,
         candidate.field,

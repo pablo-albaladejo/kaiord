@@ -25,6 +25,13 @@
   "noThreshold": "Set a {{sport}} threshold to see your zones",
   "zonesReason": "Derived from {{metric}} {{value}}. These five bands are what the AI writes workouts against and what your watch receives as targets.",
   "zonesReasonNoThreshold": "These five bands are what the AI writes workouts against and what your watch receives as targets.",
+  "metric": {
+    "ftp": "FTP",
+    "thresholdPace": "Threshold pace",
+    "cssPace": "CSS pace",
+    "thresholdHr": "Threshold HR",
+    "maxHr": "Max HR"
+  },
   "provenance": {
     "synced": "{{source}} · {{when}}",
     "manual": "By hand",

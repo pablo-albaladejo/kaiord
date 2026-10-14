@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { appI18n, setActiveLocale } from "../../../i18n/i18n";
 import { getTranslate } from "../../../i18n/use-translate";
 import { profileWith } from "../../../lib/athlete/test-profile";
 import { deriveInitials, deriveTagline } from "./athlete-identity-helpers";
@@ -118,5 +119,29 @@ describe("deriveTagline", () => {
 
     // Assert
     expect(tagline).toBe("Athlete");
+  });
+});
+
+describe("deriveTagline in Spanish", () => {
+  beforeAll(() => setActiveLocale("es"));
+  afterAll(() => appI18n.changeLanguage("en"));
+
+  it("should name the heart-rate threshold with ppm, never Threshold HR or bpm", () => {
+    // Arrange
+    const profile = profileWith("cycling", { lthr: 168 });
+
+    // Act
+    const tagline = deriveTagline(
+      profile,
+      "cycling",
+      "metric",
+      getTranslate("athlete", "es"),
+      undefined,
+      getTranslate("common", "es")("units.hr")
+    );
+
+    // Assert
+    expect(tagline).toContain("168 ppm FC umbral");
+    expect(tagline).not.toMatch(/Threshold HR|bpm/);
   });
 });

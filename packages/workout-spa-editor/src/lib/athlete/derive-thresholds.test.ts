@@ -24,9 +24,13 @@ describe("deriveThresholdMetrics", () => {
 
     // Assert
     expect(metrics).toHaveLength(CYCLING_METRIC_COUNT);
-    expect(metrics[0]).toMatchObject({ value: "265", unit: "W", label: "FTP" });
-    expect(metrics[1]).toMatchObject({ label: "Threshold HR" });
-    expect(metrics[2]).toMatchObject({ value: "189", label: "Max HR" });
+    expect(metrics[0]).toMatchObject({
+      value: "265",
+      unit: "W",
+      labelKey: "ftp",
+    });
+    expect(metrics[1]).toMatchObject({ labelKey: "thresholdHr" });
+    expect(metrics[2]).toMatchObject({ value: "189", labelKey: "maxHr" });
   });
 
   it("should derive CSS pace and threshold HR for swimming (no max HR row)", () => {
@@ -45,7 +49,7 @@ describe("deriveThresholdMetrics", () => {
     expect(metrics[0]).toMatchObject({
       value: "1:38",
       unit: "/100m",
-      label: "CSS pace",
+      labelKey: "cssPace",
     });
   });
 
@@ -63,7 +67,7 @@ describe("deriveThresholdMetrics", () => {
     expect(metrics[0]).toMatchObject({
       value: "6:34",
       unit: "/mi",
-      label: "Threshold pace",
+      labelKey: "thresholdPace",
     });
   });
 
@@ -90,7 +94,7 @@ describe("deriveThresholdMetrics", () => {
 
     // Assert
     expect(metrics).toHaveLength(1);
-    expect(metrics[0]).toMatchObject({ label: "Threshold HR" });
+    expect(metrics[0]).toMatchObject({ labelKey: "thresholdHr" });
   });
 
   it("should carry the origin of every metric it returns", () => {
