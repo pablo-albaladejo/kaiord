@@ -98,11 +98,13 @@ test.describe("Coaching activity dialog — Train2Go click path", () => {
         });
 
         // Seed an out-of-week dummy workout so `hasAnyWorkouts` is true
-        // and the FirstVisitState onboarding panel does not render. The
-        // panel intercepts pointer events at narrow viewports and would
-        // block the card click being tested here.
+        // and the first-run guide does not render. The guide intercepts
+        // pointer events at narrow viewports and would block the card
+        // click being tested here. The workout must carry the profileId:
+        // the calendar only counts the active profile's workouts.
         await db.table("workouts").put({
           id: "t2g-click-dummy-workout",
+          profileId,
           date: "2020-01-01",
           state: "raw",
           sport: "cycling",
