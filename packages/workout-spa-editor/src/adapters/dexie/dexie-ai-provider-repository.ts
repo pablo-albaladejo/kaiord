@@ -27,16 +27,32 @@ const PASSPHRASE = "kaiord-spa-v1";
 // user enters one; entering one clears `apiKeyMissing`.
 type StoredProvider = Omit<LlmProviderConfig, "apiKey"> & { apiKey?: string };
 
+// Every live reader re-reads every provider after every write, and each
+// decrypt derives a 100k-iteration PBKDF2 key: a save cost five derivations
+// per stored provider. A ciphertext this session has already decrypted or
+// written is answered from memory instead.
+const plaintextByCiphertext = new Map<string, string>();
+
 async function encryptProvider(p: LlmProviderConfig): Promise<StoredProvider> {
   const { apiKey, apiKeyMissing, ...rest } = p;
   if (!apiKey && apiKeyMissing) return { ...rest, apiKeyMissing };
-  return { ...rest, apiKey: await Dexie.waitFor(encrypt(apiKey, PASSPHRASE)) };
+  const cipher = await Dexie.waitFor(encrypt(apiKey, PASSPHRASE));
+  plaintextByCiphertext.set(cipher, apiKey);
+  return { ...rest, apiKey: cipher };
+}
+
+async function decryptKey(cipher: string): Promise<string> {
+  const known = plaintextByCiphertext.get(cipher);
+  if (known !== undefined) return known;
+  const plain = await Dexie.waitFor(decrypt(cipher, PASSPHRASE));
+  plaintextByCiphertext.set(cipher, plain);
+  return plain;
 }
 
 async function decryptProvider(p: StoredProvider): Promise<LlmProviderConfig> {
   if (typeof p.apiKey !== "string")
     return { ...p, apiKey: "", apiKeyMissing: true };
-  return { ...p, apiKey: await Dexie.waitFor(decrypt(p.apiKey, PASSPHRASE)) };
+  return { ...p, apiKey: await decryptKey(p.apiKey) };
 }
 
 const CUSTOM_PROMPT_KEY = "ai_custom_prompt";

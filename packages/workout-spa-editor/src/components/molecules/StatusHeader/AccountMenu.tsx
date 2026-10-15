@@ -1,6 +1,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useProfilesLive } from "../../../hooks/use-profiles-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
@@ -27,13 +28,18 @@ type AccountMenuProps = {
  */
 export function AccountMenu({ attention }: AccountMenuProps) {
   const t = useTranslate("nav");
-  const activeProfile = useActiveProfileLive()?.profile ?? null;
+  const active = useActiveProfileLive();
+  const activeProfile = active?.profile ?? null;
   const name = activeProfile?.name ?? null;
   const initials = accountInitials(name);
+  const profiles = useProfilesLive();
+  // Held shut while either read is in flight: opened then, the menu gained
+  // its athlete rows a moment later and moved every row under the tap.
+  const loading = active === undefined || profiles === undefined;
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
+      <DropdownMenu.Trigger asChild disabled={loading}>
         <Button
           variant="tertiary"
           size="sm"
@@ -60,7 +66,10 @@ export function AccountMenu({ attention }: AccountMenuProps) {
           className={MENU_CONTENT_CLASS}
           data-testid="account-menu"
         >
-          <AthleteSwitcher />
+          <AthleteSwitcher
+            profiles={profiles ?? []}
+            activeId={active?.id ?? ""}
+          />
           <AccountMenuItems attention={attention} />
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
