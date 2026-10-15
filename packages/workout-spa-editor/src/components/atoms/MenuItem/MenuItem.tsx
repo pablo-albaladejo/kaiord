@@ -10,6 +10,8 @@ import type { ComponentPropsWithRef, PointerEvent } from "react";
 // ends over an item and chooses it unasked. Cancelling the pointerup skips
 // that path; a press made on the item still clicks it, and the keyboard is
 // untouched. Touch never reaches it: the pointer is captured by the trigger.
+// Desktop press-drag-release (hold on the trigger, release on a row) is
+// given up on purpose: it is the same gesture as the accidental one.
 const ignoreForeignRelease =
   (onPointerUp?: (event: PointerEvent<HTMLDivElement>) => void) =>
   (event: PointerEvent<HTMLDivElement>) => {

@@ -67,6 +67,62 @@ const importRules = {
   ],
 };
 
+const MATCH_SUGGESTION_MESSAGE =
+  "MatchSuggestion is owned by application/match-suggestion.ts. Import it from there instead of redeclaring.";
+
+/** MatchSuggestion type lives in src/application/match-suggestion.ts.
+    Redeclaring elsewhere bypasses the single-source-of-truth contract
+    between the auto-match heuristic (producer) and the banner UI
+    (consumer). */
+const matchSuggestionRestrictions = [
+  {
+    selector: "TSTypeAliasDeclaration[id.name='MatchSuggestion']",
+    message: MATCH_SUGGESTION_MESSAGE,
+  },
+  {
+    selector: "TSInterfaceDeclaration[id.name='MatchSuggestion']",
+    message: MATCH_SUGGESTION_MESSAGE,
+  },
+];
+
+const MENU_ITEM_MESSAGE =
+  "Use MenuItem / MenuRadioItem from components/atoms/MenuItem: they ignore a release that did not start on the item.";
+const RADIX_DROPDOWN =
+  "ImportDeclaration[source.value='@radix-ui/react-dropdown-menu']";
+const RADIX_ITEM = "/^(DropdownMenu)?(Item|RadioItem|CheckboxItem)$/";
+
+/** A raw Radix dropdown item selects on a release that began elsewhere, so
+    the press that opened its menu can choose it unasked. Every way of
+    reaching one is closed except through components/atoms/MenuItem. */
+const menuItemRestrictions = [
+  {
+    selector: `JSXMemberExpression[object.name='DropdownMenu'][property.name=${RADIX_ITEM}]`,
+    message: MENU_ITEM_MESSAGE,
+  },
+  {
+    selector: `MemberExpression[object.name='DropdownMenu'][property.name=${RADIX_ITEM}]`,
+    message: MENU_ITEM_MESSAGE,
+  },
+  {
+    selector: `${RADIX_DROPDOWN} > ImportSpecifier[imported.name=${RADIX_ITEM}]`,
+    message: MENU_ITEM_MESSAGE,
+  },
+  {
+    selector: `ExportNamedDeclaration[source.value='@radix-ui/react-dropdown-menu'] > ExportSpecifier[local.name=${RADIX_ITEM}]`,
+    message: MENU_ITEM_MESSAGE,
+  },
+  {
+    selector:
+      "ExportAllDeclaration[source.value='@radix-ui/react-dropdown-menu']",
+    message: MENU_ITEM_MESSAGE,
+  },
+  {
+    selector: `${RADIX_DROPDOWN} > ImportNamespaceSpecifier[local.name!='DropdownMenu']`,
+    message:
+      "Import @radix-ui/react-dropdown-menu as `* as DropdownMenu`, the name the MenuItem guard checks.",
+  },
+];
+
 export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -488,53 +544,27 @@ export default tseslint.config(
       ],
       "no-restricted-syntax": [
         "error",
-        {
-          // MatchSuggestion type lives in src/application/match-suggestion.ts.
-          // Redeclaring elsewhere bypasses the single-source-of-truth contract
-          // between the auto-match heuristic (producer) and the banner UI
-          // (consumer). The canonical file is exempted in the override below.
-          selector: "TSTypeAliasDeclaration[id.name='MatchSuggestion']",
-          message:
-            "MatchSuggestion is owned by application/match-suggestion.ts. Import it from there instead of redeclaring.",
-        },
-        {
-          selector: "TSInterfaceDeclaration[id.name='MatchSuggestion']",
-          message:
-            "MatchSuggestion is owned by application/match-suggestion.ts. Import it from there instead of redeclaring.",
-        },
-        {
-          // A raw Radix item selects on a release that began elsewhere, so
-          // the press that opened its menu can choose it unasked.
-          selector:
-            "JSXMemberExpression[object.name='DropdownMenu'][property.name=/^(Item|RadioItem|CheckboxItem)$/]",
-          message:
-            "Use MenuItem / MenuRadioItem from components/atoms/MenuItem: they ignore a release that did not start on the item.",
-        },
-        {
-          selector:
-            "ImportDeclaration[source.value='@radix-ui/react-dropdown-menu'] ImportSpecifier[imported.name=/^(Item|RadioItem|CheckboxItem)$/]",
-          message:
-            "Use MenuItem / MenuRadioItem from components/atoms/MenuItem: they ignore a release that did not start on the item.",
-        },
+        ...matchSuggestionRestrictions,
+        ...menuItemRestrictions,
       ],
     },
   },
   {
-    // Owner of the Radix dropdown items the rule above forbids elsewhere.
+    // Owner of the Radix dropdown items the rule above forbids elsewhere:
+    // only the menu-item entries are lifted.
     files: [
       "packages/workout-spa-editor/src/components/atoms/MenuItem/MenuItem.tsx",
     ],
     rules: {
-      "no-restricted-syntax": "off",
+      "no-restricted-syntax": ["error", ...matchSuggestionRestrictions],
     },
   },
   {
-    // Canonical owner of MatchSuggestion — re-enable the type alias
-    // declaration that the no-restricted-syntax rule above forbids
-    // everywhere else.
+    // Canonical owner of MatchSuggestion: only the MatchSuggestion
+    // entries are lifted.
     files: ["packages/workout-spa-editor/src/application/match-suggestion.ts"],
     rules: {
-      "no-restricted-syntax": "off",
+      "no-restricted-syntax": ["error", ...menuItemRestrictions],
     },
   },
   ...adapterBoundaryRules(),
