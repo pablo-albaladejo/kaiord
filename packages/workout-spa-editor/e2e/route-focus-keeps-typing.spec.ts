@@ -9,9 +9,15 @@
  * The drop is simulated so every engine runs the window Mobile Safari only
  * opens intermittently: heading focus is ignored from boot until the field
  * is focused, so no heading holds focus when the route changes.
+ *
+ * It depends on the hook's 5 s retry budget: the field must be focused
+ * before the budget expires. On a runner slow enough to miss it, the retry
+ * is already gone and the spec passes whatever the hook does — a false green,
+ * never a false red.
  */
 
 import { expect, test } from "./fixtures/base";
+import { clickCentred } from "./helpers/click-centred";
 import { routeInApp } from "./helpers/route-in-app";
 
 type DropFlag = { __dropHeadingFocus?: boolean };
@@ -37,9 +43,9 @@ test("should keep every keystroke typed right after a route change", async ({
   const settingsPage = page.getByTestId("settings-page");
   const addAccount = settingsPage.getByRole("button", { name: "Add account" });
   await routeInApp(page, "/settings/ai", addAccount);
-  await addAccount.click();
+  await clickCentred(addAccount);
   const keyField = settingsPage.getByPlaceholder("sk-...");
-  await keyField.click();
+  await clickCentred(keyField);
   await page.evaluate(() => {
     (window as DropFlag).__dropHeadingFocus = false;
   });

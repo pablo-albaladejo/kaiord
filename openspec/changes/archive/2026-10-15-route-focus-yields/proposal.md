@@ -13,9 +13,18 @@ field took focus back, and the keystrokes typed next went to the heading.
 
 On main this showed up as the e2e `ai-generate-workout` 8.10 failing its first
 attempt on Mobile Safari (runs 38667539719 and 38769969904): the API key was
-filled, the field stayed empty, and "Add Provider" stayed disabled. The page
-snapshot at failure had the label filled, the key empty and the heading
-focused.
+filled, the field stayed empty, and the form's submit button (then "Add
+Provider", "Save account" since #1451) stayed disabled. The page snapshot at
+failure had the label filled, the key empty and the heading focused.
+
+A second Mobile Safari mechanism made the same test fail after the focus fix:
+a click released over a different element than it was pressed on. Logged
+pointer events showed `pointerdown` on "Add account", the page still moving,
+`pointerup` 50 px further on, and the `click` dispatched to the common
+ancestor, so the form never opened. Two scrolls were still gliding under
+`html { scroll-behavior: smooth }`: the Settings section reset, a plain
+`scrollTop = 0` the CSS animates over ~200 ms, and Playwright's own retry
+scroll after the floating bottom nav intercepted the first click.
 
 ## What Changes
 
@@ -23,8 +32,19 @@ focused.
   when the route changed (usually the link just activated) to anything other
   than the body or the heading. A field the user or the page focused is
   never taken back.
+- The owner is read before the new route's commit, so an element the new
+  page autofocuses in that commit counts as moved-on focus, not as the stale
+  owner.
+- A text field that kept focus across the route change is never replaced.
+- The Settings section scroll reset jumps to the top instead of gliding
+  there: the write runs with the scroller's `scroll-behavior` set to `auto`.
+- The e2e flows that click inside a Settings section bring the control to the
+  viewport centre with an instant scroll first (`e2e/helpers/click-centred`),
+  so Playwright never has to scroll it there through the smooth CSS.
 
 ## Impact
 
-- `useFocusOnRouteChange` only. A navigation with nothing else focused still
+- `useFocusOnRouteChange`: a navigation with nothing else focused still
   lands on the heading, and dropped focuses are still retried.
+- `useSectionScrollReset`: same reset, same triggers; only the animation is
+  gone. Smooth scrolling elsewhere in the app is unchanged.

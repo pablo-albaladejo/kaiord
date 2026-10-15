@@ -72,7 +72,9 @@ async function retryingTransientCrash<T>(
       const transient =
         error instanceof Error && TRANSIENT_NAV_CRASH.test(error.message);
       if (!transient) throw error;
-      reportSwallowedCrash(testInfo, error);
+      // The last attempt's crash is rethrown, not swallowed: the failure
+      // already names it.
+      if (attempt < GOTO_CRASH_RETRIES) reportSwallowedCrash(testInfo, error);
     }
   }
   throw lastError;
