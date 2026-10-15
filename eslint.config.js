@@ -502,7 +502,30 @@ export default tseslint.config(
           message:
             "MatchSuggestion is owned by application/match-suggestion.ts. Import it from there instead of redeclaring.",
         },
+        {
+          // A raw Radix item selects on a release that began elsewhere, so
+          // the press that opened its menu can choose it unasked.
+          selector:
+            "JSXMemberExpression[object.name='DropdownMenu'][property.name=/^(Item|RadioItem|CheckboxItem)$/]",
+          message:
+            "Use MenuItem / MenuRadioItem from components/atoms/MenuItem: they ignore a release that did not start on the item.",
+        },
+        {
+          selector:
+            "ImportDeclaration[source.value='@radix-ui/react-dropdown-menu'] ImportSpecifier[imported.name=/^(Item|RadioItem|CheckboxItem)$/]",
+          message:
+            "Use MenuItem / MenuRadioItem from components/atoms/MenuItem: they ignore a release that did not start on the item.",
+        },
       ],
+    },
+  },
+  {
+    // Owner of the Radix dropdown items the rule above forbids elsewhere.
+    files: [
+      "packages/workout-spa-editor/src/components/atoms/MenuItem/MenuItem.tsx",
+    ],
+    rules: {
+      "no-restricted-syntax": "off",
     },
   },
   {
