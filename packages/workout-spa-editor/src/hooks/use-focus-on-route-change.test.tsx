@@ -171,4 +171,48 @@ describe("useFocusOnRouteChange", () => {
     });
     expect(dropsLeft).toBe(0);
   });
+
+  it("should stop retrying once the user has moved focus into a field", async () => {
+    // Arrange
+    // Mobile Safari drops the heading focus for a while after a navigation.
+    // The retry loop kept re-taking focus every 50 ms, so a field the user
+    // (or Playwright's `fill`) had just focused lost its next keystrokes:
+    // the text went to the heading and the field stayed empty.
+    const realFocus = HTMLElement.prototype.focus;
+    let dropping = false;
+    vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
+      this: HTMLElement,
+      options?: FocusOptions
+    ) {
+      if (dropping && this.hasAttribute(ROUTE_HEADING_ATTR)) return;
+      realFocus.call(this, options);
+    });
+    const loc = memoryLocation({ path: "/calendar" });
+    const { rerender } = render(
+      <Router hook={loc.hook}>
+        <Harness />
+        <input aria-label="API key" />
+      </Router>
+    );
+    (document.activeElement as HTMLElement | null)?.blur();
+    dropping = true;
+    act(() => {
+      loc.navigate("/library");
+    });
+    rerender(
+      <Router hook={loc.hook}>
+        <Harness />
+        <input aria-label="API key" />
+      </Router>
+    );
+    const field = document.querySelector<HTMLInputElement>("input")!;
+
+    // Act
+    field.focus();
+    dropping = false;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // Assert
+    expect(document.activeElement).toBe(field);
+  });
 });

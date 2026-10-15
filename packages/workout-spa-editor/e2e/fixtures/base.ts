@@ -23,9 +23,17 @@
  * navigations are untouched: a page that genuinely fails to load reports a
  * net error, and an app that renders the wrong thing still fails its
  * assertions.
+ *
+ * VISIBILITY. A retried crash is not always harmless: on Linux WebKit the
+ * crashed navigation can take the context's in-memory storage with it, so
+ * the retried document boots on an EMPTY IndexedDB and the test then fails
+ * on something unrelated ("Workout not found", a control that never
+ * appears). Every swallowed crash is therefore recorded on the test as a
+ * `transient-nav-crash` annotation and printed to stderr, so a failure that
+ * follows one names its real cause instead of looking like a flake.
  */
 
-import type { Page } from "@playwright/test";
+import type { Page, TestInfo } from "@playwright/test";
 import { test as base } from "@playwright/test";
 
 const TRANSIENT_NAV_CRASH =
@@ -43,7 +51,16 @@ export function appUrl(route: string): string {
   return `/#${route}`;
 }
 
+function reportSwallowedCrash(testInfo: TestInfo, error: Error): void {
+  const description = error.message.split("\n")[0];
+  testInfo.annotations.push({ type: "transient-nav-crash", description });
+  process.stderr.write(
+    `[transient-nav-crash] ${testInfo.titlePath.join(" › ")}: ${description}\n`
+  );
+}
+
 async function retryingTransientCrash<T>(
+  testInfo: TestInfo,
   navigate: () => Promise<T>
 ): Promise<T> {
   let lastError: unknown;
@@ -55,6 +72,7 @@ async function retryingTransientCrash<T>(
       const transient =
         error instanceof Error && TRANSIENT_NAV_CRASH.test(error.message);
       if (!transient) throw error;
+      reportSwallowedCrash(testInfo, error);
     }
   }
   throw lastError;
@@ -73,7 +91,7 @@ function staysInSameDocument(current: string, target: string): boolean {
 }
 
 export const test = base.extend({
-  page: async ({ page }, use) => {
+  page: async ({ page }, use, testInfo) => {
     const originalGoto = page.goto.bind(page);
     page.goto = (async (url, options) => {
       const target = appUrl(url);
@@ -86,9 +104,13 @@ export const test = base.extend({
         // at the new route and immediately tears it down again, which is the
         // second-navigation-racing-the-mount shape that used to dominate the
         // WebKit flakes (see `helpers/seed-empty-workout`).
-        await retryingTransientCrash(() => originalGoto("about:blank"));
+        await retryingTransientCrash(testInfo, () =>
+          originalGoto("about:blank")
+        );
       }
-      return await retryingTransientCrash(() => originalGoto(target, options));
+      return await retryingTransientCrash(testInfo, () =>
+        originalGoto(target, options)
+      );
     }) as Page["goto"];
 
     // `reload` is the same operation through another door, and it aborts the
@@ -97,7 +119,9 @@ export const test = base.extend({
     // already knows how to name.
     const originalReload = page.reload.bind(page);
     page.reload = ((options) =>
-      retryingTransientCrash(() => originalReload(options))) as Page["reload"];
+      retryingTransientCrash(testInfo, () =>
+        originalReload(options)
+      )) as Page["reload"];
 
     await use(page);
   },

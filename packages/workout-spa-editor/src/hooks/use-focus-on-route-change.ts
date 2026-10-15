@@ -41,6 +41,17 @@ const OBSERVE_TIMEOUT_MS = 5000;
 // keyboard user does not notice, long enough not to busy-wait for 5s.
 const RETRY_INTERVAL_MS = 50;
 
+/** Whether focus left `staleOwner` for something other than the heading. */
+const focusMovedOn = (staleOwner: Element | null, target: HTMLElement) => {
+  const active = document.activeElement;
+  return (
+    active !== null &&
+    active !== document.body &&
+    active !== staleOwner &&
+    active !== target
+  );
+};
+
 export function useFocusOnRouteChange(): void {
   const [pathname] = useLocation();
   const lastPathRef = useRef<string | null>(null);
@@ -52,6 +63,11 @@ export function useFocusOnRouteChange(): void {
     let observer: MutationObserver | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let retryId: ReturnType<typeof setInterval> | null = null;
+    // Whatever held focus when the route changed (the link just activated)
+    // is stale and may be replaced; anything focused after that was put
+    // there by the user or the page, and the retry must not take it back —
+    // doing so swallowed the keystrokes typed into a just-focused field.
+    const staleOwner = document.activeElement;
 
     const focusTarget = (target: HTMLElement) => {
       target.focus({ preventScroll: true });
@@ -62,6 +78,7 @@ export function useFocusOnRouteChange(): void {
         ROUTE_HEADING_SELECTOR
       );
       if (!target) return false;
+      if (focusMovedOn(staleOwner, target)) return true;
       focusTarget(target);
       // Engines silently drop a programmatic focus applied during the
       // post-navigation settle window — the call returns normally and

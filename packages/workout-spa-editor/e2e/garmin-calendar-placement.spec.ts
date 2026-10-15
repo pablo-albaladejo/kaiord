@@ -23,8 +23,8 @@ import {
   readGarminStubState,
   releaseGarminStub,
 } from "./helpers/garmin-bridge-stub";
-import { openDetailWhenReady } from "./helpers/garmin-calendar-seed";
 import { seedEnabledGarminExportPolicy } from "./helpers/garmin-ready-gate";
+import { routeInApp } from "./helpers/route-in-app";
 import {
   clearDexie,
   E2E_DEFAULT_PROFILE_ID,
@@ -155,10 +155,18 @@ test.describe("Garmin calendar placement", () => {
     await page.getByTestId("send-to-garmin-button").click();
     await expect.poll(() => garminStubActions(page)).toContain("schedule");
     await page.reload();
+    // The reload is the subject and already booted the app on the seeded
+    // rows, so the detail page is reached in-app. A `goto` here tore the
+    // fresh document down and booted it again, two more cross-document
+    // navigations: on Linux WebKit those are where "internal error" fires,
+    // and the retried navigation came back to an empty IndexedDB ("Workout
+    // not found", a re-created "My athlete").
+    const send = page.getByRole("button", { name: "Send to Garmin" });
+    await routeInApp(page, `/workout/view/${workoutId}`, send);
+    await expect(send).toBeEnabled();
 
     // Act
-    await openDetailWhenReady(page, workoutId);
-    await page.getByRole("button", { name: /send to garmin/i }).click();
+    await send.click();
 
     // Assert
     await expect(
