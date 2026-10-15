@@ -1,6 +1,7 @@
 {
+  "title": "Conexiones",
   "intro": "Cada fuente que has vinculado, lo que está enviando ahora mismo y cuál gana cuando dos fuentes informan de lo mismo.",
-  "noProfile": "Crea un perfil de atleta para vincular una fuente de datos.",
+  "noProfile": "Crea un atleta para añadir una conexión.",
   "sources": "Fuentes",
   "sourcesHint": "La extensión de Kaiord y los permisos están dentro de cada conexión",
   "unsupported": "Todavía no disponibles",
@@ -152,10 +153,15 @@
     "heart-rate-series": "Serie de frecuencia cardiaca"
   },
   "profileLink": {
-    "notLinked": "{{name}} tiene sesión en este navegador pero no está vinculado a este perfil de atleta, así que todavía no se sincroniza nada.",
-    "link": "Vincular a este perfil",
-    "signIn": "{{name}} no está vinculado a este perfil de atleta. Inicia sesión en {{name}} en este navegador y luego vincúlalo aquí.",
-    "linking": "Vinculando…"
+    "notLinked": "{{name}} tiene sesión en este navegador pero no está vinculado a este atleta, así que todavía no se sincroniza nada.",
+    "link": "Vincular a este atleta",
+    "signIn": "{{name}} no está vinculado a este atleta. Inicia sesión en {{name}} en este navegador y luego vincúlalo aquí.",
+    "linking": "Vinculando…",
+    "linked": "Vinculado a este atleta como {{user}}. A diferencia del resto de esta página, el vínculo se guarda con el atleta, no solo en este navegador.",
+    "unlink": "Desvincular",
+    "unlinking": "Desvinculando…",
+    "unlinked": "Desvinculado de este atleta",
+    "unlinkFailed": "No se pudo desvincular de este atleta"
   },
   "sourceName": {
     "manual": "Entrada manual"
@@ -165,5 +171,15 @@
     "install": "Instalar la extensión de Kaiord",
     "bannerTitle": "La extensión de Kaiord no está instalada",
     "bannerDetail": "Garmin, Train2Go, WHOOP, Tanita y TrainingPeaks se conectan mediante la extensión de Kaiord. Instálala en este navegador para conectarlos."
+  },
+  "scope": {
+    "title": "Conexiones de {{name}} · en este navegador",
+    "titleNoName": "Conexiones · en este navegador",
+    "hint": "Se guardan para este atleta solo en este navegador y no se sincronizan con tus otros dispositivos."
+  },
+  "count": {
+    "none": "Ninguna conectada",
+    "connected_one": "{{count}} conectada",
+    "connected_other": "{{count}} conectadas"
   }
 }

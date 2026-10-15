@@ -23,6 +23,9 @@ const SUPPORTED_IMPORT_TYPES: Record<string, readonly ManagedDataType[]> = {
   // consolidatedtimedmetrics maps the weight channel (type 9) only; pulse /
   // HRV / sleep / spo2 remain deferred in @kaiord/trainingpeaks.
   "trainingpeaks-bridge": ["weight"],
+  // The zones sync reads the athlete's weight; Train2Go has no scale, so the
+  // rest of `read:body` would be phantom routes.
+  "train2go-bridge": ["planned-session", "training-zones", "weight"],
   // Exactly what `runWhoopImport` writes: cycles (hrv, sleep, strain, vitals),
   // the heart-rate series, stress and workouts → activity. WHOOP has no scale,
   // so weight, daily-wellness and body-composition would be phantom routes.

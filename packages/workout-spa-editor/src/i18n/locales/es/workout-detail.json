@@ -10,7 +10,7 @@
   },
   "structure": {
     "eyebrow": "Estructura · tiempo en zona",
-    "targetsFrom": "Zonas calculadas sobre {{threshold}} · de tu perfil de atleta, {{relative}}"
+    "targetsFrom": "Zonas calculadas sobre {{threshold}} · de tus datos de atleta, {{relative}}"
   },
   "sport": {
     "cycling": "Ciclismo",
@@ -30,7 +30,7 @@
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
     "sendDisabled": {
-      "noExtension": "Instala la extensión Kaiord Garmin Bridge para enviar este entreno.",
+      "noExtension": "Instala la Extensión de Kaiord para Garmin para enviar este entreno.",
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."
     }
   },
@@ -82,7 +82,7 @@
     "libraryOnly": {
       "insecure-context": "En tu biblioteca de Garmin, sin fecha: colocarlo en el calendario requiere una página segura (https).",
       "unsupported-browser": "En tu biblioteca de Garmin, sin fecha: este navegador no puede colocarlo en el calendario. Un navegador actualizado sí puede.",
-      "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la extensión Kaiord Garmin Bridge para colocarlo en el calendario."
+      "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la Extensión de Kaiord para Garmin para colocarlo en el calendario."
     },
     "updateExtension": "Actualizar la extensión",
     "openConnections": "Abrir Conexiones",
@@ -102,7 +102,7 @@
       "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Conexiones, en Entrenamiento → También se envía a.",
       "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
       "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo.",
-      "incomplete-pace-zones": "Este entrenamiento usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para enviarlo.",
+      "incomplete-pace-zones": "Este entrenamiento usa una zona de ritmo que el atleta no define. Completa tus zonas de ritmo en Atleta para enviarlo.",
       "unsupported-pace-zone-sport": "Solo se pueden enviar zonas de ritmo a Garmin en entrenamientos de carrera o natación."
     }
   },

@@ -11,7 +11,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
+import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
 import type {
   ConflictDecision,
@@ -49,6 +49,17 @@ const makeProfile = (overrides: Partial<Profile> = {}): Profile => ({
   updatedAt: NOW,
   ...overrides,
 });
+
+const weighInKgs = async (
+  persistence: ReturnType<typeof createInMemoryPersistence>
+): Promise<number[]> =>
+  (
+    await persistence.healthWeight.getByProfileAndDateRange(
+      PROFILE_ID,
+      "0000-01-01",
+      "9999-12-31"
+    )
+  ).map((r) => r.krd.weightKilograms);
 
 const makeTransport = (
   readZones?: CoachingTransport["readZones"]
@@ -95,10 +106,11 @@ describe("syncZones — silent fills and conflicts", () => {
   it("should write every incoming value silently when profile is empty (empty-fill)", async () => {
     // Arrange
     const MIN_APPLIED_COUNT = 7;
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_FULL);
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     if (!result.ok) throw new Error("expected ok");
     expect(result.conflicts).toEqual([]);
     expect(result.applied.length).toBeGreaterThanOrEqual(MIN_APPLIED_COUNT);
@@ -116,13 +128,16 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(after?.sportZones.running?.thresholds.lthr).toBe(
       VALUES.runningHrZ4Upper
     );
-    expect(after?.bodyWeight).toBe(VALUES.weight);
+    // The weight is the current weight: a weigh-in, not profile.bodyWeight.
+    expect(after?.bodyWeight).toBeUndefined();
+    expect(await weighInKgs(persistence)).toEqual([VALUES.weight]);
     expect(after?.maxHeartRate).toBe(VALUES.bpmMax);
   });
 
   it("should produce no applied or conflicts when incoming === current (no-op)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         bodyWeight: VALUES.weight,
@@ -150,7 +165,7 @@ describe("syncZones — silent fills and conflicts", () => {
       })
     );
     const transport = makeTransport(async () => PAYLOAD_FULL);
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
 
     // Act
     if (!result.ok) throw new Error("expected ok");
@@ -162,7 +177,8 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should return one conflict (NOT written) for differing FTP (single-conflict)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -176,7 +192,7 @@ describe("syncZones — silent fills and conflicts", () => {
     const transport = makeTransport(async () => ({
       paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },
     }));
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     if (!result.ok) throw new Error("expected ok");
     expect(result.conflicts).toEqual([
       {
@@ -197,7 +213,8 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should return per-sport LTHR conflict rows (multi-conflict)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -218,7 +235,7 @@ describe("syncZones — silent fills and conflicts", () => {
         running: { z4Upper: VALUES.runningHrZ4Upper },
       },
     }));
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     if (!result.ok) throw new Error("expected ok");
 
     // Act
@@ -228,9 +245,10 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(fields).toEqual([FIELDS.cyclingLthr, FIELDS.runningLthr]);
   });
 
-  it("should fill empty bodyWeight and return a conflict for manual FTP (mixed-fill-and-conflict)", async () => {
+  it("should record the unknown weight as a weigh-in and return a conflict for manual FTP (mixed-fill-and-conflict)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -245,7 +263,7 @@ describe("syncZones — silent fills and conflicts", () => {
       physiological: { weight: VALUES.bodyWeightLow },
       paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },
     }));
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     if (!result.ok) throw new Error("expected ok");
     expect(result.applied).toEqual([
       { field: FIELDS.bodyWeight, value: VALUES.bodyWeightLow },
@@ -262,7 +280,8 @@ describe("syncZones — silent fills and conflicts", () => {
     const after = await repo.getById(PROFILE_ID);
 
     // Assert
-    expect(after?.bodyWeight).toBe(VALUES.bodyWeightLow);
+    expect(after?.bodyWeight).toBeUndefined();
+    expect(await weighInKgs(persistence)).toEqual([VALUES.bodyWeightLow]);
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
       VALUES.cyclingZ4UpperLow
     );
@@ -270,12 +289,13 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should use z5Lower when z4Upper is undefined (ftp-fallback-absent)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
       paces: { cycling: { z5Lower: VALUES.cyclingZ5Lower } },
     }));
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
 
     // Act
     if (!result.ok) throw new Error("expected ok");
@@ -289,7 +309,8 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should use z5Lower when z4Upper === 0 (ftp-fallback-zero)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
       paces: {
@@ -299,7 +320,7 @@ describe("syncZones — silent fills and conflicts", () => {
         },
       },
     }));
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
 
     // Act
     if (!result.ok) throw new Error("expected ok");
@@ -313,12 +334,13 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should surface { ok: false, reason: 'transport-error' } when a transport-error exception is thrown", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => {
       throw new Error(REASONS.bridgeUnavailable);
     });
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     expect(result.ok).toBe(false);
 
     // Act
@@ -331,10 +353,11 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should surface { ok: false, reason: 'shape-mismatch' } when payload is null (shape-mismatch)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => null);
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     expect(result.ok).toBe(false);
 
     // Act
@@ -346,10 +369,11 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should return { ok: false, reason: 'unsupported' } when readZones is absent (unsupported-transport)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport();
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     expect(result.ok).toBe(false);
 
     // Act
@@ -361,9 +385,9 @@ describe("syncZones — silent fills and conflicts", () => {
 
   it("should return { ok: false, reason: 'profile-deleted' } when profile is missing mid-sync", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
     const transport = makeTransport(async () => PAYLOAD_FULL);
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
     expect(result.ok).toBe(false);
 
     // Act
@@ -374,6 +398,29 @@ describe("syncZones — silent fills and conflicts", () => {
   });
 });
 
+describe("syncZones — a profile edit made during the fetch", () => {
+  it("should keep an edit saved while Train2Go was being read", async () => {
+    // Arrange
+    const RENAMED = "Renamed while syncing";
+    const persistence = createInMemoryPersistence();
+    await persistence.profiles.put(makeProfile());
+    const transport = makeTransport(async () => {
+      await persistence.profiles.put(makeProfile({ name: RENAMED }));
+      return PAYLOAD_FULL;
+    });
+
+    // Act
+    await syncZones(PROFILE_ID, transport, persistence);
+
+    // Assert
+    const after = await persistence.profiles.getById(PROFILE_ID);
+    expect(after?.name).toBe(RENAMED);
+    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
+      VALUES.cyclingZ4Upper
+    );
+  });
+});
+
 describe("commitConflictResolution", () => {
   const conflictPayload: ZonesPayload = {
     paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },
@@ -381,9 +428,11 @@ describe("commitConflictResolution", () => {
   };
 
   const seedConflictedProfile = async (): Promise<{
-    repo: ReturnType<typeof createInMemoryProfileRepository>;
+    persistence: ReturnType<typeof createInMemoryPersistence>;
+    repo: ReturnType<typeof createInMemoryPersistence>["profiles"];
   }> => {
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(
       makeProfile({
         sportZones: {
@@ -398,12 +447,12 @@ describe("commitConflictResolution", () => {
         },
       })
     );
-    return { repo };
+    return { persistence, repo };
   };
 
   it("should write every accepted field (all-accept)", async () => {
     // Arrange
-    const { repo } = await seedConflictedProfile();
+    const { persistence, repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       [FIELDS.cyclingFtp]: "accept",
       [FIELDS.runningLthr]: "accept",
@@ -411,7 +460,7 @@ describe("commitConflictResolution", () => {
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
-      repo,
+      persistence,
       conflictPayload
     );
 
@@ -429,7 +478,7 @@ describe("commitConflictResolution", () => {
 
   it("should leave the profile untouched (all-reject)", async () => {
     // Arrange
-    const { repo } = await seedConflictedProfile();
+    const { persistence, repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       [FIELDS.cyclingFtp]: "reject",
       [FIELDS.runningLthr]: "reject",
@@ -437,7 +486,7 @@ describe("commitConflictResolution", () => {
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
-      repo,
+      persistence,
       conflictPayload
     );
 
@@ -455,7 +504,7 @@ describe("commitConflictResolution", () => {
 
   it("should accept some and reject others, idempotent on second call (mixed)", async () => {
     // Arrange
-    const { repo } = await seedConflictedProfile();
+    const { persistence, repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       [FIELDS.cyclingFtp]: "reject",
       [FIELDS.runningLthr]: "accept",
@@ -463,13 +512,13 @@ describe("commitConflictResolution", () => {
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
-      repo,
+      persistence,
       conflictPayload
     );
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
-      repo,
+      persistence,
       conflictPayload
     );
 
@@ -487,7 +536,7 @@ describe("commitConflictResolution", () => {
 
   it("should throw ProfileNotFoundError when profile deleted mid-commit", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
 
     // Act
     const decisions: Record<FieldKey, ConflictDecision> = {
@@ -496,7 +545,12 @@ describe("commitConflictResolution", () => {
 
     // Assert
     await expect(
-      commitConflictResolution(PROFILE_ID, decisions, repo, conflictPayload)
+      commitConflictResolution(
+        PROFILE_ID,
+        decisions,
+        persistence,
+        conflictPayload
+      )
     ).rejects.toThrow(ProfileNotFoundError);
   });
 });

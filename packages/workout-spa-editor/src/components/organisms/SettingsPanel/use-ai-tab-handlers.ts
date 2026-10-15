@@ -12,7 +12,6 @@ import type { AddProviderInput } from "../../../application/ai/add-provider";
 import { addProvider } from "../../../application/ai/add-provider";
 import { removeProvider } from "../../../application/ai/remove-provider";
 import { setCustomPrompt } from "../../../application/ai/set-custom-prompt";
-import { setDefaultProvider } from "../../../application/ai/set-default-provider";
 import type { UpdateProviderInput } from "../../../application/ai/update-provider";
 import { updateProvider } from "../../../application/ai/update-provider";
 import { usePersistence } from "../../../contexts/persistence-context";
@@ -27,8 +26,6 @@ export const AI_TAB_TOAST_KEYS = [
   "aiToast.addFailed",
   "aiToast.removeFailed",
   "aiToast.updateFailed",
-  "aiToast.setDefaultFailed",
-  "aiToast.promptFailed",
 ] as const;
 
 export const useAiTabHandlers = () => {
@@ -40,7 +37,7 @@ export const useAiTabHandlers = () => {
     onAdd: async (config: AddProviderInput): Promise<KeySaveOutcome> => {
       const outcome = await saveWithKeyCheck({
         credential: config,
-        save: () => addProvider(persistence, config),
+        save: (keyCheck) => addProvider(persistence, { ...config, keyCheck }),
       });
       if (outcome === "failed") toast.error(t("aiToast.addFailed"));
       return outcome;
@@ -60,20 +57,17 @@ export const useAiTabHandlers = () => {
           key !== undefined && key !== provider.apiKey
             ? { type: provider.type, apiKey: key }
             : undefined,
-        save: () => updateProvider(persistence, provider.id, updates),
+        save: (keyCheck) =>
+          updateProvider(persistence, provider.id, { ...updates, keyCheck }),
       });
       if (outcome === "failed") toast.error(t("aiToast.updateFailed"));
       return outcome;
     },
-    onSetDefault: (id: string) => {
-      void setDefaultProvider(persistence, id).catch(() =>
-        toast.error(t("aiToast.setDefaultFailed"))
-      );
-    },
-    onPromptChange: (value: string) => {
-      void setCustomPrompt(persistence, value).catch(() =>
-        toast.error(t("aiToast.promptFailed"))
-      );
-    },
+    // The field says it could not save; a toast would say it twice.
+    onPromptSave: (value: string): Promise<boolean> =>
+      setCustomPrompt(persistence, value).then(
+        () => true,
+        () => false
+      ),
   };
 };

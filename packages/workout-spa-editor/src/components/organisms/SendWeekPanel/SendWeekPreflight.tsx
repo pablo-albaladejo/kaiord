@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import type { BulkPreflightFailure } from "../../../application/garmin-bulk/bulk-preflight";
 import { useTranslate } from "../../../i18n/use-translate";
 
-const CONNECTIONS_HREF = "/settings/connections";
+const CONNECTIONS_HREF = "/connections";
 
 /** The one pre-flight message; a missing route links to where it is set. */
 export function SendWeekPreflight({

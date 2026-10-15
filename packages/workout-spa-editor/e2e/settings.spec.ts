@@ -19,64 +19,54 @@ test.describe("Settings Panel", () => {
     await page.goto("/workout/new?source=scratch");
   });
 
-  test("8.7: add provider, remove provider, set default", async ({ page }) => {
+  test("8.7: add provider, remove provider", async ({ page }) => {
     // Open the grouped settings index, then enter the AI Provider section.
     await openHeaderAction(page, /open settings/i);
     await page.waitForURL(/\/settings$/);
-    await page.getByTestId("settings-row-provider").click();
+    await page.getByTestId("settings-row-ai").click();
     await page.waitForURL(/\/settings\/ai/);
     const settingsPage = page.getByTestId("settings-page");
     await expect(settingsPage).toBeVisible({ timeout: 5000 });
-    // Provider names also appear as options of the active profile's
+    // Provider names also appear in the options of the active profile's
     // per-purpose model selects, so every row assertion targets the list.
     const providers = settingsPage.getByRole("list", {
-      name: "Configured LLM providers",
+      name: "AI accounts",
     });
 
-    // Should start with "No providers configured"
-    await expect(
-      settingsPage.getByText("No providers configured")
-    ).toBeVisible();
+    // Should start with no account
+    await expect(settingsPage.getByText("No AI accounts yet.")).toBeVisible();
 
     // Add first provider (Anthropic)
-    await settingsPage.getByPlaceholder("e.g., My Claude").fill("My Claude");
+    await settingsPage.getByRole("button", { name: "Add account" }).click();
+    await settingsPage.getByLabel("Label (optional)").fill("My Claude");
     await settingsPage.getByPlaceholder("sk-...").fill("sk-ant-key-1");
-    await settingsPage.getByRole("button", { name: /add provider/i }).click();
-
-    // First provider should be default automatically
+    await settingsPage.getByRole("button", { name: "Save account" }).click();
     await expect(
       providers.getByText("My Claude", { exact: true })
     ).toBeVisible();
-    await expect(providers.getByText("Default")).toBeVisible();
 
     // Add second provider (OpenAI)
-    const providerSelect = settingsPage.locator("select").first();
-    await providerSelect.selectOption({ value: "openai" });
-    await settingsPage.getByPlaceholder("e.g., My Claude").fill("My GPT");
+    await settingsPage.getByRole("button", { name: "Add account" }).click();
+    await settingsPage
+      .getByLabel("Provider", { exact: true })
+      .selectOption({ value: "openai" });
+    await settingsPage.getByLabel("Label (optional)").fill("My GPT");
     await settingsPage.getByPlaceholder("sk-...").fill("sk-openai-key-1");
-    await settingsPage.getByRole("button", { name: /add provider/i }).click();
-
-    // Second provider should be visible but not default
+    await settingsPage.getByRole("button", { name: "Save account" }).click();
     await expect(providers.getByText("My GPT")).toBeVisible();
 
-    // Set second as default
-    await providers.getByRole("button", { name: /set default/i }).click();
-
-    // Wait for the flip to fully settle. The two-step persistence
-    // (Claude flips off, then GPT flips on) is observable from the
-    // DOM as: Claude row now exposes its own Set Default button AND
-    // GPT no longer does. Gating here guarantees both puts have
-    // committed before the following remove fires.
+    // Remove Claude through its own row, confirming in the dialog.
     const claudeRow = providers
       .getByRole("listitem")
       .filter({ hasText: "My Claude" });
-    await expect(
-      claudeRow.getByRole("button", { name: /set default/i })
-    ).toBeVisible();
-
-    // Remove Claude through its own row's Remove button — robust to
-    // row-order changes because we located by row content.
-    await claudeRow.getByRole("button", { name: /^remove$/i }).click();
+    await claudeRow
+      .getByRole("button", { name: "More actions for My Claude" })
+      .click();
+    await page.getByRole("menuitem", { name: "Remove" }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^remove$/i })
+      .click();
 
     // Should only have GPT remaining
     await expect(
@@ -85,26 +75,26 @@ test.describe("Settings Panel", () => {
     await expect(providers.getByText("My GPT")).toBeVisible();
   });
 
-  test("8.8: Connections is reachable from the settings index", async ({
+  // Connections left Settings for its own page (P-07): the account menu
+  // reaches it, and the settings index no longer lists it.
+  test("8.8: Connections is its own page, reached from the account menu", async ({
     page,
   }) => {
     // Arrange
-    await openHeaderAction(page, /open settings/i);
-    await page.waitForURL(/\/settings$/);
 
     // Act
-    await page.getByTestId("settings-row-connections").click();
+    await openHeaderAction(page, /open connections/i);
 
     // Assert
-    await page.waitForURL(/\/settings\/connections$/);
-    await expect(page.getByTestId("settings-panel-connections")).toBeVisible();
+    await page.waitForURL(/#\/connections$/);
+    await expect(page.getByTestId("connections-page")).toBeVisible();
+    await expect(page.getByTestId("connections-scope")).toBeVisible();
   });
 
-  // Entering at the OLD url is the assertion. Navigating to
-  // /settings/connections and checking it renders would pass with the
-  // redirect deleted.
+  // Entering at the OLD url is the assertion. Navigating to /connections and
+  // checking it renders would pass with the redirect deleted.
   test.describe("retired sections", () => {
-    for (const retired of ["extensions", "data-hub"]) {
+    for (const retired of ["connections", "extensions", "data-hub"]) {
       test(`8.9: /settings/${retired} lands on Connections`, async ({
         page,
       }) => {
@@ -114,12 +104,32 @@ test.describe("Settings Panel", () => {
         await page.goto(`/settings/${retired}`);
 
         // Assert
-        await expect(page).toHaveURL(/\/settings\/connections$/, {
-          timeout: 8000,
-        });
-        await expect(
-          page.getByTestId("settings-panel-connections")
-        ).toBeVisible();
+        await expect(page).toHaveURL(/#\/connections$/, { timeout: 8000 });
+        await expect(page.getByTestId("connections-page")).toBeVisible();
+      });
+    }
+
+    const moved = [
+      { from: "preferences", to: /\/settings\/general$/, panel: "general" },
+      { from: "usage", to: /\/settings\/ai\?section=usage$/, panel: "ai" },
+      {
+        from: "privacy?section=data-management",
+        to: /\/settings\/data$/,
+        panel: "data",
+      },
+    ];
+    for (const { from, to, panel } of moved) {
+      test(`8.11: /settings/${from} lands on its new page`, async ({
+        page,
+      }) => {
+        // Arrange
+
+        // Act
+        await page.goto(`/settings/${from}`);
+
+        // Assert
+        await expect(page).toHaveURL(to, { timeout: 8000 });
+        await expect(page.getByTestId(`settings-panel-${panel}`)).toBeVisible();
       });
     }
 
@@ -136,6 +146,7 @@ test.describe("Settings Panel", () => {
       await expect(page.getByTestId("settings-group-list")).toBeVisible();
       await expect(page.getByTestId("settings-row-extensions")).toHaveCount(0);
       await expect(page.getByTestId("settings-row-dataHub")).toHaveCount(0);
+      await expect(page.getByTestId("settings-row-connections")).toHaveCount(0);
     });
   });
 });

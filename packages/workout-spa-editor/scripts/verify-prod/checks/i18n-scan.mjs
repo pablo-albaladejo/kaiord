@@ -1,7 +1,8 @@
 import { isoDate, settledText } from "../browser.mjs";
 import { ensureProfile } from "../steps.mjs";
 import { openWellnessDialog } from "../wellness.mjs";
-import { goalDialog, profileManager } from "./i18n-dialogs.mjs";
+import { athletesPage, bodySection } from "./i18n-athlete.mjs";
+import { goalDialog } from "./i18n-dialogs.mjs";
 import { DESIGN_NOTES, findEnglish } from "./i18n-terms.mjs";
 
 const ROUTES = [
@@ -10,13 +11,22 @@ const ROUTES = [
   "library",
   "nutrition",
   "athlete",
+  "athletes",
+  "athlete/zones/cycling",
+  "athlete/zones/running",
+  "athlete/zones/swimming",
+  "athlete/zones/generic",
   "chat",
   "health",
   "health/sleep",
   "health/labs",
-  "settings/connections",
+  "settings",
+  "settings/general",
+  "settings/data",
   "settings/privacy",
-  "settings/preferences",
+  "settings/about",
+  // Connections left Settings (P-07); it also carries the Train2Go link.
+  "connections",
   "workout/new",
   "workout/new?source=scratch",
 ];
@@ -63,7 +73,8 @@ export default async function i18nScan({ rec, open }) {
     await scan(rec, page, `#/${route}`, designHits);
   }
   await wellnessDialog(rec, session, designHits);
-  await profileManager(rec, session);
+  await bodySection(rec, session);
+  await athletesPage(rec, session);
   await goalDialog(rec, session);
   rec.assert(
     designHits.size === 0,

@@ -92,9 +92,12 @@ const seedProfileAndDummyWorkout = async (page: Page, ts: string) => {
         updatedAt: ts,
       });
       await db.table("meta").put({ key: "activeProfileId", value: profileId });
-      // Out-of-week dummy so FirstVisitState onboarding does not block clicks.
+      // Out-of-week dummy so the first-run guide does not render and push
+      // the calendar under the fixed chat FAB. It must carry the profileId:
+      // the calendar only counts the active profile's workouts.
       await db.table("workouts").put({
         id: "dummy-out-of-week",
+        profileId,
         date: "2020-01-01",
         state: "raw",
         sport: "cycling",
@@ -527,17 +530,22 @@ test.describe("Coaching activity dialog redesign", () => {
     });
 
     // Failure-no-persist invariant: no workout was created on failure
-    const beforeRetry = await page.evaluate(async (profileId) => {
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as {
-        table: (n: string) => {
-          toArray: () => Promise<{ profileId: string; source: string }[]>;
+    // SOURCE travels as an argument: page functions cannot see Node scope.
+    const beforeRetry = await page.evaluate(
+      async ({ profileId, source }) => {
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as {
+          table: (n: string) => {
+            toArray: () => Promise<{ profileId: string; source: string }[]>;
+          };
         };
-      };
-      const all = await db.table("workouts").toArray();
-      return all.filter((w) => w.profileId === profileId && w.source === SOURCE)
-        .length;
-    }, PROFILE_ID);
+        const all = await db.table("workouts").toArray();
+        return all.filter(
+          (w) => w.profileId === profileId && w.source === source
+        ).length;
+      },
+      { profileId: PROFILE_ID, source: SOURCE }
+    );
     expect(beforeRetry).toBe(0);
 
     // Click Retry AI — second call succeeds
@@ -601,22 +609,25 @@ test.describe("Coaching activity dialog redesign", () => {
       timeout: 10_000,
     });
     // No workout / no match persisted
-    const counts = await page.evaluate(async (profileId) => {
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as {
-        table: (n: string) => {
-          toArray: () => Promise<{ profileId: string; source?: string }[]>;
+    const counts = await page.evaluate(
+      async ({ profileId, source }) => {
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as {
+          table: (n: string) => {
+            toArray: () => Promise<{ profileId: string; source?: string }[]>;
+          };
         };
-      };
-      const workouts = await db.table("workouts").toArray();
-      const matches = await db.table("sessionMatches").toArray();
-      return {
-        workouts: workouts.filter(
-          (w) => w.profileId === profileId && w.source === SOURCE
-        ).length,
-        matches: matches.filter((m) => m.profileId === profileId).length,
-      };
-    }, PROFILE_ID);
+        const workouts = await db.table("workouts").toArray();
+        const matches = await db.table("sessionMatches").toArray();
+        return {
+          workouts: workouts.filter(
+            (w) => w.profileId === profileId && w.source === source
+          ).length,
+          matches: matches.filter((m) => m.profileId === profileId).length,
+        };
+      },
+      { profileId: PROFILE_ID, source: SOURCE }
+    );
     expect(counts.workouts).toBe(0);
     expect(counts.matches).toBe(0);
   });

@@ -34,6 +34,7 @@ const FIXTURE_RUNNING_LTHR_BPM = 168;
 const FIXTURE_RUNNING_THRESHOLD_PACE_S = 250;
 const FIXTURE_SWIMMING_THRESHOLD_PACE_S = 92;
 const MANUAL_HR_BAND_Z4_MAX_BPM = 180;
+const MANUAL_HR_BAND_ZONE = 4;
 const STABILITY_REREAD_TICK_MS = 50;
 const ORCHESTRATOR_PUT_SETTLE_MS = 150;
 // The first bridge action (read-week) only fires once bridge discovery has
@@ -53,10 +54,11 @@ type CyclingFtp = number | undefined;
 const seedProfile = async (
   page: Page,
   syncZones: SyncZonesFlag,
-  ftp: CyclingFtp
+  ftp: CyclingFtp,
+  weightRouteEnabled?: boolean
 ): Promise<void> => {
   await page.evaluate(
-    async ({ profileId, ts, syncZonesFlag, cyclingFtp }) => {
+    async ({ profileId, ts, syncZonesFlag, cyclingFtp, weightRoute }) => {
       type Db = {
         table: (n: string) => {
           put: (r: unknown) => Promise<unknown>;
@@ -97,6 +99,20 @@ const seedProfile = async (
       // any prior policy, then mirror the test's syncZones intent onto a
       // policy so the auto-sync fan-out fires (or not) accordingly.
       await db.table("integrationPolicies").clear();
+      // Written before the zones route below: that route is what lets the
+      // mounted calendar start a sync, which must already see this one.
+      if (weightRoute !== undefined) {
+        await db.table("integrationPolicies").put({
+          id: "zones-sync-weight-route",
+          profileId,
+          dataType: "weight",
+          bridgeId: "train2go-bridge",
+          direction: "import",
+          mode: "auto",
+          enabled: weightRoute,
+          updatedAt: ts,
+        });
+      }
       // Coaching sync (read-week) is governed by an enabled planned-session
       // import route (F1.3). Seed it so the Sync button is active and
       // syncWeek proceeds; the syncZones flag only gates the zones fan-out.
@@ -124,9 +140,14 @@ const seedProfile = async (
       }
 
       // Seed an out-of-week dummy workout so `hasAnyWorkouts` is true
-      // and the FirstVisitState onboarding panel does NOT render — the
-      // CalendarHeader (which owns the Sync button) only mounts when the
-      // calendar has at least one workout somewhere in the database.
+      // and the first-run guide does NOT render. The workout must carry
+      // the active `profileId`: the calendar counts workouts per profile,
+      // and without it the 554px guide pushes the Sync button down under
+      // the fixed chat FAB at the 1280x720 desktop viewport. Playwright
+      // then retries the click with a forced scroll, the page's
+      // `scroll-behavior: smooth` animates it, and under CPU load the
+      // button can move between pointerdown and pointerup — the browser
+      // dispatches `click` to a common ancestor and the sync never starts.
       type DbWithBulk = Db & {
         table: (n: string) => {
           put: (r: unknown) => Promise<unknown>;
@@ -138,6 +159,7 @@ const seedProfile = async (
         .__KAIORD_DB__ as DbWithBulk;
       await dbb.table("workouts").put({
         id: "zones-sync-dummy-workout",
+        profileId,
         date: "2020-01-01",
         state: "raw",
         sport: "cycling",
@@ -162,6 +184,7 @@ const seedProfile = async (
       ts: NOW_ISO,
       syncZonesFlag: syncZones,
       cyclingFtp: ftp,
+      weightRoute: weightRouteEnabled,
     }
   );
 };
@@ -293,7 +316,16 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
       };
     }, PROFILE_ID);
 
-    expect(profile.bodyWeight).toBe(FIXTURE_ZONES_PAYLOAD.physiological.weight);
+    // The weight is the athlete's current weight: one Train2Go weigh-in for
+    // today, written with the profile, and never profile.bodyWeight.
+    expect(profile.bodyWeight).toBeUndefined();
+    expect(await readWeighIns(page)).toEqual([
+      {
+        date: await localToday(page),
+        kg: FIXTURE_ZONES_PAYLOAD.physiological.weight,
+        source: "train2go-bridge",
+      },
+    ]);
     expect(profile.maxHeartRate).toBe(
       FIXTURE_ZONES_PAYLOAD.physiological.bpmMax
     );
@@ -313,6 +345,47 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     expect(profile.sportZones.swimming?.thresholds.thresholdPace).toBe(
       FIXTURE_SWIMMING_THRESHOLD_PACE_S
     );
+  });
+
+  test("(b2) weight route switched off — the zones sync, the weight is not recorded", async ({
+    page,
+  }) => {
+    // Arrange: the same empty profile as (b), with the Train2Go weight route
+    // switched off in the Data Hub.
+    await seedProfile(page, true, undefined, false);
+
+    // Act
+    await navigateToWeek(page);
+    await waitForSyncButton(page);
+    await waitForBridgeAction(page, "read-details");
+    // The profile and the weigh-in are written in one transaction, so once the
+    // FTP is visible the weigh-in would be too.
+    await page.waitForFunction(
+      ({ profileId, expectedFtp }) => {
+        type Db = {
+          table: (n: string) => {
+            get: (id: string) => Promise<
+              | {
+                  sportZones?: { cycling?: { thresholds?: { ftp?: number } } };
+                }
+              | undefined
+            >;
+          };
+        };
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as Db;
+        return db
+          .table("profiles")
+          .get(profileId)
+          .then((p) => p?.sportZones?.cycling?.thresholds?.ftp === expectedFtp);
+      },
+      { profileId: PROFILE_ID, expectedFtp: FIXTURE_CYCLING_FTP },
+      { timeout: 10_000 }
+    );
+
+    // Assert
+    await expect(page.getByTestId("zones-conflict-dialog")).not.toBeVisible();
+    expect(await readWeighIns(page)).toEqual([]);
   });
 
   test("(c) toggle-on with manual FTP — conflict dialog opens", async ({
@@ -548,37 +621,39 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
   }) => {
     // Arrange: pre-seed a profile already in `train2go-synced-clean`
     // state (zones match snapshot exactly) with a recent
-    // coachingSyncState row so auto-sync skips on mount. This
-    // isolates the test to the (manual sync click on synced
-    // profile) path — no race with a parallel auto-sync orchestrator.
+    // coachingSyncState row, so the week sync skips on mount. The zones
+    // import still runs once per mount (it is gated only on the
+    // training-zones policy) and issues its own read-details.
     await seedTrain2GoSyncedProfile(page);
     await navigateToWeek(page);
     await waitForSyncButton(page);
 
+    // That mount-time read-details is the barrier: once it is recorded,
+    // the import has spent its one run for this mount, so every later
+    // read-details comes from the click.
+    await waitForBridgeAction(page, "read-details");
     const before = await readProfile(page);
-
-    // Snapshot the read-details count BEFORE the click so we can
-    // wait for a strictly-greater count after — a `some()` check
-    // would false-pass on any pre-existing call from earlier in the
-    // test scaffolding (defense-in-depth even though the current
-    // pre-seed shape doesn't fire one).
-    const detailsCallsBefore = await countReadDetails(page);
+    const weekCallsBefore = await countBridgeAction(page, "read-week");
+    const detailsCallsBefore = await countBridgeAction(page, "read-details");
 
     // Act: trigger sync via the manual button.
     await page.getByRole("button", { name: /^sync train2go$/i }).click();
 
-    // Wait for the click-induced read-details to fire (count
-    // strictly increases past the snapshotted baseline).
+    // Wait for the click's own sync: only the manual sync reads the week
+    // (the mount skipped it), and it then fans out to the zones sync.
     await page.waitForFunction(
-      ({ baseline }) => {
+      ({ weekBaseline, detailsBaseline }) => {
         const calls =
           ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
             { action: string }[] | undefined) ?? [];
+        const count = (name: string) =>
+          calls.filter((c) => c.action === name).length;
         return (
-          calls.filter((c) => c.action === "read-details").length > baseline
+          count("read-week") > weekBaseline &&
+          count("read-details") > detailsBaseline
         );
       },
-      { baseline: detailsCallsBefore },
+      { weekBaseline: weekCallsBefore, detailsBaseline: detailsCallsBefore },
       { timeout: 10_000 }
     );
     // One extra tick so the orchestrator's repo.put (if any) settles.
@@ -603,27 +678,24 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
   test("(i) manual band edit → next sync surfaces ONE group row, not per-band rows", async ({
     page,
   }) => {
-    // Arrange: pre-seed a profile already in `train2go-synced-clean`
-    // state with a recent coachingSyncState so the auto-sync hook's
-    // isStale guard skips on mount (avoids racing my edit with an
-    // in-flight orchestrator put). This isolates the test to the
-    // (manual edit → manual sync click) path.
-    await seedTrain2GoSyncedProfile(page);
+    // Arrange: the profile is seeded already carrying the manual edit —
+    // one cycling HR band changed and the method flipped to "user", as
+    // ZoneEditor's `updateSportZones` leaves it (D-MA3, unit-tested in
+    // update-sport-zones.test.ts). The edit cannot be written after the
+    // page mounts: the zones import runs once per mount, gated only on the
+    // training-zones policy (the recent coachingSyncState gates the week
+    // sync, not this), and when its read landed after a late edit it found
+    // the conflict itself and opened the modal over the Sync button.
+    await seedTrain2GoSyncedProfile(page, MANUAL_HR_BAND_Z4_MAX_BPM);
     await navigateToWeek(page);
     await waitForSyncButton(page);
 
-    // Edit one cycling HR band and flip method to "user" (mirrors
-    // ZoneEditor's `updateSportZones` per D-MA3 — covered at unit
-    // level in update-sport-zones.test.ts; here we mimic its output
-    // to keep the e2e deterministic without driving the Profile
-    // Manager UI). Put + read-back happen in a single page.evaluate
-    // so they share the same in-page tick.
-    const mid = await editAndReadCyclingHrBand(page, MANUAL_HR_BAND_Z4_MAX_BPM);
-
-    // Assert intermediate state: method flipped, value diverges from
-    // T2G's payload band so reconcile WILL produce a conflict.
-    expect(mid.method).toBe("user");
-    expect(mid.z4MaxBpm).toBe(MANUAL_HR_BAND_Z4_MAX_BPM);
+    // That mount-time import is the first sync to see the edit, so its
+    // dialog is the barrier: once it is up, no other sync is in flight.
+    const dialog = page.getByTestId("zones-conflict-dialog");
+    await expect(dialog).toBeVisible({ timeout: 10_000 });
+    await page.getByRole("button", { name: /^cancel$/i }).click();
+    await expect(dialog).not.toBeVisible();
 
     // Act: trigger sync via the manual button.
     await page.getByRole("button", { name: /^sync train2go$/i }).click();
@@ -631,7 +703,6 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // Assert: dialog renders ONE group row for the cycling HR table
     // (D-MA5 — per-band rows live behind the [▼ Detail] disclosure,
     // not in the default rendering).
-    const dialog = page.getByTestId("zones-conflict-dialog");
     await expect(dialog).toBeVisible({ timeout: 10_000 });
     await expect(
       page.getByTestId("zones-conflict-group-cycling.heartRateZones")
@@ -768,9 +839,12 @@ const seedTemplateDefaultsProfile = async (page: Page): Promise<void> => {
         updatedAt: ts,
       });
 
-      // Dummy workout so the calendar header (and Sync button) mounts.
+      // Dummy workout, owned by the profile, so the calendar header (and
+      // Sync button) mounts without the first-run guide (see
+      // `seedProfile`).
       await db.table("workouts").put({
         id: "zones-sync-dummy-workout-template",
+        profileId,
         date: "2020-01-01",
         state: "raw",
         sport: "cycling",
@@ -794,15 +868,18 @@ const seedTemplateDefaultsProfile = async (page: Page): Promise<void> => {
   );
 };
 
-// Pre-seed for flow (i): profile already in `train2go-synced-clean`
-// state PLUS a recent coachingSyncState row. The recent timestamp
-// makes `isStale` return false in the auto-sync hook, so the hook
-// skips on calendar mount — the test then has full control over
-// when (re-)sync is triggered (via the manual Sync button) and isn't
-// racing a parallel auto-sync orchestrator put.
-const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
+// Pre-seed for flows (h)/(i): profile already in `train2go-synced-clean`
+// state PLUS a recent coachingSyncState row. The recent timestamp makes
+// `isStale` return false, so the week sync skips on calendar mount. It
+// does NOT stop the zones import that runs once per mount on the
+// training-zones policy. `editedCyclingZ4MaxBpm` seeds flow (i)'s manual
+// band edit: that cycling HR band diverges and its method is "user".
+const seedTrain2GoSyncedProfile = async (
+  page: Page,
+  editedCyclingZ4MaxBpm?: number
+): Promise<void> => {
   await page.evaluate(
-    async ({ profileId, ts }) => {
+    async ({ profileId, ts, editedZ4Max, editedZone }) => {
       type Db = {
         table: (n: string) => {
           put: (r: unknown) => Promise<unknown>;
@@ -829,6 +906,15 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
         method: "train2go",
         zones: t2gHrBands.map((z) => ({ ...z })),
       };
+      const cyclingHr =
+        editedZ4Max === undefined
+          ? train2goHr
+          : {
+              method: "user",
+              zones: t2gHrBands.map((z) =>
+                z.zone === editedZone ? { ...z, maxBpm: editedZ4Max } : { ...z }
+              ),
+            };
       // Power/pace bands kept schema-aligned (length 5) per
       // `lastSyncedZonesSnapshotSchema` — the snapshot writer would
       // populate full arrays after a real sync, so the seed mirrors
@@ -890,7 +976,7 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
         sportZones: {
           cycling: {
             thresholds: { ftp: 268, lthr: 174 },
-            heartRateZones: { ...train2goHr },
+            heartRateZones: { ...cyclingHr },
             powerZones: { ...train2goPower },
           },
           running: {
@@ -955,7 +1041,9 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
 
       // Recent coachingSyncState — `isStale(lastSyncedAt, now)`
       // returns false when `now - parsed < 10min`. We pin it to
-      // "right now" so the auto-sync hook skips on mount.
+      // "right now" so the week auto-sync skips on mount. The zones
+      // import still runs once per mount — it is gated only on the
+      // training-zones policy (see case (i)).
       await db.table("coachingSyncState").put({
         source: "train2go",
         profileId,
@@ -964,6 +1052,7 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
 
       await db.table("workouts").put({
         id: "zones-sync-dummy-workout-i",
+        profileId,
         date: "2020-01-01",
         state: "raw",
         sport: "cycling",
@@ -983,7 +1072,12 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
         updatedAt: ts,
       });
     },
-    { profileId: PROFILE_ID, ts: NOW_ISO }
+    {
+      profileId: PROFILE_ID,
+      ts: NOW_ISO,
+      editedZ4Max: editedCyclingZ4MaxBpm,
+      editedZone: MANUAL_HR_BAND_ZONE,
+    }
   );
 };
 
@@ -1002,13 +1096,44 @@ type ProfileSnapshot = {
   linkedAccounts?: { lastSyncedZonesSnapshot?: { syncedAt?: string } }[];
 };
 
-const countReadDetails = async (page: Page): Promise<number> =>
+const readWeighIns = async (
+  page: Page
+): Promise<Array<{ date: string; kg: number; source?: string }>> =>
+  page.evaluate(async (profileId) => {
+    type Row = {
+      profileId: string;
+      date: string;
+      sourceBridgeId?: string;
+      krd: { weightKilograms: number };
+    };
+    type Db = { table: (n: string) => { toArray: () => Promise<Row[]> } };
+    const db = (window as unknown as Record<string, unknown>)
+      .__KAIORD_DB__ as Db;
+    const rows = await db.table("healthWeight").toArray();
+    return rows
+      .filter((r) => r.profileId === profileId)
+      .map((r) => ({
+        date: r.date,
+        kg: r.krd.weightKilograms,
+        source: r.sourceBridgeId,
+      }));
+  }, PROFILE_ID);
+
+// The browser's local calendar day, the day the SPA stamps a weigh-in with.
+const localToday = async (page: Page): Promise<string> =>
   page.evaluate(() => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  });
+
+const countBridgeAction = async (page: Page, action: string): Promise<number> =>
+  page.evaluate((name) => {
     const calls =
       ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
         { action: string }[] | undefined) ?? [];
-    return calls.filter((c) => c.action === "read-details").length;
-  });
+    return calls.filter((c) => c.action === name).length;
+  }, action);
 
 const readProfile = async (page: Page): Promise<ProfileSnapshot> =>
   page.evaluate(async (id) => {
@@ -1075,62 +1200,3 @@ const waitForCyclingFtp = async (page: Page): Promise<void> => {
     { timeout: 10_000 }
   );
 };
-
-const editAndReadCyclingHrBand = async (
-  page: Page,
-  newZ4Max: number
-): Promise<{ method: string; z4MaxBpm: number }> =>
-  page.evaluate(
-    async ({ id, target }) => {
-      type Db = {
-        table: (n: string) => {
-          get: (k: string) => Promise<unknown>;
-          put: (r: unknown) => Promise<unknown>;
-        };
-      };
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as Db;
-      const profile = (await db.table("profiles").get(id)) as {
-        sportZones: {
-          cycling: {
-            heartRateZones: {
-              method: string;
-              zones: { minBpm: number; maxBpm: number }[];
-            };
-          };
-        };
-      };
-      const zones = [...profile.sportZones.cycling.heartRateZones.zones];
-      zones[3] = { ...zones[3], maxBpm: target };
-      const next = {
-        ...profile,
-        sportZones: {
-          ...profile.sportZones,
-          cycling: {
-            ...profile.sportZones.cycling,
-            heartRateZones: { method: "user", zones },
-          },
-        },
-        updatedAt: new Date().toISOString(),
-      };
-      await db.table("profiles").put(next);
-      // Read back IN THE SAME evaluate call to avoid a microtask
-      // window where an in-flight orchestrator put could overwrite
-      // our edit before the assertion runs.
-      const reread = (await db.table("profiles").get(id)) as {
-        sportZones: {
-          cycling: {
-            heartRateZones: {
-              method: string;
-              zones: { maxBpm: number }[];
-            };
-          };
-        };
-      };
-      return {
-        method: reread.sportZones.cycling.heartRateZones.method,
-        z4MaxBpm: reread.sportZones.cycling.heartRateZones.zones[3].maxBpm,
-      };
-    },
-    { id: PROFILE_ID, target: newZ4Max }
-  );

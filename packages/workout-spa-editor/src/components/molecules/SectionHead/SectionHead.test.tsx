@@ -36,6 +36,20 @@ describe("SectionHead", () => {
     expect(onAction).toHaveBeenCalledTimes(1);
   });
 
+  it("should render the action as a link when it has a route", () => {
+    // Arrange
+    render(
+      <SectionHead title="Zones" action="Adjust zones" actionHref="/zones" />
+    );
+
+    // Act
+    const link = screen.getByRole("link", { name: "Adjust zones" });
+
+    // Assert
+    expect(link).toHaveAttribute("href", "/zones");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
   it("should omit the action button when action is not provided", () => {
     // Arrange
 

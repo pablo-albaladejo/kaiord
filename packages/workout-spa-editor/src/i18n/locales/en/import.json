@@ -22,5 +22,9 @@
   "warnings": {
     "title": "Imported with warnings",
     "description": "Some parts of this file could not be imported exactly. Review the workout before you use it."
+  },
+  "noActiveAthlete": {
+    "title": "No active athlete",
+    "description": "Select or create an athlete before importing a file."
   }
 }

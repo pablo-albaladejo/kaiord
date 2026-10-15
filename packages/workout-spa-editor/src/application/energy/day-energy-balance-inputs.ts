@@ -5,9 +5,10 @@
  * and each helper is independently testable.
  */
 
-import type { BodyComposition, DailyWellness } from "@kaiord/core";
+import type { BodyComposition } from "@kaiord/core";
 
 import type { HealthRecord } from "../../ports/health-record-repository";
+import type { HealthDailyRecord } from "../../types/health/health-records";
 
 const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
 
@@ -19,15 +20,16 @@ export const deriveAge = (birthDate: string, onDate: string): number => {
   return Math.floor(elapsed / MS_PER_YEAR);
 };
 
-/** Measured device calories for the day, or `undefined` when uncovered. */
+/** Measured device calories for the day, or `undefined` when no source
+    measured them (e.g. the day only has manual steps). */
 export const toMeasuredWellness = (
-  record: HealthRecord<DailyWellness> | undefined
+  record: HealthDailyRecord | undefined
 ): { activeCalories: number; restingCalories: number } | undefined => {
-  if (!record) return undefined;
-  return {
-    activeCalories: record.krd.activeCalories,
-    restingCalories: record.krd.restingCalories,
-  };
+  const activeCalories = record?.krd.activeCalories;
+  const restingCalories = record?.krd.restingCalories;
+  if (activeCalories === undefined || restingCalories === undefined)
+    return undefined;
+  return { activeCalories, restingCalories };
 };
 
 /** Body-fat fraction in [0, 1) from the latest body-composition record. */

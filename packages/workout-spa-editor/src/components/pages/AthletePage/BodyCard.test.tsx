@@ -10,8 +10,6 @@ import { BodyCard } from "./BodyCard";
 
 const WEIGHT = 70;
 const HEIGHT = 180;
-const MAX_HR = 190;
-const OVER_MAX = 300;
 const PROFILE_ID = "11111111-1111-1111-1111-111111111111";
 
 const PROFILE: Profile = {
@@ -47,7 +45,7 @@ describe("BodyCard", () => {
 
     // Assert
     expect(container.querySelector("#body")).not.toBeNull();
-    expect(screen.getByLabelText("Body Weight (kg)")).toHaveValue(WEIGHT);
+    expect(screen.getByLabelText("Current weight (kg)")).toHaveValue(WEIGHT);
   });
 
   it("should persist an edited height and show the saved feedback", async () => {
@@ -93,34 +91,14 @@ describe("BodyCard", () => {
     });
   });
 
-  it("should persist the max heart rate as profile.maxHeartRate", async () => {
+  // The max heart rate bounds the HR zones, so it is edited with the
+  // thresholds, not here.
+  it("should not edit the max heart rate", () => {
     // Arrange
+    // Act
     renderCard();
 
-    // Act
-    await userEvent.type(
-      screen.getByLabelText("Max Heart Rate (bpm)"),
-      `${MAX_HR}{Enter}`
-    );
-
     // Assert
-    await waitFor(async () =>
-      expect((await stored())?.maxHeartRate).toBe(MAX_HR)
-    );
-  });
-
-  it("should reject a max heart rate above 250 instead of saving it", async () => {
-    // Arrange
-    renderCard();
-
-    // Act
-    await userEvent.type(
-      screen.getByLabelText("Max Heart Rate (bpm)"),
-      `${OVER_MAX}{Enter}`
-    );
-
-    // Assert
-    expect(await screen.findByText(/between 1 and 250/i)).toBeInTheDocument();
-    expect((await stored())?.maxHeartRate).not.toBe(OVER_MAX);
+    expect(screen.queryByLabelText(/max heart rate/i)).not.toBeInTheDocument();
   });
 });

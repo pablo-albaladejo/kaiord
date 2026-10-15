@@ -23,7 +23,6 @@ import {
   togglesByType,
 } from "../../application/connections/routing-by-type";
 import type { SourceOfTruthOptions } from "../../application/connections/source-of-truth-options";
-import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
 import { usePersistence } from "../../contexts/persistence-context";
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
 import { useBridgeSyncStates } from "../data-hub/use-bridge-sync-states";
@@ -31,6 +30,7 @@ import { useDataTypeSourcePolicies } from "../data-hub/use-data-type-source-poli
 import { useBridgeConnections } from "../use-bridge-connections";
 import { useConnectionStatus } from "../use-connection-status";
 import { buildRoutingCapabilitySignals } from "./routing-capability-signals";
+import type { DataFlowsByType } from "./use-data-flows";
 
 export type DataTypeRouting = {
   readonly rows: readonly DataTypeRoutingRow[];

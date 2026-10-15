@@ -1,5 +1,6 @@
 import type { AnalyticsEvent } from "@kaiord/core";
 
+import { isSportKey } from "../types/sport-zones";
 import { scrubAnalyticsString } from "./scrub-analytics-string";
 
 // Allowlist mirroring AppRoutes.tsx and HealthSubRouter. A path that
@@ -17,6 +18,8 @@ const STATIC_PATHS: ReadonlySet<string> = new Set([
   "/workout/new",
   "/settings",
   "/settings/profile",
+  "/connections",
+  "/athletes",
   "/health",
   "/health/sleep",
   "/health/weight",
@@ -49,6 +52,10 @@ const DYNAMIC_ROUTES: ReadonlyArray<[RegExp, (segment: string) => string]> = [
   [
     /^\/settings\/([^/]+)$/,
     (s) => (SETTINGS_SECTIONS.has(s) ? `/settings/${s}` : "/settings/:section"),
+  ],
+  [
+    /^\/athlete\/zones\/([^/]+)$/,
+    (s) => (isSportKey(s) ? `/athlete/zones/${s}` : "/athlete/zones/:sport"),
   ],
   [/^\/workout\/view\/([^/]+)$/, () => "/workout/view/:id"],
   [/^\/workout\/([^/]+)$/, () => "/workout/:id"],

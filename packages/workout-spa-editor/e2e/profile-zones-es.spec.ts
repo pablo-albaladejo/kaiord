@@ -1,8 +1,10 @@
 /**
- * E2E: the Profile Manager's zones tab speaks Spanish for the heart-rate
- * unit. "bpm" is English; Spanish writes "ppm" (pulsaciones por minuto).
- * `verify:prod`'s i18n scan reads the same tab on production.
+ * E2E: the athlete's zone editor speaks Spanish for the heart-rate unit.
+ * "bpm" is English; Spanish writes "ppm" (pulsaciones por minuto).
+ * `verify:prod`'s i18n scan reads the same page on production.
  */
+
+import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -12,56 +14,73 @@ const LTHR = 168;
 
 test.use({ locale: "es-ES" });
 
-test.describe("Profile Manager zones tab in Spanish", () => {
+async function seedLthrProfile(page: Page): Promise<void> {
+  await page.goto("/athlete");
+  await waitForDexieReady(page);
+  await page.evaluate(
+    async ({ profileId, lthr }) => {
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as {
+        table: (n: string) => {
+          put: (r: unknown) => Promise<void>;
+          clear: () => Promise<void>;
+        };
+      };
+      const now = new Date().toISOString();
+      for (const t of ["profiles", "meta", "userPreferences"]) {
+        await db.table(t).clear();
+      }
+      await db.table("profiles").put({
+        id: profileId,
+        name: "Perfil ES",
+        linkedAccounts: [],
+        sportZones: {
+          cycling: {
+            thresholds: { lthr },
+            heartRateZones: { method: "manual", zones: [] },
+            powerZones: { method: "manual", zones: [] },
+          },
+        },
+        createdAt: now,
+        updatedAt: now,
+      });
+      await db.table("meta").put({ key: "activeProfileId", value: profileId });
+      await db
+        .table("userPreferences")
+        .put({ profileId, calendarView: "grid", updatedAt: now });
+    },
+    { profileId: PROFILE_ID, lthr: LTHR }
+  );
+}
+
+test.describe("Zone editor in Spanish", () => {
   test("should show ppm and never bpm", async ({ page }) => {
     // Arrange
-    await page.goto("/athlete");
-    await waitForDexieReady(page);
-    await page.evaluate(
-      async ({ profileId, lthr }) => {
-        const db = (window as unknown as Record<string, unknown>)
-          .__KAIORD_DB__ as {
-          table: (n: string) => {
-            put: (r: unknown) => Promise<void>;
-            clear: () => Promise<void>;
-          };
-        };
-        const now = new Date().toISOString();
-        for (const t of ["profiles", "meta", "userPreferences"]) {
-          await db.table(t).clear();
-        }
-        await db.table("profiles").put({
-          id: profileId,
-          name: "Perfil ES",
-          linkedAccounts: [],
-          sportZones: {
-            cycling: {
-              thresholds: { lthr },
-              heartRateZones: { method: "manual", zones: [] },
-              powerZones: { method: "manual", zones: [] },
-            },
-          },
-          createdAt: now,
-          updatedAt: now,
-        });
-        await db
-          .table("meta")
-          .put({ key: "activeProfileId", value: profileId });
-        await db
-          .table("userPreferences")
-          .put({ profileId, calendarView: "grid", updatedAt: now });
-      },
-      { profileId: PROFILE_ID, lthr: LTHR }
-    );
-    await page.goto("/athlete");
+    await seedLthrProfile(page);
 
     // Act
-    await page.getByRole("button", { name: "Editar perfil" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByRole("tab", { name: "Zonas de entrenamiento" }).click();
+    await page.goto("/athlete/zones/cycling");
 
     // Assert
-    await expect(dialog.getByText("ppm").first()).toBeVisible();
-    await expect(dialog).not.toContainText(/\bbpm\b/);
+    const main = page.locator("main");
+    await expect(main.getByText("ppm").first()).toBeVisible();
+    await expect(main).not.toContainText(/\bbpm\b/);
+  });
+
+  test("should name the threshold in Spanish on the athlete page", async ({
+    page,
+  }) => {
+    // Arrange
+    await seedLthrProfile(page);
+
+    // Act
+    await page.goto("/athlete");
+
+    // Assert
+    const main = page.locator("main");
+    await expect(
+      main.getByText("Derivadas de FC umbral 168 ppm")
+    ).toBeVisible();
+    await expect(main).not.toContainText(/Threshold HR|\bbpm\b/);
   });
 });

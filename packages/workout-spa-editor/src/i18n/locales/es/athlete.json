@@ -1,17 +1,37 @@
 {
-  "emptyTitle": "Aún no hay perfil de atleta",
-  "createProfile": "Crear perfil",
-  "createProfileTitle": "Crear perfil de atleta",
-  "editProfile": "Editar perfil",
-  "edit": "Editar",
+  "emptyTitle": "Aún no hay ningún atleta",
+  "createAthlete": "Crear atleta",
+  "rename": "Cambiar el nombre del atleta",
+  "nameLabel": "Nombre del atleta",
   "editThresholds": "Editar umbrales",
   "thresholdsTitle": "Umbrales de {{sport}}",
+  "thresholds": {
+    "ftp": "FTP (W)",
+    "lthr": "LTHR ({{unit}})",
+    "pace": "Ritmo umbral ({{unit}})",
+    "cssPace": "Ritmo CSS ({{unit}})",
+    "maxHeartRate": "Frecuencia cardiaca máxima ({{unit}})",
+    "optional": "Opcional en carrera",
+    "saved": "Guardado",
+    "invalid": {
+      "whole": "Introduce un número entero mayor que 0.",
+      "heartRate": "Introduce un número entero entre 1 y 250.",
+      "pace": "Usa minutos y segundos, por ejemplo 4:30."
+    }
+  },
   "sportAria": "Deporte",
   "zonesTitle": "Zonas de {{sport}}",
+  "adjustZones": "Ajustar zonas",
   "noThreshold": "Establece un umbral de {{sport}} para ver tus zonas",
-  "noThresholds": "Añade tus umbrales de {{sport}}",
   "zonesReason": "Derivadas de {{metric}} {{value}}. Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
   "zonesReasonNoThreshold": "Estas cinco bandas son contra lo que la IA escribe los entrenamientos y lo que tu reloj recibe como objetivos.",
+  "metric": {
+    "ftp": "FTP",
+    "thresholdPace": "Ritmo umbral",
+    "cssPace": "Ritmo CSS",
+    "thresholdHr": "FC umbral",
+    "maxHr": "FC máxima"
+  },
   "provenance": {
     "synced": "{{source}} · {{when}}",
     "manual": "A mano",
@@ -28,7 +48,8 @@
     "hint": "Apagado significa que nada sobrescribe un número que escribiste tú."
   },
   "connections": {
-    "fedBy": "Este perfil se alimenta de {{source}}",
+    "title": "Conexiones",
+    "none": "Sin conexiones todavía",
     "manage": "Gestionar en Conexiones"
   },
   "tagline": {
@@ -38,86 +59,81 @@
     "fallback": "Atleta"
   },
   "defaultProfile": {
-    "notice": "Hemos creado «Mi perfil» para que empieces ya. Añade tus umbrales y tu peso para tener zonas y estimaciones personales.",
-    "complete": "Completar perfil",
+    "notice": "Hemos creado «{{name}}» para que empieces ya. Añade tus umbrales y tu peso para tener zonas y estimaciones personales.",
+    "complete": "Completar datos",
     "dismiss": "Entendido"
   },
   "title": "Atleta",
   "body": {
     "title": "Cuerpo",
     "saved": "Guardado",
-    "maxHeartRate": "Frecuencia cardiaca máxima (ppm)",
-    "maxHeartRateRange": "Introduce un número entero entre 1 y 250."
+    "currentWeight": "Peso actual ({{unit}})",
+    "currentWeightHint": "Se guarda como la pesada de hoy.",
+    "height": "Altura ({{unit}})",
+    "birthDate": "Fecha de nacimiento",
+    "restingHeartRate": "Frecuencia cardiaca en reposo (ppm)",
+    "sex": "Sexo",
+    "activityLevel": "Nivel de actividad",
+    "notSet": "Sin indicar",
+    "sexes": {
+      "male": "Hombre",
+      "female": "Mujer"
+    },
+    "activityLevels": {
+      "sedentary": "Sedentario",
+      "light": "Ligero",
+      "moderate": "Moderado",
+      "active": "Activo",
+      "very_active": "Muy activo"
+    }
   },
   "sports": {
     "cycling": "Ciclismo",
     "running": "Carrera",
     "swimming": "Natación"
   },
-  "profileManager": {
-    "title": "Gestor de perfiles",
-    "intro": "Gestiona tus perfiles de entrenamiento con zonas y datos personales.",
-    "profileName": "Nombre del perfil",
-    "newName": "Nombre del nuevo perfil",
+  "zonesPage": {
+    "back": "Atleta",
+    "thresholds": "Umbrales: {{list}}",
+    "thresholdItem": "{{label}} {{value}}",
+    "noThresholds": "Aún no hay umbrales. Las zonas siguen a los umbrales que pongas en la página de Atleta."
+  },
+  "athletes": {
+    "title": "Atletas",
+    "intro": "Todas las personas cuyo entrenamiento gestionas en este navegador. Cada página muestra el atleta activo.",
     "name": "Nombre",
-    "create": "Crear perfil",
-    "import": "Importar perfil",
-    "importFile": "Importar archivo de perfil",
+    "newName": "Nombre del nuevo atleta",
+    "create": "Crear atleta",
+    "import": "Importar atleta",
+    "importFile": "Archivo del atleta",
+    "fileHint": "Un archivo de atleta contiene un solo atleta: sus zonas y sus datos personales. Para copiarlo todo, usa la copia de seguridad.",
+    "backupLink": "Abrir Datos y copia de seguridad",
     "importFailed": "Error al importar: {{message}}",
-    "importInvalid": "Archivo de perfil no válido",
-    "saved": "Perfiles guardados ({{count}})",
-    "empty": "Aún no hay perfiles. Crea uno para empezar.",
+    "importInvalid": "Este archivo no es un archivo de atleta de Kaiord.",
+    "importSaveFailed": "No se pudo guardar el atleta importado. Inténtalo de nuevo.",
+    "list": "Atletas ({{count}})",
+    "active": "Activo",
     "setActive": "Activar",
-    "edit": "Editar",
-    "export": "Exportar perfil",
-    "delete": "Eliminar perfil",
-    "backToList": "Volver a la lista",
-    "deleteTitle": "Eliminar perfil",
-    "deleteBody": "¿Seguro que quieres eliminar este perfil? Esta acción no se puede deshacer.",
+    "setActiveFor": "Activar a {{name}}",
+    "editDetails": "Cuerpo y zonas",
+    "rename": "Cambiar el nombre de {{name}}",
+    "save": "Guardar",
     "cancel": "Cancelar",
-    "confirmDelete": "Eliminar",
-    "linkedTitle": "Cuentas de entrenador vinculadas",
-    "connectedAs": "Conectado como",
-    "notConnected": "Sin conectar",
-    "connect": "Conectar {{source}}",
-    "connecting": "Conectando…",
-    "disconnect": "Desconectar",
-    "tabs": {
-      "zones": "Zonas de entrenamiento",
-      "personal": "Datos personales",
-      "linkedAccounts": "Cuentas vinculadas"
-    },
-    "personal": {
-      "bodyWeight": "Peso corporal ({{unit}})",
-      "height": "Altura ({{unit}})",
-      "birthDate": "Fecha de nacimiento",
-      "restingHeartRate": "Frecuencia cardiaca en reposo (ppm)",
-      "sex": "Sexo",
-      "activityLevel": "Nivel de actividad",
-      "notSet": "Sin indicar",
-      "sexes": {
-        "male": "Hombre",
-        "female": "Mujer"
-      },
-      "activityLevels": {
-        "sedentary": "Sedentario",
-        "light": "Ligero",
-        "moderate": "Moderado",
-        "active": "Activo",
-        "very_active": "Muy activo"
-      }
-    },
+    "export": "Exportar {{name}}",
+    "delete": "Eliminar {{name}}",
+    "deleteOnly": "No se puede eliminar el único atleta. Crea otro primero.",
+    "deleteTitle": "¿Eliminar a {{name}}?",
+    "deleteBody": "Se eliminan el atleta y todo lo registrado para él en este navegador: entrenamientos, salud, nutrición y conexiones. No se puede deshacer.",
+    "confirmDelete": "Eliminar atleta",
+    "summaryFtp": "FTP {{value}} W",
+    "summaryLthr": "FC umbral {{value}} ppm",
     "toast": {
-      "switchFailed": "No se pudo cambiar de perfil. Inténtalo de nuevo.",
-      "switched": "Perfil activo: {{name}}",
-      "createFailed": "No se pudo crear el perfil. Inténtalo de nuevo.",
-      "saveFailed": "No se pudo guardar el perfil. Inténtalo de nuevo.",
-      "deleteFailed": "No se pudo eliminar el perfil. Inténtalo de nuevo.",
-      "accountLinked": "Cuenta de entrenador vinculada",
-      "accountDisconnected": "Cuenta de entrenador desvinculada",
-      "extensionMissing": "La extensión de Kaiord no está instalada en este navegador. Instálala para conectar {{source}}."
-    },
-    "ftp": "FTP: {{value}}W",
-    "lthr": "FC umbral: {{value}} ppm"
+      "switchFailed": "No se pudo cambiar de atleta. Inténtalo de nuevo.",
+      "switched": "Atleta activo: {{name}}",
+      "createFailed": "No se pudo crear el atleta. Inténtalo de nuevo.",
+      "saveFailed": "No se pudo guardar el atleta. Inténtalo de nuevo.",
+      "deleteFailed": "No se pudo eliminar el atleta. Inténtalo de nuevo.",
+      "imported": "Atleta importado."
+    }
   }
 }

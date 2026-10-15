@@ -1,11 +1,13 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useId } from "react";
+import { useLocation } from "wouter";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useProfileSwitch } from "../../../hooks/use-profile-switch";
 import { useProfilesLive } from "../../../hooks/use-profiles-live";
 import { useTranslate } from "../../../i18n/use-translate";
+import { ATHLETES_PATH } from "../../../routing/constants";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
-import { useProfileSwitch } from "../../organisms/ProfileManager/hooks/useProfileSwitch";
 import { MENU_ITEM_CLASS, MENU_SEPARATOR_CLASS } from "./header-menu-styles";
 
 const LABEL_CLASS =
@@ -15,23 +17,19 @@ const LABEL_CLASS =
    past a 390px-wide, short viewport. */
 const LIST_CLASS = "max-h-[40vh] overflow-y-auto";
 
-type AthleteSwitcherProps = {
-  onManage: () => void;
-};
-
 /**
  * Top of the avatar menu: every profile as a radio, the active one checked,
- * then the way into the full manager. Switching reuses the same use case and
- * failure toast as the Profile Manager.
+ * then the way to the Athletes page. Switching reuses the same use case and
+ * failure toast as that page.
  */
-export function AthleteSwitcher({ onManage }: AthleteSwitcherProps) {
+export function AthleteSwitcher() {
   const t = useTranslate("nav");
   const labelId = useId();
+  const [, navigate] = useLocation();
   const profiles = useProfilesLive() ?? [];
   const activeId = useActiveProfileLive()?.id ?? "";
   const { handleSwitchProfile } = useProfileSwitch({
     profiles,
-    setSwitchNotification: () => undefined,
   });
 
   return (
@@ -63,7 +61,7 @@ export function AthleteSwitcher({ onManage }: AthleteSwitcherProps) {
       </DropdownMenu.RadioGroup>
       <DropdownMenu.Item
         className={MENU_ITEM_CLASS}
-        onSelect={onManage}
+        onSelect={() => navigate(ATHLETES_PATH)}
         data-testid="account-menu-manage-athletes"
       >
         <span className="h-4 w-4 flex-none" aria-hidden="true" />

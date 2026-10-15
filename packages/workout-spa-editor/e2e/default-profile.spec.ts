@@ -2,7 +2,7 @@
  * E2E: a clean browser works without visiting the athlete page first.
  *
  * No profile is seeded. The app creates its first-run default profile
- * ("My profile", `origin: "auto"`) when the database opens, so scheduling,
+ * ("My athlete", `origin: "auto"`) when the database opens, so scheduling,
  * wellness, nutrition and preferences all work from the first visit. None
  * of those actions edits the profile, so it stays unclaimed (and therefore
  * out of any Drive sync until a claim).
@@ -29,7 +29,7 @@ const readProfiles = (page: Page): Promise<StoredProfile[]> =>
 async function expectOneUnclaimedProfile(page: Page): Promise<void> {
   const profiles = await readProfiles(page);
   expect(profiles).toHaveLength(1);
-  expect(profiles[0]).toMatchObject({ name: "My profile", origin: "auto" });
+  expect(profiles[0]).toMatchObject({ name: "My athlete", origin: "auto" });
 }
 
 test.describe("Default local profile on a clean browser", () => {

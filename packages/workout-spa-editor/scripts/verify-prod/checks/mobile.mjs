@@ -25,7 +25,7 @@ const weekView = (page) =>
     .first();
 
 export default async function mobile({ rec, open }) {
-  const { page, go, failedRequests } = await open({ mobile: true });
+  const { page, go, evidence } = await open({ mobile: true });
   await go("calendar");
   await weekView(page).waitFor();
   const width = page.viewportSize().width;
@@ -66,10 +66,10 @@ export default async function mobile({ rec, open }) {
     "no horizontal page overflow",
     `overflow=${overflow}`
   );
-  const fonts = failedRequests.filter((r) => r.includes(".woff2"));
+  const fonts = evidence.failedRequests.filter((r) => r.url.includes(".woff2"));
   rec.assert(
     fonts.length === 0,
     "F-03: no .woff2 request fails",
-    fonts.join(" | ")
+    fonts.map((r) => `${r.what} ${r.url}`).join(" | ")
   );
 }

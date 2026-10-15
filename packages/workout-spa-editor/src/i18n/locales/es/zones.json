@@ -39,11 +39,6 @@
     "swimming": "Natación",
     "generic": "Genérico"
   },
-  "threshold": {
-    "pace": "Ritmo umbral",
-    "ariaLabel": "umbral {{label}}",
-    "optional": "opcional"
-  },
   "section": {
     "heartRate": "Zonas de frecuencia cardíaca",
     "power": "Zonas de potencia",

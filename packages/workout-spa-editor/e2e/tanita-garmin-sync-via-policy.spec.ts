@@ -15,7 +15,7 @@
  * (chrome.runtime.sendMessage is not interceptable via page.route).
  *
  * The control moved out of the retired Extensions tab and into the Tanita
- * card's Manage panel on /settings/connections.
+ * card's Manage panel on /connections.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -42,7 +42,7 @@ const FIXTURE_CSV = readFileSync(
 );
 
 const PROFILE_ID = "tanita-garmin-policy-e2e";
-const CONNECTIONS_ROUTE = "/settings/connections";
+const CONNECTIONS_ROUTE = "/connections";
 const EXPECTED_LEDGER_ROWS = 2;
 
 type DexieDb = {

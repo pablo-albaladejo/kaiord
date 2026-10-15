@@ -37,7 +37,7 @@ import {
   Z4_MIN_PERCENT_90,
   Z5_LOWER_269,
 } from "../../test-utils/application-fixtures";
-import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
+import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
 import type {
   ConflictDecision,
@@ -108,12 +108,13 @@ const PAYLOAD_TRIATHLETE: ZonesPayload = {
 describe("syncZones full-bands — HR fallback chain", () => {
   it("should write running and swimming HR bands from Generic when only cycling Specific is present (4.7a)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
 
     // Act
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     expect(result.ok).toBe(true);
@@ -142,12 +143,13 @@ describe("syncZones full-bands — HR fallback chain", () => {
 
   it("should write LTHR scalars for cycling and running from Specific blocks and for swimming from Generic when its Specific block is absent", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
 
     // Act
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     // Cycling Specific present (z4Upper=174) and running Specific
@@ -168,7 +170,8 @@ describe("syncZones full-bands — HR fallback chain", () => {
 
   it("should NOT touch a sport's HR bands when both Specific and Generic are absent (4.7j)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const payload: ZonesPayload = {
       physiological: { weight: 83 },
@@ -177,7 +180,7 @@ describe("syncZones full-bands — HR fallback chain", () => {
     const transport = makeTransport(async () => payload);
 
     // Act
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
@@ -194,12 +197,13 @@ describe("syncZones full-bands — HR fallback chain", () => {
 describe("syncZones full-bands — cycling power watts→%FTP", () => {
   it("should convert cycling watts bands to %FTP using payload.paces.cycling.z4Upper as divisor (4.7f)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
 
     // Act
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     // Z4: 240W..268W with FTP=268 → 90%..100% (exact integer).
@@ -215,7 +219,8 @@ describe("syncZones full-bands — cycling power watts→%FTP", () => {
 
   it("should skip cycling power band writes when payload.paces.cycling.z4Upper is absent (4.7h)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const payloadNoFtp: ZonesPayload = {
       paces: {
@@ -225,7 +230,7 @@ describe("syncZones full-bands — cycling power watts→%FTP", () => {
     const transport = makeTransport(async () => payloadNoFtp);
 
     // Act
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
@@ -236,12 +241,13 @@ describe("syncZones full-bands — cycling power watts→%FTP", () => {
 describe("syncZones full-bands — running pace inversion", () => {
   it("should map T2G upper (faster) to minPace and lower (slower) to maxPace (4.7g)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
 
     // Act
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     // Z4 lower 4:44 (slower) → maxPace 284s; upper 4:10 (faster) → minPace 250s.
@@ -257,15 +263,16 @@ describe("syncZones full-bands — running pace inversion", () => {
 describe("syncZones full-bands — re-sync stability (round-trip)", () => {
   it("should produce zero conflicts when re-syncing identical T2G data (4.7r/4.7s)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
     // First sync — silent-fills the empty profile.
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Act
     // Second sync against identical data.
-    const result = await syncZones(PROFILE_ID, transport, repo);
+    const result = await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     expect(result.ok).toBe(true);
@@ -278,12 +285,13 @@ describe("syncZones full-bands — re-sync stability (round-trip)", () => {
 describe("syncZones full-bands — bpmRest flow-through-but-not-persisted", () => {
   it("should NOT add a restingHeartRate field after sync even when bpmRest is in the payload (4.7p)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
 
     // Act
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
@@ -299,12 +307,13 @@ describe("syncZones full-bands — bpmRest flow-through-but-not-persisted", () =
 describe("syncZones full-bands — power-zone count mismatch", () => {
   it("should write a 5-element array (NOT 7) replacing Kaiord defaults (4.7q)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
 
     // Act
-    await syncZones(PROFILE_ID, transport, repo);
+    await syncZones(PROFILE_ID, transport, persistence);
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
@@ -316,7 +325,8 @@ describe("syncZones full-bands — power-zone count mismatch", () => {
 describe("commitConflictResolution full-bands — band-level merge", () => {
   it("should accept Z4 maxBpm and reject Z2 maxBpm — merged array reflects both decisions (4.7l)", async () => {
     // Arrange
-    const repo = createInMemoryProfileRepository();
+    const persistence = createInMemoryPersistence();
+    const repo = persistence.profiles;
     // Pre-sync profile with HR Z2 different (will produce a conflict).
     await repo.put(
       makeProfile({
@@ -341,7 +351,7 @@ describe("commitConflictResolution full-bands — band-level merge", () => {
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
-      repo,
+      persistence,
       PAYLOAD_TRIATHLETE
     );
 
