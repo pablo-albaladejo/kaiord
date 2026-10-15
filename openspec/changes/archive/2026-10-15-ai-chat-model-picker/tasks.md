@@ -1,4 +1,4 @@
-> Tasks: 6 completed, 0 deferred
+> Tasks: 7 completed, 0 deferred
 
 # Tasks
 
@@ -8,3 +8,4 @@
 - [x] 4. Red first: `setConversationModel` rejects a blank model id; `clearConversationModel` removes the override and advances `updatedAt`.
 - [x] 5. E2E with every provider host blocked: the picker follows the main model, a draft's choice does not write a binding, the first message stamps it, and "Same as main model" clears it.
 - [x] 6. Changeset: patch for `@kaiord/workout-spa-editor`.
+- [x] 7. Red first (CodeRabbit): a draft's held choice is dropped once a saved conversation is open, so the next new conversation follows the main model (unit + e2e).

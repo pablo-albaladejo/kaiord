@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { useAiModelBindingsLive } from "../../hooks/use-ai-model-bindings-live";
 import type { ChatConversationNav } from "../../hooks/use-chat-conversation-nav";
 import { useChatModelSelection } from "../../hooks/use-chat-model-selection";
@@ -19,8 +21,7 @@ type ChatPageModelArgs = {
 /**
  * What the active conversation runs and its model picker: the chat
  * resolution it follows when it has no model of its own (the one the AI
- * settings show), and the handlers that choose or clear its model. A draft's choice applies only while no
- * persisted conversation is open.
+ * settings show), and the handlers that choose or clear its model.
  */
 export const useChatPageModel = ({
   profileId,
@@ -30,6 +31,13 @@ export const useChatPageModel = ({
 }: ChatPageModelArgs) => {
   const bindings = useAiModelBindingsLive(profileId) ?? [];
   const draft = useAiRuntimeStore((s) => s.chatDraftModel);
+  const setDraft = useAiRuntimeStore((s) => s.setChatDraftModel);
+  const savedOpen = !nav.isDraft && nav.activeId !== null;
+  // The first message stamps the draft's choice on its row; the next draft
+  // starts following the main model again.
+  useEffect(() => {
+    if (savedOpen) setDraft(null);
+  }, [savedOpen, setDraft]);
   const selection = useChatModelSelection({
     profileId,
     activeId: nav.activeId,
@@ -39,7 +47,7 @@ export const useChatPageModel = ({
   const fallback = resolveChatModels(
     providers,
     bindings,
-    nav.isDraft || !nav.activeId ? draft : null
+    savedOpen ? null : draft
   );
   const active = conversations?.find((c) => c.id === nav.activeId);
   const model = resolveActiveChatModel(active, providers, fallback);
