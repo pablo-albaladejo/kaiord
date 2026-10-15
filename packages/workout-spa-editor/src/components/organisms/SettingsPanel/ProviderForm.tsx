@@ -5,6 +5,7 @@ import type { LlmProviderType } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 import { KeyCheckMessage, type KeyCheckStatus } from "./KeyCheckMessage";
+import { PROVIDER_TYPE_OPTIONS } from "./provider-type-options";
 import type { KeySaveOutcome } from "./save-with-key-check";
 
 type ProviderFormProps = {
@@ -13,62 +14,71 @@ type ProviderFormProps = {
     apiKey: string;
     label: string;
   }) => Promise<KeySaveOutcome>;
+  onDone: () => void;
+  onCancel: () => void;
 };
 
-export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
+// A pasted key often carries a space or a newline the provider rejects, so
+// the key is trimmed before it is checked or stored; Save stays disabled
+// until it holds more than spaces. The fields lock while the key is checked.
+export const ProviderForm: React.FC<ProviderFormProps> = ({
+  onAdd,
+  onDone,
+  onCancel,
+}) => {
   const t = useTranslate("settings");
   const [type, setType] = useState<LlmProviderType>("anthropic");
   const [apiKey, setApiKey] = useState("");
   const [label, setLabel] = useState("");
   const [status, setStatus] = useState<KeyCheckStatus>("idle");
   const checking = status === "checking";
+  const key = apiKey.trim();
 
   const handleSubmit = async () => {
-    if (!apiKey || !label) return;
     setStatus("checking");
-    const outcome = await onAdd({ type, apiKey, label });
+    const outcome = await onAdd({ type, apiKey: key, label });
+    if (outcome === "saved" || outcome === "unverified") return onDone();
     setStatus(outcome);
-    if (outcome === "invalid" || outcome === "failed") return;
-    setApiKey("");
-    setLabel("");
   };
 
   return (
     <div className="space-y-3 rounded-lg border border-edge p-4">
-      <Input
-        label={t("providers.provider")}
-        variant="select"
-        value={type}
-        disabled={checking}
-        onChange={(e) => setType(e.target.value as LlmProviderType)}
-        options={[
-          { value: "anthropic", label: "Anthropic (Claude)" },
-          { value: "openai", label: "OpenAI (GPT)" },
-          { value: "google", label: "Google (Gemini)" },
-        ]}
-      />
-      <Input
-        label={t("providers.label")}
-        placeholder={t("providers.labelPlaceholder")}
-        value={label}
-        disabled={checking}
-        onChange={(e) => setLabel(e.target.value)}
-      />
-      <Input
-        label={t("providers.apiKey")}
-        type="password"
-        placeholder="sk-..."
-        value={apiKey}
-        disabled={checking}
-        onChange={(e) => setApiKey(e.target.value)}
-      />
-      <Button
-        size="sm"
-        onClick={() => void handleSubmit()}
-        disabled={checking || !apiKey || !label}
-      >
-        {t("providers.addProvider")}
-      </Button>
+      <fieldset disabled={checking} className="space-y-3">
+        <Input
+          label={t("providers.provider")}
+          variant="select"
+          autoFocus
+          value={type}
+          onChange={(e) => setType(e.target.value as LlmProviderType)}
+          options={PROVIDER_TYPE_OPTIONS}
+        />
+        <Input
+          label={t("providers.apiKey")}
+          type="password"
+          autoComplete="off"
+          placeholder="sk-..."
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+        />
+        <Input
+          label={t("accounts.labelOptional")}
+          placeholder={t("accounts.labelPlaceholder")}
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+      </fieldset>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          onClick={() => void handleSubmit()}
+          disabled={checking || !key}
+        >
+          {t("accounts.save")}
+        </Button>
+        <Button size="sm" variant="secondary" onClick={onCancel}>
+          {t("providers.cancel")}
+        </Button>
+      </div>
       <KeyCheckMessage status={status} />
     </div>
   );

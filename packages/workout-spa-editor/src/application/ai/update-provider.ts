@@ -11,9 +11,10 @@
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { ProviderNotFoundError } from "./errors";
+import { uniqueProviderLabel } from "./provider-label";
 
 export type UpdateProviderInput = Partial<
-  Pick<LlmProviderConfig, "type" | "apiKey" | "label">
+  Pick<LlmProviderConfig, "type" | "apiKey" | "label" | "keyCheck">
 >;
 
 // Drop `undefined` values so callers cannot blank required fields by
@@ -39,6 +40,17 @@ export const updateProvider = async (
     ...existing,
     ...stripUndefined(updates),
   };
+  if (updates.label !== undefined) {
+    // A new name follows the same rule as a new account: never a repeat.
+    const others = (await persistence.aiProviders.getAll())
+      .filter((p) => p.id !== providerId)
+      .map((p) => p.label);
+    updated.label = uniqueProviderLabel(
+      updates.label.trim() || existing.label,
+      updated.type,
+      others
+    );
+  }
   await persistence.aiProviders.put(updated);
   return updated;
 };

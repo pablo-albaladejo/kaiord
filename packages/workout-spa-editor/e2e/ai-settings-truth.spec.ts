@@ -49,11 +49,14 @@ async function addProvider(
   label: string,
   key: string
 ) {
-  await settings.locator("select").first().selectOption({ value: type });
-  await settings.getByPlaceholder("e.g., My Claude").fill(label);
+  await settings.getByRole("button", { name: "Add account" }).click();
+  await settings
+    .getByLabel("Provider", { exact: true })
+    .selectOption({ value: type });
+  await settings.getByLabel("Label (optional)").fill(label);
   await settings.getByPlaceholder("sk-...").fill(key);
-  await settings.getByRole("button", { name: /add provider/i }).click();
-  await expect(settings.getByPlaceholder("sk-...")).toHaveValue("");
+  await settings.getByRole("button", { name: "Save account" }).click();
+  await expect(settings.getByPlaceholder("sk-...")).toHaveCount(0);
 }
 
 test.describe("AI settings truth", () => {
@@ -66,7 +69,7 @@ test.describe("AI settings truth", () => {
     await page.goto("/settings/ai");
     const settings = page.getByTestId("settings-page");
     const providers = settings.getByRole("list", {
-      name: "Configured LLM providers",
+      name: "AI accounts",
     });
     await addProvider(settings, "anthropic", "Mi Claude", "sk-ant-fake-1111");
     await addProvider(settings, "openai", "Mi GPT", "sk-gpt-fake-2222");
@@ -74,9 +77,10 @@ test.describe("AI settings truth", () => {
     const chat = settings.getByLabel("Chat", { exact: true });
 
     // What runs before any choice: the first account and its model.
-    await expect.poll(() => shown(main)).toBe("claude-sonnet-5 · Mi Claude");
-    expect(await shown(chat)).toBe(
-      "Same as main model (claude-sonnet-5 · Mi Claude)"
+    await expect.poll(() => shown(main)).toBe("Claude Sonnet 5 · Mi Claude");
+    expect(await shown(chat)).toBe("Same as main model");
+    await expect(settings.getByTestId("model-chat-follows")).toHaveText(
+      "Runs Claude Sonnet 5 · Mi Claude"
     );
     await expect(providers.getByText("Default")).toHaveCount(0);
     await expect(
@@ -84,10 +88,11 @@ test.describe("AI settings truth", () => {
     ).toHaveCount(0);
 
     // One select picks account and model together; nothing stores a blank model.
-    await main.selectOption({ label: "gpt-5-mini · Mi GPT" });
-    await expect
-      .poll(() => shown(chat))
-      .toBe("Same as main model (gpt-5-mini · Mi GPT)");
+    await main.selectOption({ label: "GPT-5 mini · Mi GPT" });
+    await expect(settings.getByTestId("model-chat-follows")).toHaveText(
+      "Runs GPT-5 mini · Mi GPT"
+    );
+    await settings.getByText(/^Advanced: model per task/).click();
     await chat.selectOption({ label: "o3 · Mi GPT" });
     await expect.poll(() => shown(chat)).toBe("o3 · Mi GPT");
     const bindings = await storedBindings(page);
@@ -101,10 +106,10 @@ test.describe("AI settings truth", () => {
       .getByRole("listitem")
       .filter({ hasText: "Mi Claude" });
     await expect(claudeRow.getByText("••••1111")).toBeVisible();
-    await claudeRow.getByRole("button", { name: "Edit" }).click();
-    // While edited, the row holds the label in an input: find it by position.
+    await claudeRow.getByRole("button", { name: "Replace key" }).click();
+    // While edited, the row holds only the key field: find it by position.
     const editing = providers.getByRole("listitem").first();
-    await expect(editing.getByLabel("API Key")).toHaveValue("");
+    await expect(editing.getByLabel("New API key")).toHaveValue("");
     expect(await page.content()).not.toContain("sk-ant-fake-1111");
     await editing.getByRole("button", { name: "Cancel" }).click();
 
@@ -112,15 +117,21 @@ test.describe("AI settings truth", () => {
     const gptRow = providers
       .getByRole("listitem")
       .filter({ hasText: "Mi GPT" });
-    await gptRow.getByRole("button", { name: "Remove" }).click();
+    const removeGpt = async () => {
+      await gptRow
+        .getByRole("button", { name: "More actions for Mi GPT" })
+        .click();
+      await page.getByRole("menuitem", { name: "Remove" }).click();
+    };
+    await removeGpt();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toContainText("Remove Mi GPT?");
     await dialog.getByRole("button", { name: "Cancel" }).click();
     await expect(gptRow).toBeVisible();
-    await gptRow.getByRole("button", { name: "Remove" }).click();
+    await removeGpt();
     await dialog.getByRole("button", { name: "Remove" }).click();
     await expect(gptRow).toHaveCount(0);
     await expect.poll(() => storedBindings(page)).toEqual([]);
-    await expect.poll(() => shown(main)).toBe("claude-sonnet-5 · Mi Claude");
+    await expect.poll(() => shown(main)).toBe("Claude Sonnet 5 · Mi Claude");
   });
 });
