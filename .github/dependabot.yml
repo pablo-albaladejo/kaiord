@@ -8,6 +8,24 @@ updates:
       day: "monday"
     open-pull-requests-limit: 10
     groups:
+      # React gets its own PR: the 19.3 renderer adds ~8.4 kB gzip to the SPA
+      # entry chunk, which trips the initial-JS budget
+      # (scripts/check-spa-initial-js.mjs). Raising that budget needs its own
+      # evidence (docs/seo-observatory.md), so a React bump must not block the
+      # other minor/patch updates. Groups match first-wins, so keep this first.
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      # openspec 1.14 added a hard-coded warning for requirement text over 500
+      # characters; it fires 329 times on the existing specs (`pnpm
+      # lint:specs`). Taking 1.14 means splitting those requirements, which is
+      # its own change, so it gets its own PR.
+      openspec:
+        patterns:
+          - "@fission-ai/openspec"
       minor-and-patch:
         update-types:
           - "minor"
