@@ -1,15 +1,22 @@
 /**
- * Model-change handler for the chat page. A persisted conversation stores its
- * own `providerId`/`modelId` override (D9); an unsaved draft writes the
- * volatile runtime selection so the page-level resolver reflects it until the
- * first message persists the conversation.
+ * Model handlers for the chat page. A persisted conversation stores its own
+ * `providerId`/`modelId` override (D9), healed past retirement, and following
+ * the main model again clears it; an unsaved draft keeps its choice in
+ * volatile runtime state until the first message stamps it. A blank model id
+ * is never stored.
  */
-import { modelForProvider } from "@kaiord/ai/providers";
-import { useCallback } from "react";
+import { usableModel } from "@kaiord/ai/providers";
+import { useCallback, useMemo } from "react";
 
-import { setConversationModel } from "../application/chat/set-conversation-model";
+import {
+  clearConversationModel,
+  setConversationModel,
+} from "../application/chat/set-conversation-model";
 import { usePersistence } from "../contexts/persistence-context";
-import { useAiRuntimeStore } from "../store/ai-runtime-store";
+import {
+  type ChatDraftModel,
+  useAiRuntimeStore,
+} from "../store/ai-runtime-store";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import { logger } from "../utils/logger";
 
@@ -20,35 +27,50 @@ export type ChatModelSelectionArgs = {
   providers: LlmProviderConfig[];
 };
 
+export type ChatModelSelection = {
+  choose: (choice: ChatDraftModel) => void;
+  follow: () => void;
+};
+
+const logFailure = (error: unknown) =>
+  logger.error("Failed to persist chat conversation model override", {
+    error,
+  });
+
 export const useChatModelSelection = ({
   profileId,
   activeId,
   isDraft,
   providers,
-}: ChatModelSelectionArgs): ((providerId: string) => void) => {
+}: ChatModelSelectionArgs): ChatModelSelection => {
   const persistence = usePersistence();
-  const selectForGeneration = useAiRuntimeStore((s) => s.selectForGeneration);
-  return useCallback(
-    (providerId: string) => {
-      if (!profileId || !activeId || isDraft) {
-        selectForGeneration(providerId);
-        return;
-      }
+  const setDraft = useAiRuntimeStore((s) => s.setChatDraftModel);
+
+  const choose = useCallback(
+    ({ providerId, modelId }: ChatDraftModel) => {
       const provider = providers.find((p) => p.id === providerId);
-      if (!provider) return;
+      if (!provider || !modelId.trim()) return;
+      const healed = usableModel(provider.type, modelId);
+      if (isDraft || !profileId || !activeId) {
+        return setDraft({ providerId, modelId: healed });
+      }
       void setConversationModel(
         persistence,
         profileId,
         activeId,
         providerId,
-        modelForProvider(provider)
-      ).catch((error: unknown) => {
-        logger.error("Failed to persist chat conversation model override", {
-          error,
-        });
-        selectForGeneration(providerId);
-      });
+        healed
+      ).catch(logFailure);
     },
-    [persistence, selectForGeneration, profileId, activeId, isDraft, providers]
+    [persistence, setDraft, profileId, activeId, isDraft, providers]
   );
+
+  const follow = useCallback(() => {
+    if (isDraft || !profileId || !activeId) return setDraft(null);
+    void clearConversationModel(persistence, profileId, activeId).catch(
+      logFailure
+    );
+  }, [persistence, setDraft, profileId, activeId, isDraft]);
+
+  return useMemo(() => ({ choose, follow }), [choose, follow]);
 };

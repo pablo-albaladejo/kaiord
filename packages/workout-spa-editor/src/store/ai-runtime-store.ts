@@ -16,16 +16,24 @@ import { create } from "zustand";
 
 import type { GenerationState } from "./ai-store-types";
 
+/** A provider and one of its models, always chosen together. */
+export type ChatDraftModel = { providerId: string; modelId: string };
+
 export type AiRuntimeStore = {
   selectedProviderId: string | null;
   generation: GenerationState;
+  /** An unsaved chat draft's own model; null follows the chat default. */
+  chatDraftModel: ChatDraftModel | null;
   selectForGeneration: (id: string | null) => void;
   setGeneration: (state: GenerationState) => void;
+  setChatDraftModel: (model: ChatDraftModel | null) => void;
 };
 
 export const useAiRuntimeStore = create<AiRuntimeStore>((set) => ({
   selectedProviderId: null,
   generation: { status: "idle" },
+  chatDraftModel: null,
   selectForGeneration: (selectedProviderId) => set({ selectedProviderId }),
   setGeneration: (generation) => set({ generation }),
+  setChatDraftModel: (chatDraftModel) => set({ chatDraftModel }),
 }));

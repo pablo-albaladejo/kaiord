@@ -27,6 +27,8 @@ const { useActiveProfileLive } =
   await import("../../hooks/use-active-profile-live");
 const { useAiProvidersLive } =
   await import("../../hooks/use-ai-providers-live");
+const { useAiModelBindingsLive } =
+  await import("../../hooks/use-ai-model-bindings-live");
 const { useChatMessagesLive } =
   await import("../../hooks/use-chat-messages-live");
 const { useChatConversationsLive } =
@@ -34,6 +36,7 @@ const { useChatConversationsLive } =
 const mockActive = vi.mocked(useActiveProfileLive);
 const mockProviders = vi.mocked(useAiProvidersLive);
 const mockMessages = vi.mocked(useChatMessagesLive);
+const mockBindings = vi.mocked(useAiModelBindingsLive);
 const mockConversations = vi.mocked(useChatConversationsLive);
 
 const provider = {
@@ -174,5 +177,34 @@ describe("ChatPage", () => {
     expect(gate).toHaveTextContent("“Restored” came from a backup");
     expect(screen.getByRole("button", { name: "Add the key" })).toBeVisible();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  });
+
+  it("should show the athlete's main model in the picker, not the isDefault account", () => {
+    // Arrange
+    const gpt = { ...provider, id: "ai-2", type: "openai" as const };
+    mockProviders.mockReturnValue([
+      provider,
+      { ...gpt, label: "GPT", isDefault: false },
+    ]);
+    mockBindings.mockReturnValue([
+      {
+        profileId: "p1",
+        purpose: "default",
+        providerId: "ai-2",
+        modelId: "gpt-5-mini",
+        updatedAt: "2026-06-13T10:00:00.000Z",
+      },
+    ]);
+    mockConversations.mockReturnValue([]);
+    mockMessages.mockReturnValue([]);
+
+    // Act
+    renderWithProviders(<ChatPage />);
+
+    // Assert
+    const select = screen.getByTestId("chat-model-select") as HTMLSelectElement;
+    expect(select.selectedOptions[0]?.textContent).toBe(
+      "Same as main model (gpt-5-mini · GPT)"
+    );
   });
 });
