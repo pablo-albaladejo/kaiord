@@ -17,6 +17,8 @@ describe("modelDisplayName", () => {
     ["gpt-4.1-nano", "GPT-4.1 nano"],
     ["gpt-4o", "GPT-4o"],
     ["gpt-5-mini-2025-08-07", "GPT-5 mini (2025-08-07)"],
+    ["gpt-3.5-turbo-0125", "GPT-3.5 turbo (0125)"],
+    ["gpt-4-0613", "GPT-4 (0613)"],
     ["o4-mini", "o4-mini"],
     ["gemini-2.5-flash", "Gemini 2.5 Flash"],
     ["gemini-2.5-flash-lite", "Gemini 2.5 Flash Lite"],

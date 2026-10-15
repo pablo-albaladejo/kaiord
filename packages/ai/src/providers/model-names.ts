@@ -1,8 +1,9 @@
 import { MODEL_CATALOG } from "./provider-models";
 import type { LlmProviderType } from "./types";
 
-// A provider pins a snapshot of an alias with a date or a revision number.
-const PIN = /^(.+?)-(\d{8}|\d{4}-\d{2}-\d{2}|\d{3})$/;
+// A provider pins a snapshot of an alias with a date ("20251001",
+// "2025-10-01"), a month-day ("0125", OpenAI's older pins) or a revision ("001").
+const PIN = /^(.+?)-(\d{8}|\d{4}-\d{2}-\d{2}|\d{3,4})$/;
 
 const splitPin = (id: string): { base: string; pin?: string } => {
   const m = PIN.exec(id);
@@ -49,7 +50,9 @@ export const modelDisplayName = (modelId: string): string => {
 
 /**
  * The catalog models worth offering: a pinned snapshot is dropped when its
- * alias is listed too, since both name the same model.
+ * alias is listed too. The alias points at a current snapshot of the same
+ * model line, so offering both would show two entries for one choice; an
+ * exact snapshot can still be entered through "Other…".
  */
 export const listedModels = (type: LlmProviderType): string[] => {
   const ids = MODEL_CATALOG[type].map((m) => m.id);
