@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 
@@ -14,10 +14,19 @@ export function CustomModelInput({
 }: CustomModelInputProps) {
   const t = useTranslate("settings");
   const [value, setValue] = useState("");
+  // Enter or Escape settles the input; a blur fired while it unmounts must
+  // neither commit twice nor commit a value the athlete just cancelled.
+  const settled = useRef(false);
+  const cancel = () => {
+    settled.current = true;
+    onCancel();
+  };
   const commit = () => {
+    if (settled.current) return;
+    settled.current = true;
     const id = value.trim();
     if (id) onCommit(id);
-    else onCancel();
+    else cancel();
   };
   return (
     <input
@@ -31,7 +40,7 @@ export function CustomModelInput({
       onBlur={commit}
       onKeyDown={(e) => {
         if (e.key === "Enter") commit();
-        if (e.key === "Escape") onCancel();
+        if (e.key === "Escape") cancel();
       }}
     />
   );

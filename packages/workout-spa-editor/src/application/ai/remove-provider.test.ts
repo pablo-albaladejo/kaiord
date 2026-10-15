@@ -93,4 +93,32 @@ describe("removeProvider", () => {
     expect(p1.map((b) => b.purpose)).toEqual(["chat"]);
     expect(p2).toEqual([]);
   });
+
+  it("should roll the whole removal back when a binding delete fails", async () => {
+    // Arrange
+    const base = createInMemoryPersistence();
+    const removed = await addProvider(base, baseProvider);
+    await base.profiles.put(makeProfile("p-1"));
+    await base.aiModelBindings.put({
+      profileId: "p-1",
+      purpose: "default",
+      providerId: removed.id,
+      modelId: "m",
+      updatedAt: "2026-10-15T00:00:00.000Z",
+    });
+    const persistence = {
+      ...base,
+      aiModelBindings: {
+        ...base.aiModelBindings,
+        delete: () => Promise.reject(new Error("disk full")),
+      },
+    };
+
+    // Act
+    const removal = removeProvider(persistence, removed.id);
+
+    // Assert
+    await expect(removal).rejects.toThrow("disk full");
+    expect(await base.aiProviders.getById(removed.id)).toBeDefined();
+  });
 });
