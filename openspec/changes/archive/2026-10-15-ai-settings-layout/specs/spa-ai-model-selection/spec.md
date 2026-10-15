@@ -129,7 +129,8 @@ provider, and cancelling SHALL keep it.
 The AI settings SHALL open with a card titled "Your assistant (for <athlete>)" naming the
 active athlete's main model, the account it runs on, that account's key status, and this
 month's AI use (requests, tokens, estimated cost) — labelled as the total for every athlete,
-since usage is not recorded per athlete — with the main-model select. The card and the usage
+since usage is not recorded per athlete — with the main-model select. The usage table's
+title SHALL say it covers every athlete too. The card and the usage
 table SHALL format costs the same way, as US dollars in the reader's locale. The accounts
 SHALL follow under "AI accounts", stated as shared by every athlete; the add form SHALL be
 shown only after "Add account" is pressed, SHALL close once the key is stored, and SHALL
