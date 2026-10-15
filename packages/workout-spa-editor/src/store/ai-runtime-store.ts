@@ -17,7 +17,10 @@ import { create } from "zustand";
 import type { GenerationState } from "./ai-store-types";
 
 /** A provider and one of its models, always chosen together. */
-export type ChatDraftModel = { providerId: string; modelId: string };
+export type ChatModelChoice = { providerId: string; modelId: string };
+
+/** A chat draft's own model, scoped to the athlete whose draft chose it. */
+export type ChatDraftModel = ChatModelChoice & { profileId: string };
 
 export type AiRuntimeStore = {
   selectedProviderId: string | null;

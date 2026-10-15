@@ -49,7 +49,10 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
         onDelete={props.onDelete}
       />
       <div className="flex flex-col gap-3">
-        <ChatModelPicker {...props.modelPicker} />
+        <ChatModelPicker
+          key={props.activeId ?? "none"}
+          {...props.modelPicker}
+        />
         {props.provider && (
           <ModelStatusNotice
             type={props.provider.type}
@@ -63,6 +66,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
             conversationId={props.activeId}
             provider={props.provider}
             modelId={props.modelId}
+            pinModel={props.modelPicker.chosen}
             generationProvider={props.generationProvider}
             generationModelId={props.generationModelId}
             messages={props.messages}

@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
@@ -206,5 +207,27 @@ describe("ChatPage", () => {
     expect(select.selectedOptions[0]?.textContent).toBe(
       "Same as main model (gpt-5-mini · GPT)"
     );
+  });
+
+  it("should not carry a half-typed custom model into another conversation", async () => {
+    // Arrange
+    mockProviders.mockReturnValue([provider]);
+    mockConversations.mockReturnValue([
+      conversation("c1", "Cycling"),
+      conversation("c2", "Running"),
+    ]);
+    mockMessages.mockReturnValue([]);
+    const { rerender } = renderWithProviders(<ChatPage conversationId="c1" />);
+    await userEvent.selectOptions(
+      screen.getByTestId("chat-model-select"),
+      "ai-1::__custom__"
+    );
+    expect(screen.getByTestId("model-choice-custom")).toBeInTheDocument();
+
+    // Act
+    rerender(<ChatPage conversationId="c2" />);
+
+    // Assert
+    expect(screen.queryByTestId("model-choice-custom")).not.toBeInTheDocument();
   });
 });

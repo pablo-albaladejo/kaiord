@@ -27,8 +27,10 @@ the chat page's model picker still told a different story:
   reads "Same as chat in Settings (…)".
 - Semantics are kept: the choice is per conversation. A persisted
   conversation stores `providerId`/`modelId` on its row; a draft holds the
-  choice in volatile runtime state until its first message stamps it. Nothing
-  here writes the athlete's `chat` binding.
+  choice (scoped to the athlete) in volatile runtime state until its first
+  message stamps it; a draft that follows the main model is persisted with no
+  override, so it keeps following settings. Nothing here writes the athlete's
+  `chat` binding.
 - Picking "Same as main model" on a persisted conversation clears its
   override (and advances `updatedAt`); on a draft it drops the held choice.
 - `setConversationModel` rejects a blank model id.

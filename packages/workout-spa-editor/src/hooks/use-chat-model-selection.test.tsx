@@ -105,7 +105,10 @@ describe("useChatModelSelection", () => {
     act(() => result.current.choose(choice));
 
     // Assert
-    expect(useAiRuntimeStore.getState().chatDraftModel).toEqual(choice);
+    expect(useAiRuntimeStore.getState().chatDraftModel).toEqual({
+      profileId: PROFILE,
+      ...choice,
+    });
     expect((await stored())?.modelId).toBeUndefined();
   });
 
@@ -113,7 +116,11 @@ describe("useChatModelSelection", () => {
     // Arrange
     const { result } = await setup(true);
     useAiRuntimeStore.setState({
-      chatDraftModel: { providerId: PROVIDER.id, modelId: "claude-opus-5" },
+      chatDraftModel: {
+        profileId: PROFILE,
+        providerId: PROVIDER.id,
+        modelId: "claude-opus-5",
+      },
     });
 
     // Act

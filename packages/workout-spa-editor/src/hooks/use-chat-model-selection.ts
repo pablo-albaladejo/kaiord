@@ -14,7 +14,7 @@ import {
 } from "../application/chat/set-conversation-model";
 import { usePersistence } from "../contexts/persistence-context";
 import {
-  type ChatDraftModel,
+  type ChatModelChoice,
   useAiRuntimeStore,
 } from "../store/ai-runtime-store";
 import type { LlmProviderConfig } from "../store/ai-store-types";
@@ -28,7 +28,7 @@ export type ChatModelSelectionArgs = {
 };
 
 export type ChatModelSelection = {
-  choose: (choice: ChatDraftModel) => void;
+  choose: (choice: ChatModelChoice) => void;
   follow: () => void;
 };
 
@@ -47,12 +47,12 @@ export const useChatModelSelection = ({
   const setDraft = useAiRuntimeStore((s) => s.setChatDraftModel);
 
   const choose = useCallback(
-    ({ providerId, modelId }: ChatDraftModel) => {
+    ({ providerId, modelId }: ChatModelChoice) => {
       const provider = providers.find((p) => p.id === providerId);
-      if (!provider || !modelId.trim()) return;
+      if (!provider || !profileId || !modelId.trim()) return;
       const healed = usableModel(provider.type, modelId);
-      if (isDraft || !profileId || !activeId) {
-        return setDraft({ providerId, modelId: healed });
+      if (isDraft || !activeId) {
+        return setDraft({ profileId, providerId, modelId: healed });
       }
       void setConversationModel(
         persistence,

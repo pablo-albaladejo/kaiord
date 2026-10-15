@@ -51,23 +51,66 @@ async function addProvider(settings: Locator, type: string, label: string) {
   await expect(settings.getByPlaceholder("sk-...")).toHaveValue("");
 }
 
+async function setMainModel(page: Page, label: string, modelId: string) {
+  await page.goto("/settings/ai");
+  await page
+    .getByTestId("settings-page")
+    .getByLabel("Main model")
+    .selectOption({ label });
+  await expect
+    .poll(async () => (await storedRows(page, "aiModelBindings"))[0]?.modelId)
+    .toBe(modelId);
+}
+
+async function setUpTwoAccounts(page: Page) {
+  for (const host of PROVIDER_HOSTS) {
+    await page.route(host, (route) => route.abort());
+  }
+  await page.goto("/settings/ai");
+  const settings = page.getByTestId("settings-page");
+  await addProvider(settings, "anthropic", "Mi Claude");
+  await addProvider(settings, "openai", "Mi GPT");
+  await setMainModel(page, "gpt-5-mini · Mi GPT", "gpt-5-mini");
+}
+
 test.describe("Chat model picker", () => {
+  test("a conversation that follows the main model keeps following it", async ({
+    page,
+  }) => {
+    await setUpTwoAccounts(page);
+    await page.goto("/chat");
+    const picker = page.getByTestId("chat-model-select");
+    await expect
+      .poll(() => shown(picker))
+      .toBe("Same as main model (gpt-5-mini · Mi GPT)");
+
+    // Sending from a following draft pins nothing on the conversation.
+    await page.getByLabel("Message").fill("Plan my week");
+    await page.getByRole("button", { name: "Send" }).click();
+    await expect
+      .poll(async () => (await storedRows(page, "chatConversations")).length)
+      .toBe(1);
+    const [row] = await storedRows(page, "chatConversations");
+    expect(row?.modelId).toBeUndefined();
+    expect(row?.providerId).toBeUndefined();
+    await expect(page).toHaveURL(/\/chat\/.+/);
+    const conversationUrl = page.url();
+    await expect
+      .poll(() => shown(picker))
+      .toBe("Same as main model (gpt-5-mini · Mi GPT)");
+
+    // A new main model in settings is what that conversation now runs.
+    await setMainModel(page, "claude-sonnet-5 · Mi Claude", "claude-sonnet-5");
+    await page.goto(conversationUrl);
+    await expect
+      .poll(() => shown(page.getByTestId("chat-model-select")))
+      .toBe("Same as main model (claude-sonnet-5 · Mi Claude)");
+  });
+
   test("follows the main model until the conversation picks its own", async ({
     page,
   }) => {
-    for (const host of PROVIDER_HOSTS) {
-      await page.route(host, (route) => route.abort());
-    }
-    await page.goto("/settings/ai");
-    const settings = page.getByTestId("settings-page");
-    await addProvider(settings, "anthropic", "Mi Claude");
-    await addProvider(settings, "openai", "Mi GPT");
-    await settings
-      .getByLabel("Main model")
-      .selectOption({ label: "gpt-5-mini · Mi GPT" });
-    await expect
-      .poll(async () => (await storedRows(page, "aiModelBindings")).length)
-      .toBe(1);
+    await setUpTwoAccounts(page);
 
     await page.goto("/chat");
     const picker = page.getByTestId("chat-model-select");

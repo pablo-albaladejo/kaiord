@@ -73,7 +73,7 @@ A conversation's title SHALL be auto-generated from the user's first message, tr
 
 ### Requirement: Per-conversation model
 
-Each conversation SHALL remember its own AI model via optional `providerId`/`modelId` on the conversation row. The active model for a turn SHALL be the conversation's override when set, otherwise the result of `resolveModelForPurpose('chat')` (so migrated and never-customized conversations behave exactly as before). Changing the model on a persisted conversation SHALL write the override to its row and advance `updatedAt`; changing it on a draft SHALL be held in memory and written when the conversation is first persisted. A model choice SHALL name a provider and one of its models together, and a blank or whitespace-only model id SHALL NOT be stored. Choosing to follow the main model SHALL clear a persisted conversation's override (advancing `updatedAt`) or drop a draft's held choice. A draft's held choice SHALL be dropped once a persisted conversation is open, so a new draft starts following the main model. A per-conversation choice SHALL NOT write the athlete's `chat` model binding.
+Each conversation SHALL remember its own AI model via optional `providerId`/`modelId` on the conversation row. The active model for a turn SHALL be the conversation's override when set, otherwise the result of `resolveModelForPurpose('chat')` (so migrated and never-customized conversations behave exactly as before). Changing the model on a persisted conversation SHALL write the override to its row and advance `updatedAt`; changing it on a draft SHALL be held in memory, scoped to the athlete whose draft chose it, and written when the conversation is first persisted. A draft that follows the main model SHALL be persisted with no override, so the conversation keeps following the chat resolution when the athlete's settings change. A model choice SHALL name a provider and one of its models together, and a blank or whitespace-only model id SHALL NOT be stored. Choosing to follow the main model SHALL clear a persisted conversation's override (advancing `updatedAt`) or drop a draft's held choice. A draft's held choice SHALL be dropped once a persisted conversation is open or another athlete becomes active, so a new draft starts following the main model. An override whose provider no longer exists (a provider missing only its key still exists) SHALL be cleared from the row. A per-conversation choice SHALL NOT write the athlete's `chat` model binding.
 
 The chat model picker SHALL show the model the conversation runs. While the conversation has no override it SHALL select a "Same as main model (<model> · <account>)" option naming the `resolveModelForPurpose('chat')` result, never the provider flagged `isDefault` by itself; when the athlete has a `chat` binding of their own the option SHALL say it follows the chat setting instead. The picker SHALL list every account's catalog models in one select, one group per account, with a free-text "Custom…" entry per account.
 
@@ -93,6 +93,12 @@ The chat model picker SHALL show the model the conversation runs. While the conv
 - **GIVEN** two accounts where the first carries `isDefault` and the athlete's `default` binding runs `gpt-5-mini` on the second
 - **WHEN** a conversation without an override is open
 - **THEN** the picker SHALL select "Same as main model (gpt-5-mini · <second account>)"
+
+#### Scenario: A following draft stays unpinned
+
+- **GIVEN** a draft whose picker shows "Same as main model"
+- **WHEN** the user sends its first message and later changes the main model in settings
+- **THEN** the persisted conversation SHALL have no `providerId`/`modelId`, and its next turn SHALL run the new main model
 
 #### Scenario: Following the main model again clears the override
 

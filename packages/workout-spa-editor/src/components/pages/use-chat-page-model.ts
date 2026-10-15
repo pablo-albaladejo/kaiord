@@ -1,15 +1,13 @@
-import { useEffect } from "react";
-
 import { useAiModelBindingsLive } from "../../hooks/use-ai-model-bindings-live";
 import type { ChatConversationNav } from "../../hooks/use-chat-conversation-nav";
 import { useChatModelSelection } from "../../hooks/use-chat-model-selection";
-import { useAiRuntimeStore } from "../../store/ai-runtime-store";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { ChatConversationRecord } from "../../types/chat/chat-conversation-record";
 import type { ChatModelPickerProps } from "../organisms/Chat/ChatModelPicker";
 import { effectiveModel } from "../organisms/SettingsPanel/effective-models";
 import { resolveActiveChatModel } from "./resolve-active-chat-model";
 import { resolveChatModels } from "./resolve-chat-models";
+import { useChatModelCleanup } from "./use-chat-model-cleanup";
 
 type ChatPageModelArgs = {
   profileId: string | null;
@@ -30,26 +28,19 @@ export const useChatPageModel = ({
   nav,
 }: ChatPageModelArgs) => {
   const bindings = useAiModelBindingsLive(profileId) ?? [];
-  const draft = useAiRuntimeStore((s) => s.chatDraftModel);
-  const setDraft = useAiRuntimeStore((s) => s.setChatDraftModel);
-  const savedOpen = !nav.isDraft && nav.activeId !== null;
-  // The first message stamps the draft's choice on its row; the next draft
-  // starts following the main model again.
-  useEffect(() => {
-    if (savedOpen) setDraft(null);
-  }, [savedOpen, setDraft]);
+  const active = conversations?.find((c) => c.id === nav.activeId);
+  const draft = useChatModelCleanup({
+    profileId,
+    drafting: nav.isDraft || nav.activeId === null,
+    active,
+  });
   const selection = useChatModelSelection({
     profileId,
     activeId: nav.activeId,
     isDraft: nav.isDraft,
     providers,
   });
-  const fallback = resolveChatModels(
-    providers,
-    bindings,
-    savedOpen ? null : draft
-  );
-  const active = conversations?.find((c) => c.id === nav.activeId);
+  const fallback = resolveChatModels(providers, bindings, draft);
   const model = resolveActiveChatModel(active, providers, fallback);
   const modelPicker: ChatModelPickerProps = {
     providers,
