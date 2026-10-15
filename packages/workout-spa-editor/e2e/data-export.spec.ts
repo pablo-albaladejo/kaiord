@@ -16,6 +16,7 @@ import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
 import { calendarDay, workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
+import { routeInApp } from "./helpers/route-in-app";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const FAKE_KEY = "sk-e2e-fake-export-key";
@@ -39,7 +40,7 @@ async function enterRecords(page: Page, today: string): Promise<string> {
   await dialog.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Wellness saved", { exact: true })).toBeVisible();
 
-  await page.goto(`/workout/new?source=scratch&date=${today}`);
+  await routeInApp(page, `/workout/new?source=scratch&date=${today}`);
   await page.getByTestId("scratch-schedule-button").click();
   const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
@@ -48,7 +49,7 @@ async function enterRecords(page: Page, today: string): Promise<string> {
     ""
   );
 
-  await page.goto("/nutrition");
+  await routeInApp(page, "/nutrition");
   const logger = page.getByTestId("intake-logger");
   await logger.getByLabel("Energy (kcal)").fill(String(INTAKE_KCAL));
   await logger.getByTestId("intake-log-submit").click();
@@ -56,7 +57,7 @@ async function enterRecords(page: Page, today: string): Promise<string> {
 
   // Adding a provider checks its key against the provider; answer locally.
   await mockLlmSuccess(page);
-  await page.goto("/settings/ai");
+  await routeInApp(page, "/settings/ai");
   await page.getByLabel("Label").fill("E2E provider");
   await page.getByLabel("API Key").fill(FAKE_KEY);
   await page.getByRole("button", { name: "Add Provider" }).click();
@@ -73,7 +74,7 @@ test.describe("Export my data", () => {
     await page.goto("/calendar");
     await waitForDexieReady(page);
     const workoutId = await enterRecords(page, today);
-    await page.goto("/settings/data");
+    await routeInApp(page, "/settings/data");
 
     // Act
     const [download] = await Promise.all([

@@ -14,6 +14,7 @@ import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { appUrl, expect, test } from "./fixtures/base";
 import { calendarDay, workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
+import { routeInApp } from "./helpers/route-in-app";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 type Row = Record<string, unknown>;
@@ -39,14 +40,8 @@ async function cleanBrowser(browser: Browser, baseURL: string): Promise<Page> {
   return page;
 }
 
-/** `goto` that always loads the route from scratch (see fixtures/base). */
-async function open(page: Page, route: string) {
-  await page.goto("about:blank");
-  await page.goto(appUrl(route));
-}
-
 async function scheduleToday(page: Page, today: string): Promise<string> {
-  await open(page, `/workout/new?source=scratch&date=${today}`);
+  await routeInApp(page, `/workout/new?source=scratch&date=${today}`);
   await page.getByTestId("scratch-schedule-button").click();
   const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
@@ -54,7 +49,7 @@ async function scheduleToday(page: Page, today: string): Promise<string> {
 }
 
 async function logIntake(page: Page, kcal: number) {
-  await open(page, "/nutrition");
+  await routeInApp(page, "/nutrition");
   const logger = page.getByTestId("intake-logger");
   await logger.getByLabel("Energy (kcal)").fill(String(kcal));
   await logger.getByTestId("intake-log-submit").click();
@@ -62,7 +57,7 @@ async function logIntake(page: Page, kcal: number) {
 }
 
 async function saveWellness(page: Page, today: string) {
-  await open(page, "/calendar");
+  await routeInApp(page, "/calendar");
   await calendarDay(page, today).add.click();
   await page.getByTestId("add-entry-choose-wellness").click();
   const dialog = page.getByTestId("wellness-entry-dialog");
@@ -74,7 +69,7 @@ async function saveWellness(page: Page, today: string) {
 async function addProvider(page: Page) {
   // Adding a provider checks its key against the provider; answer locally.
   await mockLlmSuccess(page);
-  await open(page, "/settings/ai");
+  await routeInApp(page, "/settings/ai");
   await page.getByLabel("Label").fill("E2E provider");
   await page.getByLabel("API Key").fill("sk-e2e-fake-import-key");
   await page.getByRole("button", { name: "Add Provider" }).click();
@@ -82,7 +77,7 @@ async function addProvider(page: Page) {
 }
 
 async function exportData(page: Page): Promise<string> {
-  await open(page, "/settings/data");
+  await routeInApp(page, "/settings/data");
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     page.getByRole("button", { name: "Export my data" }).click(),
@@ -91,7 +86,7 @@ async function exportData(page: Page): Promise<string> {
 }
 
 async function importData(page: Page, file: string): Promise<string> {
-  await open(page, "/settings/data");
+  await routeInApp(page, "/settings/data");
   await page.getByLabel("Backup file").setInputFiles(file);
   const status = page.getByRole("status").filter({ hasText: SUMMARY });
   await expect(status).toBeVisible();
@@ -99,7 +94,7 @@ async function importData(page: Page, file: string): Promise<string> {
 }
 
 async function deleteWorkout(page: Page, id: string) {
-  await open(page, `/workout/view/${id}`);
+  await routeInApp(page, `/workout/view/${id}`);
   await page.getByRole("button", { name: "More options" }).click();
   await page.getByRole("menuitem", { name: /^Delete workout$/ }).click();
   await page
@@ -113,7 +108,7 @@ async function deleteWorkout(page: Page, id: string) {
 }
 
 async function deleteIntake(page: Page) {
-  await open(page, "/nutrition");
+  await routeInApp(page, "/nutrition");
   const row = page.getByTestId("intake-entry-row");
   await row.getByRole("button", { name: "Delete entry" }).click();
   await expect(row).toHaveCount(0);
@@ -151,9 +146,9 @@ test.describe("Import backup", () => {
     expect(await readTable(other, "intakeEntries")).toEqual([
       expect.objectContaining({ kcal: KCAL_A, profileId: profile.id }),
     ]);
-    await open(other, "/calendar");
+    await routeInApp(other, "/calendar");
     await expect(other.getByTestId(`workout-card-${workoutId}`)).toBeVisible();
-    await open(other, "/settings/ai");
+    await routeInApp(other, "/settings/ai");
     await expect(other.getByText("Missing key")).toBeVisible();
     await other.context().close();
   });
@@ -206,7 +201,7 @@ test.describe("Import backup", () => {
     expect((await readTable(page, "workouts")).map((w) => w.id)).not.toContain(
       id
     );
-    await open(page, "/calendar");
+    await routeInApp(page, "/calendar");
     await expect(page.getByTestId(`workout-card-${id}`)).toHaveCount(0);
   });
 
@@ -226,7 +221,7 @@ test.describe("Import backup", () => {
     // Assert
     expect(summary).toContain("1 deleted after the backup (not restored)");
     expect(await readTable(page, "intakeEntries")).toEqual([]);
-    await open(page, "/nutrition");
+    await routeInApp(page, "/nutrition");
     await expect(page.getByTestId("intake-entry-row")).toHaveCount(0);
   });
 });
