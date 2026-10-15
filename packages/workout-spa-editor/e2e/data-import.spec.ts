@@ -156,6 +156,10 @@ test.describe("Import backup", () => {
     await expect(other.getByTestId(`workout-card-${workoutId}`)).toBeVisible();
     await open(other, "/settings/ai");
     await expect(other.getByText("Key missing")).toBeVisible();
+    await expect(
+      other.getByText(/“E2E provider” has no API key/)
+    ).toBeVisible();
+    await expect(other.getByText(/Add an AI account below/)).toHaveCount(0);
     await other.context().close();
   });
 
