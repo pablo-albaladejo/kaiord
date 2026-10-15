@@ -75,9 +75,10 @@ async function addProvider(page: Page) {
   // Adding a provider checks its key against the provider; answer locally.
   await mockLlmSuccess(page);
   await open(page, "/settings/ai");
-  await page.getByLabel("Label").fill("E2E provider");
+  await page.getByRole("button", { name: "Add account" }).click();
+  await page.getByLabel("Label (optional)").fill("E2E provider");
   await page.getByLabel("API Key").fill("sk-e2e-fake-import-key");
-  await page.getByRole("button", { name: "Add Provider" }).click();
+  await page.getByRole("button", { name: "Save account" }).click();
   await expect(page.getByText("E2E provider").first()).toBeVisible();
 }
 
@@ -154,7 +155,7 @@ test.describe("Import backup", () => {
     await open(other, "/calendar");
     await expect(other.getByTestId(`workout-card-${workoutId}`)).toBeVisible();
     await open(other, "/settings/ai");
-    await expect(other.getByText("Missing key")).toBeVisible();
+    await expect(other.getByText("Key missing")).toBeVisible();
     await other.context().close();
   });
 

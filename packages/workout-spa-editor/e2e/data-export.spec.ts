@@ -57,9 +57,10 @@ async function enterRecords(page: Page, today: string): Promise<string> {
   // Adding a provider checks its key against the provider; answer locally.
   await mockLlmSuccess(page);
   await page.goto("/settings/ai");
-  await page.getByLabel("Label").fill("E2E provider");
+  await page.getByRole("button", { name: "Add account" }).click();
+  await page.getByLabel("Label (optional)").fill("E2E provider");
   await page.getByLabel("API Key").fill(FAKE_KEY);
-  await page.getByRole("button", { name: "Add Provider" }).click();
+  await page.getByRole("button", { name: "Save account" }).click();
   await expect(page.getByText("E2E provider").first()).toBeVisible();
   return workoutId;
 }

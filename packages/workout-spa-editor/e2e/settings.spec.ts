@@ -30,35 +30,39 @@ test.describe("Settings Panel", () => {
     // Provider names also appear in the options of the active profile's
     // per-purpose model selects, so every row assertion targets the list.
     const providers = settingsPage.getByRole("list", {
-      name: "Configured LLM providers",
+      name: "AI accounts",
     });
 
-    // Should start with "No providers configured"
-    await expect(
-      settingsPage.getByText("No providers configured")
-    ).toBeVisible();
+    // Should start with no account
+    await expect(settingsPage.getByText("No AI accounts yet.")).toBeVisible();
 
     // Add first provider (Anthropic)
-    await settingsPage.getByPlaceholder("e.g., My Claude").fill("My Claude");
+    await settingsPage.getByRole("button", { name: "Add account" }).click();
+    await settingsPage.getByLabel("Label (optional)").fill("My Claude");
     await settingsPage.getByPlaceholder("sk-...").fill("sk-ant-key-1");
-    await settingsPage.getByRole("button", { name: /add provider/i }).click();
+    await settingsPage.getByRole("button", { name: "Save account" }).click();
     await expect(
       providers.getByText("My Claude", { exact: true })
     ).toBeVisible();
 
     // Add second provider (OpenAI)
-    const providerSelect = settingsPage.locator("select").first();
-    await providerSelect.selectOption({ value: "openai" });
-    await settingsPage.getByPlaceholder("e.g., My Claude").fill("My GPT");
+    await settingsPage.getByRole("button", { name: "Add account" }).click();
+    await settingsPage
+      .getByLabel("Provider", { exact: true })
+      .selectOption({ value: "openai" });
+    await settingsPage.getByLabel("Label (optional)").fill("My GPT");
     await settingsPage.getByPlaceholder("sk-...").fill("sk-openai-key-1");
-    await settingsPage.getByRole("button", { name: /add provider/i }).click();
+    await settingsPage.getByRole("button", { name: "Save account" }).click();
     await expect(providers.getByText("My GPT")).toBeVisible();
 
     // Remove Claude through its own row, confirming in the dialog.
     const claudeRow = providers
       .getByRole("listitem")
       .filter({ hasText: "My Claude" });
-    await claudeRow.getByRole("button", { name: /^remove$/i }).click();
+    await claudeRow
+      .getByRole("button", { name: "More actions for My Claude" })
+      .click();
+    await page.getByRole("menuitem", { name: "Remove" }).click();
     await page
       .getByRole("dialog")
       .getByRole("button", { name: /^remove$/i })
