@@ -35,6 +35,19 @@ function makeMonth(over: Partial<MonthUsage> = {}): MonthUsage {
 }
 
 describe("UsageTable", () => {
+  it("should title the table as the total for every athlete", () => {
+    // Arrange
+    const rows = [makeMonth()];
+
+    // Act
+    render(<UsageTable rows={rows} monthsWindow={MONTHS_WINDOW} />);
+
+    // Assert
+    expect(
+      screen.getByRole("heading", { name: /all athletes/i })
+    ).toBeInTheDocument();
+  });
+
   it("should render per-month total input and output as separate columns", () => {
     // Arrange
 

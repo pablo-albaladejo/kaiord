@@ -137,8 +137,8 @@
     "replayTipsHint": "Shows again the tips you already dismissed."
   },
   "usage": {
-    "title": "AI Usage",
-    "heading": "AI Usage — last {{count}} months",
+    "title": "AI Usage — all athletes",
+    "heading": "AI Usage — all athletes, last {{count}} months",
     "empty": "No AI usage recorded yet for the last {{count}} months. It fills in once you use the AI assistant or create a workout with AI.",
     "month": "Month",
     "input": "Input",

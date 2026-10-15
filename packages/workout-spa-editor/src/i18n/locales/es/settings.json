@@ -137,8 +137,8 @@
     "replayTipsHint": "Vuelve a mostrar los consejos que ya cerraste."
   },
   "usage": {
-    "title": "Uso de IA",
-    "heading": "Uso de IA — últimos {{count}} meses",
+    "title": "Uso de IA — todos los atletas",
+    "heading": "Uso de IA — todos los atletas, últimos {{count}} meses",
     "empty": "Aún no hay uso de IA registrado en los últimos {{count}} meses. Se rellena en cuanto uses el asistente de IA o crees un entreno con IA.",
     "month": "Mes",
     "input": "Entrada",
