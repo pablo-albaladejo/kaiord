@@ -4,7 +4,9 @@
 
 A provider configuration SHALL be addable with only provider type and API key; the label
 SHALL be optional, and a blank label SHALL become the provider's name ("Anthropic"),
-numbered from 2 when an account already carries it ("Anthropic 2"). The add/edit form SHALL
+numbered from 2 when an account already carries it ("Anthropic 2"). A typed or renamed label
+another account already carries SHALL be numbered the same way ("Work 2"), so no two
+accounts share a label. The API key SHALL be stored without surrounding whitespace. The add/edit form SHALL
 NOT collect or require a model. `LlmProviderConfig.model` SHALL be optional and deprecated,
 and no inference path SHALL depend on it — the model used for any call SHALL come from a
 model binding (see "Centralized per-purpose model resolution"), never from the credential
@@ -27,6 +29,12 @@ record. The outcome of the key check SHALL be stored with the account as `keyChe
 - **GIVEN** an Anthropic account labelled "Anthropic" exists
 - **WHEN** the user adds two more Anthropic accounts without a label
 - **THEN** they SHALL be labelled "Anthropic 2" and "Anthropic 3"
+
+#### Scenario: A taken label is numbered
+
+- **GIVEN** an account labelled "Work" exists
+- **WHEN** the user adds an account labelled "Work", or renames another account to "Work"
+- **THEN** that account SHALL be labelled "Work 2"
 
 ### Requirement: AI settings show the effective model and one main model
 
@@ -120,14 +128,19 @@ provider, and cancelling SHALL keep it.
 
 The AI settings SHALL open with a card titled "Your assistant (for <athlete>)" naming the
 active athlete's main model, the account it runs on, that account's key status, and this
-month's AI use (requests, tokens, estimated cost), with the main-model select. The accounts
+month's AI use (requests, tokens, estimated cost) — labelled as the total for every athlete,
+since usage is not recorded per athlete — with the main-model select. The card and the usage
+table SHALL format costs the same way, as US dollars in the reader's locale. The accounts
 SHALL follow under "AI accounts", stated as shared by every athlete; the add form SHALL be
 shown only after "Add account" is pressed, SHALL close once the key is stored, and SHALL
 reopen blank. The per-task models SHALL sit under "Advanced: model per task (for <athlete>)",
 collapsed while every task follows the main model and open as soon as one has its own. The
 custom instructions SHALL be saved after a pause in typing or when the field is left, never
-on each keystroke, and SHALL say whether they were saved. On a 390px-wide screen no part of an
-account row SHALL overflow it.
+on each keystroke, and SHALL say whether they were saved: "Saved ✓" only once nothing newer
+waits to be saved, and a failed save SHALL be retried when the field is left again. Opening
+the add form SHALL put the focus on the provider choice, and confirming a removal SHALL leave
+the focus on "Add account". On a 390px-wide screen no part of an account row SHALL overflow it
+or run beneath its buttons, and the usage table SHALL fit the screen.
 
 #### Scenario: The assistant card states what the athlete uses
 
@@ -135,7 +148,8 @@ account row SHALL overflow it.
   verified, and two AI runs this month
 - **WHEN** the AI settings render
 - **THEN** the card SHALL read "Your assistant (for Ana)", name "Claude Opus 5" on
-  "Mi Claude" with "Key verified", and sum the two runs' tokens and cost
+  "Mi Claude" with "Key verified", and sum the two runs' tokens and cost as the total for
+  every athlete
 
 #### Scenario: The add form closes and reopens blank
 
