@@ -9,6 +9,10 @@ export type LlmProviderConfig = {
   // Set on a provider restored from a backup, which never carries keys: its
   // `apiKey` is empty until the user enters one, and no AI feature uses it.
   apiKeyMissing?: boolean;
+  // How the provider answered when the key was last saved: "valid" when it
+  // accepted it, "unverified" when it could not be reached. Absent on keys
+  // saved before the check was recorded.
+  keyCheck?: "valid" | "unverified";
   // Deprecated: model now lives in aiModelBindings; kept one release for migration.
   model?: string;
   label: string;

@@ -205,7 +205,7 @@ describe("ChatPage", () => {
     // Assert
     const select = screen.getByTestId("chat-model-select") as HTMLSelectElement;
     expect(select.selectedOptions[0]?.textContent).toBe(
-      "Same as main model (gpt-5-mini · GPT)"
+      "Same as main model (GPT-5 mini · GPT)"
     );
   });
 

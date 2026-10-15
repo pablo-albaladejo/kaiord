@@ -131,8 +131,33 @@ describe("ModelChoiceSelect", () => {
     await userEvent.selectOptions(select, INHERIT_VALUE);
 
     // Assert
-    expect(shown).toBe("Same as main model (gpt-5-mini · Mi GPT)");
+    expect(shown).toBe("Same as main model");
     expect(onInherit).toHaveBeenCalledTimes(1);
+  });
+
+  it("should keep the follow option short and name what it runs under the select", () => {
+    // Arrange
+
+    // Act
+    const { select } = renderSelect(
+      { storedModelId: null, inherited: true },
+      true
+    );
+
+    // Assert
+    const runs = screen.getByTestId("model-chat-follows");
+    expect(runs).toHaveTextContent("Runs GPT-5 mini · Mi GPT");
+    expect(select).toHaveAccessibleDescription("Runs GPT-5 mini · Mi GPT");
+  });
+
+  it("should not name the main model under the select once the purpose has its own", () => {
+    // Arrange
+
+    // Act
+    renderSelect({}, true);
+
+    // Assert
+    expect(screen.queryByTestId("model-chat-follows")).toBeNull();
   });
 
   it("should name the successor used in place of a retired stored model", () => {
@@ -162,5 +187,42 @@ describe("ModelChoiceSelect", () => {
     expect(
       screen.queryByRole("option", { name: new RegExp(retired) })
     ).not.toBeInTheDocument();
+  });
+
+  it("should name each model by its product name, once", () => {
+    // Arrange
+
+    // Act
+    renderSelect();
+
+    // Assert
+    expect(
+      screen.getByRole("option", { name: "Claude Sonnet 5 · Mi Claude" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("option", { name: /^Claude Haiku 4\.5/ })
+    ).toHaveLength(1);
+    expect(
+      screen.queryByRole("option", { name: /claude-haiku-4-5-20251001/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it("should still show a running dated pin, by name and date", () => {
+    // Arrange
+    const running = {
+      providerId: "claude",
+      modelId: "claude-haiku-4-5-20251001",
+    };
+
+    // Act
+    const { select } = renderSelect({
+      running,
+      storedModelId: running.modelId,
+    });
+
+    // Assert
+    expect((select as HTMLSelectElement).selectedOptions[0]?.textContent).toBe(
+      "Claude Haiku 4.5 (2025-10-01) · Mi Claude"
+    );
   });
 });

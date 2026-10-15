@@ -17,10 +17,20 @@ const provider = (extra: Partial<LlmProviderConfig> = {}) => ({
 
 const renderRow = (p: LlmProviderConfig, onRemove = vi.fn()) => {
   renderWithProviders(
-    <ProviderRow provider={p} onEdit={vi.fn()} onRemove={onRemove} />
+    <ProviderRow
+      provider={p}
+      onReplaceKey={vi.fn()}
+      onRename={vi.fn()}
+      onRemove={onRemove}
+    />
   );
   return onRemove;
 };
+
+const openMenu = () =>
+  userEvent.click(
+    screen.getByRole("button", { name: "More actions for Mine" })
+  );
 
 describe("ProviderRow", () => {
   it("should say a provider restored from a backup is missing its key", () => {
@@ -31,7 +41,7 @@ describe("ProviderRow", () => {
     renderRow(restored);
 
     // Assert
-    expect(screen.getByText("Missing key")).toBeInTheDocument();
+    expect(screen.getByText("Key missing")).toBeInTheDocument();
   });
 
   it("should not flag a provider that has its key", () => {
@@ -42,7 +52,7 @@ describe("ProviderRow", () => {
     renderRow(keyed);
 
     // Assert
-    expect(screen.queryByText("Missing key")).not.toBeInTheDocument();
+    expect(screen.queryByText("Key missing")).not.toBeInTheDocument();
   });
 
   it("should show only the last four characters of the key", () => {
@@ -91,7 +101,8 @@ describe("ProviderRow", () => {
     const onRemove = renderRow(provider());
 
     // Act
-    await userEvent.click(screen.getByRole("button", { name: "Remove" }));
+    await openMenu();
+    await userEvent.click(screen.getByRole("menuitem", { name: "Remove" }));
     const dialog = await screen.findByRole("dialog");
     const notYet = onRemove.mock.calls.length;
     await userEvent.click(
@@ -109,7 +120,8 @@ describe("ProviderRow", () => {
     const onRemove = renderRow(provider());
 
     // Act
-    await userEvent.click(screen.getByRole("button", { name: "Remove" }));
+    await openMenu();
+    await userEvent.click(screen.getByRole("menuitem", { name: "Remove" }));
     await userEvent.click(
       await screen.findByRole("button", { name: "Cancel" })
     );
@@ -117,5 +129,76 @@ describe("ProviderRow", () => {
     // Assert
     expect(onRemove).not.toHaveBeenCalled();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [{ keyCheck: "valid" as const }, "Key verified"],
+    [{ keyCheck: "unverified" as const }, "Key not checked"],
+    [{}, "Key not checked"],
+    [{ apiKey: "", apiKeyMissing: true }, "Key missing"],
+  ])("should state the key status of %o as %s", (extra, status) => {
+    // Arrange
+    const p = provider(extra);
+
+    // Act
+    renderRow(p);
+
+    // Assert
+    expect(screen.getByTestId("key-status")).toHaveTextContent(status);
+  });
+
+  it("should keep only replacing the key and the overflow menu in the row", () => {
+    // Arrange
+
+    // Act
+    renderRow(provider());
+
+    // Assert
+    expect(
+      screen
+        .getAllByRole("button")
+        .map((b) => b.textContent || b.getAttribute("aria-label"))
+    ).toEqual(["Replace key", "More actions for Mine"]);
+  });
+
+  it("should rename from the overflow menu", async () => {
+    // Arrange
+    const onRename = vi.fn();
+    renderWithProviders(
+      <ProviderRow
+        provider={provider()}
+        onReplaceKey={vi.fn()}
+        onRename={onRename}
+        onRemove={vi.fn()}
+      />
+    );
+
+    // Act
+    await openMenu();
+    await userEvent.click(screen.getByRole("menuitem", { name: "Rename" }));
+
+    // Assert
+    expect(onRename).toHaveBeenCalledOnce();
+  });
+
+  it("should name the provider unless the label already does", () => {
+    // Arrange
+    const named = provider({ label: "Anthropic 2" });
+
+    // Act
+    renderRow(named);
+
+    // Assert
+    expect(screen.getAllByText(/Anthropic/)).toHaveLength(1);
+  });
+
+  it("should name the provider next to a label of the athlete's own", () => {
+    // Arrange
+
+    // Act
+    renderRow(provider());
+
+    // Assert
+    expect(screen.getByText("Anthropic")).toBeInTheDocument();
   });
 });

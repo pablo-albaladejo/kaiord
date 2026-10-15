@@ -35,4 +35,17 @@ describe("useAiTabHandlers in Spanish", () => {
       "No se pudo añadir el proveedor de IA. Inténtalo de nuevo."
     );
   });
+
+  it("should leave a failed instructions save to the field's own message", async () => {
+    // Arrange
+    toast.error.mockClear();
+    const { result } = renderHook(() => useAiTabHandlers());
+
+    // Act
+    const saved = await result.current.onPromptSave("Knee");
+
+    // Assert
+    expect(saved).toBe(false);
+    expect(toast.error).not.toHaveBeenCalled();
+  });
 });

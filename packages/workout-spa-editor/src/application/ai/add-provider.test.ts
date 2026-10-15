@@ -87,4 +87,67 @@ describe("addProvider", () => {
       vi.useRealTimers();
     }
   });
+
+  it("should name an unlabelled account after its provider, numbering repeats", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const unlabelled = { ...baseProvider, label: "  " };
+
+    // Act
+    const first = await addProvider(persistence, unlabelled);
+    const second = await addProvider(persistence, unlabelled);
+    const third = await addProvider(persistence, { ...unlabelled, label: "" });
+
+    // Assert
+    expect([first.label, second.label, third.label]).toEqual([
+      "Anthropic",
+      "Anthropic 2",
+      "Anthropic 3",
+    ]);
+  });
+
+  it("should keep a label the athlete typed, trimmed", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    const created = await addProvider(persistence, {
+      ...baseProvider,
+      label: "  Work  ",
+    });
+
+    // Assert
+    expect(created.label).toBe("Work");
+  });
+
+  it("should store how the key check ended", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+
+    // Act
+    const created = await addProvider(persistence, {
+      ...baseProvider,
+      keyCheck: "valid",
+    });
+
+    // Assert
+    expect((await persistence.aiProviders.getById(created.id))?.keyCheck).toBe(
+      "valid"
+    );
+  });
+
+  it("should number a typed label another account already carries", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await addProvider(persistence, { ...baseProvider, label: "Work" });
+
+    // Act
+    const second = await addProvider(persistence, {
+      ...baseProvider,
+      label: " Work ",
+    });
+
+    // Assert
+    expect(second.label).toBe("Work 2");
+  });
 });

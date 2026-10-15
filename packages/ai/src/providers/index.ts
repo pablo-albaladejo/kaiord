@@ -2,6 +2,7 @@ export {
   createLanguageModel,
   type CreateLanguageModelOptions,
 } from "./create-language-model";
+export { listedModels, modelDisplayName } from "./model-names";
 export { isModelNotFoundError, namesMissingModel } from "./model-not-found";
 export {
   DEPRECATED_MODELS,

@@ -27,74 +27,69 @@ const renderList = (outcome: KeySaveOutcome) => {
   return onUpdate;
 };
 
-const editKey = async (key: string) => {
-  await userEvent.click(screen.getByRole("button", { name: "Edit" }));
-  const input = screen.getByLabelText("API Key");
-  await userEvent.clear(input);
-  await userEvent.type(input, key);
+const replaceKey = async (key: string) => {
+  await userEvent.click(screen.getByRole("button", { name: "Replace key" }));
+  await userEvent.type(screen.getByLabelText("New API key"), key);
   await userEvent.click(screen.getByRole("button", { name: "Save" }));
 };
 
 describe("ProviderList", () => {
-  it("should close the edit row once the new key is saved", async () => {
+  it("should replace only the key, leaving the name alone, closing once it is saved", async () => {
     // Arrange
     const onUpdate = renderList("saved");
 
     // Act
-    await editKey("sk-new");
+    await replaceKey("sk-new");
 
     // Assert
     expect(onUpdate).toHaveBeenCalledWith(provider, {
-      label: "Mine",
+      label: undefined,
       apiKey: "sk-new",
     });
-    expect(screen.queryByLabelText("API Key")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Edit" })).toBeVisible();
+    expect(screen.queryByLabelText("New API key")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Replace key" })).toBeVisible();
   });
 
-  it("should keep the edit row open when the provider rejects the new key", async () => {
+  it("should keep the key field open when the provider rejects the new key", async () => {
     // Arrange
     renderList("invalid");
 
     // Act
-    await editKey("sk-bad");
+    await replaceKey("sk-bad");
 
     // Assert
-    expect(screen.getByLabelText("API Key")).toHaveValue("sk-bad");
+    expect(screen.getByLabelText("New API key")).toHaveValue("sk-bad");
     expect(screen.getByRole("alert")).toHaveTextContent(
       "The provider rejected this key"
     );
   });
 
-  it("should close the edit row and note an unchecked key when the check is inconclusive", async () => {
+  it("should close when the key could not be checked, leaving no stale note", async () => {
     // Arrange
     renderList("unverified");
 
     // Act
-    await editKey("sk-new");
+    await replaceKey("sk-new");
 
     // Assert
-    expect(screen.queryByLabelText("API Key")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Edit" })).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "the key could not be checked"
-    );
+    expect(screen.queryByLabelText("New API key")).not.toBeInTheDocument();
+    expect(screen.queryByText(/could not be checked/)).not.toBeInTheDocument();
   });
 
-  it("should leave the edit row without saving on cancel", async () => {
+  it("should leave the key field without saving on cancel", async () => {
     // Arrange
     const onUpdate = renderList("saved");
-    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await userEvent.click(screen.getByRole("button", { name: "Replace key" }));
 
     // Act
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
     // Assert
     expect(onUpdate).not.toHaveBeenCalled();
-    expect(screen.queryByLabelText("API Key")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("New API key")).not.toBeInTheDocument();
   });
 
-  it("should say no provider is configured when the list is empty", () => {
+  it("should say no account is configured when the list is empty", () => {
     // Arrange
 
     // Act
@@ -103,26 +98,28 @@ describe("ProviderList", () => {
     );
 
     // Assert
-    expect(
-      screen.getByText("No providers configured. Add one below.")
-    ).toBeInTheDocument();
+    expect(screen.getByText("No AI accounts yet.")).toBeInTheDocument();
   });
+
   it("should open the key field empty, never echoing the stored key", async () => {
     // Arrange
     renderList("saved");
 
     // Act
-    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await userEvent.click(screen.getByRole("button", { name: "Replace key" }));
 
     // Assert
-    expect(screen.getByLabelText("API Key")).toHaveValue("");
+    expect(screen.getByLabelText("New API key")).toHaveValue("");
     expect(document.body.innerHTML).not.toContain("sk-old");
   });
 
-  it("should keep the stored key when only the label changes", async () => {
+  it("should rename without touching the stored key", async () => {
     // Arrange
     const onUpdate = renderList("saved");
-    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "More actions for Mine" })
+    );
+    await userEvent.click(screen.getByRole("menuitem", { name: "Rename" }));
 
     // Act
     await userEvent.clear(screen.getByLabelText("Label"));
@@ -133,6 +130,20 @@ describe("ProviderList", () => {
     expect(onUpdate).toHaveBeenCalledWith(provider, {
       label: "Renamed",
       apiKey: undefined,
+    });
+  });
+
+  it("should store a replaced key without the spaces pasted around it", async () => {
+    // Arrange
+    const onUpdate = renderList("saved");
+
+    // Act
+    await replaceKey("  sk-new  ");
+
+    // Assert
+    expect(onUpdate).toHaveBeenCalledWith(provider, {
+      label: undefined,
+      apiKey: "sk-new",
     });
   });
 });

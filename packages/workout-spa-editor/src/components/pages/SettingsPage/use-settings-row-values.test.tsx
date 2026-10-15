@@ -31,7 +31,7 @@ const provider = (id: string, isDefault: boolean): LlmProviderConfig => ({
 });
 
 describe("useSettingsRowValues", () => {
-  it("should name the account the athlete's main model runs on", () => {
+  it("should name the athlete's main model by its product name", () => {
     // Arrange
     live.providers = [provider("a", true), provider("b", false)];
     live.bindings = [
@@ -48,7 +48,7 @@ describe("useSettingsRowValues", () => {
     const { result } = renderHook(() => useSettingsRowValues());
 
     // Assert
-    expect(result.current.ai).toBe("Label b");
+    expect(result.current.ai).toBe("Claude Opus 5");
   });
 
   it("should show no AI value without a provider", () => {

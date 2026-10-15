@@ -111,18 +111,18 @@ async function addTestProvider(
   const settingsPage = page.getByTestId("settings-page");
   await expect(settingsPage).toBeVisible({ timeout: 5000 });
 
-  const providerSelect = settingsPage.locator("select").first();
-  await providerSelect.selectOption(type);
+  await settingsPage.getByRole("button", { name: "Add account" }).click();
+  await settingsPage.getByLabel("Provider", { exact: true }).selectOption(type);
 
-  await settingsPage.getByPlaceholder("e.g., My Claude").fill(label);
+  await settingsPage.getByLabel("Label (optional)").fill(label);
   await settingsPage.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
 
-  await settingsPage.getByRole("button", { name: /add provider/i }).click();
+  await settingsPage.getByRole("button", { name: "Save account" }).click();
 
   // Scope to the provider list: with an active profile the per-purpose
   // model selects on the same page also list the provider as an option.
   const providerList = settingsPage.getByRole("list", {
-    name: "Configured LLM providers",
+    name: "AI accounts",
   });
   await expect(providerList.getByText(label, { exact: true })).toBeVisible({
     timeout: 3000,

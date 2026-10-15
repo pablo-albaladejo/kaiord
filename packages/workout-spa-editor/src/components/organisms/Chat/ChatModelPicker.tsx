@@ -1,3 +1,5 @@
+import { modelDisplayName } from "@kaiord/ai/providers";
+
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { CustomModelInput } from "../SettingsPanel/CustomModelInput";
@@ -38,7 +40,7 @@ export function ChatModelPicker(props: ChatModelPickerProps) {
   if (providers.length === 0) return null;
   const follows = chatDefault.running;
   const name = follows
-    ? `${follows.modelId} · ${providers.find((p) => p.id === follows.providerId)?.label ?? ""}`
+    ? `${modelDisplayName(follows.modelId)} · ${providers.find((p) => p.id === follows.providerId)?.label ?? ""}`
     : "";
   const followKey = chatDefault.inherited
     ? "model.followMain"

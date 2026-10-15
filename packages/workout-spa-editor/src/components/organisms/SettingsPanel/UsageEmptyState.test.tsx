@@ -13,7 +13,7 @@ describe("UsageEmptyState", () => {
 
     // Assert
 
-    expect(screen.getByText("AI Usage")).toBeInTheDocument();
+    expect(screen.getByText(/^AI Usage — all athletes/)).toBeInTheDocument();
     expect(screen.getByText(/last 6 months/i)).toBeInTheDocument();
   });
 

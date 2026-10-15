@@ -71,4 +71,27 @@ describe("saveWithKeyCheck", () => {
     // Assert
     expect(outcome).toBe("failed");
   });
+
+  it("should hand the save how the key check ended", async () => {
+    // Arrange
+    const save = vi.fn(async () => undefined);
+    const verify = vi.fn(async () => "unverified" as const);
+
+    // Act
+    await saveWithKeyCheck({ credential, save, verify });
+
+    // Assert
+    expect(save).toHaveBeenCalledWith("unverified");
+  });
+
+  it("should hand the save no check when the key is left alone", async () => {
+    // Arrange
+    const save = vi.fn(async () => undefined);
+
+    // Act
+    await saveWithKeyCheck({ save });
+
+    // Assert
+    expect(save).toHaveBeenCalledWith(undefined);
+  });
 });
