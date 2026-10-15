@@ -21,7 +21,6 @@ const renderList = (outcome: KeySaveOutcome) => {
     <ProviderList
       providers={[provider]}
       onRemove={vi.fn()}
-      onSetDefault={vi.fn()}
       onUpdate={onUpdate}
     />
   );
@@ -100,17 +99,40 @@ describe("ProviderList", () => {
 
     // Act
     renderWithProviders(
-      <ProviderList
-        providers={[]}
-        onRemove={vi.fn()}
-        onSetDefault={vi.fn()}
-        onUpdate={vi.fn()}
-      />
+      <ProviderList providers={[]} onRemove={vi.fn()} onUpdate={vi.fn()} />
     );
 
     // Assert
     expect(
       screen.getByText("No providers configured. Add one below.")
     ).toBeInTheDocument();
+  });
+  it("should open the key field empty, never echoing the stored key", async () => {
+    // Arrange
+    renderList("saved");
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+
+    // Assert
+    expect(screen.getByLabelText("API Key")).toHaveValue("");
+    expect(document.body.innerHTML).not.toContain("sk-old");
+  });
+
+  it("should keep the stored key when only the label changes", async () => {
+    // Arrange
+    const onUpdate = renderList("saved");
+    await userEvent.click(screen.getByRole("button", { name: "Edit" }));
+
+    // Act
+    await userEvent.clear(screen.getByLabelText("Label"));
+    await userEvent.type(screen.getByLabelText("Label"), "Renamed");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    // Assert
+    expect(onUpdate).toHaveBeenCalledWith(provider, {
+      label: "Renamed",
+      apiKey: undefined,
+    });
   });
 });

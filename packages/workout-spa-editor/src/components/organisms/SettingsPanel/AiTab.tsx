@@ -12,8 +12,7 @@ export const AiTab: React.FC = () => {
   const t = useTranslate("settings");
   const providers = useAiProvidersLive({ includeKeyless: true }) ?? [];
   const customPrompt = useAiCustomPromptLive() ?? "";
-  const { onAdd, onRemove, onUpdate, onSetDefault, onPromptChange } =
-    useAiTabHandlers();
+  const { onAdd, onRemove, onUpdate, onPromptChange } = useAiTabHandlers();
 
   return (
     <div className="space-y-6">
@@ -24,7 +23,6 @@ export const AiTab: React.FC = () => {
         <ProviderList
           providers={providers}
           onRemove={onRemove}
-          onSetDefault={onSetDefault}
           onUpdate={onUpdate}
         />
       </section>
