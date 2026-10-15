@@ -20,7 +20,7 @@ A provider configuration SHALL be addable with only provider type and API key; t
 SHALL be optional, and a blank label SHALL become the provider's name ("Anthropic"),
 numbered from 2 when an account already carries it ("Anthropic 2"). A typed or renamed label
 another account already carries SHALL be numbered the same way ("Work 2"), so no two
-accounts share a label. The API key SHALL be stored without surrounding whitespace. The add/edit form SHALL
+accounts share a label; replacing only an account's key SHALL leave its label as it is. The API key SHALL be stored without surrounding whitespace. The add/edit form SHALL
 NOT collect or require a model. `LlmProviderConfig.model` SHALL be optional and deprecated,
 and no inference path SHALL depend on it — the model used for any call SHALL come from a
 model binding (see "Centralized per-purpose model resolution"), never from the credential
@@ -194,8 +194,10 @@ commits only a non-blank id), and SHALL display the effective resolution from
 be named by `modelDisplayName` from `@kaiord/ai/providers` ("Claude Sonnet 5", "GPT-5 mini"),
 and the options SHALL come from `listedModels`, which leaves out a dated snapshot whose alias
 is listed; a running model outside that list SHALL still be shown, by name and date. A
-purpose without its own binding SHALL display "Same as main model (<model> · <account>)", and
-choosing that option SHALL clear the purpose's binding. The Settings index SHALL name the
+purpose without its own binding SHALL select a short "Same as main model" option, so it fits a
+phone-width select, and SHALL name the main model and its account ("Runs <model> · <account>")
+under the select as its accessible description; choosing that option SHALL clear the purpose's
+binding. The Settings index SHALL name the
 athlete's main model. The workout generator's model select SHALL be the same select for the
 `workout_generation` purpose: it SHALL show what generation runs, and a choice there SHALL be
 stored as the athlete's `workout_generation` binding.
@@ -205,7 +207,7 @@ stored as the athlete's `workout_generation` binding.
 - **GIVEN** two accounts and no bindings, where the second carries `isDefault`
 - **WHEN** the AI settings render
 - **THEN** the main-model select SHALL show the second account with its model, and the chat
-  select SHALL show that it follows the main model, naming that model and account
+  select SHALL show that it follows the main model, and name that model and account under it
 
 #### Scenario: A stored blank model is shown as what runs
 
@@ -275,17 +277,21 @@ The AI settings SHALL open with a card titled "Your assistant (for <athlete>)" n
 active athlete's main model, the account it runs on, that account's key status, and this
 month's AI use (requests, tokens, estimated cost) — labelled as the total for every athlete,
 since usage is not recorded per athlete — with the main-model select. The usage table's
-title SHALL say it covers every athlete too. The card and the usage
-table SHALL format costs the same way, as US dollars in the reader's locale. The accounts
+title SHALL say it covers every athlete too. When no account can run because the only ones
+have no key (restored from a backup), the card SHALL name such an account and ask for its key
+with "Replace key", not ask for a new account. The card and the usage
+table SHALL format costs the same way, as US dollars in the app's language, and token counts
+in that language too. The accounts
 SHALL follow under "AI accounts", stated as shared by every athlete; the add form SHALL be
 shown only after "Add account" is pressed, SHALL close once the key is stored, and SHALL
 reopen blank. The per-task models SHALL sit under "Advanced: model per task (for <athlete>)",
 collapsed while every task follows the main model and open as soon as one has its own. The
 custom instructions SHALL be saved after a pause in typing or when the field is left, never
 on each keystroke, and SHALL say whether they were saved: "Saved ✓" only once nothing newer
-waits to be saved, and a failed save SHALL be retried when the field is left again. Opening
+waits to be saved, and a failed save SHALL be retried when the field is left again, while text already being saved
+SHALL NOT be sent a second time. Opening
 the add form SHALL put the focus on the provider choice, and confirming a removal SHALL leave
-the focus on "Add account". On a 390px-wide screen no part of an account row SHALL overflow it
+the focus on "Add account", once: a later cancelled removal SHALL NOT move it there. On a 390px-wide screen no part of an account row SHALL overflow it
 or run beneath its buttons, and the usage table SHALL fit the screen.
 
 #### Scenario: The assistant card states what the athlete uses
@@ -296,6 +302,13 @@ or run beneath its buttons, and the usage table SHALL fit the screen.
 - **THEN** the card SHALL read "Your assistant (for Ana)", name "Claude Opus 5" on
   "Mi Claude" with "Key verified", and sum the two runs' tokens and cost as the total for
   every athlete
+
+#### Scenario: An account restored without its key is named, not hidden
+
+- **GIVEN** the only account is "Mi Claude", restored from a backup without its key
+- **WHEN** the AI settings render
+- **THEN** the assistant card SHALL name "Mi Claude", say it has no key and point to
+  "Replace key", and SHALL NOT ask to add an account
 
 #### Scenario: The add form closes and reopens blank
 
