@@ -13,7 +13,7 @@ import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { ProviderNotFoundError } from "./errors";
 
 export type UpdateProviderInput = Partial<
-  Pick<LlmProviderConfig, "type" | "apiKey" | "label">
+  Pick<LlmProviderConfig, "type" | "apiKey" | "label" | "keyCheck">
 >;
 
 // Drop `undefined` values so callers cannot blank required fields by

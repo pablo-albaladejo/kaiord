@@ -25,23 +25,13 @@
     "themeDark": "Dark"
   },
   "ai": {
-    "llmProviders": "LLM Providers",
-    "addProvider": "Add Provider",
-    "models": "Models",
-    "customSystemPrompt": "Custom System Prompt",
     "customInstructionsLabel": "Additional instructions applied to all generations",
     "customInstructionsPlaceholder": "Additional instructions for all AI generations (e.g., 'I'm recovering from a knee injury')"
   },
   "providers": {
-    "empty": "No providers configured. Add one below.",
-    "listAriaLabel": "Configured LLM providers",
     "provider": "Provider",
     "label": "Label",
     "apiKey": "API Key",
-    "labelPlaceholder": "e.g., My Claude",
-    "addProvider": "Add Provider",
-    "missingKey": "Missing key",
-    "edit": "Edit",
     "remove": "Remove",
     "save": "Save",
     "cancel": "Cancel",
@@ -64,7 +54,6 @@
     "chat": "Chat",
     "workoutGeneration": "Workout generation",
     "labExtraction": "Lab extraction",
-    "hint": "Add at least one provider and select an active athlete to choose models.",
     "custom": "Custom…",
     "inherit": "Same as main model ({{model}})",
     "retired": "{{model}} was retired by the provider — using {{successor}} instead.",
@@ -181,5 +170,43 @@
     "title_one": "{{count}} connection needs attention",
     "title_other": "{{count}} connections need attention",
     "action": "Open connections"
+  },
+  "assistant": {
+    "title": "Your assistant (for {{athlete}})",
+    "titleNoAthlete": "Your assistant",
+    "empty": "Add an AI account below to choose the model your assistant uses.",
+    "noAthlete": "Choose an athlete to pick the model your assistant uses.",
+    "runsOn": "on {{account}}",
+    "usage_one": "This month: {{count}} request · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "This month: {{count}} requests · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "No AI use yet this month."
+  },
+  "keyStatus": {
+    "verified": "Key verified",
+    "unverified": "Key not checked",
+    "missing": "Key missing"
+  },
+  "accounts": {
+    "title": "AI accounts",
+    "shared": "Shared by every athlete.",
+    "listAriaLabel": "AI accounts",
+    "empty": "No AI accounts yet.",
+    "add": "Add account",
+    "save": "Save account",
+    "replaceKey": "Replace key",
+    "newKey": "New API key",
+    "rename": "Rename",
+    "moreActions": "More actions for {{label}}",
+    "labelOptional": "Label (optional)",
+    "labelPlaceholder": "Defaults to the provider name"
+  },
+  "advanced": {
+    "title": "Advanced: model per task (for {{athlete}})"
+  },
+  "prompt": {
+    "title": "Instructions for the AI",
+    "saving": "Saving…",
+    "saved": "Saved ✓",
+    "failed": "Could not save. Try again."
   }
 }

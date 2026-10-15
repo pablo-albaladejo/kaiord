@@ -1,4 +1,4 @@
-import { PROVIDER_MODELS } from "@kaiord/ai/providers";
+import { listedModels } from "@kaiord/ai/providers";
 
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 
@@ -33,7 +33,8 @@ export type ModelChoiceGroup = {
 };
 
 /**
- * One group per account with its catalog models. A model that runs but is
+ * One group per account with its catalog models, pinned snapshots of a
+ * listed alias left out. A model that runs but is
  * not in the catalog (a custom id, a stored legacy model) is listed first in
  * its group, so the select can show what actually runs.
  */
@@ -42,7 +43,7 @@ export const modelChoiceGroups = (
   running: ModelChoice | null
 ): ModelChoiceGroup[] =>
   providers.map((provider) => {
-    const models = PROVIDER_MODELS[provider.type].map((m) => m.id);
+    const models = listedModels(provider.type);
     const extra =
       running?.providerId === provider.id && !models.includes(running.modelId)
         ? [running.modelId]

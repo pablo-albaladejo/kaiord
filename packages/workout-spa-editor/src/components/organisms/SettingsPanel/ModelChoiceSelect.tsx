@@ -1,3 +1,5 @@
+import { modelDisplayName } from "@kaiord/ai/providers";
+
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
@@ -52,7 +54,7 @@ export function ModelChoiceSelect(props: ModelChoiceSelectProps) {
         {canInherit && principal && (
           <option value={INHERIT_VALUE}>
             {t("models.inherit", {
-              model: `${principal.modelId} · ${labelOf(principal)}`,
+              model: `${modelDisplayName(principal.modelId)} · ${labelOf(principal)}`,
             })}
           </option>
         )}

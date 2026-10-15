@@ -25,23 +25,13 @@
     "themeDark": "Oscuro"
   },
   "ai": {
-    "llmProviders": "Proveedores LLM",
-    "addProvider": "Añadir proveedor",
-    "models": "Modelos",
-    "customSystemPrompt": "Prompt de sistema personalizado",
     "customInstructionsLabel": "Instrucciones adicionales aplicadas a todas las generaciones",
     "customInstructionsPlaceholder": "Instrucciones adicionales para todas las generaciones de IA (p. ej., 'Me estoy recuperando de una lesión de rodilla')"
   },
   "providers": {
-    "empty": "No hay proveedores configurados. Añade uno abajo.",
-    "listAriaLabel": "Proveedores LLM configurados",
     "provider": "Proveedor",
     "label": "Etiqueta",
     "apiKey": "Clave de API",
-    "labelPlaceholder": "p. ej., Mi Claude",
-    "addProvider": "Añadir proveedor",
-    "missingKey": "Falta la clave",
-    "edit": "Editar",
     "remove": "Eliminar",
     "save": "Guardar",
     "cancel": "Cancelar",
@@ -64,7 +54,6 @@
     "chat": "Chat",
     "workoutGeneration": "Generación de entrenamientos",
     "labExtraction": "Extracción de laboratorio",
-    "hint": "Añade al menos un proveedor y selecciona un atleta activo para elegir modelos.",
     "custom": "Personalizado…",
     "inherit": "Igual que el principal ({{model}})",
     "retired": "El proveedor retiró {{model}}: se usa {{successor}} en su lugar.",
@@ -181,5 +170,43 @@
     "title_one": "{{count}} conexión requiere atención",
     "title_other": "{{count}} conexiones requieren atención",
     "action": "Abrir conexiones"
+  },
+  "assistant": {
+    "title": "Tu asistente (para {{athlete}})",
+    "titleNoAthlete": "Tu asistente",
+    "empty": "Añade una cuenta de IA abajo para elegir el modelo de tu asistente.",
+    "noAthlete": "Elige un atleta para escoger el modelo de tu asistente.",
+    "runsOn": "en {{account}}",
+    "usage_one": "Este mes: {{count}} petición · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "Este mes: {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "Aún no has usado la IA este mes."
+  },
+  "keyStatus": {
+    "verified": "Clave verificada",
+    "unverified": "Clave sin comprobar",
+    "missing": "Falta la clave"
+  },
+  "accounts": {
+    "title": "Cuentas de IA",
+    "shared": "Comunes a todos los atletas.",
+    "listAriaLabel": "Cuentas de IA",
+    "empty": "Aún no hay cuentas de IA.",
+    "add": "Añadir cuenta",
+    "save": "Guardar cuenta",
+    "replaceKey": "Reemplazar clave",
+    "newKey": "Nueva clave de API",
+    "rename": "Renombrar",
+    "moreActions": "Más acciones de {{label}}",
+    "labelOptional": "Etiqueta (opcional)",
+    "labelPlaceholder": "Por defecto, el nombre del proveedor"
+  },
+  "advanced": {
+    "title": "Avanzado: modelo por tarea (para {{athlete}})"
+  },
+  "prompt": {
+    "title": "Instrucciones para la IA",
+    "saving": "Guardando…",
+    "saved": "Guardado ✓",
+    "failed": "No se pudo guardar. Inténtalo de nuevo."
   }
 }

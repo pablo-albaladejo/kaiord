@@ -38,7 +38,7 @@ export const useAiTabHandlers = () => {
     onAdd: async (config: AddProviderInput): Promise<KeySaveOutcome> => {
       const outcome = await saveWithKeyCheck({
         credential: config,
-        save: () => addProvider(persistence, config),
+        save: (keyCheck) => addProvider(persistence, { ...config, keyCheck }),
       });
       if (outcome === "failed") toast.error(t("aiToast.addFailed"));
       return outcome;
@@ -58,15 +58,19 @@ export const useAiTabHandlers = () => {
           key !== undefined && key !== provider.apiKey
             ? { type: provider.type, apiKey: key }
             : undefined,
-        save: () => updateProvider(persistence, provider.id, updates),
+        save: (keyCheck) =>
+          updateProvider(persistence, provider.id, { ...updates, keyCheck }),
       });
       if (outcome === "failed") toast.error(t("aiToast.updateFailed"));
       return outcome;
     },
-    onPromptChange: (value: string) => {
-      void setCustomPrompt(persistence, value).catch(() =>
-        toast.error(t("aiToast.promptFailed"))
-      );
-    },
+    onPromptSave: (value: string): Promise<boolean> =>
+      setCustomPrompt(persistence, value).then(
+        () => true,
+        () => {
+          toast.error(t("aiToast.promptFailed"));
+          return false;
+        }
+      ),
   };
 };

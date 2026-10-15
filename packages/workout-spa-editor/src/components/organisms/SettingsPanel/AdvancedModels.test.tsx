@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { renderWithProviders } from "../../../test-utils";
 import type { AiModelBinding } from "../../../types/ai-model-binding";
-import { ModelsSection } from "./ModelsSection";
+import { AdvancedModels } from "./AdvancedModels";
 
 const live = vi.hoisted(() => ({
   providers: [] as LlmProviderConfig[],
@@ -12,7 +12,10 @@ const live = vi.hoisted(() => ({
 }));
 
 vi.mock("../../../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p-1", profile: null }),
+  useActiveProfileLive: () => ({
+    id: "p-1",
+    profile: { name: "Ana", linkedAccounts: [] },
+  }),
 }));
 vi.mock("../../../hooks/use-ai-providers-live", () => ({
   useAiProvidersLive: () => live.providers,
@@ -41,22 +44,10 @@ const gpt: LlmProviderConfig = {
 const shown = (select: HTMLElement): string =>
   (select as HTMLSelectElement).selectedOptions[0]?.textContent ?? "";
 
-describe("ModelsSection", () => {
+describe("AdvancedModels", () => {
   beforeEach(() => {
     live.providers = [claude, gpt];
     live.bindings = [];
-  });
-
-  it("should show the model that runs when the athlete chose none", () => {
-    // Arrange
-
-    // Act
-    renderWithProviders(<ModelsSection />);
-
-    // Assert
-    const principal = screen.getAllByRole("combobox")[0]!;
-    expect(shown(principal)).toContain("gpt-5-mini");
-    expect(shown(principal)).toContain("Mi GPT");
   });
 
   it("should say a purpose without its own model follows the main one, naming it", () => {
@@ -72,12 +63,12 @@ describe("ModelsSection", () => {
     ];
 
     // Act
-    renderWithProviders(<ModelsSection />);
+    renderWithProviders(<AdvancedModels />);
 
     // Assert
-    const chat = screen.getAllByRole("combobox")[1]!;
+    const chat = screen.getByLabelText("Chat");
     expect(shown(chat)).toMatch(/same as main model/i);
-    expect(shown(chat)).toContain("claude-opus-5");
+    expect(shown(chat)).toContain("Claude Opus 5");
     expect(shown(chat)).toContain("Mi Claude");
   });
 
@@ -94,10 +85,58 @@ describe("ModelsSection", () => {
     ];
 
     // Act
-    renderWithProviders(<ModelsSection />);
+    renderWithProviders(<AdvancedModels />);
 
     // Assert
-    const chat = screen.getAllByRole("combobox")[1]!;
-    expect(shown(chat)).toContain("gpt-5-mini");
+    const chat = screen.getByLabelText("Chat");
+    expect(shown(chat)).toContain("GPT-5 mini");
+  });
+
+  it("should start collapsed while every task follows the main model", () => {
+    // Arrange
+
+    // Act
+    renderWithProviders(<AdvancedModels />);
+
+    // Assert
+    expect(screen.getByTestId("advanced-models")).not.toHaveAttribute("open");
+    expect(
+      screen.getByText("Advanced: model per task (for Ana)")
+    ).toBeInTheDocument();
+  });
+
+  it("should open by itself when a task has its own model", () => {
+    // Arrange
+    live.bindings = [
+      {
+        profileId: "p-1",
+        purpose: "lab_extraction",
+        providerId: "gpt",
+        modelId: "gpt-5",
+        updatedAt: "2026-10-15T00:00:00.000Z",
+      },
+    ];
+
+    // Act
+    renderWithProviders(<AdvancedModels />);
+
+    // Assert
+    expect(screen.getByTestId("advanced-models")).toHaveAttribute("open");
+  });
+
+  it("should offer one select per task and none for the main model", () => {
+    // Arrange
+
+    // Act
+    renderWithProviders(<AdvancedModels />);
+
+    // Assert
+    expect(
+      screen.getAllByRole("combobox", { hidden: true }).map((c) => c.id)
+    ).toEqual([
+      "model-chat",
+      "model-workout_generation",
+      "model-lab_extraction",
+    ]);
   });
 });

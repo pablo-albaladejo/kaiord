@@ -13,11 +13,14 @@ import type {
   LlmProviderConfig,
   LlmProviderType,
 } from "../../store/ai-store-types";
+import { defaultProviderLabel } from "./provider-label";
 
 export type AddProviderInput = {
   type: LlmProviderType;
   apiKey: string;
+  /** Optional: a blank label becomes the provider's name. */
   label: string;
+  keyCheck?: LlmProviderConfig["keyCheck"];
 };
 
 export const addProvider = async (
@@ -25,8 +28,15 @@ export const addProvider = async (
   input: AddProviderInput
 ): Promise<LlmProviderConfig> => {
   const existing = await persistence.aiProviders.getAll();
+  const label =
+    input.label.trim() ||
+    defaultProviderLabel(
+      input.type,
+      existing.map((p) => p.label)
+    );
   const provider: LlmProviderConfig = {
     ...input,
+    label,
     id: crypto.randomUUID(),
     isDefault: existing.length === 0,
     // Drives orderBy("createdAt") in the repository; immutable after

@@ -74,7 +74,7 @@ describe("ModelSelector", () => {
     renderWithProviders(<ModelSelector />);
 
     // Assert
-    expect(shown()).toContain("gpt-4.1");
+    expect(shown()).toContain("GPT-4.1");
     expect(shown()).toContain("Mi GPT");
   });
 
@@ -89,7 +89,7 @@ describe("ModelSelector", () => {
     renderWithProviders(<ModelSelector />);
 
     // Assert
-    expect(shown()).toContain("gpt-5-mini");
+    expect(shown()).toContain("GPT-5 mini");
     expect(shown()).toContain("Mi GPT");
   });
 
