@@ -52,12 +52,17 @@ async function scheduleToday(page: Page, today: string): Promise<string> {
   return (await card.getAttribute("data-testid"))!.replace("workout-card-", "");
 }
 
+const intakeRow = (page: Page, kcal: number): Locator =>
+  page.getByTestId("intake-entry-row").filter({ hasText: `${kcal} kcal` });
+
 async function logIntake(page: Page, kcal: number) {
   const logger = page.getByTestId("intake-logger");
   await routeInApp(page, "/nutrition", logger);
   await logger.getByLabel("Energy (kcal)").fill(String(kcal));
   await logger.getByTestId("intake-log-submit").click();
-  await expect(page.getByText("Entry logged", { exact: true })).toBeVisible();
+  // The entry's own row, not the "Entry logged" toast: a second entry logged
+  // while the first toast is still up would find two toasts.
+  await expect(intakeRow(page, kcal)).toBeVisible();
 }
 
 async function saveWellness(page: Page, today: string) {
@@ -201,6 +206,9 @@ test.describe("Import backup", () => {
     const id = await scheduleToday(page, today);
     const file = await exportData(page);
     await deleteWorkout(page, id);
+    // A workout the backup never had: its card proves the calendar has read
+    // the day, so the deleted card's absence below is not an empty first paint.
+    const kept = await scheduleToday(page, today);
 
     // Act
     const summary = await importData(page, file);
@@ -210,7 +218,11 @@ test.describe("Import backup", () => {
     expect((await readTable(page, "workouts")).map((w) => w.id)).not.toContain(
       id
     );
-    await routeInApp(page, "/calendar", calendarDay(page, today).day);
+    await routeInApp(
+      page,
+      "/calendar",
+      page.getByTestId(`workout-card-${kept}`)
+    );
     await expect(page.getByTestId(`workout-card-${id}`)).toHaveCount(0);
   });
 
@@ -223,14 +235,19 @@ test.describe("Import backup", () => {
     await logIntake(page, KCAL_A);
     const file = await exportData(page);
     await deleteIntake(page);
+    // An entry the backup never had: its row proves the list has read the
+    // day, so the deleted row's absence below is not an empty first paint.
+    await logIntake(page, KCAL_B);
 
     // Act
     const summary = await importData(page, file);
 
     // Assert
     expect(summary).toContain("1 deleted after the backup (not restored)");
-    expect(await readTable(page, "intakeEntries")).toEqual([]);
-    await routeInApp(page, "/nutrition", page.getByTestId("intake-logger"));
-    await expect(page.getByTestId("intake-entry-row")).toHaveCount(0);
+    expect(await readTable(page, "intakeEntries")).toEqual([
+      expect.objectContaining({ kcal: KCAL_B }),
+    ]);
+    await routeInApp(page, "/nutrition", intakeRow(page, KCAL_B));
+    await expect(intakeRow(page, KCAL_A)).toHaveCount(0);
   });
 });
