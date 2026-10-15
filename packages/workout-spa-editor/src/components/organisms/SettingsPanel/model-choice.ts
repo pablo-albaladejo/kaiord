@@ -1,4 +1,4 @@
-import { listedModels } from "@kaiord/ai/providers";
+import { listedModels, modelDisplayName } from "@kaiord/ai/providers";
 
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 
@@ -50,3 +50,10 @@ export const modelChoiceGroups = (
         : [];
     return { provider, models: [...extra, ...models] };
   });
+
+/** "Claude Sonnet 5 · Mi Claude": a choice by product name and account. */
+export const choiceName = (
+  { providerId, modelId }: ModelChoice,
+  providers: LlmProviderConfig[]
+): string =>
+  `${modelDisplayName(modelId)} · ${providers.find((p) => p.id === providerId)?.label ?? ""}`;

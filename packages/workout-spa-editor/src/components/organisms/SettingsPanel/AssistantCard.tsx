@@ -1,6 +1,7 @@
 import { modelDisplayName } from "@kaiord/ai/providers";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { AssistantUsage } from "./AssistantUsage";
 import { keyStatusOf } from "./key-status";
@@ -20,10 +21,16 @@ export function AssistantCard() {
   const effective = models.default!;
   const running = effective.running;
   const account = providers.find((p) => p.id === running?.providerId);
+  const keyless = useAiProvidersLive({ includeKeyless: true })?.find(
+    (p) => p.apiKeyMissing
+  );
+  const noModelHint = keyless
+    ? t("assistant.missingKey", { account: keyless.label })
+    : t("assistant.empty");
 
   let body: React.ReactNode;
   if (!profileId) body = <Hint text={t("assistant.noAthlete")} />;
-  else if (!running || !account) body = <Hint text={t("assistant.empty")} />;
+  else if (!running || !account) body = <Hint text={noModelHint} />;
   else
     body = (
       <>

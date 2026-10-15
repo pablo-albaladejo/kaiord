@@ -24,9 +24,9 @@ const WIDE = "hidden sm:table-cell";
 
 const numericCells = (totals: UsageTotals, cls: string, locale: string) => (
   <>
-    <td className={`${cls} ${WIDE}`}>{totals.inputTokens.toLocaleString()}</td>
-    <td className={`${cls} ${WIDE}`}>{totals.outputTokens.toLocaleString()}</td>
-    <td className={cls}>{totals.totalTokens.toLocaleString()}</td>
+    <td className={`${cls} ${WIDE}`}>{totals.inputTokens.toLocaleString(locale)}</td>
+    <td className={`${cls} ${WIDE}`}>{totals.outputTokens.toLocaleString(locale)}</td>
+    <td className={cls}>{totals.totalTokens.toLocaleString(locale)}</td>
     <td className={cls}>{formatUsageCost(totals.totalCost, locale)}</td>
   </>
 );
@@ -46,15 +46,15 @@ export function UsageMonthRow({ row }: { row: MonthUsage }) {
           className={`${CELL} ${WIDE}`}
           data-testid={`usage-input-${row.yearMonth}`}
         >
-          {row.totals.inputTokens.toLocaleString()}
+          {row.totals.inputTokens.toLocaleString(locale)}
         </td>
         <td
           className={`${CELL} ${WIDE}`}
           data-testid={`usage-output-${row.yearMonth}`}
         >
-          {row.totals.outputTokens.toLocaleString()}
+          {row.totals.outputTokens.toLocaleString(locale)}
         </td>
-        <td className={CELL}>{row.totals.totalTokens.toLocaleString()}</td>
+        <td className={CELL}>{row.totals.totalTokens.toLocaleString(locale)}</td>
         <td className={CELL}>
           {formatUsageCost(row.totals.totalCost, locale)}
         </td>

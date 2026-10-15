@@ -1,11 +1,10 @@
-import { modelDisplayName } from "@kaiord/ai/providers";
-
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
 import { CustomModelInput } from "./CustomModelInput";
 import type { EffectiveModel } from "./effective-models";
 import {
+  choiceName,
   INHERIT_VALUE,
   type ModelChoice,
   modelChoiceGroups,
@@ -18,7 +17,7 @@ export type ModelChoiceSelectProps = {
   label: string;
   providers: LlmProviderConfig[];
   effective: EffectiveModel;
-  /** Offers "Same as main model", naming what the main model runs. */
+  /** Offers "Same as main model"; while followed, what it runs is named below. */
   principal?: ModelChoice | null;
   onChoose: (choice: ModelChoice) => void;
   onInherit?: () => void;
@@ -31,10 +30,12 @@ export function ModelChoiceSelect(props: ModelChoiceSelectProps) {
   const canInherit = props.onInherit !== undefined && principal !== undefined;
   const choice = useModelChoice({ ...props, canInherit });
   const { running } = effective;
-  const labelOf = (c: ModelChoice) =>
-    providers.find((p) => p.id === c.providerId)?.label ?? "";
   const type = providers.find((p) => p.id === running?.providerId)?.type;
   const follows = canInherit && effective.inherited;
+  const followsId = `${id}-follows`;
+  // What a followed main model runs, named under the select.
+  const followed =
+    follows && principal ? choiceName(principal, providers) : null;
 
   return (
     <div className="w-full">
@@ -49,17 +50,23 @@ export function ModelChoiceSelect(props: ModelChoiceSelectProps) {
         data-testid={`${id}-select`}
         className="w-full rounded-lg border border-edge bg-surface px-3 py-1.5 text-sm text-ink-strong"
         value={choice.value}
+        aria-describedby={followed ? followsId : undefined}
         onChange={(e) => choice.select(e.target.value)}
       >
         {canInherit && principal && (
-          <option value={INHERIT_VALUE}>
-            {t("models.inherit", {
-              model: `${modelDisplayName(principal.modelId)} · ${labelOf(principal)}`,
-            })}
-          </option>
+          <option value={INHERIT_VALUE}>{t("models.inherit")}</option>
         )}
         <ModelChoiceOptions groups={modelChoiceGroups(providers, running)} />
       </select>
+      {followed && (
+        <p
+          id={followsId}
+          data-testid={followsId}
+          className="mt-1 text-xs text-ink-muted"
+        >
+          {t("models.inheritRuns", { model: followed })}
+        </p>
+      )}
       {choice.customFor && (
         <CustomModelInput
           onCommit={choice.commitCustom}

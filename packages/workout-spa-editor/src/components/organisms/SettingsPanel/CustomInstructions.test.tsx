@@ -176,6 +176,31 @@ describe("CustomInstructions", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Saved ✓");
   });
 
+  it("should not write the same text again when the field is left during its save", async () => {
+    // Arrange
+    let finish: (ok: boolean) => void = () => {};
+    const onSave = vi.fn(
+      () => new Promise<boolean>((resolve) => (finish = resolve))
+    );
+    render(<CustomInstructions value="" onSave={onSave} />);
+    type("Knee");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(PAST_THE_PAUSE_MS);
+    });
+
+    // Act
+    await act(async () => {
+      fireEvent.blur(field());
+    });
+    await act(async () => {
+      finish(true);
+    });
+
+    // Assert
+    expect(onSave).toHaveBeenCalledOnce();
+    expect(screen.getByRole("status")).toHaveTextContent("Saved ✓");
+  });
+
   it("should save a change still pending when it goes away", () => {
     // Arrange
     const onSave = vi.fn(async () => true);

@@ -131,8 +131,33 @@ describe("ModelChoiceSelect", () => {
     await userEvent.selectOptions(select, INHERIT_VALUE);
 
     // Assert
-    expect(shown).toBe("Same as main model (GPT-5 mini · Mi GPT)");
+    expect(shown).toBe("Same as main model");
     expect(onInherit).toHaveBeenCalledTimes(1);
+  });
+
+  it("should keep the follow option short and name what it runs under the select", () => {
+    // Arrange
+
+    // Act
+    const { select } = renderSelect(
+      { storedModelId: null, inherited: true },
+      true
+    );
+
+    // Assert
+    const runs = screen.getByTestId("model-chat-follows");
+    expect(runs).toHaveTextContent("Runs GPT-5 mini · Mi GPT");
+    expect(select).toHaveAccessibleDescription("Runs GPT-5 mini · Mi GPT");
+  });
+
+  it("should not name the main model under the select once the purpose has its own", () => {
+    // Arrange
+
+    // Act
+    renderSelect({}, true);
+
+    // Assert
+    expect(screen.queryByTestId("model-chat-follows")).toBeNull();
   });
 
   it("should name the successor used in place of a retired stored model", () => {

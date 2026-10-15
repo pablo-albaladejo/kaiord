@@ -21,7 +21,10 @@ vi.mock("../../../hooks/use-active-profile-live", () => ({
   }),
 }));
 vi.mock("../../../hooks/use-ai-providers-live", () => ({
-  useAiProvidersLive: () => live.providers,
+  useAiProvidersLive: ({ includeKeyless = false } = {}) =>
+    includeKeyless
+      ? live.providers
+      : live.providers.filter((p) => !p.apiKeyMissing),
 }));
 vi.mock("../../../hooks/use-ai-model-bindings-live", () => ({
   useAiModelBindingsLive: (profileId: string | null) =>
@@ -152,6 +155,25 @@ describe("AssistantCard", () => {
         "Add an AI account below to choose the model your assistant uses."
       )
     ).toBeInTheDocument();
+    expect(screen.queryByLabelText("Main model")).not.toBeInTheDocument();
+  });
+
+  it("should name the account restored without its key and ask for the key", () => {
+    // Arrange
+    live.providers = [
+      { ...claude, apiKey: "", apiKeyMissing: true, isDefault: false },
+    ];
+
+    // Act
+    renderWithProviders(<AssistantCard />);
+
+    // Assert
+    expect(
+      screen.getByText(
+        "“Mi Claude” has no API key: backups never carry keys. Enter it below with “Replace key” to choose the model your assistant uses."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Add an AI account below/)).toBeNull();
     expect(screen.queryByLabelText("Main model")).not.toBeInTheDocument();
   });
 

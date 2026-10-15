@@ -11,7 +11,8 @@ const PAUSE_MS = 800;
  *
  * Only the latest save speaks: an older one landing late says nothing, and
  * "saved" shows only when no newer text is waiting. A failed value stays
- * pending, so leaving the field again retries it.
+ * pending, so leaving the field again retries it; text already being saved
+ * is not sent again.
  */
 export const usePromptAutosave = (
   save: (value: string) => Promise<boolean>
@@ -21,16 +22,20 @@ export const usePromptAutosave = (
   latestSave.current = save;
   const pending = useRef<string | null>(null);
   const lastRun = useRef(0);
+  const inFlight = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const flush = useCallback(() => {
     clearTimeout(timer.current);
     const value = pending.current;
-    if (value === null) return;
+    // The same text already on its way is not written twice.
+    if (value === null || value === inFlight.current) return;
     const run = ++lastRun.current;
+    inFlight.current = value;
     setStatus("saving");
     void latestSave.current(value).then((ok) => {
       if (run !== lastRun.current) return;
+      inFlight.current = null;
       const newerWaits = pending.current !== value;
       if (ok && !newerWaits) pending.current = null;
       if (newerWaits) setStatus("idle");

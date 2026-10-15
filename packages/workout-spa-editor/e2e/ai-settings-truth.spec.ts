@@ -78,8 +78,9 @@ test.describe("AI settings truth", () => {
 
     // What runs before any choice: the first account and its model.
     await expect.poll(() => shown(main)).toBe("Claude Sonnet 5 · Mi Claude");
-    expect(await shown(chat)).toBe(
-      "Same as main model (Claude Sonnet 5 · Mi Claude)"
+    expect(await shown(chat)).toBe("Same as main model");
+    await expect(settings.getByTestId("model-chat-follows")).toHaveText(
+      "Runs Claude Sonnet 5 · Mi Claude"
     );
     await expect(providers.getByText("Default")).toHaveCount(0);
     await expect(
@@ -88,9 +89,9 @@ test.describe("AI settings truth", () => {
 
     // One select picks account and model together; nothing stores a blank model.
     await main.selectOption({ label: "GPT-5 mini · Mi GPT" });
-    await expect
-      .poll(() => shown(chat))
-      .toBe("Same as main model (GPT-5 mini · Mi GPT)");
+    await expect(settings.getByTestId("model-chat-follows")).toHaveText(
+      "Runs GPT-5 mini · Mi GPT"
+    );
     await settings.getByText(/^Advanced: model per task/).click();
     await chat.selectOption({ label: "o3 · Mi GPT" });
     await expect.poll(() => shown(chat)).toBe("o3 · Mi GPT");

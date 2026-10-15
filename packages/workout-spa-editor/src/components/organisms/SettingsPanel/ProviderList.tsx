@@ -12,7 +12,7 @@ type ProviderListProps = {
   onRemoved?: () => void;
   onUpdate: (
     provider: LlmProviderConfig,
-    updates: { label: string; apiKey: string | undefined }
+    updates: { label: string | undefined; apiKey: string | undefined }
   ) => Promise<KeySaveOutcome>;
 };
 

@@ -118,4 +118,35 @@ describe("AccountsSection", () => {
       expect(screen.getByRole("button", { name: "Add account" })).toHaveFocus()
     );
   });
+
+  it("should not move the focus to Add account when a later removal is cancelled", async () => {
+    // Arrange
+    // A confirmed removal that did not take, so the row stays.
+    renderSection("saved", [work]);
+    const openRemove = async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: "More actions for Work" })
+      );
+      await userEvent.click(screen.getByRole("menuitem", { name: "Remove" }));
+    };
+    await openRemove();
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Remove" }).at(-1)!
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Add account" })).toHaveFocus()
+    );
+    await openRemove();
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    // Assert
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(
+      screen.getByRole("button", { name: "Add account" })
+    ).not.toHaveFocus();
+  });
 });

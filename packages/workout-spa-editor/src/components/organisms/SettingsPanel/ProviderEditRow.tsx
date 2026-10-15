@@ -12,8 +12,9 @@ export type ProviderEditMode = "rename" | "key";
 type ProviderEditRowProps = {
   provider: LlmProviderConfig;
   mode: ProviderEditMode;
+  /** Only the field being edited is sent; the other stays `undefined`. */
   onSave: (updates: {
-    label: string;
+    label: string | undefined;
     apiKey: string | undefined;
   }) => Promise<KeySaveOutcome>;
   onCancel: () => void;
@@ -37,7 +38,7 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
       await onSave(
         renaming
           ? { label: value.trim(), apiKey: undefined }
-          : { label: provider.label, apiKey: value.trim() }
+          : { label: undefined, apiKey: value.trim() }
       )
     );
   };

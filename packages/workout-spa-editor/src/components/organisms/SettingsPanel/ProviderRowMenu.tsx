@@ -56,7 +56,10 @@ export function ProviderRowMenu({
           onRemove();
         }}
         onCloseAutoFocus={(event) => {
-          if (!removed.current || !onRemoved) return;
+          const confirmed = removed.current;
+          // One confirmation moves the focus once; a later cancel must not.
+          removed.current = false;
+          if (!confirmed || !onRemoved) return;
           event.preventDefault();
           onRemoved();
         }}

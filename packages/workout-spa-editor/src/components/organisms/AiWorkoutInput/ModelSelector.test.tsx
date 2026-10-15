@@ -74,8 +74,10 @@ describe("ModelSelector", () => {
     renderWithProviders(<ModelSelector />);
 
     // Assert
-    expect(shown()).toContain("GPT-4.1");
-    expect(shown()).toContain("Mi GPT");
+    expect(shown()).toBe("Same as main model");
+    expect(screen.getByRole("combobox")).toHaveAccessibleDescription(
+      "Runs GPT-4.1 · Mi GPT"
+    );
   });
 
   it("should show the workout-generation model when the athlete set one", () => {

@@ -71,4 +71,24 @@ describe("updateProvider", () => {
     // Assert
     expect(renamed.label).toBe("Work");
   });
+
+  it("should leave a name two older accounts share alone when only the key changes", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const first = await addProvider(persistence, baseProvider);
+    await persistence.aiProviders.put({
+      ...first,
+      id: "legacy-twin",
+      isDefault: false,
+    });
+
+    // Act
+    const updated = await updateProvider(persistence, first.id, {
+      apiKey: "sk-replaced",
+    });
+
+    // Assert
+    expect(updated.label).toBe(first.label);
+    expect(updated.apiKey).toBe("sk-replaced");
+  });
 });

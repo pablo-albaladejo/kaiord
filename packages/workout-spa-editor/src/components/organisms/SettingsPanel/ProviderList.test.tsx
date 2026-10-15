@@ -34,7 +34,7 @@ const replaceKey = async (key: string) => {
 };
 
 describe("ProviderList", () => {
-  it("should replace only the key, closing once it is saved", async () => {
+  it("should replace only the key, leaving the name alone, closing once it is saved", async () => {
     // Arrange
     const onUpdate = renderList("saved");
 
@@ -43,7 +43,7 @@ describe("ProviderList", () => {
 
     // Assert
     expect(onUpdate).toHaveBeenCalledWith(provider, {
-      label: "Mine",
+      label: undefined,
       apiKey: "sk-new",
     });
     expect(screen.queryByLabelText("New API key")).not.toBeInTheDocument();
@@ -142,7 +142,7 @@ describe("ProviderList", () => {
 
     // Assert
     expect(onUpdate).toHaveBeenCalledWith(provider, {
-      label: "Mine",
+      label: undefined,
       apiKey: "sk-new",
     });
   });
