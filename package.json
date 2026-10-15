@@ -140,7 +140,7 @@
     "npm-run-all2": "^9.0.3",
     "prettier": "^3.9.10",
     "sharp": "^0.35.5",
-    "size-limit": "^13.0.3",
+    "size-limit": "^14.2.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.1",
     "yaml": "^2.9.1"
