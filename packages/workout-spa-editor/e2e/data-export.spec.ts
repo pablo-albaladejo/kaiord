@@ -40,8 +40,9 @@ async function enterRecords(page: Page, today: string): Promise<string> {
   await dialog.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Wellness saved", { exact: true })).toBeVisible();
 
-  await routeInApp(page, `/workout/new?source=scratch&date=${today}`);
-  await page.getByTestId("scratch-schedule-button").click();
+  const schedule = page.getByTestId("scratch-schedule-button");
+  await routeInApp(page, `/workout/new?source=scratch&date=${today}`, schedule);
+  await schedule.click();
   const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
   const workoutId = (await card.getAttribute("data-testid"))!.replace(
@@ -49,16 +50,17 @@ async function enterRecords(page: Page, today: string): Promise<string> {
     ""
   );
 
-  await routeInApp(page, "/nutrition");
   const logger = page.getByTestId("intake-logger");
+  await routeInApp(page, "/nutrition", logger);
   await logger.getByLabel("Energy (kcal)").fill(String(INTAKE_KCAL));
   await logger.getByTestId("intake-log-submit").click();
   await expect(page.getByText("Entry logged", { exact: true })).toBeVisible();
 
   // Adding a provider checks its key against the provider; answer locally.
   await mockLlmSuccess(page);
-  await routeInApp(page, "/settings/ai");
-  await page.getByLabel("Label").fill("E2E provider");
+  const label = page.getByLabel("Label");
+  await routeInApp(page, "/settings/ai", label);
+  await label.fill("E2E provider");
   await page.getByLabel("API Key").fill(FAKE_KEY);
   await page.getByRole("button", { name: "Add Provider" }).click();
   await expect(page.getByText("E2E provider").first()).toBeVisible();
@@ -74,12 +76,13 @@ test.describe("Export my data", () => {
     await page.goto("/calendar");
     await waitForDexieReady(page);
     const workoutId = await enterRecords(page, today);
-    await routeInApp(page, "/settings/data");
+    const exportButton = page.getByRole("button", { name: "Export my data" });
+    await routeInApp(page, "/settings/data", exportButton);
 
     // Act
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("button", { name: "Export my data" }).click(),
+      exportButton.click(),
     ]);
     const body = await readFile((await download.path())!, "utf8");
 

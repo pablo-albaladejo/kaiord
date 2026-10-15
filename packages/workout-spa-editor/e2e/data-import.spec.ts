@@ -8,7 +8,7 @@
  * page shows once the import has written.
  */
 
-import type { Browser, Page } from "@playwright/test";
+import type { Browser, Locator, Page } from "@playwright/test";
 
 import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { appUrl, expect, test } from "./fixtures/base";
@@ -40,25 +40,30 @@ async function cleanBrowser(browser: Browser, baseURL: string): Promise<Page> {
   return page;
 }
 
+const exportButton = (page: Page): Locator =>
+  page.getByRole("button", { name: "Export my data" });
+
 async function scheduleToday(page: Page, today: string): Promise<string> {
-  await routeInApp(page, `/workout/new?source=scratch&date=${today}`);
-  await page.getByTestId("scratch-schedule-button").click();
+  const schedule = page.getByTestId("scratch-schedule-button");
+  await routeInApp(page, `/workout/new?source=scratch&date=${today}`, schedule);
+  await schedule.click();
   const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
   return (await card.getAttribute("data-testid"))!.replace("workout-card-", "");
 }
 
 async function logIntake(page: Page, kcal: number) {
-  await routeInApp(page, "/nutrition");
   const logger = page.getByTestId("intake-logger");
+  await routeInApp(page, "/nutrition", logger);
   await logger.getByLabel("Energy (kcal)").fill(String(kcal));
   await logger.getByTestId("intake-log-submit").click();
   await expect(page.getByText("Entry logged", { exact: true })).toBeVisible();
 }
 
 async function saveWellness(page: Page, today: string) {
-  await routeInApp(page, "/calendar");
-  await calendarDay(page, today).add.click();
+  const { add } = calendarDay(page, today);
+  await routeInApp(page, "/calendar", add);
+  await add.click();
   await page.getByTestId("add-entry-choose-wellness").click();
   const dialog = page.getByTestId("wellness-entry-dialog");
   await dialog.getByLabel("Weight (kg)").fill("70.4");
@@ -69,24 +74,25 @@ async function saveWellness(page: Page, today: string) {
 async function addProvider(page: Page) {
   // Adding a provider checks its key against the provider; answer locally.
   await mockLlmSuccess(page);
-  await routeInApp(page, "/settings/ai");
-  await page.getByLabel("Label").fill("E2E provider");
+  const label = page.getByLabel("Label");
+  await routeInApp(page, "/settings/ai", label);
+  await label.fill("E2E provider");
   await page.getByLabel("API Key").fill("sk-e2e-fake-import-key");
   await page.getByRole("button", { name: "Add Provider" }).click();
   await expect(page.getByText("E2E provider").first()).toBeVisible();
 }
 
 async function exportData(page: Page): Promise<string> {
-  await routeInApp(page, "/settings/data");
+  await routeInApp(page, "/settings/data", exportButton(page));
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("button", { name: "Export my data" }).click(),
+    exportButton(page).click(),
   ]);
   return (await download.path())!;
 }
 
 async function importData(page: Page, file: string): Promise<string> {
-  await routeInApp(page, "/settings/data");
+  await routeInApp(page, "/settings/data", exportButton(page));
   await page.getByLabel("Backup file").setInputFiles(file);
   const status = page.getByRole("status").filter({ hasText: SUMMARY });
   await expect(status).toBeVisible();
@@ -94,8 +100,9 @@ async function importData(page: Page, file: string): Promise<string> {
 }
 
 async function deleteWorkout(page: Page, id: string) {
-  await routeInApp(page, `/workout/view/${id}`);
-  await page.getByRole("button", { name: "More options" }).click();
+  const more = page.getByRole("button", { name: "More options" });
+  await routeInApp(page, `/workout/view/${id}`, more);
+  await more.click();
   await page.getByRole("menuitem", { name: /^Delete workout$/ }).click();
   await page
     .getByRole("dialog")
@@ -108,7 +115,7 @@ async function deleteWorkout(page: Page, id: string) {
 }
 
 async function deleteIntake(page: Page) {
-  await routeInApp(page, "/nutrition");
+  await routeInApp(page, "/nutrition", page.getByTestId("intake-logger"));
   const row = page.getByTestId("intake-entry-row");
   await row.getByRole("button", { name: "Delete entry" }).click();
   await expect(row).toHaveCount(0);
@@ -146,9 +153,11 @@ test.describe("Import backup", () => {
     expect(await readTable(other, "intakeEntries")).toEqual([
       expect.objectContaining({ kcal: KCAL_A, profileId: profile.id }),
     ]);
-    await routeInApp(other, "/calendar");
+    await routeInApp(other, "/calendar", calendarDay(other, today).day);
+    // One real boot after the restore: what the import wrote must survive it.
+    await other.reload();
     await expect(other.getByTestId(`workout-card-${workoutId}`)).toBeVisible();
-    await routeInApp(other, "/settings/ai");
+    await routeInApp(other, "/settings/ai", other.getByLabel("Label"));
     await expect(other.getByText("Missing key")).toBeVisible();
     await other.context().close();
   });
@@ -201,7 +210,7 @@ test.describe("Import backup", () => {
     expect((await readTable(page, "workouts")).map((w) => w.id)).not.toContain(
       id
     );
-    await routeInApp(page, "/calendar");
+    await routeInApp(page, "/calendar", calendarDay(page, today).day);
     await expect(page.getByTestId(`workout-card-${id}`)).toHaveCount(0);
   });
 
@@ -221,7 +230,7 @@ test.describe("Import backup", () => {
     // Assert
     expect(summary).toContain("1 deleted after the backup (not restored)");
     expect(await readTable(page, "intakeEntries")).toEqual([]);
-    await routeInApp(page, "/nutrition");
+    await routeInApp(page, "/nutrition", page.getByTestId("intake-logger"));
     await expect(page.getByTestId("intake-entry-row")).toHaveCount(0);
   });
 });
