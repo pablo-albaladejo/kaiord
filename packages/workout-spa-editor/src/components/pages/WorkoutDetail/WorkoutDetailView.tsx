@@ -61,7 +61,10 @@ export function WorkoutDetailView({
   const title = model?.title ?? t("fallbackTitle");
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-4 bg-surface-deep p-4">
+    <div
+      data-testid="workout-detail"
+      className="mx-auto flex w-full max-w-md flex-col gap-4 bg-surface-deep p-4 md:max-w-3xl"
+    >
       <WorkoutDetailHeader
         onBack={onBack}
         onMove={onMove}
@@ -78,7 +81,6 @@ export function WorkoutDetailView({
           />
         </>
       )}
-      <div className="flex-1" />
       <WorkoutDetailFooter
         workout={record}
         placementRow={placementRow}

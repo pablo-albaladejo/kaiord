@@ -13,6 +13,7 @@ import { useConnectionAttention } from "../../../hooks/connections/use-connectio
 import { useTranslate } from "../../../i18n/use-translate";
 
 export type HeaderAttention = {
+  readonly count: number;
   readonly title: string;
   readonly detail: string;
 };
@@ -24,6 +25,7 @@ export const useHeaderAttention = (): HeaderAttention | null => {
 
   if (attention === null) return null;
   return {
+    count: attention.count,
     title: t(attention.count === 1 ? "alert.title_one" : "alert.title_other", {
       count: attention.count,
     }),

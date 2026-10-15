@@ -152,7 +152,7 @@ describe("LayoutHeader", () => {
       // Assert
       expect(row).toHaveClass("flex-row");
       expect(row).not.toHaveClass("flex-col");
-      expect(row).toHaveClass("md:flex-col", "lg:flex-row");
+      expect(row).toHaveClass("md:flex-col", "xl:flex-row");
     });
 
     it("should not render a help entry button", () => {

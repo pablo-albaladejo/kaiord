@@ -93,6 +93,24 @@ describe("WorkoutDetail", () => {
     expect(document.querySelector("[data-route-heading]")).toBeInTheDocument();
   });
 
+  it("should widen the sheet past the phone column and end it at the actions", () => {
+    // Arrange
+    // `min-h-screen` plus a flex-1 spacer pushed the actions a viewport below
+    // the content, and `max-w-md` kept a 448px column on every desktop.
+
+    // Act
+    render(<WorkoutDetail id="w1" />);
+    const sheet = screen.getByTestId("workout-detail");
+
+    // Assert
+    expect(sheet).toHaveClass("max-w-md", "md:max-w-3xl");
+    expect(sheet).not.toHaveClass("min-h-screen");
+    expect(sheet.lastElementChild).toBe(
+      screen.getByTestId("workout-detail-footer")
+    );
+    expect(sheet.querySelector(":scope > .flex-1")).toBeNull();
+  });
+
   it("should show the not-found state when no record exists", () => {
     // Arrange
 
