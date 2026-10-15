@@ -32,6 +32,8 @@ export type ChatTurnDeps = {
   conversationId: string | null;
   provider: LlmProviderConfig | null;
   modelId: string | null;
+  /** Stamp the model on a new conversation: true when the draft chose it. */
+  pinModel: boolean;
   today: string;
   ops: ChatActionOps;
 };
@@ -71,6 +73,7 @@ export const makeChatTurnCtx = (
     conversationId: deps.conversationId,
     provider: deps.provider,
     modelId: deps.modelId,
+    pinModel: deps.pinModel,
     today: deps.today,
     ops: deps.ops,
     ...refs,

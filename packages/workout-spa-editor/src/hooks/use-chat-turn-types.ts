@@ -13,6 +13,8 @@ export type UseChatTurnArgs = {
   conversationId: string | null;
   provider: LlmProviderConfig | null;
   modelId: string | null;
+  /** True when the conversation runs its own model, not the main one. */
+  pinModel: boolean;
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
   today: string;

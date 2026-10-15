@@ -1,14 +1,13 @@
 /**
- * Resolves the chat-page provider/model pair, honouring the runtime
- * `selectedProviderId` override from the ModelSelector. When a provider is
- * explicitly selected it wins as the provider; the model keeps the chat
- * resolution only if that provider matches, otherwise it falls back to the
- * provider's stored model (healed past retirement) or the type's catalog
- * default. Generation always uses the
- * `workout_generation` resolution untouched by the selector.
+ * Resolves the chat-page provider/model pair. An unsaved draft's own choice
+ * (provider and model together) wins while its provider still exists, its
+ * model healed past retirement; otherwise chat runs the athlete's `chat`
+ * resolution — the same one the AI settings show — never a provider flag.
+ * Generation always uses the `workout_generation` resolution.
  */
-import { modelForProvider, resolveModelForPurpose } from "@kaiord/ai/providers";
+import { resolveModelForPurpose, usableModel } from "@kaiord/ai/providers";
 
+import type { ChatDraftModel } from "../../store/ai-runtime-store";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { AiModelBinding } from "../../types/ai-model-binding";
 
@@ -17,34 +16,30 @@ export type ChatModels = {
   modelId: string | null;
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
+  /** True when the draft runs its own choice, not the chat default. */
+  chosen: boolean;
 };
 
 export const resolveChatModels = (
   providers: LlmProviderConfig[],
   bindings: AiModelBinding[],
-  selectedId: string | null
+  draft: ChatDraftModel | null
 ): ChatModels => {
   const chat = resolveModelForPurpose("chat", providers, bindings);
   const gen = resolveModelForPurpose("workout_generation", providers, bindings);
-  const selected = providers.find((p) => p.id === selectedId) ?? null;
-
-  if (!selected) {
-    return {
-      provider: chat?.provider ?? null,
-      modelId: chat?.modelId ?? null,
-      generationProvider: gen?.provider ?? null,
-      generationModelId: gen?.modelId ?? null,
-    };
-  }
-
-  const modelId =
-    chat && chat.provider.id === selected.id
-      ? chat.modelId
-      : modelForProvider(selected);
-  return {
-    provider: selected,
-    modelId,
+  const generation = {
     generationProvider: gen?.provider ?? null,
     generationModelId: gen?.modelId ?? null,
+  };
+  const own = providers.find((p) => p.id === draft?.providerId);
+  if (own && draft?.modelId.trim()) {
+    const modelId = usableModel(own.type, draft.modelId);
+    return { provider: own, modelId, ...generation, chosen: true };
+  }
+  return {
+    provider: chat?.provider ?? null,
+    modelId: chat?.modelId ?? null,
+    ...generation,
+    chosen: false,
   };
 };

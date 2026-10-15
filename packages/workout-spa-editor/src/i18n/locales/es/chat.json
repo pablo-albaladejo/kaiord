@@ -20,7 +20,9 @@
     "tool": "Acción"
   },
   "model": {
-    "label": "Modelo"
+    "label": "Modelo",
+    "followMain": "Igual que el principal ({{model}})",
+    "followChat": "Igual que el chat en Ajustes ({{model}})"
   },
   "search": {
     "placeholder": "Buscar chats…",

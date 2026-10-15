@@ -42,7 +42,9 @@ export const sendTurn = async (
       profileId: ctx.profileId,
       conversationId: ctx.conversationId,
       firstMessageText: text,
-      model: { providerId: ctx.provider.id, modelId: ctx.modelId },
+      model: ctx.pinModel
+        ? { providerId: ctx.provider.id, modelId: ctx.modelId }
+        : undefined,
     });
     await appendUserMessage(
       ctx.persistence,

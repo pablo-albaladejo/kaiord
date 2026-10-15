@@ -46,6 +46,7 @@ const args = {
   conversationId: "conv-1",
   provider,
   modelId: "claude-sonnet-4-6",
+  pinModel: false,
   generationProvider: provider,
   generationModelId: "claude-sonnet-4-6",
   today: "2026-06-15",

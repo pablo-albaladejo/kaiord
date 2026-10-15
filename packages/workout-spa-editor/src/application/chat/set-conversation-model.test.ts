@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import type { PersistencePort } from "../../ports/persistence-port";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
-import { setConversationModel } from "./set-conversation-model";
+import {
+  clearConversationModel,
+  setConversationModel,
+} from "./set-conversation-model";
 
 const NOW = () => new Date("2026-06-19T12:00:00.000Z");
 const LATER = () => new Date("2026-06-19T13:00:00.000Z");
@@ -42,5 +45,32 @@ describe("setConversationModel", () => {
 
     // Assert
     expect(await port.chatConversations.get("p1", "missing")).toBeUndefined();
+  });
+
+  it("should reject a blank model id and leave the row untouched", async () => {
+    // Arrange
+
+    // Act
+    const write = setConversationModel(port, "p1", "c1", "prov-2", "  ", LATER);
+
+    // Assert
+    await expect(write).rejects.toThrow();
+    const row = await port.chatConversations.get("p1", "c1");
+    expect(row?.modelId).toBeUndefined();
+  });
+
+  it("should clear the model override and advance updatedAt", async () => {
+    // Arrange
+    await setConversationModel(port, "p1", "c1", "prov-2", "gpt-4o", NOW);
+
+    // Act
+    await clearConversationModel(port, "p1", "c1", LATER);
+
+    // Assert
+    const row = await port.chatConversations.get("p1", "c1");
+    expect(row?.providerId).toBeUndefined();
+    expect(row?.modelId).toBeUndefined();
+    expect(row?.title).toBe("T");
+    expect(row?.updatedAt).toBe("2026-06-19T13:00:00.000Z");
   });
 });

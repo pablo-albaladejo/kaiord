@@ -3,7 +3,8 @@
  * `providerId`/`modelId` override when both are set and the provider still
  * exists, otherwise the page-level chat default (`resolveChatModels`). This is
  * the read side of the per-conversation model (D9); a draft has no row yet, so
- * it always uses the fallback.
+ * it always uses the fallback. `chosen` says whether the conversation (or the
+ * draft) runs its own choice rather than following the chat default.
  *
  * The override is stamped on the first turn, so a conversation started under
  * a since-retired default carries that id forever: it heals to its same-tier
@@ -21,6 +22,7 @@ export type ActiveChatModel = {
   modelId: string | null;
   /** The model id as stored, before retirement healing. */
   requestedModelId: string | null;
+  chosen: boolean;
 };
 
 export const resolveActiveChatModel = (
@@ -35,6 +37,7 @@ export const resolveActiveChatModel = (
         provider,
         modelId: usableModel(provider.type, conversation.modelId),
         requestedModelId: conversation.modelId,
+        chosen: true,
       };
     }
   }
@@ -42,5 +45,6 @@ export const resolveActiveChatModel = (
     provider: fallback.provider,
     modelId: fallback.modelId,
     requestedModelId: fallback.modelId,
+    chosen: fallback.chosen,
   };
 };
