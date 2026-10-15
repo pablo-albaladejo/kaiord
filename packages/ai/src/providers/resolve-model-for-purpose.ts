@@ -2,7 +2,9 @@
  * Resolves the provider + model for an AI purpose: the purpose's own binding,
  * else the `default` binding, else the default provider paired with its stored
  * model (transitional back-compat) or the catalog's default model, else null.
- * A binding whose provider no longer exists is skipped, and a model the
+ * A binding whose provider no longer exists is skipped; a binding that stored
+ * a blank model keeps its provider and runs that provider's model (healing
+ * rows written before blank models were rejected), and a model the
  * provider has retired resolves to its same-tier successor instead of a
  * certain 404. The single resolution
  * path shared by chat, generation, coaching, and batch. Generic over the
@@ -22,9 +24,11 @@ const fromBinding = <P extends ResolvableProvider>(
 ): ResolvedModel<P> | undefined => {
   if (!binding) return undefined;
   const provider = providers.find((p) => p.id === binding.providerId);
-  return provider
-    ? { provider, modelId: usableModel(provider.type, binding.modelId) }
-    : undefined;
+  if (!provider) return undefined;
+  const modelId = binding.modelId.trim()
+    ? usableModel(provider.type, binding.modelId)
+    : modelForProvider(provider);
+  return { provider, modelId };
 };
 
 const fromDefaultProvider = <P extends ResolvableProvider>(

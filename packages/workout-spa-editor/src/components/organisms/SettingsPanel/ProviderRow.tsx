@@ -1,6 +1,8 @@
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
+import { keyHint, keyLastFour } from "./key-hint";
+import { RemoveProviderButton } from "./RemoveProviderButton";
 
 const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
@@ -12,14 +14,12 @@ type ProviderRowProps = {
   provider: LlmProviderConfig;
   onEdit: () => void;
   onRemove: () => void;
-  onSetDefault: () => void;
 };
 
 export const ProviderRow: React.FC<ProviderRowProps> = ({
   provider: p,
   onEdit,
   onRemove,
-  onSetDefault,
 }) => {
   const t = useTranslate("settings");
   return (
@@ -29,14 +29,20 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
         <span className="ml-2 text-xs text-ink-muted">
           {PROVIDER_LABELS[p.type]}
         </span>
-        {p.isDefault && (
-          <span className="ml-2 rounded-full bg-ink-strong px-2.5 py-0.5 text-xs font-medium text-surface">
-            {t("providers.default")}
-          </span>
-        )}
-        {p.apiKeyMissing && (
+        {p.apiKeyMissing ? (
           <span className="ml-2 rounded-full border border-danger-border bg-danger-bg px-2.5 py-0.5 text-xs font-medium text-danger-text">
             {t("providers.missingKey")}
+          </span>
+        ) : (
+          <span
+            className="ml-2 font-mono text-xs text-ink-muted"
+            title={
+              keyLastFour(p.apiKey)
+                ? t("providers.keyHint", { last4: keyLastFour(p.apiKey) })
+                : undefined
+            }
+          >
+            {keyHint(p.apiKey)}
           </span>
         )}
       </div>
@@ -44,14 +50,7 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
         <Button size="sm" variant="secondary" onClick={onEdit}>
           {t("providers.edit")}
         </Button>
-        {!p.isDefault && (
-          <Button size="sm" variant="secondary" onClick={onSetDefault}>
-            {t("providers.setDefault")}
-          </Button>
-        )}
-        <Button size="sm" variant="danger" onClick={onRemove}>
-          {t("providers.remove")}
-        </Button>
+        <RemoveProviderButton label={p.label} onRemove={onRemove} />
       </div>
     </div>
   );

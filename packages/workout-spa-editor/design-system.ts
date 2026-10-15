@@ -160,8 +160,6 @@ export { ScratchEditorSurface } from "./src/components/organisms/ScratchEditorSu
 export { AiTab } from "./src/components/organisms/SettingsPanel/AiTab";
 export { EncryptionSection } from "./src/components/organisms/SettingsPanel/EncryptionSection";
 export { LanguageRow } from "./src/components/organisms/SettingsPanel/LanguageRow";
-export { ModelPicker } from "./src/components/organisms/SettingsPanel/ModelPicker";
-export { ModelRow } from "./src/components/organisms/SettingsPanel/ModelRow";
 export { ModelsSection } from "./src/components/organisms/SettingsPanel/ModelsSection";
 export { NotificationsRow } from "./src/components/organisms/SettingsPanel/NotificationsRow";
 export { PreferencesTab } from "./src/components/organisms/SettingsPanel/PreferencesTab";

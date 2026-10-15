@@ -11,7 +11,7 @@ type ProviderEditRowProps = {
   provider: LlmProviderConfig;
   onSave: (updates: {
     label: string;
-    apiKey: string;
+    apiKey: string | undefined;
   }) => Promise<KeySaveOutcome>;
   onCancel: () => void;
 };
@@ -23,12 +23,14 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
 }) => {
   const t = useTranslate("settings");
   const [label, setLabel] = useState(provider.label);
-  const [apiKey, setApiKey] = useState(provider.apiKey);
+  // The stored key is never put back into the DOM: an empty field keeps it.
+  const [apiKey, setApiKey] = useState("");
+  const keyRequired = provider.apiKeyMissing === true;
   const [status, setStatus] = useState<KeyCheckStatus>("idle");
 
   const handleSave = async () => {
     setStatus("checking");
-    setStatus(await onSave({ label, apiKey }));
+    setStatus(await onSave({ label, apiKey: apiKey || undefined }));
   };
 
   return (
@@ -41,6 +43,8 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
       <Input
         label={t("providers.apiKey")}
         type="password"
+        autoComplete="off"
+        placeholder={keyRequired ? "sk-..." : t("providers.keepKeyPlaceholder")}
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
       />
@@ -48,7 +52,7 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
         <Button
           size="sm"
           onClick={() => void handleSave()}
-          disabled={status === "checking" || !label || !apiKey}
+          disabled={status === "checking" || !label || (keyRequired && !apiKey)}
         >
           {t("providers.save")}
         </Button>

@@ -152,4 +152,38 @@ describe("resolveModelForPurpose", () => {
     // Assert
     expect(resolved).toBeNull();
   });
+  it("should keep the bound provider but use its model when a binding stored an empty model", () => {
+    // Arrange
+    const providers = [
+      provider({ id: "prov-1", isDefault: true }),
+      provider({
+        id: "prov-2",
+        type: "openai",
+        isDefault: false,
+        model: undefined,
+      }),
+    ];
+    const bindings = [
+      binding({ purpose: "chat", providerId: "prov-2", modelId: "" }),
+    ];
+
+    // Act
+    const resolved = resolveModelForPurpose("chat", providers, bindings);
+
+    // Assert
+    expect(resolved?.provider.id).toBe("prov-2");
+    expect(resolved?.modelId).toBe(getDefaultModel("openai"));
+  });
+
+  it("should treat a whitespace-only bound model as unset", () => {
+    // Arrange
+    const providers = [provider({ id: "prov-1", model: undefined })];
+    const bindings = [binding({ modelId: "  " })];
+
+    // Act
+    const resolved = resolveModelForPurpose("chat", providers, bindings);
+
+    // Assert
+    expect(resolved?.modelId).toBe(getDefaultModel("anthropic"));
+  });
 });

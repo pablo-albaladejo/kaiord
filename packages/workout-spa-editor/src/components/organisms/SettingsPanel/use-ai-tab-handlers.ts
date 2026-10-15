@@ -12,7 +12,6 @@ import type { AddProviderInput } from "../../../application/ai/add-provider";
 import { addProvider } from "../../../application/ai/add-provider";
 import { removeProvider } from "../../../application/ai/remove-provider";
 import { setCustomPrompt } from "../../../application/ai/set-custom-prompt";
-import { setDefaultProvider } from "../../../application/ai/set-default-provider";
 import type { UpdateProviderInput } from "../../../application/ai/update-provider";
 import { updateProvider } from "../../../application/ai/update-provider";
 import { usePersistence } from "../../../contexts/persistence-context";
@@ -27,7 +26,6 @@ export const AI_TAB_TOAST_KEYS = [
   "aiToast.addFailed",
   "aiToast.removeFailed",
   "aiToast.updateFailed",
-  "aiToast.setDefaultFailed",
   "aiToast.promptFailed",
 ] as const;
 
@@ -64,11 +62,6 @@ export const useAiTabHandlers = () => {
       });
       if (outcome === "failed") toast.error(t("aiToast.updateFailed"));
       return outcome;
-    },
-    onSetDefault: (id: string) => {
-      void setDefaultProvider(persistence, id).catch(() =>
-        toast.error(t("aiToast.setDefaultFailed"))
-      );
     },
     onPromptChange: (value: string) => {
       void setCustomPrompt(persistence, value).catch(() =>

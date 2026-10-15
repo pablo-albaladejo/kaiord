@@ -25,9 +25,13 @@
  *    beats any per-row tombstone, while the drop goes by `profileId`.
  *
  * A tombstone's id is the row's single-field primary key: `id`, or
- * `profileId` for `energyTargets` (one goal per profile).
+ * `profileId` for `energyTargets` (one goal per profile). Model bindings are
+ * the one composite-key table decorated: `delete(profileId, purpose)` is a
+ * user choice ("Same as main model", or removing the provider), so its
+ * tombstone id is `<profileId>:<purpose>` (`tombstoneIdOf`).
  */
 
+import { tombstoneIdOf } from "../application/sync/merge-record-key";
 import type { PersistencePort } from "../ports/persistence-port";
 
 /**
@@ -80,8 +84,33 @@ const decorateRepo = (
     }),
 });
 
+const decorateBindings = (
+  port: PersistencePort
+): PersistencePort["aiModelBindings"] => {
+  const repo = port.aiModelBindings;
+  return {
+    ...repo,
+    delete: (profileId, purpose) =>
+      port.transaction(async () => {
+        const existed = (await repo.get(profileId, purpose)) !== undefined;
+        await repo.delete(profileId, purpose);
+        const id = tombstoneIdOf("aiModelBindings", { profileId, purpose });
+        if (!existed || id === undefined) return;
+        await port.tombstones.put({
+          table: "aiModelBindings",
+          id,
+          deletedAt: new Date().toISOString(),
+          profileId,
+        });
+      }),
+  };
+};
+
 export function withTombstones(port: PersistencePort): PersistencePort {
-  const decorated: Record<string, unknown> = { ...port };
+  const decorated: Record<string, unknown> = {
+    ...port,
+    aiModelBindings: decorateBindings(port),
+  };
   for (const [key, snapshotTable] of Object.entries(TOMBSTONED_TABLES)) {
     const repo = port[key as TombstonedRepoKey] as unknown as IdDeletable;
     decorated[key] = decorateRepo(port, snapshotTable, repo);

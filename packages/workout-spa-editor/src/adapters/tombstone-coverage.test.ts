@@ -117,14 +117,13 @@ const OFF_PORT_TABLES: Record<string, string> = {
   labValues: "hand-tombstoned by deleteLabReport; cascade otherwise",
   chatMessages: "hand-tombstoned by deleteConversation; cascade otherwise",
   coachingDayNotes: "cascade-only delete; plain `id` PK, so tombstonable",
-  // Composite PKs — structurally untombstonable under `[table+id]`.
-  // aiModelBindings is NOT cascade-only: `clearModelBinding` deletes one row
-  // on user action ("revert this purpose to the default model", wired from
-  // SettingsPanel). That delete resurrects at the user's own next sync — it
-  // sits on the composite-PK gap documented in design.md, tracked not fixed.
+  // Composite PK, but its user deletes ARE tombstoned: `withTombstones`
+  // decorates `delete(profileId, purpose)` ("Same as main model", removing a
+  // provider) under the id `<profileId>:<purpose>` (`tombstoneIdOf`). The
+  // two-argument delete is why the port sweep above does not list it.
   aiModelBindings:
-    "composite PK (untombstonable — see design.md gap); user delete via " +
-    "clearModelBinding resurrects, tracked not fixed here",
+    "composite PK, decorated by withTombstones as <profileId>:<purpose>",
+  // Composite PKs — structurally untombstonable under `[table+id]`.
   autoMatchDismissals: "composite PK; cascade-only delete",
   coachingSyncState: "composite PK; cascade-only delete",
   dataTypeSourcePolicy: "composite PK; cascade-only delete",

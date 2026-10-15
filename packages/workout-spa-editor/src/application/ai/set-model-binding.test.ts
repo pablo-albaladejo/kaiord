@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
-import { ProviderNotFoundError } from "./errors";
+import { EmptyModelIdError, ProviderNotFoundError } from "./errors";
 import { setModelBinding } from "./set-model-binding";
 
 const provider: LlmProviderConfig = {
@@ -52,4 +52,24 @@ describe("setModelBinding", () => {
     // Assert
     await expect(act).rejects.toBeInstanceOf(ProviderNotFoundError);
   });
+  it.each(["", "   "])(
+    "should reject a blank model id %j and store nothing",
+    async (modelId) => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      await persistence.aiProviders.put(provider);
+
+      // Act
+      const act = setModelBinding(persistence, {
+        profileId: "p-1",
+        purpose: "chat",
+        providerId: "prov-1",
+        modelId,
+      });
+
+      // Assert
+      await expect(act).rejects.toBeInstanceOf(EmptyModelIdError);
+      expect(await persistence.aiModelBindings.getAll("p-1")).toEqual([]);
+    }
+  );
 });

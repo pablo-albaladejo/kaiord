@@ -5,14 +5,14 @@
 
 ## Purpose
 
-CRUD use cases for AI provider configuration: add, update, remove, clear-all, set-default, and the global custom-prompt setting. Sits between the Settings UI and the `AiProviderRepository` port.
+CRUD use cases for AI provider configuration (add, update, remove, clear-all, the global custom-prompt setting) and the per-athlete model bindings (set, clear). Sits between the Settings UI and the `AiProviderRepository` port.
 
 ## Key Files
 
 - `add-provider.ts` / `.test.ts` — append a new `LlmProviderConfig`.
 - `update-provider.ts` / `.test.ts` — patch fields on an existing config.
-- `remove-provider.ts` / `.test.ts` — delete by id; collapses default selection if needed.
-- `set-default-provider.ts` / `.test.ts` — toggle the `isDefault` flag, ensuring exactly one default.
+- `remove-provider.ts` / `.test.ts` — delete by id; promotes the next provider to the internal `isDefault` fallback and deletes every athlete's bindings that pointed at it.
+- `set-model-binding.ts` / `clear-model-binding.ts` — per-athlete provider+model per purpose; a blank model id is rejected (`EmptyModelIdError`).
 - `clear-all-providers.ts` / `.test.ts` — wipe all providers (privacy panel).
 - `set-custom-prompt.ts` / `.test.ts` — write the global system-prompt addendum (stored via the meta-row inside the AI repo).
 - `errors.ts` — `*Error` types for the AI domain.
@@ -22,7 +22,7 @@ CRUD use cases for AI provider configuration: add, update, remove, clear-all, se
 
 ### Working In This Directory
 
-1. **Set-default is an atomic toggle.** Reuse `persistence.transaction(fn)` so flipping the flag on one row while clearing it on another can't drift.
+1. **The main model is the athlete's `default` binding.** `isDefault` on a provider is only the resolver's fallback when no binding exists; no UI sets it.
 2. **Custom prompt is stored on the AI repo**, not in a separate table — `getCustomPrompt` / `setCustomPrompt` on the port (`null` = never set, `""` = user cleared).
 
 ### Testing Requirements
