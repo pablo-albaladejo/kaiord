@@ -123,7 +123,7 @@
     "@eslint/js": "^10.0.1",
     "@fission-ai/openspec": "~1.13.2",
     "@resvg/resvg-js": "^2.6.2",
-    "@size-limit/esbuild": "^13.0.3",
+    "@size-limit/esbuild": "^14.2.0",
     "@size-limit/file": "^13.0.3",
     "@types/node": "^26.6.5",
     "@vitest/eslint-plugin": "^1.6.27",
