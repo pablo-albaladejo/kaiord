@@ -1,7 +1,8 @@
 import { type DailyWellness } from "@kaiord/core";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
+import { todayIsoDate } from "../../utils/today-iso-date";
 import { saveManualHealthMetric } from "./save-manual-health-metric.use-case";
 
 const PROFILE_ID = "p-1";
@@ -163,50 +164,182 @@ describe("saveManualHealthMetric", () => {
     expect(rows).toHaveLength(2);
   });
 
-  it("should overwrite an imported value with a manual value for the same date and metric", async () => {
+  it.each(["tanita-bridge", "train2go-bridge"])(
+    "should keep the day's %s weigh-in and write its own manual row",
+    async (sourceBridgeId) => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      await persistence.healthWeight.put({
+        id: "bridge-1",
+        profileId: PROFILE_ID,
+        date: DAY,
+        sourceBridgeId,
+        externalId: "bridge-hash",
+        krd: {
+          kind: "weight",
+          version: "2.0",
+          measuredAt: `${DAY}T08:00:00.000Z`,
+          weightKilograms: SAMPLE_WEIGHT_KG,
+        },
+      });
+
+      // Act
+      const result = await saveManualHealthMetric(
+        { persistence, profileId: PROFILE_ID, newId: () => "manual-1" },
+        { metric: "weight", day: DAY, value: SAMPLE_WEIGHT_KG_2 }
+      );
+
+      // Assert
+      const rows = await persistence.healthWeight.getByProfileAndDateRange(
+        PROFILE_ID,
+        DAY,
+        DAY
+      );
+      expect(result?.recordId).toBe("manual-1");
+      expect(
+        rows.map((r) => [r.id, r.sourceBridgeId, r.krd.weightKilograms]).sort()
+      ).toEqual([
+        ["bridge-1", sourceBridgeId, SAMPLE_WEIGHT_KG],
+        ["manual-1", "manual", SAMPLE_WEIGHT_KG_2],
+      ]);
+    }
+  );
+
+  describe("the weigh-in's measurement time", () => {
+    const NOW = "2026-05-23T09:41:00.000Z";
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(NOW));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should stamp today's weigh-in with the real time it was entered", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const today = todayIsoDate();
+
+      // Act
+      await saveManualHealthMetric(
+        { persistence, profileId: PROFILE_ID },
+        { metric: "weight", day: today, value: SAMPLE_WEIGHT_KG }
+      );
+
+      // Assert
+      const rows = await persistence.healthWeight.getByProfileAndDateRange(
+        PROFILE_ID,
+        today,
+        today
+      );
+      expect(rows[0]?.krd.measuredAt).toBe(NOW);
+    });
+
+    it("should stamp a past day's weigh-in at noon of that day", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const pastDay = "2026-05-01";
+
+      // Act
+      await saveManualHealthMetric(
+        { persistence, profileId: PROFILE_ID },
+        { metric: "weight", day: pastDay, value: SAMPLE_WEIGHT_KG }
+      );
+
+      // Assert
+      const rows = await persistence.healthWeight.getByProfileAndDateRange(
+        PROFILE_ID,
+        pastDay,
+        pastDay
+      );
+      expect(rows[0]?.krd.measuredAt).toBe(`${pastDay}T12:00:00.000Z`);
+    });
+  });
+
+  it("should leave an imported daily row untouched when steps are entered by hand", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    await persistence.healthWeight.put({
-      id: "imported-1",
+    const imported = {
+      id: "imported-daily",
       profileId: PROFILE_ID,
       date: DAY,
-      krd: {
-        kind: "weight",
-        version: "2.0",
-        measuredAt: `${DAY}T08:00:00.000Z`,
-        weightKilograms: SAMPLE_WEIGHT_KG,
-      },
-    });
+      sourceBridgeId: "fit-import",
+      externalId: "fit-daily-1",
+      krd: priorDaily(),
+    };
+    await persistence.healthDaily.put(imported);
 
     // Act
     await saveManualHealthMetric(
-      { persistence, profileId: PROFILE_ID },
-      { metric: "weight", day: DAY, value: SAMPLE_WEIGHT_KG_2 }
+      { persistence, profileId: PROFILE_ID, newId: () => "manual-daily" },
+      { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
     );
 
     // Assert
-    const rows = await persistence.healthWeight.getByProfileAndDateRange(
+    const rows = await persistence.healthDaily.getByProfileAndDateRange(
       PROFILE_ID,
       DAY,
       DAY
     );
-    expect(rows).toHaveLength(1);
-    expect(rows[0]?.id).toBe("imported-1");
-    expect(rows[0]?.krd.weightKilograms).toBe(SAMPLE_WEIGHT_KG_2);
+    expect(rows).toHaveLength(2);
+    expect(rows.find((r) => r.id === "imported-daily")).toEqual(imported);
+    const manual = rows.find((r) => r.id === "manual-daily");
+    expect(manual?.sourceBridgeId).toBe("manual");
+    expect(manual?.krd.steps).toBe(NEW_STEPS);
   });
 
-  it("should preserve prior calories and intensity when overwriting steps", async () => {
+  it("should update the day's manual steps row when steps are saved again", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.healthDaily.put({
       id: "imported-daily",
       profileId: PROFILE_ID,
       date: DAY,
+      sourceBridgeId: "fit-import",
+      krd: priorDaily(),
+    });
+    const deps = { persistence, profileId: PROFILE_ID, newId: sequentialNewId };
+    const first = await saveManualHealthMetric(deps, {
+      metric: "daily-wellness",
+      day: DAY,
+      value: PRIOR_STEPS,
+    });
+
+    // Act
+    const second = await saveManualHealthMetric(deps, {
+      metric: "daily-wellness",
+      day: DAY,
+      value: NEW_STEPS,
+    });
+
+    // Assert
+    const rows = await persistence.healthDaily.getByProfileAndDateRange(
+      PROFILE_ID,
+      DAY,
+      DAY
+    );
+    const manual = rows.filter((r) => r.sourceBridgeId === "manual");
+    expect(second?.recordId).toBe(first?.recordId);
+    expect(manual).toHaveLength(1);
+    expect(manual[0]?.krd.steps).toBe(NEW_STEPS);
+    expect(rows).toHaveLength(2);
+  });
+
+  it("should keep the calories of a legacy manual row when steps are saved again", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await persistence.healthDaily.put({
+      id: "legacy-daily",
+      profileId: PROFILE_ID,
+      date: DAY,
+      sourceBridgeId: "manual",
       krd: priorDaily(),
     });
 
     // Act
-    await saveManualHealthMetric(
+    const result = await saveManualHealthMetric(
       { persistence, profileId: PROFILE_ID },
       { metric: "daily-wellness", day: DAY, value: NEW_STEPS }
     );
@@ -217,12 +350,12 @@ describe("saveManualHealthMetric", () => {
       DAY,
       DAY
     );
-    expect(rows[0]?.krd.steps).toBe(NEW_STEPS);
-    expect(rows[0]?.krd.activeCalories).toBe(PRIOR_ACTIVE_KCAL);
-    expect(rows[0]?.krd.intensityMinutes.moderate).toBe(PRIOR_MODERATE_MIN);
+    expect(result?.recordId).toBe("legacy-daily");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.krd).toEqual({ ...priorDaily(), steps: NEW_STEPS });
   });
 
-  it("should zero-fill calories and intensity when saving steps for a day with no prior daily row", async () => {
+  it("should store only the entered steps in the manual daily row", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
 
@@ -238,9 +371,12 @@ describe("saveManualHealthMetric", () => {
       DAY,
       DAY
     );
-    expect(rows[0]?.krd.steps).toBe(NEW_STEPS);
-    expect(rows[0]?.krd.activeCalories).toBe(0);
-    expect(rows[0]?.krd.intensityMinutes).toEqual({ moderate: 0, vigorous: 0 });
+    expect(rows[0]?.krd).toEqual({
+      kind: "daily",
+      version: "2.0",
+      date: DAY,
+      steps: NEW_STEPS,
+    });
   });
 
   it("should persist a valid in-range sleep score", async () => {

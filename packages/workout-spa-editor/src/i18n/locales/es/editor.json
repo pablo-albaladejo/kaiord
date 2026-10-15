@@ -86,7 +86,7 @@
     "exportFailedFallback": "No se pudo exportar el entreno",
     "paceZones": {
       "missing-pace-zones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN.",
-      "incomplete-pace-zones": "Este entreno usa una zona de ritmo que tu perfil no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",
+      "incomplete-pace-zones": "Este entreno usa una zona de ritmo que el atleta no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",
       "unsupported-pace-zone-sport": "Solo se pueden exportar zonas de ritmo como GCN en entrenos de carrera o natación."
     }
   },
@@ -102,7 +102,7 @@
     "invalidDescription": "No se pudo programar — la fecha no es un día válido del calendario.",
     "saveFailedTitle": "Error al guardar",
     "saveFailedDescription": "No se pudo programar el entreno — inténtalo de nuevo.",
-    "noProfileReason": "Selecciona o crea un perfil de atleta para programar este entreno."
+    "noProfileReason": "Selecciona o crea un atleta para programar este entreno."
   },
   "raw": {
     "dialogDescription": "Detalles del entreno en bruto con la descripción del entrenador, la selección de comentarios y acciones para procesar o saltar.",
@@ -282,8 +282,8 @@
     "staleHeadline": "Tu reloj sigue con la versión anterior a estos cambios",
     "staleDetail": "Garmin recibió una versión anterior; la has editado desde entonces.",
     "noBridgeHeadline": "Nada puede llegar a tu reloj desde este navegador",
-    "noBridgeDetail": "Garmin no tiene API pública para entrenos, así que la extensión puente hace la entrega. Sin ella, la única vía es descargar el archivo e importarlo a mano.",
-    "noBridgeAction": "Instalar la extensión",
+    "noBridgeDetail": "Garmin no tiene API pública para entrenos, así que la Extensión de Kaiord hace la entrega. Sin ella, la única vía es descargar el archivo e importarlo a mano.",
+    "noBridgeAction": "Instalar la Extensión de Kaiord",
     "exportOffHeadline": "Los entrenos no se envían a Garmin",
     "exportOffDetail": "No se ha enviado nada, y no se enviará hasta que actives esa ruta. Hasta entonces, la única vía es descargar el archivo e importarlo a mano.",
     "exportOffAction": "Activar el envío de entrenos",

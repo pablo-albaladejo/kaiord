@@ -23,9 +23,13 @@ export async function seed(session, date, workoutName) {
     route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
   );
   await go("settings/ai");
-  await page.getByLabel("Etiqueta").fill("verify-prod");
+  await page.getByRole("button", { name: "Añadir cuenta" }).click();
+  await page.getByLabel("Etiqueta (opcional)").fill("verify-prod");
   await page.getByLabel("Clave de API").fill("sk-verify-prod-fake");
-  await page.getByRole("button", { name: "Añadir proveedor" }).click();
-  await page.getByText("verify-prod").first().waitFor();
+  await page.getByRole("button", { name: "Guardar cuenta" }).click();
+  await page
+    .getByTestId("account-label")
+    .filter({ hasText: /^verify-prod$/ })
+    .waitFor();
   return scheduled;
 }

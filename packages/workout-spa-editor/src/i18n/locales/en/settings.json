@@ -2,107 +2,70 @@
   "title": "Settings",
   "back": "Settings",
   "sectionsNav": "Settings sections",
-  "groups": {
-    "yourData": "Your data",
-    "ai": "AI",
-    "preferences": "Preferences",
-    "about": "About"
-  },
-  "rows": {
-    "connections": "Connections",
-    "provider": "Provider & models",
-    "customInstructions": "Custom instructions",
-    "googleDriveSync": "Cross-device sync",
-    "units": "Units",
-    "language": "Language",
-    "notifications": "Notifications",
-    "dataPrivacy": "Privacy & data",
-    "manageYourData": "Manage your data",
-    "usage": "Usage",
-    "helpDocs": "Help & docs",
-    "replayTips": "Show tips again"
-  },
   "values": {
-    "connections": {
-      "detected": "{{found}} of {{total}} detected"
-    },
     "sync": {
       "connected": "Drive · {{relative}}"
     },
-    "usage": {
-      "tokens": "{{tokens}} tokens · {{month}}"
-    },
-    "notifications": {
-      "on": "On",
-      "off": "Off",
-      "blocked": "Blocked",
-      "unsupported": "Unsupported"
-    },
-    "privacy": {
+    "data": {
       "localFirst": "Stored in this browser"
     }
   },
   "tabs": {
+    "general": "General",
     "ai": "AI",
     "sync": "Sync",
-    "connections": "Connections",
-    "usage": "Usage",
+    "data": "Data & backup",
     "privacy": "Privacy",
-    "preferences": "Preferences"
+    "about": "About"
+  },
+  "general": {
+    "theme": "Theme",
+    "themeSystem": "Auto",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "ai": {
-    "llmProviders": "LLM Providers",
-    "addProvider": "Add Provider",
-    "models": "Models",
-    "customSystemPrompt": "Custom System Prompt",
     "customInstructionsLabel": "Additional instructions applied to all generations",
     "customInstructionsPlaceholder": "Additional instructions for all AI generations (e.g., 'I'm recovering from a knee injury')"
   },
   "providers": {
-    "empty": "No providers configured. Add one below.",
-    "listAriaLabel": "Configured LLM providers",
     "provider": "Provider",
     "label": "Label",
     "apiKey": "API Key",
-    "labelPlaceholder": "e.g., My Claude",
-    "addProvider": "Add Provider",
-    "default": "Default",
-    "missingKey": "Missing key",
-    "edit": "Edit",
-    "setDefault": "Set Default",
     "remove": "Remove",
     "save": "Save",
     "cancel": "Cancel",
     "checking": "Checking the key…",
     "keyInvalid": "The provider rejected this key. Check it and try again.",
-    "keyUnverified": "Saved, but the key could not be checked (no connection, or the provider is busy)."
+    "keyUnverified": "Saved, but the key could not be checked (no connection, or the provider is busy).",
+    "keyHint": "Key ending in {{last4}}",
+    "removeTitle": "Remove {{label}}?",
+    "removeMessage": "Its API key is deleted from this browser. Any athlete whose models used it goes back to their main model.",
+    "keepKeyPlaceholder": "Leave empty to keep the current key"
   },
   "aiToast": {
     "addFailed": "Failed to add AI provider — please retry.",
     "removeFailed": "Failed to remove AI provider — please retry.",
-    "updateFailed": "Failed to update AI provider — please retry.",
-    "setDefaultFailed": "Failed to set default provider — please retry.",
-    "promptFailed": "Failed to save custom prompt — please retry."
+    "updateFailed": "Failed to update AI provider — please retry."
   },
   "models": {
-    "default": "Default model",
+    "default": "Main model",
     "chat": "Chat",
     "workoutGeneration": "Workout generation",
     "labExtraction": "Lab extraction",
-    "hint": "Add at least one provider and select an active profile to choose models.",
-    "model": "Model",
     "custom": "Custom…",
+    "inherit": "Same as main model",
+    "inheritRuns": "Runs {{model}}",
     "retired": "{{model}} was retired by the provider — using {{successor}} instead.",
     "deprecated": "{{model}} is deprecated and will be retired — consider {{successor}}.",
     "deprecatedOn": "{{model}} is deprecated and will be retired on {{date}} — consider {{successor}}.",
     "customModelIdAriaLabel": "Custom model id",
     "customModelIdPlaceholder": "Enter a model id",
-    "reset": "Reset",
     "setFailed": "Failed to set the model — please retry.",
     "resetFailed": "Failed to reset the model — please retry."
   },
   "sync": {
-    "description": "Sync your workouts, health and nutrition data (intake log, presets and goal) and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved. If two devices each hold a nutrition goal for the same profile, the most recently saved one is kept.",
+    "description": "Sync your workouts, health and nutrition data (intake log, presets and goal) and settings across devices through your own Google Drive. Data lives on your Drive; no Kaiord server is involved. If two devices each hold a nutrition goal for the same athlete, the most recently saved one is kept.",
     "syncNow": "Sync now",
     "disconnect": "Disconnect",
     "connect": "Connect Google account",
@@ -115,9 +78,9 @@
     "passphrase": "Passphrase",
     "plaintextWarning": "Your saved AI API keys will be uploaded without end-to-end encryption. Enable encryption below to protect them.",
     "profileChoice": {
-      "title": "Which profile is this device for?",
-      "body": "Your Google Drive already holds several profiles. Pick the one that should receive what you recorded on this device; nothing is synced until you choose.",
-      "unnamed": "Unnamed profile"
+      "title": "Which athlete is this device for?",
+      "body": "Your Google Drive already holds several athletes. Pick the one that should receive what you recorded on this device; nothing is synced until you choose.",
+      "unnamed": "Unnamed athlete"
     },
     "connectFailed": "Could not connect Google account — please retry.",
     "syncFailed": "Sync failed — your data is safe and stays local.",
@@ -126,8 +89,8 @@
   "privacy": {
     "information": "Privacy Information",
     "infoNoServer": "Your records sit in this browser, unencrypted — deleting the site data deletes them. Kaiord runs no server that keeps a copy. The only things that leave are what you route to a connection, what you send to your AI provider, and the Drive snapshots if you turn cross-device sync on.",
-    "infoGarmin": "Garmin integration uses a browser extension that piggybacks on your existing Garmin Connect session. No credentials leave your browser.",
-    "infoTrain2go": "Train2Go import uses a browser extension that reads the coaching plan displayed on Train2Go pages you are already viewing. It does not read your password or authentication tokens.",
+    "infoExtension": "Garmin, Train2Go, WHOOP, Tanita and TrainingPeaks connect through the Kaiord extension, which rides the session you already have open on each site. Your passwords never leave your browser.",
+    "infoApiKey": "intervals.icu connects with an API key you paste. It is stored encrypted in this browser and sent only to intervals.icu.",
     "infoLlmKeys": "LLM API keys are sent directly to the provider (Anthropic, OpenAI, or Google) — Kaiord does not receive or relay this data.",
     "infoNotResponsible": "We are not responsible for credential security on your device.",
     "privacyPolicyLink": "Read the full privacy policy",
@@ -135,14 +98,13 @@
     "analyticsIntro": "This editor uses",
     "analyticsLink": "Umami",
     "analyticsOutro": "to track aggregate usage (page views, workout generation, exports). No cookies are set and no personal data is collected.",
-    "dataManagement": "Data Management",
     "exportData": "Export my data",
-    "exportHint": "Downloads your workouts, health, nutrition and settings data as a JSON file, unencrypted. API keys, linked integrations and sync state are not included. Keep the file somewhere safe.",
+    "exportHint": "Downloads your workouts, health, nutrition and settings data as a JSON file, unencrypted. API keys, connections and sync state are not included. Keep the file somewhere safe.",
     "exportFailed": "Could not export your data — please retry.",
     "importData": "Import backup",
     "importFileLabel": "Backup file",
     "importHint": "Merges a Kaiord backup file into this browser without deleting anything here: the newer copy of each record wins, and what you deleted after the backup stays deleted. API keys are not in the file — add them again in the AI settings.",
-    "importChooseProfile": "This backup holds several profiles. Which one should this browser's data join?",
+    "importChooseProfile": "This backup holds several athletes. Which one should this browser's data join?",
     "importConfirm": "Import",
     "importSummary": "Backup imported: {{added}} added, {{updated}} updated, {{notRestored}} deleted after the backup (not restored).",
     "importInvalid": "This file is not a Kaiord backup.",
@@ -152,10 +114,33 @@
     "clearAllHint": "This removes all stored API keys from your browser. Keys already uploaded to your Google Drive by cross-device sync are not deleted by this action.",
     "clearKeysFailed": "Failed to clear API keys — please retry."
   },
+  "data": {
+    "backup": "Backup",
+    "syncLink": "Keep a copy in your Google Drive with Sync",
+    "dangerZone": "Danger zone",
+    "wipe": "Delete all my data",
+    "wipeHint": "Deletes everything Kaiord keeps in this browser and starts again from scratch.",
+    "wipeFailed": "Could not delete your data. Nothing was deleted; please retry.",
+    "wipeDialog": {
+      "title": "Delete all my data?",
+      "body": "This deletes every athlete, workout, health and nutrition record, connection, AI key and setting stored in this browser. It cannot be undone: export a backup first if you may want any of it back.",
+      "drive": "Your copy in Google Drive is not deleted. Sync is turned off in this browser; if you connect it again, that copy comes back here.",
+      "confirmWord": "DELETE",
+      "typeLabel": "Type {{word}} to confirm",
+      "syncing": "Wait for the sync in progress to finish.",
+      "confirm": "Delete everything",
+      "cancel": "Cancel"
+    }
+  },
+  "about": {
+    "helpDocs": "Help & docs",
+    "replayTips": "Show tips again",
+    "replayTipsHint": "Shows again the tips you already dismissed."
+  },
   "usage": {
-    "title": "AI Usage",
-    "heading": "AI Usage — last {{count}} months",
-    "empty": "No AI usage recorded yet for the last {{count}} months. The panel will populate automatically after your first batch run.",
+    "title": "AI Usage — all athletes",
+    "heading": "AI Usage — all athletes, last {{count}} months",
+    "empty": "No AI usage recorded yet for the last {{count}} months. It fills in once you use the AI assistant or create a workout with AI.",
     "month": "Month",
     "input": "Input",
     "output": "Output",
@@ -183,6 +168,47 @@
   },
   "attention": {
     "title_one": "{{count}} connection needs attention",
-    "title_other": "{{count}} connections need attention"
+    "title_other": "{{count}} connections need attention",
+    "action": "Open connections"
+  },
+  "assistant": {
+    "title": "Your assistant (for {{athlete}})",
+    "titleNoAthlete": "Your assistant",
+    "empty": "Add an AI account below to choose the model your assistant uses.",
+    "missingKey": "“{{account}}” has no API key: backups never carry keys. Enter it below with “Replace key” to choose the model your assistant uses.",
+    "noAthlete": "Choose an athlete to pick the model your assistant uses.",
+    "runsOn": "on {{account}}",
+    "usage_one": "Total this month (all athletes): {{count}} request · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "Total this month (all athletes): {{count}} requests · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "No AI use yet this month, by any athlete."
+  },
+  "keyStatus": {
+    "verified": "Key verified",
+    "unverified": "Key not checked",
+    "missing": "Key missing"
+  },
+  "accounts": {
+    "title": "AI accounts",
+    "shared": "Shared by every athlete.",
+    "listAriaLabel": "AI accounts",
+    "empty": "No AI accounts yet.",
+    "add": "Add account",
+    "save": "Save account",
+    "replaceKey": "Replace key",
+    "newKey": "New API key",
+    "rename": "Rename",
+    "moreActions": "More actions for {{label}}",
+    "labelOptional": "Label (optional)",
+    "labelPlaceholder": "Defaults to the provider name"
+  },
+  "advanced": {
+    "title": "Advanced: model per task (for {{athlete}})",
+    "titleNoAthlete": "Advanced: model per task"
+  },
+  "prompt": {
+    "title": "Instructions for the AI",
+    "saving": "Saving…",
+    "saved": "Saved ✓",
+    "failed": "Could not save. Try again."
   }
 }

@@ -7,7 +7,7 @@ import { ICON_MAP } from "../../atoms/Icon/icon-map";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "./header-menu-styles";
 import type { HeaderAttention } from "./use-header-attention";
 
-const CONNECTIONS_PATH = "/settings/connections";
+const CONNECTIONS_PATH = "/connections";
 
 /**
  * No amber. Amber is Z4 — a warning painted in it competes with the
@@ -50,7 +50,13 @@ export function SourceHealthPill({ attention }: SourceHealthPillProps) {
             aria-hidden="true"
             className="h-3.5 w-3.5 flex-none"
           />
-          <span className="hidden lg:inline">{attention.title}</span>
+          {/* The count, not the sentence: beside seven labelled entries the
+              sentence pushes the avatar onto a row of its own, and a phone
+              has room for the icon alone. The title stays the accessible
+              name and heads the menu. */}
+          <span className="hidden tabular-nums md:inline">
+            {attention.count}
+          </span>
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

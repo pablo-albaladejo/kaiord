@@ -2,9 +2,9 @@ import type { ManagedDataType } from "@kaiord/core";
 import { useMemo } from "react";
 
 import { DATA_TYPE_GROUPS } from "../../../application/connections/data-type-groups";
+import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import { useDataTypeRouting } from "../../../hooks/connections/use-data-type-routing";
 import { useTranslate } from "../../../i18n/use-translate";
-import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import { DataTypeRoutingGroup } from "./DataTypeRoutingGroup";
 
 type Props = { profileId: string; byDataType: DataFlowsByType };

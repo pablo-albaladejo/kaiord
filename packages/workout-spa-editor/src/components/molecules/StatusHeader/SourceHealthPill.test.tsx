@@ -9,6 +9,7 @@ import { SourceHealthPill } from "./SourceHealthPill";
 import type { HeaderAttention } from "./use-header-attention";
 
 const DOWN: HeaderAttention = {
+  count: 1,
   title: "1 source down",
   detail: "Kaiord cannot read from a source — signing in again may restore it",
 };
@@ -51,6 +52,20 @@ describe("SourceHealthPill", () => {
     expect(pill).toHaveAccessibleName("1 source down");
   });
 
+  it("should show only the count in the bar, where the sentence does not fit", () => {
+    // Arrange
+    // The Spanish sentence ("1 fuente caída") beside seven labelled entries
+    // pushed the avatar onto a header row of its own at every desktop width.
+    renderPill({ ...DOWN, count: 2, title: "2 sources down" });
+
+    // Act
+    const pill = screen.getByTestId("status-header-source-health");
+
+    // Assert
+    expect(pill).toHaveTextContent(/^2$/);
+    expect(pill).toHaveAccessibleName("2 sources down");
+  });
+
   it("should state the consequence and lead to all connections", async () => {
     // Arrange
     const user = userEvent.setup();
@@ -65,7 +80,7 @@ describe("SourceHealthPill", () => {
     expect(menu).toHaveTextContent(
       "Kaiord cannot read from a source — signing in again may restore it"
     );
-    expect(loc.history).toContain("/settings/connections");
+    expect(loc.history).toContain("/connections");
   });
 
   it("should offer no Reconnect action it cannot perform", async () => {

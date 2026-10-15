@@ -1,6 +1,7 @@
 /**
  * One-time, dismissible hint shown while the active profile is the
- * first-run default ("My profile"): everything already works, and the link
+ * first-run default, quoting its stored name (older installs created it as
+ * "My profile"): everything already works, and the link
  * leads to the athlete page to add thresholds and weight.
  */
 import { Link } from "wouter";
@@ -11,14 +12,16 @@ import { useDefaultProfileNotice } from "./use-default-profile-notice";
 
 export function DefaultProfileNotice() {
   const t = useTranslate("athlete");
-  const { visible, dismiss } = useDefaultProfileNotice();
+  const { visible, dismiss, name } = useDefaultProfileNotice();
   if (!visible) return null;
   return (
     <div
       data-testid="default-profile-notice"
       className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-edge-soft bg-surface p-3.5 text-[13px] text-ink-body"
     >
-      <p className="m-0 flex-1 basis-60">{t("defaultProfile.notice")}</p>
+      <p className="m-0 flex-1 basis-60">
+        {t("defaultProfile.notice", { name })}
+      </p>
       <Link
         href={BODY_SECTION_HREF}
         className="text-xs font-medium text-ink-strong underline underline-offset-2"

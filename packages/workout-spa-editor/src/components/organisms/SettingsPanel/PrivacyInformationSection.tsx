@@ -9,8 +9,8 @@ export function PrivacyInformationSection() {
       </h3>
       <ul className="space-y-2 text-sm text-ink-body">
         <li>{t("privacy.infoNoServer")}</li>
-        <li>{t("privacy.infoGarmin")}</li>
-        <li>{t("privacy.infoTrain2go")}</li>
+        <li>{t("privacy.infoExtension")}</li>
+        <li>{t("privacy.infoApiKey")}</li>
         <li>{t("privacy.infoLlmKeys")}</li>
         <li>{t("privacy.infoNotResponsible")}</li>
       </ul>

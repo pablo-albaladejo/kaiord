@@ -94,20 +94,45 @@ describe("SettingsAttention", () => {
     );
   });
 
-  it("should omit the action on the chip", () => {
+  it("should run the action from the chip, so the rail is not a dead end", async () => {
+    // Arrange
+    const onSelect = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <SettingsAttention
+        attention={{
+          title: "1 connection needs attention",
+          action: { label: "Open connections", onSelect },
+        }}
+        variant="chip"
+      />
+    );
+
+    // Act
+    await user.click(screen.getByRole("button", { name: "Open connections" }));
+
+    // Assert
+    expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("should render the chip action as a real link when it has a destination", () => {
     // Arrange
     const attention = {
       title: "1 connection needs attention",
-      action: { label: "Fix", onSelect: vi.fn() },
+      action: {
+        label: "Open connections",
+        onSelect: vi.fn(),
+        href: "/connections",
+      },
     };
 
     // Act
     render(<SettingsAttention attention={attention} variant="chip" />);
 
     // Assert
-    expect(screen.getByTestId("settings-attention-chip")).toBeInTheDocument();
     expect(
-      screen.queryByTestId("settings-attention-action")
-    ).not.toBeInTheDocument();
+      screen.getByRole("link", { name: "Open connections" })
+    ).toHaveAttribute("href", "/connections");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });

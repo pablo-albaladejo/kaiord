@@ -1,11 +1,13 @@
 import { createWorkoutKRD, type Workout } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
+import { appI18n, setActiveLocale } from "../../i18n/i18n";
 import type { Target } from "../../types/krd";
 import type { SportThresholds } from "../../types/sport-zones";
 import { classifyTargetZone } from "./classify-zone";
 import { estimateTss } from "./estimate-tss";
 import { getStructuredWorkout } from "./get-workout";
+import { reviewCopyFor } from "./review-copy";
 import { buildReviewModel } from "./review-model";
 import { toStepItems } from "./step-items";
 import { timeInZone } from "./time-in-zone";
@@ -205,5 +207,18 @@ describe("workout-review", () => {
     expect(model?.steps).toHaveLength(TOTAL_ROWS);
     expect(model?.dist).toHaveLength(ZONE_COUNT);
     expect(model?.tss).toBeGreaterThan(0);
+  });
+
+  it("should word the load label in the copy's locale", async () => {
+    // Arrange
+    await setActiveLocale("es");
+    const copy = reviewCopyFor("es");
+
+    // Act
+    const model = buildReviewModel(krd(), THRESHOLDS, "Fallback", copy);
+    await appI18n.changeLanguage("en");
+
+    // Assert
+    expect(model?.load).toMatch(/^(Recuperación|Moderada|Dura|Muy dura)$/);
   });
 });

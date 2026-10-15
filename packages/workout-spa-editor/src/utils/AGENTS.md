@@ -36,7 +36,6 @@ Cross-cutting utilities used by the UI tree. Format detection, import/export pip
 ### Storage + recovery
 
 - `library-storage.ts` / `.test.ts` — Library template read/write (delegates to `TemplateRepository`).
-- `profile-storage.ts` / `.test.ts` + `profile-storage.types.ts` — profile persistence helpers.
 - `backup-download.ts` / `.test.ts` — local-backup download flow.
 - `error-recovery.ts` / `.test.ts` — `safeMode` + `lastBackup` recovery wiring.
 - `workout-migration.ts` / `.test.ts` — workout-level migrations applied at load.

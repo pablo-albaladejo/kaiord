@@ -22,6 +22,7 @@ import { useEffect, useRef } from "react";
 
 import { profileToSnapshot } from "../lib/profile-snapshot/profile-to-snapshot";
 import { SNAPSHOT_CAPABLE_BRIDGE_IDS } from "../lib/profile-snapshot/snapshot-capable-bridges";
+import { useCurrentWeightKg } from "./health/use-current-weight";
 import { useActiveProfileLive } from "./use-active-profile-live";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
 import {
@@ -33,6 +34,8 @@ import {
 export const useProfileSnapshotPush = (): void => {
   const active = useActiveProfileLive();
   const bridges = useDiscoveredBridges();
+  // The popup's weight is the athlete's current weight, not the stored field.
+  const currentWeightKg = useCurrentWeightKg(active?.id, active?.profile);
   const lastFingerprintRef = useRef<Map<string, string>>(new Map());
   const lastProfileIdRef = useRef<string | null | undefined>(undefined);
   const pendingClearRef = useRef<boolean>(false);
@@ -63,12 +66,12 @@ export const useProfileSnapshotPush = (): void => {
 
     if (!active.profile || snapshotBridges.length === 0) return;
 
-    const profile = active.profile;
+    const profile = { ...active.profile, bodyWeight: currentWeightKg };
     const snapshot = profileToSnapshot(profile, pickActiveSport(profile));
     const fp = fingerprintSnapshot(profile.id, snapshot);
     for (const bridge of snapshotBridges) {
       if (lastFingerprintRef.current.get(bridge.extensionId) === fp) continue;
       void sendSnapshot(bridge, snapshot, fp, lastFingerprintRef.current);
     }
-  }, [active, bridges]);
+  }, [active, bridges, currentWeightKg]);
 };

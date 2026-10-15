@@ -76,7 +76,7 @@
         "cta": "Añadir una clave"
       },
       "bridge": {
-        "title": "Instala la extensión puente",
+        "title": "Instala la Extensión de Kaiord",
         "consequence": "Envía las sesiones directamente a tu reloj Garmin. Sin ella, descargas el archivo y lo importas tú.",
         "cta": "Instalar"
       }
@@ -102,8 +102,8 @@
   "noBridges": {
     "headline_one": "{{count}} sesión está lista pero no puede llegar a tu reloj",
     "headline_other": "{{count}} sesiones están listas pero no pueden llegar a tu reloj",
-    "consequence": "Garmin no tiene API pública para entrenos, así que la extensión puente hace la entrega. Hasta instalarla, descargar el fichero e importarlo a mano es la única vía.",
-    "cta": "Instalar el puente"
+    "consequence": "Garmin no tiene API pública para entrenos, así que la Extensión de Kaiord hace la entrega. Hasta instalarla, descargar el fichero e importarlo a mano es la única vía.",
+    "cta": "Instalar la Extensión de Kaiord"
   },
   "coachMoves": {
     "moved_one": "{{count}} sesión se ha movido a la nueva fecha del entrenador.",
@@ -130,7 +130,7 @@
     "openConnections": "Abrir Conexiones",
     "preflight": {
       "no-export-route": "Activa el envío de entrenamientos a Garmin en Conexiones (Entrenamiento → También se envía a) y vuelve a enviar la semana.",
-      "no-bridge": "Instala la extensión Kaiord Garmin Bridge y vuelve a enviar la semana.",
+      "no-bridge": "Instala la Extensión de Kaiord para Garmin y vuelve a enviar la semana.",
       "no-session": "Inicia sesión en Garmin Connect en este navegador y vuelve a enviar la semana.",
       "insecure-context": "El calendario de Garmin necesita una página segura (HTTPS). No se ha enviado nada.",
       "unsupported-browser": "El calendario de Garmin necesita un navegador con Web Locks. No se ha enviado nada."
@@ -157,13 +157,13 @@
       "libraryOnly": "Solo en biblioteca: {{count}}",
       "attention": "Necesitan atención: {{count}}"
     },
-    "outdated": "Tu extensión Garmin Bridge aún no puede usar el calendario, así que estos solo llegaron a tu biblioteca. Actualízala y reintenta.",
+    "outdated": "Tu Extensión de Kaiord para Garmin aún no puede usar el calendario, así que estos solo llegaron a tu biblioteca. Actualízala y reintenta.",
     "updateExtension": "Actualizar la extensión"
   },
   "wellnessToast": {
     "saved": "Bienestar guardado",
     "saveFailed": "No se pudo guardar — vuelve a intentarlo",
-    "noProfile": "No hay perfil de atleta: selecciona o crea uno para guardar el bienestar"
+    "noProfile": "No hay atleta: selecciona o crea uno para guardar el bienestar"
   },
   "sport": {
     "cycling": "Ciclismo",

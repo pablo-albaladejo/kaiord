@@ -26,7 +26,11 @@ describe("kaiord-announce.js (train2go-bridge)", () => {
         name: "Kaiord Train2Go Bridge",
         version: "0.0.0",
         protocolVersion: 1,
-        capabilities: ["read:training-plan", "read:training-zones"],
+        capabilities: [
+          "read:training-plan",
+          "read:training-zones",
+          "read:body",
+        ],
       });
     });
   });

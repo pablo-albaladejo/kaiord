@@ -128,10 +128,6 @@ export const BOUNDARIES_ALLOWLIST = Object.freeze(
       "src/components/organisms/CoachingSidebar/CoachingSidebar.tsx",
       REASON.ADAPTER_EXPORTS_UI,
     ],
-    [
-      "src/components/organisms/ProfileManager/components/use-linked-account-row.ts",
-      REASON.ADAPTER_EXPORTS_UI,
-    ],
 
     // --- E: bridge transport with no port yet ---
     [

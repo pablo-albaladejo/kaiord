@@ -17,6 +17,11 @@ export type UsageTableProps = {
   monthsWindow: number;
 };
 
+const HEAD = "py-2 pr-2 font-medium sm:pr-4";
+// A phone has room for the month, the total and the cost; the input/output
+// split shows from the `sm` breakpoint up.
+const WIDE_HEAD = `${HEAD} hidden sm:table-cell`;
+
 export function UsageTable({ rows, monthsWindow }: UsageTableProps) {
   const t = useTranslate("settings");
   return (
@@ -24,14 +29,14 @@ export function UsageTable({ rows, monthsWindow }: UsageTableProps) {
       <h3 className="text-base font-semibold text-ink-strong">
         {t("usage.heading", { count: monthsWindow })}
       </h3>
-      <table className="w-full text-sm" data-testid="usage-table">
+      <table className="w-full text-xs sm:text-sm" data-testid="usage-table">
         <thead>
           <tr className="border-b border-edge text-left text-ink-muted">
-            <th className="py-2 pr-4 font-medium">{t("usage.month")}</th>
-            <th className="py-2 pr-4 font-medium">{t("usage.input")}</th>
-            <th className="py-2 pr-4 font-medium">{t("usage.output")}</th>
-            <th className="py-2 pr-4 font-medium">{t("usage.total")}</th>
-            <th className="py-2 pr-4 font-medium">{t("usage.cost")}</th>
+            <th className={HEAD}>{t("usage.month")}</th>
+            <th className={WIDE_HEAD}>{t("usage.input")}</th>
+            <th className={WIDE_HEAD}>{t("usage.output")}</th>
+            <th className={HEAD}>{t("usage.total")}</th>
+            <th className={HEAD}>{t("usage.cost")}</th>
           </tr>
         </thead>
         <tbody>

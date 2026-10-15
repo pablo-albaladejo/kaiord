@@ -86,7 +86,7 @@
     "exportFailedFallback": "Failed to export workout",
     "paceZones": {
       "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to export it as GCN.",
-      "incomplete-pace-zones": "This workout uses a pace zone your profile doesn't define. Complete your pace zones in Athlete to export it as GCN.",
+      "incomplete-pace-zones": "This workout uses a pace zone the athlete doesn't define. Complete your pace zones in Athlete to export it as GCN.",
       "unsupported-pace-zone-sport": "Pace zones can only be exported as GCN in running or swimming workouts."
     }
   },
@@ -102,7 +102,7 @@
     "invalidDescription": "Could not schedule — the date is not a valid calendar day.",
     "saveFailedTitle": "Save failed",
     "saveFailedDescription": "Could not schedule the workout — please retry.",
-    "noProfileReason": "Select or create an athlete profile to schedule this workout."
+    "noProfileReason": "Select or create an athlete to schedule this workout."
   },
   "raw": {
     "dialogDescription": "Raw workout details with coach description, comment selection, and actions to process or skip.",
@@ -282,13 +282,13 @@
     "staleHeadline": "Your watch still has the version from before these edits",
     "staleDetail": "Garmin received an earlier version; you have edited it since.",
     "noBridgeHeadline": "Nothing can reach your watch from this browser",
-    "noBridgeDetail": "Garmin has no public API for workouts, so the bridge extension does the handover. Without it, downloading the file and importing it by hand is the only route.",
-    "noBridgeAction": "Install the bridge",
+    "noBridgeDetail": "Garmin has no public API for workouts, so the Kaiord extension does the handover. Without it, downloading the file and importing it by hand is the only route.",
+    "noBridgeAction": "Install the Kaiord extension",
     "exportOffHeadline": "Workouts aren't routed to Garmin",
     "exportOffDetail": "Nothing has been sent, and nothing will be until you turn that route on. Until then, downloading the file and importing it by hand is the only way through.",
     "exportOffAction": "Turn on workout export",
     "noSessionHeadline": "Garmin signed you out, so this can't reach your watch",
-    "noSessionDetail": "The bridge rides your Garmin Connect session, and that session has ended. Sign in again, or download the file and import it by hand.",
+    "noSessionDetail": "The Kaiord extension rides your Garmin Connect session, and that session has ended. Sign in again, or download the file and import it by hand.",
     "noSessionAction": "Sign in to Garmin",
     "placementHeadline": "Your watch has this version; its calendar date needs you",
     "placementDetail": "The workout reached your Garmin library, but its date on the Garmin calendar needs a look.",
