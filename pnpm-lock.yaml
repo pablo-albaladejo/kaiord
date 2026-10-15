@@ -57,8 +57,8 @@ importers:
         specifier: ^13.0.3
         version: 13.0.3(size-limit@13.0.3)
       '@size-limit/file':
-        specifier: ^13.0.3
-        version: 13.0.3(size-limit@13.0.3)
+        specifier: ^14.2.0
+        version: 14.2.0(size-limit@13.0.3)
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -3899,11 +3899,11 @@ packages:
     peerDependencies:
       size-limit: 13.0.3
 
-  '@size-limit/file@13.0.3':
-    resolution: {integrity: sha512-PWTITIXH5p9aGIf6qq2Fruihn/b9nBQyfkyoAyb6DzFJgS1Ek9MSPJYKxKFLO8jdo0aqSgBPd3sevbS6PyBiJw==}
-    engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
+  '@size-limit/file@14.2.0':
+    resolution: {integrity: sha512-ROqMjC8Pi/ogIIm79Y4u8YieXJb++MaZWbdv/am16l4cS9CxSUXmqP3igIXyv3gK3LMG6DkZdWSM5KVND2ug7g==}
+    engines: {node: ^22.19.0 || ^24.5.0 || >=26.0.0}
     peerDependencies:
-      size-limit: 13.0.3
+      size-limit: 14.2.0
 
   '@so-ric/colorspace@1.1.6':
     resolution: {integrity: sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw==}
@@ -10869,7 +10869,7 @@ snapshots:
       nanoid: 6.0.1
       size-limit: 13.0.3
 
-  '@size-limit/file@13.0.3(size-limit@13.0.3)':
+  '@size-limit/file@14.2.0(size-limit@13.0.3)':
     dependencies:
       size-limit: 13.0.3
 
