@@ -103,4 +103,18 @@ describe("UsageTable", () => {
     expect(screen.getByTestId("usage-output-2026-04")).toHaveTextContent("300");
     expect(screen.getByTestId("usage-output-2026-03")).toHaveTextContent("100");
   });
+
+  it("should write each cost as currency, the way the assistant card does", () => {
+    // Arrange
+    const month = makeMonth();
+
+    // Act
+    render(<UsageTable rows={[month]} monthsWindow={MONTHS_WINDOW} />);
+
+    // Assert
+    expect(screen.getByTestId("usage-row-2026-04")).toHaveTextContent("$0.02");
+    expect(screen.getByTestId("usage-row-2026-04")).not.toHaveTextContent(
+      "$0.0200"
+    );
+  });
 });

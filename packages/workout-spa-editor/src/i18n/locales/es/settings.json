@@ -46,8 +46,7 @@
   "aiToast": {
     "addFailed": "No se pudo añadir el proveedor de IA. Inténtalo de nuevo.",
     "removeFailed": "No se pudo eliminar el proveedor de IA. Inténtalo de nuevo.",
-    "updateFailed": "No se pudo actualizar el proveedor de IA. Inténtalo de nuevo.",
-    "promptFailed": "No se pudo guardar el prompt personalizado. Inténtalo de nuevo."
+    "updateFailed": "No se pudo actualizar el proveedor de IA. Inténtalo de nuevo."
   },
   "models": {
     "default": "Modelo principal",
@@ -177,9 +176,9 @@
     "empty": "Añade una cuenta de IA abajo para elegir el modelo de tu asistente.",
     "noAthlete": "Elige un atleta para escoger el modelo de tu asistente.",
     "runsOn": "en {{account}}",
-    "usage_one": "Este mes: {{count}} petición · {{tokens}} tokens · ~{{cost}}",
-    "usage_other": "Este mes: {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
-    "usageNone": "Aún no has usado la IA este mes."
+    "usage_one": "Total este mes (todos los atletas): {{count}} petición · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "Total este mes (todos los atletas): {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "Ningún atleta ha usado la IA este mes."
   },
   "keyStatus": {
     "verified": "Clave verificada",
@@ -201,7 +200,8 @@
     "labelPlaceholder": "Por defecto, el nombre del proveedor"
   },
   "advanced": {
-    "title": "Avanzado: modelo por tarea (para {{athlete}})"
+    "title": "Avanzado: modelo por tarea (para {{athlete}})",
+    "titleNoAthlete": "Avanzado: modelo por tarea"
   },
   "prompt": {
     "title": "Instrucciones para la IA",

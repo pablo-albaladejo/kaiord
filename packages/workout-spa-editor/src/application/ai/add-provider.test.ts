@@ -135,4 +135,19 @@ describe("addProvider", () => {
       "valid"
     );
   });
+
+  it("should number a typed label another account already carries", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await addProvider(persistence, { ...baseProvider, label: "Work" });
+
+    // Act
+    const second = await addProvider(persistence, {
+      ...baseProvider,
+      label: " Work ",
+    });
+
+    // Assert
+    expect(second.label).toBe("Work 2");
+  });
 });

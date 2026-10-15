@@ -9,6 +9,7 @@ import type { KeySaveOutcome } from "./save-with-key-check";
 type ProviderListProps = {
   providers: Array<LlmProviderConfig>;
   onRemove: (id: string) => void;
+  onRemoved?: () => void;
   onUpdate: (
     provider: LlmProviderConfig,
     updates: { label: string; apiKey: string | undefined }
@@ -25,6 +26,7 @@ const closes = (outcome: KeySaveOutcome) =>
 export const ProviderList: React.FC<ProviderListProps> = ({
   providers,
   onRemove,
+  onRemoved,
   onUpdate,
 }) => {
   const t = useTranslate("settings");
@@ -59,6 +61,7 @@ export const ProviderList: React.FC<ProviderListProps> = ({
               onReplaceKey={() => setEditing({ id: p.id, mode: "key" })}
               onRename={() => setEditing({ id: p.id, mode: "rename" })}
               onRemove={() => onRemove(p.id)}
+              onRemoved={onRemoved}
             />
           )}
         </li>

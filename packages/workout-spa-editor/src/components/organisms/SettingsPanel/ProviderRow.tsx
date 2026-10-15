@@ -12,6 +12,7 @@ type ProviderRowProps = {
   onReplaceKey: () => void;
   onRename: () => void;
   onRemove: () => void;
+  onRemoved?: () => void;
 };
 
 export const ProviderRow: React.FC<ProviderRowProps> = ({
@@ -19,12 +20,15 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
   onReplaceKey,
   onRename,
   onRemove,
+  onRemoved,
 }) => {
   const t = useTranslate("settings");
   const last4 = keyLastFour(p.apiKey);
   const typeName = PROVIDER_TYPE_NAMES[p.type];
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-edge p-3">
+    // On a phone the actions sit under the account, so a long key status
+    // ("Clave sin comprobar") never runs beneath them.
+    <div className="flex flex-col gap-2 rounded-lg border border-edge p-3 sm:flex-row sm:items-center sm:gap-3">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2">
           <span data-testid="account-label" className="break-words font-medium">
@@ -47,7 +51,7 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
           <KeyStatusBadge status={keyStatusOf(p)} />
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="flex shrink-0 items-center justify-end gap-1">
         <Button size="sm" variant="secondary" onClick={onReplaceKey}>
           {t("accounts.replaceKey")}
         </Button>
@@ -55,6 +59,7 @@ export const ProviderRow: React.FC<ProviderRowProps> = ({
           label={p.label}
           onRename={onRename}
           onRemove={onRemove}
+          onRemoved={onRemoved}
         />
       </div>
     </div>

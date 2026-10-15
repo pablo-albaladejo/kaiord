@@ -7,21 +7,23 @@ import type { AiModelBinding } from "../../../types/ai-model-binding";
 import { AdvancedModels } from "./AdvancedModels";
 
 const live = vi.hoisted(() => ({
+  athlete: { id: "p-1", name: "Ana" },
   providers: [] as LlmProviderConfig[],
   bindings: [] as AiModelBinding[],
 }));
 
 vi.mock("../../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: () => ({
-    id: "p-1",
-    profile: { name: "Ana", linkedAccounts: [] },
+    id: live.athlete.id,
+    profile: { name: live.athlete.name, linkedAccounts: [] },
   }),
 }));
 vi.mock("../../../hooks/use-ai-providers-live", () => ({
   useAiProvidersLive: () => live.providers,
 }));
 vi.mock("../../../hooks/use-ai-model-bindings-live", () => ({
-  useAiModelBindingsLive: () => live.bindings,
+  useAiModelBindingsLive: (profileId: string | null) =>
+    live.bindings.filter((b) => b.profileId === profileId),
 }));
 
 const claude: LlmProviderConfig = {
@@ -46,6 +48,7 @@ const shown = (select: HTMLElement): string =>
 
 describe("AdvancedModels", () => {
   beforeEach(() => {
+    live.athlete = { id: "p-1", name: "Ana" };
     live.providers = [claude, gpt];
     live.bindings = [];
   });
@@ -138,5 +141,16 @@ describe("AdvancedModels", () => {
       "model-workout_generation",
       "model-lab_extraction",
     ]);
+  });
+
+  it("should leave the athlete out of the title when the athlete has no name", () => {
+    // Arrange
+    live.athlete = { id: "p-1", name: "" };
+
+    // Act
+    renderWithProviders(<AdvancedModels />);
+
+    // Assert
+    expect(screen.getByText("Advanced: model per task")).toBeInTheDocument();
   });
 });

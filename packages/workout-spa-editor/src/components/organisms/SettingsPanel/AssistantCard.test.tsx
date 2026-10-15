@@ -8,6 +8,7 @@ import type { UsageEventRecord } from "../../../types/usage-event-schemas";
 import { AssistantCard } from "./AssistantCard";
 
 const live = vi.hoisted(() => ({
+  athlete: { id: "p-1", name: "Ana" },
   providers: [] as LlmProviderConfig[],
   bindings: [] as AiModelBinding[],
   events: [] as UsageEventRecord[],
@@ -15,15 +16,16 @@ const live = vi.hoisted(() => ({
 
 vi.mock("../../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: () => ({
-    id: "p-1",
-    profile: { name: "Ana", linkedAccounts: [] },
+    id: live.athlete.id,
+    profile: { name: live.athlete.name, linkedAccounts: [] },
   }),
 }));
 vi.mock("../../../hooks/use-ai-providers-live", () => ({
   useAiProvidersLive: () => live.providers,
 }));
 vi.mock("../../../hooks/use-ai-model-bindings-live", () => ({
-  useAiModelBindingsLive: () => live.bindings,
+  useAiModelBindingsLive: (profileId: string | null) =>
+    live.bindings.filter((b) => b.profileId === profileId),
 }));
 vi.mock("../../../hooks/use-usage-summary", () => ({
   useUsageSummary: () => ({ months: ["2026-10"], events: live.events }),
@@ -39,6 +41,28 @@ const claude: LlmProviderConfig = {
   createdAt: 1,
 };
 
+const gpt: LlmProviderConfig = {
+  id: "gpt",
+  type: "openai",
+  apiKey: "sk-gpt-2222",
+  label: "Mi GPT",
+  isDefault: false,
+  keyCheck: "unverified",
+  createdAt: 2,
+};
+
+const mainBinding = (
+  profileId: string,
+  providerId: string,
+  modelId: string
+): AiModelBinding => ({
+  profileId,
+  purpose: "default",
+  providerId,
+  modelId,
+  updatedAt: "2026-10-15T00:00:00.000Z",
+});
+
 const usage = (id: string, tokens: number, cost: number): UsageEventRecord => ({
   id,
   yearMonth: "2026-10",
@@ -53,6 +77,7 @@ const usage = (id: string, tokens: number, cost: number): UsageEventRecord => ({
 
 describe("AssistantCard", () => {
   beforeEach(() => {
+    live.athlete = { id: "p-1", name: "Ana" };
     live.providers = [claude];
     live.bindings = [
       {
@@ -82,7 +107,7 @@ describe("AssistantCard", () => {
     expect(screen.getByLabelText("Main model")).toBeInTheDocument();
   });
 
-  it("should sum this month's requests, tokens and estimated cost", () => {
+  it("should sum this month's requests, tokens and estimated cost across athletes", () => {
     // Arrange
     const [big, small] = [
       { tokens: 1000, cost: 0.2 },
@@ -98,7 +123,7 @@ describe("AssistantCard", () => {
 
     // Assert
     expect(screen.getByTestId("assistant-usage")).toHaveTextContent(
-      "This month: 2 requests · 1,500 tokens · ~$0.25"
+      "Total this month (all athletes): 2 requests · 1,500 tokens · ~$0.25"
     );
   });
 
@@ -109,7 +134,9 @@ describe("AssistantCard", () => {
     renderWithProviders(<AssistantCard />);
 
     // Assert
-    expect(screen.getByText("No AI use yet this month.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No AI use yet this month, by any athlete.")
+    ).toBeInTheDocument();
   });
 
   it("should point to adding an account when there is none", () => {
@@ -126,5 +153,40 @@ describe("AssistantCard", () => {
       )
     ).toBeInTheDocument();
     expect(screen.queryByLabelText("Main model")).not.toBeInTheDocument();
+  });
+
+  it("should follow the active athlete's main model, not the account marked default", () => {
+    // Arrange
+    live.providers = [claude, gpt];
+    live.bindings = [
+      mainBinding("p-1", "gpt", "gpt-5-mini"),
+      mainBinding("p-2", "claude", "claude-opus-5"),
+    ];
+    const { rerender } = renderWithProviders(<AssistantCard />);
+    const forAna = screen.getByTestId("assistant-model").textContent;
+    const anaAccount = screen.getByText(/^on /).textContent;
+
+    // Act
+    live.athlete = { id: "p-2", name: "Bea" };
+    rerender(<AssistantCard />);
+
+    // Assert
+    expect([forAna, anaAccount]).toEqual(["GPT-5 mini", "on Mi GPT"]);
+    expect(screen.getByText("Your assistant (for Bea)")).toBeInTheDocument();
+    expect(screen.getByTestId("assistant-model")).toHaveTextContent(
+      "Claude Opus 5"
+    );
+    expect(screen.getByText("on Mi Claude")).toBeInTheDocument();
+  });
+
+  it("should leave the athlete out of the title when the athlete has no name", () => {
+    // Arrange
+    live.athlete = { id: "p-1", name: "" };
+
+    // Act
+    renderWithProviders(<AssistantCard />);
+
+    // Assert
+    expect(screen.getByText("Your assistant")).toBeInTheDocument();
   });
 });

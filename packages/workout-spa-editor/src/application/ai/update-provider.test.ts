@@ -36,4 +36,39 @@ describe("updateProvider", () => {
       updateProvider(persistence, "missing-id", { label: "Whatever" })
     ).rejects.toBeInstanceOf(ProviderNotFoundError);
   });
+
+  it("should number a new name another account already carries", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await addProvider(persistence, { ...baseProvider, label: "Work" });
+    const other = await addProvider(persistence, {
+      ...baseProvider,
+      label: "Home",
+    });
+
+    // Act
+    const renamed = await updateProvider(persistence, other.id, {
+      label: "Work",
+    });
+
+    // Assert
+    expect(renamed.label).toBe("Work 2");
+  });
+
+  it("should keep an account's own name when it is saved again", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const created = await addProvider(persistence, {
+      ...baseProvider,
+      label: "Work",
+    });
+
+    // Act
+    const renamed = await updateProvider(persistence, created.id, {
+      label: "Work",
+    });
+
+    // Assert
+    expect(renamed.label).toBe("Work");
+  });
 });

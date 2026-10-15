@@ -26,7 +26,6 @@ export const AI_TAB_TOAST_KEYS = [
   "aiToast.addFailed",
   "aiToast.removeFailed",
   "aiToast.updateFailed",
-  "aiToast.promptFailed",
 ] as const;
 
 export const useAiTabHandlers = () => {
@@ -64,13 +63,11 @@ export const useAiTabHandlers = () => {
       if (outcome === "failed") toast.error(t("aiToast.updateFailed"));
       return outcome;
     },
+    // The field says it could not save; a toast would say it twice.
     onPromptSave: (value: string): Promise<boolean> =>
       setCustomPrompt(persistence, value).then(
         () => true,
-        () => {
-          toast.error(t("aiToast.promptFailed"));
-          return false;
-        }
+        () => false
       ),
   };
 };

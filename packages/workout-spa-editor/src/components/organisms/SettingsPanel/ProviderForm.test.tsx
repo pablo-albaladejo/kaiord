@@ -104,4 +104,42 @@ describe("ProviderForm", () => {
     expect(screen.getByRole("button", { name: "Save account" })).toBeDisabled();
     expect(onAdd).not.toHaveBeenCalled();
   });
+
+  it("should store a new key without the spaces pasted around it", async () => {
+    // Arrange
+    const { onAdd } = renderForm("saved");
+
+    // Act
+    await userEvent.type(screen.getByLabelText("API Key"), "  sk-typed  ");
+    await userEvent.click(screen.getByRole("button", { name: "Save account" }));
+
+    // Assert
+    expect(onAdd).toHaveBeenCalledWith({
+      type: "anthropic",
+      apiKey: "sk-typed",
+      label: "",
+    });
+  });
+
+  it("should not submit a key made only of spaces", async () => {
+    // Arrange
+    const { onAdd } = renderForm("saved");
+
+    // Act
+    await userEvent.type(screen.getByLabelText("API Key"), "   ");
+
+    // Assert
+    expect(screen.getByRole("button", { name: "Save account" })).toBeDisabled();
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
+  it("should put the focus on the provider choice when it opens", () => {
+    // Arrange
+
+    // Act
+    renderForm("saved");
+
+    // Assert
+    expect(screen.getByLabelText("Provider")).toHaveFocus();
+  });
 });

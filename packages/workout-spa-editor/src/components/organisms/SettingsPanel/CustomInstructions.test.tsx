@@ -101,4 +101,92 @@ describe("CustomInstructions", () => {
       "Could not save. Try again."
     );
   });
+
+  it("should not say saved while newer text still waits to be saved", async () => {
+    // Arrange
+    let finish: (ok: boolean) => void = () => {};
+    const onSave = vi.fn(
+      () => new Promise<boolean>((resolve) => (finish = resolve))
+    );
+    render(<CustomInstructions value="" onSave={onSave} />);
+    type("Knee");
+    await act(async () => {
+      fireEvent.blur(field());
+    });
+    type("Knee pain");
+
+    // Act
+    await act(async () => {
+      finish(true);
+    });
+
+    // Assert
+    expect(screen.getByRole("status")).not.toHaveTextContent("Saved ✓");
+  });
+
+  it("should ignore an older save that lands after a newer one", async () => {
+    // Arrange
+    const finishers: Array<(ok: boolean) => void> = [];
+    const onSave = vi.fn(
+      () => new Promise<boolean>((resolve) => finishers.push(resolve))
+    );
+    render(<CustomInstructions value="" onSave={onSave} />);
+    type("Knee");
+    await act(async () => {
+      fireEvent.blur(field());
+    });
+    type("Knee pain");
+    await act(async () => {
+      fireEvent.blur(field());
+    });
+
+    // Act
+    await act(async () => {
+      finishers[1]!(false);
+    });
+    await act(async () => {
+      finishers[0]!(true);
+    });
+
+    // Assert
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Could not save. Try again."
+    );
+  });
+
+  it("should try a failed save again when the field is left again", async () => {
+    // Arrange
+    const onSave = vi
+      .fn<(value: string) => Promise<boolean>>()
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+    render(<CustomInstructions value="" onSave={onSave} />);
+    type("Knee");
+    await act(async () => {
+      fireEvent.blur(field());
+    });
+
+    // Act
+    await act(async () => {
+      fireEvent.blur(field());
+    });
+
+    // Assert
+    expect(onSave).toHaveBeenNthCalledWith(2, "Knee");
+    expect(screen.getByRole("status")).toHaveTextContent("Saved ✓");
+  });
+
+  it("should save a change still pending when it goes away", () => {
+    // Arrange
+    const onSave = vi.fn(async () => true);
+    const { unmount } = render(<CustomInstructions value="" onSave={onSave} />);
+    type("Knee");
+
+    // Act
+    unmount();
+
+    // Assert
+    expect(onSave).toHaveBeenCalledOnce();
+    expect(onSave).toHaveBeenCalledWith("Knee");
+  });
 });

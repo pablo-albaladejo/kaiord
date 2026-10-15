@@ -7,14 +7,16 @@ export const PROVIDER_TYPE_NAMES: Record<LlmProviderType, string> = {
 };
 
 /**
- * The label an account gets when the athlete leaves it blank: the provider's
- * name, numbered from 2 when an account already carries it.
+ * An account's label, never one another account already carries: a repeat is
+ * numbered from 2 ("Anthropic 2", "Work 2"). A blank label becomes the
+ * provider's name, numbered the same way.
  */
-export const defaultProviderLabel = (
+export const uniqueProviderLabel = (
+  wanted: string,
   type: LlmProviderType,
   taken: ReadonlyArray<string>
 ): string => {
-  const name = PROVIDER_TYPE_NAMES[type];
+  const name = wanted.trim() || PROVIDER_TYPE_NAMES[type];
   if (!taken.includes(name)) return name;
   let n = 2;
   while (taken.includes(`${name} ${n}`)) n += 1;

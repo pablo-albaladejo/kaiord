@@ -46,8 +46,7 @@
   "aiToast": {
     "addFailed": "Failed to add AI provider — please retry.",
     "removeFailed": "Failed to remove AI provider — please retry.",
-    "updateFailed": "Failed to update AI provider — please retry.",
-    "promptFailed": "Failed to save custom prompt — please retry."
+    "updateFailed": "Failed to update AI provider — please retry."
   },
   "models": {
     "default": "Main model",
@@ -177,9 +176,9 @@
     "empty": "Add an AI account below to choose the model your assistant uses.",
     "noAthlete": "Choose an athlete to pick the model your assistant uses.",
     "runsOn": "on {{account}}",
-    "usage_one": "This month: {{count}} request · {{tokens}} tokens · ~{{cost}}",
-    "usage_other": "This month: {{count}} requests · {{tokens}} tokens · ~{{cost}}",
-    "usageNone": "No AI use yet this month."
+    "usage_one": "Total this month (all athletes): {{count}} request · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "Total this month (all athletes): {{count}} requests · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "No AI use yet this month, by any athlete."
   },
   "keyStatus": {
     "verified": "Key verified",
@@ -201,7 +200,8 @@
     "labelPlaceholder": "Defaults to the provider name"
   },
   "advanced": {
-    "title": "Advanced: model per task (for {{athlete}})"
+    "title": "Advanced: model per task (for {{athlete}})",
+    "titleNoAthlete": "Advanced: model per task"
   },
   "prompt": {
     "title": "Instructions for the AI",

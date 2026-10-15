@@ -21,6 +21,7 @@ export function AccountsSection({ providers, handlers }: AccountsSectionProps) {
   const t = useTranslate("settings");
   const [adding, setAdding] = useState(false);
   const addButton = useRef<HTMLButtonElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   // Closing unmounts the form, so it reopens blank: first provider type,
   // empty fields, no message left from the previous add.
   const close = () => {
@@ -31,7 +32,11 @@ export function AccountsSection({ providers, handlers }: AccountsSectionProps) {
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-sm font-semibold text-ink-body">
+        <h3
+          ref={heading}
+          tabIndex={-1}
+          className="text-sm font-semibold text-ink-body outline-none"
+        >
           {t("accounts.title")}
         </h3>
         <p className="m-0 text-xs text-ink-muted">{t("accounts.shared")}</p>
@@ -39,6 +44,7 @@ export function AccountsSection({ providers, handlers }: AccountsSectionProps) {
       <ProviderList
         providers={providers}
         onRemove={handlers.onRemove}
+        onRemoved={() => (addButton.current ?? heading.current)?.focus()}
         onUpdate={handlers.onUpdate}
       />
       {adding ? (

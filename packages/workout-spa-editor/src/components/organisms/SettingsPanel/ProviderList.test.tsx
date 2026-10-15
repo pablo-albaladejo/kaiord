@@ -132,4 +132,18 @@ describe("ProviderList", () => {
       apiKey: undefined,
     });
   });
+
+  it("should store a replaced key without the spaces pasted around it", async () => {
+    // Arrange
+    const onUpdate = renderList("saved");
+
+    // Act
+    await replaceKey("  sk-new  ");
+
+    // Assert
+    expect(onUpdate).toHaveBeenCalledWith(provider, {
+      label: "Mine",
+      apiKey: "sk-new",
+    });
+  });
 });

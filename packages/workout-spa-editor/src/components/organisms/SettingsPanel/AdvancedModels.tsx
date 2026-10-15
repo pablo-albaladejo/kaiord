@@ -21,7 +21,7 @@ const PURPOSES = ["default", ...TASKS.map((r) => r.purpose)];
  */
 export function AdvancedModels() {
   const t = useTranslate("settings");
-  const athlete = useActiveProfileLive()?.profile?.name ?? "";
+  const athlete = useActiveProfileLive()?.profile?.name;
   const { profileId, providers, models } = useEffectiveModels(PURPOSES);
   const { onSetBinding, onClearBinding } = useAiModelsHandlers();
   const overridden = TASKS.some(({ purpose }) => !models[purpose]!.inherited);
@@ -45,7 +45,9 @@ export function AdvancedModels() {
       className="rounded-lg border border-edge p-3"
     >
       <summary className="cursor-pointer text-sm font-semibold text-ink-body">
-        {t("advanced.title", { athlete })}
+        {athlete
+          ? t("advanced.title", { athlete })
+          : t("advanced.titleNoAthlete")}
       </summary>
       <div className="mt-3 space-y-4">
         {TASKS.map(({ purpose, labelKey }) => (

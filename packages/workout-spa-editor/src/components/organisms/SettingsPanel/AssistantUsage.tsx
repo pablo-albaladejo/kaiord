@@ -3,8 +3,12 @@ import { useUsageSummary } from "../../../hooks/use-usage-summary";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { pluralKey } from "../../../i18n/plural-key";
 import { useTranslate } from "../../../i18n/use-translate";
+import { formatUsageCost } from "./format-usage-cost";
 
-/** This month's AI use in one line: requests, tokens and estimated cost. */
+/**
+ * This month's AI use in one line: requests, tokens and estimated cost. The
+ * usage log is not kept per athlete, so the line says it is the total.
+ */
 export function AssistantUsage() {
   const t = useTranslate("settings");
   const locale = useActiveLocale();
@@ -17,11 +21,7 @@ export function AssistantUsage() {
     );
   }
   const totals = foldUsageEvents(month);
-  const cost = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(totals.totalCost);
+  const cost = formatUsageCost(totals.totalCost, locale);
   return (
     <p data-testid="assistant-usage" className="m-0 text-sm text-ink-muted">
       {t(pluralKey("assistant.usage", month.length), {

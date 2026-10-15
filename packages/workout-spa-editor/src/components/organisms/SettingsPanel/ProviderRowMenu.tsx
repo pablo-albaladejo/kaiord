@@ -1,30 +1,29 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Pencil, Trash } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
 import { ConfirmationModal } from "../../molecules/ConfirmationModal";
+import { RowMenuContent } from "./ProviderRowMenuContent";
 
 type ProviderRowMenuProps = {
   label: string;
   onRename: () => void;
   onRemove: () => void;
+  /** Where the focus goes once a removal is confirmed: this row is going away. */
+  onRemoved?: () => void;
 };
-
-const ITEM =
-  "flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-ink-body outline-none hover:bg-surface-elevated focus:bg-surface-elevated";
-const DANGER =
-  "flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-danger-text outline-none hover:bg-danger-bg focus:bg-danger-bg";
 
 /** An account's less frequent actions; removing asks first, naming it. */
 export function ProviderRowMenu({
   label,
   onRename,
   onRemove,
+  onRemoved,
 }: ProviderRowMenuProps) {
   const t = useTranslate("settings");
   const [confirming, setConfirming] = useState(false);
+  const removed = useRef(false);
   return (
     <>
       <DropdownMenu.Root>
@@ -38,23 +37,10 @@ export function ProviderRowMenu({
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
-          <DropdownMenu.Content
-            align="end"
-            sideOffset={5}
-            className="z-50 min-w-[180px] rounded-lg border border-edge-soft bg-surface p-1 shadow-lg"
-          >
-            <DropdownMenu.Item className={ITEM} onSelect={onRename}>
-              <Pencil className="h-4 w-4" />
-              <span>{t("accounts.rename")}</span>
-            </DropdownMenu.Item>
-            <DropdownMenu.Item
-              className={DANGER}
-              onSelect={() => setConfirming(true)}
-            >
-              <Trash className="h-4 w-4" />
-              <span>{t("providers.remove")}</span>
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
+          <RowMenuContent
+            onRename={onRename}
+            onRemove={() => setConfirming(true)}
+          />
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
       <ConfirmationModal
@@ -65,8 +51,14 @@ export function ProviderRowMenu({
         cancelLabel={t("providers.cancel")}
         variant="destructive"
         onConfirm={() => {
+          removed.current = true;
           setConfirming(false);
           onRemove();
+        }}
+        onCloseAutoFocus={(event) => {
+          if (!removed.current || !onRemoved) return;
+          event.preventDefault();
+          onRemoved();
         }}
         onCancel={() => setConfirming(false)}
       />

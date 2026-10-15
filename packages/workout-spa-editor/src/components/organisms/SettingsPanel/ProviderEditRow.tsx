@@ -37,7 +37,7 @@ export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
       await onSave(
         renaming
           ? { label: value.trim(), apiKey: undefined }
-          : { label: provider.label, apiKey: value }
+          : { label: provider.label, apiKey: value.trim() }
       )
     );
   };

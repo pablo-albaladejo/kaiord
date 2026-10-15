@@ -41,6 +41,55 @@ async function addAccount(
 // Layout boxes are fractional; half a pixel is rounding, not overflow.
 const SUBPIXEL = 0.5;
 
+type Box = { x: number; y: number; width: number; height: number };
+
+const overlaps = (a: Box, b: Box) =>
+  a.x + a.width > b.x + SUBPIXEL &&
+  b.x + b.width > a.x + SUBPIXEL &&
+  a.y + a.height > b.y + SUBPIXEL &&
+  b.y + b.height > a.y + SUBPIXEL;
+
+// Two runs this month, large enough to give the usage table long numbers.
+const RUNS = [
+  { id: "u-1", purpose: "chat", input: 912_000, output: 304_000 },
+  { id: "u-2", purpose: "workout_generation", input: 303_000, output: 151_000 },
+];
+
+// Written the way the usage log stores them.
+async function seedUsage(page: Page) {
+  await page.evaluate(async (runs) => {
+    const now = new Date();
+    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const yearMonth = `${now.getUTCFullYear()}-${month}`;
+    const [date] = now.toISOString().split("T");
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const open = indexedDB.open("kaiord-spa");
+      open.onsuccess = () => resolve(open.result);
+      open.onerror = () => reject(open.error);
+    });
+    const tx = db.transaction("usageEvents", "readwrite");
+    for (const run of runs) {
+      tx.objectStore("usageEvents").put({
+        id: run.id,
+        yearMonth,
+        date,
+        purpose: run.purpose,
+        providerType: "anthropic",
+        promptTokens: run.input,
+        completionTokens: run.output,
+        tokens: run.input + run.output,
+        cost: 0.6215,
+        createdAt: now.toISOString(),
+      });
+    }
+    await new Promise((resolve, reject) => {
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }, RUNS);
+}
+
 const accountsOf = (settings: Locator) =>
   settings.getByRole("list", { name: "AI accounts" });
 
@@ -78,7 +127,9 @@ test.describe("AI settings layout", () => {
     await expect(
       settings.getByText("on Anthropic", { exact: true })
     ).toBeVisible();
-    await expect(settings.getByText("No AI use yet this month.")).toBeVisible();
+    await expect(
+      settings.getByText("No AI use yet this month, by any athlete.")
+    ).toBeVisible();
 
     // Per-task models stay folded until a task has its own.
     const advanced = settings.getByTestId("advanced-models");
@@ -144,5 +195,58 @@ test.describe("AI settings layout", () => {
         );
       }
     }
+  });
+
+  test.describe("in Spanish", () => {
+    test.use({ locale: "es-ES" });
+
+    test("keeps the key status clear of the row's buttons and the usage table on screen", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await blockProviders(page);
+      await page.goto("/settings/ai");
+      const settings = page.getByTestId("settings-page");
+      for (const [type, key, label] of [
+        ["anthropic", "sk-ant-fake-1111", "Mi Claude"],
+        ["openai", "sk-gpt-fake-2222", "Mi GPT"],
+      ]) {
+        await settings.getByRole("button", { name: "Añadir cuenta" }).click();
+        await settings
+          .getByLabel("Proveedor", { exact: true })
+          .selectOption({ value: type });
+        await settings.getByLabel("Etiqueta (opcional)").fill(label);
+        await settings.getByPlaceholder("sk-...").fill(key);
+        await settings.getByRole("button", { name: "Guardar cuenta" }).click();
+        await expect(settings.getByPlaceholder("sk-...")).toHaveCount(0);
+      }
+      await seedUsage(page);
+      await page.reload();
+
+      const rows = settings
+        .getByRole("list", { name: "Cuentas de IA" })
+        .getByRole("listitem");
+      await expect(rows).toHaveCount(2);
+      for (const row of await rows.all()) {
+        const badge = (await row.getByTestId("key-status").boundingBox())!;
+        for (const button of await row.getByRole("button").all()) {
+          expect(overlaps(badge, (await button.boundingBox())!)).toBe(false);
+        }
+      }
+
+      const table = settings.getByTestId("usage-table");
+      await expect(table).toBeVisible();
+      const tableBox = (await table.boundingBox())!;
+      const pageBox = (await settings.boundingBox())!;
+      expect(tableBox.x + tableBox.width).toBeLessThanOrEqual(
+        pageBox.x + pageBox.width + SUBPIXEL
+      );
+      const pageScrolls = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth
+      );
+      expect(pageScrolls).toBe(false);
+    });
   });
 });

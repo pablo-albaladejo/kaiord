@@ -1,15 +1,29 @@
+import { waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { renderWithProviders, screen } from "../../../test-utils";
 import { AccountsSection } from "./AccountsSection";
 import type { KeySaveOutcome } from "./save-with-key-check";
 
-const renderSection = (outcome: KeySaveOutcome) => {
+const work: LlmProviderConfig = {
+  id: "ai-1",
+  type: "anthropic",
+  apiKey: "sk-old",
+  label: "Work",
+  isDefault: true,
+  createdAt: 1,
+};
+
+const renderSection = (
+  outcome: KeySaveOutcome,
+  providers: LlmProviderConfig[] = []
+) => {
   const onAdd = vi.fn(async () => outcome);
   renderWithProviders(
     <AccountsSection
-      providers={[]}
+      providers={providers}
       handlers={{ onAdd, onRemove: vi.fn(), onUpdate: vi.fn() }}
     />
   );
@@ -73,5 +87,35 @@ describe("AccountsSection", () => {
     // Assert
     expect(screen.getByLabelText("API Key")).toHaveValue("sk-typed");
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("should put the focus on the provider choice when the form opens", async () => {
+    // Arrange
+    renderSection("saved");
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name: "Add account" }));
+
+    // Assert
+    expect(screen.getByLabelText("Provider")).toHaveFocus();
+  });
+
+  it("should leave the focus on Add account once a removal is confirmed", async () => {
+    // Arrange
+    renderSection("saved", [work]);
+    await userEvent.click(
+      screen.getByRole("button", { name: "More actions for Work" })
+    );
+    await userEvent.click(screen.getByRole("menuitem", { name: "Remove" }));
+
+    // Act
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Remove" }).at(-1)!
+    );
+
+    // Assert
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Add account" })).toHaveFocus()
+    );
   });
 });

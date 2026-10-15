@@ -5,7 +5,9 @@
  */
 
 import type { UsageTotals } from "../../../application/usage/fold-usage-events";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
+import { formatUsageCost } from "./format-usage-cost";
 import type { MonthUsage, UsagePurpose } from "./usage-table-types";
 import { USAGE_PURPOSES } from "./usage-table-types";
 
@@ -15,20 +17,23 @@ const PURPOSE_LABEL_KEY: Record<UsagePurpose, string> = {
   lab_extraction: "usage.purpose.lab_extraction",
 };
 
-const CELL = "py-2 pr-4 text-ink-strong";
-const SUB_CELL = "py-1 pr-4 text-ink-muted";
+const CELL = "py-2 pr-2 text-ink-strong sm:pr-4";
+const SUB_CELL = "py-1 pr-2 text-ink-muted sm:pr-4";
+// Matches the table head: the input/output split is hidden below `sm`.
+const WIDE = "hidden sm:table-cell";
 
-const numericCells = (totals: UsageTotals, cls: string) => (
+const numericCells = (totals: UsageTotals, cls: string, locale: string) => (
   <>
-    <td className={cls}>{totals.inputTokens.toLocaleString()}</td>
-    <td className={cls}>{totals.outputTokens.toLocaleString()}</td>
+    <td className={`${cls} ${WIDE}`}>{totals.inputTokens.toLocaleString()}</td>
+    <td className={`${cls} ${WIDE}`}>{totals.outputTokens.toLocaleString()}</td>
     <td className={cls}>{totals.totalTokens.toLocaleString()}</td>
-    <td className={cls}>${totals.totalCost.toFixed(4)}</td>
+    <td className={cls}>{formatUsageCost(totals.totalCost, locale)}</td>
   </>
 );
 
 export function UsageMonthRow({ row }: { row: MonthUsage }) {
   const t = useTranslate("settings");
+  const locale = useActiveLocale();
   const active = USAGE_PURPOSES.filter((p) => row.byPurpose[p].totalTokens > 0);
   return (
     <>
@@ -37,14 +42,22 @@ export function UsageMonthRow({ row }: { row: MonthUsage }) {
         className="border-b border-edge-soft font-medium"
       >
         <td className={CELL}>{row.yearMonth}</td>
-        <td className={CELL} data-testid={`usage-input-${row.yearMonth}`}>
+        <td
+          className={`${CELL} ${WIDE}`}
+          data-testid={`usage-input-${row.yearMonth}`}
+        >
           {row.totals.inputTokens.toLocaleString()}
         </td>
-        <td className={CELL} data-testid={`usage-output-${row.yearMonth}`}>
+        <td
+          className={`${CELL} ${WIDE}`}
+          data-testid={`usage-output-${row.yearMonth}`}
+        >
           {row.totals.outputTokens.toLocaleString()}
         </td>
         <td className={CELL}>{row.totals.totalTokens.toLocaleString()}</td>
-        <td className={CELL}>${row.totals.totalCost.toFixed(4)}</td>
+        <td className={CELL}>
+          {formatUsageCost(row.totals.totalCost, locale)}
+        </td>
       </tr>
       {active.map((p) => (
         <tr
@@ -52,8 +65,10 @@ export function UsageMonthRow({ row }: { row: MonthUsage }) {
           data-testid={`usage-purpose-${row.yearMonth}-${p}`}
           className="border-b border-edge-soft last:border-0"
         >
-          <td className={`${SUB_CELL} pl-6`}>{t(PURPOSE_LABEL_KEY[p])}</td>
-          {numericCells(row.byPurpose[p], SUB_CELL)}
+          <td className={`${SUB_CELL} pl-3 sm:pl-6`}>
+            {t(PURPOSE_LABEL_KEY[p])}
+          </td>
+          {numericCells(row.byPurpose[p], SUB_CELL, locale)}
         </tr>
       ))}
     </>

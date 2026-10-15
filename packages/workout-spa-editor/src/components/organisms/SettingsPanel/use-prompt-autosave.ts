@@ -8,6 +8,10 @@ const PAUSE_MS = 800;
  * Saves a text field after a pause in typing, or at once when it is left,
  * so a keystroke is never a write. A change still pending when the field
  * unmounts is saved then.
+ *
+ * Only the latest save speaks: an older one landing late says nothing, and
+ * "saved" shows only when no newer text is waiting. A failed value stays
+ * pending, so leaving the field again retries it.
  */
 export const usePromptAutosave = (
   save: (value: string) => Promise<boolean>
@@ -16,17 +20,22 @@ export const usePromptAutosave = (
   const latestSave = useRef(save);
   latestSave.current = save;
   const pending = useRef<string | null>(null);
+  const lastRun = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const flush = useCallback(() => {
     clearTimeout(timer.current);
     const value = pending.current;
     if (value === null) return;
-    pending.current = null;
+    const run = ++lastRun.current;
     setStatus("saving");
-    void latestSave
-      .current(value)
-      .then((ok) => setStatus(ok ? "saved" : "failed"));
+    void latestSave.current(value).then((ok) => {
+      if (run !== lastRun.current) return;
+      const newerWaits = pending.current !== value;
+      if (ok && !newerWaits) pending.current = null;
+      if (newerWaits) setStatus("idle");
+      else setStatus(ok ? "saved" : "failed");
+    });
   }, []);
 
   const change = (value: string) => {
