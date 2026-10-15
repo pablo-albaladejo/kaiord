@@ -9,7 +9,8 @@ export type KeySaveOutcome = "saved" | "invalid" | "unverified" | "failed";
 export type SaveWithKeyCheckArgs = {
   /** The key to check; omit it when the save does not change the key. */
   credential?: ProviderCredential;
-  save: () => Promise<unknown>;
+  /** Receives how the check ended, or nothing when no key was checked. */
+  save: (check: "valid" | "unverified" | undefined) => Promise<unknown>;
   verify?: (credential: ProviderCredential) => Promise<ProviderKeyCheck>;
 };
 
@@ -24,10 +25,10 @@ export const saveWithKeyCheck = async ({
   save,
   verify = verifyProviderKey,
 }: SaveWithKeyCheckArgs): Promise<KeySaveOutcome> => {
-  const check = credential ? await verify(credential) : "valid";
+  const check = credential ? await verify(credential) : undefined;
   if (check === "invalid") return "invalid";
   try {
-    await save();
+    await save(check);
   } catch {
     return "failed";
   }

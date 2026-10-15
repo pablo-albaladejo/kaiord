@@ -1,4 +1,4 @@
-> Synced: 2026-10-13 (connections-single-home)
+> Synced: 2026-10-15 (ai-settings-truth)
 
 # SPA Persistence Port
 
@@ -537,7 +537,7 @@ IndexedDB.
 
 ### Requirement: Deletes record tombstones
 
-Deletes through `PersistencePort` that express USER INTENT SHALL record a tombstone so the removal propagates across devices instead of being restored by the next cloud-sync merge. The system SHALL provide a `tombstones` store with primary key `[table+id]` and fields `table`, `id`, `deletedAt` (ISO 8601) and optional `profileId`. The `id` SHALL be the row's single-field primary key: `id` for most tables, `profileId` for `energyTargets`. The merge and the sync's live import SHALL suppress a row by that key; a row of a composite-primary-key table is never suppressed. The tombstone SHALL be written in the SAME transaction as the underlying delete, and SHALL NOT be written when the delete removed nothing. The `table` field SHALL carry the SNAPSHOT table name, not the port's repository key, because the merge suppresses a row by `[snapshotTable+id]`.
+Deletes through `PersistencePort` that express USER INTENT SHALL record a tombstone so the removal propagates across devices instead of being restored by the next cloud-sync merge. The system SHALL provide a `tombstones` store with primary key `[table+id]` and fields `table`, `id`, `deletedAt` (ISO 8601) and optional `profileId`. The `id` SHALL be the row's single-field primary key: `id` for most tables, `profileId` for `energyTargets`; for `aiModelBindings`, whose primary key is `[profileId+purpose]`, it SHALL be `<profileId>:<purpose>` and the tombstone SHALL carry the `profileId`. The merge and the sync's live import SHALL suppress a row by that key; a row of any other composite-primary-key table is never suppressed. The tombstone SHALL be written in the SAME transaction as the underlying delete, and SHALL NOT be written when the delete removed nothing. The `table` field SHALL carry the SNAPSHOT table name, not the port's repository key, because the merge suppresses a row by `[snapshotTable+id]`.
 
 The port composition the application actually runs SHALL apply the `withTombstones` decorator over the Dexie adapter, and SHALL be expressed as one shared factory that both the application entry point and the tests consume, so the decorator/merge join is verifiable as behaviour.
 
@@ -547,7 +547,7 @@ Where a repository's delete does not fit the decorator's single-argument `delete
 
 Deletes that DO NOT express user intent — reconciliation deletes that re-mirror an upstream source, and local-repair deletes that drop a row local state judges redundant — SHALL NOT record tombstones, and SHALL be exposed as distinct repository methods so they stay outside the decorated surface. Their orphan verdict depends on local state that may legitimately differ on another device, where the same row is live.
 
-Known gaps, not closed by this requirement: composite-primary-key tables (`aiModelBindings`, `autoMatchDismissal`) are structurally untombstonable under the `[table+id]` key; remote snapshots contaminated before the wiring was fixed keep their resurrected rows until the user deletes them once more; deleting a workout tombstones the workout but not the `exportLedger` rows its Dexie `deleting` hook removes, so those return from the remote as orphans pointing at a dead `kaiordRecordId` until the disaster-recovery orphan sweep runs; and because mirror-orphan deletes write no tombstone, a coach-removed coaching activity never leaves the cloud snapshot — it is deleted locally, unioned back from the remote, re-pushed, and deleted again on the next week-sync, so the row visibly flaps. That flapping is the accepted cost of not tombstoning a mirror; converging it needs a bridge-authoritative window (the upstream week's contents treated as the truth for that range), not a tombstone. Tombstones compare wall clocks across devices: a device whose clock runs ahead can stamp an edit later than another device's delete, and that edit then beats the tombstone and the row returns. Tombstones are pruned after 90 days, so a device that stays offline longer than that can push rows whose deletes the other devices have already forgotten, and they return. A build older than the `energyTargets` tombstone neither suppresses nor carries one: it keeps re-pushing a goal another device cleared, so once the tombstone is pruned at 90 days that goal comes back on every device. No surface clears a goal today, so nothing is exposed yet; whoever ships a "clear goal" control inherits this gap.
+Known gaps, not closed by this requirement: composite-primary-key tables other than `aiModelBindings` (`autoMatchDismissal`) are structurally untombstonable under the `[table+id]` key; remote snapshots contaminated before the wiring was fixed keep their resurrected rows until the user deletes them once more; deleting a workout tombstones the workout but not the `exportLedger` rows its Dexie `deleting` hook removes, so those return from the remote as orphans pointing at a dead `kaiordRecordId` until the disaster-recovery orphan sweep runs; and because mirror-orphan deletes write no tombstone, a coach-removed coaching activity never leaves the cloud snapshot — it is deleted locally, unioned back from the remote, re-pushed, and deleted again on the next week-sync, so the row visibly flaps. That flapping is the accepted cost of not tombstoning a mirror; converging it needs a bridge-authoritative window (the upstream week's contents treated as the truth for that range), not a tombstone. Tombstones compare wall clocks across devices: a device whose clock runs ahead can stamp an edit later than another device's delete, and that edit then beats the tombstone and the row returns. Tombstones are pruned after 90 days, so a device that stays offline longer than that can push rows whose deletes the other devices have already forgotten, and they return. A build older than the `energyTargets` tombstone neither suppresses nor carries one: it keeps re-pushing a goal another device cleared, so once the tombstone is pruned at 90 days that goal comes back on every device. No surface clears a goal today, so nothing is exposed yet; whoever ships a "clear goal" control inherits this gap. A build older than the `aiModelBindings` tombstone neither suppresses nor carries one: it keeps re-pushing a binding another device cleared, which every newer build drops on merge until the tombstone is pruned at 90 days.
 
 #### Scenario: Deleting a workout records a tombstone
 
@@ -631,6 +631,13 @@ Known gaps, not closed by this requirement: composite-primary-key tables (`aiMod
 - **GIVEN** device A deleted profile P, and device B, which has not seen the delete, then edits P itself
 - **WHEN** device B syncs, then device A syncs
 - **THEN** device A SHALL hold P again with all of its per-profile rows
+
+#### Scenario: A cleared model binding does not come back from another device
+
+- **GIVEN** two devices holding the athlete's `chat` binding
+- **WHEN** device A clears it ("Same as main model") or removes its provider and syncs, then device B syncs
+- **THEN** neither device nor the pushed snapshot SHALL hold that binding, because the `aiModelBindings` tombstone `<profileId>:chat` suppresses B's older copy
+- **AND** a binding set again later on either device SHALL win over the tombstone, because its `updatedAt` is newer than the `deletedAt`
 
 ### Requirement: Default local profile
 

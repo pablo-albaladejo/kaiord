@@ -14,6 +14,7 @@ import { expect, test } from "./fixtures/base";
 import { workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
 import { openHeaderAction } from "./helpers/mobile-menu";
+import { routeInApp } from "./helpers/route-in-app";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const NAME = "E2E lifecycle";
@@ -139,14 +140,13 @@ test.describe("Scheduled workout lifecycle", () => {
       await expect(page.getByText("Workout not found")).toHaveCount(0);
 
       // Act
-      await page.evaluate((hash) => {
-        window.location.hash = hash;
-      }, `#${route}${UNKNOWN_ID}`);
-
-      // Assert
-      await expect(page.getByText("Workout not found")).toBeVisible({
+      const notFound = page.getByText("Workout not found");
+      await routeInApp(page, `${route}${UNKNOWN_ID}`, notFound, {
         timeout: 2000,
       });
+
+      // Assert
+      await expect(notFound).toHaveCount(1);
     });
   }
 });

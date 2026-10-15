@@ -246,7 +246,7 @@ describe("SettingsPage", () => {
     });
 
     it.each([
-      { tab: "ai", content: "LLM Providers" },
+      { tab: "ai", content: "AI accounts" },
       { tab: "privacy", content: "Privacy Information" },
       { tab: "data", content: "Delete all my data" },
       { tab: "general", content: "Theme" },

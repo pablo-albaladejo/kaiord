@@ -11,6 +11,7 @@ export type ChatConversationProps = {
   conversationId: string | null;
   provider: LlmProviderConfig | null;
   modelId: string | null;
+  pinModel: boolean;
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
   messages: ChatMessageRecord[];
@@ -27,6 +28,7 @@ export function ChatConversation({
   conversationId,
   provider,
   modelId,
+  pinModel,
   generationProvider,
   generationModelId,
   messages,
@@ -38,6 +40,7 @@ export function ChatConversation({
     conversationId,
     provider,
     modelId,
+    pinModel,
     generationProvider,
     generationModelId,
     today: todayIsoDate(),

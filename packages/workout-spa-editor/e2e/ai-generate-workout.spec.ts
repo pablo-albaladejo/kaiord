@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { mockLlmApis } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
@@ -66,12 +66,10 @@ test.describe("AI Generate Workout Flow", () => {
     });
   });
 
-  test("8.10: model selector lists all configured providers", async ({
+  test("8.10: the model select shows and stores what generation runs", async ({
     page,
   }) => {
     await page.goto("/workout/new?source=scratch");
-
-    // Add two providers via settings
     await addTestProvider(page, "Test Claude", "anthropic");
     await addTestProvider(page, "Test GPT", "openai");
 
@@ -81,14 +79,22 @@ test.describe("AI Generate Workout Flow", () => {
       .first()
       .click();
 
-    // Check model selector dropdown contains both
-    const modelSelect = page.locator("select").filter({ hasText: /test/i });
-    if (await modelSelect.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const options = modelSelect.locator("option");
-      await expect(options).toHaveCount(2);
-      await expect(options.first()).toContainText("Test Claude");
-      await expect(options.last()).toContainText("Test GPT");
-    }
+    // One select of account and model together, one group per account.
+    const modelSelect = page.getByTestId("ai-model-select");
+    await expect(modelSelect.locator("optgroup")).toHaveCount(2);
+    const gptOption = modelSelect
+      .locator('optgroup[label^="Test GPT"] option')
+      .first();
+    const gptValue = await gptOption.getAttribute("value");
+    const gptText = (await gptOption.textContent()) ?? "";
+    await modelSelect.selectOption(gptValue ?? "");
+    await expect.poll(() => shownOption(modelSelect)).toBe(gptText);
+
+    // Stored as the athlete's workout-generation model: Settings shows it.
+    await openHeaderAction(page, /open settings/i);
+    await page.getByTestId("settings-row-ai").click();
+    const settingsRow = page.getByTestId("model-workout_generation-select");
+    await expect.poll(() => shownOption(settingsRow)).toBe(gptText);
   });
 });
 
@@ -105,22 +111,28 @@ async function addTestProvider(
   const settingsPage = page.getByTestId("settings-page");
   await expect(settingsPage).toBeVisible({ timeout: 5000 });
 
-  const providerSelect = settingsPage.locator("select").first();
-  await providerSelect.selectOption(type);
+  await settingsPage.getByRole("button", { name: "Add account" }).click();
+  await settingsPage.getByLabel("Provider", { exact: true }).selectOption(type);
 
-  await settingsPage.getByPlaceholder("e.g., My Claude").fill(label);
+  await settingsPage.getByLabel("Label (optional)").fill(label);
   await settingsPage.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
 
-  await settingsPage.getByRole("button", { name: /add provider/i }).click();
+  await settingsPage.getByRole("button", { name: "Save account" }).click();
 
   // Scope to the provider list: with an active profile the per-purpose
   // model selects on the same page also list the provider as an option.
   const providerList = settingsPage.getByRole("list", {
-    name: "Configured LLM providers",
+    name: "AI accounts",
   });
   await expect(providerList.getByText(label, { exact: true })).toBeVisible({
     timeout: 3000,
   });
 
   await page.goto("/workout/new?source=scratch");
+}
+
+function shownOption(select: Locator): Promise<string> {
+  return select.evaluate(
+    (el) => (el as HTMLSelectElement).selectedOptions[0]?.textContent ?? ""
+  );
 }

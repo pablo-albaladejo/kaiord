@@ -7,10 +7,11 @@ import { scheduleOn, totalSteps } from "../editor.mjs";
 import { ensureProfile, expectOk } from "../steps.mjs";
 import { moveByKeyboard } from "./scheduled-lifecycle-move.mjs";
 import { deleteWithUndo, notFound } from "./scheduled-lifecycle-steps.mjs";
+import { detailLayout } from "./workout-detail-layout.mjs";
 
 // F-28 card title, origin and duration, F-31 card → detail, F-29 edits
 // persist, journey 15 keyboard move, F-30 delete + Undo, F-42 an unknown id
-// says "not found".
+// says "not found", and the detail's desktop layout.
 
 async function editAndReload(rec, session, id) {
   const { page, go } = session;
@@ -77,6 +78,7 @@ export default async function scheduledLifecycle({ rec, open }) {
     () => expect(page).toHaveURL(/#\/workout\/view\//),
     async () => page.url()
   );
+  await detailLayout(rec, page);
   await editAndReload(rec, session, id);
   await moveByKeyboard(rec, session, id, otherDayOfWeek(today));
   await deleteWithUndo(rec, session, id);
