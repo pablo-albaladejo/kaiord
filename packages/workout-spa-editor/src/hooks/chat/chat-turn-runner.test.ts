@@ -15,7 +15,10 @@ vi.mock("./build-chat-agent", () => ({
 
 const provider = { id: "prov-1", type: "anthropic" } as LlmProviderConfig;
 
-const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
+const makeCtx = (
+  persistence: ReturnType<typeof createInMemoryPersistence>,
+  pinModel = false
+) => {
   const states: ChatTurnState[] = [];
   const pendings: Array<PendingAction | null> = [];
   const errors: Array<string | null> = [];
@@ -25,6 +28,7 @@ const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
     conversationId: "c1",
     provider,
     modelId: "claude-sonnet-4-5",
+    pinModel,
     today: "2026-06-13",
     ops: {} as never,
     agentRef: { current: fakeAgent as never },
@@ -42,6 +46,46 @@ const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
 
 describe("chat-turn-runner", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("should not pin the model on a draft that follows the main model", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence, false);
+    fakeAgent.sendTurn.mockResolvedValueOnce({
+      status: "complete",
+      text: "ok",
+      messages: [],
+      usage: { promptTokens: 1, completionTokens: 1 },
+    });
+
+    // Act
+    await sendTurn(ctx, [], "hello");
+
+    // Assert
+    const row = await persistence.chatConversations.get("p1", "c1");
+    expect(row?.providerId).toBeUndefined();
+    expect(row?.modelId).toBeUndefined();
+  });
+
+  it("should pin the draft's own model on its first message", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence, true);
+    fakeAgent.sendTurn.mockResolvedValueOnce({
+      status: "complete",
+      text: "ok",
+      messages: [],
+      usage: { promptTokens: 1, completionTokens: 1 },
+    });
+
+    // Act
+    await sendTurn(ctx, [], "hello");
+
+    // Assert
+    const row = await persistence.chatConversations.get("p1", "c1");
+    expect(row?.providerId).toBe("prov-1");
+    expect(row?.modelId).toBe("claude-sonnet-4-5");
+  });
 
   it("should append user and assistant messages on a completed send", async () => {
     // Arrange

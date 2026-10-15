@@ -28,16 +28,15 @@ test.describe("AI provider key check", () => {
     const settingsPage = page.getByTestId("settings-page");
     await expect(settingsPage).toBeVisible();
 
-    await settingsPage.getByPlaceholder("e.g., My Claude").fill("Wrong key");
+    await settingsPage.getByRole("button", { name: "Add account" }).click();
+    await settingsPage.getByLabel("Label (optional)").fill("Wrong key");
     await settingsPage.getByPlaceholder("sk-...").fill("sk-ant-wrong");
-    await settingsPage.getByRole("button", { name: /add provider/i }).click();
+    await settingsPage.getByRole("button", { name: "Save account" }).click();
 
     await expect(settingsPage.getByRole("alert")).toContainText(
       "The provider rejected this key"
     );
-    await expect(
-      settingsPage.getByText("No providers configured")
-    ).toBeVisible();
+    await expect(settingsPage.getByText("No AI accounts yet.")).toBeVisible();
     await expect(settingsPage.getByPlaceholder("sk-...")).toHaveValue(
       "sk-ant-wrong"
     );

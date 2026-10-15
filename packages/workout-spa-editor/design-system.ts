@@ -157,12 +157,12 @@ export { EditorContextMenu } from "./src/components/organisms/EditorContextMenu/
 export { EditorStateRibbon } from "./src/components/organisms/EditorStateRibbon/EditorStateRibbon";
 export { ImportDropzoneOverlay } from "./src/components/organisms/ImportDropzoneOverlay/ImportDropzoneOverlay";
 export { ScratchEditorSurface } from "./src/components/organisms/ScratchEditorSurface/ScratchEditorSurface";
+export { AccountsSection } from "./src/components/organisms/SettingsPanel/AccountsSection";
+export { AdvancedModels } from "./src/components/organisms/SettingsPanel/AdvancedModels";
 export { AiTab } from "./src/components/organisms/SettingsPanel/AiTab";
+export { AssistantCard } from "./src/components/organisms/SettingsPanel/AssistantCard";
 export { EncryptionSection } from "./src/components/organisms/SettingsPanel/EncryptionSection";
 export { LanguageRow } from "./src/components/organisms/SettingsPanel/LanguageRow";
-export { ModelPicker } from "./src/components/organisms/SettingsPanel/ModelPicker";
-export { ModelRow } from "./src/components/organisms/SettingsPanel/ModelRow";
-export { ModelsSection } from "./src/components/organisms/SettingsPanel/ModelsSection";
 export { NotificationsRow } from "./src/components/organisms/SettingsPanel/NotificationsRow";
 export { PreferencesTab } from "./src/components/organisms/SettingsPanel/PreferencesTab";
 export { PrivacyInformationSection } from "./src/components/organisms/SettingsPanel/PrivacyInformationSection";

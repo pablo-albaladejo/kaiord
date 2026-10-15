@@ -7,48 +7,60 @@ import { Input } from "../../atoms/Input";
 import { KeyCheckMessage, type KeyCheckStatus } from "./KeyCheckMessage";
 import type { KeySaveOutcome } from "./save-with-key-check";
 
+export type ProviderEditMode = "rename" | "key";
+
 type ProviderEditRowProps = {
   provider: LlmProviderConfig;
+  mode: ProviderEditMode;
+  /** Only the field being edited is sent; the other stays `undefined`. */
   onSave: (updates: {
-    label: string;
-    apiKey: string;
+    label: string | undefined;
+    apiKey: string | undefined;
   }) => Promise<KeySaveOutcome>;
   onCancel: () => void;
 };
 
+/** Renames an account, or replaces its key; one field at a time. */
 export const ProviderEditRow: React.FC<ProviderEditRowProps> = ({
   provider,
+  mode,
   onSave,
   onCancel,
 }) => {
   const t = useTranslate("settings");
-  const [label, setLabel] = useState(provider.label);
-  const [apiKey, setApiKey] = useState(provider.apiKey);
+  const [value, setValue] = useState(mode === "rename" ? provider.label : "");
   const [status, setStatus] = useState<KeyCheckStatus>("idle");
+  const renaming = mode === "rename";
 
   const handleSave = async () => {
     setStatus("checking");
-    setStatus(await onSave({ label, apiKey }));
+    setStatus(
+      await onSave(
+        renaming
+          ? { label: value.trim(), apiKey: undefined }
+          : { label: undefined, apiKey: value.trim() }
+      )
+    );
   };
 
   return (
     <div className="space-y-2 rounded-lg border border-edge-strong p-3">
+      {/* The stored key is never put back into the DOM: the field starts empty. */}
       <Input
-        label={t("providers.label")}
-        value={label}
-        onChange={(e) => setLabel(e.target.value)}
-      />
-      <Input
-        label={t("providers.apiKey")}
-        type="password"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
+        label={renaming ? t("providers.label") : t("accounts.newKey")}
+        type={renaming ? "text" : "password"}
+        autoComplete="off"
+        autoFocus
+        placeholder={renaming ? undefined : "sk-..."}
+        value={value}
+        disabled={status === "checking"}
+        onChange={(e) => setValue(e.target.value)}
       />
       <div className="flex gap-2">
         <Button
           size="sm"
           onClick={() => void handleSave()}
-          disabled={status === "checking" || !label || !apiKey}
+          disabled={status === "checking" || !value.trim()}
         >
           {t("providers.save")}
         </Button>
