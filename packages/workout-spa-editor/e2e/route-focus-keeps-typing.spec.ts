@@ -51,7 +51,9 @@ test("should keep every keystroke typed right after a route change", async ({
   });
 
   // Act
-  await keyField.pressSequentially("sk-test-key-for-e2e", { delay: 40 });
+  // Typed into whatever holds focus: `keyField.pressSequentially()` would
+  // focus the field first and hide a retry that took focus before typing.
+  await page.keyboard.type("sk-test-key-for-e2e", { delay: 40 });
 
   // Assert
   await expect(keyField).toHaveValue("sk-test-key-for-e2e");
