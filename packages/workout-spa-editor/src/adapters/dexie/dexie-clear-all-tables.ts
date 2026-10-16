@@ -1,4 +1,5 @@
 import type { SnapshotPort } from "../../ports/snapshot-port";
+import { clearKeyCache } from "./ai-key-cache";
 import type { KaiordDatabase } from "./dexie-database";
 
 type DexieTxScope = (
@@ -19,5 +20,6 @@ export function createDexieClearAllTables(
     await scoped.transaction("rw", db.tables, async () => {
       for (const table of db.tables) await table.clear();
     });
+    clearKeyCache();
   };
 }
