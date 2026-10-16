@@ -48,7 +48,7 @@ export function ImportDropzoneOverlay() {
     const node = inputRef.current;
     if (!node) return;
     if (typeof node.scrollIntoView === "function") {
-      node.scrollIntoView({ block: "center" });
+      node.scrollIntoView({ block: "center", behavior: "instant" });
     }
     node.focus();
   }, [clearWorkout]);

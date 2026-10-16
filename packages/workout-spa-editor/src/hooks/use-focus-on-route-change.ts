@@ -23,11 +23,12 @@
  * production.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation } from "wouter";
 
 import { ROUTE_HEADING_SELECTOR } from "../routing/constants";
 import { logger } from "../utils/logger";
+import { isFormFieldFocused } from "./focus/is-form-field-focused";
 
 const FALLBACK_WARN = "useFocusOnRouteChange: no [data-route-heading]";
 // Bound the wait for a route-heading to appear. Long enough to cover
@@ -41,9 +42,40 @@ const OBSERVE_TIMEOUT_MS = 5000;
 // keyboard user does not notice, long enough not to busy-wait for 5s.
 const RETRY_INTERVAL_MS = 50;
 
+/**
+ * Whether focus now belongs to someone other than the navigation: anything
+ * focused after the route changed, or a text field the user kept focus in
+ * across it. Only the stale owner (the activated link) or nothing at all
+ * may be replaced by the heading.
+ */
+const focusMovedOn = (staleOwner: Element | null, target: HTMLElement) => {
+  const active = document.activeElement;
+  if (active === null || active === document.body || active === target)
+    return false;
+  return active !== staleOwner || isFormFieldFocused(document.body);
+};
+
+/**
+ * The focus owner as it stood before the new route's commit. A layout
+ * cleanup runs in the commit's mutation phase, ahead of the `autoFocus` the
+ * new page applies in its layout phase; reading `activeElement` in the
+ * effect instead mistook that autofocus for the stale owner.
+ */
+function useOwnerBeforeRouteCommit(pathname: string) {
+  const ownerRef = useRef<Element | null>(null);
+  useLayoutEffect(
+    () => () => {
+      ownerRef.current = document.activeElement;
+    },
+    [pathname]
+  );
+  return ownerRef;
+}
+
 export function useFocusOnRouteChange(): void {
   const [pathname] = useLocation();
   const lastPathRef = useRef<string | null>(null);
+  const ownerRef = useOwnerBeforeRouteCommit(pathname);
 
   useEffect(() => {
     if (lastPathRef.current === pathname) return;
@@ -52,6 +84,11 @@ export function useFocusOnRouteChange(): void {
     let observer: MutationObserver | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let retryId: ReturnType<typeof setInterval> | null = null;
+    // Whatever held focus when the route changed (the link just activated)
+    // is stale and may be replaced; anything focused after that was put
+    // there by the user or the page, and the retry must not take it back —
+    // doing so swallowed the keystrokes typed into a just-focused field.
+    const staleOwner = ownerRef.current;
 
     const focusTarget = (target: HTMLElement) => {
       target.focus({ preventScroll: true });
@@ -62,6 +99,7 @@ export function useFocusOnRouteChange(): void {
         ROUTE_HEADING_SELECTOR
       );
       if (!target) return false;
+      if (focusMovedOn(staleOwner, target)) return true;
       focusTarget(target);
       // Engines silently drop a programmatic focus applied during the
       // post-navigation settle window — the call returns normally and
@@ -117,5 +155,5 @@ export function useFocusOnRouteChange(): void {
       cancelAnimationFrame(raf);
       cleanup();
     };
-  }, [pathname]);
+  }, [pathname, ownerRef]);
 }
