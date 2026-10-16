@@ -10,21 +10,20 @@
  * `commitConflictResolution` with the user's per-row choices, then
  * clears the pending state. `cancel()` clears state without writing.
  *
- * Toast strings come from the constants exported by `sync-zones.ts`
- * — never template-literal interpolation in toast/console calls
+ * Both use cases load on first call, outside the initial JS: the provider
+ * mounting this hook is app-wide, but a zones sync only runs on a user
+ * action or an opted-in auto-import. A failed load toasts like a failed
+ * fetch; a failed commit load keeps the decisions pending for a retry.
+ *
+ * Failure toasts (`zones-sync-failure.ts`) come from the constants in
+ * `sync-zones-toasts.ts` — never template-literal interpolation in toast/console calls
  * (mechanical guard `check-no-pii-leakage.mjs` enforces this).
  */
 import { useCallback, useState } from "react";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import { commitConflictResolution } from "../../application/coaching/commit-conflict-resolution";
-import {
-  syncZones,
-  TOAST_ZONES_FETCH_FAILED,
-  TOAST_ZONES_SHAPE_MISMATCH,
-  TOAST_ZONES_UNSUPPORTED,
-} from "../../application/coaching/sync-zones";
 import type { useToast } from "../../hooks/use-toast";
+import { lazyImport } from "../../lib/lazy-import";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
   ConflictDecision,
@@ -32,6 +31,7 @@ import type {
   FieldKey,
   ZonesPayload,
 } from "../../types/coaching-zones";
+import { handleFailure } from "./zones-sync-failure";
 
 type Pending = {
   profileId: string;
@@ -48,16 +48,6 @@ export type ZonesSyncOrchestrator = {
   cancel: () => void;
 };
 
-const handleFailure = (
-  reason: string,
-  toasts: ReturnType<typeof useToast>
-): void => {
-  if (reason === "transport-error") toasts.error(TOAST_ZONES_FETCH_FAILED);
-  else if (reason === "shape-mismatch")
-    toasts.warning(TOAST_ZONES_SHAPE_MISMATCH);
-  else if (reason === "unsupported") toasts.info(TOAST_ZONES_UNSUPPORTED);
-};
-
 export const useZonesSyncOrchestrator = (
   persistence: PersistencePort,
   transport: CoachingTransport,
@@ -67,7 +57,14 @@ export const useZonesSyncOrchestrator = (
 
   const runSync = useCallback(
     async (profileId: string) => {
-      const r = await syncZones(profileId, transport, persistence);
+      const loaded = await lazyImport(
+        () => import("../../application/coaching/sync-zones")
+      ).catch(() => null);
+      if (!loaded) {
+        handleFailure("transport-error", toasts);
+        return;
+      }
+      const r = await loaded.syncZones(profileId, transport, persistence);
       if (!r.ok) {
         handleFailure(r.reason, toasts);
         return;
@@ -82,7 +79,14 @@ export const useZonesSyncOrchestrator = (
   const confirmDecisions = useCallback(
     async (decisions: Record<FieldKey, ConflictDecision>) => {
       if (!pending) return;
-      await commitConflictResolution(
+      const loaded = await lazyImport(
+        () => import("../../application/coaching/commit-conflict-resolution")
+      ).catch(() => null);
+      if (!loaded) {
+        handleFailure("transport-error", toasts);
+        return;
+      }
+      await loaded.commitConflictResolution(
         pending.profileId,
         decisions,
         persistence,
@@ -90,7 +94,7 @@ export const useZonesSyncOrchestrator = (
       );
       setPending(null);
     },
-    [pending, persistence]
+    [pending, persistence, toasts]
   );
 
   const cancel = useCallback(() => setPending(null), []);

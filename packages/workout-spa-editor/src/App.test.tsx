@@ -1,3 +1,4 @@
+import { act } from "@testing-library/react";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import App from "./App";
@@ -110,6 +111,15 @@ describe("App", () => {
       steps,
     });
 
+    // The shortcuts are a lazy seam (`lazy-pages`): their listener binds once
+    // the chunk resolves, so let it settle before pressing keys.
+    const renderAppWithShortcuts = async () => {
+      renderWithProviders(<App />);
+      await act(async () => {
+        await import("./components/AppKeyboardShortcuts");
+      });
+    };
+
     const createMockKRD = (workout: Workout): KRD => ({
       version: "1.0",
       type: "structured_workout",
@@ -120,7 +130,7 @@ describe("App", () => {
       extensions: { structured_workout: workout },
     });
 
-    it("should move step up when Alt+ArrowUp is pressed with a selected step", () => {
+    it("should move step up when Alt+ArrowUp is pressed with a selected step", async () => {
       // Arrange
       const step1 = createMockStep(0, 100); // 100W
       const step2 = createMockStep(1, 200); // 200W
@@ -139,7 +149,7 @@ describe("App", () => {
         .getState()
         .selectStep((hydratedSteps[1] as { id: string }).id);
 
-      renderWithProviders(<App />);
+      await renderAppWithShortcuts();
 
       // Capture initial step identities by power value
       const initialWorkout = useWorkoutStore.getState().currentWorkout
@@ -176,7 +186,7 @@ describe("App", () => {
       expect(updatedStep1.stepIndex).toBe(0); // Was step0, keeps stepIndex=0
     });
 
-    it("should move step down when Alt+ArrowDown is pressed with a selected step", () => {
+    it("should move step down when Alt+ArrowDown is pressed with a selected step", async () => {
       // Arrange
       const step1 = createMockStep(0, 100); // 100W
       const step2 = createMockStep(1, 200); // 200W
@@ -193,7 +203,7 @@ describe("App", () => {
         .getState()
         .selectStep((hydratedSteps[1] as { id: string }).id);
 
-      renderWithProviders(<App />);
+      await renderAppWithShortcuts();
 
       // Capture initial step identities by power value
       const initialWorkout = useWorkoutStore.getState().currentWorkout
@@ -230,7 +240,7 @@ describe("App", () => {
       expect(updatedStep2.stepIndex).toBe(1); // Was step1, keeps stepIndex=1
     });
 
-    it("should not move step up when it is already at the top", () => {
+    it("should not move step up when it is already at the top", async () => {
       // Arrange
       const step1 = createMockStep(0, 100);
       const step2 = createMockStep(1, 200);
@@ -244,7 +254,7 @@ describe("App", () => {
       ).steps;
       useWorkoutStore.getState().selectStep((hydrated[0] as { id: string }).id);
 
-      renderWithProviders(<App />);
+      await renderAppWithShortcuts();
 
       const initialWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
@@ -263,7 +273,7 @@ describe("App", () => {
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
-    it("should not move step down when it is already at the bottom", () => {
+    it("should not move step down when it is already at the bottom", async () => {
       // Arrange
       const step1 = createMockStep(0, 100);
       const step2 = createMockStep(1, 200);
@@ -277,7 +287,7 @@ describe("App", () => {
       ).steps;
       useWorkoutStore.getState().selectStep((hydrated[1] as { id: string }).id);
 
-      renderWithProviders(<App />);
+      await renderAppWithShortcuts();
 
       const initialWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
@@ -296,7 +306,7 @@ describe("App", () => {
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
-    it("should not move step when no step is selected", () => {
+    it("should not move step when no step is selected", async () => {
       // Arrange
       const step1 = createMockStep(0, 100);
       const step2 = createMockStep(1, 200);
@@ -306,7 +316,7 @@ describe("App", () => {
       useWorkoutStore.getState().loadWorkout(krd);
       // No step selected
 
-      renderWithProviders(<App />);
+      await renderAppWithShortcuts();
 
       const initialWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.structured_workout as Workout | undefined;
@@ -332,9 +342,9 @@ describe("App", () => {
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
-    it("should not move step when no workout is loaded", () => {
+    it("should not move step when no workout is loaded", async () => {
       // Arrange
-      renderWithProviders(<App />);
+      await renderAppWithShortcuts();
 
       // Act
       const upEvent = new KeyboardEvent("keydown", {

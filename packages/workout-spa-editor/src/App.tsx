@@ -1,17 +1,18 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useLocation } from "wouter";
 
 import { AppRoutes } from "./AppRoutes";
-import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { MigrationBoot } from "./components/MigrationBoot";
 import { DefaultProfileNotice } from "./components/molecules/DefaultProfileNotice/DefaultProfileNotice";
 import { ProfileChoiceBanner } from "./components/molecules/ProfileChoiceBanner/ProfileChoiceBanner";
+import { SilentErrorBoundary } from "./components/molecules/SilentErrorBoundary";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
 import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useSyncAutoPush } from "./hooks/use-sync-auto-push";
+import { AppKeyboardShortcuts } from "./lazy-pages";
 
 function App() {
   useStoreHydration();
@@ -35,7 +36,11 @@ function App() {
   return (
     <AppToastProvider>
       <MigrationBoot />
-      <AppKeyboardShortcuts />
+      <SilentErrorBoundary name="keyboard-shortcuts">
+        <Suspense fallback={null}>
+          <AppKeyboardShortcuts />
+        </Suspense>
+      </SilentErrorBoundary>
       <MainLayout>
         <ProfileChoiceBanner />
         <DefaultProfileNotice />
