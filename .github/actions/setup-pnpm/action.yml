@@ -32,37 +32,41 @@ runs:
     # bootstrap pnpm (v11) and then `self-update`s to our version. That is
     # two uncached npmjs fetches per job, even on a node_modules hit, and on
     # a slow registry they made `Setup pnpm` take 190-300s (2026-10-15).
-    # Instead, install the pinned binary once with `npm ci` (the committed
-    # lockfile pins the tarball's sha512) and cache it, so a hit never
-    # touches npmjs.
+    # Instead, the committed pnpm-bin lockfile pins the tarball's sha512 and
+    # we cache npm's content-addressed cache (_cacache), not the installed
+    # files. Every job reinstalls from it with `npm ci`, and cacache re-checks
+    # the sha512 on read, so a tampered cache entry never runs. On a hit the
+    # install is `--offline`: zero npmjs requests, and a bad entry fails the
+    # job (ENOTCACHED) instead of silently refetching.
     - name: Restore pnpm binary cache
       id: cache-pnpm-bin
       uses: actions/cache@v6
       with:
-        path: ~/.cache/kaiord-pnpm-bin
-        key: ${{ runner.os }}-pnpm-bin-${{ hashFiles('.github/actions/setup-pnpm/pnpm-bin/package-lock.json') }}
+        path: ~/.cache/kaiord-pnpm-npm
+        key: ${{ runner.os }}-pnpm-npm-${{ hashFiles('.github/actions/setup-pnpm/pnpm-bin/package-lock.json') }}
 
-    - name: Install pnpm binary (cache miss)
-      if: steps.cache-pnpm-bin.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        mkdir -p ~/.cache/kaiord-pnpm-bin
-        cp "$GITHUB_ACTION_PATH/pnpm-bin/package.json" "$GITHUB_ACTION_PATH/pnpm-bin/package-lock.json" ~/.cache/kaiord-pnpm-bin/
-        npm ci --prefix ~/.cache/kaiord-pnpm-bin --ignore-scripts --no-audit --no-fund
-
-    - name: Put pnpm on PATH
+    - name: Install pnpm binary
       shell: bash
       env:
         WANTED: ${{ inputs.pnpm-version }}
+        CACHE_HIT: ${{ steps.cache-pnpm-bin.outputs.cache-hit }}
       run: |
-        echo "$HOME/.cache/kaiord-pnpm-bin/node_modules/.bin" >> "$GITHUB_PATH"
-        actual=$("$HOME/.cache/kaiord-pnpm-bin/node_modules/.bin/pnpm" --version)
-        echo "pnpm binary cache: ${{ steps.cache-pnpm-bin.outputs.cache-hit == 'true' && 'HIT (no npmjs fetch)' || 'MISS (installed via npm ci)' }}, pnpm $actual"
-        pinned=$(node -p 'require("./package.json").packageManager || ""')
-        if [ "$actual" != "$WANTED" ] || [ "$pinned" != "pnpm@$actual" ]; then
+        dest="$RUNNER_TEMP/kaiord-pnpm-bin"
+        mkdir -p "$dest"
+        cp "$GITHUB_ACTION_PATH/pnpm-bin/package.json" "$GITHUB_ACTION_PATH/pnpm-bin/package-lock.json" "$dest/"
+        offline=""
+        if [ "$CACHE_HIT" = "true" ]; then offline="--offline"; fi
+        echo "pnpm binary cache: ${CACHE_HIT:-false} -> npm ci ${offline:-(online)}"
+        npm ci --prefix "$dest" --cache ~/.cache/kaiord-pnpm-npm $offline \
+          --ignore-scripts --no-audit --no-fund --no-update-notifier --loglevel http
+        echo "$dest/node_modules/.bin" >> "$GITHUB_PATH"
+        actual=$("$dest/node_modules/.bin/pnpm" --version)
+        pinned=$(node -p 'require(process.env.GITHUB_WORKSPACE + "/package.json").packageManager || ""')
+        if [ "$actual" != "$WANTED" ] || [ "${pinned%%+*}" != "pnpm@$actual" ]; then
           echo "::error::pnpm mismatch: pnpm-bin installs $actual, pnpm-version is $WANTED, packageManager is '$pinned'. Keep pnpm-bin/package.json (+ its lockfile), the pnpm-version default and packageManager in step."
           exit 1
         fi
+        echo "pnpm $actual ready"
 
     - name: Get pnpm store directory
       id: pnpm-cache
