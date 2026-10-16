@@ -9,6 +9,7 @@ import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistenc
 import { createProfile } from "../../../application/profile/create-profile";
 import { setActiveProfile } from "../../../application/profile/set-active-profile";
 import { renderWithProviders } from "../../../test-utils";
+import { openAccountMenu } from "../../../test-utils/open-account-menu";
 import { AccountMenu } from "./AccountMenu";
 
 function renderMenu(attention = false) {
@@ -65,7 +66,7 @@ describe("AccountMenu", () => {
     renderMenu();
 
     // Act
-    await user.click(screen.getByTestId("status-header-account-button"));
+    await openAccountMenu(user);
 
     // Assert
     expect(
@@ -84,7 +85,7 @@ describe("AccountMenu", () => {
     const loc = renderMenu();
 
     // Act
-    await user.click(screen.getByTestId("status-header-account-button"));
+    await openAccountMenu(user);
     await user.click(await screen.findByTestId("account-menu-item-settings"));
 
     // Assert
@@ -99,7 +100,7 @@ describe("AccountMenu", () => {
     renderMenu(false);
 
     // Act
-    await user.click(screen.getByTestId("status-header-account-button"));
+    await openAccountMenu(user);
     await screen.findByTestId("account-menu-item-connections");
 
     // Assert
@@ -115,7 +116,7 @@ describe("AccountMenu", () => {
     renderMenu(true);
 
     // Act
-    await user.click(screen.getByTestId("status-header-account-button"));
+    await openAccountMenu(user);
 
     // Assert
     expect(
@@ -131,7 +132,7 @@ describe("AccountMenu", () => {
     renderMenu();
 
     // Act
-    await user.click(screen.getByTestId("status-header-account-button"));
+    await openAccountMenu(user);
     const menu = await screen.findByTestId("account-menu");
 
     // Assert
@@ -167,7 +168,7 @@ describe("AccountMenu", () => {
       await screen.findByLabelText("Account menu (Pablo)");
 
       // Act
-      await user.click(screen.getByTestId("status-header-account-button"));
+      await openAccountMenu(user);
 
       // Assert
       const group = await screen.findByRole("group", { name: "Athlete" });
@@ -214,7 +215,7 @@ describe("AccountMenu", () => {
       observer.observe(document.body, { childList: true, subtree: true });
 
       // Act
-      await user.click(screen.getByTestId("status-header-account-button"));
+      await openAccountMenu(user);
       await screen.findAllByRole("menuitemradio");
       observer.disconnect();
 
@@ -227,7 +228,7 @@ describe("AccountMenu", () => {
       const user = userEvent.setup();
       renderWith(await seedTwo());
       await screen.findByLabelText("Account menu (Pablo)");
-      await user.click(screen.getByTestId("status-header-account-button"));
+      await openAccountMenu(user);
 
       // Act
       await user.click(
@@ -251,7 +252,7 @@ describe("AccountMenu", () => {
         </Router>,
         { persistence }
       );
-      await user.click(screen.getByTestId("status-header-account-button"));
+      await openAccountMenu(user);
 
       // Act
       await user.click(
