@@ -522,14 +522,15 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    # Test execution is a few seconds per shard; wall-clock is dominated by
-    # setup (~30s) and, on the 22.18.0 shard only, a best-effort Codecov
-    # upload whose network tail (observed 90s+) previously cancelled the
-    # shard at the old 2min cap. The upload is now bounded (its own
-    # timeout-minutes + continue-on-error) so it can neither hang nor fail
-    # the shard; 4min leaves headroom above setup + test + the bounded
-    # upload. Capped at test-family ceiling 30.
-    timeout-minutes: 4
+    # Budget = 2 × measured max of everything except Codecov, plus the
+    # Codecov cap, which is a hard bound and needs no headroom:
+    # ceil((2 × 162s + 60s) / 60) = 7. Measured over 588 green shards of
+    # 22 main runs (2026-10-14..16): setup + test + post steps p50 42s,
+    # p95 68s, max 162s (setup alone reaches 147s). The old 4min could
+    # not hold its own 2min Codecov cap: 162s + 120s > 240s, and a slow
+    # registry slows setup and Codecov at the same time, so the worst
+    # cases arrive together.
+    timeout-minutes: 7
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
@@ -573,7 +574,10 @@ jobs:
         if: matrix.node-version == '22.18.0'
         # Best-effort upload: bound the network tail so a slow/hung Codecov
         # can neither cancel the shard (timeout) nor fail it (continue-on-error).
-        timeout-minutes: 2
+        # Healthy uploads take 5s p50, 26s max (294 uploads); a 60s cap only
+        # drops uploads that were already stuck. The job budget above
+        # includes this cap, so keep the two in step.
+        timeout-minutes: 1
         continue-on-error: true
         uses: codecov/codecov-action@v7
         with:
