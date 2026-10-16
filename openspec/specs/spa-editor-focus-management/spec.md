@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-10-16 (no-global-smooth-scroll)
 
 # Focus Management
 
@@ -452,14 +452,15 @@ Components rendering steps or blocks SHALL register on mount and unregister on u
 #### Scenario: Focused item is scrolled into view without double-scroll
 
 - **WHEN** the focus target DOM node is not fully visible in the scroll container
-- **THEN** the hook SHALL call `element.focus({ preventScroll: true })` followed by `element.scrollIntoView({ block: 'nearest', behavior: <instant if prefers-reduced-motion: reduce, else auto> })`
+- **THEN** the hook SHALL call `element.focus({ preventScroll: true })` followed by `element.scrollIntoView({ block: 'nearest', behavior: 'instant' })`
 - **AND** the browser's default focus-scroll SHALL NOT execute a competing scroll action
 - **AND** when the target is already fully visible, `scrollIntoView({ block: 'nearest' })` is a natural no-op per the CSSOM specification — the hook SHALL NOT compute visibility ahead of time to conditionally skip the call
 
-#### Scenario: Scroll respects prefers-reduced-motion
+#### Scenario: The focus scroll jumps whatever the motion preference
 
-- **WHEN** `window.matchMedia('(prefers-reduced-motion: reduce)').matches` is true at the time the hook applies focus
+- **WHEN** the hook applies focus, with or without `prefers-reduced-motion: reduce`
 - **THEN** `scrollIntoView` SHALL be called with `behavior: 'instant'`
+- **AND** the scroll SHALL NOT glide: focus follows an action the user just took, and a page still moving under their next press releases it on another element
 
 #### Scenario: Toast announcement is queued before focus moves
 

@@ -2,7 +2,6 @@ import type { Locator, Page } from "@playwright/test";
 
 import { mockLlmApis } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
-import { clickCentred } from "./helpers/click-centred";
 import { openHeaderAction } from "./helpers/mobile-menu";
 
 /**
@@ -106,21 +105,19 @@ async function addTestProvider(
 ): Promise<void> {
   await openHeaderAction(page, /open settings/i);
   await page.waitForURL(/\/settings$/);
-  await clickCentred(page.getByTestId("settings-row-ai"));
+  await page.getByTestId("settings-row-ai").click();
   await page.waitForURL(/\/settings\/ai/);
 
   const settingsPage = page.getByTestId("settings-page");
   await expect(settingsPage).toBeVisible({ timeout: 5000 });
 
-  await clickCentred(settingsPage.getByRole("button", { name: "Add account" }));
+  await settingsPage.getByRole("button", { name: "Add account" }).click();
   await settingsPage.getByLabel("Provider", { exact: true }).selectOption(type);
 
   await settingsPage.getByLabel("Label (optional)").fill(label);
   await settingsPage.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
 
-  await clickCentred(
-    settingsPage.getByRole("button", { name: "Save account" })
-  );
+  await settingsPage.getByRole("button", { name: "Save account" }).click();
 
   // Scope to the provider list: with an active profile the per-purpose
   // model selects on the same page also list the provider as an option.

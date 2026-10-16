@@ -17,7 +17,6 @@
  */
 
 import { expect, test } from "./fixtures/base";
-import { clickCentred } from "./helpers/click-centred";
 import { routeInApp } from "./helpers/route-in-app";
 
 type DropFlag = { __dropHeadingFocus?: boolean };
@@ -43,9 +42,9 @@ test("should keep every keystroke typed right after a route change", async ({
   const settingsPage = page.getByTestId("settings-page");
   const addAccount = settingsPage.getByRole("button", { name: "Add account" });
   await routeInApp(page, "/settings/ai", addAccount);
-  await clickCentred(addAccount);
+  await addAccount.click();
   const keyField = settingsPage.getByPlaceholder("sk-...");
-  await clickCentred(keyField);
+  await keyField.click();
   await page.evaluate(() => {
     (window as DropFlag).__dropHeadingFocus = false;
   });
