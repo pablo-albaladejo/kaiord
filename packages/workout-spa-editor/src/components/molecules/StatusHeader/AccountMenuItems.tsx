@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
+import { MenuItem } from "../../atoms/MenuItem";
 import { ThemeToggle } from "../../atoms/ThemeToggle";
 import {
   ATTENTION_ICON_CLASS,
@@ -28,7 +29,7 @@ export function AccountMenuItems({ attention }: AccountMenuItemsProps) {
   return (
     <>
       {ACCOUNT_ENTRIES.map((entry) => (
-        <DropdownMenu.Item
+        <MenuItem
           key={entry.id}
           className={MENU_ITEM_CLASS}
           aria-label={entry.ariaLabel ? t(`aria.${entry.id}`) : undefined}
@@ -45,27 +46,27 @@ export function AccountMenuItems({ attention }: AccountMenuItemsProps) {
               data-testid="account-menu-connections-attention"
             />
           )}
-        </DropdownMenu.Item>
+        </MenuItem>
       ))}
-      <DropdownMenu.Item asChild className={MENU_ITEM_CLASS}>
+      <MenuItem asChild className={MENU_ITEM_CLASS}>
         <a href={DOCS_URL} target="_blank" rel="noreferrer">
           <ICON_MAP.help className="h-4 w-4" />
           {t("helpDocs")}
         </a>
-      </DropdownMenu.Item>
+      </MenuItem>
       <DropdownMenu.Separator className={MENU_SEPARATOR_CLASS} />
       {/* A menu row rather than a nested plain button: Radix menus
           `preventDefault()` on Tab, so anything inside the content that is
           not an item is unreachable by keyboard. `preventDefault` on select
           keeps the menu open, because comparing the two themes means
           pressing this twice. */}
-      <DropdownMenu.Item
+      <MenuItem
         asChild
         className={MENU_ITEM_CLASS}
         onSelect={(event) => event.preventDefault()}
       >
         <ThemeToggle className="h-auto w-full justify-start" />
-      </DropdownMenu.Item>
+      </MenuItem>
     </>
   );
 }
