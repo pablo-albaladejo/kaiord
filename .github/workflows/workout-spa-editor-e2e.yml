@@ -44,11 +44,15 @@ jobs:
 
   e2e-tests:
     name: E2E Tests
-    # chromium/webkit finish in ~10-20 min; firefox is consistently ~2-3x
-    # slower and hit the previous 35 min cap (e.g. run 26158958084), so
-    # the workflow ends up "cancelled" even when nothing was failing. Bump
-    # the budget to 50 min while we evaluate whether to shard firefox.
-    timeout-minutes: 50
+    # Playwright runs with workers=1 on CI (playwright.config.ts), so the
+    # job is the serial sum of every test. Firefox executes the same 338
+    # specs ~1.5x slower per test than chromium (uniformly, no outliers, no
+    # retries: 1829s vs 1212s of summed test time in run 38381213683, up to
+    # 2462s on a slow runner), i.e. 31-45 min on one runner, which is what
+    # kept brushing the cap and getting cancelled. The cure is parallelism,
+    # not a bigger budget: firefox is split in 3 shards (~12-15 min each).
+    # chromium/webkit stay a single shard (20-28 min).
+    timeout-minutes: 40
     runs-on: ubuntu-latest
     needs: check-ci-status
     if: needs.check-ci-status.outputs.should-run == 'true'
@@ -56,7 +60,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        include:
+          - { browser: chromium, shard: 1, shards: 1 }
+          - { browser: firefox, shard: 1, shards: 3 }
+          - { browser: firefox, shard: 2, shards: 3 }
+          - { browser: firefox, shard: 3, shards: 3 }
+          - { browser: webkit, shard: 1, shards: 1 }
 
     steps:
       - name: Checkout code
@@ -72,7 +81,7 @@ jobs:
         run: pnpm -r build
 
       - name: Run E2E tests
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=${{ matrix.browser }}
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
           CI: true
 
@@ -80,7 +89,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report-${{ matrix.browser }}
+          name: playwright-report-${{ matrix.browser }}-${{ matrix.shard }}
           path: packages/workout-spa-editor/playwright-report/
           retention-days: 7
 
@@ -88,7 +97,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-screenshots-${{ matrix.browser }}
+          name: playwright-screenshots-${{ matrix.browser }}-${{ matrix.shard }}
           path: packages/workout-spa-editor/test-results/
           retention-days: 7
 

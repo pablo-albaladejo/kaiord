@@ -5,15 +5,11 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { HealthSleepRecord } from "../../types/health/health-records";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieHealthRecordRepository } from "./dexie-health-record-repository";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-health-repo-${suffix}-${Date.now()}-${Math.random()}`;
 
 const TABLE = "healthSleep" as const;
 const PROFILE_A = "p-A";
@@ -37,18 +33,10 @@ const seed = (
 });
 
 describe("createDexieHealthRecordRepository (against healthSleep)", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("health-records");
 
   beforeEach(async () => {
-    name = dbName("apply");
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should round-trip put + getById", async () => {

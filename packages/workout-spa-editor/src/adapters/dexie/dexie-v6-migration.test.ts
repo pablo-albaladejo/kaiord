@@ -9,11 +9,10 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { backfillBridgeSnapshotState, KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) => `kaiord-test-v6-${suffix}-${Date.now()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import { backfillBridgeSnapshotState } from "./dexie-database";
 
 const DEXIE_V5 = 5;
 
@@ -50,20 +49,13 @@ const seedV5 = async (name: string): Promise<void> => {
 };
 
 describe("Dexie v5 → v6 migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("backfill");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v6");
+  const { name } = db;
 
   it("should backfill pendingClear=false and lastSuccessfulFingerprint=null on existing bridges", async () => {
     // Arrange
     await seedV5(name);
-    const v6 = new KaiordDatabase(name);
+    const v6 = db;
     await v6.open();
     const rows = await v6.table("bridges").toArray();
 
@@ -81,7 +73,7 @@ describe("Dexie v5 → v6 migration", () => {
   it("should preserve existing fields verbatim", async () => {
     // Arrange
     await seedV5(name);
-    const v6 = new KaiordDatabase(name);
+    const v6 = db;
     await v6.open();
     const verified = await v6.table("bridges").get("ext-legacy-verified");
 

@@ -5,6 +5,7 @@ import {
   deriveThresholdMetrics,
   deriveZoneMap,
 } from "../../../lib/athlete";
+import { athleteZonesHref } from "../../../routing/athlete-zones-href";
 import type { Profile } from "../../../types/profile";
 import { Card } from "../../atoms/Card";
 import { Icon, STATUS_ICON } from "../../atoms/Icon";
@@ -20,15 +21,22 @@ type ZoneMapCardProps = {
 export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
   const t = useTranslate("athlete");
   const units = useUnits();
-  const zones = deriveZoneMap(profile, sport, units);
+  const hrUnit = useTranslate("common")("units.hr");
+  const zones = deriveZoneMap(profile, sport, units, hrUnit);
   // The zone map derives from the sport's primary threshold, which is the
   // first metric the same candidate order yields — naming it here is what
   // makes the reason a reason rather than a slogan.
-  const primary = deriveThresholdMetrics(profile, sport, units)[0];
+  const primary = deriveThresholdMetrics(
+    profile,
+    sport,
+    units,
+    undefined,
+    hrUnit
+  )[0];
 
   const reason = primary
     ? t("zonesReason", {
-        metric: primary.label,
+        metric: t(`metric.${primary.labelKey}`),
         value: primary.unit
           ? `${primary.value} ${primary.unit}`
           : primary.value,
@@ -37,7 +45,11 @@ export function ZoneMapCard({ profile, sport, sportLabel }: ZoneMapCardProps) {
 
   return (
     <div>
-      <SectionHead title={t("zonesTitle", { sport: sportLabel })} />
+      <SectionHead
+        title={t("zonesTitle", { sport: sportLabel })}
+        action={t("adjustZones")}
+        actionHref={athleteZonesHref(sport)}
+      />
       <Card className="flex flex-col gap-4 p-4">
         {/* Principle 8: the reason goes above what it justifies. */}
         <div className="flex items-start gap-2.5 rounded-xl border border-edge-soft bg-surface-elevated px-3.5 py-3">

@@ -18,6 +18,10 @@ describe("redactAnalyticsPath", () => {
     { path: `/workout/${UUID}/`, expected: "/workout/:id" },
     { path: "/calendar/alice@example.com", expected: "/calendar/:weekId" },
     { path: "/settings/alice@example.com", expected: "/settings/:section" },
+    {
+      path: "/athlete/zones/alice@example.com",
+      expected: "/athlete/zones/:sport",
+    },
   ])("should replace the record id in $path", ({ path, expected }) => {
     // Arrange
 
@@ -38,6 +42,9 @@ describe("redactAnalyticsPath", () => {
     "/health/sleep",
     "/settings/privacy",
     "/settings/profile",
+    "/connections",
+    "/athletes",
+    "/athlete/zones/running",
     "/health",
     "/daily",
     "/",

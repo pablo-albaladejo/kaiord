@@ -13,7 +13,7 @@ describe("UsageEmptyState", () => {
 
     // Assert
 
-    expect(screen.getByText("AI Usage")).toBeInTheDocument();
+    expect(screen.getByText(/^AI Usage — all athletes/)).toBeInTheDocument();
     expect(screen.getByText(/last 6 months/i)).toBeInTheDocument();
   });
 
@@ -27,5 +27,16 @@ describe("UsageEmptyState", () => {
     // Assert
 
     expect(screen.getByText(/last 3 months/i)).toBeInTheDocument();
+  });
+
+  it("should explain in plain words what fills the panel", () => {
+    // Arrange
+
+    // Act
+    render(<UsageEmptyState monthsWindow={6} />);
+
+    // Assert
+    expect(screen.getByText(/use the AI assistant/i)).toBeInTheDocument();
+    expect(screen.queryByText(/batch run/i)).toBeNull();
   });
 });

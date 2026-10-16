@@ -3,6 +3,14 @@ import { lazyPage } from "./lazy-page";
 export const AthletePage = lazyPage(
   () => import("./components/pages/AthletePage")
 );
+// Every athlete in this browser, /athletes.
+export const AthletesPage = lazyPage(
+  () => import("./components/pages/AthletesPage")
+);
+// The athlete's zone editor, /athlete/zones/:sport.
+export const ZonesPage = lazyPage(
+  () => import("./components/pages/AthleteZonesPage")
+);
 export const ChatPage = lazyPage(() => import("./components/pages/ChatPage"));
 export const CalendarPage = lazyPage(
   () => import("./components/pages/CalendarPage")
@@ -25,6 +33,9 @@ export const WorkoutDetail = lazyPage(
 );
 export const CreateWorkout = lazyPage(
   () => import("./components/pages/CreateWorkout/CreateWorkout")
+);
+export const ConnectionsPage = lazyPage(
+  () => import("./components/pages/ConnectionsPage/ConnectionsPage")
 );
 export const SettingsPage = lazyPage(
   () => import("./components/pages/SettingsPage/SettingsPage")

@@ -8,6 +8,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Profile } from "../types/profile";
+import { useCurrentWeightKg } from "./health/use-current-weight";
 import { useActiveProfileLive } from "./use-active-profile-live";
 import type { DiscoveredBridge } from "./use-discovered-bridges";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
@@ -20,6 +21,9 @@ vi.mock("./use-active-profile-live", () => ({
 }));
 vi.mock("./use-discovered-bridges", () => ({
   useDiscoveredBridges: vi.fn(),
+}));
+vi.mock("./health/use-current-weight", () => ({
+  useCurrentWeightKg: vi.fn(),
 }));
 // Keeps the real `pickActiveSport`; only the two send paths are observed.
 vi.mock("./use-profile-snapshot-push-helpers", async (importOriginal) => {
@@ -35,6 +39,9 @@ const mockedActiveProfile = vi.mocked(useActiveProfileLive);
 const mockedUseDiscoveredBridges = vi.mocked(useDiscoveredBridges);
 const mockedSendSnapshot = vi.mocked(sendSnapshot);
 const mockedSendClear = vi.mocked(sendClear);
+const mockedCurrentWeight = vi.mocked(useCurrentWeightKg);
+const PROFILE_KG = 72.5;
+const WEIGH_IN_KG = 71.9;
 
 const PROFILE_ID = "11111111-1111-4111-8111-111111111111";
 const CYCLING_FTP_W = 270;
@@ -130,5 +137,30 @@ describe("useProfileSnapshotPush", () => {
       expect(mockedSendClear).toHaveBeenCalledTimes(1);
     });
     expect(mockedSendClear.mock.calls[0]?.[0].extensionId).toBe("ext-garmin");
+  });
+
+  it("should push the current weight, not the profile weight", async () => {
+    // Arrange
+    mockedActiveProfile.mockReturnValue({
+      id: PROFILE_ID,
+      profile: { ...profile, bodyWeight: PROFILE_KG },
+    });
+    mockedUseDiscoveredBridges.mockReturnValue([GARMIN]);
+    mockedCurrentWeight.mockReturnValue(WEIGH_IN_KG);
+
+    // Act
+    renderHook(() => useProfileSnapshotPush());
+
+    // Assert
+    await waitFor(() => {
+      expect(mockedSendSnapshot).toHaveBeenCalled();
+    });
+    expect(mockedSendSnapshot.mock.calls[0]?.[1].profile.bodyWeight).toBe(
+      WEIGH_IN_KG
+    );
+    expect(mockedCurrentWeight).toHaveBeenCalledWith(PROFILE_ID, {
+      ...profile,
+      bodyWeight: PROFILE_KG,
+    });
   });
 });

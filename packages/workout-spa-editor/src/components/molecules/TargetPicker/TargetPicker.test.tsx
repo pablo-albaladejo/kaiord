@@ -282,7 +282,7 @@ describe("TargetPicker", () => {
     expect(screen.getByRole("option", { name: "Watts" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "% FTP" })).toBeInTheDocument();
     expect(
-      screen.getByRole("option", { name: "Power Zone (no profile)" })
+      screen.getByRole("option", { name: "Power Zone (no athlete)" })
     ).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Range" })).toBeInTheDocument();
   });
@@ -453,7 +453,7 @@ describe("TargetPicker", () => {
 
       // Assert
 
-      expect(zoneOption?.textContent).toBe("Power Zone (no profile)");
+      expect(zoneOption?.textContent).toBe("Power Zone (no athlete)");
     });
 
     it("should calculate absolute power values from zone and FTP", async () => {

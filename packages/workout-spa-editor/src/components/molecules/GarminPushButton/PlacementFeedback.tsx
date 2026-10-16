@@ -10,7 +10,7 @@ import { formatDateLabel } from "../TemplatePickerDialog/format-date-label";
 import { placementMessage, type PlacementTone } from "./placement-message";
 import { UncertainActions } from "./UncertainActions";
 
-const CONNECTIONS_HREF = "/settings/connections";
+const CONNECTIONS_HREF = "/connections";
 
 export const GARMIN_BRIDGE_STORE_URL =
   "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe";

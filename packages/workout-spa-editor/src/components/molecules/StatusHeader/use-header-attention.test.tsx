@@ -60,6 +60,7 @@ describe("useHeaderAttention", () => {
 
     // Assert
     expect(result.current).toEqual({
+      count: 1,
       title: "1 source down",
       detail:
         "Kaiord cannot read from a source — signing in again may restore it",

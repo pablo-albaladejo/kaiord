@@ -16,6 +16,7 @@ export const StepDetails = ({ step }: StepDetailsProps) => {
   // A swim is paced per 100 m, like the step editor types it.
   const sport = useCurrentWorkout()?.metadata.sport;
   const t = useTranslate("editor");
+  const hrUnit = useTranslate("common")("units.hr");
   const targetIcon = getTargetIcon(step.targetType);
   const durationIcon = getDurationIcon(step.durationType);
 
@@ -29,7 +30,7 @@ export const StepDetails = ({ step }: StepDetailsProps) => {
       <div className="flex items-center gap-2 mb-2">
         <Icon icon={targetIcon} size="sm" color="secondary" />
         <span className="text-sm text-ink-body">
-          {formatTarget(step, units, t, sport)}
+          {formatTarget(step, units, t, sport, hrUnit)}
         </span>
       </div>
     </>

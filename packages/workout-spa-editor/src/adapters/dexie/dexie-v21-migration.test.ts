@@ -7,12 +7,9 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v21-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_SEED = 19;
 const SCHEMA_HEAD = 37;
@@ -34,22 +31,14 @@ const seed = async (
 };
 
 describe("Dexie chatMessages (v21) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v21");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seed(name, []);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -63,7 +52,6 @@ describe("Dexie chatMessages (v21) migration", () => {
     await seed(name, []);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const count = await db.table("chatMessages").count();
     db.close();
@@ -77,7 +65,6 @@ describe("Dexie chatMessages (v21) migration", () => {
     await seed(name, [{ id: "w-1", profileId: "p-1", date: "2026-06-13" }]);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const row = await db.table("workouts").get("w-1");
     db.close();
@@ -89,7 +76,6 @@ describe("Dexie chatMessages (v21) migration", () => {
   it("should serve the per-profile chronological index", async () => {
     // Arrange
     await seed(name, []);
-    const db = new KaiordDatabase(name);
     await db.open();
 
     // Act

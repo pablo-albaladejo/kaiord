@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ConnectionSource } from "./connection-source";
-import {
-  buildConnectionAttention,
-  countDetected,
-  needsAttention,
-} from "./source-attention";
+import { buildConnectionAttention, needsAttention } from "./source-attention";
 
 const source = (
   overrides: Partial<ConnectionSource> = {}
@@ -66,23 +62,6 @@ describe("needsAttention", () => {
 
     // Assert
     expect(flagged).toBe(false);
-  });
-});
-
-describe("countDetected", () => {
-  it("should count discovered bridges regardless of their session", () => {
-    // Arrange
-    const connections = [
-      { discovered: true },
-      { discovered: true },
-      { discovered: false },
-    ];
-
-    // Act
-    const detected = countDetected(connections);
-
-    // Assert
-    expect(detected).toBe(2);
   });
 });
 

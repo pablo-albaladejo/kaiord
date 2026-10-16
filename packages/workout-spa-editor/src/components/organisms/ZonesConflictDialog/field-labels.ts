@@ -8,6 +8,7 @@
  * entries are generated at module-load time via
  * `field-labels-bands.ts`; every string literal there is hardcoded.
  */
+import { getTranslate } from "../../../i18n/use-translate";
 import type { FieldKey } from "../../../types/coaching-zones";
 import { buildBandLabels, buildBandUnits } from "./field-labels-bands";
 
@@ -49,8 +50,14 @@ const UNITS: Record<FieldKey, string> = {
 const PACE_BAND_RE =
   /^(running|swimming)\.paceZones\.z[1-5]\.(minPace|maxPace)$/;
 
-export const formatFieldValue = (field: FieldKey, value: number): string => {
+export const formatFieldValue = (
+  field: FieldKey,
+  value: number,
+  hrUnit: string = getTranslate("common")("units.hr")
+): string => {
   if (PACE_FIELDS.has(field)) return formatPace(value, UNITS[field]);
   if (PACE_BAND_RE.test(field)) return formatPace(value, UNITS[field]);
-  return `${value} ${UNITS[field]}`.trim();
+  // "bpm" in UNITS is the data token for a heart-rate field, not display text.
+  const unit = UNITS[field] === "bpm" ? hrUnit : UNITS[field];
+  return `${value} ${unit}`.trim();
 };

@@ -27,7 +27,12 @@ export function createNewProfile(
   };
 }
 
-function buildSportZones(): Record<string, SportZoneConfig> {
+/** The empty config a sport starts with: no thresholds, editable zones. */
+export function defaultSportZoneConfig(sport: SportKey): SportZoneConfig {
+  return buildSportZones()[sport];
+}
+
+function buildSportZones(): Record<SportKey, SportZoneConfig> {
   const emptyHr = { method: "custom", zones: DEFAULT_HEART_RATE_ZONES };
 
   return {

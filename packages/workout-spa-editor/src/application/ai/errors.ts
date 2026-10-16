@@ -12,3 +12,11 @@ export class ProviderNotFoundError extends Error {
     this.providerId = providerId;
   }
 }
+
+/** A model binding must name a model; a blank one would call no model. */
+export class EmptyModelIdError extends Error {
+  override readonly name = "EmptyModelIdError";
+  constructor() {
+    super("A model binding needs a model id");
+  }
+}

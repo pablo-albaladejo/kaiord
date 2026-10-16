@@ -9,13 +9,11 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v32-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 31;
 const SCHEMA_HEAD = 37;
@@ -50,22 +48,14 @@ const indexKeyPaths = (db: KaiordDatabase, store: string): string[] =>
     );
 
 describe("Dexie usageEvents (v32) migration to head", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v32");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seedV31(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -79,7 +69,6 @@ describe("Dexie usageEvents (v32) migration to head", () => {
     await seedV31(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const tableNames = db.tables.map((t) => t.name);
     db.close();
@@ -93,7 +82,6 @@ describe("Dexie usageEvents (v32) migration to head", () => {
     await seedV31(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const events = await db.table("usageEvents").toArray();
     db.close();
@@ -112,7 +100,6 @@ describe("Dexie usageEvents (v32) migration to head", () => {
     await seedV31(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const schema = db.table("usageEvents").schema;
     const indexes = indexKeyPaths(db, "usageEvents");

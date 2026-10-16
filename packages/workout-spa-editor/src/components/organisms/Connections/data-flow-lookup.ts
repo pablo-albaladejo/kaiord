@@ -1,5 +1,5 @@
+import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
-import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 
 /** All policies on a bridge, across every data type and direction. Backs
     disconnect (disables every policy on the bridge being unlinked). */

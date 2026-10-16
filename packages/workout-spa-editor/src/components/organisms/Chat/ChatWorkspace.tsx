@@ -6,7 +6,7 @@ import type { ChatConversationRecord } from "../../../types/chat/chat-conversati
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
 import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
 import { ChatConversation } from "./ChatConversation";
-import { ChatModelPicker } from "./ChatModelPicker";
+import { ChatModelPicker, type ChatModelPickerProps } from "./ChatModelPicker";
 import { ConversationSidebar } from "./ConversationSidebar";
 
 export type ChatWorkspaceProps = {
@@ -21,8 +21,8 @@ export type ChatWorkspaceProps = {
   requestedModelId: string | null;
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
+  modelPicker: ChatModelPickerProps;
   search: UseChatSearchPanel;
-  onModelChange: (providerId: string) => void;
   onSelect: (id: string) => void;
   onNew: () => void;
   onRename: (id: string, title: string) => void;
@@ -49,7 +49,10 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
         onDelete={props.onDelete}
       />
       <div className="flex flex-col gap-3">
-        <ChatModelPicker {...props} />
+        <ChatModelPicker
+          key={props.activeId ?? "none"}
+          {...props.modelPicker}
+        />
         {props.provider && (
           <ModelStatusNotice
             type={props.provider.type}
@@ -63,6 +66,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
             conversationId={props.activeId}
             provider={props.provider}
             modelId={props.modelId}
+            pinModel={props.modelPicker.chosen}
             generationProvider={props.generationProvider}
             generationModelId={props.generationModelId}
             messages={props.messages}

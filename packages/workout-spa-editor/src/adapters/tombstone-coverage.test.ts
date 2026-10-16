@@ -6,11 +6,10 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
-import { KaiordDatabase } from "./dexie/dexie-database";
+import { sharedKaiordDatabase } from "../test-utils/shared-kaiord-database";
 import { DEVICE_LOCAL } from "./dexie/dexie-snapshot-port";
 import { TOMBSTONED_TABLES } from "./with-tombstones";
 
@@ -47,6 +46,7 @@ const SNAPSHOT_TABLE_BY_REPO: Record<string, string> = {
   userPreferences: "userPreferences",
   intakeEntries: "intakeEntries",
   intakePresets: "intakePresets",
+  energyTargets: "energyTargets",
 };
 
 /**
@@ -63,13 +63,14 @@ const REVIEWED_EXCEPTIONS: Record<string, string> = {
   // Hand-tombstoned in `deleteIntegrationPolicy`: the repo's delete is
   // `deleteById`, outside the decorator's `delete(id)` shape.
   integrationPolicy: "hand-tombstoned by deleteIntegrationPolicy",
-  // Structurally untombstonable: PK is `source`, not `id`. Tombstones are
-  // `[table+id]` and the merge only suppresses rows whose `row.id` is a
-  // string. Fixing it needs a tombstone-schema + merge change.
-  syncState: "non-`id` primary key (source)",
-  // Structurally untombstonable: PK is `profileId`, not `id`. Also purely
-  // profile-scoped, so it travels with the profile-delete cascade.
-  userPreferences: "non-`id` primary key (profileId)",
+  // PK is `source`, not `id`, and no production code calls its delete, so no
+  // tombstone is written. Not a drop-in: its rows have no `updatedAt` or
+  // `createdAt` (clock 0), so a `[syncState+source]` tombstone would also
+  // hide every later copy of that source until it is pruned.
+  syncState: "non-`id` primary key (source); delete unused in production",
+  // PK is `profileId`, not `id`. Purely profile-scoped, so it travels with
+  // the profile-delete cascade (the `profiles` tombstone).
+  userPreferences: "non-`id` primary key (profileId); cascade-only delete",
 };
 
 /**
@@ -116,18 +117,14 @@ const OFF_PORT_TABLES: Record<string, string> = {
   labValues: "hand-tombstoned by deleteLabReport; cascade otherwise",
   chatMessages: "hand-tombstoned by deleteConversation; cascade otherwise",
   coachingDayNotes: "cascade-only delete; plain `id` PK, so tombstonable",
-  // Composite PKs — structurally untombstonable under `[table+id]`.
-  // aiModelBindings is NOT cascade-only: `clearModelBinding` deletes one row
-  // on user action ("revert this purpose to the default model", wired from
-  // SettingsPanel). That delete resurrects at the user's own next sync — it
-  // sits on the composite-PK gap documented in design.md, tracked not fixed.
+  // Composite PK, but its user deletes ARE tombstoned: `withTombstones`
+  // decorates `delete(profileId, purpose)` ("Same as main model", removing a
+  // provider) under the id `<profileId>:<purpose>` (`tombstoneIdOf`). The
+  // two-argument delete is why the port sweep above does not list it.
   aiModelBindings:
-    "composite PK (untombstonable — see design.md gap); user delete via " +
-    "clearModelBinding resurrects, tracked not fixed here",
+    "composite PK, decorated by withTombstones as <profileId>:<purpose>",
+  // Composite PKs — structurally untombstonable under `[table+id]`.
   autoMatchDismissals: "composite PK; cascade-only delete",
-  // On the port, but its PK is `profileId` and it has no delete(id): a goal
-  // is overwritten, never deleted, except by the profile cascade.
-  energyTargets: "non-`id` primary key (profileId); cascade-only delete",
   coachingSyncState: "composite PK; cascade-only delete",
   dataTypeSourcePolicy: "composite PK; cascade-only delete",
   // Legacy and write-dead: the only writer left is the v6 migration backfill
@@ -200,18 +197,10 @@ describe("tombstone coverage", () => {
 });
 
 describe("tombstone table names", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("tombcover");
 
   beforeEach(async () => {
-    name = `kaiord-test-tombcover-${Date.now()}-${Math.random()}`;
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should file every tombstone under a real snapshot table name", () => {

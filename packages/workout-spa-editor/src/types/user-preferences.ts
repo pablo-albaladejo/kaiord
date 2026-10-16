@@ -37,7 +37,11 @@ export const userPreferencesSchema = z.object({
   /** Sport last selected on the Athlete page; absent until first chosen. */
   activeSport: sportSchema.optional(),
   aiBannerExpanded: z.boolean().optional(),
-  /** Measurement system for display only; absent defaults to metric. */
+  /**
+   * Legacy: `units`, `notificationsEnabled` and `locale` now live on the
+   * device (`lib/device-preferences`); these are read once to seed it and
+   * kept so older app versions syncing the same snapshot still work.
+   */
   units: unitsSchema.optional(),
   /** User intent to enable browser notifications; absent defaults to off. */
   notificationsEnabled: z.boolean().optional(),

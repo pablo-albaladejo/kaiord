@@ -19,6 +19,7 @@ const FALLBACK: ChatModels = {
   modelId: "claude-sonnet-5",
   generationProvider: PROVIDER,
   generationModelId: "claude-sonnet-5",
+  chosen: false,
 };
 
 const conversation = (modelId: string): ChatConversationRecord => ({
@@ -69,6 +70,36 @@ describe("resolveActiveChatModel", () => {
       provider: PROVIDER,
       modelId: "claude-sonnet-5",
       requestedModelId: "claude-sonnet-5",
+      chosen: false,
     });
+  });
+
+  it("should mark a conversation with its own model as chosen", () => {
+    // Arrange
+    const conv = conversation("claude-opus-5");
+
+    // Act
+    const model = resolveActiveChatModel(conv, [PROVIDER], FALLBACK);
+
+    // Assert
+    expect(model.chosen).toBe(true);
+  });
+
+  it("should follow the chat default for a conversation without its own model", () => {
+    // Arrange
+    const conv: ChatConversationRecord = {
+      id: "c1",
+      profileId: "p1",
+      title: "Plan",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    };
+
+    // Act
+    const model = resolveActiveChatModel(conv, [PROVIDER], FALLBACK);
+
+    // Assert
+    expect(model.chosen).toBe(false);
+    expect(model.modelId).toBe("claude-sonnet-5");
   });
 });

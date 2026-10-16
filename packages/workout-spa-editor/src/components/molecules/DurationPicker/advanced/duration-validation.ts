@@ -4,11 +4,13 @@
  * Validation functions for advanced duration values.
  */
 
+import { getTranslate, type Translate } from "../../../../i18n/use-translate";
 import type { AdvancedDurationType } from "./duration-type-options";
 
 export const validateValue = (
   durationType: AdvancedDurationType,
-  value: string
+  value: string,
+  t: Translate = getTranslate("common")
 ): { isValid: boolean; error?: string } => {
   const numValue = Number(value);
 
@@ -43,7 +45,13 @@ export const validateValue = (
     durationType === "repeat_until_heart_rate_less_than"
   ) {
     if (numValue > 220) {
-      return { isValid: false, error: "Maximum 220 bpm" };
+      return {
+        isValid: false,
+        error: t("durationPicker.maxHeartRate", {
+          max: 220,
+          unit: t("units.hr"),
+        }),
+      };
     }
   }
 

@@ -7,13 +7,10 @@
 import "fake-indexeddb/auto";
 
 import type { LabReport, LabValue } from "@kaiord/core";
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { createDexieLabRepository } from "./dexie-lab-repository";
-
-const dbName = () => `kaiord-test-lab-${Date.now()}-${Math.random()}`;
 
 const report = (id: string, profileId: string, date: string): LabReport => ({
   id,
@@ -39,18 +36,10 @@ const value = (
 });
 
 describe("createDexieLabRepository", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("lab");
 
   beforeEach(async () => {
-    name = dbName();
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should round-trip a report and its values", async () => {

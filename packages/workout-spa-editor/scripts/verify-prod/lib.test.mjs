@@ -156,3 +156,37 @@ describe("readDeployedSha", () => {
     assert.deepEqual(shas, ["unknown", "unknown", "unknown"]);
   });
 });
+
+describe("formatSummary evidence", () => {
+  it("should print evidence under a failing check and the entry script", () => {
+    // Arrange
+    const results = [
+      {
+        name: "a",
+        passed: [],
+        failed: ["boom"],
+        notes: [],
+        evidence: "  EVID",
+      },
+      {
+        name: "b",
+        passed: ["ok"],
+        failed: [],
+        notes: [],
+        evidence: "  HIDDEN",
+      },
+    ];
+
+    // Act
+    const { text } = formatSummary(results, {
+      sha: "abc",
+      base: "b",
+      entry: "/app/assets/index-X.js",
+    });
+
+    // Assert
+    assert.match(text, /entry=\/app\/assets\/index-X\.js/);
+    assert.match(text, /x boom\n {2}EVID/);
+    assert.doesNotMatch(text, /HIDDEN/);
+  });
+});

@@ -1,5 +1,7 @@
 import { chromium, devices } from "@playwright/test";
 
+import { attachEvidence, createEvidence } from "./evidence.mjs";
+
 export { oneLine } from "./lib.mjs";
 
 export const TIMEOUT = 15_000;
@@ -10,7 +12,11 @@ export function launchBrowser() {
 
 const DESKTOP = { viewport: { width: 1366, height: 860 } };
 
-export async function openSession(browser, base, { mobile = false } = {}) {
+export async function openSession(
+  browser,
+  base,
+  { mobile = false, startedAt = Date.now() } = {}
+) {
   const device = mobile ? { ...devices["iPhone 13"] } : DESKTOP;
   delete device.defaultBrowserType;
   const ctx = await browser.newContext({
@@ -21,17 +27,11 @@ export async function openSession(browser, base, { mobile = false } = {}) {
   });
   ctx.setDefaultTimeout(TIMEOUT);
   const page = await ctx.newPage();
-  const errors = [];
-  const failedRequests = [];
-  page.on("console", (m) => {
-    if (m.type() === "error") errors.push(`console: ${m.text().slice(0, 300)}`);
-  });
-  page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
-  page.on("response", (r) => {
-    if (r.status() >= 400) failedRequests.push(`${r.status()} ${r.url()}`);
-  });
+  const collector = createEvidence(startedAt);
+  attachEvidence(page, collector);
   const go = (hash) => gotoHash(page, base, hash);
-  return { ctx, page, errors, failedRequests, go };
+  const { evidence } = collector;
+  return { ctx, page, errors: evidence.errors, evidence, go };
 }
 
 async function gotoHash(page, base, hash) {
@@ -63,12 +63,17 @@ export function mondayOf(d) {
 }
 
 // Dexie live queries render after the route's heading, so read until two
-// snapshots taken 400 ms apart agree.
-export async function settledText(page, read = () => document.body.innerText) {
-  let previous = await page.evaluate(read);
+// snapshots taken 400 ms apart agree. With a locator as `target`, `read`
+// receives its element.
+export async function settledText(
+  page,
+  read = () => document.body.innerText,
+  target = page
+) {
+  let previous = await target.evaluate(read);
   for (let i = 0; i < 20; i++) {
     await page.waitForTimeout(400);
-    const current = await page.evaluate(read);
+    const current = await target.evaluate(read);
     if (current === previous) return current;
     previous = current;
   }

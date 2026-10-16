@@ -10,7 +10,7 @@
   },
   "structure": {
     "eyebrow": "Structure · time in zone",
-    "targetsFrom": "Zones shown against {{threshold}} · from your athlete profile, {{relative}}"
+    "targetsFrom": "Zones shown against {{threshold}} · from your athlete data, {{relative}}"
   },
   "sport": {
     "cycling": "Cycling",
@@ -30,7 +30,7 @@
     "sendToTrainingPeaks": "Send to TrainingPeaks",
     "sentToTrainingPeaks": "On TrainingPeaks",
     "sendDisabled": {
-      "noExtension": "Install the Kaiord Garmin Bridge extension to send this workout.",
+      "noExtension": "Install the Kaiord extension for Garmin to send this workout.",
       "signedOut": "Sign in to Garmin Connect in this browser to send this workout."
     }
   },
@@ -82,7 +82,7 @@
     "libraryOnly": {
       "insecure-context": "In your Garmin library, with no date: placing it on the calendar needs a secure (https) page.",
       "unsupported-browser": "In your Garmin library, with no date: this browser cannot place it on the calendar. An up-to-date browser can.",
-      "bridge-outdated": "In your Garmin library, with no date: update the Kaiord Garmin Bridge extension to place it on the calendar."
+      "bridge-outdated": "In your Garmin library, with no date: update the Kaiord extension for Garmin to place it on the calendar."
     },
     "updateExtension": "Update the extension",
     "openConnections": "Open Connections",
@@ -102,7 +102,7 @@
       "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Connections, under Workout → Also sent to.",
       "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish.",
       "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to send it.",
-      "incomplete-pace-zones": "This workout uses a pace zone your profile doesn't define. Complete your pace zones in Athlete to send it.",
+      "incomplete-pace-zones": "This workout uses a pace zone the athlete doesn't define. Complete your pace zones in Athlete to send it.",
       "unsupported-pace-zone-sport": "Pace zones can only be sent to Garmin in running or swimming workouts.",
       "missing-ftp": "This workout has %FTP power targets. Set your FTP in Athlete to convert them to watts for Garmin.",
       "sport-without-power-zones": "This workout's sport has no power zones. Change its sport to cycling or running to send its %FTP power targets to Garmin."

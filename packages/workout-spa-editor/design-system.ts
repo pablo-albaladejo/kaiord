@@ -156,16 +156,13 @@ export { RoutingSourceSwitches } from "./src/components/organisms/Connections/Ro
 export { EditorContextMenu } from "./src/components/organisms/EditorContextMenu/EditorContextMenu";
 export { EditorStateRibbon } from "./src/components/organisms/EditorStateRibbon/EditorStateRibbon";
 export { ImportDropzoneOverlay } from "./src/components/organisms/ImportDropzoneOverlay/ImportDropzoneOverlay";
-export { DeleteConfirmDialog } from "./src/components/organisms/ProfileManager/DeleteConfirmDialog";
-export { ImportExportActions } from "./src/components/organisms/ProfileManager/ImportExportActions";
-export { ProfileList } from "./src/components/organisms/ProfileManager/ProfileList";
 export { ScratchEditorSurface } from "./src/components/organisms/ScratchEditorSurface/ScratchEditorSurface";
+export { AccountsSection } from "./src/components/organisms/SettingsPanel/AccountsSection";
+export { AdvancedModels } from "./src/components/organisms/SettingsPanel/AdvancedModels";
 export { AiTab } from "./src/components/organisms/SettingsPanel/AiTab";
+export { AssistantCard } from "./src/components/organisms/SettingsPanel/AssistantCard";
 export { EncryptionSection } from "./src/components/organisms/SettingsPanel/EncryptionSection";
 export { LanguageRow } from "./src/components/organisms/SettingsPanel/LanguageRow";
-export { ModelPicker } from "./src/components/organisms/SettingsPanel/ModelPicker";
-export { ModelRow } from "./src/components/organisms/SettingsPanel/ModelRow";
-export { ModelsSection } from "./src/components/organisms/SettingsPanel/ModelsSection";
 export { NotificationsRow } from "./src/components/organisms/SettingsPanel/NotificationsRow";
 export { PreferencesTab } from "./src/components/organisms/SettingsPanel/PreferencesTab";
 export { PrivacyInformationSection } from "./src/components/organisms/SettingsPanel/PrivacyInformationSection";
@@ -179,7 +176,10 @@ export { SyncTab } from "./src/components/organisms/SettingsPanel/SyncTab";
 export { UsageEmptyState } from "./src/components/organisms/SettingsPanel/UsageEmptyState";
 export { UsageMonthRow } from "./src/components/organisms/SettingsPanel/UsageMonthRow";
 export { UsageTab } from "./src/components/organisms/SettingsPanel/UsageTab";
-export { UsageTable, USAGE_PURPOSES } from "./src/components/organisms/SettingsPanel/UsageTable";
+export {
+  UsageTable,
+  USAGE_PURPOSES,
+} from "./src/components/organisms/SettingsPanel/UsageTable";
 export { ShortcutSheet } from "./src/components/organisms/ShortcutSheet/ShortcutSheet";
 export { StepEditor } from "./src/components/organisms/StepEditor/StepEditor";
 export { StepList } from "./src/components/organisms/StepList/StepList";
@@ -202,8 +202,14 @@ export { AnalyticsProvider } from "./src/contexts/analytics-context";
 export { AthleteZonesProvider } from "./src/contexts/athlete-zones-context";
 export { CoachingRegistryBootstrap } from "./src/contexts/coaching-registry-bootstrap";
 export { CoachingRegistryProvider } from "./src/contexts/coaching-registry-context";
-export { FocusRegistryContext, FocusRegistryProvider } from "./src/contexts/focus-registry-context";
-export { FocusTelemetryContext, FocusTelemetryProvider } from "./src/contexts/focus-telemetry-context";
+export {
+  FocusRegistryContext,
+  FocusRegistryProvider,
+} from "./src/contexts/focus-registry-context";
+export {
+  FocusTelemetryContext,
+  FocusTelemetryProvider,
+} from "./src/contexts/focus-telemetry-context";
 export { GarminBridgeProvider } from "./src/contexts/garmin-bridge-context";
 export { PersistenceProvider } from "./src/contexts/persistence-context";
 export { SyncProvider } from "./src/contexts/sync-context";

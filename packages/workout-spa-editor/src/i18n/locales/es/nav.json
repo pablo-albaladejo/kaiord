@@ -12,7 +12,8 @@
   "connections": "Conexiones",
   "more": "Más",
   "helpDocs": "Ayuda y documentación",
-  "localAccount": "Cuenta local",
+  "athleteSection": "Atleta",
+  "manageAthletes": "Gestionar atletas…",
   "alert": {
     "title_one": "{{count}} fuente caída",
     "title_other": "{{count}} fuentes caídas",
@@ -23,7 +24,7 @@
     "calendar": "Ir a calendario",
     "library": "Abrir biblioteca de entrenos",
     "nutrition": "Abrir nutrición",
-    "athlete": "Abrir perfil de atleta",
+    "athlete": "Abrir atleta",
     "trends": "Abrir tendencias de bienestar",
     "labs": "Abrir analíticas de laboratorio",
     "chat": "Abrir asistente de chat",
@@ -31,12 +32,13 @@
     "connections": "Abrir conexiones",
     "more": "Más destinos",
     "account": "Menú de cuenta ({{name}})",
-    "accountEmpty": "Menú de cuenta (sin perfil activo)"
+    "accountEmpty": "Menú de cuenta (sin atleta activo)"
   },
   "announce": {
     "library": "Página de biblioteca",
     "chat": "Página de chat",
     "athlete": "Página de atleta",
+    "athletes": "Página de atletas",
     "newWorkout": "Nuevo entreno",
     "workout": "Página del entreno",
     "editWorkout": "Editar entreno",
@@ -46,9 +48,11 @@
     "recovery": "Página de recuperación",
     "activity": "Página de actividad",
     "settings": "Página de ajustes",
+    "connections": "Página de conexiones",
     "nutrition": "Página de nutrición",
     "daily": "Página diaria",
-    "calendar": "Página del calendario"
+    "calendar": "Página del calendario",
+    "zones": "Página de zonas"
   },
   "chatAssistant": "Asistente de chat"
 }

@@ -8,7 +8,6 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -17,8 +16,9 @@ import {
 } from "../../application/export/record-export.use-case";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ExportLedgerEntry } from "../../types/export-ledger";
-import { KaiordDatabase } from "./dexie-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { createDexieExportLedgerRepository } from "./dexie-export-ledger-repository";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
@@ -26,9 +26,6 @@ const RECORD_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const T1 = new Date("2026-09-10T08:00:00.000Z");
 const T2 = new Date("2026-09-10T09:00:00.000Z");
 const T3 = new Date("2026-09-10T10:00:00.000Z");
-
-const dbName = (device: string) =>
-  `kaiord-test-ledger-commit-${device}-${Date.now()}-${Math.random()}`;
 
 const exportInput = (
   payload: Record<string, unknown>,
@@ -71,8 +68,8 @@ const ledgerRows = async (db: KaiordDatabase) =>
   (await db.table("exportLedger").toArray()) as ExportLedgerEntry[];
 
 describe("export-ledger commit by natural key", () => {
-  let dbA: KaiordDatabase;
-  let dbB: KaiordDatabase;
+  const dbA = sharedKaiordDatabase("ledger-commit-a");
+  const dbB = sharedKaiordDatabase("ledger-commit-b");
   const cloud = () =>
     createInMemoryCloudSyncPort({
       authenticated: true,
@@ -94,16 +91,11 @@ describe("export-ledger commit by natural key", () => {
   beforeEach(async () => {
     // Fake only `Date`: Dexie and fake-indexeddb schedule on real timers.
     vi.useFakeTimers({ toFake: ["Date"] });
-    dbA = new KaiordDatabase(dbName("a"));
-    dbB = new KaiordDatabase(dbName("b"));
     await Promise.all([dbA.open(), dbB.open()]);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     vi.useRealTimers();
-    dbA.close();
-    dbB.close();
-    await Promise.all([Dexie.delete(dbA.name), Dexie.delete(dbB.name)]);
   });
 
   it("should record the POST id on the row a mid-POST sync imported [C]", async () => {

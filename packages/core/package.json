@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/core",
-  "version": "10.1.2",
+  "version": "10.3.0",
   "description": "Core library for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
@@ -34,18 +34,18 @@
   },
   "dependencies": {
     "@noble/hashes": "^2.4.0",
-    "zod": "^4.5.4"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.5",
     "@types/rosie": "^0.0.45",
-    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.3",
     "rosie": "^2.1.1",
-    "tsdown": "^0.23.0",
-    "tsx": "^4.23.13",
+    "tsdown": "^0.23.1",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.3"
   },
   "repository": {
     "type": "git",

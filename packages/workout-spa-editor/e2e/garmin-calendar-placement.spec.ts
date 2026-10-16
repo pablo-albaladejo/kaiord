@@ -84,7 +84,7 @@ test.describe("Garmin calendar placement", () => {
 
     // Assert
     await expect(ribbon(page)).toContainText(
-      "update the Kaiord Garmin Bridge extension"
+      "update the Kaiord extension for Garmin"
     );
     await expect(
       ribbon(page).getByRole("link", { name: "Update the extension" })

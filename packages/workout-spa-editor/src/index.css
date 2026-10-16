@@ -197,6 +197,26 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* WCAG 2.3.3: honour the OS "reduce motion" setting. The theme transition
+     and smooth scrolling above are on by default; this switches them off.
+     Enter/exit animations are shortened to ~0 rather than removed so Radix
+     Presence still gets its animationend and unmounts the node. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+      transition: none;
+    }
+
+    body {
+      transition: none;
+    }
+
+    .animate-in,
+    .animate-out {
+      animation-duration: 0.01ms !important;
+    }
+  }
+
   /* Webkit-specific focus styles for better Safari/iOS support - Requirement 35 */
   button:focus,
   a:focus,

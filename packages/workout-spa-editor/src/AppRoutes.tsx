@@ -7,8 +7,10 @@ import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 import {
   AthletePage,
+  AthletesPage,
   CalendarPage,
   ChatPage,
+  ConnectionsPage,
   ConvertPage,
   DailyPage,
   EditorPage,
@@ -18,6 +20,7 @@ import {
   NutritionPage,
   SettingsPage,
   WorkoutDetail,
+  ZonesPage,
 } from "./lazy-pages";
 import { LegacyTodayRedirect } from "./routing/legacy-today-redirect";
 import { getCurrentWeekId } from "./utils/week-utils";
@@ -29,26 +32,26 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
     <RouteErrorBoundary analytics={analytics}>{node}</RouteErrorBoundary>
   );
 
+  const toCurrentWeek = (
+    <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
+  );
+
   return (
     <Suspense fallback={<RouteSpinner />}>
       <Switch>
-        <Route path="/">
-          {/* Default view: the current week's calendar (1-hop). */}
-          <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
-        </Route>
+        {/* Default view: the current week's calendar (1-hop). */}
+        <Route path="/">{toCurrentWeek}</Route>
         <Route path="/daily">{guard(<DailyPage />)}</Route>
         {/* Legacy alias: the page was renamed /today → /daily; preserve ?date=. */}
-        <Route path="/today">
-          <LegacyTodayRedirect />
-        </Route>
+        <Route path="/today" component={LegacyTodayRedirect} />
         {/* Bare /calendar is intentionally a non-durable alias for the
             CURRENT week: one URL family, one view (consensus plan, ADR).
             `replace` avoids a back-button re-bounce trap. */}
-        <Route path="/calendar">
-          <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
-        </Route>
+        <Route path="/calendar">{toCurrentWeek}</Route>
         <Route path="/calendar/:weekId">{guard(<CalendarPage />)}</Route>
         <Route path="/athlete">{guard(<AthletePage />)}</Route>
+        <Route path="/athlete/zones/:sport">{guard(<ZonesPage />)}</Route>
+        <Route path="/athletes">{guard(<AthletesPage />)}</Route>
         <Route path="/nutrition">{guard(<NutritionPage />)}</Route>
         <Route path="/chat/:conversationId?">
           {(params) =>
@@ -63,9 +66,7 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         <Route path="/workout/:id">
           {(params) => guard(<EditorPage id={params.id} />)}
         </Route>
-        <Route path="/settings/profile">
-          <Redirect to="/athlete" />
-        </Route>
+        <Route path="/connections">{guard(<ConnectionsPage />)}</Route>
         {/* One URL family for the whole Settings shell: the bare path is the
             index, a section segment opens that section's panel (beside the
             index on desktop). Retired sections (`/settings/data-hub`,
@@ -78,10 +79,8 @@ export function AppRoutes({ analytics }: AppRoutesProps) {
         <Route path="/health/*?">
           {guard(<HealthSubRouter analytics={analytics} />)}
         </Route>
-        <Route>
-          {/* Unknown routes settle on the default view (calendar). */}
-          <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />
-        </Route>
+        {/* Unknown routes settle on the default view (calendar). */}
+        <Route>{toCurrentWeek}</Route>
       </Switch>
     </Suspense>
   );

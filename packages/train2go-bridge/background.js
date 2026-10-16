@@ -19,9 +19,9 @@ const TRAIN2GO_DASHBOARD = "https://app.train2go.com/user/index";
 const BRIDGE_MANIFEST = {
   id: "train2go-bridge",
   name: "Kaiord Train2Go Bridge",
-  version: "10.1.1",
+  version: "10.3.0",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["read:training-plan", "read:training-zones"],
+  capabilities: ["read:training-plan", "read:training-zones", "read:body"],
 };
 
 // ── Swallowed-error telemetry ──

@@ -6,6 +6,7 @@ import { Button } from "../../atoms/Button/Button";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
 import { accountInitials } from "./account-initials";
 import { AccountMenuItems } from "./AccountMenuItems";
+import { AthleteSwitcher } from "./AthleteSwitcher";
 import { MENU_CONTENT_CLASS } from "./header-menu-styles";
 
 /* Inside the login the brand is ink, so the avatar is a neutral chip rather
@@ -20,13 +21,12 @@ type AccountMenuProps = {
 };
 
 /**
- * The avatar menu: everything account-level that used to be a second nav
- * row. Athlete is deliberately NOT in here — it is a destination with FTP,
- * zones and thresholds behind it, so it keeps a named slot in the bar.
+ * The avatar menu: the athlete switcher on top, then everything
+ * account-level that used to be a second nav row. The Athlete destination
+ * itself still keeps its named slot in the bar.
  */
 export function AccountMenu({ attention }: AccountMenuProps) {
   const t = useTranslate("nav");
-  const tCommon = useTranslate("common");
   const activeProfile = useActiveProfileLive()?.profile ?? null;
   const name = activeProfile?.name ?? null;
   const initials = accountInitials(name);
@@ -60,17 +60,7 @@ export function AccountMenu({ attention }: AccountMenuProps) {
           className={MENU_CONTENT_CLASS}
           data-testid="account-menu"
         >
-          <DropdownMenu.Label className="px-3 py-2">
-            <span className="block text-sm font-semibold text-ink-strong">
-              {name ?? tCommon("status.noProfile")}
-            </span>
-            {/* "Local account" is the whole claim. Records in this browser
-                are not encrypted at rest — only sync snapshots are, before
-                upload — so no line here says otherwise. */}
-            <span className="block text-xs text-ink-muted">
-              {t("localAccount")}
-            </span>
-          </DropdownMenu.Label>
+          <AthleteSwitcher />
           <AccountMenuItems attention={attention} />
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

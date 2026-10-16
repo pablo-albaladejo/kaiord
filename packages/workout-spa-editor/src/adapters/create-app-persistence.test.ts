@@ -7,8 +7,7 @@
 import "fake-indexeddb/auto";
 
 import type { LabReport, LabValue } from "@kaiord/core";
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { deleteIntegrationPolicy } from "../application/integration-policy/delete-integration-policy.use-case";
 import { deleteLabReport } from "../application/lab/delete-lab-report.use-case";
@@ -18,9 +17,10 @@ import { unmatchSession } from "../application/unmatch-session";
 import type { CloudSyncPort } from "../ports/cloud-sync-port";
 import type { PersistencePort } from "../ports/persistence-port";
 import { createInMemoryCloudSyncPort } from "../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../test-utils/shared-kaiord-database";
 import type { Snapshot } from "../types/snapshot";
 import { createAppPersistence } from "./create-app-persistence";
-import { KaiordDatabase } from "./dexie/dexie-database";
+import type { KaiordDatabase } from "./dexie/dexie-database";
 import { createDexieSnapshotPort } from "./dexie/dexie-snapshot-port";
 
 const PROFILE_ID = "11111111-1111-4111-8111-111111111111";
@@ -32,15 +32,11 @@ type Device = {
   sync: () => Promise<void>;
 };
 
-const dbName = (suffix: string) =>
-  `kaiord-test-approundtrip-${suffix}-${Date.now()}-${Math.random()}`;
-
 const openDevice = async (
-  name: string,
+  db: KaiordDatabase,
   cloud: CloudSyncPort,
   deviceId: string
 ): Promise<Device> => {
-  const db = new KaiordDatabase(name);
   await db.open();
   const snapshotPort = createDexieSnapshotPort(db);
   return {
@@ -211,30 +207,21 @@ const hasTombstone = (
   (snapshot?.tombstones ?? []).some((t) => t.table === table && t.id === id);
 
 describe("createAppPersistence cross-device delete round trip", () => {
-  let nameA: string;
-  let nameB: string;
+  const dbA = sharedKaiordDatabase("approundtrip-a");
+  const dbB = sharedKaiordDatabase("approundtrip-b");
   let deviceA: Device;
   let deviceB: Device;
   let cloud: ReturnType<typeof createInMemoryCloudSyncPort>;
 
   beforeEach(async () => {
-    nameA = dbName("a");
-    nameB = dbName("b");
     cloud = createInMemoryCloudSyncPort({
       authenticated: true,
       snapshot: null,
       revision: null,
       pushCount: 0,
     });
-    deviceA = await openDevice(nameA, cloud, "device-a");
-    deviceB = await openDevice(nameB, cloud, "device-b");
-  });
-
-  afterEach(async () => {
-    deviceA.db.close();
-    deviceB.db.close();
-    await Dexie.delete(nameA);
-    await Dexie.delete(nameB);
+    deviceA = await openDevice(dbA, cloud, "device-a");
+    deviceB = await openDevice(dbB, cloud, "device-b");
   });
 
   it("should keep a deleted workout deleted on the deleting device and on the other one", async () => {

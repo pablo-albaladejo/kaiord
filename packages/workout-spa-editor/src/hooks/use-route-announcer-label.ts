@@ -34,6 +34,8 @@ const EXACT: Record<string, string> = {
   "/library": "library",
   "/chat": "chat",
   "/athlete": "athlete",
+  "/athletes": "athletes",
+  "/connections": "connections",
   "/workout/new": "newWorkout",
   "/health": "trends",
   "/health/sleep": "sleep",
@@ -48,6 +50,7 @@ function announceKey(rawPathname: string): string {
   const pathname = normalizePath(rawPathname);
   const exact = EXACT[pathname];
   if (exact) return exact;
+  if (pathname.startsWith("/athlete/zones/")) return "zones";
   if (pathname.startsWith("/workout/view/")) return "workout";
   if (pathname.startsWith("/workout/")) return "editWorkout";
   if (pathname.startsWith("/settings")) return "settings";

@@ -1,8 +1,10 @@
 /**
  * deleteProfile — application use case.
  *
- * Removes a profile and clears `meta.activeProfileId` when it
- * matched the deleted id. Both writes happen inside
+ * Removes a profile. When it was the active one, the first remaining
+ * profile becomes active, or the active id is cleared when none is left,
+ * so deleting the active athlete never leaves the app without one while
+ * others exist. All writes happen inside
  * `persistence.transaction` so a partial failure cannot leave an
  * active id pointing at a deleted row.
  *
@@ -22,8 +24,8 @@ export const deleteProfile = async (
   await persistence.transaction(async () => {
     const activeId = await persistence.profiles.getActiveId();
     await persistence.profiles.delete(profileId);
-    if (activeId === profileId) {
-      await persistence.profiles.setActiveId(null);
-    }
+    if (activeId !== profileId) return;
+    const [next] = await persistence.profiles.getAll();
+    await persistence.profiles.setActiveId(next?.id ?? null);
   });
 };

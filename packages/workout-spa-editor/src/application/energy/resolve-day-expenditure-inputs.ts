@@ -14,7 +14,7 @@ import {
 } from "@kaiord/core";
 
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
-import type { Profile } from "../../types/profile";
+import { resolveBmrInputs } from "./bmr-inputs";
 import {
   deriveAge,
   toBodyFatFraction,
@@ -28,23 +28,10 @@ export const sumIntakeKcal = (entries: IntakeEntryRecord[]): number | null =>
     ? null
     : entries.reduce((total, entry) => total + entry.kcal, 0);
 
-const hasBmrInputs = (
-  profile: Profile | undefined
-): profile is Profile & {
-  height: number;
-  birthDate: string;
-  sex: NonNullable<Profile["sex"]>;
-  bodyWeight: number;
-} =>
-  profile?.height !== undefined &&
-  profile.birthDate !== undefined &&
-  profile.sex !== undefined &&
-  profile.bodyWeight !== undefined;
-
 /** Predicted expenditure is unavailable without measured data or BMR inputs. */
 export const isGated = (sources: DayEnergySources): boolean =>
   toMeasuredWellness(sources.wellness) === undefined &&
-  !hasBmrInputs(sources.profile);
+  resolveBmrInputs(sources) === null;
 
 /** Build the core expenditure input; caller guarantees `!isGated`. */
 export const toExpenditureInput = (
@@ -54,12 +41,12 @@ export const toExpenditureInput = (
 ): DayExpenditureInput => {
   const measured = toMeasuredWellness(sources.wellness);
   if (measured) return { measured, bmrKcal: 0, expectedActivityKcal };
-  const profile = sources.profile!;
+  const { profile, weightKg } = resolveBmrInputs(sources)!;
   const bmr = computeBmr({
-    weightKg: profile.bodyWeight!,
-    heightCm: profile.height!,
-    age: deriveAge(profile.birthDate!, date),
-    sex: profile.sex!,
+    weightKg,
+    heightCm: profile.height,
+    age: deriveAge(profile.birthDate, date),
+    sex: profile.sex,
     bodyFatFraction: toBodyFatFraction(sources.bodyComposition),
   });
   return {

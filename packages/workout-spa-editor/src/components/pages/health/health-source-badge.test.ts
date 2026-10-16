@@ -10,6 +10,7 @@ describe("healthSourceBadge", () => {
     { sourceBridgeId: "whoop-bridge", expected: "WHOOP" },
     { sourceBridgeId: "tanita-bridge", expected: "Tanita" },
     { sourceBridgeId: "trainingpeaks-bridge", expected: "TrainingPeaks" },
+    { sourceBridgeId: "train2go-bridge", expected: "Train2Go" },
     { sourceBridgeId: "unknown", expected: "Unknown" },
   ])(
     "should map $sourceBridgeId to the label $expected",

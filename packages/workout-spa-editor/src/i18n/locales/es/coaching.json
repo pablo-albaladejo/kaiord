@@ -59,7 +59,7 @@
     "loadingDescription": "Cargando descripción…",
     "retryDescription": "Reintentar",
     "descriptionError": {
-      "not-linked": "Este coach no está vinculado a tu perfil.",
+      "not-linked": "Este coach no está vinculado a este atleta.",
       "session-expired": "Tu sesión de coaching caducó: reconéctate y reintenta.",
       "transport-error": "No se pudo cargar la descripción. Revisa que la extensión del navegador esté instalada y activa."
     }

@@ -5,9 +5,10 @@
  * tab: create / delete / switch / import / export multiple profiles,
  * "Saved profiles (N)" list) was removed by the redesign. The active
  * athlete now lives on a single-profile `/athlete` page: identity, a
- * sport segmented control, a sport-scoped thresholds card (FTP / LTHR via
- * the threshold editor, each metric carrying where its number came from)
- * and a zone map under the reason it exists. `/settings/profile` redirects
+ * sport segmented control, a sport-scoped thresholds card (FTP / LTHR /
+ * max HR edited in place, each carrying where its number came from) and a
+ * zone map under the reason it exists; the zone editor itself is
+ * `/athlete/zones/:sport` (athlete-zones-page.spec.ts). `/settings/profile` redirects
  * to `/athlete`.
  *
  * Text assertions here lean on `exact`: a threshold's label and value now
@@ -28,9 +29,8 @@ import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 const PROFILE_ID = "athlete-e2e-profile";
 const PROFILE_NAME = "E2E Athlete";
 
-// Seed an active profile that has a cycling sport-zone config (so the
-// threshold editor renders the FTP/LTHR inputs) but no running config
-// (so switching to Running shows the empty-threshold prompt).
+// Seed an active profile that has a cycling sport-zone config but no
+// running config (switching to Running still shows its fields).
 async function seedAthleteProfile(page: Page) {
   await page.evaluate(
     async ({ profileId, name }) => {
@@ -81,14 +81,14 @@ async function gotoAthlete(page: Page) {
   });
 }
 
-// The editor opens from the section head's "Edit" action, not from a
-// full-width button inside the card. `exact` keeps it off the identity
-// block's "Edit profile" control.
-async function openThresholdEditor(page: Page) {
-  await page.getByRole("button", { name: "Edit", exact: true }).click();
-  await expect(
-    page.getByRole("dialog", { name: /edit thresholds/i })
-  ).toBeVisible();
+// Thresholds are edited in place: a field saves on Enter (or blur) and the
+// card says "Saved" once the write has landed.
+async function setThreshold(page: Page, label: RegExp, value: string) {
+  const card = page.getByTestId("athlete-thresholds");
+  const field = card.getByLabel(label);
+  await field.fill(value);
+  await field.press("Enter");
+  await expect(card.getByText("Saved", { exact: true })).toBeVisible();
 }
 
 test.describe("Athlete page", () => {
@@ -114,10 +114,24 @@ test.describe("Athlete page", () => {
     await expect(
       page.getByRole("heading", { name: /cycling zones/i })
     ).toBeVisible();
-    // The Connections section was retired into /settings/connections; with
-    // no linked account the Athlete page does not even link there.
+    // The Connections section was retired into /connections; the Athlete
+    // page only links there, it does not grow a second list.
     await expect(
       page.getByRole("heading", { name: /connections/i })
+    ).toHaveCount(0);
+  });
+
+  test("should edit thresholds in place, with no dialog", async ({ page }) => {
+    // Arrange
+    await gotoAthlete(page);
+
+    // Act
+    await setThreshold(page, /^FTP \(W\)/, "300");
+
+    // Assert
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Edit", exact: true })
     ).toHaveCount(0);
   });
 
@@ -128,12 +142,7 @@ test.describe("Athlete page", () => {
     await gotoAthlete(page);
 
     // Act
-    await openThresholdEditor(page);
-    await page
-      .getByRole("dialog", { name: /edit thresholds/i })
-      .getByLabel(/FTP threshold/i)
-      .fill("300");
-    await page.keyboard.press("Escape");
+    await setThreshold(page, /^FTP \(W\)/, "300");
 
     // Assert — the reason names the threshold the bands derive from.
     await expect(page.getByText(/derived from FTP 300 W\./i)).toBeVisible();
@@ -146,57 +155,29 @@ test.describe("Athlete page", () => {
     await gotoAthlete(page);
 
     // Act
-    await openThresholdEditor(page);
-    await page
-      .getByRole("dialog", { name: /edit thresholds/i })
-      .getByLabel(/FTP threshold/i)
-      .fill("300");
-    await page.keyboard.press("Escape");
+    await setThreshold(page, /^FTP \(W\)/, "300");
 
     // Assert — provenance is stated, and stays silent about an age it
     // cannot prove (the profile was written seconds ago).
     await expect(page.getByText("By hand").first()).toBeVisible();
   });
 
-  test("should set the cycling FTP threshold and reflect it on the card", async ({
-    page,
-  }) => {
-    // Arrange
-    await gotoAthlete(page);
-
-    // Act — open the threshold editor and set FTP (Cycling is the
-    // default sport in the editor).
-    await openThresholdEditor(page);
-    const dialog = page.getByRole("dialog", { name: /edit thresholds/i });
-    await dialog.getByLabel(/FTP threshold/i).fill("300");
-    // The editor auto-persists on change; close the dialog.
-    await page.keyboard.press("Escape");
-
-    // Assert — the card now shows the FTP metric. `exact` matters: the
-    // identity tagline ("Cyclist · 300 W FTP") and the zones reason
-    // ("Derived from FTP 300 W…") both contain "FTP" too.
-    await expect(page.getByText("FTP", { exact: true })).toBeVisible();
-    await expect(page.getByText("300", { exact: true })).toBeVisible();
-  });
-
-  test("should set the cycling LTHR threshold and reflect it on the card", async ({
+  test("should set the cycling LTHR threshold and keep it in the field", async ({
     page,
   }) => {
     // Arrange
     await gotoAthlete(page);
 
     // Act
-    await openThresholdEditor(page);
-    const dialog = page.getByRole("dialog", { name: /edit thresholds/i });
-    await dialog.getByLabel(/LTHR threshold/i).fill("170");
-    await page.keyboard.press("Escape");
+    await setThreshold(page, /^LTHR \(bpm\)/, "170");
 
-    // Assert — the Threshold HR metric appears with the new value.
-    await expect(page.getByText("Threshold HR", { exact: true })).toBeVisible();
-    await expect(page.getByText("170", { exact: true })).toBeVisible();
+    // Assert
+    await expect(
+      page.getByTestId("athlete-thresholds").getByLabel(/^LTHR \(bpm\)/)
+    ).toHaveValue("170");
   });
 
-  test("should switch sport and show that sport's threshold prompt", async ({
+  test("should switch sport and show that sport's thresholds", async ({
     page,
   }) => {
     // Arrange
@@ -208,8 +189,10 @@ test.describe("Athlete page", () => {
       .getByRole("radio", { name: "Running" })
       .click();
 
-    // Assert — the empty-thresholds prompt is sport-aware.
-    await expect(page.getByText(/add your running thresholds/i)).toBeVisible();
+    // Assert — a runner's thresholds lead with pace; power is optional.
+    const card = page.getByTestId("athlete-thresholds");
+    await expect(card.getByLabel(/^Threshold pace/)).toBeVisible();
+    await expect(card.getByText("Optional for running")).toBeVisible();
   });
 
   test("should persist a threshold edit across an Athlete-page reload", async ({
@@ -218,42 +201,16 @@ test.describe("Athlete page", () => {
     // Arrange
     await gotoAthlete(page);
 
-    // Act — set FTP, then reload the Athlete page.
-    await openThresholdEditor(page);
-    const dialog = page.getByRole("dialog", { name: /edit thresholds/i });
-    await dialog.getByLabel(/FTP threshold/i).fill("280");
-    await page.keyboard.press("Escape");
-    await expect(page.getByText("300", { exact: true })).toBeHidden();
-    // The editor persists on change in the background (fire-and-forget
-    // Dexie put); wait for the write to commit or the reload can win the
-    // race and hydrate the pre-edit profile.
-
-    const editedFtp = 280;
-    await page.waitForFunction(
-      async ({ profileId, ftp }) => {
-        const db = (window as unknown as Record<string, unknown>)
-          .__KAIORD_DB__ as {
-          table: (n: string) => { get: (k: string) => Promise<unknown> };
-        };
-        if (!db) return false;
-        const row = (await db.table("profiles").get(profileId)) as
-          | {
-              sportZones?: {
-                cycling?: { thresholds?: { ftp?: number } };
-              };
-            }
-          | undefined;
-        return row?.sportZones?.cycling?.thresholds?.ftp === ftp;
-      },
-      { profileId: PROFILE_ID, ftp: editedFtp },
-      { timeout: 10_000 }
-    );
+    // Act — "Saved" is shown once the write has landed, so the reload
+    // cannot hydrate the pre-edit profile.
+    await setThreshold(page, /^FTP \(W\)/, "280");
     await page.reload();
     await expect(page.getByRole("radiogroup", { name: "Sport" })).toBeVisible();
 
     // Assert — the persisted FTP survives the reload (Dexie hydration).
-    await expect(page.getByText("FTP", { exact: true })).toBeVisible();
-    await expect(page.getByText("280", { exact: true })).toBeVisible();
+    await expect(
+      page.getByTestId("athlete-thresholds").getByLabel(/^FTP \(W\)/)
+    ).toHaveValue("280");
   });
 });
 
@@ -267,9 +224,9 @@ test.describe("Profile route redirect", () => {
     // Assert
     await page.waitForURL(/\/athlete$/);
     // Exact: the first-run notice also quotes the name ("We created “My
-    // profile”…"), so a substring match is ambiguous once both have rendered.
+    // athlete”…"), so a substring match is ambiguous once both have rendered.
     await expect(
-      page.getByRole("main").getByText("My profile", { exact: true })
+      page.getByRole("main").getByText("My athlete", { exact: true })
     ).toBeVisible({ timeout: 10_000 });
   });
 });

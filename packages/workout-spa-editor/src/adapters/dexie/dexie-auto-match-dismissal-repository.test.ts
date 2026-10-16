@@ -1,10 +1,10 @@
 import "fake-indexeddb/auto";
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { AutoMatchDismissal } from "../../types/auto-match-dismissal";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
-import { KaiordDatabase } from "./dexie-database";
 
 const baseRow = (
   overrides: Partial<AutoMatchDismissal> = {}
@@ -22,13 +22,7 @@ const baseRow = (
 });
 
 describe("DexieAutoMatchDismissalRepository", () => {
-  let db: KaiordDatabase;
-
-  beforeEach(() => {
-    db = new KaiordDatabase(
-      `kaiord-dismiss-test-${Date.now()}-${Math.random()}`
-    );
-  });
+  const db = sharedKaiordDatabase("dismiss");
 
   it("should return undefined from get when no row exists", async () => {
     // Arrange

@@ -8,13 +8,11 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v35-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SEED_VERSION = 34;
 const SCHEMA_HEAD = 37;
@@ -40,22 +38,14 @@ const indexKeyPaths = (db: KaiordDatabase, store: string): string[] =>
     );
 
 describe("Dexie heart-rate-series (v35) migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v35");
+  const { name } = db;
 
   it("should bump the database schema to the current head version", async () => {
     // Arrange
     await seedV34(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -69,7 +59,6 @@ describe("Dexie heart-rate-series (v35) migration", () => {
     await seedV34(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const count = await db.table("healthHeartRateSeries").count();
     db.close();
@@ -83,7 +72,6 @@ describe("Dexie heart-rate-series (v35) migration", () => {
     await seedV34(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const profile = await db.table("profiles").get("p-1");
     const hrvCount = await db.table("healthHrv").count();
@@ -99,7 +87,6 @@ describe("Dexie heart-rate-series (v35) migration", () => {
     await seedV34(name);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const primKey = db.table("healthHeartRateSeries").schema.primKey.keyPath;
     const indexes = indexKeyPaths(db, "healthHeartRateSeries");
@@ -122,7 +109,6 @@ describe("Dexie heart-rate-series (v35) migration", () => {
   it("should dedup on the natural-key index when re-importing the same day", async () => {
     // Arrange
     await seedV34(name);
-    const db = new KaiordDatabase(name);
     await db.open();
     const row = {
       id: "hr-1",

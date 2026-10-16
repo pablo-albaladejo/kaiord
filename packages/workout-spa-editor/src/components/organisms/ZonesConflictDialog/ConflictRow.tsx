@@ -5,6 +5,7 @@
  * component cap. Same XSS contract as the parent: labels from the
  * static `FIELD_LABELS` map, values rendered as React children.
  */
+import { useTranslate } from "../../../i18n/use-translate";
 import type {
   ConflictDecision,
   ConflictItem,
@@ -49,34 +50,37 @@ export const ConflictRow = ({
   conflict,
   decision,
   onChange,
-}: ConflictRowProps) => (
-  <li
-    data-testid={`zones-conflict-row-${conflict.field}`}
-    className="rounded border border-edge p-2"
-  >
-    <div className="text-sm font-medium">{FIELD_LABELS[conflict.field]}</div>
-    <div className="mt-1 text-xs text-muted-foreground">
-      {formatFieldValue(conflict.field, conflict.current)}
-      <span aria-hidden="true"> → </span>
-      <span className="font-medium">
-        {formatFieldValue(conflict.field, conflict.incoming)}
-      </span>
-    </div>
-    <div className="mt-2 flex gap-3 text-xs">
-      <DecisionRadio
-        field={conflict.field}
-        value="accept"
-        current={decision}
-        onChange={onChange}
-        label="Accept Train2Go"
-      />
-      <DecisionRadio
-        field={conflict.field}
-        value="reject"
-        current={decision}
-        onChange={onChange}
-        label="Keep current"
-      />
-    </div>
-  </li>
-);
+}: ConflictRowProps) => {
+  const hrUnit = useTranslate("common")("units.hr");
+  return (
+    <li
+      data-testid={`zones-conflict-row-${conflict.field}`}
+      className="rounded border border-edge p-2"
+    >
+      <div className="text-sm font-medium">{FIELD_LABELS[conflict.field]}</div>
+      <div className="mt-1 text-xs text-muted-foreground">
+        {formatFieldValue(conflict.field, conflict.current, hrUnit)}
+        <span aria-hidden="true"> → </span>
+        <span className="font-medium">
+          {formatFieldValue(conflict.field, conflict.incoming, hrUnit)}
+        </span>
+      </div>
+      <div className="mt-2 flex gap-3 text-xs">
+        <DecisionRadio
+          field={conflict.field}
+          value="accept"
+          current={decision}
+          onChange={onChange}
+          label="Accept Train2Go"
+        />
+        <DecisionRadio
+          field={conflict.field}
+          value="reject"
+          current={decision}
+          onChange={onChange}
+          label="Keep current"
+        />
+      </div>
+    </li>
+  );
+};

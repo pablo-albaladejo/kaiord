@@ -3,7 +3,7 @@
  *
  * Adds or replaces a coaching-platform link on a specific Kaiord profile.
  * `profileId` is captured by the caller at user-action time (e.g., the
- * connect-flow click handler in LinkedAccountsSection) and passed in
+ * Connections card's "Link to this profile" handler) and passed in
  * explicitly. The use case MUST NOT call `getActiveId()` internally —
  * that would race with profile switches mid-poll (see design D3).
  *

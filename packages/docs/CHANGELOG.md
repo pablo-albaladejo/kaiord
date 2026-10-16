@@ -1,5 +1,18 @@
 # @kaiord/docs
 
+## 0.1.0
+
+### Minor Changes
+
+- 5a5a95d: Add a converter deep link (`/app/#/convert?from=<format>&to=<format>`) that converts one file without touching the open workout or storage; link it from every converter page with a scope note on workouts vs. activities; publish three athlete guides in English and Spanish with hreflang; and link the guides from the landing page and `llms.txt`.
+
+### Patch Changes
+
+- 30817bf: Docs: API symbol pages are `noindex,follow` and leave the sitemap (374 → 37 URLs), the root README and CHANGELOG are no longer built as pages, and pages show a git "Last updated" date with `dateModified`. Landing: `sitemap-landing.xml` is generated at build with git `<lastmod>`, and the EN/ES descriptions fit in 160 characters.
+- dded57a: Converter pages link the editor at `kaiord.com/app/` instead of the legacy `/editor/` path, and docs breadcrumbs link only pages that exist. The SPA gains a route-segment registry, kept in parity with its router, which the new site-link checker uses to validate `/app/#/<route>` links.
+- 9c4b3bf: Load the Health and new-workout route dispatchers and the Google Drive cloud sync lazily, and budget the SPA's initial JS in CI. The docs now ship one self-hosted Inter file (the preloaded `/docs/fonts/inter-var-latin.woff2`, which was a 404) instead of the 16 Inter subsets bundled by VitePress.
+- 1f473a1: Privacy policy now discloses the cookie-less, anonymous Umami analytics used on the website, docs and web editor, replacing the false "no analytics" statement. kaiord.com/privacy/ now forwards to the single docs policy instead of carrying a stale copy.
+
 ## 0.0.3
 
 ### Patch Changes

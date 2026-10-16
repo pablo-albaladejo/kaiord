@@ -2,9 +2,9 @@ import { buildConnectionConsequence } from "../../../application/connections/con
 import { buildConnectionCoverage } from "../../../application/connections/connection-coverage";
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { buildConnectionSummary } from "../../../application/connections/connection-summary";
+import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import { useDiscoverySettled } from "../../../hooks/connections/use-discovery-settled";
 import { useTranslate } from "../../../i18n/use-translate";
-import type { DataFlowsByType } from "../ProfileManager/components/useDataFlows";
 import { ConnectionRefreshButton } from "./ConnectionRefreshButton";
 import { ConnectionsBanner } from "./ConnectionsBanner";
 import { ConnectionSummaryRow } from "./ConnectionSummaryRow";

@@ -23,11 +23,12 @@ export const LayoutHeader = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-edge bg-surface shadow-sm">
       {/* One row on a phone (brand left, nav right). From md the seven
-          destinations no longer fit beside the brand, so the nav wraps under
-          it until lg gives it the room again. */}
+          destinations no longer fit beside the brand, so the nav moves under
+          it until xl: at lg the Spanish labels and the avatar do not fit
+          beside the brand. */}
       <div
         data-testid="layout-header-row"
-        className="mx-auto flex min-h-14 max-w-7xl flex-row items-center justify-between gap-2 px-4 py-1 md:min-h-16 md:flex-col md:gap-3 md:px-6 md:py-2 lg:flex-row lg:gap-4 lg:px-8"
+        className="mx-auto flex min-h-14 max-w-7xl flex-row items-center justify-between gap-2 px-4 py-1 md:min-h-16 md:flex-col md:gap-3 md:px-6 md:py-2 lg:px-8 xl:flex-row xl:gap-4"
       >
         <HeaderLogo />
         <StatusHeader />

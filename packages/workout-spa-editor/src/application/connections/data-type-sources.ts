@@ -10,7 +10,7 @@
  */
 import type { ManagedDataType } from "@kaiord/core";
 
-import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
+import type { DataFlowsByType } from "../../hooks/connections/use-data-flows";
 import { integrationIdForBridge } from "../../integrations/integration-registry";
 import { MANUAL_ENTRY_TYPES } from "../../integrations/manual-entry-types";
 

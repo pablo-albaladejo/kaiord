@@ -5,7 +5,7 @@
  */
 import "fake-indexeddb/auto";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { exportBackup } from "../../application/backup/export-backup";
 import { importBackup } from "../../application/backup/import-backup";
@@ -13,25 +13,19 @@ import { parseBackup } from "../../application/backup/parse-backup";
 import { createProfile } from "../../application/profile/create-profile";
 import { syncWithCloud } from "../../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
-import type { SnapshotPort } from "../../ports/snapshot-port";
 import { createInMemoryCloudSyncPort } from "../../test-utils/in-memory-cloud-sync-port";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import { writeAfterExport } from "../../test-utils/write-after-export";
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import { createAppPersistence } from "../create-app-persistence";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotPort } from "./dexie-snapshot-port";
 
 const NEWER_KCAL = 750;
 const OLDER_KCAL = 600;
 
-// One Dexie instance per device for the whole file: constructing a
-// KaiordDatabase registers every schema version, and Dexie re-parses all
-// earlier versions on each `stores()` call, so construction costs ~45 ms of
-// CPU — most of each test's work. Each test still gets a brand-new database:
-// `open()` creates it from scratch and `delete()` in afterEach drops it.
-const suffix = `${Date.now()}-${Math.random()}`;
 const databases = {
-  a: new KaiordDatabase(`kaiord-test-nutrition-a-${suffix}`),
-  b: new KaiordDatabase(`kaiord-test-nutrition-b-${suffix}`),
+  a: sharedKaiordDatabase("nutrition-a"),
+  b: sharedKaiordDatabase("nutrition-b"),
 };
 const open = async (label: keyof typeof databases) => {
   const db = databases[label];
@@ -79,32 +73,6 @@ const twoDevices = async () => {
   await sync(cloud, b, "dev-b");
   return { cloud, a, b, profileId };
 };
-
-/**
- * Runs `write` after the sync's export read and before its import
- * transaction: the first read-write transaction the sync opens is the import.
- */
-const writeBeforeImport = (
-  port: SnapshotPort,
-  write: () => Promise<void>
-): SnapshotPort => {
-  let pending: (() => Promise<void>) | null = write;
-  return {
-    ...port,
-    transaction: async (mode, scope) => {
-      if (mode === "rw" && pending) {
-        const run = pending;
-        pending = null;
-        await run();
-      }
-      return port.transaction(mode, scope);
-    },
-  };
-};
-
-afterEach(async () => {
-  for (const db of Object.values(databases)) await db.delete();
-});
 
 describe("nutrition sync between two devices", () => {
   it("should give device B an intake device A created", async () => {
@@ -198,7 +166,7 @@ describe("nutrition sync between two devices", () => {
     // Arrange
     const { cloud, a, profileId } = await twoDevices();
     const logged = entry(profileId, 500, "2026-10-11T08:00:00.000Z");
-    const racing = writeBeforeImport(a.snapshotPort, () =>
+    const racing = writeAfterExport(a.snapshotPort, () =>
       a.persistence.intakeEntries.put(logged)
     );
 
@@ -220,7 +188,7 @@ describe("nutrition sync between two devices", () => {
     );
     await sync(cloud, a, "dev-a");
     const edited = entry(profileId, NEWER_KCAL, "2026-10-11T08:00:00.000Z");
-    const racing = writeBeforeImport(a.snapshotPort, () =>
+    const racing = writeAfterExport(a.snapshotPort, () =>
       a.persistence.intakeEntries.put(edited)
     );
 
@@ -229,5 +197,27 @@ describe("nutrition sync between two devices", () => {
 
     // Assert
     expect(await a.persistence.intakeEntries.getById("i-1")).toEqual(edited);
+  });
+
+  it("should keep an intake deleted while a sync is between its export and its import deleted", async () => {
+    // Arrange
+    const { cloud, a, profileId } = await twoDevices();
+    await a.persistence.intakeEntries.put(
+      entry(profileId, 500, "2026-10-10T08:00:00.000Z")
+    );
+    await sync(cloud, a, "dev-a");
+    const racing = writeAfterExport(a.snapshotPort, () =>
+      a.persistence.intakeEntries.delete("i-1")
+    );
+
+    // Act
+    await syncWithCloud({ cloud, snapshotPort: racing, deviceId: "dev-a" });
+
+    // Assert
+    expect(await a.persistence.intakeEntries.getById("i-1")).toBeUndefined();
+    expect(cloud.state.snapshot?.tables.intakeEntries ?? []).toEqual([]);
+    expect(cloud.state.snapshot?.tombstones).toContainEqual(
+      expect.objectContaining({ table: "intakeEntries", id: "i-1" })
+    );
   });
 });

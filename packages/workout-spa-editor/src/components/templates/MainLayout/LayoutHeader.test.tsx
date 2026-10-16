@@ -79,7 +79,7 @@ describe("LayoutHeader", () => {
       // Assert
       expect(
         screen.getByTestId("status-header-account-button")
-      ).toHaveAccessibleName("Account menu (no active profile)");
+      ).toHaveAccessibleName("Account menu (no active athlete)");
     });
 
     it("should name the account menu for the active profile once Dexie hydrates", async () => {
@@ -152,7 +152,7 @@ describe("LayoutHeader", () => {
       // Assert
       expect(row).toHaveClass("flex-row");
       expect(row).not.toHaveClass("flex-col");
-      expect(row).toHaveClass("md:flex-col", "lg:flex-row");
+      expect(row).toHaveClass("md:flex-col", "xl:flex-row");
     });
 
     it("should not render a help entry button", () => {
