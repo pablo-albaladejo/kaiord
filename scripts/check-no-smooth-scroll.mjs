@@ -10,7 +10,7 @@
  * reduced-motion check, which this guard does not flag.
  *
  * Flags `scroll-behavior: smooth` in CSS, a `scrollBehavior: "smooth"` style
- * in TS/TSX, and Tailwind's `scroll-smooth` utility. Comment lines are skipped.
+ * in TS/TSX, and Tailwind's `scroll-smooth` utility. Comments are ignored.
  *
  * Rule id: R-NoGlobalSmoothScroll.
  */
@@ -33,7 +33,17 @@ export const ALLOWLIST = new Set();
 
 const SKIP_DIRS = new Set(["node_modules", "dist", "coverage"]);
 
-const isCommentLine = (line) => /^\s*(?:\/\/|\/\*|\*)/.test(line);
+/* Comments are blanked, not skipped by line: a line starting with `*` may be
+   the universal selector, and a rule may follow a closing comment. Newlines
+   inside a block comment survive so line numbers stay true. A `//` preceded
+   by `:` is a URL scheme, not a comment. */
+const blank = (text) => text.replace(/[^\n]/g, " ");
+const stripComments = (text, ext) => {
+  const noBlocks = text.replace(/\/\*[\s\S]*?\*\//g, blank);
+  return ext === ".css"
+    ? noBlocks
+    : noBlocks.replace(/(^|[^:])\/\/.*$/gm, (_, lead) => lead);
+};
 
 function* walk(dir) {
   for (const entry of readdirSync(dir)) {
@@ -49,11 +59,11 @@ export function runCheck({ srcRoot = DEFAULT_ROOT } = {}) {
   for (const file of walk(srcRoot)) {
     const rel = relative(REPO, file);
     if (ALLOWLIST.has(rel)) continue;
-    const patterns = PATTERNS[extname(file)];
-    readFileSync(file, "utf8")
+    const ext = extname(file);
+    const patterns = PATTERNS[ext];
+    stripComments(readFileSync(file, "utf8"), ext)
       .split("\n")
       .forEach((line, index) => {
-        if (isCommentLine(line)) return;
         for (const re of patterns) {
           for (const match of line.matchAll(re)) {
             violations.push({

@@ -71,3 +71,40 @@ test("(e) leaves per-call glides, auto behaviour and comments alone", () => {
     (found) => assert.deepEqual(found, [])
   );
 });
+
+test("(f) a rule after a closing comment and the universal selector still fail", () => {
+  withTree(
+    {
+      "after-comment.css": "/* x */ html { scroll-behavior: smooth }\n",
+      "universal.css": "* { scroll-behavior: smooth; }\n",
+      "multi.css": "/* one\n * two\n */\n.list { scroll-behavior: smooth; }\n",
+    },
+    (found) => {
+      assert.deepEqual(
+        found.map((v) => `${v.file.split("/").pop()}:${v.line}`).sort(),
+        ["after-comment.css:1", "multi.css:4", "universal.css:1"]
+      );
+    }
+  );
+});
+
+test("(g) comment-only mentions pass, and a URL does not hide a rule", () => {
+  withTree(
+    {
+      "notes.css":
+        "/* scroll-behavior: smooth */\n/*\n * scroll-behavior: smooth\n */\n",
+      "components/D.tsx": [
+        "// scroll-smooth used to be here",
+        '/* scrollBehavior: "smooth" */',
+        'const href = "https://example.com"; const c = "scroll-smooth";',
+        "",
+      ].join("\n"),
+    },
+    (found) => {
+      assert.deepEqual(
+        found.map((v) => `${v.file.split("/").pop()}:${v.line}`),
+        ["D.tsx:3"]
+      );
+    }
+  );
+});
