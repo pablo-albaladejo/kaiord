@@ -48,9 +48,14 @@ a spec requirement, so the reversal is recorded here.
   The `settings-section-scroll-jumps` e2e stays as the regression guard.
 - e2e: `helpers/click-centred` is removed (plain clicks pass on every
   project). `openBlockActionsMenu` keeps its centring, which avoids the
-  sticky header and bottom nav, but no longer forces `instant`. The zones-sync
+  sticky header and bottom nav, and still forces `instant`, so the trigger is settled before the press whatever the CSS. The zones-sync
   comment no longer blames the glide. #1457's `MenuItem` primitive stays as
   defence in depth.
+
+- A static guard, `scripts/check-no-smooth-scroll.mjs` (`R-NoGlobalSmoothScroll`,
+  run by `pnpm test:scripts`), fails on `scroll-behavior: smooth` in the
+  SPA's CSS, a `scrollBehavior: "smooth"` style, or the `scroll-smooth`
+  utility. The e2e only reads `<html>`; the guard covers every container.
 
 ## Impact
 

@@ -10,7 +10,10 @@ import { expect } from "@playwright/test";
  */
 export async function openBlockActionsMenu(trigger: Locator): Promise<void> {
   await expect(trigger).toBeVisible({ timeout: 5000 });
-  await trigger.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  // Instant so the trigger is settled before the press, whatever the CSS.
+  await trigger.evaluate((el) =>
+    el.scrollIntoView({ block: "center", behavior: "instant" })
+  );
   await trigger.click();
   await expect(trigger.page().getByRole("menu")).toBeVisible({
     timeout: 5000,

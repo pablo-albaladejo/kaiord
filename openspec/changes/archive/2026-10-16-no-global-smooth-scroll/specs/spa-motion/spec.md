@@ -19,6 +19,12 @@ jump instead under `prefers-reduced-motion: reduce`.
 - **THEN** `window.scrollY` SHALL equal `top` as soon as the call returns
 - **AND** the computed `scroll-behavior` of the document element SHALL be `auto`
 
+#### Scenario: A default glide cannot come back unnoticed
+
+- **WHEN** any stylesheet or component under `packages/workout-spa-editor/src` sets `scroll-behavior: smooth`, a `scrollBehavior: "smooth"` style, or Tailwind's `scroll-smooth` utility
+- **THEN** `scripts/check-no-smooth-scroll.mjs` (rule `R-NoGlobalSmoothScroll`, run by `pnpm test:scripts`) SHALL fail and name the file and line
+- **AND** its allowlist SHALL ship empty: a per-call `scrollIntoView({ behavior: "smooth" })` is not flagged and needs no exemption
+
 #### Scenario: A deliberate glide honours reduced motion
 
 - **GIVEN** the coach-mark highlight scrolling its target into view

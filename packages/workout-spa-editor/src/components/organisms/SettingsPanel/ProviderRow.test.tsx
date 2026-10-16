@@ -182,7 +182,7 @@ describe("ProviderRow", () => {
   });
 
   // A press that opened the menu can end over an item when the page moves
-  // under the pointer (a smooth scroll); that release is not a choice.
+  // under the pointer (a scroll still running); that release is not a choice.
   it.each(["Rename", "Remove"])(
     "should not %s on a release that did not start on the item",
     async (item) => {
