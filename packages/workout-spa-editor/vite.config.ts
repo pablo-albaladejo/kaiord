@@ -75,10 +75,6 @@ export default defineConfig({
               name: "vendor-dnd",
               test: /[\\/]node_modules[\\/]@dnd-kit[\\/]/,
             },
-            {
-              name: "vendor-icons",
-              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-            },
             { name: "kaiord-core", test: /[\\/]packages[\\/]core[\\/]/ },
             { name: "kaiord-fit", test: /[\\/]packages[\\/]fit[\\/]/ },
             { name: "kaiord-tcx", test: /[\\/]packages[\\/]tcx[\\/]/ },

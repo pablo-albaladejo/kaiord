@@ -2,12 +2,12 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useId } from "react";
 import { useLocation } from "wouter";
 
-import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useProfileSwitch } from "../../../hooks/use-profile-switch";
-import { useProfilesLive } from "../../../hooks/use-profiles-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { ATHLETES_PATH } from "../../../routing/constants";
+import type { Profile } from "../../../types/profile";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
+import { MenuItem, MenuRadioItem } from "../../atoms/MenuItem";
 import { MENU_ITEM_CLASS, MENU_SEPARATOR_CLASS } from "./header-menu-styles";
 
 const LABEL_CLASS =
@@ -17,17 +17,21 @@ const LABEL_CLASS =
    past a 390px-wide, short viewport. */
 const LIST_CLASS = "max-h-[40vh] overflow-y-auto";
 
+type AthleteSwitcherProps = { profiles: Profile[]; activeId: string };
+
 /**
  * Top of the avatar menu: every profile as a radio, the active one checked,
  * then the way to the Athletes page. Switching reuses the same use case and
  * failure toast as that page.
+ *
+ * The profiles arrive from the always-mounted menu root: queried here, the
+ * list started loading only when the menu opened, so the menu opened short
+ * and grew a row under a tap already on its way.
  */
-export function AthleteSwitcher() {
+export function AthleteSwitcher({ profiles, activeId }: AthleteSwitcherProps) {
   const t = useTranslate("nav");
   const labelId = useId();
   const [, navigate] = useLocation();
-  const profiles = useProfilesLive() ?? [];
-  const activeId = useActiveProfileLive()?.id ?? "";
   const { handleSwitchProfile } = useProfileSwitch({
     profiles,
   });
@@ -44,7 +48,7 @@ export function AthleteSwitcher() {
         className={LIST_CLASS}
       >
         {profiles.map((profile) => (
-          <DropdownMenu.RadioItem
+          <MenuRadioItem
             key={profile.id}
             value={profile.id}
             className={MENU_ITEM_CLASS}
@@ -56,17 +60,17 @@ export function AthleteSwitcher() {
               </DropdownMenu.ItemIndicator>
             </span>
             <span className="min-w-0 truncate">{profile.name}</span>
-          </DropdownMenu.RadioItem>
+          </MenuRadioItem>
         ))}
       </DropdownMenu.RadioGroup>
-      <DropdownMenu.Item
+      <MenuItem
         className={MENU_ITEM_CLASS}
         onSelect={() => navigate(ATHLETES_PATH)}
         data-testid="account-menu-manage-athletes"
       >
         <span className="h-4 w-4 flex-none" aria-hidden="true" />
         {t("manageAthletes")}
-      </DropdownMenu.Item>
+      </MenuItem>
       <DropdownMenu.Separator className={MENU_SEPARATOR_CLASS} />
     </>
   );

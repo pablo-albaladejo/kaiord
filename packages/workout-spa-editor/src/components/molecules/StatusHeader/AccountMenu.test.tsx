@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Router } from "wouter";
@@ -178,6 +178,48 @@ describe("AccountMenu", () => {
       expect(
         screen.getByRole("menuitemradio", { name: "Laura" })
       ).not.toBeChecked();
+    });
+
+    it("should not open until its athletes have loaded", async () => {
+      // Arrange
+      // On a first run the database opens and writes the default athlete
+      // while the header is already on screen; a menu opened in that window
+      // gained the athlete row a moment later, under the tap.
+      const persistence = await seedTwo();
+
+      // Act
+      renderWith(persistence);
+      const trigger = screen.getByTestId("status-header-account-button");
+      const disabledWhileLoading = (trigger as HTMLButtonElement).disabled;
+
+      // Assert
+      expect(disabledWhileLoading).toBe(true);
+      await waitFor(() => expect(trigger).toBeEnabled());
+    });
+
+    it("should open with every athlete already listed", async () => {
+      // Arrange
+      // A menu that grows after it opens moves its rows under a tap already
+      // on its way: the theme row slid down one row and the press landed on
+      // "Help & docs", which closed the menu instead of switching theme.
+      const user = userEvent.setup();
+      renderWith(await seedTwo());
+      await screen.findByLabelText("Account menu (Pablo)");
+      let rowsOnOpen: number | null = null;
+      const observer = new MutationObserver(() => {
+        const menu = document.querySelector('[data-testid="account-menu"]');
+        if (menu === null || rowsOnOpen !== null) return;
+        rowsOnOpen = menu.querySelectorAll('[role="menuitemradio"]').length;
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // Act
+      await user.click(screen.getByTestId("status-header-account-button"));
+      await screen.findAllByRole("menuitemradio");
+      observer.disconnect();
+
+      // Assert
+      expect(rowsOnOpen).toBe(2);
     });
 
     it("should switch the active profile when another athlete is selected", async () => {

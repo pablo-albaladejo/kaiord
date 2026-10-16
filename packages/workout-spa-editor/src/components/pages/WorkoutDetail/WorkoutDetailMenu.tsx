@@ -3,6 +3,7 @@ import { CalendarDays, Trash } from "lucide-react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import { MenuItem } from "../../atoms/MenuItem";
 
 export type WorkoutDetailMenuProps = {
   onMove: () => void;
@@ -39,14 +40,14 @@ export function WorkoutDetailMenu({
           sideOffset={5}
           className="z-50 min-w-[200px] rounded-lg border border-edge-soft bg-surface p-1 shadow-lg"
         >
-          <DropdownMenu.Item className={ITEM_CLASS} onSelect={onMove}>
+          <MenuItem className={ITEM_CLASS} onSelect={onMove}>
             <CalendarDays className="h-4 w-4" />
             <span>{t("menu.move")}</span>
-          </DropdownMenu.Item>
-          <DropdownMenu.Item className={DELETE_CLASS} onSelect={onDelete}>
+          </MenuItem>
+          <MenuItem className={DELETE_CLASS} onSelect={onDelete}>
             <Trash className="h-4 w-4" />
             <span>{t("menu.delete")}</span>
-          </DropdownMenu.Item>
+          </MenuItem>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
