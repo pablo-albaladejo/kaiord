@@ -41,7 +41,11 @@ export function ChatMessageList({
 
   useEffect(() => {
     if (focusMessageId && focusedRef.current)
-      focusedRef.current.scrollIntoView({ block: "center" });
+      // A jump to the result the user picked, not a glide past the rest.
+      focusedRef.current.scrollIntoView({
+        block: "center",
+        behavior: "instant",
+      });
   }, [focusMessageId]);
 
   if (messages.length === 0) {

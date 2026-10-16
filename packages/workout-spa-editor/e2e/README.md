@@ -29,7 +29,7 @@ The E2E tests validate critical user flows and ensure the application works corr
 3. **Mobile Responsiveness** (`mobile-responsive.spec.ts`)
    - Mobile-optimized layout
    - Touch interactions
-   - Smooth scrolling
+   - Scrolling a long workout
    - Tablet layout adaptation
 
 4. **Accessibility** (`accessibility.spec.ts`)

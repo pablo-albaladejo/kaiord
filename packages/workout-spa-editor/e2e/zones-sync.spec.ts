@@ -143,11 +143,8 @@ const seedProfile = async (
       // and the first-run guide does NOT render. The workout must carry
       // the active `profileId`: the calendar counts workouts per profile,
       // and without it the 554px guide pushes the Sync button down under
-      // the fixed chat FAB at the 1280x720 desktop viewport. Playwright
-      // then retries the click with a forced scroll, the page's
-      // `scroll-behavior: smooth` animates it, and under CPU load the
-      // button can move between pointerdown and pointerup — the browser
-      // dispatches `click` to a common ancestor and the sync never starts.
+      // the fixed chat FAB at the 1280x720 desktop viewport, where the
+      // click would land on the FAB instead.
       type DbWithBulk = Db & {
         table: (n: string) => {
           put: (r: unknown) => Promise<unknown>;

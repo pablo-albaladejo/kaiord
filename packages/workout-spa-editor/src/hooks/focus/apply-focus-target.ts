@@ -20,10 +20,7 @@ import {
 import type { ItemId } from "../../store/providers/item-id";
 import { useWorkoutStore } from "../../store/workout-store";
 import { logger } from "../../utils/logger";
-import {
-  applyFocusToElement,
-  prefersReducedMotion,
-} from "./apply-focus-to-element";
+import { applyFocusToElement } from "./apply-focus-to-element";
 
 export type ApplyTargetDeps = {
   getItem: (id: ItemId) => HTMLElement | undefined;
@@ -91,8 +88,7 @@ export const applyFocusTarget = (
     );
   }
 
-  const reduceMotion = prefersReducedMotion();
   setTimeout(() => {
-    applyFocusToElement(element, { reduceMotion, telemetry: deps.telemetry });
+    applyFocusToElement(element, { telemetry: deps.telemetry });
   }, 0);
 };

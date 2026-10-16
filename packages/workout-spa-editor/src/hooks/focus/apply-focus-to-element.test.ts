@@ -14,7 +14,7 @@ describe("applyFocusToElement", () => {
     vi.restoreAllMocks();
   });
 
-  it("should call focus with preventScroll and scrollIntoView with 'auto' when motion is allowed", () => {
+  it("should focus with preventScroll and jump the element into view", () => {
     // Arrange
     const el = document.createElement("div");
     const focusSpy = vi.spyOn(el, "focus");
@@ -22,27 +22,10 @@ describe("applyFocusToElement", () => {
     el.scrollIntoView = scrollSpy;
 
     // Act
-    applyFocusToElement(el, { reduceMotion: false });
+    applyFocusToElement(el);
 
     // Assert
     expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
-    expect(scrollSpy).toHaveBeenCalledWith({
-      block: "nearest",
-      behavior: "auto",
-    });
-  });
-
-  it("should use 'instant' scrollIntoView when reduce-motion is set", () => {
-    // Arrange
-    const el = document.createElement("div");
-    vi.spyOn(el, "focus").mockImplementation(() => {});
-    const scrollSpy = vi.fn();
-    el.scrollIntoView = scrollSpy;
-
-    // Act
-    applyFocusToElement(el, { reduceMotion: true });
-
-    // Assert
     expect(scrollSpy).toHaveBeenCalledWith({
       block: "nearest",
       behavior: "instant",
@@ -61,9 +44,7 @@ describe("applyFocusToElement", () => {
     el.scrollIntoView = scrollSpy;
 
     // Assert
-    expect(() =>
-      applyFocusToElement(el, { reduceMotion: false })
-    ).not.toThrow();
+    expect(() => applyFocusToElement(el)).not.toThrow();
     expect(scrollSpy).not.toHaveBeenCalled();
   });
 
@@ -78,9 +59,7 @@ describe("applyFocusToElement", () => {
     };
 
     // Assert
-    expect(() =>
-      applyFocusToElement(el, { reduceMotion: false })
-    ).not.toThrow();
+    expect(() => applyFocusToElement(el)).not.toThrow();
     expect(focusSpy).toHaveBeenCalled();
   });
 });

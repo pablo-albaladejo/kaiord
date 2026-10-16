@@ -19,10 +19,7 @@ import {
   SETTINGS_SECTION_ATTR,
   SETTINGS_SECTION_SELECTOR,
 } from "../components/pages/SettingsPage/settings-section";
-import {
-  applyFocusToElement,
-  prefersReducedMotion,
-} from "./focus/apply-focus-to-element";
+import { applyFocusToElement } from "./focus/apply-focus-to-element";
 
 export function useFocusOnSectionChange(): void {
   const search = useSearch();
@@ -47,7 +44,7 @@ export function useFocusOnSectionChange(): void {
       const el = Array.from(
         document.querySelectorAll<HTMLElement>(SETTINGS_SECTION_SELECTOR)
       ).find((n) => n.getAttribute(SETTINGS_SECTION_ATTR) === section);
-      if (el) applyFocusToElement(el, { reduceMotion: prefersReducedMotion() });
+      if (el) applyFocusToElement(el);
     });
 
     return () => cancelAnimationFrame(raf);
