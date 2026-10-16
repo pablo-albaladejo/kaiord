@@ -527,9 +527,13 @@ jobs:
     # ceil((2 × 232s + 60s) / 60) = 9. Measured over 3217 green shards
     # (22 main + 97 PR runs, 2026-10-14..16): setup + test + post steps
     # p50 ~42s, p95 ~71s, max 232s (a 24.x shard whose pnpm setup took
-    # 192s on a slow registry). The old 4min could not hold its own 2min
-    # Codecov cap (232s + 120s > 240s), and a slow registry slows setup
-    # and Codecov at the same time, so the worst cases arrive together.
+    # 192s on a slow registry). That max is censored by the old 240s
+    # limit: in the same 2026-10-15 19:59-20:48 UTC window, job
+    # 116646319626 (22.18.0 garmin-bridge) was cancelled still inside
+    # `Setup pnpm` at ~297s. Even ~300s + 40s + the 60s cap ~ 400s fits
+    # in 9min. The old 4min could not hold its own 2min Codecov cap
+    # (232s + 120s > 240s), and a slow registry slows setup and Codecov
+    # at the same time, so the worst cases arrive together.
     timeout-minutes: 9
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
@@ -574,9 +578,12 @@ jobs:
         if: matrix.node-version == '22.18.0'
         # Best-effort upload: bound the network tail so a slow/hung Codecov
         # can neither cancel the shard (timeout) nor fail it (continue-on-error).
-        # Healthy uploads take 5s p50, 26s max (294 uploads); a 60s cap only
-        # drops uploads that were already stuck. The job budget above
-        # includes this cap, so keep the two in step.
+        # Uploads take 5s p50 and 10s p99 (1837 uploads, main + PR); on
+        # main alone the max is 26s (294 uploads). 60s is ~6x p99. During a
+        # network incident it may drop a rare slow upload that would have
+        # succeeded (one took 75s on 2026-10-15), which is acceptable for a
+        # best-effort upload. The job budget above includes this cap, so
+        # keep the two in step.
         timeout-minutes: 1
         continue-on-error: true
         uses: codecov/codecov-action@v7
