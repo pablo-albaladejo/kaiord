@@ -13,7 +13,7 @@
  * Both use cases load on first call, outside the initial JS: the provider
  * mounting this hook is app-wide, but a zones sync only runs on a user
  * action or an opted-in auto-import. A failed load toasts like a failed
- * fetch.
+ * fetch; a failed commit load keeps the decisions pending for a retry.
  *
  * Failure toasts (`zones-sync-failure.ts`) come from the constants in
  * `sync-zones-toasts.ts` — never template-literal interpolation in toast/console calls
@@ -79,10 +79,14 @@ export const useZonesSyncOrchestrator = (
   const confirmDecisions = useCallback(
     async (decisions: Record<FieldKey, ConflictDecision>) => {
       if (!pending) return;
-      const { commitConflictResolution } = await lazyImport(
+      const loaded = await lazyImport(
         () => import("../../application/coaching/commit-conflict-resolution")
-      );
-      await commitConflictResolution(
+      ).catch(() => null);
+      if (!loaded) {
+        handleFailure("transport-error", toasts);
+        return;
+      }
+      await loaded.commitConflictResolution(
         pending.profileId,
         decisions,
         persistence,
@@ -90,7 +94,7 @@ export const useZonesSyncOrchestrator = (
       );
       setPending(null);
     },
-    [pending, persistence]
+    [pending, persistence, toasts]
   );
 
   const cancel = useCallback(() => setPending(null), []);

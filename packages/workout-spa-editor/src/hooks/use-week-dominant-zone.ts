@@ -38,15 +38,13 @@ export function useWeekDominantZone(
     // every route) keeps it out of the initial JS, and liveQuery has already
     // observed the only table it depends on before the foreign await.
     // A failed load costs the mark its colour, never the header: useLiveQuery
-    // rethrows a querier error during render.
-    try {
-      const { weekDominantZone } = await lazyImport(
-        () => import("../lib/week-dominant-zone")
-      );
-      return weekDominantZone(workouts, profile);
-    } catch {
-      return null;
-    }
+    // rethrows a querier error during render. Only the load is caught, so a
+    // classifier bug still surfaces.
+    const mod = await lazyImport(
+      () => import("../lib/week-dominant-zone")
+    ).catch(() => null);
+    if (!mod) return null;
+    return mod.weekDominantZone(workouts, profile);
   }, [profileId, profile, range?.start, range?.end]);
   return zone ?? null;
 }

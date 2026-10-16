@@ -32,8 +32,11 @@ describe("LazyZonesConflictDialog", () => {
   it("should keep a decision across a close and a reopen", async () => {
     // Arrange
     const { rerender } = render(dialog(true));
-    await userEvent.click(
+    expect(
       await screen.findByRole("radio", { name: "Keep current" })
+    ).toBeChecked();
+    await userEvent.click(
+      screen.getByRole("radio", { name: "Accept Train2Go" })
     );
 
     // Act
@@ -42,7 +45,7 @@ describe("LazyZonesConflictDialog", () => {
 
     // Assert
     expect(
-      await screen.findByRole("radio", { name: "Keep current" })
+      await screen.findByRole("radio", { name: "Accept Train2Go" })
     ).toBeChecked();
   });
 });

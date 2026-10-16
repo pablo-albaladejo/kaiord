@@ -8,10 +8,14 @@ import { trackLeaveDuring } from "./leave-tracking";
  * with a reload. And it always rejects on failure: `main.tsx` prevents
  * `vite:preloadError`, so a failed import whose reload is held back
  * resolves to `undefined` instead, which callers would otherwise
- * destructure into an unrelated TypeError.
+ * destructure into an unrelated TypeError. The message matches
+ * `isChunkLoadError`, so it is handled like any other chunk failure.
  */
 export const lazyImport = async <T>(load: () => Promise<T>): Promise<T> => {
   const module = await trackLeaveDuring(load);
-  if (module === undefined) throw new Error("lazy import failed");
+  if (module === undefined)
+    throw new Error(
+      "lazy import failed: dynamically imported module unavailable"
+    );
   return module;
 };

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { isChunkLoadError } from "./chunk-reload";
 import { lazyImport } from "./lazy-import";
 
 describe("lazyImport", () => {
@@ -25,6 +26,17 @@ describe("lazyImport", () => {
 
     // Assert
     await expect(loading).rejects.toThrow("lazy import failed");
+  });
+
+  it("should reject with an error the chunk-error handling recognises", async () => {
+    // Arrange
+    const swallowed = () => Promise.resolve(undefined as unknown as object);
+
+    // Act
+    const error = await lazyImport(swallowed).catch((e: unknown) => e);
+
+    // Assert
+    expect(isChunkLoadError(error)).toBe(true);
   });
 
   it("should reject when the import rejects", async () => {
