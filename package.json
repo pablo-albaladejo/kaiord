@@ -142,7 +142,7 @@
     "sharp": "^0.35.5",
     "size-limit": "^14.2.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.1",
+    "typescript-eslint": "^8.71.2",
     "yaml": "^2.9.1"
   }
 }
