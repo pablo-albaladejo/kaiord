@@ -1,10 +1,11 @@
 /**
- * Entering a Settings section resets the scroll to the top. The app sets
- * `html { scroll-behavior: smooth }`, which turned that reset into a ~200 ms
- * glide: the section moved under the pointer right after it opened, and a
- * press that started on "Add account" was released over another element, so
+ * Entering a Settings section resets the scroll to the top. The app used to
+ * set `html { scroll-behavior: smooth }`, which turned that reset into a
+ * ~200 ms glide: the section moved under the pointer right after it opened,
+ * and a press that started on "Add account" was released over another element, so
  * the click went to their common ancestor and the form never opened. That is
- * how `ai-generate-workout` 8.10 failed on Mobile Safari.
+ * how `ai-generate-workout` 8.10 failed on Mobile Safari. This guards against
+ * any glide coming back (see spa-motion).
  *
  * Every animation frame's scroll offset is recorded: a jump goes straight to
  * 0, a glide passes through the offsets in between.

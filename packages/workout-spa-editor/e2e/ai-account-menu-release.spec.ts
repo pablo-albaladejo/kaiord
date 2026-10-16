@@ -3,7 +3,7 @@ import { expect, test } from "./fixtures/base";
 
 /**
  * The account overflow menu opens on press. If the page moves before the
- * release (a smooth scroll still running), the release lands on a menu item,
+ * release (a scroll still running), the release lands on a menu item,
  * and it must not choose it. Mobile Safari hit this in CI: Playwright pressed
  * while WebKit was still animating its scroll-into-view, and the release
  * chose Rename or Remove by itself. The test pads the body, so its own
