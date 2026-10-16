@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 
 import { lazyPage } from "../../../lazy-page";
+import { SilentErrorBoundary } from "../../molecules/SilentErrorBoundary";
 import type { ZonesConflictDialogProps } from "./ZonesConflictDialog";
 
 const ZonesConflictDialog = lazyPage(() =>
@@ -19,8 +20,10 @@ export const LazyZonesConflictDialog = (props: ZonesConflictDialogProps) => {
   if (props.open && !opened) setOpened(true);
   if (!opened) return null;
   return (
-    <Suspense fallback={null}>
-      <ZonesConflictDialog {...props} />
-    </Suspense>
+    <SilentErrorBoundary name="zones-conflict-dialog">
+      <Suspense fallback={null}>
+        <ZonesConflictDialog {...props} />
+      </Suspense>
+    </SilentErrorBoundary>
   );
 };

@@ -12,21 +12,18 @@
  *
  * Both use cases load on first call, outside the initial JS: the provider
  * mounting this hook is app-wide, but a zones sync only runs on a user
- * action.
+ * action or an opted-in auto-import. A failed load toasts like a failed
+ * fetch.
  *
- * Toast strings come from the constants exported by `sync-zones-toasts.ts`
- * — never template-literal interpolation in toast/console calls
+ * Failure toasts (`zones-sync-failure.ts`) come from the constants in
+ * `sync-zones-toasts.ts` — never template-literal interpolation in toast/console calls
  * (mechanical guard `check-no-pii-leakage.mjs` enforces this).
  */
 import { useCallback, useState } from "react";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import {
-  TOAST_ZONES_FETCH_FAILED,
-  TOAST_ZONES_SHAPE_MISMATCH,
-  TOAST_ZONES_UNSUPPORTED,
-} from "../../application/coaching/sync-zones-toasts";
 import type { useToast } from "../../hooks/use-toast";
+import { lazyImport } from "../../lib/lazy-import";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
   ConflictDecision,
@@ -34,6 +31,7 @@ import type {
   FieldKey,
   ZonesPayload,
 } from "../../types/coaching-zones";
+import { handleFailure } from "./zones-sync-failure";
 
 type Pending = {
   profileId: string;
@@ -50,16 +48,6 @@ export type ZonesSyncOrchestrator = {
   cancel: () => void;
 };
 
-const handleFailure = (
-  reason: string,
-  toasts: ReturnType<typeof useToast>
-): void => {
-  if (reason === "transport-error") toasts.error(TOAST_ZONES_FETCH_FAILED);
-  else if (reason === "shape-mismatch")
-    toasts.warning(TOAST_ZONES_SHAPE_MISMATCH);
-  else if (reason === "unsupported") toasts.info(TOAST_ZONES_UNSUPPORTED);
-};
-
 export const useZonesSyncOrchestrator = (
   persistence: PersistencePort,
   transport: CoachingTransport,
@@ -69,9 +57,14 @@ export const useZonesSyncOrchestrator = (
 
   const runSync = useCallback(
     async (profileId: string) => {
-      const { syncZones } =
-        await import("../../application/coaching/sync-zones");
-      const r = await syncZones(profileId, transport, persistence);
+      const loaded = await lazyImport(
+        () => import("../../application/coaching/sync-zones")
+      ).catch(() => null);
+      if (!loaded) {
+        handleFailure("transport-error", toasts);
+        return;
+      }
+      const r = await loaded.syncZones(profileId, transport, persistence);
       if (!r.ok) {
         handleFailure(r.reason, toasts);
         return;
@@ -86,8 +79,9 @@ export const useZonesSyncOrchestrator = (
   const confirmDecisions = useCallback(
     async (decisions: Record<FieldKey, ConflictDecision>) => {
       if (!pending) return;
-      const { commitConflictResolution } =
-        await import("../../application/coaching/commit-conflict-resolution");
+      const { commitConflictResolution } = await lazyImport(
+        () => import("../../application/coaching/commit-conflict-resolution")
+      );
       await commitConflictResolution(
         pending.profileId,
         decisions,

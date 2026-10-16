@@ -5,18 +5,17 @@
  */
 
 import type { Analytics } from "@kaiord/core";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import { useCoachMoveNoticeActions } from "../../contexts/coach-move-notice-context";
+import { lazyImport } from "../../lib/lazy-import";
 import type { PersistencePort } from "../../ports/persistence-port";
-import { seedBridgeRoutes } from "../bridge/seed-bridge-routes";
-import { emitLinkResult, emitSyncResult } from "./coaching-telemetry";
+import { emitSyncResult } from "./coaching-telemetry";
 import { shouldFanOutZones } from "./should-fan-out-zones";
 
+export { useConnectCallback } from "./use-connect-callback";
 export { useExpandCallback } from "./use-expand-callback";
-
-const TRAIN2GO_BRIDGE = "train2go-bridge";
 
 export const useSyncCallback = (
   p: PersistencePort,
@@ -31,7 +30,18 @@ export const useSyncCallback = (
         source: t.source,
         trigger: "manual",
       });
-      const { syncWeek } = await import("../../application/coaching/sync-week");
+      const { syncWeek } = await lazyImport(
+        () => import("../../application/coaching/sync-week")
+      ).catch((error: unknown) => {
+        // Close the invoked event before the error reaches the caller.
+        emitSyncResult(
+          a,
+          t.source,
+          { ok: false, reason: "transport-error" },
+          0
+        );
+        throw error;
+      });
       const startedAt = Date.now();
       const result = await syncWeek(
         {
@@ -57,35 +67,5 @@ export const useSyncCallback = (
       }
     },
     [p, t, a, runZonesSync, report]
-  );
-};
-
-export const useConnectCallback = (
-  p: PersistencePort,
-  t: CoachingTransport,
-  a: Analytics,
-  runZonesSync?: (profileId: string) => Promise<void>
-) => {
-  const abortRef = useRef<AbortController | null>(null);
-  return useCallback(
-    async (profileId: string) => {
-      abortRef.current?.abort();
-      const ctrl = new AbortController();
-      abortRef.current = ctrl;
-      const { attemptLink } =
-        await import("../../application/coaching/attempt-link");
-      const r = await attemptLink(
-        { profiles: p.profiles, transport: t },
-        profileId,
-        ctrl.signal
-      );
-      emitLinkResult(a, t.source, r);
-      if (!r.ok) return;
-      await seedBridgeRoutes(p, profileId, TRAIN2GO_BRIDGE);
-      if (runZonesSync && (await shouldFanOutZones(p, t.source, profileId))) {
-        await runZonesSync(profileId).catch(() => undefined);
-      }
-    },
-    [p, t, a, runZonesSync]
   );
 };

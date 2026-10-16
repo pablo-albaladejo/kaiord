@@ -5,6 +5,7 @@ import { AppRoutes } from "./AppRoutes";
 import { MigrationBoot } from "./components/MigrationBoot";
 import { DefaultProfileNotice } from "./components/molecules/DefaultProfileNotice/DefaultProfileNotice";
 import { ProfileChoiceBanner } from "./components/molecules/ProfileChoiceBanner/ProfileChoiceBanner";
+import { SilentErrorBoundary } from "./components/molecules/SilentErrorBoundary";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
@@ -35,9 +36,11 @@ function App() {
   return (
     <AppToastProvider>
       <MigrationBoot />
-      <Suspense fallback={null}>
-        <AppKeyboardShortcuts />
-      </Suspense>
+      <SilentErrorBoundary name="keyboard-shortcuts">
+        <Suspense fallback={null}>
+          <AppKeyboardShortcuts />
+        </Suspense>
+      </SilentErrorBoundary>
       <MainLayout>
         <ProfileChoiceBanner />
         <DefaultProfileNotice />

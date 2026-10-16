@@ -16,6 +16,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
+import { lazyImport } from "../lib/lazy-import";
 import type { ZoneNumber } from "../lib/zone-colors";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { Profile } from "../types/profile";
@@ -36,8 +37,16 @@ export function useWeekDominantZone(
     // The classifier loads after the read, so the header (on screen from
     // every route) keeps it out of the initial JS, and liveQuery has already
     // observed the only table it depends on before the foreign await.
-    const { weekDominantZone } = await import("../lib/week-dominant-zone");
-    return weekDominantZone(workouts, profile);
+    // A failed load costs the mark its colour, never the header: useLiveQuery
+    // rethrows a querier error during render.
+    try {
+      const { weekDominantZone } = await lazyImport(
+        () => import("../lib/week-dominant-zone")
+      );
+      return weekDominantZone(workouts, profile);
+    } catch {
+      return null;
+    }
   }, [profileId, profile, range?.start, range?.end]);
   return zone ?? null;
 }
