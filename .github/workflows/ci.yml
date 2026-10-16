@@ -524,13 +524,13 @@ jobs:
     runs-on: ubuntu-latest
     # Budget = 2 × measured max of everything except Codecov, plus the
     # Codecov cap, which is a hard bound and needs no headroom:
-    # ceil((2 × 162s + 60s) / 60) = 7. Measured over 588 green shards of
-    # 22 main runs (2026-10-14..16): setup + test + post steps p50 42s,
-    # p95 68s, max 162s (setup alone reaches 147s). The old 4min could
-    # not hold its own 2min Codecov cap: 162s + 120s > 240s, and a slow
-    # registry slows setup and Codecov at the same time, so the worst
-    # cases arrive together.
-    timeout-minutes: 7
+    # ceil((2 × 232s + 60s) / 60) = 9. Measured over 3217 green shards
+    # (22 main + 97 PR runs, 2026-10-14..16): setup + test + post steps
+    # p50 ~42s, p95 ~71s, max 232s (a 24.x shard whose pnpm setup took
+    # 192s on a slow registry). The old 4min could not hold its own 2min
+    # Codecov cap (232s + 120s > 240s), and a slow registry slows setup
+    # and Codecov at the same time, so the worst cases arrive together.
+    timeout-minutes: 9
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
