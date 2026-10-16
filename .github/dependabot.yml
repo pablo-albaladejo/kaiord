@@ -23,7 +23,7 @@ updates:
       # times on the existing specs (`pnpm lint:specs`). 1.13 reports it as
       # INFO; 1.14 escalates it to WARNING, which breaks zero-warnings. Taking
       # 1.14 means splitting those requirements, which is its own change, so
-      # it gets its own PR.
+      # it gets its own PR, and 1.14+ is held back in `ignore` below.
       openspec:
         patterns:
           - "@fission-ai/openspec"
@@ -43,6 +43,13 @@ updates:
       # Drop this entry once twoslash's peer range accepts typescript 7.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # openspec 1.14 escalates the hard-coded ">500-character requirement"
+      # finding from INFO to WARNING, and the existing specs trip it 329 times
+      # (`pnpm lint:specs`), which breaks zero-warnings. Patches on 1.13 still
+      # flow through the `openspec` group above. Drop this entry together with
+      # the change that splits those requirements.
+      - dependency-name: "@fission-ai/openspec"
+        versions: [">=1.14.0"]
     reviewers:
       - "pablo-albaladejo"
     labels:
