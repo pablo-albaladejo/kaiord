@@ -172,12 +172,6 @@ test.describe("Mobile Responsive Design", () => {
     const stepCards = page.locator('[data-testid="step-card"]');
     await expect(stepCards).toHaveCount(MOBILE_STEP_COUNT);
 
-    // Verify smooth scroll behavior is applied
-    const scrollBehavior = await page.evaluate(() => {
-      return window.getComputedStyle(document.documentElement).scrollBehavior;
-    });
-    expect(scrollBehavior).toBe("smooth");
-
     // Get initial scroll position
     const initialScrollY = await page.evaluate(() => window.scrollY);
 

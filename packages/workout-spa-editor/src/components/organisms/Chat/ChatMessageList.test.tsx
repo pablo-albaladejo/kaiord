@@ -42,7 +42,10 @@ describe("ChatMessageList", () => {
     const focused = screen.getByText("second").closest("li");
     expect(focused?.getAttribute("data-focused")).toBe("true");
     expect(focused?.className).toContain("ring-edge-strong");
-    expect(scroll).toHaveBeenCalled();
+    expect(scroll).toHaveBeenCalledWith({
+      block: "center",
+      behavior: "instant",
+    });
   });
 
   it("should not ring any message when no message is focused", () => {
