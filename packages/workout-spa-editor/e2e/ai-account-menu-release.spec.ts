@@ -28,7 +28,16 @@ test.describe("AI account menu", () => {
     const trigger = providers.getByRole("button", {
       name: "More actions for My Claude",
     });
-    await trigger.scrollIntoViewIfNeeded();
+    // The move below scrolls the window down by about one row. Where Save
+    // leaves the page depends on how fast the list renders, and the page can
+    // end at its bottom with no room left, so make the room and centre the
+    // trigger (a centred menu opens downwards).
+    await page.evaluate(() => {
+      document.body.style.paddingBottom = `${window.innerHeight}px`;
+    });
+    await trigger.evaluate((el) =>
+      el.scrollIntoView({ block: "center", behavior: "instant" })
+    );
     const box = await trigger.boundingBox();
     if (!box) throw new Error("trigger has no box");
     const x = box.x + box.width / 2;
@@ -48,9 +57,13 @@ test.describe("AI account menu", () => {
     await page.mouse.down();
     await expect(remove).toBeVisible();
     const shift = (await removeCentre()) - y;
-    await page.evaluate((top) => {
+    expect(shift).toBeGreaterThan(0);
+    const moved = await page.evaluate((top) => {
+      const before = window.scrollY;
       window.scrollBy({ top, behavior: "instant" });
+      return window.scrollY - before;
     }, shift);
+    expect(Math.abs(moved - shift)).toBeLessThan(1);
     await expect.poll(underPointer).toBe(true);
     await page.mouse.up();
 
