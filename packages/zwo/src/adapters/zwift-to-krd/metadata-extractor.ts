@@ -5,8 +5,8 @@ type ZwiftWorkoutFile = {
   "@_kaiord:timeCreated"?: string;
   "@_kaiord:manufacturer"?: string;
   "@_kaiord:product"?: string;
-  // `parseAttributeValue: true` in the XML parser coerces a numeric serial
-  // (e.g. `serialNumber="1234"`) to a number, but KRD types it as a string.
+  // The reader keeps `kaiord:serialNumber` a string, but a pre-parsed object
+  // handed to convertZwiftToKRD may still carry a numeric serial.
   "@_kaiord:serialNumber"?: string | number;
   "@_kaiord:fitType"?: string;
   "@_kaiord:hrmFitProductId"?: number;

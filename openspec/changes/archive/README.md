@@ -7,6 +7,23 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-15 | [`ai-chat-model-picker`](./2026-10-15-ai-chat-model-picker/) | the chat model picker shows what the conversation runs |
+| 2026-10-15 | [`ai-settings-layout`](./2026-10-15-ai-settings-layout/) | the AI settings page leads with the athlete's assistant |
+| 2026-10-15 | [`ai-settings-truth`](./2026-10-15-ai-settings-truth/) | the AI settings page shows what runs |
+| 2026-10-14 | [`calendar-render-cost-ratio`](./2026-10-14-calendar-render-cost-ratio/) | The calendar performance budget measures the cards |
+| 2026-10-14 | [`legacy-manual-row-ranks-last`](./2026-10-14-legacy-manual-row-ranks-last/) | A legacy manual row ranks last |
+| 2026-10-14 | [`manual-steps-own-row`](./2026-10-14-manual-steps-own-row/) | Manual steps keep their own row |
+| 2026-10-14 | [`t2g-weight-is-current-weight`](./2026-10-14-t2g-weight-is-current-weight/) | Train2Go's weight is the current weight |
+| 2026-10-14 | [`train2go-weight-route`](./2026-10-14-train2go-weight-route/) | Train2Go is a weight source with its own route |
+| 2026-10-13 | [`athlete-zones-editor`](./2026-10-13-athlete-zones-editor/) | Thresholds in place, one zone editor at /athlete/zones |
+| 2026-10-13 | [`athletes-page`](./2026-10-13-athletes-page/) | The Athletes page replaces the Profile Manager |
+| 2026-10-13 | [`connections-single-home`](./2026-10-13-connections-single-home/) | Connections as the single home |
+| 2026-10-13 | [`settings-side-nav-and-wipe`](./2026-10-13-settings-side-nav-and-wipe/) | The Settings index is the side nav, and Data offers a full wipe |
+| 2026-10-13 | [`single-current-weight`](./2026-10-13-single-current-weight/) | One current weight |
+| 2026-10-12 | [`close-nutrition-tombstone-gaps`](./2026-10-12-close-nutrition-tombstone-gaps/) | Close the nutrition sync tombstone gaps |
+| 2026-10-12 | [`drop-profile-rows-deleted-mid-sync`](./2026-10-12-drop-profile-rows-deleted-mid-sync/) | Drop the rows of a profile deleted mid-sync |
+| 2026-10-12 | [`move-display-preferences-to-device`](./2026-10-12-move-display-preferences-to-device/) | Language, units and notifications belong to the device |
+| 2026-10-11 | [`add-ai-provider-key-check`](./2026-10-11-add-ai-provider-key-check/) | Check an AI key when it is saved, and gate the chat on what it needs |
 | 2026-10-11 | [`add-spa-data-export`](./2026-10-11-add-spa-data-export/) | Export my data from Settings → Privacy |
 | 2026-10-11 | [`add-spa-data-import`](./2026-10-11-add-spa-data-import/) | Import a backup from Settings → Privacy |
 | 2026-10-11 | [`fix-core-compare-krds-steps`](./2026-10-11-fix-core-compare-krds-steps/) | Compare structured workout steps in round-trip validation |
@@ -16,6 +33,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | 2026-10-11 | [`fix-spa-manual-first-editor`](./2026-10-11-fix-spa-manual-first-editor/) | Manual use is the main path, and the editor speaks the athlete's units |
 | 2026-10-11 | [`fix-spa-manual-sleep`](./2026-10-11-fix-spa-manual-sleep/) | Manual sleep records hours, not a 0 h night |
 | 2026-10-11 | [`fix-spa-new-session-context`](./2026-10-11-fix-spa-new-session-context/) | The "New session" sheet keeps the day it was opened for |
+| 2026-10-11 | [`fix-spa-polish-i18n-mobile`](./2026-10-11-fix-spa-polish-i18n-mobile/) | A Spanish, phone-sized and polished SPA, with a guard on untranslated text |
 | 2026-10-11 | [`harden-spa-nutrition-sync`](./2026-10-11-harden-spa-nutrition-sync/) | Close the gaps review found in nutrition sync |
 | 2026-10-11 | [`sync-spa-nutrition`](./2026-10-11-sync-spa-nutrition/) | Nutrition syncs with Drive and has tombstones |
 | 2026-10-11 | [`tcx-repeat-blocks`](./2026-10-11-tcx-repeat-blocks/) | TCX import reads repetition blocks |

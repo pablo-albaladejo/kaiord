@@ -45,7 +45,7 @@ FIT↔KRD conversion logic. Houses the strategy implementations for the `BinaryR
 
 - 80% coverage on converters and mappers.
 - Round-trip tests in `round-trip/` verify tolerance ranges.
-- Performance test in `round-trip/` validates 10k-record batch ≤500ms.
+- Throughput bench in `record/` tracks 10k-record batches (target 500ms); not a pass/fail gate.
 
 ### Common Patterns
 

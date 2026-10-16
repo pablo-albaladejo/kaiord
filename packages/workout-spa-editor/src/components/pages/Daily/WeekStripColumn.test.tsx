@@ -7,7 +7,6 @@ import { WeekStripColumn } from "./WeekStripColumn";
 
 const DAY: WeekDay = {
   iso: "2026-04-29",
-  letter: "W",
   dayNumber: 29,
   isFocused: false,
   isRealToday: false,

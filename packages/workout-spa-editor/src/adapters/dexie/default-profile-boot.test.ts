@@ -31,8 +31,8 @@ afterEach(async () => {
 
 describe("registerDefaultProfileBoot", () => {
   it.each([
-    ["en-US", "My profile"],
-    ["es-ES", "Mi perfil"],
+    ["en-US", "My athlete"],
+    ["es-ES", "Mi atleta"],
   ])(
     "should create one active auto profile named for %s on first open",
     async (language, expected) => {

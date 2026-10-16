@@ -15,8 +15,9 @@ export type CreateWorkoutCtaProps = {
 
 /**
  * The create-workout CTA each route renders in its own action row — the
- * `page`-surface destination from the nav registry. Hidden below `md`, where
- * the floating create FAB already covers the destination.
+ * `page`-surface destination from the nav registry. It stays labelled on a
+ * phone too: the bottom-nav "+" is an icon, and the week's own row is where a
+ * new user looks for "New workout".
  */
 export function CreateWorkoutCta({ origin, week }: CreateWorkoutCtaProps) {
   const t = useTranslate("nav");
@@ -26,7 +27,6 @@ export function CreateWorkoutCta({ origin, week }: CreateWorkoutCtaProps) {
     <Button
       variant="cta"
       size="sm"
-      className="hidden md:inline-flex"
       data-testid="create-workout-cta"
       onClick={() =>
         navigate(withOrigin("/workout/new", origin, week ? { week } : {}))

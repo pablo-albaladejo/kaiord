@@ -1,7 +1,5 @@
 /** A single day section within the calendar week List view. */
 
-import type { Locale } from "@kaiord/i18n";
-
 import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-sessions";
 import { useActiveLocale } from "../../i18n/LocaleProvider";
 import { useTranslate } from "../../i18n/use-translate";
@@ -10,12 +8,7 @@ import type { CoachingActivity } from "../../types/coaching-activity";
 import type { DayWellness } from "../../types/health/day-wellness";
 import { renderDayCards } from "../molecules/WorkoutCard/day-column-cards";
 import { WellnessBand } from "../molecules/WorkoutCard/WellnessBand/WellnessBand";
-import { shortMonthName, shortWeekdayName } from "./calendar-day-labels";
-
-const formatHeading = (date: string, locale: Locale): string => {
-  const d = new Date(date + "T12:00:00Z");
-  return `${shortWeekdayName(date, locale)} ${shortMonthName(date, locale)} ${d.getUTCDate()}`;
-};
+import { weekdayDate } from "./calendar-day-labels";
 
 export type CalendarWeekListDayProps = {
   date: string;
@@ -44,7 +37,7 @@ export function CalendarWeekListDay({
 }: CalendarWeekListDayProps) {
   const t = useTranslate("calendar");
   const locale = useActiveLocale();
-  const heading = formatHeading(date, locale);
+  const heading = weekdayDate(date, locale);
   return (
     <section
       data-testid={`calendar-list-day-${date}`}

@@ -17,12 +17,11 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
+import type { KaiordDatabase } from "./dexie-database";
 import { hasUserData, reclassifyZoneMethods } from "./dexie-migrations";
-
-const dbName = (suffix: string) => `kaiord-test-v9-${suffix}-${Date.now()}`;
 
 const NOW = "2026-05-04T10:00:00.000Z";
 
@@ -81,8 +80,7 @@ const seedV8 = async (name: string, profiles: unknown[]): Promise<void> => {
   v8.close();
 };
 
-const openV9AndRead = async (name: string, id: string) => {
-  const v9 = new KaiordDatabase(name);
+const openV9AndRead = async (v9: KaiordDatabase, id: string) => {
   await v9.open();
   const profile = await v9.table("profiles").get(id);
   v9.close();
@@ -90,15 +88,8 @@ const openV9AndRead = async (name: string, id: string) => {
 };
 
 describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v9");
+  const { name } = db;
 
   it("should leave a freshly-created profile unchanged (1.4a)", async () => {
     // Arrange
@@ -120,7 +111,7 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     await seedV8(name, [profile]);
 
     // Act
-    const post = await openV9AndRead(name, profile.id);
+    const post = await openV9AndRead(db, profile.id);
 
     // Assert
     expect(post.sportZones.cycling.heartRateZones.method).toBe("custom");
@@ -144,7 +135,7 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     await seedV8(name, [profile]);
 
     // Act
-    const post = await openV9AndRead(name, profile.id);
+    const post = await openV9AndRead(db, profile.id);
 
     // Assert
     expect(post.sportZones.cycling.heartRateZones.method).toBe("custom");
@@ -163,7 +154,7 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     await seedV8(name, [profile]);
 
     // Act
-    const post = await openV9AndRead(name, profile.id);
+    const post = await openV9AndRead(db, profile.id);
 
     // Assert
     expect(post.sportZones.running.heartRateZones.method).toBe("user");
@@ -185,7 +176,7 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     await seedV8(name, [profile]);
 
     // Act
-    const post = await openV9AndRead(name, profile.id);
+    const post = await openV9AndRead(db, profile.id);
 
     // Assert
     expect(post.sportZones.cycling.heartRateZones.method).toBe("custom");
@@ -207,7 +198,7 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     await seedV8(name, [profile]);
 
     // Act
-    const post = await openV9AndRead(name, profile.id);
+    const post = await openV9AndRead(db, profile.id);
 
     // Assert
     expect(post.sportZones.cycling.powerZones.method).toBe("coggan-7");
@@ -234,7 +225,7 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     await seedV8(name, [profile]);
 
     // Act
-    const post = await openV9AndRead(name, profile.id);
+    const post = await openV9AndRead(db, profile.id);
 
     // Assert
     // method stays at coggan-7; classifier handles the rest at runtime.
@@ -279,7 +270,7 @@ describe("Dexie v8 → v9 migration (zone-method-aware reconcile)", () => {
     await seedV8(name, [profile]);
 
     // Act
-    const post = await openV9AndRead(name, profile.id);
+    const post = await openV9AndRead(db, profile.id);
 
     // Assert
     expect(post.sportZones.generic.heartRateZones.method).toBe("user");

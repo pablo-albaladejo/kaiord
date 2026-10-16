@@ -4,13 +4,11 @@
  */
 import "fake-indexeddb/auto";
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { ConnectionRecord } from "../../types/connection";
 import { createDexieConnectionRepository } from "./dexie-connection-repository";
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = () => `kaiord-test-connections-${Date.now()}-${Math.random()}`;
 
 const record = (
   profileId: string,
@@ -26,18 +24,12 @@ const record = (
 });
 
 describe("createDexieConnectionRepository", () => {
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("connections");
   let repo: ReturnType<typeof createDexieConnectionRepository>;
 
   beforeEach(async () => {
-    db = new KaiordDatabase(dbName());
     await db.open();
     repo = createDexieConnectionRepository(db);
-  });
-
-  afterEach(async () => {
-    db.close();
-    await db.delete();
   });
 
   it("should round-trip a connection record by its composite key", async () => {

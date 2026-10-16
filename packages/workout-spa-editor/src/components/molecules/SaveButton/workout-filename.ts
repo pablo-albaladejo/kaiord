@@ -1,15 +1,7 @@
 import type { KRD } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFileExtension } from "../../../utils/file-format-metadata";
-
-export function sanitizeWorkoutName(name: string): string {
-  return name
-    .replace(/[^a-z0-9_-]/gi, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_|_$/g, "")
-    .toLowerCase()
-    .slice(0, 50);
-}
+import { sanitizeFilename } from "../../../utils/save-workout.helpers";
 
 export function generateWorkoutFilename(
   workout: KRD,
@@ -18,7 +10,5 @@ export function generateWorkoutFilename(
   const workoutData = workout.extensions?.structured_workout as
     { name?: string } | undefined;
   const workoutName = workoutData?.name || "workout";
-  const sanitizedName = sanitizeWorkoutName(workoutName);
-  const extension = getFileExtension(format);
-  return `${sanitizedName}.${extension}`;
+  return `${sanitizeFilename(workoutName)}.${getFileExtension(format)}`;
 }

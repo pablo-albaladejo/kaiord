@@ -90,8 +90,14 @@ module.exports = [
     // Note the 63 kB baseline was down to 0.85 kB of headroom (62.15 kB
     // measured on main at 7.0.66), which is why a routine patch-range bump
     // tripped it; 70 kB is sized to survive the next few `ai` patch ranges
-    // rather than to be raised again on the following one.
-    limit: "70 kB",
+    // rather than to be raised again on the following one. Bumped to 75 kB
+    // when `ai` moved 7.0.92 -> 7.0.137 (add-ai-provider-key-check): 7.0.123
+    // is the first release that stops `streamText` leaking an unhandled
+    // rejection on a failed turn in the browser, so the bump is the fix, not
+    // a routine patch range. It measured 71.43 kB in CI against 68.25 kB on
+    // main (run for PR #1348); `verifyProviderKey` is a plain fetch probe and
+    // accounts for well under 1 kB of that.
+    limit: "75 kB",
     import: "*",
     modifyEsbuildConfig: externalize(["zod", "@kaiord/core"]),
   },

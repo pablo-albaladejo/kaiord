@@ -36,7 +36,9 @@ export const targetTypeLabel = (
 export const formatTarget = (
   step: WorkoutStep,
   units: Units = "metric",
-  t: Translate = getTranslate("editor")
+  t: Translate = getTranslate("editor"),
+  sport?: string,
+  hrUnit?: string
 ): string => {
   const { target, targetType } = step;
   if (targetType === "open") return t("target.open");
@@ -46,11 +48,11 @@ export const formatTarget = (
     case "power":
       return formatPowerTarget(value, t);
     case "heart_rate":
-      return formatHeartRateTarget(value, t);
+      return formatHeartRateTarget(value, t, hrUnit);
     case "cadence":
       return formatCadenceTarget(value, t);
     case "pace":
-      return formatPaceTarget(value, units, t);
+      return formatPaceTarget(value, units, t, sport);
     default:
       return targetTypeLabel(targetType, t);
   }

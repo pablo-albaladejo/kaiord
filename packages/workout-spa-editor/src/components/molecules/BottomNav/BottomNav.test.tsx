@@ -65,6 +65,20 @@ describe("BottomNav", () => {
     expect(history.at(-1)).toBe("/nutrition");
   });
 
+  it.each(["/athletes", "/athlete/zones/cycling"])(
+    "should mark the Athlete tab active on %s",
+    (route) => {
+      // Arrange
+      renderAt(route);
+
+      // Act
+      const athlete = screen.getByRole("button", { name: "Athlete" });
+
+      // Assert
+      expect(athlete).toHaveAttribute("aria-current", "page");
+    }
+  );
+
   it("should mark the Daily tab active on the daily route", () => {
     // Arrange
     renderAt("/daily");
@@ -92,11 +106,27 @@ describe("BottomNav", () => {
     // The notch spacer renders inside the wrapper at NOTCH_INDEX (Nutrition,
     // index 3) and nowhere else — pinning "between Library and Nutrition".
     expect(
-      nutritionWrapper?.querySelector('span[aria-hidden="true"]')
+      nutritionWrapper?.querySelector('[data-testid="bottom-nav-notch"]')
     ).not.toBeNull();
     expect(
-      libraryWrapper?.querySelector('span[aria-hidden="true"]')
+      libraryWrapper?.querySelector('[data-testid="bottom-nav-notch"]')
     ).toBeNull();
+  });
+
+  it("should seat the create FAB in the notch, not over the bar's center", () => {
+    // Arrange
+    renderAt("/daily");
+
+    // Act
+    const fab = screen.getByRole("button", { name: "Create workout" });
+
+    // Assert
+    // Five tabs put the bar's center inside Library; centering the FAB on
+    // the bar covered that tab (F-44). The notch is the FAB's own slot.
+    expect(fab.parentElement).toHaveAttribute(
+      "data-testid",
+      "bottom-nav-notch"
+    );
   });
 
   it("should mark the Library tab active on the library route", () => {

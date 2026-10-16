@@ -106,3 +106,177 @@ is resolved from a MET compendium via a `sport`/`subSport`→activity-code mappi
 - **GIVEN** a planned strength session with only sport, intensity, and duration
 - **WHEN** expected activity kcal is estimated
 - **THEN** the MET tier is used with the sport's mapped compendium MET value and the bodyweight
+
+### Requirement: One current body weight
+
+The SPA SHALL resolve an athlete's current body weight as the latest weigh-in
+on or before the day in question, however old, and SHALL fall back to
+`profile.bodyWeight` only when the athlete has no weigh-in. When neither is
+known the current weight SHALL be unknown, never estimated. Every consumer of
+the athlete's weight (BMR, the BMR gate, the goal maintenance, the MET activity
+estimate, the goal's default start weight, the Athlete page and the profile
+snapshot sent to the extensions) SHALL use this one resolution. The latest
+weigh-in is the most recent measurement: by day, then by `measuredAt`, then by
+record id, so two weigh-ins of the same day (from different sources) resolve
+the same way whatever order they are stored in.
+
+Editing the weight on the Athlete page SHALL record a weigh-in dated today,
+stamped with the real time it was entered, and SHALL NOT write
+`profile.bodyWeight`; a second edit on the same day SHALL update that manual
+weigh-in rather than add another. A manual weigh-in SHALL NOT reuse or
+overwrite another source's weigh-in of the same day. A weigh-in entered for a
+past day SHALL be stamped at noon of that day. The energy goal's `startWeightKg` SHALL
+remain the goal's historic starting weight and SHALL default to the current
+weight when a goal is set up.
+
+#### Scenario: A weigh-in overrides the profile weight
+
+- **GIVEN** a profile with `bodyWeight` 72.5 kg and a weigh-in of 71.9 kg
+- **WHEN** the Athlete page or the expenditure calculators read the weight
+- **THEN** they use 71.9 kg
+
+#### Scenario: A weigh-in alone unlocks BMR
+
+- **GIVEN** a profile with `height`, `birthDate` and `sex` but no `bodyWeight`
+- **AND** a weigh-in
+- **WHEN** the day's expenditure is predicted
+- **THEN** it is not gated and BMR uses the weigh-in
+
+#### Scenario: Same-day re-edit updates today's weigh-in
+
+- **GIVEN** the athlete set their weight on the Athlete page today
+- **WHEN** they edit it again the same day
+- **THEN** exactly one weigh-in exists for today, holding the new value
+
+#### Scenario: The later of two same-day weigh-ins is the current weight
+
+- **GIVEN** two weigh-ins dated today from different sources, measured at 07:00 and at 18:30
+- **WHEN** the current weight is read
+- **THEN** it is the 18:30 weigh-in, whichever row was stored first
+
+#### Scenario: A manual weigh-in leaves another source's row untouched
+
+- **GIVEN** a `train2go-bridge` weigh-in dated today
+- **WHEN** the athlete enters their weight by hand today
+- **THEN** a separate manual weigh-in is recorded and the Train2Go weigh-in is unchanged
+
+### Requirement: One daily-wellness reading per day
+
+The SPA SHALL read a day's daily wellness as one reading combined from the
+daily-wellness records of that day, without rewriting any of them. The reading
+is not a stored record: it carries the head record's id and provenance. Every
+reader (the energy balance, the Activity page, the steps trends, the calendar
+steps badge and the chat health tool) SHALL use this one reading.
+
+The records SHALL be ranked by the data type's effective source order when its
+source policy is "priority" (`sourceOrder` restricted to enabled import
+policies, manual always included), then the manual record, then by source id,
+then by record id, so the reading is the same whatever order the records are
+stored in. The head is the first ranked record that is not a pure manual
+record, and it SHALL be read whole, as `resolveEffectiveSource` reads
+priority: a field the head lacks (such as `floorsClimbed`) SHALL NOT be filled
+from a lower-ranked record. The one field-level exception is `steps`: a pure
+manual record holds only `steps`, and when it ranks above the head its steps
+replace the head's. A day with only a pure manual record reads only its steps,
+so it has no measured calories.
+
+A legacy manual record is an imported record that a manual steps save made
+before this change re-stamped `manual`. It is told apart by any non-zero
+`activeCalories`, `restingCalories`, intensity minutes or `floorsClimbed`, and
+it SHALL be read as a full record (its calories count). A new manual steps
+save on that day SHALL keep its measured values and replace only `steps`; this
+also covers a device that syncs such a record back after the change.
+
+A legacy manual record has two roles. As a full record it SHALL rank after
+every other record of the day, in both "union" and "priority": its calories
+are a stale copy of imported data, so a record its source still stamps is
+fresher. It is the head only when the day has no other record that is not a
+pure manual record. Its `steps` are the steps the athlete typed (a record only
+became legacy through a manual steps save), so they SHALL compete as manual
+steps in the slot of `manual`, after a pure manual record's steps: they
+replace the head's steps when that slot ranks above the head, and lose like
+pure manual steps when a "priority" order leaves `manual` out. A steps save
+on that day updates the legacy record, so it changes the reading.
+
+Under "priority", records of a bridge whose import policy for daily wellness is
+disabled SHALL be dropped. A source with no import policy at all (a FIT file
+import, `fit-import`) SHALL stay as a fallback ranked after the listed sources.
+This differs from `resolveEffectiveSource`, which considers only listed
+sources: FIT imports are the main producer of daily-wellness records and have
+no import policy, so they never survive in the effective source order, and
+dropping them would leave every FIT-imported day blank under priority.
+
+#### Scenario: Manual steps and imported calories make one reading
+
+- **GIVEN** a `fit-import` daily record with 4000 steps, 650 active and 1750 resting kcal
+- **AND** a manual daily record for the same day with 12000 steps
+- **WHEN** the day's energy balance is resolved
+- **THEN** it reads 12000 steps and the measured 650 + 1750 kcal, with the `fit-import` record's provenance
+
+#### Scenario: The reading does not depend on storage order
+
+- **GIVEN** an imported and a manual daily record of the same day
+- **WHEN** the day is read with the records stored in any order
+- **THEN** every read gives the same reading
+
+#### Scenario: Priority reads the first source whole
+
+- **GIVEN** a "priority" policy for daily wellness with `sourceOrder` `whoop-bridge`, `fit-import` and an enabled WHOOP import
+- **AND** a WHOOP daily record without `floorsClimbed` and a `fit-import` record with 12 floors for the same day
+- **WHEN** the day is read
+- **THEN** the reading is the WHOOP record, with no `floorsClimbed`
+
+#### Scenario: Manual steps lose when the priority order leaves manual out
+
+- **GIVEN** a "priority" policy with `sourceOrder` `whoop-bridge` and an enabled WHOOP import
+- **AND** a WHOOP and a manual daily record of the same day
+- **WHEN** the day is read
+- **THEN** the steps are WHOOP's
+
+#### Scenario: A source with no import policy stays as a fallback
+
+- **GIVEN** a "priority" policy with `sourceOrder` `whoop-bridge`
+- **AND** a day whose only daily record is a `fit-import` record
+- **WHEN** the day is read
+- **THEN** the reading is the `fit-import` record
+
+#### Scenario: A disabled bridge is not read
+
+- **GIVEN** a "priority" policy whose WHOOP import policy is disabled
+- **AND** a WHOOP daily record of the day
+- **WHEN** the day is read
+- **THEN** the WHOOP record does not contribute to the reading
+
+#### Scenario: A legacy manual record keeps its calories
+
+- **GIVEN** a manual daily record with 9500 steps, 640 active and 1720 resting kcal, written by a save before this change
+- **WHEN** the day is read, and when the user saves 12000 steps for that day
+- **THEN** the reading has 640 + 1720 kcal, and after the save the record holds 12000 steps with the same calories
+
+#### Scenario: A newer imported record beats a legacy manual record's calories, not its steps
+
+- **GIVEN** no "priority" policy for daily wellness
+- **AND** a legacy manual daily record with 9500 steps and 640 active kcal and a WHOOP daily record with 5000 steps and 700 active kcal for the same day
+- **WHEN** the day is read
+- **THEN** the reading has the WHOOP record's provenance, 700 active kcal and 9500 steps
+- **AND** after the user saves 12000 steps for that day, the reading has 12000 steps and 700 active kcal
+
+#### Scenario: Manual steps still win over a legacy manual record
+
+- **GIVEN** a legacy manual daily record, a WHOOP daily record and a manual steps entry of 9000 steps for the same day
+- **WHEN** the day is read
+- **THEN** the reading has 9000 steps and the WHOOP record's calories and provenance
+
+#### Scenario: Under priority a legacy manual record's steps hold manual's slot
+
+- **GIVEN** a "priority" policy with `sourceOrder` `manual`, `whoop-bridge` and an enabled WHOOP import
+- **AND** a legacy manual daily record with 9500 steps and 640 active kcal and a WHOOP daily record with 5000 steps and 700 active kcal for the same day
+- **WHEN** the day is read
+- **THEN** the reading has the WHOOP record's provenance, 700 active kcal and 9500 steps
+- **AND** with `sourceOrder` `whoop-bridge` only, the reading has 5000 steps
+
+#### Scenario: A manual-only day is predicted, not measured as 0 kcal
+
+- **GIVEN** a day whose only daily record is a manual steps entry
+- **WHEN** the day's energy balance is resolved
+- **THEN** the expenditure is predicted from BMR, as for a day with no daily record

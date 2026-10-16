@@ -12,8 +12,11 @@ import { readFile } from "node:fs/promises";
 
 import type { Page } from "@playwright/test";
 
+import { mockLlmSuccess } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
+import { calendarDay, workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
+import { routeInApp } from "./helpers/route-in-app";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const FAKE_KEY = "sk-e2e-fake-export-key";
@@ -30,34 +33,37 @@ const readLocalProfiles = (page: Page): Promise<Row[]> =>
   });
 
 async function enterRecords(page: Page, today: string): Promise<string> {
-  await page.getByTestId(`empty-day-${today}`).click();
+  await calendarDay(page, today).add.click();
   await page.getByTestId("add-entry-choose-wellness").click();
   const dialog = page.getByTestId("wellness-entry-dialog");
   await dialog.getByLabel("Weight (kg)").fill("70.4");
   await dialog.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Wellness saved", { exact: true })).toBeVisible();
 
-  await page.goto(`/workout/new?source=scratch&date=${today}`);
-  await page.getByTestId("scratch-schedule-button").click();
-  const card = page
-    .getByTestId(`day-column-${today}`)
-    .locator('[data-testid^="workout-card-"]');
+  const schedule = page.getByTestId("scratch-schedule-button");
+  await routeInApp(page, `/workout/new?source=scratch&date=${today}`, schedule);
+  await schedule.click();
+  const card = workoutCardsOn(page, today);
   await expect(card).toHaveCount(1);
   const workoutId = (await card.getAttribute("data-testid"))!.replace(
     "workout-card-",
     ""
   );
 
-  await page.goto("/nutrition");
   const logger = page.getByTestId("intake-logger");
+  await routeInApp(page, "/nutrition", logger);
   await logger.getByLabel("Energy (kcal)").fill(String(INTAKE_KCAL));
   await logger.getByTestId("intake-log-submit").click();
   await expect(page.getByText("Entry logged", { exact: true })).toBeVisible();
 
-  await page.goto("/settings/ai");
-  await page.getByLabel("Label").fill("E2E provider");
+  // Adding a provider checks its key against the provider; answer locally.
+  await mockLlmSuccess(page);
+  const add = page.getByRole("button", { name: "Add account" });
+  await routeInApp(page, "/settings/ai", add);
+  await add.click();
+  await page.getByLabel("Label (optional)").fill("E2E provider");
   await page.getByLabel("API Key").fill(FAKE_KEY);
-  await page.getByRole("button", { name: "Add Provider" }).click();
+  await page.getByRole("button", { name: "Save account" }).click();
   await expect(page.getByText("E2E provider").first()).toBeVisible();
   return workoutId;
 }
@@ -71,12 +77,13 @@ test.describe("Export my data", () => {
     await page.goto("/calendar");
     await waitForDexieReady(page);
     const workoutId = await enterRecords(page, today);
-    await page.goto("/settings/privacy");
+    const exportButton = page.getByRole("button", { name: "Export my data" });
+    await routeInApp(page, "/settings/data", exportButton);
 
     // Act
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("button", { name: "Export my data" }).click(),
+      exportButton.click(),
     ]);
     const body = await readFile((await download.path())!, "utf8");
 

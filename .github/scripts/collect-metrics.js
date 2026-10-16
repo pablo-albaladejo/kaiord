@@ -11,7 +11,10 @@
  */
 
 import fs from "fs";
+import os from "os";
+import path from "path";
 import { execSync } from "child_process";
+import { readVitestReport, summarizeTestResults } from "./test-results.mjs";
 
 const output = process.env.METRICS_OUTPUT || "current";
 
@@ -55,40 +58,37 @@ function collectTestResults() {
     "mcp",
   ];
   const results = {};
-  let totalPassed = 0;
-  let totalFailed = 0;
-  let totalSkipped = 0;
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kaiord-vitest-"));
 
-  for (const pkg of packages) {
-    const result = run(
-      `pnpm --filter @kaiord/${pkg} exec vitest --run --reporter=json 2>&1`
-    );
-    try {
-      const lines = result.split("\n");
-      const jsonLine = lines.find((l) => l.trim().startsWith("{"));
-      if (jsonLine) {
-        const data = JSON.parse(jsonLine);
-        const passed = data.numPassedTests || 0;
-        const failed = data.numFailedTests || 0;
-        const skipped = data.numPendingTests || 0;
-        results[pkg] = { passed, failed, skipped };
-        totalPassed += passed;
-        totalFailed += failed;
-        totalSkipped += skipped;
-      }
-    } catch {
-      results[pkg] = { passed: 0, failed: 0, skipped: 0, error: true };
+  try {
+    for (const pkg of packages) {
+      // Vitest 5 writes the JSON report to a file instead of stdout.
+      // `--coverage` writes coverage/coverage-final.json in the same pass, so
+      // collectCoverage() reads it instead of running every suite a second time.
+      const file = path.join(dir, `${pkg}.json`);
+      // `pnpm exec` puts a *relative* ./node_modules/.bin on PATH, which tests
+      // that spawn `tsx` from another cwd (cli) cannot resolve. Add the absolute
+      // bin dirs, as `pnpm run` does.
+      const bins = [
+        path.resolve("packages", pkg, "node_modules/.bin"),
+        path.resolve("node_modules/.bin"),
+      ].join(path.delimiter);
+      run(
+        `pnpm --filter @kaiord/${pkg} exec vitest --run --coverage --reporter=json --outputFile=${file} 2>&1`,
+        {
+          env: {
+            ...process.env,
+            PATH: `${bins}${path.delimiter}${process.env.PATH}`,
+          },
+        }
+      );
+      results[pkg] = readVitestReport(file);
     }
+
+    return summarizeTestResults(results);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
   }
-
-  const total = totalPassed + totalFailed;
-  const passRate = total > 0 ? (totalPassed / total) * 100 : 0;
-
-  return {
-    packages: results,
-    total: { passed: totalPassed, failed: totalFailed, skipped: totalSkipped },
-    passRate: Math.round(passRate * 100) / 100,
-  };
 }
 
 function parseCoverageFile(covPath) {
@@ -143,6 +143,10 @@ function collectCoverage() {
 }
 
 function checkBuild() {
+  // The Metrics Gate workflow builds in its own step (which fails the job on
+  // a broken build) and passes the outcome here, so the tree is not rebuilt.
+  const outcome = process.env.METRICS_BUILD_OUTCOME;
+  if (outcome) return { success: outcome === "success" };
   const result = run("pnpm -r build 2>&1");
   const success = !result.includes("ERR_PNPM") && !result.includes("FAIL");
   return { success };

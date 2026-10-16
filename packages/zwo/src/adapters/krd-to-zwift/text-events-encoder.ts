@@ -1,45 +1,61 @@
 import type { WorkoutStep } from "@kaiord/core";
 
-export const encodeTextEvents = (
-  step: WorkoutStep
-): Array<Record<string, unknown>> | Record<string, unknown> | undefined => {
+type TextEvent = Record<string, unknown>;
+
+const textEventsOf = (step: WorkoutStep): Array<TextEvent> => {
   const stepExtensions = step.extensions?.zwift as
     Record<string, unknown> | undefined;
-  const textEvents = stepExtensions?.textEvents as
-    Array<Record<string, unknown>> | undefined;
+  return (stepExtensions?.textEvents as Array<TextEvent> | undefined) ?? [];
+};
 
-  if (!textEvents || textEvents.length === 0) {
-    return undefined;
+const encodeEvent = (
+  event: TextEvent,
+  timeShift = 0,
+  distanceShift = 0
+): TextEvent => {
+  const encoded: TextEvent = { "@_message": event.message };
+  if (event.timeoffset !== undefined) {
+    encoded["@_timeoffset"] = (event.timeoffset as number) + timeShift;
   }
-
-  if (textEvents.length === 1) {
-    const event = textEvents[0]!;
-    const encoded: Record<string, unknown> = {
-      "@_message": event.message,
-    };
-
-    if (event.timeoffset !== undefined) {
-      encoded["@_timeoffset"] = event.timeoffset;
-    }
-    if (event.distoffset !== undefined) {
-      encoded["@_distoffset"] = event.distoffset;
-    }
-
-    return encoded;
+  if (event.distoffset !== undefined) {
+    encoded["@_distoffset"] = (event.distoffset as number) + distanceShift;
   }
+  return encoded;
+};
 
-  return textEvents.map((event) => {
-    const encoded: Record<string, unknown> = {
-      "@_message": event.message,
-    };
+export const encodeTextEvents = (
+  step: WorkoutStep
+): Array<TextEvent> | TextEvent | undefined => {
+  const textEvents = textEventsOf(step);
+  if (textEvents.length === 0) return undefined;
+  if (textEvents.length === 1) return encodeEvent(textEvents[0]!);
+  return textEvents.map((event) => encodeEvent(event));
+};
 
-    if (event.timeoffset !== undefined) {
-      encoded["@_timeoffset"] = event.timeoffset;
-    }
-    if (event.distoffset !== undefined) {
-      encoded["@_distoffset"] = event.distoffset;
-    }
+// One IntervalsT element holds the events of both steps. Off-step events are
+// offset from the start of the pair so native Zwift shows them after the
+// on-step: timeoffset by OnDuration (the seconds Zwift plays, whatever the
+// KRD duration was) and distoffset by the on-step meters, if it has any.
+// kaiord:textEventSplit counts the on-step events so the reader can hand each
+// event back to its own step.
+export const encodeIntervalsTTextEvents = (
+  onStep: WorkoutStep,
+  offStep: WorkoutStep,
+  intervalsT: Record<string, unknown>
+): void => {
+  const onEvents = textEventsOf(onStep);
+  const offEvents = textEventsOf(offStep);
+  if (onEvents.length + offEvents.length === 0) return;
 
-    return encoded;
-  });
+  const onSeconds = intervalsT["@_OnDuration"] as number;
+  const onMeters =
+    onStep.duration.type === "distance" ? onStep.duration.meters : 0;
+  const encoded = [
+    ...onEvents.map((event) => encodeEvent(event)),
+    ...offEvents.map((event) => encodeEvent(event, onSeconds, onMeters)),
+  ];
+  intervalsT.textevent = encoded.length === 1 ? encoded[0] : encoded;
+  if (offEvents.length > 0) {
+    intervalsT["@_kaiord:textEventSplit"] = onEvents.length;
+  }
 };

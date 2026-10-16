@@ -39,6 +39,7 @@ export default function HealthDashboardPage() {
         selected={selected}
         series={series}
         rangeDays={rangeDays}
+        range={range}
       />
     </section>
   );

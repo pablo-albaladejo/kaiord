@@ -29,7 +29,7 @@ runs:
         registry-url: ${{ inputs.registry-url }}
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v6.0.10
+      uses: pnpm/action-setup@v6.1.0
       with:
         version: ${{ inputs.pnpm-version }}
 
@@ -38,16 +38,6 @@ runs:
       shell: bash
       run: |
         echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-    - name: Setup pnpm store cache
-      id: cache-pnpm-store
-      uses: actions/cache@v6
-      with:
-        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-
-          ${{ runner.os }}-pnpm-store-
 
     - name: Setup node_modules cache
       id: cache-node-modules
@@ -61,13 +51,30 @@ runs:
           ${{ runner.os }}-node-modules-${{ inputs.node-version }}-
           ${{ runner.os }}-node-modules-
 
+    # The store (~975 MB, ~16s to download and extract, plus a post-job
+    # step) is only read by `pnpm install` when node_modules is not already
+    # complete. On an exact node_modules hit, install prints "Already up to
+    # date" without touching it, so restoring it was pure waste (measured
+    # 2026-10-14 on every job using this action). Any partial or missing
+    # node_modules restore still gets the store, and saves it on a miss.
+    - name: Setup pnpm store cache
+      id: cache-pnpm-store
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      uses: actions/cache@v6
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-
+          ${{ runner.os }}-pnpm-store-
+
     - name: Display cache hit status
       shell: bash
       run: |
         echo "📦 Cache Status Report"
         echo "====================="
-        echo "pnpm store cache: ${{ steps.cache-pnpm-store.outputs.cache-hit == 'true' && '✅ HIT' || '❌ MISS' }}"
         echo "node_modules cache: ${{ steps.cache-node-modules.outputs.cache-hit == 'true' && '✅ HIT' || '❌ MISS' }}"
+        echo "pnpm store cache: ${{ steps.cache-node-modules.outputs.cache-hit == 'true' && '⏭️ SKIPPED (node_modules hit)' || (steps.cache-pnpm-store.outputs.cache-hit == 'true' && '✅ HIT' || '❌ MISS') }}"
         echo "====================="
 
     - name: Install dependencies

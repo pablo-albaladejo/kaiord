@@ -134,7 +134,7 @@ describe("PlacementFeedback", () => {
     // Assert
     expect(
       screen.getByRole("link", { name: "Open Connections" })
-    ).toHaveAttribute("href", "/settings/connections");
+    ).toHaveAttribute("href", "/connections");
   });
 
   it("should link to the store when the bridge is outdated", () => {

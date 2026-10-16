@@ -40,22 +40,27 @@ async function settle(page, lands) {
   if (!lands) {
     const steps = page.getByText(/^Pasos totales:?$/).first();
     await steps.or(failed).first().waitFor();
-    return steps.isVisible();
+    return { ok: await steps.isVisible(), timedOut: false };
   }
-  await Promise.race([waitForUrl(page, lands), failed.waitFor()]).catch(
-    () => {}
+  const timedOut = await Promise.race([
+    waitForUrl(page, lands),
+    failed.waitFor(),
+  ]).then(
+    () => false,
+    (err) => oneLine(err.message.split("\n")[0], 120)
   );
-  return lands.test(page.url());
+  return { ok: lands.test(page.url()), timedOut };
 }
 
 export default async function fitImport({ rec, open }) {
   for (const c of CASES) {
     const { page } = await importOne(open, c);
-    const ok = await settle(page, c.lands);
+    const { ok, timedOut } = await settle(page, c.lands);
+    const waited = timedOut ? ` | wait timed out: ${timedOut}` : "";
     rec.assert(
       ok,
       `${c.kind} FIT (${c.file}) imports`,
-      ok ? undefined : await observe(page)
+      ok ? undefined : `${await observe(page)}${waited}`
     );
   }
 }

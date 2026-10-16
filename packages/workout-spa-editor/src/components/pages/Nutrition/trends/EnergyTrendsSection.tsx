@@ -1,7 +1,8 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 import { useEnergyRollup } from "../../../../hooks/energy/use-energy-rollup";
 import { useTranslate } from "../../../../i18n/use-translate";
+import { lazyPage } from "../../../../lazy-page";
 import { Card } from "../../../atoms/Card";
 import { Icon, ICON_MAP } from "../../../atoms/Icon";
 import {
@@ -15,7 +16,7 @@ import { useEnergyTrendSeries } from "./use-energy-trend-series";
 // Lazy so uPlot (which touches window.matchMedia at module init) only loads
 // when a chart actually renders — keeps the Nutrition page importable in tests
 // and trims the route's initial bundle.
-const EnergyTrendChartCard = lazy(() => import("./EnergyTrendChartCard"));
+const EnergyTrendChartCard = lazyPage(() => import("./EnergyTrendChartCard"));
 
 export type EnergyTrendsSectionProps = { profileId: string; date: string };
 

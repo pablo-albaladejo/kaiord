@@ -79,7 +79,7 @@ describe("LayoutHeader", () => {
       // Assert
       expect(
         screen.getByTestId("status-header-account-button")
-      ).toHaveAccessibleName("Account menu (no active profile)");
+      ).toHaveAccessibleName("Account menu (no active athlete)");
     });
 
     it("should name the account menu for the active profile once Dexie hydrates", async () => {
@@ -142,6 +142,19 @@ describe("LayoutHeader", () => {
   });
 
   describe("retired help surfaces", () => {
+    it("should keep the brand and the nav on one row on a phone", () => {
+      // Arrange
+
+      // Act
+      renderWithProviders(<LayoutHeader />);
+      const row = screen.getByTestId("layout-header-row");
+
+      // Assert
+      expect(row).toHaveClass("flex-row");
+      expect(row).not.toHaveClass("flex-col");
+      expect(row).toHaveClass("md:flex-col", "xl:flex-row");
+    });
+
     it("should not render a help entry button", () => {
       // Arrange
 

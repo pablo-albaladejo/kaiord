@@ -1,7 +1,9 @@
 import type { DayEnergyBalance } from "@kaiord/core";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { DayEnergyGoalContext } from "../../../application/energy/day-energy-balance-result";
+import { appI18n, setActiveLocale } from "../../../i18n/i18n";
+import { getTranslate } from "../../../i18n/use-translate";
 import { toEnergyBalanceViewModel } from "./energy-balance-view-model";
 
 const goalContext = (
@@ -116,5 +118,32 @@ describe("toEnergyBalanceViewModel", () => {
 
     // Assert
     expect(vm.capWarning).toBeNull();
+  });
+});
+
+describe("toEnergyBalanceViewModel in Spanish", () => {
+  beforeAll(() => setActiveLocale("es"));
+  afterAll(() => appI18n.changeLanguage("en"));
+
+  it("should word the source, net, intake and cap in Spanish", () => {
+    // Arrange
+    const t = getTranslate("daily", "es");
+    const untracked: DayEnergyBalance = {
+      ...baseBalance,
+      intake_kcal: null,
+      source: "mixed",
+    };
+    const capped = goalContext({ capped: true });
+
+    // Act
+    const deficit = toEnergyBalanceViewModel(baseBalance, capped, t);
+    const mixed = toEnergyBalanceViewModel(untracked, null, t);
+
+    // Assert
+    expect(deficit.expenditureLabel).toBe("Medido");
+    expect(deficit.net).toBe("Déficit de 600 kcal");
+    expect(deficit.capWarning).toMatch(/^Objetivo limitado a un ritmo seguro/);
+    expect(mixed.expenditureLabel).toBe("Mixto");
+    expect(mixed.intake).toBe("Sin registrar");
   });
 });

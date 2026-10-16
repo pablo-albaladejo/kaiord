@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Duration } from "../../../types/krd";
 import { getValueLabel, isRepeatType } from "./advanced/duration-helpers";
 import { DurationTypeSelect } from "./advanced/DurationTypeSelect";
@@ -20,6 +21,7 @@ export const AdvancedDurationPicker = ({
   disabled = false,
   className = "",
 }: AdvancedDurationPickerProps) => {
+  const tCommon = useTranslate("common");
   const {
     durationType,
     durationValue,
@@ -43,7 +45,7 @@ export const AdvancedDurationPicker = ({
       <DurationValueInput
         durationType={durationType}
         value={durationValue}
-        label={getValueLabel(durationType)}
+        label={getValueLabel(durationType, tCommon)}
         onChange={handleValueChange}
         disabled={disabled}
       />

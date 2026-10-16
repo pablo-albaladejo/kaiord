@@ -6,29 +6,18 @@
  */
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { createDexieDataTypeSourcePolicyRepository } from "./dexie-data-type-source-policy-repository";
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = () => `kaiord-test-source-policy-${Date.now()}-${Math.random()}`;
 
 const PROFILE_ID = "11111111-1111-4111-8111-111111111111";
 
 describe("createDexieDataTypeSourcePolicyRepository", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("source-policy");
 
   beforeEach(async () => {
-    name = dbName();
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should return undefined when no companion row exists for the type", async () => {

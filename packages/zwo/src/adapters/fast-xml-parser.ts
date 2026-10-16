@@ -15,6 +15,10 @@ import {
 } from "./xml-validator-helpers";
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
 import { extractIntervalOrder } from "./zwift-to-krd/intervals-extractor";
+import {
+  keepTextAttribute,
+  keepTextTag,
+} from "./zwift-to-krd/text-value-processors";
 
 const parseZwiftXml = (
   xmlString: string,
@@ -27,6 +31,8 @@ const parseZwiftXml = (
       ignoreAttributes: false,
       attributeNamePrefix: "@_",
       parseAttributeValue: true,
+      attributeValueProcessor: keepTextAttribute,
+      tagValueProcessor: keepTextTag,
     });
 
     return {

@@ -38,9 +38,12 @@ export function useFocusOnSectionChange(): void {
       return;
     }
     if (section === lastRef.current) return;
-    lastRef.current = section;
 
+    // Recorded inside the frame, not before it: under StrictMode the effect
+    // runs, cleans up (cancelling the frame) and runs again, and a dedupe
+    // written up front would make that second run skip the focus entirely.
     const raf = requestAnimationFrame(() => {
+      lastRef.current = section;
       const el = Array.from(
         document.querySelectorAll<HTMLElement>(SETTINGS_SECTION_SELECTOR)
       ).find((n) => n.getAttribute(SETTINGS_SECTION_ATTR) === section);

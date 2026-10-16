@@ -37,7 +37,7 @@ export function RoutingSourceSwitches({ dataType, toggles, onToggle }: Props) {
             key={toggle.bridgeId}
             testId={`routing-route-${dataType}-${toggle.integrationId}`}
             selected={toggle.enabled}
-            label={sourceName(toggle.integrationId)}
+            label={sourceName(toggle.integrationId, t)}
             onClick={() => onToggle(toggle.bridgeId, !toggle.enabled)}
           />
         ))}

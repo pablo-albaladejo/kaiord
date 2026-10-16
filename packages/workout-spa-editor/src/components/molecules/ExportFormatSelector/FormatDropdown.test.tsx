@@ -10,25 +10,25 @@ const mockFormatOptions: FormatOption[] = [
   {
     value: "krd",
     label: "KRD",
-    description: "Kaiord native format",
+    descriptionKey: "Kaiord native format",
     compatibility: ["All platforms"],
   },
   {
     value: "fit",
     label: "FIT",
-    description: "Garmin format",
+    descriptionKey: "Garmin format",
     compatibility: ["Garmin"],
   },
   {
     value: "tcx",
     label: "TCX",
-    description: "Training Center XML",
+    descriptionKey: "Training Center XML",
     compatibility: ["Garmin", "TrainingPeaks"],
   },
   {
     value: "zwo",
     label: "ZWO",
-    description: "Zwift workout format",
+    descriptionKey: "Zwift workout format",
     compatibility: ["Zwift"],
   },
 ];

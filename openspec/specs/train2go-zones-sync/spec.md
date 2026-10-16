@@ -54,7 +54,7 @@ When `syncZones` is `true` for a linked account, the SPA SHALL invoke the zones-
 
 ### Requirement: `syncZones` returns conflicts unwritten, silent fills are committed eagerly
 
-The `syncZones(profileId, transport, repo): Promise<SyncZonesResult>` use case SHALL reconcile each Train2Go field against the persisted Kaiord profile under the following rules:
+The `syncZones(profileId, transport, persistence): Promise<SyncZonesResult>` use case SHALL reconcile each Train2Go field against the persisted Kaiord profile under the following rules:
 
 | Kaiord field state             | Action                                                        |
 | ------------------------------ | ------------------------------------------------------------- |
@@ -64,7 +64,13 @@ The `syncZones(profileId, transport, repo): Promise<SyncZonesResult>` use case S
 
 Reconciliation operates at TWO granularities: (a) **threshold scalars** (`cycling.thresholds.ftp`, etc.) — one FieldKey per scalar, identical to the original change; (b) **zone bands** (`cycling.heartRateZones.z2.maxBpm`, etc.) — one FieldKey per band-bound, where each Z1-Z5 of each sport-kind table can independently land in `applied` or `conflicts`.
 
-The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictItem[], payload: ZonesPayload }`. The `payload` field is the validated bridge response, returned so the UI can pass it back into `commitConflictResolution` without re-fetching. Conflicting values MUST NOT be written to the profile by `syncZones` itself — they are returned to the caller (the UI) for presentation. Silent fills ARE written eagerly during `syncZones` execution.
+The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictItem[], payload: ZonesPayload }`. The `payload` field is the validated bridge response, returned so the UI can pass it back into `commitConflictResolution` without re-fetching. Conflicting values MUST NOT be written to the profile by `syncZones` itself — they are returned to the caller (the UI) for presentation. Silent fills ARE written eagerly during `syncZones` execution. `syncZones` SHALL re-read the profile inside the transaction that writes the fills, so an edit saved while Train2Go was being read is kept, not overwritten by the profile read before the fetch.
+
+#### Scenario: A profile edit saved during the fetch is kept
+
+- **GIVEN** the athlete renames their profile while `syncZones` is reading Train2Go
+- **WHEN** `syncZones` writes its silent fills
+- **THEN** the profile SHALL keep the new name and gain the silent fills
 
 #### Scenario: Triathlete profile gets per-sport LTHR (silent fills)
 
@@ -126,7 +132,7 @@ The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictI
 
 ### Requirement: `commitConflictResolution` applies user decisions
 
-The `commitConflictResolution(profileId, decisions, repo, transportPayload): Promise<void>` use case SHALL accept a `decisions: Record<FieldKey, 'accept' | 'reject'>` map and apply per-row decisions. For threshold scalars (FieldKeys ending in `.thresholds.<name>`, plus `bodyWeight` and `heartRate.max`), `accept` writes the T2G scalar and `reject` is a no-op. For band-level FieldKeys (`<sport>.<kind>.z<N>.<bound>`), the decisions are grouped by `<sport>.<kind>` and applied via the per-band merge rule defined in the band-level requirement above: the persisted `zones` array becomes the merge of the user's pre-sync values (for rejected bands) and the T2G values (for accepted bands). The function SHALL be idempotent — calling it twice with the same decisions produces the same final state. The SPA SHALL open a single confirmation dialog listing every conflicting field with both values (`Field: Kaiord-value → Train2Go-value`); the user SHALL be able to accept or reject each row independently. Cancelling the dialog SHALL discard only the conflicting writes; previously-committed silent fills (returned in `applied` from `syncZones`) SHALL remain.
+The `commitConflictResolution(profileId, decisions, persistence, transportPayload): Promise<void>` use case SHALL accept a `decisions: Record<FieldKey, 'accept' | 'reject'>` map and apply per-row decisions. For threshold scalars (FieldKeys ending in `.thresholds.<name>`, plus `heartRate.max`), `accept` writes the T2G scalar and `reject` is a no-op. For `bodyWeight`, `accept` records the T2G weight as today's weigh-in (see "Train2Go's weight is the athlete's current weight") and `reject` is a no-op. For band-level FieldKeys (`<sport>.<kind>.z<N>.<bound>`), the decisions are grouped by `<sport>.<kind>` and applied via the per-band merge rule defined in the band-level requirement above: the persisted `zones` array becomes the merge of the user's pre-sync values (for rejected bands) and the T2G values (for accepted bands). The function SHALL be idempotent — calling it twice with the same decisions produces the same final state. The SPA SHALL open a single confirmation dialog listing every conflicting field with both values (`Field: Kaiord-value → Train2Go-value`); the user SHALL be able to accept or reject each row independently. Cancelling the dialog SHALL discard only the conflicting writes; previously-committed silent fills (returned in `applied` from `syncZones`) SHALL remain.
 
 #### Scenario: User rejects an FTP conflict; LTHR conflict accepted
 
@@ -139,10 +145,10 @@ The `commitConflictResolution(profileId, decisions, repo, transportPayload): Pro
 
 #### Scenario: User cancels the conflict dialog entirely
 
-- **GIVEN** the profile pre-sync has `bodyWeight = undefined`, `cycling.thresholds.ftp = 200`, `running.thresholds.lthr = 150`
+- **GIVEN** the athlete has no current weight (no weigh-in, no `profile.bodyWeight`), and the profile pre-sync has `cycling.thresholds.ftp = 200`, `running.thresholds.lthr = 150`
 - **AND** `syncZones` produced one silent fill (`bodyWeight = 72` from T2G physio.weight) and two conflicts (FTP 200→270, LTHR 150→168)
 - **WHEN** the user closes the conflict dialog without confirming any row (no `commitConflictResolution` call)
-- **THEN** the profile SHALL retain the silently-filled `bodyWeight = 72` (already committed by `syncZones`)
+- **THEN** today's weigh-in of 72 kg SHALL remain (already recorded by `syncZones`)
 - **AND** `cycling.thresholds.ftp` SHALL stay at 200
 - **AND** `running.thresholds.lthr` SHALL stay at 150
 
@@ -522,3 +528,78 @@ Standalone (non-coupled) cycling-power band groups MAY preserve per-band display
 - **WHEN** the dialog renders
 - **THEN** the FTP conflict SHALL render as a standalone row (the existing per-row scalar UI), NOT a coupled group
 - **AND** the testid `zones-conflict-row-cycling.thresholds.ftp` SHALL be present (existing test selector unchanged)
+
+### Requirement: Train2Go's weight is the athlete's current weight
+
+The zones sync SHALL treat Train2Go's `physiological.weight` as the athlete's current weight, never as `profile.bodyWeight`. It SHALL compare the incoming weight against the current weight (the latest weigh-in on or before today, else `profile.bodyWeight`, through `getCurrentWeightKg`) under the same fill / no-op / conflict rules as every other field. A silent fill, and an accepted weight conflict, SHALL record the weight as a weigh-in for today stamped `sourceBridgeId: "train2go-bridge"` (the Train2Go bridge id, like every other bridge's health rows), never as `"manual"`. Sources SHALL NOT overwrite each other's rows: a same-day write SHALL update only Train2Go's own weigh-in of that day, and a manual weigh-in of the same day SHALL stay untouched, The Train2Go weigh-in SHALL carry `measuredAt` = the moment it is recorded, so the current weight is the most recent measurement: of two weigh-ins on the same day, the one measured later SHALL win, whatever order the rows are stored in. The weigh-in SHALL be governed by the `weight · import · train2go-bridge` integration policy, like every other source's weight: with that route switched off the sync SHALL neither record the weight nor raise a weight conflict, and committing an accepted weight conflict SHALL record nothing. When no such route exists — an extension that does not announce `read:body`, or a link made before it did — the weight SHALL be recorded as if the route were on, so an athlete who has not updated the extension sees no change. Under a priority source policy the Train2Go weigh-in SHALL be ranked by its route like any other source. Neither `syncZones` nor `commitConflictResolution` SHALL write `profile.bodyWeight`. A weight equal to Train2Go's own latest weigh-in, or to the current weight, SHALL record nothing and raise no conflict.
+
+#### Scenario: An unknown weight is recorded as today's weigh-in
+
+- **GIVEN** the athlete has no weigh-in and no `profile.bodyWeight`
+- **AND** Train2Go reports `physiological.weight = 83`
+- **WHEN** `syncZones` runs
+- **THEN** `applied` SHALL contain `{ field: "bodyWeight", value: 83 }`
+- **AND** one weigh-in of 83 kg dated today, stamped `train2go-bridge`, SHALL exist
+- **AND** `profile.bodyWeight` SHALL stay unset
+
+#### Scenario: Re-syncing the same weight records no second weigh-in
+
+- **GIVEN** a previous sync recorded today's weigh-in of 83 kg
+- **WHEN** `syncZones` runs again and Train2Go still reports 83
+- **THEN** `applied` and `conflicts` SHALL be empty
+- **AND** exactly one weigh-in SHALL exist
+
+#### Scenario: The comparison reads the latest weigh-in, not the profile field
+
+- **GIVEN** `profile.bodyWeight = 80` and the latest weigh-in is 83 kg
+- **WHEN** `syncZones` runs and Train2Go reports 83
+- **THEN** no conflict SHALL be returned for `bodyWeight`
+
+#### Scenario: An accepted weight conflict keeps today's manual weigh-in
+
+- **GIVEN** today's manual weigh-in is 75 kg and Train2Go reports 83
+- **WHEN** `commitConflictResolution` is called twice with `{ "bodyWeight": "accept" }`
+- **THEN** the manual weigh-in of 75 kg SHALL be unchanged
+- **AND** exactly one `train2go-bridge` weigh-in dated today SHALL exist, at 83 kg
+- **AND** `profile.bodyWeight` SHALL be unchanged
+
+#### Scenario: An accepted weight becomes the current weight over an earlier manual weigh-in
+
+- **GIVEN** today's manual weigh-in of 75 kg was measured at 07:00 and Train2Go reports 83
+- **WHEN** the weight conflict is accepted at 09:00
+- **THEN** the current weight SHALL be 83 kg, whichever order the two rows are stored in
+
+#### Scenario: A later manual edit wins over the Train2Go weigh-in
+
+- **GIVEN** Train2Go's weigh-in of 83 kg was recorded today at 09:00
+- **WHEN** the athlete enters 75 kg by hand at 10:00
+- **THEN** the current weight SHALL be 75 kg and the Train2Go weigh-in SHALL be unchanged
+
+#### Scenario: A weight Train2Go already reported raises no conflict again
+
+- **GIVEN** today has a manual weigh-in of 75 kg and a `train2go-bridge` weigh-in of 83 kg
+- **WHEN** `syncZones` runs and Train2Go still reports 83
+- **THEN** `applied` and `conflicts` SHALL be empty and no weigh-in SHALL be added
+
+#### Scenario: A weight route switched off withholds the weight
+
+- **GIVEN** the athlete's `weight · import · train2go-bridge` route exists and is disabled
+- **AND** the current weight is 80 kg and Train2Go reports 83
+- **WHEN** `syncZones` runs
+- **THEN** `applied` and `conflicts` SHALL contain no `bodyWeight` entry
+- **AND** no `train2go-bridge` weigh-in SHALL be recorded
+- **AND** a later `commitConflictResolution` with `{ "bodyWeight": "accept" }` SHALL record none either
+
+#### Scenario: A weight route switched on records the weight
+
+- **GIVEN** the athlete's `weight · import · train2go-bridge` route exists and is enabled
+- **AND** the athlete has no current weight and Train2Go reports 83
+- **WHEN** `syncZones` runs
+- **THEN** one `train2go-bridge` weigh-in of 83 kg dated today SHALL exist
+
+#### Scenario: No weight route keeps the weight flowing
+
+- **GIVEN** the athlete has no `weight · import · train2go-bridge` route, because the extension does not announce `read:body` or Train2Go was linked before it did
+- **AND** the athlete has no current weight and Train2Go reports 83
+- **WHEN** `syncZones` runs
+- **THEN** one `train2go-bridge` weigh-in of 83 kg dated today SHALL exist

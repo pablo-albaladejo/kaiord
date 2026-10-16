@@ -6,7 +6,9 @@ import { ALERT_ICON } from "../../atoms/Icon/alert-icon";
 import { Icon } from "../../atoms/Icon/Icon";
 import {
   EMPTY_INTAKE_FIELDS,
+  type IntakeLoggerEntry,
   type IntakeLoggerFields as Fields,
+  presetCandidate,
   validateIntakeForm,
 } from "./intake-logger-model";
 import { IntakeLoggerFields } from "./IntakeLoggerFields";
@@ -19,24 +21,29 @@ export type IntakeLoggerFormProps = {
 
 /**
  * Quick intake logger: validates the fields, logs an entry for the date, and
- * (when a label is present) optionally saves the same values as a preset.
+ * (when a label is present) saves the same values as a preset, before or
+ * right after the entry is added.
  */
 export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
   const t = useTranslate("nutrition");
   const [fields, setFields] = useState<Fields>(EMPTY_INTAKE_FIELDS);
   const result = validateIntakeForm(fields, t);
   const error = "error" in result ? result.error : null;
+  const [justLogged, setJustLogged] = useState<IntakeLoggerEntry | null>(null);
+  const preset = presetCandidate(fields, result, justLogged);
 
   const handleLog = async () => {
     if (!("entry" in result)) return;
     if (await actions.logEntry(date, result.entry)) {
+      setJustLogged(result.entry);
       setFields(EMPTY_INTAKE_FIELDS);
     }
   };
 
   const handleSavePreset = async () => {
-    if (!("entry" in result) || fields.label.trim() === "") return;
-    if (await actions.savePreset(result.entry, fields.label.trim())) {
+    if (!preset) return;
+    if (await actions.savePreset(preset.entry, preset.label)) {
+      setJustLogged(null);
       setFields(EMPTY_INTAKE_FIELDS);
     }
   };
@@ -68,7 +75,7 @@ export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
         </button>
         <button
           type="button"
-          disabled={!("entry" in result) || fields.label.trim() === ""}
+          disabled={preset === null}
           onClick={handleSavePreset}
           data-testid="intake-save-preset"
           className="rounded border border-edge px-3 py-2 text-sm font-semibold text-ink-body disabled:opacity-40"

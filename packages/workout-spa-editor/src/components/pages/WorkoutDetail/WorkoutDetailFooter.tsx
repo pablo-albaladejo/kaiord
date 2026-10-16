@@ -17,7 +17,7 @@ export type WorkoutDetailFooterProps = {
 };
 
 /**
- * Sticky action bar: ghost "Edit" + "Adjust with AI" + "Send to Garmin", plus
+ * Action bar: ghost "Edit" + "Adjust with AI" + "Send to Garmin", plus
  * "Send to TrainingPeaks" once that destination has an enabled export route.
  * The TrainingPeaks control is gated rather than always-on because most
  * profiles never enable it, and an inert button on a destination the athlete
@@ -32,7 +32,13 @@ export function WorkoutDetailFooter({
   const [, navigate] = useLocation();
   const trainingPeaksGate = useTrainingPeaksGate(workout?.profileId);
   return (
-    <div className="sticky bottom-0 -mx-4 flex gap-3 border-t border-edge bg-surface-deep px-4 py-3">
+    // items-start: the send hint under the Garmin button must not stretch the
+    // buttons beside it. min-w-48 drops the send controls onto their own row
+    // when the sheet is phone-width.
+    <div
+      data-testid="workout-detail-footer"
+      className="-mx-4 flex flex-wrap items-start gap-3 border-t border-edge bg-surface-deep px-4 py-3"
+    >
       <Button variant="ghost" onClick={onEdit}>
         <Icon icon={ICON_MAP.edit} size="sm" color="inherit" />
         {t("footer.edit")}
@@ -46,11 +52,11 @@ export function WorkoutDetailFooter({
           {t("footer.adjustWithAi")}
         </Button>
       )}
-      <div className="flex-1">
+      <div className="min-w-48 flex-1">
         <PushButton workout={workout} placementRow={placementRow} full />
       </div>
       {trainingPeaksGate === "ready" && (
-        <div className="flex-1">
+        <div className="min-w-48 flex-1">
           <TrainingPeaksPushButton workout={workout} full />
         </div>
       )}

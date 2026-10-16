@@ -19,10 +19,16 @@ export const triggerDownload = (content: string, filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
-/** Sanitize filename for safe file system usage. */
+/**
+ * Sanitize filename for safe file system usage. Accented letters fold to
+ * their base letter (NFD, then the combining marks are dropped), so
+ * "auditoría" becomes "auditoria" rather than "auditor_a".
+ */
 export const sanitizeFilename = (name: string): string => {
   return (
     name
+      .normalize("NFD")
+      .replace(/\p{M}/gu, "")
       .replace(/[^a-z0-9_-]/gi, "_")
       .replace(/_+/g, "_")
       .replace(/^_|_$/g, "")

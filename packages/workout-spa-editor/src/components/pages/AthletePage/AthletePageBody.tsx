@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { useFocusOnSectionChange } from "../../../hooks/use-focus-on-section-change";
 import { useSetUserPreferenceFields } from "../../../hooks/use-set-user-preference-fields";
 import { useUserPreferences } from "../../../hooks/use-user-preferences";
 import { useTranslate } from "../../../i18n/use-translate";
 import {
   type ActiveSport,
-  ATHLETE_SPORTS,
+  athleteSportOptions,
   isActiveSport,
 } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
@@ -13,6 +14,7 @@ import { logger } from "../../../utils/logger";
 import { Segmented } from "../../atoms/Segmented";
 import { AthleteConnectionsLink } from "./AthleteConnectionsLink";
 import { AthleteIdentity } from "./AthleteIdentity";
+import { BodyCard } from "./BodyCard";
 import { ThresholdCard } from "./ThresholdCard";
 import { defaultSport } from "./use-default-sport";
 import { ZoneMapCard } from "./ZoneMapCard";
@@ -28,6 +30,7 @@ const COLUMNS = "repeat(auto-fit, minmax(min(380px, 100%), 1fr))";
 
 export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
   const t = useTranslate("athlete");
+  useFocusOnSectionChange();
   const prefs = useUserPreferences({ profileId, defaultView: "grid" });
   const setPrefs = useSetUserPreferenceFields(profileId);
   const [sport, setSport] = useState<ActiveSport>(() => defaultSport(profile));
@@ -48,14 +51,14 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
     });
   };
 
-  const sportLabel =
-    ATHLETE_SPORTS.find((option) => option.value === sport)?.label ?? "";
+  const options = athleteSportOptions(t);
+  const sportLabel = options.find((o) => o.value === sport)?.label ?? "";
 
   return (
     <div className="flex flex-col gap-5 px-4 py-4">
       <AthleteIdentity profile={profile} sport={sport} />
       <Segmented
-        options={[...ATHLETE_SPORTS]}
+        options={options}
         value={sport}
         onChange={handleSportChange}
         ariaLabel={t("sportAria")}
@@ -72,6 +75,7 @@ export function AthletePageBody({ profileId, profile }: AthletePageBodyProps) {
         />
         <ZoneMapCard profile={profile} sport={sport} sportLabel={sportLabel} />
       </div>
+      <BodyCard key={profileId} profileId={profileId} profile={profile} />
       <AthleteConnectionsLink profile={profile} />
     </div>
   );

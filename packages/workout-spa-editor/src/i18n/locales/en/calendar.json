@@ -42,6 +42,12 @@
     "stale": "Stale",
     "skipped": "Skipped"
   },
+  "lifecycleBadge": {
+    "fromCoach": "From coach plan",
+    "aiAssisted": "AI-assisted",
+    "pushedToGarmin": "Pushed to Garmin",
+    "executedAndMatched": "Executed & matched"
+  },
   "weekStatus": {
     "heading": "Where the week stands",
     "waiting_one": "{{count}} waiting to go to your watch",
@@ -70,7 +76,7 @@
         "cta": "Add a key"
       },
       "bridge": {
-        "title": "Install the bridge extension",
+        "title": "Install the Kaiord extension",
         "consequence": "Sends sessions straight to your Garmin watch. Without it you download the file and import it yourself.",
         "cta": "Install"
       }
@@ -96,8 +102,8 @@
   "noBridges": {
     "headline_one": "{{count}} session is ready but can't reach your watch",
     "headline_other": "{{count}} sessions are ready but can't reach your watch",
-    "consequence": "Garmin has no public API for workouts, so the bridge extension does the handover. Until it's installed, downloading the file and importing it by hand is the only route.",
-    "cta": "Install the bridge"
+    "consequence": "Garmin has no public API for workouts, so the Kaiord extension does the handover. Until it's installed, downloading the file and importing it by hand is the only route.",
+    "cta": "Install the Kaiord extension"
   },
   "coachMoves": {
     "moved_one": "{{count}} session moved to the coach's new date.",
@@ -124,7 +130,7 @@
     "openConnections": "Open Connections",
     "preflight": {
       "no-export-route": "Turn on sending workouts to Garmin in Connections (Workout → Also sent to), then send the week.",
-      "no-bridge": "Install the Kaiord Garmin Bridge extension, then send the week.",
+      "no-bridge": "Install the Kaiord extension for Garmin, then send the week.",
       "no-session": "Sign in to Garmin Connect in this browser, then send the week.",
       "insecure-context": "The Garmin calendar needs a secure (HTTPS) page. Nothing was sent.",
       "unsupported-browser": "The Garmin calendar needs a browser with Web Locks. Nothing was sent."
@@ -151,13 +157,13 @@
       "libraryOnly": "Library only: {{count}}",
       "attention": "Needs attention: {{count}}"
     },
-    "outdated": "Your Garmin Bridge extension can't use the calendar yet, so these reached your library only. Update it, then retry.",
+    "outdated": "Your Kaiord extension for Garmin can't use the calendar yet, so these reached your library only. Update it, then retry.",
     "updateExtension": "Update the extension"
   },
   "wellnessToast": {
     "saved": "Wellness saved",
     "saveFailed": "Could not save — please retry",
-    "noProfile": "No athlete profile — select or create one to save wellness"
+    "noProfile": "No athlete — select or create one to save wellness"
   },
   "sport": {
     "cycling": "Cycling",
@@ -173,5 +179,19 @@
     "trainingpeaks": "TrainingPeaks",
     "coach": "Coach",
     "ai": "AI"
+  },
+  "weekNav": {
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today",
+    "weekNumber": "W{{n}}"
+  },
+  "wellnessBand": {
+    "empty": "No readiness data",
+    "sleep": "Sleep",
+    "hrv": "HRV",
+    "weight": "Weight",
+    "steps": "Steps",
+    "net": "Net"
   }
 }

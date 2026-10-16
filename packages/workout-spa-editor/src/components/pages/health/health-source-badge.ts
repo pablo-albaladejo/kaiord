@@ -14,6 +14,7 @@ const HEALTH_SOURCE_BADGE_BY_ID: Record<string, string> = {
   "whoop-bridge": "WHOOP",
   "tanita-bridge": "Tanita",
   "trainingpeaks-bridge": "TrainingPeaks",
+  "train2go-bridge": "Train2Go",
   unknown: "Unknown",
 };
 

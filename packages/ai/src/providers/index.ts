@@ -2,6 +2,7 @@ export {
   createLanguageModel,
   type CreateLanguageModelOptions,
 } from "./create-language-model";
+export { listedModels, modelDisplayName } from "./model-names";
 export { isModelNotFoundError, namesMissingModel } from "./model-not-found";
 export {
   DEPRECATED_MODELS,
@@ -21,6 +22,8 @@ export {
   readProviderError,
 } from "./read-provider-error";
 export { resolveModelForPurpose } from "./resolve-model-for-purpose";
+export type { ProviderKeyCheck } from "./verify-provider-key";
+export { verifyProviderKey } from "./verify-provider-key";
 export type {
   AiModelBinding,
   AiModelPurpose,

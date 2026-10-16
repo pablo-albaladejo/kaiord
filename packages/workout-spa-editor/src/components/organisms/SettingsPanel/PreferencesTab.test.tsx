@@ -1,37 +1,38 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { I18nextProvider } from "react-i18next";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { appI18n } from "../../../i18n/i18n";
 import { PreferencesTab } from "./PreferencesTab";
 
-const setPrefs = vi.fn().mockResolvedValue(undefined);
-const prefsMock = vi.hoisted(() => ({ value: undefined as unknown }));
+const setPrefs = vi.fn();
+const prefsMock = vi.hoisted(() => ({ value: {} as unknown }));
+const readyMock = vi.hoisted(() => ({ value: true }));
 
-vi.mock("../../../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p1", profile: null }),
-}));
-
-vi.mock("../../../hooks/use-user-preferences", () => ({
-  useUserPreferences: () => prefsMock.value,
-}));
-
-vi.mock("../../../hooks/use-set-user-preference-fields", () => ({
-  useSetUserPreferenceFields: () => setPrefs,
+vi.mock("../../../hooks/use-device-preferences", () => ({
+  useDevicePreferences: () => ({
+    prefs: prefsMock.value,
+    ready: readyMock.value,
+    update: setPrefs,
+  }),
 }));
 
 const renderTab = (ui: ReactElement) =>
   render(<I18nextProvider i18n={appI18n}>{ui}</I18nextProvider>);
 
 describe("PreferencesTab", () => {
+  beforeEach(() => {
+    readyMock.value = true;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("should reflect the persisted metric units as the active segment", () => {
     // Arrange
-    prefsMock.value = {
-      profileId: "p1",
-      calendarView: "grid",
-      units: "metric",
-    };
+    prefsMock.value = { units: "metric" };
 
     // Act
     renderTab(<PreferencesTab />);
@@ -46,11 +47,7 @@ describe("PreferencesTab", () => {
   it("should persist the imperial units selection on change", () => {
     // Arrange
     setPrefs.mockClear();
-    prefsMock.value = {
-      profileId: "p1",
-      calendarView: "grid",
-      units: "metric",
-    };
+    prefsMock.value = { units: "metric" };
     renderTab(<PreferencesTab />);
 
     // Act
@@ -62,11 +59,7 @@ describe("PreferencesTab", () => {
 
   it("should reflect an absent locale preference as the Auto segment", () => {
     // Arrange
-    prefsMock.value = {
-      profileId: "p1",
-      calendarView: "grid",
-      units: "metric",
-    };
+    prefsMock.value = { units: "metric" };
 
     // Act
     renderTab(<PreferencesTab />);
@@ -81,11 +74,7 @@ describe("PreferencesTab", () => {
   it("should persist the Spanish language selection on change", () => {
     // Arrange
     setPrefs.mockClear();
-    prefsMock.value = {
-      profileId: "p1",
-      calendarView: "grid",
-      units: "metric",
-    };
+    prefsMock.value = { units: "metric" };
     renderTab(<PreferencesTab />);
 
     // Act
@@ -93,5 +82,47 @@ describe("PreferencesTab", () => {
 
     // Assert
     expect(setPrefs).toHaveBeenCalledWith({ locale: "es" });
+  });
+
+  it("should keep the units and language controls disabled until the device preferences are seeded", () => {
+    // Arrange
+    readyMock.value = false;
+    prefsMock.value = {};
+
+    // Act
+    renderTab(<PreferencesTab />);
+
+    // Assert
+    expect(screen.getByRole("radio", { name: "Imperial" })).toBeDisabled();
+    expect(screen.getByRole("radio", { name: "Spanish" })).toBeDisabled();
+  });
+
+  it("should enable the units control once the device preferences are seeded", () => {
+    // Arrange
+    prefsMock.value = {};
+
+    // Act
+    renderTab(<PreferencesTab />);
+
+    // Assert
+    expect(screen.getByRole("radio", { name: "Imperial" })).toBeEnabled();
+  });
+
+  it("should keep the notifications switch disabled until the device preferences are seeded", () => {
+    // Arrange
+    vi.stubGlobal("Notification", {
+      permission: "default",
+      requestPermission: vi.fn(),
+    });
+    readyMock.value = false;
+    prefsMock.value = {};
+
+    // Act
+    renderTab(<PreferencesTab />);
+
+    // Assert
+    expect(
+      screen.getByRole("switch", { name: /enable notifications/i })
+    ).toBeDisabled();
   });
 });

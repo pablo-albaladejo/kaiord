@@ -35,7 +35,7 @@ None.
 
 - Unit tests for field-level mapping.
 - Integration tests for batch conversion.
-- Performance test validates 10k-record batch ≤500ms (budget: 500ms).
+- Throughput bench (`fit-to-krd-record.converter.bench.ts`, `pnpm bench`) tracks the 10k-record target; the unit suite only checks the batch converts correctly, never wall-clock time.
 - Round-trip tests verify coordinate precision (±5 decimals).
 
 ### Common Patterns

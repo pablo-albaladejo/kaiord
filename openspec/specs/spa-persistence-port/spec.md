@@ -1,4 +1,4 @@
-> Synced: 2026-07-29 (retire-legacy-connection-surfaces)
+> Synced: 2026-10-15 (ai-settings-truth)
 
 # SPA Persistence Port
 
@@ -218,7 +218,7 @@ While the underlying query is loading on first mount, `useLiveQuery` returns `un
 
 #### Scenario: Connect Train2Go updates the calendar header in real time
 
-- **WHEN** the user clicks "Connect Train2Go" in Profile Settings, the `linkAccount` use case persists the link via `PersistencePort.profiles.put`, and the toast confirming success fires after the use case's promise resolves
+- **WHEN** the user links Train2Go from its card on the Connections page, the `linkAccount` use case persists the link via `PersistencePort.profiles.put`, and the toast confirming success fires after the use case's promise resolves
 - **THEN** the calendar header's per-source Sync button SHALL appear without a manual remount or page refresh — the test verifies via `waitFor` against the rendered button
 
 #### Scenario: Profiles, templates, and AI providers survive a page refresh
@@ -393,7 +393,8 @@ The `InMemoryPersistenceAdapter` SHALL include `InMemoryHealthSleepRepository`, 
 
 - **GIVEN** two synced devices holding the same profile and its per-profile rows
 - **WHEN** the profile is deleted on device A and both devices sync
-- **THEN** the `profiles` row SHALL stay deleted on both devices while the per-profile rows return from the remote snapshot as orphans, which is the documented gap rather than the intended end state
+- **THEN** the `profiles` row SHALL stay deleted on both devices and no per-row tombstone SHALL be recorded
+- **AND** the per-profile rows, chat messages included, SHALL be dropped on both devices by the `profiles` tombstone (see "Deletes record tombstones")
 
 #### Scenario: Transcript included in cloud-sync snapshot
 
@@ -536,17 +537,17 @@ IndexedDB.
 
 ### Requirement: Deletes record tombstones
 
-Deletes through `PersistencePort` that express USER INTENT SHALL record a tombstone so the removal propagates across devices instead of being restored by the next cloud-sync merge. The system SHALL provide a `tombstones` store with primary key `[table+id]` and fields `table`, `id`, `deletedAt` (ISO 8601) and optional `profileId`. The tombstone SHALL be written in the SAME transaction as the underlying delete, and SHALL NOT be written when the delete removed nothing. The `table` field SHALL carry the SNAPSHOT table name, not the port's repository key, because the merge suppresses a row by `[snapshotTable+id]`.
+Deletes through `PersistencePort` that express USER INTENT SHALL record a tombstone so the removal propagates across devices instead of being restored by the next cloud-sync merge. The system SHALL provide a `tombstones` store with primary key `[table+id]` and fields `table`, `id`, `deletedAt` (ISO 8601) and optional `profileId`. The `id` SHALL be the row's single-field primary key: `id` for most tables, `profileId` for `energyTargets`; for `aiModelBindings`, whose primary key is `[profileId+purpose]`, it SHALL be `<profileId>:<purpose>` and the tombstone SHALL carry the `profileId`. The merge and the sync's live import SHALL suppress a row by that key; a row of any other composite-primary-key table is never suppressed. The tombstone SHALL be written in the SAME transaction as the underlying delete, and SHALL NOT be written when the delete removed nothing. The `table` field SHALL carry the SNAPSHOT table name, not the port's repository key, because the merge suppresses a row by `[snapshotTable+id]`.
 
 The port composition the application actually runs SHALL apply the `withTombstones` decorator over the Dexie adapter, and SHALL be expressed as one shared factory that both the application entry point and the tests consume, so the decorator/merge join is verifiable as behaviour.
 
-The profile-delete cascade removes per-profile rows without per-row tombstones; the cross-device delete is the `profiles` tombstone. After `reconcileAutoProfile`, the sync SHALL drop every row of a per-profile table whose `profileId` has a `profiles` tombstone and no live profile row in the merged snapshot, before importing or pushing, and the backup export and import SHALL apply the same step. A row whose profile is merely absent, with no tombstone, SHALL be kept, because that profile may not have arrived yet.
+The profile-delete cascade removes per-profile rows without per-row tombstones; the cross-device delete is the `profiles` tombstone. After `reconcileAutoProfile`, the sync SHALL drop every row of a per-profile table whose `profileId` has a `profiles` tombstone and no live profile row in the merged snapshot, before importing or pushing, and the backup export and import SHALL apply the same step. A row whose profile is merely absent, with no tombstone, SHALL be kept, because that profile may not have arrived yet. A profile deleted on the device after a sync's export read and before its import SHALL lose its rows the same way: the import SHALL NOT write them back, and the pushed snapshot SHALL omit them along with the profile. Per-row tombstones SHALL NOT be added to the cascade: the drop goes by `profileId`, so it also removes a row that a device which never saw the delete edits or adds afterwards, whose clock would beat any per-row tombstone; and it costs one tombstone per profile delete instead of one per row, every one of them carried in each snapshot for the 90-day retention. A profile row edited after its delete beats the `profiles` tombstone, and its rows then come back with it, whole.
 
 Where a repository's delete does not fit the decorator's single-argument `delete(id)` shape, the owning use case SHALL write the equivalent tombstone itself inside the same transaction.
 
 Deletes that DO NOT express user intent — reconciliation deletes that re-mirror an upstream source, and local-repair deletes that drop a row local state judges redundant — SHALL NOT record tombstones, and SHALL be exposed as distinct repository methods so they stay outside the decorated surface. Their orphan verdict depends on local state that may legitimately differ on another device, where the same row is live.
 
-Known gaps, not closed by this requirement: composite-primary-key tables (`aiModelBindings`, `autoMatchDismissal`, `syncState`) are structurally untombstonable under the `[table+id]` key; remote snapshots contaminated before the wiring was fixed keep their resurrected rows until the user deletes them once more; deleting a workout tombstones the workout but not the `exportLedger` rows its Dexie `deleting` hook removes, so those return from the remote as orphans pointing at a dead `kaiordRecordId` until the disaster-recovery orphan sweep runs; and because mirror-orphan deletes write no tombstone, a coach-removed coaching activity never leaves the cloud snapshot — it is deleted locally, unioned back from the remote, re-pushed, and deleted again on the next week-sync, so the row visibly flaps. That flapping is the accepted cost of not tombstoning a mirror; converging it needs a bridge-authoritative window (the upstream week's contents treated as the truth for that range), not a tombstone. Tombstones compare wall clocks across devices: a device whose clock runs ahead can stamp an edit later than another device's delete, and that edit then beats the tombstone and the row returns. Tombstones are pruned after 90 days, so a device that stays offline longer than that can push rows whose deletes the other devices have already forgotten, and they return.
+Known gaps, not closed by this requirement: composite-primary-key tables other than `aiModelBindings` (`autoMatchDismissal`) are structurally untombstonable under the `[table+id]` key; remote snapshots contaminated before the wiring was fixed keep their resurrected rows until the user deletes them once more; deleting a workout tombstones the workout but not the `exportLedger` rows its Dexie `deleting` hook removes, so those return from the remote as orphans pointing at a dead `kaiordRecordId` until the disaster-recovery orphan sweep runs; and because mirror-orphan deletes write no tombstone, a coach-removed coaching activity never leaves the cloud snapshot — it is deleted locally, unioned back from the remote, re-pushed, and deleted again on the next week-sync, so the row visibly flaps. That flapping is the accepted cost of not tombstoning a mirror; converging it needs a bridge-authoritative window (the upstream week's contents treated as the truth for that range), not a tombstone. Tombstones compare wall clocks across devices: a device whose clock runs ahead can stamp an edit later than another device's delete, and that edit then beats the tombstone and the row returns. Tombstones are pruned after 90 days, so a device that stays offline longer than that can push rows whose deletes the other devices have already forgotten, and they return. A build older than the `energyTargets` tombstone neither suppresses nor carries one: it keeps re-pushing a goal another device cleared, so once the tombstone is pruned at 90 days that goal comes back on every device. No surface clears a goal today, so nothing is exposed yet; whoever ships a "clear goal" control inherits this gap. A build older than the `aiModelBindings` tombstone neither suppresses nor carries one: it keeps re-pushing a binding another device cleared, which every newer build drops on merge until the tombstone is pruned at 90 days.
 
 #### Scenario: Deleting a workout records a tombstone
 
@@ -606,11 +607,37 @@ Known gaps, not closed by this requirement: composite-primary-key tables (`aiMod
 - **WHEN** device A deletes P and syncs, then device B syncs
 - **THEN** neither device nor the pushed snapshot SHALL hold P's intake or wellness value
 
+#### Scenario: A profile deleted during a sync keeps its rows deleted
+
+- **GIVEN** a sync that has read the local snapshot and not yet opened its import
+- **WHEN** the user deletes a profile in that window
+- **THEN** neither the profile nor any of its per-profile rows SHALL be in the database after the import
+- **AND** the snapshot that sync pushes SHALL hold the `profiles` tombstone and none of those rows
+
 #### Scenario: A profile that has not arrived yet keeps its rows
 
 - **GIVEN** a remote snapshot with an intake whose profile it does not carry and no tombstone names
 - **WHEN** a device syncs
 - **THEN** the device and the pushed snapshot SHALL keep that intake
+
+#### Scenario: A row edited after its profile's delete does not come back
+
+- **GIVEN** device A deleted profile P, and device B, which has not seen the delete, then edits P's intake and logs a new one for P
+- **WHEN** both devices sync, in either order
+- **THEN** neither device nor the pushed snapshot SHALL hold any intake of P, although both rows are newer than the `profiles` tombstone
+
+#### Scenario: A profile edited after its delete comes back with its rows
+
+- **GIVEN** device A deleted profile P, and device B, which has not seen the delete, then edits P itself
+- **WHEN** device B syncs, then device A syncs
+- **THEN** device A SHALL hold P again with all of its per-profile rows
+
+#### Scenario: A cleared model binding does not come back from another device
+
+- **GIVEN** two devices holding the athlete's `chat` binding
+- **WHEN** device A clears it ("Same as main model") or removes its provider and syncs, then device B syncs
+- **THEN** neither device nor the pushed snapshot SHALL hold that binding, because the `aiModelBindings` tombstone `<profileId>:chat` suppresses B's older copy
+- **AND** a binding set again later on either device SHALL win over the tombstone, because its `updatedAt` is newer than the `deletedAt`
 
 ### Requirement: Default local profile
 
@@ -791,7 +818,7 @@ The import SHALL end with a summary of the rows it added, updated and did not re
 
 ### Requirement: Nutrition syncs across devices
 
-Intake entries and intake presets SHALL carry an `updatedAt` sync clock stamped by every writer, and their deletes through `PersistencePort` SHALL record tombstones. The `energyTargets` row is keyed by `profileId`, has no single-row delete and is removed only by the profile cascade, so it SHALL be classified as untombstonable; two devices holding a goal for one profile SHALL keep the most recently saved one. A snapshot that lacks a nutrition table SHALL be merged as carrying no information for it, so a device on an older build, which neither exports nor imports these tables, SHALL push the remote nutrition back unchanged. A write to `intakeEntries`, `intakePresets` or `energyTargets` SHALL arm the debounced auto-push like a workout edit (Dexie v37 indexes their `updatedAt`). A sync's import SHALL keep every live row written after its export read (a new key, or a row that changed since), in every table without a natural-key merge hook, unless the incoming row is newer by clock or a tombstone at least as new deletes it; every other live row SHALL be replaced by the merged snapshot.
+Intake entries and intake presets SHALL carry an `updatedAt` sync clock stamped by every writer, and their deletes through `PersistencePort` SHALL record tombstones. The `energyTargets` row is keyed by `profileId`; `EnergyTargetRepository` SHALL expose `getById(profileId)` and `delete(profileId)`, and the `withTombstones` decorator SHALL record an `[energyTargets+profileId]` tombstone for a delete that removed a goal. Two devices holding a goal for one profile SHALL keep the most recently saved one, and a goal saved after a clear SHALL beat its tombstone. The profile cascade's `deleteByProfile` stays untombstoned, like every other per-profile store. A snapshot that lacks a nutrition table SHALL be merged as carrying no information for it, so a device on an older build, which neither exports nor imports these tables, SHALL push the remote nutrition back unchanged. A write to `intakeEntries`, `intakePresets` or `energyTargets` SHALL arm the debounced auto-push like a workout edit (Dexie v37 indexes their `updatedAt`). A sync's import SHALL keep every live row written after its export read (a new key, or a row that changed since), in every table without a natural-key merge hook, unless the incoming row is newer by clock or a tombstone at least as new deletes it; every other live row SHALL be replaced by the merged snapshot. A row deleted on the device after the export read SHALL stay deleted: the import SHALL NOT write back an incoming row a live tombstone deletes, and the pushed snapshot SHALL carry that tombstone and omit the row.
 
 #### Scenario: An intake created on one device reaches the other
 
@@ -827,6 +854,24 @@ Intake entries and intake presets SHALL carry an `updatedAt` sync clock stamped 
 - **GIVEN** a sync that has read the local snapshot and not yet opened its import
 - **WHEN** the user logs or edits an intake in that window
 - **THEN** the intake SHALL remain after the import, with the edit, and the next sync SHALL push it
+
+#### Scenario: A row deleted during a sync stays deleted
+
+- **GIVEN** a sync that has read the local snapshot and not yet opened its import
+- **WHEN** the user deletes an intake or clears the goal in that window
+- **THEN** the row SHALL be absent after the import, and the snapshot that sync pushes SHALL neither hold it nor lack its tombstone
+
+#### Scenario: A goal cleared on one device stays cleared
+
+- **GIVEN** two synced devices holding the same energy goal
+- **WHEN** device A clears it and syncs, then device B syncs, then device A syncs
+- **THEN** neither device nor the pushed snapshot SHALL hold the goal
+
+#### Scenario: A goal saved after the clear wins
+
+- **GIVEN** device A cleared a goal and synced
+- **WHEN** device B saves a goal for that profile later and both devices sync
+- **THEN** both devices SHALL hold the goal device B saved
 
 ### Requirement: Synced energy and intake stores
 

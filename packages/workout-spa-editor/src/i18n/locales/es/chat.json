@@ -20,7 +20,9 @@
     "tool": "Acción"
   },
   "model": {
-    "label": "Modelo"
+    "label": "Modelo",
+    "followMain": "Igual que el principal ({{model}})",
+    "followChat": "Igual que el chat en Ajustes ({{model}})"
   },
   "search": {
     "placeholder": "Buscar chats…",
@@ -86,5 +88,17 @@
     "fromYourCoach": "de tu entrenador",
     "untitled": "Sesión",
     "alreadyThere": "ya había: {{value}}"
+  },
+  "gate": {
+    "noProfile": {
+      "title": "El asistente necesita un atleta",
+      "body": "Responde a partir de los entrenamientos y datos de salud del atleta activo.",
+      "action": "Crear un atleta"
+    },
+    "missingKey": {
+      "title": "Tu proveedor de IA no tiene clave de API",
+      "body": "«{{label}}» viene de una copia de seguridad, que nunca incluye claves. Añade la clave en Ajustes para usar el asistente.",
+      "action": "Añadir la clave"
+    }
   }
 }

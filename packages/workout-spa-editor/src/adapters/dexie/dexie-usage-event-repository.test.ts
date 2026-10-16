@@ -1,13 +1,10 @@
 import "fake-indexeddb/auto";
 
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { UsageEventRecord } from "../../types/usage-event-schemas";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieUsageEventRepository } from "./dexie-usage-event-repository";
-
-const dbName = () => `kaiord-usage-events-${Date.now()}-${Math.random()}`;
 
 const event = (over: Partial<UsageEventRecord>): UsageEventRecord => ({
   id: "evt",
@@ -24,18 +21,10 @@ const event = (over: Partial<UsageEventRecord>): UsageEventRecord => ({
 });
 
 describe("createDexieUsageEventRepository", () => {
-  let name: string;
-  let db: KaiordDatabase;
+  const db = sharedKaiordDatabase("usage-events");
 
   beforeEach(async () => {
-    name = dbName();
-    db = new KaiordDatabase(name);
     await db.open();
-  });
-
-  afterEach(async () => {
-    db.close();
-    await Dexie.delete(name);
   });
 
   it("should append an event and read it back by month", async () => {

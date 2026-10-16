@@ -5,7 +5,6 @@ import {
   COORD_PRECISION_5,
   LAT_INVALID_DEG,
   PERF_RECORD_BATCH_SIZE,
-  PERF_RECORD_BUDGET_MS,
   RECORD_BATCH_SAMPLE_SIZE,
   SAMPLE_CADENCE,
   SAMPLE_DISTANCE_M,
@@ -192,8 +191,11 @@ describe("convertFitToKrdRecords", () => {
   });
 });
 
-describe("performance", () => {
-  it("should process 10000 records in under 500ms", () => {
+// Timing lives in fit-to-krd-record.converter.bench.ts (`pnpm bench`), not
+// here: a wall-clock budget in a pass/fail test measures how much CPU the
+// scheduler gave this worker, not how fast the converter is.
+describe("convertFitToKrdRecords at activity scale", () => {
+  it("should convert a 10000-record batch in order", () => {
     // Arrange
     const fitRecords = Array.from(
       { length: PERF_RECORD_BATCH_SIZE },
@@ -204,14 +206,15 @@ describe("performance", () => {
         power: 250,
       })
     );
-    const start = performance.now();
-    const results = convertFitToKrdRecords(fitRecords);
 
     // Act
-    const duration = performance.now() - start;
+    const results = convertFitToKrdRecords(fitRecords);
 
     // Assert
     expect(results).toHaveLength(PERF_RECORD_BATCH_SIZE);
-    expect(duration).toBeLessThan(PERF_RECORD_BUDGET_MS);
+    expect(results[0].timestamp).toBe("2024-01-01T00:00:00.000Z");
+    expect(results[PERF_RECORD_BATCH_SIZE - 1].timestamp).toBe(
+      "2024-01-01T02:46:39.000Z"
+    );
   });
 });

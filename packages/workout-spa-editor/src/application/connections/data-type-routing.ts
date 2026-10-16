@@ -15,7 +15,7 @@
 import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY, managedDataTypes } from "@kaiord/core";
 
-import type { DataFlowsByType } from "../../components/organisms/ProfileManager/components/useDataFlows";
+import type { DataFlowsByType } from "../../hooks/connections/use-data-flows";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import { DEFAULT_DATA_TYPE_SOURCE_MODE } from "../../types/data-type-source-policy";
 import {

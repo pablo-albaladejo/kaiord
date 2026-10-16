@@ -16,10 +16,15 @@ export async function openWellnessDialog(session, date) {
   return dialog;
 }
 
+// The field's `data-wellness-focus` key, not its label: labels are
+// translated, and verify-prod runs in es-ES.
+export const wellnessField = (dialog, key) =>
+  dialog.locator(`[data-wellness-focus="${key}"]`);
+
 export async function saveWellness(session, date, fields) {
   const dialog = await openWellnessDialog(session, date);
-  for (const [label, value] of Object.entries(fields)) {
-    await dialog.getByLabel(label).fill(value);
+  for (const [key, value] of Object.entries(fields)) {
+    await wellnessField(dialog, key).fill(value);
   }
   await dialog.getByRole("button", { name: SAVE }).click();
   await dialog.waitFor({ state: "hidden", timeout: TIMEOUT });

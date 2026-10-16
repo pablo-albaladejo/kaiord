@@ -56,7 +56,10 @@ export function useKeyboardNavigation({
       case "Enter":
       case " ":
         e.preventDefault();
-        if (isOpen && formatOptions[focusedIndex]) {
+        // preventDefault suppresses the button's own click, so a closed
+        // menu has to be opened here or the keyboard can never open it.
+        if (!isOpen) onToggle();
+        else if (formatOptions[focusedIndex]) {
           onFormatSelect(formatOptions[focusedIndex].value);
           onToggle();
         }

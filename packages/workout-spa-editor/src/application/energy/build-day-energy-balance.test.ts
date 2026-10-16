@@ -7,6 +7,7 @@ import { createInMemoryPersistence } from "../../test-utils/in-memory-persistenc
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { HealthWeightRecord } from "../../types/health/health-records";
 import type { Profile } from "../../types/profile";
+import { saveManualHealthMetric } from "../health/save-manual-health-metric.use-case";
 import { buildDayEnergyBalance } from "./build-day-energy-balance";
 
 const PROFILE_ID = "p1";
@@ -30,6 +31,7 @@ const THIN_ADAPTIVE_DAYS = 5;
 const WINDOW_DAYS = 28;
 const ADAPTIVE_START_WEIGHT_KG = 82;
 const ADAPTIVE_END_WEIGHT_KG = 80;
+const MANUAL_STEPS = 12000;
 
 const baseProfile: Profile = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -256,6 +258,29 @@ describe("buildDayEnergyBalance", () => {
     if (result.gated) return;
     expect(result.balance.source).toBe("predicted");
     expect(result.balance.expenditure_kcal).toBeGreaterThan(0);
+  });
+
+  it("should predict expenditure from BMR when the day only has manual steps", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await seedProfile(persistence);
+    const deps = { persistence, profileId: PROFILE_ID, date: DATE };
+    const withoutWellness = await buildDayEnergyBalance(deps);
+    await saveManualHealthMetric(
+      { persistence, profileId: PROFILE_ID },
+      { metric: "daily-wellness", day: DATE, value: MANUAL_STEPS }
+    );
+
+    // Act
+    const result = await buildDayEnergyBalance(deps);
+
+    // Assert
+    expect(result.gated).toBe(false);
+    if (result.gated || withoutWellness.gated) return;
+    expect(result.balance.source).toBe("predicted");
+    expect(result.balance.expenditure_kcal).toBe(
+      withoutWellness.balance.expenditure_kcal
+    );
   });
 
   it("should add planned-workout activity to a predicted day's expenditure", async () => {

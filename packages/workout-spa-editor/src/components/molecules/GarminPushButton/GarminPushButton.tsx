@@ -37,6 +37,9 @@ export const GarminPushButton: React.FC<{
   );
   const placement = useGarminPlacement(workout, notice, onSent);
   const isLoading = placement.busy || pushing.status === "loading";
+  // `push` returns early without the record; until this control's own
+  // read resolves, a click would look sent and reach no bridge.
+  const unloaded = workout === undefined;
 
   return (
     <div className="flex items-center gap-2">
@@ -45,7 +48,7 @@ export const GarminPushButton: React.FC<{
         variant="cta"
         onClick={() => void placement.send()}
         loading={isLoading}
-        disabled={isLoading}
+        disabled={isLoading || unloaded}
         data-testid="send-to-garmin-button"
       >
         <Upload className="h-4 w-4" />

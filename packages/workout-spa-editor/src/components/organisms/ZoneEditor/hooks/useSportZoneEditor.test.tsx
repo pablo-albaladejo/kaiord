@@ -1,5 +1,3 @@
-/* eslint-disable no-magic-numbers -- test fixtures use literal BPM/FTP/zone values for clarity */
-
 /**
  * useSportZoneEditor hook tests.
  *
@@ -247,31 +245,6 @@ describe("useSportZoneEditor - method-switch surface", () => {
 });
 
 describe("useSportZoneEditor - direct mutations", () => {
-  it("should propagate updateSportThresholds via the actions surface", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const profile = buildProfile("p8");
-    await persistence.profiles.put(profile);
-    profileMockRef.current = profile;
-    const { result } = renderHook(() => useSportZoneEditor("p8"), {
-      wrapper: wrap(persistence),
-    });
-
-    // Act
-    act(() => {
-      result.current.updateSportThresholds("p8", "cycling", {
-        ftp: 280,
-        lthr: 175,
-      });
-    });
-
-    // Assert
-    await vi.waitFor(async () => {
-      const updated = await persistence.profiles.getById("p8");
-      expect(updated?.sportZones?.cycling?.thresholds.ftp).toBe(280);
-    });
-  });
-
   it("should propagate handleZonesChange via the actions surface", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();

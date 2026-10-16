@@ -119,9 +119,10 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     await expect(page.getByText("7:00")).toBeVisible(); // 420 seconds
     await expect(page.getByText("220W")).toBeVisible(); // No space in format
 
-    // Save the workout
+    // Download the workout: picking the format is the download.
+    await page.getByTestId("export-format-selector-button").click();
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: /download a file/i }).click();
+    await page.getByTestId("export-format-option-krd").click();
     const download = await downloadPromise;
 
     // Verify the download

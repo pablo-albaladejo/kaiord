@@ -33,7 +33,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
 
-  const { profileId, conversationId, provider, modelId, today, messages } =
+  const { profileId, conversationId, provider, modelId, pinModel, today } =
     args;
   const ctx = useMemo(
     () =>
@@ -44,19 +44,29 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
           conversationId,
           provider,
           modelId,
+          pinModel,
           today,
           ops,
         },
         { agentRef, toolsRef, messagesRef },
         { setState, setStreamingText, setPendingAction, setError }
       ),
-    [persistence, profileId, conversationId, provider, modelId, today, ops]
+    [
+      persistence,
+      profileId,
+      conversationId,
+      provider,
+      modelId,
+      pinModel,
+      today,
+      ops,
+    ]
   );
 
   const actions = useChatTurnActions(
     ctx,
     state,
-    messages,
+    args.messages,
     pendingAction,
     analytics
   );

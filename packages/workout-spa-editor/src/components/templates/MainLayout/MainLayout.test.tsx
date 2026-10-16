@@ -88,4 +88,26 @@ describe("MainLayout", () => {
 
     expect(tabBar).not.toBeInTheDocument();
   });
+
+  it("should keep content clear of the floating chat button on tablets and up", () => {
+    // Arrange
+
+    // Act
+    renderWithProviders(
+      <MainLayout>
+        <div>Main Content</div>
+      </MainLayout>,
+      { defaultTheme: "light" }
+    );
+
+    // Assert
+    // The chat button floats over the page's bottom-right corner from md up;
+    // at 768 px it covered the last grid day's "Add" button.
+    expect(screen.getByRole("main").className).toContain(
+      "md:pb-(--chat-fab-clearance)"
+    );
+    expect(screen.getByTestId("chat-fab").className).toContain(
+      "bottom-(--chat-fab-offset)"
+    );
+  });
 });

@@ -5,7 +5,7 @@
  */
 import { useId } from "react";
 
-const OVERRIDE_LABEL = "Override the safety cap and use my pace";
+import { useTranslate } from "../../../i18n/use-translate";
 
 export type GoalCapOverrideToggleProps = {
   checked: boolean;
@@ -17,6 +17,7 @@ export function GoalCapOverrideToggle({
   onChange,
 }: GoalCapOverrideToggleProps) {
   const id = useId();
+  const t = useTranslate("nutrition");
   return (
     <label htmlFor={id} className="flex items-center gap-2 text-[12px]">
       <input
@@ -26,7 +27,7 @@ export function GoalCapOverrideToggle({
         data-testid="goal-cap-override"
         onChange={(e) => onChange(e.target.checked)}
       />
-      {OVERRIDE_LABEL}
+      {t("goalSetup.override")}
     </label>
   );
 }

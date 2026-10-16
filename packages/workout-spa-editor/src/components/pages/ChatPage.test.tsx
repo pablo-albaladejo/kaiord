@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
@@ -8,7 +9,7 @@ import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
 import ChatPage from "./ChatPage";
 
 vi.mock("../../hooks/use-active-profile-live", () => ({
-  useActiveProfileLive: () => ({ id: "p1", profile: null }),
+  useActiveProfileLive: vi.fn(() => ({ id: "p1", profile: null })),
 }));
 vi.mock("../../hooks/use-ai-providers-live", () => ({
   useAiProvidersLive: vi.fn(),
@@ -23,14 +24,20 @@ vi.mock("../../hooks/use-chat-conversations-live", () => ({
   useChatConversationsLive: vi.fn(),
 }));
 
+const { useActiveProfileLive } =
+  await import("../../hooks/use-active-profile-live");
 const { useAiProvidersLive } =
   await import("../../hooks/use-ai-providers-live");
+const { useAiModelBindingsLive } =
+  await import("../../hooks/use-ai-model-bindings-live");
 const { useChatMessagesLive } =
   await import("../../hooks/use-chat-messages-live");
 const { useChatConversationsLive } =
   await import("../../hooks/use-chat-conversations-live");
+const mockActive = vi.mocked(useActiveProfileLive);
 const mockProviders = vi.mocked(useAiProvidersLive);
 const mockMessages = vi.mocked(useChatMessagesLive);
+const mockBindings = vi.mocked(useAiModelBindingsLive);
 const mockConversations = vi.mocked(useChatConversationsLive);
 
 const provider = {
@@ -61,7 +68,10 @@ const message = (id: string, content: string): ChatMessageRecord => ({
 });
 
 describe("ChatPage", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockActive.mockReturnValue({ id: "p1", profile: null });
+  });
 
   it("should render the route heading with the route-heading attribute", () => {
     // Arrange
@@ -131,5 +141,93 @@ describe("ChatPage", () => {
 
     // Assert
     expect(screen.getByText(/Select a conversation/i)).toBeInTheDocument();
+  });
+
+  it("should send a user without a profile to create one", () => {
+    // Arrange
+    mockActive.mockReturnValue({ id: null, profile: null });
+    mockProviders.mockReturnValue([provider]);
+    mockConversations.mockReturnValue([]);
+    mockMessages.mockReturnValue([]);
+
+    // Act
+    renderWithProviders(<ChatPage />);
+
+    // Assert
+    const gate = screen.getByTestId("chat-gate-noProfile");
+    expect(gate).toHaveTextContent("needs an athlete");
+    expect(
+      screen.getByRole("button", { name: "Create an athlete" })
+    ).toBeVisible();
+    expect(screen.queryByLabelText("Message")).not.toBeInTheDocument();
+  });
+
+  it("should name the provider whose key is missing instead of offering it", () => {
+    // Arrange
+    mockProviders.mockReturnValue([
+      { ...provider, apiKey: "", apiKeyMissing: true, label: "Restored" },
+    ]);
+    mockConversations.mockReturnValue([]);
+    mockMessages.mockReturnValue([]);
+
+    // Act
+    renderWithProviders(<ChatPage />);
+
+    // Assert
+    const gate = screen.getByTestId("chat-gate-missingKey");
+    expect(gate).toHaveTextContent("“Restored” came from a backup");
+    expect(screen.getByRole("button", { name: "Add the key" })).toBeVisible();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  });
+
+  it("should show the athlete's main model in the picker, not the isDefault account", () => {
+    // Arrange
+    const gpt = { ...provider, id: "ai-2", type: "openai" as const };
+    mockProviders.mockReturnValue([
+      provider,
+      { ...gpt, label: "GPT", isDefault: false },
+    ]);
+    mockBindings.mockReturnValue([
+      {
+        profileId: "p1",
+        purpose: "default",
+        providerId: "ai-2",
+        modelId: "gpt-5-mini",
+        updatedAt: "2026-06-13T10:00:00.000Z",
+      },
+    ]);
+    mockConversations.mockReturnValue([]);
+    mockMessages.mockReturnValue([]);
+
+    // Act
+    renderWithProviders(<ChatPage />);
+
+    // Assert
+    const select = screen.getByTestId("chat-model-select") as HTMLSelectElement;
+    expect(select.selectedOptions[0]?.textContent).toBe(
+      "Same as main model (GPT-5 mini · GPT)"
+    );
+  });
+
+  it("should not carry a half-typed custom model into another conversation", async () => {
+    // Arrange
+    mockProviders.mockReturnValue([provider]);
+    mockConversations.mockReturnValue([
+      conversation("c1", "Cycling"),
+      conversation("c2", "Running"),
+    ]);
+    mockMessages.mockReturnValue([]);
+    const { rerender } = renderWithProviders(<ChatPage conversationId="c1" />);
+    await userEvent.selectOptions(
+      screen.getByTestId("chat-model-select"),
+      "ai-1::__custom__"
+    );
+    expect(screen.getByTestId("model-choice-custom")).toBeInTheDocument();
+
+    // Act
+    rerender(<ChatPage conversationId="c2" />);
+
+    // Assert
+    expect(screen.queryByTestId("model-choice-custom")).not.toBeInTheDocument();
   });
 });

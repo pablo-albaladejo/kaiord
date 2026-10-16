@@ -1,15 +1,13 @@
-import { useState } from "react";
-
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { RouteSpinner } from "../../atoms/RouteSpinner";
 import { AthleteEmptyState } from "./AthleteEmptyState";
 import { AthletePageBody } from "./AthletePageBody";
-import { CreateProfileDialog } from "./CreateProfileDialog";
 
 export default function AthletePage() {
+  const t = useTranslate("athlete");
   const active = useActiveProfileLive();
-  const [creating, setCreating] = useState(false);
 
   return (
     <>
@@ -18,27 +16,24 @@ export default function AthletePage() {
           it on the post-paint rAF regardless of the spinner/empty/body state.
           Copy is stable across data states; status lives in the body. */}
       <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">
-        Athlete
+        {t("title")}
       </h1>
-      <AthletePageContent active={active} onCreate={() => setCreating(true)} />
-      <CreateProfileDialog open={creating} onClose={() => setCreating(false)} />
+      <AthletePageContent active={active} />
     </>
   );
 }
 
 function AthletePageContent({
   active,
-  onCreate,
 }: {
   active: ReturnType<typeof useActiveProfileLive>;
-  onCreate: () => void;
 }) {
   if (active === undefined) {
     return <RouteSpinner />;
   }
 
   if (active.profile === null || active.id === null) {
-    return <AthleteEmptyState onCreate={onCreate} />;
+    return <AthleteEmptyState />;
   }
 
   return <AthletePageBody profileId={active.id} profile={active.profile} />;

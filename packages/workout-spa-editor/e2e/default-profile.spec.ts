@@ -2,7 +2,7 @@
  * E2E: a clean browser works without visiting the athlete page first.
  *
  * No profile is seeded. The app creates its first-run default profile
- * ("My profile", `origin: "auto"`) when the database opens, so scheduling,
+ * ("My athlete", `origin: "auto"`) when the database opens, so scheduling,
  * wellness, nutrition and preferences all work from the first visit. None
  * of those actions edits the profile, so it stays unclaimed (and therefore
  * out of any Drive sync until a claim).
@@ -11,6 +11,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { calendarDay, workoutCardsOn } from "./helpers/calendar-day";
 import { toLocalDateString } from "./helpers/local-date";
 import { getWeekId } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -25,30 +26,10 @@ const readProfiles = (page: Page): Promise<StoredProfile[]> =>
     return (await db.table("profiles").toArray()) as StoredProfile[];
   });
 
-/**
- * A clean browser has no stored view preference, so the calendar picks its
- * default from the viewport: grid from 768px up, list below (the phone case).
- * Resolve the day surface the device actually renders instead of forcing one.
- */
-const GRID_MIN_WIDTH = 768;
-
-const dayView = (page: Page, date: string) => {
-  const isGrid = (page.viewportSize()?.width ?? 0) >= GRID_MIN_WIDTH;
-  return isGrid
-    ? {
-        day: page.getByTestId(`day-column-${date}`),
-        add: page.getByTestId(`empty-day-${date}`),
-      }
-    : {
-        day: page.getByTestId(`calendar-list-day-${date}`),
-        add: page.getByTestId(`calendar-list-add-${date}`),
-      };
-};
-
 async function expectOneUnclaimedProfile(page: Page): Promise<void> {
   const profiles = await readProfiles(page);
   expect(profiles).toHaveLength(1);
-  expect(profiles[0]).toMatchObject({ name: "My profile", origin: "auto" });
+  expect(profiles[0]).toMatchObject({ name: "My athlete", origin: "auto" });
 }
 
 test.describe("Default local profile on a clean browser", () => {
@@ -89,16 +70,14 @@ test.describe("Default local profile on a clean browser", () => {
 
     // Assert
     await expect(page).toHaveURL(new RegExp(`/calendar/${getWeekId(today)}$`));
-    await expect(
-      dayView(page, today).day.locator('[data-testid^="workout-card-"]')
-    ).toHaveCount(1);
+    await expect(workoutCardsOn(page, today)).toHaveCount(1);
     await expectOneUnclaimedProfile(page);
   });
 
   test("should save a wellness entry from the calendar", async ({ page }) => {
     // Arrange
     const today = toLocalDateString(new Date());
-    await dayView(page, today).add.click();
+    await calendarDay(page, today).add.click();
     await page.getByTestId("add-entry-choose-wellness").click();
     const dialog = page.getByTestId("wellness-entry-dialog");
 
@@ -112,7 +91,7 @@ test.describe("Default local profile on a clean browser", () => {
     ).toBeVisible();
     await page.reload();
     await expect(
-      dayView(page, today).day.getByTestId("wellness-badge-weight")
+      calendarDay(page, today).day.getByTestId("wellness-badge-weight")
     ).toBeVisible();
     await expectOneUnclaimedProfile(page);
   });

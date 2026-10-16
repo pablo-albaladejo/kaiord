@@ -10,16 +10,13 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import {
   type UserPreferences,
   userPreferencesSchema,
 } from "../../types/user-preferences";
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v15-${suffix}-${Date.now()}-${Math.random()}`;
 
 const SCHEMA_V14 = 14;
 const NOW = "2026-05-22T10:00:00.000Z";
@@ -40,15 +37,8 @@ const seedV14 = async (
 };
 
 describe("Dexie v14 → v15 migration (userPreferences scratch + AI banner)", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("scratch-banner");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v15");
+  const { name } = db;
 
   it("should preserve existing fields and normalise new fields to undefined", async () => {
     // Arrange
@@ -57,7 +47,7 @@ describe("Dexie v14 → v15 migration (userPreferences scratch + AI banner)", ()
     ]);
 
     // Act
-    const v15 = new KaiordDatabase(name);
+    const v15 = db;
     await v15.open();
     const migrated = (await v15
       .table("userPreferences")
@@ -81,7 +71,7 @@ describe("Dexie v14 → v15 migration (userPreferences scratch + AI banner)", ()
     ]);
 
     // Act
-    const v15 = new KaiordDatabase(name);
+    const v15 = db;
     await v15.open();
     const all = (await v15
       .table("userPreferences")
@@ -100,7 +90,7 @@ describe("Dexie v14 → v15 migration (userPreferences scratch + AI banner)", ()
     await seedV14(name, []);
 
     // Act
-    const v15 = new KaiordDatabase(name);
+    const v15 = db;
     await v15.open();
     const all = await v15.table("userPreferences").toArray();
 

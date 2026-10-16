@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/ai",
-  "version": "9.3.2",
+  "version": "9.4.0",
   "description": "AI/LLM integration for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
@@ -46,13 +46,13 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "zod": "^4.5.4"
+    "zod": "^4.6.6"
   },
   "peerDependencies": {
     "@ai-sdk/anthropic": "^4.0.49",
     "@ai-sdk/google": "^4.0.63",
     "@ai-sdk/openai": "^4.0.58",
-    "ai": "^7.0.92"
+    "ai": "^7.0.123"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -66,16 +66,16 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^4.0.49",
-    "@ai-sdk/google": "^4.0.63",
-    "@ai-sdk/openai": "^4.0.58",
-    "@types/node": "^26.4.1",
-    "@vitest/coverage-v8": "^5.0.0",
-    "ai": "^7.0.92",
-    "tsdown": "^0.23.0",
-    "tsx": "^4.23.13",
+    "@ai-sdk/anthropic": "^4.0.78",
+    "@ai-sdk/google": "^4.0.93",
+    "@ai-sdk/openai": "^4.0.91",
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.3",
+    "ai": "^7.0.123",
+    "tsdown": "^0.23.1",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.3"
   },
   "repository": {
     "type": "git",

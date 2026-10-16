@@ -1,17 +1,12 @@
 import "fake-indexeddb/auto";
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
-import { KaiordDatabase } from "./dexie-database";
 
 describe("DexieCoachingSyncStateRepository", () => {
-  let db: KaiordDatabase;
-  beforeEach(() => {
-    db = new KaiordDatabase(
-      `kaiord-coaching-sync-test-${Date.now()}-${Math.random()}`
-    );
-  });
+  const db = sharedKaiordDatabase("coaching-sync-state");
 
   it("should return undefined from get for missing compound key", async () => {
     // Arrange

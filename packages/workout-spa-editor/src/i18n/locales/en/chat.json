@@ -20,7 +20,9 @@
     "tool": "Action"
   },
   "model": {
-    "label": "Model"
+    "label": "Model",
+    "followMain": "Same as main model ({{model}})",
+    "followChat": "Same as chat in Settings ({{model}})"
   },
   "search": {
     "placeholder": "Search chats…",
@@ -86,5 +88,17 @@
     "fromYourCoach": "from your coach",
     "untitled": "Session",
     "alreadyThere": "already there: {{value}}"
+  },
+  "gate": {
+    "noProfile": {
+      "title": "The assistant needs an athlete",
+      "body": "It answers from the workouts and health data of the active athlete.",
+      "action": "Create an athlete"
+    },
+    "missingKey": {
+      "title": "Your AI provider has no API key",
+      "body": "“{{label}}” came from a backup, which never carries keys. Add the key in Settings to use the assistant.",
+      "action": "Add the key"
+    }
   }
 }

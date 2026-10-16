@@ -23,6 +23,7 @@
 import type { LiveRowMerge } from "../../ports/snapshot-port";
 import type { SnapshotTables, Tombstone } from "../../types/snapshot";
 import { mergePostExportWrites } from "./live-post-export-merge";
+import { tombstoneIdOf } from "./merge-record-key";
 import {
   mergeRow,
   rowClock,
@@ -38,10 +39,10 @@ const isSuppressed = (
   row: Row,
   deletes: Map<string, number>
 ) => {
-  // Tombstones are keyed by `[table+id]`; only id-keyed rows can be
-  // suppressed, so non-id tables (which are never tombstoned) pass through.
-  const id = row.id;
-  if (typeof id !== "string") return false;
+  // Tombstones are keyed by `[table+id]`, the id being the row's
+  // single-field primary key; composite-key rows are never tombstoned.
+  const id = tombstoneIdOf(table, row);
+  if (id === undefined) return false;
   const deletedAt = deletes.get(tombstoneKey(table, id));
   return deletedAt !== undefined && rowClock(table, row) <= deletedAt;
 };

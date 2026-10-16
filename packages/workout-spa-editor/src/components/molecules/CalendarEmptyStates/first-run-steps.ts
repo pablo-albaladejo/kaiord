@@ -20,7 +20,7 @@ export type FirstRunProgress = Readonly<
 >;
 
 export const FIRST_RUN_STEPS: ReadonlyArray<FirstRunStep> = [
-  { key: "sources", href: "/settings/connections" },
+  { key: "sources", href: "/connections" },
   { key: "aiKey", href: "/settings/ai" },
   { key: "bridge", href: BRIDGE_DOCS_URL, external: true },
 ];

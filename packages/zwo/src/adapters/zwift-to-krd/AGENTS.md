@@ -9,11 +9,12 @@ ZWO → KRD extraction logic. Extracts metadata, intervals, and tags from parsed
 
 ## Key Files
 
-| File                     | Description                                                                                              |
-| ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `metadata-extractor.ts`  | Extracts ZWO metadata (author, name, description, sport, duration type) into KRD metadata and extensions |
-| `intervals-extractor.ts` | Extracts ZWO interval elements and tags into KRD WorkoutStep array                                       |
-| `intervals-processor.ts` | Post-processes extracted intervals (cleanup, normalization, merging)                                     |
+| File                       | Description                                                                                              |
+| -------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `metadata-extractor.ts`    | Extracts ZWO metadata (author, name, description, sport, duration type) into KRD metadata and extensions |
+| `intervals-extractor.ts`   | Extracts ZWO interval elements and tags into KRD WorkoutStep array                                       |
+| `intervals-processor.ts`   | Post-processes extracted intervals (cleanup, normalization, merging)                                     |
+| `text-value-processors.ts` | Parser value processors that keep free-text attributes and tags (names, messages) as strings             |
 
 ## Subdirectories
 

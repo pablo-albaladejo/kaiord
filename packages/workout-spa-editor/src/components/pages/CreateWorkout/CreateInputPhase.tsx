@@ -2,7 +2,7 @@ import { useLocation, useSearch } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
-import { ATHLETE_SPORTS } from "../../../lib/athlete";
+import { athleteSportOptions } from "../../../lib/athlete";
 import {
   buildNewSessionHref,
   type NewSessionContext,
@@ -36,12 +36,6 @@ const sheetContext = (search: string): NewSessionContext => {
   };
 };
 
-const SPORT_OPTIONS = ATHLETE_SPORTS.map((s) => ({
-  value: s.value,
-  label: s.label,
-  icon: s.icon,
-}));
-
 export function CreateInputPhase({
   sport,
   onSportChange,
@@ -53,6 +47,7 @@ export function CreateInputPhase({
   onClose,
 }: CreateInputPhaseProps) {
   const t = useTranslate("create-workout");
+  const sportOptions = athleteSportOptions(useTranslate("athlete"));
   const [, navigate] = useLocation();
   const context = { ...sheetContext(useSearch()), sport };
   const clearWorkout = useClearWorkout();
@@ -74,7 +69,7 @@ export function CreateInputPhase({
     <div className="flex flex-col gap-4">
       <CreateSheetHeader title={t("sheet.newSession")} onClose={onClose} />
       <Segmented
-        options={SPORT_OPTIONS}
+        options={sportOptions}
         value={sport}
         onChange={onSportChange}
         ariaLabel={t("sport")}

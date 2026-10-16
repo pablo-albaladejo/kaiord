@@ -6,7 +6,7 @@ import type { ChatConversationRecord } from "../../../types/chat/chat-conversati
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
 import { ModelStatusNotice } from "../../molecules/ModelStatusNotice";
 import { ChatConversation } from "./ChatConversation";
-import { ChatModelPicker } from "./ChatModelPicker";
+import { ChatModelPicker, type ChatModelPickerProps } from "./ChatModelPicker";
 import { ConversationSidebar } from "./ConversationSidebar";
 
 export type ChatWorkspaceProps = {
@@ -21,16 +21,15 @@ export type ChatWorkspaceProps = {
   requestedModelId: string | null;
   generationProvider: LlmProviderConfig | null;
   generationModelId: string | null;
+  modelPicker: ChatModelPickerProps;
   search: UseChatSearchPanel;
-  onModelChange: (providerId: string) => void;
   onSelect: (id: string) => void;
   onNew: () => void;
   onRename: (id: string, title: string) => void;
   onDelete: (id: string) => void;
 };
 
-/** Two-column chat surface: the conversation list and the active thread (or a
- * prompt to pick/start one when no thread is selected). */
+/** Conversation list beside the active thread, or a prompt to start one. */
 export function ChatWorkspace(props: ChatWorkspaceProps) {
   const t = useTranslate("chat");
   const prefill = useChatPrefill();
@@ -51,9 +50,8 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
       />
       <div className="flex flex-col gap-3">
         <ChatModelPicker
-          providers={props.providers}
-          value={props.provider?.id ?? null}
-          onChange={props.onModelChange}
+          key={props.activeId ?? "none"}
+          {...props.modelPicker}
         />
         {props.provider && (
           <ModelStatusNotice
@@ -68,6 +66,7 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
             conversationId={props.activeId}
             provider={props.provider}
             modelId={props.modelId}
+            pinModel={props.modelPicker.chosen}
             generationProvider={props.generationProvider}
             generationModelId={props.generationModelId}
             messages={props.messages}

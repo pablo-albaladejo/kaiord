@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { isActiveSport } from "./sports";
+import { appI18n, setActiveLocale } from "../../i18n/i18n";
+import { getTranslate } from "../../i18n/use-translate";
+import { athleteSportOptions, isActiveSport } from "./sports";
 
 describe("isActiveSport", () => {
   it("should accept cycling, running, and swimming", () => {
@@ -34,5 +36,21 @@ describe("isActiveSport", () => {
 
     // Assert
     expect(results).toEqual([false, false, false, false]);
+  });
+});
+
+describe("athleteSportOptions", () => {
+  beforeAll(() => setActiveLocale("es"));
+  afterAll(() => appI18n.changeLanguage("en"));
+
+  it("should name the sports in the active locale", () => {
+    // Arrange
+    const t = getTranslate("athlete", "es");
+
+    // Act
+    const labels = athleteSportOptions(t).map((o) => o.label);
+
+    // Assert
+    expect(labels).toEqual(["Ciclismo", "Carrera", "Natación"]);
   });
 });

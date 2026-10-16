@@ -1,16 +1,17 @@
 import { readFile } from "node:fs/promises";
 
 import { isoDate, mainText } from "../browser.mjs";
+import { workoutDownload } from "./export-download.mjs";
 import { INTAKE_KCAL, seed } from "./export-seed.mjs";
 
-// F-41: there is no way to export "all my data" from Settings → Privacy.
+// F-41: there is no way to export "all my data" from Settings → Data & backup.
 export const EXPORT_CONTROL =
   /Exportar (mis|todos (mis|los)) datos|Exportar copia|Descargar (una )?copia|Export (my|all) data/i;
 const FORBIDDEN = ["apiKey", '"origin":"auto"', "syncState"];
 
 export async function findDataControl(page, go, pattern) {
-  await go("settings/privacy");
-  await page.getByText("Información de privacidad").waitFor();
+  await go("settings/data");
+  await page.getByTestId("settings-data").waitFor();
   const control = page
     .locator("main :is(button,a,[role=button])")
     .filter({ hasText: pattern });
@@ -45,7 +46,7 @@ function assertFile(rec, body, workoutName) {
   );
 }
 
-export default async function exportData({ rec, open }) {
+async function exportData({ rec, open }) {
   const session = await open();
   const { page, go } = session;
   const control = await findDataControl(page, go, EXPORT_CONTROL);
@@ -53,7 +54,7 @@ export default async function exportData({ rec, open }) {
   if (
     !rec.assert(
       control,
-      "F-41: Settings → Privacy has an 'export my data' control",
+      "F-41: Settings → Data & backup has an 'export my data' control",
       `buttons=[${buttons.join(" | ")}] text=${await mainText(page)}`
     )
   ) {
@@ -68,4 +69,9 @@ export default async function exportData({ rec, open }) {
   ]);
   const body = await readFile(await download.path(), "utf8");
   assertFile(rec, body, workoutName);
+}
+
+export default async function exportCheck(ctx) {
+  await exportData(ctx);
+  await workoutDownload(ctx);
 }

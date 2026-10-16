@@ -7,6 +7,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { getAdjacentWeekId, getCurrentWeekId } from "../../../utils/week-utils";
 
 const ARROW =
@@ -19,6 +20,7 @@ export type WeekNavigationProps = {
 
 export function WeekNavigation({ weekId, weekLabel }: WeekNavigationProps) {
   const [, navigate] = useLocation();
+  const t = useTranslate("calendar");
 
   const goPrev = () => navigate(`/calendar/${getAdjacentWeekId(weekId, -1)}`);
   const goNext = () => navigate(`/calendar/${getAdjacentWeekId(weekId, 1)}`);
@@ -29,7 +31,7 @@ export function WeekNavigation({ weekId, weekLabel }: WeekNavigationProps) {
       <button
         type="button"
         onClick={goPrev}
-        aria-label="Previous week"
+        aria-label={t("weekNav.previousWeek")}
         className={ARROW}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -40,7 +42,7 @@ export function WeekNavigation({ weekId, weekLabel }: WeekNavigationProps) {
       <button
         type="button"
         onClick={goNext}
-        aria-label="Next week"
+        aria-label={t("weekNav.nextWeek")}
         className={ARROW}
       >
         <ChevronRight className="h-5 w-5" />
@@ -50,7 +52,7 @@ export function WeekNavigation({ weekId, weekLabel }: WeekNavigationProps) {
         onClick={goToday}
         className="rounded-lg border border-edge px-3.5 py-1.5 text-[13px] font-medium text-ink-strong motion-safe:transition-colors hover:border-edge-strong"
       >
-        Today
+        {t("weekNav.today")}
       </button>
     </div>
   );

@@ -3,64 +3,71 @@
  * keeps the use-case + toast wiring testable in isolation and keeps
  * the rendering component under the file/function size budgets.
  *
- * Toast strings are static literals so the PII / secret audit (the
- * test-side allowlist + literal-source pass) can prove no `apiKey`
- * fragment can leak via interpolation.
+ * Toasts are translated from fixed keys, never interpolated, so the PII /
+ * secret audit (the test-side key allowlist + literal-source pass) can prove
+ * no `apiKey` fragment can leak into one.
  */
 
 import type { AddProviderInput } from "../../../application/ai/add-provider";
 import { addProvider } from "../../../application/ai/add-provider";
 import { removeProvider } from "../../../application/ai/remove-provider";
 import { setCustomPrompt } from "../../../application/ai/set-custom-prompt";
-import { setDefaultProvider } from "../../../application/ai/set-default-provider";
 import type { UpdateProviderInput } from "../../../application/ai/update-provider";
 import { updateProvider } from "../../../application/ai/update-provider";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useTranslate } from "../../../i18n/use-translate";
+import type { LlmProviderConfig } from "../../../store/ai-store-types";
+import { type KeySaveOutcome, saveWithKeyCheck } from "./save-with-key-check";
 
-const ADD_TOAST = "Failed to add AI provider — please retry.";
-const REMOVE_TOAST = "Failed to remove AI provider — please retry.";
-const UPDATE_TOAST = "Failed to update AI provider — please retry.";
-const SET_DEFAULT_TOAST = "Failed to set default provider — please retry.";
-const PROMPT_TOAST = "Failed to save custom prompt — please retry.";
-
-// Exported for the test-side audit (axis 1: allowlist match) — every
-// AI tab error toast must be a member of this set.
-export const AI_TAB_TOAST_MESSAGES: ReadonlyArray<string> = [
-  ADD_TOAST,
-  REMOVE_TOAST,
-  UPDATE_TOAST,
-  SET_DEFAULT_TOAST,
-  PROMPT_TOAST,
-];
+// Every AI tab error toast, as its `settings` key. Exported for the
+// test-side audit, which checks the English and Spanish text of each.
+export const AI_TAB_TOAST_KEYS = [
+  "aiToast.addFailed",
+  "aiToast.removeFailed",
+  "aiToast.updateFailed",
+] as const;
 
 export const useAiTabHandlers = () => {
   const persistence = usePersistence();
   const toast = useToastContext();
+  const t = useTranslate("settings");
 
   return {
-    onAdd: (config: AddProviderInput) => {
-      void addProvider(persistence, config).catch(() => toast.error(ADD_TOAST));
+    onAdd: async (config: AddProviderInput): Promise<KeySaveOutcome> => {
+      const outcome = await saveWithKeyCheck({
+        credential: config,
+        save: (keyCheck) => addProvider(persistence, { ...config, keyCheck }),
+      });
+      if (outcome === "failed") toast.error(t("aiToast.addFailed"));
+      return outcome;
     },
     onRemove: (id: string) => {
       void removeProvider(persistence, id).catch(() =>
-        toast.error(REMOVE_TOAST)
+        toast.error(t("aiToast.removeFailed"))
       );
     },
-    onUpdate: (id: string, updates: UpdateProviderInput) => {
-      void updateProvider(persistence, id, updates).catch(() =>
-        toast.error(UPDATE_TOAST)
-      );
+    onUpdate: async (
+      provider: LlmProviderConfig,
+      updates: UpdateProviderInput
+    ): Promise<KeySaveOutcome> => {
+      const key = updates.apiKey;
+      const outcome = await saveWithKeyCheck({
+        credential:
+          key !== undefined && key !== provider.apiKey
+            ? { type: provider.type, apiKey: key }
+            : undefined,
+        save: (keyCheck) =>
+          updateProvider(persistence, provider.id, { ...updates, keyCheck }),
+      });
+      if (outcome === "failed") toast.error(t("aiToast.updateFailed"));
+      return outcome;
     },
-    onSetDefault: (id: string) => {
-      void setDefaultProvider(persistence, id).catch(() =>
-        toast.error(SET_DEFAULT_TOAST)
-      );
-    },
-    onPromptChange: (value: string) => {
-      void setCustomPrompt(persistence, value).catch(() =>
-        toast.error(PROMPT_TOAST)
-      );
-    },
+    // The field says it could not save; a toast would say it twice.
+    onPromptSave: (value: string): Promise<boolean> =>
+      setCustomPrompt(persistence, value).then(
+        () => true,
+        () => false
+      ),
   };
 };

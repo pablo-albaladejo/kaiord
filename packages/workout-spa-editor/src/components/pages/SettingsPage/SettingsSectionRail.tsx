@@ -24,10 +24,8 @@ const ENTRY_CLASS =
 const ACTIVE_ENTRY_CLASS = `${ENTRY_CLASS} bg-surface-elevated text-ink-strong`;
 
 /**
- * The split's section rail. Entries are the sections themselves, not the
- * index's rows: three index rows lead to `preferences` and two to `ai`, so a
- * row-shaped rail would mark several rows current for one open section and
- * would repeat the panel's own headings word for word.
+ * The split's section rail: the same sections, in the same order and under
+ * the same names, as the index's rows (P-10).
  */
 export const SettingsSectionRail = ({
   activeSection,

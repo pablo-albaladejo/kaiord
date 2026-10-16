@@ -27,7 +27,7 @@ export function RoutingFreshness({ sourceId, at }: Props) {
       data-testid={`routing-synced-${sourceId}`}
     >
       {t("routing.sourceLastSent", {
-        name: sourceName(sourceId),
+        name: sourceName(sourceId, t),
         when: tCommon(relative.key, relative.params),
       })}
     </span>

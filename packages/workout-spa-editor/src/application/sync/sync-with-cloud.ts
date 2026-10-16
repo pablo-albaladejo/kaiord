@@ -5,7 +5,8 @@
  * local one, merges them last-write-wins (`mergeSnapshots`), reconciles the
  * unclaimed default profile against the remote (`reconcileAutoProfile`),
  * drops the rows of explicitly deleted profiles (`dropDeletedProfileRows`),
- * imports the result locally, then pushes it back under optimistic
+ * imports the result locally, then pushes it back, with any delete made
+ * during the sync applied (`importReconciledSnapshot`), under optimistic
  * concurrency. When the remote holds several real profiles and the user has
  * not picked one, the attempt stops before importing or pushing and reports
  * `needsChoice`: nothing changes until the choice is stored in `meta`.
@@ -76,14 +77,14 @@ async function attempt(deps: SyncWithCloudDeps): Promise<SyncWithCloudResult> {
   const { deviceLocalRekey } = reconciled;
   const snapshot = dropDeletedProfileRows(reconciled.snapshot, perProfile);
   assertNoAutoProfile(snapshot);
-  await importReconciledSnapshot({
+  const pushed = await importReconciledSnapshot({
     port: snapshotPort,
     snapshot,
     deviceLocalRekey,
     exported: local.tables,
     now,
   });
-  const revision = await cloud.push(snapshot, remote?.headRevisionId ?? null);
+  const revision = await cloud.push(pushed, remote?.headRevisionId ?? null);
   return { revision };
 }
 

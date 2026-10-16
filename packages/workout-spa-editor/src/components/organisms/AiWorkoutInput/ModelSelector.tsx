@@ -1,40 +1,35 @@
-import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+/**
+ * The model workout generation runs, chosen in place. It is the athlete's
+ * `workout_generation` binding (or the main model it follows), the same
+ * resolution `useAiGeneration` runs, and a choice here is stored as that
+ * binding, exactly as the AI settings row does.
+ */
 import { useTranslate } from "../../../i18n/use-translate";
-import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
+import type { AiModelPurpose } from "../../../types/ai-model-binding";
+import { ModelChoiceSelect } from "../SettingsPanel/ModelChoiceSelect";
+import { useAiModelsHandlers } from "../SettingsPanel/use-ai-models-handlers";
+import { useEffectiveModels } from "../SettingsPanel/use-effective-models";
+
+const PURPOSES: readonly AiModelPurpose[] = ["default", "workout_generation"];
 
 export const ModelSelector: React.FC = () => {
   const t = useTranslate("create-workout");
-  const providers = useAiProvidersLive();
-  const selectedProviderId = useAiRuntimeStore((s) => s.selectedProviderId);
-  const selectForGeneration = useAiRuntimeStore((s) => s.selectForGeneration);
+  const { profileId, providers, models } = useEffectiveModels(PURPOSES);
+  const { onSetBinding, onClearBinding } = useAiModelsHandlers();
 
-  if (!providers || providers.length === 0) return null;
-
-  const currentValue =
-    selectedProviderId ??
-    providers.find((p) => p.isDefault)?.id ??
-    providers[0]!.id;
+  if (!profileId || providers.length === 0) return null;
 
   return (
-    <div className="w-full">
-      <label
-        htmlFor="ai-model-select"
-        className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
-      >
-        {t("model.label")}
-      </label>
-      <select
-        id="ai-model-select"
-        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-        value={currentValue}
-        onChange={(e) => selectForGeneration(e.target.value)}
-      >
-        {providers.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.label} ({p.model})
-          </option>
-        ))}
-      </select>
-    </div>
+    <ModelChoiceSelect
+      id="ai-model"
+      label={t("model.label")}
+      providers={providers}
+      effective={models.workout_generation!}
+      principal={models.default!.running}
+      onChoose={(choice) =>
+        onSetBinding({ profileId, purpose: "workout_generation", ...choice })
+      }
+      onInherit={() => onClearBinding(profileId, "workout_generation")}
+    />
   );
 };

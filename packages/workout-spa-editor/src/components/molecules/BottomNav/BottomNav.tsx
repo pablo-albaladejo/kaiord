@@ -7,8 +7,9 @@ import { BottomNavFab } from "./BottomNavFab";
 import { BottomNavTab } from "./BottomNavTab";
 
 const CREATE_WORKOUT_PATH = "/workout/new";
-// FAB notch sits between Library (index 2) and Nutrition (index 3), the
-// central slot of the five tabs, so the raised create button stays centered.
+// The FAB's notch sits between Library (index 2) and Nutrition (index 3).
+// With five tabs that slot is off the bar's center, so the FAB is seated in
+// the notch itself; centered on the bar it covered the Library tab (F-44).
 const NOTCH_INDEX = 3;
 
 /**
@@ -29,7 +30,13 @@ export function BottomNav() {
       {BOTTOM_NAV_TABS.map((tab, index) => (
         <span key={tab.path} className="contents">
           {index === NOTCH_INDEX && (
-            <span aria-hidden="true" style={{ width: FAB_NOTCH_WIDTH }} />
+            <span
+              data-testid="bottom-nav-notch"
+              className="relative shrink-0"
+              style={{ width: FAB_NOTCH_WIDTH }}
+            >
+              <BottomNavFab onActivate={() => navigate(CREATE_WORKOUT_PATH)} />
+            </span>
           )}
           <BottomNavTab
             tab={tab}
@@ -38,7 +45,6 @@ export function BottomNav() {
           />
         </span>
       ))}
-      <BottomNavFab onActivate={() => navigate(CREATE_WORKOUT_PATH)} />
     </nav>
   );
 }

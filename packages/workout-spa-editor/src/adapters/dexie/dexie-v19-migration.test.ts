@@ -6,12 +6,9 @@
 import "fake-indexeddb/auto";
 
 import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { KaiordDatabase } from "./dexie-database";
-
-const dbName = (suffix: string) =>
-  `kaiord-test-v19-${suffix}-${Date.now()}-${Math.random()}`;
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_V18 = 18;
 // Opening KaiordDatabase always migrates to the latest registered version,
@@ -35,22 +32,14 @@ const seedV18 = async (
 };
 
 describe("Dexie v18 → v19 migration", () => {
-  let name: string;
-
-  beforeEach(() => {
-    name = dbName("apply");
-  });
-
-  afterEach(async () => {
-    await Dexie.delete(name);
-  });
+  const db = sharedKaiordDatabase("v19");
+  const { name } = db;
 
   it("should bump database schema to the current head version", async () => {
     // Arrange
     await seedV18(name, []);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const version = db.verno;
     db.close();
@@ -64,7 +53,6 @@ describe("Dexie v18 → v19 migration", () => {
     await seedV18(name, []);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const count = await db.table("tombstones").count();
     db.close();
@@ -78,7 +66,6 @@ describe("Dexie v18 → v19 migration", () => {
     await seedV18(name, [{ id: "w-1", profileId: "p-1", date: "2026-05-20" }]);
 
     // Act
-    const db = new KaiordDatabase(name);
     await db.open();
     const row = await db.table("workouts").get("w-1");
     db.close();
@@ -90,7 +77,6 @@ describe("Dexie v18 → v19 migration", () => {
   it("should accept a tombstone row keyed by [table+id]", async () => {
     // Arrange
     await seedV18(name, []);
-    const db = new KaiordDatabase(name);
     await db.open();
 
     // Act

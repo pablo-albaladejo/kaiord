@@ -266,7 +266,7 @@ When the user activates the `+` add-entry affordance on any calendar day cell (g
 
 The wellness entry surface SHALL offer a manual entry form with labeled fields for **weight**, **sleep hours** (h:mm), **sleep score**, **bedtime**, **wake time**, **HRV**, and **steps**, and an **"Import a file"** action for FIT health files. Its copy SHALL be localized. The form SHALL have a single Save button that persists every filled field in one submission; empty fields SHALL write nothing. When a metric value is saved, the SPA SHALL persist a schema-valid KRD record for the active profile and the clicked day; the live wellness query SHALL cause the corresponding badge to appear on that calendar day after it refreshes. No user-entered metric value SHALL appear in any toast message.
 
-When the user saves a metric for a day that already has a record for that metric, the prior record SHALL be replaced — exactly one record remains for that date and metric. For **steps specifically**, only the `steps` value is replaced; any prior `activeCalories`, `restingCalories`, and `intensityMinutes` fields in the existing daily-wellness record are preserved (merge-preserve, not clobber).
+When the user saves a metric for a day that already has a manual record for that metric, that record SHALL be replaced — exactly one manual record remains for that date and metric. A manual save SHALL NOT reuse, overwrite or re-stamp another source's record of the same day; this includes **steps**, which SHALL be written to the day's own manual daily-wellness record carrying only the steps (no zero-filled calories or intensity), while an imported daily-wellness record of that day keeps its values and its source. A legacy manual daily-wellness record (an imported record a save before this rule re-stamped `manual`, told apart by non-zero calories, intensity or floors) SHALL keep its measured values on a re-save, with only `steps` replaced. The day's steps and calories are then read as one combined reading (see energy-expenditure, "One daily-wellness reading per day").
 
 A sleep entry SHALL take its duration from the hours slept, or from bedtime → wake time when only those are given; the wake time falls on the entry's day and the bedtime on the evening before when it is not earlier than the wake time. A sleep score alone SHALL be stored without a duration. The SPA SHALL NOT write a sleep record of zero length: malformed hours, a single clock time without hours, or hours that disagree with bedtime → wake time by more than 60 s SHALL show an inline error and write nothing. A sleep record whose duration is absent or `0` SHALL be shown as "duration not recorded", never as 0 h.
 
@@ -290,11 +290,17 @@ When the user uses "Import a file", the imported health record SHALL be dated by
 - **WHEN** the user enters a new weight value and saves
 - **THEN** exactly one weight record remains for that date and the displayed value reflects the new entry
 
-#### Scenario: Saving steps preserves prior calories and intensity
+#### Scenario: Saving steps leaves an imported daily record untouched
 
-- **GIVEN** a daily-wellness record exists for a day with `activeCalories: 300` and `intensityMinutes.moderate: 20` (from a prior import or save)
-- **WHEN** the user enters a new steps value and saves
-- **THEN** the persisted record has the new steps value AND retains `activeCalories: 300` and `intensityMinutes.moderate: 20`
+- **GIVEN** a `fit-import` daily-wellness record exists for a day with `activeCalories: 300` and `intensityMinutes.moderate: 20`
+- **WHEN** the user enters a steps value and saves
+- **THEN** a separate manual daily-wellness record holds the steps, the imported record is unchanged and still stamped `fit-import`, and the day reads the new steps with `activeCalories: 300`
+
+#### Scenario: Re-saving steps updates the manual record
+
+- **GIVEN** the user saved steps for a day that also has an imported daily-wellness record
+- **WHEN** the user saves a new steps value for that day
+- **THEN** exactly one manual daily-wellness record remains for that day, holding the new value
 
 #### Scenario: Empty fields write nothing
 
@@ -668,3 +674,81 @@ Below the `md` breakpoint the floating bottom navigation SHALL cover no actionab
 - **GIVEN** a 390×664 viewport and the detail view of a scheduled workout
 - **WHEN** the athlete scrolls to the end
 - **THEN** its footer actions SHALL end above the bottom navigation
+
+### Requirement: The athlete's zone editor is a routed page
+
+The athlete's training zones SHALL be edited on a routed page,
+`/athlete/zones/:sport`, where `sport` is one of `cycling`, `running`,
+`swimming` or `generic`. The page's sport tabs SHALL be part of the address:
+choosing a tab SHALL replace the URL with that sport's, so a reload or a shared
+link opens on the same sport. An unknown `sport` SHALL redirect (replace) to
+`/athlete/zones/cycling`, and the page SHALL redirect to `/athlete` when there
+is no active profile. The Athlete page's zones card SHALL link to the page for
+the sport the athlete is looking at.
+
+Each threshold SHALL have one home. The thresholds of cycling, running and
+swimming (FTP, LTHR, threshold pace or CSS) and the maximum heart rate SHALL be
+edited in place on `/athlete`, saving on blur or Enter and saying when the
+value was saved; there SHALL be no threshold dialog. The zone editor page SHALL
+show those thresholds read-only with a link back to `/athlete`; only the
+generic sport, which has no place on `/athlete`, SHALL edit its LTHR beside its
+zones. No other surface SHALL edit zones. A sport with no zone configuration
+yet SHALL still show its tabs and thresholds, and setting a threshold SHALL
+create that configuration.
+
+#### Scenario: "Adjust zones" opens on the active sport
+
+- **GIVEN** the athlete is on `/athlete` looking at Running
+- **WHEN** they follow "Adjust zones"
+- **THEN** the URL is `/athlete/zones/running` and the Running tab is selected
+
+#### Scenario: The chosen sport survives a reload
+
+- **GIVEN** the athlete is on `/athlete/zones/cycling`
+- **WHEN** they choose the Swimming tab and reload
+- **THEN** the URL is `/athlete/zones/swimming` and the Swimming tab is selected
+
+#### Scenario: A threshold is edited in place
+
+- **GIVEN** the athlete is on `/athlete` looking at Cycling
+- **WHEN** they type an FTP and press Enter
+- **THEN** the FTP is stored, the card says it was saved, and no dialog opens
+
+### Requirement: Athletes are managed on a routed page
+
+The athletes stored in this browser SHALL be managed on a routed page,
+`/athletes`, and not in a dialog. The page SHALL list every athlete and mark
+the active one, and SHALL let the user create an athlete, rename one in place,
+make another one active, export one athlete as a file, import an athlete file
+as a new athlete, and delete an athlete only after a confirmation. The only
+remaining athlete SHALL NOT be deletable, and deleting the active athlete SHALL make a remaining one active. The page SHALL point to the full
+backup in Settings for copying everything. The account menu's "Manage
+athletes…" entry and the Athlete page's empty state SHALL lead to `/athletes`.
+
+On `/athlete` the active athlete's name SHALL be renamed in place, and the
+personal data (height, birth date, sex, resting heart rate, activity level)
+SHALL be edited in the Body section, so no field needs a dialog.
+
+#### Scenario: Manage athletes opens the page
+
+- **GIVEN** the user has two athletes
+- **WHEN** they choose "Manage athletes…" in the account menu
+- **THEN** the URL is `/athletes`, both athletes are listed and no dialog opens
+
+#### Scenario: Deleting asks first
+
+- **GIVEN** the user is on `/athletes` with two athletes
+- **WHEN** they choose to delete one
+- **THEN** a confirmation names the athlete, and the athlete is deleted only once they confirm
+
+#### Scenario: Deleting the active athlete keeps one active
+
+- **GIVEN** the user has two athletes and the first is active
+- **WHEN** they delete the first one
+- **THEN** the other athlete is active
+
+#### Scenario: The last athlete stays
+
+- **GIVEN** only one athlete exists
+- **WHEN** the user is on `/athletes`
+- **THEN** that athlete's delete control is disabled

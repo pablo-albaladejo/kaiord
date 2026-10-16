@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { seriesStroke } from "../../../charts/uplot-base/series-strokes";
+import { isoDateToSeconds } from "../../../charts/uplot-base/uplot-base";
 import { buildTrendChartOptions } from "./build-trend-chart-options";
 import type { TrendMetricDef } from "./trend-metrics";
 import { TREND_METRICS } from "./trend-metrics";
@@ -113,5 +114,55 @@ describe("buildTrendChartOptions", () => {
       expect(axis.grid).toEqual({ stroke: GRID_STROKE });
       expect(axis.ticks).toEqual({ stroke: GRID_STROKE });
     }
+  });
+
+  it("should pin the x axis to the requested window, not to the data", () => {
+    // Arrange
+    const window = {
+      range: { start: "2026-07-14", end: "2026-10-11" },
+      label: "Fecha",
+    };
+
+    // Act
+    const options = buildTrendChartOptions([WEIGHT], "metric", "es", window);
+
+    // Assert
+    expect(options.scales?.x?.range).toEqual([
+      isoDateToSeconds("2026-07-14"),
+      isoDateToSeconds("2026-10-11"),
+    ]);
+  });
+
+  it("should name the date series and show its value as a localized date", () => {
+    // Arrange
+    const window = {
+      range: { start: "2026-07-14", end: "2026-10-11" },
+      label: "Fecha",
+    };
+    const options = buildTrendChartOptions([WEIGHT], "metric", "es", window);
+    const x = options.series?.[0];
+    const value = x?.value as (u: unknown, v: number | null) => string;
+
+    // Act
+    const shown = [value({}, isoDateToSeconds("2026-10-11")), value({}, null)];
+
+    // Assert
+    expect(x?.label).toBe("Fecha");
+    expect(shown).toEqual(["11 oct 2026", "—"]);
+  });
+
+  it("should label the date ticks in the active locale", () => {
+    // Arrange
+    const options = buildTrendChartOptions([WEIGHT], "metric", "es");
+    const values = options.axes?.[0]?.values as (
+      u: unknown,
+      splits: number[]
+    ) => string[];
+
+    // Act
+    const ticks = values({}, [isoDateToSeconds("2026-10-05")]);
+
+    // Assert
+    expect(ticks).toEqual(["5 oct"]);
   });
 });
