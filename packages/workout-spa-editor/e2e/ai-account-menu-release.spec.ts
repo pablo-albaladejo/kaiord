@@ -6,7 +6,8 @@ import { expect, test } from "./fixtures/base";
  * release (a smooth scroll still running), the release lands on a menu item,
  * and it must not choose it. Mobile Safari hit this in CI: Playwright pressed
  * while WebKit was still animating its scroll-into-view, and the release
- * chose Rename or Remove by itself.
+ * chose Rename or Remove by itself. The test pads the body, so its own
+ * scroll never depends on where Save left the page.
  */
 test.describe("AI account menu", () => {
   test.beforeEach(async ({ page }) => {
@@ -28,6 +29,16 @@ test.describe("AI account menu", () => {
     const trigger = providers.getByRole("button", {
       name: "More actions for My Claude",
     });
+    await expect(settingsPage.getByLabel("Label (optional)")).toHaveCount(0);
+    const settled = () =>
+      trigger.evaluate(async (el) => {
+        const frame = () => new Promise(requestAnimationFrame);
+        const top = el.getBoundingClientRect().top;
+        await frame();
+        await frame();
+        return el.getBoundingClientRect().top === top;
+      });
+    await expect.poll(settled).toBe(true);
     // The move below scrolls the window down by about one row. Where Save
     // leaves the page depends on how fast the list renders, and the page can
     // end at its bottom with no room left, so make the room and centre the
@@ -38,6 +49,7 @@ test.describe("AI account menu", () => {
     await trigger.evaluate((el) =>
       el.scrollIntoView({ block: "center", behavior: "instant" })
     );
+    await expect.poll(settled).toBe(true);
     const box = await trigger.boundingBox();
     if (!box) throw new Error("trigger has no box");
     const x = box.x + box.width / 2;
@@ -56,6 +68,7 @@ test.describe("AI account menu", () => {
     await page.mouse.move(x, y);
     await page.mouse.down();
     await expect(remove).toBeVisible();
+    await expect.poll(removeCentre).not.toBeNaN();
     const shift = (await removeCentre()) - y;
     expect(shift).toBeGreaterThan(0);
     const moved = await page.evaluate((top) => {
