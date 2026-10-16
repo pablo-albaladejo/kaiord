@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@types/yargs": "^17.0.32",
-    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/coverage-v8": "^5.0.4",
     "execa": "^10.1.0",
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.2.0",
@@ -81,7 +81,7 @@
     "tsdown": "^0.23.1",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.4"
   },
   "engines": {
     "node": ">=22.12.0"
