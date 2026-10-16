@@ -7,6 +7,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { ATHLETES_PATH } from "../../../routing/constants";
 import type { Profile } from "../../../types/profile";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
+import { MenuItem, MenuRadioItem } from "../../atoms/MenuItem";
 import { MENU_ITEM_CLASS, MENU_SEPARATOR_CLASS } from "./header-menu-styles";
 
 const LABEL_CLASS =
@@ -47,7 +48,7 @@ export function AthleteSwitcher({ profiles, activeId }: AthleteSwitcherProps) {
         className={LIST_CLASS}
       >
         {profiles.map((profile) => (
-          <DropdownMenu.RadioItem
+          <MenuRadioItem
             key={profile.id}
             value={profile.id}
             className={MENU_ITEM_CLASS}
@@ -59,17 +60,17 @@ export function AthleteSwitcher({ profiles, activeId }: AthleteSwitcherProps) {
               </DropdownMenu.ItemIndicator>
             </span>
             <span className="min-w-0 truncate">{profile.name}</span>
-          </DropdownMenu.RadioItem>
+          </MenuRadioItem>
         ))}
       </DropdownMenu.RadioGroup>
-      <DropdownMenu.Item
+      <MenuItem
         className={MENU_ITEM_CLASS}
         onSelect={() => navigate(ATHLETES_PATH)}
         data-testid="account-menu-manage-athletes"
       >
         <span className="h-4 w-4 flex-none" aria-hidden="true" />
         {t("manageAthletes")}
-      </DropdownMenu.Item>
+      </MenuItem>
       <DropdownMenu.Separator className={MENU_SEPARATOR_CLASS} />
     </>
   );
