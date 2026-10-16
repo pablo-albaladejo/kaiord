@@ -21,6 +21,8 @@ Train2Go-specific adapter code: scrape the Train2Go coaching plan via the extens
 - `use-train2go-actions-fanout.test.tsx` — fan-out behavior for multi-bridge zones-sync.
 - `use-train2go-data.ts` — `useLiveQuery` wrapper over coaching data.
 - `use-expand-callback.ts` — day-expand callback wiring.
+- `use-connect-callback.ts` — link callback wiring (re-exported by `use-train2go-actions.ts`).
+- `zones-sync-failure.ts` — the toast a failed zones sync shows, by reason.
 - `use-zones-sync-orchestrator.ts` / `.test.ts` — coordinates the zones-sync write flow with the application layer.
 
 ## For AI Agents

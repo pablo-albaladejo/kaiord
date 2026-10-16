@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
+import { MenuItem } from "../../atoms/MenuItem";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "./header-menu-styles";
 import { isEntryActive } from "./status-entry-active";
 import type { EntryDef } from "./status-entry-defs";
@@ -59,7 +60,7 @@ export function NavMenu({
             data-testid={`nav-menu-${id}`}
           >
             {entries.map((entry) => (
-              <DropdownMenu.Item
+              <MenuItem
                 key={entry.id}
                 className={`${MENU_ITEM_CLASS} ${entry.bottomNavCovered ? "hidden md:flex" : ""}`}
                 aria-current={
@@ -70,7 +71,7 @@ export function NavMenu({
               >
                 <entry.icon className="h-4 w-4" />
                 {t(entry.id)}
-              </DropdownMenu.Item>
+              </MenuItem>
             ))}
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
