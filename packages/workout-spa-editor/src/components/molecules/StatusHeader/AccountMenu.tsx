@@ -35,6 +35,9 @@ export function AccountMenu({ attention }: AccountMenuProps) {
   const profiles = useProfilesLive();
   // Held shut while either read is in flight: opened then, the menu gained
   // its athlete rows a moment later and moved every row under the tap.
+  // Natively disabled, so a test or a user is told to wait. If the database
+  // never opens, every live read in the app waits with it; /settings stays
+  // reachable by URL.
   const loading = active === undefined || profiles === undefined;
 
   return (

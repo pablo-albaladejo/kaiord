@@ -10,8 +10,10 @@ import { encrypt } from "../../lib/crypto";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
+import { createDexieClearAllTables } from "./dexie-clear-all-tables";
 
 const READS = 3;
+const TAMPERED_TAIL = "AAAA";
 
 const provider = (
   id: string,
@@ -68,6 +70,123 @@ describe("createDexieAiProviderRepository", () => {
 
     // Assert
     expect(derive).not.toHaveBeenCalled();
+  });
+
+  const foreignRow = async (id: string, cipher?: string) => {
+    const { apiKey, ...rest } = provider(id);
+    const stored = cipher ?? (await encrypt(apiKey, "kaiord-spa-v1"));
+    await db.table("aiProviders").put({ ...rest, apiKey: stored });
+    return stored;
+  };
+
+  const storedCipher = async (id: string): Promise<string> =>
+    (await db.table("aiProviders").get(id)).apiKey;
+
+  it("should derive a key once when several readers miss together", async () => {
+    // Arrange
+    // On a cold load every live reader reads at once: caching only the
+    // result let each of them miss and derive its own key for every row.
+    await foreignRow("p4");
+    const derive = vi.spyOn(crypto.subtle, "deriveKey");
+
+    // Act
+    const reads = await Promise.all([
+      repo.getAll(),
+      repo.getAll(),
+      repo.getAll(),
+    ]);
+
+    // Assert
+    expect(derive).toHaveBeenCalledTimes(1);
+    expect(reads.map((all) => all[0]?.apiKey)).toEqual([
+      "sk-p4",
+      "sk-p4",
+      "sk-p4",
+    ]);
+  });
+
+  it("should forget the key of a removed provider", async () => {
+    // Arrange
+    await repo.put(provider("p5"));
+    const cipher = await storedCipher("p5");
+    await repo.delete("p5");
+    await foreignRow("p5", cipher);
+    const derive = vi.spyOn(crypto.subtle, "deriveKey");
+
+    // Act
+    await repo.getAll();
+
+    // Assert
+    expect(derive).toHaveBeenCalledTimes(1);
+  });
+
+  it("should forget the old key when a provider's key is replaced", async () => {
+    // Arrange
+    await repo.put(provider("p6"));
+    const oldCipher = await storedCipher("p6");
+    await repo.put(provider("p6", { apiKey: "sk-new" }));
+    await db.table("aiProviders").clear();
+    await foreignRow("p7", oldCipher);
+    const derive = vi.spyOn(crypto.subtle, "deriveKey");
+
+    // Act
+    await repo.getAll();
+
+    // Assert
+    expect(derive).toHaveBeenCalledTimes(1);
+  });
+
+  it("should forget a key whose row another writer removed", async () => {
+    // Arrange
+    // Another tab, an import or a wipe can remove a row without passing
+    // through this repository; the next read keeps only what it saw.
+    await repo.put(provider("p8"));
+    const cipher = await storedCipher("p8");
+    await db.table("aiProviders").clear();
+    await repo.getAll();
+    await foreignRow("p8", cipher);
+    const derive = vi.spyOn(crypto.subtle, "deriveKey");
+
+    // Act
+    await repo.getAll();
+
+    // Assert
+    expect(derive).toHaveBeenCalledTimes(1);
+  });
+
+  it("should forget every key when all data is deleted", async () => {
+    // Arrange
+    // "Delete all my data" empties every store; no key it held may outlive it.
+    await repo.put(provider("p10"));
+    const cipher = await storedCipher("p10");
+    await createDexieClearAllTables(db)();
+    await foreignRow("p10", cipher);
+    const derive = vi.spyOn(crypto.subtle, "deriveKey");
+
+    // Act
+    await repo.getById("p10");
+
+    // Assert
+    expect(derive).toHaveBeenCalledTimes(1);
+  });
+
+  it("should reject a tampered key on every read", async () => {
+    // Arrange
+    const cipher = await foreignRow("p9");
+    const tampered = `${cipher.slice(0, -TAMPERED_TAIL.length)}${TAMPERED_TAIL}`;
+    await db
+      .table("aiProviders")
+      .put({ ...(await db.table("aiProviders").get("p9")), apiKey: tampered });
+    const derive = vi.spyOn(crypto.subtle, "deriveKey");
+
+    // Act
+    const first = repo.getAll();
+    await expect(first).rejects.toThrow();
+    const second = repo.getAll();
+
+    // Assert
+    await expect(second).rejects.toThrow();
+    expect(derive).toHaveBeenCalledTimes(2);
   });
 
   it("should derive a key once for a row it did not write, however often it is read", async () => {

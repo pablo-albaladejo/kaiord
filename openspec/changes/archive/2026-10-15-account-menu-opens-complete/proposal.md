@@ -18,8 +18,9 @@ changed under it.
   snapshot.
 - `ai-generate-workout` 8.10 sometimes saved an account that the list showed
   seconds later. Every live reader of the AI providers decrypted every key on
-  every read, and each decrypt derived a 100,000-iteration PBKDF2 key: five
-  derivations per stored provider per save.
+  every read, and each decrypt derived a 100,000-iteration PBKDF2 key: one
+  derivation per reader per row per read, which with the five live readers
+  was five derivations per stored provider per save.
 
 ## What Changes
 
@@ -29,8 +30,12 @@ changed under it.
   longer starts the read.
 - The Dexie AI provider repository remembers the plaintext of every key it
   has encrypted or decrypted in this session, keyed by ciphertext, so
-  reading back a stored provider derives no key. A row this session has
-  never seen is decrypted once. The stored form is unchanged.
+  reading back a stored provider derives no key. The decryption is cached
+  while in flight, so readers that miss together on a cold load share one
+  derivation; a failed decryption is never cached. A key is forgotten when
+  its provider is removed or its key replaced, when a read no longer finds
+  its row (another tab, an import), and when all data is deleted. The
+  stored form and the backup (which omits `apiKey`) are unchanged.
 
 ## Impact
 
