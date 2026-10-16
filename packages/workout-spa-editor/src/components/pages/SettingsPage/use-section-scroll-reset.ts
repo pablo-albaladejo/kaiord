@@ -24,7 +24,14 @@ export function useSectionScrollReset(section: string | undefined): void {
     if (lastRef.current === section) return;
     lastRef.current = section;
 
-    const scroller = document.scrollingElement ?? document.documentElement;
+    // A jump, not the glide `html { scroll-behavior: smooth }` would make of
+    // it: a section still scrolling once open moves under a press, and the
+    // release lands on another element.
+    const scroller = (document.scrollingElement ??
+      document.documentElement) as HTMLElement;
+    const behaviour = scroller.style.scrollBehavior;
+    scroller.style.scrollBehavior = "auto";
     scroller.scrollTop = 0;
+    scroller.style.scrollBehavior = behaviour;
   }, [section]);
 }

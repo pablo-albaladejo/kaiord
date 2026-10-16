@@ -54,6 +54,38 @@ describe("useSectionScrollReset", () => {
     expect(scrollTop()).toBe(0);
   });
 
+  it("should jump to the top instead of gliding there", () => {
+    // Arrange
+    // `html { scroll-behavior: smooth }` turns a plain `scrollTop` write into
+    // a ~200 ms glide: the new section scrolls under the user's finger, and a
+    // tap that lands mid-glide is released over another element.
+    const root = document.documentElement;
+    const { rerender } = renderAt("ai");
+    root.scrollTop = SCROLLED;
+    const native = Object.getOwnPropertyDescriptor(
+      Element.prototype,
+      "scrollTop"
+    )!;
+    let behaviourAtWrite: string | null = null;
+    Object.defineProperty(root, "scrollTop", {
+      configurable: true,
+      get: () => native.get!.call(root),
+      set: (value: number) => {
+        behaviourAtWrite = root.style.scrollBehavior;
+        native.set!.call(root, value);
+      },
+    });
+
+    // Act
+    rerender({ current: "privacy" });
+
+    // Assert
+    delete (root as unknown as Record<string, unknown>).scrollTop;
+    expect(behaviourAtWrite).toBe("auto");
+    expect(root.style.scrollBehavior).toBe("");
+    expect(scrollTop()).toBe(0);
+  });
+
   it("should leave the scroll alone when the section is unchanged", () => {
     // Arrange
     const { rerender } = renderAt("ai");

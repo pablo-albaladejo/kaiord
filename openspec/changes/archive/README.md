@@ -11,6 +11,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | 2026-10-15 | [`ai-chat-model-picker`](./2026-10-15-ai-chat-model-picker/) | the chat model picker shows what the conversation runs |
 | 2026-10-15 | [`ai-settings-layout`](./2026-10-15-ai-settings-layout/) | the AI settings page leads with the athlete's assistant |
 | 2026-10-15 | [`ai-settings-truth`](./2026-10-15-ai-settings-truth/) | the AI settings page shows what runs |
+| 2026-10-15 | [`route-focus-yields`](./2026-10-15-route-focus-yields/) | route-heading focus yields to a field the user is in |
 | 2026-10-14 | [`calendar-render-cost-ratio`](./2026-10-14-calendar-render-cost-ratio/) | The calendar performance budget measures the cards |
 | 2026-10-14 | [`legacy-manual-row-ranks-last`](./2026-10-14-legacy-manual-row-ranks-last/) | A legacy manual row ranks last |
 | 2026-10-14 | [`manual-steps-own-row`](./2026-10-14-manual-steps-own-row/) | Manual steps keep their own row |

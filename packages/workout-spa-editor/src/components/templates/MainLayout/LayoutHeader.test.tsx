@@ -9,6 +9,7 @@ import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistenc
 import { createProfile } from "../../../application/profile/create-profile";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { renderWithProviders } from "../../../test-utils";
+import { openAccountMenu } from "../../../test-utils/open-account-menu";
 import { LayoutHeader } from "./LayoutHeader";
 
 function withRouter(ui: React.ReactNode, path = "/calendar") {
@@ -118,7 +119,7 @@ describe("LayoutHeader", () => {
       renderWithProviders(ui);
 
       // Act
-      await user.click(screen.getByTestId("status-header-account-button"));
+      await openAccountMenu(user);
       await user.click(await screen.findByTestId("account-menu-item-settings"));
 
       // Assert
