@@ -8,11 +8,12 @@ updates:
       day: "monday"
     open-pull-requests-limit: 10
     groups:
-      # React gets its own PR: the 19.3 renderer adds ~8.4 kB gzip to the SPA
-      # entry chunk, which trips the initial-JS budget
-      # (scripts/check-spa-initial-js.mjs). Raising that budget needs its own
-      # evidence (docs/seo-observatory.md), so a React bump must not block the
-      # other minor/patch updates. Groups match first-wins, so keep this first.
+      # React gets its own PR: a renderer bump moves the SPA entry chunk, which
+      # is held to the initial-JS budget (scripts/check-spa-initial-js.mjs).
+      # 19.3 was adopted on 2026-10-16 at ~288.6 kB gzip against the 300.5 kB
+      # budget (+8.5 kB). Raising that budget needs its own evidence
+      # (docs/seo-observatory.md), so a React bump must not block the other
+      # minor/patch updates. Groups match first-wins, so keep this first.
       react:
         patterns:
           - "react"
