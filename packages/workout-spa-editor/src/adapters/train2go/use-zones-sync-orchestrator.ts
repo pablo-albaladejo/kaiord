@@ -10,20 +10,22 @@
  * `commitConflictResolution` with the user's per-row choices, then
  * clears the pending state. `cancel()` clears state without writing.
  *
- * Toast strings come from the constants exported by `sync-zones.ts`
+ * Both use cases load on first call, outside the initial JS: the provider
+ * mounting this hook is app-wide, but a zones sync only runs on a user
+ * action.
+ *
+ * Toast strings come from the constants exported by `sync-zones-toasts.ts`
  * — never template-literal interpolation in toast/console calls
  * (mechanical guard `check-no-pii-leakage.mjs` enforces this).
  */
 import { useCallback, useState } from "react";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import { commitConflictResolution } from "../../application/coaching/commit-conflict-resolution";
 import {
-  syncZones,
   TOAST_ZONES_FETCH_FAILED,
   TOAST_ZONES_SHAPE_MISMATCH,
   TOAST_ZONES_UNSUPPORTED,
-} from "../../application/coaching/sync-zones";
+} from "../../application/coaching/sync-zones-toasts";
 import type { useToast } from "../../hooks/use-toast";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
@@ -67,6 +69,8 @@ export const useZonesSyncOrchestrator = (
 
   const runSync = useCallback(
     async (profileId: string) => {
+      const { syncZones } =
+        await import("../../application/coaching/sync-zones");
       const r = await syncZones(profileId, transport, persistence);
       if (!r.ok) {
         handleFailure(r.reason, toasts);
@@ -82,6 +86,8 @@ export const useZonesSyncOrchestrator = (
   const confirmDecisions = useCallback(
     async (decisions: Record<FieldKey, ConflictDecision>) => {
       if (!pending) return;
+      const { commitConflictResolution } =
+        await import("../../application/coaching/commit-conflict-resolution");
       await commitConflictResolution(
         pending.profileId,
         decisions,

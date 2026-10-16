@@ -7,7 +7,8 @@
  * value that changed while paging through past weeks would read as a property
  * of the navigation rather than of the training.
  *
- * Returns `null` for a week with nothing classifiable — no sessions, or only
+ * The arithmetic lives in `lib/week-dominant-zone`. Returns `null` for a
+ * week with nothing classifiable — no sessions, or only
  * raw imports. That is not a failure state: the caller declares no custom
  * property at all and the core inherits the ink the role layer already
  * carries.
@@ -15,36 +16,10 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
-import { thresholdsForSport } from "../lib/athlete";
-import {
-  dominantZone,
-  getStructuredWorkout,
-  timeInZone,
-} from "../lib/workout-review";
 import type { ZoneNumber } from "../lib/zone-colors";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { Profile } from "../types/profile";
 import { getCurrentWeekId, parseWeekId } from "../utils/week-utils";
-
-const ZONE_COUNT = 5;
-
-/** Sum each session's zone distribution, weighted by nothing but its shares. */
-export function weekDominantZone(
-  workouts: readonly WorkoutRecord[],
-  profile: Profile | null
-): ZoneNumber | null {
-  const totals = new Array<number>(ZONE_COUNT).fill(0);
-  for (const record of workouts) {
-    if (!record.krd) continue;
-    const workout = getStructuredWorkout(record.krd);
-    if (!workout) continue;
-    const dist = timeInZone(workout, thresholdsForSport(profile, record.sport));
-    dist.forEach((share, i) => {
-      totals[i] = (totals[i] ?? 0) + share;
-    });
-  }
-  return dominantZone(totals);
-}
 
 export function useWeekDominantZone(
   profileId: string | null,
@@ -58,6 +33,10 @@ export function useWeekDominantZone(
       .where("[profileId+date]")
       .between([profileId, range.start], [profileId, range.end], true, true)
       .toArray();
+    // The classifier loads after the read, so the header (on screen from
+    // every route) keeps it out of the initial JS, and liveQuery has already
+    // observed the only table it depends on before the foreign await.
+    const { weekDominantZone } = await import("../lib/week-dominant-zone");
     return weekDominantZone(workouts, profile);
   }, [profileId, profile, range?.start, range?.end]);
   return zone ?? null;

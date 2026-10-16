@@ -21,7 +21,7 @@ import {
   useZonesSyncOrchestrator,
   type ZonesSyncOrchestrator,
 } from "../adapters/train2go/use-zones-sync-orchestrator";
-import { ZonesConflictDialog } from "../components/organisms/ZonesConflictDialog/ZonesConflictDialog";
+import { LazyZonesConflictDialog } from "../components/organisms/ZonesConflictDialog/LazyZonesConflictDialog";
 import { usePersistence } from "./persistence-context";
 import { useToastContext } from "./ToastContext";
 
@@ -47,7 +47,7 @@ export const Train2GoZonesSyncProvider = ({
   return (
     <Ctx.Provider value={orchestrator}>
       {children}
-      <ZonesConflictDialog
+      <LazyZonesConflictDialog
         open={orchestrator.pending !== null}
         conflicts={orchestrator.pending?.conflicts ?? []}
         onConfirm={orchestrator.confirmDecisions}

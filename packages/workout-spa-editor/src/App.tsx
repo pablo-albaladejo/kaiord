@@ -1,8 +1,7 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useLocation } from "wouter";
 
 import { AppRoutes } from "./AppRoutes";
-import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { MigrationBoot } from "./components/MigrationBoot";
 import { DefaultProfileNotice } from "./components/molecules/DefaultProfileNotice/DefaultProfileNotice";
 import { ProfileChoiceBanner } from "./components/molecules/ProfileChoiceBanner/ProfileChoiceBanner";
@@ -12,6 +11,7 @@ import { useAnalytics } from "./contexts";
 import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useSyncAutoPush } from "./hooks/use-sync-auto-push";
+import { AppKeyboardShortcuts } from "./lazy-pages";
 
 function App() {
   useStoreHydration();
@@ -35,7 +35,9 @@ function App() {
   return (
     <AppToastProvider>
       <MigrationBoot />
-      <AppKeyboardShortcuts />
+      <Suspense fallback={null}>
+        <AppKeyboardShortcuts />
+      </Suspense>
       <MainLayout>
         <ProfileChoiceBanner />
         <DefaultProfileNotice />

@@ -3,7 +3,6 @@ import type { Analytics } from "@kaiord/core";
 import { useCallback } from "react";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import { expandDay } from "../../application/coaching/expand-day";
 import type { PersistencePort } from "../../ports/persistence-port";
 
 export const useExpandCallback = (
@@ -14,6 +13,8 @@ export const useExpandCallback = (
   useCallback(
     async (profileId: string, date: string) => {
       a.event("coaching.expand_day.invoked", { source: t.source });
+      const { expandDay } =
+        await import("../../application/coaching/expand-day");
       return expandDay(
         {
           profiles: p.profiles,

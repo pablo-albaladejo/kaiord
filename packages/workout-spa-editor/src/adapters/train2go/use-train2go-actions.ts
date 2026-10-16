@@ -1,11 +1,13 @@
-/** Coaching action hooks; telemetry emitted at this boundary, no PII. */
+/**
+ * Coaching action hooks; telemetry emitted at this boundary, no PII. The
+ * use cases load on first call: the hooks mount app-wide, the actions only
+ * run on a user action.
+ */
 
 import type { Analytics } from "@kaiord/core";
 import { useCallback, useRef } from "react";
 
-import { attemptLink } from "../../application/coaching/attempt-link";
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import { syncWeek } from "../../application/coaching/sync-week";
 import { useCoachMoveNoticeActions } from "../../contexts/coach-move-notice-context";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { seedBridgeRoutes } from "../bridge/seed-bridge-routes";
@@ -29,6 +31,7 @@ export const useSyncCallback = (
         source: t.source,
         trigger: "manual",
       });
+      const { syncWeek } = await import("../../application/coaching/sync-week");
       const startedAt = Date.now();
       const result = await syncWeek(
         {
@@ -69,6 +72,8 @@ export const useConnectCallback = (
       abortRef.current?.abort();
       const ctrl = new AbortController();
       abortRef.current = ctrl;
+      const { attemptLink } =
+        await import("../../application/coaching/attempt-link");
       const r = await attemptLink(
         { profiles: p.profiles, transport: t },
         profileId,
