@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "Pins the pnpm binary that setup-pnpm installs and caches. Keep in step with packageManager in the root package.json.",
+  "dependencies": {
+    "pnpm": "9.15.0"
+  }
+}

@@ -1,6 +1,11 @@
 version: 2
 updates:
   # npm dependencies
+  # `.github/actions/setup-pnpm/pnpm-bin/` is deliberately NOT scanned: it
+  # pins the pnpm binary CI runs, and a pnpm bump has to move four things
+  # together — pnpm-bin/package.json + its package-lock.json, the
+  # `pnpm-version` default in setup-pnpm/action.yml, and the root
+  # `packageManager`. setup-pnpm's guard fails any job where they drift.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
