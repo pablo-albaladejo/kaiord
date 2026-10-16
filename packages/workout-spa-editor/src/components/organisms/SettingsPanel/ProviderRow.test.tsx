@@ -2,7 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
-import { renderWithProviders, screen } from "../../../test-utils";
+import { fireEvent, renderWithProviders, screen } from "../../../test-utils";
 import { ProviderRow } from "./ProviderRow";
 
 const provider = (extra: Partial<LlmProviderConfig> = {}) => ({
@@ -180,6 +180,33 @@ describe("ProviderRow", () => {
     // Assert
     expect(onRename).toHaveBeenCalledOnce();
   });
+
+  // A press that opened the menu can end over an item when the page moves
+  // under the pointer (a smooth scroll); that release is not a choice.
+  it.each(["Rename", "Remove"])(
+    "should not %s on a release that did not start on the item",
+    async (item) => {
+      // Arrange
+      const onRename = vi.fn();
+      renderWithProviders(
+        <ProviderRow
+          provider={provider()}
+          onReplaceKey={vi.fn()}
+          onRename={onRename}
+          onRemove={vi.fn()}
+        />
+      );
+      await openMenu();
+
+      // Act
+      fireEvent.pointerUp(screen.getByRole("menuitem", { name: item }));
+
+      // Assert
+      expect(onRename).not.toHaveBeenCalled();
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(screen.getByRole("menuitem", { name: item })).toBeVisible();
+    }
+  );
 
   it("should name the provider unless the label already does", () => {
     // Arrange

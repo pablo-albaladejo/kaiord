@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 import { ICON_MAP } from "../../atoms/Icon/icon-map";
+import { MenuItem } from "../../atoms/MenuItem";
 import { MENU_CONTENT_CLASS, MENU_ITEM_CLASS } from "./header-menu-styles";
 import type { HeaderAttention } from "./use-header-attention";
 
@@ -74,13 +75,13 @@ export function SourceHealthPill({ attention }: SourceHealthPillProps) {
               {attention.detail}
             </span>
           </DropdownMenu.Label>
-          <DropdownMenu.Item
+          <MenuItem
             className={MENU_ITEM_CLASS}
             onSelect={() => navigate(CONNECTIONS_PATH)}
             data-testid="source-health-view-all"
           >
             {t("alert.viewAll")}
-          </DropdownMenu.Item>
+          </MenuItem>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
