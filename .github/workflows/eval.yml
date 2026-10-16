@@ -24,12 +24,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.1.0
-      - uses: actions/setup-node@v7
+      # Node, the cached + sha512-verified pnpm binary, node_modules/store
+      # caches and `pnpm install --frozen-lockfile`, same as every CI job.
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
         with:
           node-version: "22"
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
       - run: pnpm -r build
 
       - name: Run evals
