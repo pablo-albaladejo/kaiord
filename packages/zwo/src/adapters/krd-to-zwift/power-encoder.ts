@@ -1,5 +1,6 @@
 import type { Logger, WorkoutStep } from "@kaiord/core";
 
+import { isPowerDescending } from "../interval/power-direction";
 import { convertPowerZoneToPercentFtp } from "../target/power.converter";
 
 // No FTP in KRD watts targets; 250 W is a conventional default road-cyclist FTP
@@ -41,19 +42,19 @@ export const encodeSteadyStatePowerTarget = (
 const encodeWattsRange = (
   step: WorkoutStep,
   interval: Record<string, unknown>,
-  { min, max }: { min: number; max: number },
+  [low, high]: readonly [number, number],
   logger?: Logger
 ): void => {
-  const powerLow = (min / ASSUMED_FTP_WATTS) * 100;
-  const powerHigh = (max / ASSUMED_FTP_WATTS) * 100;
+  const powerLow = (low / ASSUMED_FTP_WATTS) * 100;
+  const powerHigh = (high / ASSUMED_FTP_WATTS) * 100;
 
   interval["@_kaiord:powerUnit"] = "watts";
-  interval["@_kaiord:originalWattsLow"] = min;
-  interval["@_kaiord:originalWattsHigh"] = max;
+  interval["@_kaiord:originalWattsLow"] = low;
+  interval["@_kaiord:originalWattsHigh"] = high;
   interval["@_kaiord:assumedFtp"] = ASSUMED_FTP_WATTS;
 
   logger?.warn("Lossy conversion: watts converted to percent FTP", {
-    originalWatts: { low: min, high: max },
+    originalWatts: { low, high },
     assumedFtp: ASSUMED_FTP_WATTS,
     convertedPercentFtp: { low: powerLow, high: powerHigh },
     stepIndex: step.stepIndex,
@@ -71,12 +72,18 @@ export const encodeRampPowerTarget = (
   if (step.target.type !== "power") return;
   const value = step.target.value;
 
-  if (value.unit === "range" && value.basis === "percent_ftp") {
-    interval["@_kaiord:powerUnit"] = "percent_ftp";
-    interval["@_PowerLow"] = value.min / 100;
-    interval["@_PowerHigh"] = value.max / 100;
-  } else if (value.unit === "range") {
-    encodeWattsRange(step, interval, value, logger);
+  if (value.unit === "range") {
+    // A descending block starts at the top bound: PowerLow > PowerHigh.
+    const [from, to] = isPowerDescending(step)
+      ? [value.max, value.min]
+      : [value.min, value.max];
+    if (value.basis === "percent_ftp") {
+      interval["@_kaiord:powerUnit"] = "percent_ftp";
+      interval["@_PowerLow"] = from / 100;
+      interval["@_PowerHigh"] = to / 100;
+    } else {
+      encodeWattsRange(step, interval, [from, to], logger);
+    }
   } else if (value.unit === "zone") {
     interval["@_kaiord:powerUnit"] = "zone";
     interval["@_kaiord:powerZone"] = value.value;
