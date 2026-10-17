@@ -60,8 +60,6 @@ const seedTwoProfiles = async () => {
 
 const rowsTool = (rows: string[]) =>
   defineReadTool({
-    name: "test_rows",
-    description: "test",
     input: {},
     rowsKey: "rows",
     maxRows: 100,
@@ -96,20 +94,24 @@ describe("defineReadTool", () => {
     }
   );
 
-  it.each([["2026/06/01"], ["June 1"], ["2026-6-1"], ["20260601"]])(
-    "should reject the non-ISO date %s",
-    async (dateFrom) => {
-      // Arrange
-      const tool = createQueryWorkoutsTool(deps());
+  it.each([
+    ["2026/06/01"],
+    ["June 1"],
+    ["2026-6-1"],
+    ["20260601"],
+    ["2026-02-30"],
+    ["2026-13-01"],
+  ])("should reject the invalid date %s", async (dateFrom) => {
+    // Arrange
+    const tool = createQueryWorkoutsTool(deps());
 
-      // Act
-      const parsed = tool.inputSchema.safeParse({ dateFrom });
+    // Act
+    const parsed = tool.inputSchema.safeParse({ dateFrom });
 
-      // Assert
-      expect(parsed.success).toBe(false);
-      await expect(tool.execute({ dateFrom })).rejects.toThrow();
-    }
-  );
+    // Assert
+    expect(parsed.success).toBe(false);
+    await expect(tool.execute({ dateFrom })).rejects.toThrow();
+  });
 
   it("should reject a sport outside the closed domain", () => {
     // Arrange

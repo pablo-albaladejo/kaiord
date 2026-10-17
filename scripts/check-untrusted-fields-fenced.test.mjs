@@ -100,10 +100,14 @@ export const summarize = (r) => ({
 });
 `,
   });
-  assert.deepEqual(
-    violations.map((v) => v.field).sort(),
-    ["description", "error", "message", "notes", "reason", "title"]
-  );
+  assert.deepEqual(violations.map((v) => v.field).sort(), [
+    "description",
+    "error",
+    "message",
+    "notes",
+    "reason",
+    "title",
+  ]);
 });
 
 test("a field outside the recognized set is a KNOWN gap, not caught", () => {
@@ -180,6 +184,72 @@ export type Spec<S extends Shape, Row> = {
   name: string;
   description: string;
 };
+`,
+  });
+  assert.deepEqual(violations, []);
+});
+
+test("a one-line type does not hide the code after it", () => {
+  const violations = inSandbox({
+    "one-line-type.ts": `
+export type Row<T> = { a: T } & X;
+
+export const summarize = (r) => ({
+  title: r.title,
+});
+
+type Other = {
+  b: string;
+};
+`,
+  });
+  assert.equal(violations.length, 1);
+  assert.equal(violations[0].field, "title");
+  assert.equal(violations[0].line, 5);
+});
+
+test("a nested type literal is blanked to its own closing brace", () => {
+  const violations = inSandbox({
+    "nested-type.ts": `
+type Spec = {
+  inner: {
+    name: string;
+  };
+  description: string;
+};
+export const summarize = (r) => ({ notes: r.notes });
+`,
+  });
+  assert.deepEqual(
+    violations.map((v) => v.field),
+    ["notes"]
+  );
+});
+
+test("a shorthand field is a returned value", () => {
+  const violations = inSandbox({
+    "shorthand.ts": `
+export const summarize = (r) => {
+  const title = r.title;
+  return { date: r.date, title };
+};
+`,
+  });
+  assert.equal(violations.length, 1);
+  assert.equal(violations[0].field, "title");
+  assert.equal(violations[0].value, "title (shorthand)");
+});
+
+test("a destructuring, parameter, or import binding is not a returned value", () => {
+  const violations = inSandbox({
+    "bindings.ts": `
+import { name } from "./x";
+export { description } from "./y";
+const { title, reason } = r;
+const pick = ({ message }) => fenceUntrusted(message);
+function read({ notes }: Row) { return fenceUntrusted(notes); }
+for (const { error } of rows) log(error);
+const prose = "date, name, state";
 `,
   });
   assert.deepEqual(violations, []);

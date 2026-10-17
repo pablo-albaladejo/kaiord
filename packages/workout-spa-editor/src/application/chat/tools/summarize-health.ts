@@ -4,8 +4,10 @@
  * The KRD payload is never forwarded: each metric names the numeric fields
  * the model may read, and only finite numbers survive. Upstream free text
  * (`externalId`, `sourceBridgeId`, …) therefore cannot reach the prompt,
- * whatever a writer stored. Sleep stages are reduced to seconds per stage.
+ * whatever a writer stored. Sleep stages are reduced to seconds per stage;
+ * sleep and stress start/end become local `HH:MM` clock times.
  */
+import { clockWindowOf } from "./health-clock";
 import {
   HRV_WINDOWS,
   NUMERIC_FIELDS,
@@ -42,7 +44,9 @@ const sleepStageSeconds = (krd: Krd): Record<string, number> => {
 };
 
 const extrasOf = (metric: HealthMetric, krd: Krd) => {
-  if (metric === "sleep") return sleepStageSeconds(krd);
+  if (metric === "sleep")
+    return { ...clockWindowOf(krd), ...sleepStageSeconds(krd) };
+  if (metric === "stress") return clockWindowOf(krd);
   if (metric === "hrv" && HRV_WINDOWS.includes(String(krd.measurementWindow)))
     return { measurementWindow: String(krd.measurementWindow) };
   if (metric === "daily-wellness") {

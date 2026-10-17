@@ -1,16 +1,13 @@
+import type { ChatTool } from "@kaiord/ai";
 import { sportSchema } from "@kaiord/core";
 
+import type { ReadToolDeps } from "./chat-tool-deps";
 import { defineReadTool } from "./define-read-tool";
 import { summarizeWorkouts } from "./summarize-workouts";
 
 const ROW_BUDGET = 50;
 
-export const createQueryWorkoutsTool = defineReadTool({
-  name: "query_workouts",
-  description:
-    "Read the user's workouts in a date range. Returns count, total and " +
-    "longest duration, and per-workout summaries (id, date, sport, name, " +
-    "state, duration, distance). Use it for questions about training history.",
+const queryWorkouts = defineReadTool({
   input: {
     sport: sportSchema
       .optional()
@@ -26,4 +23,13 @@ export const createQueryWorkoutsTool = defineReadTool({
     const { workouts, ...summary } = summarizeWorkouts(scoped);
     return { rows: workouts, summary };
   },
+});
+
+export const createQueryWorkoutsTool = (deps: ReadToolDeps): ChatTool => ({
+  name: "query_workouts",
+  description:
+    "Read the user's workouts in a date range. Returns count, total and " +
+    "longest duration, and per-workout summaries (id, date, sport, name, " +
+    "state, duration, distance). Use it for questions about training history.",
+  ...queryWorkouts(deps),
 });

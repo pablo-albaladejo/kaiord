@@ -23,7 +23,7 @@ export const applyReadBudget = <Row>(
   rows: readonly Row[],
   budget: Budget
 ): Record<string, unknown> & Truncation => {
-  const recent = rows.slice(-budget.maxRows);
+  const recent = budget.maxRows > 0 ? rows.slice(-budget.maxRows) : [];
   // Reserve the envelope plus the widest truncation marker it can carry.
   let used = bytesOf({
     ...envelope,

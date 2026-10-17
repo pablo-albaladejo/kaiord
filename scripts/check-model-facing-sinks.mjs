@@ -29,9 +29,9 @@ const TOOLS_DIR = "packages/workout-spa-editor/src/application/chat/tools";
 // Global: several tools share one file (action-tools.ts declares six).
 const NAME_RE = /^\s*name:\s*"([a-z_]+)"/gm;
 // Property (`execute: async () => …`) and method (`async execute() {}`) form,
-// plus a tool built by `defineReadTool(...)`, whose `execute` lives in the
-// shared helper. Recognizing only the colon lets such a tool skip collection.
-const EXECUTE_RE = /\bexecute\s*[:(]|\bdefineReadTool\s*\(/;
+// plus a tool built by a `define…Tool(...)` helper (`defineReadTool`), whose
+// `execute` lives in the shared helper. Recognizing only the colon lets such a tool skip collection.
+const EXECUTE_RE = /\bexecute\s*[:(]|\bdefine\w+Tool\s*\(/;
 const STATUSES = new Set(["clean", "fenced", "unbounded"]);
 
 const isToolSource = (f) =>

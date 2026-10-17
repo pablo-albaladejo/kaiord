@@ -1,7 +1,7 @@
 /**
  * Shared contract for every chat read tool.
  *
- * - Input: zod, with `dateFrom`/`dateTo` held to `YYYY-MM-DD`; closed domains
+ * - Input: zod, with `dateFrom`/`dateTo` real `YYYY-MM-DD` dates; closed domains
  *   are enums, and every field carries a `.describe()`.
  * - Scope: `read` receives readers already bound to the active profile; it
  *   never sees the persistence port or the profile id.
@@ -9,6 +9,8 @@
  *   the range actually queried is always echoed as `range_used`, and the
  *   rows are held to a row AND serialized-byte budget with a
  *   `truncated`/`omitted` marker.
+ * - Identity: each tool file writes its own `name`/`description` literals
+ *   beside the spread body.
  * - Every tool still needs its entry in `scripts/model-facing-sinks.mjs`,
  *   and externally-authored text in a row goes through `fenceUntrusted`.
  */
@@ -20,10 +22,8 @@ import { clampRange, type DateRange } from "./clamp-range";
 import { bindProfileReaders, type ProfileReaders } from "./profile-readers";
 import { applyReadBudget, DEFAULT_MAX_BYTES } from "./read-budget";
 
-export const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-export const isoDate = () =>
-  z.string().regex(ISO_DATE_RE, "Expected a date as YYYY-MM-DD");
+/** A real calendar date as `YYYY-MM-DD`; `2026-02-30` is rejected too. */
+export const isoDate = () => z.iso.date("Expected a date as YYYY-MM-DD");
 
 const DATE_RANGE_SHAPE = {
   dateFrom: isoDate().optional().describe("First day of the range, YYYY-MM-DD"),
@@ -43,8 +43,6 @@ export type ReadOutput<Row> = {
 };
 
 export type ReadToolSpec<S extends z.ZodRawShape, Row> = {
-  name: string;
-  description: string;
   input: S;
   /** Key the budgeted rows are returned under. */
   rowsKey: string;
@@ -57,15 +55,17 @@ export type ReadToolSpec<S extends z.ZodRawShape, Row> = {
   ) => Promise<ReadOutput<Row>>;
 };
 
+/**
+ * Everything but the tool's identity: each tool file spreads this under its
+ * own `name` and `description` literals, so both stay visible to the guards.
+ */
+export type ReadToolBody = Omit<ChatTool, "name" | "description">;
+
 export const defineReadTool =
   <S extends z.ZodRawShape, Row>(spec: ReadToolSpec<S, Row>) =>
-  (deps: ReadToolDeps): ChatTool => {
+  (deps: ReadToolDeps): ReadToolBody => {
     const inputSchema = z.object({ ...DATE_RANGE_SHAPE, ...spec.input });
-    // `name` and `description` are the string literals of each tool's spec.
-    const { name, description } = spec;
     return {
-      name,
-      description,
       inputSchema,
       requiresConfirmation: false,
       execute: async (raw) => {

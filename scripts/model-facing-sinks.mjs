@@ -53,7 +53,7 @@ export const SINKS = [
     tool: "query_health",
     status: "clean",
     provenance:
-      "summarize-health.ts projects each record to its date plus a fixed per-metric list of finite numbers (sleep stages summed to seconds per stage; hrv measurementWindow only when it is one of the schema's two literals). The KRD payload, and the upstream-written externalId/sourceBridgeId it carries, is never forwarded",
+      "summarize-health.ts projects each record to its date plus a fixed per-metric list of finite numbers (sleep stages summed to seconds per stage; sleep and stress startTime/endTime only as a local HH:MM clock derived from the instant in health-clock.ts; hrv measurementWindow only when it is one of the schema's two literals). The KRD payload, and the upstream-written externalId/sourceBridgeId it carries, is never forwarded",
   },
   {
     tool: "query_energy_balance",

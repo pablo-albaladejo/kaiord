@@ -90,6 +90,19 @@ export const create = defineReadTool({
   assert.ok(violations.some((v) => v.tool === "defined_read_tool"));
 });
 
+test("any define…Tool helper is recognized", () => {
+  const dir = sandbox({
+    "other-helper.ts": `
+export const create = defineSummaryTool({
+  name: "summary_helper_tool",
+});
+`,
+  });
+  const violations = runCheck({ toolsRoot: dir });
+  rmSync(dir, { recursive: true, force: true });
+  assert.ok(violations.some((v) => v.tool === "summary_helper_tool"));
+});
+
 test("a duplicate declaration fails", () => {
   const clone = { ...SINKS[0] };
   SINKS.push(clone);
