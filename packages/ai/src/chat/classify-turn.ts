@@ -7,10 +7,10 @@ import type { RawTurn } from "./run-turn";
  * history so `messages` is always the full, resume-ready conversation.
  *
  * - An unanswered action-tool call → `pending_action` (awaiting confirmation).
- *   The last one wins: the loop halts on the step that produced it, so an
- *   earlier action call was already answered (e.g. by a tool-error). Other
- *   action calls of that step are answered `one_action_at_a_time` (counted
- *   in `deferredCount`), or `duplicate_of_pending` when they copy it.
+ *   The first one of the step wins, the order the model proposed them in
+ *   (calls whose input failed validation were already answered and are not
+ *   here). Other action calls of that step are answered (see
+ *   `answerExtraActions`): deferred ones are counted in `deferredCount`.
  * - Otherwise a `tool-calls` finish reason means the step cap halted the loop
  *   while the model still wanted tools → `step_limit`.
  * - Anything else → `complete`.
@@ -22,10 +22,10 @@ export const classifyTurn = (
 ): ChatTurnResult => {
   const messages = [...history, ...raw.messages];
   const actionCalls = raw.toolCalls.filter((c) => actionNames.has(c.toolName));
-  const actionCall = actionCalls.at(-1);
+  const actionCall = actionCalls[0];
 
   if (actionCall) {
-    const extras = answerExtraActions(actionCalls.slice(0, -1), actionCall);
+    const extras = answerExtraActions(actionCalls.slice(1), actionCall);
     messages.push(...extras.messages);
     return {
       status: "pending_action",

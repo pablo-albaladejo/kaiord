@@ -67,7 +67,9 @@ const answeredIds = (prompt: Array<{ role: string; content: unknown }>) =>
     .filter((part) => part.type === "tool-result")
     .map((part) => part.toolCallId);
 
-const reAskHrv = () =>
+// After the decline the model proposes the DEFERRED action (hrv), not the
+// declined one (sleep).
+const reAskDeferred = () =>
   stream(
     [
       {
@@ -85,13 +87,13 @@ const deferredAnswer = (prompt: Array<{ role: string; content: unknown }>) =>
   prompt
     .filter((m) => m.role === "tool")
     .flatMap((m) => m.content as Array<Record<string, unknown>>)
-    .find((part) => part.toolCallId === "first");
+    .find((part) => part.toolCallId === "second");
 
 describe("chat agent with parallel action calls", () => {
   it("should offer the deferred action again once the user has declined the pending one", async () => {
     // Arrange
     const model = new MockLanguageModelV4({
-      doStream: [twoActionsInOneStep(), reAskHrv()] as never,
+      doStream: [twoActionsInOneStep(), reAskDeferred()] as never,
     });
     const agent = createChatAgent({
       model,
@@ -110,7 +112,11 @@ describe("chat agent with parallel action calls", () => {
     });
 
     // Assert
-    expect(first.pendingAction.deferredCount).toBe(1);
+    expect(first.pendingAction).toMatchObject({
+      toolCallId: "first",
+      input: JSON.parse(route("sleep")),
+      deferredCount: 1,
+    });
     const prompt = model.doStreamCalls[1]?.prompt ?? [];
     expect(JSON.stringify(deferredAnswer(prompt as never))).toContain(
       "applies to that action only"

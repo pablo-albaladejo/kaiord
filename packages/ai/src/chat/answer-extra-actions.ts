@@ -19,36 +19,45 @@ const DUPLICATE_OF_PENDING = {
     "user's confirmation. It was not run separately. Do not ask for it again.",
 };
 
-const isSameCall = (a: ToolCall, b: ToolCall) =>
-  a.toolName === b.toolName &&
-  JSON.stringify(a.input) === JSON.stringify(b.input);
+const DUPLICATE_ACTION = {
+  error: "duplicate_action",
+  message:
+    "This is the same action, with the same input, as another call of this " +
+    "step that was already answered. It was not run. Do not ask for it again.",
+};
+
+const keyOf = (call: ToolCall) =>
+  `${call.toolName}:${JSON.stringify(call.input)}`;
 
 /**
  * A step may hold several action calls, but the user confirms one. The others
  * are answered here, so every tool call has a result when the conversation is
  * sent again: the SDK and Anthropic both reject a call with no result. A copy
- * of the pending call is `duplicate_of_pending`; any other is deferred, and
- * `deferredCount` says how many the model was told to ask about again.
+ * of the pending call is `duplicate_of_pending`, a copy of an earlier extra is
+ * `duplicate_action`, and any other is deferred; `deferredCount` says how many
+ * the model was told to ask about again.
  */
 export const answerExtraActions = (
   extras: ToolCall[],
   pending: ToolCall
 ): { messages: ModelMessage[]; deferredCount: number } => {
   if (extras.length === 0) return { messages: [], deferredCount: 0 };
-  const results = extras.map((call) => {
-    const duplicate = isSameCall(call, pending);
-    const value = duplicate ? DUPLICATE_OF_PENDING : ONE_ACTION_AT_A_TIME;
-    return { call, duplicate, value };
-  });
-  const message: ModelMessage = {
-    role: "tool",
-    content: results.map(({ call, value }) => ({
-      type: "tool-result",
+  const pendingKey = keyOf(pending);
+  const seen = new Set([pendingKey]);
+  let deferredCount = 0;
+  const content = extras.map((call) => {
+    const key = keyOf(call);
+    let value = ONE_ACTION_AT_A_TIME;
+    if (key === pendingKey) value = DUPLICATE_OF_PENDING;
+    else if (seen.has(key)) value = DUPLICATE_ACTION;
+    else deferredCount++;
+    seen.add(key);
+    return {
+      type: "tool-result" as const,
       toolCallId: call.toolCallId,
       toolName: call.toolName,
-      output: { type: "json", value },
-    })),
-  };
-  const deferredCount = results.filter((r) => !r.duplicate).length;
-  return { messages: [message], deferredCount };
+      output: { type: "json" as const, value },
+    };
+  });
+  return { messages: [{ role: "tool", content }], deferredCount };
 };

@@ -79,7 +79,7 @@ describe("classifyTurn", () => {
     expect(result.status).toBe("complete");
   });
 
-  it("should pick the last action call when a turn holds several", () => {
+  it("should pick the first action call when a turn holds several", () => {
     // Arrange
     const raw = rawTurn({
       finishReason: "tool-calls",
@@ -96,7 +96,7 @@ describe("classifyTurn", () => {
     // Assert
     expect(result.status).toBe("pending_action");
     if (result.status === "pending_action") {
-      expect(result.pendingAction.toolCallId).toBe("late");
+      expect(result.pendingAction.toolCallId).toBe("early");
     }
   });
 
@@ -123,8 +123,8 @@ describe("classifyTurn", () => {
       content: [
         {
           type: "tool-result",
-          toolCallId: "early",
-          toolName: "set_data_route",
+          toolCallId: "late",
+          toolName: "push_to_garmin",
           output: {
             type: "json",
             value: expect.objectContaining({ error: "one_action_at_a_time" }),
@@ -161,10 +161,10 @@ describe("classifyTurn", () => {
     const raw = rawTurn({
       finishReason: "tool-calls",
       toolCalls: [
-        { toolName: "set_data_route", toolCallId: "copy", input },
+        { toolName: "set_data_route", toolCallId: "pending", input },
         {
           toolName: "set_data_route",
-          toolCallId: "pending",
+          toolCallId: "copy",
           input: { ...input },
         },
       ],
@@ -185,6 +185,44 @@ describe("classifyTurn", () => {
     expect(answer).not.toContain("one_action_at_a_time");
     expect(answer).not.toContain("Ask the user about it again");
   });
+
+  it.each([
+    [
+      "a copy of the pending call",
+      ["sleep", "sleep", "hrv"],
+      ["duplicate_of_pending", "one_action_at_a_time"],
+    ],
+    [
+      "a copy of an earlier extra",
+      ["sleep", "hrv", "hrv"],
+      ["one_action_at_a_time", "duplicate_action"],
+    ],
+  ])(
+    "should answer %s as a duplicate and count only distinct deferred actions",
+    (_label, dataTypes, errors) => {
+      // Arrange
+      const raw = rawTurn({
+        finishReason: "tool-calls",
+        toolCalls: dataTypes.map((dataType, i) => ({
+          toolName: "set_data_route",
+          toolCallId: `c${i}`,
+          input: { dataType },
+        })),
+      });
+
+      // Act
+      const result = classifyTurn(history, raw, new Set(["set_data_route"]));
+
+      // Assert
+      if (result.status !== "pending_action") throw new Error(result.status);
+      expect(result.pendingAction.toolCallId).toBe("c0");
+      expect(result.pendingAction.deferredCount).toBe(1);
+      const tool = result.messages.at(-1) as {
+        content: Array<{ output: { value: { error: string } } }>;
+      };
+      expect(tool.content.map((p) => p.output.value.error)).toEqual(errors);
+    }
+  );
 
   it("should add no tool message when the step holds a single action call", () => {
     // Arrange

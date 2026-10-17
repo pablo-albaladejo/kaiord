@@ -23,13 +23,13 @@ const renderCard = (deferredCount?: number) => {
 
 describe("PendingActionCard deferred actions", () => {
   it.each([
-    [1, "The assistant proposed 1 more action; it will ask you about it next."],
+    [1, "The assistant proposed 1 more action; it may ask you about it next."],
     [
       2,
-      "The assistant proposed 2 more actions; it will ask you about them next.",
+      "The assistant proposed 2 more actions; it may ask you about them next.",
     ],
   ])(
-    "should say %i other proposed action will be asked about next",
+    "should say %i other proposed action may be asked about next",
     (count, line) => {
       // Arrange
       const deferred = count;
