@@ -19,6 +19,9 @@
  *    ends its line, brace-matched); a one-line type is scanned like code;
  *  - a shorthand field (`{ title }`) is a returned value like `title: title`,
  *    unless it is a destructuring, for-of, or import/export binding;
+ *  - a quoted key (`"title": x`) is checked like a bare one; a computed key
+ *    (`[key]: x`) and a spread (`...record`) are NOT — whatever they carry
+ *    under a recognized name reaches the model unseen;
  *  - an opaque nested payload forwarded whole (`krd: unknown`) is invisible to
  *    it, which is why a tool that forwards one must be recorded as unbounded
  *    rather than clean (`query_health` projects numbers instead).
@@ -122,7 +125,10 @@ export const valueAfterColon = (src, start) => {
 };
 
 const fieldPattern = () =>
-  new RegExp(`(^|[\\s{,(])(${FENCED_FIELD_NAMES.join("|")})\\s*:`, "g");
+  new RegExp(
+    `(^|[\\s{,(])(["']?)(${FENCED_FIELD_NAMES.join("|")})\\2\\s*:`,
+    "g"
+  );
 
 const shorthandPattern = () =>
   new RegExp(`([{,])\\s*(${FENCED_FIELD_NAMES.join("|")})\\s*(?=[,}])`, "g");
@@ -183,7 +189,7 @@ export const fileViolations = (src, file) => {
   const scannable = stripNonValueRegions(src);
   const violations = shorthandViolations(scannable, file);
   for (const match of scannable.matchAll(fieldPattern())) {
-    const field = match[2];
+    const field = match[3];
     const colon = match.index + match[0].length;
     const value = valueAfterColon(scannable, colon).trim();
     if (value === "" || isAppAuthored(value)) continue;

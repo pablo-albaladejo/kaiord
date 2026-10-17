@@ -26,10 +26,10 @@ const queryWorkouts = defineReadTool({
 });
 
 export const createQueryWorkoutsTool = (deps: ReadToolDeps): ChatTool => ({
+  ...queryWorkouts(deps),
   name: "query_workouts",
   description:
     "Read the user's workouts in a date range. Returns count, total and " +
     "longest duration, and per-workout summaries (id, date, sport, name, " +
     "state, duration, distance). Use it for questions about training history.",
-  ...queryWorkouts(deps),
 });

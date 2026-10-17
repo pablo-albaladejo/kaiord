@@ -226,6 +226,28 @@ export const summarize = (r) => ({ notes: r.notes });
   );
 });
 
+test("a quoted key is checked like a bare one", () => {
+  const violations = inSandbox({
+    "quoted.ts": `
+export const summarize = (r) => ({ "title": r.title, 'notes': r.notes });
+`,
+  });
+  assert.deepEqual(
+    violations.map((v) => v.field),
+    ["title", "notes"]
+  );
+});
+
+test("a computed key and a spread are KNOWN gaps, not caught", () => {
+  const violations = inSandbox({
+    "computed.ts": `
+const key = "title";
+export const summarize = (r) => ({ [key]: r.title, ...r.extra });
+`,
+  });
+  assert.deepEqual(violations, []);
+});
+
 test("a shorthand field is a returned value", () => {
   const violations = inSandbox({
     "shorthand.ts": `

@@ -10,7 +10,7 @@
  *   rows are held to a row AND serialized-byte budget with a
  *   `truncated`/`omitted` marker.
  * - Identity: each tool file writes its own `name`/`description` literals
- *   beside the spread body.
+ *   after the spread body.
  * - Every tool still needs its entry in `scripts/model-facing-sinks.mjs`,
  *   and externally-authored text in a row goes through `fenceUntrusted`.
  */
@@ -56,8 +56,9 @@ export type ReadToolSpec<S extends z.ZodRawShape, Row> = {
 };
 
 /**
- * Everything but the tool's identity: each tool file spreads this under its
- * own `name` and `description` literals, so both stay visible to the guards.
+ * Everything but the tool's identity: each tool file spreads this first, then
+ * writes its own `name` and `description` literals, so the literals win and
+ * stay visible to the guards.
  */
 export type ReadToolBody = Omit<ChatTool, "name" | "description">;
 

@@ -24,11 +24,11 @@ const queryHealth = defineReadTool({
 });
 
 export const createQueryHealthTool = (deps: ReadToolDeps): ChatTool => ({
+  ...queryHealth(deps),
   name: "query_health",
   description:
     "Read the user's health metrics (sleep, weight, hrv, daily-wellness, " +
     "body-composition, stress) in a date range. Returns count and per-day " +
     "numeric readings for the metric. Use it for questions about sleep, " +
     "weight, recovery, etc.",
-  ...queryHealth(deps),
 });
