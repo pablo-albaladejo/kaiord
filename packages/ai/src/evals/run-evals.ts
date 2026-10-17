@@ -37,6 +37,7 @@ const runEvals = async () => {
     try {
       const workout = await textToWorkout(bench.text, {
         sport: bench.expectedSport as never,
+        athlete: bench.athleteZones ? { zones: bench.athleteZones } : undefined,
       });
       const result = evaluateBenchmark(bench, workout, Date.now() - start);
       results.push(result);

@@ -27,11 +27,27 @@ export const zoneCheckViolation = (zc: ZoneCheck): string | null => {
     : `zoneCheck for "${zc.targetType}" declares ${declared.join(", ")}, which the comparison cannot use`;
 };
 
+/**
+ * A range cannot be required of a generation that was never given the zones
+ * to resolve one: zone references would stay zones, and the case would be red
+ * by construction rather than by the model.
+ */
+export const targetCheckViolation = (b: Benchmark): string | null => {
+  const check = b.targetCheck;
+  if (!check?.requireRange) return null;
+  const table = b.athleteZones?.[check.targetType];
+  return table && table.length > 0
+    ? null
+    : `targetCheck requires ${check.targetType} ranges but athleteZones has no ${check.targetType} table`;
+};
+
 export const benchmarkViolations = (
   benchmarks: readonly Benchmark[]
 ): string[] =>
   benchmarks.flatMap((b) => {
-    if (!b.zoneCheck) return [];
-    const violation = zoneCheckViolation(b.zoneCheck);
-    return violation === null ? [] : [`${b.id}: ${violation}`];
+    const violations = [
+      b.zoneCheck ? zoneCheckViolation(b.zoneCheck) : null,
+      targetCheckViolation(b),
+    ].filter((v): v is string => v !== null);
+    return violations.map((v) => `${b.id}: ${v}`);
   });

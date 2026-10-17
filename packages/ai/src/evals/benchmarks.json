@@ -205,5 +205,134 @@
     "maxSteps": 15,
     "category": "repetition",
     "language": "en"
+  },
+  {
+    "id": "es-train2go-contrasts",
+    "text": "Rodaje con contrastes: 10' z1 +30' contrastes\nRodaje 12' z1 RPE 2-3\n5' en Z2\n4x(30sg progresivos acabando fuerte + 60sg z1)\nR: 2'\nCambios con mucho contraste en terreno variable:\n30' con (30\" fuertes con cadencia alta pero con control de los apoyos y buenas sensaciones + 1' trote Z1 + 20\" cambio fuerte + 1'40\" Z1)\n5 min cool down",
+    "expectedSport": "running",
+    "minSteps": 10,
+    "maxSteps": 14,
+    "category": "zones",
+    "language": "es",
+    "targetCheck": {
+      "targetType": "pace",
+      "requireRange": true
+    },
+    "expectedRepeatCounts": [4, 8],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
+  },
+  {
+    "id": "es-running-progressive",
+    "text": "Rodaje 20' z1, 3x(1K progresivo + 2' trote), 10' muy cómodo",
+    "expectedSport": "running",
+    "minSteps": 4,
+    "maxSteps": 8,
+    "category": "zones",
+    "language": "es",
+    "targetCheck": {
+      "targetType": "pace",
+      "requireRange": true
+    },
+    "expectedRepeatCounts": [3],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
+  },
+  {
+    "id": "es-cycling-progressive",
+    "text": "Rodillo 1h: 15' suave, 15' progresivo de Z2 a Z3, 3x(5' fuerte + 3' suave), R: 2', 10' vuelta a la calma",
+    "expectedSport": "cycling",
+    "minSteps": 6,
+    "maxSteps": 10,
+    "category": "zones",
+    "language": "es",
+    "targetCheck": {
+      "targetType": "power",
+      "requireRange": true
+    },
+    "expectedRepeatCounts": [3],
+    "athleteZones": {
+      "power": [
+        {
+          "zone": 1,
+          "minWatts": 0,
+          "maxWatts": 137
+        },
+        {
+          "zone": 2,
+          "minWatts": 138,
+          "maxWatts": 187
+        },
+        {
+          "zone": 3,
+          "minWatts": 188,
+          "maxWatts": 225
+        },
+        {
+          "zone": 4,
+          "minWatts": 226,
+          "maxWatts": 262
+        },
+        {
+          "zone": 5,
+          "minWatts": 263,
+          "maxWatts": 300
+        }
+      ]
+    }
   }
 ]

@@ -15,8 +15,6 @@ import type { GenerationState } from "../../../store/ai-store-types";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { KRD } from "../../../types/krd";
 import type { Profile } from "../../../types/profile";
-import type { SportKey } from "../../../types/sport-zones";
-import { formatZonesContext } from "./zones-formatter";
 
 export type GenerateRunArgs = {
   text: string;
@@ -47,18 +45,12 @@ export const runAiGeneration = async ({
 
   let krd;
   try {
-    const sportKey = (sport || undefined) as SportKey | undefined;
-    const zonesContext = profile
-      ? formatZonesContext(profile, sportKey)
-      : undefined;
-
     krd = await generateWorkoutKrd({
       text,
       provider,
       modelId,
       sport,
-      customPrompt: customPrompt ? customPrompt : undefined,
-      zonesContext,
+      athlete: { profile, customPrompt },
     });
   } catch (error: unknown) {
     setGeneration({ status: "error", message: localizeAiError(error, locale) });

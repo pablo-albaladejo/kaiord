@@ -15,7 +15,6 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import { ATHLETE_SPORTS } from "../../../lib/athlete";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
-import { formatZonesContext } from "../../organisms/AiWorkoutInput/zones-formatter";
 
 export type CreatePhase = "input" | "generating" | "result";
 
@@ -45,17 +44,17 @@ export function useCreateWorkout() {
     if (!promptText.trim() || !resolved) return;
     setPhase("generating");
     try {
-      const profile = active?.profile ?? null;
-      const zonesContext = profile
-        ? formatZonesContext(profile, sport)
-        : undefined;
+      // Still loading (undefined): let generation read them from the db.
+      const athlete =
+        active === undefined || customPrompt === undefined
+          ? undefined
+          : { profile: active.profile, customPrompt };
       const krd = await generateWorkoutKrd({
         text: promptText,
         provider: resolved.provider,
         modelId: resolved.modelId,
         sport,
-        customPrompt: customPrompt ?? undefined,
-        zonesContext,
+        athlete,
       });
       setGeneratedKrd(krd);
       setPhase("result");

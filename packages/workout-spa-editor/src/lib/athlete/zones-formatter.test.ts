@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { Profile } from "../../../types/profile";
-import type { SportZoneConfig } from "../../../types/sport-zones";
+import type { Profile } from "../../types/profile";
+import type { SportZoneConfig } from "../../types/sport-zones";
 import { formatZonesContext } from "./zones-formatter";
 
 const emptyHrZones = {

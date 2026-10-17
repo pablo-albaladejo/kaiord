@@ -5,17 +5,19 @@
 
 ## Purpose
 
-Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (22 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **The runners are INERT in this project**: they obtain a model through `loadEvalModel`, which throws without a provider API key, and this project has none. They have never executed. What runs on every commit is the assertion logic and the fixtures' own structural invariants, neither of which needs a credential.
+Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (25 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **The runners are INERT in this project**: they obtain a model through `loadEvalModel`, which throws without a provider API key, and this project has none. They have never executed. What runs on every commit is the assertion logic and the fixtures' own structural invariants, neither of which needs a credential.
 
 ## Key Files
 
-- `benchmarks.json` — 22 curated workout descriptions across sports (cycling, running, swimming, generic), complexity (simple, intervals, repetition blocks, mixed), languages (English, Spanish, mixed), and edge cases
+- `benchmarks.json` — 25 curated workout descriptions across sports (cycling, running, swimming, generic), complexity (simple, intervals, repetition blocks, mixed), languages (English, Spanish, mixed), and edge cases
 - `types.ts` — Type definitions: `Benchmark`, `EvalResult`, `EvalReport`, `ZoneCheck`
 - `assertions.ts` — `evaluateBenchmark(benchmark, workout, durationMs)` validates schema, sport, step count, zone ranges
 - `reporter.ts` — Report generation (`createReport`, `formatReport`) with category/language breakdowns; reused as-is by the chat-tool evals (both result shapes carry `id`/`pass`/`errors`/`durationMs`)
 - `run-evals.ts` — CLI entry point (inert): would run all benchmarks and output report JSON and markdown
 - `load-eval-model.ts` — shared `EVAL_PROVIDER`/`EVAL_MODEL` loader used by all three eval CLIs; throws without the provider's API key, which is why the CLIs are inert here
 - `benchmark-invariants.ts` — keyless structural checks over `benchmarks.json`; a `zoneCheck` with no bound the comparison can use is rejected
+- `target-assertions.ts` — the `targets` and `structure` dimensions
+- `train2go-contrasts.test.ts` — keyless end-to-end case: a `MockLanguageModelV4` returns the zone numbers a rule-following model emits for the Train2Go "rodaje con contrastes" session, `createTextToWorkout` resolves them against the benchmark's `athleteZones`, and the result passes its benchmark; the pre-fix output (open targets) fails `targets`
 - `dimension-outcomes.ts` — the `passed` / `failed` / `unmeasured` constructors, the per-dimension tally, and `dimensionRatePercent`, which returns `null` rather than a number when nothing was measured
 - `chat-tool-benchmarks.json` — Data Hub hub-conversation scenarios (F6): "where do my planned sessions come from" (read) and "read sleep only from Whoop" (action)
 - `chat-tool-types.ts` — Type definitions: `ChatToolBenchmark`, `ChatToolEvalResult`
@@ -30,16 +32,19 @@ Each benchmark is evaluated against:
 1. **Schema validation**: output must pass `workoutSchema` from `@kaiord/core`. A schema failure short-circuits; no other dimension is evaluated.
 2. **Sport correctness**: if `expectedSport` is set, `workout.sport` must match.
 3. **Step count**: `countSteps(workout)` must be within `[minSteps, maxSteps]` (nested steps in blocks are counted).
-4. **Zone accuracy** (±5% tolerance, optional): if `zoneCheck` is defined, active steps of the target type must fall within `[minValue*0.95, maxValue*1.05]`. A zone check with no matching active step **fails** — it is not skipped.
+4. **Targets** (optional): if `targetCheck` is defined, every step (repetition steps included) must carry `targetType`; with `requireRange`, as an explicit `range`, so a zone left unresolved fails. `benchmark-invariants.ts` rejects a required range whose `athleteZones` has no table of that type.
+5. **Structure** (optional): if `expectedRepeatCounts` is defined, the repetition blocks' `repeatCount`s must match it in order.
+6. **Zone accuracy** (±5% tolerance, optional): if `zoneCheck` is defined, active steps of the target type must fall within `[minValue*0.95, maxValue*1.05]`. A zone check with no matching active step **fails** — it is not skipped.
 
 Each dimension yields one outcome: `passed`, `failed` with a message, or
 `unmeasured` with a reason. `unmeasured` is a member of the union, not a flag
 beside a score, so there is no field on it a caller could average or compare —
 a criterion nobody measured cannot enter a rate by looking like a zero.
 
-Two dimensions are routinely unmeasured and say so: `sport` when the benchmark
-declares no `expectedSport`, and `zone` when it declares no `zoneCheck`. A
-schema failure marks the other three unmeasured rather than leaving them out,
+Four dimensions are routinely unmeasured and say so: `sport` when the benchmark
+declares no `expectedSport`, `zone` when it declares no `zoneCheck`, `targets`
+when it declares no `targetCheck`, and `structure` when it declares no
+`expectedRepeatCounts`. A schema failure marks the other five unmeasured rather than leaving them out,
 so the short-circuit is visible in the report instead of being inferred from
 an absence.
 

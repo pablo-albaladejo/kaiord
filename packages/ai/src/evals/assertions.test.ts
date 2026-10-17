@@ -472,7 +472,9 @@ describe("evaluateBenchmark — absence of measurement", () => {
     const unmeasured = result.outcomes
       .filter((o) => o.status === "unmeasured")
       .map((o) => o.dimension);
-    expect(new Set(unmeasured)).toEqual(new Set(["sport", "steps", "zone"]));
+    expect(new Set(unmeasured)).toEqual(
+      new Set(["sport", "steps", "zone", "targets", "structure"])
+    );
   });
 
   it("should not count an unmeasured dimension as a failure", () => {
@@ -541,5 +543,70 @@ describe("expectMeasured", () => {
 
     // Assert
     expect(act).toThrow(/No outcome for dimension/);
+  });
+});
+
+describe("evaluateBenchmark — targets and structure", () => {
+  const paceStep = (unit: "range" | "zone") => ({
+    stepIndex: 0,
+    durationType: "time" as const,
+    duration: { type: "time" as const, seconds: 60 },
+    targetType: "pace" as const,
+    target: {
+      type: "pace" as const,
+      value:
+        unit === "range"
+          ? { unit: "range" as const, min: 2.5, max: 2.9 }
+          : { unit: "zone" as const, value: 1 },
+    },
+    intensity: "active" as const,
+  });
+  const bench: Benchmark = {
+    id: "running-es-targets",
+    text: "2x(1' z1)",
+    expectedSport: "running",
+    minSteps: 1,
+    maxSteps: 5,
+    category: "zones",
+    language: "es",
+    targetCheck: { targetType: "pace", requireRange: true },
+    expectedRepeatCounts: [2],
+  };
+  const withBlock = (unit: "range" | "zone", repeatCount = 2): Workout => ({
+    sport: "running",
+    steps: [{ repeatCount, steps: [paceStep(unit)] }],
+  });
+
+  it("should pass when every step is a pace range and the repeats match", () => {
+    // Arrange
+    const workout = withBlock("range");
+
+    // Act
+    const result = evaluateBenchmark(bench, workout, EVAL_DURATION_MS_DEFAULT);
+
+    // Assert
+    expect(result.errors).toEqual([]);
+  });
+
+  it("should fail targets when a pace zone was left unresolved", () => {
+    // Arrange
+    const workout = withBlock("zone");
+
+    // Act
+    const result = evaluateBenchmark(bench, workout, EVAL_DURATION_MS_DEFAULT);
+
+    // Assert
+    expect(failedDimensions(result)).toEqual(["targets"]);
+  });
+
+  it("should fail structure when the repeat count differs", () => {
+    // Arrange
+    const workout = withBlock("range", 1);
+
+    // Act
+    const result = evaluateBenchmark(bench, workout, EVAL_DURATION_MS_DEFAULT);
+
+    // Assert
+    expect(failedDimensions(result)).toEqual(["structure"]);
   });
 });

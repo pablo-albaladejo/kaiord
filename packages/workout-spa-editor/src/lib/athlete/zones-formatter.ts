@@ -4,9 +4,9 @@
  * Formats training zone context for AI prompt injection.
  */
 
-import type { Profile } from "../../../types/profile";
-import type { SportKey, SportZoneConfig } from "../../../types/sport-zones";
-import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
+import { secondsToMmSs } from "../../components/organisms/ZoneEditor/utils/pace-format";
+import type { Profile } from "../../types/profile";
+import type { SportKey, SportZoneConfig } from "../../types/sport-zones";
 import {
   formatHrZones,
   formatPaceZones,
