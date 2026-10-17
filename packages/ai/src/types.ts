@@ -32,7 +32,8 @@ export type PowerZoneBounds = {
 
 /**
  * The athlete's zones as numbers. Zone targets the model emits are resolved
- * against these in code; a zone missing from its table becomes `open`.
+ * against these in code; a missing power zone stays a zone, a missing pace
+ * zone becomes `open`.
  */
 export type AthleteZoneTables = {
   pace?: Array<PaceZoneBounds>;

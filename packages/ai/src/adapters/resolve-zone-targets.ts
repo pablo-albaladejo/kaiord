@@ -12,11 +12,14 @@ import type { AthleteZoneTables } from "../types";
  *   `{ unit: "zone", min: A, max: B }` (a progressive step) — becomes a
  *   `range` from the athlete's table: the slowest bound of the lower zone to
  *   the fastest bound of the upper one.
- * - A zone the table cannot resolve (no table, or a zone it lacks) becomes
- *   `open`. Numbers are never invented, and an unresolved pace zone would
- *   make the Garmin push refuse the whole workout.
- * - An `open` warmup, recovery or cooldown step gets zone 1 when the table
- *   has it, and stays open otherwise.
+ * - A zone the table cannot resolve (no table, or a zone it lacks) is never
+ *   given invented numbers. A power zone stays a zone (a span collapses to
+ *   its upper zone): Garmin, FIT and ZWO carry power zones natively. A pace
+ *   zone becomes `open`, as does a pace zone with no number: Garmin has no
+ *   pace zones, and an unresolved one would make the push refuse the
+ *   whole workout.
+ * - An `open` warmup, recovery or cooldown step gets the zone 1 range when
+ *   the table has zone 1, and stays open otherwise.
  */
 
 type RawValue = { unit: string; value?: number; min?: number; max?: number };
@@ -60,17 +63,25 @@ const resolveValue = (
 ): RawValue | undefined => {
   const a = value.min ?? value.value;
   const b = value.max ?? value.value;
-  if (a === undefined || b === undefined) return value;
+  if (a === undefined || b === undefined)
+    return type === "pace" ? undefined : value;
+  const high = Math.max(a, b);
   const lowBounds = boundsOf(type, Math.min(a, b), zones);
-  const highBounds = boundsOf(type, Math.max(a, b), zones);
-  if (!lowBounds || !highBounds) return undefined;
+  const highBounds = boundsOf(type, high, zones);
+  if (!lowBounds || !highBounds)
+    return type === "pace" ? undefined : { unit: "zone", value: high };
   const all = [...lowBounds, ...highBounds];
   return { unit: "range", min: Math.min(...all), max: Math.max(...all) };
 };
 
-const withSportDefault = (step: RawStep, type: ZonedType): RawStep => {
+const withSportDefault = (
+  step: RawStep,
+  type: ZonedType,
+  zones: AthleteZoneTables
+): RawStep => {
   if (step.targetType !== "open") return step;
   if (!EASY_INTENSITIES.has(step.intensity ?? "")) return step;
+  if (!boundsOf(type, 1, zones)) return step;
   return {
     ...step,
     targetType: type,
@@ -85,7 +96,7 @@ const resolveStep = (
 ): RawStep => {
   const type = SPORT_TARGET[sport];
   if (!type) return raw;
-  const step = withSportDefault(raw, type);
+  const step = withSportDefault(raw, type, zones);
   const value = step.target?.value;
   if (step.target?.type !== type || value?.unit !== "zone") return step;
   const resolved = resolveValue(type, value, zones);

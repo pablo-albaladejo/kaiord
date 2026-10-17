@@ -91,7 +91,7 @@ describe("resolveZoneTargets", () => {
     expect(result.target).toEqual({ type: "open" });
   });
 
-  it("should turn a zone the athlete's table does not define into open", () => {
+  it("should keep a power zone the athlete's table does not define", () => {
     // Arrange
     const s = step("power", { unit: "zone", value: 2 });
 
@@ -99,7 +99,46 @@ describe("resolveZoneTargets", () => {
     const result = resolveOne("cycling", s);
 
     // Assert
+    expect(result.target).toEqual({
+      type: "power",
+      value: { unit: "zone", value: 2 },
+    });
+  });
+
+  it("should keep a power zone without a power table, collapsing a span to its upper zone", () => {
+    // Arrange
+    const single = step("power", { unit: "zone", value: 3 });
+    const span = step("power", { unit: "zone", min: 2, max: 4 });
+
+    // Act
+    const singleResult = resolveOne("cycling", single, {});
+    const spanResult = resolveOne("cycling", span, {});
+
+    // Assert
+    expect(singleResult.target.value).toEqual({ unit: "zone", value: 3 });
+    expect(spanResult.target.value).toEqual({ unit: "zone", value: 4 });
+  });
+
+  it("should turn a pace zone without a number into open", () => {
+    // Arrange
+    const s = step("pace", { unit: "zone" });
+
+    // Act
+    const result = resolveOne("running", s);
+
+    // Assert
     expect(result.target).toEqual({ type: "open" });
+  });
+
+  it("should leave an open easy cycling step open without a power table", () => {
+    // Arrange
+    const s = step("open", undefined, "warmup");
+
+    // Act
+    const result = resolveOne("cycling", s, {});
+
+    // Assert
+    expect(result).toEqual(s);
   });
 
   it.each([
