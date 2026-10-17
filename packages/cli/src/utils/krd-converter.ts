@@ -63,7 +63,8 @@ export const convertToKrd = async (
 export const convertFromKrd = async (
   krd: KRD,
   format: string,
-  logger: Logger
+  logger: Logger,
+  ftpWatts?: number
 ): Promise<Uint8Array | string> => {
   switch (format as FileFormat) {
     case "fit":
@@ -73,7 +74,7 @@ export const convertFromKrd = async (
     case "zwo":
       return krdToZwo(krd, logger);
     case "gcn":
-      return krdToGcn(krd, logger);
+      return krdToGcn(krd, logger, ftpWatts);
     case "krd":
       return krdToText(krd);
     default:

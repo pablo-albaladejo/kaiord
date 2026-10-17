@@ -7,8 +7,14 @@ import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
 import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
 import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { garminPushReports } from "./garmin-push-reports";
+
+/** A failure the placement result names itself (PlacementFeedback). */
+const explainedByResult = (error: unknown) =>
+  error instanceof PaceZonesUnavailableError ||
+  error instanceof FtpUnavailableError;
 
 export type GarminPushOptions = {
   /** The athlete chose "Send anyway" on an `uncertain` result. */
@@ -63,7 +69,7 @@ export const useGarminPush = (
         // Phase 1 folds a failed conversion into `failed`: surface it first.
         const buildGcn = () =>
           exportRecordGcn(krd, profileId).catch((error: unknown) => {
-            if (!(error instanceof PaceZonesUnavailableError)) showError(error);
+            if (!explainedByResult(error)) showError(error);
             throw error;
           });
         // A joiner's run is the owner's: only the owner reports it.

@@ -175,6 +175,8 @@ describe("SendWeekPanel", () => {
     ["missing-pace-zones", "set your threshold pace in Athlete"],
     ["incomplete-pace-zones", "complete your pace zones in Athlete"],
     ["unsupported-pace-zone-sport", "pace zones only in running or swimming"],
+    ["missing-ftp", "set your FTP in Athlete"],
+    ["sport-without-power-zones", "power zones only in cycling or running"],
   ] as const)("should tell the athlete how to fix a %s item", (reason, fix) => {
     // Arrange
     const outcome = item("w-1", failed(reason, false));

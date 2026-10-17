@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadKrdFixtureRaw } from "../tests/helpers/test-fixtures";
 import { registerGarminPushTool } from "./kaiord-garmin-push";
 
+const FTP_W = 250;
 const mockPush = vi.fn();
 const mockIsAuthenticated = vi.fn();
 
@@ -61,6 +62,21 @@ describe("kaiord_garmin_push", () => {
     // Assert
     expect(result.isError).toBeUndefined();
     expect(parsed).toEqual(mockPushResult);
+  });
+
+  it("should forward the ftp parameter to the push as ftpWatts", async () => {
+    // Arrange
+    mockIsAuthenticated.mockReturnValue(true);
+    mockPush.mockResolvedValue(mockPushResult);
+    const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
+
+    // Act
+    await handler({ input_content: krdJson, ftp: FTP_W });
+
+    // Assert
+    expect(mockPush).toHaveBeenCalledWith(expect.any(Object), {
+      ftpWatts: FTP_W,
+    });
   });
 
   it("should return error when not authenticated", async () => {

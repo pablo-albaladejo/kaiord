@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { GarminBridgeState } from "../../../contexts";
+import { profileWith } from "../../../lib/athlete/test-profile";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
 
@@ -99,8 +100,17 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
   };
 });
 
+import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
 import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { useGarminPush } from "./useGarminPush";
+
+const FTP_W = 250;
+const CYCLING_KRD = {
+  version: "1.0",
+  type: "structured_workout",
+  metadata: { created: "2026-05-14T08:00:00.000Z", sport: "cycling" },
+  extensions: { structured_workout: { sport: "cycling", steps: [] } },
+} as unknown as WorkoutRecord["krd"];
 
 // A stub KRD payload that exportGcnWorkout will receive verbatim.
 const KRD_STUB = { name: "test workout" } as unknown;
@@ -206,6 +216,49 @@ describe("useGarminPush", () => {
     expect(mockExportGcnWorkout).not.toHaveBeenCalled();
     expect(mockPushWorkout).not.toHaveBeenCalled();
   });
+
+  it("should export with the workout owner's profile, the source of its FTP", async () => {
+    // Arrange
+    const profile = profileWith("cycling", { ftp: FTP_W });
+    mockGet.mockResolvedValue(profile);
+    const workout = makeWorkout({ krd: CYCLING_KRD });
+    const { result } = renderHook(() => useGarminPush(workout));
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockGet).toHaveBeenCalledWith("profile-1");
+    expect(mockExportGcnWorkout).toHaveBeenCalledWith(CYCLING_KRD, profile);
+  });
+
+  it.each(["missing-ftp", "sport-without-power-zones"] as const)(
+    "should fail with %s, and push nothing, when the %FTP targets have no FTP",
+    async (reason) => {
+      // Arrange
+      mockExportGcnWorkout.mockRejectedValue(new FtpUnavailableError(reason));
+      const { result } = renderHook(() => useGarminPush(makeWorkout()));
+      let outcome: unknown;
+
+      // Act
+      await act(async () => {
+        outcome = await result.current.push();
+      });
+
+      // Assert
+      expect(outcome).toEqual({ kind: "failed", reason, retryable: false });
+      expect(mockPushWorkout).not.toHaveBeenCalled();
+      expect(mockSetPushing).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "error" })
+      );
+      expect(mockAnalyticsEvent).toHaveBeenCalledWith(
+        "garmin-calendar-placement",
+        expect.objectContaining({ reason })
+      );
+    }
+  );
 
   it("should set error when exportGcnWorkout throws an Error", async () => {
     // Arrange

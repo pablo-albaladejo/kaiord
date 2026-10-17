@@ -19,6 +19,8 @@ export { mapGarminSportToKrd } from "./adapters/mappers/sport.mapper";
 export type GarminWriterOptions = {
   logger?: Logger;
   paceZones?: PaceZoneTable;
+  /** Athlete FTP in watts; required to write `percent_ftp` power targets. */
+  ftpWatts?: number;
 };
 
 export const createGarminReader = (logger?: Logger): TextReader =>
@@ -35,6 +37,7 @@ export const createGarminWriter = (
   return createGarminWriterImpl({
     logger: options.logger || createConsoleLogger(),
     paceZones: options.paceZones,
+    ftpWatts: options.ftpWatts,
   });
 };
 
