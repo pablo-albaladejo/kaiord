@@ -17,8 +17,8 @@
  *    an input field's shape) and is not a data path;
  *  - type members are not values and are skipped;
  *  - an opaque nested payload forwarded whole (`krd: unknown`) is invisible to
- *    it, which is why `query_health` is recorded as unbounded rather than
- *    clean.
+ *    it, which is why a tool that forwards one must be recorded as unbounded
+ *    rather than clean (`query_health` projects numbers instead).
  *
  * Not looking is not a pass: zero files scanned, an unreadable directory and
  * an unreadable source are all faults.
@@ -68,7 +68,7 @@ export const stripNonValueRegions = (src) => {
     .replace(/\/\*[\s\S]*?\*\//g, blank)
     .replace(/\/\/[^\n]*/g, blank);
   return withoutComments.replace(
-    /(^|\n)(\s*(?:export\s+)?type\s+\w+\s*=\s*\{)([\s\S]*?)(\n\s*\};)/g,
+    /(^|\n)(\s*(?:export\s+)?type\s+\w+(?:<[^=]*>)?\s*=\s*\{)([\s\S]*?)(\n\s*\};)/g,
     (_m, lead, head, body, tail) => `${lead}${head}${blank(body)}${tail}`
   );
 };

@@ -173,6 +173,18 @@ export const summarize = (r) => ({
   assert.deepEqual(violations, []);
 });
 
+test("a generic type's members are declarations, not values", () => {
+  const violations = inSandbox({
+    "generic-spec.ts": `
+export type Spec<S extends Shape, Row> = {
+  name: string;
+  description: string;
+};
+`,
+  });
+  assert.deepEqual(violations, []);
+});
+
 test("a field inside a comment is not a value", () => {
   const violations = fileViolations(
     `/**

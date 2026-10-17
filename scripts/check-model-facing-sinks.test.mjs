@@ -76,6 +76,20 @@ export const create = () => ({
   assert.ok(violations.some((v) => v.tool === "method_form_tool"));
 });
 
+test("a tool built by defineReadTool is recognized", () => {
+  const dir = sandbox({
+    "defined-tool.ts": `
+export const create = defineReadTool({
+  name: "defined_read_tool",
+  read: async () => ({ rows: [] }),
+});
+`,
+  });
+  const violations = runCheck({ toolsRoot: dir });
+  rmSync(dir, { recursive: true, force: true });
+  assert.ok(violations.some((v) => v.tool === "defined_read_tool"));
+});
+
 test("a duplicate declaration fails", () => {
   const clone = { ...SINKS[0] };
   SINKS.push(clone);
@@ -120,7 +134,7 @@ test("the recognized field set is declared in one place", () => {
   assert.ok(FENCED_FIELD_NAMES.includes("name"));
 });
 
-test("query_health is recorded as unbounded, not clean", () => {
+test("query_health projects numbers and is no longer unbounded", () => {
   const health = SINKS.find((s) => s.tool === "query_health");
-  assert.equal(health.status, "unbounded");
+  assert.equal(health.status, "clean");
 });
