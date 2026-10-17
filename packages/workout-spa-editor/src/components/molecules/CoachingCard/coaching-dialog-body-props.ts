@@ -8,6 +8,7 @@
 
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { AiRunProgress } from "./ai-run-progress";
 import type { AiFailureState } from "./use-coaching-ai-handler";
 
 export type CoachingDialogBodyProps = {
@@ -16,7 +17,7 @@ export type CoachingDialogBodyProps = {
   pickerWorkouts: WorkoutRecord[];
   matching: boolean;
   splitting: boolean;
-  aiProcessing: boolean;
+  aiProgress: AiRunProgress | null;
   aiFailure: AiFailureState | null;
   manualCreating: boolean;
   onClose: () => void;

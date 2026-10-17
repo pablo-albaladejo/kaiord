@@ -20,4 +20,8 @@ export const createWorkoutParserAgent = (
   mode: "generate",
   outputSchema: aiWorkoutSchema,
   validate: (raw) => reindexSteps(workoutSchema.parse(raw)),
+  countItems: (partial) => {
+    const steps = (partial as { steps?: unknown } | undefined)?.steps;
+    return Array.isArray(steps) ? steps.length : undefined;
+  },
 });

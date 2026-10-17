@@ -1,8 +1,4 @@
-import { generateText, Output } from "ai";
-import type { LanguageModel } from "ai";
-import type { AgentDefinition, GenerateAgentInput } from "./definition-types";
-import type { AiUsage } from "../observability/telemetry-types";
-import { buildUserMessage } from "./build-user-message";
+import { UnsupportedFunctionalityError } from "ai";
 import {
   isAbortError,
   isNonRetryableTransport,
@@ -10,60 +6,43 @@ import {
   truncate,
 } from "./retry-policy";
 import { createAiAgentError } from "./errors";
+import {
+  callModel,
+  streamModel,
+  type CallModelArgs,
+  type GenerateOutcome,
+  type ReportPhase,
+} from "./call-model";
+import { createProgressEmitter, type OnGenerateProgress } from "./progress";
 
 const DEFAULT_MAX_RETRIES = 2;
-const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
 
-export type GenerateOutcome<TOutput> = { output: TOutput; usage?: AiUsage };
+export type { GenerateOutcome };
 
-export type GenerateLoopArgs<TOutput> = {
-  model: LanguageModel;
-  system: string;
-  input: GenerateAgentInput;
-  definition: AgentDefinition<TOutput>;
-  signal?: AbortSignal;
+export type GenerateLoopArgs<TOutput> = CallModelArgs<TOutput> & {
   onAttemptError?: (attempt: number, message: string) => void;
+  /** When set, output streams and each phase change is reported. */
+  onProgress?: OnGenerateProgress;
 };
 
-const toUsage = (raw: {
-  inputTokens?: number;
-  outputTokens?: number;
-}): AiUsage => ({
-  promptTokens: raw?.inputTokens ?? 0,
-  completionTokens: raw?.outputTokens ?? 0,
-});
+type Mode = { streaming: boolean };
 
-// `validate`, when present, owns validation and receives the RAW model output
-// (so an agent whose wire schema is permissive can validate against a stricter
-// domain schema). Otherwise the wire `outputSchema` is the gate.
-const validateOutput = <TOutput>(
-  definition: AgentDefinition<TOutput>,
-  raw: unknown
-): TOutput =>
-  definition.validate
-    ? definition.validate(raw)
-    : (definition.outputSchema.parse(raw) as TOutput);
-
-const callModel = async <TOutput>(
+// A model that cannot stream falls back to one-shot generation for this and
+// every later attempt; the run then reports phases without an item count.
+const callOnce = async <TOutput>(
   args: GenerateLoopArgs<TOutput>,
-  feedback?: string
+  feedback: string | undefined,
+  mode: Mode,
+  report: ReportPhase
 ): Promise<GenerateOutcome<TOutput>> => {
-  const { model, system, input, definition, signal } = args;
-  const result = await generateText({
-    model,
-    output: Output.object({ schema: definition.outputSchema }),
-    system,
-    messages: [buildUserMessage(input, feedback)],
-    maxOutputTokens: definition.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
-    temperature: definition.temperature ?? 0,
-    maxRetries: 0,
-    abortSignal: signal,
-  });
-  if (!result.output) throw new Error("No structured output generated");
-  return {
-    output: validateOutput(definition, result.output),
-    usage: toUsage(result.usage),
-  };
+  if (!mode.streaming) return callModel(args, feedback);
+  try {
+    return await streamModel(args, feedback, report);
+  } catch (error) {
+    if (!UnsupportedFunctionalityError.isInstance(error)) throw error;
+    mode.streaming = false;
+    return callModel(args, feedback);
+  }
 };
 
 /**
@@ -75,12 +54,17 @@ export const runGenerateLoop = async <TOutput>(
   args: GenerateLoopArgs<TOutput>
 ): Promise<GenerateOutcome<TOutput>> => {
   const maxRetries = args.definition.maxRetries ?? DEFAULT_MAX_RETRIES;
+  const emit = createProgressEmitter(args.onProgress, maxRetries + 1);
+  const mode: Mode = { streaming: args.onProgress !== undefined };
   let lastError: string | undefined;
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     args.signal?.throwIfAborted();
+    emit({ phase: "requesting", attempt });
     try {
-      return await callModel(args, lastError);
+      return await callOnce(args, lastError, mode, (phase, items) =>
+        emit({ phase, attempt, items })
+      );
     } catch (error) {
       if (isNonRetryableTransport(error) || isAbortError(error)) throw error;
       lastError = error instanceof Error ? error.message : String(error);
