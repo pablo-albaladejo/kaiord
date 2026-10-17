@@ -16,12 +16,24 @@
  * that is genuinely declared.
  *
  * It also scans `hooks/chat/`, where an approved action's `execute` actually
- * runs: a `catch` there whose body reads the caught value's text
- * (`e.message`, `e.stack`, `String(e)`, `${e}`, `e.toString()`, or a
- * destructured binding) fails, because that is how an exception's text from a
- * bridge or provider reached the model once already (R-CaughtErrorTextHidden).
- * Passing the whole value to a logging helper is not flagged. Known limit: a
- * helper that receives the error and returns its text is not followed.
+ * runs: a `catch (e)` block, typed or not, or a promise `.catch((e) => …)`
+ * whose body hands on the caught value's text or the value itself fails,
+ * because that is how an exception's text from a bridge or provider reached
+ * the model once already (R-CaughtErrorTextHidden). Flagged: `e.message`,
+ * `e?.stack`, `e.toString()`, `(e as Error).message`, `e["message"]`,
+ * `const { message } = e`, a destructured binding, `String(e)`,
+ * `JSON.stringify(e)`, `${e}`, `...e`, `"x" + e`, and returning `e` raw
+ * (`return e`, `{ error: e }`, `{ e }` first or last, `(e) => e`). Comments
+ * are ignored.
+ * Passing the value as a call argument (a logging helper, a categorizer) is
+ * not flagged.
+ *
+ * It is a text scan, not data flow. Known limits: an alias
+ * (`const err = e; err.message`), a helper that receives the error and returns
+ * its text, a rejection handler passed as `.then(ok, onRejected)` or by name
+ * (`.catch(handle)`), a key computed at runtime (`e[key]`), and a shorthand
+ * `{ a, e, b }` between two others (indistinguishable from call arguments)
+ * are not followed.
  *
  * Modes:
  *   --dry-run    Emit violations as JSON on stdout; exit 0.
@@ -40,7 +52,6 @@ const NAME_RE = /^\s*name:\s*"([a-z_]+)"/gm;
 // Recognizing only the colon lets a method-form tool skip name collection.
 const EXECUTE_RE = /\bexecute\s*[:(]/;
 const HOOKS_DIR = "packages/workout-spa-editor/src/hooks/chat";
-const CATCH_RE = /\bcatch\s*\(\s*([^)]*?)\s*\)\s*\{/g;
 const STATUSES = new Set(["clean", "fenced", "unbounded"]);
 
 const isToolSource = (f) =>
@@ -78,26 +89,108 @@ const blockAt = (src, open) => {
   return src.slice(open + 1);
 };
 
-const readsText = (body, binding) => {
-  const id = binding.replace(/\$/g, "\\$");
-  return new RegExp(
-    `\\b${id}\\s*\\??\\.\\s*(message|stack|toString)\\b` +
-      `|\\bString\\(\\s*${id}\\s*\\)|\\$\\{\\s*${id}\\s*\\}`
-  ).test(body);
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Comments blanked to spaces (newlines kept, so line numbers hold). */
+const stripComments = (src) => {
+  let out = "";
+  let quote = null;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (quote) {
+      out += c;
+      if (c === "\\") out += src[++i] ?? "";
+      else if (c === quote) quote = null;
+    } else if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      out += c;
+    } else if (c === "/" && (src[i + 1] === "/" || src[i + 1] === "*")) {
+      const close = src[i + 1] === "/" ? "\n" : "*/";
+      const stop = src.indexOf(close, i + 2);
+      const to = stop === -1 ? src.length : stop + (close === "*/" ? 2 : 0);
+      out += src.slice(i, to).replace(/[^\n]/g, " ");
+      i = to - 1;
+    } else out += c;
+  }
+  return out;
 };
 
-const catchLeaks = (src) => {
+const TEXT_PROP = "(?:message|stack|toString|cause)";
+
+/** Each way a body hands the caught value's text, or the value, onward. */
+const leakPatterns = (id) => [
+  // e.message, e?.stack, e.toString()
+  `${id}\\s*\\??\\.\\s*${TEXT_PROP}\\b`,
+  // (e as Error).message
+  `\\(\\s*${id}\\s+as\\s+[^)]*\\)\\s*\\??\\.\\s*${TEXT_PROP}\\b`,
+  // e["message"], e?.["stack"]
+  `${id}\\s*(?:\\?\\.)?\\[\\s*["'\`]${TEXT_PROP}["'\`]\\s*\\]`,
+  // const { message } = e
+  `\\{[^{}]*\\}\\s*=\\s*\\(?\\s*${id}`,
+  // String(e), JSON.stringify(e), ${e}, ...e
+  `\\b(?:String|JSON\\.stringify)\\(\\s*${id}`,
+  `\\$\\{\\s*${id}`,
+  `\\.\\.\\.\\s*${id}`,
+  // "x" + e, e + "x", s += e
+  `(?<!\\+)\\+=?\\s*${id}`,
+  `${id}\\s*\\+(?![+=])`,
+  // return { error: e }, return { ok, e }, return e, (e) => e
+  `:\\s*${id}\\s*[,}]`,
+  `\\{\\s*${id}\\s*[,}]`,
+  `,\\s*${id}\\s*\\}`,
+  `\\breturn\\s+${id}\\s*(?:[;}\\n]|$)`,
+  `^\\s*${id}\\s*$`,
+];
+
+const readsText = (body, binding) => {
+  // Bounded by hand: `\b` does not see a `$` at either end of an identifier.
+  const id = `(?<![\\w$])${escapeRegExp(binding)}(?![\\w$])`;
+  return leakPatterns(id).some((p) => new RegExp(p).test(body));
+};
+
+/** The paren-matched text of the call whose `(` is at `open`. */
+const argsAt = (src, open) => {
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === "(") depth++;
+    else if (src[i] === ")" && --depth === 0) return src.slice(open + 1, i);
+  }
+  return src.slice(open + 1);
+};
+
+// `catch (e) {`, `catch (e: unknown) {`, `catch ({ message }) {`.
+const CATCH_RE = /(?<!\.\s*)\bcatch\s*\(\s*([^)]*?)\s*\)\s*\{/g;
+// `.catch((e) => …)`, `.catch(e => …)`, `.catch(async function (e) {…})`.
+const PROMISE_CATCH_RE =
+  /\.catch\s*(\()\s*(?:async\s+)?(?:function\b[^(]*)?(?:\(\s*([^)]*?)\s*\)|([A-Za-z_$][\w$]*))\s*(?:=>|\{)/g;
+const TYPED_ID_RE = /^([A-Za-z_$][\w$]*)\s*(?::[\s\S]*)?$/;
+
+/** Every handler of a caught value: its binding, line, and body. */
+const catchSites = (src) => {
+  const sites = [];
+  const lineOf = (index) => src.slice(0, index).split("\n").length;
+  for (const m of src.matchAll(CATCH_RE)) {
+    const body = blockAt(src, m.index + m[0].length - 1);
+    sites.push({ binding: m[1], line: lineOf(m.index), body });
+  }
+  for (const m of src.matchAll(PROMISE_CATCH_RE)) {
+    const open = m.index + m[0].indexOf("(");
+    const args = argsAt(src, open);
+    const binding = m[2] ?? m[3];
+    const body = args.slice(args.search(/=>|\{/) + 2).trim();
+    sites.push({ binding, line: lineOf(m.index), body });
+  }
+  return sites;
+};
+
+const catchLeaks = (raw) => {
   const leaks = [];
-  for (const match of src.matchAll(CATCH_RE)) {
-    const binding = match[1];
-    const line = src.slice(0, match.index).split("\n").length;
-    if (!/^[A-Za-z_$][\w$]*$/.test(binding)) {
+  for (const { binding, line, body } of catchSites(stripComments(raw))) {
+    const typed = TYPED_ID_RE.exec(binding);
+    if (!typed) {
       leaks.push({ line, detail: `destructured catch binding (${binding})` });
-      continue;
-    }
-    const body = blockAt(src, match.index + match[0].length - 1);
-    if (readsText(body, binding)) {
-      leaks.push({ line, detail: `reads the text of caught \`${binding}\`` });
+    } else if (readsText(body, typed[1])) {
+      leaks.push({ line, detail: `reads the text of caught \`${typed[1]}\`` });
     }
   }
   return leaks;

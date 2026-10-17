@@ -174,6 +174,16 @@ for (const [label, body] of [
   ["String()", "return { error: String(err) };"],
   ["template literal", "return { error: `failed: ${err}` };"],
   ["toString()", "return { error: err.toString() };"],
+  ["an `as` cast", "return { error: (err as Error).message };"],
+  ["a bracket key", 'return { error: err["message"] };'],
+  ["destructuring the binding", "const { message } = err; return { message };"],
+  ["JSON.stringify()", "return { error: JSON.stringify(err) };"],
+  ["string concatenation", 'return { error: "failed: " + err };'],
+  ["trailing concatenation", 'return { error: err + " failed" };'],
+  ["a spread", "return { ...err };"],
+  ["the raw value as a property", "return { error: err };"],
+  ["the raw value as a shorthand property", "return { ok: false, err };"],
+  ["the raw value returned", "return err;"],
 ]) {
   test(`reading a caught error's text via ${label} fails`, () => {
     const violations = hookViolations({ "leak.ts": catchBody(body) });
@@ -186,6 +196,102 @@ test("a destructured catch binding fails", () => {
     "leak.ts": `try { run(); } catch ({ message }) { return { error: message }; }`,
   });
   assert.ok(violations.some((v) => v.kind === "caught-error-text"));
+});
+
+const promiseCatch = (handler) => `
+export const run = () => work().catch(${handler});
+`;
+
+for (const [label, handler] of [
+  ["an arrow with parens", "(err) => ({ error: err.message })"],
+  ["an arrow without parens", "err => ({ error: String(err) })"],
+  [
+    "an async arrow with a block",
+    "async (err) => { return { error: `${err}` }; }",
+  ],
+  ["a function expression", "function (err) { return { error: err.stack }; }"],
+  ["a typed arrow", "(err: unknown) => ({ error: (err as Error).message })"],
+  ["an arrow returning the value", "(err) => err"],
+]) {
+  test(`a promise .catch via ${label} that reads the error's text fails`, () => {
+    const violations = hookViolations({ "leak.ts": promiseCatch(handler) });
+    assert.ok(violations.some((v) => v.kind === "caught-error-text"));
+  });
+}
+
+test("a promise .catch that destructures its binding fails", () => {
+  const violations = hookViolations({
+    "leak.ts": promiseCatch("({ message }) => ({ error: message })"),
+  });
+  assert.ok(violations.some((v) => v.kind === "caught-error-text"));
+});
+
+test("a promise .catch that logs and returns a code passes", () => {
+  const violations = hookViolations({
+    "ok.ts": promiseCatch(
+      '(err) => { logFailure(err); return { error: "x" }; }'
+    ),
+  });
+  assert.deepEqual(violations, []);
+});
+
+test("a promise .catch with a function expression that returns a code passes", () => {
+  const violations = hookViolations({
+    "ok.ts": promiseCatch(
+      'function (err) { logFailure(err); return { error: "x" }; }'
+    ),
+  });
+  assert.deepEqual(violations, []);
+});
+
+test("a typed catch binding is read as its identifier, not destructured", () => {
+  const violations = hookViolations({
+    "ok.ts": `try { run(); } catch (err: unknown) { logFailure(err); return { error: "x" }; }`,
+  });
+  assert.deepEqual(violations, []);
+});
+
+test("a typed catch binding that reads the text fails", () => {
+  const violations = hookViolations({
+    "leak.ts": `try { run(); } catch (err: unknown) { return { error: String(err) }; }`,
+  });
+  assert.ok(violations.some((v) => v.kind === "caught-error-text"));
+});
+
+test("a comment naming the error's text is not a leak", () => {
+  const violations = hookViolations({
+    "ok.ts": catchBody(
+      '// never return err.message here\n /* nor String(err) */ return { error: "x" };'
+    ),
+  });
+  assert.deepEqual(violations, []);
+});
+
+test("a comment marker inside a string does not hide the code after it", () => {
+  const violations = hookViolations({
+    "leak.ts": catchBody(
+      'const url = "https://x"; return { error: err.message };'
+    ),
+  });
+  assert.ok(violations.some((v) => v.kind === "caught-error-text"));
+});
+
+test("a binding with regex metacharacters is matched literally", () => {
+  const violations = hookViolations({
+    "leak.ts": `try { run(); } catch ($e) { return { error: $e.message }; }`,
+    "ok.ts": `try { run(); } catch ($e) { return { error: e.message }; }`,
+  });
+  assert.deepEqual(
+    violations.map((v) => v.file),
+    ["leak.ts"]
+  );
+});
+
+test("passing the error as a call argument passes", () => {
+  const violations = hookViolations({
+    "ok.ts": catchBody('report(ctx, err, 1); return { error: "x" };'),
+  });
+  assert.deepEqual(violations, []);
 });
 
 test("logging the whole error and returning a code passes", () => {
