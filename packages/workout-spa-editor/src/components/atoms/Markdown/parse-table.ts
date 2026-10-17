@@ -4,12 +4,21 @@ export type TableData = { align: Align[]; head: string[]; rows: string[][] };
 
 const DELIMITER_CELL = /^:?-+:?$/;
 
-/* Short rows are padded to the header width, so a wide header over many rows
-   of "|" is a few KB of source but hundreds of thousands of cells. Past these
-   caps no table is built: too wide stays text, too long becomes code. Padding
-   is therefore bounded by MAX_TABLE_COLUMNS × MAX_TABLE_ROWS. */
+/* Rows are never padded: a short row renders its own cells and the last one
+   spans the rest, so cells are bounded by the source bytes. On top of that a
+   table is not built past these caps (too wide stays text, too long becomes
+   code), and all tables of one message share one cell budget: once spent,
+   the remaining tables render as code. */
 export const MAX_TABLE_COLUMNS = 30;
 export const MAX_TABLE_ROWS = 200;
+export const MAX_MESSAGE_TABLE_CELLS = 5000;
+
+/** Cells still available to the tables of the message being parsed. */
+export type CellBudget = { left: number };
+
+export const newCellBudget = (): CellBudget => ({
+  left: MAX_MESSAGE_TABLE_CELLS,
+});
 
 /** A GFM table starts on a row with a pipe followed by a `---|---` row. While
  * the delimiter row is still streaming the header stays a paragraph. */
@@ -32,20 +41,24 @@ function isDelimiterRow(line: string): boolean {
 }
 
 /** The table from its header row, or its raw source when it has more than
- * `MAX_TABLE_ROWS` body rows (counted before any cell is built). */
+ * `MAX_TABLE_ROWS` body rows or more cells than the message has left. */
 export function readTable(
   lines: string[],
-  i: number
+  i: number,
+  budget: CellBudget
 ): [TableData | string, number] {
   const head = splitRow(lines[i] ?? "");
   let end = i + 2;
   while (isRow(lines[end])) end++;
-  if (end - i - 2 > MAX_TABLE_ROWS)
-    return [lines.slice(i, end).join("\n"), end];
-  const align = splitRow(lines[i + 1] ?? "").map(toAlign);
+  const raw = lines.slice(i, end).join("\n");
+  if (end - i - 2 > MAX_TABLE_ROWS) return [raw, end];
   const rows = lines
     .slice(i + 2, end)
-    .map((row) => fit(splitRow(row), head.length, ""));
+    .map((row) => splitRow(row).slice(0, head.length));
+  const cells = rows.reduce((sum, row) => sum + row.length, head.length);
+  if (cells > budget.left) return [raw, end];
+  budget.left -= cells;
+  const align = splitRow(lines[i + 1] ?? "").map(toAlign);
   return [{ align: fit(align, head.length, null), head, rows }, end];
 }
 

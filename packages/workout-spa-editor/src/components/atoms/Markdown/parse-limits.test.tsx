@@ -2,9 +2,12 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { Markdown } from "./Markdown";
-import { parseBlocks } from "./parse-blocks";
 import { MAX_MARKDOWN_CHARS, parseMarkdown } from "./parse-markdown";
-import { MAX_TABLE_COLUMNS, MAX_TABLE_ROWS } from "./parse-table";
+import {
+  MAX_MESSAGE_TABLE_CELLS,
+  MAX_TABLE_COLUMNS,
+  MAX_TABLE_ROWS,
+} from "./parse-table";
 
 const BUDGET_MS = 50;
 const KB = 1024;
@@ -29,11 +32,11 @@ const table = (columns: number, rows: number) =>
 function measure(source: string) {
   let ms = Number.POSITIVE_INFINITY;
   let heap = 0;
-  let blocks = parseBlocks("");
+  let blocks = parseMarkdown("");
   for (let run = 0; run < RUNS; run++) {
     const heapBefore = process.memoryUsage().heapUsed;
     const started = performance.now();
-    blocks = parseBlocks(source);
+    blocks = parseMarkdown(source);
     ms = Math.min(ms, performance.now() - started);
     heap = Math.max(heap, process.memoryUsage().heapUsed - heapBefore);
   }
@@ -64,7 +67,7 @@ describe("parser size limits", () => {
     expect(heapMb).toBeLessThan(HEAP_BUDGET_MB);
   });
 
-  it("should build a table right at the caps, padded only up to them", () => {
+  it("should render a short row's cells only, not pad it to the header", () => {
     // Arrange
     const source = table(MAX_TABLE_COLUMNS, MAX_TABLE_ROWS);
 
@@ -72,8 +75,35 @@ describe("parser size limits", () => {
     const cells = renderedCells(source);
 
     // Assert
-    expect(cells).toBe(MAX_TABLE_COLUMNS * (MAX_TABLE_ROWS + 1));
+    expect(cells).toBe(MAX_TABLE_COLUMNS + MAX_TABLE_ROWS);
   });
+
+  it.each([
+    ["|", "|"],
+    ["|*a*", "|*a*"],
+  ])(
+    "should share one cell budget across many tables with %s rows",
+    (_name, row) => {
+      // Arrange
+      const one = table(MAX_TABLE_COLUMNS, MAX_TABLE_ROWS).replace(
+        /\n\|$/gm,
+        `\n${row}`
+      );
+      // As many as fit under the input cap: ~100 KB of tables.
+      const count = Math.floor(MAX_MARKDOWN_CHARS / (one.length + 2));
+      const source = Array.from({ length: count }, () => one).join("\n\n");
+
+      // Act
+      const { blocks, ms } = measure(source);
+      const cells = renderedCells(source);
+
+      // Assert
+      expect(source.length).toBeLessThanOrEqual(MAX_MARKDOWN_CHARS);
+      expect(blocks.some((b) => b.kind === "code")).toBe(true);
+      expect(cells).toBeLessThanOrEqual(MAX_MESSAGE_TABLE_CELLS);
+      expect(ms).toBeLessThan(BUDGET_MS);
+    }
+  );
 
   it("should leave input past the length cap as plain text", () => {
     // Arrange

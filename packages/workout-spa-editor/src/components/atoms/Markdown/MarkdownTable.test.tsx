@@ -31,7 +31,7 @@ describe("Markdown tables", () => {
     expect(within(table).getByText("11").tagName).toBe("STRONG");
   });
 
-  it("should align cells and pad short rows to the header width", () => {
+  it("should align cells and span a short row's last cell, not pad it", () => {
     // Arrange
     const source = "| L | C | R |\n|:--|:-:|--:|\n| a |";
 
@@ -42,6 +42,8 @@ describe("Markdown tables", () => {
     const headers = screen.getAllByRole("columnheader");
     expect(headers[1]).toHaveClass("text-center");
     expect(headers[2]).toHaveClass("text-right");
-    expect(screen.getAllByRole("cell")).toHaveLength(headers.length);
+    const cells = screen.getAllByRole("cell");
+    expect(cells).toHaveLength(1);
+    expect(cells[0]).toHaveAttribute("colSpan", String(headers.length));
   });
 });

@@ -30,10 +30,12 @@ Partial input never throws. An unclosed fence runs to the end as code; an unclos
   `parse-performance.test.ts` runs each pattern against 10 000-char attacks.
 - Quotes and lists nest at most `MAX_BLOCK_DEPTH` (12) levels; the rest is one
   plain paragraph, so `>`×3000 cannot overflow the stack.
-- Size caps: a table wider than 30 columns stays text, one with more than 200
-  body rows renders as code (so padding short rows is bounded by 30 × 200), and
-  input past 100 000 characters is parsed up to the last line break before the
-  cap; the rest is plain text. U+2028/U+2029 are treated as line breaks.
+- Size caps: short table rows are never padded (the last cell spans the rest),
+  a table wider than 30 columns stays text, one with more than 200 body rows
+  renders as code, and all tables of one message share a budget of 5 000 cells,
+  after which the remaining tables render as code. Input past 100 000 characters
+  is parsed up to the last line break before the cap; the rest is plain text.
+  U+2028/U+2029 are treated as line breaks.
 - Bare URLs whose text differs from their punycode host (IDN look-alikes) show
   the host beside them.
 - `MarkdownBoundary` catches anything that still throws and shows that message as

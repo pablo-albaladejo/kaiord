@@ -9,6 +9,10 @@ const ALIGN_CLASS: Record<NonNullable<Align>, string> = {
   right: "text-right",
 };
 
+/* A short row is not padded: its last cell spans the missing columns. */
+const spanOf = (col: number, cells: number, width: number) =>
+  col === cells - 1 && cells < width ? width - cells + 1 : undefined;
+
 const CELL = "whitespace-nowrap border border-edge px-2 py-1";
 
 /** A table scrolls inside its own box, so a wide one never widens the bubble
@@ -39,7 +43,11 @@ export function MarkdownTable({ align, head, rows }: TableData) {
           {rows.map((row, r) => (
             <tr key={r}>
               {row.map((cell, col) => (
-                <td key={col} className={cellClass(col)}>
+                <td
+                  key={col}
+                  className={cellClass(col)}
+                  colSpan={spanOf(col, row.length, head.length)}
+                >
                   <MarkdownInline nodes={parseInline(cell)} />
                 </td>
               ))}
