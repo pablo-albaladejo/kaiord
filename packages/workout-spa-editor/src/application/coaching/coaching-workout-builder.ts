@@ -12,7 +12,10 @@ import type { AiMeta } from "../../types/calendar-fragments";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { KRD, Sport, SubSport } from "../../types/schemas";
-import { withCoachNotes } from "../../utils/structured-workout";
+import {
+  withCoachNotes,
+  withFallbackName,
+} from "../../utils/structured-workout";
 
 const buildRaw = (activity: CoachingActivityRecord): WorkoutRecord["raw"] => ({
   title: activity.title,
@@ -68,8 +71,12 @@ export const buildStructuredCoachingWorkout = (
   sport: input.sport,
   state: "structured",
   // Coach description is the canonical workout-level note (krd-format); also
-  // mirrored into raw.description for the sidebar.
-  krd: withCoachNotes(input.krd, input.activity.description),
+  // mirrored into raw.description for the sidebar. The session title names
+  // the workout when the KRD (e.g. the AI output) carries no name.
+  krd: withCoachNotes(
+    withFallbackName(input.krd, input.activity.title),
+    input.activity.description
+  ),
   aiMeta: input.aiMeta,
 });
 

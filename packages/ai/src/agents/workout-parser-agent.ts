@@ -5,6 +5,13 @@ import { reindexSteps } from "../adapters/reindex-steps";
 import { WORKOUT_PARSER_SYSTEM } from "../prompts/parse-workout-prompt";
 import type { AgentDefinition } from "./definition-types";
 
+// A blank name is no name: drop it so callers apply their own fallback.
+const normalizeName = (workout: Workout): Workout => {
+  const { name, ...rest } = workout;
+  const trimmed = name?.trim();
+  return trimmed ? { ...rest, name: trimmed } : rest;
+};
+
 /**
  * The shipped workout-parser definition. `sportLine` is the resolved
  * `{{sport}}` hint (empty when no sport was requested). Strict validation
@@ -19,5 +26,5 @@ export const createWorkoutParserAgent = (
   systemPrompt: { id: WORKOUT_PARSER_SYSTEM.id, vars: { sport: sportLine } },
   mode: "generate",
   outputSchema: aiWorkoutSchema,
-  validate: (raw) => reindexSteps(workoutSchema.parse(raw)),
+  validate: (raw) => normalizeName(reindexSteps(workoutSchema.parse(raw))),
 });
