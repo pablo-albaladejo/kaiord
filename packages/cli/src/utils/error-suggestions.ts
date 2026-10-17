@@ -74,6 +74,14 @@ const ERROR_PATTERNS: Array<ErrorPattern> = [
     ],
   },
   {
+    pattern: "percent_ftp power targets",
+    title: "FTP required",
+    suggestions: [
+      "Pass your FTP in watts with --ftp, e.g. --ftp 250.",
+      "Percent-of-FTP power targets cannot be written as watts without it.",
+    ],
+  },
+  {
     pattern: "unable to detect format",
     title: "Invalid argument",
     suggestions: [
