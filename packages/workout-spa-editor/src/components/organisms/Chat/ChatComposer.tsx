@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
@@ -23,6 +23,14 @@ export function ChatComposer({
 }: ChatComposerProps) {
   const t = useTranslate("chat");
   const [text, setText] = useState(initialText ?? "");
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const wasDisabled = useRef(disabled);
+
+  // A disabled control drops focus; hand it back once the reply settles.
+  useEffect(() => {
+    if (wasDisabled.current && !disabled) inputRef.current?.focus();
+    wasDisabled.current = disabled;
+  }, [disabled]);
 
   const submit = () => {
     const trimmed = text.trim();
@@ -34,6 +42,7 @@ export function ChatComposer({
   return (
     <div className="flex items-end gap-2">
       <textarea
+        ref={inputRef}
         aria-label={t("composer.messageLabel")}
         rows={2}
         value={text}

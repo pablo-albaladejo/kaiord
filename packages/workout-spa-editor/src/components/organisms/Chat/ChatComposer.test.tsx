@@ -65,4 +65,28 @@ describe("ChatComposer stop control", () => {
     expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Stop" })).toBeNull();
   });
+
+  it("should return focus to the input when streaming ends", () => {
+    // Arrange
+    const { rerender } = renderWithProviders(
+      <ChatComposer onSend={vi.fn()} disabled streaming onStop={vi.fn()} />
+    );
+
+    // Act
+    rerender(<ChatComposer onSend={vi.fn()} disabled={false} />);
+
+    // Assert
+    expect(screen.getByRole("textbox", { name: "Message" })).toHaveFocus();
+  });
+
+  it("should not grab focus on an initially enabled mount", () => {
+    // Arrange
+    const onSend = vi.fn();
+
+    // Act
+    renderWithProviders(<ChatComposer onSend={onSend} disabled={false} />);
+
+    // Assert
+    expect(screen.getByRole("textbox", { name: "Message" })).not.toHaveFocus();
+  });
 });

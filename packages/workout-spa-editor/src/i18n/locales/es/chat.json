@@ -102,5 +102,9 @@
       "body": "«{{label}}» viene de una copia de seguridad, que nunca incluye claves. Añade la clave en Ajustes para usar el asistente.",
       "action": "Añadir la clave"
     }
+  },
+  "stopReason": {
+    "aborted": "Detenido por ti.",
+    "timeout": "Detenido: la respuesta tardó demasiado."
   }
 }

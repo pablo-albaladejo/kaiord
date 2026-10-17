@@ -3,11 +3,19 @@ import { z } from "zod";
 
 import { createRingBufferTelemetrySink } from "../observability/ring-buffer-sink";
 import { createChatAgent } from "./chat-agent";
+import { DEFAULT_TURN_IDLE_TIMEOUT_MS } from "./chat-types";
 import type { ChatTool } from "./chat-types";
 import type { RawTurn } from "./run-turn";
 
 vi.mock("./run-turn", () => ({ runTurn: vi.fn() }));
+vi.mock("./classify-turn", async (importOriginal) => ({
+  classifyTurn: vi.fn(
+    (await importOriginal<typeof import("./classify-turn")>()).classifyTurn
+  ),
+}));
 const mockRunTurn = vi.mocked((await import("./run-turn")).runTurn);
+const mockClassify = vi.mocked((await import("./classify-turn")).classifyTurn);
+const { attachTurnMetrics } = await import("./turn-stats");
 
 const model = { provider: "anthropic.messages", modelId: "claude-x" } as never;
 const USER_TEXT = "my resting heart rate is secret-4242";
@@ -126,6 +134,52 @@ describe("createChatAgent telemetry", () => {
     expect(sink.events()[0]).toMatchObject({ status: "aborted" });
   });
 
+  it("should report the finished steps' metrics on an error event", async () => {
+    // Arrange
+    const failure = new Error("overloaded");
+    attachTurnMetrics(failure, {
+      steps: 1,
+      toolNames: ["query_health"],
+      usage: { promptTokens: 40, completionTokens: 9 },
+    });
+    mockRunTurn.mockRejectedValueOnce(failure);
+    const sink = createRingBufferTelemetrySink();
+    const agent = createChatAgent({ model, tools: [], telemetry: sink });
+
+    // Act
+    const run = agent.sendTurn([{ role: "user", content: USER_TEXT }]);
+
+    // Assert
+    await expect(run).rejects.toBe(failure);
+    expect(sink.events()).toEqual([
+      expect.objectContaining({
+        status: "error",
+        steps: 1,
+        toolNames: ["query_health"],
+        inputTokens: 40,
+        outputTokens: 9,
+      }),
+    ]);
+  });
+
+  it("should emit exactly one error event when classifying the turn throws", async () => {
+    // Arrange
+    mockRunTurn.mockResolvedValueOnce(raw({}));
+    mockClassify.mockImplementationOnce(() => {
+      throw new Error("classify failed");
+    });
+    const sink = createRingBufferTelemetrySink();
+    const agent = createChatAgent({ model, tools: [], telemetry: sink });
+
+    // Act
+    const run = agent.sendTurn([{ role: "user", content: "x" }]);
+
+    // Assert
+    await expect(run).rejects.toThrow("classify failed");
+    expect(sink.events()).toHaveLength(1);
+    expect(sink.events()[0]).toMatchObject({ status: "error" });
+  });
+
   it("should emit an error event with zero metrics and rethrow when the turn fails", async () => {
     // Arrange
     mockRunTurn.mockRejectedValueOnce(new Error(`boom ${USER_TEXT}`));
@@ -147,11 +201,11 @@ describe("createChatAgent telemetry", () => {
     expect(JSON.stringify(sink.events())).not.toContain("secret-");
   });
 
-  it("should pass the caller signal and a step-derived watchdog to runTurn", async () => {
+  it("should pass the caller signal and the default idle watchdog to runTurn", async () => {
     // Arrange
     mockRunTurn.mockResolvedValueOnce(raw({}));
     const controller = new AbortController();
-    const agent = createChatAgent({ model, tools: [], maxSteps: 4 });
+    const agent = createChatAgent({ model, tools: [] });
 
     // Act
     await agent.sendTurn([{ role: "user", content: "x" }], {
@@ -162,7 +216,7 @@ describe("createChatAgent telemetry", () => {
     expect(mockRunTurn).toHaveBeenCalledWith(
       expect.objectContaining({
         abortSignal: controller.signal,
-        timeoutMs: 60_000,
+        idleTimeoutMs: DEFAULT_TURN_IDLE_TIMEOUT_MS,
       })
     );
   });

@@ -17,6 +17,7 @@ import { buildChatTools } from "../../application/chat/tools/build-chat-tools";
 import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
 import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
 import type { PersistencePort } from "../../ports/persistence-port";
+import { logger } from "../../utils/logger";
 
 export type BuiltChatAgent = { agent: ChatAgent; tools: ChatTool[] };
 
@@ -49,7 +50,7 @@ export const buildChatAgent = async (
     tools,
     system: buildChatSystemPrompt(),
     promptVersion: CHAT_PROMPT_VERSION,
-    telemetry: createDexieUsageTelemetrySink(args.persistence),
+    telemetry: createDexieUsageTelemetrySink(args.persistence, logger),
     onTextDelta: args.onTextDelta,
   });
   return { agent, tools };

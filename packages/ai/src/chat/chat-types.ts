@@ -88,10 +88,11 @@ export type ChatAgentConfig = {
   /** Invoked with each streamed text delta as the assistant response arrives. */
   onTextDelta?: (delta: string) => void;
   /**
-   * Watchdog for one turn, in ms; resolves with status `timeout` when hit.
-   * Defaults to `maxSteps` × {@link TURN_STEP_BUDGET_MS}.
+   * Inactivity watchdog, in ms: the turn resolves with status `timeout` when
+   * no chunk arrives and no step finishes for this long. Defaults to
+   * {@link DEFAULT_TURN_IDLE_TIMEOUT_MS}.
    */
-  turnTimeoutMs?: number;
+  turnIdleTimeoutMs?: number;
   /** Receives one `chat_turn_finished` event per turn (ids + metrics only). */
   telemetry?: AiTelemetrySink;
   /** Version of `system`, stamped on telemetry. Defaults to `unknown`. */
@@ -113,12 +114,11 @@ export type ChatAgent = {
 export const DEFAULT_MAX_STEPS = 8;
 
 /**
- * Wall-clock budget per tool step: one streamed model call (a few seconds to
- * first token, then the reply) plus a local Dexie-backed read tool. 15 s is
- * generous for a healthy provider, so the watchdog only fires on a stalled
- * stream, never on a merely long answer.
+ * Longest silence a healthy turn has: the wait for one model call's first
+ * chunk (a reasoning model may think for tens of seconds before it streams)
+ * or one local Dexie-backed read tool. It restarts on every chunk and step,
+ * so it is independent of {@link DEFAULT_MAX_STEPS}: a long multi-step turn
+ * that keeps producing output is never cut, only a stalled one. The step cap
+ * already bounds how long a progressing turn can run.
  */
-export const TURN_STEP_BUDGET_MS = 15_000;
-
-/** {@link DEFAULT_MAX_STEPS} steps at {@link TURN_STEP_BUDGET_MS}: 120 s. */
-export const DEFAULT_TURN_TIMEOUT_MS = DEFAULT_MAX_STEPS * TURN_STEP_BUDGET_MS;
+export const DEFAULT_TURN_IDLE_TIMEOUT_MS = 60_000;

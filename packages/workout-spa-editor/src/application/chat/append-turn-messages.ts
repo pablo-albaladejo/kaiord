@@ -56,18 +56,16 @@ export const appendToolEvent = (
     })
   );
 
-/** Marks a turn that ended early, so the transcript and the next turn's
- * history both say the reply was cut short rather than finished. */
-const STOP_MARKERS: Partial<Record<ChatTurnResult["status"], string>> = {
-  step_limit: "(Stopped: reached the step limit.)",
-  aborted: "(Stopped by the user.)",
-  timeout: "(Stopped: the response took too long.)",
-};
-
 /**
- * Persists the assistant reply. Usage is NOT logged here: the agent's
- * `chat_turn_finished` telemetry event feeds the usage sink for every turn,
- * including paused and stopped ones that never reach this writer.
+ * Persists the assistant reply. A stopped or timed-out reply keeps only what
+ * streamed in `content` and records why in `stopReason`; the transcript
+ * localizes it and the model replay adds the marker. `step_limit` still
+ * appends its legacy English marker to `content`: rows already stored carry
+ * it that way, so changing it would split the history in two shapes.
+ *
+ * Usage is NOT logged here: the agent's `chat_turn_finished` telemetry event
+ * feeds the usage sink for every turn, including paused and stopped ones that
+ * never reach this writer.
  */
 export const appendAssistantTurn = async (
   persistence: PersistencePort,
@@ -76,19 +74,22 @@ export const appendAssistantTurn = async (
   result: Extract<ChatTurnResult, { text: string }>,
   gen: IdGen = defaultGen
 ): Promise<void> => {
-  const marker = STOP_MARKERS[result.status];
-  const text = marker
-    ? [result.text, marker].filter(Boolean).join("\n\n")
-    : result.text;
   await persistence.chatMessages.append(
     newChatMessage({
       id: gen.newId(),
       profileId,
       conversationId,
       role: "assistant",
-      content: text,
+      content:
+        result.status === "step_limit"
+          ? `${result.text}\n\n(Stopped: reached the step limit.)`
+          : result.text,
       createdAt: gen.now(),
       usage: result.usage,
+      stopReason:
+        result.status === "aborted" || result.status === "timeout"
+          ? result.status
+          : undefined,
     })
   );
 };

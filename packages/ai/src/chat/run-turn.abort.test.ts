@@ -33,7 +33,23 @@ const slowTextModel = (deltas: string[], chunkDelayInMs: number) =>
 const messages = [{ role: "user" as const, content: "hola" }];
 const SLOW_CHUNK_MS = 20;
 const FAST_CHUNK_MS = 5;
-const STALLED_CHUNK_MS = 40;
+const STEADY_CHUNK_MS = 40;
+const IDLE_MS = 100;
+
+/** Streams one delta, then never sends another chunk nor closes. */
+const stallingModel = (delta: string) =>
+  new MockLanguageModelV4({
+    doStream: async () =>
+      ({
+        stream: new ReadableStream({
+          start: (controller) => {
+            controller.enqueue({ type: "stream-start", warnings: [] });
+            controller.enqueue({ type: "text-start", id: "t" });
+            controller.enqueue({ type: "text-delta", id: "t", delta });
+          },
+        }),
+      }) as never,
+  });
 
 describe("runTurn stop paths", () => {
   it("should resolve an aborted turn keeping the text streamed before the stop", async () => {
@@ -83,12 +99,9 @@ describe("runTurn stop paths", () => {
     expect(raw.messages).toEqual([]);
   });
 
-  it("should resolve a timeout turn when the watchdog deadline passes mid-stream", async () => {
+  it("should time out when the stream goes silent past the idle window", async () => {
     // Arrange
-    const model = slowTextModel(
-      ["a", "b", "c", "d", "e", "f"],
-      STALLED_CHUNK_MS
-    );
+    const model = stallingModel("Hola ");
 
     // Act
     const raw = await runTurn({
@@ -96,18 +109,19 @@ describe("runTurn stop paths", () => {
       messages,
       tools: {},
       maxSteps: 8,
-      timeoutMs: 100,
+      idleTimeoutMs: IDLE_MS,
     });
 
     // Assert
     expect(raw.stopped).toBe("timeout");
-    expect(raw.text.length).toBeGreaterThan(0);
-    expect(raw.text.length).toBeLessThan("abcdef".length);
+    expect(raw.text).toBe("Hola ");
+    expect(raw.messages).toEqual([{ role: "assistant", content: "Hola " }]);
   });
 
-  it("should complete normally when the stream ends before the deadline", async () => {
+  it("should not time out a turn that keeps streaming longer than the idle window", async () => {
     // Arrange
-    const model = slowTextModel(["ok"], 1);
+    const deltas = ["a", "b", "c", "d", "e", "f"];
+    const model = slowTextModel(deltas, STEADY_CHUNK_MS);
 
     // Act
     const raw = await runTurn({
@@ -115,12 +129,12 @@ describe("runTurn stop paths", () => {
       messages,
       tools: {},
       maxSteps: 8,
-      timeoutMs: 5_000,
+      idleTimeoutMs: IDLE_MS,
     });
 
     // Assert
     expect(raw.stopped).toBeUndefined();
-    expect(raw.text).toBe("ok");
+    expect(raw.text).toBe(deltas.join(""));
     expect(raw.steps).toBe(1);
     expect(raw.usage).toEqual({ promptTokens: 4, completionTokens: 3 });
   });

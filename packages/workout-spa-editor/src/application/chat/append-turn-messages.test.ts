@@ -26,11 +26,11 @@ const result = (over: Partial<TextResult> = {}): TextResult =>
     ...over,
   }) as TextResult;
 
-const persistedContent = async (r: TextResult) => {
+const persisted = async (r: TextResult) => {
   const persistence = createInMemoryPersistence();
   await appendAssistantTurn(persistence, "p-1", "c-1", r, gen);
   const [row] = await persistence.chatMessages.listByProfile("p-1");
-  return row?.content;
+  return row;
 };
 
 describe("appendAssistantTurn", () => {
@@ -82,36 +82,51 @@ describe("appendAssistantTurn", () => {
     expect(events).toHaveLength(0);
   });
 
-  it("should keep the partial text of a user-stopped turn and mark it stopped", async () => {
+  it("should keep the partial text of a user-stopped turn with its stop reason", async () => {
     // Arrange
     const stopped = result({ status: "aborted", text: "Your week had" });
 
     // Act
-    const content = await persistedContent(stopped);
+    const row = await persisted(stopped);
 
     // Assert
-    expect(content).toBe("Your week had\n\n(Stopped by the user.)");
+    expect(row).toMatchObject({
+      content: "Your week had",
+      stopReason: "aborted",
+    });
   });
 
-  it("should persist only the marker when a timed-out turn streamed nothing", async () => {
+  it("should store no marker text when a timed-out turn streamed nothing", async () => {
     // Arrange
     const stopped = result({ status: "timeout", text: "" });
 
     // Act
-    const content = await persistedContent(stopped);
+    const row = await persisted(stopped);
 
     // Assert
-    expect(content).toBe("(Stopped: the response took too long.)");
+    expect(row).toMatchObject({ content: "", stopReason: "timeout" });
   });
 
-  it("should append the step-limit marker to a step-limited turn", async () => {
+  it("should append the legacy step-limit marker and no stop reason", async () => {
     // Arrange
     const limited = result({ status: "step_limit", text: "Partial" });
 
     // Act
-    const content = await persistedContent(limited);
+    const row = await persisted(limited);
 
     // Assert
-    expect(content).toBe("Partial\n\n(Stopped: reached the step limit.)");
+    expect(row?.content).toBe("Partial\n\n(Stopped: reached the step limit.)");
+    expect(row?.stopReason).toBeUndefined();
+  });
+
+  it("should leave the stop reason unset on a complete reply", async () => {
+    // Arrange
+    const complete = result();
+
+    // Act
+    const row = await persisted(complete);
+
+    // Assert
+    expect(row?.stopReason).toBeUndefined();
   });
 });

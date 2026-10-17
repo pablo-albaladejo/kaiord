@@ -71,13 +71,16 @@ describe("chat-turn-runner", () => {
     // Assert
     const stored = await persistence.chatMessages.listByProfile("p1");
     expect(stored.map((m) => m.role)).toEqual(["user", "assistant"]);
-    expect(stored[1]?.content).toBe("Your last ride\n\n(Stopped by the user.)");
+    expect(stored[1]).toMatchObject({
+      content: "Your last ride",
+      stopReason: "aborted",
+    });
     expect(pendings.at(-1)).toBeNull();
     expect(states.at(-1)).toBe("idle");
     expect(ctx.abortRef.current).toBeNull();
   });
 
-  it("should persist a timed-out turn with the timeout marker", async () => {
+  it("should persist a timed-out turn with its timeout stop reason", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     const { ctx, states } = makeCtx(persistence);
@@ -92,7 +95,7 @@ describe("chat-turn-runner", () => {
 
     // Assert
     const stored = await persistence.chatMessages.listByProfile("p1");
-    expect(stored[1]?.content).toBe("(Stopped: the response took too long.)");
+    expect(stored[1]).toMatchObject({ content: "", stopReason: "timeout" });
     expect(states.at(-1)).toBe("idle");
   });
 

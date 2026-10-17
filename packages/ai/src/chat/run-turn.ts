@@ -1,8 +1,12 @@
 import { streamText, stepCountIs } from "ai";
 import type { LanguageModel, ModelMessage, ToolSet } from "ai";
 import type { ChatUsage } from "./chat-types";
-import { createTurnStats, stoppedTurn } from "./turn-stats";
-import { createTurnWatchdog, type TurnStopCause } from "./turn-watchdog";
+import { attachTurnMetrics, createTurnStats, stoppedTurn } from "./turn-stats";
+import {
+  createTurnWatchdog,
+  type TurnStopCause,
+  type TurnWatchdog,
+} from "./turn-watchdog";
 
 /** Normalized result of a single AI SDK turn, decoupled from the SDK shape. */
 export type RawTurn = {
@@ -27,8 +31,8 @@ export type RunTurnParams = {
   maxSteps: number;
   onTextDelta?: (delta: string) => void;
   abortSignal?: AbortSignal;
-  /** Watchdog deadline for the whole turn; omitted means no deadline. */
-  timeoutMs?: number;
+  /** Longest silence (no chunk, no finished step) before the turn times out. */
+  idleTimeoutMs?: number;
 };
 
 /**
@@ -48,12 +52,13 @@ export type RunTurnParams = {
  *
  * An abort (caller signal or watchdog) ends `textStream` quietly and rejects
  * the result promises with the abort reason, so a stop is detected first and
- * resolved as a `stopped` turn holding the text streamed so far.
+ * resolved as a `stopped` turn holding the text streamed so far. A thrown
+ * error carries the finished steps' metrics (see `turnMetricsOf`).
  */
 export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
-  const watchdog = createTurnWatchdog(params.abortSignal, params.timeoutMs);
+  const watchdog = createTurnWatchdog(params.abortSignal, params.idleTimeoutMs);
   try {
-    return await streamTurn(params, watchdog.signal, watchdog.cause);
+    return await streamTurn(params, watchdog);
   } finally {
     watchdog.dispose();
   }
@@ -61,12 +66,11 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
 
 const streamTurn = async (
   params: RunTurnParams,
-  abortSignal: AbortSignal,
-  stopCause: () => TurnStopCause | undefined
+  watchdog: TurnWatchdog
 ): Promise<RawTurn> => {
   let streamError: unknown;
   let streamed = "";
-  const stats = createTurnStats();
+  const stats = createTurnStats(params.tools);
   const result = streamText({
     model: params.model,
     system: params.system,
@@ -76,8 +80,12 @@ const streamTurn = async (
     // We own retries at the call-site; disable the SDK's internal layer so a
     // retryable error costs one HTTP call per turn, not N.
     maxRetries: 0,
-    abortSignal,
-    onStepEnd: stats.onStepEnd,
+    abortSignal: watchdog.signal,
+    onChunk: watchdog.touch,
+    onStepEnd: (step) => {
+      watchdog.touch();
+      stats.onStepEnd(step);
+    },
     onError: ({ error }) => {
       streamError ??= error;
     },
@@ -96,13 +104,23 @@ const streamTurn = async (
       result.response,
     ]);
   };
+  const fail = (error: unknown): never => {
+    attachTurnMetrics(error, stats.snapshot());
+    throw error;
+  };
   const outcome = await settled().catch((e: unknown) => {
-    if (stopCause()) return undefined;
-    throw streamError ?? e;
+    if (watchdog.cause()) return undefined;
+    return fail(streamError ?? e);
   });
-  if (!outcome) return stoppedTurn(stopCause() ?? "aborted", streamed, stats);
-  if (streamError !== undefined) throw streamError;
+  if (!outcome)
+    return stoppedTurn(
+      watchdog.cause() ?? "aborted",
+      streamed,
+      stats.snapshot()
+    );
+  if (streamError !== undefined) fail(streamError);
   const [text, toolCalls, finishReason, usage, response] = outcome;
+  const { steps, toolNames } = stats.snapshot();
 
   return {
     text,
@@ -124,7 +142,7 @@ const streamTurn = async (
         }
       : undefined,
     messages: response.messages,
-    steps: stats.steps(),
-    toolNames: stats.toolNames(),
+    steps,
+    toolNames,
   };
 };

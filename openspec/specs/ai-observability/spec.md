@@ -36,6 +36,12 @@ exactly one `chat_turn_finished` per turn when a sink is configured, with
 - **WHEN** a turn completes, pauses for confirmation, is stopped, times out, or throws
 - **THEN** exactly one `chat_turn_finished` event SHALL be emitted with the matching `status`, and a sink that throws SHALL NOT fail the turn
 
+#### Scenario: A failed or stopped chat turn reports its finished steps
+
+- **GIVEN** a chat turn that finished one step, then threw a provider error, was stopped, or went idle past the inactivity watchdog
+- **WHEN** its `chat_turn_finished` event is emitted
+- **THEN** `steps`, `toolNames`, and the token counts SHALL reflect the steps that finished; tokens of a step cut mid-stream are not reported by the provider and SHALL NOT be estimated
+
 ### Requirement: Redaction by construction
 
 Telemetry events SHALL carry identifiers, versions, and metrics only. No

@@ -5,8 +5,7 @@ export type { TextToWorkoutConfig, TextToWorkoutOptions } from "./types";
 export { createChatAgent } from "./chat/chat-agent";
 export {
   DEFAULT_MAX_STEPS,
-  DEFAULT_TURN_TIMEOUT_MS,
-  TURN_STEP_BUDGET_MS,
+  DEFAULT_TURN_IDLE_TIMEOUT_MS,
 } from "./chat/chat-types";
 export type {
   ChatAgent,
