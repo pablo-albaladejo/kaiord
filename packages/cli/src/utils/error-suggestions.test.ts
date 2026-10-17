@@ -24,6 +24,11 @@ describe("getErrorTitle", () => {
     ['No files found matching "*.fit"', undefined, "No files matched"],
     ["Batch mode requires --output-dir", undefined, "Invalid argument"],
     ["Unable to detect format for file.xyz", undefined, "Invalid argument"],
+    [
+      'Adapter "garmin" cannot convert percent_ftp power targets to watts without an FTP.',
+      "MissingFtpError",
+      "FTP required",
+    ],
     ["Some argument error", "InvalidArgumentError", "Invalid argument"],
     ["Something completely unknown", undefined, "An unexpected error occurred"],
     ["FILE NOT FOUND: workout.fit", undefined, "File not found"],

@@ -6,7 +6,9 @@
  * already in flight is `push_in_progress`, one the bridge failed is
  * `push_failed`, and a workout whose pace zone targets the profile cannot
  * resolve is `missing_pace_zones`, `incomplete_pace_zones` or
- * `unsupported_pace_zone_sport`, so this never throws for any of them.
+ * `unsupported_pace_zone_sport`, and one with %FTP power targets but no
+ * FTP to resolve them is `missing_ftp` or `sport_without_power_zones`, so
+ * this never throws for any of them.
  *
  * Otherwise the result carries `calendar`: the placement's kind, an
  * app-authored enum, with a `failed` one's `reason`. Any exception on this
@@ -18,6 +20,7 @@
 import { NoActiveExportRouteError } from "../../application/export/execute-workout-push";
 import { logGarminPushFailure } from "../../application/garmin-placement/log-garmin-push-failure";
 import type { PlacementResult } from "../../application/garmin-placement/placement-result";
+import { isFtpReason } from "../../types/ftp-unavailable-error";
 import { isPaceZonesReason } from "../../types/pace-zones-unavailable-error";
 import { placeRecord } from "../garmin-place-record";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
@@ -45,6 +48,22 @@ const PACE_ZONE_ERRORS = {
   },
 } as const;
 
+const FTP_ERRORS = {
+  "missing-ftp": {
+    error: "missing_ftp",
+    message:
+      "The workout has %FTP power targets, but the athlete's profile has " +
+      "no FTP for its sport. Ask the athlete to set their FTP in Athlete, " +
+      "then send it again.",
+  },
+  "sport-without-power-zones": {
+    error: "sport_without_power_zones",
+    message:
+      "The workout has %FTP power targets, but its sport has no power " +
+      "zones. Ask the athlete to change its sport to cycling or running.",
+  },
+} as const;
+
 /** The Phase 1 failures, as the tool's error codes. */
 const libraryError = (result: PlacementResult) => {
   if (result.kind !== "failed") return undefined;
@@ -55,6 +74,7 @@ const libraryError = (result: PlacementResult) => {
   if (result.reason === "busy") return { error: "push_in_progress" };
   if (result.reason === "library-push-failed") return { error: "push_failed" };
   if (isPaceZonesReason(result.reason)) return PACE_ZONE_ERRORS[result.reason];
+  if (isFtpReason(result.reason)) return FTP_ERRORS[result.reason];
   return undefined;
 };
 
