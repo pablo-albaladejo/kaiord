@@ -1,6 +1,8 @@
 import { streamText, stepCountIs } from "ai";
 import type { LanguageModel, ModelMessage, ToolSet } from "ai";
 import type { ChatUsage } from "./chat-types";
+import { createTurnStats, stoppedTurn } from "./turn-stats";
+import { createTurnWatchdog, type TurnStopCause } from "./turn-watchdog";
 
 /** Normalized result of a single AI SDK turn, decoupled from the SDK shape. */
 export type RawTurn = {
@@ -10,6 +12,11 @@ export type RawTurn = {
   usage?: ChatUsage;
   /** Response messages produced this turn (assistant text + tool parts). */
   messages: ModelMessage[];
+  /** Set when the caller's signal or the watchdog halted the turn. */
+  stopped?: TurnStopCause;
+  /** Completed model steps and the tool names they called, for telemetry. */
+  steps: number;
+  toolNames: string[];
 };
 
 export type RunTurnParams = {
@@ -19,6 +26,9 @@ export type RunTurnParams = {
   tools: ToolSet;
   maxSteps: number;
   onTextDelta?: (delta: string) => void;
+  abortSignal?: AbortSignal;
+  /** Watchdog deadline for the whole turn; omitted means no deadline. */
+  timeoutMs?: number;
 };
 
 /**
@@ -35,9 +45,28 @@ export type RunTurnParams = {
  * the real failure. (Tool failures are `tool-error` parts, not `error` parts,
  * and stay in the loop.) Capturing it also replaces the SDK's default
  * `onError` (`console.error`), which would log the request body.
+ *
+ * An abort (caller signal or watchdog) ends `textStream` quietly and rejects
+ * the result promises with the abort reason, so a stop is detected first and
+ * resolved as a `stopped` turn holding the text streamed so far.
  */
 export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
+  const watchdog = createTurnWatchdog(params.abortSignal, params.timeoutMs);
+  try {
+    return await streamTurn(params, watchdog.signal, watchdog.cause);
+  } finally {
+    watchdog.dispose();
+  }
+};
+
+const streamTurn = async (
+  params: RunTurnParams,
+  abortSignal: AbortSignal,
+  stopCause: () => TurnStopCause | undefined
+): Promise<RawTurn> => {
   let streamError: unknown;
+  let streamed = "";
+  const stats = createTurnStats();
   const result = streamText({
     model: params.model,
     system: params.system,
@@ -47,13 +76,18 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
     // We own retries at the call-site; disable the SDK's internal layer so a
     // retryable error costs one HTTP call per turn, not N.
     maxRetries: 0,
+    abortSignal,
+    onStepEnd: stats.onStepEnd,
     onError: ({ error }) => {
       streamError ??= error;
     },
   });
 
   const settled = async () => {
-    for await (const delta of result.textStream) params.onTextDelta?.(delta);
+    for await (const delta of result.textStream) {
+      streamed += delta;
+      params.onTextDelta?.(delta);
+    }
     return Promise.all([
       result.text,
       result.toolCalls,
@@ -62,11 +96,13 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
       result.response,
     ]);
   };
-  const [text, toolCalls, finishReason, usage, response] =
-    await settled().catch((e: unknown) => {
-      throw streamError ?? e;
-    });
+  const outcome = await settled().catch((e: unknown) => {
+    if (stopCause()) return undefined;
+    throw streamError ?? e;
+  });
+  if (!outcome) return stoppedTurn(stopCause() ?? "aborted", streamed, stats);
   if (streamError !== undefined) throw streamError;
+  const [text, toolCalls, finishReason, usage, response] = outcome;
 
   return {
     text,
@@ -88,5 +124,7 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
         }
       : undefined,
     messages: response.messages,
+    steps: stats.steps(),
+    toolNames: stats.toolNames(),
   };
 };

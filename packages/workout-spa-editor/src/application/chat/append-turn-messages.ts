@@ -7,8 +7,6 @@
 import type { ChatTurnResult } from "@kaiord/ai";
 
 import type { PersistencePort } from "../../ports/persistence-port";
-import type { LlmProviderType } from "../../store/ai-store-types";
-import { appendUsageEvent } from "../usage/append-usage-event";
 import { newChatMessage } from "./chat-message-mapper";
 
 export type IdGen = { newId: () => string; now: () => string };
@@ -58,18 +56,30 @@ export const appendToolEvent = (
     })
   );
 
+/** Marks a turn that ended early, so the transcript and the next turn's
+ * history both say the reply was cut short rather than finished. */
+const STOP_MARKERS: Partial<Record<ChatTurnResult["status"], string>> = {
+  step_limit: "(Stopped: reached the step limit.)",
+  aborted: "(Stopped by the user.)",
+  timeout: "(Stopped: the response took too long.)",
+};
+
+/**
+ * Persists the assistant reply. Usage is NOT logged here: the agent's
+ * `chat_turn_finished` telemetry event feeds the usage sink for every turn,
+ * including paused and stopped ones that never reach this writer.
+ */
 export const appendAssistantTurn = async (
   persistence: PersistencePort,
   profileId: string,
   conversationId: string,
   result: Extract<ChatTurnResult, { text: string }>,
-  providerType: LlmProviderType,
   gen: IdGen = defaultGen
 ): Promise<void> => {
-  const text =
-    result.status === "step_limit"
-      ? `${result.text}\n\n(Stopped: reached the step limit.)`
-      : result.text;
+  const marker = STOP_MARKERS[result.status];
+  const text = marker
+    ? [result.text, marker].filter(Boolean).join("\n\n")
+    : result.text;
   await persistence.chatMessages.append(
     newChatMessage({
       id: gen.newId(),
@@ -81,13 +91,4 @@ export const appendAssistantTurn = async (
       usage: result.usage,
     })
   );
-  if (result.usage)
-    await appendUsageEvent(persistence, {
-      purpose: "chat",
-      providerType,
-      ...result.usage,
-    }).catch(() => {
-      // Best-effort: the event log is authoritative, but a failed usage write
-      // must never fail a turn whose messages already committed.
-    });
 };

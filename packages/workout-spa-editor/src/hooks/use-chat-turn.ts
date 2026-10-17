@@ -32,6 +32,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const agentRef = useRef<ChatAgent | null>(null);
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
+  const abortRef = useRef<AbortController | null>(null);
 
   const { profileId, conversationId, provider, modelId, pinModel, today } =
     args;
@@ -48,7 +49,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
           today,
           ops,
         },
-        { agentRef, toolsRef, messagesRef },
+        { agentRef, toolsRef, messagesRef, abortRef },
         { setState, setStreamingText, setPendingAction, setError }
       ),
     [

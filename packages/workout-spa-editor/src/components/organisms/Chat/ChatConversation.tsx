@@ -64,6 +64,8 @@ export function ChatConversation({
         onSend={turn.send}
         disabled={busy || turn.state === "awaiting_confirmation"}
         initialText={composerInitialText}
+        streaming={busy}
+        onStop={turn.stop}
       />
     </div>
   );

@@ -16,85 +16,102 @@ const gen = {
   now: () => "2026-07-10T10:00:00.000Z",
 };
 
-const completeResult = (usage?: {
-  promptTokens: number;
-  completionTokens: number;
-}): Extract<ChatTurnResult, { text: string }> => ({
-  status: "complete",
-  text: "Here is your plan.",
-  messages: [],
-  usage,
-});
+type TextResult = Extract<ChatTurnResult, { text: string }>;
 
-describe("appendAssistantTurn usage logging", () => {
-  it("should write a chat usage event for a turn carrying usage", async () => {
+const result = (over: Partial<TextResult> = {}): TextResult =>
+  ({
+    status: "complete",
+    text: "Here is your plan.",
+    messages: [],
+    ...over,
+  }) as TextResult;
+
+const persistedContent = async (r: TextResult) => {
+  const persistence = createInMemoryPersistence();
+  await appendAssistantTurn(persistence, "p-1", "c-1", r, gen);
+  const [row] = await persistence.chatMessages.listByProfile("p-1");
+  return row?.content;
+};
+
+describe("appendAssistantTurn", () => {
+  it("should persist a complete reply verbatim with its usage", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
+    const usage = {
+      promptTokens: PROMPT_TOKENS,
+      completionTokens: COMPLETION_TOKENS,
+    };
 
     // Act
     await appendAssistantTurn(
       persistence,
       "p-1",
       "c-1",
-      completeResult({
-        promptTokens: PROMPT_TOKENS,
-        completionTokens: COMPLETION_TOKENS,
-      }),
-      "google",
+      result({ usage }),
       gen
     );
-    const events = await persistence.usageEvents.listByMonth(month());
+    const [row] = await persistence.chatMessages.listByProfile("p-1");
 
     // Assert
-    expect(events).toHaveLength(1);
-    expect(events[0]).toMatchObject({
-      purpose: "chat",
-      promptTokens: PROMPT_TOKENS,
-      completionTokens: COMPLETION_TOKENS,
+    expect(row).toMatchObject({
+      role: "assistant",
+      content: "Here is your plan.",
+      usage,
     });
   });
 
-  it("should still commit the turn when the usage write fails", async () => {
+  it("should leave usage logging to the telemetry sink", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
-    persistence.usageEvents.append = () => Promise.reject(new Error("boom"));
-
-    // Act
-    const act = appendAssistantTurn(
-      persistence,
-      "p-1",
-      "c-1",
-      completeResult({
-        promptTokens: PROMPT_TOKENS,
-        completionTokens: COMPLETION_TOKENS,
-      }),
-      "google",
-      gen
-    );
-
-    // Assert
-    await expect(act).resolves.toBeUndefined();
-    const messages = await persistence.chatMessages.listByProfile("p-1");
-    expect(messages).toHaveLength(1);
-    expect(messages[0]?.role).toBe("assistant");
-  });
-
-  it("should write no usage event for a turn without usage", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
+    const usage = {
+      promptTokens: PROMPT_TOKENS,
+      completionTokens: COMPLETION_TOKENS,
+    };
 
     // Act
     await appendAssistantTurn(
       persistence,
       "p-1",
       "c-1",
-      completeResult(),
-      "google",
+      result({ usage }),
       gen
     );
     const events = await persistence.usageEvents.listByMonth(month());
 
     // Assert
     expect(events).toHaveLength(0);
+  });
+
+  it("should keep the partial text of a user-stopped turn and mark it stopped", async () => {
+    // Arrange
+    const stopped = result({ status: "aborted", text: "Your week had" });
+
+    // Act
+    const content = await persistedContent(stopped);
+
+    // Assert
+    expect(content).toBe("Your week had\n\n(Stopped by the user.)");
+  });
+
+  it("should persist only the marker when a timed-out turn streamed nothing", async () => {
+    // Arrange
+    const stopped = result({ status: "timeout", text: "" });
+
+    // Act
+    const content = await persistedContent(stopped);
+
+    // Assert
+    expect(content).toBe("(Stopped: the response took too long.)");
+  });
+
+  it("should append the step-limit marker to a step-limited turn", async () => {
+    // Arrange
+    const limited = result({ status: "step_limit", text: "Partial" });
+
+    // Act
+    const content = await persistedContent(limited);
+
+    // Assert
+    expect(content).toBe("Partial\n\n(Stopped: reached the step limit.)");
   });
 });

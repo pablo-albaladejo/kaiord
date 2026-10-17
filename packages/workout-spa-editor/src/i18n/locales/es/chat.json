@@ -9,7 +9,8 @@
   "composer": {
     "messageLabel": "Mensaje",
     "placeholder": "Pregunta sobre tu entrenamiento o tu salud…",
-    "send": "Enviar"
+    "send": "Enviar",
+    "stop": "Detener"
   },
   "empty": {
     "startConversation": "Inicia una conversación: pregunta por tus entrenamientos recientes o tu sueño."

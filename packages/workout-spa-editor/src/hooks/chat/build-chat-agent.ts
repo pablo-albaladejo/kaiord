@@ -1,15 +1,18 @@
 /**
  * Builds a chat agent for one conversation: resolves the provider into an AI
- * SDK model, assembles the tool registry, and wires the streaming callback.
+ * SDK model, assembles the tool registry, and wires the streaming callback
+ * and the usage telemetry sink (chat cost lands in the same `usageEvents`
+ * log as the generate agents).
  * Async because `createLanguageModel` dynamically imports the provider SDK.
  */
 import { type ChatAgent, type ChatTool, createChatAgent } from "@kaiord/ai";
-import { buildChatSystemPrompt } from "@kaiord/ai/prompts";
+import { buildChatSystemPrompt, CHAT_PROMPT_VERSION } from "@kaiord/ai/prompts";
 import {
   createLanguageModel,
   type ProviderCredential,
 } from "@kaiord/ai/providers";
 
+import { createDexieUsageTelemetrySink } from "../../adapters/telemetry/dexie-usage-telemetry-sink";
 import { buildChatTools } from "../../application/chat/tools/build-chat-tools";
 import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
 import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
@@ -45,6 +48,8 @@ export const buildChatAgent = async (
     model,
     tools,
     system: buildChatSystemPrompt(),
+    promptVersion: CHAT_PROMPT_VERSION,
+    telemetry: createDexieUsageTelemetrySink(args.persistence),
     onTextDelta: args.onTextDelta,
   });
   return { agent, tools };
