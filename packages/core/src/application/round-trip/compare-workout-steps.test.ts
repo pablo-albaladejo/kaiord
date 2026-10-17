@@ -7,7 +7,10 @@ import type {
   RepetitionBlock,
   WorkoutStep,
 } from "../../domain/schemas/workout";
-import { createToleranceChecker } from "../../domain/validation/tolerance-checker";
+import {
+  createToleranceChecker,
+  DEFAULT_TOLERANCES,
+} from "../../domain/validation/tolerance-checker";
 import { createMockLogger } from "../../test-utils/index.js";
 import { compareKRDs } from "./compare-krds";
 
@@ -210,6 +213,41 @@ describe("compareKRDs round-trip comparison of structured workout steps", () => 
       expect(violations).toHaveLength(1);
     }
   );
+
+  it("should flag a power range that loses its percent_ftp basis", () => {
+    // Arrange
+    const range = { unit: "range", min: FTP_85, max: FTP_87 };
+    const a = workout([
+      step(time(FIVE_MINUTES), power({ ...range, basis: "percent_ftp" })),
+    ]);
+    const b = workout([step(time(FIVE_MINUTES), power(range))]);
+
+    // Act
+    const violations = compare(a, b);
+
+    // Assert
+    expect(violations.map((v) => v.field)).toStrictEqual([
+      `${PATH}[0].target.value.basis`,
+    ]);
+  });
+
+  it("should check percent_ftp range bounds with the percent FTP tolerance", () => {
+    // Arrange
+    const loosePercent = createToleranceChecker({
+      ...DEFAULT_TOLERANCES,
+      ftpTolerance: FTP_87 - FTP_85,
+    });
+    const range = (max: number) =>
+      power({ unit: "range", min: FTP_85, max, basis: "percent_ftp" });
+    const a = workout([step(time(FIVE_MINUTES), range(FTP_85))]);
+    const b = workout([step(time(FIVE_MINUTES), range(FTP_87))]);
+
+    // Act
+    const violations = compareKRDs(a, b, loosePercent, logger);
+
+    // Assert
+    expect(violations).toStrictEqual([]);
+  });
 
   it("should accept a heart-rate target within ±1 bpm", () => {
     // Arrange

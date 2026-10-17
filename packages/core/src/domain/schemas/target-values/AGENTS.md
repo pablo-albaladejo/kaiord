@@ -25,6 +25,7 @@ The per-target-type value schemas referenced by `targetSchema` (in `../target.ts
 
 - All value schemas use `unit` as the discriminator and pull literals from `targetUnitSchema.enum.*`. NEVER inline string literals like `"watts"`; always `z.literal(targetUnitSchema.enum.watts)`.
 - The `range` variant always has `{ unit: "range", min, max }` (NO `value` field). The non-range variants always have `{ unit, value }`. Adapters depend on this shape — don't merge them.
+- The power `range` variant takes an optional `basis: "percent_ftp"`. Absent means the bounds are watts (all pre-existing data); `percent_ftp` means they are percentages of FTP. Every writer that reads a power range MUST honour it: watts-only writers resolve it with the athlete FTP (Garmin) or refuse/warn, never write the percentages as watts.
 - Power zones go 1..7 (Coggan); HR and pace zones go 1..5. These ranges are baked into the schemas as `z.number().int().min(N).max(M)`. If you change them, update `../../zones/power-zones.ts` and every adapter's zone mapper.
 - `stroke-type.ts` deliberately does NOT use `discriminatedUnion` because there's only one variant; it's a plain `z.object(...)`.
 
