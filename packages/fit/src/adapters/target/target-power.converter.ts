@@ -28,39 +28,34 @@ export const convertPowerTarget = (data: FitTargetData): Target => {
   return { type: targetTypeSchema.enum.open };
 };
 
+const buildRange = (low: number, high: number): Target => {
+  const min = interpretWorkoutPower(low);
+  const max = interpretWorkoutPower(high);
+  const percent = min.type === "percentage" && max.type === "percentage";
+  return {
+    type: targetTypeSchema.enum.power,
+    value: {
+      unit: targetUnitSchema.enum.range,
+      min: min.value,
+      max: max.value,
+      ...(percent && { basis: targetUnitSchema.enum.percent_ftp }),
+    },
+  };
+};
+
 const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
   if (
     data.customTargetPowerLow !== undefined &&
     data.customTargetPowerHigh !== undefined
   ) {
-    const minValue = interpretWorkoutPower(data.customTargetPowerLow);
-    const maxValue = interpretWorkoutPower(data.customTargetPowerHigh);
-
-    return {
-      type: targetTypeSchema.enum.power,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: minValue.value,
-        max: maxValue.value,
-      },
-    };
+    return buildRange(data.customTargetPowerLow, data.customTargetPowerHigh);
   }
 
   if (
     data.customTargetValueLow !== undefined &&
     data.customTargetValueHigh !== undefined
   ) {
-    const minValue = interpretWorkoutPower(data.customTargetValueLow);
-    const maxValue = interpretWorkoutPower(data.customTargetValueHigh);
-
-    return {
-      type: targetTypeSchema.enum.power,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: minValue.value,
-        max: maxValue.value,
-      },
-    };
+    return buildRange(data.customTargetValueLow, data.customTargetValueHigh);
   }
 
   return null;

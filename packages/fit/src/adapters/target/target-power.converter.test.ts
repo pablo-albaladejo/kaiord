@@ -5,7 +5,7 @@ import { convertPowerTarget } from "./target-power.converter";
 
 describe("convertPowerTarget", () => {
   describe("range target using specific power fields", () => {
-    it("should return power range with interpreted values for customTargetPowerLow/High", () => {
+    it("should read raw customTargetPowerLow/High as a percent_ftp range", () => {
       // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 200,
@@ -18,7 +18,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
 
@@ -41,7 +41,7 @@ describe("convertPowerTarget", () => {
   });
 
   describe("range target using generic custom fields", () => {
-    it("should return power range for customTargetValueLow/High", () => {
+    it("should read raw customTargetValueLow/High as a percent_ftp range", () => {
       // Arrange
       const data: FitTargetData = {
         customTargetValueLow: 180,
@@ -54,7 +54,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 180, max: 220 },
+        value: { unit: "range", min: 180, max: 220, basis: "percent_ftp" },
       });
     });
   });
@@ -75,7 +75,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
   });
@@ -223,7 +223,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
 

@@ -54,6 +54,32 @@ describe("convertPowerTarget", () => {
     });
   });
 
+  it("should convert a percent_ftp power range without the watts offset", () => {
+    // Arrange
+    const step: WorkoutStep = {
+      stepIndex: 0,
+      durationType: "time",
+      duration: { type: "time", seconds: 300 },
+      targetType: "power",
+      target: {
+        type: "power",
+        value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+      },
+    };
+    const message: Record<string, unknown> = {};
+
+    // Act
+    convertPowerTarget(step, message);
+
+    // Assert
+    expect(message).toStrictEqual({
+      targetType: "power",
+      targetValue: 0,
+      customTargetPowerLow: 50,
+      customTargetPowerHigh: 75,
+    });
+  });
+
   it("should convert power watts target with offset", () => {
     // Arrange
     const step: WorkoutStep = {
