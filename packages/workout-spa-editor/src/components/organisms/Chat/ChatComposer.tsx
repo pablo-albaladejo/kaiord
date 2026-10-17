@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type Ref, useImperativeHandle, useRef, useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
@@ -8,8 +8,12 @@ export type ChatComposerProps = {
   disabled: boolean;
   /** Seeds the input on mount (e.g. an "adjust with AI" deep-link prefill). */
   initialText?: string;
-  /** Focuses the input on mount (after a suggestion filled it). */
-  autoFocus?: boolean;
+  ref?: Ref<ChatComposerHandle>;
+};
+
+export type ChatComposerHandle = {
+  /** Adds a suggestion without discarding what the user typed, then focuses. */
+  suggest: (text: string) => void;
 };
 
 /** Message input. Enter sends; Shift+Enter inserts a newline. */
@@ -17,10 +21,19 @@ export function ChatComposer({
   onSend,
   disabled,
   initialText,
-  autoFocus,
+  ref,
 }: ChatComposerProps) {
   const t = useTranslate("chat");
   const [text, setText] = useState(initialText ?? "");
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  useImperativeHandle(ref, () => ({
+    suggest: (suggestion) => {
+      setText((prev) =>
+        prev.trim() ? `${prev.trimEnd()}\n${suggestion}` : suggestion
+      );
+      inputRef.current?.focus();
+    },
+  }));
 
   const submit = () => {
     const trimmed = text.trim();
@@ -32,9 +45,9 @@ export function ChatComposer({
   return (
     <div className="flex items-end gap-2">
       <textarea
+        ref={inputRef}
         aria-label={t("composer.messageLabel")}
         rows={2}
-        autoFocus={autoFocus}
         value={text}
         disabled={disabled}
         onChange={(e) => setText(e.target.value)}

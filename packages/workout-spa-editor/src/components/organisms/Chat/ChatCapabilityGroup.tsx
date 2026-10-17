@@ -14,22 +14,27 @@ export function ChatCapabilityGroup({
   onPick,
 }: ChatCapabilityGroupProps) {
   const t = useTranslate("chat");
+  const name = t(`capabilities.group.${section.group}`);
   return (
     <div className="flex flex-col gap-2">
       <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-ink-muted">
-        {t(`capabilities.group.${section.group}`)}
-        {section.writes && (
-          <span className="ml-1 font-normal normal-case">
-            · {t("capabilities.youConfirm")}
-          </span>
-        )}
+        {name}
       </h3>
+      {section.writes && (
+        <p className="m-0 text-[12px] text-ink-muted">
+          {t("capabilities.youConfirm")}
+        </p>
+      )}
       <ul className="m-0 list-none p-0 text-[13px] text-ink-muted">
-        {section.tools.map((name) => (
-          <li key={name}>{t(`capabilities.tool.${name}`)}</li>
+        {section.tools.map((tool) => (
+          <li key={tool}>{t(`capabilities.tool.${tool}`)}</li>
         ))}
       </ul>
-      <div className="flex flex-wrap gap-2">
+      <div
+        role="group"
+        aria-label={t("capabilities.suggestions", { group: name })}
+        className="flex flex-wrap gap-2"
+      >
         {section.examples.map((id) => {
           const text = t(`capabilities.example.${id}`);
           return (

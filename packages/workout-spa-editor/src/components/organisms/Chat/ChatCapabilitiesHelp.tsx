@@ -1,37 +1,61 @@
+import { useId, useRef } from "react";
+
+import type { ChatCapabilitiesState } from "../../../hooks/use-chat-capabilities";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 import { ChatCapabilities } from "./ChatCapabilities";
 
-export type ChatCapabilitiesHelpProps = {
-  open: boolean;
-  /** Omitted for the empty state, where the catalog cannot be dismissed. */
-  onOpenChange?: (open: boolean) => void;
-  onPick: (text: string) => void;
+export type ChatCapabilitiesHelpProps = ChatCapabilitiesState & {
+  /** Empty conversation: the catalog is the empty state, always shown. */
+  empty?: boolean;
 };
 
-/** "What can I do?" in a running conversation: a button that opens the local
- * capability catalog, answered without calling the model. */
+/** "What can I do?", answered from the local catalog without calling the
+ * model. Empty conversation: the catalog itself (focused when asked for).
+ * Otherwise a disclosure: opening moves focus to the catalog heading,
+ * closing returns it to the trigger. */
 export function ChatCapabilitiesHelp({
   open,
   onOpenChange,
   onPick,
+  empty,
 }: ChatCapabilitiesHelpProps) {
   const t = useTranslate("chat");
-  if (open)
+  const panelId = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  if (empty)
     return (
       <ChatCapabilities
+        key={open ? "asked" : "idle"}
+        focusOnMount={open}
         onPick={onPick}
-        onClose={onOpenChange && (() => onOpenChange(false))}
       />
     );
+  const close = () => {
+    onOpenChange(false);
+    triggerRef.current?.focus();
+  };
   return (
-    <Button
-      variant="tertiary"
-      size="sm"
-      className="self-start"
-      onClick={() => onOpenChange?.(true)}
-    >
-      {t("capabilities.help")}
-    </Button>
+    <>
+      <Button
+        ref={triggerRef}
+        variant="tertiary"
+        size="sm"
+        className="self-start"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => onOpenChange(!open)}
+      >
+        {t("capabilities.help")}
+      </Button>
+      {open && (
+        <ChatCapabilities
+          id={panelId}
+          focusOnMount
+          onPick={onPick}
+          onClose={close}
+        />
+      )}
+    </>
   );
 }

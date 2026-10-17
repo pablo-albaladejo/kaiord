@@ -6,7 +6,7 @@
  * other way round, so adding a tool means adding one line here plus its
  * `chat.json` strings.
  *
- * Labels live under `capabilities.tool.<name>` and example prompts under
+ * Visible tools need a label under `capabilities.tool.<name>` and example prompts under
  * `capabilities.example.<id>` in the `chat` namespace.
  */
 
@@ -20,10 +20,12 @@ export type ChatCapability = {
   writes: boolean;
   /** Example prompt ids, rendered as suggestion chips. */
   examples: readonly string[];
+  /** Plumbing the user never asks for (kept for registry parity, not shown). */
+  hidden?: boolean;
 };
 
 export const CHAT_CAPABILITIES = {
-  get_today: { group: "consult", writes: false, examples: [] },
+  get_today: { group: "consult", writes: false, examples: [], hidden: true },
   query_workouts: { group: "consult", writes: false, examples: ["week"] },
   query_health: { group: "consult", writes: false, examples: ["sleep"] },
   query_energy_balance: {
@@ -67,7 +69,7 @@ export const chatCapabilitySections = (): ChatCapabilitySection[] =>
         ChatCapabilityToolName,
         ChatCapability,
       ][]
-    ).filter(([, c]) => c.group === group);
+    ).filter(([, c]) => c.group === group && !c.hidden);
     return {
       group,
       writes: entries.some(([, c]) => c.writes),

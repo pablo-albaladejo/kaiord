@@ -49,13 +49,13 @@ export function ChatConversation({
     messages,
   });
   const busy = turn.state === "streaming";
-  const caps = useChatCapabilities(turn.send);
+  const caps = useChatCapabilities(turn.send, messages.length > 0);
   const empty = messages.length === 0 && !busy;
 
   return (
     <div className="flex flex-col gap-3">
       {empty ? (
-        <ChatCapabilitiesHelp open onPick={caps.fill} />
+        <ChatCapabilitiesHelp empty {...caps.help} />
       ) : (
         <ChatMessageList messages={messages} focusMessageId={focusMessageId} />
       )}
@@ -68,19 +68,12 @@ export function ChatConversation({
         onDeny={turn.deny}
         onRetry={turn.retry}
       />
-      {!empty && (
-        <ChatCapabilitiesHelp
-          open={caps.open}
-          onOpenChange={caps.setOpen}
-          onPick={caps.fill}
-        />
-      )}
+      {messages.length > 0 && <ChatCapabilitiesHelp {...caps.help} />}
       <ChatComposer
-        key={caps.composerKey}
+        ref={caps.composerRef}
         onSend={caps.send}
         disabled={busy || turn.state === "awaiting_confirmation"}
-        initialText={caps.draft ?? composerInitialText}
-        autoFocus={caps.draft !== null}
+        initialText={composerInitialText}
       />
     </div>
   );

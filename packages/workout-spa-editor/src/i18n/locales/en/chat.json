@@ -107,14 +107,13 @@
     "close": "Close",
     "fillHint": "A suggestion fills in your message; it doesn't send it.",
     "nothingSaved": "Nothing is saved without your confirmation.",
-    "youConfirm": "you confirm",
+    "youConfirm": "You confirm each one.",
     "group": {
       "consult": "Look up",
       "log": "Log",
       "do": "Do"
     },
     "tool": {
-      "get_today": "Today's date, for relative dates",
       "query_workouts": "Your workouts by date and sport",
       "query_health": "Sleep, weight, HRV, steps…",
       "query_energy_balance": "Energy balance and goal",
@@ -137,9 +136,10 @@
       "logSleep": "I slept 7 h last night",
       "logMeal": "I ate 120 g of pasta",
       "createWorkout": "Create a 45-minute Z2 run for tomorrow",
-      "pushGarmin": "Send tomorrow's workout to Garmin",
+      "pushGarmin": "Push tomorrow's workout to Garmin",
       "syncCoaching": "Sync my Train2Go plan",
       "setRoute": "Use WHOOP for sleep"
-    }
+    },
+    "suggestions": "{{group}} suggestions"
   }
 }

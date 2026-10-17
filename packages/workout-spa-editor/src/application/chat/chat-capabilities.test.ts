@@ -56,7 +56,7 @@ describe("CHAT_CAPABILITIES", () => {
   it.each([
     ["en", en],
     ["es", es],
-  ])("should have a %s label for every tool and example", (_, dict) => {
+  ])("should have a %s label for every visible tool and example", (_, dict) => {
     // Arrange
     const { tool, example } = dict.capabilities as {
       tool: Record<string, string>;
@@ -65,7 +65,7 @@ describe("CHAT_CAPABILITIES", () => {
 
     // Act
     const missing = Object.entries(catalog).flatMap(([name, c]) => [
-      ...(tool[name] ? [] : [`tool.${name}`]),
+      ...(c.hidden || tool[name] ? [] : [`tool.${name}`]),
       ...c.examples.filter((id) => !example[id]).map((id) => `example.${id}`),
     ]);
 
@@ -87,5 +87,6 @@ describe("chatCapabilitySections", () => {
     expect(sections.map((s) => s.writes)).toEqual([false, true, true]);
     expect(sections[1].tools).toEqual(["log_health_metric", "log_intake"]);
     expect(sections[1].examples).toEqual(["logWeight", "logSleep", "logMeal"]);
+    expect(sections[0].tools).not.toContain("get_today");
   });
 });

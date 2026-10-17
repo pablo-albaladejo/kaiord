@@ -107,14 +107,13 @@
     "close": "Cerrar",
     "fillHint": "Una sugerencia rellena el mensaje; no lo envía.",
     "nothingSaved": "Nada se guarda sin tu confirmación.",
-    "youConfirm": "confirmas tú",
+    "youConfirm": "Confirmas tú cada una.",
     "group": {
       "consult": "Consultar",
       "log": "Registrar",
       "do": "Hacer"
     },
     "tool": {
-      "get_today": "Qué día es, para las fechas relativas",
       "query_workouts": "Tus entrenamientos por fechas y deporte",
       "query_health": "Sueño, peso, VFC, pasos…",
       "query_energy_balance": "Balance energético y objetivo",
@@ -140,6 +139,7 @@
       "pushGarmin": "Envía el entreno de mañana a Garmin",
       "syncCoaching": "Sincroniza mi plan de Train2Go",
       "setRoute": "Usa WHOOP para el sueño"
-    }
+    },
+    "suggestions": "Sugerencias: {{group}}"
   }
 }

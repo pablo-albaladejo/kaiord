@@ -64,6 +64,9 @@ describe("ChatConversation capabilities", () => {
     expect(catalog).toHaveTextContent(
       "Nothing is saved without your confirmation."
     );
+    expect(
+      screen.getByRole("group", { name: "Do suggestions" })
+    ).toBeInTheDocument();
   });
 
   it("should fill the composer with a suggestion without sending it", async () => {
@@ -81,6 +84,36 @@ describe("ChatConversation capabilities", () => {
     expect(send).not.toHaveBeenCalled();
   });
 
+  it("should add a suggestion without discarding what the user typed", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    renderConversation([]);
+    const composer = screen.getByRole("textbox", { name: "Message" });
+    await user.type(composer, "My knee hurts.");
+
+    // Act
+    await user.click(screen.getByRole("button", { name: "Log 71.9 kg today" }));
+
+    // Assert
+    expect(composer).toHaveValue("My knee hurts.\nLog 71.9 kg today");
+  });
+
+  it("should send a mid-conversation what-can-I-do follow-up to the model", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    renderConversation([message]);
+
+    // Act
+    await user.type(
+      screen.getByRole("textbox", { name: "Message" }),
+      "What can I do?{Enter}"
+    );
+
+    // Assert
+    expect(send).toHaveBeenCalledWith("What can I do?");
+    expect(screen.queryByTestId("chat-capabilities")).not.toBeInTheDocument();
+  });
+
   it("should answer a typed what-can-you-do question locally", async () => {
     // Arrange
     const user = userEvent.setup();
@@ -94,6 +127,9 @@ describe("ChatConversation capabilities", () => {
 
     // Assert
     expect(screen.getByTestId("chat-capabilities")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Ask about your data/ })
+    ).toHaveFocus();
     expect(send).not.toHaveBeenCalled();
   });
 
@@ -102,11 +138,17 @@ describe("ChatConversation capabilities", () => {
     const user = userEvent.setup();
     renderConversation([message]);
 
+    const trigger = screen.getByRole("button", { name: "What can I do?" });
+
     // Act
-    await user.click(screen.getByRole("button", { name: "What can I do?" }));
+    await user.click(trigger);
+    const expanded = trigger.getAttribute("aria-expanded");
     await user.click(screen.getByRole("button", { name: "Close" }));
 
     // Assert
+    expect(expanded).toBe("true");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveFocus();
     expect(screen.queryByTestId("chat-capabilities")).not.toBeInTheDocument();
     expect(send).not.toHaveBeenCalled();
   });
