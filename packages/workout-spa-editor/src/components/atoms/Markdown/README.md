@@ -30,6 +30,9 @@ Partial input never throws. An unclosed fence runs to the end as code; an unclos
   `parse-performance.test.ts` runs each pattern against 10 000-char attacks.
 - Quotes and lists nest at most `MAX_BLOCK_DEPTH` (12) levels; the rest is one
   plain paragraph, so `>`×3000 cannot overflow the stack.
+- Size caps: a table wider than 64 columns stays text, one past 5 000 cells
+  (rows padded to the header) renders as code, and input past 100 000 characters
+  is parsed up to the last line break before the cap; the rest is plain text.
 - `MarkdownBoundary` catches anything that still throws and shows that message as
   plain text, so one bad reply cannot take the chat down.
 - Re-parsing while streaming goes through `useDeferredValue`.

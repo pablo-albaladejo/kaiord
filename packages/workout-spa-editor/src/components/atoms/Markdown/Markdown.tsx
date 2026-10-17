@@ -2,7 +2,7 @@ import { useDeferredValue, useMemo } from "react";
 
 import { MarkdownBlocks } from "./MarkdownBlocks";
 import { MarkdownBoundary } from "./MarkdownBoundary";
-import { parseBlocks } from "./parse-blocks";
+import { parseMarkdown } from "./parse-markdown";
 
 export type MarkdownProps = {
   /** Markdown written by the assistant; may be partial while it streams. */
@@ -30,6 +30,6 @@ export function Markdown({ source, className = "" }: MarkdownProps) {
    skip re-parses it has no time for and keeps typing and scrolling responsive. */
 function MarkdownBody({ source }: { source: string }) {
   const deferred = useDeferredValue(source);
-  const blocks = useMemo(() => parseBlocks(deferred), [deferred]);
+  const blocks = useMemo(() => parseMarkdown(deferred), [deferred]);
   return <MarkdownBlocks blocks={blocks} />;
 }

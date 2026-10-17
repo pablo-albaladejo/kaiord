@@ -16,6 +16,9 @@ function MarkdownBlock({ block }: { block: Block }) {
           <MarkdownInline nodes={parseInline(block.text)} />
         </p>
       );
+    // Past the input cap: shown, never parsed.
+    case "text":
+      return <p>{block.text}</p>;
     // A reply's heading is a label inside a bubble, not a page outline entry.
     case "heading":
       return (

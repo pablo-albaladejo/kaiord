@@ -10,7 +10,7 @@ import { LIST_ITEM, readList } from "./parse-list";
 import { isTableStart, readTable, type TableData } from "./parse-table";
 
 export type Block =
-  | { kind: "paragraph" | "heading"; text: string }
+  | { kind: "paragraph" | "heading" | "text"; text: string }
   | { kind: "code"; text: string }
   | { kind: "rule" }
   | { kind: "quote"; blocks: Block[] }
@@ -61,6 +61,7 @@ function readBlock(lines: string[], i: number, depth: number): Read {
   }
   if (isTableStart(lines, i)) {
     const [table, next] = readTable(lines, i);
+    if (typeof table === "string") return [{ kind: "code", text: table }, next];
     return [{ kind: "table", ...table }, next];
   }
   return readParagraph(lines, i);
