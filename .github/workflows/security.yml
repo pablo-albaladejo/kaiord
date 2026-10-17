@@ -35,6 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     # P95 = 44s; ceil(P95 × 1.5 / 60) = 2; capped at lint-family ceiling 10.
     timeout-minutes: 2
+    # One audit per ref at a time, so two runs cannot race on the alert issue.
+    concurrency:
+      group: security-audit-${{ github.ref }}
+      cancel-in-progress: false
 
     steps:
       - name: Checkout code
@@ -55,39 +59,33 @@ jobs:
           # Parse audit results using jq
           # Extract vulnerability counts by severity for detailed reporting
 
-          # Validate JSON before parsing
-          if ! jq empty audit-results.json 2>/dev/null; then
-            echo "warn: Failed to parse audit results JSON, assuming no vulnerabilities"
-            {
-              echo "info=0"
-              echo "low=0"
-              echo "moderate=0"
-              echo "high=0"
-              echo "critical=0"
-              echo "total=0"
-              echo "has_critical=false"
-              echo "status=passed"
-            } >> "$GITHUB_OUTPUT"
-          elif [ -f audit-results.json ]; then
+          # Trust the report only by its shape. A registry failure makes
+          # `pnpm audit --json` print valid JSON such as {"error":{...}}, which
+          # has no counts; reading it with `// 0` would report a clean audit.
+          # A missing or empty file also fails the shape check.
+          if jq -e 'type == "object" and (has("error") | not) and (.metadata.vulnerabilities | type == "object")' audit-results.json > /dev/null 2>&1; then
             # pnpm audit --json uses .metadata.vulnerabilities with counts per severity
-            INFO=$(jq '.metadata.vulnerabilities.info // 0' audit-results.json 2>/dev/null || echo "0")
-            LOW=$(jq '.metadata.vulnerabilities.low // 0' audit-results.json 2>/dev/null || echo "0")
-            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit-results.json 2>/dev/null || echo "0")
-            HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit-results.json 2>/dev/null || echo "0")
-            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit-results.json 2>/dev/null || echo "0")
-            
+            INFO=$(jq '.metadata.vulnerabilities.info // 0' audit-results.json)
+            LOW=$(jq '.metadata.vulnerabilities.low // 0' audit-results.json)
+            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit-results.json)
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit-results.json)
+            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit-results.json)
+
             # Output vulnerability counts for downstream steps (using block redirect)
+            # `parsed=true` marks counts read from a real audit report. Only a
+            # parsed report may decide pass/fail or close the alert issue.
             {
+              echo "parsed=true"
               echo "info=$INFO"
               echo "low=$LOW"
               echo "moderate=$MODERATE"
               echo "high=$HIGH"
               echo "critical=$CRITICAL"
             } >> "$GITHUB_OUTPUT"
-            
+
             TOTAL=$((INFO + LOW + MODERATE + HIGH + CRITICAL))
             echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
-            
+
             # Determine workflow status based on severity
             # FAIL: High or critical vulnerabilities (immediate action required)
             # WARN: Moderate or low vulnerabilities (address in follow-up)
@@ -109,41 +107,47 @@ jobs:
               } >> "$GITHUB_OUTPUT"
             fi
           else
+            echo "::error::pnpm audit did not produce a vulnerability report"
+            head -c 2000 audit-results.json 2>/dev/null || true
             {
-              echo "has_critical=false"
-              echo "status=passed"
-              echo "total=0"
+              echo "parsed=false"
+              echo "status=error"
             } >> "$GITHUB_OUTPUT"
           fi
 
       - name: Display audit summary
         if: always()
         run: |
-          echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Critical | ${{ steps.audit.outputs.critical || 0 }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| High | ${{ steps.audit.outputs.high || 0 }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Moderate | ${{ steps.audit.outputs.moderate || 0 }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Low | ${{ steps.audit.outputs.low || 0 }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Info | ${{ steps.audit.outputs.info || 0 }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total vulnerabilities:** ${{ steps.audit.outputs.total || 0 }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Security Audit Summary"
+            echo ""
+            echo "| Severity | Count |"
+            echo "|----------|-------|"
+            echo "| Critical | ${{ steps.audit.outputs.critical || 0 }} |"
+            echo "| High | ${{ steps.audit.outputs.high || 0 }} |"
+            echo "| Moderate | ${{ steps.audit.outputs.moderate || 0 }} |"
+            echo "| Low | ${{ steps.audit.outputs.low || 0 }} |"
+            echo "| Info | ${{ steps.audit.outputs.info || 0 }} |"
+            echo ""
+            echo "**Total vulnerabilities:** ${{ steps.audit.outputs.total || 0 }}"
 
-          if [ "${{ steps.audit.outputs.status }}" = "failed" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "❌ **Status:** Failed - High or critical vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.audit.outputs.status }}" = "warning" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "⚠️ **Status:** Warning - Moderate or low vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ **Status:** Passed - No vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
-          fi
+            if [ "${{ steps.audit.outputs.status }}" = "failed" ]; then
+              echo ""
+              echo "❌ **Status:** Failed - High or critical vulnerabilities detected"
+            elif [ "${{ steps.audit.outputs.status }}" = "warning" ]; then
+              echo ""
+              echo "⚠️ **Status:** Warning - Moderate or low vulnerabilities detected"
+            elif [ "${{ steps.audit.outputs.status }}" = "passed" ]; then
+              echo ""
+              echo "✅ **Status:** Passed - No vulnerabilities detected"
+            else
+              echo ""
+              echo "❌ **Status:** Error - The audit did not produce a vulnerability report"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment on PR with vulnerability summary
-        if: github.event_name == 'pull_request' && steps.audit.outputs.total != '0'
+        if: github.event_name == 'pull_request' && steps.audit.outputs.parsed == 'true' && steps.audit.outputs.total != '0'
         uses: actions/github-script@v9
         with:
           script: |
@@ -204,11 +208,35 @@ jobs:
               body: body
             });
 
-      - name: Create GitHub issue for critical vulnerabilities
-        if: steps.audit.outputs.has_critical == 'true' && github.event_name != 'pull_request'
+      - name: Create or update GitHub issue for critical vulnerabilities
+        if: >-
+          steps.audit.outputs.has_critical == 'true' &&
+          github.event_name != 'pull_request' &&
+          github.ref == 'refs/heads/main'
         uses: actions/github-script@v9
         with:
           script: |
+            // One open alert issue at a time: find it by labels + body marker
+            // (or the legacy title prefix, for issues created before the
+            // marker existed) and update it in place instead of opening a
+            // new one on every red run.
+            const MARKER = '<!-- security-audit-alert -->';
+            const TITLE_PREFIX = '🚨 Security Alert:';
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,automated',
+              sort: 'created',
+              direction: 'desc',
+              per_page: 100,
+            });
+            const existing = open.find(
+              (i) =>
+                !i.pull_request &&
+                ((i.body || '').includes(MARKER) || i.title.startsWith(TITLE_PREFIX)),
+            );
+
             const critical = ${{ steps.audit.outputs.critical || 0 }};
             const high = ${{ steps.audit.outputs.high || 0 }};
             const moderate = ${{ steps.audit.outputs.moderate || 0 }};
@@ -219,7 +247,7 @@ jobs:
 
             const body = `## Security Audit Alert
 
-            The weekly security audit has detected **critical or high severity vulnerabilities** in our dependencies.
+            The security audit has detected **critical or high severity vulnerabilities** in our dependencies.
 
             ### Vulnerability Summary
 
@@ -281,15 +309,81 @@ jobs:
 
             ---
 
-            This issue was automatically created by the Security Audit workflow.`;
+            This issue is kept up to date by the Security Audit workflow. It is updated in place on every red run and closed when the audit on main is clean.
 
-            github.rest.issues.create({
+            ${MARKER}`;
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                title: title,
+                body: body,
+              });
+              core.info(`Updated security alert issue #${existing.number}`);
+            } else {
+              const { data: created } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['security', 'dependencies', 'automated']
+              });
+              core.info(`Created security alert issue #${created.number}`);
+            }
+
+      - name: Close security alert issue when main is clean
+        continue-on-error: true
+        if: >-
+          steps.audit.outputs.parsed == 'true' &&
+          steps.audit.outputs.has_critical == 'false' &&
+          (github.event_name == 'push' || github.event_name == 'schedule') &&
+          github.ref == 'refs/heads/main'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const MARKER = '<!-- security-audit-alert -->';
+            const TITLE_PREFIX = '🚨 Security Alert:';
+            const open = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: title,
-              body: body,
-              labels: ['security', 'dependencies', 'automated']
+              state: 'open',
+              labels: 'security,automated',
+              sort: 'created',
+              direction: 'desc',
+              per_page: 100,
             });
+            const existing = open.find(
+              (i) =>
+                !i.pull_request &&
+                ((i.body || '').includes(MARKER) || i.title.startsWith(TITLE_PREFIX)),
+            );
+            if (!existing) {
+              core.info('No open security alert issue to close');
+              return;
+            }
+            const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existing.number,
+              body: `The security audit on \`main\` now reports 0 critical and 0 high vulnerabilities ([run](${runUrl})). Closing.`,
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existing.number,
+              state: 'closed',
+              state_reason: 'completed',
+            });
+            core.info(`Closed security alert issue #${existing.number}`);
+
+      - name: Fail workflow if the audit did not produce a report
+        if: steps.audit.outputs.parsed != 'true'
+        run: |
+          echo "❌ Security audit failed: pnpm audit did not produce a vulnerability report"
+          exit 1
 
       - name: Fail workflow if critical vulnerabilities found
         if: steps.audit.outputs.has_critical == 'true'
