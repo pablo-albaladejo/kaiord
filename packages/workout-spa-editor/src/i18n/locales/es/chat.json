@@ -9,7 +9,8 @@
   "composer": {
     "messageLabel": "Mensaje",
     "placeholder": "Pregunta sobre tu entrenamiento o tu salud…",
-    "send": "Enviar"
+    "send": "Enviar",
+    "stop": "Detener"
   },
   "empty": {
     "startConversation": "Inicia una conversación: pregunta por tus entrenamientos recientes o tu sueño."
@@ -101,5 +102,9 @@
       "body": "«{{label}}» viene de una copia de seguridad, que nunca incluye claves. Añade la clave en Ajustes para usar el asistente.",
       "action": "Añadir la clave"
     }
+  },
+  "stopReason": {
+    "aborted": "Detenido por ti.",
+    "timeout": "Detenido: la respuesta tardó demasiado."
   }
 }

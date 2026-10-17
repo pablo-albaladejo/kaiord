@@ -5,6 +5,8 @@ import type { RawTurn } from "./run-turn";
  * Classifies a raw turn into the engine's outcome, prepending the prior
  * history so `messages` is always the full, resume-ready conversation.
  *
+ * - A stop (caller abort or watchdog) → `aborted` / `timeout`, first: the
+ *   stopped turn carries no tool calls, so nothing is left pending.
  * - An unanswered action-tool call → `pending_action` (awaiting confirmation).
  *   The last one wins: the loop halts on the step that produced it, so an
  *   earlier action call was already answered (e.g. by a tool-error).
@@ -18,6 +20,9 @@ export const classifyTurn = (
   actionNames: Set<string>
 ): ChatTurnResult => {
   const messages = [...history, ...raw.messages];
+  if (raw.stopped) {
+    return { status: raw.stopped, text: raw.text, messages, usage: raw.usage };
+  }
   const actionCall = [...raw.toolCalls]
     .reverse()
     .find((c) => actionNames.has(c.toolName));

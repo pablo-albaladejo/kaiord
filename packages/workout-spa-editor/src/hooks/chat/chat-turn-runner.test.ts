@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
+import { stopTurn } from "./chat-turn-context";
 import { approveAction, denyAction } from "./chat-turn-resume";
 import { retryTurn, sendTurn } from "./chat-turn-runner";
 import type { ChatTurnCtx, ChatTurnState } from "./chat-turn-types";
@@ -34,6 +35,7 @@ const makeCtx = (
     agentRef: { current: fakeAgent as never },
     toolsRef: { current: [] },
     messagesRef: { current: [] },
+    abortRef: { current: null },
     set: {
       state: (s) => states.push(s),
       streamingText: () => undefined,
@@ -46,6 +48,67 @@ const makeCtx = (
 
 describe("chat-turn-runner", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("should stop a streaming turn and persist its partial reply marked stopped", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx, states, pendings } = makeCtx(persistence);
+    fakeAgent.sendTurn.mockImplementationOnce(
+      (_messages: unknown, options: { signal: AbortSignal }) =>
+        new Promise((resolve) => {
+          options.signal.addEventListener("abort", () =>
+            resolve({ status: "aborted", text: "Your last ride", messages: [] })
+          );
+        })
+    );
+
+    // Act
+    const running = sendTurn(ctx, [], "last ride?");
+    await vi.waitFor(() => expect(fakeAgent.sendTurn).toHaveBeenCalled());
+    stopTurn(ctx);
+    await running;
+
+    // Assert
+    const stored = await persistence.chatMessages.listByProfile("p1");
+    expect(stored.map((m) => m.role)).toEqual(["user", "assistant"]);
+    expect(stored[1]).toMatchObject({
+      content: "Your last ride",
+      stopReason: "aborted",
+    });
+    expect(pendings.at(-1)).toBeNull();
+    expect(states.at(-1)).toBe("idle");
+    expect(ctx.abortRef.current).toBeNull();
+  });
+
+  it("should persist a timed-out turn with its timeout stop reason", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx, states } = makeCtx(persistence);
+    fakeAgent.sendTurn.mockResolvedValueOnce({
+      status: "timeout",
+      text: "",
+      messages: [],
+    });
+
+    // Act
+    await sendTurn(ctx, [], "slow?");
+
+    // Assert
+    const stored = await persistence.chatMessages.listByProfile("p1");
+    expect(stored[1]).toMatchObject({ content: "", stopReason: "timeout" });
+    expect(states.at(-1)).toBe("idle");
+  });
+
+  it("should do nothing when stop is called with no turn in flight", () => {
+    // Arrange
+    const { ctx, states } = makeCtx(createInMemoryPersistence());
+
+    // Act
+    stopTurn(ctx);
+
+    // Assert
+    expect(states).toEqual([]);
+  });
 
   it("should not pin the model on a draft that follows the main model", async () => {
     // Arrange
@@ -159,7 +222,8 @@ describe("chat-turn-runner", () => {
     expect(execute).toHaveBeenCalledWith({ source: "train2go" });
     expect(fakeAgent.resume).toHaveBeenCalledWith(
       [],
-      expect.objectContaining({ status: "approved", output: { synced: 3 } })
+      expect.objectContaining({ status: "approved", output: { synced: 3 } }),
+      { signal: expect.any(AbortSignal) }
     );
   });
 
@@ -217,7 +281,8 @@ describe("chat-turn-runner", () => {
     // Assert
     expect(fakeAgent.resume).toHaveBeenCalledWith(
       [],
-      expect.objectContaining({ status: "declined" })
+      expect.objectContaining({ status: "declined" }),
+      { signal: expect.any(AbortSignal) }
     );
   });
 
@@ -279,9 +344,10 @@ describe("chat-turn-runner", () => {
     await retryTurn(ctx, [], "hola");
 
     // Assert
-    expect(fakeAgent.sendTurn).toHaveBeenCalledWith([
-      { role: "user", content: "hola" },
-    ]);
+    expect(fakeAgent.sendTurn).toHaveBeenCalledWith(
+      [{ role: "user", content: "hola" }],
+      { signal: expect.any(AbortSignal) }
+    );
     const stored = await persistence.chatMessages.listByProfile("p1");
     expect(stored.filter((m) => m.role === "user")).toHaveLength(1);
   });
@@ -300,9 +366,12 @@ describe("chat-turn-runner", () => {
     await retryTurn(ctx, history, "second");
 
     // Assert
-    expect(fakeAgent.sendTurn).toHaveBeenLastCalledWith([
-      { role: "user", content: "first" },
-      { role: "user", content: "second" },
-    ]);
+    expect(fakeAgent.sendTurn).toHaveBeenLastCalledWith(
+      [
+        { role: "user", content: "first" },
+        { role: "user", content: "second" },
+      ],
+      { signal: expect.any(AbortSignal) }
+    );
   });
 });

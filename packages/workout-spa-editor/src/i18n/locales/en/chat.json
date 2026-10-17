@@ -9,7 +9,8 @@
   "composer": {
     "messageLabel": "Message",
     "placeholder": "Ask about your training or health…",
-    "send": "Send"
+    "send": "Send",
+    "stop": "Stop"
   },
   "empty": {
     "startConversation": "Start a conversation — ask about your recent workouts or sleep."
@@ -101,5 +102,9 @@
       "body": "“{{label}}” came from a backup, which never carries keys. Add the key in Settings to use the assistant.",
       "action": "Add the key"
     }
+  },
+  "stopReason": {
+    "aborted": "Stopped by you.",
+    "timeout": "Stopped: the response took too long."
   }
 }
