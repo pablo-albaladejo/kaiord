@@ -1,3 +1,10 @@
+import {
+  HEADING,
+  headingText,
+  isRule,
+  QUOTE,
+  startsBlock,
+} from "./block-starts";
 import { FENCE, readFence } from "./parse-fence";
 import { LIST_ITEM, readList } from "./parse-list";
 import { isTableStart, readTable, type TableData } from "./parse-table";
@@ -12,21 +19,23 @@ export type Block =
 
 type Read = [Block, number];
 
-const HEADING = /^ {0,3}#{1,6}\s+(.*?)\s*#*\s*$/;
-const RULE = /^ {0,3}([-*_])(\s*\1){2,}\s*$/;
-const QUOTE = /^ {0,3}>\s?(.*)$/;
-const STARTERS = [FENCE, HEADING, RULE, QUOTE, LIST_ITEM];
+/** Quotes and lists nest by re-parsing their body. Past this depth the rest
+ * is one plain paragraph, so `>>>>…` or `- - - …` ×3000 can neither overflow
+ * the stack while parsing nor build a tree too deep to render. */
+export const MAX_BLOCK_DEPTH = 12;
 
-/** Markdown → blocks. Line based and total: any input, however partial,
- * yields blocks and never throws. */
-export function parseBlocks(source: string): Block[] {
+/** Markdown → blocks. Line based and total: any input, however partial or
+ * hostile, yields blocks in linear time per level and never throws. */
+export function parseBlocks(source: string, depth = 0): Block[] {
+  if (depth >= MAX_BLOCK_DEPTH)
+    return source.trim() === "" ? [] : [{ kind: "paragraph", text: source }];
   const lines = source.replace(/\r\n?/g, "\n").split("\n");
   const blocks: Block[] = [];
   let i = 0;
   while (i < lines.length) {
     if ((lines[i] ?? "").trim() === "") i++;
     else {
-      const [block, next] = readBlock(lines, i);
+      const [block, next] = readBlock(lines, i, depth);
       blocks.push(block);
       i = next;
     }
@@ -34,22 +43,21 @@ export function parseBlocks(source: string): Block[] {
   return blocks;
 }
 
-function readBlock(lines: string[], i: number): Read {
+function readBlock(lines: string[], i: number, depth: number): Read {
   const line = lines[i] ?? "";
   if (FENCE.test(line)) {
     const [text, next] = readFence(lines, i);
     return [{ kind: "code", text }, next];
   }
   const heading = HEADING.exec(line);
-  if (heading) return [{ kind: "heading", text: heading[1] ?? "" }, i + 1];
-  if (RULE.test(line)) return [{ kind: "rule" }, i + 1];
-  if (QUOTE.test(line)) return readQuote(lines, i);
+  if (heading)
+    return [{ kind: "heading", text: headingText(heading[1] ?? "") }, i + 1];
+  if (isRule(line)) return [{ kind: "rule" }, i + 1];
+  if (QUOTE.test(line)) return readQuote(lines, i, depth);
   if (LIST_ITEM.test(line)) {
     const [list, next] = readList(lines, i);
-    return [
-      { kind: "list", ...list, items: list.items.map(parseBlocks) },
-      next,
-    ];
+    const items = list.items.map((item) => parseBlocks(item, depth + 1));
+    return [{ kind: "list", ...list, items }, next];
   }
   if (isTableStart(lines, i)) {
     const [table, next] = readTable(lines, i);
@@ -58,20 +66,20 @@ function readBlock(lines: string[], i: number): Read {
   return readParagraph(lines, i);
 }
 
-function readQuote(lines: string[], i: number): Read {
+function readQuote(lines: string[], i: number, depth: number): Read {
   const body: string[] = [];
   let j = i;
   for (let m = QUOTE.exec(lines[j] ?? ""); m; m = QUOTE.exec(lines[j] ?? "")) {
     body.push(m[1] ?? "");
     j++;
   }
-  return [{ kind: "quote", blocks: parseBlocks(body.join("\n")) }, j];
+  const blocks = parseBlocks(body.join("\n"), depth + 1);
+  return [{ kind: "quote", blocks }, j];
 }
 
 function readParagraph(lines: string[], i: number): Read {
   let j = i + 1;
-  for (let line = lines[j]; line?.trim(); line = lines[++j])
-    if (STARTERS.some((re) => re.test(line)) || isTableStart(lines, j)) break;
+  while ((lines[j] ?? "").trim() !== "" && !startsBlock(lines, j)) j++;
   const text = lines
     .slice(i, j)
     .map((l) => l.trim())

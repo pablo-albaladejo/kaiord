@@ -2,15 +2,22 @@ export type Align = "left" | "center" | "right" | null;
 
 export type TableData = { align: Align[]; head: string[]; rows: string[][] };
 
-const DELIMITER = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
+const DELIMITER_CELL = /^:?-+:?$/;
 
 /** A GFM table starts on a row with a pipe followed by a `---|---` row. While
  * the delimiter row is still streaming the header stays a paragraph. */
 export function isTableStart(lines: string[], i: number): boolean {
   const next = lines[i + 1];
   return (
-    (lines[i] ?? "").includes("|") && next !== undefined && DELIMITER.test(next)
+    (lines[i] ?? "").includes("|") && next !== undefined && isDelimiterRow(next)
   );
+}
+
+/* Checked cell by cell in code: one regex for the whole row needs adjacent
+   `\s*` runs, which backtrack quadratically on a line of spaces. */
+function isDelimiterRow(line: string): boolean {
+  if (!line.includes("|") || !line.includes("-")) return false;
+  return splitRow(line).every((cell) => DELIMITER_CELL.test(cell));
 }
 
 export function readTable(lines: string[], i: number): [TableData, number] {

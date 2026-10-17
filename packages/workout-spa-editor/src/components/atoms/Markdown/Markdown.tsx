@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useDeferredValue, useMemo } from "react";
 
 import { MarkdownBlocks } from "./MarkdownBlocks";
+import { MarkdownBoundary } from "./MarkdownBoundary";
 import { parseBlocks } from "./parse-blocks";
 
 export type MarkdownProps = {
@@ -14,12 +15,21 @@ export type MarkdownProps = {
  * in their own box, and http(s) links that open in a new tab. There is no raw
  * HTML path: every node is a React element and every string a text child. */
 export function Markdown({ source, className = "" }: MarkdownProps) {
-  const blocks = useMemo(() => parseBlocks(source), [source]);
   return (
     <div
       className={`min-w-0 space-y-2 whitespace-pre-line break-words ${className}`}
     >
-      <MarkdownBlocks blocks={blocks} />
+      <MarkdownBoundary source={source}>
+        <MarkdownBody source={source} />
+      </MarkdownBoundary>
     </div>
   );
+}
+
+/* While a reply streams every delta is a new source. Deferring it lets React
+   skip re-parses it has no time for and keeps typing and scrolling responsive. */
+function MarkdownBody({ source }: { source: string }) {
+  const deferred = useDeferredValue(source);
+  const blocks = useMemo(() => parseBlocks(deferred), [deferred]);
+  return <MarkdownBlocks blocks={blocks} />;
 }

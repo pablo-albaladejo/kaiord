@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import { MarkdownInline } from "./MarkdownInline";
 import { parseInline } from "./parse-inline";
 import type { Align, TableData } from "./parse-table";
@@ -13,11 +14,14 @@ const CELL = "whitespace-nowrap border border-edge px-2 py-1";
 /** A table scrolls inside its own box, so a wide one never widens the bubble
  * or the page. The box is focusable so the keyboard can scroll it too. */
 export function MarkdownTable({ align, head, rows }: TableData) {
+  const t = useTranslate("common");
   const cellClass = (col: number) =>
     `${CELL} ${ALIGN_CLASS[align[col] ?? "left"]}`;
   return (
     <div
       className="max-w-full overflow-x-auto"
+      role="region"
+      aria-label={t("markdown.table")}
       tabIndex={0}
       data-testid="markdown-table-scroll"
     >

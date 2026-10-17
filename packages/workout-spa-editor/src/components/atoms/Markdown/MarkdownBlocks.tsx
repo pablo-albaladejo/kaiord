@@ -1,3 +1,4 @@
+import { MarkdownCode } from "./MarkdownCode";
 import { MarkdownInline } from "./MarkdownInline";
 import { MarkdownTable } from "./MarkdownTable";
 import type { Block } from "./parse-blocks";
@@ -23,14 +24,7 @@ function MarkdownBlock({ block }: { block: Block }) {
         </p>
       );
     case "code":
-      return (
-        <pre
-          className="overflow-x-auto whitespace-pre rounded-lg bg-surface-deep p-2 font-mono text-[12.5px]"
-          tabIndex={0}
-        >
-          <code>{block.text}</code>
-        </pre>
-      );
+      return <MarkdownCode text={block.text} />;
     case "rule":
       return <hr className="border-edge" />;
     case "quote":
