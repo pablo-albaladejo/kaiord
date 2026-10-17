@@ -10,10 +10,12 @@ import { ExitCode } from "../utils/exit-codes";
 const FTP_W = "250";
 const SWEET_SPOT_W = 213;
 const ENDURANCE_W = 125;
+const RAMP_TOP_W = 188;
 
 const ZWO = `<workout_file><name>ftp test</name><sportType>bike</sportType><workout>
 <SteadyState Duration="600" Power="0.85"/>
 <SteadyState Duration="300" Power="0.50"/>
+<Warmup Duration="300" PowerLow="0.50" PowerHigh="0.75"/>
 </workout></workout_file>`;
 
 type GcnStep = {
@@ -39,7 +41,7 @@ describe("convert --ftp (ZWO to GCN)", () => {
   });
 
   it(
-    "should write %FTP power targets as watts resolved with --ftp",
+    "should write %FTP power targets and ramps as watts resolved with --ftp",
     { timeout: 30_000 },
     async () => {
       // Arrange
@@ -56,7 +58,7 @@ describe("convert --ftp (ZWO to GCN)", () => {
       const gcn = JSON.parse(await readFile(outputPath, "utf-8")) as {
         workoutSegments: [{ workoutSteps: GcnStep[] }];
       };
-      const [steady, easy] = gcn.workoutSegments[0].workoutSteps;
+      const [steady, easy, ramp] = gcn.workoutSegments[0].workoutSteps;
       expect(steady.targetType.workoutTargetTypeKey).toBe("power.zone");
       expect([steady.targetValueOne, steady.targetValueTwo]).toEqual([
         SWEET_SPOT_W,
@@ -64,6 +66,10 @@ describe("convert --ftp (ZWO to GCN)", () => {
       ]);
       expect([easy.targetValueOne, easy.targetValueTwo]).toEqual([
         ENDURANCE_W,
+        ENDURANCE_W,
+      ]);
+      expect([ramp.targetValueOne, ramp.targetValueTwo]).toEqual([
+        RAMP_TOP_W,
         ENDURANCE_W,
       ]);
     }
