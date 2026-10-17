@@ -61,7 +61,13 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
       const { output } = await runGenerateAgent(
         agent,
         { text: sanitized },
-        { model, logger, telemetry }
+        {
+          model,
+          logger,
+          telemetry,
+          signal: options?.signal,
+          onProgress: options?.onProgress,
+        }
       );
       const workout = options?.name
         ? { ...output, name: options.name }

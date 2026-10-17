@@ -1,3 +1,4 @@
+import type { OnGenerateProgress } from "@kaiord/ai";
 import { createTextToWorkout } from "@kaiord/ai";
 import type { AiTelemetrySink } from "@kaiord/ai/observability";
 import { createLanguageModel } from "@kaiord/ai/providers";
@@ -18,6 +19,10 @@ export type GenerateWorkoutOptions = {
   // Telemetry sink override; defaults to the Dexie usage sink over the app db so
   // every generation call site is accounted without bolting on its own writer.
   telemetry?: AiTelemetrySink;
+  // Aborts the provider request itself, not just the caller's wait.
+  abortSignal?: AbortSignal;
+  // When set, the output streams and real progress is reported per phase.
+  onProgress?: OnGenerateProgress;
 };
 
 export const generateWorkoutKrd = async (
@@ -34,6 +39,8 @@ export const generateWorkoutKrd = async (
   const prompt = buildPrompt(options);
   const workout = await textToWorkout(prompt, {
     sport: options.sport,
+    signal: options.abortSignal,
+    onProgress: options.onProgress,
   });
 
   return createWorkoutKRD(workout);
