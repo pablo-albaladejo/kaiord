@@ -16,6 +16,7 @@
  * behind it.
  */
 import { createChatAgent } from "../index";
+import { buildChatSystemPrompt } from "../prompts";
 import {
   evaluateChatToolBenchmark,
   expectationFault,
@@ -25,14 +26,6 @@ import { loadEvalModel } from "./load-eval-model";
 import { createReport, formatReport } from "./reporter";
 import benchmarks from "./chat-tool-benchmarks.json";
 import type { ChatToolBenchmark, ChatToolEvalResult } from "./chat-tool-types";
-
-const SYSTEM_PROMPT = [
-  "You are Kaiord's in-app fitness assistant, running the Data Hub chat",
-  "tools. Answer ONLY from tool results — call get_data_routes for",
-  "questions about where data comes from or goes to. Call set_data_route",
-  "to change routing when the user asks; it always requires the user's",
-  "confirmation before it runs, so just propose the call.",
-].join("\n");
 
 /**
  * Before the credential, not after: a fixture the scorer cannot read is a
@@ -63,7 +56,7 @@ const runEvals = async () => {
   const agent = createChatAgent({
     model,
     tools: createHubChatToolFixtures(),
-    system: SYSTEM_PROMPT,
+    system: buildChatSystemPrompt(),
   });
 
   console.log(
