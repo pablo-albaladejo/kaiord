@@ -167,10 +167,12 @@ describe("placeRecordResult ordering", () => {
 describe("doPushToGarmin with pace zone targets", () => {
   it("should report missing_pace_zones, not push_failed, when the profile has no pace zones", async () => {
     // Arrange
-    const { persistence, deps, pushWorkout } = await setup(freshProfile());
+    const profile = freshProfile();
+    const { persistence, deps, pushWorkout } = await setup(profile);
 
     // Act
     const result = await doPushToGarmin(
+      profile.id,
       persistence,
       pushWorkout,
       WORKOUT_ID,
