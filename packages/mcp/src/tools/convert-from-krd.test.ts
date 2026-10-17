@@ -25,7 +25,7 @@ describe("convertFromKrd", () => {
     // Arrange
 
     // Act
-    const result = await convertFromKrd(krd, "tcx", undefined, logger);
+    const result = await convertFromKrd(krd, "tcx", undefined, { logger });
 
     // Assert
     expect(result.content).toContain("TrainingCenterDatabase");
@@ -34,7 +34,7 @@ describe("convertFromKrd", () => {
 
   it("should convert KRD to KRD JSON text", async () => {
     // Arrange
-    const result = await convertFromKrd(krd, "krd", undefined, logger);
+    const result = await convertFromKrd(krd, "krd", undefined, { logger });
 
     // Act
     const parsed = JSON.parse(result.content);
@@ -47,7 +47,7 @@ describe("convertFromKrd", () => {
   it("should write text output file when path provided", async () => {
     // Arrange
     const outPath = join(tmpDir, "output.tcx");
-    const result = await convertFromKrd(krd, "tcx", outPath, logger);
+    const result = await convertFromKrd(krd, "tcx", outPath, { logger });
     expect(result.writtenTo).toBe(outPath);
 
     // Act
@@ -63,15 +63,15 @@ describe("convertFromKrd", () => {
     // Act
 
     // Assert
-    await expect(convertFromKrd(krd, "fit", undefined, logger)).rejects.toThrow(
-      "output_file is required for binary format"
-    );
+    await expect(
+      convertFromKrd(krd, "fit", undefined, { logger })
+    ).rejects.toThrow("output_file is required for binary format");
   });
 
   it("should write FIT binary output", async () => {
     // Arrange
     const outPath = join(tmpDir, "output.fit");
-    const result = await convertFromKrd(krd, "fit", outPath, logger);
+    const result = await convertFromKrd(krd, "fit", outPath, { logger });
     expect(result.writtenTo).toBe(outPath);
 
     // Act
@@ -86,7 +86,7 @@ describe("convertFromKrd", () => {
     const unsupported = "xyz" as FileFormat;
 
     // Act
-    const attempt = convertFromKrd(krd, unsupported, undefined, logger);
+    const attempt = convertFromKrd(krd, unsupported, undefined, { logger });
 
     // Assert
     await expect(attempt).rejects.toThrow("Unsupported output format: xyz");

@@ -7,6 +7,16 @@ import { WORKOUT_PARSER_SYSTEM } from "../prompts/parse-workout-prompt";
 import type { AthleteZoneTables } from "../types";
 import type { AgentDefinition } from "./definition-types";
 
+const MAX_NAME_LENGTH = 40;
+
+// A blank name is no name: drop it so callers apply their own fallback. The
+// prompt asks for at most MAX_NAME_LENGTH characters; enforce it here.
+const normalizeName = (workout: Workout): Workout => {
+  const { name, ...rest } = workout;
+  const trimmed = name?.trim().slice(0, MAX_NAME_LENGTH).trim();
+  return trimmed ? { ...rest, name: trimmed } : rest;
+};
+
 /**
  * The shipped workout-parser definition. `sportLine` is the resolved
  * `{{sport}}` hint (empty when no sport was requested). Validation first
@@ -24,5 +34,7 @@ export const createWorkoutParserAgent = (
   mode: "generate",
   outputSchema: aiWorkoutSchema,
   validate: (raw) =>
-    reindexSteps(workoutSchema.parse(resolveZoneTargets(raw, zones))),
+    normalizeName(
+      reindexSteps(workoutSchema.parse(resolveZoneTargets(raw, zones)))
+    ),
 });

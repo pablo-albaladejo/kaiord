@@ -5,12 +5,12 @@
  * injection defense). The athlete's zones and instructions are appended by
  * `buildAthleteContext` on every generation path.
  *
- * `PROMPT_VERSION` is persisted on each AI-converted workout; 1.1.0 is the
+ * `PROMPT_VERSION` is persisted on each AI-converted workout; 1.2.0 is the
  * first version whose generation carries the athlete's zones, their custom
  * instructions and the sport target rules.
  */
 
-export const PROMPT_VERSION = "1.1.0";
+export const PROMPT_VERSION = "1.2.0";
 
 /**
  * @deprecated Never sent to the model. The workout-parser system prompt

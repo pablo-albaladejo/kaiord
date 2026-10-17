@@ -85,9 +85,9 @@ export const krdToZwo = async (krd: KRD, logger: Logger) =>
     return toText(krd, createZwiftWriter(logger), logger);
   });
 
-export const krdToGcn = async (krd: KRD, logger: Logger) => {
+export const krdToGcn = async (krd: KRD, logger: Logger, ftpWatts?: number) => {
   const { createGarminWriter } = await import("@kaiord/garmin");
-  return toText(krd, createGarminWriter(logger), logger);
+  return toText(krd, createGarminWriter({ logger, ftpWatts }), logger);
 };
 
 export const krdToText = (krd: KRD): string => {
