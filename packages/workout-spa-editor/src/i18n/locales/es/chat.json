@@ -23,7 +23,7 @@
     "label": "Modelo",
     "followMain": "Igual que el principal ({{model}})",
     "followChat": "Igual que el chat en Ajustes ({{model}})",
-    "manage": "Configurar IA…"
+    "manage": "Gestionar IA…"
   },
   "search": {
     "placeholder": "Buscar chats…",
