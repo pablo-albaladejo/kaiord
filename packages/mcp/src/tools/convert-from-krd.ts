@@ -4,19 +4,22 @@ import { toBinary, toText } from "@kaiord/core";
 import type { FileFormat } from "../types/tool-schemas";
 import { isBinaryFormat } from "../types/tool-schemas";
 import { writeOutputFile } from "../utils/file-io";
-import { FORMAT_REGISTRY } from "../utils/format-registry";
+import { FORMAT_REGISTRY, type WriterOptions } from "../utils/format-registry";
 
 export type ConvertFromKrdResult = {
   readonly content: string;
   readonly writtenTo: string | null;
 };
 
+export type ConvertFromKrdContext = WriterOptions & { logger: Logger };
+
 export const convertFromKrd = async (
   krd: KRD,
   outputFormat: FileFormat,
   outputFile: string | undefined,
-  logger: Logger
+  context: ConvertFromKrdContext
 ): Promise<ConvertFromKrdResult> => {
+  const { logger } = context;
   if (!FORMAT_REGISTRY[outputFormat]) {
     const error = new Error(
       `Unsupported output format: ${String(outputFormat)}`
@@ -27,7 +30,7 @@ export const convertFromKrd = async (
   if (isBinaryFormat(outputFormat)) {
     return writeBinaryOutput(krd, outputFormat, outputFile, logger);
   }
-  return writeTextOutput(krd, outputFormat, outputFile, logger);
+  return writeTextOutput(krd, outputFormat, outputFile, context);
 };
 
 const writeBinaryOutput = async (
@@ -54,11 +57,11 @@ const writeTextOutput = async (
   krd: KRD,
   format: FileFormat,
   outputFile: string | undefined,
-  logger: Logger
+  { logger, ftpWatts }: ConvertFromKrdContext
 ): Promise<ConvertFromKrdResult> => {
-  const writer = (await FORMAT_REGISTRY[format].createWriter(
-    logger
-  )) as TextWriter;
+  const writer = (await FORMAT_REGISTRY[format].createWriter(logger, {
+    ftpWatts,
+  })) as TextWriter;
   const text = await toText(krd, writer, logger);
   if (outputFile) {
     await writeOutputFile(outputFile, text);

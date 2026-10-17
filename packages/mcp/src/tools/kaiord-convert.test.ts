@@ -9,6 +9,34 @@ import {
 } from "../tests/helpers/mcp-test-client";
 import { loadKrdFixtureRaw } from "../tests/helpers/test-fixtures";
 
+const FTP_W = 250;
+const SWEET_SPOT_W = 213;
+// KRD input, not ZWO: ZWO input is XSD-validated by spawning a JVM per
+// call (xsd-schema-validator), which alone can exceed the 5 s test budget
+// on a cold CI runner. These tests cover the `ftp` parameter, not parsing.
+const PERCENT_FTP_KRD = JSON.stringify({
+  version: "1.0",
+  type: "structured_workout",
+  metadata: { created: "2026-01-01T00:00:00.000Z", sport: "cycling" },
+  extensions: {
+    structured_workout: {
+      name: "ftp test",
+      sport: "cycling",
+      steps: [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 600 },
+          targetType: "power",
+          target: { type: "power", value: { unit: "percent_ftp", value: 85 } },
+        },
+      ],
+    },
+  },
+});
+
+type GcnStep = { targetValueOne: number; targetValueTwo: number };
+
 describe("kaiord_convert", () => {
   let tmpDir: string;
 
@@ -97,5 +125,51 @@ describe("kaiord_convert", () => {
     // Assert
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("Written to:");
+  });
+
+  it("should resolve %FTP power targets to watts for GCN output with ftp", async () => {
+    // Arrange
+    const client = await createTestClient();
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_convert",
+      arguments: {
+        input_content: PERCENT_FTP_KRD,
+        input_format: "krd",
+        output_format: "gcn",
+        ftp: FTP_W,
+      },
+    })) as McpToolResult;
+
+    // Assert
+    expect(result.isError).toBeUndefined();
+    const gcn = JSON.parse(result.content[0].text) as {
+      workoutSegments: [{ workoutSteps: [GcnStep] }];
+    };
+    const step = gcn.workoutSegments[0].workoutSteps[0];
+    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+  });
+
+  it("should return a missing-ftp error for %FTP GCN output without ftp", async () => {
+    // Arrange
+    const client = await createTestClient();
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_convert",
+      arguments: {
+        input_content: PERCENT_FTP_KRD,
+        input_format: "krd",
+        output_format: "gcn",
+      },
+    })) as McpToolResult & {
+      structuredContent?: { error: { type: string } };
+    };
+
+    // Assert
+    expect(result.isError).toBe(true);
+    expect(result.structuredContent?.error.type).toBe("missing-ftp");
   });
 });

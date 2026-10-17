@@ -2,6 +2,7 @@ import type { Argv } from "yargs";
 
 import { t } from "../../i18n/index.js";
 import { FORMAT_CODES } from "../../utils/format-registry";
+import { ftpOption } from "../../utils/ftp-option";
 import { convertCommand } from "./index";
 import type { ConvertOptions } from "./types";
 
@@ -35,6 +36,7 @@ export const convertYargsConfig = {
         choices: FORMAT_CODES,
         description: t("options.convert.outputFormat"),
       })
+      .option("ftp", ftpOption(t("options.convert.ftp")))
       .example("$0 convert -i workout.fit -o workout.krd", "Convert FIT to KRD")
       .example("$0 convert -i workout.krd -o workout.fit", "Convert KRD to FIT")
       .example(

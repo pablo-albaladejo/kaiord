@@ -9,6 +9,7 @@ export type { ToleranceViolation, ValidationError } from "./error-types";
 export { createFitParsingError, FitParsingError } from "./fit-errors";
 export { createGarminParsingError, GarminParsingError } from "./garmin-errors";
 export { createKrdValidationError, KrdValidationError } from "./krd-errors";
+export { createMissingFtpError, MissingFtpError } from "./missing-ftp-error";
 export {
   createServiceApiError,
   createServiceAuthError,

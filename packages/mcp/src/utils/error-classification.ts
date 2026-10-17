@@ -12,6 +12,7 @@ export type McpErrorType =
   | "auth"
   | "service"
   | "environment"
+  | "missing-ftp"
   | "unknown";
 
 export type McpErrorClassification = {
@@ -32,6 +33,7 @@ const NAME_TO_TYPE: Record<string, McpErrorType> = {
   ServiceApiError: "service",
   UnsupportedKrdTypeError: "unsupported-format",
   UnsupportedFormatError: "unsupported-format",
+  MissingFtpError: "missing-ftp",
 };
 
 const CODE_TO_TYPE: Record<string, McpErrorType> = {
@@ -46,6 +48,8 @@ const SUGGESTIONS: Partial<Record<McpErrorType, string>> = {
     "Use one of the supported formats: fit, gcn, krd, tcx, zwo.",
   auth: "Call kaiord_garmin_login first.",
   service: "The Garmin Connect request failed; retry later.",
+  "missing-ftp":
+    "Pass the athlete's FTP in watts as the ftp parameter to resolve %FTP power targets.",
   environment:
     "Reinstall @kaiord/mcp — a bundled schema or dependency is missing.",
 };
