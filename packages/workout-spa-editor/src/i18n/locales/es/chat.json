@@ -49,7 +49,9 @@
   "pendingAction": {
     "confirm": "Confirmar: {{action}}",
     "approve": "Aprobar",
-    "decline": "Rechazar"
+    "decline": "Rechazar",
+    "deferred_one": "El asistente propuso {{count}} acción más; puede pedírtela después.",
+    "deferred_other": "El asistente propuso {{count}} acciones más; puede pedírtelas después."
   },
   "action": {
     "sync_coaching": "Sincronizar actividades del entrenador",
