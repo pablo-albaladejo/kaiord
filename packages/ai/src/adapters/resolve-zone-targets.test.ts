@@ -79,7 +79,7 @@ describe("resolveZoneTargets", () => {
     expect(result.target.value).toEqual({ unit: "range", min: 188, max: 262 });
   });
 
-  it("should keep a zone when the athlete has no zones, collapsing a span to its upper zone", () => {
+  it("should turn a zone into open when the athlete has no zones", () => {
     // Arrange
     const s = step("pace", { unit: "zone", min: 4, max: 5 });
 
@@ -87,10 +87,11 @@ describe("resolveZoneTargets", () => {
     const result = resolveOne("running", s, {});
 
     // Assert
-    expect(result.target.value).toEqual({ unit: "zone", value: 5 });
+    expect(result.targetType).toBe("open");
+    expect(result.target).toEqual({ type: "open" });
   });
 
-  it("should keep a zone the athlete's table does not define", () => {
+  it("should turn a zone the athlete's table does not define into open", () => {
     // Arrange
     const s = step("power", { unit: "zone", value: 2 });
 
@@ -98,7 +99,7 @@ describe("resolveZoneTargets", () => {
     const result = resolveOne("cycling", s);
 
     // Assert
-    expect(result.target.value).toEqual({ unit: "zone", value: 2 });
+    expect(result.target).toEqual({ type: "open" });
   });
 
   it.each([
@@ -106,22 +107,52 @@ describe("resolveZoneTargets", () => {
     ["running", "pace", "cooldown"],
     ["cycling", "power", "warmup"],
   ])(
-    "should give an open %s %s step with %s intensity zone 1",
+    "should give an open %s %s step with %s intensity the zone 1 range",
     (sport, type, intensity) => {
       // Arrange
       const s = step("open", undefined, intensity);
 
       // Act
-      const result = resolveOne(sport, s, {});
+      const result = resolveOne(sport, s);
 
       // Assert
       expect(result.targetType).toBe(type);
-      expect(result.target).toEqual({
-        type,
-        value: { unit: "zone", value: 1 },
-      });
+      expect(result.target).toMatchObject({ type, value: { unit: "range" } });
     }
   );
+
+  it("should leave an open easy step open when the athlete has no zones", () => {
+    // Arrange
+    const s = step("open", undefined, "recovery");
+
+    // Act
+    const result = resolveOne("running", s, {});
+
+    // Assert
+    expect(result).toEqual(s);
+  });
+
+  it("should leave a swimming pace zone alone even with a running pace table", () => {
+    // Arrange
+    const s = step("pace", { unit: "zone", value: 1 });
+
+    // Act
+    const result = resolveOne("swimming", s);
+
+    // Assert
+    expect(result).toEqual(s);
+  });
+
+  it("should leave a pace zone on a cycling workout alone", () => {
+    // Arrange
+    const s = step("pace", { unit: "zone", value: 1 });
+
+    // Act
+    const result = resolveOne("cycling", s);
+
+    // Assert
+    expect(result).toEqual(s);
+  });
 
   it("should leave an open interval without stated intensity open", () => {
     // Arrange
