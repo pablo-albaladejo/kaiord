@@ -9,6 +9,7 @@ export { WORKOUT_PARSER_SYSTEM } from "./parse-workout-prompt";
 export { LAB_EXTRACTOR_SYSTEM } from "./lab-extractor-prompt";
 export {
   buildChatSystemPrompt,
+  CHAT_ACTION_TOOL_NAMES,
   CHAT_PROMPT_VERSION,
 } from "./chat-system-prompt";
 export {

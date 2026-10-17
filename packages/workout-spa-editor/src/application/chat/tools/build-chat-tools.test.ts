@@ -1,3 +1,7 @@
+import {
+  buildChatSystemPrompt,
+  CHAT_ACTION_TOOL_NAMES,
+} from "@kaiord/ai/prompts";
 import { describe, expect, it, vi } from "vitest";
 
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
@@ -62,5 +66,20 @@ describe("buildChatTools", () => {
       "set_data_route",
       "sync_coaching",
     ]);
+  });
+
+  it("should name every confirmation-gated tool in the chat system prompt", () => {
+    // Arrange
+    const prompt = buildChatSystemPrompt();
+    const declared: ReadonlyArray<string> = CHAT_ACTION_TOOL_NAMES;
+
+    // Act
+    const unnamed = buildChatTools(makeDeps())
+      .filter((t) => t.requiresConfirmation)
+      .map((t) => t.name)
+      .filter((name) => !declared.includes(name) || !prompt.includes(name));
+
+    // Assert
+    expect(unnamed).toEqual([]);
   });
 });
