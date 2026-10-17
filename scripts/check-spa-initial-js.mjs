@@ -36,6 +36,17 @@ import { gzipSync } from "node:zlib";
 // - `src/new-workout-route.tsx` (`NewWorkoutRoute`)
 // - `src/components/pages/ConvertPage/ConvertPage.tsx` (`ConvertPage`, the
 //   docs' converter deep link; every other route must not pay for it)
+// The slim-initial-js seams keep app-wide providers and chrome from pulling
+// in code that only runs on a user action or on an editor route:
+// - `src/hooks/use-app-keyboard-handlers.ts` (`AppKeyboardShortcuts`, which
+//   drags the whole workout store and its actions)
+// - `src/components/organisms/ZonesConflictDialog/ZonesConflictDialog.tsx`
+//   (`LazyZonesConflictDialog`, loaded the first time a conflict opens it)
+// - `src/application/coaching/{sync-zones,commit-conflict-resolution,
+//   sync-week,attempt-link,expand-day}.ts` (dynamic imports inside the
+//   Train2Go action callbacks)
+// - `src/lib/week-dominant-zone.ts` (loaded by the header's
+//   `useWeekDominantZone` after its read)
 //
 // Usage: node scripts/check-spa-initial-js.mjs <spa-dist> [--report]
 // Exit 1 when <spa-dist>/index.html is missing, has no recognisable entry
@@ -49,6 +60,14 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/components/pages/health/health-routes.tsx",
   "src/new-workout-route.tsx",
   "src/components/pages/ConvertPage/ConvertPage.tsx",
+  "src/hooks/use-app-keyboard-handlers.ts",
+  "src/components/organisms/ZonesConflictDialog/ZonesConflictDialog.tsx",
+  "src/application/coaching/sync-zones.ts",
+  "src/application/coaching/commit-conflict-resolution.ts",
+  "src/application/coaching/sync-week.ts",
+  "src/application/coaching/attempt-link.ts",
+  "src/application/coaching/expand-day.ts",
+  "src/lib/week-dominant-zone.ts",
 ];
 
 // The entry chunk MUST have a sourcemap: a static import of a seam gets
@@ -193,9 +212,8 @@ function main() {
   if (result.forbidden.length > 0) {
     fail(
       `forbidden lazy-seam source in the initial JS: ${result.forbidden.join(", ")}. ` +
-        "One of the perf-app-initial-js lazy seams (cloud sync, health routes, " +
-        "new-workout route) was pulled back into the entry graph by a static " +
-        "import — see FORBIDDEN_LAZY_SOURCES in this script."
+        "One of the lazy seams was pulled back into the entry graph by a " +
+        "static import — see FORBIDDEN_LAZY_SOURCES in this script."
     );
   }
   const line = `SPA initial JS: ${kb(result.gzip)} kB gzip across ${result.files.length} files (budget ${kb(result.budget)} kB)`;

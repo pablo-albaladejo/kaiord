@@ -9,6 +9,10 @@
  * `scrollIntoView()` is swallowed — the focus move already succeeded.
  * Both catches emit a `focus-error` telemetry event when a handler is
  * provided.
+ *
+ * The scroll is an explicit `instant` jump, whatever the motion preference:
+ * focus follows an action the user just took, and a glide would move the
+ * page under their next press.
  */
 
 import {
@@ -18,13 +22,12 @@ import {
 } from "../../store/providers/focus-telemetry";
 
 export type FocusApplyOptions = {
-  reduceMotion: boolean;
   telemetry?: FocusTelemetry;
 };
 
 export const applyFocusToElement = (
   el: HTMLElement,
-  { reduceMotion, telemetry }: FocusApplyOptions
+  { telemetry }: FocusApplyOptions = {}
 ): void => {
   try {
     el.focus({ preventScroll: true });
@@ -33,10 +36,7 @@ export const applyFocusToElement = (
     return;
   }
   try {
-    el.scrollIntoView({
-      block: "nearest",
-      behavior: reduceMotion ? ("instant" as ScrollBehavior) : "auto",
-    });
+    el.scrollIntoView({ block: "nearest", behavior: "instant" });
   } catch {
     if (telemetry) safeEmit(telemetry, focusErrorEvent("scrollIntoView"));
   }

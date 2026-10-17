@@ -50,3 +50,10 @@ export const HealthSubRouter = lazyPage(() =>
 export const NewWorkoutRoute = lazyPage(() =>
   import("./new-workout-route").then((m) => ({ default: m.NewWorkoutRoute }))
 );
+// Editor shortcuts: they act on the workout store, which only the editor
+// routes need, so the store and its actions stay out of the entry graph.
+export const AppKeyboardShortcuts = lazyPage(() =>
+  import("./components/AppKeyboardShortcuts").then((m) => ({
+    default: m.AppKeyboardShortcuts,
+  }))
+);

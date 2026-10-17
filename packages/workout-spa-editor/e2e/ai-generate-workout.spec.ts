@@ -118,6 +118,10 @@ async function addTestProvider(
   await settingsPage.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
 
   await settingsPage.getByRole("button", { name: "Save account" }).click();
+  // The form closes once the provider is committed. The list is no proof:
+  // Dexie shows a write to live queries before its transaction commits, and
+  // the `goto` below tears the page down, so a save still in flight is lost.
+  await expect(settingsPage.getByPlaceholder("sk-...")).toHaveCount(0);
 
   // Scope to the provider list: with an active profile the per-purpose
   // model selects on the same page also list the provider as an option.

@@ -182,8 +182,6 @@
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
-    /* Smooth scrolling for mobile - Requirement 8 */
-    scroll-behavior: smooth;
   }
 
   body {
@@ -198,12 +196,14 @@
   }
 
   /* WCAG 2.3.3: honour the OS "reduce motion" setting. The theme transition
-     and smooth scrolling above are on by default; this switches them off.
+     above is on by default; this switches it off. Scrolling is never smooth
+     by default: a glide moves the page under a press already started, and the
+     release lands elsewhere. A caller wanting a glide asks per call and checks
+     the preference itself.
      Enter/exit animations are shortened to ~0 rather than removed so Radix
      Presence still gets its animationend and unmounts the node. */
   @media (prefers-reduced-motion: reduce) {
     html {
-      scroll-behavior: auto;
       transition: none;
     }
 
