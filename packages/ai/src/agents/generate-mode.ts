@@ -66,6 +66,9 @@ export const runGenerateLoop = async <TOutput>(
         emit({ phase, attempt, items })
       );
     } catch (error) {
+      // An aborted signal stops the run whatever its reason was: a caller may
+      // abort with a non-AbortError reason, which must not read as retryable.
+      if (args.signal?.aborted) throw error;
       if (isNonRetryableTransport(error) || isAbortError(error)) throw error;
       lastError = error instanceof Error ? error.message : String(error);
       args.onAttemptError?.(attempt, lastError);

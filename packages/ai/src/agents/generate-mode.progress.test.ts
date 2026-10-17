@@ -12,6 +12,7 @@ import {
 import { jsonResult, jsonStream } from "../test-utils/mock-language-model";
 import type { AgentDefinition } from "./definition-types";
 import type { GenerateProgress } from "./progress";
+import { runGenerateLoop } from "./generate-mode";
 import { runGenerateAgent } from "./runtime";
 
 definePrompt({
@@ -187,6 +188,58 @@ describe("runGenerateAgent progress", () => {
 
     // Assert
     await expect(run).rejects.toMatchObject({ name: "AbortError" });
+    expect(model.doStreamCalls).toHaveLength(1);
+  });
+
+  it("should not report validating when the signal aborts mid-stream", async () => {
+    // Arrange
+    const controller = new AbortController();
+    const model = new MockLanguageModelV4({
+      doStream: [jsonStream(['{"steps":[1,', "2", "]}"])],
+    });
+    const events: GenerateProgress[] = [];
+    const onProgress = (p: GenerateProgress) => {
+      events.push(p);
+      if (p.phase === "generating") controller.abort();
+    };
+
+    // Act
+    const run = runGenerateAgent(
+      AGENT,
+      { text: "go" },
+      { model, onProgress, signal: controller.signal }
+    );
+
+    // Assert
+    await expect(run).rejects.toThrow();
+    expect(events.map((e) => e.phase)).not.toContain("validating");
+  });
+
+  it("should stop without retrying when aborted with a non-AbortError reason", async () => {
+    // Arrange
+    const controller = new AbortController();
+    const model = new MockLanguageModelV4({
+      doStream: [jsonStream(['{"steps":[1,', "2", "]}"])],
+    });
+    const onAttemptError = vi.fn();
+    const onProgress = (p: GenerateProgress) => {
+      if (p.phase === "generating") controller.abort(new Error("user left"));
+    };
+
+    // Act
+    const run = runGenerateLoop({
+      model,
+      system: "SYSTEM",
+      input: { text: "go" },
+      definition: AGENT,
+      signal: controller.signal,
+      onProgress,
+      onAttemptError,
+    });
+
+    // Assert
+    await expect(run).rejects.toThrow("user left");
+    expect(onAttemptError).not.toHaveBeenCalled();
     expect(model.doStreamCalls).toHaveLength(1);
   });
 });

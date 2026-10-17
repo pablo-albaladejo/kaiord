@@ -261,4 +261,33 @@ describe("useCoachingAi", () => {
     expect(result.current.progress).toBeNull();
     expect(result.current.processing).toBe(false);
   });
+
+  it("should not navigate when the cancel lands before the run settles", async () => {
+    // Arrange
+    let settle: (value: unknown) => void = () => undefined;
+    runConvertMock.mockImplementation(
+      () => new Promise((res) => (settle = res))
+    );
+    const onClose = vi.fn();
+    const { result } = renderHook(
+      () => useCoachingAi(activity, "profile-1", onClose, vi.fn()),
+      { wrapper: wrap() }
+    );
+    let run: Promise<void> = Promise.resolve();
+    act(() => {
+      run = result.current.startAi();
+    });
+    await waitFor(() => expect(result.current.processing).toBe(true));
+
+    // Act
+    act(() => result.current.cancelAi());
+    await act(async () => {
+      settle({ ok: true, workoutId: "w-late", created: true });
+      await run;
+    });
+
+    // Assert
+    expect(onClose).not.toHaveBeenCalled();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
 });

@@ -52,10 +52,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
     ctx.providers ?? [],
     ctx.bindings ?? []
   );
-  if (!resolved) {
-    ctx.setFailure({ reason: "no-provider" });
-    return;
-  }
+  if (!resolved) return ctx.setFailure({ reason: "no-provider" });
   ctx.setFailure(null);
   const { controller, onProgress } = beginAiRun(
     ctx,
@@ -89,6 +86,8 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   } finally {
     endAiRun(ctx, controller);
   }
+  // A cancel that lands after the run settled must not navigate away.
+  if (controller.signal.aborted) return;
   if (result.ok) {
     ctx.onClose();
     ctx.navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));

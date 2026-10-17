@@ -92,14 +92,18 @@ export const streamModel = async <TOutput>(
     for await (const partial of result.partialOutputStream) {
       report("generating", args.definition.countItems?.(partial));
     }
-    // A failed stream also ends the loop; it must not claim to validate.
-    if (streamError === undefined) report("validating");
+    // A failed or aborted stream also ends the loop; it must not claim to
+    // validate.
+    if (streamError === undefined && !args.signal?.aborted) {
+      report("validating");
+    }
     return Promise.all([result.output, result.usage]);
   };
   const [raw, usage] = await settled().catch((e: unknown) => {
     throw streamError ?? e;
   });
   if (streamError !== undefined) throw streamError;
+  if (!raw) throw new Error("No structured output generated");
   return {
     output: validateOutput(args.definition, raw),
     usage: toUsage(usage),
