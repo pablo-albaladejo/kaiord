@@ -28,7 +28,7 @@ export const TargetPicker = ({
     ...state,
     onChange: (target) => onChange(keepPowerBasis(value, target)),
   });
-  const props = useTargetPickerProps(state, error, activeProfile);
+  const props = useTargetPickerProps(state, error, activeProfile, value);
 
   return (
     <div className={`space-y-4 ${className}`}>

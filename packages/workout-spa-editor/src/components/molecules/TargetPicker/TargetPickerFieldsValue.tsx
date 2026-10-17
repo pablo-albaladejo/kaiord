@@ -12,6 +12,7 @@ type TargetPickerFieldsValueProps = Pick<
   | "displayError"
   | "disabled"
   | "activeProfile"
+  | "rangeUnit"
   | "onValueChange"
   | "onMinChange"
   | "onMaxChange"
@@ -28,6 +29,7 @@ export function TargetPickerFieldsValue({
   displayError,
   disabled,
   activeProfile,
+  rangeUnit,
   onValueChange,
   onMinChange,
   onMaxChange,
@@ -40,6 +42,7 @@ export function TargetPickerFieldsValue({
     return (
       <TargetPickerRangeFields
         clock={targetType === "pace"}
+        unit={rangeUnit}
         minValue={minValue}
         maxValue={maxValue}
         displayError={displayError}

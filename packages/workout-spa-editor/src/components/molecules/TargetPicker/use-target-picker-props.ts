@@ -1,12 +1,15 @@
 import { useTranslate } from "../../../i18n/use-translate";
+import type { Target } from "../../../types/krd";
 import type { Profile } from "../../../types/profile";
 import { getUnitOptions, getValueLabel, getValuePlaceholder } from "./helpers";
+import { getRangeUnit } from "./range-unit";
 import type { TargetPickerState } from "./useTargetPickerState";
 
 export function useTargetPickerProps(
   state: TargetPickerState,
   error?: string,
-  activeProfile?: Profile | null
+  activeProfile?: Profile | null,
+  value?: Target | null
 ) {
   const t = useTranslate("targets");
   const displayError = error || state.validationError;
@@ -30,5 +33,6 @@ export function useTargetPickerProps(
       unit: string
     ) => getValuePlaceholder(type, unit, t, state.paceBase),
     activeProfile,
+    rangeUnit: getRangeUnit(value, t),
   };
 }
