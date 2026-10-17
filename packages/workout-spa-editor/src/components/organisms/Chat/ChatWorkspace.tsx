@@ -48,11 +48,10 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
         onRename={props.onRename}
         onDelete={props.onDelete}
       />
-      <div className="flex flex-col gap-3">
-        <ChatModelPicker
-          key={props.activeId ?? "none"}
-          {...props.modelPicker}
-        />
+      {/* Keyed per conversation so no turn state (error, stream, pending
+          action, retry input) or half-typed model choice crosses threads. */}
+      <div key={props.activeId ?? "none"} className="flex flex-col gap-3">
+        <ChatModelPicker {...props.modelPicker} />
         {props.provider && (
           <ModelStatusNotice
             type={props.provider.type}

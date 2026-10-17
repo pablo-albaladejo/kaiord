@@ -17,6 +17,7 @@ Focus-after-action machinery. Reads the workout store's `pendingFocusTarget`, ap
 - `apply-focus-target.ts` — pure resolver from `FocusTarget` to focused element id.
 - `apply-focus-to-element.ts` / `.test.ts` — DOM-side `.focus()` with form-field short-circuit + telemetry.
 - `is-form-field-focused.ts` / `.test.ts` — predicate: is the user actively typing in an input?
+- `skip-route-focus.ts` — one-shot opt-out from `useFocusOnRouteChange` for a route change that only renames the current view (chat draft → `/chat/:id`).
 
 ## For AI Agents
 
