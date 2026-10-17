@@ -1,7 +1,9 @@
+import { useChatCapabilities } from "../../../hooks/use-chat-capabilities";
 import { useChatTurn } from "../../../hooks/use-chat-turn";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
 import { todayIsoDate } from "../../../utils/today-iso-date";
+import { ChatCapabilitiesHelp } from "./ChatCapabilitiesHelp";
 import { ChatComposer } from "./ChatComposer";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatTurnExtras } from "./ChatTurnExtras";
@@ -47,10 +49,16 @@ export function ChatConversation({
     messages,
   });
   const busy = turn.state === "streaming";
+  const caps = useChatCapabilities(turn.send);
+  const empty = messages.length === 0 && !busy;
 
   return (
     <div className="flex flex-col gap-3">
-      <ChatMessageList messages={messages} focusMessageId={focusMessageId} />
+      {empty ? (
+        <ChatCapabilitiesHelp open onPick={caps.fill} />
+      ) : (
+        <ChatMessageList messages={messages} focusMessageId={focusMessageId} />
+      )}
       <ChatTurnExtras
         busy={busy}
         streamingText={turn.streamingText}
@@ -60,10 +68,19 @@ export function ChatConversation({
         onDeny={turn.deny}
         onRetry={turn.retry}
       />
+      {!empty && (
+        <ChatCapabilitiesHelp
+          open={caps.open}
+          onOpenChange={caps.setOpen}
+          onPick={caps.fill}
+        />
+      )}
       <ChatComposer
-        onSend={turn.send}
+        key={caps.composerKey}
+        onSend={caps.send}
         disabled={busy || turn.state === "awaiting_confirmation"}
-        initialText={composerInitialText}
+        initialText={caps.draft ?? composerInitialText}
+        autoFocus={caps.draft !== null}
       />
     </div>
   );

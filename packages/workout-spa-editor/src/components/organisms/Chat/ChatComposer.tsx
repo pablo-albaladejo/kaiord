@@ -8,6 +8,8 @@ export type ChatComposerProps = {
   disabled: boolean;
   /** Seeds the input on mount (e.g. an "adjust with AI" deep-link prefill). */
   initialText?: string;
+  /** Focuses the input on mount (after a suggestion filled it). */
+  autoFocus?: boolean;
 };
 
 /** Message input. Enter sends; Shift+Enter inserts a newline. */
@@ -15,6 +17,7 @@ export function ChatComposer({
   onSend,
   disabled,
   initialText,
+  autoFocus,
 }: ChatComposerProps) {
   const t = useTranslate("chat");
   const [text, setText] = useState(initialText ?? "");
@@ -31,6 +34,7 @@ export function ChatComposer({
       <textarea
         aria-label={t("composer.messageLabel")}
         rows={2}
+        autoFocus={autoFocus}
         value={text}
         disabled={disabled}
         onChange={(e) => setText(e.target.value)}

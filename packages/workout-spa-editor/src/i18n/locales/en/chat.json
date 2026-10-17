@@ -100,5 +100,46 @@
       "body": "“{{label}}” came from a backup, which never carries keys. Add the key in Settings to use the assistant.",
       "action": "Add the key"
     }
+  },
+  "capabilities": {
+    "title": "Ask about your data or ask me to do something",
+    "help": "What can I do?",
+    "close": "Close",
+    "fillHint": "A suggestion fills in your message; it doesn't send it.",
+    "nothingSaved": "Nothing is saved without your confirmation.",
+    "youConfirm": "you confirm",
+    "group": {
+      "consult": "Look up",
+      "log": "Log",
+      "do": "Do"
+    },
+    "tool": {
+      "get_today": "Today's date, for relative dates",
+      "query_workouts": "Your workouts by date and sport",
+      "query_health": "Sleep, weight, HRV, steps…",
+      "query_energy_balance": "Energy balance and goal",
+      "query_coaching": "What your coach has planned",
+      "get_data_routes": "Which source each data type comes from",
+      "log_health_metric": "Weight, sleep, HRV or steps",
+      "log_intake": "Meals and intake",
+      "create_workout": "Create and save a workout on a date",
+      "push_to_garmin": "Send a workout to Garmin",
+      "sync_coaching": "Sync your coach's plan",
+      "set_data_route": "Change which source a data type comes from"
+    },
+    "example": {
+      "week": "How did my week go?",
+      "sleep": "Have I slept better this month?",
+      "balance": "How is my energy balance going?",
+      "coachPlan": "What has my coach planned this week?",
+      "weightSource": "Where does my weight come from?",
+      "logWeight": "Log 71.9 kg today",
+      "logSleep": "I slept 7 h last night",
+      "logMeal": "I ate 120 g of pasta",
+      "createWorkout": "Create a 45-minute Z2 run for tomorrow",
+      "pushGarmin": "Send tomorrow's workout to Garmin",
+      "syncCoaching": "Sync my Train2Go plan",
+      "setRoute": "Use WHOOP for sleep"
+    }
   }
 }
