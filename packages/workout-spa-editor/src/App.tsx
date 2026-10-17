@@ -9,6 +9,7 @@ import { SilentErrorBoundary } from "./components/molecules/SilentErrorBoundary"
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
+import { useBridgeThemePush } from "./hooks/use-bridge-theme-push";
 import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useSyncAutoPush } from "./hooks/use-sync-auto-push";
@@ -17,6 +18,7 @@ import { AppKeyboardShortcuts } from "./lazy-pages";
 function App() {
   useStoreHydration();
   useProfileSnapshotPush();
+  useBridgeThemePush();
   useSyncAutoPush();
   const analytics = useAnalytics();
   const [path] = useLocation();
