@@ -126,4 +126,21 @@ describe("ChatPage turn isolation", () => {
     expect(screen.queryByText("Respuesta parcial")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Message")).toBeEnabled();
   });
+
+  it("should seed an adjust-with-AI prefill only into the conversation it opened", () => {
+    // Arrange
+    window.history.replaceState(null, "", "/chat?prefill=Ajusta%20el%20rodaje");
+    const { rerender } = renderWithProviders(<ChatPage conversationId="c1" />);
+    expect(screen.getByLabelText("Message")).toHaveValue("Ajusta el rodaje");
+
+    // Act
+    rerender(<ChatPage conversationId="c2" />);
+    const inSecond = (screen.getByLabelText("Message") as HTMLTextAreaElement)
+      .value;
+    rerender(<ChatPage conversationId="c1" />);
+
+    // Assert
+    expect(inSecond).toBe("");
+    expect(screen.getByLabelText("Message")).toHaveValue("");
+  });
 });
