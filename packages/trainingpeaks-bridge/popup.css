@@ -1,16 +1,25 @@
 /*
- * Kaiord Bridge Popup Shell — one 340px dark popup for every bridge.
+ * Kaiord Bridge Popup Shell — one 340px popup for every bridge.
  *
  * Master: packages/_shared/bridge-core/popup.css. Never edit a vendored
  * copy — edit the master and run `pnpm bridge:sync`. The parity guard at
  * scripts/check-bridge-core-parity.test.mjs fails the lint job if any
  * vendored copy drifts from this master.
  *
- * The `--kd-*` custom properties below are copied from the `.dark` block of
- * styles/brand-tokens.css so every popup and the web app render the same
- * palette. scripts/check-bridge-popup-tokens-parity.test.mjs fails when a
- * value here diverges from its brand-token source. The popups are dark-only:
- * no light-theme block is specified for them anywhere.
+ * The popup follows the theme picked in the Kaiord app. The app sends its
+ * preference (light | dark | system) to the bridge; bridge-theme.js applies
+ * it as `data-theme` on <html> before first paint. An explicit preference
+ * wins; `system`, or no preference yet (the app was never opened), follows
+ * `prefers-color-scheme`.
+ *
+ * The `--kd-*` custom properties are copied from styles/brand-tokens.css:
+ * `:root` below holds the `.dark` values, the two light blocks hold the
+ * light `:root` values. scripts/check-bridge-popup-tokens-parity.test.mjs
+ * fails when a value diverges from its brand-token source. Two light tokens
+ * read a darker role than their dark twin, because the brand's light
+ * `--text-dim` is 4.36:1 on the page background — under WCAG AA for the
+ * 12px text the popup sets in it: `--kd-text-muted` reads `--text-secondary`
+ * and `--kd-text-disabled` reads `--text-dim`.
  *
  * There is no per-bridge colour. The one thing each popup.html sets for
  * itself is the monogram glyph in the header — initials, not a hue, because
@@ -27,6 +36,8 @@
  */
 
 :root {
+  color-scheme: dark;
+
   /* Backgrounds */
   --kd-bg-primary: #0d0d0d;
   --kd-bg-surface: #171717;
@@ -54,6 +65,64 @@
   --kd-zone-4: #f2b036;
 
   --kd-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* The two light blocks must stay identical: one serves an explicit light
+   preference, the other the OS scheme when the app chose none. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Backgrounds */
+  --kd-bg-primary: #f7f7f7;
+  --kd-bg-surface: #ffffff;
+  --kd-bg-elevated: #f0f0f0;
+
+  /* Text */
+  --kd-text-primary: #303030;
+  --kd-text-secondary: #5b5b5b;
+  --kd-text-muted: #5b5b5b;
+  --kd-text-disabled: #747474;
+
+  /* Interactive fill */
+  --kd-control: #303030;
+  --kd-control-ink: #ffffff;
+  --kd-control-hover: #232323;
+
+  /* Borders */
+  --kd-border: #d4d4d4;
+  --kd-border-soft: #e4e4e4;
+
+  /* The dominant training zone */
+  --kd-zone-4: #93670c;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+
+    /* Backgrounds */
+    --kd-bg-primary: #f7f7f7;
+    --kd-bg-surface: #ffffff;
+    --kd-bg-elevated: #f0f0f0;
+
+    /* Text */
+    --kd-text-primary: #303030;
+    --kd-text-secondary: #5b5b5b;
+    --kd-text-muted: #5b5b5b;
+    --kd-text-disabled: #747474;
+
+    /* Interactive fill */
+    --kd-control: #303030;
+    --kd-control-ink: #ffffff;
+    --kd-control-hover: #232323;
+
+    /* Borders */
+    --kd-border: #d4d4d4;
+    --kd-border-soft: #e4e4e4;
+
+    /* The dominant training zone */
+    --kd-zone-4: #93670c;
+  }
 }
 
 * {

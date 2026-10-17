@@ -21,9 +21,10 @@ top-level flat files, test masters into the bridge's `test/`). Every
 vendored copy MUST be byte-identical to its master;
 `scripts/check-bridge-core-parity.test.mjs` SHALL fail the lint job on any
 drift. Each master declares its consumer set: the envelope, announce core,
-popup utilities, and chrome mock are vendored by all bridges; the popup CSS,
-popup snapshot module, and profile-snapshot validator are vendored only by
-bridges with a profile-snapshot popup (garmin, train2go today).
+popup utilities, popup shell and CSS, popup theme module, and chrome mock are
+vendored by all bridges; the popup snapshot module and profile-snapshot
+validator are vendored only by bridges with a profile-snapshot popup (garmin,
+train2go today).
 
 #### Scenario: Sync propagates a master edit to every consumer
 
@@ -108,6 +109,48 @@ invoked — for all actions, not only snapshot actions.
 - **GIVEN** a bridge whose external-actions allowlist does not include `set-credentials`
 - **WHEN** an allowed origin sends `{ action: "set-credentials" }` externally
 - **THEN** the shared guard SHALL reject it with the error envelope, without invoking the bridge's action handler
+
+### Requirement: Popup follows the app theme
+
+Every bridge popup SHALL render in the theme the user picked in the Kaiord app.
+The SPA SHALL send its theme PREFERENCE to each discovered bridge as the
+external action `{ action: "set-theme", theme }` when the bridge is discovered
+and whenever the preference changes. `set-theme` SHALL be in every bridge's
+`EXTERNAL_ACTIONS`, so the uniform external gate pins the sender origin; the
+shared `bridge-theme.js` master SHALL accept only `light`, `dark` or `system`,
+refusing anything else as non-retryable without writing, and SHALL store an
+accepted value in `chrome.storage.local` under `kaiordTheme`. No manifest
+permission is added: `storage` and `externally_connectable` already cover it.
+
+The popup SHALL apply the stored preference as `data-theme` on `<html>` before
+first paint. An explicit `light` or `dark` SHALL win; `system`, a missing
+value, or an unrecognised one SHALL follow `prefers-color-scheme`. `popup.css`
+SHALL carry the dark palette on `:root` and the light palette in two identical
+blocks — `[data-theme="light"]` and the `prefers-color-scheme: light` query
+when no explicit dark is set — each pinned to `styles/brand-tokens.css` by
+`scripts/check-bridge-popup-tokens-parity.test.mjs`.
+
+#### Scenario: Light preference reaches the popup
+
+- **GIVEN** the user picks the light theme in the Kaiord app with a bridge installed
+- **WHEN** the app sends `{ action: "set-theme", theme: "light" }` and the user then opens that bridge's popup
+- **THEN** the popup renders with `data-theme="light"` and the light palette
+
+#### Scenario: System or missing preference follows the OS
+
+- **GIVEN** the stored preference is `system`, or the app has never sent one
+- **WHEN** the popup opens
+- **THEN** it sets no `data-theme` and follows `prefers-color-scheme`
+
+#### Scenario: Invalid theme value is refused
+
+- **WHEN** an allowed origin sends `set-theme` with a value other than `light`, `dark` or `system`
+- **THEN** the bridge responds `{ ok: false, error: "Invalid theme preference", retryable: false }` and leaves the stored preference unchanged
+
+#### Scenario: Foreign origin cannot set the theme
+
+- **WHEN** a sender outside the allowed Kaiord origins sends `set-theme`
+- **THEN** the bridge responds `{ ok: false, error: "Origin or action not permitted" }` and stores nothing
 
 ### Requirement: Per-bridge literals preserved for mechanical probes
 

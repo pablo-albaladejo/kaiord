@@ -25,7 +25,8 @@ storage
   receipt locally, so the popup can show connection status and the most recent
   push without re-fetching.
   Usage: chrome.storage.local.set/get/remove for the keys profileSnapshot,
-  lastWeeklyRollup, and lastPushReceipt. Stored only on the user's device —
+  lastWeeklyRollup, and lastPushReceipt, plus kaiordTheme (the Kaiord app's
+  theme preference — light, dark or system — so the popup matches the app). Stored only on the user's device —
   never synced and never sent to any server.
 
 scripting

@@ -49,7 +49,8 @@ for development and testing (see "Build entrypoint" below).
   the sports catalog, Advanced-Labs biomarker tests, and daily stress. Any
   other path or method is rejected before a network call is made.
 - Expose a small message-passing surface, split by caller. The SPA reaches
-  only `ping`, `status`, and `whoop-fetch` via `chrome.runtime.sendMessage`
+  only `ping`, `status`, `whoop-fetch`, and `set-theme` (the app's theme
+  preference for the popup) via `chrome.runtime.sendMessage`
   — `EXTERNAL_ACTIONS` in `background.js` — once it has discovered the
   extension ID at runtime through the vendored `kaiord-announce.js` content
   script; every other action, and every non-Kaiord origin, is rejected with

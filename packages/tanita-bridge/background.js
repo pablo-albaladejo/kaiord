@@ -35,6 +35,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
 }
 
+// ── App theme preference for the popup (vendored bridge-core) ──
+let bridgeTheme;
+try {
+  importScripts("bridge-theme.js");
+  bridgeTheme = globalThis;
+} catch {
+  bridgeTheme =
+    typeof require !== "undefined" ? require("./bridge-theme.js") : {};
+}
+
 // ── Identity-free cookie transport (vendored bridge-core) ──
 let sessionFetch;
 try {
@@ -127,6 +137,8 @@ const handleAction = async (message) => {
       return await checkSession();
     case "read-export-csv":
       return await readExportCsv();
+    case "set-theme":
+      return await bridgeTheme.storeThemePreference(message.theme);
     default:
       throw new Error(`Unknown action: ${message.action}`);
   }
@@ -138,7 +150,12 @@ const handleAction = async (message) => {
 // vendored guard as a second layer over the manifest's
 // externally_connectable. The allowlist equals this bridge's full action
 // surface — there is no popup-only action.
-const EXTERNAL_ACTIONS = new Set(["ping", "checkSession", "read-export-csv"]);
+const EXTERNAL_ACTIONS = new Set([
+  "ping",
+  "checkSession",
+  "read-export-csv",
+  "set-theme",
+]);
 
 // No credential handshake: this bridge mints nothing and exchanges nothing.
 // The MyTANITA session cookie rides along on the export fetch itself

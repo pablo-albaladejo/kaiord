@@ -80,7 +80,8 @@
       "profile-snapshot-clear",
       "schedule",
       "unschedule",
-      "calendar-find"
+      "calendar-find",
+      "set-theme"
     ],
     "auth_endpoints": [
       "https://sso.garmin.com/sso/signin",
@@ -133,7 +134,8 @@
     "external_actions": [
       "ping",
       "checkSession",
-      "read-export-csv"
+      "read-export-csv",
+      "set-theme"
     ],
     "auth_endpoints": []
   },
@@ -202,7 +204,8 @@
       "read-details",
       "open-train2go",
       "profile-snapshot",
-      "profile-snapshot-clear"
+      "profile-snapshot-clear",
+      "set-theme"
     ],
     "auth_endpoints": []
   },
@@ -266,7 +269,8 @@
       "read-metrics",
       "push-weight",
       "push-workout",
-      "open-trainingpeaks"
+      "open-trainingpeaks",
+      "set-theme"
     ],
     "auth_endpoints": [
       "https://tpapi.trainingpeaks.com/users/v3/token"
@@ -353,7 +357,8 @@
     "external_actions": [
       "ping",
       "status",
-      "whoop-fetch"
+      "whoop-fetch",
+      "set-theme"
     ],
     "auth_endpoints": []
   }

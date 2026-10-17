@@ -134,7 +134,7 @@ Capability presence alone SHALL NOT drive SPA affordances; the SPA additionally 
 
 ### Requirement: Origin-pinned external message API
 
-The extension SHALL handle messages from allowed SPA origins via `chrome.runtime.onMessageExternal`. The externally reachable actions SHALL be exactly `ping`, `list`, `activities`, `push`, `push-body-composition`, `open-garmin`, `profile-snapshot` and `profile-snapshot-clear`:
+The extension SHALL handle messages from allowed SPA origins via `chrome.runtime.onMessageExternal`. The externally reachable actions SHALL be exactly `ping`, `list`, `activities`, `push`, `push-body-composition`, `open-garmin`, `profile-snapshot`, `profile-snapshot-clear`, `schedule`, `unschedule`, `calendar-find` and `set-theme`:
 
 - `ping` — session check plus the bridge manifest
 - `list` — the workout list from Garmin Connect
@@ -143,6 +143,8 @@ The extension SHALL handle messages from allowed SPA origins via `chrome.runtime
 - `push-body-composition` — a FIT body-composition payload (requires `message.fit`)
 - `open-garmin` — opens the Garmin Connect dashboard in a new tab
 - `profile-snapshot` / `profile-snapshot-clear` — store or drop the SPA's pushed profile snapshot
+- `schedule` / `unschedule` / `calendar-find` — place, remove or look up a workout on the Garmin Connect calendar
+- `set-theme` — store the app's theme preference for the popup (spec: bridge-core)
 
 All responses SHALL use the shape `{ ok: boolean, protocolVersion?: number, data?: unknown, error?: string }`, and `ping` SHALL include `protocolVersion: 1` (bumped only when the message contract changes).
 

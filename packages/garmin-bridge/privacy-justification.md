@@ -8,7 +8,7 @@ This document explains why each Chrome extension permission is required, for Chr
 
 **Why**: Persist the Garmin OAuth token pair (and cached profile snapshot) so the bridge can call Garmin on the user's behalf across MV3 service worker restarts without re-authenticating every time.
 
-**Data stored** (`chrome.storage.local`): the OAuth1 token (long-lived) and OAuth2 access/refresh token minted from the user's own Garmin session, plus the cached profile snapshot pushed by the Kaiord SPA. All data stays on the user's device; nothing is transmitted anywhere except to Garmin's own servers.
+**Data stored** (`chrome.storage.local`): the OAuth1 token (long-lived) and OAuth2 access/refresh token minted from the user's own Garmin session, plus the cached profile snapshot pushed by the Kaiord SPA and the app's theme preference (`light`, `dark` or `system`) so the popup matches the app. All data stays on the user's device; nothing is transmitted anywhere except to Garmin's own servers.
 
 ### `scripting`
 

@@ -41,7 +41,8 @@ never in the master. Identity values in `bridge-identity.js` must match
 - The bridge NEVER parses CSV and NEVER imports `@kaiord/tanita` — it returns
   raw text; the SPA parses.
 - External dispatch is origin-pinned and action-allowlisted via the vendored
-  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `read-export-csv`.
+  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `read-export-csv` /
+  `set-theme`.
 - The session cookie is never read, stored, or logged; session presence is a
   boolean only.
 - English-only: `_locales/en/` is the sole locale (hard constraint).

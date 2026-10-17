@@ -6,16 +6,18 @@ import { readBrandTokenColor } from "./brand-tokens.mjs";
 import { DEFAULT_MASTERS_DIR } from "./sync-bridge-core.mjs";
 
 // The bridge popups cannot import styles/brand-tokens.css — Chrome extensions
-// ship flat, unbundled files — so the popup-shell master re-declares the dark
-// palette as `--kd-*` literals. This guard pins each literal to the role it was
-// copied from, so a brand-token repaint cannot leave the five popups on a stale
-// palette.
+// ship flat, unbundled files — so the popup-shell master re-declares both
+// palettes as `--kd-*` literals: the dark one on `:root`, the light one in an
+// explicit-preference block and an OS-scheme block. This guard pins each
+// literal to the role it was copied from, so a brand-token repaint cannot
+// leave the five popups on a stale palette.
 //
 // The comparison resolves rather than string-matches: a role is a `var()`
 // reference into an oklch ramp, and the popup master keeps hex so the file
 // still reads as a palette and so this guard's failure message stays legible.
 // Only the FIRST `.dark { … }` block is read — brand-tokens.css documents that
-// invariant (single flat block) for exactly this class of Node-side reader.
+// invariant (single flat block) for exactly this class of Node-side reader;
+// light values are read from `:root` with that block removed.
 
 // --kd-* token in the popup master → the role it is copied from.
 const TOKEN_SOURCES = {
@@ -36,6 +38,20 @@ const TOKEN_SOURCES = {
   "--kd-zone-4": "--zone-4",
 };
 
+// Light-only departures from TOKEN_SOURCES. The brand's light `--text-dim`
+// is 4.36:1 on `--bg-page` and 4.10:1 on `--bg-elevated`, under WCAG AA's
+// 4.5:1 for the 12px captions, causes and meta lines the popup sets in
+// `--kd-text-muted`; each muted step therefore reads one role darker.
+const LIGHT_SOURCE_OVERRIDES = {
+  "--kd-text-muted": "--text-secondary",
+  "--kd-text-disabled": "--text-dim",
+};
+
+const LIGHT_BLOCKS = [
+  ':root[data-theme="light"]',
+  ':root:not([data-theme="dark"])',
+];
+
 const readDeclarations = (src, prefix) =>
   Object.fromEntries(
     [
@@ -47,19 +63,22 @@ const readDeclarations = (src, prefix) =>
 
 // Anchored at a line start so the prose in each file's header comment (both
 // mention the selector by name) cannot be mistaken for the rule itself.
+// A token block holds no nested rule, so the first `}` after the opener ends
+// it; the leading indent admits the light block nested in its media query.
 const readRuleBlock = (src, selector, file) => {
-  const opener = new RegExp(`^${selector.replace(".", "\\.")} \\{$`, "m");
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const opener = new RegExp(`^ *${escaped} \\{$`, "m");
   const match = opener.exec(src);
   assert.ok(match, `${file}: no ${selector} { … } block found`);
   const start = match.index;
-  const end = src.indexOf("\n}", start);
+  const end = src.indexOf("}", start + match[0].length);
   assert.ok(end > start, `${file}: unterminated ${selector} block`);
   return src.slice(start, end);
 };
 
-const readPopupTokens = () => {
+const readPopupTokens = (selector = ":root") => {
   const src = readFileSync(join(DEFAULT_MASTERS_DIR, "popup.css"), "utf8");
-  const block = readRuleBlock(src, ":root", "popup.css master");
+  const block = readRuleBlock(src, selector, "popup.css master");
   return readDeclarations(block, "--kd-");
 };
 
@@ -89,4 +108,28 @@ describe("bridge popup token parity", () => {
       "add these tokens to TOKEN_SOURCES so they are pinned to brand-tokens.css"
     );
   });
+
+  for (const selector of LIGHT_BLOCKS) {
+    it(`every --kd-* literal in ${selector} equals its role's resolved light value`, () => {
+      const popup = readPopupTokens(selector);
+      assert.deepEqual(
+        Object.keys(popup).sort(),
+        Object.keys(TOKEN_SOURCES).sort(),
+        `${selector} must redeclare exactly the tokens :root declares`
+      );
+      for (const kdToken of Object.keys(TOKEN_SOURCES)) {
+        const role = LIGHT_SOURCE_OVERRIDES[kdToken] ?? TOKEN_SOURCES[kdToken];
+        const resolved = readBrandTokenColor(
+          role,
+          undefined,
+          "light"
+        ).toLowerCase();
+        assert.equal(
+          popup[kdToken],
+          resolved,
+          `${selector} ${kdToken} is ${popup[kdToken]} but light ${role} resolves to ${resolved} — re-copy the light palette into the popup master`
+        );
+      }
+    });
+  }
 });
