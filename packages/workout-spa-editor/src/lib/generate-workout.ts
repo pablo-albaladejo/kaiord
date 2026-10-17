@@ -21,6 +21,9 @@ export type GenerateWorkoutOptions = {
   // The athlete's profile (zones) and custom AI instructions. Omitted, they
   // are read from the app db, so no generation call site can forget them.
   athlete?: AthleteInput;
+  // The profile the workout is generated for, when it is not the active one
+  // (batch and chat write the workout to a given profile).
+  profileId?: string;
   // Telemetry sink override; defaults to the Dexie usage sink over the app db so
   // every generation call site is accounted without bolting on its own writer.
   telemetry?: AiTelemetrySink;
@@ -35,7 +38,8 @@ export const generateWorkoutKrd = async (
   const persistence = createDexiePersistence();
   const telemetry =
     options.telemetry ?? createDexieUsageTelemetrySink(persistence);
-  const athlete = options.athlete ?? (await loadAthleteInput(persistence));
+  const athlete =
+    options.athlete ?? (await loadAthleteInput(persistence, options.profileId));
   const textToWorkout = createTextToWorkout({ model, telemetry });
 
   const workout = await textToWorkout(options.text, {

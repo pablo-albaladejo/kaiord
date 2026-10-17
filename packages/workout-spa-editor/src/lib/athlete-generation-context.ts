@@ -1,10 +1,10 @@
 import type { AthleteContext } from "@kaiord/ai";
 import type { Sport } from "@kaiord/core";
 
-import { formatZonesContext } from "../components/organisms/AiWorkoutInput/zones-formatter";
 import type { PersistencePort } from "../ports/persistence-port";
 import type { Profile } from "../types/profile";
 import { isSportKey } from "../types/sport-zones";
+import { formatZonesContext } from "./athlete/zones-formatter";
 import { athleteZoneTables } from "./athlete-zone-tables";
 
 /** What every AI generation knows about the athlete. */
@@ -13,12 +13,16 @@ export type AthleteInput = {
   customPrompt: string | null;
 };
 
-/** The active profile and the athlete's "Instructions for the AI". */
+/**
+ * The athlete's profile and their "Instructions for the AI". `profileId` names
+ * the profile the generated workout belongs to; without it, the active one.
+ */
 export const loadAthleteInput = async (
-  persistence: Pick<PersistencePort, "profiles" | "aiProviders">
+  persistence: Pick<PersistencePort, "profiles" | "aiProviders">,
+  profileId?: string
 ): Promise<AthleteInput> => {
   const [id, customPrompt] = await Promise.all([
-    persistence.profiles.getActiveId(),
+    profileId ?? persistence.profiles.getActiveId(),
     persistence.aiProviders.getCustomPrompt(),
   ]);
   const profile = id ? await persistence.profiles.getById(id) : undefined;

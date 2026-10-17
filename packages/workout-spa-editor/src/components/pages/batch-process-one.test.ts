@@ -68,7 +68,7 @@ describe("createProcessOne (Train2Go coaching path)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockTextToWorkout.mockResolvedValue(WORKOUT);
-    mockPersistence.profiles.getActiveId.mockResolvedValue("athlete");
+    mockPersistence.profiles.getActiveId.mockResolvedValue("someone-else");
     mockPersistence.profiles.getById.mockResolvedValue(PROFILE);
     mockPersistence.aiProviders.getCustomPrompt.mockResolvedValue(
       "Always use pace for running"
@@ -91,6 +91,10 @@ describe("createProcessOne (Train2Go coaching path)", () => {
 
     // Assert
     expect(result.ok).toBe(true);
+    expect(mockPersistence.profiles.getById).toHaveBeenCalledWith(
+      workout.profileId
+    );
+    expect(mockPersistence.profiles.getActiveId).not.toHaveBeenCalled();
     const [text, options] = mockTextToWorkout.mock.calls[0]!;
     expect(text).toContain("<coach_description>\nRodaje 12' z1 RPE 2-3");
     expect(options.athlete.zonesText).toContain("Threshold Pace: 5:00/km");

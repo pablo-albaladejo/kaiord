@@ -25,7 +25,9 @@ const powerTableFor = (
 /**
  * The numeric zones a generation resolves its zone targets against. With no
  * sport requested, the model may pick one: pace comes from running and power
- * from cycling, the sports whose steps always carry those targets.
+ * from cycling, the sports whose steps always carry those targets. The
+ * resolver only applies each table to its own sport (pace to running, power
+ * to cycling), so a swimming or cross-sport zone never takes these values.
  */
 export const athleteZoneTables = (
   profile: Profile | null,

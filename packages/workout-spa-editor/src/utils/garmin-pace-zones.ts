@@ -53,7 +53,8 @@ const zoneTableFor = (
 /**
  * The athlete's pace zone table for `sport`, empty when it has none. AI
  * generation resolves zone targets against this same table, so a generated
- * range is exactly what the Garmin export would have produced for the zone.
+ * range matches what the Garmin export would have produced for the zone, to
+ * the 1 mm/s the generated range is rounded to.
  */
 export const paceZoneTableFor = (
   profile: Profile | null | undefined,

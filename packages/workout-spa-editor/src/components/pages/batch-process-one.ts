@@ -30,6 +30,7 @@ export function createProcessOne(
         text: prompt,
         provider,
         modelId,
+        profileId: workout.profileId,
         sport: sport as Parameters<typeof generateWorkoutKrd>[0]["sport"],
       });
 

@@ -213,6 +213,24 @@ describe("generateWorkoutKrd", () => {
     expect(sent.instructions).toBe("Prefer ranges");
   });
 
+  it("should load the named profile instead of the active one", async () => {
+    // Arrange
+    mockPersistence.profiles.getById.mockResolvedValueOnce(RUNNING_PROFILE);
+    mockPersistence.aiProviders.getCustomPrompt.mockResolvedValueOnce(null);
+
+    // Act
+    await generateWorkoutKrd({
+      ...baseOptions,
+      sport: "running",
+      profileId: "p2",
+    });
+
+    // Assert
+    expect(mockPersistence.profiles.getActiveId).not.toHaveBeenCalled();
+    expect(mockPersistence.profiles.getById).toHaveBeenCalledWith("p2");
+    expect(sentOptions().athlete.zonesText).toContain("Pace zones");
+  });
+
   it("should send no zones when there is no active profile", async () => {
     // Arrange
     mockPersistence.profiles.getActiveId.mockResolvedValueOnce(null);
