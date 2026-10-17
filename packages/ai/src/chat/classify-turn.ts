@@ -1,3 +1,4 @@
+import { answerExtraActions } from "./answer-extra-actions";
 import type { ChatTurnResult } from "./chat-types";
 import type { RawTurn } from "./run-turn";
 
@@ -7,7 +8,8 @@ import type { RawTurn } from "./run-turn";
  *
  * - An unanswered action-tool call → `pending_action` (awaiting confirmation).
  *   The last one wins: the loop halts on the step that produced it, so an
- *   earlier action call was already answered (e.g. by a tool-error).
+ *   earlier action call was already answered (e.g. by a tool-error). Other
+ *   action calls of that step are answered `one_action_at_a_time`.
  * - Otherwise a `tool-calls` finish reason means the step cap halted the loop
  *   while the model still wanted tools → `step_limit`.
  * - Anything else → `complete`.
@@ -18,11 +20,11 @@ export const classifyTurn = (
   actionNames: Set<string>
 ): ChatTurnResult => {
   const messages = [...history, ...raw.messages];
-  const actionCall = [...raw.toolCalls]
-    .reverse()
-    .find((c) => actionNames.has(c.toolName));
+  const actionCalls = raw.toolCalls.filter((c) => actionNames.has(c.toolName));
+  const actionCall = actionCalls.at(-1);
 
   if (actionCall) {
+    messages.push(...answerExtraActions(actionCalls.slice(0, -1)));
     return {
       status: "pending_action",
       pendingAction: {

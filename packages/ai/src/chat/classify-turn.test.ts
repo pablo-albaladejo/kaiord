@@ -99,4 +99,52 @@ describe("classifyTurn", () => {
       expect(result.pendingAction.toolCallId).toBe("late");
     }
   });
+
+  it("should answer the other action calls of the step so none is left without a result", () => {
+    // Arrange
+    const raw = rawTurn({
+      finishReason: "tool-calls",
+      toolCalls: [
+        { toolName: "set_data_route", toolCallId: "early", input: {} },
+        { toolName: "query_workouts", toolCallId: "read", input: {} },
+        { toolName: "push_to_garmin", toolCallId: "late", input: {} },
+      ],
+    });
+    const actions = new Set(["set_data_route", "push_to_garmin"]);
+
+    // Act
+    const result = classifyTurn(history, raw, actions);
+
+    // Assert
+    expect(result.status).toBe("pending_action");
+    expect(result.messages.slice(0, -1)).toEqual([...history, ...response]);
+    expect(result.messages.at(-1)).toEqual({
+      role: "tool",
+      content: [
+        {
+          type: "tool-result",
+          toolCallId: "early",
+          toolName: "set_data_route",
+          output: {
+            type: "json",
+            value: expect.objectContaining({ error: "one_action_at_a_time" }),
+          },
+        },
+      ],
+    });
+  });
+
+  it("should add no tool message when the step holds a single action call", () => {
+    // Arrange
+    const raw = rawTurn({
+      finishReason: "tool-calls",
+      toolCalls: [{ toolName: "sync_coaching", toolCallId: "c1", input: {} }],
+    });
+
+    // Act
+    const result = classifyTurn(history, raw, new Set(["sync_coaching"]));
+
+    // Assert
+    expect(result.messages).toEqual([...history, ...response]);
+  });
 });
