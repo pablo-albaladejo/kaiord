@@ -65,4 +65,26 @@ describe("Markdown links", () => {
       screen.getByRole("link", { name: "https://x.dev/a_(b)" })
     ).toHaveAttribute("href", "https://x.dev/a_(b)");
   });
+
+  it("should show the punycode host beside a look-alike bare URL", () => {
+    // Arrange
+    const source = "https://p\u0430ypal.com/login";
+
+    // Act
+    const { container } = render(<Markdown source={source} />);
+
+    // Assert
+    expect(container.textContent).toBe(`${source} (xn--pypal-4ve.com)`);
+  });
+
+  it("should not repeat the host after a plain bare URL", () => {
+    // Arrange
+    const source = "https://kaiord.com/docs";
+
+    // Act
+    const { container } = render(<Markdown source={source} />);
+
+    // Assert
+    expect(container.textContent).toBe(source);
+  });
 });

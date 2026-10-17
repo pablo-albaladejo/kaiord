@@ -44,4 +44,21 @@ describe("MarkdownBoundary", () => {
     expect(screen.getByText("fine now")).toBeInTheDocument();
     expect(screen.queryByText("boom")).toBeNull();
   });
+
+  it("should report a message that keeps failing only once", () => {
+    // Arrange
+    const { rerender } = render(<Markdown source="boom 1" />);
+
+    // Act
+    rerender(<Markdown source="boom 12" />);
+    rerender(<Markdown source="boom 123" />);
+
+    // Assert
+    const reports = consoleErrorSpy.mock.calls.filter(
+      ([message]) =>
+        message === "Chat markdown failed to render; showing plain text"
+    );
+    expect(reports).toHaveLength(1);
+    expect(screen.getByText("boom 123").tagName).toBe("P");
+  });
 });

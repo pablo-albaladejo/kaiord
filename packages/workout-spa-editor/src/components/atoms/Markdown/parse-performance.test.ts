@@ -53,6 +53,9 @@ const ATTACKS: Record<string, string> = {
   backslashes: "\\".repeat(N),
   "quote markers": ">".repeat(N),
   "list markers": "- ".repeat(N),
+  "list item ending in U+2028": `-${" ".repeat(N)}a\u2028`,
+  "heading ending in U+2029": `# ${" ".repeat(N)}a\u2029`,
+  "quote ending in U+2028": `>${" ".repeat(N)}a\u2028`,
   "ordered markers": "1. ".repeat(N / "1. ".length),
 };
 

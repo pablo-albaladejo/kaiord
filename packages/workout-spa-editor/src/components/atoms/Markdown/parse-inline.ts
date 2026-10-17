@@ -52,6 +52,10 @@ function toToken(match: RegExpExecArray, depth: number): Inline {
     return { kind: "strong", children: parseInline(strong, depth) };
   const em = e1 ?? e2;
   if (em !== undefined) return { kind: "em", children: parseInline(em, depth) };
+  // A bare URL's text is its own label: an IDN look-alike (Cyrillic "а" in
+  // pаypal.com) differs from its punycode host, which is then shown.
+  const href = safeHref(bare);
+  const host = href === null ? null : revealedHost(href, bare);
   const text: Inline = { kind: "text", text: bare };
-  return { kind: "link", href: safeHref(bare), host: null, children: [text] };
+  return { kind: "link", href, host, children: [text] };
 }

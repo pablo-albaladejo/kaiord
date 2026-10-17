@@ -29,7 +29,9 @@ export const MAX_BLOCK_DEPTH = 12;
 export function parseBlocks(source: string, depth = 0): Block[] {
   if (depth >= MAX_BLOCK_DEPTH)
     return source.trim() === "" ? [] : [{ kind: "paragraph", text: source }];
-  const lines = source.replace(/\r\n?/g, "\n").split("\n");
+  /* U+2028/U+2029 end a line for `.` and `$` but not for split("\n"): left
+     in, a line never matches `(.*)$` and every pattern backtracks on it. */
+  const lines = source.replace(/\r\n?|[\u2028\u2029]/g, "\n").split("\n");
   const blocks: Block[] = [];
   let i = 0;
   while (i < lines.length) {

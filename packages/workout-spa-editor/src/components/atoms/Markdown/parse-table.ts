@@ -4,11 +4,12 @@ export type TableData = { align: Align[]; head: string[]; rows: string[][] };
 
 const DELIMITER_CELL = /^:?-+:?$/;
 
-/* Short rows are padded to the header width, so a wide header times many
-   rows of "|" is a few KB of source but millions of cells. Past these caps
-   a table is not built: too wide stays text, too many cells becomes code. */
-export const MAX_TABLE_COLUMNS = 64;
-export const MAX_TABLE_CELLS = 5000;
+/* Short rows are padded to the header width, so a wide header over many rows
+   of "|" is a few KB of source but hundreds of thousands of cells. Past these
+   caps no table is built: too wide stays text, too long becomes code. Padding
+   is therefore bounded by MAX_TABLE_COLUMNS × MAX_TABLE_ROWS. */
+export const MAX_TABLE_COLUMNS = 30;
+export const MAX_TABLE_ROWS = 200;
 
 /** A GFM table starts on a row with a pipe followed by a `---|---` row. While
  * the delimiter row is still streaming the header stays a paragraph. */
@@ -30,8 +31,8 @@ function isDelimiterRow(line: string): boolean {
   return splitRow(line).every((cell) => DELIMITER_CELL.test(cell));
 }
 
-/** The table from its header row, or its raw source when it would hold more
- * than `MAX_TABLE_CELLS` cells once every row is padded to the header. */
+/** The table from its header row, or its raw source when it has more than
+ * `MAX_TABLE_ROWS` body rows (counted before any cell is built). */
 export function readTable(
   lines: string[],
   i: number
@@ -39,7 +40,7 @@ export function readTable(
   const head = splitRow(lines[i] ?? "");
   let end = i + 2;
   while (isRow(lines[end])) end++;
-  if ((end - i - 1) * head.length > MAX_TABLE_CELLS)
+  if (end - i - 2 > MAX_TABLE_ROWS)
     return [lines.slice(i, end).join("\n"), end];
   const align = splitRow(lines[i + 1] ?? "").map(toAlign);
   const rows = lines

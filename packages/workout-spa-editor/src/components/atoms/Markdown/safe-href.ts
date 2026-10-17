@@ -19,7 +19,7 @@ export function safeHref(raw: string): string | null {
 /** The host to show beside a link whose label does not already name it, so
  * "Reconnect Garmin" pointing at evil.com reads "Reconnect Garmin (evil.com)". */
 export function revealedHost(href: string, label: string): string | null {
-  const host = new URL(href).hostname;
+  const { host } = new URL(href);
   const bare = stripPrefix(host, "www.");
   let shown = label.trim().toLowerCase();
   shown = stripPrefix(stripPrefix(shown, "https://"), "http://");

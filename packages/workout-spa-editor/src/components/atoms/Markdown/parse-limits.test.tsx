@@ -1,8 +1,10 @@
+import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { Markdown } from "./Markdown";
 import { parseBlocks } from "./parse-blocks";
 import { MAX_MARKDOWN_CHARS, parseMarkdown } from "./parse-markdown";
-import { MAX_TABLE_CELLS, MAX_TABLE_COLUMNS } from "./parse-table";
+import { MAX_TABLE_COLUMNS, MAX_TABLE_ROWS } from "./parse-table";
 
 const BUDGET_MS = 50;
 const KB = 1024;
@@ -11,6 +13,8 @@ const HEAP_BUDGET_MB = 32;
 const RUNS = 3;
 const WIDE = 10_000;
 const MANY_ROWS = 5000;
+const SOME_COLUMNS = 100;
+const SOME_ROWS = 2000;
 
 const table = (columns: number, rows: number) =>
   [
@@ -20,8 +24,8 @@ const table = (columns: number, rows: number) =>
   ].join("\n");
 
 /* Fastest of a few runs (a cold JIT or a GC pause is not the parser's cost)
-   and the largest heap growth seen. Padding 10 000 columns × 5 000 rows would
-   be 50 M cells: seconds and hundreds of MB on every run. */
+   and the largest heap growth seen. Padding every "|" row to a wide header is
+   hundreds of thousands of cells: slow and large on every run. */
 function measure(source: string) {
   let ms = Number.POSITIVE_INFINITY;
   let heap = 0;
@@ -36,44 +40,39 @@ function measure(source: string) {
   return { blocks, ms, heapMb: heap / MB };
 }
 
+const renderedCells = (source: string) =>
+  render(<Markdown source={source} />).container.querySelectorAll("td, th")
+    .length;
+
 describe("parser size limits", () => {
-  it("should keep a header wider than the column cap as text, fast and small", () => {
+  it.each([
+    ["10 000 columns × 5 000 rows", table(WIDE, MANY_ROWS)],
+    ["100 columns × 2 000 rows", table(SOME_COLUMNS, SOME_ROWS)],
+    ["30 columns × 2 000 rows", table(MAX_TABLE_COLUMNS, SOME_ROWS)],
+    ["30 columns × 201 rows", table(MAX_TABLE_COLUMNS, MAX_TABLE_ROWS + 1)],
+  ])("should build no cells for %s, fast and small", (_name, source) => {
     // Arrange
-    const source = table(WIDE, MANY_ROWS);
+    const kinds = new Set(["paragraph", "code"]);
 
     // Act
     const { blocks, ms, heapMb } = measure(source);
 
     // Assert
-    expect(blocks.some((b) => b.kind === "table")).toBe(false);
+    expect(blocks.every((b) => kinds.has(b.kind))).toBe(true);
+    expect(renderedCells(source)).toBe(0);
     expect(ms).toBeLessThan(BUDGET_MS);
     expect(heapMb).toBeLessThan(HEAP_BUDGET_MB);
   });
 
-  it("should render a table past the cell cap as code instead of padding it", () => {
+  it("should build a table right at the caps, padded only up to them", () => {
     // Arrange
-    const source = table(MAX_TABLE_COLUMNS, MANY_ROWS);
+    const source = table(MAX_TABLE_COLUMNS, MAX_TABLE_ROWS);
 
     // Act
-    const { blocks, ms, heapMb } = measure(source);
+    const cells = renderedCells(source);
 
     // Assert
-    expect(blocks).toHaveLength(1);
-    expect(blocks[0]?.kind).toBe("code");
-    expect(ms).toBeLessThan(BUDGET_MS);
-    expect(heapMb).toBeLessThan(HEAP_BUDGET_MB);
-  });
-
-  it("should still build a table right at the caps", () => {
-    // Arrange
-    const rows = MAX_TABLE_CELLS / MAX_TABLE_COLUMNS - 1;
-    const source = table(MAX_TABLE_COLUMNS, Math.floor(rows));
-
-    // Act
-    const [block] = parseBlocks(source);
-
-    // Assert
-    expect(block?.kind).toBe("table");
+    expect(cells).toBe(MAX_TABLE_COLUMNS * (MAX_TABLE_ROWS + 1));
   });
 
   it("should leave input past the length cap as plain text", () => {
