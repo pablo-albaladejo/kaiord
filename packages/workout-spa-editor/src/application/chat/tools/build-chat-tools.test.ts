@@ -82,4 +82,17 @@ describe("buildChatTools", () => {
     // Assert
     expect(unnamed).toEqual([]);
   });
+
+  it("should declare exactly the registry's confirmation-gated tools in the prompt tuple", () => {
+    // Arrange
+    const gated = buildChatTools(makeDeps())
+      .filter((t) => t.requiresConfirmation)
+      .map((t) => t.name);
+
+    // Act
+    const declared = [...CHAT_ACTION_TOOL_NAMES].sort();
+
+    // Assert
+    expect(declared).toEqual([...gated].sort());
+  });
 });
