@@ -132,6 +132,58 @@ describe("classifyTurn", () => {
         },
       ],
     });
+    if (result.status !== "pending_action") throw new Error(result.status);
+    expect(result.pendingAction.deferredCount).toBe(1);
+  });
+
+  it("should tell the model a user's no to the pending action does not cover the deferred one", () => {
+    // Arrange
+    const raw = rawTurn({
+      finishReason: "tool-calls",
+      toolCalls: [
+        { toolName: "set_data_route", toolCallId: "early", input: { a: 1 } },
+        { toolName: "set_data_route", toolCallId: "late", input: { a: 2 } },
+      ],
+    });
+
+    // Act
+    const result = classifyTurn(history, raw, new Set(["set_data_route"]));
+
+    // Assert
+    expect(JSON.stringify(result.messages.at(-1))).toContain(
+      "applies to that action only"
+    );
+  });
+
+  it("should answer a copy of the pending call as a duplicate without counting it as deferred", () => {
+    // Arrange
+    const input = { dataType: "sleep" };
+    const raw = rawTurn({
+      finishReason: "tool-calls",
+      toolCalls: [
+        { toolName: "set_data_route", toolCallId: "copy", input },
+        {
+          toolName: "set_data_route",
+          toolCallId: "pending",
+          input: { ...input },
+        },
+      ],
+    });
+
+    // Act
+    const result = classifyTurn(history, raw, new Set(["set_data_route"]));
+
+    // Assert
+    if (result.status !== "pending_action") throw new Error(result.status);
+    expect(result.pendingAction).toEqual({
+      toolName: "set_data_route",
+      toolCallId: "pending",
+      input,
+    });
+    const answer = JSON.stringify(result.messages.at(-1));
+    expect(answer).toContain("duplicate_of_pending");
+    expect(answer).not.toContain("one_action_at_a_time");
+    expect(answer).not.toContain("Ask the user about it again");
   });
 
   it("should add no tool message when the step holds a single action call", () => {

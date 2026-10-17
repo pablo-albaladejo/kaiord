@@ -1,5 +1,6 @@
 import type { PendingAction } from "@kaiord/ai";
 
+import { pluralKey } from "../../../i18n/plural-key";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
 
@@ -35,6 +36,13 @@ export function PendingActionCard({
       <pre className="my-2 overflow-x-auto rounded-lg bg-surface-deep p-2 text-[12px] text-ink-body">
         {JSON.stringify(action.input, null, 2)}
       </pre>
+      {action.deferredCount !== undefined && action.deferredCount > 0 && (
+        <p className="mb-2 text-[12px] text-ink-muted">
+          {t(pluralKey("pendingAction.deferred", action.deferredCount), {
+            count: action.deferredCount,
+          })}
+        </p>
+      )}
       <div className="flex gap-2">
         <Button onClick={onApprove} disabled={busy}>
           {t("pendingAction.approve")}

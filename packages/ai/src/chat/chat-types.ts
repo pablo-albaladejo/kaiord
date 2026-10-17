@@ -29,6 +29,9 @@ export type PendingAction = {
   toolCallId: string;
   /** Input already validated against the tool's `inputSchema`. */
   input: unknown;
+  /** Other actions of the same step the model was told to ask about again;
+   * absent when there are none. */
+  deferredCount?: number;
 };
 
 /** The caller's decision for a pending action, fed back on resume. */
