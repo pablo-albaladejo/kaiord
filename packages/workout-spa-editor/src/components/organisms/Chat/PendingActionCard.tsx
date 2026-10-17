@@ -38,10 +38,11 @@ export function PendingActionCard({
     dataTypeLabel: (type) => tc(`dataTypes.${type}`),
     formatDay: (day) => formatShortDay(day, locale),
   };
+  const isPush = name === "push_to_garmin";
   const summary =
-    known && name !== "push_to_garmin"
-      ? (summarizeAction(name, action.input, ctx) ?? t("summary.unreadable"))
-      : t("summary.unreadable");
+    known && !isPush ? summarizeAction(name, action.input, ctx) : null;
+  // Approving what the card cannot describe would be approving blind.
+  const readable = isPush || summary !== null;
   return (
     <div className="rounded-2xl border border-edge-strong bg-surface-elevated p-3">
       <p className="text-[13px] font-semibold text-ink-strong">
@@ -50,14 +51,14 @@ export function PendingActionCard({
         })}
       </p>
       <p className="my-2 break-words text-[13px] text-ink-body">
-        {name === "push_to_garmin" ? (
+        {isPush ? (
           <PushToGarminSummary
             input={action.input}
             t={t}
             formatDay={ctx.formatDay}
           />
         ) : (
-          summary
+          (summary ?? t("summary.unreadable"))
         )}
       </p>
       {known && EXTERNAL_ACTIONS.has(name) && (
@@ -67,7 +68,7 @@ export function PendingActionCard({
         </p>
       )}
       <div className="flex gap-2">
-        <Button onClick={onApprove} disabled={busy}>
+        <Button onClick={onApprove} disabled={busy || !readable}>
           {t("pendingAction.approve")}
         </Button>
         <button

@@ -55,4 +55,26 @@ describe("PendingActionCard in Spanish", () => {
     // Assert
     expect(screen.getByText("Sueño: 7 h el 16 oct")).toBeInTheDocument();
   });
+
+  it("should word an intake with its meal slot", () => {
+    // Arrange
+    const input = {
+      date: "2026-10-16",
+      kcal: 400,
+      proteinG: 20,
+      carbG: 50,
+      fatG: 10,
+      mealSlot: "dinner",
+    };
+
+    // Act
+    renderCard("log_intake", input);
+
+    // Assert
+    expect(
+      screen.getByText(
+        "Cena: 400 kcal (proteína 20 g · hidratos 50 g · grasa 10 g) el 16 oct"
+      )
+    ).toBeInTheDocument();
+  });
 });

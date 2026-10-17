@@ -4,6 +4,7 @@ import {
   type SummaryContext,
   text,
 } from "./action-input";
+import { summarizeLogIntake } from "./summarize-log-intake";
 import { summarizeSetDataRoute } from "./summarize-set-data-route";
 
 type Summarize = (input: ActionInput, ctx: SummaryContext) => string | null;
@@ -16,7 +17,12 @@ const TEXT_SUMMARIES = {
     const description = text(input, "description");
     const date = text(input, "date");
     if (!description || !date) return null;
-    return t("summary.createWorkout", { date: formatDay(date), description });
+    const sport = text(input, "sport");
+    const vars = { date: formatDay(date), description, sport };
+    return t(
+      sport ? "summary.createWorkoutSport" : "summary.createWorkout",
+      vars
+    );
   },
   log_health_metric: (input, { t, formatDay }) => {
     const metric = text(input, "metric");
@@ -27,31 +33,7 @@ const TEXT_SUMMARIES = {
     }
     return t(`summary.metric.${metric}`, { value, date: formatDay(day) });
   },
-  log_intake: (input, { t, formatDay }) => {
-    const date = text(input, "date");
-    const kcal = num(input, "kcal");
-    const protein = num(input, "proteinG");
-    const carb = num(input, "carbG");
-    const fat = num(input, "fatG");
-    if (
-      !date ||
-      kcal === undefined ||
-      protein === undefined ||
-      carb === undefined ||
-      fat === undefined
-    ) {
-      return null;
-    }
-    const line = t("summary.intake", {
-      kcal,
-      protein,
-      carb,
-      fat,
-      date: formatDay(date),
-    });
-    const label = text(input, "label");
-    return label ? t("summary.intakeLabelled", { label, line }) : line;
-  },
+  log_intake: summarizeLogIntake,
   set_data_route: summarizeSetDataRoute,
 } satisfies Record<string, Summarize>;
 

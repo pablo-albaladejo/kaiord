@@ -62,6 +62,7 @@
     "unreadable": "The assistant sent details the app could not read. Decline and ask again.",
     "syncCoaching": "Fetch the latest prescribed activities from your coaching provider.",
     "createWorkout": "On {{date}}: “{{description}}”",
+    "createWorkoutSport": "{{sport}} on {{date}}: “{{description}}”",
     "metric": {
       "sleep": "Sleep: {{value}} h on {{date}}",
       "weight": "Weight: {{value}} kg on {{date}}",
@@ -70,6 +71,13 @@
     },
     "intake": "{{kcal}} kcal (protein {{protein}} g · carbs {{carb}} g · fat {{fat}} g) on {{date}}",
     "intakeLabelled": "“{{label}}”: {{line}}",
+    "intakeSlot": "{{slot}}: {{line}}",
+    "mealSlot": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
     "push": "“{{title}}” ({{duration}}) on {{date}}",
     "pushLoading": "Looking up the workout…",
     "pushMissing": "This workout is not in the active athlete's library. Decline and ask again.",

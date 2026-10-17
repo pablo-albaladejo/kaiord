@@ -37,6 +37,35 @@ describe("PendingActionCard", () => {
       "On Oct 16: “Easy run with strides”",
     ],
     [
+      "create_workout",
+      { description: "Easy run", date: "2026-10-16", sport: "running" },
+      "running on Oct 16: “Easy run”",
+    ],
+    [
+      "log_intake",
+      {
+        date: "2026-10-16",
+        kcal: 400,
+        proteinG: 20,
+        carbG: 50,
+        fatG: 10,
+        mealSlot: "breakfast",
+      },
+      "Breakfast: 400 kcal (protein 20 g · carbs 50 g · fat 10 g) on Oct 16",
+    ],
+    [
+      "log_intake",
+      {
+        date: "2026-10-16",
+        kcal: 400,
+        proteinG: 20,
+        carbG: 50,
+        fatG: 10,
+        mealSlot: "brunch",
+      },
+      "400 kcal (protein 20 g · carbs 50 g · fat 10 g) on Oct 16",
+    ],
+    [
       "log_health_metric",
       { metric: "sleep", day: "2026-10-16", value: 7 },
       "Sleep: 7 h on Oct 16",
@@ -161,5 +190,34 @@ describe("PendingActionCard", () => {
 
     // Assert
     expect(screen.getByText(/could not read/)).toBeInTheDocument();
+  });
+
+  it.each([
+    ["log_health_metric", { metric: "mood" }],
+    ["delete_everything", { all: true }],
+  ])(
+    "should not let %s be approved when the card cannot describe it",
+    (tool, input) => {
+      // Arrange
+      const action = pending(tool, input);
+
+      // Act
+      renderCard(action);
+
+      // Assert
+      expect(screen.getByRole("button", { name: "Approve" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Decline" })).toBeEnabled();
+    }
+  );
+
+  it("should let a readable action be approved", () => {
+    // Arrange
+    const action = pending("sync_coaching", {});
+
+    // Act
+    renderCard(action);
+
+    // Assert
+    expect(screen.getByRole("button", { name: "Approve" })).toBeEnabled();
   });
 });

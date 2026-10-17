@@ -62,6 +62,7 @@
     "unreadable": "El asistente envió datos que la app no puede leer. Recházalo y vuelve a pedirlo.",
     "syncCoaching": "Traer las últimas actividades prescritas por tu entrenador.",
     "createWorkout": "El {{date}}: «{{description}}»",
+    "createWorkoutSport": "{{sport}} el {{date}}: «{{description}}»",
     "metric": {
       "sleep": "Sueño: {{value}} h el {{date}}",
       "weight": "Peso: {{value}} kg el {{date}}",
@@ -70,6 +71,13 @@
     },
     "intake": "{{kcal}} kcal (proteína {{protein}} g · hidratos {{carb}} g · grasa {{fat}} g) el {{date}}",
     "intakeLabelled": "«{{label}}»: {{line}}",
+    "intakeSlot": "{{slot}}: {{line}}",
+    "mealSlot": {
+      "breakfast": "Desayuno",
+      "lunch": "Almuerzo",
+      "dinner": "Cena",
+      "snack": "Tentempié"
+    },
     "push": "«{{title}}» ({{duration}}) el {{date}}",
     "pushLoading": "Buscando el entrenamiento…",
     "pushMissing": "Este entrenamiento no está en la biblioteca del atleta activo. Recházalo y vuelve a pedirlo.",
