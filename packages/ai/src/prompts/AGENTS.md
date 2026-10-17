@@ -10,6 +10,7 @@ System prompt templates and template variable substitution utilities. Contains t
 ## Key Files
 
 - `parse-workout.md` — System prompt template (7617 bytes): Defines workout structure (sport, steps, repetition blocks), target/duration types, zone abbreviations (FTP%, HR zones, pace zones), handling of languages (Spanish, English), ambiguity resolution
+- `athlete-context.ts` — `buildAthleteContext`: the `<athlete_zones>` / `<athlete_instructions>` section `createTextToWorkout` appends to every generation user message (instructions capped at 500 chars)
 - `load-prompt.ts` — Template loader: replaces `{{variable}}` placeholders (e.g., `{{sport}}`) in raw prompt template with runtime values
 
 ## Prompt Template

@@ -20,7 +20,36 @@ export type TextToWorkoutConfig = {
   telemetry?: AiTelemetrySink;
 };
 
+/** One pace zone in metres per second; `minMps` is the slower bound. */
+export type PaceZoneBounds = { zone: number; minMps: number; maxMps: number };
+
+/** One power zone in watts. */
+export type PowerZoneBounds = {
+  zone: number;
+  minWatts: number;
+  maxWatts: number;
+};
+
+/**
+ * The athlete's zones as numbers. Zone targets the model emits are resolved
+ * against these in code; a zone missing from its table stays a zone.
+ */
+export type AthleteZoneTables = {
+  pace?: Array<PaceZoneBounds>;
+  power?: Array<PowerZoneBounds>;
+};
+
+export type AthleteContext = {
+  /** Human-readable zones shown to the model. */
+  zonesText?: string;
+  /** The athlete's own instructions for the AI (capped). */
+  instructions?: string;
+  /** Numeric tables for deterministic zone resolution. */
+  zones?: AthleteZoneTables;
+};
+
 export type TextToWorkoutOptions = {
   sport?: Sport;
   name?: string;
+  athlete?: AthleteContext;
 };
