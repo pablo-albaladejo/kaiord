@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 10.4.0
+
+### Minor Changes
+
+- 69dfb8c: Add `MissingFtpError`, thrown by writers that must turn percent-of-FTP power targets into watts when no FTP is provided, and an optional `PushOptions` (`ftpWatts`) argument on `WorkoutService.push`.
+
 ## 10.3.0
 
 ### Minor Changes

@@ -1,5 +1,18 @@
 # @kaiord/garmin-connect
 
+## 10.4.0
+
+### Minor Changes
+
+- 69dfb8c: **Behaviour change:** `push(krd)` of a workout with percent-of-FTP power targets now rejects with `MissingFtpError` before any request is sent unless an FTP is passed as `push(krd, { ftpWatts })`; previously the percentages reached Garmin Connect as watts. With `ftpWatts` they are sent as the right watts.
+
+### Patch Changes
+
+- Updated dependencies [69dfb8c]
+- Updated dependencies [69dfb8c]
+  - @kaiord/core@10.4.0
+  - @kaiord/garmin@10.4.0
+
 ## 10.0.0
 
 ### Patch Changes

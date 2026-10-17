@@ -1,5 +1,28 @@
 # @kaiord/ai
 
+## 9.5.0
+
+### Minor Changes
+
+- fd698de: AI workout generation now gives every running step a pace target and every cycling step a power target, taken from the athlete's own zones. The workout parser prompt (1.2.0) gains sport target rules and a Spanish/English intensity vocabulary ("suave"/"trote"/RPE 2-3 → Z1, short "fuerte"/"cambio fuerte" → Z4-Z5, "a tope" → Z5, "progresivo" → a zone span, "R: 2'" → a Z1 recovery step, "30' con (…)" → whole repeated cycles). The model emits zone numbers; `createTextToWorkout` resolves them in code against `TextToWorkoutOptions.athlete.zones` into explicit m/s or watt ranges (pace only on running, power only on cycling), keeps a power zone the athlete has not configured as a zone (Garmin, FIT and ZWO carry power zones natively) and turns such a pace zone into `open` rather than guess or block the Garmin push, and gives open warmup/recovery/cooldown steps the zone 1 range when the athlete has one. The athlete blocks are length-capped and cannot close or open each other. `athlete.zonesText` and `athlete.instructions` are appended to the user message in their own delimiters.
+
+  In the editor, every generation path — Train2Go batch conversion, converting a coached session from its card, create-from-text, the AI input and the chat — now sends the athlete's zones and their "Instructions for the AI"; the Train2Go paths previously sent neither, so coached sessions came back with "Open" and bare "Zone 1" targets.
+
+- 620f332: AI settings lead with the athlete's assistant: a card with the main model by name, its account, key status and this month's use; AI accounts shared by every athlete with "Replace key", Rename and confirmed Remove, an add form on demand whose label is optional; per-task models folded until one is set; custom instructions saved on pause or blur with a "Saved" note. `@kaiord/ai` adds `modelDisplayName` and `listedModels` (product names, dated snapshots of a listed alias left out).
+
+### Patch Changes
+
+- 3f3a229: AI settings show what actually runs. Each model row is one select of account and model together, shows the effective resolution, and a purpose without its own model says it follows the main model. The main model is the athlete's default binding (the provider "Default" badge and "Set Default" button are gone). A blank model id is rejected when saved, and `resolveModelForPurpose` heals bindings already stored blank by running the bound provider's model. Provider rows show only the key's last four characters, editing no longer puts the key back into the page, and removing a provider asks for confirmation and deletes the bindings that used it. A cleared or removed model binding no longer comes back from another device on the next sync, and the workout generator's model select shows the model generation runs and saves the choice as the athlete's workout-generation model.
+- e645bf3: The chat system prompt now names all six confirmation-gated action tools (`sync_coaching`, `create_workout`, `log_health_metric`, `log_intake`, `push_to_garmin`, `set_data_route`), rendered from the new exported `CHAT_ACTION_TOOL_NAMES` tuple; `CHAT_PROMPT_VERSION` is bumped to 1.1.0. The inert chat-tool eval runner now uses `buildChatSystemPrompt()` instead of its own prompt.
+- c4ba5c5: AI-generated workouts get a real name instead of "Untitled Workout". The
+  workout parser's structured-output schema now carries `name` (it previously
+  omitted it, so any name the model produced was stripped) and the prompt asks for
+  a concise title in the language of the input; a blank name is dropped. In the
+  editor, a coaching or batch-processed workout falls back to the coached session's
+  own title when the AI gives none, and only then to the localized default.
+- Updated dependencies [69dfb8c]
+  - @kaiord/core@10.4.0
+
 ## 9.4.0
 
 ### Minor Changes
