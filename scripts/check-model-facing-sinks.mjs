@@ -38,6 +38,9 @@
  * fails though it may be safe, and so does code-shaped text inside a string
  * literal (`"e.message"`). Brace and paren matching skips string literals,
  * but the code inside a template's `${}` is treated as part of the string.
+ * Regex literals are not recognized: a `}` in one (`/\}/g`) can end a catch
+ * body early, and a `//` in one (`/https?:\/\//`) blanks the rest of its line
+ * as a comment, so code after either can be missed (a false negative).
  *
  * Modes:
  *   --dry-run    Emit violations as JSON on stdout; exit 0.
