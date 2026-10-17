@@ -19,7 +19,7 @@ export const convertPowerTarget = (
     // Percent-FTP bounds are stored raw, like a single percent_ftp target.
     const encode =
       value.basis === targetUnitSchema.enum.percent_ftp
-        ? (bound: number) => bound
+        ? Math.round
         : encodeWorkoutPower;
     message.targetValue = 0;
     message.customTargetPowerLow = encode(value.min);
@@ -28,6 +28,6 @@ export const convertPowerTarget = (
     message.targetValue = encodeWorkoutPower(value.value);
   } else if (value.unit === targetUnitSchema.enum.percent_ftp) {
     // Garmin encoding: Percentage FTP has no offset
-    message.targetValue = value.value;
+    message.targetValue = Math.round(value.value);
   }
 };

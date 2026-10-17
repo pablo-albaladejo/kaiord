@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
 
 import type { FitTargetData } from "./target.types";
 import { convertPowerTarget } from "./target-power.converter";
@@ -37,6 +38,43 @@ describe("convertPowerTarget", () => {
         type: "power",
         value: { unit: "range", min: 200, max: 300 },
       });
+    });
+  });
+
+  describe("range target with mixed bounds", () => {
+    it("should warn when one bound is %FTP and the other is watts", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+      const data: FitTargetData = {
+        customTargetPowerLow: 80,
+        customTargetPowerHigh: 1300,
+      };
+
+      // Act
+      convertPowerTarget(data, logger);
+
+      // Assert
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Power range mixes %FTP and watts bounds",
+        { low: 80, high: 1300 }
+      );
+    });
+
+    it("should not warn when both bounds share a unit", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+      const data: FitTargetData = {
+        customTargetPowerLow: 1200,
+        customTargetPowerHigh: 1300,
+      };
+
+      // Act
+      convertPowerTarget(data, logger);
+
+      // Assert
+      expect(warnSpy).not.toHaveBeenCalled();
     });
   });
 

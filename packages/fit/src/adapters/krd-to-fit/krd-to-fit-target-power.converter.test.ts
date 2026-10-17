@@ -150,4 +150,34 @@ describe("convertPowerTarget", () => {
       targetType: "power",
     });
   });
+
+  it.each([
+    {
+      value: { unit: "percent_ftp", value: 87.7 },
+      raw: { targetValue: 88 },
+    },
+    {
+      value: { unit: "range", min: 57.4, max: 87.7, basis: "percent_ftp" },
+      raw: { customTargetPowerLow: 57, customTargetPowerHigh: 88 },
+    },
+  ] as const)(
+    "should round a fractional $value.unit percent to the FIT integer",
+    ({ value, raw }) => {
+      // Arrange
+      const step: WorkoutStep = {
+        stepIndex: 0,
+        durationType: "time",
+        duration: { type: "time", seconds: 300 },
+        targetType: "power",
+        target: { type: "power", value },
+      };
+      const message: Record<string, unknown> = {};
+
+      // Act
+      convertPowerTarget(step, message);
+
+      // Assert
+      expect(message).toMatchObject(raw);
+    }
+  );
 });

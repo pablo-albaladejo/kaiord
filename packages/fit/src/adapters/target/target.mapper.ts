@@ -1,4 +1,9 @@
-import { type Target, type TargetType, targetTypeSchema } from "@kaiord/core";
+import {
+  type Logger,
+  type Target,
+  type TargetType,
+  targetTypeSchema,
+} from "@kaiord/core";
 
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
@@ -22,9 +27,9 @@ const REPEAT_UNTIL_DURATIONS: ReadonlySet<string> = new Set([
 const hasTarget = (step: FitWorkoutStep): boolean =>
   !REPEAT_UNTIL_DURATIONS.has(step.durationType ?? "");
 
-export const mapTarget = (step: FitWorkoutStep): Target =>
+export const mapTarget = (step: FitWorkoutStep, logger?: Logger): Target =>
   hasTarget(step)
-    ? convertFitTarget(step)
+    ? convertFitTarget(step, logger)
     : { type: targetTypeSchema.enum.open };
 
 export const mapTargetType = (
