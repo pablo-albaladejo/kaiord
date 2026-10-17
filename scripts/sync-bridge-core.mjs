@@ -74,6 +74,13 @@ export const BRIDGE_CORE_MASTERS = [
     bridges: ALL_BRIDGES,
   },
   { master: "popup.css", dest: "popup.css", bridges: ALL_BRIDGES },
+  // The app's theme preference: stored by background.js on the external
+  // `set-theme` action, applied by popup.html before first paint.
+  {
+    master: "bridge-theme.js",
+    dest: "bridge-theme.js",
+    bridges: ALL_BRIDGES,
+  },
   {
     master: "bridge-popup-snapshot.js",
     dest: "bridge-popup-snapshot.js",
@@ -102,6 +109,11 @@ export const BRIDGE_CORE_MASTERS = [
   {
     master: "test/bridge-popup-health.test.js",
     dest: "test/bridge-popup-health.test.js",
+    bridges: ALL_BRIDGES,
+  },
+  {
+    master: "test/bridge-theme.test.js",
+    dest: "test/bridge-theme.test.js",
     bridges: ALL_BRIDGES,
   },
   {

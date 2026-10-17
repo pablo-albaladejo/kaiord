@@ -9,6 +9,7 @@ export { WORKOUT_PARSER_SYSTEM } from "./parse-workout-prompt";
 export { LAB_EXTRACTOR_SYSTEM } from "./lab-extractor-prompt";
 export {
   buildChatSystemPrompt,
+  CHAT_ACTION_TOOL_NAMES,
   CHAT_PROMPT_VERSION,
 } from "./chat-system-prompt";
 export {
@@ -16,4 +17,10 @@ export {
   PROMPT_VERSION,
   SPANISH_ABBREVIATION_DICTIONARY,
 } from "./user-prompt";
+export {
+  buildAthleteContext,
+  MAX_ATHLETE_INSTRUCTIONS,
+  MAX_ATHLETE_ZONES,
+  type AthletePromptInput,
+} from "./athlete-context";
 export { fenceUntrusted, UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./fence";

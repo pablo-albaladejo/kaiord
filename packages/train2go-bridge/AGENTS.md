@@ -8,7 +8,7 @@
 ## Purpose
 
 - Fetch training-plan endpoints on `app.train2go.com` directly from the service worker with `credentials:"include"` (SW-direct) so the site's HttpOnly session cookie travels automatically — no content script on `app.train2go.com`, no relay hop
-- Expose a message-passing surface (`ping`, `read-week`, `read-day`, `read-details`, `open-train2go`, `profile-snapshot`) that the SPA invokes via `chrome.runtime.sendMessage`
+- Expose a message-passing surface (`ping`, `read-week`, `read-day`, `read-details`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) that the SPA invokes via `chrome.runtime.sendMessage`
 - Restrict communication to Kaiord-controlled origins (`https://*.kaiord.com/*`, `http://localhost/*`)
 - Persist the user profile snapshot via `chrome.storage.local`
 - Surface a dead session (redirect / login response) as `needsReauth` so the editor can prompt a re-login
