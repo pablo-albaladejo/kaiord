@@ -72,7 +72,9 @@ export const buildStructuredCoachingWorkout = (
   state: "structured",
   // Coach description is the canonical workout-level note (krd-format); also
   // mirrored into raw.description for the sidebar. The session title names
-  // the workout when the KRD (e.g. the AI output) carries no name.
+  // the workout when the KRD (e.g. the AI output) carries no name. The manual
+  // draft save (persistCoachingWorkout) also lands here, intentionally: a
+  // draft saved with a cleared name gets the session title too.
   krd: withCoachNotes(
     withFallbackName(input.krd, input.activity.title),
     input.activity.description

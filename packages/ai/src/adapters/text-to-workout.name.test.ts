@@ -11,6 +11,9 @@ const step = {
   intensity: "warmup",
 };
 
+const NAME_CAP = 40;
+const OVERLONG_NAME_LENGTH = 60;
+
 const parseWith = (output: unknown) =>
   createTextToWorkout({ model: mockModelReturning(output), maxRetries: 0 })(
     "Rodaje 12' z1 RPE 2-3"
@@ -89,5 +92,20 @@ describe("createTextToWorkout workout name", () => {
       type: "json",
       schema: { properties: { name: { type: "string" } } },
     });
+  });
+
+  it("should cap a generated name at 40 characters", async () => {
+    // Arrange
+    const output = {
+      name: "x".repeat(OVERLONG_NAME_LENGTH),
+      sport: "running",
+      steps: [step],
+    };
+
+    // Act
+    const workout = await parseWith(output);
+
+    // Assert
+    expect(workout.name).toBe("x".repeat(NAME_CAP));
   });
 });
