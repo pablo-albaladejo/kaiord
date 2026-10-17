@@ -7,7 +7,7 @@ import systemPromptRaw from "./parse-workout.md";
  */
 export const WORKOUT_PARSER_SYSTEM = definePrompt({
   id: "workout-parser/system",
-  version: "1.0.0",
+  version: "1.1.0",
   template: systemPromptRaw,
   variables: ["sport"],
 });

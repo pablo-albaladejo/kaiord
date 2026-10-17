@@ -317,6 +317,28 @@ When the GCN adapter encounters an end-condition the KRD duration vocabulary can
 - **THEN** a `Lossy conversion:` warning names the reps condition
 - **AND** the produced duration is open
 
+### Requirement: Garmin GCN Writer Resolves Percent-Of-FTP Power Targets With A Provided FTP
+
+The Garmin GCN writer SHALL write a KRD `percent_ftp` power target as a `power.zone` target in watts, computed as `round(percent / 100 × ftpWatts)`, where `ftpWatts` is supplied by the caller through the writer options. When no FTP is provided, or the FTP is zero, negative or not finite, the writer SHALL throw the typed `MissingFtpError` from `@kaiord/core` and SHALL NOT substitute an assumed FTP. Watts targets, watt ranges (faster-first) and power zones SHALL be written unchanged.
+
+#### Scenario: Percent of FTP resolved with the athlete FTP
+
+- **GIVEN** a cycling step with a `percent_ftp` power target of 85
+- **WHEN** the GCN writer emits the step with `ftpWatts: 250`
+- **THEN** the emitted JSON has `targetValueOne: 213` and `targetValueTwo: 213`
+
+#### Scenario: Missing FTP fails loudly
+
+- **GIVEN** a cycling step with a `percent_ftp` power target
+- **WHEN** the GCN writer emits the step without `ftpWatts`
+- **THEN** the writer throws `MissingFtpError` and produces no GCN output
+
+#### Scenario: Watts targets need no FTP
+
+- **GIVEN** a cycling step with a power range of 125–188 W
+- **WHEN** the GCN writer emits the step with any FTP or none
+- **THEN** the emitted JSON has `targetValueOne: 188` and `targetValueTwo: 125`
+
 ### Requirement: FIT reader maps recorded activities from the SDK-decoded message shape
 
 The `@kaiord/fit` reader SHALL map activity FIT files from the messages as the `@garmin/fitsdk` `Decoder` returns them by default: `date_time` fields as `Date`, scaled fields already in profile units (it SHALL NOT rescale them), and enums as profile names. A `record` without a `timestamp` SHALL be dropped with a logged warning. Every activity fixture in `test-fixtures/fit/` SHALL have a real-decoder test validated against `krdSchema`.
