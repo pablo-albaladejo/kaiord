@@ -348,6 +348,51 @@ describe("krdToTrainingPeaksWorkout — percent_ftp ranges", () => {
   const RAMP_LOW_PERCENT = 50;
   const RAMP_HIGH_PERCENT = 75;
 
+  it("should receive a descending Zwift cooldown as an ascending band", () => {
+    // Arrange
+    const logger = spyLogger();
+    const krd = asKrd({
+      name: "Cooldown",
+      sport: "cycling",
+      steps: [
+        {
+          stepIndex: 0,
+          name: "Cool down",
+          durationType: "time",
+          duration: { type: "time", seconds: WARM_UP_SECONDS },
+          targetType: "power",
+          target: {
+            type: "power",
+            value: {
+              unit: "range",
+              min: RAMP_LOW_PERCENT,
+              max: RAMP_HIGH_PERCENT,
+              basis: "percent_ftp",
+            },
+          },
+          intensity: "cooldown",
+          extensions: { zwift: { powerDirection: "descending" } },
+        },
+      ],
+    } as Workout);
+
+    // Act
+    const result = krdToTrainingPeaksWorkout(krd, {
+      athleteId: ATHLETE_ID,
+      workoutDay: WORKOUT_DAY,
+      logger,
+    });
+    const structure = JSON.parse(result.structure as unknown as string);
+
+    // Assert
+    const [target] = structure.structure[0].steps[0].targets;
+    expect(target).toEqual({
+      minValue: RAMP_LOW_PERCENT,
+      maxValue: RAMP_HIGH_PERCENT,
+    });
+    expect(target.minValue).toBeLessThanOrEqual(target.maxValue);
+  });
+
   it("should pass a percent_ftp range through as its percentages without an FTP", () => {
     // Arrange
     const logger = spyLogger();
