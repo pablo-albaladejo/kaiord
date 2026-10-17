@@ -109,6 +109,21 @@ try {
   );
 }
 
+// ── App theme preference for the popup (vendored bridge-core) ──
+let bridgeTheme;
+try {
+  importScripts("bridge-theme.js");
+  bridgeTheme = globalThis;
+} catch (e) {
+  bridgeTheme =
+    typeof require !== "undefined" ? require("./bridge-theme.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-bridge-theme",
+    e
+  );
+}
+
 // ── Identity-free cookie transport (vendored bridge-core) ──
 let sessionFetch;
 try {
@@ -316,6 +331,8 @@ const handleAction = async (message) => {
       return await persistSnapshot(message.snapshot);
     case "profile-snapshot-clear":
       return await clearSnapshot();
+    case "set-theme":
+      return await bridgeTheme.storeThemePreference(message.theme);
     default:
       throw new Error(`Unknown action: ${message.action}`);
   }
@@ -334,6 +351,7 @@ const EXTERNAL_ACTIONS = new Set([
   "open-train2go",
   "profile-snapshot",
   "profile-snapshot-clear",
+  "set-theme",
 ]);
 
 // No credential handshake: this bridge mints nothing and exchanges nothing.
