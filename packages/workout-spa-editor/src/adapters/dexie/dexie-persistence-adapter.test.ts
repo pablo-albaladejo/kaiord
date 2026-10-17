@@ -180,6 +180,30 @@ describe("DexieWorkoutRepository", () => {
     expect(ids).toEqual(["w-2", "w-3"]);
   });
 
+  it("should filter by profile and date range on the compound index", async () => {
+    // Arrange
+    const { workouts } = createDexiePersistence(testDb);
+    await workouts.put(
+      makeWorkout({ id: "w-1", profileId: "p1", date: "2026-04-07" })
+    );
+    await workouts.put(
+      makeWorkout({ id: "w-2", profileId: "p2", date: "2026-04-07" })
+    );
+    await workouts.put(
+      makeWorkout({ id: "w-3", profileId: "p1", date: "2026-04-09" })
+    );
+
+    // Act
+    const result = await workouts.getByProfileAndDateRange(
+      "p1",
+      "2026-04-06",
+      "2026-04-08"
+    );
+
+    // Assert
+    expect(result.map((w) => w.id)).toEqual(["w-1"]);
+  });
+
   it("should return empty array for no matches", async () => {
     // Arrange
     const { workouts } = createDexiePersistence(testDb);

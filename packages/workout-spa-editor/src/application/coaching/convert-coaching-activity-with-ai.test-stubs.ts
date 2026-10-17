@@ -45,6 +45,8 @@ export const buildStubWorkoutRepo = (
   return {
     getById: async (id) => store.get(id),
     getByDateRange: async () => [...store.values()],
+    getByProfileAndDateRange: async (pid) =>
+      [...store.values()].filter((w) => w.profileId === pid),
     getByState: async () => [],
     getBySourceId: async () => next,
     put: async (w) => void store.set(w.id, w),

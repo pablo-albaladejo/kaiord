@@ -10,7 +10,7 @@ Hexagonal port interfaces. Each `.ts` file here defines a repository contract th
 ## Key Files
 
 - `persistence-port.ts` — aggregate `PersistencePort` type and the leaf types `TemplateRepository`, `ProfileRepository`, `AiProviderRepository`, `SyncStateRepository`, `UsageEventRepository`. Re-exports the leaf-file types below. Defines `transaction<T>(fn) => Promise<T>` (Dexie wraps `db.transaction("rw", db.tables, fn)`; in-memory implements snapshot/revert).
-- `workout-repository.ts` — `WorkoutRepository`: `getById`, `getByDateRange`, `getByState`, `getBySourceId`, `put`, `delete`, `deleteByProfile`. Profile-scoped 1–1 since Dexie v13.
+- `workout-repository.ts` — `WorkoutRepository`: `getById`, `getByDateRange`, `getByProfileAndDateRange`, `getByState`, `getBySourceId`, `put`, `delete`, `deleteByProfile`. Profile-scoped 1–1 since Dexie v13.
 - `coaching-repositories.ts` — `CoachingRepository` + `CoachingSyncStateRepository`. `CoachingRepository` intentionally exposes no raw scan API — `getByProfileAndDateRange` is the only public scan, making profile isolation a structural property. `getById(id)` is composite-keyed.
 - `session-match-repository.ts` — `SessionMatchRepository`: enforces uniqueness on `(profileId, coachingActivityId)` and `(profileId, workoutId)`; has `updateCoachingActivityId` (heal path), `appendExecutedWorkoutIds` (Train2Go three-slot grouping), and the cascade hooks `deleteByActivityId`/`deleteByWorkoutId`/`deleteByProfile`.
 - `auto-match-dismissal-repository.ts` — `AutoMatchDismissalRepository`: per `(profileId, weekStart)` dismissals with cascade-on-profile-delete.
