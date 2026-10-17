@@ -7,7 +7,7 @@
  */
 import type { ChatAgent, ChatTool, PendingAction } from "@kaiord/ai";
 import type { ModelMessage } from "ai";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useAnalytics } from "../contexts/analytics-context";
 import { usePersistence } from "../contexts/persistence-context";
@@ -33,6 +33,10 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
   const abortRef = useRef<AbortController | null>(null);
+  // Leaving the conversation stops its turn, so it settles as `aborted` in
+  // the conversation it started in instead of running on with no Stop
+  // control while a second turn starts there.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const { profileId, conversationId, provider, modelId, pinModel, today } =
     args;
