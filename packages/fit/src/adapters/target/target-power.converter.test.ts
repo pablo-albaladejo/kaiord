@@ -1,11 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
 
 import type { FitTargetData } from "./target.types";
 import { convertPowerTarget } from "./target-power.converter";
 
 describe("convertPowerTarget", () => {
   describe("range target using specific power fields", () => {
-    it("should return power range with interpreted values for customTargetPowerLow/High", () => {
+    it("should read raw customTargetPowerLow/High as a percent_ftp range", () => {
       // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 200,
@@ -18,7 +19,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
 
@@ -40,8 +41,45 @@ describe("convertPowerTarget", () => {
     });
   });
 
+  describe("range target with mixed bounds", () => {
+    it("should warn when one bound is %FTP and the other is watts", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+      const data: FitTargetData = {
+        customTargetPowerLow: 80,
+        customTargetPowerHigh: 1300,
+      };
+
+      // Act
+      convertPowerTarget(data, logger);
+
+      // Assert
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Power range mixes %FTP and watts bounds",
+        { low: 80, high: 1300 }
+      );
+    });
+
+    it("should not warn when both bounds share a unit", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+      const data: FitTargetData = {
+        customTargetPowerLow: 1200,
+        customTargetPowerHigh: 1300,
+      };
+
+      // Act
+      convertPowerTarget(data, logger);
+
+      // Assert
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("range target using generic custom fields", () => {
-    it("should return power range for customTargetValueLow/High", () => {
+    it("should read raw customTargetValueLow/High as a percent_ftp range", () => {
       // Arrange
       const data: FitTargetData = {
         customTargetValueLow: 180,
@@ -54,7 +92,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 180, max: 220 },
+        value: { unit: "range", min: 180, max: 220, basis: "percent_ftp" },
       });
     });
   });
@@ -75,7 +113,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
   });
@@ -223,7 +261,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
 

@@ -1,4 +1,4 @@
-import { type Target, targetTypeSchema } from "@kaiord/core";
+import { type Logger, type Target, targetTypeSchema } from "@kaiord/core";
 import { targetUnitSchema } from "@kaiord/core";
 
 import { convertPowerValue, interpretWorkoutPower } from "./power-helpers";
@@ -8,8 +8,11 @@ import type { FitTargetData } from "./target.types";
 // reinterpret it as an absolute value (FIT overloads the zone field).
 const POWER_ZONE_MAX = 7;
 
-export const convertPowerTarget = (data: FitTargetData): Target => {
-  const rangeTarget = buildPowerRangeTarget(data);
+export const convertPowerTarget = (
+  data: FitTargetData,
+  logger?: Logger
+): Target => {
+  const rangeTarget = buildPowerRangeTarget(data, logger);
   if (rangeTarget) return rangeTarget;
 
   const zoneTarget = buildPowerZoneTarget(data);
@@ -28,39 +31,48 @@ export const convertPowerTarget = (data: FitTargetData): Target => {
   return { type: targetTypeSchema.enum.open };
 };
 
-const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
+const buildRange = (low: number, high: number, logger?: Logger): Target => {
+  const min = interpretWorkoutPower(low);
+  const max = interpretWorkoutPower(high);
+  const percent = min.type === "percentage" && max.type === "percentage";
+  if (min.type !== max.type) {
+    logger?.warn("Power range mixes %FTP and watts bounds", { low, high });
+  }
+  return {
+    type: targetTypeSchema.enum.power,
+    value: {
+      unit: targetUnitSchema.enum.range,
+      min: min.value,
+      max: max.value,
+      ...(percent && { basis: targetUnitSchema.enum.percent_ftp }),
+    },
+  };
+};
+
+const buildPowerRangeTarget = (
+  data: FitTargetData,
+  logger?: Logger
+): Target | null => {
   if (
     data.customTargetPowerLow !== undefined &&
     data.customTargetPowerHigh !== undefined
   ) {
-    const minValue = interpretWorkoutPower(data.customTargetPowerLow);
-    const maxValue = interpretWorkoutPower(data.customTargetPowerHigh);
-
-    return {
-      type: targetTypeSchema.enum.power,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: minValue.value,
-        max: maxValue.value,
-      },
-    };
+    return buildRange(
+      data.customTargetPowerLow,
+      data.customTargetPowerHigh,
+      logger
+    );
   }
 
   if (
     data.customTargetValueLow !== undefined &&
     data.customTargetValueHigh !== undefined
   ) {
-    const minValue = interpretWorkoutPower(data.customTargetValueLow);
-    const maxValue = interpretWorkoutPower(data.customTargetValueHigh);
-
-    return {
-      type: targetTypeSchema.enum.power,
-      value: {
-        unit: targetUnitSchema.enum.range,
-        min: minValue.value,
-        max: maxValue.value,
-      },
-    };
+    return buildRange(
+      data.customTargetValueLow,
+      data.customTargetValueHigh,
+      logger
+    );
   }
 
   return null;

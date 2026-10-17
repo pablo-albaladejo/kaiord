@@ -61,6 +61,28 @@ describe("powerValueSchema bounds", () => {
     // Assert
     expect(result.success).toBe(true);
   });
+
+  it("should keep a percent_ftp basis on a power range", () => {
+    // Arrange
+    const input = { unit: "range", min: 50, max: 75, basis: "percent_ftp" };
+
+    // Act
+    const result = powerValueSchema.safeParse(input);
+
+    // Assert
+    expect(result.success && result.data).toStrictEqual(input);
+  });
+
+  it("should reject a power range basis other than percent_ftp", () => {
+    // Arrange
+    const input = { unit: "range", min: 50, max: 75, basis: "zone" };
+
+    // Act
+    const result = powerValueSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("heartRateValueSchema bounds", () => {

@@ -17,7 +17,11 @@
     "minAria": "Minimum value",
     "maxAria": "Maximum value",
     "minPlaceholder": "Enter minimum value",
-    "maxPlaceholder": "Enter maximum value"
+    "maxPlaceholder": "Enter maximum value",
+    "minLabelWithUnit": "Minimum ({{unit}})",
+    "maxLabelWithUnit": "Maximum ({{unit}})",
+    "unitWatts": "W",
+    "unitPercentFtp": "% FTP"
   },
   "unit": {
     "watts": "Watts",

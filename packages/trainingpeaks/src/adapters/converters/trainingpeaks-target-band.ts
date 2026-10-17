@@ -1,5 +1,7 @@
 import type { Logger } from "@kaiord/core";
 
+import { toPercent } from "./trainingpeaks-threshold-percent";
+
 /**
  * The one shape TrainingPeaks accepts for intensity, and the arithmetic that
  * gets KRD's four unit families there.
@@ -37,29 +39,13 @@ export type BandRecipe = {
 /** KRD target values, narrowed to the shapes every family shares. */
 export type KrdTargetValue =
   | { unit: "zone"; value: number }
-  | { unit: "range"; min: number; max: number }
+  | { unit: "range"; min: number; max: number; basis?: string }
   | { unit: string; value: number };
 
 const band = (min: number, max: number): TargetBand => ({
   minValue: Math.round(min),
   maxValue: Math.round(max),
 });
-
-const toPercent = (
-  value: number,
-  recipe: BandRecipe,
-  logger: Logger | undefined,
-  context: Record<string, unknown>
-): number | undefined => {
-  if (recipe.threshold === undefined || recipe.threshold <= 0) {
-    logger?.warn(
-      `Lossy conversion: dropped ${recipe.label} target — no athlete threshold to express it as a percentage`,
-      { ...context, value }
-    );
-    return undefined;
-  }
-  return (value / recipe.threshold) * 100;
-};
 
 /**
  * Map one KRD target value onto a TrainingPeaks band, or `undefined` when it
@@ -91,6 +77,9 @@ export const toTargetBand = (
     return band(percent, percent);
   }
   if (value.unit === "range" && "min" in value) {
+    if (value.basis === recipe.passthroughUnit) {
+      return band(value.min, value.max);
+    }
     const min = toPercent(value.min, recipe, logger, context);
     const max = toPercent(value.max, recipe, logger, context);
     return min === undefined || max === undefined ? undefined : band(min, max);

@@ -10,13 +10,6 @@ Converts structured workouts (steps and targets), not recorded activities.
 See [Workouts vs. activities](/convert/#workouts-vs-activities).
 :::
 
-::: warning Known issue: % FTP ranges
-Single % FTP power targets are converted to watts with your FTP (see
-[Gotchas](#gotchas)). % FTP power _ranges_ are not yet: they can arrive in
-Garmin Connect as watts with the same numbers. The fix is tracked in
-[issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279).
-:::
-
 Turn a **Garmin FIT** workout into the **Garmin Connect** workout format (GCN
 JSON) so a session from a FIT file can live in your Garmin Connect account and
 sync to your watch or head unit. Use the free, in-browser
@@ -70,7 +63,7 @@ await writeFile("workout.gcn", gcn);
 | Time durations       | seconds       | time durations        | Preserved (±1 s)                     |
 | Distance durations   | meters        | distance durations    | Preserved                            |
 | Power targets        | watts / zone  | watts / power zone    | Preserved (±1 W; zones map across)   |
-| % FTP power targets  | % FTP         | watts                 | Converted using your FTP (see below) |
+| % FTP power targets  | % FTP / range | watts / watt range    | Converted using your FTP (see below) |
 | Heart-rate targets   | bpm / zone    | bpm / heart-rate zone | Preserved (±1 bpm)                   |
 | Cadence targets      | rpm           | rpm                   | Preserved (±1 rpm)                   |
 | Speed / pace targets | m/s           | m/s                   | Preserved                            |
@@ -83,8 +76,8 @@ highest-fidelity conversions Kaiord does.
 ## Gotchas
 
 **% FTP power targets need your FTP.** A FIT workout can store power as % FTP,
-but Garmin Connect workouts store watts, so those targets are converted with
-your FTP (watts = round(% / 100 × FTP)). Set your FTP in **Athlete** in the Editor, or
+but Garmin Connect workouts store watts, so those targets — single values and
+% FTP ranges alike — are converted with your FTP (watts = round(% / 100 × FTP)). Set your FTP in **Athlete** in the Editor, or
 pass `--ftp <watts>` to `kaiord convert` / `kaiord garmin push`. Without one the
 conversion stops with an error rather than guessing.
 
