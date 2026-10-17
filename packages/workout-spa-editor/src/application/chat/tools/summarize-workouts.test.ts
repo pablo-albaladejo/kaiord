@@ -10,7 +10,6 @@ const SUM_TWO_WORKOUTS = TEN_MIN + FIFTEEN_MIN;
 const TWO_HOURS = 7200;
 const FILLER_SECS = 300;
 const FILLER_COUNT = 60;
-const ROW_CAP = 50;
 
 const recordFor = (
   date: string,
@@ -58,9 +57,9 @@ describe("summarizeWorkouts", () => {
     expect(summary.totalDurationSeconds).toBe(SUM_TWO_WORKOUTS);
   });
 
-  it("should report the longest workout even when it predates the row cap", () => {
+  it("should report the longest workout over every record, not only the newest", () => {
     // Arrange
-    // Many short workouts after one very long one; the row cap is 50.
+    // Many short workouts after one very long one.
     const long = recordFor("2026-01-01", TWO_HOURS, "Epic");
     const many = Array.from({ length: FILLER_COUNT }, () =>
       recordFor("2026-06-15", FILLER_SECS)
@@ -72,7 +71,7 @@ describe("summarizeWorkouts", () => {
     // Assert
     expect(summary.longest?.name).toBe(fenceUntrusted("Epic"));
     expect(summary.longest?.durationSeconds).toBe(TWO_HOURS);
-    expect(summary.workouts.length).toBeLessThanOrEqual(ROW_CAP);
+    expect(summary.workouts).toHaveLength(FILLER_COUNT + 1);
   });
 
   it("should fence an injection carried by an imported workout name", () => {

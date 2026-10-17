@@ -83,6 +83,34 @@ describe("createQueryWorkoutsTool", () => {
     expect(result.range_used).toEqual({ from: "2026-06-01", to: TODAY });
   });
 
+  it("should project each workout to its explicit summary fields", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await seed(persistence);
+    const tool = createQueryWorkoutsTool({
+      persistence,
+      profileId: "p1",
+      today: TODAY,
+    });
+
+    // Act
+    const result = (await tool.execute({ sport: "running" })) as {
+      workouts: Array<Record<string, unknown>>;
+    };
+
+    // Assert
+    expect(Object.keys(result.workouts[0] ?? {}).sort()).toEqual([
+      "date",
+      "distanceMeters",
+      "durationSeconds",
+      "id",
+      "name",
+      "sport",
+      "state",
+    ]);
+    expect(result.workouts[0]?.id).toBe("w2");
+  });
+
   it("should be a read tool that does not require confirmation", () => {
     // Arrange
     const persistence = createInMemoryPersistence();

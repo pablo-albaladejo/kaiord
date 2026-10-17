@@ -5,14 +5,12 @@ import { buildDayEnergyBalance } from "../../energy/build-day-energy-balance";
 import type { DayEnergyBalanceResult } from "../../energy/day-energy-balance-result";
 import type { ReadToolDeps } from "./chat-tool-deps";
 import { clampRange } from "./clamp-range";
+import { isoDate } from "./define-read-tool";
 import { buildGoalContext, eachDay } from "./query-energy-balance-goal";
 
 const inputSchema = z.object({
-  date: z
-    .string()
-    .optional()
-    .describe("Start date YYYY-MM-DD (defaults today)"),
-  dateTo: z.string().optional().describe("End date YYYY-MM-DD (defaults date)"),
+  date: isoDate().optional().describe("Start date YYYY-MM-DD (defaults today)"),
+  dateTo: isoDate().optional().describe("End date YYYY-MM-DD (defaults date)"),
 });
 
 export const createQueryEnergyBalanceTool = (deps: ReadToolDeps): ChatTool => ({

@@ -11,6 +11,11 @@ import type { WorkoutRecord } from "../types/calendar-schemas";
 export type WorkoutRepository = {
   getById: (id: string) => Promise<WorkoutRecord | undefined>;
   getByDateRange: (start: string, end: string) => Promise<WorkoutRecord[]>;
+  getByProfileAndDateRange: (
+    profileId: string,
+    start: string,
+    end: string
+  ) => Promise<WorkoutRecord[]>;
   getByState: (state: WorkoutState) => Promise<WorkoutRecord[]>;
   getBySourceId: (
     source: string,

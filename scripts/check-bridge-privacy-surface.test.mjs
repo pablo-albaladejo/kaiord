@@ -168,7 +168,8 @@ describe("bridge privacy surface guard", () => {
     withTempRepo(
       {
         ...syntheticBridge({
-          background: 'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n',
+          background:
+            'const ALLOWED = [{ method: "GET", pattern: /^\\/ok$/ }];\n',
           allowedPaths: [{ method: "GET", pattern: "^\\/ok$" }],
         }),
         "packages/acme-bridge/popup.js":

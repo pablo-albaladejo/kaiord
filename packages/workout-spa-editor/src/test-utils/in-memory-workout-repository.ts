@@ -18,6 +18,11 @@ export function createInMemoryWorkoutRepository(
     getByDateRange: async (start, end) =>
       [...store.values()].filter((w) => w.date >= start && w.date <= end),
 
+    getByProfileAndDateRange: async (profileId, start, end) =>
+      [...store.values()].filter(
+        (w) => w.profileId === profileId && w.date >= start && w.date <= end
+      ),
+
     getByState: async (state) =>
       [...store.values()].filter((w) => w.state === state),
 

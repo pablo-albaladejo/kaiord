@@ -81,13 +81,13 @@ describe("createQueryHealthTool", () => {
     // Act
     const result = (await tool.execute({ metric: "daily-wellness" })) as {
       count: number;
-      records: { krd: { steps: number; activeCalories: number } }[];
+      records: { steps: number; activeCalories: number }[];
     };
 
     // Assert
     expect(result.count).toBe(1);
-    expect(result.records[0]?.krd.steps).toBe(MANUAL_STEPS);
-    expect(result.records[0]?.krd.activeCalories).toBe(IMPORTED_ACTIVE_KCAL);
+    expect(result.records[0]?.steps).toBe(MANUAL_STEPS);
+    expect(result.records[0]?.activeCalories).toBe(IMPORTED_ACTIVE_KCAL);
   });
 
   it("should reject an unknown metric via its schema", () => {
