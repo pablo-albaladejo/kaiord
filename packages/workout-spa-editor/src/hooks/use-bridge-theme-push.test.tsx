@@ -154,4 +154,51 @@ describe("useBridgeThemePush", () => {
       ])
     );
   });
+
+  it("should end on the latest preference when the user switches back before an ack", async () => {
+    // Arrange
+    mockedBridges.mockReturnValue([TRAIN2GO]);
+    const { result } = renderPush();
+    await waitFor(() => expect(mockedSend).toHaveBeenCalledTimes(1));
+    await settleQueue();
+    let ackDark: (r: { ok: boolean; delivered: boolean }) => void = () => {};
+    mockedSend.mockImplementationOnce(
+      () => new Promise((resolve) => (ackDark = resolve))
+    );
+
+    // Act
+    act(() => result.current.setTheme("dark"));
+    await waitFor(() => expect(mockedSend).toHaveBeenCalledTimes(2));
+    act(() => result.current.setTheme("system"));
+    ackDark({ ok: true, delivered: true });
+    await settleQueue();
+
+    // Assert
+    expect(themeMessagesTo("ext-t2g")).toEqual([
+      { action: "set-theme", theme: "system" },
+      { action: "set-theme", theme: "dark" },
+      { action: "set-theme", theme: "system" },
+    ]);
+  });
+
+  it("should stop sending to a bridge that permanently refused the action", async () => {
+    // Arrange
+    mockedSend.mockResolvedValueOnce({
+      ok: false,
+      delivered: true,
+      retryable: false,
+      error: "Origin or action not permitted",
+    });
+    mockedBridges.mockReturnValue([TRAIN2GO]);
+    const { result } = renderPush();
+    await waitFor(() => expect(mockedSend).toHaveBeenCalledTimes(1));
+    await settleQueue();
+
+    // Act
+    act(() => result.current.setTheme("light"));
+    await settleQueue();
+
+    // Assert
+    expect(mockedSend).toHaveBeenCalledTimes(1);
+  });
 });

@@ -6,38 +6,50 @@
  * value: a `system` popup follows the OS scheme itself. The bridge pins
  * the sender origin and the three literals (bridge-core `set-theme`).
  *
- * Fires when a bridge is discovered and whenever the preference changes.
- * Deduped per extension so a re-render never re-sends, and enqueued on the
- * shared per-bridge queue so it shares the protocol's 60/h budget. A bridge
- * released before `set-theme` refuses it; the refusal is left unrecorded
- * and retried on the next change or discovery.
+ * Fires when a bridge is discovered and whenever the preference changes,
+ * on the shared per-bridge queue so it shares the protocol's 60/h budget.
+ * Dedup keys on the last value QUEUED, not the last acknowledged: the queue
+ * runs a bridge's sends in order, so the latest queued value is the one the
+ * bridge ends on, and A→B→A while B is in flight still sends the final A.
+ * A failed send forgets its value so the next change or discovery retries
+ * it. A non-retryable refusal — a bridge released before `set-theme` —
+ * parks that extension for the session instead of spending its budget.
  */
 
 import { useEffect, useRef } from "react";
 
 import { sendBridgeMessage } from "../adapters/bridge/bridge-transport";
 import { BRIDGE_QUEUE } from "../adapters/bridge/shared-operation-queue";
-import { useTheme } from "../contexts/ThemeContext";
+import { type Theme, useTheme } from "../contexts/ThemeContext";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
 
 export const useBridgeThemePush = (): void => {
   const { theme } = useTheme();
   const bridges = useDiscoveredBridges();
-  const sentRef = useRef<Map<string, string>>(new Map());
+  const queuedRef = useRef<Map<string, Theme>>(new Map());
+  const refusedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const sent = sentRef.current;
-    for (const bridge of bridges) {
-      if (sent.get(bridge.extensionId) === theme) continue;
+    const queued = queuedRef.current;
+    const refused = refusedRef.current;
+    for (const { bridgeId, extensionId } of bridges) {
+      if (refused.has(extensionId) || queued.get(extensionId) === theme)
+        continue;
+      queued.set(extensionId, theme);
+      const forget = () => {
+        if (queued.get(extensionId) === theme) queued.delete(extensionId);
+      };
       void BRIDGE_QUEUE.enqueue({
-        bridgeId: bridge.bridgeId,
+        bridgeId,
         execute: () =>
-          sendBridgeMessage(bridge.extensionId, { action: "set-theme", theme }),
+          sendBridgeMessage(extensionId, { action: "set-theme", theme }),
       })
         .then((res) => {
-          if (res?.ok) sent.set(bridge.extensionId, theme);
+          if (res?.ok) return;
+          if (res?.retryable === false) refused.add(extensionId);
+          forget();
         })
-        .catch(() => undefined);
+        .catch(forget);
     }
   }, [bridges, theme]);
 };
