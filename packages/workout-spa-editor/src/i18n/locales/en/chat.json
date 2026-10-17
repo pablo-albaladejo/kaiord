@@ -23,7 +23,8 @@
   "model": {
     "label": "Model",
     "followMain": "Same as main model ({{model}})",
-    "followChat": "Same as chat in Settings ({{model}})"
+    "followChat": "Same as chat in Settings ({{model}})",
+    "manage": "Manage AI…"
   },
   "search": {
     "placeholder": "Search chats…",

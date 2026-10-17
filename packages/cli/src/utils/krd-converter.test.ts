@@ -6,6 +6,7 @@ import { convertFromKrd, convertToKrd, loadFileAsKrd } from "./krd-converter";
 
 const FIT_MAGIC_BYTES = Uint8Array.from(Buffer.from("2e464954", "hex"));
 const SAMPLE_BINARY = Uint8Array.from(Buffer.from("010203", "hex"));
+const FTP_W = 250;
 
 vi.mock("@kaiord/core", async (importOriginal) => {
   const actual = await importOriginal<typeof KaiordCore>();
@@ -245,10 +246,13 @@ describe("convertFromKrd", () => {
     const { createGarminWriter } = await import("@kaiord/garmin");
 
     // Act
-    await convertFromKrd(mockKrd, "gcn", mockLogger);
+    await convertFromKrd(mockKrd, "gcn", mockLogger, FTP_W);
 
     // Assert
-    expect(createGarminWriter).toHaveBeenCalledWith(mockLogger);
+    expect(createGarminWriter).toHaveBeenCalledWith({
+      logger: mockLogger,
+      ftpWatts: FTP_W,
+    });
     expect(toText).toHaveBeenCalledWith(
       mockKrd,
       expect.any(Function),
