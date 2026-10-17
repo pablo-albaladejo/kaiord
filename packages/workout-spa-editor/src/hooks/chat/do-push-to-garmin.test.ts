@@ -116,6 +116,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -145,10 +146,16 @@ describe("doPushToGarmin", () => {
       .mockResolvedValue({ success: true, garminWorkoutId: "1707805999" });
 
     // Act
-    const result = await doPushToGarmin(persistence, pushWorkout, "workout-1", {
-      ...deps,
-      features: [],
-    });
+    const result = await doPushToGarmin(
+      "profile-1",
+      persistence,
+      pushWorkout,
+      "workout-1",
+      {
+        ...deps,
+        features: [],
+      }
+    );
 
     // Assert
     expect(result).toEqual({
@@ -169,6 +176,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -190,6 +198,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -212,6 +221,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -236,6 +246,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "missing",
@@ -246,6 +257,46 @@ describe("doPushToGarmin", () => {
     expect(result).toEqual({ error: "workout_not_found" });
     expect(pushWorkout).not.toHaveBeenCalled();
     expect(put).not.toHaveBeenCalled();
+  });
+
+  it("should refuse another athlete's workout as workout_not_found when two profiles share the device", async () => {
+    // Arrange
+    const { deps } = makeDeps();
+    const records = new Map([
+      ["workout-1", makeRecord()],
+      ["workout-2", makeRecord({ id: "workout-2", profileId: "profile-2" })],
+    ]);
+    const put = vi.fn();
+    const persistence = {
+      workouts: { getById: async (id: string) => records.get(id), put },
+      profiles: { getById: vi.fn().mockResolvedValue(undefined) },
+      transaction: <T>(fn: () => Promise<T>) => fn(),
+    } as unknown as PersistencePort;
+    const pushWorkout = vi
+      .fn()
+      .mockResolvedValue({ success: true, garminWorkoutId: "1707805999" });
+
+    // Act
+    const foreign = await doPushToGarmin(
+      "profile-1",
+      persistence,
+      pushWorkout,
+      "workout-2",
+      deps
+    );
+    const own = await doPushToGarmin(
+      "profile-1",
+      persistence,
+      pushWorkout,
+      "workout-1",
+      deps
+    );
+
+    // Assert
+    expect(foreign).toEqual({ error: "workout_not_found" });
+    expect(own).toMatchObject({ workoutId: "workout-1" });
+    expect(pushWorkout).toHaveBeenCalledTimes(1);
+    expect(put.mock.calls.map(([record]) => record.id)).toEqual(["workout-1"]);
   });
 
   it("should report push_failed without persisting when the bridge reports failure", async () => {
@@ -259,6 +310,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -281,6 +333,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -306,6 +359,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -332,6 +386,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -359,6 +414,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",
@@ -385,6 +441,7 @@ describe("doPushToGarmin", () => {
 
     // Act
     const result = await doPushToGarmin(
+      "profile-1",
       persistence,
       pushWorkout,
       "workout-1",

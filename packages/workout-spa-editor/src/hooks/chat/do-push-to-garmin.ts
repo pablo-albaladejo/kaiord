@@ -8,6 +8,8 @@
  * resolve is `missing_pace_zones`, `incomplete_pace_zones` or
  * `unsupported_pace_zone_sport`, so this never throws for any of them.
  *
+ * A workout that is not the active athlete's is `workout_not_found`.
+ *
  * Otherwise the result carries `calendar`: the placement's kind, an
  * app-authored enum, with a `failed` one's `reason`. Any exception on this
  * path is `push_failed`, never the exception's text. When Garmin confirmed the library workout id, the
@@ -21,6 +23,7 @@ import type { PlacementResult } from "../../application/garmin-placement/placeme
 import { isPaceZonesReason } from "../../types/pace-zones-unavailable-error";
 import { placeRecord } from "../garmin-place-record";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
+import { isOwnedWorkout } from "./is-owned-workout";
 
 const PACE_ZONE_ERRORS = {
   "missing-pace-zones": {
@@ -76,9 +79,13 @@ const pushAndRecord = async (
 };
 
 export const doPushToGarmin = async (
+  profileId: string,
   ...args: Parameters<typeof pushAndRecord>
 ): Promise<unknown> => {
   try {
+    if (!(await isOwnedWorkout(args[0], profileId, args[2]))) {
+      return { error: "workout_not_found" };
+    }
     return await pushAndRecord(...args);
   } catch (error) {
     // An exception's text never reaches the model; it is only logged.
