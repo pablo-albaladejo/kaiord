@@ -55,10 +55,6 @@ vi.mock("../../../lib/generate-workout", () => ({
     mockGenerateWorkoutKrd(...args) as unknown,
 }));
 
-vi.mock("./zones-formatter", () => ({
-  formatZonesContext: vi.fn(() => undefined),
-}));
-
 import { useAiGeneration } from "./useAiGeneration";
 
 describe("useAiGeneration — analytics call-site", () => {
