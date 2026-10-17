@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { getStructuredWorkout } from "../utils/structured-workout";
 import type { GenerateFn, ProcessorParams } from "./ai-workout-processor";
 import { processWorkoutWithAi } from "./ai-workout-processor";
 import { makeValidKrd, makeWorkoutRecord } from "./test-helpers";
@@ -31,7 +32,7 @@ describe("processWorkoutWithAi", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.krd.type).toBe("structured_workout");
-      expect(result.aiMeta.promptVersion).toBe("1.0.0");
+      expect(result.aiMeta.promptVersion).toBe("1.1.0");
       expect(result.aiMeta.provider).toBe("openai");
       expect(result.aiMeta.model).toBe("gpt-4o");
       expect(result.retried).toBe(false);
@@ -150,5 +151,36 @@ describe("processWorkoutWithAi", () => {
     expect(result.ok).toBe(false);
     expect(result.retried).toBe(false);
     expect(generateFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("should name an unnamed AI workout from the raw session title", async () => {
+    // Arrange
+    const krd = makeValidKrd();
+    const unnamed = { ...getStructuredWorkout(krd), name: undefined };
+    const generateFn = vi.fn<GenerateFn>().mockResolvedValue({
+      ...krd,
+      extensions: { structured_workout: unnamed },
+    });
+
+    // Act
+    const result = await processWorkoutWithAi(makeParams({ generateFn }));
+
+    // Assert
+    expect(result.ok && getStructuredWorkout(result.krd)?.name).toBe(
+      "Easy run"
+    );
+  });
+
+  it("should keep the AI-generated name over the raw session title", async () => {
+    // Arrange
+    const params = makeParams();
+
+    // Act
+    const result = await processWorkoutWithAi(params);
+
+    // Assert
+    expect(result.ok && getStructuredWorkout(result.krd)?.name).toBe(
+      "Test workout"
+    );
   });
 });

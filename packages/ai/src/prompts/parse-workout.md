@@ -8,7 +8,7 @@ The output is a `Workout` object:
 
 ```json
 {
-  "name": "optional string",
+  "name": "short workout title, in the language of the input",
   "sport": "cycling" | "running" | "swimming" | "generic",
   "subSport": "optional (e.g. indoor_cycling, trail, treadmill, street, indoor_running, lap_swimming)",
   "steps": [WorkoutStep | RepetitionBlock]
@@ -154,6 +154,7 @@ Use these types (targetType MUST match target.type):
 7. If sport is not specified, infer from context (pace notation = running, watts/FTP = cycling)
 8. Use `notes` for nutrition cues, technique reminders, or non-structural instructions
 9. The input may contain special characters like `{}`, `[]`, quotes, or emoji. Parse them as workout notation.
+10. Always set `name`: a concise title (at most 40 characters) summarising the session, written in the same language as the input (e.g. "Rodaje con series 4x8'", "Sweet spot 3x10min")
 
 ## Example
 
@@ -163,6 +164,7 @@ Output:
 
 ```json
 {
+  "name": "Rodaje con series 4x8'",
   "sport": "running",
   "steps": [
     {

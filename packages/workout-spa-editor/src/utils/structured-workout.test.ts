@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import type { KRD } from "../types/krd";
-import { getStructuredWorkout, withCoachNotes } from "./structured-workout";
+import {
+  getStructuredWorkout,
+  withCoachNotes,
+  withFallbackName,
+} from "./structured-workout";
 
 const structuredKrd = (): KRD => ({
   version: "1.0",
@@ -59,5 +63,56 @@ describe("withCoachNotes", () => {
 
     // Assert
     expect(getStructuredWorkout(krd)?.notes).toBeUndefined();
+  });
+});
+
+const namedKrd = (name: string): KRD => ({
+  ...structuredKrd(),
+  extensions: { structured_workout: { name, sport: "cycling", steps: [] } },
+});
+
+describe("withFallbackName", () => {
+  it("should name an unnamed workout from the fallback, trimmed", () => {
+    // Arrange
+    const krd = structuredKrd();
+
+    // Act
+    const result = withFallbackName(krd, "  Rodaje Z1 ");
+
+    // Assert
+    expect(getStructuredWorkout(result)?.name).toBe("Rodaje Z1");
+  });
+
+  it("should keep an existing non-blank name", () => {
+    // Arrange
+    const krd = namedKrd("AI name");
+
+    // Act
+    const result = withFallbackName(krd, "Session title");
+
+    // Assert
+    expect(result).toBe(krd);
+  });
+
+  it("should replace a blank existing name with the fallback", () => {
+    // Arrange
+    const krd = namedKrd("   ");
+
+    // Act
+    const result = withFallbackName(krd, "Session title");
+
+    // Assert
+    expect(getStructuredWorkout(result)?.name).toBe("Session title");
+  });
+
+  it("should leave the workout unnamed when the fallback is blank", () => {
+    // Arrange
+    const krd = structuredKrd();
+
+    // Act
+    const result = withFallbackName(krd, " ");
+
+    // Assert
+    expect(result).toBe(krd);
   });
 });

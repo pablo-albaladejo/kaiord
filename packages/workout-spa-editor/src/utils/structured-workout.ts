@@ -55,3 +55,21 @@ export function withCoachNotes(krd: KRD, description?: string): KRD {
     },
   };
 }
+
+/**
+ * Returns a copy of `krd` whose structured workout is named `fallback` when it
+ * has no non-blank name of its own. No-op when the fallback is blank too, so
+ * the editor's localized "Untitled" default still applies as the last resort.
+ */
+export function withFallbackName(krd: KRD, fallback?: string): KRD {
+  const workout = getStructuredWorkout(krd);
+  const name = fallback?.trim();
+  if (!workout || workout.name?.trim() || !name) return krd;
+  return {
+    ...krd,
+    extensions: {
+      ...krd.extensions,
+      structured_workout: { ...workout, name },
+    },
+  };
+}

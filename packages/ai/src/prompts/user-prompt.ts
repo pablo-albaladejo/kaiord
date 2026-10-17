@@ -6,7 +6,7 @@
  * used when converting free-text coaching into structured workouts.
  */
 
-export const PROMPT_VERSION = "1.0.0";
+export const PROMPT_VERSION = "1.1.0";
 
 export const SPANISH_ABBREVIATION_DICTIONARY = `
 Common coaching abbreviations:
