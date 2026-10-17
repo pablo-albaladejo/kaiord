@@ -12,6 +12,7 @@ import {
   resolveActiveConversation,
 } from "../components/pages/resolve-active-conversation";
 import type { ChatConversationRecord } from "../types/chat/chat-conversation-record";
+import { skipRouteFocusFor } from "./focus/skip-route-focus";
 
 export type ChatConversationNav = ActiveConversation & {
   startNew: () => void;
@@ -38,7 +39,10 @@ export const useChatConversationNav = (
   useEffect(() => {
     if (draftId && persistedIds.includes(draftId)) {
       setDraftId(null);
-      navigate(`/chat/${draftId}`);
+      // Same thread, now addressable: keep focus on the composer and keep the
+      // throwaway draft URL out of the back stack.
+      skipRouteFocusFor(`/chat/${draftId}`);
+      navigate(`/chat/${draftId}`, { replace: true });
     }
   }, [draftId, persistedIds, navigate]);
 

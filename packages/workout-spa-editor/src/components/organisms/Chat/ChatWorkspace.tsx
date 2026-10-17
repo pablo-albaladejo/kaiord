@@ -32,7 +32,7 @@ export type ChatWorkspaceProps = {
 /** Conversation list beside the active thread, or a prompt to start one. */
 export function ChatWorkspace(props: ChatWorkspaceProps) {
   const t = useTranslate("chat");
-  const prefill = useChatPrefill();
+  const prefill = useChatPrefill(props.activeId);
   return (
     <div className="grid gap-4 md:grid-cols-[240px_1fr]">
       <ConversationSidebar
@@ -48,11 +48,13 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
         onRename={props.onRename}
         onDelete={props.onDelete}
       />
-      <div className="flex flex-col gap-3">
-        <ChatModelPicker
-          key={props.activeId ?? "none"}
-          {...props.modelPicker}
-        />
+      {/* Keyed per conversation so no turn state (error, stream, pending
+          action, retry input) or half-typed model choice crosses threads.
+          A turn still in flight keeps writing to its own conversation. A
+          pending action awaiting confirmation lives only in this state (it
+          is not persisted), so leaving the thread discards it unconfirmed. */}
+      <div key={props.activeId ?? "none"} className="flex flex-col gap-3">
+        <ChatModelPicker {...props.modelPicker} />
         {props.provider && (
           <ModelStatusNotice
             type={props.provider.type}
