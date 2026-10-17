@@ -75,3 +75,23 @@ export const STEP_ORDER = {
   COUNTER_FIVE: 5,
   COUNTER_EIGHT: 8,
 } as const;
+
+// percent_ftp → watts resolution samples: round(pct / 100 × ftp).
+export const FTP_RESOLUTION = {
+  FTP_W: 250,
+  SWEET_SPOT_PCT: 85,
+  SWEET_SPOT_W: 213,
+  ODD_FTP_W: 263,
+  HALF_PCT: 50,
+  HALF_OF_ODD_FTP_W: 132,
+  NEGATIVE_FTP_W: -200,
+  STEADY_W: 240,
+  RANGE_LOW_W: 125,
+  RANGE_HIGH_W: 188,
+  // Half-watt boundaries where `pct / 100 * ftp` lands a hair below .5
+  // in floating point and would round down; `pct * ftp / 100` does not.
+  BOUNDARY_CASES: [
+    { pct: 35, ftpWatts: 330, watts: 116 },
+    { pct: 57, ftpWatts: 150, watts: 86 },
+  ],
+} as const;

@@ -17,7 +17,8 @@
       "output": "Ruta del archivo de salida",
       "outputDir": "Directorio de salida para conversión por lotes",
       "inputFormat": "Anular la detección del formato de entrada",
-      "outputFormat": "Anular la detección del formato de salida"
+      "outputFormat": "Anular la detección del formato de salida",
+      "ftp": "FTP del atleta en vatios, usado para escribir los objetivos de potencia en %FTP como vatios (obligatorio para salida GCN de entrenamientos en %FTP)"
     },
     "validate": {
       "input": "Ruta del archivo de entrada",
@@ -47,7 +48,8 @@
     },
     "garminPush": {
       "input": "Ruta del archivo de entrenamiento de entrada",
-      "inputFormat": "Anular la detección del formato de entrada"
+      "inputFormat": "Anular la detección del formato de entrada",
+      "ftp": "FTP del atleta en vatios, usado para escribir los objetivos de potencia en %FTP como vatios"
     },
     "global": {
       "verbose": "Habilita el registro detallado",
@@ -75,5 +77,8 @@
     "workoutExtracted": "Entrenamiento extraído correctamente",
     "mustSpecifyCommand": "Debes especificar un comando",
     "specifyGarminSubcommand": "Especifica un subcomando de garmin"
+  },
+  "errors": {
+    "ftpInvalid": "--ftp debe ser un número positivo de vatios"
   }
 }

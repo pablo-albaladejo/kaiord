@@ -22,6 +22,10 @@ export const PLACEMENT_FAILURE_REASONS = [
   "missing-pace-zones",
   "incomplete-pace-zones",
   "unsupported-pace-zone-sport",
+  /** %FTP power targets and no FTP: nothing is exported or pushed. */
+  "missing-ftp",
+  /** %FTP power targets on a sport with no power zones: never pushed. */
+  "sport-without-power-zones",
 ] as const;
 export type PlacementFailureReason = (typeof PLACEMENT_FAILURE_REASONS)[number];
 

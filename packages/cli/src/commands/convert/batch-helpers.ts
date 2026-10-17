@@ -52,7 +52,13 @@ export const convertBatchFile = async (
     const outputFile = join(options.outputDir!, outputFileName);
 
     await convertSingleFile(
-      { inputFile: file, outputFile, inputFormat, outputFormat },
+      {
+        inputFile: file,
+        outputFile,
+        inputFormat,
+        outputFormat,
+        ftpWatts: options.ftp,
+      },
       logger
     );
     return { success: true, inputFile: file, outputFile };

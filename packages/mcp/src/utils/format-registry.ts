@@ -10,7 +10,11 @@ import { validateKrd } from "@kaiord/core";
 import type { FileFormat } from "../types/tool-schemas";
 
 type ReaderFactory = (logger: Logger) => Promise<BinaryReader | TextReader>;
-type WriterFactory = (logger: Logger) => Promise<BinaryWriter | TextWriter>;
+export type WriterOptions = { ftpWatts?: number };
+type WriterFactory = (
+  logger: Logger,
+  options?: WriterOptions
+) => Promise<BinaryWriter | TextWriter>;
 
 export type FormatDescriptor = {
   readonly name: string;
@@ -81,9 +85,9 @@ export const FORMAT_REGISTRY: Record<FileFormat, FormatDescriptor> = {
       const { createGarminReader } = await import("@kaiord/garmin");
       return createGarminReader(l);
     },
-    createWriter: async (l) => {
+    createWriter: async (l, o) => {
       const { createGarminWriter } = await import("@kaiord/garmin");
-      return createGarminWriter(l);
+      return createGarminWriter({ logger: l, ftpWatts: o?.ftpWatts });
     },
   },
   krd: {

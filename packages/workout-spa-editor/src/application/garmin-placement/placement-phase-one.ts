@@ -2,6 +2,7 @@
  * Phase 1 inside the lock: the governed library push (design §3.3 step 2).
  * `onLibraryConfirmed` fires iff the row then holds a confirmed library id.
  */
+import { FtpUnavailableError } from "../../types/ftp-unavailable-error";
 import type { GarminWorkoutId } from "../../types/garmin-ledger";
 import { PaceZonesUnavailableError } from "../../types/pace-zones-unavailable-error";
 import { NoActiveExportRouteError } from "../export/execute-workout-push";
@@ -39,7 +40,10 @@ export const runPhaseOne = async (
   } catch (error) {
     if (error instanceof NoActiveExportRouteError)
       return failed("no-export-route", false);
-    if (error instanceof PaceZonesUnavailableError)
+    if (
+      error instanceof PaceZonesUnavailableError ||
+      error instanceof FtpUnavailableError
+    )
       return failed(error.reason, false);
     logGarminPushFailure(error);
     return failed("library-push-failed", true);
