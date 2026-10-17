@@ -8,6 +8,7 @@ export const convertOptionsSchema = z.object({
   outputDir: z.string().optional(),
   inputFormat: fileFormatSchema.optional(),
   outputFormat: fileFormatSchema.optional(),
+  ftp: z.number().positive().optional(),
   verbose: z.boolean().optional(),
   quiet: z.boolean().optional(),
   json: z.boolean().optional(),

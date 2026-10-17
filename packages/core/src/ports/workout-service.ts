@@ -17,6 +17,12 @@ export type WorkoutSummary = {
 export type PushResult = { id: string; name: string; url?: string };
 
 /**
+ * Options for pushing a workout. `ftpWatts` resolves `percent_ftp` power
+ * targets for services that store absolute watts.
+ */
+export type PushOptions = { ftpWatts?: number };
+
+/**
  * Options for listing workouts.
  */
 export type ListOptions = { offset?: number; limit?: number };
@@ -25,7 +31,7 @@ export type ListOptions = { offset?: number; limit?: number };
  * Port for a remote workout service (push/pull/list/delete).
  */
 export type WorkoutService = {
-  push: (krd: KRD) => Promise<PushResult>;
+  push: (krd: KRD, options?: PushOptions) => Promise<PushResult>;
   pull: (workoutId: string) => Promise<KRD>;
   list: (options?: ListOptions) => Promise<WorkoutSummary[]>;
   remove: (workoutId: string) => Promise<void>;
