@@ -69,6 +69,20 @@ describe("stepDetail", () => {
     expect(detail).toBe("@ 85% FTP");
   });
 
+  it("should format a percent_ftp power range as % FTP", () => {
+    // Arrange
+    const target: Target = {
+      type: "power",
+      value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+    };
+
+    // Act
+    const detail = stepDetail(target);
+
+    // Assert
+    expect(detail).toBe("@ 50–75% FTP");
+  });
+
   it("should format a power zone as Z", () => {
     // Arrange
     const target: Target = { type: "power", value: { unit: "zone", value: 3 } };
