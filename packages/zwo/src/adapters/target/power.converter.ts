@@ -16,7 +16,8 @@ export const convertZwiftPowerTarget = (ftpPercentage: number): Target => {
 };
 
 /**
- * Convert Zwift power range (PowerLow/PowerHigh) to KRD range target
+ * Convert Zwift power range (PowerLow/PowerHigh, FTP fractions) to a KRD
+ * range target whose bounds are percent FTP (`basis: "percent_ftp"`).
  */
 export const convertZwiftPowerRange = (
   powerLow: number,
@@ -28,6 +29,7 @@ export const convertZwiftPowerRange = (
       unit: "range",
       min: powerLow * 100,
       max: powerHigh * 100,
+      basis: "percent_ftp",
     },
   };
 };

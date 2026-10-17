@@ -37,7 +37,7 @@ describe("convertZwiftPowerRange", () => {
     { low: 0.75, high: 0.5, min: 75, max: 50 },
     { low: 1.0, high: 1.2, min: 100, max: 120 },
   ])(
-    "should convert FTP range $low/$high to percent range $min/$max",
+    "should convert FTP range $low/$high to a percent_ftp range $min/$max",
     ({ low, high, min, max }) => {
       // Arrange
 
@@ -47,7 +47,7 @@ describe("convertZwiftPowerRange", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min, max },
+        value: { unit: "range", min, max, basis: "percent_ftp" },
       });
     }
   );
