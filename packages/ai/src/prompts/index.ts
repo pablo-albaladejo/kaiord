@@ -17,4 +17,10 @@ export {
   PROMPT_VERSION,
   SPANISH_ABBREVIATION_DICTIONARY,
 } from "./user-prompt";
+export {
+  buildAthleteContext,
+  MAX_ATHLETE_INSTRUCTIONS,
+  MAX_ATHLETE_ZONES,
+  type AthletePromptInput,
+} from "./athlete-context";
 export { fenceUntrusted, UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./fence";

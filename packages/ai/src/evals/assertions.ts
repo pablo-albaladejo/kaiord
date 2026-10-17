@@ -6,16 +6,24 @@ import {
   passed,
   unmeasured,
 } from "./dimension-outcomes";
-import type { Benchmark, DimensionOutcome, EvalResult } from "./types";
+import { structureOutcome, targetOutcome } from "./target-assertions";
+import type {
+  Benchmark,
+  DimensionOutcome,
+  EvalDimension,
+  EvalResult,
+} from "./types";
 import type { Workout } from "@kaiord/core";
 
 // Eval allows ±5% drift on zone bounds to absorb AI rounding.
 const ZONE_TOLERANCE = 0.05;
 
-const DOWNSTREAM: ReadonlyArray<"sport" | "steps" | "zone"> = [
+const DOWNSTREAM: ReadonlyArray<EvalDimension> = [
   "sport",
   "steps",
   "zone",
+  "targets",
+  "structure",
 ];
 
 export const evaluateBenchmark = (
@@ -52,6 +60,8 @@ export const evaluateBenchmark = (
     sportOutcome(benchmark, workout),
     ...stepOutcomes(benchmark, stepCount),
     ...zoneOutcomes(benchmark, workout),
+    targetOutcome(benchmark, workout),
+    structureOutcome(benchmark, workout),
   ];
 
   return {

@@ -35,6 +35,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
 }
 
+// ── App theme preference for the popup (vendored bridge-core) ──
+let bridgeTheme;
+try {
+  importScripts("bridge-theme.js");
+  bridgeTheme = globalThis;
+} catch {
+  bridgeTheme =
+    typeof require !== "undefined" ? require("./bridge-theme.js") : {};
+}
+
 // ── Identity-free transports (vendored bridge-core) ──
 // Loaded BEFORE tp-auth.js so it can read self.cookieSessionFetch (cookie
 // token exchange) and self.bearerRequest (Bearer data calls).
@@ -225,6 +235,8 @@ const handleAction = async (message) => {
     case "open-trainingpeaks":
       await openTrainingPeaks();
       return null;
+    case "set-theme":
+      return await bridgeTheme.storeThemePreference(message.theme);
     default:
       throw new Error(`Unknown action: ${message.action}`);
   }
@@ -241,6 +253,7 @@ const EXTERNAL_ACTIONS = new Set([
   "push-weight",
   "push-workout",
   "open-trainingpeaks",
+  "set-theme",
 ]);
 
 const dispatch = bridgeEnvelope.createDispatch({

@@ -10,6 +10,7 @@ import { buildUserPrompt, PROMPT_VERSION } from "@kaiord/ai/prompts";
 import type { AiMeta } from "../types/calendar-fragments";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { KRD } from "../types/schemas";
+import { withFallbackName } from "../utils/structured-workout";
 import { validateSanity } from "./sanity-checks";
 
 export type GenerateFn = (prompt: string, sport: string) => Promise<KRD>;
@@ -21,7 +22,6 @@ export type ProcessResult =
 export type ProcessorParams = {
   workout: WorkoutRecord;
   selectedComments: string[];
-  zonesContext: string;
   generateFn: GenerateFn;
   provider: string;
   model: string;
@@ -82,7 +82,7 @@ function toSuccess(
 ): ProcessResult {
   return {
     ok: true,
-    krd,
+    krd: withFallbackName(krd, params.workout.raw?.title),
     aiMeta: {
       promptVersion: PROMPT_VERSION,
       model: params.model,
