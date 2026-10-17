@@ -18,11 +18,10 @@ const TEXT_SUMMARIES = {
     const date = text(input, "date");
     if (!description || !date) return null;
     const sport = text(input, "sport");
-    const vars = { date: formatDay(date), description, sport };
-    return t(
-      sport ? "summary.createWorkoutSport" : "summary.createWorkout",
-      vars
-    );
+    const vars = { date: formatDay(date), description };
+    return sport
+      ? t("summary.createWorkoutSport", { ...vars, sport })
+      : t("summary.createWorkout", vars);
   },
   log_health_metric: (input, { t, formatDay }) => {
     const metric = text(input, "metric");
