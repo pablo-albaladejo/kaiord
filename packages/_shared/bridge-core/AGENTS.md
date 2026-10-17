@@ -20,12 +20,15 @@ two agree and that no master contains identity values. The one per-bridge
 visual value — the header monogram glyph (`G`, `T2`, `Wh`, `Ta`, `TP`) — is
 markup in each bridge's `popup.html`, not a token in the shared `popup.css`.
 
-All five bridges share ONE 340px dark popup shell (`popup.css` +
+All five bridges share ONE 340px popup shell (`popup.css` +
 `bridge-popup-shell.js`); the header monogram is the only per-bridge variable,
-and no provider brand hue appears in any bridge package. The shell's `--kd-*`
-palette is copied from the `.dark` block of `styles/brand-tokens.css` and
-pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`. The popups are
-dark-only; there is no light-theme block for them.
+and no provider brand hue appears in any bridge package. The popup follows the
+theme picked in the Kaiord app: the SPA sends its preference as the external
+`set-theme` action, `bridge-theme.js` stores it and applies `data-theme` before
+first paint, and `system` (or no preference yet) follows
+`prefers-color-scheme`. The shell's `--kd-*` palettes are copied from
+`styles/brand-tokens.css` (dark on `:root`, light in two identical blocks) and
+pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 
 ## Key Files
 
@@ -37,12 +40,14 @@ dark-only; there is no light-theme block for them.
 | `bridge-popup-shell.js`            | all bridges      | Shell renderers: `renderStatusBlock`, `renderChips`, `renderConsequence`, `renderSkeleton`, `renderCtas`.                       |
 | `bridge-popup-health.js`           | all bridges      | Outage boundary (`bridgeHealth` in `chrome.storage.local`): when a bridge was first observed broken, cleared on success.        |
 | `bridge-popup-snapshot.js`         | garmin, train2go | Athlete card + snapshot freshness (`STALE_SNAPSHOT_THRESHOLD_DAYS` vendored literal).                                           |
-| `popup.css`                        | all bridges      | The unified 340px dark popup shell (`--kd-*` brand palette, layout, components).                                                |
+| `popup.css`                        | all bridges      | The unified 340px popup shell (`--kd-*` light + dark palettes, layout, components).                                             |
+| `bridge-theme.js`                  | all bridges      | App theme preference: `set-theme` validation + `chrome.storage.local` write (SW); `data-theme` before first paint (popup).      |
 | `profile-snapshot.js`              | garmin, train2go | Plain-JS snapshot validator mirroring the @kaiord/core Zod schema.                                                              |
 | `test/chrome-mock.js`              | all bridges      | Superset chrome API mock for vitest (neutral identity values).                                                                  |
 | `test/bridge-envelope.test.js`     | all bridges      | Vendored unit tests for the envelope module.                                                                                    |
 | `test/bridge-popup-shell.test.js`  | all bridges      | Vendored unit tests for the shell renderers (jsdom env, CJS `require`).                                                         |
 | `test/bridge-popup-health.test.js` | all bridges      | Vendored unit tests for the health record (callback-form storage stub, CJS `require`).                                          |
+| `test/bridge-theme.test.js`        | all bridges      | Vendored unit tests for the theme module (validation, storage, light/dark/system/missing, mirror).                              |
 
 ## For AI Agents
 
