@@ -17,6 +17,28 @@ describe("resolvePercentFtpToWatts", () => {
     expect(result).toEqual({ unit: "watts", value: 116 });
   });
 
+  it("should resolve a percent_ftp range to a watts range with the FTP", () => {
+    // Arrange
+    const value = { unit: "range", min: 50, max: 75, basis: "percent_ftp" };
+
+    // Act
+    const result = resolvePercentFtpToWatts(value, FTP_WATTS);
+
+    // Assert
+    expect(result).toStrictEqual({ unit: "range", min: 165, max: 248 });
+  });
+
+  it("should throw MissingFtpError for a percent_ftp range without an FTP", () => {
+    // Arrange
+    const value = { unit: "range", min: 50, max: 75, basis: "percent_ftp" };
+
+    // Act
+    const act = () => resolvePercentFtpToWatts(value, undefined);
+
+    // Assert
+    expect(act).toThrow(expect.objectContaining({ name: "MissingFtpError" }));
+  });
+
   it("should pass non-percent values through without an FTP", () => {
     // Arrange
     const value = { unit: "range", min: 150, max: 200 };
