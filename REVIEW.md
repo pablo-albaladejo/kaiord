@@ -3,12 +3,13 @@
 This file is for every reviewer, AI or human. It adds no new rules. Each
 pass points at a rule that already lives in [CLAUDE.md](./CLAUDE.md),
 [AGENTS.md](./AGENTS.md), a `scripts/check-*.mjs` guard, a hook in
-[.claude/](./.claude/settings.json), or [openspec/](./openspec/AGENTS.md).
+[.claude/settings.json](./.claude/settings.json), or [openspec/](./openspec/AGENTS.md).
 When this file and one of those disagree, the source wins. Fix this file.
 
 ## Passes
 
-Run every pass on every PR. Name the pass in each finding.
+Run every pass on every PR. (This is a convention of this file, not a
+repo rule.)
 
 ### 1. Correctness
 
@@ -21,14 +22,20 @@ Run every pass on every PR. Name the pass in each finding.
 
 ### 2. Architecture
 
-- Hexagonal order: `domain` → `application` → `ports` → `adapters`. Inner
-  layers import no outer layer and no external library.
-  `scripts/check-architecture.mjs` and `.claude/hooks/check-architecture.cjs`
-  enforce this.
+- Layer order: `domain` → `ports` → `application` → `adapters`. No layer
+  imports a layer to its right (R-ArchLeftward).
+- `domain` imports only the libraries in `DOMAIN_EXTERNAL_ALLOWLIST`
+  (`zod`, `@noble/hashes`, in `scripts/architecture.vocab.mjs`).
+  `application` imports no external library (R-ArchAppPure). `ports` holds
+  types only, no runtime code (R-ArchPortPure).
+- Source: `scripts/check-architecture.mjs` (`pnpm lint:architecture`, run
+  in CI) and [hexagonal-arch](./openspec/specs/hexagonal-arch/spec.md).
 - `scripts/boundaries-allowlist.mjs` only shrinks. A new entry there is a
   finding: fix the import instead.
 - State: Zustand only for the editor runtime, Dexie + `useLiveQuery` for
-  persisted data, React state for local UI (`check-no-zustand-writethrough`).
+  persisted data, React state for local UI (CLAUDE.md "State Management").
+  `check-no-zustand-writethrough` enforces part of it: no Zustand store
+  writes Dexie directly.
 - Size: files ≤100 lines, functions <40 lines (60 for React components).
   Tests are exempt. No JSDoc preamble that explains a file split.
 
@@ -46,15 +53,18 @@ Run every pass on every PR. Name the pass in each finding.
 
 ### 4. Security and privacy
 
-- Local-first: data stays on the device. It leaves only through opt-in
-  Google Drive sync to the user's own `drive.appdata` folder. A new
-  network call that carries user data is a finding
-  ([README](./README.md#-local-first-architecture)).
+- Local-first: a new path that sends user data off the device is a
+  finding. The known paths are the ones the
+  [README](./README.md#-local-first-architecture) lists (opt-in Drive
+  `drive.appdata` sync, bridges on the user's own session) and the user's
+  chosen AI provider, called from the browser
+  ([ai-providers](./openspec/specs/ai-providers/spec.md)).
 - Bridges never store, send, or manage credentials
   ([adapter-contracts](./openspec/specs/adapter-contracts/spec.md)). Any
   change to a bridge's permissions, hosts, or read allowlist must update the
   golden in `check-bridge-privacy-surface`.
-- No PII in toast or `console.*` first arguments (`check-no-pii-leakage`).
+- Toast, `console.*` and `analytics.event` first arguments are static
+  literals (`check-no-pii-leakage`).
 - A chat tool returns outside text to the model only through
   `fenceUntrusted(...)`, and every chat tool sink is declared
   (`check-untrusted-fields-fenced`, `check-model-facing-sinks`).
@@ -63,7 +73,8 @@ Run every pass on every PR. Name the pass in each finding.
 ### 5. Spec artifacts
 
 - A feature or non-trivial fix has a change in `openspec/changes/<slug>/`
-  (proposal, design, tasks). Tasks are ticked as they land.
+  (proposal, design, tasks), and its tasks are ticked as they land
+  ([openspec/AGENTS.md](./openspec/AGENTS.md)).
 - A changed domain spec follows `openspec/SPEC_TEMPLATE.md` and passes
   `pnpm lint:specs`.
 - A change under a publishable package (`core`, `cli`, `fit`, `tcx`, `zwo`,
@@ -92,12 +103,7 @@ these as a finding, not as a pass:
   above, missing tests or spec artifacts, a privacy leak, or a gate that
   did not run. The `code-reviewer` agent's CRITICAL and IMPORTANT map here.
 - **Nit** does not block: naming, wording, or a simpler form of correct
-  code. The agent's SUGGESTION maps here. Mark it `Nit:`.
+  code. The agent's SUGGESTION maps here.
 
-Each finding gives file and line, problem, fix, and how to check the fix.
-
-## When a finding comes back
-
-If the same finding shows up on two PRs, do not just flag it a third time.
-Turn it into a rule in AGENTS.md, or into a `scripts/check-*.mjs` guard with
-a co-located test. That is how the existing guards were born.
+Each finding gives file and line, problem, fix, and how to check the fix,
+as in the `code-reviewer` agent's output format.
