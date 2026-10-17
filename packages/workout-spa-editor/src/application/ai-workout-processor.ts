@@ -21,7 +21,6 @@ export type ProcessResult =
 export type ProcessorParams = {
   workout: WorkoutRecord;
   selectedComments: string[];
-  zonesContext: string;
   generateFn: GenerateFn;
   provider: string;
   model: string;

@@ -51,6 +51,19 @@ const zoneTableFor = (
 };
 
 /**
+ * The athlete's pace zone table for `sport`, empty when it has none. AI
+ * generation resolves zone targets against this same table, so a generated
+ * range is exactly what the Garmin export would have produced for the zone.
+ */
+export const paceZoneTableFor = (
+  profile: Profile | null | undefined,
+  sport: string | undefined
+): PaceZoneTable =>
+  isPaceSport(sport)
+    ? zoneTableFor(profile?.sportZones[sport], METRES_BY_SPORT[sport])
+    : [];
+
+/**
  * The pace zone table the Garmin writer needs for `krd`. `undefined` when
  * the workout references no pace zone; throws `PaceZonesUnavailableError`
  * when it references one the profile cannot resolve for its sport.
@@ -64,8 +77,7 @@ export const garminPaceZonesFor = (
   const sport = getStructuredWorkout(krd)?.sport;
   if (!isPaceSport(sport))
     throw new PaceZonesUnavailableError("unsupported-pace-zone-sport");
-  const config = profile?.sportZones[sport];
-  const table = zoneTableFor(config, METRES_BY_SPORT[sport]);
+  const table = paceZoneTableFor(profile, sport);
   if (table.length === 0)
     throw new PaceZonesUnavailableError("missing-pace-zones");
   const defined = new Set(table.map((z) => z.zone));
