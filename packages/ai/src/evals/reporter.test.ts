@@ -45,27 +45,23 @@ describe("createReport", () => {
     expect(report.results).toStrictEqual(results);
   });
 
-  it("should compute 100% pass rate when all pass", () => {
+  it.each([
+    {
+      label: "100% when all pass",
+      results: [passingResult, { ...passingResult, id: "cycling-en-002" }],
+      rate: 100,
+      failed: 0,
+    },
+    { label: "0% when all fail", results: [failingResult], rate: 0, failed: 1 },
+  ])("should compute $label", ({ results, rate, failed }) => {
     // Arrange
-    const results = [passingResult, { ...passingResult, id: "cycling-en-002" }];
-
-    // Act
-    const report = createReport(results, "anthropic", "claude");
-
-    // Assert
-    expect(report.passRatePercent).toBe(100);
-    expect(report.failed).toBe(0);
-  });
-
-  it("should compute 0% pass rate when all fail", () => {
-    // Arrange
-    const results = [failingResult];
 
     // Act
     const report = createReport(results, "openai", "gpt-4");
 
     // Assert
-    expect(report.passRatePercent).toBe(0);
+    expect(report.passRatePercent).toBe(rate);
+    expect(report.failed).toBe(failed);
   });
 
   it("should store the rate unrounded, so display cannot move a comparison", () => {
