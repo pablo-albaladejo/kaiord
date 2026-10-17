@@ -343,3 +343,50 @@ describe("krdToTrainingPeaksWorkout — mixed target metrics", () => {
     );
   });
 });
+
+describe("krdToTrainingPeaksWorkout — percent_ftp ranges", () => {
+  const RAMP_LOW_PERCENT = 50;
+  const RAMP_HIGH_PERCENT = 75;
+
+  it("should pass a percent_ftp range through as its percentages without an FTP", () => {
+    // Arrange
+    const logger = spyLogger();
+    const krd = asKrd({
+      name: "Ramp",
+      sport: "cycling",
+      steps: [
+        {
+          stepIndex: 0,
+          name: "Warm up",
+          durationType: "time",
+          duration: { type: "time", seconds: WARM_UP_SECONDS },
+          targetType: "power",
+          target: {
+            type: "power",
+            value: {
+              unit: "range",
+              min: RAMP_LOW_PERCENT,
+              max: RAMP_HIGH_PERCENT,
+              basis: "percent_ftp",
+            },
+          },
+          intensity: "warmup",
+        },
+      ],
+    } as Workout);
+
+    // Act
+    const result = krdToTrainingPeaksWorkout(krd, {
+      athleteId: ATHLETE_ID,
+      workoutDay: WORKOUT_DAY,
+      logger,
+    });
+    const structure = JSON.parse(result.structure as unknown as string);
+
+    // Assert
+    expect(structure.structure[0].steps[0].targets).toEqual([
+      { minValue: RAMP_LOW_PERCENT, maxValue: RAMP_HIGH_PERCENT },
+    ]);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+});

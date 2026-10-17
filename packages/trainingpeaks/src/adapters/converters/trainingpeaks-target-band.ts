@@ -37,7 +37,7 @@ export type BandRecipe = {
 /** KRD target values, narrowed to the shapes every family shares. */
 export type KrdTargetValue =
   | { unit: "zone"; value: number }
-  | { unit: "range"; min: number; max: number }
+  | { unit: "range"; min: number; max: number; basis?: string }
   | { unit: string; value: number };
 
 const band = (min: number, max: number): TargetBand => ({
@@ -91,6 +91,9 @@ export const toTargetBand = (
     return band(percent, percent);
   }
   if (value.unit === "range" && "min" in value) {
+    if (value.basis === recipe.passthroughUnit) {
+      return band(value.min, value.max);
+    }
     const min = toPercent(value.min, recipe, logger, context);
     const max = toPercent(value.max, recipe, logger, context);
     return min === undefined || max === undefined ? undefined : band(min, max);
