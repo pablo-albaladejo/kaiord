@@ -33,7 +33,11 @@
  * its text, a rejection handler passed as `.then(ok, onRejected)` or by name
  * (`.catch(handle)`), a key computed at runtime (`e[key]`), and a shorthand
  * `{ a, e, b }` between two others (indistinguishable from call arguments)
- * are not followed.
+ * are not followed. It errs on the side of failing: handing the raw value to
+ * an object (`logger.error("x", { error: e })`, `new Error("x", { cause: e })`)
+ * fails though it may be safe, and so does code-shaped text inside a string
+ * literal (`"e.message"`). Brace and paren matching skips string literals,
+ * but the code inside a template's `${}` is treated as part of the string.
  *
  * Modes:
  *   --dry-run    Emit violations as JSON on stdout; exit 0.
@@ -79,31 +83,47 @@ const collectHookSources = (root, dir = root, out = []) => {
   return out;
 };
 
-/** The brace-matched body of the block whose `{` is at `open`. */
-const blockAt = (src, open) => {
-  let depth = 0;
-  for (let i = open; i < src.length; i++) {
-    if (src[i] === "{") depth++;
-    else if (src[i] === "}" && --depth === 0) return src.slice(open + 1, i);
+/** The index just past the string literal opening at `i`. */
+const skipString = (src, i) => {
+  const quote = src[i];
+  for (let j = i + 1; j < src.length; j++) {
+    if (src[j] === "\\") j++;
+    else if (src[j] === quote) return j + 1;
   }
-  return src.slice(open + 1);
+  return src.length;
 };
+
+const isQuote = (c) => c === '"' || c === "'" || c === "`";
+
+/** The text between the `open` delimiter at `start` and its match, skipping
+ * delimiters inside string literals. */
+const matchedAt = (src, start, open, close) => {
+  let depth = 0;
+  for (let i = start; i < src.length; i++) {
+    if (isQuote(src[i])) {
+      i = skipString(src, i) - 1;
+      continue;
+    }
+    if (src[i] === open) depth++;
+    else if (src[i] === close && --depth === 0) return src.slice(start + 1, i);
+  }
+  return src.slice(start + 1);
+};
+
+/** The brace-matched body of the block whose `{` is at `open`. */
+const blockAt = (src, open) => matchedAt(src, open, "{", "}");
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Comments blanked to spaces (newlines kept, so line numbers hold). */
 const stripComments = (src) => {
   let out = "";
-  let quote = null;
   for (let i = 0; i < src.length; i++) {
     const c = src[i];
-    if (quote) {
-      out += c;
-      if (c === "\\") out += src[++i] ?? "";
-      else if (c === quote) quote = null;
-    } else if (c === '"' || c === "'" || c === "`") {
-      quote = c;
-      out += c;
+    if (isQuote(c)) {
+      const end = skipString(src, i);
+      out += src.slice(i, end);
+      i = end - 1;
     } else if (c === "/" && (src[i + 1] === "/" || src[i + 1] === "*")) {
       const close = src[i + 1] === "/" ? "\n" : "*/";
       const stop = src.indexOf(close, i + 2);
@@ -149,14 +169,7 @@ const readsText = (body, binding) => {
 };
 
 /** The paren-matched text of the call whose `(` is at `open`. */
-const argsAt = (src, open) => {
-  let depth = 0;
-  for (let i = open; i < src.length; i++) {
-    if (src[i] === "(") depth++;
-    else if (src[i] === ")" && --depth === 0) return src.slice(open + 1, i);
-  }
-  return src.slice(open + 1);
-};
+const argsAt = (src, open) => matchedAt(src, open, "(", ")");
 
 // `catch (e) {`, `catch (e: unknown) {`, `catch ({ message }) {`.
 const CATCH_RE = /(?<!\.\s*)\bcatch\s*\(\s*([^)]*?)\s*\)\s*\{/g;
@@ -186,6 +199,8 @@ const catchSites = (src) => {
 const catchLeaks = (raw) => {
   const leaks = [];
   for (const { binding, line, body } of catchSites(stripComments(raw))) {
+    // `.catch(() => …)` binds nothing, so it cannot read anything.
+    if (binding === "") continue;
     const typed = TYPED_ID_RE.exec(binding);
     if (!typed) {
       leaks.push({ line, detail: `destructured catch binding (${binding})` });

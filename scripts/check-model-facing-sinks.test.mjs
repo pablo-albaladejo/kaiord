@@ -244,6 +244,29 @@ test("a promise .catch with a function expression that returns a code passes", (
   assert.deepEqual(violations, []);
 });
 
+test("a promise .catch without a parameter passes", () => {
+  const violations = hookViolations({
+    "ok.ts": promiseCatch('() => ({ error: "x" })'),
+  });
+  assert.deepEqual(violations, []);
+});
+
+test("a closing brace inside a string does not end the catch body early", () => {
+  const violations = hookViolations({
+    "leak.ts": `try { run(); } catch (e) { log("}"); return { error: e.message }; }`,
+  });
+  assert.ok(violations.some((v) => v.kind === "caught-error-text"));
+});
+
+test("a closing paren inside a string does not end a promise .catch early", () => {
+  const violations = hookViolations({
+    "leak.ts": promiseCatch(
+      '(e) => { log(")"); return { error: e.message }; }'
+    ),
+  });
+  assert.ok(violations.some((v) => v.kind === "caught-error-text"));
+});
+
 test("a typed catch binding is read as its identifier, not destructured", () => {
   const violations = hookViolations({
     "ok.ts": `try { run(); } catch (err: unknown) { logFailure(err); return { error: "x" }; }`,
