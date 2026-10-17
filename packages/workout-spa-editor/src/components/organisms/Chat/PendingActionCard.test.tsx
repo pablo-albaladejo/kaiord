@@ -39,7 +39,12 @@ describe("PendingActionCard", () => {
     [
       "create_workout",
       { description: "Easy run", date: "2026-10-16", sport: "running" },
-      "running on Oct 16: “Easy run”",
+      "Running on Oct 16: “Easy run”",
+    ],
+    [
+      "create_workout",
+      { description: "Easy run", date: "2026-10-16", sport: "rowing" },
+      "On Oct 16: “Easy run”",
     ],
     [
       "log_intake",
@@ -209,6 +214,72 @@ describe("PendingActionCard", () => {
       expect(screen.getByRole("button", { name: "Decline" })).toBeEnabled();
     }
   );
+
+  it.each([
+    [
+      "the date does not exist",
+      "create_workout",
+      { description: "Run", date: "2026-02-31" },
+    ],
+    [
+      "the day is not a date",
+      "log_health_metric",
+      { metric: "sleep", day: "tomorrow", value: 7 },
+    ],
+    [
+      "the data type is unknown",
+      "set_data_route",
+      { action: "set_source_policy", dataType: "mood", mode: "union" },
+    ],
+    [
+      "the source order holds a non-name",
+      "set_data_route",
+      {
+        action: "set_source_policy",
+        dataType: "sleep",
+        mode: "priority",
+        sourceOrder: ["whoop", null],
+      },
+    ],
+  ])("should treat the input as unreadable when %s", (_case, tool, input) => {
+    // Arrange
+    const action = pending(tool, input);
+
+    // Act
+    renderCard(action);
+
+    // Assert
+    expect(screen.getByText(/could not read/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve" })).toBeDisabled();
+  });
+
+  it.each([
+    ["still being looked up", undefined],
+    ["not in the active athlete's library", null],
+  ])(
+    "should not let a Garmin push be approved while its workout is %s",
+    (_case, value) => {
+      // Arrange
+      label.value = value;
+
+      // Act
+      renderCard(pending("push_to_garmin", { workoutId: "w1" }));
+
+      // Assert
+      expect(screen.getByRole("button", { name: "Approve" })).toBeDisabled();
+    }
+  );
+
+  it("should let a Garmin push be approved once its workout is resolved", () => {
+    // Arrange
+    label.value = { title: "Easy run", duration: "45 min", date: "2026-10-16" };
+
+    // Act
+    renderCard(pending("push_to_garmin", { workoutId: "w1" }));
+
+    // Assert
+    expect(screen.getByRole("button", { name: "Approve" })).toBeEnabled();
+  });
 
   it("should let a readable action be approved", () => {
     // Arrange

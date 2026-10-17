@@ -13,24 +13,23 @@ const METRIC_KEYS = new Set(["weight", "sleep", "hrv", "daily-wellness"]);
 
 const TEXT_SUMMARIES = {
   sync_coaching: (_input, { t }) => t("summary.syncCoaching"),
-  create_workout: (input, { t, formatDay }) => {
+  create_workout: (input, { t, formatDay, sportLabel }) => {
     const description = text(input, "description");
-    const date = text(input, "date");
+    const date = formatDay(text(input, "date") ?? "");
     if (!description || !date) return null;
-    const sport = text(input, "sport");
-    const vars = { date: formatDay(date), description };
+    const sport = sportLabel(text(input, "sport") ?? "");
     return sport
-      ? t("summary.createWorkoutSport", { ...vars, sport })
-      : t("summary.createWorkout", vars);
+      ? t("summary.createWorkoutSport", { date, description, sport })
+      : t("summary.createWorkout", { date, description });
   },
   log_health_metric: (input, { t, formatDay }) => {
     const metric = text(input, "metric");
-    const day = text(input, "day");
+    const date = formatDay(text(input, "day") ?? "");
     const value = num(input, "value");
-    if (!metric || !METRIC_KEYS.has(metric) || !day || value === undefined) {
+    if (!metric || !METRIC_KEYS.has(metric) || !date || value === undefined) {
       return null;
     }
-    return t(`summary.metric.${metric}`, { value, date: formatDay(day) });
+    return t(`summary.metric.${metric}`, { value, date });
   },
   log_intake: summarizeLogIntake,
   set_data_route: summarizeSetDataRoute,

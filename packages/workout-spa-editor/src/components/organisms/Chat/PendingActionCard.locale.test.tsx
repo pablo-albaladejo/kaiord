@@ -77,4 +77,19 @@ describe("PendingActionCard in Spanish", () => {
       )
     ).toBeInTheDocument();
   });
+
+  it("should name a known sport of a proposed workout in Spanish", () => {
+    // Arrange
+    const input = {
+      description: "Rodaje",
+      date: "2026-10-16",
+      sport: "running",
+    };
+
+    // Act
+    renderCard("create_workout", input);
+
+    // Assert
+    expect(screen.getByText("Carrera el 16 oct: «Rodaje»")).toBeInTheDocument();
+  });
 });

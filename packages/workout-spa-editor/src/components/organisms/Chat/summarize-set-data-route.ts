@@ -6,8 +6,8 @@ export const summarizeSetDataRoute = (
 ): string | null => {
   const action = text(input, "action");
   const dataType = text(input, "dataType");
-  if (!dataType) return null;
-  const type = dataTypeLabel(dataType);
+  const type = dataTypeLabel(dataType ?? "");
+  if (!type) return null;
 
   if (action === "enable_route" || action === "disable_route") {
     const integration = text(input, "integrationId");
@@ -23,9 +23,11 @@ export const summarizeSetDataRoute = (
     const mode = text(input, "mode");
     if (mode === "union") return t("summary.route.union", { type });
     const order = input.sourceOrder;
-    if (mode !== "priority" || !Array.isArray(order) || order.length === 0) {
-      return null;
-    }
+    const isNames =
+      Array.isArray(order) &&
+      order.length > 0 &&
+      order.every((id) => typeof id === "string" && id !== "");
+    if (mode !== "priority" || !isNames) return null;
     return t("summary.route.priority", { type, order: order.join(" → ") });
   }
 

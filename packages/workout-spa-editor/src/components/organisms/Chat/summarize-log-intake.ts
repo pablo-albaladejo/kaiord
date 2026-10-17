@@ -18,7 +18,7 @@ export const summarizeLogIntake = (
   input: ActionInput,
   { t, formatDay }: SummaryContext
 ): string | null => {
-  const date = text(input, "date");
+  const date = formatDay(text(input, "date") ?? "");
   const kcal = num(input, "kcal");
   const protein = num(input, "proteinG");
   const carb = num(input, "carbG");
@@ -37,7 +37,7 @@ export const summarizeLogIntake = (
     protein,
     carb,
     fat,
-    date: formatDay(date),
+    date,
   });
   const slot = text(input, "mealSlot");
   const slotted =
