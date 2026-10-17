@@ -84,7 +84,10 @@ At an FTP of 250 W, `Power="0.85"` becomes a 213 W target.
 
 **Ramps.** Zwift ramps (`Warmup`, `Cooldown`, `Ramp`) become a ranged power
 target, and both bounds are converted with the same FTP: at 250 W, a 50–75 %
-warm-up becomes a 125–188 W target. A ramp needs an FTP just like a
+warm-up becomes a 125–188 W target. `Cooldown` blocks and other descending ramps
+(`PowerLow` above `PowerHigh`) are converted the same way: a 75–50 % cooldown
+also becomes a 125–188 W target, because a Garmin Connect range holds its two
+bounds, not the direction of the ramp. A ramp needs an FTP just like a
 steady-state block.
 
 **How does it get on my watch?** A `.gcn` file is Garmin Connect's JSON, not a
