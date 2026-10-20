@@ -335,11 +335,15 @@ const statePath = (env, sessionId) =>
   path.join(guardDir(env), `${sessionId}.json`);
 
 // Session state, shared format with the Deepgent guard:
-//   { "<agent_id | main>": { "blocks": n, "lastGreen": "<toplevel>:<sha256>" } }
+//   { "main" | "agent:<agent_id>": {
+//       "blocks": n,
+//       "lastGreen": "<toplevel>:<sha256>" | null,
+//       "lastRed": { "key": "<toplevel>:<sha256>", "failures": [...] } | null } }
 // One slot per agent, so a subagent's red runs do not spend the main
-// conversation's block budget.
+// conversation's block budget. lastRed lets blocks 2 and 3 on an unchanged
+// tree reuse the failures instead of re-running the tests.
 const slotKey = (input) =>
-  safeSessionId(input?.agent_id) ? input.agent_id : "main";
+  safeSessionId(input?.agent_id) ? `agent:${input.agent_id}` : "main";
 
 // Pure: given the agent's previous slot and a run outcome, return the hook
 // output (null = allow silently) and the next slot.
@@ -347,12 +351,14 @@ function verdict(slot, run, { root, fp, lanes }) {
   const next = {
     blocks: slot?.blocks ?? 0,
     lastGreen: slot?.lastGreen ?? null,
+    lastRed: slot?.lastRed ?? null,
   };
   const rerun = lanes.map(laneLabel).join("\n  ");
 
   if (run.outcome === "green") {
     next.blocks = 0;
     next.lastGreen = `${root}:${fp}`;
+    next.lastRed = null;
     return { output: null, next };
   }
   if (run.outcome !== "red") {
@@ -370,6 +376,7 @@ function verdict(slot, run, { root, fp, lanes }) {
   }
 
   const failures = run.red.flatMap((r) => r.failures);
+  next.lastRed = { key: `${root}:${fp}`, failures };
   const shown = failures
     .slice(0, 20)
     .map((f) => `  - ${f}`)
@@ -453,12 +460,17 @@ async function main(input, { env = process.env, budgetMs } = {}) {
   const fp = fingerprint(root, lanes);
   if (slot?.lastGreen === `${root}:${fp}`) return null;
 
-  const run = await runWithBudget(root, lanes, {
-    env,
-    budgetMs:
-      budgetMs ??
-      (Number(env.CLAUDE_GUARDS_TEST_BUDGET_MS) || DEFAULT_BUDGET_MS),
-  });
+  // Same tree as the last red run: its failures still stand.
+  const run =
+    slot?.lastRed?.key === `${root}:${fp}` &&
+    Array.isArray(slot.lastRed.failures)
+      ? { outcome: "red", red: [{ failures: slot.lastRed.failures }] }
+      : await runWithBudget(root, lanes, {
+          env,
+          budgetMs:
+            budgetMs ??
+            (Number(env.CLAUDE_GUARDS_TEST_BUDGET_MS) || DEFAULT_BUDGET_MS),
+        });
   const { output, next } = verdict(slot, run, { root, fp, lanes });
   // Re-read just before writing: another agent of the session may have
   // updated its own slot while the tests ran.

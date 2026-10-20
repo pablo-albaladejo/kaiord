@@ -364,8 +364,8 @@ describe("CLI — a throwaway repository", () => {
     // Assert
     assert.equal(reader.stdout, "");
     assert.equal(JSON.parse(editor.stdout).decision, "block");
-    assert.equal(counter()["agent-Grep"], undefined);
-    assert.equal(counter()["agent-Edit"].blocks, 1);
+    assert.equal(counter()["agent:agent-Grep"], undefined);
+    assert.equal(counter()["agent:agent-Edit"].blocks, 1);
   });
 
   it("should pass a green change and record it so the same tree is not re-run", () => {
@@ -428,6 +428,24 @@ describe("CLI — a throwaway repository", () => {
     const out = JSON.parse(result.stdout);
     assert.equal(out.decision, undefined);
     assert.match(out.systemMessage, /exit 75/);
+  });
+
+  it("should reuse the cached failures on an unchanged red tree", () => {
+    // Arrange: a first red run, then a gate that would refuse any re-run
+    write("scripts/sum.mjs", "export const sum = (a, b) => a - b;\n");
+    run();
+    const gate = join(sandbox, "refusing-gate.sh");
+    writeFileSync(gate, "#!/bin/bash\nexit 75\n");
+    chmodSync(gate, 0o755);
+
+    // Act
+    const second = JSON.parse(run({ CLAUDE_GUARDS_HG_GATE: gate }).stdout);
+
+    // Assert
+    assert.equal(second.decision, "block");
+    assert.match(second.reason, /block 2\/3/);
+    assert.match(second.reason, /sum adds/);
+    assert.equal(counter().main.lastRed.failures.length > 0, true);
   });
 
   it("should do nothing outside a git worktree", () => {

@@ -92,7 +92,7 @@ Red tests SHALL block the turn with `decision: "block"` and a reason that names 
 
 The hook SHALL NOT skip because `stop_hook_active` is set. Consecutive blocks SHALL be capped at 3 per session and agent, counted in `$TMPDIR/claude-guards/<session_id>.json` outside the repository. The red Stop after the third block SHALL be let through with a loud message, and the count reset.
 
-A green run SHALL record the tree's fingerprint, so an unchanged tree is not re-run.
+A green run SHALL record the tree's fingerprint, so an unchanged tree is not re-run. A red run SHALL record its fingerprint and failures, so the next block on an unchanged tree reuses them. Each slot is keyed `main` or `agent:<agent_id>`, in the format shared with the Deepgent guard.
 
 #### Scenario: Red related test
 
