@@ -7,8 +7,16 @@ import { test } from "node:test";
 
 import { cleanGitEnv } from "./clean-git-env.mjs";
 
-const git = (args, options) =>
-  execFileSync("git", args, { encoding: "utf8", ...options }).trim();
+// Fixture git calls must never inherit a hook's GIT_DIR / GIT_INDEX_FILE: under
+// pre-commit they name the committing worktree, so an inherited env would
+// init, commit and add worktrees in the real repo. Only the control below
+// passes a hook-style env, and it builds that env from a clean base.
+const git = (args, options = {}) =>
+  execFileSync("git", args, {
+    encoding: "utf8",
+    ...options,
+    env: options.env ?? cleanGitEnv(process.env),
+  }).trim();
 
 test("cleanGitEnv drops every GIT_* variable and keeps the rest", () => {
   const env = cleanGitEnv({
@@ -31,7 +39,7 @@ test("a git init under a hook-style GIT_DIR leaves the shared config alone", () 
     git(["init", "-q", main]);
     git([...ident, "-C", main, "commit", "-q", "--allow-empty", "-m", "x"]);
     git(["-C", main, "worktree", "add", "-q", join(base, "wt"), "-b", "f"]);
-    const hookEnv = { ...process.env, GIT_DIR: linkedGitDir };
+    const hookEnv = { ...cleanGitEnv(process.env), GIT_DIR: linkedGitDir };
     const sandbox = mkdtempSync(join(base, "sandbox-"));
     const bare = () => git(["-C", main, "config", "core.bare"]);
     assert.equal(bare(), "false");
