@@ -6,6 +6,8 @@ import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { cleanGitEnv } from "./lib/clean-git-env.mjs";
+
 import {
   isInScope,
   isPureReexportBarrel,
@@ -123,10 +125,12 @@ test("real tree has zero violations (whole-tree smoke)", () => {
 test("--changed-files exits zero silently when no in-scope test file is staged", () => {
   const repo = mkdtempSync(join(tmpdir(), "barrel-guard-git-"));
   try {
-    execFileSync("git", ["init", "-q"], { cwd: repo });
+    const env = cleanGitEnv();
+    execFileSync("git", ["init", "-q"], { cwd: repo, env });
     const result = spawnSync(process.execPath, [SCRIPT, "--changed-files"], {
       cwd: repo,
       encoding: "utf8",
+      env,
     });
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stdout, "");

@@ -17,6 +17,7 @@ one place.
 | `strip-jsonc.mjs`        | Strip comments/trailing commas so `JSON.parse` can consume `.json` files that have JSONC syntax (e.g. `tsconfig.json`, `.changeset/config.json`).                                 |
 | `site-links-resolve.mjs` | GitHub Pages path resolution and link extraction for `check-site-links.mjs`. Split out to keep the guard under 100 lines; covered by `check-site-links.test.mjs`.                 |
 | `site-links-scan.mjs`    | Walks the built site (`*.html`, `*.md`, `llms*.txt`, `sitemap*.xml`, `robots.txt`) for `check-site-links.mjs` and counts what it checked; covered by `check-site-links.test.mjs`. |
+| `clean-git-env.mjs`      | `process.env` minus every `GIT_*` variable. Pass as `env` when a test spawns git (or a script that does): a hook's inherited `GIT_DIR` otherwise rewrites the shared `.git/config`. |
 
 ## For AI Agents
 
