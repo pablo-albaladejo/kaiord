@@ -2,8 +2,12 @@
 // the Deepgent guards, and the input hygiene every hook relies on.
 
 import { strict as assert } from "node:assert";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync, symlinkSync } from "node:fs";
 import { createRequire } from "node:module";
-import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 
 const require = createRequire(import.meta.url);
@@ -63,5 +67,34 @@ describe("guard-common", () => {
 
     // Assert
     assert.deepEqual(clean, { PATH: "/bin" });
+  });
+});
+
+describe("entry guard — hooks launched through a symlinked path", () => {
+  // An entry check that compares a realpath with argv[1] is false through a
+  // symlink, so main() never runs and the hook exits 0: it fails OPEN.
+  it("should still fail closed on unreadable input", () => {
+    // Arrange
+    const sandbox = mkdtempSync(join(tmpdir(), "guard-entry-"));
+    const link = join(sandbox, "hooks");
+    symlinkSync(dirname(fileURLToPath(import.meta.url)), link);
+    const hooks = ["never-auto-remediate.cjs", "plan-approval-guard.cjs"];
+
+    try {
+      // Act
+      const codes = hooks.map(
+        (hook) =>
+          spawnSync(process.execPath, [join(link, hook)], {
+            input: "not json",
+            encoding: "utf8",
+            env: { ...gitEnv(), TMPDIR: sandbox },
+          }).status
+      );
+
+      // Assert
+      assert.deepEqual(codes, [2, 2]);
+    } finally {
+      rmSync(sandbox, { recursive: true, force: true });
+    }
   });
 });
