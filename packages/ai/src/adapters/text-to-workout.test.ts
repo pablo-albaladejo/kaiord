@@ -107,6 +107,50 @@ describe("createTextToWorkout", () => {
     expect(callArgs.system).toContain("running");
   });
 
+  it("should append the athlete's zones and instructions to the user message", async () => {
+    // Arrange
+    mockGenerateText.mockResolvedValueOnce({
+      output: RUNNING_WORKOUT,
+    } as never);
+    const parse = createTextToWorkout({ model: mockModel });
+
+    // Act
+    await parse("Rodaje 12' z1", {
+      athlete: {
+        zonesText: "Pace zones: Z1 6:30-5:45/km",
+        instructions: "Keep it simple",
+      },
+    });
+
+    // Assert
+    const callArgs = mockGenerateText.mock.calls[0]?.[0] as {
+      messages?: unknown;
+    };
+    const sent = JSON.stringify(callArgs.messages);
+    expect(sent).toContain("Rodaje 12' z1");
+    expect(sent).toContain("Pace zones: Z1 6:30-5:45/km");
+    expect(sent).toContain("<athlete_instructions>");
+  });
+
+  it("should resolve zone targets against the athlete's zones", async () => {
+    // Arrange
+    mockGenerateText.mockResolvedValueOnce({
+      output: RUNNING_WORKOUT,
+    } as never);
+    const parse = createTextToWorkout({ model: mockModel });
+    const pace = [{ zone: 1, minMps: 2.5, maxMps: 2.9 }];
+
+    // Act
+    const result = await parse("Rodaje 15' Z1", {
+      athlete: { zones: { pace } },
+    });
+
+    // Assert
+    expect(result.steps[0]).toMatchObject({
+      target: { type: "pace", value: { unit: "range", min: 2.5, max: 2.9 } },
+    });
+  });
+
   it("should apply name override as post-processing", async () => {
     // Arrange
     mockGenerateText.mockResolvedValueOnce({

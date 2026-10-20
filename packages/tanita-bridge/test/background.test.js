@@ -123,7 +123,7 @@ describe("background.js", () => {
   describe("EXTERNAL_ACTIONS origin pinning", () => {
     it("should expose exactly the read + session probe surface", () => {
       // Arrange
-      const expected = ["ping", "checkSession", "read-export-csv"];
+      const expected = ["ping", "checkSession", "read-export-csv", "set-theme"];
 
       // Act
       const actual = [...EXTERNAL_ACTIONS];
@@ -231,7 +231,11 @@ describe("background.js", () => {
 
     it("should deny a look-alike export path", () => {
       // Arrange
-      const lookAlikes = ["/en/user/export-csv-all", "/en/user/export", "/en/user/export-csv/"];
+      const lookAlikes = [
+        "/en/user/export-csv-all",
+        "/en/user/export",
+        "/en/user/export-csv/",
+      ];
 
       // Act
       const results = lookAlikes.map((path) => isAllowed("GET", path));
@@ -358,7 +362,9 @@ describe("background.js", () => {
       const attempt = handleAction(message);
 
       // Assert
-      await expect(attempt).rejects.toThrow("Unknown action: delete-everything");
+      await expect(attempt).rejects.toThrow(
+        "Unknown action: delete-everything"
+      );
     });
   });
 
@@ -399,5 +405,55 @@ describe("background.js", () => {
       // Assert
       expect(result).toBe(true);
     });
+  });
+});
+
+describe("set-theme (the app's theme preference for the popup)", () => {
+  const sendExternal = (message, origin) =>
+    new Promise((resolve) => externalCb(message, { origin }, resolve));
+
+  beforeEach(() => __resetChromeMock());
+
+  it("should store a valid preference sent from a Kaiord origin", async () => {
+    // Arrange
+    const message = { action: "set-theme", theme: "light" };
+
+    // Act
+    const response = await sendExternal(message, "https://kaiord.com");
+
+    // Assert
+    expect(response).toMatchObject({ ok: true, data: null });
+    expect(__chromeLocalStore.kaiordTheme).toBe("light");
+  });
+
+  it("should refuse a preference sent from a foreign origin", async () => {
+    // Arrange
+    const message = { action: "set-theme", theme: "dark" };
+
+    // Act
+    const response = await sendExternal(message, "https://attacker.example");
+
+    // Assert
+    expect(response).toMatchObject({
+      ok: false,
+      error: "Origin or action not permitted",
+    });
+    expect(__chromeLocalStore.kaiordTheme).toBeUndefined();
+  });
+
+  it("should refuse a value outside light, dark and system", async () => {
+    // Arrange
+    const message = { action: "set-theme", theme: "sepia" };
+
+    // Act
+    const response = await sendExternal(message, "https://kaiord.com");
+
+    // Assert
+    expect(response).toMatchObject({
+      ok: false,
+      error: "Invalid theme preference",
+      retryable: false,
+    });
+    expect(__chromeLocalStore.kaiordTheme).toBeUndefined();
   });
 });

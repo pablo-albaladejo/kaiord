@@ -220,11 +220,12 @@ No new capability token is introduced. It SHALL re-announce on
 
 ### Requirement: Origin-pinned external message API
 
-The extension SHALL expose exactly `ping`, `status`, and `whoop-fetch` to
-external (SPA) callers via `chrome.runtime.onMessageExternal` — `ping` returns
-the bridge manifest plus the session status, `status` returns the session status
-(`{ connected, userId, capturedAt }` — never the token), and `whoop-fetch`
-relays an allowed read. The `capture-token` and `open-whoop` actions SHALL be
+The extension SHALL expose exactly `ping`, `status`, `whoop-fetch`, and
+`set-theme` to external (SPA) callers via `chrome.runtime.onMessageExternal` —
+`ping` returns the bridge manifest plus the session status, `status` returns the
+session status (`{ connected, userId, capturedAt }` — never the token),
+`whoop-fetch` relays an allowed read, and `set-theme` stores the app's theme
+preference for the popup (spec: bridge-core). The `capture-token` and `open-whoop` actions SHALL be
 reachable only over the internal `chrome.runtime.onMessage` channel (the
 extension's own content script and popup) and SHALL NOT appear in the external
 action allowlist. It SHALL accept external messages only from sender origins
