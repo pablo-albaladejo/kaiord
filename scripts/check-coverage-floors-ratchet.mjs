@@ -29,9 +29,9 @@
  *                              (default origin/main).
  */
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse as parseYaml } from "yaml";
 
 const CI = ".github/workflows/ci.yml";
@@ -261,4 +261,10 @@ const main = () => {
   process.exit(1);
 };
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+// Resolve symlinks so the guard cannot silently skip itself when it is reached
+// through a linked directory (import.meta.url is always the real path).
+const isMain =
+  Boolean(process.argv[1]) &&
+  pathToFileURL(realpathSync(process.argv[1])).href === import.meta.url;
+
+if (isMain) main();
