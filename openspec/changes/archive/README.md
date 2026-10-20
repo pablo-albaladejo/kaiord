@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-20 | [`agent-guardrails`](./2026-10-20-agent-guardrails/) | agent guardrails enforced by hooks |
 | 2026-10-16 | [`no-global-smooth-scroll`](./2026-10-16-no-global-smooth-scroll/) | drop the global smooth scroll |
 | 2026-10-15 | [`account-menu-opens-complete`](./2026-10-15-account-menu-opens-complete/) | the account menu opens complete, and a saved key reaches the list at once |
 | 2026-10-15 | [`ai-chat-model-picker`](./2026-10-15-ai-chat-model-picker/) | the chat model picker shows what the conversation runs |

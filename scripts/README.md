@@ -90,6 +90,21 @@ tree — keep the format `- \`<filename>\` — When to run: <reason>`.
 
 <!-- manual-tools:end -->
 
+## Claude Code hooks (`.claude/hooks/`)
+
+Agent guardrails live next to the Claude Code settings that wire them, not
+here. Their suites run under `pnpm test:scripts` (glob `.claude/hooks/*.test.mjs`).
+Rule IDs are in `openspec/specs/agent-guardrails/spec.md`.
+
+| Hook                        | Rule                    | Wired by (`.claude/settings.json`)                |
+| --------------------------- | ----------------------- | ------------------------------------------------- |
+| `never-auto-remediate.cjs`  | `R-NeverAutoRemediate`  | PreToolUse `Bash`                                 |
+| `record-human-approval.cjs` | `R-PlanApprovalReceipt` | UserPromptSubmit                                  |
+| `plan-approval-guard.cjs`   | `R-PlanApprovalReceipt` | PreToolUse `Edit\|Write\|MultiEdit\|NotebookEdit` |
+| `related-tests-stop.cjs`    | `R-RelatedTestsStop`    | Stop, SubagentStop                                |
+| `guard-common.cjs`          | (shared state helpers)  | required by the four above                        |
+| `check-architecture.cjs`    | hexagonal layers        | Stop                                              |
+
 ## Subdirectories
 
 | Folder      | Purpose                                                                                                                 |
