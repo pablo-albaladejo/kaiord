@@ -606,6 +606,8 @@ jobs:
           # covered; the residual is stable pre-existing code. The
           # privacy-surface and icon-distinct mechanical guards remain
           # the load-bearing checks for these packages.
+          # These floors only ratchet up: scripts/check-coverage-floors-ratchet.mjs
+          # (pnpm lint) fails if one is lowered or removed.
           case "${{ matrix.package }}" in
             garmin-bridge|train2go-bridge|whoop-bridge|trainingpeaks-bridge|tanita-bridge) THRESHOLD=60 ;;
             *) THRESHOLD=80 ;;
