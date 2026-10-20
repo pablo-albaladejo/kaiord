@@ -72,9 +72,17 @@ const hasVitestConfig = (root, pkg) => {
 // Pure apart from existence checks, which the tests inject.
 function planRuns(files, { exists, isVitestPackage }) {
   const vitest = new Map();
+  const full = new Set();
   const nodeTests = new Set();
   for (const file of files) {
-    if (!CODE.test(file) || GENERATED.test(file) || !exists(file)) continue;
+    if (!CODE.test(file) || GENERATED.test(file)) continue;
+    if (!exists(file)) {
+      // `vitest related` cannot follow a deleted file to its dependents:
+      // run that package's whole suite instead.
+      const gone = /^(packages\/[^/]+)\//.exec(file);
+      if (gone && isVitestPackage(gone[1])) full.add(gone[1]);
+      continue;
+    }
     if (NODE_TEST_DIR.test(file)) {
       const test = /\.test\.mjs$/.test(file)
         ? file
@@ -87,9 +95,14 @@ function planRuns(files, { exists, isVitestPackage }) {
     if (!vitest.has(match[1])) vitest.set(match[1], []);
     vitest.get(match[1]).push(match[2]);
   }
+  for (const pkg of full) if (!vitest.has(pkg)) vitest.set(pkg, []);
   const lanes = [...vitest.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([pkg, list]) => ({ kind: "vitest", pkg, files: list.sort() }));
+    .map(([pkg, list]) =>
+      full.has(pkg)
+        ? { kind: "vitest", pkg, files: [], full: true }
+        : { kind: "vitest", pkg, files: list.sort() }
+    );
   if (nodeTests.size > 0)
     lanes.push({ kind: "node", files: [...nodeTests].sort() });
   return lanes;
@@ -97,7 +110,9 @@ function planRuns(files, { exists, isVitestPackage }) {
 
 const laneLabel = (lane) =>
   lane.kind === "vitest"
-    ? `(cd ${lane.pkg} && pnpm exec vitest related --run ${lane.files.join(" ")})`
+    ? lane.full
+      ? `(cd ${lane.pkg} && pnpm exec vitest run)`
+      : `(cd ${lane.pkg} && pnpm exec vitest related --run ${lane.files.join(" ")})`
     : `node --test ${lane.files.join(" ")}`;
 
 // Same tree, same plan -> same fingerprint. Untracked files are hashed by
@@ -177,8 +192,7 @@ function executeLanes(root, lanes, resultFile) {
         [
           "exec",
           "vitest",
-          "related",
-          "--run",
+          ...(lane.full ? ["run"] : ["related", "--run"]),
           "--passWithNoTests",
           "--reporter=json",
           `--outputFile=${out}`,
@@ -295,9 +309,17 @@ function runWithBudget(root, lanes, { env, budgetMs }) {
         finish(null);
       }, KILL_GRACE_MS);
     }, budgetMs);
+    // If Claude Code kills the hook, take the test run down with it.
+    const onSignal = () => {
+      signalGroup("SIGKILL");
+      process.exit(0);
+    };
+    const SIGNALS = ["SIGTERM", "SIGINT", "SIGHUP"];
+    for (const sig of SIGNALS) process.once(sig, onSignal);
     const finish = (code) => {
       if (done) return;
       done = true;
+      for (const sig of SIGNALS) process.removeListener(sig, onSignal);
       clearTimeout(timer);
       clearTimeout(hardStop);
       // hg-gate may abort only its direct child; reap vitest stragglers.
@@ -362,6 +384,8 @@ function verdict(slot, run, { root, fp, lanes }) {
     return { output: null, next };
   }
   if (run.outcome !== "red") {
+    // The turn closes, so the run of consecutive blocks is over.
+    next.blocks = 0;
     const why = {
       timeout: "the related tests exceeded the 180 s budget",
       host: "hostguard refused or aborted the run (exit 75: host pressure, not a red)",
@@ -433,6 +457,37 @@ function subagentWrote(input) {
   return false;
 }
 
+const LOCK_STALE_MS = 30_000;
+const LOCK_WAIT_MS = 5_000;
+
+// mkdir lock around the read-modify-write of the session file, so a Stop
+// and a SubagentStop finishing together do not drop each other's slot. A
+// lock older than 30 s is stale; after 5 s of waiting we write unlocked.
+function withLock(lock, fn) {
+  const deadline = Date.now() + LOCK_WAIT_MS;
+  let held = false;
+  while (!held && Date.now() < deadline) {
+    try {
+      fs.mkdirSync(path.dirname(lock), { recursive: true, mode: 0o700 });
+      fs.mkdirSync(lock);
+      held = true;
+    } catch {
+      try {
+        if (Date.now() - fs.statSync(lock).mtimeMs > LOCK_STALE_MS)
+          fs.rmSync(lock, { recursive: true, force: true });
+      } catch {
+        // the holder just released it
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    if (held) fs.rmSync(lock, { recursive: true, force: true });
+  }
+}
+
 async function main(input, { env = process.env, budgetMs } = {}) {
   const sessionId = safeSessionId(input?.session_id);
   let root;
@@ -474,7 +529,10 @@ async function main(input, { env = process.env, budgetMs } = {}) {
   const { output, next } = verdict(slot, run, { root, fp, lanes });
   // Re-read just before writing: another agent of the session may have
   // updated its own slot while the tests ran.
-  if (file) writeJson(file, { ...(readJson(file) ?? {}), [key]: next });
+  if (file)
+    withLock(`${file}.lock`, () =>
+      writeJson(file, { ...(readJson(file) ?? {}), [key]: next })
+    );
   if (run.outcome !== "green")
     appendLog(
       env,

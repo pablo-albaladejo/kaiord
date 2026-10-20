@@ -183,6 +183,20 @@ describe("DENY — spellings of the guard's wiring", () => {
     assert.deepEqual(exempt, [false, false]);
   });
 
+  it("should deny writes into the git dir (hooks, config) without a receipt", () => {
+    // Arrange
+    const paths = [".git/hooks/pre-commit", ".git/config"];
+
+    // Act
+    const verdicts = paths.map(
+      (p) =>
+        decide(edit(join(repo, p)), { env, parentSession: () => null }).verdict
+    );
+
+    // Assert
+    assert.deepEqual(verdicts, ["deny", "deny"]);
+  });
+
   it("should judge a symlink outside the repo by the repo file it points to", () => {
     // Arrange
     const link = join(sandbox, "outside-link.ts");

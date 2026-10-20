@@ -145,12 +145,19 @@ function decide(
   const projectRepo = repoOf(
     env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd()
   );
-  const fileRepo = repoOf(dir);
-  if (!projectRepo || !fileRepo || fileRepo.commonDir !== projectRepo.commonDir)
+  if (!projectRepo) return { verdict: "allow", why: "outside the repository" };
+  // The git dir itself (.git/hooks, .git/config) has no work tree, so
+  // rev-parse cannot place it: it is repository territory all the same.
+  const inGitDir = target.startsWith(projectRepo.commonDir + path.sep);
+  const fileRepo = inGitDir ? null : repoOf(dir);
+  if (!inGitDir && (!fileRepo || fileRepo.commonDir !== projectRepo.commonDir))
     return { verdict: "allow", why: "outside the repository" };
 
-  const rel = path.relative(fileRepo.top, target);
-  if (isExemptRepoPath(rel)) return { verdict: "allow", why: `exempt ${rel}` };
+  const rel = inGitDir
+    ? path.join(".git", path.relative(projectRepo.commonDir, target))
+    : path.relative(fileRepo.top, target);
+  if (!inGitDir && isExemptRepoPath(rel))
+    return { verdict: "allow", why: `exempt ${rel}` };
 
   const sessionId = safeSessionId(input.session_id);
   const receipt = sessionId ? readJson(receiptPath(env, sessionId)) : null;

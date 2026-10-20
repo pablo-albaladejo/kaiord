@@ -56,7 +56,7 @@ The repository SHALL contain `.claude/hooks/plan-approval-guard.cjs`, wired as `
 
 Writes to `.omc/**`, to `.claude/**` state, and to paths outside the repository SHALL be allowed without a receipt. `.claude/settings*.json` and `.claude/hooks/**` SHALL NOT count as state.
 
-A subagent's tool call carries the parent's `session_id` and SHALL be judged by the parent's receipt. An agent-team teammate runs as its own process with its own `session_id`; its writes SHALL be judged by the lead's receipt, found as `--parent-session-id` in the hook's process ancestry. The path check SHALL be case-insensitive and SHALL follow a symlinked target. The rule ID is `R-PlanApprovalReceipt`.
+A subagent's tool call carries the parent's `session_id` and SHALL be judged by the parent's receipt. An agent-team teammate runs as its own process with its own `session_id`; its writes SHALL be judged by the lead's receipt, found as `--parent-session-id` in the hook's process ancestry. Paths inside the git common dir (`.git/hooks`, `.git/config`) SHALL count as repository paths. The path check SHALL be case-insensitive and SHALL follow a symlinked target. The rule ID is `R-PlanApprovalReceipt`.
 
 #### Scenario: A write before any human prompt
 
@@ -81,14 +81,14 @@ The repository SHALL contain `.claude/hooks/related-tests-stop.cjs`, wired as `S
 
 The hook SHALL collect the changed files of the worktree at the input `cwd`: `git diff --name-only HEAD` plus untracked, non-ignored files. When none of them is test-relevant it SHALL exit 0. Otherwise it SHALL run only the related tests:
 
-- `vitest related --run` per package that has a vitest config;
+- `vitest related --run` per package that has a vitest config, or that package's full `vitest run` when a tracked code file in it was deleted;
 - the co-located `*.test.mjs` for files under `scripts/`, `packages/*/scripts/` and `.claude/hooks/`.
 
 The tests SHALL run under `~/.claude/hostguard/hg-gate.sh` when it exists, within a 180 s budget.
 
 A `SubagentStop` whose transcript is readable and shows no `Edit`, `Write`, `MultiEdit` or `NotebookEdit` call SHALL NOT be checked: a read-only subagent cannot fix the tests.
 
-Red tests SHALL block the turn with `decision: "block"` and a reason that names the failing tests. A timeout, hostguard exit 75, or a runner that cannot start SHALL let the turn close with a `systemMessage` warning, and SHALL be logged to `$TMPDIR/claude-guards/guards.log`.
+Red tests SHALL block the turn with `decision: "block"` and a reason that names the failing tests. A timeout, hostguard exit 75, or a runner that cannot start SHALL let the turn close with a `systemMessage` warning and reset the count, and SHALL be logged to `$TMPDIR/claude-guards/guards.log`.
 
 The hook SHALL NOT skip because `stop_hook_active` is set. Consecutive blocks SHALL be capped at 3 per session and agent, counted in `$TMPDIR/claude-guards/<session_id>.json` outside the repository. The red Stop after the third block SHALL be let through with a loud message, and the count reset.
 

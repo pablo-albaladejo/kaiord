@@ -141,7 +141,8 @@ Garmin Connect.
   never skips because `stop_hook_active` is set. It allows at most 3 consecutive
   blocks per session and agent (`$TMPDIR/claude-guards/<session_id>.json`); the next
   red Stop goes through with a loud message. An unchanged red tree reuses the recorded
-  failures instead of re-running. A subagent whose transcript shows no
+  failures instead of re-running. A timeout or host pressure resets the count. A
+  deleted code file runs its package's whole suite. A subagent whose transcript shows no
   Edit or Write call is not checked, because it cannot fix the tests.
 
 **Limits.** These guards stop an agent drifting past a gate by accident. They are

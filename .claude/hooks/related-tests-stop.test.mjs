@@ -39,7 +39,7 @@ const HOOK = join(
 const SESSION = "sess-stop";
 
 describe("planRuns", () => {
-  it("should group package files for vitest and map scripts to co-located suites", () => {
+  it("should group package files for vitest, run a package's full suite when it lost a file, and map scripts to co-located suites", () => {
     // Arrange
     const files = [
       "packages/core/src/a.ts",
@@ -67,11 +67,7 @@ describe("planRuns", () => {
 
     // Assert
     assert.deepEqual(lanes, [
-      {
-        kind: "vitest",
-        pkg: "packages/core",
-        files: ["src/a.test.ts", "src/a.ts"],
-      },
+      { kind: "vitest", pkg: "packages/core", files: [], full: true },
       { kind: "vitest", pkg: "packages/fit", files: ["src/b.ts"] },
       {
         kind: "node",
@@ -196,7 +192,7 @@ describe("verdict — block cap and outcomes", () => {
   });
 
   for (const outcome of ["timeout", "host", "infra"]) {
-    it(`should let a ${outcome} through with a warning and keep the count`, () => {
+    it(`should let a ${outcome} through with a warning and end the run of blocks`, () => {
       // Arrange
       const state = { blocks: 1 };
 
@@ -206,7 +202,7 @@ describe("verdict — block cap and outcomes", () => {
       // Assert
       assert.equal(output.decision, undefined);
       assert.match(output.systemMessage, /NOT VERIFIED/);
-      assert.equal(next.blocks, 1);
+      assert.equal(next.blocks, 0);
     });
   }
 });
