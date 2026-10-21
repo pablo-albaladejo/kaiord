@@ -26,6 +26,14 @@ export const FENCED_FIELD_NAMES = [
 ];
 
 /**
+ * Every action tool (sync_coaching, create_workout, log_health_metric,
+ * log_intake, push_to_garmin, set_data_route) also has a second path to the
+ * model: an approved call runs in hooks/chat/run-confirmed-tool.ts, and a
+ * throw from its `execute` becomes `{ error: "invalid_input" |
+ * "action_failed" }` there, never the exception's text (the text is logged,
+ * scrubbed). The guard's hooks/chat scan keeps that catch, and every other
+ * catch in that directory, from reading the caught value's text.
+ *
  * Known limits, stated so a green run is not read as more than it is:
  *  - syntactic: an externally-authored field under a NEW name is not caught;
  *  - opaque payloads: a nested `unknown` forwarded whole is not inspected;
@@ -71,32 +79,36 @@ export const SINKS = [
     tool: "sync_coaching",
     status: "clean",
     provenance:
-      "produced in application/coaching/sync-week.ts, OUTSIDE this directory: the bridge's exception text was read into SyncWeekResult.error and returned verbatim. doSyncCoaching now projects it away; the use case keeps it for the UI and the log.",
+      "produced in application/coaching/sync-week.ts, OUTSIDE this directory: the bridge's exception text was read into SyncWeekResult.error and returned verbatim. doSyncCoaching now projects it away; the use case keeps it for the UI and the log. A throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
   },
   {
     tool: "create_workout",
     status: "clean",
-    provenance: "returns ids the app generated",
+    provenance:
+      "returns ids the app generated; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
   },
   {
     tool: "log_health_metric",
     status: "clean",
-    provenance: "returns the persisted record's own numeric fields",
+    provenance:
+      "returns the persisted record's own numeric fields; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
   },
   {
     tool: "log_intake",
     status: "clean",
-    provenance: "returns app-computed totals",
+    provenance:
+      "returns app-computed totals; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
   },
   {
     tool: "push_to_garmin",
     status: "clean",
     provenance:
-      "garminPushId is the Garmin-confirmed library workout id (parsed to ^[1-9]\\d*$ at the source) or null; calendar is the PlacementResult kind and reason is a failed PlacementResult's reason, both app-authored literal enums; error codes are app-authored literals, and any exception on the path becomes push_failed, never its text; message is NoActiveExportRouteError's app-authored text or one of the app-authored pace zone literals (missing_pace_zones, incomplete_pace_zones, unsupported_pace_zone_sport) or FTP literals (missing_ftp, sport_without_power_zones)",
+      "garminPushId is the Garmin-confirmed library workout id (parsed to ^[1-9]\\d*$ at the source) or null; calendar is the PlacementResult kind and reason is a failed PlacementResult's reason, both app-authored literal enums; error codes are app-authored literals, and any exception on the path becomes push_failed, never its text; message is NoActiveExportRouteError's app-authored text or one of the app-authored pace zone literals (missing_pace_zones, incomplete_pace_zones, unsupported_pace_zone_sport) or FTP literals (missing_ftp, sport_without_power_zones); a workoutId that is not the active athlete's is workout_not_found; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
   },
   {
     tool: "set_data_route",
     status: "clean",
-    provenance: "returns the same route answer as get_data_routes",
+    provenance:
+      "returns the same route answer as get_data_routes; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
   },
 ];

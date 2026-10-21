@@ -37,7 +37,7 @@ export const useChatActionOps = (
   generation: ChatGenerationModel
 ): ChatActionOps => {
   const persistence = usePersistence();
-  const pushToGarmin = usePushToGarminOp();
+  const pushToGarmin = usePushToGarminOp(profileId);
   const setDataRoute = useSetDataRouteOp(profileId);
   const { logHealthMetric, logIntake } = useLogOps(profileId);
   const transport = useTrain2GoCoachingTransport();
