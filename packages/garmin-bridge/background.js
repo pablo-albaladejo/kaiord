@@ -74,6 +74,21 @@ try {
   );
 }
 
+// ── App theme preference for the popup (vendored bridge-core) ──
+let bridgeTheme;
+try {
+  importScripts("bridge-theme.js");
+  bridgeTheme = globalThis;
+} catch (e) {
+  bridgeTheme =
+    typeof require !== "undefined" ? require("./bridge-theme.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-bridge-theme",
+    e
+  );
+}
+
 // ── Bearer transport (vendored bridge-core; consumed by garmin-oauth.js) ──
 // Loaded before garmin-oauth so the SW exposes self.bearerFetch/bearerRequest.
 try {
@@ -565,6 +580,8 @@ const handleAction = async (message) => {
       return await persistSnapshot(message.snapshot);
     case "profile-snapshot-clear":
       return await clearSnapshot();
+    case "set-theme":
+      return await bridgeTheme.storeThemePreference(message.theme);
     default:
       throw new Error(`Unknown action: ${message.action}`);
   }
@@ -587,6 +604,7 @@ const EXTERNAL_ACTIONS = new Set([
   "schedule",
   "unschedule",
   "calendar-find",
+  "set-theme",
 ]);
 
 const dispatch = bridgeEnvelope.createDispatch({

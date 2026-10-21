@@ -22,7 +22,8 @@
   "model": {
     "label": "Modelo",
     "followMain": "Igual que el principal ({{model}})",
-    "followChat": "Igual que el chat en Ajustes ({{model}})"
+    "followChat": "Igual que el chat en Ajustes ({{model}})",
+    "manage": "Gestionar IA…"
   },
   "search": {
     "placeholder": "Buscar chats…",
@@ -53,7 +54,50 @@
   "action": {
     "sync_coaching": "Sincronizar actividades del entrenador",
     "create_workout": "Crear un entrenamiento",
-    "log_health_metric": "Registrar una métrica de salud"
+    "log_health_metric": "Registrar una métrica de salud",
+    "log_intake": "Registrar una ingesta",
+    "push_to_garmin": "Enviar a Garmin",
+    "set_data_route": "Cambiar el enrutado de datos"
+  },
+  "summary": {
+    "unreadable": "El asistente envió datos que la app no puede leer. Recházalo y vuelve a pedirlo.",
+    "syncCoaching": "Traer las últimas actividades prescritas por tu entrenador.",
+    "createWorkout": "El {{date}}: «{{description}}»",
+    "createWorkoutSport": "{{sport}} el {{date}}: «{{description}}»",
+    "metric": {
+      "sleep": "Sueño: {{value}} h el {{date}}",
+      "weight": "Peso: {{value}} kg el {{date}}",
+      "hrv": "VFC: {{value}} ms el {{date}}",
+      "daily-wellness": "Pasos: {{value}} el {{date}}"
+    },
+    "intake": "{{kcal}} kcal (proteína {{protein}} g · hidratos {{carb}} g · grasa {{fat}} g) el {{date}}",
+    "intakeLabelled": "«{{label}}»: {{line}}",
+    "intakeSlot": "{{slot}}: {{line}}",
+    "mealSlot": {
+      "breakfast": "Desayuno",
+      "lunch": "Almuerzo",
+      "dinner": "Cena",
+      "snack": "Tentempié"
+    },
+    "push": "«{{title}}» ({{duration}}) el {{date}}",
+    "pushLoading": "Buscando el entrenamiento…",
+    "pushMissing": "Este entrenamiento no está en la biblioteca del atleta activo. Recházalo y vuelve a pedirlo.",
+    "route": {
+      "enable": {
+        "import": "Empezar a importar {{type}} desde {{integration}}",
+        "export": "Empezar a enviar {{type}} a {{integration}}"
+      },
+      "disable": {
+        "import": "Dejar de importar {{type}} desde {{integration}}",
+        "export": "Dejar de enviar {{type}} a {{integration}}"
+      },
+      "union": "{{type}}: combinar todas las fuentes activas",
+      "priority": "{{type}}: leer de {{order}}, en ese orden"
+    }
+  },
+  "external": {
+    "push_to_garmin": "Esto envía el entrenamiento fuera de tu dispositivo, a tu cuenta de Garmin Connect.",
+    "sync_coaching": "Esto se conecta con tu proveedor de entrenamiento, fuera de tu dispositivo."
   },
   "toolLinks": {
     "viewWorkout": "Ver entrenamiento",
