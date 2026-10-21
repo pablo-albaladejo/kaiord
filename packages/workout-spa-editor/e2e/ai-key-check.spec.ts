@@ -55,7 +55,7 @@ test.describe("AI provider key check", () => {
 
     await page.goto("/chat");
     await page.getByLabel("Message").fill("How was my week?");
-    await page.getByRole("button", { name: "Send" }).click();
+    await page.getByRole("button", { name: "Send", exact: true }).click();
 
     await expect(
       page.getByText("Authentication failed — check your API key in settings.")
