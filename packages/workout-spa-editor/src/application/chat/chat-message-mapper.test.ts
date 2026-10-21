@@ -44,6 +44,36 @@ describe("recordsToModelMessages", () => {
   });
 });
 
+describe("recordsToModelMessages stop markers", () => {
+  it("should append the model-facing marker to a stopped reply", () => {
+    // Arrange
+    const stopped = {
+      ...record("2", "assistant", "Partial"),
+      stopReason: "aborted" as const,
+    };
+
+    // Act
+    const [message] = recordsToModelMessages([stopped]);
+
+    // Assert
+    expect(message.content).toBe("Partial\n\n(Stopped by the user.)");
+  });
+
+  it("should send only the marker when a timed-out reply is empty", () => {
+    // Arrange
+    const stopped = {
+      ...record("2", "assistant", ""),
+      stopReason: "timeout" as const,
+    };
+
+    // Act
+    const [message] = recordsToModelMessages([stopped]);
+
+    // Assert
+    expect(message.content).toBe("(Stopped: the response took too long.)");
+  });
+});
+
 describe("newChatMessage", () => {
   it("should omit optional fields when not provided", () => {
     // Arrange
