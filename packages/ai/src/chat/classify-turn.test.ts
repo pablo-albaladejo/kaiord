@@ -186,6 +186,35 @@ describe("classifyTurn", () => {
     expect(answer).not.toContain("Ask the user about it again");
   });
 
+  it("should answer a copy of the pending call as a duplicate when its keys come in another order", () => {
+    // Arrange
+    const raw = rawTurn({
+      finishReason: "tool-calls",
+      toolCalls: [
+        {
+          toolName: "set_data_route",
+          toolCallId: "pending",
+          input: { dataType: "sleep", direction: "import" },
+        },
+        {
+          toolName: "set_data_route",
+          toolCallId: "copy",
+          input: { direction: "import", dataType: "sleep" },
+        },
+      ],
+    });
+
+    // Act
+    const result = classifyTurn(history, raw, new Set(["set_data_route"]));
+
+    // Assert
+    if (result.status !== "pending_action") throw new Error(result.status);
+    expect(result.pendingAction.deferredCount).toBeUndefined();
+    expect(JSON.stringify(result.messages.at(-1))).toContain(
+      "duplicate_of_pending"
+    );
+  });
+
   it.each([
     [
       "a copy of the pending call",

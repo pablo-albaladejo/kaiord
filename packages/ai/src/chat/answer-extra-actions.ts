@@ -26,8 +26,20 @@ const DUPLICATE_ACTION = {
     "step that was already answered. It was not run. Do not ask for it again.",
 };
 
+// Sorts object keys so the same input in another key order is the same call.
+const stable = (value: unknown): unknown =>
+  Array.isArray(value)
+    ? value.map(stable)
+    : value !== null && typeof value === "object"
+      ? Object.fromEntries(
+          Object.keys(value)
+            .sort()
+            .map((k) => [k, stable((value as Record<string, unknown>)[k])])
+        )
+      : value;
+
 const keyOf = (call: ToolCall) =>
-  `${call.toolName}:${JSON.stringify(call.input)}`;
+  `${call.toolName}:${JSON.stringify(stable(call.input))}`;
 
 /**
  * A step may hold several action calls, but the user confirms one. The others
