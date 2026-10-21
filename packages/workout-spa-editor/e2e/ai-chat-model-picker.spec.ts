@@ -89,7 +89,7 @@ test.describe("Chat model picker", () => {
 
     // Sending from a following draft pins nothing on the conversation.
     await page.getByLabel("Message").fill("Plan my week");
-    await page.getByRole("button", { name: "Send" }).click();
+    await page.getByRole("button", { name: "Send", exact: true }).click();
     await expect
       .poll(async () => (await storedRows(page, "chatConversations")).length)
       .toBe(1);
@@ -130,7 +130,7 @@ test.describe("Chat model picker", () => {
 
     // The first message stamps the choice on the conversation.
     await page.getByLabel("Message").fill("How was my week?");
-    await page.getByRole("button", { name: "Send" }).click();
+    await page.getByRole("button", { name: "Send", exact: true }).click();
     await expect
       .poll(async () => (await storedRows(page, "chatConversations"))[0])
       .toMatchObject({ modelId: "o3" });
