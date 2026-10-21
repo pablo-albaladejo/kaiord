@@ -96,8 +96,12 @@ module.exports = [
     // rejection on a failed turn in the browser, so the bump is the fix, not
     // a routine patch range. It measured 71.43 kB in CI against 68.25 kB on
     // main (run for PR #1348); `verifyProviderKey` is a plain fetch probe and
-    // accounts for well under 1 kB of that.
-    limit: "75 kB",
+    // accounts for well under 1 kB of that. Bumped to 80 kB for the `ai`
+    // 7.0.138 -> 7.0.143 patch range (PR #1523), which measured 75.59 kB
+    // against 74.79 kB on main. The chat batch (#1513, #1508, #1501: deferred
+    // parallel actions, stop/timeout watchdog, streamed generation progress)
+    // had taken main from ~71.4 kB to 74.79 kB, leaving 0.2 kB of headroom.
+    limit: "80 kB",
     import: "*",
     modifyEsbuildConfig: externalize(["zod", "@kaiord/core"]),
   },
