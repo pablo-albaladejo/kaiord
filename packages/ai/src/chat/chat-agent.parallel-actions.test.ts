@@ -89,6 +89,34 @@ const deferredAnswer = (prompt: Array<{ role: string; content: unknown }>) =>
     .flatMap((m) => m.content as Array<Record<string, unknown>>)
     .find((part) => part.toolCallId === "second");
 
+// The first call of the step fails validation, so it is answered with its
+// error and the first VALID call (hrv) is the one put to the user.
+const invalidThenTwoValid = () =>
+  stream(
+    [
+      {
+        type: "tool-call",
+        toolCallId: "bad",
+        toolName: "set_data_route",
+        input: route("not_a_data_type"),
+      },
+      {
+        type: "tool-call",
+        toolCallId: "good",
+        toolName: "set_data_route",
+        input: route("hrv"),
+      },
+      {
+        type: "tool-call",
+        toolCallId: "good2",
+        toolName: "set_data_route",
+        input: route("weight"),
+      },
+    ],
+    "tool-calls",
+    "tool_use"
+  );
+
 describe("chat agent with parallel action calls", () => {
   it("should offer the deferred action again once the user has declined the pending one", async () => {
     // Arrange
@@ -155,5 +183,42 @@ describe("chat agent with parallel action calls", () => {
     expect(resumed.status).toBe("complete");
     const prompt = model.doStreamCalls[1]?.prompt ?? [];
     expect(answeredIds(prompt as never).sort()).toEqual(["first", "second"]);
+  });
+
+  it("should put the first valid action to the user when an invalid call opens the step", async () => {
+    // Arrange
+    const model = new MockLanguageModelV4({
+      doStream: [invalidThenTwoValid(), done()] as never,
+    });
+    const agent = createChatAgent({
+      model,
+      tools: createHubChatToolFixtures(),
+    });
+    const first = await agent.sendTurn([
+      { role: "user", content: "import hrv and weight from whoop" },
+    ]);
+    if (first.status !== "pending_action") throw new Error(first.status);
+
+    // Act
+    const resumed = await agent.resume(first.messages, {
+      toolCallId: first.pendingAction.toolCallId,
+      toolName: first.pendingAction.toolName,
+      status: "approved",
+      output: { ok: true },
+    });
+
+    // Assert
+    expect(first.pendingAction).toMatchObject({
+      toolCallId: "good",
+      input: JSON.parse(route("hrv")),
+      deferredCount: 1,
+    });
+    expect(resumed.status).toBe("complete");
+    const prompt = model.doStreamCalls[1]?.prompt ?? [];
+    expect(answeredIds(prompt as never).sort()).toEqual([
+      "bad",
+      "good",
+      "good2",
+    ]);
   });
 });
