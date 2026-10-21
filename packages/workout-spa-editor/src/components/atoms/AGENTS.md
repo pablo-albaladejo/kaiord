@@ -17,6 +17,7 @@ Leaf UI primitives. No business logic; no Dexie reads; no Zustand selectors beyo
 - `Button/` — `Button.tsx` + `LoadingSpinner.tsx` + styles + stories + tests + README. Primary, secondary, ghost, danger variants.
 - `ErrorMessage/` — `ErrorMessage.tsx` + `ErrorActions.tsx` + `ValidationErrorList.tsx` + stories + tests.
 - `Icon/` — `Icon.tsx` wrapper over `lucide-react` + stories + tests + README + EXAMPLES.
+- `Markdown/` — `Markdown.tsx` (safe markdown for assistant replies) + its own line parser (`parse-blocks.ts`, `parse-inline.ts`, `parse-list.ts`, `parse-table.ts`, `parse-fence.ts`, `safe-href.ts`) + stories + tests + README. No HTML path: every node is a React element; only http(s) links become anchors.
 - `MenuItem/` — `MenuItem.tsx` (`MenuItem`, `MenuRadioItem`): the only Radix dropdown items the app uses. They ignore a release that did not start on the item, so the press that opened a menu cannot choose a row; lint (`no-restricted-syntax`) forbids raw `DropdownMenu.Item` / `RadioItem` / `CheckboxItem` elsewhere.
 - `Input/` — `Input.tsx` + `InputElement.tsx` + `InputMessages.tsx` + styles + types + stories + tests + README. Text + numeric + select variants.
 - `ThemeToggle/` — `ThemeToggle.tsx` (light/dark switch consuming `useTheme`) + stories + tests.
