@@ -49,7 +49,9 @@
   "pendingAction": {
     "confirm": "Confirm: {{action}}",
     "approve": "Approve",
-    "decline": "Decline"
+    "decline": "Decline",
+    "deferred_one": "The assistant proposed {{count}} more action; it may ask you about it next.",
+    "deferred_other": "The assistant proposed {{count}} more actions; it may ask you about them next."
   },
   "action": {
     "sync_coaching": "Sync coaching activities",
