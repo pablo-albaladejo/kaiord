@@ -1,3 +1,5 @@
+import { CHAT_ACTION_TOOL_NAMES } from "@kaiord/ai/prompts";
+
 import {
   type ActionInput,
   num,
@@ -33,18 +35,18 @@ const TEXT_SUMMARIES = {
   },
   log_intake: summarizeLogIntake,
   set_data_route: summarizeSetDataRoute,
-} satisfies Record<string, Summarize>;
+} satisfies Record<TextActionName, Summarize>;
 
-export type TextActionName = keyof typeof TEXT_SUMMARIES;
+/** Every confirmation-gated tool the card can describe, taken from the
+ * tuple the chat prompt names, so the card and the prompt cannot drift. */
+export type ActionToolName = (typeof CHAT_ACTION_TOOL_NAMES)[number];
 
-/** Every confirmation-gated tool the card can describe. `push_to_garmin`
- * is rendered by a component because it resolves the workout from Dexie. */
-export type ActionToolName = TextActionName | "push_to_garmin";
+/** `push_to_garmin` is rendered by a component because it resolves the
+ * workout from Dexie; every other action has a text summary. */
+export type TextActionName = Exclude<ActionToolName, "push_to_garmin">;
 
-export const ACTION_TOOL_NAMES: ReadonlyArray<ActionToolName> = [
-  ...(Object.keys(TEXT_SUMMARIES) as TextActionName[]),
-  "push_to_garmin",
-];
+export const ACTION_TOOL_NAMES: ReadonlyArray<ActionToolName> =
+  CHAT_ACTION_TOOL_NAMES;
 
 /** Actions whose effect reaches a service outside this device. */
 export const EXTERNAL_ACTIONS: ReadonlySet<ActionToolName> = new Set([

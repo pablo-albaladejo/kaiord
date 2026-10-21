@@ -78,6 +78,22 @@ describe("useWorkoutLabelLive", () => {
     await waitFor(() => expect(result.current).toBeNull());
   });
 
+  it("should report null once the active athlete switches away from the workout's owner", async () => {
+    // Arrange
+    const workout = record(ACTIVE);
+    await db.table("workouts").put(workout);
+    const { result } = renderHook(() =>
+      useWorkoutLabelLive(workout.id, "Session")
+    );
+    await waitFor(() => expect(result.current).toBeTruthy());
+
+    // Act
+    await db.table("meta").put({ key: "activeProfileId", value: OTHER });
+
+    // Assert
+    await waitFor(() => expect(result.current).toBeNull());
+  });
+
   it("should report null for an id with no saved workout", async () => {
     // Arrange
     const id = "00000000-0000-4000-8000-0000000000ff";
