@@ -1,7 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import type { Ref } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
+import {
+  type ChatComposerHandle,
+  useComposerInput,
+} from "./use-composer-input";
+
+export type { ChatComposerHandle };
 
 export type ChatComposerProps = {
   onSend: (text: string) => void;
@@ -11,6 +17,7 @@ export type ChatComposerProps = {
   /** While a reply streams, the send button becomes a Stop control. */
   streaming?: boolean;
   onStop?: () => void;
+  ref?: Ref<ChatComposerHandle>;
 };
 
 /** Message input. Enter sends; Shift+Enter inserts a newline. */
@@ -20,17 +27,14 @@ export function ChatComposer({
   initialText,
   streaming = false,
   onStop,
+  ref,
 }: ChatComposerProps) {
   const t = useTranslate("chat");
-  const [text, setText] = useState(initialText ?? "");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const wasDisabled = useRef(disabled);
-
-  // A disabled control drops focus; hand it back once the reply settles.
-  useEffect(() => {
-    if (wasDisabled.current && !disabled) inputRef.current?.focus();
-    wasDisabled.current = disabled;
-  }, [disabled]);
+  const { text, setText, inputRef } = useComposerInput(
+    disabled,
+    initialText,
+    ref
+  );
 
   const submit = () => {
     const trimmed = text.trim();

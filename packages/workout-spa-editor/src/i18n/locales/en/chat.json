@@ -55,7 +55,50 @@
   "action": {
     "sync_coaching": "Sync coaching activities",
     "create_workout": "Create a workout",
-    "log_health_metric": "Log a health metric"
+    "log_health_metric": "Log a health metric",
+    "log_intake": "Log food intake",
+    "push_to_garmin": "Send to Garmin",
+    "set_data_route": "Change data routing"
+  },
+  "summary": {
+    "unreadable": "The assistant sent details the app could not read. Decline and ask again.",
+    "syncCoaching": "Fetch the latest prescribed activities from your coaching provider.",
+    "createWorkout": "On {{date}}: “{{description}}”",
+    "createWorkoutSport": "{{sport}} on {{date}}: “{{description}}”",
+    "metric": {
+      "sleep": "Sleep: {{value}} h on {{date}}",
+      "weight": "Weight: {{value}} kg on {{date}}",
+      "hrv": "HRV: {{value}} ms on {{date}}",
+      "daily-wellness": "Steps: {{value}} on {{date}}"
+    },
+    "intake": "{{kcal}} kcal (protein {{protein}} g · carbs {{carb}} g · fat {{fat}} g) on {{date}}",
+    "intakeLabelled": "“{{label}}”: {{line}}",
+    "intakeSlot": "{{slot}}: {{line}}",
+    "mealSlot": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
+    "push": "“{{title}}” ({{duration}}) on {{date}}",
+    "pushLoading": "Looking up the workout…",
+    "pushMissing": "This workout is not in the active athlete's library. Decline and ask again.",
+    "route": {
+      "enable": {
+        "import": "Start importing {{type}} from {{integration}}",
+        "export": "Start sending {{type}} to {{integration}}"
+      },
+      "disable": {
+        "import": "Stop importing {{type}} from {{integration}}",
+        "export": "Stop sending {{type}} to {{integration}}"
+      },
+      "union": "{{type}}: merge every enabled source",
+      "priority": "{{type}}: read from {{order}}, in that order"
+    }
+  },
+  "external": {
+    "push_to_garmin": "This sends the workout off your device, to your Garmin Connect account.",
+    "sync_coaching": "This connects to your coaching provider, outside your device."
   },
   "toolLinks": {
     "viewWorkout": "View workout",
@@ -106,5 +149,46 @@
   "stopReason": {
     "aborted": "Stopped by you.",
     "timeout": "Stopped: the response took too long."
+  },
+  "capabilities": {
+    "title": "Ask about your data or ask me to do something",
+    "help": "What can I do?",
+    "close": "Close",
+    "fillHint": "A suggestion fills in your message; it doesn't send it.",
+    "nothingSaved": "Nothing is saved without your confirmation.",
+    "youConfirm": "You confirm each one.",
+    "group": {
+      "consult": "Look up",
+      "log": "Log",
+      "do": "Do"
+    },
+    "tool": {
+      "query_workouts": "Your workouts by date and sport",
+      "query_health": "Sleep, weight, HRV, steps…",
+      "query_energy_balance": "Energy balance and goal",
+      "query_coaching": "What your coach has planned",
+      "get_data_routes": "Which source each data type comes from",
+      "log_health_metric": "Weight, sleep, HRV or steps",
+      "log_intake": "Meals and intake",
+      "create_workout": "Create and save a workout on a date",
+      "push_to_garmin": "Send a workout to Garmin",
+      "sync_coaching": "Sync your coach's plan",
+      "set_data_route": "Change which source a data type comes from"
+    },
+    "example": {
+      "week": "How did my week go?",
+      "sleep": "Have I slept better this month?",
+      "balance": "How is my energy balance going?",
+      "coachPlan": "What has my coach planned this week?",
+      "weightSource": "Where does my weight come from?",
+      "logWeight": "Log 71.9 kg today",
+      "logSleep": "I slept 7 h last night",
+      "logMeal": "I ate 120 g of pasta",
+      "createWorkout": "Create a 45-minute Z2 run for tomorrow",
+      "pushGarmin": "Push tomorrow's workout to Garmin",
+      "syncCoaching": "Sync my Train2Go plan",
+      "setRoute": "Use WHOOP for sleep"
+    },
+    "suggestions": "{{group}} suggestions"
   }
 }
