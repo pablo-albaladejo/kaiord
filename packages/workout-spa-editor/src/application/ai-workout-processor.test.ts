@@ -12,7 +12,6 @@ function makeParams(overrides: Partial<ProcessorParams> = {}): ProcessorParams {
   return {
     workout: makeWorkoutRecord(),
     selectedComments: [],
-    zonesContext: "Z1: 120-140bpm",
     generateFn: vi.fn<GenerateFn>().mockResolvedValue(makeValidKrd()),
     provider: "openai",
     model: "gpt-4o",
@@ -32,7 +31,7 @@ describe("processWorkoutWithAi", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.krd.type).toBe("structured_workout");
-      expect(result.aiMeta.promptVersion).toBe("1.1.0");
+      expect(result.aiMeta.promptVersion).toBe("1.2.0");
       expect(result.aiMeta.provider).toBe("openai");
       expect(result.aiMeta.model).toBe("gpt-4o");
       expect(result.retried).toBe(false);

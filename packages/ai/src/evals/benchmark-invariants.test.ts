@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import benchmarks from "./benchmarks.json";
 import {
   benchmarkViolations,
+  targetCheckViolation,
   zoneCheckViolation,
 } from "./benchmark-invariants";
 import type { Benchmark } from "./types";
@@ -74,6 +75,43 @@ describe("zoneCheckViolation", () => {
 
     // Assert
     expect(violation).not.toBeNull();
+  });
+});
+
+describe("targetCheckViolation", () => {
+  const base: Benchmark = {
+    id: "running-es-range",
+    text: "Rodaje 20' z1",
+    minSteps: 1,
+    maxSteps: 3,
+    category: "zones",
+    language: "es",
+    targetCheck: { targetType: "pace", requireRange: true },
+  };
+
+  it("should reject a required range with no zone table to resolve it", () => {
+    // Arrange
+    const benchmark = base;
+
+    // Act
+    const violation = targetCheckViolation(benchmark);
+
+    // Assert
+    expect(violation).toContain("no pace table");
+  });
+
+  it("should accept a required range backed by the matching zone table", () => {
+    // Arrange
+    const benchmark: Benchmark = {
+      ...base,
+      athleteZones: { pace: [{ zone: 1, minMps: 2.5, maxMps: 2.9 }] },
+    };
+
+    // Act
+    const violation = targetCheckViolation(benchmark);
+
+    // Assert
+    expect(violation).toBeNull();
   });
 });
 

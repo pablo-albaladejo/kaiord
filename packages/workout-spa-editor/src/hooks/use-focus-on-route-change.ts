@@ -29,6 +29,7 @@ import { useLocation } from "wouter";
 import { ROUTE_HEADING_SELECTOR } from "../routing/constants";
 import { logger } from "../utils/logger";
 import { isFormFieldFocused } from "./focus/is-form-field-focused";
+import { consumeRouteFocusSkip } from "./focus/skip-route-focus";
 
 const FALLBACK_WARN = "useFocusOnRouteChange: no [data-route-heading]";
 // Bound the wait for a route-heading to appear. Long enough to cover
@@ -80,6 +81,7 @@ export function useFocusOnRouteChange(): void {
   useEffect(() => {
     if (lastPathRef.current === pathname) return;
     lastPathRef.current = pathname;
+    if (consumeRouteFocusSkip(pathname)) return;
 
     let observer: MutationObserver | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -90,17 +92,13 @@ export function useFocusOnRouteChange(): void {
     // doing so swallowed the keystrokes typed into a just-focused field.
     const staleOwner = ownerRef.current;
 
-    const focusTarget = (target: HTMLElement) => {
-      target.focus({ preventScroll: true });
-    };
-
     const tryFocus = (): boolean => {
       const target = document.querySelector<HTMLElement>(
         ROUTE_HEADING_SELECTOR
       );
       if (!target) return false;
       if (focusMovedOn(staleOwner, target)) return true;
-      focusTarget(target);
+      target.focus({ preventScroll: true });
       // Engines silently drop a programmatic focus applied during the
       // post-navigation settle window — the call returns normally and
       // activeElement stays put. Reporting success on the element merely
