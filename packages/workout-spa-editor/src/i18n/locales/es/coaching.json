@@ -49,6 +49,17 @@
     "not-found": "La actividad de coaching ya no está disponible",
     "no-provider": "No hay ningún proveedor de IA configurado"
   },
+  "aiProgress": {
+    "preparing": "Preparando la petición…",
+    "requesting": "Esperando a que {{model}} lea la descripción…",
+    "retrying": "La respuesta no encajaba con el formato del entreno. Volviendo a pedírselo a {{model}} (intento {{attempt}} de {{max}})…",
+    "generating": "{{model}} está escribiendo los pasos…",
+    "validating": "Comprobando el entreno…",
+    "steps_one": "{{count}} paso por ahora",
+    "steps_other": "{{count}} pasos por ahora",
+    "elapsed": "{{seconds}} s",
+    "cancel": "Cancelar"
+  },
   "status": {
     "pending": "Pendiente",
     "completed": "Completado",
