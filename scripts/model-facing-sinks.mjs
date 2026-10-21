@@ -49,19 +49,19 @@ export const SINKS = [
     tool: "query_workouts",
     status: "fenced",
     provenance:
-      "workout.name is read from krd.extensions.structured_workout.name. utils/import-workout.ts parses FIT/TCX/ZWO/GCN/KRD uploads into that KRD, so a file supplies the name; fenced in summarize-workouts.ts",
+      "workout.name is read from krd.extensions.structured_workout.name. utils/import-workout.ts parses FIT/TCX/ZWO/GCN/KRD uploads into that KRD, so a file supplies the name; fenced in summarize-workouts.ts. id is the app-generated record uuid; sport and state are the record's own columns. Rows come from the profile-bound reader in profile-readers.ts, held to the defineReadTool row+byte budget",
   },
   {
     tool: "query_coaching",
     status: "fenced",
     provenance:
-      "title and description are coach-authored on the coaching platform; fenced in summarize-coaching.ts",
+      "title and description are coach-authored on the coaching platform; fenced in summarize-coaching.ts. Rows come from the profile-bound reader in profile-readers.ts, held to the defineReadTool row+byte budget",
   },
   {
     tool: "query_health",
-    status: "unbounded",
+    status: "clean",
     provenance:
-      "summarize-health.ts forwards krd: unknown verbatim. Health schemas carry externalId: z.string().optional(), written upstream, and the Dexie adapter never parses. Benign today by write-path discipline, not by type. A syntactic guard cannot see inside it.",
+      "summarize-health.ts projects each record to its date plus a fixed per-metric list of finite numbers (sleep stages summed to seconds per stage; sleep and stress startTime/endTime only as a local HH:MM clock derived from the instant in health-clock.ts; hrv measurementWindow only when it is one of the schema's two literals). The KRD payload, and the upstream-written externalId/sourceBridgeId it carries, is never forwarded",
   },
   {
     tool: "query_energy_balance",

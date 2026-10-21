@@ -48,6 +48,7 @@ const blockSchema = z.object({
 });
 
 export const aiWorkoutSchema = z.object({
+  name: z.string().optional(),
   sport: z.enum(["cycling", "running", "swimming", "generic"]),
   steps: z.array(z.union([stepSchema, blockSchema])),
 });
