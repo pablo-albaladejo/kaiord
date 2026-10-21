@@ -12,6 +12,8 @@ const rawTurn = (over: Partial<RawTurn>): RawTurn => ({
   finishReason: "stop",
   usage: { promptTokens: 10, completionTokens: 5 },
   messages: response,
+  steps: 1,
+  toolNames: [],
   ...over,
 });
 
@@ -265,5 +267,24 @@ describe("classifyTurn", () => {
 
     // Assert
     expect(result.messages).toEqual([...history, ...response]);
+  });
+
+  it("should classify a stopped turn as timeout even with a tool-calls finish", () => {
+    // Arrange
+    const raw = rawTurn({
+      stopped: "timeout",
+      finishReason: "tool-calls",
+      text: "partial",
+      toolCalls: [
+        { toolName: "set_data_route", toolCallId: "late", input: {} },
+      ],
+    });
+
+    // Act
+    const result = classifyTurn(history, raw, new Set(["set_data_route"]));
+
+    // Assert
+    expect(result.status).toBe("timeout");
+    expect("pendingAction" in result).toBe(false);
   });
 });

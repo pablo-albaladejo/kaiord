@@ -1,6 +1,12 @@
 import { streamText, stepCountIs } from "ai";
 import type { LanguageModel, ModelMessage, ToolSet } from "ai";
 import type { ChatUsage } from "./chat-types";
+import { attachTurnMetrics, createTurnStats, stoppedTurn } from "./turn-stats";
+import {
+  createTurnWatchdog,
+  type TurnStopCause,
+  type TurnWatchdog,
+} from "./turn-watchdog";
 
 /** Normalized result of a single AI SDK turn, decoupled from the SDK shape. */
 export type RawTurn = {
@@ -10,6 +16,11 @@ export type RawTurn = {
   usage?: ChatUsage;
   /** Response messages produced this turn (assistant text + tool parts). */
   messages: ModelMessage[];
+  /** Set when the caller's signal or the watchdog halted the turn. */
+  stopped?: TurnStopCause;
+  /** Completed model steps and the tool names they called, for telemetry. */
+  steps: number;
+  toolNames: string[];
 };
 
 export type RunTurnParams = {
@@ -19,6 +30,9 @@ export type RunTurnParams = {
   tools: ToolSet;
   maxSteps: number;
   onTextDelta?: (delta: string) => void;
+  abortSignal?: AbortSignal;
+  /** Longest silence (no chunk, no finished step) before the turn times out. */
+  idleTimeoutMs?: number;
 };
 
 /**
@@ -35,9 +49,28 @@ export type RunTurnParams = {
  * the real failure. (Tool failures are `tool-error` parts, not `error` parts,
  * and stay in the loop.) Capturing it also replaces the SDK's default
  * `onError` (`console.error`), which would log the request body.
+ *
+ * An abort (caller signal or watchdog) ends `textStream` quietly and rejects
+ * the result promises with the abort reason, so a stop is detected first and
+ * resolved as a `stopped` turn holding the text streamed so far. A thrown
+ * error carries the finished steps' metrics (see `turnMetricsOf`).
  */
 export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
+  const watchdog = createTurnWatchdog(params.abortSignal, params.idleTimeoutMs);
+  try {
+    return await streamTurn(params, watchdog);
+  } finally {
+    watchdog.dispose();
+  }
+};
+
+const streamTurn = async (
+  params: RunTurnParams,
+  watchdog: TurnWatchdog
+): Promise<RawTurn> => {
   let streamError: unknown;
+  let streamed = "";
+  const stats = createTurnStats(params.tools);
   const result = streamText({
     model: params.model,
     system: params.system,
@@ -47,13 +80,22 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
     // We own retries at the call-site; disable the SDK's internal layer so a
     // retryable error costs one HTTP call per turn, not N.
     maxRetries: 0,
+    abortSignal: watchdog.signal,
+    onChunk: watchdog.touch,
+    onStepEnd: (step) => {
+      watchdog.touch();
+      stats.onStepEnd(step);
+    },
     onError: ({ error }) => {
       streamError ??= error;
     },
   });
 
   const settled = async () => {
-    for await (const delta of result.textStream) params.onTextDelta?.(delta);
+    for await (const delta of result.textStream) {
+      streamed += delta;
+      params.onTextDelta?.(delta);
+    }
     return Promise.all([
       result.text,
       result.toolCalls,
@@ -62,11 +104,23 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
       result.response,
     ]);
   };
-  const [text, toolCalls, finishReason, usage, response] =
-    await settled().catch((e: unknown) => {
-      throw streamError ?? e;
-    });
-  if (streamError !== undefined) throw streamError;
+  const fail = (error: unknown): never => {
+    attachTurnMetrics(error, stats.snapshot());
+    throw error;
+  };
+  const outcome = await settled().catch((e: unknown) => {
+    if (watchdog.cause()) return undefined;
+    return fail(streamError ?? e);
+  });
+  if (!outcome)
+    return stoppedTurn(
+      watchdog.cause() ?? "aborted",
+      streamed,
+      stats.snapshot()
+    );
+  if (streamError !== undefined) fail(streamError);
+  const [text, toolCalls, finishReason, usage, response] = outcome;
+  const { steps, toolNames } = stats.snapshot();
 
   return {
     text,
@@ -88,5 +142,7 @@ export const runTurn = async (params: RunTurnParams): Promise<RawTurn> => {
         }
       : undefined,
     messages: response.messages,
+    steps,
+    toolNames,
   };
 };

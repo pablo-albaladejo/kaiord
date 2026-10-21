@@ -1,5 +1,6 @@
 /**
- * The user-facing turn actions for `useChatTurn` (send/approve/deny/retry).
+ * The user-facing turn actions for `useChatTurn` (send/approve/deny/retry/
+ * stop).
  * Each action no-ops unless the context and any required pending action are
  * present, and emits the count-only analytics events the chat usage rule
  * mandates.
@@ -9,6 +10,7 @@ import type { Analytics } from "@kaiord/core";
 import { useCallback, useRef } from "react";
 
 import type { ChatMessageRecord } from "../types/chat/chat-message-record";
+import { stopTurn } from "./chat/chat-turn-context";
 import { approveAction, denyAction } from "./chat/chat-turn-resume";
 import { retryTurn, sendTurn } from "./chat/chat-turn-runner";
 import type { ChatTurnCtx, ChatTurnState } from "./chat/chat-turn-types";
@@ -18,6 +20,7 @@ export type ChatTurnActions = {
   approve: () => void;
   deny: () => void;
   retry: () => void;
+  stop: () => void;
 };
 
 export const useChatTurnActions = (
@@ -51,5 +54,8 @@ export const useChatTurnActions = (
     analytics.event("chat-turn-retried");
     void retryTurn(ctx, messages, text);
   }, [ctx, state, messages, analytics]);
-  return { send, approve, deny, retry };
+  const stop = useCallback(() => {
+    if (ctx && state === "streaming") stopTurn(ctx);
+  }, [ctx, state]);
+  return { send, approve, deny, retry, stop };
 };
