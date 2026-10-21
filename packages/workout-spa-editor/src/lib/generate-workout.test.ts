@@ -163,6 +163,21 @@ describe("generateWorkoutKrd", () => {
     );
   });
 
+  it("should forward the abort signal and the progress listener to the run", async () => {
+    // Arrange
+    const abortSignal = new AbortController().signal;
+    const onProgress = vi.fn();
+
+    // Act
+    await generateWorkoutKrd({ ...baseOptions, abortSignal, onProgress });
+
+    // Assert
+    expect(mockTextToWorkout).toHaveBeenCalledWith(
+      baseOptions.text,
+      expect.objectContaining({ signal: abortSignal, onProgress })
+    );
+  });
+
   it("should pass sport option when provided", async () => {
     // Arrange
 

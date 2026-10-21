@@ -1,19 +1,23 @@
-import { type Ref, useImperativeHandle, useRef, useState } from "react";
+import type { Ref } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
+import {
+  type ChatComposerHandle,
+  useComposerInput,
+} from "./use-composer-input";
+
+export type { ChatComposerHandle };
 
 export type ChatComposerProps = {
   onSend: (text: string) => void;
   disabled: boolean;
   /** Seeds the input on mount (e.g. an "adjust with AI" deep-link prefill). */
   initialText?: string;
+  /** While a reply streams, the send button becomes a Stop control. */
+  streaming?: boolean;
+  onStop?: () => void;
   ref?: Ref<ChatComposerHandle>;
-};
-
-export type ChatComposerHandle = {
-  /** Adds a suggestion without discarding what the user typed, then focuses. */
-  suggest: (text: string) => void;
 };
 
 /** Message input. Enter sends; Shift+Enter inserts a newline. */
@@ -21,19 +25,16 @@ export function ChatComposer({
   onSend,
   disabled,
   initialText,
+  streaming = false,
+  onStop,
   ref,
 }: ChatComposerProps) {
   const t = useTranslate("chat");
-  const [text, setText] = useState(initialText ?? "");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  useImperativeHandle(ref, () => ({
-    suggest: (suggestion) => {
-      setText((prev) =>
-        prev.trim() ? `${prev.trimEnd()}\n${suggestion}` : suggestion
-      );
-      inputRef.current?.focus();
-    },
-  }));
+  const { text, setText, inputRef } = useComposerInput(
+    disabled,
+    initialText,
+    ref
+  );
 
   const submit = () => {
     const trimmed = text.trim();
@@ -60,13 +61,19 @@ export function ChatComposer({
         placeholder={t("composer.placeholder")}
         className="flex-1 resize-none rounded-2xl border border-edge bg-surface-deep px-3 py-2 text-[14px] text-ink-strong placeholder:text-ink-muted"
       />
-      <Button
-        variant="cta"
-        onClick={submit}
-        disabled={disabled || text.trim() === ""}
-      >
-        {t("composer.send")}
-      </Button>
+      {streaming && onStop ? (
+        <Button variant="ghost" onClick={onStop}>
+          {t("composer.stop")}
+        </Button>
+      ) : (
+        <Button
+          variant="cta"
+          onClick={submit}
+          disabled={disabled || text.trim() === ""}
+        >
+          {t("composer.send")}
+        </Button>
+      )}
     </div>
   );
 }

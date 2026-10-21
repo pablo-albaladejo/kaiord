@@ -30,4 +30,6 @@ export type UseChatTurn = {
   approve: () => void;
   deny: () => void;
   retry: () => void;
+  /** Stops the streaming turn; its partial reply is kept, marked stopped. */
+  stop: () => void;
 };

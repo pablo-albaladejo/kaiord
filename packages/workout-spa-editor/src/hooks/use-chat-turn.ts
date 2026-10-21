@@ -12,6 +12,7 @@ import { useMemo, useRef, useState } from "react";
 import { useAnalytics } from "../contexts/analytics-context";
 import { usePersistence } from "../contexts/persistence-context";
 import { type ChatTurnState, makeChatTurnCtx } from "./chat/chat-turn-types";
+import { useStopTurnOnLeave } from "./chat/use-stop-turn-on-leave";
 import { useChatActionOps } from "./use-chat-action-ops";
 import { useChatTurnActions } from "./use-chat-turn-actions";
 import type { UseChatTurn, UseChatTurnArgs } from "./use-chat-turn-types";
@@ -32,6 +33,8 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const agentRef = useRef<ChatAgent | null>(null);
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
+  const abortRef = useRef<AbortController | null>(null);
+  const disposedRef = useStopTurnOnLeave(abortRef);
 
   const { profileId, conversationId, provider, modelId, pinModel, today } =
     args;
@@ -48,7 +51,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
           today,
           ops,
         },
-        { agentRef, toolsRef, messagesRef },
+        { agentRef, toolsRef, messagesRef, abortRef, disposedRef },
         { setState, setStreamingText, setPendingAction, setError }
       ),
     [
@@ -60,6 +63,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
       pinModel,
       today,
       ops,
+      disposedRef,
     ]
   );
 

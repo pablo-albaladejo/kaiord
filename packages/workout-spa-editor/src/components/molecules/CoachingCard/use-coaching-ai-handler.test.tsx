@@ -6,6 +6,7 @@
  * the hook's wiring (re-entry guard, processing state, navigate-on-ok)
  * without paying for a full Dexie + LLM round-trip.
  */
+import type { GenerateProgress } from "@kaiord/ai";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,6 +18,7 @@ import { createInMemoryPersistence } from "../../../test-utils/in-memory-persist
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { useCoachingAi } from "./use-coaching-ai-handler";
 import type * as AiHelpers from "./use-coaching-ai-helpers";
+import type { RunAiInput } from "./use-coaching-ai-helpers";
 
 const navigateMock = vi.fn();
 const runConvertMock = vi.fn();
@@ -201,5 +203,91 @@ describe("useCoachingAi", () => {
     expect(result.current.processing).toBe(false);
     // Cleanup: resolve the still-pending mock so the test doesn't leak.
     resolveRun({ ok: false, reason: "ai-cancelled" });
+  });
+
+  it("should expose the model name and the streamed progress while in flight", async () => {
+    // Arrange
+    let report: (p: GenerateProgress) => void = () => undefined;
+    runConvertMock.mockImplementation((input: RunAiInput) => {
+      report = input.onProgress ?? report;
+      return new Promise(() => undefined);
+    });
+    const { result } = renderHook(
+      () => useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
+      { wrapper: wrap() }
+    );
+    act(() => {
+      void result.current.startAi();
+    });
+    await waitFor(() => expect(result.current.progress).not.toBeNull());
+
+    // Act
+    act(() =>
+      report({ phase: "generating", attempt: 1, maxAttempts: 3, items: 4 })
+    );
+
+    // Assert
+    expect(result.current.progress?.modelName).toBe("GPT-4o mini");
+    expect(result.current.progress?.update).toMatchObject({
+      phase: "generating",
+      items: 4,
+    });
+  });
+
+  it("should abort the provider request and ignore late progress on cancel", async () => {
+    // Arrange
+    let input: RunAiInput | undefined;
+    runConvertMock.mockImplementation((i: RunAiInput) => {
+      input = i;
+      return new Promise(() => undefined);
+    });
+    const { result } = renderHook(
+      () => useCoachingAi(activity, "profile-1", vi.fn(), vi.fn()),
+      { wrapper: wrap() }
+    );
+    act(() => {
+      void result.current.startAi();
+    });
+    await waitFor(() => expect(input).toBeDefined());
+
+    // Act
+    act(() => result.current.cancelAi());
+    act(() =>
+      input?.onProgress?.({ phase: "validating", attempt: 1, maxAttempts: 3 })
+    );
+
+    // Assert
+    expect(input?.abortSignal.aborted).toBe(true);
+    expect(result.current.progress).toBeNull();
+    expect(result.current.processing).toBe(false);
+  });
+
+  it("should not navigate when the cancel lands before the run settles", async () => {
+    // Arrange
+    let settle: (value: unknown) => void = () => undefined;
+    runConvertMock.mockImplementation(
+      () => new Promise((res) => (settle = res))
+    );
+    const onClose = vi.fn();
+    const { result } = renderHook(
+      () => useCoachingAi(activity, "profile-1", onClose, vi.fn()),
+      { wrapper: wrap() }
+    );
+    let run: Promise<void> = Promise.resolve();
+    act(() => {
+      run = result.current.startAi();
+    });
+    await waitFor(() => expect(result.current.processing).toBe(true));
+
+    // Act
+    act(() => result.current.cancelAi());
+    await act(async () => {
+      settle({ ok: true, workoutId: "w-late", created: true });
+      await run;
+    });
+
+    // Assert
+    expect(onClose).not.toHaveBeenCalled();
+    expect(navigateMock).not.toHaveBeenCalled();
   });
 });
