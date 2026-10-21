@@ -22,6 +22,13 @@ const convertSchema = {
     .string()
     .optional()
     .describe("Path to write output (required for FIT)"),
+  ftp: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      "Athlete FTP in watts. Required for GCN output when the workout has %FTP power targets (resolved to watts)"
+    ),
 };
 
 export const registerConvertTool = (
@@ -45,7 +52,7 @@ export const registerConvertTool = (
           krd,
           args.output_format,
           args.output_file,
-          logger
+          { logger, ftpWatts: args.ftp }
         );
         const message = result.writtenTo
           ? `Converted to ${args.output_format}. Written to: ${result.writtenTo}\n\n${result.content}`

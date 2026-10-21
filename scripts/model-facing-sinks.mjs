@@ -41,19 +41,19 @@ export const SINKS = [
     tool: "query_workouts",
     status: "fenced",
     provenance:
-      "workout.name is read from krd.extensions.structured_workout.name. utils/import-workout.ts parses FIT/TCX/ZWO/GCN/KRD uploads into that KRD, so a file supplies the name; fenced in summarize-workouts.ts",
+      "workout.name is read from krd.extensions.structured_workout.name. utils/import-workout.ts parses FIT/TCX/ZWO/GCN/KRD uploads into that KRD, so a file supplies the name; fenced in summarize-workouts.ts. id is the app-generated record uuid; sport and state are the record's own columns. Rows come from the profile-bound reader in profile-readers.ts, held to the defineReadTool row+byte budget",
   },
   {
     tool: "query_coaching",
     status: "fenced",
     provenance:
-      "title and description are coach-authored on the coaching platform; fenced in summarize-coaching.ts",
+      "title and description are coach-authored on the coaching platform; fenced in summarize-coaching.ts. Rows come from the profile-bound reader in profile-readers.ts, held to the defineReadTool row+byte budget",
   },
   {
     tool: "query_health",
-    status: "unbounded",
+    status: "clean",
     provenance:
-      "summarize-health.ts forwards krd: unknown verbatim. Health schemas carry externalId: z.string().optional(), written upstream, and the Dexie adapter never parses. Benign today by write-path discipline, not by type. A syntactic guard cannot see inside it.",
+      "summarize-health.ts projects each record to its date plus a fixed per-metric list of finite numbers (sleep stages summed to seconds per stage; sleep and stress startTime/endTime only as a local HH:MM clock derived from the instant in health-clock.ts; hrv measurementWindow only when it is one of the schema's two literals). The KRD payload, and the upstream-written externalId/sourceBridgeId it carries, is never forwarded",
   },
   {
     tool: "query_energy_balance",
@@ -92,7 +92,7 @@ export const SINKS = [
     tool: "push_to_garmin",
     status: "clean",
     provenance:
-      "garminPushId is the Garmin-confirmed library workout id (parsed to ^[1-9]\\d*$ at the source) or null; calendar is the PlacementResult kind and reason is a failed PlacementResult's reason, both app-authored literal enums; error codes are app-authored literals, and any exception on the path becomes push_failed, never its text; message is NoActiveExportRouteError's app-authored text or one of the app-authored pace zone literals (missing_pace_zones, incomplete_pace_zones, unsupported_pace_zone_sport)",
+      "garminPushId is the Garmin-confirmed library workout id (parsed to ^[1-9]\\d*$ at the source) or null; calendar is the PlacementResult kind and reason is a failed PlacementResult's reason, both app-authored literal enums; error codes are app-authored literals, and any exception on the path becomes push_failed, never its text; message is NoActiveExportRouteError's app-authored text or one of the app-authored pace zone literals (missing_pace_zones, incomplete_pace_zones, unsupported_pace_zone_sport) or FTP literals (missing_ftp, sport_without_power_zones)",
   },
   {
     tool: "set_data_route",

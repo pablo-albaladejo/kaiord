@@ -6,6 +6,7 @@ import { runGenerateAgent } from "../agents/runtime";
 import { createWorkoutParserAgent } from "../agents/workout-parser-agent";
 import { AiAgentError } from "../agents/errors";
 import { createAiParsingError } from "../errors";
+import { buildAthleteContext } from "../prompts/athlete-context";
 
 const MAX_INPUT_ECHO = 200;
 
@@ -13,6 +14,16 @@ const sportLineFor = (options?: TextToWorkoutOptions): string =>
   options?.sport
     ? `The sport for this workout is "${options.sport}". Use it for the sport field.`
     : "";
+
+// Appended after input validation: the length cap guards the workout text,
+// and the athlete section is bounded by its own builder.
+const withAthleteContext = (
+  text: string,
+  options?: TextToWorkoutOptions
+): string => {
+  const context = buildAthleteContext(options?.athlete);
+  return context ? `${text}\n\n${context}` : text;
+};
 
 const toDomainError = (error: unknown, inputText: string): unknown =>
   error instanceof AiAgentError
@@ -48,7 +59,10 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
     if (options?.sport) sportSchema.parse(options.sport);
     const sanitized = validateInput(text);
     const agent = {
-      ...createWorkoutParserAgent(sportLineFor(options)),
+      ...createWorkoutParserAgent(
+        sportLineFor(options),
+        options?.athlete?.zones
+      ),
       maxRetries,
       maxOutputTokens,
       temperature,
@@ -60,7 +74,7 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
     try {
       const { output } = await runGenerateAgent(
         agent,
-        { text: sanitized },
+        { text: withAthleteContext(sanitized, options) },
         {
           model,
           logger,

@@ -1,7 +1,18 @@
+import type { AthleteZoneTables } from "../types";
+
 export type ZoneCheck = {
   targetType: string;
   minValue?: number;
   maxValue?: number;
+};
+
+/**
+ * Every step (repetition steps included) must carry this target type; with
+ * `requireRange`, as an explicit `range` — a zone left unresolved fails.
+ */
+export type TargetCheck = {
+  targetType: "pace" | "power";
+  requireRange?: boolean;
 };
 
 export type Benchmark = {
@@ -13,10 +24,16 @@ export type Benchmark = {
   category: string;
   language: string;
   zoneCheck?: ZoneCheck;
+  targetCheck?: TargetCheck;
+  /** The repetition blocks' `repeatCount`s, in workout order. */
+  expectedRepeatCounts?: Array<number>;
+  /** Zones handed to the generation, as the SPA does for the athlete. */
+  athleteZones?: AthleteZoneTables;
 };
 
 /** The capability a failure is attributed to, so a red result says which one. */
-export type EvalDimension = "schema" | "sport" | "steps" | "zone" | "run";
+export type EvalDimension =
+  "schema" | "sport" | "steps" | "zone" | "targets" | "structure" | "run";
 
 /**
  * What one dimension produced for one benchmark.

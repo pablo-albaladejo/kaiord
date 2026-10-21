@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { WorkoutRecord } from "../../types/calendar-record";
+import { FtpUnavailableError } from "../../types/ftp-unavailable-error";
 import type { IntegrationPolicy } from "../../types/integration-policy";
+import { exportGcnWorkout } from "../../utils/export-workout-formats";
 
 vi.mock("../../utils/export-workout-formats", () => ({
   exportGcnWorkout: vi.fn().mockResolvedValue({ gcn: "payload" }),
@@ -395,4 +397,38 @@ describe("doPushToGarmin", () => {
     expect(result).toEqual({ error: "push_failed" });
     expect(JSON.stringify(result)).not.toContain("athlete-private-detail");
   });
+
+  it.each([
+    { reason: "missing-ftp", error: "missing_ftp", hint: "Athlete" },
+    {
+      reason: "sport-without-power-zones",
+      error: "sport_without_power_zones",
+      hint: "cycling or running",
+    },
+  ] as const)(
+    "should report $error and never push a %FTP workout without an FTP",
+    async ({ reason, error, hint }) => {
+      // Arrange
+      vi.mocked(exportGcnWorkout).mockRejectedValueOnce(
+        new FtpUnavailableError(reason)
+      );
+      const { deps, calendar } = makeDeps();
+      const { persistence, put } = makePersistence(makeRecord());
+      const pushWorkout = vi.fn();
+
+      // Act
+      const result = await doPushToGarmin(
+        persistence,
+        pushWorkout,
+        "workout-1",
+        deps
+      );
+
+      // Assert
+      expect(result).toEqual({ error, message: expect.stringContaining(hint) });
+      expect(pushWorkout).not.toHaveBeenCalled();
+      expect(put).not.toHaveBeenCalled();
+      expect(calendar.items).toEqual([]);
+    }
+  );
 });

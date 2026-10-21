@@ -8,6 +8,7 @@ import type { BulkOutcome } from "../../../application/garmin-bulk/send-week-to-
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import { withOrigin } from "../../../routing/with-origin";
+import { isFtpReason } from "../../../types/ftp-unavailable-error";
 import { isPaceZonesReason } from "../../../types/pace-zones-unavailable-error";
 import { formatDateLabel } from "../../molecules/TemplatePickerDialog/format-date-label";
 import { type SendWeekTone, statusTone } from "./send-week-status";
@@ -23,8 +24,11 @@ const reasonOf = (outcome: BulkOutcome, t: Translate): string => {
   if (outcome.notEligible)
     return ` (${t(`sendWeek.notEligible.${outcome.notEligible}`)})`;
   const { result } = outcome;
-  return result?.kind === "failed" && isPaceZonesReason(result.reason)
-    ? ` (${t(`sendWeek.paceZones.${result.reason}`)})`
+  if (result?.kind !== "failed") return "";
+  if (isPaceZonesReason(result.reason))
+    return ` (${t(`sendWeek.paceZones.${result.reason}`)})`;
+  return isFtpReason(result.reason)
+    ? ` (${t(`sendWeek.ftp.${result.reason}`)})`
     : "";
 };
 
