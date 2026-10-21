@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
+import { runConfirmedTool } from "./chat/run-confirmed-tool";
 import { useChatTurn } from "./use-chat-turn";
 
 const persistence = createInMemoryPersistence();
@@ -17,6 +18,7 @@ vi.mock("../contexts/persistence-context", () => ({
 vi.mock("./use-chat-action-ops", () => ({
   useChatActionOps: () => ({}),
 }));
+vi.mock("./chat/run-confirmed-tool", () => ({ runConfirmedTool: vi.fn() }));
 vi.mock("./chat/build-chat-agent", () => ({
   buildChatAgent: vi.fn(async () => ({ agent: fakeAgent, tools: [] })),
 }));
@@ -62,5 +64,43 @@ describe("useChatTurn unmount", () => {
         stopReason: "aborted",
       });
     });
+  });
+
+  it("should abort a resume that starts after the conversation was left", async () => {
+    // Arrange
+    fakeAgent.sendTurn.mockResolvedValueOnce({
+      status: "pending_action",
+      pendingAction: {
+        toolCallId: "call-1",
+        toolName: "create_workout",
+        input: { date: "2026-06-16", description: "Easy run" },
+      },
+      messages: [],
+    });
+    let finishTool: (r: { output: unknown; ok: boolean }) => void = () =>
+      undefined;
+    vi.mocked(runConfirmedTool).mockImplementationOnce(
+      () => new Promise((resolve) => (finishTool = resolve))
+    );
+    let resumeSignal: AbortSignal | undefined;
+    fakeAgent.resume.mockImplementationOnce(
+      async (_m: unknown, _r: unknown, options: { signal: AbortSignal }) => {
+        resumeSignal = options.signal;
+        return { status: "aborted", text: "", messages: [] };
+      }
+    );
+    const { result, unmount } = renderHook(() => useChatTurn(args));
+    result.current.send("add an easy run tomorrow");
+    await waitFor(() => expect(result.current.pendingAction).not.toBeNull());
+    result.current.approve();
+    await waitFor(() => expect(runConfirmedTool).toHaveBeenCalled());
+
+    // Act
+    unmount();
+    finishTool({ output: { id: "w1" }, ok: true });
+
+    // Assert
+    await waitFor(() => expect(fakeAgent.resume).toHaveBeenCalled());
+    expect(resumeSignal?.aborted).toBe(true);
   });
 });

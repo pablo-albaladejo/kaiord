@@ -41,6 +41,7 @@ export const runAgent = async (
 ): Promise<void> => {
   const controller = new AbortController();
   ctx.abortRef.current = controller;
+  if (ctx.disposedRef.current) controller.abort();
   ctx.set.error(null);
   ctx.set.state("streaming");
   ctx.set.streamingText("");

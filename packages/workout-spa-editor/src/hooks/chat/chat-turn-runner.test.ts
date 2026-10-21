@@ -36,6 +36,7 @@ const makeCtx = (
     toolsRef: { current: [] },
     messagesRef: { current: [] },
     abortRef: { current: null },
+    disposedRef: { current: false },
     set: {
       state: (s) => states.push(s),
       streamingText: () => undefined,
