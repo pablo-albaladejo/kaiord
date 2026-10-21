@@ -8,6 +8,11 @@ export type {
   TextToWorkoutConfig,
   TextToWorkoutOptions,
 } from "./types";
+export type {
+  GenerateProgress,
+  GenerateProgressPhase,
+  OnGenerateProgress,
+} from "./agents/progress";
 
 export { createChatAgent } from "./chat/chat-agent";
 export {

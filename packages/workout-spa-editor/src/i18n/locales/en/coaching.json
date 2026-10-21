@@ -49,6 +49,17 @@
     "not-found": "Coaching activity is no longer available",
     "no-provider": "No AI provider is configured"
   },
+  "aiProgress": {
+    "preparing": "Preparing the request…",
+    "requesting": "Waiting for {{model}} to read the description…",
+    "retrying": "The answer didn't fit the workout format. Asking {{model}} again (attempt {{attempt}} of {{max}})…",
+    "generating": "{{model}} is writing the steps…",
+    "validating": "Checking the workout…",
+    "steps_one": "{{count}} step so far",
+    "steps_other": "{{count}} steps so far",
+    "elapsed": "{{seconds}} s",
+    "cancel": "Cancel"
+  },
   "status": {
     "pending": "Pending",
     "completed": "Completed",
