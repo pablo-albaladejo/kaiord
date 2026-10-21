@@ -103,6 +103,7 @@ export const MODEL_CATALOG: Record<LlmProviderType, ModelOption[]> = {
     { id: "gemini-3.6-flash", label: "gemini-3.6-flash" },
     { id: "gemini-3.7-flash", label: "gemini-3.7-flash" },
     { id: "gemini-3.8-flash", label: "gemini-3.8-flash" },
+    { id: "gemini-4-argon", label: "gemini-4-argon" },
     { id: "gemini-pro-latest", label: "gemini-pro-latest" },
     { id: "gemini-flash-latest", label: "gemini-flash-latest" },
     { id: "gemini-flash-lite-latest", label: "gemini-flash-lite-latest" },
