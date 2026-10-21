@@ -1,6 +1,7 @@
 import type { PendingAction } from "@kaiord/ai";
 import { Globe } from "lucide-react";
 
+import { pluralKey } from "../../../i18n/plural-key";
 import { Button } from "../../atoms/Button";
 import { Icon } from "../../atoms/Icon";
 import { PushToGarminSummary } from "./PushToGarminSummary";
@@ -45,6 +46,13 @@ export function PendingActionCard({
         <p className="mb-2 flex items-center gap-1.5 text-[12px] text-ink-muted">
           <Icon icon={Globe} size="xs" color="inherit" aria-hidden="true" />
           {t(`external.${name}`)}
+        </p>
+      )}
+      {action.deferredCount !== undefined && action.deferredCount > 0 && (
+        <p className="mb-2 text-[12px] text-ink-muted">
+          {t(pluralKey("pendingAction.deferred", action.deferredCount), {
+            count: action.deferredCount,
+          })}
         </p>
       )}
       <div className="flex gap-2">
