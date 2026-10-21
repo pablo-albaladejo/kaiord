@@ -1,5 +1,6 @@
 import type { PendingAction } from "@kaiord/ai";
 
+import { Markdown } from "../../atoms/Markdown";
 import { ChatErrorNotice } from "./ChatErrorNotice";
 import { PendingActionCard } from "./PendingActionCard";
 
@@ -27,9 +28,9 @@ export function ChatTurnExtras({
   return (
     <>
       {busy && streamingText !== "" && (
-        <p className="max-w-[80%] self-start whitespace-pre-wrap rounded-2xl bg-surface px-3 py-2 text-[14px] text-ink-strong">
-          {streamingText}
-        </p>
+        <div className="max-w-[80%] self-start rounded-2xl bg-surface px-3 py-2 text-[14px] text-ink-strong">
+          <Markdown source={streamingText} />
+        </div>
       )}
       {pendingAction && (
         <PendingActionCard

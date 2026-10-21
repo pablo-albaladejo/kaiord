@@ -15,6 +15,33 @@
  * form, because a tool the walk never reaches reports the same green as a tool
  * that is genuinely declared.
  *
+ * It also scans `hooks/chat/`, where an approved action's `execute` actually
+ * runs: a `catch (e)` block, typed or not, or a promise `.catch((e) => …)`
+ * whose body hands on the caught value's text or the value itself fails,
+ * because that is how an exception's text from a bridge or provider reached
+ * the model once already (R-CaughtErrorTextHidden). Flagged: `e.message`,
+ * `e?.stack`, `e.toString()`, `(e as Error).message`, `e["message"]`,
+ * `const { message } = e`, a destructured binding, `String(e)`,
+ * `JSON.stringify(e)`, `${e}`, `...e`, `"x" + e`, and returning `e` raw
+ * (`return e`, `{ error: e }`, `{ e }` first or last, `(e) => e`). Comments
+ * are ignored.
+ * Passing the value as a call argument (a logging helper, a categorizer) is
+ * not flagged.
+ *
+ * It is a text scan, not data flow. Known limits: an alias
+ * (`const err = e; err.message`), a helper that receives the error and returns
+ * its text, a rejection handler passed as `.then(ok, onRejected)` or by name
+ * (`.catch(handle)`), a key computed at runtime (`e[key]`), and a shorthand
+ * `{ a, e, b }` between two others (indistinguishable from call arguments)
+ * are not followed. It errs on the side of failing: handing the raw value to
+ * an object (`logger.error("x", { error: e })`, `new Error("x", { cause: e })`)
+ * fails though it may be safe, and so does code-shaped text inside a string
+ * literal (`"e.message"`). Brace and paren matching skips string literals,
+ * but the code inside a template's `${}` is treated as part of the string.
+ * Regex literals are not recognized: a `}` in one (`/\}/g`) can end a catch
+ * body early, and a `//` in one (`/https?:\/\//`) blanks the rest of its line
+ * as a comment, so code after either can be missed (a false negative).
+ *
  * Modes:
  *   --dry-run    Emit violations as JSON on stdout; exit 0.
  *   (default)    Print a human-readable report; exit non-zero on any.
@@ -32,6 +59,7 @@ const NAME_RE = /^\s*name:\s*"([a-z_]+)"/gm;
 // plus a tool built by a `define…Tool(...)` helper (`defineReadTool`), whose
 // `execute` lives in the shared helper. Recognizing only the colon lets such a tool skip collection.
 const EXECUTE_RE = /\bexecute\s*[:(]|\bdefine\w+Tool\s*\(/;
+const HOOKS_DIR = "packages/workout-spa-editor/src/hooks/chat";
 const STATUSES = new Set(["clean", "fenced", "unbounded"]);
 
 const isToolSource = (f) =>
@@ -45,6 +73,182 @@ const collectSources = (root, dir = root, out = []) => {
     else if (isToolSource(entry.name)) out.push(relative(root, full));
   }
   return out;
+};
+
+const isHookSource = (f) =>
+  /\.tsx?$/.test(f) && !/\.test\.tsx?$/.test(f) && !f.endsWith(".d.ts");
+
+const collectHookSources = (root, dir = root, out = []) => {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) collectHookSources(root, full, out);
+    else if (isHookSource(entry.name)) out.push(relative(root, full));
+  }
+  return out;
+};
+
+/** The index just past the string literal opening at `i`. */
+const skipString = (src, i) => {
+  const quote = src[i];
+  for (let j = i + 1; j < src.length; j++) {
+    if (src[j] === "\\") j++;
+    else if (src[j] === quote) return j + 1;
+  }
+  return src.length;
+};
+
+const isQuote = (c) => c === '"' || c === "'" || c === "`";
+
+/** The text between the `open` delimiter at `start` and its match, skipping
+ * delimiters inside string literals. */
+const matchedAt = (src, start, open, close) => {
+  let depth = 0;
+  for (let i = start; i < src.length; i++) {
+    if (isQuote(src[i])) {
+      i = skipString(src, i) - 1;
+      continue;
+    }
+    if (src[i] === open) depth++;
+    else if (src[i] === close && --depth === 0) return src.slice(start + 1, i);
+  }
+  return src.slice(start + 1);
+};
+
+/** The brace-matched body of the block whose `{` is at `open`. */
+const blockAt = (src, open) => matchedAt(src, open, "{", "}");
+
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Comments blanked to spaces (newlines kept, so line numbers hold). */
+const stripComments = (src) => {
+  let out = "";
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (isQuote(c)) {
+      const end = skipString(src, i);
+      out += src.slice(i, end);
+      i = end - 1;
+    } else if (c === "/" && (src[i + 1] === "/" || src[i + 1] === "*")) {
+      const close = src[i + 1] === "/" ? "\n" : "*/";
+      const stop = src.indexOf(close, i + 2);
+      const to = stop === -1 ? src.length : stop + (close === "*/" ? 2 : 0);
+      out += src.slice(i, to).replace(/[^\n]/g, " ");
+      i = to - 1;
+    } else out += c;
+  }
+  return out;
+};
+
+const TEXT_PROP = "(?:message|stack|toString|cause)";
+
+/** Each way a body hands the caught value's text, or the value, onward. */
+const leakPatterns = (id) => [
+  // e.message, e?.stack, e.toString()
+  `${id}\\s*\\??\\.\\s*${TEXT_PROP}\\b`,
+  // (e as Error).message
+  `\\(\\s*${id}\\s+as\\s+[^)]*\\)\\s*\\??\\.\\s*${TEXT_PROP}\\b`,
+  // e["message"], e?.["stack"]
+  `${id}\\s*(?:\\?\\.)?\\[\\s*["'\`]${TEXT_PROP}["'\`]\\s*\\]`,
+  // const { message } = e
+  `\\{[^{}]*\\}\\s*=\\s*\\(?\\s*${id}`,
+  // String(e), JSON.stringify(e), ${e}, ...e
+  `\\b(?:String|JSON\\.stringify)\\(\\s*${id}`,
+  `\\$\\{\\s*${id}`,
+  `\\.\\.\\.\\s*${id}`,
+  // "x" + e, e + "x", s += e
+  `(?<!\\+)\\+=?\\s*${id}`,
+  `${id}\\s*\\+(?![+=])`,
+  // return { error: e }, return { ok, e }, return e, (e) => e
+  `:\\s*${id}\\s*[,}]`,
+  `\\{\\s*${id}\\s*[,}]`,
+  `,\\s*${id}\\s*\\}`,
+  `\\breturn\\s+${id}\\s*(?:[;}\\n]|$)`,
+  `^\\s*${id}\\s*$`,
+];
+
+const readsText = (body, binding) => {
+  // Bounded by hand: `\b` does not see a `$` at either end of an identifier.
+  const id = `(?<![\\w$])${escapeRegExp(binding)}(?![\\w$])`;
+  return leakPatterns(id).some((p) => new RegExp(p).test(body));
+};
+
+/** The paren-matched text of the call whose `(` is at `open`. */
+const argsAt = (src, open) => matchedAt(src, open, "(", ")");
+
+// `catch (e) {`, `catch (e: unknown) {`, `catch ({ message }) {`.
+const CATCH_RE = /(?<!\.\s*)\bcatch\s*\(\s*([^)]*?)\s*\)\s*\{/g;
+// `.catch((e) => …)`, `.catch(e => …)`, `.catch(async function (e) {…})`.
+const PROMISE_CATCH_RE =
+  /\.catch\s*(\()\s*(?:async\s+)?(?:function\b[^(]*)?(?:\(\s*([^)]*?)\s*\)|([A-Za-z_$][\w$]*))\s*(?:=>|\{)/g;
+const TYPED_ID_RE = /^([A-Za-z_$][\w$]*)\s*(?::[\s\S]*)?$/;
+
+/** Every handler of a caught value: its binding, line, and body. */
+const catchSites = (src) => {
+  const sites = [];
+  const lineOf = (index) => src.slice(0, index).split("\n").length;
+  for (const m of src.matchAll(CATCH_RE)) {
+    const body = blockAt(src, m.index + m[0].length - 1);
+    sites.push({ binding: m[1], line: lineOf(m.index), body });
+  }
+  for (const m of src.matchAll(PROMISE_CATCH_RE)) {
+    const open = m.index + m[0].indexOf("(");
+    const args = argsAt(src, open);
+    const binding = m[2] ?? m[3];
+    const body = args.slice(args.search(/=>|\{/) + 2).trim();
+    sites.push({ binding, line: lineOf(m.index), body });
+  }
+  return sites;
+};
+
+const catchLeaks = (raw) => {
+  const leaks = [];
+  for (const { binding, line, body } of catchSites(stripComments(raw))) {
+    // `.catch(() => …)` binds nothing, so it cannot read anything.
+    if (binding === "") continue;
+    const typed = TYPED_ID_RE.exec(binding);
+    if (!typed) {
+      leaks.push({ line, detail: `destructured catch binding (${binding})` });
+    } else if (readsText(body, typed[1])) {
+      leaks.push({ line, detail: `reads the text of caught \`${typed[1]}\`` });
+    }
+  }
+  return leaks;
+};
+
+/** Every `catch` under `hooksRoot` keeps the caught value's text to itself. */
+export const runCaughtErrorCheck = ({ hooksRoot }) => {
+  let files;
+  try {
+    files = collectHookSources(hooksRoot);
+  } catch (error) {
+    return [
+      {
+        kind: "scan-failed",
+        detail: `could not read ${hooksRoot}: ${error.message}`,
+      },
+    ];
+  }
+  if (files.length === 0) {
+    return [{ kind: "scan-empty", detail: `no sources under ${hooksRoot}` }];
+  }
+  const violations = [];
+  for (const file of files) {
+    let src;
+    try {
+      src = readFileSync(join(hooksRoot, file), "utf8");
+    } catch (error) {
+      violations.push({ kind: "scan-failed", file, detail: error.message });
+      continue;
+    }
+    for (const leak of catchLeaks(src)) {
+      violations.push({
+        kind: "caught-error-text",
+        file,
+        detail: `${file}:${leak.line} ${leak.detail}`,
+      });
+    }
+  }
+  return violations;
 };
 
 const inventoryViolations = () => {
@@ -117,7 +321,10 @@ export const runCheck = ({ toolsRoot }) => {
 
 const main = () => {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-  const violations = runCheck({ toolsRoot: join(root, TOOLS_DIR) });
+  const violations = [
+    ...runCheck({ toolsRoot: join(root, TOOLS_DIR) }),
+    ...runCaughtErrorCheck({ hooksRoot: join(root, HOOKS_DIR) }),
+  ];
   if (process.argv.includes("--dry-run")) {
     console.log(JSON.stringify(violations, null, 2));
     return;
@@ -131,7 +338,9 @@ const main = () => {
   }
   console.error(
     "\nEvery model-facing tool must appear in scripts/model-facing-sinks.mjs\n" +
-      "with a status and a provenance note naming where its strings are produced."
+      "with a status and a provenance note naming where its strings are produced,\n" +
+      "and a catch under hooks/chat/ must return an app error code, never the\n" +
+      "caught value's text."
   );
   process.exit(1);
 };
