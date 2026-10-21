@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { Router } from "wouter";
+import { memoryLocation } from "wouter/memory-location";
 
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { EffectiveModel } from "../SettingsPanel/effective-models";
@@ -42,17 +44,20 @@ type Over = {
 const renderPicker = (over: Over = {}) => {
   const onModelChoose = vi.fn();
   const onModelFollow = vi.fn();
+  const loc = memoryLocation({ path: "/chat", record: true });
   render(
-    <ChatModelPicker
-      providers={[claude, gpt]}
-      running={over.running ?? GPT_MINI}
-      chosen={over.chosen ?? false}
-      chatDefault={over.chatDefault ?? chatDefault()}
-      onModelChoose={onModelChoose}
-      onModelFollow={onModelFollow}
-    />
+    <Router hook={loc.hook}>
+      <ChatModelPicker
+        providers={[claude, gpt]}
+        running={over.running ?? GPT_MINI}
+        chosen={over.chosen ?? false}
+        chatDefault={over.chatDefault ?? chatDefault()}
+        onModelChoose={onModelChoose}
+        onModelFollow={onModelFollow}
+      />
+    </Router>
   );
-  return { onModelChoose, onModelFollow };
+  return { onModelChoose, onModelFollow, loc };
 };
 
 const select = () => screen.getByRole("combobox");
@@ -165,5 +170,18 @@ describe("ChatModelPicker", () => {
       providerId: "gpt",
       modelId: "o9",
     });
+  });
+
+  it("should link to the AI settings from the chat", async () => {
+    // Arrange
+    const { loc, onModelChoose, onModelFollow } = renderPicker();
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name: "Manage AI…" }));
+
+    // Assert
+    expect(loc.history.at(-1)).toBe("/settings/ai");
+    expect(onModelChoose).not.toHaveBeenCalled();
+    expect(onModelFollow).not.toHaveBeenCalled();
   });
 });

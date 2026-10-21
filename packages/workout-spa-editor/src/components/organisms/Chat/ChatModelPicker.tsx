@@ -1,7 +1,9 @@
 import { modelDisplayName } from "@kaiord/ai/providers";
+import { useLocation } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
+import { Button } from "../../atoms/Button";
 import { CustomModelInput } from "../SettingsPanel/CustomModelInput";
 import type { EffectiveModel } from "../SettingsPanel/effective-models";
 import {
@@ -26,11 +28,13 @@ export type ChatModelPickerProps = {
 
 /**
  * Per-conversation model: provider and model in one select, plus "Same as
- * main model", which follows the athlete's chat resolution. Shows what runs.
+ * main model", which follows the athlete's chat resolution. Shows what runs,
+ * and links to the AI settings where accounts and defaults are managed.
  */
 export function ChatModelPicker(props: ChatModelPickerProps) {
   const { providers, running, chosen, chatDefault } = props;
   const t = useTranslate("chat");
+  const [, navigate] = useLocation();
   const choice = useModelChoice({
     effective: { ...chatDefault, running, inherited: !chosen },
     canInherit: true,
@@ -70,6 +74,15 @@ export function ChatModelPicker(props: ChatModelPickerProps) {
           onCancel={choice.cancelCustom}
         />
       )}
+      <Button
+        variant="tertiary"
+        size="sm"
+        className="mt-1"
+        data-testid="chat-manage-ai"
+        onClick={() => navigate("/settings/ai")}
+      >
+        {t("model.manage")}
+      </Button>
     </div>
   );
 }
