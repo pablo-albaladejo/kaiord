@@ -426,6 +426,43 @@ describe("CLI — a throwaway repository", () => {
     assert.match(out.systemMessage, /exit 75/);
   });
 
+  it("should check a tree whose `git diff HEAD` is larger than 1 MiB", () => {
+    // Arrange: a tracked data file rewritten past execFileSync's default
+    // 1 MiB buffer, next to a green code change
+    write("data/big.txt", "a\n");
+    git("add", "-A");
+    git("commit", "-q", "-m", "data");
+    write("data/big.txt", "b".repeat(80).concat("\n").repeat(20_000));
+    write("scripts/sum.mjs", "export const sum = (a, b) => b + a;\n");
+
+    // Act
+    const result = run();
+
+    // Assert: verified green, not "crashed … NOT verified"
+    assert.equal(result.stdout, "");
+    assert.match(counter().main.lastGreen, /:[0-9a-f]{64}$/);
+  });
+
+  it("should report a crash as NOT verified, never as a silent pass", () => {
+    // Arrange: a repository with no commit, so `git diff HEAD` throws
+    const fresh = join(sandbox, "fresh");
+    mkdirSync(join(fresh, "scripts"), { recursive: true });
+    writeFileSync(join(fresh, "scripts", "a.mjs"), "export {};\n");
+    execFileSync("git", ["init", "-q", "-b", "main"], {
+      cwd: fresh,
+      env: gitEnv(),
+    });
+
+    // Act
+    const result = run({}, { cwd: fresh });
+
+    // Assert
+    assert.equal(result.status, 0);
+    const out = JSON.parse(result.stdout);
+    assert.equal(out.decision, undefined);
+    assert.match(out.systemMessage, /crashed[\s\S]*NOT verified/);
+  });
+
   it("should reuse the cached failures on an unchanged red tree", () => {
     // Arrange: a first red run, then a gate that would refuse any re-run
     write("scripts/sum.mjs", "export const sum = (a, b) => a - b;\n");

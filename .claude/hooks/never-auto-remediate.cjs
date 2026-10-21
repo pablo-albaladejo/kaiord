@@ -217,11 +217,21 @@ function normalize(words) {
       );
     } else if (WRAPPERS[head]) {
       w = skipFlags(w.slice(1), WRAPPERS[head].valued);
-    } else if (
-      (head === "pnpm" || head === "yarn") &&
-      ["exec", "dlx"].includes(w[1])
-    ) {
-      w = skipFlags(w.slice(2), []);
+    } else if (["pnpm", "yarn", "npm"].includes(head)) {
+      // `pnpm --filter x exec …`, `pnpm -r dlx …`, `npm exec …`, `npm x …`:
+      // the runner verb may follow leading flags.
+      const rest = w.slice(1);
+      let i = 0;
+      while (i < rest.length && rest[i].startsWith("-"))
+        i += NPM_VALUED.includes(rest[i]) ? 2 : 1;
+      const verbs = head === "npm" ? ["exec", "x"] : ["exec", "dlx"];
+      if (!verbs.includes(rest[i])) return [w];
+      const args = rest.slice(i + 1);
+      // `npm exec -c '<cmd>'` runs a command string.
+      const call = args.findIndex((a) => a === "-c" || a === "--call");
+      if (call !== -1 && args[call + 1] !== undefined)
+        return splitCommands(args[call + 1]).flatMap(normalize);
+      w = skipFlags(args, ["-p", "--package", ...NPM_VALUED]);
     } else if (SHELLS.includes(head)) {
       const c = w.findIndex((x) => /^-[a-z]*c[a-z]*$/.test(x));
       if (c !== -1 && w[c + 1] !== undefined)

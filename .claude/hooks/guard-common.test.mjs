@@ -47,7 +47,7 @@ describe("guard-common", () => {
     ]);
   });
 
-  it("should parse objects only", () => {
+  it("should parse objects only, rejecting arrays", () => {
     // Arrange
     const raws = ['{"a":1}', "null", "[]", "nope"];
 
@@ -55,7 +55,7 @@ describe("guard-common", () => {
     const parsed = raws.map(parseInput);
 
     // Assert
-    assert.deepEqual(parsed, [{ a: 1 }, null, [], null]);
+    assert.deepEqual(parsed, [{ a: 1 }, null, null, null]);
   });
 
   it("should drop every inherited GIT_* variable", () => {
@@ -86,6 +86,32 @@ describe("entry guard — hooks launched through a symlinked path", () => {
         (hook) =>
           spawnSync(process.execPath, [join(link, hook)], {
             input: "not json",
+            encoding: "utf8",
+            env: { ...gitEnv(), TMPDIR: sandbox },
+          }).status
+      );
+
+      // Assert
+      assert.deepEqual(codes, [2, 2]);
+    } finally {
+      rmSync(sandbox, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("malformed hook input — a JSON array", () => {
+  it("should make both PreToolUse hooks fail closed with exit 2", () => {
+    // Arrange
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const hooks = ["never-auto-remediate.cjs", "plan-approval-guard.cjs"];
+    const sandbox = mkdtempSync(join(tmpdir(), "guard-array-"));
+
+    try {
+      // Act
+      const codes = hooks.map(
+        (hook) =>
+          spawnSync(process.execPath, [join(dir, hook)], {
+            input: "[]",
             encoding: "utf8",
             env: { ...gitEnv(), TMPDIR: sandbox },
           }).status

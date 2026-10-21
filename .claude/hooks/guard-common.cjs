@@ -29,7 +29,9 @@ const readStdin = () => fs.readFileSync(0, "utf8");
 const parseInput = (raw) => {
   try {
     const value = JSON.parse(raw);
-    return value && typeof value === "object" ? value : null;
+    return value && typeof value === "object" && !Array.isArray(value)
+      ? value
+      : null;
   } catch {
     return null;
   }
@@ -49,6 +51,8 @@ const git = (cwd, args) =>
     encoding: "utf8",
     env: gitEnv(),
     stdio: ["ignore", "pipe", "pipe"],
+    // `git diff HEAD` over a lockfile bump passes the 1 MiB default.
+    maxBuffer: 512 * 1024 * 1024,
   });
 
 const readJson = (file) => {
