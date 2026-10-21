@@ -4,7 +4,8 @@
  *
  * Three named helpers cover the dialog flows that exercise the AI
  * transport boundary:
- *   - `mockLlmSuccess(page, response?)` resolves with a 200 + JSON body.
+ *   - `mockLlmSuccess(page, response?)` resolves with a 200: JSON, or the
+ *     provider's `text/event-stream` when the request streams (see llm-sse).
  *   - `mockLlmFailure(page, error?)` resolves with an error status.
  *   - `mockLlmHang(page)` never resolves (cancel/abort flows).
  * `mockLlmApis(page, response?)` is preserved for existing callers and
@@ -14,6 +15,7 @@
 import type { Page } from "@playwright/test";
 
 import { LLM_CYCLING_RESPONSE } from "./llm-responses";
+import { fulfillLlm } from "./llm-sse";
 
 const LLM_ROUTE_PATTERNS = [
   "**/api.anthropic.com/**",
@@ -33,13 +35,7 @@ export async function mockLlmSuccess(
   response: unknown = LLM_CYCLING_RESPONSE
 ): Promise<void> {
   for (const pattern of LLM_ROUTE_PATTERNS) {
-    await page.route(pattern, (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(response),
-      })
-    );
+    await page.route(pattern, (route) => fulfillLlm(route, response));
   }
 }
 

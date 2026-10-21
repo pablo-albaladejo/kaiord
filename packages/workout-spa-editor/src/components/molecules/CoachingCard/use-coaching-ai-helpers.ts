@@ -4,6 +4,7 @@
  * `GenerateKrdPort` adapter from a concrete `LlmProviderConfig` and
  * runs the use case end-to-end behind a single async function.
  */
+import type { OnGenerateProgress } from "@kaiord/ai";
 import { PROMPT_VERSION } from "@kaiord/ai/prompts";
 import type { Analytics } from "@kaiord/core";
 
@@ -21,14 +22,17 @@ const isKnownSport = (s: string): s is Sport =>
 export const buildGenerateKrdPort = (
   provider: LlmProviderConfig,
   modelId: string,
-  now: () => string
+  now: () => string,
+  onProgress?: OnGenerateProgress
 ): GenerateKrdPort => {
-  return async ({ text, sport }) => {
+  return async ({ text, sport, abortSignal }) => {
     const krd = await generateWorkoutKrd({
       text,
       provider,
       modelId,
       sport: isKnownSport(sport) ? sport : undefined,
+      abortSignal,
+      onProgress,
     });
     return {
       krd,
@@ -47,6 +51,7 @@ export type RunAiInput = {
   provider: LlmProviderConfig;
   modelId: string;
   abortSignal: AbortSignal;
+  onProgress?: OnGenerateProgress;
   persistence: PersistencePort;
   analytics: Analytics;
 };
@@ -59,8 +64,11 @@ export const runConvertWithAi = (input: RunAiInput) =>
       workouts: input.persistence.workouts,
       sessionMatches: input.persistence.sessionMatch,
       analytics: input.analytics,
-      generateKrd: buildGenerateKrdPort(input.provider, input.modelId, () =>
-        new Date().toISOString()
+      generateKrd: buildGenerateKrdPort(
+        input.provider,
+        input.modelId,
+        () => new Date().toISOString(),
+        input.onProgress
       ),
       newWorkoutId: () => crypto.randomUUID(),
       newMatchId: () => crypto.randomUUID(),

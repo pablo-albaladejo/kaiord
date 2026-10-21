@@ -37,4 +37,8 @@ export const createWorkoutParserAgent = (
     normalizeName(
       reindexSteps(workoutSchema.parse(resolveZoneTargets(raw, zones)))
     ),
+  countItems: (partial) => {
+    const steps = (partial as { steps?: unknown } | undefined)?.steps;
+    return Array.isArray(steps) ? steps.length : undefined;
+  },
 });

@@ -1,6 +1,7 @@
 import type { LanguageModel } from "ai";
 import type { Logger, Sport } from "@kaiord/core";
 import type { AiTelemetrySink } from "./observability/telemetry-types";
+import type { OnGenerateProgress } from "./agents/progress";
 
 /**
  * Configuration for the textToWorkout factory.
@@ -53,4 +54,8 @@ export type TextToWorkoutOptions = {
   sport?: Sport;
   name?: string;
   athlete?: AthleteContext;
+  /** Aborts the in-flight request; an aborted run never retries. */
+  signal?: AbortSignal;
+  /** Streams the output and reports real progress (phase, attempt, steps). */
+  onProgress?: OnGenerateProgress;
 };

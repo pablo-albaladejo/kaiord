@@ -18,6 +18,7 @@ import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-liv
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { type AiRunProgress, cancelAiRun } from "./ai-run-progress";
 import { runStartAi, type StartAiCtx } from "./use-coaching-ai-handler-helpers";
 
 export type AiFailureState = {
@@ -27,6 +28,7 @@ export type AiFailureState = {
 
 export type UseCoachingAi = {
   processing: boolean;
+  progress: AiRunProgress | null;
   failure: AiFailureState | null;
   clearFailure: () => void;
   startAi: () => Promise<void>;
@@ -46,7 +48,7 @@ export const useCoachingAi = (
   const providers = useAiProvidersLive();
   const bindings = useAiModelBindingsLive(profileId);
   const [, navigate] = useLocation();
-  const [processing, setProcessing] = useState(false);
+  const [progress, setProgress] = useState<AiRunProgress | null>(null);
   const [failure, setFailure] = useState<AiFailureState | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -61,7 +63,7 @@ export const useCoachingAi = (
       analytics,
       abortRef,
       setFailure,
-      setProcessing,
+      setProgress,
       onClose,
       navigate,
       onFailureToast: () => toast.error(t("hooks.aiProcessFailed")),
@@ -82,14 +84,11 @@ export const useCoachingAi = (
   ]);
 
   return {
-    processing,
+    processing: progress !== null,
+    progress,
     failure,
     clearFailure: useCallback(() => setFailure(null), []),
     startAi,
-    cancelAi: useCallback(() => {
-      abortRef.current?.abort();
-      abortRef.current = null;
-      setProcessing(false);
-    }, []),
+    cancelAi: useCallback(() => cancelAiRun({ abortRef, setProgress }), []),
   };
 };

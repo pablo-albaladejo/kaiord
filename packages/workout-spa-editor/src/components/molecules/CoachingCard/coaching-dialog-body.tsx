@@ -13,8 +13,13 @@ export type { CoachingDialogBodyProps };
 export { renderMatchedBody } from "./coaching-dialog-matched-body";
 
 export const renderNoWorkoutBody = (props: CoachingDialogBodyProps) => {
-  if (props.aiProcessing)
-    return <AiProcessingOverlay onCancel={props.onAiCancel} />;
+  if (props.aiProgress)
+    return (
+      <AiProcessingOverlay
+        progress={props.aiProgress}
+        onCancel={props.onAiCancel}
+      />
+    );
   if (props.aiFailure)
     return (
       <AiErrorState

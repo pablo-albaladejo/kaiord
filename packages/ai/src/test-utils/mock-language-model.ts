@@ -1,4 +1,4 @@
-import { MockLanguageModelV4 } from "ai/test";
+import { convertArrayToReadableStream, MockLanguageModelV4 } from "ai/test";
 
 /** Raw V4 usage with the given input/output token totals. */
 const usage = (input: number, output: number) => ({
@@ -39,3 +39,22 @@ export const mockModelReturning = (
     provider: "mock-provider",
     doGenerate: objects.map((o) => jsonResult(o)),
   });
+
+const streamParts = (deltas: string[]) => [
+  { type: "stream-start" as const, warnings: [] },
+  { type: "text-start" as const, id: "t" },
+  ...deltas.map((delta) => ({ type: "text-delta" as const, id: "t", delta })),
+  { type: "text-end" as const, id: "t" },
+  {
+    type: "finish" as const,
+    finishReason: { unified: "stop" as const, raw: "stop" },
+    usage: usage(10, 5),
+  },
+];
+
+/**
+ * A scripted `doStream` result emitting `deltas` as text deltas, so a test can
+ * split the JSON wherever it wants the partial outputs to land.
+ */
+export const jsonStream = (deltas: string[]) =>
+  ({ stream: convertArrayToReadableStream(streamParts(deltas)) }) as never;

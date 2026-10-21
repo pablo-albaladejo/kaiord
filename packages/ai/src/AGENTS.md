@@ -15,7 +15,7 @@ Source root for `@kaiord/ai`. Houses the public API export, type definitions, er
 
 ## Subdirectories
 
-- **`agents/`** — Declarative `AgentDefinition` and the generate-mode runtime (multimodal input, validate-and-retry, telemetry per run)
+- **`agents/`** — Declarative `AgentDefinition` and the generate-mode runtime (multimodal input, validate-and-retry, telemetry per run; with an `onProgress` listener the output streams and the run reports phase, attempt and partial item count — `progress.ts`, `call-model.ts`)
 - **`chat/`** — The multi-step tool-calling chat engine; read tools auto-execute, action tools pause for confirmation
 - **`providers/`** — Provider model instantiation, the generated model catalog, purpose→model resolution
 - **`observability/`** — The redaction-safe telemetry port and its console / ring-buffer sinks
