@@ -66,7 +66,7 @@ describe("useChatTurn unmount", () => {
     });
   });
 
-  it("should abort a resume that starts after the conversation was left", async () => {
+  it("should abort a resume that starts after the conversation was left and save it there", async () => {
     // Arrange
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "pending_action",
@@ -89,7 +89,9 @@ describe("useChatTurn unmount", () => {
         return { status: "aborted", text: "", messages: [] };
       }
     );
-    const { result, unmount } = renderHook(() => useChatTurn(args));
+    const { result, unmount } = renderHook(() =>
+      useChatTurn({ ...args, conversationId: "conv-b" })
+    );
     result.current.send("add an easy run tomorrow");
     await waitFor(() => expect(result.current.pendingAction).not.toBeNull());
     result.current.approve();
@@ -102,5 +104,16 @@ describe("useChatTurn unmount", () => {
     // Assert
     await waitFor(() => expect(fakeAgent.resume).toHaveBeenCalled());
     expect(resumeSignal?.aborted).toBe(true);
+    await waitFor(async () => {
+      const rows = (
+        await persistence.chatMessages.listByProfile("prof-1")
+      ).filter((r) => r.conversationId === "conv-b");
+      expect(rows).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ role: "tool", toolName: "create_workout" }),
+          expect.objectContaining({ role: "assistant", stopReason: "aborted" }),
+        ])
+      );
+    });
   });
 });
