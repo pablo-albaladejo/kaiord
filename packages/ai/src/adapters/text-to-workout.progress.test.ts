@@ -42,6 +42,40 @@ describe("createTextToWorkout progress", () => {
     expect(events.at(-1)?.phase).toBe("validating");
   });
 
+  it("should resolve zone targets against the athlete's zones while streaming", async () => {
+    // Arrange
+    const zoneStep = JSON.stringify({
+      stepIndex: 0,
+      durationType: "time",
+      duration: { type: "time", seconds: 900 },
+      targetType: "pace",
+      target: { type: "pace", value: { unit: "zone", value: 1 } },
+      intensity: "warmup",
+    });
+    const model = new MockLanguageModelV4({
+      doStream: [
+        jsonStream([
+          '{"name":"Easy run","sport":"running","steps":[',
+          zoneStep,
+          "]}",
+        ]),
+      ],
+    });
+    const pace = [{ zone: 1, minMps: 2.5, maxMps: 2.9 }];
+
+    // Act
+    const workout = await createTextToWorkout({ model })("Rodaje 15' Z1", {
+      athlete: { zones: { pace } },
+      onProgress: () => {},
+    });
+
+    // Assert
+    expect(model.doStreamCalls).toHaveLength(1);
+    expect(workout.steps[0]).toMatchObject({
+      target: { type: "pace", value: { unit: "range", min: 2.5, max: 2.9 } },
+    });
+  });
+
   it("should forward the abort signal so a cancelled run never calls the model", async () => {
     // Arrange
     const model = new MockLanguageModelV4({ doStream: [jsonStream(["{}"])] });
