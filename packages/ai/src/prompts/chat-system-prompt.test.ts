@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildChatSystemPrompt,
+  CHAT_ACTION_TOOL_NAMES,
   CHAT_PROMPT_VERSION,
 } from "./chat-system-prompt";
 import { UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./fence";
@@ -38,4 +39,19 @@ describe("buildChatSystemPrompt", () => {
     // Assert
     expect(version).toMatch(/^\d+\.\d+\.\d+$/);
   });
+});
+
+describe("buildChatSystemPrompt action list", () => {
+  it.each([...CHAT_ACTION_TOOL_NAMES])(
+    "should name the %s action tool",
+    (name) => {
+      // Arrange
+
+      // Act
+      const prompt = buildChatSystemPrompt();
+
+      // Assert
+      expect(prompt).toContain(name);
+    }
+  );
 });

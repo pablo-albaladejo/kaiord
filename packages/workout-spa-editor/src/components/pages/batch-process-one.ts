@@ -23,19 +23,20 @@ export function createProcessOne(
     workout: WorkoutRecord,
     allowRetry: boolean
   ): Promise<ProcessResult> => {
-    // Usage telemetry is emitted by `generateWorkoutKrd` (default Dexie sink).
+    // Usage telemetry, the athlete's zones and their custom AI instructions
+    // all come from `generateWorkoutKrd`'s app-db defaults.
     const generateFn = (prompt: string, sport: string) =>
       generateWorkoutKrd({
         text: prompt,
         provider,
         modelId,
+        profileId: workout.profileId,
         sport: sport as Parameters<typeof generateWorkoutKrd>[0]["sport"],
       });
 
     const result = await processWorkoutWithAi({
       workout,
       selectedComments: (workout.raw?.comments ?? []).map((c) => c.text),
-      zonesContext: "",
       generateFn,
       provider: provider.type,
       model: modelId,

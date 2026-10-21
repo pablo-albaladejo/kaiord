@@ -7,14 +7,23 @@ import { createWorkoutKRD } from "@kaiord/core";
 import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adapter";
 import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { LlmProviderConfig } from "../store/ai-store-types";
+import type { AthleteInput } from "./athlete-generation-context";
+import {
+  loadAthleteInput,
+  toAthleteContext,
+} from "./athlete-generation-context";
 
 export type GenerateWorkoutOptions = {
   text: string;
   provider: LlmProviderConfig;
   modelId: string;
   sport?: Sport;
-  customPrompt?: string;
-  zonesContext?: string;
+  // The athlete's profile (zones) and custom AI instructions. Omitted, they
+  // are read from the app db, so no generation call site can forget them.
+  athlete?: AthleteInput;
+  // The profile the workout is generated for, when it is not the active one
+  // (batch and chat write the workout to a given profile).
+  profileId?: string;
   // Telemetry sink override; defaults to the Dexie usage sink over the app db so
   // every generation call site is accounted without bolting on its own writer.
   telemetry?: AiTelemetrySink;
@@ -26,31 +35,17 @@ export const generateWorkoutKrd = async (
   const model = await createLanguageModel(options.provider, options.modelId, {
     browser: true,
   });
+  const persistence = createDexiePersistence();
   const telemetry =
-    options.telemetry ??
-    createDexieUsageTelemetrySink(createDexiePersistence());
+    options.telemetry ?? createDexieUsageTelemetrySink(persistence);
+  const athlete =
+    options.athlete ?? (await loadAthleteInput(persistence, options.profileId));
   const textToWorkout = createTextToWorkout({ model, telemetry });
 
-  const prompt = buildPrompt(options);
-  const workout = await textToWorkout(prompt, {
+  const workout = await textToWorkout(options.text, {
     sport: options.sport,
+    athlete: toAthleteContext(athlete, options.sport),
   });
 
   return createWorkoutKRD(workout);
-};
-
-const MAX_CUSTOM_PROMPT = 500;
-
-const buildPrompt = (options: GenerateWorkoutOptions): string => {
-  const parts = [options.text];
-
-  if (options.zonesContext) {
-    parts.push(`\nTraining zones:\n${options.zonesContext}`);
-  }
-  if (options.customPrompt) {
-    const truncated = options.customPrompt.slice(0, MAX_CUSTOM_PROMPT);
-    parts.push(`\nAdditional instructions:\n${truncated}`);
-  }
-
-  return parts.join("");
 };
