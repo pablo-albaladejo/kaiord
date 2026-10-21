@@ -70,14 +70,21 @@ describe("ChatPage turn in flight across a conversation switch", () => {
     ]);
   });
 
-  it("should save the reply to the conversation that sent it and show nothing in the other", async () => {
+  it("should stop the turn on leaving its conversation, save it there as aborted and show nothing in the other", async () => {
     // Arrange
-    let resolveTurn: (r: ChatTurnResult) => void = () => undefined;
     vi.mocked(buildChatAgent).mockImplementation(async (args) => ({
       agent: {
-        sendTurn: () => {
+        sendTurn: (_messages: unknown, options: { signal: AbortSignal }) => {
           args.onTextDelta?.("Respuesta para c1");
-          return new Promise<ChatTurnResult>((r) => (resolveTurn = r));
+          return new Promise<ChatTurnResult>((resolve) =>
+            options.signal.addEventListener("abort", () =>
+              resolve({
+                status: "aborted",
+                text: "Respuesta para c1",
+                messages: [],
+              } as ChatTurnResult)
+            )
+          );
         },
       } as never,
       tools: [],
@@ -85,20 +92,21 @@ describe("ChatPage turn in flight across a conversation switch", () => {
     const { rerender } = renderWithProviders(<ChatPage conversationId="c1" />);
     await userEvent.type(screen.getByLabelText("Message"), "hola{Enter}");
     await screen.findByText("Respuesta para c1");
-    rerender(<ChatPage conversationId="c2" />);
 
     // Act
-    await act(async () =>
-      resolveTurn({ status: "complete", text: "Hecho", messages: [] })
-    );
+    await act(async () => rerender(<ChatPage conversationId="c2" />));
 
     // Assert
-    expect(vi.mocked(appendAssistantTurn)).toHaveBeenCalledWith(
-      expect.anything(),
-      "p1",
-      "c1",
-      expect.objectContaining({ text: "Hecho" }),
-      "anthropic"
+    await vi.waitFor(() =>
+      expect(vi.mocked(appendAssistantTurn)).toHaveBeenCalledWith(
+        expect.anything(),
+        "p1",
+        "c1",
+        expect.objectContaining({
+          status: "aborted",
+          text: "Respuesta para c1",
+        })
+      )
     );
     expect(screen.queryByText("Respuesta para c1")).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

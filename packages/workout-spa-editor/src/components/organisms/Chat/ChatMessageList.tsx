@@ -78,6 +78,11 @@ export function ChatMessageList({
             ) : (
               m.content
             )}
+            {m.stopReason && (
+              <span className="mt-1 block text-[12px] italic text-ink-muted">
+                {t(`stopReason.${m.stopReason}`)}
+              </span>
+            )}
             {proposalId && <ChatWorkoutProposal workoutId={proposalId} />}
             <ToolResultLinks links={buildToolResultLinks(m, t)} />
           </li>

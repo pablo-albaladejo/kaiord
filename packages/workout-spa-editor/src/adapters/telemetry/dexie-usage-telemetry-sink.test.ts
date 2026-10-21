@@ -1,4 +1,7 @@
-import type { AiTelemetryEvent } from "@kaiord/ai/observability";
+import type {
+  AiTelemetryEvent,
+  ChatTurnFinishedEvent,
+} from "@kaiord/ai/observability";
 import type { Logger } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
@@ -22,6 +25,23 @@ const finished = (over: Partial<AiTelemetryEvent> = {}): AiTelemetryEvent => ({
   purpose: "lab_extraction",
   latencyMs: 42,
   usage: { promptTokens: 300, completionTokens: 120 },
+  ...over,
+});
+
+const chatTurn = (
+  over: Partial<ChatTurnFinishedEvent> = {}
+): ChatTurnFinishedEvent => ({
+  type: "chat_turn_finished",
+  traceId: "chat-1",
+  promptVersion: "1.0.0",
+  provider: "anthropic.messages",
+  modelId: "claude",
+  steps: 2,
+  toolNames: ["query_workouts"],
+  status: "complete",
+  inputTokens: 500,
+  outputTokens: 80,
+  latencyMs: 900,
   ...over,
 });
 
@@ -119,5 +139,41 @@ describe("createDexieUsageTelemetrySink", () => {
 
     // Assert
     expect(row).toMatchObject({ cost: 0, tokens: 420 });
+  });
+
+  it("should append a chat usage row for a chat turn, stopped turns included", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const sink = createDexieUsageTelemetrySink(persistence);
+
+    // Act
+    sink.emit(chatTurn({ status: "aborted" }));
+    await flush();
+    const [row] = await persistence.usageEvents.listByMonth(currentMonth());
+
+    // Assert
+    expect(row).toMatchObject({
+      purpose: "chat",
+      providerType: "anthropic",
+      modelId: "claude",
+      traceId: "chat-1",
+      promptTokens: 500,
+      completionTokens: 80,
+      tokens: 580,
+    });
+  });
+
+  it("should skip a chat turn that reported no tokens", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const sink = createDexieUsageTelemetrySink(persistence);
+
+    // Act
+    sink.emit(chatTurn({ status: "error", inputTokens: 0, outputTokens: 0 }));
+    await flush();
+    const rows = await persistence.usageEvents.listByMonth(currentMonth());
+
+    // Assert
+    expect(rows).toHaveLength(0);
   });
 });

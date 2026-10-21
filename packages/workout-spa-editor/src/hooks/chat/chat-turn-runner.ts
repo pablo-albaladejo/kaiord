@@ -15,7 +15,11 @@ import { buildDataRouteSignals } from "./build-data-route-signals";
 import { runAgent } from "./chat-turn-context";
 import type { ChatTurnCtx } from "./chat-turn-types";
 
-const buildAndSend = async (ctx: ChatTurnCtx, messages: ModelMessage[]) => {
+const buildAndSend = async (
+  ctx: ChatTurnCtx,
+  messages: ModelMessage[],
+  signal: AbortSignal
+) => {
   const built = await buildChatAgent({
     persistence: ctx.persistence,
     profileId: ctx.profileId,
@@ -29,7 +33,7 @@ const buildAndSend = async (ctx: ChatTurnCtx, messages: ModelMessage[]) => {
   });
   ctx.agentRef.current = built.agent;
   ctx.toolsRef.current = built.tools;
-  return built.agent.sendTurn(messages);
+  return built.agent.sendTurn(messages, { signal });
 };
 
 export const sendTurn = async (
@@ -37,7 +41,7 @@ export const sendTurn = async (
   history: ChatMessageRecord[],
   text: string
 ): Promise<void> => {
-  await runAgent(ctx, async () => {
+  await runAgent(ctx, async (signal) => {
     await ensureConversationForTurn(ctx.persistence, {
       profileId: ctx.profileId,
       conversationId: ctx.conversationId,
@@ -52,10 +56,11 @@ export const sendTurn = async (
       ctx.conversationId,
       text
     );
-    return buildAndSend(ctx, [
-      ...recordsToModelMessages(history),
-      { role: "user", content: text },
-    ]);
+    return buildAndSend(
+      ctx,
+      [...recordsToModelMessages(history), { role: "user", content: text }],
+      signal
+    );
   });
 };
 
@@ -75,5 +80,5 @@ export const retryTurn = async (
   const last = replay.at(-1);
   if (last?.role !== "user" || last.content !== text)
     return sendTurn(ctx, history, text);
-  await runAgent(ctx, () => buildAndSend(ctx, replay));
+  await runAgent(ctx, (signal) => buildAndSend(ctx, replay, signal));
 };

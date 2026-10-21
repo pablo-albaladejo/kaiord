@@ -2,9 +2,12 @@ import type { Logger } from "@kaiord/core";
 import type { AiTelemetryEvent, AiTelemetrySink } from "./telemetry-types";
 
 const summarize = (event: AiTelemetryEvent): string =>
-  `[ai:${event.type}] ${event.agentId}@${event.agentVersion} ` +
-  `${event.provider}/${event.modelId} purpose=${event.purpose} ` +
-  `${event.latencyMs}ms`;
+  event.type === "chat_turn_finished"
+    ? `[ai:${event.type}] ${event.provider}/${event.modelId} ` +
+      `status=${event.status} steps=${event.steps} ${event.latencyMs}ms`
+    : `[ai:${event.type}] ${event.agentId}@${event.agentVersion} ` +
+      `${event.provider}/${event.modelId} purpose=${event.purpose} ` +
+      `${event.latencyMs}ms`;
 
 /**
  * Development sink: logs a single-line summary per run. Carries ids and
@@ -22,6 +25,10 @@ export const createConsoleTelemetrySink = (
       return;
     }
     const debug = logger?.debug ?? ((m: string) => console.debug(m));
+    if (event.type === "chat_turn_finished") {
+      debug(line, { toolNames: event.toolNames });
+      return;
+    }
     debug(line, { usage: event.usage });
   },
 });

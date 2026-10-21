@@ -22,7 +22,7 @@ export const approveAction = async (
     pending.input
   );
   ctx.set.pendingAction(null);
-  await runAgent(ctx, async () => {
+  await runAgent(ctx, async (signal) => {
     await appendToolEvent(
       ctx.persistence,
       ctx.profileId,
@@ -31,12 +31,16 @@ export const approveAction = async (
       ok,
       output
     );
-    return agent.resume(ctx.messagesRef.current, {
-      toolCallId: pending.toolCallId,
-      toolName: pending.toolName,
-      status: "approved",
-      output,
-    });
+    return agent.resume(
+      ctx.messagesRef.current,
+      {
+        toolCallId: pending.toolCallId,
+        toolName: pending.toolName,
+        status: "approved",
+        output,
+      },
+      { signal }
+    );
   });
 };
 
@@ -47,11 +51,15 @@ export const denyAction = async (
   const agent = ctx.agentRef.current;
   if (!agent) return;
   ctx.set.pendingAction(null);
-  await runAgent(ctx, () =>
-    agent.resume(ctx.messagesRef.current, {
-      toolCallId: pending.toolCallId,
-      toolName: pending.toolName,
-      status: "declined",
-    })
+  await runAgent(ctx, (signal) =>
+    agent.resume(
+      ctx.messagesRef.current,
+      {
+        toolCallId: pending.toolCallId,
+        toolName: pending.toolName,
+        status: "declined",
+      },
+      { signal }
+    )
   );
 };

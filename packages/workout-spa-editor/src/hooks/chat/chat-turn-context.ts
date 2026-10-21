@@ -24,25 +24,39 @@ const applyResult = async (
     ctx.persistence,
     ctx.profileId,
     ctx.conversationId,
-    result,
-    ctx.provider.type
+    result
   );
   ctx.set.streamingText("");
   ctx.set.state("idle");
 };
 
+/**
+ * Runs one turn under a fresh `AbortController` held in `abortRef`, so
+ * {@link stopTurn} can cut it short. A stopped turn resolves (status
+ * `aborted` / `timeout`) and is persisted like any other reply.
+ */
 export const runAgent = async (
   ctx: ChatTurnCtx,
-  run: () => Promise<ChatTurnResult>
+  run: (signal: AbortSignal) => Promise<ChatTurnResult>
 ): Promise<void> => {
+  const controller = new AbortController();
+  ctx.abortRef.current = controller;
+  if (ctx.disposedRef.current) controller.abort();
   ctx.set.error(null);
   ctx.set.state("streaming");
   ctx.set.streamingText("");
   try {
-    await applyResult(ctx, await run());
+    await applyResult(ctx, await run(controller.signal));
   } catch (e) {
     ctx.set.streamingText("");
     ctx.set.state("error");
     ctx.set.error(categorizeChatError(e));
+  } finally {
+    if (ctx.abortRef.current === controller) ctx.abortRef.current = null;
   }
+};
+
+/** Stops the in-flight turn, if any; a no-op once it has settled. */
+export const stopTurn = (ctx: ChatTurnCtx): void => {
+  ctx.abortRef.current?.abort();
 };

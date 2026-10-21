@@ -4,7 +4,7 @@
 
 ## Purpose
 
-The SPA usage event log: a redaction-safe, append-only, **synced** `usageEvents` store that is the single authoritative record of AI token usage — fed by the `@kaiord/ai` telemetry port (Dexie sink) for agent runs and directly by the chat path, both through the shared `appendUsageEvent` writer. It aggregates cross-device by append-only union-by-id, is rendered per month with a per-purpose breakdown in Settings via `foldUsageEvents`, and is retention-pruned to stay bounded. There is no legacy `usage` table or dual-write.
+The SPA usage event log: a redaction-safe, append-only, **synced** `usageEvents` store that is the single authoritative record of AI token usage — fed by the `@kaiord/ai` telemetry port (Dexie sink) for agent runs and chat turns, through the shared `appendUsageEvent` writer. It aggregates cross-device by append-only union-by-id, is rendered per month with a per-purpose breakdown in Settings via `foldUsageEvents`, and is retention-pruned to stay bounded. There is no legacy `usage` table or dual-write.
 
 ## Requirements
 
@@ -24,23 +24,24 @@ The SPA SHALL persist AI token usage as an append-only Dexie event log (`usageEv
 
 ### Requirement: Single writer applied through a repository port
 
-The SPA SHALL write `usageEvents` only through `appendUsageEvent`, the single application-layer writer, over the `UsageEventRepository` port. It is THE authoritative usage writer — there is no legacy `usage` row and no dual-write. It computes cost as `estimateCost(tokens, getProviderRate(providerType))` and skips a run whose total token count is zero. Chat turns call it directly with `purpose: "chat"`; agent runs reach it via the Dexie telemetry sink.
+The SPA SHALL write `usageEvents` only through `appendUsageEvent`, the single application-layer writer, over the `UsageEventRepository` port. It is THE authoritative usage writer — there is no legacy `usage` row and no dual-write. It computes cost as `estimateCost(tokens, getProviderRate(providerType))` and skips a run whose total token count is zero. Agent runs and chat turns both reach it via the Dexie telemetry sink; chat turns record `purpose: "chat"`.
 
 #### Scenario: Cost formula and zero-token skip
 
 - **WHEN** `appendUsageEvent` records a `1_000_000`-token `anthropic` run
 - **THEN** the stored `cost` SHALL equal `estimateCost(1_000_000, getProviderRate("anthropic"))`, and a zero-token run SHALL write nothing
 
-#### Scenario: A chat turn writes one usage event directly
+#### Scenario: A chat turn writes one usage event through the sink
 
-- **GIVEN** a chat turn with usage `{ promptTokens: 200, completionTokens: 100 }` on provider type `google`
-- **WHEN** the assistant turn is persisted
-- **THEN** exactly one `usageEvents` row with `purpose: "chat"` SHALL be appended, and no legacy `usage` row SHALL be written (none exists)
+- **GIVEN** a chat turn with `inputTokens: 500, outputTokens: 80` on provider `anthropic.messages`
+- **WHEN** its `chat_turn_finished` event reaches the Dexie sink — whatever its status, a stopped or paused turn included
+- **THEN** exactly one `usageEvents` row with `purpose: "chat"` and the turn's `traceId` SHALL be appended, and persisting the assistant message SHALL write no usage row of its own
 
 ### Requirement: Telemetry sink folds runtime events into the log
 
 The SPA SHALL provide `createDexieUsageTelemetrySink(persistence)` implementing
-`AiTelemetrySink`. On a `run_finished` event that carries usage, it SHALL map
+`AiTelemetrySink`. On a `run_finished` event that carries usage, or a
+`chat_turn_finished` event (as `purpose: "chat"`), it SHALL map
 the SDK provider string to an `LlmProviderType`, compute cost, and append a
 `usageEvents` row. It SHALL no-op on `run_failed` and on `run_finished` without
 usage. Persisting SHALL be best-effort: a write error SHALL be swallowed (logged)

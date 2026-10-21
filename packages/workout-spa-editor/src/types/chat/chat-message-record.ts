@@ -10,6 +10,9 @@
 
 export type ChatMessageRole = "user" | "assistant" | "tool";
 
+/** Why an assistant reply ended early: stopped by the user, or timed out. */
+export type ChatStopReason = "aborted" | "timeout";
+
 export type ChatMessageUsage = {
   promptTokens: number;
   completionTokens: number;
@@ -35,4 +38,10 @@ export type ChatMessageRecord = {
   createdAt: string;
   /** Provider-reported token usage, present on completed assistant turns. */
   usage?: ChatMessageUsage;
+  /**
+   * Set on an assistant reply cut short. `content` then holds only what
+   * streamed; the transcript renders the reason localized, and the replay
+   * to the model appends a fixed marker (see `recordsToModelMessages`).
+   */
+  stopReason?: ChatStopReason;
 };

@@ -12,6 +12,7 @@ vi.mock("@kaiord/ai/providers", () => ({
 }));
 vi.mock("@kaiord/ai/prompts", () => ({
   buildChatSystemPrompt: () => "SYSTEM_PROMPT",
+  CHAT_PROMPT_VERSION: "9.9.9",
 }));
 vi.mock("../../application/chat/tools/build-chat-tools", () => ({
   buildChatTools: (deps: unknown) => buildChatTools(deps),
@@ -63,6 +64,8 @@ describe("buildChatAgent", () => {
       model: { id: "model" },
       tools: ["tool"],
       system: "SYSTEM_PROMPT",
+      promptVersion: "9.9.9",
+      telemetry: expect.objectContaining({ emit: expect.any(Function) }),
       onTextDelta,
     });
     expect(result.tools).toEqual(["tool"]);

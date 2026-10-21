@@ -13,14 +13,30 @@ import type {
   ChatMessageRecord,
   ChatMessageRole,
   ChatMessageUsage,
+  ChatStopReason,
 } from "../../types/chat/chat-message-record";
+
+/** Model-facing only (never rendered): tells the model its earlier reply was
+ * cut short, so it does not build on it as if finished. */
+const MODEL_STOP_MARKERS: Record<ChatStopReason, string> = {
+  aborted: "(Stopped by the user.)",
+  timeout: "(Stopped: the response took too long.)",
+};
+
+const modelContent = (r: ChatMessageRecord): string =>
+  r.stopReason
+    ? [r.content, MODEL_STOP_MARKERS[r.stopReason]].filter(Boolean).join("\n\n")
+    : r.content;
 
 export const recordsToModelMessages = (
   records: ChatMessageRecord[]
 ): ModelMessage[] =>
   records
     .filter((r) => r.role === "user" || r.role === "assistant")
-    .map((r) => ({ role: r.role as "user" | "assistant", content: r.content }));
+    .map((r) => ({
+      role: r.role as "user" | "assistant",
+      content: modelContent(r),
+    }));
 
 export type NewChatMessageInput = {
   id: string;
@@ -32,6 +48,7 @@ export type NewChatMessageInput = {
   toolName?: string;
   toolResult?: unknown;
   usage?: ChatMessageUsage;
+  stopReason?: ChatStopReason;
 };
 
 export const newChatMessage = (
@@ -46,4 +63,5 @@ export const newChatMessage = (
   ...(input.toolName ? { toolName: input.toolName } : {}),
   ...(input.toolResult !== undefined ? { toolResult: input.toolResult } : {}),
   ...(input.usage ? { usage: input.usage } : {}),
+  ...(input.stopReason ? { stopReason: input.stopReason } : {}),
 });

@@ -26,12 +26,40 @@ type RunIdentity = {
   latencyMs: number;
 };
 
+/** How a chat turn ended; `error` covers every thrown provider failure. */
+export type ChatTurnStatus =
+  | "complete"
+  | "pending_action"
+  | "step_limit"
+  | "aborted"
+  | "timeout"
+  | "error";
+
+/**
+ * One chat turn. `toolNames` are the app-registered tool names the model
+ * called (never their inputs or outputs); token counts are provider-reported.
+ */
+export type ChatTurnFinishedEvent = {
+  type: "chat_turn_finished";
+  traceId: string;
+  promptVersion: string;
+  provider: string;
+  modelId: string;
+  steps: number;
+  toolNames: string[];
+  status: ChatTurnStatus;
+  inputTokens: number;
+  outputTokens: number;
+  latencyMs: number;
+};
+
 export type AiTelemetryEvent =
   | ({ type: "run_finished"; usage?: AiUsage } & RunIdentity)
   | ({
       type: "run_failed";
       error: { name: string; retriable: boolean };
-    } & RunIdentity);
+    } & RunIdentity)
+  | ChatTurnFinishedEvent;
 
 export type AiTelemetrySink = {
   emit: (event: AiTelemetryEvent) => void;

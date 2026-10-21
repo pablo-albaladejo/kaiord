@@ -50,9 +50,10 @@ export function ChatWorkspace(props: ChatWorkspaceProps) {
       />
       {/* Keyed per conversation so no turn state (error, stream, pending
           action, retry input) or half-typed model choice crosses threads.
-          A turn still in flight keeps writing to its own conversation. A
-          pending action awaiting confirmation lives only in this state (it
-          is not persisted), so leaving the thread discards it unconfirmed. */}
+          Leaving the thread stops a turn still in flight, which is saved
+          there as aborted, so no thread ever runs a turn without its Stop
+          control. A pending action awaiting confirmation lives only in this
+          state (it is not persisted), so leaving discards it unconfirmed. */}
       <div key={props.activeId ?? "none"} className="flex flex-col gap-3">
         <ChatModelPicker {...props.modelPicker} />
         {props.provider && (

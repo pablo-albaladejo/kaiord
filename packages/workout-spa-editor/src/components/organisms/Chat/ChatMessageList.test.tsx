@@ -98,4 +98,32 @@ describe("ChatMessageList", () => {
     // Assert
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
+
+  it("should render a localized note under a reply the user stopped", () => {
+    // Arrange
+    const stopped = {
+      ...message("m1", "Partial"),
+      stopReason: "aborted" as const,
+    };
+
+    // Act
+    render(<ChatMessageList messages={[stopped]} />);
+
+    // Assert
+    expect(screen.getByText("Partial")).toBeInTheDocument();
+    expect(screen.getByText("Stopped by you.")).toBeInTheDocument();
+  });
+
+  it("should render a localized note under a reply that timed out", () => {
+    // Arrange
+    const stopped = { ...message("m1", ""), stopReason: "timeout" as const };
+
+    // Act
+    render(<ChatMessageList messages={[stopped]} />);
+
+    // Assert
+    expect(
+      screen.getByText("Stopped: the response took too long.")
+    ).toBeInTheDocument();
+  });
 });
