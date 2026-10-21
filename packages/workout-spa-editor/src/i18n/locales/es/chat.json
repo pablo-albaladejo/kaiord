@@ -144,5 +144,46 @@
       "body": "«{{label}}» viene de una copia de seguridad, que nunca incluye claves. Añade la clave en Ajustes para usar el asistente.",
       "action": "Añadir la clave"
     }
+  },
+  "capabilities": {
+    "title": "Pregunta por tus datos o pídeme que haga algo",
+    "help": "¿Qué puedo hacer?",
+    "close": "Cerrar",
+    "fillHint": "Una sugerencia rellena el mensaje; no lo envía.",
+    "nothingSaved": "Nada se guarda sin tu confirmación.",
+    "youConfirm": "Confirmas tú cada una.",
+    "group": {
+      "consult": "Consultar",
+      "log": "Registrar",
+      "do": "Hacer"
+    },
+    "tool": {
+      "query_workouts": "Tus entrenamientos por fechas y deporte",
+      "query_health": "Sueño, peso, VFC, pasos…",
+      "query_energy_balance": "Balance energético y objetivo",
+      "query_coaching": "Lo que te ha planificado el entrenador",
+      "get_data_routes": "De qué fuente viene cada dato",
+      "log_health_metric": "Peso, sueño, VFC o pasos",
+      "log_intake": "Comidas e ingesta",
+      "create_workout": "Crear y guardar un entreno en una fecha",
+      "push_to_garmin": "Enviar un entreno a Garmin",
+      "sync_coaching": "Sincronizar el plan del entrenador",
+      "set_data_route": "Cambiar de qué fuente viene un dato"
+    },
+    "example": {
+      "week": "¿Cómo fue mi semana?",
+      "sleep": "¿He dormido mejor este mes?",
+      "balance": "¿Cómo va mi balance energético?",
+      "coachPlan": "¿Qué me ha planificado el entrenador esta semana?",
+      "weightSource": "¿De dónde viene mi peso?",
+      "logWeight": "Registra 71,9 kg hoy",
+      "logSleep": "Dormí 7 h anoche",
+      "logMeal": "Comí 120 g de pasta",
+      "createWorkout": "Créame un rodaje Z2 de 45' para mañana",
+      "pushGarmin": "Envía el entreno de mañana a Garmin",
+      "syncCoaching": "Sincroniza mi plan de Train2Go",
+      "setRoute": "Usa WHOOP para el sueño"
+    },
+    "suggestions": "Sugerencias: {{group}}"
   }
 }
