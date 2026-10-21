@@ -56,7 +56,50 @@
   "action": {
     "sync_coaching": "Sync coaching activities",
     "create_workout": "Create a workout",
-    "log_health_metric": "Log a health metric"
+    "log_health_metric": "Log a health metric",
+    "log_intake": "Log food intake",
+    "push_to_garmin": "Send to Garmin",
+    "set_data_route": "Change data routing"
+  },
+  "summary": {
+    "unreadable": "The assistant sent details the app could not read. Decline and ask again.",
+    "syncCoaching": "Fetch the latest prescribed activities from your coaching provider.",
+    "createWorkout": "On {{date}}: “{{description}}”",
+    "createWorkoutSport": "{{sport}} on {{date}}: “{{description}}”",
+    "metric": {
+      "sleep": "Sleep: {{value}} h on {{date}}",
+      "weight": "Weight: {{value}} kg on {{date}}",
+      "hrv": "HRV: {{value}} ms on {{date}}",
+      "daily-wellness": "Steps: {{value}} on {{date}}"
+    },
+    "intake": "{{kcal}} kcal (protein {{protein}} g · carbs {{carb}} g · fat {{fat}} g) on {{date}}",
+    "intakeLabelled": "“{{label}}”: {{line}}",
+    "intakeSlot": "{{slot}}: {{line}}",
+    "mealSlot": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
+    "push": "“{{title}}” ({{duration}}) on {{date}}",
+    "pushLoading": "Looking up the workout…",
+    "pushMissing": "This workout is not in the active athlete's library. Decline and ask again.",
+    "route": {
+      "enable": {
+        "import": "Start importing {{type}} from {{integration}}",
+        "export": "Start sending {{type}} to {{integration}}"
+      },
+      "disable": {
+        "import": "Stop importing {{type}} from {{integration}}",
+        "export": "Stop sending {{type}} to {{integration}}"
+      },
+      "union": "{{type}}: merge every enabled source",
+      "priority": "{{type}}: read from {{order}}, in that order"
+    }
+  },
+  "external": {
+    "push_to_garmin": "This sends the workout off your device, to your Garmin Connect account.",
+    "sync_coaching": "This connects to your coaching provider, outside your device."
   },
   "toolLinks": {
     "viewWorkout": "View workout",
