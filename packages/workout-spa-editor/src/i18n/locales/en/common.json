@@ -64,5 +64,9 @@
   "durationPicker": {
     "maxHeartRate": "Maximum {{max}} {{unit}}",
     "heartRateLabel": "Heart Rate ({{unit}})"
+  },
+  "markdown": {
+    "table": "Table",
+    "code": "Code block"
   }
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
+import { Markdown } from "../../atoms/Markdown";
 import {
   buildToolResultLinks,
   proposedWorkoutId,
@@ -72,7 +73,11 @@ export function ChatMessageList({
             <span className="mb-0.5 block text-[11px] font-semibold opacity-70">
               {roleKey ? t(roleKey) : m.role}
             </span>
-            {m.content}
+            {m.role === "assistant" ? (
+              <Markdown source={m.content} />
+            ) : (
+              m.content
+            )}
             {proposalId && <ChatWorkoutProposal workoutId={proposalId} />}
             <ToolResultLinks links={buildToolResultLinks(m, t)} />
           </li>
