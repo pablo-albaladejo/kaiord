@@ -15,7 +15,8 @@ import type {
 } from "../application/chat/tools/chat-tool-deps";
 import { usePersistence } from "../contexts/persistence-context";
 import type { LlmProviderConfig } from "../store/ai-store-types";
-import { doCreateWorkout, doSyncCoaching } from "./chat/chat-action-ops-impl";
+import { doSyncCoaching } from "./chat/chat-action-ops-impl";
+import { doCreateWorkout } from "./chat/chat-create-workout";
 import { useLogOps } from "./use-log-ops";
 import { usePushToGarminOp } from "./use-push-to-garmin-op";
 import { useSetDataRouteOp } from "./use-set-data-route-op";
@@ -36,7 +37,7 @@ export const useChatActionOps = (
   generation: ChatGenerationModel
 ): ChatActionOps => {
   const persistence = usePersistence();
-  const pushToGarmin = usePushToGarminOp();
+  const pushToGarmin = usePushToGarminOp(profileId);
   const setDataRoute = useSetDataRouteOp(profileId);
   const { logHealthMetric, logIntake } = useLogOps(profileId);
   const transport = useTrain2GoCoachingTransport();
