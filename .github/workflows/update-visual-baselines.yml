@@ -32,8 +32,14 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      # Same browser + system packages as the e2e jobs whose baselines this
+      # regenerates; `required` so a baseline is never rendered without the
+      # fonts the comparing jobs install.
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+        timeout-minutes: 12
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: chromium
 
       - name: Build workspace dependencies
         run: pnpm -r build
