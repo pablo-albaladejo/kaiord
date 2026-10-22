@@ -103,10 +103,12 @@ recording. Haiku iteration runs write to the gitignored
 
 Staleness covers prompt, tools, fixture and request hash (system prompt,
 messages, canonical schema, model id). The schema is hashed canonicalized (keys
-sorted, `$schema`, `title` and `description` stripped) so an `ai`/`zod` bump
-that only reshuffles serialization does not stale every cassette. Empty green is
-a fault, and exit non-zero was chosen over a "not a gate" label: the replay
-runner is meant to gate, so a pass that measured nothing or found a stale
+sorted recursively, only `$schema` stripped) so an `ai`/`zod` bump that only
+reshuffles serialization does not stale every cassette. `title` and
+`description` stay in the hash: the schema is model-facing through
+`--json-schema`, so editing a description changes what the model is asked. Empty
+green is a fault, and exit non-zero was chosen over a "not a gate" label: the
+replay runner is meant to gate, so a pass that measured nothing or found a stale
 cassette must turn red rather than ask a reader to notice a label. PR 6 ships
 only `recorder: "synthetic"` fixtures, which are never measured; the measured
 path, the sentinel and staleness are tested with in-memory

@@ -21,11 +21,12 @@
 - [ ] 2.2 Hashes: prompt, tools, fixture, and request (system prompt, messages,
       canonical schema, model id); a mismatch in any of the four makes the case
       unmeasured with a stale-cassette reason. The schema is canonicalized
-      before hashing: keys sorted recursively, `$schema`, `title` and
-      `description` removed at every level. Tests cover a changed prompt, a
-      changed schema constraint and a changed model id (stale, asserting the
-      stale ids in the fault, not only the exit code), and reordered keys or a
-      new `$schema` URI (fresh).
+      before hashing: keys sorted recursively and only `$schema` removed at
+      every level (`title` and `description` stay; they are model-facing). Tests
+      cover a changed prompt, a changed schema constraint, a changed field
+      description and a changed model id (stale, asserting the stale ids in the
+      fault, not only the exit code), and reordered keys or a new `$schema` URI
+      (fresh).
 - [ ] 2.3 Replay runner over `MockLanguageModelV4` through the real runtime; it
       imports nothing from `evals/claude-cli/`; a test pins that.
 - [ ] 2.4 Empty green is a fault: zero measured cases or any stale cassette

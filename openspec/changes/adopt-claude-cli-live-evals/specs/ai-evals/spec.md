@@ -280,11 +280,12 @@ not. A cassette whose prompt
 hash, tools hash, fixture hash or request hash (which covers the schema and the
 model id) differs from the current one is **stale**: its case is unmeasured
 with a stale-cassette reason, neither passing nor failing. The schema enters
-the request hash **canonicalized**: object keys sorted recursively, and the
-`$schema` key and the annotation-only keys `title` and `description` removed at
-every level, so serialization churn from an `ai` or `zod` upgrade (key order, a
-new `$schema` URI) leaves a cassette fresh and only a change to the schema's
-structure or constraints makes it stale. A synthetic cassette SHALL never count
+the request hash **canonicalized**: object keys sorted recursively and the
+`$schema` key removed at every level, nothing else, so serialization churn from
+an `ai` or `zod` upgrade (key order, a new `$schema` URI) leaves a cassette
+fresh. Every other key stays in the hash, including `title` and `description`:
+the schema reaches the model through `--json-schema`, so a changed field
+description is a changed request and makes the cassette stale. A synthetic cassette SHALL never count
 as measured and SHALL never decide an exit code.
 
 An empty green is not a pass: a replay pass that measures zero cases, or that
@@ -343,6 +344,12 @@ runs only inside unit tests over in-memory and synthetic cassettes, so
 - **GIVEN** a dependency bump that only reorders the keys of the serialized output schema or changes its `$schema` URI
 - **WHEN** the replay runner recomputes the request hash
 - **THEN** the canonical hash SHALL be unchanged and the cassette SHALL stay fresh
+
+#### Scenario: A changed field description makes a cassette stale
+
+- **GIVEN** a cassette recorded against an output schema whose only later change is the `description` of one field
+- **WHEN** the replay runner recomputes the request hash
+- **THEN** the hash SHALL differ and the case SHALL be unmeasured with a stale-cassette reason
 
 #### Scenario: Stale or empty replay never passes silently
 
