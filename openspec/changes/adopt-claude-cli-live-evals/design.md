@@ -70,7 +70,10 @@ field, so this is pinned before the guard ships; no "divide by 100 if large"
 heuristic, which is ambiguous at 1), converts it to 0–1 by a fixed rule, and
 stops before the next call once it is strictly above
 `EVAL_MAX_WEEKLY_UTILIZATION` (0.85; D1b says "above", so 0.85 itself continues)
-or the status leaves `allowed*`. The guard fails closed: a missing or
+or the status is neither `allowed` nor `allowed_warning`. The fraction governs:
+D1b's rule is "stop above 85 % of the weekly limit", so `allowed_warning`
+continues and only the pinned fraction above 0.85 stops the pass; any other
+status (`rejected` or a value the guard does not know) stops it. The guard fails closed: a missing or
 unparseable signal stops the pass, since "no signal" cannot be read as "room
 left"; an unrecognized event shape is the same fault. Stopped and rate-limited
 cases are unmeasured — chatbot-kb counted 429s as failures and read a broken

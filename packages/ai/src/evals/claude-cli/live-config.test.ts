@@ -4,7 +4,8 @@ import { getDefaultModel } from "../../providers/provider-models";
 import { OFFICIAL_CASSETTE_MODEL } from "../cassettes/validate-cassette";
 import {
   NOT_MEASURED_PREFIX,
-  OFFICIAL_LIVE_MODEL,
+  DEFAULT_CALL_TIMEOUT_MS,
+  readCallTimeoutMs,
   readMaxCalls,
   readMaxWeekly,
   readModelId,
@@ -15,16 +16,20 @@ const DEFAULT_WEEKLY = 0.85;
 const HALF = 0.5;
 
 describe("live-config", () => {
-  it("should pin the official live model to the official cassette model", () => {
+  it("should read the call timeout, defaulting and rejecting a non-integer", () => {
     // Arrange
-    const literal = "claude-sonnet-5";
+    const custom = { EVAL_CALL_TIMEOUT_MS: "1000" };
+    const bad = { EVAL_CALL_TIMEOUT_MS: "soon" };
 
     // Act
-    const official = OFFICIAL_LIVE_MODEL;
+    const values = [readCallTimeoutMs({}), readCallTimeoutMs(custom)];
 
     // Assert
-    expect(official).toBe(literal);
-    expect(official).toBe(OFFICIAL_CASSETTE_MODEL);
+    expect(values).toEqual([
+      DEFAULT_CALL_TIMEOUT_MS,
+      Number(custom.EVAL_CALL_TIMEOUT_MS),
+    ]);
+    expect(() => readCallTimeoutMs(bad)).toThrow("EVAL_CALL_TIMEOUT_MS");
   });
 
   it("should default EVAL_MODEL to the literal, never to the catalog default", () => {
@@ -35,7 +40,7 @@ describe("live-config", () => {
     const modelId = readModelId(env);
 
     // Assert
-    expect(modelId).toBe(OFFICIAL_LIVE_MODEL);
+    expect(modelId).toBe(OFFICIAL_CASSETTE_MODEL);
     expect(typeof getDefaultModel("anthropic")).toBe("string");
   });
 

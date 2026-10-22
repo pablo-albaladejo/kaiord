@@ -20,6 +20,8 @@ export type SpawnReply = {
   stdout?: string;
   code?: number;
   error?: Error & { code?: string };
+  /** Never closes: the child hangs until it is killed. */
+  hang?: true;
 };
 
 /**
@@ -28,6 +30,7 @@ export type SpawnReply = {
  */
 export const createSpawnDouble = (reply: (call: SpawnCall) => SpawnReply) => {
   const calls: Array<SpawnCall> = [];
+  const killed: Array<string> = [];
   const spawn: SpawnFn = (command, args, options) => {
     const child = new EventEmitter() as EventEmitter & ChildLike;
     const stdout = new EventEmitter();
@@ -45,9 +48,11 @@ export const createSpawnDouble = (reply: (call: SpawnCall) => SpawnReply) => {
       stdout,
       stderr: new EventEmitter(),
       stdin: { end: (chunk: string) => (call.stdin = chunk) },
+      kill: (signal: string) => killed.push(signal),
     });
     setImmediate(() => {
       const out = reply(call);
+      if (out.hang) return;
       if (out.error) {
         child.emit("error", out.error);
         return;
@@ -57,7 +62,7 @@ export const createSpawnDouble = (reply: (call: SpawnCall) => SpawnReply) => {
     });
     return child;
   };
-  return { spawn, calls };
+  return { spawn, calls, killed };
 };
 
 export const initMessage = (overrides: Record<string, unknown> = {}) => ({

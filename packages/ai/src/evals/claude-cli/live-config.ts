@@ -1,10 +1,11 @@
+import { OFFICIAL_CASSETTE_MODEL } from "../cassettes/validate-cassette";
 import type { Env } from "./child-env";
 import { DEFAULT_MAX_WEEKLY_UTILIZATION } from "./rate-limit-guard";
 
 export const DEFAULT_MAX_CALLS = 50;
 
-/** The pinned official model (D1c), a literal: never `getDefaultModel`. */
-export const OFFICIAL_LIVE_MODEL = "claude-sonnet-5";
+/** A call that has not exited by then is killed as a harness fault. */
+export const DEFAULT_CALL_TIMEOUT_MS = 300_000;
 
 const ANTHROPIC_ID = /^claude-[a-z0-9.-]+$/;
 
@@ -19,6 +20,19 @@ export const readMaxCalls = (env: Env): number => {
   if (!Number.isInteger(value) || value < 1) {
     throw new Error(
       `EVAL_MAX_CALLS must be a positive integer, got ${JSON.stringify(raw)}`
+    );
+  }
+  return value;
+};
+
+/** `EVAL_CALL_TIMEOUT_MS`: how long one `claude -p` call may run. */
+export const readCallTimeoutMs = (env: Env): number => {
+  const raw = env.EVAL_CALL_TIMEOUT_MS;
+  if (raw === undefined) return DEFAULT_CALL_TIMEOUT_MS;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 1) {
+    throw new Error(
+      `EVAL_CALL_TIMEOUT_MS must be a positive integer, got ${JSON.stringify(raw)}`
     );
   }
   return value;
@@ -42,7 +56,7 @@ export const readMaxWeekly = (env: Env): number => {
  * live, and the report says so rather than passing them.
  */
 export const readModelId = (env: Env): string => {
-  const modelId = env.EVAL_MODEL ?? OFFICIAL_LIVE_MODEL;
+  const modelId = env.EVAL_MODEL ?? OFFICIAL_CASSETTE_MODEL;
   if (!ANTHROPIC_ID.test(modelId)) {
     throw new Error(
       `${NOT_MEASURED_PREFIX}: EVAL_MODEL ${JSON.stringify(modelId)} is not an Anthropic model id; only Anthropic models are reachable live, and OpenAI and Google are not measured`

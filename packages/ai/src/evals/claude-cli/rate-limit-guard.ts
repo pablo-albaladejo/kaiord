@@ -22,6 +22,7 @@ export const DEFAULT_MAX_WEEKLY_UTILIZATION = 0.85;
 /** The fixed conversion to 0–1; the scale is pinned, never inferred. */
 const SCALE_MAX = { fraction: 1, percent: 100 } as const;
 
+/** D1b: the fraction governs, so a warning continues; anything else stops. */
 const ALLOWED_STATUS = new Set(["allowed", "allowed_warning"]);
 
 const infoSchema = z.looseObject({ status: z.string() });

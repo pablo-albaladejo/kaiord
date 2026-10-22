@@ -1,3 +1,5 @@
+import { harnessFault } from "./harness-fault";
+
 type Readable = {
   on(event: "data", listener: (chunk: Buffer | string) => void): unknown;
 };
@@ -9,6 +11,7 @@ export type ChildLike = {
   stderr: Readable | null;
   on(event: "error", listener: (error: Error) => void): unknown;
   on(event: "close", listener: (code: number | null) => void): unknown;
+  kill(signal: "SIGKILL"): unknown;
 };
 
 export type SpawnOptions = {
@@ -34,14 +37,27 @@ export type ProcessResult = {
   stderr: string;
 };
 
-/** Arguments as an array and never a shell; `input` goes to stdin. */
+export const DEFAULT_PROCESS_TIMEOUT_MS = 300_000;
+
+export type RunOptions = {
+  cwd: string;
+  env: Record<string, string>;
+  input: string;
+  timeoutMs?: number;
+};
+
+/**
+ * Arguments as an array and never a shell; `input` goes to stdin. A child
+ * still running after `timeoutMs` is killed and the call is a harness fault.
+ */
 export const runProcess = (
   spawn: SpawnFn,
   command: string,
   args: Array<string>,
-  options: { cwd: string; env: Record<string, string>; input: string }
+  options: RunOptions
 ): Promise<ProcessResult> =>
   new Promise((resolve, reject) => {
+    const timeoutMs = options.timeoutMs ?? DEFAULT_PROCESS_TIMEOUT_MS;
     const child = spawn(command, args, {
       cwd: options.cwd,
       env: options.env,
@@ -56,7 +72,21 @@ export const runProcess = (
     child.stderr?.on("data", (chunk) => {
       stderr += String(chunk);
     });
-    child.on("error", reject);
-    child.on("close", (code) => resolve({ code, stdout, stderr }));
+    const timer = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(
+        harnessFault(
+          `${command} did not exit within ${timeoutMs} ms and was killed`
+        )
+      );
+    }, timeoutMs);
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      resolve({ code, stdout, stderr });
+    });
     child.stdin?.end(options.input);
   });

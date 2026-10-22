@@ -30,14 +30,19 @@ export const initFault = (init: CliInit): string | undefined => {
 
 /** One `claude -p` process per call; any doubt aborts as a harness fault. */
 export const createSpawnClaude =
-  (deps: { env: Env; spawn: SpawnFn }): SpawnClaude =>
+  (deps: { env: Env; spawn: SpawnFn; timeoutMs?: number }): SpawnClaude =>
   (request) =>
     withEmptyCwd(async (cwd) => {
       const out = await runProcess(
         deps.spawn,
         CLAUDE_BINARY,
         claudeArgs(request),
-        { cwd, env: buildChildEnv(deps.env), input: request.prompt }
+        {
+          cwd,
+          env: buildChildEnv(deps.env),
+          input: request.prompt,
+          timeoutMs: deps.timeoutMs,
+        }
       );
       const parsed = parseStream(out.stdout);
       if (!parsed.ok) throw harnessFault(`${parsed.fault} (exit ${out.code})`);
@@ -48,5 +53,8 @@ export const createSpawnClaude =
           `the CLI returned an error result (${parsed.run.result.subtype})`
         );
       }
+      // A parsed stream does not excuse a failed process.
+      if (out.code !== 0)
+        throw harnessFault(`the CLI exited with code ${out.code}`);
       return parsed.run;
     });

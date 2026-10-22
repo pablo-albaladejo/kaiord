@@ -135,6 +135,22 @@ describe("decideNextCall", () => {
     expect(decision).toEqual({ action: "continue", utilization: 0.8 });
   });
 
+  it.each([
+    ["allowed_warning at the limit", "allowed_warning", LIMIT, "continue"],
+    ["allowed_warning above the limit", "allowed_warning", ABOVE, "stop"],
+    ["an unknown status at a low fraction", "throttled", LOW, "stop"],
+  ])("should let the fraction govern: %s", (_label, status, value, action) => {
+    // Arrange
+    const infos = [weekly(value, status)];
+
+    // Act
+    const decision = decide(infos);
+
+    // Assert
+    expect(decision.action).toBe(action);
+    if (decision.action === "stop") expect(decision.kind).toBe("rate-limit");
+  });
+
   it("should ship unpinned, so every decision stops the pass until calibration", () => {
     // Arrange
     const infos = [weekly(LOW)];

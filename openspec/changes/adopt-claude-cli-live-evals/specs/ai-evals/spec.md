@@ -159,7 +159,9 @@ cannot ship before they are pinned); the conversion to 0–1 SHALL be a fixed
 rule for that field, never inferred from the value. It SHALL stop before the
 next call once utilization is strictly above `EVAL_MAX_WEEKLY_UTILIZATION`
 (default `0.85`, decision D1b: "stops above 85 %"), or once the CLI reports a
-rate-limit status other than allowed. A call whose output carries no
+rate-limit status other than `allowed` or `allowed_warning`. The fraction
+governs: `allowed_warning` SHALL continue, and only the pinned fraction above
+the limit SHALL stop the pass on that status. A call whose output carries no
 `rate_limit_event`, an event of an unrecognized shape, or a pinned field that
 is missing, non-numeric or outside its scale SHALL be a harness fault that
 stops the pass: the guard fails closed. A rate limit, a 429, a missing or
@@ -208,6 +210,12 @@ cassette: a strict schema whose validator rejects any unknown key, and
 - **GIVEN** a CLI response whose pinned seven-day field converts to exactly `0.85`
 - **WHEN** the runner decides whether to make the next call
 - **THEN** it SHALL continue, because the limit stops only above 85 %
+
+#### Scenario: A warning status does not stop the pass
+
+- **GIVEN** a CLI response with status `allowed_warning` and a pinned seven-day fraction of `0.85` or below
+- **WHEN** the runner decides whether to make the next call
+- **THEN** it SHALL continue; with the same status and a fraction above `0.85` it SHALL stop as a rate limit, and with any status other than `allowed` or `allowed_warning` it SHALL stop whatever the fraction
 
 #### Scenario: A missing rate-limit signal fails closed
 
