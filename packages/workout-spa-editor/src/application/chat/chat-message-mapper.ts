@@ -5,8 +5,9 @@
  * records are display-only, and each turn re-runs tools fresh, so they carry
  * no value as prior context and would not round-trip to `ModelMessage` tool
  * parts cleanly. The one exception is a stopped reply, whose marker names the
- * actions its turn already ran (by tool name only). `newChatMessage` is a pure factory: the caller injects the
- * id and timestamp so persistence stays deterministic and testable.
+ * actions its turn already ran (by tool name only). `newChatMessage` is a pure
+ * factory: the caller injects the id and timestamp so persistence stays
+ * deterministic and testable.
  */
 import type { ModelMessage } from "ai";
 
