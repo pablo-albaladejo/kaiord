@@ -8,31 +8,36 @@
  * gates nothing.
  *
  * Scope is deliberate on both sides. INERT means the runner cannot execute in
- * CI: it names the credential-bound loader `load-eval-model`, it imports any
- * module resolving under `packages/ai/src/evals/claude-cli/` (the live loader,
- * the CLI adapter, the spawner, the rate-limit guard or anything else there),
- * or it is itself located under `claude-cli/`. Import specifiers are resolved
- * against the importing file, so a sibling import `./x` from inside that
- * directory counts. The scan is recursive. A runner that needs neither a
- * credential nor the CLI is EXEMPT and may gate freely — a directory-wide ban
- * would forbid the keyless replay runner this project wants to gate on.
+ * CI. It is decided over the TypeScript AST and the runner's transitive
+ * closure of local imports: a runner is inert when it, or any local module it
+ * reaches, names the credential-bound loader `load-eval-model`, holds a
+ * string literal resolving under `packages/ai/src/evals/claude-cli/` (every
+ * string literal is a candidate specifier, so a path kept in a constant
+ * counts), lives under `claude-cli/`, or uses a loader the walk cannot follow
+ * (`createRequire`, `import()`/`require()` of anything but a plain string,
+ * `x.require`): an unknowable target fails closed. Runners are every
+ * `run-*.{ts,mts,cts}` under the evals tree, recursively, tests excluded. A
+ * runner that needs neither a credential nor the CLI is EXEMPT and may gate
+ * freely — a directory-wide ban would forbid the keyless replay runner this
+ * project wants to gate on.
  *
- * Two rules, because one is evadable. The obvious grep for a comparison inside
- * `process.exit` is defeated by binding it first:
+ * Two rules, because one is evadable. The obvious check for a comparison
+ * inside `process.exit` is defeated by binding it first:
  *
  *   const ok = rate >= 0.9;
  *   process.exit(ok ? 0 : 1);   // <- no comparison in sight
  *
- * So: (1) in an inert runner `process.exit` takes a numeric literal, and
- * (2) no comparison may be applied to a score-shaped name anywhere in it.
- * Rule 2 is a name-based approximation and says so; it is the half that
- * survives the variable binding.
+ * So: (1) in an inert runner `process.exit(x)` and `process.exitCode = x`
+ * take a numeric literal, and (2) no `<`, `<=`, `>`, `>=` may have a
+ * score-shaped identifier on either side anywhere in it. Rule 2 is a
+ * name-based approximation and says so; it is the half that survives the
+ * variable binding. Comments are not code, so they never match.
  *
  * Modes:
  *   --dry-run    Emit violations as JSON on stdout; exit 0.
  *   (default)    Print a human-readable report; exit non-zero on any.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import {
   basename,
   dirname,
@@ -43,85 +48,206 @@ import {
   sep,
 } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 
 const RUNNERS_DIR = "packages/ai/src/evals";
 const CREDENTIAL_LOADER = "load-eval-model";
 const LIVE_DIR = "claude-cli";
 const SCORE_NAMES =
   "rate|passrate|passratepercent|score|passed|threshold|floor|ratio|accuracy";
-// Whitespace on BOTH sides is required, and that is load-bearing: it is what
-// separates a comparison (`rate >= 0.9`, as prettier writes it) from an arrow
-// (`(r) => passed`) and from a generic (`Array<Score>`), which carry the same
-// characters and mean nothing of the sort.
-const COMPARISON = new RegExp(
-  `(?:\\b(?:${SCORE_NAMES})\\w*\\s+(?:>=|<=|>|<)\\s)` +
-    `|(?:\\s(?:>=|<=|>|<)\\s+\\w*(?:${SCORE_NAMES})\\b)`,
+/** An identifier that starts or ends with a score name: `passRate`, `minScore`. */
+const SCORE_WORD = new RegExp(
+  `^(?:(?:${SCORE_NAMES})\\w*|\\w*(?:${SCORE_NAMES}))$`,
   "i"
 );
-const EXIT_CALL = /process\.exit\(([^)]*)\)/g;
-const NUMERIC_LITERAL = /^\s*\d+\s*$/;
-/** `from "x"`, `import "x"`, `import("x")`, `require("x")`. */
-const SPECIFIER =
-  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)(["'`])([^"'`]+)\1/g;
+const RUNNER_NAME = /^run-.+\.(?:ts|mts|cts)$/;
+const TEST_NAME = /\.(?:test|spec)\.(?:ts|mts|cts)$/;
+const SOURCE_EXTENSIONS = [".ts", ".mts", ".cts", ".tsx"];
+const COMPARISON_KINDS = new Set([
+  ts.SyntaxKind.GreaterThanToken,
+  ts.SyntaxKind.GreaterThanEqualsToken,
+  ts.SyntaxKind.LessThanToken,
+  ts.SyntaxKind.LessThanEqualsToken,
+]);
+const LOADER_NAMES = new Set(["require", "createRequire"]);
 
 const isRunner = (path) => {
   const name = basename(path);
-  return (
-    name.startsWith("run-") &&
-    name.endsWith(".ts") &&
-    !name.endsWith(".test.ts")
-  );
+  return RUNNER_NAME.test(name) && !TEST_NAME.test(name);
 };
 
 const isUnder = (path, dir) => path === dir || path.startsWith(dir + sep);
 
-/** Local specifiers of `src`, resolved against the importing file. */
-export const importTargets = (src, file) =>
-  [...src.matchAll(SPECIFIER)]
-    .map((match) => match[2])
-    .filter((s) => s.startsWith(".") || isAbsolute(s))
-    .map((s) => resolve(dirname(file), s));
+const parse = (src, file) =>
+  ts.createSourceFile(file ?? "module.ts", src, ts.ScriptTarget.Latest, true);
+
+const walk = (node, visit) => {
+  visit(node);
+  ts.forEachChild(node, (child) => walk(child, visit));
+};
+
+const nameOf = (node) =>
+  ts.isIdentifier(node) || ts.isStringLiteralLike(node) ? node.text : "";
 
 /**
- * `file` and `root` are absolute; without them only the credential-bound
- * loader can be recognized.
+ * A loader the walk cannot follow: `import()` or `require()` of anything but
+ * a plain string, `createRequire` in any form, `x.require`, `x["require"]`.
+ * Its target is unknowable, so the module counts as inert: it fails closed.
  */
-export const isInert = (src, file, root) => {
-  if (src.includes(CREDENTIAL_LOADER)) return true;
-  if (file === undefined || root === undefined) return false;
-  const liveDir = join(root, LIVE_DIR);
-  if (isUnder(resolve(file), liveDir)) return true;
-  return importTargets(src, file).some((target) => isUnder(target, liveDir));
+const isOpaqueLoader = (node) => {
+  if (ts.isIdentifier(node)) return node.text === "createRequire";
+  if (ts.isPropertyAccessExpression(node)) {
+    return LOADER_NAMES.has(nameOf(node.name));
+  }
+  if (ts.isElementAccessExpression(node)) {
+    return LOADER_NAMES.has(nameOf(node.argumentExpression));
+  }
+  if (!ts.isCallExpression(node)) return false;
+  const callee = node.expression;
+  const isLoader =
+    callee.kind === ts.SyntaxKind.ImportKeyword ||
+    (ts.isIdentifier(callee) && callee.text === "require");
+  const [argument] = node.arguments;
+  return isLoader && !(argument && ts.isStringLiteralLike(argument));
 };
+
+/**
+ * Every string literal is a candidate specifier, as in the replay lane's
+ * import pin: a path held in a constant is caught wherever it appears.
+ */
+export const scanModule = (src, file) => {
+  const scan = { specifiers: [], opaque: [] };
+  walk(parse(src, file), (node) => {
+    if (ts.isStringLiteralLike(node)) scan.specifiers.push(node.text);
+    if (isOpaqueLoader(node)) scan.opaque.push(node.getText().slice(0, 80));
+  });
+  return scan;
+};
+
+/** Local specifiers of `src`, resolved against the importing file. */
+export const importTargets = (src, file) =>
+  scanModule(src, file)
+    .specifiers.filter((s) => s.startsWith(".") || isAbsolute(s))
+    .map((s) => resolve(dirname(file), s));
+
+/** A local target as a source file on disk, `.js` written for `.ts` included. */
+const asSourceFile = (target) => {
+  const stem = target.replace(/\.[cm]?js$/, "");
+  const candidates = [
+    target,
+    ...SOURCE_EXTENSIONS.map((ext) => stem + ext),
+    ...SOURCE_EXTENSIONS.map((ext) => join(target, `index${ext}`)),
+  ];
+  return candidates.find(
+    (p) => SOURCE_EXTENSIONS.some((ext) => p.endsWith(ext)) && existsSync(p)
+  );
+};
+
+/** Why one module makes its importer inert, or undefined. */
+const moduleReason = (src, file, liveDir) => {
+  const scan = scanModule(src, file);
+  if (scan.specifiers.some((s) => s.includes(CREDENTIAL_LOADER))) {
+    return `names ${CREDENTIAL_LOADER}`;
+  }
+  if (scan.opaque.length > 0) return `opaque loader ${scan.opaque[0]}`;
+  if (liveDir === undefined) return undefined;
+  if (isUnder(resolve(file), liveDir)) return `lives under ${LIVE_DIR}/`;
+  const live = importTargets(src, file).find((t) => isUnder(t, liveDir));
+  return live ? `reaches ${LIVE_DIR}/` : undefined;
+};
+
+/**
+ * Why the runner is inert, following local imports transitively, or
+ * undefined. `file` and `root` are absolute; without them only the runner's
+ * own text is judged.
+ */
+export const inertReason = (src, file, root) => {
+  const liveDir = root === undefined ? undefined : join(root, LIVE_DIR);
+  const seen = new Set();
+  const queue = [{ path: file, text: src }];
+  while (queue.length > 0) {
+    const { path, text } = queue.pop();
+    if (seen.has(path)) continue;
+    seen.add(path);
+    const reason = moduleReason(text, path, liveDir);
+    if (reason) return path === file ? reason : `${reason} via ${path}`;
+    if (root === undefined) continue;
+    for (const target of importTargets(text, path)) {
+      const next = asSourceFile(target);
+      if (next && !seen.has(next)) {
+        queue.push({ path: next, text: readFileSync(next, "utf8") });
+      }
+    }
+  }
+  return undefined;
+};
+
+export const isInert = (src, file, root) =>
+  inertReason(src, file, root) !== undefined;
+
+const isProcessMember = (node, member) =>
+  (ts.isPropertyAccessExpression(node) &&
+    nameOf(node.expression) === "process" &&
+    node.name.text === member) ||
+  (ts.isElementAccessExpression(node) &&
+    nameOf(node.expression) === "process" &&
+    nameOf(node.argumentExpression) === member);
+
+const isNumericLiteral = (node) =>
+  node !== undefined && ts.isNumericLiteral(node);
+
+/** `process.exit(x)` or `process.exitCode = x` (any assignment) with `x`. */
+const exitValue = (node) => {
+  if (ts.isCallExpression(node) && isProcessMember(node.expression, "exit")) {
+    return { found: true, value: node.arguments[0] };
+  }
+  const isAssignment =
+    ts.isBinaryExpression(node) &&
+    node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+    node.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
+  if (isAssignment && isProcessMember(node.left, "exitCode")) {
+    return { found: true, value: node.right };
+  }
+  return { found: false };
+};
+
+const isScoreShaped = (node) =>
+  (node.getText().match(/[A-Za-z_$][\w$]*/g) ?? []).some((w) =>
+    SCORE_WORD.test(w)
+  );
 
 export const fileViolations = (src, file, root) => {
   if (!isInert(src, file, root)) return [];
   const label = root === undefined ? file : relative(root, file);
+  const source = parse(src, file);
+  const lineOf = (node) =>
+    source.getLineAndCharacterOfPosition(node.getStart()).line + 1;
   const violations = [];
-  const lineOf = (index) => src.slice(0, index).split("\n").length;
-
-  for (const match of src.matchAll(EXIT_CALL)) {
-    const argument = match[1];
-    if (NUMERIC_LITERAL.test(argument)) continue;
-    violations.push({
-      kind: "computed-exit",
-      file: label,
-      line: lineOf(match.index),
-      detail: `process.exit(${argument.trim()}) — an inert runner exits on a literal`,
-    });
-  }
-
-  src.split("\n").forEach((text, i) => {
-    if (text.trim().startsWith("*") || text.trim().startsWith("//")) return;
-    if (!COMPARISON.test(text)) return;
-    violations.push({
-      kind: "score-comparison",
-      file: label,
-      line: i + 1,
-      detail: text.trim().slice(0, 80),
-    });
+  walk(source, (node) => {
+    const exit = exitValue(node);
+    if (exit.found && !isNumericLiteral(exit.value)) {
+      violations.push({
+        kind: "computed-exit",
+        file: label,
+        line: lineOf(node),
+        detail: `${node.getText().slice(0, 80)} — an inert runner exits on a literal`,
+      });
+    }
+    const isComparison =
+      ts.isBinaryExpression(node) &&
+      COMPARISON_KINDS.has(node.operatorToken.kind);
+    if (
+      isComparison &&
+      (isScoreShaped(node.left) || isScoreShaped(node.right))
+    ) {
+      violations.push({
+        kind: "score-comparison",
+        file: label,
+        line: lineOf(node),
+        detail: node.getText().slice(0, 80),
+      });
+    }
   });
-
   return violations;
 };
 
@@ -181,8 +307,9 @@ const main = () => {
     console.error(`  [${v.kind}] ${v.file ?? ""}:${v.line ?? 0} ${v.detail}`);
   }
   console.error(
-    "\nA runner that names load-eval-model, imports from evals/claude-cli/ or\n" +
-      "lives there cannot run in CI, so no score of its may decide its exit code."
+    "\nA runner that names load-eval-model, reaches evals/claude-cli/ (directly,\n" +
+      "through a helper, or through a loader the scan cannot follow) or lives\n" +
+      "there cannot run in CI, so no score of its may decide its exit code."
   );
   process.exit(1);
 };

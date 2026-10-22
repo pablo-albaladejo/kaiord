@@ -78,7 +78,7 @@ test("a generic type argument is not a comparison", () => {
 });
 
 test("a comparison inside a comment is not a floor", () => {
-  const src = `${INERT_HEAD}// it used to be rate >= 0.9 here\n * or score < 1\n`;
+  const src = `${INERT_HEAD}// it used to be rate >= 0.9 here\n/*\n * or score < 1\n */\n`;
   assert.deepEqual(fileViolations(src, "run-x.ts"), []);
 });
 
@@ -158,4 +158,82 @@ test("import specifiers are resolved against the importing file", () => {
     "/evals/nested/run-x.ts"
   );
   assert.deepEqual(targets, ["/evals/claude-cli/x"]);
+});
+
+// Provoked reds for the evasions the review found: each one passed the guard
+// with a gating runner and zero violations before the guard moved to the
+// TypeScript AST, every string literal as a specifier, and a transitive walk.
+
+const kindsOf = (files) => checkSandbox(files).map((v) => v.kind);
+
+test("a transitive re-export through a helper makes the runner inert", () => {
+  const kinds = kindsOf({
+    "live-helpers.ts": `export { loadLiveModel } from "./claude-cli/load-live-model";\n`,
+    "run-t.ts": `import { loadLiveModel } from "./live-helpers";\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+  assert.ok(kinds.includes("score-comparison"));
+});
+
+test("a helper two hops away is still followed", () => {
+  const kinds = kindsOf({
+    "a.ts": `export * from "./b";\n`,
+    "b.ts": `export * from "./claude-cli/spawn-claude";\n`,
+    "run-t.ts": `import { x } from "./a.js";\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});
+
+test("createRequire makes the runner inert", () => {
+  const kinds = kindsOf({
+    "run-c.ts": `import { createRequire } from "node:module";\nconst req = createRequire(import.meta.url);\nconst m = req("./x");\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});
+
+test("a string constant passed to import() is a specifier", () => {
+  const kinds = kindsOf({
+    "run-s.ts": `const p = "./claude-cli/load-live-model";\nconst m = await import(p);\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});
+
+test("a concatenated import path is an opaque loader", () => {
+  const kinds = kindsOf({
+    "run-k.ts": `const m = await import("./claude-" + "cli/load-live-model");\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});
+
+test("a computed process.exitCode is a computed exit", () => {
+  const kinds = kindsOf({
+    "run-e.ts": `import { x } from "./claude-cli/load-live-model";\nconst ok = r >= 0.9;\nprocess.exitCode = ok ? 0 : 1;\n`,
+  });
+  assert.deepEqual(kinds, ["computed-exit"]);
+});
+
+test("a literal process.exitCode is allowed", () => {
+  const kinds = kindsOf({
+    "run-e.ts": `import { x } from "./claude-cli/load-live-model";\nprocess.exitCode = 1;\nprocess["exitCode"] = 2;\n`,
+  });
+  assert.deepEqual(kinds, []);
+});
+
+test("run-*.mts and run-*.cts runners are scanned, their tests are not", () => {
+  const head = `import { x } from "./claude-cli/load-live-model";\n${GATE}`;
+  const violations = checkSandbox({
+    "run-m.mts": head,
+    "run-c.cts": head,
+    "run-m.test.mts": head,
+  });
+  const files = new Set(violations.map((v) => v.file));
+  assert.deepEqual([...files].sort(), ["run-c.cts", "run-m.mts"]);
+});
+
+test("a keyless runner whose helpers stay local may still gate", () => {
+  const kinds = kindsOf({
+    "helpers.ts": `export const readFixture = () => 1;\n`,
+    "run-keyless.ts": `import { readFixture } from "./helpers";\n${GATE}`,
+  });
+  assert.deepEqual(kinds, []);
 });
