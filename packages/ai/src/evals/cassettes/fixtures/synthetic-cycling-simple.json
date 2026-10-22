@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "synthetic-cycling-simple",
+  "caseId": "cycling-simple",
+  "recorder": "synthetic",
+  "cliVersion": null,
+  "provider": "anthropic",
+  "requestedModelId": "synthetic",
+  "servedModelId": "synthetic",
+  "recordedAt": "2026-10-22T00:00:00.000Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.2.0",
+    "hash": "e9942a4ddb3bfe7c30f4345e50f0520a10eac4c222e6a293661a20b3d604e71b"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "0552a90563be78413bb6abc06ac4aaadaaa273d24429ff30a4cd944741820d14",
+  "requestHash": "99b86c8cf2e278e64b221a419102910f1d96d9330377e96ed1b0821ce0e8dbfb",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [],
+  "response": {
+    "structuredOutput": {
+      "sport": "cycling",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 1800
+          },
+          "targetType": "open",
+          "target": {
+            "type": "open"
+          },
+          "intensity": "active"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 0
+    }
+  }
+}
