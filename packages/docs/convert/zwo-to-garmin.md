@@ -10,21 +10,13 @@ Converts structured workouts (steps and targets), not recorded activities.
 See [Workouts vs. activities](/convert/#workouts-vs-activities).
 :::
 
-::: warning Known issue: ramps
-Steady-state and interval power targets are converted from % FTP to watts with
-your FTP. Ramps (`Warmup`, `Cooldown`, `Ramp`) are not yet: their % FTP bounds
-arrive in Garmin Connect as watts with the same numbers (a 50–75 % warm-up
-becomes 50–75 W). The fix is tracked in
-[issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279).
-:::
-
 Take a **Zwift ZWO** workout into **Garmin Connect** so you can run a session you
 built in Zwift on your Garmin watch or head unit. Kaiord converts ZWO to the
 Garmin Connect workout format (GCN JSON) — free and in-browser in the
 [Kaiord Editor](https://kaiord.com/app/#/convert?from=zwo&to=garmin) (no account, no upload), or via the
 [CLI](/cli/commands#convert) and [TypeScript SDK](/guide/quick-start).
 Conversions go through Kaiord's canonical [KRD format](/formats/krd) and stay
-within round-trip tolerances (time ±1 s), except for the power issue above.
+within round-trip tolerances (time ±1 s).
 
 ## Three ways to convert
 
@@ -37,15 +29,17 @@ it straight to your watch, use the Editor's Garmin sync (backed by the
 
 ### 2. CLI
 
+Zwift power is % FTP, so pass your FTP in watts with `--ftp`:
+
 ```bash
 pnpm add -g @kaiord/cli
-kaiord convert -i workout.zwo -o workout.gcn
+kaiord convert -i workout.zwo -o workout.gcn --ftp 250
 ```
 
 To push directly to Garmin Connect (after `kaiord garmin login`):
 
 ```bash
-kaiord garmin push -i workout.zwo --input-format zwo
+kaiord garmin push -i workout.zwo --input-format zwo --ftp 250
 ```
 
 ### 3. SDK
@@ -53,25 +47,25 @@ kaiord garmin push -i workout.zwo --input-format zwo
 ```ts
 import { fromText, toText } from "@kaiord/core";
 import { zwiftReader } from "@kaiord/zwo";
-import { garminWriter } from "@kaiord/garmin";
+import { createGarminWriter } from "@kaiord/garmin";
 import { readFile, writeFile } from "node:fs/promises";
 
 const zwo = await readFile("workout.zwo", "utf-8");
 const krd = await fromText(zwo, zwiftReader);
-const gcn = await toText(krd, garminWriter);
+const gcn = await toText(krd, createGarminWriter({ ftpWatts: 250 }));
 await writeFile("workout.gcn", gcn);
 ```
 
 ## What survives the conversion
 
-| Data                | ZWO (Zwift)                    | Garmin Connect (GCN) | Result                                  |
-| ------------------- | ------------------------------ | -------------------- | --------------------------------------- |
-| Step order & names  | blocks                         | workout steps        | Preserved                               |
-| Time durations      | `Duration` seconds             | time durations       | Preserved (±1 s)                        |
-| Power targets       | % FTP (`Power` fraction)       | watts                | Converted using your FTP (see below)    |
-| Ramps               | `Warmup` / `Cooldown` / `Ramp` | ranged target        | Not converted correctly yet (see below) |
-| Repeats / intervals | `IntervalsT`                   | repeat blocks        | Preserved                               |
-| Free-ride segments  | `FreeRide`                     | open step            | Preserved as an untargeted step         |
+| Data                | ZWO (Zwift)                    | Garmin Connect (GCN) | Result                               |
+| ------------------- | ------------------------------ | -------------------- | ------------------------------------ |
+| Step order & names  | blocks                         | workout steps        | Preserved                            |
+| Time durations      | `Duration` seconds             | time durations       | Preserved (±1 s)                     |
+| Power targets       | % FTP (`Power` fraction)       | watts                | Converted using your FTP (see below) |
+| Ramps               | `Warmup` / `Cooldown` / `Ramp` | ranged target        | Converted using your FTP (see below) |
+| Repeats / intervals | `IntervalsT`                   | repeat blocks        | Preserved                            |
+| Free-ride segments  | `FreeRide`                     | open step            | Preserved as an untargeted step      |
 
 ## Gotchas
 
@@ -90,10 +84,13 @@ instead of writing wrong watts.
 
 At an FTP of 250 W, `Power="0.85"` becomes a 213 W target.
 
-**Ramps.** Zwift ramps (`Warmup`, `Cooldown`, `Ramp`) are not yet resolved
-against your FTP: their % FTP bounds reach Garmin Connect as if they were watts
-(a 50–75 % warm-up arrives as 50–75 W). Steady-state blocks and intervals are
-converted correctly.
+**Ramps.** Zwift ramps (`Warmup`, `Cooldown`, `Ramp`) become a ranged power
+target, and both bounds are converted with the same FTP: at 250 W, a 50–75 %
+warm-up becomes a 125–188 W target. `Cooldown` blocks and other descending ramps
+(`PowerLow` above `PowerHigh`) are converted the same way: a 75–50 % cooldown
+also becomes a 125–188 W target, because a Garmin Connect range holds its two
+bounds, not the direction of the ramp. A ramp needs an FTP just like a
+steady-state block.
 
 **How does it get on my watch?** A `.gcn` file is Garmin Connect's JSON, not a
 device file. Push it to your account with `kaiord garmin push` (via

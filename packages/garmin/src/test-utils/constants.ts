@@ -88,6 +88,9 @@ export const FTP_RESOLUTION = {
   STEADY_W: 240,
   RANGE_LOW_W: 125,
   RANGE_HIGH_W: 188,
+  // A 50-75 % FTP warm-up ramp; at FTP_W it resolves to RANGE_LOW/HIGH_W.
+  RAMP_LOW_PCT: 50,
+  RAMP_HIGH_PCT: 75,
   // Half-watt boundaries where `pct / 100 * ftp` lands a hair below .5
   // in floating point and would round down; `pct * ftp / 100` does not.
   BOUNDARY_CASES: [

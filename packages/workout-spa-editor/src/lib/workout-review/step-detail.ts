@@ -28,6 +28,7 @@ function powerDetail(v: (Target & { type: "power" })["value"]): string {
   if (v.unit === "watts") return `@ ${v.value} W`;
   if (v.unit === "percent_ftp") return `@ ${v.value}% FTP`;
   if (v.unit === "zone") return `@ Z${v.value}`;
+  if (v.basis === "percent_ftp") return `@ ${v.min}–${v.max}% FTP`;
   return `@ ${v.min}–${v.max} W`;
 }
 

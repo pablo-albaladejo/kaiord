@@ -208,4 +208,27 @@ describe("convertSteadyStateToKrd power-unit extension edge", () => {
     expect(result.target.type).toBe("power");
     expect(result.target).not.toMatchObject({ value: { unit: "watts" } });
   });
+
+  it("should warn that a non-standard SteadyState PowerLow/PowerHigh is ignored", () => {
+    // Arrange
+    const logger = createMockLogger();
+    const warnSpy = vi.spyOn(logger, "warn");
+    const data = {
+      Duration: 300,
+      durationType: "time" as const,
+      PowerLow: 0.5,
+      PowerHigh: 0.75,
+      stepIndex: 2,
+    };
+
+    // Act
+    const result = convertSteadyStateToKrd(data, logger);
+
+    // Assert
+    expect(result.target).toStrictEqual({ type: "open" });
+    expect(warnSpy).toHaveBeenCalledWith(
+      "SteadyState PowerLow/PowerHigh is not supported, ignored",
+      { stepIndex: 2 }
+    );
+  });
 });

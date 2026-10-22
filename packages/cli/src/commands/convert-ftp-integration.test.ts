@@ -10,10 +10,16 @@ import { ExitCode } from "../utils/exit-codes";
 const FTP_W = "250";
 const SWEET_SPOT_W = 213;
 const ENDURANCE_W = 125;
+const RAMP_TOP_W = 188;
+const OVER_TOP_W = 263;
+const OVER_BOTTOM_W = 200;
 
 const ZWO = `<workout_file><name>ftp test</name><sportType>bike</sportType><workout>
 <SteadyState Duration="600" Power="0.85"/>
 <SteadyState Duration="300" Power="0.50"/>
+<Warmup Duration="300" PowerLow="0.50" PowerHigh="0.75"/>
+<Ramp Duration="300" PowerLow="1.05" PowerHigh="0.80"/>
+<Cooldown Duration="300" PowerLow="0.75" PowerHigh="0.50"/>
 </workout></workout_file>`;
 
 type GcnStep = {
@@ -39,7 +45,7 @@ describe("convert --ftp (ZWO to GCN)", () => {
   });
 
   it(
-    "should write %FTP power targets as watts resolved with --ftp",
+    "should write %FTP power targets and ramps as watts resolved with --ftp",
     { timeout: 30_000 },
     async () => {
       // Arrange
@@ -56,7 +62,8 @@ describe("convert --ftp (ZWO to GCN)", () => {
       const gcn = JSON.parse(await readFile(outputPath, "utf-8")) as {
         workoutSegments: [{ workoutSteps: GcnStep[] }];
       };
-      const [steady, easy] = gcn.workoutSegments[0].workoutSteps;
+      const [steady, easy, ramp, down, cooldown] =
+        gcn.workoutSegments[0].workoutSteps;
       expect(steady.targetType.workoutTargetTypeKey).toBe("power.zone");
       expect([steady.targetValueOne, steady.targetValueTwo]).toEqual([
         SWEET_SPOT_W,
@@ -65,6 +72,52 @@ describe("convert --ftp (ZWO to GCN)", () => {
       expect([easy.targetValueOne, easy.targetValueTwo]).toEqual([
         ENDURANCE_W,
         ENDURANCE_W,
+      ]);
+      expect([ramp.targetValueOne, ramp.targetValueTwo]).toEqual([
+        RAMP_TOP_W,
+        ENDURANCE_W,
+      ]);
+      expect([down.targetValueOne, down.targetValueTwo]).toEqual([
+        OVER_TOP_W,
+        OVER_BOTTOM_W,
+      ]);
+      expect([cooldown.targetValueOne, cooldown.targetValueTwo]).toEqual([
+        RAMP_TOP_W,
+        ENDURANCE_W,
+      ]);
+    }
+  );
+
+  it(
+    "should write descending ramps to FIT as ascending %FTP ranges",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const fitPath = join(tempDir.path, "t.fit");
+      const krdPath = join(tempDir.path, "t.krd");
+
+      // Act
+      const toFit = await execa(
+        "tsx",
+        [cliPath, "convert", "-i", inputPath, "-o", fitPath],
+        { reject: false }
+      );
+      await execa("tsx", [cliPath, "convert", "-i", fitPath, "-o", krdPath]);
+
+      // Assert
+      expect(toFit.exitCode, toFit.stderr).toBe(ExitCode.SUCCESS);
+      const krd = JSON.parse(await readFile(krdPath, "utf-8")) as {
+        extensions: {
+          structured_workout: { steps: Array<{ target: { value: unknown } }> };
+        };
+      };
+      const targets = krd.extensions.structured_workout.steps.map(
+        (step) => step.target.value
+      );
+      const [, , , down, cooldown] = targets;
+      expect([down, cooldown]).toStrictEqual([
+        { unit: "range", min: 80, max: 105, basis: "percent_ftp" },
+        { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
       ]);
     }
   );
