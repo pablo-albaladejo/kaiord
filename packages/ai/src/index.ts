@@ -8,13 +8,22 @@ export type {
   TextToWorkoutConfig,
   TextToWorkoutOptions,
 } from "./types";
+export type {
+  GenerateProgress,
+  GenerateProgressPhase,
+  OnGenerateProgress,
+} from "./agents/progress";
 
 export { createChatAgent } from "./chat/chat-agent";
-export { DEFAULT_MAX_STEPS } from "./chat/chat-types";
+export {
+  DEFAULT_MAX_STEPS,
+  DEFAULT_TURN_IDLE_TIMEOUT_MS,
+} from "./chat/chat-types";
 export type {
   ChatAgent,
   ChatAgentConfig,
   ChatTool,
+  ChatTurnOptions,
   ChatTurnResult,
   ChatUsage,
   PendingAction,

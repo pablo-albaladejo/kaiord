@@ -24,6 +24,11 @@ export type ChatTurnRefs = {
   agentRef: MutableRefObject<ChatAgent | null>;
   toolsRef: MutableRefObject<ChatTool[]>;
   messagesRef: MutableRefObject<ModelMessage[]>;
+  /** The in-flight turn's controller; aborting it stops the turn. */
+  abortRef: MutableRefObject<AbortController | null>;
+  /** True once the conversation is left; a turn started after it (a
+   * resume once its confirmed tool finishes) is aborted at once. */
+  disposedRef: MutableRefObject<boolean>;
 };
 
 export type ChatTurnDeps = {

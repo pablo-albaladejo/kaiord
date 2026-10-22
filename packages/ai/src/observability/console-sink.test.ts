@@ -67,4 +67,32 @@ describe("createConsoleTelemetrySink", () => {
     expect(act).not.toThrow();
     spy.mockRestore();
   });
+
+  it("should log a chat turn at debug level with its status and tool names", () => {
+    // Arrange
+    const logger = buildLogger();
+    const sink = createConsoleTelemetrySink(logger);
+    const event: AiTelemetryEvent = {
+      type: "chat_turn_finished",
+      traceId: "t2",
+      promptVersion: "1.0.0",
+      provider: "anthropic.messages",
+      modelId: "claude-x",
+      steps: 2,
+      toolNames: ["query_health"],
+      status: "timeout",
+      inputTokens: 10,
+      outputTokens: 5,
+      latencyMs: 30,
+    };
+
+    // Act
+    sink.emit(event);
+
+    // Assert
+    expect(logger.debug).toHaveBeenCalledWith(
+      "[ai:chat_turn_finished] anthropic.messages/claude-x status=timeout steps=2 30ms",
+      { toolNames: ["query_health"] }
+    );
+  });
 });
