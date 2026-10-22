@@ -62,7 +62,15 @@ const SCORE_WORD = new RegExp(
 );
 const RUNNER_NAME = /^run-.+\.(?:ts|mts|cts)$/;
 const TEST_NAME = /\.(?:test|spec)\.(?:ts|mts|cts)$/;
-const SOURCE_EXTENSIONS = [".ts", ".mts", ".cts", ".tsx"];
+const SOURCE_EXTENSIONS = [
+  ".ts",
+  ".mts",
+  ".cts",
+  ".tsx",
+  ".mjs",
+  ".js",
+  ".cjs",
+];
 const COMPARISON_KINDS = new Set([
   ts.SyntaxKind.GreaterThanToken,
   ts.SyntaxKind.GreaterThanEqualsToken,
@@ -130,7 +138,10 @@ export const importTargets = (src, file) =>
     .specifiers.filter((s) => s.startsWith(".") || isAbsolute(s))
     .map((s) => resolve(dirname(file), s));
 
-/** A local target as a source file on disk, `.js` written for `.ts` included. */
+/**
+ * A local target as a code file on disk: TypeScript, `.js` written for `.ts`
+ * included, and plain `.mjs`/`.js`/`.cjs` helpers, which the walk follows too.
+ */
 const asSourceFile = (target) => {
   const stem = target.replace(/\.[cm]?js$/, "");
   const candidates = [

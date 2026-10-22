@@ -237,3 +237,20 @@ test("a keyless runner whose helpers stay local may still gate", () => {
   });
   assert.deepEqual(kinds, []);
 });
+
+test("a plain .mjs helper re-exporting claude-cli is followed", () => {
+  const kinds = kindsOf({
+    "helpers.mjs": `export { loadLiveModel } from "./claude-cli/load-live-model.js";\n`,
+    "run-j.ts": `import { loadLiveModel } from "./helpers.mjs";\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+  assert.ok(kinds.includes("score-comparison"));
+});
+
+test("an extensionless import of a .cjs helper is followed", () => {
+  const kinds = kindsOf({
+    "helpers.cjs": `module.exports = require("./claude-cli/spawn-claude");\n`,
+    "run-j.ts": `import helpers from "./helpers";\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});
