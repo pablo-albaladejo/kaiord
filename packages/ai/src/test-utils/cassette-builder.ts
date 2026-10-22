@@ -1,6 +1,6 @@
 import { PARITY_WARNINGS } from "../evals/cassettes/cassette-schema";
 import type { Cassette } from "../evals/cassettes/cassette-schema";
-import type { ReplaySuite } from "../evals/cassettes/replay-cassette";
+import type { ReplaySuite } from "../evals/cassettes/case-verdict";
 import {
   fixtureHashOf,
   requestHashOf,

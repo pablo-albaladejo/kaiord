@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join, relative, resolve, sep } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const CASSETTES_DIR = import.meta.dirname;
@@ -16,7 +16,7 @@ const MIN_REACHED_MODULES = 10;
  * The classic compiler API. `@kaiord/ai` builds with TypeScript 7, whose
  * package exposes no parser, so the repo root's TypeScript 6 is loaded.
  */
-type Node = { kind: number; getStart(): number; getText(): string };
+type Node = { kind: number; getText(): string };
 type Ts = {
   createSourceFile(
     name: string,
@@ -26,38 +26,68 @@ type Ts = {
   ): Node;
   forEachChild(node: Node, visit: (child: Node) => void): void;
   ScriptTarget: { Latest: number };
-  isImportDeclaration(n: Node): n is Node & { moduleSpecifier: Node };
-  isExportDeclaration(n: Node): n is Node & { moduleSpecifier?: Node };
-  isExternalModuleReference(n: Node): n is Node & { expression: Node };
   isCallExpression(
     n: Node
   ): n is Node & { expression: Node; arguments: Array<Node> };
   isIdentifier(n: Node): n is Node & { text: string };
   isStringLiteralLike(n: Node): n is Node & { text: string };
+  isPropertyAccessExpression(n: Node): n is Node & { name: Node };
+  isElementAccessExpression(n: Node): n is Node & { argumentExpression: Node };
   SyntaxKind: { ImportKeyword: number };
 };
-const ts = createRequire(join(REPO_ROOT, "package.json"))("typescript") as Ts;
 
+const classicCompiler = (candidate: unknown): Ts => {
+  if (typeof (candidate as Partial<Ts>)?.createSourceFile !== "function") {
+    throw new Error(
+      "the repo root's typescript has no createSourceFile: the claude-cli " +
+        "import pin needs the classic compiler API, so port it to the new one"
+    );
+  }
+  return candidate as Ts;
+};
+
+const ts = classicCompiler(
+  createRequire(join(REPO_ROOT, "package.json"))("typescript")
+);
+
+/**
+ * `specifiers`: every string literal in the module, so a path to claude-cli
+ * is caught wherever it appears. `dynamic`: every loader the walk cannot
+ * follow: `import()`/`require()` of a non-literal, `createRequire`, and any
+ * `x.require` / `x["require"]`.
+ */
 type Scan = { specifiers: Array<string>; dynamic: Array<string> };
 
-const isLoader = (call: { expression: Node }): boolean =>
-  call.expression.kind === ts.SyntaxKind.ImportKeyword ||
-  (ts.isIdentifier(call.expression) && call.expression.text === "require");
+const LOADER_NAMES = new Set(["require", "createRequire"]);
 
-/** Static and literal dynamic specifiers, plus every non-literal loader call. */
+const isLoaderCallee = (callee: Node): boolean =>
+  callee.kind === ts.SyntaxKind.ImportKeyword ||
+  (ts.isIdentifier(callee) && callee.text === "require");
+
+const nameOf = (node: Node): string | undefined =>
+  ts.isIdentifier(node) || ts.isStringLiteralLike(node) ? node.text : undefined;
+
+const isOpaqueLoader = (node: Node): boolean => {
+  if (ts.isIdentifier(node)) return node.text === "createRequire";
+  if (ts.isPropertyAccessExpression(node)) {
+    return LOADER_NAMES.has(nameOf(node.name) ?? "");
+  }
+  if (ts.isElementAccessExpression(node)) {
+    return LOADER_NAMES.has(nameOf(node.argumentExpression) ?? "");
+  }
+  if (!ts.isCallExpression(node) || !isLoaderCallee(node.expression)) {
+    return false;
+  }
+  const [argument] = node.arguments;
+  return !(argument && ts.isStringLiteralLike(argument));
+};
+
 const scanSource = (src: string, file: string): Scan => {
   const scan: Scan = { specifiers: [], dynamic: [] };
-  const literal = (node: Node | undefined) => {
-    if (node && ts.isStringLiteralLike(node)) scan.specifiers.push(node.text);
-  };
   const visit = (node: Node): void => {
-    if (ts.isImportDeclaration(node)) literal(node.moduleSpecifier);
-    else if (ts.isExportDeclaration(node)) literal(node.moduleSpecifier);
-    else if (ts.isExternalModuleReference(node)) literal(node.expression);
-    else if (ts.isCallExpression(node) && isLoader(node)) {
-      const [argument] = node.arguments;
-      if (argument && ts.isStringLiteralLike(argument)) literal(argument);
-      else scan.dynamic.push(`${relative(EVALS_DIR, file)}: ${node.getText()}`);
+    if (ts.isStringLiteralLike(node)) scan.specifiers.push(node.text);
+    if (isOpaqueLoader(node)) {
+      scan.dynamic.push(`${relative(EVALS_DIR, file)}: ${node.getText()}`);
     }
     ts.forEachChild(node, visit);
   };
@@ -65,9 +95,10 @@ const scanSource = (src: string, file: string): Scan => {
   return scan;
 };
 
+/** Relative and absolute path literals, resolved against the module. */
 const localTargets = (scan: Scan, file: string): Array<string> =>
   scan.specifiers
-    .filter((s) => s.startsWith("."))
+    .filter((s) => s.startsWith(".") || isAbsolute(s))
     .map((s) => resolve(dirname(file), s));
 
 const asSourceFile = (path: string): string | undefined =>
@@ -140,20 +171,45 @@ describe("replay runner imports", () => {
 
   it.each([
     ["a template literal", "const m = await import(`../claude-cli/${name}`);"],
-    ["a variable", 'const p = "../claude-cli/x"; const m = await import(p);'],
+    ["a variable", "const p = name; const m = await import(p);"],
     ["a computed require", "const m = require(dir + '/spawn');"],
-  ])(
-    "should flag a dynamic import of %s, which cannot be resolved",
-    (_label, src) => {
-      // Arrange
+    ["createRequire", 'import { createRequire } from "node:module";'],
+    ["createRequire(...)(...)", "createRequire(import.meta.url)(name);"],
+    ["module.require", "module.require(name);"],
+    ['module["require"]', 'module["require"](name);'],
+  ])("should flag a loader the walk cannot follow: %s", (_label, src) => {
+    // Arrange
 
-      // Act
-      const { dynamic } = scanSource(src, RUNNER);
+    // Act
+    const { dynamic } = scanSource(src, RUNNER);
 
-      // Assert
-      expect(dynamic).toHaveLength(1);
-    }
-  );
+    // Assert
+    expect(dynamic).toHaveLength(1);
+  });
+
+  it.each([
+    ["a string constant", 'const p = "../claude-cli/spawn-claude";'],
+    ["an absolute path", `import x from "${join(CLAUDE_CLI_DIR, "x.ts")}";`],
+  ])("should resolve %s under claude-cli", (_label, src) => {
+    // Arrange
+
+    // Act
+    const targets = localTargets(scanSource(src, RUNNER), RUNNER);
+
+    // Assert
+    expect(targets.some(isUnderClaudeCli)).toBe(true);
+  });
+
+  it("should fail readably when the root typescript has no classic parser", () => {
+    // Arrange
+    const typescript7 = { version: "7.0.2" };
+
+    // Act
+    const act = () => classicCompiler(typescript7);
+
+    // Assert
+    expect(act).toThrow("has no createSourceFile");
+  });
 
   it("should treat a sibling import inside claude-cli as under it", () => {
     // Arrange

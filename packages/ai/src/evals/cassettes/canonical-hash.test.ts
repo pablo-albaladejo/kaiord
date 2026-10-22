@@ -126,18 +126,48 @@ describe("canonicalize", () => {
     expect(hashes[1]).not.toBe(hashes[0]);
   });
 
-  it("should serialize a URL as its href and a Date as ISO", () => {
+  it("should serialize a URL, a Date and bytes by content under a type tag", () => {
     // Arrange
-    const value = { url: new URL("https://a.example/x"), at: new Date(0) };
+    const value = {
+      url: new URL("https://a.example/x"),
+      at: new Date(0),
+      bytes: new Uint8Array([1]),
+    };
 
     // Act
     const canonical = canonicalize(value);
 
     // Assert
     expect(canonical).toEqual({
-      at: "1970-01-01T00:00:00.000Z",
-      url: "https://a.example/x",
+      at: { "\u0000Date": "1970-01-01T00:00:00.000Z" },
+      bytes: { "\u0000bytes": [1] },
+      url: { "\u0000URL": "https://a.example/x" },
     });
+  });
+
+  it.each([
+    ["bytes and a plain array", new Uint8Array([1]), [1]],
+    ["a URL and its href", new URL("https://a.example/"), "https://a.example/"],
+    ["a Date and its ISO string", new Date(0), "1970-01-01T00:00:00.000Z"],
+  ])("should hash %s differently", (_label, tagged, plain) => {
+    // Arrange
+
+    // Act
+    const hashes = [hashOf({ value: tagged }), hashOf({ value: plain })];
+
+    // Assert
+    expect(hashes[1]).not.toBe(hashes[0]);
+  });
+
+  it("should reject a plain object using the reserved tag prefix", () => {
+    // Arrange
+    const forged = { value: { "\u0000bytes": [1] } };
+
+    // Act
+    const act = () => hashOf(forged);
+
+    // Assert
+    expect(act).toThrow("reserved key");
   });
 
   it("should reject a Map rather than hash it as an empty object", () => {

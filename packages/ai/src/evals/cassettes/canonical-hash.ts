@@ -5,18 +5,24 @@ const isPlainObject = (value: object): value is Record<string, unknown> => {
   return proto === Object.prototype || proto === null;
 };
 
+/** Reserved key prefix for tagged values; a plain object may not use it. */
+const TAG = "\u0000";
+
 /**
  * Values JSON would collapse to `{}` (a URL, a Date, a byte array) are
- * serialized by content, so two different values never share a hash. Any
- * other class instance is rejected rather than hashed as an empty object.
+ * serialized by content under a type tag, so they never share a hash with a
+ * string or a plain array. Any other class instance is rejected.
  */
 const scalarOf = (value: object): unknown => {
-  if (value instanceof URL) return value.href;
-  if (value instanceof Date) return value.toISOString();
+  if (value instanceof URL) return { [`${TAG}URL`]: value.href };
+  if (value instanceof Date) return { [`${TAG}Date`]: value.toISOString() };
   if (ArrayBuffer.isView(value)) {
-    return Array.from(
-      new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+    const bytes = new Uint8Array(
+      value.buffer,
+      value.byteOffset,
+      value.byteLength
     );
+    return { [`${TAG}bytes`]: Array.from(bytes) };
   }
   throw new TypeError(
     `cannot canonicalize a ${value.constructor?.name ?? "non-plain object"}`
@@ -30,6 +36,8 @@ export const canonicalize = (value: unknown): unknown => {
   if (!isPlainObject(value)) return scalarOf(value);
   const sorted: Record<string, unknown> = {};
   for (const key of Object.keys(value).sort()) {
+    if (key.startsWith(TAG))
+      throw new TypeError(`reserved key ${JSON.stringify(key)}`);
     if (value[key] !== undefined) sorted[key] = canonicalize(value[key]);
   }
   return sorted;

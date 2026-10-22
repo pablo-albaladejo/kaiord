@@ -1,10 +1,7 @@
 import type { Cassette } from "./cassette-schema";
-import { replayCassette, unmeasured } from "./replay-cassette";
-import type {
-  CaseVerdict,
-  ReplaySuite,
-  UnmeasuredCause,
-} from "./replay-cassette";
+import { unmeasured } from "./case-verdict";
+import type { CaseVerdict, ReplaySuite, UnmeasuredCause } from "./case-verdict";
+import { replayCassette } from "./replay-cassette";
 
 export const UNBLOCK_PATHS =
   "re-record locally, or retire the id in the manifest";

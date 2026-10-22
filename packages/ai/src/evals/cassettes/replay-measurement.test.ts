@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -9,13 +9,14 @@ import {
 import benchmarks from "../benchmarks.json";
 import type { Benchmark } from "../types";
 import {
+  COMMITTED_DIR,
   FIXTURES_DIR,
   loadCassetteFiles,
   readCassetteFiles,
 } from "./cassette-files";
 import { PARITY_WARNINGS } from "./cassette-schema";
 import { createParserReplaySuite } from "./parser-replay-suite";
-import type { ReplaySuite } from "./replay-cassette";
+import type { ReplaySuite } from "./case-verdict";
 import { replayCassettes } from "./replay-runner";
 
 const CASE = "cycling-simple";
@@ -48,17 +49,24 @@ const editedBenchmarks = (edit: Partial<Benchmark>): Array<Benchmark> =>
     b.id === CASE ? { ...b, ...edit } : b
   );
 
-/** Every path under the package except installed and built output, with mtimes. */
-const packageSnapshot = (): Array<string> => {
+/** Every place a recording could write: committed/, fixtures/ and .eval-cassettes/. */
+const RECORDING_DIRS = [
+  COMMITTED_DIR,
+  FIXTURES_DIR,
+  join(PACKAGE_DIR, ".eval-cassettes"),
+];
+
+const recordingSnapshot = (): Array<string> => {
   const walk = (dir: string): Array<string> =>
-    readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-      if (entry.name === "node_modules" || entry.name === "dist") return [];
-      const path = join(dir, entry.name);
-      return entry.isDirectory()
-        ? walk(path)
-        : [`${path}@${statSync(path).mtimeMs}`];
-    });
-  return walk(PACKAGE_DIR).sort();
+    existsSync(dir)
+      ? readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+          const path = join(dir, entry.name);
+          return entry.isDirectory()
+            ? [path, ...walk(path)]
+            : [`${path}@${statSync(path).mtimeMs}`];
+        })
+      : [`${dir}: absent`];
+  return RECORDING_DIRS.flatMap(walk).sort();
 };
 
 afterEach(() => {
@@ -190,7 +198,7 @@ describe("replay measurement", () => {
       CASE,
       simpleWorkout("running")
     );
-    const before = packageSnapshot();
+    const before = recordingSnapshot();
 
     // Act
     const result = await replayCassettes(suite, [cassette]);
@@ -199,7 +207,7 @@ describe("replay measurement", () => {
     expect(result.faults).toEqual([
       'case cycling-simple failed scorer "sport": Sport mismatch: expected cycling, got running',
     ]);
-    expect(packageSnapshot()).toEqual(before);
+    expect(recordingSnapshot()).toEqual(before);
   });
 
   it("should replay keyless: no provider key in the env and no network", async () => {

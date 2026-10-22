@@ -2,7 +2,7 @@ import { parseAll, parseJson } from "./cassette-files";
 import type { CassetteFile, LoadedCassettes } from "./cassette-files";
 import { checkManifest, duplicatesOf, manifestSchema } from "./manifest";
 import type { Manifest } from "./manifest";
-import type { ReplaySuite } from "./replay-cassette";
+import type { ReplaySuite } from "./case-verdict";
 import { replayCassettes } from "./replay-runner";
 import type { ReplayResult } from "./replay-runner";
 import { validateCommittedCassette } from "./validate-cassette";
@@ -28,6 +28,8 @@ const readManifest = (
  * model, one file per id named `<id>.json`, matching the manifest by id and
  * by file digest. Any cassette that raised a fault is left out of
  * `cassettes`, so a tampered, unlisted or duplicated file is never replayed.
+ * Its `faults` must reach the exit code: replay through `replayCommitted`, never
+ * this plus `replayCassettes`, which would drop them.
  */
 export const loadCommittedFiles = (
   files: ReadonlyArray<CassetteFile>

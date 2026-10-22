@@ -3,14 +3,10 @@ import { WORKOUT_PARSER_SYSTEM } from "../../prompts/parse-workout-prompt";
 import { evaluateBenchmark } from "../assertions";
 import benchmarks from "../benchmarks.json";
 import type { Benchmark } from "../types";
-import type { ReplayCase, ReplaySuite } from "./replay-cassette";
+import type { ReplayCase, ReplaySuite } from "./case-verdict";
 import { promptHashOf } from "./request-hashes";
 import { OFFICIAL_CASSETTE_MODEL } from "./validate-cassette";
 
-/**
- * `maxRetries: 0` because a cassette is one recorded call: a retry would send
- * a request carrying validation feedback that no cassette holds.
- */
 /**
  * Only what reaches the prompt. Scorer expectations (`minSteps`, `zoneCheck`,
  * `category`, ...) stay out, so tightening one re-scores the stored answer
@@ -22,6 +18,10 @@ export const modelVisibleInput = (benchmark: Benchmark) => ({
   athleteZones: benchmark.athleteZones ?? null,
 });
 
+/**
+ * `maxRetries: 0` because a cassette is one recorded call: a retry would send
+ * a request carrying validation feedback that no cassette holds.
+ */
 const parserCase = (benchmark: Benchmark): ReplayCase => ({
   id: benchmark.id,
   fixture: modelVisibleInput(benchmark),
