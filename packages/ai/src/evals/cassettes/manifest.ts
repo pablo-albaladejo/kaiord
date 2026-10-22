@@ -28,7 +28,7 @@ export const duplicatesOf = (ids: ReadonlyArray<string>): Array<string> => [
 ];
 
 const push = (faults: Array<string>, label: string, ids: Array<string>) => {
-  if (ids.length > 0) faults.push(label.replace("{ids}", ids.join(", ")));
+  if (ids.length > 0) faults.push(label.replace("{ids}", () => ids.join(", ")));
 };
 
 /**
