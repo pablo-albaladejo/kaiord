@@ -116,6 +116,22 @@ path, the sentinel and staleness are tested with in-memory
 over committed cassettes joins `pnpm test` in PR 7a in the same commit as the
 first real cassette, so it is never red by construction in between.
 
+The fixture hash covers only what the model sees: for the parser, the
+benchmark text, the sport line input and `athleteZones`, exactly what reaches
+the prompt. It does not cover scorer expectations (`minSteps`, `maxSteps`,
+`zoneCheck`, `targetCheck`, `expectedRepeatCounts`, `category`, `language`).
+Re-scoring a stored answer keylessly against tightened expectations is one of
+the main points of a cassette, and an expectation change must not force a
+quota-bound re-record; a change to anything the model is shown does.
+
+A cassette holds exactly one model call, so replay runs the runtime with
+`maxRetries: 0`: a retry would send a request carrying validation feedback
+that no cassette holds, and a recorded answer that fails validation is a
+measured failure, not a retry. A case is measured only when it consumed its
+cassette (exactly one model call) and at least one scorer returned a verdict.
+PR 7a's recorder SHALL record exactly one call per case, with the same
+`maxRetries: 0`.
+
 A committed manifest lists the expected real cassette ids, each with a digest of
 its cassette file written by the recorder. Without the digest, rewriting a
 cassette's hash fields to current values would make an old response look fresh,
