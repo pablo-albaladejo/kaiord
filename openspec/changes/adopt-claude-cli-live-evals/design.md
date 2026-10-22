@@ -64,12 +64,15 @@ The subscription quota is shared with the maintainer's daily work. Calls run
 one at a time; `EVAL_MAX_CALLS` caps a pass by call count (the CLI's dollar
 figure is notional, `costBasis: "list"`, so a dollar budget would cap nothing
 real) and defaults to 50, counting calibration and retries; the runner reads
-`rate_limit_event`, normalizes seven-day utilization to a 0–1 fraction, and
-stops before the next call once it is strictly above
+`rate_limit_event` through one pinned seven-day field whose name and scale
+come from a real recorded event (the smoke calls saw 75 % but did not record
+the field, so this is pinned before the guard ships; no "divide by 100 if
+large" heuristic, which is ambiguous at 1), converts it to 0–1 by a fixed rule,
+and stops before the next call once it is strictly above
 `EVAL_MAX_WEEKLY_UTILIZATION` (0.85; D1b says "above", so 0.85 itself
 continues) or the status leaves `allowed*`. The guard fails closed: a missing
 or unparseable signal stops the pass, since "no signal" cannot be read as "room
-left". Stopped and rate-limited cases are unmeasured — chatbot-kb counted 429s
+left"; an unrecognized event shape is the same fault. Stopped and rate-limited cases are unmeasured — chatbot-kb counted 429s
 as failures and read a broken lane as a regression.
 
 ### D4. Cassettes record provenance, replay never touches the CLI
@@ -91,7 +94,9 @@ reports follow the same rule and `eval-report-*.json` is gitignored.
 
 The official model is the literal `claude-sonnet-5` (D1c), not
 `getDefaultModel("anthropic")`, which moves with the catalog. A committed
-cassette must have requested and served that id; `modelUsage` naming two models
+cassette must have requested that id and been served it or a dated snapshot of
+it (the smoke calls did not record which form `modelUsage` keys; checked before
+the recorder ships); `modelUsage` naming two models
 or a substitute rejects the recording. Haiku iteration runs write to the
 gitignored `packages/ai/.eval-cassettes/` or nowhere.
 
@@ -100,15 +105,34 @@ messages, schema, model id). Empty green is a fault, and exit non-zero was
 chosen over a "not a gate" label: the replay runner is meant to gate, so a pass
 that measured nothing or found a stale cassette must turn red rather than ask a
 reader to notice a label. PR 6 ships only `recorder: "synthetic"` fixtures,
-which are never measured; the lane joins `pnpm test` in PR 7a with the first
-real cassettes, so it is never red by construction in between.
+which are never measured; the measured path, the sentinel and staleness are
+tested with in-memory `recorder: "claude-cli"` cassettes whose failure reasons
+are asserted. The lane over committed cassettes joins `pnpm test` in PR 7a in
+the same commit as the first real cassette, so it is never red by construction
+in between.
+
+A committed manifest lists the expected real cassette ids. Without it, the only
+way to unblock a stale cassette in CI would be a quota-bound local run or a
+silent delete. With it, a missing or unlisted id fails, and the two unblock
+paths are explicit: re-record locally, or retire the id in the manifest (a
+reviewed diff). Stale fails on every PR, bot bumps included: a dependency that
+changes schema serialization really changes the request. The alternative,
+letting stale pass on bot PRs, was rejected because it is exactly the empty
+green this change exists to remove.
+
+The chat-tool and lab runners do not call the live loader at all: they would
+otherwise stop on the `EVAL_LIVE` opt-in before reporting their gap. They keep
+their scripts, report every case unmeasured with the unsupported reason, and
+exit zero. Detection (`claude auth status --json`) uses the same allowlisted
+environment as model calls.
 
 ### D5. Inertness is "cannot run in CI", enforced by import
 
 `check-no-inert-floors.mjs` detects inertness by the literal `load-eval-model`
 and lists only the top level of `packages/ai/src/evals` (`readdirSync`, `:87`).
-It becomes: a runner is inert if it names the old loader (until deleted) or
-imports anything from `evals/claude-cli/` — not only the loader, since a runner
+It becomes: a runner is inert if it names the old loader (until deleted),
+imports anything resolving under `evals/claude-cli/` (specifiers resolved
+against the importing file, so `./x` inside it counts), or lives there — not only the loader, since a runner
 could build the adapter itself — and the scan is recursive. The PR that adds
 the loader proves the guard fails on a nested runner and on a direct adapter
 import.

@@ -30,9 +30,12 @@ live pass rate MAY inform a manual release decision; it SHALL NOT block CI.
 The obligation is on the **runner's exit behaviour**, not on any syntactic form
 of it: extracting the comparison to a variable does not satisfy it. The
 mechanical guard that enforces it (`scripts/check-no-inert-floors.mjs`) SHALL
-treat as inert every runner that names the credential-bound loader or imports
-any module under `evals/claude-cli/`, SHALL scan `packages/ai/src/evals`
-recursively (not only its top level), and a change to what it recognizes SHALL
+treat as inert every runner that names the credential-bound loader, that
+imports any module resolving under `evals/claude-cli/` (import specifiers are
+resolved against the importing file, so a sibling import `./x` from inside that
+directory counts), or that is itself located under `evals/claude-cli/`; it
+SHALL scan `packages/ai/src/evals` recursively (not only its top level), and a
+change to what it recognizes SHALL
 be proven by a provoked failure of the guard. A runner that CAN obtain
 everything it needs in CI without a credential is unaffected and MAY gate.
 
@@ -52,6 +55,12 @@ everything it needs in CI without a credential is unaffected and MAY gate.
 - **GIVEN** a runner that imports the CLI adapter directly from `evals/claude-cli/`, not the live loader, and does not mention the credential-bound loader
 - **WHEN** the mechanical guard scans it with a score comparison deciding its exit code
 - **THEN** the guard SHALL report a violation and fail
+
+#### Scenario: A runner inside the adapter directory is inert
+
+- **GIVEN** a runner located under `evals/claude-cli/` that imports its siblings as `./x` and gates on a score
+- **WHEN** the mechanical guard runs
+- **THEN** it SHALL treat the runner as inert, report a violation and fail
 
 #### Scenario: A nested runner is scanned
 
@@ -82,10 +91,13 @@ key) can never occur. It is replaced by "Local subscription-backed live
 loader".
 
 **Migration**: `packages/ai/src/evals/load-eval-model.ts` and its
-`API_KEY_ENV` map SHALL be deleted. Every runner that imported `loadEvalModel`
-SHALL take its model from the local subscription-backed live loader. A suite
-whose calls that loader cannot carry (tool calling, document file parts) SHALL
-report every case as unmeasured with that reason rather than fail.
+`API_KEY_ENV` map SHALL be deleted. The parser runner SHALL take its model from
+the local subscription-backed live loader. The chat-tool and lab-extraction
+runners, whose calls that loader cannot carry (tool calling, document file
+parts), SHALL NOT call or import the live loader: they keep their scripts
+(`eval:chat-tools`, `eval:labs`), report every case as unmeasured with that
+reason, and exit zero, so they never reach the `EVAL_LIVE` opt-in and never
+fail.
 `EVAL_PROVIDER` is no longer read. `.github/workflows/eval.yml`, which only
 existed to invoke the old loader with a repository secret that will never
 exist, SHALL be deleted, and `scripts/check-model-ids-fresh.mjs` SHALL stop
@@ -107,7 +119,8 @@ iteration model. Only Anthropic models are reachable; OpenAI and Google
 defaults SHALL be reported as not measured, never as passing.
 
 The loader SHALL detect availability before any model call, through
-`claude auth status --json`, and SHALL fail with a message starting
+`claude auth status --json` run with the same allowlisted child environment as
+model calls, and SHALL fail with a message starting
 `INERT: claude CLI not available` and naming the reason when: the `CI`
 environment variable is set; `EVAL_LIVE` is not exactly `1` (only the
 `eval:live` package script sets it, so a bare `tsx` invocation or a CI job
@@ -137,15 +150,19 @@ no case SHALL be measured.
 
 A live pass SHALL run calls one at a time and SHALL stop after `EVAL_MAX_CALLS`
 model calls, counting the calibration call and every retry; when
-`EVAL_MAX_CALLS` is unset the budget SHALL be 50. Weekly utilization is a
-fraction from 0 to 1: the rate-limit guard SHALL normalize the CLI's seven-day
-utilization to that scale (a value reported as a percentage is divided by 100)
-and SHALL stop before the next call once it is strictly above
-`EVAL_MAX_WEEKLY_UTILIZATION` (default `0.85`, decision D1b: "stops above
-85 %"), or once the CLI reports a rate-limit status other than allowed. A call
-whose output carries no seven-day rate-limit signal, or one the guard cannot
-parse or normalize into 0–1, SHALL be a harness fault that stops the pass: the
-guard fails closed. A rate limit, a 429, a missing or unparseable signal, or a
+`EVAL_MAX_CALLS` is unset the budget SHALL be 50. Weekly utilization is
+compared as a fraction from 0 to 1. The rate-limit guard SHALL read one pinned
+field of the CLI's `rate_limit_event` for the seven-day window, whose name and
+scale are fixed in the guard from a real recorded event (the smoke calls
+observed 75 % but did not record the field name or its scale, so the guard
+cannot ship before they are pinned); the conversion to 0–1 SHALL be a fixed
+rule for that field, never inferred from the value. It SHALL stop before the
+next call once utilization is strictly above `EVAL_MAX_WEEKLY_UTILIZATION`
+(default `0.85`, decision D1b: "stops above 85 %"), or once the CLI reports a
+rate-limit status other than allowed. A call whose output carries no
+`rate_limit_event`, an event of an unrecognized shape, or a pinned field that
+is missing, non-numeric or outside its scale SHALL be a harness fault that
+stops the pass: the guard fails closed. A rate limit, a 429, a missing or unparseable signal, or a
 stopped pass SHALL leave the affected cases unmeasured; it SHALL NOT be counted
 as a failed case.
 
@@ -188,13 +205,13 @@ cassette: a strict schema whose validator rejects any unknown key, and
 
 #### Scenario: The threshold itself does not stop the pass
 
-- **GIVEN** a CLI response reporting seven-day utilization of exactly `0.85`, or `85` on a percentage scale
+- **GIVEN** a CLI response whose pinned seven-day field converts to exactly `0.85`
 - **WHEN** the runner decides whether to make the next call
-- **THEN** it SHALL normalize the value to `0.85` and continue, because the limit stops only above 85 %
+- **THEN** it SHALL continue, because the limit stops only above 85 %
 
 #### Scenario: A missing rate-limit signal fails closed
 
-- **GIVEN** a CLI response with no seven-day utilization, or one that cannot be parsed into a fraction from 0 to 1
+- **GIVEN** a CLI response with no `rate_limit_event`, an event of an unrecognized shape, or a pinned field that is missing or outside its scale
 - **WHEN** the runner decides whether to make the next call
 - **THEN** it SHALL stop the pass with a harness fault and leave the remaining cases unmeasured
 
@@ -240,17 +257,25 @@ email or organization, or any field a future CLI version adds) can never reach
 a committed cassette.
 
 A cassette committed to the repository for replay SHALL have been recorded with
-the pinned official model: its requested and served model ids SHALL both equal
-`claude-sonnet-5` (decision D1c), and the validator SHALL reject a committed
-cassette otherwise. A recording whose CLI `modelUsage` names more than one
-served model, or one that differs from the requested model, SHALL be rejected
+the pinned official model (decision D1c): its requested model id SHALL equal
+`claude-sonnet-5`, and its served model id SHALL be `claude-sonnet-5` or a
+dated snapshot of it (`claude-sonnet-5-` followed by an eight-digit date),
+recorded verbatim in the cassette; the validator SHALL reject a committed
+cassette otherwise. Whether `modelUsage` keys the bare or a dated id is not yet
+observed and SHALL be checked against a real result before the recorder ships.
+A recording whose CLI `modelUsage` names more than one served model, or one
+that is neither the requested id nor a dated snapshot of it, SHALL be rejected
 before it is written. A recording with any other model is an iteration run: it
 SHALL be written only to a gitignored directory (`packages/ai/.eval-cassettes/`)
 or not at all.
 
 The replay runner SHALL feed recorded responses through `MockLanguageModelV4`
 into the real runtime and SHALL import nothing from `evals/claude-cli/`, so it
-needs no credential and no CLI and MAY gate in CI. A cassette whose prompt
+needs no credential and no CLI and MAY gate in CI. Unit tests MAY build
+cassettes in memory with `recorder: "claude-cli"`, never written to disk, so
+the measured path is exercised before any real cassette exists; the schema
+rules apply to them, the committed-cassette rules (official model, manifest) do
+not. A cassette whose prompt
 hash, tools hash, fixture hash or request hash (which covers the schema and the
 model id) differs from the current one is **stale**: its case is unmeasured
 with a stale-cassette reason, neither passing nor failing. A synthetic cassette
@@ -258,10 +283,13 @@ SHALL never count as measured and SHALL never decide an exit code.
 
 An empty green is not a pass: a replay pass that measures zero cases, or that
 finds any stale cassette, SHALL exit non-zero with a fault naming the reason
-(zero measured, or the stale cassettes by id). Because synthetic fixtures are
-never measured, the replay lane joins `pnpm test` only once at least one real
-cassette is committed; until then the replay runner is exercised by unit tests
-over synthetic fixtures.
+(zero measured, or the stale cassettes by id). Tests of these failures and of
+the scorer sentinel SHALL assert the reason (zero measured, the stale ids, the
+failing case id and scorer), not only a non-zero exit. No replay lane over
+committed cassettes SHALL be part of `pnpm test` until the same change commits
+the first real cassette and its manifest entry; until then the replay runner
+runs only inside unit tests over in-memory and synthetic cassettes, so
+`pnpm test` is never red by construction.
 
 #### Scenario: Provenance is recorded
 
@@ -310,6 +338,18 @@ over synthetic fixtures.
 - **WHEN** it finishes
 - **THEN** it SHALL exit non-zero with a fault naming the reason, even if no scored case failed
 
+#### Scenario: The measured path is tested before real cassettes exist
+
+- **GIVEN** a unit test that builds an in-memory cassette with `recorder: "claude-cli"` and a sabotaged scorer case
+- **WHEN** the replay runner runs it
+- **THEN** it SHALL count the case as measured and fail with a reason naming the case id and the scorer, and no cassette file SHALL be written
+
+#### Scenario: A stale failure names its ids
+
+- **GIVEN** a unit test with one in-memory cassette whose prompt hash is out of date
+- **WHEN** the replay runner finishes
+- **THEN** the test SHALL assert that the fault names that cassette id as stale, not only that the exit code is non-zero
+
 #### Scenario: A synthetic cassette never gates
 
 - **GIVEN** only cassettes with `recorder: "synthetic"`
@@ -321,3 +361,47 @@ over synthetic fixtures.
 - **GIVEN** an environment with no Claude Code CLI and no provider credential
 - **WHEN** the replay runner runs
 - **THEN** it SHALL execute every non-stale real cassette and MAY exit non-zero on a scorer failure
+
+### Requirement: Committed cassettes are pinned by a manifest
+
+The committed cassette directory SHALL carry a committed manifest listing the
+id of every real cassette expected there. The replay lane SHALL fail when a
+listed id has no cassette, when a real cassette is present whose id is not
+listed, and when a listed cassette is stale. Each such failure SHALL name the
+affected ids and the only two ways to unblock it: **re-record the case locally
+through the live lane, or retire the id in the manifest**. Retiring an id SHALL
+be a removal from the manifest plus deletion of the cassette in the same diff,
+so it is visible and reviewed; deleting a cassette without retiring its id
+fails, and so does a silent edit of its hashes, which makes it stale or
+invalid.
+
+A stale real cassette SHALL fail CI on every pull request, including bot pull
+requests (for example a dependency bump that changes the serialized JSON
+schema and therefore the request hash): the request really changed, and a
+pass that ignored it would replay a response to a request the production code
+no longer makes. The failure message SHALL say so and name both unblock paths,
+so the maintainer re-records locally within the quota (D1b) or retires the id.
+
+#### Scenario: A missing cassette fails
+
+- **GIVEN** a manifest listing `parse-basic` and no cassette with that id
+- **WHEN** the replay lane runs
+- **THEN** it SHALL fail naming `parse-basic` as missing and the two unblock paths
+
+#### Scenario: Retiring an id is a reviewed diff
+
+- **GIVEN** a change that deletes a committed cassette and removes its id from the manifest
+- **WHEN** the replay lane runs
+- **THEN** it SHALL pass that check, and the retirement SHALL appear as a manifest line removed in the diff
+
+#### Scenario: An unlisted cassette fails
+
+- **GIVEN** a real cassette in the committed directory whose id is not in the manifest
+- **WHEN** the replay lane runs
+- **THEN** it SHALL fail naming that id as unlisted
+
+#### Scenario: A bot bump that changes the schema fails with the unblock paths
+
+- **GIVEN** a dependency bump pull request that changes the serialized output schema so a listed cassette's request hash no longer matches
+- **WHEN** CI runs the replay lane
+- **THEN** it SHALL fail naming the stale ids and stating "re-record locally, or retire the id in the manifest"

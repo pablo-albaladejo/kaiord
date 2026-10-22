@@ -76,7 +76,9 @@ CI.
   hashes, and which parity gaps applied (no `temperature`, hidden system
   overhead, no `maxOutputTokens`). Committed cassettes are `claude-sonnet-5`
   only; Haiku iteration stays gitignored. A replay pass that measures nothing
-  or finds a stale cassette exits non-zero. The replay runner imports nothing
+  or finds a stale cassette exits non-zero. A committed manifest of expected cassette ids makes a missing
+  or retired cassette a reviewed diff; a stale one fails naming the ids and the
+  two unblock paths (re-record locally, or retire the id). The replay runner imports nothing
   from the CLI adapter, so it stays keyless and may gate.
 - **`.github/workflows/eval.yml` is deleted** (in the implementing PR): it can
   never have a secret, so it is a shape with no possible path.
