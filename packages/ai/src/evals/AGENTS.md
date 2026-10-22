@@ -25,6 +25,18 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 - `chat-tool-assertions.ts` — `evaluateChatToolBenchmark(benchmark, chatTurnResult, durationMs)`: read scenarios check the expected tool was called and the final answer names the real source; action scenarios check the paused `pendingAction` matches the expected tool + input fields
 - `run-chat-tool-evals.ts` — CLI entry point (inert): would run `createChatAgent` against the hub tool fixtures for each benchmark
 
+## Cassettes and replay (`cassettes/`)
+
+Keyless replay of recorded model responses through `MockLanguageModelV4` and the real runtime. It imports nothing from `evals/claude-cli/` (pinned by `replay-imports.test.ts`), so it MAY gate. No replay lane over committed cassettes is part of `pnpm test` yet: it joins in the same commit as the first real cassette (OpenSpec `adopt-claude-cli-live-evals`, task 3.5).
+
+- `cassette-schema.ts` — the strict allowlisted cassette schema (provenance + response content); any unknown key, at any level, is rejected and named by `validate-cassette.ts`
+- `validate-cassette.ts` — `validateCassette` (schema only, for in-memory and fixture cassettes) and `validateCommittedCassette` (plus the official-model rule: requested `claude-sonnet-5`, served `claude-sonnet-5` or a dated snapshot `claude-sonnet-5-YYYYMMDD`)
+- `canonical-hash.ts` / `request-hashes.ts` — SHA-256 over canonical JSON (keys sorted recursively; only `$schema` stripped, from the schema); prompt, tools, fixture and request hashes. The request hash is computed from the call options the runtime actually sends
+- `replay-model.ts` / `replay-cassette.ts` / `replay-runner.ts` — one cassette per call; a mismatch in any of the four hashes makes the case unmeasured and stale. Zero measured cases, any stale cassette, an orphaned cassette or a failed scorer exits non-zero with a fault naming the reason and the ids
+- `parser-replay-suite.ts` — the workout-parser benchmarks as a replay suite (`maxRetries: 0`: a cassette holds one call)
+- `manifest.ts` / `cassette-directory.ts` — the committed directory `committed/` and its `manifest.json` (id + SHA-256 of the file per real cassette; empty for now). Missing, unlisted, digest-mismatched and stale cassettes fail naming the ids
+- `fixtures/` — `recorder: "synthetic"` cassettes only; never measured, never decide an exit code
+
 ## Assertions per Benchmark
 
 Each benchmark is evaluated against:
