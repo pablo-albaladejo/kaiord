@@ -176,6 +176,28 @@ describe("encodeRampPowerTarget", () => {
     expect(interval["@_kaiord:powerUnit"]).toBe("percent_ftp");
   });
 
+  it("should encode a percent_ftp range as its FTP fractions without a warning", () => {
+    // Arrange
+    const step = makeStep({
+      type: "power",
+      value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+    });
+    const interval: Record<string, unknown> = {};
+    const logger = createMockLogger();
+    const warnSpy = vi.spyOn(logger, "warn");
+
+    // Act
+    encodeRampPowerTarget(step, interval, logger);
+
+    // Assert
+    expect(interval).toStrictEqual({
+      "@_kaiord:powerUnit": "percent_ftp",
+      "@_PowerLow": 0.5,
+      "@_PowerHigh": 0.75,
+    });
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
   it("should encode zone as equal PowerLow and PowerHigh", () => {
     // Arrange
     const step = makeStep({ type: "power", value: { unit: "zone", value: 3 } });

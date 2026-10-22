@@ -131,6 +131,44 @@ describe("Round-trip: workoutHr/workoutPower offsets through the real encoder", 
     }
   );
 
+  it("should write a percent_ftp power range raw and read it back unchanged", async () => {
+    // Arrange
+    const target: Target = {
+      type: "power",
+      value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+    };
+
+    // Act
+    const bytes = await write(krdWith(ONE_MINUTE, target));
+    const decoded = stepsOf(await read(bytes))[0];
+
+    // Assert
+    expect(rawSteps(bytes)[0]).toMatchObject({
+      customTargetPowerLow: 50,
+      customTargetPowerHigh: 75,
+    });
+    expect(decoded?.target).toStrictEqual(target);
+  });
+
+  it("should write a descending Zwift cooldown range raw without throwing", async () => {
+    // Arrange
+    const krd = krdWith(ONE_MINUTE, {
+      type: "power",
+      value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+    });
+    const step = stepsOf(krd)[0];
+    if (step) step.extensions = { zwift: { powerDirection: "descending" } };
+
+    // Act
+    const bytes = await write(krd);
+
+    // Assert
+    expect(rawSteps(bytes)[0]).toMatchObject({
+      customTargetPowerLow: 50,
+      customTargetPowerHigh: 75,
+    });
+  });
+
   it.each([
     {
       duration: { type: "heart_rate_less_than", bpm: 125 },

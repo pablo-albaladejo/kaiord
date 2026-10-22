@@ -32,6 +32,7 @@ export function TargetPickerFieldsContent(
         displayError={props.displayError}
         disabled={props.disabled}
         activeProfile={props.activeProfile}
+        rangeUnit={props.rangeUnit}
         onValueChange={props.onValueChange}
         onMinChange={props.onMinChange}
         onMaxChange={props.onMaxChange}

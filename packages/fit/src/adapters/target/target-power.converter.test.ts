@@ -1,11 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
 
 import type { FitTargetData } from "./target.types";
 import { convertPowerTarget } from "./target-power.converter";
 
 describe("convertPowerTarget", () => {
   describe("range target using specific power fields", () => {
-    it("should return power range with interpreted values for customTargetPowerLow/High", () => {
+    it("should read raw customTargetPowerLow/High as a percent_ftp range", () => {
       // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 200,
@@ -18,7 +19,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
 
@@ -40,8 +41,65 @@ describe("convertPowerTarget", () => {
     });
   });
 
+  describe("range target stored high to low", () => {
+    it("should sort the bounds so min <= max", () => {
+      // Arrange
+      const data: FitTargetData = {
+        customTargetPowerLow: 75,
+        customTargetPowerHigh: 50,
+      };
+
+      // Act
+      const result = convertPowerTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+      });
+    });
+  });
+
+  describe("range target with mixed bounds", () => {
+    it("should warn and drop a range whose bounds mix %FTP and watts", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+      const data: FitTargetData = {
+        customTargetPowerLow: 80,
+        customTargetPowerHigh: 1300,
+      };
+
+      // Act
+      const result = convertPowerTarget(data, logger);
+
+      // Assert
+      expect(result).toStrictEqual({ type: "open" });
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Power range mixes %FTP and watts bounds; range dropped",
+        { low: 80, high: 1300 }
+      );
+    });
+
+    it("should not warn when both bounds share a unit", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const warnSpy = vi.spyOn(logger, "warn");
+      const data: FitTargetData = {
+        customTargetPowerLow: 1200,
+        customTargetPowerHigh: 1300,
+      };
+
+      // Act
+      convertPowerTarget(data, logger);
+
+      // Assert
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("range target using generic custom fields", () => {
-    it("should return power range for customTargetValueLow/High", () => {
+    it("should read raw customTargetValueLow/High as a percent_ftp range", () => {
       // Arrange
       const data: FitTargetData = {
         customTargetValueLow: 180,
@@ -54,7 +112,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 180, max: 220 },
+        value: { unit: "range", min: 180, max: 220, basis: "percent_ftp" },
       });
     });
   });
@@ -75,7 +133,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
   });
@@ -177,7 +235,47 @@ describe("convertPowerTarget", () => {
       });
     });
 
-    it("should return percent FTP for targetValue between 1 and 1000", () => {
+    it("should read targetValue 1000 as 0 W, matching the range bounds", () => {
+      // Arrange
+      const data: FitTargetData = {
+        targetValue: 1000,
+      };
+
+      // Act
+      const result = convertPowerTarget(data);
+      const range = convertPowerTarget({
+        customTargetPowerLow: 1000,
+        customTargetPowerHigh: 1000,
+      });
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "watts", value: 0 },
+      });
+      expect(range).toStrictEqual({
+        type: "power",
+        value: { unit: "range", min: 0, max: 0 },
+      });
+    });
+
+    it("should return percent FTP for targetValue 999", () => {
+      // Arrange
+      const data: FitTargetData = {
+        targetValue: 999,
+      };
+
+      // Act
+      const result = convertPowerTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "percent_ftp", value: 999 },
+      });
+    });
+
+    it("should return percent FTP for targetValue between 1 and 999", () => {
       // Arrange
       const data: FitTargetData = {
         targetValue: 85,
@@ -223,7 +321,7 @@ describe("convertPowerTarget", () => {
       // Assert
       expect(result).toStrictEqual({
         type: "power",
-        value: { unit: "range", min: 200, max: 250 },
+        value: { unit: "range", min: 200, max: 250, basis: "percent_ftp" },
       });
     });
 

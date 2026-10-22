@@ -8,6 +8,7 @@ import type { ChatTurnResult } from "@kaiord/ai";
 
 import type { PersistencePort } from "../../ports/persistence-port";
 import { newChatMessage } from "./chat-message-mapper";
+import { toolEventContent } from "./tool-event-content";
 
 export type IdGen = { newId: () => string; now: () => string };
 
@@ -49,7 +50,7 @@ export const appendToolEvent = (
       profileId,
       conversationId,
       role: "tool",
-      content: ok ? `Ran ${toolName}.` : `${toolName} failed.`,
+      content: toolEventContent(toolName, ok),
       toolName,
       toolResult: ok ? toolResult : undefined,
       createdAt: gen.now(),

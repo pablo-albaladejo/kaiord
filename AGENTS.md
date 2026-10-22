@@ -17,6 +17,7 @@ Train2Go, and a VitePress documentation site.
 | ------------------------- | ------------------------------------------------------------------------- |
 | `AGENTS.md`               | This file — strict AI/agent guidance (hexagonal rules, KRD, code style)   |
 | `CLAUDE.md`               | Claude Code project instructions (commands, conventions, hexagonal rules) |
+| `REVIEW.md`               | Review passes and severity for AI and human PR reviewers                  |
 | `README.md`               | Human-facing project overview                                             |
 | `CONTRIBUTING.md`         | Contributor workflow, OpenSpec flow, changesets                           |
 | `DEPLOYMENT.md`           | Release/deployment notes                                                  |
@@ -68,6 +69,11 @@ Train2Go, and a VitePress documentation site.
   security workflow, or a write to a real athlete's account. Diagnose, gather the
   evidence, open an issue and message Pablo; he runs it with `!`. Hooks in
   `.claude/settings.json` enforce this. See `CLAUDE.md`, "Never auto-remediate".
+
+### Reviewing a PR
+
+Review against [`REVIEW.md`](./REVIEW.md): its passes, the "gate actually
+ran" check, and the Important / Nit severity split.
 
 ### Spec awareness
 

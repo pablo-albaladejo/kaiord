@@ -1,11 +1,8 @@
 import type { Logger, Target } from "@kaiord/core";
 
 import type { TrainingPeaksIntensityMetric } from "../schemas/trainingpeaks-workout.schema";
-import type {
-  BandRecipe,
-  KrdTargetValue,
-  TargetBand,
-} from "./trainingpeaks-target-band";
+import type { BandRecipe } from "./trainingpeaks-band-recipe.types";
+import type { KrdTargetValue, TargetBand } from "./trainingpeaks-target-band";
 import {
   FIVE_ZONE_PERCENT,
   POWER_ZONE_PERCENT_FTP,

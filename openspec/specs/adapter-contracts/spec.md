@@ -319,13 +319,19 @@ When the GCN adapter encounters an end-condition the KRD duration vocabulary can
 
 ### Requirement: Garmin GCN Writer Resolves Percent-Of-FTP Power Targets With A Provided FTP
 
-The Garmin GCN writer SHALL write a KRD `percent_ftp` power target as a `power.zone` target in watts, computed as `round(percent / 100 × ftpWatts)`, where `ftpWatts` is supplied by the caller through the writer options. When no FTP is provided, or the FTP is zero, negative or not finite, the writer SHALL throw the typed `MissingFtpError` from `@kaiord/core` and SHALL NOT substitute an assumed FTP. Watts targets, watt ranges (faster-first) and power zones SHALL be written unchanged.
+The Garmin GCN writer SHALL write a KRD `percent_ftp` power target as a `power.zone` target in watts, computed as `round(percent / 100 × ftpWatts)`, where `ftpWatts` is supplied by the caller through the writer options. A power `range` with `basis: "percent_ftp"` SHALL have both bounds resolved the same way and be written faster-first. When no FTP is provided, or the FTP is zero, negative or not finite, the writer SHALL throw the typed `MissingFtpError` from `@kaiord/core` and SHALL NOT substitute an assumed FTP. Watts targets, watt ranges (no `basis`, faster-first) and power zones SHALL be written unchanged.
 
 #### Scenario: Percent of FTP resolved with the athlete FTP
 
 - **GIVEN** a cycling step with a `percent_ftp` power target of 85
 - **WHEN** the GCN writer emits the step with `ftpWatts: 250`
 - **THEN** the emitted JSON has `targetValueOne: 213` and `targetValueTwo: 213`
+
+#### Scenario: Percent-of-FTP range resolved with the athlete FTP
+
+- **GIVEN** a cycling step with a power range of 50–75 and `basis: "percent_ftp"`
+- **WHEN** the GCN writer emits the step with `ftpWatts: 250`
+- **THEN** the emitted JSON has `targetValueOne: 188` and `targetValueTwo: 125`
 
 #### Scenario: Missing FTP fails loudly
 

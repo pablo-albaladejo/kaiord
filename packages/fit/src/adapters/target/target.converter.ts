@@ -1,4 +1,4 @@
-import { type Target, targetTypeSchema } from "@kaiord/core";
+import { type Logger, type Target, targetTypeSchema } from "@kaiord/core";
 
 import { fitTargetTypeSchema } from "../schemas/fit-target";
 import type { FitTargetData } from "./target.types";
@@ -10,9 +10,12 @@ import { convertStrokeTypeTarget } from "./target-stroke.converter";
 
 export type { FitTargetData };
 
-export const convertFitTarget = (data: FitTargetData): Target => {
+export const convertFitTarget = (
+  data: FitTargetData,
+  logger?: Logger
+): Target => {
   if (data.targetType === fitTargetTypeSchema.enum.power) {
-    return convertPowerTarget(data);
+    return convertPowerTarget(data, logger);
   }
 
   if (data.targetType === fitTargetTypeSchema.enum.heartRate) {

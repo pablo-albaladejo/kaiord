@@ -45,6 +45,22 @@ describe("workoutDependsOnFtp", () => {
     expect(depends).toBe(false);
   });
 
+  it("should depend on FTP for a percent_ftp power range", () => {
+    // Arrange
+    const ride = workout([
+      step({
+        type: "power",
+        value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+      }),
+    ]);
+
+    // Act
+    const depends = workoutDependsOnFtp(ride);
+
+    // Assert
+    expect(depends).toBe(true);
+  });
+
   it("should depend on FTP for a percent-of-FTP target", () => {
     // Arrange
     const ride = workout([

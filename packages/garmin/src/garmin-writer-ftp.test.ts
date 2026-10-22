@@ -92,4 +92,30 @@ describe("createGarminWriter ftpWatts option", () => {
     expect(firstStep(rangeGcn).targetValueOne).toBe(F.RANGE_HIGH_W);
     expect(firstStep(rangeGcn).targetValueTwo).toBe(F.RANGE_LOW_W);
   });
+
+  it("should resolve a descending Zwift cooldown range with the same bound order", async () => {
+    // Arrange
+    const writer = createGarminWriter({
+      logger: silentLogger,
+      ftpWatts: F.FTP_W,
+    });
+    const cooldown = workoutWith({
+      type: "power",
+      value: {
+        unit: "range",
+        min: F.RAMP_LOW_PCT,
+        max: F.RAMP_HIGH_PCT,
+        basis: "percent_ftp",
+      },
+    });
+    const step = cooldown.extensions?.structured_workout?.steps[0];
+    if (step) step.extensions = { zwift: { powerDirection: "descending" } };
+
+    // Act
+    const gcn = await toText(cooldown, writer, silentLogger);
+
+    // Assert
+    expect(firstStep(gcn).targetValueOne).toBe(F.RANGE_HIGH_W);
+    expect(firstStep(gcn).targetValueTwo).toBe(F.RANGE_LOW_W);
+  });
 });
