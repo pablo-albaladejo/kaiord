@@ -35,13 +35,20 @@ const fromOutcomes = (outcomes: Array<DimensionOutcome>): RunOutcome => {
     : { status: "unmeasured", reason: "no scorer measured the case" };
 };
 
+/** The error and the failure it wraps: the runtime keeps it as `cause`. */
+const chainOf = (error: unknown): Array<unknown> =>
+  error instanceof Error && error.cause !== undefined
+    ? [error, error.cause]
+    : [error];
+
 const stopReason = (stop: StopState) =>
   `pass stopped (${stop.kind}): ${stop.reason}`;
 
 /**
  * A stopped pass, a harness fault or a call the CLI cannot carry leaves the
  * case unmeasured. Only a model answer that the runtime or a scorer rejects
- * is a failure. A harness fault raised outside the session stops it too.
+ * is a failure. A harness fault raised outside the session stops it too, and
+ * each is also found as the `cause` of the runtime's wrapping error.
  */
 const runOnce = async (
   session: LiveSession,
@@ -53,14 +60,17 @@ const runOnce = async (
   try {
     return fromOutcomes(await liveCase.run(model));
   } catch (error) {
-    if (isHarnessFault(error)) {
-      session.halt({ kind: "harness-fault", reason: messageOf(error) });
-    }
+    const chain = chainOf(error);
+    const fault = chain.find(isHarnessFault);
+    if (fault)
+      session.halt({ kind: "harness-fault", reason: messageOf(fault) });
     const stop = session.stopped();
     if (stop) return { status: "unmeasured", reason: stopReason(stop) };
-    if (UnsupportedFunctionalityError.isInstance(error)) {
-      return { status: "unmeasured", reason: messageOf(error) };
-    }
+    const unsupported = chain.find((e) =>
+      UnsupportedFunctionalityError.isInstance(e)
+    );
+    if (unsupported)
+      return { status: "unmeasured", reason: messageOf(unsupported) };
     return { status: "failed", reason: `exception: ${messageOf(error)}` };
   }
 };

@@ -76,7 +76,8 @@ export const runGenerateLoop = async <TOutput>(
         throw createAiAgentError(
           `Failed after ${attempt} attempts: ${truncate(lastError, MAX_ERROR_LENGTH)}`,
           attempt,
-          truncate(lastError, MAX_ERROR_LENGTH)
+          truncate(lastError, MAX_ERROR_LENGTH),
+          error
         );
       }
     }

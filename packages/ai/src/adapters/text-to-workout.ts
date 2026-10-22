@@ -31,7 +31,8 @@ const toDomainError = (error: unknown, inputText: string): unknown =>
         error.message,
         inputText.slice(0, MAX_INPUT_ECHO),
         error.attempts,
-        error.lastError
+        error.lastError,
+        { cause: error.cause }
       )
     : error;
 
