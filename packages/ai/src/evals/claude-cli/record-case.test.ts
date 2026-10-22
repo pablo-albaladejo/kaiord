@@ -156,6 +156,34 @@ describe("recordCase", () => {
     );
   });
 
+  it("should name the last error when every attempt rejected", async () => {
+    // Arrange
+    const model = createClaudeCliLanguageModel({
+      modelId: "claude-sonnet-5",
+      call: async () => {
+        throw new Error("spawn failed on every attempt");
+      },
+    });
+    const retrying: ReplayCase = {
+      id: "cycling-simple",
+      fixture: {},
+      run: async (m) => {
+        await createTextToWorkout({ model: m })("30 min easy ride");
+        return [];
+      },
+    };
+
+    // Act
+    const fault = await faultOf(recordCase(suite, retrying, model, NOW));
+
+    // Assert
+    expect(fault).toContain(
+      "made 3 model calls (0 completed); a cassette records exactly one"
+    );
+    expect(fault).toContain("last error: ");
+    expect(fault).toContain("spawn failed on every attempt");
+  });
+
   it("should reject a case that made no call", async () => {
     // Arrange
     const { model } = cliModel(simpleWorkout("cycling"));

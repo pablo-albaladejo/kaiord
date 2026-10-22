@@ -9,7 +9,7 @@ import {
 } from "../cassettes/request-hashes";
 import { validateCassette } from "../cassettes/validate-cassette";
 import type { DimensionOutcome } from "../types";
-import { harnessFault } from "./harness-fault";
+import { harnessFault, messageOf } from "./harness-fault";
 import { CLI_METADATA_KEY } from "./language-model-types";
 import type { LanguageModelV4 } from "./language-model-types";
 import { createRecordingModel } from "./recording-model";
@@ -107,8 +107,10 @@ export const recordCase = async (
   }
   const [only] = calls;
   if (attempts !== 1 || calls.length !== 1 || only === undefined) {
+    const last =
+      "error" in outcome ? `; last error: ${messageOf(outcome.error)}` : "";
     throw harnessFault(
-      `case ${replayCase.id} made ${attempts} model calls (${calls.length} completed); a cassette records exactly one`
+      `case ${replayCase.id} made ${attempts} model calls (${calls.length} completed); a cassette records exactly one${last}`
     );
   }
   return { cassette: cassetteOf(suite, replayCase, only, now()), outcome };
