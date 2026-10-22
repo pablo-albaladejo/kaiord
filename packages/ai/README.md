@@ -30,18 +30,22 @@ The eval suite validates LLM output quality against a curated set of workout des
 
 ### Running Evals Locally
 
+The suite runs only on your local Claude Code subscription, through
+`eval:live`; see [Live evals (local only)](#live-evals-local-only). No provider
+API key is used.
+
 ```bash
-# Set your API key
-export ANTHROPIC_API_KEY=sk-ant-...
+# Default model (claude-sonnet-5, the official cassette model)
+pnpm --filter @kaiord/ai eval:live
 
-# Run with default model (claude-sonnet-5, the catalog default)
-pnpm --filter @kaiord/ai eval
-
-# Run with a specific model
-EVAL_MODEL=claude-sonnet-4-5-20250929 pnpm --filter @kaiord/ai eval
+# Another Anthropic model
+EVAL_MODEL=claude-haiku-4-5 pnpm --filter @kaiord/ai eval:live
 ```
 
-The eval runner outputs pass/fail per benchmark and saves a JSON report to the working directory.
+`pnpm --filter @kaiord/ai eval` without `:live` stays inert unless `EVAL_LIVE=1`
+is exported in your shell. The runner prints
+per-case counts and saves a JSON report (`eval-report-<timestamp>.json`) in the
+package directory, `packages/ai/`.
 
 ### Benchmarks
 
@@ -72,12 +76,12 @@ neither was ever implemented.
 Each failure carries the dimension that produced it, so a red result says which
 capability broke rather than only that something did.
 
-**The suite is inert in this project and carries no pass threshold.** Its
-runner needs a provider API key, which this project does not have, so it has
-never executed. The floor it used to declare could not fire, so it was removed
-rather than kept as decoration. What runs on every commit is the assertion
-logic and the fixtures' own structural invariants, neither of which needs a
-credential.
+**The suite carries no pass threshold and never runs in CI.** It runs live
+only through `eval:live` on the maintainer's local subscription, and that
+runner never gates. The floor it used to declare could not fire, so it was
+removed rather than kept as decoration. What runs on every commit is the
+assertion logic and the fixtures' own structural invariants, neither of which
+needs a credential.
 
 ### Adding New Benchmarks
 
