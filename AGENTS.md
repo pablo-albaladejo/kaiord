@@ -17,6 +17,7 @@ Train2Go, and a VitePress documentation site.
 | ------------------------- | ------------------------------------------------------------------------- |
 | `AGENTS.md`               | This file — strict AI/agent guidance (hexagonal rules, KRD, code style)   |
 | `CLAUDE.md`               | Claude Code project instructions (commands, conventions, hexagonal rules) |
+| `REVIEW.md`               | Review passes and severity for AI and human PR reviewers                  |
 | `README.md`               | Human-facing project overview                                             |
 | `CONTRIBUTING.md`         | Contributor workflow, OpenSpec flow, changesets                           |
 | `DEPLOYMENT.md`           | Release/deployment notes                                                  |
@@ -62,6 +63,11 @@ Train2Go, and a VitePress documentation site.
 - **Zero tolerance**: zero ESLint warnings, zero TS errors, zero test warnings,
   zero build warnings, zero IDE warnings.
 - **Round-trip safety**: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm.
+
+### Reviewing a PR
+
+Review against [`REVIEW.md`](./REVIEW.md): its passes, the "gate actually
+ran" check, and the Important / Nit severity split.
 
 ### Spec awareness
 
