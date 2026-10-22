@@ -39,8 +39,8 @@ Keyless replay of recorded model responses through `MockLanguageModelV4` and the
 ## Live lane (`claude-cli/`)
 
 Local only: the maintainer's Claude Code subscription driven headless. It never
-runs in CI, so nothing here may gate (`check-no-inert-floors` treats any runner
-reaching this directory, transitively, as inert). Every unit test injects `spawn`; no
+runs in CI, so nothing here may gate (`check-no-inert-floors` treats any runner,
+`run-*.{ts,mts,cts,mjs,js,cjs}`, reaching this directory transitively as inert). Every unit test injects `spawn`; no
 test starts the real binary.
 
 - `detect-claude-cli.ts` — both locks before any process (`CI` set; `EVAL_LIVE` not `1`), then `claude auth status --json`; only `loggedIn`, `authMethod`, `apiProvider` are read, so no email or organization is kept

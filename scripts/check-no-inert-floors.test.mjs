@@ -280,3 +280,14 @@ test("a .jsx helper is followed", () => {
   });
   assert.ok(kinds.includes("computed-exit"));
 });
+
+test("a plain JavaScript runner is scanned and fails", () => {
+  const violations = checkSandbox({
+    "run-j.mjs": `import { spawnClaude } from "./claude-cli/spawn-claude.js";\nconst ok = rate >= 0.9;\nprocess.exit(ok ? 0 : 1);\n`,
+    "run-j.test.mjs": `import { spawnClaude } from "./claude-cli/spawn-claude.js";\n${GATE}`,
+  });
+  assert.deepEqual(
+    [...new Set(violations.map((v) => `${v.file} ${v.kind}`))].sort(),
+    ["run-j.mjs computed-exit", "run-j.mjs score-comparison"]
+  );
+});

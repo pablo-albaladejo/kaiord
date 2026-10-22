@@ -16,7 +16,7 @@
  * counts), lives under `claude-cli/`, or uses a loader the walk cannot follow
  * (`createRequire`, `import()`/`require()` of anything but a plain string,
  * `x.require`): an unknowable target fails closed. Runners are every
- * `run-*.{ts,mts,cts}` under the evals tree, recursively, tests excluded. A
+ * `run-*.{ts,mts,cts,mjs,js,cjs}` under the evals tree, recursively, tests excluded. A
  * runner that needs neither a credential nor the CLI is EXEMPT and may gate
  * freely — a directory-wide ban would forbid the keyless replay runner this
  * project wants to gate on.
@@ -60,8 +60,8 @@ const SCORE_WORD = new RegExp(
   `^(?:(?:${SCORE_NAMES})\\w*|\\w*(?:${SCORE_NAMES}))$`,
   "i"
 );
-const RUNNER_NAME = /^run-.+\.(?:ts|mts|cts)$/;
-const TEST_NAME = /\.(?:test|spec)\.(?:ts|mts|cts)$/;
+const RUNNER_NAME = /^run-.+\.(?:ts|mts|cts|mjs|js|cjs)$/;
+const TEST_NAME = /\.(?:test|spec)\.(?:ts|mts|cts|mjs|js|cjs)$/;
 const SOURCE_EXTENSIONS = [
   ".ts",
   ".mts",
