@@ -1,16 +1,21 @@
 #!/usr/bin/env node
 /**
- * Mechanical guard: a runner that cannot execute may not carry a floor
+ * Mechanical guard: a runner that cannot run in CI may not carry a floor
  * (R-NoInertFloors).
  *
- * A threshold on a suite that needs a credential this project does not have is
- * a comparison that can never fire. It reads as a gate, reviews as a gate, and
+ * A threshold on a suite that cannot run in CI is a comparison that never
+ * fires where merges are decided. It reads as a gate, reviews as a gate, and
  * gates nothing.
  *
- * Scope is deliberate on both sides. INERT means the runner takes its model
- * from `load-eval-model`, which throws without a provider key. A runner that
- * needs no credential is EXEMPT and may gate freely — a directory-wide ban
- * would forbid the keyless gating runner this project should eventually want.
+ * Scope is deliberate on both sides. INERT means the runner cannot execute in
+ * CI: it names the credential-bound loader `load-eval-model`, it imports any
+ * module resolving under `packages/ai/src/evals/claude-cli/` (the live loader,
+ * the CLI adapter, the spawner, the rate-limit guard or anything else there),
+ * or it is itself located under `claude-cli/`. Import specifiers are resolved
+ * against the importing file, so a sibling import `./x` from inside that
+ * directory counts. The scan is recursive. A runner that needs neither a
+ * credential nor the CLI is EXEMPT and may gate freely — a directory-wide ban
+ * would forbid the keyless replay runner this project wants to gate on.
  *
  * Two rules, because one is evadable. The obvious grep for a comparison inside
  * `process.exit` is defeated by binding it first:
@@ -28,11 +33,20 @@
  *   (default)    Print a human-readable report; exit non-zero on any.
  */
 import { readdirSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 
 const RUNNERS_DIR = "packages/ai/src/evals";
 const CREDENTIAL_LOADER = "load-eval-model";
+const LIVE_DIR = "claude-cli";
 const SCORE_NAMES =
   "rate|passrate|passratepercent|score|passed|threshold|floor|ratio|accuracy";
 // Whitespace on BOTH sides is required, and that is load-bearing: it is what
@@ -46,13 +60,43 @@ const COMPARISON = new RegExp(
 );
 const EXIT_CALL = /process\.exit\(([^)]*)\)/g;
 const NUMERIC_LITERAL = /^\s*\d+\s*$/;
+/** `from "x"`, `import "x"`, `import("x")`, `require("x")`. */
+const SPECIFIER =
+  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)(["'`])([^"'`]+)\1/g;
 
-const isRunner = (f) => f.startsWith("run-") && f.endsWith(".ts");
+const isRunner = (path) => {
+  const name = basename(path);
+  return (
+    name.startsWith("run-") &&
+    name.endsWith(".ts") &&
+    !name.endsWith(".test.ts")
+  );
+};
 
-export const isInert = (src) => src.includes(CREDENTIAL_LOADER);
+const isUnder = (path, dir) => path === dir || path.startsWith(dir + sep);
 
-export const fileViolations = (src, file) => {
-  if (!isInert(src)) return [];
+/** Local specifiers of `src`, resolved against the importing file. */
+export const importTargets = (src, file) =>
+  [...src.matchAll(SPECIFIER)]
+    .map((match) => match[2])
+    .filter((s) => s.startsWith(".") || isAbsolute(s))
+    .map((s) => resolve(dirname(file), s));
+
+/**
+ * `file` and `root` are absolute; without them only the credential-bound
+ * loader can be recognized.
+ */
+export const isInert = (src, file, root) => {
+  if (src.includes(CREDENTIAL_LOADER)) return true;
+  if (file === undefined || root === undefined) return false;
+  const liveDir = join(root, LIVE_DIR);
+  if (isUnder(resolve(file), liveDir)) return true;
+  return importTargets(src, file).some((target) => isUnder(target, liveDir));
+};
+
+export const fileViolations = (src, file, root) => {
+  if (!isInert(src, file, root)) return [];
+  const label = root === undefined ? file : relative(root, file);
   const violations = [];
   const lineOf = (index) => src.slice(0, index).split("\n").length;
 
@@ -61,7 +105,7 @@ export const fileViolations = (src, file) => {
     if (NUMERIC_LITERAL.test(argument)) continue;
     violations.push({
       kind: "computed-exit",
-      file,
+      file: label,
       line: lineOf(match.index),
       detail: `process.exit(${argument.trim()}) — an inert runner exits on a literal`,
     });
@@ -72,7 +116,7 @@ export const fileViolations = (src, file) => {
     if (!COMPARISON.test(text)) return;
     violations.push({
       kind: "score-comparison",
-      file,
+      file: label,
       line: i + 1,
       detail: text.trim().slice(0, 80),
     });
@@ -81,10 +125,16 @@ export const fileViolations = (src, file) => {
   return violations;
 };
 
+const runnersUnder = (root) =>
+  readdirSync(root, { recursive: true, encoding: "utf8" })
+    .filter(isRunner)
+    .map((path) => join(root, path))
+    .sort();
+
 export const runCheck = ({ runnersRoot }) => {
   let files;
   try {
-    files = readdirSync(runnersRoot).filter(isRunner);
+    files = runnersUnder(runnersRoot);
   } catch (error) {
     return [
       {
@@ -101,10 +151,14 @@ export const runCheck = ({ runnersRoot }) => {
   for (const file of files) {
     try {
       violations.push(
-        ...fileViolations(readFileSync(join(runnersRoot, file), "utf8"), file)
+        ...fileViolations(readFileSync(file, "utf8"), file, runnersRoot)
       );
     } catch (error) {
-      violations.push({ kind: "scan-failed", file, detail: error.message });
+      violations.push({
+        kind: "scan-failed",
+        file: relative(runnersRoot, file),
+        detail: error.message,
+      });
     }
   }
   return violations;
@@ -119,7 +173,7 @@ const main = () => {
   }
   if (violations.length === 0) {
     console.log(
-      "inert floors: none — no credential-bound runner gates on a score."
+      "inert floors: none — no runner that cannot run in CI gates on a score."
     );
     return;
   }
@@ -127,8 +181,8 @@ const main = () => {
     console.error(`  [${v.kind}] ${v.file ?? ""}:${v.line ?? 0} ${v.detail}`);
   }
   console.error(
-    "\nA runner whose model comes from load-eval-model cannot execute here,\n" +
-      "so no score of its may decide its exit code."
+    "\nA runner that names load-eval-model, imports from evals/claude-cli/ or\n" +
+      "lives there cannot run in CI, so no score of its may decide its exit code."
   );
   process.exit(1);
 };
