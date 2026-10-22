@@ -1,75 +1,51 @@
 #!/usr/bin/env tsx
 /**
- * INERT IN THIS PROJECT. This runner obtains its model through
- * `loadEvalModel`, which throws without a provider API key, and this project
- * has none — so it cannot execute and never has.
+ * LIVE, LOCAL ONLY, INERT IN CI. The workout-parser suite over the
+ * maintainer's Claude Code subscription (`claude -p`), reached through
+ * `loadLiveModel`. Detection refuses with `INERT: claude CLI not available`
+ * when `CI` is set, when `EVAL_LIVE` is not `1` (only `pnpm eval:live` sets
+ * it), or when the CLI is missing, logged out, or not on the claude.ai
+ * subscription. It cannot run where merges are decided, so it carries no pass
+ * threshold: it reports per-case counts (k of n with `--repeat N`) and exits
+ * on a literal. A floor is a decision for later, derived from a measured A/A
+ * run, and it would gate the keyless replay lane, never this one.
  *
- * It is kept as the executable form of the fixture-to-assertion wiring: which
- * fixture feeds which scorer, in what shape. That contract would otherwise be
- * implicit, recoverable only by reading the tests backwards. What is checked
- * on every commit is the assertion logic and the fixtures' own invariants,
- * which need no credential.
+ *   pnpm --filter @kaiord/ai eval:live                  one pass
+ *   pnpm --filter @kaiord/ai eval:live -- --repeat 5    five passes, k of n
+ *   pnpm --filter @kaiord/ai eval:live -- --record      one cassette per case
+ *   pnpm --filter @kaiord/ai eval:live -- --calibrate   the calibration step
  *
- * It carries no pass threshold. A comparison that cannot run is not a gate,
- * and one dressed as a gate is the failure this suite exists to remove. If a
- * key ever exists, the floor is a decision to take then, with a measurement
- * behind it.
+ * Exit 0: the pass ran or stopped on a limit (rate limit, call budget), every
+ * case reported. Exit 1: inert or misconfigured (a bad argument included), no
+ * model call made. Exit 2: a harness fault or a context leak stopped the pass.
+ * The body is `runLiveMain`, tested with injected doubles; this file only maps
+ * its outcome to a literal exit code.
+ *
+ * `pnpm eval` (without `:live`) stays inert only while `EVAL_LIVE` is not
+ * exported in the shell: it does not unset the opt-in, it just never sets it.
  */
-import { createTextToWorkout } from "../index";
-import { evaluateBenchmark } from "./assertions";
-import { loadEvalModel } from "./load-eval-model";
-import { createReport, formatReport } from "./reporter";
-import benchmarks from "./benchmarks.json";
-import type { Benchmark, EvalResult } from "./types";
+import { join } from "node:path";
+import { ITERATION_DIR } from "./claude-cli/cassette-writer";
+import { runLiveMain } from "./claude-cli/live-main";
+import { loadLiveModel } from "./claude-cli/load-live-model";
 
-const runEvals = async () => {
-  const { model, provider, modelName } = await loadEvalModel();
-  const textToWorkout = createTextToWorkout({ model });
+const PACKAGE_DIR = join(import.meta.dirname, "..", "..");
 
-  console.log(
-    `Running ${benchmarks.length} benchmarks with ${provider}/${modelName}...\n`
-  );
+// The parity gaps are declared once in the report, not logged per call.
+globalThis.AI_SDK_LOG_WARNINGS = false;
 
-  const results: Array<EvalResult> = [];
-
-  for (const bench of benchmarks as Array<Benchmark>) {
-    const start = Date.now();
-    try {
-      const workout = await textToWorkout(bench.text, {
-        sport: bench.expectedSport as never,
-        athlete: bench.athleteZones ? { zones: bench.athleteZones } : undefined,
-      });
-      const result = evaluateBenchmark(bench, workout, Date.now() - start);
-      results.push(result);
-      const icon = result.pass ? "PASS" : "FAIL";
-      console.log(`[${icon}] ${bench.id} (${Date.now() - start}ms)`);
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : String(error);
-      results.push({
-        id: bench.id,
-        pass: false,
-        errors: [`Exception: ${msg}`],
-        outcomes: [
-          { dimension: "run", status: "failed", message: `Exception: ${msg}` },
-        ],
-        durationMs: Date.now() - start,
-      });
-      console.log(`[FAIL] ${bench.id} - Exception: ${msg}`);
-    }
-  }
-
-  const report = createReport(results, provider, modelName);
-  console.log("\n" + formatReport(report));
-
-  const fs = await import("fs");
-  const path = await import("path");
-  const packageDir = path.join(import.meta.dirname, "..", "..");
-  const outPath = path.join(packageDir, `eval-report-${Date.now()}.json`);
-  fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
-  console.log(`\nReport saved to ${outPath}`);
-};
-
-runEvals().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+runLiveMain({
+  argv: process.argv.slice(2),
+  load: () => loadLiveModel(),
+  log: (line) => console.log(line),
+  error: (line) => console.error(line),
+  reportDir: PACKAGE_DIR,
+  calibrationDir: ITERATION_DIR,
+}).then(
+  (outcome) => {
+    if (outcome === "fault") process.exit(2);
+    if (outcome === "refused") process.exit(1);
+    process.exit(0);
+  },
+  () => process.exit(2)
+);

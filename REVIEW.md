@@ -90,9 +90,9 @@ these as a finding, not as a pass:
   [#1333](https://github.com/pablo-albaladejo/kaiord/pull/1333), CodeRabbit
   posted SUCCESS ("Review rate limited") next to a "Review limit reached"
   comment. No review happened.
-- A skipped job, or a runner with no credential. The eval runner
-  `packages/ai/src/evals/run-evals.ts` is marked INERT: it needs a provider
-  key that this project does not have, so it has never run.
+- A skipped job, or a runner that cannot run in CI. The live eval runner
+  `packages/ai/src/evals/run-evals.ts` runs only on the maintainer's machine,
+  over the local Claude Code subscription, and is INERT in CI.
   `check-no-inert-floors` keeps a score threshold off it for that reason.
 - A red job that is not required. "Green" means the full CI run, not the
   required subset (see "Automated nightly maintenance" in AGENTS.md).

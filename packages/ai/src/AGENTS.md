@@ -21,7 +21,7 @@ Source root for `@kaiord/ai`. Houses the public API export, type definitions, er
 - **`observability/`** — The redaction-safe telemetry port and its console / ring-buffer sinks
 - **`prompts/`** — The versioned prompt registry, template substitution, and the untrusted-data fence
 - **`adapters/`** — The deprecated `createTextToWorkout` wrapper over the agent runtime, plus input validation and step reindexing
-- **`evals/`** — Assertion logic, fixtures and their invariants. The runners are inert: they need a provider API key this project does not have
+- **`evals/`** — Assertion logic, fixtures and their invariants; the keyless cassette replay lane (`cassettes/`); the local-only live lane over the Claude Code CLI (`claude-cli/`), which never runs in CI
 - **`test-utils/`** — Shared numeric constants and `MockLanguageModelV4` helpers
 
 ## For AI Agents

@@ -30,18 +30,22 @@ The eval suite validates LLM output quality against a curated set of workout des
 
 ### Running Evals Locally
 
+The suite runs only on your local Claude Code subscription, through
+`eval:live`; see [Live evals (local only)](#live-evals-local-only). No provider
+API key is used.
+
 ```bash
-# Set your API key
-export ANTHROPIC_API_KEY=sk-ant-...
+# Default model (claude-sonnet-5, the official cassette model)
+pnpm --filter @kaiord/ai eval:live
 
-# Run with default model (claude-sonnet-5, the catalog default)
-pnpm --filter @kaiord/ai eval
-
-# Run with a specific model
-EVAL_MODEL=claude-sonnet-4-5-20250929 pnpm --filter @kaiord/ai eval
+# Another Anthropic model
+EVAL_MODEL=claude-haiku-4-5 pnpm --filter @kaiord/ai eval:live
 ```
 
-The eval runner outputs pass/fail per benchmark and saves a JSON report to the working directory.
+`pnpm --filter @kaiord/ai eval` without `:live` stays inert unless `EVAL_LIVE=1`
+is exported in your shell. The runner prints
+per-case counts and saves a JSON report (`eval-report-<timestamp>.json`) in the
+package directory, `packages/ai/`.
 
 ### Benchmarks
 
@@ -72,12 +76,12 @@ neither was ever implemented.
 Each failure carries the dimension that produced it, so a red result says which
 capability broke rather than only that something did.
 
-**The suite is inert in this project and carries no pass threshold.** Its
-runner needs a provider API key, which this project does not have, so it has
-never executed. The floor it used to declare could not fire, so it was removed
-rather than kept as decoration. What runs on every commit is the assertion
-logic and the fixtures' own structural invariants, neither of which needs a
-credential.
+**The suite carries no pass threshold and never runs in CI.** It runs live
+only through `eval:live` on the maintainer's local subscription, and that
+runner never gates. The floor it used to declare could not fire, so it was
+removed rather than kept as decoration. What runs on every commit is the
+assertion logic and the fixtures' own structural invariants, neither of which
+needs a credential.
 
 ### Adding New Benchmarks
 
@@ -103,9 +107,31 @@ credential.
 
 The `zoneCheck` field is optional. When present, active steps with the specified target type are validated against the min/max values with a 5% tolerance.
 
-### CI Integration
+### Live evals (local only)
 
-Evals run via GitHub Actions as a manual `workflow_dispatch` trigger (`.github/workflows/eval.yml`). Results are uploaded as workflow artifacts. Evals are not part of the standard CI pipeline because they require LLM API keys and incur costs.
+This project holds no provider API key, and no eval runs in CI. The only live
+model access is the maintainer's local Claude Code subscription, driven
+headless (`claude -p`) behind a `LanguageModelV4` adapter, so the real agent
+runtime runs unchanged above it:
+
+```bash
+pnpm --filter @kaiord/ai eval:live                  # one pass of the parser suite
+pnpm --filter @kaiord/ai eval:live -- --repeat 5    # five passes, k of n per case
+pnpm --filter @kaiord/ai eval:live -- --record      # one cassette per case
+pnpm --filter @kaiord/ai eval:live -- --calibrate   # one call, captured for pinning
+```
+
+`eval:live` is the only script that sets `EVAL_LIVE=1`; with `CI` set or
+without that opt-in the runner stops as `INERT` before any process starts.
+`pnpm eval` stays inert only while `EVAL_LIVE` is not exported in your shell:
+it never sets the opt-in, but it does not clear one you exported.
+Each pass starts with a calibration call, runs one call at a time, stops after
+`EVAL_MAX_CALLS` calls (default 50) or above `EVAL_MAX_WEEKLY_UTILIZATION`
+(default 0.85), and reports cost as API-equivalent, never as money spent. It
+never gates: the report holds per-case counts, not a pass rate. The chat-tool
+and lab-extraction suites need tool calling and document file parts, which
+`claude -p` cannot carry, so `eval:chat-tools` and `eval:labs` report every
+case unmeasured and exit 0.
 
 ## License
 

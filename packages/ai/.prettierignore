@@ -1,3 +1,6 @@
 # Generated: SDK-sourced model catalog. Regenerate via
 # `pnpm --filter @kaiord/ai generate:model-catalog`.
 src/providers/generated/
+
+# Recorded cassettes: the manifest digest covers their exact bytes.
+src/evals/cassettes/committed/
