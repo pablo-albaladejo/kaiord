@@ -325,17 +325,19 @@ test("require.resolve and import = require() are import positions, followed", ()
   }
 });
 
-test("a helper reached outside an import position is still followed", () => {
-  for (const head of [
-    `const r = require;\nr("./helpers");\n`,
-    `(0, require)("./helpers");\n`,
-    `import { Worker } from "node:worker_threads";\nnew Worker(new URL("./helpers.ts", import.meta.url));\n`,
-    `import { execFileSync } from "node:child_process";\nexecFileSync("tsx", ["./helpers.ts"]);\n`,
-  ]) {
+const HELPER_ROUTES = {
+  "an aliased require": `const r = require;\nr("./helpers");\n`,
+  "a (0, require)() call": `(0, require)("./helpers");\n`,
+  "a Worker URL": `import { Worker } from "node:worker_threads";\nnew Worker(new URL("./helpers.ts", import.meta.url));\n`,
+  "a child-process argument": `import { execFileSync } from "node:child_process";\nexecFileSync("tsx", ["./helpers.ts"]);\n`,
+};
+
+for (const [route, head] of Object.entries(HELPER_ROUTES)) {
+  test(`a helper reached through ${route} is still followed`, () => {
     const kinds = kindsOf({
       "helpers.ts": `export * from "./claude-cli/spawn-claude";\n`,
       "run-w.ts": `${head}${GATE}`,
     });
-    assert.ok(kinds.includes("computed-exit"), head);
-  }
-});
+    assert.ok(kinds.includes("computed-exit"));
+  });
+}

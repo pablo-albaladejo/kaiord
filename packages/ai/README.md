@@ -133,6 +133,12 @@ and lab-extraction suites need tool calling and document file parts, which
 `claude -p` cannot carry, so `eval:chat-tools` and `eval:labs` report every
 case unmeasured and exit 0.
 
+`--record` with the official model (`claude-sonnet-5`) writes the committed
+cassettes (`src/evals/cassettes/committed/`) and their manifest entries, and
+stays refused until the served form is pinned. With any other `EVAL_MODEL` it
+writes to `packages/ai/.eval-cassettes/`, which is gitignored and never listed
+in the manifest.
+
 ## License
 
 MIT

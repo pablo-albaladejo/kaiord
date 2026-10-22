@@ -103,7 +103,7 @@ const runLive = async (deps: LiveMainDeps): Promise<LiveOutcome> => {
   const preflight = args.record
     ? recordPreflightFault(
         live.modelId,
-        deps.targets?.servedForm ?? OFFICIAL_SERVED_FORM
+        deps.targets ? deps.targets.servedForm : OFFICIAL_SERVED_FORM
       )
     : undefined;
   if (preflight) {
