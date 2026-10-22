@@ -50,5 +50,6 @@ describe("createRecordingModel", () => {
     expect(generate).toBe("spawn failed");
     expect(stream).toBe("unsupported");
     expect(recording.calls()).toEqual([]);
+    expect(recording.attempts()).toBe(1);
   });
 });

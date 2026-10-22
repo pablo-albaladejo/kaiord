@@ -53,7 +53,8 @@ const faultsOf = (verdicts: Array<CaseVerdict>, measured: number) => {
     const ids = verdicts
       .filter((v) => v.status === "unmeasured" && v.cause === cause)
       .map((v) => v.cassetteId);
-    if (ids.length > 0) faults.push(template.replace("{ids}", ids.join(", ")));
+    if (ids.length > 0)
+      faults.push(template.replace("{ids}", () => ids.join(", ")));
   }
   if (measured === 0) {
     faults.push("zero measured cases: a replay that measured nothing fails");

@@ -1,3 +1,4 @@
+import { isDatedSnapshotOf } from "../cassettes/dated-snapshot";
 import {
   OFFICIAL_CASSETTE_MODEL,
   OFFICIAL_SERVED_FORM,
@@ -7,14 +8,6 @@ import type { ServedForm } from "../cassettes/validate-cassette";
 
 export type ServedModel =
   { ok: true; servedModelId: string } | { ok: false; reason: string };
-
-const DATE_SUFFIX = /^\d{8}$/;
-
-// Plain prefix comparison: the requested id comes from the environment, so it
-// never becomes part of a regular expression.
-const isDatedSnapshotOf = (served: string, requested: string) =>
-  served.startsWith(`${requested}-`) &&
-  DATE_SUFFIX.test(served.slice(requested.length + 1));
 
 /**
  * The model the CLI says it served: exactly one `modelUsage` key, equal to
