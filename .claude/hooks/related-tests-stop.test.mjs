@@ -507,6 +507,73 @@ describe("CLI — a throwaway repository", () => {
     assert.equal(second.stdout, "");
   });
 
+  it("should keep blocking within a turn whatever wrapper the feedback has", () => {
+    // Arrange
+    write("scripts/sum.mjs", "export const sum = (a, b) => a - b;\n");
+    const save = (name, entries) => {
+      const f = join(sandbox, `${name}.jsonl`);
+      writeFileSync(f, entries.map((e) => JSON.stringify(e)).join("\n"));
+      return f;
+    };
+    const user = (uuid, text, extra = {}) => ({
+      type: "user",
+      uuid,
+      message: { content: text },
+      ...extra,
+    });
+    const edit = {
+      type: "assistant",
+      message: { content: [{ type: "tool_use", id: "t1", name: "Edit" }] },
+    };
+    const answer = { type: "assistant", message: { content: [] } };
+    const same = [user("u1", "fix"), edit];
+    const meta = user("m1", "Caveat: generated locally", { isMeta: true });
+    const wrapped = user(
+      "m2",
+      "<hook-wrapper>Related tests are RED for the files changed in /x</hook-wrapper>"
+    );
+
+    // Act
+    const first = run({}, { transcript_path: save("a", same) });
+    const second = run(
+      {},
+      { transcript_path: save("b", [...same, meta, answer]) }
+    );
+    const third = run(
+      {},
+      { transcript_path: save("c", [...same, wrapped, answer]) }
+    );
+
+    // Assert
+    assert.equal(JSON.parse(first.stdout).decision, "block");
+    assert.equal(JSON.parse(second.stdout).decision, "block");
+    assert.equal(JSON.parse(third.stdout).decision, "block");
+    assert.equal(counter().main.blocks, 3);
+  });
+
+  it("should treat a different uuid at the same line index as a new turn", () => {
+    // Arrange
+    write("scripts/sum.mjs", "export const sum = (a, b) => a - b;\n");
+    const save = (name, entries) => {
+      const f = join(sandbox, `${name}.jsonl`);
+      writeFileSync(f, entries.map((e) => JSON.stringify(e)).join("\n"));
+      return f;
+    };
+    const user = (uuid) => ({ type: "user", uuid, message: { content: "q" } });
+    const edit = {
+      type: "assistant",
+      message: { content: [{ type: "tool_use", id: "t1", name: "Edit" }] },
+    };
+
+    // Act
+    const first = run({}, { transcript_path: save("x", [user("u1"), edit]) });
+    const second = run({}, { transcript_path: save("y", [user("u2")]) });
+
+    // Assert
+    assert.equal(JSON.parse(first.stdout).decision, "block");
+    assert.equal(second.stdout, "");
+  });
+
   it("should pass a green change and record it so the same tree is not re-run", () => {
     // Arrange
     write("scripts/sum.mjs", "export const sum = (a, b) => b + a;\n");

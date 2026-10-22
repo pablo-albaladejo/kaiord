@@ -353,6 +353,9 @@ function runWithBudget(root, lanes, { env, budgetMs }) {
 
 const KILL_GRACE_MS = 10_000;
 
+// Fixed opening of our own block reason; also how feedback is recognised.
+const BLOCK_PHRASE = "Related tests are RED for the files changed in";
+
 // ------------------------------------------------------------------ verdicts
 
 const statePath = (env, sessionId) =>
@@ -422,7 +425,7 @@ function verdict(slot, run, { root, fp, lanes }) {
   return {
     output: {
       decision: "block",
-      reason: `Related tests are RED for the files changed in ${root} (block ${next.blocks}/${MAX_CONSECUTIVE_BLOCKS}). Fix them before ending the turn:\n${shown}${more}\nRe-run:\n  ${rerun}`,
+      reason: `${BLOCK_PHRASE} ${root} (block ${next.blocks}/${MAX_CONSECUTIVE_BLOCKS}). Fix them before ending the turn:\n${shown}${more}\nRe-run:\n  ${rerun}`,
     },
     next,
   };
@@ -474,6 +477,7 @@ function isMachineEntry(entry) {
   const text = entryText(entry.message?.content).trimStart();
   return (
     text.startsWith("Stop hook feedback:") ||
+    text.includes(BLOCK_PHRASE) ||
     MACHINE_PREFIXES.some((prefix) => text.startsWith(prefix))
   );
 }
@@ -608,7 +612,7 @@ async function main(input, { env = process.env, budgetMs } = {}) {
             (Number(env.CLAUDE_GUARDS_TEST_BUDGET_MS) || DEFAULT_BUDGET_MS),
         });
   const { output, next } = verdict(slot, run, { root, fp, lanes });
-  if (next.blocks > 0 && prompt !== null) next.prompt = prompt;
+  if (next.blocks > 0) next.prompt = prompt ?? slot?.prompt;
   // Re-read just before writing: another agent of the session may have
   // updated its own slot while the tests ran.
   if (file)
