@@ -63,6 +63,12 @@ Train2Go, and a VitePress documentation site.
 - **Zero tolerance**: zero ESLint warnings, zero TS errors, zero test warnings,
   zero build warnings, zero IDE warnings.
 - **Round-trip safety**: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm.
+- **Never auto-remediate**: an agent never runs, on its own, an npm publish, a
+  release tag, a push to `main`, a production deploy (kaiord.com, Chrome Web
+  Store), a force-push, a change to repo settings, rules or secrets, a weakened
+  security workflow, or a write to a real athlete's account. Diagnose, gather the
+  evidence, open an issue and message Pablo; he runs it with `!`. Hooks in
+  `.claude/settings.json` enforce this. See `CLAUDE.md`, "Never auto-remediate".
 
 ### Reviewing a PR
 

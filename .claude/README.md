@@ -19,6 +19,15 @@ This directory contains Claude Code configuration, skills, and hooks for the Kai
 └── settings.json                # Project-level Claude Code settings
 ```
 
+## Guardrail hooks
+
+`settings.json` wires four guardrail hooks. They block an action in code rather
+than ask for it in prose: never-auto-remediate commands, code writes without a
+human approval in the session, and a turn that ends with red related tests. What
+each one enforces, and where it stops, is in `CLAUDE.md` under "Never
+auto-remediate". The spec is `openspec/specs/agent-guardrails/spec.md`. State
+lives outside the repo, in `$TMPDIR/claude-guards/`.
+
 ## Available Skills
 
 ### `/analyze-bundle`

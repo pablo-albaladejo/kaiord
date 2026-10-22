@@ -24,7 +24,20 @@
       "Bash(npm publish*)",
       "Bash(pnpm publish*)",
       "Bash(rm -rf /)",
-      "Bash(rm -rf ~/*)"
+      "Bash(rm -rf ~/*)",
+      "Bash(yarn publish*)",
+      "Bash(npm unpublish*)",
+      "Bash(pnpm exec changeset publish*)",
+      "Bash(npx changeset publish*)",
+      "Bash(git push --tags*)",
+      "Bash(gh release create*)",
+      "Bash(gh release delete*)",
+      "Bash(gh secret set*)",
+      "Bash(gh secret delete*)",
+      "Bash(gh repo edit*)",
+      "Bash(gh repo delete*)",
+      "Bash(gh workflow disable*)",
+      "mcp__kaiord__kaiord_garmin_push"
     ]
   },
   "enableAllProjectMcpServers": true,
@@ -36,6 +49,26 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/check-docs-sync.sh",
             "if": "Bash(git commit*)"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/never-auto-remediate.cjs",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/plan-approval-guard.cjs",
+            "timeout": 15
           }
         ]
       }
@@ -58,6 +91,33 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-test-needed.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/related-tests-stop.cjs",
+            "timeout": 240
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/record-human-approval.cjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/related-tests-stop.cjs",
+            "timeout": 240
           }
         ]
       }
