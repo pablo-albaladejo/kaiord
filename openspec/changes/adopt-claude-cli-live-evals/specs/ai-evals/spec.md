@@ -162,9 +162,9 @@ next call once utilization is strictly above `EVAL_MAX_WEEKLY_UTILIZATION`
 rate-limit status other than allowed. A call whose output carries no
 `rate_limit_event`, an event of an unrecognized shape, or a pinned field that
 is missing, non-numeric or outside its scale SHALL be a harness fault that
-stops the pass: the guard fails closed. A rate limit, a 429, a missing or unparseable signal, or a
-stopped pass SHALL leave the affected cases unmeasured; it SHALL NOT be counted
-as a failed case.
+stops the pass: the guard fails closed. A rate limit, a 429, a missing or
+unparseable signal, or a stopped pass SHALL leave the affected cases
+unmeasured; it SHALL NOT be counted as a failed case.
 
 The notional cost the CLI reports SHALL be presented as "API-equivalent cost",
 never as money spent. The live runner SHALL support repeating a pass a stated
@@ -246,7 +246,8 @@ else. The provenance fields are the recorder (`claude-cli` for a real
 recording, `synthetic` for a hand-written fixture), the CLI version, the
 provider, the requested model id, the served model id, the recording time, the
 prompt id, version and hash, the tools hash, the fixture hash, a request hash
-over the system prompt, messages, schema and model id, the sampling settings
+over the system prompt, messages, canonical schema and model id, the sampling
+settings
 that applied, and a warning for each known parity gap with the production call
 (at least: the temperature setting is not honoured, a hidden system overhead is
 injected by the CLI, the output-token limit is not honoured). The response
@@ -278,8 +279,13 @@ rules apply to them, the committed-cassette rules (official model, manifest) do
 not. A cassette whose prompt
 hash, tools hash, fixture hash or request hash (which covers the schema and the
 model id) differs from the current one is **stale**: its case is unmeasured
-with a stale-cassette reason, neither passing nor failing. A synthetic cassette
-SHALL never count as measured and SHALL never decide an exit code.
+with a stale-cassette reason, neither passing nor failing. The schema enters
+the request hash **canonicalized**: object keys sorted recursively, and the
+`$schema` key and the annotation-only keys `title` and `description` removed at
+every level, so serialization churn from an `ai` or `zod` upgrade (key order, a
+new `$schema` URI) leaves a cassette fresh and only a change to the schema's
+structure or constraints makes it stale. A synthetic cassette SHALL never count
+as measured and SHALL never decide an exit code.
 
 An empty green is not a pass: a replay pass that measures zero cases, or that
 finds any stale cassette, SHALL exit non-zero with a fault naming the reason
@@ -332,6 +338,12 @@ runs only inside unit tests over in-memory and synthetic cassettes, so
 - **WHEN** the replay runner loads it
 - **THEN** the case SHALL be unmeasured with a stale-cassette reason
 
+#### Scenario: Serialization churn does not make a cassette stale
+
+- **GIVEN** a dependency bump that only reorders the keys of the serialized output schema or changes its `$schema` URI
+- **WHEN** the replay runner recomputes the request hash
+- **THEN** the canonical hash SHALL be unchanged and the cassette SHALL stay fresh
+
 #### Scenario: Stale or empty replay never passes silently
 
 - **GIVEN** a replay pass that measures zero cases, or that finds at least one stale cassette
@@ -364,19 +376,25 @@ runs only inside unit tests over in-memory and synthetic cassettes, so
 
 ### Requirement: Committed cassettes are pinned by a manifest
 
-The committed cassette directory SHALL carry a committed manifest listing the
-id of every real cassette expected there. The replay lane SHALL fail when a
-listed id has no cassette, when a real cassette is present whose id is not
-listed, and when a listed cassette is stale. Each such failure SHALL name the
-affected ids and the only two ways to unblock it: **re-record the case locally
-through the live lane, or retire the id in the manifest**. Retiring an id SHALL
+The committed cassette directory SHALL carry a committed manifest with one
+entry per real cassette expected there: its id and a SHA-256 digest of the
+cassette file, both written by the recorder when it records the cassette. The
+replay lane SHALL fail when a listed id has no cassette, when a real cassette
+is present whose id is not listed, when a cassette file's digest differs from
+its manifest entry, and when a listed cassette is stale. Each such failure
+SHALL name the affected ids and the only two ways to unblock it: **re-record
+the case locally through the live lane, or retire the id in the manifest**.
+Retiring an id SHALL
 be a removal from the manifest plus deletion of the cassette in the same diff,
 so it is visible and reviewed; deleting a cassette without retiring its id
-fails, and so does a silent edit of its hashes, which makes it stale or
-invalid.
+fails. Editing a cassette by hand, including rewriting its hash fields to the
+current values so an old response looks fresh, changes its file digest and
+fails naming the id; making such an edit pass requires changing the digest in
+the manifest too, which is itself a visible, reviewed line in the diff. The
+recorder is the only writer of a digest.
 
 A stale real cassette SHALL fail CI on every pull request, including bot pull
-requests (for example a dependency bump that changes the serialized JSON
+requests (for example a dependency bump that changes the canonical output
 schema and therefore the request hash): the request really changed, and a
 pass that ignored it would replay a response to a request the production code
 no longer makes. The failure message SHALL say so and name both unblock paths,
@@ -400,8 +418,14 @@ so the maintainer re-records locally within the quota (D1b) or retires the id.
 - **WHEN** the replay lane runs
 - **THEN** it SHALL fail naming that id as unlisted
 
+#### Scenario: A cassette edited without a manifest digest change fails
+
+- **GIVEN** a committed cassette whose hash fields were rewritten by hand to the current values while its manifest digest was left unchanged
+- **WHEN** the replay lane runs
+- **THEN** it SHALL fail naming that cassette id as not matching its manifest digest
+
 #### Scenario: A bot bump that changes the schema fails with the unblock paths
 
-- **GIVEN** a dependency bump pull request that changes the serialized output schema so a listed cassette's request hash no longer matches
+- **GIVEN** a dependency bump pull request that changes the canonical output schema so a listed cassette's request hash no longer matches
 - **WHEN** CI runs the replay lane
 - **THEN** it SHALL fail naming the stale ids and stating "re-record locally, or retire the id in the manifest"
