@@ -31,14 +31,26 @@ jobs:
               ref: context.payload.workflow_run.head_sha,
             });
             const files = commits.data.files?.map(f => f.filename) || [];
-            const frontendChanged = files.some(f =>
-              f.startsWith('packages/workout-spa-editor/') ||
-              f.startsWith('packages/core/') ||
-              f.startsWith('packages/fit/') ||
-              f.startsWith('packages/tcx/') ||
-              f.startsWith('packages/zwo/') ||
-              f.startsWith('packages/garmin/')
-            );
+            // The SPA, every workspace package it depends on (keep in sync
+            // with packages/workout-spa-editor/package.json), and the e2e
+            // pipeline itself: a change to this workflow or to the composites
+            // it runs must be exercised by the run it triggers.
+            const prefixes = [
+              'packages/workout-spa-editor/',
+              'packages/ai/',
+              'packages/core/',
+              'packages/fit/',
+              'packages/garmin/',
+              'packages/tanita/',
+              'packages/tcx/',
+              'packages/trainingpeaks/',
+              'packages/whoop/',
+              'packages/zwo/',
+              '.github/workflows/workout-spa-editor-e2e.yml',
+              '.github/actions/setup-playwright/',
+              '.github/actions/setup-pnpm/',
+            ];
+            const frontendChanged = files.some(f => prefixes.some(p => f.startsWith(p)));
             core.setOutput('should-run', frontendChanged ? 'true' : 'false');
             console.log(`Frontend changed: ${frontendChanged}, files: ${files.length}`);
 
