@@ -6,6 +6,7 @@ import {
   truncate,
 } from "./retry-policy";
 import { createAiAgentError } from "./errors";
+import { keepUnderlyingFailure } from "./underlying-failure";
 import {
   callModel,
   streamModel,
@@ -73,10 +74,12 @@ export const runGenerateLoop = async <TOutput>(
       lastError = error instanceof Error ? error.message : String(error);
       args.onAttemptError?.(attempt, lastError);
       if (attempt > maxRetries) {
-        throw createAiAgentError(
-          `Failed after ${attempt} attempts: ${truncate(lastError, MAX_ERROR_LENGTH)}`,
-          attempt,
-          truncate(lastError, MAX_ERROR_LENGTH),
+        throw keepUnderlyingFailure(
+          createAiAgentError(
+            `Failed after ${attempt} attempts: ${truncate(lastError, MAX_ERROR_LENGTH)}`,
+            attempt,
+            truncate(lastError, MAX_ERROR_LENGTH)
+          ),
           error
         );
       }

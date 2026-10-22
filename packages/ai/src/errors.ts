@@ -6,8 +6,6 @@ export type AiParsingErrorOptions = {
   reason?: AiParsingErrorReason;
   /** Structured params for the reason (e.g. `{ maxLength, actualLength }`). */
   details?: Record<string, number>;
-  /** The underlying failure, when the error wraps one. */
-  cause?: unknown;
 };
 
 export class AiParsingError extends Error {
@@ -25,10 +23,7 @@ export class AiParsingError extends Error {
     lastError?: string,
     options?: AiParsingErrorOptions
   ) {
-    super(
-      message,
-      options?.cause === undefined ? undefined : { cause: options.cause }
-    );
+    super(message);
     this.name = "AiParsingError";
     this.inputText = inputText;
     this.attempts = attempts;

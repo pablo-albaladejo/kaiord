@@ -6,6 +6,10 @@ import { runGenerateAgent } from "../agents/runtime";
 import { createWorkoutParserAgent } from "../agents/workout-parser-agent";
 import { AiAgentError } from "../agents/errors";
 import { createAiParsingError } from "../errors";
+import {
+  keepUnderlyingFailure,
+  underlyingFailureOf,
+} from "../agents/underlying-failure";
 import { buildAthleteContext } from "../prompts/athlete-context";
 
 const MAX_INPUT_ECHO = 200;
@@ -27,12 +31,14 @@ const withAthleteContext = (
 
 const toDomainError = (error: unknown, inputText: string): unknown =>
   error instanceof AiAgentError
-    ? createAiParsingError(
-        error.message,
-        inputText.slice(0, MAX_INPUT_ECHO),
-        error.attempts,
-        error.lastError,
-        { cause: error.cause }
+    ? keepUnderlyingFailure(
+        createAiParsingError(
+          error.message,
+          inputText.slice(0, MAX_INPUT_ECHO),
+          error.attempts,
+          error.lastError
+        ),
+        underlyingFailureOf(error)
       )
     : error;
 

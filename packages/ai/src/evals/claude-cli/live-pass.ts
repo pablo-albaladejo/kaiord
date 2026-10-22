@@ -1,5 +1,6 @@
 import { UnsupportedFunctionalityError } from "ai";
 import type { DimensionOutcome } from "../types";
+import { underlyingFailureOf } from "../../agents/underlying-failure";
 import { isHarnessFault, messageOf } from "./harness-fault";
 import type { LanguageModelV4 } from "./language-model-types";
 import type { LiveSession, StopState } from "./live-session";
@@ -35,11 +36,11 @@ const fromOutcomes = (outcomes: Array<DimensionOutcome>): RunOutcome => {
     : { status: "unmeasured", reason: "no scorer measured the case" };
 };
 
-/** The error and the failure it wraps: the runtime keeps it as `cause`. */
-const chainOf = (error: unknown): Array<unknown> =>
-  error instanceof Error && error.cause !== undefined
-    ? [error, error.cause]
-    : [error];
+/** The error and the raw failure the runtime keeps for it internally. */
+const chainOf = (error: unknown): Array<unknown> => {
+  const failure = underlyingFailureOf(error);
+  return failure === undefined ? [error] : [error, failure];
+};
 
 const stopReason = (stop: StopState) =>
   `pass stopped (${stop.kind}): ${stop.reason}`;
@@ -48,7 +49,7 @@ const stopReason = (stop: StopState) =>
  * A stopped pass, a harness fault or a call the CLI cannot carry leaves the
  * case unmeasured. Only a model answer that the runtime or a scorer rejects
  * is a failure. A harness fault raised outside the session stops it too, and
- * each is also found as the `cause` of the runtime's wrapping error.
+ * each is also found behind the runtime's wrapping errors.
  */
 const runOnce = async (
   session: LiveSession,
