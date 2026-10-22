@@ -56,4 +56,24 @@ describe("buildGenerateKrdPort", () => {
       expect.objectContaining({ sport: undefined })
     );
   });
+
+  it("should forward the abort signal and the progress listener to the generator", async () => {
+    // Arrange
+    const onProgress = vi.fn();
+    const port = buildGenerateKrdPort(
+      provider,
+      "gpt-4o-mini",
+      () => "2026-05-07T12:00:00Z",
+      onProgress
+    );
+    const abortSignal = new AbortController().signal;
+
+    // Act
+    await port({ text: "warmup", sport: "cycling", abortSignal });
+
+    // Assert
+    expect(generateWorkoutKrd).toHaveBeenCalledWith(
+      expect.objectContaining({ abortSignal, onProgress })
+    );
+  });
 });

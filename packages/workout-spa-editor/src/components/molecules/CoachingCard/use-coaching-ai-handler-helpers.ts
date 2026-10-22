@@ -6,7 +6,7 @@
  * so the R-PIIInterpolation guard finds the literal alongside its
  * caller; this helper only invokes the bound `onFailureToast` callback.
  */
-import { resolveModelForPurpose } from "@kaiord/ai/providers";
+import { modelDisplayName, resolveModelForPurpose } from "@kaiord/ai/providers";
 import type { Analytics } from "@kaiord/core";
 import type { MutableRefObject } from "react";
 
@@ -17,6 +17,7 @@ import { withOrigin } from "../../../routing/with-origin";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { AiModelBinding } from "../../../types/ai-model-binding";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { beginAiRun, endAiRun, type SetAiRunProgress } from "./ai-run-progress";
 import { runConvertWithAi } from "./use-coaching-ai-helpers";
 
 type Reason = AiFailureReason | "not-found" | "no-provider";
@@ -31,7 +32,7 @@ export type StartAiCtx = {
   analytics: Analytics;
   abortRef: MutableRefObject<AbortController | null>;
   setFailure: (f: { reason: Reason; error?: string } | null) => void;
-  setProcessing: (v: boolean) => void;
+  setProgress: SetAiRunProgress;
   onClose: () => void;
   navigate: (to: string) => void;
   onFailureToast: () => void;
@@ -51,14 +52,12 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
     ctx.providers ?? [],
     ctx.bindings ?? []
   );
-  if (!resolved) {
-    ctx.setFailure({ reason: "no-provider" });
-    return;
-  }
+  if (!resolved) return ctx.setFailure({ reason: "no-provider" });
   ctx.setFailure(null);
-  ctx.setProcessing(true);
-  const controller = new AbortController();
-  ctx.abortRef.current = controller;
+  const { controller, onProgress } = beginAiRun(
+    ctx,
+    modelDisplayName(resolved.modelId)
+  );
   // The view-model `activity.id` is `${source}:${sourceId}`; the
   // persistence record id (what `coaching.getById` keys on) is the
   // composite `${profileId}:${source}:${sourceId}` — see
@@ -71,6 +70,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
       provider: resolved.provider,
       modelId: resolved.modelId,
       abortSignal: controller.signal,
+      onProgress,
       persistence: ctx.persistence,
       analytics: ctx.analytics,
     });
@@ -84,11 +84,10 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
     }
     return;
   } finally {
-    if (ctx.abortRef.current === controller) {
-      ctx.abortRef.current = null;
-      ctx.setProcessing(false);
-    }
+    endAiRun(ctx, controller);
   }
+  // A cancel that lands after the run settled must not navigate away.
+  if (controller.signal.aborted) return;
   if (result.ok) {
     ctx.onClose();
     ctx.navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));

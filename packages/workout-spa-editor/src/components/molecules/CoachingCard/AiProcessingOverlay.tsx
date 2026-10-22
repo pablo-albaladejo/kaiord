@@ -1,19 +1,31 @@
 /**
  * Body-level overlay rendered while the synchronous AI flow is in
- * flight (per design D2). Replaces the action row with a spinner and a
- * Cancel button that aborts the in-flight request.
+ * flight (per design D2). Replaces the action row with the run's real
+ * progress and a Cancel button that aborts the in-flight request.
  *
- * Keep visually consistent with `LinkedWorkoutSection`'s rounded card
- * but in slate so it doesn't conflict with the activity description
- * panel above.
+ * Only the phase label sits in the polite live region, so a screen
+ * reader hears each phase once; the step count and the seconds counter
+ * change far more often and are left out of it.
  */
 import { Loader2 } from "lucide-react";
 
+import { pluralKey } from "../../../i18n/plural-key";
+import { useTranslate } from "../../../i18n/use-translate";
+import { aiPhaseLabel, type AiRunProgress } from "./ai-run-progress";
+import { useElapsedSeconds } from "./use-elapsed-seconds";
+
 export type AiProcessingOverlayProps = {
+  progress: AiRunProgress;
   onCancel: () => void;
 };
 
-export function AiProcessingOverlay({ onCancel }: AiProcessingOverlayProps) {
+export function AiProcessingOverlay({
+  progress,
+  onCancel,
+}: AiProcessingOverlayProps) {
+  const t = useTranslate("coaching");
+  const seconds = useElapsedSeconds(progress.startedAt);
+  const items = progress.update?.items;
   return (
     <div
       data-testid="coaching-dialog-ai-processing"
@@ -21,10 +33,23 @@ export function AiProcessingOverlay({ onCancel }: AiProcessingOverlayProps) {
     >
       <div className="flex items-center justify-center gap-2 text-sm">
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-        <span>Processing with AI…</span>
+        <span
+          role="status"
+          aria-live="polite"
+          data-testid="coaching-dialog-ai-phase"
+        >
+          {aiPhaseLabel(t, progress)}
+        </span>
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        This usually takes 10-15 seconds.
+      <p className="flex justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+        {items !== undefined && (
+          <span data-testid="coaching-dialog-ai-steps">
+            {t(pluralKey("aiProgress.steps", items), { count: items })}
+          </span>
+        )}
+        <span data-testid="coaching-dialog-ai-elapsed" className="tabular-nums">
+          {t("aiProgress.elapsed", { seconds })}
+        </span>
       </p>
       <button
         type="button"
@@ -32,7 +57,7 @@ export function AiProcessingOverlay({ onCancel }: AiProcessingOverlayProps) {
         onClick={onCancel}
         className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
       >
-        Cancel
+        {t("aiProgress.cancel")}
       </button>
     </div>
   );

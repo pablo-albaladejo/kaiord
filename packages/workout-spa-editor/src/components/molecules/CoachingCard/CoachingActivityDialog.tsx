@@ -73,7 +73,7 @@ export function CoachingActivityDialog({
         pickerWorkouts={pickable ?? []}
         matching={dialog.matching}
         splitting={dialog.splitting}
-        aiProcessing={dialog.ai.processing}
+        aiProgress={dialog.ai.progress}
         aiFailure={dialog.ai.failure}
         manualCreating={dialog.manual.creating}
         onClose={handleDialogClose}

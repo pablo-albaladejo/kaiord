@@ -37,6 +37,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
 }
 
+// ── App theme preference for the popup (vendored bridge-core) ──
+let bridgeTheme;
+try {
+  importScripts("bridge-theme.js");
+  bridgeTheme = globalThis;
+} catch {
+  bridgeTheme =
+    typeof require !== "undefined" ? require("./bridge-theme.js") : {};
+}
+
 // ── Session bearer capture ──
 //
 // The internal API authenticates with a Cognito bearer JWT (not cookies). We
@@ -179,6 +189,8 @@ const handleAction = async (message) => {
     case "whoop-fetch":
       if (!message.path) throw new Error("Missing path");
       return whoopFetch(message.path);
+    case "set-theme":
+      return await bridgeTheme.storeThemePreference(message.theme);
     default:
       throw new Error(`Unknown action: ${message.action}`);
   }
@@ -186,10 +198,16 @@ const handleAction = async (message) => {
 
 // ── External messages (SPA ↔ Extension) ──
 //
-// Web callers get a reduced action surface (reads + status only). Token capture
-// stays internal (content script / popup). The sender origin is pinned by the
-// vendored guard as a second layer over the manifest's externally_connectable.
-const EXTERNAL_ACTIONS = new Set(["ping", "status", "whoop-fetch"]);
+// Web callers get a reduced action surface (reads, status, and the app's theme
+// preference for the popup). Token capture stays internal (content script /
+// popup). The sender origin is pinned by the vendored guard as a second layer
+// over the manifest's externally_connectable.
+const EXTERNAL_ACTIONS = new Set([
+  "ping",
+  "status",
+  "whoop-fetch",
+  "set-theme",
+]);
 
 // No credential handshake: this bridge mints nothing and exchanges nothing.
 // It piggybacks the page's own session — inject-main.js captures an

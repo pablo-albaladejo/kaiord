@@ -26,6 +26,12 @@ export function createDexieWorkoutRepository(
     getByDateRange: async (start, end) =>
       table().where("date").between(start, end, true, true).toArray(),
 
+    getByProfileAndDateRange: async (profileId, start, end) =>
+      table()
+        .where("[profileId+date]")
+        .between([profileId, start], [profileId, end], true, true)
+        .toArray(),
+
     getByState: async (state) =>
       table()
         .filter((w: Record<string, unknown>) => w.state === state)

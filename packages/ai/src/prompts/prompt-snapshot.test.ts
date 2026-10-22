@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import { buildChatSystemPrompt } from "./chat-system-prompt";
 import { WORKOUT_PARSER_SYSTEM } from "./parse-workout-prompt";
 import { resolvePrompt } from "./registry";
+import { buildAthleteContext } from "./athlete-context";
 import { buildUserPrompt } from "./user-prompt";
 
 describe("prompt assembly snapshots", () => {
@@ -51,5 +52,18 @@ describe("prompt assembly snapshots", () => {
 
     // Assert
     expect(prompt).toMatchSnapshot();
+  });
+
+  it("should keep a representative athlete context stable", () => {
+    // Arrange
+
+    // Act
+    const context = buildAthleteContext({
+      zonesText: "Pace zones (Custom): Z1 Recovery: 6:30-5:45/km",
+      instructions: "Use pace targets for every running step",
+    });
+
+    // Assert
+    expect(context).toMatchSnapshot();
   });
 });

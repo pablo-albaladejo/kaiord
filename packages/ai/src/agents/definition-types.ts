@@ -27,6 +27,11 @@ export type AgentDefinition<TOutput = unknown> = {
    * triggers a retry. When absent, `outputSchema.parse` is the gate.
    */
   validate?: (raw: unknown) => TOutput;
+  /**
+   * Counts the items a PARTIAL output already holds (e.g. workout steps), so
+   * a streamed run can report real progress. Absent: no count is reported.
+   */
+  countItems?: (partial: unknown) => number | undefined;
   maxRetries?: number;
   maxOutputTokens?: number;
   temperature?: number;
