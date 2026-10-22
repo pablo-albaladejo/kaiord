@@ -42,6 +42,19 @@ describe("servedModelOf", () => {
     // Assert
     expect(results.map((r) => r.ok)).toEqual([false, false, false, false]);
   });
+
+  it("should treat regex metacharacters in the requested id literally", () => {
+    // Arrange
+    const requested = "claude-sonnet-5+";
+
+    // Act
+    const widened = servedModelOf(["claude-sonnet-55-20260101"], requested);
+    const literal = servedModelOf(["claude-sonnet-5+-20260101"], requested);
+
+    // Assert
+    expect(widened.ok).toBe(false);
+    expect(literal.ok).toBe(true);
+  });
 });
 
 describe("committedServedFault", () => {

@@ -8,8 +8,13 @@ import type { ServedForm } from "../cassettes/validate-cassette";
 export type ServedModel =
   { ok: true; servedModelId: string } | { ok: false; reason: string };
 
-const datedOf = (requested: string) =>
-  new RegExp(`^${requested.replace(/[.]/g, "\\.")}-\\d{8}$`);
+const DATE_SUFFIX = /^\d{8}$/;
+
+// Plain prefix comparison: the requested id comes from the environment, so it
+// never becomes part of a regular expression.
+const isDatedSnapshotOf = (served: string, requested: string) =>
+  served.startsWith(`${requested}-`) &&
+  DATE_SUFFIX.test(served.slice(requested.length + 1));
 
 /**
  * The model the CLI says it served: exactly one `modelUsage` key, equal to
@@ -27,7 +32,7 @@ export const servedModelOf = (
     };
   }
   const [served = ""] = servedModels;
-  return served === requested || datedOf(requested).test(served)
+  return served === requested || isDatedSnapshotOf(served, requested)
     ? { ok: true, servedModelId: served }
     : {
         ok: false,
