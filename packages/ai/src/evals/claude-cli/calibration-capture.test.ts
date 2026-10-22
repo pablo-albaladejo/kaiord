@@ -141,4 +141,41 @@ describe("project", () => {
     // Assert
     expect(projected).toEqual({ a: { b: { c: {} } } });
   });
+
+  it.each([
+    [
+      "a uuid under a neutral key",
+      { ref: "3f2b8c1e-9a4d-4e2b-8f1a-2c3d4e5f6a7b" },
+    ],
+    ["a dotted user.host value", { owner: "pablo.albaladejo" }],
+    ["a host name", { host: "pablos-macbook.local" }],
+    [
+      "a nested entity key",
+      { nested: { entityKey: "acct_01HZX9Q2W3E4R5T6Y7U8I9O0P" } },
+    ],
+    [
+      "a token-shaped secret",
+      { tag: "sk-ant-oat01-abcdefghijklmnopqrstuvwxyz" },
+    ],
+  ])("should drop %s", (_label, input) => {
+    // Arrange
+    const leaked = /3f2b8c1e|pablo|macbook|acct_|sk-ant/;
+
+    // Act
+    const projected = project(input);
+
+    // Assert
+    expect(JSON.stringify(projected)).not.toMatch(leaked);
+  });
+
+  it("should keep enum words, numbers and booleans", () => {
+    // Arrange
+    const info = { status: "allowed_warning", utilization: 0.5, ok: true };
+
+    // Act
+    const projected = project(info);
+
+    // Assert
+    expect(projected).toEqual(info);
+  });
 });

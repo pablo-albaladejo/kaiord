@@ -8,13 +8,21 @@ import { totalInputTokens } from "./stream-messages";
 
 /** A key naming who or where, dropped whatever its value. */
 const DENIED_KEY = /email|org|uuid|session|cwd|user|account|path|name|id$/i;
-/** A string kept only when it is a short token: an enum, never free text. */
-const TOKEN = /^[a-z0-9_.-]{1,40}$/i;
+/**
+ * The only strings kept: enum-shaped words such as `allowed_warning` or
+ * `seven_day`. No digit, dot, hyphen or capital, so a uuid, an account or
+ * entity key, a `user.name` handle or a `host.local` name never survives,
+ * whatever key it sits under.
+ */
+const ENUM_WORD = /^[a-z][a-z_]{0,31}$/;
+const CLI_VERSION = /^\d+\.\d+\.\d+$/;
+const MODEL_ID = /^claude-[a-z0-9.-]+$/;
+const FIELD_KEY = /^[A-Za-z0-9_]+$/;
 const MAX_DEPTH = 3;
 
 type Projected = { [key: string]: number | boolean | string | Projected };
 
-/** Numbers, booleans and token strings, nested to a fixed depth. */
+/** Numbers, booleans and enum words, nested to a fixed depth; no arrays. */
 export const project = (node: unknown, depth = 0): Projected => {
   const out: Projected = {};
   if (typeof node !== "object" || node === null || Array.isArray(node)) {
@@ -24,7 +32,7 @@ export const project = (node: unknown, depth = 0): Projected => {
     if (DENIED_KEY.test(key)) continue;
     if (typeof value === "number" || typeof value === "boolean") {
       out[key] = value;
-    } else if (typeof value === "string" && TOKEN.test(value)) {
+    } else if (typeof value === "string" && ENUM_WORD.test(value)) {
       out[key] = value;
     } else if (
       typeof value === "object" &&
@@ -40,20 +48,25 @@ export const project = (node: unknown, depth = 0): Projected => {
 
 const projectedSchema: z.ZodType<Projected> = z.lazy(() =>
   z.record(
-    z.string().regex(/^[A-Za-z0-9_]+$/),
-    z.union([z.number(), z.boolean(), z.string().regex(TOKEN), projectedSchema])
+    z.string().regex(FIELD_KEY),
+    z.union([
+      z.number(),
+      z.boolean(),
+      z.string().regex(ENUM_WORD),
+      projectedSchema,
+    ])
   )
 );
 
 export const calibrationCaptureSchema = z.strictObject({
   kind: z.literal("calibration-capture"),
-  cliVersion: z.string().regex(TOKEN),
-  requestedModelId: z.string().regex(TOKEN),
+  cliVersion: z.string().regex(CLI_VERSION),
+  requestedModelId: z.string().regex(MODEL_ID),
   inputTokens: z.number().int().nonnegative(),
   rateLimitInfos: z.array(projectedSchema),
   modelUsage: z.record(
-    z.string().regex(TOKEN),
-    z.record(z.string(), z.number())
+    z.string().regex(MODEL_ID),
+    z.record(z.string().regex(FIELD_KEY), z.number())
   ),
 });
 
@@ -62,8 +75,9 @@ export type CalibrationCapture = z.infer<typeof calibrationCaptureSchema>;
 /**
  * The calibration step: one call, whatever the guard then decides, captured
  * so the maintainer can pin `SEVEN_DAY_FIELD` (3.4) and the served-model form
- * (3.5). No email, organization, uuid, session id or cwd survives the
- * projection, and the strict schema rejects anything that did.
+ * (3.5). The projection is an allowlist of shapes: numbers, booleans and
+ * enum words. Free text, ids, handles and host names are dropped, and the
+ * strict schema rejects any string of another shape that got through.
  */
 export const captureCalibration = async (
   session: LiveSession,
