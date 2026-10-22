@@ -63,7 +63,7 @@ Common operations:
 - Test files: `*.test.ts` colocated with source
 - Coverage: 80% (core package threshold)
 - Run: `pnpm --filter @kaiord/ai test` or `pnpm --filter @kaiord/ai test:watch`
-- Evals: no provider API key exists and no eval runs in CI. `pnpm --filter @kaiord/ai eval:live` runs the parser suite on the maintainer's local Claude Code subscription (`claude -p`, see `src/evals/AGENTS.md`); in CI, or without the `EVAL_LIVE=1` that only that script sets, it stops as `INERT` before spawning anything. `eval:chat-tools` and `eval:labs` report every case unmeasured (tool calling and document file parts cannot go through `claude -p`) and exit 0. No live runner declares a pass threshold, because a comparison that cannot run where merges are decided is not a gate (`check-no-inert-floors.mjs` enforces that). Never run `eval:live` from an agent session: its calls spend the maintainer's subscription quota
+- Evals: no provider API key exists and no eval runs in CI. `pnpm --filter @kaiord/ai eval:live` runs the parser suite on the maintainer's local Claude Code subscription (`claude -p`, see `src/evals/AGENTS.md`); in CI, or without the `EVAL_LIVE=1` that only that script sets, it stops as `INERT` before spawning anything (`pnpm eval` is inert only while `EVAL_LIVE` is not exported in the shell). `eval:chat-tools` and `eval:labs` report every case unmeasured (tool calling and document file parts cannot go through `claude -p`) and exit 0. No live runner declares a pass threshold, because a comparison that cannot run where merges are decided is not a gate (`check-no-inert-floors.mjs` enforces that). Never run `eval:live` from an agent session: its calls spend the maintainer's subscription quota
 
 ### Common Patterns
 

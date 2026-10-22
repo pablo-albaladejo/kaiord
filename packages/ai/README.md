@@ -119,6 +119,8 @@ pnpm --filter @kaiord/ai eval:live -- --calibrate   # one call, captured for pin
 
 `eval:live` is the only script that sets `EVAL_LIVE=1`; with `CI` set or
 without that opt-in the runner stops as `INERT` before any process starts.
+`pnpm eval` stays inert only while `EVAL_LIVE` is not exported in your shell:
+it never sets the opt-in, but it does not clear one you exported.
 Each pass starts with a calibration call, runs one call at a time, stops after
 `EVAL_MAX_CALLS` calls (default 50) or above `EVAL_MAX_WEEKLY_UTILIZATION`
 (default 0.85), and reports cost as API-equivalent, never as money spent. It

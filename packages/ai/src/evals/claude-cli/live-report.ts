@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import { serialize } from "./cassette-writer";
@@ -53,6 +53,7 @@ export const writeLiveReport = (
   now: () => number = Date.now
 ): string => {
   const parsed = liveReportSchema.parse(report);
+  mkdirSync(dir, { recursive: true });
   const path = join(dir, `eval-report-${now()}.json`);
   writeFileSync(path, serialize(parsed));
   return path;

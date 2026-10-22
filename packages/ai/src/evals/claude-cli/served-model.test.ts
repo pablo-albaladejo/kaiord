@@ -4,7 +4,11 @@ import {
   OFFICIAL_SERVED_FORM,
   isOfficialServedModel,
 } from "../cassettes/validate-cassette";
-import { committedServedFault, servedModelOf } from "./served-model";
+import {
+  committedServedFault,
+  recordPreflightFault,
+  servedModelOf,
+} from "./served-model";
 
 describe("servedModelOf", () => {
   it("should accept the requested id or a dated snapshot of it", () => {
@@ -94,5 +98,22 @@ describe("isOfficialServedModel", () => {
     expect(unpinned).toEqual([true, true, false]);
     expect(bare).toEqual([true, false, false]);
     expect(dated).toEqual([false, true, false]);
+  });
+});
+
+describe("recordPreflightFault", () => {
+  it("should refuse only the official model while the form is unpinned", () => {
+    // Arrange
+    const cases = [
+      recordPreflightFault("claude-sonnet-5", null),
+      recordPreflightFault("claude-sonnet-5", "bare"),
+      recordPreflightFault("claude-haiku-4-5", null),
+    ];
+
+    // Act
+    const refused = cases.map((fault) => fault !== undefined);
+
+    // Assert
+    expect(refused).toEqual([true, false, false]);
   });
 });

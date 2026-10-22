@@ -51,3 +51,16 @@ export const committedServedFault = (
     ? undefined
     : `served ${servedModelId}, but the pinned form for ${OFFICIAL_CASSETTE_MODEL} is ${form}`;
 };
+
+/**
+ * Checked before a `--record` pass makes any call: recording the official
+ * model while its served form is unpinned would spend every call on a
+ * cassette the writer then refuses.
+ */
+export const recordPreflightFault = (
+  modelId: string,
+  form: ServedForm | null = OFFICIAL_SERVED_FORM
+): string | undefined =>
+  modelId === OFFICIAL_CASSETTE_MODEL && form === null
+    ? committedServedFault(modelId, form)
+    : undefined;

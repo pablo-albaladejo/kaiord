@@ -3,8 +3,14 @@ import type { Env } from "./child-env";
 import { createClaudeCliLanguageModel } from "./claude-cli-language-model";
 import { detectClaudeCli, inertMessage } from "./detect-claude-cli";
 import type { LanguageModelV4 } from "./language-model-types";
-import { readMaxCalls, readMaxWeekly, readModelId } from "./live-config";
+import {
+  readCallTimeoutMs,
+  readMaxCalls,
+  readMaxWeekly,
+  readModelId,
+} from "./live-config";
 import { createLiveSession } from "./live-session";
+import { managedSettingsFile } from "./managed-settings";
 import type { LiveSession } from "./live-session";
 import { SEVEN_DAY_FIELD } from "./rate-limit-guard";
 import type { WeeklyField } from "./rate-limit-guard";
@@ -16,12 +22,15 @@ export type LiveModel = {
   modelId: string;
   provider: "anthropic";
   session: LiveSession;
+  /** A managed-settings file found by existence, never read; else null. */
+  managedSettingsFile: string | null;
 };
 
 export type LoadLiveDeps = {
   env?: Env;
   spawn?: SpawnFn;
   field?: WeeklyField | null;
+  managedSettings?: () => string | null;
 };
 
 /**
@@ -39,11 +48,21 @@ export const loadLiveModel = async (
   if (!detection.available) throw new Error(inertMessage(detection.reason));
   const modelId = readModelId(env);
   const session = createLiveSession({
-    spawnClaude: createSpawnClaude({ env, spawn }),
+    spawnClaude: createSpawnClaude({
+      env,
+      spawn,
+      timeoutMs: readCallTimeoutMs(env),
+    }),
     maxCalls: readMaxCalls(env),
     maxWeekly: readMaxWeekly(env),
     field: deps.field === undefined ? SEVEN_DAY_FIELD : deps.field,
   });
   const model = createClaudeCliLanguageModel({ modelId, call: session.call });
-  return { model, modelId, provider: "anthropic", session };
+  return {
+    model,
+    modelId,
+    provider: "anthropic",
+    session,
+    managedSettingsFile: (deps.managedSettings ?? managedSettingsFile)(),
+  };
 };
