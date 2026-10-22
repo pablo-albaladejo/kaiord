@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { userInfo } from "node:os";
 
 /**
  * Where Claude Code reads enterprise managed settings, per platform: the
@@ -26,6 +27,26 @@ const MANAGED_SETTINGS: Readonly<Record<string, ReadonlyArray<string>>> = {
   ],
 };
 
+const MANAGED_PREFERENCES = "/Library/Managed Preferences";
+const DOMAIN_PLIST = "com.anthropic.claudecode.plist";
+
+/** The login name for the per-user MDM plist; none when the OS cannot say. */
+const currentUser = (): string | undefined => {
+  try {
+    return userInfo().username;
+  } catch {
+    return undefined;
+  }
+};
+
+/** The fixed paths, plus on macOS the per-user managed-preferences plist. */
+const candidates = (platform: string, username: string | undefined) => {
+  const fixed = MANAGED_SETTINGS[platform] ?? [];
+  return platform === "darwin" && username
+    ? [...fixed, `${MANAGED_PREFERENCES}/${username}/${DOMAIN_PLIST}`]
+    : [...fixed];
+};
+
 /**
  * The managed-settings paths that exist, checked by existence only: none is
  * opened or listed, so nothing they hold is read. Managed settings apply
@@ -34,5 +55,6 @@ const MANAGED_SETTINGS: Readonly<Record<string, ReadonlyArray<string>>> = {
  */
 export const managedSettingsPaths = (
   platform: string = process.platform,
-  exists: (path: string) => boolean = existsSync
-): Array<string> => (MANAGED_SETTINGS[platform] ?? []).filter(exists);
+  exists: (path: string) => boolean = existsSync,
+  username: string | undefined = currentUser()
+): Array<string> => candidates(platform, username).filter(exists);

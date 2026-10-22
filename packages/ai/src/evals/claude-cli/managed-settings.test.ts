@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { managedSettingsPaths } from "./managed-settings";
 
-/** Linux checks two paths, macOS three; the unknown platform none. */
-const PATHS_CHECKED = 5;
+/** Linux checks two paths, macOS four (one per user); the unknown none. */
+const PATHS_CHECKED = 6;
 
 describe("managedSettingsPaths", () => {
   it("should report the file and the drop-in directory that exist, without reading them", () => {
@@ -19,9 +19,9 @@ describe("managedSettingsPaths", () => {
 
     // Act
     const found = [
-      managedSettingsPaths("linux", exists),
-      managedSettingsPaths("darwin", exists),
-      managedSettingsPaths("aix", exists),
+      managedSettingsPaths("linux", exists, "someone"),
+      managedSettingsPaths("darwin", exists, "someone"),
+      managedSettingsPaths("aix", exists, "someone"),
     ];
 
     // Assert
@@ -46,5 +46,22 @@ describe("managedSettingsPaths", () => {
 
     // Assert
     expect(found).toEqual([plist]);
+  });
+
+  it("should probe the per-user managed-preferences plist by existence", () => {
+    // Arrange
+    const plist =
+      "/Library/Managed Preferences/someone/com.anthropic.claudecode.plist";
+    const exists = (path: string) => path === plist;
+
+    // Act
+    const found = [
+      managedSettingsPaths("darwin", exists, "someone"),
+      managedSettingsPaths("darwin", exists, undefined),
+      managedSettingsPaths("linux", exists, "someone"),
+    ];
+
+    // Assert
+    expect(found).toEqual([[plist], [], []]);
   });
 });
