@@ -18,6 +18,8 @@ export type SpawnCall = {
 
 export type SpawnReply = {
   stdout?: string;
+  /** Raw stdout chunks, emitted in order in place of `stdout`. */
+  chunks?: Array<Buffer>;
   code?: number;
   error?: Error & { code?: string };
   /** Never closes: the child hangs until it is killed. */
@@ -63,7 +65,9 @@ export const createSpawnDouble = (reply: (call: SpawnCall) => SpawnReply) => {
         child.emit("error", out.error);
         return;
       }
-      stdout.emit("data", out.stdout ?? "");
+      for (const chunk of out.chunks ?? [out.stdout ?? ""]) {
+        stdout.emit("data", chunk);
+      }
       child.emit("close", out.code ?? 0);
     });
     return child;

@@ -1,3 +1,5 @@
+import { StringDecoder } from "node:string_decoder";
+
 import { harnessFault, messageOf } from "./harness-fault";
 
 type Readable = {
@@ -67,13 +69,16 @@ export const runProcess = (
       stdio: ["pipe", "pipe", "pipe"],
       shell: false,
     });
+    // One decoder per stream: a UTF-8 character split across chunks survives.
+    const out = new StringDecoder("utf8");
+    const err = new StringDecoder("utf8");
     let stdout = "";
     let stderr = "";
     child.stdout?.on("data", (chunk) => {
-      stdout += String(chunk);
+      stdout += out.write(chunk);
     });
     child.stderr?.on("data", (chunk) => {
-      stderr += String(chunk);
+      stderr += err.write(chunk);
     });
     const timer = setTimeout(() => {
       child.kill("SIGKILL");
@@ -89,7 +94,7 @@ export const runProcess = (
     });
     child.on("close", (code) => {
       clearTimeout(timer);
-      resolve({ code, stdout, stderr });
+      resolve({ code, stdout: stdout + out.end(), stderr: stderr + err.end() });
     });
     // A child that exits before reading its prompt raises EPIPE here.
     child.stdin?.on("error", (error) => {
