@@ -1,15 +1,26 @@
 name: "Install Playwright browsers with caching"
 description: >-
-  Restores the Playwright browser cache keyed by the installed
-  @playwright/test version and only runs `playwright install --with-deps`
-  on a cache miss. Exists because the apt half of --with-deps depends on
-  the runner's Ubuntu mirror, which has hung e2e jobs until the full
-  45-minute job timeout killed them; on a cache hit nothing touches apt
-  at all (hosted Ubuntu images already ship Chromium's system deps).
+  Installs one Playwright browser and the system packages it needs so that
+  a warm run never contacts an apt mirror. Two exact-key caches: the browser
+  binaries (keyed by the installed @playwright/test version) and the .deb
+  archives of whatever `playwright install-deps` would add to THIS runner
+  image (keyed by image version, Playwright version, browser and the
+  missing-package list). The missing list comes from `install-deps --dry-run`,
+  an offline `apt-get -s` against the image's own package lists, so the
+  previous assumption that hosted Ubuntu ships every dependency is now
+  checked instead of assumed. It was false even for Chromium (9 font
+  packages missing on ubuntu-24.04 20261021) and is far off for WebKit
+  (181 packages, ~110 MB) and Firefox; when nothing is missing, apt and
+  the .deb cache are skipped entirely. On a hit the .debs install with
+  dpkg, which has no network code. On a miss they are fetched by a bounded
+  apt run (per-attempt timeouts, then a retry with the Azure mirror
+  dropped) and saved at once, so a red test step cannot discard them. Exists
+  because the Azure Ubuntu mirror served 119 MB at 96.5 kB/s in run
+  39768401399 and ate a 40-minute e2e job timeout with every test passing.
 
 inputs:
   browser:
-    description: "Browser to install"
+    description: "Browser to install (chromium, firefox or webkit)"
     required: false
     default: "chromium"
 
@@ -20,7 +31,7 @@ runs:
       id: pw-version
       shell: bash
       working-directory: packages/workout-spa-editor
-      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
 
     # Exact-key only, no restore-keys: browser binaries live in per-revision
     # directories, so a partial restore from another Playwright version would
@@ -32,12 +43,140 @@ runs:
         path: ~/.cache/ms-playwright
         key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-${{ inputs.browser }}
 
-    - name: Install Playwright browsers (cache miss)
+    # Browser download only (Playwright CDN). System packages are handled
+    # below, so --with-deps is never used and apt never runs from here.
+    - name: Install Playwright browser (cache miss)
       if: steps.pw-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps ${{ inputs.browser }}
+      working-directory: packages/workout-spa-editor
+      run: pnpm exec playwright install ${{ inputs.browser }}
+
+    # `install-deps --dry-run` simulates the install with `apt-get -s`
+    # against the image's package lists (no network) and prints every
+    # package apt would add, transitive ones included, or "All system
+    # dependencies are installed." Anything else is a format change we
+    # refuse to guess about.
+    - name: Resolve missing system packages
+      id: pw-deps
+      shell: bash
+      working-directory: packages/workout-spa-editor
+      env:
+        BROWSER: ${{ inputs.browser }}
+      run: |
+        set +e
+        out=$(pnpm exec playwright install-deps --dry-run "$BROWSER" 2>&1)
+        code=$?
+        set -e
+        echo "$out"
+        missing=$(printf '%s\n' "$out" | sed -n 's/^  \([a-z0-9][a-z0-9.+:-]*\)$/\1/p' | sort -u | tr '\n' ' ' | sed 's/ $//')
+        if [ "$code" -eq 0 ] && printf '%s' "$out" | grep -q "All system dependencies are installed"; then
+          missing=""
+        elif [ "$code" -eq 0 ] || [ -z "$missing" ] || ! printf '%s' "$out" | grep -q "^Missing system dependencies"; then
+          echo "::error::Unrecognised 'playwright install-deps --dry-run $BROWSER' output (exit $code). setup-playwright parses it to build the offline .deb cache; update the parser for this Playwright version."
+          exit 1
+        fi
+        echo "missing=$missing" >> "$GITHUB_OUTPUT"
+        echo "count=$(printf '%s' "$missing" | wc -w | tr -d ' ')" >> "$GITHUB_OUTPUT"
+        echo "hash=$(printf '%s' "$missing" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+        echo "image=${ImageOS:-unknown}-${ImageVersion:-unknown}" >> "$GITHUB_OUTPUT"
+        echo "dir=$HOME/.cache/kaiord-playwright-debs/$BROWSER" >> "$GITHUB_OUTPUT"
+
+    # Keyed by the exact runner image too: the .debs were resolved against
+    # that image's installed versions, and a newer image may already carry
+    # newer ones that an older cached .deb would have to downgrade.
+    - name: Restore system package cache
+      id: deb-cache
+      if: steps.pw-deps.outputs.count != '0'
+      uses: actions/cache/restore@v6
+      with:
+        path: ${{ steps.pw-deps.outputs.dir }}
+        key: ${{ runner.os }}-playwright-debs-v2-${{ steps.pw-deps.outputs.image }}-${{ steps.pw-version.outputs.version }}-${{ inputs.browser }}-${{ steps.pw-deps.outputs.hash }}
+
+    # Cold path. Each attempt is capped so a crawling mirror fails in
+    # minutes with a clear error instead of eating the job timeout. Attempt 2
+    # drops azure.archive.ubuntu.com from the runner's mirror list (or
+    # rewrites it to archive.ubuntu.com) and resumes the partial downloads.
+    - name: Download system packages (cache miss)
+      if: steps.pw-deps.outputs.count != '0' && steps.deb-cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        DEB_DIR: ${{ steps.pw-deps.outputs.dir }}
+        MISSING: ${{ steps.pw-deps.outputs.missing }}
+      run: |
+        mkdir -p "$DEB_DIR/partial"
+        opts=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o "Dir::Cache::archives=$DEB_DIR")
+        attempt() {
+          local label=$1 update_s=$2 fetch_s=$3 start=$SECONDS
+          echo "apt attempt $label: update <= ${update_s}s, download <= ${fetch_s}s"
+          # shellcheck disable=SC2086 # MISSING is a space-separated package list
+          timeout "$update_s" sudo apt-get update -q "${opts[@]}" &&
+            timeout "$fetch_s" sudo apt-get install -y -q --download-only --no-install-recommends "${opts[@]}" $MISSING
+          local rc=$?
+          echo "apt attempt $label: exit $rc after $((SECONDS - start))s"
+          return $rc
+        }
+        if ! attempt "1 (runner mirror)" 60 180; then
+          echo "::warning::apt download from the runner's mirror failed or exceeded its budget; retrying without azure.archive.ubuntu.com"
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            grep -q . /etc/apt/apt-mirrors.txt || echo "http://archive.ubuntu.com/ubuntu/" | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+          fi
+          sudo find /etc/apt -name '*.list' -o -name '*.sources' | xargs -r sudo sed -i 's#azure\.archive\.ubuntu\.com#archive.ubuntu.com#g'
+          if ! attempt "2 (archive.ubuntu.com)" 90 300; then
+            echo "::error::Could not download the $(echo "$MISSING" | wc -w) system packages Playwright needs from either Ubuntu mirror within budget. This is the apt mirror, not the tests: re-run the job."
+            exit 1
+          fi
+        fi
+        sudo rm -rf "$DEB_DIR/partial" "$DEB_DIR/lock"
+        sudo chown -R "$(id -u):$(id -g)" "$DEB_DIR"
+        echo "Downloaded $(find "$DEB_DIR" -maxdepth 1 -name '*.deb' | wc -l) .debs ($(du -sh "$DEB_DIR" | cut -f1))"
+
+    # Saved straight away (not in a post step) so the cache survives a
+    # failing or cancelled test step later in the job.
+    - name: Save system package cache
+      if: steps.pw-deps.outputs.count != '0' && steps.deb-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: ${{ steps.pw-deps.outputs.dir }}
+        key: ${{ steps.deb-cache.outputs.cache-primary-key }}
+
+    # Same command on both paths, and dpkg has no network code at all.
+    # (`apt-get install --no-download ./*.deb` is not offline-safe: it
+    # prefers the package lists' candidate over the local file and then
+    # refuses to fetch it.) One dpkg call unpacks the whole set and
+    # configures it in dependency order; a second pass after
+    # `--configure -a` covers a Pre-Depends ordering miss. The closing check
+    # asks dpkg, not `install-deps --dry-run`: after the cold path's
+    # `apt-get update` the simulation also lists mere upgrades of packages
+    # the image already has (libglib2.0, libnss3, xvfb), which are not gaps.
+    - name: Install system packages offline
+      if: steps.pw-deps.outputs.count != '0'
+      shell: bash
+      env:
+        DEB_DIR: ${{ steps.pw-deps.outputs.dir }}
+        MISSING: ${{ steps.pw-deps.outputs.missing }}
+        BROWSER: ${{ inputs.browser }}
+      run: |
+        echo "Installing $(find "$DEB_DIR" -maxdepth 1 -name '*.deb' | wc -l) cached .debs offline (dpkg, no network)"
+        export DEBIAN_FRONTEND=noninteractive
+        if ! timeout 300 sudo -E dpkg -i --skip-same-version "$DEB_DIR"/*.deb >/dev/null; then
+          echo "dpkg first pass incomplete; configuring and retrying once"
+          timeout 120 sudo -E dpkg --configure -a
+          timeout 300 sudo -E dpkg -i --skip-same-version "$DEB_DIR"/*.deb >/dev/null
+        fi
+        gaps=""
+        for p in $MISSING; do
+          [ "$(dpkg-query -W -f='${db:Status-Abbrev}' "$p" 2>/dev/null)" = "ii " ] || gaps="$gaps $p"
+        done
+        if [ -n "$gaps" ]; then
+          echo "::error::Still not installed after the offline install:$gaps"
+          exit 1
+        fi
+        echo "All $(echo "$MISSING" | wc -w) packages Playwright needs for $BROWSER are installed."
 
     - name: Report cache status
       shell: bash
       run: |
-        echo "🎭 Playwright ${{ steps.pw-version.outputs.version }} (${{ inputs.browser }}): ${{ steps.pw-cache.outputs.cache-hit == 'true' && '✅ cache HIT — apt untouched' || '❌ cache MISS — installed with deps' }}"
+        echo "🎭 Playwright ${{ steps.pw-version.outputs.version }} (${{ inputs.browser }}) on ${{ steps.pw-deps.outputs.image }}"
+        echo "   browser: ${{ steps.pw-cache.outputs.cache-hit == 'true' && '✅ cache HIT' || '❌ cache MISS — downloaded from the Playwright CDN' }}"
+        echo "   system packages: ${{ steps.pw-deps.outputs.count == '0' && '✅ none missing — apt untouched' || (steps.deb-cache.outputs.cache-hit == 'true' && format('✅ cache HIT — {0} packages installed offline, apt mirror untouched', steps.pw-deps.outputs.count) || format('❌ cache MISS — {0} packages downloaded from the apt mirror', steps.pw-deps.outputs.count)) }}"

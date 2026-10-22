@@ -881,6 +881,7 @@ jobs:
           node-version: "22.18.0"
 
       - name: Warm Playwright browser cache
+        timeout-minutes: 12
         uses: ./.github/actions/setup-playwright
         with:
           browser: chromium
@@ -915,6 +916,7 @@ jobs:
           expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
+        timeout-minutes: 12
         uses: ./.github/actions/setup-playwright
         with:
           browser: chromium
@@ -953,6 +955,7 @@ jobs:
           expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
+        timeout-minutes: 12
         uses: ./.github/actions/setup-playwright
         with:
           browser: chromium

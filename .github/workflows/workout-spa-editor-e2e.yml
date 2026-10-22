@@ -74,8 +74,14 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      # Browser + system packages from caches; apt is only contacted on a
+      # cold key, and the composite bounds that path internally (see its
+      # description). The step cap sits just above its internal budgets.
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+        timeout-minutes: 12
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: ${{ matrix.browser }}
 
       - name: Build workspace dependencies
         run: pnpm -r build
@@ -111,7 +117,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        device: ["Mobile Chrome", "Mobile Safari"]
+        include:
+          - { device: "Mobile Chrome", browser: chromium }
+          - { device: "Mobile Safari", browser: webkit }
 
     steps:
       - name: Checkout code
@@ -120,8 +128,14 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      # Browser + system packages from caches; apt is only contacted on a
+      # cold key, and the composite bounds that path internally (see its
+      # description). The step cap sits just above its internal budgets.
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+        timeout-minutes: 12
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: ${{ matrix.browser }}
 
       - name: Build workspace dependencies
         run: pnpm -r build
