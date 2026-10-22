@@ -33,7 +33,7 @@ No pre-built singleton is exported because `model` (a `LanguageModel` from the V
 - **`src/observability/`** — Records usage telemetry; no quality signal is fed back
 - **`src/prompts/`** — System prompts plus the untrusted-data fence, whose payload neutralization is the only defense against injection in synced coach text
 - **`src/adapters/`** — Strategy implementations for LLM integration
-- **`src/evals/`** — Assertions and fixtures. **The runners are INERT here**: they need a provider API key this project does not have. What gates every commit is the assertion logic and the fixtures' own invariants
+- **`src/evals/`** — Assertions and fixtures, the keyless cassette replay lane, and the local-only live lane over the Claude Code CLI. **No live runner runs in CI**. What gates every commit is the assertion logic and the fixtures' own invariants
 - **`src/test-utils/`** — Shared test constants and mocks
 
 ## For AI Agents
@@ -63,7 +63,7 @@ Common operations:
 - Test files: `*.test.ts` colocated with source
 - Coverage: 80% (core package threshold)
 - Run: `pnpm --filter @kaiord/ai test` or `pnpm --filter @kaiord/ai test:watch`
-- Evals: `pnpm --filter @kaiord/ai eval` is INERT — it throws at `load-eval-model.ts` without a provider API key, which this project does not have. It has never executed. `eval:chat-tools` and `eval:labs` are the same. Nothing in the suite declares a pass threshold, because a comparison that cannot run is not a gate (`check-no-inert-floors.mjs` enforces that)
+- Evals: no provider API key exists and no eval runs in CI. `pnpm --filter @kaiord/ai eval:live` runs the parser suite on the maintainer's local Claude Code subscription (`claude -p`, see `src/evals/AGENTS.md`); in CI, or without the `EVAL_LIVE=1` that only that script sets, it stops as `INERT` before spawning anything. `eval:chat-tools` and `eval:labs` report every case unmeasured (tool calling and document file parts cannot go through `claude -p`) and exit 0. No live runner declares a pass threshold, because a comparison that cannot run where merges are decided is not a gate (`check-no-inert-floors.mjs` enforces that). Never run `eval:live` from an agent session: its calls spend the maintainer's subscription quota
 
 ### Common Patterns
 

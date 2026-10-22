@@ -1,11 +1,11 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-09-07 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-10-22 -->
 
 # src/evals/
 
 ## Purpose
 
-Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (25 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **The runners are INERT in this project**: they obtain a model through `loadEvalModel`, which throws without a provider API key, and this project has none. They have never executed. What runs on every commit is the assertion logic and the fixtures' own structural invariants, neither of which needs a credential.
+Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (25 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **No runner here runs in CI.** This project holds no provider API key. The parser runner (`run-evals.ts`) is the live lane: it runs only on the maintainer's machine, over the local Claude Code subscription (`claude -p`, see `claude-cli/` below), and is INERT anywhere else. The chat-tool and lab-extraction runners need tool calling and document file parts, which `claude -p` cannot carry: they report every case unmeasured and exit 0. What runs on every commit is the assertion logic, the fixtures' own structural invariants and the keyless replay lane, none of which needs a credential.
 
 ## Key Files
 
@@ -13,8 +13,7 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 - `types.ts` — Type definitions: `Benchmark`, `EvalResult`, `EvalReport`, `ZoneCheck`
 - `assertions.ts` — `evaluateBenchmark(benchmark, workout, durationMs)` validates schema, sport, step count, zone ranges
 - `reporter.ts` — Report generation (`createReport`, `formatReport`) with category/language breakdowns; reused as-is by the chat-tool evals (both result shapes carry `id`/`pass`/`errors`/`durationMs`)
-- `run-evals.ts` — CLI entry point (inert): would run all benchmarks and output report JSON and markdown
-- `load-eval-model.ts` — shared `EVAL_PROVIDER`/`EVAL_MODEL` loader used by all three eval CLIs; throws without the provider's API key, which is why the CLIs are inert here
+- `run-evals.ts` — the live parser runner (`eval:live`): per-case counts with `--repeat N`, cassettes with `--record`, the calibration capture with `--calibrate`; INERT in CI and without `EVAL_LIVE=1`; exits on a literal and carries no threshold
 - `benchmark-invariants.ts` — keyless structural checks over `benchmarks.json`; a `zoneCheck` with no bound the comparison can use is rejected
 - `target-assertions.ts` — the `targets` and `structure` dimensions
 - `train2go-contrasts.test.ts` — keyless end-to-end case: a `MockLanguageModelV4` returns the zone numbers a rule-following model emits for the Train2Go "rodaje con contrastes" session, `createTextToWorkout` resolves them against the benchmark's `athleteZones`, and the result passes its benchmark; the pre-fix output (open targets) fails `targets`
@@ -23,7 +22,7 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 - `chat-tool-types.ts` — Type definitions: `ChatToolBenchmark`, `ChatToolEvalResult`
 - `chat-tool-fixtures.ts` — local `get_data_routes`/`set_data_route` `ChatTool` fixtures mirroring the real schemas registered in `@kaiord/workout-spa-editor` (hand-kept in sync; that package cannot be a dependency here)
 - `chat-tool-assertions.ts` — `evaluateChatToolBenchmark(benchmark, chatTurnResult, durationMs)`: read scenarios check the expected tool was called and the final answer names the real source; action scenarios check the paused `pendingAction` matches the expected tool + input fields
-- `run-chat-tool-evals.ts` — CLI entry point (inert): would run `createChatAgent` against the hub tool fixtures for each benchmark
+- `run-chat-tool-evals.ts` / `run-lab-extraction-evals.ts` — report every case unmeasured (tool calling; document file parts) and exit 0; they import no live code, so they never reach the `EVAL_LIVE` opt-in
 
 ## Cassettes and replay (`cassettes/`)
 
@@ -36,6 +35,23 @@ Keyless replay of recorded model responses through `MockLanguageModelV4` and the
 - `parser-replay-suite.ts` — the workout-parser benchmarks as a replay suite (`maxRetries: 0`: a cassette holds one call)
 - `cassette-files.ts` / `manifest.ts` / `committed-directory.ts` — the committed directory `committed/` and its `manifest.json` (id + SHA-256 of the file per real cassette; empty for now). `replayCommitted` is the one entry point: missing, unlisted, duplicated, misnamed, digest-mismatched and stale cassettes, a stray file or subdirectory and an unreadable manifest all reach the exit code, and a faulted cassette is never replayed
 - `fixtures/` — `recorder: "synthetic"` cassettes only; their model ids are `synthetic`, so even relabelled as real they are never measured
+
+## Live lane (`claude-cli/`)
+
+Local only: the maintainer's Claude Code subscription driven headless. It never
+runs in CI, so nothing here may gate (`check-no-inert-floors` treats any import
+resolving under this directory as inert). Every unit test injects `spawn`; no
+test starts the real binary.
+
+- `detect-claude-cli.ts` — both locks before any process (`CI` set; `EVAL_LIVE` not `1`), then `claude auth status --json`; only `loggedIn`, `authMethod`, `apiProvider` are read, so no email or organization is kept
+- `child-env.ts` / `empty-cwd.ts` / `clean-context-args.ts` / `run-process.ts` / `spawn-claude.ts` — one process per call: an allowlisted env (`PATH`, `HOME`, `USER`, `LOGNAME`, `SHELL`, `LANG`, `TMPDIR`, plus `MAX_THINKING_TOKENS=0`), a fresh empty cwd removed in a `finally`, an argument array, the prompt on stdin, the clean-context flags with `stream-json` output; an `init` reporting an API key source other than none, or any tool, MCP server, skill or plugin, aborts as a harness fault
+- `stream-messages.ts` — parses `init`, `result` and `rate_limit_event`; only named fields survive
+- `claude-cli-language-model.ts` / `claude-request.ts` — the `LanguageModelV4` adapter (`doGenerate` only); every response declares the parity gaps (temperature, output-token limit, hidden system overhead); tools, file parts, a schema-less call and streaming are unsupported
+- `rate-limit-guard.ts` — `SEVEN_DAY_FIELD`, **NOT PINNED** (tasks.md 3.4): every decision stops the pass as a harness fault until a real `rate_limit_event` fixes its name and scale. Pinned, it stops strictly above `EVAL_MAX_WEEKLY_UTILIZATION` (default 0.85) or on a status other than allowed
+- `live-session.ts` / `live-config.ts` / `calibration-call.ts` — one call at a time, `EVAL_MAX_CALLS` (default 50, calibration and retries included), the official model literal, and the calibration call whose input tokens above 1000 stop the pass as a context leak
+- `live-pass.ts` / `parser-live-cases.ts` / `live-report.ts` / `live-summary.ts` — the pass: a stopped pass, a harness fault or an unsupported call leaves a case unmeasured, never failed; per-case k of n; a strict report (`eval-report-*.json`, gitignored) with cost labelled API-equivalent
+- `recording-model.ts` / `record-case.ts` / `served-model.ts` / `cassette-writer.ts` — the recorder: one call per case (D4), `modelUsage` naming exactly the requested model or a dated snapshot of it, the official model to `cassettes/committed/` with its manifest digest, any other model to the gitignored `packages/ai/.eval-cassettes/`. `OFFICIAL_SERVED_FORM` (in `cassettes/validate-cassette.ts`) is **NOT PINNED** (tasks.md 3.5), so every committed write is refused until a real result shows whether `modelUsage` keys the bare or the dated id. The committed directory is in `.prettierignore`, so lint-staged cannot change the bytes its digest covers
+- `calibration-capture.ts` — `eval:live -- --calibrate`: one call, its `rate_limit_event`s projected to numbers, booleans and token strings (no email, org, uuid, session id or cwd) and its `modelUsage` keys, written to `.eval-cassettes/calibration-<ts>.json` and printed, for pinning the two seams above
 
 ## Assertions per Benchmark
 
@@ -76,20 +92,21 @@ Which layers exist here, and which do not, using the six-layer stage axis:
 | 1. Unit / component           | yes     | `assertions.test.ts`, `reporter.test.ts`, `chat-tool-assertions.test.ts` — keyless, every commit                                     |
 | 2. Fixture invariants         | yes     | `benchmark-invariants.ts`, the `chat-tool-benchmarks.json` shape tests — the fixtures are a specification, and this checks it        |
 | 3. Guardrails / containment   | yes     | outside this directory: `fence.test.ts` plus the two mechanical guards (`check-untrusted-fields-fenced`, `check-model-facing-sinks`) |
-| 4. End-to-end model behaviour | NO      | needs a provider key; the three runners here are its inert skeleton                                                                  |
-| 5. Human / preference         | NO      | no rater pool, and nothing to rate while layer 4 cannot run                                                                          |
+| 4. End-to-end model behaviour | local   | `eval:live` on the maintainer's subscription only; never in CI, so it reports and records but never gates                            |
+| 5. Human / preference         | NO      | no rater pool                                                                                                                        |
 | 6. Production monitoring      | partial | `observability/` records usage telemetry; no quality signal is fed back                                                              |
 
 Layers 1-3 gate every commit and need no credential. Layer 4 is the boundary:
-everything above it is blocked on the same missing key, so nothing here
-declares a threshold — see below.
+it runs only where merges are not decided, so nothing here declares a
+threshold — see below.
 
 **There are no per-dimension thresholds, and there is no overall pass rate
 gate.** Earlier revisions of this file documented a 100% schema threshold and a
 ≥95% sport threshold; neither was ever implemented — `evaluateBenchmark` folds
 every dimension into one binary `pass`. They are not implemented now either,
-deliberately: this suite cannot run in this project (see the runner header), so
-any threshold on it would be a number that can never fire.
+deliberately: the live suite cannot run in CI (see the runner header), so any
+threshold on it would be a number that never fires where it matters. A floor
+belongs on the keyless replay lane, derived from a measured A/A run.
 
 ## Benchmark Schema
 
@@ -136,7 +153,7 @@ any threshold on it would be a number that can never fire.
 - **Add a benchmark**: Edit `benchmarks.json`, follow the schema, run `pnpm --filter @kaiord/ai test` to validate
 - **Modify assertions**: Update `assertions.ts` (e.g., change tolerance from 5% to 10%), re-run evals
 - **Customize report**: Edit `reporter.ts` formatting (markdown, JSON structure)
-- **Run locally**: not possible in this project — the runners need a provider API key it does not have
+- **Run locally**: the maintainer runs `pnpm --filter @kaiord/ai eval:live` (add `-- --repeat N`, `-- --record` or `-- --calibrate`). An agent never runs it: every call spends the maintainer's subscription quota
 - **Add a chat-tool benchmark**: Edit `chat-tool-benchmarks.json`, follow the schema above; if the scenario needs a new fixture answer, extend `chat-tool-fixtures.ts`
 
 ### Testing Requirements
@@ -146,7 +163,7 @@ any threshold on it would be a number that can never fire.
 - `chat-tool-assertions.test.ts` also scores the shipped `chat-tool-benchmarks.json` itself: every expectation must be in a shape `expectationFault` understands, and each benchmark must declare the expectation its own category is scored on. Without it a fixture could go green by declaring nothing the scorer reads
 - `reporter.test.ts`: Unit tests for `createReport` grouping and `formatReport` output
 - `chat-tool-assertions.test.ts`: Unit tests for `evaluateChatToolBenchmark` against fabricated `ChatTurnResult` values (no LLM calls)
-- No integration tests for `run-evals.ts` / `run-chat-tool-evals.ts` (CLIs; manually tested)
+- No integration tests for the `run-*.ts` CLIs; the live lane's modules are unit-tested under `claude-cli/` with an injected `spawn`
 - All assertions test mocked workouts / chat turns (no LLM calls)
 
 ### Common Patterns
@@ -164,12 +181,12 @@ any threshold on it would be a number that can never fire.
 - `../index` — `createTextToWorkout`, `createChatAgent`, `ChatTool`, `ChatTurnResult`
 - `./types` / `./chat-tool-types` — Type definitions
 - `./benchmarks.json` / `./chat-tool-benchmarks.json` — Benchmark data
-- `./load-eval-model` — shared model loader
+- `./claude-cli/load-live-model` — the live loader (parser runner only)
 
 ### External
 
-- `ai` — `LanguageModel`, `ModelMessage` (via dynamic import in the CLIs)
-- `@ai-sdk/anthropic` — `createAnthropic` for the CLIs
+- `ai` — `LanguageModel`, `UnsupportedFunctionalityError`; the live adapter implements its `LanguageModelV4` member
+- the Claude Code CLI (`claude`), installed and logged in on the maintainer's machine — never a package dependency
 - `zod` — chat-tool fixture schemas
 
 ## File Line Limits

@@ -38,9 +38,10 @@
     "test:watch": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check src",
     "lint:fix": "eslint . --fix && prettier --write src",
-    "eval": "echo 'INERT: needs a provider API key this project does not have. See the runner header.' && tsx src/evals/run-evals.ts",
-    "eval:chat-tools": "echo 'INERT: needs a provider API key this project does not have. See the runner header.' && tsx src/evals/run-chat-tool-evals.ts",
-    "eval:labs": "echo 'INERT: needs a provider API key this project does not have. See the runner header.' && tsx src/evals/run-lab-extraction-evals.ts",
+    "eval": "echo 'INERT without the opt-in: the live lane runs only through eval:live, on the local Claude Code subscription. See the runner header.' && tsx --import ./scripts/md-text-loader.mjs src/evals/run-evals.ts",
+    "eval:live": "EVAL_LIVE=1 tsx --import ./scripts/md-text-loader.mjs src/evals/run-evals.ts",
+    "eval:chat-tools": "echo 'UNMEASURED: needs tool calling, which the claude -p live lane cannot carry. See the runner header.' && tsx src/evals/run-chat-tool-evals.ts",
+    "eval:labs": "echo 'UNMEASURED: needs document file parts, which the claude -p live lane cannot carry. See the runner header.' && tsx src/evals/run-lab-extraction-evals.ts",
     "generate:model-catalog": "node scripts/generate-model-catalog.mjs",
     "clean": "rm -rf dist"
   },

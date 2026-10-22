@@ -103,9 +103,29 @@ credential.
 
 The `zoneCheck` field is optional. When present, active steps with the specified target type are validated against the min/max values with a 5% tolerance.
 
-### CI Integration
+### Live evals (local only)
 
-Evals run via GitHub Actions as a manual `workflow_dispatch` trigger (`.github/workflows/eval.yml`). Results are uploaded as workflow artifacts. Evals are not part of the standard CI pipeline because they require LLM API keys and incur costs.
+This project holds no provider API key, and no eval runs in CI. The only live
+model access is the maintainer's local Claude Code subscription, driven
+headless (`claude -p`) behind a `LanguageModelV4` adapter, so the real agent
+runtime runs unchanged above it:
+
+```bash
+pnpm --filter @kaiord/ai eval:live                  # one pass of the parser suite
+pnpm --filter @kaiord/ai eval:live -- --repeat 5    # five passes, k of n per case
+pnpm --filter @kaiord/ai eval:live -- --record      # one cassette per case
+pnpm --filter @kaiord/ai eval:live -- --calibrate   # one call, captured for pinning
+```
+
+`eval:live` is the only script that sets `EVAL_LIVE=1`; with `CI` set or
+without that opt-in the runner stops as `INERT` before any process starts.
+Each pass starts with a calibration call, runs one call at a time, stops after
+`EVAL_MAX_CALLS` calls (default 50) or above `EVAL_MAX_WEEKLY_UTILIZATION`
+(default 0.85), and reports cost as API-equivalent, never as money spent. It
+never gates: the report holds per-case counts, not a pass rate. The chat-tool
+and lab-extraction suites need tool calling and document file parts, which
+`claude -p` cannot carry, so `eval:chat-tools` and `eval:labs` report every
+case unmeasured and exit 0.
 
 ## License
 
