@@ -74,8 +74,16 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      # Browser + system packages from caches; apt is only contacted on a
+      # cold key. The composite's internal budgets add up to 650s (browser
+      # 90s + apt attempt 1 45s+90s + attempt 2 45s+240s + dpkg 60s+20s+60s);
+      # the 12-min cap leaves 70s for cache restore/save. system-deps stays
+      # `required`: firefox and webkit cannot launch without the packages.
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+        timeout-minutes: 12
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: ${{ matrix.browser }}
 
       - name: Build workspace dependencies
         run: pnpm -r build
@@ -111,7 +119,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        device: ["Mobile Chrome", "Mobile Safari"]
+        include:
+          - { device: "Mobile Chrome", browser: chromium }
+          - { device: "Mobile Safari", browser: webkit }
 
     steps:
       - name: Checkout code
@@ -120,8 +130,16 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      # Browser + system packages from caches; apt is only contacted on a
+      # cold key. The composite's internal budgets add up to 650s (browser
+      # 90s + apt attempt 1 45s+90s + attempt 2 45s+240s + dpkg 60s+20s+60s);
+      # the 12-min cap leaves 70s for cache restore/save. system-deps stays
+      # `required`: firefox and webkit cannot launch without the packages.
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+        timeout-minutes: 12
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: ${{ matrix.browser }}
 
       - name: Build workspace dependencies
         run: pnpm -r build
