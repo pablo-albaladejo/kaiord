@@ -37,6 +37,8 @@ const {
   writeJson,
 } = require("./guard-common.cjs");
 
+const { MACHINE_PREFIXES } = require("./record-human-approval.cjs");
+
 const MAX_CONSECUTIVE_BLOCKS = 3;
 const DEFAULT_BUDGET_MS = 180_000;
 const CODE = /\.(c|m)?[jt]sx?$/;
@@ -460,6 +462,22 @@ function subagentWrote(input) {
 // Stop: did THIS turn (everything after the last real user prompt) call a
 // write tool? A question-only turn in a dirty worktree must not be blocked
 // for tests it never touched. Unreadable or unknown means it may have: run.
+const entryText = (content) =>
+  typeof content === "string"
+    ? content
+    : Array.isArray(content)
+      ? content.map((c) => (typeof c?.text === "string" ? c.text : "")).join("")
+      : "";
+
+function isMachineEntry(entry) {
+  if (entry.isMeta === true) return true;
+  const text = entryText(entry.message?.content).trimStart();
+  return (
+    text.startsWith("Stop hook feedback:") ||
+    MACHINE_PREFIXES.some((prefix) => text.startsWith(prefix))
+  );
+}
+
 function turnWrote(input) {
   const file = input?.transcript_path;
   if (typeof file !== "string") return true;
@@ -478,6 +496,9 @@ function turnWrote(input) {
     }
     const content = entry?.message?.content;
     if (entry?.type === "user") {
+      // Hook feedback, task notifications and other machine-made entries are
+      // recorded as user entries but do not open a turn.
+      if (isMachineEntry(entry)) continue;
       const toolResult =
         Array.isArray(content) &&
         content.every((c) => c?.type === "tool_result");
@@ -542,11 +563,18 @@ async function main(input, { env = process.env, budgetMs } = {}) {
   // block it, and do not spend 180 s re-running them for it.
   if (input?.hook_event_name === "SubagentStop" && !subagentWrote(input))
     return null;
-  if (input?.hook_event_name === "Stop" && !turnWrote(input)) return null;
 
   const file = sessionId ? statePath(env, sessionId) : null;
   const key = slotKey(input);
   const slot = file ? readJson(file)?.[key] : undefined;
+  // Only a clean slate may skip: after a block, the agent's next Stop must be
+  // judged on the tests, not on whether it wrote anything since the feedback.
+  if (
+    input?.hook_event_name === "Stop" &&
+    !(slot?.blocks > 0) &&
+    !turnWrote(input)
+  )
+    return null;
   const fp = fingerprint(root, lanes);
   if (slot?.lastGreen === `${root}:${fp}`) return null;
 

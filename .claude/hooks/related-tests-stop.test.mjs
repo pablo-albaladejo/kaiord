@@ -26,6 +26,7 @@ const {
   MAX_CONSECUTIVE_BLOCKS,
   planRuns,
   subagentWrote,
+  turnWrote,
   tapFailures,
   verdict,
   vitestFailures,
@@ -220,6 +221,62 @@ describe("subagentWrote", () => {
   });
 });
 
+describe("turnWrote", () => {
+  const transcript = (entries) => {
+    const dir = mkdtempSync(join(tmpdir(), "turn-wrote-"));
+    const file = join(dir, "t.jsonl");
+    writeFileSync(file, entries.map((e) => JSON.stringify(e)).join("\n"));
+    return file;
+  };
+  const prompt = { type: "user", message: { content: "fix it" } };
+  const edit = {
+    type: "assistant",
+    message: { content: [{ type: "tool_use", id: "t1", name: "Edit" }] },
+  };
+  const answer = { type: "assistant", message: { content: [] } };
+
+  it("should not treat Stop hook feedback as the start of a turn", () => {
+    // Arrange
+    const feedback = {
+      type: "user",
+      isMeta: true,
+      message: { content: "Stop hook feedback:\nRelated tests are RED" },
+    };
+    const plain = {
+      type: "user",
+      message: { content: "Stop hook feedback:\nRelated tests are RED" },
+    };
+
+    // Act
+    const meta = turnWrote({
+      transcript_path: transcript([prompt, edit, answer, feedback, answer]),
+    });
+    const text = turnWrote({
+      transcript_path: transcript([prompt, edit, answer, plain, answer]),
+    });
+
+    // Assert
+    assert.equal(meta, true);
+    assert.equal(text, true);
+  });
+
+  it("should keep counting an Edit made before a mid-turn task notification", () => {
+    // Arrange
+    const note = {
+      type: "user",
+      message: { content: "<task-notification>done</task-notification>" },
+    };
+
+    // Act
+    const wrote = turnWrote({
+      transcript_path: transcript([prompt, edit, answer, note, answer]),
+    });
+
+    // Assert
+    assert.equal(wrote, true);
+  });
+});
+
 describe("CLI — a throwaway repository", () => {
   let sandbox;
   let repo;
@@ -397,6 +454,32 @@ describe("CLI — a throwaway repository", () => {
     // Assert
     assert.equal(asked.stdout, "");
     assert.equal(JSON.parse(edited.stdout).decision, "block");
+  });
+
+  it("should keep blocking a red tree after a block even if the next turn wrote nothing", () => {
+    // Arrange
+    write("scripts/sum.mjs", "export const sum = (a, b) => a - b;\n");
+    const prompt = { type: "user", message: { content: "q" } };
+    const edit = {
+      type: "assistant",
+      message: { content: [{ type: "tool_use", id: "t1", name: "Edit" }] },
+    };
+    const file = join(sandbox, "blocked.jsonl");
+    writeFileSync(
+      file,
+      [prompt, edit].map((e) => JSON.stringify(e)).join("\n")
+    );
+    const quiet = join(sandbox, "quiet.jsonl");
+    writeFileSync(quiet, JSON.stringify(prompt));
+
+    // Act
+    const first = run({}, { transcript_path: file });
+    const second = run({}, { transcript_path: quiet });
+
+    // Assert
+    assert.equal(JSON.parse(first.stdout).decision, "block");
+    assert.equal(JSON.parse(second.stdout).decision, "block");
+    assert.equal(counter().main.blocks, 2);
   });
 
   it("should pass a green change and record it so the same tree is not re-run", () => {

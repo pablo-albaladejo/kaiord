@@ -170,7 +170,7 @@ function decide(
   const rel = inGitDir
     ? path.join(".git", path.relative(projectRepo.commonDir, target))
     : path.relative(fileRepo.top, target);
-  if (!inGitDir && isExemptRepoPath(rel, projectRepo.top))
+  if (!inGitDir && isExemptRepoPath(rel, fileRepo.top))
     return { verdict: "allow", why: `exempt ${rel}` };
 
   const sessionId = safeSessionId(input.session_id);

@@ -67,7 +67,14 @@ function record(input, { env = process.env, now = Date.now() } = {}) {
   return "recorded";
 }
 
-module.exports = { TTL_MS, buildReceipt, isHumanPrompt, receiptPath, record };
+module.exports = {
+  MACHINE_PREFIXES,
+  TTL_MS,
+  buildReceipt,
+  isHumanPrompt,
+  receiptPath,
+  record,
+};
 
 if (require.main === module) {
   try {
