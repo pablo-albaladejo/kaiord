@@ -291,3 +291,36 @@ test("a plain JavaScript runner is scanned and fails", () => {
     ["run-j.mjs computed-exit", "run-j.mjs score-comparison"]
   );
 });
+
+// Only import positions are walked: a path literal that is not imported is
+// never read as a module, so a keyless runner naming its package root keeps
+// its gate. Reaching claude-cli/ still scans every literal.
+
+test("a keyless runner resolving a path to its package root still gates", () => {
+  const kinds = kindsOf({
+    "package.json": "{}\n",
+    "a/b/run-k.ts": `import { resolve } from "node:path";\nconst ROOT = resolve(import.meta.dirname, "../..");\n${GATE}`,
+  });
+  assert.deepEqual(kinds, []);
+});
+
+test("a keyless runner joining to a parent with a package.json still gates", () => {
+  const kinds = kindsOf({
+    "package.json": "{}\n",
+    "sub/run-k.ts": `import { join } from "node:path";\nconst ROOT = join(import.meta.dirname, "..");\nconst p = ["a", "b"].join(".");\n${GATE}`,
+  });
+  assert.deepEqual(kinds, []);
+});
+
+test("require.resolve and import = require() are import positions, followed", () => {
+  for (const head of [
+    `const p = require.resolve("./helpers");\n`,
+    `import h = require("./helpers");\n`,
+  ]) {
+    const kinds = kindsOf({
+      "helpers.ts": `export * from "./claude-cli/spawn-claude";\n`,
+      "run-r.ts": `${head}${GATE}`,
+    });
+    assert.ok(kinds.includes("computed-exit"), head);
+  }
+});

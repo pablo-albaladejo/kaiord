@@ -13,11 +13,13 @@
  * reaches, names the credential-bound loader `load-eval-model`, holds a
  * string literal resolving under `packages/ai/src/evals/claude-cli/` (every
  * string literal is a candidate specifier, so a path kept in a constant
- * counts), lives under `claude-cli/`, or uses a loader the walk cannot follow
+ * counts), lives under `claude-cli/`, imports a local package directory with
+ * no index file, or uses a loader the walk cannot follow
  * (`createRequire`, `import()`/`require()` of anything but a plain string,
- * `x.require`): an unknowable target fails closed. Runners are every
- * `run-*.{ts,mts,cts,mjs,js,cjs}` under the evals tree, recursively, tests excluded. A
- * runner that needs neither a credential nor the CLI is EXEMPT and may gate
+ * `x.require`): an unknowable target fails closed. Only specifiers in import
+ * positions are walked, so a path literal such as `resolve(dir, "../..")` is
+ * never read as a module. Runners are every `run-*.{ts,mts,cts,mjs,js,cjs}`
+ * under the evals tree, recursively, tests excluded. A runner that needs neither a credential nor the CLI is EXEMPT and may gate
  * freely — a directory-wide ban would forbid the keyless replay runner this
  * project wants to gate on.
  *
@@ -120,24 +122,61 @@ const isOpaqueLoader = (node) => {
   return isLoader && !(argument && ts.isStringLiteralLike(argument));
 };
 
+/** The plain-string specifier a node imports by, or undefined. */
+const importedSpecifier = (node) => {
+  if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+    const spec = node.moduleSpecifier;
+    return spec && ts.isStringLiteralLike(spec) ? spec.text : undefined;
+  }
+  if (ts.isExternalModuleReference(node)) {
+    const spec = node.expression;
+    return ts.isStringLiteralLike(spec) ? spec.text : undefined;
+  }
+  if (!ts.isCallExpression(node)) return undefined;
+  const callee = node.expression;
+  const isLoader =
+    callee.kind === ts.SyntaxKind.ImportKeyword ||
+    (ts.isIdentifier(callee) && callee.text === "require") ||
+    (ts.isPropertyAccessExpression(callee) &&
+      nameOf(callee.expression) === "require" &&
+      callee.name.text === "resolve");
+  const [argument] = node.arguments;
+  return isLoader && argument && ts.isStringLiteralLike(argument)
+    ? argument.text
+    : undefined;
+};
+
 /**
- * Every string literal is a candidate specifier, as in the replay lane's
- * import pin: a path held in a constant is caught wherever it appears.
+ * `specifiers`: every string literal, as in the replay lane's import pin, so
+ * a path to `claude-cli/` held in a constant is caught wherever it appears.
+ * `imports`: only the specifiers in import positions (import/export
+ * declarations, `import x = require()`, and the literal argument of
+ * `import()`, `require()` and `require.resolve()`); these alone are walked,
+ * so a path such as `resolve(dirname, "../..")` is never read as a module.
  */
 export const scanModule = (src, file) => {
-  const scan = { specifiers: [], opaque: [] };
+  const scan = { specifiers: [], imports: [], opaque: [] };
   walk(parse(src, file), (node) => {
     if (ts.isStringLiteralLike(node)) scan.specifiers.push(node.text);
+    const imported = importedSpecifier(node);
+    if (imported !== undefined) scan.imports.push(imported);
     if (isOpaqueLoader(node)) scan.opaque.push(node.getText().slice(0, 80));
   });
   return scan;
 };
 
-/** Local specifiers of `src`, resolved against the importing file. */
-export const importTargets = (src, file) =>
-  scanModule(src, file)
-    .specifiers.filter((s) => s.startsWith(".") || isAbsolute(s))
+const localTargets = (specifiers, file) =>
+  specifiers
+    .filter((s) => s.startsWith(".") || isAbsolute(s))
     .map((s) => resolve(dirname(file), s));
+
+/** Every local string literal of `src`, resolved against the importing file. */
+export const importTargets = (src, file) =>
+  localTargets(scanModule(src, file).specifiers, file);
+
+/** Only the local specifiers in import positions, resolved the same way. */
+export const importedTargets = (src, file) =>
+  localTargets(scanModule(src, file).imports, file);
 
 /**
  * Every code file a local target could resolve to: TypeScript, `.js` written
@@ -167,7 +206,7 @@ const moduleReason = (src, file, liveDir) => {
   if (liveDir === undefined) return undefined;
   // A directory resolved through its package.json `main` or `exports` is a
   // target the walk does not follow: unknowable, so it fails closed.
-  const packageDir = importTargets(src, file).find(
+  const packageDir = importedTargets(src, file).find(
     (t) => sourceFiles(t).length === 0 && existsSync(join(t, "package.json"))
   );
   if (packageDir) return `opaque package directory ${basename(packageDir)}`;
@@ -192,7 +231,7 @@ export const inertReason = (src, file, root) => {
     const reason = moduleReason(text, path, liveDir);
     if (reason) return path === file ? reason : `${reason} via ${path}`;
     if (root === undefined) continue;
-    for (const target of importTargets(text, path)) {
+    for (const target of importedTargets(text, path)) {
       for (const next of sourceFiles(target)) {
         if (!seen.has(next)) {
           queue.push({ path: next, text: readFileSync(next, "utf8") });
