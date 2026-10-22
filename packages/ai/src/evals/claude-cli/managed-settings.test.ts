@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { managedSettingsPaths } from "./managed-settings";
 
-/** Two known platforms, two paths each; the unknown one checks none. */
-const PATHS_CHECKED = 4;
+/** Linux checks two paths, macOS three; the unknown platform none. */
+const PATHS_CHECKED = 5;
 
 describe("managedSettingsPaths", () => {
   it("should report the file and the drop-in directory that exist, without reading them", () => {
@@ -34,5 +34,17 @@ describe("managedSettingsPaths", () => {
       [],
     ]);
     expect(checked).toHaveLength(PATHS_CHECKED);
+  });
+
+  it("should probe the macOS MDM managed-preferences plist by existence", () => {
+    // Arrange
+    const plist = "/Library/Managed Preferences/com.anthropic.claudecode.plist";
+    const exists = (path: string) => path === plist;
+
+    // Act
+    const found = managedSettingsPaths("darwin", exists);
+
+    // Assert
+    expect(found).toEqual([plist]);
   });
 });

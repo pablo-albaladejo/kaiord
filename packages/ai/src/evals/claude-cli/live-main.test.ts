@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { cliRun } from "../../test-utils/claude-cli-doubles";
 import { createClaudeCliLanguageModel } from "./claude-cli-language-model";
-import { runLiveMain } from "./live-main";
+import { POLICY_BLIND_SPOT, runLiveMain } from "./live-main";
 import type { LiveMainDeps } from "./live-main";
 import { createLiveSession } from "./live-session";
 import type { WeeklyField } from "./rate-limit-guard";
@@ -121,6 +121,7 @@ describe("runLiveMain", () => {
     expect(outcome).toBe("ran");
     expect(calls()).toBe(1);
     expect(text).toContain(`managed settings exist at ${MANAGED}`);
+    expect(text).toContain(POLICY_BLIND_SPOT);
     expect(readdirSync(join(root, "calibration"))).toHaveLength(1);
   });
 

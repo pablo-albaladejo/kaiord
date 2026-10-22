@@ -2,12 +2,19 @@ import { existsSync } from "node:fs";
 
 /**
  * Where Claude Code reads enterprise managed settings, per platform: the
- * file and the `managed-settings.d/` drop-in directory beside it.
+ * file and the `managed-settings.d/` drop-in directory beside it, and on
+ * macOS the MDM managed-preferences plist. Windows registry policy
+ * (`HKLM`/`HKCU\\SOFTWARE\\Policies\\ClaudeCode`) and server-managed org
+ * settings are out of reach: no `reg.exe`, no network, nothing read.
  */
 const MANAGED_SETTINGS: Readonly<Record<string, ReadonlyArray<string>>> = {
   darwin: [
     "/Library/Application Support/ClaudeCode/managed-settings.json",
     "/Library/Application Support/ClaudeCode/managed-settings.d",
+    // MDM policy, which outranks the files. The docs name the managed
+    // preferences domain `com.anthropic.claudecode` but not a path; this is
+    // the standard location of MDM-delivered preferences for a domain.
+    "/Library/Managed Preferences/com.anthropic.claudecode.plist",
   ],
   linux: [
     "/etc/claude-code/managed-settings.json",

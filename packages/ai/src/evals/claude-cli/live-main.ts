@@ -15,6 +15,10 @@ import type { LiveModel } from "./load-live-model";
 import { parserLiveCases, recordingLiveCases } from "./parser-live-cases";
 import { recordPreflightFault } from "./served-model";
 
+/** What the existence probes cannot see, printed before calibrating. */
+export const POLICY_BLIND_SPOT =
+  "note: this lane cannot see Windows registry policy or server-managed (org) policy; confirm the effective settings with /status in Claude Code before calibrating";
+
 /** `ran` exits 0, `refused` 1 (inert or misconfigured), `fault` 2. */
 export type LiveOutcome = "ran" | "refused" | "fault";
 
@@ -91,6 +95,9 @@ const runLive = async (deps: LiveMainDeps): Promise<LiveOutcome> => {
     deps.log(
       `note: managed settings exist at ${path} (not read); they apply whatever --setting-sources says, so confirm they set no ANTHROPIC_BASE_URL`
     );
+  }
+  if (args.calibrate || live.managedSettings.length > 0) {
+    deps.log(POLICY_BLIND_SPOT);
   }
   if (args.calibrate) return runCalibration(deps, live);
   const preflight = args.record
