@@ -41,6 +41,25 @@ describe("convertPowerTarget", () => {
     });
   });
 
+  describe("range target stored high to low", () => {
+    it("should sort the bounds so min <= max", () => {
+      // Arrange
+      const data: FitTargetData = {
+        customTargetPowerLow: 75,
+        customTargetPowerHigh: 50,
+      };
+
+      // Act
+      const result = convertPowerTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+      });
+    });
+  });
+
   describe("range target with mixed bounds", () => {
     it("should warn and drop a range whose bounds mix %FTP and watts", () => {
       // Arrange
@@ -216,7 +235,47 @@ describe("convertPowerTarget", () => {
       });
     });
 
-    it("should return percent FTP for targetValue between 1 and 1000", () => {
+    it("should read targetValue 1000 as 0 W, matching the range bounds", () => {
+      // Arrange
+      const data: FitTargetData = {
+        targetValue: 1000,
+      };
+
+      // Act
+      const result = convertPowerTarget(data);
+      const range = convertPowerTarget({
+        customTargetPowerLow: 1000,
+        customTargetPowerHigh: 1000,
+      });
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "watts", value: 0 },
+      });
+      expect(range).toStrictEqual({
+        type: "power",
+        value: { unit: "range", min: 0, max: 0 },
+      });
+    });
+
+    it("should return percent FTP for targetValue 999", () => {
+      // Arrange
+      const data: FitTargetData = {
+        targetValue: 999,
+      };
+
+      // Act
+      const result = convertPowerTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "percent_ftp", value: 999 },
+      });
+    });
+
+    it("should return percent FTP for targetValue between 1 and 999", () => {
       // Arrange
       const data: FitTargetData = {
         targetValue: 85,

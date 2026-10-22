@@ -52,8 +52,9 @@ const buildRange = (
     type: targetTypeSchema.enum.power,
     value: {
       unit: targetUnitSchema.enum.range,
-      min: min.value,
-      max: max.value,
+      // KRD ranges are min <= max; a FIT range stored high-to-low is sorted.
+      min: Math.min(min.value, max.value),
+      max: Math.max(min.value, max.value),
       ...(percent && { basis: targetUnitSchema.enum.percent_ftp }),
     },
   };
