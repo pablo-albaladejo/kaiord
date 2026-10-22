@@ -173,7 +173,7 @@ describe("recordCase", () => {
     const model = createClaudeCliLanguageModel({
       modelId: "claude-sonnet-5",
       call: async () => {
-        throw new TypeError("the pass stopped on a rate limit");
+        throw new TypeError("spawn failed before any output");
       },
     });
 
@@ -189,7 +189,7 @@ describe("recordCase", () => {
     expect(isHarnessFault(caught)).toBe(false);
     expect(caught).toMatchObject({
       name: "AiParsingError",
-      lastError: "the pass stopped on a rate limit",
+      lastError: "spawn failed before any output",
     });
   });
 
