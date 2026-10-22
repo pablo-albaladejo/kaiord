@@ -178,4 +178,23 @@ describe("project", () => {
     // Assert
     expect(projected).toEqual(info);
   });
+
+  it.each([
+    [
+      "a hex-id-keyed map",
+      { windows: { "3f2b8c1e": { utilization: 0.5 } } },
+      { windows: {} },
+    ],
+    ["a digit-bearing key", { ref2: 482913374, resetsAt: 1 }, { resetsAt: 1 }],
+  ])("should drop %s with its numbers", (_label, input, expected) => {
+    // Arrange
+    const leaked = /3f2b8c1e|482913374/;
+
+    // Act
+    const projected = project(input);
+
+    // Assert
+    expect(projected).toEqual(expected);
+    expect(JSON.stringify(projected)).not.toMatch(leaked);
+  });
 });

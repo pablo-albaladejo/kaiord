@@ -17,19 +17,27 @@ const DENIED_KEY = /email|org|uuid|session|cwd|user|account|path|name|id$/i;
 const ENUM_WORD = /^[a-z][a-z_]{0,31}$/;
 const CLI_VERSION = /^\d+\.\d+\.\d+$/;
 const MODEL_ID = /^claude-[a-z0-9.-]+$/;
-const FIELD_KEY = /^[A-Za-z0-9_]+$/;
+/**
+ * The only keys kept, at every level: letters and underscores, no digit, so
+ * a map keyed by ids (`3f2b8c1e`, `ref2`) is dropped with whatever it holds,
+ * a number included. A number survives only under a word key.
+ */
+const FIELD_KEY = /^[A-Za-z][A-Za-z_]{0,39}$/;
 const MAX_DEPTH = 3;
 
 type Projected = { [key: string]: number | boolean | string | Projected };
 
-/** Numbers, booleans and enum words, nested to a fixed depth; no arrays. */
+/**
+ * Numbers, booleans and enum words under word keys, nested to a fixed depth;
+ * no arrays.
+ */
 export const project = (node: unknown, depth = 0): Projected => {
   const out: Projected = {};
   if (typeof node !== "object" || node === null || Array.isArray(node)) {
     return out;
   }
   for (const [key, value] of Object.entries(node)) {
-    if (DENIED_KEY.test(key)) continue;
+    if (!FIELD_KEY.test(key) || DENIED_KEY.test(key)) continue;
     if (typeof value === "number" || typeof value === "boolean") {
       out[key] = value;
     } else if (typeof value === "string" && ENUM_WORD.test(value)) {
@@ -77,7 +85,9 @@ export type CalibrationCapture = z.infer<typeof calibrationCaptureSchema>;
  * so the maintainer can pin `SEVEN_DAY_FIELD` (3.4) and the served-model form
  * (3.5). The projection is an allowlist of shapes: numbers, booleans and
  * enum words. Free text, ids, handles and host names are dropped, and the
- * strict schema rejects any string of another shape that got through.
+ * strict schema rejects any string of another shape that got through. It is
+ * a narrowing, not a proof: the maintainer reviews the printed capture before
+ * committing any of it as a fixture.
  */
 export const captureCalibration = async (
   session: LiveSession,
