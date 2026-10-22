@@ -9,7 +9,7 @@
 
 ## 2. Cassettes and replay (PR 6)
 
-- [ ] 2.1 Cassette type and keyless validator as a strict allowlisted schema
+- [x] 2.1 Cassette type and keyless validator as a strict allowlisted schema
       (provenance fields + response content); any unknown key is rejected and
       named, so `cwd`, `uuid`, `session_id`, home paths, rate-limit info, email,
       organization and future CLI fields cannot be committed. A committed
@@ -18,7 +18,7 @@
       or a dated snapshot of it. Committed-cassette rules apply only to files in
       the committed directory; tests may build in-memory
       `recorder: "claude-cli"` cassettes that are never written.
-- [ ] 2.2 Hashes: prompt, tools, fixture, and request (system prompt, messages,
+- [x] 2.2 Hashes: prompt, tools, fixture, and request (system prompt, messages,
       canonical schema, model id); a mismatch in any of the four makes the case
       unmeasured with a stale-cassette reason. The schema is canonicalized
       before hashing: keys sorted recursively and only `$schema` removed at
@@ -27,19 +27,19 @@
       description and a changed model id (stale, asserting the stale ids in the
       fault, not only the exit code), and reordered keys or a new `$schema` URI
       (fresh).
-- [ ] 2.3 Replay runner over `MockLanguageModelV4` through the real runtime; it
+- [x] 2.3 Replay runner over `MockLanguageModelV4` through the real runtime; it
       imports nothing from `evals/claude-cli/`; a test pins that.
-- [ ] 2.4 Empty green is a fault: zero measured cases or any stale cassette
+- [x] 2.4 Empty green is a fault: zero measured cases or any stale cassette
       exits non-zero naming the reason. Only fixture cassettes with
       `recorder: "synthetic"` are committed in this PR; no replay lane over
       committed cassettes enters `pnpm test` here (it joins in 3.5, in the same
       commit as the first real cassette). Tests assert the reason: a
       synthetic-only pass fails as zero measured; one stale in-memory cassette
       fails naming its id.
-- [ ] 2.5 Sentinel: an in-memory `recorder: "claude-cli"` cassette with a
+- [x] 2.5 Sentinel: an in-memory `recorder: "claude-cli"` cassette with a
       sabotaged scorer case is measured and fails with a reason naming the case
       id and scorer (asserted, not only the exit code).
-- [ ] 2.6 Manifest of committed real cassettes (empty in this PR): one entry per
+- [x] 2.6 Manifest of committed real cassettes (empty in this PR): one entry per
       id with a SHA-256 digest of the cassette file. Checks: missing id,
       unlisted cassette, digest mismatch and stale cassette each fail naming the
       ids; missing and stale also state "re-record locally, or retire the id in
