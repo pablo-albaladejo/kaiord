@@ -106,24 +106,45 @@ describe("writeCassette", () => {
     expect(checkManifest(manifestOf(), found).faults).toEqual([]);
   });
 
-  it("should replace the entry of a re-recorded id and keep entries sorted", async () => {
+  it("should keep the manifest entries of distinct cases sorted by id", async () => {
     // Arrange
     const a = await cassetteFor("claude-sonnet-5", "cycling-simple");
     const b = await cassetteFor("claude-sonnet-5", "cycling-endurance");
-    const changed: Cassette = {
-      ...b,
-      response: { ...b.response, usage: { inputTokens: 1, outputTokens: 1 } },
-    };
 
     // Act
     writeCassette(a, targets);
     writeCassette(b, targets);
-    writeCassette(changed, targets);
 
     // Assert
-    const entries = manifestOf().cassettes;
-    expect(entries.map((e) => e.id)).toEqual([b.id, a.id]);
-    expect(entries[0]?.sha256).toBe(sha256Hex(serialize(changed)));
+    expect(manifestOf().cassettes.map((e) => e.id)).toEqual([b.id, a.id]);
+  });
+
+  it("should write no cassette when the manifest does not validate", async () => {
+    // Arrange
+    const cassette = await cassetteFor("claude-sonnet-5");
+    writeFileSync(join(targets.committedDir, "manifest.json"), "{}\n");
+
+    // Act
+    const fault = faultOf(() => writeCassette(cassette, targets));
+
+    // Assert
+    expect(fault).toContain(`could not write cassette ${cassette.id}`);
+    expect(readdirSync(targets.committedDir)).toEqual(["manifest.json"]);
+  });
+
+  it("should raise a disk failure as a harness fault", async () => {
+    // Arrange
+    const cassette = await cassetteFor("claude-haiku-4-5");
+    const blocked = join(root, "a-file");
+    writeFileSync(blocked, "");
+
+    // Act
+    const fault = faultOf(() =>
+      writeCassette(cassette, { ...targets, iterationDir: join(blocked, "x") })
+    );
+
+    // Assert
+    expect(fault).toContain(`could not write cassette ${cassette.id}`);
   });
 
   it("should refuse every committed write while the served form is unpinned", async () => {

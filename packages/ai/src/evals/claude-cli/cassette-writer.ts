@@ -11,7 +11,7 @@ import {
   validateCommittedCassette,
 } from "../cassettes/validate-cassette";
 import type { ServedForm } from "../cassettes/validate-cassette";
-import { harnessFault } from "./harness-fault";
+import { harnessFault, isHarnessFault, messageOf } from "./harness-fault";
 import { committedServedFault } from "./served-model";
 
 /** Gitignored: every recording with a model other than the official one. */
@@ -42,17 +42,18 @@ const DEFAULT_TARGETS: CassetteTargets = {
 export const serialize = (value: unknown): string =>
   `${JSON.stringify(value, null, 2)}\n`;
 
-const upsertManifest = (dir: string, id: string, sha256: string) => {
-  const path = join(dir, "manifest.json");
-  const manifest: Manifest = manifestSchema.parse(
-    JSON.parse(readFileSync(path, "utf8"))
+/** Read and validated first: a bad manifest leaves no unlisted cassette. */
+const readManifest = (dir: string): Manifest =>
+  manifestSchema.parse(
+    JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"))
   );
-  const cassettes = [
+
+const upserted = (manifest: Manifest, id: string, sha256: string) => ({
+  cassettes: [
     ...manifest.cassettes.filter((entry) => entry.id !== id),
     { id, sha256 },
-  ].sort((a, b) => a.id.localeCompare(b.id));
-  writeFileSync(path, serialize({ cassettes }));
-};
+  ].sort((a, b) => a.id.localeCompare(b.id)),
+});
 
 const writeCommitted = (cassette: Cassette, targets: CassetteTargets) => {
   const validation = validateCommittedCassette(cassette);
@@ -62,26 +63,42 @@ const writeCommitted = (cassette: Cassette, targets: CassetteTargets) => {
     targets.servedForm
   );
   if (served) throw harnessFault(served);
+  const manifest = readManifest(targets.committedDir);
   const bytes = serialize(cassette);
-  writeFileSync(join(targets.committedDir, `${cassette.id}.json`), bytes);
-  upsertManifest(targets.committedDir, cassette.id, sha256Hex(bytes));
+  const path = join(targets.committedDir, `${cassette.id}.json`);
+  writeFileSync(path, bytes);
+  writeFileSync(
+    join(targets.committedDir, "manifest.json"),
+    serialize(upserted(manifest, cassette.id, sha256Hex(bytes)))
+  );
+  return path;
+};
+
+const writeIteration = (cassette: Cassette, targets: CassetteTargets) => {
+  mkdirSync(targets.iterationDir, { recursive: true });
+  const path = join(targets.iterationDir, `${cassette.id}.json`);
+  writeFileSync(path, serialize(cassette));
+  return path;
 };
 
 /**
  * Official model: the committed directory plus its manifest entry, the only
  * writer of a digest. Any other model: the iteration directory, never listed.
- * Returns the path written.
+ * Returns the path written. Every failure is a harness fault.
  */
 export const writeCassette = (
   cassette: Cassette,
   targets: CassetteTargets = DEFAULT_TARGETS
 ): string => {
-  if (cassette.requestedModelId === OFFICIAL_CASSETTE_MODEL) {
-    writeCommitted(cassette, targets);
-    return join(targets.committedDir, `${cassette.id}.json`);
+  try {
+    return cassette.requestedModelId === OFFICIAL_CASSETTE_MODEL
+      ? writeCommitted(cassette, targets)
+      : writeIteration(cassette, targets);
+  } catch (error) {
+    // A disk or manifest failure is the harness's, never the case's.
+    if (isHarnessFault(error)) throw error;
+    throw harnessFault(
+      `could not write cassette ${cassette.id}: ${messageOf(error)}`
+    );
   }
-  mkdirSync(targets.iterationDir, { recursive: true });
-  const path = join(targets.iterationDir, `${cassette.id}.json`);
-  writeFileSync(path, serialize(cassette));
-  return path;
 };

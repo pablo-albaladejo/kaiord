@@ -51,10 +51,10 @@ export const cassetteOf = (
   if (!meta.success) throw harnessFault("the call carries no CLI provenance");
   const served = servedModelOf(meta.data.servedModels, suite.modelId);
   if (!served.ok) throw harnessFault(`recording rejected: ${served.reason}`);
-  const stamp = recordedAt.toISOString().replace(/\D/g, "").slice(0, 14);
   const validation = validateCassette({
     schemaVersion: 1,
-    id: `${replayCase.id}-${stamp}`,
+    // One cassette per case: a re-record replaces it, file and manifest entry.
+    id: replayCase.id,
     caseId: replayCase.id,
     recorder: "claude-cli",
     cliVersion: meta.data.cliVersion,

@@ -66,7 +66,8 @@ describe("recordCase", () => {
     // Assert
     expect(validateCassette(recorded.cassette).ok).toBe(true);
     expect(recorded.cassette).toMatchObject({
-      id: "cycling-simple-20261022100000",
+      id: "cycling-simple",
+      recordedAt: "2026-10-22T10:00:00.000Z",
       recorder: "claude-cli",
       cliVersion: "2.1.308",
       requestedModelId: "claude-sonnet-5",
