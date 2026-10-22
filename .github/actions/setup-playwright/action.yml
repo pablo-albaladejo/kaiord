@@ -15,9 +15,10 @@ description: >-
   dpkg, which has no network code. On a miss they are fetched by a bounded
   apt run (per-attempt timeouts, then a retry with the Azure mirror
   dropped), installed, verified, and only then saved, before any test runs.
-  Every internal budget together is 11 minutes (browser 90s, two apt
-  attempts of 45s + 150s, dpkg 75s + 30s + 75s), leaving a minute of the
-  12-minute cap callers put on this step for cache restore and save. Exists because the Azure Ubuntu
+  Every internal budget together is 650s (browser 90s, apt attempt 1
+  45s + 90s, apt attempt 2 45s + 240s, dpkg 60s + 20s + 60s), leaving
+  over a minute of the 12-minute cap callers put on this step for cache
+  restore and save. Exists because the Azure Ubuntu
   mirror served 119 MB at 96.5 kB/s in run 39768401399 and ate a 40-minute
   e2e job timeout with every test passing.
 
@@ -142,10 +143,11 @@ runs:
 
     # Cold path (budget 2/4 and 3/4). Each attempt is capped so a crawling
     # mirror fails in minutes with a clear message instead of eating the job
-    # timeout: attempt 1 uses the runner's mirror (45s update + 150s
-    # download), attempt 2 drops azure.archive.ubuntu.com from the mirror
-    # list (or rewrites it to archive.ubuntu.com) and resumes the partial
-    # downloads (same caps). `apt-get update` reads only the Ubuntu sources,
+    # timeout: attempt 1 uses the runner's mirror (45s update + 90s
+    # download; a healthy Azure mirror serves WebKit's 110 MB in under 40s,
+    # a stalled one serves nothing), attempt 2 drops azure.archive.ubuntu.com
+    # from the mirror list (or rewrites it to archive.ubuntu.com) and
+    # resumes the partial downloads (45s + 240s). `apt-get update` reads only the Ubuntu sources,
     # so a slow third-party repo on the image (packages.microsoft.com)
     # cannot spend the budget.
     - name: Download system packages (cache miss)
@@ -165,23 +167,23 @@ runs:
           echo "::notice::/etc/apt/sources.list.d/ubuntu.sources not found; apt-get update reads every configured source."
         fi
         attempt() {
-          local label=$1 start=$SECONDS rc
-          echo "apt attempt $label: update <= 45s, download <= 150s"
+          local label=$1 fetch_s=$2 start=$SECONDS rc
+          echo "apt attempt $label: update <= 45s, download <= ${fetch_s}s"
           # shellcheck disable=SC2086 # MISSING is a space-separated package list
           timeout 45 sudo apt-get update -q "${opts[@]}" &&
-            timeout 150 sudo apt-get install -y -q --download-only --no-install-recommends "${opts[@]}" $MISSING
+            timeout "$fetch_s" sudo apt-get install -y -q --download-only --no-install-recommends "${opts[@]}" $MISSING
           rc=$?
           echo "apt attempt $label: exit $rc after $((SECONDS - start))s"
           return $rc
         }
-        if ! attempt "1 (runner mirror)"; then
+        if ! attempt "1 (runner mirror)" 90; then
           echo "::warning::apt download from the runner's mirror failed or exceeded its budget; retrying without azure.archive.ubuntu.com"
           if [ -f /etc/apt/apt-mirrors.txt ]; then
             sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
             grep -q . /etc/apt/apt-mirrors.txt || echo "http://archive.ubuntu.com/ubuntu/" | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
           fi
           sudo find /etc/apt -name '*.list' -o -name '*.sources' | xargs -r sudo sed -i 's#azure\.archive\.ubuntu\.com#archive.ubuntu.com#g'
-          if ! attempt "2 (archive.ubuntu.com)"; then
+          if ! attempt "2 (archive.ubuntu.com)" 240; then
             msg="Could not download the $(echo "$MISSING" | wc -w) system packages Playwright needs from either Ubuntu mirror within budget. This is the apt mirror, not the tests: re-run the job."
             if [ "$MODE" = "required" ]; then echo "::error::$msg"; exit 1; fi
             echo "::warning::$msg Continuing without them (system-deps: best-effort)."
@@ -194,7 +196,7 @@ runs:
         echo "Downloaded $(find "$DEB_DIR" -maxdepth 1 -name '*.deb' | wc -l) .debs ($(du -sh "$DEB_DIR" | cut -f1))"
         echo "ok=true" >> "$GITHUB_OUTPUT"
 
-    # Same command on both paths (budget 4/4: two dpkg passes, 75s each),
+    # Same command on both paths (budget 4/4: two dpkg passes of 60s, a 20s configure),
     # and dpkg has no network code at all. (`apt-get install --no-download
     # ./*.deb` is not offline-safe: it prefers the package lists' candidate
     # over the local file and then refuses to fetch it.) One `dpkg -i`
@@ -217,12 +219,12 @@ runs:
         echo "Installing $(find "$DEB_DIR" -maxdepth 1 -name '*.deb' | wc -l) cached .debs offline (dpkg, no network)"
         export DEBIAN_FRONTEND=noninteractive
         log="$RUNNER_TEMP/kaiord-playwright-dpkg.log"
-        if ! timeout 75 sudo -E dpkg -i --skip-same-version "$DEB_DIR"/*.deb > "$log" 2>&1; then
+        if ! timeout 60 sudo -E dpkg -i --skip-same-version "$DEB_DIR"/*.deb > "$log" 2>&1; then
           echo "dpkg first pass failed; last 40 lines:"
           tail -n 40 "$log"
           echo "Running dpkg --configure -a and retrying once"
-          timeout 30 sudo -E dpkg --configure -a || true
-          timeout 75 sudo -E dpkg -i --skip-same-version "$DEB_DIR"/*.deb > "$log" 2>&1 || { echo "dpkg second pass failed; last 40 lines:"; tail -n 40 "$log"; }
+          timeout 20 sudo -E dpkg --configure -a || true
+          timeout 60 sudo -E dpkg -i --skip-same-version "$DEB_DIR"/*.deb > "$log" 2>&1 || { echo "dpkg second pass failed; last 40 lines:"; tail -n 40 "$log"; }
         fi
         gaps=""
         for p in $MISSING; do

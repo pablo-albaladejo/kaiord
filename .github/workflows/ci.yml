@@ -867,7 +867,7 @@ jobs:
   # launched without those fonts before this cache existed, so an apt
   # failure is a ::warning:: and the job carries on, never a new red (a
   # failed set is not cached, so each shard retries and warns too). The
-  # composite bounds the apt path itself (11 min of internal budgets under
+  # composite bounds the apt path itself (650s of internal budgets under
   # the 12-min step cap), so a hung mirror no longer reaches this job's
   # 15-minute cap.
   playwright-cache:
