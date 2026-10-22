@@ -167,10 +167,10 @@ runs:
       run: |
         mkdir -p "$DEB_DIR/partial"
         opts=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o "Dir::Cache::archives=$DEB_DIR")
-        # With sourceparts=- apt may drop the list files of every other
-        # source (packages.microsoft.com, ...) for the rest of the job: a
-        # later step installing from another repo must run its own
-        # `apt-get update` first.
+        # With sourceparts=- apt drops the list files of every other source
+        # for the rest of the job (ubuntu-24.04: the 5 packages.microsoft.com
+        # lists go to 0), so a later step installing from another repo must
+        # run its own `apt-get update` first. Warm runs never touch them.
         if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
           opts+=(-o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=-)
         else
