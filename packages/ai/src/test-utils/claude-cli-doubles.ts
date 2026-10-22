@@ -22,6 +22,8 @@ export type SpawnReply = {
   error?: Error & { code?: string };
   /** Never closes: the child hangs until it is killed. */
   hang?: true;
+  /** Its stdin fails as a pipe closed by an exited child would. */
+  stdinError?: Error;
 };
 
 /**
@@ -44,15 +46,19 @@ export const createSpawnDouble = (reply: (call: SpawnCall) => SpawnReply) => {
       stdin: "",
     };
     calls.push(call);
+    const stdin = Object.assign(new EventEmitter(), {
+      end: (chunk: string) => (call.stdin = chunk),
+    });
     Object.assign(child, {
       stdout,
       stderr: new EventEmitter(),
-      stdin: { end: (chunk: string) => (call.stdin = chunk) },
+      stdin,
       kill: (signal: string) => killed.push(signal),
     });
     setImmediate(() => {
       const out = reply(call);
-      if (out.hang) return;
+      if (out.stdinError) stdin.emit("error", out.stdinError);
+      if (out.hang || out.stdinError) return;
       if (out.error) {
         child.emit("error", out.error);
         return;

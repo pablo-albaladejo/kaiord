@@ -1,4 +1,4 @@
-import { harnessFault } from "./harness-fault";
+import { harnessFault, messageOf } from "./harness-fault";
 
 type Readable = {
   on(event: "data", listener: (chunk: Buffer | string) => void): unknown;
@@ -6,7 +6,10 @@ type Readable = {
 
 /** The part of a `ChildProcess` the live lane uses. */
 export type ChildLike = {
-  stdin: { end(chunk: string): unknown } | null;
+  stdin: {
+    end(chunk: string): unknown;
+    on(event: "error", listener: (error: Error) => void): unknown;
+  } | null;
   stdout: Readable | null;
   stderr: Readable | null;
   on(event: "error", listener: (error: Error) => void): unknown;
@@ -87,6 +90,15 @@ export const runProcess = (
     child.on("close", (code) => {
       clearTimeout(timer);
       resolve({ code, stdout, stderr });
+    });
+    // A child that exits before reading its prompt raises EPIPE here.
+    child.stdin?.on("error", (error) => {
+      clearTimeout(timer);
+      reject(
+        harnessFault(
+          `could not write the prompt to ${command}: ${messageOf(error)}`
+        )
+      );
     });
     child.stdin?.end(options.input);
   });

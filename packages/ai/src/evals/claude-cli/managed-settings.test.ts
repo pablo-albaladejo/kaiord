@@ -1,29 +1,38 @@
 import { describe, expect, it } from "vitest";
 
-import { managedSettingsFile } from "./managed-settings";
+import { managedSettingsPaths } from "./managed-settings";
 
-describe("managedSettingsFile", () => {
-  it("should report the platform's file only when it exists, without reading it", () => {
+/** Two known platforms, two paths each; the unknown one checks none. */
+const PATHS_CHECKED = 4;
+
+describe("managedSettingsPaths", () => {
+  it("should report the file and the drop-in directory that exist, without reading them", () => {
     // Arrange
     const checked: Array<string> = [];
     const exists = (path: string) => {
       checked.push(path);
-      return path.startsWith("/etc/");
+      return (
+        path.startsWith("/etc/") ||
+        path.endsWith("ClaudeCode/managed-settings.d")
+      );
     };
 
     // Act
     const found = [
-      managedSettingsFile("linux", exists),
-      managedSettingsFile("darwin", exists),
-      managedSettingsFile("aix", exists),
+      managedSettingsPaths("linux", exists),
+      managedSettingsPaths("darwin", exists),
+      managedSettingsPaths("aix", exists),
     ];
 
     // Assert
     expect(found).toEqual([
-      "/etc/claude-code/managed-settings.json",
-      null,
-      null,
+      [
+        "/etc/claude-code/managed-settings.json",
+        "/etc/claude-code/managed-settings.d",
+      ],
+      ["/Library/Application Support/ClaudeCode/managed-settings.d"],
+      [],
     ]);
-    expect(checked).toHaveLength(2);
+    expect(checked).toHaveLength(PATHS_CHECKED);
   });
 });

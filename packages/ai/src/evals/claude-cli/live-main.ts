@@ -87,9 +87,9 @@ const runLive = async (deps: LiveMainDeps): Promise<LiveOutcome> => {
   const args = parseLiveArgs(deps.argv);
   const live = await loadOrRefuse(deps);
   if (typeof live === "string") return live;
-  if (live.managedSettingsFile) {
+  for (const path of live.managedSettings) {
     deps.log(
-      `note: a managed-settings file exists at ${live.managedSettingsFile} (not read); it applies whatever --setting-sources says, so confirm it sets no ANTHROPIC_BASE_URL`
+      `note: managed settings exist at ${path} (not read); they apply whatever --setting-sources says, so confirm they set no ANTHROPIC_BASE_URL`
     );
   }
   if (args.calibrate) return runCalibration(deps, live);

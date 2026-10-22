@@ -61,4 +61,22 @@ describe("process faults", () => {
     // Assert
     expect(fault).toBe(`the CLI exited with code ${FAILED_EXIT}`);
   });
+
+  it("should turn an EPIPE on stdin into a harness fault", async () => {
+    // Arrange
+    const epipe = Object.assign(new Error("write EPIPE"), { code: "EPIPE" });
+    const double = createSpawnDouble(() => ({ stdinError: epipe }));
+
+    // Act
+    const fault = await faultOf(
+      runProcess(double.spawn, "claude", [], {
+        cwd: "/nowhere",
+        env: {},
+        input: "p",
+      })
+    );
+
+    // Assert
+    expect(fault).toBe("could not write the prompt to claude: write EPIPE");
+  });
 });

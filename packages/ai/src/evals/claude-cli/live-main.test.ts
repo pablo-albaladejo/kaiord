@@ -39,7 +39,7 @@ const liveModel = (options: {
     modelId,
     provider: "anthropic" as const,
     session,
-    managedSettingsFile: options.managed ?? null,
+    managedSettings: options.managed ? [options.managed] : [],
   };
   return { live, calls: () => calls };
 };
@@ -120,7 +120,7 @@ describe("runLiveMain", () => {
     // Assert
     expect(outcome).toBe("ran");
     expect(calls()).toBe(1);
-    expect(text).toContain(`managed-settings file exists at ${MANAGED}`);
+    expect(text).toContain(`managed settings exist at ${MANAGED}`);
     expect(readdirSync(join(root, "calibration"))).toHaveLength(1);
   });
 

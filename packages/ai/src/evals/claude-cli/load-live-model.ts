@@ -10,7 +10,7 @@ import {
   readModelId,
 } from "./live-config";
 import { createLiveSession } from "./live-session";
-import { managedSettingsFile } from "./managed-settings";
+import { managedSettingsPaths } from "./managed-settings";
 import type { LiveSession } from "./live-session";
 import { SEVEN_DAY_FIELD } from "./rate-limit-guard";
 import type { WeeklyField } from "./rate-limit-guard";
@@ -22,15 +22,15 @@ export type LiveModel = {
   modelId: string;
   provider: "anthropic";
   session: LiveSession;
-  /** A managed-settings file found by existence, never read; else null. */
-  managedSettingsFile: string | null;
+  /** Managed-settings paths found by existence, never read. */
+  managedSettings: Array<string>;
 };
 
 export type LoadLiveDeps = {
   env?: Env;
   spawn?: SpawnFn;
   field?: WeeklyField | null;
-  managedSettings?: () => string | null;
+  managedSettings?: () => Array<string>;
 };
 
 /**
@@ -63,6 +63,6 @@ export const loadLiveModel = async (
     modelId,
     provider: "anthropic",
     session,
-    managedSettingsFile: (deps.managedSettings ?? managedSettingsFile)(),
+    managedSettings: (deps.managedSettings ?? managedSettingsPaths)(),
   };
 };
