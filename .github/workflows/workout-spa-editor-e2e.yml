@@ -27,11 +27,18 @@ jobs:
           script: |
             const ref = context.payload.workflow_run.head_sha;
             const { owner, repo } = context.repo;
-            const commits = await github.rest.repos.getCommit({ owner, repo, ref });
-            const files = commits.data.files?.map(f => f.filename) || [];
+            let files = [];
+            let filesKnown = true;
+            try {
+              const commits = await github.rest.repos.getCommit({ owner, repo, ref });
+              files = commits.data.files?.map(f => f.filename) || [];
+            } catch (error) {
+              filesKnown = false;
+              core.warning(`Could not list commit files, running e2e: ${error.message}`);
+            }
             // The SPA, every workspace package it depends on (read from its
-            // package.json at this commit, so the list cannot drift; all are
-            // named @kaiord/<dir>), and the e2e pipeline itself, so a change
+            // package.json at this commit, so the list cannot drift; each SPA
+            // dep must be named @kaiord/<dir> to map to its folder), and the e2e pipeline itself, so a change
             // to this workflow or its composites is exercised by the run it
             // triggers. Root package.json/pnpm-lock.yaml/tsconfig.base.json
             // are excluded on purpose: CI installs and builds them first, and
@@ -60,7 +67,7 @@ jobs:
             }
             // getCommit lists at most 300 files: a capped list may hide a match.
             const capped = files.length >= 300;
-            const frontendChanged = !depsKnown || capped ||
+            const frontendChanged = !filesKnown || !depsKnown || capped ||
               files.some(f => prefixes.some(p => f.startsWith(p)));
             core.setOutput('should-run', frontendChanged ? 'true' : 'false');
             console.log(`Frontend changed: ${frontendChanged}, files: ${files.length}`);
