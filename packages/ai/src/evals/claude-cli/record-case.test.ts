@@ -135,6 +135,53 @@ describe("recordCase", () => {
     expect(fault).toContain("made 0 model calls");
   });
 
+  it("should rethrow the case's own error when its only call rejects", async () => {
+    // Arrange
+    const model = createClaudeCliLanguageModel({
+      modelId: "claude-sonnet-5",
+      call: async () => {
+        throw new TypeError("the pass stopped on a rate limit");
+      },
+    });
+
+    // Act
+    const caught = await recordCase(
+      suite,
+      caseOf("cycling-simple"),
+      model,
+      NOW
+    ).catch((error: unknown) => error);
+
+    // Assert
+    expect(isHarnessFault(caught)).toBe(false);
+    expect(caught).toMatchObject({
+      name: "AiParsingError",
+      lastError: "the pass stopped on a rate limit",
+    });
+  });
+
+  it("should keep the original error's identity when no call completed", async () => {
+    // Arrange
+    const { model } = cliModel(simpleWorkout("cycling"));
+    const cause = new RangeError("fixture out of range");
+    const failing: ReplayCase = {
+      id: "x",
+      fixture: {},
+      run: async () => {
+        throw cause;
+      },
+    };
+
+    // Act
+    const caught = await recordCase(suite, failing, model, NOW).catch(
+      (error: unknown) => error
+    );
+
+    // Assert
+    expect(caught).toBe(cause);
+    expect(caught).toBeInstanceOf(RangeError);
+  });
+
   it("should reject a result naming more than one served model", async () => {
     // Arrange
     const { model } = cliModel(simpleWorkout("cycling"), {
