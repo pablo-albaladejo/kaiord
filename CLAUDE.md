@@ -93,6 +93,76 @@ If you encounter warnings or errors during your work:
 
 This policy ensures professional code quality and prevents warning/error accumulation.
 
+## Never auto-remediate
+
+Some actions reach people outside this repository. An agent NEVER takes them on
+its own, even to fix a failure it caused. It diagnoses, gathers the evidence,
+opens an issue, and messages Pablo with the exact command. Pablo runs it himself
+with `!`. Commands typed with `!` skip hooks and permission rules (verified on
+Claude Code 2.1.304).
+
+| Class                | What it covers in Kaiord                                                                                                                                                                                                                                                                                                                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm-publish`        | `npm`/`pnpm`/`yarn publish`, `changeset publish`, `scripts/changeset-publish.sh`, `npm unpublish`/`deprecate`/`dist-tag`/`owner`/`access`. `release.yml` is the only publisher.                                                                                                                                                                                   |
+| `release-tags`       | Pushing or deleting release tags (`@kaiord/<pkg>@x.y.z`, `v*`, `--tags`), `gh release create/edit/delete/upload`, `scripts/create-github-releases.js`, deleting `main` or `changeset-release/*`, `git push --mirror/--all/--prune`.                                                                                                                               |
+| `prod-deploy`        | Pushing to `main` (`deploy-site.yml` deploys kaiord.com and `release.yml` publishes to npm), `gh workflow run` of a release/deploy/CWS workflow, `scripts/cws-api.mjs upload/publish` (Chrome Web Store).                                                                                                                                                         |
+| `force-push`         | `--force`, `--force-with-lease`, `-f`, `+refspec`.                                                                                                                                                                                                                                                                                                                |
+| `repo-settings`      | `gh secret`/`gh variable` set/delete, `gh repo edit/delete/rename/archive`, deploy keys, `gh pr merge --admin`, and a mutating `gh api` call on repo settings, rulesets, branch protection, secrets, environments, hooks, releases, tag refs or git tags (also `git/refs` with a tag or protected `ref=`, `merges` into `main`, and `contents` writes to `main`). |
+| `security-workflows` | Weakening `security.yml`, `codeql.yml` or any required check, and `gh workflow disable/enable`.                                                                                                                                                                                                                                                                   |
+| `athlete-data`       | Writing to or deleting from a real athlete's account: `kaiord garmin push`, and the `kaiord_garmin_push` MCP tool.                                                                                                                                                                                                                                                |
+
+Kaiord runs no backend of its own. User data lives in the browser and in the
+athlete's third-party accounts, which is why the athlete-data class covers
+Garmin Connect.
+
+**Enforced by code** (`.claude/settings.json`, spec `agent-guardrails`). These rules are not advice to follow:
+
+- `.claude/hooks/never-auto-remediate.cjs` (PreToolUse, Bash) denies every class above
+  except "weakening" a workflow by editing it, which no parser can judge. It reads
+  through `&&`, `;`, pipes, `bash -c`, `$(...)`, env prefixes, `sudo` and `rtk`. It
+  allows `--dry-run`. `permissions.deny` repeats the commonest prefixes and denies
+  the `kaiord_garmin_push` MCP tool.
+- `.claude/hooks/plan-approval-guard.cjs` (PreToolUse, Edit|Write|MultiEdit|NotebookEdit)
+  blocks writes to files in any worktree of this repo until Pablo has typed a prompt
+  in the session. The receipt is written by `.claude/hooks/record-human-approval.cjs`
+  (UserPromptSubmit), stored at `$TMPDIR/claude-guards/approvals/<session_id>.json`,
+  and lasts 12 h. Task notifications, cross-session messages and teammate messages
+  do not count as a human prompt. Subagents share the parent's `session_id` and so
+  inherit its receipt. An agent-team teammate has its own `session_id`, so it uses
+  the lead's receipt, found from `--parent-session-id` in its process ancestry. No receipt is needed for `.omc/**`, untracked `.claude/**` state, or
+  anything outside the repo. Tracked files under `.claude/` (settings, hooks, agents,
+  skills, plugins, commands) do need one, and so does any new file there. The block message is "no human approval in this session: ask Pablo, or
+  wait for his message".
+- `.claude/hooks/related-tests-stop.cjs` (Stop and SubagentStop) runs the tests
+  related to the worktree's changed files: `vitest related --run` per package, and
+  the co-located `*.test.mjs` for `scripts/` and `.claude/hooks/`. They run under
+  `~/.claude/hostguard/hg-gate.sh` with a 180 s budget. A red result blocks the turn
+  and names the failing tests. A timeout or host pressure (exit 75) lets the turn
+  close, with a warning and a line in `$TMPDIR/claude-guards/guards.log`. The hook
+  never skips because `stop_hook_active` is set. It allows at most 3 consecutive
+  blocks per session and agent (`$TMPDIR/claude-guards/<session_id>.json`); the next
+  red Stop goes through with a loud message. An unchanged red tree reuses the recorded
+  failures instead of re-running. A timeout or host pressure resets the count. A
+  deleted code file runs its package's whole suite. A subagent whose transcript shows no
+  Edit or Write call is not checked, because it cannot fix the tests. Likewise a Stop
+  whose turn (everything after the last user prompt) made no Edit or Write call is
+  not checked, so a question in a dirty worktree is not blocked.
+
+**Limits.** These guards stop an agent drifting past a gate by accident. They are
+not a sandbox:
+
+- Anything that can write `$TMPDIR/claude-guards/` can forge a receipt or reset the counter.
+- A file written by a Bash command (`sed -i`, `>`) is not an Edit.
+- A command assembled at run time (a variable, or a script file) is invisible to the parser.
+- A `/loop` firing replays its prompt without a marker, so it reads as human.
+- `gh run rerun` of a deploy run looks the same as a CI rerun, so it is not blocked.
+- A branch named like a version (`v2.0.0-x`) is denied as a release tag.
+- A subagent that writes only through Bash is treated as read-only by the Stop hook.
+- A session started in a non-repo container directory (for example
+  `/Users/pablo/development/kaiord.worktrees`) loads no project hooks at all.
+- The Stop hook tests the worktree of the session's cwd; edits made in a
+  different worktree are not test-checked.
+
 ## Architecture (Hexagonal + Plugin)
 
 ```
