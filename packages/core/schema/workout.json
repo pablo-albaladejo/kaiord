@@ -596,6 +596,10 @@
                                 "type": "number",
                                 "minimum": 0,
                                 "maximum": 5000
+                              },
+                              "basis": {
+                                "type": "string",
+                                "const": "percent_ftp"
                               }
                             },
                             "required": [
@@ -1385,6 +1389,10 @@
                                       "type": "number",
                                       "minimum": 0,
                                       "maximum": 5000
+                                    },
+                                    "basis": {
+                                      "type": "string",
+                                      "const": "percent_ftp"
                                     }
                                   },
                                   "required": [

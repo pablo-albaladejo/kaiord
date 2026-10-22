@@ -1,4 +1,4 @@
-import type { WorkoutStep } from "@kaiord/core";
+import type { Logger, WorkoutStep } from "@kaiord/core";
 import { type Intensity, intensitySchema } from "@kaiord/core";
 
 import { mapDuration, mapDurationType } from "../duration/duration.mapper";
@@ -6,9 +6,13 @@ import { mapEquipmentToKrd } from "../equipment/equipment.mapper";
 import type { FitWorkoutStep } from "../shared/types";
 import { mapStepTargetType, mapTarget } from "../target/target.mapper";
 
-export const mapStep = (step: FitWorkoutStep, index: number): WorkoutStep => {
+export const mapStep = (
+  step: FitWorkoutStep,
+  index: number,
+  logger?: Logger
+): WorkoutStep => {
   const duration = mapDuration(step);
-  const target = mapTarget(step);
+  const target = mapTarget(step, logger);
 
   const workoutStep: WorkoutStep = {
     stepIndex: step.messageIndex ?? index,

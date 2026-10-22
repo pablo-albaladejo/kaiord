@@ -1,4 +1,4 @@
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
+import type { Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
 
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import type { FitWorkoutStep } from "../shared/types";
@@ -26,7 +26,8 @@ export const findRepetitionStepIndices = (
 
 export const buildWorkoutSteps = (
   workoutSteps: Array<FitWorkoutStep>,
-  repetitionStepIndices: Set<number>
+  repetitionStepIndices: Set<number>,
+  logger?: Logger
 ): Array<WorkoutStep | RepetitionBlock> => {
   const steps = [];
 
@@ -37,10 +38,15 @@ export const buildWorkoutSteps = (
       step.durationType === fitDurationTypeSchema.enum.repeatUntilStepsCmplt &&
       step.repeatSteps
     ) {
-      const repetitionBlock = buildRepetitionBlock(step, workoutSteps, i);
+      const repetitionBlock = buildRepetitionBlock(
+        step,
+        workoutSteps,
+        i,
+        logger
+      );
       steps.push(repetitionBlock);
     } else if (!repetitionStepIndices.has(i)) {
-      steps.push(mapStep(step, i));
+      steps.push(mapStep(step, i, logger));
     }
   }
 
@@ -50,14 +56,15 @@ export const buildWorkoutSteps = (
 export const buildRepetitionBlock = (
   step: FitWorkoutStep,
   workoutSteps: Array<FitWorkoutStep>,
-  currentIndex: number
+  currentIndex: number,
+  logger?: Logger
 ): RepetitionBlock => {
   const repeatCount = step.repeatSteps!;
   const startIndex = (step.durationStep || 0) as number;
   const repeatedSteps = [];
 
   for (let j = startIndex; j < currentIndex; j++) {
-    repeatedSteps.push(mapStep(workoutSteps[j]!, j));
+    repeatedSteps.push(mapStep(workoutSteps[j]!, j, logger));
   }
 
   return {

@@ -12,6 +12,11 @@ const percentFtp = (value: number): Target => ({
   value: { unit: "percent_ftp", value },
 });
 
+const percentRange = (min: number, max: number): Target => ({
+  type: "power",
+  value: { unit: "range", min, max, basis: "percent_ftp" },
+});
+
 describe("convertKrdTargetToGarmin percent_ftp power", () => {
   it("should resolve a percent_ftp value to watts with the provided FTP", () => {
     // Arrange
@@ -108,6 +113,34 @@ describe("convertKrdTargetToGarmin percent_ftp power", () => {
     expect(result.targetValueOne).toBe(F.RANGE_HIGH_W);
     expect(result.targetValueTwo).toBe(F.RANGE_LOW_W);
   });
+
+  it("should resolve a percent_ftp range to watts fastest-first with the FTP", () => {
+    // Arrange
+    const target = percentRange(F.RAMP_LOW_PCT, F.RAMP_HIGH_PCT);
+
+    // Act
+    const result = convertKrdTargetToGarmin(target, { ftpWatts: FTP_W });
+
+    // Assert
+    expect(result.targetType.workoutTargetTypeKey).toBe("power.zone");
+    expect(result.targetValueOne).toBe(F.RANGE_HIGH_W);
+    expect(result.targetValueTwo).toBe(F.RANGE_LOW_W);
+    expect(result.zoneNumber).toBeNull();
+  });
+
+  it.each([undefined, 0, F.NEGATIVE_FTP_W, Number.NaN])(
+    "should throw MissingFtpError for a percent_ftp range when the FTP is %s",
+    (ftpWatts) => {
+      // Arrange
+      const target = percentRange(F.RAMP_LOW_PCT, F.RAMP_HIGH_PCT);
+
+      // Act
+      const convert = () => convertKrdTargetToGarmin(target, { ftpWatts });
+
+      // Assert
+      expect(convert).toThrow(MissingFtpError);
+    }
+  );
 
   it("should keep power zones as zone numbers without needing an FTP", () => {
     // Arrange

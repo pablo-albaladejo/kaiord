@@ -251,7 +251,13 @@ Supported units:
 - **watts**: Absolute power in watts (0-5000)
 - **percent_ftp**: Percentage of Functional Threshold Power (0-1000)
 - **zone**: Power zone (1-7)
-- **range**: Power range with min/max values (each 0-5000, min <= max)
+- **range**: Power range with min/max values (each 0-5000, min <= max). The
+  bounds are watts unless the optional `basis` is `"percent_ftp"`, in which case
+  they are percentages of FTP:
+
+  ```json
+  { "unit": "range", "min": 50, "max": 75, "basis": "percent_ftp" }
+  ```
 
 ### Heart Rate Targets
 

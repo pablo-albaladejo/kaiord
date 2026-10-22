@@ -10,6 +10,8 @@ export type TargetPickerFieldsProps = {
   disabled: boolean;
   unitOptions: Array<{ value: string; label: string }>;
   activeProfile?: Profile | null;
+  /** Unit of a power range's bounds ("% FTP" or "W"). */
+  rangeUnit?: string;
   onTypeChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onUnitChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onValueChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

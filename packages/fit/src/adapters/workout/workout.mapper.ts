@@ -21,7 +21,7 @@ export const mapWorkout = (
   });
 
   const repetitionStepIndices = findRepetitionStepIndices(workoutSteps);
-  const steps = buildWorkoutSteps(workoutSteps, repetitionStepIndices);
+  const steps = buildWorkoutSteps(workoutSteps, repetitionStepIndices, logger);
 
   const workout: Workout = {
     name: workoutMsg?.wktName,

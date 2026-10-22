@@ -10,7 +10,16 @@ import {
   pushNumeric,
 } from "./step-violations";
 
-type TargetValue = { unit: string; value?: number; min?: number; max?: number };
+type TargetValue = {
+  unit: string;
+  value?: number;
+  min?: number;
+  max?: number;
+  basis?: string;
+};
+
+/** A range's bounds are measured in its basis (watts when absent). */
+const measuredUnit = (value: TargetValue): string => value.basis ?? value.unit;
 
 /** The check for a target value, by target type and unit. Zones are exact. */
 const checkFor = (
@@ -43,7 +52,9 @@ export const compareStepTarget = (
   const v2 = t2.value as TargetValue;
   const unitPath = `${path}.value.unit`;
   if (pushCategorical(violations, unitPath, v1.unit, v2.unit)) return;
-  const check = checkFor(t1.type, v1.unit, checker);
+  const basisPath = `${path}.value.basis`;
+  if (pushCategorical(violations, basisPath, v1.basis, v2.basis)) return;
+  const check = checkFor(t1.type, measuredUnit(v1), checker);
   for (const key of ["value", "min", "max"] as const) {
     const a = v1[key];
     const b = v2[key];

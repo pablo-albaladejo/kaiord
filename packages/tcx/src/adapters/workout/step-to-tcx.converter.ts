@@ -24,6 +24,12 @@ const addPowerExtensions = (
           Watts: powerValue.value,
         },
       };
+    } else {
+      // TCX has no power target; only a single watts value survives, as TPX.
+      logger.warn("Power target dropped: TCX only stores single watts", {
+        stepIndex: step.stepIndex,
+        unit: powerValue.unit,
+      });
     }
   }
 };

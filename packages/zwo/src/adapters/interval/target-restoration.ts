@@ -21,12 +21,14 @@ const restoreWattsTarget = (data: KaiordTargetAttributes): Target | null => {
     data["kaiord:originalWattsLow"] !== undefined &&
     data["kaiord:originalWattsHigh"] !== undefined
   ) {
+    const low = data["kaiord:originalWattsLow"];
+    const high = data["kaiord:originalWattsHigh"];
     return {
       type: targetTypeSchema.enum.power,
       value: {
         unit: "range",
-        min: data["kaiord:originalWattsLow"],
-        max: data["kaiord:originalWattsHigh"],
+        min: Math.min(low, high),
+        max: Math.max(low, high),
       },
     };
   }

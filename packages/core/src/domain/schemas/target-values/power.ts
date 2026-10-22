@@ -13,7 +13,8 @@ import { targetUnitSchema } from "./unit";
  * Validates power targets in watts, percent FTP, zones, or ranges.
  * Watts and range bounds are capped at 5000 W (above any recorded human
  * sprint peak); percent FTP is capped at 1000. Range targets enforce
- * `min <= max`.
+ * `min <= max`. A range's bounds are watts unless `basis` is `"percent_ftp"`,
+ * in which case they are percentages of FTP (e.g. a 50–75 % FTP ramp).
  *
  * @example
  * ```typescript
@@ -27,6 +28,14 @@ import { targetUnitSchema } from "./unit";
  *
  * // Power zone
  * const zone = powerValueSchema.parse({ unit: 'zone', value: 3 });
+ *
+ * // Range in percent FTP (absent basis = watts)
+ * const ramp = powerValueSchema.parse({
+ *   unit: 'range',
+ *   min: 50,
+ *   max: 75,
+ *   basis: 'percent_ftp',
+ * });
  * ```
  */
 export const powerValueSchema = z.discriminatedUnion("unit", [
@@ -47,6 +56,7 @@ export const powerValueSchema = z.discriminatedUnion("unit", [
       unit: z.literal(targetUnitSchema.enum.range),
       min: z.number().min(0).max(5000),
       max: z.number().min(0).max(5000),
+      basis: z.literal(targetUnitSchema.enum.percent_ftp).optional(),
     })
     .refine(minLteMax, {
       message: MIN_LTE_MAX_MESSAGE,

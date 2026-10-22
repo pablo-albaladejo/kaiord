@@ -16,13 +16,18 @@ export const convertPowerTarget = (
   if (value.unit === targetUnitSchema.enum.zone) {
     message.targetPowerZone = value.value;
   } else if (value.unit === targetUnitSchema.enum.range) {
+    // Percent-FTP bounds are stored raw, like a single percent_ftp target.
+    const encode =
+      value.basis === targetUnitSchema.enum.percent_ftp
+        ? Math.round
+        : encodeWorkoutPower;
     message.targetValue = 0;
-    message.customTargetPowerLow = encodeWorkoutPower(value.min);
-    message.customTargetPowerHigh = encodeWorkoutPower(value.max);
+    message.customTargetPowerLow = encode(value.min);
+    message.customTargetPowerHigh = encode(value.max);
   } else if (value.unit === targetUnitSchema.enum.watts) {
     message.targetValue = encodeWorkoutPower(value.value);
   } else if (value.unit === targetUnitSchema.enum.percent_ftp) {
     // Garmin encoding: Percentage FTP has no offset
-    message.targetValue = value.value;
+    message.targetValue = Math.round(value.value);
   }
 };

@@ -7,6 +7,7 @@ import { targetTypeSchema } from "@kaiord/core";
 import type { ZwiftDurationData } from "../duration/duration.mapper";
 import { convertZwiftPowerRange } from "../target/power.converter";
 import { restoreIntensity } from "./intensity-restoration";
+import { markPowerDirection } from "./power-direction";
 import {
   restoreHeartRateTarget,
   restorePowerTarget,
@@ -74,6 +75,7 @@ export const addRampMetadata = (
   data: ZwiftRampData
 ): void => {
   if (data["kaiord:name"]) step.name = data["kaiord:name"];
+  markPowerDirection(step, data.PowerLow, data.PowerHigh);
   if (data["kaiord:equipment"]) {
     step.equipment = data["kaiord:equipment"] as WorkoutStep["equipment"];
   }

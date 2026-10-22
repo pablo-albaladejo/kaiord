@@ -156,6 +156,31 @@ describe("convertStepToTcx", () => {
     });
   });
 
+  it.each([
+    { unit: "percent_ftp", value: 85 },
+    { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+  ] as const)(
+    "should warn instead of silently dropping a $unit power target",
+    (value) => {
+      // Arrange
+      const logger = createMockLogger();
+      const step = createWorkoutStep({
+        target: { type: "power", value },
+        targetType: "power",
+      });
+
+      // Act
+      const result = convertStepToTcx(step, 0, "cycling", logger);
+
+      // Assert
+      expect(result.Extensions).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Power target dropped: TCX only stores single watts",
+        { stepIndex: 0, unit: value.unit }
+      );
+    }
+  );
+
   it("should not add power extensions for non-power targets", () => {
     // Arrange
     const logger = createMockLogger();

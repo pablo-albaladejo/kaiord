@@ -28,7 +28,9 @@ export const formatPowerTarget = (
   if (v.unit === "zone" && isValidNumber(v.value))
     return t("target.zone", { n: v.value });
   if (v.unit === "range" && isValidNumber(v.min) && isValidNumber(v.max))
-    return `${v.min}-${v.max}W`;
+    return v.basis === "percent_ftp"
+      ? `${v.min}-${v.max}% FTP`
+      : `${v.min}-${v.max}W`;
   return t("target.power");
 };
 

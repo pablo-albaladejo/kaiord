@@ -29,11 +29,11 @@ export const interpretWorkoutPower = (
 /**
  * Convert a single power value to KRD target
  * Garmin FIT encoding:
- * - Values > 1000: Absolute watts (offset by 1000)
- * - Values 0-1000: Percentage of FTP
+ * - Values >= 1000: Absolute watts (offset by 1000, so 1000 is 0 W)
+ * - Values 0-999: Percentage of FTP
  */
 export const convertPowerValue = (value: number) => {
-  if (value > WATTS_OFFSET) {
+  if (value >= WATTS_OFFSET) {
     return {
       unit: "watts" as const,
       value: value - WATTS_OFFSET,

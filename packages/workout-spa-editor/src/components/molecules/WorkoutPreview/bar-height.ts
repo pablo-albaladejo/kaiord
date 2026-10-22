@@ -42,8 +42,11 @@ function heightFromTarget(target: Target): number | null {
     if (value.unit === "percent_ftp")
       return clamp(value.value / MAX_PERCENT_FTP);
     if (value.unit === "watts") return clamp(value.value / MAX_WATTS);
-    if (value.unit === "range")
-      return clamp((value.min + value.max) / (MAX_WATTS * 2));
+    if (value.unit === "range") {
+      const percent = "basis" in value && value.basis === "percent_ftp";
+      const max = percent ? MAX_PERCENT_FTP : MAX_WATTS;
+      return clamp((value.min + value.max) / (max * 2));
+    }
   }
 
   if (target.type === "heart_rate") {

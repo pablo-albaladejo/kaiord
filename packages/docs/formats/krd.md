@@ -101,6 +101,11 @@ Additional repeat types: `repeat_until_time`, `repeat_until_distance`, `repeat_u
 | `cadence`    | `rpm`, `zone`, `range`                  |
 | `open`       | No target                               |
 
+A power `range` holds watts by default. Ranges in percent of FTP — a Zwift
+warm-up ramp from 50 % to 75 % FTP, say — carry `"basis": "percent_ftp"`:
+`{ "unit": "range", "min": 50, "max": 75, "basis": "percent_ftp" }`. Writers
+that store watts (Garmin Connect) resolve those bounds with your FTP.
+
 ## Sessions
 
 Sessions capture training session summaries:

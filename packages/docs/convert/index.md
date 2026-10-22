@@ -67,11 +67,9 @@ and the gotchas that matter for that direction. In short:
 - **ZWO** is power-based (% of FTP); heart-rate and cadence targets have no
   native equivalent.
 - **Garmin Connect (GCN)** covers power, heart rate, speed, and cadence in
-  watts/bpm/rpm, plus calorie durations.
-  Known issue: power targets in % FTP (every ZWO target, and FIT targets
-  stored as % FTP) currently arrive in Garmin Connect as watts with the same
-  number; the fix is tracked in
-  [issue #1279](https://github.com/pablo-albaladejo/kaiord/issues/1279).
+  watts/bpm/rpm, plus calorie durations. Power targets in % FTP (every ZWO
+  target, ramps included, and FIT targets stored as % FTP) are converted to
+  watts with your FTP; without one the conversion stops instead of guessing.
 
 Format-specific data that has no target-side equivalent is preserved under the
 KRD `extensions` object so it can survive a later round-trip.

@@ -11,6 +11,9 @@ export type ZwiftSteadyStateData = {
   Duration?: number;
   durationType?: "time" | "distance";
   Power?: number;
+  // Not in Zwift's XSD for SteadyState; read only to warn they are dropped.
+  PowerLow?: number;
+  PowerHigh?: number;
   Cadence?: number;
   stepIndex: number;
   textevent?: ZwiftTextEvent | Array<ZwiftTextEvent>;
@@ -48,6 +51,11 @@ export const convertSteadyStateToKrd = (
 
   const duration = convertOriginalZwiftDuration(durationData, logger);
   const target = restoreSteadyStateTarget(data);
+  if (data.Power === undefined && data.PowerLow !== undefined) {
+    logger?.warn("SteadyState PowerLow/PowerHigh is not supported, ignored", {
+      stepIndex: data.stepIndex,
+    });
+  }
   const textEventData = extractTextEvents(data.textevent);
 
   const step: WorkoutStep = {

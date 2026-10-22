@@ -46,6 +46,11 @@ describe("formatPowerTarget", () => {
       "200-260W",
     ],
     [
+      "percent_ftp range",
+      { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+      "50-75% FTP",
+    ],
+    [
       "range with NaN min",
       { unit: "range", min: Number.NaN, max: 260 },
       "Power",

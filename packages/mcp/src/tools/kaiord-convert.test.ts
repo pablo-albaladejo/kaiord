@@ -11,6 +11,8 @@ import { loadKrdFixtureRaw } from "../tests/helpers/test-fixtures";
 
 const FTP_W = 250;
 const SWEET_SPOT_W = 213;
+const RAMP_LOW_W = 125;
+const RAMP_HIGH_W = 188;
 // KRD input, not ZWO: ZWO input is XSD-validated by spawning a JVM per
 // call (xsd-schema-validator), which alone can exceed the 5 s test budget
 // on a cold CI runner. These tests cover the `ftp` parameter, not parsing.
@@ -29,6 +31,16 @@ const PERCENT_FTP_KRD = JSON.stringify({
           duration: { type: "time", seconds: 600 },
           targetType: "power",
           target: { type: "power", value: { unit: "percent_ftp", value: 85 } },
+        },
+        {
+          stepIndex: 1,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "power",
+          target: {
+            type: "power",
+            value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+          },
         },
       ],
     },
@@ -145,11 +157,13 @@ describe("kaiord_convert", () => {
     // Assert
     expect(result.isError).toBeUndefined();
     const gcn = JSON.parse(result.content[0].text) as {
-      workoutSegments: [{ workoutSteps: [GcnStep] }];
+      workoutSegments: [{ workoutSteps: [GcnStep, GcnStep] }];
     };
-    const step = gcn.workoutSegments[0].workoutSteps[0];
+    const [step, ramp] = gcn.workoutSegments[0].workoutSteps;
     expect(step.targetValueOne).toBe(SWEET_SPOT_W);
     expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+    expect(ramp.targetValueOne).toBe(RAMP_HIGH_W);
+    expect(ramp.targetValueTwo).toBe(RAMP_LOW_W);
   });
 
   it("should return a missing-ftp error for %FTP GCN output without ftp", async () => {

@@ -17,7 +17,11 @@
     "minAria": "Valor mínimo",
     "maxAria": "Valor máximo",
     "minPlaceholder": "Introduce el valor mínimo",
-    "maxPlaceholder": "Introduce el valor máximo"
+    "maxPlaceholder": "Introduce el valor máximo",
+    "minLabelWithUnit": "Mínimo ({{unit}})",
+    "maxLabelWithUnit": "Máximo ({{unit}})",
+    "unitWatts": "W",
+    "unitPercentFtp": "% FTP"
   },
   "unit": {
     "watts": "Vatios",

@@ -2,6 +2,7 @@ import { useUnits } from "../../../contexts/units-context";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { paceInputBase } from "../../../lib/units/pace-input";
 import { useCurrentWorkout } from "../../../store/selectors";
+import { keepPowerBasis } from "./keep-power-basis";
 import type { TargetPickerProps } from "./TargetPicker.types";
 import { TargetPickerFields } from "./TargetPickerFields";
 import { useTargetPickerProps } from "./use-target-picker-props";
@@ -25,9 +26,9 @@ export const TargetPicker = ({
   const state = useTargetPickerState(value, paceInputBase(sport, useUnits()));
   const handlers = useTargetPickerHandlers({
     ...state,
-    onChange,
+    onChange: (target) => onChange(keepPowerBasis(value, target)),
   });
-  const props = useTargetPickerProps(state, error, activeProfile);
+  const props = useTargetPickerProps(state, error, activeProfile, value);
 
   return (
     <div className={`space-y-4 ${className}`}>

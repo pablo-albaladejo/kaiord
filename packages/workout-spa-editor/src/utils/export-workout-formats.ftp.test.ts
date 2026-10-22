@@ -1,4 +1,4 @@
-import type { KRD } from "@kaiord/core";
+import type { KRD, Target } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import { profileWith } from "../lib/athlete/test-profile";
@@ -8,8 +8,19 @@ import { exportGcnWorkout } from "./export-workout-formats";
 
 const FTP_W = 250;
 const SWEET_SPOT_W = 213;
+const RAMP_LOW_W = 125;
+const RAMP_HIGH_W = 188;
 
-const percentFtpKrd = (sport: string): KRD => ({
+const SWEET_SPOT: Target = {
+  type: "power",
+  value: { unit: "percent_ftp", value: 85 },
+};
+const WARM_UP_RAMP: Target = {
+  type: "power",
+  value: { unit: "range", min: 50, max: 75, basis: "percent_ftp" },
+};
+
+const percentFtpKrd = (sport: string, target: Target = SWEET_SPOT): KRD => ({
   version: "1.0",
   type: "structured_workout",
   metadata: { created: "2026-01-01T00:00:00.000Z", sport },
@@ -23,7 +34,7 @@ const percentFtpKrd = (sport: string): KRD => ({
           durationType: "time",
           duration: { type: "time", seconds: 600 },
           targetType: "power",
-          target: { type: "power", value: { unit: "percent_ftp", value: 85 } },
+          target,
         },
       ],
     },
@@ -92,5 +103,33 @@ describe("exportGcnWorkout — %FTP targets", () => {
     await expect(run).rejects.toMatchObject({
       cause: expect.any(FtpUnavailableError),
     });
+  });
+});
+
+describe("exportGcnWorkout — %FTP ranges", () => {
+  it("should write a percent_ftp range as watts from the profile's FTP", async () => {
+    // Arrange
+    const profile = profileWith("cycling", { ftp: FTP_W });
+    const krd = percentFtpKrd("cycling", WARM_UP_RAMP);
+
+    // Act
+    const gcn = await exportGcnWorkout(krd, profile);
+
+    // Assert
+    expect(firstStep(gcn)).toMatchObject({
+      targetValueOne: RAMP_HIGH_W,
+      targetValueTwo: RAMP_LOW_W,
+    });
+  });
+
+  it("should refuse a percent_ftp range when the profile has no FTP", async () => {
+    // Arrange
+    const krd = percentFtpKrd("cycling", WARM_UP_RAMP);
+
+    // Act
+    const run = exportGcnWorkout(krd, null);
+
+    // Assert
+    await expect(run).rejects.toMatchObject({ reason: "missing-ftp" });
   });
 });
