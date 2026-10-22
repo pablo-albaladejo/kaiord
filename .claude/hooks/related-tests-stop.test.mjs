@@ -240,7 +240,7 @@ describe("turnWrote", () => {
     const feedback = {
       type: "user",
       isMeta: true,
-      message: { content: "Stop hook feedback:\nRelated tests are RED" },
+      message: { content: "Caveat: the messages below were generated locally" },
     };
     const plain = {
       type: "user",
@@ -480,6 +480,31 @@ describe("CLI — a throwaway repository", () => {
     assert.equal(JSON.parse(first.stdout).decision, "block");
     assert.equal(JSON.parse(second.stdout).decision, "block");
     assert.equal(counter().main.blocks, 2);
+  });
+
+  it("should skip a new human prompt that wrote nothing even after an earlier block", () => {
+    // Arrange
+    write("scripts/sum.mjs", "export const sum = (a, b) => a - b;\n");
+    const user = (text) => ({ type: "user", message: { content: text } });
+    const edit = {
+      type: "assistant",
+      message: { content: [{ type: "tool_use", id: "t1", name: "Edit" }] },
+    };
+    const save = (name, entries) => {
+      const f = join(sandbox, `${name}.jsonl`);
+      writeFileSync(f, entries.map((e) => JSON.stringify(e)).join("\n"));
+      return f;
+    };
+    const blocked = save("blocked2", [user("fix"), edit]);
+    const next = save("next", [user("fix"), edit, user("what is this?")]);
+
+    // Act
+    const first = run({}, { transcript_path: blocked });
+    const second = run({}, { transcript_path: next });
+
+    // Assert
+    assert.equal(JSON.parse(first.stdout).decision, "block");
+    assert.equal(second.stdout, "");
   });
 
   it("should pass a green change and record it so the same tree is not re-run", () => {

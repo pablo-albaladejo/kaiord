@@ -478,15 +478,18 @@ function isMachineEntry(entry) {
   );
 }
 
-function turnWrote(input) {
+// { wrote, prompt }: prompt identifies the opening human prompt (its uuid, else
+// its line index) so a later Stop can tell a new turn from the same one.
+function turnInfo(input) {
   const file = input?.transcript_path;
-  if (typeof file !== "string") return true;
+  if (typeof file !== "string") return { wrote: true, prompt: null };
   let lines;
   try {
     lines = fs.readFileSync(file, "utf8").split("\n");
   } catch {
-    return true;
+    return { wrote: true, prompt: null };
   }
+  let wrote = false;
   for (let i = lines.length - 1; i >= 0; i--) {
     let entry;
     try {
@@ -502,14 +505,29 @@ function turnWrote(input) {
       const toolResult =
         Array.isArray(content) &&
         content.every((c) => c?.type === "tool_result");
-      if (!toolResult) return false; // the prompt that opened this turn
+      // the prompt that opened this turn
+      if (!toolResult) return { wrote, prompt: entry.uuid ?? i };
     } else if (
       Array.isArray(content) &&
       content.some((c) => c?.type === "tool_use" && WRITE_TOOLS.has(c.name))
     )
-      return true;
+      wrote = true;
   }
-  return true; // no prompt found: the transcript is not what we expect
+  return { wrote: true, prompt: null }; // no prompt found: not what we expect
+}
+
+const turnWrote = (input) => turnInfo(input).wrote;
+
+// Stop only. A block leaves blocks > 0 plus the prompt it blocked; the skip is
+// bypassed only while that same prompt is still the turn. Another prompt (the
+// user interrupted, or the session ended) starts a clean slate. An unknown
+// prompt (unreadable transcript) cannot prove a new turn, so the count stands.
+function stopGate(slot, input) {
+  const info = turnInfo(input);
+  const sameTurn =
+    slot?.blocks > 0 && (info.prompt === null || slot.prompt === info.prompt);
+  const fresh = sameTurn || !slot ? slot : { ...slot, blocks: 0 };
+  return { skip: !sameTurn && !info.wrote, slot: fresh, prompt: info.prompt };
 }
 
 const LOCK_STALE_MS = 30_000;
@@ -566,15 +584,15 @@ async function main(input, { env = process.env, budgetMs } = {}) {
 
   const file = sessionId ? statePath(env, sessionId) : null;
   const key = slotKey(input);
-  const slot = file ? readJson(file)?.[key] : undefined;
-  // Only a clean slate may skip: after a block, the agent's next Stop must be
-  // judged on the tests, not on whether it wrote anything since the feedback.
-  if (
-    input?.hook_event_name === "Stop" &&
-    !(slot?.blocks > 0) &&
-    !turnWrote(input)
-  )
-    return null;
+  let slot = file ? readJson(file)?.[key] : undefined;
+  // Within the turn that was blocked, the next Stop is judged on the tests, not
+  // on whether it wrote anything since the feedback.
+  let prompt = null;
+  if (input?.hook_event_name === "Stop") {
+    const gate = stopGate(slot, input);
+    if (gate.skip) return null;
+    ({ slot, prompt } = gate);
+  }
   const fp = fingerprint(root, lanes);
   if (slot?.lastGreen === `${root}:${fp}`) return null;
 
@@ -590,6 +608,7 @@ async function main(input, { env = process.env, budgetMs } = {}) {
             (Number(env.CLAUDE_GUARDS_TEST_BUDGET_MS) || DEFAULT_BUDGET_MS),
         });
   const { output, next } = verdict(slot, run, { root, fp, lanes });
+  if (next.blocks > 0 && prompt !== null) next.prompt = prompt;
   // Re-read just before writing: another agent of the session may have
   // updated its own slot while the tests ran.
   if (file)
