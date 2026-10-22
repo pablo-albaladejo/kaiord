@@ -7,7 +7,7 @@ import { fixtureHashOf } from "./request-hashes";
 
 export type ReplayCase = {
   id: string;
-  /** What the case feeds the model; hashed into `fixtureHash`. */
+  /** Exactly what the case shows the model; hashed into `fixtureHash`. */
   fixture: unknown;
   /** Runs the case through the real runtime and scores the result. */
   run: (model: LanguageModel) => Promise<Array<DimensionOutcome>>;
@@ -20,11 +20,38 @@ export type ReplaySuite = {
   cases: ReadonlyArray<ReplayCase>;
 };
 
+export type UnmeasuredCause =
+  | "synthetic"
+  | "orphan"
+  | "model-mismatch"
+  | "stale"
+  | "not-consumed"
+  | "nothing-scored";
+
 export type CaseVerdict = { cassetteId: string; caseId: string } & (
   | { status: "passed" }
   | { status: "failed"; failures: Array<string> }
-  | { status: "unmeasured"; reason: string; stale?: Array<StaleHash> }
+  | {
+      status: "unmeasured";
+      cause: UnmeasuredCause;
+      reason: string;
+      stale?: Array<StaleHash>;
+    }
 );
+
+export const unmeasured = (
+  cassette: Cassette,
+  cause: UnmeasuredCause,
+  reason: string,
+  stale?: Array<StaleHash>
+): CaseVerdict => ({
+  cassetteId: cassette.id,
+  caseId: cassette.caseId,
+  status: "unmeasured",
+  cause,
+  reason,
+  ...(stale ? { stale } : {}),
+});
 
 const staticStaleness = (
   suite: ReplaySuite,
@@ -35,58 +62,65 @@ const staticStaleness = (
   const current = suite.prompt;
   const promptStale =
     id !== current.id || version !== current.version || hash !== current.hash;
+  const fixtureStale =
+    cassette.fixtureHash !== fixtureHashOf(replayCase.fixture);
   return [
     ...(promptStale ? ["prompt" as const] : []),
-    ...(cassette.fixtureHash === fixtureHashOf(replayCase.fixture)
-      ? []
-      : ["fixture" as const]),
+    ...(fixtureStale ? ["fixture" as const] : []),
   ];
 };
 
-const staleVerdict = (cassette: Cassette, stale: Array<StaleHash>) => ({
-  cassetteId: cassette.id,
-  caseId: cassette.caseId,
-  status: "unmeasured" as const,
-  reason: `stale cassette: ${stale.join(", ")} hash changed`,
-  stale,
-});
+const stale = (cassette: Cassette, hashes: Array<StaleHash>) =>
+  unmeasured(cassette, "stale", `stale: ${hashes.join(", ")}`, hashes);
 
+/** A verdict needs a scorer that measured something; none is not a pass. */
 const scored = (
   cassette: Cassette,
   outcomes: Array<DimensionOutcome>
 ): CaseVerdict => {
+  const ids = { cassetteId: cassette.id, caseId: cassette.caseId };
   const failures = outcomes.flatMap((o) =>
     o.status === "failed"
       ? [`case ${cassette.caseId} failed scorer "${o.dimension}": ${o.message}`]
       : []
   );
-  const ids = { cassetteId: cassette.id, caseId: cassette.caseId };
-  return failures.length === 0
+  if (failures.length > 0) return { ...ids, status: "failed", failures };
+  return outcomes.some((o) => o.status === "passed")
     ? { ...ids, status: "passed" }
-    : { ...ids, status: "failed", failures };
+    : unmeasured(cassette, "nothing-scored", "no scorer measured the case");
 };
 
-/** One real cassette against its case: stale, failed or passed. */
+/**
+ * One real cassette against its case. It is measured only when the case made
+ * exactly one model call, so the recorded response is what got scored.
+ */
 export const replayCassette = async (
   suite: ReplaySuite,
   cassette: Cassette,
   replayCase: ReplayCase
 ): Promise<CaseVerdict> => {
   const preflight = staticStaleness(suite, cassette, replayCase);
-  if (preflight.length > 0) return staleVerdict(cassette, preflight);
+  if (preflight.length > 0) return stale(cassette, preflight);
 
-  let stale: Array<StaleHash> = [];
+  let staleHashes: Array<StaleHash> = [];
   const model = createReplayModel(cassette, suite.modelId, (hashes) => {
-    stale = hashes;
+    staleHashes = hashes;
   });
-  try {
-    const outcomes = await replayCase.run(model);
-    return stale.length > 0
-      ? staleVerdict(cassette, stale)
-      : scored(cassette, outcomes);
-  } catch (error) {
-    if (stale.length > 0) return staleVerdict(cassette, stale);
-    const message = error instanceof Error ? error.message : String(error);
-    return scored(cassette, [{ dimension: "run", status: "failed", message }]);
+  const run = await replayCase.run(model).then(
+    (outcomes) => ({ outcomes, error: undefined }),
+    (error: unknown) => ({ outcomes: [], error })
+  );
+  if (staleHashes.length > 0) return stale(cassette, staleHashes);
+  const calls = model.doGenerateCalls.length;
+  if (calls !== 1) {
+    return unmeasured(
+      cassette,
+      "not-consumed",
+      `cassette not consumed: ${calls} model calls, expected exactly 1`
+    );
   }
+  if (run.error === undefined) return scored(cassette, run.outcomes);
+  const message =
+    run.error instanceof Error ? run.error.message : String(run.error);
+  return scored(cassette, [{ dimension: "run", status: "failed", message }]);
 };

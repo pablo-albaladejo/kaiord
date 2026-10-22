@@ -8,7 +8,7 @@ import {
   FIXTURES_DIR,
   loadCassetteFiles,
   readCassetteFiles,
-} from "./cassette-directory";
+} from "./cassette-files";
 import type { Cassette } from "./cassette-schema";
 import { hashOf } from "./canonical-hash";
 import { createParserReplaySuite } from "./parser-replay-suite";
@@ -265,7 +265,9 @@ describe("replayCassettes", () => {
     const result = await replayCassettes(suite, [cassette, orphan]);
 
     // Assert
-    expect(result.faults).toEqual(["cassettes without a case: gone-1"]);
+    expect(result.faults).toEqual([
+      `cassettes without a case: gone-1 — ${UNBLOCK}`,
+    ]);
     expect(result.exitCode).toBe(1);
   });
 });

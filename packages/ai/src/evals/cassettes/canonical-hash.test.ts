@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { canonicalSchema, hashOf } from "./canonical-hash";
+import { canonicalize, canonicalSchema, hashOf } from "./canonical-hash";
 
 const SCHEMA = {
   $schema: "http://json-schema.org/draft-07/schema#",
@@ -108,5 +108,46 @@ describe("canonicalSchema", () => {
 
     // Assert
     expect(hashes[1]).not.toBe(hashes[0]);
+  });
+});
+
+describe("canonicalize", () => {
+  it.each([
+    ["URLs", new URL("https://a.example"), new URL("https://b.example")],
+    ["dates", new Date(0), new Date(1)],
+    ["byte arrays", new Uint8Array([1]), new Uint8Array([2])],
+  ])("should hash two different %s differently", (_label, a, b) => {
+    // Arrange
+
+    // Act
+    const hashes = [hashOf({ value: a }), hashOf({ value: b })];
+
+    // Assert
+    expect(hashes[1]).not.toBe(hashes[0]);
+  });
+
+  it("should serialize a URL as its href and a Date as ISO", () => {
+    // Arrange
+    const value = { url: new URL("https://a.example/x"), at: new Date(0) };
+
+    // Act
+    const canonical = canonicalize(value);
+
+    // Assert
+    expect(canonical).toEqual({
+      at: "1970-01-01T00:00:00.000Z",
+      url: "https://a.example/x",
+    });
+  });
+
+  it("should reject a Map rather than hash it as an empty object", () => {
+    // Arrange
+    const value = { map: new Map([["k", "v"]]) };
+
+    // Act
+    const act = () => hashOf(value);
+
+    // Assert
+    expect(act).toThrow("cannot canonicalize a Map");
   });
 });

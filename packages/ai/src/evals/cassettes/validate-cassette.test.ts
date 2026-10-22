@@ -4,6 +4,7 @@ import {
   buildCassette,
   simpleWorkout,
 } from "../../test-utils/cassette-builder";
+import type { Cassette } from "./cassette-schema";
 import { createParserReplaySuite } from "./parser-replay-suite";
 import {
   validateCassette,
@@ -67,6 +68,36 @@ describe("validateCassette", () => {
       'unknown key(s) "session_id" at response.usage',
     ]);
   });
+
+  it.each([
+    ["prompt", (c: Cassette) => ({ ...c, prompt: { ...c.prompt, uuid: "u" } })],
+    [
+      "sampling",
+      (c: Cassette) => ({ ...c, sampling: { ...c.sampling, cwd: "/h" } }),
+    ],
+    [
+      "response",
+      (c: Cassette) => ({
+        ...c,
+        response: { ...c.response, rate_limit_info: {} },
+      }),
+    ],
+  ])(
+    "should reject an unknown key at the %s level and name it",
+    async (level, edit) => {
+      // Arrange
+      const cassette = edit(await realCassette());
+
+      // Act
+      const result = validateCassette(cassette);
+
+      // Assert
+      expect(errorsOf(result)).toHaveLength(1);
+      expect(errorsOf(result)[0]).toMatch(
+        new RegExp(`^unknown key\\(s\\) "\\w+" at ${level}$`)
+      );
+    }
+  );
 
   it("should reject a real recording that omits a parity warning", async () => {
     // Arrange

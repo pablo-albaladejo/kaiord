@@ -15,10 +15,17 @@ const sha256 = z.string().regex(/^[0-9a-f]{64}$/, "expected a SHA-256 hex");
 const tokens = z.number().int().nonnegative();
 
 /**
- * The whole cassette, allowlisted at every level: `strictObject` rejects any
- * key it does not name, so CLI output such as `cwd`, `uuid`, `session_id`,
- * `rate_limit_info`, an email or a field a future CLI adds cannot be
- * committed by being passed through.
+ * Every provenance and envelope level is allowlisted: `strictObject` rejects
+ * any key it does not name, so CLI output such as `cwd`, `uuid`,
+ * `session_id`, `rate_limit_info`, an email or a field a future CLI adds
+ * cannot be committed by being passed through.
+ *
+ * The one exception is `response.structuredOutput`, which is the model's
+ * answer, not CLI metadata: it is any JSON value here. It is not checked
+ * against the agent's wire schema at load time, because an answer that does
+ * not fit it is a real model failure that replay must report as a measured
+ * failure, not hide as an unloadable file. On replay the runtime validates
+ * it exactly as it validates a live answer.
  */
 export const cassetteSchema = z
   .strictObject({

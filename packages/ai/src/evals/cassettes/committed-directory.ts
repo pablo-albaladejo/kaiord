@@ -1,0 +1,65 @@
+import { parseAll, parseJson } from "./cassette-files";
+import type { CassetteFile, LoadedCassettes } from "./cassette-files";
+import { checkManifest, duplicatesOf, manifestSchema } from "./manifest";
+import type { Manifest } from "./manifest";
+import type { ReplaySuite } from "./replay-cassette";
+import { replayCassettes } from "./replay-runner";
+import type { ReplayResult } from "./replay-runner";
+import { validateCommittedCassette } from "./validate-cassette";
+
+export const MANIFEST_FILE = "manifest.json";
+
+const readManifest = (
+  file: CassetteFile | undefined
+): { manifest: Manifest } | { fault: string } => {
+  if (!file?.bytes) return { fault: `no ${MANIFEST_FILE} in the directory` };
+  try {
+    const parsed = manifestSchema.safeParse(parseJson(file.bytes));
+    return parsed.success
+      ? { manifest: parsed.data }
+      : { fault: `${MANIFEST_FILE}: ${parsed.error.message}` };
+  } catch (error) {
+    return { fault: `${MANIFEST_FILE}: ${(error as Error).message}` };
+  }
+};
+
+/**
+ * The committed directory: only real cassettes recorded with the official
+ * model, one file per id named `<id>.json`, matching the manifest by id and
+ * by file digest. Any cassette that raised a fault is left out of
+ * `cassettes`, so a tampered, unlisted or duplicated file is never replayed.
+ */
+export const loadCommittedFiles = (
+  files: ReadonlyArray<CassetteFile>
+): LoadedCassettes => {
+  const manifestFile = files.find((f) => f.name === MANIFEST_FILE);
+  const read = readManifest(manifestFile);
+  if ("fault" in read) return { cassettes: [], faults: [read.fault] };
+
+  const rest = files.filter((f) => f !== manifestFile);
+  const { found, faults } = parseAll(rest, validateCommittedCassette);
+  const duplicated = duplicatesOf(found.map((f) => f.cassette.id));
+  if (duplicated.length > 0) {
+    faults.push(`duplicate cassette ids: ${duplicated.join(", ")}`);
+  }
+  const unique = found.filter((f) => !duplicated.includes(f.cassette.id));
+  const check = checkManifest(read.manifest, unique);
+  return {
+    cassettes: unique
+      .filter((f) => !check.rejected.has(f.cassette.id))
+      .map((f) => f.cassette),
+    faults: [...faults, ...check.faults],
+  };
+};
+
+/**
+ * The one entry point for a replay over the committed directory: every load
+ * fault reaches `faults` and the exit code, beside the replay's own.
+ */
+export const replayCommitted = async (
+  suite: ReplaySuite,
+  files: ReadonlyArray<CassetteFile>
+): Promise<ReplayResult> => {
+  const { cassettes, faults } = loadCommittedFiles(files);
+  return replayCassettes(suite, cassettes, faults);
+};

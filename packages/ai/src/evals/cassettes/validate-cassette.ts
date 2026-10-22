@@ -31,7 +31,11 @@ export const isOfficialServedModel = (servedModelId: string): boolean =>
   DATED_SNAPSHOT.test(servedModelId);
 
 const officialModelErrors = (cassette: Cassette): Array<string> => {
-  if (cassette.recorder !== "claude-cli") return [];
+  if (cassette.recorder !== "claude-cli") {
+    return [
+      `${cassette.id}: recorder "${cassette.recorder}" is not allowed in the committed directory; synthetic fixtures live in fixtures/`,
+    ];
+  }
   const errors: Array<string> = [];
   if (cassette.requestedModelId !== OFFICIAL_CASSETTE_MODEL) {
     errors.push(
@@ -47,8 +51,9 @@ const officialModelErrors = (cassette: Cassette): Array<string> => {
 };
 
 /**
- * A file in the committed cassette directory: the schema plus the official
- * model rule. In-memory cassettes built by tests are never checked here.
+ * A file in the committed cassette directory: the schema, a real recorder and
+ * the official model rule. In-memory cassettes built by tests are never
+ * checked here.
  */
 export const validateCommittedCassette = (raw: unknown): CassetteValidation => {
   const result = validateCassette(raw);

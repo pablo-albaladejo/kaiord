@@ -17,41 +17,53 @@ export type Manifest = z.infer<typeof manifestSchema>;
 /** A cassette as found on disk, with the SHA-256 of its file bytes. */
 export type CommittedCassette = { cassette: Cassette; digest: string };
 
-const idsNotIn = (ids: Array<string>, among: Set<string>): Array<string> =>
-  ids.filter((id) => !among.has(id));
+export type ManifestCheck = {
+  faults: Array<string>;
+  /** Ids that must not be replayed: unlisted or not matching their digest. */
+  rejected: Set<string>;
+};
+
+export const duplicatesOf = (ids: ReadonlyArray<string>): Array<string> => [
+  ...new Set(ids.filter((id, i) => ids.indexOf(id) !== i)),
+];
+
+const push = (faults: Array<string>, label: string, ids: Array<string>) => {
+  if (ids.length > 0) faults.push(label.replace("{ids}", ids.join(", ")));
+};
 
 /**
- * The manifest against what is on disk. Only real cassettes are pinned: a
- * synthetic fixture is never measured, so it needs no entry. Retiring an id
- * is the entry and the file removed together, which passes every check here.
+ * The manifest against what is on disk. Retiring an id is the entry and the
+ * file removed together, which passes every check here; deleting only the
+ * file leaves a listed id missing.
  */
-export const manifestFaults = (
+export const checkManifest = (
   manifest: Manifest,
   found: ReadonlyArray<CommittedCassette>
-): Array<string> => {
-  const real = found.filter((f) => f.cassette.recorder === "claude-cli");
+): ManifestCheck => {
   const listed = new Map(manifest.cassettes.map((e) => [e.id, e.sha256]));
-  const present = new Set(real.map((f) => f.cassette.id));
+  const present = new Set(found.map((f) => f.cassette.id));
   const faults: Array<string> = [];
-
-  const missing = idsNotIn([...listed.keys()], present);
-  if (missing.length > 0) {
-    faults.push(`missing cassettes: ${missing.join(", ")} — ${UNBLOCK_PATHS}`);
-  }
-  const unlisted = idsNotIn([...present], new Set(listed.keys()));
-  if (unlisted.length > 0) {
-    faults.push(
-      `unlisted cassettes: ${unlisted.join(", ")} — only the recorder writes a manifest entry`
-    );
-  }
-  const tampered = real
+  const unlisted = [...present].filter((id) => !listed.has(id));
+  const tampered = found
     .filter((f) => listed.has(f.cassette.id))
     .filter((f) => listed.get(f.cassette.id) !== f.digest)
     .map((f) => f.cassette.id);
-  if (tampered.length > 0) {
-    faults.push(
-      `cassettes not matching their manifest digest: ${tampered.join(", ")}`
-    );
-  }
-  return faults;
+
+  push(
+    faults,
+    "duplicate manifest entries: {ids}",
+    duplicatesOf(manifest.cassettes.map((e) => e.id))
+  );
+  push(
+    faults,
+    `missing cassettes: {ids} — ${UNBLOCK_PATHS}`,
+    [...listed.keys()].filter((id) => !present.has(id))
+  );
+  push(
+    faults,
+    "unlisted cassettes: {ids} — only the recorder writes a manifest entry",
+    unlisted
+  );
+  push(faults, "cassettes not matching their manifest digest: {ids}", tampered);
+  return { faults, rejected: new Set([...unlisted, ...tampered]) };
 };

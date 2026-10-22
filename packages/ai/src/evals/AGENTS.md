@@ -29,13 +29,13 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 
 Keyless replay of recorded model responses through `MockLanguageModelV4` and the real runtime. It imports nothing from `evals/claude-cli/` (pinned by `replay-imports.test.ts`), so it MAY gate. No replay lane over committed cassettes is part of `pnpm test` yet: it joins in the same commit as the first real cassette (OpenSpec `adopt-claude-cli-live-evals`, task 3.5).
 
-- `cassette-schema.ts` — the strict allowlisted cassette schema (provenance + response content); any unknown key, at any level, is rejected and named by `validate-cassette.ts`
-- `validate-cassette.ts` — `validateCassette` (schema only, for in-memory and fixture cassettes) and `validateCommittedCassette` (plus the official-model rule: requested `claude-sonnet-5`, served `claude-sonnet-5` or a dated snapshot `claude-sonnet-5-YYYYMMDD`)
-- `canonical-hash.ts` / `request-hashes.ts` — SHA-256 over canonical JSON (keys sorted recursively; only `$schema` stripped, from the schema); prompt, tools, fixture and request hashes. The request hash is computed from the call options the runtime actually sends
-- `replay-model.ts` / `replay-cassette.ts` / `replay-runner.ts` — one cassette per call; a mismatch in any of the four hashes makes the case unmeasured and stale. Zero measured cases, any stale cassette, an orphaned cassette or a failed scorer exits non-zero with a fault naming the reason and the ids
+- `cassette-schema.ts` — the strict allowlisted cassette schema; every provenance and envelope key is allowlisted and an unknown one is rejected and named by `validate-cassette.ts`. `response.structuredOutput` is the model's answer (any JSON), validated by the runtime on replay
+- `validate-cassette.ts` — `validateCassette` (schema only, for in-memory and fixture cassettes) and `validateCommittedCassette` (plus: recorder `claude-cli` only, requested `claude-sonnet-5`, served `claude-sonnet-5` or a dated snapshot `claude-sonnet-5-YYYYMMDD`)
+- `canonical-hash.ts` / `request-hashes.ts` — SHA-256 over canonical JSON (keys sorted recursively; URL, Date and byte arrays serialized by content, other class instances rejected; only `$schema` stripped, from the schema); prompt, tools, fixture and request hashes. The request hash is computed from the call options the runtime actually sends. The fixture hash covers only what the model sees, never scorer expectations
+- `replay-model.ts` / `replay-cassette.ts` / `replay-runner.ts` — one cassette per call. A case is measured only if it consumed its cassette (exactly one model call) and a scorer returned a verdict. Every unmeasured cause except `synthetic` (stale, orphan, model mismatch, not consumed, nothing scored), zero measured cases and a failed scorer exit non-zero with a fault naming the reason and the ids
 - `parser-replay-suite.ts` — the workout-parser benchmarks as a replay suite (`maxRetries: 0`: a cassette holds one call)
-- `manifest.ts` / `cassette-directory.ts` — the committed directory `committed/` and its `manifest.json` (id + SHA-256 of the file per real cassette; empty for now). Missing, unlisted, digest-mismatched and stale cassettes fail naming the ids
-- `fixtures/` — `recorder: "synthetic"` cassettes only; never measured, never decide an exit code
+- `cassette-files.ts` / `manifest.ts` / `committed-directory.ts` — the committed directory `committed/` and its `manifest.json` (id + SHA-256 of the file per real cassette; empty for now). `replayCommitted` is the one entry point: missing, unlisted, duplicated, misnamed, digest-mismatched and stale cassettes, a stray file or subdirectory and an unreadable manifest all reach the exit code, and a faulted cassette is never replayed
+- `fixtures/` — `recorder: "synthetic"` cassettes only; their model ids are `synthetic`, so even relabelled as real they are never measured
 
 ## Assertions per Benchmark
 

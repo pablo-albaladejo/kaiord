@@ -11,9 +11,20 @@ import { OFFICIAL_CASSETTE_MODEL } from "./validate-cassette";
  * `maxRetries: 0` because a cassette is one recorded call: a retry would send
  * a request carrying validation feedback that no cassette holds.
  */
+/**
+ * Only what reaches the prompt. Scorer expectations (`minSteps`, `zoneCheck`,
+ * `category`, ...) stay out, so tightening one re-scores the stored answer
+ * keylessly instead of forcing a quota-bound re-record.
+ */
+export const modelVisibleInput = (benchmark: Benchmark) => ({
+  text: benchmark.text,
+  sport: benchmark.expectedSport ?? null,
+  athleteZones: benchmark.athleteZones ?? null,
+});
+
 const parserCase = (benchmark: Benchmark): ReplayCase => ({
   id: benchmark.id,
-  fixture: benchmark,
+  fixture: modelVisibleInput(benchmark),
   run: async (model) => {
     const start = Date.now();
     const textToWorkout = createTextToWorkout({ model, maxRetries: 0 });
