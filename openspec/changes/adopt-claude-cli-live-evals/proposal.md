@@ -22,7 +22,8 @@ installation, signed in to a claude.ai Max subscription, runs headless with
 - `--bare` is unusable: it allows only `ANTHROPIC_API_KEY`/`apiKeyHelper`, never
   the subscription. A clean context is reached instead with the flags below,
   run from an empty temporary directory with `ANTHROPIC_API_KEY` removed from
-  the child's environment. The `init` message then reports
+  the child's environment (the implementation builds that environment from an
+  allowlist). The `init` message then reports
   `apiKeySource: "none"`, no MCP servers, no skills.
 
   ```
@@ -59,18 +60,24 @@ CI.
   unable to run in CI. The guard SHALL recognize every live loader, and the fix
   ships in the same PR as the loader, proven by a provoked red.
 - **"Provider-generalized manual eval loader" is replaced** by a local,
-  subscription-backed live loader: `EVAL_MODEL` (default
-  `getDefaultModel("anthropic")`), Anthropic only, detection declared through
-  `claude auth status --json`, clean-context invocation, a rate-limit guard at
-  0.85 weekly utilization, a call budget (`EVAL_MAX_CALLS`), concurrency 1, and
-  cost reported as "API-equivalent cost", never as spend. OpenAI and Google
+  subscription-backed live loader: `EVAL_MODEL` (default the pinned literal
+  `claude-sonnet-5`, never `getDefaultModel`), Anthropic only, an explicit
+  `EVAL_LIVE=1` opt-in on top of the `CI` lock, detection declared through
+  `claude auth status --json`, clean-context invocation with an allowlisted
+  child environment and a context-leak tripwire, a fail-closed rate-limit guard
+  that stops above 0.85 weekly utilization, a call budget (`EVAL_MAX_CALLS`,
+  default 50), concurrency 1, and cost reported as "API-equivalent cost", never
+  as spend. OpenAI and Google
   are no longer reachable from an eval; that gap is declared, not hidden.
 - **Cassette provenance is added.** Real responses are recorded once and
-  replayed keyless through `MockLanguageModelV4`; every cassette states who
-  recorded it, with which CLI version and which served model, against which
-  prompt, tools and fixture hashes, and which parity gaps applied
-  (no `temperature`, hidden system overhead, no `maxOutputTokens`). The replay
-  runner imports nothing from the CLI adapter, so it stays keyless and may gate.
+  replayed keyless through `MockLanguageModelV4`; every cassette is a strict
+  allowlisted schema stating who recorded it, with which CLI version and which
+  requested and served model, against which prompt, tools, fixture and request
+  hashes, and which parity gaps applied (no `temperature`, hidden system
+  overhead, no `maxOutputTokens`). Committed cassettes are `claude-sonnet-5`
+  only; Haiku iteration stays gitignored. A replay pass that measures nothing
+  or finds a stale cassette exits non-zero. The replay runner imports nothing
+  from the CLI adapter, so it stays keyless and may gate.
 - **`.github/workflows/eval.yml` is deleted** (in the implementing PR): it can
   never have a secret, so it is a shape with no possible path.
   `scripts/check-model-ids-fresh.mjs` scans it and is updated in the same PR.
@@ -104,14 +111,17 @@ CI.
 - **CI**: unchanged in what blocks a merge. The keyless replay lane joins
   `pnpm test`; the live lane is manual (`pnpm --filter @kaiord/ai eval:live`)
   and never runs in CI. `eval.yml` is deleted.
-- **Security and privacy**: the child process never sees `ANTHROPIC_API_KEY`;
+- **Security and privacy**: the child process never sees `ANTHROPIC_API_KEY`,
+  `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL` or any variable outside the
+  allowlist;
   the CLI runs from an empty temporary directory so no `CLAUDE.md`, settings,
   hooks, plugins or MCP servers of the maintainer leak into the prompt; account
-  data (email, organization, `session_id`, `rate_limit_info`) is never written
-  to a cassette, because the repo is public.
+  data (email, organization, `session_id`, `rate_limit_info`, `cwd`) is never
+  written to a cassette or a live report, because both are allowlisted schemas
+  and the repo is public.
 - **Terms**: personal, local, small-batch use of a documented Claude Code mode;
   never exposed to Kaiord users nor to CI (D1a).
-- **Delivery**: PR 6 (cassettes + replay), then PR 7a (`evals/claude-cli/`,
+- **Delivery**: PR 6 (cassettes + replay, synthetic fixtures only), then PR 7a (`evals/claude-cli/`,
   `eval:live` for the parser, `--repeat` for A/A, guard fix, removal of
   `load-eval-model.ts` and `eval.yml`). PR 7b (chat MCP spike) is not part of
   this change.

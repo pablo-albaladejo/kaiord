@@ -9,9 +9,10 @@ which needs a provider API key the project will never hold. The keyless lanes
 the only ones that ever ran. The production calls are:
 
 - parser and labs: `generateText({ output: Output.object({ schema }), system,
-messages, temperature: definition.temperature ?? 0, maxOutputTokens: 4096,
-maxRetries: 0 })` in `packages/ai/src/agents/generate-mode.ts`, with the
-  validation retry loop above it;
+messages, temperature: definition.temperature ?? 0, maxOutputTokens:
+definition.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS, maxRetries: 0 })`,
+  built in `packages/ai/src/agents/call-model.ts:44-56`, with the validation
+  retry loop above it;
 - chat: `streamText({ system, messages, tools, stopWhen: stepCountIs(8) })` in
   `packages/ai/src/chat/run-turn.ts`, with action tools registered without
   `execute`.
@@ -39,22 +40,37 @@ measures obedience to an invented format, not native tool use.
 
 `--bare` forbids OAuth, so it cannot use the subscription. Isolation comes
 from `--safe-mode --setting-sources "" --strict-mcp-config --tools ""
---disable-slash-commands --no-session-persistence`, an empty `mkdtemp` cwd, and
-an environment without `ANTHROPIC_API_KEY` and with `MAX_THINKING_TOKENS=0`
-(production does not enable reasoning). The runner checks the `init` message on
-every call (`apiKeySource === "none"`, no MCP servers, no skills) and aborts
-otherwise: a stray key would bill the API silently.
+--disable-slash-commands --no-session-persistence`, an empty `mkdtemp` cwd
+removed after every call, and a child environment built from an allowlist
+(`PATH`, `HOME`, `USER`, `LOGNAME`, `SHELL`, `LANG`, `TMPDIR`) plus
+`MAX_THINKING_TOKENS=0` (production does not enable reasoning). A denylist that
+only drops `ANTHROPIC_API_KEY` would still pass `ANTHROPIC_AUTH_TOKEN`,
+`ANTHROPIC_BASE_URL` and any variable a future CLI reads. The runner checks the
+`init` message on every call (`apiKeySource === "none"`, no MCP servers, no
+skills) and aborts otherwise: a stray key would bill the API silently.
+
+Isolation is also checked by its effect: each pass opens with a calibration
+call on a fixed minimal prompt. The smoke calls showed ~670 hidden input
+tokens; above 1000 the pass stops with a context-leak fault, because something
+(a user `CLAUDE.md`, a setting) escaped the flags.
+
+Two locks keep the lane off CI: `CI` set makes it inert, and so does any
+`EVAL_LIVE` other than `1`, which only the `eval:live` script sets. Unit tests
+of the adapter inject `spawn` and never start the binary.
 
 ### D3. Rate limits are a harness fault, never a failure
 
 The subscription quota is shared with the maintainer's daily work. Calls run
 one at a time; `EVAL_MAX_CALLS` caps a pass by call count (the CLI's dollar
 figure is notional, `costBasis: "list"`, so a dollar budget would cap nothing
-real); the runner reads `rate_limit_event` and stops before the next call once
-seven-day utilization reaches `EVAL_MAX_WEEKLY_UTILIZATION` (0.85, decision
-D1b) or the status leaves `allowed*`. Stopped and rate-limited cases are
-unmeasured — chatbot-kb counted 429s as failures and read a broken lane as a
-regression.
+real) and defaults to 50, counting calibration and retries; the runner reads
+`rate_limit_event`, normalizes seven-day utilization to a 0–1 fraction, and
+stops before the next call once it is strictly above
+`EVAL_MAX_WEEKLY_UTILIZATION` (0.85; D1b says "above", so 0.85 itself
+continues) or the status leaves `allowed*`. The guard fails closed: a missing
+or unparseable signal stops the pass, since "no signal" cannot be read as "room
+left". Stopped and rate-limited cases are unmeasured — chatbot-kb counted 429s
+as failures and read a broken lane as a regression.
 
 ### D4. Cassettes record provenance, replay never touches the CLI
 
@@ -68,12 +84,38 @@ a cassette is a real decision of the production model under a noisier sampling
 regime, not a bit-exact replica of an app call. That is why the live lane
 supports `--repeat N` for an A/A run before any k-of-n floor is set.
 
-### D5. Inertness is "cannot run in CI", enforced by name
+The cassette is a strict allowlisted schema, not "the CLI result minus a
+denylist": the `init` message carries `cwd` (a home path), `uuid` and
+`session_id`, and a future CLI may add more. Unknown keys are rejected; live
+reports follow the same rule and `eval-report-*.json` is gitignored.
 
-`check-no-inert-floors.mjs` detects inertness by the literal `load-eval-model`.
-It becomes a list of live loaders (the new live loader and, until it is
-deleted, the old one) and the PR that adds the loader proves the extended guard
-fails on a provoked violation.
+The official model is the literal `claude-sonnet-5` (D1c), not
+`getDefaultModel("anthropic")`, which moves with the catalog. A committed
+cassette must have requested and served that id; `modelUsage` naming two models
+or a substitute rejects the recording. Haiku iteration runs write to the
+gitignored `packages/ai/.eval-cassettes/` or nowhere.
+
+Staleness covers prompt, tools, fixture and request hash (system prompt,
+messages, schema, model id). Empty green is a fault, and exit non-zero was
+chosen over a "not a gate" label: the replay runner is meant to gate, so a pass
+that measured nothing or found a stale cassette must turn red rather than ask a
+reader to notice a label. PR 6 ships only `recorder: "synthetic"` fixtures,
+which are never measured; the lane joins `pnpm test` in PR 7a with the first
+real cassettes, so it is never red by construction in between.
+
+### D5. Inertness is "cannot run in CI", enforced by import
+
+`check-no-inert-floors.mjs` detects inertness by the literal `load-eval-model`
+and lists only the top level of `packages/ai/src/evals` (`readdirSync`, `:87`).
+It becomes: a runner is inert if it names the old loader (until deleted) or
+imports anything from `evals/claude-cli/` — not only the loader, since a runner
+could build the adapter itself — and the scan is recursive. The PR that adds
+the loader proves the guard fails on a nested runner and on a direct adapter
+import.
+
+The requirement is renamed to "A suite that cannot run in CI declares its own
+inertness" (OpenSpec `RENAMED` then `MODIFIED` under the new name): a live
+runner can execute locally, so "cannot execute" would mislabel it.
 
 ## Risks
 
