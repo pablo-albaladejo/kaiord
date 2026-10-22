@@ -29,15 +29,17 @@ it straight to your watch, use the Editor's Garmin sync (backed by the
 
 ### 2. CLI
 
+Zwift power is % FTP, so pass your FTP in watts with `--ftp`:
+
 ```bash
 pnpm add -g @kaiord/cli
-kaiord convert -i workout.zwo -o workout.gcn
+kaiord convert -i workout.zwo -o workout.gcn --ftp 250
 ```
 
 To push directly to Garmin Connect (after `kaiord garmin login`):
 
 ```bash
-kaiord garmin push -i workout.zwo --input-format zwo
+kaiord garmin push -i workout.zwo --input-format zwo --ftp 250
 ```
 
 ### 3. SDK
@@ -45,12 +47,12 @@ kaiord garmin push -i workout.zwo --input-format zwo
 ```ts
 import { fromText, toText } from "@kaiord/core";
 import { zwiftReader } from "@kaiord/zwo";
-import { garminWriter } from "@kaiord/garmin";
+import { createGarminWriter } from "@kaiord/garmin";
 import { readFile, writeFile } from "node:fs/promises";
 
 const zwo = await readFile("workout.zwo", "utf-8");
 const krd = await fromText(zwo, zwiftReader);
-const gcn = await toText(krd, garminWriter);
+const gcn = await toText(krd, createGarminWriter({ ftpWatts: 250 }));
 await writeFile("workout.gcn", gcn);
 ```
 
