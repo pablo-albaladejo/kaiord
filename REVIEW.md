@@ -36,7 +36,7 @@ repo rule.)
   persisted data, React state for local UI (CLAUDE.md "State Management").
   `check-no-zustand-writethrough` enforces part of it: no Zustand store
   writes Dexie directly.
-- Size: files ≤100 lines, functions <40 lines (60 for React components).
+- Size: files ≤100 lines, functions ≤40 lines (60 for React components).
   Tests are exempt. No JSDoc preamble that explains a file split.
 
 ### 3. Tests
@@ -77,8 +77,9 @@ repo rule.)
   ([openspec/AGENTS.md](./openspec/AGENTS.md)).
 - A changed domain spec follows `openspec/SPEC_TEMPLATE.md` and passes
   `pnpm lint:specs`.
-- A change under a publishable package (`core`, `cli`, `fit`, `tcx`, `zwo`,
-  `garmin`, `garmin-connect`, `mcp`, `ai`) has a changeset.
+- A version-worthy change under a publishable (non-private) package has a
+  changeset (AGENTS.md; the packages are listed in `.changeset/config.json`
+  and each `package.json` without `"private": true`).
 
 ### 6. The gate actually ran
 
