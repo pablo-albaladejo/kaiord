@@ -7,8 +7,6 @@
 import type { ChatTurnResult } from "@kaiord/ai";
 
 import type { PersistencePort } from "../../ports/persistence-port";
-import type { LlmProviderType } from "../../store/ai-store-types";
-import { appendUsageEvent } from "../usage/append-usage-event";
 import { newChatMessage } from "./chat-message-mapper";
 
 export type IdGen = { newId: () => string; now: () => string };
@@ -58,36 +56,40 @@ export const appendToolEvent = (
     })
   );
 
+/**
+ * Persists the assistant reply. A stopped or timed-out reply keeps only what
+ * streamed in `content` and records why in `stopReason`; the transcript
+ * localizes it and the model replay adds the marker. `step_limit` still
+ * appends its legacy English marker to `content`: rows already stored carry
+ * it that way, so changing it would split the history in two shapes.
+ *
+ * Usage is NOT logged here: the agent's `chat_turn_finished` telemetry event
+ * feeds the usage sink for every turn, including paused and stopped ones that
+ * never reach this writer.
+ */
 export const appendAssistantTurn = async (
   persistence: PersistencePort,
   profileId: string,
   conversationId: string,
   result: Extract<ChatTurnResult, { text: string }>,
-  providerType: LlmProviderType,
   gen: IdGen = defaultGen
 ): Promise<void> => {
-  const text =
-    result.status === "step_limit"
-      ? `${result.text}\n\n(Stopped: reached the step limit.)`
-      : result.text;
   await persistence.chatMessages.append(
     newChatMessage({
       id: gen.newId(),
       profileId,
       conversationId,
       role: "assistant",
-      content: text,
+      content:
+        result.status === "step_limit"
+          ? `${result.text}\n\n(Stopped: reached the step limit.)`
+          : result.text,
       createdAt: gen.now(),
       usage: result.usage,
+      stopReason:
+        result.status === "aborted" || result.status === "timeout"
+          ? result.status
+          : undefined,
     })
   );
-  if (result.usage)
-    await appendUsageEvent(persistence, {
-      purpose: "chat",
-      providerType,
-      ...result.usage,
-    }).catch(() => {
-      // Best-effort: the event log is authoritative, but a failed usage write
-      // must never fail a turn whose messages already committed.
-    });
 };

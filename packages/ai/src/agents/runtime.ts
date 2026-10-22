@@ -10,12 +10,15 @@ import { createNoopTelemetrySink } from "../observability/noop-sink";
 import { modelIdOf, providerOf, resolveSystemPrompt } from "./prelude";
 import { runGenerateLoop } from "./generate-mode";
 import { AiAgentError } from "./errors";
+import type { OnGenerateProgress } from "./progress";
 
 export type GenerateAgentConfig = {
   model: LanguageModel;
   telemetry?: AiTelemetrySink;
   logger?: Logger;
   signal?: AbortSignal;
+  /** Streams the output and reports each phase change (see `progress.ts`). */
+  onProgress?: OnGenerateProgress;
 };
 
 /**
@@ -50,6 +53,7 @@ export const runGenerateAgent = async <TOutput>(
       input,
       definition,
       signal: config.signal,
+      onProgress: config.onProgress,
       onAttemptError: (attempt, error) =>
         config.logger?.warn("Agent attempt failed", { attempt, error }),
     });

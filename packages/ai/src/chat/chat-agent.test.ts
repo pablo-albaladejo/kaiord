@@ -33,6 +33,8 @@ const raw = (over: Partial<RawTurn>): RawTurn => ({
   finishReason: "stop",
   usage: { promptTokens: 1, completionTokens: 1 },
   messages: assistant,
+  steps: 1,
+  toolNames: [],
   ...over,
 });
 

@@ -1,13 +1,11 @@
 import type { PendingAction } from "@kaiord/ai";
+import { Globe } from "lucide-react";
 
-import { useTranslate } from "../../../i18n/use-translate";
+import { pluralKey } from "../../../i18n/plural-key";
 import { Button } from "../../atoms/Button";
-
-const ACTION_LABEL_KEY: Record<string, string> = {
-  sync_coaching: "action.sync_coaching",
-  create_workout: "action.create_workout",
-  log_health_metric: "action.log_health_metric",
-};
+import { Icon } from "../../atoms/Icon";
+import { PushToGarminSummary } from "./PushToGarminSummary";
+import { usePendingActionView } from "./use-pending-action-view";
 
 export type PendingActionCardProps = {
   action: PendingAction;
@@ -16,27 +14,49 @@ export type PendingActionCardProps = {
   busy: boolean;
 };
 
-/** Inline confirmation for an action the assistant proposed. Nothing runs
- * until the user approves. */
+/** Inline confirmation for an action the assistant proposed, worded per
+ * tool. Nothing runs until the user approves. */
 export function PendingActionCard({
   action,
   onApprove,
   onDeny,
   busy,
 }: PendingActionCardProps) {
-  const t = useTranslate("chat");
-  const actionKey = ACTION_LABEL_KEY[action.toolName];
-  const label = actionKey ? t(actionKey) : action.toolName;
+  const { t, name, known, isPush, ctx, workout, summary, readable, external } =
+    usePendingActionView(action);
   return (
     <div className="rounded-2xl border border-edge-strong bg-surface-elevated p-3">
       <p className="text-[13px] font-semibold text-ink-strong">
-        {t("pendingAction.confirm", { action: label })}
+        {t("pendingAction.confirm", {
+          action: known ? t(`action.${name}`) : name,
+        })}
       </p>
-      <pre className="my-2 overflow-x-auto rounded-lg bg-surface-deep p-2 text-[12px] text-ink-body">
-        {JSON.stringify(action.input, null, 2)}
-      </pre>
+      <p className="my-2 break-words text-[13px] text-ink-body">
+        {isPush ? (
+          <PushToGarminSummary
+            workout={workout}
+            t={t}
+            formatDay={ctx.formatDay}
+          />
+        ) : (
+          (summary ?? t("summary.unreadable"))
+        )}
+      </p>
+      {external && (
+        <p className="mb-2 flex items-center gap-1.5 text-[12px] text-ink-muted">
+          <Icon icon={Globe} size="xs" color="inherit" aria-hidden="true" />
+          {t(`external.${name}`)}
+        </p>
+      )}
+      {action.deferredCount !== undefined && action.deferredCount > 0 && (
+        <p className="mb-2 text-[12px] text-ink-muted">
+          {t(pluralKey("pendingAction.deferred", action.deferredCount), {
+            count: action.deferredCount,
+          })}
+        </p>
+      )}
       <div className="flex gap-2">
-        <Button onClick={onApprove} disabled={busy}>
+        <Button onClick={onApprove} disabled={busy || !readable}>
           {t("pendingAction.approve")}
         </Button>
         <button

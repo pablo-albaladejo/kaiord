@@ -4,9 +4,9 @@
  * Turns profile-scoped workout records into compact summaries plus
  * aggregates (count, total and longest duration) so the model can answer
  * questions like "what was my longest workout?" without the full row set
- * being serialized into the prompt. The row list is capped; the aggregates
- * are computed over every record, so a "longest" answer is correct even
- * when the longest workout falls outside the capped list.
+ * being serialized into the prompt. The aggregates are computed over every
+ * record, so a "longest" answer is correct even when the read tool's budget
+ * later cuts the longest workout out of the returned rows.
  *
  * `name` is authored outside the app — it arrives with imported FIT/TCX/ZWO
  * files and with Garmin sync — so it is fenced as untrusted data, the same
@@ -18,9 +18,9 @@ import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { Workout } from "../../../types/krd";
 import { calculateWorkoutStats } from "../../../utils/workout-stats";
 
-const ROW_BUDGET = 50;
-
 export type WorkoutSummary = {
+  /** App-generated record id, e.g. for push_to_garmin. */
+  id: string;
   date: string;
   sport: string;
   /** Fenced untrusted text, or null when the workout has no name. */
@@ -44,6 +44,7 @@ const toSummary = (record: WorkoutRecord): WorkoutSummary => {
   const workout = workoutOf(record);
   const stats = calculateWorkoutStats(workout);
   return {
+    id: record.id,
     date: record.date,
     sport: record.sport,
     name: workout?.name ? fenceUntrusted(workout.name) : null,
@@ -75,6 +76,6 @@ export const summarizeWorkouts = (
     count: all.length,
     totalDurationSeconds,
     longest: longestOf(all),
-    workouts: byDateAsc.slice(-ROW_BUDGET),
+    workouts: byDateAsc,
   };
 };

@@ -39,6 +39,7 @@ import type { Page, Route } from "@playwright/test";
 import { mockLlmFailure, mockLlmSuccess } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
 import { LLM_CYCLING_RESPONSE } from "./fixtures/llm-responses";
+import { fulfillLlm } from "./fixtures/llm-sse";
 import {
   getGarminBridgeCallActions,
   installGarminBridgeStub,
@@ -430,11 +431,7 @@ test.describe("Coaching activity dialog redesign", () => {
     const captureAndRespond = async (route: Route) => {
       const body = route.request().postData() ?? "";
       capturedBodies.push(body);
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(LLM_CYCLING_RESPONSE),
-      });
+      await fulfillLlm(route, LLM_CYCLING_RESPONSE);
     };
     await page.route("**/api.anthropic.com/**", captureAndRespond);
     await page.route("**/api.openai.com/**", captureAndRespond);
@@ -495,11 +492,7 @@ test.describe("Coaching activity dialog redesign", () => {
         });
         return;
       }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(LLM_CYCLING_RESPONSE),
-      });
+      await fulfillLlm(route, LLM_CYCLING_RESPONSE);
     };
     await page.route("**/api.anthropic.com/**", handler);
     await page.route("**/api.openai.com/**", handler);
