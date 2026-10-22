@@ -56,7 +56,7 @@ match `BRIDGE_MANIFEST` in `background.js`.
   returns raw JSON; the SPA parses.
 - External dispatch is origin-pinned and action-allowlisted via the vendored
   envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `read-metrics` /
-  `push-weight` / `open-trainingpeaks`.
+  `push-weight` / `push-workout` / `open-trainingpeaks` / `set-theme`.
 - The session cookie is never read, stored, or logged; the extension only holds
   the minted access token. Session presence is a boolean only.
 - Weight-unit assumption: the type-9 metric value is kilograms (see

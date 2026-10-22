@@ -19,6 +19,7 @@
 import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
+import { withFallbackName } from "../../utils/structured-workout";
 import { transitionToStructured } from "../workout-transitions";
 import { forceKrdSport } from "./coaching-krd-sport";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
@@ -65,9 +66,8 @@ export const processExistingRawInPlace = async (
     });
     // Force the resolved sport onto the KRD too (not just the LLM hint) so a
     // known Train2Go sport is never persisted as the model's `generic` guess.
-    const krd = resolved
-      ? forceKrdSport(generated.krd, resolved)
-      : generated.krd;
+    const named = withFallbackName(generated.krd, activity.title);
+    const krd = resolved ? forceKrdSport(named, resolved) : named;
     const updated = transitionToStructured(existingWorkout, krd, {
       provider: generated.aiMeta.provider,
       model: generated.aiMeta.model,

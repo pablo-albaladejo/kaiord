@@ -19,8 +19,16 @@ vi.mock("@kaiord/ai/providers", () => ({
 
 const mockSink = { emit: vi.fn() };
 
+const mockPersistence = {
+  profiles: {
+    getActiveId: vi.fn(),
+    getById: vi.fn(),
+  },
+  aiProviders: { getCustomPrompt: vi.fn() },
+};
+
 vi.mock("../adapters/dexie/dexie-persistence-adapter", () => ({
-  createDexiePersistence: vi.fn(() => ({})),
+  createDexiePersistence: vi.fn(() => mockPersistence),
 }));
 
 vi.mock("../adapters/telemetry/dexie-usage-telemetry-sink", () => ({
@@ -32,10 +40,43 @@ import { createLanguageModel } from "@kaiord/ai/providers";
 import { createWorkoutKRD } from "@kaiord/core";
 
 import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
+import type { Profile } from "../types/profile";
 import type { GenerateWorkoutOptions } from "./generate-workout";
 import { generateWorkoutKrd } from "./generate-workout";
 
-const OVER_LIMIT_PROMPT_LENGTH = 600;
+const RUNNING_PROFILE = {
+  id: "p1",
+  sportZones: {
+    running: {
+      thresholds: {},
+      heartRateZones: { method: "custom", zones: [] },
+      paceZones: {
+        method: "custom",
+        zones: [
+          {
+            zone: 1,
+            name: "Easy",
+            minPace: 345,
+            maxPace: 390,
+            unit: "min_per_km",
+          },
+        ],
+      },
+    },
+  },
+} as unknown as Profile;
+
+type SentOptions = {
+  sport?: string;
+  athlete: {
+    zonesText?: string;
+    instructions?: string;
+    zones: { pace?: Array<{ zone: number }> };
+  };
+};
+
+const sentOptions = (): SentOptions =>
+  mockTextToWorkout.mock.calls[0]![1] as SentOptions;
 
 const baseOptions: GenerateWorkoutOptions = {
   text: "30 minute endurance ride",
@@ -116,9 +157,25 @@ describe("generateWorkoutKrd", () => {
     await generateWorkoutKrd(baseOptions);
 
     // Assert
-    expect(mockTextToWorkout).toHaveBeenCalledWith("30 minute endurance ride", {
-      sport: undefined,
-    });
+    expect(mockTextToWorkout).toHaveBeenCalledWith(
+      "30 minute endurance ride",
+      expect.objectContaining({ sport: undefined })
+    );
+  });
+
+  it("should forward the abort signal and the progress listener to the run", async () => {
+    // Arrange
+    const abortSignal = new AbortController().signal;
+    const onProgress = vi.fn();
+
+    // Act
+    await generateWorkoutKrd({ ...baseOptions, abortSignal, onProgress });
+
+    // Assert
+    expect(mockTextToWorkout).toHaveBeenCalledWith(
+      baseOptions.text,
+      expect.objectContaining({ signal: abortSignal, onProgress })
+    );
   });
 
   it("should pass sport option when provided", async () => {
@@ -132,56 +189,77 @@ describe("generateWorkoutKrd", () => {
     });
 
     // Assert
-    expect(mockTextToWorkout).toHaveBeenCalledWith("easy run", {
+    expect(sentOptions().sport).toBe("running");
+  });
+
+  it("should send the athlete's zones and instructions when supplied", async () => {
+    // Arrange
+    const athlete = {
+      profile: RUNNING_PROFILE,
+      customPrompt: "Pace targets on every step",
+    };
+
+    // Act
+    await generateWorkoutKrd({ ...baseOptions, sport: "running", athlete });
+
+    // Assert
+    const sent = sentOptions().athlete;
+    expect(sent.zonesText).toContain("Pace zones");
+    expect(sent.instructions).toBe("Pace targets on every step");
+    expect(sent.zones.pace?.map((z) => z.zone)).toEqual([1]);
+    expect(mockPersistence.profiles.getActiveId).not.toHaveBeenCalled();
+  });
+
+  it("should load the active profile and custom instructions when the caller passes none", async () => {
+    // Arrange
+    mockPersistence.profiles.getActiveId.mockResolvedValueOnce("p1");
+    mockPersistence.profiles.getById.mockResolvedValueOnce(RUNNING_PROFILE);
+    mockPersistence.aiProviders.getCustomPrompt.mockResolvedValueOnce(
+      "Prefer ranges"
+    );
+
+    // Act
+    await generateWorkoutKrd({ ...baseOptions, sport: "running" });
+
+    // Assert
+    const sent = sentOptions().athlete;
+    expect(mockPersistence.profiles.getById).toHaveBeenCalledWith("p1");
+    expect(sent.zonesText).toContain("Pace zones");
+    expect(sent.instructions).toBe("Prefer ranges");
+  });
+
+  it("should load the named profile instead of the active one", async () => {
+    // Arrange
+    mockPersistence.profiles.getById.mockResolvedValueOnce(RUNNING_PROFILE);
+    mockPersistence.aiProviders.getCustomPrompt.mockResolvedValueOnce(null);
+
+    // Act
+    await generateWorkoutKrd({
+      ...baseOptions,
       sport: "running",
+      profileId: "p2",
     });
-  });
-
-  it("should append zones context to prompt when provided", async () => {
-    // Arrange
-    await generateWorkoutKrd({
-      ...baseOptions,
-      zonesContext: "FTP: 250W\nPower zones: Z1: 0-137W",
-    });
-
-    // Act
-    const prompt = mockTextToWorkout.mock.calls[0][0] as string;
 
     // Assert
-    expect(prompt).toContain("30 minute endurance ride");
-    expect(prompt).toContain("Training zones:");
-    expect(prompt).toContain("FTP: 250W");
+    expect(mockPersistence.profiles.getActiveId).not.toHaveBeenCalled();
+    expect(mockPersistence.profiles.getById).toHaveBeenCalledWith("p2");
+    expect(sentOptions().athlete.zonesText).toContain("Pace zones");
   });
 
-  it("should append custom prompt when provided", async () => {
+  it("should send no zones when there is no active profile", async () => {
     // Arrange
-    await generateWorkoutKrd({
-      ...baseOptions,
-      customPrompt: "focus on sweet spot",
-    });
+    mockPersistence.profiles.getActiveId.mockResolvedValueOnce(null);
+    mockPersistence.aiProviders.getCustomPrompt.mockResolvedValueOnce(null);
 
     // Act
-    const prompt = mockTextToWorkout.mock.calls[0][0] as string;
+    await generateWorkoutKrd(baseOptions);
 
     // Assert
-    expect(prompt).toContain("Additional instructions:");
-    expect(prompt).toContain("focus on sweet spot");
-  });
-
-  it("should truncate custom prompt to 500 characters", async () => {
-    // Arrange
-    const longPrompt = "a".repeat(OVER_LIMIT_PROMPT_LENGTH);
-    await generateWorkoutKrd({
-      ...baseOptions,
-      customPrompt: longPrompt,
+    expect(sentOptions().athlete).toEqual({
+      zonesText: undefined,
+      instructions: undefined,
+      zones: {},
     });
-    const prompt = mockTextToWorkout.mock.calls[0][0] as string;
-
-    // Act
-    const additionalSection = prompt.split("Additional instructions:\n")[1];
-
-    // Assert
-    expect(additionalSection).toHaveLength(500);
   });
 
   it("should wrap result with createWorkoutKRD", async () => {

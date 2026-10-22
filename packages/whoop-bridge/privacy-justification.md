@@ -22,7 +22,7 @@ This document explains why each Chrome extension permission is required, for Chr
 
 **Why**: Hold the captured session bearer in `chrome.storage.session` — memory-only storage that survives service-worker restarts but is cleared when the browser closes. No password, developer API key, or long-lived token is ever stored.
 
-**Data stored**: the session bearer, the decoded numeric WHOOP user id, and the capture timestamp. All three live only in `chrome.storage.session`. The bearer is never written to disk and is transmitted nowhere except back to WHOOP as part of an allowlisted read; the user id and capture timestamp are also returned to the allowed Kaiord SPA origins as part of the bridge's status response (see "Data Handling" below).
+**Data stored**: the session bearer, the decoded numeric WHOOP user id, and the capture timestamp. All three live only in `chrome.storage.session`. The bearer is never written to disk and is transmitted nowhere except back to WHOOP as part of an allowlisted read; the user id and capture timestamp are also returned to the allowed Kaiord SPA origins as part of the bridge's status response (see "Data Handling" below). Separately, `chrome.storage.local` holds the Kaiord app's theme preference (`light`, `dark` or `system`) so the popup matches the app; it is not personal data and is sent nowhere.
 
 ## Website Access
 
