@@ -1,11 +1,10 @@
 import type { z } from "zod";
 import { cassetteSchema } from "./cassette-schema";
 import type { Cassette } from "./cassette-schema";
+import { isDatedSnapshotOf } from "./dated-snapshot";
 
 /** The pinned official recording model (D1c), never `getDefaultModel`. */
 export const OFFICIAL_CASSETTE_MODEL = "claude-sonnet-5";
-
-const DATED_SNAPSHOT = new RegExp(`^${OFFICIAL_CASSETTE_MODEL}-\\d{8}$`);
 
 export type ServedForm = "bare" | "dated";
 
@@ -40,7 +39,7 @@ export const isOfficialServedModel = (
   form: ServedForm | null = OFFICIAL_SERVED_FORM
 ): boolean => {
   const bare = servedModelId === OFFICIAL_CASSETTE_MODEL;
-  const dated = DATED_SNAPSHOT.test(servedModelId);
+  const dated = isDatedSnapshotOf(servedModelId, OFFICIAL_CASSETTE_MODEL);
   if (form === null) return bare || dated;
   return form === "bare" ? bare : dated;
 };
