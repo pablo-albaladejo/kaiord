@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  cliRun,
   createSpawnDouble,
   initMessage,
   rateLimitEvent,
@@ -196,5 +197,33 @@ describe("project", () => {
     // Assert
     expect(projected).toEqual(expected);
     expect(JSON.stringify(projected)).not.toMatch(leaked);
+  });
+});
+
+describe("captureCalibration modelUsage", () => {
+  it("should drop a digit-bearing modelUsage field instead of failing the parse", async () => {
+    // Arrange
+    const session = createLiveSession({
+      spawnClaude: async () =>
+        cliRun({
+          modelUsage: {
+            "claude-sonnet-5": {
+              inputTokens: 600,
+              cacheCreation5mInputTokens: 9,
+            },
+          },
+        }),
+      maxCalls: 1,
+      maxWeekly: 0.85,
+      field: null,
+    });
+
+    // Act
+    const result = await captureCalibration(session, "claude-sonnet-5");
+
+    // Assert
+    expect(result.modelUsage).toEqual({
+      "claude-sonnet-5": { inputTokens: 600 },
+    });
   });
 });

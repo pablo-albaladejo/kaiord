@@ -81,6 +81,21 @@ export const calibrationCaptureSchema = z.strictObject({
 export type CalibrationCapture = z.infer<typeof calibrationCaptureSchema>;
 
 /**
+ * `modelUsage` keeps every numeric field the CLI adds, so a future one with a
+ * digit (`cacheCreation5mInputTokens`) is dropped here, as `project` drops
+ * it, instead of failing the parse after the call was already spent.
+ */
+const wordKeyed = (usage: Record<string, Record<string, number>>) =>
+  Object.fromEntries(
+    Object.entries(usage).map(([model, fields]) => [
+      model,
+      Object.fromEntries(
+        Object.entries(fields).filter(([key]) => FIELD_KEY.test(key))
+      ),
+    ])
+  );
+
+/**
  * The calibration step: one call, whatever the guard then decides, captured
  * so the maintainer can pin `SEVEN_DAY_FIELD` (3.4) and the served-model form
  * (3.5). The projection is an allowlist of shapes: numbers, booleans and
@@ -100,7 +115,7 @@ export const captureCalibration = async (
     requestedModelId: modelId,
     inputTokens: totalInputTokens(run.result),
     rateLimitInfos: run.rateLimitInfos.map((info) => project(info)),
-    modelUsage: run.result.modelUsage,
+    modelUsage: wordKeyed(run.result.modelUsage),
   });
 };
 
