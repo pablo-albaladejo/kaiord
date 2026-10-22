@@ -41,9 +41,9 @@ repo rule.)
 
 ### 3. Tests
 
-- Every `it()` title starts with `should `, and every body has
-  `// Arrange`, `// Act`, `// Assert` in order
-  ([test-conventions](./openspec/specs/test-conventions/spec.md)).
+- Every in-scope `it()` title starts with `should `, and every body has
+  `// Arrange`, `// Act`, `// Assert` in order, with blank lines separating
+  the sections ([test-conventions](./openspec/specs/test-conventions/spec.md)).
 - Every test asserts an observable outcome. No suite targets a pure
   re-export barrel ([test-minimality](./openspec/specs/test-minimality/spec.md)).
 - A `*.converter.ts` has a sibling test. A `*.mapper.ts` has none.
