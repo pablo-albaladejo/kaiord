@@ -94,6 +94,8 @@ export const runProcess = (
     // A child that exits before reading its prompt raises EPIPE here.
     child.stdin?.on("error", (error) => {
       clearTimeout(timer);
+      // Killed first: the caller removes the child's cwd once this settles.
+      child.kill("SIGKILL");
       reject(
         harnessFault(
           `could not write the prompt to ${command}: ${messageOf(error)}`

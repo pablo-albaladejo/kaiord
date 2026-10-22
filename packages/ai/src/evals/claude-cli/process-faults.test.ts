@@ -78,5 +78,6 @@ describe("process faults", () => {
 
     // Assert
     expect(fault).toBe("could not write the prompt to claude: write EPIPE");
+    expect(double.killed).toEqual(["SIGKILL"]);
   });
 });
