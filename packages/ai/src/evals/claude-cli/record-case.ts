@@ -81,7 +81,8 @@ export type RecordedCase = {
 
 /**
  * Runs a replay case (`maxRetries: 0`) once over the recording decorator. A
- * cassette is exactly one call (D4): any other count is rejected. A scored
+ * cassette is exactly one attempted call that completed (D4): any other
+ * count, a retry that rejected included, is rejected. A scored
  * failure still records, because the stored answer is a real decision. A
  * case that failed before any call completed rethrows its own error.
  */
@@ -99,12 +100,15 @@ export const recordCase = async (
     outcome = { error };
   }
   const calls = recording.calls();
-  // A first call that rejected records nothing: its own error is the cause.
-  if (calls.length === 0 && "error" in outcome) throw outcome.error;
+  const attempts = recording.attempts();
+  // The only attempt rejected, or none was made: its own error is the cause.
+  if (calls.length === 0 && attempts <= 1 && "error" in outcome) {
+    throw outcome.error;
+  }
   const [only] = calls;
-  if (calls.length !== 1 || only === undefined) {
+  if (attempts !== 1 || calls.length !== 1 || only === undefined) {
     throw harnessFault(
-      `case ${replayCase.id} made ${calls.length} model calls; a cassette records exactly one`
+      `case ${replayCase.id} made ${attempts} model calls (${calls.length} completed); a cassette records exactly one`
     );
   }
   return { cassette: cassetteOf(suite, replayCase, only, now()), outcome };

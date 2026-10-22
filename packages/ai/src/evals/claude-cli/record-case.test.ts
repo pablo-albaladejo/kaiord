@@ -119,7 +119,40 @@ describe("recordCase", () => {
     // Assert
     expect(calls()).toBe(PRODUCTION_ATTEMPTS);
     expect(fault).toContain(
-      "made 3 model calls; a cassette records exactly one"
+      "made 3 model calls (3 completed); a cassette records exactly one"
+    );
+  });
+
+  it("should reject a case whose retry rejected after one call completed", async () => {
+    // Arrange
+    let attempt = 0;
+    const model = createClaudeCliLanguageModel({
+      modelId: "claude-sonnet-5",
+      call: async () => {
+        attempt++;
+        if (attempt > 1) throw new Error("spawn failed on the retry");
+        return cliRun({
+          structuredOutput: { sport: "cycling", steps: "none" },
+        });
+      },
+    });
+    const retrying: ReplayCase = {
+      id: "cycling-simple",
+      fixture: {},
+      run: async (m) => {
+        await createTextToWorkout({ model: m })("30 min easy ride");
+        return [];
+      },
+    };
+
+    // Act
+    const fault = await faultOf(recordCase(suite, retrying, model, NOW));
+
+    // Assert
+    // The first call completes; both runtime retries reject.
+    expect(attempt).toBe(PRODUCTION_ATTEMPTS);
+    expect(fault).toContain(
+      "made 3 model calls (1 completed); a cassette records exactly one"
     );
   });
 
