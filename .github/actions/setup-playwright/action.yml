@@ -59,6 +59,10 @@ runs:
     - name: Restore Playwright browser cache
       id: pw-cache
       uses: actions/cache@v6
+      # A stalled segment download aborts after 1 min and counts as a miss,
+      # instead of hanging until the caller's 12-min step cap.
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: "1"
       with:
         path: ~/.cache/ms-playwright
         key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-${{ inputs.browser }}
@@ -137,6 +141,8 @@ runs:
       id: deb-cache
       if: steps.pw-deps.outputs.count != '0' && steps.pw-deps.outputs.cacheable == 'true'
       uses: actions/cache/restore@v6
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: "1"
       with:
         path: ${{ steps.pw-deps.outputs.dir }}
         key: ${{ runner.os }}-${{ runner.arch }}-playwright-debs-v3-${{ steps.pw-deps.outputs.image }}-${{ steps.pw-version.outputs.version }}-${{ inputs.browser }}-${{ steps.pw-deps.outputs.hash }}
@@ -161,6 +167,10 @@ runs:
       run: |
         mkdir -p "$DEB_DIR/partial"
         opts=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o "Dir::Cache::archives=$DEB_DIR")
+        # With sourceparts=- apt may drop the list files of every other
+        # source (packages.microsoft.com, ...) for the rest of the job: a
+        # later step installing from another repo must run its own
+        # `apt-get update` first.
         if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
           opts+=(-o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=-)
         else
@@ -230,6 +240,13 @@ runs:
         for p in $MISSING; do
           [ "$(dpkg-query -W -f='${db:Status-Abbrev}' "$p" 2>/dev/null)" = "ii " ] || gaps="$gaps $p"
         done
+        # A failed second pass, or a half-configured upgrade outside MISSING,
+        # shows up here even when every MISSING package reads "ii".
+        audit=$(dpkg --audit 2>&1 || true)
+        if [ -n "$audit" ]; then
+          echo "dpkg --audit:"; echo "$audit" | tail -n 40
+          gaps="$gaps (dpkg --audit reports unconfigured or broken packages)"
+        fi
         if [ -n "$gaps" ]; then
           msg="Still not installed after the offline install:$gaps"
           if [ "$MODE" = "required" ]; then echo "::error::$msg"; exit 1; fi
@@ -237,7 +254,7 @@ runs:
           echo "ok=false" >> "$GITHUB_OUTPUT"
           exit 0
         fi
-        echo "All $(echo "$MISSING" | wc -w) packages Playwright needs for $BROWSER are installed."
+        echo "All $(echo "$MISSING" | wc -w) packages Playwright needs for $BROWSER are installed; dpkg --audit is clean."
         echo "ok=true" >> "$GITHUB_OUTPUT"
 
     # Saved only after the set installed and verified, so a broken set is
