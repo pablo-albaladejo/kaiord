@@ -25,20 +25,50 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
-            const commits = await github.rest.repos.getCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.payload.workflow_run.head_sha,
-            });
-            const files = commits.data.files?.map(f => f.filename) || [];
-            const frontendChanged = files.some(f =>
-              f.startsWith('packages/workout-spa-editor/') ||
-              f.startsWith('packages/core/') ||
-              f.startsWith('packages/fit/') ||
-              f.startsWith('packages/tcx/') ||
-              f.startsWith('packages/zwo/') ||
-              f.startsWith('packages/garmin/')
-            );
+            const ref = context.payload.workflow_run.head_sha;
+            const { owner, repo } = context.repo;
+            let files = [];
+            let filesKnown = true;
+            try {
+              const commits = await github.rest.repos.getCommit({ owner, repo, ref });
+              files = commits.data.files?.map(f => f.filename) || [];
+            } catch (error) {
+              filesKnown = false;
+              core.warning(`Could not list commit files, running e2e: ${error.message}`);
+            }
+            // The SPA, every workspace package it depends on (read from its
+            // package.json at this commit, so the list cannot drift; each SPA
+            // dep must be named @kaiord/<dir> to map to its folder), and the e2e pipeline itself, so a change
+            // to this workflow or its composites is exercised by the run it
+            // triggers. Root package.json/pnpm-lock.yaml/tsconfig.base.json
+            // are excluded on purpose: CI installs and builds them first, and
+            // matching them would run the full matrix on every dev-tool bump.
+            const prefixes = [
+              'packages/workout-spa-editor/',
+              '.github/workflows/workout-spa-editor-e2e.yml',
+              '.github/actions/setup-playwright/',
+              '.github/actions/setup-pnpm/',
+            ];
+            let depsKnown = true;
+            try {
+              const { data } = await github.rest.repos.getContent({
+                owner, repo, ref, path: 'packages/workout-spa-editor/package.json',
+              });
+              const pkg = JSON.parse(Buffer.from(data.content, 'base64').toString());
+              const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+              for (const [name, spec] of Object.entries(deps)) {
+                if (spec.startsWith('workspace:') && name.startsWith('@kaiord/')) {
+                  prefixes.push(`packages/${name.slice('@kaiord/'.length)}/`);
+                }
+              }
+            } catch (error) {
+              depsKnown = false;
+              core.warning(`Could not read SPA deps, running e2e: ${error.message}`);
+            }
+            // getCommit lists at most 300 files: a capped list may hide a match.
+            const capped = files.length >= 300;
+            const frontendChanged = !filesKnown || !depsKnown || capped ||
+              files.some(f => prefixes.some(p => f.startsWith(p)));
             core.setOutput('should-run', frontendChanged ? 'true' : 'false');
             console.log(`Frontend changed: ${frontendChanged}, files: ${files.length}`);
 
@@ -74,8 +104,16 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      # Browser + system packages from caches; apt is only contacted on a
+      # cold key. The composite's internal budgets add up to 650s (browser
+      # 90s + apt attempt 1 45s+90s + attempt 2 45s+240s + dpkg 60s+20s+60s);
+      # the 12-min cap leaves 70s for cache restore/save. system-deps stays
+      # `required`: firefox and webkit cannot launch without the packages.
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+        timeout-minutes: 12
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: ${{ matrix.browser }}
 
       - name: Build workspace dependencies
         run: pnpm -r build
@@ -111,7 +149,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        device: ["Mobile Chrome", "Mobile Safari"]
+        include:
+          - { device: "Mobile Chrome", browser: chromium }
+          - { device: "Mobile Safari", browser: webkit }
 
     steps:
       - name: Checkout code
@@ -120,8 +160,16 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      # Browser + system packages from caches; apt is only contacted on a
+      # cold key. The composite's internal budgets add up to 650s (browser
+      # 90s + apt attempt 1 45s+90s + attempt 2 45s+240s + dpkg 60s+20s+60s);
+      # the 12-min cap leaves 70s for cache restore/save. system-deps stays
+      # `required`: firefox and webkit cannot launch without the packages.
       - name: Install Playwright browsers
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
+        timeout-minutes: 12
+        uses: ./.github/actions/setup-playwright
+        with:
+          browser: ${{ matrix.browser }}
 
       - name: Build workspace dependencies
         run: pnpm -r build
