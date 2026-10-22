@@ -11,7 +11,7 @@ CI verifies freshness via `pnpm lint:specs-inventory`.
 | [`adapter-contracts`](./adapter-contracts/spec.md) | Adapter Contracts | Generic contract that every format-adapter and browser-extension-adapter in the monorepo MUST satisfy, so adapters stay interchangeable behind ports and cannot… |
 | [`agent-guardrails`](./agent-guardrails/spec.md) | Agent Guardrails | Gates on what a Claude Code agent may do in this repository, enforced by hooks in |
 | [`ai-agents`](./ai-agents/spec.md) | ai-agents Specification | Defines `@kaiord/ai/agents` — the declarative `AgentDefinition` and the generate-mode runtime (multimodal document input, validate-and-retry-with-feedback, tok… |
-| [`ai-evals`](./ai-evals/spec.md) | ai-evals Specification | Defines the deterministic, keyless eval smoke lane (built on `MockLanguageModelV4`) that exercises the real agent runtime in CI, and the provider-generalized m… |
+| [`ai-evals`](./ai-evals/spec.md) | ai-evals Specification | Defines the deterministic, keyless eval smoke lane (built on `MockLanguageModelV4`) that exercises the real agent runtime in CI, and the local-only live lane o… |
 | [`ai-guardrails`](./ai-guardrails/spec.md) | ai-guardrails Specification | Containment for text the application did not author. Coach-authored plans |
 | [`ai-observability`](./ai-observability/spec.md) | ai-observability Specification | Defines `@kaiord/ai/observability` — a minimal, redaction-safe telemetry port (`run_finished`/`run_failed` for agent runs, `chat_turn_finished` for chat turns,… |
 | [`ai-prompts`](./ai-prompts/spec.md) | ai-prompts Specification | Defines `@kaiord/ai/prompts` — the versioned prompt registry, template variable substitution, and the untrusted-data fence utility, owning the migrated workout… |
