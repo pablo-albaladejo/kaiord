@@ -42,7 +42,7 @@ describe("convertPowerTarget", () => {
   });
 
   describe("range target with mixed bounds", () => {
-    it("should warn when one bound is %FTP and the other is watts", () => {
+    it("should warn and drop a range whose bounds mix %FTP and watts", () => {
       // Arrange
       const logger = createMockLogger();
       const warnSpy = vi.spyOn(logger, "warn");
@@ -52,11 +52,12 @@ describe("convertPowerTarget", () => {
       };
 
       // Act
-      convertPowerTarget(data, logger);
+      const result = convertPowerTarget(data, logger);
 
       // Assert
+      expect(result).toStrictEqual({ type: "open" });
       expect(warnSpy).toHaveBeenCalledWith(
-        "Power range mixes %FTP and watts bounds",
+        "Power range mixes %FTP and watts bounds; range dropped",
         { low: 80, high: 1300 }
       );
     });

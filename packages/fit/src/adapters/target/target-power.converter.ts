@@ -31,13 +31,23 @@ export const convertPowerTarget = (
   return { type: targetTypeSchema.enum.open };
 };
 
-const buildRange = (low: number, high: number, logger?: Logger): Target => {
+// A range whose bounds use different encodings (e.g. 90 %FTP to 250 W) has
+// no single-unit KRD representation, so it is rejected rather than coerced.
+const buildRange = (
+  low: number,
+  high: number,
+  logger?: Logger
+): Target | null => {
   const min = interpretWorkoutPower(low);
   const max = interpretWorkoutPower(high);
-  const percent = min.type === "percentage" && max.type === "percentage";
   if (min.type !== max.type) {
-    logger?.warn("Power range mixes %FTP and watts bounds", { low, high });
+    logger?.warn("Power range mixes %FTP and watts bounds; range dropped", {
+      low,
+      high,
+    });
+    return null;
   }
+  const percent = min.type === "percentage";
   return {
     type: targetTypeSchema.enum.power,
     value: {
