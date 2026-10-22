@@ -139,17 +139,19 @@ export const importTargets = (src, file) =>
     .map((s) => resolve(dirname(file), s));
 
 /**
- * A local target as a code file on disk: TypeScript, `.js` written for `.ts`
- * included, and plain `.mjs`/`.js`/`.cjs` helpers, which the walk follows too.
+ * Every code file a local target could resolve to: TypeScript, `.js` written
+ * for `.ts` included, and plain `.mjs`/`.js`/`.cjs` helpers. All of them are
+ * followed, not the first found, so an ambiguous stem (`helpers.js` beside
+ * `helpers.ts`) fails closed instead of hiding one of the two.
  */
-const asSourceFile = (target) => {
+const sourceFiles = (target) => {
   const stem = target.replace(/\.[cm]?js$/, "");
   const candidates = [
     target,
     ...SOURCE_EXTENSIONS.map((ext) => stem + ext),
     ...SOURCE_EXTENSIONS.map((ext) => join(target, `index${ext}`)),
   ];
-  return candidates.find(
+  return [...new Set(candidates)].filter(
     (p) => SOURCE_EXTENSIONS.some((ext) => p.endsWith(ext)) && existsSync(p)
   );
 };
@@ -184,9 +186,10 @@ export const inertReason = (src, file, root) => {
     if (reason) return path === file ? reason : `${reason} via ${path}`;
     if (root === undefined) continue;
     for (const target of importTargets(text, path)) {
-      const next = asSourceFile(target);
-      if (next && !seen.has(next)) {
-        queue.push({ path: next, text: readFileSync(next, "utf8") });
+      for (const next of sourceFiles(target)) {
+        if (!seen.has(next)) {
+          queue.push({ path: next, text: readFileSync(next, "utf8") });
+        }
       }
     }
   }

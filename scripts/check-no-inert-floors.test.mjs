@@ -254,3 +254,12 @@ test("an extensionless import of a .cjs helper is followed", () => {
   });
   assert.ok(kinds.includes("computed-exit"));
 });
+
+test("an ambiguous stem follows both files, so the offending one is found", () => {
+  const kinds = kindsOf({
+    "helpers.js": `export const readFixture = () => 1;\n`,
+    "helpers.ts": `export * from "./claude-cli/spawn-claude";\n`,
+    "run-a.ts": `import { readFixture } from "./helpers.js";\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});
