@@ -19,6 +19,15 @@ const NATIVE_RAMPS = `<?xml version="1.0" encoding="UTF-8"?>
   </workout>
 </workout_file>`;
 
+const ASCENDING_COOLDOWN = `<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <name>Ascending cooldown</name>
+  <sportType>bike</sportType>
+  <workout>
+    <Cooldown Duration="600" PowerLow="0.5" PowerHigh="0.75"/>
+  </workout>
+</workout_file>`;
+
 const POWER_ATTRIBUTES = [
   ["0.5", "0.75"],
   ["0.8", "1.05"],
@@ -125,6 +134,27 @@ describe("Zwift ramp %FTP round-trip", () => {
       // Assert
       expect(stepsOf(krd)[0]?.target.value).toMatchObject({ min: 57 });
       expect(xml).toContain('PowerLow="0.57"');
+    }
+  );
+
+  it(
+    "should write an ascending Cooldown back ascending",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const { reader, writer } = createIo();
+      const krd = await reader(ASCENDING_COOLDOWN);
+
+      // Act
+      const xml = await writer(krd);
+      const krd2 = await reader(xml);
+
+      // Assert
+      expect(stepsOf(krd)[0]?.extensions).toStrictEqual({
+        zwift: { powerDirection: "ascending" },
+      });
+      expect(powerAttributesOf(xml)).toStrictEqual([["0.5", "0.75"]]);
+      expect(krd2).toStrictEqual(krd);
     }
   );
 });
