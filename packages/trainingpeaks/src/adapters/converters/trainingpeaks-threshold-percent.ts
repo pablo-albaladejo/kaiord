@@ -1,6 +1,6 @@
 import type { Logger } from "@kaiord/core";
 
-import type { BandRecipe } from "./trainingpeaks-target-band";
+import type { BandRecipe } from "./trainingpeaks-band-recipe.types";
 
 const PERCENT = 100;
 

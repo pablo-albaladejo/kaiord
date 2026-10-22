@@ -1,5 +1,6 @@
 import type { Logger } from "@kaiord/core";
 
+import type { BandRecipe } from "./trainingpeaks-band-recipe.types";
 import { toPercent } from "./trainingpeaks-threshold-percent";
 
 /**
@@ -23,18 +24,6 @@ export type TargetBand = { minValue: number; maxValue: number };
  */
 export const POWER_ZONE_PERCENT_FTP = [55, 75, 90, 105, 120, 140, 200] as const;
 export const FIVE_ZONE_PERCENT = [60, 70, 80, 90, 100] as const;
-
-/** How one KRD target family reaches TrainingPeaks' percentage model. */
-export type BandRecipe = {
-  /** Unit already expressed as a percentage — passes through untouched. */
-  passthroughUnit: string;
-  /** Zone midpoints, indexed from zone 1. */
-  zonePercents: readonly number[];
-  /** The athlete threshold absolute units divide by; `undefined` if unknown. */
-  threshold: number | undefined;
-  /** Names the quantity in warnings, e.g. "power". */
-  label: string;
-};
 
 /** KRD target values, narrowed to the shapes every family shares. */
 export type KrdTargetValue =
