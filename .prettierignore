@@ -17,6 +17,11 @@ openspec/changes/archive/README.md
 openspec/specs/README.md
 scripts/fixtures/bridge-privacy-surface.json
 
+# Recorded eval cassettes and their manifest: the recorder writes them and the
+# manifest holds the SHA-256 of their exact bytes, so formatting them would
+# break the digest (lint-staged runs prettier --write on staged JSON).
+packages/ai/src/evals/cassettes/committed/
+
 # design-sync generated inputs: the bundle entry and the static i18n registry,
 # both emitted by `.design-sync/gen-*.mjs` (see .design-sync/NOTES.md). The
 # generators write them unformatted; keeping their raw output canonical avoids

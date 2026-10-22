@@ -7,6 +7,15 @@ export const OFFICIAL_CASSETTE_MODEL = "claude-sonnet-5";
 
 const DATED_SNAPSHOT = new RegExp(`^${OFFICIAL_CASSETTE_MODEL}-\\d{8}$`);
 
+export type ServedForm = "bare" | "dated";
+
+/**
+ * NOT PINNED (tasks.md 3.5): whether a real result's `modelUsage` keys the
+ * bare id or a dated snapshot of it. `null` keeps accepting both here, and the
+ * recorder refuses every committed write until it is set from a real result.
+ */
+export const OFFICIAL_SERVED_FORM: ServedForm | null = null;
+
 export type CassetteValidation =
   { ok: true; cassette: Cassette } | { ok: false; errors: Array<string> };
 
@@ -26,9 +35,15 @@ export const validateCassette = (raw: unknown): CassetteValidation => {
     : { ok: false, errors: parsed.error.issues.map(describeIssue) };
 };
 
-export const isOfficialServedModel = (servedModelId: string): boolean =>
-  servedModelId === OFFICIAL_CASSETTE_MODEL ||
-  DATED_SNAPSHOT.test(servedModelId);
+export const isOfficialServedModel = (
+  servedModelId: string,
+  form: ServedForm | null = OFFICIAL_SERVED_FORM
+): boolean => {
+  const bare = servedModelId === OFFICIAL_CASSETTE_MODEL;
+  const dated = DATED_SNAPSHOT.test(servedModelId);
+  if (form === null) return bare || dated;
+  return form === "bare" ? bare : dated;
+};
 
 const officialModelErrors = (cassette: Cassette): Array<string> => {
   if (cassette.recorder !== "claude-cli") {
