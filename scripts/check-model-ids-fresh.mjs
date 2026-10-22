@@ -31,11 +31,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const CATALOG = "packages/ai/src/providers/generated/model-catalog.ts";
-const SCANNED = [
-  "packages/ai/README.md",
-  "packages/ai/AGENTS.md",
-  ".github/workflows/eval.yml",
-];
+const SCANNED = ["packages/ai/README.md", "packages/ai/AGENTS.md"];
 
 const SOURCE_DIRS = ["packages"];
 const SOURCE_FILE = /\.(?:ts|tsx|mts|js|mjs)$/;

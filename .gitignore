@@ -93,3 +93,8 @@ ds-bundle/
 # Compiled by .design-sync/build-css.mjs. Lives inside the package because the
 # converter bounds cfg.cssEntry to the package root.
 packages/workout-spa-editor/.design-sync-styles.css
+
+# Live eval lane (packages/ai, `eval:live`): iteration cassettes and the
+# calibration capture stay local; live reports are never committed.
+packages/ai/.eval-cassettes/
+eval-report-*.json

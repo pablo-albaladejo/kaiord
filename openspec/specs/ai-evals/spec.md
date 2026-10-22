@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Defines the deterministic, keyless eval smoke lane (built on `MockLanguageModelV4`) that exercises the real agent runtime in CI, and the provider-generalized manual eval loader driven by `EVAL_PROVIDER`/`EVAL_MODEL`.
+Defines the deterministic, keyless eval smoke lane (built on `MockLanguageModelV4`) that exercises the real agent runtime in CI, and the local-only live lane over the maintainer's Claude Code subscription (`claude -p`), reached through the live loader driven by `EVAL_MODEL`, which never runs in CI.
 
 ## Requirements
 

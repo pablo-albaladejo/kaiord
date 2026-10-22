@@ -49,17 +49,17 @@
 
 ## 3. Live lane over the local subscription (PR 7a)
 
-- [ ] 3.1 `evals/claude-cli/detect-claude-cli.ts` (`claude auth status --json`;
+- [x] 3.1 `evals/claude-cli/detect-claude-cli.ts` (`claude auth status --json`;
       `CI` set → inert; `EVAL_LIVE !== "1"` → inert; no email or organization
       kept; runs with the same allowlisted env as model calls). `eval:live` is
       the only script that sets `EVAL_LIVE=1`.
-- [ ] 3.2 `spawn-claude.ts`: argument array, stdin prompt, `mkdtemp` cwd removed
+- [x] 3.2 `spawn-claude.ts`: argument array, stdin prompt, `mkdtemp` cwd removed
       in a `finally`, clean-context flags, child env built from the allowlist
       (`PATH`, `HOME`, `USER`, `LOGNAME`, `SHELL`, `LANG`, `TMPDIR`,
       `MAX_THINKING_TOKENS=0`) with a test that `ANTHROPIC_API_KEY`,
       `ANTHROPIC_AUTH_TOKEN` and `ANTHROPIC_BASE_URL` never pass; `init` check.
       All adapter/spawner/detector tests inject `spawn`; none runs `claude`.
-- [ ] 3.3 `claude-cli-language-model.ts`: `LanguageModelV4.doGenerate`, parity
+- [x] 3.3 `claude-cli-language-model.ts`: `LanguageModelV4.doGenerate`, parity
       warnings, unsupported tools/file parts/stream.
 - [ ] 3.4 `rate-limit-guard.ts`: before it ships, pin the seven-day field name
       and its scale from a real recorded `rate_limit_event` (not recorded in the
@@ -71,6 +71,12 @@
       1; limits are harness faults, never failures. Calibration call at pass
       start: input tokens above 1000 (observed overhead ~670) stop the pass with
       a context-leak fault.
+      **Remaining (PR 7a, blocked on maintainer calibration):** everything but
+      the pin is built and tested. `SEVEN_DAY_FIELD` in `rate-limit-guard.ts`
+      ships as `null`, so every pass stops with a harness fault after its first
+      call. To pin: run `pnpm --filter @kaiord/ai eval:live -- --calibrate`
+      once, read the field and its scale from the captured `rateLimitInfos`,
+      set `SEVEN_DAY_FIELD`, and add that capture as the guard's test fixture.
 - [ ] 3.5 Recording decorator writing cassettes with provenance. The official
       model is the literal `claude-sonnet-5` (not `getDefaultModel`). Before it
       ships, check against a real result whether `modelUsage` keys the bare id
@@ -88,17 +94,26 @@
       the recorder formats with Prettier before hashing (or the cassette
       directory goes in `.prettierignore` as generated output), and a test
       commits a recorded cassette through the hook and checks its digest.
-- [ ] 3.6 `load-live-model.ts`; the parser runner migrates; the chat-tool and
+      **Remaining (PR 7a, blocked on maintainer calibration):** the decorator,
+      the one-call rule, the served-model check, the writer and its manifest
+      entry, the strict report, the `.gitignore` and `.prettierignore` entries
+      and the digest-through-the-hook test are built. `OFFICIAL_SERVED_FORM` in
+      `cassettes/validate-cassette.ts` ships as `null`, so the recorder refuses
+      every committed write. To pin: read the `modelUsage` key from the same
+      calibration capture, set `"bare"` or `"dated"`, and add a fixture. The
+      first real cassettes, their manifest entries and the replay lane in
+      `pnpm test` then land in one commit, as above.
+- [x] 3.6 `load-live-model.ts`; the parser runner migrates; the chat-tool and
       lab runners drop the loader and report every case unmeasured with the
       unsupported reason, exit 0; `eval:live` for the parser with `--repeat N`;
       cost reported as API-equivalent.
-- [ ] 3.7 `check-no-inert-floors.mjs` treats any import from `evals/claude-cli/`
+- [x] 3.7 `check-no-inert-floors.mjs` treats any import from `evals/claude-cli/`
       as inert and scans `packages/ai/src/evals` recursively (today
       `readdirSync` of the top level only), resolving import specifiers against
       the importing file; provoked reds show the guard fails on a nested runner,
       on a runner importing the adapter directly, and on a runner located under
       `evals/claude-cli/` importing siblings as `./x`.
-- [ ] 3.8 Delete `load-eval-model.ts` and `.github/workflows/eval.yml`; update
+- [x] 3.8 Delete `load-eval-model.ts` and `.github/workflows/eval.yml`; update
       `check-model-ids-fresh.mjs`, the eval docs, the Purpose line of
       `openspec/specs/ai-evals/spec.md` (names `EVAL_PROVIDER`), the `eval*`
       script echoes in `packages/ai/package.json`, and the root `CLAUDE.md`
