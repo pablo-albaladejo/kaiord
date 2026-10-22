@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { cliRun } from "../../test-utils/claude-cli-doubles";
 import benchmarks from "../benchmarks.json";
+import { createTextToWorkout } from "../../adapters/text-to-workout";
 import { createParserReplaySuite } from "../cassettes/parser-replay-suite";
 import type { Benchmark } from "../types";
 import { createClaudeCliLanguageModel } from "./claude-cli-language-model";
@@ -48,6 +49,21 @@ const passThrowing = async (
 };
 
 const measuring = () => parserLiveCases(cycling);
+const doublyWrapped = (): Array<LiveCase> => [
+  {
+    id: "wrapped",
+    run: async (model) => {
+      try {
+        await createTextToWorkout({ model })("30 min easy ride");
+      } catch (error) {
+        throw new Error("the case wrapped the runtime's error", {
+          cause: error,
+        });
+      }
+      return [];
+    },
+  },
+];
 const recording = (dir: string) => {
   const suite = createParserReplaySuite(MODEL);
   return recordingLiveCases(
@@ -107,5 +123,16 @@ describe("errors the runtime wraps", () => {
       kind: "harness-fault",
       reason: "the stream had no result message",
     });
+  });
+
+  it("should still classify an unsupported call under a second wrap", async () => {
+    // Arrange
+    const error = unsupported("tool calling");
+
+    // Act
+    const { tally } = await passThrowing(error, doublyWrapped);
+
+    // Assert
+    expect(tally).toMatchObject({ runs: 1, unmeasured: 1, failed: 0 });
   });
 });

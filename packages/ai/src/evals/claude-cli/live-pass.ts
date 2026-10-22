@@ -36,10 +36,22 @@ const fromOutcomes = (outcomes: Array<DimensionOutcome>): RunOutcome => {
     : { status: "unmeasured", reason: "no scorer measured the case" };
 };
 
-/** The error and the raw failure the runtime keeps for it internally. */
+const MAX_DEPTH = 4;
+
+/**
+ * The error and the failures it wraps, at most `MAX_DEPTH` deep: the runtime
+ * keeps its raw failure internally, and other errors use `cause`.
+ */
 const chainOf = (error: unknown): Array<unknown> => {
-  const failure = underlyingFailureOf(error);
-  return failure === undefined ? [error] : [error, failure];
+  const chain: Array<unknown> = [];
+  let current = error;
+  while (current !== undefined && chain.length < MAX_DEPTH) {
+    chain.push(current);
+    current =
+      underlyingFailureOf(current) ??
+      (current instanceof Error ? current.cause : undefined);
+  }
+  return chain;
 };
 
 const stopReason = (stop: StopState) =>
