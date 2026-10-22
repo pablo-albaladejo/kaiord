@@ -292,9 +292,9 @@ test("a plain JavaScript runner is scanned and fails", () => {
   );
 });
 
-// Only import positions are walked: a path literal that is not imported is
-// never read as a module, so a keyless runner naming its package root keeps
-// its gate. Reaching claude-cli/ still scans every literal.
+// Only import positions face the package-directory rule: a path literal that
+// is not imported never makes a runner opaque, so a keyless runner naming its
+// package root keeps its gate. Every local literal is still walked.
 
 test("a keyless runner resolving a path to its package root still gates", () => {
   const kinds = kindsOf({
@@ -320,6 +320,21 @@ test("require.resolve and import = require() are import positions, followed", ()
     const kinds = kindsOf({
       "helpers.ts": `export * from "./claude-cli/spawn-claude";\n`,
       "run-r.ts": `${head}${GATE}`,
+    });
+    assert.ok(kinds.includes("computed-exit"), head);
+  }
+});
+
+test("a helper reached outside an import position is still followed", () => {
+  for (const head of [
+    `const r = require;\nr("./helpers");\n`,
+    `(0, require)("./helpers");\n`,
+    `import { Worker } from "node:worker_threads";\nnew Worker(new URL("./helpers.ts", import.meta.url));\n`,
+    `import { execFileSync } from "node:child_process";\nexecFileSync("tsx", ["./helpers.ts"]);\n`,
+  ]) {
+    const kinds = kindsOf({
+      "helpers.ts": `export * from "./claude-cli/spawn-claude";\n`,
+      "run-w.ts": `${head}${GATE}`,
     });
     assert.ok(kinds.includes("computed-exit"), head);
   }

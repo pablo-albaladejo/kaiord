@@ -16,10 +16,13 @@
  * counts), lives under `claude-cli/`, imports a local package directory with
  * no index file, or uses a loader the walk cannot follow
  * (`createRequire`, `import()`/`require()` of anything but a plain string,
- * `x.require`): an unknowable target fails closed. Only specifiers in import
- * positions are walked, so a path literal such as `resolve(dir, "../..")` is
- * never read as a module. Runners are every `run-*.{ts,mts,cts,mjs,js,cjs}`
- * under the evals tree, recursively, tests excluded. A runner that needs neither a credential nor the CLI is EXEMPT and may gate
+ * `x.require`): an unknowable target fails closed. Every local literal is
+ * walked, so an aliased `require`, a `Worker` URL or a child-process argument
+ * naming a helper is followed; only import positions face the package-directory
+ * rule, so a path literal such as `resolve(dir, "../..")` is not opaque.
+ * Runners are every `run-*.{ts,mts,cts,mjs,js,cjs}` under the evals tree,
+ * recursively, tests excluded. A runner that needs neither a credential nor
+ * the CLI is EXEMPT and may gate
  * freely — a directory-wide ban would forbid the keyless replay runner this
  * project wants to gate on.
  *
@@ -231,7 +234,7 @@ export const inertReason = (src, file, root) => {
     const reason = moduleReason(text, path, liveDir);
     if (reason) return path === file ? reason : `${reason} via ${path}`;
     if (root === undefined) continue;
-    for (const target of importedTargets(text, path)) {
+    for (const target of importTargets(text, path)) {
       for (const next of sourceFiles(target)) {
         if (!seen.has(next)) {
           queue.push({ path: next, text: readFileSync(next, "utf8") });
