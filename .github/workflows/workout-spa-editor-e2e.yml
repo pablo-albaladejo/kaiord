@@ -75,8 +75,10 @@ jobs:
         uses: ./.github/actions/setup-pnpm
 
       # Browser + system packages from caches; apt is only contacted on a
-      # cold key, and the composite bounds that path internally (see its
-      # description). The step cap sits just above its internal budgets.
+      # cold key. The composite's internal budgets add up to 11 min (browser
+      # 90s + two apt attempts of 45s+150s + dpkg 75s+30s+75s); the 12-min
+      # cap leaves 1 min for cache restore/save. system-deps stays
+      # `required`: firefox and webkit cannot launch without the packages.
       - name: Install Playwright browsers
         timeout-minutes: 12
         uses: ./.github/actions/setup-playwright
@@ -129,8 +131,10 @@ jobs:
         uses: ./.github/actions/setup-pnpm
 
       # Browser + system packages from caches; apt is only contacted on a
-      # cold key, and the composite bounds that path internally (see its
-      # description). The step cap sits just above its internal budgets.
+      # cold key. The composite's internal budgets add up to 11 min (browser
+      # 90s + two apt attempts of 45s+150s + dpkg 75s+30s+75s); the 12-min
+      # cap leaves 1 min for cache restore/save. system-deps stays
+      # `required`: firefox and webkit cannot launch without the packages.
       - name: Install Playwright browsers
         timeout-minutes: 12
         uses: ./.github/actions/setup-playwright
