@@ -263,3 +263,20 @@ test("an ambiguous stem follows both files, so the offending one is found", () =
   });
   assert.ok(kinds.includes("computed-exit"));
 });
+
+test("a local package directory without an index is opaque, so inert", () => {
+  const kinds = kindsOf({
+    "lib/package.json": `{ "main": "../claude-cli/spawn-claude.js" }\n`,
+    "lib/main.txt": "",
+    "run-p.ts": `import { x } from "./lib";\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});
+
+test("a .jsx helper is followed", () => {
+  const kinds = kindsOf({
+    "view.jsx": `export * from "./claude-cli/spawn-claude";\n`,
+    "run-v.ts": `import { x } from "./view";\n${GATE}`,
+  });
+  assert.ok(kinds.includes("computed-exit"));
+});

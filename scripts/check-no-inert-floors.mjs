@@ -67,6 +67,7 @@ const SOURCE_EXTENSIONS = [
   ".mts",
   ".cts",
   ".tsx",
+  ".jsx",
   ".mjs",
   ".js",
   ".cjs",
@@ -164,6 +165,12 @@ const moduleReason = (src, file, liveDir) => {
   }
   if (scan.opaque.length > 0) return `opaque loader ${scan.opaque[0]}`;
   if (liveDir === undefined) return undefined;
+  // A directory resolved through its package.json `main` or `exports` is a
+  // target the walk does not follow: unknowable, so it fails closed.
+  const packageDir = importTargets(src, file).find(
+    (t) => sourceFiles(t).length === 0 && existsSync(join(t, "package.json"))
+  );
+  if (packageDir) return `opaque package directory ${basename(packageDir)}`;
   if (isUnder(resolve(file), liveDir)) return `lives under ${LIVE_DIR}/`;
   const live = importTargets(src, file).find((t) => isUnder(t, liveDir));
   return live ? `reaches ${LIVE_DIR}/` : undefined;
