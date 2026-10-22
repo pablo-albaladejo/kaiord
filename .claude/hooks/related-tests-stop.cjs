@@ -457,6 +457,40 @@ function subagentWrote(input) {
   return false;
 }
 
+// Stop: did THIS turn (everything after the last real user prompt) call a
+// write tool? A question-only turn in a dirty worktree must not be blocked
+// for tests it never touched. Unreadable or unknown means it may have: run.
+function turnWrote(input) {
+  const file = input?.transcript_path;
+  if (typeof file !== "string") return true;
+  let lines;
+  try {
+    lines = fs.readFileSync(file, "utf8").split("\n");
+  } catch {
+    return true;
+  }
+  for (let i = lines.length - 1; i >= 0; i--) {
+    let entry;
+    try {
+      entry = JSON.parse(lines[i]);
+    } catch {
+      continue;
+    }
+    const content = entry?.message?.content;
+    if (entry?.type === "user") {
+      const toolResult =
+        Array.isArray(content) &&
+        content.every((c) => c?.type === "tool_result");
+      if (!toolResult) return false; // the prompt that opened this turn
+    } else if (
+      Array.isArray(content) &&
+      content.some((c) => c?.type === "tool_use" && WRITE_TOOLS.has(c.name))
+    )
+      return true;
+  }
+  return true; // no prompt found: the transcript is not what we expect
+}
+
 const LOCK_STALE_MS = 30_000;
 const LOCK_WAIT_MS = 5_000;
 
@@ -508,6 +542,7 @@ async function main(input, { env = process.env, budgetMs } = {}) {
   // block it, and do not spend 180 s re-running them for it.
   if (input?.hook_event_name === "SubagentStop" && !subagentWrote(input))
     return null;
+  if (input?.hook_event_name === "Stop" && !turnWrote(input)) return null;
 
   const file = sessionId ? statePath(env, sessionId) : null;
   const key = slotKey(input);
@@ -546,6 +581,7 @@ module.exports = {
   main,
   planRuns,
   subagentWrote,
+  turnWrote,
   tapFailures,
   verdict,
   vitestFailures,

@@ -215,6 +215,9 @@ function normalize(words) {
       w = skipFlags(w.slice(1), ["-s", "-k", "--signal", "--kill-after"]).slice(
         1
       );
+    } else if (head === "env" && splitStringArg(w)) {
+      // `env -S "git push origin main"` splits its argument into a command.
+      return splitCommands(splitStringArg(w)).flatMap(normalize);
     } else if (WRAPPERS[head]) {
       w = skipFlags(w.slice(1), WRAPPERS[head].valued);
     } else if (["pnpm", "yarn", "npm"].includes(head)) {
@@ -244,6 +247,19 @@ function normalize(words) {
     }
   }
   return w.length > 0 ? [w] : [];
+}
+
+// The argument of `env -S` / `--split-string` (plus the words after it).
+function splitStringArg(w) {
+  for (let i = 1; i < w.length; i++) {
+    if (!w[i].startsWith("-")) return null;
+    if (w[i] === "-S" || w[i] === "--split-string")
+      return w.slice(i + 1).join(" ") || null;
+    if (w[i].startsWith("--split-string="))
+      return [w[i].slice(15), ...w.slice(i + 1)].join(" ");
+    if (/^-S./.test(w[i])) return [w[i].slice(2), ...w.slice(i + 1)].join(" ");
+  }
+  return null;
 }
 
 // Drop leading flags (and the values of flags known to take one).
@@ -418,7 +434,13 @@ function gitPushRule(w, ctx) {
   }
   if (w[i] !== "push") return null;
   const args = w.slice(i + 1);
-  const flags = args.filter((a) => a.startsWith("-"));
+  // Values of `-o`/`--push-option` etc. are not flags of push itself.
+  const flags = [];
+  for (let k = 0; k < args.length; k++) {
+    if (!args[k].startsWith("-")) continue;
+    flags.push(args[k]);
+    if (PUSH_VALUED.includes(args[k])) k++;
+  }
   const short = flags.filter((f) => /^-[a-zA-Z]+$/.test(f)).join("");
   const has = (...names) =>
     flags.some((f) => names.some((n) => f === n || f.startsWith(`${n}=`)));
@@ -581,7 +603,11 @@ function ghRule(w) {
       rule: "prod-deploy",
       why: `\`gh workflow run ${target}\` triggers a release or deploy`,
     };
-  if (sub === "pr" && action === "merge" && flags.includes("--admin"))
+  if (
+    sub === "pr" &&
+    action === "merge" &&
+    flags.some((f) => f === "--admin" || /^--admin=(?!false$)/.test(f))
+  )
     return {
       rule: "repo-settings",
       why: "`gh pr merge --admin` bypasses the repository's rules",
@@ -601,6 +627,8 @@ function ghApiRule(w) {
   const args = w.slice(w.indexOf("api") + 1);
   let method = null;
   let fields = false;
+  let input = false;
+  const values = {};
   let path = null;
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -612,6 +640,11 @@ function ghApiRule(w) {
     else if (/^-X./.test(a)) method = a.slice(2).toUpperCase();
     else if (["-f", "-F", "--field", "--raw-field", "--input"].includes(flag)) {
       fields = true;
+      if (flag === "--input") input = true;
+      else {
+        const kv = inline ?? args[i + 1] ?? "";
+        values[kv.split("=")[0].replace(/\[\]$/, "")] = kv.split(/=(.*)/s)[1];
+      }
       if (inline === undefined) i++;
     } else if (
       [
@@ -650,6 +683,32 @@ function ghApiRule(w) {
     .replace(/^https:\/\/api\.github\.com\//, "")
     .replace(/^\//, "")
     .split("?")[0];
+  const route = clean.match(/^repos\/[^/]+\/[^/]+\/(.*)$/)?.[1] ?? "";
+  const protectedRef = (r) =>
+    PROTECTED_BRANCH.test((r ?? "").replace(/^refs\/heads\//, ""));
+  if (route === "git/tags" || route === "git/refs") {
+    // Creating a ref/tag object: inspect `ref=`; a body file cannot be read.
+    const ref = values.ref;
+    if (route === "git/tags" || input || TAG_LIKE.test(ref ?? ""))
+      return {
+        rule: "release-tags",
+        why: `\`gh api ${verb} ${clean}\` can create a release tag`,
+      };
+    if (protectedRef(ref))
+      return {
+        rule: "prod-deploy",
+        why: `\`gh api ${verb} ${clean}\` creates a protected branch ref`,
+      };
+  }
+  if (
+    (route === "merges" && (input || protectedRef(values.base))) ||
+    (/^contents\//.test(route) &&
+      (input || values.branch === undefined || protectedRef(values.branch)))
+  )
+    return {
+      rule: "prod-deploy",
+      why: `\`gh api ${verb} ${clean}\` writes straight to a protected branch; a push to main deploys kaiord.com and publishes to npm`,
+    };
   if (SENSITIVE_API.some((re) => re.test(clean)))
     return {
       rule: "repo-settings",

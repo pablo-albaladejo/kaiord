@@ -316,17 +316,52 @@ describe("ALLOW — receipt present, or not repository code", () => {
     // Arrange
     const rels = [
       ".omc/a",
+      ".claude/scheduled_tasks.json",
       ".claude/agents/x.md",
+      ".claude/skills/s/SKILL.md",
+      ".claude/plugins/p/hooks/hooks.json",
       ".claude/hooks/a.cjs",
       ".claude/settings.json",
       "src/a.ts",
     ];
 
     // Act
-    const exempt = rels.map(isExemptRepoPath);
+    const exempt = rels.map((r) => isExemptRepoPath(r, repo));
 
     // Assert
-    assert.deepEqual(exempt, [true, true, false, false, false]);
+    assert.deepEqual(exempt, [
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it("should require a receipt for tracked files under .claude/ and plugin hooks", () => {
+    // Arrange
+    mkdirSync(join(repo, ".claude", "plugins", "p", "hooks"), {
+      recursive: true,
+    });
+    writeFileSync(join(repo, ".claude", "tracked.json"), "{}\n");
+    git(repo, "add", "-A");
+    git(repo, "commit", "-q", "-m", "claude files");
+    const paths = [
+      ".claude/tracked.json",
+      ".claude/plugins/p/hooks/hooks.json",
+      ".claude/agents/new.md",
+    ];
+
+    // Act
+    const verdicts = paths.map(
+      (p) => decide(edit(join(repo, p)), { env }).verdict
+    );
+
+    // Assert
+    assert.deepEqual(verdicts, ["deny", "deny", "deny"]);
   });
 });
 

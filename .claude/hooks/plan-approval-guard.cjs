@@ -108,17 +108,31 @@ function repoOf(dir) {
   }
 }
 
+function isTracked(rel, root) {
+  if (!root) return true; // unknown: treat as code
+  try {
+    return git(root, ["ls-files", "--", rel]).trim().length > 0;
+  } catch {
+    return true;
+  }
+}
+
 // Inside the repo, which repo-relative paths need no receipt.
-function isExemptRepoPath(rel) {
+function isExemptRepoPath(rel, root) {
   // Lowercased: APFS is case-insensitive, so `.claude/SETTINGS.json` IS
   // the settings file.
   const p = rel.split(path.sep).join("/").toLowerCase();
   if (p.startsWith(".omc/")) return true;
   if (!p.startsWith(".claude/")) return false;
-  return !(
-    /^\.claude\/settings(\.local)?\.json$/.test(p) ||
-    p.startsWith(".claude/hooks/")
-  );
+  if (/^\.claude\/settings(\.local)?\.json$/.test(p)) return false;
+  // Tracked files under .claude/ are committed executable configuration
+  // (hooks, agents, skills, plugins): they need a receipt. Only untracked
+  // state (scheduled_tasks.json, worktrees, ...) is exempt.
+  if (
+    /^\.claude\/(hooks|agents|skills|plugins|commands|output-styles)\//.test(p)
+  )
+    return false; // a NEW file there is executable configuration too
+  return !isTracked(rel, root);
 }
 
 // "allow" or "deny", with the reason for the log.
@@ -156,7 +170,7 @@ function decide(
   const rel = inGitDir
     ? path.join(".git", path.relative(projectRepo.commonDir, target))
     : path.relative(fileRepo.top, target);
-  if (!inGitDir && isExemptRepoPath(rel))
+  if (!inGitDir && isExemptRepoPath(rel, projectRepo.top))
     return { verdict: "allow", why: `exempt ${rel}` };
 
   const sessionId = safeSessionId(input.session_id);

@@ -364,6 +364,41 @@ describe("CLI — a throwaway repository", () => {
     assert.equal(counter()["agent:agent-Edit"].blocks, 1);
   });
 
+  it("should not block a question-only Stop, but should block once the turn edited", () => {
+    // Arrange
+    write("scripts/sum.mjs", "export const sum = (a, b) => a - b;\n");
+    const transcript = (name, entries) => {
+      const file = join(sandbox, `${name}.jsonl`);
+      writeFileSync(file, entries.map((e) => JSON.stringify(e)).join("\n"));
+      return file;
+    };
+    const prompt = { type: "user", message: { content: "question?" } };
+    const edit = {
+      type: "assistant",
+      message: { content: [{ type: "tool_use", id: "t1", name: "Edit" }] },
+    };
+    const result = {
+      type: "user",
+      message: { content: [{ type: "tool_result", tool_use_id: "t1" }] },
+    };
+    const answer = { type: "assistant", message: { content: [] } };
+    const oldEdit = [prompt, edit, result, answer];
+
+    // Act
+    const asked = run(
+      {},
+      { transcript_path: transcript("q", [...oldEdit, prompt, answer]) }
+    );
+    const edited = run(
+      {},
+      { transcript_path: transcript("e", [prompt, edit, result, answer]) }
+    );
+
+    // Assert
+    assert.equal(asked.stdout, "");
+    assert.equal(JSON.parse(edited.stdout).decision, "block");
+  });
+
   it("should pass a green change and record it so the same tree is not re-run", () => {
     // Arrange
     write("scripts/sum.mjs", "export const sum = (a, b) => b + a;\n");
