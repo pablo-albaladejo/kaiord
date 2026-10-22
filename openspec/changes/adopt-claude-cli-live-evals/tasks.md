@@ -83,7 +83,11 @@
       digest. Add the iteration directory and `eval-report-*.json` to
       `.gitignore`; live reports use a strict schema that rejects unknown keys.
       Commit the first real cassettes, their manifest entries and the replay
-      lane in `pnpm test` in one commit.
+      lane in `pnpm test` in one commit. lint-staged runs `prettier --write` on
+      committed JSON, which would change the bytes after the digest is taken:
+      the recorder formats with Prettier before hashing (or the cassette
+      directory goes in `.prettierignore` as generated output), and a test
+      commits a recorded cassette through the hook and checks its digest.
 - [ ] 3.6 `load-live-model.ts`; the parser runner migrates; the chat-tool and
       lab runners drop the loader and report every case unmeasured with the
       unsupported reason, exit 0; `eval:live` for the parser with `--repeat N`;
