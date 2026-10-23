@@ -41,7 +41,7 @@ const capture = async () => {
     rateLimitEvent(LEAKY_INFO),
     resultMessage({
       modelUsage: {
-        "claude-sonnet-5-20261001": {
+        "claude-sonnet-5": {
           inputTokens: 3,
           costUSD: 0.01,
           label: "x",
@@ -76,7 +76,7 @@ describe("captureCalibration", () => {
     expect(session.stopped()?.kind).toBe("harness-fault");
     expect(result.inputTokens).toBe(OVERHEAD);
     expect(result.modelUsage).toEqual({
-      "claude-sonnet-5-20261001": { inputTokens: 3, costUSD: 0.01 },
+      "claude-sonnet-5": { inputTokens: 3, costUSD: 0.01 },
     });
   });
 

@@ -8,6 +8,7 @@ import {
   streamOf,
 } from "../../test-utils/claude-cli-doubles";
 import type { SpawnCall } from "../../test-utils/claude-cli-doubles";
+import { CALIBRATION_RATE_LIMIT_INFO } from "../../test-utils/calibration-capture-fixture";
 import { CALIBRATION_REQUEST } from "./calibration-call";
 import { loadLiveModel } from "./load-live-model";
 
@@ -95,5 +96,28 @@ describe("loadLiveModel", () => {
     expect(live.session.stopped()?.reason).toContain(
       "pinned field unifiedWindows.seven_day.utilization is missing"
     );
+  });
+
+  it("should continue through the default pin on the real calibration event", async () => {
+    // Arrange
+    const real = streamOf(
+      initMessage(),
+      rateLimitEvent(CALIBRATION_RATE_LIMIT_INFO),
+      resultMessage()
+    );
+    const double = createSpawnDouble((call) => ({
+      stdout: call.args[0] === "auth" ? AUTH_OK : real,
+    }));
+    const live = await loadLiveModel({
+      env: { EVAL_LIVE: "1" },
+      spawn: double.spawn,
+    });
+
+    // Act
+    await live.session.call({ modelId: live.modelId, ...CALIBRATION_REQUEST });
+
+    // Assert
+    expect(live.session.stopped()).toBeUndefined();
+    expect(live.session.callsMade()).toBe(1);
   });
 });

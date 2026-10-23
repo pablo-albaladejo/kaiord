@@ -176,4 +176,28 @@ describe("decideNextCall", () => {
       "--calibrate"
     );
   });
+
+  it("should let the highest weekly value of several real-shaped events govern", () => {
+    // Arrange
+    const withWeekly = (utilization: number, rateLimitType: string) => ({
+      ...CALIBRATION_RATE_LIMIT_INFO,
+      rateLimitType,
+      unifiedWindows: {
+        ...CALIBRATION_RATE_LIMIT_INFO.unifiedWindows,
+        seven_day: { utilization, resetsAt: 1793088000 },
+      },
+    });
+    const noWindows = { status: "allowed", rateLimitType: "five_hour" };
+    const over = [withWeekly(LOW, "five_hour"), withWeekly(ABOVE, "seven_day")];
+    const partial = [noWindows, CALIBRATION_RATE_LIMIT_INFO];
+
+    // Act
+    const decisions = [over, partial].map((infos) =>
+      decide(infos, SEVEN_DAY_FIELD)
+    );
+
+    // Assert
+    expect(decisions[0]).toMatchObject({ action: "stop", kind: "rate-limit" });
+    expect(decisions[1]).toEqual({ action: "continue", utilization: 0.52 });
+  });
 });
