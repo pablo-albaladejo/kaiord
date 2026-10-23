@@ -178,7 +178,7 @@ describe("writeCassette", () => {
     ];
 
     // Assert
-    expect(faults[0]).toContain("the pinned form for claude-sonnet-5 is bare");
+    expect(faults[0]).toContain("served claude-sonnet-5-20261001");
     expect(faults[1]).toContain('recorder "synthetic" is not allowed');
     expect(readdirSync(targets.committedDir)).toEqual(["manifest.json"]);
   });

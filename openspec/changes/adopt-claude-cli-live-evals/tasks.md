@@ -61,7 +61,7 @@
       All adapter/spawner/detector tests inject `spawn`; none runs `claude`.
 - [x] 3.3 `claude-cli-language-model.ts`: `LanguageModelV4.doGenerate`, parity
       warnings, unsupported tools/file parts/stream.
-- [ ] 3.4 `rate-limit-guard.ts`: before it ships, pin the seven-day field name
+- [x] 3.4 `rate-limit-guard.ts`: before it ships, pin the seven-day field name
       and its scale from a real recorded `rate_limit_event` (not recorded in the
       smoke calls) and convert by a fixed rule; stop strictly above
       `EVAL_MAX_WEEKLY_UTILIZATION` (default 0.85); a missing event, an
@@ -71,12 +71,9 @@
       1; limits are harness faults, never failures. Calibration call at pass
       start: input tokens above 1000 (observed overhead ~670) stop the pass with
       a context-leak fault.
-      **Remaining (PR 7a, blocked on maintainer calibration):** everything but
-      the pin is built and tested. `SEVEN_DAY_FIELD` in `rate-limit-guard.ts`
-      ships as `null`, so every pass stops with a harness fault after its first
-      call. To pin: run `pnpm --filter @kaiord/ai eval:live -- --calibrate`
-      once, read the field and its scale from the captured `rateLimitInfos`,
-      set `SEVEN_DAY_FIELD`, and add that capture as the guard's test fixture.
+      **Pinned 2026-10-23** from the maintainer's calibration capture (CLI
+      2.1.309): `unifiedWindows.seven_day.utilization`, scale `fraction`; the
+      capture is the guard's fixture (`test-utils/calibration-capture-fixture.ts`).
 - [ ] 3.5 Recording decorator writing cassettes with provenance. The official
       model is the literal `claude-sonnet-5` (not `getDefaultModel`). Before it
       ships, check against a real result whether `modelUsage` keys the bare id
@@ -94,15 +91,10 @@
       the recorder formats with Prettier before hashing (or the cassette
       directory goes in `.prettierignore` as generated output), and a test
       commits a recorded cassette through the hook and checks its digest.
-      **Remaining (PR 7a, blocked on maintainer calibration):** the decorator,
-      the one-call rule, the served-model check, the writer and its manifest
-      entry, the strict report, the `.gitignore` and `.prettierignore` entries
-      and the digest-through-the-hook test are built. `OFFICIAL_SERVED_FORM` in
-      `cassettes/validate-cassette.ts` ships as `null`, so the recorder refuses
-      every committed write. To pin: read the `modelUsage` key from the same
-      calibration capture, set `"bare"` or `"dated"`, and add a fixture. The
-      first real cassettes, their manifest entries and the replay lane in
-      `pnpm test` then land in one commit, as above.
+      **Remaining:** `OFFICIAL_SERVED_FORM` is pinned to `"bare"` (2026-10-23,
+      same capture: `modelUsage` keyed `claude-sonnet-5`). The first real
+      cassettes, their manifest entries and the replay lane in `pnpm test`
+      still land in one commit, after the maintainer's first `--record`.
 - [x] 3.6 `load-live-model.ts`; the parser runner migrates; the chat-tool and
       lab runners drop the loader and report every case unmeasured with the
       unsupported reason, exit 0; `eval:live` for the parser with `--repeat N`;

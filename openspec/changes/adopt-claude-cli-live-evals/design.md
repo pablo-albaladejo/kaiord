@@ -99,8 +99,9 @@ reports follow the same rule and `eval-report-*.json` is gitignored.
 The official model is the literal `claude-sonnet-5` (D1c), not
 `getDefaultModel("anthropic")`, which moves with the catalog. A committed
 cassette must have requested that id and been served it or a dated snapshot of
-it (the smoke calls did not record which form `modelUsage` keys; checked before
-the recorder ships); `modelUsage` naming two models or a substitute rejects the
+it (the smoke calls did not record which form `modelUsage` keys; the
+calibration of 2026-10-23 showed the bare id, which is now the only form
+accepted); `modelUsage` naming two models or a substitute rejects the
 recording. Haiku iteration runs write to the gitignored
 `packages/ai/.eval-cassettes/` or nowhere.
 

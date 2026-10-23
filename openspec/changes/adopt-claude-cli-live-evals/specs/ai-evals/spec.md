@@ -270,8 +270,9 @@ the pinned official model (decision D1c): its requested model id SHALL equal
 `claude-sonnet-5`, and its served model id SHALL be `claude-sonnet-5` or a
 dated snapshot of it (`claude-sonnet-5-` followed by an eight-digit date),
 recorded verbatim in the cassette; the validator SHALL reject a committed
-cassette otherwise. Whether `modelUsage` keys the bare or a dated id is not yet
-observed and SHALL be checked against a real result before the recorder ships.
+cassette otherwise. Which of the two forms `modelUsage` keys SHALL be checked
+against a real result and pinned, and the validator SHALL accept only the pinned
+form (observed 2026-10-23: the bare id).
 A recording whose CLI `modelUsage` names more than one served model, or one
 that is neither the requested id nor a dated snapshot of it, SHALL be rejected
 before it is written. A recording with any other model is an iteration run: it

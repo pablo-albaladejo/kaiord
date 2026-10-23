@@ -9,11 +9,11 @@ export const OFFICIAL_CASSETTE_MODEL = "claude-sonnet-5";
 export type ServedForm = "bare" | "dated";
 
 /**
- * NOT PINNED (tasks.md 3.5): whether a real result's `modelUsage` keys the
- * bare id or a dated snapshot of it. `null` keeps accepting both here, and the
- * recorder refuses every committed write until it is set from a real result.
+ * Pinned from the real calibration capture (2026-10-23, CLI 2.1.309):
+ * `modelUsage` keys the bare `claude-sonnet-5`. `null` (no pin) accepts both
+ * here, and the recorder refuses every committed write under it.
  */
-export const OFFICIAL_SERVED_FORM: ServedForm | null = null;
+export const OFFICIAL_SERVED_FORM: ServedForm | null = "bare";
 
 export type CassetteValidation =
   { ok: true; cassette: Cassette } | { ok: false; errors: Array<string> };

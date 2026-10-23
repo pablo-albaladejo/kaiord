@@ -164,19 +164,18 @@ describe("validateCommittedCassette", () => {
     );
   });
 
-  it.each(["claude-sonnet-5", "claude-sonnet-5-20261001"])(
-    "should accept a committed cassette served as %s",
-    async (servedModelId) => {
-      // Arrange
-      const cassette = { ...(await realCassette()), servedModelId };
+  it("should accept the pinned bare form and reject a dated snapshot", async () => {
+    // Arrange
+    const cassette = await realCassette();
+    const bare = { ...cassette, servedModelId: "claude-sonnet-5" };
+    const dated = { ...cassette, servedModelId: "claude-sonnet-5-20261001" };
 
-      // Act
-      const result = validateCommittedCassette(cassette);
+    // Act
+    const results = [bare, dated].map((c) => validateCommittedCassette(c));
 
-      // Assert
-      expect(result.ok).toBe(true);
-    }
-  );
+    // Assert
+    expect(results.map((r) => r.ok)).toEqual([true, false]);
+  });
 
   it.each(["claude-sonnet-5-1", "claude-sonnet-5-2026100", "claude-sonnet-5x"])(
     "should reject the served id %s as not a dated snapshot",
