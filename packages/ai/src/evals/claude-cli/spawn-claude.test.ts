@@ -186,6 +186,29 @@ describe("createSpawnClaude", () => {
     expect(fault).toBe("the clean context leaked: plugins oh-my-claudecode");
   });
 
+  it("should abort when the init message omits or garbles the plugins field", async () => {
+    // Arrange
+    const missing = streamOf(
+      initMessage({ plugins: undefined }),
+      resultMessage()
+    );
+    const garbled = streamOf(initMessage({ plugins: null }), resultMessage());
+
+    // Act
+    const first = await faultOf(
+      spawnWith(() => ({ stdout: missing })).spawnClaude(REQUEST)
+    );
+    const second = await faultOf(
+      spawnWith(() => ({ stdout: garbled })).spawnClaude(REQUEST)
+    );
+
+    // Assert
+    expect(first).toBe(
+      "the clean context leaked: plugins <plugins field absent>"
+    );
+    expect(second).toContain("no recognizable init message");
+  });
+
   it("should abort on an error result or output it cannot parse", async () => {
     // Arrange
     const errorResult = streamOf(

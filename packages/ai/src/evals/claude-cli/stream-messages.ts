@@ -22,7 +22,7 @@ const initSchema = z
     tools: m.tools,
     mcpServers: m.mcp_servers,
     skills: m.skills ?? 0,
-    strayPlugins: strayPlugins(m.plugins ?? []),
+    strayPlugins: strayPlugins(m.plugins),
   }));
 
 const numericFields = z

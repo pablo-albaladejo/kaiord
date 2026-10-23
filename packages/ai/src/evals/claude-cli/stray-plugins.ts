@@ -23,10 +23,30 @@ const isKnownBuiltin = (plugin: z.output<typeof pluginSchema>) =>
   plugin.source === `${plugin.name}@builtin` &&
   BUILTIN_PLUGINS.has(plugin.name);
 
-/** The name of every plugin in the init message that is not a known builtin. */
-export const strayPlugins = (plugins: Array<unknown>): Array<string> =>
-  plugins.flatMap((item) => {
-    const parsed = pluginSchema.safeParse(item);
-    if (!parsed.success) return ["<unrecognized plugin entry>"];
-    return isKnownBuiltin(parsed.data) ? [] : [parsed.data.name];
-  });
+export const MAX_PRINTED_NAME = 80;
+const PLAIN_NAME = /^[\w@./-]+$/;
+const UNRECOGNIZED = "<unrecognized plugin entry>";
+
+/** Names go into the fault text, so only a short, plain one is printed. */
+const printable = (name: unknown) =>
+  typeof name === "string" && name.length <= MAX_PRINTED_NAME && PLAIN_NAME.test(name) ? name : undefined;
+
+const strayName = (item: unknown): Array<string> => {
+  const parsed = pluginSchema.safeParse(item);
+  if (parsed.success) {
+    if (isKnownBuiltin(parsed.data)) return [];
+    return [printable(parsed.data.name) ?? UNRECOGNIZED];
+  }
+  const name = printable((item as { name?: unknown } | null)?.name);
+  return [name === undefined ? UNRECOGNIZED : `<unrecognized: ${name}>`];
+};
+
+/**
+ * The name of every plugin in the init message that is not a known builtin.
+ * A missing field counts as stray: a CLI that stops reporting plugins must
+ * not switch the check off.
+ */
+export const strayPlugins = (plugins: Array<unknown> | undefined) =>
+  plugins === undefined
+    ? ["<plugins field absent>"]
+    : plugins.flatMap(strayName);

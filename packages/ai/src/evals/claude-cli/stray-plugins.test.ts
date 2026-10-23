@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { strayPlugins } from "./stray-plugins";
+import { MAX_PRINTED_NAME, strayPlugins } from "./stray-plugins";
 
 const builtin = (name: string) => ({
   name,
@@ -52,14 +52,45 @@ describe("strayPlugins", () => {
     expect(stray).toStrictEqual(["cc-plugin-telemetry"]);
   });
 
-  it("should count an entry it cannot read as stray", () => {
+  it("should count an entry it cannot read as stray, keeping a plain name", () => {
     // Arrange
-    const plugins = ["oh-my-claudecode"];
+    const plugins = ["oh-my-claudecode", { name: "half-entry" }, null];
 
     // Act
     const stray = strayPlugins(plugins);
 
     // Assert
-    expect(stray).toStrictEqual(["<unrecognized plugin entry>"]);
+    expect(stray).toStrictEqual([
+      "<unrecognized plugin entry>",
+      "<unrecognized: half-entry>",
+      "<unrecognized plugin entry>",
+    ]);
+  });
+
+  it("should not print a name that is long or not plain text", () => {
+    // Arrange
+    const tooLong = "x".repeat(MAX_PRINTED_NAME + 1);
+    const odd = (name: string) => ({ name, path: "/p", source: `${name}@m` });
+    const plugins = [odd(tooLong), odd("evil\nline")];
+
+    // Act
+    const stray = strayPlugins(plugins);
+
+    // Assert
+    expect(stray).toStrictEqual([
+      "<unrecognized plugin entry>",
+      "<unrecognized plugin entry>",
+    ]);
+  });
+
+  it("should treat a missing plugins field as stray", () => {
+    // Arrange
+    const plugins = undefined;
+
+    // Act
+    const stray = strayPlugins(plugins);
+
+    // Assert
+    expect(stray).toStrictEqual(["<plugins field absent>"]);
   });
 });
