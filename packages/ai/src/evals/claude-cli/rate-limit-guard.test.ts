@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { CALIBRATION_RATE_LIMIT_INFO } from "../../test-utils/calibration-capture-fixture";
 import { SEVEN_DAY_FIELD, decideNextCall } from "./rate-limit-guard";
 import type { WeeklyField } from "./rate-limit-guard";
 
@@ -9,7 +10,7 @@ const BELOW = 0.8;
 const LOW = 0.1;
 const PERCENT_LIKE = 75;
 
-/** A stand-in pin: the real name and scale wait for the calibration step. */
+/** Stand-in pins for the decision rules; the real pin is checked against the capture below. */
 const FRACTION: WeeklyField = {
   path: ["utilization"],
   scale: "fraction",
@@ -151,15 +152,25 @@ describe("decideNextCall", () => {
     if (decision.action === "stop") expect(decision.kind).toBe("rate-limit");
   });
 
-  it("should ship unpinned, so every decision stops the pass until calibration", () => {
+  it("should read the weekly fraction from the real calibration event", () => {
     // Arrange
-    const infos = [weekly(LOW)];
+    const infos = [CALIBRATION_RATE_LIMIT_INFO];
 
     // Act
     const decision = decide(infos, SEVEN_DAY_FIELD);
 
     // Assert
-    expect(SEVEN_DAY_FIELD).toBeNull();
+    expect(decision).toEqual({ action: "continue", utilization: 0.52 });
+  });
+
+  it("should stop the pass when no field is pinned", () => {
+    // Arrange
+    const infos = [weekly(LOW)];
+
+    // Act
+    const decision = decide(infos, null);
+
+    // Assert
     expect(decision).toMatchObject({ action: "stop", kind: "harness-fault" });
     expect(decision.action === "stop" && decision.reason).toContain(
       "--calibrate"

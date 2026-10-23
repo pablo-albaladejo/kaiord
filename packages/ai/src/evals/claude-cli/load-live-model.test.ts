@@ -79,7 +79,7 @@ describe("loadLiveModel", () => {
     expect(live.session.stopped()).toBeUndefined();
   });
 
-  it("should ship fail-closed: the unpinned guard stops the pass after one call", async () => {
+  it("should apply the pinned field by default and stop on an event without it", async () => {
     // Arrange
     const double = createSpawnDouble(reply);
     const live = await loadLiveModel({
@@ -92,6 +92,8 @@ describe("loadLiveModel", () => {
 
     // Assert
     expect(live.session.stopped()?.kind).toBe("harness-fault");
-    expect(live.session.stopped()?.reason).toContain("SEVEN_DAY_FIELD");
+    expect(live.session.stopped()?.reason).toContain(
+      "pinned field unifiedWindows.seven_day.utilization is missing"
+    );
   });
 });

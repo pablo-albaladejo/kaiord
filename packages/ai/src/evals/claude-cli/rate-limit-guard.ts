@@ -11,11 +11,15 @@ export type WeeklyField = {
 };
 
 /**
- * NOT PINNED. Its name and scale come from a real recorded `rate_limit_event`
- * (the calibration step, `eval:live --calibrate`), never from a guess. Until
- * then every decision below stops the pass: the guard fails closed.
+ * Pinned from the real calibration capture (2026-10-23, CLI 2.1.309): every
+ * `rate_limit_event` carries both windows under `unifiedWindows`, whatever its
+ * `rateLimitType`, and `utilization` is a 0–1 fraction (0.52 at a weekly use
+ * of about half).
  */
-export const SEVEN_DAY_FIELD: WeeklyField | null = null;
+export const SEVEN_DAY_FIELD: WeeklyField | null = {
+  path: ["unifiedWindows", "seven_day", "utilization"],
+  scale: "fraction",
+};
 
 export const DEFAULT_MAX_WEEKLY_UTILIZATION = 0.85;
 

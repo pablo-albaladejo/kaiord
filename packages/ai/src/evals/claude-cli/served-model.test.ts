@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { CALIBRATION_SERVED_MODEL_ID } from "../../test-utils/calibration-capture-fixture";
 import {
   OFFICIAL_SERVED_FORM,
   isOfficialServedModel,
@@ -63,11 +64,23 @@ describe("committedServedFault", () => {
     const served = "claude-sonnet-5";
 
     // Act
-    const fault = committedServedFault(served);
+    const fault = committedServedFault(served, null);
 
     // Assert
-    expect(OFFICIAL_SERVED_FORM).toBeNull();
     expect(fault).toContain("OFFICIAL_SERVED_FORM is not pinned");
+  });
+
+  it("should ship pinned to the bare id the real calibration served", () => {
+    // Arrange
+    const served = [CALIBRATION_SERVED_MODEL_ID, "claude-sonnet-5-20261001"];
+
+    // Act
+    const faults = served.map((id) => committedServedFault(id));
+
+    // Assert
+    expect(OFFICIAL_SERVED_FORM).toBe("bare");
+    expect(faults[0]).toBeUndefined();
+    expect(faults[1]).toContain("the pinned form for claude-sonnet-5 is bare");
   });
 
   it("should accept only the pinned form once it is set", () => {
