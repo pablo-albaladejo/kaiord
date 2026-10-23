@@ -11,11 +11,17 @@ export type WeeklyField = {
 };
 
 /**
- * NOT PINNED. Its name and scale come from a real recorded `rate_limit_event`
- * (the calibration step, `eval:live --calibrate`), never from a guess. Until
- * then every decision below stops the pass: the guard fails closed.
+ * Pinned from the real calibration capture (2026-10-23, CLI 2.1.309): every
+ * `rate_limit_event` carries both windows under `unifiedWindows`, whatever its
+ * `rateLimitType`, and `utilization` reads as a 0–1 fraction (0.51 and 0.52
+ * across two calls; as a percent that would be half of one percent of a week
+ * in use). Mis-pinned this way the guard fails closed: a percent value above 1
+ * is out of scale, and one below 1 would stop the pass at 0.85% of real use.
  */
-export const SEVEN_DAY_FIELD: WeeklyField | null = null;
+export const SEVEN_DAY_FIELD: WeeklyField | null = {
+  path: ["unifiedWindows", "seven_day", "utilization"],
+  scale: "fraction",
+};
 
 export const DEFAULT_MAX_WEEKLY_UTILIZATION = 0.85;
 
@@ -54,9 +60,11 @@ const utilizationOf = (infos: Array<Info>, field: WeeklyField) => {
   const name = field.path.join(".");
   const values = infos
     .filter((info) => matches(info, field.when))
-    .map((info) => valueAt(info, field.path))
-    .filter((value) => value !== undefined);
-  if (values.length === 0) return fault(`pinned field ${name} is missing`);
+    .map((info) => valueAt(info, field.path));
+  // Every event the pin applies to must carry it: one without is no signal.
+  if (values.length === 0 || values.includes(undefined)) {
+    return fault(`pinned field ${name} is missing`);
+  }
   const max = SCALE_MAX[field.scale];
   for (const value of values) {
     if (typeof value !== "number" || !Number.isFinite(value)) {
