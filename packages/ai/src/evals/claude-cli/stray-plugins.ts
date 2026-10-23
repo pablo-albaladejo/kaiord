@@ -29,7 +29,11 @@ const UNRECOGNIZED = "<unrecognized plugin entry>";
 
 /** Names go into the fault text, so only a short, plain one is printed. */
 const printable = (name: unknown) =>
-  typeof name === "string" && name.length <= MAX_PRINTED_NAME && PLAIN_NAME.test(name) ? name : undefined;
+  typeof name === "string" &&
+  name.length <= MAX_PRINTED_NAME &&
+  PLAIN_NAME.test(name)
+    ? name
+    : undefined;
 
 const strayName = (item: unknown): Array<string> => {
   const parsed = pluginSchema.safeParse(item);
