@@ -158,6 +158,57 @@ describe("createSpawnClaude", () => {
     expect(fault).toBe("the clean context leaked: 1 mcpServers, 1 tools");
   });
 
+  it("should name a plugin that leaked and let the CLI builtins through", async () => {
+    // Arrange
+    const stdout = streamOf(
+      initMessage({
+        plugins: [
+          {
+            name: "cc-plugin-telemetry",
+            path: "builtin",
+            source: "cc-plugin-telemetry@builtin",
+          },
+          {
+            name: "oh-my-claudecode",
+            path: "/home/x/.claude/plugins/omc",
+            source: "oh-my-claudecode@omc",
+          },
+        ],
+      }),
+      resultMessage()
+    );
+    const { spawnClaude } = spawnWith(() => ({ stdout }));
+
+    // Act
+    const fault = await faultOf(spawnClaude(REQUEST));
+
+    // Assert
+    expect(fault).toBe("the clean context leaked: plugins oh-my-claudecode");
+  });
+
+  it("should abort when the init message omits or garbles the plugins field", async () => {
+    // Arrange
+    const missing = streamOf(
+      initMessage({ plugins: undefined }),
+      resultMessage()
+    );
+    const garbled = streamOf(initMessage({ plugins: null }), resultMessage());
+
+    // Act
+    const first = await faultOf(
+      spawnWith(() => ({ stdout: missing })).spawnClaude(REQUEST)
+    );
+    const second = await faultOf(
+      spawnWith(() => ({ stdout: garbled })).spawnClaude(REQUEST)
+    );
+
+    // Assert
+    expect(first).toBe(
+      "the clean context leaked: plugins <plugins field absent>"
+    );
+    expect(second).toContain("no recognizable init message");
+  });
+
   it("should abort on an error result or output it cannot parse", async () => {
     // Arrange
     const errorResult = streamOf(
