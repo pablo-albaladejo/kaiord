@@ -16,7 +16,7 @@ export type WeeklyField = {
  * `rateLimitType`, and `utilization` reads as a 0–1 fraction (0.51 and 0.52
  * across two calls; as a percent that would be half of one percent of a week
  * in use). Mis-pinned this way the guard fails closed: a percent value above 1
- * is out of scale, and one below 1 stops the pass early.
+ * is out of scale, and one below 1 would stop the pass at 0.85% of real use.
  */
 export const SEVEN_DAY_FIELD: WeeklyField | null = {
   path: ["unifiedWindows", "seven_day", "utilization"],
