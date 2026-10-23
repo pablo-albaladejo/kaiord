@@ -60,9 +60,11 @@ const utilizationOf = (infos: Array<Info>, field: WeeklyField) => {
   const name = field.path.join(".");
   const values = infos
     .filter((info) => matches(info, field.when))
-    .map((info) => valueAt(info, field.path))
-    .filter((value) => value !== undefined);
-  if (values.length === 0) return fault(`pinned field ${name} is missing`);
+    .map((info) => valueAt(info, field.path));
+  // Every event the pin applies to must carry it: one without is no signal.
+  if (values.length === 0 || values.includes(undefined)) {
+    return fault(`pinned field ${name} is missing`);
+  }
   const max = SCALE_MAX[field.scale];
   for (const value of values) {
     if (typeof value !== "number" || !Number.isFinite(value)) {

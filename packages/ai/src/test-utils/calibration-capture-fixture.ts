@@ -14,6 +14,6 @@ export const CALIBRATION_RATE_LIMIT_INFO = {
     five_hour: { utilization: 0.11, resetsAt: 1792787400 },
     seven_day: { utilization: 0.52, resetsAt: 1793088000 },
   },
-};
+} as const;
 
-export const CALIBRATION_SERVED_MODEL_ID = "claude-sonnet-5";
+export const CALIBRATION_SERVED_MODEL_ID = "claude-sonnet-5" as const;

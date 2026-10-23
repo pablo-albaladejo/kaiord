@@ -177,7 +177,7 @@ describe("decideNextCall", () => {
     );
   });
 
-  it("should let the highest weekly value of several real-shaped events govern", () => {
+  it("should let the highest weekly value govern and stop when one event lacks it", () => {
     // Arrange
     const withWeekly = (utilization: number, rateLimitType: string) => ({
       ...CALIBRATION_RATE_LIMIT_INFO,
@@ -198,6 +198,10 @@ describe("decideNextCall", () => {
 
     // Assert
     expect(decisions[0]).toMatchObject({ action: "stop", kind: "rate-limit" });
-    expect(decisions[1]).toEqual({ action: "continue", utilization: 0.52 });
+    expect(decisions[1]).toMatchObject({
+      action: "stop",
+      kind: "harness-fault",
+      reason: "pinned field unifiedWindows.seven_day.utilization is missing",
+    });
   });
 });
