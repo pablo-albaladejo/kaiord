@@ -158,6 +158,34 @@ describe("createSpawnClaude", () => {
     expect(fault).toBe("the clean context leaked: 1 mcpServers, 1 tools");
   });
 
+  it("should name a plugin that leaked and let the CLI builtins through", async () => {
+    // Arrange
+    const stdout = streamOf(
+      initMessage({
+        plugins: [
+          {
+            name: "cc-plugin-telemetry",
+            path: "builtin",
+            source: "cc-plugin-telemetry@builtin",
+          },
+          {
+            name: "oh-my-claudecode",
+            path: "/home/x/.claude/plugins/omc",
+            source: "oh-my-claudecode@omc",
+          },
+        ],
+      }),
+      resultMessage()
+    );
+    const { spawnClaude } = spawnWith(() => ({ stdout }));
+
+    // Act
+    const fault = await faultOf(spawnClaude(REQUEST));
+
+    // Assert
+    expect(fault).toBe("the clean context leaked: plugins oh-my-claudecode");
+  });
+
   it("should abort on an error result or output it cannot parse", async () => {
     // Arrange
     const errorResult = streamOf(

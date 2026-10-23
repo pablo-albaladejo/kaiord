@@ -84,6 +84,12 @@ export const initMessage = (overrides: Record<string, unknown> = {}) => ({
   claude_code_version: "2.1.308",
   tools: [],
   mcp_servers: [],
+  // What the real CLI reports under the clean-context flags (2026-10-23).
+  plugins: ["agents-md", "telemetry", "plugin-authoring"].map((short) => ({
+    name: `cc-plugin-${short}`,
+    path: "builtin",
+    source: `cc-plugin-${short}@builtin`,
+  })),
   model: "claude-sonnet-5",
   ...overrides,
 });
@@ -123,7 +129,7 @@ export const cliRun = (
     tools: 0,
     mcpServers: 0,
     skills: 0,
-    plugins: 0,
+    strayPlugins: [],
   },
   result: {
     subtype: "success",

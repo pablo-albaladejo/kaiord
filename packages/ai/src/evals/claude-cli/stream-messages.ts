@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { strayPlugins } from "./stray-plugins";
+
 const count = z.array(z.unknown()).transform((items) => items.length);
 const tokens = z.number().int().nonnegative();
 
@@ -12,7 +14,7 @@ const initSchema = z
     tools: count,
     mcp_servers: count,
     skills: count.optional(),
-    plugins: count.optional(),
+    plugins: z.array(z.unknown()).optional(),
   })
   .transform((m) => ({
     apiKeySource: m.apiKeySource,
@@ -20,7 +22,7 @@ const initSchema = z
     tools: m.tools,
     mcpServers: m.mcp_servers,
     skills: m.skills ?? 0,
-    plugins: m.plugins ?? 0,
+    strayPlugins: strayPlugins(m.plugins ?? []),
   }));
 
 const numericFields = z

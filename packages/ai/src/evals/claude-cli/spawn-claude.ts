@@ -14,15 +14,19 @@ export type SpawnClaude = (request: ClaudeRequest) => Promise<CliRun>;
 
 /**
  * Isolation checked by its effect on every call: a stray key would bill the
- * API silently, and an MCP server, skill or tool means the flags leaked.
+ * API silently, and an MCP server, skill, tool or non-builtin plugin means
+ * the flags leaked.
  */
 export const initFault = (init: CliInit): string | undefined => {
   if (init.apiKeySource !== "none") {
     return "the CLI reports an API key source other than none: a stray key would bill the API";
   }
-  const leaked = (["mcpServers", "skills", "plugins", "tools"] as const)
+  const leaked = (["mcpServers", "skills", "tools"] as const)
     .filter((key) => init[key] > 0)
     .map((key) => `${init[key]} ${key}`);
+  if (init.strayPlugins.length > 0) {
+    leaked.push(`plugins ${init.strayPlugins.join(", ")}`);
+  }
   return leaked.length === 0
     ? undefined
     : `the clean context leaked: ${leaked.join(", ")}`;
