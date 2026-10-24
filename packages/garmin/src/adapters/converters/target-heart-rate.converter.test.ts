@@ -1,4 +1,4 @@
-import { MissingMaxHeartRateError } from "@kaiord/core";
+import { KrdValidationError, MissingMaxHeartRateError } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
 import { MAX_HR_RESOLUTION as H } from "../../test-utils/constants";
@@ -48,6 +48,7 @@ describe("resolvePercentMaxToBpm", () => {
     H.NEGATIVE_MAX_HR_BPM,
     Number.NaN,
     Number.POSITIVE_INFINITY,
+    H.IMPLAUSIBLE_MAX_HR_BPM,
   ])("should throw MissingMaxHeartRateError when the max HR is %s", (maxHr) => {
     // Arrange
     const value = { unit: "percent_max", value: H.PCT };
@@ -57,5 +58,27 @@ describe("resolvePercentMaxToBpm", () => {
 
     // Assert
     expect(act).toThrow(MissingMaxHeartRateError);
+  });
+
+  it("should accept a max HR at the 300 bpm schema limit", () => {
+    // Arrange
+    const value = { unit: "percent_max", value: H.PCT };
+
+    // Act
+    const result = resolvePercentMaxToBpm(value, H.SCHEMA_MAX_BPM);
+
+    // Assert
+    expect(result.value).toBeLessThanOrEqual(H.SCHEMA_MAX_BPM);
+  });
+
+  it("should reject a percent_max target that resolves above 300 bpm instead of banding it", () => {
+    // Arrange
+    const value = { unit: "percent_max", value: H.OVER_HUNDRED_PCT };
+
+    // Act
+    const act = () => resolvePercentMaxToBpm(value, H.NEAR_LIMIT_MAX_HR_BPM);
+
+    // Assert
+    expect(act).toThrow(KrdValidationError);
   });
 });

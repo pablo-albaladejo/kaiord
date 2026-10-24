@@ -57,6 +57,12 @@ export const MAX_HR_RESOLUTION = {
   BAND_LOW_BPM: 159,
   BAND_HIGH_BPM: 165,
   NEGATIVE_MAX_HR_BPM: -190,
+  // Above the 300 bpm schema limit: 85 % of 400 = 340 bpm would clamp to 300-300.
+  IMPLAUSIBLE_MAX_HR_BPM: 400,
+  SCHEMA_MAX_BPM: 300,
+  // 110 % of 290 bpm = 319 bpm: a valid max HR, but over the limit once resolved.
+  NEAR_LIMIT_MAX_HR_BPM: 290,
+  OVER_HUNDRED_PCT: 110,
 } as const;
 
 // Decimal digits for float comparisons of converted speeds.
