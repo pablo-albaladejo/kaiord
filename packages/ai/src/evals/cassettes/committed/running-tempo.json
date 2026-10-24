@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "id": "running-tempo",
+  "caseId": "running-tempo",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:51:18.205Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "cb5ac17028b1d342c07d53f5223c709d37980b7005bf5624cb156d194e96a928",
+  "requestHash": "360089adb70b20cf1e6fcbb3be3bffae2bda176c7e8b36c9977b761b68eee06a",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Tempo run 15'+20'+10'",
+      "sport": "running",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 900
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "stepIndex": 1,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 1200
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 3
+            }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 2,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "cooldown"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7133,
+      "outputTokens": 428
+    }
+  }
+}

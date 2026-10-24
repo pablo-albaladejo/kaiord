@@ -52,8 +52,9 @@ Common operations:
 
 - **Add a new provider**: Extend `src/providers/`; regenerate the catalog with `pnpm generate:model-catalog` after bumping `@ai-sdk/*`. Do not hand-edit `src/providers/generated/model-catalog.ts`
 - **A provider retires a model**: add the id to `retired` (answers 404) or `deprecated` (still answers, retirement announced) under its provider in `scripts/model-catalog-extract.mjs`, then regenerate. Retired ids leave the catalog and resolve to `getDefaultModel(type)`, which reads the curated `PREFERRED_DEFAULT_MODELS` — never the catalog's first entry, which is the oldest SDK id
-- **Tweak the system prompt**: Edit `src/prompts/parse-workout.md` and test via `pnpm --filter @kaiord/ai test`
-- **Add benchmark**: Edit `src/evals/benchmarks.json` following the `Benchmark` schema in `src/evals/types.ts`; the fixture's own invariants are asserted keylessly
+- **Re-record trigger**: a change to the prompt, a benchmark's text/`expectedSport`/`athleteZones`, the output/wire schema, or a new benchmark needs a local `EVAL_MODEL=claude-sonnet-5 pnpm --filter @kaiord/ai eval:live -- --record` by the maintainer before merge (an agent never runs it); scorer-only changes (`minSteps`, `zoneCheck`) re-score keylessly
+- **Tweak the system prompt**: Edit `src/prompts/parse-workout.md` and test via `pnpm --filter @kaiord/ai test`; see the re-record trigger above
+- **Add benchmark**: Edit `src/evals/benchmarks.json` following the `Benchmark` schema in `src/evals/types.ts`; the fixture's own invariants are asserted keylessly; see the re-record trigger above. Retiring a benchmark removes its manifest entry and cassette too
 - **Send a new externally-authored field to the model**: fence it with `fenceUntrusted(...)`. `check-untrusted-fields-fenced.mjs` fails on a recognized field that is not
 
 ### Testing Requirements
@@ -63,7 +64,7 @@ Common operations:
 - Test files: `*.test.ts` colocated with source
 - Coverage: 80% (core package threshold)
 - Run: `pnpm --filter @kaiord/ai test` or `pnpm --filter @kaiord/ai test:watch`
-- Evals: no provider API key exists and no eval runs in CI. `pnpm --filter @kaiord/ai eval:live` runs the parser suite on the maintainer's local Claude Code subscription (`claude -p`, see `src/evals/AGENTS.md`); in CI, or without the `EVAL_LIVE=1` that only that script sets, it stops as `INERT` before spawning anything (`pnpm eval` is inert only while `EVAL_LIVE` is not exported in the shell). `eval:chat-tools` and `eval:labs` report every case unmeasured (tool calling and document file parts cannot go through `claude -p`) and exit 0. No live runner declares a pass threshold, because a comparison that cannot run where merges are decided is not a gate (`check-no-inert-floors.mjs` enforces that). Never run `eval:live` from an agent session: its calls spend the maintainer's subscription quota
+- Evals: no provider API key exists and no live eval runs in CI; the keyless replay of committed cassettes (`committed-replay.test.ts`) runs in `pnpm test` and gates CI. `pnpm --filter @kaiord/ai eval:live` runs the parser suite on the maintainer's local Claude Code subscription (`claude -p`, see `src/evals/AGENTS.md`); in CI, or without the `EVAL_LIVE=1` that only that script sets, it stops as `INERT` before spawning anything (`pnpm eval` is inert only while `EVAL_LIVE` is not exported in the shell). `eval:chat-tools` and `eval:labs` report every case unmeasured (tool calling and document file parts cannot go through `claude -p`) and exit 0. No live runner declares a pass threshold, because a comparison that cannot run where merges are decided is not a gate (`check-no-inert-floors.mjs` enforces that). Never run `eval:live` from an agent session: its calls spend the maintainer's subscription quota
 
 ### Common Patterns
 
