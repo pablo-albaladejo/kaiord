@@ -126,7 +126,7 @@ export const cliRun = (
   init: {
     apiKeySource: "none",
     cliVersion: "2.1.308",
-    tools: 0,
+    tools: [],
     mcpServers: 0,
     skills: 0,
     strayPlugins: [],
