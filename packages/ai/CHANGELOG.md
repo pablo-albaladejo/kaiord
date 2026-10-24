@@ -1,5 +1,16 @@
 # @kaiord/ai
 
+## 9.6.0
+
+### Minor Changes
+
+- 89f2349: Report a `reasoning` phase while a thinking model reasons before it writes, so a streamed run no longer looks stalled. A retry now carries why the previous attempt failed (`retryReason`: `truncated`, `invalid` or `provider`), an output cut off at the token limit is caught as truncated instead of reaching validation and its retry gets double the output budget (up to 16384 tokens), since a thinking model spends its reasoning from the same budget; and each `generating` update carries the partial output. Streamed runs put their per-phase timings (`timings`) on the telemetry event, and the console sink prints them.
+
+### Patch Changes
+
+- d1f3f3a: Workout-parser validation now rejects `basis` anywhere but a power `range`: on a heart-rate or pace target, or on a single power value such as `{ "unit": "watts", "value": 85, "basis": "percent_ftp" }`. Before, core silently stripped it, so an 85% FTP step could have been stored as 85 W. The retry-with-feedback loop now asks the model to correct the step and names it.
+- 33804fb: The workout parser prompt (1.3.0) now shows the explicit heart-rate and power `range` forms (`{ "unit": "range", "min": 130, "max": 150 }`, and `"basis": "percent_ftp"` for a % FTP range) and states that `bpm`, `percent_max`, `watts` and `percent_ftp` take a single value. A heart-rate `range` is always bpm, and a % max HR range is given as a single `percent_max` value (the midpoint). A coached "88-93% FTP" or "130-150 bpm" step was otherwise answered as `{ "unit": "percent_ftp", "min": 88, "max": 93 }`, which strict validation rejects, costing a retry or failing the conversion. The structured-output wire schema now carries `basis` too, so a % FTP range is no longer stripped to a bare range and read as watts.
+
 ## 9.5.0
 
 ### Minor Changes
