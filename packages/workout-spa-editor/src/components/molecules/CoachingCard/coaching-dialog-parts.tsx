@@ -11,6 +11,7 @@ import type { CoachingActivity } from "../../../types/coaching-activity";
 import { renderCoachingInline } from "../../organisms/CoachingSidebar/coaching-inline";
 import { formatCoachingDescription } from "../../organisms/CoachingSidebar/format-coaching-description";
 import { DialogDescriptionError } from "./coaching-dialog-description-error";
+import { ClampedNotes } from "./coaching-dialog-notes";
 import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
 
 export const DialogHeader = ({ activity }: { activity: CoachingActivity }) => {
@@ -32,17 +33,6 @@ export const DialogHeader = ({ activity }: { activity: CoachingActivity }) => {
     </div>
   );
 };
-
-export const DialogMeta = ({ activity }: { activity: CoachingActivity }) => (
-  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-    <span>{activity.sport.icon}</span>
-    <span>{activity.sport.label}</span>
-    {activity.duration && <span>· {activity.duration}</span>}
-    <span className="ml-auto rounded bg-danger-bg px-1 py-0.5 text-[10px] font-bold text-danger-text">
-      {activity.sourceBadge}
-    </span>
-  </div>
-);
 
 export const DialogDescription = ({
   activity,
@@ -69,7 +59,7 @@ export const DialogDescription = ({
   if (!activity.description) return null;
   const paragraphs = formatCoachingDescription(activity.description);
   return (
-    <div className="space-y-2 border-t border-edge pt-3 text-sm leading-relaxed">
+    <ClampedNotes>
       {paragraphs.map((p, pi) => (
         <p key={pi}>
           {p.inlines.map((inline, ii) =>
@@ -77,7 +67,7 @@ export const DialogDescription = ({
           )}
         </p>
       ))}
-    </div>
+    </ClampedNotes>
   );
 };
 
