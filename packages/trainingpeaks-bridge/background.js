@@ -20,7 +20,7 @@ const OPEN_TRAININGPEAKS_URL = "https://app.trainingpeaks.com/";
 const BRIDGE_MANIFEST = {
   id: "trainingpeaks-bridge",
   name: "TrainingPeaks",
-  version: "10.3.0",
+  version: "10.4.0",
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["read:body", "write:body", "write:workouts"],
 };

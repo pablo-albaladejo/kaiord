@@ -1,5 +1,42 @@
 # @kaiord/ai
 
+## 9.5.0
+
+### Minor Changes
+
+- fd698de: AI workout generation now gives every running step a pace target and every cycling step a power target, taken from the athlete's own zones. The workout parser prompt (1.2.0) gains sport target rules and a Spanish/English intensity vocabulary ("suave"/"trote"/RPE 2-3 → Z1, short "fuerte"/"cambio fuerte" → Z4-Z5, "a tope" → Z5, "progresivo" → a zone span, "R: 2'" → a Z1 recovery step, "30' con (…)" → whole repeated cycles). The model emits zone numbers; `createTextToWorkout` resolves them in code against `TextToWorkoutOptions.athlete.zones` into explicit m/s or watt ranges (pace only on running, power only on cycling), keeps a power zone the athlete has not configured as a zone (Garmin, FIT and ZWO carry power zones natively) and turns such a pace zone into `open` rather than guess or block the Garmin push, and gives open warmup/recovery/cooldown steps the zone 1 range when the athlete has one. The athlete blocks are length-capped and cannot close or open each other. `athlete.zonesText` and `athlete.instructions` are appended to the user message in their own delimiters.
+
+  In the editor, every generation path — Train2Go batch conversion, converting a coached session from its card, create-from-text, the AI input and the chat — now sends the athlete's zones and their "Instructions for the AI"; the Train2Go paths previously sent neither, so coached sessions came back with "Open" and bare "Zone 1" targets.
+
+- 8faf447: AI workout conversion reports real progress instead of a static spinner. `createTextToWorkout` (and `runGenerateAgent`) accept an `onProgress` listener: when one is given, the structured output streams and the run reports its phase (`requesting` → `generating` → `validating`), the attempt number of any schema-repair retry, and — for the workout parser — how many steps the partial output already holds. A model that cannot stream falls back to one-shot generation and still reports its phases. `createTextToWorkout` also accepts a `signal`, so cancelling aborts the provider request itself.
+
+  In the calendar's coached-session dialog, "Convert with AI" now shows which model is working, the current phase (announced politely to screen readers once per phase), the steps written so far and the elapsed seconds, and Cancel aborts the request in flight rather than only hiding the wait.
+
+- 620f332: AI settings lead with the athlete's assistant: a card with the main model by name, its account, key status and this month's use; AI accounts shared by every athlete with "Replace key", Rename and confirmed Remove, an add form on demand whose label is optional; per-task models folded until one is set; custom instructions saved on pause or blur with a "Saved" note. `@kaiord/ai` adds `modelDisplayName` and `listedModels` (product names, dated snapshots of a listed alias left out).
+- c5e2107: The chat engine can be stopped and is bounded by inactivity. `sendTurn` and `resume` accept `{ signal }`; aborting it resolves the turn with status `aborted`, keeping the text streamed so far as a plain assistant message (no half-finished tool call, so nothing is left pending). An idle watchdog (`turnIdleTimeoutMs`, default `DEFAULT_TURN_IDLE_TIMEOUT_MS` = 60 s) restarts on every streamed chunk and finished step, so a long turn that keeps streaming is never cut, while one that goes silent resolves with status `timeout` instead of a generic error.
+
+  Each turn now emits exactly one `chat_turn_finished` telemetry event (traceId, promptVersion, provider, modelId, steps, toolNames, status, input/output tokens, latency) to the configured `AiTelemetrySink`: ids and metrics only, never message text or tool input. `toolNames` lists only registered tools called with valid input. A turn that throws reports the metrics of the steps it finished. A stopped or timed-out turn reports its finished steps too. The tokens of the step cut mid-stream are not counted, because providers report usage only when a step finishes.
+
+  This widens two public unions: `AiTelemetryEvent` gains `chat_turn_finished`, and `ChatTurnResult.status` gains `aborted` and `timeout` alongside `step_limit`. Exhaustive `switch`es over either need a new case.
+
+### Patch Changes
+
+- 3f3a229: AI settings show what actually runs. Each model row is one select of account and model together, shows the effective resolution, and a purpose without its own model says it follows the main model. The main model is the athlete's default binding (the provider "Default" badge and "Set Default" button are gone). A blank model id is rejected when saved, and `resolveModelForPurpose` heals bindings already stored blank by running the bound provider's model. Provider rows show only the key's last four characters, editing no longer puts the key back into the page, and removing a provider asks for confirmation and deletes the bindings that used it. A cleared or removed model binding no longer comes back from another device on the next sync, and the workout generator's model select shows the model generation runs and saves the choice as the athlete's workout-generation model.
+- 5d21ffc: When the model calls several action tools in one step, the chat agent offers the first one for confirmation (previously the last one) and now answers the others with `{ error: "one_action_at_a_time" }`, so every tool call has a result. Before, resuming such a turn failed with `AI_MissingToolResultsError` (and Anthropic rejects a `tool_use` without a `tool_result`).
+
+  A copy of the pending call (same tool, same input) is answered `{ error: "duplicate_of_pending" }` and a copy of another extra call `{ error: "duplicate_action" }` instead, so the model does not ask for them again. The deferred message says that the user's answer to the pending action does not cover it, and `pendingAction.deferredCount` reports how many actions were deferred.
+
+- e645bf3: The chat system prompt now names all six confirmation-gated action tools (`sync_coaching`, `create_workout`, `log_health_metric`, `log_intake`, `push_to_garmin`, `set_data_route`), rendered from the new exported `CHAT_ACTION_TOOL_NAMES` tuple; `CHAT_PROMPT_VERSION` is bumped to 1.1.0. The inert chat-tool eval runner now uses `buildChatSystemPrompt()` instead of its own prompt.
+- c4ba5c5: AI-generated workouts get a real name instead of "Untitled Workout". The
+  workout parser's structured-output schema now carries `name` (it previously
+  omitted it, so any name the model produced was stripped) and the prompt asks for
+  a concise title in the language of the input; a blank name is dropped. In the
+  editor, a coaching or batch-processed workout falls back to the coached session's
+  own title when the AI gives none, and only then to the localized default.
+- Updated dependencies [69dfb8c]
+- Updated dependencies [aa47f14]
+  - @kaiord/core@10.4.0
+
 ## 9.4.0
 
 ### Minor Changes

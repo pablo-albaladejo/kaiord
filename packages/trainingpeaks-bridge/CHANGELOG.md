@@ -1,5 +1,11 @@
 # @kaiord/trainingpeaks-bridge
 
+## 10.4.0
+
+### Minor Changes
+
+- 5ec4d9f: The extension popup now follows the theme picked in the Kaiord app — light, dark or system — instead of always rendering dark. The app sends its preference through the new `set-theme` action (Kaiord origins only, three accepted values); until the app has sent one, the popup follows the operating-system colour scheme.
+
 ## 10.3.0
 
 ### Patch Changes

@@ -19,7 +19,7 @@ const BRIDGE_FEATURES = ["calendar-write-v1", "calendar-find-v1"];
 const BRIDGE_MANIFEST = {
   id: "garmin-bridge",
   name: "Garmin Connect",
-  version: "10.3.0",
+  version: "10.4.0",
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["write:workouts", "read:activities", "write:body"],
 };
