@@ -135,14 +135,16 @@ const checkZones = (workout: Workout, benchmark: Benchmark): Array<string> => {
   );
 
   const targetSteps = steps.filter(
-    (s) => s.targetType === zc.targetType && s.intensity === "active"
+    (s) =>
+      s.targetType === zc.targetType &&
+      (s.intensity === "active" || s.intensity === "interval")
   );
 
   // A zone check with nothing to check is a failure, not a pass: the model was
-  // asked for active steps of this target type and produced none, and reporting
+  // asked for active or interval steps of this target type and produced none, and reporting
   // that as success is the green-that-means-nothing this suite exists to catch.
   if (targetSteps.length === 0) {
-    errors.push(`No active ${zc.targetType} step to zone-check`);
+    errors.push(`No active or interval ${zc.targetType} step to zone-check`);
     return errors;
   }
 

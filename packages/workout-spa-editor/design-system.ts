@@ -13,6 +13,8 @@ export { ErrorMessage } from "./src/components/atoms/ErrorMessage/ErrorMessage";
 export { Icon } from "./src/components/atoms/Icon/Icon";
 export { Input } from "./src/components/atoms/Input/Input";
 export { KeyChips } from "./src/components/atoms/KeyChips/KeyChips";
+export { Markdown } from "./src/components/atoms/Markdown/Markdown";
+export { MenuItem, MenuRadioItem } from "./src/components/atoms/MenuItem/MenuItem";
 export { Pill } from "./src/components/atoms/Pill/Pill";
 export { Segmented } from "./src/components/atoms/Segmented/Segmented";
 export { ThemeToggle } from "./src/components/atoms/ThemeToggle/ThemeToggle";
@@ -30,6 +32,8 @@ export { BottomNav } from "./src/components/molecules/BottomNav/BottomNav";
 export { ConsequenceBanner } from "./src/components/molecules/CalendarEmptyStates/ConsequenceBanner";
 export { EmptyWeekState } from "./src/components/molecules/CalendarEmptyStates/EmptyWeekState";
 export { FirstRunGuide } from "./src/components/molecules/CalendarEmptyStates/FirstRunGuide";
+export { FirstRunManualStarts } from "./src/components/molecules/CalendarEmptyStates/FirstRunManualStarts";
+export { FirstRunStepCta } from "./src/components/molecules/CalendarEmptyStates/FirstRunStepCta";
 export { FirstRunStepRow } from "./src/components/molecules/CalendarEmptyStates/FirstRunStepRow";
 export { NoAiProviderState } from "./src/components/molecules/CalendarEmptyStates/NoAiProviderState";
 export { NoBridgesState } from "./src/components/molecules/CalendarEmptyStates/NoBridgesState";
@@ -37,6 +41,7 @@ export { CalendarViewToggle } from "./src/components/molecules/CalendarViewToggl
 export { CardShell } from "./src/components/molecules/CardShell/CardShell";
 export { ChatFab } from "./src/components/molecules/ChatFab/ChatFab";
 export { CoachMarkCard } from "./src/components/molecules/CoachMark/CoachMarkCard";
+export { CoachMoveNotice } from "./src/components/molecules/CoachMoveNotice/CoachMoveNotice";
 export { AiErrorState } from "./src/components/molecules/CoachingCard/AiErrorState";
 export { AiProcessingOverlay } from "./src/components/molecules/CoachingCard/AiProcessingOverlay";
 export { CoachingActivityCard } from "./src/components/molecules/CoachingCard/CoachingActivityCard";
@@ -55,6 +60,7 @@ export { ConfirmationModal } from "./src/components/molecules/ConfirmationModal/
 export { CreateRepetitionBlockButton } from "./src/components/molecules/CreateRepetitionBlockButton/CreateRepetitionBlockButton";
 export { CreateRepetitionBlockDialog } from "./src/components/molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
 export { CreateWorkoutCta } from "./src/components/molecules/CreateWorkoutCta/CreateWorkoutCta";
+export { DefaultProfileNotice } from "./src/components/molecules/DefaultProfileNotice/DefaultProfileNotice";
 export { DurationPicker } from "./src/components/molecules/DurationPicker/DurationPicker";
 export { EmptyWorkoutState } from "./src/components/molecules/EmptyWorkoutState/EmptyWorkoutState";
 export { ExecutedActivityDialog } from "./src/components/molecules/ExecutedActivityDialog/ExecutedActivityDialog";
@@ -62,10 +68,13 @@ export { ExportFormatSelector } from "./src/components/molecules/ExportFormatSel
 export { FileUpload } from "./src/components/molecules/FileUpload/FileUpload";
 export { GarminPushButton } from "./src/components/molecules/GarminPushButton/GarminPushButton";
 export { GoalSetupDialog } from "./src/components/molecules/GoalSetupDialog/GoalSetupDialog";
+export { InlineNameEdit } from "./src/components/molecules/InlineNameEdit/InlineNameEdit";
 export { LibraryCard } from "./src/components/molecules/LibraryCard/LibraryCard";
 export { MatchedSessionCard } from "./src/components/molecules/MatchedSessionCard/MatchedSessionCard";
 export { Metric } from "./src/components/molecules/Metric/Metric";
+export { ModelStatusNotice } from "./src/components/molecules/ModelStatusNotice/ModelStatusNotice";
 export { PasteButton } from "./src/components/molecules/PasteButton/PasteButton";
+export { ProfileChoiceBanner } from "./src/components/molecules/ProfileChoiceBanner/ProfileChoiceBanner";
 export { PushButton } from "./src/components/molecules/PushButton/PushButton";
 export { RawWorkoutDialog } from "./src/components/molecules/RawWorkoutDialog/RawWorkoutDialog";
 export { ReadinessRing } from "./src/components/molecules/ReadinessRing/ReadinessRing";
@@ -99,9 +108,13 @@ export { ZoneProfileBar } from "./src/components/molecules/ZoneProfileBar/ZonePr
 export { AiWorkoutInput } from "./src/components/organisms/AiWorkoutInput/AiWorkoutInput";
 export { AutoMatchBanner } from "./src/components/organisms/AutoMatchBanner/AutoMatchBanner";
 export { BatchCostConfirmation } from "./src/components/organisms/BatchCostConfirmation/BatchCostConfirmation";
+export { ChatCapabilities } from "./src/components/organisms/Chat/ChatCapabilities";
+export { ChatCapabilitiesHelp } from "./src/components/organisms/Chat/ChatCapabilitiesHelp";
+export { ChatCapabilityGroup } from "./src/components/organisms/Chat/ChatCapabilityGroup";
 export { ChatComposer } from "./src/components/organisms/Chat/ChatComposer";
 export { ChatConversation } from "./src/components/organisms/Chat/ChatConversation";
 export { ChatErrorNotice } from "./src/components/organisms/Chat/ChatErrorNotice";
+export { ChatGateNotice } from "./src/components/organisms/Chat/ChatGateNotice";
 export { ChatHeader } from "./src/components/organisms/Chat/ChatHeader";
 export { ChatLoading } from "./src/components/organisms/Chat/ChatLoading";
 export { ChatMessageList } from "./src/components/organisms/Chat/ChatMessageList";
@@ -116,6 +129,7 @@ export { ConversationListItem } from "./src/components/organisms/Chat/Conversati
 export { ConversationSidebar } from "./src/components/organisms/Chat/ConversationSidebar";
 export { ConversationTitleInput } from "./src/components/organisms/Chat/ConversationTitleInput";
 export { PendingActionCard } from "./src/components/organisms/Chat/PendingActionCard";
+export { PushToGarminSummary } from "./src/components/organisms/Chat/PushToGarminSummary";
 export { SnippetText } from "./src/components/organisms/Chat/SnippetText";
 export { ToolResultLinks } from "./src/components/organisms/Chat/ToolResultLinks";
 export { CoachMarkHost } from "./src/components/organisms/CoachMark/CoachMarkHost";
@@ -129,6 +143,8 @@ export { ConnectionCardAction } from "./src/components/organisms/Connections/Con
 export { ConnectionCardHeader } from "./src/components/organisms/Connections/ConnectionCardHeader";
 export { ConnectionManagePanel } from "./src/components/organisms/Connections/ConnectionManagePanel";
 export { ConnectionMark } from "./src/components/organisms/Connections/ConnectionMark";
+export { ConnectionProfileLink } from "./src/components/organisms/Connections/ConnectionProfileLink";
+export { ConnectionProfileLinked } from "./src/components/organisms/Connections/ConnectionProfileLinked";
 export { ConnectionRefreshButton } from "./src/components/organisms/Connections/ConnectionRefreshButton";
 export { ConnectionRouteChips } from "./src/components/organisms/Connections/ConnectionRouteChips";
 export { ConnectionRouteList } from "./src/components/organisms/Connections/ConnectionRouteList";
@@ -138,13 +154,16 @@ export { ConnectionSummaryRow } from "./src/components/organisms/Connections/Con
 export { ConnectionSummaryTile } from "./src/components/organisms/Connections/ConnectionSummaryTile";
 export { ConnectionSyncButton } from "./src/components/organisms/Connections/ConnectionSyncButton";
 export { ConnectionsBanner } from "./src/components/organisms/Connections/ConnectionsBanner";
+export { ConnectionsExtensionBanner } from "./src/components/organisms/Connections/ConnectionsExtensionBanner";
 export { ConnectionsHealth } from "./src/components/organisms/Connections/ConnectionsHealth";
+export { ConnectionsScope } from "./src/components/organisms/Connections/ConnectionsScope";
 export { ConnectionsTab } from "./src/components/organisms/Connections/ConnectionsTab";
 export { ConnectionsUnsupported } from "./src/components/organisms/Connections/ConnectionsUnsupported";
 export { DataTypeRoutingGroup } from "./src/components/organisms/Connections/DataTypeRoutingGroup";
 export { DataTypeRoutingRow } from "./src/components/organisms/Connections/DataTypeRoutingRow";
 export { DataTypeRoutingSection } from "./src/components/organisms/Connections/DataTypeRoutingSection";
 export { DisconnectConfirmation } from "./src/components/organisms/Connections/DisconnectConfirmation";
+export { ExtensionInstallLink } from "./src/components/organisms/Connections/ExtensionInstallLink";
 export { RoutingChoiceButton } from "./src/components/organisms/Connections/RoutingChoiceButton";
 export { RoutingExportTargets } from "./src/components/organisms/Connections/RoutingExportTargets";
 export { RoutingFreshness } from "./src/components/organisms/Connections/RoutingFreshness";
@@ -157,12 +176,26 @@ export { EditorContextMenu } from "./src/components/organisms/EditorContextMenu/
 export { EditorStateRibbon } from "./src/components/organisms/EditorStateRibbon/EditorStateRibbon";
 export { ImportDropzoneOverlay } from "./src/components/organisms/ImportDropzoneOverlay/ImportDropzoneOverlay";
 export { ScratchEditorSurface } from "./src/components/organisms/ScratchEditorSurface/ScratchEditorSurface";
+export { SendWeekPanel } from "./src/components/organisms/SendWeekPanel/SendWeekPanel";
+export { AboutTab } from "./src/components/organisms/SettingsPanel/AboutTab";
 export { AccountsSection } from "./src/components/organisms/SettingsPanel/AccountsSection";
 export { AdvancedModels } from "./src/components/organisms/SettingsPanel/AdvancedModels";
 export { AiTab } from "./src/components/organisms/SettingsPanel/AiTab";
 export { AssistantCard } from "./src/components/organisms/SettingsPanel/AssistantCard";
+export { AssistantUsage } from "./src/components/organisms/SettingsPanel/AssistantUsage";
+export { BackupImportSection } from "./src/components/organisms/SettingsPanel/BackupImportSection";
+export { BackupProfileChoice } from "./src/components/organisms/SettingsPanel/BackupProfileChoice";
+export { ClearApiKeysSection } from "./src/components/organisms/SettingsPanel/ClearApiKeysSection";
+export { CustomInstructions } from "./src/components/organisms/SettingsPanel/CustomInstructions";
+export { CustomModelInput } from "./src/components/organisms/SettingsPanel/CustomModelInput";
+export { DataTab } from "./src/components/organisms/SettingsPanel/DataTab";
 export { EncryptionSection } from "./src/components/organisms/SettingsPanel/EncryptionSection";
+export { GeneralTab } from "./src/components/organisms/SettingsPanel/GeneralTab";
+export { KeyCheckMessage } from "./src/components/organisms/SettingsPanel/KeyCheckMessage";
+export { KeyStatusBadge } from "./src/components/organisms/SettingsPanel/KeyStatusBadge";
 export { LanguageRow } from "./src/components/organisms/SettingsPanel/LanguageRow";
+export { ModelChoiceOptions } from "./src/components/organisms/SettingsPanel/ModelChoiceOptions";
+export { ModelChoiceSelect } from "./src/components/organisms/SettingsPanel/ModelChoiceSelect";
 export { NotificationsRow } from "./src/components/organisms/SettingsPanel/NotificationsRow";
 export { PreferencesTab } from "./src/components/organisms/SettingsPanel/PreferencesTab";
 export { PrivacyInformationSection } from "./src/components/organisms/SettingsPanel/PrivacyInformationSection";
@@ -171,15 +204,18 @@ export { ProviderEditRow } from "./src/components/organisms/SettingsPanel/Provid
 export { ProviderForm } from "./src/components/organisms/SettingsPanel/ProviderForm";
 export { ProviderList } from "./src/components/organisms/SettingsPanel/ProviderList";
 export { ProviderRow } from "./src/components/organisms/SettingsPanel/ProviderRow";
+export { ProviderRowMenu } from "./src/components/organisms/SettingsPanel/ProviderRowMenu";
+export { RowMenuContent } from "./src/components/organisms/SettingsPanel/ProviderRowMenuContent";
 export { SyncStatusLine } from "./src/components/organisms/SettingsPanel/SyncStatusLine";
 export { SyncTab } from "./src/components/organisms/SettingsPanel/SyncTab";
+export { ThemeRow } from "./src/components/organisms/SettingsPanel/ThemeRow";
 export { UsageEmptyState } from "./src/components/organisms/SettingsPanel/UsageEmptyState";
 export { UsageMonthRow } from "./src/components/organisms/SettingsPanel/UsageMonthRow";
 export { UsageTab } from "./src/components/organisms/SettingsPanel/UsageTab";
-export {
-  UsageTable,
-  USAGE_PURPOSES,
-} from "./src/components/organisms/SettingsPanel/UsageTable";
+export { UsageTable, USAGE_PURPOSES } from "./src/components/organisms/SettingsPanel/UsageTable";
+export { WipeAllDataDialog } from "./src/components/organisms/SettingsPanel/WipeAllDataDialog";
+export { WipeAllDataSection } from "./src/components/organisms/SettingsPanel/WipeAllDataSection";
+export { WipeConfirmField } from "./src/components/organisms/SettingsPanel/WipeConfirmField";
 export { ShortcutSheet } from "./src/components/organisms/ShortcutSheet/ShortcutSheet";
 export { StepEditor } from "./src/components/organisms/StepEditor/StepEditor";
 export { StepList } from "./src/components/organisms/StepList/StepList";
@@ -200,18 +236,14 @@ export { ThemeProvider } from "./src/contexts/ThemeContext";
 export { ToastContextProvider } from "./src/contexts/ToastContext";
 export { AnalyticsProvider } from "./src/contexts/analytics-context";
 export { AthleteZonesProvider } from "./src/contexts/athlete-zones-context";
+export { CoachMoveNoticeProvider } from "./src/contexts/coach-move-notice-context";
 export { CoachingRegistryBootstrap } from "./src/contexts/coaching-registry-bootstrap";
 export { CoachingRegistryProvider } from "./src/contexts/coaching-registry-context";
-export {
-  FocusRegistryContext,
-  FocusRegistryProvider,
-} from "./src/contexts/focus-registry-context";
-export {
-  FocusTelemetryContext,
-  FocusTelemetryProvider,
-} from "./src/contexts/focus-telemetry-context";
+export { FocusRegistryContext, FocusRegistryProvider } from "./src/contexts/focus-registry-context";
+export { FocusTelemetryContext, FocusTelemetryProvider } from "./src/contexts/focus-telemetry-context";
 export { GarminBridgeProvider } from "./src/contexts/garmin-bridge-context";
 export { PersistenceProvider } from "./src/contexts/persistence-context";
+export { PlacementOutcomeProvider } from "./src/contexts/placement-outcome-context";
 export { SyncProvider } from "./src/contexts/sync-context";
 export { Train2GoZonesSyncProvider } from "./src/contexts/train2go-zones-sync-context";
 export { UnitsProvider } from "./src/contexts/units-context";

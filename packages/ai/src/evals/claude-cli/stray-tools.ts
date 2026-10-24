@@ -1,4 +1,4 @@
-import { printable } from "./stray-plugins";
+import { printable } from "./printable-name";
 
 /**
  * The one tool the CLI adds for `--json-schema` (observed on CLI 2.1.310):

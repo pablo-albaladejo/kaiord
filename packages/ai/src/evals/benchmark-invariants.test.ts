@@ -6,7 +6,7 @@ import {
   targetCheckViolation,
   zoneCheckViolation,
 } from "./benchmark-invariants";
-import type { Benchmark } from "./types";
+import type { Benchmark, ZoneCheck } from "./types";
 
 const FIXTURE = benchmarks as Benchmark[];
 
@@ -20,6 +20,53 @@ describe("zoneCheckViolation", () => {
 
     // Assert
     expect(violation).toBeNull();
+  });
+
+  it("should accept a power range basis", () => {
+    // Arrange
+    const zc: ZoneCheck = {
+      targetType: "power",
+      minValue: 88,
+      unit: "range",
+      basis: "percent_ftp",
+    };
+
+    // Act
+    const violation = zoneCheckViolation(zc);
+
+    // Assert
+    expect(violation).toBeNull();
+  });
+
+  it("should reject a basis declared with a unit other than range", () => {
+    // Arrange
+    const zc: ZoneCheck = {
+      targetType: "power",
+      minValue: 88,
+      unit: "percent_ftp",
+      basis: "percent_ftp",
+    };
+
+    // Act
+    const violation = zoneCheckViolation(zc);
+
+    // Assert
+    expect(violation).toContain("qualifies only a range");
+  });
+
+  it("should reject a basis on a target type other than power", () => {
+    // Arrange
+    const zc: ZoneCheck = {
+      targetType: "heart_rate",
+      minValue: 120,
+      basis: "percent_ftp",
+    };
+
+    // Act
+    const violation = zoneCheckViolation(zc);
+
+    // Assert
+    expect(violation).toContain("qualifies only a power target");
   });
 
   it("should accept a zone check declaring only a usable minimum", () => {

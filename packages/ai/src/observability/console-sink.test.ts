@@ -36,6 +36,29 @@ describe("createConsoleTelemetrySink", () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it("should append a streamed run's timings to its summary line", () => {
+    // Arrange
+    const logger = buildLogger();
+    const sink = createConsoleTelemetrySink(logger);
+    const event: AiTelemetryEvent = {
+      type: "run_finished",
+      ...BASE,
+      timings: {
+        attempts: 2,
+        phaseMs: { reasoning: 40000, generating: 70000 },
+        retryReasons: ["truncated"],
+      },
+    };
+
+    // Act
+    sink.emit(event);
+
+    // Assert
+    expect(logger.debug.mock.calls[0]?.[0]).toContain(
+      "attempts=2 reasoning=40000ms generating=70000ms retries=truncated"
+    );
+  });
+
   it("should log failed runs at warn level", () => {
     // Arrange
     const logger = buildLogger();

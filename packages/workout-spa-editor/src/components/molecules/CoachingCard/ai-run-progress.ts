@@ -1,35 +1,31 @@
 import type { GenerateProgress } from "@kaiord/ai";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 
-import type { Translate } from "../../../i18n/use-translate";
-
 /**
  * What the dialog knows about an AI run in flight. `update` is absent until
  * the request is sent; every field after that comes from the run itself.
+ * `phaseStartedAt` moves whenever the phase or the attempt changes, so the
+ * dialog can say how long the current phase has taken.
  */
 export type AiRunProgress = {
   modelName: string;
   startedAt: number;
+  phaseStartedAt: number;
   update?: GenerateProgress;
 };
 
-export type SetAiRunProgress = Dispatch<SetStateAction<AiRunProgress | null>>;
+const samePhase = (a: GenerateProgress | undefined, b: GenerateProgress) =>
+  a?.phase === b.phase && a.attempt === b.attempt;
 
-/** Live-region copy: changes only when the phase or the attempt changes. */
-export const aiPhaseLabel = (t: Translate, run: AiRunProgress): string => {
-  const { update, modelName: model } = run;
-  if (!update) return t("aiProgress.preparing");
-  if (update.phase === "validating") return t("aiProgress.validating");
-  if (update.phase === "generating")
-    return t("aiProgress.generating", { model });
-  if (update.attempt > 1)
-    return t("aiProgress.retrying", {
-      model,
-      attempt: update.attempt,
-      max: update.maxAttempts,
-    });
-  return t("aiProgress.requesting", { model });
-};
+const withUpdate = (run: AiRunProgress, update: GenerateProgress) => ({
+  ...run,
+  update,
+  phaseStartedAt: samePhase(run.update, update)
+    ? run.phaseStartedAt
+    : Date.now(),
+});
+
+export type SetAiRunProgress = Dispatch<SetStateAction<AiRunProgress | null>>;
 
 /** The in-flight controller doubles as the re-entry lock. */
 export type AiRunSlot = {
@@ -45,10 +41,11 @@ export type AiRunSlot = {
 export const beginAiRun = (slot: AiRunSlot, modelName: string) => {
   const controller = new AbortController();
   slot.abortRef.current = controller;
-  slot.setProgress({ modelName, startedAt: Date.now() });
+  const now = Date.now();
+  slot.setProgress({ modelName, startedAt: now, phaseStartedAt: now });
   const onProgress = (update: GenerateProgress) => {
     if (slot.abortRef.current !== controller) return;
-    slot.setProgress((run) => run && { ...run, update });
+    slot.setProgress((run) => run && withUpdate(run, update));
   };
   return { controller, onProgress };
 };
