@@ -11,6 +11,8 @@ export const PACE_M_PER_S = {
   SINGLE_4_45: 1000 / 285,
   BAND_4_40: 1000 / 280,
   BAND_4_50: 1000 / 290,
+  // paceValueSchema cap; a band around it must not exceed it on re-import.
+  SCHEMA_MAX: 30,
 } as const;
 
 // Decimal digits for float comparisons of converted speeds.
