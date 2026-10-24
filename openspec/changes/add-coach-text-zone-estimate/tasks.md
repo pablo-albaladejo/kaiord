@@ -10,13 +10,13 @@
 
 ## 2. Dialog fallback (D3, D4)
 
-- [ ] 2.0 `ZoneProfileBar` draws an unknown segment with a neutral role and a "no zone given" title
+- [x] 2.0 `ZoneProfileBar` draws an unknown segment with a neutral role and a "no zone given" title
 
-- [ ] 2.1 Fall back to the estimate when the dialog has no structured segments
-- [ ] 2.2 "Estimated from coach text" caption and estimate-aware aria label (en/es)
-- [ ] 2.3 Tests: structured wins, unzoned draws grey, distance hides, estimate renders with caption
+- [x] 2.1 Fall back to the estimate when the dialog has no structured segments
+- [x] 2.2 "Estimated from coach text" caption and estimate-aware aria label (en/es)
+- [x] 2.3 Tests: structured wins, unzoned draws grey, distance hides, estimate renders with caption
 
 ## 3. Ship
 
-- [ ] 3.1 Changeset (`@kaiord/workout-spa-editor` patch)
+- [x] 3.1 Changeset (`@kaiord/workout-spa-editor` patch)
 - [ ] 3.2 Archive after merge
