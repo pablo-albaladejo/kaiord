@@ -30,7 +30,23 @@ export type CalendarBuckets = {
   matchedByDay: Record<string, PageMatchedSession[]>;
   soloPlansByDay: Record<string, CoachingActivity[]>;
   soloActualsByDay: Record<string, WorkoutRecord[]>;
+  /**
+   * Renderable ids of the week's executed activities: the twin WorkoutRecord
+   * id when there is one, else the activity's own id (the rule in
+   * `match-executed-refs`). Lets a match whose `workoutId` is itself the
+   * execution be recognised as executed.
+   */
+  executedRefIds: ReadonlySet<string>;
 };
+
+const collectExecutedRefIds = (
+  activitiesByDay: Record<string, ActivityRecord[]>
+): Set<string> =>
+  new Set(
+    Object.values(activitiesByDay)
+      .flat()
+      .map((a) => a.linkedWorkoutId ?? a.id)
+  );
 
 const collectMatchedWorkoutIds = (
   matched: PageMatchedSession[]
@@ -71,5 +87,10 @@ export function buildCalendarBuckets({
       ...soloActivityActuals(activitiesByDay[day] ?? [], matchedWorkoutIds),
     ];
   }
-  return { matchedByDay, soloPlansByDay, soloActualsByDay };
+  return {
+    matchedByDay,
+    soloPlansByDay,
+    soloActualsByDay,
+    executedRefIds: collectExecutedRefIds(activitiesByDay),
+  };
 }

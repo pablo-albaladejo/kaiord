@@ -7,7 +7,16 @@ export const PACE_M_PER_S = {
   Z3_MAX: 3.51,
   RANGE_LOW: 3.5,
   RANGE_HIGH: 4.0,
+  // Single 4:45 min/km value and its ±5 s/km Garmin band (4:40..4:50).
+  SINGLE_4_45: 1000 / 285,
+  BAND_4_40: 1000 / 280,
+  BAND_4_50: 1000 / 290,
+  // paceValueSchema cap; a band around it must not exceed it on re-import.
+  SCHEMA_MAX: 30,
 } as const;
+
+// Decimal digits for float comparisons of converted speeds.
+export const FLOAT_DIGITS = 9;
 
 // Zone numeric values used in power / HR / pace zone assertions.
 export const ZONE = {
