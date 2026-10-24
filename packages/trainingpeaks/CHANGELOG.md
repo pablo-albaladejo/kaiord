@@ -1,5 +1,14 @@
 # @kaiord/trainingpeaks
 
+## 10.4.0
+
+### Patch Changes
+
+- aa47f14: Power ranges with `basis: "percent_ftp"` are now sent to TrainingPeaks as their percentages instead of being divided by the athlete FTP as if they were watts.
+- Updated dependencies [69dfb8c]
+- Updated dependencies [aa47f14]
+  - @kaiord/core@10.4.0
+
 ## 10.3.0
 
 ### Patch Changes

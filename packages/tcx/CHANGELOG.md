@@ -1,5 +1,14 @@
 # @kaiord/tcx
 
+## 10.4.0
+
+### Patch Changes
+
+- aa47f14: The TCX writer now logs a warning when it drops a power target it cannot store (anything but a single watts value, e.g. `percent_ftp` or a power range) instead of dropping it silently.
+- Updated dependencies [69dfb8c]
+- Updated dependencies [aa47f14]
+  - @kaiord/core@10.4.0
+
 ## 10.3.0
 
 ### Minor Changes

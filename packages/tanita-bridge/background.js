@@ -20,7 +20,7 @@ const EXPORT_CSV_PATH = "/en/user/export-csv";
 const BRIDGE_MANIFEST = {
   id: "tanita-bridge",
   name: "Tanita",
-  version: "10.3.0",
+  version: "10.4.0",
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["read:body"],
 };
