@@ -11,6 +11,10 @@ export { createGarminParsingError, GarminParsingError } from "./garmin-errors";
 export { createKrdValidationError, KrdValidationError } from "./krd-errors";
 export { createMissingFtpError, MissingFtpError } from "./missing-ftp-error";
 export {
+  createMissingMaxHeartRateError,
+  MissingMaxHeartRateError,
+} from "./missing-max-heart-rate-error";
+export {
   createServiceApiError,
   createServiceAuthError,
   ServiceApiError,
