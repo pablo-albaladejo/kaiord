@@ -11,7 +11,10 @@
 
 import type { SessionMatchRepository } from "../ports/session-match-repository";
 import { SessionAlreadyMatchedError } from "../types/session-match-errors";
-import type { SessionMatch } from "../types/session-match";
+import {
+  assertSessionMatchDate,
+  type SessionMatch,
+} from "../types/session-match";
 import { appendExecutedWorkoutIdsInMemory } from "./in-memory-session-match-append-executed";
 import {
   findActivityConflict,
@@ -28,6 +31,7 @@ const buildWriters = (
   | "put"
   | "updateCoachingActivityId"
   | "appendExecutedWorkoutIds"
+  | "updateDate"
   | "delete"
   | "deleteLocalOrphan"
   | "deleteByActivityId"
@@ -63,6 +67,11 @@ const buildWriters = (
   },
   appendExecutedWorkoutIds: async (id, workoutIds) => {
     appendExecutedWorkoutIdsInMemory(store, id, workoutIds);
+  },
+  updateDate: async (id, date, updatedAt) => {
+    assertSessionMatchDate(date);
+    const existing = store.get(id);
+    if (existing) store.set(id, { ...existing, date, updatedAt });
   },
   delete: async (id) => {
     store.delete(id);

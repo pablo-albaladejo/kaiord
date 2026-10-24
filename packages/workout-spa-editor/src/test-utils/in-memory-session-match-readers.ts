@@ -14,7 +14,12 @@ export const buildReaders = (
   store: Store
 ): Pick<
   SessionMatchRepository,
-  "getById" | "getByActivityId" | "getByWorkoutId" | "listByProfileAndWeek"
+  | "getById"
+  | "getByActivityId"
+  | "getByWorkoutId"
+  | "listByProfileAndWeek"
+  | "listByActivityIds"
+  | "listByProfile"
 > => ({
   getById: async (id) => store.get(id),
   getByActivityId: async (profileId, coachingActivityId) =>
@@ -31,4 +36,12 @@ export const buildReaders = (
       (m) =>
         m.profileId === profileId && m.date >= weekStart && m.date <= weekEnd
     ),
+  listByActivityIds: async (profileId, coachingActivityIds) => {
+    const wanted = new Set(coachingActivityIds);
+    return [...store.values()].filter(
+      (m) => m.profileId === profileId && wanted.has(m.coachingActivityId)
+    );
+  },
+  listByProfile: async (profileId) =>
+    [...store.values()].filter((m) => m.profileId === profileId),
 });

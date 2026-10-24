@@ -58,6 +58,23 @@ export type SessionMatchRepository = {
     weekStart: string,
     weekEnd: string
   ) => Promise<SessionMatch[]>;
+  /**
+   * Re-dates the row in place and stamps `updatedAt`. A no-op when the row is
+   * missing; rejects a non-`YYYY-MM-DD` date without writing. Joins the
+   * caller's `PersistencePort.transaction`.
+   */
+  updateDate: (
+    matchId: string,
+    date: string,
+    updatedAt: string
+  ) => Promise<void>;
+  /** The profile's matches of the given activities, whatever their date. */
+  listByActivityIds: (
+    profileId: string,
+    coachingActivityIds: readonly string[]
+  ) => Promise<SessionMatch[]>;
+  /** Every match of the profile (the heal and the recording-held check). */
+  listByProfile: (profileId: string) => Promise<SessionMatch[]>;
   /** No-op when the row does not exist. */
   delete: (id: string) => Promise<void>;
   /**

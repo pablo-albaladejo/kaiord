@@ -11,6 +11,8 @@
 
 import { z } from "zod";
 
+export const SESSION_MATCH_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 export const sessionMatchSourceSchema = z.enum([
   "manual",
   "auto-suggestion",
@@ -26,13 +28,16 @@ export const sessionMatchSchema = z.object({
   coachingActivityId: z.string().min(1),
   workoutId: z.string().min(1),
   /**
-   * Denormalized from the matched activity at write time so the
-   * `listByProfileAndWeek` query can be served by an index without
-   * joining the activities table. The date is stable per match —
-   * matches are created with a known activity at a known date.
+   * The session's effective date, denormalized so `listByProfileAndWeek`
+   * is served by the `[profileId+date]` index. It equals the matched
+   * workout's `date` after every date writer and after the heal, except
+   * for a locked match (an executed slot, or a `completed` activity),
+   * which keeps the day of its recording.
    */
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().regex(SESSION_MATCH_DATE_PATTERN),
   createdAt: z.iso.datetime(),
+  /** Stamped by every re-date; the merge clock prefers it over `createdAt`. */
+  updatedAt: z.iso.datetime().optional(),
   source: sessionMatchSourceSchema,
   /**
    * Executed activities (e.g., Garmin/FIT recordings) auto-linked to
@@ -46,3 +51,9 @@ export const sessionMatchSchema = z.object({
 });
 
 export type SessionMatch = z.infer<typeof sessionMatchSchema>;
+
+/** Throws on a date that is not `YYYY-MM-DD`; adapters call it before a re-date. */
+export const assertSessionMatchDate = (date: string): void => {
+  if (!SESSION_MATCH_DATE_PATTERN.test(date))
+    throw new Error(`Invalid session match date: ${date}`);
+};

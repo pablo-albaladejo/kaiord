@@ -8,35 +8,15 @@ import type Dexie from "dexie";
 import type { Table } from "dexie";
 
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
-import type { SessionMatch } from "../../types/session-match";
+import {
+  assertSessionMatchDate,
+  type SessionMatch,
+} from "../../types/session-match";
 import type { KaiordDatabase } from "./dexie-database";
 import { appendExecutedWorkoutIdsTx } from "./dexie-session-match-append-executed";
+import { buildReaders } from "./dexie-session-match-readers";
 import { updateCoachingActivityIdTx } from "./dexie-session-match-update";
 import { assertNoSessionMatchConflict } from "./session-match-conflict";
-
-const buildReaders = (
-  table: () => Table<SessionMatch>
-): Pick<
-  SessionMatchRepository,
-  "getById" | "getByActivityId" | "getByWorkoutId" | "listByProfileAndWeek"
-> => ({
-  getById: async (id) => (await table().get(id)) ?? undefined,
-  getByActivityId: async (profileId, coachingActivityId) =>
-    (await table()
-      .where("[profileId+coachingActivityId]")
-      .equals([profileId, coachingActivityId])
-      .first()) ?? undefined,
-  getByWorkoutId: async (profileId, workoutId) =>
-    (await table()
-      .where("[profileId+workoutId]")
-      .equals([profileId, workoutId])
-      .first()) ?? undefined,
-  listByProfileAndWeek: async (profileId, weekStart, weekEnd) =>
-    table()
-      .where("[profileId+date]")
-      .between([profileId, weekStart], [profileId, weekEnd], true, true)
-      .toArray(),
-});
 
 const buildWriters = (
   db: KaiordDatabase,
@@ -46,6 +26,7 @@ const buildWriters = (
   | "put"
   | "updateCoachingActivityId"
   | "appendExecutedWorkoutIds"
+  | "updateDate"
   | "delete"
   | "deleteLocalOrphan"
   | "deleteByActivityId"
@@ -66,6 +47,10 @@ const buildWriters = (
     updateCoachingActivityIdTx(db, table, id, newCoachingActivityId),
   appendExecutedWorkoutIds: (id, workoutIds) =>
     appendExecutedWorkoutIdsTx(db, table, id, workoutIds),
+  updateDate: async (id, date, updatedAt) => {
+    assertSessionMatchDate(date);
+    await table().update(id, { date, updatedAt });
+  },
   delete: (id) => table().delete(id),
   // Same primitive as `delete`; a distinct name is what keeps the
   // heal/local-repair path off the `withTombstones` surface.

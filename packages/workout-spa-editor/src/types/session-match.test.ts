@@ -142,4 +142,36 @@ describe("sessionMatchSchema", () => {
     // Assert
     expect(parsed.executedWorkoutIds).toEqual(["w-exec-1", "w-exec-2"]);
   });
+
+  it("should parse a row without updatedAt (legacy row)", () => {
+    // Arrange
+    const row = baseRow();
+
+    // Act
+    const parsed = sessionMatchSchema.parse(row);
+
+    // Assert
+    expect(parsed.updatedAt).toBeUndefined();
+  });
+
+  it("should parse a row with an ISO updatedAt", () => {
+    // Arrange
+    const row = baseRow({ updatedAt: "2026-05-02T08:00:00.000Z" });
+
+    // Act
+    const parsed = sessionMatchSchema.parse(row);
+
+    // Assert
+    expect(parsed.updatedAt).toBe("2026-05-02T08:00:00.000Z");
+  });
+
+  it("should reject an updatedAt that is not an ISO datetime", () => {
+    // Arrange
+    const row = baseRow({ updatedAt: "2026-05-02" });
+
+    // Act
+
+    // Assert
+    expect(() => sessionMatchSchema.parse(row)).toThrow();
+  });
 });
