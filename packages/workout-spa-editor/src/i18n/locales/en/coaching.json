@@ -58,7 +58,25 @@
     "steps_one": "{{count}} step so far",
     "steps_other": "{{count}} steps so far",
     "elapsed": "{{seconds}} s",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "reasoning": "{{model}} is working out how the session is built…",
+    "reasoningHint": "The model reasons before it writes; with a long description this can take a minute or more.",
+    "retryingTruncated": "The answer was cut off for length. Asking {{model}} again (attempt {{attempt}} of {{max}})…",
+    "retryingProvider": "{{model}} returned an error. Trying again (attempt {{attempt}} of {{max}})…",
+    "attempt": "Attempt {{attempt}} of {{max}}",
+    "elapsedSplit": "{{phase}} s in this phase · {{total}} s total",
+    "latestStep": "Last step: {{summary}}",
+    "latestBlock_one": "Last step: {{repeat}}× block of {{count}} step",
+    "latestBlock_other": "Last step: {{repeat}}× block of {{count}} steps",
+    "minutes": "{{minutes}} min",
+    "seconds": "{{seconds}} s",
+    "meters": "{{meters}} m",
+    "retryReason": {
+      "truncated": "was cut off for length",
+      "invalid": "did not fit the format",
+      "provider": "hit a provider error"
+    },
+    "attemptWithReason": "Attempt {{attempt}} of {{max}} · the last one {{reason}}"
   },
   "status": {
     "pending": "Pending",

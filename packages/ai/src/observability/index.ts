@@ -1,5 +1,6 @@
 export type {
   AiTelemetryEvent,
+  AiRunTimings,
   AiTelemetrySink,
   AiUsage,
   ChatTurnFinishedEvent,

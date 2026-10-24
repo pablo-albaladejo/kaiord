@@ -11,6 +11,7 @@ export type {
 export type {
   GenerateProgress,
   GenerateProgressPhase,
+  GenerateRetryReason,
   OnGenerateProgress,
 } from "./agents/progress";
 
