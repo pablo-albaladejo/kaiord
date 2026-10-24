@@ -16,7 +16,20 @@ import type { Benchmark, ZoneCheck } from "./types";
 const usableBound = (value: number | undefined): boolean =>
   value !== undefined && Number.isFinite(value) && value !== 0;
 
+/** `basis` qualifies only a power `range`; anywhere else core would strip it. */
+const basisViolation = (zc: ZoneCheck): string | null => {
+  if (zc.basis === undefined) return null;
+  if (zc.unit !== undefined && zc.unit !== "range") {
+    return `zoneCheck for "${zc.targetType}" declares basis ${zc.basis} with unit ${zc.unit}, but basis qualifies only a range`;
+  }
+  return zc.targetType === "power"
+    ? null
+    : `zoneCheck for "${zc.targetType}" declares basis ${zc.basis}, but basis qualifies only a power target`;
+};
+
 export const zoneCheckViolation = (zc: ZoneCheck): string | null => {
+  const basis = basisViolation(zc);
+  if (basis !== null) return basis;
   if (usableBound(zc.minValue) || usableBound(zc.maxValue)) return null;
   const declared = [
     zc.minValue === undefined ? null : `minValue=${zc.minValue}`,

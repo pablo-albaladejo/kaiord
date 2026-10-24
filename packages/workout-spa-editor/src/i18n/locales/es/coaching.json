@@ -58,7 +58,25 @@
     "steps_one": "{{count}} paso por ahora",
     "steps_other": "{{count}} pasos por ahora",
     "elapsed": "{{seconds}} s",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "reasoning": "{{model}} está analizando cómo se estructura la sesión…",
+    "reasoningHint": "El modelo razona antes de escribir; con una descripción larga puede tardar un minuto o más.",
+    "retryingTruncated": "La respuesta se cortó por longitud. Volviendo a pedírselo a {{model}} (intento {{attempt}} de {{max}})…",
+    "retryingProvider": "{{model}} devolvió un error. Reintentando (intento {{attempt}} de {{max}})…",
+    "attempt": "Intento {{attempt}} de {{max}}",
+    "elapsedSplit": "{{phase}} s en esta fase · {{total}} s en total",
+    "latestStep": "Último paso: {{summary}}",
+    "latestBlock_one": "Último paso: bloque {{repeat}}× de {{count}} paso",
+    "latestBlock_other": "Último paso: bloque {{repeat}}× de {{count}} pasos",
+    "minutes": "{{minutes}} min",
+    "seconds": "{{seconds}} s",
+    "meters": "{{meters}} m",
+    "retryReason": {
+      "truncated": "se cortó por longitud",
+      "invalid": "no encajaba con el formato",
+      "provider": "dio un error del proveedor"
+    },
+    "attemptWithReason": "Intento {{attempt}} de {{max}} · el anterior {{reason}}"
   },
   "status": {
     "pending": "Pendiente",

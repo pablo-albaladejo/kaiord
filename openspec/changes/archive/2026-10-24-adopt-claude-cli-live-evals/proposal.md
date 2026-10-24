@@ -1,3 +1,5 @@
+> Completed: 2026-10-24
+
 # Proposal: Run live evals through the maintainer's local Claude subscription
 
 ## Why
