@@ -56,6 +56,32 @@ const styles = result.css.replace(
   ""
 );
 
+// Tailwind theme tokens that fit no token category (color, spacing, type, …).
+// The converter reads a `/* @kind other */` after a declaration as its
+// category; without it these five are reported as uncategorizable. The marker
+// cannot live in `src/index.css`: Tailwind strips every comment from the
+// compiled theme layer, so it is added to the output here.
+const KIND_OTHER = [
+  "--animate-spin",
+  "--animate-pulse",
+  "--aspect-video",
+  "--default-transition-duration",
+  "--default-transition-timing-function",
+];
+
+const annotate = (text, token) => {
+  const declaration = new RegExp(`(^\\s*${token}:[^;]*;)`, "m");
+  if (!declaration.test(text)) {
+    // Tailwind drops a theme token nothing uses; the next sync then has
+    // nothing to categorize, so a missing token is reported, not fatal.
+    console.warn(`@kind other: ${token} is not declared in the output`);
+    return text;
+  }
+  return text.replace(declaration, "$1 /* @kind other */");
+};
+
+const annotated = KIND_OTHER.reduce(annotate, styles);
+
 mkdirSync(dirname(OUT), { recursive: true });
-writeFileSync(OUT, styles);
-console.log(`wrote ${OUT}: ${(styles.length / 1024).toFixed(0)} KB`);
+writeFileSync(OUT, annotated);
+console.log(`wrote ${OUT}: ${(annotated.length / 1024).toFixed(0)} KB`);
