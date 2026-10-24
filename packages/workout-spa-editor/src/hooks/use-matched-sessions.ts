@@ -5,7 +5,8 @@
  * Read budget per render is bounded: one `useLiveQuery` over
  * `session_matches` filtered by `(profileId, day in days)`, then one
  * `bulkGet` on `coachingActivities` and one on `workouts` to hydrate
- * the matched sides. The hook does not subscribe to those child
+ * the matched sides, plus the week's coach activities and their matches
+ * dated in another week (`queryCrossWeekMatches`, design §3.6). The hook does not subscribe to those child
  * tables itself — the parent calendar page already does, and a
  * separate subscription would defeat the budget.
  *
@@ -23,10 +24,16 @@
  */
 
 import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
 
 import type { MatchedSession } from "../components/molecules/MatchedSessionCard/MatchedSessionCard";
 import { usePersistence } from "../contexts/persistence-context";
 import type { SessionMatch } from "../types/session-match";
+import {
+  type CrossWeekMatches,
+  NO_CROSS_WEEK,
+  queryCrossWeekMatches,
+} from "./use-matched-sessions-cross-week";
 import {
   type DanglingMatch,
   useMatchedSessionsHeal,
@@ -44,31 +51,48 @@ export type MatchedSessionWithMetadata = MatchedSession & {
 
 export type { MatchedSession };
 
-type HydrateResult = {
+export type MatchedWeek = {
   matched: MatchedSessionWithMetadata[];
-  dangling: DanglingMatch[];
+  crossWeek: CrossWeekMatches;
 };
 
-const EMPTY: HydrateResult = { matched: [], dangling: [] };
+type HydrateResult = MatchedWeek & { dangling: DanglingMatch[] };
+
+const EMPTY: HydrateResult = {
+  matched: [],
+  dangling: [],
+  crossWeek: NO_CROSS_WEEK,
+};
 
 export function useMatchedSessions(
   profileId: string | null,
   days: string[]
-): MatchedSessionWithMetadata[] | undefined {
-  const { matchedSessionsReadModel } = usePersistence();
+): MatchedWeek | undefined {
+  const persistence = usePersistence();
+  const { matchedSessionsReadModel } = persistence;
   const result = useLiveQuery<HydrateResult>(async () => {
     markUseMatchedSessionsStart();
     try {
       if (!profileId || days.length === 0) return EMPTY;
-      const matches = await queryMatchesForWeek(profileId, days);
-      if (matches.length === 0) return EMPTY;
-      return await hydrateMatchedSessions(matches, matchedSessionsReadModel);
+      const [matches, crossWeek] = await Promise.all([
+        queryMatchesForWeek(profileId, days),
+        queryCrossWeekMatches(persistence, profileId, days),
+      ]);
+      if (matches.length === 0) return { ...EMPTY, crossWeek };
+      const hydrated = await hydrateMatchedSessions(
+        matches,
+        matchedSessionsReadModel
+      );
+      return { ...hydrated, crossWeek };
     } finally {
       markUseMatchedSessionsEnd();
     }
-  }, [profileId, days.join(","), matchedSessionsReadModel]);
+  }, [profileId, days.join(","), persistence]);
 
   useMatchedSessionsHeal(result?.dangling ?? null);
 
-  return result?.matched;
+  return useMemo(
+    () => result && { matched: result.matched, crossWeek: result.crossWeek },
+    [result]
+  );
 }

@@ -1,8 +1,13 @@
 import { activityToWorkoutRecord } from "../../application/coaching/activity-to-workout-record";
 import type { MatchedSessionWithMetadata as PageMatchedSession } from "../../hooks/use-matched-sessions";
+import type { CrossWeekMatches } from "../../hooks/use-matched-sessions-cross-week";
 import type { ActivityRecord } from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
+import {
+  collectExecutedRefIds,
+  collectMatchedWorkoutIds,
+} from "./calendar-bucket-ids";
 
 export type BuildBucketsArgs = {
   days: string[];
@@ -11,7 +16,7 @@ export type BuildBucketsArgs = {
   /** Executed activities (v27) rendered natively; defaults to none. */
   activitiesByDay?: Record<string, ActivityRecord[]>;
   matched: PageMatchedSession[];
-};
+} & Partial<CrossWeekMatches>;
 
 /**
  * Unmatched source-only activities (no twin WorkoutRecord), projected for the
@@ -39,41 +44,28 @@ export type CalendarBuckets = {
   executedRefIds: ReadonlySet<string>;
 };
 
-const collectExecutedRefIds = (
-  activitiesByDay: Record<string, ActivityRecord[]>
-): Set<string> =>
-  new Set(
-    Object.values(activitiesByDay)
-      .flat()
-      .map((a) => a.linkedWorkoutId ?? a.id)
-  );
-
-const collectMatchedWorkoutIds = (
-  matched: PageMatchedSession[]
-): Set<string> => {
-  const out = new Set<string>();
-  for (const m of matched) {
-    out.add(m.workout.id);
-    // Tolerate raw/pre-v12 rows that may lack the executed slot (see
-    // use-matched-sessions-hydrate-helpers).
-    for (const wid of m.match.executedWorkoutIds ?? []) out.add(wid);
-  }
-  return out;
-};
-
 export function buildCalendarBuckets({
   days,
   workoutsByDay,
   coachingByDay,
   activitiesByDay = {},
   matched,
+  crossWeekMatchedActivityIds = new Set(),
+  crossWeekMatchedWorkoutIds,
 }: BuildBucketsArgs): CalendarBuckets {
-  const matchedActivityIds = new Set(matched.map((m) => m.activity.id));
+  // A session matched in another week renders there (design §3.6).
+  const matchedActivityIds = new Set([
+    ...matched.map((m) => m.activity.id),
+    ...crossWeekMatchedActivityIds,
+  ]);
   // Suppress both the structured workout AND any executed workouts the
   // match has absorbed — otherwise an executed Garmin/FIT recording
   // would render as solo `WorkoutCard` AND as the executed slot of the
   // matched card (A5: no 2x card duplicate).
-  const matchedWorkoutIds = collectMatchedWorkoutIds(matched);
+  const matchedWorkoutIds = collectMatchedWorkoutIds(
+    matched,
+    crossWeekMatchedWorkoutIds
+  );
   const matchedByDay: Record<string, PageMatchedSession[]> = {};
   const soloPlansByDay: Record<string, CoachingActivity[]> = {};
   const soloActualsByDay: Record<string, WorkoutRecord[]> = {};

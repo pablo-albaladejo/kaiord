@@ -101,6 +101,10 @@ const PERF_PROFILE = "11111111-1111-4111-8111-111111111111";
 const BIG_WEEK = { weekId: "2026-W18", day: "2026-04-29" };
 const SMALL_WEEK = { weekId: "2026-W20", day: "2026-05-13" };
 const EMPTY_WEEK = { weekId: "2026-W19", day: "2026-05-06" };
+// The 30-card week also holds plans whose match sits in a week never shown
+// (design §3.6): `useMatchedSessions` reads and hides them, so the hook is
+// measured with the cross-week read while the card counts stay 10/10/10.
+const CROSS_WEEK = { count: 10, onDay: "2026-05-27" };
 const BIG: CardCounts = { matched: 10, soloPlans: 10, soloActuals: 10 };
 const SMALL: CardCounts = { matched: 1, soloPlans: 1, soloActuals: 1 };
 const NONE: CardCounts = { matched: 0, soloPlans: 0, soloActuals: 0 };
@@ -176,7 +180,7 @@ test.describe("CalendarPage render-cost budget", () => {
       profileId: PERF_PROFILE,
       now: NOW,
       weeks: [
-        { prefix: "perf", ...BIG_WEEK, ...BIG },
+        { prefix: "perf", ...BIG_WEEK, ...BIG, crossWeek: CROSS_WEEK },
         { prefix: "base", ...SMALL_WEEK, ...SMALL },
       ],
     });
@@ -330,6 +334,9 @@ test.describe("CalendarPage render-cost budget", () => {
       const entries = performance.getEntriesByName("useMatchedSessions");
       return Math.min(...entries.map((e) => e.duration));
     });
+    console.log(
+      `useMatchedSessions steady state: ${useMatchedMinMs.toFixed(1)} ms (envelope ${useMatchedBudgetMs.toFixed(1)} ms)`
+    );
     expect(
       useMatchedMinMs,
       `useMatchedSessions best steady-state measure ${useMatchedMinMs.toFixed(1)}ms exceeds the ${useMatchedBudgetMs.toFixed(1)}ms CI envelope (envelope ${USE_MATCHED_SESSIONS_CI_ENVELOPE_MS}ms x runner slowdown ${slowdownFactor.toFixed(2)}, aspirational slice ${USE_MATCHED_SESSIONS_BUDGET_MS}ms, calibration ${calibrationMs.toFixed(1)}ms vs reference ${CALIBRATION_REFERENCE_MS}ms, project: ${testInfo.project.name})`
