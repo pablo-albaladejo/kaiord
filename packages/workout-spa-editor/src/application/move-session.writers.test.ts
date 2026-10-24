@@ -89,6 +89,7 @@ const sync = ({ persistence, lock }: Setup, date: string) =>
   applyCoachDateMoves(
     {
       workouts: persistence.workouts,
+      sessionMatch: persistence.sessionMatch,
       now: () => NOW,
       transaction: lock.transaction,
     },
@@ -106,7 +107,11 @@ describe("moveSession racing another writer", () => {
     const next = await sync(s, D2);
 
     // Assert
-    expect(next).toEqual({ coachMoves: 0, overriddenLocalMoves: 0 });
+    expect(next).toEqual({
+      coachMoves: 0,
+      overriddenLocalMoves: 0,
+      overridden: [],
+    });
     expect(await s.persistence.workouts.getById("w")).toMatchObject({
       coachDate: D2,
     });

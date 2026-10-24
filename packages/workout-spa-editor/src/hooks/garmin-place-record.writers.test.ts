@@ -111,7 +111,12 @@ describe("placeRecord and applyCoachDateMoves on the same workout", () => {
 
     // Act
     await applyCoachDateMoves(
-      { workouts, now: () => T0.toISOString(), transaction: lock.transaction },
+      {
+        workouts,
+        sessionMatch: persistence.sessionMatch,
+        now: () => T0.toISOString(),
+        transaction: lock.transaction,
+      },
       [activity(D2)],
       []
     );

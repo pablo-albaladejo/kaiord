@@ -50,6 +50,7 @@ export const useSyncCallback = (
           transport: t,
           coachingSyncState: p.coachingSyncState,
           workouts: p.workouts,
+          sessionMatch: p.sessionMatch,
           transaction: p.transaction,
           integrationPolicy: p.integrationPolicy,
         },
