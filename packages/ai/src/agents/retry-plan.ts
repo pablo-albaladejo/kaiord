@@ -3,7 +3,8 @@ import { AiOutputInvalidError, AiOutputTruncatedError } from "./output-errors";
 
 // A thinking model spends its reasoning from the same budget as the answer,
 // so a retry at the budget that just ran out is cut off again: each
-// truncation doubles it, up to a ceiling every supported model accepts.
+// truncation doubles it, up to a ceiling every supported model accepts. The
+// ceiling caps growth only: a caller's budget already above it is kept.
 const TRUNCATION_GROWTH = 2;
 const MAX_OUTPUT_BUDGET = 16384;
 
@@ -18,5 +19,5 @@ export const nextOutputBudget = (
   reason: GenerateRetryReason
 ): number =>
   reason === "truncated"
-    ? Math.min(budget * TRUNCATION_GROWTH, MAX_OUTPUT_BUDGET)
+    ? Math.max(budget, Math.min(budget * TRUNCATION_GROWTH, MAX_OUTPUT_BUDGET))
     : budget;
