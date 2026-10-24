@@ -1,7 +1,12 @@
 import type { Target } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import { PACE_M_PER_S, POWER_W, ZONE } from "../../test-utils/constants";
+import {
+  FLOAT_DIGITS,
+  PACE_M_PER_S,
+  POWER_W,
+  ZONE,
+} from "../../test-utils/constants";
 import { convertKrdTargetToGarmin } from "./target-to-garmin.converter";
 import type { PaceZoneTable } from "./target-types";
 
@@ -78,6 +83,45 @@ describe("convertKrdTargetToGarmin", () => {
       expect(result.targetValueOne).toBe(PACE_M_PER_S.RANGE_HIGH);
       expect(result.targetValueTwo).toBe(PACE_M_PER_S.RANGE_LOW);
       expect(result.zoneNumber).toBeNull();
+    });
+
+    it("should widen a single pace value into a ±5 s/km band, faster first", () => {
+      // Arrange
+      const target: Target = {
+        type: "pace",
+        value: { unit: "mps", value: PACE_M_PER_S.SINGLE_4_45 },
+      };
+
+      // Act
+      const result = convertKrdTargetToGarmin(target);
+
+      // Assert
+      // 4:45 min/km -> 4:40 (faster, higher m/s) .. 4:50 (slower) min/km.
+      expect(result.targetValueOne).toBeCloseTo(
+        PACE_M_PER_S.BAND_4_40,
+        FLOAT_DIGITS
+      );
+      expect(result.targetValueTwo).toBeCloseTo(
+        PACE_M_PER_S.BAND_4_50,
+        FLOAT_DIGITS
+      );
+      expect(result.zoneNumber).toBeNull();
+      expect(result.targetType.workoutTargetTypeKey).toBe("pace.zone");
+    });
+
+    it("should keep a non-positive single pace value unchanged", () => {
+      // Arrange
+      const target: Target = {
+        type: "pace",
+        value: { unit: "mps", value: 0 },
+      };
+
+      // Act
+      const result = convertKrdTargetToGarmin(target);
+
+      // Assert
+      expect(result.targetValueOne).toBe(0);
+      expect(result.targetValueTwo).toBe(0);
     });
 
     it("should encode power range with higher wattage in targetValueOne", () => {
@@ -177,6 +221,21 @@ describe("convertKrdTargetToGarmin defensive null fallbacks", () => {
     const target = {
       type: "power",
       value: { unit: "watts" },
+    } as unknown as Target;
+
+    // Act
+    const result = convertKrdTargetToGarmin(target);
+
+    // Assert
+    expect(result.targetValueOne).toBeNull();
+    expect(result.targetValueTwo).toBeNull();
+  });
+
+  it("should encode a single pace target without a value as null values", () => {
+    // Arrange
+    const target = {
+      type: "pace",
+      value: { unit: "mps" },
     } as unknown as Target;
 
     // Act

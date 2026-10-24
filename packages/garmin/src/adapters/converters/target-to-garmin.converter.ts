@@ -1,6 +1,7 @@
 import type { Target } from "@kaiord/core";
 
 import {
+  buildPaceBand,
   buildPaceTargetType,
   resolvePaceZone,
 } from "../mappers/target-pace.mapper";
@@ -54,7 +55,11 @@ export const convertKrdTargetToGarmin = (
 
 const mapPace = (value: Val, paceZones?: PaceZoneTable): GarminTargetInfo => {
   if (value.unit === "zone") return resolvePaceZone(value, paceZones);
-  return mapRangeOrValue(buildPaceTargetType(), value, true);
+  const band =
+    value.unit === "mps" && value.value != null
+      ? buildPaceBand(value.value)
+      : null;
+  return band ?? mapRangeOrValue(buildPaceTargetType(), value, true);
 };
 
 const mapZoneOrRange = (

@@ -309,6 +309,42 @@ describe("buildCalendarBuckets", () => {
     expect(buckets.soloActualsByDay[DAY]?.[0]?.id).toBe("w-7");
   });
 
+  it("should index executed refs by twin workout id, else activity id", () => {
+    // Arrange
+    const twin: ActivityRecord = {
+      ...buildSourceActivityRecord({
+        profileId: "p1",
+        date: DAY,
+        sport: "cycling",
+        sourceBridgeId: "fit-import",
+        externalId: "hash-2",
+      }),
+      linkedWorkoutId: "w-7",
+    };
+    const sourceOnly = buildSourceActivityRecord({
+      profileId: "p1",
+      date: DAY,
+      sport: "running",
+      sourceBridgeId: "garmin-bridge",
+      externalId: "777",
+    });
+    const args = {
+      days: DAYS,
+      coachingByDay: {},
+      workoutsByDay: {},
+      activitiesByDay: { [DAY]: [twin, sourceOnly] },
+      matched: [],
+    };
+
+    // Act
+    const buckets = buildCalendarBuckets(args);
+
+    // Assert
+    expect([...buckets.executedRefIds].sort()).toEqual(
+      [sourceOnly.id, "w-7"].sort()
+    );
+  });
+
   it("should produce empty buckets for days with no items in either lane", () => {
     // Arrange
     const args = {
