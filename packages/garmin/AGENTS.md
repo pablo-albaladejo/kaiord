@@ -41,8 +41,10 @@ GCN (Garmin Connect Native) JSON format adapter for Kaiord. Provides bidirection
 
 - Pre-built singletons: `garminReader`, `garminWriter` (no logger needed for defaults).
 - Factory functions: `createGarminConnectReader(logger?)`, `createGarminConnectWriter(options?)` (inject custom logger or options).
-- Options type: `GarminWriterOptions = { logger?: Logger; paceZones?: PaceZoneTable; ftpWatts?: number }`.
+- Options type: `GarminWriterOptions = { logger?: Logger; paceZones?: PaceZoneTable; ftpWatts?: number; maxHeartRate?: number }`.
 - `percent_ftp` power targets, and power ranges with `basis: "percent_ftp"` (both bounds), are written as `power.zone` watts, `round(pct / 100 × ftpWatts)`. Without a positive `ftpWatts` the writer throws `MissingFtpError` (from `@kaiord/core`); it never assumes an FTP.
+- `percent_max` heart-rate targets are written as `heart.rate.zone` bpm, `round(pct / 100 × maxHeartRate)`, then banded like any single bpm value. Without a positive `maxHeartRate` the writer throws `MissingMaxHeartRateError` (from `@kaiord/core`); it never assumes a max HR.
+- Single values (pace, power, heart rate, cadence) are sent as tolerance bands, never zero-width: pace ±5 s/km, power ±5 % (≥ ±5 W), heart rate and cadence ±3, capped at the KRD schema bounds.
 - Callers may use `createDefaultProviders({ garmin: createGarminProviders() })` for integration.
 
 **GCN Format Characteristics:**

@@ -11,6 +11,7 @@ import {
   resolvePaceZone,
 } from "../mappers/target-pace.mapper";
 import { TargetTypeId } from "../schemas/common";
+import { resolvePercentMaxToBpm } from "./target-heart-rate.converter";
 import { resolvePercentFtpToWatts } from "./target-power.converter";
 import { mapRangeOrValue, mapZoneOrRange } from "./target-range.converter";
 import type {
@@ -37,7 +38,7 @@ export const convertKrdTargetToGarmin = (
     case "heart_rate":
       return mapZoneOrRange(
         buildTargetType(TargetTypeId.HEART_RATE_ZONE, "heart.rate.zone", 4),
-        target.value,
+        resolvePercentMaxToBpm(target.value, options?.maxHeartRate),
         false,
         buildHeartRateBand
       );

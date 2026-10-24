@@ -62,6 +62,7 @@ const mapSteps = (
   const targetOpts: TargetMapperOptions = {
     paceZones: options.paceZones,
     ftpWatts: options.ftpWatts,
+    maxHeartRate: options.maxHeartRate,
   };
   return workout.steps.map((step) =>
     isRepetitionBlock(step)

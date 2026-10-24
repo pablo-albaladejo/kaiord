@@ -40,6 +40,17 @@ export const TARGET_BAND = {
   SCHEMA_MAX_RPM: 300,
 } as const;
 
+// percent_max -> bpm resolution samples: round(pct * maxHr / 100), then the
+// ±3 bpm band. 85 % of 190 bpm = 161.5 -> 162 bpm -> 159..165 bpm.
+export const MAX_HR_RESOLUTION = {
+  MAX_HR_BPM: 190,
+  PCT: 85,
+  BPM: 162,
+  BAND_LOW_BPM: 159,
+  BAND_HIGH_BPM: 165,
+  NEGATIVE_MAX_HR_BPM: -190,
+} as const;
+
 // Decimal digits for float comparisons of converted speeds.
 export const FLOAT_DIGITS = 9;
 
