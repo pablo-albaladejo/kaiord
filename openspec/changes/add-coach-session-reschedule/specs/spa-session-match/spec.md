@@ -13,18 +13,19 @@ A `SessionMatch` SHALL be a domain aggregate that links exactly one `CoachingAct
   date: string,                     // YYYY-MM-DD — the session's effective date
   createdAt: string,                // ISO timestamp from injected clock
   updatedAt?: string,               // ISO timestamp of the last re-date (optional)
-  source: "manual" | "auto-suggestion" | "auto-conversion",
+  source: "manual" | "auto-suggestion" | "auto-coaching" | "auto-coaching-v10-migration",
   executedWorkoutIds: string[]      // executed recordings auto-linked to the slot
 }
 ```
 
-`date` SHALL be the session's effective date. It is set at creation from the coaching activity's date. Every writer that changes the matched workout's `date` (`moveSession`, `applyCoachDateMoves`) and the match-date heal SHALL re-date the match to the workout's `date` and stamp `updatedAt`. A row without `updatedAt` SHALL remain valid, and its merge clock SHALL be `createdAt`.
+`date` SHALL be the session's effective date. At creation it SHALL be set from the matched workout's `date` when the workout is coach-built (`coachDate` set), and from the coaching activity's `date` otherwise. Every writer that changes the matched workout's `date` (`moveSession`, `applyCoachDateMoves`) and the match-date heal SHALL re-date the match to the workout's `date` and stamp `updatedAt`, except for a **locked** match. A match is locked when its `executedWorkoutIds` is non-empty or its coaching activity is `completed`. A locked match SHALL keep its `date`. A row without `updatedAt` SHALL remain valid, and its merge clock SHALL be `createdAt`.
 
-The `source` field SHALL distinguish three provenance cases for analytics and bug triage:
+The `source` field SHALL distinguish four provenance cases for analytics and bug triage:
 
 - `"manual"`: the user explicitly invoked match via the dialog "Match to…" action.
 - `"auto-suggestion"`: the user accepted an auto-match suggestion produced by `autoMatchSessions`. Accepting a suggestion is recorded as `"auto-suggestion"`, NOT `"manual"`, so analytics can distinguish heuristic acceptance from explicit picker selection.
-- `"auto-conversion"`: the use case `convertCoachingActivity` produced a workout from a coaching activity and auto-linked them.
+- `"auto-coaching"`: a coaching convert use case (`convertCoachingActivity`, its manual and AI variants, or the coaching auto-heal) produced or reused a workout for a coaching activity and auto-linked them.
+- `"auto-coaching-v10-migration"`: the Dexie v10 migration backfilled the link from a legacy coach-built workout.
 
 The `(profileId, coachingActivityId)` pair MUST be unique — a single planned activity SHALL NOT be matched to more than one workout. The `(profileId, workoutId)` pair MUST be unique within a profile — a single workout SHALL NOT be matched to more than one planned activity in the same profile. Across profiles, the same `WorkoutRecord` MAY be matched to different planned activities (one per profile) because workouts are profile-agnostic per `spa-coaching-integration`; the `SessionMatch` aggregate is profile-scoped and these matches are independent. Deleting a profile cascades only to that profile's `sessionMatches` rows.
 
@@ -54,6 +55,18 @@ These uniqueness invariants are enforced by the `SessionMatchRepository` adapter
 
 - **WHEN** activity `A` belongs to profile `P1` and the call is `matchSession({ profileId: P2, coachingActivityId: A, workoutId: W })`
 - **THEN** the use case throws `CrossProfileMatchError`; no row is written
+
+#### Scenario: A coach-built workout's new match takes the workout's date
+
+- **GIVEN** an athlete-moved coach-built workout dated Thursday whose activity is dated Tuesday
+- **WHEN** a coaching convert or auto-heal creates its match
+- **THEN** the match SHALL be dated Thursday
+
+#### Scenario: A non-coach-built workout's new match takes the activity's date
+
+- **GIVEN** a workout without `coachDate` on Thursday and a plan on Tuesday
+- **WHEN** the user matches them manually
+- **THEN** the match SHALL be dated Tuesday
 
 #### Scenario: A legacy match without updatedAt parses
 
@@ -102,7 +115,7 @@ The Dexie and in-memory adapters SHALL behave identically.
 
 ### Requirement: Match dates are healed to their workout's date
 
-`healMatchDates({ profileId })` SHALL re-date every match M of the profile to its workout W's `date`, and stamp `updatedAt`, when W exists, `W.coachDate` is defined and `W.date !== M.date`. Each write SHALL re-read inside its own transaction. It SHALL NOT touch a match whose workout has no `coachDate` (a manual cross-day match). It SHALL run once per app session per profile after the database opens, and after every cloud import completes. It SHALL report only a count, with no ids.
+`healMatchDates({ profileId })` SHALL re-date every match M of the profile to its workout W's `date`, and stamp `updatedAt`, when W exists, `W.coachDate` is defined, `W.date !== M.date` and M is not locked (an executed slot, or a `completed` activity). Each write SHALL re-read both W and M inside its own transaction and re-check these conditions on the fresh rows. It SHALL NOT touch a match whose workout has no `coachDate` (a manual cross-day match). It SHALL run once per app session per profile after the database opens, and after every cloud import completes. It SHALL report only a count, with no ids.
 
 #### Scenario: Stale coach-built match is healed
 
@@ -115,6 +128,18 @@ The Dexie and in-memory adapters SHALL behave identically.
 - **GIVEN** a workout without `coachDate` on Thursday, manually matched to a Tuesday plan with the match dated Tuesday
 - **WHEN** the heal runs
 - **THEN** the match SHALL stay dated Tuesday
+
+#### Scenario: Locked match is not healed
+
+- **GIVEN** a coach-built workout on Thursday whose match is dated Tuesday and has an executed recording, or whose activity is `completed`
+- **WHEN** the heal runs
+- **THEN** the match SHALL stay dated Tuesday, and the recording SHALL NOT appear as a solo card
+
+#### Scenario: A move between the batch read and the write is kept
+
+- **GIVEN** the heal has listed a stale match M of workout W
+- **WHEN** a `moveSession(W)` commits before the heal's per-match transaction
+- **THEN** the heal SHALL re-read W and M, find them equal, and write nothing
 
 #### Scenario: Torn merge is healed after import
 

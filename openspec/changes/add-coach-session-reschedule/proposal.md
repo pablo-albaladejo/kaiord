@@ -38,7 +38,8 @@ that matter most.
     activity's `date` are left alone and form the trace.
 - **Matches carry an effective date and a clock.** `SessionMatch.date`
   becomes the session's effective date. It gains an optional `updatedAt`.
-  `SessionMatchRepository` gains `updateDate` and `listByActivityIds`.
+  `SessionMatchRepository` gains `updateDate`, `listByActivityIds` and
+  `listByProfile`.
 - **Coach follow re-dates the match too.** `applyCoachDateMoves` re-dates the
   match in the same transaction. When the coach replaces a day the athlete
   had chosen, the notice names that day and offers **Move back**.
@@ -48,6 +49,12 @@ that matter most.
   A one-shot pass re-dates those matches to the workout's date. It runs at
   startup and after every cloud import. It only touches coach-built workouts
   (`coachDate` set), so manual matches across days are left as they are.
+  Neither the heal nor coach follow re-dates a locked match: one with an
+  executed recording, or whose activity is completed.
+- **Stale-snapshot writers are fixed at the root.** Five writers `put` a copy
+  of the workout read before an `await` (batch processing, skip/unskip, the
+  AI and manual coach converts). Each now re-reads and writes in one
+  transaction, so a move made meanwhile survives.
 - **No ghost cards across weeks.** The week view also loads the matches of the
   week's coach activities, so a session moved into another week no longer
   leaves a solo plan card behind.
@@ -85,8 +92,8 @@ that matter most.
     `matchExecutedWorkouts`)
   - UI (calendar drag and buckets, coaching dialog, chip, Garmin state,
     notice)
-- **Ports**: `SessionMatchRepository.updateDate` and `listByActivityIds` are
-  specified before their adapters (design §3.2).
+- **Ports**: `SessionMatchRepository.updateDate`, `listByActivityIds` and
+  `listByProfile` are specified before their adapters (design §3.2).
 - **Persistence**: one optional field, `SessionMatch.updatedAt`. It needs no
   index change and no schema version bump, and old rows parse as they are.
   If a client that does not know the field yet syncs, it may drop

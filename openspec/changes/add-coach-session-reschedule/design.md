@@ -196,7 +196,7 @@ activities.
   match dated in another week is never loaded there, so it would never heal.
 - **Add `sessionMatches` to `SYNCED_TABLES`.** Unnecessary. The workout write
   in the same transaction already advances the change token.
-- **Keep the TrainingPeaks guard in this change.** Rejected (Decision 6b).
+- **Keep the TrainingPeaks guard in this change.** Rejected (Decision 7).
   `spa-trainingpeaks-extension` exists only in an unarchived change, which
   would block this change's archive.
 
@@ -224,6 +224,22 @@ activities.
   accepted last-writer-wins residual of `spa-persistence-port`.
 - A torn merge (workout from one device, match from another) resolves to the
   workout's date on the next heal.
+- **A locked session keeps its match date.** A match that has an executed
+  slot, or whose activity is `completed`, is never re-dated by coach follow or
+  by the heal (§3.1). After a coach move, its workout's `date` and `coachDate`
+  follow the coach as today, but the card stays on its recording's day. This
+  is consistent with Decision 6 (executed sessions are not movable). The
+  recording never re-appears as a solo card, and it is never linked to a
+  second match.
+- **A heal does not move the sync change token.** The heal writes only
+  `sessionMatches`, and that table is not in `SYNCED_TABLES`.
+  - The healed rows reach the cloud with the next push that some other change
+    triggers.
+  - This is accepted: every device runs the same deterministic heal from
+    `workout.date` at startup and after every import. So a device that pulls
+    an unhealed match heals it locally before rendering.
+  - Adding `sessionMatches` to `SYNCED_TABLES` would need an `updatedAt`
+    index and a schema bump, so it is not done here.
 - A client that does not know the new field yet may drop
   `SessionMatch.updatedAt` when it syncs. That is harmless: the `date` travels
   with the row, and the heal re-stamps it.
@@ -256,9 +272,24 @@ activities.
 - `SessionMatch.updatedAt?: ISO datetime` is optional, so legacy rows parse.
   `updateDate` stamps it. `recordClock` already prefers it over `createdAt`,
   so the merge code does not change.
-- **Invariant**: for every coach-built workout W (`coachDate` set) with a
-  match M, `M.date === W.date` holds after `moveSession(W)`, after an
-  `applyCoachDateMoves` write of W, and after a heal pass.
+- **Locked match**: M is locked when `M.executedWorkoutIds.length > 0` or its
+  coaching activity has `status === "completed"`.
+- **Invariant**: for every coach-built workout W (`coachDate` set) with an
+  **unlocked** match M, `M.date === W.date` holds after `moveSession(W)`,
+  after an `applyCoachDateMoves` write of W, and after a heal pass.
+- **Exception**: a locked M keeps its `date`. Coach follow and the heal never
+  re-date it, and `moveSession` refuses it (§3.3). The card stays on the day
+  of its recording.
+- **Creation**: a new match is dated from the matched **workout's** `date`
+  when the workout is coach-built (`coachDate` set), and from the activity's
+  `date` otherwise.
+  - Today every creator passes `activity.date`: `ensure-session-match.ts:49`
+    via its callers, such as `convert-coaching-activity-manual-helpers.ts:39-43`
+    and `persist-coaching-workout.ts:61-65`, and `match-session.ts:64`.
+  - For a freshly built workout the two dates are equal.
+  - They differ when an existing, athlete-moved workout is matched again. One
+    case is the manual convert of an existing record. Another is the
+    auto-heal in `use-coaching-auto-heal.ts:35`.
 - Manual matches of workouts that were not coach-built keep today's rule: the
   match is dated on the plan's day at creation, and only `moveSession`
   re-dates it.
@@ -331,16 +362,26 @@ Inside one `transaction`, in this order:
 After the commit:
 
 - Executed auto-link sees the new `match.date` on its next live-query run.
-- `rescheduleWorkout.ts` is deleted, and both callers move to `moveSession`.
+- `rescheduleWorkout.ts` is deleted, and both callers move to `moveSession`
+  **in PR-1**.
+- In the same PR, both callers catch `SessionNotMovableError` and show the
+  blocked toast (en and es). Otherwise the detail page's
+  `use-move-workout.ts:25-28`, which rethrows anything that is not a
+  `WorkoutNotFoundError`, would turn a refused move on `/workout/view/:id`
+  into an unhandled rejection between PR-1 and PR-2.
 - Projected records are never passed in. The UI gates them, as it does today.
 
 ### 3.4 Coach follow re-dates the match (application)
 
 - `moveOne` in `apply-coach-date-moves.ts` gains a `sessionMatch` dependency.
-- When `verdict.write.date !== workout.date`, `moveOne` calls
+- When `verdict.write.date !== workout.date`, `moveOne` finds the match with
+  `getByWorkoutId(workout.profileId, workout.id)`. If the match is
+  **unlocked** (§3.1), it calls
   `sessionMatch.updateDate(match.id, verdict.write.date, now)` in the same
-  transaction. It finds the match with
-  `getByWorkoutId(workout.profileId, workout.id)`.
+  transaction.
+- If the match is **locked**, `moveOne` still writes the workout's
+  `date`/`coachDate` as today, but leaves `match.date` untouched. The card
+  stays on its recording's day.
 - `persistSyncedWeek` passes `sessionMatch` through.
 - The §3.11 decision table is unchanged.
 - `CoachDateMoves` gains `overridden: { workoutId, athleteDate, coachDate }[]`.
@@ -356,10 +397,16 @@ After the commit:
 
 - It reads `listByProfile(profileId)` and their workouts with
   `workouts.getById`, batched.
-- For each match M whose workout W exists, has `W.coachDate !== undefined`,
-  and has `W.date !== M.date`, it calls `updateDate(M.id, W.date, now)`. Each
-  call re-reads inside its own transaction, so a concurrent move is never
-  overwritten with an older value.
+- The batched read only picks candidates. For each candidate, the heal opens
+  its own transaction and **re-reads both W and M**. Then it calls
+  `updateDate(M.id, W.date, now)` only if all of these hold on the fresh rows:
+  - W exists
+  - `W.coachDate !== undefined`
+  - `W.date !== M.date`
+  - M is unlocked (§3.1)
+- A concurrent move or link is therefore never overwritten with an older
+  value.
+- A locked match is never re-dated.
 - Manual matches of workouts that were not coach-built (`coachDate`
   undefined) are never touched.
 - It returns the number of matches it healed. It only reports this through
@@ -384,6 +431,12 @@ After the commit:
   are **not** rendered in this week; their card renders in the week of
   `match.date`.
 - The Daily view gets the same treatment through `buildTodayBuckets`.
+- **Read budget**: the extra `listByActivityIds` read sits inside the same
+  `useMatchedSessions` live query, and inside its `performance.measure`
+  (`use-matched-sessions-perf.ts`). The Playwright performance spec's 30 ms
+  slice of the CalendarPage FCP budget (design D16 of the original change)
+  therefore covers it. PR-1 extends that spec with a week whose activities
+  have matches in another week.
 - Example: a session moved from Sunday of week 1 to Monday of week 2.
   - Week 1 shows nothing on Sunday.
   - Week 2 shows the matched card on Monday.
@@ -473,27 +526,99 @@ After the commit:
 - An entry is hidden once it has been used. It is also hidden whenever the
   workout's current `date !== entry.coachDate`, because the athlete or the
   coach has already moved it again.
+- The notice state holds only the static `overridden` list. The current date
+  comes from a live read: `CoachMoveNotice` runs one `useLiveQuery` of
+  `workouts.bulkGet(overridden.map(o => o.workoutId))`. An entry whose
+  workout is gone is hidden as well. The notice's "used" set is kept in
+  memory per notice `seq`, like the existing dismissal.
 - If the workout is no longer movable, the button shows the block reason.
 - The notice never pushes.
 
-### 3.10 Static guard: `scripts/check-workout-date-writers.mjs`
+### 3.10 Static guard and stale-snapshot writers
 
-- A static scan over `packages/workout-spa-editor/src`, excluding tests. It
-  lists every call site of `workouts.put(`, `workouts.bulkPut(`,
-  `table("workouts").put|bulkPut(` and `db.workouts.put|bulkPut(`.
-- It checks them against an allowlist in the script. Each entry is
-  `{ file, reason }`, and the reason is one of:
-  - `date-writer`: `move-session.ts` and `apply-coach-date-moves.ts`, which
-    must call `sessionMatch.updateDate` in the same file. The script asserts
-    this.
-  - `date-preserving`: a writer that copies the re-read row's `date`, such as
-    the editor save, the placement stamp or the batch processor.
-  - `import-exempt`: snapshot import and backup restore, covered by the heal
-    (§3.5).
-- An unlisted call site fails with a message that names the file.
-- `scripts/check-workout-date-writers.test.mjs` sits next to it and covers
-  three cases: a fixture with an unlisted writer fails, a `date-writer`
-  without `updateDate` fails, and a clean tree passes.
+**Root fix for stale-snapshot writers (PR-1).** These writers `put` a copy of
+the workout that was read before an `await`, outside any transaction. A move,
+or a coach move, that lands during that window is silently reverted. The heal
+would then move the match back to the stale date.
+
+| Site                                                                       | Snapshot taken                                 |
+| -------------------------------------------------------------------------- | ---------------------------------------------- |
+| `components/pages/batch-process-one.ts:52`                                 | read before the AI call                        |
+| `components/pages/use-dialog-handlers.ts:64` (skip)                        | the `selectedWorkout` React state              |
+| `components/pages/use-dialog-handlers.ts:79` (unskip)                      | the `selectedWorkout` React state              |
+| `application/coaching/convert-coaching-activity-with-ai-idempotency.ts:77` | `existingWorkout`, read before the LLM `await` |
+| `application/coaching/convert-coaching-activity-manual-helpers.ts:29`      | `getById`, then `put`, with no transaction     |
+
+- Each site moves to `updateWorkoutRecord(persistence, id, change)`
+  (`application/save-workout-edits.ts:19-31`). That helper re-reads the row
+  and writes it inside one transaction.
+- The `change` callback merges only the fields that site owns:
+  - the state transition plus `krd` and `aiMeta`, or
+  - `state` and `krd` for the manual template.
+- The re-read `date`, `coachDate` and `updatedAt` stamp are kept.
+- A row that is gone is not resurrected.
+- Each site gets a test that interleaves a `moveSession` during the `await`,
+  or between the snapshot and the write, and asserts the moved date survives.
+
+**The guard: `scripts/check-workout-date-writers.mjs`**
+
+- It scans `packages/workout-spa-editor/src`, excluding tests, for every call
+  site of:
+  - `workouts.put(` and `workouts.bulkPut(`, including `deps.workouts`,
+    `persistence.workouts` and `db.workouts`
+  - `table("workouts").put|bulkPut(`
+- It classifies each site against a registry in the script. The registry is
+  named `WORKOUT_DATE_WRITERS`, an exported array of
+  `{ file, reason, note }` objects.
+  - `scripts/check-allowlists-empty.mjs` forbids only a non-empty
+    `const ALLOWLIST = new Set([...])` in `scripts/check-*.mjs`.
+  - This registry is not named `ALLOWLIST` and is not a `Set` of strings. It
+    is a permanent classification of legitimate writers, not a drained
+    allowlist, so it complies by name and by shape.
+- Each entry's reason is one of the following. The lists were verified on
+  `origin/main` @ `77f1236d9`.
+  - `date-writer`: `application/move-session.ts` and
+    `application/coaching/apply-coach-date-moves.ts`. The file must also call
+    `sessionMatch.updateDate`, and the script asserts this.
+  - `date-preserving`: re-read and write in one transaction, keeping the
+    fresh `date`:
+    - `application/save-workout-edits.ts`
+    - `hooks/garmin-place-record.ts`
+    - the five sites above once fixed (they then go through
+      `updateWorkoutRecord`)
+  - `creator`: writes a new row or restores a deleted one, so no match can be
+    stale:
+    - `application/coaching/convert-coaching-activity.ts`
+    - `convert-coaching-activity-manual.ts`
+    - `convert-coaching-activity-with-ai-helpers.ts`
+    - `persist-coaching-workout.ts`
+    - `application/library/schedule-template.ts`
+    - `application/restore-deleted-workout.ts`
+    - `components/organisms/ImportDropzoneOverlay/persist-imported-workout.ts`
+    - `components/organisms/ScratchEditorSurface/persist-scratch-workout.ts`
+    - `components/pages/CreateWorkout/use-save-and-push.ts`
+    - `components/pages/use-schedule-template.ts`
+    - `hooks/chat/chat-create-workout.ts`
+- **Fails** when:
+  - a call site is not in the registry (the message names the file and line)
+  - a `date-writer` lacks `updateDate`
+  - a registry entry matches no call site (a stale entry)
+- **Generic imports**:
+  - Snapshot import and the profile ops write through a generic
+    `table.bulkPut(rows)` loop (`adapters/dexie/dexie-snapshot-port.ts:93`,
+    `dexie-snapshot-profile-ops.ts:43`). Dexie migrations use
+    `tx.table(storeName)`.
+  - These call sites name no `workouts` literal, so the scan does not match
+    them. There is no `import-exempt` entry, which would only match nothing
+    and fail as stale.
+  - The heal covers them instead. It runs after every import (§3.5), and a
+    PR-1 unit test asserts the import path calls it.
+- `scripts/check-workout-date-writers.test.mjs` sits next to the script. Its
+  fixtures cover:
+  - an unlisted writer, which fails
+  - a `date-writer` without `updateDate`, which fails
+  - a stale registry entry, which fails
+  - a clean tree, which passes
 - It is wired as `lint:workout-date-writers` in `lint:parallel`, like
   `lint:session-match-id-shape`. The test runs in `pnpm test:scripts`.
 
@@ -573,7 +698,7 @@ After the commit:
 | AC-3  | `moveSession` writes `date`, `updatedAt`, `match.date` and `match.updatedAt` in one transaction. It takes `profileId` from the re-read workout and leaves `coachDate`, `state`, `modifiedAt`, `garminPushId` and `krd` untouched.                                                                            | PR-1 |
 | AC-4  | `moveSession` throws `SessionNotMovableError("executed")` for a session with an executed slot and for a recording held by a match. It throws `("completed")` for a completed activity and `WorkoutNotFoundError` for a missing workout. Each makes 0 writes. The same day returns `unchanged` with 0 writes. | PR-1 |
 | AC-5  | `applyCoachDateMoves` re-dates the match in every row of the §3.11 table that moves `date`. `overridden` lists the athlete's day, and its length equals `overriddenLocalMoves`. `reportMoves` keeps it.                                                                                                      | PR-1 |
-| AC-6  | `scripts/check-workout-date-writers.mjs` fails on an unlisted `workouts.put`/`bulkPut` call site and on a `date-writer` without `updateDate`. It passes on the tree. Its co-located test covers all three cases.                                                                                             | PR-1 |
+| AC-6  | `scripts/check-workout-date-writers.mjs` fails on an unlisted `workouts.put`/`bulkPut` call site, on a `date-writer` without `updateDate` and on a stale registry entry. It passes on the tree. Its co-located test covers all four cases.                                                                   | PR-1 |
 | AC-7  | `buildCalendarBuckets` puts a moved matched session only on its new day, with no solo duplicate. This holds after a coach move. When the session crosses weeks (Sun W1 → Mon W2), W1 shows no solo plan card. The Daily view behaves the same.                                                               | PR-1 |
 | AC-8  | Executed auto-link attaches a same-sport recording on the moved day to the moved match. It never attaches a recording already held by another match.                                                                                                                                                         | PR-1 |
 | AC-9  | Cloud merge: a moved workout and its match win against a stale remote copy, and the change token advances after a move. A torn merge (workout from A on Thu, match from B on Tue) ends with the match on Thu after the post-import heal.                                                                     | PR-1 |
@@ -591,6 +716,10 @@ After the commit:
 | AC-21 | Playwright E2E: drag on a matched card persists after a reload, and blocked cards are not draggable.                                                                                                                                                                                                         | PR-2 |
 | AC-22 | Playwright E2E: the flows of the PR-4 test plan pass on a fresh profile with the Train2Go and Garmin bridge stubs.                                                                                                                                                                                           | PR-4 |
 | AC-23 | `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts` pass.                                                                                                                                                                                                                                      | each |
+| AC-24 | A locked match (an executed slot, or a `completed` activity) is never re-dated. After a coach move, the workout's `date`/`coachDate` follow the coach while `match.date` stays. A heal pass leaves it as it is. The recording does not re-appear as a solo card and is not linked to a second match.         | PR-1 |
+| AC-25 | The five stale-snapshot writers of §3.10 re-read and write in one transaction. In each, a `moveSession` interleaved during the `await` keeps its date.                                                                                                                                                       | PR-1 |
+| AC-26 | On `/workout/view/:id`, a refused move (`SessionNotMovableError`) shows the blocked toast (en and es) and raises no unhandled rejection. This holds already after PR-1.                                                                                                                                      | PR-1 |
+| AC-27 | A new match for a coach-built workout is dated from the workout's `date`. A non-coach-built workout's match is dated from the activity's `date`.                                                                                                                                                             | PR-1 |
 
 ## Test plan (per PR)
 
@@ -627,6 +756,20 @@ adapter tests, plus `node --test`.
   match is left alone. The heal is wired at startup and after import (AC-10).
 - Mixed-version sync: a snapshot whose matches have no `updatedAt` imports,
   and the heal re-stamps any that are stale.
+- Locked matches (AC-24):
+  - `applyCoachDateMoves` with an executed match and with a `completed`
+    activity: the workout moves and the match stays
+  - the heal skips locked matches
+  - buckets keep the card on the recording's day, and the recording is not
+    shown as a solo card
+- The heal re-reads W and M: a move between the batch read and the write is
+  not reverted.
+- Stale-snapshot writers (AC-25): one interleaving test per site.
+- `use-move-workout`: a `SessionNotMovableError` shows the toast and is not
+  rethrown (AC-26).
+- Match creation date for coach-built and other workouts (AC-27).
+- The `useMatchedSessions` 30 ms performance spec with cross-week matches
+  (§3.6).
 
 **PR-2: entry points, chip, same-sport check, Move back.** RTL, plus one
 Playwright spec.

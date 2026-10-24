@@ -26,8 +26,13 @@
       different hash with a known different date (`moved`), and a different
       hash otherwise (`changed`).
 - [ ] 2.2 Wire the guard into `useTrainingPeaksPush` /
-      `TrainingPeaksPushButton`: - a blocked push sends 0 bridge requests - "Send a copy anyway" sits behind a confirmation whose copy says that
-      Kaiord then tracks only the latest copy - add the en and es copy
+      `TrainingPeaksPushButton`:
+
+  - A blocked push sends 0 bridge requests.
+  - "Send a copy anyway" sits behind a confirmation. Its copy says that
+    Kaiord then tracks only the latest copy.
+  - Add the en and es copy.
+
 - [ ] 2.3 Add a hook test: after the confirmation there is exactly 1 POST, and
       the row's `destinationDate` is the new day.
 - [ ] 2.4 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts`.

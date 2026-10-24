@@ -2,13 +2,19 @@
 
 ### Requirement: Coach date moves re-date the session match
 
-Whenever the coach-follow step (`applyCoachDateMoves`) writes a new `date` to a converted workout, it SHALL re-date that workout's `SessionMatch` to the same date, stamping `updatedAt`, in the same transaction as the workout write. Writes that only set `coachDate` SHALL NOT touch the match. The coach-follow decision table (coach wins when both moved it to different days) SHALL be unchanged. The result SHALL additionally list, for every overridden athlete move, `{ workoutId, athleteDate, coachDate }`, where `athleteDate` is the workout's date before the write; the list length SHALL equal `overriddenLocalMoves`.
+Whenever the coach-follow step (`applyCoachDateMoves`) writes a new `date` to a converted workout, it SHALL re-date that workout's `SessionMatch` to the same date, stamping `updatedAt`, in the same transaction as the workout write. A **locked** match (non-empty `executedWorkoutIds`, or a `completed` activity) SHALL keep its `date`: the workout's `date` and `coachDate` are still written, but the match is not. Writes that only set `coachDate` SHALL NOT touch the match. The coach-follow decision table (coach wins when both moved it to different days) SHALL be unchanged. The result SHALL additionally list, for every overridden athlete move, `{ workoutId, athleteDate, coachDate }`, where `athleteDate` is the workout's date before the write; the list length SHALL equal `overriddenLocalMoves`.
 
 #### Scenario: Coach move moves the matched card
 
 - **GIVEN** a converted, matched workout with `date` and `coachDate` 2026-10-20 and a match dated 2026-10-20
 - **WHEN** a sync fetches the activity on 2026-10-23
 - **THEN** the workout's `date` and the match's `date` SHALL both be 2026-10-23 and `coachMoves` SHALL be 1
+
+#### Scenario: Coach move leaves a locked match on its recording's day
+
+- **GIVEN** a converted, matched workout dated 2026-10-20 whose match has an executed recording, or whose activity is `completed`
+- **WHEN** a sync fetches the activity on 2026-10-23
+- **THEN** the workout's `date` and `coachDate` SHALL be 2026-10-23, the match SHALL stay dated 2026-10-20, and the recording SHALL NOT be shown as a solo card nor linked to another match
 
 #### Scenario: Overridden athlete move is reported with its day
 
@@ -24,7 +30,7 @@ Whenever the coach-follow step (`applyCoachDateMoves`) writes a new `date` to a 
 
 ### Requirement: Coach-move notice offers Move back
 
-When a sync's result lists overridden athlete moves, the notice state SHALL keep that list, and the coach-move notice SHALL name the athlete's replaced day for up to three of them. Beyond three it SHALL show the remaining count. For each named entry it SHALL offer "Move back to {athleteDate}". "Move back" SHALL be an ordinary athlete move: it SHALL run the same flow as any other move, including the same-sport confirmation, and then `moveSession`. It SHALL NOT pin the date. A later coach move to another day SHALL override it again and SHALL be reported again. An entry SHALL be hidden once it has been used, or whenever the workout's current `date` differs from that entry's `coachDate`. If the workout is no longer movable, the action SHALL be replaced by the block reason. The copy SHALL be static, in en and es. "Move back" SHALL NOT push to any destination.
+When a sync's result lists overridden athlete moves, the notice state SHALL keep that list, and the coach-move notice SHALL name the athlete's replaced day for up to three of them. Beyond three it SHALL show the remaining count. For each named entry it SHALL offer "Move back to {athleteDate}". "Move back" SHALL be an ordinary athlete move: it SHALL run the same flow as any other move, including the same-sport confirmation, and then `moveSession`. It SHALL NOT pin the date. A later coach move to another day SHALL override it again and SHALL be reported again. An entry SHALL be hidden once it has been used, or whenever the workout's current `date` differs from that entry's `coachDate`. The current `date` SHALL come from a live read of the listed workouts, since the notice state is static; an entry whose workout no longer exists SHALL be hidden. If the workout is no longer movable, the action SHALL be replaced by the block reason. The copy SHALL be static, in en and es. "Move back" SHALL NOT push to any destination.
 
 #### Scenario: Move back restores the athlete's day
 

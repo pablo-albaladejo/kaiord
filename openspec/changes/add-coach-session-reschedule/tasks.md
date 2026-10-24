@@ -30,23 +30,44 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       `reschedule-workout.ts`. Port its tests, including
       `reschedule-workout.writers.test.ts`, to `move-session*.test.ts`. There
       is no chat-tool caller on `origin/main`.
+- [ ] 1.4b In the same PR, make both callers catch `SessionNotMovableError`
+      and show the blocked toast, in en and es. `use-move-workout.ts:25-28`
+      rethrows anything but `WorkoutNotFoundError`, so without this main
+      would raise an unhandled rejection between PR-1 and PR-2 (AC-26).
 - [ ] 1.5 Make `applyCoachDateMoves` re-date the match in the same
       transaction and return `CoachDateMoves.overridden`. Have
       `persistSyncedWeek` pass `sessionMatch`. Keep `overridden` in
       `reportMoves` (`contexts/coach-move-notice-state.ts:30-33`) and in the
-      `WeekNotice` type (AC-5).
+      `WeekNotice` type (AC-5). Leave a locked match's `date` untouched
+      (design §3.1), with tests for an executed match and for a `completed`
+      activity (AC-24).
 - [ ] 1.6 Add `healMatchDates({ profileId })` (design §3.5). Wire it once per
       session per profile after the database opens, and after every cloud
-      import (AC-9, AC-10).
+      import (AC-9, AC-10). Re-read W and M in each per-match transaction,
+      and skip locked matches (AC-24). Assert the snapshot import path calls
+      it.
 - [ ] 1.7 Make the week match source also call `listByActivityIds` for the
       week's coach activities. Add `crossWeekMatchedActivityIds` to
       `buildCalendarBuckets`, and route it through `buildTodayBuckets` (AC-7).
+      Keep the read inside the `useMatchedSessions` measure, and extend the
+      Playwright performance spec (30 ms budget) with cross-week matches.
 - [ ] 1.8 Build `matchExecutedWorkouts`'s `taken` set from all matches
       (design §3.7) (AC-8).
+- [ ] 1.8b Fix the five stale-snapshot writers of design §3.10
+      (`batch-process-one.ts:52`, `use-dialog-handlers.ts:64,79`,
+      `convert-coaching-activity-with-ai-idempotency.ts:77`,
+      `convert-coaching-activity-manual-helpers.ts:29`). Move each to
+      `updateWorkoutRecord`, merging only the fields it owns and keeping the
+      re-read `date`. Write a test per site that interleaves a `moveSession`
+      during the `await` (AC-25).
+- [ ] 1.8c Date a new match from the workout's `date` for coach-built
+      workouts, in `ensureSessionMatch` and `match-session.ts` (AC-27).
 - [ ] 1.9 Add `scripts/check-workout-date-writers.mjs` and its co-located
-      `check-workout-date-writers.test.mjs`. Give the allowlist a reason per
-      entry. Wire it as `lint:workout-date-writers` in `lint:parallel`
-      (AC-6).
+      `check-workout-date-writers.test.mjs`. The registry is
+      `WORKOUT_DATE_WRITERS`, an array of `{ file, reason, note }` with
+      reasons `date-writer`, `date-preserving` and `creator`, so
+      `check-allowlists-empty.mjs` does not apply. Fail on stale entries.
+      Wire it as `lint:workout-date-writers` in `lint:parallel` (AC-6).
 - [ ] 1.10 Add regression tests: buckets after an athlete move, a coach move
       and a cross-week move (AC-7); the auto-link (AC-8); merge, change token,
       torn merge and heal (AC-9); and mixed-version import with no
@@ -76,8 +97,10 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       `aria-label` (AC-17).
 - [ ] 2.7 Make `CoachMoveNotice` name the overridden athlete days, with
       **Move back** for each, up to 3. Hide an entry once used or once
-      `date !== entry.coachDate`. Provide en and es copy (AC-18).
-- [ ] 2.8 Add the blocked and not-found toasts, in en and es.
+      `date !== entry.coachDate`, read live with one `useLiveQuery` of
+      `workouts.bulkGet` (design §3.9). Provide en and es copy (AC-18).
+- [ ] 2.8 Reuse the blocked toast of 1.4b on the new entry points, and add
+      the not-found toast, in en and es.
 - [ ] 2.9 Add `e2e/coach-session-drag.spec.ts`: on a fresh profile with the
       Train2Go stub, drag a matched card and reload; an executed session must
       not be draggable (AC-21).

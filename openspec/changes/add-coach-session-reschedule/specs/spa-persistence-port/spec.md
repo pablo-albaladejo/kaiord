@@ -23,16 +23,44 @@ Every writer that changes a workout's `date` (`moveSession`, `applyCoachDateMove
 
 ### Requirement: Workout date writers are statically guarded
 
-`scripts/check-workout-date-writers.mjs` SHALL scan the SPA source, excluding tests, for every `workouts.put` and `workouts.bulkPut` call site, including calls made through `db.workouts` and `table("workouts")`. It SHALL fail unless each site is in its allowlist with a reason: `date-writer`, `date-preserving` or `import-exempt`. A `date-writer` file SHALL also call `sessionMatch.updateDate`, or the scan SHALL fail. Snapshot import and backup restore SHALL be `import-exempt`, because the heal covers them. A co-located `check-workout-date-writers.test.mjs` SHALL cover a failing and a passing fixture. The check SHALL run in `pnpm lint`, and its test SHALL run in `pnpm test:scripts`.
+`scripts/check-workout-date-writers.mjs` SHALL scan the SPA source, excluding tests, for every `workouts.put` and `workouts.bulkPut` call site, including calls made through `db.workouts` and `table("workouts")`. It SHALL classify each site against a registry named `WORKOUT_DATE_WRITERS`: an array of `{ file, reason, note }` objects, not a `Set` named `ALLOWLIST`, so that `check-allowlists-empty.mjs` does not apply to it. Each reason SHALL be one of:
+
+- `date-writer`: the file changes a workout's `date`, and it SHALL also call `sessionMatch.updateDate`, or the scan SHALL fail.
+- `date-preserving`: the file re-reads the workout and writes it inside one transaction, keeping the fresh `date`.
+- `creator`: the file writes a new row or restores a deleted one.
+
+The check SHALL fail on an unlisted call site, and on a registry entry that matches no call site. Generic writers that name no `workouts` literal (snapshot import, profile ops and Dexie migrations, which write through `table(name).bulkPut`) are outside the scan; the match-date heal after every import covers them, so the registry SHALL NOT carry an entry for them. A co-located `check-workout-date-writers.test.mjs` SHALL cover an unlisted writer, a `date-writer` without `updateDate`, a stale entry and a passing tree. The check SHALL run in `pnpm lint`, and its test SHALL run in `pnpm test:scripts`.
 
 #### Scenario: Unlisted writer fails the lint
 
-- **GIVEN** a new source file that calls `workouts.put` and is not in the allowlist
+- **GIVEN** a new source file that calls `workouts.put` and is not in `WORKOUT_DATE_WRITERS`
 - **WHEN** `pnpm lint` runs
 - **THEN** the check SHALL fail and name the file
 
 #### Scenario: Date writer without match re-date fails
 
-- **GIVEN** an allowlisted `date-writer` file that no longer calls `sessionMatch.updateDate`
+- **GIVEN** a registered `date-writer` file that no longer calls `sessionMatch.updateDate`
 - **WHEN** the check runs
 - **THEN** it SHALL fail
+
+#### Scenario: Stale registry entry fails
+
+- **GIVEN** a `WORKOUT_DATE_WRITERS` entry whose file no longer has a `workouts.put` or `bulkPut` call site
+- **WHEN** the check runs
+- **THEN** it SHALL fail and name the entry
+
+### Requirement: Workout writers do not write stale snapshots
+
+A writer that updates an existing workout after an `await`, or from a copy held in UI state, SHALL re-read the row and write it inside one `PersistencePort.transaction`. It SHALL merge only the fields it owns and keep the re-read `date`, `coachDate` and `updatedAt`. It SHALL NOT recreate a row that no longer exists. This applies to batch processing, skip and unskip, the AI convert of an existing workout and the manual template convert.
+
+#### Scenario: A move during an AI convert survives
+
+- **GIVEN** an existing coach-built workout on Tuesday whose AI convert is awaiting the model
+- **WHEN** `moveSession` moves it to Thursday before the model returns
+- **THEN** after the convert commits, the workout SHALL be structured and dated Thursday
+
+#### Scenario: Skip from a stale dialog keeps the moved date
+
+- **GIVEN** the dialog holds a workout snapshot dated Tuesday and the workout is then moved to Thursday
+- **WHEN** the user skips it from that dialog
+- **THEN** the workout SHALL be skipped and dated Thursday
