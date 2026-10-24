@@ -10,7 +10,7 @@
  *                    contextual buttons.
  */
 
-import { formatHms } from "../../../lib/workout-review";
+import { formatHms } from "../../../lib/workout-review/format-duration";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { cardDurationSeconds } from "../WorkoutCard/workout-card-labels";
 import {
@@ -58,7 +58,10 @@ export function CoachingActivityDialogContent(
         activity={activity}
         duration={activity.duration ?? linkedDurationLabel(linked)}
       />
-      {linked ? <CoachingDialogZoneProfile workout={linked} /> : null}
+      <CoachingDialogZoneProfile
+        workout={linked}
+        description={activity.description}
+      />
       <DialogDescription activity={activity} load={descriptionLoad} />
       {matched
         ? renderMatchedBody(props, matched.workout, matched.executed)

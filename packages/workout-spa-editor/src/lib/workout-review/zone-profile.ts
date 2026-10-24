@@ -12,6 +12,13 @@ const ZONE_COUNT = 5;
 export type ZoneSegment = { zone: ZoneNumber; seconds: number };
 
 /**
+ * A segment that may carry no zone: an estimate from a coach's text keeps a
+ * timed span whose intensity it cannot read, so the chart spans the whole
+ * plan. Structured KRD profiles are always `ZoneSegment`.
+ */
+export type ProfileSegment = { zone: ZoneNumber | null; seconds: number };
+
+/**
  * The session's shape over time: consecutive steps that classify into the same
  * zone are merged into one segment, so a 4×(4 min Z4 / 2 min Z1) block reads as
  * eight alternating segments rather than eight identical bars.

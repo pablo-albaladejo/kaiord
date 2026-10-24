@@ -44,6 +44,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 - `LinkedWorkoutSection.tsx` / `.test.tsx` + `linked-workout-utils.ts` — section showing the linked workout.
 - `ExecutedWorkoutsSection.tsx` / `.test.tsx` — Train2Go three-slot executed-activity section (1-N, from #597 / #599).
 - `CoachingSyncButton.tsx` / `.test.tsx` + `coaching-sync-button-tooltip.ts` — manual scrape trigger.
+- `coaching-dialog-zone-profile.tsx` / `.test.tsx` — the dialog's intensity profile: the linked workout's structured KRD wins; otherwise `use-coach-text-estimate.ts` estimates it from the coach's text (`application/coaching/estimate-zone-profile`). `coaching-dialog-zone-chart.tsx` draws either, captioning an estimate; `zone-profile-copy.ts`, `zone-profile-axis.ts` / `.test.ts` and `zone-profile-parts.tsx` hold its titles, aria label, minute axis and legend.
 
 ## For AI Agents
 

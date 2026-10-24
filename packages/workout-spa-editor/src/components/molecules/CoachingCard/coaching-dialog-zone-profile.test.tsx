@@ -18,6 +18,8 @@ import { CoachingDialogZoneProfile } from "./coaching-dialog-zone-profile";
 const REPEATS = 3;
 const INTERVAL_SECONDS = 60;
 const PROFILE_TESTID = "coaching-dialog-zone-profile";
+const CAPTION_TESTID = "coaching-dialog-zone-estimate-caption";
+const ZONED_TEXT = "12' Z1, 4x(3' Z4 + 2' Z1), 10' Z1";
 
 const makeWorkout = (krd: KRD | null): WorkoutRecord =>
   ({
@@ -139,4 +141,81 @@ describe("CoachingDialogZoneProfile", () => {
       screen.getByRole("list", { name: "Training zones" })
     ).toHaveTextContent("Z1Z2Z3Z4Z5");
   });
+
+  it("should draw the structured profile, not the estimate, when the linked workout has one", () => {
+    // Arrange
+    const workout = makeWorkout(
+      structuredKrd([{ percentFtp: PCT_Z4, seconds: LONG_STEP_SECONDS }])
+    );
+
+    // Act
+    render(
+      <CoachingDialogZoneProfile workout={workout} description={ZONED_TEXT} />
+    );
+
+    // Assert
+    expect(bars().map((bar) => bar.getAttribute("data-zone"))).toEqual(["4"]);
+    expect(screen.queryByTestId(CAPTION_TESTID)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["no linked workout", null],
+    ["a linked workout without structure", makeWorkout(null)],
+  ])(
+    "should estimate the profile from the coach's text with %s",
+    (_case, workout) => {
+      // Arrange
+      const name = `Estimated intensity profile from coach text, 42m in 9 blocks: Z1 30m, Z4 12m`;
+
+      // Act
+      render(
+        <CoachingDialogZoneProfile workout={workout} description={ZONED_TEXT} />
+      );
+
+      // Assert
+      expect(screen.getByRole("img", { name })).toBeInTheDocument();
+      expect(screen.getByTestId(CAPTION_TESTID)).toHaveTextContent(
+        "Estimated from coach text"
+      );
+    }
+  );
+
+  it("should draw an unzoned span as a neutral bar titled no zone given", () => {
+    // Arrange
+    const text = "10' z1 + 30' contrastes";
+
+    // Act
+    render(<CoachingDialogZoneProfile workout={null} description={text} />);
+
+    // Assert
+    const [zoned, unzoned] = bars();
+    expect(unzoned?.getAttribute("data-zone")).toBe("none");
+    expect(unzoned?.className).toContain("bg-ink-muted");
+    expect(bars().map((bar) => bar.title)).toEqual([
+      "Z1 · 10m",
+      "No zone given · 30m",
+    ]);
+    expect(zoned?.getAttribute("data-zone")).toBe("1");
+    expect(
+      screen.getByRole("img", {
+        name: "Estimated intensity profile from coach text, 40m in 2 blocks: Z1 10m, No zone given 30m",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it.each(["10' z1 + 1K fuerte", "Easy spin with friends", ""])(
+    "should render no chart for the text %j",
+    (text) => {
+      // Arrange
+      const description = text;
+
+      // Act
+      const { container } = render(
+        <CoachingDialogZoneProfile workout={null} description={description} />
+      );
+
+      // Assert
+      expect(container).toBeEmptyDOMElement();
+    }
+  );
 });
