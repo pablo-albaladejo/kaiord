@@ -33,6 +33,7 @@ import en_settings from "../packages/workout-spa-editor/src/i18n/locales/en/sett
 import en_setup from "../packages/workout-spa-editor/src/i18n/locales/en/setup.json";
 import en_targets from "../packages/workout-spa-editor/src/i18n/locales/en/targets.json";
 import en_workout_detail from "../packages/workout-spa-editor/src/i18n/locales/en/workout-detail.json";
+import en_workout_review from "../packages/workout-spa-editor/src/i18n/locales/en/workout-review.json";
 import en_zones from "../packages/workout-spa-editor/src/i18n/locales/en/zones.json";
 import es_athlete from "../packages/workout-spa-editor/src/i18n/locales/es/athlete.json";
 import es_calendar from "../packages/workout-spa-editor/src/i18n/locales/es/calendar.json";
@@ -59,6 +60,7 @@ import es_settings from "../packages/workout-spa-editor/src/i18n/locales/es/sett
 import es_setup from "../packages/workout-spa-editor/src/i18n/locales/es/setup.json";
 import es_targets from "../packages/workout-spa-editor/src/i18n/locales/es/targets.json";
 import es_workout_detail from "../packages/workout-spa-editor/src/i18n/locales/es/workout-detail.json";
+import es_workout_review from "../packages/workout-spa-editor/src/i18n/locales/es/workout-review.json";
 import es_zones from "../packages/workout-spa-editor/src/i18n/locales/es/zones.json";
 
 const CATALOGS: Record<string, LocaleNamespaces> = {
@@ -88,6 +90,7 @@ const CATALOGS: Record<string, LocaleNamespaces> = {
     "setup": en_setup,
     "targets": en_targets,
     "workout-detail": en_workout_detail,
+    "workout-review": en_workout_review,
     "zones": en_zones,
   },
   "es": {
@@ -116,6 +119,7 @@ const CATALOGS: Record<string, LocaleNamespaces> = {
     "setup": es_setup,
     "targets": es_targets,
     "workout-detail": es_workout_detail,
+    "workout-review": es_workout_review,
     "zones": es_zones,
   },
 };
