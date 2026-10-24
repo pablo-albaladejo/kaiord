@@ -2,6 +2,10 @@ import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 
+import {
+  seedSession,
+  THU,
+} from "../../../application/session-move.test-fixtures";
 import { makeWorkoutRecord } from "../../../application/test-helpers";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import {
@@ -13,8 +17,7 @@ import { useMoveWorkout } from "./use-move-workout";
 
 const ID = "550e8400-e29b-41d4-a716-446655440088";
 
-const setup = () => {
-  const persistence = createInMemoryPersistence();
+const setup = (persistence = createInMemoryPersistence()) => {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <PersistenceProvider persistence={persistence}>
       <ToastContextProvider>{children}</ToastContextProvider>
@@ -57,6 +60,41 @@ describe("useMoveWorkout", () => {
         title: "This workout no longer exists.",
         variant: "error",
       }),
+    ]);
+  });
+
+  it("should show the blocked toast and not rethrow when the session is done", async () => {
+    // Arrange
+    const persistence = await seedSession({
+      match: { executedWorkoutIds: ["rec"] },
+    });
+    const { view } = setup(persistence);
+
+    // Act
+    await act(() => view.result.current.move("w", THU));
+
+    // Assert
+    expect(view.result.current.toasts).toEqual([
+      expect.objectContaining({
+        title: "Already done — it can't be moved.",
+        variant: "error",
+      }),
+    ]);
+  });
+
+  it("should name the coach when a completed session is refused", async () => {
+    // Arrange
+    const persistence = await seedSession({
+      activity: { status: "completed" },
+    });
+    const { view } = setup(persistence);
+
+    // Act
+    await act(() => view.result.current.move("w", THU));
+
+    // Assert
+    expect(view.result.current.toasts.map((t) => t.title)).toEqual([
+      "The coach marked it completed — it can't be moved.",
     ]);
   });
 });

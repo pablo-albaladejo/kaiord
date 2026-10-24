@@ -31,7 +31,9 @@
     "error": "Batch processing encountered an unexpected error."
   },
   "reschedule": {
-    "moveFailed": "Could not move workout"
+    "moveFailed": "Could not move workout",
+    "blockedExecuted": "Already done — it can't be moved.",
+    "blockedCompleted": "The coach marked it completed — it can't be moved."
   },
   "lifecycle": {
     "raw": "Raw",

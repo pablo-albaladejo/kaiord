@@ -31,7 +31,9 @@
     "error": "El procesamiento por lotes encontró un error inesperado."
   },
   "reschedule": {
-    "moveFailed": "No se pudo mover el entrenamiento"
+    "moveFailed": "No se pudo mover el entrenamiento",
+    "blockedExecuted": "Ya está hecho: no se puede mover.",
+    "blockedCompleted": "El entrenador lo marcó como completado: no se puede mover."
   },
   "lifecycle": {
     "raw": "Sin procesar",
