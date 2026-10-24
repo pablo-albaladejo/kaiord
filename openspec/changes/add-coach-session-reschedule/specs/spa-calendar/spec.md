@@ -19,7 +19,7 @@ The workout detail, the editor and their dialogs SHALL be the canonical surfaces
 
 ### Requirement: moveSession is the single athlete date writer
 
-`moveSession({ workoutId, targetDay })` SHALL be the only use case through which the athlete changes a workout's date. Inside one persistence transaction it SHALL re-read the workout, take the profile from the re-read workout's `profileId`, write `date = targetDay` and `updatedAt = now`, and, when the workout has a `SessionMatch`, re-date that match to `targetDay` with the same `updatedAt`. It SHALL leave `coachDate`, `state`, `modifiedAt`, `garminPushId` and `krd` untouched. It SHALL return `unchanged` and write nothing when `targetDay` equals the current date. It MUST throw `SessionNotMovableError` with reason `executed` when the workout's match has at least one executed workout id, or when the workout is itself an executed recording held in some match's `executedWorkoutIds`; and with reason `completed` when the matched coaching activity's status is `completed`. In each of these cases nothing SHALL be written. It MUST throw `WorkoutNotFoundError` when the workout no longer exists. It SHALL NOT call any bridge.
+`moveSession({ workoutId, targetDay })` SHALL be the only use case through which the athlete changes a workout's date. Inside one persistence transaction it SHALL re-read the workout, take the profile from the re-read workout's `profileId`, write `date = targetDay` and `updatedAt = now`, and, when the workout has a `SessionMatch`, re-date that match to `targetDay` with the same `updatedAt`. It SHALL leave `coachDate`, `state`, `modifiedAt`, `garminPushId` and `krd` untouched. It SHALL return `unchanged` and write nothing when `targetDay` equals the current date. This same-day check SHALL run before the executed and completed checks, on purpose, so that a same-day call for a done session returns `unchanged` and does not throw. Otherwise it MUST throw `SessionNotMovableError` with reason `executed` when the workout's match has at least one executed workout id, or when the workout is itself an executed recording held in some match's `executedWorkoutIds`; and with reason `completed` when the matched coaching activity's status is `completed`. In each of these cases nothing SHALL be written. It MUST throw `WorkoutNotFoundError` when the workout no longer exists. It SHALL NOT call any bridge.
 
 #### Scenario: Moving a matched session re-dates the match
 
@@ -43,6 +43,12 @@ The workout detail, the editor and their dialogs SHALL be the canonical surfaces
 
 - **WHEN** `moveSession` is called with the workout's current date
 - **THEN** it SHALL return `unchanged` and `updatedAt` SHALL NOT change
+
+#### Scenario: Same day for a done session returns unchanged
+
+- **GIVEN** a matched session whose match has an executed workout id
+- **WHEN** `moveSession` is called with the workout's current date
+- **THEN** it SHALL return `unchanged`, SHALL NOT throw `SessionNotMovableError`, and SHALL write nothing
 
 ### Requirement: A moved session renders on its new day
 

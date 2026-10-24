@@ -345,6 +345,9 @@ Inside one `transaction`, in this order:
 1. Re-read the workout. If it is missing, throw `WorkoutNotFoundError`. Let
    `profileId = workout.profileId`.
 2. If `targetDay === workout.date`, return `unchanged` and write nothing.
+   This check comes **before** the executed and completed guards, on purpose.
+   A no-op move of a done session is not an error, so dropping a done card
+   on its own day stays silent.
 3. Look up the match with `sessionMatch.getByWorkoutId(profileId, workoutId)`.
 4. If the match has `executedWorkoutIds.length > 0`, throw
    `SessionNotMovableError("executed")`.
@@ -854,6 +857,16 @@ profile (AC-22).
   move. Note it in the changelog.
 - **Clock skew**: last-writer-wins can still revert a move across devices.
   This is an accepted residual. A torn merge heals to the workout's date.
+- **Clock-skewed future `updatedAt` (known limitation, out of scope)**:
+  - The auto-push change token is the `max(updatedAt)` over the synced
+    tables. If a synced workout carries an `updatedAt` in the future, from a
+    device whose clock ran ahead, a move stamped with the real `now` may not
+    raise that maximum.
+  - The token then does not change, and auto-push can skip the move until a
+    later write passes the skewed stamp. A manual push still sends it.
+  - This is a property of the existing last-writer-wins token, not of this
+    change. A fix belongs to cloud sync, for example a per-write counter or
+    clamping future stamps on import.
 - **Silent divergence from the coach**: Train2Go is read-only (non-goal).
 - **Profile scan cost** for the heal and the recording check (B5). Profiled
   in PR-1.
