@@ -110,7 +110,7 @@ A power `range` is in watts unless it has `"basis": "percent_ftp"`.
 
 ### Explicit Ranges
 
-`mps`, `bpm`, `percent_max`, `watts` and `percent_ftp` take a single `value`, never `min`/`max`. A range of explicit values (`130-150 bpm`, `200-250W`, `88-93% FTP`) is always `unit: "range"` with `min` and `max`.
+`mps`, `bpm`, `percent_max`, `watts` and `percent_ftp` take a single `value`, never `min`/`max`. A range of explicit values (`130-150 bpm`, `200-250W`, `88-93% FTP`) is a `unit: "range"` with `min` and `max`, except a % max HR range (below).
 
 A heart-rate `range` is always bpm. A % max HR range is not a range: give a single `percent_max` value, the midpoint (`85-90% max HR` is `{ "unit": "percent_max", "value": 87.5 }`). Only `zone` (pace and power spans) and `range` take `min`/`max`.
 
@@ -133,7 +133,7 @@ A heart-rate `range` is always bpm. A % max HR range is not a range: give a sing
 - **Swimming**: `open` is fine unless the text gives an explicit target.
 - A bare zone reference ("Z1", "z2", "zona 3") is a pace zone for running and a power zone for cycling.
 - Emit zone NUMBERS, never zone values: write `{ "unit": "zone", "value": 1 }`, not the athlete's pace or watts for zone 1. The athlete's zones are resolved to real values after you answer.
-- Explicit values in the text (`a 5'15"/km`, `250W`, `88-93% FTP`) are kept as explicit values; a range of them is a `range` target.
+- Explicit values in the text (`a 5'15"/km`, `250W`, `88-93% FTP`) are kept as explicit values; a range of them is a `range` target (a % max HR range is its midpoint).
 - `open` is allowed only when the text gives no intensity at all AND no zone can be inferred from the step's role.
 
 ## Intensity Vocabulary → Zones
