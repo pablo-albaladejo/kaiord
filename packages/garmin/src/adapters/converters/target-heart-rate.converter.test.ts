@@ -49,6 +49,8 @@ describe("resolvePercentMaxToBpm", () => {
     Number.NaN,
     Number.POSITIVE_INFINITY,
     H.IMPLAUSIBLE_MAX_HR_BPM,
+    1,
+    H.IMPLAUSIBLY_LOW_MAX_HR_BPM,
   ])("should throw MissingMaxHeartRateError when the max HR is %s", (maxHr) => {
     // Arrange
     const value = { unit: "percent_max", value: H.PCT };
@@ -81,4 +83,30 @@ describe("resolvePercentMaxToBpm", () => {
     // Assert
     expect(act).toThrow(KrdValidationError);
   });
+
+  it("should accept a max HR at the 100 bpm plausibility floor", () => {
+    // Arrange
+    const value = { unit: "percent_max", value: H.PCT };
+
+    // Act
+    const result = resolvePercentMaxToBpm(value, H.MIN_PLAUSIBLE_MAX_HR_BPM);
+
+    // Assert
+    expect(result.value).toBeGreaterThan(0);
+  });
+
+  it.each([H.ZERO_PCT, H.TINY_PCT, -H.PCT])(
+    "should reject a percent_max of %s that resolves below 1 bpm instead of writing 0",
+    (pct) => {
+      // Arrange
+      const value = { unit: "percent_max", value: pct };
+
+      // Act
+      const act = () =>
+        resolvePercentMaxToBpm(value, H.MIN_PLAUSIBLE_MAX_HR_BPM);
+
+      // Assert
+      expect(act).toThrow(KrdValidationError);
+    }
+  );
 });

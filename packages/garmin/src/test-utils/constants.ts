@@ -63,6 +63,11 @@ export const MAX_HR_RESOLUTION = {
   // 110 % of 290 bpm = 319 bpm: a valid max HR, but over the limit once resolved.
   NEAR_LIMIT_MAX_HR_BPM: 290,
   OVER_HUNDRED_PCT: 110,
+  // Below the 100 bpm plausibility floor: 1 % of a 1 bpm max HR would round to 0.
+  IMPLAUSIBLY_LOW_MAX_HR_BPM: 99,
+  MIN_PLAUSIBLE_MAX_HR_BPM: 100,
+  TINY_PCT: 0.4,
+  ZERO_PCT: 0,
 } as const;
 
 // Decimal digits for float comparisons of converted speeds.
