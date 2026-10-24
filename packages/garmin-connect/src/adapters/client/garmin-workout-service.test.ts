@@ -46,7 +46,9 @@ const sampleKrd: KRD = {
 
 const FTP_W = 250;
 const SWEET_SPOT_PCT = 85;
-const SWEET_SPOT_W = 213;
+// 85 % of 250 W = 213 W; Garmin gets a single value as its ±5 % band.
+const SWEET_SPOT_BAND_HIGH_W = 224;
+const SWEET_SPOT_BAND_LOW_W = 202;
 
 type GcnPayload = {
   workoutSegments: [
@@ -140,8 +142,8 @@ describe("createGarminWorkoutService", () => {
     // Assert
     const payload = vi.mocked(httpClient.post).mock.calls[0][1] as GcnPayload;
     const step = payload.workoutSegments[0].workoutSteps[0];
-    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
-    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+    expect(step.targetValueOne).toBe(SWEET_SPOT_BAND_HIGH_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_BAND_LOW_W);
   });
 
   it("should reject with MissingFtpError before calling Garmin when no FTP is given", async () => {
