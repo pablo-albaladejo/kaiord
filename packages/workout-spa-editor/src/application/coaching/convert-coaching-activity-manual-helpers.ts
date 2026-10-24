@@ -7,6 +7,7 @@ import type {
   ConvertManualResult,
 } from "./convert-coaching-activity-manual-types";
 import { ensureSessionMatch } from "./ensure-session-match";
+import { sessionMatchDate } from "./session-match-date";
 
 export const manualMatchSource: SessionMatchSource = "auto-coaching";
 
@@ -41,7 +42,7 @@ export const handleExistingManualWorkout = async (
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId: existingWorkoutId,
-    date: activity.date,
+    date: existing ? sessionMatchDate(existing, activity) : activity.date,
     source: manualMatchSource,
     newId: deps.newMatchId,
     clock: deps.clock,

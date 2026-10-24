@@ -29,17 +29,19 @@ import type {
   ConvertWithAiResult,
 } from "./convert-coaching-activity-with-ai-types";
 import { ensureSessionMatch } from "./ensure-session-match";
+import { sessionMatchDate } from "./session-match-date";
 
 export const ensureMatchForExisting = async (
   deps: ConvertWithAiDeps,
   activity: CoachingActivityRecord,
-  workoutId: string
+  existing: WorkoutRecord
 ): Promise<ConvertWithAiResult> => {
+  const workoutId = existing.id;
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId,
-    date: activity.date,
+    date: sessionMatchDate(existing, activity),
     source: "auto-coaching",
     newId: deps.newMatchId,
     clock: deps.clock,
