@@ -5,7 +5,11 @@
  * yields a zero-width alert ("250-250 W") that fires whenever the athlete is
  * off that exact value. A single value is widened to a symmetric band with
  * integer bounds, capped at the KRD schema maxima so a re-imported band still
- * validates. Returns `[low, high]`; the caller applies the Garmin ordering.
+ * validates. The centre and the half-width are rounded separately, so the
+ * band stays symmetric around the rounded target (213.3 W -> 202..224 W).
+ * Returns `[low, high]`; the caller applies the Garmin ordering (power
+ * higher value first). Some authored GCN fixtures list power ascending: the
+ * reader accepts either order, so do not change the writer to match them.
  * Non-positive values return null and the caller keeps its passthrough.
  */
 
@@ -33,13 +37,12 @@ const integerBand = (
   value: number,
   halfWidth: number,
   max: number
-): Band | null =>
-  value > 0
-    ? [
-        clamp(Math.round(value - halfWidth), max),
-        clamp(Math.round(value + halfWidth), max),
-      ]
-    : null;
+): Band | null => {
+  if (!(value > 0)) return null;
+  const centre = Math.round(value);
+  const half = Math.round(halfWidth);
+  return [clamp(centre - half, max), clamp(centre + half, max)];
+};
 
 export const buildPowerBand = (watts: number): Band | null =>
   integerBand(

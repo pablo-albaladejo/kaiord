@@ -38,6 +38,23 @@ describe("convertKrdTargetToGarmin single-value bands", () => {
     expect(result).toEqual([B.SMALL_POWER_HIGH_W, B.SMALL_POWER_LOW_W]);
   });
 
+  it("should keep a fractional-watt band symmetric around its rounded centre", () => {
+    // Arrange
+    const target: Target = {
+      type: "power",
+      value: { unit: "watts", value: B.FRACTIONAL_POWER_W },
+    };
+
+    // Act
+    const result = bounds(target);
+
+    // Assert
+    expect(result).toEqual([
+      B.FRACTIONAL_POWER_HIGH_W,
+      B.FRACTIONAL_POWER_LOW_W,
+    ]);
+  });
+
   it("should cap the power band at the schema's 5000 W", () => {
     // Arrange
     const target: Target = {
