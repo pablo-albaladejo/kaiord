@@ -11,6 +11,7 @@ import {
   createConsoleLogger,
   createServiceApiError,
   MissingFtpError,
+  MissingMaxHeartRateError,
   toText,
 } from "@kaiord/core";
 import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
@@ -27,8 +28,21 @@ import { removeWorkout } from "./remove-workout";
 
 export type GarminWorkoutClient = WorkoutService;
 
-const isNamedMissingFtp = (error: unknown): boolean =>
-  error instanceof Error && error.name === "MissingFtpError";
+const MISSING_PROFILE_VALUE_ERRORS = new Set([
+  "MissingFtpError",
+  "MissingMaxHeartRateError",
+]);
+
+/**
+ * A target the push options cannot resolve (%FTP without an FTP, %max HR
+ * without a max HR): the caller's input is wrong, so it is rethrown as is
+ * rather than wrapped as a retryable service failure. The name check covers
+ * a second copy of @kaiord/core, where `instanceof` fails.
+ */
+const isMissingProfileValue = (error: unknown): boolean =>
+  error instanceof MissingFtpError ||
+  error instanceof MissingMaxHeartRateError ||
+  (error instanceof Error && MISSING_PROFILE_VALUE_ERRORS.has(error.name));
 
 const pushWorkout = async (
   krd: KRD,
@@ -55,10 +69,7 @@ const pushWorkout = async (
       url: garminWorkoutWebUrl(result.workoutId),
     };
   } catch (error) {
-    // Name check too: a second copy of @kaiord/core breaks `instanceof`.
-    if (error instanceof MissingFtpError || isNamedMissingFtp(error)) {
-      throw error;
-    }
+    if (isMissingProfileValue(error)) throw error;
     throw createServiceApiError("Failed to push workout", undefined, error);
   }
 };
