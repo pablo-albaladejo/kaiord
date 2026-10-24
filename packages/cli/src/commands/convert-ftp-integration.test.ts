@@ -8,8 +8,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ExitCode } from "../utils/exit-codes";
 
 const FTP_W = "250";
-const SWEET_SPOT_W = 213;
+// 85 % of 250 W = 213 W; Garmin gets a single value as its ±5 % band.
+const SWEET_SPOT_BAND_HIGH_W = 224;
+const SWEET_SPOT_BAND_LOW_W = 202;
 const ENDURANCE_W = 125;
+// 125 W ± 6.25 W, rounded.
+const ENDURANCE_BAND_HIGH_W = 131;
+const ENDURANCE_BAND_LOW_W = 119;
 const RAMP_TOP_W = 188;
 const OVER_TOP_W = 263;
 const OVER_BOTTOM_W = 200;
@@ -66,12 +71,12 @@ describe("convert --ftp (ZWO to GCN)", () => {
         gcn.workoutSegments[0].workoutSteps;
       expect(steady.targetType.workoutTargetTypeKey).toBe("power.zone");
       expect([steady.targetValueOne, steady.targetValueTwo]).toEqual([
-        SWEET_SPOT_W,
-        SWEET_SPOT_W,
+        SWEET_SPOT_BAND_HIGH_W,
+        SWEET_SPOT_BAND_LOW_W,
       ]);
       expect([easy.targetValueOne, easy.targetValueTwo]).toEqual([
-        ENDURANCE_W,
-        ENDURANCE_W,
+        ENDURANCE_BAND_HIGH_W,
+        ENDURANCE_BAND_LOW_W,
       ]);
       expect([ramp.targetValueOne, ramp.targetValueTwo]).toEqual([
         RAMP_TOP_W,

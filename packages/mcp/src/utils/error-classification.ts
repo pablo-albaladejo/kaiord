@@ -13,6 +13,7 @@ export type McpErrorType =
   | "service"
   | "environment"
   | "missing-ftp"
+  | "missing-max-hr"
   | "unknown";
 
 export type McpErrorClassification = {
@@ -34,6 +35,7 @@ const NAME_TO_TYPE: Record<string, McpErrorType> = {
   UnsupportedKrdTypeError: "unsupported-format",
   UnsupportedFormatError: "unsupported-format",
   MissingFtpError: "missing-ftp",
+  MissingMaxHeartRateError: "missing-max-hr",
 };
 
 const CODE_TO_TYPE: Record<string, McpErrorType> = {
@@ -50,6 +52,8 @@ const SUGGESTIONS: Partial<Record<McpErrorType, string>> = {
   service: "The Garmin Connect request failed; retry later.",
   "missing-ftp":
     "Pass the athlete's FTP in watts as the ftp parameter to resolve %FTP power targets.",
+  "missing-max-hr":
+    "Rewrite the %max HR heart-rate targets as bpm (max HR × percent / 100); these tools do not take a max heart rate yet.",
   environment:
     "Reinstall @kaiord/mcp — a bundled schema or dependency is missing.",
 };

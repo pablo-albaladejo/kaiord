@@ -1,12 +1,19 @@
 import type { Target } from "@kaiord/core";
 
 import {
+  buildCadenceBand,
+  buildHeartRateBand,
+  buildPowerBand,
+} from "../mappers/target-band.mapper";
+import {
   buildPaceBand,
   buildPaceTargetType,
   resolvePaceZone,
 } from "../mappers/target-pace.mapper";
 import { TargetTypeId } from "../schemas/common";
+import { resolvePercentMaxToBpm } from "./target-heart-rate.converter";
 import { resolvePercentFtpToWatts } from "./target-power.converter";
+import { mapRangeOrValue, mapZoneOrRange } from "./target-range.converter";
 import type {
   GarminTargetInfo,
   PaceZoneTable,
@@ -15,7 +22,6 @@ import type {
 import { buildTargetType } from "./target-types";
 
 type Val = { unit: string; value?: number; min?: number; max?: number };
-type TT = GarminTargetInfo["targetType"];
 
 export const convertKrdTargetToGarmin = (
   target: Target,
@@ -26,13 +32,15 @@ export const convertKrdTargetToGarmin = (
       return mapZoneOrRange(
         buildTargetType(TargetTypeId.POWER_ZONE, "power.zone", 2),
         resolvePercentFtpToWatts(target.value, options?.ftpWatts),
-        true
+        true,
+        buildPowerBand
       );
     case "heart_rate":
       return mapZoneOrRange(
         buildTargetType(TargetTypeId.HEART_RATE_ZONE, "heart.rate.zone", 4),
-        target.value,
-        false
+        resolvePercentMaxToBpm(target.value, options?.maxHeartRate),
+        false,
+        buildHeartRateBand
       );
     case "pace":
       return mapPace(target.value, options?.paceZones);
@@ -40,7 +48,8 @@ export const convertKrdTargetToGarmin = (
       return mapRangeOrValue(
         buildTargetType(TargetTypeId.CADENCE_ZONE, "cadence", 3),
         target.value,
-        false
+        false,
+        buildCadenceBand
       );
     case "open":
     default:
@@ -60,53 +69,4 @@ const mapPace = (value: Val, paceZones?: PaceZoneTable): GarminTargetInfo => {
       ? buildPaceBand(value.value)
       : null;
   return band ?? mapRangeOrValue(buildPaceTargetType(), value, true);
-};
-
-const mapZoneOrRange = (
-  tt: TT,
-  value: Val,
-  fasterFirst: boolean
-): GarminTargetInfo => {
-  if (value.unit === "zone") {
-    return {
-      targetType: tt,
-      targetValueOne: null,
-      targetValueTwo: null,
-      zoneNumber: value.value ?? null,
-    };
-  }
-  return mapRangeOrValue(tt, value, fasterFirst);
-};
-
-/**
- * Garmin wire convention for range targets: speed/power targets are ordered
- * fastest-bound-first (the higher numeric value in `targetValueOne`), while
- * heart-rate and cadence targets are ordered ascending (lower bound first).
- * `fasterFirst` selects between the two orderings — `true` for power and pace,
- * `false` for heart rate and cadence (see the call sites in
- * `convertKrdTargetToGarmin`).
- */
-const mapRangeOrValue = (
-  tt: TT,
-  value: Val,
-  fasterFirst: boolean
-): GarminTargetInfo => {
-  if (value.unit === "range") {
-    const min = value.min ?? null;
-    const max = value.max ?? null;
-    const [one, two] =
-      fasterFirst && min !== null && max !== null ? [max, min] : [min, max];
-    return {
-      targetType: tt,
-      targetValueOne: one,
-      targetValueTwo: two,
-      zoneNumber: null,
-    };
-  }
-  return {
-    targetType: tt,
-    targetValueOne: value.value ?? null,
-    targetValueTwo: value.value ?? null,
-    zoneNumber: null,
-  };
 };

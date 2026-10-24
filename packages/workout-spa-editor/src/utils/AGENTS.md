@@ -13,6 +13,7 @@ Cross-cutting utilities used by the UI tree. Format detection, import/export pip
 
 - `import-workout.ts` / `.test.ts` (+ `.test-fixtures.ts`), `import-workout-formats.ts`, `import-workout-errors.ts` — multi-format workout import (FIT / TCX / ZWO / KRD / GCN).
 - `export-workout.ts` / `.test.ts`, `export-workout-formats.ts` — multi-format export. Calls `stripIds` on the way out.
+- `write-gcn.ts` — the only Garmin (GCN) writer: resolves pace zones, %FTP and %max HR from the profile and refuses what it cannot resolve (guarded by `garmin-payload-call-sites.test.ts`).
 - `file-format-detector.ts` / `.test.ts`, `file-format-metadata.ts` — sniff input format by magic bytes / extension.
 - `save-workout.ts` / `.test.ts` + `save-workout.helpers.ts` — write a workout to Dexie via `PersistencePort.workouts`, after `stripIds`.
 

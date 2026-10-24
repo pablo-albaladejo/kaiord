@@ -22,7 +22,9 @@ vi.mock("../../../utils/export-workout", async (importOriginal) => ({
 }));
 
 const FTP_W = 250;
-const SWEET_SPOT_W = 213;
+// 85 % of 250 W = 213 W; Garmin gets a single value as its ±5 % band.
+const SWEET_SPOT_BAND_HIGH_W = 224;
+const SWEET_SPOT_BAND_LOW_W = 202;
 
 const PERCENT_FTP_RIDE = {
   version: "1.0",
@@ -84,8 +86,8 @@ describe("ConvertExport with %FTP power targets", () => {
     // Assert
     await vi.waitFor(() => expect(downloadWorkout).toHaveBeenCalled());
     expect(downloadedStep()).toMatchObject({
-      targetValueOne: SWEET_SPOT_W,
-      targetValueTwo: SWEET_SPOT_W,
+      targetValueOne: SWEET_SPOT_BAND_HIGH_W,
+      targetValueTwo: SWEET_SPOT_BAND_LOW_W,
     });
   });
 

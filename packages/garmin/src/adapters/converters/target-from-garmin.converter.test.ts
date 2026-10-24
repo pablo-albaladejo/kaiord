@@ -5,6 +5,7 @@ import {
   FLOAT_DIGITS,
   PACE_M_PER_S,
   POWER_W,
+  TARGET_BAND,
 } from "../../test-utils/constants";
 import { convertGarminTargetToKrd } from "./target-from-garmin.converter";
 import { convertKrdTargetToGarmin } from "./target-to-garmin.converter";
@@ -103,4 +104,75 @@ describe("single-value pace round-trip", () => {
     // Assert
     expect(targetSchema.safeParse(result.target).success).toBe(true);
   });
+});
+
+const roundTrip = (target: Target) => {
+  const garmin = convertKrdTargetToGarmin(target);
+  return convertGarminTargetToKrd(
+    garmin.targetType.workoutTargetTypeKey,
+    garmin.targetValueOne,
+    garmin.targetValueTwo,
+    garmin.zoneNumber
+  );
+};
+
+describe("single-value power, heart-rate and cadence round-trip", () => {
+  it.each([
+    {
+      type: "power",
+      unit: "watts",
+      value: TARGET_BAND.POWER_W,
+      min: TARGET_BAND.POWER_LOW_W,
+      max: TARGET_BAND.POWER_HIGH_W,
+    },
+    {
+      type: "heart_rate",
+      unit: "bpm",
+      value: TARGET_BAND.HR_BPM,
+      min: TARGET_BAND.HR_LOW_BPM,
+      max: TARGET_BAND.HR_HIGH_BPM,
+    },
+    {
+      type: "cadence",
+      unit: "rpm",
+      value: TARGET_BAND.CADENCE_RPM,
+      min: TARGET_BAND.CADENCE_LOW_RPM,
+      max: TARGET_BAND.CADENCE_HIGH_RPM,
+    },
+  ])(
+    "should read a single $unit value back as its band range (round-trip is not exact)",
+    ({ type, unit, value, min, max }) => {
+      // Arrange
+      const target = { type, value: { unit, value } } as Target;
+
+      // Act
+      const result = roundTrip(target);
+
+      // Assert
+      // KRD single -> Garmin band -> KRD range: the unit changes and the band
+      // widens, by design, so a single value never round-trips exactly.
+      expect(result.target).toEqual({
+        type,
+        value: { unit: "range", min, max },
+      });
+    }
+  );
+
+  it.each([
+    { type: "power", unit: "watts", value: TARGET_BAND.POWER_SCHEMA_MAX_W },
+    { type: "heart_rate", unit: "bpm", value: TARGET_BAND.SCHEMA_MAX_BPM },
+    { type: "cadence", unit: "rpm", value: TARGET_BAND.SCHEMA_MAX_RPM },
+  ])(
+    "should keep a re-imported $unit band within the schema at its max (round-trip)",
+    ({ type, unit, value }) => {
+      // Arrange
+      const target = { type, value: { unit, value } } as Target;
+
+      // Act
+      const result = roundTrip(target);
+
+      // Assert
+      expect(targetSchema.safeParse(result.target).success).toBe(true);
+    }
+  );
 });

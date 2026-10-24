@@ -1,6 +1,7 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
 import type { KRD, ValidationError } from "../../../types/krd";
+import { MaxHrUnavailableError } from "../../../types/max-hr-unavailable-error";
 import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import type { Profile } from "../../../types/profile";
 import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
@@ -13,6 +14,8 @@ const exportErrorMessage = (err: unknown, t: Translate): string => {
     return t(`save.paceZones.${err.cause.reason}`);
   if (err.cause instanceof FtpUnavailableError)
     return t(`save.ftp.${err.cause.reason}`);
+  if (err.cause instanceof MaxHrUnavailableError)
+    return t(`save.maxHr.${err.cause.reason}`);
   return err.message;
 };
 

@@ -20,6 +20,7 @@ export type PaceZoneTable = PaceZoneEntry[];
 export type TargetMapperOptions = {
   paceZones?: PaceZoneTable;
   ftpWatts?: number;
+  maxHeartRate?: number;
 };
 
 type TargetTypeKey = z.infer<typeof targetTypeKeySchema>;

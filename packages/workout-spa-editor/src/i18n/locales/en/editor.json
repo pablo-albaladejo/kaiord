@@ -92,6 +92,9 @@
     "ftp": {
       "missing-ftp": "This workout has %FTP power targets. Set your FTP in Athlete to export it as GCN.",
       "sport-without-power-zones": "This workout's sport has no power zones. Change its sport to cycling or running to export its %FTP power targets as GCN."
+    },
+    "maxHr": {
+      "missing-max-hr": "This workout has %max HR heart-rate targets. Set your max heart rate in Athlete to export it as GCN."
     }
   },
   "saveError": {

@@ -56,8 +56,9 @@ describe("createGarminWriter ftpWatts option", () => {
     const gcn = await toText(percentFtpWorkout, writer, silentLogger);
 
     // Assert
-    expect(firstStep(gcn).targetValueOne).toBe(F.SWEET_SPOT_W);
-    expect(firstStep(gcn).targetValueTwo).toBe(F.SWEET_SPOT_W);
+    // 85 % of 250 W = 213 W, sent as its ±5 % band, higher wattage first.
+    expect(firstStep(gcn).targetValueOne).toBe(F.SWEET_SPOT_BAND_HIGH_W);
+    expect(firstStep(gcn).targetValueTwo).toBe(F.SWEET_SPOT_BAND_LOW_W);
   });
 
   it("should reject percent_ftp power targets when no FTP is configured", async () => {
@@ -88,7 +89,8 @@ describe("createGarminWriter ftpWatts option", () => {
     const rangeGcn = await toText(range, writer, silentLogger);
 
     // Assert
-    expect(firstStep(wattsGcn).targetValueOne).toBe(F.STEADY_W);
+    expect(firstStep(wattsGcn).targetValueOne).toBe(F.STEADY_BAND_HIGH_W);
+    expect(firstStep(wattsGcn).targetValueTwo).toBe(F.STEADY_BAND_LOW_W);
     expect(firstStep(rangeGcn).targetValueOne).toBe(F.RANGE_HIGH_W);
     expect(firstStep(rangeGcn).targetValueTwo).toBe(F.RANGE_LOW_W);
   });

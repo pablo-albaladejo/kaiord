@@ -61,7 +61,7 @@ Format facts consumed by the CLI — codes, extensions, binary-ness, human descr
 
 ### Requirement: MCP tool errors SHALL be machine-branchable
 
-Every MCP tool failure response SHALL carry, in addition to the human-readable text, a machine-readable error classification (a stable `type` drawn from a shared vocabulary: file-not-found, unsupported-format, validation, tolerance, auth, service, environment, missing-ftp, unknown) and, where a remediation exists, a `suggestion`. Health-family tools SHALL share one response contract including the `skipped` count.
+Every MCP tool failure response SHALL carry, in addition to the human-readable text, a machine-readable error classification (a stable `type` drawn from a shared vocabulary: file-not-found, unsupported-format, validation, tolerance, auth, service, environment, missing-ftp, missing-max-hr, unknown) and, where a remediation exists, a `suggestion`. Health-family tools SHALL share one response contract including the `skipped` count.
 
 #### Scenario: An agent can branch on the failure type
 
@@ -74,6 +74,12 @@ Every MCP tool failure response SHALL carry, in addition to the human-readable t
 - **GIVEN** `kaiord_convert` is asked for GCN output from a workout with percent-of-FTP power targets and no `ftp`
 - **WHEN** the tool responds with `isError: true`
 - **THEN** the response carries the `missing-ftp` type and a suggestion to pass `ftp`
+
+#### Scenario: Missing max heart rate is reported as its own type
+
+- **GIVEN** `kaiord_convert` is asked for GCN output from a workout with percent-of-max-heart-rate targets and no max heart rate
+- **WHEN** the tool responds with `isError: true`
+- **THEN** the response carries the `missing-max-hr` type and a suggestion to rewrite those targets as bpm
 
 #### Scenario: Recovery status reports skipped inputs like its siblings
 

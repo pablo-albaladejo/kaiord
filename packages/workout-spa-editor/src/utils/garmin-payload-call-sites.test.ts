@@ -1,6 +1,6 @@
 /**
  * Every Garmin payload goes through the one GCN builder that resolves pace
- * zones (`export-workout-formats.ts`): a call site with its own writer — the
+ * zones, FTP and max HR (`write-gcn.ts`): a call site with its own writer — the
  * option-less default `garminWriter` — cannot resolve pace zone targets and
  * would fail every pace zone workout again.
  */
@@ -27,7 +27,7 @@ const filesMatching = (pattern: RegExp) =>
     .sort();
 
 describe("Garmin payload call sites", () => {
-  it("should build GCN with a Garmin writer in export-workout-formats only", () => {
+  it("should build GCN with a Garmin writer in write-gcn only", () => {
     // Arrange
     const writer = /\b(garminWriter|createGarminWriter)\b/;
 
@@ -35,7 +35,7 @@ describe("Garmin payload call sites", () => {
     const files = filesMatching(writer);
 
     // Assert
-    expect(files).toEqual(["utils/export-workout-formats.ts"]);
+    expect(files).toEqual(["utils/write-gcn.ts"]);
   });
 
   it("should export a persisted workout's GCN through exportRecordGcn only", () => {

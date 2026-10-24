@@ -37,7 +37,9 @@ vi.mock(
 
 const PROFILE = "00000000-0000-0000-0000-000000000000";
 const FTP_W = 250;
-const SWEET_SPOT_W = 213;
+// 85 % of 250 W = 213 W; Garmin gets a single value as its ±5 % band.
+const SWEET_SPOT_BAND_HIGH_W = 224;
+const SWEET_SPOT_BAND_LOW_W = 202;
 const OTHER_PROFILE = "00000000-0000-0000-0000-000000000009";
 /** 85 % of it is 255 W, so the other profile's FTP would show. */
 const OTHER_FTP_W = 300;
@@ -99,8 +101,8 @@ describe("placeRecordResult with %FTP power targets", () => {
 
     // Assert
     const step = firstStep(pushWorkout.mock.calls[0]?.[0]);
-    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
-    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+    expect(step.targetValueOne).toBe(SWEET_SPOT_BAND_HIGH_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_BAND_LOW_W);
   });
 
   it("should push the owner's watts when another profile with its own FTP is active", async () => {
@@ -122,8 +124,8 @@ describe("placeRecordResult with %FTP power targets", () => {
 
     // Assert
     const step = firstStep(pushWorkout.mock.calls[0]?.[0]);
-    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
-    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+    expect(step.targetValueOne).toBe(SWEET_SPOT_BAND_HIGH_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_BAND_LOW_W);
   });
 
   it.each([
