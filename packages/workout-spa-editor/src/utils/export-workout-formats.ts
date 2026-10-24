@@ -7,11 +7,10 @@
 import type { KRD } from "@kaiord/core";
 import { toBinary, toText } from "@kaiord/core";
 
-import { ftpForWorkout, refuseMissingFtp } from "../lib/athlete/workout-ftp";
 import type { Profile } from "../types/profile";
 import type { ExportProgressCallback } from "./export-workout";
 import { ExportError } from "./export-workout";
-import { garminPaceZonesFor } from "./garmin-pace-zones";
+import { writeGcn } from "./write-gcn";
 
 export const exportKrdFile = async (
   krd: KRD,
@@ -65,20 +64,6 @@ export const exportZwoFile = async (
   const buffer = new TextEncoder().encode(zwoString);
   onProgress?.(100);
   return buffer;
-};
-
-/**
- * The one GCN writer every Garmin payload goes through (single push, Send
- * week, chat, file export): pace zone and %FTP power targets resolved from
- * `profile`. Either one it cannot resolve is refused, never guessed.
- */
-const writeGcn = async (krd: KRD, profile: Profile | null | undefined) => {
-  const paceZones = garminPaceZonesFor(krd, profile);
-  const ftpWatts = ftpForWorkout(profile, krd);
-  const { createGarminWriter } = await import("@kaiord/garmin");
-  return refuseMissingFtp(krd, () =>
-    toText(krd, createGarminWriter({ paceZones, ftpWatts }))
-  );
 };
 
 export const exportGcnWorkout = async (

@@ -92,6 +92,9 @@
     "ftp": {
       "missing-ftp": "Este entreno tiene objetivos de potencia en %FTP. Configura tu FTP en Atleta para exportarlo como GCN.",
       "sport-without-power-zones": "El deporte de este entreno no tiene zonas de potencia. Cambia su deporte a ciclismo o carrera para exportar sus objetivos de potencia en %FTP como GCN."
+    },
+    "maxHr": {
+      "missing-max-hr": "Este entreno tiene objetivos de frecuencia cardiaca en % de FC máx. Configura tu FC máxima en Atleta para exportarlo como GCN."
     }
   },
   "saveError": {
