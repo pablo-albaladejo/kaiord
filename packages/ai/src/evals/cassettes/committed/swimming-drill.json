@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "swimming-drill",
+  "caseId": "swimming-drill",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:51:31.555Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "99e2002ec2e11c618df215e2a133ea24f78bc3ad4deaad38d4d1a55739b052fb",
+  "requestHash": "7a2ee073122304f739356db56d28133907574c8e9a147acfaeada62e30055b9f",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Natación 10x100m al umbral",
+      "sport": "swimming",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "distance",
+          "duration": {
+            "type": "distance",
+            "meters": 200
+          },
+          "targetType": "open",
+          "target": {
+            "type": "open"
+          },
+          "intensity": "warmup"
+        },
+        {
+          "repeatCount": 10,
+          "steps": [
+            {
+              "stepIndex": 0,
+              "durationType": "distance",
+              "duration": {
+                "type": "distance",
+                "meters": 100
+              },
+              "targetType": "pace",
+              "target": {
+                "type": "pace",
+                "value": {
+                  "unit": "zone",
+                  "value": 4
+                }
+              },
+              "intensity": "interval"
+            },
+            {
+              "stepIndex": 1,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 15
+              },
+              "targetType": "open",
+              "target": {
+                "type": "open"
+              },
+              "intensity": "recovery"
+            }
+          ]
+        },
+        {
+          "stepIndex": 1,
+          "durationType": "distance",
+          "duration": {
+            "type": "distance",
+            "meters": 200
+          },
+          "targetType": "open",
+          "target": {
+            "type": "open"
+          },
+          "intensity": "cooldown"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7142,
+      "outputTokens": 398
+    }
+  }
+}

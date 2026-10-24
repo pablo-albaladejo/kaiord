@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "generic-strength",
+  "caseId": "generic-strength",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:51:40.469Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "d09012bdbb920e630a6d35bc2cecbdc66ab562aa0a550ba384da81506af0449c",
+  "requestHash": "f0cc1ed1af648b634a646a9a409f5a826ddb876452503040a2a0cb7d14ea4851",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Entrenamiento de fuerza 45'",
+      "sport": "generic",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 2700
+          },
+          "targetType": "open",
+          "target": {
+            "type": "open"
+          },
+          "intensity": "active"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7112,
+      "outputTokens": 173
+    }
+  }
+}

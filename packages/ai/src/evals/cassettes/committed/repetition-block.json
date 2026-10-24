@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "id": "repetition-block",
+  "caseId": "repetition-block",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:52:51.535Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "e67269b107cd9d4de706f3d22fada153c97ff8077abc88effa088ea6952035cf",
+  "requestHash": "4a982516e61dc13b9e4187388522b94bd1065923f5d8f0583f34dc9fb0684a1f",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Calentamiento + series 3x(5' fuerte + 2' suave + 1' sprint)",
+      "sport": "cycling",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "repeatCount": 3,
+          "steps": [
+            {
+              "stepIndex": 0,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 300
+              },
+              "targetType": "power",
+              "target": {
+                "type": "power",
+                "value": {
+                  "unit": "zone",
+                  "value": 4
+                }
+              },
+              "intensity": "interval"
+            },
+            {
+              "stepIndex": 1,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 120
+              },
+              "targetType": "power",
+              "target": {
+                "type": "power",
+                "value": {
+                  "unit": "zone",
+                  "value": 1
+                }
+              },
+              "intensity": "recovery"
+            },
+            {
+              "stepIndex": 2,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 60
+              },
+              "targetType": "power",
+              "target": {
+                "type": "power",
+                "value": {
+                  "unit": "zone",
+                  "min": 4,
+                  "max": 5
+                }
+              },
+              "intensity": "interval"
+            }
+          ]
+        },
+        {
+          "stepIndex": 1,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "cooldown"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7154,
+      "outputTokens": 684
+    }
+  }
+}
