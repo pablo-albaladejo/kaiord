@@ -380,6 +380,21 @@ treat dark-mode fidelity as unknown rather than good.
   components whose primary story graded `match` and which were warning-free.
 - The build was produced on node v24.15.0 with the converter's own playwright
   (chromium 1243), not the repo's pinned 1.62.1.
+- **Token registration: never register Tailwind's internal variables.** Skip
+  every `--tw-*` declared under a utility selector (`:where(.space-y-*)`,
+  `.translate-*`, `.scale-*`, …), under `@property`, and in the `@supports`
+  fallback layer. They are Tailwind's per-utility plumbing, not design tokens.
+  They must NOT be stripped from `.design-sync-styles.css` either: the
+  utilities read them, and the `@property` rules give them their initial
+  values. Skip them when registering tokens instead.
+- **Five theme tokens are `/* @kind other */`**: `--animate-spin`,
+  `--animate-pulse`, `--aspect-video`, `--default-transition-duration` and
+  `--default-transition-timing-function` fit no token category. Tailwind
+  strips every comment from the compiled theme layer, so the marker cannot
+  live in `src/index.css`. `build-css.mjs` appends it to those declarations in
+  `.design-sync-styles.css`, and prints a warning if one is missing. After a
+  re-sync, `check_design_system` must report no token issues; a new
+  uncategorizable token goes into `KIND_OTHER` in `build-css.mjs`.
 
 ## Toolchain
 
