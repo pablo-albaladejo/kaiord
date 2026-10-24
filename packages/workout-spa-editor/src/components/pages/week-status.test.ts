@@ -14,9 +14,10 @@ const record = (state: WorkoutRecord["state"]): WorkoutRecord =>
   ({ state }) as WorkoutRecord;
 
 const executedMatch = (
-  executedWorkoutIds?: string[]
+  executedWorkoutIds?: string[],
+  workoutId = "planned"
 ): MatchedSessionWithMetadata =>
-  ({ match: { executedWorkoutIds } }) as MatchedSessionWithMetadata;
+  ({ match: { workoutId, executedWorkoutIds } }) as MatchedSessionWithMetadata;
 
 const buckets = (
   overrides: Partial<CalendarBuckets> = {}
@@ -24,6 +25,7 @@ const buckets = (
   matchedByDay: {},
   soloPlansByDay: {},
   soloActualsByDay: {},
+  executedRefIds: new Set(),
   ...overrides,
 });
 
@@ -52,6 +54,25 @@ describe("buildWeekStatus", () => {
 
     // Act
     const status = buildWeekStatus(buckets({ matchedByDay: matched }), 0);
+
+    // Assert
+    expect(status.doneAndMatched).toBe(1);
+  });
+
+  it("should count a match whose joined workout is itself the execution", () => {
+    // Arrange
+    // Auto-match / manual pick paired the plan with an executed twin record:
+    // workoutId is the execution and executedWorkoutIds stays empty.
+    const matched = {
+      [MONDAY]: [executedMatch([], "twin"), executedMatch([], "future")],
+    };
+    const overrides = {
+      matchedByDay: matched,
+      executedRefIds: new Set(["twin"]),
+    };
+
+    // Act
+    const status = buildWeekStatus(buckets(overrides), 0);
 
     // Assert
     expect(status.doneAndMatched).toBe(1);
