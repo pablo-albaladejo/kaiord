@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-24 | [`adopt-claude-cli-live-evals`](./2026-10-24-adopt-claude-cli-live-evals/) | Run live evals through the maintainer's local Claude subscription |
 | 2026-10-20 | [`agent-guardrails`](./2026-10-20-agent-guardrails/) | agent guardrails enforced by hooks |
 | 2026-10-17 | [`coverage-floors-ratchet`](./2026-10-17-coverage-floors-ratchet/) | coverage floors only ratchet up |
 | 2026-10-16 | [`no-global-smooth-scroll`](./2026-10-16-no-global-smooth-scroll/) | drop the global smooth scroll |
