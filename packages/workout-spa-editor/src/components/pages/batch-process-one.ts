@@ -5,19 +5,20 @@
  * calls the AI processor and persists results to Dexie.
  */
 
-import type { KaiordDatabase } from "../../adapters/dexie/dexie-database";
 import type { ProcessResult } from "../../application/ai-workout-processor";
 import { processWorkoutWithAi } from "../../application/ai-workout-processor";
 import type { ProcessOneFn } from "../../application/batch-processor";
+import { updateWorkoutRecord } from "../../application/save-workout-edits";
 import { transitionToStructured } from "../../application/workout-transitions";
 import { generateWorkoutKrd } from "../../lib/generate-workout";
+import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 
 export function createProcessOne(
   provider: LlmProviderConfig,
   modelId: string,
-  db: KaiordDatabase
+  persistence: Pick<PersistencePort, "workouts" | "transaction">
 ): ProcessOneFn {
   return async (
     workout: WorkoutRecord,
@@ -43,14 +44,14 @@ export function createProcessOne(
       allowRetry,
     });
 
-    if (result.ok) {
-      const updated = transitionToStructured(
-        workout,
-        result.krd,
-        result.aiMeta
+    // Written onto the row as stored after the AI call, so a move made
+    // meanwhile keeps its date; a row that left `raw` is left alone.
+    if (result.ok)
+      await updateWorkoutRecord(persistence, workout.id, (fresh) =>
+        fresh.state === "raw"
+          ? transitionToStructured(fresh, result.krd, result.aiMeta)
+          : undefined
       );
-      await db.table("workouts").put(updated);
-    }
 
     return result;
   };

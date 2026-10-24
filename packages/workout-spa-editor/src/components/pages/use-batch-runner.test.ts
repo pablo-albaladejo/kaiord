@@ -11,8 +11,8 @@ vi.mock("../../application/batch-processor", () => ({
   processBatch: (...args: unknown[]) => processBatchSpy(...args),
 }));
 
-vi.mock("../../adapters/dexie/dexie-database", () => ({
-  db: {},
+vi.mock("../../contexts/persistence-context", () => ({
+  usePersistence: () => ({}),
 }));
 
 vi.mock("./batch-process-one", () => ({

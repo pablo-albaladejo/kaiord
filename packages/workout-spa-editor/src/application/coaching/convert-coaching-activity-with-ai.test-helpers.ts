@@ -40,6 +40,9 @@ export const buildStubAnalytics = (): Analytics => ({
   pageView: vi.fn(),
   event: vi.fn(),
 });
+/** The stub repositories have no rollback: run the body as is. */
+export const passThroughTransaction = <T>(fn: () => Promise<T>): Promise<T> =>
+  fn();
 export const fakeKrd = (): KRD => buildCoachingTemplateKrd("cycling");
 /** Simulates the LLM collapsing an unrecognised hint to `generic`. */
 export const fakeGenericKrd = (): KRD => buildCoachingTemplateKrd("generic");

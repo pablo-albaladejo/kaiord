@@ -32,6 +32,7 @@ const convertDeps = (persistence: Persistence) => ({
   coaching: persistence.coaching,
   workouts: persistence.workouts,
   sessionMatches: persistence.sessionMatch,
+  transaction: persistence.transaction,
   analytics: buildStubAnalytics(),
   generateKrd: vi.fn(),
   newWorkoutId: () => "w-new",

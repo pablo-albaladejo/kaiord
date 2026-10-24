@@ -7,11 +7,12 @@
 import { useCallback, useState } from "react";
 import { useLocation } from "wouter";
 
-import { db } from "../../adapters/dexie/dexie-database";
+import { updateWorkoutRecord } from "../../application/save-workout-edits";
 import {
   transitionToRaw,
   transitionToSkipped,
 } from "../../application/workout-transitions";
+import { usePersistence } from "../../contexts/persistence-context";
 import { withOrigin } from "../../routing/with-origin";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { getWeekIdForDate } from "../../utils/week-utils";
@@ -39,6 +40,7 @@ export function useDialogHandlers(
 ) {
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const persistence = usePersistence();
 
   const handleProcess = useCallback(
     (id: string) => {
@@ -60,14 +62,16 @@ export function useDialogHandlers(
       if (!selectedWorkout || selectedWorkout.id !== id) return;
       setIsSubmitting(true);
       try {
-        const updated = transitionToSkipped(selectedWorkout);
-        await db.table("workouts").put(updated);
+        // Onto the row as stored: a move made since the dialog opened stays.
+        await updateWorkoutRecord(persistence, id, (fresh) =>
+          fresh.state === "raw" ? transitionToSkipped(fresh) : undefined
+        );
         onCloseWorkout();
       } finally {
         setIsSubmitting(false);
       }
     },
-    [selectedWorkout, onCloseWorkout]
+    [selectedWorkout, onCloseWorkout, persistence]
   );
 
   const handleUnskip = useCallback(
@@ -75,14 +79,15 @@ export function useDialogHandlers(
       if (!selectedWorkout || selectedWorkout.id !== id) return;
       setIsSubmitting(true);
       try {
-        const updated = transitionToRaw(selectedWorkout);
-        await db.table("workouts").put(updated);
+        await updateWorkoutRecord(persistence, id, (fresh) =>
+          fresh.state === "skipped" ? transitionToRaw(fresh) : undefined
+        );
         onCloseWorkout();
       } finally {
         setIsSubmitting(false);
       }
     },
-    [selectedWorkout, onCloseWorkout]
+    [selectedWorkout, onCloseWorkout, persistence]
   );
 
   return { handleProcess, handleSkip, handleUnskip, isSubmitting };

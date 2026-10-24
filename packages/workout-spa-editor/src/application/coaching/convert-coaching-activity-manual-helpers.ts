@@ -1,5 +1,6 @@
 import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { SessionMatchSource } from "../../types/session-match";
+import { updateWorkoutRecord } from "../save-workout-edits";
 import { buildCoachingTemplateKrd } from "./coaching-template";
 import type {
   CoachingActivityForConvert,
@@ -26,18 +27,22 @@ export const handleExistingManualWorkout = async (
   const resolved = resolveT2GSport(activity.sport);
   // For a rest day (or unknown sport) `resolved` is null: leave the
   // existing raw record untouched rather than seeding a KRD.
-  if (existing && !existing.krd && resolved) {
-    await deps.workouts.put({
-      ...existing,
-      state: "structured",
-      krd: buildCoachingTemplateKrd(
-        resolved.sport,
-        activity.title,
-        resolved.subSport
-      ),
-      updatedAt: deps.clock(),
-    });
-  }
+  // Written onto the row as stored, so a move made since the read stays.
+  if (existing && !existing.krd && resolved)
+    await updateWorkoutRecord(deps, existingWorkoutId, (fresh) =>
+      fresh.krd
+        ? undefined
+        : {
+            ...fresh,
+            state: "structured",
+            krd: buildCoachingTemplateKrd(
+              resolved.sport,
+              activity.title,
+              resolved.subSport
+            ),
+            updatedAt: deps.clock(),
+          }
+    );
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
     coachingActivityId: activity.id,

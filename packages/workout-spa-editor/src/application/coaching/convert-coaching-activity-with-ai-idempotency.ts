@@ -20,6 +20,7 @@ import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import { withFallbackName } from "../../utils/structured-workout";
+import { updateWorkoutRecord } from "../save-workout-edits";
 import { transitionToStructured } from "../workout-transitions";
 import { forceKrdSport } from "./coaching-krd-sport";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
@@ -70,17 +71,19 @@ export const processExistingRawInPlace = async (
     // known Train2Go sport is never persisted as the model's `generic` guess.
     const named = withFallbackName(generated.krd, activity.title);
     const krd = resolved ? forceKrdSport(named, resolved) : named;
-    const updated = transitionToStructured(existingWorkout, krd, {
-      provider: generated.aiMeta.provider,
-      model: generated.aiMeta.model,
-      promptVersion: generated.aiMeta.promptVersion,
-      processedAt: generated.aiMeta.processedAt,
-    });
-    await deps.workouts.put(updated);
+    const { provider, model, promptVersion, processedAt } = generated.aiMeta;
+    const aiMeta = { provider, model, promptVersion, processedAt };
+    // Onto the row as stored after the LLM call: a move made meanwhile keeps
+    // its date, and a row that left `raw` is left alone.
+    await updateWorkoutRecord(deps, existingWorkout.id, (fresh) =>
+      fresh.state === "raw"
+        ? transitionToStructured(fresh, krd, aiMeta)
+        : undefined
+    );
     deps.analytics.event("coaching.convert_with_ai.success", {
       created: false,
     });
-    return { ok: true, workoutId: updated.id, created: false };
+    return { ok: true, workoutId: existingWorkout.id, created: false };
   } catch (err) {
     return buildAiFailure(deps.analytics, err);
   }

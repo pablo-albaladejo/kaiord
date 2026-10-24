@@ -21,7 +21,7 @@ const REASON = {
     "resolves sport and hands the application already-KRD values. That reshapes the " +
     "coaching-conversion call chain across 4 files and is a behaviour-bearing redesign.",
 
-  // Bucket B — 17 files.
+  // Bucket B — 14 files.
   LIVE_QUERY:
     "Page-scoped hook colocated under components/ that opens a Dexie `useLiveQuery` " +
     "against the `db` singleton. This is the pattern CLAUDE.md documents ('Dexie + " +
@@ -98,13 +98,10 @@ export const BOUNDARIES_ALLOWLIST = Object.freeze(
       "src/components/pages/WorkoutDetail/use-workout-detail-record.ts",
       REASON.LIVE_QUERY,
     ],
-    ["src/components/pages/batch-process-one.ts", REASON.LIVE_QUERY],
     ["src/components/pages/calendar-hooks.ts", REASON.LIVE_QUERY],
-    ["src/components/pages/use-batch-runner.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-batch-state.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-calendar-live-queries.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-coaching-draft.ts", REASON.LIVE_QUERY],
-    ["src/components/pages/use-dialog-handlers.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-schedule-template.ts", REASON.LIVE_QUERY],
     ["src/components/pages/use-workout-record.ts", REASON.LIVE_QUERY],
 
@@ -146,7 +143,7 @@ export const ALLOWLIST_PACKAGE_ROOT = "packages/workout-spa-editor";
  * High-water mark. The allowlist may shrink below this, never grow past it.
  * Lower this number whenever entries are removed so the ratchet keeps tightening.
  */
-export const BOUNDARIES_ALLOWLIST_MAX = 27;
+export const BOUNDARIES_ALLOWLIST_MAX = 23;
 
 /** Repo-root-relative globs, for `ignores` in eslint.config.js. */
 export const boundariesAllowlistPaths = () =>

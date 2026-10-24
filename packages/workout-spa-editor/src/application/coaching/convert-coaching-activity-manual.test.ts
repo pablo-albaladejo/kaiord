@@ -11,6 +11,7 @@ import {
   buildStubAnalytics,
   buildStubCoachingRepo,
   buildStubWorkoutRepo,
+  passThroughTransaction,
   stubActivity,
 } from "./convert-coaching-activity-with-ai.test-helpers";
 
@@ -22,6 +23,7 @@ const buildDeps = (
   coaching: buildStubCoachingRepo([]),
   workouts: buildStubWorkoutRepo(),
   sessionMatches: createInMemorySessionMatchRepository(),
+  transaction: passThroughTransaction,
   analytics: buildStubAnalytics(),
   newWorkoutId: () => "w-new",
   newMatchId: () => "M-new",

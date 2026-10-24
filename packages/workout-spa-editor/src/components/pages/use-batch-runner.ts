@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 
-import { db } from "../../adapters/dexie/dexie-database";
 import type { BatchProgress } from "../../application/batch-processor";
 import { processBatch } from "../../application/batch-processor";
+import { usePersistence } from "../../contexts/persistence-context";
 import { useTranslate } from "../../i18n/use-translate";
 import { createProcessOne } from "./batch-process-one";
 import type { BatchPending } from "./use-batch-state";
@@ -12,6 +12,7 @@ export function useBatchRunner(
   onSuccess?: (count: number) => void
 ) {
   const t = useTranslate("calendar");
+  const persistence = usePersistence();
   const [progress, setProgress] = useState<BatchProgress | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -23,7 +24,11 @@ export function useBatchRunner(
       const controller = new AbortController();
       abortRef.current = controller;
       try {
-        const processOne = createProcessOne(batch.provider, batch.modelId, db);
+        const processOne = createProcessOne(
+          batch.provider,
+          batch.modelId,
+          persistence
+        );
         await processBatch(
           batch.workouts,
           processOne,
@@ -41,7 +46,7 @@ export function useBatchRunner(
         setIsProcessing(false);
       }
     },
-    [setMessage, onSuccess, t]
+    [setMessage, onSuccess, t, persistence]
   );
 
   const cancel = useCallback(() => {
