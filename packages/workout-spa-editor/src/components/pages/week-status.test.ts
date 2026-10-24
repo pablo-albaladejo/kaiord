@@ -13,21 +13,28 @@ const TWO = 2;
 const record = (state: WorkoutRecord["state"]): WorkoutRecord =>
   ({ state }) as WorkoutRecord;
 
+const executedMatch = (
+  executedWorkoutIds?: string[],
+  workoutId = "planned"
+): MatchedSessionWithMetadata =>
+  ({ match: { workoutId, executedWorkoutIds } }) as MatchedSessionWithMetadata;
+
 const buckets = (
   overrides: Partial<CalendarBuckets> = {}
 ): CalendarBuckets => ({
   matchedByDay: {},
   soloPlansByDay: {},
   soloActualsByDay: {},
+  executedRefIds: new Set(),
   ...overrides,
 });
 
 describe("buildWeekStatus", () => {
-  it("should count matched sessions across every day of the week", () => {
+  it("should count executed matched sessions across every day of the week", () => {
     // Arrange
     const matched = {
-      [MONDAY]: [{}, {}] as MatchedSessionWithMetadata[],
-      [TUESDAY]: [{}] as MatchedSessionWithMetadata[],
+      [MONDAY]: [executedMatch(["w1"]), executedMatch(["w2", "w3"])],
+      [TUESDAY]: [executedMatch(["w4"])],
     };
 
     // Act
@@ -35,6 +42,40 @@ describe("buildWeekStatus", () => {
 
     // Assert
     expect(status.doneAndMatched).toBe(TWO + 1);
+  });
+
+  it("should not count a matched session that has not been executed yet", () => {
+    // Arrange
+    // A converted coach plan for a future day: joined, but nothing recorded.
+    const matched = {
+      [MONDAY]: [executedMatch(["w1"]), executedMatch([])],
+      [TUESDAY]: [executedMatch(undefined)],
+    };
+
+    // Act
+    const status = buildWeekStatus(buckets({ matchedByDay: matched }), 0);
+
+    // Assert
+    expect(status.doneAndMatched).toBe(1);
+  });
+
+  it("should count a match whose joined workout is itself the execution", () => {
+    // Arrange
+    // Auto-match / manual pick paired the plan with an executed twin record:
+    // workoutId is the execution and executedWorkoutIds stays empty.
+    const matched = {
+      [MONDAY]: [executedMatch([], "twin"), executedMatch([], "future")],
+    };
+    const overrides = {
+      matchedByDay: matched,
+      executedRefIds: new Set(["twin"]),
+    };
+
+    // Act
+    const status = buildWeekStatus(buckets(overrides), 0);
+
+    // Assert
+    expect(status.doneAndMatched).toBe(1);
   });
 
   it("should count only the sessions that are ready and not yet pushed", () => {
