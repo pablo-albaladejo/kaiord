@@ -76,12 +76,12 @@ neither was ever implemented.
 Each failure carries the dimension that produced it, so a red result says which
 capability broke rather than only that something did.
 
-**The suite carries no pass threshold and never runs in CI.** It runs live
-only through `eval:live` on the maintainer's local subscription, and that
+**The live suite carries no pass threshold and never calls a model in CI.**
+It runs live only through `eval:live` on the maintainer's local subscription, and that
 runner never gates. The floor it used to declare could not fire, so it was
 removed rather than kept as decoration. What runs on every commit is the
-assertion logic and the fixtures' own structural invariants, neither of which
-needs a credential.
+assertion logic, the fixtures' own structural invariants and the keyless replay
+of the committed cassettes, none of which needs a credential.
 
 ### Adding New Benchmarks
 
@@ -109,7 +109,8 @@ The `zoneCheck` field is optional. When present, active steps with the specified
 
 ### Live evals (local only)
 
-This project holds no provider API key, and no eval runs in CI. The only live
+This project holds no provider API key, and no live eval runs in CI (only the
+keyless replay of committed cassettes does). The only live
 model access is the maintainer's local Claude Code subscription, driven
 headless (`claude -p`) behind a `LanguageModelV4` adapter, so the real agent
 runtime runs unchanged above it:
