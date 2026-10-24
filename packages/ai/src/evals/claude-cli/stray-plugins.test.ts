@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { MAX_PRINTED_NAME, strayPlugins } from "./stray-plugins";
+import { MAX_PRINTED_NAME } from "./printable-name";
+import { strayPlugins } from "./stray-plugins";
 
 const builtin = (name: string) => ({
   name,

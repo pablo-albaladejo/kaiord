@@ -349,6 +349,29 @@ describe("evaluateBenchmark", () => {
       expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);
     });
 
+    it("should zone-check an interval step as it does an active one", () => {
+      // Arrange
+      const benchmark: Benchmark = {
+        ...baseBenchmark,
+        zoneCheck: { targetType: "power", minValue: 300 },
+      };
+      const [warmup, main, cooldown] = createWorkout().steps;
+      const workout = createWorkout({
+        steps: [warmup!, { ...main!, intensity: "interval" }, cooldown!],
+      });
+
+      // Act
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(failedDimensions(result)).toEqual(["zone"]);
+      expect(result.errors.some((e) => e.includes("Zone low"))).toBe(true);
+    });
+
     it("should fail the zone check when no active steps match targetType", () => {
       // Arrange
       const benchmark: Benchmark = {
@@ -370,7 +393,7 @@ describe("evaluateBenchmark", () => {
       // Assert
       expect(result.pass).toBe(false);
       expect(result.errors).toContain(
-        "No active heart_rate step to zone-check"
+        "No active or interval heart_rate step to zone-check"
       );
     });
 

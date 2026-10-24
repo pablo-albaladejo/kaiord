@@ -33,8 +33,10 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 
 ### Subcomponents
 
-- `AiProcessingOverlay.tsx` / `.test.tsx` + `use-elapsed-seconds.ts` — progress overlay while AI runs: model, phase (polite live region, one announcement per phase), streamed step count, elapsed seconds, Cancel.
-- `ai-run-progress.ts` / `.test.ts` — in-flight run state (`AiRunProgress`), phase label, and begin/end/cancel bookkeeping on the abort-controller lock.
+- `AiProcessingOverlay.tsx` / `.test.tsx` + `AiProgressDetails.tsx` + `use-elapsed-seconds.ts` — progress overlay while AI runs: model, phase (polite live region, one announcement per phase), a hint while the model reasons, the last finished step, streamed step count, attempt, phase and total elapsed seconds, Cancel.
+- `ai-phase-label.ts` / `.test.ts` — the live-region phase label, including why a retry happened.
+- `ai-latest-step.ts` / `.test.ts` + `ai-latest-step-label.ts` — the last step the model finished, read defensively from the untyped partial output, and its label.
+- `ai-run-progress.ts` / `.test.ts` — in-flight run state (`AiRunProgress`, with `phaseStartedAt`) and begin/end/cancel bookkeeping on the abort-controller lock.
 - `AiErrorState.tsx` / `.test.tsx` — error pane for AI failures.
 - `MatchToPicker.tsx` / `.test.tsx` + `MatchToPickerItem.tsx` — pickable-workout picker used to link a workout to the activity.
 - `MatchedActions.tsx` / `.test.tsx` — action buttons in the matched body.

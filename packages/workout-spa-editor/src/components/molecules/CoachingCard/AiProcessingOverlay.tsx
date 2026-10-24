@@ -4,15 +4,15 @@
  * progress and a Cancel button that aborts the in-flight request.
  *
  * Only the phase label sits in the polite live region, so a screen
- * reader hears each phase once; the step count and the seconds counter
- * change far more often and are left out of it.
+ * reader hears each phase once; the step count, the last finished step
+ * and the seconds counters change far more often and are left out of it.
  */
 import { Loader2 } from "lucide-react";
 
-import { pluralKey } from "../../../i18n/plural-key";
 import { useTranslate } from "../../../i18n/use-translate";
-import { aiPhaseLabel, type AiRunProgress } from "./ai-run-progress";
-import { useElapsedSeconds } from "./use-elapsed-seconds";
+import { aiPhaseLabel } from "./ai-phase-label";
+import type { AiRunProgress } from "./ai-run-progress";
+import { AiProgressDetails } from "./AiProgressDetails";
 
 export type AiProcessingOverlayProps = {
   progress: AiRunProgress;
@@ -24,8 +24,6 @@ export function AiProcessingOverlay({
   onCancel,
 }: AiProcessingOverlayProps) {
   const t = useTranslate("coaching");
-  const seconds = useElapsedSeconds(progress.startedAt);
-  const items = progress.update?.items;
   return (
     <div
       data-testid="coaching-dialog-ai-processing"
@@ -41,16 +39,7 @@ export function AiProcessingOverlay({
           {aiPhaseLabel(t, progress)}
         </span>
       </div>
-      <p className="flex justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-        {items !== undefined && (
-          <span data-testid="coaching-dialog-ai-steps">
-            {t(pluralKey("aiProgress.steps", items), { count: items })}
-          </span>
-        )}
-        <span data-testid="coaching-dialog-ai-elapsed" className="tabular-nums">
-          {t("aiProgress.elapsed", { seconds })}
-        </span>
-      </p>
+      <AiProgressDetails progress={progress} />
       <button
         type="button"
         data-testid="coaching-dialog-ai-cancel"

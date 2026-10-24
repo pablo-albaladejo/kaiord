@@ -11,6 +11,7 @@ import { modelIdOf, providerOf, resolveSystemPrompt } from "./prelude";
 import { runGenerateLoop } from "./generate-mode";
 import { AiAgentError } from "./errors";
 import type { OnGenerateProgress } from "./progress";
+import { createPhaseClock } from "./phase-clock";
 
 export type GenerateAgentConfig = {
   model: LanguageModel;
@@ -46,6 +47,8 @@ export const runGenerateAgent = async <TOutput>(
     purpose: definition.purpose,
   };
 
+  const clock = config.onProgress && createPhaseClock(config.onProgress);
+
   try {
     const { output, usage } = await runGenerateLoop({
       model: config.model,
@@ -53,12 +56,19 @@ export const runGenerateAgent = async <TOutput>(
       input,
       definition,
       signal: config.signal,
-      onProgress: config.onProgress,
+      onProgress: clock?.observe,
       onAttemptError: (attempt, error) =>
         config.logger?.warn("Agent attempt failed", { attempt, error }),
     });
     const latencyMs = Date.now() - start;
-    telemetry.emit({ type: "run_finished", ...identity, latencyMs, usage });
+    const timings = clock?.stop();
+    telemetry.emit({
+      type: "run_finished",
+      ...identity,
+      latencyMs,
+      usage,
+      timings,
+    });
     return { output, usage, traceId };
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";
@@ -66,6 +76,7 @@ export const runGenerateAgent = async <TOutput>(
       type: "run_failed",
       ...identity,
       latencyMs: Date.now() - start,
+      timings: clock?.stop(),
       error: { name, retriable: error instanceof AiAgentError },
     });
     throw error;
