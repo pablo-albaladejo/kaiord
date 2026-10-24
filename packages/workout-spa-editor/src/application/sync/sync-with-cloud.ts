@@ -36,6 +36,8 @@ export type SyncWithCloudDeps = {
   now?: () => Date;
   /** Max optimistic-concurrency retries on a moved remote revision. */
   maxRetries?: number;
+  /** Runs once the merged snapshot is imported locally (the match-date heal). */
+  afterImport?: () => Promise<void>;
 };
 
 export type SyncWithCloudResult =
@@ -84,6 +86,7 @@ async function attempt(deps: SyncWithCloudDeps): Promise<SyncWithCloudResult> {
     exported: local.tables,
     now,
   });
+  await deps.afterImport?.();
   const revision = await cloud.push(pushed, remote?.headRevisionId ?? null);
   return { revision };
 }
@@ -91,9 +94,8 @@ async function attempt(deps: SyncWithCloudDeps): Promise<SyncWithCloudResult> {
 export async function syncWithCloud(
   deps: SyncWithCloudDeps
 ): Promise<SyncWithCloudResult> {
-  const maxRetries = deps.maxRetries ?? 3;
   let lastError: unknown;
-  for (let i = 0; i <= maxRetries; i += 1) {
+  for (let i = 0; i <= (deps.maxRetries ?? 3); i += 1) {
     try {
       return await attempt(deps);
     } catch (error) {

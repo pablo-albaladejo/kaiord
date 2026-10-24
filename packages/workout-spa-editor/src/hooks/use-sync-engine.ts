@@ -22,6 +22,7 @@ export type UseSyncEngineDeps = {
   cloud: CloudSyncPort;
   snapshotPort: SnapshotPort;
   deviceId: string;
+  afterImport?: () => Promise<void>;
 };
 
 export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
