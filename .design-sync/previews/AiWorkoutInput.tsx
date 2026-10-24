@@ -7,7 +7,6 @@ import { AiWorkoutInput } from "../../packages/workout-spa-editor/src/components
 import { PersistenceProvider } from "../../packages/workout-spa-editor/src/contexts/persistence-context";
 import type { useAiRuntimeStore as UseAiRuntimeStore } from "../../packages/workout-spa-editor/src/store/ai-runtime-store";
 import type { GenerationState } from "../../packages/workout-spa-editor/src/store/ai-store-types";
-import { createInMemoryPersistence } from "../../packages/workout-spa-editor/src/test-utils/in-memory-persistence";
 
 /**
  * `useAiProvidersLive` reads the browser IndexedDB and the generation status
@@ -27,10 +26,16 @@ const bundle = (
   }
 ).KaiordDesignSystem;
 
+// The model selector's handlers call usePersistence() unconditionally, and the
+// card harness wires no global PersistenceProvider. The card supplies the same
+// Dexie port it seeds through, so a model picked in the card lands where the
+// providers live.
+const persistence = createDexiePersistence(db);
+
 const seedProviders = async (withProvider: boolean) => {
   await db.table("aiProviders").clear();
   if (!withProvider) return;
-  await addProvider(createDexiePersistence(db), {
+  await addProvider(persistence, {
     type: "anthropic",
     apiKey: "sk-ant-demo-not-a-real-key",
     label: "Team Claude",
@@ -38,11 +43,6 @@ const seedProviders = async (withProvider: boolean) => {
 };
 
 const noop = () => {};
-
-// The model selector's handlers call usePersistence() unconditionally, and the
-// card harness wires no global PersistenceProvider, so the card supplies an
-// isolated in-memory port; providers are still read from the seeded Dexie.
-const persistence = createInMemoryPersistence();
 
 function SeededInput({
   withProvider,
