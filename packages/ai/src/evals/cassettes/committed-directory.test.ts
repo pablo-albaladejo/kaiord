@@ -45,7 +45,7 @@ const realCassette = async (caseId = "cycling-simple") => {
 };
 
 describe("loadCommittedFiles", () => {
-  it("should accept the committed directory as shipped: empty manifest, no real cassette", () => {
+  it("should accept the committed directory as shipped: one real cassette per benchmark", () => {
     // Arrange
     const files = readCassetteFiles(COMMITTED_DIR);
 
@@ -53,9 +53,10 @@ describe("loadCommittedFiles", () => {
     const { cassettes, faults } = loadCommittedFiles(files);
 
     // Assert
-    expect(files.map((f) => f.name)).toEqual(["manifest.json"]);
+    expect(files.map((f) => f.name)).toContain("manifest.json");
     expect(faults).toEqual([]);
-    expect(cassettes).toEqual([]);
+    expect(cassettes.length).toBe(files.length - 1);
+    expect(cassettes.length).toBeGreaterThan(0);
   });
 
   it("should ship only synthetic fixtures", () => {

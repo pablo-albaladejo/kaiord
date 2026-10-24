@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "cycling-endurance",
+  "caseId": "cycling-endurance",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:50:55.798Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "06c91a663d7fc49637d17a54177b5c1c7d02d5991c8a41d17966903b1b32e2e3",
+  "requestHash": "f30e76eb6c2aaea1289d4f321b9046f7731688aaa28f0c05a46123cebd590a5d",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Rodaje de resistencia 2h Z2",
+      "sport": "cycling",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 7200
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 2
+            }
+          },
+          "intensity": "active"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7119,
+      "outputTokens": 190
+    }
+  }
+}

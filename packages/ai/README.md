@@ -134,8 +134,9 @@ and lab-extraction suites need tool calling and document file parts, which
 case unmeasured and exit 0.
 
 `--record` with the official model (`claude-sonnet-5`) writes the committed
-cassettes (`src/evals/cassettes/committed/`) and their manifest entries, and
-stays refused until the served form is pinned. With any other `EVAL_MODEL` it
+cassettes (`src/evals/cassettes/committed/`) and their manifest entries; the
+served form is pinned to the bare `claude-sonnet-5`. `pnpm test` replays them
+keylessly and fails on any fault. With any other `EVAL_MODEL` it
 writes to `packages/ai/.eval-cassettes/`, which is gitignored and never listed
 in the manifest.
 

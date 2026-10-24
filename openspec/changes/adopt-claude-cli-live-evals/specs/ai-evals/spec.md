@@ -301,11 +301,10 @@ An empty green is not a pass: a replay pass that measures zero cases, or that
 finds any stale cassette, SHALL exit non-zero with a fault naming the reason
 (zero measured, or the stale cassettes by id). Tests of these failures and of
 the scorer sentinel SHALL assert the reason (zero measured, the stale ids, the
-failing case id and scorer), not only a non-zero exit. No replay lane over
-committed cassettes SHALL be part of `pnpm test` until the same change commits
-the first real cassette and its manifest entry; until then the replay runner
-runs only inside unit tests over in-memory and synthetic cassettes, so
-`pnpm test` is never red by construction.
+failing case id and scorer), not only a non-zero exit. The replay lane over
+the committed cassettes is part of `pnpm test` (keyless; it imports nothing from
+`evals/claude-cli/`), committed in the same change as the first real cassettes
+and their manifest entries, so it was never red by construction.
 
 #### Scenario: Provenance is recorded
 

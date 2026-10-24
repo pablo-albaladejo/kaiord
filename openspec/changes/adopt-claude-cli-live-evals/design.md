@@ -117,8 +117,8 @@ cassette must turn red rather than ask a reader to notice a label. PR 6 ships
 only `recorder: "synthetic"` fixtures, which are never measured; the measured
 path, the sentinel and staleness are tested with in-memory
 `recorder: "claude-cli"` cassettes whose failure reasons are asserted. The lane
-over committed cassettes joins `pnpm test` in PR 7a in the same commit as the
-first real cassette, so it is never red by construction in between.
+over committed cassettes joined `pnpm test` in the same commit as the first
+real cassettes, so it was never red by construction in between.
 
 The fixture hash covers only what the model sees: for the parser, the
 benchmark text, the sport line input and `athleteZones`, exactly what reaches
