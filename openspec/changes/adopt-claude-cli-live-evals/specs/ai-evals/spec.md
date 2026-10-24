@@ -399,16 +399,16 @@ is present whose id is not listed, when a cassette file's digest differs from
 its manifest entry, and when a listed cassette is stale. Each such failure
 SHALL name the affected ids and the only two ways to unblock it: **re-record
 the case locally through the live lane, or retire the id in the manifest**.
-Retiring an id SHALL
-be a removal from the manifest plus deletion of the cassette in the same diff,
-so it is visible and reviewed; deleting a cassette without retiring its id
-fails. A case still in the suite is uncovered without its cassette, so
-retiring it also removes its benchmark in that diff; the committed replay
-fails naming the uncovered case ids otherwise. Editing a cassette by hand,
-including rewriting its hash fields to the current values so an old response looks fresh, changes its file digest and
-fails naming the id; making such an edit pass requires changing the digest in
-the manifest too, which is itself a visible, reviewed line in the diff. The
-recorder is the only writer of a digest.
+Retiring an id SHALL be a removal from the manifest plus deletion of the
+cassette in the same diff, so it is visible and reviewed; deleting a cassette
+without retiring its id fails. Retiring a case that is still in the suite also
+removes its benchmark in that diff, because a suite case without a real
+cassette is uncovered and the committed replay fails naming its id.
+Editing a cassette by hand, including rewriting its hash fields to the current
+values so an old response looks fresh, changes its file digest and fails naming
+the id; making such an edit pass requires changing the digest in the manifest
+too, which is itself a visible, reviewed line in the diff. The recorder is the
+only writer of a digest.
 
 A stale real cassette SHALL fail CI on every pull request, including bot pull
 requests (for example a dependency bump that changes the canonical output
@@ -428,6 +428,18 @@ so the maintainer re-records locally within the quota (D1b) or retires the id.
 - **GIVEN** a change that deletes a committed cassette and removes its id from the manifest
 - **WHEN** the replay lane runs
 - **THEN** it SHALL pass that check, and the retirement SHALL appear as a manifest line removed in the diff
+
+#### Scenario: A suite case without a cassette fails as uncovered
+
+- **GIVEN** a suite case `parse-basic` and no real cassette recorded for it
+- **WHEN** the committed replay runs
+- **THEN** it SHALL fail naming `parse-basic` as uncovered, with record and retire paths
+
+#### Scenario: A second cassette of one case does not cover another
+
+- **GIVEN** suite cases `parse-basic` and `parse-zones`, and two real cassettes, both of `parse-basic`
+- **WHEN** the committed replay runs
+- **THEN** it SHALL fail naming `parse-zones` as uncovered
 
 #### Scenario: An unlisted cassette fails
 

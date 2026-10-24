@@ -61,8 +61,10 @@ export const loadCommittedFiles = (
  * A suite case with no real cassette is uncovered, whatever the manifest
  * says: retiring a case removes its benchmark with its entry and cassette.
  * Coverage is by case id, so two cassettes of one case never cover another.
+ * The synthetic filter is defence in depth: validation already rejects any
+ * non-claude-cli cassette in the committed directory.
  */
-const uncoveredFault = (
+const uncoveredFaults = (
   suite: ReplaySuite,
   cassettes: LoadedCassettes["cassettes"]
 ): Array<string> => {
@@ -86,6 +88,6 @@ export const replayCommitted = async (
   const { cassettes, faults } = loadCommittedFiles(files);
   return replayCassettes(suite, cassettes, [
     ...faults,
-    ...uncoveredFault(suite, cassettes),
+    ...uncoveredFaults(suite, cassettes),
   ]);
 };

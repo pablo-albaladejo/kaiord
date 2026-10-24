@@ -397,9 +397,11 @@ describe("replayCommitted", () => {
     // Assert
     expect(result.exitCode).toBe(1);
     expect(result.measured).toBe(0);
-    expect(result.faults).toContain(
-      "cassettes not matching their manifest digest: cycling-simple-1"
-    );
+    expect(result.faults).toEqual([
+      "cassettes not matching their manifest digest: cycling-simple-1",
+      "uncovered cases: cycling-simple — record them locally, or retire the case (its benchmark, manifest entry and cassette)",
+      "zero measured cases: a replay that measured nothing fails",
+    ]);
   });
 
   it("should replay a listed fresh cassette green", async () => {

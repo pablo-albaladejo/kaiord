@@ -143,7 +143,8 @@ an unblock nobody sees; with it, that edit fails unless the manifest digest
 changes too, which shows in review. Without it, the only way to unblock a stale
 cassette in CI would be a quota-bound local run or a silent delete. With it, a
 missing or unlisted id fails, and the two unblock paths are explicit: re-record
-locally, or retire the id in the manifest (a reviewed diff). Stale fails on
+locally, or retire the id in the manifest (a reviewed diff; a case still in the
+suite also loses its benchmark, or it fails as uncovered). Stale fails on
 every PR, bot bumps included: a dependency that changes the canonical schema
 really changes the request. The alternative, letting stale pass on bot PRs, was
 rejected because it is exactly the empty green this change exists to remove.
