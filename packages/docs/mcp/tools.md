@@ -53,6 +53,8 @@ Convert between FIT, TCX, ZWO, GCN, and KRD formats.
 
 GCN output stores power in watts, so a workout with % FTP power targets needs
 `ftp`; without it the tool fails with the `missing-ftp` error type.
+Heart-rate targets given as % max HR fail with the `missing-max-hr` type until
+the tools accept a max heart rate (#1554); rewrite them as bpm.
 
 ### kaiord_garmin_push
 
