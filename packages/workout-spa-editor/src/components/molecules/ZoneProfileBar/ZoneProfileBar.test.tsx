@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { ZoneSegment } from "../../../lib/workout-review";
+import type {
+  ProfileSegment,
+  ZoneSegment,
+} from "../../../lib/workout-review/zone-profile";
 import { ZoneProfileBar } from "./ZoneProfileBar";
 
 const SECONDS = 600;
@@ -9,6 +12,7 @@ const EASY_ZONE = 2;
 const HARD_ZONE = 4;
 const GRID_HEIGHT = 14;
 const LIST_HEIGHT = 20;
+const NO_ZONE_HEIGHT = "50%";
 
 const SEGMENTS: ZoneSegment[] = [
   { zone: EASY_ZONE, seconds: SECONDS },
@@ -101,5 +105,31 @@ describe("ZoneProfileBar", () => {
       "aria-hidden",
       "true"
     );
+  });
+
+  it("should draw a segment with no zone as a neutral mid-height bar", () => {
+    // Arrange
+    const segments: ProfileSegment[] = [
+      { zone: EASY_ZONE, seconds: SECONDS },
+      { zone: null, seconds: SECONDS },
+    ];
+
+    // Act
+    render(
+      <ZoneProfileBar
+        segments={segments}
+        segmentTitle={(segment) => String(segment.zone ?? "none")}
+      />
+    );
+
+    // Assert
+    const [, unknown] = Array.from(
+      screen.getByTestId("zone-profile-bar").children
+    ) as HTMLElement[];
+    expect(unknown?.getAttribute("data-zone")).toBe("none");
+    expect(unknown?.className).toContain("bg-ink-muted");
+    expect(unknown?.className).not.toMatch(/bg-zone-/);
+    expect(unknown?.style.height).toBe(NO_ZONE_HEIGHT);
+    expect(unknown?.title).toBe("none");
   });
 });
