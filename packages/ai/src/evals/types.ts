@@ -1,3 +1,5 @@
+import type { TargetUnit } from "@kaiord/core";
+
 import type { AthleteZoneTables } from "../types";
 
 export type ZoneCheck = {
@@ -5,9 +7,9 @@ export type ZoneCheck = {
   minValue?: number;
   maxValue?: number;
   /** The `unit` every checked target must carry (e.g. `range`). */
-  unit?: string;
+  unit?: TargetUnit;
   /** The `basis` every checked target must carry (e.g. `percent_ftp`). */
-  basis?: string;
+  basis?: Extract<TargetUnit, "percent_ftp">;
 };
 
 /**

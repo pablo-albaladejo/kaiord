@@ -201,7 +201,8 @@ describe("decideNextCall", () => {
     expect(decisions[1]).toMatchObject({
       action: "stop",
       kind: "harness-fault",
-      reason: "pinned field unifiedWindows.seven_day.utilization is missing",
+      reason:
+        "pinned field unifiedWindows.seven_day.utilization is missing in 1 of 2 rate_limit_event entries",
     });
   });
 });

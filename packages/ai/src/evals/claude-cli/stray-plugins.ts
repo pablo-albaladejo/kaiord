@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { printable } from "./printable-name";
+
 /**
  * Plugins compiled into the CLI itself: `--safe-mode` disables installed
  * plugins but not these, and no flag that keeps the subscription login turns
@@ -23,17 +25,7 @@ const isKnownBuiltin = (plugin: z.output<typeof pluginSchema>) =>
   plugin.source === `${plugin.name}@builtin` &&
   BUILTIN_PLUGINS.has(plugin.name);
 
-export const MAX_PRINTED_NAME = 80;
-const PLAIN_NAME = /^[\w@./-]+$/;
 const UNRECOGNIZED = "<unrecognized plugin entry>";
-
-/** Names go into the fault text, so only a short, plain one is printed. */
-export const printable = (name: unknown) =>
-  typeof name === "string" &&
-  name.length <= MAX_PRINTED_NAME &&
-  PLAIN_NAME.test(name)
-    ? name
-    : undefined;
 
 const strayName = (item: unknown): Array<string> => {
   const parsed = pluginSchema.safeParse(item);

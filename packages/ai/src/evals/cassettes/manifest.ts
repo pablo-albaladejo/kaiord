@@ -61,9 +61,13 @@ export const checkManifest = (
   );
   push(
     faults,
-    "unlisted cassettes: {ids} — only the recorder writes a manifest entry",
+    `unlisted cassettes: {ids} — only the recorder writes a manifest entry; ${UNBLOCK_PATHS}`,
     unlisted
   );
-  push(faults, "cassettes not matching their manifest digest: {ids}", tampered);
+  push(
+    faults,
+    `cassettes not matching their manifest digest: {ids} — ${UNBLOCK_PATHS}`,
+    tampered
+  );
   return { faults, rejected: new Set([...unlisted, ...tampered]) };
 };

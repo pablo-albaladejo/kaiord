@@ -43,7 +43,7 @@ export const committedServedFault = (
   form: ServedForm | null = OFFICIAL_SERVED_FORM
 ): string | undefined => {
   if (form === null) {
-    return "OFFICIAL_SERVED_FORM is not pinned (tasks.md 3.5): run the calibration step and pin it before recording a committed cassette";
+    return "OFFICIAL_SERVED_FORM is not pinned: pin it in cassettes/validate-cassette.ts from a calibration capture before recording a committed cassette";
   }
   return isOfficialServedModel(servedModelId, form)
     ? undefined

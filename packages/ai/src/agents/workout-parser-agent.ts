@@ -5,6 +5,7 @@ import { reindexSteps } from "../adapters/reindex-steps";
 import { resolveZoneTargets } from "../adapters/resolve-zone-targets";
 import { WORKOUT_PARSER_SYSTEM } from "../prompts/parse-workout-prompt";
 import type { AthleteZoneTables } from "../types";
+import { assertBasisOnPowerOnly } from "./assert-basis-on-power";
 import type { AgentDefinition } from "./definition-types";
 
 const MAX_NAME_LENGTH = 40;
@@ -33,10 +34,12 @@ export const createWorkoutParserAgent = (
   systemPrompt: { id: WORKOUT_PARSER_SYSTEM.id, vars: { sport: sportLine } },
   mode: "generate",
   outputSchema: aiWorkoutSchema,
-  validate: (raw) =>
-    normalizeName(
+  validate: (raw) => {
+    assertBasisOnPowerOnly(raw);
+    return normalizeName(
       reindexSteps(workoutSchema.parse(resolveZoneTargets(raw, zones)))
-    ),
+    );
+  },
   countItems: (partial) => {
     const steps = (partial as { steps?: unknown } | undefined)?.steps;
     return Array.isArray(steps) ? steps.length : undefined;

@@ -106,7 +106,7 @@ describe("loadCommittedFiles", () => {
 
     // Assert
     expect(faults).toEqual([
-      "unlisted cassettes: cycling-simple-1 — only the recorder writes a manifest entry",
+      `unlisted cassettes: cycling-simple-1 — only the recorder writes a manifest entry; ${UNBLOCK}`,
     ]);
   });
 
@@ -122,7 +122,7 @@ describe("loadCommittedFiles", () => {
 
     // Assert
     expect(faults).toEqual([
-      "cassettes not matching their manifest digest: cycling-simple-1",
+      `cassettes not matching their manifest digest: cycling-simple-1 — ${UNBLOCK}`,
     ]);
   });
 
@@ -398,7 +398,7 @@ describe("replayCommitted", () => {
     expect(result.exitCode).toBe(1);
     expect(result.measured).toBe(0);
     expect(result.faults).toEqual([
-      "cassettes not matching their manifest digest: cycling-simple-1",
+      `cassettes not matching their manifest digest: cycling-simple-1 — ${UNBLOCK}`,
       "uncovered cases: cycling-simple — record them locally, or retire the case (its benchmark, manifest entry and cassette)",
       "zero measured cases: a replay that measured nothing fails",
     ]);

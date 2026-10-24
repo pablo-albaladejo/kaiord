@@ -105,7 +105,7 @@ of the committed cassettes, none of which needs a credential.
 }
 ```
 
-The `zoneCheck` field is optional. When present, active steps with the specified target type are validated against the min/max values with a 5% tolerance.
+The `zoneCheck` field is optional. When present, active and interval steps with the specified target type are validated against the min/max values with a 5% tolerance.
 
 ### Live evals (local only)
 
