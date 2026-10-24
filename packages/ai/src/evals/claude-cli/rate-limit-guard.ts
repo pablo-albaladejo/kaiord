@@ -62,8 +62,14 @@ const utilizationOf = (infos: Array<Info>, field: WeeklyField) => {
     .filter((info) => matches(info, field.when))
     .map((info) => valueAt(info, field.path));
   // Every event the pin applies to must carry it: one without is no signal.
-  if (values.length === 0 || values.includes(undefined)) {
-    return fault(`pinned field ${name} is missing`);
+  if (values.length === 0) {
+    return fault(`pinned field ${name} is missing: no rate_limit_event matches`);
+  }
+  const lacking = values.filter((value) => value === undefined).length;
+  if (lacking > 0) {
+    return fault(
+      `pinned field ${name} is missing in ${lacking} of ${values.length} rate_limit_event`
+    );
   }
   const max = SCALE_MAX[field.scale];
   for (const value of values) {
