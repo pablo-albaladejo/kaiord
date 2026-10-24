@@ -402,8 +402,10 @@ the case locally through the live lane, or retire the id in the manifest**.
 Retiring an id SHALL
 be a removal from the manifest plus deletion of the cassette in the same diff,
 so it is visible and reviewed; deleting a cassette without retiring its id
-fails. Editing a cassette by hand, including rewriting its hash fields to the
-current values so an old response looks fresh, changes its file digest and
+fails. A case still in the suite is uncovered without its cassette, so
+retiring it also removes its benchmark in that diff; the committed replay
+fails naming the uncovered case ids otherwise. Editing a cassette by hand,
+including rewriting its hash fields to the current values so an old response looks fresh, changes its file digest and
 fails naming the id; making such an edit pass requires changing the digest in
 the manifest too, which is itself a visible, reviewed line in the diff. The
 recorder is the only writer of a digest.

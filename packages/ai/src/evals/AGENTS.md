@@ -26,7 +26,7 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 
 ## Cassettes and replay (`cassettes/`)
 
-Keyless replay of recorded model responses through `MockLanguageModelV4` and the real runtime. It imports nothing from `evals/claude-cli/` (pinned by `replay-imports.test.ts`), so it MAY gate. The replay lane over the committed cassettes is part of `pnpm test` (`committed-replay.test.ts`: `replayCommitted` over `committed/` must measure all 25 benchmarks with no fault); the 25 committed cassettes are the first official `--record` (claude-sonnet-5, CLI 2.1.310, prompt 1.3.0).
+Keyless replay of recorded model responses through `MockLanguageModelV4` and the real runtime. It imports nothing from `evals/claude-cli/` (pinned by `replay-imports.test.ts`), so it MAY gate. The replay lane over the committed cassettes is part of `pnpm test` (`committed-replay.test.ts`: `replayCommitted` over `committed/` must measure every benchmark with no fault; a case without a cassette is an `uncovered cases` fault); the 25 committed cassettes are the first official `--record` (claude-sonnet-5, CLI 2.1.310, prompt 1.3.0).
 
 - `cassette-schema.ts` — the strict allowlisted cassette schema; every provenance and envelope key is allowlisted and an unknown one is rejected and named by `validate-cassette.ts`. `response.structuredOutput` is the model's answer (any JSON), validated by the runtime on replay
 - `validate-cassette.ts` — `validateCassette` (schema only, for in-memory and fixture cassettes) and `validateCommittedCassette` (plus: recorder `claude-cli` only, requested `claude-sonnet-5`, served the pinned form of `claude-sonnet-5`: `"bare"`, so a dated snapshot `claude-sonnet-5-YYYYMMDD` is refused)
@@ -152,7 +152,7 @@ belongs on the keyless replay lane, derived from a measured A/A run.
 
 ### Working In This Directory
 
-- **Add a benchmark**: Edit `benchmarks.json`, follow the schema, run `pnpm --filter @kaiord/ai test` to validate
+- **Add a benchmark**: Edit `benchmarks.json`, follow the schema, run `pnpm --filter @kaiord/ai test` to validate. A change to the prompt, a benchmark's text/`expectedSport`/`athleteZones`, the output/wire schema, or a new benchmark needs a local `EVAL_MODEL=claude-sonnet-5 pnpm --filter @kaiord/ai eval:live -- --record` by the maintainer before merge (an agent never runs it); scorer-only changes (`minSteps`, `zoneCheck`) re-score keylessly.
 - **Modify assertions**: Update `assertions.ts` (e.g., change tolerance from 5% to 10%), re-run evals
 - **Customize report**: Edit `reporter.ts` formatting (markdown, JSON structure)
 - **Run locally**: the maintainer runs `pnpm --filter @kaiord/ai eval:live` (add `-- --repeat N`, `-- --record` or `-- --calibrate`). An agent never runs it: every call spends the maintainer's subscription quota

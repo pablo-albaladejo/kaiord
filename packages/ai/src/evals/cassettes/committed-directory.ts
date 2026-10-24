@@ -9,6 +9,9 @@ import { validateCommittedCassette } from "./validate-cassette";
 
 export const MANIFEST_FILE = "manifest.json";
 
+const UNCOVERED_PATHS =
+  "record them locally, or retire the case (its benchmark, manifest entry and cassette)";
+
 const readManifest = (
   file: CassetteFile | undefined
 ): { manifest: Manifest } | { fault: string } => {
@@ -55,6 +58,24 @@ export const loadCommittedFiles = (
 };
 
 /**
+ * A suite case with no real cassette is uncovered, whatever the manifest
+ * says: retiring a case removes its benchmark with its entry and cassette.
+ * Coverage is by case id, so two cassettes of one case never cover another.
+ */
+const uncoveredFault = (
+  suite: ReplaySuite,
+  cassettes: LoadedCassettes["cassettes"]
+): Array<string> => {
+  const covered = new Set(
+    cassettes.filter((c) => c.recorder !== "synthetic").map((c) => c.caseId)
+  );
+  const ids = suite.cases.map((c) => c.id).filter((id) => !covered.has(id));
+  return ids.length > 0
+    ? [`uncovered cases: ${ids.join(", ")} — ${UNCOVERED_PATHS}`]
+    : [];
+};
+
+/**
  * The one entry point for a replay over the committed directory: every load
  * fault reaches `faults` and the exit code, beside the replay's own.
  */
@@ -63,5 +84,8 @@ export const replayCommitted = async (
   files: ReadonlyArray<CassetteFile>
 ): Promise<ReplayResult> => {
   const { cassettes, faults } = loadCommittedFiles(files);
-  return replayCassettes(suite, cassettes, faults);
+  return replayCassettes(suite, cassettes, [
+    ...faults,
+    ...uncoveredFault(suite, cassettes),
+  ]);
 };
