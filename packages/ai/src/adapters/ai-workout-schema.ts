@@ -26,6 +26,8 @@ const targetValueSchema = z.object({
   value: z.number().optional(),
   min: z.number().optional(),
   max: z.number().optional(),
+  // Without it zod strips the field and a % FTP range reads back as watts.
+  basis: z.literal("percent_ftp").optional(),
 });
 
 const targetSchema = z.object({

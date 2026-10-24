@@ -154,6 +154,15 @@ const checkZones = (workout: Workout, benchmark: Benchmark): Array<string> => {
     const min = (value.min ?? value.value) as number | undefined;
     const max = (value.max ?? value.value) as number | undefined;
 
+    if (zc.unit !== undefined && value.unit !== zc.unit) {
+      errors.push(`Zone unit ${value.unit} is not the expected ${zc.unit}`);
+    }
+    if (zc.basis !== undefined && value.basis !== zc.basis) {
+      errors.push(
+        `Zone basis ${value.basis ?? "absent"} is not the expected ${zc.basis}`
+      );
+    }
+
     // Presence, not truthiness: a declared bound of 0 is a bound.
     if (
       zc.minValue !== undefined &&

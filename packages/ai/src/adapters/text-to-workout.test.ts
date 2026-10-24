@@ -90,6 +90,38 @@ describe("createTextToWorkout", () => {
     expect(mockGenerateText).toHaveBeenCalledOnce();
   });
 
+  it("should keep the percent_ftp basis of a power range in the KRD", async () => {
+    // Arrange
+    const raw = {
+      sport: "cycling",
+      steps: [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 900 },
+          targetType: "power",
+          target: {
+            type: "power",
+            value: { unit: "range", min: 88, max: 93, basis: "percent_ftp" },
+          },
+          intensity: "active",
+        },
+      ],
+    };
+    mockGenerateText.mockImplementationOnce((async (args: {
+      output: { schema: { parse: (v: unknown) => unknown } };
+    }) => ({ output: args.output.schema.parse(raw) })) as never);
+    const parse = createTextToWorkout({ model: mockModel });
+
+    // Act
+    const result = await parse("15' at 88-93% FTP");
+
+    // Assert
+    expect(result.steps[0]).toMatchObject({
+      target: { value: { unit: "range", basis: "percent_ftp" } },
+    });
+  });
+
   it("should pass sport hint to system prompt", async () => {
     // Arrange
     mockGenerateText.mockResolvedValueOnce({

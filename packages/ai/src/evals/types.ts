@@ -4,6 +4,10 @@ export type ZoneCheck = {
   targetType: string;
   minValue?: number;
   maxValue?: number;
+  /** The `unit` every checked target must carry (e.g. `range`). */
+  unit?: string;
+  /** The `basis` every checked target must carry (e.g. `percent_ftp`). */
+  basis?: string;
 };
 
 /**

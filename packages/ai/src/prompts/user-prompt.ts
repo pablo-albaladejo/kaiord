@@ -7,10 +7,11 @@
  *
  * `PROMPT_VERSION` is persisted on each AI-converted workout; 1.2.0 is the
  * first version whose generation carries the athlete's zones, their custom
- * instructions and the sport target rules.
+ * instructions and the sport target rules; 1.3.0 teaches the explicit
+ * heart-rate and power `range` forms.
  */
 
-export const PROMPT_VERSION = "1.2.0";
+export const PROMPT_VERSION = "1.3.0";
 
 /**
  * @deprecated Never sent to the model. The workout-parser system prompt
