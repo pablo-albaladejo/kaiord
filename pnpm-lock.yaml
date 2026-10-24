@@ -12,7 +12,6 @@ overrides:
   lodash@<4.17.23: '>=4.17.23'
   esbuild@<=0.24.2: '>=0.27.0'
   '@isaacs/brace-expansion@<=5.0.0': '>=5.0.1'
-  qs@<6.16.0: '>=6.16.0'
   undici@<6.23.0: '>=6.23.0'
   ajv@>=8.0.0 <8.18.0: '>=8.18.0'
   hono@<4.12.34: '>=4.13.7'
@@ -28,6 +27,7 @@ overrides:
   picomatch@>=4.0.0 <4.0.4: '>=4.0.4'
   path-to-regexp@>=8.0.0 <8.4.0: '>=8.4.0'
   express-rate-limit@<8.2.2: '>=8.2.2'
+  body-parser@>=2.0.0 <2.4.0: '>=2.4.0'
   smol-toml@<1.6.1: '>=1.6.1'
   yaml@>=2.0.0 <2.8.3: '>=2.8.3'
   vite: ^8.0.5
@@ -4760,8 +4760,8 @@ packages:
   birpc@2.9.0:
     resolution: {integrity: sha512-KrayHS5pBi69Xi9JmvoqrIgYGDkD6mcSe/i6YKi3w5kekCLzrX4+nawcXqrj2tIp50Kw/mT/s3p+GVK0A0sKxw==}
 
-  body-parser@2.3.0:
-    resolution: {integrity: sha512-2cGmJupaNgg+QUwVLAucDuWuoMZ6EX9iHDRswZ5lsNYEmwPaRknMPCLZz07yTzVq/83p4o/wzbDZbBrTvGGTIw==}
+  body-parser@2.4.0:
+    resolution: {integrity: sha512-Ifk1KcLrxaGt1occQagQNFNNOqRt1LFuehEnHHzB8Z6cRgIxRU1TBaiIsUiCdA+gy5PL7Y1IX31DNKkRmxtXjQ==}
     engines: {node: '>=18'}
 
   boolbase@1.0.0:
@@ -11469,7 +11469,7 @@ snapshots:
 
   birpc@2.9.0: {}
 
-  body-parser@2.3.0:
+  body-parser@2.4.0:
     dependencies:
       bytes: 3.1.2
       content-type: 2.1.0
@@ -12191,7 +12191,7 @@ snapshots:
   express@5.3.0:
     dependencies:
       accepts: 2.0.0
-      body-parser: 2.3.0
+      body-parser: 2.4.0
       content-disposition: 2.0.1
       content-type: 2.1.0
       cookie: 0.7.2
