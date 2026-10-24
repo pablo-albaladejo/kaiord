@@ -6,7 +6,9 @@
  * Z1→Z5, drawn at a single height).
  *
  * `height` is the caller's: 14 px in the calendar grid, 20 px in the calendar
- * list, 10 px on a library card. One component, three densities.
+ * list, 10 px on a library card, 88 px in the coaching dialog. One component,
+ * four densities. `segmentTitle` gives each bar a hover title, for the
+ * surfaces large enough to point at a single bar.
  */
 import { forwardRef, type HTMLAttributes } from "react";
 
@@ -29,8 +31,10 @@ export type ZoneProfileBarProps = Omit<
   "children"
 > & {
   segments: readonly ZoneSegment[];
-  /** Rendered height in px. Grid 14, list 20, library card 10. */
+  /** Rendered height in px. Grid 14, list 20, library card 10, dialog 88. */
   height?: number;
+  /** Per-bar hover title (zone + duration). Omitted → bars carry no title. */
+  segmentTitle?: (segment: ZoneSegment) => string;
   /** Accessible summary. Omitted → the bar is decorative and hidden. */
   label?: string;
   className?: string;
@@ -42,6 +46,7 @@ export const ZoneProfileBar = forwardRef<HTMLDivElement, ZoneProfileBarProps>(
       segments,
       height = DEFAULT_HEIGHT_PX,
       label,
+      segmentTitle,
       className = "",
       style,
       ...props
@@ -66,6 +71,7 @@ export const ZoneProfileBar = forwardRef<HTMLDivElement, ZoneProfileBarProps>(
           <span
             key={`${segment.zone}-${i}`}
             data-zone={segment.zone}
+            title={segmentTitle?.(segment)}
             className={`rounded-t-[2px] ${zoneBgClass(segment.zone)}`}
             style={{ flex: segment.seconds, height: ZONE_HEIGHT[segment.zone] }}
           />
