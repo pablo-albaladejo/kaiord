@@ -1,6 +1,7 @@
 import { NoActiveExportRouteError } from "../../application/export/execute-workout-push";
 import type { PlacementResult } from "../../application/garmin-placement/placement-result";
 import { isFtpReason } from "../../types/ftp-unavailable-error";
+import { isMaxHrReason } from "../../types/max-hr-unavailable-error";
 import { isPaceZonesReason } from "../../types/pace-zones-unavailable-error";
 import { GARMIN_BRIDGE_ID } from "../garmin-push-fn";
 
@@ -43,6 +44,16 @@ const FTP_ERRORS = {
   },
 } as const;
 
+const MAX_HR_ERRORS = {
+  "missing-max-hr": {
+    error: "missing_max_hr",
+    message:
+      "The workout has %max HR heart-rate targets, but the athlete's " +
+      "profile has no max heart rate. Ask the athlete to set their max " +
+      "heart rate in Athlete, then send it again.",
+  },
+} as const;
+
 /** The Phase 1 failures, as the tool's error codes. */
 export const libraryError = (result: PlacementResult) => {
   if (result.kind !== "failed") return undefined;
@@ -54,5 +65,6 @@ export const libraryError = (result: PlacementResult) => {
   if (result.reason === "library-push-failed") return { error: "push_failed" };
   if (isPaceZonesReason(result.reason)) return PACE_ZONE_ERRORS[result.reason];
   if (isFtpReason(result.reason)) return FTP_ERRORS[result.reason];
+  if (isMaxHrReason(result.reason)) return MAX_HR_ERRORS[result.reason];
   return undefined;
 };

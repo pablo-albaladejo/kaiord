@@ -3,6 +3,7 @@ import {
   createGarminParsingError,
   createKrdValidationError,
   createMissingFtpError,
+  createMissingMaxHeartRateError,
   createServiceApiError,
   createServiceAuthError,
   ToleranceExceededError,
@@ -110,6 +111,30 @@ describe("mapErrorToExitCode", () => {
   it("should map MissingFtpError to INVALID_ARGUMENT", () => {
     // Arrange
     const error = createMissingFtpError("garmin");
+
+    // Act
+    const code = mapErrorToExitCode(error);
+
+    // Assert
+    expect(code).toBe(ExitCode.INVALID_ARGUMENT);
+  });
+
+  it("should map MissingMaxHeartRateError to INVALID_ARGUMENT", () => {
+    // Arrange
+    const error = createMissingMaxHeartRateError("garmin");
+
+    // Act
+    const code = mapErrorToExitCode(error);
+
+    // Assert
+    expect(code).toBe(ExitCode.INVALID_ARGUMENT);
+  });
+
+  it("should map a MissingMaxHeartRateError from another @kaiord/core copy by name", () => {
+    // Arrange
+    const error = Object.assign(new Error("needs a max HR"), {
+      name: "MissingMaxHeartRateError",
+    });
 
     // Act
     const code = mapErrorToExitCode(error);

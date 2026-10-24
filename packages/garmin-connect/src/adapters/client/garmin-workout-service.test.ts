@@ -1,5 +1,5 @@
 import type { KRD, Logger } from "@kaiord/core";
-import { MissingFtpError } from "@kaiord/core";
+import { MissingFtpError, MissingMaxHeartRateError } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
 
 import type { GarminHttpClient } from "../http/types";
@@ -46,7 +46,10 @@ const sampleKrd: KRD = {
 
 const FTP_W = 250;
 const SWEET_SPOT_PCT = 85;
-const SWEET_SPOT_W = 213;
+// 85 % of 250 W = 213 W; Garmin gets a single value as its ±5 % band.
+const SWEET_SPOT_BAND_HIGH_W = 224;
+const SWEET_SPOT_BAND_LOW_W = 202;
+const THRESHOLD_HR_PCT = 90;
 
 type GcnPayload = {
   workoutSegments: [
@@ -54,7 +57,7 @@ type GcnPayload = {
   ];
 };
 
-const withPercentFtpStep = (krd: KRD): KRD => {
+const withStepTarget = (krd: KRD, targetType: string, value: object): KRD => {
   const workout = krd.extensions?.structured_workout as {
     steps: Array<Record<string, unknown>>;
   };
@@ -66,17 +69,23 @@ const withPercentFtpStep = (krd: KRD): KRD => {
         steps: [
           {
             ...workout.steps[0],
-            targetType: "power",
-            target: {
-              type: "power",
-              value: { unit: "percent_ftp", value: SWEET_SPOT_PCT },
-            },
+            targetType,
+            target: { type: targetType, value },
           },
         ],
       },
     },
   };
 };
+
+const withPercentFtpStep = (krd: KRD): KRD =>
+  withStepTarget(krd, "power", { unit: "percent_ftp", value: SWEET_SPOT_PCT });
+
+const withPercentMaxStep = (krd: KRD): KRD =>
+  withStepTarget(krd, "heart_rate", {
+    unit: "percent_max",
+    value: THRESHOLD_HR_PCT,
+  });
 
 describe("createGarminWorkoutService", () => {
   it("should list workouts", async () => {
@@ -140,8 +149,8 @@ describe("createGarminWorkoutService", () => {
     // Assert
     const payload = vi.mocked(httpClient.post).mock.calls[0][1] as GcnPayload;
     const step = payload.workoutSegments[0].workoutSteps[0];
-    expect(step.targetValueOne).toBe(SWEET_SPOT_W);
-    expect(step.targetValueTwo).toBe(SWEET_SPOT_W);
+    expect(step.targetValueOne).toBe(SWEET_SPOT_BAND_HIGH_W);
+    expect(step.targetValueTwo).toBe(SWEET_SPOT_BAND_LOW_W);
   });
 
   it("should reject with MissingFtpError before calling Garmin when no FTP is given", async () => {
@@ -162,6 +171,36 @@ describe("createGarminWorkoutService", () => {
     // Arrange
     const foreign = Object.assign(new Error("needs an FTP"), {
       name: "MissingFtpError",
+    });
+    const httpClient = createMockHttpClient();
+    vi.mocked(httpClient.post).mockRejectedValue(foreign);
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    // Act
+    const push = service.push(sampleKrd);
+
+    // Assert
+    await expect(push).rejects.toBe(foreign);
+  });
+
+  it("should reject with MissingMaxHeartRateError before calling Garmin for a percent_max target", async () => {
+    // Arrange
+    const httpClient = createMockHttpClient();
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+    const krd = withPercentMaxStep(sampleKrd);
+
+    // Act
+    const push = service.push(krd);
+
+    // Assert
+    await expect(push).rejects.toBeInstanceOf(MissingMaxHeartRateError);
+    expect(httpClient.post).not.toHaveBeenCalled();
+  });
+
+  it("should rethrow a MissingMaxHeartRateError from another @kaiord/core copy unwrapped", async () => {
+    // Arrange
+    const foreign = Object.assign(new Error("needs a max HR"), {
+      name: "MissingMaxHeartRateError",
     });
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.post).mockRejectedValue(foreign);

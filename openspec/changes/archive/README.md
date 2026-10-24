@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-25 | [`garmin-single-value-target-bands`](./2026-10-25-garmin-single-value-target-bands/) | Band single-value Garmin targets and resolve percent-of-max-HR targets |
 | 2026-10-24 | [`add-coach-text-zone-estimate`](./2026-10-24-add-coach-text-zone-estimate/) | The coaching dialog's intensity thumbnail (feat/calendar-modal-zone-profile) |
 | 2026-10-24 | [`adopt-claude-cli-live-evals`](./2026-10-24-adopt-claude-cli-live-evals/) | Run live evals through the maintainer's local Claude subscription |
 | 2026-10-20 | [`agent-guardrails`](./2026-10-20-agent-guardrails/) | agent guardrails enforced by hooks |

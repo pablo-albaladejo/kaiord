@@ -12,6 +12,15 @@ const percentFtp = (value: number): Target => ({
   value: { unit: "percent_ftp", value },
 });
 
+const watts = (value: number): Target => ({
+  type: "power",
+  value: { unit: "watts", value },
+});
+
+// A resolved percent_ftp value must export exactly like the same single watts
+// value (which Garmin receives as a tolerance band, see target-band.mapper).
+const asWatts = (value: number) => convertKrdTargetToGarmin(watts(value));
+
 const percentRange = (min: number, max: number): Target => ({
   type: "power",
   value: { unit: "range", min, max, basis: "percent_ftp" },
@@ -27,8 +36,7 @@ describe("convertKrdTargetToGarmin percent_ftp power", () => {
 
     // Assert
     expect(result.targetType.workoutTargetTypeKey).toBe("power.zone");
-    expect(result.targetValueOne).toBe(F.SWEET_SPOT_W);
-    expect(result.targetValueTwo).toBe(F.SWEET_SPOT_W);
+    expect(result).toEqual(asWatts(F.SWEET_SPOT_W));
     expect(result.zoneNumber).toBeNull();
   });
 
@@ -40,8 +48,7 @@ describe("convertKrdTargetToGarmin percent_ftp power", () => {
     const result = convertKrdTargetToGarmin(target, { ftpWatts: F.ODD_FTP_W });
 
     // Assert
-    expect(result.targetValueOne).toBe(F.HALF_OF_ODD_FTP_W);
-    expect(result.targetValueTwo).toBe(F.HALF_OF_ODD_FTP_W);
+    expect(result).toEqual(asWatts(F.HALF_OF_ODD_FTP_W));
   });
 
   it.each(F.BOUNDARY_CASES)(
@@ -54,8 +61,7 @@ describe("convertKrdTargetToGarmin percent_ftp power", () => {
       const result = convertKrdTargetToGarmin(target, { ftpWatts });
 
       // Assert
-      expect(result.targetValueOne).toBe(watts);
-      expect(result.targetValueTwo).toBe(watts);
+      expect(result).toEqual(asWatts(watts));
     }
   );
 
@@ -86,17 +92,13 @@ describe("convertKrdTargetToGarmin percent_ftp power", () => {
 
   it("should pass watts targets through unchanged when an FTP is provided", () => {
     // Arrange
-    const target: Target = {
-      type: "power",
-      value: { unit: "watts", value: F.STEADY_W },
-    };
+    const target = watts(F.STEADY_W);
 
     // Act
     const result = convertKrdTargetToGarmin(target, { ftpWatts: FTP_W });
 
     // Assert
-    expect(result.targetValueOne).toBe(F.STEADY_W);
-    expect(result.targetValueTwo).toBe(F.STEADY_W);
+    expect(result).toEqual(asWatts(F.STEADY_W));
   });
 
   it("should keep watt ranges fastest-first and unscaled when an FTP is provided", () => {

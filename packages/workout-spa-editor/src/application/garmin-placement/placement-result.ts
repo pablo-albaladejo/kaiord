@@ -26,6 +26,8 @@ export const PLACEMENT_FAILURE_REASONS = [
   "missing-ftp",
   /** %FTP power targets on a sport with no power zones: never pushed. */
   "sport-without-power-zones",
+  /** %max HR heart-rate targets and no max HR: nothing is exported or pushed. */
+  "missing-max-hr",
 ] as const;
 export type PlacementFailureReason = (typeof PLACEMENT_FAILURE_REASONS)[number];
 

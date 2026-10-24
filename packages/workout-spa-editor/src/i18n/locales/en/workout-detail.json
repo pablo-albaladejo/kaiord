@@ -105,7 +105,8 @@
       "incomplete-pace-zones": "This workout uses a pace zone the athlete doesn't define. Complete your pace zones in Athlete to send it.",
       "unsupported-pace-zone-sport": "Pace zones can only be sent to Garmin in running or swimming workouts.",
       "missing-ftp": "This workout has %FTP power targets. Set your FTP in Athlete to convert them to watts for Garmin.",
-      "sport-without-power-zones": "This workout's sport has no power zones. Change its sport to cycling or running to send its %FTP power targets to Garmin."
+      "sport-without-power-zones": "This workout's sport has no power zones. Change its sport to cycling or running to send its %FTP power targets to Garmin.",
+      "missing-max-hr": "This workout has %max HR heart-rate targets. Set your max heart rate in Athlete to convert them to bpm for Garmin."
     }
   },
   "menu": {

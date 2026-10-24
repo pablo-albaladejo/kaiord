@@ -75,6 +75,18 @@ describe("formatError", () => {
     expect(result.structuredContent?.error.suggestion).toBeDefined();
   });
 
+  it("should classify a missing max heart rate with an actionable suggestion", () => {
+    // Arrange
+    const error = namedError("MissingMaxHeartRateError", "needs a max HR");
+
+    // Act
+    const result = formatError(error);
+
+    // Assert
+    expect(result.structuredContent?.error.type).toBe("missing-max-hr");
+    expect(result.structuredContent?.error.suggestion).toContain("bpm");
+  });
+
   it("should classify a missing input file for agent branching", () => {
     // Arrange
     const error = Object.assign(new Error("no such file"), { code: "ENOENT" });

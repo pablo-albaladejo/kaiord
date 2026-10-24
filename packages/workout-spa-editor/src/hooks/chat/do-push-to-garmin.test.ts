@@ -4,6 +4,7 @@ import type { PersistencePort } from "../../ports/persistence-port";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { FtpUnavailableError } from "../../types/ftp-unavailable-error";
 import type { IntegrationPolicy } from "../../types/integration-policy";
+import { MaxHrUnavailableError } from "../../types/max-hr-unavailable-error";
 import { exportGcnWorkout } from "../../utils/export-workout-formats";
 
 vi.mock("../../utils/export-workout-formats", () => ({
@@ -453,6 +454,34 @@ describe("doPushToGarmin", () => {
     // Assert
     expect(result).toEqual({ error: "push_failed" });
     expect(JSON.stringify(result)).not.toContain("athlete-private-detail");
+  });
+
+  it("should report missing_max_hr and never push a %max HR workout without a max HR", async () => {
+    // Arrange
+    vi.mocked(exportGcnWorkout).mockRejectedValueOnce(
+      new MaxHrUnavailableError("missing-max-hr")
+    );
+    const { deps, calendar } = makeDeps();
+    const { persistence, put } = makePersistence(makeRecord());
+    const pushWorkout = vi.fn();
+
+    // Act
+    const result = await doPushToGarmin(
+      "profile-1",
+      persistence,
+      pushWorkout,
+      "workout-1",
+      deps
+    );
+
+    // Assert
+    expect(result).toEqual({
+      error: "missing_max_hr",
+      message: expect.stringContaining("Athlete"),
+    });
+    expect(pushWorkout).not.toHaveBeenCalled();
+    expect(put).not.toHaveBeenCalled();
+    expect(calendar.items).toEqual([]);
   });
 
   it.each([

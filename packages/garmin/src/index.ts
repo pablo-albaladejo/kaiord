@@ -21,6 +21,8 @@ export type GarminWriterOptions = {
   paceZones?: PaceZoneTable;
   /** Athlete FTP in watts; required to write `percent_ftp` power targets. */
   ftpWatts?: number;
+  /** Athlete max heart rate in bpm; required to write `percent_max` targets. */
+  maxHeartRate?: number;
 };
 
 export const createGarminReader = (logger?: Logger): TextReader =>
@@ -38,6 +40,7 @@ export const createGarminWriter = (
     logger: options.logger || createConsoleLogger(),
     paceZones: options.paceZones,
     ftpWatts: options.ftpWatts,
+    maxHeartRate: options.maxHeartRate,
   });
 };
 

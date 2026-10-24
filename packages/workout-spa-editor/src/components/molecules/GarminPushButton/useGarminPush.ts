@@ -7,14 +7,11 @@ import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
 import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
-import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
+import { isProfileRefusal } from "../../../types/profile-refusal";
 import { garminPushReports } from "./garmin-push-reports";
 
 /** A failure the placement result names itself (PlacementFeedback). */
-const explainedByResult = (error: unknown) =>
-  error instanceof PaceZonesUnavailableError ||
-  error instanceof FtpUnavailableError;
+const explainedByResult = isProfileRefusal;
 
 export type GarminPushOptions = {
   /** The athlete chose "Send anyway" on an `uncertain` result. */

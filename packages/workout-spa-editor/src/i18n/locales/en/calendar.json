@@ -131,6 +131,9 @@
       "missing-ftp": "set your FTP in Athlete",
       "sport-without-power-zones": "power zones only in cycling or running"
     },
+    "maxHr": {
+      "missing-max-hr": "set your max heart rate in Athlete"
+    },
     "openConnections": "Open Connections",
     "preflight": {
       "no-export-route": "Turn on sending workouts to Garmin in Connections (Workout → Also sent to), then send the week.",

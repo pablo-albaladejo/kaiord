@@ -15,6 +15,61 @@ export const PACE_M_PER_S = {
   SCHEMA_MAX: 30,
 } as const;
 
+// Single-value power / HR / cadence tolerance bands (integer bounds).
+// Power: ±5 % but at least ±5 W; HR and cadence: ±3. Capped at the KRD
+// schema maxima (5000 W, 300 bpm, 300 rpm) and floored at 0.
+export const TARGET_BAND = {
+  POWER_W: 200,
+  POWER_LOW_W: 190,
+  POWER_HIGH_W: 210,
+  SMALL_POWER_W: 80,
+  SMALL_POWER_LOW_W: 75,
+  SMALL_POWER_HIGH_W: 85,
+  POWER_SCHEMA_MAX_W: 5000,
+  // 213.3 W: centre 213, half-width round(10.67) = 11 -> 202..224 (not 203..224).
+  FRACTIONAL_POWER_W: 213.3,
+  FRACTIONAL_POWER_LOW_W: 202,
+  FRACTIONAL_POWER_HIGH_W: 224,
+  // 250 W: half-width 12.5 rounds outward on both sides -> 237..263 (not 238..263).
+  HALF_WATT_POWER_W: 250,
+  HALF_WATT_POWER_LOW_W: 237,
+  HALF_WATT_POWER_HIGH_W: 263,
+  HR_BPM: 150,
+  HR_LOW_BPM: 147,
+  HR_HIGH_BPM: 153,
+  HR_NEAR_MAX_BPM: 299,
+  HR_NEAR_MAX_LOW_BPM: 296,
+  SCHEMA_MAX_BPM: 300,
+  HR_NEAR_ZERO_BPM: 2,
+  HR_NEAR_ZERO_HIGH_BPM: 5,
+  CADENCE_RPM: 90,
+  CADENCE_LOW_RPM: 87,
+  CADENCE_HIGH_RPM: 93,
+  SCHEMA_MAX_RPM: 300,
+} as const;
+
+// percent_max -> bpm resolution samples: round(pct * maxHr / 100), then the
+// ±3 bpm band. 85 % of 190 bpm = 161.5 -> 162 bpm -> 159..165 bpm.
+export const MAX_HR_RESOLUTION = {
+  MAX_HR_BPM: 190,
+  PCT: 85,
+  BPM: 162,
+  BAND_LOW_BPM: 159,
+  BAND_HIGH_BPM: 165,
+  NEGATIVE_MAX_HR_BPM: -190,
+  // Above the 300 bpm schema limit: 85 % of 400 = 340 bpm would clamp to 300-300.
+  IMPLAUSIBLE_MAX_HR_BPM: 400,
+  SCHEMA_MAX_BPM: 300,
+  // 110 % of 290 bpm = 319 bpm: a valid max HR, but over the limit once resolved.
+  NEAR_LIMIT_MAX_HR_BPM: 290,
+  OVER_HUNDRED_PCT: 110,
+  // Below the 100 bpm plausibility floor: 1 % of a 1 bpm max HR would round to 0.
+  IMPLAUSIBLY_LOW_MAX_HR_BPM: 99,
+  MIN_PLAUSIBLE_MAX_HR_BPM: 100,
+  TINY_PCT: 0.4,
+  ZERO_PCT: 0,
+} as const;
+
 // Decimal digits for float comparisons of converted speeds.
 export const FLOAT_DIGITS = 9;
 
@@ -90,11 +145,16 @@ export const FTP_RESOLUTION = {
   FTP_W: 250,
   SWEET_SPOT_PCT: 85,
   SWEET_SPOT_W: 213,
+  // 213 W ± 5 % (10.65 W), rounded: what Garmin receives for a single 213 W.
+  SWEET_SPOT_BAND_LOW_W: 202,
+  SWEET_SPOT_BAND_HIGH_W: 224,
   ODD_FTP_W: 263,
   HALF_PCT: 50,
   HALF_OF_ODD_FTP_W: 132,
   NEGATIVE_FTP_W: -200,
   STEADY_W: 240,
+  STEADY_BAND_LOW_W: 228,
+  STEADY_BAND_HIGH_W: 252,
   RANGE_LOW_W: 125,
   RANGE_HIGH_W: 188,
   // A 50-75 % FTP warm-up ramp; at FTP_W it resolves to RANGE_LOW/HIGH_W.

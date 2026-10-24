@@ -101,6 +101,7 @@ vi.mock("../../../hooks/garmin-placement-deps", async () => {
 });
 
 import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
+import { MaxHrUnavailableError } from "../../../types/max-hr-unavailable-error";
 import { PaceZonesUnavailableError } from "../../../types/pace-zones-unavailable-error";
 import { useGarminPush } from "./useGarminPush";
 
@@ -259,6 +260,31 @@ describe("useGarminPush", () => {
       );
     }
   );
+
+  it("should fail with missing-max-hr, and push nothing, when %max HR targets have no max HR", async () => {
+    // Arrange
+    mockExportGcnWorkout.mockRejectedValue(
+      new MaxHrUnavailableError("missing-max-hr")
+    );
+    const { result } = renderHook(() => useGarminPush(makeWorkout()));
+    let outcome: unknown;
+
+    // Act
+    await act(async () => {
+      outcome = await result.current.push();
+    });
+
+    // Assert
+    expect(outcome).toEqual({
+      kind: "failed",
+      reason: "missing-max-hr",
+      retryable: false,
+    });
+    expect(mockPushWorkout).not.toHaveBeenCalled();
+    expect(mockSetPushing).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "error" })
+    );
+  });
 
   it("should set error when exportGcnWorkout throws an Error", async () => {
     // Arrange
