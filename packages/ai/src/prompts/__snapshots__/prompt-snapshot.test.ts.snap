@@ -146,6 +146,7 @@ Use these types (targetType MUST match target.type):
 { "type": "heart_rate", "value": { "unit": "zone", "value": 1 } }
 { "type": "heart_rate", "value": { "unit": "bpm", "value": 145 } }
 { "type": "heart_rate", "value": { "unit": "percent_max", "value": 80 } }
+{ "type": "heart_rate", "value": { "unit": "range", "min": 130, "max": 150 } }
 \`\`\`
 
 ### Power (cycling)
@@ -157,7 +158,17 @@ Use these types (targetType MUST match target.type):
 { "type": "power", "value": { "unit": "zone", "min": 1, "max": 2 } }
 { "type": "power", "value": { "unit": "watts", "value": 250 } }
 { "type": "power", "value": { "unit": "percent_ftp", "value": 85 } }
+{ "type": "power", "value": { "unit": "range", "min": 200, "max": 250 } }
+{ "type": "power", "value": { "unit": "range", "min": 88, "max": 93, "basis": "percent_ftp" } }
 \`\`\`
+
+A power \`range\` is in watts unless it has \`"basis": "percent_ftp"\`.
+
+### Explicit Ranges
+
+\`mps\`, \`bpm\`, \`percent_max\`, \`watts\` and \`percent_ftp\` take a single \`value\`, never \`min\`/\`max\`. A range of explicit values (\`130-150 bpm\`, \`200-250W\`, \`88-93% FTP\`) is a \`unit: "range"\` with \`min\` and \`max\`, except a % max HR range (below).
+
+A heart-rate \`range\` is always bpm. A % max HR range is not a range: give a single \`percent_max\` value, the midpoint (\`85-90% max HR\` is \`{ "unit": "percent_max", "value": 87.5 }\`). Only \`zone\` (pace and power spans) and \`range\` take \`min\`/\`max\`.
 
 ### Cadence
 
@@ -178,7 +189,7 @@ Use these types (targetType MUST match target.type):
 - **Swimming**: \`open\` is fine unless the text gives an explicit target.
 - A bare zone reference ("Z1", "z2", "zona 3") is a pace zone for running and a power zone for cycling.
 - Emit zone NUMBERS, never zone values: write \`{ "unit": "zone", "value": 1 }\`, not the athlete's pace or watts for zone 1. The athlete's zones are resolved to real values after you answer.
-- Explicit values in the text (\`a 5'15"/km\`, \`250W\`, \`88-93% FTP\`) are kept as explicit values.
+- Explicit values in the text (\`a 5'15"/km\`, \`250W\`, \`88-93% FTP\`) are kept as explicit values; a range of them is a \`range\` target (a % max HR range is its midpoint).
 - \`open\` is allowed only when the text gives no intensity at all AND no zone can be inferred from the step's role.
 
 ## Intensity Vocabulary → Zones
@@ -211,7 +222,7 @@ Use these types (targetType MUST match target.type):
 | Abbreviation       | Meaning                        | Typical mapping                  |
 | ------------------ | ------------------------------ | -------------------------------- |
 | Z1, Z2, Z3, Z4, Z5 | Training zones (pace/HR/power) | \`{ "unit": "zone", "value": N }\` |
-| SS, Sweet Spot     | 88-94% FTP                     | Power zone or percent_ftp        |
+| SS, Sweet Spot     | 88-94% FTP                     | Power zone or % FTP range        |
 | TEMPO              | Threshold-adjacent             | ~76-87% FTP or pace zone 3       |
 | R:, RI, Rec, desc  | Recovery interval / rest       | \`intensity: "recovery"\`, Z1      |
 | CV, VC             | Vuelta a la calma (cooldown)   | \`intensity: "cooldown"\`, Z1      |

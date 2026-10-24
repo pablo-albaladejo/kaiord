@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "id": "edge-long",
+  "caseId": "edge-long",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:52:35.624Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "d6d078056207e8e55bc8bb8a5b170b62c619e9df150789a640b0483934dc0028",
+  "requestHash": "36241f8ed5998d7ec5fc64171bede96ba41755390432d19a4e9774a73fcbb7ee",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Resistencia 3h con avituallamiento cada 45'",
+      "sport": "cycling",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "stepIndex": 1,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 2700
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 2
+            }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 2,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 2700
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 2
+            }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 3,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 2700
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 2
+            }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 4,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 2100
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 2
+            }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 5,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "cooldown"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 16116,
+      "outputTokens": 1550
+    }
+  }
+}

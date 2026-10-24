@@ -45,7 +45,7 @@ const realCassette = async (caseId = "cycling-simple") => {
 };
 
 describe("loadCommittedFiles", () => {
-  it("should accept the committed directory as shipped: empty manifest, no real cassette", () => {
+  it("should load every committed file with no fault (coverage is checked by the replay)", () => {
     // Arrange
     const files = readCassetteFiles(COMMITTED_DIR);
 
@@ -53,9 +53,10 @@ describe("loadCommittedFiles", () => {
     const { cassettes, faults } = loadCommittedFiles(files);
 
     // Assert
-    expect(files.map((f) => f.name)).toEqual(["manifest.json"]);
+    expect(files.map((f) => f.name)).toContain("manifest.json");
     expect(faults).toEqual([]);
-    expect(cassettes).toEqual([]);
+    expect(cassettes.length).toBe(files.length - 1);
+    expect(cassettes.length).toBeGreaterThan(0);
   });
 
   it("should ship only synthetic fixtures", () => {
@@ -309,10 +310,82 @@ describe("loadCommittedFiles", () => {
   });
 });
 
+const UNCOVERED_PATHS =
+  "record them locally, or retire the case (its benchmark, manifest entry and cassette)";
+
+/** The parser suite narrowed to the named cases: what a shrunk suite replays. */
+const suiteOf = (...ids: Array<string>) => {
+  const suite = createParserReplaySuite();
+  return { ...suite, cases: suite.cases.filter((c) => ids.includes(c.id)) };
+};
+
 describe("replayCommitted", () => {
+  it("should fail a suite case with no cassette, naming it", async () => {
+    // Arrange
+    const suite = suiteOf("cycling-simple", "cycling-sweetspot");
+    const file = cassetteFile(await realCassette());
+    const files = [manifestFile([entryFor(file, "cycling-simple-1")]), file];
+
+    // Act
+    const result = await replayCommitted(suite, files);
+
+    // Assert
+    expect(result.faults).toEqual([
+      `uncovered cases: cycling-sweetspot — ${UNCOVERED_PATHS}`,
+    ]);
+    expect(result.exitCode).toBe(1);
+  });
+
+  it("should not let a second cassette of one case cover another case", async () => {
+    // Arrange
+    const suite = suiteOf("cycling-simple", "cycling-sweetspot");
+    const first = await realCassette();
+    const second = cassetteFile({ ...first, id: "cycling-simple-2" });
+    const firstFile = cassetteFile(first);
+    const files = [
+      manifestFile([
+        entryFor(firstFile, "cycling-simple-1"),
+        entryFor(second, "cycling-simple-2"),
+      ]),
+      firstFile,
+      second,
+    ];
+
+    // Act
+    const result = await replayCommitted(suite, files);
+
+    // Assert
+    expect(result.faults).toEqual([
+      `uncovered cases: cycling-sweetspot — ${UNCOVERED_PATHS}`,
+    ]);
+    expect(result.exitCode).toBe(1);
+  });
+
+  it("should replay green when every suite case has a cassette", async () => {
+    // Arrange
+    const suite = suiteOf("cycling-simple", "swimming-simple");
+    const simple = cassetteFile(await realCassette());
+    const swimming = cassetteFile(await realCassette("swimming-simple"));
+    const files = [
+      manifestFile([
+        entryFor(simple, "cycling-simple-1"),
+        entryFor(swimming, "swimming-simple-1"),
+      ]),
+      simple,
+      swimming,
+    ];
+
+    // Act
+    const result = await replayCommitted(suite, files);
+
+    // Assert
+    expect(result.faults).toEqual([]);
+    expect(result.exitCode).toBe(0);
+  });
+
   it("should exit non-zero on a tampered committed file, naming its id", async () => {
     // Arrange
-    const suite = createParserReplaySuite();
+    const suite = suiteOf("cycling-simple");
     const original = await realCassette();
     const recorded = cassetteFile({ ...original, requestHash: OTHER_DIGEST });
     const rewritten = cassetteFile(original);
@@ -324,14 +397,16 @@ describe("replayCommitted", () => {
     // Assert
     expect(result.exitCode).toBe(1);
     expect(result.measured).toBe(0);
-    expect(result.faults).toContain(
-      "cassettes not matching their manifest digest: cycling-simple-1"
-    );
+    expect(result.faults).toEqual([
+      "cassettes not matching their manifest digest: cycling-simple-1",
+      "uncovered cases: cycling-simple — record them locally, or retire the case (its benchmark, manifest entry and cassette)",
+      "zero measured cases: a replay that measured nothing fails",
+    ]);
   });
 
   it("should replay a listed fresh cassette green", async () => {
     // Arrange
-    const suite = createParserReplaySuite();
+    const suite = suiteOf("cycling-simple");
     const file = cassetteFile(await realCassette());
     const files = [manifestFile([entryFor(file, "cycling-simple-1")]), file];
 
@@ -346,7 +421,7 @@ describe("replayCommitted", () => {
 
   it("should fail a listed stale cassette naming its id and both unblock paths", async () => {
     // Arrange
-    const suite = createParserReplaySuite();
+    const suite = suiteOf("cycling-simple");
     const file = cassetteFile({
       ...(await realCassette()),
       requestHash: OTHER_DIGEST,

@@ -374,6 +374,78 @@ describe("evaluateBenchmark", () => {
       );
     });
 
+    it("should pass when the range basis matches the zoneCheck", () => {
+      // Arrange
+      const benchmark: Benchmark = {
+        ...baseBenchmark,
+        zoneCheck: {
+          targetType: "power",
+          unit: "range",
+          basis: "percent_ftp",
+        },
+      };
+      const workout = createWorkout();
+      const main = workout.steps[1] as { target: { value: object } };
+      main.target.value = {
+        unit: "range",
+        min: 88,
+        max: 93,
+        basis: "percent_ftp",
+      };
+
+      // Act
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);
+    });
+
+    it("should fail when the range basis is absent", () => {
+      // Arrange
+      const benchmark: Benchmark = {
+        ...baseBenchmark,
+        zoneCheck: { targetType: "power", basis: "percent_ftp" },
+      };
+      const workout = createWorkout();
+
+      // Act
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(result.errors).toContain(
+        "Zone basis absent is not the expected percent_ftp"
+      );
+    });
+
+    it("should fail when the target unit differs from the zoneCheck", () => {
+      // Arrange
+      const benchmark: Benchmark = {
+        ...baseBenchmark,
+        zoneCheck: { targetType: "power", unit: "watts" },
+      };
+      const workout = createWorkout();
+
+      // Act
+      const result = evaluateBenchmark(
+        benchmark,
+        workout,
+        EVAL_DURATION_MS_DEFAULT
+      );
+
+      // Assert
+      expect(result.errors).toContain(
+        "Zone unit range is not the expected watts"
+      );
+    });
+
     it("should honour a declared bound of zero rather than skipping it", () => {
       // Arrange
       const benchmark: Benchmark = {
