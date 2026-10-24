@@ -1,3 +1,5 @@
+> Tasks: 15 completed, 0 deferred
+
 # Tasks
 
 ## 1. Spec (this PR)
