@@ -232,6 +232,27 @@ describe("createSpawnClaude", () => {
     );
   });
 
+  it("should abort when the init message omits or garbles the tools field", async () => {
+    // Arrange
+    const missing = streamOf(
+      initMessage({ tools: undefined }),
+      resultMessage()
+    );
+    const garbled = streamOf(initMessage({ tools: 3 }), resultMessage());
+
+    // Act
+    const faults = await Promise.all(
+      [missing, garbled].map((stdout) =>
+        faultOf(spawnWith(() => ({ stdout })).spawnClaude(REQUEST))
+      )
+    );
+
+    // Assert
+    for (const fault of faults) {
+      expect(fault).toContain("no recognizable init message");
+    }
+  });
+
   it("should abort on an error result or output it cannot parse", async () => {
     // Arrange
     const errorResult = streamOf(
