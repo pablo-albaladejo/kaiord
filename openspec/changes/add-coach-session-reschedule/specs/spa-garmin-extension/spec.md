@@ -2,13 +2,19 @@
 
 ### Requirement: Garmin still on its old date
 
-The SPA SHALL derive, from the Garmin export-ledger row and the workout, a date drift that holds iff the row's placement is `Placed` and its date differs from the workout's `date`. While it holds, the workout's calendar card SHALL show a "Garmin: {placed date}" badge, and the workout detail and the coaching dialog SHALL show "Garmin still on {placed date}" with an "Update Garmin" action. "Update Garmin" SHALL run the existing calendar placement push (library unchanged, then schedule on the new date, verify, delete the old entry). Moving a session and syncing a coaching week SHALL NOT push to Garmin. When the Garmin bridge is missing or lacks the calendar features, the state SHALL still show and the action SHALL be disabled with the existing capability reason. After a move of a drifting workout, the success toast SHALL name the Garmin date and carry an "Update Garmin" action. Reading the ledger for the visible week SHALL NOT delay the calendar's first render of the week.
+From the Garmin export-ledger row and the workout, the SPA SHALL derive a date drift. The drift holds only when the row's placement is a `Placed` (`scheduled` or `unconfirmed`) whose date differs from the workout's `date`; it is `placed` for a `scheduled` placement and `unconfirmed` for an `unconfirmed` one. `attempting` and `uncertain` rows, and no row, SHALL give no drift; the existing placement notice covers those. While a drift holds, the workout's calendar card SHALL show a Garmin badge with the placed date. The workout detail and the coaching dialog SHALL show "Garmin still on {placed date}" for `placed`, or "Garmin may still be on {placed date}" for `unconfirmed`, together with an "Update Garmin" action. "Update Garmin" SHALL run the existing calendar placement push: the library is unchanged, then the workout is scheduled on the new date, verified, and the old entry is deleted. Moving a session and syncing a coaching week SHALL NOT push to Garmin. When the Garmin bridge is missing or lacks the calendar features, the state SHALL still show and the action SHALL be disabled with the existing capability reason. After a move of a drifting workout, the success toast SHALL name the Garmin date and carry an "Update Garmin" action. Reading the ledger for the visible week SHALL NOT delay the calendar's first render of the week.
 
 #### Scenario: A move leaves Garmin on the old date
 
 - **GIVEN** a workout placed in Garmin on Tuesday
 - **WHEN** the athlete moves it to Thursday
 - **THEN** no Garmin call SHALL be made and the card and detail SHALL show that Garmin still has it on Tuesday
+
+#### Scenario: Unconfirmed placement uses the softer copy
+
+- **GIVEN** a workout whose Garmin placement on Tuesday is `unconfirmed`, moved to Thursday
+- **WHEN** the detail renders
+- **THEN** it SHALL read "Garmin may still be on" Tuesday and offer "Update Garmin"
 
 #### Scenario: Update Garmin moves the entry
 

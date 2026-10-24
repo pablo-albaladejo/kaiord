@@ -24,13 +24,25 @@ Whenever the coach-follow step (`applyCoachDateMoves`) writes a new `date` to a 
 
 ### Requirement: Coach-move notice offers Move back
 
-When a sync's result lists overridden athlete moves, the coach-move notice SHALL name, for each of up to three of them, the athlete's replaced day and SHALL offer a "Move back to {athleteDate}" action that runs `moveSession` for that workout; beyond three it SHALL show the remaining count. The copy SHALL be static en/es. "Move back" SHALL NOT push to any destination. If the workout is no longer movable, the action SHALL be replaced by the block reason.
+When a sync's result lists overridden athlete moves, the notice state SHALL keep that list, and the coach-move notice SHALL name the athlete's replaced day for up to three of them. Beyond three it SHALL show the remaining count. For each named entry it SHALL offer "Move back to {athleteDate}". "Move back" SHALL be an ordinary athlete move: it SHALL run the same flow as any other move, including the same-sport confirmation, and then `moveSession`. It SHALL NOT pin the date. A later coach move to another day SHALL override it again and SHALL be reported again. An entry SHALL be hidden once it has been used, or whenever the workout's current `date` differs from that entry's `coachDate`. If the workout is no longer movable, the action SHALL be replaced by the block reason. The copy SHALL be static, in en and es. "Move back" SHALL NOT push to any destination.
 
 #### Scenario: Move back restores the athlete's day
 
 - **GIVEN** the notice lists a session whose athlete day 2026-10-22 was replaced by the coach's 2026-10-24
 - **WHEN** the user chooses "Move back to 2026-10-22"
-- **THEN** the session SHALL be on 2026-10-22, and a later sync whose coach date is still 2026-10-24 SHALL NOT move it
+- **THEN** the session SHALL be on 2026-10-22, the entry SHALL be hidden, and a later sync whose coach date is still 2026-10-24 SHALL NOT move it
+
+#### Scenario: A later coach move overrides Move back again
+
+- **GIVEN** the athlete used "Move back" to 2026-10-22 and the coach date is 2026-10-24
+- **WHEN** a sync fetches the activity on 2026-10-25
+- **THEN** the session SHALL be on 2026-10-25 and the notice SHALL report the override of 2026-10-22 again
+
+#### Scenario: Entry hides when the session already moved again
+
+- **GIVEN** a listed entry with `coachDate` 2026-10-24
+- **WHEN** the athlete drags the session to 2026-10-23 before using "Move back"
+- **THEN** the entry SHALL be hidden
 
 ### Requirement: Move a coach session from the coaching dialog
 
