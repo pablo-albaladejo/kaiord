@@ -40,14 +40,38 @@ export const mockModelReturning = (
     doGenerate: objects.map((o) => jsonResult(o)),
   });
 
-const streamParts = (deltas: string[]) => [
+export type JsonStreamOptions = {
+  /** Reasoning deltas streamed before the output, as a thinking model does. */
+  reasoning?: string[];
+  /** `length` scripts an output cut off at the token limit. */
+  finishReason?: "stop" | "length";
+};
+
+const reasoningParts = (deltas: string[]) =>
+  deltas.length === 0
+    ? []
+    : [
+        { type: "reasoning-start" as const, id: "r" },
+        ...deltas.map((delta) => ({
+          type: "reasoning-delta" as const,
+          id: "r",
+          delta,
+        })),
+        { type: "reasoning-end" as const, id: "r" },
+      ];
+
+const streamParts = (deltas: string[], options: JsonStreamOptions) => [
   { type: "stream-start" as const, warnings: [] },
+  ...reasoningParts(options.reasoning ?? []),
   { type: "text-start" as const, id: "t" },
   ...deltas.map((delta) => ({ type: "text-delta" as const, id: "t", delta })),
   { type: "text-end" as const, id: "t" },
   {
     type: "finish" as const,
-    finishReason: { unified: "stop" as const, raw: "stop" },
+    finishReason: {
+      unified: options.finishReason ?? ("stop" as const),
+      raw: options.finishReason ?? "stop",
+    },
     usage: usage(10, 5),
   },
 ];
@@ -56,5 +80,7 @@ const streamParts = (deltas: string[]) => [
  * A scripted `doStream` result emitting `deltas` as text deltas, so a test can
  * split the JSON wherever it wants the partial outputs to land.
  */
-export const jsonStream = (deltas: string[]) =>
-  ({ stream: convertArrayToReadableStream(streamParts(deltas)) }) as never;
+export const jsonStream = (deltas: string[], options: JsonStreamOptions = {}) =>
+  ({
+    stream: convertArrayToReadableStream(streamParts(deltas, options)),
+  }) as never;
