@@ -51,6 +51,9 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       `buildCalendarBuckets`, and route it through `buildTodayBuckets` (AC-7).
       Keep the read inside the `useMatchedSessions` measure, and extend the
       Playwright performance spec (30 ms budget) with cross-week matches.
+      Add the cross-week matches' `workoutId` and `executedWorkoutIds` to
+      the solo-workout suppression set, in the Grid and Daily views. Test a
+      locked match coach-moved across weeks (AC-28).
 - [ ] 1.8 Build `matchExecutedWorkouts`'s `taken` set from all matches
       (design §3.7) (AC-8).
 - [ ] 1.8b Fix the five stale-snapshot writers of design §3.10
@@ -59,9 +62,12 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       `convert-coaching-activity-manual-helpers.ts:29`). Move each to
       `updateWorkoutRecord`, merging only the fields it owns and keeping the
       re-read `date`. Write a test per site that interleaves a `moveSession`
-      during the `await` (AC-25).
+      during the `await` (AC-25). When the fresh row's state no longer fits
+      the transition, skip as a no-op, with no throw and no write (AC-30).
 - [ ] 1.8c Date a new match from the workout's `date` for coach-built
-      workouts, in `ensureSessionMatch` and `match-session.ts` (AC-27).
+      workouts. The callers of `ensureSessionMatch` and `match-session.ts`
+      pass `coachDate !== undefined ? workout.date : activity.date`.
+      `ensureSessionMatch` stays repository-only (AC-27).
 - [ ] 1.9 Add `scripts/check-workout-date-writers.mjs` and its co-located
       `check-workout-date-writers.test.mjs`. The registry is
       `WORKOUT_DATE_WRITERS`, an array of `{ file, reason, note }` with
@@ -110,7 +116,8 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
 ## 3. Garmin out-of-date placement state (PR-3, after PR-1)
 
 - [ ] 3.1 Add `garminDateDrift(row, workout)` as a pure function, covering
-      `placed` and `unconfirmed`. Write the truth-table tests first (AC-19).
+      `placed` and `unconfirmed`, plus no drift for a locked session. Write
+      the truth-table tests first (AC-19, AC-29).
 - [ ] 3.2 Read the visible week's ledger rows with one live query. Show the
       card badge ("Garmin:" / "Garmin?:") off the week's critical read
       (AC-19).

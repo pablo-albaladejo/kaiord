@@ -430,6 +430,14 @@ After the commit:
   ids join `matchedActivityIds`, so the coach plan is hidden. Those matches
   are **not** rendered in this week; their card renders in the week of
   `match.date`.
+- The same cross-week matches also feed the **workout** suppression set: their
+  `workoutId` and `executedWorkoutIds` join `collectMatchedWorkoutIds`
+  (`calendar-buckets.ts:35-46`), so neither the planned workout nor a
+  recording renders as a solo card in this week.
+  - This matters for a locked match (§3.1). After a coach move across weeks,
+    M stays on Tuesday of week 1 while `W.date` moves to Thursday of week 2.
+    Without this, week 2 would show W as a solo card. That card would be
+    draggable, and a drag would then be refused as executed.
 - The Daily view gets the same treatment through `buildTodayBuckets`.
 - **Read budget**: the extra `listByActivityIds` read sits inside the same
   `useMatchedSessions` live query, and inside its `performance.measure`
@@ -557,6 +565,11 @@ would then move the match back to the stale date.
   - `state` and `krd` for the manual template.
 - The re-read `date`, `coachDate` and `updatedAt` stamp are kept.
 - A row that is gone is not resurrected.
+- The callback checks the **fresh** row's `state` before transitioning. Say
+  the row is no longer in the state the transition expects: for example, it
+  was skipped while the AI call ran, or it is already structured. Then the
+  transition is a no-op skip. It does not throw, and it writes nothing. The
+  caller treats the outcome as skipped, not failed.
 - Each site gets a test that interleaves a `moveSession` during the `await`,
   or between the snapshot and the write, and asserts the moved date survives.
 
@@ -584,8 +597,10 @@ would then move the match back to the stale date.
     fresh `date`:
     - `application/save-workout-edits.ts`
     - `hooks/garmin-place-record.ts`
-    - the five sites above once fixed (they then go through
-      `updateWorkoutRecord`)
+    - The five fixed sites are **not** listed. They call
+      `updateWorkoutRecord` and have no `workouts.put` of their own, so an
+      entry for them would fail as stale. `save-workout-edits.ts` covers
+      them.
   - `creator`: writes a new row or restores a deleted one, so no match can be
     stale:
     - `application/coaching/convert-coaching-activity.ts`
@@ -636,6 +651,10 @@ would then move the match back to the stale date.
     was sent, but Garmin's id was never confirmed.
   - `undefined` otherwise. `attempting` and `uncertain` stay with the existing
     placement notice.
+  - `undefined` as well when the workout's session is **locked** (§3.1). A
+    done session is not movable, so it shows no "Garmin still on" state and
+    no **Update Garmin**. The caller passes `locked`:
+    `garminDateDrift(row, workout, { locked })`.
 
 **Card**
 
@@ -720,6 +739,9 @@ would then move the match back to the stale date.
 | AC-25 | The five stale-snapshot writers of §3.10 re-read and write in one transaction. In each, a `moveSession` interleaved during the `await` keeps its date.                                                                                                                                                       | PR-1 |
 | AC-26 | On `/workout/view/:id`, a refused move (`SessionNotMovableError`) shows the blocked toast (en and es) and raises no unhandled rejection. This holds already after PR-1.                                                                                                                                      | PR-1 |
 | AC-27 | A new match for a coach-built workout is dated from the workout's `date`. A non-coach-built workout's match is dated from the activity's `date`.                                                                                                                                                             | PR-1 |
+| AC-28 | A locked match whose coach-built workout is coach-moved into the next week (M on Tue W1, `W.date` on Thu W2) renders its matched card in W1 only. W2 shows no solo card for W or its recordings, and the Daily view on Thursday shows none either.                                                           | PR-1 |
+| AC-29 | `garminDateDrift` returns `undefined` for a locked session. A done session shows no "Garmin still on" state and no **Update Garmin**.                                                                                                                                                                        | PR-3 |
+| AC-30 | A stale-snapshot writer whose fresh row changed state during the `await` (for example, skipped during the AI call) writes nothing and does not throw. Its outcome is skipped.                                                                                                                                | PR-1 |
 
 ## Test plan (per PR)
 
@@ -768,6 +790,10 @@ adapter tests, plus `node --test`.
 - `use-move-workout`: a `SessionNotMovableError` shows the toast and is not
   rethrown (AC-26).
 - Match creation date for coach-built and other workouts (AC-27).
+- Locked match plus a coach move across weeks: no solo card in week 2, in the
+  Grid and Daily views (AC-28).
+- Stale-snapshot writer whose state changed during the `await`: no write and
+  no throw (AC-30).
 - The `useMatchedSessions` 30 ms performance spec with cross-week matches
   (§3.6).
 
@@ -790,7 +816,8 @@ Playwright spec.
 **PR-3: Garmin state and Update.** Vitest and RTL.
 
 - The `garminDateDrift` truth table: `Placed` on the same day and on another
-  day, `unconfirmed`, `attempting`, `uncertain`, and no row (AC-19).
+  day, `unconfirmed`, `attempting`, `uncertain`, no row (AC-19), and a locked
+  session (AC-29).
 - The badge, the detail state and the post-move toast. No push happens on a
   move or a sync (AC-19).
 - **Update Garmin** with the fake calendar port runs schedule → verify →

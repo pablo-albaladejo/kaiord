@@ -46,7 +46,7 @@ The workout detail, the editor and their dialogs SHALL be the canonical surfaces
 
 ### Requirement: A moved session renders on its new day
 
-The calendar SHALL bucket a matched session by its `SessionMatch.date`, which is the session's effective date. After `moveSession`, a coach move or a heal commits, the matched card SHALL render only on the new day, and neither a matched card nor a solo card of its workout SHALL render on the old day. The week view SHALL also load, through the `[profileId+coachingActivityId]` index, the matches of the visible week's coaching activities, whatever their date. It SHALL hide those activities' solo plan cards without rendering the matches in that week. The Daily view SHALL apply the same rule.
+The calendar SHALL bucket a matched session by its `SessionMatch.date`, which is the session's effective date. After `moveSession`, a coach move or a heal commits, the matched card SHALL render only on the new day, and neither a matched card nor a solo card of its workout SHALL render on the old day. The week view SHALL also load, through the `[profileId+coachingActivityId]` index, the matches of the visible week's coaching activities, whatever their date. It SHALL hide those activities' solo plan cards without rendering the matches in that week, and it SHALL hide, as solo cards, those matches' `workoutId` and `executedWorkoutIds`. The Daily view SHALL apply the same rule.
 
 #### Scenario: Athlete-moved session
 
@@ -67,6 +67,12 @@ The calendar SHALL bucket a matched session by its `SessionMatch.date`, which is
 - **THEN** no solo coach plan card and no matched card for it SHALL appear on Sunday
 - **AND WHEN** week 2 renders
 - **THEN** the matched card SHALL appear on Monday
+
+#### Scenario: Locked match coach-moved into the next week
+
+- **GIVEN** a coach-built workout with an executed recording, its locked match dated Tuesday of week 1, and a coach move of the workout to Thursday of week 2
+- **WHEN** week 2 renders, in the Grid and in the Daily view of Thursday
+- **THEN** no solo card for the workout or its recording SHALL appear, and the matched card SHALL stay on Tuesday of week 1
 
 ### Requirement: Drag to reschedule a coach session in the Grid view
 

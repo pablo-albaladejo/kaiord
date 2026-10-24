@@ -51,13 +51,19 @@ The check SHALL fail on an unlisted call site, and on a registry entry that matc
 
 ### Requirement: Workout writers do not write stale snapshots
 
-A writer that updates an existing workout after an `await`, or from a copy held in UI state, SHALL re-read the row and write it inside one `PersistencePort.transaction`. It SHALL merge only the fields it owns and keep the re-read `date`, `coachDate` and `updatedAt`. It SHALL NOT recreate a row that no longer exists. This applies to batch processing, skip and unskip, the AI convert of an existing workout and the manual template convert.
+A writer that updates an existing workout after an `await`, or from a copy held in UI state, SHALL re-read the row and write it inside one `PersistencePort.transaction`. It SHALL merge only the fields it owns and keep the re-read `date`, `coachDate` and `updatedAt`. It SHALL NOT recreate a row that no longer exists. If the fresh row's state no longer fits the writer's transition (for example, it was skipped during the AI call), the write SHALL be a no-op skip: no throw and no write. This applies to batch processing, skip and unskip, the AI convert of an existing workout and the manual template convert.
 
 #### Scenario: A move during an AI convert survives
 
 - **GIVEN** an existing coach-built workout on Tuesday whose AI convert is awaiting the model
 - **WHEN** `moveSession` moves it to Thursday before the model returns
 - **THEN** after the convert commits, the workout SHALL be structured and dated Thursday
+
+#### Scenario: A workout skipped during the AI call is left skipped
+
+- **GIVEN** a batch AI convert awaiting the model for a raw workout
+- **WHEN** the user skips that workout before the model returns
+- **THEN** the convert SHALL write nothing, SHALL NOT throw, and the workout SHALL stay skipped
 
 #### Scenario: Skip from a stale dialog keeps the moved date
 
