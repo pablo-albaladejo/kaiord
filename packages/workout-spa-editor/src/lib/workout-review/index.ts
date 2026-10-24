@@ -4,4 +4,9 @@ export { type ReviewCopy, reviewCopyFor } from "./review-copy";
 export { buildReviewModel, type ReviewModel } from "./review-model";
 export { timeInZone } from "./time-in-zone";
 export { dominantZone } from "./zone-emphasis";
-export { zoneSeconds, type ZoneSegment, zoneSegments } from "./zone-profile";
+export {
+  type ProfileSegment,
+  zoneSeconds,
+  type ZoneSegment,
+  zoneSegments,
+} from "./zone-profile";
