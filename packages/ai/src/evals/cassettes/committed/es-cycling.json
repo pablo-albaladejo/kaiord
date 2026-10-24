@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "es-cycling",
+  "caseId": "es-cycling",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:51:46.360Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "84110a6ed4733639ca3c2782e768e39d3546d57b477e52120a74a2316120d8d6",
+  "requestHash": "9c10395075ac1796e4d9bf880fe585196c57c1f0d6347d6e70836cf2f087d1fe",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Ciclismo 3x10' Z4",
+      "sport": "cycling",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 900
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "repeatCount": 3,
+          "steps": [
+            {
+              "stepIndex": 0,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 600
+              },
+              "targetType": "power",
+              "target": {
+                "type": "power",
+                "value": {
+                  "unit": "zone",
+                  "value": 4
+                }
+              },
+              "intensity": "interval"
+            },
+            {
+              "stepIndex": 1,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 300
+              },
+              "targetType": "power",
+              "target": {
+                "type": "power",
+                "value": {
+                  "unit": "zone",
+                  "value": 1
+                }
+              },
+              "intensity": "recovery"
+            }
+          ]
+        },
+        {
+          "stepIndex": 2,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "cooldown"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7178,
+      "outputTokens": 557
+    }
+  }
+}

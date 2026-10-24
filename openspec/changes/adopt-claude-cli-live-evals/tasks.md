@@ -74,7 +74,7 @@
       **Pinned 2026-10-23** from the maintainer's calibration capture (CLI
       2.1.309): `unifiedWindows.seven_day.utilization`, scale `fraction`; the
       capture is the guard's fixture (`test-utils/calibration-capture-fixture.ts`).
-- [ ] 3.5 Recording decorator writing cassettes with provenance. The official
+- [x] 3.5 Recording decorator writing cassettes with provenance. The official
       model is the literal `claude-sonnet-5` (not `getDefaultModel`). Before it
       ships, check against a real result whether `modelUsage` keys the bare id
       or a dated snapshot and pin that in the validator. A result whose
@@ -91,10 +91,11 @@
       the recorder formats with Prettier before hashing (or the cassette
       directory goes in `.prettierignore` as generated output), and a test
       commits a recorded cassette through the hook and checks its digest.
-      **Remaining:** `OFFICIAL_SERVED_FORM` is pinned to `"bare"` (2026-10-23,
-      same capture: `modelUsage` keyed `claude-sonnet-5`). The first real
-      cassettes, their manifest entries and the replay lane in `pnpm test`
-      still land in one commit, after the maintainer's first `--record`.
+      **Done:** `OFFICIAL_SERVED_FORM` is pinned to `"bare"` (2026-10-23,
+      same capture: `modelUsage` keyed `claude-sonnet-5`). The first official
+      `--record` (2026-10-24, CLI 2.1.310, prompt 1.3.0, 25/25 cases) landed
+      with its 25 cassettes, manifest entries and the replay lane
+      (`committed-replay.test.ts`, run by `pnpm test`) in one commit.
 - [x] 3.6 `load-live-model.ts`; the parser runner migrates; the chat-tool and
       lab runners drop the loader and report every case unmeasured with the
       unsupported reason, exit 0; `eval:live` for the parser with `--repeat N`;

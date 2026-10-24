@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "id": "edge-ambiguous",
+  "caseId": "edge-ambiguous",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:52:45.081Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "b46fdc3cad7eaaf27de4d8e1d37204178b0d72c28a24fc1d2b6a2131795a9ca8",
+  "requestHash": "7e247c9ccd09703a5fd69e076113aca5098b036a88494525e7a9c240734e14da",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Rodaje moderado 40'",
+      "sport": "running",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "stepIndex": 1,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 1500
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 2
+            }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 2,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 300
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "cooldown"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 14942,
+      "outputTokens": 853
+    }
+  }
+}

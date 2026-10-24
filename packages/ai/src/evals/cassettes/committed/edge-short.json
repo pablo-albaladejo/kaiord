@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "edge-short",
+  "caseId": "edge-short",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:52:21.930Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "7003bb2c0308c4571960077d5617f8d205c68d779a5d49fdc97b226a891e96f7",
+  "requestHash": "fa3c4c9ebf9b7465a2f1f95dd6a4601084e76e820a19274fc2d01e172ff45e80",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Sprint 5 minutos",
+      "sport": "cycling",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 300
+          },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": {
+              "unit": "zone",
+              "value": 5
+            }
+          },
+          "intensity": "interval"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7112,
+      "outputTokens": 184
+    }
+  }
+}

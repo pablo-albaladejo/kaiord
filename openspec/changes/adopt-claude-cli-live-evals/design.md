@@ -117,8 +117,8 @@ cassette must turn red rather than ask a reader to notice a label. PR 6 ships
 only `recorder: "synthetic"` fixtures, which are never measured; the measured
 path, the sentinel and staleness are tested with in-memory
 `recorder: "claude-cli"` cassettes whose failure reasons are asserted. The lane
-over committed cassettes joins `pnpm test` in PR 7a in the same commit as the
-first real cassette, so it is never red by construction in between.
+over committed cassettes joined `pnpm test` in the same commit as the first
+real cassettes, so it was never red by construction in between.
 
 The fixture hash covers only what the model sees: for the parser, the
 benchmark text, the sport line input and `athleteZones`, exactly what reaches
@@ -143,7 +143,8 @@ an unblock nobody sees; with it, that edit fails unless the manifest digest
 changes too, which shows in review. Without it, the only way to unblock a stale
 cassette in CI would be a quota-bound local run or a silent delete. With it, a
 missing or unlisted id fails, and the two unblock paths are explicit: re-record
-locally, or retire the id in the manifest (a reviewed diff). Stale fails on
+locally, or retire the id in the manifest (a reviewed diff; a case still in the
+suite also loses its benchmark, or it fails as uncovered). Stale fails on
 every PR, bot bumps included: a dependency that changes the canonical schema
 really changes the request. The alternative, letting stale pass on bot PRs, was
 rejected because it is exactly the empty green this change exists to remove.

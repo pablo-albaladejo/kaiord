@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "zones-hr",
+  "caseId": "zones-hr",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:52:17.574Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "fe909782eb82dff48ed35609778456868c48d51c05c69d985edc6522a1b4e0f1",
+  "requestHash": "b1d64d833d46ad4893e29a70dab193108117f3b333286c620bbef6f964f2d620",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Carrera Z2 30'",
+      "sport": "running",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 1800
+          },
+          "targetType": "heart_rate",
+          "target": {
+            "type": "heart_rate",
+            "value": {
+              "unit": "range",
+              "min": 130,
+              "max": 150
+            }
+          },
+          "intensity": "active"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7130,
+      "outputTokens": 194
+    }
+  }
+}

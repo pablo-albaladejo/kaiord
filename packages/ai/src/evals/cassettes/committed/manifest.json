@@ -1,3 +1,104 @@
 {
-  "cassettes": []
+  "cassettes": [
+    {
+      "id": "cycling-endurance",
+      "sha256": "c9590eb0e31f99c8fae5ae2e8c0b024e675f4031409b755b6b569ee55c33fba6"
+    },
+    {
+      "id": "cycling-mixed",
+      "sha256": "e5bda4309f7abaa77ef8aa18a49f728a9e5b025517327a66592fd2bfaedc0c01"
+    },
+    {
+      "id": "cycling-simple",
+      "sha256": "a7cd5c907b0cb083e28de8e59a9cdd1e2a65449947ae6e0fc7c3285e470baa26"
+    },
+    {
+      "id": "cycling-sweetspot",
+      "sha256": "9b3d98c588cddb241fd7fbbd0ba47cf2e0f2a6cc6aa0524d4532a04c0deeb8f7"
+    },
+    {
+      "id": "cycling-vo2max",
+      "sha256": "00d4ff4f04dbb0cb3c7a3d5af508bdd44da1f5bcae869adb141172dc578fc8d2"
+    },
+    {
+      "id": "edge-ambiguous",
+      "sha256": "42e59444774df3b1814b27207ef76d9f35778c8795d7c9e628e3e030f8385a7f"
+    },
+    {
+      "id": "edge-long",
+      "sha256": "6066faa93fa76fdac2f1d5f2fc418659ecbc212ec1ae37cd5a0afdfa3a51c03f"
+    },
+    {
+      "id": "edge-short",
+      "sha256": "c88054e1c29083d16b4c246120232ab37cd146d03e85498cc9d9a46709e37996"
+    },
+    {
+      "id": "es-cycling",
+      "sha256": "1503aa3cc3faebbe7446ae2094e54d1cfe6e801c3bc9453939a1da753cb46881"
+    },
+    {
+      "id": "es-cycling-progressive",
+      "sha256": "b301ddeb6e2f2fbd79be728ebe90636d57ca539149911072a35df94fa0780ab5"
+    },
+    {
+      "id": "es-running",
+      "sha256": "10ee7ea923b806ba25c8094de4abf459001b3b50d1ef0d8efc8d759cda9692aa"
+    },
+    {
+      "id": "es-running-progressive",
+      "sha256": "058316e97a25267f0660090d71e9c3e615023c1d53326a6c4a8c290ffafa943b"
+    },
+    {
+      "id": "es-swimming",
+      "sha256": "a3948d4e0636a5c04949c4604994241c99cdbf0525f0bc0cb6c7ba613adb02d4"
+    },
+    {
+      "id": "es-train2go-contrasts",
+      "sha256": "c6f3a29dd179bf6da78d7cc214fe6cd4adf78cbcf6939537c63b982ac1ca3a0a"
+    },
+    {
+      "id": "generic-strength",
+      "sha256": "a13f677d030af33c32174ce83b85e302da6ae6e422a5cec92fe3e9410ff3856c"
+    },
+    {
+      "id": "mixed-lang",
+      "sha256": "dda18a97f558679f0dcc95b75aeed6906c6f6a3ae3b897917a10575c7321fc7c"
+    },
+    {
+      "id": "repetition-block",
+      "sha256": "1fe9a56521ea1761df3eab27b15e051208eba25a68e376aee18243c0e8562c4b"
+    },
+    {
+      "id": "running-easy",
+      "sha256": "f4b0a0f2f06a8f0a404097d6db2d551578a6cc4e15ba22f53d25c226cef45d75"
+    },
+    {
+      "id": "running-intervals",
+      "sha256": "4cc5248940d173c5302fe2bf54e9ce27a39193aac34ef486257b620fa4cc2b84"
+    },
+    {
+      "id": "running-long",
+      "sha256": "ee79d185997688e1907aee7c72bbbfbe65b137be5bdcda38679f1b87668b8e74"
+    },
+    {
+      "id": "running-tempo",
+      "sha256": "72f2391aea2ed1f84a1bcce17f928ffe869ba967e2635bddb38987b0e1b23044"
+    },
+    {
+      "id": "swimming-drill",
+      "sha256": "ba571bf823c76fb54a3e5032b15bfd2a1fcbf9220fafb45bf2d9f5caff8130c7"
+    },
+    {
+      "id": "swimming-simple",
+      "sha256": "43217b165fdcd38050ba8b6f56f2775ff2dfa117171c6d1a0edbc2ca3bf36726"
+    },
+    {
+      "id": "zones-ftp",
+      "sha256": "7617435340382b72f149ad6e3ebfbd77e4956fdb29369150bed3c367f47cd11c"
+    },
+    {
+      "id": "zones-hr",
+      "sha256": "db1123b2fca566063d53138e2f2519419d425f22ae03638c95a204c4a1060a89"
+    }
+  ]
 }

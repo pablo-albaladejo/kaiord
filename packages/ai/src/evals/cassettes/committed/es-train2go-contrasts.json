@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "id": "es-train2go-contrasts",
+  "caseId": "es-train2go-contrasts",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:53:15.927Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "0940220c7ed59bb02024d21a6148abce05a2f21e158f0fe885593eb095cf452e",
+  "requestHash": "5a9f56fd9ac1a1c5d1d9978cddd62351146be6a6a1ec8b78edf05b27b4e868c9",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Rodaje con contrastes y cambios",
+      "sport": "running",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 600
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "stepIndex": 1,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 720
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "stepIndex": 2,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 300
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 2
+            }
+          },
+          "intensity": "active"
+        },
+        {
+          "repeatCount": 4,
+          "steps": [
+            {
+              "stepIndex": 0,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 30
+              },
+              "targetType": "pace",
+              "target": {
+                "type": "pace",
+                "value": {
+                  "unit": "zone",
+                  "min": 1,
+                  "max": 5
+                }
+              },
+              "intensity": "interval"
+            },
+            {
+              "stepIndex": 1,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 60
+              },
+              "targetType": "pace",
+              "target": {
+                "type": "pace",
+                "value": {
+                  "unit": "zone",
+                  "value": 1
+                }
+              },
+              "intensity": "recovery"
+            }
+          ]
+        },
+        {
+          "stepIndex": 3,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 120
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "recovery"
+        },
+        {
+          "repeatCount": 8,
+          "steps": [
+            {
+              "stepIndex": 0,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 30
+              },
+              "targetType": "pace",
+              "target": {
+                "type": "pace",
+                "value": {
+                  "unit": "zone",
+                  "min": 4,
+                  "max": 5
+                }
+              },
+              "intensity": "interval"
+            },
+            {
+              "stepIndex": 1,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 60
+              },
+              "targetType": "pace",
+              "target": {
+                "type": "pace",
+                "value": {
+                  "unit": "zone",
+                  "value": 1
+                }
+              },
+              "intensity": "recovery"
+            },
+            {
+              "stepIndex": 2,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 20
+              },
+              "targetType": "pace",
+              "target": {
+                "type": "pace",
+                "value": {
+                  "unit": "zone",
+                  "min": 4,
+                  "max": 5
+                }
+              },
+              "intensity": "interval"
+            },
+            {
+              "stepIndex": 3,
+              "durationType": "time",
+              "duration": {
+                "type": "time",
+                "seconds": 100
+              },
+              "targetType": "pace",
+              "target": {
+                "type": "pace",
+                "value": {
+                  "unit": "zone",
+                  "value": 1
+                }
+              },
+              "intensity": "recovery"
+            }
+          ]
+        },
+        {
+          "stepIndex": 4,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 300
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "cooldown"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 17172,
+      "outputTokens": 3030
+    }
+  }
+}
