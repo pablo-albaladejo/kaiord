@@ -1,3 +1,5 @@
+> Completed: 2026-10-24
+
 ## Why
 
 The coaching dialog's intensity thumbnail (`feat/calendar-modal-zone-profile`)

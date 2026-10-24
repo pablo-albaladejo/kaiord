@@ -19,4 +19,4 @@
 ## 3. Ship
 
 - [x] 3.1 Changeset (`@kaiord/workout-spa-editor` patch)
-- [ ] 3.2 Archive after merge
+- [x] 3.2 Archive after merge
