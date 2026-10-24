@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "running-easy",
+  "caseId": "running-easy",
+  "recorder": "claude-cli",
+  "cliVersion": "2.1.310",
+  "provider": "anthropic",
+  "requestedModelId": "claude-sonnet-5",
+  "servedModelId": "claude-sonnet-5",
+  "recordedAt": "2026-10-24T14:51:06.298Z",
+  "prompt": {
+    "id": "workout-parser/system",
+    "version": "1.3.0",
+    "hash": "bff60392d9e9b84fd70c4968fa1a37be613f11bdb21f8e5984a88093856fa38f"
+  },
+  "toolsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "fixtureHash": "9d8f6393a7aada9177003296b3ccbf0a22d8b563bc24715cf7ea5786d9e57b79",
+  "requestHash": "ed6d0aa146e0c32af286e97661ab87dbce71080c60fb6d239a556ba3ae05faa2",
+  "sampling": {
+    "temperature": null,
+    "maxOutputTokens": null
+  },
+  "parityWarnings": [
+    "temperature-not-honoured",
+    "hidden-system-overhead",
+    "max-output-tokens-not-honoured"
+  ],
+  "response": {
+    "structuredOutput": {
+      "name": "Rodaje suave 30'",
+      "sport": "running",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": {
+            "type": "time",
+            "seconds": 1800
+          },
+          "targetType": "pace",
+          "target": {
+            "type": "pace",
+            "value": {
+              "unit": "zone",
+              "value": 1
+            }
+          },
+          "intensity": "active"
+        }
+      ]
+    },
+    "finishReason": "stop",
+    "usage": {
+      "inputTokens": 7109,
+      "outputTokens": 184
+    }
+  }
+}
