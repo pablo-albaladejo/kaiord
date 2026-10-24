@@ -134,7 +134,7 @@ to check.
 
 #### Scenario: No matching steps is not a pass
 
-- **GIVEN** a workout containing no active step of the zone check's target type
+- **GIVEN** a workout containing no active or interval step of the zone check's target type
 - **WHEN** the zone assertion runs
 - **THEN** it SHALL NOT contribute a passing result
 
@@ -259,9 +259,9 @@ model calls, counting the calibration call and every retry; when
 `EVAL_MAX_CALLS` is unset the budget SHALL be 50. Weekly utilization is
 compared as a fraction from 0 to 1. The rate-limit guard SHALL read one pinned
 field of the CLI's `rate_limit_event` for the seven-day window, whose name and
-scale are fixed in the guard from a real recorded event (the smoke calls
-observed 75 % but did not record the field name or its scale, so the guard
-cannot ship before they are pinned); the conversion to 0–1 SHALL be a fixed
+scale are fixed in the guard from a real recorded event: the pinned field is
+`unifiedWindows.seven_day.utilization`, a 0–1 fraction (observed 2026-10-23);
+the conversion to 0–1 SHALL be a fixed
 rule for that field, never inferred from the value. It SHALL stop before the
 next call once utilization is strictly above `EVAL_MAX_WEEKLY_UTILIZATION`
 (default `0.85`, decision D1b: "stops above 85 %"), or once the CLI reports a
@@ -376,9 +376,8 @@ the pinned official model (decision D1c): its requested model id SHALL equal
 `claude-sonnet-5`, and its served model id SHALL be `claude-sonnet-5` or a
 dated snapshot of it (`claude-sonnet-5-` followed by an eight-digit date),
 recorded verbatim in the cassette; the validator SHALL reject a committed
-cassette otherwise. Which of the two forms `modelUsage` keys SHALL be checked
-against a real result and pinned, and the validator SHALL accept only the pinned
-form (observed 2026-10-23: the bare id).
+cassette otherwise. The validator SHALL accept only the form `modelUsage` keys
+take in a real result, which is pinned: the bare id (observed 2026-10-23).
 A recording whose CLI `modelUsage` names more than one served model, or one
 that is neither the requested id nor a dated snapshot of it, SHALL be rejected
 before it is written. A recording with any other model is an iteration run: it
@@ -389,7 +388,7 @@ The replay runner SHALL feed recorded responses through `MockLanguageModelV4`
 into the real runtime and SHALL import nothing from `evals/claude-cli/`, so it
 needs no credential and no CLI and MAY gate in CI. Unit tests MAY build
 cassettes in memory with `recorder: "claude-cli"`, never written to disk, so
-the measured path is exercised before any real cassette exists; the schema
+the measured path is exercised without touching a real cassette; the schema
 rules apply to them, the committed-cassette rules (official model, manifest) do
 not. A cassette whose prompt
 hash, tools hash, fixture hash or request hash (which covers the schema and the
@@ -410,7 +409,7 @@ the scorer sentinel SHALL assert the reason (zero measured, the stale ids, the
 failing case id and scorer), not only a non-zero exit. The replay lane over
 the committed cassettes is part of `pnpm test` (keyless; it imports nothing from
 `evals/claude-cli/`), committed in the same change as the first real cassettes
-and their manifest entries, so it was never red by construction.
+and their manifest entries.
 
 #### Scenario: Provenance is recorded
 
