@@ -73,7 +73,22 @@
       "not-linked": "Este coach no está vinculado a este atleta.",
       "session-expired": "Tu sesión de coaching caducó: reconéctate y reintenta.",
       "transport-error": "No se pudo cargar la descripción. Revisa que la extensión del navegador esté instalada y activa."
-    }
+    },
+    "showAll": "Ver todo",
+    "showLess": "Ver menos"
+  },
+  "profile": {
+    "ariaLabel_one": "Perfil de intensidad, {{duration}} en {{count}} bloque: {{breakdown}}",
+    "ariaLabel_other": "Perfil de intensidad, {{duration}} en {{count}} bloques: {{breakdown}}",
+    "estimateAriaLabel_one": "Perfil de intensidad estimado a partir del texto del entrenador, {{duration}} en {{count}} bloque: {{breakdown}}",
+    "estimateAriaLabel_other": "Perfil de intensidad estimado a partir del texto del entrenador, {{duration}} en {{count}} bloques: {{breakdown}}",
+    "zoneTime": "Z{{zone}} {{duration}}",
+    "barTitle": "Z{{zone}} · {{duration}}",
+    "noZoneBarTitle": "Sin zona indicada · {{duration}}",
+    "zone": "Z{{zone}}",
+    "tick": "{{minutes}}′",
+    "legendAria": "Zonas de entrenamiento",
+    "estimateCaption": "Estimado a partir del texto del entrenador"
   },
   "actions": {
     "close": "Cerrar",

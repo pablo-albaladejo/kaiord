@@ -10,17 +10,17 @@
  *                    contextual buttons.
  */
 
-import { useTranslate } from "../../../i18n/use-translate";
+import { formatHms } from "../../../lib/workout-review";
+import type { WorkoutRecord } from "../../../types/calendar-record";
+import { cardDurationSeconds } from "../WorkoutCard/workout-card-labels";
 import {
   type CoachingDialogBodyProps,
   renderMatchedBody,
   renderNoWorkoutBody,
 } from "./coaching-dialog-body";
-import {
-  DialogDescription,
-  DialogHeader,
-  DialogMeta,
-} from "./coaching-dialog-parts";
+import { DialogMeta } from "./coaching-dialog-meta";
+import { DialogDescription, DialogHeader } from "./coaching-dialog-parts";
+import { CoachingDialogZoneProfile } from "./coaching-dialog-zone-profile";
 import { CoachingDayComments } from "./CoachingDayComments";
 import { useCoachingDayComments } from "./use-coaching-day-comments";
 import type { DescriptionLoad } from "./use-coaching-dialog-helpers";
@@ -32,12 +32,20 @@ export type CoachingActivityDialogContentProps = CoachingDialogBodyProps & {
   profileId: string | null;
 };
 
+const linkedDurationLabel = (
+  workout: WorkoutRecord | null
+): string | undefined => {
+  const seconds = workout ? cardDurationSeconds(workout) : null;
+  return seconds ? formatHms(seconds) : undefined;
+};
+
 export function CoachingActivityDialogContent(
   props: CoachingActivityDialogContentProps
 ) {
   const { activity, dialogState, descriptionLoad, profileId } = props;
-  const t = useTranslate("coaching");
   const matched = dialogState?.kind === "matched" ? dialogState : null;
+  const linked =
+    dialogState && "workout" in dialogState ? dialogState.workout : null;
   const comments = useCoachingDayComments(
     profileId,
     activity.source,
@@ -46,10 +54,14 @@ export function CoachingActivityDialogContent(
   return (
     <div className="space-y-3">
       <DialogHeader activity={activity} />
-      <DialogMeta activity={activity} />
-      <div className="text-xs text-muted-foreground">
-        <span className="font-medium">{t(`status.${activity.status}`)}</span>
-      </div>
+      <DialogMeta
+        activity={activity}
+        duration={activity.duration ?? linkedDurationLabel(linked)}
+      />
+      <CoachingDialogZoneProfile
+        workout={linked}
+        description={activity.description}
+      />
       <DialogDescription activity={activity} load={descriptionLoad} />
       {matched
         ? renderMatchedBody(props, matched.workout, matched.executed)
