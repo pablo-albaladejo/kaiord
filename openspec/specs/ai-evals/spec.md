@@ -1,10 +1,10 @@
-> Synced: 2026-07-09 (add-lab-extraction-agent)
+> Synced: 2026-10-24 (adopt-claude-cli-live-evals)
 
 # ai-evals Specification
 
 ## Purpose
 
-Defines the deterministic, keyless eval smoke lane (built on `MockLanguageModelV4`) that exercises the real agent runtime in CI, and the local-only live lane over the maintainer's Claude Code subscription (`claude -p`), reached through the live loader driven by `EVAL_MODEL`, which never runs in CI.
+Defines the deterministic, keyless eval smoke lane (built on `MockLanguageModelV4`) that exercises the real agent runtime in CI, and the local-only live lane over the maintainer's Claude Code subscription (`claude -p`), reached through the live loader driven by `EVAL_MODEL`, which never runs in CI. Between them sits the keyless cassette replay lane: `pnpm test` replays the committed live answers through the real agent path and fails on any stale, missing, tampered or uncovered cassette, so it gates CI without a key.
 
 ## Requirements
 
