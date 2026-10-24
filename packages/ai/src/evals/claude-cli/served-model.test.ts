@@ -68,6 +68,8 @@ describe("committedServedFault", () => {
 
     // Assert
     expect(fault).toContain("OFFICIAL_SERVED_FORM is not pinned");
+    expect(fault).toContain("cassettes/validate-cassette.ts");
+    expect(fault).not.toContain("tasks.md");
   });
 
   it("should ship pinned to the bare id the real calibration served", () => {
