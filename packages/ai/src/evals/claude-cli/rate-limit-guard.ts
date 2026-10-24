@@ -63,7 +63,9 @@ const utilizationOf = (infos: Array<Info>, field: WeeklyField) => {
     .map((info) => valueAt(info, field.path));
   // Every event the pin applies to must carry it: one without is no signal.
   if (values.length === 0) {
-    return fault(`pinned field ${name} is missing: no rate_limit_event matches`);
+    return fault(
+      `pinned field ${name} is missing: no rate_limit_event matches`
+    );
   }
   const lacking = values.filter((value) => value === undefined).length;
   if (lacking > 0) {

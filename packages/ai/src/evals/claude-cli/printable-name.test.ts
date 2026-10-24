@@ -16,7 +16,7 @@ describe("printable", () => {
 
   it("should drop a non-string, an over-long or a non-plain name", () => {
     // Arrange
-    const names = [null,"x".repeat(MAX_PRINTED_NAME + 1), "has space"];
+    const names = [null, "x".repeat(MAX_PRINTED_NAME + 1), "has space"];
 
     // Act
     const results = names.map(printable);
