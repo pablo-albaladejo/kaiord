@@ -13,7 +13,7 @@
  */
 import { forwardRef, type HTMLAttributes } from "react";
 
-import type { ProfileSegment } from "../../../lib/workout-review";
+import type { ProfileSegment } from "../../../lib/workout-review/zone-profile";
 import { zoneBgClass, type ZoneNumber } from "../../../lib/zone-colors";
 
 /** Fraction of the bar's height per zone — the second, colour-free channel. */

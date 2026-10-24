@@ -1,11 +1,11 @@
 import { pluralKey } from "../../../i18n/plural-key";
 import type { Translate } from "../../../i18n/use-translate";
+import { formatHms } from "../../../lib/workout-review/format-duration";
 import {
-  formatHms,
   type ProfileSegment,
   zoneSeconds,
   type ZoneSegment,
-} from "../../../lib/workout-review";
+} from "../../../lib/workout-review/zone-profile";
 import { profileTotalSeconds } from "./zone-profile-axis";
 
 /** "Z4 · 20m", or "No zone given · 30m" — the hover title of one bar. */
@@ -21,21 +21,28 @@ const isZoned = (segment: ProfileSegment): segment is ZoneSegment =>
 
 /**
  * The chart's accessible summary: total length, how many blocks, and the time
- * spent in each zone the session touches, in Z1→Z5 order. Unzoned time counts
- * toward the total but has no zone to list; an estimate says it is one.
+ * spent in each zone the session touches, in Z1→Z5 order, then the time the
+ * text gives no zone for. An estimate says it is one.
  */
 export function profileAriaLabel(
   t: Translate,
   segments: readonly ProfileSegment[],
   estimated = false
 ): string {
-  const breakdown = zoneSeconds(segments.filter(isZoned))
+  const zoned = zoneSeconds(segments.filter(isZoned))
     .map((seconds, index) => ({ zone: index + 1, seconds }))
     .filter(({ seconds }) => seconds > 0)
     .map(({ zone, seconds }) =>
       t("profile.zoneTime", { zone, duration: formatHms(seconds) })
-    )
-    .join(", ");
+    );
+  const unzonedSeconds = segments
+    .filter((segment) => !isZoned(segment))
+    .reduce((sum, segment) => sum + segment.seconds, 0);
+  const unzoned =
+    unzonedSeconds > 0
+      ? [t("profile.noZoneTime", { duration: formatHms(unzonedSeconds) })]
+      : [];
+  const breakdown = [...zoned, ...unzoned].join(", ");
   const key = estimated ? "profile.estimateAriaLabel" : "profile.ariaLabel";
   return t(pluralKey(key, segments.length), {
     count: segments.length,

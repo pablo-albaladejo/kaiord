@@ -198,7 +198,7 @@ describe("CoachingDialogZoneProfile", () => {
     expect(zoned?.getAttribute("data-zone")).toBe("1");
     expect(
       screen.getByRole("img", {
-        name: "Estimated intensity profile from coach text, 40m in 2 blocks: Z1 10m",
+        name: "Estimated intensity profile from coach text, 40m in 2 blocks: Z1 10m, No zone given 30m",
       })
     ).toBeInTheDocument();
   });

@@ -10,7 +10,7 @@
  *                    contextual buttons.
  */
 
-import { formatHms } from "../../../lib/workout-review";
+import { formatHms } from "../../../lib/workout-review/format-duration";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { cardDurationSeconds } from "../WorkoutCard/workout-card-labels";
 import {

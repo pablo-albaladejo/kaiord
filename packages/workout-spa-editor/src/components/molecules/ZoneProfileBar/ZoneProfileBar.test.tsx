@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { ProfileSegment, ZoneSegment } from "../../../lib/workout-review";
+import type {
+  ProfileSegment,
+  ZoneSegment,
+} from "../../../lib/workout-review/zone-profile";
 import { ZoneProfileBar } from "./ZoneProfileBar";
 
 const SECONDS = 600;

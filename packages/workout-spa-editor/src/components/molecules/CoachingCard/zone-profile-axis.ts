@@ -1,4 +1,4 @@
-import type { ProfileSegment } from "../../../lib/workout-review";
+import type { ProfileSegment } from "../../../lib/workout-review/zone-profile";
 
 const SECONDS_PER_MINUTE = 60;
 const FULL_PERCENT = 100;

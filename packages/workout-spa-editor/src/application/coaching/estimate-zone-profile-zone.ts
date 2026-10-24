@@ -54,13 +54,16 @@ export const explicitZone = (text: string): EstimatedZone | null =>
 // leaves the span unzoned.
 export const resolveZone = (text: string): EstimatedZone | null => {
   const named = namedZones(text);
+  // A ceiling ("máximo Z3") starts with a Z5 word, so the RPE, mixed and word
+  // checks read the text with every ceiling removed.
+  const uncapped = text.replace(CAPPED, " ");
   if (named.length > 0) {
     const progression = new Set(named).size > 1 && PROGRESSION.test(text);
     return progression ? null : lowest(named);
   }
-  const rpe = rpeZone(text);
-  if (rpe !== null || MIXED.test(text)) return rpe;
-  return lowest(WORDS.filter(([, re]) => re.test(text)).map(([z]) => z));
+  const rpe = rpeZone(uncapped);
+  if (rpe !== null || MIXED.test(uncapped)) return rpe;
+  return lowest(WORDS.filter(([, re]) => re.test(uncapped)).map(([z]) => z));
 };
 
 // Only a section word makes a label; an intensity word ("Rodaje suave")

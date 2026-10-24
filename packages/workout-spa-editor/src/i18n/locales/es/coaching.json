@@ -101,6 +101,7 @@
     "estimateAriaLabel_one": "Perfil de intensidad estimado a partir del texto del entrenador, {{duration}} en {{count}} bloque: {{breakdown}}",
     "estimateAriaLabel_other": "Perfil de intensidad estimado a partir del texto del entrenador, {{duration}} en {{count}} bloques: {{breakdown}}",
     "zoneTime": "Z{{zone}} {{duration}}",
+    "noZoneTime": "Sin zona indicada {{duration}}",
     "barTitle": "Z{{zone}} · {{duration}}",
     "noZoneBarTitle": "Sin zona indicada · {{duration}}",
     "zone": "Z{{zone}}",

@@ -101,6 +101,7 @@
     "estimateAriaLabel_one": "Estimated intensity profile from coach text, {{duration}} in {{count}} block: {{breakdown}}",
     "estimateAriaLabel_other": "Estimated intensity profile from coach text, {{duration}} in {{count}} blocks: {{breakdown}}",
     "zoneTime": "Z{{zone}} {{duration}}",
+    "noZoneTime": "No zone given {{duration}}",
     "barTitle": "Z{{zone}} · {{duration}}",
     "noZoneBarTitle": "No zone given · {{duration}}",
     "zone": "Z{{zone}}",

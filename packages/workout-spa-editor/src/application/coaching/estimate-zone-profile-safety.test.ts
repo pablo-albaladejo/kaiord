@@ -53,6 +53,17 @@ describe("estimateZoneProfile (safety caps)", () => {
     expect(segments).toEqual([]);
   });
 
+  it("should return no estimate for a group that opens and closes on different lines", () => {
+    // Arrange
+    const text = "10' z2\n(5' z1\n)";
+
+    // Act
+    const segments = estimateZoneProfile(text);
+
+    // Assert
+    expect(segments).toEqual([]);
+  });
+
   it("should stop expanding nested repeats at the segment cap", () => {
     // Arrange
     const exploding = "99x(99x(99x(1' z1 + 1' z4)))";

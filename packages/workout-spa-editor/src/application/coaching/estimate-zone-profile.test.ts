@@ -100,6 +100,17 @@ describe("estimateZoneProfile (zone resolution)", () => {
     expect(segments).toEqual(expected);
   });
 
+  it("should not read a ceiling's maximum as a Z5 word", () => {
+    // Arrange
+    const text = "10' z1, 30' máximo Z3";
+
+    // Act
+    const segments = estimateZoneProfile(text);
+
+    // Assert
+    expect(segments).toEqual([seg(Z1, MIN_10), seg(null, MIN_30)]);
+  });
+
   it("should let RPE beat a word and ignore the colon after RPE", () => {
     // Arrange
     const text = "10' trote RPE: 3, 20' z2";

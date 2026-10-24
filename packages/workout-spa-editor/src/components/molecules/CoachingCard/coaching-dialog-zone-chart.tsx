@@ -1,5 +1,5 @@
 import { useTranslate } from "../../../i18n/use-translate";
-import type { ProfileSegment } from "../../../lib/workout-review";
+import type { ProfileSegment } from "../../../lib/workout-review/zone-profile";
 import { ZoneProfileBar } from "../ZoneProfileBar/ZoneProfileBar";
 import { axisTicks, profileTotalSeconds } from "./zone-profile-axis";
 import { profileAriaLabel, segmentTitle } from "./zone-profile-copy";
