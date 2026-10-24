@@ -9,12 +9,18 @@ import { createAiAgentError } from "./errors";
 import { keepUnderlyingFailure } from "./underlying-failure";
 import {
   callModel,
-  streamModel,
+  outputBudgetOf,
   type CallModelArgs,
   type GenerateOutcome,
   type ReportPhase,
 } from "./call-model";
-import { createProgressEmitter, type OnGenerateProgress } from "./progress";
+import { streamModel } from "./stream-model";
+import { nextOutputBudget, retryReasonOf } from "./retry-plan";
+import {
+  createProgressEmitter,
+  type GenerateRetryReason,
+  type OnGenerateProgress,
+} from "./progress";
 
 const DEFAULT_MAX_RETRIES = 2;
 
@@ -58,13 +64,16 @@ export const runGenerateLoop = async <TOutput>(
   const emit = createProgressEmitter(args.onProgress, maxRetries + 1);
   const mode: Mode = { streaming: args.onProgress !== undefined };
   let lastError: string | undefined;
+  let retryReason: GenerateRetryReason | undefined;
+  let budget = outputBudgetOf(args);
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     args.signal?.throwIfAborted();
-    emit({ phase: "requesting", attempt });
+    emit({ phase: "requesting", attempt, retryReason });
     try {
-      return await callOnce(args, lastError, mode, (phase, items) =>
-        emit({ phase, attempt, items })
+      const call = { ...args, maxOutputTokens: budget };
+      return await callOnce(call, lastError, mode, (phase, items, partial) =>
+        emit({ phase, attempt, retryReason, items, partial })
       );
     } catch (error) {
       // An aborted signal stops the run whatever its reason was: a caller may
@@ -72,6 +81,8 @@ export const runGenerateLoop = async <TOutput>(
       if (args.signal?.aborted) throw error;
       if (isNonRetryableTransport(error) || isAbortError(error)) throw error;
       lastError = error instanceof Error ? error.message : String(error);
+      retryReason = retryReasonOf(error);
+      budget = nextOutputBudget(budget, retryReason);
       args.onAttemptError?.(attempt, lastError);
       if (attempt > maxRetries) {
         throw keepUnderlyingFailure(

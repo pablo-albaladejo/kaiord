@@ -53,10 +53,29 @@ export type ChatTurnFinishedEvent = {
   latencyMs: number;
 };
 
+/**
+ * Where a streamed generate run spent its time: milliseconds per progress
+ * phase summed over every attempt, the attempt count, and why each retry
+ * happened. Present on every run given a progress listener; a run whose model
+ * cannot stream counts all its time as `requesting`.
+ */
+export type AiRunTimings = {
+  attempts: number;
+  phaseMs: Partial<
+    Record<"requesting" | "reasoning" | "generating" | "validating", number>
+  >;
+  retryReasons: Array<"truncated" | "invalid" | "provider">;
+};
+
 export type AiTelemetryEvent =
-  | ({ type: "run_finished"; usage?: AiUsage } & RunIdentity)
+  | ({
+      type: "run_finished";
+      usage?: AiUsage;
+      timings?: AiRunTimings;
+    } & RunIdentity)
   | ({
       type: "run_failed";
+      timings?: AiRunTimings;
       error: { name: string; retriable: boolean };
     } & RunIdentity)
   | ChatTurnFinishedEvent;

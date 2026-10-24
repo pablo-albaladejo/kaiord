@@ -1,5 +1,20 @@
 import type { Logger } from "@kaiord/core";
-import type { AiTelemetryEvent, AiTelemetrySink } from "./telemetry-types";
+import type {
+  AiRunTimings,
+  AiTelemetryEvent,
+  AiTelemetrySink,
+} from "./telemetry-types";
+
+const timingsOf = (timings: AiRunTimings | undefined): string => {
+  if (!timings) return "";
+  const phases = Object.entries(timings.phaseMs)
+    .map(([phase, ms]) => `${phase}=${ms}ms`)
+    .join(" ");
+  const retries = timings.retryReasons.length
+    ? ` retries=${timings.retryReasons.join(",")}`
+    : "";
+  return ` attempts=${timings.attempts} ${phases}${retries}`;
+};
 
 const summarize = (event: AiTelemetryEvent): string =>
   event.type === "chat_turn_finished"
@@ -7,7 +22,7 @@ const summarize = (event: AiTelemetryEvent): string =>
       `status=${event.status} steps=${event.steps} ${event.latencyMs}ms`
     : `[ai:${event.type}] ${event.agentId}@${event.agentVersion} ` +
       `${event.provider}/${event.modelId} purpose=${event.purpose} ` +
-      `${event.latencyMs}ms`;
+      `${event.latencyMs}ms${timingsOf(event.timings)}`;
 
 /**
  * Development sink: logs a single-line summary per run. Carries ids and

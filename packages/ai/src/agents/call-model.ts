@@ -1,9 +1,14 @@
-import { generateText, Output, streamText } from "ai";
+import { generateText, Output } from "ai";
 import type { LanguageModel } from "ai";
 import type { AgentDefinition, GenerateAgentInput } from "./definition-types";
 import type { AiUsage } from "../observability/telemetry-types";
 import type { GenerateProgressPhase } from "./progress";
 import { buildUserMessage } from "./build-user-message";
+import {
+  AiOutputInvalidError,
+  throwIfTruncated,
+  toOutputError,
+} from "./output-errors";
 
 const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
 
@@ -15,14 +20,17 @@ export type CallModelArgs<TOutput> = {
   input: GenerateAgentInput;
   definition: AgentDefinition<TOutput>;
   signal?: AbortSignal;
+  /** Overrides the definition's budget, e.g. raised after a truncation. */
+  maxOutputTokens?: number;
 };
 
 export type ReportPhase = (
   phase: GenerateProgressPhase,
-  items?: number
+  items?: number,
+  partial?: unknown
 ) => void;
 
-const toUsage = (raw: {
+export const toUsage = (raw: {
   inputTokens?: number;
   outputTokens?: number;
 }): AiUsage => ({
@@ -33,15 +41,27 @@ const toUsage = (raw: {
 // `validate`, when present, owns validation and receives the RAW model output
 // (so an agent whose wire schema is permissive can validate against a stricter
 // domain schema). Otherwise the wire `outputSchema` is the gate.
-const validateOutput = <TOutput>(
+export const validateOutput = <TOutput>(
   definition: AgentDefinition<TOutput>,
   raw: unknown
-): TOutput =>
-  definition.validate
-    ? definition.validate(raw)
-    : (definition.outputSchema.parse(raw) as TOutput);
+): TOutput => {
+  if (!raw) throw new AiOutputInvalidError("No structured output generated");
+  try {
+    return definition.validate
+      ? definition.validate(raw)
+      : (definition.outputSchema.parse(raw) as TOutput);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new AiOutputInvalidError(message, error);
+  }
+};
 
-const callSettings = <TOutput>(
+export const outputBudgetOf = <TOutput>(args: CallModelArgs<TOutput>) =>
+  args.maxOutputTokens ??
+  args.definition.maxOutputTokens ??
+  DEFAULT_MAX_OUTPUT_TOKENS;
+
+export const callSettings = <TOutput>(
   args: CallModelArgs<TOutput>,
   feedback?: string
 ) => ({
@@ -49,7 +69,7 @@ const callSettings = <TOutput>(
   output: Output.object({ schema: args.definition.outputSchema }),
   system: args.system,
   messages: [buildUserMessage(args.input, feedback)],
-  maxOutputTokens: args.definition.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
+  maxOutputTokens: outputBudgetOf(args),
   temperature: args.definition.temperature ?? 0,
   maxRetries: 0,
   abortSignal: args.signal,
@@ -59,53 +79,14 @@ export const callModel = async <TOutput>(
   args: CallModelArgs<TOutput>,
   feedback?: string
 ): Promise<GenerateOutcome<TOutput>> => {
-  const result = await generateText(callSettings(args, feedback));
-  if (!result.output) throw new Error("No structured output generated");
+  const result = await generateText(callSettings(args, feedback)).catch(
+    (error: unknown) => {
+      throw toOutputError(error);
+    }
+  );
+  throwIfTruncated(result.finishReason);
   return {
     output: validateOutput(args.definition, result.output),
     usage: toUsage(result.usage),
-  };
-};
-
-/**
- * Streaming twin of `callModel`: same request, same validation, plus a phase
- * report per partial output. A provider failure arrives as a stream `error`
- * part handed to `onError`, not a throw, and the result promises then reject
- * with a generic error that drops the `statusCode`; the first stream error is
- * captured and rethrown so retry classification sees the real failure (the
- * same seam as `chat/run-turn.ts`). Capturing it also replaces the SDK's
- * default `onError`, which logs the request body.
- */
-export const streamModel = async <TOutput>(
-  args: CallModelArgs<TOutput>,
-  feedback: string | undefined,
-  report: ReportPhase
-): Promise<GenerateOutcome<TOutput>> => {
-  let streamError: unknown;
-  const result = streamText({
-    ...callSettings(args, feedback),
-    onError: ({ error }) => {
-      streamError ??= error;
-    },
-  });
-  const settled = async () => {
-    for await (const partial of result.partialOutputStream) {
-      report("generating", args.definition.countItems?.(partial));
-    }
-    // A failed or aborted stream also ends the loop; it must not claim to
-    // validate.
-    if (streamError === undefined && !args.signal?.aborted) {
-      report("validating");
-    }
-    return Promise.all([result.output, result.usage]);
-  };
-  const [raw, usage] = await settled().catch((e: unknown) => {
-    throw streamError ?? e;
-  });
-  if (streamError !== undefined) throw streamError;
-  if (!raw) throw new Error("No structured output generated");
-  return {
-    output: validateOutput(args.definition, raw),
-    usage: toUsage(usage),
   };
 };

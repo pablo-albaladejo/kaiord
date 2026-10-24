@@ -126,15 +126,21 @@ describe("generateWorkoutKrd", () => {
 
   it("should build and forward a default usage-telemetry sink so the run is accounted", async () => {
     // Arrange
+    const event = { type: "run_finished" } as never;
+    const debug = vi.spyOn(console, "debug").mockImplementation(() => {});
+    await generateWorkoutKrd(baseOptions);
+    const [[config]] = vi.mocked(createTextToWorkout).mock.calls as unknown as [
+      [{ telemetry: { emit: (e: never) => void } }],
+    ];
 
     // Act
-    await generateWorkoutKrd(baseOptions);
+    config.telemetry.emit(event);
 
     // Assert
     expect(createDexieUsageTelemetrySink).toHaveBeenCalled();
-    expect(createTextToWorkout).toHaveBeenCalledWith(
-      expect.objectContaining({ telemetry: mockSink })
-    );
+    expect(mockSink.emit).toHaveBeenCalledWith(event);
+    expect(debug).toHaveBeenCalledOnce();
+    debug.mockRestore();
   });
 
   it("should prefer an explicitly supplied telemetry sink over the default", async () => {

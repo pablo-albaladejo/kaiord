@@ -9,6 +9,7 @@ export { runGenerateAgent, type GenerateAgentConfig } from "./runtime";
 export type {
   GenerateProgress,
   GenerateProgressPhase,
+  GenerateRetryReason,
   OnGenerateProgress,
 } from "./progress";
 export { AiAgentError, createAiAgentError } from "./errors";

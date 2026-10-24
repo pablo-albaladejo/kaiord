@@ -84,6 +84,7 @@ describe("runGenerateAgent progress", () => {
       phase: "requesting",
       attempt: 2,
       maxAttempts: 3,
+      retryReason: "invalid",
     });
     expect(JSON.stringify(model.doStreamCalls[1]?.prompt)).toContain(
       "Previous attempt failed"

@@ -1,78 +1,47 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { loadLocaleNamespaces } from "../../../i18n/resources";
-import { getTranslate } from "../../../i18n/use-translate";
-import { aiPhaseLabel, type AiRunProgress } from "./ai-run-progress";
+import { type AiRunProgress, beginAiRun } from "./ai-run-progress";
 
-const en = getTranslate("coaching", "en");
-const es = getTranslate("coaching", "es");
+const T0 = Date.parse("2026-10-24T10:00:00Z");
+const LATER_MS = 4_000;
+const MUCH_LATER_MS = 9_000;
 
-const run = (update?: AiRunProgress["update"]): AiRunProgress => ({
-  modelName: "Claude Sonnet 5",
-  startedAt: 0,
-  update,
-});
+const slotWithState = () => {
+  let state: AiRunProgress | null = null;
+  const slot = {
+    abortRef: { current: null },
+    setProgress: (
+      next:
+        | AiRunProgress
+        | null
+        | ((run: AiRunProgress | null) => AiRunProgress | null)
+    ) => {
+      state = typeof next === "function" ? next(state) : next;
+    },
+  };
+  return { slot, read: () => state };
+};
 
-describe("aiPhaseLabel", () => {
-  beforeAll(async () => {
-    await loadLocaleNamespaces("es");
+describe("beginAiRun", () => {
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  it("should say the request is being prepared before it is sent", () => {
+  it("should restart the phase clock only when the phase changes", () => {
     // Arrange
-    const progress = run();
+    vi.useFakeTimers({ now: T0 });
+    const { slot, read } = slotWithState();
+    const { onProgress } = beginAiRun(slot, "Claude Sonnet 5");
 
     // Act
-    const label = aiPhaseLabel(es, progress);
+    vi.setSystemTime(T0 + LATER_MS);
+    onProgress({ phase: "generating", attempt: 1, maxAttempts: 3, items: 1 });
+    vi.setSystemTime(T0 + MUCH_LATER_MS);
+    onProgress({ phase: "generating", attempt: 1, maxAttempts: 3, items: 2 });
 
     // Assert
-    expect(label).toBe("Preparando la petición…");
-  });
-
-  it("should name the attempt when a schema-repair retry is requested", () => {
-    // Arrange
-    const progress = run({ phase: "requesting", attempt: 2, maxAttempts: 3 });
-
-    // Act
-    const label = aiPhaseLabel(en, progress);
-
-    // Assert
-    expect(label).toContain("Asking Claude Sonnet 5 again (attempt 2 of 3)");
-  });
-
-  it("should not change while only the streamed count changes", () => {
-    // Arrange
-    const first = run({
-      phase: "generating",
-      attempt: 1,
-      maxAttempts: 3,
-      items: 1,
-    });
-    const later = run({
-      phase: "generating",
-      attempt: 1,
-      maxAttempts: 3,
-      items: 5,
-    });
-
-    // Act
-    const labels = [aiPhaseLabel(es, first), aiPhaseLabel(es, later)];
-
-    // Assert
-    expect(labels).toEqual([
-      "Claude Sonnet 5 está escribiendo los pasos…",
-      "Claude Sonnet 5 está escribiendo los pasos…",
-    ]);
-  });
-
-  it("should report validation once the output is complete", () => {
-    // Arrange
-    const progress = run({ phase: "validating", attempt: 1, maxAttempts: 3 });
-
-    // Act
-    const label = aiPhaseLabel(es, progress);
-
-    // Assert
-    expect(label).toBe("Comprobando el entreno…");
+    expect(read()?.startedAt).toBe(T0);
+    expect(read()?.phaseStartedAt).toBe(T0 + LATER_MS);
+    expect(read()?.update?.items).toBe(2);
   });
 });
