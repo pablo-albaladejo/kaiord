@@ -28,7 +28,7 @@ const PLAIN_NAME = /^[\w@./-]+$/;
 const UNRECOGNIZED = "<unrecognized plugin entry>";
 
 /** Names go into the fault text, so only a short, plain one is printed. */
-const printable = (name: unknown) =>
+export const printable = (name: unknown) =>
   typeof name === "string" &&
   name.length <= MAX_PRINTED_NAME &&
   PLAIN_NAME.test(name)

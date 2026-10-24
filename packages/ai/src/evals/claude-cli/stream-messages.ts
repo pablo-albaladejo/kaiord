@@ -11,7 +11,7 @@ const initSchema = z
     subtype: z.literal("init"),
     apiKeySource: z.string(),
     claude_code_version: z.string(),
-    tools: count,
+    tools: z.array(z.unknown()),
     mcp_servers: count,
     skills: count.optional(),
     plugins: z.array(z.unknown()).optional(),

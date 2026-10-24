@@ -155,7 +155,7 @@ describe("createSpawnClaude", () => {
     const fault = await faultOf(spawnClaude(REQUEST));
 
     // Assert
-    expect(fault).toBe("the clean context leaked: 1 mcpServers, 1 tools");
+    expect(fault).toBe("the clean context leaked: 1 mcpServers, tools Bash");
   });
 
   it("should name a plugin that leaked and let the CLI builtins through", async () => {
@@ -207,6 +207,50 @@ describe("createSpawnClaude", () => {
       "the clean context leaked: plugins <plugins field absent>"
     );
     expect(second).toContain("no recognizable init message");
+  });
+
+  it("should let the structured-output tool through only for a call with a schema", async () => {
+    // Arrange
+    const stdout = streamOf(
+      initMessage({ tools: ["StructuredOutput"] }),
+      resultMessage()
+    );
+    const noSchema = { ...REQUEST, jsonSchema: undefined };
+
+    // Act
+    const withSchema = await faultOf(
+      spawnWith(() => ({ stdout })).spawnClaude(REQUEST)
+    );
+    const withoutSchema = await faultOf(
+      spawnWith(() => ({ stdout })).spawnClaude(noSchema)
+    );
+
+    // Assert
+    expect(withSchema).toBe("resolved");
+    expect(withoutSchema).toBe(
+      "the clean context leaked: tools StructuredOutput"
+    );
+  });
+
+  it("should abort when the init message omits or garbles the tools field", async () => {
+    // Arrange
+    const missing = streamOf(
+      initMessage({ tools: undefined }),
+      resultMessage()
+    );
+    const garbled = streamOf(initMessage({ tools: 3 }), resultMessage());
+
+    // Act
+    const faults = await Promise.all(
+      [missing, garbled].map((stdout) =>
+        faultOf(spawnWith(() => ({ stdout })).spawnClaude(REQUEST))
+      )
+    );
+
+    // Assert
+    for (const fault of faults) {
+      expect(fault).toContain("no recognizable init message");
+    }
   });
 
   it("should abort on an error result or output it cannot parse", async () => {
