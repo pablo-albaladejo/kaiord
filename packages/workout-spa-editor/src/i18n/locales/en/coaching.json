@@ -80,11 +80,15 @@
   "profile": {
     "ariaLabel_one": "Intensity profile, {{duration}} in {{count}} block: {{breakdown}}",
     "ariaLabel_other": "Intensity profile, {{duration}} in {{count}} blocks: {{breakdown}}",
+    "estimateAriaLabel_one": "Estimated intensity profile from coach text, {{duration}} in {{count}} block: {{breakdown}}",
+    "estimateAriaLabel_other": "Estimated intensity profile from coach text, {{duration}} in {{count}} blocks: {{breakdown}}",
     "zoneTime": "Z{{zone}} {{duration}}",
     "barTitle": "Z{{zone}} · {{duration}}",
+    "noZoneBarTitle": "No zone given · {{duration}}",
     "zone": "Z{{zone}}",
     "tick": "{{minutes}}′",
-    "legendAria": "Training zones"
+    "legendAria": "Training zones",
+    "estimateCaption": "Estimated from coach text"
   },
   "actions": {
     "close": "Close",

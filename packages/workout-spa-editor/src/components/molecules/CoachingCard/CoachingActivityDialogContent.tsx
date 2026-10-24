@@ -58,7 +58,10 @@ export function CoachingActivityDialogContent(
         activity={activity}
         duration={activity.duration ?? linkedDurationLabel(linked)}
       />
-      {linked ? <CoachingDialogZoneProfile workout={linked} /> : null}
+      <CoachingDialogZoneProfile
+        workout={linked}
+        description={activity.description}
+      />
       <DialogDescription activity={activity} load={descriptionLoad} />
       {matched
         ? renderMatchedBody(props, matched.workout, matched.executed)

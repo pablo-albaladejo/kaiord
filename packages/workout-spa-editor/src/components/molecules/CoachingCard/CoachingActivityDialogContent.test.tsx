@@ -37,10 +37,13 @@ const workout = {
   krd: structuredKrd(THRESHOLD_STEPS),
 } as WorkoutRecord;
 
-const renderContent = (dialogState: CoachingDialogState) => {
+const renderContent = (
+  dialogState: CoachingDialogState,
+  shown: CoachingActivity = activity
+) => {
   const noop = vi.fn();
   const props = {
-    activity,
+    activity: shown,
     dialogState,
     descriptionLoad: { reason: null, retry: noop },
     profileId: "profile-1",
@@ -117,12 +120,26 @@ describe("CoachingActivityDialogContent", () => {
     expect(meta).toHaveTextContent("T2G");
   });
 
-  it("should hide the intensity profile when no workout is linked yet", () => {
+  it("should estimate the intensity profile from the coach's text when no workout is linked", () => {
     // Arrange
     const state: CoachingDialogState = { kind: "no-workout" };
 
     // Act
     renderContent(state);
+
+    // Assert
+    expect(
+      screen.getByTestId("coaching-dialog-zone-estimate-caption")
+    ).toHaveTextContent("Estimated from coach text");
+  });
+
+  it("should hide the intensity profile when no workout is linked and the text names no zone", () => {
+    // Arrange
+    const state: CoachingDialogState = { kind: "no-workout" };
+    const unzoned = { ...activity, description: "Easy spin with friends" };
+
+    // Act
+    renderContent(state, unzoned);
 
     // Assert
     expect(

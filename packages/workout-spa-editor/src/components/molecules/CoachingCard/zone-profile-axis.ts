@@ -1,4 +1,4 @@
-import type { ZoneSegment } from "../../../lib/workout-review";
+import type { ProfileSegment } from "../../../lib/workout-review";
 
 const SECONDS_PER_MINUTE = 60;
 const FULL_PERCENT = 100;
@@ -9,8 +9,9 @@ const MAX_TICKS = 7;
 
 export type AxisTick = { minutes: number; percent: number };
 
-export const profileTotalSeconds = (segments: readonly ZoneSegment[]): number =>
-  segments.reduce((sum, segment) => sum + segment.seconds, 0);
+export const profileTotalSeconds = (
+  segments: readonly ProfileSegment[]
+): number => segments.reduce((sum, segment) => sum + segment.seconds, 0);
 
 const tickStepMinutes = (totalMinutes: number): number =>
   TICK_STEPS_MINUTES.find((step) => totalMinutes / step + 1 <= MAX_TICKS) ??
