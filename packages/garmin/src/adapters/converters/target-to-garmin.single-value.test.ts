@@ -55,6 +55,20 @@ describe("convertKrdTargetToGarmin single-value bands", () => {
     ]);
   });
 
+  it("should round a .5 W half-width outward on both sides", () => {
+    // Arrange
+    const target: Target = {
+      type: "power",
+      value: { unit: "watts", value: B.HALF_WATT_POWER_W },
+    };
+
+    // Act
+    const result = bounds(target);
+
+    // Assert
+    expect(result).toEqual([B.HALF_WATT_POWER_HIGH_W, B.HALF_WATT_POWER_LOW_W]);
+  });
+
   it("should cap the power band at the schema's 5000 W", () => {
     // Arrange
     const target: Target = {

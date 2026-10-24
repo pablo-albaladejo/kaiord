@@ -7,6 +7,8 @@
  * integer bounds, capped at the KRD schema maxima so a re-imported band still
  * validates. The centre and the half-width are rounded separately, so the
  * band stays symmetric around the rounded target (213.3 W -> 202..224 W).
+ * A target whose half-width is already an integer is unchanged by this; a
+ * .5 half-width rounds outward on both sides (250 W, ±12.5 -> 237..263 W).
  * Returns `[low, high]`; the caller applies the Garmin ordering (power
  * higher value first). Some authored GCN fixtures list power ascending: the
  * reader accepts either order, so do not change the writer to match them.
