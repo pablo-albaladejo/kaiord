@@ -64,7 +64,7 @@ Each benchmark is evaluated against:
 3. **Step count**: `countSteps(workout)` must be within `[minSteps, maxSteps]` (nested steps in blocks are counted).
 4. **Targets** (optional): if `targetCheck` is defined, every step (repetition steps included) must carry `targetType`; with `requireRange`, as an explicit `range`, so a zone left unresolved fails. `benchmark-invariants.ts` rejects a required range whose `athleteZones` has no table of that type.
 5. **Structure** (optional): if `expectedRepeatCounts` is defined, the repetition blocks' `repeatCount`s must match it in order.
-6. **Zone accuracy** (±5% tolerance, optional): if `zoneCheck` is defined, active steps of the target type must fall within `[minValue*0.95, maxValue*1.05]`. Optional `unit` and `basis` must equal the target value's (a % FTP range keeps `basis: "percent_ftp"`; one that lost it reads as watts). A zone check with no matching active step **fails** — it is not skipped.
+6. **Zone accuracy** (±5% tolerance, optional): if `zoneCheck` is defined, active and interval steps of the target type must fall within `[minValue*0.95, maxValue*1.05]`. Optional `unit` and `basis` must equal the target value's (a % FTP range keeps `basis: "percent_ftp"`; one that lost it reads as watts). A zone check with no matching active or interval step **fails** — it is not skipped.
 
 Each dimension yields one outcome: `passed`, `failed` with a message, or
 `unmeasured` with a reason. `unmeasured` is a member of the union, not a flag

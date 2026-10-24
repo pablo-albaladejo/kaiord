@@ -202,7 +202,7 @@ describe("decideNextCall", () => {
       action: "stop",
       kind: "harness-fault",
       reason:
-        "pinned field unifiedWindows.seven_day.utilization is missing in 1 of 2 rate_limit_event",
+        "pinned field unifiedWindows.seven_day.utilization is missing in 1 of 2 rate_limit_event entries",
     });
   });
 });

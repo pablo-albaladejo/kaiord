@@ -70,7 +70,7 @@ const utilizationOf = (infos: Array<Info>, field: WeeklyField) => {
   const lacking = values.filter((value) => value === undefined).length;
   if (lacking > 0) {
     return fault(
-      `pinned field ${name} is missing in ${lacking} of ${values.length} rate_limit_event`
+      `pinned field ${name} is missing in ${lacking} of ${values.length} rate_limit_event entries`
     );
   }
   const max = SCALE_MAX[field.scale];

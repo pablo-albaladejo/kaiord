@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { assertBasisOnPowerOnly } from "./assert-basis-on-power";
 import { createWorkoutParserAgent } from "./workout-parser-agent";
 
 const rawStep = (type: string, value: Record<string, unknown>) => ({
@@ -39,7 +40,9 @@ describe("createWorkoutParserAgent validate", () => {
     const validate = () => agent.validate(raw);
 
     // Assert
-    expect(validate).toThrow(/basis is only valid on a power target/);
+    expect(validate).toThrow(
+      "step 0: basis is only valid on a power range, but a heart_rate range target carries basis percent_ftp"
+    );
   });
 
   it("should reject a basis on a non-power step inside a repetition block", () => {
@@ -55,6 +58,60 @@ describe("createWorkoutParserAgent validate", () => {
     const validate = () => agent.validate(raw);
 
     // Assert
-    expect(validate).toThrow(/a pace target carries basis percent_ftp/);
+    expect(validate).toThrow(/a pace range target carries basis percent_ftp/);
+  });
+
+  it("should reject a basis on a power value that is not a range", () => {
+    // Arrange
+    const watts = { unit: "watts", value: 85, basis: "percent_ftp" };
+    const agent = createWorkoutParserAgent("");
+    const raw = rawWorkout(rawStep("power", watts));
+
+    // Act
+    const validate = () => agent.validate(raw);
+
+    // Assert
+    expect(validate).toThrow(/a power watts target carries basis/);
+  });
+
+  it("should keep a power range basis inside a repetition block", () => {
+    // Arrange
+    const power = { unit: "range", min: 88, max: 93, basis: "percent_ftp" };
+    const agent = createWorkoutParserAgent("");
+    const raw = rawWorkout({
+      repeatCount: 3,
+      steps: [rawStep("power", power)],
+    });
+
+    // Act
+    const workout = agent.validate(raw);
+
+    // Assert
+    expect(workout.steps[0]).toMatchObject({
+      steps: [{ target: { value: power } }],
+    });
+  });
+
+  it("should accept a heart-rate range without a basis", () => {
+    // Arrange
+    const hr = { unit: "range", min: 130, max: 150 };
+    const agent = createWorkoutParserAgent("");
+
+    // Act
+    const workout = agent.validate(rawWorkout(rawStep("heart_rate", hr)));
+
+    // Assert
+    expect(workout.steps[0]).toMatchObject({ target: { value: hr } });
+  });
+
+  it("should skip a null step in the basis check and leave it to the schema", () => {
+    // Arrange
+    const raw = rawWorkout(null, { repeatCount: 2, steps: [null] });
+
+    // Act
+    const check = () => assertBasisOnPowerOnly(raw);
+
+    // Assert
+    expect(check).not.toThrow();
   });
 });
