@@ -154,7 +154,9 @@
     "zoneCheck": {
       "targetType": "power",
       "minValue": 88,
-      "maxValue": 93
+      "maxValue": 93,
+      "unit": "range",
+      "basis": "percent_ftp"
     }
   },
   {
@@ -168,7 +170,8 @@
     "zoneCheck": {
       "targetType": "heart_rate",
       "minValue": 120,
-      "maxValue": 160
+      "maxValue": 160,
+      "unit": "range"
     }
   },
   {

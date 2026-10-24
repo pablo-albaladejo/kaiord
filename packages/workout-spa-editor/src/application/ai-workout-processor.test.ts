@@ -31,7 +31,7 @@ describe("processWorkoutWithAi", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.krd.type).toBe("structured_workout");
-      expect(result.aiMeta.promptVersion).toBe("1.2.0");
+      expect(result.aiMeta.promptVersion).toBe("1.3.0");
       expect(result.aiMeta.provider).toBe("openai");
       expect(result.aiMeta.model).toBe("gpt-4o");
       expect(result.retried).toBe(false);
