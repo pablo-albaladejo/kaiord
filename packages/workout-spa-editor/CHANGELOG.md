@@ -1,5 +1,15 @@
 # @kaiord/workout-spa-editor
 
+## 1.6.1
+
+### Patch Changes
+
+- 89f2349: Narrate an AI workout conversion while it runs: say when the model is reasoning before it writes, show the last step it finished, name the attempt and why the previous one failed, and split the elapsed time between the current phase and the whole run. Each generation also logs its phase timings to the browser console at debug level.
+- Updated dependencies [d1f3f3a]
+- Updated dependencies [33804fb]
+- Updated dependencies [89f2349]
+  - @kaiord/ai@9.6.0
+
 ## 1.6.0
 
 ### Minor Changes
