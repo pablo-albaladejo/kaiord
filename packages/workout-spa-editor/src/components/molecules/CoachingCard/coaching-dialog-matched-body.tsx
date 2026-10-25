@@ -6,6 +6,7 @@
  */
 import { isMovableSession } from "../../../application/session-movability";
 import type { CoachingDialogBodyProps } from "./coaching-dialog-body-props";
+import { DialogGarminDrift } from "./DialogGarminDrift";
 import { ExecutedWorkoutsSection } from "./ExecutedWorkoutsSection";
 import { LinkedWorkoutSection } from "./LinkedWorkoutSection";
 import { MatchedActions } from "./MatchedActions";
@@ -16,35 +17,39 @@ type MatchedState = Extract<CoachingDialogState, { kind: "matched" }>;
 export const renderMatchedBody = (
   props: CoachingDialogBodyProps,
   { workout, executed, executedWorkoutIds, recorded }: MatchedState
-) => (
-  <>
-    <LinkedWorkoutSection
-      workout={workout}
-      splitting={false}
-      onSplit={() => undefined}
-    />
-    {executed.length > 0 ? (
-      <ExecutedWorkoutsSection
-        executed={executed}
-        onOpenExecuted={props.onOpenExecuted}
+) => {
+  const movability = isMovableSession({
+    workout,
+    activity: props.activity,
+    executed,
+    match: { executedWorkoutIds },
+    recorded,
+  });
+  return (
+    <>
+      <LinkedWorkoutSection
+        workout={workout}
+        splitting={false}
+        onSplit={() => undefined}
       />
-    ) : null}
-    <MatchedActions
-      workout={workout}
-      splitting={props.splitting}
-      onClose={props.onClose}
-      onOpenEditor={props.onOpenEditor}
-      onAiProcess={props.onAiProcess}
-      onPushToGarmin={props.onPushToGarmin}
-      onSplit={props.onSplit}
-      movability={isMovableSession({
-        workout,
-        activity: props.activity,
-        executed,
-        match: { executedWorkoutIds },
-        recorded,
-      })}
-      onMoveTo={props.onMoveTo}
-    />
-  </>
-);
+      <DialogGarminDrift workout={workout} locked={!movability.movable} />
+      {executed.length > 0 ? (
+        <ExecutedWorkoutsSection
+          executed={executed}
+          onOpenExecuted={props.onOpenExecuted}
+        />
+      ) : null}
+      <MatchedActions
+        workout={workout}
+        splitting={props.splitting}
+        onClose={props.onClose}
+        onOpenEditor={props.onOpenEditor}
+        onAiProcess={props.onAiProcess}
+        onPushToGarmin={props.onPushToGarmin}
+        onSplit={props.onSplit}
+        movability={movability}
+        onMoveTo={props.onMoveTo}
+      />
+    </>
+  );
+};

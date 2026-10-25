@@ -45,6 +45,14 @@ export const createDexieExportLedgerRepository = (
 ): ExportLedgerRepository => ({
   findByNaturalKey: (key) => findByKey(db, key),
 
+  listByRecordIds: async ({ kaiordRecordIds, destinationBridgeId }) =>
+    (await db
+      .table("exportLedger")
+      .where("kaiordRecordId")
+      .anyOf(kaiordRecordIds)
+      .filter((r) => r.destinationBridgeId === destinationBridgeId)
+      .toArray()) as ExportLedgerEntry[],
+
   insertPending: async (
     entry: ExportLedgerEntry
   ): Promise<InsertPendingResult> => {

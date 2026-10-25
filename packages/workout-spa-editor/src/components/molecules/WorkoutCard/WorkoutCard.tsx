@@ -14,6 +14,10 @@ import type { CalendarView } from "../../../types/user-preferences";
 import { CardShell } from "../CardShell/CardShell";
 import { LifecycleChip } from "../CardShell/LifecycleChip";
 import { zoneBorderClass } from "../CardShell/status-tokens";
+import {
+  GarminDriftBadge,
+  useGarminDriftLabel,
+} from "../GarminDriftBadge/GarminDriftBadge";
 import { ZONE_BAR_HEIGHT } from "../ZoneProfileBar/zone-bar-height";
 import { ZoneProfileBar } from "../ZoneProfileBar/ZoneProfileBar";
 import { deriveWorkoutLifecycle } from "./session-lifecycle";
@@ -41,11 +45,14 @@ export function WorkoutCard({ workout, view, onClick }: WorkoutCardProps) {
   const lifecycle = deriveWorkoutLifecycle(workout);
   const zones = useSessionZones(workout);
   const stateLabel = t(`lifecycle.${workout.state}`);
+  const garminDrift = useGarminDriftLabel(workout.id);
 
   return (
     <CardShell
       borderClass={zoneBorderClass(zones.dominant)}
-      ariaLabel={`${title}, ${sport}, ${stateLabel}`}
+      ariaLabel={[`${title}, ${sport}, ${stateLabel}`, garminDrift]
+        .filter(Boolean)
+        .join("; ")}
       onClick={() => onClick(workout)}
       testId={`workout-card-${workout.id}`}
       originChip={originLabel(t, workout.source)}
@@ -72,6 +79,7 @@ export function WorkoutCard({ workout, view, onClick }: WorkoutCardProps) {
           <span>{sport}</span>
           {duration ? <span>{formatDuration(duration)}</span> : null}
           <SessionLifecycleBadges flags={lifecycle} />
+          <GarminDriftBadge workoutId={workout.id} />
         </>
       }
     />

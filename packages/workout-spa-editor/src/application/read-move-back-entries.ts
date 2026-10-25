@@ -5,7 +5,8 @@
  */
 import type { PersistencePort } from "../ports/persistence-port";
 import type { OverriddenSession } from "./coaching/apply-coach-date-moves";
-import { isMovableSession, type Movability } from "./session-movability";
+import { readSessionMovability } from "./read-session-movability";
+import type { Movability } from "./session-movability";
 
 export type MoveBackEntry = OverriddenSession & { movability: Movability };
 
@@ -21,19 +22,7 @@ const readOne = async (
 ): Promise<MoveBackEntry | undefined> => {
   const workout = await deps.workouts.getById(entry.workoutId);
   if (!workout || workout.date !== entry.coachDate) return undefined;
-  const match = await deps.sessionMatch.getByWorkoutId(profileId, workout.id);
-  const activity = match
-    ? await deps.coaching.getById(match.coachingActivityId)
-    : undefined;
-  const movability = isMovableSession({
-    workout,
-    activity: { status: activity?.status ?? "pending" },
-    match,
-    // As in `moveSession`: only a planned side counts as a held recording.
-    recorded:
-      match !== undefined &&
-      (await deps.activities.referencesWorkout(profileId, workout.id)),
-  });
+  const movability = await readSessionMovability(deps, profileId, workout);
   return { ...entry, movability };
 };
 
