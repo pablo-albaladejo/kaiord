@@ -154,5 +154,5 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       "Garmin still on" mean, and that Train2Go is not updated. Write the
       release note: coach-moved cards now move, and stale cards are healed on
       the first launch.
-- [ ] 4.5 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts`
+- [x] 4.5 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts`
       (AC-23).
