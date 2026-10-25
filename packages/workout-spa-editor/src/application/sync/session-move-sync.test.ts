@@ -4,15 +4,20 @@
  * auto-push change token advances; a torn merge is healed onto the
  * workout's date.
  */
+import "fake-indexeddb/auto";
+
 import { describe, expect, it } from "vitest";
 
-import { buildChangeToken } from "../../hooks/sync-change-token";
+import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { syncedChangeToken } from "../../hooks/use-sync-auto-push";
+import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { SessionMatch } from "../../types/session-match";
 import type { Snapshot } from "../../types/snapshot";
 import { healMatchDates } from "../coaching/heal-match-dates";
 import { moveSession } from "../move-session";
 import {
+  coachActivity,
   coachWorkout,
   NOW,
   PROFILE,
@@ -26,8 +31,6 @@ import { mergeSnapshots } from "./merge-snapshots";
 const MOVED_AT = "2026-10-02T09:30:00.000Z";
 const LATER = "2026-10-03T09:30:00.000Z";
 const REMOTE_EDIT = "2026-10-02T00:00:00.000Z";
-
-type Persistence = Awaited<ReturnType<typeof seedSession>>;
 
 const snapshot = (
   exportedAt: string,
@@ -51,10 +54,14 @@ const movedRows = async () => {
   };
 };
 
-// The workouts signal of the auto-push token: row count and max updatedAt.
-const workoutsToken = async (persistence: Persistence) => {
-  const row = await persistence.workouts.getById("w");
-  return buildChangeToken([{ count: 1, latest: row?.updatedAt ?? "" }]);
+const db = sharedKaiordDatabase("session-move-sync");
+
+const seedDexieSession = async () => {
+  const persistence = createDexiePersistence(db);
+  await persistence.coaching.upsertMany([coachActivity()]);
+  await persistence.workouts.put(coachWorkout());
+  await persistence.sessionMatch.put(sessionMatch());
+  return persistence;
 };
 
 describe("a moved session and cloud sync", () => {
@@ -80,8 +87,8 @@ describe("a moved session and cloud sync", () => {
 
   it("should advance the auto-push change token", async () => {
     // Arrange
-    const persistence = await seedSession();
-    const before = await workoutsToken(persistence);
+    const persistence = await seedDexieSession();
+    const before = await syncedChangeToken(db);
 
     // Act
     await moveSession(
@@ -90,7 +97,7 @@ describe("a moved session and cloud sync", () => {
     );
 
     // Assert
-    expect(await workoutsToken(persistence)).not.toBe(before);
+    expect(await syncedChangeToken(db)).not.toBe(before);
   });
 
   it("should heal a torn merge onto the workout's date", async () => {
