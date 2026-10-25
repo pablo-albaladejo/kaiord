@@ -725,7 +725,7 @@ would then move the match back to the stale date.
 
 **Card**
 
-- The card shows a small badge, "Garmin: {placedOn}", or "Garmin?:
+- The card shows a small badge, "Garmin: {placedOn}", or "Garmin (?)
   {placedOn}" when the placement is unconfirmed.
 - The week's ledger rows come from one live query (`exportLedger` by
   `kaiordRecordId` `anyOf`). It runs after the first paint, outside the week's

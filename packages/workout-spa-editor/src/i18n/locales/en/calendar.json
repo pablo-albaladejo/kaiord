@@ -50,7 +50,7 @@
   },
   "garminDrift": {
     "badge": "Garmin: {{day}}",
-    "badgeUnconfirmed": "Garmin?: {{day}}",
+    "badgeUnconfirmed": "Garmin (?) {{day}}",
     "placed": "Garmin still on {{date}}",
     "unconfirmed": "Garmin may still be on {{date}}",
     "moved": "Workout moved",

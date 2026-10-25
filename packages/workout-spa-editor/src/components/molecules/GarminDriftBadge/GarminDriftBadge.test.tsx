@@ -48,7 +48,7 @@ describe("GarminDriftBadge", () => {
     // Assert
     expect(
       screen.getByRole("img", { name: "Garmin may still be on Tue, Oct 6" })
-    ).toHaveTextContent("Garmin?: Tue 6");
+    ).toHaveTextContent("Garmin (?) Tue 6");
   });
 
   it("should render nothing for a workout without drift", () => {
