@@ -27,6 +27,7 @@
   "batch": {
     "processed": "Lote procesado",
     "workoutsProcessed": "{{count}} entrenamientos",
+    "workoutsProcessedSkipped": "{{count}} entrenamientos, {{skipped}} omitidos porque cambiaron mientras tanto",
     "noProvider": "Configura un proveedor de IA en Ajustes para procesar entrenamientos.",
     "error": "El procesamiento por lotes encontró un error inesperado."
   },

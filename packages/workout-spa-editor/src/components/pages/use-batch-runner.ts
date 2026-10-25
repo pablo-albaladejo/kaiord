@@ -1,6 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 
-import type { BatchProgress } from "../../application/batch-processor";
+import type {
+  BatchProgress,
+  BatchResult,
+} from "../../application/batch-processor";
 import { processBatch } from "../../application/batch-processor";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useTranslate } from "../../i18n/use-translate";
@@ -9,7 +12,7 @@ import type { BatchPending } from "./use-batch-state";
 
 export function useBatchRunner(
   setMessage: (msg: string | null) => void,
-  onSuccess?: (count: number) => void
+  onSuccess?: (result: BatchResult) => void
 ) {
   const t = useTranslate("calendar");
   const persistence = usePersistence();
@@ -29,7 +32,7 @@ export function useBatchRunner(
           batch.modelId,
           persistence
         );
-        await processBatch(
+        const result = await processBatch(
           batch.workouts,
           processOne,
           setProgress,
@@ -39,7 +42,7 @@ export function useBatchRunner(
         // cleanly (cancellation throws AbortError → caught below → no
         // notification). Static-title toast lives in the caller to keep
         // this hook free of React-context coupling.
-        onSuccess?.(batch.workouts.length);
+        onSuccess?.(result);
       } catch {
         setMessage(t("batch.error"));
       } finally {

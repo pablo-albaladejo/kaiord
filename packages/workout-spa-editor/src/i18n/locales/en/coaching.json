@@ -35,6 +35,7 @@
     "queued": "Queued {{n}}",
     "processing": "Processing {{n}}",
     "succeeded": "Succeeded {{n}}",
+    "skipped": "Skipped {{n}}",
     "failed": "Failed {{n}}",
     "cancelAria": "Cancel batch processing"
   },

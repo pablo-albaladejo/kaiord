@@ -1,7 +1,8 @@
 /**
  * The batch writes the AI result onto the row as stored after the AI call
  * (design §3.10, AC-25, AC-30): a move that lands during the call keeps its
- * date, and a row that left the `raw` state meanwhile is not written.
+ * date, and a row that left the `raw` state meanwhile is not written and
+ * reports `written: false`.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -49,9 +50,10 @@ describe("createProcessOne with a row changed during the AI call", () => {
     const processOne = createProcessOne(PROVIDER, "m", persistence);
 
     // Act
-    await processOne(snapshot!, false);
+    const result = await processOne(snapshot!, false);
 
     // Assert
+    expect(result).toMatchObject({ ok: true, written: true });
     expect(await persistence.workouts.getById("w")).toMatchObject({
       date: THU,
       coachDate: TUE,
@@ -74,7 +76,7 @@ describe("createProcessOne with a row changed during the AI call", () => {
     const result = await processOne(snapshot!, false);
 
     // Assert
-    expect(result.ok).toBe(true);
+    expect(result).toMatchObject({ ok: true, written: false });
     expect(put).toHaveBeenCalledTimes(1);
     expect((await persistence.workouts.getById("w"))?.state).toBe("skipped");
   });

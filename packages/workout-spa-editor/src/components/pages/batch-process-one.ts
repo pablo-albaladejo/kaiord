@@ -5,9 +5,11 @@
  * calls the AI processor and persists results to Dexie.
  */
 
-import type { ProcessResult } from "../../application/ai-workout-processor";
 import { processWorkoutWithAi } from "../../application/ai-workout-processor";
-import type { ProcessOneFn } from "../../application/batch-processor";
+import type {
+  ProcessOneFn,
+  ProcessOneOutcome,
+} from "../../application/batch-processor";
 import { updateWorkoutRecord } from "../../application/save-workout-edits";
 import { transitionToStructured } from "../../application/workout-transitions";
 import { generateWorkoutKrd } from "../../lib/generate-workout";
@@ -23,7 +25,7 @@ export function createProcessOne(
   return async (
     workout: WorkoutRecord,
     allowRetry: boolean
-  ): Promise<ProcessResult> => {
+  ): Promise<ProcessOneOutcome> => {
     // Usage telemetry, the athlete's zones and their custom AI instructions
     // all come from `generateWorkoutKrd`'s app-db defaults.
     const generateFn = (prompt: string, sport: string) =>
@@ -44,15 +46,18 @@ export function createProcessOne(
       allowRetry,
     });
 
+    if (!result.ok) return result;
     // Written onto the row as stored after the AI call, so a move made
-    // meanwhile keeps its date; a row that left `raw` is left alone.
-    if (result.ok)
-      await updateWorkoutRecord(persistence, workout.id, (fresh) =>
+    // meanwhile keeps its date; a row that left `raw` is left alone and
+    // reported as not written.
+    const written = await updateWorkoutRecord(
+      persistence,
+      workout.id,
+      (fresh) =>
         fresh.state === "raw"
           ? transitionToStructured(fresh, result.krd, result.aiMeta)
           : undefined
-      );
-
-    return result;
+    );
+    return { ...result, written };
   };
 }

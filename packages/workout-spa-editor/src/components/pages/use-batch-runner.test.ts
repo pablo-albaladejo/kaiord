@@ -62,10 +62,16 @@ describe("useBatchRunner", () => {
     expect(result.current.isProcessing).toBe(false);
   });
 
-  it("should fire onSuccess with the workout count after a clean batch run", async () => {
+  it("should fire onSuccess with the batch result after a clean batch run", async () => {
     // Arrange
 
-    processBatchSpy.mockResolvedValueOnce(undefined);
+    const batchResult = {
+      succeeded: ["w1"],
+      skipped: ["w2"],
+      failed: [],
+      cancelled: false,
+    };
+    processBatchSpy.mockResolvedValueOnce(batchResult);
     const setMessage = vi.fn();
     const onSuccess = vi.fn();
 
@@ -83,7 +89,7 @@ describe("useBatchRunner", () => {
     // Assert
 
     expect(onSuccess).toHaveBeenCalledTimes(1);
-    expect(onSuccess).toHaveBeenCalledWith(2);
+    expect(onSuccess).toHaveBeenCalledWith(batchResult);
   });
 
   it("should NOT fire onSuccess when processBatch throws", async () => {
