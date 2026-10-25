@@ -14,8 +14,7 @@ export type DayInput = {
 };
 
 export type SameSportVerdict =
-  | { kind: "clear" }
-  | { kind: "conflict"; recording: boolean };
+  { kind: "clear" } | { kind: "conflict"; recording: boolean };
 
 const sportKey = (sport: string, canonicalSport: CanonicalSport): string =>
   canonicalSport(sport) ?? sport.trim().toLowerCase();
