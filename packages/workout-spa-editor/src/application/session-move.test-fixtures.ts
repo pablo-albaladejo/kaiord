@@ -54,7 +54,7 @@ export const sessionMatch = (
 ): SessionMatch => ({
   id: "m",
   profileId: PROFILE,
-  coachingActivityId: ACTIVITY_ID,
+  coachingActivityId: buildCoachingActivityId(PROFILE, "train2go", SOURCE_ID),
   workoutId: "w",
   date: TUE,
   createdAt: NOW,
