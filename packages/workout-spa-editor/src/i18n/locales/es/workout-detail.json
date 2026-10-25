@@ -29,6 +29,15 @@
     "sent": "En tu Garmin",
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
+    "trainingPeaksRepush": {
+      "moved": "TrainingPeaks ya tiene este entrenamiento el {{date}}. Enviarlo de nuevo crea una segunda copia.",
+      "changed": "TrainingPeaks ya tiene una versión anterior de este entrenamiento. Enviarlo de nuevo crea una segunda copia.",
+      "sendCopy": "Enviar una copia de todos modos",
+      "confirmTitle": "¿Enviar una segunda copia?",
+      "confirmMessage": "TrainingPeaks tendrá entonces dos copias de este entrenamiento. Kaiord solo seguirá la última copia y olvidará la primera.",
+      "confirmSend": "Enviar una copia",
+      "cancel": "Cancelar"
+    },
     "sendDisabled": {
       "noExtension": "Instala la Extensión de Kaiord para Garmin para enviar este entreno.",
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."

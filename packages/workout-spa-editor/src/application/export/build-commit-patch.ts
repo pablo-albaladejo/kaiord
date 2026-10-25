@@ -6,7 +6,9 @@
  * library state the push reported (when it reported one) and clears
  * `forceRepush`: a successful library push is exactly what that flag asked
  * for. A push that reports no `library` (every non-Garmin destination) leaves
- * the row's `library` as it was.
+ * the row's `library` as it was. Likewise a `destinationDate` (the day a
+ * TrainingPeaks copy sits on) is set when given and kept when not, so a
+ * destination without one never gains it.
  */
 import type { ExportLedgerEntry } from "../../types/export-ledger";
 import type { GarminLibraryState } from "../../types/garmin-ledger";
@@ -23,8 +25,9 @@ export const buildCommitPatch = (input: {
   pushed: ExportPushResult;
   contentHash: string;
   exportedAt: string;
+  destinationDate?: string;
 }): CommitPatch => {
-  const { pushed, contentHash, exportedAt } = input;
+  const { pushed, contentHash, exportedAt, destinationDate } = input;
   return (row) => {
     const next: ExportLedgerEntry = {
       ...row,
@@ -33,6 +36,7 @@ export const buildCommitPatch = (input: {
       exportedAt,
     };
     if (pushed.library) next.library = pushed.library;
+    if (destinationDate !== undefined) next.destinationDate = destinationDate;
     delete next.forceRepush;
     return next;
   };

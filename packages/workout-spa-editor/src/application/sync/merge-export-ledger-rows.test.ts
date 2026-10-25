@@ -31,6 +31,32 @@ describe("mergeExportLedgerRows", () => {
     expect(winners).toEqual([newer, newer]);
   });
 
+  it("should carry the newer row's destinationDate through the merge", () => {
+    // Arrange
+    const older = ledgerRow({
+      id: "id-a",
+      destinationBridgeId: "trainingpeaks-bridge",
+      destinationDate: "2026-10-20",
+    });
+    const newer = ledgerRow({
+      destinationBridgeId: "trainingpeaks-bridge",
+      destinationDate: "2026-10-22",
+      updatedAt: LATER,
+    });
+
+    // Act
+    const winners = [
+      mergeExportLedgerRows(older, newer),
+      mergeExportLedgerRows(newer, older),
+    ];
+
+    // Assert
+    expect(winners.map((w) => w.destinationDate)).toEqual([
+      "2026-10-22",
+      "2026-10-22",
+    ]);
+  });
+
   it("should fall back to exportedAt when updatedAt is absent", () => {
     // Arrange
     const legacy = ledgerRow({ id: "id-a", updatedAt: undefined });

@@ -38,6 +38,13 @@ duplicate easy to hit. The guard lives in its own change because
     differs from the workout's `date`.
   - Otherwise the reason is `changed`.
   - An unchanged re-send stays the existing idempotent skip.
+  - The guard runs after the read-only `checkSession` probe, not before it.
+    The payload hash includes the `athleteId`, and only the probe provides
+    it. So a blocked push still probes the session, but no workout write
+    (`push-workout`) reaches the bridge.
+  - A pending row and a row flagged `forceRepush` are not blocked. A
+    forced re-push means the destination lost its copy, so sending again is
+    the repair.
 - **Override.** A blocked push offers "Send a copy anyway" behind a
   confirmation. The confirmation says that TrainingPeaks will then hold two
   copies, and that Kaiord forgets the first copy and tracks only the latest

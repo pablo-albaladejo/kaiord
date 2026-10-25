@@ -34,6 +34,8 @@ export type PostAndCommitInput = {
   payload: Record<string, unknown>;
   postFn: ExportPushFn;
   t0: number;
+  /** The pushed day, for a destination that records one (TrainingPeaks). */
+  destinationDate?: string;
 };
 
 export const postAndCommit = async (
@@ -62,6 +64,7 @@ export const postAndCommit = async (
       pushed,
       contentHash: input.pending.contentHash,
       exportedAt: new Date().toISOString(),
+      destinationDate: input.destinationDate,
     })
   );
   await emitExportAnalytics(
