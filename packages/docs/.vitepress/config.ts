@@ -265,10 +265,14 @@ const config = {
       {
         text: "For athletes",
         collapsed: false,
-        items: ATHLETE_GUIDES.map(([slug, en]) => ({
-          text: en,
-          link: `/guide/${slug}`,
-        })),
+        items: [
+          ...ATHLETE_GUIDES.map(([slug, en]) => ({
+            text: en,
+            link: `/guide/${slug}`,
+          })),
+          // English only, so it stays out of ATHLETE_GUIDES (translated).
+          { text: "Move coach sessions", link: "/guide/move-coach-sessions" },
+        ],
       },
       {
         text: "Guides",
