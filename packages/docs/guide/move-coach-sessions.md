@@ -9,6 +9,8 @@ Your coach plans the week in Train2Go; your week does not always go to plan.
 In Kaiord you can move a coach session to another day, and when your coach
 moves it instead, the card follows on the next sync.
 
+_Leer en español: [Mueve a otro día las sesiones de tu entrenador](/es/guide/move-coach-sessions)._
+
 ## Moving a session
 
 A coach session can be moved once it is a workout in Kaiord, that is, once

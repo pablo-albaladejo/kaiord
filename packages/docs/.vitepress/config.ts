@@ -161,6 +161,11 @@ const ATHLETE_GUIDES = [
   ["ai-planning-byok", "AI planning with your key", "IA con tu propia clave"],
   ["whoop-recovery-in-plan", "WHOOP recovery", "Recuperación de WHOOP"],
   [
+    "move-coach-sessions",
+    "Move coach sessions",
+    "Mover sesiones del entrenador",
+  ],
+  [
     "kaiord-vs-trainingpeaks-intervals-garmin",
     "Kaiord vs TrainingPeaks, intervals.icu, Garmin",
     "Kaiord frente a otras plataformas",
@@ -170,7 +175,7 @@ const ATHLETE_GUIDES = [
 const config = {
   lang: "en",
 
-  // Only the four athlete guides are translated. `i18nRouting: false` makes
+  // Only the athlete guides (ATHLETE_GUIDES) are translated. `i18nRouting: false` makes
   // the language switcher link to each locale's root instead of "/es/<same
   // path>", which would be a 404 on every untranslated page.
   locales: {
@@ -265,14 +270,10 @@ const config = {
       {
         text: "For athletes",
         collapsed: false,
-        items: [
-          ...ATHLETE_GUIDES.map(([slug, en]) => ({
-            text: en,
-            link: `/guide/${slug}`,
-          })),
-          // English only, so it stays out of ATHLETE_GUIDES (translated).
-          { text: "Move coach sessions", link: "/guide/move-coach-sessions" },
-        ],
+        items: ATHLETE_GUIDES.map(([slug, en]) => ({
+          text: en,
+          link: `/guide/${slug}`,
+        })),
       },
       {
         text: "Guides",
