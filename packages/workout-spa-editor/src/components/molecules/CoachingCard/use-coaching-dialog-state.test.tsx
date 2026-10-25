@@ -65,6 +65,7 @@ const makeMatch = (
 afterEach(async () => {
   await db.table("sessionMatches").clear();
   await db.table("workouts").clear();
+  await db.table("activities").clear();
 });
 
 describe("useCoachingDialogState — matched executed", () => {
@@ -128,5 +129,36 @@ describe("useCoachingDialogState — matched executed", () => {
     const state = result.current;
     if (state?.kind !== "matched") throw new Error("expected matched");
     expect(state.executed.map((w) => w.id)).toEqual([exec1.id]);
+  });
+
+  it("should carry the match's executed ids and whether its plan is a recording", async () => {
+    // Arrange
+    const structured = makeWorkout("w-structured");
+    await db.table("workouts").bulkPut([structured]);
+    await db.table("sessionMatches").put(makeMatch(structured.id, ["w-gone"]));
+    await db.table("activities").put({
+      id: "act-1",
+      profileId: PROFILE_ID,
+      date: "2026-04-13",
+      sport: "cycling",
+      sourceBridgeId: "garmin",
+      externalId: "ext-1",
+      linkedWorkoutId: structured.id,
+      krd: null,
+      createdAt: "2026-05-01T12:00:00.000Z",
+    });
+
+    // Act
+    const { result } = renderHook(() =>
+      useCoachingDialogState(PROFILE_ID, activity)
+    );
+
+    // Assert
+    await waitFor(() => expect(result.current?.kind).toBe("matched"));
+    expect(result.current).toMatchObject({
+      executed: [],
+      executedWorkoutIds: ["w-gone"],
+      recorded: true,
+    });
   });
 });

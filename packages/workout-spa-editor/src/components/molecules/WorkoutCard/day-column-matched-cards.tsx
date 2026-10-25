@@ -12,6 +12,8 @@ export type MatchedCardsProps = {
   density: "compact" | "comfortable";
   onActivityClick?: (activity: CoachingActivity) => void;
   bindCardDrag?: (workoutId: string) => (event: PointerEvent) => void;
+  /** The week's executed refs: a matched plan listed here is a recording. */
+  executedRefIds?: ReadonlySet<string>;
 };
 
 /**
@@ -30,7 +32,9 @@ export const renderMatchedCards = (p: MatchedCardsProps) =>
         onClick={p.onActivityClick}
       />
     );
-    if (!p.bindCardDrag || !isMovableSession(s).movable) return card;
+    const recorded = p.executedRefIds?.has(s.workout.id) ?? false;
+    if (!p.bindCardDrag || !isMovableSession({ ...s, recorded }).movable)
+      return card;
     return (
       <div key={s.match.id} onPointerDown={p.bindCardDrag(s.workout.id)}>
         {card}

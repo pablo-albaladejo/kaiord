@@ -66,4 +66,31 @@ describe("readMoveBackEntries", () => {
       { movable: false, reason: "completed" },
     ]);
   });
+
+  it("should block an entry whose planned side is a recording", async () => {
+    // Arrange
+    const persistence = await seedSession({
+      workout: { date: THU, coachDate: THU },
+      match: { date: THU },
+    });
+    await persistence.activities.upsertByExternalId({
+      id: "act",
+      profileId: PROFILE,
+      date: THU,
+      sport: "running",
+      sourceBridgeId: "garmin",
+      externalId: "ext",
+      linkedWorkoutId: "w",
+      krd: null,
+      createdAt: "2026-10-01T08:00:00.000Z",
+    });
+
+    // Act
+    const entries = await readMoveBackEntries(persistence, PROFILE, [entry]);
+
+    // Assert
+    expect(entries.map((e) => e.movability)).toEqual([
+      { movable: false, reason: "executed" },
+    ]);
+  });
 });

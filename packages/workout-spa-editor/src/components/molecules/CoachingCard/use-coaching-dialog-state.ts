@@ -16,6 +16,7 @@
  */
 import { useLiveQuery } from "dexie-react-hooks";
 
+import { createDexieActivityRepository } from "../../../adapters/dexie/dexie-activity-repository";
 import { db } from "../../../adapters/dexie/dexie-database";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
@@ -33,6 +34,10 @@ export type CoachingDialogState =
       matchId: string;
       workout: WorkoutRecord;
       executed: WorkoutRecord[];
+      /** The match's slot, including ids whose rows are gone. */
+      executedWorkoutIds?: readonly string[];
+      /** An activity is the planned workout or links to it. */
+      recorded?: boolean;
     };
 
 const resolveExecuted = async (
@@ -64,8 +69,18 @@ const resolveState = async (
     // to the no-workout branch so the dialog re-offers AI/Manual/Match.
     // Stale-match cleanup belongs to the cascade hooks, not the dialog.
     if (!workout) return { kind: "no-workout" };
-    const executed = await resolveExecuted(match.executedWorkoutIds ?? []);
-    return { kind: "matched", matchId: match.id, workout, executed };
+    const executedWorkoutIds = match.executedWorkoutIds ?? [];
+    return {
+      kind: "matched",
+      matchId: match.id,
+      workout,
+      executed: await resolveExecuted(executedWorkoutIds),
+      executedWorkoutIds,
+      recorded: await createDexieActivityRepository(db).referencesWorkout(
+        profileId,
+        workout.id
+      ),
+    };
   }
 
   const prefix = `${activity.source}:`;

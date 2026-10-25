@@ -18,9 +18,12 @@ export type MovabilityInput = {
   activity: { status: ActivityStatus };
   executed?: readonly unknown[];
   match?: { executedWorkoutIds?: readonly string[] };
+  /** An activity is the planned side or links to it: a recording. */
+  recorded?: boolean;
 };
 
 const hasExecutedSlot = (s: MovabilityInput): boolean =>
+  s.recorded === true ||
   (s.executed?.length ?? 0) > 0 ||
   (s.match?.executedWorkoutIds?.length ?? 0) > 0;
 

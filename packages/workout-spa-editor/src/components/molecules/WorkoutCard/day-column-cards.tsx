@@ -34,6 +34,7 @@ export type DayCardBuckets = {
   workoutCardPointerDownFor?: (
     workoutId: string
   ) => (event: PointerEvent) => void;
+  executedRefIds?: ReadonlySet<string>;
 };
 
 const viewToCardDensity = (view: CalendarView): "compact" | "comfortable" =>
@@ -50,6 +51,7 @@ export function renderDayCards(buckets: DayCardBuckets) {
         density: cardDensity,
         onActivityClick: buckets.onActivityClick,
         bindCardDrag,
+        executedRefIds: buckets.executedRefIds,
       })}
       {buckets.soloPlans.map((a) => (
         <CoachingActivityCard

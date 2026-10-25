@@ -47,6 +47,17 @@ describe("isMovableSession", () => {
     expect(verdict).toEqual({ movable: false, reason: "executed" });
   });
 
+  it("should refuse a session whose planned side is itself a recording", () => {
+    // Arrange
+    const input = session({ recorded: true });
+
+    // Act
+    const verdict = isMovableSession(input);
+
+    // Assert
+    expect(verdict).toEqual({ movable: false, reason: "executed" });
+  });
+
   it("should refuse a session whose activity is completed", () => {
     // Arrange
     const input = session({ activity: { status: "completed" } });

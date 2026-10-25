@@ -5,16 +5,17 @@
  * `ExecutedWorkoutsSection` slots wired up.
  */
 import { isMovableSession } from "../../../application/session-movability";
-import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingDialogBodyProps } from "./coaching-dialog-body-props";
 import { ExecutedWorkoutsSection } from "./ExecutedWorkoutsSection";
 import { LinkedWorkoutSection } from "./LinkedWorkoutSection";
 import { MatchedActions } from "./MatchedActions";
+import type { CoachingDialogState } from "./use-coaching-dialog-state";
+
+type MatchedState = Extract<CoachingDialogState, { kind: "matched" }>;
 
 export const renderMatchedBody = (
   props: CoachingDialogBodyProps,
-  workout: WorkoutRecord,
-  executed: WorkoutRecord[]
+  { workout, executed, executedWorkoutIds, recorded }: MatchedState
 ) => (
   <>
     <LinkedWorkoutSection
@@ -40,6 +41,8 @@ export const renderMatchedBody = (
         workout,
         activity: props.activity,
         executed,
+        match: { executedWorkoutIds },
+        recorded,
       })}
       onMoveTo={props.onMoveTo}
     />

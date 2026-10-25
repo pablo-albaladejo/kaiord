@@ -39,7 +39,8 @@ const matched = (
 
 const renderWith = (
   matchedSessions: MatchedSessionWithMetadata[],
-  soloPlans: CoachingActivity[] = []
+  soloPlans: CoachingActivity[] = [],
+  executedRefIds: ReadonlySet<string> = new Set()
 ) => {
   const bind = vi.fn(() => vi.fn());
   render(
@@ -51,6 +52,7 @@ const renderWith = (
         view: "grid",
         onWorkoutClick: vi.fn(),
         workoutCardPointerDownFor: bind,
+        executedRefIds,
       })}
     </>
   );
@@ -89,6 +91,17 @@ describe("renderDayCards matched drag", () => {
 
     // Assert
     expect(bind).not.toHaveBeenCalled();
+  });
+
+  it("should not bind a session whose planned side is a recording", () => {
+    // Arrange
+    const sessions = [matched("w-rec"), matched("w-move")];
+
+    // Act
+    const bind = renderWith(sessions, [], new Set(["w-rec"]));
+
+    // Assert
+    expect(bind.mock.calls).toEqual([["w-move"]]);
   });
 
   it("should never bind an unconverted coach plan", () => {

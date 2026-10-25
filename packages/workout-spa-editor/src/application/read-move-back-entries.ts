@@ -9,7 +9,10 @@ import { isMovableSession, type Movability } from "./session-movability";
 
 export type MoveBackEntry = OverriddenSession & { movability: Movability };
 
-type Deps = Pick<PersistencePort, "workouts" | "sessionMatch" | "coaching">;
+type Deps = Pick<
+  PersistencePort,
+  "workouts" | "sessionMatch" | "coaching" | "activities"
+>;
 
 const readOne = async (
   deps: Deps,
@@ -26,6 +29,10 @@ const readOne = async (
     workout,
     activity: { status: activity?.status ?? "pending" },
     match,
+    // As in `moveSession`: only a planned side counts as a held recording.
+    recorded:
+      match !== undefined &&
+      (await deps.activities.referencesWorkout(profileId, workout.id)),
   });
   return { ...entry, movability };
 };

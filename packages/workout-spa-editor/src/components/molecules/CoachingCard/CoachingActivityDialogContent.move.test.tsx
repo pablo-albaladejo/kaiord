@@ -106,6 +106,20 @@ describe("CoachingActivityDialogContent move", () => {
     );
   });
 
+  it.each([
+    ["its planned side is a recording", { recorded: true }],
+    ["its match holds a recording not loaded", { executedWorkoutIds: ["rec"] }],
+  ])("should disable Move when %s", (_label, extra) => {
+    // Arrange
+    const state = { ...matched(), ...extra };
+
+    // Act
+    renderContent(state);
+
+    // Assert
+    expect(moveButton()).toBeDisabled();
+  });
+
   it("should offer no Move outside a move flow", () => {
     // Arrange
     const state = matched();
