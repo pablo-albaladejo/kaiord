@@ -12,6 +12,7 @@ import { test } from "node:test";
 import sharp from "sharp";
 
 import {
+  APP_ICONS,
   FAVICON_RASTERS,
   LANDING_SUBTITLE,
   MIRRORS,
@@ -48,6 +49,48 @@ test("apple-touch-icon is the 180px iOS size", async () => {
 
   assert.equal(meta.width, 180);
   assert.equal(meta.height, 180);
+});
+
+test("every web app icon is committed at the size its name promises", async () => {
+  for (const { out, size } of APP_ICONS) {
+    const meta = await sharp(asset(out)).metadata();
+    assert.equal(meta.width, size, `${out} width`);
+    assert.equal(meta.height, size, `${out} height`);
+  }
+});
+
+// The OS crops a maskable icon to its own shape; only the circle of radius
+// 40% around the centre is guaranteed to survive, so the mark lives there and
+// the background reaches every edge.
+test("the maskable icon is full-bleed with its mark inside the safe zone", async () => {
+  const { out, size } = APP_ICONS.find((icon) => icon.maskable);
+  const { data, info } = await sharp(asset(out))
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const pixel = (x, y) =>
+    data.subarray((y * size + x) * 4, (y * size + x) * 4 + 4);
+  const safeRadius = size * 0.4;
+  let markPixels = 0;
+  const outside = [];
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const [r, , , a] = pixel(x, y);
+      assert.ok(a === 255, `transparent pixel at ${x},${y}`);
+      if (r < 128) continue;
+      markPixels++;
+      const d = Math.hypot(x + 0.5 - size / 2, y + 0.5 - size / 2);
+      if (d > safeRadius) outside.push(`${x},${y}`);
+    }
+  }
+
+  assert.equal(info.width, size);
+  assert.ok(markPixels > 0, "the mark rendered no pixels");
+  assert.deepEqual(
+    outside.slice(0, 5),
+    [],
+    "mark pixels outside the safe zone"
+  );
 });
 
 test("the Open Graph raster keeps the 1200x630 aspect", async () => {

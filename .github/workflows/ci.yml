@@ -652,15 +652,18 @@ jobs:
 
       # The only job that holds all three site builds (landing, SPA, docs):
       # the `lint` job's artifacts carry `packages/*/dist` alone, so its
-      # dist-reading docs tests skip. REQUIRE_DOCS_DIST=1 turns that skip
+      # dist-reading docs and SPA tests skip. REQUIRE_DOCS_DIST=1 and
+      # REQUIRE_SPA_DIST=1 turn that skip
       # into a failure here, so the guards cannot pass vacuously pre-merge.
       - name: Site guards
         env:
           REQUIRE_DOCS_DIST: "1"
+          REQUIRE_SPA_DIST: "1"
           REQUIRE_FULL_HISTORY: "1"
         run: |
           node scripts/check-site-links.mjs --landing packages/landing/dist --app packages/workout-spa-editor/dist --docs packages/docs/.vitepress/dist
           node --test packages/docs/scripts/*.test.mjs
+          node --test packages/workout-spa-editor/scripts/dist-pwa-manifest.test.mjs
 
       - name: Verify build outputs
         # Verify every package whose dist/ a downstream consumer reads.
