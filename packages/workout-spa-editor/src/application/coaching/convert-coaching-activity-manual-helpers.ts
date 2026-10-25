@@ -1,4 +1,5 @@
 import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
+import type { WorkoutRecord } from "../../types/calendar-record";
 import type { SessionMatchSource } from "../../types/session-match";
 import { updateWorkoutRecord } from "../save-workout-edits";
 import { buildCoachingTemplateKrd } from "./coaching-template";
@@ -11,6 +12,36 @@ import { ensureSessionMatch } from "./ensure-session-match";
 import { sessionMatchDate } from "./session-match-date";
 
 export const manualMatchSource: SessionMatchSource = "auto-coaching";
+
+type Resolved = NonNullable<ReturnType<typeof resolveT2GSport>>;
+
+/**
+ * Seeds the template onto the row as stored, so a move made since the read
+ * stays; returns that stored row, or the read when nothing was attempted.
+ */
+const seedTemplateOnStoredRow = async (
+  deps: ConvertManualDeps,
+  activity: CoachingActivityForConvert,
+  existing: WorkoutRecord,
+  resolved: Resolved
+): Promise<WorkoutRecord> => {
+  let stored = existing;
+  await updateWorkoutRecord(deps, existing.id, (fresh) => {
+    stored = fresh;
+    if (fresh.krd) return undefined;
+    return {
+      ...fresh,
+      state: "structured",
+      krd: buildCoachingTemplateKrd(
+        resolved.sport,
+        activity.title,
+        resolved.subSport
+      ),
+      updatedAt: deps.clock(),
+    };
+  });
+  return stored;
+};
 
 export const handleExistingManualWorkout = async (
   deps: ConvertManualDeps,
@@ -27,27 +58,16 @@ export const handleExistingManualWorkout = async (
   const resolved = resolveT2GSport(activity.sport);
   // For a rest day (or unknown sport) `resolved` is null: leave the
   // existing raw record untouched rather than seeding a KRD.
-  // Written onto the row as stored, so a move made since the read stays.
-  if (existing && !existing.krd && resolved)
-    await updateWorkoutRecord(deps, existingWorkoutId, (fresh) =>
-      fresh.krd
-        ? undefined
-        : {
-            ...fresh,
-            state: "structured",
-            krd: buildCoachingTemplateKrd(
-              resolved.sport,
-              activity.title,
-              resolved.subSport
-            ),
-            updatedAt: deps.clock(),
-          }
-    );
+  const stored =
+    existing && !existing.krd && resolved
+      ? await seedTemplateOnStoredRow(deps, activity, existing, resolved)
+      : existing;
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId: existingWorkoutId,
-    date: existing ? sessionMatchDate(existing, activity) : activity.date,
+    // Dated from the row read inside the write's transaction (AC-27).
+    date: stored ? sessionMatchDate(stored, activity) : activity.date,
     source: manualMatchSource,
     newId: deps.newMatchId,
     clock: deps.clock,
