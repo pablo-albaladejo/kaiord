@@ -18,6 +18,7 @@ import {
   NO_NOTICES,
   reportMoves,
   visibleMoves,
+  type WeekNotice,
 } from "./coach-move-notice-state";
 
 type Actions = {
@@ -66,7 +67,7 @@ export const useCoachMoveNoticeActions = (): Actions =>
 export const useCoachMoveNotice = (
   profileId: string | null,
   weekStart: string
-): CoachDateMoves | undefined => {
+): WeekNotice | undefined => {
   const ctx = useContext(CoachMoveNoticeContext);
   return ctx ? visibleMoves(ctx.state, profileId, weekStart) : undefined;
 };

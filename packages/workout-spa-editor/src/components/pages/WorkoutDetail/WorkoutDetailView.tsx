@@ -3,6 +3,7 @@ import type { ReviewModel } from "../../../lib/workout-review";
 import { hardestZone } from "../../../lib/workout-review/zone-emphasis";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { ExportLedgerEntry } from "../../../types/export-ledger";
+import { MovedFromChip } from "../../molecules/MovedFromChip/MovedFromChip";
 import type { SummaryItem } from "../../molecules/SummaryStrip";
 import { SummaryStrip } from "../../molecules/SummaryStrip";
 import { WorkoutDetailFooter } from "./WorkoutDetailFooter";
@@ -71,6 +72,7 @@ export function WorkoutDetailView({
         onDelete={onDelete}
       />
       <WorkoutDetailTitle sport={record.sport} title={title} tag={tag} />
+      <MovedFromChip workout={record} />
       {model && (
         <>
           <SummaryStrip items={buildSummary(model, t, tZones)} />

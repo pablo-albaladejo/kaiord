@@ -63,9 +63,7 @@ export function CoachingActivityDialogContent(
         description={activity.description}
       />
       <DialogDescription activity={activity} load={descriptionLoad} />
-      {matched
-        ? renderMatchedBody(props, matched.workout, matched.executed)
-        : renderNoWorkoutBody(props)}
+      {matched ? renderMatchedBody(props, matched) : renderNoWorkoutBody(props)}
       <CoachingDayComments comments={comments} />
     </div>
   );

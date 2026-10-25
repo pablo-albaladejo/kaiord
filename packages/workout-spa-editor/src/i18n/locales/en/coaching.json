@@ -151,5 +151,16 @@
     "invalidActivityId": "Invalid activity id",
     "activityNotFound": "Activity not found"
   },
-  "effortOf": "Intensity {{n}} of {{max}}"
+  "effortOf": "Intensity {{n}} of {{max}}",
+  "move": {
+    "action": "Move to another day",
+    "title": "Move session",
+    "description": "Pick the new day for this session.",
+    "confirm": "Move",
+    "cancel": "Cancel",
+    "blockedExecuted": "Already done — it can't be moved.",
+    "blockedCompleted": "The coach marked it completed — it can't be moved.",
+    "blockedProjected": "A recorded activity can't be moved.",
+    "createFirst": "Create the workout first to move it."
+  }
 }

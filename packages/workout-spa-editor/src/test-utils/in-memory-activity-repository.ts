@@ -19,4 +19,11 @@ export const createInMemoryActivityRepository = (
     [...store.values()].filter(
       (a) => a.profileId === profileId && a.date >= start && a.date <= end
     ),
+
+  referencesWorkout: async (profileId, workoutId) =>
+    [...store.values()].some(
+      (a) =>
+        a.profileId === profileId &&
+        (a.id === workoutId || a.linkedWorkoutId === workoutId)
+    ),
 });

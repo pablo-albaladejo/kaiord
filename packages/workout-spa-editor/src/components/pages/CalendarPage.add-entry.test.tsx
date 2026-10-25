@@ -13,10 +13,10 @@ import { Route, Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
 import { CoachingRegistryProvider } from "../../contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
-import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { AppToastProvider } from "../providers/AppToastProvider";
 import CalendarPage from "./CalendarPage";
@@ -59,7 +59,7 @@ function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
 function renderCalendar(path = "/calendar/2026-W15") {
   const loc = memoryLocation({ path, record: true });
   const view = render(
-    <PersistenceProvider persistence={createInMemoryPersistence()}>
+    <PersistenceProvider persistence={createDexiePersistence(db)}>
       <GarminBridgeProvider>
         <CoachingRegistryProvider factories={[]}>
           <AppToastProvider>

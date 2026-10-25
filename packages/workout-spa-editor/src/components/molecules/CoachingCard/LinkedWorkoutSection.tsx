@@ -7,6 +7,7 @@
 
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { MovedFromChip } from "../MovedFromChip/MovedFromChip";
 import {
   formatDurationMinutes,
   sportLabel,
@@ -39,6 +40,7 @@ export function LinkedWorkoutSection({
         {sportLabel(workout.sport, t)}
         {duration && ` · ${duration}`}
       </div>
+      <MovedFromChip workout={workout} />
       <div className="pt-1">
         <button
           type="button"

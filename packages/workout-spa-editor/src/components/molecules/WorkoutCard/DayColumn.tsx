@@ -23,6 +23,7 @@ export type DayColumnProps = {
     workoutId: string
   ) => (event: PointerEvent) => void;
   dropTargetActive?: boolean;
+  executedRefIds?: ReadonlySet<string>;
   wellness?: DayWellness;
   /** Whether the week-level wellness query has resolved (see WellnessBand). */
   wellnessResolved?: boolean;
@@ -47,6 +48,7 @@ export function DayColumn({
   onActivityClick,
   workoutCardPointerDownFor,
   dropTargetActive = false,
+  executedRefIds,
   wellness,
   wellnessResolved = false,
 }: DayColumnProps) {
@@ -72,6 +74,7 @@ export function DayColumn({
           onWorkoutClick,
           onActivityClick,
           workoutCardPointerDownFor,
+          executedRefIds,
         })}
       </div>
       <DayColumnAddButton date={date} onAddClick={onAddClick} />

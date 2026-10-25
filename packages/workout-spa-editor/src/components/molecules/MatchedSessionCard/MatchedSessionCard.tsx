@@ -15,8 +15,8 @@
 
 import type { CalendarView } from "../../../types/user-preferences";
 import { CardShell } from "../CardShell/CardShell";
-import { LifecycleChip } from "../CardShell/LifecycleChip";
 import { zoneBorderClass } from "../CardShell/status-tokens";
+import { useMovedFromLabel } from "../MovedFromChip/MovedFromChip";
 import { useSessionZones } from "../WorkoutCard/use-session-zones";
 import { ZONE_BAR_HEIGHT } from "../ZoneProfileBar/zone-bar-height";
 import { ZoneProfileBar } from "../ZoneProfileBar/ZoneProfileBar";
@@ -25,15 +25,13 @@ import {
   renderComfortableMetadata,
   renderComfortableSecondary,
   renderCompactMetadata,
-  renderTitleRow,
 } from "./matched-session-rows";
 import {
   buildAriaLabel,
   buildTooltip,
-  formatPercent,
-  hasFiniteCompliance,
   type MatchedSession,
 } from "./matched-session-text";
+import { MatchedTitleRow } from "./matched-session-title-row";
 
 export type { MatchedSession };
 
@@ -52,21 +50,19 @@ export function MatchedSessionCard({
 }: MatchedSessionCardProps) {
   const executed = session.executed ?? [];
   const zones = useSessionZones(session.workout);
+  const movedFrom = useMovedFromLabel(session.workout);
   return (
     <CardShell
       borderClass={zoneBorderClass(zones.dominant)}
-      ariaLabel={buildAriaLabel(session)}
+      ariaLabel={[buildAriaLabel(session), movedFrom]
+        .filter(Boolean)
+        .join("; ")}
       tooltip={buildTooltip(session)}
       onClick={() => onClick?.(session.activity)}
       testId={`matched-card-${session.activity.id}`}
       originChip={`${session.activity.sourceBadge} + ${session.activity.sport.icon}`}
       titleRow={
-        <>
-          {renderTitleRow(session)}
-          {hasFiniteCompliance(session.complianceScore) && (
-            <LifecycleChip label={formatPercent(session.complianceScore)} />
-          )}
-        </>
+        <MatchedTitleRow session={session} compact={density === "compact"} />
       }
       zoneBar={
         <ZoneProfileBar

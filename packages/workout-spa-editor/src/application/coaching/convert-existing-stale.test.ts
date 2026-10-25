@@ -153,6 +153,32 @@ describe("handleExistingManualWorkout with a row moved after its read", () => {
     });
   });
 
+  it("should date a new match from the stored row when the workout already has a KRD", async () => {
+    // Arrange
+    const persistence = await seedSession({
+      workout: { state: "structured", krd: fakeKrd() },
+      match: null,
+    });
+    const read = persistence.workouts.getById.bind(persistence.workouts);
+    vi.spyOn(persistence.workouts, "getById").mockImplementationOnce(
+      async (id) => {
+        const row = await read(id);
+        await moveToThursday(persistence);
+        return row;
+      }
+    );
+    const deps = depsOf(persistence, async () => undefined);
+
+    // Act
+    await handleExistingManualWorkout(deps, coachActivity(), "w");
+
+    // Assert
+    expect(await persistence.sessionMatch.getById("m-new")).toMatchObject({
+      workoutId: "w",
+      date: THU,
+    });
+  });
+
   it("should write nothing when the row got a KRD meanwhile", async () => {
     // Arrange
     const persistence = await seedSession({ workout: { state: "raw" } });

@@ -110,4 +110,26 @@ describe("LinkedWorkoutSection", () => {
       screen.getByText("30 minute endurance ride at zone 2")
     ).toBeInTheDocument();
   });
+
+  it("should name the coach's day when the athlete moved the session (AC-17)", () => {
+    // Arrange
+    const workout = makeWorkout({
+      date: "2026-04-15",
+      coachDate: "2026-04-13",
+    });
+
+    // Act
+    render(
+      <LinkedWorkoutSection
+        workout={workout}
+        splitting={false}
+        onSplit={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(
+      screen.getByRole("img", { name: "Moved from Mon, Apr 13" })
+    ).toBeVisible();
+  });
 });

@@ -8,6 +8,9 @@
  *   - pushed    → [Open editor]
  *   - any other → [Open editor]
  *
+ * [Move to another day] joins every state inside the calendar's move flow,
+ * disabled with the reason once the session is done (design §3.8).
+ *
  * `[Process with AI]` for raw workouts re-uses the dialog's AI handler
  * (the use case detects the existing workout id and transitions raw →
  * structured in place rather than creating a new record).
@@ -17,8 +20,10 @@
  * Dexie-backed `WorkoutRecord` directly (Option α) so the dialog
  * pushes the persisted state.
  */
+import type { Movability } from "../../../application/session-movability";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { MoveSessionAction } from "./MoveSessionAction";
 
 export type MatchedActionsProps = {
   workout: WorkoutRecord;
@@ -28,6 +33,8 @@ export type MatchedActionsProps = {
   onAiProcess: () => void;
   onPushToGarmin: () => void;
   onSplit: () => void;
+  movability?: Movability;
+  onMoveTo?: (date: string) => void;
 };
 
 export function MatchedActions(props: MatchedActionsProps) {
@@ -53,6 +60,11 @@ export function MatchedActions(props: MatchedActionsProps) {
       >
         {props.splitting ? t("actions.splitting") : t("actions.split")}
       </button>
+      <MoveSessionAction
+        date={props.workout.date}
+        movability={props.movability}
+        onMoveTo={props.onMoveTo}
+      />
       {showPush && (
         <button
           type="button"

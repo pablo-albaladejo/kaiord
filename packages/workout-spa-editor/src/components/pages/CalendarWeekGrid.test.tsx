@@ -2,13 +2,22 @@ import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { PersistenceProvider } from "../../contexts/persistence-context";
 import { ToastContextProvider } from "../../contexts/ToastContext";
+import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
+import { SessionMoveProvider } from "./session-move/SessionMoveProvider";
 
 const renderWithToast = (ui: ReactElement) =>
-  render(<ToastContextProvider>{ui}</ToastContextProvider>);
+  render(
+    <PersistenceProvider persistence={createInMemoryPersistence()}>
+      <ToastContextProvider>
+        <SessionMoveProvider>{ui}</SessionMoveProvider>
+      </ToastContextProvider>
+    </PersistenceProvider>
+  );
 
 const DAYS_IN_WEEK = 7;
 

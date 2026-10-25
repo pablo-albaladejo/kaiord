@@ -43,6 +43,7 @@ export function CalendarBodyView({
       soloActualsByDay={buckets.soloActualsByDay}
       todayDate={todayDate}
       view={view}
+      executedRefIds={buckets.executedRefIds}
       onWorkoutClick={s.handleWorkoutClick}
       onAddClick={s.handleAddClick}
       onActivityClick={setSelectedActivity}

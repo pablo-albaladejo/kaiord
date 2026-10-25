@@ -44,6 +44,7 @@ export const renderNoWorkoutBody = (props: CoachingDialogBodyProps) => {
       onOpenPicker={props.onOpenPicker}
       onClosePicker={props.onClosePicker}
       onSelectWorkout={props.onSelectWorkout}
+      showMoveHint={props.onMoveTo !== undefined}
     />
   );
 };

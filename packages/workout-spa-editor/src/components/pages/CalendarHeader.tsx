@@ -53,7 +53,9 @@ export function CalendarHeader({
     <>
       {moves && profileId && (
         <CoachMoveNotice
+          key={moves.seq}
           moves={moves}
+          profileId={profileId}
           onDismiss={() => dismissMoves(profileId, s.data.weekStart)}
         />
       )}

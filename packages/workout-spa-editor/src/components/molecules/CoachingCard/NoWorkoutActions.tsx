@@ -7,6 +7,7 @@
  * The MatchToPicker renders inline above the action row when open so
  * the keyboard contract stays in one render pass.
  */
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { MatchToPicker } from "./MatchToPicker";
@@ -24,6 +25,8 @@ export type NoWorkoutActionsProps = {
   onOpenPicker: () => void;
   onClosePicker: () => void;
   onSelectWorkout: (workoutId: string) => void;
+  /** Inside the move flow: an unconverted plan says to create it first. */
+  showMoveHint?: boolean;
 };
 
 const isDescriptionEmpty = (activity: CoachingActivity): boolean => {
@@ -32,6 +35,7 @@ const isDescriptionEmpty = (activity: CoachingActivity): boolean => {
 };
 
 export function NoWorkoutActions(props: NoWorkoutActionsProps) {
+  const t = useTranslate("coaching");
   const showHint = isDescriptionEmpty(props.activity);
   // Single-writer invariant: a fast user must not queue two creation paths.
   const writeInFlight = props.creatingManual || props.matching;
@@ -43,6 +47,14 @@ export function NoWorkoutActions(props: NoWorkoutActionsProps) {
           className="text-xs text-slate-500 dark:text-slate-400"
         >
           ℹ AI will use only the title + sport
+        </p>
+      )}
+      {props.showMoveHint && (
+        <p
+          data-testid="coaching-dialog-move-hint"
+          className="text-xs text-ink-muted"
+        >
+          {t("move.createFirst")}
         </p>
       )}
       {props.pickerOpen && (

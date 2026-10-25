@@ -10,6 +10,7 @@ import { Redirect } from "wouter";
 import { getCurrentWeekId } from "../../utils/week-utils";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
 import { CalendarPageView } from "./CalendarPageView";
+import { SessionMoveProvider } from "./session-move/SessionMoveProvider";
 import { useCalendarPage } from "./use-calendar-page";
 
 export default function CalendarPage() {
@@ -19,5 +20,9 @@ export default function CalendarPage() {
   if (result.state === "redirect")
     return <Redirect to={`/calendar/${getCurrentWeekId()}`} replace />;
   if (result.state === "skeleton") return <CalendarSkeleton />;
-  return <CalendarPageView {...result} />;
+  return (
+    <SessionMoveProvider>
+      <CalendarPageView {...result} />
+    </SessionMoveProvider>
+  );
 }

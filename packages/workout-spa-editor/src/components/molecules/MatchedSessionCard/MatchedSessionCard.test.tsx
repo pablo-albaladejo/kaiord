@@ -300,4 +300,34 @@ describe("MatchedSessionCard", () => {
 
     expect(onClick).toHaveBeenCalledWith(baseActivity);
   });
+
+  it("should name the coach's day in the card when the athlete moved it (AC-17)", () => {
+    // Arrange
+    const moved = session({
+      workout: { ...baseWorkout, date: "2026-10-08", coachDate: "2026-10-06" },
+    });
+
+    // Act
+    render(<MatchedSessionCard session={moved} />);
+
+    // Assert
+    expect(screen.getByTestId("moved-from-chip")).toBeInTheDocument();
+    expect(screen.getByRole("button")).toHaveAccessibleName(
+      /; Moved from Tue, Oct 6$/
+    );
+  });
+
+  it("should carry no moved trace for a session on the coach's day", () => {
+    // Arrange
+    const onDay = session({
+      workout: { ...baseWorkout, coachDate: baseWorkout.date },
+    });
+
+    // Act
+    render(<MatchedSessionCard session={onDay} />);
+
+    // Assert
+    expect(screen.queryByTestId("moved-from-chip")).toBeNull();
+    expect(screen.getByRole("button")).not.toHaveAccessibleName(/Moved from/);
+  });
 });

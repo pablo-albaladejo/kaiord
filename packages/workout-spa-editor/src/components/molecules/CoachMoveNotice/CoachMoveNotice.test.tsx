@@ -7,7 +7,7 @@ import { CoachMoveNotice } from "./CoachMoveNotice";
 describe("CoachMoveNotice", () => {
   it("should count the moves and point to sending the week", () => {
     // Arrange
-    const moves = { coachMoves: 2, overriddenLocalMoves: 0 };
+    const moves = { coachMoves: 2, overriddenLocalMoves: 0, overridden: [] };
 
     // Act
     render(<CoachMoveNotice moves={moves} onDismiss={vi.fn()} />);
@@ -20,7 +20,13 @@ describe("CoachMoveNotice", () => {
 
   it("should name the overridden moves only when there are some", () => {
     // Arrange
-    const moves = { coachMoves: 1, overriddenLocalMoves: 1 };
+    const moves = {
+      coachMoves: 1,
+      overriddenLocalMoves: 1,
+      overridden: [
+        { workoutId: "w", athleteDate: "2026-10-06", coachDate: "2026-10-08" },
+      ],
+    };
 
     // Act
     render(<CoachMoveNotice moves={moves} onDismiss={vi.fn()} />);
@@ -36,7 +42,7 @@ describe("CoachMoveNotice", () => {
     const onDismiss = vi.fn();
     render(
       <CoachMoveNotice
-        moves={{ coachMoves: 1, overriddenLocalMoves: 0 }}
+        moves={{ coachMoves: 1, overriddenLocalMoves: 0, overridden: [] }}
         onDismiss={onDismiss}
       />
     );

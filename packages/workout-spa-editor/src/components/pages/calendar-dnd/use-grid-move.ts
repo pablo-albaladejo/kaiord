@@ -1,9 +1,9 @@
 /**
- * The calendar drag's drop: `moveSession` over the given persistence.
- * Failures are non-fatal: the optimistic UI reverts through the
- * `useLiveQuery` re-fetch, and a static toast gives one line of feedback,
- * naming why a done session can't move. Toast arguments are static
- * translation keys (R-PIIInterpolation).
+ * The calendar move's write: `moveSession` over the given persistence.
+ * Failures are non-fatal: the card stays where the live query has it, and a
+ * static toast gives one line of feedback, naming why a done session can't
+ * move or that the workout is gone. Toast arguments are static translation
+ * keys (R-PIIInterpolation).
  */
 
 import { useCallback } from "react";
@@ -11,6 +11,7 @@ import { useCallback } from "react";
 import {
   moveSession,
   SessionNotMovableError,
+  WorkoutNotFoundError,
 } from "../../../application/move-session";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -26,7 +27,9 @@ export function useGridMove(persistence: () => PersistencePort) {
     (workoutId: string, targetDay: string): void => {
       const deps = { ...persistence(), now: nowIso };
       moveSession(deps, { workoutId, targetDay }).catch((error: unknown) => {
-        if (!(error instanceof SessionNotMovableError))
+        if (error instanceof WorkoutNotFoundError)
+          toast.error(t("reschedule.notFound"));
+        else if (!(error instanceof SessionNotMovableError))
           toast.error(t("reschedule.moveFailed"));
         else if (error.reason === "executed")
           toast.error(t("reschedule.blockedExecuted"));

@@ -16,14 +16,14 @@
  */
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { db } from "../../../adapters/dexie/dexie-database";
+import { usePersistence } from "../../../contexts/persistence-context";
+import type { PersistencePort } from "../../../ports/persistence-port";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import {
   namespaceSourceId,
   toPersistedCoachingActivityId,
 } from "../../../types/coaching-activity-record";
-import type { SessionMatch } from "../../../types/session-match";
 
 export type CoachingDialogState =
   | { kind: "no-workout" }
@@ -33,50 +33,59 @@ export type CoachingDialogState =
       matchId: string;
       workout: WorkoutRecord;
       executed: WorkoutRecord[];
+      /** The match's slot, including ids whose rows are gone. */
+      executedWorkoutIds?: readonly string[];
+      /** An activity is the planned workout or links to it. */
+      recorded?: boolean;
     };
 
+type Deps = Pick<PersistencePort, "workouts" | "sessionMatch" | "activities">;
+
 const resolveExecuted = async (
+  deps: Deps,
   ids: readonly string[]
 ): Promise<WorkoutRecord[]> => {
-  if (ids.length === 0) return [];
-  const rows = await db.table<WorkoutRecord>("workouts").bulkGet([...ids]);
-  // `bulkGet` returns `undefined` for missing ids; drop dangling refs so
-  // the dialog never renders a row for a deleted recording.
+  const rows = await Promise.all(ids.map((id) => deps.workouts.getById(id)));
+  // Drop dangling refs so the dialog never renders a row for a deleted
+  // recording.
   return rows.filter((r): r is WorkoutRecord => Boolean(r));
 };
 
 const resolveState = async (
+  deps: Deps,
   profileId: string,
   activity: CoachingActivity
 ): Promise<CoachingDialogState> => {
-  const match = await db
-    .table<SessionMatch>("sessionMatches")
-    .where("[profileId+coachingActivityId]")
-    .equals([profileId, toPersistedCoachingActivityId(profileId, activity.id)])
-    .first();
+  const match = await deps.sessionMatch.getByActivityId(
+    profileId,
+    toPersistedCoachingActivityId(profileId, activity.id)
+  );
 
   if (match) {
-    const workout = await db
-      .table<WorkoutRecord>("workouts")
-      .get(match.workoutId);
+    const workout = await deps.workouts.getById(match.workoutId);
     // Dangling-ref tolerance (mirrors `useActivityMatchState`): if the
     // match references a workout that no longer exists, fall through
     // to the no-workout branch so the dialog re-offers AI/Manual/Match.
     // Stale-match cleanup belongs to the cascade hooks, not the dialog.
     if (!workout) return { kind: "no-workout" };
-    const executed = await resolveExecuted(match.executedWorkoutIds ?? []);
-    return { kind: "matched", matchId: match.id, workout, executed };
+    const executedWorkoutIds = match.executedWorkoutIds ?? [];
+    return {
+      kind: "matched",
+      matchId: match.id,
+      workout,
+      executed: await resolveExecuted(deps, executedWorkoutIds),
+      executedWorkoutIds,
+      recorded: await deps.activities.referencesWorkout(profileId, workout.id),
+    };
   }
 
   const prefix = `${activity.source}:`;
   if (!activity.id.startsWith(prefix)) return { kind: "no-workout" };
   const platformId = activity.id.slice(prefix.length);
-  const ns = namespaceSourceId(profileId, platformId);
-  const workout = await db
-    .table<WorkoutRecord>("workouts")
-    .where("[source+sourceId]")
-    .equals([activity.source, ns])
-    .first();
+  const workout = await deps.workouts.getBySourceId(
+    activity.source,
+    namespaceSourceId(profileId, platformId)
+  );
 
   if (workout) return { kind: "converted", workout };
   return { kind: "no-workout" };
@@ -85,8 +94,10 @@ const resolveState = async (
 export const useCoachingDialogState = (
   profileId: string | null,
   activity: CoachingActivity | null
-): CoachingDialogState | undefined =>
-  useLiveQuery<CoachingDialogState>(async () => {
+): CoachingDialogState | undefined => {
+  const persistence = usePersistence();
+  return useLiveQuery<CoachingDialogState>(async () => {
     if (!profileId || !activity) return { kind: "no-workout" };
-    return resolveState(profileId, activity);
-  }, [profileId, activity?.id]);
+    return resolveState(persistence, profileId, activity);
+  }, [persistence, profileId, activity?.id]);
+};

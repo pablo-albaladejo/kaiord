@@ -11,6 +11,8 @@ export type T2GStubScriptArgs = {
   bridgeId: string;
   caps: readonly string[];
   payload: unknown;
+  /** What `read-week` returns, for every week; empty by default. */
+  activities?: readonly unknown[];
 };
 
 // eslint-disable-next-line max-lines-per-function -- self-contained on purpose; Playwright `.toString()` serialisation precludes referencing module-level helpers from inside.
@@ -59,7 +61,7 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
         userId: "99999",
         userName: "Test User",
       }),
-    "read-week": () => wrap({ activities: [] }),
+    "read-week": () => wrap({ activities: args.activities ?? [] }),
     "read-day": () => wrap({ activities: [] }),
     "read-details": () => wrap(args.payload),
     "open-train2go": () => wrap(null),

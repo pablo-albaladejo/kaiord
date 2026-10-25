@@ -151,5 +151,16 @@
     "invalidActivityId": "ID de actividad no válido",
     "activityNotFound": "Actividad no encontrada"
   },
-  "effortOf": "Intensidad {{n}} de {{max}}"
+  "effortOf": "Intensidad {{n}} de {{max}}",
+  "move": {
+    "action": "Mover a otro día",
+    "title": "Mover sesión",
+    "description": "Elige el nuevo día para esta sesión.",
+    "confirm": "Mover",
+    "cancel": "Cancelar",
+    "blockedExecuted": "Ya está hecha: no se puede mover.",
+    "blockedCompleted": "El entrenador la marcó como completada: no se puede mover.",
+    "blockedProjected": "Una actividad grabada no se puede mover.",
+    "createFirst": "Crea primero el entreno para poder moverlo."
+  }
 }

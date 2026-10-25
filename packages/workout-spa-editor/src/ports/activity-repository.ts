@@ -23,4 +23,11 @@ export type ActivityRepository = {
     start: string,
     end: string
   ) => Promise<ActivityRecord[]>;
+  /**
+   * Whether an activity of the profile is this workout (`id`) or links to
+   * it (`linkedWorkoutId`): the workout is a recording and can't be moved
+   * (design §3.3). There is no `linkedWorkoutId` index; this scans the
+   * profile's rows through `[profileId+date]`.
+   */
+  referencesWorkout: (profileId: string, workoutId: string) => Promise<boolean>;
 };

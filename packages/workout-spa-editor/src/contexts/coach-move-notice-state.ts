@@ -6,7 +6,7 @@
  */
 import type { CoachDateMoves } from "../application/coaching/apply-coach-date-moves";
 
-type WeekNotice = CoachDateMoves & { seq: number };
+export type WeekNotice = CoachDateMoves & { seq: number };
 
 export type CoachMoveNotices = {
   notices: Record<string, WeekNotice>;
@@ -47,7 +47,7 @@ export const visibleMoves = (
   s: CoachMoveNotices,
   profileId: string | null,
   weekStart: string
-): CoachDateMoves | undefined => {
+): WeekNotice | undefined => {
   if (!profileId) return undefined;
   const key = noticeKey(profileId, weekStart);
   const notice = s.notices[key];
