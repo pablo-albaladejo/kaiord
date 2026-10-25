@@ -1,3 +1,5 @@
+> Completed: 2026-10-25
+
 ## Why
 
 Chrome on Android says "This app cannot be installed" for `kaiord.com/app/`.
