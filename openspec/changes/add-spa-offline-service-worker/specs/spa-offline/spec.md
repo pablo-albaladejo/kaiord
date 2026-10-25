@@ -74,23 +74,50 @@ The page SHALL check for an update on navigation, when it becomes visible, and e
 
 ### Requirement: Stale code never touches a newer database
 
-Before Dexie first opens the editor database, the editor SHALL read the installed IndexedDB version without requesting an upgrade. If that version is higher than the native version its own code declares, the editor SHALL NOT open the database. It SHALL then look for a newer worker, activate it, and reload, at most once per session, with no dialog. If no newer worker is available, or that reload already happened, it SHALL show the blocking dialog.
+The editor SHALL treat the database as newer than its code when `Math.floor(nativeVersion / 10)` exceeds `DECLARED_VERNO`. `DECLARED_VERNO` SHALL be a constant captured after the versions are registered and before any open. A native version within the declared major, such as one bumped by Dexie's schema patching, SHALL NOT count as newer.
 
-When another connection upgrades the database past the declared version mid-session, the editor SHALL close its connection with auto-reopen disabled and SHALL show the blocking dialog.
+Before Dexie first opens the database, the editor SHALL read the installed version without requesting an upgrade, and then SHALL handle the result as follows:
 
-The dialog SHALL NOT be dismissible. Its title SHALL be "Kaiord was updated in another window" and it SHALL have a "Reload" action, both in English and Spanish. The action SHALL activate a newer worker if one exists, then reload. A database delete SHALL keep the existing close-and-reopen behaviour.
+- **Absent.** A database that does not exist SHALL be reported as absent, and the probe SHALL leave no database behind.
+- **Failed.** A probe that fails for any reason SHALL let boot continue with the normal open, and SHALL NOT show the stale dialog.
+- **Newer.** The editor SHALL NOT open the database. It SHALL look for a newer worker, activate it and reload, at most once per session and with no dialog. If none is available, or that reload already happened, it SHALL show the blocking dialog.
+- **Otherwise.** The probe SHALL keep its connection open until Dexie's open settles, and SHALL close itself on `versionchange`.
+
+After Dexie opens, the editor SHALL check the opened version again. If it is newer, the editor SHALL close the database with auto-reopen disabled and enter the stale state.
+
+When a `versionchange` announces a newer version, the editor's handler SHALL close the database with auto-reopen disabled, SHALL enter the stale state, and SHALL return `false` so that Dexie's default handler does not re-enable auto-open. A database delete SHALL keep the existing close-and-reopen behaviour.
+
+The stale dialog SHALL NOT be dismissible. Its title SHALL be "Kaiord was updated in another window", in English and Spanish. It SHALL offer a "Download draft" action whenever an in-memory workout exists. That action SHALL save the workout as a `.krd` file that the editor's import accepts. It SHALL also offer a "Reload" action that activates a newer worker, if one exists, and then reloads.
 
 #### Scenario: An old shell boots against an upgraded database
 
-- **GIVEN** the database installed at a version higher than the shell declares, and a newer worker available
+- **GIVEN** the database installed at native version 380 or higher, a shell that declares 37, and a newer worker available
 - **WHEN** the editor boots
 - **THEN** Dexie SHALL NOT open the database, no read or write SHALL reach it, and the editor SHALL activate the newer worker and reload without a dialog
 
+#### Scenario: A schema-patched database is not stale
+
+- **GIVEN** the database installed at native version 371 and a shell that declares 37
+- **WHEN** the editor boots
+- **THEN** the editor SHALL open the database normally and SHALL NOT enter the stale state
+
+#### Scenario: A first visit creates the database normally
+
+- **GIVEN** no editor database exists
+- **WHEN** the editor boots
+- **THEN** the probe SHALL report absent and leave no database behind, and Dexie SHALL create the database as a new one
+
 #### Scenario: Another tab upgrades the database
 
-- **GIVEN** an open editor tab, and another tab upgrading the database to a higher version
+- **GIVEN** an open editor tab, and another tab upgrading the database to native version 380
 - **WHEN** the `versionchange` event arrives
-- **THEN** the tab SHALL close its connection, the next query SHALL reject without reopening, and the dialog SHALL be shown
+- **THEN** the tab SHALL close its connection, the next query SHALL reject with `DatabaseClosedError` without reopening, and the dialog SHALL be shown
+
+#### Scenario: A draft is never stranded
+
+- **GIVEN** the stale dialog shown while the editor holds an unsaved workout
+- **WHEN** the user activates "Download draft"
+- **THEN** a `.krd` file of that workout SHALL be downloaded, and importing it SHALL restore the workout
 
 ### Requirement: Scoped, deferred, production-only registration
 

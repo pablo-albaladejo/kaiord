@@ -41,11 +41,19 @@
   - on click, in order: the unsaved-edits gate ("Save your changes to update"), await flushes, `SKIP_WAITING`, reload only the clicking tab;
   - en/es copy.
 - [ ] 2.4 Schema-skew guard (D9):
-  - pre-open version probe;
-  - boot gate with a one-shot update-and-reload;
-  - `versionchange` handled with `disableAutoOpen: true`;
-  - blocking stale-code dialog in en/es;
-  - `fake-indexeddb` tests.
+  - a `DECLARED_VERNO` constant and the `floor(native/10)` rule;
+  - the pre-open probe:
+    - an absent database aborts and is deleted, reported as "absent";
+    - any probe error fails open;
+    - the probe closes itself on `versionchange`;
+    - the probe stays open until Dexie's open settles;
+  - the post-open `ready` gate;
+  - the `versionchange` override, which returns `false` when stale;
+  - `storage-store` maps `DatabaseClosedError` to "stale";
+  - the boot gate, with a one-shot update-and-reload;
+  - the blocking dialog, with Download draft (`.krd`) and Reload, in en/es;
+  - `fake-indexeddb` tests for every case in D10, including the mandatory "next query rejects `DatabaseClosedError`".
+- [ ] 2.4b Optional, LOW: broadcast the unsaved flag on a `BroadcastChannel`, so the toast can note unsaved changes in another window.
 - [ ] 2.5 Wire everything from `main.tsx` and the storage boot.
 
 ## 3. Deploy and CI
