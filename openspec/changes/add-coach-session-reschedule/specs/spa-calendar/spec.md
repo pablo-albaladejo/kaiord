@@ -19,7 +19,7 @@ The workout detail, the editor and their dialogs SHALL be the canonical surfaces
 
 ### Requirement: moveSession is the single athlete date writer
 
-`moveSession({ workoutId, targetDay })` SHALL be the only use case through which the athlete changes a workout's date. Inside one persistence transaction it SHALL re-read the workout, take the profile from the re-read workout's `profileId`, write `date = targetDay` and `updatedAt = now`, and, when the workout has a `SessionMatch`, re-date that match to `targetDay` with the same `updatedAt`. It SHALL leave `coachDate`, `state`, `modifiedAt`, `garminPushId` and `krd` untouched. It SHALL return `unchanged` and write nothing when `targetDay` equals the current date. This same-day check SHALL run before the executed and completed checks, on purpose, so that a same-day call for a done session returns `unchanged` and does not throw. Otherwise it MUST throw `SessionNotMovableError` with reason `executed` when the workout's match has at least one executed workout id, or when the workout is itself an executed recording held in some match's `executedWorkoutIds`; and with reason `completed` when the matched coaching activity's status is `completed`. In each of these cases nothing SHALL be written. It MUST throw `WorkoutNotFoundError` when the workout no longer exists. It SHALL NOT call any bridge.
+`moveSession({ workoutId, targetDay })` SHALL be the only use case through which the athlete changes a workout's date. Inside one persistence transaction it SHALL re-read the workout, take the profile from the re-read workout's `profileId`, write `date = targetDay` and `updatedAt = now`, and, when the workout has a `SessionMatch`, re-date that match to `targetDay` with the same `updatedAt`. It SHALL leave `coachDate`, `state`, `modifiedAt`, `garminPushId` and `krd` untouched. It SHALL return `unchanged` and write nothing when `targetDay` equals the current date. This same-day check SHALL run before the executed and completed checks, on purpose, so that a same-day call for a done session returns `unchanged` and does not throw. Otherwise it MUST throw `SessionNotMovableError` with reason `executed` when the workout's match has at least one executed workout id, when the workout has a match and an activity of the profile is the workout or links to it, or when the workout is itself an executed recording held in some match's `executedWorkoutIds`; and with reason `completed` when the matched coaching activity's status is `completed`. In each of these cases nothing SHALL be written. It MUST throw `WorkoutNotFoundError` when the workout no longer exists. It SHALL NOT call any bridge.
 
 #### Scenario: Moving a matched session re-dates the match
 
@@ -37,6 +37,12 @@ The workout detail, the editor and their dialogs SHALL be the canonical surfaces
 
 - **GIVEN** a recording whose id is in a match's `executedWorkoutIds`
 - **WHEN** `moveSession` is called for the recording from its detail page
+- **THEN** it SHALL throw `SessionNotMovableError` with reason `executed` and nothing SHALL be written
+
+#### Scenario: A recording paired as the planned side is not moved
+
+- **GIVEN** a match whose `workoutId` is a recording an activity links to, and whose `executedWorkoutIds` is empty
+- **WHEN** `moveSession` is called for that workout
 - **THEN** it SHALL throw `SessionNotMovableError` with reason `executed` and nothing SHALL be written
 
 #### Scenario: Moving to the same day writes nothing
@@ -82,7 +88,7 @@ The calendar SHALL bucket a matched session by its `SessionMatch.date`, which is
 
 ### Requirement: Drag to reschedule a coach session in the Grid view
 
-In the Grid view a `MatchedSessionCard` SHALL be draggable to another day when its session is movable: it has no executed slot, its coaching activity is not `completed`, and its workout is not projected. A drop SHALL call `moveSession`. A card whose session is not movable SHALL NOT get a drag binding. A `CoachingActivityCard` (a coach plan not yet converted to a workout) SHALL NOT be draggable. The List view SHALL keep having no drag.
+In the Grid view a `MatchedSessionCard` SHALL be draggable to another day when its session is movable: it has no executed slot, its planned workout is not a recording (no activity of the week is it or links to it), its coaching activity is not `completed`, and its workout is not projected. A drop SHALL call `moveSession`. A card whose session is not movable SHALL NOT get a drag binding. A `CoachingActivityCard` (a coach plan not yet converted to a workout) SHALL NOT be draggable. The List view SHALL keep having no drag.
 
 #### Scenario: Drag a coach session to another day
 
@@ -103,7 +109,7 @@ In the Grid view a `MatchedSessionCard` SHALL be draggable to another day when i
 
 ### Requirement: Same-sport target asks before moving
 
-Before any athlete move (drag, dialog, detail, "Move back"), the UI SHALL check the target day for a session of the same canonical sport. It SHALL count the target day's matched sessions, solo workouts and unmatched solo coach plans, and SHALL exclude the moved workout and its own match. Every target day, inside the visible week or outside it, SHALL be checked from stored rows: the `[profileId+date]` indexes of `workouts`, recorded `activities` and `coachingActivities`, plus the profile's `sessionMatches`, so a match dated on another day still holds its plan and its recording. When the check finds a session, the UI SHALL ask for confirmation, and cancelling SHALL write nothing. When the same-sport session on the target day is an executed recording, the prompt SHALL also say that the recording will be linked to the moved session, which will then be locked against further moves. A target day holding only other sports SHALL be accepted without a prompt.
+Before any athlete move (drag, dialog, detail, "Move back"), the UI SHALL check the target day for a session of the same canonical sport. It SHALL count the target day's matched sessions, solo workouts and unmatched solo coach plans, and SHALL exclude the moved workout and its own match. Every target day, inside the visible week or outside it, SHALL be checked from stored rows: the `[profileId+date]` indexes of `workouts`, recorded `activities` and `coachingActivities`, plus the profile's `sessionMatches`, so a match dated on another day still holds its plan and its recording. When the check finds a session, the UI SHALL ask for confirmation, and cancelling SHALL write nothing. When the same-sport session on the target day is an executed recording that no match holds, the prompt SHALL also say that the recording will be linked to the moved session, which will then be locked against further moves. A target day holding only other sports SHALL be accepted without a prompt.
 
 #### Scenario: Matched session of the same sport
 
@@ -116,6 +122,12 @@ Before any athlete move (drag, dialog, detail, "Move back"), the UI SHALL check 
 - **GIVEN** Thursday holds a solo run recording
 - **WHEN** the user moves a run session onto Thursday
 - **THEN** the prompt SHALL say the recording will be linked and the session locked
+
+#### Scenario: Matched session whose recording is held
+
+- **GIVEN** Thursday holds a matched run session whose match already holds its recording
+- **WHEN** the athlete moves another run onto Thursday
+- **THEN** the prompt SHALL ask for confirmation without the linked-and-locked sentence
 
 #### Scenario: Solo coach plan of the same sport
 

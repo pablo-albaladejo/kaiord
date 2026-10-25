@@ -52,7 +52,7 @@ When a sync's result lists overridden athlete moves, the notice state SHALL keep
 
 ### Requirement: Move a coach session from the coaching dialog
 
-When the `CoachingActivityDialog` opens for a matched session, it SHALL offer "Move to another day", which opens the same date picker as the workout detail and runs `moveSession` for the matched workout. When the session is not movable (an executed slot, or a `completed` activity) the action SHALL be disabled and show the reason ("Already done — it can't be moved"). For a coach plan with no converted workout the dialog SHALL NOT offer a move and SHALL hint that creating the workout first makes it movable. The dialog's existing "open" navigation SHALL be unchanged.
+When the `CoachingActivityDialog` opens for a matched session, it SHALL offer "Move to another day", which opens the same date picker as the workout detail and runs `moveSession` for the matched workout. When the session is not movable (an executed slot, including ids whose rows are gone, a planned workout that is itself a recording, or a `completed` activity) the action SHALL be disabled and show the reason ("Already done — it can't be moved"). For a coach plan with no converted workout the dialog SHALL NOT offer a move and SHALL hint that creating the workout first makes it movable. The dialog's existing "open" navigation SHALL be unchanged.
 
 #### Scenario: Move from the dialog
 
