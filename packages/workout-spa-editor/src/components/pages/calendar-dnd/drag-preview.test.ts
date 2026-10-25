@@ -118,4 +118,33 @@ describe("createDragPreview", () => {
     // Assert
     expect(ghost()).toBeNull();
   });
+
+  it("should keep a new drag of the same card dimmed while the last copy lands", () => {
+    // Arrange
+    const card = mountCard();
+    const target = document.createElement("div");
+    const first = createDragPreview(card, GRAB, GRAB);
+    first.move(PAST_THRESHOLD.x, PAST_THRESHOLD.y);
+    first.end(target);
+
+    // Act
+    const second = createDragPreview(card, GRAB, GRAB);
+    second.move(PAST_THRESHOLD.x, PAST_THRESHOLD.y);
+    vi.runAllTimers();
+
+    // Assert
+    expect(card.dataset.dragging).toBe("true");
+    expect(document.body.querySelectorAll(GHOST)).toHaveLength(1);
+  });
+
+  it("should keep the copy out of the tab order", () => {
+    // Arrange
+    const preview = createDragPreview(mountCard(), GRAB, GRAB);
+
+    // Act
+    preview.move(PAST_THRESHOLD.x, PAST_THRESHOLD.y);
+
+    // Assert
+    expect(ghost()?.inert).toBe(true);
+  });
 });

@@ -52,6 +52,8 @@ export function createDragGhost(
     el.removeAttribute("id");
   }
   ghost.setAttribute("aria-hidden", "true");
+  // aria-hidden alone leaves a cloned button in the tab order.
+  ghost.inert = true;
   ghost.dataset.testid = "calendar-drag-ghost";
   styleGhost(ghost, rect);
   document.body.appendChild(ghost);
@@ -60,9 +62,12 @@ export function createDragGhost(
   const place = (px: number, py: number, extra: string) => {
     ghost.style.transform = `translate(${px - offsetX}px, ${py - offsetY}px) ${extra}`;
   };
+  // The source is released as soon as its drag ends, not when the landing
+  // copy finishes: a new drag of the same card may already be under way.
+  const release = () => delete source.dataset.dragging;
   const remove = () => {
+    release();
     ghost.remove();
-    delete source.dataset.dragging;
   };
   place(grabX, grabY, LIFT);
 
@@ -70,10 +75,11 @@ export function createDragGhost(
     move: (px, py) => place(px, py, LIFT),
     land: (target) => {
       if (!target || prefersReducedMotion()) return remove();
+      release();
       ghost.style.transition = `transform ${LAND_MS}ms ease-out, opacity ${LAND_MS}ms ease-out`;
       ghost.style.transform = `translate(${target.left + 8}px, ${target.top + 8}px) scale(0.96)`;
       ghost.style.opacity = "0";
-      window.setTimeout(remove, LAND_MS);
+      window.setTimeout(() => ghost.remove(), LAND_MS);
     },
     remove,
   };
