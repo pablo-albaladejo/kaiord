@@ -1,10 +1,17 @@
 import { forwardRef, useCallback, useState } from "react";
 
-import { useTrainingPeaksPush } from "../../../hooks/use-trainingpeaks-push";
+import {
+  type TrainingPeaksPushOptions,
+  useTrainingPeaksPush,
+} from "../../../hooks/use-trainingpeaks-push";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button, type ButtonSize } from "../../atoms/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import {
+  type TrainingPeaksPushFailure,
+  TrainingPeaksPushFeedback,
+} from "./TrainingPeaksPushFeedback";
 import { TrainingPeaksSentButton } from "./TrainingPeaksSentButton";
 
 /**
@@ -36,21 +43,24 @@ export const TrainingPeaksPushButton = forwardRef<
   const t = useTranslate("workout-detail");
   const { push } = useTrainingPeaksPush(workout);
   const [status, setStatus] = useState<PushStatus>("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [failure, setFailure] = useState<TrainingPeaksPushFailure | null>(null);
   const widthClass = full ? "w-full" : "";
 
-  const handlePush = useCallback(async () => {
-    setStatus("pushing");
-    setError(null);
-    const outcome = await push();
-    if (outcome.ok) {
-      setStatus("done");
-      onSent?.();
-      return;
-    }
-    setStatus("idle");
-    setError(outcome.message);
-  }, [push, onSent]);
+  const handlePush = useCallback(
+    async (options?: TrainingPeaksPushOptions) => {
+      setStatus("pushing");
+      setFailure(null);
+      const outcome = await push(options);
+      if (outcome.ok) {
+        setStatus("done");
+        onSent?.();
+        return;
+      }
+      setStatus("idle");
+      setFailure(outcome);
+    },
+    [push, onSent]
+  );
 
   if (status === "done") {
     return (
@@ -66,7 +76,7 @@ export const TrainingPeaksPushButton = forwardRef<
         variant="primary"
         loading={status === "pushing"}
         disabled={status === "pushing"}
-        onClick={handlePush}
+        onClick={() => handlePush()}
         className={widthClass}
         data-testid="send-to-trainingpeaks-button"
       >
@@ -75,13 +85,11 @@ export const TrainingPeaksPushButton = forwardRef<
           ? t("footer.sending")
           : t("footer.sendToTrainingPeaks")}
       </Button>
-      {error !== null && (
-        <span
-          className="text-xs text-[var(--danger-text)]"
-          data-testid="trainingpeaks-push-error"
-        >
-          {error}
-        </span>
+      {failure !== null && (
+        <TrainingPeaksPushFeedback
+          failure={failure}
+          onSendCopy={() => handlePush({ allowCopy: true })}
+        />
       )}
     </div>
   );

@@ -38,7 +38,7 @@ vi.mock("./use-active-profile-live", () => ({
 
 vi.mock("./trainingpeaks-push-fn", () => ({
   buildTrainingPeaksPushFn: () => vi.fn(),
-  ledgerRepo: {},
+  ledgerRepo: { findByNaturalKey: async () => undefined },
   policyRepo: {},
   TRAININGPEAKS_BRIDGE_ID: "trainingpeaks-bridge",
 }));

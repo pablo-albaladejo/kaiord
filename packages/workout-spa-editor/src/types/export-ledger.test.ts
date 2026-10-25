@@ -36,4 +36,30 @@ describe("exportLedgerEntrySchema", () => {
       expect(result.success).toBe(false);
     }
   );
+
+  it("should accept a row carrying the pushed day as destinationDate", () => {
+    // Arrange
+    const input = { ...VALID_ENTRY, destinationDate: "2026-10-22" };
+
+    // Act
+    const result = exportLedgerEntrySchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(true);
+    expect(result.data?.destinationDate).toBe("2026-10-22");
+  });
+
+  it.each(["2026-10-22T08:00:00.000Z", "22/10/2026", ""])(
+    "should reject a destinationDate that is not YYYY-MM-DD (%s)",
+    (destinationDate) => {
+      // Arrange
+      const input = { ...VALID_ENTRY, destinationDate };
+
+      // Act
+      const result = exportLedgerEntrySchema.safeParse(input);
+
+      // Assert
+      expect(result.success).toBe(false);
+    }
+  );
 });

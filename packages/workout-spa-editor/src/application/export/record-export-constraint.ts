@@ -29,6 +29,8 @@ export type ConstraintInput = {
   payload: Record<string, unknown>;
   postFn: ExportPushFn;
   now: string;
+  /** The pushed day, for a destination that records one (TrainingPeaks). */
+  destinationDate?: string;
 };
 
 /** A pending row is live until PENDING_TTL_MS after its (clamped) export
@@ -77,7 +79,12 @@ export const handleConstraintResult = async (
   const ledgerId = await commitByKey(
     ledgerRepo,
     existing,
-    buildCommitPatch({ pushed, contentHash, exportedAt: now })
+    buildCommitPatch({
+      pushed,
+      contentHash,
+      exportedAt: now,
+      destinationDate: input.destinationDate,
+    })
   );
   return {
     ledgerId,

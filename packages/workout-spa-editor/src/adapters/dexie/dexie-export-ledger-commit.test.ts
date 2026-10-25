@@ -195,4 +195,31 @@ describe("export-ledger commit by natural key", () => {
       [first.ledgerId, "garmin-a2"],
     ]);
   });
+
+  it("should persist the TrainingPeaks pushed day on the created and updated paths", async () => {
+    // Arrange
+    vi.setSystemTime(T1);
+    const pushTp = (workoutDay: string, externalId: string) =>
+      recordExport(
+        { ledgerRepo: createDexieExportLedgerRepository(dbA) },
+        {
+          ...exportInput({ name: "Intervals", workoutDay }, async () => ({
+            externalId,
+          })),
+          destinationBridgeId: "trainingpeaks-bridge",
+        }
+      );
+    await pushTp("2026-10-20", "tp-1");
+    const created = (await ledgerRows(dbA))[0]?.destinationDate;
+    vi.setSystemTime(T2);
+
+    // Act
+    const result = await pushTp("2026-10-22", "tp-2");
+
+    // Assert
+    const rows = await ledgerRows(dbA);
+    expect(created).toBe("2026-10-20");
+    expect(result.outcome).toBe("updated");
+    expect(rows.map((r) => r.destinationDate)).toEqual(["2026-10-22"]);
+  });
 });

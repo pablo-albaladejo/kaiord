@@ -11,23 +11,39 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type {
+  TrainingPeaksPushOptions,
+  TrainingPeaksPushOutcome,
+} from "../../../hooks/use-trainingpeaks-push";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { TrainingPeaksPushButton } from "./TrainingPeaksPushButton";
 
-type Outcome =
-  { ok: true; workoutId: string | undefined } | { ok: false; message: string };
+const locale = vi.hoisted(() => ({ active: "en" }));
 
-const push = vi.fn<() => Promise<Outcome>>();
+vi.mock("../../../i18n/LocaleProvider", () => ({
+  useActiveLocale: () => locale.active,
+}));
+
+const push =
+  vi.fn<
+    (options?: TrainingPeaksPushOptions) => Promise<TrainingPeaksPushOutcome>
+  >();
 
 vi.mock("../../../hooks/use-trainingpeaks-push", () => ({
   useTrainingPeaksPush: () => ({ push }),
 }));
 
 vi.mock("../../../i18n/use-translate", () => ({
-  useTranslate: () => (key: string) => key,
+  useTranslate: () => (key: string, params?: Record<string, string>) =>
+    params ? `${key} ${Object.values(params).join(" ")}` : key,
 }));
 
 const workout = { id: "w1", profileId: "p1" } as WorkoutRecord;
+
+const MOVED: TrainingPeaksPushOutcome = {
+  ok: false,
+  block: { blocked: true, reason: "moved", recordedDate: "2026-10-20" },
+};
 
 const HORIZON_MESSAGE =
   "TrainingPeaks refused the date: planning that far ahead needs a paid account";
@@ -35,6 +51,7 @@ const HORIZON_MESSAGE =
 describe("TrainingPeaksPushButton", () => {
   beforeEach(() => {
     push.mockReset();
+    locale.active = "en";
   });
 
   it("should offer the send action before anything is pushed", () => {
@@ -91,5 +108,93 @@ describe("TrainingPeaksPushButton", () => {
     // Assert
     await screen.findByTestId("trainingpeaks-push-error");
     expect(onSent).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { active: "en", day: "Tue, Oct 20" },
+    { active: "es", day: "mar, 20 oct" },
+  ])(
+    "should name the recorded day of a blocked moved push in $active",
+    async ({ active, day }) => {
+      // Arrange
+      locale.active = active;
+      push.mockResolvedValue(MOVED);
+      render(<TrainingPeaksPushButton workout={workout} />);
+
+      // Act
+      await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+
+      // Assert
+      expect(
+        await screen.findByTestId("trainingpeaks-repush-blocked")
+      ).toHaveTextContent(`footer.trainingPeaksRepush.moved ${day}`);
+      expect(push).toHaveBeenCalledWith(undefined);
+    }
+  );
+
+  it("should explain a blocked changed push without a date", async () => {
+    // Arrange
+    push.mockResolvedValue({
+      ok: false,
+      block: { blocked: true, reason: "changed" },
+    });
+    render(<TrainingPeaksPushButton workout={workout} />);
+
+    // Act
+    await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+
+    // Assert
+    expect(
+      await screen.findByTestId("trainingpeaks-repush-blocked")
+    ).toHaveTextContent(/^footer\.trainingPeaksRepush\.changed$/);
+  });
+
+  it("should send a copy only after the athlete confirms it", async () => {
+    // Arrange
+    push.mockResolvedValueOnce(MOVED);
+    push.mockResolvedValueOnce({ ok: true, workoutId: "222" });
+    render(<TrainingPeaksPushButton workout={workout} />);
+    await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+    await userEvent.click(
+      await screen.findByTestId("trainingpeaks-send-copy-button")
+    );
+    expect(
+      screen.getByText("footer.trainingPeaksRepush.confirmMessage")
+    ).toBeInTheDocument();
+    expect(push).toHaveBeenCalledTimes(1);
+
+    // Act
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "footer.trainingPeaksRepush.confirmSend",
+      })
+    );
+
+    // Assert
+    expect(push).toHaveBeenLastCalledWith({ allowCopy: true });
+    expect(
+      await screen.findByText("footer.sentToTrainingPeaks")
+    ).toBeInTheDocument();
+  });
+
+  it("should send nothing when the athlete cancels the copy", async () => {
+    // Arrange
+    push.mockResolvedValue(MOVED);
+    render(<TrainingPeaksPushButton workout={workout} />);
+    await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+    await userEvent.click(
+      await screen.findByTestId("trainingpeaks-send-copy-button")
+    );
+
+    // Act
+    await userEvent.click(
+      screen.getByRole("button", { name: "footer.trainingPeaksRepush.cancel" })
+    );
+
+    // Assert
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByTestId("trainingpeaks-repush-blocked")
+    ).toBeInTheDocument();
   });
 });

@@ -17,13 +17,13 @@ Every confirmed TrainingPeaks workout export-ledger row SHALL record the payload
 
 ### Requirement: Re-push of a changed TrainingPeaks workout is blocked
 
-TrainingPeaks workouts are create-only for Kaiord, so a re-push always creates a second copy. Before a TrainingPeaks push, the SPA SHALL block the push when a confirmed row exists for the workout and the row's `contentHash` differs from the new payload's hash. The reason SHALL be `moved` when the row's `destinationDate` is defined and differs from the workout's `date`. In every other blocked case the reason SHALL be `changed`. A blocked push SHALL send no request to the bridge. It SHALL tell the athlete that TrainingPeaks already has the workout, naming the recorded date when the reason is `moved`, and that sending again creates a second copy. It SHALL offer "Send a copy anyway" behind a confirmation. The confirmation SHALL state that Kaiord will then track only the latest copy and forget the first. An unchanged re-send (equal hash) SHALL stay the existing idempotent skip.
+TrainingPeaks workouts are create-only for Kaiord, so a re-push always creates a second copy. Before a TrainingPeaks push, the SPA SHALL block the push when a confirmed row exists for the workout and the row's `contentHash` differs from the new payload's hash. The reason SHALL be `moved` when the row's `destinationDate` is defined and differs from the workout's `date`. In every other blocked case the reason SHALL be `changed`. A blocked push SHALL send no workout write (`push-workout`) to the bridge; the read-only session probe still runs, because the payload hash covers the athlete id only the probe provides. It SHALL tell the athlete that TrainingPeaks already has the workout, naming the recorded date when the reason is `moved`, and that sending again creates a second copy. It SHALL offer "Send a copy anyway" behind a confirmation. The confirmation SHALL state that Kaiord will then track only the latest copy and forget the first. An unchanged re-send (equal hash) SHALL stay the existing idempotent skip.
 
 #### Scenario: Moved workout is blocked
 
 - **GIVEN** a workout pushed to TrainingPeaks on Tuesday and then moved to Thursday
 - **WHEN** the athlete sends it to TrainingPeaks
-- **THEN** no request SHALL reach the bridge and the message SHALL name Tuesday
+- **THEN** no workout write (`push-workout`) SHALL reach the bridge and the message SHALL name Tuesday
 
 #### Scenario: Edited workout is blocked
 
@@ -41,4 +41,4 @@ TrainingPeaks workouts are create-only for Kaiord, so a re-push always creates a
 
 - **GIVEN** a confirmed row whose hash equals the new payload's
 - **WHEN** the athlete sends the workout
-- **THEN** no request SHALL be sent and the outcome SHALL be the existing skip
+- **THEN** no workout write SHALL be sent and the outcome SHALL be the existing skip
