@@ -40,7 +40,7 @@ const read = (persistence: Awaited<ReturnType<typeof seedSession>>) =>
   });
 
 describe("readDayInputs", () => {
-  it("should read a matched session on the target day with its recording slot", async () => {
+  it("should read a matched session on the target day, its held recording never relinked", async () => {
     // Arrange
     const persistence = await seedSession();
     await persistence.coaching.upsertMany([
@@ -64,7 +64,7 @@ describe("readDayInputs", () => {
 
     // Assert
     expect(inputs).toEqual([
-      { workoutIds: ["w2", "rec"], sport: "cycling", recording: true },
+      { workoutIds: ["w2", "rec"], sport: "cycling", recording: false },
     ]);
   });
 

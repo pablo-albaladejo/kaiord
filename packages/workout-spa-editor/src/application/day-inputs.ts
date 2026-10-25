@@ -4,6 +4,7 @@
  * week, and `matchedPlans` every coach plan with a match: neither shows as a
  * solo card on this day, so neither is counted solo. A recording is an
  * executed activity: its twin workout when it has one, else the activity.
+ * Only an unheld solo recording is flagged, because only it can be linked.
  */
 import type { ActivityRecord } from "../types/activity-record";
 import type { WorkoutRecord } from "../types/calendar-record";
@@ -24,11 +25,9 @@ const matchedInputs = (rows: DayRows): DayInput[] =>
   rows.matches.flatMap((m) => {
     const planned = rows.plannedById.get(m.workoutId);
     if (m.date !== rows.day || !planned) return [];
-    const executed = m.executedWorkoutIds ?? [];
-    const workoutIds = [m.workoutId, ...executed];
-    return [
-      { workoutIds, sport: planned.sport, recording: executed.length > 0 },
-    ];
+    const workoutIds = [m.workoutId, ...(m.executedWorkoutIds ?? [])];
+    // Its recording is held, so the move never links it: no lock sentence.
+    return [{ workoutIds, sport: planned.sport, recording: false }];
   });
 
 const soloInputs = (rows: DayRows, held: ReadonlySet<string>): DayInput[] => {
