@@ -162,6 +162,36 @@ describe("moveSession", () => {
     expect(writes()).toBe(0);
   });
 
+  it.each([
+    ["links to it", { id: "act", linkedWorkoutId: "w" }],
+    ["is it", { id: "w", linkedWorkoutId: null }],
+  ])(
+    "should refuse a planned side paired with a recording that %s, with an empty slot",
+    async (_label, ref) => {
+      // Arrange
+      const persistence = await seedSession();
+      await persistence.activities.upsertByExternalId({
+        ...ref,
+        profileId: PROFILE,
+        date: TUE,
+        sport: "running",
+        sourceBridgeId: "garmin",
+        externalId: "ext",
+        krd: null,
+        createdAt: NOW,
+      });
+      const { deps, writes } = depsOf(persistence);
+
+      // Act
+      const move = moveSession(deps, { workoutId: "w", targetDay: THU });
+
+      // Assert
+      await expect(move).rejects.toMatchObject({ reason: "executed" });
+      expect(writes()).toBe(0);
+      expect((await persistence.workouts.getById("w"))?.date).toBe(TUE);
+    }
+  );
+
   it("should throw WorkoutNotFoundError with no writes for a missing workout", async () => {
     // Arrange
     const persistence = await seedSession();
