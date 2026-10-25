@@ -32,7 +32,7 @@ export function useGarminDriftToast(persistence: () => PersistencePort) {
       const drift = garminDateDrift(row, workout, { locked: false });
       if (!drift) return false;
       toast.warning(t("garminDrift.moved"), driftSentence(t, locale, drift), {
-        action: createElement(UpdateGarminToastAction, { workout }),
+        action: createElement(UpdateGarminToastAction, { workoutId }),
       });
       return true;
     },

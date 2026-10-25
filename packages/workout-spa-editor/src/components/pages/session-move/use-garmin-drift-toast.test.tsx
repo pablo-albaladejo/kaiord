@@ -13,10 +13,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "../../../adapters/dexie/dexie-database";
 import type { PlacementResult } from "../../../application/garmin-placement/placement-result";
 import {
+  ACTIVITY_ID,
+  FRI,
   seedSession,
   THU,
   TUE,
 } from "../../../application/session-move.test-fixtures";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
 import {
   ToastContextProvider,
   useToastContext,
@@ -61,6 +64,35 @@ const setup = (persistence: PersistencePort) => {
   );
 };
 
+/** Renders the toasts with their actions, inside the app's providers. */
+const showToastWithAction = async (persistence: PersistencePort) => {
+  const notify: { current?: (id: string) => Promise<boolean> } = {};
+  function Harness() {
+    notify.current = useGarminDriftToast(() => persistence);
+    const { toasts } = useToastContext();
+    return (
+      <ul>
+        {toasts.map((t) => (
+          <li key={t.id}>
+            {t.title}
+            {t.action}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  render(
+    <PersistenceProvider persistence={persistence}>
+      <ToastContextProvider>
+        <Harness />
+      </ToastContextProvider>
+    </PersistenceProvider>
+  );
+  await act(async () => {
+    await notify.current?.("w");
+  });
+};
+
 describe("useGarminDriftToast", () => {
   beforeEach(async () => {
     pushTo.mockClear();
@@ -89,33 +121,13 @@ describe("useGarminDriftToast", () => {
     expect(pushTo).not.toHaveBeenCalled();
   });
 
-  it("should update Garmin from the toast's action and say so", async () => {
+  it("should push the row as stored at the press, not as it was at the move", async () => {
     // Arrange
     await db.table("exportLedger").put(placedOn(TUE));
     const persistence = await seedSession({ workout: { date: THU } });
-    const notify: { current?: (id: string) => Promise<boolean> } = {};
-    function Harness() {
-      notify.current = useGarminDriftToast(() => persistence);
-      const { toasts } = useToastContext();
-      return (
-        <ul>
-          {toasts.map((t) => (
-            <li key={t.id}>
-              {t.title}
-              {t.action}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-    render(
-      <ToastContextProvider>
-        <Harness />
-      </ToastContextProvider>
-    );
-    await act(async () => {
-      await notify.current?.("w");
-    });
+    await showToastWithAction(persistence);
+    const moved = await persistence.workouts.getById("w");
+    await persistence.workouts.put({ ...moved!, date: FRI, name: "Edited" });
 
     // Act
     await userEvent.click(
@@ -123,11 +135,43 @@ describe("useGarminDriftToast", () => {
     );
 
     // Assert
+    expect(pushTo).toHaveBeenCalledTimes(1);
     expect(pushTo).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "w", date: THU })
+      expect.objectContaining({ id: "w", date: FRI, name: "Edited" })
     );
     expect(await screen.findByText("Garmin updated")).toBeInTheDocument();
   });
+
+  it.each([
+    ["the workout was deleted", (p: PersistencePort) => p.workouts.delete("w")],
+    [
+      "the coach completed the session",
+      async (p: PersistencePort) => {
+        const activity = await p.coaching.getById(ACTIVITY_ID);
+        await p.coaching.put({ ...activity!, status: "completed" });
+      },
+    ],
+  ])(
+    "should push nothing and say nothing when %s before the press",
+    async (_label, change) => {
+      // Arrange
+      await db.table("exportLedger").put(placedOn(TUE));
+      const persistence = await seedSession({ workout: { date: THU } });
+      await showToastWithAction(persistence);
+      await change(persistence);
+
+      // Act
+      await userEvent.click(
+        screen.getByRole("button", { name: "Update Garmin" })
+      );
+
+      // Assert
+      await act(async () => {});
+      expect(pushTo).not.toHaveBeenCalled();
+      expect(screen.queryByText("Garmin updated")).toBeNull();
+      expect(screen.queryByText(/Garmin was not updated/)).toBeNull();
+    }
+  );
 
   it.each([
     ["Garmin already holds the new day", placedOn(THU)],
