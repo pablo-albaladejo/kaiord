@@ -7,10 +7,7 @@
 import { type ReactNode, useCallback } from "react";
 
 import { usePersistence } from "../../../contexts/persistence-context";
-import {
-  type RequestMove,
-  SessionMoveContext,
-} from "../../../contexts/session-move-context";
+import { SessionMoveContext } from "../../../contexts/session-move-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
 import { useGridMove } from "../calendar-dnd/use-grid-move";
@@ -22,17 +19,13 @@ export function SessionMoveProvider({ children }: { children: ReactNode }) {
   const toast = useToastContext();
   const t = useTranslate("calendar");
   const move = useGridMove(useCallback(() => persistence, [persistence]));
-  const gate = useSameSportGate(persistence, move);
-  const { request } = gate;
-  const requestMove = useCallback<RequestMove>(
-    (workoutId, day) =>
-      void request(workoutId, day).catch(() =>
-        toast.error(t("reschedule.moveFailed"))
-      ),
-    [request, toast, t]
+  const onError = useCallback(
+    () => toast.error(t("reschedule.moveFailed")),
+    [toast, t]
   );
+  const gate = useSameSportGate(persistence, move, onError);
   return (
-    <SessionMoveContext.Provider value={requestMove}>
+    <SessionMoveContext.Provider value={gate.request}>
       {children}
       <SameSportPrompt
         pending={gate.pending}

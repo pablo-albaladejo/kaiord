@@ -11,14 +11,9 @@ export function useGatedDetailMove() {
   const persistence = usePersistence();
   const toast = useToastContext();
   const t = useTranslate("calendar");
-  const gate = useSameSportGate(persistence, useMoveWorkout());
-  const { request: gatedRequest } = gate;
-  const request = useCallback(
-    (workoutId: string, day: string) =>
-      void gatedRequest(workoutId, day).catch(() =>
-        toast.error(t("reschedule.moveFailed"))
-      ),
-    [gatedRequest, toast, t]
+  const onError = useCallback(
+    () => toast.error(t("reschedule.moveFailed")),
+    [toast, t]
   );
-  return { ...gate, request };
+  return useSameSportGate(persistence, useMoveWorkout(), onError);
 }

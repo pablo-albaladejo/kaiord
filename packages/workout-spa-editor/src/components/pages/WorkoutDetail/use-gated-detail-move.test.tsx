@@ -4,7 +4,7 @@
  */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   coachWorkout,
@@ -89,6 +89,27 @@ describe("useGatedDetailMove", () => {
 
     // Assert
     await waitFor(async () => expect(await dateOf(persistence)).toBe(THU));
+    expect(view.result.current.move.pending).toBeNull();
+  });
+
+  it("should report a failed write after the athlete agrees", async () => {
+    // Arrange
+    const { persistence, view } = await setup("cycling");
+    act(() => view.result.current.move.request("w", THU));
+    await waitFor(() =>
+      expect(view.result.current.move.pending).not.toBeNull()
+    );
+    vi.spyOn(persistence.workouts, "put").mockRejectedValue(new Error("boom"));
+
+    // Act
+    act(() => view.result.current.move.confirm());
+
+    // Assert
+    await waitFor(() =>
+      expect(view.result.current.toasts.map((t) => t.title)).toEqual([
+        "Could not move workout",
+      ])
+    );
     expect(view.result.current.move.pending).toBeNull();
   });
 });
