@@ -10,7 +10,9 @@ export const useMoveBackEntries = (
   overridden: readonly OverriddenSession[]
 ) => {
   const persistence = usePersistence();
-  const key = overridden.map((o) => `${o.workoutId}@${o.coachDate}`).join(",");
+  const key = overridden
+    .map((o) => `${o.workoutId}@${o.athleteDate}>${o.coachDate}`)
+    .join(",");
   return (
     useLiveQuery(
       () => readMoveBackEntries(persistence, profileId, overridden),
