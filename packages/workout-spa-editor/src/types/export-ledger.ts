@@ -2,6 +2,7 @@ import { canonicalHash, managedDataTypes } from "@kaiord/core";
 import { z } from "zod";
 
 import {
+  calendarDate,
   garminLibraryStateSchema,
   garminPlacementSchema,
 } from "./garmin-ledger";
@@ -22,6 +23,10 @@ export const exportLedgerEntrySchema = z.object({
   // push state, the calendar placement and the superseded entries to delete.
   library: garminLibraryStateSchema.optional(),
   forceRepush: z.literal(true).optional(),
+  // TrainingPeaks workout rows only: the payload's `workoutDay`, the day the
+  // confirmed copy sits on there (create-only destination, so a re-push of a
+  // moved workout would leave a second copy — see trainingpeaks-repush-guard).
+  destinationDate: calendarDate.optional(),
   placement: garminPlacementSchema.optional(),
   removalQueue: z.array(garminRemovalEntrySchema).optional(),
 });
