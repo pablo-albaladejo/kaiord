@@ -29,13 +29,19 @@ The deploy SHALL publish a service worker at `<base>sw.js`. Its precache SHALL l
 
 ### Requirement: Client-keyed cache retention
 
-A controlled page SHALL report the URL of its entry module to the worker when it boots. The worker SHALL record which cached versions contain that entry, against the reporting client's id. On activation, and after each report, the worker SHALL delete an editor cache only when it is not the worker's own cache and no live window client is recorded against it. Lookups SHALL search the worker's own cache first and then every retained editor cache. Writes to that record and deletions SHALL be serialised.
+A controlled page SHALL report the URL of its entry module to the worker when it boots and again on every `controllerchange`. The worker SHALL record which cached versions contain that entry in a separate meta entry for each reporting client id. On activation, and after each report, the worker SHALL delete nothing while any live window client has no record. Otherwise it SHALL delete an editor cache only when that cache is neither the worker's own nor recorded for a live window client, and SHALL delete only the meta entries of clients that are gone. Lookups SHALL search the worker's own cache first and then every retained editor cache. Writes to that record and deletions SHALL be serialised.
 
 #### Scenario: A window survives two deploys
 
 - **GIVEN** a window running deploy N while deploys N+1 and N+2 are each activated
 - **WHEN** the window lazily imports a chunk of N that it never loaded before
 - **THEN** the import SHALL resolve from N's cache, and no reload SHALL happen
+
+#### Scenario: An unrecorded window defers deletion
+
+- **GIVEN** a live window whose report has not reached the worker yet
+- **WHEN** an activation triggers a prune
+- **THEN** no editor cache SHALL be deleted in that round
 
 #### Scenario: A version no live window runs is deleted
 
@@ -45,7 +51,7 @@ A controlled page SHALL report the URL of its entry module to the worker when it
 
 ### Requirement: Gated, prompted update
 
-The editor SHALL NOT reload on its own while the user has interacted or has unsaved edits. A newer worker found within 10 seconds of load, before any pointer or key input, and with no unsaved edits SHALL be applied without a prompt. Otherwise, while a newer worker is waiting, the editor SHALL show a persistent toast titled "New version available" with a "Reload" action ("Nueva versión disponible" and "Recargar" in Spanish). Activating it SHALL go through these steps, in order:
+The editor SHALL NOT reload on its own while the user has interacted or has unsaved edits. A newer worker SHALL be applied without a prompt only when it is found within 10 seconds of load, before any pointer or key input, with no unsaved edits, and while the worker reports exactly one window client. Otherwise, while a newer worker is waiting, the editor SHALL show a persistent toast titled "New version available" with a "Reload" action ("Nueva versión disponible" and "Recargar" in Spanish). Activating it SHALL go through these steps, in order:
 
 1. While the unsaved-edits flag is set (the same condition that arms `beforeunload`), it SHALL show "Save your changes to update" and stop, without messaging the worker.
 2. It SHALL await every pending debounced autosave.
@@ -80,14 +86,14 @@ Before Dexie first opens the database, the editor SHALL read the installed versi
 
 - **Absent.** A database that does not exist SHALL be reported as absent, and the probe SHALL leave no database behind.
 - **Failed.** A probe that fails for any reason SHALL let boot continue with the normal open, and SHALL NOT show the stale dialog.
-- **Newer.** The editor SHALL NOT open the database. It SHALL look for a newer worker, activate it and reload, at most once per session and with no dialog. If none is available, or that reload already happened, it SHALL show the blocking dialog.
+- **Newer.** The editor SHALL NOT open the database. It SHALL look up the existing registration and request an update. It SHALL show the blocking dialog immediately when no registration exists, or when the update yields no installing or waiting worker. Otherwise it SHALL wait for that worker to become installed or redundant, for at most about 15 seconds. When the worker is installed, the editor SHALL activate it and reload, with no dialog. When it becomes redundant or the wait times out, the editor SHALL show the dialog. The reload SHALL happen at most once per session, and a non-stale boot SHALL clear that limit.
 - **Otherwise.** The probe SHALL keep its connection open until Dexie's open settles, and SHALL close itself on `versionchange`.
 
-After Dexie opens, the editor SHALL check the opened version again. If it is newer, the editor SHALL close the database with auto-reopen disabled and enter the stale state.
+A ready subscriber SHALL be registered before every other ready subscriber, and SHALL check the opened version. If that version is newer, it SHALL throw a `StaleSchemaError`. No later ready subscriber SHALL run, `open()` and every queued query SHALL reject with that error, and none SHALL hang. The storage boot SHALL map `StaleSchemaError` to the stale state, not to a storage failure, and SHALL then close the database with auto-reopen disabled.
 
 When a `versionchange` announces a newer version, the editor's handler SHALL close the database with auto-reopen disabled, SHALL enter the stale state, and SHALL return `false` so that Dexie's default handler does not re-enable auto-open. A database delete SHALL keep the existing close-and-reopen behaviour.
 
-The stale dialog SHALL NOT be dismissible. Its title SHALL be "Kaiord was updated in another window", in English and Spanish. It SHALL offer a "Download draft" action whenever an in-memory workout exists. That action SHALL save the workout as a `.krd` file that the editor's import accepts. It SHALL also offer a "Reload" action that activates a newer worker, if one exists, and then reloads.
+The stale dialog SHALL NOT be dismissible. Its title SHALL be "Kaiord was updated in another window", in English and Spanish. It SHALL offer a "Download draft" action whenever an in-memory workout exists. That action SHALL save the workout as a `.krd` file that the editor's import accepts. It SHALL also offer a "Reload" action that activates a newer worker if one exists, and then reloads. Without a registration, the action SHALL be a plain reload. When no newer worker was found, the dialog SHALL say to try again in a few minutes.
 
 #### Scenario: An old shell boots against an upgraded database
 
@@ -100,6 +106,12 @@ The stale dialog SHALL NOT be dismissible. Its title SHALL be "Kaiord was update
 - **GIVEN** the database installed at native version 371 and a shell that declares 37
 - **WHEN** the editor boots
 - **THEN** the editor SHALL open the database normally and SHALL NOT enter the stale state
+
+#### Scenario: A later ready subscriber does not hang
+
+- **GIVEN** a database that becomes newer between the probe and Dexie's open, and a promise-returning ready subscriber registered after the stale gate
+- **WHEN** Dexie opens
+- **THEN** `open()` SHALL reject with `StaleSchemaError`, that subscriber SHALL NOT run, and no pending query SHALL hang
 
 #### Scenario: A first visit creates the database normally
 
@@ -156,7 +168,7 @@ The service-worker dist guard SHALL be the last deploy step before the Pages art
 - an excluded file is listed;
 - the worker's mode (normal or kill) differs from the one the deploy requested.
 
-CI SHALL run the same assembly and the guard over a `/app/` build, and SHALL run the `@service-worker` e2e.
+CI SHALL run the same assembly and the guard over a `/app/` build, and SHALL run the `@service-worker` e2e. Apart from the emitted worker, the assembly SHALL produce a tree byte-identical to the inline deploy steps it replaces. In particular, it SHALL copy top-level dotfiles only where those steps copied them (the landing `.nojekyll`), SHALL write `version.json` as `{"sha":"<sha>"}` followed by a newline, and SHALL fail when an analytics placeholder remains after substitution.
 
 #### Scenario: A rewrite after emit is caught
 

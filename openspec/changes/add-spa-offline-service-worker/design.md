@@ -90,13 +90,14 @@ The reviewer's objection to the earlier "keep N and N-1" rule is correct. A wait
 
 Mechanism:
 
-1. **Hello.** At boot the page posts `{type: "HELLO", entry: <URL of its own index-*.js module script>}` to `navigator.serviceWorker.controller`. The entry URL is unique to a build, and the page can read it from its own DOM, so the page needs no version constant.
-2. **Recording.** The worker finds every `kaiord-app-*` cache that holds that entry. Usually there is one. A shell-only deploy, such as an analytics-id change, shares the entry, and then all matches are kept. It records `event.source.id → [v…]` in a JSON entry of cache `kaiord-app-meta`.
-3. **Pruning.** Pruning runs on `activate` and after each hello:
-   - `live` is the set of ids from `clients.matchAll({type: "window", includeUncontrolled: true})`;
-   - `keep` is `{own v} ∪ versions recorded for live ids`;
-   - every `kaiord-app-*` cache not in `keep` is deleted, and the records of dead ids are dropped.
-4. **Serialisation.** Meta writes and prunes run through one promise chain inside the worker. Events in a single worker run concurrently, and a lost write would let a live version be pruned.
+1. **Hello.** The page posts `{type: "HELLO", entry: <URL of its own index-*.js module script>}` to `navigator.serviceWorker.controller` at boot, and **again on every `controllerchange`**. A hello sent to a controller that is going redundant during activation would otherwise be lost. The entry URL is unique to a build, and the page can read it from its own DOM, so it needs no version constant.
+2. **Recording, one entry per client.** The worker finds every `kaiord-app-*` cache that holds that entry. Usually there is one. A shell-only deploy, such as an analytics-id change, shares the entry, and then all matches are kept. The worker writes them as **its own entry**, `<scope>__sw/client/<clientId>`, in cache `kaiord-app-meta`, with a JSON body of `[v…]`. There is no shared blob, so two workers active around an activation can never overwrite each other's records.
+3. **Pruning.** It runs on `activate` and after each hello.
+   - `live` is the set of ids from `clients.matchAll({type: "window", includeUncontrolled: true})`.
+   - **If any live window has no record yet, the round deletes nothing.** Its hello may still be in flight, and its version is unknown.
+   - Otherwise `keep` is `{own v} ∪ versions recorded for live ids`, and every `kaiord-app-*` cache outside `keep` is deleted.
+   - Only the entries of **dead** ids are deleted.
+4. **Serialisation.** Within one worker, writes and prunes run through a single promise chain. Across workers, per-client entries remove the shared write, and the "unrecorded live client → delete nothing" rule covers the window where a hello is in flight.
 5. **Lookup.** The fetch handler looks up its own cache first and then every `kaiord-app-*` cache, so a page on an older retained version still resolves its chunks.
 
 **What is not covered.** A page that never had a controller (a first visit, a shift-reload) sends no hello and is unprotected. Its chunks come from the network, as they do today, and chunk-reload remains the backstop (D5). Storage is bounded by the number of distinct versions among open windows.
@@ -110,7 +111,14 @@ Mechanism:
 
 **When an update is found.**
 
-1. **Silent apply on a cold start.** If the update is found within 10 s of load and before the first `pointerdown` or `keydown`, and the unsaved flag is clear, it is applied with no toast. This is accepted per the review: no input means there is nothing to lose.
+1. **Silent apply on a cold start.** The update is applied with no toast only when all of these hold:
+   - it is found within 10 s of load;
+   - there has been no `pointerdown` or `keydown` yet;
+   - the unsaved flag is clear;
+   - the worker reports exactly **one** window client (`clients.matchAll({type: "window"})`, answered to a `CLIENT_COUNT` message).
+
+   With other windows open, a silent `SKIP_WAITING` would swap the controller under them, so the toast is shown instead. This is accepted per the review: one window and no input means nothing to lose.
+
 2. **Otherwise, a persistent toast.** It reads "New version available" with a "Reload" action, and in Spanish "Nueva versión disponible · Recargar". It never auto-dismisses.
 
 **On click, in this order. The gate always comes before `SKIP_WAITING`, never after it.**
@@ -159,6 +167,14 @@ Mechanism:
 - the e2e fixture `merged-dist-server.ts`, which today copies and injects by hand.
 
 **Docs.** `--docs <dir>` is required unless `--without docs` is passed explicitly. Only CI and the fixture pass it, because they lack the VitePress dist.
+
+**Parity with today's inline steps.** B1 is a refactor and must produce byte-identical output.
+
+- **Glob semantics.** `cp -r dist/*` skips top-level dotfiles. The SPA's and the docs' `public/.nojekyll` do **not** ship today, but a plain `fs.cpSync(dir, …)` would add them. The script copies only the top-level entries a shell glob would match, plus the explicit landing `.nojekyll` copy that today's step makes.
+- **Analytics substitution.** It keeps the fail-if-placeholder-remains check (`deploy-site.yml` 117–121), and skips when the id is unset, as today.
+- **`version.json`.** It is written exactly as `{"sha":"<sha>"}\n`.
+- **Deploy-only checks.** "Verify merged artifact" and `check-css-asset-urls` stay as **separate deploy steps**, between assembly and the guard.
+- **Evidence.** The current inline YAML and `assemble-site.mjs` are run over the same inputs, and `diff -r` is taken with `app/sw.js` excluded, since B1 emits none. The result is reported in the PR. A `node:test` fixture that includes dotfiles pins the glob semantics.
 
 **Guards, last.** `scripts/dist-service-worker.test.mjs` (`REQUIRE_SPA_DIST`, `SPA_DIST`, `SPA_BASE`) runs over the assembled `app/` and asserts:
 
@@ -263,9 +279,13 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
    - **Stale.** If the version is stale by the rule above, Dexie is never opened. That also closes the `schemaPatchMode` hole for the old code.
    - **Fresh.** If it is not stale, the probe connection **stays open until Dexie's `open()` settles**, and only then closes. This narrows the probe-to-open race. While the probe is open, another tab's upgrade has to deliver a `versionchange` to the existing connections. If Dexie's connection is already open, the step-3 override catches it. If Dexie's request is still queued, FIFO ordering lets Dexie open first at the declared version, and the override catches it right after.
 2. **Post-open gate.** One ordering is still uncovered: an upgrader whose request was queued _before_ Dexie's. Dexie then hits `VersionError`, retries at version 0, opens the newer database, and no `versionchange` ever fires.
-   - So a `db.on("ready")` subscriber checks `Math.floor(db.idbdb.version / 10) > DECLARED_VERNO`. When that holds, it calls `db.close({ disableAutoOpen: true })` and sets the stale state.
-   - The close lands while `isBeingOpened`, so `open()` rejects with `DatabaseClosedError`. `storage-store` maps that rejection to **stale**, not to `"failed"`.
-   - The check is synchronous. It returns nothing, so it does not hold up readiness the way a returned promise would.
+   - A synchronous `close()` inside `on("ready")` does **not** make `open()` reject, so it is the wrong tool. The cancel races a `DexiePromise.race` that has already settled (≈4604–4611, `_close` ≈6062–6080), so `open()` still resolves. Two failures follow.
+     - The junk-cleanup subscriber (`dexie-database.ts:33`), registered earlier, runs first, against the newer database.
+     - `registerDefaultProfileBoot` (`main.tsx:47`), a vip ready subscriber, deadlocks. With `idbdb` null, `_whenReady` waits on `dbReadyPromise`, which waits on the ready chain.
+   - **The gate is registered first,** in the `KaiordDatabase` constructor right after `registerKaiordVersions(this)`. It **throws** a typed `StaleSchemaError` when `Math.floor(this.idbdb.version / 10) > DECLARED_VERNO`.
+   - **What the throw does.** The ready chain rejects, no later subscriber runs (junk cleanup, default-profile boot), `open()` rejects with `StaleSchemaError`, and every queued query rejects with it.
+   - **What `storage-store` does.** It maps `StaleSchemaError` to **stale**, not to `"failed"`. It then calls `db.close({ disableAutoOpen: true })`, so nothing auto-reopens.
+   - **Required test.** A promise-returning vip ready subscriber registered after the gate, standing in for default-profile boot, must reject and **not hang**.
 3. **Mid-session override.** It runs from `db.on("versionchange", handler)`. When `ev.newVersion` is non-null and `Math.floor(ev.newVersion / 10) > DECLARED_VERNO`, the handler:
    - calls `db.close({ disableAutoOpen: true });`
    - sets the stale state;
@@ -273,10 +293,19 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
 
    On a delete (`newVersion` null), or on a same-major bump, it returns nothing, so the default still runs and keeps today's close-and-reopen. **Mandatory test:** after a stale `versionchange`, the next query rejects with `DatabaseClosedError`.
 
-4. **Boot gate (stale at boot).** There are no edits at boot. The gate calls `registration.update()`, waits for `installed`, posts `SKIP_WAITING`, and reloads, with no dialog. A sessionStorage one-shot key prevents a loop, as in chunk-reload. If no newer worker exists, or the one-shot has already fired, it falls through to step 5. That happens on an uncontrolled page that upgraded ahead of a deploy still propagating.
+4. **Boot gate (stale at boot).** There are no edits at boot.
+   - The gate calls `navigator.serviceWorker.getRegistration()`, because the deferred registration of D2 does not exist yet at that point.
+   - **No registration at all** (Save-Data, an uncontrolled page, no service-worker support): the dialog is shown, and its Reload is a plain `location.reload()`.
+   - **A registration exists:** the gate runs `await reg.update()`.
+     - With no `installing` and no `waiting` worker, the dialog is shown **now**.
+     - Otherwise the gate waits for that worker to reach `installed` **or** `redundant`, with a ~15 s timeout. On `installed` (or when one is already waiting) it posts `SKIP_WAITING` and reloads, with no dialog. On `redundant` or on timeout it shows the dialog.
+   - **Loop guard.** A sessionStorage one-shot prevents a loop, as chunk-reload does. It is **cleared on every non-stale boot**, so a later stale event gets its own attempt.
 5. **Blocking dialog.** It is used mid-session, and at boot when the gate cannot update. It cannot be dismissed. The title is "Kaiord was updated in another window", in en and es. It has two actions:
    - **Download draft** appears whenever `workout-store` holds a `currentWorkout`. It saves that KRD as JSON through a `Blob` to `<name>.krd`, a file that `FileUpload` already re-imports (`accept` includes `.krd`). A draft is never stranded. The database is closed, so it cannot be saved there.
-   - **Reload** runs the step-4 update-then-reload path. If nothing newer is found, the dialog stays up and offers a retry. `beforeunload` still prompts when the editor is dirty.
+   - **Reload** runs the step-4 path, or a plain `location.reload()` when there is no registration.
+   - When no newer worker was found, the dialog adds "Try again in a few minutes" ("Inténtalo de nuevo en unos minutos"), because a deploy may still be propagating (≈10 min at the edge). It stays up and offers a retry.
+   - `beforeunload` still prompts when the editor is dirty.
+   - A dev build never reaches this path. It runs on another origin, with its own database.
 6. **Optional, LOW.** The per-tab unsaved flag (D4) is broadcast on a `BroadcastChannel("kaiord-unsaved")`. The update toast can then add "Unsaved changes in another window" before the user activates Reload. This is informational only and gates nothing across tabs. It is built only if it fits within the file limits; it is not required for the gates.
 
 **Rejected alternatives.**
@@ -292,10 +321,10 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
 - **Registration module, with a fake `navigator.serviceWorker`:**
   - PROD gate, Save-Data skip, base scope, and swallowing a failed registration;
   - the waiting path and the installed path;
-  - the silent cold-start apply, and its denial after input or with the unsaved flag set;
+  - the silent cold-start apply, and its denial after input, with the unsaved flag set, or with more than one window client;
   - the click order: the unsaved flag blocks before anything is posted, flushes are awaited, then `SKIP_WAITING`, then a single reload on `controllerchange`;
   - visible and interval update throttling;
-  - the hello message.
+  - the hello at boot and again on every `controllerchange`.
 - **Unsaved flag:** fed by `useBeforeUnloadGuard`, cleared on disarm.
 - **D9, with `fake-indexeddb`:**
   - a database at native 380 makes the probe report stale and Dexie never opens;
@@ -303,10 +332,19 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
   - an absent database makes the probe report absent and leaves no database behind; Dexie then creates it fresh, and `_onDatabaseCreated` fires;
   - when the probe errors, boot continues and no stale state is set;
   - the probe closes itself on `versionchange`;
-  - the post-open gate: a database upgraded to 380 between probe and open ends stale, and `open()` rejects with `DatabaseClosedError`;
+  - the post-open gate is registered first and throws `StaleSchemaError`:
+    - with the database upgraded to 380 between probe and open, `open()` rejects with `StaleSchemaError`;
+    - queued queries reject;
+    - the junk-cleanup subscriber never runs;
+    - a promise-returning vip ready subscriber registered after the gate rejects instead of hanging;
   - **mandatory:** a stale `versionchange` (380) makes the next query reject with `DatabaseClosedError`, because the override returned `false` and no auto-reopen happened;
   - a delete `versionchange` keeps auto-reopen;
-  - the boot gate's one-shot;
+  - the boot gate, with a fake registration:
+    - no registration → dialog with a plain reload;
+    - no `installing` or `waiting` after `update()` → dialog now;
+    - `installed` → `SKIP_WAITING` and reload;
+    - `redundant` or timeout → dialog with "try again";
+    - the one-shot is cleared on a non-stale boot;
   - Download draft produces JSON that `FileUpload` re-imports.
 - **Copy:** toast and dialog text in en and es.
 
@@ -344,6 +382,21 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
 - **`workbox-build` `injectManifest` after assembly is also rejected.** It fixes the timing, but per the Workbox docs it "does not compile or bundle `swSrc`". Using `workbox-precaching` would therefore need a bundling step for one file. The 2 MB `maximumFileSizeToCacheInBytes` default silently skips files.
   - Workbox would not provide D1.3's digest check, D2's copy-forward or D3's client-keyed retention anyway. They would be custom code inside it.
 - **Hand-written is chosen.** It is ≈120 lines of worker in `packages/workout-spa-editor/sw/sw.js`, outside `src/` so Vite never bundles it, plus ≈80 lines of emitter. It adds 0 dependencies. The page-side registration and the hello together stay well under 2 KB.
+
+## Delivery
+
+One OpenSpec change ships as three PRs. Each PR is cut from `main` after the previous one merges.
+
+1. **B1: `assemble-site.mjs` refactor, with no behaviour change.**
+   - The deploy, CI `e2e-prod-base` and `merged-dist-server` all use it.
+   - The PR carries the `diff -r` parity evidence (D6).
+   - No worker is emitted.
+2. **B2: the stale-schema guard (D9) alone.**
+   - It covers the probe, the ready gate that throws `StaleSchemaError`, the `versionchange` override, and the stale dialog with Download draft, plus tests.
+   - It ships **before** the worker. It already fixes today's skew for tabs left open across a deploy, and every client that carries it before B3 lands makes N-1 safer.
+3. **B3: the worker.**
+   - It covers the verified precache, retention, copy-forward, the update toast with its unsaved gate, the kill switch, the guards, the `@service-worker` e2e and the runbook.
+   - It carries the branding MODIFIED delta.
 
 ## Risks / Trade-offs
 
