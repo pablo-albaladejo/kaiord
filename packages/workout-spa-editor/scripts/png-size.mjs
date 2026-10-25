@@ -1,9 +1,15 @@
-const PNG_SIGNATURE = "89504e470d0a1a0a";
+import sharp from "sharp";
 
-/** Width and height from a PNG's IHDR chunk, which always comes first. */
-export function pngSize(bytes) {
-  if (bytes.subarray(0, 8).toString("hex") !== PNG_SIGNATURE) {
-    throw new Error("not a PNG");
-  }
-  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+/**
+ * Pixel size of a PNG that actually decodes. Reading IHDR alone would pass a
+ * file truncated after its header, so every pixel is decoded, and any decoder
+ * warning (truncation, a bad CRC) is an error.
+ */
+export async function decodedPngSize(bytes) {
+  const { format } = await sharp(bytes).metadata();
+  if (format !== "png") throw new Error(`not a PNG: ${format}`);
+  const { info } = await sharp(bytes, { failOn: "warning" })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return { width: info.width, height: info.height };
 }

@@ -13,7 +13,8 @@ import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { pngSize } from "./png-size.mjs";
+import { headManifestHrefs } from "./manifest-link.mjs";
+import { decodedPngSize } from "./png-size.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(process.env.SPA_DIST ?? join(__dirname, "..", "dist"));
@@ -28,11 +29,9 @@ const readManifest = () =>
 
 test("the SPA's HTML links the manifest under the build base", { skip }, () => {
   const html = readFileSync(join(DIST, "index.html"), "utf8");
-  const links = [...html.matchAll(/<link\b[^>]*\brel="manifest"[^>]*>/g)];
+  const hrefs = headManifestHrefs(html);
 
-  assert.equal(links.length, 1, "exactly one manifest link");
-  const href = links[0][0].match(/\bhref="([^"]+)"/)?.[1];
-  assert.equal(href, `${BASE}manifest.webmanifest`);
+  assert.deepEqual(hrefs, [`${BASE}manifest.webmanifest`]);
 });
 
 test("the manifest installs a standalone app scoped to /app/", { skip }, () => {
@@ -58,16 +57,17 @@ test("the manifest colours match the theme-color meta tag", { skip }, () => {
   assert.equal(manifest.background_color, themeColor);
 });
 
-test("every manifest icon exists at its stated size", { skip }, () => {
+test("every manifest icon decodes at its stated size", { skip }, async () => {
   const { icons } = readManifest();
-  const found = icons.map(({ src, sizes, purpose = "any" }) => {
+  const found = [];
+  for (const { src, sizes, purpose = "any" } of icons) {
     assert.doesNotMatch(src, /^\//, `${src} must be relative to the manifest`);
     const path = join(DIST, src);
     assert.ok(existsSync(path), `${src} is missing from the dist`);
-    const { width, height } = pngSize(readFileSync(path));
+    const { width, height } = await decodedPngSize(readFileSync(path));
     assert.equal(`${width}x${height}`, sizes, `${src} pixel size`);
-    return `${sizes} ${purpose}`;
-  });
+    found.push(`${sizes} ${purpose}`);
+  }
 
   for (const required of ["192x192 any", "512x512 any", "512x512 maskable"]) {
     assert.ok(found.includes(required), `missing a ${required} icon`);

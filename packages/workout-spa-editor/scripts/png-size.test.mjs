@@ -1,22 +1,32 @@
 import { strict as assert } from "node:assert";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 
-import { pngSize } from "./png-size.mjs";
+import { decodedPngSize } from "./png-size.mjs";
 
-const header = (width, height) => {
-  const bytes = Buffer.alloc(24);
-  Buffer.from("89504e470d0a1a0a", "hex").copy(bytes, 0);
-  bytes.writeUInt32BE(13, 8);
-  bytes.write("IHDR", 12, "ascii");
-  bytes.writeUInt32BE(width, 16);
-  bytes.writeUInt32BE(height, 20);
-  return bytes;
-};
+const ICON = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "public",
+  "app-icon-192.png"
+);
 
-test("pngSize reads the IHDR width and height", () => {
-  assert.deepEqual(pngSize(header(192, 512)), { width: 192, height: 512 });
+test("decodedPngSize decodes a real PNG to its pixel size", async () => {
+  const size = await decodedPngSize(readFileSync(ICON));
+
+  assert.deepEqual(size, { width: 192, height: 192 });
 });
 
-test("pngSize rejects bytes that are not a PNG", () => {
-  assert.throws(() => pngSize(Buffer.alloc(24)), /not a PNG/);
+// A valid signature and IHDR with the image data cut off: the header alone
+// names a size, so only a full decode can tell this file is broken.
+test("decodedPngSize rejects a truncated PNG whose header is valid", async () => {
+  const truncated = readFileSync(ICON).subarray(0, 64);
+
+  await assert.rejects(decodedPngSize(truncated));
+});
+
+test("decodedPngSize rejects bytes that are not a PNG", async () => {
+  await assert.rejects(decodedPngSize(Buffer.alloc(64)));
 });
