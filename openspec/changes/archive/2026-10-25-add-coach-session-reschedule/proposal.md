@@ -1,3 +1,5 @@
+> Completed: 2026-10-25
+
 ## Why
 
 The athlete needs to move a session to another day, coach sessions included,
