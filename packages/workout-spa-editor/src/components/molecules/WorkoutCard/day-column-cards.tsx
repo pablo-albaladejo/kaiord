@@ -22,6 +22,7 @@ import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { CalendarView } from "../../../types/user-preferences";
 import { CoachingActivityCard } from "../CoachingCard/CoachingActivityCard";
 import { renderMatchedCards } from "./day-column-matched-cards";
+import { DRAGGABLE_CARD } from "./draggable-card";
 import { WorkoutCard } from "./WorkoutCard";
 
 export type DayCardBuckets = {
@@ -65,7 +66,11 @@ export function renderDayCards(buckets: DayCardBuckets) {
         // gate A1) — never wire drag for them, so there is no failed
         // persistence call to catch/toast in the first place.
         bindCardDrag && !isProjectedWorkoutRecord(w) ? (
-          <div key={w.id} onPointerDown={bindCardDrag(w.id)}>
+          <div
+            key={w.id}
+            className={DRAGGABLE_CARD}
+            onPointerDown={bindCardDrag(w.id)}
+          >
             <WorkoutCard
               workout={w}
               view={buckets.view}

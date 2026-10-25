@@ -5,6 +5,7 @@ import type { MatchedSessionWithMetadata } from "../../../hooks/use-matched-sess
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { CalendarView } from "../../../types/user-preferences";
 import { MatchedSessionCard } from "../MatchedSessionCard/MatchedSessionCard";
+import { DRAGGABLE_CARD } from "./draggable-card";
 
 export type MatchedCardsProps = {
   sessions: MatchedSessionWithMetadata[];
@@ -36,7 +37,11 @@ export const renderMatchedCards = (p: MatchedCardsProps) =>
     if (!p.bindCardDrag || !isMovableSession({ ...s, recorded }).movable)
       return card;
     return (
-      <div key={s.match.id} onPointerDown={p.bindCardDrag(s.workout.id)}>
+      <div
+        key={s.match.id}
+        className={DRAGGABLE_CARD}
+        onPointerDown={p.bindCardDrag(s.workout.id)}
+      >
         {card}
       </div>
     );
