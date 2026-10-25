@@ -8,7 +8,9 @@
  * `workouts` supplies only the planned side (the match's structured workout).
  *
  * Pure: no IO, no clock — the caller supplies the week slice and the
- * `canonicalSport` function. Returns the per-match ids to append.
+ * `canonicalSport` function. Returns the per-match ids to append. One `taken`
+ * set spans every input match, so a recording held by one match, or claimed
+ * earlier in the pass, is never appended to a second (design §3.7).
  */
 
 import type { ActivityRecord } from "../../types/activity-record";
@@ -28,6 +30,8 @@ export type MatchExecutedWorkoutsInput = {
   activities?: readonly ActivityRecord[];
   /** Returns the canonical sport key or `null` for "unknown — skip". */
   canonicalSport: CanonicalSport;
+  /** Ids held by matches outside `sessionMatches` (another week's). */
+  heldWorkoutIds?: Iterable<string>;
 };
 
 export type MatchExecutedWorkoutsAppend = {
@@ -38,13 +42,10 @@ export type MatchExecutedWorkoutsAppend = {
 const buildAppendsForMatch = (
   match: SessionMatch,
   refsByDate: ReadonlyMap<string, ExecutedRef[]>,
-  matchCanonical: string
+  matchCanonical: string,
+  taken: Set<string>
 ): string[] => {
   const refs = refsByDate.get(match.date) ?? [];
-  const taken = new Set<string>([
-    match.workoutId,
-    ...(match.executedWorkoutIds ?? []),
-  ]);
   const toAppend: string[] = [];
   for (const ref of refs) {
     if (taken.has(ref.id)) continue;
@@ -72,6 +73,13 @@ export const matchExecutedWorkouts = (
     input.activities ?? [],
     input.canonicalSport
   );
+  const taken = new Set<string>([
+    ...(input.heldWorkoutIds ?? []),
+    ...input.sessionMatches.flatMap((m) => [
+      m.workoutId,
+      ...(m.executedWorkoutIds ?? []),
+    ]),
+  ]);
   const out: MatchExecutedWorkoutsAppend[] = [];
   for (const match of input.sessionMatches) {
     const matchCanonical = resolveMatchCanonical(
@@ -80,7 +88,12 @@ export const matchExecutedWorkouts = (
       input.canonicalSport
     );
     if (!matchCanonical) continue;
-    const toAppend = buildAppendsForMatch(match, refsByDate, matchCanonical);
+    const toAppend = buildAppendsForMatch(
+      match,
+      refsByDate,
+      matchCanonical,
+      taken
+    );
     if (toAppend.length > 0) out.push({ matchId: match.id, toAppend });
   }
   return out;

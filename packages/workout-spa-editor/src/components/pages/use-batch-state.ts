@@ -30,12 +30,16 @@ export function useBatchState(weekStart: string, weekEnd: string) {
   const [pending, setPending] = useState<BatchPending | null>(null);
   const { success: showSuccess } = useToastContext();
   // The static translation-key title satisfies the R-PIIInterpolation
-  // guard; the dynamic count flows through the description field.
-  const runner = useBatchRunner(setMessage, (count) =>
-    showSuccess(t("batch.processed"), t("batch.workoutsProcessed", { count }), {
-      duration: 3000,
-    })
-  );
+  // guard; the dynamic counts flow through the description field. A row
+  // skipped because it changed meanwhile is not counted as processed.
+  const runner = useBatchRunner(setMessage, (result) => {
+    const count = result.succeeded.length + result.failed.length;
+    const skipped = result.skipped.length;
+    const description = skipped
+      ? t("batch.workoutsProcessedSkipped", { count, skipped })
+      : t("batch.workoutsProcessed", { count });
+    showSuccess(t("batch.processed"), description, { duration: 3000 });
+  });
 
   const providerCount = useLiveQuery(() => db.table("aiProviders").count(), []);
 

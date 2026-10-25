@@ -222,4 +222,66 @@ describe("BatchProcessingBanner", () => {
       "Failed 1"
     );
   });
+
+  it("should show the rows skipped because they changed meanwhile", () => {
+    // Arrange
+    const counts = {
+      queued: 0,
+      processing: 0,
+      succeeded: 1,
+      skipped: 2,
+      failed: 0,
+    };
+
+    // Act
+    render(
+      <BatchProcessingBanner
+        rawCount={3}
+        isProcessing={true}
+        progress={{
+          total: 3,
+          processed: 3,
+          succeeded: 1,
+          failed: 0,
+          current: null,
+          counts,
+          byId: { w1: "succeeded", w2: "skipped", w3: "skipped" },
+        }}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(screen.getByTestId("batch-count-skipped")).toHaveTextContent(
+      "Skipped 2"
+    );
+    expect(screen.getByTestId("batch-count-succeeded")).toHaveTextContent(
+      "Succeeded 1"
+    );
+  });
+
+  it("should not show a skipped count when nothing was skipped", () => {
+    // Arrange
+
+    // Act
+    render(
+      <BatchProcessingBanner
+        rawCount={1}
+        isProcessing={true}
+        progress={{
+          total: 1,
+          processed: 1,
+          succeeded: 1,
+          failed: 0,
+          current: null,
+        }}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(screen.queryByTestId("batch-count-skipped")).toBeNull();
+  });
 });

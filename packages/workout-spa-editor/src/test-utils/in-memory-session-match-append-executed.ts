@@ -4,7 +4,10 @@
  * under the per-file line cap.
  */
 
-import type { SessionMatch } from "../types/session-match";
+import {
+  idsHeldByOtherMatches,
+  type SessionMatch,
+} from "../types/session-match";
 
 type Store = Map<string, SessionMatch>;
 
@@ -16,7 +19,11 @@ export const appendExecutedWorkoutIdsInMemory = (
   if (workoutIds.length === 0) return;
   const existing = store.get(id);
   if (!existing) return;
-  const seen = new Set(existing.executedWorkoutIds);
+  const held = idsHeldByOtherMatches(
+    [...store.values()].filter((m) => m.profileId === existing.profileId),
+    id
+  );
+  const seen = new Set([...existing.executedWorkoutIds, ...held]);
   const merged = [...existing.executedWorkoutIds];
   let changed = false;
   for (const wid of workoutIds) {

@@ -23,10 +23,10 @@ vi.mock("../../adapters/telemetry/dexie-usage-telemetry-sink", () => ({
   createDexieUsageTelemetrySink: vi.fn(() => ({ emit: vi.fn() })),
 }));
 
-import type { KaiordDatabase } from "../../adapters/dexie/dexie-database";
 import { makeWorkoutRecord } from "../../application/test-helpers";
 import { PACE_MODEL } from "../../lib/athlete/zone-models";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
+import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { Profile } from "../../types/profile";
 import { createProcessOne } from "./batch-process-one";
 
@@ -77,8 +77,11 @@ describe("createProcessOne (Train2Go coaching path)", () => {
 
   it("should send the coach text with the athlete's zones and custom instructions", async () => {
     // Arrange
-    const db = { table: () => ({ put: vi.fn() }) } as unknown as KaiordDatabase;
-    const processOne = createProcessOne(PROVIDER, "m", db);
+    const processOne = createProcessOne(
+      PROVIDER,
+      "m",
+      createInMemoryPersistence()
+    );
     const workout = makeWorkoutRecord({
       raw: {
         ...makeWorkoutRecord().raw!,

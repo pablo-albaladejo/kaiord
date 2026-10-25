@@ -1,5 +1,5 @@
 /**
- * The athlete's calendar drag (`rescheduleWorkout`) against the two other
+ * The athlete's move (`moveSession`) against the two other
  * writers of a workout's row: a week sync following the coach's date and a
  * Garmin push stamping its id. Each other writer starts between the drag's
  * read and its write; the lock stands in for Dexie's serialized
@@ -17,8 +17,8 @@ import {
 } from "../types/coaching-activity-record";
 import type { KRD } from "../types/krd";
 import { applyCoachDateMoves } from "./coaching/apply-coach-date-moves";
+import { moveSession } from "./move-session";
 import { recordGarminPush } from "./record-garmin-push";
-import { rescheduleWorkout } from "./reschedule-workout";
 import { makeWorkoutRecord } from "./test-helpers";
 
 const PROFILE = "p1";
@@ -67,10 +67,14 @@ const setup = async (other: (s: Setup) => Promise<unknown>) => {
     },
   };
   const drag = async () => {
-    await rescheduleWorkout(
-      { workouts, transaction: lock.transaction },
-      "w",
-      D3
+    await moveSession(
+      {
+        ...persistence,
+        workouts,
+        transaction: lock.transaction,
+        now: () => NOW,
+      },
+      { workoutId: "w", targetDay: D3 }
     );
     await racing;
   };
@@ -85,6 +89,7 @@ const sync = ({ persistence, lock }: Setup, date: string) =>
   applyCoachDateMoves(
     {
       workouts: persistence.workouts,
+      sessionMatch: persistence.sessionMatch,
       now: () => NOW,
       transaction: lock.transaction,
     },
@@ -92,7 +97,7 @@ const sync = ({ persistence, lock }: Setup, date: string) =>
     []
   );
 
-describe("rescheduleWorkout racing another writer", () => {
+describe("moveSession racing another writer", () => {
   it("should keep the coach's date so the next sync reports no override", async () => {
     // Arrange
     const s = await setup((setup) => sync(setup, D2));
@@ -102,7 +107,11 @@ describe("rescheduleWorkout racing another writer", () => {
     const next = await sync(s, D2);
 
     // Assert
-    expect(next).toEqual({ coachMoves: 0, overriddenLocalMoves: 0 });
+    expect(next).toEqual({
+      coachMoves: 0,
+      overriddenLocalMoves: 0,
+      overridden: [],
+    });
     expect(await s.persistence.workouts.getById("w")).toMatchObject({
       coachDate: D2,
     });

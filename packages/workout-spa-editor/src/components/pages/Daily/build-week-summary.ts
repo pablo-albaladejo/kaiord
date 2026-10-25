@@ -4,6 +4,7 @@
  * no fabricated continuous load).
  */
 import type { MatchedSessionWithMetadata } from "../../../hooks/use-matched-sessions";
+import type { CrossWeekMatches } from "../../../hooks/use-matched-sessions-cross-week";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { Profile } from "../../../types/profile";
@@ -23,7 +24,7 @@ export type BuildWeekSummaryArgs = {
   coachingByDay: Record<string, CoachingActivity[]>;
   matched: MatchedSessionWithMetadata[];
   profile: Profile | null;
-};
+} & Partial<CrossWeekMatches>;
 
 export function buildWeekSummary({
   dayIsos,
@@ -31,6 +32,7 @@ export function buildWeekSummary({
   coachingByDay,
   matched,
   profile,
+  ...crossWeek
 }: BuildWeekSummaryArgs): WeekSummary {
   const workoutsByDay = groupWorkoutsByDay(weekWorkouts, dayIsos);
   const { matchedByDay, soloPlansByDay, soloActualsByDay } =
@@ -39,6 +41,7 @@ export function buildWeekSummary({
       workoutsByDay,
       coachingByDay,
       matched,
+      ...crossWeek,
     });
 
   const summary: WeekSummary = {};

@@ -6,6 +6,7 @@
 import { useMemo } from "react";
 
 import type { MatchedSessionWithMetadata } from "../../hooks/use-matched-sessions";
+import type { CrossWeekMatches } from "../../hooks/use-matched-sessions-cross-week";
 import type { ActivityRecord } from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
@@ -18,6 +19,7 @@ export type UseCalendarBucketsArgs = {
   coachingByDay: Record<string, CoachingActivity[]>;
   activitiesByDay: Record<string, ActivityRecord[]>;
   matched: MatchedSessionWithMetadata[];
+  crossWeek: CrossWeekMatches;
 };
 
 export const useCalendarBucketsMemo = ({
@@ -26,6 +28,7 @@ export const useCalendarBucketsMemo = ({
   coachingByDay,
   activitiesByDay,
   matched,
+  crossWeek,
 }: UseCalendarBucketsArgs): CalendarBuckets =>
   useMemo(
     () =>
@@ -35,6 +38,7 @@ export const useCalendarBucketsMemo = ({
         coachingByDay,
         activitiesByDay,
         matched,
+        ...crossWeek,
       }),
-    [days, workoutsByDay, coachingByDay, activitiesByDay, matched]
+    [days, workoutsByDay, coachingByDay, activitiesByDay, matched, crossWeek]
   );

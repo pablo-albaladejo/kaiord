@@ -46,7 +46,8 @@ const fireAppend = (
 export const useExecutedMatchAutoForCalendar = (
   rawMatched: readonly MatchedSessionWithMetadata[] | undefined,
   workoutsByDay: Readonly<Record<string, WorkoutRecord[]>>,
-  activities: readonly ActivityRecord[]
+  activities: readonly ActivityRecord[],
+  heldWorkoutIds?: ReadonlySet<string>
 ): void => {
   const matches = useMemo(
     () => (rawMatched ?? []).map((m) => m.match),
@@ -56,13 +57,14 @@ export const useExecutedMatchAutoForCalendar = (
     () => Object.values(workoutsByDay).flat(),
     [workoutsByDay]
   );
-  useExecutedMatchAuto(matches, workouts, activities);
+  useExecutedMatchAuto(matches, workouts, activities, heldWorkoutIds);
 };
 
 export const useExecutedMatchAuto = (
   matches: readonly SessionMatch[] | null,
   workouts: readonly WorkoutRecord[] | null,
-  activities: readonly ActivityRecord[] = []
+  activities: readonly ActivityRecord[] = [],
+  heldWorkoutIds?: ReadonlySet<string>
 ): void => {
   const persistence = usePersistence();
   const firedRef = useRef<Set<string>>(new Set());
@@ -76,6 +78,7 @@ export const useExecutedMatchAuto = (
       workouts: workouts ?? [],
       activities,
       canonicalSport: canonicalizeSport,
+      heldWorkoutIds,
     });
     for (const { matchId, toAppend } of appends) {
       const fresh = toAppend.filter(
@@ -90,5 +93,5 @@ export const useExecutedMatchAuto = (
         firedRef
       );
     }
-  }, [matches, workouts, activities, persistence]);
+  }, [matches, workouts, activities, heldWorkoutIds, persistence]);
 };

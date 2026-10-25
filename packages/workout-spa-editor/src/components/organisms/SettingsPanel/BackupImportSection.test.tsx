@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { renderWithProviders, screen, userEvent } from "../../../test-utils";
 import { createInMemorySnapshotPort } from "../../../test-utils/in-memory-snapshot-port";
@@ -71,6 +71,23 @@ describe("BackupImportSection", () => {
       )
     ).toBeInTheDocument();
     expect(device.state.tables.profiles).toEqual([ana]);
+  });
+
+  it("should run the match-date heal after the import", async () => {
+    // Arrange
+    const device = freshDevice();
+    const afterImport = vi.fn(async () => {});
+    renderWithProviders(<BackupImportSection />, {
+      snapshotPort: device.port,
+      afterImport,
+    });
+
+    // Act
+    await upload(backupFile([ana]));
+
+    // Assert
+    await screen.findByText(/Backup imported/);
+    expect(afterImport).toHaveBeenCalledTimes(1);
   });
 
   it("should say so when the file is not a Kaiord backup", async () => {

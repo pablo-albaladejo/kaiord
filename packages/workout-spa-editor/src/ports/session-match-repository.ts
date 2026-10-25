@@ -32,7 +32,9 @@ export type SessionMatchRepository = {
    * Idempotent set-union append into `executedWorkoutIds`. The
    * transaction reads the row, dedups the input against the current
    * array, and writes the merged result. A no-op when the row is
-   * missing — concurrent-delete tolerance matches `delete`.
+   * missing — concurrent-delete tolerance matches `delete`. An id another
+   * match of the profile plans or holds, in any week, is skipped inside the
+   * same transaction (design §3.7).
    *
    * Drives the Train2Go three-slot grouping: an executed activity
    * (e.g., Garmin/FIT) on the same day+sport as a prescribed+structured
@@ -58,6 +60,23 @@ export type SessionMatchRepository = {
     weekStart: string,
     weekEnd: string
   ) => Promise<SessionMatch[]>;
+  /**
+   * Re-dates the row in place and stamps `updatedAt`. A no-op when the row is
+   * missing; rejects a non-`YYYY-MM-DD` date without writing. Joins the
+   * caller's `PersistencePort.transaction`.
+   */
+  updateDate: (
+    matchId: string,
+    date: string,
+    updatedAt: string
+  ) => Promise<void>;
+  /** The profile's matches of the given activities, whatever their date. */
+  listByActivityIds: (
+    profileId: string,
+    coachingActivityIds: readonly string[]
+  ) => Promise<SessionMatch[]>;
+  /** Every match of the profile (the heal and the recording-held check). */
+  listByProfile: (profileId: string) => Promise<SessionMatch[]>;
   /** No-op when the row does not exist. */
   delete: (id: string) => Promise<void>;
   /**

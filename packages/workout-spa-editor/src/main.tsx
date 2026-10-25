@@ -11,6 +11,7 @@ import { registerDefaultProfileBoot } from "./adapters/dexie/default-profile-boo
 import { db } from "./adapters/dexie/dexie-database";
 import { createDexieSnapshotPort } from "./adapters/dexie/dexie-snapshot-port";
 import App from "./App.tsx";
+import { runMatchDatesHeal } from "./application/coaching/run-match-dates-heal";
 import {
   AnalyticsProvider,
   GarminBridgeProvider,
@@ -55,6 +56,11 @@ const cloudSync = createLazyCloudSync(() =>
 );
 const snapshotPort = createDexieSnapshotPort(db);
 
+// Every cloud or backup import may bring a match torn from its workout's
+// date (design §3.5): heal all profiles once it lands.
+const healMatchDatesAfterImport = () =>
+  runMatchDatesHeal(persistence, analytics, "all-profiles");
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AnalyticsProvider analytics={analytics}>
@@ -63,6 +69,7 @@ createRoot(document.getElementById("root")!).render(
           cloud={cloudSync}
           snapshotPort={snapshotPort}
           deviceId={getDeviceId()}
+          afterImport={healMatchDatesAfterImport}
         >
           <ThemeProvider defaultTheme="dark">
             <GarminBridgeProvider>

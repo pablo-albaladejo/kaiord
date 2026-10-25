@@ -4,6 +4,7 @@
  */
 
 import type { ProcessResult } from "./ai-workout-processor";
+import type { ProcessOneOutcome } from "./batch-processor";
 
 export const BATCH_PROCESSOR_IDS = {
   workoutIdPrefix: "550e8400-e29b-41d4-a716-44665544000",
@@ -33,7 +34,7 @@ export const BATCH_PROCESSOR_META = {
   errorMessage: "LLM error",
 } as const;
 
-export const BATCH_PROCESSOR_OK_RESULT: ProcessResult = {
+export const BATCH_PROCESSOR_OK_RESULT: ProcessOneOutcome = {
   ok: true,
   krd: {
     version: BATCH_PROCESSOR_META.krdVersion,
@@ -50,6 +51,7 @@ export const BATCH_PROCESSOR_OK_RESULT: ProcessResult = {
     processedAt: BATCH_PROCESSOR_META.processedAt,
   },
   retried: false,
+  written: true,
 };
 
 export const BATCH_PROCESSOR_FAIL_RESULT: ProcessResult = {

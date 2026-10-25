@@ -27,11 +27,14 @@
   "batch": {
     "processed": "Batch processed",
     "workoutsProcessed": "{{count}} workouts",
+    "workoutsProcessedSkipped": "{{count}} workouts, {{skipped}} skipped because they changed meanwhile",
     "noProvider": "Configure an AI provider in Settings to process workouts.",
     "error": "Batch processing encountered an unexpected error."
   },
   "reschedule": {
-    "moveFailed": "Could not move workout"
+    "moveFailed": "Could not move workout",
+    "blockedExecuted": "Already done — it can't be moved.",
+    "blockedCompleted": "The coach marked it completed — it can't be moved."
   },
   "lifecycle": {
     "raw": "Raw",

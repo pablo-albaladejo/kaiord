@@ -5,6 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
 import {
   buildCoachingActivityId,
@@ -12,10 +13,8 @@ import {
   namespaceSourceId,
 } from "../../types/coaching-activity-record";
 import { makeWorkoutRecord } from "../test-helpers";
-import {
-  applyCoachDateMoves,
-  coachDateVerdict,
-} from "./apply-coach-date-moves";
+import { applyCoachDateMoves } from "./apply-coach-date-moves";
+import { coachDateVerdict } from "./coach-date-verdict";
 
 const MON = "2026-04-13";
 const TUE = "2026-04-14";
@@ -111,6 +110,7 @@ describe("applyCoachDateMoves", () => {
     if (workout) await workouts.put(workout);
     return {
       workouts,
+      sessionMatch: createInMemorySessionMatchRepository(),
       now: () => NOW,
       transaction: <T>(fn: () => Promise<T>) => fn(),
     };
@@ -128,7 +128,11 @@ describe("applyCoachDateMoves", () => {
     );
 
     // Assert
-    expect(counts).toEqual({ coachMoves: 0, overriddenLocalMoves: 0 });
+    expect(counts).toEqual({
+      coachMoves: 0,
+      overriddenLocalMoves: 0,
+      overridden: [],
+    });
     expect(await deps.workouts.getById("w-1")).toBeUndefined();
   });
 
@@ -140,7 +144,11 @@ describe("applyCoachDateMoves", () => {
     const counts = await applyCoachDateMoves(deps, [activity(TUE)], []);
 
     // Assert
-    expect(counts).toEqual({ coachMoves: 1, overriddenLocalMoves: 0 });
+    expect(counts).toEqual({
+      coachMoves: 1,
+      overriddenLocalMoves: 0,
+      overridden: [],
+    });
     expect(await deps.workouts.getById("w-1")).toMatchObject({
       date: TUE,
       coachDate: TUE,
@@ -158,7 +166,11 @@ describe("applyCoachDateMoves", () => {
     const counts = await applyCoachDateMoves(deps, [activity(TUE)], []);
 
     // Assert
-    expect(counts).toEqual({ coachMoves: 0, overriddenLocalMoves: 1 });
+    expect(counts).toEqual({
+      coachMoves: 0,
+      overriddenLocalMoves: 1,
+      overridden: [{ workoutId: "w-1", athleteDate: WED, coachDate: TUE }],
+    });
     expect((await deps.workouts.getById("w-1"))?.date).toBe(TUE);
   });
 
@@ -176,7 +188,11 @@ describe("applyCoachDateMoves", () => {
     );
 
     // Assert
-    expect(counts).toEqual({ coachMoves: 0, overriddenLocalMoves: 0 });
+    expect(counts).toEqual({
+      coachMoves: 0,
+      overriddenLocalMoves: 0,
+      overridden: [],
+    });
     expect(await deps.workouts.getById("w-1")).toEqual(settled);
   });
 });

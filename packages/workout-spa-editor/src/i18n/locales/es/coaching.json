@@ -35,6 +35,7 @@
     "queued": "En cola {{n}}",
     "processing": "Procesando {{n}}",
     "succeeded": "Completados {{n}}",
+    "skipped": "Omitidos {{n}}",
     "failed": "Fallidos {{n}}",
     "cancelAria": "Cancelar el procesamiento por lotes"
   },

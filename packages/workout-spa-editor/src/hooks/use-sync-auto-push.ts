@@ -12,6 +12,7 @@
  * Zustand store), so it does not violate the no-write-through guards.
  */
 
+import type Dexie from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
@@ -37,8 +38,14 @@ const SYNCED_TABLES: ReadonlyArray<readonly [string, string]> = [
 // "loading / disconnected" that never collides with a genuine change token.
 const DISCONNECTED = "";
 
-async function tableSignal(name: string, field: string): Promise<TableSignal> {
-  const table = db.table(name);
+type SignalSource = Pick<Dexie, "table">;
+
+async function tableSignal(
+  database: SignalSource,
+  name: string,
+  field: string
+): Promise<TableSignal> {
+  const table = database.table(name);
   const [count, last] = await Promise.all([
     table.count(),
     table.orderBy(field).last(),
@@ -47,16 +54,19 @@ async function tableSignal(name: string, field: string): Promise<TableSignal> {
   return { count, latest: latest == null ? "" : String(latest) };
 }
 
-async function syncedChangeToken(): Promise<string> {
+/** The auto-push change token of `database` (the app's db by default). */
+export async function syncedChangeToken(
+  database: SignalSource = db
+): Promise<string> {
   const signals = await Promise.all(
-    SYNCED_TABLES.map(([name, field]) => tableSignal(name, field))
+    SYNCED_TABLES.map(([name, field]) => tableSignal(database, name, field))
   );
   return buildChangeToken(signals);
 }
 
 export function useSyncAutoPush(): void {
   const { connected, requestPush } = useSync();
-  const token = useLiveQuery(syncedChangeToken, [], DISCONNECTED);
+  const token = useLiveQuery(() => syncedChangeToken(), [], DISCONNECTED);
   // Only arm auto-push once an account is connected; while disconnected the
   // token is pinned to the sentinel so requestPush is never reached.
   useAutoPush(connected ? token : DISCONNECTED, requestPush);

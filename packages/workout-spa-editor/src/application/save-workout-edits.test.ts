@@ -4,7 +4,7 @@ import type { PersistencePort } from "../ports/persistence-port";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import type { WorkoutState } from "../types/calendar-enums";
 import type { KRD } from "../types/krd";
-import { saveWorkoutEdits } from "./save-workout-edits";
+import { saveWorkoutEdits, updateWorkoutRecord } from "./save-workout-edits";
 import { makeWorkoutRecord } from "./test-helpers";
 
 const T0 = "2026-10-01T08:00:00.000Z";
@@ -99,5 +99,21 @@ describe("saveWorkoutEdits", () => {
       date: "2026-10-09",
       krd: EDITED,
     });
+  });
+});
+
+describe("updateWorkoutRecord", () => {
+  it("should write nothing when the change skips the fresh row", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    await seed(persistence, "skipped");
+    const put = vi.spyOn(persistence.workouts, "put");
+
+    // Act
+    const written = await updateWorkoutRecord(persistence, ID, () => undefined);
+
+    // Assert
+    expect(written).toBe(false);
+    expect(put).not.toHaveBeenCalled();
   });
 });

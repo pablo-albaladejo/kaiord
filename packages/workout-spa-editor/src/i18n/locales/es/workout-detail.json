@@ -128,6 +128,8 @@
     "confirm": "Mover",
     "cancel": "Cancelar",
     "done": "Entreno movido",
-    "notFound": "Este entreno ya no existe."
+    "notFound": "Este entreno ya no existe.",
+    "blockedExecuted": "Ya está hecho: no se puede mover.",
+    "blockedCompleted": "El entrenador lo marcó como completado: no se puede mover."
   }
 }

@@ -11,7 +11,7 @@
  * The projected record's `id` lives in the `activities` table, not
  * `workouts` — it was never persisted as a workout, so it cannot be
  * opened in the editor (which reads `workouts` by id) nor rescheduled
- * (`rescheduleWorkout` reads the same table). `projectedFromActivity`
+ * (`moveSession` reads the same table). `projectedFromActivity`
  * marks that, so callers can route clicks/drag away from those flows
  * without changing `WorkoutRecord`'s own persisted schema.
  */

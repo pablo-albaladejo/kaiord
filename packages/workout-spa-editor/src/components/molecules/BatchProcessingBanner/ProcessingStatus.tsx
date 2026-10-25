@@ -11,6 +11,7 @@ function deriveCounts(progress: BatchProgress) {
       queued: Math.max(progress.total - progress.processed - 1, 0),
       processing: progress.current ? 1 : 0,
       succeeded: progress.succeeded,
+      skipped: 0,
       failed: progress.failed,
     }
   );
@@ -48,6 +49,11 @@ export function ProcessingStatus({
           <span data-testid="batch-count-succeeded">
             {t("batch.succeeded", { n: counts.succeeded })}
           </span>
+          {counts.skipped > 0 && (
+            <span data-testid="batch-count-skipped">
+              {t("batch.skipped", { n: counts.skipped })}
+            </span>
+          )}
           <span data-testid="batch-count-failed">
             {t("batch.failed", { n: counts.failed })}
           </span>

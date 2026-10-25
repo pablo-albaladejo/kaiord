@@ -26,7 +26,12 @@ import type { SnapshotPort } from "../ports/snapshot-port";
 const SyncContext = createContext<SyncEngine | null>(null);
 
 /** The local database snapshot, for readers outside the sync cycle (backup). */
-export type SnapshotSource = { snapshotPort: SnapshotPort; deviceId: string };
+export type SnapshotSource = {
+  snapshotPort: SnapshotPort;
+  deviceId: string;
+  /** Runs after every snapshot import (the match-date heal, design §3.5). */
+  afterImport?: () => Promise<void>;
+};
 
 const SnapshotSourceContext = createContext<SnapshotSource | null>(null);
 
@@ -34,6 +39,7 @@ export type SyncProviderProps = {
   cloud: CloudSyncPort;
   snapshotPort: SnapshotPort;
   deviceId: string;
+  afterImport?: () => Promise<void>;
   children: ReactNode;
 };
 
@@ -41,9 +47,10 @@ export const SyncProvider = ({
   cloud,
   snapshotPort,
   deviceId,
+  afterImport,
   children,
 }: SyncProviderProps) => {
-  const engine = useSyncEngine({ cloud, snapshotPort, deviceId });
+  const engine = useSyncEngine({ cloud, snapshotPort, deviceId, afterImport });
   const bootstrapped = useRef(false);
   const { connected, syncNow } = engine;
 
@@ -54,8 +61,8 @@ export const SyncProvider = ({
   }, [connected, syncNow]);
 
   const source = useMemo(
-    () => ({ snapshotPort, deviceId }),
-    [snapshotPort, deviceId]
+    () => ({ snapshotPort, deviceId, afterImport }),
+    [snapshotPort, deviceId, afterImport]
   );
 
   return (

@@ -63,6 +63,7 @@ export const runConvertWithAi = (input: RunAiInput) =>
       coaching: input.persistence.coaching,
       workouts: input.persistence.workouts,
       sessionMatches: input.persistence.sessionMatch,
+      transaction: input.persistence.transaction,
       analytics: input.analytics,
       generateKrd: buildGenerateKrdPort(
         input.provider,

@@ -9,12 +9,13 @@
  */
 
 export type WorkoutBatchStatus =
-  "queued" | "processing" | "succeeded" | "failed";
+  "queued" | "processing" | "succeeded" | "skipped" | "failed";
 
 export type BatchProgressCounts = {
   queued: number;
   processing: number;
   succeeded: number;
+  skipped: number;
   failed: number;
 };
 
@@ -23,7 +24,7 @@ export type BatchProgress = {
   counts: BatchProgressCounts;
   current: string | null;
   byId: Record<string, WorkoutBatchStatus>;
-  /** Back-compat aggregate — `counts.succeeded + counts.failed`. */
+  /** Back-compat aggregate — every row that finished, skipped included. */
   processed: number;
   /** Back-compat alias for `counts.succeeded`. */
   succeeded: number;
@@ -40,6 +41,7 @@ export function buildBatchProgress(
     queued: 0,
     processing: 0,
     succeeded: 0,
+    skipped: 0,
     failed: 0,
   };
   for (const status of Object.values(byId)) counts[status]++;
@@ -49,7 +51,7 @@ export function buildBatchProgress(
     counts,
     current,
     byId: { ...byId },
-    processed: counts.succeeded + counts.failed,
+    processed: counts.succeeded + counts.skipped + counts.failed,
     succeeded: counts.succeeded,
     failed: counts.failed,
   };

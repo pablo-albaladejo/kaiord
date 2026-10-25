@@ -9,6 +9,7 @@
 import { useEffect, useRef } from "react";
 
 import { ensureSessionMatch } from "../../../application/coaching/ensure-session-match";
+import { sessionMatchDate } from "../../../application/coaching/session-match-date";
 import { useAnalytics } from "../../../contexts/analytics-context";
 import { usePersistence } from "../../../contexts/persistence-context";
 import type { CoachingActivity } from "../../../types/coaching-activity";
@@ -36,7 +37,7 @@ export const useCoachingAutoHeal = (
           profileId,
           coachingActivityId: composite,
           workoutId: dialogState.workout.id,
-          date: activity.date,
+          date: sessionMatchDate(dialogState.workout, activity),
           source: "auto-coaching-v10-migration",
           newId: () => crypto.randomUUID(),
           clock: () => new Date().toISOString(),

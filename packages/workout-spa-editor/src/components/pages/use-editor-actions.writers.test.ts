@@ -43,6 +43,7 @@ const syncTo = (persistence: PersistencePort, date: string) =>
   applyCoachDateMoves(
     {
       workouts: persistence.workouts,
+      sessionMatch: persistence.sessionMatch,
       now: () => NOW,
       transaction: persistence.transaction,
     },

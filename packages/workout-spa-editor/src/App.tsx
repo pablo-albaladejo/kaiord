@@ -9,7 +9,9 @@ import { SilentErrorBoundary } from "./components/molecules/SilentErrorBoundary"
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
+import { useActiveProfileLive } from "./hooks/use-active-profile-live";
 import { useBridgeThemePush } from "./hooks/use-bridge-theme-push";
+import { useMatchDatesHeal } from "./hooks/use-match-dates-heal";
 import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useSyncAutoPush } from "./hooks/use-sync-auto-push";
@@ -20,6 +22,7 @@ function App() {
   useProfileSnapshotPush();
   useBridgeThemePush();
   useSyncAutoPush();
+  useMatchDatesHeal(useActiveProfileLive()?.id ?? null);
   const analytics = useAnalytics();
   const [path] = useLocation();
 

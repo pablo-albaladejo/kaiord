@@ -5,24 +5,27 @@
  * calls the AI processor and persists results to Dexie.
  */
 
-import type { KaiordDatabase } from "../../adapters/dexie/dexie-database";
-import type { ProcessResult } from "../../application/ai-workout-processor";
 import { processWorkoutWithAi } from "../../application/ai-workout-processor";
-import type { ProcessOneFn } from "../../application/batch-processor";
+import type {
+  ProcessOneFn,
+  ProcessOneOutcome,
+} from "../../application/batch-processor";
+import { updateWorkoutRecord } from "../../application/save-workout-edits";
 import { transitionToStructured } from "../../application/workout-transitions";
 import { generateWorkoutKrd } from "../../lib/generate-workout";
+import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 
 export function createProcessOne(
   provider: LlmProviderConfig,
   modelId: string,
-  db: KaiordDatabase
+  persistence: Pick<PersistencePort, "workouts" | "transaction">
 ): ProcessOneFn {
   return async (
     workout: WorkoutRecord,
     allowRetry: boolean
-  ): Promise<ProcessResult> => {
+  ): Promise<ProcessOneOutcome> => {
     // Usage telemetry, the athlete's zones and their custom AI instructions
     // all come from `generateWorkoutKrd`'s app-db defaults.
     const generateFn = (prompt: string, sport: string) =>
@@ -43,15 +46,18 @@ export function createProcessOne(
       allowRetry,
     });
 
-    if (result.ok) {
-      const updated = transitionToStructured(
-        workout,
-        result.krd,
-        result.aiMeta
-      );
-      await db.table("workouts").put(updated);
-    }
-
-    return result;
+    if (!result.ok) return result;
+    // Written onto the row as stored after the AI call, so a move made
+    // meanwhile keeps its date; a row that left `raw` is left alone and
+    // reported as not written.
+    const written = await updateWorkoutRecord(
+      persistence,
+      workout.id,
+      (fresh) =>
+        fresh.state === "raw"
+          ? transitionToStructured(fresh, result.krd, result.aiMeta)
+          : undefined
+    );
+    return { ...result, written };
   };
 }

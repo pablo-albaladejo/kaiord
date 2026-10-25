@@ -14,6 +14,7 @@ import type {
   ConvertWithAiResult,
 } from "./convert-coaching-activity-with-ai-types";
 import { ensureSessionMatch } from "./ensure-session-match";
+import { sessionMatchDate } from "./session-match-date";
 
 export const resolvePromptText = (activity: CoachingActivityRecord): string =>
   activity.description?.trim()
@@ -40,7 +41,7 @@ const persistFreshWorkout = async (
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId: workout.id,
-    date: activity.date,
+    date: sessionMatchDate(workout, activity),
     source: "auto-coaching",
     newId: deps.newMatchId,
     clock: deps.clock,

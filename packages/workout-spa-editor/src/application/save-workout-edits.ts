@@ -15,17 +15,21 @@ import { onWorkoutMutation, transitionToModified } from "./workout-transitions";
 
 type WorkoutWriter = Pick<PersistencePort, "workouts" | "transaction">;
 
-/** Applies `change` to the stored row; `false` when the row is gone. */
+/**
+ * Applies `change` to the stored row. `change` returns `undefined` to skip
+ * (the fresh row no longer fits it); `false` when the row is gone or skipped.
+ */
 export async function updateWorkoutRecord(
   persistence: WorkoutWriter,
   id: string,
-  change: (fresh: WorkoutRecord) => WorkoutRecord
+  change: (fresh: WorkoutRecord) => WorkoutRecord | undefined
 ): Promise<boolean> {
   let written = false;
   await persistence.transaction(async () => {
     const fresh = await persistence.workouts.getById(id);
-    if (!fresh) return;
-    await persistence.workouts.put(change(fresh));
+    const next = fresh && change(fresh);
+    if (!next) return;
+    await persistence.workouts.put(next);
     written = true;
   });
   return written;

@@ -97,7 +97,7 @@ describe("useMatchedSessions", () => {
     });
 
     // Assert
-    await waitFor(() => expect(result.current).toEqual([]));
+    await waitFor(() => expect(result.current?.matched).toEqual([]));
   });
 
   it("should return [] when no matches exist", async () => {
@@ -109,7 +109,7 @@ describe("useMatchedSessions", () => {
     });
 
     // Assert
-    await waitFor(() => expect(result.current).toEqual([]));
+    await waitFor(() => expect(result.current?.matched).toEqual([]));
   });
 
   it("should hydrate matches with activity, workout, and compliance score", async () => {
@@ -125,11 +125,11 @@ describe("useMatchedSessions", () => {
       wrapper: wrap,
     });
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current?.matched).toHaveLength(1);
     });
 
     // Act
-    const ms = result.current![0]!;
+    const ms = result.current!.matched[0]!;
 
     // Assert
     expect(ms.match.id).toBe("M1");
@@ -154,7 +154,7 @@ describe("useMatchedSessions", () => {
     });
 
     // Assert
-    await waitFor(() => expect(result.current).toEqual([]));
+    await waitFor(() => expect(result.current?.matched).toEqual([]));
   });
 
   it("should scope to profile (other profiles' matches do not leak)", async () => {
@@ -178,7 +178,7 @@ describe("useMatchedSessions", () => {
     });
 
     // Assert
-    await waitFor(() => expect(result.current).toEqual([]));
+    await waitFor(() => expect(result.current?.matched).toEqual([]));
   });
 
   it("should tolerate dangling references (skips if activity or workout missing)", async () => {
@@ -191,7 +191,7 @@ describe("useMatchedSessions", () => {
     });
 
     // Assert
-    await waitFor(() => expect(result.current).toEqual([]));
+    await waitFor(() => expect(result.current?.matched).toEqual([]));
   });
 
   it("should re-evaluate when a new match is written", async () => {
@@ -203,14 +203,59 @@ describe("useMatchedSessions", () => {
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
       wrapper: wrap,
     });
-    await waitFor(() => expect(result.current).toEqual([]));
+    await waitFor(() => expect(result.current?.matched).toEqual([]));
 
     // Act
     await db.table("sessionMatches").put(seedMatch());
 
     // Assert
     await waitFor(() => {
-      expect(result.current).toHaveLength(1);
+      expect(result.current?.matched).toHaveLength(1);
     });
+  });
+
+  it("should report a this-week activity matched in another week", async () => {
+    // Arrange
+    await db
+      .table("coachingActivities")
+      .put(seedActivity("p1:train2go:1", "p1", "2026-05-03"));
+    await db.table("workouts").put(seedWorkout("w-1", "2026-05-04"));
+    await db
+      .table("sessionMatches")
+      .put(seedMatch({ date: "2026-05-04", executedWorkoutIds: ["rec"] }));
+
+    // Act
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
+
+    // Assert
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        matched: [],
+        crossWeek: {
+          crossWeekMatchedActivityIds: new Set(["train2go:1"]),
+          crossWeekMatchedWorkoutIds: new Set(["w-1", "rec"]),
+        },
+      })
+    );
+  });
+
+  it("should not report a match of this week as cross-week", async () => {
+    // Arrange
+    await db
+      .table("coachingActivities")
+      .put(seedActivity("p1:train2go:1", "p1", "2026-04-28"));
+    await db.table("workouts").put(seedWorkout("w-1", "2026-04-29"));
+    await db.table("sessionMatches").put(seedMatch());
+    const { result } = renderHook(() => useMatchedSessions("p1", WEEK), {
+      wrapper: wrap,
+    });
+
+    // Act
+    await waitFor(() => expect(result.current?.matched).toHaveLength(1));
+
+    // Assert
+    expect(result.current?.crossWeek.crossWeekMatchedActivityIds.size).toBe(0);
   });
 });

@@ -11,7 +11,8 @@
  *   - `processExistingRawInPlace` — raw re-process branch. Bills the
  *     LLM for a row currently in `state="raw"`, writes the resulting
  *     KRD + aiMeta into the existing row via `transitionToStructured`,
- *     and leaves the existing `session_match` row untouched. Re-uses
+ *     and leaves the existing `session_match` row untouched. A row that
+ *     left `raw` during the call is not written and emits `skipped`. Re-uses
  *     the same `generateKrd` port as the create-new flow so flow (f)
  *     of the coaching-dialog redesign is observable through the same
  *     route-mock surface as flow (a, c).
@@ -20,6 +21,7 @@ import { resolveT2GSport } from "../../adapters/train2go/train2go-krd-sport";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import { withFallbackName } from "../../utils/structured-workout";
+import { updateWorkoutRecord } from "../save-workout-edits";
 import { transitionToStructured } from "../workout-transitions";
 import { forceKrdSport } from "./coaching-krd-sport";
 import { buildAiFailure } from "./convert-coaching-activity-error-mapper";
@@ -29,17 +31,19 @@ import type {
   ConvertWithAiResult,
 } from "./convert-coaching-activity-with-ai-types";
 import { ensureSessionMatch } from "./ensure-session-match";
+import { sessionMatchDate } from "./session-match-date";
 
 export const ensureMatchForExisting = async (
   deps: ConvertWithAiDeps,
   activity: CoachingActivityRecord,
-  workoutId: string
+  existing: WorkoutRecord
 ): Promise<ConvertWithAiResult> => {
+  const workoutId = existing.id;
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId,
-    date: activity.date,
+    date: sessionMatchDate(existing, activity),
     source: "auto-coaching",
     newId: deps.newMatchId,
     clock: deps.clock,
@@ -68,17 +72,28 @@ export const processExistingRawInPlace = async (
     // known Train2Go sport is never persisted as the model's `generic` guess.
     const named = withFallbackName(generated.krd, activity.title);
     const krd = resolved ? forceKrdSport(named, resolved) : named;
-    const updated = transitionToStructured(existingWorkout, krd, {
-      provider: generated.aiMeta.provider,
-      model: generated.aiMeta.model,
-      promptVersion: generated.aiMeta.promptVersion,
-      processedAt: generated.aiMeta.processedAt,
-    });
-    await deps.workouts.put(updated);
-    deps.analytics.event("coaching.convert_with_ai.success", {
-      created: false,
-    });
-    return { ok: true, workoutId: updated.id, created: false };
+    const { provider, model, promptVersion, processedAt } = generated.aiMeta;
+    const aiMeta = { provider, model, promptVersion, processedAt };
+    // Onto the row as stored after the LLM call: a move made meanwhile keeps
+    // its date, and a row that left `raw` is left alone and reported as
+    // skipped rather than as a success (AC-30).
+    const written = await updateWorkoutRecord(
+      deps,
+      existingWorkout.id,
+      (fresh) =>
+        fresh.state === "raw"
+          ? transitionToStructured(fresh, krd, aiMeta)
+          : undefined
+    );
+    if (written)
+      deps.analytics.event("coaching.convert_with_ai.success", {
+        created: false,
+      });
+    else
+      deps.analytics.event("coaching.convert_with_ai.skipped", {
+        reason: "changed-meanwhile",
+      });
+    return { ok: true, workoutId: existingWorkout.id, created: false };
   } catch (err) {
     return buildAiFailure(deps.analytics, err);
   }
