@@ -240,25 +240,44 @@ Pages cannot send `Clear-Site-Data`, so the kill switch is itself a worker. `ass
 
 **How the skew arises.** A page running N-1 meets a database that N has already upgraded. This already happens in production today: a tab left open across a deploy does it. D4 makes it longer-lived, because other tabs deliberately stay on their version. A cold start can also produce it, once a newer page has upgraded the database. **This code is the future N-1**, so the guard ships in this change.
 
-**What Dexie 4.4.6 actually does.** This was read in `node_modules/dexie/dist/dexie.mjs` and confirmed independently by the review. None of it is a hard failure.
+**What Dexie 4.4.6 actually does.** This was read in `node_modules/dexie/dist/dexie.mjs` and confirmed independently by the review. None of these cases fails hard.
 
-- **Opening an older declared version (≈4594).** `tryOpenDB` catches `VersionError` and retries with `nativeVerToOpen = 0`, which opens at the installed version.
-- **Schema diff on open.** `verifyInstalledSchema` ignores tables and indexes that only N has.
-  - **The exception (≈4561):** if N dropped an index that N-1 declares, `schemaPatchMode` kicks in, and the old client bumps the native version and re-creates the index.
-- **`versionchange` (≈5942).** The default handler closes with `disableAutoOpen: false`, so the next query silently reopens.
+- **Opening an older declared version (≈4594).** `tryOpenDB` catches the `VersionError` and retries with `nativeVerToOpen = 0`. That opens the database at whatever version is installed.
+- **Schema diff on open.** `verifyInstalledSchema` ignores any table or index that only N has.
+  - **The exception (≈4561).** `schemaPatchMode` kicks in when N dropped an index or a table that N-1 declares, or changed an index definition. The old client then bumps the native version by one and re-creates what it expects. The same path ("Schema was extended without increasing the number…") can also bump a database that **no newer deploy** ever touched.
+- **`versionchange` (≈5942).** The default handler closes with `disableAutoOpen: false`, so the next query reopens silently. Handlers are chained with `reverseStoppableEventChain` (≈547). A later subscriber runs **first**, and the default runs after it unless that subscriber returns `false`. The default's `close({disableAutoOpen: false})` (≈6082) re-enables `autoOpen`.
 
-The net effect is that N-1 code reads and writes rows that N's `upgrade()` already rewrote. The database is at v37, with 21 `upgrade()` functions. **The result is silent corruption, not a visible break.**
+The net effect is that N-1 code reads and writes rows that N's `upgrade()` has already rewritten. The database is at v37 with 21 `upgrade()` functions. **The result is silent corruption, not a visible break.**
+
+**Comparison rule.** The rule is `Math.floor(nativeVersion / 10) > DECLARED_VERNO`. `DECLARED_VERNO` is a module constant captured right after `registerKaiordVersions(db)` and before any open, so 37 today. It is never the live `db.verno`, because Dexie rewrites `db.verno` from the installed version on open.
+
+`native > verno * 10` is wrong. A legitimate `schemaPatchMode` bump, or the "extended without increasing" path, can take a database from 370 to 371+ with no newer deploy at all. Under `>` the **newest** code would then call itself stale forever, and the kill switch cannot repair a database. With `floor(…/10)`, a database at 371–379 still belongs to code at 37. Only 380+ (a real `version(38)`) is newer.
 
 **Decision.**
 
-1. **Pre-open probe.** It runs before Dexie first opens. `indexedDB.open("kaiord-spa")` is called with no version argument, which never upgrades. The probe reads `version`, closes, and compares it with `Math.round(db.verno * 10)`, the native version Dexie maps to. If the installed version is higher, the editor is stale and Dexie is never opened. That also closes the `schemaPatchMode` hole. The probe lives beside `probeStorage` (`adapters/dexie/storage-probe.ts`), which `store/storage-store.ts` drives.
-2. **Boot gate (stale at boot).** At boot there are no edits yet. The gate checks for a newer worker with `registration.update()`, waits for it to reach `installed`, posts `SKIP_WAITING`, and reloads. **There is no dialog.**
-   - A sessionStorage one-shot key prevents a loop, just as chunk-reload does.
-   - If no newer worker exists, or the one-shot has already fired, the gate falls through to the dialog in step 4. That happens on an uncontrolled page that upgraded ahead of a deploy that is still propagating.
-3. **Mid-session (`versionchange` with `newVersion > db.verno * 10`).** The page calls `db.close({ disableAutoOpen: true })`, so every later query rejects with `DatabaseClosedError` and never reopens on the old schema. A delete (`newVersion` null) keeps today's close-and-reopen.
-4. **Blocking dialog.** It is used mid-session, and at boot when the gate could not update. It cannot be dismissed: "Kaiord was updated in another window" with a "Reload" action, in en and es.
-   - Reload runs the same update-then-reload path as step 2. If nothing newer is found, the dialog stays up with a retry.
-   - Unsaved edits cannot be saved, because the database is closed. The dialog says so. `beforeunload` still prompts, as it does for any leave.
+1. **Pre-open probe.** It runs before Dexie first opens, beside `probeStorage` (`adapters/dexie/storage-probe.ts`, driven by `store/storage-store.ts`).
+   - **Read the installed version.** It calls `indexedDB.open("kaiord-spa")` with no version argument, which never upgrades an existing database, and reads `result.version`.
+   - **Absent database.** If `onupgradeneeded` fires with `oldVersion === 0`, the probe aborts that transaction, closes, and calls `deleteDatabase`, the way Dexie's own autoSchema does (≈4528–4535). It then reports **absent, not stale**. Otherwise the probe would leave an empty v1 behind, and Dexie would see `oldVersion = 1`. With `wasCreated` false, Dexie would replay all 37 versions and 21 upgraders. That is slow, it throws on any primary-key change, and it skips `_onDatabaseCreated`.
+   - **Never block another tab.** The probe sets `onversionchange` to close its own connection, so it never blocks another tab's upgrade.
+   - **Fail open.** Any probe error (private mode, blocked storage, `open` rejected) reports **unknown**. Boot then continues with the normal open, so a probe failure never shows the stale dialog by itself.
+   - **Stale.** If the version is stale by the rule above, Dexie is never opened. That also closes the `schemaPatchMode` hole for the old code.
+   - **Fresh.** If it is not stale, the probe connection **stays open until Dexie's `open()` settles**, and only then closes. This narrows the probe-to-open race. While the probe is open, another tab's upgrade has to deliver a `versionchange` to the existing connections. If Dexie's connection is already open, the step-3 override catches it. If Dexie's request is still queued, FIFO ordering lets Dexie open first at the declared version, and the override catches it right after.
+2. **Post-open gate.** One ordering is still uncovered: an upgrader whose request was queued _before_ Dexie's. Dexie then hits `VersionError`, retries at version 0, opens the newer database, and no `versionchange` ever fires.
+   - So a `db.on("ready")` subscriber checks `Math.floor(db.idbdb.version / 10) > DECLARED_VERNO`. When that holds, it calls `db.close({ disableAutoOpen: true })` and sets the stale state.
+   - The close lands while `isBeingOpened`, so `open()` rejects with `DatabaseClosedError`. `storage-store` maps that rejection to **stale**, not to `"failed"`.
+   - The check is synchronous. It returns nothing, so it does not hold up readiness the way a returned promise would.
+3. **Mid-session override.** It runs from `db.on("versionchange", handler)`. When `ev.newVersion` is non-null and `Math.floor(ev.newVersion / 10) > DECLARED_VERNO`, the handler:
+   - calls `db.close({ disableAutoOpen: true });`
+   - sets the stale state;
+   - **returns `false`**, so Dexie's default `close({disableAutoOpen: false})` never runs and never re-enables autoOpen.
+
+   On a delete (`newVersion` null), or on a same-major bump, it returns nothing, so the default still runs and keeps today's close-and-reopen. **Mandatory test:** after a stale `versionchange`, the next query rejects with `DatabaseClosedError`.
+
+4. **Boot gate (stale at boot).** There are no edits at boot. The gate calls `registration.update()`, waits for `installed`, posts `SKIP_WAITING`, and reloads, with no dialog. A sessionStorage one-shot key prevents a loop, as in chunk-reload. If no newer worker exists, or the one-shot has already fired, it falls through to step 5. That happens on an uncontrolled page that upgraded ahead of a deploy still propagating.
+5. **Blocking dialog.** It is used mid-session, and at boot when the gate cannot update. It cannot be dismissed. The title is "Kaiord was updated in another window", in en and es. It has two actions:
+   - **Download draft** appears whenever `workout-store` holds a `currentWorkout`. It saves that KRD as JSON through a `Blob` to `<name>.krd`, a file that `FileUpload` already re-imports (`accept` includes `.krd`). A draft is never stranded. The database is closed, so it cannot be saved there.
+   - **Reload** runs the step-4 update-then-reload path. If nothing newer is found, the dialog stays up and offers a retry. `beforeunload` still prompts when the editor is dirty.
+6. **Optional, LOW.** The per-tab unsaved flag (D4) is broadcast on a `BroadcastChannel("kaiord-unsaved")`. The update toast can then add "Unsaved changes in another window" before the user activates Reload. This is informational only and gates nothing across tabs. It is built only if it fits within the file limits; it is not required for the gates.
 
 **Rejected alternatives.**
 
@@ -279,10 +298,16 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` alrea
   - the hello message.
 - **Unsaved flag:** fed by `useBeforeUnloadGuard`, cleared on disarm.
 - **D9, with `fake-indexeddb`:**
-  - the database at `verno + 1` makes the probe report stale and Dexie never opens;
-  - a `versionchange` to a higher version rejects the next query and sets the stale state;
-  - a delete keeps auto-reopen;
-  - the boot gate's one-shot.
+  - a database at native 380 makes the probe report stale and Dexie never opens;
+  - native 371 (a schemaPatchMode bump) is **not** stale, and Dexie opens;
+  - an absent database makes the probe report absent and leaves no database behind; Dexie then creates it fresh, and `_onDatabaseCreated` fires;
+  - when the probe errors, boot continues and no stale state is set;
+  - the probe closes itself on `versionchange`;
+  - the post-open gate: a database upgraded to 380 between probe and open ends stale, and `open()` rejects with `DatabaseClosedError`;
+  - **mandatory:** a stale `versionchange` (380) makes the next query reject with `DatabaseClosedError`, because the override returned `false` and no auto-reopen happened;
+  - a delete `versionchange` keeps auto-reopen;
+  - the boot gate's one-shot;
+  - Download draft produces JSON that `FileUpload` re-imports.
 - **Copy:** toast and dialog text in en and es.
 
 **`node:test`.**
@@ -308,7 +333,7 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` alrea
 2. **Update while dirty.** Reassemble as v2 and assert that a toast appears and nothing reloads. A dirty editor blocks the update. A clean one reloads only the clicking page, and a second page keeps working.
 3. **Retention.** A page on v1 survives two activations, its unvisited lazy chunk still resolves, and nothing reloads.
 4. **Install integrity.** A shell served with the wrong bytes during install leaves the old worker active.
-5. **Schema bump mid-session.** Bump the database from a second page, and the first page shows the dialog.
+5. **Schema bump mid-session.** Bump the database from a second page to native ≥ 380, a real major version. The first page shows the dialog, and Download draft yields the draft.
 6. **Kill switch.** As described in D8.
 
 **Mobile projects.** They run only on `main`, so they are run locally, in full, before the PR, and the result is reported.
