@@ -1,374 +1,329 @@
 ## Context
 
-The editor deploys to GitHub Pages at `/app/`, alongside the landing page (`/`)
-and the docs (`/docs/`). Routing uses the hash (#1157), so every in-app URL
-resolves to a single request for `/app/` (that is, `index.html`). Vite emits
-content-hashed chunks. A deploy replaces the whole tree, and Pages stops
-serving the previous hashes.
+The editor is served from GitHub Pages at `/app/`. The landing page (`/`) and the docs (`/docs/`) sit next to it. Routing lives in the hash fragment (#1157), so every in-app URL resolves to one request for `/app/`, which is `index.html`. Vite emits content-hashed chunks. A deploy replaces the whole tree, and once it lands Pages no longer serves the previous hashes. Pages answers every file with `Cache-Control: max-age=600`, and its CDN edge caches them for the same 10 minutes.
 
 Measured on `main` 489313464 (`VITE_BASE_PATH=/app/ vite build`):
 
-| Set                                                                           | Files | Raw     | Over the wire                   |
-| ----------------------------------------------------------------------------- | ----- | ------- | ------------------------------- |
-| `.js`                                                                         | 245   | 3.24 MB | 0.97 MB gz                      |
-| `.css`                                                                        | 2     | 85 KB   | 17 KB gz                        |
-| `.map`                                                                        | 241   | 13.8 MB | none (never requested by users) |
-| Precache set: all of the above except maps, plus shell, manifest, icons, font | 256   | 3.41 MB | **≈1.06 MB**                    |
-| What the shell loads up front (`index.html` script + modulepreload + css)     | 58    | none    | 310 KB gz                       |
+| Set                                                                           | Files | Raw     | Over the wire                |
+| ----------------------------------------------------------------------------- | ----- | ------- | ---------------------------- |
+| `.js`                                                                         | 245   | 3.24 MB | 0.97 MB gz                   |
+| `.css`                                                                        | 2     | 85 KB   | 17 KB gz                     |
+| `.map`                                                                        | 241   | 13.8 MB | — (never requested by users) |
+| Precache set: everything above except maps, plus shell, manifest, icons, font | 256   | 3.41 MB | **≈1.06 MB**                 |
+| What the shell loads up front (`index.html` script + modulepreload + css)     | 58    | —       | 310 KB gz                    |
 
-The largest single file is `kaiord-fit-*.js` at 476 KB, under any per-file cap.
+The largest single file is `kaiord-fit-*.js` at 476 KB.
 
 Two deploy steps rewrite `app/index.html` after `vite build` has finished:
-"Substitute analytics website id" (`sed` on `dist/index.html`) and "Inject SPA
-route fallback" (`inject-spa-fallback.mjs`, which adds the `?p=` decoder to
-`<head>`). Any precache manifest computed during `vite build` therefore records
-a revision for a file that is not the one that ships.
+
+- "Substitute analytics website id", a `sed` over `dist/index.html`.
+- "Inject SPA route fallback", `inject-spa-fallback.mjs`, which puts the `?p=` decoder into `<head>`.
+
+A precache manifest computed inside `vite build` would therefore record a revision for a shell that is not the one that ships. CI is worse off still. Its `build` job builds the SPA with base `/` and runs none of the merge, sed or inject steps, so a guard over that tree cannot see the deploy's shape.
 
 ## Goals / Non-Goals
 
-**Goals:** the installed app and returning visitors start with no network and
-run every feature that needs none. A deploy never leaves a client on a shell
-whose chunks are gone. An update never discards work without the user asking
-for it. Production can turn the worker off without a code change.
+**Goals:**
 
-**Non-Goals:** offline sync with bridges or AI (they stay network-only),
-background sync, push, and caching anything outside `/app/`. Opening and
-sharing files into the app (`share_target`, `file_handlers`) is the next
-change, `add-spa-file-share-handlers`.
+- The installed app and returning visitors start with no network and run every feature that does not need one.
+- A deploy never leaves a client on a shell whose chunks are gone.
+- An update never discards unsaved work.
+- Old code never touches a database that newer code has upgraded.
+- Production can turn the worker off without a code change.
+
+**Non-Goals:**
+
+- Offline bridge sync and offline AI. Both stay network-only.
+- Background sync and push.
+- Caching anything outside `/app/`.
+- `share_target` and `file_handlers`. These belong to the next change, `add-spa-file-share-handlers`.
 
 ## Decisions
 
-### D1. Precache the entire build of one deploy; runtime-cache nothing same-origin
+### D1. Precache one deploy's whole build, verified byte for byte
 
-**Claim checked.** "A precache keyed to the build, holding every hashed chunk
-of that version, keeps an old client consistent until it updates." This holds
-under three conditions:
+**Checking the claim.** The claim is that a precache keyed to the build, holding every hashed chunk of that version, keeps an old client consistent until it updates. It holds only if all four of these are true:
 
-1. **The shell and its chunks come from the same cache.** The worker answers
-   navigations with the cached `index.html` from the same versioned cache that
-   holds the chunks it references, so the shell is never fresher than its
-   chunks.
-2. **Every chunk the shell can reach is in that cache.** That includes
-   lazy-only chunks that no route has requested yet. This is why the
-   precache takes everything and runtime caching (stale-while-revalidate,
-   cache-on-first-use) is rejected. A chunk cached only on first use goes
-   missing as soon as a deploy removes it from Pages, which is exactly the
-   #1566 failure. The generator includes every file under `assets/`, and the
-   guard (D6) fails if one is missing.
-3. **The cache survives until no client runs it.** A waiting worker does not
-   touch the active cache. The active worker's `activate` deletes only
-   versions older than the previous one, so it keeps N and N-1 (see D2 for
-   why N-1 matters).
+1. **The shell and its chunks come from one consistent set.** Navigations are answered with the cached shell of the active worker's version, and that cache holds every chunk the shell references.
+2. **Every reachable chunk is in that set, lazy ones included.** So the precache takes everything, and same-origin runtime caching is rejected. A chunk cached on first use goes missing the moment a deploy removes it from Pages, and that is the #1566 failure. The guard enforces set equality with `assets/` (D6).
+3. **The bytes in cache N are N's bytes.** This does not hold by default. Install fetches go through the HTTP cache, and Pages sets `max-age=600`. An install that runs within 10 minutes of a visit could store N-1's `index.html` under N's name: a stale shell inside a cache that looks fresh. Three measures close this:
+   - every install fetch uses `{cache: "reload"}`, which bypasses the browser's HTTP cache;
+   - URLs that are not content-hashed (`index.html`, `manifest.webmanifest`, the icons, the font) are fetched and stored as `<url>?__rev=<revision>`. That gives each revision its own Cache Storage key, which D2's copy-forward relies on. It does **not** bust the CDN edge. I measured this on prod on 2026-10-25: three fresh random queries on `/app/apple-touch-icon.png?q=<random>` came back `MISS`, then `HIT`, then `HIT`, so Fastly drops the query from its cache key. For up to 10 minutes after a deploy, the edge can still serve N-1's bytes for any URL;
+   - every response is digested with `crypto.subtle.digest("SHA-256", …)` and compared with its manifest revision. **Any mismatch fails the whole install.** This check is what actually guarantees the bytes, because no request option reaches past the edge. The browser keeps the current worker and tries again on the next update check (D4), so an edge that is still serving N-1 delays the update by at most ≈10 minutes and never produces a mixed cache.
+4. **A cache lives as long as any client runs it.** See D3.
 
-**Excluded:** `*.map` (13.8 MB, devtools only), `version.json` (it must always
-reflect the live deploy), `AGENTS.md`, `.nojekyll`, and `og-image-editor.png`
-(read by crawlers, never by the app). These pass through to the network.
+**Excluded, and passed through to the network:**
 
-**Cost:** about 1.06 MB once per deploy, downloaded in the background after
-first paint. A first visit already pays 310 KB of it. 3.4 MB of storage is far
-below the Cache Storage quotas of Chromium, Firefox and Safari. Safari can
-still evict the storage of a non-installed site that has gone unused; the
-worker then reinstalls from the network on the next online visit.
+- `*.map`, which only devtools read.
+- `version.json`, which must always reflect the live deploy.
+- `AGENTS.md` and `.nojekyll`.
+- `og-image-editor.png`, which crawlers read and the app never does.
 
-**Cache key.** The cache name is `kaiord-app-<v>`, where `<v>` is the first 12
-hex digits of the SHA-256 over the sorted `url revision` lines. Each
-revision is the SHA-256 of the file's shipped bytes. `<v>` is embedded in
-`sw.js`, so every deploy that changes any shipped byte changes `sw.js`
-byte-wise, which is what makes the browser install a new worker.
+**Naming.**
 
-### D2. Update strategy: prompt, never auto-reload (the proposed default, kept)
+- Each revision is the SHA-256 (hex) of the file's shipped bytes.
+- `<v>` is the first 12 hex digits of the SHA-256 over the sorted `url revision` lines.
+- The cache is named `kaiord-app-<v>`.
+- `<v>` and the manifest are embedded in `sw.js`, so any changed shipped byte changes `sw.js` and triggers a browser update.
 
-Kept as proposed, for three reasons.
+### D2. Per-deploy cost: copy forward what is unchanged, register late, respect Save-Data
 
-- **Unsaved work is real.** The editor keeps an in-progress workout in the
-  Zustand `workout-store`, and `use-confirm-discard-edits.ts` already exists
-  to guard it. A silent `skipWaiting` plus reload, or an auto-reload on
-  `controllerchange`, would bypass that guard.
-- **Nothing forces an update.** Under D1 the old version stays fully
-  consistent, so there is no correctness pressure to switch.
-- **The alternative is no better.** "Activate on next cold start", which is
-  the browser default with no `skipWaiting`, still applies. The toast is just
-  a faster path: if a user never clicks it, closing every window of the app
-  activates the new worker on the next launch.
+**Copy forward.** Install does not re-download unchanged files. For each manifest entry it looks up the same request key (a hashed URL, or `url?__rev=<revision>`) in the existing `kaiord-app-*` caches. If it finds one, it digests the stored body against the revision and copies it into the new cache. Only misses and mismatches go to the network.
 
-**Flow.**
+- Vendor chunks (`vendor-ui`, `vendor-zod`, `kaiord-fit`, `kaiord-tcx`, …) change only when a dependency is bumped.
+- A typical feature deploy re-downloads the touched route chunks, the entry and the shell, not 1.06 MB.
 
-1. `registration.waiting` exists at registration time, or an `installed`
-   state arrives while a controller already exists.
-2. The app shows a persistent toast: "New version available" with a "Reload"
-   action, plus "Nueva versión disponible · Recargar" in `es`. It never
-   auto-dismisses.
-3. On click, the page posts `{type: "SKIP_WAITING"}` to the waiting worker.
-4. On `controllerchange`, that tab alone calls `location.reload()`. A
-   module-level flag is set by the click, and only a tab with it set reloads.
-5. If the editor has unsaved edits, the click first goes through the same
-   confirmation that discarding edits already uses.
+**Registration timing.**
 
-**Other tabs.** They receive `controllerchange` but do not reload. They keep
-running version N-1, whose cache the new worker keeps (D1.3). From then on
-their navigations and imports are answered by the new worker. Its fetch
-handler looks up the request in **every** `kaiord-app-*` cache
-(`caches.match`), so old chunks still resolve.
+- Registration waits for the `load` event and then for `requestIdleCallback`, so it never competes with first paint.
+- Safari does not implement `requestIdleCallback`, so it gets a `setTimeout` of 2 s.
+- It is skipped entirely when `navigator.connection?.saveData` is true.
 
-**Update checks.** The browser checks `sw.js` on each navigation, at most
-every 24 h, bypassing the HTTP cache (`updateViaCache` defaults to
-`"imports"`). An installed app can stay open for days, so the page also calls
-`registration.update()` on `visibilitychange` to visible, at most once an
-hour.
+**What a first visit costs.** It already pays 310 KB. The remaining ≈750 KB downloads in the background, once.
 
-### D3. Coexisting with chunk-reload recovery: the worker is the first line, recovery is the backstop
+### D3. Retention: delete a version only when no live client runs it
 
-Existing code:
+The reviewer's objection to the earlier "keep N and N-1" rule is correct. A waiting worker can be replaced, and an installed window can stay open across two deploys. Once its cache is deleted, its next lazy import 404s, and chunk-reload reloads it without asking. Two replacements were weighed.
 
-- `src/lib/chunk-reload.ts`: `isChunkLoadError` plus `reloadOnceForChunkError`.
-  The loop guard is a one-shot reload with a 10 s sessionStorage cooldown and
-  an in-memory flag, and it is skipped during a leave.
-- Its callers are `main.tsx` (`vite:preloadError`, prevented),
-  `RouteErrorBoundary.tsx` (render-time chunk errors), and `lazyImport`
-  (`lib/lazy-import.ts`, which turns an `undefined` module into a
-  chunk-pattern error).
+- **(a) Keep your own cache plus the outgoing active worker's, recorded in a meta entry.** Rejected. It is still keyed to workers, not to clients, so a window two activations behind loses its cache.
+- **(b) Clients report the version they run. Chosen.** Retention then follows the thing that can break, which is a live page. It costs one message per page load and a few bytes of meta.
 
-Interaction:
+Mechanism:
 
-- **Controlled client.** Every chunk the client can reach is in the cache
-  (D1.2), so `vite:preloadError` cannot fire for a stale hash, whether
-  online or offline. The recovery stays dormant.
-- **A reload while a new worker is waiting.** It is still served by the old
-  active worker, so the shell and chunks are version N-1 and consistent. No
-  loop. This is why the existing reload is safe to keep.
-- **Uncontrolled client.** This covers a first visit before `activate`, a
-  hard reload (shift-reload bypasses the worker), and a browser that has
-  service workers disabled. Behaviour is exactly as today: recovery reloads
-  once, and the cooldown stops a loop.
-- **Two-versions-back tab.** A tab still on N-2 after two deploys has had its
-  cache deleted. A lazy import 404s, recovery reloads once, and the tab is
-  now on the newest version. That reload is unprompted, but it is today's
-  behaviour, and only after two deploys while the tab stayed open.
-- **Offline plus uncontrolled.** The chunk fetch fails, recovery reloads
-  once, the reload fails, and the cooldown hands over to the route boundary.
-  This is unchanged.
+1. **Hello.** At boot the page posts `{type: "HELLO", entry: <URL of its own index-*.js module script>}` to `navigator.serviceWorker.controller`. The entry URL is unique to a build, and the page can read it from its own DOM, so the page needs no version constant.
+2. **Recording.** The worker finds every `kaiord-app-*` cache that holds that entry. Usually there is one. A shell-only deploy, such as an analytics-id change, shares the entry, and then all matches are kept. It records `event.source.id → [v…]` in a JSON entry of cache `kaiord-app-meta`.
+3. **Pruning.** Pruning runs on `activate` and after each hello:
+   - `live` is the set of ids from `clients.matchAll({type: "window", includeUncontrolled: true})`;
+   - `keep` is `{own v} ∪ versions recorded for live ids`;
+   - every `kaiord-app-*` cache not in `keep` is deleted, and the records of dead ids are dropped.
+4. **Serialisation.** Meta writes and prunes run through one promise chain inside the worker. Events in a single worker run concurrently, and a lost write would let a live version be pruned.
+5. **Lookup.** The fetch handler looks up its own cache first and then every `kaiord-app-*` cache, so a page on an older retained version still resolves its chunks.
 
-**Who wins.** The worker decides what is served. Recovery is never disabled
-and never called by the worker. They cannot fight, because recovery only acts
-on a failed import, and under a worker that only happens in the
-uncontrolled or N-2 cases above, where a reload is the right answer.
+**What is not covered.** A page that never had a controller (a first visit, a shift-reload) sends no hello and is unprotected. Its chunks come from the network, as they do today, and chunk-reload remains the backstop (D5). Storage is bounded by the number of distinct versions among open windows.
 
-### D4. Scope `/app/`, production only
+### D4. Updates: a prompt, never an automatic reload, and gated before activation
 
-- **The file.** It lives at `app/sw.js`. The maximum scope is the script's
-  directory, so `/app/` is enforced by the browser and not just by an option.
-  It is registered with `{scope: import.meta.env.BASE_URL}`.
-- **What the fetch handler intercepts.** Only same-origin GET requests whose
-  path starts with the scope. Of those, it answers precached URLs and
-  navigations; everything else falls through to the network with no
-  `respondWith`. The landing and the docs live outside the scope and are
-  never controlled.
-- **When registration runs.** Only when `import.meta.env.PROD` is set and
-  `"serviceWorker" in navigator`, from `main.tsx` after the first render.
-  `vite dev` never registers a worker. A local `vite build` plus
-  `vite preview` serves no `sw.js` (the generator runs in assembly, not in
-  `vite build`). The registration then rejects with a 404, and the rejection
-  is caught and swallowed with no console noise or toast.
+**How a waiting worker is detected.** There are two signals:
 
-### D5. Tests
+- `registration.waiting` is already set at registration time;
+- `updatefound`, followed by `installed`, fires while a controller exists.
 
-- **Unit (vitest).**
-  - The registration module: it registers only when PROD, uses the base
-    scope, wires the waiting and installed paths to the toast callback, and
-    on click posts `SKIP_WAITING` then reloads once on `controllerchange`.
-    Uses a fake `navigator.serviceWorker`.
-  - The toast copy in en and es.
-- **Generator plus guard (`node:test`).** Fixture trees covering an empty
-  `assets/`, a missing file, a `.map`, and a shell rewritten after
-  generation.
-- **Playwright.**
-  - The global `use` gets `serviceWorkers: "block"`. That covers every
-    existing spec, including the `E2E_PROD_BASE` specs, which serve a real
-    build through `merged-dist-server`.
-  - One new spec, `e2e/offline-service-worker.spec.ts`, opts back in with
-    `test.use({ serviceWorkers: "allow" })` and runs only on chromium.
-    Playwright documents service-worker support as Chromium-only. The spec:
-    1. serves the merged tree with the generator applied;
-    2. waits for `navigator.serviceWorker.ready`;
-    3. calls `context.setOffline(true)`;
-    4. reloads and asserts the editor renders and that a lazy route (one
-       never visited online) opens.
-    5. A second case regenerates a changed tree (v2) and asserts that the
-       toast appears and that nothing reloads until the click.
-  - The mobile projects only run on `main`, so the full mobile set is run
-    locally before the PR, and that run is reported.
+**When an update is found.**
 
-### D6. Dist guard: no green on empty
+1. **Silent apply on a cold start.** If the update is found within 10 s of load and before the first `pointerdown` or `keydown`, and the unsaved flag is clear, it is applied with no toast. This is accepted per the review: no input means there is nothing to lose.
+2. **Otherwise, a persistent toast.** It reads "New version available" with a "Reload" action, and in Spanish "Nueva versión disponible · Recargar". It never auto-dismisses.
 
-The guard is `packages/workout-spa-editor/scripts/dist-service-worker.test.mjs`.
-It is gated like the manifest guard (`REQUIRE_SPA_DIST`, `SPA_DIST`,
-`SPA_BASE`) and asserts that:
+**On click, in this order. The gate always comes before `SKIP_WAITING`, never after it.**
 
-- `sw.js` exists at the dist root, and its embedded scope equals `SPA_BASE`.
-- The manifest it embeds is non-empty and lists **every** file under
-  `assets/` except `.map`. It does that as set equality with the directory,
-  not a count threshold, so a dropped chunk fails.
-- Every listed URL exists on disk, and each revision equals the SHA-256 of
-  the bytes on disk. This catches any step that rewrites `index.html` after
-  generation.
-- No `.map`, `version.json` or `AGENTS.md` is listed.
-- `index.html` is listed, as are the icons the web manifest names.
+1. **Unsaved edits block the update.** If the module-level unsaved flag is set, the click shows "Save your changes to update" ("Guarda los cambios para actualizar") and stops. Nothing is posted to the worker. The flag lives in `lib/unsaved-edits.ts`. It is written by the same effect that arms `beforeunload` in `use-editor-save.ts` (`useBeforeUnloadGuard(armed)`), so the two can never disagree. There is no discard confirmation; this is the team-lead's decision. The editor has no autosave: `isDirty` lives in `use-editor-edit-mode.ts`.
+2. **Pending debounced autosaves are flushed.** `use-prompt-autosave` registers its `flush` in `lib/pending-flushes.ts` while a timer is pending. The update path awaits every registered flush. A reload runs no React cleanup, so without this the timer would be lost.
+3. **The worker is told to skip waiting.** `{type: "SKIP_WAITING"}` is posted to the waiting worker.
+4. **Only the clicking tab reloads.** On `controllerchange`, the tab whose click set the module flag calls `location.reload()`. No other tab reloads.
 
-It runs in `deploy-site.yml` right after the generator, over
-`merged-dist/app`, and in the CI `build` job's site guards.
+**Other tabs.** They see `controllerchange` and do not reload. They keep running their version: its cache is retained while they live (D3), and the new worker's lookup finds their chunks. **The exception is a schema bump.** If the new version upgrades the IndexedDB schema, those tabs stop at D9's blocking dialog. They do not keep working.
 
-### D7. Tooling: a hand-written worker plus a generator script, with no new dependency
+**Update checks.**
 
-- **`vite-plugin-pwa` (generateSW or injectManifest).** Rejected. It computes
-  the manifest inside `vite build`, before two deploy steps rewrite
-  `index.html`, so the shell revision would be wrong on every deploy where
-  only the injected content changes. Its update API
-  (`virtual:pwa-register`, `registerType: "prompt"`, `onNeedRefresh` and
-  `updateSW()`) is the same flow as D2. It also brings `workbox-window` into
-  the page and the workbox runtime into the worker.
-- **`workbox-build` injectManifest run post-assembly.** This fixes the
-  timing. But injectManifest "does not compile or bundle `swSrc`" (Workbox
-  docs), so using `workbox-precaching` in the worker would need a separate
-  bundling step for one file. The default `maximumFileSizeToCacheInBytes` of
-  2 MB is a silent-skip footgun, though no file reaches it today.
-- **Hand-written.** About 60 lines of worker
-  (install/activate/fetch/message) and about 60 lines of generator (walk,
-  hash, emit). Zero dependencies, nothing added to the page bundle beyond the
-  registration module (well under 1 KB), and full control over the D1 and D2
-  details. Workbox's revision-based precaching and outdated-cache cleanup are
-  the only parts we would use, and both are a few lines here. Chosen.
+- The browser checks `sw.js` on navigation, bypassing the HTTP cache (`updateViaCache` defaults to `"imports"`).
+- An installed app can stay open for days with no navigation, so the page also calls `registration.update()` on every `visibilitychange` to visible and on a 60-minute interval. Each check is throttled to once per 60 minutes.
 
-The worker source lives at `packages/workout-spa-editor/sw/sw.js` as plain
-ES2020, outside `src/` so Vite never bundles it. The generator
-`scripts/emit-spa-service-worker.mjs` substitutes the manifest and `<v>` into
-it.
+### D5. Coexisting with chunk-reload: the worker comes first, recovery is the backstop
+
+**The existing recovery.**
+
+- `src/lib/chunk-reload.ts` holds `isChunkLoadError` and `reloadOnceForChunkError`. The reload is one-shot, with a 10 s sessionStorage cooldown, an in-memory flag, and a skip while the page is being left.
+- It is called from `main.tsx` on `vite:preloadError` (the default is prevented there), from `RouteErrorBoundary.tsx`, and from `lazyImport` (`lib/lazy-import.ts`).
+
+**How the two interact.**
+
+- **Controlled page.** All its chunks are retained (D1, D3), so a stale hash cannot fail. Recovery stays dormant, online and offline.
+- **A reload while a worker is waiting.** It is served by the still-active worker, so it gets a consistent version and cannot loop.
+- **Uncontrolled page.** This covers a first visit, a shift-reload, and service workers being disabled. Behaviour is today's: one reload, then the cooldown hands over to the boundary.
+- **Who wins.** The worker decides what is served. Recovery is never disabled and never driven by the worker. It acts only on a failed import, which under a worker happens only on an uncontrolled page, where a reload is the right answer.
+
+### D6. One assembly script, one guard last, and a real CI home
+
+**One assembly script.** `scripts/assemble-site.mjs` replaces the inline steps of `deploy-site.yml` with a single ordered pipeline:
+
+1. merge the landing, SPA and docs dists;
+2. write `app/version.json`;
+3. substitute the analytics id, on the merged copies, from the `UMAMI_WEBSITE_ID` env var (left as the placeholder when it is unset, as today);
+4. run `inject-spa-fallback`;
+5. emit the legacy `/editor/` page;
+6. emit the service worker, **always the last mutation**.
+
+**Who calls it.** Three callers share it:
+
+- `deploy-site.yml`, which keeps its check steps (`check-css-asset-urls`, `check-site-links`, the marker, IndexNow) as separate steps;
+- CI, through the `e2e-prod-base` job;
+- the e2e fixture `merged-dist-server.ts`, which today copies and injects by hand.
+
+**Docs.** `--docs <dir>` is required unless `--without docs` is passed explicitly. Only CI and the fixture pass it, because they lack the VitePress dist.
+
+**Guards, last.** `scripts/dist-service-worker.test.mjs` (`REQUIRE_SPA_DIST`, `SPA_DIST`, `SPA_BASE`) runs over the assembled `app/` and asserts:
+
+- `sw.js` exists, and its embedded scope equals `SPA_BASE`;
+- the manifest is non-empty, and the non-map files under `assets/` equal the manifest's hashed entries **as sets**;
+- every listed file exists, and its bytes digest to its revision, which catches a rewrite of any file after emit;
+- `index.html` and the web manifest's icons are listed, under `?__rev=`;
+- none of the excluded files is listed.
+
+In `deploy-site.yml` the guard is the **last step before `upload-pages-artifact`**, with the kill switch's expected mode passed in (D8).
+
+**CI home.** `e2e-prod-base` already holds a `/app/` build from its global setup.
+
+- It adds `landing` to `consume-build-artifacts`' `expected-packages`. `packages/landing/dist` is in the `packages/*/dist/` upload.
+- It runs `assemble-site.mjs --without docs`, then the manifest guard and the service-worker guard.
+- The new e2e is tagged `@service-worker`, and the tag joins the job's `--grep` (`ci.yml:979`).
+
+### D7. Scope, shell matching, and production-only registration
+
+**Scope.**
+
+- The file is `app/sw.js`. Its maximum scope is its own directory, so the browser itself caps the scope at `/app/`.
+- It is registered with `{scope: import.meta.env.BASE_URL}`.
+
+**What the fetch handler does.**
+
+- **Shell.** Only same-origin `GET` navigations to exactly `/app/` or `/app/index.html` are answered, with `ignoreSearch`, from the cached shell.
+- **Assets.** Requests for precached URLs are answered from cache.
+- **Everything else** passes through with no `respondWith`. That includes other in-scope paths, `version.json`, maps and cross-origin requests. Controlled and uncontrolled pages therefore behave identically for every URL outside the precache.
+
+**Registration.** It runs only when `import.meta.env.PROD` is set and `"serviceWorker" in navigator` is true, and is timed as in D2.
+
+- `vite dev` never registers.
+- `vite build` plus `vite preview` serves no `sw.js`, because emit happens in assembly. That registration rejects with a 404, which is caught silently.
+
+**Documented limitation.** The `/editor/*` and legacy-path bridge lives in the root `404.html`, outside the scope, so it needs the network. An old `/editor/...` link opened offline shows the browser's offline page. `/app/` itself works.
 
 ### D8. Kill switch
 
-Pages cannot send `Clear-Site-Data`, so the switch is a worker.
+Pages cannot send `Clear-Site-Data`, so the kill switch is itself a worker. `assemble-site.mjs --sw-kill` (equivalently `emit-spa-service-worker.mjs --kill`) writes a `sw.js` that behaves as follows:
 
-- **The switch.** `emit-spa-service-worker.mjs --kill` writes a `sw.js` that,
-  on `install`, calls `skipWaiting()`. On `activate` it deletes every
-  `kaiord-app-*` cache, unregisters itself, and calls `client.navigate()` on
-  each open window so it reloads unworkered.
-- **Why it reaches every client.** The browser fetches `sw.js` past the HTTP
-  cache on navigation and on the hourly `update()`, so even a client whose
-  shell is broken picks up the kill switch. The one invariant this relies on
-  is that **`sw.js` is never renamed.**
-- **Turning it on.** `deploy-site.yml` passes `--kill` when the repository
-  variable `SPA_SW_KILL_SWITCH` is `"1"`. Pablo sets it with `gh variable
-set` (repo-settings class, never an agent), then re-runs the deploy or
-  pushes. The page's registration code stays unchanged: it re-registers the
-  kill worker, which unregisters again. That is harmless, and the guard
-  asserts the killed `sw.js` has no fetch handler.
-- **Turning it off.** Unset the variable and deploy. Clients install the
-  normal worker on their next visit.
-- **The runbook.** `docs/runbooks/spa-service-worker.md`, linked from the
-  workflow step (per `docs/runbooks/AGENTS.md`). It covers symptoms, the
-  switch, how to verify that `/app/sw.js` serves the kill body, how long it
-  takes (next navigation, or about an hour for a long-open app), rollback,
-  and the manual per-device fallback (site settings → clear data).
+- **`install`:** calls `skipWaiting()`.
+- **`activate`:** deletes every `kaiord-app-*` cache, including `kaiord-app-meta`, then unregisters itself. It then calls `navigate(url)` on each window from `clients.matchAll({type: "window"})`.
 
-### D9. IndexedDB schema skew: an old shell must never run against a newer database
+**SHALL invariants:**
 
-**How the skew arises.** A tab running N-1 meets a database that N has
-already upgraded. This exists in production today, without any service
-worker: a tab left open across a deploy keeps running N-1 code in memory
-while a fresh tab upgrades the database. D2 makes it longer-lived and more
-likely, because it lets other tabs keep running N-1 on purpose. A cold start
-can also produce it: tab B is upgraded through the toast, then tab A, still
-on N-1, wakes up.
+- `matchAll` is called with its default `includeUncontrolled: false`, so the kill worker navigates only the clients it controls;
+- it never calls `clients.claim()`;
+- it has no `fetch` handler.
 
-**What Dexie 4.4.6 actually does.** This was read in
-`node_modules/dexie/dist/dexie.mjs`, not recalled from memory. It is not a
-hard failure.
+**Why it cannot loop.** A reloaded page is uncontrolled. It registers `sw.js` again, which installs the kill worker again. That worker activates over zero controlled clients, navigates nobody, and unregisters.
 
-- **Opening an older declared version.** `tryOpenDB` catches `VersionError`
-  and retries with `nativeVerToOpen = 0`, which opens the installed (higher)
-  version. Then `verifyInstalledSchema` diffs installed against declared.
-  Tables and indexes that only N has land in `del`, and Dexie ignores them,
-  so N-1 opens successfully.
-  - **The exception.** If N _dropped_ an index that N-1 declares, the diff
-    has `change.add`, and Dexie enters `schemaPatchMode`. N-1 then bumps the
-    native version by one and re-creates the index. That is an old client
-    writing schema.
-- **`versionchange` from another tab upgrading.** The default handler closes
-  with `disableAutoOpen: false`, so the next query silently reopens at the
-  new version.
+**How it is turned on.**
 
-So the team-lead's concern is real, but its shape differs. Dexie 4.4.6 never
-produces a VersionError lock-out here (that comes from `tryOpenDB`'s retry). What it
-produces is **N-1 code reading and writing rows that N's `upgrade()` has
-already rewritten**. The database is at v37, with 21 `upgrade()` functions in
-`adapters/dexie/`, so data-shape migrations are routine. N never re-runs a
-migration for rows that N-1 writes back in the old shape. That is silent data
-corruption, which is worse than a visible break.
+- `deploy-site.yml` passes `--sw-kill` when `vars.SPA_SW_KILL_SWITCH == "1"`.
+- The guard is told the expected mode, and in kill mode asserts the kill body (no `fetch` handler, no `claim`).
+- Pablo sets the variable with `gh variable set` (the repo-settings class, never an agent) and re-runs the deploy.
+- To turn it off, unset the variable and deploy again.
 
-**Decision: detect the skew before any read or write, and stop.**
+**How long it takes to reach clients.**
 
-1. **Pre-open probe.** Before Dexie's first open, the boot path calls
-   `indexedDB.open("kaiord-spa")` with **no version argument**, which never
-   upgrades. It reads `version`, closes, and compares that with
-   `db.verno * 10`, the native version Dexie maps to. If the installed
-   version is higher, Dexie is never opened. This also closes the
-   `schemaPatchMode` hole, because no N-1 open is ever attempted. The probe sits beside the existing `probeStorage` (`adapters/dexie/storage-probe.ts`, driven by `store/storage-store.ts`).
-2. **At runtime.** `db.on("versionchange")` is overridden. When
-   `ev.newVersion > db.verno * 10`, the tab calls
-   `db.close({ disableAutoOpen: true })`. From then on any query rejects
-   with `DatabaseClosedError` and never auto-reopens on the old schema. A
-   delete (`newVersion` null) keeps today's behaviour.
-3. **What the user sees.** Both paths put the app into a **stale-code
-   state**. A blocking dialog, which cannot be dismissed because nothing
-   behind it can persist, says "Kaiord was updated in another window" and
-   offers a "Reload" action (en and es).
-   - **The Reload action.** It calls `registration.update()`. If a worker is
-     waiting, it posts `SKIP_WAITING`. Then it reloads. If no newer worker
-     exists, as with an uncontrolled tab that upgraded ahead of a deploy
-     still propagating, the dialog stays up and offers retry.
-   - **Unsaved work.** The in-memory draft in `workout-store` remains
-     visible behind the dialog, but cannot be saved. This is the price of
-     not writing old-shape rows. Exporting the draft to a file is a
-     follow-up, not this change.
-4. **What a schema-adding deploy costs.** It surfaces the dialog in other
-   tabs at most once. A deploy that doesn't bump the Dexie version never
-   triggers it, so there is no new friction on most deploys.
+- Pages' edge `max-age=600` means up to **≈10 minutes** after the deploy before the edge serves the new `sw.js`.
+- After that, a client picks it up on its next navigation, on becoming visible, or within the 60-minute interval (D4).
+- The URL `sw.js` is **never renamed**. This is the one invariant the switch depends on.
+
+**Runbook.** `docs/runbooks/spa-service-worker.md` is linked from the deploy step, and its index row is added to `docs/runbooks/AGENTS.md`. It covers:
+
+- symptoms;
+- turning the switch on;
+- checking that `/app/sw.js` serves the kill body;
+- the timing above;
+- that `navigate()` **drops unsaved edits** in the windows it reloads;
+- rollback;
+- the manual fallback per device (site settings → clear data).
+
+**Automated.** The e2e assembles the tree normally, takes control, then reassembles it with `--sw-kill`. It asserts that the registration is gone, the caches are empty, the page ends up uncontrolled, and the page navigated exactly once.
+
+### D9. IndexedDB schema skew: old code never touches a newer database
+
+**How the skew arises.** A page running N-1 meets a database that N has already upgraded. This already happens in production today: a tab left open across a deploy does it. D4 makes it longer-lived, because other tabs deliberately stay on their version. A cold start can also produce it, once a newer page has upgraded the database. **This code is the future N-1**, so the guard ships in this change.
+
+**What Dexie 4.4.6 actually does.** This was read in `node_modules/dexie/dist/dexie.mjs` and confirmed independently by the review. None of it is a hard failure.
+
+- **Opening an older declared version (≈4594).** `tryOpenDB` catches `VersionError` and retries with `nativeVerToOpen = 0`, which opens at the installed version.
+- **Schema diff on open.** `verifyInstalledSchema` ignores tables and indexes that only N has.
+  - **The exception (≈4561):** if N dropped an index that N-1 declares, `schemaPatchMode` kicks in, and the old client bumps the native version and re-creates the index.
+- **`versionchange` (≈5942).** The default handler closes with `disableAutoOpen: false`, so the next query silently reopens.
+
+The net effect is that N-1 code reads and writes rows that N's `upgrade()` already rewrote. The database is at v37, with 21 `upgrade()` functions. **The result is silent corruption, not a visible break.**
+
+**Decision.**
+
+1. **Pre-open probe.** It runs before Dexie first opens. `indexedDB.open("kaiord-spa")` is called with no version argument, which never upgrades. The probe reads `version`, closes, and compares it with `Math.round(db.verno * 10)`, the native version Dexie maps to. If the installed version is higher, the editor is stale and Dexie is never opened. That also closes the `schemaPatchMode` hole. The probe lives beside `probeStorage` (`adapters/dexie/storage-probe.ts`), which `store/storage-store.ts` drives.
+2. **Boot gate (stale at boot).** At boot there are no edits yet. The gate checks for a newer worker with `registration.update()`, waits for it to reach `installed`, posts `SKIP_WAITING`, and reloads. **There is no dialog.**
+   - A sessionStorage one-shot key prevents a loop, just as chunk-reload does.
+   - If no newer worker exists, or the one-shot has already fired, the gate falls through to the dialog in step 4. That happens on an uncontrolled page that upgraded ahead of a deploy that is still propagating.
+3. **Mid-session (`versionchange` with `newVersion > db.verno * 10`).** The page calls `db.close({ disableAutoOpen: true })`, so every later query rejects with `DatabaseClosedError` and never reopens on the old schema. A delete (`newVersion` null) keeps today's close-and-reopen.
+4. **Blocking dialog.** It is used mid-session, and at boot when the gate could not update. It cannot be dismissed: "Kaiord was updated in another window" with a "Reload" action, in en and es.
+   - Reload runs the same update-then-reload path as step 2. If nothing newer is found, the dialog stays up with a retry.
+   - Unsaved edits cannot be saved, because the database is closed. The dialog says so. `beforeunload` still prompts, as it does for any leave.
 
 **Rejected alternatives.**
 
-- **Network-first navigation.** It would mostly avoid the skew online, but
-  it silently updates on every reload, which contradicts D2. It also does
-  nothing offline or for an already-open tab.
-- **Making every migration backward-compatible.** That is a policy no guard
-  enforces, and 21 existing upgrades already violate it.
-- **Keeping Dexie's auto-reopen.** That is the corruption path.
+- **Network-first navigation.** It updates silently on every reload, against D4, and does nothing offline or for open tabs.
+- **A backward-compatible-migrations policy.** No guard could enforce it, and 21 existing upgrades already break it.
+- **Keeping auto-reopen.** That is the corruption path.
 
-**Tests.**
+### D10. Tests
 
-- **Vitest with `fake-indexeddb`.**
-  - Create the database at `verno + 1`, then assert that the boot probe
-    reports stale and that Dexie's `open` is never called.
-  - Fire `versionchange` with a higher version, then assert that the next
-    query rejects with `DatabaseClosedError` and the stale state is set.
-  - Fire a delete-`versionchange` and assert that it keeps auto-reopen.
-- **Chromium e2e (SW spec).** Bump the database in a second page, then
-  assert that the dialog appears in the first page.
+**Vitest.**
+
+- **Registration module, with a fake `navigator.serviceWorker`:**
+  - PROD gate, Save-Data skip, base scope, and swallowing a failed registration;
+  - the waiting path and the installed path;
+  - the silent cold-start apply, and its denial after input or with the unsaved flag set;
+  - the click order: the unsaved flag blocks before anything is posted, flushes are awaited, then `SKIP_WAITING`, then a single reload on `controllerchange`;
+  - visible and interval update throttling;
+  - the hello message.
+- **Unsaved flag:** fed by `useBeforeUnloadGuard`, cleared on disarm.
+- **D9, with `fake-indexeddb`:**
+  - the database at `verno + 1` makes the probe report stale and Dexie never opens;
+  - a `versionchange` to a higher version rejects the next query and sets the stale state;
+  - a delete keeps auto-reopen;
+  - the boot gate's one-shot.
+- **Copy:** toast and dialog text in en and es.
+
+**`node:test`.**
+
+- **Emitter:** walk, exclusions, revisions, `<v>`, the `?__rev=` URLs, and the kill body.
+- **Guard negatives:**
+  - an empty manifest;
+  - a missing file;
+  - a chunk under `assets/` that the manifest omits;
+  - a listed map;
+  - a shell rewritten after emit;
+  - the kill mode against a normal body, and the reverse.
+- **`assemble-site.mjs`:**
+  - step order (emit is last);
+  - Umami substitution on the copies;
+  - `--without docs` is required when docs are missing.
+
+**Worker source.** `sw/sw.js` is plain ES2020 kept outside `src/`. Its install, fetch, hello, prune and kill logic is exercised through Playwright, not vitest.
+
+**Playwright.** The global `use` gets `serviceWorkers: "block"`, which covers every existing spec. `e2e/offline-service-worker.spec.ts` is tagged `@service-worker`. It runs only on chromium, because Playwright documents service-worker support as Chromium-only, and opts in with `test.use({ serviceWorkers: "allow" })` over `merged-dist-server`, which calls the real assembly. Its cases:
+
+1. **Offline cold start.** Wait for control, go `context.setOffline(true)`, reload, and open a lazy route that was never visited online.
+2. **Update while dirty.** Reassemble as v2 and assert that a toast appears and nothing reloads. A dirty editor blocks the update. A clean one reloads only the clicking page, and a second page keeps working.
+3. **Retention.** A page on v1 survives two activations, its unvisited lazy chunk still resolves, and nothing reloads.
+4. **Install integrity.** A shell served with the wrong bytes during install leaves the old worker active.
+5. **Schema bump mid-session.** Bump the database from a second page, and the first page shows the dialog.
+6. **Kill switch.** As described in D8.
+
+**Mobile projects.** They run only on `main`, so they are run locally, in full, before the PR, and the result is reported.
+
+### D11. Tooling: a hand-written worker plus an emitter, with no new dependency
+
+- **`vite-plugin-pwa` is rejected.** It computes the manifest inside `vite build`, before the shell is rewritten, so the shell's revision would be wrong. Its prompt flow (`registerType: "prompt"`, `onNeedRefresh`, `updateSW()`) is D4 anyway.
+- **`workbox-build` `injectManifest` after assembly is also rejected.** It fixes the timing, but per the Workbox docs it "does not compile or bundle `swSrc`". Using `workbox-precaching` would therefore need a bundling step for one file. The 2 MB `maximumFileSizeToCacheInBytes` default silently skips files.
+  - Workbox would not provide D1.3's digest check, D2's copy-forward or D3's client-keyed retention anyway. They would be custom code inside it.
+- **Hand-written is chosen.** It is ≈120 lines of worker in `packages/workout-spa-editor/sw/sw.js`, outside `src/` so Vite never bundles it, plus ≈80 lines of emitter. It adds 0 dependencies. The page-side registration and the hello together stay well under 2 KB.
 
 ## Risks / Trade-offs
 
-- **A bad worker is sticky.** That is the reason D8 exists and `sw.js` is
-  never renamed.
-- **Users see an older version for longer.** A user who ignores the toast
-  stays on version N. That is intentional (D2), and closing the app picks up
-  the update.
-- **A shift-reload bypasses the worker.** It then behaves like today, with
-  recovery as the backstop (D3).
-- **The worker is not bundled.** It is hand-written ES2020, kept minimal and
-  covered by the e2e plus the guard; vitest does not cover the worker
-  itself.
-
-## Open Questions
-
-- **The reload confirmation when edits are unsaved (D2.5).** It reuses
-  `use-confirm-discard-edits`. If wiring that guard into a global toast
-  needs more than a store read, the fallback is to block the click with a
-  toast asking the user to save first.
+- **A bad worker is sticky.** That is why D8 exists, and why `sw.js` is never renamed.
+- **A user can stay on N for days by ignoring the toast.** This is intended. Closing every window of the app applies the update.
+- **A schema-bumping deploy interrupts other open tabs with D9's dialog.** It happens once per such deploy, and it is the price of not corrupting data.
+- **A shift-reload or a first visit is unprotected by D3.** That page uses the network, as today, with chunk-reload as the backstop.
+- **The `/editor/*` legacy bridge does not work offline (D7).**
