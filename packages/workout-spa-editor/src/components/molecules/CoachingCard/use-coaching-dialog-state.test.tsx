@@ -7,9 +7,12 @@
  */
 
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { toPersistedCoachingActivityId } from "../../../types/coaching-activity-record";
@@ -62,9 +65,17 @@ const makeMatch = (
   executedWorkoutIds,
 });
 
+const persistence = createDexiePersistence(db);
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <PersistenceProvider persistence={persistence}>
+    {children}
+  </PersistenceProvider>
+);
+
 afterEach(async () => {
   await db.table("sessionMatches").clear();
   await db.table("workouts").clear();
+  await db.table("activities").clear();
 });
 
 describe("useCoachingDialogState — matched executed", () => {
@@ -79,8 +90,9 @@ describe("useCoachingDialogState — matched executed", () => {
       .put(makeMatch(structured.id, [exec1.id, exec2.id]));
 
     // Act
-    const { result } = renderHook(() =>
-      useCoachingDialogState(PROFILE_ID, activity)
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
     );
 
     // Assert
@@ -98,8 +110,9 @@ describe("useCoachingDialogState — matched executed", () => {
     await db.table("sessionMatches").put(makeMatch(structured.id, []));
 
     // Act
-    const { result } = renderHook(() =>
-      useCoachingDialogState(PROFILE_ID, activity)
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
     );
 
     // Assert
@@ -119,8 +132,9 @@ describe("useCoachingDialogState — matched executed", () => {
       .put(makeMatch(structured.id, [exec1.id, "w-missing"]));
 
     // Act
-    const { result } = renderHook(() =>
-      useCoachingDialogState(PROFILE_ID, activity)
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
     );
 
     // Assert
@@ -128,5 +142,37 @@ describe("useCoachingDialogState — matched executed", () => {
     const state = result.current;
     if (state?.kind !== "matched") throw new Error("expected matched");
     expect(state.executed.map((w) => w.id)).toEqual([exec1.id]);
+  });
+
+  it("should carry the match's executed ids and whether its plan is a recording", async () => {
+    // Arrange
+    const structured = makeWorkout("w-structured");
+    await db.table("workouts").bulkPut([structured]);
+    await db.table("sessionMatches").put(makeMatch(structured.id, ["w-gone"]));
+    await db.table("activities").put({
+      id: "act-1",
+      profileId: PROFILE_ID,
+      date: "2026-04-13",
+      sport: "cycling",
+      sourceBridgeId: "garmin",
+      externalId: "ext-1",
+      linkedWorkoutId: structured.id,
+      krd: null,
+      createdAt: "2026-05-01T12:00:00.000Z",
+    });
+
+    // Act
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
+    );
+
+    // Assert
+    await waitFor(() => expect(result.current?.kind).toBe("matched"));
+    expect(result.current).toMatchObject({
+      executed: [],
+      executedWorkoutIds: ["w-gone"],
+      recorded: true,
+    });
   });
 });

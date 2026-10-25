@@ -38,6 +38,7 @@ export type CalendarWeekGridProps = {
   onAddClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
   wellnessByDay?: Record<string, DayWellness>;
+  executedRefIds?: ReadonlySet<string>;
 };
 
 export function CalendarWeekGrid({
@@ -53,6 +54,7 @@ export function CalendarWeekGrid({
   onAddClick,
   onActivityClick,
   wellnessByDay,
+  executedRefIds,
 }: CalendarWeekGridProps) {
   // Back-compat: if the caller passes the legacy buckets, treat them as
   // solo. Once all callers migrate to matchedByDay / soloPlansByDay /
@@ -89,6 +91,7 @@ export function CalendarWeekGrid({
             onActivityClick={onActivityClick}
             workoutCardPointerDownFor={bind}
             dropTargetActive={dropTargetId === date}
+            executedRefIds={executedRefIds}
             wellness={wellnessByDay?.[date]}
             wellnessResolved={wellnessByDay !== undefined}
           />

@@ -23,7 +23,7 @@ export {
 
 export type MoveSessionDeps = Pick<
   PersistencePort,
-  "workouts" | "sessionMatch" | "coaching" | "transaction"
+  "workouts" | "sessionMatch" | "coaching" | "activities" | "transaction"
 > & { now: () => string };
 
 export type MoveSessionInput = { workoutId: string; targetDay: string };
@@ -39,7 +39,11 @@ const assertMovable = async (
   match: SessionMatch | undefined
 ): Promise<void> => {
   if (match) {
-    if (match.executedWorkoutIds.length > 0)
+    // A match can pair a recording as its plan while the slot stays empty.
+    if (
+      match.executedWorkoutIds.length > 0 ||
+      (await deps.activities.referencesWorkout(profileId, workoutId))
+    )
       throw new SessionNotMovableError("executed");
     const activity = await deps.coaching.getById(match.coachingActivityId);
     if (activity?.status === "completed")

@@ -1,6 +1,7 @@
 import { AthleteZonesProvider } from "../../../contexts/athlete-zones-context";
 import { SetupChecklist } from "../../molecules/SetupChecklist/SetupChecklist";
 import { CalendarDialogs } from "../CalendarDialogs";
+import { SessionMoveProvider } from "../session-move/SessionMoveProvider";
 import { DailyHeader } from "./DailyHeader";
 import { EnergyBalanceCard } from "./EnergyBalanceCard";
 import { PlannedSession } from "./PlannedSession";
@@ -54,15 +55,17 @@ export default function Daily() {
         <ReadinessCard readiness={readiness} date={focusIso} />
         <EnergyBalanceCard profileId={profile?.id ?? null} date={focusIso} />
         <TrendsCard />
-        <CalendarDialogs
-          selectedWorkout={open.selectedWorkout}
-          selectedCoachingActivity={open.selectedActivity}
-          onCloseWorkout={open.closeWorkout}
-          onCloseCoaching={open.closeActivity}
-          expandActivity={expandActivity}
-          onOpenExecuted={open.handleWorkoutClick}
-          buildProcessHref={open.buildProcessHref}
-        />
+        <SessionMoveProvider>
+          <CalendarDialogs
+            selectedWorkout={open.selectedWorkout}
+            selectedCoachingActivity={open.selectedActivity}
+            onCloseWorkout={open.closeWorkout}
+            onCloseCoaching={open.closeActivity}
+            expandActivity={expandActivity}
+            onOpenExecuted={open.handleWorkoutClick}
+            buildProcessHref={open.buildProcessHref}
+          />
+        </SessionMoveProvider>
       </div>
     </AthleteZonesProvider>
   );

@@ -31,4 +31,6 @@ export type CoachingDialogBodyProps = {
   onOpenExecuted: (workout: WorkoutRecord) => void;
   onPushToGarmin: () => void;
   onSplit: () => void;
+  /** The calendar's move flow; absent outside it, so no Move is offered. */
+  onMoveTo?: (date: string) => void;
 };

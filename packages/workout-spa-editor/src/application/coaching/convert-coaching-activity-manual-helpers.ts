@@ -16,19 +16,20 @@ export const manualMatchSource: SessionMatchSource = "auto-coaching";
 type Resolved = NonNullable<ReturnType<typeof resolveT2GSport>>;
 
 /**
- * Seeds the template onto the row as stored, so a move made since the read
- * stays; returns that stored row, or the read when nothing was attempted.
+ * Reads the row inside a transaction and seeds the template onto it when it
+ * has no KRD and the sport resolves, so a move made since the first read
+ * stays; returns that stored row.
  */
-const seedTemplateOnStoredRow = async (
+const readStoredRowSeedingTemplate = async (
   deps: ConvertManualDeps,
   activity: CoachingActivityForConvert,
   existing: WorkoutRecord,
-  resolved: Resolved
+  resolved: Resolved | null
 ): Promise<WorkoutRecord> => {
   let stored = existing;
   await updateWorkoutRecord(deps, existing.id, (fresh) => {
     stored = fresh;
-    if (fresh.krd) return undefined;
+    if (fresh.krd || !resolved) return undefined;
     return {
       ...fresh,
       state: "structured",
@@ -58,10 +59,9 @@ export const handleExistingManualWorkout = async (
   const resolved = resolveT2GSport(activity.sport);
   // For a rest day (or unknown sport) `resolved` is null: leave the
   // existing raw record untouched rather than seeding a KRD.
-  const stored =
-    existing && !existing.krd && resolved
-      ? await seedTemplateOnStoredRow(deps, activity, existing, resolved)
-      : existing;
+  const stored = existing
+    ? await readStoredRowSeedingTemplate(deps, activity, existing, resolved)
+    : undefined;
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
     coachingActivityId: activity.id,

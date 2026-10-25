@@ -8,8 +8,9 @@
  * vocabulary (used by MatchedSessionCard and CoachingActivityCard).
  *
  * `workoutCardPointerDownFor` is an optional binding passed by the
- * Grid view to enable drag-to-reschedule; the List view never supplies
- * it, so card pointer events stay as plain clicks.
+ * Grid view to enable drag-to-reschedule on solo workouts and movable
+ * matched sessions; the List view never supplies it, so card pointer
+ * events stay as plain clicks. A coach plan is never draggable.
  */
 
 import type { PointerEvent } from "react";
@@ -20,7 +21,7 @@ import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { CalendarView } from "../../../types/user-preferences";
 import { CoachingActivityCard } from "../CoachingCard/CoachingActivityCard";
-import { MatchedSessionCard } from "../MatchedSessionCard/MatchedSessionCard";
+import { renderMatchedCards } from "./day-column-matched-cards";
 import { WorkoutCard } from "./WorkoutCard";
 
 export type DayCardBuckets = {
@@ -33,6 +34,7 @@ export type DayCardBuckets = {
   workoutCardPointerDownFor?: (
     workoutId: string
   ) => (event: PointerEvent) => void;
+  executedRefIds?: ReadonlySet<string>;
 };
 
 const viewToCardDensity = (view: CalendarView): "compact" | "comfortable" =>
@@ -43,15 +45,14 @@ export function renderDayCards(buckets: DayCardBuckets) {
   const bindCardDrag = buckets.workoutCardPointerDownFor;
   return (
     <>
-      {buckets.matchedSessions.map((s) => (
-        <MatchedSessionCard
-          key={s.match.id}
-          session={s}
-          view={buckets.view}
-          density={cardDensity}
-          onClick={buckets.onActivityClick}
-        />
-      ))}
+      {renderMatchedCards({
+        sessions: buckets.matchedSessions,
+        view: buckets.view,
+        density: cardDensity,
+        onActivityClick: buckets.onActivityClick,
+        bindCardDrag,
+        executedRefIds: buckets.executedRefIds,
+      })}
       {buckets.soloPlans.map((a) => (
         <CoachingActivityCard
           key={a.id}

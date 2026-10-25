@@ -8,10 +8,8 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { useLocation } from "wouter";
 
 import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
-import { withOrigin } from "../../../routing/with-origin";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { ExpandActivity } from "../../../types/coaching-expand-result";
@@ -20,6 +18,8 @@ import { buildCoachingDialogCloseHandler } from "./build-coaching-dialog-close-h
 import { CoachingDialogShell } from "./coaching-dialog-shell";
 import { CoachingActivityDialogContent } from "./CoachingActivityDialogContent";
 import { useCoachingDialog } from "./use-coaching-dialog";
+import { useDialogMoveTo } from "./use-dialog-move-to";
+import { useOpenEditorHandler } from "./use-open-editor-handler";
 import { useOpenExecutedHandler } from "./use-open-executed-handler";
 
 export type CoachingActivityDialogProps = {
@@ -41,16 +41,10 @@ export function CoachingActivityDialog({
     activity?.date ?? null,
     activity?.sport.label ?? null
   );
-  const [, navigate] = useLocation();
   const matchedWorkout =
     dialog.dialogState?.kind === "matched" ? dialog.dialogState.workout : null;
   const matchedId = matchedWorkout?.id ?? null;
-  const onOpenEditor = useCallback(() => {
-    if (matchedId) {
-      onClose();
-      navigate(withOrigin(`/workout/${matchedId}`, "coaching"));
-    }
-  }, [matchedId, navigate, onClose]);
+  const onOpenEditor = useOpenEditorHandler(matchedId, onClose);
   const { push: pushToGarmin } = useGarminPush(matchedWorkout ?? undefined);
   const onPushToGarmin = useCallback(() => void pushToGarmin(), [pushToGarmin]);
   const { cancelAi } = dialog.ai;
@@ -59,6 +53,7 @@ export function CoachingActivityDialog({
     [cancelAi, onClose]
   );
   const handleOpenExecuted = useOpenExecutedHandler(onClose, onOpenExecuted);
+  const onMoveTo = useDialogMoveTo(matchedId, handleDialogClose);
 
   if (!activity) return null;
 
@@ -87,6 +82,7 @@ export function CoachingActivityDialog({
         onOpenExecuted={handleOpenExecuted}
         onPushToGarmin={onPushToGarmin}
         onSplit={dialog.handleSplit}
+        onMoveTo={onMoveTo}
       />
     </CoachingDialogShell>
   );

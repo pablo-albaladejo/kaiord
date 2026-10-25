@@ -76,6 +76,8 @@ export type T2GStubOptions = {
   capabilities?: readonly string[];
   /** Override the zones payload returned for `read-details`. */
   zonesPayload?: unknown;
+  /** Train2Go activities every `read-week` returns. */
+  weekActivities?: readonly unknown[];
 };
 
 const DEFAULT_CAPS = ["read:training-plan", "read:training-zones"] as const;
@@ -93,6 +95,7 @@ export const installTrain2GoBridgeStub = async (
     bridgeId: TRAIN2GO_BRIDGE_ID,
     caps: options.capabilities ?? DEFAULT_CAPS,
     payload: options.zonesPayload ?? FIXTURE_ZONES_PAYLOAD,
+    activities: options.weekActivities,
   });
 };
 
