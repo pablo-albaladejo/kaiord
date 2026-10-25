@@ -516,13 +516,22 @@ After the commit:
   - matched sessions
   - solo workouts
   - solo coach plans that are not matched
-- When the target day is inside the visible week, `inputs` comes from that
-  week's buckets.
-- When it is outside the visible week (a date typed in the picker), `inputs`
-  is read with indexed queries:
-  - `sessionMatches [profileId+date]`
+- `inputs` is read from stored rows for every target day, inside the visible
+  week or outside it. The week's view model carries the plan sport only as a
+  display label, and the check needs the raw sport, so one read path serves
+  both cases and gives the same verdict for the same day (AC-16):
   - `workouts [profileId+date]`
+  - `activities [profileId+date]`, the recordings, so a recording twinned to
+    a workout counts once
   - `coachingActivities [profileId+date]`
+  - the profile's `sessionMatches` (`listByProfile`), not a date read: a
+    match dated on another day still holds its plan and its recording, and
+    neither may count as solo here. B5 measured this scan under 4 ms for
+    1000 rows.
+- The flow lives in `SessionMoveProvider`, which the calendar page and the
+  coaching dialog's host mount. `useRequestMove()` returns `null` outside it,
+  and an entry point with no flow offers no move. The workout detail runs the
+  same gate through `useGatedDetailMove`, keeping its own toasts.
 - If a recording of the same sport is on the target day, the prompt reads:
   "There is already a {sport} session on {day}. If it's a recording, it will
   be linked to this session and the session will be locked. Move anyway?"
@@ -554,10 +563,15 @@ After the commit:
   workout's current `date !== entry.coachDate`, because the athlete or the
   coach has already moved it again.
 - The notice state holds only the static `overridden` list. The current date
-  comes from a live read: `CoachMoveNotice` runs one `useLiveQuery` of
-  `workouts.bulkGet(overridden.map(o => o.workoutId))`. An entry whose
-  workout is gone is hidden as well. The notice's "used" set is kept in
-  memory per notice `seq`, like the existing dismissal.
+  comes from a live read: the notice runs one `useLiveQuery` that reads each
+  listed workout with `workouts.getById` (the port has no bulk read), plus
+  its match and activity for the movability. An entry whose workout is gone
+  is hidden as well.
+- "Used" needs no separate set. A Move back that succeeds changes the
+  workout's `date`, so the live read hides the entry; a Move back cancelled
+  at the same-sport prompt, or refused, leaves it offered. A set filled on
+  click would hide an entry that never moved. The notice is keyed by its
+  `seq`, so a later sync reporting the same workout again starts fresh.
 - If the workout is no longer movable, the button shows the block reason.
 - The notice never pushes.
 

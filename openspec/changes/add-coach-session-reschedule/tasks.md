@@ -84,34 +84,34 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
 
 ## 2. Entry points, trace chip, same-sport check and Move back (PR-2, after PR-1)
 
-- [ ] 2.1 Add `isMovableSession(session)` and
+- [x] 2.1 Add `isMovableSession(session)` and
       `sameSportOnDay(inputs, sport, canonicalSport)` as pure functions, with
       inputs for matched sessions, solo workouts and solo plans. Write their
       unit tests first, one per input (AC-11, AC-13..AC-15).
-- [ ] 2.2 Add an indexed read of the target day's inputs for a date outside
+- [x] 2.2 Add an indexed read of the target day's inputs for a date outside
       the visible week, using `[profileId+date]` on `sessionMatches`,
       `workouts` and `coachingActivities` (AC-16).
-- [ ] 2.3 Add Grid drag on movable `MatchedSessionCard`s in `renderDayCards`.
+- [x] 2.3 Add Grid drag on movable `MatchedSessionCard`s in `renderDayCards`.
       Do not bind cards that are not movable, and never bind
       `CoachingActivityCard` (AC-11).
-- [ ] 2.4 Extract a shared date picker. Add **Move to another day** to
+- [x] 2.4 Extract a shared date picker. Add **Move to another day** to
       `MatchedActions`, disabled with the reason when the session is not
       movable. Show the create-first hint for an unconverted plan (AC-12).
-- [ ] 2.5 Show the same-sport confirmation on every entry point, Move back
+- [x] 2.5 Show the same-sport confirmation on every entry point, Move back
       included. Add the "will be linked and locked" sentence when the target
       day has a recording. Cancelling writes nothing (AC-13..AC-16).
-- [ ] 2.6 Add the **Moved from {coachDate}** chip, in en and es, with an
+- [x] 2.6 Add the **Moved from {coachDate}** chip, in en and es, with an
       `aria-label` (AC-17).
-- [ ] 2.7 Make `CoachMoveNotice` name the overridden athlete days, with
+- [x] 2.7 Make `CoachMoveNotice` name the overridden athlete days, with
       **Move back** for each, up to 3. Hide an entry once used or once
       `date !== entry.coachDate`, read live with one `useLiveQuery` of
       `workouts.bulkGet` (design §3.9). Provide en and es copy (AC-18).
-- [ ] 2.8 Reuse the blocked toast of 1.4b on the new entry points, and add
+- [x] 2.8 Reuse the blocked toast of 1.4b on the new entry points, and add
       the not-found toast, in en and es.
-- [ ] 2.9 Add `e2e/coach-session-drag.spec.ts`: on a fresh profile with the
+- [x] 2.9 Add `e2e/coach-session-drag.spec.ts`: on a fresh profile with the
       Train2Go stub, drag a matched card and reload; an executed session must
       not be draggable (AC-21).
-- [ ] 2.10 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts`
+- [x] 2.10 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts`
       (AC-23).
 
 ## 3. Garmin out-of-date placement state (PR-3, after PR-1)
