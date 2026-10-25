@@ -5,8 +5,9 @@ import { parseBackOrigin } from "../../../routing/back-origin";
 import { resolveBackTarget } from "../../../routing/resolve-back-target";
 import { withOrigin } from "../../../routing/with-origin";
 import { RouteSpinner } from "../../atoms/RouteSpinner";
+import { SameSportPrompt } from "../session-move/SameSportPrompt";
 import { useDeleteWorkoutWithUndo } from "./use-delete-workout-with-undo";
-import { useMoveWorkout } from "./use-move-workout";
+import { useGatedDetailMove } from "./use-gated-detail-move";
 import { useWorkoutDetailModel } from "./use-workout-detail-model";
 import { useWorkoutDetailRecord } from "./use-workout-detail-record";
 import {
@@ -37,7 +38,7 @@ export default function WorkoutDetail({ id }: WorkoutDetailProps) {
     [navigate, id]
   );
   const deleteWithUndo = useDeleteWorkoutWithUndo(onBack);
-  const moveWorkout = useMoveWorkout();
+  const move = useGatedDetailMove();
 
   if (loading) return <RouteSpinner />;
   if (notFound || !record) return <WorkoutDetailNotFound onBack={onBack} />;
@@ -61,12 +62,17 @@ export default function WorkoutDetail({ id }: WorkoutDetailProps) {
         onClose={() => setDialog(null)}
         onMove={(date) => {
           setDialog(null);
-          void moveWorkout(record.id, date);
+          move.request(record.id, date);
         }}
         onDelete={() => {
           setDialog(null);
           void deleteWithUndo(record);
         }}
+      />
+      <SameSportPrompt
+        pending={move.pending}
+        onConfirm={move.confirm}
+        onCancel={move.cancel}
       />
     </>
   );

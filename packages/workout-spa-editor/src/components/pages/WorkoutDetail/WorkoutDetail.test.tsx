@@ -32,8 +32,13 @@ vi.mock("./use-delete-workout-with-undo", () => ({
   useDeleteWorkoutWithUndo: () => vi.fn(),
 }));
 
-vi.mock("./use-move-workout", () => ({
-  useMoveWorkout: () => vi.fn(),
+vi.mock("./use-gated-detail-move", () => ({
+  useGatedDetailMove: () => ({
+    pending: null,
+    request: vi.fn(),
+    confirm: vi.fn(),
+    cancel: vi.fn(),
+  }),
 }));
 
 vi.mock("./use-workout-detail-model", () => ({
