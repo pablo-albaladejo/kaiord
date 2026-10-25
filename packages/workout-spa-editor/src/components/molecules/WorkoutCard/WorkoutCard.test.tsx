@@ -319,7 +319,7 @@ describe("WorkoutCard", () => {
 
     // Assert
     expect(screen.getByTestId("garmin-drift-badge")).toHaveTextContent(
-      "Garmin (?) Sun 5"
+      "Garmin? Sun 5"
     );
     expect(screen.getByRole("button")).toHaveAccessibleName(
       /; Garmin may still be on Sun, Apr 5$/

@@ -50,7 +50,7 @@
   },
   "garminDrift": {
     "badge": "Garmin: {{day}}",
-    "badgeUnconfirmed": "Garmin (?) {{day}}",
+    "badgeUnconfirmed": "Garmin? {{day}}",
     "placed": "En Garmin sigue el {{date}}",
     "unconfirmed": "En Garmin puede seguir el {{date}}",
     "moved": "Entrenamiento movido",

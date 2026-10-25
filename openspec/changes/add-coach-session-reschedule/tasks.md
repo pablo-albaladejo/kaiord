@@ -122,7 +122,7 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       `placed` and `unconfirmed`, plus no drift for a locked session. Write
       the truth-table tests first (AC-19, AC-29).
 - [x] 3.2 Read the visible week's ledger rows with one live query. Show the
-      card badge ("Garmin:" / "Garmin (?)") off the week's critical read
+      card badge ("Garmin:" / "Garmin?") off the week's critical read
       (AC-19).
 - [x] 3.3 Show the detail and dialog state ("still on" / "may still be on")
       and **Update Garmin**, which goes through `useGarminPush` →
