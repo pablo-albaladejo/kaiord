@@ -60,7 +60,10 @@ export const UpdateGarminToastAction = forwardRef<HTMLButtonElement, Props>(
     if (reason)
       return (
         <span className="flex max-w-[14rem] flex-col items-end gap-1">
+          {/* No onClick: Radix's would close the toast and drop the reason. */}
           <button
+            {...rest}
+            ref={ref}
             type="button"
             disabled
             aria-describedby={reasonId}

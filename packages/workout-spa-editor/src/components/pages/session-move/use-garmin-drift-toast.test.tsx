@@ -7,7 +7,7 @@ import "fake-indexeddb/auto";
 
 import { act, render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
+import { createRef, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
@@ -26,6 +26,7 @@ import {
   useToastContext,
 } from "../../../contexts/ToastContext";
 import type { PersistencePort } from "../../../ports/persistence-port";
+import { UpdateGarminToastAction } from "./UpdateGarminToastAction";
 import { useGarminDriftToast } from "./use-garmin-drift-toast";
 
 const pushTo = vi.fn(async (): Promise<PlacementResult | undefined> => ({
@@ -231,6 +232,34 @@ describe("useGarminDriftToast", () => {
       expect(screen.getByText(why)).toBeVisible();
     }
   );
+
+  it("should hand the toast primitive's ref and props to the disabled button", async () => {
+    // Arrange
+    Object.assign(bridge, { sessionActive: false });
+    const ref = createRef<HTMLButtonElement>();
+    const onClick = vi.fn();
+    const persistence = await seedSession({ workout: { date: THU } });
+
+    // Act
+    render(
+      <PersistenceProvider persistence={persistence}>
+        <ToastContextProvider>
+          <UpdateGarminToastAction
+            ref={ref}
+            workoutId="w"
+            data-radix-toast-announce-exclude=""
+            onClick={onClick}
+          />
+        </ToastContextProvider>
+      </PersistenceProvider>
+    );
+
+    // Assert
+    expect(ref.current).toBe(updateButtons()[0]);
+    expect(ref.current).toBeDisabled();
+    expect(ref.current).toHaveAttribute("data-radix-toast-announce-exclude");
+    expect(onClick).not.toHaveBeenCalled();
+  });
 
   it.each([
     ["Garmin already holds the new day", placedOn(THU)],
