@@ -2,7 +2,8 @@
  * Grid drag on a coach session (design §3.8, AC-21): a Train2Go plan synced
  * through the bridge stub and converted by hand is dragged from Tuesday to
  * Thursday, and a reload keeps it there. A session already done is not
- * draggable: dropping it elsewhere leaves it on its day.
+ * draggable: the same hover that highlights a day for a movable card
+ * highlights none for it, and it stays on its day.
  */
 import type { Locator, Page } from "@playwright/test";
 
@@ -18,6 +19,7 @@ const NOW = new Date(`${TUE}T08:00:00Z`).toISOString();
 const PLAN_ID = 4101;
 const PLAN_CARD = `train2go:${PLAN_ID}`;
 const DONE_ID = 4102;
+const SOLO_ID = "coach-drag-solo";
 
 type Db = {
   table: (n: string) => {
@@ -90,15 +92,19 @@ const seedProfile = (page: Page) =>
     }
   );
 
-/** The converted workout of the Wednesday plan, its match holding a recording. */
+/**
+ * The converted workout of the Wednesday plan, its match holding a
+ * recording, and a solo workout that can move. The activity itself comes
+ * from the sync, which runs first so the match never dangles.
+ */
 const seedDoneSession = (page: Page) =>
   page.evaluate(
-    async ({ profileId, ts, day, id, planned, recording }) => {
+    async ({ profileId, ts, day, id, planned, recording, solo }) => {
       const db = (window as unknown as { __KAIORD_DB__: Db }).__KAIORD_DB__;
-      // The activity itself comes from the sync, which owns the week.
       const activityId = `${profileId}:train2go:${id}`;
       await db.table("workouts").put(planned);
       await db.table("workouts").put(recording);
+      await db.table("workouts").put(solo);
       await db.table("sessionMatches").put({
         id: `match-${id}`,
         profileId,
@@ -121,6 +127,7 @@ const seedDoneSession = (page: Page) =>
         coachDate: WED,
       }),
       recording: workoutRow("done-recording", WED, {}),
+      solo: workoutRow(SOLO_ID, WED, { sport: "running" }),
     }
   );
 
@@ -229,12 +236,20 @@ test.describe("Coach session drag", () => {
 
   test("should not move a session that is already done", async ({ page }) => {
     // Arrange
-    await seedDoneSession(page);
     await syncWeek(page);
+    await page
+      .getByTestId(`coaching-card-train2go:${DONE_ID}`)
+      .waitFor({ timeout: 15_000 });
+    await seedDoneSession(page);
     const card = page.getByTestId(`matched-card-train2go:${DONE_ID}`);
     await expect(dayColumn(page, WED).locator(card)).toBeVisible({
       timeout: 10_000,
     });
+    // Positive control: the same hover on a movable card highlights a day.
+    await hoverDragOver(page, page.getByTestId(`workout-card-${SOLO_ID}`), FRI);
+    await expect(dropTarget(page)).toHaveAttribute("data-day", FRI);
+    await page.mouse.up();
+    await expect.poll(() => workoutDate(page, SOLO_ID)).toBe(FRI);
 
     // Act
     await hoverDragOver(page, card, FRI);
