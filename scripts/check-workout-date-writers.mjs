@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Mechanical guard (R-WorkoutDateWriters, design §3.10 of
- * add-coach-session-reschedule): every `workouts.put(` / `workouts.bulkPut(`
- * and `table("workouts").put|bulkPut(` call site under
+ * add-coach-session-reschedule): every `put` / `bulkPut` / `update` / `add` /
+ * `bulkAdd` call on `workouts` or `table("workouts")` under
  * `packages/workout-spa-editor/src` (tests excluded) MUST be classified in
  * `WORKOUT_DATE_WRITERS`.
  *
@@ -11,7 +11,8 @@
  * move made meanwhile, so every writer is one of:
  *
  *   - `date-writer` — changes the date and re-dates the match: the file (or
- *     the `via` module it imports) MUST call `sessionMatch.updateDate(`.
+ *     the `via` module it MUST import) MUST call `sessionMatch.updateDate(`.
+ *     `via` is rejected on any other reason.
  *   - `date-preserving` — re-reads and writes in one transaction, keeping
  *     the fresh `date`.
  *   - `creator` — writes a new row or restores a deleted one, so no match
@@ -108,8 +109,10 @@ export const WORKOUT_DATE_WRITERS = [
 ];
 
 const WRITE_RE =
-  /\b(?:workouts|table\(\s*["']workouts["']\s*\))\s*\.\s*(?:put|bulkPut)\s*\(/g;
+  /\b(?:workouts|table\(\s*["']workouts["']\s*\))\s*\.\s*(?:put|bulkPut|update|add|bulkAdd)\s*\(/g;
 const UPDATE_DATE_RE = /\bsessionMatch\s*\.\s*updateDate\s*\(/;
+const SPECIFIER_RE =
+  /\bfrom\s*["']([^"']+)["']|\bimport\s*\(\s*["']([^"']+)["']/g;
 const SKIPPED = /\.(test|stories)\.tsx?$|\.test-[\w-]+\.tsx?$|test-setup\.ts$/;
 
 // Blank out comments, keeping newlines so line numbers still match.
@@ -138,12 +141,36 @@ const callsUpdateDate = (root, file) =>
   existsSync(join(root, file)) &&
   UPDATE_DATE_RE.test(stripComments(readFileSync(join(root, file), "utf8")));
 
+const SOURCE_SUFFIXES = ["", ".ts", ".tsx", "/index.ts", "/index.tsx"];
+
+/** Whether `file` imports a relative specifier that resolves to `via`. */
+const importsVia = (root, file, via) => {
+  const code = stripComments(readFileSync(join(root, file), "utf8"));
+  return [...code.matchAll(SPECIFIER_RE)]
+    .map((m) => m[1] ?? m[2])
+    .filter((spec) => spec.startsWith("."))
+    .some((spec) => {
+      const target = relative(root, resolve(root, dirname(file), spec));
+      return SOURCE_SUFFIXES.some(
+        (suffix) => `${target}${suffix}`.replaceAll("\\", "/") === via
+      );
+    });
+};
+
 const checkDateWriter = (root, entry) => {
+  if (entry.via && !importsVia(root, entry.file, entry.via))
+    return [`${entry.file}: via ${entry.via} is not imported by the file`];
   if (callsUpdateDate(root, entry.file)) return [];
   if (entry.via && callsUpdateDate(root, entry.via)) return [];
   return [
     `${entry.file}: a date-writer must call sessionMatch.updateDate(${entry.via ? ` (directly or in ${entry.via})` : ""}`,
   ];
+};
+
+const checkEntry = (root, entry) => {
+  if (entry.via && entry.reason !== "date-writer")
+    return [`${entry.file}: via is only allowed on a date-writer`];
+  return entry.reason === "date-writer" ? checkDateWriter(root, entry) : [];
 };
 
 export const runCheck = ({
@@ -165,8 +192,7 @@ export const runCheck = ({
   for (const entry of registry) {
     if (!writers.has(entry.file))
       problems.push(`${entry.file}: stale entry, no workout write left`);
-    else if (entry.reason === "date-writer")
-      problems.push(...checkDateWriter(root, entry));
+    else problems.push(...checkEntry(root, entry));
   }
   return problems;
 };

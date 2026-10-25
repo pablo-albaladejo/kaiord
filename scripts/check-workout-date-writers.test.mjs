@@ -95,7 +95,7 @@ test("should fail a date-writer that never re-dates the match", () => {
 test("should accept a date-writer that re-dates the match through its via module", () => {
   // Arrange
   const files = {
-    "app/follow.ts": `await deps.workouts.put(next);\nawait redate(deps);\n`,
+    "app/follow.ts": `import { redate } from "./redate";\nawait deps.workouts.put(next);\nawait redate(deps);\n`,
     "app/redate.ts": `await sessionMatch.updateDate(m.id, d, now);\n`,
   };
   const registry = [
@@ -112,6 +112,55 @@ test("should accept a date-writer that re-dates the match through its via module
 
   // Assert
   assert.deepEqual(problems, []);
+});
+
+test("should fail a via module the date-writer does not import", () => {
+  // Arrange
+  const files = {
+    "app/follow.ts": `import { other } from "./other";\nawait deps.workouts.put(next);\n`,
+    "app/other.ts": `export const other = 1;\n`,
+    "app/redate.ts": `await sessionMatch.updateDate(m.id, d, now);\n`,
+  };
+  const registry = [
+    {
+      file: "app/follow.ts",
+      reason: "date-writer",
+      via: "app/redate.ts",
+      note: "follows",
+    },
+  ];
+
+  // Act
+  const problems = withTree(files, (root) => runCheck({ root, registry }));
+
+  // Assert
+  assert.deepEqual(problems, [
+    "app/follow.ts: via app/redate.ts is not imported by the file",
+  ]);
+});
+
+test("should fail a via on an entry that is not a date-writer", () => {
+  // Arrange
+  const files = {
+    "ui/create.ts": `import { redate } from "../app/redate";\n${CREATE}`,
+    "app/redate.ts": `await sessionMatch.updateDate(m.id, d, now);\n`,
+  };
+  const registry = [
+    {
+      file: "ui/create.ts",
+      reason: "creator",
+      via: "app/redate.ts",
+      note: "creates",
+    },
+  ];
+
+  // Act
+  const problems = withTree(files, (root) => runCheck({ root, registry }));
+
+  // Assert
+  assert.deepEqual(problems, [
+    "ui/create.ts: via is only allowed on a date-writer",
+  ]);
 });
 
 test("should fail a stale registry entry", () => {
@@ -132,7 +181,7 @@ test("should fail a stale registry entry", () => {
   ]);
 });
 
-test("should find writes through deps, persistence, db and a table call", () => {
+test("should find put, bulkPut, update, add and bulkAdd writes through any handle", () => {
   // Arrange
   const source = [
     "deps.workouts.put(a);",
@@ -140,13 +189,16 @@ test("should find writes through deps, persistence, db and a table call", () => 
     "db.workouts.put(c);",
     'db.table("workouts").put(d);',
     "persistence.workouts.getById(e);",
+    "deps.workouts.update(f, { date });",
+    "db.workouts.add(g);",
+    'db.table("workouts").bulkAdd([h]);',
   ].join("\n");
 
   // Act
   const lines = findWriteLines(source);
 
   // Assert
-  assert.deepEqual(lines, [1, 2, 3, 4]);
+  assert.deepEqual(lines, [1, 2, 3, 4, 6, 7, 8]);
 });
 
 test("should classify every entry with a known reason and a note", () => {
