@@ -4,9 +4,6 @@
  * Co-located fixture module — pure constants only.
  */
 
-// Async cleanup wait window (ms) used in afterEach.
-export const CLEANUP_WAIT_MS = 50;
-
 // Reject threshold sanity inputs for the 10 MB limit guard.
 export const FILE_SIZE_REJECT = {
   megabytes: 11,
