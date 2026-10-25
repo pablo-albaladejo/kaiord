@@ -15,3 +15,9 @@ The editor SHALL link a web app manifest from its `index.html` at `<base>manifes
 - **GIVEN** the merged site tree the deploy publishes
 - **WHEN** the dist guard reads `app/index.html` with base `/app/`
 - **THEN** the HTML SHALL link `/app/manifest.webmanifest`, the manifest SHALL parse with `id`, `start_url` and `scope` `/app/`, and its 192 and 512 icons SHALL exist at those pixel sizes
+
+#### Scenario: No service worker is registered
+
+- **GIVEN** the editor running under `vite dev`, or a production build whose `<base>sw.js` the host does not serve
+- **WHEN** the editor loads
+- **THEN** no service worker SHALL be registered and every chunk SHALL load from the network

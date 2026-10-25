@@ -9,6 +9,7 @@
 - [ ] 2.1 Registration module (PROD only, base scope, silent failure, hourly visible update check) + vitest with a fake `navigator.serviceWorker`
 - [ ] 2.2 Update toast with Reload action, en/es strings, discard-edits confirmation, reload only the clicking tab
 - [ ] 2.3 Wire from `main.tsx` after first render
+- [ ] 2.4 Schema-skew guard (D9): pre-open version probe, `versionchange` override with `disableAutoOpen: true`, blocking stale-code dialog (en/es) + `fake-indexeddb` tests
 
 ## 3. Deploy and CI
 
