@@ -144,13 +144,13 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
 
 ## 4. E2E, docs and release note (PR-4, after PR-2 and PR-3)
 
-- [ ] 4.1 Extend the Train2Go bridge stub so a coach move can be scripted
+- [x] 4.1 Extend the Train2Go bridge stub so a coach move can be scripted
       between syncs: same `sourceId`, new date.
-- [ ] 4.2 Add `e2e/coach-session-reschedule.spec.ts` with flows 1–4 and 6 of
+- [x] 4.2 Add `e2e/coach-session-reschedule.spec.ts` with flows 1–4 and 6 of
       design §Test plan PR-4, on a fresh profile (AC-22).
-- [ ] 4.3 Add `e2e/coach-session-reschedule-garmin.spec.ts` with flow 5,
+- [x] 4.3 Add `e2e/coach-session-reschedule-garmin.spec.ts` with flow 5,
       using the Garmin calendar stub (AC-22).
-- [ ] 4.4 Write the user docs: moving a session, what "Moved from" and
+- [x] 4.4 Write the user docs: moving a session, what "Moved from" and
       "Garmin still on" mean, and that Train2Go is not updated. Write the
       release note: coach-moved cards now move, and stale cards are healed on
       the first launch.
