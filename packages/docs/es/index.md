@@ -14,6 +14,8 @@ está [en inglés](/).
   genera y ajusta sesiones con Anthropic, OpenAI o Google.
 - [La recuperación de WHOOP en tu plan de entrenamiento](/es/guide/whoop-recovery-in-plan):
   recuperación, VFC y sueño junto a tus entrenamientos.
+- [Mueve a otro día las sesiones de tu entrenador](/es/guide/move-coach-sessions):
+  cambia el día de una sesión de Train2Go y mantén Garmin al día.
 - [Kaiord frente a TrainingPeaks, intervals.icu y Garmin Connect](/es/guide/kaiord-vs-trainingpeaks-intervals-garmin):
   una comparación con fuentes.
 

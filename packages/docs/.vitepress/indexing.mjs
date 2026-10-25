@@ -127,6 +127,7 @@ export function apiSourcePaths(url, packages) {
 export const HREFLANG_PAIRS = [
   "guide/ai-planning-byok",
   "guide/whoop-recovery-in-plan",
+  "guide/move-coach-sessions",
   "guide/kaiord-vs-trainingpeaks-intervals-garmin",
 ].map((path) => ({ en: `${path}.md`, es: `es/${path}.md` }));
 

@@ -16,7 +16,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 /** Mirrors `defaultView()` in `src/components/pages/use-calendar-page.ts`. */
-const GRID_MIN_WIDTH = 768;
+export const GRID_MIN_WIDTH = 768;
 
 export type CalendarDay = {
   /** The day's container: grid column or list section. */
