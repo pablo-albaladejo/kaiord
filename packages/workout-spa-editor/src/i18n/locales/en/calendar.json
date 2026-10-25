@@ -126,6 +126,10 @@
     "overridden_one": "{{count}} of them replaced a day you had chosen.",
     "overridden_other": "{{count}} of them replaced days you had chosen.",
     "sendHint": "Send the week to update Garmin.",
+    "entry": "The coach moved it to {{coachDate}}; you had it on {{athleteDate}}.",
+    "moveBack": "Move back to {{athleteDate}}",
+    "more_one": "{{count}} more session.",
+    "more_other": "{{count}} more sessions.",
     "dismiss": "Dismiss"
   },
   "sendWeek": {

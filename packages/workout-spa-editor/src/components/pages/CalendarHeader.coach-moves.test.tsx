@@ -49,7 +49,11 @@ describe("CalendarHeader coach-move notice", () => {
       </CoachMoveNoticeProvider>
     );
     act(() =>
-      actions.report("p1", WEEK, { coachMoves: 1, overriddenLocalMoves: 0 })
+      actions.report("p1", WEEK, {
+        coachMoves: 1,
+        overriddenLocalMoves: 0,
+        overridden: [],
+      })
     );
     const status = screen.getByRole("status");
 

@@ -5,12 +5,10 @@
  */
 import { useId, useState } from "react";
 
-import type {
-  Movability,
-  NotMovableReason,
-} from "../../../application/session-movability";
+import type { Movability } from "../../../application/session-movability";
 import { useTranslate } from "../../../i18n/use-translate";
 import { ScheduleDateDialog } from "../ScheduleDateDialog";
+import { MOVE_REASON_KEYS } from "./move-reason-keys";
 
 export type MoveSessionActionProps = {
   date: string;
@@ -19,19 +17,15 @@ export type MoveSessionActionProps = {
   onMoveTo?: (date: string) => void;
 };
 
-const REASON_KEYS: Record<NotMovableReason, string> = {
-  executed: "move.blockedExecuted",
-  completed: "move.blockedCompleted",
-  projected: "move.blockedProjected",
-};
-
 export function MoveSessionAction(props: MoveSessionActionProps) {
   const t = useTranslate("coaching");
   const [open, setOpen] = useState(false);
   const reasonId = useId();
   const { movability, onMoveTo } = props;
   if (!movability || !onMoveTo) return null;
-  const reason = movability.movable ? null : REASON_KEYS[movability.reason];
+  const reason = movability.movable
+    ? null
+    : MOVE_REASON_KEYS[movability.reason];
   return (
     <>
       <button
