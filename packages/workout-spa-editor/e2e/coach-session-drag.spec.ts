@@ -4,10 +4,16 @@
  * Thursday, and a reload keeps it there. A session already done is not
  * draggable: the same hover that highlights a day for a movable card
  * highlights none for it, and it stays on its day.
+ *
+ * Drag exists only from 768px up: `usePointerDrag` is enabled by
+ * `isDesktopViewport()` (`(min-width: 768px)`), so a phone has no drag in
+ * either view. There a session moves through the dialog's Move to another
+ * day, which coach-session-reschedule.spec.ts covers in the List view.
  */
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { GRID_MIN_WIDTH } from "./helpers/calendar-day";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
 import { installTrain2GoBridgeStub } from "./helpers/train2go-bridge-stub";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -178,6 +184,10 @@ const syncAndConvert = async (page: Page): Promise<Locator> => {
 };
 
 test.describe("Coach session drag", () => {
+  test.skip(
+    ({ viewport }) => (viewport?.width ?? 0) < GRID_MIN_WIDTH,
+    "Drag needs a 768px viewport (isDesktopViewport); phones move through the dialog"
+  );
   test.beforeEach(async ({ page }) => {
     await installTrain2GoBridgeStub(page, {
       weekActivities: [
