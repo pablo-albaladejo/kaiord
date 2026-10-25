@@ -11,7 +11,10 @@ export type T2GStubScriptArgs = {
   bridgeId: string;
   caps: readonly string[];
   payload: unknown;
-  /** What `read-week` returns, for every week; empty by default. */
+  /**
+   * What `read-week` returns, for every week; empty by default. A test can
+   * replace it between syncs with `setStubWeekActivities` (train2go-stub-week).
+   */
   activities?: readonly unknown[];
 };
 
@@ -61,7 +64,8 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
         userId: "99999",
         userName: "Test User",
       }),
-    "read-week": () => wrap({ activities: args.activities ?? [] }),
+    "read-week": () =>
+      wrap({ activities: win.__T2G_STUB_WEEK__ ?? args.activities ?? [] }),
     "read-day": () => wrap({ activities: [] }),
     "read-details": () => wrap(args.payload),
     "open-train2go": () => wrap(null),

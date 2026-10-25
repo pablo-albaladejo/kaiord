@@ -22,6 +22,7 @@
 import type { Page } from "@playwright/test";
 
 import { installStubScript } from "./train2go-bridge-stub-page-script";
+import { restoreStubWeekScript } from "./train2go-stub-week";
 
 export const TRAIN2GO_EXTENSION_ID = "train2go-stub-ext";
 export const TRAIN2GO_BRIDGE_ID = "train2go-bridge";
@@ -97,6 +98,7 @@ export const installTrain2GoBridgeStub = async (
     payload: options.zonesPayload ?? FIXTURE_ZONES_PAYLOAD,
     activities: options.weekActivities,
   });
+  await page.addInitScript(restoreStubWeekScript);
 };
 
 /** Returns the action names recorded by the stub since page load (or last clear). */
