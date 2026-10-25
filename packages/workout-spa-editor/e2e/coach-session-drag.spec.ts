@@ -152,6 +152,9 @@ const hoverDragOver = async (page: Page, card: Locator, day: string) => {
   });
 };
 
+/** The copy of the card that follows the pointer while it is dragged. */
+const dragGhost = (page: Page) => page.getByTestId("calendar-drag-ghost");
+
 /** The day the drag would drop on, highlighted only while a drag runs. */
 const dropTarget = (page: Page) => page.locator('[data-drop-target="true"]');
 
@@ -231,10 +234,16 @@ test.describe("Coach session drag", () => {
     // Act
     await hoverDragOver(page, card, THU);
     await expect(dropTarget(page)).toHaveAttribute("data-day", THU);
+    await expect(dragGhost(page)).toBeVisible();
+    await expect(card.locator("xpath=..")).toHaveAttribute(
+      "data-dragging",
+      "true"
+    );
     await page.mouse.up();
     await expect(dayColumn(page, THU).locator(card)).toBeVisible({
       timeout: 10_000,
     });
+    await expect(dragGhost(page)).toHaveCount(0);
     await page.reload();
 
     // Assert

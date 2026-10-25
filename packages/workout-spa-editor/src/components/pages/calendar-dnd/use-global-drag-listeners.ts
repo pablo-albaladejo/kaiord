@@ -1,10 +1,15 @@
-import { useEffect } from "react";
+import { type RefObject, useEffect } from "react";
 
-import { readDayFromPoint } from "./use-pointer-drag-helpers";
+import type { DragPreview } from "./drag-preview";
+import {
+  readDayElementFromPoint,
+  readDayFromPoint,
+} from "./use-pointer-drag-helpers";
 
 type Args = {
   activeWorkoutId: string | null;
   enabled: boolean;
+  previewRef: RefObject<DragPreview | null>;
   onDrop: (workoutId: string, targetDayISO: string) => void;
   reset: () => void;
   setDropTargetId: (id: string | null) => void;
@@ -13,6 +18,7 @@ type Args = {
 export function useGlobalDragListeners({
   activeWorkoutId,
   enabled,
+  previewRef,
   onDrop,
   reset,
   setDropTargetId,
@@ -20,15 +26,23 @@ export function useGlobalDragListeners({
   useEffect(() => {
     if (!enabled || !activeWorkoutId) return;
     const onMove = (e: PointerEvent) => {
+      previewRef.current?.move(e.clientX, e.clientY);
       setDropTargetId(readDayFromPoint(e.clientX, e.clientY));
     };
     const onUp = (e: PointerEvent) => {
-      const target = readDayFromPoint(e.clientX, e.clientY);
+      const dayEl = readDayElementFromPoint(e.clientX, e.clientY);
+      const target = dayEl?.dataset.day ?? null;
+      previewRef.current?.end(dayEl);
+      previewRef.current = null;
       const sourceId = activeWorkoutId;
       reset();
       if (target && sourceId) onDrop(sourceId, target);
     };
-    const onCancel = () => reset();
+    const onCancel = () => {
+      previewRef.current?.end(null);
+      previewRef.current = null;
+      reset();
+    };
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onCancel);
@@ -37,5 +51,5 @@ export function useGlobalDragListeners({
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onCancel);
     };
-  }, [activeWorkoutId, enabled, onDrop, reset, setDropTargetId]);
+  }, [activeWorkoutId, enabled, previewRef, onDrop, reset, setDropTargetId]);
 }
