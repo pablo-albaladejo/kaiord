@@ -52,7 +52,11 @@
     "badge": "Garmin: {{day}}",
     "badgeUnconfirmed": "Garmin?: {{day}}",
     "placed": "Garmin still on {{date}}",
-    "unconfirmed": "Garmin may still be on {{date}}"
+    "unconfirmed": "Garmin may still be on {{date}}",
+    "moved": "Workout moved",
+    "update": "Update Garmin",
+    "updated": "Garmin updated",
+    "notUpdated": "Garmin was not updated. Open the workout to see why."
   },
   "lifecycle": {
     "raw": "Raw",

@@ -4,6 +4,7 @@
  * detail shows. A card that is itself a button cannot expose an inner name,
  * so it appends `useGarminDriftLabel` to its own.
  */
+import type { Locale } from "@kaiord/i18n";
 import { useTranslation } from "react-i18next";
 
 import type { GarminDateDrift } from "../../../application/garmin-placement/garmin-date-drift";
@@ -14,14 +15,21 @@ import { useGarminDriftOf } from "./garmin-drift-context";
 const dayNumber = (date: string) => String(Number(date.slice(8)));
 
 /** "Garmin still on Tue, Oct 6", or "may still be on" when unconfirmed. */
-export const useGarminDriftSentence = (drift: GarminDateDrift | undefined) => {
-  const { t } = useTranslation("calendar");
-  const locale = useActiveLocale();
-  if (!drift) return undefined;
+export const driftSentence = (
+  t: (key: string, params: { date: string }) => string,
+  locale: Locale,
+  drift: GarminDateDrift
+) => {
   const date = weekdayDate(drift.placedOn, locale);
   return drift.certainty === "placed"
     ? t("garminDrift.placed", { date })
     : t("garminDrift.unconfirmed", { date });
+};
+
+export const useGarminDriftSentence = (drift: GarminDateDrift | undefined) => {
+  const { t } = useTranslation("calendar");
+  const locale = useActiveLocale();
+  return drift ? driftSentence(t, locale, drift) : undefined;
 };
 
 export const useGarminDriftLabel = (workoutId: string) =>

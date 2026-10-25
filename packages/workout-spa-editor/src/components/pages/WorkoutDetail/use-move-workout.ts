@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 import {
   moveSession,
@@ -8,6 +8,7 @@ import {
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
+import { useGarminDriftToast } from "../session-move/use-garmin-drift-toast";
 
 const nowIso = () => new Date().toISOString();
 
@@ -15,12 +16,15 @@ const nowIso = () => new Date().toISOString();
  * Moves a workout to another day through `moveSession`, the same use case
  * the calendar drag runs. A done session and a workout deleted meanwhile are
  * toasts, never a rejection: the live record query already turns the page
- * into "not found".
+ * into "not found". When Garmin still holds the old day, the drift toast
+ * replaces the confirmation.
  */
 export function useMoveWorkout() {
   const persistence = usePersistence();
   const toast = useToastContext();
   const t = useTranslate("workout-detail");
+  const getPersistence = useMemo(() => () => persistence, [persistence]);
+  const notifyDrift = useGarminDriftToast(getPersistence);
 
   return useCallback(
     async (workoutId: string, date: string) => {
@@ -29,7 +33,8 @@ export function useMoveWorkout() {
           { ...persistence, now: nowIso },
           { workoutId, targetDay: date }
         );
-        toast.success(t("move.done"));
+        const drifted = await notifyDrift(workoutId).catch(() => false);
+        if (!drifted) toast.success(t("move.done"));
       } catch (error) {
         if (error instanceof SessionNotMovableError) {
           if (error.reason === "executed")
@@ -41,6 +46,6 @@ export function useMoveWorkout() {
         toast.error(t("move.notFound"));
       }
     },
-    [persistence, toast, t]
+    [persistence, toast, t, notifyDrift]
   );
 }
