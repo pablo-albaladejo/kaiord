@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import { checkTrainingPeaksSession } from "../adapters/trainingpeaks/trainingpeaks-transport";
 import { executeWorkoutPush } from "../application/export/execute-workout-push";
+import type { RepushVerdict } from "../application/trainingpeaks/trainingpeaks-repush-guard";
 import { toTrainingPeaksThresholds } from "../application/trainingpeaks/trainingpeaks-thresholds";
 import { useAnalytics } from "../contexts";
 import type { WorkoutRecord } from "../types/calendar-record";
@@ -13,6 +14,7 @@ import {
   policyRepo,
   TRAININGPEAKS_BRIDGE_ID,
 } from "./trainingpeaks-push-fn";
+import { checkTrainingPeaksRepush } from "./trainingpeaks-repush-check";
 import { useActiveProfileLive } from "./use-active-profile-live";
 
 export type TrainingPeaksPushOutcome =
@@ -21,7 +23,12 @@ export type TrainingPeaksPushOutcome =
    * the in-flight POST — the push still succeeded, this caller just does not
    * own the id. Callers must not assume an id is always there.
    */
-  { ok: true; workoutId: string | undefined } | { ok: false; message: string };
+  | { ok: true; workoutId: string | undefined }
+  | { ok: false; message: string }
+  /** A changed workout TrainingPeaks already holds; `allowCopy` overrides. */
+  | { ok: false; block: Extract<RepushVerdict, { blocked: true }> };
+
+export type TrainingPeaksPushOptions = { allowCopy?: boolean };
 
 /**
  * Pushes a persisted workout to the athlete's TrainingPeaks calendar.
@@ -41,46 +48,59 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
   const analytics = useAnalytics();
   const profile = useActiveProfileLive()?.profile ?? null;
 
-  const push = useCallback(async (): Promise<TrainingPeaksPushOutcome> => {
-    if (!workout?.krd) return { ok: false, message: "Workout has no KRD" };
-    const extensionId = bridgeDiscovery.getExtensionId(TRAININGPEAKS_BRIDGE_ID);
-    if (!extensionId) {
-      return { ok: false, message: "TrainingPeaks bridge is not installed" };
-    }
-
-    try {
-      const session = await checkTrainingPeaksSession(extensionId);
-      if (!session.authenticated || session.athleteId === undefined) {
-        return { ok: false, message: "Sign in to TrainingPeaks and retry" };
-      }
-      const payload = krdToTrainingPeaksWorkout(workout.krd, {
-        athleteId: session.athleteId,
-        workoutDay: workout.date,
-        thresholds: toTrainingPeaksThresholds(
-          profile?.sportZones,
-          workout.sport,
-          profile?.maxHeartRate
-        ),
-      });
-      const result = await executeWorkoutPush(
-        { policyRepo, ledgerRepo },
-        {
-          profileId: workout.profileId,
-          kaiordRecordId: workout.id,
-          destinationBridgeId: TRAININGPEAKS_BRIDGE_ID,
-          payload: { ...payload },
-          pushFn: buildTrainingPeaksPushFn(extensionId),
-        }
+  const push = useCallback(
+    async (
+      options?: TrainingPeaksPushOptions
+    ): Promise<TrainingPeaksPushOutcome> => {
+      if (!workout?.krd) return { ok: false, message: "Workout has no KRD" };
+      const extensionId = bridgeDiscovery.getExtensionId(
+        TRAININGPEAKS_BRIDGE_ID
       );
-      analytics.event("trainingpeaks-workout-pushed", { result: "success" });
-      return { ok: true, workoutId: result.externalId };
-    } catch (error: unknown) {
-      analytics.event("trainingpeaks-workout-pushed", { result: "failure" });
-      const message =
-        error instanceof Error ? error.message : "TrainingPeaks push failed";
-      return { ok: false, message };
-    }
-  }, [workout, profile, analytics]);
+      if (!extensionId) {
+        return { ok: false, message: "TrainingPeaks bridge is not installed" };
+      }
+
+      try {
+        const session = await checkTrainingPeaksSession(extensionId);
+        if (!session.authenticated || session.athleteId === undefined) {
+          return { ok: false, message: "Sign in to TrainingPeaks and retry" };
+        }
+        const payload = krdToTrainingPeaksWorkout(workout.krd, {
+          athleteId: session.athleteId,
+          workoutDay: workout.date,
+          thresholds: toTrainingPeaksThresholds(
+            profile?.sportZones,
+            workout.sport,
+            profile?.maxHeartRate
+          ),
+        });
+        if (!options?.allowCopy) {
+          const verdict = await checkTrainingPeaksRepush(workout, {
+            ...payload,
+          });
+          if (verdict.blocked) return { ok: false, block: verdict };
+        }
+        const result = await executeWorkoutPush(
+          { policyRepo, ledgerRepo },
+          {
+            profileId: workout.profileId,
+            kaiordRecordId: workout.id,
+            destinationBridgeId: TRAININGPEAKS_BRIDGE_ID,
+            payload: { ...payload },
+            pushFn: buildTrainingPeaksPushFn(extensionId),
+          }
+        );
+        analytics.event("trainingpeaks-workout-pushed", { result: "success" });
+        return { ok: true, workoutId: result.externalId };
+      } catch (error: unknown) {
+        analytics.event("trainingpeaks-workout-pushed", { result: "failure" });
+        const message =
+          error instanceof Error ? error.message : "TrainingPeaks push failed";
+        return { ok: false, message };
+      }
+    },
+    [workout, profile, analytics]
+  );
 
   return { push };
 };
