@@ -12,19 +12,22 @@ are MV3-specific and follow a different rendering pipeline.
 
 ## Key Files
 
-| File                   | Description                                                           |
-| ---------------------- | --------------------------------------------------------------------- |
-| `favicon.svg`          | **The mark.** Magenta on a baked dark plate; browser tab and OG cards |
-| `mark.svg`             | Product mark, pure `currentColor` — **inline it, never `<img src>`**  |
-| `mark-core-live.svg`   | App-header mark; core reads `var(--core-live, currentColor)`          |
-| `mark-app-icon.svg`    | Installed-app / dock icon, ink on a baked plate, ≥ 64 px              |
-| `logo.svg`             | Pre-rebrand wordmark + symbol. Kept until the wordmark is redrawn     |
-| `favicon.png`          | PNG fallback favicon (generated)                                      |
-| `favicon-16.png`       | 16×16 PNG favicon, legacy browsers and RSS readers (generated)        |
-| `favicon-32.png`       | 32×32 PNG favicon (generated)                                         |
-| `favicon-48.png`       | 48×48 PNG favicon (generated)                                         |
-| `apple-touch-icon.png` | iOS home-screen icon, 180×180, from `mark-app-icon.svg` (generated)   |
-| `og-image.png`         | Open-Graph / Twitter Card preview image (generated)                   |
+| File                         | Description                                                           |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `favicon.svg`                | **The mark.** Magenta on a baked dark plate; browser tab and OG cards |
+| `mark.svg`                   | Product mark, pure `currentColor` — **inline it, never `<img src>`**  |
+| `mark-core-live.svg`         | App-header mark; core reads `var(--core-live, currentColor)`          |
+| `mark-app-icon.svg`          | Installed-app / dock icon, ink on a baked plate, ≥ 64 px              |
+| `mark-app-icon-maskable.svg` | Maskable app icon: full-bleed plate, mark inside the 80% safe zone    |
+| `logo.svg`                   | Pre-rebrand wordmark + symbol. Kept until the wordmark is redrawn     |
+| `favicon.png`                | PNG fallback favicon (generated)                                      |
+| `favicon-16.png`             | 16×16 PNG favicon, legacy browsers and RSS readers (generated)        |
+| `favicon-32.png`             | 32×32 PNG favicon (generated)                                         |
+| `favicon-48.png`             | 48×48 PNG favicon (generated)                                         |
+| `apple-touch-icon.png`       | iOS home-screen icon, 180×180, from `mark-app-icon.svg` (generated)   |
+| `app-icon-{192,512}.png`     | Web app manifest icons, from `mark-app-icon.svg` (generated)          |
+| `app-icon-maskable-512.png`  | Maskable manifest icon, from the maskable master (generated)          |
+| `og-image.png`               | Open-Graph / Twitter Card preview image (generated)                   |
 
 ## For AI Agents
 
