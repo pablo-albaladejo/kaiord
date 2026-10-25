@@ -193,6 +193,15 @@ jobs:
           echo "✅ All required files present in merged artifact"
           node scripts/check-css-asset-urls.mjs --dist merged-dist/app --base /app/
 
+      # Installability over the tree that ships: the app's HTML links
+      # /app/manifest.webmanifest, scoped to /app/, with every icon present.
+      - name: SPA web app manifest guard
+        env:
+          REQUIRE_SPA_DIST: "1"
+          SPA_DIST: merged-dist/app
+          SPA_BASE: /app/
+        run: node --test packages/workout-spa-editor/scripts/dist-pwa-manifest.test.mjs
+
       - name: Inject SPA route fallback
         run: node scripts/inject-spa-fallback.mjs merged-dist
 
