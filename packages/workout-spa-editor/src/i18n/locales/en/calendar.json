@@ -44,6 +44,10 @@
     "confirm": "Move anyway",
     "cancel": "Cancel"
   },
+  "movedFrom": {
+    "label": "Moved from {{day}}",
+    "aria": "Moved from {{date}}"
+  },
   "lifecycle": {
     "raw": "Raw",
     "structured": "Structured",

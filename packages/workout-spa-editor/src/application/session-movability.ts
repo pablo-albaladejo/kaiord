@@ -11,8 +11,7 @@ import { isProjectedWorkoutRecord } from "./coaching/activity-to-workout-record"
 export type NotMovableReason = "executed" | "completed" | "projected";
 
 export type Movability =
-  | { movable: true }
-  | { movable: false; reason: NotMovableReason };
+  { movable: true } | { movable: false; reason: NotMovableReason };
 
 export type MovabilityInput = {
   workout: WorkoutRecord;
@@ -33,3 +32,7 @@ export const isMovableSession = (s: MovabilityInput): Movability => {
     return { movable: false, reason: "completed" };
   return { movable: true };
 };
+
+/** The athlete moved it off the coach's day (design §3.13, AC-17). */
+export const isAthleteMoved = (w: Pick<WorkoutRecord, "date" | "coachDate">) =>
+  w.coachDate !== undefined && w.date !== w.coachDate;

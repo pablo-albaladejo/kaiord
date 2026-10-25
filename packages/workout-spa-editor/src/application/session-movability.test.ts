@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isMovableSession } from "./session-movability";
+import { isAthleteMoved, isMovableSession } from "./session-movability";
 import { coachWorkout } from "./session-move.test-fixtures";
 
 const session = (
@@ -69,5 +69,33 @@ describe("isMovableSession", () => {
 
     // Assert
     expect(verdict).toEqual({ movable: false, reason: "projected" });
+  });
+});
+
+describe("isAthleteMoved", () => {
+  it("should flag a workout off the coach's day", () => {
+    // Arrange
+    const workout = coachWorkout({
+      date: "2026-10-08",
+      coachDate: "2026-10-06",
+    });
+
+    // Act
+    const moved = isAthleteMoved(workout);
+
+    // Assert
+    expect(moved).toBe(true);
+  });
+
+  it("should not flag a workout on the coach's day or one with no coach day", () => {
+    // Arrange
+    const onDay = coachWorkout({ date: "2026-10-06", coachDate: "2026-10-06" });
+    const own = coachWorkout({ coachDate: undefined });
+
+    // Act
+    const verdicts = [isAthleteMoved(onDay), isAthleteMoved(own)];
+
+    // Assert
+    expect(verdicts).toEqual([false, false]);
   });
 });

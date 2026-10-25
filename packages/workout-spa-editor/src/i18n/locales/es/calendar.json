@@ -44,6 +44,10 @@
     "confirm": "Mover igualmente",
     "cancel": "Cancelar"
   },
+  "movedFrom": {
+    "label": "Movida desde el {{day}}",
+    "aria": "Movida desde el {{date}}"
+  },
   "lifecycle": {
     "raw": "Sin procesar",
     "structured": "Estructurada",

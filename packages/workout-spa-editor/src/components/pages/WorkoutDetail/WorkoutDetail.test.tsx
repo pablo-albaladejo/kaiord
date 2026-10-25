@@ -179,4 +179,17 @@ describe("WorkoutDetail", () => {
       expect.objectContaining({ workout: RECORD, placementRow: PLACEMENT_ROW })
     );
   });
+
+  it("should name the coach's day when the athlete moved the workout (AC-17)", () => {
+    // Arrange
+    mockRecord = { ...RECORD, date: "2026-10-08", coachDate: "2026-10-06" };
+
+    // Act
+    render(<WorkoutDetail id="w1" />);
+
+    // Assert
+    expect(
+      screen.getByRole("img", { name: "Moved from Tue, Oct 6" })
+    ).toBeVisible();
+  });
 });
