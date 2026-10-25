@@ -88,9 +88,10 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       `sameSportOnDay(inputs, sport, canonicalSport)` as pure functions, with
       inputs for matched sessions, solo workouts and solo plans. Write their
       unit tests first, one per input (AC-11, AC-13..AC-15).
-- [x] 2.2 Add an indexed read of the target day's inputs for a date outside
-      the visible week, using `[profileId+date]` on `sessionMatches`,
-      `workouts` and `coachingActivities` (AC-16).
+- [x] 2.2 Add a stored-row read of the target day's inputs for every target
+      day (design §3.8): `[profileId+date]` on `workouts`, `activities` and
+      `coachingActivities`, and a `sessionMatch.listByProfile` scan for the
+      matches, since `sessionMatches` has no date index (AC-16).
 - [x] 2.3 Add Grid drag on movable `MatchedSessionCard`s in `renderDayCards`.
       Do not bind cards that are not movable, and never bind
       `CoachingActivityCard` (AC-11).
@@ -103,9 +104,10 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
 - [x] 2.6 Add the **Moved from {coachDate}** chip, in en and es, with an
       `aria-label` (AC-17).
 - [x] 2.7 Make `CoachMoveNotice` name the overridden athlete days, with
-      **Move back** for each, up to 3. Hide an entry once used or once
-      `date !== entry.coachDate`, read live with one `useLiveQuery` of
-      `workouts.bulkGet` (design §3.9). Provide en and es copy (AC-18).
+      **Move back** for each, up to 3. Hide an entry once
+      `date !== entry.coachDate`, read live with one `useLiveQuery` that
+      calls `workouts.getById` per entry, since the port has no bulk read
+      (design §3.9). Provide en and es copy (AC-18).
 - [x] 2.8 Reuse the blocked toast of 1.4b on the new entry points, and add
       the not-found toast, in en and es.
 - [x] 2.9 Add `e2e/coach-session-drag.spec.ts`: on a fresh profile with the
