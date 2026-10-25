@@ -27,6 +27,10 @@ vi.mock("wouter", () => ({
   useSearch: () => "",
 }));
 
+vi.mock("./DetailGarminDrift", () => ({
+  DetailGarminDrift: () => null,
+}));
+
 vi.mock("../../molecules/PushButton", () => ({
   PushButton: () => null,
 }));

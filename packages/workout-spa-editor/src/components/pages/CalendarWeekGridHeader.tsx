@@ -11,7 +11,7 @@ import type { Locale } from "@kaiord/i18n";
 
 import { useActiveLocale } from "../../i18n/LocaleProvider";
 import { useTranslate } from "../../i18n/use-translate";
-import { shortWeekdayName } from "./calendar-day-labels";
+import { shortWeekdayName } from "../../utils/calendar-day-labels";
 
 /* Today is the one filled pill on the row; the rest of the header stays flat,
    so the accent is spent once instead of on a column-wide wash. */

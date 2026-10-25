@@ -48,6 +48,16 @@
     "label": "Movida desde el {{day}}",
     "aria": "Movida desde el {{date}}"
   },
+  "garminDrift": {
+    "badge": "Garmin: {{day}}",
+    "badgeUnconfirmed": "Garmin? {{day}}",
+    "placed": "En Garmin sigue el {{date}}",
+    "unconfirmed": "En Garmin puede seguir el {{date}}",
+    "moved": "Entrenamiento movido",
+    "update": "Actualizar Garmin",
+    "updated": "Garmin actualizado",
+    "notUpdated": "Garmin no se ha actualizado. Abre el entrenamiento para ver por qué."
+  },
   "lifecycle": {
     "raw": "Sin procesar",
     "structured": "Estructurada",

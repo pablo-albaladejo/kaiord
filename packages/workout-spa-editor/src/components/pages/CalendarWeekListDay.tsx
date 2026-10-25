@@ -6,9 +6,9 @@ import { useTranslate } from "../../i18n/use-translate";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import type { DayWellness } from "../../types/health/day-wellness";
+import { weekdayDate } from "../../utils/calendar-day-labels";
 import { renderDayCards } from "../molecules/WorkoutCard/day-column-cards";
 import { WellnessBand } from "../molecules/WorkoutCard/WellnessBand/WellnessBand";
-import { weekdayDate } from "./calendar-day-labels";
 
 export type CalendarWeekListDayProps = {
   date: string;

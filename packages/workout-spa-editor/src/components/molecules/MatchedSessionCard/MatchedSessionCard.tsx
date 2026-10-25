@@ -16,6 +16,10 @@
 import type { CalendarView } from "../../../types/user-preferences";
 import { CardShell } from "../CardShell/CardShell";
 import { zoneBorderClass } from "../CardShell/status-tokens";
+import {
+  GarminDriftBadge,
+  useGarminDriftLabel,
+} from "../GarminDriftBadge/GarminDriftBadge";
 import { useMovedFromLabel } from "../MovedFromChip/MovedFromChip";
 import { useSessionZones } from "../WorkoutCard/use-session-zones";
 import { ZONE_BAR_HEIGHT } from "../ZoneProfileBar/zone-bar-height";
@@ -51,10 +55,11 @@ export function MatchedSessionCard({
   const executed = session.executed ?? [];
   const zones = useSessionZones(session.workout);
   const movedFrom = useMovedFromLabel(session.workout);
+  const garminDrift = useGarminDriftLabel(session.workout.id);
   return (
     <CardShell
       borderClass={zoneBorderClass(zones.dominant)}
-      ariaLabel={[buildAriaLabel(session), movedFrom]
+      ariaLabel={[buildAriaLabel(session), movedFrom, garminDrift]
         .filter(Boolean)
         .join("; ")}
       tooltip={buildTooltip(session)}
@@ -71,9 +76,12 @@ export function MatchedSessionCard({
         />
       }
       metadataRow={
-        density === "comfortable"
-          ? renderComfortableMetadata(session)
-          : renderCompactMetadata(session)
+        <>
+          {density === "comfortable"
+            ? renderComfortableMetadata(session)
+            : renderCompactMetadata(session)}
+          <GarminDriftBadge workoutId={session.workout.id} />
+        </>
       }
       secondaryRow={
         density === "comfortable"

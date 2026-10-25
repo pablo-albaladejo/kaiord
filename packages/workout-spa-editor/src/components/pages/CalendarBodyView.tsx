@@ -1,4 +1,5 @@
 import type { CoachingActivity } from "../../types/coaching-activity";
+import { CalendarGarminDrift } from "./CalendarGarminDrift";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
 import { CalendarWeekList } from "./CalendarWeekList";
 import type { CalendarPageReadyState } from "./use-calendar-page";
@@ -12,7 +13,15 @@ export type CalendarBodyViewProps = {
   wellnessByDay: CalendarPageReadyState["wellnessByDay"];
 };
 
-export function CalendarBodyView({
+export function CalendarBodyView(props: CalendarBodyViewProps) {
+  return (
+    <CalendarGarminDrift buckets={props.buckets}>
+      <CalendarBodyLayout {...props} />
+    </CalendarGarminDrift>
+  );
+}
+
+function CalendarBodyLayout({
   s,
   buckets,
   view,

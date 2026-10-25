@@ -9,7 +9,10 @@ import { useTranslation } from "react-i18next";
 import { isAthleteMoved } from "../../../application/session-movability";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { shortWeekdayName, weekdayDate } from "../../pages/calendar-day-labels";
+import {
+  shortWeekdayName,
+  weekdayDate,
+} from "../../../utils/calendar-day-labels";
 
 type MovedWorkout = Pick<WorkoutRecord, "date" | "coachDate">;
 

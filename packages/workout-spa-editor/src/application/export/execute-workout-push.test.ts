@@ -67,6 +67,7 @@ const makeLedgerRepo = (): ExportLedgerRepository & {
       naturalKeyIndex.set(k, next.id);
       return next;
     },
+    listByRecordIds: async () => [],
     rollbackPending: async (id) => {
       const entry = store.get(id);
       if (entry?.destinationExternalId === "pending") {

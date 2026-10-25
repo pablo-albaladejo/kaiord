@@ -45,6 +45,10 @@ vi.mock("./use-workout-detail-model", () => ({
   useWorkoutDetailModel: () => mockModel,
 }));
 
+vi.mock("./DetailGarminDrift", () => ({
+  DetailGarminDrift: () => null,
+}));
+
 vi.mock("../../molecules/PushButton", () => ({
   PushButton: (props: unknown) => {
     pushButtonProps(props);

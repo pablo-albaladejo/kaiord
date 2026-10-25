@@ -1,10 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { db } from "../../../adapters/dexie/dexie-database";
 import {
   seedSession,
   THU,
+  TUE,
 } from "../../../application/session-move.test-fixtures";
 import { makeWorkoutRecord } from "../../../application/test-helpers";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
@@ -14,6 +16,28 @@ import {
 } from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { useMoveWorkout } from "./use-move-workout";
+
+const placedOnTue = {
+  id: "row-w",
+  kaiordRecordId: "w",
+  destinationBridgeId: "garmin-bridge",
+  dataType: "workout",
+  destinationExternalId: "101",
+  contentHash: "h",
+  exportedAt: "2026-10-01T08:00:00.000Z",
+  placement: {
+    kind: "scheduled",
+    workoutScheduleId: "202",
+    workoutId: "101",
+    date: TUE,
+  },
+};
+
+const pushTo = vi.fn();
+
+vi.mock("../../molecules/GarminPushButton/useGarminPush", () => ({
+  useGarminPushTo: () => pushTo,
+}));
 
 const ID = "550e8400-e29b-41d4-a716-446655440088";
 
@@ -31,6 +55,10 @@ const setup = (persistence = createInMemoryPersistence()) => {
 };
 
 describe("useMoveWorkout", () => {
+  afterEach(async () => {
+    await db.table("exportLedger").clear();
+  });
+
   it("should move the workout and confirm it", async () => {
     // Arrange
     const { persistence, view } = setup();
@@ -96,5 +124,23 @@ describe("useMoveWorkout", () => {
     expect(view.result.current.toasts.map((t) => t.title)).toEqual([
       "The coach marked it completed — it can't be moved.",
     ]);
+  });
+
+  it("should name the day Garmin still holds instead of confirming, and push nothing", async () => {
+    // Arrange
+    await db.table("exportLedger").put(placedOnTue);
+    const { view } = setup(await seedSession({ workout: { date: TUE } }));
+
+    // Act
+    await act(() => view.result.current.move("w", THU));
+
+    // Assert
+    expect(view.result.current.toasts).toEqual([
+      expect.objectContaining({
+        title: "Workout moved",
+        description: "Garmin still on Tue, Oct 6",
+      }),
+    ]);
+    expect(pushTo).not.toHaveBeenCalled();
   });
 });

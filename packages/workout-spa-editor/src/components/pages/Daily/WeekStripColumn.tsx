@@ -1,7 +1,7 @@
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { type Translate, useTranslate } from "../../../i18n/use-translate";
 import { formatHms } from "../../../lib/workout-review";
-import { narrowWeekdayName } from "../calendar-day-labels";
+import { narrowWeekdayName } from "../../../utils/calendar-day-labels";
 import type { DaySummary } from "./build-week-summary";
 import type { WeekDay } from "./today-dates";
 import { WeekStripMark } from "./WeekStripMark";

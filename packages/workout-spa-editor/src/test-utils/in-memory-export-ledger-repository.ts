@@ -22,6 +22,11 @@ export function createInMemoryExportLedgerRepository(
   return {
     store,
     findByNaturalKey: async (key) => store.get(keyOf(key)),
+    listByRecordIds: async ({ kaiordRecordIds, destinationBridgeId }) =>
+      kaiordRecordIds.flatMap((kaiordRecordId) => {
+        const row = store.get(keyOf({ kaiordRecordId, destinationBridgeId }));
+        return row ? [row] : [];
+      }),
     insertPending: async (entry) => {
       if (store.has(keyOf(entry))) return { ok: false, reason: "constraint" };
       store.set(keyOf(entry), entry);

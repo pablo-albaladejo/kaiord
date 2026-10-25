@@ -18,6 +18,11 @@ export type ExportLedgerRepository = {
     kaiordRecordId: string;
     destinationBridgeId: string;
   }) => Promise<ExportLedgerEntry | undefined>;
+  /** The rows of `kaiordRecordIds` for one bridge; absent ids are skipped. */
+  listByRecordIds: (input: {
+    kaiordRecordIds: string[];
+    destinationBridgeId: string;
+  }) => Promise<ExportLedgerEntry[]>;
   insertPending: (entry: ExportLedgerEntry) => Promise<InsertPendingResult>;
   /**
    * Read-modify-write of the row holding `key`, in its own read-write

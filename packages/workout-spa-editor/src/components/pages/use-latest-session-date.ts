@@ -1,5 +1,5 @@
 import { useActiveLocale } from "../../i18n/LocaleProvider";
-import { shortDate } from "./calendar-day-labels";
+import { shortDate } from "../../utils/calendar-day-labels";
 
 /**
  * The athlete's most recent session as a readable date, for the copy that

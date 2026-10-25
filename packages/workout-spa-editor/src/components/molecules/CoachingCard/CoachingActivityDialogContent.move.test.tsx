@@ -19,6 +19,15 @@ vi.mock("./use-coaching-day-comments", () => ({
   useCoachingDayComments: () => [],
 }));
 
+const garminDrift = vi.fn();
+
+vi.mock("./DialogGarminDrift", () => ({
+  DialogGarminDrift: (props: { locked: boolean }) => {
+    garminDrift(props);
+    return null;
+  },
+}));
+
 const activity: CoachingActivity = {
   id: "train2go:77",
   source: "train2go",
@@ -148,4 +157,28 @@ describe("CoachingActivityDialogContent move", () => {
       screen.queryByRole("button", { name: "Move to another day" })
     ).toBeNull();
   });
+
+  it.each([
+    ["a movable session", matched(), false],
+    ["a done session", matched([coachWorkout({ id: "rec" })]), true],
+    [
+      "a session whose plan is a recording",
+      { ...matched(), recorded: true },
+      true,
+    ],
+  ])(
+    "should hand the Garmin state of %s its lock (AC-29)",
+    (_label, state, locked) => {
+      // Arrange
+      garminDrift.mockClear();
+
+      // Act
+      renderContent(state);
+
+      // Assert
+      expect(garminDrift).toHaveBeenLastCalledWith(
+        expect.objectContaining({ locked })
+      );
+    }
+  );
 });

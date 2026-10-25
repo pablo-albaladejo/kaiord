@@ -131,5 +131,9 @@
     "notFound": "This workout no longer exists.",
     "blockedExecuted": "Already done — it can't be moved.",
     "blockedCompleted": "The coach marked it completed — it can't be moved."
+  },
+  "garminDrift": {
+    "update": "Update Garmin",
+    "bridgeOutdated": "Update the Kaiord extension for Garmin to move this workout on the Garmin calendar."
   }
 }

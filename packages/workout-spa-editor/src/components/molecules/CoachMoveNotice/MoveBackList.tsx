@@ -9,7 +9,7 @@ import { useRequestMove } from "../../../contexts/session-move-context";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { pluralKey } from "../../../i18n/plural-key";
 import { useTranslate } from "../../../i18n/use-translate";
-import { weekdayDate } from "../../pages/calendar-day-labels";
+import { weekdayDate } from "../../../utils/calendar-day-labels";
 import { MOVE_REASON_KEYS } from "../CoachingCard/move-reason-keys";
 import { useMoveBackEntries } from "./use-move-back-entries";
 

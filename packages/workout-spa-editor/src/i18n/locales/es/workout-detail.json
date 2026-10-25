@@ -131,5 +131,9 @@
     "notFound": "Este entreno ya no existe.",
     "blockedExecuted": "Ya está hecho: no se puede mover.",
     "blockedCompleted": "El entrenador lo marcó como completado: no se puede mover."
+  },
+  "garminDrift": {
+    "update": "Actualizar Garmin",
+    "bridgeOutdated": "Actualiza la extensión de Kaiord para Garmin para mover este entrenamiento en el calendario de Garmin."
   }
 }

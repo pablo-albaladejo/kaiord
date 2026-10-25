@@ -6,6 +6,7 @@ import type { ExportLedgerEntry } from "../../../types/export-ledger";
 import { MovedFromChip } from "../../molecules/MovedFromChip/MovedFromChip";
 import type { SummaryItem } from "../../molecules/SummaryStrip";
 import { SummaryStrip } from "../../molecules/SummaryStrip";
+import { DetailGarminDrift } from "./DetailGarminDrift";
 import { WorkoutDetailFooter } from "./WorkoutDetailFooter";
 import { WorkoutDetailHeader } from "./WorkoutDetailHeader";
 import { WorkoutDetailStructure } from "./WorkoutDetailStructure";
@@ -73,6 +74,7 @@ export function WorkoutDetailView({
       />
       <WorkoutDetailTitle sport={record.sport} title={title} tag={tag} />
       <MovedFromChip workout={record} />
+      <DetailGarminDrift record={record} placementRow={placementRow} />
       {model && (
         <>
           <SummaryStrip items={buildSummary(model, t, tZones)} />

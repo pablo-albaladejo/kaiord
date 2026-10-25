@@ -14,6 +14,10 @@ import {
 } from "./CoachingActivityDialogContent";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
+vi.mock("./DialogGarminDrift", () => ({
+  DialogGarminDrift: () => null,
+}));
+
 vi.mock("./use-coaching-day-comments", () => ({
   useCoachingDayComments: () => [],
 }));

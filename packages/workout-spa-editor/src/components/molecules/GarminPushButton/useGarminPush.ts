@@ -22,8 +22,9 @@ const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Conversion failed";
 
 /**
- * Pushes a persisted workout to Garmin Connect and places it on its date
- * in the Garmin calendar (`pushWorkoutToGarminCalendar`), resolving with
+ * Returns a function that pushes a persisted workout to Garmin Connect and
+ * places it on its date in the Garmin calendar
+ * (`pushWorkoutToGarminCalendar`), resolving with
  * the `PlacementResult`, or `undefined` when there is nothing to push (no
  * workout, or no Garmin session).
  *
@@ -40,16 +41,16 @@ const errorMessage = (error: unknown) =>
  * ⇒ `failed{no-export-route}` and no bridge call. A throw before the
  * pipeline starts still emits its one `garmin-calendar-placement` event.
  */
-export const useGarminPush = (
-  workout: WorkoutRecord | undefined,
-  onSent?: (garminWorkoutId: string) => void
-) => {
+export const useGarminPushTo = (onSent?: (garminWorkoutId: string) => void) => {
   const { pushWorkout, setPushing, sessionActive, features } =
     useGarminBridge();
   const analytics = useAnalytics();
 
-  const push = useCallback(
-    async (options: GarminPushOptions = {}) => {
+  return useCallback(
+    async (
+      workout: WorkoutRecord | undefined,
+      options: GarminPushOptions = {}
+    ) => {
       if (!workout?.krd || !sessionActive) return undefined;
       const { synced, failedEarly } = garminPushReports(analytics, Date.now());
       const showError = (error: unknown) =>
@@ -92,16 +93,19 @@ export const useGarminPush = (
         return failedEarly();
       }
     },
-    [
-      workout,
-      sessionActive,
-      features,
-      pushWorkout,
-      setPushing,
-      analytics,
-      onSent,
-    ]
+    [sessionActive, features, pushWorkout, setPushing, analytics, onSent]
   );
+};
 
+/** `useGarminPushTo` bound to one workout. */
+export const useGarminPush = (
+  workout: WorkoutRecord | undefined,
+  onSent?: (garminWorkoutId: string) => void
+) => {
+  const pushTo = useGarminPushTo(onSent);
+  const push = useCallback(
+    (options?: GarminPushOptions) => pushTo(workout, options),
+    [pushTo, workout]
+  );
   return { push };
 };

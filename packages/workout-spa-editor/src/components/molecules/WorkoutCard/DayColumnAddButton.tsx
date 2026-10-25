@@ -1,6 +1,6 @@
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
-import { shortWeekdayName } from "../../pages/calendar-day-labels";
+import { shortWeekdayName } from "../../../utils/calendar-day-labels";
 
 export type DayColumnAddButtonProps = {
   date: string;
