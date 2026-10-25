@@ -118,22 +118,28 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
 
 ## 3. Garmin out-of-date placement state (PR-3, after PR-1)
 
-- [ ] 3.1 Add `garminDateDrift(row, workout)` as a pure function, covering
+- [x] 3.1 Add `garminDateDrift(row, workout)` as a pure function, covering
       `placed` and `unconfirmed`, plus no drift for a locked session. Write
       the truth-table tests first (AC-19, AC-29).
-- [ ] 3.2 Read the visible week's ledger rows with one live query. Show the
+- [x] 3.2 Read the visible week's ledger rows with one live query. Show the
       card badge ("Garmin:" / "Garmin?:") off the week's critical read
       (AC-19).
-- [ ] 3.3 Show the detail and dialog state ("still on" / "may still be on")
+- [x] 3.3 Show the detail and dialog state ("still on" / "may still be on")
       and **Update Garmin**, which goes through `useGarminPush` →
       `pushWorkoutToGarminCalendar`. When the bridge is missing or outdated,
-      disable it and show the existing reason (AC-20).
-- [ ] 3.4 Add the **Update Garmin** action to the post-move toast. Assert
+      disable it and show the existing reason (AC-20). The send control
+      has no reason for a bridge without calendar writes, so that case
+      adds one: "Update the Kaiord extension for Garmin to move this
+      workout on the Garmin calendar."
+- [x] 3.4 Add the **Update Garmin** action to the post-move toast. Assert
       that a move and a sync never push. Extend `coach-move-push.test.ts` with
       an athlete-move case (AC-19, AC-20). The manual check against a real
       account is covered by `add-garmin-calendar-scheduling` task 9.4
-      (check 3).
-- [ ] 3.5 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts`
+      (check 3). The toast follows the calendar drag, the dialog's Move to
+      another day and Move back (all through `useGridMove`), and the
+      detail's move, where it replaces "Workout moved" when Garmin still
+      holds the old day.
+- [x] 3.5 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts`
       (AC-23).
 
 ## 4. E2E, docs and release note (PR-4, after PR-2 and PR-3)
