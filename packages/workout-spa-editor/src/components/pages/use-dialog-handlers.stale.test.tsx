@@ -84,8 +84,6 @@ describe("useDialogHandlers with a row changed after the dialog opened", () => {
 
     // Assert
     expect(put).not.toHaveBeenCalled();
-    expect((await persistence.workouts.getById("w"))?.state).toBe(
-      "structured"
-    );
+    expect((await persistence.workouts.getById("w"))?.state).toBe("structured");
   });
 });
