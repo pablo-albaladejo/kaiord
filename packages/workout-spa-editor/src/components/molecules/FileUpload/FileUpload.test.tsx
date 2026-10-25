@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { KRD } from "../../../types/krd";
 import { FileUpload } from "./FileUpload";
 import {
-  CLEANUP_WAIT_MS,
   FILE_SIZE_REJECT,
   MOCK_WAIT_MS,
   PLACEHOLDER_BYTES,
@@ -48,10 +47,8 @@ describe("FileUpload", () => {
     vi.clearAllMocks();
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     cleanup();
-    // Wait for any pending async operations to complete before tearing down
-    await new Promise((resolve) => setTimeout(resolve, CLEANUP_WAIT_MS));
     vi.clearAllTimers();
     vi.useRealTimers();
   });
@@ -614,7 +611,8 @@ describe("FileUpload", () => {
     });
 
     const user = userEvent.setup();
-    render(<FileUpload onFileLoad={vi.fn()} />);
+    const onFileLoad = vi.fn();
+    render(<FileUpload onFileLoad={onFileLoad} />);
 
     const fileInput = screen.getByLabelText(/upload workout file/i);
     const file = new File([JSON.stringify(mockKRD)], "workout.krd", {
@@ -634,6 +632,10 @@ describe("FileUpload", () => {
     });
 
     await uploadPromise;
+
+    // The mocked import is still pending here; wait for it to settle so no
+    // state update outlives the test and lands on a torn-down jsdom.
+    await waitFor(() => expect(onFileLoad).toHaveBeenCalledWith(mockKRD));
   });
 
   it("should show converting status during import", async () => {
@@ -649,7 +651,8 @@ describe("FileUpload", () => {
     });
 
     const user = userEvent.setup();
-    render(<FileUpload onFileLoad={vi.fn()} />);
+    const onFileLoad = vi.fn();
+    render(<FileUpload onFileLoad={onFileLoad} />);
 
     const fileInput = screen.getByLabelText(/upload workout file/i);
     const file = new File([JSON.stringify(mockKRD)], "workout.fit", {
@@ -664,6 +667,10 @@ describe("FileUpload", () => {
 
     // The converting message may disappear quickly.
     expect(screen.getByText(/converting workout.fit/i)).toBeInTheDocument();
+
+    // The mocked import is still pending here; wait for it to settle so no
+    // state update outlives the test and lands on a torn-down jsdom.
+    await waitFor(() => expect(onFileLoad).toHaveBeenCalledWith(mockKRD));
   });
 
   it("should show spinner during conversion", async () => {
@@ -678,7 +685,8 @@ describe("FileUpload", () => {
     });
 
     const user = userEvent.setup();
-    render(<FileUpload onFileLoad={vi.fn()} />);
+    const onFileLoad = vi.fn();
+    render(<FileUpload onFileLoad={onFileLoad} />);
 
     const fileInput = screen.getByLabelText(/upload workout file/i);
     const file = new File([JSON.stringify(mockKRD)], "workout.krd", {
@@ -698,6 +706,10 @@ describe("FileUpload", () => {
     });
 
     await uploadPromise;
+
+    // The mocked import is still pending here; wait for it to settle so no
+    // state update outlives the test and lands on a torn-down jsdom.
+    await waitFor(() => expect(onFileLoad).toHaveBeenCalledWith(mockKRD));
   });
 
   it("should disable UI during conversion", async () => {
@@ -712,7 +724,8 @@ describe("FileUpload", () => {
     });
 
     const user = userEvent.setup();
-    render(<FileUpload onFileLoad={vi.fn()} />);
+    const onFileLoad = vi.fn();
+    render(<FileUpload onFileLoad={onFileLoad} />);
 
     const fileInput = screen.getByLabelText(/upload workout file/i);
     const file = new File([JSON.stringify(mockKRD)], "workout.krd", {
@@ -735,6 +748,10 @@ describe("FileUpload", () => {
     });
 
     await uploadPromise;
+
+    // The mocked import is still pending here; wait for it to settle so no
+    // state update outlives the test and lands on a torn-down jsdom.
+    await waitFor(() => expect(onFileLoad).toHaveBeenCalledWith(mockKRD));
   });
 
   it("should display time estimate during long conversion", async () => {
@@ -753,7 +770,8 @@ describe("FileUpload", () => {
     });
 
     const user = userEvent.setup();
-    render(<FileUpload onFileLoad={vi.fn()} />);
+    const onFileLoad = vi.fn();
+    render(<FileUpload onFileLoad={onFileLoad} />);
 
     const fileInput = screen.getByLabelText(/upload workout file/i);
     const file = new File([JSON.stringify(mockKRD)], "workout.krd", {
@@ -775,5 +793,9 @@ describe("FileUpload", () => {
     );
 
     await uploadPromise;
+
+    // The mocked import is still pending here; wait for it to settle so no
+    // state update outlives the test and lands on a torn-down jsdom.
+    await waitFor(() => expect(onFileLoad).toHaveBeenCalledWith(mockKRD));
   });
 });
