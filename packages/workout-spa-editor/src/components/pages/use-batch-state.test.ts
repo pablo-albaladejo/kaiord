@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { BatchResult } from "../../application/batch-processor";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { BatchPrep } from "./batch-prepare";
@@ -28,12 +29,12 @@ vi.mock("./batch-prepare", () => ({
   prepareBatch: async () => mockPrep,
 }));
 
-const runnerSuccessSpy = vi.fn<(count: number) => void>();
+const runnerSuccessSpy = vi.fn<(result: BatchResult) => void>();
 
 vi.mock("./use-batch-runner", () => ({
   useBatchRunner: (
     _setMessage: (msg: string | null) => void,
-    onSuccess?: (count: number) => void
+    onSuccess?: (result: BatchResult) => void
   ) => {
     if (onSuccess) {
       runnerSuccessSpy.mockImplementation(onSuccess);
@@ -85,6 +86,7 @@ describe("useBatchState (two-phase start)", () => {
     mockPrep = { ok: false, message: "" };
     runSpy.mockReset();
     runSpy.mockResolvedValue();
+    mockShowSuccess.mockReset();
   });
 
   it("should surface a message when no providers are configured", async () => {
@@ -233,5 +235,49 @@ describe("useBatchState (two-phase start)", () => {
     // Assert
 
     expect(runSpy).not.toHaveBeenCalled();
+  });
+
+  it("should not count rows skipped because they changed meanwhile as processed", () => {
+    // Arrange
+    renderHook(() => useBatchState("2026-04-13", "2026-04-19"));
+
+    // Act
+    act(() =>
+      runnerSuccessSpy({
+        succeeded: ["a"],
+        skipped: ["b", "c"],
+        failed: [{ id: "d", error: "x" }],
+        cancelled: false,
+      })
+    );
+
+    // Assert
+    expect(mockShowSuccess).toHaveBeenCalledWith(
+      "Batch processed",
+      "2 workouts, 2 skipped because they changed meanwhile",
+      { duration: 3000 }
+    );
+  });
+
+  it("should toast the processed count alone when nothing was skipped", () => {
+    // Arrange
+    renderHook(() => useBatchState("2026-04-13", "2026-04-19"));
+
+    // Act
+    act(() =>
+      runnerSuccessSpy({
+        succeeded: ["a", "b"],
+        skipped: [],
+        failed: [],
+        cancelled: false,
+      })
+    );
+
+    // Assert
+    expect(mockShowSuccess).toHaveBeenCalledWith(
+      "Batch processed",
+      "2 workouts",
+      { duration: 3000 }
+    );
   });
 });

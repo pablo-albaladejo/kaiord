@@ -72,7 +72,7 @@ export const convertCoachingActivityWithAi = async (
         input.abortSignal
       );
     }
-    return ensureMatchForExisting(deps, activity, existing.id);
+    return ensureMatchForExisting(deps, activity, existing);
   }
 
   const text = resolvePromptText(activity);

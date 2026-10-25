@@ -128,6 +128,8 @@
     "confirm": "Move",
     "cancel": "Cancel",
     "done": "Workout moved",
-    "notFound": "This workout no longer exists."
+    "notFound": "This workout no longer exists.",
+    "blockedExecuted": "Already done — it can't be moved.",
+    "blockedCompleted": "The coach marked it completed — it can't be moved."
   }
 }

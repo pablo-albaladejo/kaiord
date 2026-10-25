@@ -20,6 +20,7 @@ import { useCalendarExecuted } from "../../hooks/use-calendar-executed";
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
+import { NO_CROSS_WEEK } from "../../hooks/use-matched-sessions-cross-week";
 import { useSetCalendarView } from "../../hooks/use-set-calendar-view";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
 import type { CalendarView } from "../../types/user-preferences";
@@ -49,8 +50,9 @@ export function useCalendarPage(): CalendarPageState {
     weekStart,
     s.data.days.at(-1) ?? ""
   );
-  const rawMatched = useMatchedSessions(profileId, s.data.days);
-  const activitiesByDay = useCalendarExecuted(profileId, rawMatched, s.data);
+  const matchedWeek = useMatchedSessions(profileId, s.data.days);
+  const rawMatched = matchedWeek?.matched;
+  const activitiesByDay = useCalendarExecuted(profileId, matchedWeek, s.data);
   const suggestions = useAutoMatchSuggestions(profileId, weekStart);
   const bannerActions = useAutoMatchBannerActions(profileId, weekStart);
   const prefs = useUserPreferences({ profileId, defaultView: defaultView() });
@@ -60,6 +62,7 @@ export function useCalendarPage(): CalendarPageState {
     coachingByDay: coaching.byDay,
     activitiesByDay,
     matched: rawMatched ?? [],
+    crossWeek: matchedWeek?.crossWeek ?? NO_CROSS_WEEK,
   });
   const onViewChange = useSetCalendarView(profileId);
 

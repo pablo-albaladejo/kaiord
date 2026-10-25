@@ -25,7 +25,7 @@ const problemOf = (error: unknown): ImportProblem =>
 
 /** Reads a backup file and merges it into this device (Settings → Privacy). */
 export function useImportBackup() {
-  const { snapshotPort, deviceId } = useSnapshotSource();
+  const { snapshotPort, deviceId, afterImport } = useSnapshotSource();
   const [state, setState] = useState<ImportBackupState>({ kind: "idle" });
 
   const run = useCallback(
@@ -38,6 +38,7 @@ export function useImportBackup() {
           backup,
           choice,
         });
+        if (result.kind !== "needsChoice") await afterImport?.();
         setState(
           result.kind === "needsChoice"
             ? { kind: "choose", backup, candidates: result.candidates }
@@ -47,7 +48,7 @@ export function useImportBackup() {
         setState({ kind: "error", problem: problemOf(error) });
       }
     },
-    [snapshotPort, deviceId]
+    [snapshotPort, deviceId, afterImport]
   );
 
   const importFile = useCallback(

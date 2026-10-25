@@ -70,7 +70,7 @@ export const Processing: Story = {
       processed: 2,
       succeeded: 2,
       failed: 0,
-      counts: { queued: 2, processing: 1, succeeded: 2, failed: 0 },
+      counts: { queued: 2, processing: 1, succeeded: 2, skipped: 0, failed: 0 },
       byId: {
         w1: "succeeded",
         w2: "succeeded",
@@ -95,7 +95,7 @@ export const ProcessingWithFailures: Story = {
       processed: 3,
       succeeded: 2,
       failed: 1,
-      counts: { queued: 1, processing: 1, succeeded: 2, failed: 1 },
+      counts: { queued: 1, processing: 1, succeeded: 2, skipped: 0, failed: 1 },
       byId: {
         w1: "succeeded",
         w2: "failed",

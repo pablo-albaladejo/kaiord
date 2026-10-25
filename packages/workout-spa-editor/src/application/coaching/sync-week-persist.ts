@@ -10,6 +10,7 @@ import type {
   PersistencePort,
   WorkoutRepository,
 } from "../../ports/persistence-port";
+import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import { stampProvenance } from "../import/stamp-provenance";
 import {
@@ -21,6 +22,7 @@ export type PersistSyncedWeekDeps = {
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
   workouts: WorkoutRepository;
+  sessionMatch: SessionMatchRepository;
   transaction: PersistencePort["transaction"];
   now?: () => string;
 };
@@ -46,7 +48,12 @@ export const persistSyncedWeek = async (
   }));
   await deps.coaching.upsertMany(stamped);
   const moves = await applyCoachDateMoves(
-    { workouts: deps.workouts, now, transaction: deps.transaction },
+    {
+      workouts: deps.workouts,
+      sessionMatch: deps.sessionMatch,
+      now,
+      transaction: deps.transaction,
+    },
     input.fetched,
     input.localSameSource
   );

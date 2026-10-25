@@ -9,6 +9,7 @@ import { createInMemoryCoachingRepository } from "../../test-utils/in-memory-coa
 import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-memory-coaching-sync-state-repository";
 import { createInMemoryIntegrationPolicyRepository } from "../../test-utils/in-memory-integration-policy-repository";
 import { createInMemoryProfileRepository } from "../../test-utils/in-memory-profile-repository";
+import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
 import {
@@ -190,7 +191,7 @@ const plannedImportPolicy = (profileId: string, enabled: boolean) => ({
   updatedAt: NOW,
 });
 
-const NO_MOVES = { coachMoves: 0, overriddenLocalMoves: 0 };
+const NO_MOVES = { coachMoves: 0, overriddenLocalMoves: 0, overridden: [] };
 
 describe("syncWeek", () => {
   let deps: Parameters<typeof syncWeek>[0];
@@ -206,6 +207,7 @@ describe("syncWeek", () => {
       coachingSyncState: createInMemoryCoachingSyncStateRepository(),
       integrationPolicy,
       workouts: createInMemoryWorkoutRepository(),
+      sessionMatch: createInMemorySessionMatchRepository(),
       transaction: (fn) => fn(),
       transport: makeTransport(),
       now: () => NOW,
@@ -372,6 +374,7 @@ describe("syncWeek", () => {
       ok: true,
       coachMoves: 1,
       overriddenLocalMoves: 0,
+      overridden: [],
     });
     expect(await deps.workouts.getById("w-7")).toMatchObject({
       date: "2026-04-16",

@@ -28,6 +28,7 @@ import type { SessionMatchRepository } from "../ports/session-match-repository";
 import { CoachingActivityNotFoundError } from "../types/session-match-errors";
 import { convertCoachingActivity } from "./coaching/convert-coaching-activity";
 import { ensureSessionMatch } from "./coaching/ensure-session-match";
+import { sessionMatchDate } from "./coaching/session-match-date";
 
 export type ConvertAndAutoMatchInput = {
   activityId: string;
@@ -59,11 +60,12 @@ export async function convertAndAutoMatch(
     input.activityId
   );
 
+  const workout = await deps.workouts.getById(conversion.workoutId);
   await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId: conversion.workoutId,
-    date: activity.date,
+    date: workout ? sessionMatchDate(workout, activity) : activity.date,
     source: "auto-coaching",
     newId: deps.newMatchId,
     clock: deps.clock,

@@ -8,6 +8,7 @@
  * two surfaces cannot silently diverge (incl. cross-day matches).
  */
 import type { MatchedSessionWithMetadata } from "../../../hooks/use-matched-sessions";
+import type { CrossWeekMatches } from "../../../hooks/use-matched-sessions-cross-week";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { buildCalendarBuckets } from "../calendar-buckets";
@@ -25,7 +26,7 @@ export type BuildTodayBucketsArgs = {
   weekWorkouts: WorkoutRecord[] | undefined;
   coachingByDay: Record<string, CoachingActivity[]>;
   matched: MatchedSessionWithMetadata[];
-};
+} & Partial<CrossWeekMatches>;
 
 export function buildTodayBuckets({
   dayIsos,
@@ -33,6 +34,7 @@ export function buildTodayBuckets({
   weekWorkouts,
   coachingByDay,
   matched,
+  ...crossWeek
 }: BuildTodayBucketsArgs): TodayBuckets {
   const workoutsByDay = groupWorkoutsByDay(weekWorkouts, dayIsos);
   const { matchedByDay, soloPlansByDay, soloActualsByDay } =
@@ -41,6 +43,7 @@ export function buildTodayBuckets({
       workoutsByDay,
       coachingByDay,
       matched,
+      ...crossWeek,
     });
   return {
     matchedSessions: matchedByDay[focusIso] ?? [],

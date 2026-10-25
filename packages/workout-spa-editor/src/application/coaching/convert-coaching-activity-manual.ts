@@ -25,6 +25,7 @@ import type {
 } from "./convert-coaching-activity-manual-types";
 import { ensureSessionMatch } from "./ensure-session-match";
 import { persistCoachingWorkout } from "./persist-coaching-workout";
+import { sessionMatchDate } from "./session-match-date";
 
 export type {
   ConvertManualDeps,
@@ -50,7 +51,7 @@ const createRawRestDay = async (
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId: workout.id,
-    date: activity.date,
+    date: sessionMatchDate(workout, activity),
     source: manualMatchSource,
     newId: deps.newMatchId,
     clock: deps.clock,

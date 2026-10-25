@@ -20,13 +20,11 @@ export type UseSyncCycleDeps = {
   cloud: CloudSyncPort;
   snapshotPort: SnapshotPort;
   deviceId: string;
+  afterImport?: () => Promise<void>;
 };
 
-export function useSyncCycle({
-  cloud,
-  snapshotPort,
-  deviceId,
-}: UseSyncCycleDeps) {
+export function useSyncCycle(deps: UseSyncCycleDeps) {
+  const { cloud, snapshotPort, deviceId, afterImport } = deps;
   const [status, setStatus] = useState<SyncStatus>("idle");
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +38,12 @@ export function useSyncCycle({
     setStatus("syncing");
     setError(null);
     try {
-      const result = await syncWithCloud({ cloud, snapshotPort, deviceId });
+      const result = await syncWithCloud({
+        cloud,
+        snapshotPort,
+        deviceId,
+        afterImport,
+      });
       setProfileChoice(result.needsChoice ?? null);
       setStatus("idle");
       if (result.needsChoice) return "needsChoice";
@@ -51,7 +54,7 @@ export function useSyncCycle({
       setStatus("error");
       return "failed";
     }
-  }, [cloud, snapshotPort, deviceId]);
+  }, [cloud, snapshotPort, deviceId, afterImport]);
 
   const syncNow = useCallback((): Promise<SyncOutcome> => {
     const cycle = runCycle();

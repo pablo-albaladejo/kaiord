@@ -35,6 +35,7 @@ export type RenderWithProvidersOptions = Omit<RenderOptions, "wrapper"> & {
   persistence?: PersistencePort;
   cloud?: CloudSyncPort;
   snapshotPort?: SnapshotPort;
+  afterImport?: () => Promise<void>;
 };
 
 /**
@@ -55,6 +56,7 @@ export function renderWithProviders(
       tables: {},
       tombstones: [],
     }),
+    afterImport,
     ...renderOptions
   } = options ?? {};
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -65,6 +67,7 @@ export function renderWithProviders(
             cloud={cloud}
             snapshotPort={snapshotPort}
             deviceId="test-device"
+            afterImport={afterImport}
           >
             <GarminBridgeProvider>
               <CoachingRegistryProvider factories={[]}>

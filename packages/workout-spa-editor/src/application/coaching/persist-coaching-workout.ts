@@ -26,6 +26,7 @@ import type {
   ConvertManualResult,
 } from "./convert-coaching-activity-manual-types";
 import { ensureSessionMatch } from "./ensure-session-match";
+import { sessionMatchDate } from "./session-match-date";
 
 export type PersistCoachingInput = {
   krd: KRD;
@@ -62,7 +63,7 @@ export const persistCoachingWorkout = async (
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId: workout.id,
-    date: activity.date,
+    date: sessionMatchDate(workout, activity),
     source: manualMatchSource,
     newId: deps.newMatchId,
     clock: deps.clock,

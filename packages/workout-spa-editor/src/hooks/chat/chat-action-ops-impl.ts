@@ -35,6 +35,7 @@ export const doSyncCoaching = async (
       transport,
       coachingSyncState: persistence.coachingSyncState,
       workouts: persistence.workouts,
+      sessionMatch: persistence.sessionMatch,
       transaction: persistence.transaction,
       integrationPolicy: persistence.integrationPolicy,
     },

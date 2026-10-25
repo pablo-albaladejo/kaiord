@@ -16,6 +16,7 @@ import {
   fakeAiMeta,
   fakeGenericKrd,
   fakeKrd,
+  passThroughTransaction,
   stubActivity,
 } from "./convert-coaching-activity-with-ai.test-helpers";
 
@@ -27,6 +28,7 @@ const buildDeps = (
   coaching: buildStubCoachingRepo([]),
   workouts: buildStubWorkoutRepo(),
   sessionMatches: createInMemorySessionMatchRepository(),
+  transaction: passThroughTransaction,
   analytics: buildStubAnalytics(),
   generateKrd: vi
     .fn()

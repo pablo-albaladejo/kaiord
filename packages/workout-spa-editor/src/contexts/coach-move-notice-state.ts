@@ -27,11 +27,9 @@ export const reportMoves = (
   if (moves.coachMoves + moves.overriddenLocalMoves === 0) return s;
   const key = noticeKey(profileId, weekStart);
   const seq = (s.notices[key]?.seq ?? 0) + 1;
-  const { coachMoves, overriddenLocalMoves } = moves;
-  return {
-    ...s,
-    notices: { ...s.notices, [key]: { coachMoves, overriddenLocalMoves, seq } },
-  };
+  const { coachMoves, overriddenLocalMoves, overridden } = moves;
+  const notice = { coachMoves, overriddenLocalMoves, overridden, seq };
+  return { ...s, notices: { ...s.notices, [key]: notice } };
 };
 
 export const dismissMoves = (

@@ -6,6 +6,7 @@ import type { Analytics } from "@kaiord/core";
 
 import type {
   CoachingRepository,
+  PersistencePort,
   WorkoutRepository,
 } from "../../ports/persistence-port";
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
@@ -20,6 +21,7 @@ export type ConvertManualDeps = {
   coaching: CoachingRepository;
   workouts: WorkoutRepository;
   sessionMatches: SessionMatchRepository;
+  transaction: PersistencePort["transaction"];
   analytics: Analytics;
   newWorkoutId: () => string;
   newMatchId: () => string;

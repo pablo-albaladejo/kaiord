@@ -14,6 +14,7 @@ import {
   buildStubCoachingRepo,
   buildStubWorkoutRepo,
   fakeAiMeta,
+  passThroughTransaction,
   stubActivity,
   type StubWorkoutRepo,
 } from "./convert-coaching-activity-with-ai.test-helpers";
@@ -28,6 +29,7 @@ const buildDeps = (
   coaching: buildStubCoachingRepo([activity]),
   workouts,
   sessionMatches: createInMemorySessionMatchRepository(),
+  transaction: passThroughTransaction,
   analytics: buildStubAnalytics(),
   generateKrd: vi.fn().mockResolvedValue({
     krd: buildCoachingTemplateKrd("running", aiName),

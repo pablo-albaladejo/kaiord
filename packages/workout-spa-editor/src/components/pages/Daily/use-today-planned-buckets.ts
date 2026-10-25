@@ -13,6 +13,7 @@ import { useMemo } from "react";
 
 import { useCoachingActivities } from "../../../hooks/use-coaching-activities";
 import { useMatchedSessions } from "../../../hooks/use-matched-sessions";
+import { NO_CROSS_WEEK } from "../../../hooks/use-matched-sessions-cross-week";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { ExpandActivity } from "../../../types/coaching-expand-result";
@@ -35,7 +36,9 @@ export function useTodayPlannedBuckets(
   profile: Profile | null
 ): TodayPlanned {
   const coaching = useCoachingActivities(dayIsos);
-  const matched = useMatchedSessions(profileId, dayIsos);
+  const matchedWeek = useMatchedSessions(profileId, dayIsos);
+  const matched = matchedWeek?.matched;
+  const crossWeek = matchedWeek?.crossWeek ?? NO_CROSS_WEEK;
 
   const planned = useMemo(
     () =>
@@ -45,8 +48,9 @@ export function useTodayPlannedBuckets(
         weekWorkouts,
         coachingByDay: coaching.byDay,
         matched: matched ?? [],
+        ...crossWeek,
       }),
-    [dayIsos, focusIso, weekWorkouts, coaching.byDay, matched]
+    [dayIsos, focusIso, weekWorkouts, coaching.byDay, matched, crossWeek]
   );
 
   const weekSummary = useMemo(
@@ -57,8 +61,9 @@ export function useTodayPlannedBuckets(
         coachingByDay: coaching.byDay,
         matched: matched ?? [],
         profile,
+        ...crossWeek,
       }),
-    [dayIsos, weekWorkouts, coaching.byDay, matched, profile]
+    [dayIsos, weekWorkouts, coaching.byDay, matched, profile, crossWeek]
   );
 
   return {

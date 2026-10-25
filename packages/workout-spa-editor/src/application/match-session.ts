@@ -18,6 +18,7 @@ import {
   CrossProfileMatchError,
   WorkoutNotFoundError,
 } from "../types/session-match-errors";
+import { sessionMatchDate } from "./coaching/session-match-date";
 
 export type MatchSessionInput = {
   profileId: string;
@@ -61,7 +62,7 @@ export async function matchSession(
     profileId: input.profileId,
     coachingActivityId: input.coachingActivityId,
     workoutId: input.workoutId,
-    date: activity.date,
+    date: sessionMatchDate(workout, activity),
     createdAt: deps.clock(),
     source: input.source ?? "manual",
     executedWorkoutIds: [],

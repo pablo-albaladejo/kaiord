@@ -13,6 +13,7 @@ import type {
   ProfileRepository,
   WorkoutRepository,
 } from "../../ports/persistence-port";
+import type { SessionMatchRepository } from "../../ports/session-match-repository";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import { addDaysIso } from "../shared/date-utils";
 import type { CoachingTransport } from "./coaching-transport-port";
@@ -24,6 +25,7 @@ export type SyncWeekDeps = {
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
   workouts: WorkoutRepository;
+  sessionMatch: SessionMatchRepository;
   transaction: PersistencePort["transaction"];
   integrationPolicy: IntegrationPolicyRepository;
   transport: CoachingTransport;
@@ -84,16 +86,12 @@ export const syncWeek = async (
     return { ok: false, reason: "transport-error", error };
   }
 
-  const persisted = await persistSyncedWeek(
-    {
-      coaching: deps.coaching,
-      coachingSyncState: deps.coachingSyncState,
-      workouts: deps.workouts,
-      transaction: deps.transaction,
-      now: deps.now,
-    },
-    { profileId, source: deps.transport.source, fetched, localSameSource }
-  );
+  const persisted = await persistSyncedWeek(deps, {
+    profileId,
+    source: deps.transport.source,
+    fetched,
+    localSameSource,
+  });
 
   return { ok: true, activityCount: fetched.length, ...persisted };
 };

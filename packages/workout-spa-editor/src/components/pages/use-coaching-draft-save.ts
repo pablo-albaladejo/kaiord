@@ -42,6 +42,7 @@ export function useCoachingDraftSave(
           coaching: persistence.coaching,
           workouts: persistence.workouts,
           sessionMatches: persistence.sessionMatch,
+          transaction: persistence.transaction,
           analytics,
           newWorkoutId: () => crypto.randomUUID(),
           newMatchId: () => crypto.randomUUID(),

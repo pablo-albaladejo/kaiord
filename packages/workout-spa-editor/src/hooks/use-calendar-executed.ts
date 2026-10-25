@@ -1,7 +1,8 @@
 /**
  * useCalendarExecuted — groups the calendar's executed-activity plumbing:
  * pull Garmin activities and WHOOP cycles/heart-rate (both governed), read
- * the visible week's activities, and auto-match them into existing sessions.
+ * the visible week's activities, and auto-match them into existing sessions,
+ * never onto a recording another week's match holds.
  * Returns the by-day activities for the bucket builder's native render.
  * Extracted so `useCalendarPage` stays under its line cap.
  */
@@ -10,7 +11,7 @@ import type { WorkoutRecord } from "../types/calendar-record";
 import { useCalendarActivities } from "./use-calendar-activities";
 import { useExecutedMatchAutoForCalendar } from "./use-executed-match-auto";
 import { useGarminActivitiesPull } from "./use-garmin-activities-pull";
-import type { MatchedSessionWithMetadata } from "./use-matched-sessions";
+import type { MatchedWeek } from "./use-matched-sessions";
 import { useTanitaImport } from "./use-tanita-import";
 import { useTrainingPeaksSync } from "./use-trainingpeaks-sync";
 import { useWhoopSync } from "./use-whoop-sync";
@@ -22,7 +23,7 @@ export type CalendarExecutedData = {
 
 export const useCalendarExecuted = (
   profileId: string | null,
-  rawMatched: readonly MatchedSessionWithMetadata[] | undefined,
+  matchedWeek: MatchedWeek | undefined,
   data: CalendarExecutedData
 ): Record<string, ActivityRecord[]> => {
   useGarminActivitiesPull(profileId);
@@ -30,6 +31,11 @@ export const useCalendarExecuted = (
   useTrainingPeaksSync(profileId);
   useTanitaImport(profileId);
   const { activities, byDay } = useCalendarActivities(profileId, data.days);
-  useExecutedMatchAutoForCalendar(rawMatched, data.workoutsByDay, activities);
+  useExecutedMatchAutoForCalendar(
+    matchedWeek?.matched,
+    data.workoutsByDay,
+    activities,
+    matchedWeek?.crossWeek.crossWeekMatchedWorkoutIds
+  );
   return byDay;
 };
