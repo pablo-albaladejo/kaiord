@@ -77,3 +77,19 @@ The deploy SHALL emit a self-destructing worker in place of the normal one when 
 - **GIVEN** clients controlled by a faulty worker, and the variable set to `1`
 - **WHEN** the deploy runs and a client next checks for an update
 - **THEN** the client SHALL end with no registration and no editor caches, and SHALL load from the network
+
+### Requirement: Stale code never touches a newer database
+
+Before Dexie first opens the editor database, the editor SHALL read the installed IndexedDB version without requesting an upgrade. If that version is higher than the one its own code declares, it SHALL NOT open the database. When another connection upgrades the database past the declared version, the editor SHALL close its connection without auto-reopen. In both cases it SHALL show a blocking "Kaiord was updated in another window" dialog with a "Reload" action (en and es). The action SHALL activate a waiting worker if one exists, then reload. A database delete SHALL keep the existing close-and-reopen behaviour.
+
+#### Scenario: An old shell starts against an upgraded database
+
+- **GIVEN** the database installed at a version higher than the shell declares
+- **WHEN** the editor boots
+- **THEN** Dexie SHALL NOT open the database, no read or write SHALL reach it, and the dialog SHALL be shown
+
+#### Scenario: Another tab upgrades the database
+
+- **GIVEN** an open editor tab, and another tab upgrading the database to a higher version
+- **WHEN** the `versionchange` event arrives
+- **THEN** the tab SHALL close its connection, the next query SHALL reject without reopening, and the dialog SHALL be shown

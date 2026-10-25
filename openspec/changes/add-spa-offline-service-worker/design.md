@@ -269,6 +269,90 @@ set` (repo-settings class, never an agent), then re-runs the deploy or
   takes (next navigation, or about an hour for a long-open app), rollback,
   and the manual per-device fallback (site settings → clear data).
 
+### D9. IndexedDB schema skew: an old shell must never run against a newer database
+
+**How the skew arises.** A tab running N-1 meets a database that N has
+already upgraded. This exists in production today, without any service
+worker: a tab left open across a deploy keeps running N-1 code in memory
+while a fresh tab upgrades the database. D2 makes it longer-lived and more
+likely, because it lets other tabs keep running N-1 on purpose. A cold start
+can also produce it: tab B is upgraded through the toast, then tab A, still
+on N-1, wakes up.
+
+**What Dexie 4.4.6 actually does.** This was read in
+`node_modules/dexie/dist/dexie.mjs`, not recalled from memory. It is not a
+hard failure.
+
+- **Opening an older declared version.** `tryOpenDB` catches `VersionError`
+  and retries with `nativeVerToOpen = 0`, which opens the installed (higher)
+  version. Then `verifyInstalledSchema` diffs installed against declared.
+  Tables and indexes that only N has land in `del`, and Dexie ignores them,
+  so N-1 opens successfully.
+  - **The exception.** If N _dropped_ an index that N-1 declares, the diff
+    has `change.add`, and Dexie enters `schemaPatchMode`. N-1 then bumps the
+    native version by one and re-creates the index. That is an old client
+    writing schema.
+- **`versionchange` from another tab upgrading.** The default handler closes
+  with `disableAutoOpen: false`, so the next query silently reopens at the
+  new version.
+
+So the team-lead's concern is real, but its shape differs. Dexie 4.4.6 never
+produces a VersionError lock-out here (that comes from `tryOpenDB`'s retry). What it
+produces is **N-1 code reading and writing rows that N's `upgrade()` has
+already rewritten**. The database is at v37, with 21 `upgrade()` functions in
+`adapters/dexie/`, so data-shape migrations are routine. N never re-runs a
+migration for rows that N-1 writes back in the old shape. That is silent data
+corruption, which is worse than a visible break.
+
+**Decision: detect the skew before any read or write, and stop.**
+
+1. **Pre-open probe.** Before Dexie's first open, the boot path calls
+   `indexedDB.open("kaiord-spa")` with **no version argument**, which never
+   upgrades. It reads `version`, closes, and compares that with
+   `db.verno * 10`, the native version Dexie maps to. If the installed
+   version is higher, Dexie is never opened. This also closes the
+   `schemaPatchMode` hole, because no N-1 open is ever attempted. The probe sits beside the existing `probeStorage` (`adapters/dexie/storage-probe.ts`, driven by `store/storage-store.ts`).
+2. **At runtime.** `db.on("versionchange")` is overridden. When
+   `ev.newVersion > db.verno * 10`, the tab calls
+   `db.close({ disableAutoOpen: true })`. From then on any query rejects
+   with `DatabaseClosedError` and never auto-reopens on the old schema. A
+   delete (`newVersion` null) keeps today's behaviour.
+3. **What the user sees.** Both paths put the app into a **stale-code
+   state**. A blocking dialog, which cannot be dismissed because nothing
+   behind it can persist, says "Kaiord was updated in another window" and
+   offers a "Reload" action (en and es).
+   - **The Reload action.** It calls `registration.update()`. If a worker is
+     waiting, it posts `SKIP_WAITING`. Then it reloads. If no newer worker
+     exists, as with an uncontrolled tab that upgraded ahead of a deploy
+     still propagating, the dialog stays up and offers retry.
+   - **Unsaved work.** The in-memory draft in `workout-store` remains
+     visible behind the dialog, but cannot be saved. This is the price of
+     not writing old-shape rows. Exporting the draft to a file is a
+     follow-up, not this change.
+4. **What a schema-adding deploy costs.** It surfaces the dialog in other
+   tabs at most once. A deploy that doesn't bump the Dexie version never
+   triggers it, so there is no new friction on most deploys.
+
+**Rejected alternatives.**
+
+- **Network-first navigation.** It would mostly avoid the skew online, but
+  it silently updates on every reload, which contradicts D2. It also does
+  nothing offline or for an already-open tab.
+- **Making every migration backward-compatible.** That is a policy no guard
+  enforces, and 21 existing upgrades already violate it.
+- **Keeping Dexie's auto-reopen.** That is the corruption path.
+
+**Tests.**
+
+- **Vitest with `fake-indexeddb`.**
+  - Create the database at `verno + 1`, then assert that the boot probe
+    reports stale and that Dexie's `open` is never called.
+  - Fire `versionchange` with a higher version, then assert that the next
+    query rejects with `DatabaseClosedError` and the stale state is set.
+  - Fire a delete-`versionchange` and assert that it keeps auto-reopen.
+- **Chromium e2e (SW spec).** Bump the database in a second page, then
+  assert that the dialog appears in the first page.
+
 ## Risks / Trade-offs
 
 - **A bad worker is sticky.** That is the reason D8 exists and `sw.js` is
