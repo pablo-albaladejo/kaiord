@@ -38,9 +38,10 @@ const recording = (id: string) =>
     linkedWorkoutId: null,
   }) as ActivityRecord;
 
-const run = (sessionMatches: SessionMatch[]) =>
+const run = (sessionMatches: SessionMatch[], heldWorkoutIds?: string[]) =>
   matchExecutedWorkouts({
     sessionMatches,
+    heldWorkoutIds,
     workouts: sessionMatches.map((m) => planned(m.workoutId)),
     activities: [recording("rec")],
     canonicalSport: (sport) => sport || null,
@@ -80,5 +81,16 @@ describe("matchExecutedWorkouts across matches", () => {
 
     // Assert
     expect(result).toEqual([{ matchId: "a", toAppend: ["rec"] }]);
+  });
+
+  it("should not link a recording a match outside the input holds", () => {
+    // Arrange
+    const moved = match("b");
+
+    // Act
+    const result = run([moved], ["rec"]);
+
+    // Assert
+    expect(result).toEqual([]);
   });
 });

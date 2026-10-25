@@ -4,13 +4,18 @@
  *
  * Idempotent: the merge dedups against the current array, so re-running
  * with the same ids is a no-op. A missing row is also a no-op
- * (concurrent-delete tolerance — matches the `delete` contract).
+ * (concurrent-delete tolerance — matches the `delete` contract). An id
+ * another match of the profile plans or holds is skipped, read in the same
+ * transaction, so a recording never lands on two matches (design §3.7).
  */
 
 import type Dexie from "dexie";
 import type { Table } from "dexie";
 
-import type { SessionMatch } from "../../types/session-match";
+import {
+  idsHeldByOtherMatches,
+  type SessionMatch,
+} from "../../types/session-match";
 import type { KaiordDatabase } from "./dexie-database";
 
 const unionAppend = (
@@ -43,9 +48,14 @@ export const appendExecutedWorkoutIdsTx = async (
   await dexie.transaction("rw", "sessionMatches", async () => {
     const existing = await table().get(matchId);
     if (!existing) return;
+    const profile = await table()
+      .where("profileId")
+      .equals(existing.profileId)
+      .toArray();
+    const held = idsHeldByOtherMatches(profile, matchId);
     const { merged, changed } = unionAppend(
       existing.executedWorkoutIds,
-      workoutIds
+      workoutIds.filter((id) => !held.has(id))
     );
     if (!changed) return;
     const next: SessionMatch = { ...existing, executedWorkoutIds: merged };

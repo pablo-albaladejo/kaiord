@@ -30,6 +30,8 @@ export type MatchExecutedWorkoutsInput = {
   activities?: readonly ActivityRecord[];
   /** Returns the canonical sport key or `null` for "unknown — skip". */
   canonicalSport: CanonicalSport;
+  /** Ids held by matches outside `sessionMatches` (another week's). */
+  heldWorkoutIds?: Iterable<string>;
 };
 
 export type MatchExecutedWorkoutsAppend = {
@@ -71,12 +73,13 @@ export const matchExecutedWorkouts = (
     input.activities ?? [],
     input.canonicalSport
   );
-  const taken = new Set<string>(
-    input.sessionMatches.flatMap((m) => [
+  const taken = new Set<string>([
+    ...(input.heldWorkoutIds ?? []),
+    ...input.sessionMatches.flatMap((m) => [
       m.workoutId,
       ...(m.executedWorkoutIds ?? []),
-    ])
-  );
+    ]),
+  ]);
   const out: MatchExecutedWorkoutsAppend[] = [];
   for (const match of input.sessionMatches) {
     const matchCanonical = resolveMatchCanonical(

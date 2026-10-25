@@ -52,7 +52,7 @@ export function useCalendarPage(): CalendarPageState {
   );
   const matchedWeek = useMatchedSessions(profileId, s.data.days);
   const rawMatched = matchedWeek?.matched;
-  const activitiesByDay = useCalendarExecuted(profileId, rawMatched, s.data);
+  const activitiesByDay = useCalendarExecuted(profileId, matchedWeek, s.data);
   const suggestions = useAutoMatchSuggestions(profileId, weekStart);
   const bannerActions = useAutoMatchBannerActions(profileId, weekStart);
   const prefs = useUserPreferences({ profileId, defaultView: defaultView() });

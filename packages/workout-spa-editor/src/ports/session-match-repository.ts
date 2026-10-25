@@ -32,7 +32,9 @@ export type SessionMatchRepository = {
    * Idempotent set-union append into `executedWorkoutIds`. The
    * transaction reads the row, dedups the input against the current
    * array, and writes the merged result. A no-op when the row is
-   * missing — concurrent-delete tolerance matches `delete`.
+   * missing — concurrent-delete tolerance matches `delete`. An id another
+   * match of the profile plans or holds, in any week, is skipped inside the
+   * same transaction (design §3.7).
    *
    * Drives the Train2Go three-slot grouping: an executed activity
    * (e.g., Garmin/FIT) on the same day+sport as a prescribed+structured

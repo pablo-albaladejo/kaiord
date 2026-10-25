@@ -57,3 +57,17 @@ export const assertSessionMatchDate = (date: string): void => {
   if (!SESSION_MATCH_DATE_PATTERN.test(date))
     throw new Error(`Invalid session match date: ${date}`);
 };
+
+/**
+ * Every workout id the profile's other matches plan or hold (design §3.7):
+ * an append never gives one of them to `matchId`, whatever week it is in.
+ */
+export const idsHeldByOtherMatches = (
+  matches: readonly SessionMatch[],
+  matchId: string
+): Set<string> =>
+  new Set(
+    matches
+      .filter((m) => m.id !== matchId)
+      .flatMap((m) => [m.workoutId, ...(m.executedWorkoutIds ?? [])])
+  );
