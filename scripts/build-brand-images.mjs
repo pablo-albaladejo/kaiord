@@ -35,6 +35,19 @@ export const FAVICON_RASTERS = [
   { out: "favicon.png", size: 32 },
 ];
 
+// The SPA's web app manifest icons. The maskable one renders from its own
+// master: full-bleed, with the mark inside the 80% safe zone the OS keeps.
+export const APP_ICONS = [
+  { out: "app-icon-192.png", size: 192, master: "mark-app-icon.svg" },
+  { out: "app-icon-512.png", size: 512, master: "mark-app-icon.svg" },
+  {
+    out: "app-icon-maskable-512.png",
+    size: 512,
+    master: "mark-app-icon-maskable.svg",
+    maskable: true,
+  },
+];
+
 export const LANDING_SUBTITLE = "One framework. Every fitness format.";
 
 // package public dir → the assets it serves verbatim.
@@ -49,6 +62,7 @@ export const MIRRORS = {
     "favicon.svg",
     "favicon.png",
     "apple-touch-icon.png",
+    ...APP_ICONS.map(({ out }) => out),
   ],
   "packages/docs/public": ["favicon.svg"],
 };
@@ -91,6 +105,13 @@ async function main() {
     join(ASSETS, "apple-touch-icon.png")
   );
   console.log(`  ✓ assets/apple-touch-icon.png (180px, ${touchBytes} bytes)`);
+
+  console.log("Rendering the web app manifest icons...");
+  for (const { out, size, master } of APP_ICONS) {
+    const svg = readFileSync(join(ASSETS, master));
+    const bytes = await renderSvg(svg, size, size, join(ASSETS, out));
+    console.log(`  ✓ assets/${out} (${size}px, ${bytes} bytes)`);
+  }
 
   console.log("Rendering the landing Open Graph card...");
   const ogBytes = await renderSvg(
