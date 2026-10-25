@@ -4,6 +4,7 @@
  * the per-file line cap with both `LinkedWorkoutSection` and the new
  * `ExecutedWorkoutsSection` slots wired up.
  */
+import { isMovableSession } from "../../../application/session-movability";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingDialogBodyProps } from "./coaching-dialog-body-props";
 import { ExecutedWorkoutsSection } from "./ExecutedWorkoutsSection";
@@ -35,6 +36,12 @@ export const renderMatchedBody = (
       onAiProcess={props.onAiProcess}
       onPushToGarmin={props.onPushToGarmin}
       onSplit={props.onSplit}
+      movability={isMovableSession({
+        workout,
+        activity: props.activity,
+        executed,
+      })}
+      onMoveTo={props.onMoveTo}
     />
   </>
 );

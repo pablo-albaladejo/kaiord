@@ -15,14 +15,15 @@ import {
   TUE,
 } from "../../../application/session-move.test-fixtures";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { useRequestMove } from "../../../contexts/session-move-context";
 import { ToastContextProvider } from "../../../contexts/ToastContext";
 import type { PersistencePort } from "../../../ports/persistence-port";
-import { SessionMoveProvider, useRequestMove } from "./SessionMoveProvider";
+import { SessionMoveProvider } from "./SessionMoveProvider";
 
 const MoveButton = () => {
   const requestMove = useRequestMove();
   return (
-    <button type="button" onClick={() => requestMove("w", THU)}>
+    <button type="button" onClick={() => requestMove?.("w", THU)}>
       move
     </button>
   );
