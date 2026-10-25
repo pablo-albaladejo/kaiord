@@ -3,6 +3,13 @@ import { useGarminBridge } from "../../../contexts";
 
 export type UpdateGarminReason = "noExtension" | "signedOut" | "bridgeOutdated";
 
+/** `workout-detail` keys: the send control's own reasons, plus the calendar write it lacks. */
+export const UPDATE_GARMIN_REASON_KEY: Record<UpdateGarminReason, string> = {
+  noExtension: "footer.sendDisabled.noExtension",
+  signedOut: "footer.sendDisabled.signedOut",
+  bridgeOutdated: "garminDrift.bridgeOutdated",
+};
+
 /**
  * Why Update Garmin is unavailable, or `undefined` when it can run. The
  * move needs the calendar write a bridge without `calendar-write-v1` lacks,

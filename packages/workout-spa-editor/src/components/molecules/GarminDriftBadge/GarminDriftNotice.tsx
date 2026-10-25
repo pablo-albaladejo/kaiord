@@ -10,16 +10,9 @@ import { PlacementFeedback } from "../GarminPushButton/PlacementFeedback";
 import { useGarminPlacement } from "../GarminPushButton/useGarminPlacement";
 import { useGarminDriftSentence } from "./GarminDriftBadge";
 import {
-  type UpdateGarminReason,
+  UPDATE_GARMIN_REASON_KEY,
   useUpdateGarminReason,
 } from "./use-update-garmin-reason";
-
-/** The send control's own reasons, plus the calendar write it lacks. */
-const REASON_KEY: Record<UpdateGarminReason, string> = {
-  noExtension: "footer.sendDisabled.noExtension",
-  signedOut: "footer.sendDisabled.signedOut",
-  bridgeOutdated: "garminDrift.bridgeOutdated",
-};
 
 export type GarminDriftNoticeProps = {
   workout: WorkoutRecord;
@@ -82,7 +75,7 @@ export function GarminDriftNotice({
       </Button>
       {reason && (
         <p id={reasonId} className="w-full text-xs text-ink-muted">
-          {t(REASON_KEY[reason])}
+          {t(UPDATE_GARMIN_REASON_KEY[reason])}
         </p>
       )}
       {feedback}

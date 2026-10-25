@@ -12,6 +12,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import type { PlacementResult } from "../../../application/garmin-placement/placement-result";
+import { CALENDAR_WRITE_FEATURE } from "../../../application/garmin-placement/placement-timing";
 import {
   ACTIVITY_ID,
   FRI,
@@ -33,6 +34,18 @@ const pushTo = vi.fn(async (): Promise<PlacementResult | undefined> => ({
 
 vi.mock("../../molecules/GarminPushButton/useGarminPush", () => ({
   useGarminPushTo: () => pushTo,
+}));
+
+const READY = {
+  extensionInstalled: true,
+  sessionActive: true,
+  features: [CALENDAR_WRITE_FEATURE],
+};
+const bridge = { ...READY };
+
+vi.mock("../../../contexts", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  useGarminBridge: () => bridge,
 }));
 
 const placedOn = (date: string) => ({
@@ -88,14 +101,21 @@ const showToastWithAction = async (persistence: PersistencePort) => {
       </ToastContextProvider>
     </PersistenceProvider>
   );
-  await act(async () => {
-    await notify.current?.("w");
-  });
+  const show = () =>
+    act(async () => {
+      await notify.current?.("w");
+    });
+  await show();
+  return { show };
 };
+
+const updateButtons = () =>
+  screen.getAllByRole("button", { name: "Update Garmin" });
 
 describe("useGarminDriftToast", () => {
   beforeEach(async () => {
     pushTo.mockClear();
+    Object.assign(bridge, READY);
     await db.table("exportLedger").clear();
   });
 
@@ -151,6 +171,12 @@ describe("useGarminDriftToast", () => {
         await p.coaching.put({ ...activity!, status: "completed" });
       },
     ],
+    [
+      "Garmin already caught up with the workout's day",
+      async () => {
+        await db.table("exportLedger").put(placedOn(THU));
+      },
+    ],
   ])(
     "should push nothing and say nothing when %s before the press",
     async (_label, change) => {
@@ -170,6 +196,39 @@ describe("useGarminDriftToast", () => {
       expect(pushTo).not.toHaveBeenCalled();
       expect(screen.queryByText("Garmin updated")).toBeNull();
       expect(screen.queryByText(/Garmin was not updated/)).toBeNull();
+    }
+  );
+
+  it.each([
+    [
+      "the extension is not detected",
+      { extensionInstalled: false },
+      "Install the Kaiord extension for Garmin to send this workout.",
+    ],
+    [
+      "Garmin is signed out",
+      { sessionActive: false },
+      "Sign in to Garmin Connect in this browser to send this workout.",
+    ],
+    [
+      "the extension cannot write the calendar",
+      { features: [] },
+      "Update the Kaiord extension for Garmin to move this workout on the Garmin calendar.",
+    ],
+  ])(
+    "should disable the toast's Update Garmin and say why while %s",
+    async (_label, state, why) => {
+      // Arrange
+      Object.assign(bridge, state);
+      await db.table("exportLedger").put(placedOn(TUE));
+
+      // Act
+      await showToastWithAction(await seedSession({ workout: { date: THU } }));
+
+      // Assert
+      expect(updateButtons()[0]).toBeDisabled();
+      expect(updateButtons()[0]).toHaveAccessibleDescription(why);
+      expect(screen.getByText(why)).toBeVisible();
     }
   );
 
