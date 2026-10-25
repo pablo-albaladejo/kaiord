@@ -50,7 +50,8 @@ Work inside-out with TDD, in this order: types → port → adapters → use cas
       week's coach activities. Add `crossWeekMatchedActivityIds` to
       `buildCalendarBuckets`, and route it through `buildTodayBuckets` (AC-7).
       Keep the read inside the `useMatchedSessions` measure, and extend the
-      Playwright performance spec (30 ms budget) with cross-week matches.
+      Playwright performance spec (250 ms CI envelope, 60 ms aspirational
+      slice) with cross-week matches.
       Add the cross-week matches' `workoutId` and `executedWorkoutIds` to
       the solo-workout suppression set, in the Grid and Daily views. Test a
       locked match coach-moved across weeks (AC-28).

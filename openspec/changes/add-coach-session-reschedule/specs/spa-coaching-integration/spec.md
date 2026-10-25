@@ -96,3 +96,55 @@ Train2Go SHALL be treated as read-only: a technical limitation of Train2Go, not 
 - **GIVEN** the Train2Go bridge is linked
 - **WHEN** the athlete moves a Train2Go-derived session
 - **THEN** no message other than the existing read actions SHALL be sent to the Train2Go bridge
+
+## MODIFIED Requirements
+
+### Requirement: AI-driven creation from coaching activity (synchronous)
+
+The system SHALL provide a use case `convertCoachingActivityWithAi(activityId, providerConfig, abortSignal)` that runs the AI pipeline synchronously and writes both the resulting workout AND its `SessionMatch` atomically. The use case:
+
+1. Reads the `CoachingActivityRecord` by id (rejects with `not-found` if missing).
+2. Reads the activity's `description`. If empty/undefined, builds the prompt as `"${activity.title} (${activity.sport})"`. Otherwise uses the description verbatim.
+3. Computes `namespacedSourceId = ${activity.profileId}:${activity.sourceId}`.
+4. Calls `WorkoutRepository.getBySourceId(activity.source, namespacedSourceId)`. If a `WorkoutRecord` already exists, returns `{ ok: true, workoutId, created: false }` AND ensures a matching `SessionMatch` row exists (creates one silently if missing — handles legacy data per the Dexie v10 retro-fix invariant).
+5. Otherwise, calls `generateWorkoutKrd({ text, provider, sport })` with the abort signal piped through. The model produces a KRD object.
+6. On model success, persists a new `WorkoutRecord` with `state: "structured"`, the produced `krd`, `aiMeta` (provider, model, prompt version, timestamp), `raw.description: activity.description ?? ""`, `source`, `sourceId: namespacedSourceId`, `date`, `sport`, `title`, fresh `nanoid()` id. Writes a `SessionMatch` row with `source: "auto-coaching"`, `profileId: activity.profileId`, `coachingActivityId: activity.id`, `workoutId`, `date: activity.date`. Both writes complete before returning. Returns `{ ok: true, workoutId, created: true }`.
+7. On model failure (rejection, abort, invalid KRD shape, timeout), the use case writes NOTHING — no `WorkoutRepository.put`, no `SessionMatchRepository.put`. Returns `{ ok: false, reason, error }` where `reason ∈ { "ai-error" | "ai-cancelled" | "ai-timeout" | "ai-invalid-krd" | "transport-error" }`.
+
+The use case emits analytics: `coaching.convert_with_ai.invoked` on entry, then exactly one of `coaching.convert_with_ai.success` (with `created` flag), `coaching.convert_with_ai.failure` (with `reason` enum) or `coaching.convert_with_ai.skipped` (with `reason: "changed-meanwhile"`) on exit. `skipped` is emitted when an existing raw workout left the `raw` state during the LLM call, so nothing was written (AC-30).
+
+#### Scenario: Successful AI conversion creates workout and match atomically
+
+- **GIVEN** an activity `A` with `description="Calentamiento Z1 + 5x(15\" Z5)"` and no existing workout
+- **WHEN** the user clicks `[AI process]` and `generateWorkoutKrd` returns a valid KRD
+- **THEN** a new `WorkoutRecord` with `state="structured"` and the produced KRD is persisted; a new `SessionMatch` row with `source="auto-coaching"` linking activity `A` to the new workout is persisted; the use case returns `{ ok: true, created: true }`; the calendar bucketer routes both into `matchedByDay` (the activity disappears from `soloPlansByDay`)
+
+#### Scenario: AI failure persists nothing
+
+- **GIVEN** an activity with no existing workout
+- **WHEN** the user clicks `[AI process]` and `generateWorkoutKrd` rejects with `"Model returned invalid KRD"`
+- **THEN** no `WorkoutRecord` is created; no `SessionMatch` is created; the use case returns `{ ok: false, reason: "ai-invalid-krd", error: "Model returned invalid KRD" }`; the dialog stays in `no-workout` state with the error rendered inline
+
+#### Scenario: AI cancellation persists nothing
+
+- **GIVEN** an in-flight `[AI process]` request
+- **WHEN** the user clicks `[Cancel]` (or presses Escape, or closes the dialog) and the abort signal fires
+- **THEN** the in-flight LLM request aborts; no `WorkoutRecord` is created; no `SessionMatch` is created; the use case returns `{ ok: false, reason: "ai-cancelled" }`; the dialog returns to `no-workout` state without an error message
+
+#### Scenario: Empty description falls back to title + sport
+
+- **GIVEN** an activity with `description=""` and `title="Long ride Z2"` and `sport.label="Cycling"`
+- **WHEN** the user clicks `[AI process]`
+- **THEN** `generateWorkoutKrd` is called with `text="Long ride Z2 (Cycling)"`; the dialog shows the hint `"ℹ AI usará solo title + sport"` above the action buttons; the use case proceeds normally
+
+#### Scenario: Idempotent re-click after success returns existing workout without re-billing
+
+- **GIVEN** an activity already converted via AI on a prior call
+- **WHEN** the user clicks `[AI process]` again
+- **THEN** the use case returns `{ ok: true, created: false }` after a single read; no `generateWorkoutKrd` call fires; the dialog navigates to the existing `/workout/:id`
+
+#### Scenario: A raw workout that changed during the LLM call is skipped, not a success
+
+- **GIVEN** an activity whose existing workout is in `state="raw"`
+- **WHEN** the user clicks `[AI process]` and the workout is skipped by another writer before `generateWorkoutKrd` resolves
+- **THEN** the workout is not written and stays `skipped`; the use case returns `{ ok: true, created: false }`; the use case emits `coaching.convert_with_ai.skipped` with `reason: "changed-meanwhile"` and does not emit `coaching.convert_with_ai.success`

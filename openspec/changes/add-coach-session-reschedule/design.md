@@ -444,10 +444,19 @@ After the commit:
 - The Daily view gets the same treatment through `buildTodayBuckets`.
 - **Read budget**: the extra `listByActivityIds` read sits inside the same
   `useMatchedSessions` live query, and inside its `performance.measure`
-  (`use-matched-sessions-perf.ts`). The Playwright performance spec's 30 ms
-  slice of the CalendarPage FCP budget (design D16 of the original change)
-  therefore covers it. PR-1 extends that spec with a week whose activities
-  have matches in another week.
+  (`use-matched-sessions-perf.ts`), so the Playwright performance spec
+  covers it. That spec asserts the fastest of 5 steady-state re-fires
+  against a 250 ms CI envelope, scaled by the runner's slowdown.
+  `USE_MATCHED_SESSIONS_BUDGET_MS` (60 ms, the upper end of D16's
+  aspirational 30–60 ms slice) is reported, not asserted. PR-1 extends that
+  spec with a week whose activities have matches in another week.
+  - A relative assertion was tried and dropped: the same spec re-fired the
+    cross-week week and a twin 30-card week without cross-week matches,
+    interleaved, and bounded the ratio of their fastest spans. It measured
+    1.02–1.31 over six local runs against a 1.5 budget. The ratio of two
+    ~25 ms floors moves with a few ms of jitter, and CI's 128–157 ms floor,
+    dominated by IndexedDB latency, was never measured for it. A budget wide
+    enough not to flake would catch nothing the envelope misses.
 - Example: a session moved from Sunday of week 1 to Monday of week 2.
   - Week 1 shows nothing on Sunday.
   - Week 2 shows the matched card on Monday.
@@ -459,6 +468,13 @@ After the commit:
   set as it appends.
 - So a recording already linked to one match, or claimed earlier in the same
   pass, is never appended to a second match.
+- The calendar only passes the visible week's matches, so a match dated in
+  another week (a manual match, a torn merge) is outside that set. Two
+  layers cover it:
+  - `taken` is also seeded with the cross-week matches' ids (§3.6).
+  - The root fix is in `appendExecutedWorkoutIds`, in both adapters. Its
+    transaction reads the profile's matches and skips any id another match
+    plans or holds, whatever its week.
 - The consequence of a move: moving a session onto a day that has a
   same-sport recording which no match holds yet links that recording on the
   next run. The session then counts as executed and is locked against further
@@ -572,7 +588,14 @@ would then move the match back to the stale date.
   the row is no longer in the state the transition expects: for example, it
   was skipped while the AI call ran, or it is already structured. Then the
   transition is a no-op skip. It does not throw, and it writes nothing. The
-  caller treats the outcome as skipped, not failed.
+  caller treats the outcome as skipped, not failed, and not as a success:
+  - `updateWorkoutRecord` returns `false`.
+  - The batch's `processOne` returns `written: false`. `processBatch` keeps
+    the row in a `skipped` bucket and status, and the toast names it apart
+    from the processed rows.
+  - `processExistingRawInPlace` emits `coaching.convert_with_ai.skipped`
+    instead of `success`.
+  - Dialog skip and unskip close silently.
 - Each site gets a test that interleaves a `moveSession` during the `await`,
   or between the snapshot and the write, and asserts the moved date survives.
 
@@ -580,12 +603,12 @@ would then move the match back to the stale date.
 
 - It scans `packages/workout-spa-editor/src`, excluding tests, for every call
   site of:
-  - `workouts.put(` and `workouts.bulkPut(`, including `deps.workouts`,
-    `persistence.workouts` and `db.workouts`
-  - `table("workouts").put|bulkPut(`
+  - `put`, `bulkPut`, `update`, `add` and `bulkAdd` on `workouts`,
+    including `deps.workouts`, `persistence.workouts` and `db.workouts`
+  - the same methods on `table("workouts")`
 - It classifies each site against a registry in the script. The registry is
   named `WORKOUT_DATE_WRITERS`, an exported array of
-  `{ file, reason, note }` objects.
+  `{ file, reason, note, via? }` objects.
   - `scripts/check-allowlists-empty.mjs` forbids only a non-empty
     `const ALLOWLIST = new Set([...])` in `scripts/check-*.mjs`.
   - This registry is not named `ALLOWLIST` and is not a `Set` of strings. It
@@ -596,6 +619,11 @@ would then move the match back to the stale date.
   - `date-writer`: `application/move-session.ts` and
     `application/coaching/apply-coach-date-moves.ts`. The file must also call
     `sessionMatch.updateDate`, and the script asserts this.
+    - `via` names the module that makes that call for the writer:
+      `apply-coach-date-moves.ts` re-dates an unlocked match through
+      `application/coaching/redate-followed-match.ts` (§3.4).
+    - The file must import a relative specifier that resolves to its `via`.
+      `via` is rejected on any reason other than `date-writer`.
   - `date-preserving`: re-read and write in one transaction, keeping the
     fresh `date`:
     - `application/save-workout-edits.ts`
@@ -619,7 +647,8 @@ would then move the match back to the stale date.
     - `hooks/chat/chat-create-workout.ts`
 - **Fails** when:
   - a call site is not in the registry (the message names the file and line)
-  - a `date-writer` lacks `updateDate`
+  - a `date-writer` lacks `updateDate`, in the file and in its `via`
+  - a `via` the file does not import, or a `via` on another reason
   - a registry entry matches no call site (a stale entry)
 - **Generic imports**:
   - Snapshot import and the profile ops write through a generic
@@ -635,6 +664,8 @@ would then move the match back to the stale date.
   fixtures cover:
   - an unlisted writer, which fails
   - a `date-writer` without `updateDate`, which fails
+  - a `date-writer` that re-dates through its imported `via`, which passes
+  - a `via` the file does not import, and a `via` on a `creator`, which fail
   - a stale registry entry, which fails
   - a clean tree, which passes
 - It is wired as `lint:workout-date-writers` in `lint:parallel`, like
@@ -720,7 +751,7 @@ would then move the match back to the stale date.
 | AC-3  | `moveSession` writes `date`, `updatedAt`, `match.date` and `match.updatedAt` in one transaction. It takes `profileId` from the re-read workout and leaves `coachDate`, `state`, `modifiedAt`, `garminPushId` and `krd` untouched.                                                                            | PR-1 |
 | AC-4  | `moveSession` throws `SessionNotMovableError("executed")` for a session with an executed slot and for a recording held by a match. It throws `("completed")` for a completed activity and `WorkoutNotFoundError` for a missing workout. Each makes 0 writes. The same day returns `unchanged` with 0 writes. | PR-1 |
 | AC-5  | `applyCoachDateMoves` re-dates the match in every row of the §3.11 table that moves `date`. `overridden` lists the athlete's day, and its length equals `overriddenLocalMoves`. `reportMoves` keeps it.                                                                                                      | PR-1 |
-| AC-6  | `scripts/check-workout-date-writers.mjs` fails on an unlisted `workouts.put`/`bulkPut` call site, on a `date-writer` without `updateDate` and on a stale registry entry. It passes on the tree. Its co-located test covers all four cases.                                                                   | PR-1 |
+| AC-6  | `scripts/check-workout-date-writers.mjs` fails on an unlisted `workouts` write call site, on a `date-writer` without `updateDate` and on a stale registry entry. It passes on the tree. Its co-located test covers all four cases.                                                                           | PR-1 |
 | AC-7  | `buildCalendarBuckets` puts a moved matched session only on its new day, with no solo duplicate. This holds after a coach move. When the session crosses weeks (Sun W1 → Mon W2), W1 shows no solo plan card. The Daily view behaves the same.                                                               | PR-1 |
 | AC-8  | Executed auto-link attaches a same-sport recording on the moved day to the moved match. It never attaches a recording already held by another match.                                                                                                                                                         | PR-1 |
 | AC-9  | Cloud merge: a moved workout and its match win against a stale remote copy, and the change token advances after a move. A torn merge (workout from A on Thu, match from B on Tue) ends with the match on Thu after the post-import heal.                                                                     | PR-1 |
@@ -797,8 +828,8 @@ adapter tests, plus `node --test`.
   Grid and Daily views (AC-28).
 - Stale-snapshot writer whose state changed during the `await`: no write and
   no throw (AC-30).
-- The `useMatchedSessions` 30 ms performance spec with cross-week matches
-  (§3.6).
+- The `useMatchedSessions` performance spec (250 ms CI envelope, 60 ms
+  aspirational slice) with cross-week matches (§3.6).
 
 **PR-2: entry points, chip, same-sport check, Move back.** RTL, plus one
 Playwright spec.
