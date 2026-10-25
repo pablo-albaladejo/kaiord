@@ -193,7 +193,11 @@ jobs:
           echo "✅ All required files present in merged artifact"
           node scripts/check-css-asset-urls.mjs --dist merged-dist/app --base /app/
 
-      # Installability over the tree that ships: the app's HTML links
+      - name: Inject SPA route fallback
+        run: node scripts/inject-spa-fallback.mjs merged-dist
+
+      # Installability over the exact bytes Pages serves (after the fallback
+      # rewrote app/index.html): the app's HTML links
       # /app/manifest.webmanifest, scoped to /app/, with every icon present.
       - name: SPA web app manifest guard
         env:
@@ -201,9 +205,6 @@ jobs:
           SPA_DIST: merged-dist/app
           SPA_BASE: /app/
         run: node --test packages/workout-spa-editor/scripts/dist-pwa-manifest.test.mjs
-
-      - name: Inject SPA route fallback
-        run: node scripts/inject-spa-fallback.mjs merged-dist
 
       # A real 200 page for the bare /editor/ URL (canonical to /app/). It
       # refuses to run without the bridge above, and leaves every deeper
