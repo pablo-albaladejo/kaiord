@@ -34,7 +34,15 @@
   "reschedule": {
     "moveFailed": "Could not move workout",
     "blockedExecuted": "Already done — it can't be moved.",
-    "blockedCompleted": "The coach marked it completed — it can't be moved."
+    "blockedCompleted": "The coach marked it completed — it can't be moved.",
+    "notFound": "This workout no longer exists."
+  },
+  "sameSport": {
+    "title": "Same sport that day",
+    "message": "There is already a {{sport}} session on {{day}}. Move anyway?",
+    "messageRecording": "There is already a {{sport}} session on {{day}}. If it's a recording, it will be linked to this session and the session will be locked. Move anyway?",
+    "confirm": "Move anyway",
+    "cancel": "Cancel"
   },
   "lifecycle": {
     "raw": "Raw",

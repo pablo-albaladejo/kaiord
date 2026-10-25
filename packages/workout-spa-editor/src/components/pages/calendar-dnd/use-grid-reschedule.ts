@@ -1,16 +1,12 @@
 /**
- * useGridReschedule — wires `usePointerDrag` to `moveSession` backed by
- * Dexie (`useGridMove`), so the grid only reads the `bind` /
- * `dropTargetId` API. This hook is the drag's composition root.
+ * useGridReschedule — wires `usePointerDrag` to the calendar's shared move
+ * flow (`useRequestMove`: same-sport check, then `moveSession`), so the
+ * grid only reads the `bind` / `dropTargetId` API.
  */
 
-import { db } from "../../../adapters/dexie/dexie-database";
-import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
-import { useGridMove } from "./use-grid-move";
+import { useRequestMove } from "../session-move/SessionMoveProvider";
 import { usePointerDrag } from "./use-pointer-drag";
 
-const dexiePersistence = () => createDexiePersistence(db);
-
 export function useGridReschedule() {
-  return usePointerDrag({ onDrop: useGridMove(dexiePersistence) });
+  return usePointerDrag({ onDrop: useRequestMove() });
 }

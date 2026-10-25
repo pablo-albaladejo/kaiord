@@ -34,7 +34,15 @@
   "reschedule": {
     "moveFailed": "No se pudo mover el entrenamiento",
     "blockedExecuted": "Ya está hecho: no se puede mover.",
-    "blockedCompleted": "El entrenador lo marcó como completado: no se puede mover."
+    "blockedCompleted": "El entrenador lo marcó como completado: no se puede mover.",
+    "notFound": "Este entreno ya no existe."
+  },
+  "sameSport": {
+    "title": "Mismo deporte ese día",
+    "message": "Ya hay una sesión de {{sport}} el {{day}}. ¿La mueves igualmente?",
+    "messageRecording": "Ya hay una sesión de {{sport}} el {{day}}. Si es una grabación, se vinculará a esta sesión y la sesión quedará bloqueada. ¿La mueves igualmente?",
+    "confirm": "Mover igualmente",
+    "cancel": "Cancelar"
   },
   "lifecycle": {
     "raw": "Sin procesar",

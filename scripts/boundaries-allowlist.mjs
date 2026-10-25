@@ -108,10 +108,6 @@ export const BOUNDARIES_ALLOWLIST = Object.freeze(
     // --- C: component layer acting as composition root ---
     ["src/components/pages/batch-prepare.ts", REASON.COMPOSITION_ROOT],
     [
-      "src/components/pages/calendar-dnd/use-grid-reschedule.ts",
-      REASON.COMPOSITION_ROOT,
-    ],
-    [
       "src/components/pages/health/labs/dashboard/use-lab-dashboard-params.ts",
       REASON.COMPOSITION_ROOT,
     ],
@@ -143,7 +139,7 @@ export const ALLOWLIST_PACKAGE_ROOT = "packages/workout-spa-editor";
  * High-water mark. The allowlist may shrink below this, never grow past it.
  * Lower this number whenever entries are removed so the ratchet keeps tightening.
  */
-export const BOUNDARIES_ALLOWLIST_MAX = 23;
+export const BOUNDARIES_ALLOWLIST_MAX = 22;
 
 /** Repo-root-relative globs, for `ignores` in eslint.config.js. */
 export const boundariesAllowlistPaths = () =>

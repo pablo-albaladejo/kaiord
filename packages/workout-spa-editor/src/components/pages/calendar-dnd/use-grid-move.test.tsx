@@ -59,7 +59,7 @@ describe("useGridMove", () => {
     );
   });
 
-  it("should show the generic failure toast for a missing workout", async () => {
+  it("should show the not-found toast for a missing workout", async () => {
     // Arrange
     const view = setup(await seedSession({ match: null }));
 
@@ -69,7 +69,7 @@ describe("useGridMove", () => {
     // Assert
     await waitFor(() =>
       expect(view.result.current.toasts.map((t) => t.title)).toEqual([
-        "Could not move workout",
+        "This workout no longer exists.",
       ])
     );
   });
