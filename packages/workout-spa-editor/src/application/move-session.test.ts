@@ -192,6 +192,29 @@ describe("moveSession", () => {
     }
   );
 
+  it("should still move a solo recording that no match holds", async () => {
+    // Arrange
+    const persistence = await seedSession({ match: null });
+    await persistence.activities.upsertByExternalId({
+      id: "act",
+      profileId: PROFILE,
+      date: TUE,
+      sport: "running",
+      sourceBridgeId: "garmin",
+      externalId: "ext",
+      linkedWorkoutId: "w",
+      krd: null,
+      createdAt: NOW,
+    });
+    const { deps } = depsOf(persistence);
+
+    // Act
+    const result = await moveSession(deps, { workoutId: "w", targetDay: THU });
+
+    // Assert
+    expect(result).toEqual({ kind: "moved", from: TUE, to: THU });
+  });
+
   it("should throw WorkoutNotFoundError with no writes for a missing workout", async () => {
     // Arrange
     const persistence = await seedSession();

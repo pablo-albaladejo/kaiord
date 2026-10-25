@@ -38,11 +38,12 @@ const assertMovable = async (
   workoutId: string,
   match: SessionMatch | undefined
 ): Promise<void> => {
-  // A match can pair the plan with a recording while its slot stays empty.
-  if (await deps.activities.referencesWorkout(profileId, workoutId))
-    throw new SessionNotMovableError("executed");
   if (match) {
-    if (match.executedWorkoutIds.length > 0)
+    // A match can pair a recording as its plan while the slot stays empty.
+    if (
+      match.executedWorkoutIds.length > 0 ||
+      (await deps.activities.referencesWorkout(profileId, workoutId))
+    )
       throw new SessionNotMovableError("executed");
     const activity = await deps.coaching.getById(match.coachingActivityId);
     if (activity?.status === "completed")
