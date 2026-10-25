@@ -14,8 +14,9 @@
  * drop-target highlight.
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { type DragPreview, restartDragPreview } from "./drag-preview";
 import { useGlobalDragListeners } from "./use-global-drag-listeners";
 import { isDesktopViewport, TOUCH_HOLD_MS } from "./use-pointer-drag-helpers";
 
@@ -38,7 +39,11 @@ export function usePointerDrag({
   const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(null);
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewRef = useRef<DragPreview | null>(null);
   const enabled = isDesktopViewport();
+
+  // A drag cut short by unmounting the grid must not leave its ghost behind.
+  useEffect(() => () => previewRef.current?.end(null), []);
 
   const reset = useCallback(() => {
     if (holdTimerRef.current) {
@@ -63,6 +68,7 @@ export function usePointerDrag({
       // otherwise a second pointerdown leaks the previous timeout and
       // `setActiveWorkoutId` can fire on the stale workout id.
       cancelHold();
+      restartDragPreview(previewRef, event);
       if (event.pointerType === "mouse") {
         setActiveWorkoutId(workoutId);
         return;
@@ -88,6 +94,7 @@ export function usePointerDrag({
   useGlobalDragListeners({
     activeWorkoutId,
     enabled,
+    previewRef,
     onDrop,
     reset,
     setDropTargetId,

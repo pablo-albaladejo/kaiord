@@ -11,10 +11,14 @@ export const isDesktopViewport = (): boolean => {
   return window.matchMedia(MIN_VIEWPORT_PX_QUERY).matches;
 };
 
-export const readDayFromPoint = (x: number, y: number): string | null => {
+export const readDayElementFromPoint = (
+  x: number,
+  y: number
+): HTMLElement | null => {
   if (typeof document === "undefined") return null;
   const el = document.elementFromPoint(x, y);
-  if (!el) return null;
-  const dayEl = (el as Element).closest<HTMLElement>("[data-day]");
-  return dayEl?.dataset.day ?? null;
+  return el?.closest<HTMLElement>("[data-day]") ?? null;
 };
+
+export const readDayFromPoint = (x: number, y: number): string | null =>
+  readDayElementFromPoint(x, y)?.dataset.day ?? null;
