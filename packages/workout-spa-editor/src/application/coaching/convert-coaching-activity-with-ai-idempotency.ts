@@ -11,7 +11,8 @@
  *   - `processExistingRawInPlace` — raw re-process branch. Bills the
  *     LLM for a row currently in `state="raw"`, writes the resulting
  *     KRD + aiMeta into the existing row via `transitionToStructured`,
- *     and leaves the existing `session_match` row untouched. Re-uses
+ *     and leaves the existing `session_match` row untouched. A row that
+ *     left `raw` during the call is not written and emits `skipped`. Re-uses
  *     the same `generateKrd` port as the create-new flow so flow (f)
  *     of the coaching-dialog redesign is observable through the same
  *     route-mock surface as flow (a, c).
@@ -74,15 +75,24 @@ export const processExistingRawInPlace = async (
     const { provider, model, promptVersion, processedAt } = generated.aiMeta;
     const aiMeta = { provider, model, promptVersion, processedAt };
     // Onto the row as stored after the LLM call: a move made meanwhile keeps
-    // its date, and a row that left `raw` is left alone.
-    await updateWorkoutRecord(deps, existingWorkout.id, (fresh) =>
-      fresh.state === "raw"
-        ? transitionToStructured(fresh, krd, aiMeta)
-        : undefined
+    // its date, and a row that left `raw` is left alone and reported as
+    // skipped rather than as a success (AC-30).
+    const written = await updateWorkoutRecord(
+      deps,
+      existingWorkout.id,
+      (fresh) =>
+        fresh.state === "raw"
+          ? transitionToStructured(fresh, krd, aiMeta)
+          : undefined
     );
-    deps.analytics.event("coaching.convert_with_ai.success", {
-      created: false,
-    });
+    if (written)
+      deps.analytics.event("coaching.convert_with_ai.success", {
+        created: false,
+      });
+    else
+      deps.analytics.event("coaching.convert_with_ai.skipped", {
+        reason: "changed-meanwhile",
+      });
     return { ok: true, workoutId: existingWorkout.id, created: false };
   } catch (err) {
     return buildAiFailure(deps.analytics, err);

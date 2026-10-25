@@ -2,7 +2,8 @@
  * Converting an activity whose workout already exists writes onto the row
  * as stored (design §3.10, AC-25, AC-30): a move that lands during the LLM
  * call, or between the read and the write, keeps its date, and a row no
- * longer in the expected state is not written.
+ * longer in the expected state is not written and reported as skipped,
+ * not as a success.
  */
 import { describe, expect, it, vi } from "vitest";
 
@@ -60,6 +61,10 @@ describe("processExistingRawInPlace with a row changed during the LLM call", () 
 
     // Assert
     expect(result).toEqual({ ok: true, workoutId: "w", created: false });
+    expect(deps.analytics.event).toHaveBeenCalledWith(
+      "coaching.convert_with_ai.success",
+      { created: false }
+    );
     expect(await persistence.workouts.getById("w")).toMatchObject({
       date: THU,
       coachDate: TUE,
@@ -83,6 +88,14 @@ describe("processExistingRawInPlace with a row changed during the LLM call", () 
 
     // Assert
     expect(result).toEqual({ ok: true, workoutId: "w", created: false });
+    expect(deps.analytics.event).toHaveBeenCalledWith(
+      "coaching.convert_with_ai.skipped",
+      { reason: "changed-meanwhile" }
+    );
+    expect(deps.analytics.event).not.toHaveBeenCalledWith(
+      "coaching.convert_with_ai.success",
+      expect.anything()
+    );
     expect(await persistence.workouts.getById("w")).toMatchObject({
       state: "skipped",
       krd: null,
