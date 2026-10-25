@@ -5,6 +5,7 @@
  */
 import type { Page } from "@playwright/test";
 
+import { calendarDay } from "./calendar-day";
 import { getWeekId } from "./seed-dexie";
 
 /** Week 1 runs Mon 2026-10-05 → Sun 2026-10-11; week 2 starts on the 12th. */
@@ -79,8 +80,9 @@ export const seedCoachProfile = (page: Page, profileId: string) =>
     { id: profileId, ts: NOW }
   );
 
+/** The day as the viewport renders it: grid column, or list day on a phone. */
 export const dayColumn = (page: Page, day: string) =>
-  page.locator(`[data-day="${day}"]`);
+  calendarDay(page, day).day;
 
 export const matchedCard = (page: Page) =>
   page.getByTestId(`matched-card-${PLAN_CARD}`);

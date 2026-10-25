@@ -7,6 +7,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { GRID_MIN_WIDTH } from "./helpers/calendar-day";
 import {
   DAY,
   dayColumn,
@@ -163,7 +164,10 @@ test.describe("Coach session reschedule", () => {
     page.on("pageerror", (error) => errors.push(error.message));
     await setup(page, DAY.TUE);
     await syncAndConvert(page, WEEK_1);
-    await page.getByRole("switch", { name: "Switch to list view" }).click();
+    // The List view is the phone default and one switch away above it.
+    if ((page.viewportSize()?.width ?? 0) >= GRID_MIN_WIDTH) {
+      await page.getByRole("switch", { name: "Switch to list view" }).click();
+    }
     const tuesday = page.getByTestId(`calendar-list-day-${DAY.TUE}`);
     const thursday = page.getByTestId(`calendar-list-day-${DAY.THU}`);
     const card = tuesday.getByTestId(/^matched-card-/);
