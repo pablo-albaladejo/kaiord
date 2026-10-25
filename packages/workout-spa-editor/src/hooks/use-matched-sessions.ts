@@ -13,8 +13,9 @@
  * Performance instrumentation: the hook wraps the live query in
  * `performance.mark` / `performance.measure` calls under DEV / test
  * mode only (gated by `import.meta.env`). The Playwright performance
- * spec reads the resulting measure entry to enforce the 30 ms slice
- * of the CalendarPage FCP budget (per design D16). Production builds
+ * spec reads the resulting measure entry and asserts its steady-state
+ * floor against a 250 ms CI envelope (design D16 named 30–60 ms as the
+ * aspirational slice). Production builds
  * tree-shake these calls out — see `scripts/check-no-perf-marks-in-prod.mjs`.
  *
  * Returns the same `MatchedSession` shape `MatchedSessionCard`
