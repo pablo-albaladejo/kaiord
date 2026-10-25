@@ -16,16 +16,23 @@ import {
 } from "../../../application/session-move.test-fixtures";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { useRequestMove } from "../../../contexts/session-move-context";
-import { ToastContextProvider } from "../../../contexts/ToastContext";
+import {
+  ToastContextProvider,
+  useToastContext,
+} from "../../../contexts/ToastContext";
 import type { PersistencePort } from "../../../ports/persistence-port";
 import { SessionMoveProvider } from "./SessionMoveProvider";
 
 const MoveButton = () => {
   const requestMove = useRequestMove();
+  const { toasts } = useToastContext();
   return (
-    <button type="button" onClick={() => requestMove?.("w", THU)}>
-      move
-    </button>
+    <>
+      <button type="button" onClick={() => requestMove?.("w", THU)}>
+        move
+      </button>
+      <output>{toasts.map((t) => t.title).join("|")}</output>
+    </>
   );
 };
 
@@ -126,5 +133,43 @@ describe("SessionMoveProvider", () => {
     // Assert
     await waitFor(async () => expect(await dateOf(persistence)).toBe(THU));
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("should report a workout that no longer exists, on any entry point (2.8)", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const persistence = await seedSession({ match: null });
+    await persistence.workouts.delete("w");
+    renderFlow(persistence);
+
+    // Act
+    await user.click(screen.getByRole("button", { name: "move" }));
+
+    // Assert
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "This workout no longer exists."
+      )
+    );
+  });
+
+  it("should report a done session as blocked, on any entry point (2.8)", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    const persistence = await seedSession({
+      match: { executedWorkoutIds: ["rec"] },
+    });
+    renderFlow(persistence);
+
+    // Act
+    await user.click(screen.getByRole("button", { name: "move" }));
+
+    // Assert
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Already done — it can't be moved."
+      )
+    );
+    expect(await dateOf(persistence)).toBe(TUE);
   });
 });
