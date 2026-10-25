@@ -1,6 +1,6 @@
 /**
- * Reads one day's same-sport inputs for a move target outside the visible
- * week (design §3.8, AC-16): the `[profileId+date]` index on workouts,
+ * Reads one day's same-sport inputs for any move target, inside the visible
+ * week or not (design §3.8, AC-16): the `[profileId+date]` index on workouts,
  * activities and coach plans, plus the profile's matches. The matches are a
  * profile scan (`listByProfile`, measured under 4 ms for 1000 rows in B5)
  * rather than a date read, because a match dated in another week still holds
