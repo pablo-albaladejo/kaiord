@@ -7,6 +7,7 @@ import {
   THRESHOLD_STEPS,
 } from "../../../test-utils/zone-profile-fixtures";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { GarminDriftProvider } from "../GarminDriftBadge/garmin-drift-context";
 import { WorkoutCard } from "./WorkoutCard";
 
 function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
@@ -301,5 +302,27 @@ describe("WorkoutCard", () => {
     expect(
       screen.getByTestId("lifecycle-badge-aiAssisted")
     ).toBeInTheDocument();
+  });
+
+  it("should name the Garmin day on the card when the entry is unconfirmed (AC-19)", () => {
+    // Arrange
+    const drift = new Map([
+      ["w1", { placedOn: "2026-04-05", certainty: "unconfirmed" as const }],
+    ]);
+
+    // Act
+    render(
+      <GarminDriftProvider value={drift}>
+        <WorkoutCard workout={makeWorkout()} onClick={vi.fn()} />
+      </GarminDriftProvider>
+    );
+
+    // Assert
+    expect(screen.getByTestId("garmin-drift-badge")).toHaveTextContent(
+      "Garmin?: Sun 5"
+    );
+    expect(screen.getByRole("button")).toHaveAccessibleName(
+      /; Garmin may still be on Sun, Apr 5$/
+    );
   });
 });

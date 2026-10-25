@@ -48,6 +48,12 @@
     "label": "Moved from {{day}}",
     "aria": "Moved from {{date}}"
   },
+  "garminDrift": {
+    "badge": "Garmin: {{day}}",
+    "badgeUnconfirmed": "Garmin?: {{day}}",
+    "placed": "Garmin still on {{date}}",
+    "unconfirmed": "Garmin may still be on {{date}}"
+  },
   "lifecycle": {
     "raw": "Raw",
     "structured": "Structured",

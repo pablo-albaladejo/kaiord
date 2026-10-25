@@ -8,6 +8,7 @@ import {
 } from "../../../test-utils/zone-profile-fixtures";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { GarminDriftProvider } from "../GarminDriftBadge/garmin-drift-context";
 import { type MatchedSession, MatchedSessionCard } from "./MatchedSessionCard";
 
 const baseActivity: CoachingActivity = {
@@ -329,5 +330,30 @@ describe("MatchedSessionCard", () => {
     // Assert
     expect(screen.queryByTestId("moved-from-chip")).toBeNull();
     expect(screen.getByRole("button")).not.toHaveAccessibleName(/Moved from/);
+  });
+
+  it("should name the Garmin day on the card when Garmin still holds another (AC-19)", () => {
+    // Arrange
+    const drift = new Map([
+      [
+        baseWorkout.id,
+        { placedOn: "2026-04-27", certainty: "placed" as const },
+      ],
+    ]);
+
+    // Act
+    render(
+      <GarminDriftProvider value={drift}>
+        <MatchedSessionCard session={session()} />
+      </GarminDriftProvider>
+    );
+
+    // Assert
+    expect(screen.getByTestId("garmin-drift-badge")).toHaveTextContent(
+      "Garmin: Mon 27"
+    );
+    expect(screen.getByRole("button")).toHaveAccessibleName(
+      /; Garmin still on Mon, Apr 27$/
+    );
   });
 });

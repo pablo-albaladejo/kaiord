@@ -48,6 +48,12 @@
     "label": "Movida desde el {{day}}",
     "aria": "Movida desde el {{date}}"
   },
+  "garminDrift": {
+    "badge": "Garmin: {{day}}",
+    "badgeUnconfirmed": "Garmin?: {{day}}",
+    "placed": "En Garmin sigue el {{date}}",
+    "unconfirmed": "En Garmin puede seguir el {{date}}"
+  },
   "lifecycle": {
     "raw": "Sin procesar",
     "structured": "Estructurada",
