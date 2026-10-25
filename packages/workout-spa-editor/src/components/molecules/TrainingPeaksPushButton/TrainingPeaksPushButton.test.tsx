@@ -18,6 +18,12 @@ import type {
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { TrainingPeaksPushButton } from "./TrainingPeaksPushButton";
 
+const locale = vi.hoisted(() => ({ active: "en" }));
+
+vi.mock("../../../i18n/LocaleProvider", () => ({
+  useActiveLocale: () => locale.active,
+}));
+
 const push =
   vi.fn<
     (options?: TrainingPeaksPushOptions) => Promise<TrainingPeaksPushOutcome>
@@ -45,6 +51,7 @@ const HORIZON_MESSAGE =
 describe("TrainingPeaksPushButton", () => {
   beforeEach(() => {
     push.mockReset();
+    locale.active = "en";
   });
 
   it("should offer the send action before anything is pushed", () => {
@@ -103,20 +110,27 @@ describe("TrainingPeaksPushButton", () => {
     expect(onSent).not.toHaveBeenCalled();
   });
 
-  it("should explain a blocked moved push and name the recorded day", async () => {
-    // Arrange
-    push.mockResolvedValue(MOVED);
-    render(<TrainingPeaksPushButton workout={workout} />);
+  it.each([
+    { active: "en", day: "Tue, Oct 20" },
+    { active: "es", day: "mar, 20 oct" },
+  ])(
+    "should name the recorded day of a blocked moved push in $active",
+    async ({ active, day }) => {
+      // Arrange
+      locale.active = active;
+      push.mockResolvedValue(MOVED);
+      render(<TrainingPeaksPushButton workout={workout} />);
 
-    // Act
-    await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+      // Act
+      await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
 
-    // Assert
-    expect(
-      await screen.findByTestId("trainingpeaks-repush-blocked")
-    ).toHaveTextContent("footer.trainingPeaksRepush.moved 2026-10-20");
-    expect(push).toHaveBeenCalledWith(undefined);
-  });
+      // Assert
+      expect(
+        await screen.findByTestId("trainingpeaks-repush-blocked")
+      ).toHaveTextContent(`footer.trainingPeaksRepush.moved ${day}`);
+      expect(push).toHaveBeenCalledWith(undefined);
+    }
+  );
 
   it("should explain a blocked changed push without a date", async () => {
     // Arrange

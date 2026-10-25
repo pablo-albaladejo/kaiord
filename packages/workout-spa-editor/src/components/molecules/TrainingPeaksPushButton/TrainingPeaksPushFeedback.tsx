@@ -1,7 +1,9 @@
 import { useState } from "react";
 
 import type { TrainingPeaksPushOutcome } from "../../../hooks/use-trainingpeaks-push";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
+import { weekdayDate } from "../../../utils/calendar-day-labels";
 import { Button } from "../../atoms/Button";
 import { ConfirmationModal } from "../ConfirmationModal";
 
@@ -23,6 +25,7 @@ export const TrainingPeaksPushFeedback = ({
   onSendCopy,
 }: TrainingPeaksPushFeedbackProps) => {
   const t = useTranslate("workout-detail");
+  const locale = useActiveLocale();
   const [confirming, setConfirming] = useState(false);
   if (!("block" in failure)) {
     return (
@@ -34,7 +37,9 @@ export const TrainingPeaksPushFeedback = ({
   const { block } = failure;
   const message =
     block.reason === "moved"
-      ? t("footer.trainingPeaksRepush.moved", { date: block.recordedDate })
+      ? t("footer.trainingPeaksRepush.moved", {
+          date: weekdayDate(block.recordedDate, locale),
+        })
       : t("footer.trainingPeaksRepush.changed");
 
   return (
