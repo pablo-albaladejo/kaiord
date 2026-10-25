@@ -7,9 +7,12 @@
  */
 
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { toPersistedCoachingActivityId } from "../../../types/coaching-activity-record";
@@ -62,6 +65,13 @@ const makeMatch = (
   executedWorkoutIds,
 });
 
+const persistence = createDexiePersistence(db);
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <PersistenceProvider persistence={persistence}>
+    {children}
+  </PersistenceProvider>
+);
+
 afterEach(async () => {
   await db.table("sessionMatches").clear();
   await db.table("workouts").clear();
@@ -80,8 +90,9 @@ describe("useCoachingDialogState — matched executed", () => {
       .put(makeMatch(structured.id, [exec1.id, exec2.id]));
 
     // Act
-    const { result } = renderHook(() =>
-      useCoachingDialogState(PROFILE_ID, activity)
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
     );
 
     // Assert
@@ -99,8 +110,9 @@ describe("useCoachingDialogState — matched executed", () => {
     await db.table("sessionMatches").put(makeMatch(structured.id, []));
 
     // Act
-    const { result } = renderHook(() =>
-      useCoachingDialogState(PROFILE_ID, activity)
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
     );
 
     // Assert
@@ -120,8 +132,9 @@ describe("useCoachingDialogState — matched executed", () => {
       .put(makeMatch(structured.id, [exec1.id, "w-missing"]));
 
     // Act
-    const { result } = renderHook(() =>
-      useCoachingDialogState(PROFILE_ID, activity)
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
     );
 
     // Assert
@@ -149,8 +162,9 @@ describe("useCoachingDialogState — matched executed", () => {
     });
 
     // Act
-    const { result } = renderHook(() =>
-      useCoachingDialogState(PROFILE_ID, activity)
+    const { result } = renderHook(
+      () => useCoachingDialogState(PROFILE_ID, activity),
+      { wrapper }
     );
 
     // Assert
