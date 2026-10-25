@@ -5,7 +5,7 @@ import { useGarminPlacementNotice } from "../../../hooks/use-garmin-placement-no
 import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { ExportLedgerEntry } from "../../../types/export-ledger";
-import { Button } from "../../atoms/Button";
+import { Button } from "../../atoms/Button/Button";
 import { PlacementFeedback } from "../GarminPushButton/PlacementFeedback";
 import { useGarminPlacement } from "../GarminPushButton/useGarminPlacement";
 import { useGarminDriftSentence } from "./GarminDriftBadge";

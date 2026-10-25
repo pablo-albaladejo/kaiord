@@ -9,7 +9,10 @@ import { useTranslation } from "react-i18next";
 
 import type { GarminDateDrift } from "../../../application/garmin-placement/garmin-date-drift";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
-import { shortWeekdayName, weekdayDate } from "../../pages/calendar-day-labels";
+import {
+  shortWeekdayName,
+  weekdayDate,
+} from "../../../utils/calendar-day-labels";
 import { useGarminDriftOf } from "./garmin-drift-context";
 
 const dayNumber = (date: string) => String(Number(date.slice(8)));
