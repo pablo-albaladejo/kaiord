@@ -4,6 +4,7 @@ pnpm-lock.yaml
 
 # Build outputs
 dist/
+.e2e-prod-dist/
 build/
 coverage/
 *.tsbuildinfo

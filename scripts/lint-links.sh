@@ -11,6 +11,7 @@ mapfile -d '' MARKDOWN_FILES < <(
   find . -type f -name '*.md' \
     -not -path '*/node_modules/*' \
     -not -path '*/dist/*' \
+    -not -path '*/.e2e-prod-dist/*' \
     -not -path '*/coverage/*' \
     -not -path '*/.changeset/*' \
     -not -path '*/.claude/worktrees/*' \

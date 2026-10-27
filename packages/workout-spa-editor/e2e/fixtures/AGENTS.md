@@ -14,6 +14,8 @@ Playwright fixtures and static test data shared across specs.
 - `llm-responses.ts` — canned LLM response payloads keyed by prompt fingerprint; used by `ai-generate-workout.spec.ts` so AI flows don't hit a real provider.
 - `static-pages-server.ts` — tiny static-page server for tests that need a non-SPA origin.
 - `focus-workout.krd.json` — KRD fixture used by `focus-management.spec.ts`.
+- `dev-server-warmup-global-setup.ts` — global setup for every dev-server run: crawls the module graph, lazy routes included, so no worker's first test pays the cold-transform cost.
+- `prod-base-global-setup.ts` — global setup under `E2E_PROD_BASE=1`: builds the `/app/` artifact once into the gitignored `.e2e-prod-dist/`, which `merged-dist-server.ts` assembles and serves.
 
 ## For AI Agents
 

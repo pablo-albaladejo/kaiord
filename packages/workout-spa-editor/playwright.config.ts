@@ -25,7 +25,7 @@ export default defineConfig({
   globalSetup:
     process.env.E2E_PROD_BASE === "1"
       ? "./e2e/fixtures/prod-base-global-setup.ts"
-      : undefined,
+      : "./e2e/fixtures/dev-server-warmup-global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

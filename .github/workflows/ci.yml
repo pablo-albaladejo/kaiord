@@ -989,7 +989,7 @@ jobs:
           E2E_PROD_BASE: "1"
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle'
 
-      # The global setup above left an /app/ build in dist/. Assemble it with
+      # The global setup above left an /app/ build in .e2e-prod-dist/. Assemble it with
       # the landing exactly as the deploy does (docs are not in the build
       # artifact, hence --without docs), so the guards below read the shape
       # Pages serves rather than a raw package dist.
@@ -998,7 +998,7 @@ jobs:
           node scripts/assemble-site.mjs \
             --out merged-dist \
             --landing packages/landing/dist \
-            --app packages/workout-spa-editor/dist \
+            --app packages/workout-spa-editor/.e2e-prod-dist \
             --without docs \
             --sha "$GITHUB_SHA"
           test -f merged-dist/.nojekyll || { echo "❌ merged-dist/.nojekyll missing"; exit 1; }
