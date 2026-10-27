@@ -1,6 +1,6 @@
 ## B1. Assembly refactor (no behaviour change)
 
-- [ ] 1.1 Add `scripts/assemble-site.mjs` with `node:test` coverage. It runs these steps in order:
+- [x] 1.1 Add `scripts/assemble-site.mjs` with `node:test` coverage. It runs these steps in order:
   - merge;
   - `version.json`, written exactly as `{"sha":"…"}\n`;
   - Umami substitution on the copies, failing when a placeholder remains;
@@ -9,13 +9,13 @@
 
   The script copies with glob semantics: no top-level dotfiles, except the explicit landing `.nojekyll`. `--without docs` is required whenever docs are absent. The fixture includes dotfiles.
 
-- [ ] 1.2 `deploy-site.yml`: replace the inline merge, sed, inject and legacy steps with the script. "Verify merged artifact" and `check-css-asset-urls` stay as separate steps after it.
-- [ ] 1.3 `ci.yml` `e2e-prod-base`:
+- [x] 1.2 `deploy-site.yml`: replace the inline merge, sed, inject and legacy steps with the script. "Verify merged artifact" and `check-css-asset-urls` stay as separate steps after it.
+- [x] 1.3 `ci.yml` `e2e-prod-base`:
   - add `landing` to `expected-packages`;
   - run `assemble-site.mjs --without docs` and the manifest guard;
   - update the `check-ci-fanout-invariants` whitelist if it needs it.
-- [ ] 1.4 Switch `e2e/fixtures/merged-dist-server.ts` to call the script instead of copying and injecting by hand.
-- [ ] 1.5 Parity evidence: run the old inline YAML steps and the script over the same inputs, then `diff -r` the two trees. Report the result in the PR.
+- [x] 1.4 Switch `e2e/fixtures/merged-dist-server.ts` to call the script instead of copying and injecting by hand.
+- [x] 1.5 Parity evidence: run the old inline YAML steps and the script over the same inputs, then `diff -r` the two trees. Report the result in the PR.
 
 ## B2. Stale-schema guard (D9)
 
