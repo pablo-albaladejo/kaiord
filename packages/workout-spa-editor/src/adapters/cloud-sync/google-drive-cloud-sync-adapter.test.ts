@@ -23,6 +23,7 @@ function fakeAuth(authenticated: boolean): GisAuth {
     isAuthenticated: () => authenticated,
     authenticate: vi.fn(async () => {}),
     getAccessToken: () => (authenticated ? "tok" : null),
+    invalidate: vi.fn(),
   };
 }
 

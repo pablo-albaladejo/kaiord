@@ -68,6 +68,52 @@ describe("createGisAuth", () => {
     await expect(act()).rejects.toThrow(/access_denied/);
   });
 
+  it("should stop reporting authenticated once the token nears its expiry", async () => {
+    // Arrange
+    const LIFETIME_S = 3599;
+    const MS_PER_S = 1000;
+    const MARGIN_MS = 60_000;
+    const clock = { now: 0 };
+    stubGis((cfg) =>
+      cfg.callback({ access_token: "tok-1", expires_in: LIFETIME_S })
+    );
+    const auth = createGisAuth("client-x", () => clock.now);
+    await auth.authenticate();
+
+    // Act
+    clock.now = LIFETIME_S * MS_PER_S - MARGIN_MS;
+
+    // Assert
+    expect(auth.isAuthenticated()).toBe(false);
+    expect(auth.getAccessToken()).toBeNull();
+  });
+
+  it("should reject instead of hanging when the popup fails to open", async () => {
+    // Arrange
+    stubGis((cfg) => cfg.error_callback?.({ type: "popup_failed_to_open" }));
+    const auth = createGisAuth("client-x");
+
+    // Act
+    const act = () => auth.authenticate();
+
+    // Assert
+    await expect(act()).rejects.toThrow(/popup_failed_to_open/);
+    expect(auth.isAuthenticated()).toBe(false);
+  });
+
+  it("should forget the token on invalidate", async () => {
+    // Arrange
+    stubGis((cfg) => cfg.callback({ access_token: "tok-1" }));
+    const auth = createGisAuth("client-x");
+    await auth.authenticate();
+
+    // Act
+    auth.invalidate();
+
+    // Assert
+    expect(auth.isAuthenticated()).toBe(false);
+  });
+
   it("should request a silent token with empty prompt", async () => {
     // Arrange
     let seenPrompt: string | undefined = "unset";
