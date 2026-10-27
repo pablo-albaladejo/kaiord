@@ -192,5 +192,9 @@
       "setRoute": "Use WHOOP for sleep"
     },
     "suggestions": "{{group}} suggestions"
+  },
+  "toast": {
+    "garminPushed": "Workout sent to Garmin Connect",
+    "garminPushFailed": "Couldn't send the workout to Garmin Connect"
   }
 }

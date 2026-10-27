@@ -1,7 +1,8 @@
 /**
  * useChatActionOps — binds the chat action tools' side-effecting operations
  * (implemented in `chat-action-ops-impl`) to the active profile + provider.
- * Each op is confirmation-gated upstream, so they run only after approval.
+ * Each op is confirmation-gated upstream, so they run only after approval;
+ * push_to_garmin is approved automatically (see `chat-turn-approve`).
  *
  * `syncCoaching` builds a Train2Go transport and calls the `syncWeek` use
  * case directly rather than `useTrain2GoSource`, whose
