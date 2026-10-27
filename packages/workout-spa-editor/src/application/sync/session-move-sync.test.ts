@@ -1,15 +1,15 @@
 /**
  * A moved session against cloud sync (design §3.14, AC-9): both rows carry
  * the move's `updatedAt`, so a stale remote copy loses the merge and the
- * auto-push change token advances; a torn merge is healed onto the
+ * move notifies auto-push; a torn merge is healed onto the
  * workout's date.
  */
 import "fake-indexeddb/auto";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
-import { syncedChangeToken } from "../../hooks/use-sync-auto-push";
+import { onSyncedTableChange } from "../../adapters/dexie/sync-change-notifier";
 import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { SessionMatch } from "../../types/session-match";
@@ -85,10 +85,11 @@ describe("a moved session and cloud sync", () => {
     expect(merged.tables.sessionMatches).toEqual([match]);
   });
 
-  it("should advance the auto-push change token", async () => {
+  it("should notify auto-push of the move", async () => {
     // Arrange
     const persistence = await seedDexieSession();
-    const before = await syncedChangeToken(db);
+    const changes = vi.fn();
+    const unsubscribe = onSyncedTableChange(changes);
 
     // Act
     await moveSession(
@@ -97,7 +98,8 @@ describe("a moved session and cloud sync", () => {
     );
 
     // Assert
-    expect(await syncedChangeToken(db)).not.toBe(before);
+    unsubscribe();
+    expect(changes).toHaveBeenCalled();
   });
 
   it("should heal a torn merge onto the workout's date", async () => {

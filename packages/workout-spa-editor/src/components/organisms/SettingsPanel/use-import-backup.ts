@@ -7,7 +7,7 @@ import {
 } from "../../../application/backup/parse-backup";
 import type { BackupImportSummary } from "../../../application/backup/summarize-backup-import";
 import type { ProfileChoice } from "../../../application/sync/reconcile-auto-profile";
-import { useSnapshotSource } from "../../../contexts/sync-context";
+import { useSnapshotSource, useSync } from "../../../contexts/sync-context";
 import type { KaiordBackup } from "../../../types/backup";
 
 export type ImportProblem =
@@ -26,6 +26,7 @@ const problemOf = (error: unknown): ImportProblem =>
 /** Reads a backup file and merges it into this device (Settings → Privacy). */
 export function useImportBackup() {
   const { snapshotPort, deviceId, afterImport } = useSnapshotSource();
+  const { requestPush } = useSync();
   const [state, setState] = useState<ImportBackupState>({ kind: "idle" });
 
   const run = useCallback(
@@ -38,7 +39,11 @@ export function useImportBackup() {
           backup,
           choice,
         });
-        if (result.kind !== "needsChoice") await afterImport?.();
+        if (result.kind !== "needsChoice") {
+          await afterImport?.();
+          // An import's writes are silent to auto-push; this one is a change.
+          requestPush();
+        }
         setState(
           result.kind === "needsChoice"
             ? { kind: "choose", backup, candidates: result.candidates }
@@ -48,7 +53,7 @@ export function useImportBackup() {
         setState({ kind: "error", problem: problemOf(error) });
       }
     },
-    [snapshotPort, deviceId, afterImport]
+    [snapshotPort, deviceId, afterImport, requestPush]
   );
 
   const importFile = useCallback(

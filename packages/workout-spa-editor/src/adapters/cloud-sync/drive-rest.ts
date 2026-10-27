@@ -4,12 +4,12 @@
  * The four-endpoint Drive surface the cloud-sync adapter needs, over
  * `fetch` (no Google SDK): locate-or-create `kaiord-snapshot.json` in
  * `appDataFolder`, multipart-create or media-PATCH it, and `alt=media`
- * download it. No merge logic — pure file transport. The access token is
- * supplied per call via the injected getter so refresh stays the auth
- * layer's concern.
+ * download it. No merge logic — pure file transport. The injected fetch
+ * adds the bearer token, so refresh stays the auth layer's concern.
  */
 
 import type { RemoteSnapshot, Snapshot } from "../../types/snapshot";
+import type { DriveFetch } from "./drive-authed-fetch";
 import { buildMultipartBody, MULTIPART_CONTENT_TYPE } from "./drive-multipart";
 import {
   createUrl,
@@ -29,20 +29,14 @@ export type DriveRest = {
   ) => Promise<string>;
 };
 
-export function createDriveRest(getToken: () => string | null): DriveRest {
-  const authHeader = () => {
-    const token = getToken();
-    if (!token) throw new Error("Drive request attempted without a token");
-    return { Authorization: `Bearer ${token}` };
-  };
-
+export function createDriveRest(send: DriveFetch): DriveRest {
   const asJson = async <T>(res: Response): Promise<T> => {
     if (!res.ok) throw new Error(`Drive API error ${res.status}`);
     return (await res.json()) as T;
   };
 
   const findFile = async (): Promise<DriveFile | null> => {
-    const res = await fetch(findUrl(), { headers: authHeader() });
+    const res = await send(findUrl());
     const body = await asJson<{ files: DriveFile[] }>(res);
     return body.files[0] ?? null;
   };
@@ -50,7 +44,7 @@ export function createDriveRest(getToken: () => string | null): DriveRest {
   const download = async (): Promise<RemoteSnapshot | null> => {
     const file = await findFile();
     if (!file) return null;
-    const res = await fetch(mediaUrl(file.id), { headers: authHeader() });
+    const res = await send(mediaUrl(file.id));
     const snapshot = await asJson<Snapshot>(res);
     return { snapshot, headRevisionId: file.headRevisionId ?? "" };
   };
@@ -67,14 +61,14 @@ export function createDriveRest(getToken: () => string | null): DriveRest {
       throw new Error("Drive snapshot revision conflict");
     }
     const res = file
-      ? await fetch(updateUrl(file.id), {
+      ? await send(updateUrl(file.id), {
           method: "PATCH",
-          headers: { ...authHeader(), "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(snapshot),
         })
-      : await fetch(createUrl(), {
+      : await send(createUrl(), {
           method: "POST",
-          headers: { ...authHeader(), "Content-Type": MULTIPART_CONTENT_TYPE },
+          headers: { "Content-Type": MULTIPART_CONTENT_TYPE },
           body: buildMultipartBody(SNAPSHOT_FILE_NAME, snapshot),
         });
     const body = await asJson<DriveFile>(res);
