@@ -129,6 +129,7 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
+      "**/.e2e-prod-dist/**",
       "**/coverage/**",
       "**/node_modules/**",
       "**/*.config.js",
