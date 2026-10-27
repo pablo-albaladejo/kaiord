@@ -1,7 +1,7 @@
 /**
  * Sends a saved workout to Garmin Connect through the browser-extension
- * bridge. Confirmation-gated like every action tool; the push operation is
- * injected (`ChatActionOps`) so this layer stays free of React and bridge
+ * bridge. An action tool, but the app approves it on the athlete's behalf
+ * (no confirmation card); the push operation is injected (`ChatActionOps`) so this layer stays free of React and bridge
  * transports.
  */
 import type { ChatTool } from "@kaiord/ai";
@@ -18,7 +18,8 @@ export const createPushToGarminTool = (ops: ChatActionOps): ChatTool => ({
   description:
     "Push a saved workout to Garmin Connect and place it on its date in " +
     "the user's Garmin calendar, so it can be executed on the user's watch " +
-    "or device. Requires the user to confirm before running.",
+    "or device. It runs as soon as it is called, without asking the user, " +
+    "so call it only when the user asks to send a workout to Garmin.",
   inputSchema: pushToGarminSchema,
   requiresConfirmation: true,
   execute: (raw) => ops.pushToGarmin(pushToGarminSchema.parse(raw)),
