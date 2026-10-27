@@ -700,6 +700,10 @@ jobs:
             # (dist/../schema/zwift-workout.xsd); without it every dist
             # consumer (e.g. the CLI converting KRD to ZWO) fails ENOENT.
             packages/zwo/schema/
+          # The landing's .nojekyll must survive the round trip: the
+          # e2e-prod-base assembly copies it to the site root, as the deploy
+          # does, and the default (false) drops every dotfile.
+          include-hidden-files: true
           # 30 days covers the typical PR review cycle so "Re-run failed
           # jobs only" stays usable; spec floor 14, ceiling 90.
           retention-days: 30
@@ -997,6 +1001,7 @@ jobs:
             --app packages/workout-spa-editor/dist \
             --without docs \
             --sha "$GITHUB_SHA"
+          test -f merged-dist/.nojekyll || { echo "❌ merged-dist/.nojekyll missing"; exit 1; }
 
       # Every absolute url() in the app CSS must name a file the /app/ build
       # serves (R-CssAssetUrls).
