@@ -13,6 +13,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import {
+  isSyncConnected,
+  setSyncConnected,
+} from "../lib/cloud-sync/sync-connected-pref";
 import type { CloudSyncPort } from "../ports/cloud-sync-port";
 import type { SnapshotPort } from "../ports/snapshot-port";
 import { PUSH_DEBOUNCE_MS, type SyncEngine } from "./sync-engine-types";
@@ -29,8 +33,10 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
   const { cloud } = deps;
   const cycle = useSyncCycle(deps);
   const { syncNow, settled, ...state } = cycle;
-  const [connected, setConnected] = useState<boolean>(() =>
-    cloud.isAuthenticated()
+  // A reopened app has no token yet but stays connected: its first sync
+  // signs in again, or waits for a gesture (`needsAuth`).
+  const [connected, setConnected] = useState<boolean>(
+    () => cloud.isAuthenticated() || isSyncConnected()
   );
   // Mirror `connected` in a ref so debounced callbacks read the live value
   // rather than the value captured at the render that scheduled them.
@@ -48,6 +54,7 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
 
   const connect = useCallback(async () => {
     await cloud.authenticate();
+    setSyncConnected(true);
     connectedRef.current = true;
     setConnected(true);
   }, [cloud]);
@@ -57,6 +64,7 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
       clearTimeout(timer.current);
       timer.current = null;
     }
+    setSyncConnected(false);
     connectedRef.current = false;
     setConnected(false);
   }, []);

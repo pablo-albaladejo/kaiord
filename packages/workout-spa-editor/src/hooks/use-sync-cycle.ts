@@ -14,6 +14,7 @@ import {
 import { syncWithCloud } from "../application/sync/sync-with-cloud";
 import type { CloudSyncPort } from "../ports/cloud-sync-port";
 import type { SnapshotPort } from "../ports/snapshot-port";
+import { isCloudAuthRequired } from "../types/cloud-auth-required-error";
 import type { SyncOutcome, SyncStatus } from "./sync-engine-types";
 
 export type UseSyncCycleDeps = {
@@ -22,6 +23,9 @@ export type UseSyncCycleDeps = {
   deviceId: string;
   afterImport?: () => Promise<void>;
 };
+
+const errorText = (cause: unknown): string =>
+  cause instanceof Error ? cause.message : "Sync failed";
 
 export function useSyncCycle(deps: UseSyncCycleDeps) {
   const { cloud, snapshotPort, deviceId, afterImport } = deps;
@@ -50,9 +54,10 @@ export function useSyncCycle(deps: UseSyncCycleDeps) {
       setLastSyncedAt(new Date().toISOString());
       return "synced";
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Sync failed");
-      setStatus("error");
-      return "failed";
+      const needsAuth = isCloudAuthRequired(cause);
+      setError(needsAuth ? null : errorText(cause));
+      setStatus(needsAuth ? "needsAuth" : "error");
+      return needsAuth ? "needsAuth" : "failed";
     }
   }, [cloud, snapshotPort, deviceId, afterImport]);
 

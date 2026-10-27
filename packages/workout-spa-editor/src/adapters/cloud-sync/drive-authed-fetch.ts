@@ -5,6 +5,7 @@
  * blocked popup: the sync waits for the next click rather than failing.
  */
 
+import { loadGisScript } from "../../lib/cloud-sync/load-gis-script";
 import { CloudAuthRequiredError } from "../../types/cloud-auth-required-error";
 import type { GisAuth } from "./gis-token-client";
 
@@ -22,7 +23,12 @@ export function createDriveAuthedFetch(
 ): DriveFetch {
   const ensureToken = async () => {
     if (auth.isAuthenticated()) return;
-    if (!canPrompt()) throw new CloudAuthRequiredError();
+    if (!canPrompt()) {
+      // Loaded now so the gesture that resumes sync reaches the popup with
+      // no network wait, while the browser still counts it as a gesture.
+      loadGisScript().catch(() => undefined);
+      throw new CloudAuthRequiredError();
+    }
     try {
       await auth.authenticate();
     } catch {

@@ -101,6 +101,22 @@ describe("createGisAuth", () => {
     expect(auth.isAuthenticated()).toBe(false);
   });
 
+  it("should share one popup between sign-ins started together", async () => {
+    // Arrange
+    const popups = vi.fn();
+    stubGis((cfg) => {
+      popups();
+      cfg.callback({ access_token: "tok-1" });
+    });
+    const auth = createGisAuth("client-x");
+
+    // Act
+    await Promise.all([auth.authenticate(), auth.authenticate()]);
+
+    // Assert
+    expect(popups).toHaveBeenCalledTimes(1);
+  });
+
   it("should forget the token on invalidate", async () => {
     // Arrange
     stubGis((cfg) => cfg.callback({ access_token: "tok-1" }));

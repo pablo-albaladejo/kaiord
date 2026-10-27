@@ -4,6 +4,10 @@ import { CloudAuthRequiredError } from "../../types/cloud-auth-required-error";
 import { createDriveAuthedFetch } from "./drive-authed-fetch";
 import type { GisAuth } from "./gis-token-client";
 
+vi.mock("../../lib/cloud-sync/load-gis-script", () => ({
+  loadGisScript: vi.fn(async () => {}),
+}));
+
 type FakeAuth = GisAuth & { token: string | null };
 
 function fakeAuth(token: string | null, next = "fresh"): FakeAuth {

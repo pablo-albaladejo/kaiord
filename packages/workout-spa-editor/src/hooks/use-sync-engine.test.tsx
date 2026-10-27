@@ -6,6 +6,7 @@ import {
   createInMemorySnapshotPort,
   type InMemorySnapshotState,
 } from "../test-utils/in-memory-snapshot-port";
+import { CloudAuthRequiredError } from "../types/cloud-auth-required-error";
 import type { Snapshot } from "../types/snapshot";
 import { useSyncEngine } from "./use-sync-engine";
 
@@ -34,6 +35,7 @@ function snapshotWith(rows: ReadonlyArray<unknown>): Snapshot {
 describe("useSyncEngine", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    localStorage.clear();
   });
 
   afterEach(() => {
@@ -224,5 +226,73 @@ describe("useSyncEngine", () => {
     expect(stoppedWhileRunning).toBe(false);
     expect(stopped).toBe(true);
     expect(result.current.connected).toBe(false);
+  });
+
+  it("should stay connected on reopen when sync was connected before", async () => {
+    // Arrange
+    const cloud = createInMemoryCloudSyncPort();
+    const snapshotPort = createInMemorySnapshotPort(makeSnapshotState());
+    const first = renderHook(() =>
+      useSyncEngine({ cloud, snapshotPort, deviceId: DEVICE_ID })
+    );
+    await act(async () => {
+      await first.result.current.connect();
+    });
+    first.unmount();
+    cloud.state.authenticated = false;
+
+    // Act
+    const { result } = renderHook(() =>
+      useSyncEngine({ cloud, snapshotPort, deviceId: DEVICE_ID })
+    );
+
+    // Assert
+    expect(result.current.connected).toBe(true);
+  });
+
+  it("should forget the connection on disconnect", async () => {
+    // Arrange
+    const cloud = createInMemoryCloudSyncPort();
+    const snapshotPort = createInMemorySnapshotPort(makeSnapshotState());
+    const first = renderHook(() =>
+      useSyncEngine({ cloud, snapshotPort, deviceId: DEVICE_ID })
+    );
+    await act(async () => {
+      await first.result.current.connect();
+    });
+
+    // Act
+    act(() => first.result.current.disconnect());
+    first.unmount();
+    cloud.state.authenticated = false;
+    const { result } = renderHook(() =>
+      useSyncEngine({ cloud, snapshotPort, deviceId: DEVICE_ID })
+    );
+
+    // Assert
+    expect(result.current.connected).toBe(false);
+  });
+
+  it("should report needsAuth, not error, when the cloud needs a gesture to sign in", async () => {
+    // Arrange
+    const cloud = createInMemoryCloudSyncPort();
+    cloud.pull = async () => {
+      throw new CloudAuthRequiredError();
+    };
+    const snapshotPort = createInMemorySnapshotPort(makeSnapshotState());
+    const { result } = renderHook(() =>
+      useSyncEngine({ cloud, snapshotPort, deviceId: DEVICE_ID })
+    );
+
+    // Act
+    let outcome: string | undefined;
+    await act(async () => {
+      outcome = await result.current.syncNow();
+    });
+
+    // Assert
+    expect(outcome).toBe("needsAuth");
+    expect(result.current.status).toBe("needsAuth");
+    expect(result.current.error).toBeNull();
   });
 });

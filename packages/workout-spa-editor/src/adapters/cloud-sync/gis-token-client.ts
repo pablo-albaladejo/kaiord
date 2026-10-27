@@ -40,6 +40,7 @@ export function createGisAuth(
 ): GisAuth {
   let accessToken: string | null = null;
   let expiresAt = 0;
+  let pending: Promise<void> | null = null;
 
   const invalidate = () => {
     accessToken = null;
@@ -83,9 +84,13 @@ export function createGisAuth(
     isAuthenticated,
     getAccessToken: () => (isAuthenticated() ? accessToken : null),
     invalidate,
-    authenticate: async () => {
-      await loadGisScript();
-      await new Promise<void>(request);
-    },
+    // One gesture can start two sign-ins (the resume listener and the
+    // button it landed on); they share one popup.
+    authenticate: () =>
+      (pending ??= loadGisScript()
+        .then(() => new Promise<void>(request))
+        .finally(() => {
+          pending = null;
+        })),
   };
 }
