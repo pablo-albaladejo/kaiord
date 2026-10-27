@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { pollKaiordStore, readKaiordStore } from "./helpers/kaiord-idb";
 
 /**
  * E2E: the chat model picker shows what the conversation runs.
@@ -20,23 +21,10 @@ const PROVIDER_HOSTS = [
 type Row = { purpose?: string; modelId?: string; providerId?: string };
 
 const storedRows = (page: Page, store: string): Promise<Row[]> =>
-  page.evaluate(
-    (name) =>
-      new Promise<Row[]>((resolve, reject) => {
-        const open = indexedDB.open("kaiord-spa");
-        open.onerror = () => reject(open.error);
-        open.onsuccess = () => {
-          const db = open.result;
-          const rows = db.transaction(name).objectStore(name).getAll();
-          rows.onerror = () => reject(rows.error);
-          rows.onsuccess = () => {
-            db.close();
-            resolve(rows.result as Row[]);
-          };
-        };
-      }),
-    store
-  );
+  readKaiordStore<Row>(page, store);
+
+const polledRows = (page: Page, store: string): Promise<Row[] | undefined> =>
+  pollKaiordStore<Row>(page, store);
 
 const shown = (select: Locator) =>
   select.evaluate(
@@ -61,7 +49,7 @@ async function setMainModel(page: Page, label: string, modelId: string) {
     .getByLabel("Main model")
     .selectOption({ label });
   await expect
-    .poll(async () => (await storedRows(page, "aiModelBindings"))[0]?.modelId)
+    .poll(async () => (await polledRows(page, "aiModelBindings"))?.[0]?.modelId)
     .toBe(modelId);
 }
 
@@ -91,7 +79,7 @@ test.describe("Chat model picker", () => {
     await page.getByLabel("Message").fill("Plan my week");
     await page.getByRole("button", { name: "Send", exact: true }).click();
     await expect
-      .poll(async () => (await storedRows(page, "chatConversations")).length)
+      .poll(async () => (await polledRows(page, "chatConversations"))?.length)
       .toBe(1);
     const [row] = await storedRows(page, "chatConversations");
     expect(row?.modelId).toBeUndefined();
@@ -132,7 +120,7 @@ test.describe("Chat model picker", () => {
     await page.getByLabel("Message").fill("How was my week?");
     await page.getByRole("button", { name: "Send", exact: true }).click();
     await expect
-      .poll(async () => (await storedRows(page, "chatConversations"))[0])
+      .poll(async () => (await polledRows(page, "chatConversations"))?.[0])
       .toMatchObject({ modelId: "o3" });
     await expect.poll(() => shown(picker)).toBe("o3 · Mi GPT");
 
