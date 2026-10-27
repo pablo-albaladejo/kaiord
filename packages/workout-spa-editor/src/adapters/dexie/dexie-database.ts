@@ -11,6 +11,7 @@ import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository"
 import { installExportLedgerCascade } from "./dexie-export-ledger-cascade";
 import { runJunkCleanupOnce } from "./dexie-junk-cleanup";
 import { registerKaiordVersions } from "./register-kaiord-versions";
+import { installStaleSchemaGuard } from "./stale-schema-guard";
 
 export {
   backfillBridgeSnapshotState,
@@ -22,10 +23,14 @@ export class KaiordDatabase extends Dexie {
   constructor(name = "kaiord-spa") {
     super(name);
     registerKaiordVersions(this);
+    installStaleSchemaGuard(this);
   }
 }
 
 export const db = new KaiordDatabase();
+// The version this code declares, read before anything opens the database:
+// once open, Dexie rewrites `db.verno` from the installed version.
+export const DECLARED_VERNO = db.verno;
 installExportLedgerCascade(db);
 // Fire-and-forget: returning the promise from a `ready` handler would make
 // Dexie block DB readiness (and all queued queries) until the cleanup scan

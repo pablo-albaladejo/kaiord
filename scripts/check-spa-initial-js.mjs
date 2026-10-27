@@ -47,6 +47,10 @@ import { gzipSync } from "node:zlib";
 //   Train2Go action callbacks)
 // - `src/lib/week-dominant-zone.ts` (loaded by the header's
 //   `useWeekDominantZone` after its read)
+// - `src/boot/render-stale-boot.tsx` (imported by `main.tsx` only on a
+//   stale boot) and `src/components/organisms/StaleSchemaDialog/
+//   StaleSchemaMidSession.tsx` (behind `StaleSchemaGate`; it reads the
+//   editor store, which would otherwise join the entry graph)
 //
 // Usage: node scripts/check-spa-initial-js.mjs <spa-dist> [--report]
 // Exit 1 when <spa-dist>/index.html is missing, has no recognisable entry
@@ -68,6 +72,8 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/application/coaching/attempt-link.ts",
   "src/application/coaching/expand-day.ts",
   "src/lib/week-dominant-zone.ts",
+  "src/boot/render-stale-boot.tsx",
+  "src/components/organisms/StaleSchemaDialog/StaleSchemaMidSession.tsx",
 ];
 
 // The entry chunk MUST have a sourcemap: a static import of a seam gets

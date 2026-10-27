@@ -85,11 +85,11 @@ The editor SHALL treat the database as newer than its code when `Math.floor(nati
 Before Dexie first opens the database, the editor SHALL read the installed version without requesting an upgrade, and then SHALL handle the result as follows:
 
 - **Absent.** A database that does not exist SHALL be reported as absent, and the probe SHALL leave no database behind.
-- **Failed.** A probe that fails for any reason SHALL let boot continue with the normal open, and SHALL NOT show the stale dialog.
-- **Newer.** The editor SHALL NOT open the database. It SHALL look up the existing registration and request an update. It SHALL show the blocking dialog immediately when no registration exists, or when the update yields no installing or waiting worker. Otherwise it SHALL wait for that worker to become installed or redundant, for at most about 15 seconds. When the worker is installed, the editor SHALL activate it and reload, with no dialog. When it becomes redundant or the wait times out, the editor SHALL show the dialog. The reload SHALL happen at most once per session, and a non-stale boot SHALL clear that limit.
+- **Failed.** A probe that fails for any reason, or that has not settled within about 1.5 seconds, SHALL let boot continue with the normal open, and SHALL NOT show the stale dialog. A probe connection that opens after that deadline SHALL be closed at once.
+- **Newer.** The editor SHALL NOT open the database. It SHALL look up the existing registration and request an update. It SHALL show the blocking dialog immediately when no registration exists, or when the update yields no installing or waiting worker. Otherwise it SHALL wait for that worker to become installed or redundant, for at most about 15 seconds. When the worker is installed, the editor SHALL activate it and reload without waiting for a click. While it waits, the blocking dialog SHALL already be shown with its reload action busy, so the screen is never blank. When it becomes redundant or the wait times out, the editor SHALL show the dialog. The reload SHALL happen at most once per session, and a non-stale boot SHALL clear that limit.
 - **Otherwise.** The probe SHALL keep its connection open until Dexie's open settles, and SHALL close itself on `versionchange`.
 
-A ready subscriber SHALL be registered before every other ready subscriber, and SHALL check the opened version. If that version is newer, it SHALL throw a `StaleSchemaError`. No later ready subscriber SHALL run, `open()` and every queued query SHALL reject with that error, and none SHALL hang. The storage boot SHALL map `StaleSchemaError` to the stale state, not to a storage failure, and SHALL then close the database with auto-reopen disabled.
+A ready subscriber SHALL be registered before every other ready subscriber, and SHALL check the opened version. If that version is newer, it SHALL throw a `StaleSchemaError`. No later ready subscriber SHALL run, `open()` SHALL reject with that error, every queued query SHALL reject with a `DatabaseClosedError` whose `inner` is that error, and none SHALL hang. Boot SHALL map `StaleSchemaError` to the stale state, not to a storage failure, and SHALL then close the database with auto-reopen disabled.
 
 When a `versionchange` announces a newer version, the editor's handler SHALL close the database with auto-reopen disabled, SHALL enter the stale state, and SHALL return `false` so that Dexie's default handler does not re-enable auto-open. A database delete SHALL keep the existing close-and-reopen behaviour.
 
@@ -99,7 +99,7 @@ The stale dialog SHALL NOT be dismissible. Its title SHALL be "Kaiord was update
 
 - **GIVEN** the database installed at native version 380 or higher, a shell that declares 37, and a newer worker available
 - **WHEN** the editor boots
-- **THEN** Dexie SHALL NOT open the database, no read or write SHALL reach it, and the editor SHALL activate the newer worker and reload without a dialog
+- **THEN** Dexie SHALL NOT open the database, no read or write SHALL reach it, and the editor SHALL activate the newer worker and reload without a click, while the blocking dialog shows its reload action busy
 
 #### Scenario: A schema-patched database is not stale
 
