@@ -14,6 +14,7 @@ on:
       - "packages/garmin/**"
       - "styles/**"
       - ".github/workflows/deploy-site.yml"
+      - "scripts/assemble-site.mjs"
       - "scripts/inject-spa-fallback.mjs"
       - "scripts/emit-legacy-editor-page.mjs"
       - "scripts/check-site-links.mjs"
@@ -91,39 +92,6 @@ jobs:
           VITE_BASE_PATH: /app/
         run: pnpm --filter @kaiord/workout-spa-editor... build
 
-      # Inject the Umami website id at deploy time (runtime config). The
-      # bundles are environment-agnostic per 12-factor III + V — see
-      # packages/workout-spa-editor/docs/analytics.md. When the secret is
-      # absent the placeholders remain and the noop analytics adapter wins.
-      # Two artifacts carry the __UMAMI_WEBSITE_ID__ placeholder: the editor
-      # SPA index.html (runtime config) and the landing 404.html (a public/
-      # file that bypasses Vite's build-time replacement). The landing
-      # index.html is already substituted at build time via
-      # VITE_UMAMI_WEBSITE_ID.
-      - name: Substitute analytics website id
-        env:
-          UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
-        run: |
-          set -e
-          if [ -z "${UMAMI_WEBSITE_ID:-}" ]; then
-            echo "UMAMI_WEBSITE_ID unset; leaving placeholders (analytics disabled)"
-            exit 0
-          fi
-          for f in \
-            packages/workout-spa-editor/dist/index.html \
-            packages/landing/dist/404.html; do
-            test -f "$f" || { echo "::error::Build artifact missing: $f"; exit 1; }
-            # Use | as the delimiter to avoid escaping issues.
-            sed -i "s|__UMAMI_WEBSITE_ID__|${UMAMI_WEBSITE_ID}|g" "$f"
-            # Verify substitution actually replaced the placeholder so a
-            # silent failure does not ship a no-analytics build.
-            if grep -q "__UMAMI_WEBSITE_ID__" "$f"; then
-              echo "::error::Placeholder __UMAMI_WEBSITE_ID__ still present in $f after sed"
-              exit 1
-            fi
-          done
-          echo "Analytics website id injected at runtime"
-
       - name: Build Docs
         env:
           UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
@@ -139,33 +107,25 @@ jobs:
           REQUIRE_FULL_HISTORY: "1"
         run: node --test packages/docs/scripts/dist-seo-uniqueness.test.mjs packages/docs/scripts/single-font.test.mjs
 
-      - name: Merge dist outputs
+      # One script turns the three builds into the tree Pages serves, so CI
+      # and the e2e fixture assemble the same shape. It copies with shell-glob
+      # semantics (no top-level dotfiles; only the landing .nojekyll by name),
+      # writes app/version.json, substitutes the Umami placeholder on the
+      # merged app/index.html and 404.html (failing if one remains), injects
+      # the legacy path bridge and emits the bare /editor/ page.
+      # When the secret is absent the placeholders remain and the noop
+      # analytics adapter wins — see packages/workout-spa-editor/docs/analytics.md.
+      - name: Assemble site
         env:
           BUILD_SHA: ${{ github.sha }}
+          UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
         run: |
-          mkdir -p merged-dist
-
-          # Landing page at root
-          cp -r packages/landing/dist/* merged-dist/
-          cp -r packages/landing/dist/.nojekyll merged-dist/ 2>/dev/null || true
-
-          # SPA at /app/
-          mkdir -p merged-dist/app
-          cp -r packages/workout-spa-editor/dist/* merged-dist/app/
-          # The commit this bundle was built from, so a check against the live
-          # site can tell which deploy it is looking at.
-          printf '{"sha":"%s"}\n' "$BUILD_SHA" > merged-dist/app/version.json
-
-          # Docs at /docs/
-          mkdir -p merged-dist/docs
-          cp -r packages/docs/.vitepress/dist/* merged-dist/docs/
-
-          # Sitemaps: the landing ships a root sitemap.xml that is a sitemap
-          # index referencing /sitemap-landing.xml (landing + editor pages)
-          # and /docs/sitemap.xml (VitePress). Keep the VitePress sitemap in
-          # place under /docs/ — do NOT move it to the root.
-
-          echo "✅ Merged dist structure:"
+          node scripts/assemble-site.mjs \
+            --out merged-dist \
+            --landing packages/landing/dist \
+            --app packages/workout-spa-editor/dist \
+            --docs packages/docs/.vitepress/dist \
+            --sha "$BUILD_SHA"
           ls -la merged-dist/
 
       - name: Verify merged artifact
@@ -179,6 +139,7 @@ jobs:
           test -f merged-dist/CNAME                || { echo "❌ Missing CNAME"; exit 1; }
           test -f merged-dist/.nojekyll            || { echo "❌ Missing .nojekyll"; exit 1; }
           test -f merged-dist/404.html             || { echo "❌ Missing 404.html"; exit 1; }
+          test -f merged-dist/editor/index.html    || { echo "❌ Missing editor/index.html"; exit 1; }
           test -f merged-dist/robots.txt           || { echo "❌ Missing robots.txt"; exit 1; }
           test -f merged-dist/sitemap.xml          || { echo "❌ Missing sitemap.xml"; exit 1; }
           test -f merged-dist/sitemap-landing.xml  || { echo "❌ Missing sitemap-landing.xml"; exit 1; }
@@ -193,9 +154,6 @@ jobs:
           echo "✅ All required files present in merged artifact"
           node scripts/check-css-asset-urls.mjs --dist merged-dist/app --base /app/
 
-      - name: Inject SPA route fallback
-        run: node scripts/inject-spa-fallback.mjs merged-dist
-
       # Installability over the exact bytes Pages serves (after the fallback
       # rewrote app/index.html): the app's HTML links
       # /app/manifest.webmanifest, scoped to /app/, with every icon present.
@@ -205,15 +163,6 @@ jobs:
           SPA_DIST: merged-dist/app
           SPA_BASE: /app/
         run: node --test packages/workout-spa-editor/scripts/dist-pwa-manifest.test.mjs
-
-      # A real 200 page for the bare /editor/ URL (canonical to /app/). It
-      # refuses to run without the bridge above, and leaves every deeper
-      # /editor/<route> path to it.
-      - name: Emit legacy /editor/ page
-        run: |
-          set -e
-          node scripts/emit-legacy-editor-page.mjs merged-dist
-          test -f merged-dist/editor/index.html || { echo "❌ Missing editor/index.html"; exit 1; }
 
       - name: Check site links
         env:

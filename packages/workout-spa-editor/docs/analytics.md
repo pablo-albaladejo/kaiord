@@ -39,14 +39,7 @@ The website id is **NOT** baked into the build. The compiled bundle is environme
 
 ## Activating analytics in a deploy
 
-The deploy step substitutes the placeholder string inside the deployed `index.html`. The pipeline (`.github/workflows/deploy-site.yml`, "Substitute analytics website id" step) does this with `sed`:
-
-```bash
-if [ -n "$UMAMI_WEBSITE_ID" ]; then
-  sed -i "s|__UMAMI_WEBSITE_ID__|${UMAMI_WEBSITE_ID}|g" \
-    packages/workout-spa-editor/dist/index.html
-fi
-```
+The deploy step substitutes the placeholder string inside the deployed `index.html`. The pipeline (`.github/workflows/deploy-site.yml`, "Assemble site" step) runs `scripts/assemble-site.mjs` with `UMAMI_WEBSITE_ID` set. On the merged copies of `app/index.html` and the landing `404.html`, it replaces every `__UMAMI_WEBSITE_ID__`, and it fails the deploy if any placeholder is left. The package `dist/` stays untouched.
 
 The website id is **public** (it identifies the site to Umami's ingest endpoint) — there are no secrets to handle here. To disable analytics for a deploy, simply skip the substitution step (or leave the secret unset); the placeholder remains and the noop adapter wins.
 

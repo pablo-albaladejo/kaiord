@@ -1,6 +1,5 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import {
-  cpSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -71,16 +70,23 @@ export async function startMergedDist(label: string): Promise<MergedDist> {
   assertBuiltForAppBase(readFileSync(builtIndex, "utf8"));
 
   const dir = mkdtempSync(join(tmpdir(), `merged-dist-${label}-`));
-  mkdirSync(join(dir, "app"), { recursive: true });
-  cpSync(builtDist, join(dir, "app"), { recursive: true });
-  writeFileSync(join(dir, "404.html"), HOST_404);
+  const landing = join(dir, "landing");
+  const site = join(dir, "site");
+  mkdirSync(landing);
+  writeFileSync(join(landing, "404.html"), HOST_404);
 
-  execSync(`node scripts/inject-spa-fallback.mjs ${dir}`, {
-    cwd: repoRoot,
-    stdio: "inherit",
-  });
+  // The same assembly the deploy runs, so the served tree has its shape.
+  execFileSync(
+    process.execPath,
+    [
+      "scripts/assemble-site.mjs",
+      ...["--out", site, "--landing", landing, "--app", builtDist],
+      ...["--without", "docs", "--sha", "e2e"],
+    ],
+    { cwd: repoRoot, stdio: "inherit" }
+  );
 
-  const server = await startStaticPagesServer(dir);
+  const server = await startStaticPagesServer(site);
 
   return {
     server,
