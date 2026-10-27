@@ -29,8 +29,8 @@
 - [ ] 2.4 Add the `versionchange` override: when stale it closes the database and returns `false`; on a delete or a same-major change it returns nothing.
 - [ ] 2.5 Add the boot gate:
   - looks up the registration with `getRegistration()`;
-  - with no registration, uses a plain reload;
-  - calls `update()`, and if no worker is installing or waiting, shows the dialog;
+  - with no registration, shows the stale dialog first; its Reload is a plain `location.reload()`;
+  - calls `update()`; if it rejects, or no worker is installing or waiting, shows the dialog with "Try again in a few minutes" and a Retry;
   - otherwise waits up to ~15 s for installed or redundant: installed means `SKIP_WAITING` plus reload, redundant or a timeout means the dialog;
   - uses a one-shot that is cleared on a non-stale boot.
 - [ ] 2.6 Add the blocking stale dialog in en/es, with:

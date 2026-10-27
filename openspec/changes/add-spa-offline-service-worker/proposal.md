@@ -26,7 +26,7 @@ strategy that #1566 said it would need.
   - Unsaved edits block the update with "Save your changes to update".
   - Pending autosaves are flushed before `SKIP_WAITING`, and only the tab that was clicked reloads.
   - On a cold start with no input yet, the update is applied silently.
-- **Schema skew.** Old code never opens, reads or writes a database that newer code has upgraded. The check is a pre-open version probe, plus a `versionchange` close with auto-reopen disabled.
+- **Schema skew.** Old code never opens a database that newer code has upgraded through Dexie, and never reads or writes app data in it. The only access is a version-less pre-open probe that reads the version number, plus a `versionchange` close with auto-reopen disabled.
   - At boot, the editor updates and reloads.
   - Mid-session, a blocking dialog asks the user to reload.
 - **Kill switch.** A repository variable makes the deploy emit a `sw.js` that destroys itself. It never claims clients and never loops. The procedure is documented in a new runbook.

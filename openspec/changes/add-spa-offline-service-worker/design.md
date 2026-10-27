@@ -54,6 +54,7 @@ A precache manifest computed inside `vite build` would therefore record a revisi
 
 **Excluded, and passed through to the network:**
 
+- `sw.js` itself. It embeds the manifest, so it cannot carry its own revision, and the browser fetches it for update checks without going through the fetch handler.
 - `*.map`, which only devtools read.
 - `version.json`, which must always reflect the live deploy.
 - `AGENTS.md` and `.nojekyll`.
@@ -90,17 +91,17 @@ The reviewer's objection to the earlier "keep N and N-1" rule is correct. A wait
 
 Mechanism:
 
-1. **Hello.** The page posts `{type: "HELLO", entry: <URL of its own index-*.js module script>}` to `navigator.serviceWorker.controller` at boot, and **again on every `controllerchange`**. A hello sent to a controller that is going redundant during activation would otherwise be lost. The entry URL is unique to a build, and the page can read it from its own DOM, so it needs no version constant.
+1. **Hello.** The page posts `{type: "HELLO", entry: <URL of its own index-*.js module script>}` to `navigator.serviceWorker.controller` at boot, and **again on every `controllerchange`**. A page with no controller (a first visit, a shift-reload) posts it to `(await navigator.serviceWorker.ready).active` instead, so every in-scope window is recorded and none can stall pruning. A hello sent to a controller that is going redundant during activation would otherwise be lost. The entry URL is unique to a build, and the page can read it from its own DOM, so it needs no version constant.
 2. **Recording, one entry per client.** The worker finds every `kaiord-app-*` cache that holds that entry. Usually there is one. A shell-only deploy, such as an analytics-id change, shares the entry, and then all matches are kept. The worker writes them as **its own entry**, `<scope>__sw/client/<clientId>`, in cache `kaiord-app-meta`, with a JSON body of `[v…]`. There is no shared blob, so two workers active around an activation can never overwrite each other's records.
 3. **Pruning.** It runs on `activate` and after each hello.
-   - `live` is the set of ids from `clients.matchAll({type: "window", includeUncontrolled: true})`.
+   - `live` is the set of ids from `clients.matchAll({type: "window", includeUncontrolled: true})` whose `url` starts with the worker scope (`/app/`). That call returns every same-origin window, and a `/` or `/docs/` tab never sends a hello, so counting it would block every round for as long as it stays open.
    - **If any live window has no record yet, the round deletes nothing.** Its hello may still be in flight, and its version is unknown.
    - Otherwise `keep` is `{own v} ∪ versions recorded for live ids`, and every `kaiord-app-*` cache outside `keep` is deleted.
    - Only the entries of **dead** ids are deleted.
 4. **Serialisation.** Within one worker, writes and prunes run through a single promise chain. Across workers, per-client entries remove the shared write, and the "unrecorded live client → delete nothing" rule covers the window where a hello is in flight.
 5. **Lookup.** The fetch handler looks up its own cache first and then every `kaiord-app-*` cache, so a page on an older retained version still resolves its chunks.
 
-**What is not covered.** A page that never had a controller (a first visit, a shift-reload) sends no hello and is unprotected. Its chunks come from the network, as they do today, and chunk-reload remains the backstop (D5). Storage is bounded by the number of distinct versions among open windows.
+**What is not covered.** A page that never had a controller (a first visit, a shift-reload) is recorded, but its fetches do not go through the worker. Its chunks come from the network, as they do today, and chunk-reload remains the backstop (D5). Storage is bounded by the number of distinct versions among open windows.
 
 ### D4. Updates: a prompt, never an automatic reload, and gated before activation
 
@@ -179,7 +180,7 @@ Mechanism:
 **Guards, last.** `scripts/dist-service-worker.test.mjs` (`REQUIRE_SPA_DIST`, `SPA_DIST`, `SPA_BASE`) runs over the assembled `app/` and asserts:
 
 - `sw.js` exists, and its embedded scope equals `SPA_BASE`;
-- the manifest is non-empty, and the non-map files under `assets/` equal the manifest's hashed entries **as sets**;
+- the manifest is non-empty, and its entries equal **as sets** every file of the shipped `app/` tree minus `sw.js` and the exclusions above, so a shipped file the emitter missed fails just as a hashed chunk would;
 - every listed file exists, and its bytes digest to its revision, which catches a rewrite of any file after emit;
 - `index.html` and the web manifest's icons are listed, under `?__rev=`;
 - none of the excluded files is listed.
@@ -297,13 +298,14 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
    - The gate calls `navigator.serviceWorker.getRegistration()`, because the deferred registration of D2 does not exist yet at that point.
    - **No registration at all** (Save-Data, an uncontrolled page, no service-worker support): the dialog is shown, and its Reload is a plain `location.reload()`.
    - **A registration exists:** the gate runs `await reg.update()`.
+     - If `update()` rejects (offline, a network error, a 404 or a script error on `sw.js`), the dialog is shown **now**, with the "Try again in a few minutes" line and its Retry, which reruns this step.
      - With no `installing` and no `waiting` worker, the dialog is shown **now**.
      - Otherwise the gate waits for that worker to reach `installed` **or** `redundant`, with a ~15 s timeout. On `installed` (or when one is already waiting) it posts `SKIP_WAITING` and reloads, with no dialog. On `redundant` or on timeout it shows the dialog.
    - **Loop guard.** A sessionStorage one-shot prevents a loop, as chunk-reload does. It is **cleared on every non-stale boot**, so a later stale event gets its own attempt.
 5. **Blocking dialog.** It is used mid-session, and at boot when the gate cannot update. It cannot be dismissed. The title is "Kaiord was updated in another window", in en and es. It has two actions:
    - **Download draft** appears whenever `workout-store` holds a `currentWorkout`. It saves that KRD as JSON through a `Blob` to `<name>.krd`, a file that `FileUpload` already re-imports (`accept` includes `.krd`). A draft is never stranded. The database is closed, so it cannot be saved there.
    - **Reload** runs the step-4 path, or a plain `location.reload()` when there is no registration.
-   - When no newer worker was found, the dialog adds "Try again in a few minutes" ("Inténtalo de nuevo en unos minutos"), because a deploy may still be propagating (≈10 min at the edge). It stays up and offers a retry.
+   - When no newer worker was found, or `update()` failed, the dialog adds "Try again in a few minutes" ("Inténtalo de nuevo en unos minutos"), because a deploy may still be propagating (≈10 min at the edge). It stays up and offers a retry.
    - `beforeunload` still prompts when the editor is dirty.
    - A dev build never reaches this path. It runs on another origin, with its own database.
 6. **Optional, LOW.** The per-tab unsaved flag (D4) is broadcast on a `BroadcastChannel("kaiord-unsaved")`. The update toast can then add "Unsaved changes in another window" before the user activates Reload. This is informational only and gates nothing across tabs. It is built only if it fits within the file limits; it is not required for the gates.
@@ -344,6 +346,7 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
     - no `installing` or `waiting` after `update()` → dialog now;
     - `installed` → `SKIP_WAITING` and reload;
     - `redundant` or timeout → dialog with "try again";
+    - `update()` rejects → dialog with "try again" now;
     - the one-shot is cleared on a non-stale boot;
   - Download draft produces JSON that `FileUpload` re-imports.
 - **Copy:** toast and dialog text in en and es.

@@ -18,6 +18,8 @@ The editor SHALL link a web app manifest from its `index.html` at `<base>manifes
 
 #### Scenario: No service worker is registered
 
-- **GIVEN** the editor running under `vite dev`, or a production build whose `<base>sw.js` the host does not serve
+- **GIVEN** a browser with no existing service-worker registration for `<base>`, and the editor running under `vite dev`, or a production build whose `<base>sw.js` the host does not serve
 - **WHEN** the editor loads
 - **THEN** no service worker SHALL be registered and every chunk SHALL load from the network
+
+A registration made earlier survives the host ceasing to serve `sw.js`, so this scenario does not describe removal. Removing the worker from browsers that have one SHALL go through the kill switch of the `spa-offline` capability.

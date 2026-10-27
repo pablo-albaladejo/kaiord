@@ -2,7 +2,7 @@
 
 ### Requirement: Build-consistent, verified precache
 
-The deploy SHALL publish a service worker at `<base>sw.js`. Its precache SHALL list every file the shipped tree serves under `<base>`, except source maps, `version.json`, `AGENTS.md`, `.nojekyll` and `og-image-editor.png`. Each entry's revision SHALL be the SHA-256 of the shipped bytes, computed after the last assembly step that mutates the tree. Files that are not content-hashed SHALL be requested and stored as `<url>?__rev=<revision>`. Install SHALL fetch with `cache: "reload"`, SHALL digest every response, and SHALL fail on any digest that differs from its revision. Install SHALL copy an entry from an existing editor cache when the same request key is found there and its digest matches, and fetch only the rest. The worker SHALL NOT cache any response on first use.
+The deploy SHALL publish a service worker at `<base>sw.js`. Its precache SHALL list every file the shipped tree serves under `<base>`, except `sw.js` itself, source maps, `version.json`, `AGENTS.md`, `.nojekyll` and `og-image-editor.png`. Each entry's revision SHALL be the SHA-256 of the shipped bytes, computed after the last assembly step that mutates the tree. Files that are not content-hashed SHALL be requested and stored as `<url>?__rev=<revision>`. Install SHALL fetch with `cache: "reload"`, SHALL digest every response, and SHALL fail on any digest that differs from its revision. Install SHALL copy an entry from an existing editor cache when the same request key is found there and its digest matches, and fetch only the rest. The worker SHALL NOT cache any response on first use.
 
 #### Scenario: An installed client starts offline
 
@@ -29,7 +29,7 @@ The deploy SHALL publish a service worker at `<base>sw.js`. Its precache SHALL l
 
 ### Requirement: Client-keyed cache retention
 
-A controlled page SHALL report the URL of its entry module to the worker when it boots and again on every `controllerchange`. The worker SHALL record which cached versions contain that entry in a separate meta entry for each reporting client id. On activation, and after each report, the worker SHALL delete nothing while any live window client has no record. Otherwise it SHALL delete an editor cache only when that cache is neither the worker's own nor recorded for a live window client, and SHALL delete only the meta entries of clients that are gone. Lookups SHALL search the worker's own cache first and then every retained editor cache. Writes to that record and deletions SHALL be serialised.
+A page under `<base>` SHALL report the URL of its entry module to the worker when it boots and again on every `controllerchange`; a page with no controller SHALL report it to the registration's active worker. The worker SHALL record which cached versions contain that entry in a separate meta entry for each reporting client id. On activation, and after each report, the worker SHALL delete nothing while any live window client whose URL is under `<base>` has no record; window clients outside `<base>` SHALL NOT count as live. Otherwise it SHALL delete an editor cache only when that cache is neither the worker's own nor recorded for a live window client, and SHALL delete only the meta entries of clients that are gone. Lookups SHALL search the worker's own cache first and then every retained editor cache. Writes to that record and deletions SHALL be serialised.
 
 #### Scenario: A window survives two deploys
 
@@ -163,7 +163,7 @@ The service-worker dist guard SHALL be the last deploy step before the Pages art
 - `<base>sw.js` is missing;
 - its scope differs from the base;
 - the manifest is empty;
-- the manifest's hashed entries and the non-map files under `assets/` differ as sets;
+- the manifest's entries and the files of the shipped `<base>` tree, minus `sw.js` and the files the precache excludes, differ as sets;
 - a listed file is missing, or its bytes do not digest to its revision;
 - an excluded file is listed;
 - the worker's mode (normal or kill) differs from the one the deploy requested.
