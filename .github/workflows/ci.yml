@@ -90,6 +90,11 @@ jobs:
               - 'packages/_shared/bridge-core/**'
             frontend:
               - 'packages/workout-spa-editor/**'
+              # The site assembler and the two steps it runs: e2e-prod-base
+              # serves its output, so a change to them must run that e2e.
+              - 'scripts/assemble-site.mjs'
+              - 'scripts/inject-spa-fallback.mjs'
+              - 'scripts/emit-legacy-editor-page.mjs'
             docs_site:
               - 'packages/docs/**'
               - 'packages/landing/**'
