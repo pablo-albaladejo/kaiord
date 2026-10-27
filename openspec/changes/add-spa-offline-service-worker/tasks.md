@@ -27,7 +27,7 @@
   - the probe closes itself on `versionchange`;
   - it stays open until Dexie's open settles.
 - [ ] 2.3 Register the ready gate first, in the `KaiordDatabase` constructor. When stale it throws `StaleSchemaError`. `storage-store` maps that error to "stale" and then calls `close({disableAutoOpen: true})`.
-- [ ] 2.4 Add the `versionchange` override: when stale it closes the database and returns `false`; on a delete or a same-major change it returns nothing.
+- [x] 2.4 Add the `versionchange` override: when stale it closes the database and returns `false`; on a delete or a same-major change it returns nothing.
 - [ ] 2.5 Add the boot gate:
   - looks up the registration with `getRegistration()`;
   - with no registration, shows the stale dialog first; its Reload is a plain `location.reload()`;

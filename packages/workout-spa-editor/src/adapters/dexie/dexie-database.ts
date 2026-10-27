@@ -11,6 +11,7 @@ import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository"
 import { installExportLedgerCascade } from "./dexie-export-ledger-cascade";
 import { runJunkCleanupOnce } from "./dexie-junk-cleanup";
 import { registerKaiordVersions } from "./register-kaiord-versions";
+import { installStaleSchemaGuard } from "./stale-schema-guard";
 
 export {
   backfillBridgeSnapshotState,
@@ -22,6 +23,7 @@ export class KaiordDatabase extends Dexie {
   constructor(name = "kaiord-spa") {
     super(name);
     registerKaiordVersions(this);
+    installStaleSchemaGuard(this);
   }
 }
 
