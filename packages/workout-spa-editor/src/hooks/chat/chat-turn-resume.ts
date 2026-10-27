@@ -5,7 +5,7 @@
  */
 import type { PendingAction } from "@kaiord/ai";
 
-import { appendToolEvent } from "../../application/chat/append-turn-messages";
+import { resumeWithOutcome } from "./chat-turn-approve";
 import { runAgent } from "./chat-turn-context";
 import type { ChatTurnCtx } from "./chat-turn-types";
 import { runConfirmedTool } from "./run-confirmed-tool";
@@ -22,26 +22,9 @@ export const approveAction = async (
     pending.input
   );
   ctx.set.pendingAction(null);
-  await runAgent(ctx, async (signal) => {
-    await appendToolEvent(
-      ctx.persistence,
-      ctx.profileId,
-      ctx.conversationId,
-      pending.toolName,
-      ok,
-      output
-    );
-    return agent.resume(
-      ctx.messagesRef.current,
-      {
-        toolCallId: pending.toolCallId,
-        toolName: pending.toolName,
-        status: "approved",
-        output,
-      },
-      { signal }
-    );
-  });
+  await runAgent(ctx, (signal) =>
+    resumeWithOutcome(ctx, pending, { output, ok }, signal)
+  );
 };
 
 export const denyAction = async (
