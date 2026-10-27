@@ -36,23 +36,24 @@ type Visit = { imports: string[]; stale: boolean };
 
 // Every failure names the URL and what came back, and fails global setup: a
 // warmup that gave up quietly would bring the cold flake back unseen.
-const fail = (message: string): never => {
-  throw new Error(`warmup: ${message}`);
+const fail = (message: string, cause?: unknown): never => {
+  throw new Error(`warmup: ${message}`, { cause });
 };
 
-async function load(url: string): Promise<Response> {
-  try {
-    return await fetch(url, {
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-  } catch (error) {
-    // undici reports the socket-level reason (ECONNRESET, timeout) as cause.
-    const reason = (error as Error).cause ?? (error as Error).name;
-    throw new Error(`warmup: ${url} failed: ${String(reason)}`, {
-      cause: error,
-    });
-  }
-}
+// undici puts the socket-level reason in `cause`. For localhost Node tries
+// several addresses, so it is an AggregateError with an empty message that
+// keeps the codes in `errors`.
+type Cause = { code?: string; errors?: { code?: string }[] };
+const reasonOf = (error: unknown): string => {
+  const cause = (error as Error).cause as Cause | undefined;
+  const code = cause?.code ?? cause?.errors?.[0]?.code;
+  return code ?? String(cause ?? (error as Error).name);
+};
+
+const load = (url: string): Promise<Response> =>
+  fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) }).catch(
+    (error: unknown) => fail(`${url} failed: ${reasonOf(error)}`, error)
+  );
 
 async function visit(origin: string, path: string): Promise<Visit> {
   const response = await load(origin + path);
