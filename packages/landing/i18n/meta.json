@@ -1,12 +1,12 @@
 {
   "es": {
     "lang": "es",
-    "title": "Kaiord — Tu cabina de entrenamiento. Todos los formatos deportivos.",
+    "title": "Kaiord — Tu centro de mando para entrenar. Todos los formatos deportivos.",
     "description": "App de entrenamiento libre y local-first: calendario, asistente de IA, sincronización con Garmin y WHOOP, analíticas de salud y SDK para FIT, TCX, ZWO y Garmin.",
     "canonical": "https://kaiord.com/es/",
     "ogUrl": "https://kaiord.com/es/",
     "ogLocale": "es_ES",
-    "ogTitle": "Kaiord — Tu cabina de entrenamiento. Todos los formatos deportivos.",
+    "ogTitle": "Kaiord — Tu centro de mando para entrenar. Todos los formatos deportivos.",
     "ogDescription": "App de entrenamiento libre y local-first: calendario, asistente de IA, sincronización con Garmin y WHOOP, analíticas de salud y SDK para FIT, TCX, ZWO y Garmin."
   }
 }
