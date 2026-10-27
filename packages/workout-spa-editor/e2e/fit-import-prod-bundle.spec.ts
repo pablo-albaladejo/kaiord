@@ -21,6 +21,7 @@ import {
   type MergedDist,
   startMergedDist,
 } from "./fixtures/merged-dist-server";
+import { countKaiordStore, pollKaiordStore } from "./helpers/kaiord-idb";
 
 const ENABLED = process.env.E2E_PROD_BASE === "1";
 const IMPORT_TIMEOUT_MS = 15_000;
@@ -89,25 +90,11 @@ const hasStepCards = (page: Page, steps: number) => async () =>
   (await page.getByTestId("step-card").count()) === steps;
 
 /** Origins of every stored profile, read without the app's dev-only hooks. */
-const profileOrigins = (page: Page): Promise<(string | null)[]> =>
-  page.evaluate(
-    () =>
-      new Promise<(string | null)[]>((resolve, reject) => {
-        const open = indexedDB.open("kaiord-spa");
-        open.onerror = () => reject(open.error);
-        open.onsuccess = () => {
-          const db = open.result;
-          const rows = db
-            .transaction("profiles")
-            .objectStore("profiles")
-            .getAll();
-          rows.onerror = () => reject(rows.error);
-          rows.onsuccess = () => {
-            db.close();
-            resolve(rows.result.map((row) => row.origin ?? null));
-          };
-        };
-      })
+const profileOrigins = async (
+  page: Page
+): Promise<(string | null)[] | undefined> =>
+  (await pollKaiordStore<{ origin?: string }>(page, "profiles"))?.map(
+    (row) => row.origin ?? null
   );
 
 /**
@@ -124,26 +111,6 @@ async function expectDefaultProfile(
     .poll(() => profileOrigins(page), { timeout: IMPORT_TIMEOUT_MS })
     .toEqual(["auto"]);
 }
-
-/** Row count of an IndexedDB store, read without the app's dev-only hooks. */
-const storeCount = (page: Page, store: string): Promise<number> =>
-  page.evaluate(
-    (name) =>
-      new Promise<number>((resolve, reject) => {
-        const open = indexedDB.open("kaiord-spa");
-        open.onerror = () => reject(open.error);
-        open.onsuccess = () => {
-          const db = open.result;
-          const count = db.transaction(name).objectStore(name).count();
-          count.onerror = () => reject(count.error);
-          count.onsuccess = () => {
-            db.close();
-            resolve(count.result);
-          };
-        };
-      }),
-    store
-  );
 
 test.describe("@prod-bundle FIT import on the production bundle", () => {
   test.skip(!ENABLED, "Production-base e2e gated behind E2E_PROD_BASE=1");
@@ -245,7 +212,7 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
       await expectImported(page, async () =>
         new URL(page.url()).hash.startsWith(`#/health/${health.route}`)
       );
-      expect(await storeCount(page, health.store)).toBe(1);
+      expect(await countKaiordStore(page, health.store)).toBe(1);
     });
   }
 
@@ -267,6 +234,6 @@ test.describe("@prod-bundle FIT import on the production bundle", () => {
     await expectImported(page, async () =>
       new URL(page.url()).hash.startsWith("#/calendar")
     );
-    expect(await storeCount(page, "activities")).toBe(1);
+    expect(await countKaiordStore(page, "activities")).toBe(1);
   });
 });
