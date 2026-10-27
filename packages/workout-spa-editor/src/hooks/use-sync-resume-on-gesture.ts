@@ -16,6 +16,8 @@ export function useSyncResumeOnGesture(engine: SyncEngine): void {
   const used = useRef(false);
 
   useEffect(() => {
+    // Leaving needsAuth (a sync now worked) re-arms the next expiry.
+    if (status !== "needsAuth") used.current = false;
     if (used.current || !connected || status !== "needsAuth") return;
     const resume = () => {
       remove();

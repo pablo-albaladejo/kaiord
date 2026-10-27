@@ -6,6 +6,8 @@
  * the snapshot, and edits to the rest (sessions, health data, coaching)
  * never reached the other device. Writes made by a sync or backup import
  * itself are marked silent, or every import would schedule the next push.
+ * Other tabs share the database, so a change is relayed to them too: the
+ * tab that holds the Google token pushes what a signed-out tab wrote.
  */
 
 import Dexie, { type DBCore, type Middleware } from "dexie";
@@ -14,6 +16,14 @@ type Listener = () => void;
 
 const listeners = new Set<Listener>();
 const silent = new WeakSet<object>();
+const notifyHere = () => {
+  for (const listener of listeners) listener();
+};
+const otherTabs =
+  typeof BroadcastChannel === "undefined"
+    ? null
+    : new BroadcastChannel("kaiord-synced-table-change");
+if (otherTabs) otherTabs.onmessage = notifyHere;
 
 /** Calls `listener` after each write to a synced table; returns the unsubscribe. */
 export function onSyncedTableChange(listener: Listener): () => void {
@@ -41,7 +51,10 @@ const notifier = (
         ...table,
         mutate: async (req) => {
           const res = await table.mutate(req);
-          if (!silent.has(req.trans)) for (const l of listeners) l();
+          if (!silent.has(req.trans)) {
+            notifyHere();
+            otherTabs?.postMessage(null);
+          }
           return res;
         },
       };
