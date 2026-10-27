@@ -21,12 +21,16 @@ export type GisAuth = {
   getAccessToken: () => string | null;
   /** Forget the token, after Drive refused it. */
   invalidate: () => void;
+  /** True while a sign-in popup is open. */
+  isSigningIn: () => boolean;
 };
 
 /** Treat a token as expired this long before Google does. */
 const EXPIRY_MARGIN_MS = 60_000;
 /** GIS tokens last an hour; assumed when the response omits `expires_in`. */
 const DEFAULT_LIFETIME_S = 3600;
+/** GIS does not always see a closed popup; give up rather than hang. */
+export const SIGN_IN_TIMEOUT_MS = 120_000;
 
 function oauth2() {
   const oauth = (window as unknown as GisGlobal).google?.accounts?.oauth2;
@@ -55,7 +59,13 @@ export function createGisAuth(
 
   const isAuthenticated = () => accessToken !== null && now() < expiresAt;
 
-  const request = (resolve: () => void, reject: (e: Error) => void) =>
+  const request = (done: () => void, failed: (e: Error) => void) => {
+    const timer = setTimeout(
+      () => failed(new Error("sign-in timed out")),
+      SIGN_IN_TIMEOUT_MS
+    );
+    const resolve = () => (clearTimeout(timer), done());
+    const reject = (e: Error) => (clearTimeout(timer), failed(e));
     oauth2()
       .initTokenClient({
         client_id: clientId,
@@ -79,11 +89,13 @@ export function createGisAuth(
       // Empty prompt requests a silent token, falling back to the consent
       // popup only when no prior grant exists for this client.
       .requestAccessToken({ prompt: "" });
+  };
 
   return {
     isAuthenticated,
     getAccessToken: () => (isAuthenticated() ? accessToken : null),
     invalidate,
+    isSigningIn: () => pending !== null,
     // One gesture can start two sign-ins (the resume listener and the
     // button it landed on); they share one popup.
     authenticate: () =>

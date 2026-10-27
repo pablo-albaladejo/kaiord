@@ -23,7 +23,8 @@ export function createDriveAuthedFetch(
 ): DriveFetch {
   const ensureToken = async () => {
     if (auth.isAuthenticated()) return;
-    if (!canPrompt()) {
+    // A sign-in already open (the gesture listener's) is joined, not refused.
+    if (!auth.isSigningIn() && !canPrompt()) {
       // Loaded now so the gesture that resumes sync reaches the popup with
       // no network wait, while the browser still counts it as a gesture.
       loadGisScript().catch(() => undefined);

@@ -4,7 +4,7 @@ import type {
   GisGlobal,
   GisTokenClientConfig,
 } from "../../lib/cloud-sync/gis-types";
-import { createGisAuth } from "./gis-token-client";
+import { createGisAuth, SIGN_IN_TIMEOUT_MS } from "./gis-token-client";
 
 vi.mock("../../lib/cloud-sync/load-gis-script", () => ({
   loadGisScript: vi.fn(async () => {}),
@@ -115,6 +115,23 @@ describe("createGisAuth", () => {
 
     // Assert
     expect(popups).toHaveBeenCalledTimes(1);
+  });
+
+  it("should give up when GIS never answers, so a later sign-in can start", async () => {
+    // Arrange
+    vi.useFakeTimers();
+    stubGis(() => undefined);
+    const auth = createGisAuth("client-x");
+    const first = auth.authenticate();
+    const settled = expect(first).rejects.toThrow(/timed out/);
+
+    // Act
+    await vi.advanceTimersByTimeAsync(SIGN_IN_TIMEOUT_MS);
+
+    // Assert
+    await settled;
+    expect(auth.isSigningIn()).toBe(false);
+    vi.useRealTimers();
   });
 
   it("should forget the token on invalidate", async () => {

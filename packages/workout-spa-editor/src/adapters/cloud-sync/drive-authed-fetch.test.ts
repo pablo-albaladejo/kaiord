@@ -15,6 +15,7 @@ function fakeAuth(token: string | null, next = "fresh"): FakeAuth {
     token,
     isAuthenticated: () => auth.token !== null,
     getAccessToken: () => auth.token,
+    isSigningIn: () => false,
     invalidate: vi.fn(() => {
       auth.token = null;
     }),
@@ -120,5 +121,22 @@ describe("createDriveAuthedFetch", () => {
 
     // Assert
     await expect(run).rejects.toBeInstanceOf(CloudAuthRequiredError);
+  });
+
+  it("should join a sign-in already open instead of refusing it", async () => {
+    // Arrange
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => status(OK))
+    );
+    const auth = fakeAuth(null);
+    auth.isSigningIn = () => true;
+    const send = createDriveAuthedFetch(auth, () => false);
+
+    // Act
+    await send("https://drive/x");
+
+    // Assert
+    expect(auth.authenticate).toHaveBeenCalledTimes(1);
   });
 });

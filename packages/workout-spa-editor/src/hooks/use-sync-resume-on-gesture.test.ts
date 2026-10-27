@@ -37,9 +37,32 @@ describe("useSyncResumeOnGesture", () => {
     expect(sync.syncNow).toHaveBeenCalledTimes(1);
   });
 
-  it("should not resume a second time after a gesture was used", async () => {
+  it("should re-arm after a successful resume, for the next expiry", async () => {
     // Arrange
     const sync = engine("needsAuth");
+    const { rerender } = renderHook(
+      ({ value }) => useSyncResumeOnGesture(value),
+      { initialProps: { value: sync } }
+    );
+    document.body.click();
+    await flush();
+    rerender({ value: { ...sync, status: "idle" } });
+    rerender({ value: { ...sync, status: "needsAuth" } });
+
+    // Act
+    document.body.click();
+    await flush();
+
+    // Assert
+    expect(sync.connect).toHaveBeenCalledTimes(2);
+  });
+
+  it("should not resume a second time after a sign-in failed", async () => {
+    // Arrange
+    const sync = engine("needsAuth");
+    sync.connect = vi.fn(async () => {
+      throw new Error("popup_closed");
+    });
     const { rerender } = renderHook(
       ({ value }) => useSyncResumeOnGesture(value),
       { initialProps: { value: sync } }
