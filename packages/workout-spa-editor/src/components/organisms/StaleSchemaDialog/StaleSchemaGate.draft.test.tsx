@@ -67,7 +67,9 @@ describe("StaleSchemaGate draft download", () => {
     render(<StaleSchemaGate />);
 
     // Act
-    await user.click(screen.getByRole("button", { name: "Download draft" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Download draft" })
+    );
     const file = new File([await saved.blob!.text()], saved.name!);
     const imported = await parseFile(file);
 

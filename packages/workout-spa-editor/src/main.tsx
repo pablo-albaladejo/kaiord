@@ -11,7 +11,6 @@ import { createDexieSnapshotPort } from "./adapters/dexie/dexie-snapshot-port";
 import { probeSchema } from "./adapters/dexie/schema-probe";
 import { runMatchDatesHeal } from "./application/coaching/run-match-dates-heal";
 import { AppRoot } from "./AppRoot";
-import { renderStaleBoot } from "./boot/render-stale-boot";
 import { startApp } from "./boot/start-app";
 import { defaultProfileName } from "./i18n/default-profile-name";
 import { reloadOnceForChunkError } from "./lib/chunk-reload";
@@ -57,7 +56,9 @@ void startApp({
   probe: () => probeSchema(db.name, DECLARED_VERNO),
   openDb: () => db.open(),
   closeDb: () => db.close({ disableAutoOpen: true }),
-  renderStale: () => renderStaleBoot(root),
+  // Outside the initial JS: only a stale boot ever needs it.
+  renderStale: () =>
+    import("./boot/render-stale-boot").then((m) => m.renderStaleBoot(root)),
   renderApp: () => {
     clearStaleReloadAttempt();
     root.render(

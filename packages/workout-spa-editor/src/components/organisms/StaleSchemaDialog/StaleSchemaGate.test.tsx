@@ -47,13 +47,15 @@ describe("StaleSchemaGate", () => {
     render(<StaleSchemaGate />);
 
     // Act
-    await user.click(screen.getByRole("button", { name: "Download draft" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Download draft" })
+    );
 
     // Assert
     expect(downloadBackup).toHaveBeenCalledWith(draft);
   });
 
-  it("should block without a draft action when nothing is loaded", () => {
+  it("should block without a draft action when nothing is loaded", async () => {
     // Arrange
     stale.value = true;
 
@@ -61,7 +63,9 @@ describe("StaleSchemaGate", () => {
     render(<StaleSchemaGate />);
 
     // Assert
-    expect(screen.getByTestId("stale-schema-dialog")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("stale-schema-dialog")
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Download draft" })
     ).not.toBeInTheDocument();
