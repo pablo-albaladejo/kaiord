@@ -26,6 +26,8 @@ const depsFor = (
   ...overrides,
 });
 
+type Settle = { resolve: () => void; reject: (error: Error) => void };
+
 const resolved = (result: SchemaProbeResult) => async () => result;
 
 describe("startApp", () => {
@@ -62,6 +64,39 @@ describe("startApp", () => {
     // Assert
     expect(order).toEqual(["render", "open", "release"]);
   });
+
+  it.each([
+    ["resolves", (settle: Settle) => settle.resolve()],
+    ["rejects", (settle: Settle) => settle.reject(new Error("quota"))],
+  ])(
+    "should not release a fresh probe until the open %s",
+    async (_outcome, finish) => {
+      // Arrange
+      const release = vi.fn();
+      let settle: Settle = {
+        resolve: () => undefined,
+        reject: () => undefined,
+      };
+      const pendingOpen = new Promise<void>((resolve, reject) => {
+        settle = { resolve, reject };
+      });
+      const deps = depsFor(
+        resolved({ status: "fresh", nativeVersion: NATIVE_FRESH, release }),
+        { openDb: vi.fn(() => pendingOpen) }
+      );
+
+      // Act
+      const booting = startApp(deps);
+      await vi.waitFor(() => expect(deps.openDb).toHaveBeenCalledTimes(1));
+      const releasedWhilePending = release.mock.calls.length;
+      finish(settle);
+      await booting;
+
+      // Assert
+      expect(releasedWhilePending).toBe(0);
+      expect(release).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it("should render normally when the probe throws or rejects", async () => {
     // Arrange
