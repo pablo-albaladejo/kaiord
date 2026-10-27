@@ -45,6 +45,7 @@ export const StaleSchemaDialog = ({
           <Dialog.Description className="text-sm text-ink-body">
             {t("staleSchema.body")}
           </Dialog.Description>
+          <p className="text-sm text-ink-body">{t("staleSchema.dataSafe")}</p>
           {tryAgainLater && (
             <p className="text-sm text-ink-muted" data-testid="stale-try-later">
               {t("staleSchema.tryAgainLater")}

@@ -72,6 +72,7 @@
   "staleSchema": {
     "title": "Kaiord was updated in another window",
     "body": "This window is running an older version. Reload to keep working with your data.",
+    "dataSafe": "Everything already saved stays in this browser, untouched, for the newer version to open.",
     "tryAgainLater": "The update is still reaching this device. Try again in a few minutes.",
     "downloadDraft": "Download draft",
     "reload": "Reload",

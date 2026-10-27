@@ -72,6 +72,7 @@
   "staleSchema": {
     "title": "Kaiord se ha actualizado en otra ventana",
     "body": "Esta ventana usa una versión anterior. Recarga para seguir trabajando con tus datos.",
+    "dataSafe": "Todo lo que ya está guardado se queda en este navegador, intacto, para que lo abra la versión nueva.",
     "tryAgainLater": "La actualización aún está llegando a este dispositivo. Inténtalo de nuevo en unos minutos.",
     "downloadDraft": "Descargar borrador",
     "reload": "Recargar",

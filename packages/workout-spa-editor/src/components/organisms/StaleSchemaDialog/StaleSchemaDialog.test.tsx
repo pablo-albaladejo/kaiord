@@ -33,6 +33,19 @@ describe("StaleSchemaDialog", () => {
     expect(screen.queryByTestId("stale-try-later")).not.toBeInTheDocument();
   });
 
+  it("should tell the user that saved data stays safe in the browser", () => {
+    // Arrange
+    renderDialog();
+
+    // Act
+    const note = screen.getByText(
+      "Everything already saved stays in this browser, untouched, for the newer version to open."
+    );
+
+    // Assert
+    expect(note).toBeInTheDocument();
+  });
+
   it("should stay open on Escape", async () => {
     // Arrange
     const user = userEvent.setup();
