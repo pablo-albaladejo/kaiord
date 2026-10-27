@@ -20,6 +20,7 @@ import {
 
 import type { SyncEngine } from "../hooks/sync-engine-types";
 import { useSyncEngine } from "../hooks/use-sync-engine";
+import { useSyncOnResume } from "../hooks/use-sync-on-resume";
 import { useSyncResumeOnGesture } from "../hooks/use-sync-resume-on-gesture";
 import type { CloudSyncPort } from "../ports/cloud-sync-port";
 import type { SnapshotPort } from "../ports/snapshot-port";
@@ -55,6 +56,7 @@ export const SyncProvider = ({
   const bootstrapped = useRef(false);
   const { connected, syncNow } = engine;
   useSyncResumeOnGesture(engine);
+  useSyncOnResume(engine);
 
   useEffect(() => {
     if (bootstrapped.current || !connected) return;
