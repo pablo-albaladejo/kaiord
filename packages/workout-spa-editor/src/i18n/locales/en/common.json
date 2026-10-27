@@ -68,5 +68,12 @@
   "markdown": {
     "table": "Table",
     "code": "Code block"
+  },
+  "staleSchema": {
+    "title": "Kaiord was updated in another window",
+    "body": "This window is running an older version. Reload to keep working with your data.",
+    "tryAgainLater": "The update is still reaching this device. Try again in a few minutes.",
+    "downloadDraft": "Download draft",
+    "reload": "Reload"
   }
 }

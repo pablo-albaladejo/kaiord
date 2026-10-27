@@ -68,5 +68,12 @@
   "markdown": {
     "table": "Tabla",
     "code": "Bloque de código"
+  },
+  "staleSchema": {
+    "title": "Kaiord se ha actualizado en otra ventana",
+    "body": "Esta ventana usa una versión anterior. Recarga para seguir trabajando con tus datos.",
+    "tryAgainLater": "La actualización aún está llegando a este dispositivo. Inténtalo de nuevo en unos minutos.",
+    "downloadDraft": "Descargar borrador",
+    "reload": "Recargar"
   }
 }
