@@ -5,6 +5,8 @@ export type SchemaProbeResult =
   | { status: "unknown" };
 
 const ABSENT: SchemaProbeResult = { status: "absent" };
+// Boot waits on the probe before the first render, so it must not wait long.
+export const PROBE_DEADLINE_MS = 1500;
 const UNKNOWN: SchemaProbeResult = { status: "unknown" };
 
 /**
@@ -37,15 +39,19 @@ const settleOpened = (
  * so the probe aborts that upgrade, which leaves no database behind. It never
  * calls `deleteDatabase`: the app's own open may be queued behind the probe,
  * and a delete would destroy the database that open creates. Any failure
- * reports "unknown", so boot falls back to the normal open.
+ * reports "unknown", so boot falls back to the normal open, and so does a
+ * probe that has not settled by the deadline; a connection that opens after
+ * it is closed at once.
  */
 export function probeSchema(
   name: string,
   declaredVerno: number,
-  factory: IDBFactory | null = globalThis.indexedDB ?? null
+  factory: IDBFactory | null = globalThis.indexedDB ?? null,
+  deadlineMs = PROBE_DEADLINE_MS
 ): Promise<SchemaProbeResult> {
   return new Promise((resolve) => {
     let absent = false;
+    let late = false;
     let request: IDBOpenDBRequest;
     try {
       if (!factory) return resolve(UNKNOWN);
@@ -53,15 +59,25 @@ export function probeSchema(
     } catch {
       return resolve(UNKNOWN);
     }
+    const timer = setTimeout(() => {
+      late = true;
+      resolve(UNKNOWN);
+    }, deadlineMs);
+    const settle = (result: SchemaProbeResult) => {
+      clearTimeout(timer);
+      resolve(result);
+    };
     request.onupgradeneeded = (event) => {
       absent = event.oldVersion === 0;
       request.transaction?.abort();
     };
     request.onerror = (event) => {
       event.preventDefault();
-      resolve(absent ? ABSENT : UNKNOWN);
+      settle(absent ? ABSENT : UNKNOWN);
     };
-    request.onsuccess = () =>
-      resolve(settleOpened(request.result, declaredVerno));
+    request.onsuccess = () => {
+      if (late) return request.result.close();
+      settle(settleOpened(request.result, declaredVerno));
+    };
   });
 }

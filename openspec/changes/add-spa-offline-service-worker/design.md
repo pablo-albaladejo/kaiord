@@ -272,7 +272,10 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
 
 **Decision.**
 
-1. **Pre-open probe.** It runs before Dexie first opens, beside `probeStorage` (`adapters/dexie/storage-probe.ts`, driven by `store/storage-store.ts`).
+1. **Pre-open probe.** It runs in `main.tsx` before the first render, and the first open of `db` is boot's own, after the probe settles. It cannot sit beside `probeStorage`: that runs from a React effect, child effects can auto-open Dexie before it, and schemaPatchMode writes before the ready gate runs.
+   - **Async boot.** `startApp` (`boot/start-app.ts`) is called as `void startApp(…)`. There is no top-level await, since `build.target` is es2020. Any throw or rejection in boot falls back to **unknown** and the normal render, so the screen is never left blank.
+   - **Deadline.** A probe that has not settled after 1.5 s reports **unknown**. A connection that opens after the deadline is closed at once, and an upgrade that arrives after it is still aborted.
+   - **Module scope.** Nothing in `main.tsx`'s static import graph opens `db` at module scope: it only registers ready subscribers and builds repositories. `main.test.tsx` imports `main` against a newer database and asserts the only `indexedDB.open("kaiord-spa")` is the probe's.
    - **Read the installed version.** It calls `indexedDB.open("kaiord-spa")` with no version argument, which never upgrades an existing database, and reads `result.version`.
    - **Absent database.** If `onupgradeneeded` fires with `oldVersion === 0`, the probe aborts that upgrade transaction and reports **absent, not stale**. Aborting the upgrade of a database that did not exist leaves no database behind. That was verified on Chromium, Firefox and WebKit, and on `fake-indexeddb`, so Dexie's first open sees `oldVersion = 0` and creates it fresh. Leaving an empty v1 instead would make Dexie replay all 37 versions and 21 upgraders and skip `_onDatabaseCreated`.
    - **No `deleteDatabase`, ever.** By the time the probe's abort lands, the app's own open may already be queued behind it and may have created the database. A delete issued then would destroy that fresh database.
@@ -286,7 +289,8 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
      - `registerDefaultProfileBoot` (`main.tsx:47`), a vip ready subscriber, deadlocks. With `idbdb` null, `_whenReady` waits on `dbReadyPromise`, which waits on the ready chain.
    - **The gate is registered first,** in the `KaiordDatabase` constructor right after `registerKaiordVersions(this)`. It **throws** a typed `StaleSchemaError` when `Math.floor(this.idbdb.version / 10) > DECLARED_VERNO`.
    - **What the throw does.** The ready chain rejects, no later subscriber runs (junk cleanup, default-profile boot), `open()` rejects with `StaleSchemaError`, and every queued query rejects with a `DatabaseClosedError` whose `inner` is the `StaleSchemaError`: Dexie closes the database when an open fails. Verified on `fake-indexeddb`. A database installed at 380 also comes back at 381: Dexie's schemaPatchMode runs before ready fires, which is why the probe must run first.
-   - **What `storage-store` does.** It maps `StaleSchemaError` to **stale**, not to `"failed"`. It then calls `db.close({ disableAutoOpen: true })`, so nothing auto-reopens.
+   - **What boot does.** The gate has already entered the stale state when it throws, so the in-app dialog shows; `storage-store` never sees the error. Boot's own `db.open()` catches `StaleSchemaError` and calls `db.close({ disableAutoOpen: true })`, so nothing auto-reopens.
+   - **The stale state is sticky.** `getStaleSchemaVersion()` keeps it, and the in-app dialog reads it through `useSyncExternalStore`, so a host that subscribes after the event still shows the dialog.
    - **Required test.** A promise-returning vip ready subscriber registered after the gate, standing in for default-profile boot, must reject and **not hang**.
 3. **Mid-session override.** It runs from `db.on("versionchange", handler)`. When `ev.newVersion` is non-null and `Math.floor(ev.newVersion / 10) > DECLARED_VERNO`, the handler:
    - calls `db.close({ disableAutoOpen: true });`

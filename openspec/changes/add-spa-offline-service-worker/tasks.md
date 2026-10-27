@@ -20,13 +20,16 @@
 ## B2. Stale-schema guard (D9)
 
 - [x] 2.1 Add the `DECLARED_VERNO` constant and the `floor(native/10)` rule.
-- [ ] 2.2 Add the pre-open probe:
+- [x] 2.2 Add the pre-open probe, run in `main.tsx` before the first render from an async `startApp` (no top-level await):
   - an absent database: the probe aborts the upgrade and reports "absent"; it never calls `deleteDatabase`;
   - two openers both survive: Dexie's open queued behind the probe still creates the database;
   - any error fails open;
   - the probe closes itself on `versionchange`;
-  - it stays open until Dexie's open settles.
-- [ ] 2.3 Register the ready gate first, in the `KaiordDatabase` constructor. When stale it throws `StaleSchemaError`. `storage-store` maps that error to "stale" and then calls `close({disableAutoOpen: true})`.
+  - it stays open until Dexie's open settles;
+  - it reports "unknown" after a ~1.5 s deadline and closes a connection that opens late;
+  - any throw in boot falls back to the normal render;
+  - a stale probe never opens `db`, and nothing in `main.tsx`'s import graph opens it at module scope.
+- [x] 2.3 Register the ready gate first, in the `KaiordDatabase` constructor. When stale it throws `StaleSchemaError`. Boot maps that error to "stale" and then calls `close({disableAutoOpen: true})`.
 - [x] 2.4 Add the `versionchange` override: when stale it closes the database and returns `false`; on a delete or a same-major change it returns nothing.
 - [ ] 2.5 Add the boot gate:
   - looks up the registration with `getRegistration()`;
@@ -34,7 +37,7 @@
   - calls `update()`; if it rejects, or no worker is installing or waiting, shows the dialog with "Try again in a few minutes" and a Retry;
   - otherwise waits up to ~15 s for installed or redundant: installed means `SKIP_WAITING` plus reload, redundant or a timeout means the dialog;
   - uses a one-shot that is cleared on a non-stale boot.
-- [ ] 2.6 Add the blocking stale dialog in en/es, with:
+- [x] 2.6 Add the blocking stale dialog in en/es, with:
   - Download draft (`.krd`);
   - Reload;
   - "Try again in a few minutes".

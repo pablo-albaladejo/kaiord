@@ -2,7 +2,7 @@ import "fake-indexeddb/auto";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { isNewerSchema, probeSchema } from "./schema-probe";
+import { isNewerSchema, PROBE_DEADLINE_MS, probeSchema } from "./schema-probe";
 
 const DECLARED = 37;
 // Native versions are `verno * 10`; schema patching adds one within a major.
@@ -12,6 +12,17 @@ const TOP_OF_MAJOR = 379;
 const NEWER = 380;
 const NEWEST = 390;
 let dbName = "";
+
+type SilentRequest = {
+  result?: { version: number; close: () => void };
+  transaction: { abort: () => void } | null;
+  onsuccess?: () => void;
+  onupgradeneeded?: (event: { oldVersion: number }) => void;
+};
+
+// An open that only answers when the test says so.
+const silentFactory = (request: SilentRequest) =>
+  ({ open: () => request }) as unknown as IDBFactory;
 let counter = 0;
 
 const openAt = (name: string, version: number): Promise<IDBDatabase> =>
@@ -158,5 +169,42 @@ describe("probeSchema", () => {
     // Assert
     expect(missing).toEqual({ status: "unknown" });
     expect(blocked).toEqual({ status: "unknown" });
+  });
+
+  it("should report unknown at the deadline and close a late connection", async () => {
+    // Arrange
+    vi.useFakeTimers();
+    const request: SilentRequest = { transaction: null };
+    const probe = probeSchema(dbName, DECLARED, silentFactory(request));
+
+    // Act
+    await vi.advanceTimersByTimeAsync(PROBE_DEADLINE_MS);
+    const result = await probe;
+    const close = vi.fn();
+    request.result = { version: CURRENT, close };
+    request.onsuccess?.();
+    vi.useRealTimers();
+
+    // Assert
+    expect(result).toEqual({ status: "unknown" });
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it("should still abort an upgrade that arrives after the deadline", async () => {
+    // Arrange
+    vi.useFakeTimers();
+    const abort = vi.fn();
+    const request: SilentRequest = { transaction: { abort } };
+    const probe = probeSchema(dbName, DECLARED, silentFactory(request));
+
+    // Act
+    await vi.advanceTimersByTimeAsync(PROBE_DEADLINE_MS);
+    request.onupgradeneeded?.({ oldVersion: 0 });
+    const result = await probe;
+    vi.useRealTimers();
+
+    // Assert
+    expect(result).toEqual({ status: "unknown" });
+    expect(abort).toHaveBeenCalledTimes(1);
   });
 });

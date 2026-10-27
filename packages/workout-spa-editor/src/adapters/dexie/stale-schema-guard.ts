@@ -14,6 +14,11 @@ export class StaleSchemaError extends Error {
 
 type StaleListener = (nativeVersion: number) => void;
 const listeners = new Set<StaleListener>();
+// Sticky: a host that subscribes after the event still sees it.
+let staleVersion: number | null = null;
+
+/** The newer native version this tab met, or null while it is current. */
+export const getStaleSchemaVersion = (): number | null => staleVersion;
 
 /** Subscribes to "this tab is now stale"; returns the unsubscribe. */
 export const onStaleSchema = (listener: StaleListener): (() => void) => {
@@ -22,6 +27,7 @@ export const onStaleSchema = (listener: StaleListener): (() => void) => {
 };
 
 const notifyStale = (nativeVersion: number): void => {
+  staleVersion = nativeVersion;
   for (const listener of listeners) listener(nativeVersion);
 };
 
