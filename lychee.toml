@@ -44,6 +44,7 @@ exclude_path = [
   "THIRD-PARTY-LICENSES.md",
   "packages/*/node_modules",
   "packages/*/dist",
+  "packages/workout-spa-editor/.e2e-prod-dist",
   "packages/*/coverage",
   # VitePress-rendered docs use server-relative URLs that only
   # resolve in the live site. VitePress build catches link drift

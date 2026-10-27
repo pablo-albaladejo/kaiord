@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { putKaiordRows } from "./helpers/kaiord-idb";
 
 /**
  * E2E: the AI settings page leads with the athlete's assistant, keeps the
@@ -57,37 +58,26 @@ const RUNS = [
 
 // Written the way the usage log stores them.
 async function seedUsage(page: Page) {
-  await page.evaluate(async (runs) => {
-    const now = new Date();
-    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-    const yearMonth = `${now.getUTCFullYear()}-${month}`;
-    const [date] = now.toISOString().split("T");
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const open = indexedDB.open("kaiord-spa");
-      open.onsuccess = () => resolve(open.result);
-      open.onerror = () => reject(open.error);
-    });
-    const tx = db.transaction("usageEvents", "readwrite");
-    for (const run of runs) {
-      tx.objectStore("usageEvents").put({
-        id: run.id,
-        yearMonth,
-        date,
-        purpose: run.purpose,
-        providerType: "anthropic",
-        promptTokens: run.input,
-        completionTokens: run.output,
-        tokens: run.input + run.output,
-        cost: 0.6215,
-        createdAt: now.toISOString(),
-      });
-    }
-    await new Promise((resolve, reject) => {
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    });
-    db.close();
-  }, RUNS);
+  const now = new Date();
+  const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const yearMonth = `${now.getUTCFullYear()}-${month}`;
+  const [date] = now.toISOString().split("T");
+  await putKaiordRows(
+    page,
+    "usageEvents",
+    RUNS.map((run) => ({
+      id: run.id,
+      yearMonth,
+      date,
+      purpose: run.purpose,
+      providerType: "anthropic",
+      promptTokens: run.input,
+      completionTokens: run.output,
+      tokens: run.input + run.output,
+      cost: 0.6215,
+      createdAt: now.toISOString(),
+    }))
+  );
 }
 
 const accountsOf = (settings: Locator) =>

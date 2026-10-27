@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { pollKaiordStore, readKaiordStore } from "./helpers/kaiord-idb";
 
 /**
  * E2E: the AI settings page shows what actually runs.
@@ -18,25 +19,7 @@ const PROVIDER_HOSTS = [
 type StoredBinding = { purpose: string; providerId: string; modelId: string };
 
 const storedBindings = (page: Page): Promise<StoredBinding[]> =>
-  page.evaluate(
-    () =>
-      new Promise<StoredBinding[]>((resolve, reject) => {
-        const open = indexedDB.open("kaiord-spa");
-        open.onerror = () => reject(open.error);
-        open.onsuccess = () => {
-          const db = open.result;
-          const rows = db
-            .transaction("aiModelBindings")
-            .objectStore("aiModelBindings")
-            .getAll();
-          rows.onerror = () => reject(rows.error);
-          rows.onsuccess = () => {
-            db.close();
-            resolve(rows.result as StoredBinding[]);
-          };
-        };
-      })
-  );
+  readKaiordStore<StoredBinding>(page, "aiModelBindings");
 
 const shown = (select: Locator) =>
   select.evaluate(
@@ -131,7 +114,9 @@ test.describe("AI settings truth", () => {
     await removeGpt();
     await dialog.getByRole("button", { name: "Remove" }).click();
     await expect(gptRow).toHaveCount(0);
-    await expect.poll(() => storedBindings(page)).toEqual([]);
+    await expect
+      .poll(() => pollKaiordStore(page, "aiModelBindings"))
+      .toEqual([]);
     await expect.poll(() => shown(main)).toBe("Claude Sonnet 5 · Mi Claude");
   });
 });
