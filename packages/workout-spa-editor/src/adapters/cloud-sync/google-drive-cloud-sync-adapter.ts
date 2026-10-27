@@ -14,6 +14,7 @@
 
 import { resolveGoogleOAuthClientId } from "../../lib/cloud-sync/google-oauth-config";
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
+import { createDriveAuthedFetch } from "./drive-authed-fetch";
 import { createDriveRest, type DriveRest } from "./drive-rest";
 import { createGisAuth, type GisAuth } from "./gis-token-client";
 
@@ -37,6 +38,6 @@ export function createGoogleDriveCloudSyncAdapter(
 
 export function createGoogleDriveCloudSync(clientId?: string): CloudSyncPort {
   const auth = createGisAuth(clientId ?? resolveGoogleOAuthClientId());
-  const rest = createDriveRest(() => auth.getAccessToken());
+  const rest = createDriveRest(createDriveAuthedFetch(auth));
   return createGoogleDriveCloudSyncAdapter({ auth, rest });
 }

@@ -9,10 +9,11 @@ import type { ProfileChoice } from "../application/sync/reconcile-auto-profile";
 /** Auto-push debounce window: collapse a burst of edits into one push. */
 export const PUSH_DEBOUNCE_MS = 5000;
 
-export type SyncStatus = "idle" | "syncing" | "error";
+/** `needsAuth`: the Google sign-in lapsed and can only resume on a gesture. */
+export type SyncStatus = "idle" | "syncing" | "error" | "needsAuth";
 
 /** How a sync cycle ended; `needsChoice` pushed nothing and is not an error. */
-export type SyncOutcome = "synced" | "needsChoice" | "failed";
+export type SyncOutcome = "synced" | "needsChoice" | "needsAuth" | "failed";
 
 export type SyncEngine = {
   status: SyncStatus;

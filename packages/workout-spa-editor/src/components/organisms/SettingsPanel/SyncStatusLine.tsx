@@ -18,6 +18,7 @@ function describe(
   if (!props.connected) return t("sync.notConnected");
   if (props.status === "syncing") return t("sync.syncing");
   if (props.status === "error") return t("sync.offline");
+  if (props.status === "needsAuth") return t("sync.needsAuth");
   if (props.lastSyncedAt) {
     return t("sync.lastSynced", {
       date: new Date(props.lastSyncedAt).toLocaleString(),

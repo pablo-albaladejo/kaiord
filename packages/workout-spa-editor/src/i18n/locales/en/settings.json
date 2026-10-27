@@ -72,6 +72,7 @@
     "notConnected": "Not connected",
     "syncing": "Syncing…",
     "offline": "Last sync failed — working offline",
+    "needsAuth": "Google sign-in expired — tap Sync now to resume",
     "lastSynced": "Last synced {{date}}",
     "connectedNotSynced": "Connected — not synced yet",
     "encryption": "End-to-end encryption for sync snapshots",

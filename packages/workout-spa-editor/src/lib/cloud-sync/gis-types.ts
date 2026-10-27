@@ -8,14 +8,20 @@
 
 export type GisTokenResponse = {
   access_token?: string;
+  /** Lifetime of the token, in seconds. */
+  expires_in?: number | string;
   error?: string;
   error_description?: string;
 };
+
+/** A popup that failed to open or was closed; the `callback` never runs. */
+export type GisClientError = { type: string };
 
 export type GisTokenClientConfig = {
   client_id: string;
   scope: string;
   callback: (response: GisTokenResponse) => void;
+  error_callback?: (error: GisClientError) => void;
 };
 
 export type GisTokenClient = {

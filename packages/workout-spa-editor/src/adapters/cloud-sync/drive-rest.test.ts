@@ -32,7 +32,7 @@ describe("createDriveRest.download", () => {
     // Arrange
     const fetchMock = vi.fn(async () => jsonResponse({ files: [] }));
     vi.stubGlobal("fetch", fetchMock);
-    const rest = createDriveRest(() => "tok");
+    const rest = createDriveRest((url, init) => fetch(url, init));
 
     // Act
     const result = await rest.download();
@@ -52,7 +52,7 @@ describe("createDriveRest.download", () => {
       return jsonResponse(snapshot());
     });
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
-    const rest = createDriveRest(() => "tok");
+    const rest = createDriveRest((url, init) => fetch(url, init));
 
     // Act
     const result = await rest.download();
@@ -73,7 +73,7 @@ describe("createDriveRest.upload", () => {
       return jsonResponse({ id: "new-file", headRevisionId: "rev-1" });
     });
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
-    const rest = createDriveRest(() => "tok");
+    const rest = createDriveRest((url, init) => fetch(url, init));
 
     // Act
     const revision = await rest.upload(snapshot(), null);
@@ -96,7 +96,7 @@ describe("createDriveRest.upload", () => {
       return jsonResponse({ id: "file-9", headRevisionId: "rev-4" });
     });
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
-    const rest = createDriveRest(() => "tok");
+    const rest = createDriveRest((url, init) => fetch(url, init));
 
     // Act
     const revision = await rest.upload(snapshot(), "rev-3");
@@ -114,7 +114,7 @@ describe("createDriveRest.upload", () => {
       jsonResponse({ files: [{ id: "file-9", headRevisionId: "rev-3" }] })
     );
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
-    const rest = createDriveRest(() => "tok");
+    const rest = createDriveRest((url, init) => fetch(url, init));
 
     // Act
     const attempt = rest.upload(snapshot(), "rev-1");

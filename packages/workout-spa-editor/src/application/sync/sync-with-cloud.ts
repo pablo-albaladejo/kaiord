@@ -17,6 +17,7 @@
 
 import type { CloudSyncPort } from "../../ports/cloud-sync-port";
 import type { SnapshotPort } from "../../ports/snapshot-port";
+import { isCloudAuthRequired } from "../../types/cloud-auth-required-error";
 import type { Snapshot } from "../../types/snapshot";
 import { isAutoProfile } from "../profile/helpers/claim-profile";
 import { dropDeletedProfileRows } from "./drop-deleted-profile-rows";
@@ -94,13 +95,12 @@ async function attempt(deps: SyncWithCloudDeps): Promise<SyncWithCloudResult> {
 export async function syncWithCloud(
   deps: SyncWithCloudDeps
 ): Promise<SyncWithCloudResult> {
-  let lastError: unknown;
-  for (let i = 0; i <= (deps.maxRetries ?? 3); i += 1) {
+  for (let left = deps.maxRetries ?? 3; ; left -= 1) {
     try {
       return await attempt(deps);
     } catch (error) {
-      lastError = error;
+      // A missing sign-in does not heal by retrying: it needs a gesture.
+      if (left <= 0 || isCloudAuthRequired(error)) throw error;
     }
   }
-  throw lastError;
 }

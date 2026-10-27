@@ -10,8 +10,10 @@ import Dexie from "dexie";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
 import { installExportLedgerCascade } from "./dexie-export-ledger-cascade";
 import { runJunkCleanupOnce } from "./dexie-junk-cleanup";
+import { DEVICE_LOCAL } from "./dexie-snapshot-port";
 import { registerKaiordVersions } from "./register-kaiord-versions";
 import { installStaleSchemaGuard } from "./stale-schema-guard";
+import { installSyncChangeNotifier } from "./sync-change-notifier";
 
 export {
   backfillBridgeSnapshotState,
@@ -24,6 +26,7 @@ export class KaiordDatabase extends Dexie {
     super(name);
     registerKaiordVersions(this);
     installStaleSchemaGuard(this);
+    installSyncChangeNotifier(this, DEVICE_LOCAL);
   }
 }
 

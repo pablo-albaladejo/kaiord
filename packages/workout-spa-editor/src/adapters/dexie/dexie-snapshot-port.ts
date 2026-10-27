@@ -19,6 +19,7 @@ import type { SnapshotTables, Tombstone } from "../../types/snapshot";
 import { createDexieClearAllTables } from "./dexie-clear-all-tables";
 import type { KaiordDatabase } from "./dexie-database";
 import { createDexieSnapshotProfileOps } from "./dexie-snapshot-profile-ops";
+import { markImportTransaction } from "./sync-change-notifier";
 
 const TOMBSTONES = "tombstones";
 // Device-local; never exported to / imported from a remote snapshot.
@@ -83,6 +84,7 @@ export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
     importTables: async (tables: SnapshotTables, { liveMerge }) => {
       const scope = dataTables();
       await scoped.transaction("rw", scope, async () => {
+        markImportTransaction();
         for (const table of scope) {
           let rows = tables[table.name] ?? [];
           // Read the live rows inside this rw transaction so a write that
@@ -100,6 +102,7 @@ export function createDexieSnapshotPort(db: KaiordDatabase): SnapshotPort {
 
     replaceTombstones: async (tombstones) => {
       await scoped.transaction("rw", [db.table(TOMBSTONES)], async () => {
+        markImportTransaction();
         await db.table(TOMBSTONES).clear();
         if (tombstones.length > 0)
           await db.table(TOMBSTONES).bulkPut([...tombstones]);
