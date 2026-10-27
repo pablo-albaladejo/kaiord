@@ -173,7 +173,7 @@ describe("reloadIntoNewerCode", () => {
     }
   );
 
-  it("should not reload automatically twice in one session", async () => {
+  it("should end at the dialog on a second stale boot even with a fresh worker", async () => {
     // Arrange
     const env = envWith(alwaysWaiting());
     await reloadIntoNewerCode({ auto: true }, env);
