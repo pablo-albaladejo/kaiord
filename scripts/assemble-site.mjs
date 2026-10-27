@@ -42,9 +42,10 @@ const substituteAnalyticsId = (out, websiteId) => {
   if (!websiteId) return false;
   for (const file of [join(out, "app/index.html"), join(out, "404.html")]) {
     if (!existsSync(file)) throw new Error(`Build artifact missing: ${file}`);
+    // A function replacement, so `$&` or `$'` in the id stay literal.
     const html = readFileSync(file, "utf8").replaceAll(
       UMAMI_PLACEHOLDER,
-      websiteId
+      () => websiteId
     );
     if (html.includes(UMAMI_PLACEHOLDER)) {
       throw new Error(

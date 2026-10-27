@@ -115,6 +115,14 @@ describe("assemble-site", () => {
     );
   });
 
+  it("should insert a website id holding replacement patterns verbatim", () => {
+    assembleSite({ ...inputs, umamiWebsiteId: "a$&b$'c" });
+
+    assert.ok(
+      readFileSync(join(inputs.out, "404.html"), "utf8").includes("a$&b$'c")
+    );
+  });
+
   it("should fail when the website id itself reintroduces the placeholder", () => {
     assert.throws(
       () => assembleSite({ ...inputs, umamiWebsiteId: UMAMI_PLACEHOLDER }),
