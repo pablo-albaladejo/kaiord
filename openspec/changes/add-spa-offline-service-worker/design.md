@@ -274,7 +274,8 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
 
 1. **Pre-open probe.** It runs before Dexie first opens, beside `probeStorage` (`adapters/dexie/storage-probe.ts`, driven by `store/storage-store.ts`).
    - **Read the installed version.** It calls `indexedDB.open("kaiord-spa")` with no version argument, which never upgrades an existing database, and reads `result.version`.
-   - **Absent database.** If `onupgradeneeded` fires with `oldVersion === 0`, the probe aborts that transaction, closes, and calls `deleteDatabase`, the way Dexie's own autoSchema does (≈4528–4535). It then reports **absent, not stale**. Otherwise the probe would leave an empty v1 behind, and Dexie would see `oldVersion = 1`. With `wasCreated` false, Dexie would replay all 37 versions and 21 upgraders. That is slow, it throws on any primary-key change, and it skips `_onDatabaseCreated`.
+   - **Absent database.** If `onupgradeneeded` fires with `oldVersion === 0`, the probe aborts that upgrade transaction and reports **absent, not stale**. Aborting the upgrade of a database that did not exist leaves no database behind. That was verified on Chromium, Firefox and WebKit, and on `fake-indexeddb`, so Dexie's first open sees `oldVersion = 0` and creates it fresh. Leaving an empty v1 instead would make Dexie replay all 37 versions and 21 upgraders and skip `_onDatabaseCreated`.
+   - **No `deleteDatabase`, ever.** By the time the probe's abort lands, the app's own open may already be queued behind it and may have created the database. A delete issued then would destroy that fresh database.
    - **Never block another tab.** The probe sets `onversionchange` to close its own connection, so it never blocks another tab's upgrade.
    - **Fail open.** Any probe error (private mode, blocked storage, `open` rejected) reports **unknown**. Boot then continues with the normal open, so a probe failure never shows the stale dialog by itself.
    - **Stale.** If the version is stale by the rule above, Dexie is never opened. That also closes the `schemaPatchMode` hole for the old code.
@@ -332,6 +333,8 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
   - a database at native 380 makes the probe report stale and Dexie never opens;
   - native 371 (a schemaPatchMode bump) is **not** stale, and Dexie opens;
   - an absent database makes the probe report absent and leaves no database behind; Dexie then creates it fresh, and `_onDatabaseCreated` fires;
+  - **two openers both survive:** with the database absent, Dexie's open queued right behind the probe still opens and creates the database, and the probe's abort does not remove it;
+  - nothing on the probe path calls `deleteDatabase`;
   - when the probe errors, boot continues and no stale state is set;
   - the probe closes itself on `versionchange`;
   - the post-open gate is registered first and throws `StaleSchemaError`:

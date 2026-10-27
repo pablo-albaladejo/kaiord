@@ -19,9 +19,10 @@
 
 ## B2. Stale-schema guard (D9)
 
-- [ ] 2.1 Add the `DECLARED_VERNO` constant and the `floor(native/10)` rule.
+- [x] 2.1 Add the `DECLARED_VERNO` constant and the `floor(native/10)` rule.
 - [ ] 2.2 Add the pre-open probe:
-  - an absent database is aborted, deleted and reported as "absent";
+  - an absent database: the probe aborts the upgrade and reports "absent"; it never calls `deleteDatabase`;
+  - two openers both survive: Dexie's open queued behind the probe still creates the database;
   - any error fails open;
   - the probe closes itself on `versionchange`;
   - it stays open until Dexie's open settles.
