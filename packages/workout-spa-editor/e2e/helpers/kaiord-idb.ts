@@ -10,9 +10,12 @@ import type { Page } from "@playwright/test";
  * `onsuccess`, a connection that ignores `versionchange` leaves the app's own
  * open `blocked`, and every later open queues behind it. So every access here:
  * - aborts the upgrade on `oldVersion === 0`, which leaves no database behind
- *   (Chromium, Firefox and WebKit agree), and reports the database as absent;
+ *   (Chromium, Firefox and WebKit agree), and reports the database as absent.
+ *   There is deliberately no `deleteDatabase` after it: the app's own open may
+ *   be queued behind this one, and a delete would wipe what it just created;
  * - closes on `versionchange`, so it can never block the app's upgrade;
- * - closes on every path, including a throwing store lookup.
+ * - closes on every path, including a throwing store lookup and an aborted
+ *   transaction (quota, an external abort), so no access can hang.
  *
  * Absent never reads as empty. `pollKaiordStore` returns `undefined` for it,
  * so a poll keeps going and no `toEqual([])` passes on a database that does
@@ -59,11 +62,12 @@ const access = (page: Page, op: Op): Promise<Outcome> =>
             const mode = op.kind === "put" ? "readwrite" : "readonly";
             const tx = db.transaction(op.store, mode);
             const store = tx.objectStore(op.store);
+            // A failed put aborts the transaction too, with tx.error set.
+            tx.onabort = () => fail(`abort: ${tx.error?.name}`);
             if (op.kind === "put") {
               for (const row of op.rows) store.put(row);
               tx.oncomplete = () =>
                 done({ status: "ok", value: op.rows.length });
-              tx.onerror = () => fail(`${tx.error?.name}`);
               return;
             }
             const req = op.kind === "count" ? store.count() : store.getAll();
