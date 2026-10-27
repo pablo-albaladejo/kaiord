@@ -42,6 +42,7 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
   // rather than the value captured at the render that scheduled them.
   const connectedRef = useRef<boolean>(connected);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const epoch = useRef(0);
 
   const requestPush = useCallback(() => {
     if (!connectedRef.current) return;
@@ -53,13 +54,17 @@ export function useSyncEngine(deps: UseSyncEngineDeps): SyncEngine {
   }, [syncNow]);
 
   const connect = useCallback(async () => {
+    const started = epoch.current;
     await cloud.authenticate();
+    // A disconnect pressed while the popup was open wins over the sign-in.
+    if (epoch.current !== started) throw new Error("disconnected");
     setSyncConnected(true);
     connectedRef.current = true;
     setConnected(true);
   }, [cloud]);
 
   const disconnect = useCallback(() => {
+    epoch.current += 1;
     if (timer.current !== null) {
       clearTimeout(timer.current);
       timer.current = null;

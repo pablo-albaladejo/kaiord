@@ -47,7 +47,12 @@ export const SyncTab: React.FC = () => {
             >
               {t("sync.syncNow")}
             </Button>
-            <Button size="sm" variant="tertiary" onClick={sync.disconnect}>
+            <Button
+              size="sm"
+              variant="tertiary"
+              onClick={sync.disconnect}
+              data-no-sync-resume=""
+            >
               {t("sync.disconnect")}
             </Button>
           </>

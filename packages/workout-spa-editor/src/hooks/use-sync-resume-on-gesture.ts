@@ -3,6 +3,12 @@ import { useEffect, useRef } from "react";
 import type { SyncEngine } from "./sync-engine-types";
 
 const GESTURES = ["click", "keydown"] as const;
+/** Marks a control whose press must not sign in (Disconnect). */
+const NO_SYNC_RESUME_ATTR = "data-no-sync-resume";
+
+const optedOut = (event: Event) =>
+  event.target instanceof Element &&
+  event.target.closest(`[${NO_SYNC_RESUME_ATTR}]`) !== null;
 
 /**
  * A reopened app holds no Google token, and the sign-in popup only opens
@@ -19,7 +25,8 @@ export function useSyncResumeOnGesture(engine: SyncEngine): void {
     // Leaving needsAuth (a sync now worked) re-arms the next expiry.
     if (status !== "needsAuth") used.current = false;
     if (used.current || !connected || status !== "needsAuth") return;
-    const resume = () => {
+    const resume = (event: Event) => {
+      if (optedOut(event)) return;
       remove();
       used.current = true;
       connect()

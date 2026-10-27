@@ -19,8 +19,9 @@ const silent = new WeakSet<object>();
 const notifyHere = () => {
   for (const listener of listeners) listener();
 };
+// Browser only: an open channel would keep a Node importer alive.
 const otherTabs =
-  typeof BroadcastChannel === "undefined"
+  typeof window === "undefined" || typeof BroadcastChannel === "undefined"
     ? null
     : new BroadcastChannel("kaiord-synced-table-change");
 if (otherTabs) otherTabs.onmessage = notifyHere;

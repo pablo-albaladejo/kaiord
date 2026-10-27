@@ -295,4 +295,30 @@ describe("useSyncEngine", () => {
     expect(result.current.status).toBe("needsAuth");
     expect(result.current.error).toBeNull();
   });
+
+  it("should not reconnect when disconnect is pressed while the sign-in is open", async () => {
+    // Arrange
+    const cloud = createInMemoryCloudSyncPort();
+    let finishSignIn = () => {};
+    cloud.authenticate = () =>
+      new Promise<void>((resolve) => {
+        finishSignIn = resolve;
+      });
+    const snapshotPort = createInMemorySnapshotPort(makeSnapshotState());
+    const { result } = renderHook(() =>
+      useSyncEngine({ cloud, snapshotPort, deviceId: DEVICE_ID })
+    );
+    let connecting: Promise<void> = Promise.resolve();
+    act(() => {
+      connecting = result.current.connect();
+    });
+
+    // Act
+    act(() => result.current.disconnect());
+    finishSignIn();
+
+    // Assert
+    await expect(connecting).rejects.toThrow(/disconnected/);
+    expect(result.current.connected).toBe(false);
+  });
 });

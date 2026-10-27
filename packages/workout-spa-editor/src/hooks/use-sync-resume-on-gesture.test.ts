@@ -117,4 +117,21 @@ describe("useSyncResumeOnGesture", () => {
     expect(idle.connect).not.toHaveBeenCalled();
     expect(offline.connect).not.toHaveBeenCalled();
   });
+
+  it("should not sign in from a press on a control that opts out", async () => {
+    // Arrange
+    const sync = engine("needsAuth");
+    renderHook(() => useSyncResumeOnGesture(sync));
+    const disconnect = document.createElement("button");
+    disconnect.setAttribute("data-no-sync-resume", "");
+    document.body.append(disconnect);
+
+    // Act
+    disconnect.click();
+    await flush();
+
+    // Assert
+    expect(sync.connect).not.toHaveBeenCalled();
+    disconnect.remove();
+  });
 });
