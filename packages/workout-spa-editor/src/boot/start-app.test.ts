@@ -8,11 +8,16 @@ import {
 } from "../adapters/dexie/dexie-database";
 import type { SchemaProbeResult } from "../adapters/dexie/schema-probe";
 import { probeSchema } from "../adapters/dexie/schema-probe";
-import { StaleSchemaError } from "../adapters/dexie/stale-schema-guard";
+import {
+  getStaleSchemaVersion,
+  StaleSchemaError,
+} from "../adapters/dexie/stale-schema-guard";
 import { startApp, type StartAppDeps } from "./start-app";
 
 const NATIVE_STALE = 380;
 const NATIVE_FRESH = 370;
+// Dexie stores `verno * 10` as the native version.
+const NATIVE_PER_VERNO = 10;
 
 const depsFor = (
   probe: StartAppDeps["probe"],
@@ -112,6 +117,7 @@ describe("startApp", () => {
     // Assert
     expect(throwing.renderApp).toHaveBeenCalledTimes(1);
     expect(rejecting.renderApp).toHaveBeenCalledTimes(1);
+    expect(getStaleSchemaVersion()).toBeNull();
   });
 
   it("should render normally when the stale screen fails", async () => {
@@ -186,5 +192,33 @@ describe("startApp against a real newer database", () => {
     expect(renderStale).toHaveBeenCalledTimes(1);
     expect(open).not.toHaveBeenCalled();
     expect(db.isOpen()).toBe(false);
+  });
+
+  it("should let Dexie create an absent database from scratch", async () => {
+    // Arrange
+    const db = new KaiordDatabase("start-app-absent");
+    const created = vi.fn();
+    db.on("populate", created);
+    let probed: SchemaProbeResult | undefined;
+
+    // Act
+    await startApp({
+      probe: async () => {
+        probed = await probeSchema(db.name, DECLARED_VERNO);
+        return probed;
+      },
+      openDb: () => db.open(),
+      closeDb: () => db.close({ disableAutoOpen: true }),
+      renderApp: vi.fn(),
+      renderStale: vi.fn(async () => undefined),
+    });
+
+    // Assert
+    expect(probed).toEqual({ status: "absent" });
+    expect(created).toHaveBeenCalledTimes(1);
+    expect(Math.floor(db.backendDB().version / NATIVE_PER_VERNO)).toBe(
+      DECLARED_VERNO
+    );
+    db.close();
   });
 });

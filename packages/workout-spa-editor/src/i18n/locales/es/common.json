@@ -74,6 +74,7 @@
     "body": "Esta ventana usa una versión anterior. Recarga para seguir trabajando con tus datos.",
     "tryAgainLater": "La actualización aún está llegando a este dispositivo. Inténtalo de nuevo en unos minutos.",
     "downloadDraft": "Descargar borrador",
-    "reload": "Recargar"
+    "reload": "Recargar",
+    "retry": "Reintentar"
   }
 }

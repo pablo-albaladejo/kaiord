@@ -16,6 +16,7 @@ import { startApp } from "./boot/start-app";
 import { defaultProfileName } from "./i18n/default-profile-name";
 import { reloadOnceForChunkError } from "./lib/chunk-reload";
 import { getUmamiWebsiteId } from "./lib/runtime-config";
+import { clearStaleReloadAttempt } from "./lib/stale-reload-mark";
 
 // Recover from stale lazy chunks after a deploy: Vite fires `vite:preloadError`
 // when a hashed chunk can no longer be fetched; reload once to pull the fresh
@@ -57,7 +58,8 @@ void startApp({
   openDb: () => db.open(),
   closeDb: () => db.close({ disableAutoOpen: true }),
   renderStale: () => renderStaleBoot(root),
-  renderApp: () =>
+  renderApp: () => {
+    clearStaleReloadAttempt();
     root.render(
       <AppRoot
         analytics={analytics}
@@ -66,5 +68,6 @@ void startApp({
         snapshotPort={snapshotPort}
         afterImport={healMatchDatesAfterImport}
       />
-    ),
+    );
+  },
 });

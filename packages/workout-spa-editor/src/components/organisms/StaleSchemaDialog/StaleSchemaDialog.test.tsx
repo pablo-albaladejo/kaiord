@@ -68,13 +68,13 @@ describe("StaleSchemaDialog", () => {
     expect(draft).not.toBeInTheDocument();
   });
 
-  it("should reload and show the try-again line when asked", async () => {
+  it("should retry and show the try-again line when asked", async () => {
     // Arrange
     const user = userEvent.setup();
     const props = renderDialog({ tryAgainLater: true });
 
     // Act
-    await user.click(screen.getByRole("button", { name: "Reload" }));
+    await user.click(screen.getByRole("button", { name: "Retry" }));
 
     // Assert
     expect(props.onReload).toHaveBeenCalledTimes(1);

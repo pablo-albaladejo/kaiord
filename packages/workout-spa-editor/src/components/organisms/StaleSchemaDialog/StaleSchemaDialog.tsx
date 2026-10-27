@@ -6,7 +6,7 @@ import { Button } from "../../atoms/Button";
 export type StaleSchemaDialogProps = {
   /** An in-memory workout exists; the database is closed, so offer a file. */
   hasDraft: boolean;
-  /** No newer worker was found yet, or the update check failed. */
+  /** No newer worker was found yet, or the update check failed: Retry. */
   tryAgainLater: boolean;
   reloading: boolean;
   onDownloadDraft: () => void;
@@ -57,7 +57,7 @@ export const StaleSchemaDialog = ({
               </Button>
             )}
             <Button loading={reloading} disabled={reloading} onClick={onReload}>
-              {t("staleSchema.reload")}
+              {t(tryAgainLater ? "staleSchema.retry" : "staleSchema.reload")}
             </Button>
           </div>
         </Dialog.Content>

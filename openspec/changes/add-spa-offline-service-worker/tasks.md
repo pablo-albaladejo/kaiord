@@ -31,7 +31,7 @@
   - a stale probe never opens `db`, and nothing in `main.tsx`'s import graph opens it at module scope.
 - [x] 2.3 Register the ready gate first, in the `KaiordDatabase` constructor. When stale it throws `StaleSchemaError`. Boot maps that error to "stale" and then calls `close({disableAutoOpen: true})`.
 - [x] 2.4 Add the `versionchange` override: when stale it closes the database and returns `false`; on a delete or a same-major change it returns nothing.
-- [ ] 2.5 Add the boot gate:
+- [x] 2.5 Add the boot gate:
   - looks up the registration with `getRegistration()`;
   - with no registration, shows the stale dialog first; its Reload is a plain `location.reload()`;
   - calls `update()`; if it rejects, or no worker is installing or waiting, shows the dialog with "Try again in a few minutes" and a Retry;
@@ -41,7 +41,7 @@
   - Download draft (`.krd`);
   - Reload;
   - "Try again in a few minutes".
-- [ ] 2.7 Add `fake-indexeddb` tests for every D9 case in D10. Two are mandatory:
+- [x] 2.7 Add `fake-indexeddb` tests for every D9 case in D10. Two are mandatory:
   - after a stale `versionchange`, the next query rejects with `DatabaseClosedError`;
   - a later vip ready subscriber does not hang.
 

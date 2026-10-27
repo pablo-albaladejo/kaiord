@@ -305,8 +305,10 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
    - **A registration exists:** the gate runs `await reg.update()`.
      - If `update()` rejects (offline, a network error, a 404 or a script error on `sw.js`), the dialog is shown **now**, with the "Try again in a few minutes" line and its Retry, which reruns this step.
      - With no `installing` and no `waiting` worker, the dialog is shown **now**.
-     - Otherwise the gate waits for that worker to reach `installed` **or** `redundant`, with a ~15 s timeout. On `installed` (or when one is already waiting) it posts `SKIP_WAITING` and reloads, with no dialog. On `redundant` or on timeout it shows the dialog.
-   - **Loop guard.** A sessionStorage one-shot prevents a loop, as chunk-reload does. It is **cleared on every non-stale boot**, so a later stale event gets its own attempt.
+     - Otherwise the gate waits for that worker to reach `installed` **or** `redundant`, with a ~15 s timeout. On `installed` (or when one is already waiting) it posts `SKIP_WAITING`, waits for `activated`, and reloads without a click. On `redundant` or on timeout it shows the "try again" state.
+     - While the gate waits, the dialog is already up with its Reload busy, so the screen is never blank for those 15 s.
+   - **Where it lives.** `lib/stale-schema-reload.ts` runs this path, and `StaleSchemaScreen` drives the dialog from it, both at boot (`autoUpdate`) and mid-session (on click). In the "try again" state the button reads Retry and reruns the path.
+   - **Loop guard.** A sessionStorage one-shot prevents a loop, as chunk-reload does. It guards only the automatic attempt at boot; a click always tries. It is **cleared on every non-stale boot** (`main.tsx` clears it before the app renders), so a later stale event gets its own attempt.
 5. **Blocking dialog.** It is used mid-session, and at boot when the gate cannot update. It cannot be dismissed. The title is "Kaiord was updated in another window", in en and es. It has two actions:
    - **Download draft** appears whenever `workout-store` holds a `currentWorkout`. It saves that KRD as JSON through a `Blob` to `<name>.krd`, a file that `FileUpload` already re-imports (`accept` includes `.krd`). A draft is never stranded. The database is closed, so it cannot be saved there.
    - **Reload** runs the step-4 path, or a plain `location.reload()` when there is no registration.
