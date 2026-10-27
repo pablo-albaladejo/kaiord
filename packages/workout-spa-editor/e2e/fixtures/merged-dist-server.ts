@@ -43,17 +43,18 @@ export type MergedDist = {
   close: () => Promise<void>;
 };
 
-const builtDist = join(repoRoot, "packages/workout-spa-editor/dist");
+export const PROD_DIST_DIR = ".e2e-prod-dist";
+const builtDist = join(repoRoot, "packages/workout-spa-editor", PROD_DIST_DIR);
 
 /**
- * Fails loudly on an artifact built for another base. A `dist/` left by a
- * plain `pnpm build` would serve, and every asset would 404 — a confusing
+ * Fails loudly on an artifact built for another base. A tree built without
+ * the `/app/` base would serve, and every asset would 404 — a confusing
  * shape for a suite whose whole subject is status codes.
  */
 function assertBuiltForAppBase(indexHtml: string): void {
   if (!indexHtml.includes(`${APP_BASE}assets/`)) {
     throw new Error(
-      `packages/workout-spa-editor/dist was not built with VITE_BASE_PATH=${APP_BASE}. ` +
+      `${builtDist} was not built with VITE_BASE_PATH=${APP_BASE}. ` +
         "The production-base run builds it in global setup; run it with E2E_PROD_BASE=1."
     );
   }
