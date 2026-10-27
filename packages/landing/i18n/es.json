@@ -103,7 +103,7 @@
   "Skip to main content": "Saltar al contenido principal",
   "Source priorities": "Prioridades de origen",
   "Star on GitHub": "Dale una estrella en GitHub",
-  "Strategy pattern — bring your own adapters. Type-safe end to end.": "Patrón estrategia: usa tus propios adaptadores. Tipado de principio a fin.",
+  "Strategy pattern — bring your own adapters. Type-safe end to end.": "Patrón estrategia: usa tus propios adaptadores. Tipado seguro de principio a fin.",
   "Strategy pattern: inject your own readers and writers.": "Patrón estrategia: inyecta tus propios lectores y escritores.",
   "Strict types, Zod schemas, full IntelliSense. No": "Tipos estrictos, esquemas Zod, IntelliSense completo. Sin",
   "Swapped Thursday's Sweet Spot 3×12 for a 45-minute recovery spin and moved the intervals to Saturday.": "Cambié el Sweet Spot 3×12 del jueves por 45 minutos de rodaje de recuperación y moví las series al sábado.",
@@ -133,6 +133,6 @@
   "You decide where your data flows.": "Tú decides hacia dónde fluyen tus datos.",
   "Your model, your key": "Tu modelo, tu clave",
   "Your training cockpit.": "Tu centro de mando para entrenar.",
-  "Your week is the cockpit.": "Tu semana, al mando.",
+  "Your week is the cockpit.": "Tu semana es tu centro de mando.",
   "Zero infrastructure": "Cero infraestructura"
 }
