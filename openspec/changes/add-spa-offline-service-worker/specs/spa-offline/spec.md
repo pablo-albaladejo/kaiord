@@ -99,7 +99,7 @@ The stale dialog SHALL NOT be dismissible. Its title SHALL be "Kaiord was update
 
 - **GIVEN** the database installed at native version 380 or higher, a shell that declares 37, and a newer worker available
 - **WHEN** the editor boots
-- **THEN** Dexie SHALL NOT open the database, no read or write SHALL reach it, and the editor SHALL activate the newer worker and reload without a dialog
+- **THEN** Dexie SHALL NOT open the database, no read or write SHALL reach it, and the editor SHALL activate the newer worker and reload without a click, while the blocking dialog shows its reload action busy
 
 #### Scenario: A schema-patched database is not stale
 
