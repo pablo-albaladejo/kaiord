@@ -1,34 +1,21 @@
 import "./index.css";
 
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Router } from "wouter";
 
 import { createUmamiAnalytics } from "./adapters/analytics/umami-analytics";
 import { createLazyCloudSync } from "./adapters/cloud-sync/lazy-cloud-sync";
 import { createAppPersistence } from "./adapters/create-app-persistence";
 import { registerDefaultProfileBoot } from "./adapters/dexie/default-profile-boot";
-import { db } from "./adapters/dexie/dexie-database";
+import { db, DECLARED_VERNO } from "./adapters/dexie/dexie-database";
 import { createDexieSnapshotPort } from "./adapters/dexie/dexie-snapshot-port";
-import App from "./App.tsx";
+import { probeSchema } from "./adapters/dexie/schema-probe";
 import { runMatchDatesHeal } from "./application/coaching/run-match-dates-heal";
-import {
-  AnalyticsProvider,
-  GarminBridgeProvider,
-  ThemeProvider,
-} from "./contexts";
-import { CoachMoveNoticeProvider } from "./contexts/coach-move-notice-context";
-import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
-import { PersistenceProvider } from "./contexts/persistence-context";
-import { PlacementOutcomeProvider } from "./contexts/placement-outcome-context";
-import { SyncProvider } from "./contexts/sync-context";
-import { UnitsProvider } from "./contexts/units-context";
+import { AppRoot } from "./AppRoot";
+import { startApp } from "./boot/start-app";
 import { defaultProfileName } from "./i18n/default-profile-name";
-import { LocaleProvider } from "./i18n/LocaleProvider";
 import { reloadOnceForChunkError } from "./lib/chunk-reload";
-import { getDeviceId } from "./lib/cloud-sync/device-id";
-import { useFragmentLocation } from "./lib/fragment-location";
 import { getUmamiWebsiteId } from "./lib/runtime-config";
+import { clearStaleReloadAttempt } from "./lib/stale-reload-mark";
 
 // Recover from stale lazy chunks after a deploy: Vite fires `vite:preloadError`
 // when a hashed chunk can no longer be fetched; reload once to pull the fresh
@@ -61,35 +48,27 @@ const snapshotPort = createDexieSnapshotPort(db);
 const healMatchDatesAfterImport = () =>
   runMatchDatesHeal(persistence, analytics, "all-profiles");
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <AnalyticsProvider analytics={analytics}>
-      <PersistenceProvider persistence={persistence}>
-        <SyncProvider
-          cloud={cloudSync}
-          snapshotPort={snapshotPort}
-          deviceId={getDeviceId()}
-          afterImport={healMatchDatesAfterImport}
-        >
-          <ThemeProvider defaultTheme="dark">
-            <GarminBridgeProvider>
-              <PlacementOutcomeProvider>
-                <CoachMoveNoticeProvider>
-                  <CoachingRegistryBootstrap>
-                    <LocaleProvider>
-                      <UnitsProvider>
-                        <Router hook={useFragmentLocation}>
-                          <App />
-                        </Router>
-                      </UnitsProvider>
-                    </LocaleProvider>
-                  </CoachingRegistryBootstrap>
-                </CoachMoveNoticeProvider>
-              </PlacementOutcomeProvider>
-            </GarminBridgeProvider>
-          </ThemeProvider>
-        </SyncProvider>
-      </PersistenceProvider>
-    </AnalyticsProvider>
-  </StrictMode>
-);
+const root = createRoot(document.getElementById("root")!);
+
+// Nothing above opens the database; the first open is `startApp`'s, after
+// the probe has ruled out a schema newer than this code.
+void startApp({
+  probe: () => probeSchema(db.name, DECLARED_VERNO),
+  openDb: () => db.open(),
+  closeDb: () => db.close({ disableAutoOpen: true }),
+  // Outside the initial JS: only a stale boot ever needs it.
+  renderStale: () =>
+    import("./boot/render-stale-boot").then((m) => m.renderStaleBoot(root)),
+  renderApp: () => {
+    clearStaleReloadAttempt();
+    root.render(
+      <AppRoot
+        analytics={analytics}
+        persistence={persistence}
+        cloudSync={cloudSync}
+        snapshotPort={snapshotPort}
+        afterImport={healMatchDatesAfterImport}
+      />
+    );
+  },
+});

@@ -23,6 +23,17 @@ const LocaleContext = createContext<Locale>(DEFAULT_LOCALE);
 /** Active, resolved UI locale; defaults to English outside a provider. */
 export const useActiveLocale = (): Locale => useContext(LocaleContext);
 
+/** A fixed locale, for a screen rendered before the database may be read. */
+export const StaticLocaleProvider = ({
+  locale,
+  children,
+}: {
+  locale: Locale;
+  children: ReactNode;
+}) => (
+  <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
+);
+
 const readNavigatorLanguage = (): string =>
   typeof navigator !== "undefined" ? navigator.language : DEFAULT_LOCALE;
 
