@@ -1,0 +1,43 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Kaiord",
+    "identifier": "did:web:kaiord.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:kaiord.com:server:kaiord-mcp",
+      "displayName": "Kaiord MCP server",
+      "type": "application/mcp-server+json",
+      "url": "https://registry.modelcontextprotocol.io/v0/servers/io.github.pablo-albaladejo%2Fkaiord/versions/latest",
+      "representativeQueries": [
+        "convert a FIT workout file to Zwift ZWO",
+        "inspect what a Garmin FIT workout file contains",
+        "check that a TCX workout survives a round-trip conversion",
+        "list the workout file formats an MCP server can convert"
+      ]
+    },
+    {
+      "identifier": "urn:air:kaiord.com:skills:index",
+      "displayName": "Kaiord agent skills",
+      "type": "application/agent-skills+json",
+      "url": "https://kaiord.com/.well-known/agent-skills/index.json",
+      "representativeQueries": [
+        "how to convert workout files between training platforms",
+        "skill for validating structured workout files",
+        "convert a Garmin Connect workout to another format"
+      ]
+    },
+    {
+      "identifier": "urn:air:kaiord.com:docs:llms-txt",
+      "displayName": "Kaiord site map for language models",
+      "type": "text/markdown",
+      "url": "https://kaiord.com/llms.txt",
+      "representativeQueries": [
+        "what is Kaiord",
+        "open-source local-first training calendar with an AI assistant",
+        "TypeScript SDK for FIT, TCX and ZWO workout files"
+      ]
+    }
+  ]
+}

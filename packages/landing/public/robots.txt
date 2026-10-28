@@ -1,7 +1,9 @@
 User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
 Allow: /
 
 Sitemap: https://kaiord.com/sitemap.xml
+Agentmap: https://kaiord.com/.well-known/ai-catalog.json
 
 # AI agents: a curated map of this site lives at https://kaiord.com/llms.txt
 # Full docs corpus in markdown: https://kaiord.com/docs/llms-full.txt
