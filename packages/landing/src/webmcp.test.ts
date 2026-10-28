@@ -78,6 +78,17 @@ describe("webmcp", () => {
     expect(result.content[0].text).toBe("pnpm add @kaiord/core");
   });
 
+  it("should fall back to npm for a key that is not a package manager", async () => {
+    // Arrange
+    const tool = toolNamed("get_install_command");
+
+    // Act
+    const result = await tool.execute({ packageManager: "constructor" });
+
+    // Assert
+    expect(result.content[0].text).toBe("npm i @kaiord/core");
+  });
+
   it("should list the public resources as JSON", async () => {
     // Arrange
     const tool = toolNamed("get_kaiord_resources");

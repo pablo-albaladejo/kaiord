@@ -44,8 +44,10 @@ export const createTools = (navigate: (url: string) => void): WebMcpTool[] => [
       },
       required: ["packageManager"],
     },
-    execute: async ({ packageManager }) =>
-      text(commands[String(packageManager)] ?? commands.npm),
+    execute: async ({ packageManager }) => {
+      const key = String(packageManager);
+      return text(Object.hasOwn(commands, key) ? commands[key] : commands.npm);
+    },
   },
   {
     name: "get_kaiord_resources",

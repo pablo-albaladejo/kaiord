@@ -9,7 +9,7 @@
       "identifier": "urn:air:kaiord.com:server:kaiord-mcp",
       "displayName": "Kaiord MCP server",
       "type": "application/mcp-server+json",
-      "url": "https://registry.modelcontextprotocol.io/v0/servers/io.github.pablo-albaladejo%2Fkaiord/versions/latest",
+      "url": "https://raw.githubusercontent.com/pablo-albaladejo/kaiord/main/packages/mcp/server.json",
       "representativeQueries": [
         "convert a FIT workout file to Zwift ZWO",
         "inspect what a Garmin FIT workout file contains",

@@ -6,7 +6,7 @@
       "type": "skill-md",
       "description": "Convert, validate and inspect structured workout files (FIT, TCX, ZWO, Garmin Connect JSON, KRD) with the Kaiord CLI or the Kaiord MCP server.",
       "url": "https://kaiord.com/.well-known/agent-skills/kaiord-workout-files/SKILL.md",
-      "digest": "sha256:5558213102cd0a1f8aeaba49062b09d5228882b7c483df05022c705fb2b0dc48"
+      "digest": "sha256:75c4f683c5a37a7ed8217c016c2650e5d0eff36d7def5733238d8a2259893b68"
     }
   ]
 }
