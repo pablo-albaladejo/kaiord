@@ -90,6 +90,7 @@ tree — keep the format `- \`<filename>\` — When to run: <reason>`.
 - `create-release.sh` — When to run: when shipping a manual hotfix release with a package-scoped tag (bypasses the normal Changesets flow). Documented in `DEPLOYMENT.md`.
 - `parse-release-tag.sh` — When to run: when validating a `@kaiord/<pkg>@<version>` tag locally; used by `create-release.sh`.
 - `validate-package.sh` — When to run: when validating that a package version matches its `package.json` before pushing a tag; used by `create-release.sh`.
+- `geo/agent-edge-worker.mjs` — When to run: when deploying the Cloudflare Worker in front of kaiord.com (`npx wrangler@4 deploy --config scripts/geo/wrangler.toml`). It adds RFC 8288 Link headers to HTML responses and serves Markdown (`llms.txt`, or a docs page's `.md` twin) to `Accept: text/markdown`. GitHub Pages cannot set either.
 
 <!-- manual-tools:end -->
 

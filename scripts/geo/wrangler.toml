@@ -1,0 +1,12 @@
+# Cloudflare Worker that fronts the GitHub Pages origin for kaiord.com.
+# Requires the kaiord.com zone to be on Cloudflare with the apex and www
+# records proxied. Deploy from the repo root:
+#   npx wrangler@4 deploy --config scripts/geo/wrangler.toml
+name = "kaiord-agent-edge"
+main = "agent-edge-worker.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+routes = [
+  { pattern = "kaiord.com/*", zone_name = "kaiord.com" },
+]
