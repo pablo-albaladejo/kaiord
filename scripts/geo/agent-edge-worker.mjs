@@ -20,26 +20,36 @@ const CHARS_PER_TOKEN = 4;
 export function markdownPathFor(pathname) {
   if (pathname === "/" || pathname === "/es/") return "/llms.txt";
   if (pathname === "/docs/") return "/docs/llms.txt";
-  if (!pathname.startsWith("/docs/") || pathname.endsWith("/")) return null;
-  const last = pathname.slice(pathname.lastIndexOf("/") + 1);
-  return last.includes(".") ? null : `${pathname}.md`;
+  if (!pathname.startsWith("/docs/")) return null;
+  // A directory index `/docs/x/` is published as `/docs/x.md`.
+  const page = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const last = page.slice(page.lastIndexOf("/") + 1);
+  return last.includes(".") ? null : `${page}.md`;
 }
 
-const qualityOf = (accept, type) => {
+// RFC 9110 §12.5.1: the most specific matching range decides the quality.
+const rangesFor = (type) => [type, `${type.split("/")[0]}/*`, "*/*"];
+
+const qualityOf = (accept, type, { wildcards = true } = {}) => {
+  const ranges = wildcards ? rangesFor(type) : [type];
+  const found = new Map();
   for (const part of accept.split(",")) {
     const [media, ...params] = part.trim().split(";");
-    if (media.trim().toLowerCase() !== type) continue;
+    const range = media.trim().toLowerCase();
+    if (!ranges.includes(range) || found.has(range)) continue;
     const q = params.map((p) => p.trim()).find((p) => p.startsWith("q="));
-    return q ? Number(q.slice(2)) : 1;
+    found.set(range, q ? Number(q.slice(2)) : 1);
   }
-  return 0;
+  const match = ranges.find((range) => found.has(range));
+  return match ? found.get(match) : 0;
 };
 
 // Markdown only when it is asked for by name and not ranked below HTML, so a
 // browser's `text/html,…,*/*` never receives it.
 export function prefersMarkdown(accept) {
-  const markdown = qualityOf(accept ?? "", "text/markdown");
-  return markdown > 0 && markdown >= qualityOf(accept ?? "", "text/html");
+  const header = accept ?? "";
+  const markdown = qualityOf(header, "text/markdown", { wildcards: false });
+  return markdown > 0 && markdown >= qualityOf(header, "text/html");
 }
 
 const withHeaders = (response, extra) => {

@@ -45,7 +45,8 @@ describe("agent-edge-worker", () => {
     assert.equal(markdownPathFor("/es/"), "/llms.txt");
     assert.equal(markdownPathFor("/docs/"), "/docs/llms.txt");
     assert.equal(markdownPathFor("/docs/formats/krd"), "/docs/formats/krd.md");
-    assert.equal(markdownPathFor("/docs/guide/"), null);
+    assert.equal(markdownPathFor("/docs/convert/"), "/docs/convert.md");
+    assert.equal(markdownPathFor("/docs/es/"), "/docs/es.md");
     assert.equal(markdownPathFor("/docs/assets/app.js"), null);
     assert.equal(markdownPathFor("/app/"), null);
   });
@@ -56,6 +57,14 @@ describe("agent-edge-worker", () => {
     assert.equal(prefersMarkdown("text/html, text/markdown;q=0.5"), false);
     assert.equal(prefersMarkdown("text/markdown;q=0"), false);
     assert.equal(prefersMarkdown(BROWSER_ACCEPT), false);
+    assert.equal(prefersMarkdown("text/markdown;q=0.5, */*"), false);
+    assert.equal(prefersMarkdown("text/markdown;q=0.5, text/*"), false);
+    assert.equal(prefersMarkdown("text/markdown, */*;q=0.8"), true);
+    assert.equal(
+      prefersMarkdown("text/markdown;q=0.5, text/html;q=0.4, */*"),
+      true
+    );
+    assert.equal(prefersMarkdown("text/*"), false);
     assert.equal(prefersMarkdown(null), false);
   });
 
