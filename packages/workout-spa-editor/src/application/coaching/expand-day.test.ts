@@ -229,4 +229,34 @@ describe("expandDay", () => {
     const stored = await coaching.getById("p1:train2go:Z");
     expect(stored?.description).toBe("desc");
   });
+
+  it("should stamp the bridge provenance on every row it writes, as the week sync does", async () => {
+    // Arrange
+    const row = {
+      id: "p1:train2go:a1",
+      profileId: "p1",
+      source: "train2go",
+      sourceId: "a1",
+      date: "2026-04-13",
+      sport: "running",
+      title: "Rodaje",
+      status: "pending" as const,
+      description: "20' z1",
+      fetchedAt: "2026-04-13T08:00:00.000Z",
+    };
+    deps = {
+      ...deps,
+      transport: transport({
+        readDay: vi.fn(async () => ({ activities: [row] })),
+      }),
+    };
+
+    // Act
+    await expandDay(deps, "p1", "2026-04-13");
+
+    // Assert
+    const stored = await deps.coaching.getById(row.id);
+    expect(stored?.sourceBridgeId).toBe("train2go-bridge");
+    expect(stored?.externalId).toBe("a1");
+  });
 });

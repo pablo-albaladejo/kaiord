@@ -27,6 +27,7 @@ import type { CoachingDayComment } from "../../types/coaching-day-notes-record";
 import { buildCoachingDayNotesId } from "../../types/coaching-day-notes-record";
 import type { ExpandDayResult } from "../../types/coaching-expand-result";
 import { logger } from "../../utils/logger";
+import { stampProvenance } from "../import/stamp-provenance";
 import type { CoachingTransport } from "./coaching-transport-port";
 
 export type {
@@ -94,7 +95,15 @@ export const expandDay = async (
     return { ok: false, reason: "transport-error", error };
   }
 
-  await deps.coaching.upsertMany(fetched.activities);
+  // Same provenance as `syncWeek`: the upsert replaces the row, and a row
+  // without `sourceBridgeId` loses its origin until the next week sync.
+  const bridgeId = `${deps.transport.source}-bridge`;
+  await deps.coaching.upsertMany(
+    fetched.activities.map((r) => ({
+      ...r,
+      ...stampProvenance(bridgeId, r.sourceId),
+    }))
+  );
   await persistDayNotes(deps, profileId, date, fetched.comments);
   return { ok: true, activityCount: fetched.activities.length };
 };
