@@ -21,7 +21,8 @@ import { injectSpaFallback } from "./inject-spa-fallback.mjs";
 //
 // The copy mirrors `cp -r <dist>/* <dest>/`: the shell glob skips top-level
 // dotfiles. Each `public/` carries a `.nojekyll`, and only the landing's is
-// meant to reach the site root, so it is the only one copied by name.
+// meant to reach the site root, so it is copied by name, as is the landing's
+// `.well-known/` (agent discovery documents served from the origin root).
 
 export const UMAMI_PLACEHOLDER = "__UMAMI_WEBSITE_ID__";
 
@@ -63,6 +64,10 @@ export function assembleSite({ out, landing, app, docs, sha, umamiWebsiteId }) {
   const landingNojekyll = join(landing, ".nojekyll");
   if (existsSync(landingNojekyll)) {
     copyFileSync(landingNojekyll, join(out, ".nojekyll"));
+  }
+  const landingWellKnown = join(landing, ".well-known");
+  if (existsSync(landingWellKnown)) {
+    cpSync(landingWellKnown, join(out, ".well-known"), { recursive: true });
   }
   copyGlobContents(app, join(out, "app"));
   writeFileSync(join(out, "app/version.json"), `{"sha":"${sha}"}\n`);

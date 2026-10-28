@@ -43,8 +43,10 @@ describe("assemble-site", () => {
     put(join(inputs.landing, "404.html"), HTML(UMAMI_PLACEHOLDER));
     put(join(inputs.landing, ".nojekyll"), "");
     put(join(inputs.landing, ".well-known/x.txt"), "top-level dotdir");
+    put(join(inputs.landing, ".hidden/x.txt"), "other top-level dotdir");
     put(join(inputs.app, "index.html"), HTML(UMAMI_PLACEHOLDER));
     put(join(inputs.app, ".nojekyll"), "");
+    put(join(inputs.app, ".well-known/y.txt"), "app dotdir");
     put(join(inputs.app, "assets/.keep"), "nested dotfile");
     put(join(inputs.docs, "index.html"), HTML("docs"));
     put(join(inputs.docs, ".nojekyll"), "");
@@ -54,11 +56,16 @@ describe("assemble-site", () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it("should copy with shell-glob semantics plus the landing .nojekyll", () => {
+  it("should copy with shell-glob semantics plus the landing .nojekyll and .well-known", () => {
     assembleSite(inputs);
 
     assert.ok(existsSync(join(inputs.out, ".nojekyll")));
-    assert.ok(!existsSync(join(inputs.out, ".well-known")));
+    assert.equal(
+      readFileSync(join(inputs.out, ".well-known/x.txt"), "utf8"),
+      "top-level dotdir"
+    );
+    assert.ok(!existsSync(join(inputs.out, ".hidden")));
+    assert.ok(!existsSync(join(inputs.out, "app/.well-known")));
     assert.ok(!existsSync(join(inputs.out, "app/.nojekyll")));
     assert.ok(!existsSync(join(inputs.out, "docs/.nojekyll")));
     assert.ok(existsSync(join(inputs.out, "app/assets/.keep")));
