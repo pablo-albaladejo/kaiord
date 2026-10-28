@@ -8,17 +8,11 @@ type ExpandActivity = (
   activity: CoachingActivity
 ) => Promise<ExpandDayResult | undefined>;
 
-// One attempt per profile, source and day for the page's lifetime, success or
-// not: the registry hands out a new `expand` on every render, so a failed
-// read must not come back on the next one. The dialog keeps its own retry.
-const attempted = new Set<string>();
-
-export const resetDescriptionPrefetch = (): void => attempted.clear();
-
 const pendingDays = (
   profileId: string,
   plans: readonly CoachingActivity[],
-  connected: ReadonlySet<string>
+  connected: ReadonlySet<string>,
+  attempted: ReadonlySet<string>
 ): Map<string, CoachingActivity> => {
   const pending = new Map<string, CoachingActivity>();
   for (const plan of plans) {
@@ -32,7 +26,10 @@ const pendingDays = (
 /**
  * Reads the coach's text for the visible week's unmatched plans, one day at a
  * time, so their cards can draw an estimated profile without being opened.
- * Only sources that are linked and connected are asked.
+ * Only sources that are linked and connected are asked. Each profile, source
+ * and day is tried once while the calendar is mounted, success or not: the
+ * registry hands out a new `expand` on every render, so a failed read must
+ * not come back on the next one. The dialog keeps its own retry.
  */
 export function useCoachingDescriptionPrefetch(
   profileId: string | null,
@@ -42,6 +39,10 @@ export function useCoachingDescriptionPrefetch(
 ): void {
   const expandRef = useRef(expand);
   expandRef.current = expand;
+  const attempted = useRef(new Set<string>());
+  // Every batch chains onto the previous one, so a re-render never starts a
+  // second read while one is still in flight.
+  const queue = useRef<Promise<void>>(Promise.resolve());
   const connected = sources
     .filter((s) => s.linked && s.connected)
     .map((s) => s.id)
@@ -49,20 +50,18 @@ export function useCoachingDescriptionPrefetch(
 
   useEffect(() => {
     if (!profileId) return;
+    const run = expandRef.current;
     const plans = Object.values(plansByDay).flat();
-    const pending = pendingDays(
-      profileId,
-      plans,
-      new Set(connected.split(","))
-    );
+    const online = new Set(connected.split(","));
+    const tried = attempted.current;
     let cancelled = false;
-    void (async () => {
-      for (const [key, plan] of pending) {
-        if (cancelled) return;
-        attempted.add(key);
-        await expandRef.current(plan).catch(() => undefined);
-      }
-    })();
+    for (const [key, plan] of pendingDays(profileId, plans, online, tried)) {
+      queue.current = queue.current.then(async () => {
+        if (cancelled || tried.has(key)) return;
+        tried.add(key);
+        await run(plan).catch(() => undefined);
+      });
+    }
     return () => {
       cancelled = true;
     };

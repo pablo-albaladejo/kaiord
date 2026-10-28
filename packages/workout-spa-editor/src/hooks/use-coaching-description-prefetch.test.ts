@@ -1,12 +1,9 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { CoachingActivity } from "../types/coaching-activity";
 import type { CoachingSyncState } from "./use-coaching-activities";
-import {
-  resetDescriptionPrefetch,
-  useCoachingDescriptionPrefetch,
-} from "./use-coaching-description-prefetch";
+import { useCoachingDescriptionPrefetch } from "./use-coaching-description-prefetch";
 
 const plan = (
   id: string,
@@ -39,8 +36,6 @@ const okExpand = () =>
   vi.fn(async () => ({ ok: true as const, activityCount: 1 }));
 
 describe("useCoachingDescriptionPrefetch", () => {
-  beforeEach(() => resetDescriptionPrefetch());
-
   it("should read each day with an unread plan once, not each plan", async () => {
     // Arrange
     const expand = okExpand();
@@ -110,5 +105,56 @@ describe("useCoachingDescriptionPrefetch", () => {
 
     // Assert
     expect(expand).toHaveBeenCalledTimes(1);
+  });
+
+  it("should try a failed day again when the calendar is opened again", async () => {
+    // Arrange
+    const expand = vi.fn(async () => {
+      throw new Error("offline");
+    });
+    const byDay = { "2026-10-26": [plan("a", "2026-10-26")] };
+    const first = renderHook(() =>
+      useCoachingDescriptionPrefetch("p1", byDay, [source(true)], expand)
+    );
+    await waitFor(() => expect(expand).toHaveBeenCalledTimes(1));
+    first.unmount();
+
+    // Act
+    renderHook(() =>
+      useCoachingDescriptionPrefetch("p1", byDay, [source(true)], expand)
+    );
+
+    // Assert
+    await waitFor(() => expect(expand).toHaveBeenCalledTimes(2));
+  });
+
+  it("should not start a second day's read while the first is still in flight", async () => {
+    // Arrange
+    let release = () => {};
+    const expand = vi.fn(
+      () =>
+        new Promise<undefined>((resolve) => {
+          release = () => resolve(undefined);
+        })
+    );
+    const monday = { "2026-10-26": [plan("a", "2026-10-26")] };
+    const { rerender } = renderHook(
+      ({ days }) =>
+        useCoachingDescriptionPrefetch("p1", days, [source(true)], expand),
+      { initialProps: { days: monday } }
+    );
+    await waitFor(() => expect(expand).toHaveBeenCalledTimes(1));
+
+    // Act
+    rerender({
+      days: { ...monday, "2026-10-27": [plan("b", "2026-10-27")] },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const whileInFlight = expand.mock.calls.length;
+    release();
+
+    // Assert
+    expect(whileInFlight).toBe(1);
+    await waitFor(() => expect(expand).toHaveBeenCalledTimes(2));
   });
 });
