@@ -235,6 +235,8 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           path: merged-dist
+          # v5 drops dot entries by default, which would strip .well-known/.
+          include-hidden-files: true
 
   deploy:
     environment:
