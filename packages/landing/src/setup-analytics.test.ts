@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import indexHtml from "../index.html?raw";
 
 import { setupAnalytics } from "./setup-analytics";
@@ -20,12 +20,22 @@ function mountLinks(): void {
     <a id="app" href="/app/">Open</a>`;
 }
 
+// Cancelable, so the capture listener below can stop jsdom from following
+// the link, which it cannot do and reports as "Not implemented".
+const clickEvent = () => new MouseEvent("click", { cancelable: true });
+const preventNavigation = (e: Event): void => e.preventDefault();
+
 const click = (id: string): void => {
-  document.getElementById(id)?.dispatchEvent(new MouseEvent("click"));
+  document.getElementById(id)?.dispatchEvent(clickEvent());
 };
 
 describe("setupAnalytics", () => {
+  beforeEach(() => {
+    document.addEventListener("click", preventNavigation, true);
+  });
+
   afterEach(() => {
+    document.removeEventListener("click", preventNavigation, true);
     event.mockClear();
     document.body.innerHTML = "";
   });
@@ -108,7 +118,7 @@ describe("setupAnalytics", () => {
     );
 
     // Act
-    links.forEach((a) => a.dispatchEvent(new MouseEvent("click")));
+    links.forEach((a) => a.dispatchEvent(clickEvent()));
 
     // Assert
     expect(links.length).toBeGreaterThan(0);

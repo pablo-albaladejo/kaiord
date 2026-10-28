@@ -1,0 +1,72 @@
+import { describe, expect, it } from "vitest";
+import catalogJson from "../public/.well-known/ai-catalog.json?raw";
+import skillsJson from "../public/.well-known/agent-skills/index.json?raw";
+
+type SkillEntry = { name: string; url: string; digest: string };
+type CatalogEntry = { url?: string; data?: unknown; identifier: string };
+
+const ORIGIN = "https://kaiord.com/";
+const HEX = 16;
+const PUBLISHED = import.meta.glob<string>("../public/.well-known/**/*", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
+const publishedText = (url: string) =>
+  PUBLISHED[`../public/${url.slice(ORIGIN.length)}`];
+
+const sha256 = async (text: string) => {
+  const bytes = new TextEncoder().encode(text);
+  const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+  return [...hash].map((b) => b.toString(HEX).padStart(2, "0")).join("");
+};
+
+const { skills } = JSON.parse(skillsJson) as { skills: SkillEntry[] };
+const { entries } = JSON.parse(catalogJson) as { entries: CatalogEntry[] };
+
+describe("well-known agent discovery documents", () => {
+  it("should pin each skill digest to the bytes that are published", async () => {
+    // Arrange
+    const published = skills.map((skill) => publishedText(skill.url) ?? "");
+
+    // Act
+    const digests = await Promise.all(published.map(sha256));
+
+    // Assert
+    expect(skills.length).toBeGreaterThan(0);
+    expect(skills.map((skill) => skill.digest)).toEqual(
+      digests.map((hex) => `sha256:${hex}`)
+    );
+  });
+
+  it("should give every catalog entry exactly one of url or data", () => {
+    // Arrange
+    const hasUrl = (entry: CatalogEntry) => entry.url !== undefined;
+
+    // Act
+    const invalid = entries.filter(
+      (entry) => hasUrl(entry) === (entry.data !== undefined)
+    );
+
+    // Assert
+    expect(entries.length).toBeGreaterThan(0);
+    expect(invalid.map((entry) => entry.identifier)).toEqual([]);
+  });
+
+  it("should only point well-known urls on this origin at published files", () => {
+    // Arrange
+    const urls = [
+      ...entries.map((e) => e.url ?? ""),
+      ...skills.map((s) => s.url),
+    ];
+
+    // Act
+    const missing = urls
+      .filter((url) => url.startsWith(`${ORIGIN}.well-known/`))
+      .filter((url) => publishedText(url) === undefined);
+
+    // Assert
+    expect(missing).toEqual([]);
+  });
+});
