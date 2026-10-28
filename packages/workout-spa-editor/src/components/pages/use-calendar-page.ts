@@ -19,6 +19,7 @@ import { useAutoMatchSuggestions } from "../../hooks/use-auto-match-suggestions"
 import { useCalendarExecuted } from "../../hooks/use-calendar-executed";
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
+import { useCoachingDescriptionPrefetch } from "../../hooks/use-coaching-description-prefetch";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { NO_CROSS_WEEK } from "../../hooks/use-matched-sessions-cross-week";
 import { useSetCalendarView } from "../../hooks/use-set-calendar-view";
@@ -64,6 +65,12 @@ export function useCalendarPage(): CalendarPageState {
     matched: rawMatched ?? [],
     crossWeek: matchedWeek?.crossWeek ?? NO_CROSS_WEEK,
   });
+  useCoachingDescriptionPrefetch(
+    profileId,
+    buckets.soloPlansByDay,
+    coaching.syncSources,
+    coaching.expandActivity
+  );
   const onViewChange = useSetCalendarView(profileId);
 
   if (!s.data.isValidWeek) return { state: "redirect" };
