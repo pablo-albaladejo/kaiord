@@ -165,4 +165,46 @@ describe("CoachingActivityCard", () => {
       screen.queryByTestId("lifecycle-badge-executedAndMatched")
     ).not.toBeInTheDocument();
   });
+
+  it("should draw the profile estimated from the coach's text, titled as an estimate", () => {
+    // Arrange
+    const activity = {
+      ...baseActivity,
+      description: "Rodaje 20' z1, 3x(5' z4 + 2' z1), 10' z1",
+    };
+
+    // Act
+    render(<CoachingActivityCard activity={activity} />);
+
+    // Assert
+    const bar = screen.getByTestId("coaching-card-estimated-profile");
+    expect(bar).toHaveAttribute("title", "Estimated from coach text");
+    const intervals = 3;
+    expect(bar.querySelectorAll("[data-zone='4']")).toHaveLength(intervals);
+  });
+
+  it("should draw no profile when the coach's text has not been read yet", () => {
+    // Arrange
+
+    // Act
+    render(<CoachingActivityCard activity={baseActivity} />);
+
+    // Assert
+    expect(
+      screen.queryByTestId("coaching-card-estimated-profile")
+    ).not.toBeInTheDocument();
+  });
+
+  it("should draw no profile when the coach's text names no zone", () => {
+    // Arrange
+    const activity = { ...baseActivity, description: "Descanso" };
+
+    // Act
+    render(<CoachingActivityCard activity={activity} />);
+
+    // Assert
+    expect(
+      screen.queryByTestId("coaching-card-estimated-profile")
+    ).not.toBeInTheDocument();
+  });
 });

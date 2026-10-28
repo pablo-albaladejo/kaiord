@@ -59,6 +59,7 @@ export function renderDayCards(buckets: DayCardBuckets) {
           key={a.id}
           activity={a}
           onClick={buckets.onActivityClick}
+          view={buckets.view}
         />
       ))}
       {buckets.soloActuals.map((w) =>
