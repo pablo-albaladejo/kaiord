@@ -486,6 +486,39 @@ export const REQUIRED_RULES = [
     re: /custom:user_id/,
   },
 
+  // ---------------------- remote MCP endpoint ----------------------
+  // Whole-file rules: the section-rule floor ratchet is per bridge, and
+  // each phrase below exists only in the endpoint section, so deleting
+  // that section fails every one of them.
+  {
+    label: "Remote MCP endpoint: structured workouts only, rejects not kept",
+    re: /accepts only structured workout definitions[\s\S]*?decoded in memory only to learn its type, and is neither stored, logged nor returned/i,
+  },
+  {
+    label: "Remote MCP endpoint: workout content may carry personal data",
+    re: /name, free-text notes, heart-rate targets and device metadata[\s\S]*?processed in transit, and may contain personal information/i,
+  },
+  {
+    label: "Remote MCP endpoint: content never stored or logged",
+    re: /processed only to answer that request and is never stored or logged/i,
+  },
+  {
+    label: "Remote MCP endpoint: client IP transient, not stored",
+    re: /client IP address is used transiently by the rate limiter and is not stored by Kaiord/i,
+  },
+  {
+    label: "Remote MCP endpoint: Cloudflare named as provider",
+    re: /travel through Cloudflare's network, which is the endpoint's network and hosting provider/i,
+  },
+  {
+    label: "Remote MCP endpoint: no Garmin or health tools",
+    re: /endpoint offers no Garmin or health tools/i,
+  },
+  {
+    label: "Regulatory statement covers remote MCP in-transit data",
+    re: /no personal data is retained server-side[\s\S]*?in transit only, and retains neither/i,
+  },
+
   // -------------------------- whole file --------------------------
   {
     label: "Kaiord origin disclosed",

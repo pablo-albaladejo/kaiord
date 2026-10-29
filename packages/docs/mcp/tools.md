@@ -41,6 +41,40 @@ Add to your MCP configuration:
 }
 ```
 
+### Remote endpoint
+
+Kaiord also runs a hosted, stateless MCP endpoint at `https://kaiord.com/mcp`
+(MCP over HTTP, no install, no account):
+
+```json
+{
+  "kaiord": {
+    "type": "http",
+    "url": "https://kaiord.com/mcp"
+  }
+}
+```
+
+The remote server is a subset of the local one:
+
+- **Eight tools**: `kaiord_get_format_spec`, `kaiord_list_formats`,
+  `kaiord_convert`, `kaiord_validate`, `kaiord_round_trip_validate`,
+  `kaiord_inspect`, `kaiord_extract_workout` and `kaiord_diff`. They take
+  inline content only: text as is, FIT as base64. File path parameters are
+  rejected, and FIT output comes back as base64.
+- **Structured workouts only**: recorded activities, courses and health files
+  are rejected.
+- **Size limit**: a request body may be at most 65,536 bytes, and carries one
+  call. JSON-RPC batches are rejected.
+- **ZWO without XSD**: ZWO input is checked for well-formedness only. It is not
+  validated against the ZWO XSD, which needs Java.
+- **Local-only tools**: the Garmin Connect tools (`kaiord_garmin_*`) and the
+  health tools need your own machine and accounts, so they exist only in the
+  local `@kaiord/mcp` server. The remote server has no prompts.
+
+The endpoint stores and logs nothing; see the
+[privacy policy](/legal/privacy-policy#remote-mcp-endpoint).
+
 ## Tools
 
 ### kaiord_convert

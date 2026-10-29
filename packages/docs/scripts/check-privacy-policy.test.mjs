@@ -628,6 +628,57 @@ test("every section-anchored rule is exercised by a solo case", () => {
   assert.deepEqual(uncovered, []);
 });
 
+// ---------- remote MCP endpoint disclosure ----------
+
+const REMOTE_MCP = "Remote MCP Endpoint";
+const REMOTE_MCP_SOLO_CASES = [
+  ["accepts only structured", "structured workouts only"],
+  ["free-text notes", "workout content may carry personal data"],
+  ["never stored or logged", "content never stored or logged"],
+  ["used transiently by the rate limiter", "client IP transient"],
+  ["network and hosting provider", "Cloudflare named as provider"],
+  ["offers no Garmin or health tools", "no Garmin or health tools"],
+];
+
+for (const [find, label] of REMOTE_MCP_SOLO_CASES) {
+  test(`"Remote MCP endpoint: ${label}" fails alone when its disclosure is removed`, () => {
+    const src = mutateInSection(POLICY, REMOTE_MCP, find, "redacted");
+    const v = checkPolicy(src);
+
+    assert.equal(v.length, 1, v.join(" | ") || "(none)");
+    assert.match(v[0], new RegExp(`Remote MCP endpoint: ${label}`));
+  });
+}
+
+test("deleting the remote MCP endpoint section fails every endpoint rule", () => {
+  const src = dropSection(POLICY, REMOTE_MCP);
+  const endpointRules = REQUIRED_RULES.filter((r) =>
+    r.label.startsWith("Remote MCP endpoint:")
+  );
+
+  const v = checkPolicy(src);
+
+  assert.equal(endpointRules.length, REMOTE_MCP_SOLO_CASES.length);
+  for (const rule of endpointRules) {
+    assert.ok(v.includes(rule.label), `"${rule.label}" did not fire`);
+  }
+});
+
+test("the regulatory statement must cover the endpoint's in-transit data", () => {
+  const src = mutateInSection(
+    POLICY,
+    "Regulatory Compliance",
+    "and retains neither",
+    "and keeps it"
+  );
+
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, [
+    "Regulatory statement covers remote MCP in-transit data",
+  ]);
+});
+
 // ---------- a section body gutted to one line is flagged ----------
 
 const GUTTED_CASES = [

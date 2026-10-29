@@ -242,6 +242,20 @@ describe("check-site-links", () => {
     );
   });
 
+  it("ends a link at an escaped quote", () => {
+    assert.deepEqual(
+      linksIn("{&quot;url&quot;:&quot;https://kaiord.com/mcp&quot;}"),
+      ["https://kaiord.com/mcp"]
+    );
+  });
+
+  it("accepts the Worker-routed /mcp endpoint, which no dist holds", () => {
+    addDocsPage("remote.html", "https://kaiord.com/mcp");
+    addDocsPage("near.html", "https://kaiord.com/mcp/other");
+
+    assert.deepEqual(reasons(), ["no page is served at /mcp/other"]);
+  });
+
   it("fails on a missing dist only when REQUIRE_DOCS_DIST=1", () => {
     const args = [SCRIPT, "--merged", join(dir, "nope")];
     const env = { ...process.env, REQUIRE_DOCS_DIST: "" };
