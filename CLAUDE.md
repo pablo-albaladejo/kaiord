@@ -112,9 +112,11 @@ Claude Code 2.1.304).
 | `security-workflows` | Weakening `security.yml`, `codeql.yml` or any required check, and `gh workflow disable/enable`.                                                                                                                                                                                                                                                                   |
 | `athlete-data`       | Writing to or deleting from a real athlete's account: `kaiord garmin push`, and the `kaiord_garmin_push` MCP tool.                                                                                                                                                                                                                                                |
 
-Kaiord runs no backend of its own. User data lives in the browser and in the
-athlete's third-party accounts, which is why the athlete-data class covers
-Garmin Connect.
+Kaiord runs no backend that stores user data. The one server it runs is the
+stateless remote MCP endpoint (`kaiord.com/mcp`), which converts workouts in
+transit and keeps nothing. User data lives in the browser and in the athlete's
+third-party accounts, which is why the athlete-data class covers Garmin
+Connect.
 
 **Enforced by code** (`.claude/settings.json`, spec `agent-guardrails`). These rules are not advice to follow:
 

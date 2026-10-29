@@ -7,10 +7,19 @@ import {
 } from "@kaiord/core/test-utils";
 import { describe, expect, it } from "vitest";
 
-import { createEncoder } from "./create-encoder";
+import { createEncoder, outputStreamOptionsFor } from "./create-encoder";
 import { createGarminFitSdkWriter } from "./garmin-fitsdk";
 
 const SIXTEEN_MIB = 16_777_216;
+const GROWTH_STEP = 524_288;
+const CAPS = [
+  1,
+  100,
+  GROWTH_STEP,
+  GROWTH_STEP + 1,
+  2 * GROWTH_STEP - 1,
+  SIXTEEN_MIB,
+];
 
 const buildWorkoutKrd = () =>
   buildKRD.build({
@@ -102,4 +111,21 @@ describe("createEncoder", () => {
       Encoder.supportsOutputStreamOptions = original;
     }
   });
+
+  it.each(CAPS)(
+    "should make the buffer growth land exactly on a %i-byte cap",
+    (cap) => {
+      // Arrange
+      const step = GROWTH_STEP;
+
+      // Act
+      const options = outputStreamOptionsFor(cap);
+
+      // Assert
+      expect(options.initialByteLength).toBeGreaterThan(0);
+      expect(options.initialByteLength).toBeLessThanOrEqual(cap);
+      expect((cap - options.initialByteLength) % step).toBe(0);
+      expect(options.maxByteLength).toBe(cap);
+    }
+  );
 });
