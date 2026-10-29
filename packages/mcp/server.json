@@ -17,5 +17,11 @@
         "type": "stdio"
       }
     }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://kaiord.com/mcp"
+    }
   ]
 }
