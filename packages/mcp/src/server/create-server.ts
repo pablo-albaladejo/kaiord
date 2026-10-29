@@ -37,7 +37,7 @@ export const createServer = (options: CreateServerOptions = {}): McpServer => {
     { name: SERVER_NAME, version },
     { instructions: remote ? REMOTE_INSTRUCTIONS : LOCAL_INSTRUCTIONS }
   );
-  const logger = createStderrLogger();
+  const logger = options.logger ?? createStderrLogger();
   const context: ToolContext = {
     logger,
     remote,
