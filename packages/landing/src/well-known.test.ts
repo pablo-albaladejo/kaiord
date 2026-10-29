@@ -1,10 +1,24 @@
 import { describe, expect, it } from "vitest";
 import catalogJson from "../public/.well-known/ai-catalog.json?raw";
 import skillsJson from "../public/.well-known/agent-skills/index.json?raw";
+import cardJson from "../public/.well-known/mcp/server-card.json?raw";
 
 type SkillEntry = { name: string; url: string; digest: string };
-type CatalogEntry = { url?: string; data?: unknown; identifier: string };
+type CatalogEntry = {
+  url?: string;
+  data?: unknown;
+  identifier: string;
+  type?: string;
+};
+type ServerCard = {
+  version: string;
+  remotes: { url: string }[];
+  serverInfo: { version: string };
+  transport: { endpoint: string };
+  capabilities: Record<string, unknown>;
+};
 
+const MCP_ENDPOINT = "https://kaiord.com/mcp";
 const ORIGIN = "https://kaiord.com/";
 const HEX = 16;
 const PUBLISHED = import.meta.glob<string>("../public/.well-known/**/*", {
@@ -68,5 +82,32 @@ describe("well-known agent discovery documents", () => {
 
     // Assert
     expect(missing).toEqual([]);
+  });
+
+  it("should point every server card field at the one remote endpoint", () => {
+    // Arrange
+    const card = JSON.parse(cardJson) as ServerCard;
+
+    // Act
+    const endpoints = [
+      ...card.remotes.map((remote) => remote.url),
+      card.transport.endpoint,
+    ];
+
+    // Assert
+    expect(endpoints).toEqual([MCP_ENDPOINT, MCP_ENDPOINT]);
+    expect(card.serverInfo.version).toBe(card.version);
+    expect(card.capabilities).toHaveProperty("tools");
+  });
+
+  it("should list the server card in the AI catalog", () => {
+    // Arrange
+    const cardUrl = `${ORIGIN}.well-known/mcp/server-card.json`;
+
+    // Act
+    const entry = entries.find((e) => e.url === cardUrl);
+
+    // Assert
+    expect(entry?.type).toBe("application/mcp-server-card+json");
   });
 });

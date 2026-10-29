@@ -113,21 +113,21 @@
 
 ## 5. Deploy (manual, after PR-1 to PR-4 are merged)
 
-- [ ] 5.1 With Pablo's go-ahead, deploy `kaiord-mcp` with
+- [x] 5.1 With Pablo's go-ahead, deploy `kaiord-mcp` with
       `npx wrangler@4 deploy`.
 - [ ] 5.2 Add the WAF rate-limiting rule on `/mcp` (always, not only as a
       fallback), and set the `kaiord-agent-edge` route to fail open.
-- [ ] 5.3 Run the smoke script against `https://kaiord.com/mcp`. It must pass
+- [x] 5.3 Run the smoke script against `https://kaiord.com/mcp`. It must pass
       before section 6 starts.
-- [ ] 5.4 Check that `kaiord-agent-edge` still serves `/` and the docs, so the
+- [x] 5.4 Check that `kaiord-agent-edge` still serves `/` and the docs, so the
       route precedence holds.
 
 ## 6. Discovery (PR-5, after 5.3 passes)
 
-- [ ] 6.1 Publish `/.well-known/mcp/server-card.json` (SEP-2127 draft shape).
+- [x] 6.1 Publish `/.well-known/mcp/server-card.json` (SEP-2127 draft shape).
       Extend the landing `well-known` test and the deploy-site `test -f`
       checks.
-- [ ] 6.2 Add the AI-catalog entry for the remote server.
+- [x] 6.2 Add the AI-catalog entry for the remote server.
 - [ ] 6.3 Add `remotes` to `packages/mcp/server.json`. Pablo then runs
       `mcp-publisher publish`.
 - [ ] 6.4 Enable DNSSEC on the Cloudflare zone. With Pablo's approval, add the
