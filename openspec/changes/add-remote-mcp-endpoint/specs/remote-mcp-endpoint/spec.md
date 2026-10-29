@@ -23,7 +23,7 @@ Kaiord SHALL serve MCP over stateless Streamable HTTP at `https://kaiord.com/mcp
 
 ### Requirement: The remote toolset is exactly the stateless tools
 
-The remote server SHALL register exactly these tools: `kaiord_list_formats`, `kaiord_get_format_spec`, `kaiord_convert`, `kaiord_validate`, `kaiord_inspect`, `kaiord_diff`, `kaiord_extract_workout` and `kaiord_round_trip_validate`. It SHALL NOT register any `kaiord_garmin_*` tool or any health tool. No remote tool schema SHALL advertise a file-path parameter (`input_file`, `output_file`, `file1`, `file2`). A tool added to the local server SHALL NOT appear remotely unless it is added to this list. The remote server SHALL register no prompt, SHALL register only the `krd-format-spec`, `krd-schema` and `supported-formats` resources, and its instructions text SHALL name no tool outside the list.
+The remote server SHALL register exactly these tools: `kaiord_list_formats`, `kaiord_get_format_spec`, `kaiord_convert`, `kaiord_validate`, `kaiord_inspect`, `kaiord_diff`, `kaiord_extract_workout` and `kaiord_round_trip_validate`. It SHALL NOT register any `kaiord_garmin_*` tool or any health tool. No remote tool schema SHALL advertise a file-path parameter (`input_file`, `output_file`, `file1`, `file2`), and a remote call that carries one SHALL fail with a tool error naming it, even when valid inline content is also present. A tool added to the local server SHALL NOT appear remotely unless it is added to this list. The remote server SHALL register no prompt, SHALL register only the `krd-format-spec`, `krd-schema` and `supported-formats` resources, and its instructions text SHALL name no tool outside the list.
 
 #### Scenario: Remote listing equals the allowlist
 
@@ -45,12 +45,17 @@ The remote server SHALL register exactly these tools: `kaiord_list_formats`, `ka
 #### Scenario: Paths are never read remotely
 
 - **WHEN** a remote `kaiord_convert` call includes `input_file` and no `input_content`
-- **THEN** the call SHALL fail for missing inline content
+- **THEN** the call SHALL fail with a tool error naming `input_file`
 - **AND** a spy on the file-reading helpers SHALL record no call
+
+#### Scenario: A path next to valid content is still rejected
+
+- **WHEN** a remote `kaiord_convert` call includes valid `input_content` and an `output_file`
+- **THEN** the call SHALL fail with a tool error naming `output_file` and SHALL NOT be converted
 
 ### Requirement: Remote tools accept structured workouts only
 
-Every remote tool that takes content SHALL decode it and SHALL reject, with a tool error naming the type, any document whose KRD `type` is not `structured_workout`. This SHALL apply to `recorded_activity`, `course` and every health type, in every input format. The local server SHALL keep accepting all types.
+Every remote tool that takes content SHALL decode it and SHALL accept only a document of KRD type `structured_workout` with no `sessions`, `laps`, `records` or `events`, and with no `extensions` namespace outside the remote workout allowlist (which SHALL NOT contain `health`, `course` or `course_points`). Any other document SHALL be rejected with a tool error naming the type or the offending field, and SHALL NOT be stored, logged or returned. This SHALL apply in every input format. The local server SHALL keep accepting all types.
 
 #### Scenario: A health FIT file is rejected remotely
 
@@ -62,6 +67,16 @@ Every remote tool that takes content SHALL decode it and SHALL reject, with a to
 
 - **WHEN** a remote `kaiord_convert` call sends a FIT activity with heart-rate records
 - **THEN** the call SHALL fail with an error naming `recorded_activity`
+
+#### Scenario: A workout label does not admit recorded data
+
+- **WHEN** a remote call sends a KRD with `type: "structured_workout"` that also carries `records` with positions and heart rate
+- **THEN** the call SHALL fail with an error naming `records`
+
+#### Scenario: A workout label does not admit health extensions
+
+- **WHEN** a remote call sends a KRD with `type: "structured_workout"` and an `extensions.health` payload
+- **THEN** the call SHALL fail with an error naming `extensions.health`
 
 #### Scenario: The local server is unchanged
 
@@ -91,7 +106,7 @@ Every remote tool SHALL accept its input as inline content, base64 for FIT. A FI
 
 ### Requirement: Request size and rate are bounded
 
-The endpoint SHALL reject a request body larger than 65,536 bytes with `413` before parsing it, whether or not `content-length` is present or truthful. It SHALL reject a JSON-RPC batch (an array body) with `400`. The endpoint SHALL rate-limit requests per client IP and SHALL answer an over-limit request with `429`.
+The endpoint SHALL reject a request body larger than 65,536 bytes with `413` before parsing it, whether or not `content-length` is present or truthful. It SHALL reject a JSON-RPC batch (an array body) with `400`. The endpoint SHALL rate-limit requests per client IP and SHALL answer an over-limit request with `429`. Rate limiting SHALL include a control that runs before the Worker is invoked, so throttled traffic does not consume the account's shared daily Worker quota.
 
 #### Scenario: Oversized body is rejected
 

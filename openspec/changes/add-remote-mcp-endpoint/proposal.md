@@ -38,10 +38,17 @@ feasibility questions this proposal depends on:
   also has its own instructions text, prompt list and resource list, so
   nothing it advertises points at a local-only tool or a file path.
 - **Structured workouts only.** The remote tools accept only documents that
-  decode to KRD type `structured_workout`. A recorded activity (heart rate,
-  GPS), a course or any of the six health types is rejected before any tool
-  logic runs. A workout definition carries no personal data, which is what
-  lets the endpoint stay out of personal-data processing.
+  decode to KRD type `structured_workout` with no recorded data (`sessions`,
+  `laps`, `records`, `events`) and no health or course extensions. A recorded
+  activity (heart rate, GPS), a course or any of the six health types is
+  decoded in memory, rejected, and not stored. A workout's free-text fields
+  and device metadata are still processed in transit, and the privacy policy
+  says so.
+- **Paths rejected.** A remote call carrying `input_file`, `output_file`,
+  `file1` or `file2` fails instead of having the key silently stripped.
+- **Quota.** The WAF rate rule throttles `/mcp` before any Worker runs, so
+  abuse cannot drain the account-wide daily quota the edge Worker shares;
+  the edge Worker's route fails open.
 - **Excluded from remote.** The `kaiord_garmin_*` tools, which would hold an
   athlete's Garmin session and write to their account, and the five health
   tools. Both stay local-only. Excluding the tools is not enough on its own:

@@ -38,10 +38,16 @@
       `createServer()` keeps today's behaviour. The `fitWriter` factory is
       used by both the format registry and `kaiord_round_trip_validate`.
       Green.
-- [ ] 2.2b Remote toolset only: decode content, then reject any KRD `type`
-      other than `structured_workout`, with a tool error naming it. Test a
-      FIT sleep record, a FIT activity and a TCX activity remotely, and the
-      same sleep record locally (still accepted).
+- [ ] 2.2b Remote toolset only: decode content, then accept only a
+      `structured_workout` with no `sessions`/`laps`/`records`/`events` and
+      only allowlisted `extensions` namespaces (pin the allowlist from what
+      the workout adapters emit), with a tool error naming the type or
+      field. Test a FIT sleep record, a FIT activity, a TCX activity, a
+      workout-labelled KRD with `records`, and one with `extensions.health`
+      remotely, and the same sleep record locally (still accepted).
+- [ ] 2.2c Remote toolset only: a `tools/call` whose arguments carry
+      `input_file`, `output_file`, `file1` or `file2` fails with a tool error
+      naming it, also when valid inline content is present.
 - [ ] 2.3 `kaiord_inspect` and `kaiord_round_trip_validate` accept
       `input_content` (base64 for FIT). Cover path/content exclusivity.
 - [ ] 2.4 `kaiord_diff` accepts `content1`/`format1` and `content2`/`format2`.
@@ -75,7 +81,9 @@
     rule's period is believed fixed at 10 s: confirm, then use 10/10 s).
 
   Either way the handler takes the limiter as an injected `RateLimiter`, and
-  the `429` test uses a fake.
+  the `429` test uses a fake. Also confirm the Free-plan WAF rate rule's
+  limits: it is the primary control because it runs before the Worker and
+  so protects the account-wide daily quota shared with `kaiord-agent-edge`.
 
 - [ ] 3.4 Log only the error class and tool name. Add a test that a failing
       tool call logs no argument content.
@@ -107,7 +115,8 @@
 
 - [ ] 5.1 With Pablo's go-ahead, deploy `kaiord-mcp` with
       `npx wrangler@4 deploy`.
-- [ ] 5.2 If task 3.3 fell back, add the WAF rate-limiting rule on `/mcp`.
+- [ ] 5.2 Add the WAF rate-limiting rule on `/mcp` (always, not only as a
+      fallback), and set the `kaiord-agent-edge` route to fail open.
 - [ ] 5.3 Run the smoke script against `https://kaiord.com/mcp`. It must pass
       before section 6 starts.
 - [ ] 5.4 Check that `kaiord-agent-edge` still serves `/` and the docs, so the

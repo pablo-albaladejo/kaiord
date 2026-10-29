@@ -86,10 +86,13 @@ unchanged.
   tools, with schemas that omit `input_file`, `output_file`, `file1` and
   `file2`. So `tools/list` never advertises a parameter the endpoint cannot
   honour.
-- **Not a runtime check:** a remote tool that received a path anyway would
-  still fail. The SDK's object schema strips the unknown key, so the path
-  never reaches the handler, and the call fails for missing inline content.
-  No disk read is ever attempted.
+- **Paths are rejected, not stripped:** the SDK's object schema would strip
+  an unknown `input_file` silently, so a call sending a path alongside valid
+  `input_content` would succeed and an `output_file` would be ignored. The
+  Worker therefore inspects `tools/call` arguments before dispatch and
+  answers any call that carries `input_file`, `output_file`, `file1` or
+  `file2` with a tool error naming the parameter. No disk read is ever
+  attempted.
 
 ### D3. Inline content for every remote tool
 
@@ -172,30 +175,48 @@ and the Worker's logger is the only one used.
 - **Rate-limit caveat:** the binding counts per Cloudflare location and is
   eventually consistent, so it slows abuse rather than enforcing an exact
   ceiling.
-- **Rate-limit fallback:** the binding's documentation does not say whether
-  it exists on the Free plan, so task 3.3 checks it first. If it is
-  unavailable, a single Cloudflare WAF rate-limiting rule on `/mcp` replaces
-  it. The Free plan includes one rule, and as far as we know its counting
-  period is fixed at 10 s, so the fallback is 10 requests per 10 s. Task 3.3
-  confirms both before either is wired.
+- **Two layers:** a Cloudflare WAF rate-limiting rule on `/mcp` is always
+  created, because it runs before the Worker (see the daily quota below). The
+  Free plan includes one rule, and as far as we know its counting period is
+  fixed at 10 s, so it is 10 requests per 10 s. The binding is the second,
+  finer layer, wired only if task 3.3 finds it on the Free plan; its
+  documentation does not say.
 - **Ports:** the limiter and the body reader sit behind two small types,
   `RateLimiter` (`limit(key) → Promise<{ success: boolean }>`, the binding's
   own shape) and the handler's injected dependencies. Tests pass fakes, so the
   `429` scenario runs without Cloudflare.
-- **Daily quota:** the Free plan allows 100,000 requests a day. Past that, the
-  route fails closed with Error 1027. That is acceptable for an anonymous
-  endpoint.
+- **Daily quota is account-wide:** the Free plan's 100,000 requests a day
+  are shared by every Worker on the account, `kaiord-agent-edge` included,
+  and a request the binding rejects has still invoked the Worker. So the
+  binding alone cannot protect the edge Worker. Two measures:
+  - the Cloudflare WAF rate-limiting rule on `/mcp` runs before any Worker
+    is invoked, so throttled traffic consumes no Worker quota. It is the
+    primary control; the binding is a second, finer one;
+  - the `kaiord-agent-edge` route is set to fail open, so if the quota is
+    exhausted the site is still served from GitHub Pages, without the Link
+    headers and Markdown negotiation, while `/mcp` fails closed with Error 1027.
+
+  Task 3.3 confirms the WAF rule's limits on Free; task 5.2 creates it.
 
 ### D7. Structured workouts only
 
-- **Rule:** every remote tool that takes content decodes it first and rejects
-  anything whose KRD `type` is not `structured_workout`, with a tool error
-  naming the type. That covers `recorded_activity` (heart rate, GPS),
-  `course`, and the six health types.
+- **Rule:** every remote tool that takes content decodes it first and accepts
+  only a document of KRD type `structured_workout` with no `sessions`, `laps`, `records` or `events`, and with no `extensions` namespace outside an allowlist of workout namespaces (`structured_workout` plus any the workout adapters emit, pinned by a test; never `health`, `course` or `course_points`). Anything else gets a tool error naming the type or the
+  offending field. That covers `recorded_activity` (heart rate, GPS),
+  `course`, the six health types, and a document labelled
+  `structured_workout` that still carries records or health extensions.
+- **Decoding comes first:** the type is only known after decoding, so a
+  rejected file is decoded in memory before it is refused. It is not stored,
+  logged or returned.
 - **Why:** dropping the health tools does not keep health data out.
   `kaiord_convert` and `kaiord_inspect` read any FIT file, and the FIT reader
-  maps sleep, HRV, weight and stress messages. A workout definition carries no
-  personal data, so this rule is what makes the privacy statement true.
+  maps sleep, HRV, weight and stress messages. The rule keeps recorded and
+  health data out of what the endpoint processes and returns.
+- **What a workout can still carry:** a workout has free-text `name` and
+  `notes`, heart-rate targets, and metadata such as a device serial number.
+  A caller can put personal content there. The endpoint does not try to
+  detect it; the privacy policy says so instead of claiming no personal data
+  is processed.
 - **Cost:** it also removes the CPU risk the PoC found. Activity files were
   the only inputs near the 10 ms budget; structured workouts are a few hundred
   bytes.
