@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+  "name": "io.github.pablo-albaladejo/kaiord",
+  "title": "Kaiord",
+  "version": "10.4.0",
+  "description": "Stateless remote MCP endpoint that converts, validates, inspects and diffs structured workouts (FIT, TCX, ZWO, Garmin Connect JSON). Nothing is stored. Garmin account and health tools stay in the local npm server.",
+  "websiteUrl": "https://kaiord.com/docs/mcp/tools",
+  "repository": {
+    "url": "https://github.com/pablo-albaladejo/kaiord",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://kaiord.com/mcp"
+    }
+  ],
+  "serverInfo": {
+    "name": "kaiord-mcp",
+    "version": "10.4.0"
+  },
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "https://kaiord.com/mcp"
+  },
+  "capabilities": {
+    "tools": {},
+    "resources": {}
+  }
+}

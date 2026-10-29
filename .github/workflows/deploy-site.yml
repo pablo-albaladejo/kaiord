@@ -149,6 +149,7 @@ jobs:
           test -f merged-dist/docs/llms-full.txt   || { echo "❌ Missing docs/llms-full.txt"; exit 1; }
           test -f merged-dist/.well-known/ai-catalog.json || { echo "❌ Missing .well-known/ai-catalog.json"; exit 1; }
           test -f merged-dist/.well-known/agent-skills/index.json || { echo "❌ Missing .well-known/agent-skills/index.json"; exit 1; }
+          test -f merged-dist/.well-known/mcp/server-card.json || { echo "❌ Missing .well-known/mcp/server-card.json"; exit 1; }
           test -f merged-dist/docs/fonts/inter-var-latin.woff2 || { echo "❌ Missing docs/fonts/inter-var-latin.woff2"; exit 1; }
           # IndexNow proves ownership by fetching /<key>.txt, whose body is the key.
           KEY=$(node scripts/geo/indexnow.mjs key)
