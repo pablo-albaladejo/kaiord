@@ -12,7 +12,14 @@ import { createGarminFitSdkWriter } from "./garmin-fitsdk";
 
 const SIXTEEN_MIB = 16_777_216;
 const GROWTH_STEP = 524_288;
-const CAPS = [1, 100, GROWTH_STEP, GROWTH_STEP + 1, 2 * GROWTH_STEP - 1, SIXTEEN_MIB];
+const CAPS = [
+  1,
+  100,
+  GROWTH_STEP,
+  GROWTH_STEP + 1,
+  2 * GROWTH_STEP - 1,
+  SIXTEEN_MIB,
+];
 
 const buildWorkoutKrd = () =>
   buildKRD.build({
