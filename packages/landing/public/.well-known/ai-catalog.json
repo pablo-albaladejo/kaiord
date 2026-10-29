@@ -18,6 +18,17 @@
       ]
     },
     {
+      "identifier": "urn:air:kaiord.com:server:kaiord-mcp-remote",
+      "displayName": "Kaiord remote MCP endpoint",
+      "type": "application/mcp-server-card+json",
+      "url": "https://kaiord.com/.well-known/mcp/server-card.json",
+      "representativeQueries": [
+        "remote MCP server that converts FIT workouts to Zwift ZWO",
+        "hosted MCP endpoint for validating structured workout files",
+        "MCP over HTTP with no install for workout file conversion"
+      ]
+    },
+    {
       "identifier": "urn:air:kaiord.com:skills:index",
       "displayName": "Kaiord agent skills",
       "type": "application/agent-skills+json",

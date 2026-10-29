@@ -124,10 +124,10 @@
 
 ## 6. Discovery (PR-5, after 5.3 passes)
 
-- [ ] 6.1 Publish `/.well-known/mcp/server-card.json` (SEP-2127 draft shape).
+- [x] 6.1 Publish `/.well-known/mcp/server-card.json` (SEP-2127 draft shape).
       Extend the landing `well-known` test and the deploy-site `test -f`
       checks.
-- [ ] 6.2 Add the AI-catalog entry for the remote server.
+- [x] 6.2 Add the AI-catalog entry for the remote server.
 - [ ] 6.3 Add `remotes` to `packages/mcp/server.json`. Pablo then runs
       `mcp-publisher publish`.
 - [ ] 6.4 Enable DNSSEC on the Cloudflare zone. With Pablo's approval, add the
