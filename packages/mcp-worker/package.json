@@ -1,0 +1,33 @@
+{
+  "name": "@kaiord/mcp-worker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Cloudflare Worker serving the stateless Kaiord MCP tools at kaiord.com/mcp",
+  "type": "module",
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit && eslint . && prettier --check src",
+    "lint:fix": "eslint . --fix && prettier --write src",
+    "smoke": "node scripts/smoke.mjs",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@kaiord/mcp": "workspace:^",
+    "@modelcontextprotocol/sdk": "^1.32.1"
+  },
+  "devDependencies": {
+    "@kaiord/fit": "workspace:^",
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.155.0"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

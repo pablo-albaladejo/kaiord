@@ -64,6 +64,9 @@ export const PACKAGE_DEPS = {
     "@kaiord/garmin",
     "@kaiord/garmin-connect",
   ],
+  // Private Cloudflare Worker: the remote transport for @kaiord/mcp's server.
+  // @kaiord/fit is a devDependency, used to decode FIT output in tests.
+  "mcp-worker": ["@kaiord/mcp", "@kaiord/fit"],
   cli: [
     "@kaiord/core",
     "@kaiord/fit",
