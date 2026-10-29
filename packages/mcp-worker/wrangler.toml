@@ -48,12 +48,12 @@ enabled = false
 
 # No KV, D1, R2 or Durable Object bindings: the endpoint stores nothing.
 
-# Per-IP rate limit, 60 requests per 60 s (D6). Task 3.3 decides whether the
-# Rate Limiting binding exists on the Workers Free plan. If it does, uncomment
-# this block; the handler reads MCP_RATE_LIMITER when bound and answers 429
-# over the limit. Without it the Worker never answers 429 and the WAF rule on
-# /mcp (task 5.2) is the only rate control.
-# [[ratelimits]]
-# name = "MCP_RATE_LIMITER"
-# namespace_id = "1001"
-# simple = { limit = 60, period = 60 }
+# Per-IP rate limit, 60 requests per 60 s (D6); the handler answers 429 over
+# it. The binding exists on Workers Free (task 3.3). Its counters are
+# per-location and eventually consistent, so a concurrent burst can pass it:
+# the WAF rule on /mcp (task 5.2), which runs before the Worker, stays the
+# primary control.
+[[ratelimits]]
+name = "MCP_RATE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }

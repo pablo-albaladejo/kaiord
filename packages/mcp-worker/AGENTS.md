@@ -15,9 +15,12 @@ OpenSpec change: `add-remote-mcp-endpoint` (design D1, D6, D8, D9).
 
 - `wrangler.toml` — Worker `kaiord-mcp`, route `kaiord.com/mcp`,
   `nodejs_compat`, pinned `compatibility_date`, every log and trace off, no
-  storage bindings, the `.md` text-module rule, and the commented
-  `MCP_RATE_LIMITER` binding (task 3.3 decides it).
+  storage bindings, the `.md` text-module rule, and the `MCP_RATE_LIMITER`
+  binding (60 per 60 s per IP).
 - `src/worker.ts` — Worker entry; passes the optional rate-limit binding in.
+- `src/load-at-startup.ts` — the entry's first import. It initializes zod
+  and the format adapters at isolate startup: without it the bundle fails to
+  load in workerd, and a cold adapter spends a request's 10 ms CPU budget.
 - `src/handler.ts` — `POST /mcp` only (405 with `Allow: POST`, 404 elsewhere),
   rate limit (429), bounded body (413), then one JSON-RPC message.
 - `src/read-bounded-body.ts` — streams the body and stops past 65,536 bytes;
@@ -54,10 +57,14 @@ OpenSpec change: `add-remote-mcp-endpoint` (design D1, D6, D8, D9).
 - `src/wrangler-config.test.ts` pins logs off, no storage, the route and
   `nodejs_compat`.
 - `scripts/smoke.test.mjs` runs under `pnpm test:scripts`.
+- `test/workerd-startup.test.mjs` (`pnpm test:workerd`, part of `test`) boots
+  the real bundle in local workerd. The Vitest suites never see the bundle,
+  so a module-load crash passes them.
 
 ## Dependencies
 
 - `@kaiord/mcp` (`createServer`), `@modelcontextprotocol/sdk`
   (`WebStandardStreamableHTTPServerTransport`).
-- Dev: `wrangler@4`, `@kaiord/fit` (decodes FIT output in tests and the smoke
-  script).
+- `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` and `zod`,
+  imported only by `src/load-at-startup.ts`.
+- Dev: `wrangler@4`.

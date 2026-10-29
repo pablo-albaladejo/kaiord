@@ -41,7 +41,8 @@ types, schemas, ports, and use cases; every other package is an outer adapter
   `ai/`) depend on `@kaiord/core` only. Applications (`workout-spa-editor/`,
   `landing/`, `docs/`, `garmin-bridge/`, `train2go-bridge/`,
   `whoop-bridge/`) compose adapter packages. `mcp-worker/` is a second
-  transport for `mcp/`'s server and depends on `@kaiord/mcp` only.
+  transport for `mcp/`'s server; besides `@kaiord/mcp` it imports the format
+  adapters only to initialize them at isolate startup.
 - **Never import upward**: a format adapter MUST NOT import the SPA editor;
   `core/` MUST NOT import any adapter. `eslint-plugin-boundaries` and
   `dependency-cruiser` enforce this — failures are lint errors.

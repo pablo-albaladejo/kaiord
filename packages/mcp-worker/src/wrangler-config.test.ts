@@ -99,15 +99,16 @@ describe("wrangler.toml", () => {
     expect(main).toBe('"src/worker.ts"');
   });
 
-  it("should leave the rate-limit binding to task 3.3, commented out", () => {
+  it("should bind the per-IP rate limiter at 60 requests per 60 s", () => {
     // Arrange
-    const binding = "MCP_RATE_LIMITER";
+    const binding = 'name = "MCP_RATE_LIMITER"';
 
     // Act
-    const commented = raw.includes(`# name = "${binding}"`);
+    const limits = active.slice(active.indexOf("[[ratelimits]]"));
 
     // Assert
-    expect(commented).toBe(true);
-    expect(active).not.toContain(binding);
+    expect(active).toContain("[[ratelimits]]");
+    expect(limits).toContain(binding);
+    expect(limits).toContain("simple = { limit = 60, period = 60 }");
   });
 });

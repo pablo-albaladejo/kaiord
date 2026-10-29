@@ -74,7 +74,7 @@
   - a 65,536-byte body does not;
   - a batch array returns `400` and runs no tool;
   - two requests get different server instances and no `mcp-session-id`.
-- [ ] 3.3 Check whether the Rate Limiting binding exists on the Workers Free
+- [x] 3.3 Check whether the Rate Limiting binding exists on the Workers Free
       plan:
   - if it does, wire it at 60/60 s per IP, returning `429`;
   - if it does not, record the WAF rule for task 5.2 instead (the Free
@@ -91,7 +91,7 @@
       `tools/list` names, KRD→FIT round-trip, `kaiord_round_trip_validate`
       on FIT, ZWO convert, activity rejected, `413`. It exits non-zero
       naming the failed check.
-- [ ] 3.6 On a throwaway `workers.dev` deploy (Pablo's `!` command), measure
+- [x] 3.6 On a throwaway `workers.dev` deploy (Pablo's `!` command), measure
       CPU for `kaiord_round_trip_validate` and the per-request server build.
       Drop from the remote list any tool that hits Error 1102.
 - [ ] 3.7 Add `wrangler deploy`, `wrangler delete` and Worker route changes
