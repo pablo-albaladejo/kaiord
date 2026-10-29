@@ -24,8 +24,13 @@ export const createZwiftWriter = (logger?: Logger): TextWriter => {
   return createFastXmlZwiftWriter(log, validator);
 };
 
-export const zwiftReader: TextReader = createZwiftReader();
-export const zwiftWriter: TextWriter = createZwiftWriter();
+let defaultReader: TextReader | undefined;
+let defaultWriter: TextWriter | undefined;
+
+export const zwiftReader: TextReader = (text) =>
+  (defaultReader ??= createZwiftReader())(text);
+export const zwiftWriter: TextWriter = (krd) =>
+  (defaultWriter ??= createZwiftWriter())(krd);
 
 export { createFastXmlZwiftReader, createFastXmlZwiftWriter };
 export { createZwiftValidator };

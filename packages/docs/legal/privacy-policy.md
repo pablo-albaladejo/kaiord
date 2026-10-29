@@ -7,13 +7,13 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-09-29
+**Last updated:** 2026-10-29
 
-This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
+This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
 ## Data Controller
 
-Kaiord operates no backend that receives, stores, or processes your data. All processing of your workouts, health data and editor state is client-side — on your device, inside your browser. The only other flows are the ones described below: anonymous analytics, and, if you configure them, requests to your chosen AI provider. For GDPR purposes there is therefore no Kaiord-operated data controller. The maintainer (Pablo Albaladejo) is the point of contact for privacy inquiries; see the [Contact](#contact) section.
+Kaiord operates no backend that stores your data. All processing of your workouts, health data and editor state is client-side — on your device, inside your browser — with one exception: the stateless [remote MCP endpoint](#remote-mcp-endpoint), which processes a request in transit and keeps nothing. The only other flows are the ones described below: anonymous analytics, and, if you configure them, requests to your chosen AI provider. So there is no Kaiord-held record of you. For GDPR purposes there is therefore no Kaiord-operated data controller. The maintainer (Pablo Albaladejo) is the point of contact for privacy inquiries; see the [Contact](#contact) section.
 
 ## Data Collection
 
@@ -24,6 +24,17 @@ All workout-editor state (workouts, templates, sport-zone profiles, AI provider 
 If you configure the optional AI features inside the workout editor, your prompts and workout content are sent directly from your browser to the LLM provider you chose (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service. Kaiord does not receive or relay this data; your API key is stored locally and transmitted only to the provider you configured.
 
 When you use the in-app chat assistant, summaries of your locally stored history — including workout, coaching, and health data such as sleep — are sent to the LLM provider you configured, and only while you are actively conversing with the assistant (never in the background). Your chat transcripts are stored locally in your browser like the rest of your editor state and, if you enable cross-device sync, are included in the encrypted snapshot saved to your own cloud storage; they are never sent to a Kaiord-operated server.
+
+## Remote MCP Endpoint
+
+`https://kaiord.com/mcp` is a stateless Model Context Protocol endpoint, hosted on Cloudflare Workers, that converts and inspects workout definitions an AI agent sends to it. Here is how it handles data:
+
+- **Structured Workouts Only**: The endpoint accepts only structured workout definitions. Recorded activities, courses, and every health file type are rejected; a rejected file is decoded in memory only to learn its type, and is neither stored, logged nor returned.
+- **Workout Content in Transit**: A workout's own content — its name, free-text notes, heart-rate targets and device metadata such as a serial number — is processed in transit, and may contain personal information if the caller puts it there.
+- **Nothing Stored or Logged**: The content is processed only to answer that request and is never stored or logged. The endpoint has no database, no file storage and no request logs.
+- **IP Address for Rate Limiting**: The client IP address is used transiently by the rate limiter and is not stored by Kaiord.
+- **Cloudflare as Infrastructure Provider**: Requests travel through Cloudflare's network, which is the endpoint's network and hosting provider, subject to [Cloudflare's own privacy policy](https://www.cloudflare.com/privacypolicy/). Kaiord gives Cloudflare no other data.
+- **No Garmin or Health Tools**: The endpoint offers no Garmin or health tools. Garmin Connect access and health data stay with the local `@kaiord/mcp` server and the browser extensions.
 
 ## Kaiord Garmin Bridge Extension
 
@@ -102,7 +113,7 @@ No other domains are contacted in production builds. During local development, t
 
 ## Regulatory Compliance
 
-Because Kaiord operates no backend and collects no personal data server-side, there is no personal data held by us to protect, share, or delete. This applies as long as Kaiord operates no backend and collects no personal data server-side (the state of the system today and at every release), under all applicable data protection regulations, including the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
+Because no personal data is retained server-side, there is no personal data held by us to protect, share, or delete. The remote MCP endpoint processes the client IP address for rate limiting, and any personal content a caller places in a workout, in transit only, and retains neither. This applies as long as Kaiord retains no personal data server-side (the state of the system today and at every release), under all applicable data protection regulations, including the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
 
 You retain all data-subject rights under GDPR and CCPA (access, rectification, erasure, portability). Because Kaiord holds no records about you, a request would return nothing to act upon; if you believe data has been collected or processed in error, please contact us and we will investigate immediately.
 

@@ -27,6 +27,7 @@ const NAME_TO_TYPE: Record<string, McpErrorType> = {
   ZwiftParsingError: "validation",
   GarminParsingError: "validation",
   KrdValidationError: "validation",
+  RemoteInputRejectedError: "validation",
   TcxValidationError: "validation",
   ZwiftValidationError: "validation",
   ToleranceExceededError: "tolerance",

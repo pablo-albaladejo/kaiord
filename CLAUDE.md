@@ -16,6 +16,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/garmin-connect` - Garmin Connect API client (SSO auth, push/list workouts)
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
+- `@kaiord/mcp-worker` - Cloudflare Worker serving the stateless MCP tools at kaiord.com/mcp (private)
 - `@kaiord/garmin-bridge` - Chrome extension for SPA-to-Garmin Connect integration (private)
 - `@kaiord/train2go-bridge` - Chrome extension for reading Train2Go coaching plans (private)
 - `@kaiord/whoop-bridge` - Chrome extension for WHOOP health data via session piggyback (private)
@@ -105,15 +106,17 @@ Claude Code 2.1.304).
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `npm-publish`        | `npm`/`pnpm`/`yarn publish`, `changeset publish`, `scripts/changeset-publish.sh`, `npm unpublish`/`deprecate`/`dist-tag`/`owner`/`access`. `release.yml` is the only publisher.                                                                                                                                                                                   |
 | `release-tags`       | Pushing or deleting release tags (`@kaiord/<pkg>@x.y.z`, `v*`, `--tags`), `gh release create/edit/delete/upload`, `scripts/create-github-releases.js`, deleting `main` or `changeset-release/*`, `git push --mirror/--all/--prune`.                                                                                                                               |
-| `prod-deploy`        | Pushing to `main` (`deploy-site.yml` deploys kaiord.com and `release.yml` publishes to npm), `gh workflow run` of a release/deploy/CWS workflow, `scripts/cws-api.mjs upload/publish` (Chrome Web Store).                                                                                                                                                         |
+| `prod-deploy`        | Pushing to `main` (`deploy-site.yml` deploys kaiord.com and `release.yml` publishes to npm), `gh workflow run` of a release/deploy/CWS workflow, `scripts/cws-api.mjs upload/publish` (Chrome Web Store), `wrangler deploy`/`delete`/`rollback`/`versions deploy`/`triggers deploy` (Cloudflare Workers and their kaiord.com routes; `--dry-run` allowed).        |
 | `force-push`         | `--force`, `--force-with-lease`, `-f`, `+refspec`.                                                                                                                                                                                                                                                                                                                |
 | `repo-settings`      | `gh secret`/`gh variable` set/delete, `gh repo edit/delete/rename/archive`, deploy keys, `gh pr merge --admin`, and a mutating `gh api` call on repo settings, rulesets, branch protection, secrets, environments, hooks, releases, tag refs or git tags (also `git/refs` with a tag or protected `ref=`, `merges` into `main`, and `contents` writes to `main`). |
 | `security-workflows` | Weakening `security.yml`, `codeql.yml` or any required check, and `gh workflow disable/enable`.                                                                                                                                                                                                                                                                   |
 | `athlete-data`       | Writing to or deleting from a real athlete's account: `kaiord garmin push`, and the `kaiord_garmin_push` MCP tool.                                                                                                                                                                                                                                                |
 
-Kaiord runs no backend of its own. User data lives in the browser and in the
-athlete's third-party accounts, which is why the athlete-data class covers
-Garmin Connect.
+Kaiord runs no backend that stores user data. The one server it runs is the
+stateless remote MCP endpoint (`kaiord.com/mcp`), which converts workouts in
+transit and keeps nothing. User data lives in the browser and in the athlete's
+third-party accounts, which is why the athlete-data class covers Garmin
+Connect.
 
 **Enforced by code** (`.claude/settings.json`, spec `agent-guardrails`). These rules are not advice to follow:
 

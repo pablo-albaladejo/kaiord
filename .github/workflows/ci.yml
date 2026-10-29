@@ -72,6 +72,8 @@ jobs:
               - 'packages/cli/**'
             mcp:
               - 'packages/mcp/**'
+            mcp_worker:
+              - 'packages/mcp-worker/**'
             ai:
               - 'packages/ai/**'
             i18n:
@@ -203,6 +205,7 @@ jobs:
              [[ "${{ steps.changed-files.outputs.garmin_connect_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.mcp_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.mcp_worker_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.i18n_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_bridge_any_changed }}" == "false" ]] && \
@@ -555,6 +558,7 @@ jobs:
             "garmin",
             "garmin-connect",
             "mcp",
+            "mcp-worker",
             "ai",
             "i18n",
             "garmin-bridge",

@@ -1,77 +1,51 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
 
 import { createStderrLogger } from "../adapters/stderr-logger";
-import { registerAnalyzeWorkoutPrompt } from "../prompts/analyze-workout";
-import { registerConvertFilePrompt } from "../prompts/convert-file";
-import { registerKrdFormatSpecResource } from "../resources/krd-format-spec";
-import { registerKrdSchemaResource } from "../resources/krd-schema";
-import { registerSupportedFormatsResource } from "../resources/supported-formats";
-import { registerConvertTool } from "../tools/kaiord-convert";
-import { registerDiffTool } from "../tools/kaiord-diff";
-import { registerExtractWorkoutTool } from "../tools/kaiord-extract-workout";
-import { registerGarminListTool } from "../tools/kaiord-garmin-list";
-import { registerGarminLoginTool } from "../tools/kaiord-garmin-login";
-import { registerGarminLogoutTool } from "../tools/kaiord-garmin-logout";
-import { registerGarminPushTool } from "../tools/kaiord-garmin-push";
-import { registerGetFormatSpecTool } from "../tools/kaiord-get-format-spec";
-import { registerGetHealthSummaryTool } from "../tools/kaiord-get-health-summary";
-import { registerGetHrvHistoryTool } from "../tools/kaiord-get-hrv-history";
-import { registerGetRecoveryStatusTool } from "../tools/kaiord-get-recovery-status";
-import { registerGetSleepHistoryTool } from "../tools/kaiord-get-sleep-history";
-import { registerGetWeightHistoryTool } from "../tools/kaiord-get-weight-history";
-import { registerInspectTool } from "../tools/kaiord-inspect";
-import { registerListFormatsTool } from "../tools/kaiord-list-formats";
-import { registerRoundTripValidateTool } from "../tools/kaiord-round-trip-validate";
-import { registerValidateTool } from "../tools/kaiord-validate";
+import type { ToolContext } from "../tools/tool-context";
+import { LOCAL_INSTRUCTIONS, REMOTE_INSTRUCTIONS } from "./instructions";
+import { registerLocalSurface } from "./register-local-surface";
+import { registerSharedSurface } from "./register-shared-surface";
+import type { LocalInputs } from "./resolve-local-inputs";
+import { resolveLocalInputs } from "./resolve-local-inputs";
+import type { CreateServerOptions } from "./server-options";
 
 const SERVER_NAME = "kaiord-mcp";
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(
-  readFileSync(join(__dirname, "../../package.json"), "utf-8")
-) as { version: string };
 
-const SERVER_INSTRUCTIONS = [
-  "Kaiord is a fitness data framework. KRD is the canonical JSON format — all conversions go through KRD.",
-  "BEFORE creating or editing KRD documents, call the kaiord_get_format_spec tool to get the full specification.",
-  "Use kaiord_list_formats to discover all supported formats (FIT, TCX, ZWO, GCN, KRD).",
-  "Use kaiord_garmin_login to authenticate, then kaiord_garmin_list/kaiord_garmin_push to interact with Garmin Connect.",
-  "Use kaiord_get_health_summary / *_history / *_recovery_status to query health data from FIT health files (sleep, weight, HRV, daily wellness).",
-].join("\n");
+// Disk is read only when the caller left an input out, and only at call
+// time: importing this module touches no file.
+const resolveInputs = (options: CreateServerOptions): LocalInputs => {
+  const { version, formatSpec, krdSchema } = options;
+  if (
+    version !== undefined &&
+    formatSpec !== undefined &&
+    krdSchema !== undefined
+  ) {
+    return { version, formatSpec, krdSchema };
+  }
+  const local = resolveLocalInputs();
+  return {
+    version: version ?? local.version,
+    formatSpec: formatSpec ?? local.formatSpec,
+    krdSchema: krdSchema ?? local.krdSchema,
+  };
+};
 
-export const createServer = (): McpServer => {
+export const createServer = (options: CreateServerOptions = {}): McpServer => {
+  const remote = options.toolset === "remote";
+  const { version, formatSpec, krdSchema } = resolveInputs(options);
   const server = new McpServer(
-    { name: SERVER_NAME, version: pkg.version },
-    { instructions: SERVER_INSTRUCTIONS }
+    { name: SERVER_NAME, version },
+    { instructions: remote ? REMOTE_INSTRUCTIONS : LOCAL_INSTRUCTIONS }
   );
-  const logger = createStderrLogger();
+  const logger = options.logger ?? createStderrLogger();
+  const context: ToolContext = {
+    logger,
+    remote,
+    fitWriter: options.fitWriter,
+  };
 
-  registerGetFormatSpecTool(server);
-  registerListFormatsTool(server);
-  registerConvertTool(server, logger);
-  registerValidateTool(server, logger);
-  registerRoundTripValidateTool(server, logger);
-  registerInspectTool(server, logger);
-  registerExtractWorkoutTool(server, logger);
-  registerDiffTool(server, logger);
-  registerGarminLoginTool(server, logger);
-  registerGarminLogoutTool(server, logger);
-  registerGarminListTool(server, logger);
-  registerGarminPushTool(server, logger);
-  registerGetHealthSummaryTool(server, logger);
-  registerGetSleepHistoryTool(server, logger);
-  registerGetWeightHistoryTool(server, logger);
-  registerGetHrvHistoryTool(server, logger);
-  registerGetRecoveryStatusTool(server, logger);
-
-  registerKrdSchemaResource(server);
-  registerSupportedFormatsResource(server);
-  registerKrdFormatSpecResource(server);
-
-  registerConvertFilePrompt(server);
-  registerAnalyzeWorkoutPrompt(server);
+  registerSharedSurface(server, context, { formatSpec, krdSchema });
+  if (!remote) registerLocalSurface(server, logger);
 
   return server;
 };

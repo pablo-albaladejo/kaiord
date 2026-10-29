@@ -24,40 +24,40 @@
 
 ## 2. Shared server, remote toolset (PR-2, `@kaiord/mcp`)
 
-- [ ] 2.1 Red: test that `createServer({ toolset: "remote", ... })`:
+- [x] 2.1 Red: test that `createServer({ toolset: "remote", ... })`:
   - lists exactly the eight remote tool names;
   - has no remote schema with `input_file`, `output_file`, `file1` or
     `file2`;
   - lists no prompt and exactly the three remote resources;
   - has instructions that name no excluded tool.
-- [ ] 2.1b Move the module-scope `package.json` read and the
+- [x] 2.1b Move the module-scope `package.json` read and the
       `find-spec-file.ts` path lookup into the Node bin. A test imports the
       server module with `node:fs` spied and asserts no read.
-- [ ] 2.2 Add `createServer` options: `toolset`, `version`, `formatSpec`,
+- [x] 2.2 Add `createServer` options: `toolset`, `version`, `formatSpec`,
       `krdSchema` and `fitWriter`. The Node bin fills them from disk, and
       `createServer()` keeps today's behaviour. The `fitWriter` factory is
       used by both the format registry and `kaiord_round_trip_validate`.
       Green.
-- [ ] 2.2b Remote toolset only: decode content, then accept only a
+- [x] 2.2b Remote toolset only: decode content, then accept only a
       `structured_workout` with no `sessions`/`laps`/`records`/`events` and
       only allowlisted `extensions` namespaces (pin the allowlist from what
       the workout adapters emit), with a tool error naming the type or
       field. Test a FIT sleep record, a FIT activity, a TCX activity, a
       workout-labelled KRD with `records`, and one with `extensions.health`
       remotely, and the same sleep record locally (still accepted).
-- [ ] 2.2c Remote toolset only: a `tools/call` whose arguments carry
+- [x] 2.2c Remote toolset only: a `tools/call` whose arguments carry
       `input_file`, `output_file`, `file1` or `file2` fails with a tool error
       naming it, also when valid inline content is present.
-- [ ] 2.3 `kaiord_inspect` and `kaiord_round_trip_validate` accept
+- [x] 2.3 `kaiord_inspect` and `kaiord_round_trip_validate` accept
       `input_content` (base64 for FIT). Cover path/content exclusivity.
-- [ ] 2.4 `kaiord_diff` accepts `content1`/`format1` and `content2`/`format2`.
+- [x] 2.4 `kaiord_diff` accepts `content1`/`format1` and `content2`/`format2`.
       Cover path/content exclusivity per side.
-- [ ] 2.5 `kaiord_convert` to FIT without `output_file` returns base64. Add a
+- [x] 2.5 `kaiord_convert` to FIT without `output_file` returns base64. Add a
       test that the bytes decode back to the same KRD.
-- [ ] 2.6 Make the `zwiftReader` and `zwiftWriter` singletons in
+- [x] 2.6 Make the `zwiftReader` and `zwiftWriter` singletons in
       `@kaiord/zwo`'s `browser.ts` lazy, so importing the entry logs
       nothing. The validator already uses the injected logger.
-- [ ] 2.7 Add changesets (`@kaiord/mcp` minor, `@kaiord/zwo` patch).
+- [x] 2.7 Add changesets (`@kaiord/mcp` minor, `@kaiord/zwo` patch).
 
 ## 3. Worker (PR-3, `@kaiord/mcp-worker`, private)
 
@@ -74,7 +74,7 @@
   - a 65,536-byte body does not;
   - a batch array returns `400` and runs no tool;
   - two requests get different server instances and no `mcp-session-id`.
-- [ ] 3.3 Check whether the Rate Limiting binding exists on the Workers Free
+- [x] 3.3 Check whether the Rate Limiting binding exists on the Workers Free
       plan:
   - if it does, wire it at 60/60 s per IP, returning `429`;
   - if it does not, record the WAF rule for task 5.2 instead (the Free
@@ -91,7 +91,7 @@
       `tools/list` names, KRD→FIT round-trip, `kaiord_round_trip_validate`
       on FIT, ZWO convert, activity rejected, `413`. It exits non-zero
       naming the failed check.
-- [ ] 3.6 On a throwaway `workers.dev` deploy (Pablo's `!` command), measure
+- [x] 3.6 On a throwaway `workers.dev` deploy (Pablo's `!` command), measure
       CPU for `kaiord_round_trip_validate` and the per-request server build.
       Drop from the remote list any tool that hits Error 1102.
 - [ ] 3.7 Add `wrangler deploy`, `wrangler delete` and Worker route changes
@@ -99,11 +99,11 @@
 
 ## 4. Privacy and docs (PR-4, `@kaiord/docs`)
 
-- [ ] 4.1 Update the privacy policy per the `privacy-policy` delta. Extend
+- [x] 4.1 Update the privacy policy per the `privacy-policy` delta. Extend
       `lint:privacy-policy` with a rule for the endpoint disclosure.
-- [ ] 4.1b Update `CLAUDE.md`'s "Kaiord runs no backend of its own" to name
+- [x] 4.1b Update `CLAUDE.md`'s "Kaiord runs no backend of its own" to name
       the stateless endpoint.
-- [ ] 4.2 Document remote usage on the MCP docs pages:
+- [x] 4.2 Document remote usage on the MCP docs pages:
   - the endpoint URL;
   - the eight tools;
   - the 65,536-byte limit and one call per request;
