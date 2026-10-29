@@ -6,21 +6,21 @@
 
 ## 1. FIT writer output cap (PR-1, `@kaiord/fit`)
 
-- [ ] 1.1 Red: a test asserts that `createFitWriter(logger, { maxOutputBytes })`
+- [x] 1.1 Red: a test asserts that `createFitWriter(logger, { maxOutputBytes })`
       reaches the SDK `OutputStream` as `maxByteLength`. It fails today.
-- [ ] 1.2 Add `pnpm patch @garmin/fitsdk`: `Encoder` accepts `outputStream`
+- [x] 1.2 Add `pnpm patch @garmin/fitsdk`: `Encoder` accepts `outputStream`
       options. The default behaviour is unchanged.
-- [ ] 1.3 Thread the option through `createFitWriter` and
+- [x] 1.3 Thread the option through `createFitWriter` and
       `createGarminFitSdkWriter`. The patch replaces the `#outputStream`
       field initializer, not only the constructor. Green.
-- [ ] 1.3b The writer throws when the encoder did not honour the cap (an
+- [x] 1.3b The writer throws when the encoder did not honour the cap (an
       unpatched SDK), with a test. The option stays internal, not
       documented as public API.
-- [ ] 1.4 Add a test that a writer created without the option encodes exactly
+- [x] 1.4 Add a test that a writer created without the option encodes exactly
       as before, with byte-identical output on the existing fixtures.
 - [ ] 1.5 File the upstream issue with the SDK maintainers and link it from
       the patch file.
-- [ ] 1.6 Add a changeset (`@kaiord/fit` patch; the option is internal).
+- [x] 1.6 Add a changeset (`@kaiord/fit` patch; the option is internal).
 
 ## 2. Shared server, remote toolset (PR-2, `@kaiord/mcp`)
 

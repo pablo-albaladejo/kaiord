@@ -1,0 +1,28 @@
+diff --git a/src/encoder.js b/src/encoder.js
+index 0578ab3e660edc8b8d9a9bcab6f0070ad12c21e8..282de4fc20253aa987231997839941f89b6b7741 100644
+--- a/src/encoder.js
++++ b/src/encoder.js
+@@ -21,7 +21,13 @@ const HEADER_WITH_CRC_SIZE = 14;
+ const HEADER_WITHOUT_CRC_SIZE = 12;
+ 
+ class Encoder {
+-    constructor({ fieldDescriptions = null, } = {}) {
++    // Kaiord patch: forward OutputStream options so a runtime with a small
++    // memory ceiling (a Cloudflare Worker isolate) can bound the resizable
++    // buffer's 500 MB maxByteLength reservation. Drop when upstream has it.
++    static supportsOutputStreamOptions = true;
++
++    constructor({ fieldDescriptions = null, outputStream = undefined, } = {}) {
++        this.#outputStream = new OutputStream(outputStream);
+         this.#fieldDescriptions = {};
+ 
+         for (const [key, {developerDataIdMesg, fieldDescriptionMesg}] of Object.entries(fieldDescriptions ?? {})) {
+@@ -297,7 +303,7 @@ class Encoder {
+ 
+     #localMesgDefinitions = Array(16).fill(null);
+     #nextLocalMesgNum = 0;
+-    #outputStream = new OutputStream();
++    #outputStream = null;
+     #fieldDescriptions = null;
+ }
+ 
