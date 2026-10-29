@@ -99,11 +99,11 @@
 
 ## 4. Privacy and docs (PR-4, `@kaiord/docs`)
 
-- [ ] 4.1 Update the privacy policy per the `privacy-policy` delta. Extend
+- [x] 4.1 Update the privacy policy per the `privacy-policy` delta. Extend
       `lint:privacy-policy` with a rule for the endpoint disclosure.
-- [ ] 4.1b Update `CLAUDE.md`'s "Kaiord runs no backend of its own" to name
+- [x] 4.1b Update `CLAUDE.md`'s "Kaiord runs no backend of its own" to name
       the stateless endpoint.
-- [ ] 4.2 Document remote usage on the MCP docs pages:
+- [x] 4.2 Document remote usage on the MCP docs pages:
   - the endpoint URL;
   - the eight tools;
   - the 65,536-byte limit and one call per request;

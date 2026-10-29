@@ -60,13 +60,20 @@ export function switcherHrefsIn(html) {
 
 const trimTrailingPunctuation = (url) => url.replace(/[.,;:!?]+$/, "");
 
+// An escaped quote (`&quot;`, `&#39;`) ends the URL it follows, as `"` does.
+const QUOTE_ENTITY = /&(?:quot|apos|#3[49]);?.*$/;
+
 export function linksIn(text) {
   return [...text.matchAll(SITE_LINK_PATTERN)].map((m) =>
-    trimTrailingPunctuation(m[0].replace(/&amp;/g, "&"))
+    trimTrailingPunctuation(
+      m[0].replace(QUOTE_ENTITY, "").replace(/&amp;/g, "&")
+    )
   );
 }
 
 const SPA_PATHS = new Set(["/app", "/app/", "/app/index.html"]);
+// Routed to a Cloudflare Worker ahead of Pages, so no dist holds them.
+const WORKER_PATHS = new Set(["/mcp"]);
 
 /**
  * Returns the reason a kaiord.com link is broken, or null when it resolves.
@@ -78,6 +85,7 @@ export function brokenReason(mounts, segments, link) {
   if (pathname === "/editor" || pathname.startsWith("/editor/")) {
     return LEGACY_EDITOR_REASON;
   }
+  if (WORKER_PATHS.has(pathname)) return null;
   if (!pathExists(mounts, pathname)) {
     return `no page is served at ${pathname}`;
   }
