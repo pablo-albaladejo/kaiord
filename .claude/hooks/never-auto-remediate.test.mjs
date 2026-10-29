@@ -135,6 +135,13 @@ const DENIED = [
   ["pnpm exec wrangler versions deploy", "prod-deploy"],
   ["npx wrangler@4 triggers deploy", "prod-deploy"],
   ["wrangler triggers deploy -e production", "prod-deploy"],
+  ["wrangler --env-file .env.production deploy", "prod-deploy"],
+  ["npx wrangler@4 --profile production deploy", "prod-deploy"],
+  ["npx wrangler@4 secret put API_KEY", "prod-deploy"],
+  ["wrangler secret delete API_KEY --name kaiord-mcp", "prod-deploy"],
+  ["pnpm exec wrangler secret bulk secrets.json", "prod-deploy"],
+  ["bun x wrangler deploy", "prod-deploy"],
+  ["bun x wrangler@4 delete", "prod-deploy"],
 ];
 
 const WRAPPED = [
@@ -203,6 +210,8 @@ const ALLOWED = [
   "npx wrangler@4 versions list",
   "npx wrangler@4 versions upload",
   "npx wrangler@4 whoami",
+  "npx wrangler@4 secret list",
+  "bun x wrangler dev",
   "echo wrangler deploy",
   'git commit -m "wrangler deploy later"',
   "cat wrangler.toml",

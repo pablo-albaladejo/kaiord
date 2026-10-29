@@ -414,6 +414,8 @@ const WRANGLER_VALUED = [
   "--config",
   "-e",
   "--env",
+  "--env-file",
+  "--profile",
   "--cwd",
   "--name",
   "--outdir",
@@ -428,14 +430,20 @@ const WRANGLER_DEPLOYS = [
   ["rollback"],
   ["versions", "deploy"],
   ["triggers", "deploy"],
+  // A secret change deploys a new version of the Worker at once.
+  ["secret", "put"],
+  ["secret", "delete"],
+  ["secret", "bulk"],
 ];
 
 // Where the wrangler bin leads: `wrangler …`, or `pnpm [flags] wrangler …`
-// and `yarn wrangler …`, which run a local bin directly.
+// and `yarn wrangler …`, which run a local bin directly; `bun x` is `bunx`.
 function wranglerArgs(w) {
   if (WRANGLER.test(base(w[0]))) return w.slice(1);
   if (!["pnpm", "yarn", "bun"].includes(base(w[0]))) return null;
-  const rest = skipFlags(w.slice(1), NPM_VALUED);
+  let rest = skipFlags(w.slice(1), NPM_VALUED);
+  if (base(w[0]) === "bun" && rest[0] === "x")
+    rest = skipFlags(rest.slice(1), NPM_VALUED);
   return WRANGLER.test(base(rest[0] ?? "")) ? rest.slice(1) : null;
 }
 
