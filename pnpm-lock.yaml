@@ -554,19 +554,19 @@ importers:
   packages/mcp-worker:
     dependencies:
       '@kaiord/fit':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../fit
       '@kaiord/garmin':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../garmin
       '@kaiord/mcp':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../mcp
       '@kaiord/tcx':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../tcx
       '@kaiord/zwo':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../zwo
       '@modelcontextprotocol/sdk':
         specifier: ^1.32.1

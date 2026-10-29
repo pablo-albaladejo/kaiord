@@ -1,6 +1,7 @@
 // The post-deploy checks (design D9), each against a live MCP endpoint.
-// A check resolves to nothing on success and throws an Error naming what it
-// saw otherwise. `call(method, params)` posts one JSON-RPC request.
+// A check resolves to nothing on success and throws an Error naming what
+// failed otherwise, never quoting a tool result: smoke output carries no
+// endpoint content. `call(method, params)` posts one JSON-RPC request.
 import { readFileSync } from "node:fs";
 
 import { createFitReader } from "@kaiord/fit";
@@ -42,20 +43,32 @@ export const SMOKE_KRD = {
   },
 };
 
+const HTTP_OK = 200;
+
+// A success-shaped body on a non-200 reply is still a failed request.
+const expectStatusOk = (reply, label) => {
+  if (reply.status !== HTTP_OK)
+    throw new Error(`${label} got HTTP ${reply.status}`);
+};
+
 const tool = async (call, name, args) => {
   const reply = await call("tools/call", { name, arguments: args });
+  expectStatusOk(reply, name);
   const text = reply.body?.result?.content?.[0]?.text ?? "";
   return { isError: reply.body?.result?.isError === true, text, reply };
 };
 
 const expectOk = (result, label) => {
   if (result.isError || result.text === "")
-    throw new Error(`${label} failed: ${result.text.slice(0, 200)}`);
+    throw new Error(
+      `${label} failed: ${result.isError ? "tool error" : "empty result"}`
+    );
 };
 
 export const CHECKS = {
   "tools-list": async (call) => {
     const reply = await call("tools/list", {});
+    expectStatusOk(reply, "tools/list");
     const names = (reply.body?.result?.tools ?? []).map((t) => t.name).sort();
     if (JSON.stringify(names) !== JSON.stringify(REMOTE_TOOLS))
       throw new Error(`tools/list returned ${JSON.stringify(names)}`);
@@ -84,7 +97,7 @@ export const CHECKS = {
     });
     expectOk(result, "kaiord_round_trip_validate");
     if (!/passed/i.test(result.text))
-      throw new Error(`round trip reported: ${result.text.slice(0, 200)}`);
+      throw new Error("the round trip did not report a pass");
   },
   "zwo-convert": async (call) => {
     const input_content = fixture("zwo/WorkoutIndividualSteps.zwo").toString(

@@ -24,6 +24,7 @@ const SMOKE = join(dirname(fileURLToPath(import.meta.url)), "smoke.mjs");
 const quiet = { debug() {}, info() {}, warn() {}, error() {} };
 const silent = { log() {}, error() {} };
 const CHECK_NAMES = Object.keys(CHECKS);
+const TOOL_CONTENT = "step 2 power drifted on athlete-private workout";
 
 const toolReply = (text, isError) => ({
   result: {
@@ -34,7 +35,9 @@ const toolReply = (text, isError) => ({
 
 const answerTool = async ({ name, arguments: args }, faults) => {
   if (name === "kaiord_round_trip_validate")
-    return toolReply("Round-trip validation passed. No violations.");
+    return faults.failRoundTrip
+      ? toolReply(TOOL_CONTENT, faults.failRoundTrip === "error")
+      : toolReply("Round-trip validation passed. No violations.");
   if (args.input_format === "zwo")
     return toolReply(faults.breakZwo ? "" : '{"type":"structured_workout"}');
   if (args.input_format === "fit")
@@ -62,8 +65,11 @@ const fakeEndpoint =
       method === "tools/list"
         ? { result: { tools } }
         : await answerTool(params, faults);
+    const failStatus =
+      (faults.listStatus && method === "tools/list") ||
+      (faults.toolStatus && params?.name === "kaiord_round_trip_validate");
     return new Response(JSON.stringify({ jsonrpc: "2.0", id, ...reply }), {
-      status: 200,
+      status: failStatus ? 500 : 200,
     });
   };
 
@@ -83,6 +89,8 @@ describe("smoke checks", () => {
     ["breakZwo", "zwo-convert"],
     ["breakGate", "activity-rejected"],
     ["breakCap", "oversized-413"],
+    ["listStatus", "tools-list"],
+    ["toolStatus", "round-trip-fit"],
   ]) {
     it(`should fail only ${check} when the endpoint has ${fault}`, async () => {
       assert.deepEqual(await failedChecks({ [fault]: true }), [check]);
@@ -118,6 +126,25 @@ describe("smoke CLI", () => {
     assert.equal(code, 1);
     assert.deepEqual(lines, ["smoke failed: oversized-413"]);
   });
+
+  for (const mode of ["error", "text"]) {
+    it(`should print no tool result when a check fails on ${mode}`, async () => {
+      const lines = [];
+      const out = { log: (l) => lines.push(l), error: (l) => lines.push(l) };
+      const faults = { failRoundTrip: mode };
+      const code = await main(
+        ["https://kaiord.com"],
+        fakeEndpoint(faults),
+        out
+      );
+      assert.equal(code, 1);
+      assert.ok(lines.some((l) => l.startsWith("FAIL round-trip-fit: ")));
+      assert.ok(
+        lines.every((l) => !l.includes(TOOL_CONTENT)),
+        lines.join("\n")
+      );
+    });
+  }
 
   it("should exit 0 as a plain node script against a live server", async () => {
     const fake = fakeEndpoint();

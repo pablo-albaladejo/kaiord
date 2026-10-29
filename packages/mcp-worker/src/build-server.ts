@@ -2,6 +2,9 @@ import type { CreateServerOptions } from "@kaiord/mcp";
 import { createServer } from "@kaiord/mcp";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
+// Relative on purpose: the Worker has no filesystem, so these files are
+// bundled at build time, and no package exports them. The spec and the
+// generated schema are the same bytes the local server reads from disk.
 import formatSpec from "../../../docs/krd-format.md";
 import krdSchema from "../../core/schema/krd.json";
 import { version } from "../../mcp/package.json";
