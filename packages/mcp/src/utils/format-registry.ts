@@ -6,11 +6,15 @@ import type {
   TextWriter,
 } from "@kaiord/core";
 import { validateKrd } from "@kaiord/core";
+import type { FitWriterOptions } from "@kaiord/fit";
 
 import type { FileFormat } from "../types/tool-schemas";
 
 type ReaderFactory = (logger: Logger) => Promise<BinaryReader | TextReader>;
-export type WriterOptions = { ftpWatts?: number };
+export type WriterOptions = {
+  ftpWatts?: number;
+  fitWriter?: FitWriterOptions;
+};
 type WriterFactory = (
   logger: Logger,
   options?: WriterOptions
@@ -43,9 +47,9 @@ export const FORMAT_REGISTRY: Record<FileFormat, FormatDescriptor> = {
       const { createFitReader } = await import("@kaiord/fit");
       return createFitReader(l);
     },
-    createWriter: async (l) => {
+    createWriter: async (l, o) => {
       const { createFitWriter } = await import("@kaiord/fit");
-      return createFitWriter(l);
+      return createFitWriter(l, o?.fitWriter);
     },
   },
   tcx: {

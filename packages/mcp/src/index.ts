@@ -1,5 +1,6 @@
 export { createStderrLogger } from "./adapters/stderr-logger";
 export { createServer } from "./server/create-server";
+export type { CreateServerOptions, Toolset } from "./server/server-options";
 export type { FileFormat } from "./types/tool-schemas";
 export { formatSchema } from "./types/tool-schemas";
 export type { ToolResult } from "./utils/error-formatter";

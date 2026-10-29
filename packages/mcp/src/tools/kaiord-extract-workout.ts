@@ -1,4 +1,3 @@
-import type { Logger } from "@kaiord/core";
 import { extractWorkout } from "@kaiord/core";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -6,7 +5,9 @@ import { z } from "zod";
 import { formatSchema } from "../types/tool-schemas";
 import { formatError, formatSuccess } from "../utils/error-formatter";
 import { validateExclusiveInput } from "../utils/resolve-input";
-import { convertToKrd } from "./convert-to-krd";
+import { registerKaiordTool } from "./register-kaiord-tool";
+import type { ToolContext } from "./tool-context";
+import { readAdmittedKrd } from "./tool-context";
 
 const extractWorkoutSchema = {
   input_file: z.string().optional().describe("Path to the fitness data file"),
@@ -21,26 +22,27 @@ const extractWorkoutSchema = {
 
 export const registerExtractWorkoutTool = (
   server: McpServer,
-  logger: Logger
+  context: ToolContext
 ): void => {
-  server.tool(
-    "kaiord_extract_workout",
-    "Extract the structured workout from a fitness file as JSON",
-    extractWorkoutSchema,
-    async (args) => {
-      try {
-        validateExclusiveInput(args.input_file, args.input_content);
-        const krd = await convertToKrd(
-          args.input_file,
-          args.input_content,
-          args.input_format,
-          logger
-        );
-        const workout = extractWorkout(krd);
-        return formatSuccess(JSON.stringify(workout, null, 2));
-      } catch (error) {
-        return formatError(error);
-      }
+  const tool = {
+    name: "kaiord_extract_workout",
+    description: "Extract the structured workout from a fitness file as JSON",
+    shape: extractWorkoutSchema,
+    remote: context.remote,
+  };
+  registerKaiordTool(server, tool, async (args) => {
+    try {
+      validateExclusiveInput(args.input_file, args.input_content);
+      const krd = await readAdmittedKrd(
+        context,
+        args.input_file,
+        args.input_content,
+        args.input_format
+      );
+      const workout = extractWorkout(krd);
+      return formatSuccess(JSON.stringify(workout, null, 2));
+    } catch (error) {
+      return formatError(error);
     }
-  );
+  });
 };

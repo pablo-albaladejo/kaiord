@@ -14,9 +14,9 @@ All MCP **tool** registrations plus their internal pipeline helpers
 ## Key Files (one entry per MCP tool)
 
 - `kaiord-get-format-spec.ts` — MCP tool **`kaiord_get_format_spec`**. No
-  args. Returns the bundled KRD specification markdown (loaded via
-  `findSpecFile`). The server `instructions` ask LLMs to call this before
-  authoring KRD.
+  args. Returns the KRD specification text passed to `createServer` (the
+  bin reads it from disk at startup). The server `instructions` ask LLMs to
+  call this before authoring KRD.
 - `kaiord-list-formats.ts` — MCP tool **`kaiord_list_formats`**. No args.
   Returns `FORMAT_REGISTRY` projected to `{format, name, extension,
 description, binary}` as JSON.
@@ -24,24 +24,26 @@ description, binary}` as JSON.
   `{input_file?, input_content?, input_format?, output_format,
 output_file?}`. Validates mutual exclusivity, converts via
   `convertToKrd` → `convertFromKrd`, returns text body and (if applicable)
-  the written-to path. `output_file` is required for binary `fit` output.
+  the written-to path. FIT output without `output_file` comes back as
+  base64 text.
 - `kaiord-validate.ts` — MCP tool **`kaiord_validate`**. Args `{input_file?,
 input_content?}`. Parses text as JSON and runs `validateKrd` from
   `@kaiord/core`. On success returns `"Valid KRD document."`.
 - `kaiord-round-trip-validate.ts` — MCP tool
-  **`kaiord_round_trip_validate`**. Args `{input_file}` (FIT only). Runs
+  **`kaiord_round_trip_validate`**. Args `{input_file?, input_content?}`
+  (FIT only, base64 inline). Runs
   `validateRoundTrip` (FIT → KRD → FIT) with `createToleranceChecker`,
   formats any `ToleranceViolation[]` as `"<field>: expected X, got Y
 (deviation: D, tolerance: T)"`.
-- `kaiord-inspect.ts` — MCP tool **`kaiord_inspect`**. Args `{input_file,
-input_format?}`. Converts to KRD, then returns a human-readable summary
+- `kaiord-inspect.ts` — MCP tool **`kaiord_inspect`**. Args `{input_file?,
+input_content?, input_format?}`. Converts to KRD, then returns a human-readable summary
   (type, sport, sub-sport, metadata, session/lap/record/event counts, and
   structured-workout name + step count) from `buildInspectSummary`.
 - `kaiord-extract-workout.ts` — MCP tool **`kaiord_extract_workout`**. Args
   `{input_file?, input_content?, input_format?}`. Calls
   `extractWorkout(krd)` from `@kaiord/core` and returns it as pretty JSON.
-- `kaiord-diff.ts` — MCP tool **`kaiord_diff`**. Args `{file1, file2,
-format1?, format2?}`. Loads both into KRD in parallel, runs
+- `kaiord-diff.ts` — MCP tool **`kaiord_diff`**. Args `{file1?, content1?,
+format1?, file2?, content2?, format2?}`, one of path or content per side. Loads both into KRD in parallel, runs
   `compareKrdFiles` and returns a `{metadata, steps, extensions}` diff as
   JSON.
 - `kaiord-garmin-login.ts` — MCP tool **`kaiord_garmin_login`**. Args
@@ -57,6 +59,12 @@ format1?, format2?}`. Loads both into KRD in parallel, runs
   the Garmin Connect service; returns the API response JSON.
 
 ## Internal pipeline helpers (not directly registered as tools)
+
+- `register-kaiord-tool.ts` — registers one of the eight shared tools. On
+  the remote toolset it drops `input_file`/`output_file`/`file1`/`file2`
+  from the schema and makes it strict, so a call carrying one fails naming it.
+- `tool-context.ts` — `ToolContext` (`logger`, `remote`, `fitWriter`) and
+  `readAdmittedKrd`, which applies `structured-workout-gate.ts` remotely.
 
 - `convert-to-krd.ts` — `convertToKrd(file?, content?, format?, logger):
 Promise<KRD>`. Resolves the format (explicit arg → path extension), then

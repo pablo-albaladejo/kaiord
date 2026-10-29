@@ -1,13 +1,17 @@
+import { createMockLogger } from "@kaiord/core/test-utils";
+import { createFitReader } from "@kaiord/fit";
 import { mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
+  createRemoteTestClient,
   createTestClient,
   type McpToolResult,
 } from "../tests/helpers/mcp-test-client";
 import { loadKrdFixtureRaw } from "../tests/helpers/test-fixtures";
+import { decodeBase64 } from "../utils/base64";
 
 const FTP_W = 250;
 // 85 % of 250 W = 213 W; Garmin gets a single value as its ±5 % band.
@@ -139,6 +143,32 @@ describe("kaiord_convert", () => {
     // Assert
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("Written to:");
+  });
+
+  it("should return FIT as base64 text that decodes back to the same KRD", async () => {
+    // Arrange
+    const client = await createRemoteTestClient();
+    const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
+    const reader = createFitReader(createMockLogger());
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_convert",
+      arguments: {
+        input_content: krdJson,
+        input_format: "krd",
+        output_format: "fit",
+      },
+    })) as McpToolResult;
+    const [header, encoded] = result.content[0].text.split("\n");
+    const decoded = await reader(decodeBase64(encoded));
+
+    // Assert
+    expect(result.isError).toBeUndefined();
+    expect(header).toContain("base64");
+    expect(decoded.extensions?.structured_workout).toEqual(
+      JSON.parse(krdJson).extensions.structured_workout
+    );
   });
 
   it("should resolve %FTP power targets to watts for GCN output with ftp", async () => {

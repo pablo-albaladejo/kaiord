@@ -3,8 +3,11 @@ import { toBinary, toText } from "@kaiord/core";
 
 import type { FileFormat } from "../types/tool-schemas";
 import { isBinaryFormat } from "../types/tool-schemas";
+import { encodeBase64 } from "../utils/base64";
 import { writeOutputFile } from "../utils/file-io";
 import { FORMAT_REGISTRY, type WriterOptions } from "../utils/format-registry";
+
+export const BASE64_HEADER = "Binary output, base64-encoded";
 
 export type ConvertFromKrdResult = {
   readonly content: string;
@@ -19,7 +22,6 @@ export const convertFromKrd = async (
   outputFile: string | undefined,
   context: ConvertFromKrdContext
 ): Promise<ConvertFromKrdResult> => {
-  const { logger } = context;
   if (!FORMAT_REGISTRY[outputFormat]) {
     const error = new Error(
       `Unsupported output format: ${String(outputFormat)}`
@@ -28,7 +30,7 @@ export const convertFromKrd = async (
     throw error;
   }
   if (isBinaryFormat(outputFormat)) {
-    return writeBinaryOutput(krd, outputFormat, outputFile, logger);
+    return writeBinaryOutput(krd, outputFormat, outputFile, context);
   }
   return writeTextOutput(krd, outputFormat, outputFile, context);
 };
@@ -37,15 +39,18 @@ const writeBinaryOutput = async (
   krd: KRD,
   format: FileFormat,
   outputFile: string | undefined,
-  logger: Logger
+  { logger, fitWriter }: ConvertFromKrdContext
 ): Promise<ConvertFromKrdResult> => {
-  if (!outputFile) {
-    throw new Error("output_file is required for binary format (FIT)");
-  }
-  const writer = (await FORMAT_REGISTRY[format].createWriter(
-    logger
-  )) as BinaryWriter;
+  const writer = (await FORMAT_REGISTRY[format].createWriter(logger, {
+    fitWriter,
+  })) as BinaryWriter;
   const buffer = await toBinary(krd, writer, logger);
+  if (!outputFile) {
+    return {
+      content: `${BASE64_HEADER} (${buffer.length} bytes):\n${encodeBase64(buffer)}`,
+      writtenTo: null,
+    };
+  }
   await writeOutputFile(outputFile, buffer);
   return {
     content: `Binary file written (${buffer.length} bytes)`,
