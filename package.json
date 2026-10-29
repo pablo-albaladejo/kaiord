@@ -52,6 +52,9 @@
         "vitepress>@vitejs/plugin-vue>vite": "8",
         "@vitejs/plugin-vue>vite": "8"
       }
+    },
+    "patchedDependencies": {
+      "@garmin/fitsdk@21.218.0": "patches/@garmin__fitsdk@21.218.0.patch"
     }
   },
   "scripts": {
