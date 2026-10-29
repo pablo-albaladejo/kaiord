@@ -64,6 +64,16 @@ export const PACKAGE_DEPS = {
     "@kaiord/garmin",
     "@kaiord/garmin-connect",
   ],
+  // Private Cloudflare Worker: the remote transport for @kaiord/mcp's server.
+  // It imports the format adapters only to initialize them at isolate
+  // startup (src/load-at-startup.ts); the tests also decode FIT output.
+  "mcp-worker": [
+    "@kaiord/mcp",
+    "@kaiord/fit",
+    "@kaiord/tcx",
+    "@kaiord/zwo",
+    "@kaiord/garmin",
+  ],
   cli: [
     "@kaiord/core",
     "@kaiord/fit",

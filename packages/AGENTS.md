@@ -25,6 +25,7 @@ types, schemas, ports, and use cases; every other package is an outer adapter
 | `garmin-connect/`     | `@kaiord/garmin-connect` — Garmin Connect HTTP client (SSO, push/list workouts) (see `garmin-connect/AGENTS.md`)            |
 | `landing/`            | `@kaiord/landing` — marketing landing page at kaiord.com (see `landing/AGENTS.md`)                                          |
 | `mcp/`                | `@kaiord/mcp` — Model Context Protocol server exposing conversions to AI clients (see `mcp/AGENTS.md`)                      |
+| `mcp-worker/`         | Private Cloudflare Worker serving the remote MCP tools at kaiord.com/mcp (see `mcp-worker/AGENTS.md`)                       |
 | `tcx/`                | `@kaiord/tcx` — TCX XML adapter via `fast-xml-parser` (see `tcx/AGENTS.md`)                                                 |
 | `train2go-bridge/`    | Private Chrome extension reading Train2Go coaching plans (see `train2go-bridge/AGENTS.md`)                                  |
 | `whoop-bridge/`       | Private Chrome extension bridging SPA editor to WHOOP data (see `whoop-bridge/AGENTS.md`)                                   |
@@ -39,7 +40,9 @@ types, schemas, ports, and use cases; every other package is an outer adapter
   (`fit/`, `tcx/`, `zwo/`, `garmin/`, `garmin-connect/`, `mcp/`, `cli/`,
   `ai/`) depend on `@kaiord/core` only. Applications (`workout-spa-editor/`,
   `landing/`, `docs/`, `garmin-bridge/`, `train2go-bridge/`,
-  `whoop-bridge/`) compose adapter packages.
+  `whoop-bridge/`) compose adapter packages. `mcp-worker/` is a second
+  transport for `mcp/`'s server; besides `@kaiord/mcp` it imports the format
+  adapters only to initialize them at isolate startup.
 - **Never import upward**: a format adapter MUST NOT import the SPA editor;
   `core/` MUST NOT import any adapter. `eslint-plugin-boundaries` and
   `dependency-cruiser` enforce this — failures are lint errors.

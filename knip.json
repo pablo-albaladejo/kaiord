@@ -55,6 +55,10 @@
       "project": ["src/**/*.ts"],
       "ignore": ["src/**/*.test.ts"]
     },
+    "packages/mcp-worker": {
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/test-utils/**"]
+    },
     "packages/cli": {
       "entry": ["src/bin/kaiord.ts"],
       "project": ["src/**/*.ts"],

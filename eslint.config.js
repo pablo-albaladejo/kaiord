@@ -199,6 +199,7 @@ export default tseslint.config(
       "packages/garmin-connect/**/*.ts",
       "packages/cli/**/*.ts",
       "packages/mcp/**/*.ts",
+      "packages/mcp-worker/**/*.ts",
     ],
     languageOptions: {
       parser: tseslint.parser,
