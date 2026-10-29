@@ -5,6 +5,7 @@
 import type { BinaryReader, BinaryWriter, Logger } from "@kaiord/core";
 import { createConsoleLogger } from "@kaiord/core";
 
+import type { FitWriterOptions } from "./adapters/create-encoder";
 import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,
@@ -18,10 +19,14 @@ export {
 export const createFitReader = (logger?: Logger): BinaryReader =>
   createGarminFitSdkReader(logger || createConsoleLogger());
 
-export const createFitWriter = (logger?: Logger): BinaryWriter =>
-  createGarminFitSdkWriter(logger || createConsoleLogger());
+export const createFitWriter = (
+  logger?: Logger,
+  options?: FitWriterOptions
+): BinaryWriter =>
+  createGarminFitSdkWriter(logger || createConsoleLogger(), options);
 
 export const fitReader: BinaryReader = createFitReader();
 export const fitWriter: BinaryWriter = createFitWriter();
 
 export { createGarminFitSdkReader, createGarminFitSdkWriter };
+export type { FitWriterOptions };
