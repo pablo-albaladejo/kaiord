@@ -11,7 +11,19 @@ declare module "@garmin/fitsdk" {
     };
   }
 
+  export type OutputStreamOptions = {
+    initialByteLength?: number;
+    maxByteLength?: number;
+    resizeByBytes?: number;
+  };
+
   export class Encoder {
+    /** Set only by the monorepo's patch (patches/@garmin__fitsdk@*.patch). */
+    static supportsOutputStreamOptions?: boolean;
+    constructor(options?: {
+      fieldDescriptions?: unknown;
+      outputStream?: OutputStreamOptions;
+    });
     writeMesg(message: unknown): void;
     close(): Array<number>;
   }

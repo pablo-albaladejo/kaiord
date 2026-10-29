@@ -3,13 +3,15 @@
  * References: https://developer.garmin.com/fit/file-types/workout/
  */
 
-import { Decoder, Encoder, Stream } from "@garmin/fitsdk";
+import { Decoder, Stream } from "@garmin/fitsdk";
 import type { KRD } from "@kaiord/core";
 import type { BinaryReader } from "@kaiord/core";
 import type { BinaryWriter } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 import { createConsoleLogger, createFitParsingError } from "@kaiord/core";
 
+import type { FitWriterOptions } from "./create-encoder";
+import { createEncoder } from "./create-encoder";
 import { convertKrdToWeightScaleUploadMessages } from "./health/body-composition/krd-to-weight-scale-fit.converter";
 import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
 import { mapMessagesToKRD } from "./messages/messages.mapper";
@@ -23,9 +25,10 @@ import type { FitMessages } from "./shared/types";
  */
 export const encodeFitMessages = (
   messages: Array<unknown>,
-  logger: Logger
+  logger: Logger,
+  options?: FitWriterOptions
 ): Uint8Array => {
-  const encoder = new Encoder();
+  const encoder = createEncoder(options);
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i] as Record<string, unknown>;
     const mesgNum = message.mesgNum as number;
@@ -90,13 +93,13 @@ export const createGarminFitSdkReader =
   };
 
 export const createGarminFitSdkWriter =
-  (logger: Logger): BinaryWriter =>
+  (logger: Logger, options?: FitWriterOptions): BinaryWriter =>
   async (krd: KRD): Promise<Uint8Array> => {
     try {
       logger.debug("Encoding KRD to FIT");
 
       const messages = convertKRDToMessages(krd, logger);
-      const buffer = encodeFitMessages(messages, logger);
+      const buffer = encodeFitMessages(messages, logger, options);
       logger.info("KRD encoded to FIT successfully");
       return buffer;
     } catch (error) {
