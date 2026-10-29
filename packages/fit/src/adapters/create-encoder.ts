@@ -23,12 +23,19 @@ export const createEncoder = (options: FitWriterOptions = {}): Encoder => {
       "maxOutputBytes needs the patched @garmin/fitsdk that forwards OutputStream options"
     );
   }
-  const initialByteLength = Math.min(HALF_MEGABYTE, maxOutputBytes);
-  return new Encoder({
-    outputStream: {
-      initialByteLength,
-      maxByteLength: maxOutputBytes,
-      resizeByBytes: initialByteLength,
-    },
-  });
+  return new Encoder({ outputStream: outputStreamOptionsFor(maxOutputBytes) });
+};
+
+/**
+ * The SDK grows its buffer by a fixed step and refuses a step that would pass
+ * maxByteLength, so the initial size is the remainder: initial + k * step
+ * lands exactly on the cap and every byte of it is usable.
+ */
+export const outputStreamOptionsFor = (maxOutputBytes: number) => {
+  const remainder = maxOutputBytes % HALF_MEGABYTE;
+  return {
+    initialByteLength: remainder === 0 ? HALF_MEGABYTE : remainder,
+    maxByteLength: maxOutputBytes,
+    resizeByBytes: HALF_MEGABYTE,
+  };
 };
