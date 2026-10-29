@@ -1,3 +1,6 @@
+// Must stay the first import: see load-at-startup.ts.
+import "./load-at-startup";
+
 import type { RateLimiter } from "./deps";
 import { handleRequest } from "./handler";
 

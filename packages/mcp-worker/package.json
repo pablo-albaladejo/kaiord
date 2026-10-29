@@ -6,20 +6,25 @@
   "type": "module",
   "scripts": {
     "build": "wrangler deploy --dry-run --outdir dist",
-    "test": "vitest --run",
-    "test:coverage": "vitest --run --coverage",
+    "test": "vitest --run && pnpm test:workerd",
+    "test:coverage": "vitest --run --coverage && pnpm test:workerd",
     "test:watch": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check src",
     "lint:fix": "eslint . --fix && prettier --write src",
     "smoke": "node scripts/smoke.mjs",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test:workerd": "node --test test/*.test.mjs"
   },
   "dependencies": {
+    "@kaiord/fit": "workspace:^",
+    "@kaiord/garmin": "workspace:^",
     "@kaiord/mcp": "workspace:^",
-    "@modelcontextprotocol/sdk": "^1.32.1"
+    "@kaiord/tcx": "workspace:^",
+    "@kaiord/zwo": "workspace:^",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
-    "@kaiord/fit": "workspace:^",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.5",
     "typescript": "^7.0.2",
