@@ -10,4 +10,5 @@
 set -euo pipefail
 pnpm exec changeset version
 node scripts/sync-extension-version.mjs
+node scripts/sync-mcp-server-version.mjs
 pnpm install --no-frozen-lockfile
