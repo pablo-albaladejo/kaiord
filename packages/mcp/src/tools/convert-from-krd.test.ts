@@ -1,4 +1,5 @@
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { createFitReader } from "@kaiord/fit";
 import { mkdtemp, readFile, rm } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -6,7 +7,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { loadKrdFixture } from "../tests/helpers/test-fixtures";
 import type { FileFormat } from "../types/tool-schemas";
-import { convertFromKrd } from "./convert-from-krd";
+import { decodeBase64 } from "../utils/base64";
+import { BASE64_HEADER, convertFromKrd } from "./convert-from-krd";
 
 describe("convertFromKrd", () => {
   let tmpDir: string;
@@ -57,15 +59,21 @@ describe("convertFromKrd", () => {
     expect(written).toContain("TrainingCenterDatabase");
   });
 
-  it("should throw when output_file missing for binary FIT format", async () => {
+  it("should return base64 FIT text that decodes back when output_file is omitted", async () => {
     // Arrange
+    const reader = createFitReader(logger);
 
     // Act
+    const result = await convertFromKrd(krd, "fit", undefined, { logger });
+    const [header, encoded] = result.content.split("\n");
+    const decoded = await reader(decodeBase64(encoded));
 
     // Assert
-    await expect(
-      convertFromKrd(krd, "fit", undefined, { logger })
-    ).rejects.toThrow("output_file is required for binary format");
+    expect(header).toContain(BASE64_HEADER);
+    expect(result.writtenTo).toBeNull();
+    expect(decoded.extensions?.structured_workout).toEqual(
+      krd.extensions?.structured_workout
+    );
   });
 
   it("should write FIT binary output", async () => {

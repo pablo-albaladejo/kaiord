@@ -24,40 +24,40 @@
 
 ## 2. Shared server, remote toolset (PR-2, `@kaiord/mcp`)
 
-- [ ] 2.1 Red: test that `createServer({ toolset: "remote", ... })`:
+- [x] 2.1 Red: test that `createServer({ toolset: "remote", ... })`:
   - lists exactly the eight remote tool names;
   - has no remote schema with `input_file`, `output_file`, `file1` or
     `file2`;
   - lists no prompt and exactly the three remote resources;
   - has instructions that name no excluded tool.
-- [ ] 2.1b Move the module-scope `package.json` read and the
+- [x] 2.1b Move the module-scope `package.json` read and the
       `find-spec-file.ts` path lookup into the Node bin. A test imports the
       server module with `node:fs` spied and asserts no read.
-- [ ] 2.2 Add `createServer` options: `toolset`, `version`, `formatSpec`,
+- [x] 2.2 Add `createServer` options: `toolset`, `version`, `formatSpec`,
       `krdSchema` and `fitWriter`. The Node bin fills them from disk, and
       `createServer()` keeps today's behaviour. The `fitWriter` factory is
       used by both the format registry and `kaiord_round_trip_validate`.
       Green.
-- [ ] 2.2b Remote toolset only: decode content, then accept only a
+- [x] 2.2b Remote toolset only: decode content, then accept only a
       `structured_workout` with no `sessions`/`laps`/`records`/`events` and
       only allowlisted `extensions` namespaces (pin the allowlist from what
       the workout adapters emit), with a tool error naming the type or
       field. Test a FIT sleep record, a FIT activity, a TCX activity, a
       workout-labelled KRD with `records`, and one with `extensions.health`
       remotely, and the same sleep record locally (still accepted).
-- [ ] 2.2c Remote toolset only: a `tools/call` whose arguments carry
+- [x] 2.2c Remote toolset only: a `tools/call` whose arguments carry
       `input_file`, `output_file`, `file1` or `file2` fails with a tool error
       naming it, also when valid inline content is present.
-- [ ] 2.3 `kaiord_inspect` and `kaiord_round_trip_validate` accept
+- [x] 2.3 `kaiord_inspect` and `kaiord_round_trip_validate` accept
       `input_content` (base64 for FIT). Cover path/content exclusivity.
-- [ ] 2.4 `kaiord_diff` accepts `content1`/`format1` and `content2`/`format2`.
+- [x] 2.4 `kaiord_diff` accepts `content1`/`format1` and `content2`/`format2`.
       Cover path/content exclusivity per side.
-- [ ] 2.5 `kaiord_convert` to FIT without `output_file` returns base64. Add a
+- [x] 2.5 `kaiord_convert` to FIT without `output_file` returns base64. Add a
       test that the bytes decode back to the same KRD.
-- [ ] 2.6 Make the `zwiftReader` and `zwiftWriter` singletons in
+- [x] 2.6 Make the `zwiftReader` and `zwiftWriter` singletons in
       `@kaiord/zwo`'s `browser.ts` lazy, so importing the entry logs
       nothing. The validator already uses the injected logger.
-- [ ] 2.7 Add changesets (`@kaiord/mcp` minor, `@kaiord/zwo` patch).
+- [x] 2.7 Add changesets (`@kaiord/mcp` minor, `@kaiord/zwo` patch).
 
 ## 3. Worker (PR-3, `@kaiord/mcp-worker`, private)
 
