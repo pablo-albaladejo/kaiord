@@ -406,6 +406,63 @@ function garminRule(w) {
   return null;
 }
 
+// Cloudflare Workers: a deploy, rollback or delete changes what kaiord.com
+// serves (the route, the code, the Worker itself). `--dry-run` only bundles.
+const WRANGLER = /^wrangler(@[^/]+)?$/;
+const WRANGLER_VALUED = [
+  "-c",
+  "--config",
+  "-e",
+  "--env",
+  "--env-file",
+  "--profile",
+  "--cwd",
+  "--name",
+  "--outdir",
+  "--message",
+  "--tag",
+  "--version-id",
+  "--compatibility-date",
+];
+const WRANGLER_DEPLOYS = [
+  ["deploy"],
+  ["delete"],
+  ["rollback"],
+  ["versions", "deploy"],
+  ["triggers", "deploy"],
+  // A secret change deploys a new version of the Worker at once.
+  ["secret", "put"],
+  ["secret", "delete"],
+  ["secret", "bulk"],
+];
+
+// Where the wrangler bin leads: `wrangler …`, or `pnpm [flags] wrangler …`
+// and `yarn wrangler …`, which run a local bin directly; `bun x` is `bunx`.
+function wranglerArgs(w) {
+  if (WRANGLER.test(base(w[0]))) return w.slice(1);
+  if (!["pnpm", "yarn", "bun"].includes(base(w[0]))) return null;
+  let rest = skipFlags(w.slice(1), NPM_VALUED);
+  if (base(w[0]) === "bun" && rest[0] === "x")
+    rest = skipFlags(rest.slice(1), NPM_VALUED);
+  return WRANGLER.test(base(rest[0] ?? "")) ? rest.slice(1) : null;
+}
+
+function wranglerRule(w) {
+  const args = wranglerArgs(w);
+  if (args === null) return null;
+  if (args.some((a) => a === "--dry-run" || /^--dry-run=(?!false$)/.test(a)))
+    return null;
+  const pos = positionals(args, WRANGLER_VALUED);
+  const hit = WRANGLER_DEPLOYS.find((cmd) =>
+    cmd.every((part, i) => pos[i] === part)
+  );
+  if (!hit) return null;
+  return {
+    rule: "prod-deploy",
+    why: `\`wrangler ${hit.join(" ")}\` changes a live Cloudflare Worker or its kaiord.com route`,
+  };
+}
+
 const PROTECTED_BRANCH = /^(main|master|changeset-release\/.+)$/;
 const TAG_LIKE = /(^refs\/tags\/)|(^|@)v?\d+\.\d+\.\d+([-+][\w.]+)?$/;
 const GIT_GLOBAL_VALUED = [
@@ -722,6 +779,7 @@ const RULES = [
   changesetRule,
   scriptRule,
   garminRule,
+  wranglerRule,
   gitPushRule,
   ghRule,
 ];

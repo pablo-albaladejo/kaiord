@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createRemoteTestClient,
@@ -141,5 +141,30 @@ describe("createServer default toolset", () => {
     expect(prompts).toHaveLength(LOCAL_PROMPT_COUNT);
     expect(info?.version).toMatch(/^\d+\.\d+\.\d+/);
     expect(client.getInstructions()).toContain("kaiord_garmin_login");
+  });
+});
+
+describe("createServer injected logger", () => {
+  it("should log through the injected logger instead of stderr", async () => {
+    // Arrange
+    const logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+    const stderr = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = await createRemoteTestClient({ logger });
+
+    // Act
+    await client.callTool({
+      name: "kaiord_validate",
+      arguments: { input_content: "{}" },
+    });
+
+    // Assert
+    expect(logger.debug).toHaveBeenCalledWith("Validating KRD document");
+    expect(stderr).not.toHaveBeenCalled();
+    stderr.mockRestore();
   });
 });

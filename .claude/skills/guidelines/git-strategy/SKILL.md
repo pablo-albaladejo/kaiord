@@ -49,6 +49,7 @@ garmin-connect
 ai
 cli
 mcp
+mcp-worker
 i18n
 spa-editor
 garmin-bridge
