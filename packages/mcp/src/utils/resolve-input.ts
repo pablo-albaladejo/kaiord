@@ -2,13 +2,14 @@ import { readFileAsText } from "./file-io";
 
 export const validateExclusiveInput = (
   inputFile: string | undefined,
-  inputContent: string | undefined
+  inputContent: string | undefined,
+  [fileParam, contentParam] = ["input_file", "input_content"]
 ): void => {
   if (inputFile === undefined && inputContent === undefined) {
-    throw new Error("Provide either input_file or input_content");
+    throw new Error(`Provide either ${fileParam} or ${contentParam}`);
   }
   if (inputFile && inputContent) {
-    throw new Error("Provide only one of input_file or input_content");
+    throw new Error(`Provide only one of ${fileParam} or ${contentParam}`);
   }
 };
 

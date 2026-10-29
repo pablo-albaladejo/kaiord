@@ -1,11 +1,11 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-import { findSpecFile } from "../utils/find-spec-file";
-
 const SPEC_URI = "kaiord://docs/krd-format";
 
-export const registerKrdFormatSpecResource = (server: McpServer): void => {
-  const spec = findSpecFile();
+export const registerKrdFormatSpecResource = (
+  server: McpServer,
+  spec: string
+): void => {
   server.resource(
     "krd-format-spec",
     SPEC_URI,

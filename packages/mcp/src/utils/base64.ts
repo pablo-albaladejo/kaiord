@@ -13,3 +13,6 @@ export const decodeBase64 = (input: string): Uint8Array => {
   }
   return new Uint8Array(buffer);
 };
+
+export const encodeBase64 = (bytes: Uint8Array): string =>
+  Buffer.from(bytes).toString("base64");
