@@ -1,15 +1,22 @@
 // Cloudflare Worker in front of the GitHub Pages origin for kaiord.com.
-// Pages cannot set response headers, so this edge adds the two things an
-// agent looks for in a response: RFC 8288 Link headers pointing at the
-// discovery documents, and a Markdown body when the request asks for
-// `Accept: text/markdown`. Everything else passes through untouched.
+// Pages cannot set response headers, so this edge adds what an agent looks
+// for in a response: RFC 8288 Link headers pointing at the discovery
+// documents, a Markdown body when the request asks for
+// `Accept: text/markdown`, and the RFC 9727 media type on the extensionless
+// api-catalog. Everything else passes through untouched.
 // Deploy: scripts/geo/wrangler.toml (route kaiord.com/*).
+import { prefersMarkdown } from "./accept-negotiation.mjs";
+
+export { prefersMarkdown };
+
+export const API_CATALOG_PATH = "/.well-known/api-catalog";
 
 export const LINK_HEADER = [
   '</.well-known/ai-catalog.json>; rel="ai-catalog"',
   '</.well-known/agent-skills/index.json>; rel="describedby"; type="application/json"',
   '</llms.txt>; rel="describedby"; type="text/markdown"',
   '</docs/>; rel="service-doc"',
+  `<${API_CATALOG_PATH}>; rel="api-catalog"`,
 ].join(", ");
 
 const CONTENT_SIGNAL = "ai-train=yes, search=yes, ai-input=yes";
@@ -25,31 +32,6 @@ export function markdownPathFor(pathname) {
   const page = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
   const last = page.slice(page.lastIndexOf("/") + 1);
   return last.includes(".") ? null : `${page}.md`;
-}
-
-// RFC 9110 §12.5.1: the most specific matching range decides the quality.
-const rangesFor = (type) => [type, `${type.split("/")[0]}/*`, "*/*"];
-
-const qualityOf = (accept, type, { wildcards = true } = {}) => {
-  const ranges = wildcards ? rangesFor(type) : [type];
-  const found = new Map();
-  for (const part of accept.split(",")) {
-    const [media, ...params] = part.trim().split(";");
-    const range = media.trim().toLowerCase();
-    if (!ranges.includes(range) || found.has(range)) continue;
-    const q = params.map((p) => p.trim()).find((p) => p.startsWith("q="));
-    found.set(range, q ? Number(q.slice(2)) : 1);
-  }
-  const match = ranges.find((range) => found.has(range));
-  return match ? found.get(match) : 0;
-};
-
-// Markdown only when it is asked for by name and not ranked below HTML, so a
-// browser's `text/html,…,*/*` never receives it.
-export function prefersMarkdown(accept) {
-  const header = accept ?? "";
-  const markdown = qualityOf(header, "text/markdown", { wildcards: false });
-  return markdown > 0 && markdown >= qualityOf(header, "text/html");
 }
 
 const withHeaders = (response, extra) => {
@@ -80,11 +62,25 @@ async function markdownResponse(request, path, originFetch) {
   return new Response(isHead ? null : body, { status: 200, headers });
 }
 
+// Pages serves the extensionless catalog with a generic type; only a 200
+// is relabelled, so a missing file still reads as missing.
+const apiCatalogResponse = (response) =>
+  response.status === 200
+    ? withHeaders(response, {
+        "content-type": "application/linkset+json",
+        "access-control-allow-origin": "*",
+      })
+    : response;
+
 export async function handle(request, originFetch = fetch) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return originFetch(request);
   }
-  const path = markdownPathFor(new URL(request.url).pathname);
+  const pathname = new URL(request.url).pathname;
+  if (pathname === API_CATALOG_PATH) {
+    return apiCatalogResponse(await originFetch(request));
+  }
+  const path = markdownPathFor(pathname);
   if (path && prefersMarkdown(request.headers.get("accept"))) {
     const markdown = await markdownResponse(request, path, originFetch);
     if (markdown) return markdown;
