@@ -1,0 +1,19 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://kaiord.com/mcp",
+      "service-desc": [
+        {
+          "href": "https://kaiord.com/.well-known/mcp/server-card.json",
+          "type": "application/json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://kaiord.com/docs/mcp/tools",
+          "type": "text/html"
+        }
+      ]
+    }
+  ]
+}

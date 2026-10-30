@@ -27,6 +27,7 @@ They are not used. Do not send credentials. Kaiord ignores them.
 - MCP server (Streamable HTTP): `https://kaiord.com/mcp`
   ([server card](https://kaiord.com/.well-known/mcp/server-card.json),
   [tools](https://kaiord.com/docs/mcp/tools))
+- [API catalog (RFC 9727)](https://kaiord.com/.well-known/api-catalog)
 
 ## Limits
 
