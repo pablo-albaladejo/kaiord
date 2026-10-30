@@ -135,7 +135,9 @@ unchanged.
   it (its stream's `maxByteLength` equals the cap) and throws if not, instead
   of failing later with a 500 MB reservation.
 - **Upstream:** an issue is filed with the SDK maintainers, so the patch can
-  be dropped once the option exists upstream.
+  be dropped once the option exists upstream. _Superseded: the SDK repo has
+  issues disabled, so the Garmin developer forum is the channel (see
+  Post-implementation notes)._
 
 ### D5. ZWO validates well-formedness only in the Worker
 
@@ -268,6 +270,8 @@ Each document is published only after the smoke test passes in production:
 - **Registry:** `server.json` adds
   `remotes: [{ "type": "streamable-http", "url": "https://kaiord.com/mcp" }]`.
   Republishing to the registry is Pablo's `mcp-publisher publish`.
+  _Superseded: the `registry` job in `release.yml` publishes each release
+  (see Post-implementation notes)._
 - **DNS-AID:**
   - record `_mcp._agents.kaiord.com. SVCB 1 kaiord.com. alpn="h2" port=443`;
   - DNSSEC enabled on the Cloudflare zone;
@@ -286,7 +290,7 @@ Each document is published only after the smoke test passes in production:
 - **Patch drift:** pnpm keys a patch by the exact package version, so every
   `@garmin/fitsdk` bump needs the patch re-keyed, not only the ones that
   conflict. A bump without it fails `pnpm install` loudly. A unit test asserts
-  the option reaches the `OutputStream`. The upstream issue is the way out.
+  the option reaches the `OutputStream`. Upstream adoption is the way out.
 - **Second runtime:** the remote server is a second runtime for the same
   tools. A test asserts the remote `tools/list` equals the eight names, so a
   tool added later cannot reach the network by default.

@@ -147,7 +147,8 @@ The privacy policy SHALL cover the following topics:
 
 - **WHEN** the privacy policy is read
 - **THEN** it SHALL state that `https://kaiord.com/mcp` processes workout content sent by an AI agent in transit only, without storing or logging it
-- **AND** it SHALL state that only structured workout definitions are accepted and activity, location and health files are rejected
+- **AND** it SHALL state that only structured workout definitions are accepted, and that recorded activities, courses and every health file type are rejected
+- **AND** it SHALL state that a rejected file is decoded in memory only to learn its type, and is neither stored, logged nor returned
 - **AND** it SHALL disclose that the client IP address is used transiently for rate limiting and is not retained
 - **AND** it SHALL state that a workout's name, notes, heart-rate targets and device metadata are processed in transit and may contain personal information supplied by the caller
 - **AND** it SHALL name Cloudflare as the network and hosting provider and state that the endpoint offers no Garmin or health tools
