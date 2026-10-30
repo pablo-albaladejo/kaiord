@@ -1,0 +1,56 @@
+# Daily live check of kaiord.com's agent discovery surfaces (auth.md, the
+# well-known cards and the remote MCP endpoint). The checks live in
+# scripts/geo/agent-surfaces.mjs, which is stdlib-only, so no install or
+# build is needed. On failure, one open issue labelled agent-surfaces
+# collects every failed run: the first failure opens it, later ones comment.
+name: Agent Surfaces
+
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    name: Check agent discovery surfaces
+    runs-on: ubuntu-latest
+    # A handful of HTTPS requests; lint-family ceiling halved.
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Check surfaces
+        run: node scripts/geo/agent-surfaces.mjs | tee "$RUNNER_TEMP/surfaces.txt"
+        shell: bash
+
+      - name: Open or update the failure issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh label create agent-surfaces --color B60205 --description "Agent discovery guard" 2>/dev/null || true
+          FAILED=$(grep '^FAIL ' "$RUNNER_TEMP/surfaces.txt" 2>/dev/null | sed 's/^/- /' || true)
+          BODY=$(printf 'Run: %s\n\n%s\n' "$RUN_URL" "${FAILED:-No row output; see the run log.}")
+          N=$(gh issue list --label agent-surfaces --state open --json number --jq '.[0].number // empty')
+          if [ -n "$N" ]; then
+            gh issue comment "$N" --body "$BODY"
+          else
+            gh issue create --title "Agent discovery surfaces failing" \
+              --label agent-surfaces --assignee pablo-albaladejo --body "$BODY"
+          fi
