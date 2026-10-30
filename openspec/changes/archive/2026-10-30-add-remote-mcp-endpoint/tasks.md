@@ -18,8 +18,9 @@
       documented as public API.
 - [x] 1.4 Add a test that a writer created without the option encodes exactly
       as before, with byte-identical output on the existing fixtures.
-- [ ] 1.5 File the upstream issue with the SDK maintainers and link it from
-      the patch file.
+- [x] 1.5 Find the upstream channel and record it in `design.md`.
+      `garmin/fit-javascript-sdk` has issues disabled and closes outside
+      PRs, so the only channel is the Garmin developer forum.
 - [x] 1.6 Add a changeset (`@kaiord/fit` patch; the option is internal).
 
 ## 2. Shared server, remote toolset (PR-2, `@kaiord/mcp`)
@@ -61,12 +62,12 @@
 
 ## 3. Worker (PR-3, `@kaiord/mcp-worker`, private)
 
-- [ ] 3.1 Scaffold the private package: `wrangler.toml` (route
+- [x] 3.1 Scaffold the private package: `wrangler.toml` (route
       `kaiord.com/mcp`, `nodejs_compat`, pinned `compatibility_date`,
       invocation logs off, no storage bindings), text-module rules for the
       spec and schema, and the CI test matrix and `detect-changes` entries.
       A config test asserts logs off and no storage bindings.
-- [ ] 3.2 Red then green: handler tests with Fetch-API `Request`s:
+- [x] 3.2 Red then green: handler tests with Fetch-API `Request`s:
   - `POST /mcp` `tools/list` returns the eight tools;
   - a KRD→FIT call round-trips;
   - `GET /mcp` returns `405` with `Allow: POST`;
@@ -85,16 +86,16 @@
   limits: it is the primary control because it runs before the Worker and
   so protects the account-wide daily quota shared with `kaiord-agent-edge`.
 
-- [ ] 3.4 Log only the error class and tool name. Add a test that a failing
+- [x] 3.4 Log only the error class and tool name. Add a test that a failing
       tool call logs no argument content.
-- [ ] 3.5 Write the post-deploy smoke script with its `node:test`:
+- [x] 3.5 Write the post-deploy smoke script with its `node:test`:
       `tools/list` names, KRD→FIT round-trip, `kaiord_round_trip_validate`
       on FIT, ZWO convert, activity rejected, `413`. It exits non-zero
       naming the failed check.
 - [x] 3.6 On a throwaway `workers.dev` deploy (Pablo's `!` command), measure
       CPU for `kaiord_round_trip_validate` and the per-request server build.
       Drop from the remote list any tool that hits Error 1102.
-- [ ] 3.7 Add `wrangler deploy`, `wrangler delete` and Worker route changes
+- [x] 3.7 Add `wrangler deploy`, `wrangler delete` and Worker route changes
       to the `prod-deploy` class in `never-auto-remediate.cjs`, with tests.
 
 ## 4. Privacy and docs (PR-4, `@kaiord/docs`)
@@ -115,7 +116,7 @@
 
 - [x] 5.1 With Pablo's go-ahead, deploy `kaiord-mcp` with
       `npx wrangler@4 deploy`.
-- [ ] 5.2 Add the WAF rate-limiting rule on `/mcp` (always, not only as a
+- [x] 5.2 Add the WAF rate-limiting rule on `/mcp` (always, not only as a
       fallback), and set the `kaiord-agent-edge` route to fail open.
 - [x] 5.3 Run the smoke script against `https://kaiord.com/mcp`. It must pass
       before section 6 starts.
@@ -128,10 +129,11 @@
       Extend the landing `well-known` test and the deploy-site `test -f`
       checks.
 - [x] 6.2 Add the AI-catalog entry for the remote server.
-- [ ] 6.3 Add `remotes` to `packages/mcp/server.json`. Pablo then runs
-      `mcp-publisher publish`.
-- [ ] 6.4 Enable DNSSEC on the Cloudflare zone. With Pablo's approval, add the
+- [x] 6.3 `remotes` is in `packages/mcp/server.json`, and the `registry` job
+      in `release.yml` publishes it with each `@kaiord/mcp` release. Tick
+      once a release has put the `remotes` entry in the MCP Registry.
+- [x] 6.4 Enable DNSSEC on the Cloudflare zone. With Pablo's approval, add the
       DS record at the Route53 registrar.
-- [ ] 6.5 Create the `_mcp._agents.kaiord.com` `SVCB` record. Verify it
+- [x] 6.5 Create the `_mcp._agents.kaiord.com` `SVCB` record. Verify it
       returns authenticated data through DNS-over-HTTPS.
-- [ ] 6.6 Rescan isitagentready.com. `mcpServerCard` and `dnsAid` must pass.
+- [x] 6.6 Rescan isitagentready.com. `mcpServerCard` and `dnsAid` must pass.

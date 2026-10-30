@@ -1,4 +1,12 @@
-## ADDED Requirements
+> Synced: 2026-10-30 (add-remote-mcp-endpoint)
+
+# Remote MCP Endpoint
+
+## Purpose
+
+Serve the stateless subset of the Kaiord MCP tools over Streamable HTTP at `https://kaiord.com/mcp`, so hosted agents can convert and validate structured workouts without a local install, while keeping account, health and recorded data out of the network path.
+
+## Requirements
 
 ### Requirement: Stateless remote MCP endpoint
 
@@ -55,7 +63,7 @@ The remote server SHALL register exactly these tools: `kaiord_list_formats`, `ka
 
 ### Requirement: Remote tools accept structured workouts only
 
-Every remote tool that takes content SHALL decode it and SHALL accept only a document of KRD type `structured_workout` with no `sessions`, `laps`, `records` or `events`, and with no `extensions` namespace outside the remote workout allowlist (which SHALL NOT contain `health`, `course` or `course_points`). Any other document SHALL be rejected with a tool error naming the type or the offending field, and SHALL NOT be stored, logged or returned. This SHALL apply in every input format. The local server SHALL keep accepting all types.
+Every remote tool that takes content SHALL decode it and SHALL accept only a document of KRD type `structured_workout` with no `sessions`, `laps`, `records` or `events`, and with no `extensions` namespace outside the remote workout allowlist. The allowlist SHALL be `structured_workout` plus the namespaces the workout readers emit (`fit`, `tcx`, `zwift`, `gcn`), defined once as `REMOTE_EXTENSION_ALLOWLIST` in `packages/mcp/src/tools/structured-workout-gate.ts`, and SHALL NOT contain `health`, `course` or `course_points`. Any other document SHALL be rejected with a tool error naming the type or the offending field, and SHALL NOT be stored, logged or returned. This SHALL apply in every input format. The local server SHALL keep accepting all types.
 
 #### Scenario: A health FIT file is rejected remotely
 
@@ -184,4 +192,4 @@ The MCP Server Card at `/.well-known/mcp/server-card.json`, the AI-catalog entry
 
 - **WHEN** the `kaiord-mcp` route is removed
 - **THEN** `/mcp` SHALL return `404`
-- **AND** the change that removes the route SHALL also remove the Server Card, the AI-catalog entry and the registry `remotes` entry
+- **AND** the change that removes the route SHALL also remove the Server Card, the AI-catalog entry, the registry `remotes` entry and the DNS-AID record
