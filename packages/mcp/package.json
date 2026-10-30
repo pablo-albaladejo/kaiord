@@ -38,13 +38,13 @@
     "@kaiord/garmin-connect": "workspace:^",
     "@kaiord/tcx": "workspace:^",
     "@kaiord/zwo": "workspace:^",
-    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.5",
-    "tsdown": "^0.23.1",
+    "tsdown": "^0.23.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"

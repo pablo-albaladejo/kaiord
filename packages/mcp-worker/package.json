@@ -21,7 +21,7 @@
     "@kaiord/mcp": "workspace:*",
     "@kaiord/tcx": "workspace:*",
     "@kaiord/zwo": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^4.6.6"
   },
   "devDependencies": {
