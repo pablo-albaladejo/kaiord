@@ -99,6 +99,7 @@
     "bridge:sync": "node scripts/sync-bridge-core.mjs",
     "test:scripts": "node --test scripts/*.test.mjs scripts/lib/*.test.mjs scripts/cws-api/*.test.mjs scripts/eslint-rules/*.test.mjs scripts/geo/*.test.mjs packages/docs/scripts/*.test.mjs packages/mcp-worker/scripts/*.test.mjs packages/workout-spa-editor/scripts/*.test.mjs packages/workout-spa-editor/scripts/verify-prod/*.test.mjs packages/workout-spa-editor/scripts/verify-prod/checks/*.test.mjs .claude/hooks/*.test.mjs",
     "archive:index": "node scripts/generate-archive-index.mjs",
+    "geo:agent-surfaces": "node scripts/geo/agent-surfaces.mjs",
     "specs:inventory": "node scripts/generate-specs-inventory.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
