@@ -1,5 +1,13 @@
 # @kaiord/zwo
 
+## 10.5.0
+
+### Patch Changes
+
+- e33503a: Importing the browser entry no longer logs "Browser environment detected". The `zwiftReader` and `zwiftWriter` singletons are now built on first use, so a caller that passes its own logger to `createZwiftReader` or `createZwiftWriter` sees no output from the default console logger.
+- Updated dependencies [2fe08dc]
+  - @kaiord/core@10.5.0
+
 ## 10.4.0
 
 ### Minor Changes

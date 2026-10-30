@@ -1,5 +1,17 @@
 # @kaiord/fit
 
+## 10.5.0
+
+### Patch Changes
+
+- c5070f0: Add an internal `maxOutputBytes` option to the FIT writer that bounds the
+  encoder's output buffer. The Garmin SDK always reserves a resizable buffer
+  with a 500 MB ceiling, which a Cloudflare Worker isolate refuses; the option
+  needs the monorepo's patched `@garmin/fitsdk` and throws without it. Writers
+  created without the option behave exactly as before.
+- Updated dependencies [2fe08dc]
+  - @kaiord/core@10.5.0
+
 ## 10.4.0
 
 ### Minor Changes
