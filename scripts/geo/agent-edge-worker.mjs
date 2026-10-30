@@ -63,12 +63,14 @@ async function markdownResponse(request, path, originFetch) {
 }
 
 // Pages serves the extensionless catalog with a generic type; only a 200
-// is relabelled, so a missing file still reads as missing.
+// is relabelled, so a missing file still reads as missing. RFC 9727 §2:
+// a HEAD on the catalog carries the rel="api-catalog" Link header.
 const apiCatalogResponse = (response) =>
   response.status === 200
     ? withHeaders(response, {
         "content-type": "application/linkset+json",
         "access-control-allow-origin": "*",
+        link: LINK_HEADER,
       })
     : response;
 

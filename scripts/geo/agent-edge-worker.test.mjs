@@ -77,7 +77,7 @@ describe("agent-edge-worker", () => {
     assert.equal(await response.text(), CATALOG_BODY);
   });
 
-  it("should answer HEAD on the api-catalog with the type and no body", async () => {
+  it("should answer HEAD on the api-catalog with type, link and no body", async () => {
     const { originFetch } = fakeOrigin(CATALOG_SITE);
 
     const response = await handle(
@@ -89,6 +89,8 @@ describe("agent-edge-worker", () => {
       response.headers.get("content-type"),
       "application/linkset+json"
     );
+    assert.equal(response.headers.get("link"), LINK_HEADER);
+    assert.match(response.headers.get("link"), /rel="api-catalog"/);
     assert.equal(await response.text(), "");
   });
 
