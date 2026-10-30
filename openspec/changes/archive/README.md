@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-10-30 | [`add-remote-mcp-endpoint`](./2026-10-30-add-remote-mcp-endpoint/) | @kaiord/mcp is stdio-only. An agent can use it only after the user installs |
 | 2026-10-25 | [`add-coach-session-reschedule`](./2026-10-25-add-coach-session-reschedule/) | The athlete needs to move a session to another day, coach sessions included, |
 | 2026-10-25 | [`add-spa-pwa-manifest`](./2026-10-25-add-spa-pwa-manifest/) | Chrome on Android says "This app cannot be installed" for kaiord.com/app/. |
 | 2026-10-25 | [`garmin-single-value-target-bands`](./2026-10-25-garmin-single-value-target-bands/) | Band single-value Garmin targets and resolve percent-of-max-HR targets |
