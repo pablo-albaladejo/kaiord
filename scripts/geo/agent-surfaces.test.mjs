@@ -136,10 +136,16 @@ describe("agent-surfaces", () => {
 
   it("should fail a row whose reply stalls past the deadline", async () => {
     // Arrange
+    // A stalled socket keeps the event loop alive; the signal's own timer
+    // is unref'd, so the fake holds a ref'd handle the way a socket would.
     const fetch = (_url, { signal }) =>
-      new Promise((_resolve, reject) =>
-        signal.addEventListener("abort", () => reject(signal.reason))
-      );
+      new Promise((_resolve, reject) => {
+        const socket = setInterval(() => {}, 1_000);
+        signal.addEventListener("abort", () => {
+          clearInterval(socket);
+          reject(signal.reason);
+        });
+      });
 
     // Act
     const result = await checkRow(ROW, fetch, 10);
