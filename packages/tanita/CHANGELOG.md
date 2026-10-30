@@ -1,5 +1,12 @@
 # @kaiord/tanita
 
+## 10.5.0
+
+### Patch Changes
+
+- Updated dependencies [2fe08dc]
+  - @kaiord/core@10.5.0
+
 ## 10.4.0
 
 ### Patch Changes

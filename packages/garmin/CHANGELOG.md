@@ -1,5 +1,15 @@
 # @kaiord/garmin
 
+## 10.5.0
+
+### Patch Changes
+
+- 414f931: A single-value pace target (`{ "unit": "mps", "value": … }`) is now exported to Garmin Connect as a ±5 s/km band around that pace, fastest bound first, instead of a zero-width range. Before, a 4:45 min/km step reached the watch as "4:45-4:45 min/km", so the pace alert fired whenever the runner was off that exact pace; it now shows 4:40-4:50 min/km. Non-positive speeds (no finite pace) are passed through unchanged, and the band never exceeds the pace schema's 30 m/s cap. Reading such a workout back from Garmin now gives a pace `range` (the band) rather than the original single value, so a single-value pace target no longer round-trips exactly.
+- 2fe08dc: `percent_max` heart-rate targets are now written to Garmin Connect as bpm, resolved with the athlete's max heart rate from the new `maxHeartRate` writer option (`round(pct × maxHeartRate / 100)`) and then sent as a ±3 bpm band. Before, the percentage itself was written as bpm, so an "85 % max HR" step reached the watch as an 85 bpm target. If `maxHeartRate` is missing or not a plausible value (finite and between 100 and 300 bpm), the writer throws `MissingMaxHeartRateError` instead of guessing one, as it does for `percent_ftp` without an FTP. A target that resolves outside 1–300 bpm throws `KrdValidationError` instead of being written as 0 bpm or clamped to a zero-width 300–300 band.
+- 2fe08dc: Single-value power, heart-rate and cadence targets are now exported to Garmin Connect as a tolerance band instead of a zero-width range, so the watch alert no longer fires whenever the athlete is off one exact number. Power gets ±5 % (at least ±5 W), heart rate ±3 bpm and cadence ±3, with integer bounds. Power is ordered higher wattage first; heart rate and cadence lowest first. A `percent_ftp` value is resolved to watts first, then banded: 85 % of a 250 W FTP is now sent as 202-224 W instead of 213-213 W. Bands are capped at the KRD schema maxima (5000 W, 300 bpm, 300 rpm) and floored at 0, and zero or negative values and zone targets are passed through unchanged. Reading such a workout back from Garmin gives a `range` (the band), so a single value no longer round-trips exactly.
+- Updated dependencies [2fe08dc]
+  - @kaiord/core@10.5.0
+
 ## 10.4.0
 
 ### Minor Changes
