@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import authMd from "../public/auth.md?raw";
 import catalogJson from "../public/.well-known/ai-catalog.json?raw";
 import skillsJson from "../public/.well-known/agent-skills/index.json?raw";
 import cardJson from "../public/.well-known/mcp/server-card.json?raw";
@@ -109,5 +110,31 @@ describe("well-known agent discovery documents", () => {
 
     // Assert
     expect(entry?.type).toBe("application/mcp-server-card+json");
+  });
+});
+
+describe("auth.md", () => {
+  it("should state that no authentication and no registration exist", () => {
+    // Arrange
+    const authentication = /^## Authentication\s*\n+None\b/m;
+    const registration = /^## Registration\s*\n+(None|There is no)/m;
+
+    // Act
+    const sections = [authentication.test(authMd), registration.test(authMd)];
+
+    // Assert
+    expect(sections).toEqual([true, true]);
+  });
+
+  it("should name the remote endpoint and no OAuth issuer", () => {
+    // Arrange
+    const issuer = /oauth-authorization-server|openid-configuration|issuer/i;
+
+    // Act
+    const namesIssuer = issuer.test(authMd);
+
+    // Assert
+    expect(authMd).toContain(MCP_ENDPOINT);
+    expect(namesIssuer).toBe(false);
   });
 });
