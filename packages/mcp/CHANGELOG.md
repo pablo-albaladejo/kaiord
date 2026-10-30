@@ -1,5 +1,28 @@
 # @kaiord/mcp
 
+## 10.5.0
+
+### Minor Changes
+
+- e07e1c2: `createServer` takes an optional `logger`. Without it the server logs to stderr as before; a host where stderr is not private, such as a Cloudflare Worker, can pass a quiet one.
+- 2fe08dc: New `missing-max-hr` error type. `kaiord_convert` to GCN and `kaiord_garmin_push` fail with it when a workout has `percent_max` heart-rate targets, because the tools don't take a max heart rate yet. The suggestion tells the agent to rewrite those targets as bpm. Before this change, the percentages were silently written to Garmin as bpm.
+- e33503a: `createServer(options?)` now takes `toolset` (`"local"` by default, or `"remote"`), `version`, `formatSpec`, `krdSchema` and `fitWriter`. Called with no arguments it behaves as before. The `"remote"` toolset registers only the eight stateless tools, no prompts and three resources. Its schemas have no file-path parameters, and a call that sends one fails with an error naming it. It accepts only structured workouts. Importing the server module no longer reads any file; the `kaiord-mcp` bin reads the version, the format spec and the schema at startup. `kaiord_inspect` and `kaiord_round_trip_validate` accept `input_content` (base64 for FIT), and `kaiord_diff` accepts `content1`/`format1` and `content2`/`format2`. `kaiord_convert` to FIT without `output_file` returns the FIT bytes as base64 text instead of failing.
+
+### Patch Changes
+
+- Updated dependencies [2fe08dc]
+- Updated dependencies [c5070f0]
+- Updated dependencies [2fe08dc]
+- Updated dependencies [414f931]
+- Updated dependencies [2fe08dc]
+- Updated dependencies [2fe08dc]
+- Updated dependencies [e33503a]
+  - @kaiord/core@10.5.0
+  - @kaiord/fit@10.5.0
+  - @kaiord/garmin-connect@10.5.0
+  - @kaiord/garmin@10.5.0
+  - @kaiord/zwo@10.5.0
+
 ## 10.4.0
 
 ### Minor Changes

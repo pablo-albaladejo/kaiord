@@ -1,5 +1,45 @@
 # @kaiord/workout-spa-editor
 
+## 1.7.0
+
+### Minor Changes
+
+- 03e897c: Show when Garmin still holds a moved workout on its old day. The card carries a "Garmin: Tue 6" badge ("Garmin? Tue 6" when the placement is unconfirmed). The workout detail and the coaching dialog say "Garmin still on {date}" or "Garmin may still be on {date}" and offer Update Garmin. A move made from the calendar or the detail ends with a toast that names the Garmin day and has the same action. Neither a move nor a sync pushes to Garmin on its own, and a locked session shows no drift.
+- baf0532: Moving a session now moves it everywhere. The workout's date is the session's effective date: the athlete's move, the coach's move and the cloud merge re-date the session match with it, so a coach-moved card now moves on the calendar. Cards already stuck on a stale day are healed on the first launch and after every cloud import. A done session (with a recording, or completed by the coach) can't be moved and says why. A plan matched in another week no longer shows a second card, and a recording linked to one session is never linked to another.
+- 88abc8f: Move coach sessions from the calendar: drag a matched session in the Grid, or use Move to another day in the coaching dialog. Every move, the workout detail and the coach-move notice's Move back included, first asks when the target day already holds a session of the same sport. A moved session shows the day the coach had it on, and the coach-move notice now names the days a coach move replaced, each with Move back.
+- 8440cfe: Make the editor installable as an app: `index.html` links a web app manifest scoped to `/app/` (standalone display, the brand dark theme colour, 192, 512 and maskable icons). No service worker is registered, so every deploy is still picked up on the next load.
+- c5b3120: Block re-sending a TrainingPeaks workout that was moved or edited since it was pushed: TrainingPeaks is create-only for Kaiord, so a re-send would leave a second copy. The ledger now records the pushed day, the message names it when the workout moved, and "Send a copy anyway" stays available behind a confirmation.
+
+### Patch Changes
+
+- 89f2349: Narrate an AI workout conversion while it runs: say when the model is reasoning before it writes, show the last step it finished, name the attempt and why the previous one failed, and split the elapsed time between the current phase and the whole run. Each generation also logs its phase timings to the browser console at debug level.
+- 3fa69b6: Dragging a workout across the calendar now shows the drag: a copy of the card lifts and follows the pointer, the original stays dimmed in place, the cursor turns into a grab hand, and on release the copy settles into the target day (instantly under reduced motion). A plain click never shows the copy.
+- 9f02073: Show the session's intensity in the calendar workout dialog: a full-width zone-profile chart under the header, with one bar per step sized by duration and coloured by zone, a minute axis and a Z1–Z5 legend. The header reads sport · duration · status · source, and the coach notes are clamped to two lines with Show all / Show less.
+- 26e16bb: The coaching dialog now estimates a zone profile from the coach's text when the plan has no structured workout to draw. The chart is captioned "Estimated from coach text", spans the coach's whole plan, and draws any span with no readable zone as a neutral grey bar. Text the estimator cannot read faithfully (distances, totals that do not reconcile, nested sub-steps) shows no chart.
+- 8a0d32f: The chat assistant now sends a workout to Garmin Connect without asking for confirmation first, and a toast says whether it was sent or failed. Every other chat action still asks before it runs.
+- bdad967: Calendar cards for coach sessions not yet turned into a workout now draw the zone profile estimated from the coach's text, faded and titled as an estimate. The visible week reads the missing coach texts in the background, one request per day, once.
+- 65b4e5d: Fix cross-device sync through Google Drive not carrying changes between browsers. A reopened tab or installed PWA now stays connected, and the next tap signs in again. The app pulls again when it is resumed or regains focus, and every 5 minutes while it is open. An expired Google token is refreshed instead of failing every sync after an hour. Edits to every synced table now push, not only workouts, templates, profiles, AI providers and nutrition.
+- 2fe08dc: Garmin exports (single push, Send week, the chat tool and the GCN file download) now pass the athlete's max heart rate to the Garmin writer, so `% max HR` targets reach the watch as a bpm band instead of the raw percentage as bpm. When the profile has no max heart rate, the export is refused with a `missing-max-hr` reason and an EN/ES message asking to set it in Athlete, the same way a missing FTP is reported for `% FTP` power.
+- dd84c48: Stop a tab whose code is older than the installed database instead of letting it patch the newer schema. Boot probes the database version before the first render and shows a blocking dialog when a newer deploy has upgraded it; a running tab closes its connection and shows the same dialog when another window upgrades. The dialog offers to download the open draft and reloads into the newer worker when one is waiting. Everything already saved stays in IndexedDB, untouched.
+- 414f931: The calendar's week status bar now counts a matched session as done only once an execution has been recorded against it. A coach plan that was converted and joined to a Kaiord workout, but not yet run (for example a session later in the week), no longer shows up as done.
+- Updated dependencies [d1f3f3a]
+- Updated dependencies [33804fb]
+- Updated dependencies [89f2349]
+- Updated dependencies [2fe08dc]
+- Updated dependencies [c5070f0]
+- Updated dependencies [414f931]
+- Updated dependencies [2fe08dc]
+- Updated dependencies [2fe08dc]
+- Updated dependencies [e33503a]
+  - @kaiord/ai@9.6.0
+  - @kaiord/core@10.5.0
+  - @kaiord/fit@10.5.0
+  - @kaiord/garmin@10.5.0
+  - @kaiord/zwo@10.5.0
+  - @kaiord/tanita@10.5.0
+  - @kaiord/trainingpeaks@10.5.0
+  - @kaiord/whoop@10.5.0
+
 ## 1.6.0
 
 ### Minor Changes

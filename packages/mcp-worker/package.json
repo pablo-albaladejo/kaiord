@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/mcp-worker",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Cloudflare Worker serving the stateless Kaiord MCP tools at kaiord.com/mcp",
   "type": "module",
