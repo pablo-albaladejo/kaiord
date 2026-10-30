@@ -19,14 +19,35 @@ export const REMOTE_TOOLS = [
   "kaiord_validate",
 ];
 
-const json = (path) => ({
+const MCP_ENDPOINT = `${ORIGIN}/mcp`;
+const SERVER_CARD = `${ORIGIN}/.well-known/mcp/server-card.json`;
+const DEADLINE_MS = 20_000;
+
+const json = (path, predicate) => ({
   name: path,
   url: `${ORIGIN}${path}`,
   typePrefix: "application/json",
   cors: true,
   parse: "json",
-  predicate: (body) => body !== null && typeof body === "object",
+  predicate,
 });
+
+export const isServerCard = (card) =>
+  card?.transport?.endpoint === MCP_ENDPOINT &&
+  Array.isArray(card.remotes) &&
+  card.remotes.some((remote) => remote?.url === MCP_ENDPOINT) &&
+  typeof card.capabilities?.tools === "object";
+
+export const isAiCatalog = (catalog) =>
+  Array.isArray(catalog?.entries) &&
+  catalog.entries.some((entry) => entry?.url === SERVER_CARD);
+
+export const isSkillsIndex = (index) =>
+  Array.isArray(index?.skills) &&
+  index.skills.length > 0 &&
+  index.skills.every(
+    (skill) => skill?.url && /^sha256:[0-9a-f]{64}$/.test(skill.digest)
+  );
 
 export const ROWS = [
   {
@@ -36,13 +57,13 @@ export const ROWS = [
     parse: "text",
     predicate: (body) => /^## Authentication\s*\n+None\b/m.test(body),
   },
-  json("/.well-known/mcp/server-card.json"),
-  json("/.well-known/ai-catalog.json"),
-  json("/.well-known/agent-skills/index.json"),
+  json("/.well-known/mcp/server-card.json", isServerCard),
+  json("/.well-known/ai-catalog.json", isAiCatalog),
+  json("/.well-known/agent-skills/index.json", isSkillsIndex),
   {
     name: "POST /mcp tools/list",
     method: "POST",
-    url: `${ORIGIN}/mcp`,
+    url: MCP_ENDPOINT,
     headers: {
       "content-type": "application/json",
       accept: "application/json, text/event-stream",
@@ -56,9 +77,11 @@ export const ROWS = [
   },
 ];
 
-async function inspect(row, fetch) {
+// The signal also aborts the body read, so a stalled stream ends the row.
+async function inspect(row, fetch, timeoutMs) {
   const { method = "GET", headers, body } = row;
-  const response = await fetch(row.url, { method, headers, body });
+  const signal = AbortSignal.timeout(timeoutMs);
+  const response = await fetch(row.url, { method, headers, body, signal });
   if (response.status !== (row.status ?? 200))
     return `status ${response.status}`;
   const type = response.headers.get("content-type") ?? "";
@@ -77,9 +100,9 @@ async function inspect(row, fetch) {
   return row.predicate(parsed) ? null : "body check failed";
 }
 
-export async function checkRow(row, fetch) {
+export async function checkRow(row, fetch, timeoutMs = DEADLINE_MS) {
   try {
-    return { name: row.name, reason: await inspect(row, fetch) };
+    return { name: row.name, reason: await inspect(row, fetch, timeoutMs) };
   } catch (error) {
     return { name: row.name, reason: `fetch failed: ${error.message}` };
   }

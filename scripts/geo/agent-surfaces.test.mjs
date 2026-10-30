@@ -2,7 +2,15 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { REMOTE_TOOLS, ROWS, checkRow, run } from "./agent-surfaces.mjs";
+import {
+  REMOTE_TOOLS,
+  ROWS,
+  checkRow,
+  isAiCatalog,
+  isServerCard,
+  isSkillsIndex,
+  run,
+} from "./agent-surfaces.mjs";
 
 const ROW = {
   name: "card",
@@ -103,6 +111,41 @@ describe("agent-surfaces", () => {
 
     // Assert
     assert.deepEqual([...registered].sort(), REMOTE_TOOLS);
+  });
+
+  for (const [file, predicate] of [
+    ["mcp/server-card.json", isServerCard],
+    ["ai-catalog.json", isAiCatalog],
+    ["agent-skills/index.json", isSkillsIndex],
+  ]) {
+    it(`should accept the published ${file} and reject an empty object`, () => {
+      // Arrange
+      const path = new URL(
+        `../../packages/landing/public/.well-known/${file}`,
+        import.meta.url
+      );
+      const published = JSON.parse(readFileSync(path, "utf8"));
+
+      // Act
+      const verdicts = [predicate(published), predicate({})];
+
+      // Assert
+      assert.deepEqual(verdicts, [true, false]);
+    });
+  }
+
+  it("should fail a row whose reply stalls past the deadline", async () => {
+    // Arrange
+    const fetch = (_url, { signal }) =>
+      new Promise((_resolve, reject) =>
+        signal.addEventListener("abort", () => reject(signal.reason))
+      );
+
+    // Act
+    const result = await checkRow(ROW, fetch, 10);
+
+    // Assert
+    assert.match(result.reason, /^fetch failed: /);
   });
 
   it("should accept the live tools/list reply shape", () => {
