@@ -74,11 +74,11 @@
   "devDependencies": {
     "@types/yargs": "^17.0.32",
     "@vitest/coverage-v8": "^5.0.5",
-    "execa": "^10.1.1",
+    "execa": "^10.2.1",
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.2.0",
     "tmp-promise": "^3.0.3",
-    "tsdown": "^0.23.1",
+    "tsdown": "^0.23.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
