@@ -1,3 +1,5 @@
+> Completed: 2026-10-30
+
 ## Why
 
 `@kaiord/mcp` is stdio-only. An agent can use it only after the user installs

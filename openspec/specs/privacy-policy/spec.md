@@ -1,4 +1,4 @@
-> Synced: 2026-09-27 (privacy-umami-disclosure)
+> Synced: 2026-10-30 (add-remote-mcp-endpoint)
 
 # Privacy Policy
 
@@ -21,7 +21,7 @@ The docs site SHALL include a privacy policy page at `/legal/privacy-policy`. Th
 
 The privacy policy SHALL cover the following topics:
 
-- **Data controller identity**: The policy SHALL state that Kaiord operates no backend and that processing is entirely client-side, so there is no Kaiord-operated data controller beyond the user
+- **Data controller identity**: The policy SHALL state that Kaiord operates no backend that stores user data. Processing is client-side, with one exception: the stateless remote MCP endpoint, which processes a request in transit and keeps nothing (see Remote MCP endpoint). So there is no Kaiord-held record of the user
 - **Data collection**: The policy SHALL disclose that the website, docs and web editor use Umami, a cookie-less analytics tool that records anonymous page views and product events (e.g. 'workout exported'), and that it never records the user's workouts, health data or API keys. The policy SHALL state that no cookies are used for tracking. The Chrome extensions include no telemetry (see each extension's section)
 - **Client-side storage disclosure**: The policy SHALL state that workout-editor state (workouts, templates, profiles, AI provider keys, sync state, chat transcripts) is stored locally in the user's browser via IndexedDB / Dexie, and that nothing is sent to a Kaiord-operated server
 - **LLM provider data flow**: The policy SHALL disclose that, when the user configures AI features, prompts and workout content are sent directly from the browser to the chosen LLM provider (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service, and that Kaiord does not receive or relay this data. For the chat assistant specifically, the policy SHALL disclose that summaries of the user's locally stored history — including workout, coaching, and health data (e.g. sleep) — are sent to the configured provider only when the user converses with the assistant, and never in the background. The policy SHALL also state that chat transcripts are stored locally and, when the user enables cross-device sync, are included in the sync snapshot stored in the user's own cloud storage — never on a Kaiord-operated server
@@ -34,12 +34,13 @@ The privacy policy SHALL cover the following topics:
 - **Exhaustive credential-path disclosure**: For each extension, the policy SHALL enumerate **every** path by which a credential or personal datum enters or leaves the extension, not merely a representative one. A section in which every individual sentence is true but a capture, storage, derivation, or egress path is omitted SHALL be treated as a policy violation of the same severity as a false statement
 - **Permission disclosure symmetry**: Each extension's section SHALL name the `permissions` its manifest declares and SHALL state which credential-adjacent permissions it does NOT declare (at minimum `cookies`, and the request-mutation permissions `webRequestBlocking` / `declarativeNetRequest*`). Where an extension declares a permission that grants direct credential access — today only `webRequest` on `@kaiord/whoop-bridge` — the policy SHALL say so explicitly and SHALL describe the read-only nature of its use
 - **No password handling**: No extension reads, stores, or transmits user passwords. The Garmin Bridge stores an OAuth token minted from the user's own session locally (see Garmin Bridge data handling) and sends it only to Garmin; no extension transmits credentials to a Kaiord-operated server
-- **No third-party sharing**: No data is shared with third parties beyond the user-configured LLM provider and the anonymous Umami analytics disclosed above
+- **Remote MCP endpoint**: The policy SHALL disclose every data path of `https://kaiord.com/mcp`, a stateless endpoint on Cloudflare Workers that converts and inspects workout definitions an AI agent sends to it. It SHALL state that (1) the endpoint accepts only structured workout definitions and rejects recorded activities, courses and every health file type, which are decoded in memory only to learn their type and are neither stored, logged nor returned; (1b) a workout's own content — its name, free-text notes, heart-rate targets and device metadata such as a serial number — is processed in transit, and may contain personal information if the caller puts it there; (2) the content is processed only to answer that request and is never stored or logged; (3) the client IP address is used transiently by the rate limiter and is not stored by Kaiord; (4) requests travel through Cloudflare's network, subject to Cloudflare's own privacy policy; and (5) the endpoint offers no Garmin or health tools
+- **No third-party sharing**: No data is shared with third parties beyond the user-configured LLM provider, the anonymous Umami analytics, and Cloudflare as the remote MCP endpoint's infrastructure provider, all disclosed above. Cloudflare carries remote MCP requests as network and hosting provider; Kaiord gives it no other data
 - **Communication scope**: Each extension only communicates with its declared hosts (`connect.garmin.com`, `connectapi.garmin.com`, `sso.garmin.com` / `app.train2go.com` / `mytanita.eu` / `tpapi.trainingpeaks.com` / `app.whoop.com`, `api.prod.whoop.com`) and allowed Kaiord origins. The Kaiord-origin channel (`externally_connectable`) SHALL be described as one-way inbound (editor → extension)
 - **Runtime discovery disclosure**: The policy SHALL disclose the announce-only content script injected into SPA origins (`https://*.kaiord.com/*` in production, additionally `http://localhost/*` in development) and SHALL state that the script only posts a fixed announcement object via `window.postMessage`, does not read SPA DOM / cookies / storage / network, and does not modify the page
 - **Localhost dev disclosure**: The policy SHALL disclose that local-development manifests additionally accept messages from `http://localhost:5173` / `http://localhost:5174` via `externally_connectable`, that the announce content script injects on `http://localhost/*`, and SHALL state that these development-only matches are stripped from the production manifest before CWS submission
-- **Regulatory compliance**: Statement of compliance with applicable data protection regulations (GDPR, CCPA) — specifically that because no personal data is collected server-side, there is no personal data held by Kaiord to protect, share, or delete
-- **Data-subject rights**: The policy SHALL explicitly enumerate GDPR/CCPA rights (access, rectification, erasure, portability) and state that, because Kaiord holds no records, such requests have no data to act upon
+- **Regulatory compliance**: Statement of compliance with applicable data protection regulations (GDPR, CCPA) — specifically that because no personal data is retained server-side, there is no personal data held by Kaiord to protect, share, or delete. The policy SHALL state that the remote MCP endpoint processes the client IP address for rate limiting and any personal content a caller places in a workout, in transit only, and retains neither
+- **Data-subject rights**: The policy SHALL explicitly enumerate GDPR/CCPA rights (access, rectification, erasure, portability) and state that, because Kaiord holds no records (the remote MCP endpoint included), such requests have no data to act upon
 - **Retention guidance**: The policy SHALL describe how the user can remove local data — at minimum the editor's API-key clear action, per-workout delete, the per-conversation chat delete action (delete an individual conversation), and the browser-level "clear site data" path
 - **Host-permission narrowing**: The policy SHALL state that each extension declares `host_permissions` limited to its disclosed hosts (no wildcard, no `<all_urls>`)
 - **Children's Privacy**: The policy SHALL include a Children's Privacy section stating the products are not directed at children under 13 (or 16 in jurisdictions where that age applies)
@@ -131,7 +132,8 @@ The privacy policy SHALL cover the following topics:
 #### Scenario: Policy includes regulatory compliance statement
 
 - **WHEN** the privacy policy is read
-- **THEN** it SHALL include references to GDPR and CCPA and state that no personal data is collected or processed
+- **THEN** it SHALL include references to GDPR and CCPA and state that no personal data is retained
+- **AND** it SHALL state that the remote MCP endpoint's in-transit processing (the client IP address and the workout content a caller sends) retains nothing
 
 #### Scenario: Policy includes last updated date
 
@@ -157,6 +159,20 @@ The privacy policy SHALL cover the following topics:
 
 - **WHEN** the `pnpm -C packages/docs lint:privacy-policy` command runs in CI
 - **THEN** it SHALL verify that the policy file contains all the required disclosures listed in this spec and fail the build if any are missing
+
+#### Scenario: Policy discloses the remote MCP endpoint
+
+- **WHEN** the privacy policy is read
+- **THEN** it SHALL state that `https://kaiord.com/mcp` processes workout content sent by an AI agent in transit only, without storing or logging it
+- **AND** it SHALL state that only structured workout definitions are accepted and activity, location and health files are rejected
+- **AND** it SHALL disclose that the client IP address is used transiently for rate limiting and is not retained
+- **AND** it SHALL state that a workout's name, notes, heart-rate targets and device metadata are processed in transit and may contain personal information supplied by the caller
+- **AND** it SHALL name Cloudflare as the network and hosting provider and state that the endpoint offers no Garmin or health tools
+
+#### Scenario: Removing the endpoint disclosure fails the policy lint
+
+- **WHEN** the policy's remote MCP endpoint disclosure is deleted
+- **THEN** `pnpm -C packages/docs lint:privacy-policy` SHALL fail, reporting the missing disclosure
 
 ### Requirement: Privacy policy navigation
 

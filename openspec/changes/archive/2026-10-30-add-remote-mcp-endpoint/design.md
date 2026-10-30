@@ -302,3 +302,24 @@ behaviour, and the new options and tool inputs are additive.
 Rollback is deleting the `kaiord-mcp` route. Requests to `/mcp` then fall
 through to the agent-edge Worker and GitHub Pages, which return 404. The
 discovery documents must be reverted in the same rollback.
+
+## Post-implementation notes
+
+- **WAF threshold.** The Free plan allows one rate-limiting rule, with a fixed
+  10 s period. The rule is 10 requests per 10 s per IP on `/mcp`. One
+  stateless call per request keeps a normal agent session under it. Clients
+  behind a shared NAT wait 10 s after a block. The Worker's own 60/60 s
+  binding is a second layer behind the WAF rule.
+- **Task 6.3 reworded.** `10.4.0` was registered before the remote existed,
+  and the registry rejects a version it already has. So `remotes` ships with
+  the next `@kaiord/mcp` release through the automated `registry` job in
+  `release.yml`, not through a manual `mcp-publisher publish`.
+- **Task 6.3 evidence.** Release 10.5.0 published the entry: the registry
+  serves `remotes[0].url = https://kaiord.com/mcp` with `isLatest: true`.
+- **Agent-edge fail-open.** The Workers routes API reports
+  `request_limit_fail_open: true` on `kaiord.com/*` (checked 2026-10-30).
+  The `/mcp` route stays fail-closed.
+- **Upstream channel.** `garmin/fit-javascript-sdk` has issues disabled and
+  closes outside PRs. The Garmin developer forum is the only channel. The
+  patch file is left as is: editing it changes the lockfile's patch hash,
+  and its comment already says to drop it once upstream has the option.
