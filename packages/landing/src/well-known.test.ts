@@ -113,6 +113,92 @@ describe("well-known agent discovery documents", () => {
   });
 });
 
+type Link = { href: string; type: string };
+type LinkContext = { anchor: string } & Record<string, Link[] | string>;
+
+const API_CATALOG = `${ORIGIN}.well-known/api-catalog`;
+const DOCS_PAGES = import.meta.glob<string>("../../docs/**/*.md", {
+  query: "?raw",
+  import: "default",
+});
+
+const linkset = () =>
+  (
+    JSON.parse(publishedText(API_CATALOG) ?? "{}") as {
+      linkset?: LinkContext[];
+    }
+  ).linkset ?? [];
+
+const hrefsOf = (context: LinkContext) =>
+  Object.values(context)
+    .filter((value): value is Link[] => Array.isArray(value))
+    .flat()
+    .map((link) => link.href);
+
+const isPublished = (href: string) =>
+  href.startsWith(`${ORIGIN}docs/`)
+    ? `../../docs/${href.slice(`${ORIGIN}docs/`.length)}.md` in DOCS_PAGES
+    : publishedText(href) !== undefined;
+
+describe("RFC 9727 api-catalog", () => {
+  it("should be published without an extension and parse as a linkset", () => {
+    // Arrange
+    const text = publishedText(API_CATALOG);
+
+    // Act
+    const contexts = linkset();
+
+    // Assert
+    expect(text).toBeDefined();
+    expect(contexts.length).toBeGreaterThan(0);
+  });
+
+  it("should anchor only endpoints that have a server card", () => {
+    // Arrange
+    const card = JSON.parse(cardJson) as ServerCard;
+
+    // Act
+    const anchors = linkset().map((context) => context.anchor);
+
+    // Assert
+    expect(anchors).toEqual(card.remotes.map((remote) => remote.url));
+  });
+
+  it("should point every link at a published file or docs page", () => {
+    // Arrange
+    const hrefs = linkset().flatMap(hrefsOf);
+
+    // Act
+    const missing = hrefs.filter((href) => !isPublished(href));
+
+    // Assert
+    expect(hrefs.length).toBeGreaterThan(0);
+    expect(missing).toEqual([]);
+  });
+
+  it("should not claim a status link, as there is no health endpoint", () => {
+    // Arrange
+    const contexts = linkset();
+
+    // Act
+    const withStatus = contexts.filter((context) => "status" in context);
+
+    // Assert
+    expect(withStatus).toEqual([]);
+  });
+
+  it("should be listed in auth.md with every anchor it declares", () => {
+    // Arrange
+    const anchors = linkset().map((context) => context.anchor);
+
+    // Act
+    const named = [API_CATALOG, ...anchors].map((url) => authMd.includes(url));
+
+    // Assert
+    expect(named.every(Boolean)).toBe(true);
+  });
+});
+
 describe("auth.md", () => {
   it("should state that no authentication and no registration exist", () => {
     // Arrange

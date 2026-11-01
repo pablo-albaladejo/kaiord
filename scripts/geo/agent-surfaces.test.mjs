@@ -7,6 +7,7 @@ import {
   ROWS,
   checkRow,
   isAiCatalog,
+  isApiCatalog,
   isServerCard,
   isSkillsIndex,
   run,
@@ -117,6 +118,7 @@ describe("agent-surfaces", () => {
     ["mcp/server-card.json", isServerCard],
     ["ai-catalog.json", isAiCatalog],
     ["agent-skills/index.json", isSkillsIndex],
+    ["api-catalog", isApiCatalog],
   ]) {
     it(`should accept the published ${file} and reject an empty object`, () => {
       // Arrange
