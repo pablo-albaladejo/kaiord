@@ -146,6 +146,7 @@ jobs:
           test -f merged-dist/docs/sitemap.xml     || { echo "❌ Missing docs/sitemap.xml"; exit 1; }
           test -f merged-dist/llms.txt             || { echo "❌ Missing llms.txt"; exit 1; }
           test -f merged-dist/auth.md              || { echo "❌ Missing auth.md"; exit 1; }
+          test -f merged-dist/.well-known/api-catalog || { echo "❌ Missing .well-known/api-catalog"; exit 1; }
           test -f merged-dist/docs/llms.txt        || { echo "❌ Missing docs/llms.txt"; exit 1; }
           test -f merged-dist/docs/llms-full.txt   || { echo "❌ Missing docs/llms-full.txt"; exit 1; }
           test -f merged-dist/.well-known/ai-catalog.json || { echo "❌ Missing .well-known/ai-catalog.json"; exit 1; }

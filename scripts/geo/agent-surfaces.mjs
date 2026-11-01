@@ -49,6 +49,17 @@ export const isSkillsIndex = (index) =>
     (skill) => skill?.url && /^sha256:[0-9a-f]{64}$/.test(skill.digest)
   );
 
+// Every anchor is an endpoint with a card; today that is /mcp alone.
+export const isApiCatalog = (catalog) =>
+  Array.isArray(catalog?.linkset) &&
+  catalog.linkset.length > 0 &&
+  catalog.linkset.every(
+    (context) =>
+      context?.anchor === MCP_ENDPOINT &&
+      context["service-desc"]?.[0]?.href === SERVER_CARD &&
+      !("status" in context)
+  );
+
 export const ROWS = [
   {
     name: "/auth.md",
@@ -60,6 +71,10 @@ export const ROWS = [
   json("/.well-known/mcp/server-card.json", isServerCard),
   json("/.well-known/ai-catalog.json", isAiCatalog),
   json("/.well-known/agent-skills/index.json", isSkillsIndex),
+  {
+    ...json("/.well-known/api-catalog", isApiCatalog),
+    typePrefix: "application/linkset+json",
+  },
   {
     name: "POST /mcp tools/list",
     method: "POST",
