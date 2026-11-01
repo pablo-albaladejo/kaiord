@@ -1,5 +1,6 @@
+import { serveA2a } from "./a2a/serve-a2a";
 import type { HandlerDeps, RateLimiter } from "./deps";
-import { MAX_BODY_BYTES, MCP_PATH } from "./limits";
+import { A2A_PATH, MAX_BODY_BYTES, MCP_PATH } from "./limits";
 import { parseMessage } from "./parse-message";
 import { readBoundedBody } from "./read-bounded-body";
 import {
@@ -27,7 +28,8 @@ export const handleRequest = async (
   request: Request,
   deps: HandlerDeps = {}
 ): Promise<Response> => {
-  if (new URL(request.url).pathname !== MCP_PATH) return notFound();
+  const { pathname } = new URL(request.url);
+  if (pathname !== MCP_PATH && pathname !== A2A_PATH) return notFound();
   if (request.method !== "POST") return methodNotAllowed();
   if (await isOverLimit(request, deps.rateLimiter)) return tooManyRequests();
 
@@ -36,5 +38,6 @@ export const handleRequest = async (
 
   const parsed = parseMessage(body);
   if (!parsed.ok) return parsed.response;
-  return serveMcp(request, parsed.message, deps);
+  const serve = pathname === A2A_PATH ? serveA2a : serveMcp;
+  return serve(request, parsed.message, deps);
 };

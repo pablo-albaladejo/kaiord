@@ -11,38 +11,39 @@
 
 ## 1. Privacy disclosure and link path (PR `docs/a2a-privacy`)
 
-- [ ] 1.1 The privacy policy names `https://kaiord.com/a2a`: the same tools,
+- [x] 1.1 The privacy policy names `https://kaiord.com/a2a`: the same tools,
       the same terms, tasks not retained. The existing lint phrases stay
       verbatim and **Last updated** is bumped.
-- [ ] 1.2 Add a privacy-lint rule for the A2A sentence, with a test that
+- [x] 1.2 Add a privacy-lint rule for the A2A sentence, with a test that
       deleting the sentence fails the lint.
-- [ ] 1.3 Add `/a2a` to `WORKER_PATHS` in the site link check, with a test.
-- [ ] 1.4 Merge before any `/a2a` route exists.
+- [x] 1.3 Add `/a2a` to `WORKER_PATHS` in the site link check, with a test.
+- [x] 1.4 Merge before any `/a2a` route exists.
 
 ## 2. Worker code, route and smoke (PR `feat/a2a-endpoint`; merging deploys nothing)
 
-- [ ] 2.1 Extract `dispatchMcp(message, deps)`: a server and transport per
+- [x] 2.1 Extract `dispatchMcp(message, deps)`: a server and transport per
       call, and a fresh internal `Request` carrying none of the caller's
       headers. `/mcp` behaviour and its tests are unchanged.
-- [ ] 2.2 Add `src/a2a/` (skills, JSON-RPC dispatch and version check,
+- [x] 2.2 Add `src/a2a/` (skills, JSON-RPC dispatch and version check,
       `SendMessage`, the tool-reply mapping, task builders, the card
       builder) and route `/a2a` in the handler with the shared method
       check, rate limit and bounded body.
-- [ ] 2.3 Tests for every `a2a-endpoint` scenario, including the
+- [x] 2.3 Tests for every `a2a-endpoint` scenario, including the
       `Accept: application/json`-only request reaching
       `TASK_STATE_COMPLETED`. The PR body records the mutation check:
       forwarding the caller's headers turns that test red.
-- [ ] 2.4 `agent-card.test.ts`: the file snapshot, the in-process parity of
+- [x] 2.4 `agent-card.test.ts`: the file snapshot, the in-process parity of
       `tools/list` with the literal skill ids and `REMOTE_TOOL_NAMES`, and
       the content-hash version changing with a skill description.
-- [ ] 2.5 Add the `kaiord.com/a2a` route; the config test pins exactly the
+- [x] 2.5 Add the `kaiord.com/a2a` route; the config test pins exactly the
       two exact patterns, with `workers_dev` false.
-- [ ] 2.6 The smoke script picks the `/a2a` check set by path, each check
+- [x] 2.6 The smoke script picks the `/a2a` check set by path, each check
       covered with a fake fetch.
-- [ ] 2.7 The mcp-worker `detect-changes` filter covers both card paths.
-- [ ] 2.8 Gates under `hg-gate.sh`, one at a time: mcp-worker test
+- [x] 2.7 The mcp-worker `detect-changes` filter covers both card paths.
+- [x] 2.8 Gates under `hg-gate.sh`, one at a time: mcp-worker test
       (including workerd), lint, the `--dry-run` build under 3 MiB, and
-      `pnpm test:scripts`.
+      `pnpm test:scripts`. The Free limit applies to the compressed size:
+      547 KiB gzip (3,454 KiB raw, against 3,442 KiB on `main`).
 
 ## 3. WAF widening, before the deploy (Pablo)
 

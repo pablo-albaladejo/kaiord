@@ -52,3 +52,35 @@ test("should boot the bundle in workerd and list the remote tools", async () => 
   assert.equal(response.status, HTTP_OK);
   assert.equal(payload.result.tools.length, REMOTE_TOOL_COUNT);
 });
+
+test("should complete an A2A skill in workerd", async () => {
+  // Arrange
+  const message = {
+    messageId: "workerd",
+    role: "ROLE_USER",
+    parts: [{ data: { skill: "kaiord_list_formats" } }],
+  };
+  const body = JSON.stringify({
+    jsonrpc: "2.0",
+    id: 1,
+    method: "SendMessage",
+    params: { message },
+  });
+
+  // Act
+  const response = await worker.fetch("/a2a", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      accept: "application/json",
+      "a2a-version": "1.0",
+    },
+    body,
+  });
+  const payload = await response.json();
+
+  // Assert
+  assert.equal(response.status, HTTP_OK);
+  assert.equal(payload.result.task.status.state, "TASK_STATE_COMPLETED");
+  assert.match(payload.result.task.id, /^k1\.[A-Za-z0-9_-]{16}$/);
+});

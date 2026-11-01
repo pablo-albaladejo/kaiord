@@ -74,6 +74,8 @@ jobs:
               - 'packages/mcp/**'
             mcp_worker:
               - 'packages/mcp-worker/**'
+              # The agent card snapshot moves here once /a2a is live (add-a2a-endpoint D8).
+              - 'packages/landing/public/.well-known/agent-card.json'
             ai:
               - 'packages/ai/**'
             i18n:

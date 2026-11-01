@@ -2,6 +2,7 @@ const KIB = 1024;
 const MIB = KIB * KIB;
 
 export const MCP_PATH = "/mcp";
+export const A2A_PATH = "/a2a";
 
 /** D6: the largest request body the Worker reads, streamed, before parsing. */
 export const MAX_BODY_BYTES = 64 * KIB;

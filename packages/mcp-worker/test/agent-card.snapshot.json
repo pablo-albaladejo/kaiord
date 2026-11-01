@@ -1,0 +1,135 @@
+{
+  "name": "Kaiord",
+  "description": "Deterministic workout conversion and validation for FIT, TCX, ZWO, Garmin Connect (GCN) and KRD. No AI model runs behind it: name a skill in the first data part of a message, {\"skill\": \"<id>\", ...arguments}. A2A 1.0 only: send A2A-Version: 1.0 (0.3 clients get -32009). Tasks finish inside the reply and are not retained.",
+  "version": "1.0.0+d4cef1272d59",
+  "supportedInterfaces": [
+    {
+      "url": "https://kaiord.com/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "provider": {
+    "organization": "Kaiord",
+    "url": "https://kaiord.com"
+  },
+  "documentationUrl": "https://kaiord.com/docs/mcp/tools",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extendedAgentCard": false
+  },
+  "defaultInputModes": [
+    "application/json",
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "skills": [
+    {
+      "id": "kaiord_convert",
+      "name": "Convert a workout",
+      "description": "Convert a structured workout between FIT, TCX, ZWO, GCN and KRD. Arguments: input_content (text, or base64 for FIT), input_format, output_format, optional ftp. FIT output is base64 text.",
+      "tags": [
+        "convert",
+        "fit",
+        "tcx",
+        "zwo",
+        "garmin",
+        "krd"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_convert\",\"input_content\":\"<zwo xml>\",\"input_format\":\"zwo\",\"output_format\":\"krd\"}"
+      ]
+    },
+    {
+      "id": "kaiord_diff",
+      "name": "Compare two workouts",
+      "description": "Compare two workout files and list their differences. Arguments: content1, content2, optional format1 and format2.",
+      "tags": [
+        "diff",
+        "compare"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_diff\",\"content1\":\"<krd>\",\"content2\":\"<krd>\"}"
+      ]
+    },
+    {
+      "id": "kaiord_extract_workout",
+      "name": "Extract a workout",
+      "description": "Extract the structured workout from a file as JSON. Arguments: input_content (text, or base64 for FIT), optional input_format.",
+      "tags": [
+        "extract",
+        "workout",
+        "json"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_extract_workout\",\"input_content\":\"<base64 fit>\",\"input_format\":\"fit\"}"
+      ]
+    },
+    {
+      "id": "kaiord_get_format_spec",
+      "name": "Get the KRD format spec",
+      "description": "Return the KRD format specification. Read it before creating or editing KRD documents. No arguments.",
+      "tags": [
+        "krd",
+        "spec",
+        "docs"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_get_format_spec\"}"
+      ]
+    },
+    {
+      "id": "kaiord_inspect",
+      "name": "Inspect a workout",
+      "description": "Return a human-readable summary of a workout file. Arguments: input_content (text, or base64 for FIT), optional input_format.",
+      "tags": [
+        "inspect",
+        "summary"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_inspect\",\"input_content\":\"<tcx xml>\",\"input_format\":\"tcx\"}"
+      ]
+    },
+    {
+      "id": "kaiord_list_formats",
+      "name": "List formats",
+      "description": "List the supported workout formats and their capabilities. No arguments.",
+      "tags": [
+        "formats",
+        "discovery"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_list_formats\"}"
+      ]
+    },
+    {
+      "id": "kaiord_round_trip_validate",
+      "name": "Round-trip validate FIT",
+      "description": "Convert a FIT workout to KRD and back, and report tolerance violations. Arguments: input_content (base64 FIT).",
+      "tags": [
+        "validate",
+        "fit",
+        "round-trip"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_round_trip_validate\",\"input_content\":\"<base64 fit>\"}"
+      ]
+    },
+    {
+      "id": "kaiord_validate",
+      "name": "Validate KRD",
+      "description": "Validate a KRD JSON document against the schema. Arguments: input_content (KRD JSON).",
+      "tags": [
+        "validate",
+        "krd",
+        "schema"
+      ],
+      "examples": [
+        "{\"skill\":\"kaiord_validate\",\"input_content\":\"<krd json>\"}"
+      ]
+    }
+  ]
+}
