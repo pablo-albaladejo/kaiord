@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import authMd from "../public/auth.md?raw";
+import agentCardJson from "../public/.well-known/agent-card.json?raw";
 import catalogJson from "../public/.well-known/ai-catalog.json?raw";
 import skillsJson from "../public/.well-known/agent-skills/index.json?raw";
 import cardJson from "../public/.well-known/mcp/server-card.json?raw";
@@ -251,5 +252,58 @@ describe("auth.md", () => {
     // Assert
     expect(authMd).toContain(MCP_ENDPOINT);
     expect(namesIssuer).toBe(false);
+  });
+});
+
+type AgentCard = {
+  description: string;
+  supportedInterfaces: {
+    url: string;
+    protocolBinding: string;
+  }[];
+  defaultOutputModes: string[];
+  skills: unknown[];
+};
+
+const A2A_ENDPOINT = "https://kaiord.com/a2a";
+const SKILL_COUNT = 8;
+
+describe("A2A agent card", () => {
+  it("should expose one JSON-RPC interface at the A2A endpoint", () => {
+    // Arrange
+    const card = JSON.parse(agentCardJson) as AgentCard;
+
+    // Act
+    const [first, ...others] = card.supportedInterfaces;
+
+    // Assert
+    expect(others).toEqual([]);
+    expect(first?.url).toBe(A2A_ENDPOINT);
+    expect(first?.protocolBinding).toBe("JSONRPC");
+  });
+
+  it("should declare no security fields", () => {
+    // Arrange
+    const card = JSON.parse(agentCardJson) as AgentCard;
+
+    // Act
+    const keys = Object.keys(card);
+
+    // Assert
+    expect(keys).not.toContain("securitySchemes");
+    expect(keys).not.toContain("security");
+  });
+
+  it("should list every skill, answer in text and state its one version", () => {
+    // Arrange
+    const card = JSON.parse(agentCardJson) as AgentCard;
+
+    // Act
+    const skillCount = card.skills.length;
+
+    // Assert
+    expect(skillCount).toBe(SKILL_COUNT);
+    expect(card.defaultOutputModes).toContain("text/plain");
+    expect(card.description).toContain("A2A 1.0 only");
   });
 });

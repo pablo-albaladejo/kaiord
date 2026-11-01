@@ -5,7 +5,7 @@ import { REMOTE_TOOL_NAMES } from "../limits";
 import { buildAgentCard } from "./agent-card";
 import { SKILL_IDS, SKILLS } from "./skills";
 
-const SNAPSHOT = "../../test/agent-card.snapshot.json";
+const SNAPSHOT = "../../../landing/public/.well-known/agent-card.json";
 const JSON_INDENT = 2;
 
 type ToolsList = {
