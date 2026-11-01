@@ -515,6 +515,14 @@ export const REQUIRED_RULES = [
     re: /endpoint offers no Garmin or health tools/i,
   },
   {
+    label: "Remote A2A endpoint: same tools and terms, tasks not retained",
+    re: /`https:\/\/kaiord\.com\/a2a`[^\n]*same tools under the same terms[^\n]*tasks finish inside the reply and are not retained/i,
+  },
+  {
+    label: "Regulatory statement names both remote endpoints",
+    re: /Each remote endpoint, MCP \(kaiord\.com\/mcp\) and A2A \(kaiord\.com\/a2a\)/,
+  },
+  {
     label: "Regulatory statement covers remote MCP in-transit data",
     re: /no personal data is retained server-side[\s\S]*?in transit only, and retains neither/i,
   },

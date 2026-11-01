@@ -630,7 +630,7 @@ test("every section-anchored rule is exercised by a solo case", () => {
 
 // ---------- remote MCP endpoint disclosure ----------
 
-const REMOTE_MCP = "Remote MCP Endpoint";
+const REMOTE_MCP = "Remote MCP and A2A Endpoints";
 const REMOTE_MCP_SOLO_CASES = [
   ["accepts only structured", "structured workouts only"],
   ["free-text notes", "workout content may carry personal data"],
@@ -662,6 +662,34 @@ test("deleting the remote MCP endpoint section fails every endpoint rule", () =>
   for (const rule of endpointRules) {
     assert.ok(v.includes(rule.label), `"${rule.label}" did not fire`);
   }
+});
+
+test("deleting the A2A sentence fails the A2A rule alone", () => {
+  const src = mutateInSection(
+    POLICY,
+    REMOTE_MCP,
+    /\n`https:\/\/kaiord\.com\/a2a`[^\n]*\n/,
+    "\n"
+  );
+
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, [
+    "Remote A2A endpoint: same tools and terms, tasks not retained",
+  ]);
+});
+
+test("the regulatory statement must name both remote endpoints", () => {
+  const src = mutateInSection(
+    POLICY,
+    "Regulatory Compliance",
+    "MCP (kaiord.com/mcp) and A2A (kaiord.com/a2a)",
+    "MCP (kaiord.com/mcp)"
+  );
+
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, ["Regulatory statement names both remote endpoints"]);
 });
 
 test("the regulatory statement must cover the endpoint's in-transit data", () => {
