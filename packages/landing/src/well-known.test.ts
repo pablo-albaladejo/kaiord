@@ -113,6 +113,18 @@ describe("well-known agent discovery documents", () => {
     // Assert
     expect(entry?.type).toBe("application/mcp-server-card+json");
   });
+
+  it("should list the agent card in the AI catalog", () => {
+    // Arrange
+    const cardUrl = `${ORIGIN}.well-known/agent-card.json`;
+
+    // Act
+    const entry = entries.find((e) => e.url === cardUrl);
+
+    // Assert
+    expect(entry?.identifier).toBe("urn:air:kaiord.com:agent:kaiord-a2a");
+    expect(entry?.type).toBe("application/a2a+json");
+  });
 });
 
 type Link = { href: string; type: string };
@@ -137,10 +149,12 @@ const hrefsOf = (context: LinkContext) =>
     .flat()
     .map((link) => link.href);
 
-const isPublished = (href: string) =>
-  href.startsWith(`${ORIGIN}docs/`)
-    ? `../../docs/${href.slice(`${ORIGIN}docs/`.length)}.md` in DOCS_PAGES
-    : publishedText(href) !== undefined;
+const isPublished = (href: string) => {
+  const [path = ""] = href.split("#");
+  return path.startsWith(`${ORIGIN}docs/`)
+    ? `../../docs/${path.slice(`${ORIGIN}docs/`.length)}.md` in DOCS_PAGES
+    : publishedText(path) !== undefined;
+};
 
 describe("RFC 9727 api-catalog", () => {
   it("should be published without an extension and parse as a linkset", () => {
@@ -155,15 +169,21 @@ describe("RFC 9727 api-catalog", () => {
     expect(contexts.length).toBeGreaterThan(0);
   });
 
-  it("should anchor only endpoints that have a server card", () => {
+  it("should anchor exactly the endpoints that have a card", () => {
     // Arrange
-    const card = JSON.parse(cardJson) as ServerCard;
+    const serverCard = JSON.parse(cardJson) as ServerCard;
+    const agentCard = JSON.parse(agentCardJson) as {
+      supportedInterfaces: { url: string }[];
+    };
 
     // Act
     const anchors = linkset().map((context) => context.anchor);
 
     // Assert
-    expect(anchors).toEqual(card.remotes.map((remote) => remote.url));
+    expect(anchors).toEqual([
+      ...serverCard.remotes.map((remote) => remote.url),
+      ...agentCard.supportedInterfaces.map((entry) => entry.url),
+    ]);
   });
 
   it("should point every link at a published file or docs page", () => {
@@ -252,6 +272,29 @@ describe("auth.md", () => {
     // Assert
     expect(authMd).toContain(MCP_ENDPOINT);
     expect(namesIssuer).toBe(false);
+  });
+
+  it("should state the rate budget shared by both endpoints", () => {
+    // Arrange
+    const budget = /10 requests per 10 s per IP across .\/mcp. and .\/a2a./;
+
+    // Act
+    const statesBudget = budget.test(authMd);
+
+    // Assert
+    expect(statesBudget).toBe(true);
+  });
+
+  it("should say which A2A version the endpoint serves", () => {
+    // Arrange
+    const statement = "A2A 1.0 only; 0.3 clients";
+
+    // Act
+    const flat = authMd.replace(/\s+/g, " ");
+
+    // Assert
+    expect(flat).toContain(statement);
+    expect(flat).toContain("get -32009");
   });
 });
 
