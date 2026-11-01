@@ -73,16 +73,22 @@ describe("wrangler.toml", () => {
     expect(found).toEqual([]);
   });
 
-  it("should route kaiord.com/mcp only, off workers.dev", () => {
+  it("should route exactly kaiord.com/mcp and kaiord.com/a2a, off workers.dev", () => {
     // Arrange
-    const route = '{ pattern = "kaiord.com/mcp", zone_name = "kaiord.com" }';
+    const expected = ["kaiord.com/mcp", "kaiord.com/a2a"];
 
     // Act
-    const routes = active.match(/pattern\s*=/g) ?? [];
+    const routes = [...active.matchAll(/pattern\s*=\s*"([^"]*)"/g)].map(
+      (match) => match[1]
+    );
 
     // Assert
-    expect(active).toContain(route);
-    expect(routes).toHaveLength(1);
+    expect(routes).toEqual(expected);
+    for (const pattern of expected) {
+      expect(active).toContain(
+        `{ pattern = "${pattern}", zone_name = "kaiord.com" }`
+      );
+    }
     expect(config.get("workers_dev")).toBe("false");
   });
 

@@ -7,13 +7,16 @@
 
 Private Cloudflare Worker that serves `@kaiord/mcp`'s remote toolset (the
 eight stateless tools, no prompts, three resources) over stateless
-Streamable HTTP at `https://kaiord.com/mcp`. It is a second transport for the
+Streamable HTTP at `https://kaiord.com/mcp`, and the same eight tools as A2A
+1.0 skills at `https://kaiord.com/a2a`. It is a second transport for the
 same server the `kaiord-mcp` stdio bin runs; it adds no tool of its own.
-OpenSpec change: `add-remote-mcp-endpoint` (design D1, D6, D8, D9).
+OpenSpec changes: `add-remote-mcp-endpoint` (design D1, D6, D8, D9) and
+`add-a2a-endpoint` (D1-D11).
 
 ## Key Files
 
-- `wrangler.toml` — Worker `kaiord-mcp`, route `kaiord.com/mcp`,
+- `wrangler.toml` — Worker `kaiord-mcp`, exact routes `kaiord.com/mcp` and
+  `kaiord.com/a2a`,
   `nodejs_compat`, pinned `compatibility_date`, every log and trace off, no
   storage bindings, the `.md` text-module rule, and the `MCP_RATE_LIMITER`
   binding (60 per 60 s per IP).
@@ -21,18 +24,27 @@ OpenSpec change: `add-remote-mcp-endpoint` (design D1, D6, D8, D9).
 - `src/load-at-startup.ts` — the entry's first import. It initializes zod
   and the format adapters at isolate startup: without it the bundle fails to
   load in workerd, and a cold adapter spends a request's 10 ms CPU budget.
-- `src/handler.ts` — `POST /mcp` only (405 with `Allow: POST`, 404 elsewhere),
-  rate limit (429), bounded body (413), then one JSON-RPC message.
+- `src/handler.ts` — `POST /mcp` and `POST /a2a` only (405 with
+  `Allow: POST`, 404 elsewhere), rate limit (429), bounded body (413), then
+  one JSON-RPC message, routed by path.
 - `src/read-bounded-body.ts` — streams the body and stops past 65,536 bytes;
   `content-length` is never trusted.
 - `src/parse-message.ts` — invalid JSON is a 400 parse error, a batch is 400.
 - `src/serve-mcp.ts` — a new server and stateless transport per request.
+- `src/dispatch-mcp.ts` — runs one MCP message on a fresh internal request
+  that carries none of the caller's headers; every A2A skill goes through it.
+- `src/a2a/` — the A2A 1.0 JSON-RPC binding: version check and method table
+  (`serve-a2a.ts`), `SendMessage`, the tool-reply mapping (`call-tool.ts`),
+  task builders, the literal skill list and the agent-card builder.
 - `src/build-server.ts` — `createServer({ toolset: "remote", ... })` with the
   bundled format spec and KRD schema, the 16 MiB FIT writer cap and a quiet
   logger.
 - `src/content-free-log.ts`, `src/log-failure.ts` — the only log lines: event,
   JSON-RPC method, tool name and error class, each from an allowlist.
-- `scripts/smoke.mjs` — post-deploy smoke test (`pnpm smoke <url>`).
+- `scripts/smoke.mjs` — post-deploy smoke test (`pnpm smoke <url>`); a URL
+  ending in `/a2a` runs `scripts/smoke-a2a-checks.mjs` instead.
+- `test/agent-card.snapshot.json` — the rendered agent card, pinned by
+  `src/a2a/agent-card.test.ts` (`vitest -u` rewrites it).
 
 ## For AI Agents
 
@@ -42,6 +54,12 @@ OpenSpec change: `add-remote-mcp-endpoint` (design D1, D6, D8, D9).
   and `triggers deploy` are in the `prod-deploy` class and the
   never-auto-remediate hook denies them. Pablo runs the deploy himself.
   `pnpm build` is `wrangler deploy --dry-run --outdir dist`, which only bundles.
+- **Deploy before discovery (A2A D10).** The agent card, the api-catalog
+  `/a2a` anchor, `auth.md`, the AI-catalog entry and the public A2A docs
+  merge only after the deployed Worker passes `pnpm smoke
+https://kaiord.com/a2a`. Until then the card stays at
+  `test/agent-card.snapshot.json`, outside `packages/landing/public`; it is
+  then moved with `git mv`, never copied.
 - **Log no content.** Never log arguments, results or bodies. A new log field
   must come from an allowlist or from server-generated labels.
 - **No global patches.** The FIT size fix is `fitWriter.maxOutputBytes`, not
