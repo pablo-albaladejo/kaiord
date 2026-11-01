@@ -138,6 +138,22 @@ describe("agent-surfaces", () => {
     });
   }
 
+  it("should reject an api-catalog anchor with no card of its own", () => {
+    // Arrange
+    const context = {
+      anchor: "https://kaiord.com/a2a",
+      "service-desc": [
+        { href: "https://kaiord.com/.well-known/mcp/server-card.json" },
+      ],
+    };
+
+    // Act
+    const ok = isApiCatalog({ linkset: [context] });
+
+    // Assert
+    assert.equal(ok, false);
+  });
+
   it("should fail a row whose reply stalls past the deadline", async () => {
     // Arrange
     // A stalled socket keeps the event loop alive; the signal's own timer
