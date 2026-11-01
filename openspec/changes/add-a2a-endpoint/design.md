@@ -88,18 +88,19 @@ contextId, taskId}`.
 
 ### D5. Methods, version and errors
 
-| Request                                          | Reply                                                    |
-| ------------------------------------------------ | -------------------------------------------------------- |
-| `SendMessage`                                    | a task (D4, D6)                                          |
-| `SendMessage` with `message.taskId` set          | `-32001` TaskNotFound ("tasks are not retained")         |
-| `GetTask`, any id                                | `-32001` TaskNotFound                                    |
-| `CancelTask`, any id                             | `-32002` TaskNotCancelable ("tasks finish in the reply") |
-| `ListTasks`                                      | `{tasks: [], nextPageToken: "", pageSize, totalSize: 0}` |
-| `SendStreamingMessage`, `SubscribeToTask`        | `-32004` UnsupportedOperation                            |
-| `GetExtendedAgentCard`                           | `-32004` UnsupportedOperation                            |
-| the four `*TaskPushNotificationConfig*` methods  | `-32003` PushNotificationNotSupported                    |
-| any other method                                 | `-32601` Method not found                                |
-| `A2A-Version` (header or query) other than `1.0` | `-32009` VersionNotSupported                             |
+| Request                                                    | Reply                                                    |
+| ---------------------------------------------------------- | -------------------------------------------------------- |
+| `SendMessage`                                              | a task (D4, D6)                                          |
+| `SendMessage` with `message.taskId` set                    | `-32001` TaskNotFound ("tasks are not retained")         |
+| `GetTask`, any id                                          | `-32001` TaskNotFound                                    |
+| `CancelTask`, any id                                       | `-32001` TaskNotFound                                    |
+| `SendMessage` with `configuration.returnImmediately: true` | `-32004` UnsupportedOperation, before any tool runs      |
+| `ListTasks`                                                | `{tasks: [], nextPageToken: "", pageSize, totalSize: 0}` |
+| `SendStreamingMessage`, `SubscribeToTask`                  | `-32004` UnsupportedOperation                            |
+| `GetExtendedAgentCard`                                     | `-32004` UnsupportedOperation                            |
+| the four `*TaskPushNotificationConfig*` methods            | `-32003` PushNotificationNotSupported                    |
+| any other method                                           | `-32601` Method not found                                |
+| `A2A-Version` (header or query) other than `1.0`           | `-32009` VersionNotSupported                             |
 
 An absent or empty version means 0.3 (spec §3.6), so it is rejected. Every
 A2A error carries `data` as an array whose first element is a
@@ -107,9 +108,15 @@ A2A error carries `data` as an array whose first element is a
 `TASK_NOT_FOUND`, `domain: "a2a-protocol.org"`); the version error adds
 `metadata: {"supported": "1.0"}`.
 
-`CancelTask` returns `-32002` rather than `-32001`. Neither is retained, but
-`-32002` says why a cancel can never succeed. The asymmetry was accepted
-in review (2026-11-01).
+`CancelTask` returns `-32001`: spec §3.1.5 reserves `-32002` for a task
+that exists but is terminal, and no task id exists here. The error message
+says that tasks are not retained.
+
+Non-blocking mode (spec §3.2.2) requires returning an in-progress task the
+caller later polls with `GetTask`. Without stored tasks that is impossible,
+so a request asking for it is refused before any tool runs, rather than
+answered with a completed task that breaks the contract. The default
+blocking mode is served normally.
 
 ### D6. Mapping the internal tool reply
 
@@ -146,10 +153,12 @@ Generated, committed and pinned by a file snapshot.
   the canonical card JSON with `version` omitted. Any skill change changes
   it; nobody bumps it by hand.
 - Interface: `{url: "https://kaiord.com/a2a", protocolBinding: "JSONRPC",
-protocolVersion: "1.0", transport: "JSONRPC"}`. `transport` is a 0.3 field
-  absent from the 1.0 proto. It is kept because the scanner's skeleton
-  shows it and the accepted sibling card carries it; extra fields are
-  ignored by 1.0 clients.
+protocolVersion: "1.0"}`, exactly the 1.0 `AgentInterface`. The 0.3
+  `transport` field is left out: ProtoJSON parsers reject unknown fields by
+  default, so it could make the card unreadable to strict 1.0 clients. The
+  accepted sibling card carries it, so if the scan after publishing fails
+  `a2aAgentCard` on the interface alone, adding it back is the documented
+  fallback.
 - `capabilities` are all false. There are no `securitySchemes` or
   `security` fields.
 - `defaultInputModes: ["application/json", "text/plain"]`,
@@ -184,8 +193,8 @@ falls through to agent-edge and gets the Pages 404, which is documented.
 ## Risks / Trade-offs
 
 - **The scanner's exact rule is unpublished** → the card carries every 1.0
-  required field plus `transport`, matching an accepted card; the scan after
-  publishing checks `serviceUrl`, `hasSecurity` and `skillCount`.
+  required field; the scan after publishing checks `serviceUrl`,
+  `hasSecurity` and `skillCount`, and D8 names the one fallback.
 - **The card drifts from the server** → literal skill ids, an in-process
   parity test against `tools/list`, a content-hash version, one snapshot
   file, and a daily live comparison of card skills with `tools/list`.
@@ -205,4 +214,5 @@ discovery PR; the WAF widening is harmless without a route.
 
 ## Open Questions
 
-None. `CancelTask` returning `-32002` (D5) was settled in review.
+None. `CancelTask` returns `-32001` (D5), as the pinned spec requires for
+an id that does not exist; settled in review.

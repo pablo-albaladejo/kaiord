@@ -29,8 +29,10 @@ that does not exist. This change builds the endpoint first, then the card.
     applies unchanged: structured workouts only, path keys rejected, the
     FIT output cap.
   - A task finishes inside the reply. Nothing is retained, so `GetTask`
-    and `CancelTask` answer with the A2A "not found" and "not cancelable"
-    errors, and `ListTasks` is always empty.
+    and `CancelTask` answer with the A2A "task not found" error, and
+    `ListTasks` is always empty. Non-blocking `SendMessage`
+    (`returnImmediately`) needs stored tasks, so it is refused as
+    unsupported before any tool runs.
   - The same 65,536-byte body cap, the batch rejection and the per-IP rate
     limit apply.
 - **WAF.** The Cloudflare rate rule that throttles `/mcp` before any Worker

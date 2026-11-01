@@ -61,7 +61,7 @@ A task SHALL be `{id, contextId, status, artifacts?, history?}`. Its `id` SHALL 
 
 ### Requirement: Methods and errors reflect that tasks are not retained
 
-`SendMessage` with `message.taskId` set and `GetTask` for any id SHALL return `-32001`. `CancelTask` SHALL return `-32002`. `ListTasks` SHALL return `{tasks: [], nextPageToken: "", pageSize, totalSize: 0}`. `SendStreamingMessage`, `SubscribeToTask` and `GetExtendedAgentCard` SHALL return `-32004`. The four push-notification configuration methods SHALL return `-32003`. Any other method SHALL return `-32601`. Every A2A error SHALL carry `data` as an array whose first element is a `google.rpc.ErrorInfo` with domain `a2a-protocol.org`.
+`SendMessage` with `message.taskId` set, `GetTask` for any id and `CancelTask` for any id SHALL return `-32001`. `SendMessage` with `configuration.returnImmediately` true SHALL return `-32004` before any tool runs. `ListTasks` SHALL return `{tasks: [], nextPageToken: "", pageSize, totalSize: 0}`. `SendStreamingMessage`, `SubscribeToTask` and `GetExtendedAgentCard` SHALL return `-32004`. The four push-notification configuration methods SHALL return `-32003`. Any other method SHALL return `-32601`. Every A2A error SHALL carry `data` as an array whose first element is a `google.rpc.ErrorInfo` with domain `a2a-protocol.org`.
 
 #### Scenario: Task lookup is not found
 
@@ -73,10 +73,15 @@ A task SHALL be `{id, contextId, status, artifacts?, history?}`. Its `id` SHALL 
 - **WHEN** a client sends `SendMessage` with `message.taskId` set
 - **THEN** the reply SHALL be error `-32001` and no tool SHALL run
 
-#### Scenario: Cancel is not possible
+#### Scenario: Cancel finds no task
 
-- **WHEN** a client sends `CancelTask`
-- **THEN** the reply SHALL be error `-32002`
+- **WHEN** a client sends `CancelTask` with any id
+- **THEN** the reply SHALL be error `-32001`
+
+#### Scenario: Non-blocking send is refused
+
+- **WHEN** a client sends `SendMessage` with `configuration.returnImmediately` true
+- **THEN** the reply SHALL be error `-32004` and no tool SHALL run
 
 #### Scenario: Task listing is empty
 
@@ -154,7 +159,7 @@ A `200` internal reply with an `isError: true` result SHALL give `TASK_STATE_FAI
 
 ### Requirement: The agent card is generated and cannot drift
 
-`/.well-known/agent-card.json` SHALL be rendered from the literal skill list and pinned by a single committed snapshot file. Its skill ids SHALL equal the in-process `tools/list` names and the remote tool allowlist. Its `version` SHALL be `1.0.0+` followed by 12 hex characters of the SHA-256 of the card with `version` omitted. It SHALL carry every A2A 1.0 required field (`name`, `description`, `version`, `supportedInterfaces`, `capabilities`, `defaultInputModes`, `defaultOutputModes`, `skills` with `id`, `name`, `description`, `tags`), an interface `{url: "https://kaiord.com/a2a", protocolBinding: "JSONRPC", protocolVersion: "1.0", transport: "JSONRPC"}`, all capabilities false, and no `securitySchemes` or `security`.
+`/.well-known/agent-card.json` SHALL be rendered from the literal skill list and pinned by a single committed snapshot file. Its skill ids SHALL equal the in-process `tools/list` names and the remote tool allowlist. Its `version` SHALL be `1.0.0+` followed by 12 hex characters of the SHA-256 of the card with `version` omitted. It SHALL carry every A2A 1.0 required field (`name`, `description`, `version`, `supportedInterfaces`, `capabilities`, `defaultInputModes`, `defaultOutputModes`, `skills` with `id`, `name`, `description`, `tags`), an interface `{url: "https://kaiord.com/a2a", protocolBinding: "JSONRPC", protocolVersion: "1.0"}` with no field outside the 1.0 `AgentInterface`, all capabilities false, and no `securitySchemes` or `security`.
 
 #### Scenario: Card skills equal the live tools
 
