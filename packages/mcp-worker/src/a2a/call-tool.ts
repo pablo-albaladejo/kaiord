@@ -29,6 +29,8 @@ const readReply = async (response: Response): Promise<ToolReply | null> => {
   }
 };
 
+// Every remote tool answers with text content only (formatSuccess and
+// formatError in @kaiord/mcp), so text items are the whole reply.
 const textParts = (reply: ToolReply): Part[] =>
   (reply.result?.content ?? [])
     .filter((item) => typeof item.text === "string")

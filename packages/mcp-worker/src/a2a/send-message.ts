@@ -21,10 +21,21 @@ const GUIDANCE = `Name a skill in the first data part: {"skill": "<id>", ...argu
 
 type Params = {
   readonly message?: unknown;
-  readonly configuration?: { readonly returnImmediately?: unknown };
+  readonly configuration?: {
+    readonly returnImmediately?: unknown;
+    readonly historyLength?: unknown;
+  };
 };
 
-type TaskBase = { readonly contextId: string; readonly message: UserMessage };
+/** ProtoJSON writes an unset string as "", so "" and null mean absent. */
+const isAbsent = (value: unknown): boolean =>
+  value === undefined || value === null || value === "";
+
+type TaskBase = {
+  readonly contextId: string;
+  readonly message: UserMessage;
+  readonly omitHistory: boolean;
+};
 
 const taskReply = (id: RpcId, input: TaskInput): Response =>
   rpcResult(id, { task: buildTask(input) });
@@ -60,7 +71,7 @@ export const sendMessage = async (
 ): Promise<Response> => {
   const message = readMessage(params.message);
   if (message === null) return rpcError(id, INVALID_PARAMS, "Invalid message");
-  if (message.taskId !== undefined) {
+  if (!isAbsent(message.taskId)) {
     const text = "Task not found: tasks are not retained";
     return a2aError(id, A2A_ERRORS.taskNotFound, text);
   }
@@ -68,11 +79,12 @@ export const sendMessage = async (
     const text = "Non-blocking send is not supported: tasks are not retained";
     return a2aError(id, A2A_ERRORS.unsupported, text);
   }
-  const given = message.contextId ?? randomId();
+  const given = isAbsent(message.contextId) ? randomId() : message.contextId;
   if (typeof given !== "string" || !CONTEXT_ID.test(given)) {
     return rpcError(id, INVALID_PARAMS, "Invalid contextId");
   }
-  const base = { contextId: given, message };
+  const omitHistory = params.configuration?.historyLength === 0;
+  const base = { contextId: given, message, omitHistory };
   const call = readSkillCall(message.parts, SKILL_IDS);
   if (call === null) {
     return taskReply(id, {

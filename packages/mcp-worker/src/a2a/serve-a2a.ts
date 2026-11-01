@@ -4,6 +4,7 @@ import type { A2aError, RpcId } from "./json-rpc";
 import {
   A2A_ERRORS,
   a2aError,
+  INVALID_PARAMS,
   INVALID_REQUEST,
   METHOD_NOT_FOUND,
   rpcError,
@@ -15,6 +16,7 @@ import { sendMessage } from "./send-message";
 const SUPPORTED_VERSION = "1.0";
 const VERSION_PARAM = "A2A-Version";
 const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE = 100;
 const NOT_RETAINED = "Task not found: tasks are not retained";
 
 type Refusal = readonly [A2aError, string];
@@ -42,8 +44,8 @@ const REFUSED: Readonly<Record<string, Refusal>> = {
 
 /** Spec §3.6: an absent or empty version means 0.3, which is not served. */
 const versionOf = (request: Request): string =>
-  request.headers.get(VERSION_PARAM) ??
-  new URL(request.url).searchParams.get(VERSION_PARAM) ??
+  request.headers.get(VERSION_PARAM) ||
+  new URL(request.url).searchParams.get(VERSION_PARAM) ||
   "";
 
 const paramsOf = (message: JsonRpcMessage): Record<string, unknown> => {
@@ -54,8 +56,11 @@ const paramsOf = (message: JsonRpcMessage): Record<string, unknown> => {
 };
 
 const listTasks = (id: RpcId, params: Record<string, unknown>): Response => {
-  const size = params.pageSize;
-  const pageSize = Number.isInteger(size) ? size : DEFAULT_PAGE_SIZE;
+  const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
+  const valid = Number.isInteger(pageSize);
+  if (!valid || (pageSize as number) < 1 || (pageSize as number) > MAX_PAGE) {
+    return rpcError(id, INVALID_PARAMS, "pageSize must be 1 to 100");
+  }
   return rpcResult(id, {
     tasks: [],
     nextPageToken: "",

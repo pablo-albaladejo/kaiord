@@ -4,6 +4,7 @@ import { handleRequest } from "../handler";
 export const A2A_ENDPOINT = "https://kaiord.com/a2a";
 
 export type A2aReply = {
+  readonly id?: string | number | null;
   readonly result?: {
     readonly task?: {
       readonly id: string;

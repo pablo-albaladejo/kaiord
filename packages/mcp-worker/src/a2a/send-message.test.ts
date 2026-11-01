@@ -9,7 +9,7 @@ import {
   skillMessage,
   userMessage,
 } from "../test-utils/a2a-request";
-import { fixtureBase64 } from "../test-utils/mcp-request";
+import { fixtureBase64, THREE_STEP_KRD } from "../test-utils/mcp-request";
 import { SKILL_IDS } from "./skills";
 
 const INVALID_PARAMS = -32602;
@@ -68,13 +68,36 @@ describe("SendMessage over A2A", () => {
 
   it("should fail a call that names an input_file path", async () => {
     // Arrange
-    const args = { input_file: "/etc/passwd" };
+    const args = {
+      input_file: "/etc/passwd",
+      input_content: JSON.stringify(THREE_STEP_KRD),
+      input_format: "krd",
+    };
 
     // Act
     const { reply } = await sendSkill("kaiord_inspect", args);
 
     // Assert
-    expect(reply.result?.task?.status.state).toBe("TASK_STATE_FAILED");
+    const task = reply.result?.task;
+    expect(task?.status.state).toBe("TASK_STATE_FAILED");
+    expect(task?.status.message.parts[0]?.text).toContain(
+      "not accepted by the remote endpoint"
+    );
+  });
+
+  it("should complete the same inline call without the path key", async () => {
+    // Arrange
+    const args = {
+      input_content: JSON.stringify(THREE_STEP_KRD),
+      input_format: "krd",
+    };
+
+    // Act
+    const { reply } = await sendSkill("kaiord_inspect", args);
+
+    // Assert
+    expect(reply.id).toBe("r1");
+    expect(reply.result?.task?.status.state).toBe("TASK_STATE_COMPLETED");
   });
 
   it("should build a new MCP server per request", async () => {
@@ -253,6 +276,7 @@ describe("SendMessage tool reply mapping", () => {
     const { reply } = await sendSkill("kaiord_list_formats", {}, { deps });
 
     // Assert
+    expect(reply.id).toBe("r1");
     expect(reply.error?.code).toBe(INTERNAL_ERROR);
     expect(reply.result).toBeUndefined();
   });
@@ -270,5 +294,50 @@ describe("SendMessage tool reply mapping", () => {
     // Assert
     expect(reply.error?.code).toBe(INVALID_PARAMS);
     expect(reply.result).toBeUndefined();
+  });
+});
+
+describe("SendMessage defaults and echoes", () => {
+  it.each([[""], [null]])(
+    "should treat a taskId and contextId of %j as absent",
+    async (empty) => {
+      // Arrange
+      const extra = { taskId: empty, contextId: empty };
+      const params = skillMessage("kaiord_list_formats", {}, extra);
+
+      // Act
+      const { reply } = await postA2a(a2aBody("SendMessage", params));
+
+      // Assert
+      expect(reply.result?.task?.status.state).toBe("TASK_STATE_COMPLETED");
+      expect(reply.result?.task?.contextId).toMatch(BASE64URL);
+    }
+  );
+
+  it("should omit history when historyLength is 0", async () => {
+    // Arrange
+    const params = {
+      ...skillMessage("kaiord_list_formats"),
+      configuration: { historyLength: 0 },
+    };
+
+    // Act
+    const { reply } = await postA2a(a2aBody("SendMessage", params));
+
+    // Assert
+    expect(reply.result?.task?.status.state).toBe("TASK_STATE_COMPLETED");
+    expect(reply.result?.task).not.toHaveProperty("history");
+  });
+
+  it("should echo the user message as ROLE_USER whatever role it claims", async () => {
+    // Arrange
+    const params = skillMessage("kaiord_list_formats");
+    params.message.role = "ROLE_AGENT";
+
+    // Act
+    const { reply } = await postA2a(a2aBody("SendMessage", params));
+
+    // Assert
+    expect(reply.result?.task?.history?.[0]?.role).toBe("ROLE_USER");
   });
 });

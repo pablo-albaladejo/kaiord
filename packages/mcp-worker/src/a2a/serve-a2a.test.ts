@@ -15,6 +15,10 @@ const UNSUPPORTED = -32004;
 const VERSION_NOT_SUPPORTED = -32009;
 const INVALID_REQUEST = -32600;
 const METHOD_NOT_FOUND = -32601;
+const INVALID_PARAMS = -32602;
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 100;
+const FRACTIONAL_PAGE_SIZE = 1.5;
 
 describe("A2A methods and errors", () => {
   it.each([
@@ -62,6 +66,7 @@ describe("A2A methods and errors", () => {
       const { reply } = await postA2a(body);
 
       // Assert
+      expect(reply.id).toBe("r1");
       expect(reply.error?.code).toBe(code);
       expect(reply.error?.data?.[0]).toEqual({
         "@type": ERROR_INFO,
@@ -161,6 +166,7 @@ describe("A2A version", () => {
     });
 
     // Assert
+    expect(reply.id).toBe("r1");
     expect(reply.error?.code).toBe(VERSION_NOT_SUPPORTED);
     expect(reply.error?.data?.[0]).toMatchObject({
       reason: "VERSION_NOT_SUPPORTED",
@@ -190,5 +196,44 @@ describe("A2A version", () => {
 
     // Assert
     expect(reply.result?.task?.status.state).toBe("TASK_STATE_COMPLETED");
+  });
+});
+
+describe("A2A edge inputs", () => {
+  it.each([[0], [-1], [MAX_PAGE_SIZE + 1], [FRACTIONAL_PAGE_SIZE], ["10"]])(
+    "should answer ListTasks with pageSize %j with -32602",
+    async (pageSize) => {
+      // Arrange
+      const body = a2aBody("ListTasks", { pageSize });
+
+      // Act
+      const { reply } = await postA2a(body);
+
+      // Assert
+      expect(reply.error?.code).toBe(INVALID_PARAMS);
+    }
+  );
+
+  it("should default the ListTasks pageSize to 50", async () => {
+    // Arrange
+    const body = a2aBody("ListTasks", {});
+
+    // Act
+    const { reply } = await postA2a(body);
+
+    // Assert
+    expect(reply.result).toMatchObject({ pageSize: DEFAULT_PAGE_SIZE });
+  });
+
+  it("should read the query parameter when the header is empty", async () => {
+    // Arrange
+    const url = `${A2A_ENDPOINT}?A2A-Version=1.0`;
+    const headers = { "a2a-version": "" };
+
+    // Act
+    const { reply } = await postA2a(a2aBody("ListTasks"), { url, headers });
+
+    // Assert
+    expect(reply.error).toBeUndefined();
   });
 });

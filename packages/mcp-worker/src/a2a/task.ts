@@ -14,6 +14,8 @@ export type TaskInput = {
   readonly message: UserMessage;
   readonly state: TaskState;
   readonly statusText: string;
+  /** Spec §3.2.4: historyLength 0 asks for no history. */
+  readonly omitHistory?: boolean;
   readonly artifact?: {
     readonly name: string;
     readonly parts: ReadonlyArray<Part>;
@@ -35,7 +37,7 @@ export const newTaskId = (): string => `k1.${randomId()}`;
 const historyOf = (message: UserMessage, contextId: string) => [
   {
     messageId: message.messageId,
-    role: typeof message.role === "string" ? message.role : "ROLE_USER",
+    role: "ROLE_USER",
     parts: message.parts,
     contextId,
   },
@@ -62,6 +64,8 @@ export const buildTask = (input: TaskInput) => {
     ...(artifact === undefined
       ? {}
       : { artifacts: [{ artifactId: "result", ...artifact }] }),
-    history: historyOf(input.message, contextId),
+    ...(input.omitHistory === true
+      ? {}
+      : { history: historyOf(input.message, contextId) }),
   };
 };
