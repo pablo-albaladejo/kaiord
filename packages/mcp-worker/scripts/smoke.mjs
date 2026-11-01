@@ -4,10 +4,12 @@
 // against the deployed Worker and gates the discovery step.
 //
 //   node scripts/smoke.mjs https://kaiord.com/mcp
+//   node scripts/smoke.mjs https://kaiord.com/a2a
 //
 // Exits 0 when every check passes, 1 naming each failed check, 2 on usage.
 import { pathToFileURL } from "node:url";
 
+import { A2A_CHECKS, createA2aCaller } from "./smoke-a2a-checks.mjs";
 import { CHECKS } from "./smoke-checks.mjs";
 
 const ACCEPT = "application/json, text/event-stream";
@@ -44,9 +46,13 @@ export const createCaller = (endpoint, fetchImpl) => {
 };
 
 export const runSmoke = async (base, fetchImpl = globalThis.fetch) => {
-  const call = createCaller(endpointOf(base), fetchImpl);
+  // A URL ending in /a2a runs the A2A checks; anything else is MCP.
+  const a2a = new URL(base).pathname.endsWith("/a2a");
+  const call = a2a
+    ? createA2aCaller(base, fetchImpl)
+    : createCaller(endpointOf(base), fetchImpl);
   const results = [];
-  for (const [name, check] of Object.entries(CHECKS)) {
+  for (const [name, check] of Object.entries(a2a ? A2A_CHECKS : CHECKS)) {
     try {
       await check(call);
       results.push({ name, ok: true });

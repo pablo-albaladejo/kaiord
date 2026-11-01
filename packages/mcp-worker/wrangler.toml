@@ -1,6 +1,8 @@
 # Cloudflare Worker serving the stateless Kaiord MCP tools at kaiord.com/mcp
-# (OpenSpec change add-remote-mcp-endpoint, D1/D6/D8/D9). The route is more
-# specific than kaiord-agent-edge's kaiord.com/*, so it wins for /mcp only.
+# (OpenSpec change add-remote-mcp-endpoint, D1/D6/D8/D9) and the same tools
+# over A2A at kaiord.com/a2a (add-a2a-endpoint, D1/D11). Both routes are exact
+# and more specific than kaiord-agent-edge's kaiord.com/*, so they win for
+# /mcp and /a2a only; /a2a/... falls through to the site.
 #
 # Deploying is a production change (prod-deploy class): Pablo runs it himself.
 #   npx wrangler@4 deploy
@@ -19,6 +21,7 @@ send_metrics = false
 
 routes = [
   { pattern = "kaiord.com/mcp", zone_name = "kaiord.com" },
+  { pattern = "kaiord.com/a2a", zone_name = "kaiord.com" },
 ]
 
 # The KRD format spec (docs/krd-format.md) is served as a resource and by
