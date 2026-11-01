@@ -20,7 +20,13 @@ export const REMOTE_TOOLS = [
 ];
 
 const MCP_ENDPOINT = `${ORIGIN}/mcp`;
+const A2A_ENDPOINT = `${ORIGIN}/a2a`;
 const SERVER_CARD = `${ORIGIN}/.well-known/mcp/server-card.json`;
+const AGENT_CARD = `${ORIGIN}/.well-known/agent-card.json`;
+const CARD_OF_ANCHOR = new Map([
+  [MCP_ENDPOINT, SERVER_CARD],
+  [A2A_ENDPOINT, AGENT_CARD],
+]);
 const DEADLINE_MS = 20_000;
 
 const json = (path, predicate) => ({
@@ -49,14 +55,15 @@ export const isSkillsIndex = (index) =>
     (skill) => skill?.url && /^sha256:[0-9a-f]{64}$/.test(skill.digest)
   );
 
-// Every anchor is an endpoint with a card; today that is /mcp alone.
+// Every anchor is an endpoint described by its own card.
 export const isApiCatalog = (catalog) =>
   Array.isArray(catalog?.linkset) &&
   catalog.linkset.length > 0 &&
   catalog.linkset.every(
     (context) =>
-      context?.anchor === MCP_ENDPOINT &&
-      context["service-desc"]?.[0]?.href === SERVER_CARD &&
+      CARD_OF_ANCHOR.has(context?.anchor) &&
+      context["service-desc"]?.[0]?.href ===
+        CARD_OF_ANCHOR.get(context.anchor) &&
       !("status" in context)
   );
 
