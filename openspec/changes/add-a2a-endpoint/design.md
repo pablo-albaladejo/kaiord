@@ -108,8 +108,8 @@ A2A error carries `data` as an array whose first element is a
 `metadata: {"supported": "1.0"}`.
 
 `CancelTask` returns `-32002` rather than `-32001`. Neither is retained, but
-`-32002` says why a cancel can never succeed. This asymmetry is an open
-question for the review.
+`-32002` says why a cancel can never succeed. The asymmetry was accepted
+in review (2026-11-01).
 
 ### D6. Mapping the internal tool reply
 
@@ -205,4 +205,4 @@ discovery PR; the WAF widening is harmless without a route.
 
 ## Open Questions
 
-- Should `CancelTask` return `-32001` like `GetTask`, instead of `-32002`?
+None. `CancelTask` returning `-32002` (D5) was settled in review.

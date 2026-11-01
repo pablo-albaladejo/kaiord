@@ -7,7 +7,7 @@
       codes and the required AgentCard fields against it and against a
       card the scanner already accepts.
 - [x] 0.3 `openspec validate add-a2a-endpoint --strict` passes.
-- [ ] 0.4 Pablo approves the change in chat before any code.
+- [x] 0.4 Pablo approves the change in chat before any code.
 
 ## 1. Privacy disclosure and link path (PR `docs/a2a-privacy`)
 
