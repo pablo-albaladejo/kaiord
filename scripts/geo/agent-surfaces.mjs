@@ -60,6 +60,15 @@ export const isApiCatalog = (catalog) =>
       !("status" in context)
   );
 
+// Website-only PAP manifest: these three keys and an empty `web`, so it
+// declares no agent and no OAuth.
+export const isPoppy = (manifest) =>
+  JSON.stringify(Object.keys(manifest ?? {}).sort()) ===
+    '["organization","protocol_version","web"]' &&
+  manifest.protocol_version === "0.1" &&
+  manifest.organization?.domain === "kaiord.com" &&
+  JSON.stringify(manifest.web) === "{}";
+
 export const ROWS = [
   {
     name: "/auth.md",
@@ -75,6 +84,7 @@ export const ROWS = [
     ...json("/.well-known/api-catalog", isApiCatalog),
     typePrefix: "application/linkset+json",
   },
+  json("/.well-known/poppy.json", isPoppy),
   {
     name: "POST /mcp tools/list",
     method: "POST",

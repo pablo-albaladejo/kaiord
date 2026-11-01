@@ -3,6 +3,7 @@ import authMd from "../public/auth.md?raw";
 import catalogJson from "../public/.well-known/ai-catalog.json?raw";
 import skillsJson from "../public/.well-known/agent-skills/index.json?raw";
 import cardJson from "../public/.well-known/mcp/server-card.json?raw";
+import poppyJson from "../public/.well-known/poppy.json?raw";
 
 type SkillEntry = { name: string; url: string; digest: string };
 type CatalogEntry = {
@@ -196,6 +197,34 @@ describe("RFC 9727 api-catalog", () => {
 
     // Assert
     expect(named.every(Boolean)).toBe(true);
+  });
+});
+
+describe("PAP poppy.json", () => {
+  it("should declare the website only, with no agent and no OAuth", () => {
+    // Arrange
+    const manifest = JSON.parse(poppyJson) as Record<string, unknown>;
+
+    // Act
+    const keys = Object.keys(manifest).sort();
+
+    // Assert
+    expect(keys).toEqual(["organization", "protocol_version", "web"]);
+    expect(manifest.protocol_version).toBe("0.1");
+    expect(manifest.web).toEqual({});
+  });
+
+  it("should name Kaiord on this domain", () => {
+    // Arrange
+    const manifest = JSON.parse(poppyJson) as {
+      organization: Record<string, unknown>;
+    };
+
+    // Act
+    const organization = manifest.organization;
+
+    // Assert
+    expect(organization).toEqual({ name: "Kaiord", domain: "kaiord.com" });
   });
 });
 

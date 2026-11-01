@@ -8,6 +8,7 @@ import {
   checkRow,
   isAiCatalog,
   isApiCatalog,
+  isPoppy,
   isServerCard,
   isSkillsIndex,
   run,
@@ -119,6 +120,7 @@ describe("agent-surfaces", () => {
     ["ai-catalog.json", isAiCatalog],
     ["agent-skills/index.json", isSkillsIndex],
     ["api-catalog", isApiCatalog],
+    ["poppy.json", isPoppy],
   ]) {
     it(`should accept the published ${file} and reject an empty object`, () => {
       // Arrange
