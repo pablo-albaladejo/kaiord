@@ -139,7 +139,11 @@ The same streamed 65,536-byte cap answers `413` before parsing, with or
 without `content-length`. A batch gets `400`. `GET` gets `405` with
 `Allow: POST`. The `MCP_RATE_LIMITER` binding is shared. The WAF bucket is
 **combined** across `/mcp` and `/a2a`: 10 requests per 10 s per IP, then a
-10 s block, keyed on `ip.src` and `cf.colo.id`.
+10 s block, keyed on `ip.src` and `cf.colo.id`. Cloudflare keeps the
+counter per data center (`cf.colo.id` is a mandatory characteristic on
+this plan), so a client reaching several data centers gets one budget in
+each. The guarantee is therefore per IP per data center, and the docs say
+so; the Worker's own limiter remains a second layer.
 
 ### D8. The agent card
 
