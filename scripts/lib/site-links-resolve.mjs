@@ -73,7 +73,7 @@ export function linksIn(text) {
 
 const SPA_PATHS = new Set(["/app", "/app/", "/app/index.html"]);
 // Routed to a Cloudflare Worker ahead of Pages, so no dist holds them.
-const WORKER_PATHS = new Set(["/mcp"]);
+const WORKER_PATHS = new Set(["/mcp", "/a2a"]);
 
 /**
  * Returns the reason a kaiord.com link is broken, or null when it resolves.

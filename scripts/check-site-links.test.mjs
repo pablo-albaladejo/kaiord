@@ -256,6 +256,13 @@ describe("check-site-links", () => {
     assert.deepEqual(reasons(), ["no page is served at /mcp/other"]);
   });
 
+  it("accepts the Worker-routed /a2a endpoint, but not a path under it", () => {
+    addDocsPage("a2a.html", "https://kaiord.com/a2a");
+    addDocsPage("under.html", "https://kaiord.com/a2a/tasks");
+
+    assert.deepEqual(reasons(), ["no page is served at /a2a/tasks"]);
+  });
+
   it("fails on a missing dist only when REQUIRE_DOCS_DIST=1", () => {
     const args = [SCRIPT, "--merged", join(dir, "nope")];
     const env = { ...process.env, REQUIRE_DOCS_DIST: "" };
