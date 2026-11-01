@@ -73,7 +73,7 @@ The remote server is a subset of the local one:
   local `@kaiord/mcp` server. The remote server has no prompts.
 
 The endpoint stores and logs nothing; see the
-[privacy policy](/legal/privacy-policy#remote-mcp-endpoint).
+[privacy policy](/legal/privacy-policy#remote-mcp-and-a2a-endpoints).
 
 ## Tools
 
