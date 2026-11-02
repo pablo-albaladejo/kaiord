@@ -23,14 +23,16 @@ export const SKILLS: ReadonlyArray<Skill> = [
     id: "kaiord_diff",
     name: "Compare two workouts",
     description:
-      "Compare two workout files and list their differences. Arguments: content1, content2, optional format1 and format2.",
+      "Compare two workout files and list their differences. Arguments: content1, content2, format1, format2.",
     tags: ["diff", "compare"],
-    examples: ['{"skill":"kaiord_diff","content1":"<krd>","content2":"<krd>"}'],
+    examples: [
+      '{"skill":"kaiord_diff","content1":"<krd>","format1":"krd","content2":"<krd>","format2":"krd"}',
+    ],
   },
   {
     id: "kaiord_extract_workout",
     name: "Extract a workout",
-    description: `Extract the structured workout from a file as JSON. Arguments: ${CONTENT}, optional input_format.`,
+    description: `Extract the structured workout from a file as JSON. Arguments: ${CONTENT}, input_format.`,
     tags: ["extract", "workout", "json"],
     examples: [
       '{"skill":"kaiord_extract_workout","input_content":"<base64 fit>","input_format":"fit"}',
@@ -47,7 +49,7 @@ export const SKILLS: ReadonlyArray<Skill> = [
   {
     id: "kaiord_inspect",
     name: "Inspect a workout",
-    description: `Return a human-readable summary of a workout file. Arguments: ${CONTENT}, optional input_format.`,
+    description: `Return a human-readable summary of a workout file. Arguments: ${CONTENT}, input_format.`,
     tags: ["inspect", "summary"],
     examples: [
       '{"skill":"kaiord_inspect","input_content":"<tcx xml>","input_format":"tcx"}',
