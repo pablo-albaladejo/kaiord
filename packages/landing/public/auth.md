@@ -27,18 +27,23 @@ They are not used. Do not send credentials. Kaiord ignores them.
 - MCP server (Streamable HTTP): `https://kaiord.com/mcp`
   ([server card](https://kaiord.com/.well-known/mcp/server-card.json),
   [tools](https://kaiord.com/docs/mcp/tools))
+- A2A agent (JSON-RPC): `https://kaiord.com/a2a`
+  ([agent card](https://kaiord.com/.well-known/agent-card.json),
+  [docs](https://kaiord.com/docs/mcp/tools#a2a)). A2A 1.0 only; 0.3 clients
+  get -32009.
 - [API catalog (RFC 9727)](https://kaiord.com/.well-known/api-catalog)
 
 ## Limits
 
 - A request body may be at most 65,536 bytes. A larger body gets 413.
-- About 10 requests per 10 seconds per IP address. Above that, the edge
-  answers 429.
+- 10 requests per 10 s per IP per data center across `/mcp` and `/a2a`, then a
+  10 s block. While blocked, the edge answers 429. Data centers do not share
+  the count.
 - Only structured workouts are accepted. Activities, courses and health data
   are rejected.
 
 ## Data
 
-The MCP server converts workouts in transit. It stores nothing and keeps no
-logs of what you send. See the
+Both endpoints convert workouts in transit. They store nothing and keep no
+logs of what you send. A2A tasks are not retained, so `GetTask` answers -32001. See the
 [privacy policy](https://kaiord.com/docs/legal/privacy-policy).

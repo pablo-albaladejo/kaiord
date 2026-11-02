@@ -16,7 +16,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/garmin-connect` - Garmin Connect API client (SSO auth, push/list workouts)
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
-- `@kaiord/mcp-worker` - Cloudflare Worker serving the stateless MCP tools at kaiord.com/mcp (private)
+- `@kaiord/mcp-worker` - Cloudflare Worker serving the stateless MCP tools at kaiord.com/mcp and as A2A skills at kaiord.com/a2a (private)
 - `@kaiord/garmin-bridge` - Chrome extension for SPA-to-Garmin Connect integration (private)
 - `@kaiord/train2go-bridge` - Chrome extension for reading Train2Go coaching plans (private)
 - `@kaiord/whoop-bridge` - Chrome extension for WHOOP health data via session piggyback (private)
@@ -113,8 +113,8 @@ Claude Code 2.1.304).
 | `athlete-data`       | Writing to or deleting from a real athlete's account: `kaiord garmin push`, and the `kaiord_garmin_push` MCP tool.                                                                                                                                                                                                                                                |
 
 Kaiord runs no backend that stores user data. The one server it runs is the
-stateless remote MCP endpoint (`kaiord.com/mcp`), which converts workouts in
-transit and keeps nothing. User data lives in the browser and in the athlete's
+stateless remote Worker behind `kaiord.com/mcp` and `kaiord.com/a2a`, which
+converts workouts in transit and keeps nothing. User data lives in the browser and in the athlete's
 third-party accounts, which is why the athlete-data class covers Garmin
 Connect.
 
