@@ -196,9 +196,13 @@ async function inspect(row, fetch, timeoutMs) {
   if (first.reason) return first.reason;
   const second = row.joins ? await read(row.joins, fetch, signal) : {};
   if (second.reason) return `joined reply: ${second.reason}`;
-  return row.predicate(first.parsed, second.parsed)
-    ? null
-    : "body check failed";
+  try {
+    return row.predicate(first.parsed, second.parsed)
+      ? null
+      : "body check failed";
+  } catch (error) {
+    return `body check threw: ${error.message}`;
+  }
 }
 
 export async function checkRow(row, fetch, timeoutMs = DEADLINE_MS) {

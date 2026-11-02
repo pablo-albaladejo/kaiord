@@ -144,15 +144,21 @@ describe("agent-surfaces", () => {
 
   it("should reject an api-catalog anchor with no card of its own", () => {
     // Arrange
-    const context = {
-      anchor: "https://kaiord.com/a2a",
-      "service-desc": [
-        { href: "https://kaiord.com/.well-known/mcp/server-card.json" },
-      ],
-    };
+    const server = "https://kaiord.com/.well-known/mcp/server-card.json";
+    const agent = "https://kaiord.com/.well-known/agent-card.json";
+    const linkset = [
+      {
+        anchor: "https://kaiord.com/mcp",
+        "service-desc": [{ href: agent }],
+      },
+      {
+        anchor: "https://kaiord.com/a2a",
+        "service-desc": [{ href: server }],
+      },
+    ];
 
     // Act
-    const ok = isApiCatalog({ linkset: [context] });
+    const ok = isApiCatalog({ linkset });
 
     // Assert
     assert.equal(ok, false);
@@ -328,6 +334,54 @@ describe("agent-surfaces", () => {
 
     // Assert
     assert.equal(result.reason, "joined reply: status 500");
+  });
+
+  it("should ask /mcp for the event stream too, or it answers 406", () => {
+    // Arrange
+    const { joins } = ROWS.find((r) => r.joins);
+
+    // Act
+    const { accept } = joins.headers;
+
+    // Assert
+    assert.equal(accept, "application/json, text/event-stream");
+  });
+
+  it("should fail the card-vs-tools row when the joined reply stalls", async () => {
+    // Arrange
+    const row = ROWS.find((r) => r.joins);
+    const card = JSON.stringify(cardOf(REMOTE_TOOLS));
+    const fetch = (url, { signal }) =>
+      url.endsWith("/mcp")
+        ? new Promise((_resolve, reject) => {
+            const socket = setInterval(() => {}, 1_000);
+            signal.addEventListener("abort", () => {
+              clearInterval(socket);
+              reject(signal.reason);
+            });
+          })
+        : reply(card)();
+
+    // Act
+    const result = await checkRow(row, fetch, 10);
+
+    // Assert
+    assert.match(result.reason, /^fetch failed: /);
+  });
+
+  it("should name a predicate that throws as a body check", async () => {
+    // Arrange
+    const row = ROWS.find((r) => r.joins);
+    const card = JSON.stringify({ skills: [null] });
+    const tools = JSON.stringify(toolsReply(REMOTE_TOOLS));
+    const fetch = async (url) =>
+      url.endsWith("/mcp") ? reply(tools)() : reply(card)();
+
+    // Act
+    const result = await checkRow(row, fetch);
+
+    // Assert
+    assert.match(result.reason, /^body check threw: /);
   });
 
   it("should accept the live tools/list reply shape", () => {
