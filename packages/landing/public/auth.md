@@ -36,14 +36,14 @@ They are not used. Do not send credentials. Kaiord ignores them.
 ## Limits
 
 - A request body may be at most 65,536 bytes. A larger body gets 413.
-- 10 requests per 10 s per IP across `/mcp` and `/a2a`, then a 10 s block. While
-  blocked, the edge answers 429.
+- 10 requests per 10 s per IP per data center across `/mcp` and `/a2a`, then a
+  10 s block. While blocked, the edge answers 429. Data centers do not share
+  the count.
 - Only structured workouts are accepted. Activities, courses and health data
   are rejected.
 
 ## Data
 
 Both endpoints convert workouts in transit. They store nothing and keep no
-logs of what you send. A2A tasks are not retained, so `GetTask` always answers
--32001. See the
+logs of what you send. A2A tasks are not retained, so `GetTask` answers -32001. See the
 [privacy policy](https://kaiord.com/docs/legal/privacy-policy).

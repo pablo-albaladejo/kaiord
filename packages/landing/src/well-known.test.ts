@@ -131,6 +131,8 @@ type Link = { href: string; type: string };
 type LinkContext = { anchor: string } & Record<string, Link[] | string>;
 
 const API_CATALOG = `${ORIGIN}.well-known/api-catalog`;
+const SHARED_BUDGET =
+  /10 requests per 10 s per IP per data center across .\/mcp. and .\/a2a./;
 const DOCS_PAGES = import.meta.glob<string>("../../docs/**/*.md", {
   query: "?raw",
   import: "default",
@@ -274,15 +276,29 @@ describe("auth.md", () => {
     expect(namesIssuer).toBe(false);
   });
 
-  it("should state the rate budget shared by both endpoints", () => {
+  it("should state the rate budget shared by both endpoints", async () => {
     // Arrange
-    const budget = /10 requests per 10 s per IP across .\/mcp. and .\/a2a./;
+    const toolsPage = await DOCS_PAGES["../../docs/mcp/tools.md"]!();
 
     // Act
-    const statesBudget = budget.test(authMd);
+    const statesBudget = [authMd, toolsPage].map((text) =>
+      SHARED_BUDGET.test(text.replace(/\s+/g, " "))
+    );
 
     // Assert
-    expect(statesBudget).toBe(true);
+    expect(statesBudget).toEqual([true, true]);
+  });
+
+  it("should link to an A2A section that exists on the tools page", async () => {
+    // Arrange
+    const toolsPage = await DOCS_PAGES["../../docs/mcp/tools.md"]!();
+
+    // Act
+    const hasSection = /^## A2A$/m.test(toolsPage);
+
+    // Assert
+    expect(authMd).toContain("docs/mcp/tools#a2a");
+    expect(hasSection).toBe(true);
   });
 
   it("should say which A2A version the endpoint serves", () => {
