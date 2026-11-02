@@ -86,7 +86,8 @@ Send `A2A-Version: 1.0` as a header on every request. This endpoint serves A2A
 1.0 only: a missing or different version gets `-32009`.
 
 Name the skill in the first data part of the message. Its other keys are the
-tool's arguments:
+tool's arguments. A message needs a `messageId` and `parts`. An optional
+`contextId` must be 1-64 letters, digits, `_` or `-`.
 
 ```json
 {
@@ -120,13 +121,17 @@ notifications:
 | `configuration.returnImmediately: true`            | `-32004` |
 | `SendStreamingMessage`, `SubscribeToTask`          | `-32004` |
 | `GetExtendedAgentCard`                             | `-32004` |
+| Not a JSON-RPC 2.0 request                         | `-32600` |
+| An unknown method                                  | `-32601` |
+| Invalid params, such as a message with no `parts`  | `-32602` |
+| The tool call could not run                        | `-32603` |
 
-`ListTasks` always returns an empty list.
+`ListTasks` returns an empty list. A `pageSize` outside 1-100 gets `-32602`.
 
 The limits of the remote endpoint apply here too: inline content only,
 structured workouts only, and a request body of at most 65,536 bytes. The rate
-budget is shared: 10 requests per 10 s per IP across `/mcp` and `/a2a`, then a
-10 s block.
+budget is shared: 10 requests per 10 s per IP per data center across `/mcp` and
+`/a2a`, then a 10 s block. Data centers do not share the count.
 
 ## Tools
 
