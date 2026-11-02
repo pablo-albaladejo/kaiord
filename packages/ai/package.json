@@ -53,7 +53,7 @@
     "@ai-sdk/anthropic": "^4.0.49",
     "@ai-sdk/google": "^4.0.63",
     "@ai-sdk/openai": "^4.0.58",
-    "ai": "^7.0.143"
+    "ai": "^7.0.158"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/anthropic": {
@@ -67,13 +67,13 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^4.0.82",
-    "@ai-sdk/google": "^4.0.99",
-    "@ai-sdk/openai": "^4.0.96",
-    "@types/node": "^26.6.5",
+    "@ai-sdk/anthropic": "^4.0.93",
+    "@ai-sdk/google": "^4.0.109",
+    "@ai-sdk/openai": "^4.0.106",
+    "@types/node": "^26.6.6",
     "@vitest/coverage-v8": "^5.0.5",
-    "ai": "^7.0.143",
-    "tsdown": "^0.23.1",
+    "ai": "^7.0.158",
+    "tsdown": "^0.23.4",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
