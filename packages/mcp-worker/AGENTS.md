@@ -55,10 +55,11 @@ OpenSpec changes: `add-remote-mcp-endpoint` (design D1, D6, D8, D9) and
   and `triggers deploy` are in the `prod-deploy` class and the
   never-auto-remediate hook denies them. Pablo runs the deploy himself.
   `pnpm build` is `wrangler deploy --dry-run --outdir dist`, which only bundles.
-- **Deploy before discovery (A2A D10).** A change to `/a2a` that the agent
-  card, the api-catalog, `auth.md`, the AI-catalog entry or the public A2A docs
-  describe merges only after the deployed Worker passes `pnpm smoke
-https://kaiord.com/a2a`.
+- **Deploy before discovery (A2A D10).** A new discovery surface (agent card,
+  api-catalog, `auth.md`, AI-catalog entry, public A2A docs) merges only after
+  the deployed Worker passes `pnpm smoke https://kaiord.com/a2a`. A skill change
+  ships its card and code in one PR, because the snapshot test ties them: merging
+  publishes the card at once, so deploy the Worker right after and run the smoke.
 - **Log no content.** Never log arguments, results or bodies. A new log field
   must come from an allowlist or from server-generated labels.
 - **No global patches.** The FIT size fix is `fitWriter.maxOutputBytes`, not
