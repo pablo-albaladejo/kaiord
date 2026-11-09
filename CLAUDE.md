@@ -84,7 +84,10 @@ When working on this codebase, ALL problems must be fixed, regardless of whether
   - `check-coverage-floors-ratchet.mjs` — every coverage floor (the `THRESHOLD` arms in `ci.yml`, each package's vitest `thresholds`, the `codecov.yml` status targets, the `check-coverage.js` default) is compared with its value at the merge base with `origin/main`; a floor lowered or removed fails, raising or adding passes (R-CoverageFloorsRatchet, spec/spa-quality-gates). A codecov `threshold` is a tolerance, so for it RAISING fails. An unresolvable base ref fails closed — the lint job checks out with `fetch-depth: 0`
   - `check-untrusted-fields-fenced.mjs` — a recognized externally-authored field (`name`, `title`, `description`, `notes`, `error`, `message`, `reason`) returned to the model from `application/chat/tools/**` MUST be assigned from `fenceUntrusted(...)`; the guard names the file and the field (R-UntrustedFieldsFenced). It is syntactic: a field under a name outside the set is a KNOWN gap, and an opaque nested payload is invisible to it. Values built only from string literals, and zod schema builders, are app-authored by construction and exempt
   - `check-model-facing-sinks.mjs` — every chat tool whose `execute` returns a value the model reads MUST appear in `scripts/model-facing-sinks.mjs` with a status (`clean` / `fenced` / `unbounded`) and a provenance note naming where its strings are produced (R-ModelFacingSinksDeclared). A field-name allowlist catches the fields you named; this catches the sink you forgot, which is the failure that actually happened — a summarizer passed `workout.name` through raw while the fence docstring claimed it was covered, and a coaching bridge's exception text reached the model through a field called `error`, outside the tools directory, with no summarizer involved. Zero files scanned, an unreadable directory, and an unreadable source are FAULTS, not passes. It also scans `hooks/chat/`, where approved actions run: a `catch` block (typed or not) or promise `.catch((e) => …)` there whose body reads the caught value's text or hands on the value itself (`e.message`, `(e as Error).message`, `e["message"]`, `const { message } = e`, `String(e)`, `JSON.stringify(e)`, `"x" + e`, `${e}`, `return { error: e }`) fails, so an exception's text cannot reach the model as a tool result (R-CaughtErrorTextHidden). Comments are ignored; it is a text scan, so an alias (`const err = e`) or a text-returning helper is a KNOWN gap
-  - `check-boundaries-allowlist.mjs` — the `boundaries/dependencies` allowlist in `scripts/boundaries-allowlist.mjs` is shrink-only: it may never grow past `BOUNDARIES_ALLOWLIST_MAX`, every entry needs a reason, and an entry whose file no longer imports `adapters/` is stale and must be deleted (R-BoundariesAllowlistShrinkOnly). Never park a _new_ violation here — fix the import instead
+  - `check-scripts-orphans.mjs` — every file under `scripts/` and `.github/scripts/` MUST be reachable from a real caller (a `package.json` script, a workflow or composite action, a husky hook, `.claude/settings.json`, the root `eslint.config.js`, or another non-test script) or sit in the `scripts/README.md` manual-tools allowlist. Every reference counts only outside a comment and as a whole path (`max.sh` does not reach `x.sh`, `.github/scripts/x` does not wire `scripts/x`), and reachability is a fixpoint from the wired and allowlisted roots, so two scripts naming only each other are both orphans. A `*.test.mjs` importing a script is not wiring, and neither is a row in any Markdown file (`README.md`, `AGENTS.md`): a script reached only by its own test has no real caller, so a guard needs a `lint:*` entry (R-ScriptsNoOrphans)
+  - `check-bridge-ci-coverage.test.mjs` — every `packages/*-bridge` and every published (non-private) library MUST appear in each `ci.yml` enumeration (detect-changes filter, docs-only skip chain, `test` matrix or a dedicated job, a named `THRESHOLD` arm) and, for libraries, in a `codecov.yml` flag under the default patch target, and in every publish-side list (`release.yml` paths, changeset-bot `PUBLISHABLE`, `create-github-releases.js`, the `build` verify loop, the `consume-build-artifacts` default); the two publish lists hold nothing private, a published package without a `test` script fails, and so does a package CI runs `test:coverage` for without that script (`pnpm --filter` exits 0 on a missing script); every detect-changes filter MUST be read by the docs-only skip condition itself, by its exact key and polarity (a per-package `*-changed` step does not count, and `core` is not satisfied by `bridge_core`), and replaying the bash with docs plus that one filter MUST yield `should-test=true`, and the real `Analyze changes` bash is replayed so a package change plus a `.md` yields `should-test=true`. `@kaiord/whoop`, `@kaiord/tanita` and `@kaiord/trainingpeaks` were published with suites CI never ran because this guard only scanned bridges
+  - `check-ux-glossary-shape.mjs` — `packages/workout-spa-editor/docs/ux-glossary.md` keeps its Verbs / Nouns / State labels sections and a `**Create**` row (R-UXGlossaryShape, `pnpm lint:ux-glossary`)
+  - `check-boundaries-allowlist.mjs` — the `boundaries/dependencies` allowlist in `scripts/boundaries-allowlist.mjs` is shrink-only: it may never grow past `BOUNDARIES_ALLOWLIST_MAX`, every entry needs a reason, an entry absent from the list at the merge base with `origin/main` fails (so a swap under the cap is caught; an unresolvable base fails closed), and an entry whose file no longer imports `adapters/` (static, side-effect or dynamic `import()`, comments ignored) is stale and must be deleted (R-BoundariesAllowlistShrinkOnly). Never park a _new_ violation here — fix the import instead
 
 If you encounter warnings or errors during your work:
 
@@ -171,7 +174,7 @@ not a sandbox:
 ```
 packages/
 ├── core/src/
-│   ├── domain/           # Pure types & Zod schemas (no dependencies)
+│   ├── domain/           # Pure types & Zod schemas (zod and @noble/hashes only)
 │   ├── application/      # Use cases, provider types (depends only on ports)
 │   ├── ports/            # I/O contracts (interfaces)
 │   └── adapters/logger/  # Console logger only
@@ -185,7 +188,7 @@ packages/
 
 **Critical rules:**
 
-- `domain` depends on nothing
+- `domain` depends on nothing except `zod` (schemas) and `@noble/hashes` (canonical hashing)
 - `application` MUST NOT import external libs or adapters
 - Adapter packages (`fit`, `tcx`, `zwo`) depend on `core` only
 - Strategy pattern: readers/writers injected into generic core functions
@@ -328,9 +331,13 @@ When adding a new publishable package to the monorepo, update these CI/CD files:
 
 1. **`.changeset/config.json`** - Add to `linked` array
 2. **`.github/workflows/changeset-bot.yml`** - Add to `PUBLISHABLE` list
-3. **`.github/workflows/release.yml`** - Add to `paths` trigger, version tracking, and build step
-4. **`.github/workflows/ci.yml`** - Add to `test` matrix, `build` verification, and `detect-changes`
-5. **`scripts/create-github-releases.js`** - Add package entry for GitHub releases
+3. **`.github/workflows/release.yml`** - Add to the `paths` trigger
+4. **`.github/workflows/ci.yml`** - Add to `detect-changes` (filter + docs-only skip chain), the `test` matrix, a named `THRESHOLD` arm, and `build` verification
+5. **`codecov.yml`** - Add a flag over `packages/<pkg>/src/`
+6. **`scripts/create-github-releases.js`** - Add package entry for GitHub releases
+7. **`.github/actions/consume-build-artifacts/action.yml`** - Add to the `expected-packages` default
+
+`scripts/check-bridge-ci-coverage.test.mjs` fails `pnpm test:scripts` when steps 2-7 are missed.
 
 ## Key References
 

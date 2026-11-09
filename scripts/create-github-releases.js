@@ -23,6 +23,9 @@ const PUBLISHABLE_DIRS = [
   "cli",
   "mcp",
   "ai",
+  "whoop",
+  "tanita",
+  "trainingpeaks",
 ];
 
 function getPackagesFromEnv() {

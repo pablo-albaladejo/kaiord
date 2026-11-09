@@ -79,3 +79,21 @@ test("returns a single violation when assets dir is missing", () => {
   assert.equal(violations.length, 1);
   assert.equal(violations[0].rule, "R-NoPerfMarksInProd");
 });
+
+test("should report a violation when assets holds no JS bundle", () => {
+  // Arrange
+  const { dir, assets } = makeDist();
+  try {
+    writeFileSync(join(assets, "style.css"), "body{margin:0}\n");
+
+    // Act
+    const violations = runCheck({ assetsDir: assets });
+
+    // Assert
+    assert.equal(violations.length, 1);
+    assert.equal(violations[0].rule, "R-NoPerfMarksInProd");
+    assert.match(violations[0].detail, /no JS bundles found in dist\/assets/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

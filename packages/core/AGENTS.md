@@ -29,7 +29,7 @@
 
 ### Working In This Directory
 
-- This is the innermost layer of the monorepo. `domain` depends on nothing except `zod`. `application` MUST NOT import external libs or adapters. Adapter packages may depend on `@kaiord/core`; `@kaiord/core` MUST NOT import any other workspace package at runtime.
+- This is the innermost layer of the monorepo. `domain` depends on nothing except `zod` (schemas) and `@noble/hashes` (canonical hashing). `application` MUST NOT import external libs or adapters. Adapter packages may depend on `@kaiord/core`; `@kaiord/core` MUST NOT import any other workspace package at runtime.
 - Domain schemas use **snake_case** enum values (`indoor_cycling`, `lap_swimming`, `structured_workout`); access them via `sportSchema.enum.cycling`, never raw strings.
 - KRD's `metadata.sport` and `session.sport` are `z.string()` (not `sportSchema`) for forward compatibility with unknown sport values from FIT files.
 - All errors are exported as both a `class` (for `instanceof` checks) and a `create*` factory (for FP style) — see `src/domain/types/errors.ts`.
@@ -58,6 +58,7 @@ None. This is the root of the dependency DAG.
 ### External
 
 - `zod ^4.4.3` (runtime) — schema validation and type inference.
+- `@noble/hashes ^2.4.0` (runtime) — sync SHA-256 for `domain/hash/canonical-hash.ts`.
 - `@faker-js/faker`, `rosie` (devDep, but RE-EXPORTED for tests under `./test-utils` via rosie factories).
 - `tsdown`, `tsx`, `typescript`, `vitest`, `@vitest/coverage-v8` (build/test only).
 
