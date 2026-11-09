@@ -1,4 +1,6 @@
 import { execa } from "execa";
+import { mkdtemp, rm, writeFile } from "fs/promises";
+import { tmpdir } from "os";
 import { dirname, join, resolve } from "path";
 import stripAnsi from "strip-ansi";
 import { fileURLToPath } from "url";
@@ -159,6 +161,30 @@ describe("diff command integration", () => {
       // Assert
       expect(exitCode).toBe(ExitCode.INVALID_ARGUMENT);
       expect(stripAnsi(stderr)).toContain("Unable to detect format");
+    },
+    INTEGRATION_TIMEOUT
+  );
+
+  it(
+    "should exit with VALIDATION_ERROR when a file is not a valid KRD",
+    async () => {
+      // Arrange
+      const validFile = join(FIXTURES_PATH, "krd/WorkoutIndividualSteps.krd");
+      const dir = await mkdtemp(join(tmpdir(), "kaiord-diff-"));
+      const invalid = join(dir, "bad.krd");
+      await writeFile(invalid, '{"not":"krd"}');
+
+      // Act
+      const { exitCode, stderr } = await execa(
+        "node",
+        [CLI_PATH, "diff", "--file1", validFile, "--file2", invalid],
+        { reject: false }
+      );
+      await rm(dir, { recursive: true, force: true });
+
+      // Assert
+      expect(exitCode).toBe(ExitCode.VALIDATION_ERROR);
+      expect(stripAnsi(stderr)).toContain("Invalid KRD format");
     },
     INTEGRATION_TIMEOUT
   );
