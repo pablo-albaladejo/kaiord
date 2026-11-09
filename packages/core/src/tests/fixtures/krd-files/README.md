@@ -1,6 +1,6 @@
 # KRD Test Fixtures
 
-This directory contains KRD (Kaiord Representation Definition) files generated from the FIT test fixtures.
+This directory contains KRD (Kaiord Representation Definition) files derived from the FIT test fixtures.
 
 ## Files
 
@@ -8,16 +8,6 @@ This directory contains KRD (Kaiord Representation Definition) files generated f
 - **WorkoutRepeatSteps.krd** - Workout with repetition blocks
 - **WorkoutRepeatGreaterThanStep.krd** - Workout with conditional repeat steps
 - **WorkoutCustomTargetValues.krd** - Workout with custom target values (watts, FTP percentages)
-
-## Generation
-
-These files are automatically generated from the corresponding FIT files using:
-
-```bash
-pnpm run generate:krd-fixtures
-```
-
-The generation script is located at `scripts/generate-krd-fixtures.ts`.
 
 ## Usage
 
@@ -37,14 +27,3 @@ All KRD files follow the schema defined in `schema/workout.json` and use:
 - **Type**: `workout`
 - **Units**: Standardized (seconds, meters, watts, bpm, etc.)
 - **Naming**: camelCase for all field names
-
-## Regeneration
-
-If the FIT fixtures are updated or the conversion logic changes, regenerate these files:
-
-```bash
-cd packages/core
-pnpm run generate:krd-fixtures
-```
-
-This ensures the KRD fixtures stay in sync with the source FIT files.
