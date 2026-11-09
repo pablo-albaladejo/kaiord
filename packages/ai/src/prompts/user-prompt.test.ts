@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import benchmarks from "../evals/benchmarks.json";
-import { CONTROL_CHARS } from "./control-chars";
+import { stripControlChars } from "./control-chars";
 import { WORKOUT_PARSER_SYSTEM } from "./parse-workout-prompt";
 
 import {
@@ -180,7 +180,7 @@ describe("closing-tag neutralization", () => {
     const result = buildUserPrompt("running", hostile, []);
 
     // Assert
-    const afterStrip = result.replace(CONTROL_CHARS, "");
+    const afterStrip = stripControlChars(result);
     expect(afterStrip.match(/<\s*\/\s*coach_description\s*>/gi)).toHaveLength(
       1
     );
@@ -195,7 +195,7 @@ describe("closing-tag neutralization", () => {
     const result = buildUserPrompt("running", "desc", [hostile]);
 
     // Assert
-    const afterStrip = result.replace(CONTROL_CHARS, "");
+    const afterStrip = stripControlChars(result);
     expect(afterStrip.match(/<\s*\/\s*coach_comment\s*>/gi)).toHaveLength(1);
   });
 });
