@@ -26,7 +26,7 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 ### Working In This Directory
 
 1. **Organisms own a hook surface.** Each organism either has its own `use-*.ts` hooks inside the folder or composes hooks from `src/hooks/`. UI shouldn't directly call use cases — go through a hook.
-2. **Library no-dual-mount.** When adding a new organism that needs Library content, route through `TemplatePickerDialog` instead of importing `WorkoutLibrary` directly. The mechanical guard fails CI on imports from other call sites.
+2. **Library no-dual-mount.** Organisms MUST NOT import the Library content component `pages/Library/LibraryContent`; only `LibraryPage.tsx` mounts it. The mechanical guard fails CI on imports from other call sites.
 3. **PII rule.** Static literals / constants for toast + console first args.
 4. **Storybook for visual variants.** Organisms with multi-state UI (e.g. `StepEditor`, `WorkoutList`) ship stories.
 
@@ -53,4 +53,4 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 
 <!-- MANUAL: -->
 
-Library no-dual-mount is the most-likely-to-trip mechanical guard when refactoring this tree. Before importing `WorkoutLibrary` anywhere, check the guard.
+Library no-dual-mount is the most-likely-to-trip mechanical guard when refactoring this tree. Before importing `pages/Library/LibraryContent` anywhere, check the guard.

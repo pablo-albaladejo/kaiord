@@ -65,7 +65,7 @@ Private (not published to npm). Deployed to GitHub Pages.
 - **Static toast/`console.*` strings.** First args to `toast(...)` and `console.{log,warn,error,info,debug}` under `src/{components,hooks,lib}/**` MUST be a bare string literal or a top-level `SCREAMING_SNAKE_CASE` constant referencing a literal. Enforced by `check-no-pii-leakage.mjs` (R-PIIInterpolation).
 - **`stripIds` chokepoint.** Every Dexie write path, `saveWorkout`, and `exportWorkout` pass `UIWorkout` through `stripIds()` first — see `src/store/strip-ids.ts`.
 - **Coaching id shape.** Every `coachingActivityId:` literal on a `sessionMatches` write AND every `[profileId+coachingActivityId]` reader MUST be constructed via `buildCoachingActivityId(...)`, `toPersistedCoachingActivityId(...)`, or a `CoachingActivityRecord.id` access (R-SessionMatchIdShape; see `.omc/autopilot/bug-trace.md` §H7 for the SHORT/COMPOSITE divergence that motivated the guard).
-- **Library no-dual-mount.** Only `LibraryPage.tsx` and `TemplatePickerDialog.tsx` may import `organisms/WorkoutLibrary` / `WorkoutLibrary/WorkoutLibrary` / `LibraryDialogContent` (R-LibraryNoDualMount).
+- **Library no-dual-mount.** Only `LibraryPage.tsx` may import `components/pages/Library/LibraryContent` (R-LibraryNoDualMount).
 
 ## Dependencies
 
