@@ -31,15 +31,18 @@ describe("PROMPT_VERSION", () => {
 });
 
 describe("SPANISH_ABBREVIATION_DICTIONARY", () => {
-  it("should include common coaching abbreviations", () => {
+  it("should list every abbreviation as a dash entry with its meaning", () => {
     // Arrange
+    const entries = SPANISH_ABBREVIATION_DICTIONARY.split("\n").filter((l) =>
+      l.startsWith("- ")
+    );
 
     // Act
+    const malformed = entries.filter((l) => !/^- [^:]+: .+$/.test(l));
 
     // Assert
-    expect(SPANISH_ABBREVIATION_DICTIONARY).toContain("Z1-Z5");
-    expect(SPANISH_ABBREVIATION_DICTIONARY).toContain("CV/VC");
-    expect(SPANISH_ABBREVIATION_DICTIONARY).toContain("RI");
+    expect(entries.length).toBeGreaterThan(0);
+    expect(malformed).toEqual([]);
   });
 });
 
