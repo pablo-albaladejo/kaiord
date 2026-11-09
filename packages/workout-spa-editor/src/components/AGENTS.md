@@ -16,7 +16,7 @@ The UI tree. Follows Atomic Design (atoms → molecules → organisms → templa
 
 - `atoms/` — leaf primitives (Button, Badge, Icon, Input, Toast, Tooltip, ThemeToggle, ErrorMessage, RouteSpinner).
 - `molecules/` — compositions of atoms (StepCard, FormField, dialogs, CoachingCard, etc.).
-- `organisms/` — feature-complete components (WorkoutList, StepEditor, WorkoutLibrary, SettingsPanel, ZoneEditor, AiWorkoutInput, ProfileManager, etc.).
+- `organisms/` — feature-complete components (WorkoutList, StepEditor, SettingsPanel, ZoneEditor, AiWorkoutInput, ProfileManager, etc.).
 - `templates/` — page layouts (MainLayout).
 - `pages/` — page components mounted by Wouter routes (`CalendarPage`, `LibraryPage`, `EditorPage`).
 - `providers/` — root-level providers not in `contexts/` (`AppToastProvider`).

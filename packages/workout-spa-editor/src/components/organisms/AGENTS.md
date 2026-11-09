@@ -17,7 +17,6 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 - `ProfileManager/` — profile CRUD + sport-specific zones tabbed UI.
 - `SettingsPanel/` — settings dialog (AI, Extensions, Privacy, Usage tabs).
 - `StepEditor/` — main step-edit form (sport-aware fields, target picker, duration picker, notes).
-- `WorkoutLibrary/` — Library content. **R-LibraryNoDualMount**: only `LibraryPage.tsx` and `TemplatePickerDialog.tsx` may import this organism.
 - `WorkoutList/` — the editor's main list (steps + blocks), with `@dnd-kit/sortable` reordering.
 - `WorkoutStats/` — duration / distance / TSS panel.
 - `ZoneEditor/` — sport-specific zone editor used by Profile Manager.
