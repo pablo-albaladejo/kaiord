@@ -32,7 +32,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const SPA_SRC = join(REPO_ROOT, "packages", "workout-spa-editor", "src");
 
-// The route page spa-routing:38 defines as the sole mount point — the invariant, not an exception.
+// The page surface spa-routing:38 allows. The spec also allows an in-flow
+// picker dialog; none exists today, so this page is the only mount.
 export const CANONICAL_MOUNT =
   "packages/workout-spa-editor/src/components/pages/LibraryPage.tsx";
 const MOUNT_IN_SRC = relative(
