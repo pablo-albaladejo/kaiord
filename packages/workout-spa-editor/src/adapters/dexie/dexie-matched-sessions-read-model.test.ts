@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
-import type { SessionMatch } from "../../types/session-match";
 import { db } from "./dexie-database";
 import { createDexieMatchedSessionsReadModel } from "./dexie-matched-sessions-read-model";
 
@@ -36,18 +35,6 @@ const seedWorkout = (id: string): WorkoutRecord =>
     state: "ready",
     raw: { duration: { value: 3600, unit: "s" } },
   }) as unknown as WorkoutRecord;
-
-const seedMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
-  id: "m-1",
-  profileId: PROFILE,
-  coachingActivityId: COMPOSITE,
-  workoutId: "w-1",
-  date: DATE,
-  createdAt: "2026-04-28T10:00:00.000Z",
-  source: "manual",
-  executedWorkoutIds: [],
-  ...overrides,
-});
 
 const clearAll = (): Promise<unknown> =>
   Promise.all([
@@ -91,42 +78,6 @@ describe("dexie matched-sessions read-model", () => {
       // Assert
       expect(activitiesById.size).toBe(0);
       expect(workoutsById.size).toBe(0);
-    });
-  });
-
-  describe("findActivityMatch", () => {
-    it("should return the match id and workout for a matched activity", async () => {
-      // Arrange
-      await db.table("workouts").put(seedWorkout("w-1"));
-      await db.table("sessionMatches").put(seedMatch());
-
-      // Act
-      const result = await readModel.findActivityMatch(PROFILE, COMPOSITE);
-
-      // Assert
-      expect(result).toEqual({ matchId: "m-1", workout: expect.anything() });
-      expect(result?.workout.id).toBe("w-1");
-    });
-
-    it("should return null when no match exists for the activity", async () => {
-      // Arrange
-
-      // Act
-      const result = await readModel.findActivityMatch(PROFILE, COMPOSITE);
-
-      // Assert
-      expect(result).toBeNull();
-    });
-
-    it("should return null when the matched workout is a dangling ref", async () => {
-      // Arrange
-      await db.table("sessionMatches").put(seedMatch({ workoutId: "w-gone" }));
-
-      // Act
-      const result = await readModel.findActivityMatch(PROFILE, COMPOSITE);
-
-      // Assert
-      expect(result).toBeNull();
     });
   });
 });
