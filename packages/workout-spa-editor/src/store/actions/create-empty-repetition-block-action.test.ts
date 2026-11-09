@@ -44,7 +44,6 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
   describe("Property 1: Empty blocks always contain default step", () => {
     /**
      * Feature: 09-repetition-blocks-and-ui-polish, Property 1: Empty blocks always contain default step
-     * Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5
      *
      * For any newly created empty repetition block, the block should contain exactly one step
      * with the default values (5 minutes duration, open target, active intensity)
