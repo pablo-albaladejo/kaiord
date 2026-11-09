@@ -12,7 +12,7 @@
  * heart-rate and power `range` forms.
  */
 
-import { CONTROL_CHARS } from "./control-chars";
+import { stripControlChars } from "./control-chars";
 import { PARSER_PROMPT_VERSION } from "./parser-prompt-version";
 
 export const PROMPT_VERSION = PARSER_PROMPT_VERSION;
@@ -26,9 +26,10 @@ export const PROMPT_VERSION = PARSER_PROMPT_VERSION;
  * closing tag is returned unchanged.
  */
 export const neutralizeClosingTag = (text: string, tag: string): string =>
-  text
-    .replace(CONTROL_CHARS, "")
-    .replace(new RegExp(`<\\s*/\\s*${tag}\\s*>`, "gi"), `[/${tag}]`);
+  stripControlChars(text).replace(
+    new RegExp(`<\\s*/\\s*${tag}\\s*>`, "gi"),
+    `[/${tag}]`
+  );
 
 /**
  * @deprecated Never sent to the model. The workout-parser system prompt
