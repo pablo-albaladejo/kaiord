@@ -160,4 +160,23 @@ describe("runGenerateAgent telemetry", () => {
     // Assert
     expect(events).toEqual(["run_finished"]);
   });
+
+  it("should still succeed when both the sink and the logger throw", async () => {
+    // Arrange
+    const boom = () => {
+      throw new Error("down");
+    };
+    const logger = { debug: boom, info: boom, warn: boom, error: boom };
+    const sink = { emit: boom };
+
+    // Act
+    const result = await runGenerateAgent(
+      AGENT,
+      { text: "x" },
+      { model: mockModelReturning({ n: 5 }), telemetry: sink, logger }
+    );
+
+    // Assert
+    expect(result.output).toEqual({ n: 5 });
+  });
 });
