@@ -5,7 +5,7 @@ import type { RateLimiter } from "./deps";
 import { handleRequest } from "./handler";
 
 export type Env = {
-  /** Bound only if task 3.3 finds the Rate Limiting binding on Free. */
+  /** Per-IP rate limit (`[[ratelimits]]` in wrangler.toml); unset in tests and local dev. */
   readonly MCP_RATE_LIMITER?: RateLimiter;
 };
 
