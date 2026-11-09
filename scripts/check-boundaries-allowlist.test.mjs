@@ -241,6 +241,45 @@ describe("boundaries allowlist merge-base ratchet", () => {
     assert.match(base.error, /fatal: no ref.*fails closed/);
   });
 
+  it("should refuse a merge base that is HEAD itself when HEAD is not on origin/main", async () => {
+    // Arrange
+    const git = (args) => {
+      if (args[0] === "merge-base" && args[1] === "--is-ancestor") {
+        throw Object.assign(new Error("not ancestor"), { stderr: "" });
+      }
+      return args[0] === "show"
+        ? "export const BOUNDARIES_ALLOWLIST = [];"
+        : "abc123\n";
+    };
+
+    // Act
+    const base = await baseAllowlistFiles({ root: ".", baseRef: "HEAD", git });
+
+    // Assert
+    assert.equal(base.files, undefined);
+    assert.match(base.error, /merge base with HEAD is HEAD itself/);
+  });
+
+  it("should accept a merge base equal to HEAD when HEAD is on origin/main", async () => {
+    // Arrange
+    const source =
+      'export const BOUNDARIES_ALLOWLIST = [{ file: "src/a.ts", reason: "r" }];\n';
+    const git = (args) => {
+      if (args[1] === "--is-ancestor") return "";
+      return args[0] === "show" ? source : "abc123\n";
+    };
+
+    // Act
+    const base = await baseAllowlistFiles({
+      root: ".",
+      baseRef: "origin/main",
+      git,
+    });
+
+    // Assert
+    assert.deepEqual([...base.files], ["src/a.ts"]);
+  });
+
   it("should read the parked files from the list at the merge base", async () => {
     // Arrange
     const source =
