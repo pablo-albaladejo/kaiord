@@ -1,8 +1,9 @@
 /**
  * Versioned generation user-prompt builder.
  *
- * Wraps the coach's description and comments in XML delimiters (prompt
- * injection defense). The athlete's zones and instructions are appended by
+ * Wraps the coach's description and comments in XML delimiters. The closing
+ * delimiter is neutralized inside the wrapped text, so coach text cannot end
+ * its own block early and land the rest in trusted prompt space. The athlete's zones and instructions are appended by
  * `buildAthleteContext` on every generation path.
  *
  * `PROMPT_VERSION` is persisted on each AI-converted workout; 1.2.0 is the
@@ -11,7 +12,24 @@
  * heart-rate and power `range` forms.
  */
 
-export const PROMPT_VERSION = "1.3.0";
+import { stripControlChars } from "./control-chars";
+import { PARSER_PROMPT_VERSION } from "./parser-prompt-version";
+
+export const PROMPT_VERSION = PARSER_PROMPT_VERSION;
+
+/**
+ * Strips control characters (input validation removes them later, which
+ * could otherwise re-join a delimiter split by one), then replaces every
+ * closing `tag`, in any case and with whitespace inside the brackets, with
+ * `[/tag]`. The replacement has no `<`, so a closing tag cannot re-form from
+ * the neighbours of a replacement. Text with neither control characters nor a
+ * closing tag is returned unchanged.
+ */
+export const neutralizeClosingTag = (text: string, tag: string): string =>
+  stripControlChars(text).replace(
+    new RegExp(`<\\s*/\\s*${tag}\\s*>`, "gi"),
+    `[/${tag}]`
+  );
 
 /**
  * @deprecated Never sent to the model. The workout-parser system prompt
@@ -39,11 +57,14 @@ export function buildUserPrompt(
   adjustmentNotes?: string
 ): string {
   let prompt = `Sport: ${sport}\n\n`;
-  prompt += `<coach_description>\n${description}\n</coach_description>`;
+  prompt += `<coach_description>\n${neutralizeClosingTag(description, "coach_description")}\n</coach_description>`;
 
   if (comments.length > 0) {
     const wrapped = comments
-      .map((c) => `<coach_comment>\n${c}\n</coach_comment>`)
+      .map(
+        (c) =>
+          `<coach_comment>\n${neutralizeClosingTag(c, "coach_comment")}\n</coach_comment>`
+      )
       .join("\n");
     prompt += `\n\nCoach notes:\n${wrapped}`;
   }

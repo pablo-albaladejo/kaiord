@@ -181,4 +181,54 @@ describe("config file integration", () => {
       expect(krd.type).toBe("structured_workout");
     }
   );
+
+  it(
+    "should report a diff failure as JSON on stdout when config sets json",
+    { timeout: PROCESS_TIMEOUT_MS },
+    async () => {
+      // Arrange
+      await writeFile(
+        join(tmpDir.path, ".kaiordrc.json"),
+        JSON.stringify({ json: true })
+      );
+      const missingFile = join(tmpDir.path, "missing.fit");
+
+      // Act
+      const result = await execa(
+        "tsx",
+        [CLI_PATH, "diff", "--file1", FIT_FIXTURE, "--file2", missingFile],
+        { cwd: tmpDir.path, reject: false }
+      );
+
+      // Assert
+      expect(result.exitCode).toBe(2);
+      const output = JSON.parse(result.stdout);
+      expect(output.success).toBe(false);
+      expect(output.error.message).toContain("File not found");
+    }
+  );
+
+  it(
+    "should report an invalid option as JSON when only the config sets json",
+    { timeout: PROCESS_TIMEOUT_MS },
+    async () => {
+      // Arrange
+      await writeFile(
+        join(tmpDir.path, ".kaiordrc.json"),
+        JSON.stringify({ json: true })
+      );
+      const args = ["extract-workout", "--input", FIT_FIXTURE];
+
+      // Act
+      const result = await execa(
+        "tsx",
+        [CLI_PATH, ...args, "--input-format", "bogus"],
+        { cwd: tmpDir.path, reject: false }
+      );
+
+      // Assert
+      expect(result.exitCode).toBe(1);
+      expect(JSON.parse(result.stdout).success).toBe(false);
+    }
+  );
 });
