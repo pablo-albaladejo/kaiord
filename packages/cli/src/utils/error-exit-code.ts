@@ -120,9 +120,3 @@ export const mapErrorToExitCode = (error: unknown): ExitCodeValue =>
   classifyBySignature(error) ??
   classifyByName(error) ??
   ExitCode.UNKNOWN_ERROR;
-
-/**
- * Backwards-compatible alias used by the CLI entrypoint.
- * @deprecated Prefer {@link mapErrorToExitCode}.
- */
-export const getExitCodeForError = mapErrorToExitCode;

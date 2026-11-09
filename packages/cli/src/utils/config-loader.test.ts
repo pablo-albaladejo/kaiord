@@ -2,7 +2,11 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { configSchema, loadConfig, mergeWithConfig } from "./config-loader";
+import {
+  configSchema,
+  loadConfigWithMetadata,
+  mergeWithConfig,
+} from "./config-loader";
 
 // Mock fs/promises
 vi.mock("fs/promises", () => ({
@@ -73,7 +77,7 @@ describe("configSchema", () => {
   });
 });
 
-describe("loadConfig", () => {
+describe("loadConfigWithMetadata", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -92,7 +96,7 @@ describe("loadConfig", () => {
     vi.mocked(readFile).mockResolvedValueOnce(JSON.stringify(mockConfig));
 
     // Act
-    const config = await loadConfig();
+    const { config } = await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual(mockConfig);
@@ -113,7 +117,7 @@ describe("loadConfig", () => {
       .mockResolvedValueOnce(JSON.stringify(mockConfig));
 
     // Act
-    const config = await loadConfig();
+    const { config } = await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual(mockConfig);
@@ -132,7 +136,7 @@ describe("loadConfig", () => {
     vi.mocked(readFile).mockRejectedValue(new Error("File not found"));
 
     // Act
-    const config = await loadConfig();
+    const { config } = await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual({});
@@ -143,7 +147,7 @@ describe("loadConfig", () => {
     vi.mocked(readFile).mockResolvedValue("invalid json");
 
     // Act
-    const config = await loadConfig();
+    const { config } = await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual({});
@@ -158,7 +162,7 @@ describe("loadConfig", () => {
     vi.mocked(readFile).mockResolvedValue(JSON.stringify(invalidConfig));
 
     // Act
-    const config = await loadConfig();
+    const { config } = await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual({});
