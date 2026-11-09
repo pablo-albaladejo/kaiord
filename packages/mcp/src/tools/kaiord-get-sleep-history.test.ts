@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import {
   createTestClient,
@@ -10,6 +10,13 @@ import {
 import { getFixturePath } from "../tests/helpers/test-fixtures";
 
 describe("kaiord_get_sleep_history", () => {
+  let dir: string | undefined;
+
+  afterEach(async () => {
+    if (dir) await rm(dir, { recursive: true, force: true });
+    dir = undefined;
+  });
+
   it("should return both sleep records sorted ascending", async () => {
     // Arrange
     const client = await createTestClient();
@@ -58,7 +65,7 @@ describe("kaiord_get_sleep_history", () => {
   it("should leave a sleep KRD without a sleep entry out of total", async () => {
     // Arrange
     const client = await createTestClient();
-    const dir = await mkdtemp(join(tmpdir(), "mcp-sleep-history-"));
+    dir = await mkdtemp(join(tmpdir(), "mcp-sleep-history-"));
     const emptyKrd = join(dir, "empty-sleep.krd");
     await writeFile(
       emptyKrd,
@@ -78,7 +85,6 @@ describe("kaiord_get_sleep_history", () => {
       name: "kaiord_get_sleep_history",
       arguments: { input_files: inputs },
     })) as McpToolResult;
-    await rm(dir, { recursive: true, force: true });
 
     // Assert
     const parsed = JSON.parse(result.content[0].text) as {
