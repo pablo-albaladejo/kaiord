@@ -1,6 +1,4 @@
 /**
- * CoachNotesField Component
- *
  * Textarea for workout-level coach notes (the canonical KRD `notes`),
  * e.g. Train2Go coach instructions with markdown links.
  */
