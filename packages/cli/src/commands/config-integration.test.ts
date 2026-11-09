@@ -207,4 +207,28 @@ describe("config file integration", () => {
       expect(output.error.message).toContain("File not found");
     }
   );
+
+  it(
+    "should report an invalid option as JSON when only the config sets json",
+    { timeout: PROCESS_TIMEOUT_MS },
+    async () => {
+      // Arrange
+      await writeFile(
+        join(tmpDir.path, ".kaiordrc.json"),
+        JSON.stringify({ json: true })
+      );
+      const args = ["extract-workout", "--input", FIT_FIXTURE];
+
+      // Act
+      const result = await execa(
+        "tsx",
+        [CLI_PATH, ...args, "--input-format", "bogus"],
+        { cwd: tmpDir.path, reject: false }
+      );
+
+      // Assert
+      expect(result.exitCode).toBe(1);
+      expect(JSON.parse(result.stdout).success).toBe(false);
+    }
+  );
 });

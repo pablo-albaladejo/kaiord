@@ -153,6 +153,17 @@ describe("resolveJsonFlag", () => {
     expect(json).toBe(true);
   });
 
+  it("should return false instead of throwing when the config cannot be read", async () => {
+    // Arrange
+    vi.mocked(loadConfigWithMetadata).mockRejectedValue(new Error("uv_cwd"));
+
+    // Act
+    const json = await resolveJsonFlag({ input: "a.krd" });
+
+    // Assert
+    expect(json).toBe(false);
+  });
+
   it("should return false when neither the flag nor the config sets json", async () => {
     // Arrange
     vi.mocked(loadConfigWithMetadata).mockResolvedValue(withConfig(undefined));
