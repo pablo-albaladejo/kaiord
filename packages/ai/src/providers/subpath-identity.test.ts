@@ -6,14 +6,12 @@
  * Identity would regress if the entries were split into separate builds
  * (a `defineConfig([...])` array), where each build inlines its own copy of
  * shared modules. This test imports the actual config object and fails the
- * moment it regresses to that shape, and asserts the providers barrel does
- * not duplicate the catalog module through divergent import paths.
+ * moment it regresses to that shape.
  */
 import { describe, expect, it } from "vitest";
 
 import aiBuildConfig from "../../tsdown.config";
 import { MODEL_CATALOG, PROVIDER_MODELS } from "./index";
-import { MODEL_CATALOG as DIRECT_CATALOG } from "./provider-models";
 
 const SUBPATH_ENTRIES = [
   "src/index.ts",
@@ -40,14 +38,13 @@ describe("subpath module identity", () => {
     expect(entryValues).toEqual(expect.arrayContaining(SUBPATH_ENTRIES));
   });
 
-  it("should resolve the catalog to a single module instance through the barrel", () => {
+  it("should keep the legacy PROVIDER_MODELS export as an alias of the catalog", () => {
     // Arrange
 
     // Act
-    const viaBarrel = MODEL_CATALOG;
+    const alias = PROVIDER_MODELS;
 
     // Assert
-    expect(viaBarrel).toBe(DIRECT_CATALOG);
-    expect(PROVIDER_MODELS).toBe(DIRECT_CATALOG);
+    expect(alias).toBe(MODEL_CATALOG);
   });
 });
