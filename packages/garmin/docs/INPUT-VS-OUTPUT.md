@@ -397,6 +397,8 @@ const garminStrokeTypeOutputSchema = z.object({
   displayOrder: z.number(),
 });
 
+// Historical design sketch: the *InputSchema names below no longer exist in code;
+// the reader validates with `garminWorkoutParseSchema`.
 // Server-assigned fields
 const garminWorkoutOutputSchema = garminWorkoutInputSchema.extend({
   workoutId: z.number(),
