@@ -208,10 +208,11 @@ describe("runGenerateAgent telemetry", () => {
       throw new Error("logger down");
     };
     const logger = { debug: boom, info: boom, warn: boom, error: boom };
+    const replies = [jsonResult({}), jsonResult({}), jsonResult({})];
     const model = new MockLanguageModelV4({
       modelId: "m",
       provider: "p",
-      doGenerate: [jsonResult({}), jsonResult({}), jsonResult({})],
+      doGenerate: replies,
     });
 
     // Act
@@ -223,5 +224,7 @@ describe("runGenerateAgent telemetry", () => {
 
     // Assert
     expect(error).toBeInstanceOf(AiAgentError);
+    expect((error as AiAgentError).attempts).toBe(replies.length);
+    expect(model.doGenerateCalls).toHaveLength(replies.length);
   });
 });
