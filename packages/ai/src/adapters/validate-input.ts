@@ -1,5 +1,5 @@
 import { truncate } from "../agents/retry-policy";
-import { CONTROL_CHARS } from "../prompts/control-chars";
+import { stripControlChars } from "../prompts/control-chars";
 import { createAiParsingError } from "../errors";
 
 const MAX_INPUT_LENGTH = 2000;
@@ -11,7 +11,7 @@ const MAX_ERROR_TEXT_LENGTH = 200;
  * Throws AiParsingError on empty or too-long input.
  */
 export const validateInput = (text: string): string => {
-  const sanitized = text.replace(CONTROL_CHARS, "").trim();
+  const sanitized = stripControlChars(text).trim();
 
   if (sanitized.length === 0) {
     throw createAiParsingError(
