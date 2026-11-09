@@ -29,7 +29,7 @@ The UI tree. Follows Atomic Design (atoms → molecules → organisms → templa
 2. **Import the component file in new code.** `import { Button } from "../atoms/Button/Button"`. About 50 component folders still have an `index.ts` barrel and some are imported through it (`atoms/Icon` has dozens of folder importers); do not add new barrels, and do not add new folder imports.
 3. **Each component goes in its own folder** with at minimum: `<Name>.tsx`, `<Name>.test.tsx`, often `<Name>.stories.tsx`, and any helpers (`<name>-styles.ts`, `<name>-helpers.ts`, `<name>-types.ts`).
 4. **PII rule (R-PIIInterpolation).** All `toast(...)` and `console.*` first args under this tree must be a literal or a top-level SCREAMING_SNAKE_CASE constant referencing a literal. Templated strings need to go through `scrub-analytics-string` first.
-5. **Library no-dual-mount.** Only `LibraryPage.tsx` and `TemplatePickerDialog.tsx` may import `organisms/WorkoutLibrary` / `WorkoutLibrary/WorkoutLibrary` / `LibraryDialogContent`.
+5. **Library no-dual-mount.** Only `LibraryPage.tsx` may import `pages/Library/LibraryContent`.
 
 ### Testing Requirements
 
