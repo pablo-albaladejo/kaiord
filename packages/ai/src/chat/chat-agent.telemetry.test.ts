@@ -237,4 +237,26 @@ describe("createChatAgent telemetry", () => {
     // Assert
     expect(result.status).toBe("complete");
   });
+
+  it("should warn through the logger when the telemetry sink throws", async () => {
+    // Arrange
+    mockRunTurn.mockResolvedValueOnce(raw({}));
+    const warn = vi.fn();
+    const logger = { debug: vi.fn(), info: vi.fn(), warn, error: vi.fn() };
+    const telemetry = {
+      emit: () => {
+        throw new Error("sink down");
+      },
+    };
+    const agent = createChatAgent({ model, tools: [], telemetry, logger });
+
+    // Act
+    await agent.sendTurn([{ role: "user", content: "x" }]);
+
+    // Assert
+    expect(warn).toHaveBeenCalledWith(
+      "Telemetry sink failed",
+      expect.objectContaining({ type: "chat_turn_finished" })
+    );
+  });
 });
