@@ -4,8 +4,8 @@
 
 /**
  * Maximum length for a workout name. This is the hard bound the Garmin
- * Connect API enforces on `workoutName` (see `workout-input.schema.ts`,
- * `z.string().min(1).max(255)`); names longer than this are rejected by
+ * Connect API enforces on `workoutName` (`workoutName` is
+ * limited to 1-255 characters); names longer than this are rejected by
  * the service, so we truncate before sending and when reading back.
  */
 export const GARMIN_NAME_MAX = 255;

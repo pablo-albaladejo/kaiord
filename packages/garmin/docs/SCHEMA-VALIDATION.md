@@ -272,9 +272,7 @@ These schemas are fully consistent with the fixtures:
 
 ### Input Schemas
 
-- ✅ **workout-input.schema.ts** - Correctly optional fields
-- ✅ **segment-input.schema.ts** - Schema correct
-- ✅ **repeat-input.schema.ts** - Schema correct
+- ℹ️ workout/segment/repeat input schemas were removed (unused at runtime; types remain in `input/types.ts`)
 - ⚠️ **step-input.schema.ts** - See Issue #4
 
 ---
@@ -373,12 +371,9 @@ docs/garmin-schemas-temp/
 │   ├── drill-type.schema.ts
 │   ├── unit.schema.ts
 │   └── index.ts
-├── input/ (5 schemas)
-│   ├── workout-input.schema.ts ✅
-│   ├── segment-input.schema.ts ✅
+├── input/ (1 schema + types)
 │   ├── step-input.schema.ts ⚠️ Issue #4
-│   ├── repeat-input.schema.ts ✅
-│   └── index.ts
+│   └── types.ts
 └── output/ (6 schemas)
     ├── workout.schema.ts ⚠️ Issue #1
     ├── segment.schema.ts ✅
