@@ -227,6 +227,19 @@ describe("mapErrorToExitCode", () => {
     expect(code).toBe(ExitCode.INVALID_ARGUMENT);
   });
 
+  it("should map a ZodError from another zod copy by name", () => {
+    // Arrange
+    const error = Object.assign(new Error("invalid options"), {
+      name: "ZodError",
+    });
+
+    // Act
+    const code = mapErrorToExitCode(error);
+
+    // Assert
+    expect(code).toBe(ExitCode.INVALID_ARGUMENT);
+  });
+
   it("should map an unknown error to UNKNOWN_ERROR", () => {
     // Arrange
     const error = new Error("something unexpected");

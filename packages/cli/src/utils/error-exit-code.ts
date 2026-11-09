@@ -53,6 +53,7 @@ const ERROR_NAME_TO_EXIT_CODE: Record<string, ExitCodeValue> = {
   ToleranceExceededError: ExitCode.TOLERANCE_EXCEEDED,
   InvalidArgumentError: ExitCode.INVALID_ARGUMENT,
   UnsupportedFormatError: ExitCode.INVALID_ARGUMENT,
+  ZodError: ExitCode.INVALID_ARGUMENT,
   ServiceAuthError: ExitCode.AUTH_ERROR,
   DirectoryCreateError: ExitCode.DIRECTORY_CREATE_ERROR,
   EnvironmentError: ExitCode.ENVIRONMENT_ERROR,

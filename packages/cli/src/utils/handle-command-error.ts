@@ -13,7 +13,7 @@ type HandleCommandErrorOptions = {
  * Whether JSON output was requested, for a command that is failing. Reads
  * only the `json` option, so it holds even when other options are invalid
  * (the command may be failing precisely because of them), and falls back to
- * the `.kaiordrc.json` default when the flag is absent.
+ * the `.kaiordrc.json` default when the flag is absent. Never throws.
  */
 export const resolveJsonFlag = async (options: unknown): Promise<boolean> => {
   const raw =
@@ -21,8 +21,13 @@ export const resolveJsonFlag = async (options: unknown): Promise<boolean> => {
       ? (options as { json?: unknown }).json
       : undefined;
   if (typeof raw === "boolean") return raw;
-  const { config } = await loadConfigWithMetadata();
-  return config.json ?? false;
+  try {
+    const { config } = await loadConfigWithMetadata();
+    return config.json ?? false;
+  } catch {
+    // Runs while handling a failure: it must never throw and hide that error.
+    return false;
+  }
 };
 
 /**
