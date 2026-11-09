@@ -400,6 +400,29 @@ export default tseslint.config(
     },
   },
   {
+    // R-CaughtErrorTextHidden: check-model-facing-sinks is a text scan, so a
+    // shared helper that returns a caught value's text is a known gap. Keep
+    // errorMessage out of the chat paths whose results can reach the model.
+    files: [
+      "packages/workout-spa-editor/src/hooks/chat/**/*.{ts,tsx}",
+      "packages/workout-spa-editor/src/application/chat/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/utils/error-message", "**/utils/error-message.*"],
+              message:
+                "Chat code must not turn a caught error into text: its result can reach the model (R-CaughtErrorTextHidden).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // Frontend page components: allow more lines for orchestration
     files: ["packages/workout-spa-editor/**/pages/**/*.tsx"],
     rules: {
