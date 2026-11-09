@@ -96,10 +96,16 @@ describe("loadConfigWithMetadata", () => {
     vi.mocked(readFile).mockResolvedValueOnce(JSON.stringify(mockConfig));
 
     // Act
-    const { config } = await loadConfigWithMetadata();
+    const { config, loadedFrom, searchedPaths } =
+      await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual(mockConfig);
+    expect(loadedFrom).toBe(join(process.cwd(), ".kaiordrc.json"));
+    expect(searchedPaths).toEqual([
+      join(process.cwd(), ".kaiordrc.json"),
+      join("/home/user", ".kaiordrc.json"),
+    ]);
     expect(readFile).toHaveBeenCalledWith(
       join(process.cwd(), ".kaiordrc.json"),
       "utf-8"
@@ -117,10 +123,16 @@ describe("loadConfigWithMetadata", () => {
       .mockResolvedValueOnce(JSON.stringify(mockConfig));
 
     // Act
-    const { config } = await loadConfigWithMetadata();
+    const { config, loadedFrom, searchedPaths } =
+      await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual(mockConfig);
+    expect(loadedFrom).toBe(join("/home/user", ".kaiordrc.json"));
+    expect(searchedPaths).toEqual([
+      join(process.cwd(), ".kaiordrc.json"),
+      join("/home/user", ".kaiordrc.json"),
+    ]);
     expect(readFile).toHaveBeenCalledWith(
       join(process.cwd(), ".kaiordrc.json"),
       "utf-8"
@@ -136,10 +148,16 @@ describe("loadConfigWithMetadata", () => {
     vi.mocked(readFile).mockRejectedValue(new Error("File not found"));
 
     // Act
-    const { config } = await loadConfigWithMetadata();
+    const { config, loadedFrom, searchedPaths } =
+      await loadConfigWithMetadata();
 
     // Assert
     expect(config).toEqual({});
+    expect(loadedFrom).toBe(null);
+    expect(searchedPaths).toEqual([
+      join(process.cwd(), ".kaiordrc.json"),
+      join("/home/user", ".kaiordrc.json"),
+    ]);
   });
 
   it("should return empty config if config file is invalid JSON", async () => {

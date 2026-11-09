@@ -1,4 +1,7 @@
-import { loadConfigWithMetadata } from "../../utils/config-loader.js";
+import {
+  loadConfigWithMetadata,
+  mergeWithConfig,
+} from "../../utils/config-loader.js";
 import { ExitCode } from "../../utils/exit-codes.js";
 import { handleCommandError } from "../../utils/handle-command-error.js";
 import { createLogger } from "../../utils/logger-factory.js";
@@ -11,7 +14,11 @@ export type { DiffOptions } from "./types";
  * Diff command - compare two workout files
  */
 export const diffCommand = async (options: DiffOptions): Promise<number> => {
-  const validatedOptions = diffOptionsSchema.parse(options);
+  const configResult = await loadConfigWithMetadata();
+  const { config } = configResult;
+  const validatedOptions = diffOptionsSchema.parse(
+    mergeWithConfig(options, config)
+  );
 
   const logger = await createLogger({
     type: validatedOptions.logFormat,
@@ -23,7 +30,6 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
     quiet: validatedOptions.quiet,
   });
 
-  const configResult = await loadConfigWithMetadata();
   if (configResult.loadedFrom) {
     logger.debug("Configuration loaded", { path: configResult.loadedFrom });
   } else {

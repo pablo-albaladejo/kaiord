@@ -135,15 +135,16 @@ export type MyOptions = z.infer<typeof myOptionsSchema>;
 
 **Error mapping:**
 
+Exit codes come from `mapErrorToExitCode` (`error-exit-code.ts`), the single
+mapper; never hard-code numbers. A missing file is a Node `ENOENT` error and
+maps to `ExitCode.FILE_NOT_FOUND` (2):
+
 ```typescript
-export const handleError = (
-  error: unknown
-): { code: number; message: string } => {
-  if (error instanceof ZodError) return { code: 1, message: "Invalid input" };
-  if (error instanceof FileNotFoundError)
-    return { code: 1, message: "File not found" };
-  return { code: 1, message: String(error) };
-};
+import { mapErrorToExitCode } from "./error-exit-code.js";
+import { ExitCode } from "./exit-codes.js";
+
+const missing = Object.assign(new Error("File not found"), { code: "ENOENT" });
+mapErrorToExitCode(missing) === ExitCode.FILE_NOT_FOUND; // true (2)
 ```
 
 **File safety:**

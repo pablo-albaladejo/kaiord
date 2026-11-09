@@ -21,9 +21,8 @@ Complete architectural design including:
 
 ### 2. Type Definitions
 
-**File:** `packages/cli/src/types/plugin.ts`
-
-TypeScript type definitions for:
+**Not delivered.** `packages/cli/src/types/plugin.ts` was never written; the
+types below exist only as sketches in `plugin-architecture.md`:
 
 - `KaiordPlugin` - Core plugin interface
 - `PluginFormat` - Format descriptor
@@ -186,7 +185,6 @@ When implementing this system:
 ## Files Created
 
 - `packages/cli/docs/plugin-architecture.md` - Complete architecture design
-- `packages/cli/src/types/plugin.ts` - TypeScript type definitions
 - `packages/cli/docs/example-plugin-gpx.md` - Working example plugin
 - `packages/cli/docs/plugin-system-summary.md` - This summary document
 - `packages/cli/README.md` - Updated with plugin system section
