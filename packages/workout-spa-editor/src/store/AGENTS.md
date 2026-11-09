@@ -17,7 +17,7 @@ Zustand stores for editor runtime ONLY. Holds the currently-edited workout, the 
 - `workout-state.types.ts`, `workout-store-state.types.ts`, `workout-store-types.ts`, `workout-store-actions.types.ts` — type contracts.
 - `workout-store-actions.ts`, `workout-store-step-actions.ts`, `workout-store-selection-actions.ts`, `workout-store-repetition-actions.ts`, `workout-store-modal-actions.ts`, `workout-store-history.ts`, `workout-actions.ts` — domain action surfaces.
 - `create-workout-method-helpers.ts`, `create-workout-method-helpers-basic.ts`, `create-workout-methods.ts` — composition helpers (one method per call so the per-file/per-function caps hold).
-- `create-base-workout-actions.ts`, `create-all-step-actions.ts`, `create-all-block-actions.ts`, `create-block-action-handlers.ts`, `create-step-action-handlers.ts`, `create-workout-store-block-actions.ts`, `create-workout-store-step-actions.ts` — per-action-type factories.
+- `create-base-workout-actions.ts` — base workout action factory.
 - `create-history-methods.ts`, `create-recovery-methods.ts` — undo/redo + last-backup recovery wiring.
 - `hydrate-ui-workout.ts` / `.test.ts` — assigns fresh `ItemId`s when loading a KRD into the store.
 - `strip-ids.ts` / `.test.ts` — outbound chokepoint: removes `id` fields before any KRD crosses a boundary (Dexie write, `saveWorkout`, `exportWorkout`).
