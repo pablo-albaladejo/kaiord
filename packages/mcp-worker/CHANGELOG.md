@@ -1,5 +1,12 @@
 # @kaiord/mcp-worker
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [f6d9ee8]
+  - @kaiord/mcp@10.5.1
+
 ## 0.0.1
 
 ### Patch Changes
