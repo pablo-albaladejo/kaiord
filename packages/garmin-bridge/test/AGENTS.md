@@ -3,22 +3,25 @@
 
 # @kaiord/garmin-bridge/test AGENTS.md
 
-Unit test suite for the Kaiord Garmin Bridge extension. Tests cover service worker message handling, content script fetch allowlisting, announce script context detection, popup UI state rendering, and profile snapshot validation against a Chrome Extension API mock.
+Unit test suite for the Kaiord Garmin Bridge extension. Tests cover service worker message handling, fetch allowlisting, OAuth, announce script context detection, popup UI state rendering, and profile snapshot validation against a Chrome Extension API mock.
 
 ## Purpose
 
 **What lives here:** Vitest test files, Chrome API mock implementation, shared test utilities.
 
-**Core responsibility:** Provide comprehensive test coverage for all extension scripts (background, content, kaiord-announce, popup, profile-snapshot) without requiring a real browser or Chrome runtime. Mock the Chrome Extension API consistently across all test suites.
+**Core responsibility:** Provide comprehensive test coverage for all extension scripts (background, garmin-oauth, kaiord-announce, popup, profile-snapshot) without requiring a real browser or Chrome runtime. Mock the Chrome Extension API consistently across all test suites.
 
 ## Key Files
 
 - `chrome-mock.js` — Minimal Chrome Extension API mock (runtime, tabs, storage, webRequest, scripting). Stateful session/local storage. Factory for resetting state between tests.
-- `background.test.js` — Service worker tests (~600 LOC). Covers CSRF token capture, action dispatch (ping, list, push, profile-snapshot), session validation, content script messaging, service worker onInstalled re-injection.
-- `content.test.js` — Content script tests (~200 LOC). Covers fetch allowlist enforcement, CSRF token injection in headers, timeout handling, error responses.
-- `kaiord-announce.test.js` — Vendored from `_shared/bridge-core/test/` — edit the master, then `pnpm bridge:sync`. Covers announcement structure, runtime ID discovery, context invalidation on extension reload, listener cleanup.
-- `popup.test.js` — Popup UI tests (~250 LOC). Covers status rendering (connected/disconnected), profile snapshot display, staleness detection (7-day threshold), fetch timeouts, retry UX.
-- `profile-snapshot.test.js` — Profile validator tests (~300 LOC). Covers shape validation, type guards, prototype pollution detection, JSON length cap, shared fixtures with `@kaiord/core`.
+- `background.test.js` — Service worker tests (~1600 LOC). Covers the protocol version and manifest, the path allowlist (`isAllowed`), `garminFetch`, the internal and external message listeners with origin pinning, `checkSession` (ping), `handleAction` routing, body-composition push, activity listing with backoff, calendar placement/find actions and their deadlines, and `set-theme`.
+- `garmin-oauth.test.js` — OAuth1 signing, ticket/session minting, auth endpoints, exchange, and token store/expiry.
+- `popup.test.js` — Popup UI tests. Covers status rendering (connected/disconnected), profile snapshot display, staleness detection, fetch timeouts, retry UX.
+- `profile-snapshot.test.js` — Snapshot validator parity with `@kaiord/core` fixtures, plus the external-message origin gate and `handleAction` routing for the snapshot actions.
+
+### Vendored suites (do not edit here)
+
+`bearer-fetch.test.js`, `bridge-envelope.test.js`, `bridge-popup-health.test.js`, `bridge-popup-shell.test.js`, `bridge-popup-utils.test.js`, `bridge-theme.test.js` and `kaiord-announce.test.js` are byte-copies of the masters in `packages/_shared/bridge-core/test/`. Edit the master and run `pnpm bridge:sync`; see `packages/_shared/bridge-core/AGENTS.md`.
 
 ## For AI Agents: Working in This Directory
 
@@ -95,7 +98,7 @@ it("should reject disallowed paths", async () => {
 
 ## Coverage
 
-- **Target**: 80% line coverage for `background.js`, `content.js`, `kaiord-announce.js`
+- **Target**: 80% line coverage for `background.js`, `garmin-oauth.js`, `kaiord-announce.js`
 - **Exclude**: `popup.js` (DOM-heavy, tested manually), `profile-snapshot.js` (90%+ coverage via focused validator tests)
 - Run: `pnpm test:coverage`
 
