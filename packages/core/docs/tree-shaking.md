@@ -49,13 +49,12 @@ import { krdSchema } from "@kaiord/core";
 - `krdSchema` definition
 - `workoutSchema` (used by krdSchema)
 - `durationSchema` (used by workoutSchema)
-- Zod library (peer dependency)
+- Zod library (runtime dependency)
 
 **Excludes:**
 
-- `createDefaultProviders` (not used)
-- `convertFitToKrd` (not used)
-- `FitReader` types (not used)
+- `fromBinary` / `toBinary` / `fromText` / `toText` (not used)
+- `validateRoundTrip` and the tolerance checker (not used)
 - All other unused exports
 
 ## 🎯 Common Import Patterns
@@ -79,37 +78,41 @@ const validateKrd = (data: unknown): KRD => {
 import type { KRD, Workout, WorkoutStep } from "@kaiord/core";
 
 // Types are erased at runtime, 0 bytes in bundle
-const myWorkout: Workout = {/* ... */};
+declare const myWorkout: Workout;
 ```
 
 **Bundle size:** 0 bytes (types are compile-time only)
 
-### Pattern 3: Full Conversion
+### Pattern 3: Conversion With One Adapter
 
 ```typescript
-import { createDefaultProviders } from "@kaiord/core";
-import type { KRD } from "@kaiord/core";
+import { fromBinary } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
 
-const providers = createDefaultProviders();
-const krd = await providers.convertFitToKrd({ fitBuffer });
+declare const fitBuffer: Uint8Array;
+
+const krd = await fromBinary(fitBuffer, fitReader);
 ```
 
-**Bundle size:** ~50-80KB (minified + gzipped)
-Includes converters, mappers, validators, and Garmin FIT SDK.
+**Bundle size:** core's conversion functions plus the adapter you import.
+Format adapters live in their own packages, so a format you don't import (FIT,
+TCX, ZWO) never reaches your bundle.
 
-### Pattern 4: Custom Providers
+### Pattern 4: Custom Reader
 
 ```typescript
-import { convertFitToKrd, createSchemaValidator } from "@kaiord/core";
-import { myCustomFitReader } from "./my-reader";
+import { fromBinary } from "@kaiord/core";
+import type { BinaryReader } from "@kaiord/core";
 
-// Use custom reader, exclude default Garmin SDK
-const validator = createSchemaValidator();
-const convert = convertFitToKrd(myCustomFitReader, validator);
+declare const myCustomFitReader: BinaryReader;
+declare const buffer: Uint8Array;
+
+// Use a custom reader, exclude the default FIT adapter
+const krd = await fromBinary(buffer, myCustomFitReader);
 ```
 
-**Bundle size:** Depends on your custom reader
-Excludes Garmin FIT SDK if not imported.
+**Bundle size:** Depends on your custom reader.
+Excludes the Garmin FIT SDK if `@kaiord/fit` is not imported.
 
 ## 🔧 Configuration
 
@@ -140,11 +143,16 @@ Excludes Garmin FIT SDK if not imported.
 
 ### tsdown.config.ts
 
+Excerpt of the main-entry build (the real config has a second entry for
+`test-utils`):
+
 ```typescript
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
+  entry: { index: "src/index.ts" },
   format: ["esm"],
+  dts: true,
   treeshake: true,
 });
 ```
@@ -154,7 +162,7 @@ export default defineConfig({
 
 ## 📊 Bundle Size Examples
 
-Real-world bundle sizes (minified + gzipped):
+Approximate bundle sizes (minified + gzipped, indicative figures, not re-measured per release):
 
 | Import Pattern    | Size   | What's Included                  |
 | ----------------- | ------ | -------------------------------- |
@@ -162,7 +170,7 @@ Real-world bundle sizes (minified + gzipped):
 | Schema validation | ~15 KB | Zod schemas                      |
 | Domain schemas    | ~20 KB | All KRD schemas                  |
 | Single use case   | ~40 KB | Use case + dependencies          |
-| Full providers    | ~80 KB | Everything                       |
+| Everything        | ~80 KB | All of core (no adapters)        |
 | Test utilities    | N/A    | Not included in production build |
 
 **Note:** Test utilities (`@kaiord/core/test-utils`) are separate exports intended for development/testing only and should not be included in production bundles.
@@ -214,13 +222,16 @@ Analyze `meta.json` to see what's included.
 ### Example: Dynamic Import
 
 ```typescript
-// Load converter only when needed
-const loadConverter = async () => {
-  const { createDefaultProviders } = await import("@kaiord/core");
-  return createDefaultProviders();
+// Load the FIT adapter only when needed
+const convertFit = async (fitBuffer: Uint8Array) => {
+  const [{ fromBinary }, { fitReader }] = await Promise.all([
+    import("@kaiord/core"),
+    import("@kaiord/fit"),
+  ]);
+  return fromBinary(fitBuffer, fitReader);
 };
 
-// Converter is in a separate chunk, loaded on demand
+// The adapter is in a separate chunk, loaded on demand
 ```
 
 ## 🎓 Learn More

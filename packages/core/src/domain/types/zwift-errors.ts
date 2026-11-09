@@ -9,12 +9,11 @@ import { FormatParsingError, SchemaValidationError } from "./shared-errors";
  *
  * @example
  * ```typescript
- * import { ZwiftParsingError, convertZwiftToKrd } from '@kaiord/core';
+ * import { ZwiftParsingError, fromText } from '@kaiord/core';
+ * import { zwiftReader } from '@kaiord/zwo';
  *
  * try {
- *   const krd = await convertZwiftToKrd(zwiftReader, validator, logger)({
- *     zwiftString: invalidXml
- *   });
+ *   const krd = await fromText(invalidXml, zwiftReader);
  * } catch (error) {
  *   if (error instanceof ZwiftParsingError) {
  *     console.error('Zwift parsing failed:', error.message);
