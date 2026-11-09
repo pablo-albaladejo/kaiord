@@ -30,8 +30,8 @@ vi.mock("../../../contexts/ToastContext", () => ({
   }),
 }));
 
-import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { ActivityMatchState } from "./activity-match-state";
 import { useCoachingDialogActions } from "./use-coaching-dialog-actions";
 
 const activity: CoachingActivity = {

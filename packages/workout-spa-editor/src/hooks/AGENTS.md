@@ -43,7 +43,6 @@ Custom React hooks. This is where the SPA bridges the persistence layer (Dexie v
 - `use-unmatch-session.ts` / `.test.tsx` — explicit-unlink action wrapper.
 - `use-matched-sessions.ts` / `.test.tsx` (+ `use-matched-sessions-query.ts` + `use-matched-sessions-perf.ts` + `use-matched-sessions-heal.ts`) — week-scoped matched-session feed.
 - `use-matched-sessions-hydrate.ts` / `.test.ts` + `use-matched-sessions-hydrate-helpers.ts` — hydration of matched sessions for the calendar.
-- `use-activity-match-state.ts` — the `ActivityMatchState` type the coaching dialog renders (solo or matched).
 - `use-executed-match-auto.ts` — auto-detects executed workouts that should be matched.
 - `use-coaching-auto-sync.ts` / `.test.tsx` + `use-coaching-auto-sync-helpers.ts` / `.test.ts` — periodic coaching scrape.
 

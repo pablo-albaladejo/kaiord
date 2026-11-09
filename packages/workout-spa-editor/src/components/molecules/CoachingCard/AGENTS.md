@@ -21,6 +21,7 @@ The Train2Go coaching-activity dialog + matched-session UI. The richest molecule
 
 ### State + handlers
 
+- `activity-match-state.ts` — the `ActivityMatchState` type the dialog renders (solo or matched).
 - `use-coaching-dialog.ts` / `.test.tsx` — top-level dialog hook.
 - `use-coaching-dialog-state.ts` / `.test.tsx` — explicit state machine for the dialog flow.
 - `use-coaching-dialog-actions.ts` / `.test.tsx` + `use-coaching-dialog-helpers.ts` — action surface (match, unmatch, convert, manual, AI).
