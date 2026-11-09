@@ -16,6 +16,7 @@ import type { ActivityRepository } from "../../ports/activity-repository";
 import type { CoachingSyncStateRepository } from "../../ports/persistence-port";
 import { WHOOP_BRIDGE_SOURCE } from "../import/map-whoop-activity";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 import { importWhoopCycleWorkouts } from "./import-whoop-cycle-workouts";
 import { buildCyclesPath, chunkWindow } from "./whoop-cycles-window";
@@ -52,7 +53,7 @@ const isActiveRoute = async (
     { policyRepo },
     { profileId, dataType: ACTIVITY }
   );
-  return policies.some((p) => p.enabled && p.bridgeId === WHOOP_BRIDGE_SOURCE);
+  return isRouteEnabled(policies, WHOOP_BRIDGE_SOURCE);
 };
 
 export const syncWhoopActivities = async (
