@@ -264,6 +264,9 @@ describe("createTextToWorkout", () => {
     await parse("test");
 
     // Assert
+    expect(logger.debug).not.toHaveBeenCalledWith("Workout parse requested", {
+      length: 4,
+    });
     expect(logger.info).toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
   });

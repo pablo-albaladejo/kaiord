@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 
 import aiBuildConfig from "../../tsdown.config";
 import { MODEL_CATALOG, PROVIDER_MODELS } from "./index";
+import { MODEL_CATALOG as DIRECT_CATALOG } from "./provider-models";
 
 const SUBPATH_ENTRIES = [
   "src/index.ts",
@@ -46,5 +47,6 @@ describe("subpath module identity", () => {
 
     // Assert
     expect(alias).toBe(MODEL_CATALOG);
+    expect(MODEL_CATALOG).toBe(DIRECT_CATALOG);
   });
 });

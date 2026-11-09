@@ -1,6 +1,19 @@
 import type { Logger } from "@kaiord/core";
 import type { AiTelemetryEvent, AiTelemetrySink } from "./telemetry-types";
 
+/** A faulty logger must never change a run's or a turn's outcome. */
+export const warnBestEffort = (
+  logger: Logger | undefined,
+  message: string,
+  context: Record<string, unknown>
+): void => {
+  try {
+    logger?.warn(message, context);
+  } catch {
+    // Best-effort: the warning is lost, the caller's outcome is kept.
+  }
+};
+
 /**
  * Telemetry is best-effort: a faulty sink must never change a run's or a
  * turn's outcome. The failure is not silent, though: it is reported once, as
@@ -14,10 +27,9 @@ export const emitBestEffort = (
   try {
     sink.emit(event);
   } catch (error) {
-    try {
-      logger?.warn("Telemetry sink failed", { type: event.type, error });
-    } catch {
-      // Best-effort: a faulty logger must not undo the swallow above.
-    }
+    warnBestEffort(logger, "Telemetry sink failed", {
+      type: event.type,
+      error,
+    });
   }
 };
