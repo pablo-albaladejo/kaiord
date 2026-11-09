@@ -51,6 +51,9 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 | `test/bridge-popup-shell.test.js`  | all bridges                     | Vendored unit tests for the shell renderers (jsdom env, CJS `require`).                                                                                                    |
 | `test/bridge-popup-health.test.js` | all bridges                     | Vendored unit tests for the health record (callback-form storage stub, CJS `require`).                                                                                     |
 | `test/bridge-theme.test.js`        | all bridges                     | Vendored unit tests for the theme module (validation, storage, light/dark/system/missing, mirror).                                                                         |
+| `test/session-fetch.test.js`       | tanita, train2go, trainingpeaks | Vendored unit tests for the cookie-session transport (neutral origin and allowlist).                                                                                       |
+| `test/bridge-popup-utils.test.js`  | all bridges                     | Vendored unit tests for the popup utilities, incl. `withTimeout` and `renderRetry` (jsdom env).                                                                            |
+| `test/kaiord-announce.test.js`     | all bridges                     | Vendored unit tests for the announce core; reads the bridge's own `bridge-identity.js` instead of repeating it.                                                            |
 
 ## For AI Agents
 
@@ -83,8 +86,8 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 ### Testing Requirements
 
 - `pnpm test:scripts` — parity (byte, purity, identity↔manifest) + sync unit
-  tests.
+  tests, including the check that each test master is vendored to exactly the
+  bridges of its runtime master.
 - Each consumer bridge's vitest suite exercises its vendored copies
-  (including the vendored `test/bridge-envelope.test.js` and
-  `test/bridge-popup-shell.test.js`), so a drifted copy fails where it is
+  (every `test/*.test.js` master listed above), so a drifted copy fails where it is
   actually used, not only in the parity guard.
