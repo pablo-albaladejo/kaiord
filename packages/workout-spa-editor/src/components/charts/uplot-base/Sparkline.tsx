@@ -4,13 +4,13 @@
  */
 import { useMemo } from "react";
 
-import { useTheme } from "../../../contexts/ThemeContext";
 import {
   buildSparklineData,
   buildSparklineOptions,
   type SparklinePoint,
 } from "./build-sparkline";
 import { UplotChart } from "./uplot-chart";
+import { useThemedChartOptions } from "./use-themed-chart-options";
 
 const DEFAULT_WIDTH = 120;
 const DEFAULT_HEIGHT = 28;
@@ -28,13 +28,9 @@ export const Sparkline = ({
   height = DEFAULT_HEIGHT,
   stroke,
 }: SparklineProps) => {
-  const { resolvedTheme } = useTheme();
-  const options = useMemo(
+  const options = useThemedChartOptions(
     () => buildSparklineOptions({ width, height, stroke }),
-    // resolvedTheme forces a rebuild so the default stroke follows the ink
-    // ladder across a `.dark` flip.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [width, height, stroke, resolvedTheme]
+    [width, height, stroke]
   );
   const data = useMemo(() => buildSparklineData(points), [points]);
 

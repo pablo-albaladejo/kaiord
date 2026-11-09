@@ -179,10 +179,9 @@ describe("EditorPage", () => {
     expect(record.state).toBe("structured");
   });
 
-  it("should transition ready -> pushed on push", async () => {
+  it("should keep a ready workout unpushed when no bridge can reach the watch", async () => {
     // Arrange
 
-    const user = userEvent.setup();
     await db.table("workouts").add(makeRecord({ state: "ready" }));
 
     // Act
@@ -204,7 +203,8 @@ describe("EditorPage", () => {
       })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();
-    expect(user).toBeDefined();
+    const stored = await db.table<WorkoutRecord>("workouts").get("w-test");
+    expect(stored?.state).toBe("ready");
   });
 
   it("should surface the delivery ribbon for modified workouts", async () => {
@@ -232,7 +232,6 @@ describe("EditorPage", () => {
   it("should offer the bridge install rather than a dead send on a modified workout", async () => {
     // Arrange
 
-    const user = userEvent.setup();
     await db.table("workouts").add(
       makeRecord({
         state: "modified",
@@ -253,7 +252,7 @@ describe("EditorPage", () => {
         name: /install the kaiord extension/i,
       })
     ).toBeInTheDocument();
-    expect(user).toBeDefined();
+    expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();
   });
 
   it("should mount the ImportDropzoneOverlay when navigated with ?action=import", async () => {
