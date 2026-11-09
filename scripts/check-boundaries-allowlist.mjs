@@ -8,8 +8,11 @@
  * entry — a file that no longer imports `adapters/` — must be deleted from
  * the list, otherwise the list silently stops reflecting reality and a future
  * regression in that file would be re-admitted for free.
+ *
+ * The count cap alone misses a swap (one entry removed, another added), so
+ * the CLI also rejects any entry absent from the list at the merge base.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -18,21 +21,27 @@ import {
   BOUNDARIES_ALLOWLIST,
   BOUNDARIES_ALLOWLIST_MAX,
 } from "./boundaries-allowlist.mjs";
+import { baseAllowlistFiles } from "./boundaries-allowlist-base.mjs";
+import { extractImports } from "./check-architecture.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** Matches any import/export whose specifier reaches into `adapters/`. */
-const ADAPTER_IMPORT = /from\s+["'][^"']*\badapters\/[^"']*["']/;
+const ADAPTER_SPEC = /\badapters\//;
+const SHOWN = 3;
 
 /**
  * Collects every violation of the shrink-only invariant.
  *
  * @param {string} repoRoot Absolute path to the repository root.
+ * @param {{ entries?: typeof BOUNDARIES_ALLOWLIST, baseFiles?: Set<string> }} [options]
+ *   `baseFiles` are the entries at the merge base; omitted, that check is skipped.
  * @returns {string[]} Human-readable problems; empty when the ratchet holds.
  */
-export function checkBoundariesAllowlist(repoRoot = REPO_ROOT) {
+export function checkBoundariesAllowlist(
+  repoRoot = REPO_ROOT,
+  { entries = BOUNDARIES_ALLOWLIST, baseFiles } = {}
+) {
   const problems = [];
-  const entries = BOUNDARIES_ALLOWLIST;
 
   if (entries.length > BOUNDARIES_ALLOWLIST_MAX) {
     problems.push(
@@ -45,6 +54,13 @@ export function checkBoundariesAllowlist(repoRoot = REPO_ROOT) {
   for (const { file, reason } of entries) {
     if (seen.has(file)) problems.push(`Duplicate allowlist entry: ${file}`);
     seen.add(file);
+
+    if (baseFiles && !baseFiles.has(file)) {
+      problems.push(
+        `Allowlist entry "${file}" is not in the list at the merge base. ` +
+          `The allowlist is shrink-only: fix the import instead of listing it.`
+      );
+    }
 
     if (!reason || reason.trim().length < 40) {
       problems.push(
@@ -60,7 +76,8 @@ export function checkBoundariesAllowlist(repoRoot = REPO_ROOT) {
       continue;
     }
 
-    if (!ADAPTER_IMPORT.test(readFileSync(abs, "utf8"))) {
+    const specs = extractImports(readFileSync(abs, "utf8"));
+    if (!specs.some((spec) => ADAPTER_SPEC.test(spec))) {
       problems.push(
         `Allowlist entry "${file}" no longer imports adapters/. ` +
           `Delete it from the list and lower BOUNDARIES_ALLOWLIST_MAX.`
@@ -80,12 +97,21 @@ export function checkBoundariesAllowlist(repoRoot = REPO_ROOT) {
 
 if (
   process.argv[1] &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
+  import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href
 ) {
-  const problems = checkBoundariesAllowlist();
+  const baseRef = process.env.BOUNDARIES_ALLOWLIST_BASE_REF || "origin/main";
+  const base = await baseAllowlistFiles({ root: REPO_ROOT, baseRef });
+  const problems = [
+    ...(base.error ? [base.error] : []),
+    ...checkBoundariesAllowlist(REPO_ROOT, { baseFiles: base.files }),
+  ];
   if (problems.length > 0) {
-    console.error("boundaries allowlist check failed:\n");
-    for (const p of problems) console.error(`  - ${p}`);
+    console.error(
+      `boundaries allowlist check failed: ${problems.length} problem(s).`
+    );
+    for (const p of problems.slice(0, SHOWN)) console.error(`  - ${p}`);
+    if (problems.length > SHOWN)
+      console.error(`  ... and ${problems.length - SHOWN} more.`);
     process.exit(1);
   }
   console.log(
