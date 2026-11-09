@@ -1,11 +1,11 @@
 import { MIN_ADAPTIVE_DAYS } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import { addDaysIso } from "../../components/pages/Daily/today-dates";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { HealthWeightRecord } from "../../types/health/health-records";
 import type { Profile } from "../../types/profile";
+import { addDaysIso } from "../shared/date-utils";
 import { computeAdaptiveMaintenance } from "./compute-adaptive-maintenance";
 
 const PROFILE_ID = "p1";
