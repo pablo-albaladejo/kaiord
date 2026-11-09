@@ -16,7 +16,8 @@
     "cycling": "Ciclismo",
     "running": "Carrera",
     "swim": "Natación",
-    "strength": "Fuerza"
+    "strength": "Fuerza",
+    "generic": "Otro"
   },
   "empty": {
     "title": "Tu biblioteca está vacía",
