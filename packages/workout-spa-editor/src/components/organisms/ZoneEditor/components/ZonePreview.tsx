@@ -1,6 +1,4 @@
 /**
- * ZonePreview Component
- *
  * Preview of calculated zone values.
  */
 

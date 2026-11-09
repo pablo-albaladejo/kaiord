@@ -14,12 +14,11 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 - `BatchCostConfirmation/` — confirmation dialog for AI batch conversion with rolled-up cost estimate.
 - `CoachingSidebar/` — left-side coaching list on the calendar.
 - `EditorContextMenu/` — Radix context menu over the workout list (copy, paste, duplicate, delete).
-- `ProfileManager/` — profile CRUD + sport-specific zones tabbed UI.
 - `SettingsPanel/` — settings dialog (AI, Extensions, Privacy, Usage tabs).
 - `StepEditor/` — main step-edit form (sport-aware fields, target picker, duration picker, notes).
 - `WorkoutList/` — the editor's main list (steps + blocks), with `@dnd-kit/sortable` reordering.
 - `WorkoutStats/` — duration / distance / TSS panel.
-- `ZoneEditor/` — sport-specific zone editor used by Profile Manager.
+- `ZoneEditor/` — sport-specific zone editor used by `AthleteZonesPage`.
 - `ZonesConflictDialog/` — surface conflicts when pushing zones to Train2Go.
 
 ## For AI Agents
@@ -34,12 +33,12 @@ Feature-complete components composed from molecules + atoms. Organisms own multi
 ### Testing Requirements
 
 - `.test.tsx` per organism + per major sub-component.
-- Major flows (StepEditor, SettingsPanel, ProfileManager) have integration coverage.
+- Major flows (StepEditor, SettingsPanel) have integration coverage.
 
 ### Common Patterns
 
 - Folder shape: `<Name>.tsx` + sub-components + hooks (`use-*.ts`) + helpers (`*-helpers.ts`) + stories + tests.
-- Tab-style organisms (SettingsPanel, ProfileManager) split each tab into a sibling file.
+- Tab-style organisms (SettingsPanel) split each tab into a sibling file.
 
 ## Dependencies
 

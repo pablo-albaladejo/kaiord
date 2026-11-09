@@ -1,13 +1,5 @@
 /**
- * SaveToLibraryButton Component
- *
  * Button with integrated dialog for saving workouts to the library.
- *
- * Requirements:
- * - Requirement 17.1: Store workout in browser local storage
- * - Requirement 17.2: Allow adding tags and notes for organization
- * - Requirement 17.3: Generate thumbnail preview of the workout
- * - Requirement 17.5: Display success notification
  */
 
 import { Bookmark } from "lucide-react";

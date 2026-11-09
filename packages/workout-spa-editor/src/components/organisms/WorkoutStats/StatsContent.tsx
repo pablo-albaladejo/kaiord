@@ -1,6 +1,4 @@
 /**
- * StatsContent Component
- *
  * Renders the statistics content rows.
  */
 

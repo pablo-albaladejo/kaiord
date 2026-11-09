@@ -1,6 +1,4 @@
 /**
- * KeyChips Component
- *
  * Renders the `<kbd>` chips for a catalog shortcut on the current platform,
  * followed by its alias binding when it has one.
  */

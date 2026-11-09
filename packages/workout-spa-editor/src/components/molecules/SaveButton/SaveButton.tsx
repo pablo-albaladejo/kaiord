@@ -1,14 +1,6 @@
 /**
- * SaveButton Component
- *
  * The editor's one download control: it opens the format menu, and picking
  * a format downloads the workout in it.
- *
- * Requirements:
- * - Requirement 6: Save workout as KRD file
- * - Requirement 12.6: Provide format selection options (FIT, TCX, ZWO, KRD)
- * - Requirement 12.10: Generate correct file extension based on format
- * - Requirement 36: Clear error feedback with retry options
  */
 
 import { Download } from "lucide-react";

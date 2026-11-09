@@ -1,11 +1,5 @@
 /**
- * SaveErrorDialog Component
- *
  * Displays validation errors when saving a workout fails.
- *
- * Requirements:
- * - Requirement 6.3: Display specific validation errors with field references
- * - Requirement 36: Clear error feedback with retry options
  */
 
 import { AlertCircle, X } from "lucide-react";

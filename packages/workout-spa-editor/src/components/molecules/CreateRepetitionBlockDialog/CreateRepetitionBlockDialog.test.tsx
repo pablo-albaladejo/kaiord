@@ -2,7 +2,6 @@
  * CreateRepetitionBlockDialog Component Tests
  *
  * Tests for the create repetition block dialog component.
- * Requirement 7.1.5: Validate minimum repeat count of 2
  */
 
 import { render, screen } from "@testing-library/react";

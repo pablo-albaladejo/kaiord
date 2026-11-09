@@ -1,6 +1,4 @@
 /**
- * SportZoneEditor Component
- *
  * Sport-specific zone editor with tabs and zone sections. Thresholds are
  * not edited here: they have one home, the Athlete page; the caller passes
  * what to show for them in `thresholds`.

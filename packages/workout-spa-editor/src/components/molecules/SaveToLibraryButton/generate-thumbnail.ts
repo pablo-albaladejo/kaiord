@@ -2,9 +2,6 @@
  * Thumbnail Generation Utility
  *
  * Generates a thumbnail preview of a workout for the library.
- *
- * Requirements:
- * - Requirement 17.3: Generate thumbnail preview of the workout
  */
 
 import type { KRD } from "../../../types/krd";

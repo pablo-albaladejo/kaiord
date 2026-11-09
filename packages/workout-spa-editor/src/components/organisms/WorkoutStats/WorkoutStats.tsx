@@ -1,10 +1,5 @@
 /**
- * WorkoutStats Component
- *
  * Displays workout statistics including total duration, distance, and step counts.
- *
- * Requirements:
- * - Requirement 9: Display workout statistics with real-time updates
  */
 
 import React, { useMemo } from "react";
@@ -31,7 +26,7 @@ export const WorkoutStats: React.FC<WorkoutStatsProps> = ({
   workout,
   className = "",
 }) => {
-  // Calculate stats (memoized for performance - Requirement 9.5)
+  // Calculate stats (memoized)
   const stats = useMemo(() => calculateWorkoutStats(workout), [workout]);
   const t = useTranslate("workout-detail");
 

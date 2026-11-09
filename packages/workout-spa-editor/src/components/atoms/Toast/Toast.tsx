@@ -10,9 +10,6 @@ import type { ToastProps } from "./Toast.types";
 export type { ToastProps, ToastVariant } from "./Toast.types";
 
 /**
- * Toast Component
- *
- * Requirement 39: Visual feedback for user actions
  * - Displays success, error, warning, and info notifications
  * - Auto-dismisses after specified duration
  * - Supports custom actions (e.g., undo button)
