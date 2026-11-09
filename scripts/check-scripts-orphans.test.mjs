@@ -514,3 +514,79 @@ test("script named only in a Markdown table outside the README fails", () => {
     h.cleanup();
   }
 });
+
+/** Runs a harness and asserts the run fails naming `orphan`. */
+function assertOrphan(prep, orphan) {
+  // Arrange
+  const h = mkHarness(prep);
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(result.stderr, new RegExp(orphan.replace(".", "\\.")));
+  } finally {
+    h.cleanup();
+  }
+}
+
+test("should not count a longer filename ending in the basename as a reference", () => {
+  assertOrphan((root) => {
+    writeScript(root, "x.sh", "echo x\n");
+    writeScript(root, "max.sh", "echo max\n");
+    writeScript(root, "wired.mjs", 'spawnSync("bash", ["scripts/max.sh"]);\n');
+    setRootPackage(root, {
+      "lint:wired": "node scripts/wired.mjs",
+      "lint:max": "bash scripts/max.sh",
+    });
+  }, "x.sh");
+});
+
+test("should not count a JS comment naming the script as wiring", () => {
+  assertOrphan((root) => {
+    writeScript(root, "helper.mjs", "export const X = 1;\n");
+    writeScript(
+      root,
+      "wired.mjs",
+      '// import { X } from "./helper.mjs";\n/* see helper.mjs */\nconsole.log(1);\n'
+    );
+    setRootPackage(root, { "lint:wired": "node scripts/wired.mjs" });
+  }, "helper.mjs");
+});
+
+test("should not count a shell comment naming the script as wiring", () => {
+  assertOrphan((root) => {
+    writeScript(root, "helper.sh", "echo helper\n");
+    writeScript(
+      root,
+      "wired.sh",
+      "#!/bin/bash\n# calls helper.sh later\necho wired\n"
+    );
+    setRootPackage(root, { "lint:wired": "bash scripts/wired.sh" });
+  }, "helper.sh");
+});
+
+test("should still count a shell source of the script as wiring", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "helper.sh", "echo helper\n");
+    writeScript(
+      root,
+      "wired.sh",
+      '#!/bin/bash\nsource "$(dirname "$0")/helper.sh" # load\n'
+    );
+    setRootPackage(root, { "lint:wired": "bash scripts/wired.sh" });
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+});
