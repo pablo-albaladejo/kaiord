@@ -37,7 +37,7 @@ Command-line interface for Kaiord workout file conversion. Wires format adapters
 - **`src/utils/`** — Shared utilities (format detection, error handling, file I/O, config, logging)
 - **`src/types/`** — Reserved for shared type definitions (currently empty)
 - **`src/tests/`** — Test utilities and smoke tests
-- **`docs/`** — Architecture docs (plugin system, publish verification)
+- **`docs/`** — Architecture docs (plugin system design, examples)
 
 ## For AI Agents: Working in This Directory
 
@@ -47,7 +47,7 @@ Command-line interface for Kaiord workout file conversion. Wires format adapters
 2. **Logger factory**: All commands use `createLogger()` which auto-detects pretty vs. structured based on CI environment
 3. **Config merging**: CLI args override `.kaiordrc.json` config file (searched in cwd and home)
 4. **Batch detection**: Convert command detects glob patterns (`*`, `?`) to route to batch vs. single-file handler
-5. **Error exit codes**: `ExitCode` enum (0=success, 1=error, 2=tolerance exceeded, 3=diff found) and `mapErrorToExitCode()` mapper
+5. **Error exit codes**: `ExitCode` enum (0=success, 1=invalid argument, 2=file not found, 3=permission denied, 4=parsing error, 5=validation error, 6=tolerance exceeded, 7=auth error, 10=differences found, 11=partial success, 12=directory create error, 13=environment error, 14=service error, 99=unknown) and `mapErrorToExitCode()` mapper
 6. **Format detection**: Infer format from file extension; override with `--input-format` / `--output-format`
 
 ### File Size Limits & Structure
