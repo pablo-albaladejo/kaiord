@@ -10,21 +10,14 @@
 
 export type {
   Duration,
-  DurationType,
   Equipment,
   Intensity,
   KRD,
-  KRDEvent,
-  KRDLap,
-  KRDMetadata,
-  KRDRecord,
-  KRDSession,
   RepetitionBlock,
   Sport,
   SubSport,
   SwimStroke,
   Target,
-  TargetType,
   Workout,
   WorkoutStep,
 } from "./krd-core";

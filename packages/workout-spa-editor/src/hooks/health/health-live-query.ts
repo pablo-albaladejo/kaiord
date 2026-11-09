@@ -23,18 +23,6 @@ export const queryHealthRangeAsync = <T extends HealthRecord<unknown>>(
     .between([profileId, range.start], [profileId, range.end], true, true)
     .toArray();
 
-export const queryHealthDayAsync = async <T extends HealthRecord<unknown>>(
-  tableName: string,
-  profileId: string,
-  day: string
-): Promise<T | undefined> => {
-  const rows = await queryHealthRangeAsync<T>(tableName, profileId, {
-    start: day,
-    end: day,
-  });
-  return rows[0];
-};
-
 export const queryHealthLatestAsync = async <T extends HealthRecord<unknown>>(
   tableName: string,
   profileId: string
