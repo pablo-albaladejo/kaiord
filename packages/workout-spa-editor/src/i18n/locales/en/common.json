@@ -77,5 +77,11 @@
     "downloadDraft": "Download draft",
     "reload": "Reload",
     "retry": "Retry"
+  },
+  "routeError": {
+    "title": "Something went wrong",
+    "body": "This page hit an unexpected error. Try again, or go to Daily.",
+    "retry": "Retry",
+    "goToDaily": "Go to Daily"
   }
 }

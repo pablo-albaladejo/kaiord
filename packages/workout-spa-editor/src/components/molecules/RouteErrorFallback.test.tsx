@@ -15,19 +15,21 @@ function renderWithRouter(ui: React.ReactNode, path = "/test") {
 }
 
 describe("RouteErrorFallback", () => {
-  const error = new Error("Something broke");
-
-  it("should render the error message", () => {
+  it("should render the title and the recovery hint", () => {
     // Arrange
 
     // Act
 
-    renderWithRouter(<RouteErrorFallback error={error} onRetry={vi.fn()} />);
+    renderWithRouter(<RouteErrorFallback onRetry={vi.fn()} />);
 
     // Assert
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-    expect(screen.getByText("Something broke")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "This page hit an unexpected error. Try again, or go to Daily."
+      )
+    ).toBeInTheDocument();
   });
 
   it("should have role=alert for accessibility", () => {
@@ -35,7 +37,7 @@ describe("RouteErrorFallback", () => {
 
     // Act
 
-    renderWithRouter(<RouteErrorFallback error={error} onRetry={vi.fn()} />);
+    renderWithRouter(<RouteErrorFallback onRetry={vi.fn()} />);
 
     // Assert
 
@@ -48,7 +50,7 @@ describe("RouteErrorFallback", () => {
     const user = userEvent.setup();
     const onRetry = vi.fn();
 
-    renderWithRouter(<RouteErrorFallback error={error} onRetry={onRetry} />);
+    renderWithRouter(<RouteErrorFallback onRetry={onRetry} />);
 
     // Act
 
@@ -64,7 +66,7 @@ describe("RouteErrorFallback", () => {
 
     // Act
 
-    renderWithRouter(<RouteErrorFallback error={error} onRetry={vi.fn()} />);
+    renderWithRouter(<RouteErrorFallback onRetry={vi.fn()} />);
 
     // Assert
 
@@ -79,7 +81,7 @@ describe("RouteErrorFallback", () => {
 
     const user = userEvent.setup();
     const { location } = renderWithRouter(
-      <RouteErrorFallback error={new Error("fail")} onRetry={vi.fn()} />
+      <RouteErrorFallback onRetry={vi.fn()} />
     );
 
     // Act

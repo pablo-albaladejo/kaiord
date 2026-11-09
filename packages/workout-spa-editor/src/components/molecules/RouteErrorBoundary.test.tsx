@@ -68,8 +68,9 @@ describe("RouteErrorBoundary analytics", () => {
         componentStack: expect.any(String),
       })
     );
-    // Fallback is rendered
+    // Fallback is rendered, without the thrown text
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    expect(screen.queryByText("kaboom")).not.toBeInTheDocument();
   });
 
   it("should not invoke the payload builder when no analytics prop is provided (zero scrub work in noop deployments)", async () => {
