@@ -3,7 +3,10 @@ import {
   mergeWithConfig,
 } from "../../utils/config-loader.js";
 import { ExitCode } from "../../utils/exit-codes.js";
-import { handleCommandError } from "../../utils/handle-command-error.js";
+import {
+  handleCommandError,
+  resolveJsonFlag,
+} from "../../utils/handle-command-error.js";
 import { createLogger } from "../../utils/logger-factory.js";
 import { computeDiff, printDiffResult } from "./diff-executor";
 import { type DiffOptions, diffOptionsSchema } from "./types";
@@ -15,14 +18,12 @@ export type { DiffOptions } from "./types";
  */
 export const diffCommand = async (options: DiffOptions): Promise<number> => {
   let logger: Awaited<ReturnType<typeof createLogger>> | undefined;
-  let json = false;
 
   try {
     const configResult = await loadConfigWithMetadata();
     const validatedOptions = diffOptionsSchema.parse(
       mergeWithConfig(options, configResult.config)
     );
-    json = validatedOptions.json ?? false;
     logger = await createLogger({
       type: validatedOptions.logFormat,
       level: validatedOptions.verbose
@@ -45,6 +46,8 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
     return result.identical ? ExitCode.SUCCESS : ExitCode.DIFFERENCES_FOUND;
   } catch (error) {
     logger?.error("Diff command failed", { error });
-    return handleCommandError(error, { json });
+    return handleCommandError(error, {
+      json: await resolveJsonFlag(options),
+    });
   }
 };

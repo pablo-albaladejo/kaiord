@@ -21,7 +21,7 @@ describe("diffCommand", () => {
     const exitCode = await diffCommand(options);
 
     // Assert
-    expect(exitCode).toBe(ExitCode.UNKNOWN_ERROR);
+    expect(exitCode).toBe(ExitCode.INVALID_ARGUMENT);
     expect(stderr).toHaveBeenCalledTimes(1);
   });
 });

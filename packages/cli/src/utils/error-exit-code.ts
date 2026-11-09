@@ -8,6 +8,7 @@ import {
   ServiceAuthError,
   ToleranceExceededError,
 } from "@kaiord/core";
+import { ZodError } from "zod";
 
 import {
   DirectoryCreateError,
@@ -79,6 +80,7 @@ const INSTANCE_RULES: ReadonlyArray<InstanceRule> = [
   [KrdValidationError, ExitCode.VALIDATION_ERROR],
   [ToleranceExceededError, ExitCode.TOLERANCE_EXCEEDED],
   [UnsupportedFormatError, ExitCode.INVALID_ARGUMENT],
+  [ZodError, ExitCode.INVALID_ARGUMENT],
   [MissingFtpError, ExitCode.INVALID_ARGUMENT],
   [MissingMaxHeartRateError, ExitCode.INVALID_ARGUMENT],
   [DirectoryCreateError, ExitCode.DIRECTORY_CREATE_ERROR],
