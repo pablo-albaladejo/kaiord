@@ -15,7 +15,7 @@ import {
   EnvironmentError,
   UnsupportedFormatError,
 } from "./cli-errors";
-import { getExitCodeForError, mapErrorToExitCode } from "./error-exit-code";
+import { mapErrorToExitCode } from "./error-exit-code";
 import { ExitCode } from "./exit-codes";
 
 const HTTP_SERVICE_UNAVAILABLE = 503;
@@ -266,16 +266,5 @@ describe("mapErrorToExitCode", () => {
     // Assert
     expect(rewordedCode).toBe(originalCode);
     expect(rewordedCode).toBe(ExitCode.INVALID_ARGUMENT);
-  });
-
-  it("should expose getExitCodeForError as an alias of the mapper", () => {
-    // Arrange
-    const error = createServiceApiError("Garmin 503", HTTP_SERVICE_UNAVAILABLE);
-
-    // Act
-    const code = getExitCodeForError(error);
-
-    // Assert
-    expect(code).toBe(mapErrorToExitCode(error));
   });
 });

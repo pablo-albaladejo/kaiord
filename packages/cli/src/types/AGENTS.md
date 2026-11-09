@@ -9,18 +9,11 @@ Type definitions and interfaces for the CLI.
 
 **What lives here:** Shared TypeScript types, interfaces, and protocols that multiple modules depend on.
 
-Currently: Plugin system interfaces (for future extensibility).
+Currently: no shared types live here. The planned plugin system (see `docs/plugin-architecture.md`) is design-only; `src/types/plugin.ts` does not exist.
 
 ## Key Files
 
-- **`plugin.ts`** — Plugin system interfaces:
-  - `KaiordPlugin` — Main plugin interface (name, version, formats, converters, lifecycle hooks)
-  - `PluginFormat` — Describes a format supported by a plugin (extension, MIME type, description)
-  - `PluginMetadata` — Metadata discovered during plugin scanning
-  - `PluginValidationResult` — Result of plugin validation
-  - `PluginDiscovery` — Service to discover and load plugins
-  - `PluginRegistry` — Service to register and query loaded plugins
-  - `PluginConfig` — Plugin configuration from `.kaiordrc.json`
+None yet.
 
 ## For AI Agents: Working in This Directory
 
@@ -37,42 +30,6 @@ Currently: Plugin system interfaces (for future extensibility).
 - Command-specific options (keep in `src/commands/mycommand/types.ts`)
 - Utility-specific schemas (keep in `src/utils/my-util.ts` as Zod schema)
 
-### Plugin System Overview
-
-The plugin system is **designed but not yet implemented**. It allows third-party developers to add format support without modifying core code.
-
-**Key concepts:**
-
-- Plugins are npm packages named `@kaiord/plugin-*`
-- Each plugin implements `KaiordPlugin` interface
-- Plugin discovery: scan `node_modules/@kaiord/plugin-*`, global plugin dir, config file
-- Format resolution: map file extensions to plugins
-- Converters: `toKrd()` (format → KRD) and `fromKrd()` (KRD → format)
-
-**Example (from docs/plugin-architecture.md):**
-
-```typescript
-const gpxPlugin: KaiordPlugin = {
-  name: "@kaiord/plugin-gpx",
-  version: "1.0.0",
-  description: "GPX format support",
-  formats: [
-    {
-      extension: ".gpx",
-      mimeType: "application/gpx+xml",
-      description: "GPS Exchange Format",
-    },
-  ],
-  kaiordVersion: "^0.1.0",
-  toKrd: async (input) => {
-    /* ... */
-  },
-  fromKrd: async (krd) => {
-    /* ... */
-  },
-};
-```
-
 ### Adding New Types
 
 1. Create a focused `.ts` file in `src/types/`
@@ -84,7 +41,6 @@ const gpxPlugin: KaiordPlugin = {
 ## Testing
 
 - Types are validated by TypeScript compiler (no runtime tests needed)
-- Plugin system types validated when implementations are created
 
 ## Dependencies
 
