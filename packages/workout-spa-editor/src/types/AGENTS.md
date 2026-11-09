@@ -58,7 +58,6 @@ Domain types, Zod schemas, type guards, validators, and module-augmentation decl
 
 ## Subdirectories
 
-- `schemas/` — core schema re-exports (`core-exports`) and `repetition-block-id.test`.
 - `validation/` — Zod error formatters (`formatters`).
 
 ## For AI Agents
