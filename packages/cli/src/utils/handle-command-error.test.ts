@@ -143,3 +143,34 @@ describe("resolveJsonFlag", () => {
     expect(json).toBe(false);
   });
 });
+
+describe("handleCommandError golden output", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should print the exact double-envelope JSON for validate and inspect", () => {
+    // Arrange
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const error = new UnsupportedFormatError("Unsupported: a.txt");
+
+    // Act
+    handleCommandError(error, { json: true, envelope: true });
+
+    // Assert
+    expect(logSpy).toHaveBeenCalledWith(
+      [
+        "{",
+        '  "success": false,',
+        '  "error": {',
+        '    "success": false,',
+        '    "error": {',
+        '      "type": "UnsupportedFormatError",',
+        '      "message": "Unsupported: a.txt"',
+        "    }",
+        "  }",
+        "}",
+      ].join("\n")
+    );
+  });
+});
