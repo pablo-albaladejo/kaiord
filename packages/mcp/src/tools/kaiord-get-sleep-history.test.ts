@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -50,5 +53,41 @@ describe("kaiord_get_sleep_history", () => {
     expect(result.isError).toBeUndefined();
     const parsed = JSON.parse(result.content[0].text) as { skipped: number };
     expect(parsed.skipped).toBe(1);
+  });
+
+  it("should leave a sleep KRD without a sleep entry out of total", async () => {
+    // Arrange
+    const client = await createTestClient();
+    const dir = await mkdtemp(join(tmpdir(), "mcp-sleep-history-"));
+    const emptyKrd = join(dir, "empty-sleep.krd");
+    await writeFile(
+      emptyKrd,
+      JSON.stringify({
+        version: "2.0",
+        type: "sleep_record",
+        metadata: { created: "2026-05-22T07:00:00.000Z" },
+      })
+    );
+    const inputs = [
+      getFixturePath("fit", "HealthSleepFullNight.fit"),
+      emptyKrd,
+    ];
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_get_sleep_history",
+      arguments: { input_files: inputs },
+    })) as McpToolResult;
+    await rm(dir, { recursive: true, force: true });
+
+    // Assert
+    const parsed = JSON.parse(result.content[0].text) as {
+      records: Array<unknown>;
+      total: number;
+      skipped: number;
+    };
+    expect(parsed.skipped).toBe(0);
+    expect(parsed.records).toHaveLength(1);
+    expect(parsed.total).toBe(1);
   });
 });

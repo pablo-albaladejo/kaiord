@@ -7,13 +7,11 @@ import { registerGarminListTool } from "../tools/kaiord-garmin-list";
 import { registerGarminLoginTool } from "../tools/kaiord-garmin-login";
 import { registerGarminLogoutTool } from "../tools/kaiord-garmin-logout";
 import { registerGarminPushTool } from "../tools/kaiord-garmin-push";
-import {
-  registerGetHrvHistoryTool,
-  registerGetSleepHistoryTool,
-  registerGetWeightHistoryTool,
-} from "../tools/kaiord-get-health-history";
 import { registerGetHealthSummaryTool } from "../tools/kaiord-get-health-summary";
+import { registerGetHrvHistoryTool } from "../tools/kaiord-get-hrv-history";
 import { registerGetRecoveryStatusTool } from "../tools/kaiord-get-recovery-status";
+import { registerGetSleepHistoryTool } from "../tools/kaiord-get-sleep-history";
+import { registerGetWeightHistoryTool } from "../tools/kaiord-get-weight-history";
 
 export const registerLocalSurface = (
   server: McpServer,

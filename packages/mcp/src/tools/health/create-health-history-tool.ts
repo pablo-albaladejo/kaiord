@@ -2,13 +2,13 @@ import type { Logger } from "@kaiord/core";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { formatError, formatSuccess } from "../utils/error-formatter";
+import { formatError, formatSuccess } from "../../utils/error-formatter";
 import {
   type HealthKrdType,
   pickHealthByType,
   sortByHealthDate,
-} from "./health/health-record-filters";
-import { parseHealthRecords } from "./health/parse-health-records";
+} from "./health-record-filters";
+import { parseHealthRecords } from "./parse-health-records";
 
 type HealthHistorySpec = {
   /** Tool name registered with the server. */
@@ -22,7 +22,7 @@ type HealthHistorySpec = {
   healthKey: string;
 };
 
-const createRegisterHealthHistoryTool =
+export const createRegisterHealthHistoryTool =
   (spec: HealthHistorySpec) =>
   (server: McpServer, logger: Logger): void => {
     const schema = {
@@ -43,11 +43,7 @@ const createRegisterHealthHistoryTool =
           args.input_files,
           logger
         );
-        const matching = sortByHealthDate(pickHealthByType(krds, spec.krdType));
-        const total = matching.length;
-        const limited =
-          args.limit !== undefined ? matching.slice(-args.limit) : matching;
-        const records = limited
+        const entries = sortByHealthDate(pickHealthByType(krds, spec.krdType))
           .map(
             (k) =>
               (k.extensions?.health as Record<string, unknown> | undefined)?.[
@@ -55,36 +51,12 @@ const createRegisterHealthHistoryTool =
               ]
           )
           .filter((v): v is Record<string, unknown> => v !== undefined);
+        const total = entries.length;
+        const records =
+          args.limit !== undefined ? entries.slice(-args.limit) : entries;
         return formatSuccess(JSON.stringify({ records, total, skipped }));
       } catch (error) {
         return formatError(error);
       }
     });
   };
-
-export const registerGetSleepHistoryTool = createRegisterHealthHistoryTool({
-  name: "kaiord_get_sleep_history",
-  description:
-    "List sleep records from input files sorted by startTime ascending",
-  inputNoun: "sleep records",
-  krdType: "sleep_record",
-  healthKey: "sleep",
-});
-
-export const registerGetWeightHistoryTool = createRegisterHealthHistoryTool({
-  name: "kaiord_get_weight_history",
-  description:
-    "List weight measurements from input files sorted by measuredAt ascending",
-  inputNoun: "weight measurements",
-  krdType: "weight_measurement",
-  healthKey: "weight",
-});
-
-export const registerGetHrvHistoryTool = createRegisterHealthHistoryTool({
-  name: "kaiord_get_hrv_history",
-  description:
-    "List HRV summaries from input files sorted by measuredAt ascending",
-  inputNoun: "HRV summaries",
-  krdType: "hrv_summary",
-  healthKey: "hrv",
-});
