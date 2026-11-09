@@ -10,7 +10,7 @@
     "i18n:extract": "node scripts/extract-strings.mjs",
     "preview": "vite preview",
     "test": "vitest --run",
-    "lint": "tsc --noEmit && eslint . && prettier --check src partials",
+    "lint": "tsc --noEmit && eslint . && prettier --check src partials index.html",
     "lint:fix": "eslint . --fix && prettier --write src partials public index.html"
   },
   "dependencies": {

@@ -13,7 +13,11 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(here, "../../..");
 const ORIGIN = "https://kaiord.com";
-const LANDING = ["packages/landing/index.html", "packages/landing/src"];
+const LANDING = [
+  "packages/landing/index.html",
+  "packages/landing/partials",
+  "packages/landing/src",
+];
 const ALTERNATES = [
   ["en", `${ORIGIN}/`],
   ["es", `${ORIGIN}/es/`],
