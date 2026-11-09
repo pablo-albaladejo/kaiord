@@ -73,6 +73,40 @@ describe("checkGlossaryShape", () => {
         `expected error mentioning the Create row, got: ${JSON.stringify(errors)}`
       );
     });
+
+    it("should flag a **Create** that survives only in prose outside the Verbs table", () => {
+      // Arrange
+      const broken = WELL_FORMED.replace(
+        "| **Create** | Start a new workout | Add |\n",
+        ""
+      ).replace("## Nouns", "Use **Create** for new workouts.\n\n## Nouns");
+
+      // Act
+      const errors = checkGlossaryShape(broken);
+
+      // Assert
+      assert.ok(
+        errors.some((e) => e.includes("Create")),
+        `expected error mentioning the Create row, got: ${JSON.stringify(errors)}`
+      );
+    });
+
+    it("should flag a **Create** row placed in another section's table", () => {
+      // Arrange
+      const broken = WELL_FORMED.replace(
+        "| **Create** | Start a new workout | Add |\n",
+        ""
+      ).replace("| **Workout** | A session |", "| **Create** | A session |");
+
+      // Act
+      const errors = checkGlossaryShape(broken);
+
+      // Assert
+      assert.ok(
+        errors.some((e) => e.includes("Create")),
+        `expected error mentioning the Create row, got: ${JSON.stringify(errors)}`
+      );
+    });
   });
 
   describe("multiple errors", () => {

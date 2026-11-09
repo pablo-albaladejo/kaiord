@@ -9,6 +9,10 @@
  * lacking a reason.
  *
  * Do not add a file here to make a new violation go green. Fix the import.
+ *
+ * This module MUST stay import-free: `boundaries-allowlist-base.mjs`
+ * evaluates its merge-base copy as a `data:` module, where no relative
+ * import can resolve.
  */
 
 /** Reasons shared by whole buckets of entries, so the split stays legible. */

@@ -13,7 +13,7 @@
  * mock is moot).
  *
  * Invocation:
- *   pnpm test:scripts                    # included in the suite
+ *   CI: the `build` job's "Site guards" step, with --skip-build
  *   node scripts/check-no-perf-marks-in-prod.mjs  # direct
  *   node scripts/check-no-perf-marks-in-prod.mjs --skip-build
  *
@@ -76,7 +76,19 @@ export function runCheck({ assetsDir = DIST_ASSETS } = {}) {
       },
     ];
   }
-  for (const file of listJsFiles(assetsDir)) {
+  const files = listJsFiles(assetsDir);
+  // An empty bundle set would pass every pattern vacuously.
+  if (files.length === 0) {
+    return [
+      {
+        rule: "R-NoPerfMarksInProd",
+        file: assetsDir,
+        detail:
+          "no JS bundles found in dist/assets; the SPA build produced nothing to check.",
+      },
+    ];
+  }
+  for (const file of files) {
     const source = readFileSync(file, "utf8");
     for (const pattern of FORBIDDEN_PATTERNS) {
       if (pattern.test(source)) {
