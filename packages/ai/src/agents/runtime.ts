@@ -6,7 +6,10 @@ import type {
   GenerateAgentResult,
 } from "./definition-types";
 import type { AiTelemetrySink } from "../observability/telemetry-types";
-import { emitBestEffort } from "../observability/emit-best-effort";
+import {
+  emitBestEffort,
+  warnBestEffort,
+} from "../observability/emit-best-effort";
 import { createNoopTelemetrySink } from "../observability/noop-sink";
 import { modelIdOf, providerOf, resolveSystemPrompt } from "./prelude";
 import { runGenerateLoop, type GenerateOutcome } from "./generate-mode";
@@ -60,7 +63,10 @@ export const runGenerateAgent = async <TOutput>(
       signal: config.signal,
       onProgress: clock?.observe,
       onAttemptError: (attempt, error) =>
-        config.logger?.warn("Agent attempt failed", { attempt, error }),
+        warnBestEffort(config.logger, "Agent attempt failed", {
+          attempt,
+          error,
+        }),
     });
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";

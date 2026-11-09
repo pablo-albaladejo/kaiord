@@ -179,4 +179,49 @@ describe("runGenerateAgent telemetry", () => {
     // Assert
     expect(result.output).toEqual({ n: 5 });
   });
+  it("should still retry when the logger throws on a failed attempt", async () => {
+    // Arrange
+    const boom = () => {
+      throw new Error("logger down");
+    };
+    const logger = { debug: boom, info: boom, warn: boom, error: boom };
+    const model = new MockLanguageModelV4({
+      modelId: "m",
+      provider: "p",
+      doGenerate: [jsonResult({}), jsonResult({ n: 5 })],
+    });
+
+    // Act
+    const result = await runGenerateAgent(
+      AGENT,
+      { text: "x" },
+      { model, logger }
+    );
+
+    // Assert
+    expect(result.output).toEqual({ n: 5 });
+  });
+
+  it("should throw AiAgentError, not the logger error, when retries run out and the logger throws", async () => {
+    // Arrange
+    const boom = () => {
+      throw new Error("logger down");
+    };
+    const logger = { debug: boom, info: boom, warn: boom, error: boom };
+    const model = new MockLanguageModelV4({
+      modelId: "m",
+      provider: "p",
+      doGenerate: [jsonResult({}), jsonResult({}), jsonResult({})],
+    });
+
+    // Act
+    const error = await runGenerateAgent(
+      AGENT,
+      { text: "x" },
+      { model, logger }
+    ).catch((e: unknown) => e);
+
+    // Assert
+    expect(error).toBeInstanceOf(AiAgentError);
+  });
 });
