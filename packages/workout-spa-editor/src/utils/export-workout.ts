@@ -9,6 +9,7 @@ import type { KRD } from "@kaiord/core";
 
 import { stripIds } from "../store/strip-ids";
 import type { Profile } from "../types/profile";
+import { errorMessage } from "./error-message";
 import {
   exportFitFile,
   exportGcnFile,
@@ -70,7 +71,7 @@ export const exportWorkout = async (
     }
 
     throw new ExportError(
-      `Failed to export workout as ${format.toUpperCase()}: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to export workout as ${format.toUpperCase()}: ${errorMessage(error)}`,
       format,
       error
     );

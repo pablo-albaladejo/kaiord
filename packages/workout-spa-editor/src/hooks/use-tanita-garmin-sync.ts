@@ -16,6 +16,7 @@ import { readTanitaExportCsv } from "../adapters/tanita/tanita-transport";
 import type { SyncTanitaPhase } from "../application/health/sync-tanita-body-composition.use-case";
 import { syncTanitaBodyComposition } from "../application/health/sync-tanita-body-composition.use-case";
 import { usePersistence } from "../contexts/persistence-context";
+import { errorMessage } from "../utils/error-message";
 import { ledgerRepo } from "./garmin-push-fn";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
 
@@ -88,7 +89,7 @@ export const useTanitaGarminSync = (
       setLastError(result.error ?? "Sync failed");
     } catch (err) {
       setStatus("error");
-      setLastError(err instanceof Error ? err.message : String(err));
+      setLastError(errorMessage(err));
     }
   }, [persistence, profileId]);
 

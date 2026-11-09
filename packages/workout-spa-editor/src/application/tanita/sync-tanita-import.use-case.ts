@@ -14,6 +14,7 @@
 import type { KRD } from "@kaiord/core";
 
 import { syncSourceFor } from "../../integrations/bridge-sync-sources";
+import { errorMessage } from "../../utils/error-message";
 import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 import {
@@ -67,7 +68,7 @@ export const syncTanitaImport = async (
     return {
       ok: false,
       reason: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
 
