@@ -112,5 +112,9 @@
   },
   "toast": {
     "updateFailed": "No se pudieron actualizar las zonas. Inténtalo de nuevo."
+  },
+  "conflict": {
+    "accept": "Aceptar Train2Go",
+    "keep": "Mantener actual"
   }
 }

@@ -2,8 +2,7 @@
  * Dexie Schema Definitions
  *
  * Per-version `stores()` configs for the Kaiord IndexedDB schema.
- * Co-located with `dexie-database.ts` but split out so the database
- * class stays under the per-file line cap. Early versions (v1–v16) live
+ * Used by `dexie-database.ts`. Early versions (v1–v16) live
  * in `dexie-schemas-early.ts`; this file adds v17+ and assembles `SCHEMAS`.
  */
 
@@ -94,7 +93,7 @@ const CORE_V23 = {
 };
 
 // v24 (connections) and v26 (energy-balance stores) live in
-// `dexie-schemas-late.ts` so this file stays under the per-file line cap.
+// `dexie-schemas-late.ts`.
 const CORE_V24 = buildCoreV24(CORE_V23);
 
 // v25 — multi-conversation chat. Adds the mutable `chatConversations` store

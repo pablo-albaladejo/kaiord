@@ -382,7 +382,6 @@ describe("reorderStepAction", () => {
   describe("Property 4: Stable stepIndex after reorder", () => {
     /**
      * **Feature: dnd-stable-ids-fix, Property 4: Stable stepIndex after reorder**
-     * **Validates: Requirements 1.3**
      *
      * For any workout after a reorder operation, the stepIndex values SHALL remain
      * stable (unchanged from their original values), NOT recalculated to match array positions.

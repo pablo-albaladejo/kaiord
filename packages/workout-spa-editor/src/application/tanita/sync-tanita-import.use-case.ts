@@ -14,6 +14,8 @@
 import type { KRD } from "@kaiord/core";
 
 import { syncSourceFor } from "../../integrations/bridge-sync-sources";
+import { errorMessage } from "../../utils/error-message";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 import {
   persistPendingRecords,
@@ -41,7 +43,7 @@ const resolveFlags = async (
       { policyRepo: deps.policyRepo },
       { profileId, dataType }
     );
-    return policies.some((p) => p.enabled && p.bridgeId === TANITA_BRIDGE_ID);
+    return isRouteEnabled(policies, TANITA_BRIDGE_ID);
   };
   const [weight, bodyComposition] = await Promise.all([
     enabledFor("weight"),
@@ -66,7 +68,7 @@ export const syncTanitaImport = async (
     return {
       ok: false,
       reason: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
 

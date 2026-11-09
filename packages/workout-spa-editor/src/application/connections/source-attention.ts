@@ -17,6 +17,7 @@
  * The result is i18n-free on purpose: the Settings banner and the header
  * pill word the same fact differently, and only the wording may differ.
  */
+import { calendarDay } from "./calendar-day";
 import type { ConnectionSource } from "./connection-source";
 import { sourceNeedsAttention } from "./connection-source";
 
@@ -55,26 +56,13 @@ export type ConnectionAttention = {
   readonly cause: AttentionCause;
 };
 
-/**
- * The user's calendar day, not `toISOString()`'s: a sync at 02:00Z happened
- * the previous evening in New York, and the sentence is about their day.
- * Nothing when the stored value does not parse as a date.
- */
-const dayOf = (timestamp: string | undefined): string | undefined => {
-  if (timestamp === undefined) return undefined;
-  const at = new Date(timestamp);
-  if (Number.isNaN(at.getTime())) return undefined;
-  const month = String(at.getMonth() + 1).padStart(2, "0");
-  return `${at.getFullYear()}-${month}-${String(at.getDate()).padStart(2, "0")}`;
-};
-
 const causeOf = (affected: readonly ConnectionSource[]): AttentionCause => {
   if (affected.some((source) => source.needsReauth))
     return { kind: "noAccess" };
   if (affected.some((source) => source.outdated))
     return { kind: "extensionOutdated" };
   const date =
-    affected.length === 1 ? dayOf(affected[0]?.lastSyncAt) : undefined;
+    affected.length === 1 ? calendarDay(affected[0]?.lastSyncAt) : undefined;
   return date === undefined
     ? { kind: "noAccess" }
     : { kind: "noNewDataSince", date };

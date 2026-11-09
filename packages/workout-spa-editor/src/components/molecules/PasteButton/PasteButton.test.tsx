@@ -2,7 +2,6 @@
  * PasteButton Component Tests
  *
  * Tests for the paste button component.
- * Requirement 39.2: Paste step from clipboard
  */
 
 import { render, screen } from "@testing-library/react";

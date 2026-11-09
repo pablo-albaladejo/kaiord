@@ -1,7 +1,6 @@
 /**
  * Set-union append helper for the in-memory SessionMatchRepository's
- * `appendExecutedWorkoutIds` writer. Extracted so the entry file stays
- * under the per-file line cap.
+ * `appendExecutedWorkoutIds` writer.
  */
 
 import {

@@ -6,6 +6,7 @@
  */
 
 import { FileParsingError } from "../types/errors";
+import { errorMessage } from "./error-message";
 
 /**
  * Parse JSON with enhanced error messages
@@ -57,7 +58,7 @@ export const parseJSON = <T = unknown>(text: string): T => {
       );
     }
     throw new FileParsingError(
-      `Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to parse JSON: ${errorMessage(error)}`,
       undefined,
       undefined,
       error

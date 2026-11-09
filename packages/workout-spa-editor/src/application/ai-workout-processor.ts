@@ -10,6 +10,7 @@ import { buildUserPrompt, PROMPT_VERSION } from "@kaiord/ai/prompts";
 import type { AiMeta } from "../types/calendar-fragments";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { KRD } from "../types/schemas";
+import { errorMessage } from "../utils/error-message";
 import { withFallbackName } from "../utils/structured-workout";
 import { validateSanity } from "./sanity-checks";
 
@@ -70,7 +71,7 @@ async function attemptGeneration(
     if (sanityError) return { ok: false, error: sanityError };
     return { ok: true, krd };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = errorMessage(err);
     return { ok: false, error: message };
   }
 }

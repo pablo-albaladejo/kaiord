@@ -1,10 +1,5 @@
 /**
- * ExportFormatSelector Component
- *
  * Dropdown selector for choosing workout export format with descriptions and warnings.
- *
- * Requirements:
- * - Requirement 12.6: Provide format selection options (FIT, TCX, ZWO, KRD)
  */
 
 import { type ReactNode, useState } from "react";

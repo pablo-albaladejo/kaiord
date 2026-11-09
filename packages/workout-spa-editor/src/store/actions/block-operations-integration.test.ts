@@ -4,8 +4,8 @@
  * Integration tests for ID-based block operations.
  *
  * Requirements:
- * - Requirement 2.4: Use block ID for operations
- * - Requirement 2.5: Ensure correct blocks are affected
+ * - Use block ID for operations
+ * - Ensure correct blocks are affected
  */
 
 import { describe, expect, it } from "vitest";

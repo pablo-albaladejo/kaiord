@@ -1,18 +1,6 @@
 /**
- * ConfirmationModal Component
- *
  * A reusable confirmation modal dialog using Radix UI Dialog.
  * Provides focus trap, backdrop dismissal, and keyboard accessibility.
- *
- * Requirements:
- * - Requirement 6.2: Display modal with dim background
- * - Requirement 6.3: Trap keyboard focus within modal
- * - Requirement 6.4: Clearly labeled action buttons
- * - Requirement 6.5: Allow Escape key to dismiss
- * - Requirement 6.6: Prevent background interaction
- * - Requirement 6.7: Restore focus after dismissal
- * - Requirement 6.8: Use warning colors for destructive actions
- * - Requirement 6.9: Adapt to mobile screens
  */
 
 import * as Dialog from "@radix-ui/react-dialog";

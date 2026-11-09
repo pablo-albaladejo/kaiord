@@ -14,7 +14,7 @@ Users can delete entire repetition blocks (including all contained steps) with a
 - **Keyboard Shortcuts**: Press `Delete` or `Backspace` when a block is focused
 - **Undo Support**: Full undo/redo capability for deleted blocks
 - **Focus Management**: Automatic focus handling after deletion
-- **Migration Support**: Existing workouts are automatically migrated to use block IDs
+- **IDs on load**: Existing workouts get block IDs when they are loaded into the store
 
 ## User Interface
 
@@ -102,34 +102,11 @@ const id = generateBlockId();
 IDs are generated automatically when:
 
 1. **Creating new blocks**: `createEmptyRepetitionBlockAction()` and `createRepetitionBlockAction()`
-2. **Loading workouts**: `migrateRepetitionBlocks()` adds IDs to blocks without them
-3. **Importing workouts**: Migration runs automatically on load
+2. **Loading or importing workouts**: `hydrateUIWorkout()` gives every step and block a fresh `ItemId`
 
-### Migration Strategy
+### IDs on Load
 
-Existing workouts without block IDs are automatically migrated:
-
-```typescript
-// Before migration
-const workout = {
-  sport: "running",
-  steps: [
-    { repeatCount: 3, steps: [...] } // No ID
-  ]
-};
-
-// After migration
-const migrated = migrateRepetitionBlocks(workout);
-// migrated.steps[0].id => "block-1704123456789-x7k2m9p4q"
-```
-
-**Migration behavior**:
-
-- ✅ Adds IDs to blocks without them
-- ✅ Preserves existing IDs if present
-- ✅ Returns new workout object (immutable)
-- ✅ Runs automatically on workout load
-- ✅ Zero user intervention required
+There is no separate migration pass. `hydrateUIWorkout()` (`src/store/hydrate-ui-workout.ts`) runs whenever a KRD enters the store and, by default, regenerates every step and block id, so a workout stored without block IDs gets a complete set on load with no user action.
 
 ### Type Definition
 
@@ -142,7 +119,7 @@ type RepetitionBlock = {
 };
 ```
 
-The `id` field is optional in the type definition to maintain backward compatibility with existing KRD files, but all blocks in the application will have IDs after migration.
+The `id` field is optional in the type definition to maintain backward compatibility with existing KRD files, but all blocks in the application will have IDs once `hydrateUIWorkout()` has run on load.
 
 ## Technical Details
 
@@ -360,7 +337,7 @@ deleteRepetitionBlock(blockId: string)
 
 - `src/types/schemas/repetition-block-id.test.ts` - Block ID schema validation
 - `src/utils/id-generation.test.ts` - ID generation tests
-- `src/utils/workout-migration.test.ts` - Migration tests
+- `src/store/hydrate-ui-workout.test.ts` - ID assignment on load
 
 **Store Actions**:
 
@@ -392,7 +369,7 @@ deleteRepetitionBlock(blockId: string)
 
 ### Integration Tests
 
-- `src/store/workout-loading-integration.test.ts` - Workout loading with migration
+- `src/store/workout-loading-integration.test.ts` - Workout loading
 - `src/store/actions/performance.test.ts` - Performance benchmarks
 
 ### E2E Tests

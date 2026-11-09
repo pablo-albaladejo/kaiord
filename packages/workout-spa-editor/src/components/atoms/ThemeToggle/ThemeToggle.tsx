@@ -7,9 +7,6 @@ import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";
 
 /**
- * ThemeToggle Component
- *
- * Requirement 13: Theme toggle UI
  * - Shows current theme icon (sun for light, moon for dark)
  * - Cycles between light → dark → light
  * - Smooth transition between themes (handled by CSS)

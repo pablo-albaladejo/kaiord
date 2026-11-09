@@ -45,7 +45,7 @@ Private (not published to npm). Deployed to GitHub Pages.
 1. **Hexagonal layout inside the SPA.** Source is split `domain types → ports → adapters → application → components`. Adapters (Dexie, Garmin extension, Train2Go extension, Umami analytics) implement the ports under `src/ports/`. UI never imports adapters directly — it goes through ports via the `PersistenceProvider` context or hooks.
 2. **File-size + function-size caps.** ≤100 lines per file (tests exempt), <40 LOC per function, 60 LOC for React components. Split when needed (the `create-*` factories under `src/store/` exist for exactly this reason).
 3. **`type` not `interface`. Factories not classes.** Only Dexie's `KaiordDatabase` is a class because the library requires it.
-4. **Direct imports only.** No barrel `index.ts` imports — see `src/PROJECT_STRUCTURE.md`. Existing `index.ts` files are legacy and unused.
+4. **Prefer direct imports.** New code imports the source file, not a barrel `index.ts` — see `src/PROJECT_STRUCTURE.md`. Some barrels (e.g. `components/atoms/Icon`, `test-utils`) are still imported.
 5. **English everywhere.** Comments, identifiers, commit messages, changesets.
 
 ### Testing Requirements
@@ -65,7 +65,7 @@ Private (not published to npm). Deployed to GitHub Pages.
 - **Static toast/`console.*` strings.** First args to `toast(...)` and `console.{log,warn,error,info,debug}` under `src/{components,hooks,lib}/**` MUST be a bare string literal or a top-level `SCREAMING_SNAKE_CASE` constant referencing a literal. Enforced by `check-no-pii-leakage.mjs` (R-PIIInterpolation).
 - **`stripIds` chokepoint.** Every Dexie write path, `saveWorkout`, and `exportWorkout` pass `UIWorkout` through `stripIds()` first — see `src/store/strip-ids.ts`.
 - **Coaching id shape.** Every `coachingActivityId:` literal on a `sessionMatches` write AND every `[profileId+coachingActivityId]` reader MUST be constructed via `buildCoachingActivityId(...)`, `toPersistedCoachingActivityId(...)`, or a `CoachingActivityRecord.id` access (R-SessionMatchIdShape; see `.omc/autopilot/bug-trace.md` §H7 for the SHORT/COMPOSITE divergence that motivated the guard).
-- **Library no-dual-mount.** Only `LibraryPage.tsx` and `TemplatePickerDialog.tsx` may import `organisms/WorkoutLibrary` / `WorkoutLibrary/WorkoutLibrary` / `LibraryDialogContent` (R-LibraryNoDualMount).
+- **Library no-dual-mount.** Only `LibraryPage.tsx` may import `components/pages/Library/LibraryContent` (R-LibraryNoDualMount).
 
 ## Dependencies
 

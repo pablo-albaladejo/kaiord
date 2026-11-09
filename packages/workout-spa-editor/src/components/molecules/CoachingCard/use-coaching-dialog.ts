@@ -8,9 +8,9 @@
  * the JSX never branches on workout-existence directly.
  */
 
-import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { ExpandActivity } from "../../../types/coaching-expand-result";
+import type { ActivityMatchState } from "./activity-match-state";
 import type { UseCoachingAi } from "./use-coaching-ai-handler";
 import { useCoachingAi } from "./use-coaching-ai-handler";
 import { useCoachingAutoHeal } from "./use-coaching-auto-heal";

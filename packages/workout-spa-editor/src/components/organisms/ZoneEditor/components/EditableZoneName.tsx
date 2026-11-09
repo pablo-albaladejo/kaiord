@@ -1,6 +1,4 @@
 /**
- * EditableZoneName Component
- *
  * Inline editable text cell for a zone name.
  */
 

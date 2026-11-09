@@ -1,6 +1,4 @@
 /**
- * NotesTextarea Component
- *
  * Textarea for workout notes with character counter.
  */
 

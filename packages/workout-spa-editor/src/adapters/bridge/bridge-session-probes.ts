@@ -13,6 +13,7 @@
  * once the extension exposes a cheap session action. Bridges without an
  * entry are reported as discovered-only and are never messaged.
  */
+import { errorMessage } from "../../utils/error-message";
 import { checkTrainingPeaksSession } from "../trainingpeaks/trainingpeaks-transport";
 import {
   probeGarminSession,
@@ -28,9 +29,6 @@ import { readWhoopStatus } from "./whoop-transport";
 
 export type { SessionProbeResult } from "./bridge-session-probe-types";
 
-const messageOf = (err: unknown): string =>
-  err instanceof Error ? err.message : String(err);
-
 const needsReauthOf = (err: unknown): boolean =>
   (err as { needsReauth?: boolean } | null)?.needsReauth === true;
 
@@ -45,8 +43,8 @@ const probeWhoopSession: SessionProber = async (extensionId) => {
     return status.connected && status.userId !== null ? active() : inactive();
   } catch (err) {
     return wasDelivered(err)
-      ? inactive(messageOf(err))
-      : unreachable(messageOf(err));
+      ? inactive(errorMessage(err))
+      : unreachable(errorMessage(err));
   }
 };
 
@@ -56,8 +54,8 @@ const probeTrainingPeaksSession: SessionProber = async (extensionId) => {
     return authenticated ? active() : inactive();
   } catch (err) {
     return wasDelivered(err)
-      ? inactive(messageOf(err), needsReauthOf(err))
-      : unreachable(messageOf(err));
+      ? inactive(errorMessage(err), needsReauthOf(err))
+      : unreachable(errorMessage(err));
   }
 };
 

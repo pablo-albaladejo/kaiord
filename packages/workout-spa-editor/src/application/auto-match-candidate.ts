@@ -1,6 +1,5 @@
 /**
- * Internal helpers for the auto-match heuristic — kept separate so the
- * top-level use case stays under the file-line cap.
+ * Internal helpers for the auto-match heuristic.
  */
 
 import type { WorkoutRecord } from "../types/calendar-record";

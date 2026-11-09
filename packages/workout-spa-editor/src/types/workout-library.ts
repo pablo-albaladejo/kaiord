@@ -42,14 +42,3 @@ export const workoutTemplateSchema = z.object({
 });
 
 export type WorkoutTemplate = z.infer<typeof workoutTemplateSchema>;
-
-/**
- * Workout Library State Schema
- *
- * Represents the complete library state for persistence.
- */
-export const workoutLibraryStateSchema = z.object({
-  templates: z.array(workoutTemplateSchema),
-});
-
-export type WorkoutLibraryState = z.infer<typeof workoutLibraryStateSchema>;

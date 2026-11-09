@@ -9,12 +9,12 @@
 import { useCallback, useState } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
-import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import { useMatchSession } from "../../../hooks/use-match-session";
 import { useUnmatchSession } from "../../../hooks/use-unmatch-session";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { toPersistedCoachingActivityId } from "../../../types/coaching-activity-record";
+import type { ActivityMatchState } from "./activity-match-state";
 
 export type UseCoachingDialogActions = {
   matching: boolean;

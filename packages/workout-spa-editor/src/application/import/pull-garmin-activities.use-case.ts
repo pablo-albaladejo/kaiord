@@ -13,7 +13,9 @@ import type { ManagedDataType } from "@kaiord/core";
 
 import type { ActivityRepository } from "../../ports/activity-repository";
 import type { CoachingSyncStateRepository } from "../../ports/persistence-port";
+import { errorMessage } from "../../utils/error-message";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 import type { GarminActivitiesResponse } from "./garmin-activity-schema";
 import { GARMIN_BRIDGE_SOURCE, mapGarminActivity } from "./map-garmin-activity";
@@ -46,9 +48,7 @@ export const pullGarminActivities = async (
     { policyRepo: deps.policyRepo },
     { profileId, dataType: ACTIVITY }
   );
-  const active = policies.some(
-    (p) => p.enabled && p.bridgeId === GARMIN_BRIDGE_SOURCE
-  );
+  const active = isRouteEnabled(policies, GARMIN_BRIDGE_SOURCE);
   if (!active) return { ok: false, reason: "route-inactive" };
 
   let response: GarminActivitiesResponse;
@@ -58,7 +58,7 @@ export const pullGarminActivities = async (
     return {
       ok: false,
       reason: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
 

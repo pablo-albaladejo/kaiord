@@ -5,7 +5,7 @@
 
 ## Purpose
 
-The UI tree. Follows Atomic Design (atoms → molecules → organisms → templates → pages) plus a top-level `providers/` slot for cross-cutting providers. Direct imports only (no barrel `index.ts` consumption — see `src/PROJECT_STRUCTURE.md`).
+The UI tree. Follows Atomic Design (atoms → molecules → organisms → templates → pages) plus a top-level `providers/` slot for cross-cutting providers. New imports point at the component file, not at a folder `index.ts` (see `src/PROJECT_STRUCTURE.md`).
 
 ## Key Files (top-level)
 
@@ -15,8 +15,8 @@ The UI tree. Follows Atomic Design (atoms → molecules → organisms → templa
 ## Subdirectories
 
 - `atoms/` — leaf primitives (Button, Badge, Icon, Input, Toast, Tooltip, ThemeToggle, ErrorMessage, RouteSpinner).
-- `molecules/` — compositions of atoms (StepCard, FormField, dialogs, CoachingCard, etc.).
-- `organisms/` — feature-complete components (WorkoutList, StepEditor, WorkoutLibrary, SettingsPanel, ZoneEditor, AiWorkoutInput, ProfileManager, etc.).
+- `molecules/` — compositions of atoms (StepCard, dialogs, CoachingCard, etc.).
+- `organisms/` — feature-complete components (WorkoutList, StepEditor, SettingsPanel, ZoneEditor, AiWorkoutInput, etc.).
 - `templates/` — page layouts (MainLayout).
 - `pages/` — page components mounted by Wouter routes (`CalendarPage`, `LibraryPage`, `EditorPage`).
 - `providers/` — root-level providers not in `contexts/` (`AppToastProvider`).
@@ -26,10 +26,10 @@ The UI tree. Follows Atomic Design (atoms → molecules → organisms → templa
 ### Working In This Directory
 
 1. **Atomic Design layering matters.** Atoms don't import from molecules/organisms/pages; molecules don't import from organisms/pages; etc. The compiler doesn't enforce this; reviewers do.
-2. **Direct imports only.** `import { Button } from "@/components/atoms/Button/Button"`, never `from "@/components/atoms"` or `from "@/components/atoms/Button"`.
-3. **Each component goes in its own folder** with at minimum: `<Name>.tsx`, `<Name>.test.tsx`, often `<Name>.stories.tsx`, `index.ts` (legacy, unused), and any helpers (`<name>-styles.ts`, `<name>-helpers.ts`, `<name>-types.ts`).
+2. **Import the component file in new code.** `import { Button } from "../atoms/Button/Button"`. About 50 component folders still have an `index.ts` barrel and some are imported through it (`atoms/Icon` has dozens of folder importers); do not add new barrels, and do not add new folder imports.
+3. **Each component goes in its own folder** with at minimum: `<Name>.tsx`, `<Name>.test.tsx`, often `<Name>.stories.tsx`, and any helpers (`<name>-styles.ts`, `<name>-helpers.ts`, `<name>-types.ts`).
 4. **PII rule (R-PIIInterpolation).** All `toast(...)` and `console.*` first args under this tree must be a literal or a top-level SCREAMING_SNAKE_CASE constant referencing a literal. Templated strings need to go through `scrub-analytics-string` first.
-5. **Library no-dual-mount.** Only `LibraryPage.tsx` and `TemplatePickerDialog.tsx` may import `organisms/WorkoutLibrary` / `WorkoutLibrary/WorkoutLibrary` / `LibraryDialogContent`.
+5. **Library no-dual-mount.** Only `LibraryPage.tsx` may import `pages/Library/LibraryContent`.
 
 ### Testing Requirements
 

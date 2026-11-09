@@ -1,6 +1,4 @@
 /**
- * ZoneRow Component
- *
  * Single zone row with editable name, min/max values, and optional delete.
  */
 

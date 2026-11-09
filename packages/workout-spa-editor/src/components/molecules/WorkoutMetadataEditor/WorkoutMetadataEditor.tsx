@@ -1,6 +1,4 @@
 /**
- * WorkoutMetadataEditor Component
- *
  * Editor for workout metadata (name, sport, sub-sport).
  */
 

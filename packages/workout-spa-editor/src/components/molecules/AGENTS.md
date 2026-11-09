@@ -44,7 +44,7 @@ Compositions of atoms with one focused responsibility. Each molecule may know ab
 - `StorageAvailabilityBanner/` — banner when IndexedDB is unavailable (driven by `use-storage-probe`).
 - `SwimmingStepEditor/` — sport-specific editor for swimming steps (`equipment`, distance-based intervals).
 - `TargetPicker/` — sport+zone target picker (50 files: per-method panes, custom-zone overrides, swim/pace/HR/power variants).
-- `TemplatePickerDialog/` — Library template picker (one of the two allowed mount sites for `WorkoutLibrary`).
+- `TemplatePickerDialog/format-date-label.ts` — the shared day label formatter; the picker dialog itself was removed.
 - `UndoRedoButtons/` — undo/redo controls.
 - `WorkoutCard/` — calendar-cell card for an unmatched workout.
 - `WorkoutMetadataEditor/` — title + description editor.
@@ -59,7 +59,7 @@ Compositions of atoms with one focused responsibility. Each molecule may know ab
 
 1. **Each molecule owns one concern.** When a molecule grows over a few files, split helpers/hooks into `<name>-helpers.ts` and `use-<name>.ts`.
 2. **Dialogs use Radix Dialog.** No `alert()` / `confirm()` (pinned by `utils/no-browser-alerts.test.ts`).
-3. **Library imports are restricted.** Only `LibraryPage.tsx` and `TemplatePickerDialog.tsx` may import the WorkoutLibrary organism (R-LibraryNoDualMount).
+3. **Library imports are restricted.** Only `LibraryPage.tsx` may import the Library content component `pages/Library/LibraryContent` (R-LibraryNoDualMount).
 4. **PII rule.** Toast/`console.*` first args must be literals or top-level SCREAMING_SNAKE_CASE constants.
 5. **Match-to writes go through `buildCoachingActivityId(...)`** when generating session-match rows from the picker — never concat.
 

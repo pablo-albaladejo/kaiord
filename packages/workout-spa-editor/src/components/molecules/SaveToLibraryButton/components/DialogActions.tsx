@@ -1,6 +1,4 @@
 /**
- * DialogActions Component
- *
  * Action buttons for the save to library dialog.
  */
 

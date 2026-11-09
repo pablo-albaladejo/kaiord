@@ -48,7 +48,6 @@ export type {
   HealthRecordRepository,
 } from "./health-record-repository";
 export type {
-  ActivityMatch,
   MatchedSessionJoinSources,
   MatchedSessionsReadModel,
 } from "./matched-sessions-read-model";

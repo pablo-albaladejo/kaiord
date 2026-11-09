@@ -1,7 +1,6 @@
 /**
  * Fetches, converts, and persists ONE calendar day of WHOOP heart-rate-series
- * for the syncWhoopHeartRate orchestrator. Split out to keep that use case's
- * loop body under the 40-LOC function cap (mirrors persist-whoop-cycle-
+ * for the syncWhoopHeartRate orchestrator (mirrors persist-whoop-cycle-
  * records.ts's role for the cycles sync). `metricsToHeartRateSeries`
  * returning `null` (no samples that day) and an already-imported day
  * (dedup) both surface as `{ status: "skipped" }` — the orchestrator counts
@@ -12,6 +11,7 @@ import {
   whoopMetricsResponseSchema,
 } from "@kaiord/whoop";
 
+import { errorMessage } from "../../utils/error-message";
 import type { ImportedRecordRepository } from "../import/imported-record-repository.port";
 import { stampProvenance } from "../import/stamp-provenance";
 import { upsertImportedRecord } from "../import/upsert-imported-record.use-case";
@@ -47,7 +47,7 @@ export const syncHeartRateDay = async (
   } catch (err) {
     return {
       status: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   if (!result.ok) return { status: "transport-error", error: result.error };

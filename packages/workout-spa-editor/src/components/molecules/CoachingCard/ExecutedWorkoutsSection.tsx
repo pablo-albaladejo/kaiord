@@ -9,6 +9,7 @@
  * way clicking a solo `WorkoutCard` does.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import {
   formatDurationMinutes,
@@ -25,6 +26,7 @@ export function ExecutedWorkoutsSection({
   executed,
   onOpenExecuted,
 }: ExecutedWorkoutsSectionProps) {
+  const t = useTranslate("coaching");
   if (executed.length === 0) return null;
   return (
     <div
@@ -32,7 +34,7 @@ export function ExecutedWorkoutsSection({
       className="space-y-2 rounded border border-slate-200 bg-slate-50/40 p-3 text-sm dark:border-slate-700 dark:bg-slate-900/30"
     >
       <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-        Completed activities
+        {t("executed.heading")}
       </div>
       <ul className="space-y-1">
         {executed.map((w) => (
@@ -43,9 +45,9 @@ export function ExecutedWorkoutsSection({
               onClick={() => onOpenExecuted(w)}
               className="flex w-full flex-col items-start rounded px-2 py-1 text-left hover:bg-slate-100 dark:hover:bg-slate-800"
             >
-              <span className="font-medium">{workoutTitle(w)}</span>
+              <span className="font-medium">{workoutTitle(w, t)}</span>
               <span className="text-xs text-slate-600 dark:text-slate-400">
-                {sportLabel(w.sport)}
+                {sportLabel(w.sport, t)}
                 {formatDurationMinutes(w.raw?.duration?.value) &&
                   ` · ${formatDurationMinutes(w.raw?.duration?.value)}`}
               </span>

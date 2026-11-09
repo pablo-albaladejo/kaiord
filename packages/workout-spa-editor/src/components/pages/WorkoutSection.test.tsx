@@ -11,14 +11,14 @@ import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 /**
  * WorkoutSection Tests
  *
- * Tests the step editing flow (Requirement 3):
+ * Tests the step editing flow:
  * - Opening StepEditor on step selection
  * - Updating workout state on save
  * - Reverting changes on cancel
  * - Closing editor after save/cancel
- * - Immediate step deletion without modal (Requirement 1.1)
- * - Undo toast after deletion (Requirement 1.2)
- * - Step restoration via undo (Requirement 1.3)
+ * - Immediate step deletion without modal
+ * - Undo toast after deletion
+ * - Step restoration via undo
  */
 describe("WorkoutSection", () => {
   beforeEach(() => {
@@ -87,7 +87,7 @@ describe("WorkoutSection", () => {
     expect(screen.getByText(/Sport:/)).toBeInTheDocument();
   });
 
-  it("should render SaveToLibraryButton when workout is loaded (Requirement 17)", () => {
+  it("should render SaveToLibraryButton when workout is loaded", () => {
     // Arrange
     const workout = createMockWorkout([createMockStep(0)]);
     const krd = createMockKRD(workout);
@@ -189,7 +189,7 @@ describe("WorkoutSection", () => {
     });
   });
 
-  describe("CreateRepetitionBlockButton integration (Requirement 7.1)", () => {
+  describe("CreateRepetitionBlockButton integration", () => {
     it("should not show create repetition block button when no steps selected", () => {
       // Arrange
       const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
@@ -426,7 +426,7 @@ describe("WorkoutSection", () => {
     });
   });
 
-  describe("step deletion without modal (Requirement 1.1, 1.2, 1.3)", () => {
+  describe("step deletion without modal", () => {
     it("should delete step immediately without modal", () => {
       // Arrange
       const step1 = createMockStep(0);

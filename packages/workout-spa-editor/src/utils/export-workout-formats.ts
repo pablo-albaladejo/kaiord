@@ -8,6 +8,7 @@ import type { KRD } from "@kaiord/core";
 import { toBinary, toText } from "@kaiord/core";
 
 import type { Profile } from "../types/profile";
+import { errorMessage } from "./error-message";
 import type { ExportProgressCallback } from "./export-workout";
 import { ExportError } from "./export-workout";
 import { writeGcn } from "./write-gcn";
@@ -24,7 +25,7 @@ export const exportKrdFile = async (
     return buffer;
   } catch (error) {
     throw new ExportError(
-      `Failed to serialize KRD to JSON: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to serialize KRD to JSON: ${errorMessage(error)}`,
       "krd",
       error
     );

@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Cross-cutting utilities used by the UI tree. Format detection, import/export pipelines, workout statistics, zone math (calculation only), keyboard-handler builders, storage migrations, week/calendar helpers, file-format metadata, and similar leaf concerns.
+Cross-cutting utilities used by the UI tree. Format detection, import/export pipelines, workout statistics, zone math (calculation only), keyboard-handler builders, week/calendar helpers, file-format metadata, and similar leaf concerns.
 
 ## Key Files
 
@@ -15,7 +15,7 @@ Cross-cutting utilities used by the UI tree. Format detection, import/export pip
 - `export-workout.ts` / `.test.ts`, `export-workout-formats.ts` — multi-format export. Calls `stripIds` on the way out.
 - `write-gcn.ts` — the only Garmin (GCN) writer: resolves pace zones, %FTP and %max HR from the profile and refuses what it cannot resolve (guarded by `garmin-payload-call-sites.test.ts`).
 - `file-format-detector.ts` / `.test.ts`, `file-format-metadata.ts` — sniff input format by magic bytes / extension.
-- `save-workout.ts` / `.test.ts` + `save-workout.helpers.ts` — write a workout to Dexie via `PersistencePort.workouts`, after `stripIds`.
+- `save-workout.ts` / `.test.ts` + `save-workout.helpers.ts` — validate a workout and download it as a `.krd` file, after `stripIds`.
 
 ### Workout statistics
 
@@ -23,7 +23,7 @@ Cross-cutting utilities used by the UI tree. Format detection, import/export pip
 
 ### Zone math
 
-- `calculate-hr-zones.ts` / `.test.ts`, `calculate-power-zones.ts` / `.test.ts`, `calculate-pace-zones.ts` / `.test.ts`, `calculate-zone-values.ts` / `.test.ts` — UI-side zone calculators (display only; canonical math lives in `lib/{hr,power,pace,zone}-methods.ts`).
+- `calculate-hr-zones.ts` / `.test.ts`, `calculate-power-zones.ts` / `.test.ts`, `calculate-pace-zones.ts` / `.test.ts` — UI-side zone calculators (display only; canonical math lives in `lib/{hr,power,pace,zone}-methods.ts`).
 
 ### Keyboard handlers
 
@@ -32,18 +32,15 @@ Cross-cutting utilities used by the UI tree. Format detection, import/export pip
 ### Validation
 
 - `krd-validator.ts` / `.test.ts` + `krd-validator-helpers.ts` — KRD-level cross-field validation.
-- `repetition-block-validation.ts` / `.test.ts` — block-specific validation.
 
-### Storage + recovery
+### Backup
 
-- `library-storage.ts` / `.test.ts` — Library template read/write (delegates to `TemplateRepository`).
 - `backup-download.ts` / `.test.ts` — local-backup download flow.
-- `error-recovery.ts` / `.test.ts` — `safeMode` + `lastBackup` recovery wiring.
-- `workout-migration.ts` / `.test.ts` — workout-level migrations applied at load.
 
 ### Misc
 
 - `id-generation.ts` / `.test.ts` — `ItemId` factory.
+- `error-message.ts` / `.test.ts` — the text of a caught value.
 - `json-parser.ts` / `.test.ts` — typed JSON parser with structured errors.
 - `logger.ts` — `console.*` wrapper with PII-safe defaults.
 - `step-colors.ts` — step-intensity → Tailwind class mapping.
