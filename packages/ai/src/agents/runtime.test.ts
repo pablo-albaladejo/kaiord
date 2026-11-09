@@ -69,4 +69,66 @@ describe("runGenerateAgent telemetry", () => {
     expect(event.type).toBe("run_failed");
     expect(event).toMatchObject({ error: { retriable: true } });
   });
+
+  it("should return the output when the telemetry sink throws on a finished run", async () => {
+    // Arrange
+    const sink = {
+      emit: () => {
+        throw new Error("sink down");
+      },
+    };
+    const model = mockModelReturning({ n: 5 });
+
+    // Act
+    const result = await runGenerateAgent(
+      AGENT,
+      { text: "x" },
+      { model, telemetry: sink }
+    );
+
+    // Assert
+    expect(result.output).toEqual({ n: 5 });
+  });
+
+  it("should rethrow the run error, not the sink error, when the sink throws on a failed run", async () => {
+    // Arrange
+    const sink = {
+      emit: () => {
+        throw new Error("sink down");
+      },
+    };
+    const model = new MockLanguageModelV4({
+      modelId: "m",
+      provider: "p",
+      doGenerate: [jsonResult({}), jsonResult({}), jsonResult({})],
+    });
+
+    // Act
+    const error = await runGenerateAgent(
+      AGENT,
+      { text: "x" },
+      { model, telemetry: sink }
+    ).catch((e: unknown) => e);
+
+    // Assert
+    expect((error as Error).message).not.toBe("sink down");
+  });
+
+  it("should emit exactly one run_finished event and no run_failed when the sink throws once", async () => {
+    // Arrange
+    const events: string[] = [];
+    const sink = {
+      emit: (e: { type: string }) => {
+        events.push(e.type);
+        throw new Error("sink down");
+      },
+    };
+    const model = mockModelReturning({ n: 5 });
+
+    // Act
+    await runGenerateAgent(AGENT, { text: "x" }, { model, telemetry: sink });
+
+    // Assert
+    expect(events).toEqual(["run_finished"]);
+  });
 });
