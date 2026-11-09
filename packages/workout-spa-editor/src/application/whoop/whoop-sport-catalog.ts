@@ -6,6 +6,7 @@
  */
 import { buildSportCatalog, whoopSportsResponseSchema } from "@kaiord/whoop";
 
+import { errorMessage } from "../../utils/error-message";
 import type { WhoopFetchResult } from "./whoop-fetch-result";
 
 export type WhoopSportCatalogOutcome =
@@ -20,7 +21,7 @@ export const resolveWhoopSportCatalog = async (
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   if (!result.ok) return { ok: false, error: result.error };

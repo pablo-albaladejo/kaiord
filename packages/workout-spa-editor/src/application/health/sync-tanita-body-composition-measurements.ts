@@ -79,6 +79,3 @@ export const readNeedsReauth = (err: unknown): boolean =>
   typeof err === "object" &&
   err !== null &&
   (err as { needsReauth?: unknown }).needsReauth === true;
-
-export const errorMessage = (err: unknown): string =>
-  err instanceof Error ? err.message : String(err);

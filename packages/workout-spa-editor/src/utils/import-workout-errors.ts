@@ -13,6 +13,7 @@ import {
   FileParsingError,
   ValidationError,
 } from "../types/errors";
+import { errorMessage } from "./error-message";
 import type { WorkoutFileFormat } from "./file-format-detector";
 import { ImportError } from "./import-workout";
 
@@ -72,7 +73,7 @@ export const transformError = (
       error
     );
   }
-  const msg = error instanceof Error ? error.message : String(error);
+  const msg = errorMessage(error);
   return new ImportError(
     `Failed to import ${format.toUpperCase()} file: ${msg}`,
     format,

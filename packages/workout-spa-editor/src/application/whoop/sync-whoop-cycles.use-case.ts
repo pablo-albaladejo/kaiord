@@ -11,6 +11,7 @@
  */
 import { whoopCyclesResponseSchema } from "@kaiord/whoop";
 
+import { errorMessage } from "../../utils/error-message";
 import type { ImportedRecordRepository } from "../import/imported-record-repository.port";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import {
@@ -76,7 +77,7 @@ export const syncWhoopCycles = async (
     try {
       result = await deps.fetchCycles(buildCyclesPath(input.userId, window));
     } catch (err) {
-      return transportError(err instanceof Error ? err.message : String(err));
+      return transportError(errorMessage(err));
     }
     if (!result.ok) return transportError(result.error);
     const parsed = whoopCyclesResponseSchema.safeParse(result.data);

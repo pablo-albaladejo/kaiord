@@ -10,6 +10,7 @@ import {
   type WhoopBiomarkerTest,
 } from "@kaiord/whoop";
 
+import { errorMessage } from "../../utils/error-message";
 import { buildLabReportSubmission } from "../lab/build-lab-report-submission";
 import { saveLabReport } from "../lab/save-lab-report.use-case";
 import { mapWhoopTestToSubmissionInput } from "./map-whoop-biomarker-test";
@@ -40,7 +41,7 @@ export const importOneWhoopLabTest = async (
   } catch (err) {
     return {
       kind: "error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   if (!fetched.ok) return { kind: "error", error: fetched.error };
@@ -71,7 +72,7 @@ export const importOneWhoopLabTest = async (
     // idempotent so this test self-heals next run.
     return {
       kind: "error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   return { kind: "imported" };
