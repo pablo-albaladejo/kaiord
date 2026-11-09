@@ -9,11 +9,9 @@ Duration encoding/decoding logic for time-based vs. distance-based workouts. ZWO
 
 ## Key Files
 
-| File                         | Description                                                |
-| ---------------------------- | ---------------------------------------------------------- |
-| `duration.converter.ts`      | Main converter logic for duration bidirectional conversion |
-| `duration.converter.test.ts` | Tests for duration conversion edge cases                   |
-| `duration.mapper.ts`         | Simple mapper for duration attribute extraction from ZWO   |
+| File                 | Description                                              |
+| -------------------- | -------------------------------------------------------- |
+| `duration.mapper.ts` | Simple mapper for duration attribute extraction from ZWO |
 
 ## Subdirectories
 
