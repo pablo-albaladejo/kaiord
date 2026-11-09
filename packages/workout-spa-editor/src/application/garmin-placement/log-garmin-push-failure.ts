@@ -13,8 +13,5 @@ const MAX_MESSAGE = 200;
 export const logGarminPushFailure = (error: unknown): void =>
   logger.error("[garmin-push] failed", {
     name: error instanceof Error ? error.name : typeof error,
-    message: scrubAnalyticsString(
-      errorMessage(error),
-      MAX_MESSAGE
-    ),
+    message: scrubAnalyticsString(errorMessage(error), MAX_MESSAGE),
   });
