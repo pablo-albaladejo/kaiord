@@ -47,19 +47,6 @@ Complete example of a working GPX format plugin. Shows how to:
 
 **For AI agents:** Reference this when implementing a real plugin or helping users create one.
 
-### npm-publish-verification.md
-
-Publishing checklist and verification steps before releasing to npm.
-
-**Contents:**
-
-- Pre-publish checks (build, tests, types)
-- Version updates (package.json, CHANGELOG)
-- Publish command and verification
-- Post-publish verification (tarball, npm registry, installation)
-
-**For AI agents:** Reference before any release. Ensures quality and prevents broken releases.
-
 ## For AI Agents: Working in This Directory
 
 ### Adding Documentation

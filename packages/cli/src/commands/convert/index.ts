@@ -3,9 +3,8 @@ import {
   loadConfigWithMetadata,
   mergeWithConfig,
 } from "../../utils/config-loader.js";
-import { mapErrorToExitCode } from "../../utils/error-exit-code.js";
-import { formatError } from "../../utils/error-formatter";
 import { ExitCode } from "../../utils/exit-codes";
+import { handleCommandError } from "../../utils/handle-command-error.js";
 import { createLogger } from "../../utils/logger-factory";
 import { executeBatchConversion } from "./batch";
 import { executeSingleFileConversion } from "./single-file";
@@ -75,9 +74,6 @@ export const convertCommand = async (
     return ExitCode.SUCCESS;
   } catch (error) {
     logger.error("Conversion failed", { error });
-    const formatted = formatError(error, { json: validated.json });
-    if (validated.json) console.log(formatted);
-    else console.error(formatted);
-    return mapErrorToExitCode(error);
+    return handleCommandError(error, { json: validated.json });
   }
 };

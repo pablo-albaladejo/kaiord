@@ -7,9 +7,12 @@ import {
   mergeWithConfig,
 } from "../../utils/config-loader.js";
 import { ExitCode } from "../../utils/exit-codes.js";
+import {
+  handleCommandError,
+  resolveJsonFlag,
+} from "../../utils/handle-command-error.js";
 import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import { createLogger } from "../../utils/logger-factory.js";
-import { handleExtractWorkoutError } from "./handle-error.js";
 import type { ExtractWorkoutOptions } from "./types.js";
 import { extractWorkoutOptionsSchema } from "./types.js";
 
@@ -57,7 +60,9 @@ export const extractWorkoutCommand = async (
   } catch (error) {
     spinner?.fail("Extraction failed");
     logger?.error("Extract workout failed", { error });
-    return handleExtractWorkoutError(error);
+    return handleCommandError(error, {
+      json: await resolveJsonFlag(options),
+    });
   } finally {
     spinner?.stop();
   }

@@ -22,7 +22,7 @@ CLI bootstrap and command registration.
 2. **Global options:** Register `--verbose`, `--quiet`, `--json`, `--log-format` (available to all commands)
 3. **Command registration:** Import command yargs configs and register them
 4. **Error handling:** Catch uncaught exceptions and unhandled rejections, format errors, and exit with appropriate code
-5. **Exit codes:** Map errors to exit codes using `getExitCodeForError()`
+5. **Exit codes:** Map errors to exit codes using `mapErrorToExitCode()`
 
 ### Adding a New Global Option
 

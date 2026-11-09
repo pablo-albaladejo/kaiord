@@ -9,8 +9,8 @@ export type RingBufferTelemetrySink = AiTelemetrySink & {
 const DEFAULT_CAPACITY = 100;
 
 /**
- * Bounded in-memory sink used by tests and the deterministic eval lane to
- * assert emitted telemetry. Keeps at most `capacity` most-recent events.
+ * Bounded in-memory sink for asserting emitted telemetry in tests and
+ * consumer code. Keeps at most `capacity` most-recent events.
  */
 export const createRingBufferTelemetrySink = (
   capacity: number = DEFAULT_CAPACITY

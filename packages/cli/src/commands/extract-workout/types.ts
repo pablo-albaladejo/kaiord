@@ -7,6 +7,7 @@ export const extractWorkoutOptionsSchema = z.object({
   inputFormat: fileFormatSchema.optional(),
   verbose: z.boolean().optional(),
   quiet: z.boolean().optional(),
+  json: z.boolean().optional(),
   logFormat: z.enum(["pretty", "structured"]).optional(),
 });
 

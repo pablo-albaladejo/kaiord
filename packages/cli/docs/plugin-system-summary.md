@@ -1,5 +1,8 @@
 # Plugin System Summary
 
+> **Status: design sketch.** No plugin API exists: `@kaiord/cli` exports no
+> `KaiordPlugin` type and loads no plugins, so the snippets here do not compile.
+
 ## Overview
 
 The Kaiord CLI plugin system has been designed to allow third-party developers to add support for custom workout file formats without modifying the core library or CLI code. This is a **future enhancement** that provides a clear architectural foundation for extensibility.
@@ -21,9 +24,8 @@ Complete architectural design including:
 
 ### 2. Type Definitions
 
-**File:** `packages/cli/src/types/plugin.ts`
-
-TypeScript type definitions for:
+**Not delivered.** `packages/cli/src/types/plugin.ts` was never written; the
+types below exist only as sketches in `plugin-architecture.md`:
 
 - `KaiordPlugin` - Core plugin interface
 - `PluginFormat` - Format descriptor
@@ -37,7 +39,7 @@ TypeScript type definitions for:
 
 **File:** `packages/cli/docs/example-plugin-gpx.md`
 
-Complete working example of a GPX plugin including:
+Sketch of a GPX plugin (not runnable until a plugin API ships) covering:
 
 - Full plugin implementation
 - GPX parsing and building logic
@@ -102,6 +104,8 @@ export type KaiordPlugin = {
 ## Example Plugin Usage
 
 ### Creating a Plugin
+
+Proposed API; `@kaiord/cli` does not export this type today.
 
 ```typescript
 import type { KaiordPlugin } from "@kaiord/cli";
@@ -186,8 +190,7 @@ When implementing this system:
 ## Files Created
 
 - `packages/cli/docs/plugin-architecture.md` - Complete architecture design
-- `packages/cli/src/types/plugin.ts` - TypeScript type definitions
-- `packages/cli/docs/example-plugin-gpx.md` - Working example plugin
+- `packages/cli/docs/example-plugin-gpx.md` - Example plugin sketch
 - `packages/cli/docs/plugin-system-summary.md` - This summary document
 - `packages/cli/README.md` - Updated with plugin system section
 

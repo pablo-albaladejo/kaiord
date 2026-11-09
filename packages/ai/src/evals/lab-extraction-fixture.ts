@@ -90,8 +90,3 @@ export const EXPECTED_ROWS: readonly LabExpectation[] = [
 
 /** Report-level metadata the header states explicitly. */
 export const EXPECTED_METADATA = { date: "2026-05-01", fasting: true };
-
-/** Kept for callers that only need the canonical keys the report contains. */
-export const EXPECTED_KEYS: readonly string[] = EXPECTED_ROWS.map(
-  (row) => row.key
-).filter((key): key is string => key !== null);
