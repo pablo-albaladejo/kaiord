@@ -5,26 +5,23 @@
  *
  * Per spec/spa-routing scenario "No SPA surface mounts as both a
  * routed page and a header-mounted modal" — the Library content
- * component MAY be imported only from the routed-page surface and
- * from the in-flow picker dialog. Any other importer is a regression
- * (the deleted header modal sneaking back in).
+ * component MAY be imported only from the routed-page surface. Any
+ * other importer is a regression (a second mount sneaking back in).
  *
- * Detection: import statements whose specifier ends with one of the
- * SUSPECT paths (case-sensitive, posix-style) below. The check uses
- * the same lightweight regex/import scanner as
- * `check-no-zustand-writethrough.mjs` so it runs without requiring
- * `tsconfig.app.json` paths resolution at full fidelity.
+ * Detection: every static import, dynamic `import()` and re-export in
+ * the SPA source is resolved to a path under `src/` (relative
+ * specifiers against the importing file, `@/` against `src/`). A
+ * specifier that resolves to one of SUSPECT_PATHS (with or without a
+ * `.ts`/`.tsx` extension or an `/index` barrel) is a violation unless
+ * the importer is CANONICAL_MOUNT or in ALLOWLIST. Resolving, rather than
+ * matching a specifier suffix, catches `./Library/LibraryContent`
+ * from the page as well as `../pages/Library/LibraryContent` from
+ * anywhere else.
  *
- *   - `organisms/WorkoutLibrary`              (barrel)
- *   - `organisms/WorkoutLibrary/WorkoutLibrary` (modal wrapper)
- *   - `organisms/WorkoutLibrary/components/LibraryDialogContent`
- *
- * If a future PR reintroduces any of those modules, only the files
- * in ALLOWLIST may import them. The allowlist is keyed by the source
- * file's path under `packages/workout-spa-editor/src/` (posix-style).
- *
- * Today the modal organism is deleted and no source file imports any
- * SUSPECT path; the guard is a forward-only invariant.
+ * Inert-by-construction protection: if a SUSPECT_PATH or
+ * CANONICAL_MOUNT no longer exists on disk the guard fails. A move or
+ * rename must update this file, instead of silently turning the guard
+ * into a check on a path nobody imports.
  */
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -35,32 +32,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const SPA_SRC = join(REPO_ROOT, "packages", "workout-spa-editor", "src");
 
-// Allowlist (posix-style, relative to repo root). Files allowed to
-// import the Library content component.
-//
-// PERMITTED FUTURE ENTRIES: per spec/spa-routing scenario "No SPA
-// surface mounts as both a routed page and a header-mounted modal",
-// the only files that may be added to this set are the routed-page
-// surface (`packages/workout-spa-editor/src/components/pages/LibraryPage.tsx`)
-// and the in-flow picker dialog
-// (`packages/workout-spa-editor/src/components/molecules/TemplatePickerDialog/TemplatePickerDialog.tsx`).
-// Adding anything else requires an OpenSpec amendment, NOT just a PR
-// that edits this file.
-//
-// The set ships empty because today neither file imports the SUSPECT
-// paths — the modal organism is deleted. R-AllowlistsEmpty therefore
-// passes without a special-case OUT_OF_SCOPE entry.
+// The route page spa-routing:38 defines as the sole mount point — the invariant, not an exception.
+export const CANONICAL_MOUNT =
+  "packages/workout-spa-editor/src/components/pages/LibraryPage.tsx";
+const MOUNT_IN_SRC = relative(
+  SPA_SRC,
+  join(REPO_ROOT, CANONICAL_MOUNT)
+).replaceAll("\\", "/");
+
+// Exceptions beyond CANONICAL_MOUNT, keyed by path relative to the repo root.
+// Adding an entry requires an OpenSpec amendment, NOT just a PR that
+// edits this file.
 export const ALLOWLIST = new Set();
 
-// Paths whose import is restricted. The check is suffix-match: if an
-// import specifier ends with one of these strings (after stripping a
-// trailing `.ts`/`.tsx`/`.js`/`.jsx` extension if present), the
-// importer must be in ALLOWLIST.
-const SUSPECT_PATHS = [
-  "organisms/WorkoutLibrary",
-  "organisms/WorkoutLibrary/WorkoutLibrary",
-  "organisms/WorkoutLibrary/components/LibraryDialogContent",
-];
+// Modules whose import is restricted, relative to `src/`, without
+// extension.
+export const SUSPECT_PATHS = ["components/pages/Library/LibraryContent"];
 
 const TS_EXTENSIONS = [".ts", ".tsx"];
 const SKIP_EXTENSIONS = [
@@ -100,13 +87,22 @@ function walk(dir, visit) {
   }
 }
 
-function stripExt(spec) {
-  return spec.replace(/\.(?:tsx?|jsx?)$/, "");
+function toPosix(p) {
+  return p.replaceAll("\\", "/");
 }
 
-function specifierMatchesSuspect(spec) {
-  const noExt = stripExt(spec);
-  return SUSPECT_PATHS.some((p) => noExt === p || noExt.endsWith(`/${p}`));
+function stripModuleSuffix(p) {
+  return p.replace(/\.(?:tsx?|jsx?)$/, "").replace(/\/index$/, "");
+}
+
+// Resolve a specifier to a posix path relative to `root`, or null for
+// bare package specifiers.
+function resolveSpec(root, file, spec) {
+  let abs;
+  if (spec.startsWith(".")) abs = resolve(dirname(file), spec);
+  else if (spec.startsWith("@/")) abs = join(root, spec.slice(2));
+  else return null;
+  return stripModuleSuffix(toPosix(relative(root, abs)));
 }
 
 function extractImportSpecs(source) {
@@ -117,45 +113,59 @@ function extractImportSpecs(source) {
   return out;
 }
 
-function relForRule(file) {
-  return relative(REPO_ROOT, file).replaceAll("\\", "/");
+function suspectExists(root, suspect) {
+  return TS_EXTENSIONS.some((ext) => safeStat(join(root, suspect + ext)));
 }
 
-export function runCheck({ srcRoot } = {}) {
+/**
+ * Returns `{ missing, violations }`: watched paths (SUSPECT_PATHS and
+ * CANONICAL_MOUNT, relative to `src/`) absent from disk, and
+ * unauthorised importers of the suspects that exist.
+ */
+export function runCheck({ srcRoot, suspectPaths = SUSPECT_PATHS } = {}) {
   const root = srcRoot ?? SPA_SRC;
+  const missing = suspectPaths.filter((p) => !suspectExists(root, p));
+  if (!safeStat(join(root, MOUNT_IN_SRC))) missing.push(MOUNT_IN_SRC);
+  const suspects = new Set(suspectPaths);
   const violations = [];
   walk(root, (file) => {
+    const fromSrc = toPosix(relative(root, file));
+    const fromRepo = toPosix(relative(REPO_ROOT, file));
+    if (fromSrc === MOUNT_IN_SRC || ALLOWLIST.has(fromRepo)) return;
     const source = readFileSync(file, "utf8");
-    const specs = extractImportSpecs(source);
-    for (const spec of specs) {
-      if (!specifierMatchesSuspect(spec)) continue;
-      const rel = relForRule(file);
-      if (ALLOWLIST.has(rel)) continue;
-      violations.push({ file: rel, spec });
+    for (const spec of extractImportSpecs(source)) {
+      if (suspects.has(resolveSpec(root, file, spec))) {
+        violations.push({ file: fromRepo, spec });
+      }
     }
   });
-  return violations;
+  return { missing, violations };
 }
 
 const isMain =
   process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
 
 if (isMain) {
-  const found = runCheck();
-  if (found.length === 0) {
+  const { missing, violations } = runCheck();
+  if (missing.length === 0 && violations.length === 0) {
     console.log(
-      "✅ No unauthorised imports of the WorkoutLibrary content component."
+      "✅ The Library content component is mounted only by LibraryPage."
     );
     process.exit(0);
   }
-  console.error(
-    "❌ Library no-dual-mount guard violations (R-LibraryNoDualMount):"
-  );
-  for (const v of found) {
+  console.error("❌ Library no-dual-mount guard (R-LibraryNoDualMount):");
+  for (const p of missing) {
+    console.error(
+      `  Watched path "${p}" does not exist under the SPA src. It moved or was renamed: update SUSPECT_PATHS / CANONICAL_MOUNT so the guard is not inert.`
+    );
+  }
+  for (const v of violations) {
     console.error(`  ${v.file} — imports "${v.spec}"`);
   }
-  console.error(
-    "  Remediation: only LibraryPage.tsx and TemplatePickerDialog.tsx may import the Library content component."
-  );
+  if (violations.length > 0) {
+    console.error(
+      `  Remediation: only ${CANONICAL_MOUNT} may import the Library content component.`
+    );
+  }
   process.exit(1);
 }
