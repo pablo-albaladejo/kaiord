@@ -325,9 +325,11 @@ try {
 
 ```typescript
 import { toBinary, KrdValidationError } from "@kaiord/core";
+import type { KRD } from "@kaiord/core";
 import { fitWriter } from "@kaiord/fit";
 
-declare const invalidKrd: never;
+// Typed as KRD but fails schema validation at runtime
+declare const invalidKrd: KRD;
 
 try {
   await toBinary(invalidKrd, fitWriter);
