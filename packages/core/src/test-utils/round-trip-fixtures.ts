@@ -21,6 +21,7 @@ export const createFitBufferSample = (): Uint8Array =>
 // Power assertion fixtures (watts)
 export const POWER_EXPECTED = 250 as const;
 export const POWER_ACTUAL = 255 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const POWER_ACTUAL_HIGH = 260 as const;
 
 // Heart rate assertion fixtures (bpm)
@@ -33,36 +34,57 @@ export const CADENCE_EXPECTED = 85 as const;
 export const CADENCE_ACTUAL = 90 as const;
 
 // Session-level time / distance fixtures
+/** @deprecated No known consumer; removed in the next major. */
 export const TIME_EXPECTED_SEC = 3600 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const TIME_ACTUAL_SEC = 3602 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DISTANCE_EXPECTED_M = 10000 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DISTANCE_ACTUAL_M = 10005 as const;
 
 // Lap-level time / distance fixtures
+/** @deprecated No known consumer; removed in the next major. */
 export const LAP_TIME_EXPECTED_SEC = 600 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const LAP_TIME_ACTUAL_SEC = 605 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const LAP_DISTANCE_EXPECTED_M = 1000 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const LAP_DISTANCE_ACTUAL_M = 1010 as const;
 
 // Record-level fixtures
+/** @deprecated No known consumer; removed in the next major. */
 export const RECORD_DISTANCE_EXPECTED_M = 100 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const RECORD_DISTANCE_ACTUAL_M = 105 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const RECORD_SPEED_EXPECTED_MPS = 2.78 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const RECORD_SPEED_ACTUAL_MPS = 2.85 as const;
 
 // Violation count assertions
+/** @deprecated No known consumer; removed in the next major. */
 export const VIOLATION_COUNT_FULL_SESSION = 5 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const VIOLATION_COUNT_LAP = 3 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const VIOLATION_COUNT_RECORD = 5 as const;
 
 // Deviation values fed to ToleranceChecker mocks
 export const DEVIATION_POWER_5W = 5 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DEVIATION_POWER_10W = 10 as const;
 export const DEVIATION_HR_5BPM = 5 as const;
 export const DEVIATION_HR_10BPM = 10 as const;
 export const DEVIATION_CADENCE_5RPM = 5 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DEVIATION_DISTANCE_5M = 5 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DEVIATION_DISTANCE_10M = 10 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DEVIATION_TIME_2SEC = 2 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DEVIATION_TIME_5SEC = 5 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const DEVIATION_PACE = 0.07 as const;
