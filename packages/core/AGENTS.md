@@ -29,7 +29,7 @@
 
 ### Working In This Directory
 
-- This is the innermost layer of the monorepo. `domain` depends on nothing except `zod` and `@noble/hashes` (canonical hashing). `application` MUST NOT import external libs or adapters. Adapter packages may depend on `@kaiord/core`; `@kaiord/core` MUST NOT import any other workspace package at runtime.
+- This is the innermost layer of the monorepo. `domain` depends on nothing except `zod` (schemas) and `@noble/hashes` (canonical hashing). `application` MUST NOT import external libs or adapters. Adapter packages may depend on `@kaiord/core`; `@kaiord/core` MUST NOT import any other workspace package at runtime.
 - Domain schemas use **snake_case** enum values (`indoor_cycling`, `lap_swimming`, `structured_workout`); access them via `sportSchema.enum.cycling`, never raw strings.
 - KRD's `metadata.sport` and `session.sport` are `z.string()` (not `sportSchema`) for forward compatibility with unknown sport values from FIT files.
 - All errors are exported as both a `class` (for `instanceof` checks) and a `create*` factory (for FP style) — see `src/domain/types/errors.ts`.

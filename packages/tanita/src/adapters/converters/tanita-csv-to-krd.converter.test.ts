@@ -117,4 +117,164 @@ describe("tanitaCsvToKrd", () => {
     // Assert
     expect(allValid).toBe(true);
   });
+
+  describe("CSV edge cases", () => {
+    const DATE = '"2021-01-28 08:04:11"';
+    const MEASURED_AT = "2021-01-28T08:04:11.000Z";
+    const WEIGHT_KG = 80;
+    const BMI = 26;
+    const LATER_WEIGHT_KG = 82;
+
+    it("should unescape doubled quotes inside a quoted field without shifting columns", () => {
+      // Arrange
+      const csv = [
+        'Date,Note,"Weight (kg)"',
+        `${DATE},"scale ""A"", bathroom",80.00`,
+      ].join("\n");
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result).toHaveLength(1);
+      expect(result[0]?.extensions?.health?.weight?.weightKilograms).toBe(
+        WEIGHT_KG
+      );
+    });
+
+    it("should keep a newline inside a quoted field within one row", () => {
+      // Arrange
+      const csv = [
+        'Date,Note,"Weight (kg)",BMI',
+        `${DATE},"first line\nsecond line",80.00,26.00`,
+        `"2021-01-29 08:04:11","",82.00,26.00`,
+      ].join("\n");
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0]?.extensions?.health?.weight?.weightKilograms).toBe(
+        WEIGHT_KG
+      );
+      expect(result[0]?.extensions?.health?.bodyComposition?.bmi).toBe(BMI);
+      expect(result[1]?.extensions?.health?.weight?.weightKilograms).toBe(
+        LATER_WEIGHT_KG
+      );
+    });
+
+    it("should read CRLF line endings like LF", () => {
+      // Arrange
+      const csv = `Date,"Weight (kg)",BMI\r\n${DATE},80.00,26.00\r\n`;
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result).toHaveLength(1);
+      expect(result[0]?.extensions?.health?.bodyComposition?.bmi).toBe(BMI);
+    });
+
+    it("should keep a final row whose last cell is empty and has no newline", () => {
+      // Arrange
+      const csv = `Date,"Weight (kg)",BMI\n${DATE},80.00,`;
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result).toHaveLength(1);
+      expect(result[0]?.type).toBe("weight_measurement");
+      expect(result[0]?.extensions?.health?.bodyComposition).toBeUndefined();
+    });
+
+    it("should treat a column absent from the header as missing", () => {
+      // Arrange
+      const csv = `Date,"Weight (kg)"\n${DATE},80.00`;
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result[0]?.extensions?.health).toEqual({
+        weight: {
+          kind: "weight",
+          version: HEALTH_VERSION,
+          measuredAt: MEASURED_AT,
+          weightKilograms: WEIGHT_KG,
+        },
+      });
+    });
+
+    it("should read a duplicated header label from its first column", () => {
+      // Arrange
+      const csv = `Date,"Weight (kg)","Weight (kg)"\n${DATE},80.00,99.00`;
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result[0]?.extensions?.health?.weight?.weightKilograms).toBe(
+        WEIGHT_KG
+      );
+    });
+
+    it("should emit composition without a weight when the weight cell is missing", () => {
+      // Arrange
+      const csv = `Date,"Weight (kg)",BMI\n${DATE},-,26.00`;
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result[0]?.type).toBe("body_composition");
+      expect(result[0]?.extensions?.health?.weight).toBeUndefined();
+      expect(result[0]?.extensions?.health?.bodyComposition?.bmi).toBe(BMI);
+    });
+
+    it("should skip a row that carries no metric at all", () => {
+      // Arrange
+      const csv = `Date,"Weight (kg)",BMI\n${DATE},-,-`;
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+    it("should skip blank rows and rows whose datetime is malformed", () => {
+      // Arrange
+      const csv = [
+        'Date,"Weight (kg)"',
+        `${DATE},80.00`,
+        "",
+        " , ",
+        "28/01/2021,81.00",
+        '"2021-01-29 08:00:00",82.00',
+      ].join("\n");
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(
+        result.map(
+          (document) => document.extensions?.health?.weight?.weightKilograms
+        )
+      ).toEqual([WEIGHT_KG, LATER_WEIGHT_KG]);
+    });
+
+    it("should return no documents for an empty export", () => {
+      // Arrange
+      const csv = "";
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+  });
 });

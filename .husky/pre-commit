@@ -2,7 +2,7 @@ echo "🔍 Running lint-staged on changed files..."
 
 # Step 1: file-scoped formatting / linting on staged files only.
 #   - *.{ts,tsx} → `eslint --fix --max-warnings=0`
-#   - *.{md,json,yml} → `prettier --check`
+#   - *.{md,json,yml,yaml} → `prettier --write`
 # Configuration lives in the root `package.json`'s `lint-staged` block.
 # Touches only what the developer staged: O(diff), not O(repo).
 pnpm exec lint-staged
