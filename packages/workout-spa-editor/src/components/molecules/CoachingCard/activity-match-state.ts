@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from "../types/calendar-record";
+import type { WorkoutRecord } from "../../../types/calendar-record";
 
 /**
  * One coaching activity's matched/solo status as the coaching dialog renders
