@@ -1,8 +1,5 @@
 /**
- * State fields of the workout store.
- *
- * Split out of `workout-store-types.ts` so both the state shape and the
- * action signatures can live under the ≤80-line-per-file rule.
+ * State fields of the workout store, composed by `workout-store-types.ts`.
  */
 
 import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";

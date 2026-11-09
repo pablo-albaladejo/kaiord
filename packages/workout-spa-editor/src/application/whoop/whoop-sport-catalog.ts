@@ -1,8 +1,7 @@
 /**
  * Resolves the WHOOP sports catalog (`activities-service/v1/sports/history`)
  * into an `id -> name` lookup so `syncWhoopActivities` can label each
- * workout's numeric `sport_id`. Split out of sync-whoop-activities.use-case.ts
- * to keep that file under the per-file line cap.
+ * workout's numeric `sport_id`.
  */
 import { buildSportCatalog, whoopSportsResponseSchema } from "@kaiord/whoop";
 

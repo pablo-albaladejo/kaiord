@@ -5,8 +5,7 @@
  * `PersistencePort` intersects this type.
  *
  * `importedRecords`, `activities`, and `dataTypeSourcePolicy` are
- * intersected here too (rather than inline on `PersistencePort`, which
- * is line-capped): the first is the natural-key upsert over those six
+ * intersected here too: the first is the natural-key upsert over those six
  * health stores; the second is the v27 Data Hub executed-activity
  * write port; the third is the F3.1 multi-source companion table
  * (today consumed only by health reads, hence hosted here — generic
@@ -34,8 +33,7 @@ export type HealthRepositories = {
   healthBodyComposition: HealthRecordRepository<HealthBodyCompositionRecord>;
   healthStress: HealthRecordRepository<HealthStressRecord>;
   importedRecords: ImportedRecordRepository;
-  // v27 Data Hub executed-activity write port (hosted here for the same
-  // line-cap reason as importedRecords).
+  // v27 Data Hub executed-activity write port.
   activities: ActivityRepository;
   dataTypeSourcePolicy: DataTypeSourcePolicyRepository;
 };
