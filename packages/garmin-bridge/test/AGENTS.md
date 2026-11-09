@@ -16,7 +16,7 @@ Unit test suite for the Kaiord Garmin Bridge extension. Tests cover service work
 - `chrome-mock.js` — Minimal Chrome Extension API mock (runtime, tabs, storage, webRequest, scripting). Stateful session/local storage. Factory for resetting state between tests.
 - `background.test.js` — Service worker tests (~600 LOC). Covers CSRF token capture, action dispatch (ping, list, push, profile-snapshot), session validation, content script messaging, service worker onInstalled re-injection.
 - `content.test.js` — Content script tests (~200 LOC). Covers fetch allowlist enforcement, CSRF token injection in headers, timeout handling, error responses.
-- `kaiord-announce.test.js` — Announce script tests (~100 LOC). Covers announcement structure, runtime ID discovery, context invalidation on extension reload, listener cleanup.
+- `kaiord-announce.test.js` — Vendored from `_shared/bridge-core/test/` — edit the master, then `pnpm bridge:sync`. Covers announcement structure, runtime ID discovery, context invalidation on extension reload, listener cleanup.
 - `popup.test.js` — Popup UI tests (~250 LOC). Covers status rendering (connected/disconnected), profile snapshot display, staleness detection (7-day threshold), fetch timeouts, retry UX.
 - `profile-snapshot.test.js` — Profile validator tests (~300 LOC). Covers shape validation, type guards, prototype pollution detection, JSON length cap, shared fixtures with `@kaiord/core`.
 
