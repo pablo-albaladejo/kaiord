@@ -73,7 +73,7 @@ poc-*/
 # OpenSpec
 openspec/.cache/
 packages/docs/.vitepress/cache/
-*.gcn
+/*.gcn
 .claude/scheduled_tasks.lock
 
 # Self-improve git worktrees
