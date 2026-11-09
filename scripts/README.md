@@ -85,6 +85,21 @@ Every non-trivial script ships with a co-located `*.test.mjs` exercised by
 | `sync-mcp-server-version.mjs`                             | Sync `packages/mcp/server.json` (MCP Registry entry) and the published server card version with `@kaiord/mcp`.                                                             | `scripts/changeset-version.sh`                                                |
 | `sync-bridge-core.mjs`                                    | Sync `_shared/bridge-core` masters into each extension.                                                                                                                    | `pnpm bridge:sync`                                                            |
 
+### Base-ref ratchets
+
+Two guards compare the tree with the merge base of `HEAD` and a base ref, and
+fail closed when that base cannot be read (CI checks out with
+`fetch-depth: 0`):
+
+| Variable                        | Guard                               | Default       |
+| ------------------------------- | ----------------------------------- | ------------- |
+| `COVERAGE_FLOORS_BASE_REF`      | `check-coverage-floors-ratchet.mjs` | `origin/main` |
+| `BOUNDARIES_ALLOWLIST_BASE_REF` | `check-boundaries-allowlist.mjs`    | `origin/main` |
+
+`check-boundaries-allowlist.mjs` also refuses a merge base equal to `HEAD`
+unless `HEAD` is already on `origin/main`: comparing the list with itself
+would let any entry through.
+
 ## Manual maintainer tools
 
 These scripts are not auto-invoked. They live here as documented helpers
