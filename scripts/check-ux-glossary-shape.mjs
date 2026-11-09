@@ -13,7 +13,7 @@
  *   - `## State labels (visible to user)`
  *
  * It MUST also contain at least one canonical-verb row in the Verbs
- * table (matched by the literal `**Create**` cell). The script only
+ * table: a row whose first cell is `**Create**`, inside that section. The script only
  * enforces the SHAPE today; verb-level enforcement (R-CTACopy) ships
  * in a follow-up PR once the existing call-sites are aligned with the
  * glossary.
@@ -45,6 +45,14 @@ const REQUIRED_HEADINGS = [
 ];
 
 const REQUIRED_VERB_ROW_MARKER = "**Create**";
+const VERB_ROW = /^\|\s*\*\*Create\*\*\s*\|/m;
+
+function verbsSection(text) {
+  const start = text.indexOf(REQUIRED_HEADINGS[0]);
+  if (start === -1) return "";
+  const end = text.indexOf("\n## ", start + 1);
+  return text.slice(start, end === -1 ? undefined : end);
+}
 
 export function checkGlossaryShape(text) {
   const errors = [];
@@ -53,7 +61,7 @@ export function checkGlossaryShape(text) {
       errors.push(`R-UXGlossaryShape: missing required heading: "${heading}"`);
     }
   }
-  if (!text.includes(REQUIRED_VERB_ROW_MARKER)) {
+  if (!VERB_ROW.test(verbsSection(text))) {
     errors.push(
       `R-UXGlossaryShape: missing canonical-verb row marker: "${REQUIRED_VERB_ROW_MARKER}"`
     );
