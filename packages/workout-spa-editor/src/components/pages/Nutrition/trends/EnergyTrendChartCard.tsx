@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { useTheme } from "../../../../contexts/ThemeContext";
 import { useTranslate } from "../../../../i18n/use-translate";
-import { UplotChart } from "../../health/trends/UplotChart";
+import { UplotChart } from "../../../charts/uplot-base/uplot-chart";
 import { buildEnergyTrendOptions } from "./build-energy-trend-options";
 import {
   buildEnergyTrendData,

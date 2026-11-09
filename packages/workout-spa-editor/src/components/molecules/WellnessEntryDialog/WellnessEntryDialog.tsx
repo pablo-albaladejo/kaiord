@@ -17,7 +17,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import {
   DIALOG_CONTENT_CLASSES,
   DIALOG_OVERLAY_CLASSES,
-} from "../../organisms/WorkoutLibrary/constants";
+} from "../dialog-classes";
 import { formatDateLabel } from "../TemplatePickerDialog/format-date-label";
 import { WellnessImportAction } from "./wellness-import-action";
 import { WellnessEntryForm } from "./WellnessEntryForm";

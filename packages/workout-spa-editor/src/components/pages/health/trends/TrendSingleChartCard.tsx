@@ -5,6 +5,7 @@ import { useUnits } from "../../../../contexts/units-context";
 import type { HealthDateRange } from "../../../../hooks/health/health-live-query";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { type Translate, useTranslate } from "../../../../i18n/use-translate";
+import { UplotChart } from "../../../charts/uplot-base/uplot-chart";
 import {
   buildTrendChartData,
   type PerMetricPoints,
@@ -15,7 +16,6 @@ import {
   type TrendMetricDef,
   type TrendMetricKey,
 } from "./trend-metrics";
-import { UplotChart } from "./UplotChart";
 import type { TrendSeriesByMetric } from "./use-trend-series";
 
 const CHART_WIDTH = 880;
