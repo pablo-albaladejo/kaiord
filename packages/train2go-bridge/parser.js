@@ -645,8 +645,6 @@ if (typeof self !== "undefined" && typeof module === "undefined") {
   self.parsePingJson = parsePingJson;
   self.parseDetailsHtml = parseDetailsHtml;
   self.decodeEntities = decodeEntities;
-  self.extractDescription = extractDescription;
-  self.extractCompletion = extractCompletion;
   self.extractComments = extractComments;
 }
 
@@ -658,8 +656,6 @@ if (typeof module !== "undefined") {
     parsePingJson,
     parseDetailsHtml,
     decodeEntities,
-    extractDescription,
-    extractCompletion,
     extractComments,
     htmlToPlainText,
   };
