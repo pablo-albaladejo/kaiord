@@ -112,7 +112,7 @@ export const validateCommand = async (options: unknown): Promise<number> => {
   } catch (error) {
     logger?.error("Validation failed", { error });
     return handleCommandError(error, {
-      json: resolveJsonFlag(validateOptionsSchema, options),
+      json: await resolveJsonFlag(options),
       envelope: true,
     });
   } finally {

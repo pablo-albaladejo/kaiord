@@ -1,11 +1,19 @@
 import { KrdValidationError, ToleranceExceededError } from "@kaiord/core";
 import stripAnsi from "strip-ansi";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { z } from "zod";
 
 import { DirectoryCreateError, UnsupportedFormatError } from "./cli-errors.js";
+import { loadConfigWithMetadata } from "./config-loader.js";
 import { ExitCode } from "./exit-codes.js";
 import { handleCommandError, resolveJsonFlag } from "./handle-command-error.js";
+
+vi.mock("./config-loader.js", () => ({ loadConfigWithMetadata: vi.fn() }));
+
+const withConfig = (json: boolean | undefined) => ({
+  config: json === undefined ? {} : { json },
+  loadedFrom: null,
+  searchedPaths: [],
+});
 
 const enoent = (): Error =>
   Object.assign(new Error("open failed"), {
@@ -108,36 +116,49 @@ describe("handleCommandError", () => {
 });
 
 describe("resolveJsonFlag", () => {
-  const schema = z.object({ input: z.string(), json: z.boolean().optional() });
+  afterEach(() => {
+    vi.mocked(loadConfigWithMetadata).mockReset();
+  });
 
-  it("should return true when options are valid and json is set", () => {
+  it("should return true when json is set and other options are invalid", async () => {
     // Arrange
-    const options = { input: "a.krd", json: true };
+    const options = { input: ["a.krd", "b.krd"], json: true };
 
     // Act
-    const json = resolveJsonFlag(schema, options);
+    const json = await resolveJsonFlag(options);
 
     // Assert
     expect(json).toBe(true);
   });
 
-  it("should return false when options fail their schema", () => {
+  it("should prefer an explicit json false over the config default", async () => {
     // Arrange
-    const options = { json: true };
+    vi.mocked(loadConfigWithMetadata).mockResolvedValue(withConfig(true));
 
     // Act
-    const json = resolveJsonFlag(schema, options);
+    const json = await resolveJsonFlag({ json: false });
 
     // Assert
     expect(json).toBe(false);
   });
 
-  it("should return false when json is absent", () => {
+  it("should fall back to the config json default when the flag is absent", async () => {
     // Arrange
-    const options = { input: "a.krd" };
+    vi.mocked(loadConfigWithMetadata).mockResolvedValue(withConfig(true));
 
     // Act
-    const json = resolveJsonFlag(schema, options);
+    const json = await resolveJsonFlag({ input: "a.krd" });
+
+    // Assert
+    expect(json).toBe(true);
+  });
+
+  it("should return false when neither the flag nor the config sets json", async () => {
+    // Arrange
+    vi.mocked(loadConfigWithMetadata).mockResolvedValue(withConfig(undefined));
+
+    // Act
+    const json = await resolveJsonFlag(undefined);
 
     // Assert
     expect(json).toBe(false);

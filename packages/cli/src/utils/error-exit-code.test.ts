@@ -9,6 +9,7 @@ import {
   ToleranceExceededError,
 } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import {
   DirectoryCreateError,
@@ -212,6 +213,18 @@ describe("mapErrorToExitCode", () => {
 
     // Assert
     expect(code).toBe(ExitCode.FILE_NOT_FOUND);
+  });
+
+  it("should map an option-schema ZodError to INVALID_ARGUMENT", () => {
+    // Arrange
+    const parsed = z.object({ input: z.string() }).safeParse({ input: 1 });
+    const error = parsed.success ? undefined : parsed.error;
+
+    // Act
+    const code = mapErrorToExitCode(error);
+
+    // Assert
+    expect(code).toBe(ExitCode.INVALID_ARGUMENT);
   });
 
   it("should map an unknown error to UNKNOWN_ERROR", () => {

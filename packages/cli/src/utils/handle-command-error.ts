@@ -1,5 +1,4 @@
-import type { ZodType } from "zod";
-
+import { loadConfigWithMetadata } from "./config-loader.js";
 import { mapErrorToExitCode } from "./error-exit-code.js";
 import { formatError } from "./error-formatter.js";
 import type { ExitCodeValue } from "./exit-codes.js";
@@ -11,15 +10,19 @@ type HandleCommandErrorOptions = {
 };
 
 /**
- * Whether `--json` was requested, tolerating options that fail their schema
- * (the command may be failing precisely because its options are invalid).
+ * Whether JSON output was requested, for a command that is failing. Reads
+ * only the `json` option, so it holds even when other options are invalid
+ * (the command may be failing precisely because of them), and falls back to
+ * the `.kaiordrc.json` default when the flag is absent.
  */
-export const resolveJsonFlag = (
-  schema: ZodType<{ json?: boolean }>,
-  options: unknown
-): boolean => {
-  const parsed = schema.safeParse(options);
-  return parsed.success ? parsed.data.json || false : false;
+export const resolveJsonFlag = async (options: unknown): Promise<boolean> => {
+  const raw =
+    options !== null && typeof options === "object"
+      ? (options as { json?: unknown }).json
+      : undefined;
+  if (typeof raw === "boolean") return raw;
+  const { config } = await loadConfigWithMetadata();
+  return config.json ?? false;
 };
 
 /**

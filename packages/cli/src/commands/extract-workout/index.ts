@@ -7,7 +7,10 @@ import {
   mergeWithConfig,
 } from "../../utils/config-loader.js";
 import { ExitCode } from "../../utils/exit-codes.js";
-import { handleCommandError } from "../../utils/handle-command-error.js";
+import {
+  handleCommandError,
+  resolveJsonFlag,
+} from "../../utils/handle-command-error.js";
 import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import { createLogger } from "../../utils/logger-factory.js";
 import type { ExtractWorkoutOptions } from "./types.js";
@@ -36,11 +39,9 @@ export const extractWorkoutCommand = async (
 ): Promise<number> => {
   let logger: Awaited<ReturnType<typeof createLogger>> | undefined;
   let spinner: ReturnType<typeof ora> | null = null;
-  let json = false;
 
   try {
     const opts = await resolveOptions(options);
-    json = opts.json ?? false;
     logger = await createLogger({
       type: opts.logFormat,
       level: opts.verbose ? "debug" : opts.quiet ? "error" : "info",
@@ -59,7 +60,9 @@ export const extractWorkoutCommand = async (
   } catch (error) {
     spinner?.fail("Extraction failed");
     logger?.error("Extract workout failed", { error });
-    return handleCommandError(error, { json });
+    return handleCommandError(error, {
+      json: await resolveJsonFlag(options),
+    });
   } finally {
     spinner?.stop();
   }

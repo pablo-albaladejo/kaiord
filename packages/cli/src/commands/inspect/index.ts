@@ -69,7 +69,7 @@ export const inspectCommand = async (options: unknown): Promise<number> => {
     spinner?.fail("Inspection failed");
     logger?.error("Inspect failed", { error });
     return handleCommandError(error, {
-      json: resolveJsonFlag(inspectOptionsSchema, options),
+      json: await resolveJsonFlag(options),
       envelope: true,
     });
   } finally {
