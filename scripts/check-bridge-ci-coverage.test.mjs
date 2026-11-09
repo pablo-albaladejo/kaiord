@@ -86,11 +86,30 @@ const publishedOf = (manifests) =>
     .filter(([, manifest]) => manifest.private !== true)
     .map(([name]) => name);
 
-/** A published package with no `test` script ships tests nobody runs. */
-export const findUntested = (manifests) =>
-  publishedOf(manifests)
+/**
+ * A published package with no `test` script ships tests nobody runs. With
+ * `ciText`, every package CI runs `test:coverage` for (the `test` matrix and
+ * each literal `--filter @kaiord/<pkg> test:coverage`) must define it too:
+ * `pnpm --filter` exits 0 when the script is missing, so nothing runs.
+ */
+export const findUntested = (manifests, ciText) => {
+  const problems = publishedOf(manifests)
     .filter((name) => typeof manifests[name].scripts?.test !== "string")
     .map((name) => `roster: published ${name} has no 'test' script`);
+  if (ciText === undefined) return problems;
+  const literal = [
+    ...ciText.matchAll(/--filter @kaiord\/([a-z0-9-]+) test:coverage/g),
+  ].map((match) => match[1]);
+  const runners = [...new Set([...readCi(ciText).matrix, ...literal])];
+  for (const name of runners) {
+    if (typeof manifests[name]?.scripts?.["test:coverage"] !== "string") {
+      problems.push(
+        `roster: CI runs test:coverage for ${name}, which has no 'test:coverage' script`
+      );
+    }
+  }
+  return problems;
+};
 
 const LIBS = publishedOf(MANIFESTS);
 
@@ -169,9 +188,16 @@ const readCi = (ciText) => {
         runs.some((r) => r.includes(`check-coverage.js ./packages/${pkg}/`))
       );
     });
+  // The `if` whose branch writes should-test=false: only a filter read
+  // there can stop a docs-only skip; a per-package `*-changed` step cannot.
+  const skipCondition =
+    analyzeRun
+      .split(/^\s*if /m)
+      .find((block) => block.includes('echo "should-test=false"')) ?? "";
   return {
     filesYaml,
     analyzeRun,
+    skipCondition,
     matrix: workflow.jobs.test.strategy.matrix.package,
     arms,
     dedicatedJob,
@@ -191,7 +217,7 @@ export const findViolations = (
   const bridgeArm = ci.arms.find((names) => names.includes("garmin-bridge"));
 
   for (const key of Object.keys(ci.filesYaml)) {
-    if (!ci.analyzeRun.includes(`${key}_any_changed`)) {
+    if (!ci.skipCondition.includes(`${key}_any_changed`)) {
       violations.push(`skip chain: filter '${key}' is never consulted`);
     }
   }
@@ -202,7 +228,7 @@ export const findViolations = (
     if (!(ci.filesYaml[key] ?? []).includes(`packages/${pkg}/**`)) {
       violations.push(`filters: no '${key}' filter over packages/${pkg}/**`);
     }
-    if (!ci.analyzeRun.includes(`${key}_any_changed`)) {
+    if (!ci.skipCondition.includes(`${key}_any_changed`)) {
       violations.push(`skip chain: ${pkg} (${key}_any_changed) not consulted`);
     }
     if (ci.matrix.includes(pkg)) {
@@ -330,6 +356,33 @@ test("plant: a published package without a test script is reported", () => {
   ]);
 });
 
+test("should give every package CI runs test:coverage for that script", () => {
+  // Arrange
+  const manifests = MANIFESTS;
+
+  // Act
+  const problems = findUntested(manifests, REAL.ci);
+
+  // Assert
+  assert.deepEqual(problems, []);
+});
+
+for (const pkg of ["whoop", "cli"]) {
+  test(`should report ${pkg} when CI runs its test:coverage but the script is gone`, () => {
+    // Arrange
+    const { "test:coverage": _dropped, ...scripts } = MANIFESTS[pkg].scripts;
+    const manifests = { ...MANIFESTS, [pkg]: { ...MANIFESTS[pkg], scripts } };
+
+    // Act
+    const problems = findUntested(manifests, REAL.ci);
+
+    // Assert
+    assert.deepEqual(problems, [
+      `roster: CI runs test:coverage for ${pkg}, which has no 'test:coverage' script`,
+    ]);
+  });
+}
+
 test("the real CI and publish files see every bridge and library", () => {
   assert.deepEqual(findViolations(REAL), []);
 });
@@ -427,6 +480,42 @@ test("plant: a filter missing from the skip chain is reported", () => {
   );
   assert.equal(
     replayShouldTest(texts.ci, ["planted/x.ts", "README.md"]),
+    "false"
+  );
+});
+
+test("should test a frontend change plus README.md in the skip-chain replay", () => {
+  // Arrange
+  const files = ["packages/workout-spa-editor/src/x.ts", "README.md"];
+
+  // Act
+  const shouldTest = replayShouldTest(REAL.ci, files);
+
+  // Assert
+  assert.equal(shouldTest, "true");
+});
+
+test("should report a filter dropped from the docs-only skip condition even when another step reads it", () => {
+  // Arrange
+  const texts = plantIn(
+    "ci",
+    '             [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \\\n',
+    ""
+  );
+
+  // Act
+  const violations = findViolations(texts);
+
+  // Assert
+  assert.ok(
+    violations.includes("skip chain: filter 'frontend' is never consulted"),
+    `expected a skip-chain violation for frontend, got: ${violations.join("; ")}`
+  );
+  assert.equal(
+    replayShouldTest(texts.ci, [
+      "packages/workout-spa-editor/src/x.ts",
+      "README.md",
+    ]),
     "false"
   );
 });
