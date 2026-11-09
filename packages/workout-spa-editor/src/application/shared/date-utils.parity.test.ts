@@ -73,6 +73,17 @@ describe("addDaysIso parity", () => {
     expect(actual).toEqual(cases.map(([, , expected]) => expected));
   });
 
+  it("should return NaN parts for a malformed date instead of throwing", () => {
+    // Arrange
+    const malformed = "bad";
+
+    // Act
+    const actual = addDaysIso(malformed, 1);
+
+    // Assert
+    expect(actual).toBe("NaN-NaN-NaN");
+  });
+
   it.each(DATES)(
     "should resolve the same Monday-to-Sunday week as the Daily page for %s",
     (iso) => {
