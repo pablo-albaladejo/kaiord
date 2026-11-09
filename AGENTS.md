@@ -140,11 +140,13 @@ Before any non-trivial change:
 - `check-archive-followups.mjs` — `> Deferred to: #N` marker invariants.
 - `check-spec-format.mjs` — domain spec structure (run as `pnpm lint:specs`).
 - `check-scripts-orphans.mjs` — every `scripts/*` and `.github/scripts/*` file
-  is wired; a test importer or a `scripts/README.md` table row is not wiring
+  is wired; a test importer or a row in any Markdown file is not wiring
   (R-ScriptsNoOrphans).
 - `check-bridge-ci-coverage.test.mjs` — every `packages/*-bridge` and every
-  published library is in each `ci.yml` / `codecov.yml` enumeration, and the
-  docs-only skip chain is replayed so a package change plus a `.md` still tests.
+  published library is in each `ci.yml` / `codecov.yml` enumeration and every
+  publish-side list (release paths, changeset-bot, GitHub releases, verify
+  loop, consume-build-artifacts default), and the docs-only skip chain is
+  replayed so a package change plus a `.md` still tests.
 - `check-ux-glossary-shape.mjs` — the SPA UX glossary keeps its required
   sections (R-UXGlossaryShape, `pnpm lint:ux-glossary`).
 

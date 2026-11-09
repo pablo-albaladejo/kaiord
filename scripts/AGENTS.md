@@ -40,7 +40,7 @@ notes.
 | `check-allowlists-empty.mjs`                   | Allowlists are not silently growing                                                           |
 | `check-build-portable.mjs`                     | Build artifacts are portable (no absolute paths)                                              |
 | `check-ci-fanout-invariants.mjs`               | CI fan-out matrix invariants                                                                  |
-| `check-scripts-orphans.mjs`                    | Every `scripts/*` and `.github/scripts/*` file is wired (a test importer is not wiring)       |
+| `check-scripts-orphans.mjs`                    | Every `scripts/*` and `.github/scripts/*` file is wired (tests and Markdown are not wiring)   |
 | `check-workflow-timeouts.mjs`                  | `.github/workflows/*.yml` declare per-job timeouts                                            |
 | `check-overrides-stale.mjs`                    | `pnpm.overrides` entries match installed versions                                             |
 | `check-husky-no-bypass-hint.mjs`               | Husky hook content doesn't hint `--no-verify`                                                 |
