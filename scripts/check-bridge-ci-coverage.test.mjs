@@ -216,11 +216,33 @@ export const findViolations = (
   const violations = [];
   const bridgeArm = ci.arms.find((names) => names.includes("garmin-bridge"));
 
-  for (const key of Object.keys(ci.filesYaml)) {
-    if (!ci.skipCondition.includes(`${key}_any_changed`)) {
-      violations.push(`skip chain: filter '${key}' is never consulted`);
-    }
+  const keys = Object.keys(ci.filesYaml);
+  // Exact key and polarity: `core_any_changed` is a substring of
+  // `bridge_core_any_changed`, so a bare includes() is not enough.
+  const requires = (key) =>
+    new RegExp(
+      `outputs\\.${key}_any_changed\\s*\\}\\}"\\s*==\\s*"${key === "docs" ? "true" : "false"}"`
+    ).test(ci.skipCondition);
+  for (const key of keys.filter((k) => !requires(k))) {
+    violations.push(`skip chain: filter '${key}' is never consulted`);
   }
+  // Behaviour: replay the real bash with only docs set, then docs plus each
+  // other filter; only the first may skip the tests.
+  const probed = keys.filter((k) => k !== "docs");
+  const [docsOnly, ...withKey] = replayProbes(ci, [
+    new Set(["docs"]),
+    ...probed.map((key) => new Set(["docs", key])),
+  ]);
+  if (docsOnly !== "false") {
+    violations.push("skip chain: a docs-only diff does not skip the tests");
+  }
+  probed.forEach((key, i) => {
+    if (withKey[i] !== "true") {
+      violations.push(
+        `skip chain: filter '${key}' plus a .md change skips the tests`
+      );
+    }
+  });
 
   for (const pkg of [...bridges, ...libs]) {
     const key = pkg.replaceAll("-", "_");
@@ -228,7 +250,7 @@ export const findViolations = (
     if (!(ci.filesYaml[key] ?? []).includes(`packages/${pkg}/**`)) {
       violations.push(`filters: no '${key}' filter over packages/${pkg}/**`);
     }
-    if (!ci.skipCondition.includes(`${key}_any_changed`)) {
+    if (!(key in ci.filesYaml) || !requires(key)) {
       violations.push(`skip chain: ${pkg} (${key}_any_changed) not consulted`);
     }
     if (ci.matrix.includes(pkg)) {
@@ -298,36 +320,53 @@ const globToRegex = (glob) =>
       "$"
   );
 
-/** Runs the real 'Analyze changes' bash for a changed-file list. */
-export const replayShouldTest = (ciText, changedFiles) => {
-  const { filesYaml, analyzeRun } = readCi(ciText);
-  const anyChanged = Object.fromEntries(
-    Object.entries(filesYaml).map(([key, patterns]) => [
-      `${key}_any_changed`,
-      String(
-        changedFiles.some((file) =>
-          patterns.some((pattern) => globToRegex(pattern).test(file))
-        )
-      ),
-    ])
-  );
-  const script = analyzeRun.replace(
-    /\$\{\{\s*steps\.changed-files\.outputs\.(\w+)\s*\}\}/g,
-    (_, name) => {
-      assert.ok(name in anyChanged, `unknown changed-files output '${name}'`);
-      return anyChanged[name];
-    }
-  );
+/**
+ * Runs the real 'Analyze changes' bash once per probe (the set of filter
+ * keys reported changed), in one bash process, and returns each probe's
+ * should-test value.
+ */
+const replayProbes = ({ filesYaml, analyzeRun }, probes) => {
   const dir = mkdtempSync(join(tmpdir(), "ci-skip-chain-"));
+  const outputs = probes.map((_, i) => join(dir, `output-${i}`));
+  const script = probes
+    .map((changed, i) => {
+      const body = analyzeRun.replace(
+        /\$\{\{\s*steps\.changed-files\.outputs\.(\w+)\s*\}\}/g,
+        (_, name) => {
+          const key = name.replace(/_any_changed$/, "");
+          assert.ok(
+            name !== key && key in filesYaml,
+            `unknown changed-files output '${name}'`
+          );
+          return String(changed.has(key));
+        }
+      );
+      return `(\nGITHUB_OUTPUT='${outputs[i]}'\n${body}\n)`;
+    })
+    .join("\n");
   try {
-    const output = join(dir, "output");
-    execFileSync("bash", ["-c", script], {
-      env: { ...process.env, GITHUB_OUTPUT: output },
-    });
-    return /^should-test=(\w+)$/m.exec(readFileSync(output, "utf8"))?.[1];
+    execFileSync("bash", ["-c", script]);
+    return outputs.map(
+      (output) => /^should-test=(\w+)$/m.exec(readFileSync(output, "utf8"))?.[1]
+    );
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+};
+
+/** Runs the real 'Analyze changes' bash for a changed-file list. */
+export const replayShouldTest = (ciText, changedFiles) => {
+  const ci = readCi(ciText);
+  const changed = new Set(
+    Object.entries(ci.filesYaml)
+      .filter(([, patterns]) =>
+        changedFiles.some((file) =>
+          patterns.some((pattern) => globToRegex(pattern).test(file))
+        )
+      )
+      .map(([key]) => key)
+  );
+  return replayProbes(ci, [changed])[0];
 };
 
 const replaceOnce = (text, from, to) => {
@@ -519,6 +558,54 @@ test("should report a filter dropped from the docs-only skip condition even when
     "false"
   );
 });
+
+test("should report a filter whose skip term is present but neutralised", () => {
+  // Arrange
+  const texts = plantIn(
+    "ci",
+    'outputs.core_any_changed }}" == "false" ]]',
+    'outputs.core_any_changed }}" == "false" || true ]]'
+  );
+
+  // Act
+  const violations = findViolations(texts);
+
+  // Assert
+  assert.ok(
+    violations.includes(
+      "skip chain: filter 'core' plus a .md change skips the tests"
+    ),
+    `expected a replay violation for core, got: ${violations.join("; ")}`
+  );
+});
+
+const CORE_SKIP_LINE =
+  '             [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \\\n';
+
+for (const [label, from, to] of [
+  ["removed", CORE_SKIP_LINE, ""],
+  [
+    "polarity-flipped",
+    'outputs.core_any_changed }}" == "false"',
+    'outputs.core_any_changed }}" == "true"',
+  ],
+]) {
+  test(`should report core ${label} in the docs-only condition though bridge_core stays`, () => {
+    // Arrange
+    const texts = plantIn("ci", from, to);
+    const files = ["packages/core/src/x.ts", "README.md"];
+
+    // Act
+    const violations = findViolations(texts);
+
+    // Assert
+    assert.equal(replayShouldTest(texts.ci, files), "false");
+    assert.ok(
+      violations.some((v) => v.startsWith("skip chain: filter 'core' ")),
+      `expected a skip-chain violation for core, got: ${violations.join("; ")}`
+    );
+  });
+}
 
 test("plant: a library in the relaxed bridge arm is reported", () => {
   const texts = plantIn(
