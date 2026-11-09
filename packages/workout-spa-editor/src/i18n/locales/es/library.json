@@ -16,15 +16,13 @@
     "cycling": "Ciclismo",
     "running": "Carrera",
     "swim": "Natación",
-    "strength": "Fuerza",
-    "generic": "Otro"
+    "strength": "Fuerza"
   },
   "empty": {
     "title": "Tu biblioteca está vacía",
     "message": "Guarda un entrenamiento en tu biblioteca para empezar.",
     "create": "Nuevo entreno",
     "import": "Importar archivo",
-    "createMessage": "Crea tu primer entrenamiento y guárdalo en tu biblioteca para empezar.",
     "filteredTitle": "No se encontraron entrenamientos",
     "filteredMessage": "Ningún entrenamiento coincide con tus filtros actuales."
   },
@@ -32,8 +30,7 @@
     "schedule": "Programar",
     "load": "Cargar",
     "loadAria": "Cargar {{name}} en el editor",
-    "deleteAria": "Eliminar {{name}}",
-    "thumbnailAlt": "Vista previa de {{name}}"
+    "deleteAria": "Eliminar {{name}}"
   },
   "actions": {
     "cancel": "Cancelar",
@@ -42,38 +39,7 @@
   },
   "deleteDialog": {
     "title": "Eliminar entrenamiento",
-    "confirm": "¿Eliminar \"{{name}}\"? Esto no se puede deshacer.",
-    "description": "¿Seguro que quieres eliminar \"{{name}}\"? Esta acción no se puede deshacer."
-  },
-  "filters": {
-    "clearFilters": "Borrar filtros",
-    "tagsLabel": "Etiquetas:",
-    "sport": {
-      "label": "Deporte",
-      "all": "Todos los deportes",
-      "cycling": "Ciclismo",
-      "running": "Carrera",
-      "swimming": "Natación",
-      "generic": "Genérico"
-    },
-    "difficulty": {
-      "label": "Dificultad",
-      "all": "Todos los niveles",
-      "easy": "Fácil",
-      "medium": "Media",
-      "hard": "Difícil"
-    },
-    "sortBy": {
-      "label": "Ordenar por",
-      "name": "Nombre",
-      "dateCreated": "Fecha de creación",
-      "difficulty": "Dificultad"
-    },
-    "sortOrder": {
-      "label": "Orden",
-      "asc": "Ascendente",
-      "desc": "Descendente"
-    }
+    "confirm": "¿Eliminar \"{{name}}\"? Esto no se puede deshacer."
   },
   "saveDialog": {
     "title": "Guardar en la biblioteca",
