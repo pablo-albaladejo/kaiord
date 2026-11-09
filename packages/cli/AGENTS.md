@@ -100,9 +100,7 @@ export const myCommand = async (options: MyOptions): Promise<number> => {
   } catch (error) {
     spinner?.fail("Failed");
     logger.error("Failed", { error });
-    const formatted = formatError(error, { json: opts.json });
-    console.error(formatted);
-    return mapErrorToExitCode(error);
+    return handleCommandError(error, { json: opts.json });
   } finally {
     spinner?.stop();
   }
