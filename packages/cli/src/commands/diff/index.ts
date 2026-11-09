@@ -1,6 +1,6 @@
 import { loadConfigWithMetadata } from "../../utils/config-loader.js";
-import { formatError } from "../../utils/error-formatter.js";
 import { ExitCode } from "../../utils/exit-codes.js";
+import { handleCommandError } from "../../utils/handle-command-error.js";
 import { createLogger } from "../../utils/logger-factory.js";
 import { computeDiff, printDiffResult } from "./diff-executor";
 import { type DiffOptions, diffOptionsSchema } from "./types";
@@ -38,11 +38,6 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
     return result.identical ? ExitCode.SUCCESS : ExitCode.DIFFERENCES_FOUND;
   } catch (error) {
     logger.error("Diff command failed", { error });
-    const formatted = formatError(error, { json: validatedOptions.json });
-
-    if (validatedOptions.json) console.log(formatted);
-    else console.error(formatted);
-
-    return ExitCode.UNKNOWN_ERROR;
+    return handleCommandError(error, { json: validatedOptions.json });
   }
 };
