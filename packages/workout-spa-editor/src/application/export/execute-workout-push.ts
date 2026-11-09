@@ -19,6 +19,7 @@
 import type { ManagedDataType } from "@kaiord/core";
 
 import type { IntegrationPolicyDeps } from "../integration-policy/integration-policy-deps";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveExportPolicies } from "../integration-policy/resolve-export-policies.use-case";
 import type {
   ExportPushFn,
@@ -63,9 +64,7 @@ export const executeWorkoutPush = async (
     profileId,
     dataType: WORKOUT_DATA_TYPE,
   });
-  const hasActiveRoute = policies.some(
-    (p) => p.enabled && p.bridgeId === destinationBridgeId
-  );
+  const hasActiveRoute = isRouteEnabled(policies, destinationBridgeId);
   if (!hasActiveRoute) {
     throw new NoActiveExportRouteError(destinationBridgeId);
   }
