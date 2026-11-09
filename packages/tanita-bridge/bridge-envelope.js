@@ -81,7 +81,6 @@ const createExternalDispatch = ({
 
 if (typeof module !== "undefined") {
   module.exports = {
-    ALLOWED_ORIGIN_REGEX,
     isAllowedSenderOrigin,
     createEnvelope,
     createDispatch,
