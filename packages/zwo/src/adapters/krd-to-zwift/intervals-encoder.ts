@@ -1,4 +1,9 @@
-import type { Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
+import {
+  isRepetitionBlock,
+  type Logger,
+  type RepetitionBlock,
+  type WorkoutStep,
+} from "@kaiord/core";
 
 import { detectIntervalType } from "../interval/interval-type-detector";
 import { encodeIntervalsT } from "./intervals-t-encoder";
@@ -46,7 +51,7 @@ export const convertStepsToZwiftIntervals = (
   logger?: Logger
 ): Array<OrderedNode> =>
   steps.flatMap((step) =>
-    "repeatCount" in step
+    isRepetitionBlock(step)
       ? encodeRepetitionBlock(step, logger)
       : [encodeStep(step, logger)]
   );

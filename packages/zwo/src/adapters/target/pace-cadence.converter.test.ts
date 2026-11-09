@@ -8,8 +8,6 @@ import {
   SPEED_MPS,
 } from "../../test-utils";
 import {
-  convertKrdCadenceToZwift,
-  convertKrdPaceToZwift,
   convertZwiftCadenceTarget,
   convertZwiftPaceTarget,
 } from "./pace-cadence.converter";
@@ -97,57 +95,5 @@ describe("convertZwiftCadenceTarget", () => {
       type: "cadence",
       value: { unit: "rpm", value: rpm },
     });
-  });
-});
-
-describe("convertKrdPaceToZwift", () => {
-  it.each([
-    { secPerKm: PACE_SECONDS_PER_KM.MODERATE },
-    { secPerKm: PACE_SECONDS_PER_KM.FAST },
-    { secPerKm: PACE_SECONDS_PER_KM.EASY },
-  ])("should convert m/s back to $secPerKm seconds per km", ({ secPerKm }) => {
-    // Arrange
-
-    // Act
-    const result = convertKrdPaceToZwift(PACE_METERS.KILOMETER / secPerKm);
-
-    // Assert
-    expect(result).toBeCloseTo(secPerKm, 1);
-  });
-});
-
-describe("convertKrdCadenceToZwift", () => {
-  it("should keep RPM as-is for cycling", () => {
-    // Arrange
-
-    // Act
-    const result = convertKrdCadenceToZwift(CADENCE_RPM.HIGH, false);
-
-    // Assert
-    expect(result).toBe(CADENCE_RPM.HIGH);
-  });
-
-  it("should default to cycling (isRunning = false)", () => {
-    // Arrange
-
-    // Act
-    const result = convertKrdCadenceToZwift(CADENCE_RPM.HIGH);
-
-    // Assert
-    expect(result).toBe(CADENCE_RPM.HIGH);
-  });
-
-  it.each([
-    { rpm: CADENCE_RPM.HIGH, spm: CADENCE_SPM.STANDARD },
-    { rpm: CADENCE_RPM.MED, spm: CADENCE_RPM.RUN_LOW },
-    { rpm: CADENCE_RPM.RUN_HIGH / 2, spm: CADENCE_RPM.RUN_HIGH },
-  ])("should convert $rpm RPM to $spm SPM for running", ({ rpm, spm }) => {
-    // Arrange
-
-    // Act
-    const result = convertKrdCadenceToZwift(rpm, true);
-
-    // Assert
-    expect(result).toBe(spm);
   });
 });

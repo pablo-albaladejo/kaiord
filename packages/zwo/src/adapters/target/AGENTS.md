@@ -12,7 +12,7 @@ Target conversion between KRD domain and ZWO domain. Handles bidirectional mappi
 | File                             | Description                                                          |
 | -------------------------------- | -------------------------------------------------------------------- |
 | `power.converter.ts`             | Power target conversion (watts ↔ FTP %) with absolute/relative logic |
-| `power.converter.test.ts`        | Tests for power conversion edge cases and rounding                   |
+| `power.converter.test.ts`        | Tests for Zwift → KRD power conversion and rounding                  |
 | `pace-cadence.converter.ts`      | Pace (min/km) and cadence (rpm) conversions                          |
 | `pace-cadence.converter.test.ts` | Tests for pace/cadence conversions                                   |
 
