@@ -13,6 +13,7 @@ import type { ManagedDataType } from "@kaiord/core";
 
 import type { ActivityRepository } from "../../ports/activity-repository";
 import type { CoachingSyncStateRepository } from "../../ports/persistence-port";
+import { errorMessage } from "../../utils/error-message";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
 import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
@@ -57,7 +58,7 @@ export const pullGarminActivities = async (
     return {
       ok: false,
       reason: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
 

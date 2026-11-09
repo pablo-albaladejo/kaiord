@@ -15,6 +15,7 @@
 import type { KRD } from "@kaiord/core";
 
 import { syncSourceFor } from "../../integrations/bridge-sync-sources";
+import { errorMessage } from "../../utils/error-message";
 import {
   isTrainingPeaksWeightEnabled,
   persistWeightDocuments,
@@ -51,7 +52,7 @@ export const syncTrainingPeaksWeight = async (
     return {
       ok: false,
       reason: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
 

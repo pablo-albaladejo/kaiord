@@ -11,6 +11,7 @@ import {
 } from "@kaiord/whoop";
 
 import type { ActivityRepository } from "../../ports/activity-repository";
+import { errorMessage } from "../../utils/error-message";
 import { mapWhoopActivity } from "../import/map-whoop-activity";
 import type { WhoopFetchResult } from "./whoop-fetch-result";
 
@@ -55,7 +56,7 @@ export const importWhoopCycleWorkouts = async (
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   if (!result.ok) return { ok: false, error: result.error };
