@@ -1,7 +1,6 @@
 /**
  * Bounded `useLiveQuery` source for `useMatchedSessions`: one
- * profile+date-range scan against `sessionMatches`. Extracted so the
- * hook entry stays under the per-file line cap.
+ * profile+date-range scan against `sessionMatches`.
  */
 
 import { db } from "../adapters/dexie/dexie-database";

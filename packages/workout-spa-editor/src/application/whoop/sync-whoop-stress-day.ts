@@ -1,7 +1,6 @@
 /**
  * Fetches, converts, and persists ONE calendar day of WHOOP stress for the
- * syncWhoopStress orchestrator. Split out to keep that use case's loop body
- * under the function-size cap (mirrors sync-whoop-heart-rate-day.ts's role
+ * syncWhoopStress orchestrator (mirrors sync-whoop-heart-rate-day.ts's role
  * for the heart-rate-series sync). `stressBffToEpisode` returning `null`
  * (no gauge reported that day) and an already-imported day (dedup) both
  * surface as `{ status: "skipped" }` — the orchestrator counts them

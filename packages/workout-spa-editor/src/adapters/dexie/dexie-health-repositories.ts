@@ -1,7 +1,6 @@
 /**
- * Assembles the six per-metric Dexie health-record repositories. Split out of
- * `dexie-persistence-adapter.ts` so that file stays under the per-file line cap
- * as new stores are added; the adapter spreads the returned object.
+ * Assembles the six per-metric Dexie health-record repositories;
+ * `dexie-persistence-adapter.ts` spreads the returned object.
  */
 import type {
   HealthBodyCompositionRecord,

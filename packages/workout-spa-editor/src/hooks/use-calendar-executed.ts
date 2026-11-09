@@ -4,7 +4,6 @@
  * the visible week's activities, and auto-match them into existing sessions,
  * never onto a recording another week's match holds.
  * Returns the by-day activities for the bucket builder's native render.
- * Extracted so `useCalendarPage` stays under its line cap.
  */
 import type { ActivityRecord } from "../types/activity-record";
 import type { WorkoutRecord } from "../types/calendar-record";

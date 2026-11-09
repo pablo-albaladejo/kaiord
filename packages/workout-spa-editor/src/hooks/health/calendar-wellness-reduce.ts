@@ -1,7 +1,7 @@
 /**
  * Reduces the four per-week health scans into the `wellnessByDay` map
  * consumed by the calendar band. Pure so it can be unit-tested without
- * Dexie and so `use-calendar-wellness-week-live` stays under its caps.
+ * Dexie.
  *
  * Contract: a day key is emitted only when ≥1 metric is present, and a
  * metric field is set only when its source value exists. Days/metrics

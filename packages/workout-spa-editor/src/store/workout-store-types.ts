@@ -1,8 +1,7 @@
 /**
  * Workout Store Types — composed type + supporting shape re-exports.
  *
- * Concrete field / action lists live in the split files alongside this
- * one, so every file stays under the ≤80-line-per-file rule.
+ * Concrete field / action lists live in the sibling `*.types.ts` files.
  */
 
 import type { WorkoutStoreActions } from "./workout-store-actions.types";
