@@ -79,13 +79,9 @@ IDs are automatically generated in these scenarios:
    - `createEmptyRepetitionBlockAction()` - Creates a new empty block
    - `createRepetitionBlockAction()` - Creates a block from selected steps
 
-2. **Loading workouts**:
-   - `migrateRepetitionBlocks()` - Adds IDs to blocks without them
-   - Runs automatically when workouts are loaded from storage
-
-3. **Importing workouts**:
-   - Migration runs automatically on import
-   - Preserves existing IDs if present
+2. **Loading or importing workouts**:
+   - `hydrateUIWorkout()` gives every step and block a fresh `ItemId`
+   - Runs whenever a KRD enters the store, so stored ids are not reused
 
 ### Generation Function
 
@@ -114,82 +110,19 @@ export const generateBlockId = (): string => {
 
 **Location**: `src/utils/id-generation.ts`
 
-## Migration System
+## IDs on Load
 
-### Overview
-
-Existing workouts without block IDs are automatically migrated when loaded. This ensures backward compatibility with workouts created before the block ID system was introduced.
-
-### Migration Function
-
-```typescript
-/**
- * Migrates repetition blocks in a workout to ensure all blocks have unique IDs.
- *
- * This function:
- * - Adds IDs to blocks that don't have them
- * - Preserves existing IDs if present
- * - Returns a new workout object (does not mutate the original)
- *
- * @param workout - The workout to migrate
- * @returns A new workout with all repetition blocks having IDs
- */
-export const migrateRepetitionBlocks = (workout: Workout): Workout => {
-  return {
-    ...workout,
-    steps: workout.steps.map((step) => {
-      if (!isRepetitionBlock(step)) {
-        return step;
-      }
-
-      if (step.id) {
-        return step; // Preserve existing ID
-      }
-
-      return {
-        ...step,
-        id: generateBlockId(), // Add new ID
-      };
-    }),
-  };
-};
-```
-
-**Location**: `src/utils/workout-migration.ts`
-
-### Migration Behavior
-
-- ✅ **Adds IDs to blocks without them**: Ensures all blocks have IDs
-- ✅ **Preserves existing IDs**: Doesn't overwrite IDs that are already present
-- ✅ **Immutable**: Returns a new workout object, doesn't mutate the original
-- ✅ **Automatic**: Runs automatically on workout load
-- ✅ **Zero user intervention**: Completely transparent to users
-
-### When Migration Runs
-
-Migration is triggered automatically in these scenarios:
-
-1. **Loading from localStorage**: When the app loads a saved workout
-2. **Importing files**: When a user imports a KRD file
-3. **Undo/redo**: When restoring a workout from history
-4. **Store initialization**: When the workout store is created
-
-### Example
+There is no separate migration pass. `hydrateUIWorkout()` in
+`src/store/hydrate-ui-workout.ts` runs whenever a KRD is loaded into the
+store, and by default it regenerates the `ItemId` of every step and block
+(`preserveExistingIds: false`). Stable ids are an in-memory UI concern, so a
+workout saved without block ids, or with ids from another source, gets a
+complete set on load. `preserveExistingIds: true` is an opt-in for
+deterministic tests.
 
 ```typescript
-// Before migration
-const workout = {
-  sport: "running",
-  steps: [
-    { repeatCount: 3, steps: [...] }, // No ID
-    { repeatCount: 5, steps: [...] }  // No ID
-  ]
-};
-
-// After migration
-const migrated = migrateRepetitionBlocks(workout);
-// migrated.steps[0].id => "block-1704123456789-x7k2m9p4q"
-// migrated.steps[1].id => "block-1704123456790-a8n3p5r2s"
+const workout = hydrateUIWorkout(krd);
+// every step and block in workout now carries an ItemId
 ```
 
 ## Type Definition
@@ -213,7 +146,7 @@ The `id` field is optional in the type definition to maintain backward compatibi
 - External systems that generate KRD files
 - Test fixtures that may not include IDs
 
-However, **all blocks in the application will have IDs** after migration runs.
+However, **all blocks in the application will have IDs** once `hydrateUIWorkout()` has run on load.
 
 ### Validation
 
@@ -222,7 +155,7 @@ The application validates that blocks have IDs before performing operations:
 ```typescript
 // In component
 if (!block.id) {
-  console.error("Block missing ID - migration may have failed");
+  console.error("Block missing ID");
   return;
 }
 
@@ -415,7 +348,7 @@ deleteRepetitionBlock: (blockId: string) => void;
 
 - `src/types/schemas/repetition-block-id.test.ts` - Schema validation
 - `src/utils/id-generation.test.ts` - ID generation tests
-- `src/utils/workout-migration.test.ts` - Migration tests
+- `src/store/hydrate-ui-workout.test.ts` - ID assignment on load
 
 **Store Actions**:
 
@@ -434,7 +367,7 @@ deleteRepetitionBlock: (blockId: string) => void;
 
 ### Integration Tests
 
-- `src/store/workout-loading-integration.test.ts` - Workout loading with migration
+- `src/store/workout-loading-integration.test.ts` - Workout loading
 - `src/store/actions/performance.test.ts` - Performance benchmarks
 
 ### E2E Tests
@@ -451,7 +384,6 @@ deleteRepetitionBlock: (blockId: string) => void;
 
 - **ID generation**: < 1ms per ID
 - **Block lookup**: < 1ms for typical workouts (< 50 steps)
-- **Migration**: < 5ms for typical workouts
 - **Memory overhead**: ~50 bytes per block (negligible)
 
 ### Optimization
@@ -478,7 +410,7 @@ The system is optimized for:
 ❌ **Don't use array indices**: They change when blocks are reordered
 ❌ **Don't mutate IDs**: IDs should never change after creation
 ❌ **Don't assume ID format**: Use the ID as an opaque string
-❌ **Don't skip migration**: Always run migration on workout load
+❌ **Don't bypass hydration**: Load workouts through the store so `hydrateUIWorkout()` assigns ids
 ❌ **Don't hardcode IDs**: Always generate them dynamically
 
 ## Troubleshooting
@@ -491,7 +423,7 @@ The system is optimized for:
 
 1. Block was already deleted
 2. ID is incorrect (typo or wrong variable)
-3. Migration didn't run (block has no ID)
+3. The workout skipped `hydrateUIWorkout()` (block has no ID)
 
 **Solution**:
 
@@ -513,15 +445,14 @@ if (!result) {
 
 **Possible causes**:
 
-1. Migration didn't run
-2. Workout was created before migration system
-3. External KRD file without IDs
+1. The workout was not loaded through the store, so `hydrateUIWorkout()` did not run
+2. External KRD file without IDs, read directly
 
 **Solution**:
 
 ```typescript
-// Manually trigger migration
-const migratedWorkout = migrateRepetitionBlocks(workout);
+// Assign ids the same way the store does on load
+const hydrated = hydrateUIWorkout(krd);
 ```
 
 ### Wrong Block Deleted
