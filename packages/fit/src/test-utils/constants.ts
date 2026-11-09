@@ -2,12 +2,8 @@
 
 // === Time domain ===
 export const TIME_TOLERANCE_MS = 1000 as const;
-export const ONE_MIN_MS = 60000 as const;
-export const FIFTY_FIVE_SEC_MS = 55000 as const;
-export const NINE_MIN_FIFTY_SEC_MS = 590000 as const;
 export const TEN_MIN_SEC = 600 as const;
 export const NINE_MIN_FORTY_SEC = 580 as const;
-export const SECONDS_PER_MINUTE = 60 as const;
 
 // === FIT timestamp roots ===
 export const SAMPLE_TIMESTAMP_2024_01_01_SEC = 1704067200 as const;
@@ -82,21 +78,15 @@ export const COORD_PRECISION_6 = 6 as const;
 // === Workout step / swim ===
 export const SAMPLE_WORKOUT_STEP_INDEX = 3 as const;
 export const SAMPLE_NUM_LENGTHS = 4 as const;
-export const SAMPLE_SWIM_STROKE_BREASTSTROKE = 2 as const;
 
 // === Activity-scale record batch (unit test + bench) ===
 export const PERF_RECORD_BATCH_SIZE = 10000 as const;
 
 // === Event-converter sample data ===
 export const SAMPLE_EVENT_DATA = 42 as const;
-export const SAMPLE_EVENT_TYPE_LAP = 3 as const;
 
 // === Record batch sample size ===
 export const RECORD_BATCH_SAMPLE_SIZE = 3 as const;
-
-// === Numeric duration sample (used in invalid-type test) ===
-export const NUMERIC_DURATION_TYPE_SAMPLE = 123 as const;
-export const SECONDS_PER_MINUTE_SAMPLE = 60 as const;
 
 // === FIT step counts and target zones ===
 export const FIT_STEPS_COUNT_4 = 4 as const;
@@ -117,14 +107,9 @@ export const FIT_NOTES_OVERSIZED_LENGTH = 300 as const;
 export const FIT_NOTES_MAX_LENGTH = 256 as const;
 
 // === krd-to-fit watts/percent FTP scaling samples ===
-export const FIT_TIME_300_SEC = 300 as const;
 export const FIT_DURATION_VALUE_1000 = 1000 as const;
 export const FIT_TARGET_VALUE_1200 = 1200 as const;
 export const FIT_TARGET_VALUE_1250 = 1250 as const;
-export const FIT_PERCENT_FTP_85 = 85 as const;
-export const FIT_DURATION_CALORIES_10000 = 10000 as const;
-export const FIT_DURATION_POWER_50 = 50 as const;
-export const FIT_DURATION_POWER_1000 = 1000 as const;
 export const FIT_TARGET_POWER_RANGE_LOW = 200 as const;
 export const FIT_TARGET_POWER_RANGE_HIGH = 250 as const;
 
