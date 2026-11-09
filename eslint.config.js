@@ -259,7 +259,10 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "error",
+      "react-hooks/exhaustive-deps": [
+        "error",
+        { additionalHooks: "^useThemedChartOptions$" },
+      ],
       ...importRules,
       "@typescript-eslint/no-restricted-imports": [
         "error",
