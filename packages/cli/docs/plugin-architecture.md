@@ -114,7 +114,7 @@ const createPluginDiscovery = (logger: Logger): PluginDiscovery => ({
     plugins.push(...globalPlugins);
 
     // 3. Load plugins from config
-    const config = await loadConfig();
+    const config = (await loadConfigWithMetadata()).config;
     if (config.plugins) {
       plugins.push(...config.plugins);
     }

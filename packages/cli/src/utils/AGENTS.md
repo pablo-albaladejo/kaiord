@@ -39,7 +39,7 @@ Shared utilities for file I/O, configuration, error handling, format detection, 
 - **`error-exit-code.ts`** — Map error types to exit codes
 - **`error-suggestions.ts`** — Generate helpful suggestions based on error type (file not found → check path, etc.)
 - **`format-violations.ts`** — Format validation tolerance violations for human readability
-- **`exit-codes.ts`** — Constants for exit codes (0=success, 1=error, 2=tolerance exceeded, 3=diff found)
+- **`exit-codes.ts`** — Constants for exit codes (0=success, 1=invalid argument, 2=file not found, 3=permission denied, 4=parsing error, 5=validation error, 6=tolerance exceeded, 7=auth error, 10=differences found, 11=partial success, 12=directory create error, 13=environment error, 14=service error, 99=unknown)
 
 ### Logging
 
