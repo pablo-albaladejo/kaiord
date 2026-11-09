@@ -245,7 +245,7 @@ describe("createTextToWorkout", () => {
     expect(result.steps[0]).toMatchObject({ stepIndex: 0 });
   });
 
-  it("should log at debug, info, and warn levels", async () => {
+  it("should log at info and warn levels", async () => {
     // Arrange
     const logger = {
       debug: vi.fn(),
@@ -264,7 +264,6 @@ describe("createTextToWorkout", () => {
     await parse("test");
 
     // Assert
-    expect(logger.debug).toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
   });

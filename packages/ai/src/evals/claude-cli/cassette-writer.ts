@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { sha256Hex } from "../cassettes/canonical-hash";
 import { COMMITTED_DIR } from "../cassettes/cassette-files";
 import type { Cassette } from "../cassettes/cassette-schema";
+import { MANIFEST_FILE } from "../cassettes/committed-directory";
 import { manifestSchema } from "../cassettes/manifest";
 import type { Manifest } from "../cassettes/manifest";
 import {
@@ -45,7 +46,7 @@ export const serialize = (value: unknown): string =>
 /** Read and validated first: a bad manifest leaves no unlisted cassette. */
 const readManifest = (dir: string): Manifest =>
   manifestSchema.parse(
-    JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"))
+    JSON.parse(readFileSync(join(dir, MANIFEST_FILE), "utf8"))
   );
 
 const upserted = (manifest: Manifest, id: string, sha256: string) => ({
@@ -68,7 +69,7 @@ const writeCommitted = (cassette: Cassette, targets: CassetteTargets) => {
   const path = join(targets.committedDir, `${cassette.id}.json`);
   writeFileSync(path, bytes);
   writeFileSync(
-    join(targets.committedDir, "manifest.json"),
+    join(targets.committedDir, MANIFEST_FILE),
     serialize(upserted(manifest, cassette.id, sha256Hex(bytes)))
   );
   return path;
