@@ -99,10 +99,8 @@ These schemas are ready to be moved to the actual implementation:
 
 #### Input Schemas (Flexible)
 
-- `input/workout-input.schema.ts` - Workout input schema
-- `input/segment-input.schema.ts` - Segment input schema (multisport)
 - `input/step-input.schema.ts` - Step input schema
-- `input/repeat-input.schema.ts` - Repeat block input schema
+- `input/types.ts` - Step input types (repeat-group included)
 
 #### Output Schemas (Strict)
 

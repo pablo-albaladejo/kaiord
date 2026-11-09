@@ -9,32 +9,27 @@ Zod runtime validators for GCN JSON payloads. Defines schemas for input (flexibl
 
 ## Key Files
 
-| File                                 | Description                                                                                                                  |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| `garmin-workout-parse.schema.ts`     | Top-level Zod schema for parsing incoming GCN JSON. Entry point for validation before conversion.                            |
-| `index.ts`                           | Public exports: all input, output, and common schemas.                                                                       |
-| `common/index.ts`                    | Exports all shared enum schemas.                                                                                             |
-| `common/sport-type.schema.ts`        | Zod enum for sport types: `running` (1), `cycling` (2), `swimming` (5), `strength_training` (10), `multi_sport` (10).        |
-| `common/condition-type.schema.ts`    | Zod enum for step condition types: `open` (1), `lap` (2), `rest` (3), `recover` (4).                                         |
-| `common/equipment-type.schema.ts`    | Zod enum for equipment types: `goggles` (5), `kickboard` (6), `pull_buoy` (7), `hand_paddle` (8), `cap` (9), `wetsuit` (10). |
-| `common/step-type.schema.ts`         | Zod enum for step types: `active`, `rest`, `repeat`, `warmup`, `cooldown`, `recovery`.                                       |
-| `common/stroke-type.schema.ts`       | Zod enum for stroke types: `freestyle` (1), `backstroke` (2), `breaststroke` (3), `butterfly` (4), `mixed` (5), `drill` (6). |
-| `common/target-type.schema.ts`       | Zod enum for target types: `speed`, `power`, `heart_rate`, `cadence`, `zone`.                                                |
-| `common/unit.schema.ts`              | Zod enum for GCN unit IDs: `meters` (1), `feet` (2), etc.                                                                    |
-| `input/index.ts`                     | Exports all input schemas.                                                                                                   |
-| `input/types.ts`                     | TypeScript type exports derived from input schemas.                                                                          |
-| `input/workout-input.schema.ts`      | Flexible GCN workout input schema (unions, optional fields, flexible target types).                                          |
-| `input/workout-input.schema.test.ts` | Unit tests for input schema validation.                                                                                      |
-| `input/segment-input.schema.ts`      | Schema for GCN workout segment (part of multisport).                                                                         |
-| `input/step-input.schema.ts`         | Schema for GCN workout step (flexible types).                                                                                |
-| `input/repeat-input.schema.ts`       | Schema for GCN repeat block structure.                                                                                       |
-| `output/index.ts`                    | Exports all output schemas.                                                                                                  |
-| `output/types.ts`                    | TypeScript type exports derived from output schemas.                                                                         |
-| `output/workout.schema.ts`           | Strict GCN workout output schema (required fields, expanded type objects, server IDs).                                       |
-| `output/segment.schema.ts`           | Schema for GCN output segment (with metrics).                                                                                |
-| `output/step.schema.ts`              | Schema for GCN output step (strict types, required fields).                                                                  |
-| `output/repeat.schema.ts`            | Schema for GCN output repeat block.                                                                                          |
-| `output/author.schema.ts`            | Schema for GCN author object (creator metadata).                                                                             |
+| File                              | Description                                                                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `garmin-workout-parse.schema.ts`  | Top-level Zod schema for parsing incoming GCN JSON. Entry point for validation before conversion.                            |
+| `index.ts`                        | Public exports: all input, output, and common schemas.                                                                       |
+| `common/index.ts`                 | Exports all shared enum schemas.                                                                                             |
+| `common/sport-type.schema.ts`     | Zod enum for sport types: `running` (1), `cycling` (2), `swimming` (5), `strength_training` (10), `multi_sport` (10).        |
+| `common/condition-type.schema.ts` | Zod enum for step condition types: `open` (1), `lap` (2), `rest` (3), `recover` (4).                                         |
+| `common/equipment-type.schema.ts` | Zod enum for equipment types: `goggles` (5), `kickboard` (6), `pull_buoy` (7), `hand_paddle` (8), `cap` (9), `wetsuit` (10). |
+| `common/step-type.schema.ts`      | Zod enum for step types: `active`, `rest`, `repeat`, `warmup`, `cooldown`, `recovery`.                                       |
+| `common/stroke-type.schema.ts`    | Zod enum for stroke types: `freestyle` (1), `backstroke` (2), `breaststroke` (3), `butterfly` (4), `mixed` (5), `drill` (6). |
+| `common/target-type.schema.ts`    | Zod enum for target types: `speed`, `power`, `heart_rate`, `cadence`, `zone`.                                                |
+| `common/unit.schema.ts`           | Zod enum for GCN unit IDs: `meters` (1), `feet` (2), etc.                                                                    |
+| `input/types.ts`                  | Step input types (`GarminWorkoutStepInput`, `RepeatGroupDTOInputType`).                                                      |
+| `input/step-input.schema.ts`      | Schema for a GCN executable step (flexible types).                                                                           |
+| `output/index.ts`                 | Exports all output schemas.                                                                                                  |
+| `output/types.ts`                 | TypeScript type exports derived from output schemas.                                                                         |
+| `output/workout.schema.ts`        | Strict GCN workout output schema (required fields, expanded type objects, server IDs).                                       |
+| `output/segment.schema.ts`        | Schema for GCN output segment (with metrics).                                                                                |
+| `output/step.schema.ts`           | Schema for GCN output step (strict types, required fields).                                                                  |
+| `output/repeat.schema.ts`         | Schema for GCN output repeat block.                                                                                          |
+| `output/author.schema.ts`         | Schema for GCN author object (creator metadata).                                                                             |
 
 ## Subdirectories
 
@@ -82,7 +77,7 @@ This is by design and enforced at the schema level. The Garmin API has fundament
 
 **Schema Tests:**
 
-- `input/workout-input.schema.test.ts` validates input schema against real payloads.
+- Input step types are exercised through the converter tests.
 - Coverage: 80%+ for schema validation logic.
 
 **Test Conventions:**
@@ -98,7 +93,7 @@ it("should parse input workout with flexible target types", () => {
   const payload = { sportType: { sportTypeId: 1 }, workoutName: "Run", ... };
 
   // Act
-  const result = workoutInputSchema.safeParse(payload);
+  const result = workoutStepParseSchema.safeParse(payload);
 
   // Assert
   expect(result.success).toBe(true);
@@ -147,7 +142,7 @@ const workoutOutputSchema = z.object({
 export const sportTypeSchema = z.enum(["running", "cycling", "swimming", ...]);
 export type SportType = z.infer<typeof sportTypeSchema>;
 
-// input/workout-input.schema.ts
+// output/workout.schema.ts
 import { sportTypeSchema } from "../common/sport-type.schema";
 ```
 
