@@ -1,6 +1,5 @@
 /**
- * Pure helpers for the auto-match dismissal use cases. Extracted so the
- * use-case file stays under the per-file lint cap.
+ * Pure helpers for the auto-match dismissal use cases.
  */
 
 import type { AutoMatchDismissedPair } from "../types/auto-match-dismissal";

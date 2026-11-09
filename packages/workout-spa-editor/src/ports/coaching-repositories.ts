@@ -1,8 +1,7 @@
 /**
  * Coaching repository port interfaces.
  *
- * Split from persistence-port.ts to keep file size under the lint limit;
- * re-exported from persistence-port for ergonomics. CoachingRepository
+ * Re-exported from persistence-port for ergonomics. CoachingRepository
  * intentionally does NOT expose raw table access — `getByProfileAndDateRange`
  * is the only public scan API, making profile isolation a structural
  * property of the port surface.

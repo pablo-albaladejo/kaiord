@@ -1,8 +1,7 @@
 /**
  * Dexie Migration Helpers
  *
- * Pure row-level upgrade functions. Co-located with `dexie-database.ts`
- * but split out so the database class stays under the per-file line cap.
+ * Pure row-level upgrade functions for `dexie-database.ts`.
  */
 
 import type { Transaction } from "dexie";
@@ -65,8 +64,8 @@ export const applyV8Upgrade = async (tx: Transaction): Promise<void> => {
     .modify(makeBackfillAiProviderCreatedAt());
 };
 
-// v9 migration helpers live in `./dexie-v9-migration.ts` to keep this
-// file under the 80-line cap. Re-exported for the database class.
+// v9 migration helpers live in `./dexie-v9-migration.ts`. Re-exported for
+// the database class.
 export {
   applyV9Upgrade,
   hasUserData,

@@ -1,8 +1,7 @@
 /**
  * Fetches one WHOOP `cycles/details` window and imports every workout it
  * carries into the `activities` store, resolving each `sport_id` through the
- * pre-fetched sports catalog. Split out of sync-whoop-activities.use-case.ts
- * to keep that file under the per-file line cap.
+ * pre-fetched sports catalog, for sync-whoop-activities.use-case.ts.
  */
 import {
   type WhoopCycleRecord,
