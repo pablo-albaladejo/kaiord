@@ -6,10 +6,13 @@ import {
   mergeWithConfig,
 } from "../../utils/config-loader.js";
 import { ExitCode } from "../../utils/exit-codes.js";
+import {
+  handleCommandError,
+  resolveJsonFlag,
+} from "../../utils/handle-command-error.js";
 import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import { createLogger } from "../../utils/logger-factory.js";
 import { buildInspectSummary } from "./build-summary.js";
-import { handleInspectError } from "./handle-error.js";
 import type { InspectOptions } from "./types.js";
 import { inspectOptionsSchema } from "./types.js";
 
@@ -65,7 +68,10 @@ export const inspectCommand = async (options: unknown): Promise<number> => {
   } catch (error) {
     spinner?.fail("Inspection failed");
     logger?.error("Inspect failed", { error });
-    return handleInspectError(error, options);
+    return handleCommandError(error, {
+      json: resolveJsonFlag(inspectOptionsSchema, options),
+      envelope: true,
+    });
   } finally {
     spinner?.stop();
   }
