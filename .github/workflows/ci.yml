@@ -686,6 +686,8 @@ jobs:
       # dist-reading docs and SPA tests skip. REQUIRE_DOCS_DIST=1 and
       # REQUIRE_SPA_DIST=1 turn that skip
       # into a failure here, so the guards cannot pass vacuously pre-merge.
+      # check-no-perf-marks-in-prod greps this job's SPA bundle, so it lives
+      # here too (--skip-build: the bundle was just built above).
       - name: Site guards
         env:
           REQUIRE_DOCS_DIST: "1"
@@ -695,6 +697,7 @@ jobs:
           node scripts/check-site-links.mjs --landing packages/landing/dist --app packages/workout-spa-editor/dist --docs packages/docs/.vitepress/dist
           node --test packages/docs/scripts/*.test.mjs
           node --test packages/workout-spa-editor/scripts/dist-pwa-manifest.test.mjs
+          node scripts/check-no-perf-marks-in-prod.mjs --skip-build
 
       - name: Verify build outputs
         # Verify every package whose dist/ a downstream consumer reads.

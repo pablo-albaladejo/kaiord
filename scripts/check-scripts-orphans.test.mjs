@@ -487,3 +487,30 @@ test("script named only in the README inventory table fails", () => {
     h.cleanup();
   }
 });
+
+test("script named only in a Markdown table outside the README fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "check-documented.mjs");
+    writeFileSync(
+      join(root, "scripts", "AGENTS.md"),
+      "| `check-documented.mjs` | a guard |\n"
+    );
+    mkdirSync(join(root, "scripts", "notes"), { recursive: true });
+    writeFileSync(
+      join(root, "scripts", "notes", "guards.md"),
+      "Run `check-documented.mjs` by hand.\n"
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /scripts\/check-documented\.mjs/);
+  } finally {
+    h.cleanup();
+  }
+});

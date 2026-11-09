@@ -41,7 +41,8 @@ function listScriptCandidates(rootDir) {
       }
       const full = join(dir, entry.name);
       const rel = relative(rootDir, full);
-      if (entry.name === README_NAME && dir === rootDir) continue;
+      // Markdown is documentation, never a script to wire.
+      if (entry.name.endsWith(".md")) continue;
       if (entry.name.endsWith(".test.mjs")) continue;
       out.push(rel);
     }
@@ -142,8 +143,9 @@ function collectRootConfigs(rootDir) {
 function collectScriptsTransitive(rootDir, scriptsDir) {
   // Read every non-test file under scripts/ and .github/scripts/, excluding
   // the lib/cws-api/fixtures subdirs (internal to a single parent script)
-  // and scripts/README.md: a row in its inventory table documents wiring,
-  // it is not wiring. Only its manual-tools block counts, as an allowlist.
+  // and every Markdown file: a row in an inventory table (README.md,
+  // AGENTS.md) documents wiring, it is not wiring. Only the README's
+  // manual-tools block counts, as an allowlist, and it is parsed apart.
   // Keys are repo-relative paths.
   const map = new Map();
   function walk(dir) {
@@ -154,7 +156,7 @@ function collectScriptsTransitive(rootDir, scriptsDir) {
         continue;
       }
       if (e.name.endsWith(".test.mjs")) continue;
-      if (dir === scriptsDir && e.name === README_NAME) continue;
+      if (e.name.endsWith(".md")) continue;
       const full = join(dir, e.name);
       map.set(relative(rootDir, full), readSafe(full));
     }
