@@ -9,13 +9,12 @@ Package-specific Markdown documentation for `@kaiord/core` consumers. Cross-cutt
 
 ## Key Files
 
-| File                         | Description                                                                                                                                   |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api-examples.md`            | Comprehensive code examples for `fromBinary`/`fromText`/`toBinary`/`toText`, schema validation, error handling.                               |
-| `tree-shaking.md`            | Guide for minimising bundle size — recommends `import type`, named imports, and the `./test-utils` subpath separation.                        |
-| `krd-fixtures-generation.md` | How `scripts/generate-krd-fixtures.ts` produces `.krd` fixtures from FIT files and how downstream packages consume them via `loadKrdFixture`. |
-| `zwift-format-extensions.md` | Maps kaiord/KRD concepts onto Zwift ZWO XML extensions used by the `@kaiord/zwo` adapter.                                                     |
-| `zwift-kaiord-attributes.md` | Currently empty (0 bytes) — placeholder for documenting custom `kaiord:*` XML attributes injected into ZWO output.                            |
+| File                         | Description                                                                                                            |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `api-examples.md`            | Comprehensive code examples for `fromBinary`/`fromText`/`toBinary`/`toText`, schema validation, error handling.        |
+| `tree-shaking.md`            | Guide for minimising bundle size — recommends `import type`, named imports, and the `./test-utils` subpath separation. |
+| `zwift-format-extensions.md` | Maps kaiord/KRD concepts onto Zwift ZWO XML extensions used by the `@kaiord/zwo` adapter.                              |
+| `zwift-kaiord-attributes.md` | Currently empty (0 bytes) — placeholder for documenting custom `kaiord:*` XML attributes injected into ZWO output.     |
 
 ## For AI Agents
 

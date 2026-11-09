@@ -445,7 +445,6 @@ async function convertWorkout(fitBuffer: Uint8Array) {
 
 - **[API Examples](./docs/api-examples.md)** - Comprehensive code examples (coming soon)
 - **[Tree Shaking Guide](./docs/tree-shaking.md)** - Optimize bundle size
-- **[KRD Fixtures Generation](./docs/krd-fixtures-generation.md)** - Generate test fixtures
 - **[Zwift Format Extensions](./docs/zwift-format-extensions.md)** - Zwift-specific features
 - **[Zwift Kaiord Attributes](./docs/zwift-kaiord-attributes.md)** - Custom Zwift attributes
 
@@ -472,7 +471,6 @@ pnpm test                   # Run tests once
 pnpm test:watch             # Run tests in watch mode
 pnpm test:coverage          # Run tests with coverage report
 pnpm generate:schema        # Generate JSON Schema from Zod schemas
-pnpm generate:krd-fixtures  # Generate KRD test fixtures from FIT files
 pnpm clean                  # Clean build artifacts
 ```
 
@@ -520,5 +518,3 @@ const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
 // Load both for round-trip tests
 const { fit, krd } = loadFixturePair(FIXTURE_NAMES.INDIVIDUAL_STEPS);
 ```
-
-See [docs/krd-fixtures-generation.md](./docs/krd-fixtures-generation.md) for details on fixture generation.
