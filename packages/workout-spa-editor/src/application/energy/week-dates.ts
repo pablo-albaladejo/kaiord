@@ -4,20 +4,16 @@
  * week boundaries match how `WorkoutRecord.date` is stored.
  */
 
-import {
-  addDaysIso,
-  isoToLocalDate,
-  toIsoDate,
-} from "../../components/pages/Daily/today-dates";
+import { addDaysIso } from "../shared/date-utils";
 
 const DAYS_PER_WEEK = 7;
 const MONDAY_OFFSET = 1;
 
 const mondayIsoOf = (iso: string): string => {
-  const date = isoToLocalDate(iso);
-  const weekday = date.getDay();
+  const [year, month, day] = iso.split("-").map(Number);
+  const weekday = new Date(year!, (month ?? 1) - 1, day ?? 1).getDay();
   const diff = (weekday + DAYS_PER_WEEK - MONDAY_OFFSET) % DAYS_PER_WEEK;
-  return addDaysIso(toIsoDate(date), -diff);
+  return addDaysIso(iso, -diff);
 };
 
 export const weekDatesFrom = (iso: string): string[] => {

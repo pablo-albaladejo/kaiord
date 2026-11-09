@@ -16,9 +16,9 @@
 
 import { type AdaptiveTdeeResult, computeAdaptiveTdee } from "@kaiord/core";
 
-import { addDaysIso } from "../../components/pages/Daily/today-dates";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { HealthWeightRecord } from "../../types/health/health-records";
+import { addDaysIso } from "../shared/date-utils";
 import { buildEnergyRollup } from "./build-energy-rollup";
 import { buildWeightTrend } from "./build-weight-trend";
 
