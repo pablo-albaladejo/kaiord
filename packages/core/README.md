@@ -37,46 +37,49 @@ yarn add @kaiord/core
 
 ## Quick Start
 
+Core exposes four conversion functions. Each takes the data, an injected
+reader or writer from an adapter package, and an optional logger:
+
+| Function                           | Direction           | Adapter port                      |
+| ---------------------------------- | ------------------- | --------------------------------- |
+| `fromBinary(buffer, reader, log?)` | binary format → KRD | `BinaryReader` (e.g. `fitReader`) |
+| `toBinary(krd, writer, log?)`      | KRD → binary format | `BinaryWriter` (e.g. `fitWriter`) |
+| `fromText(text, reader, log?)`     | text format → KRD   | `TextReader` (e.g. `tcxReader`)   |
+| `toText(krd, writer, log?)`        | KRD → text format   | `TextWriter` (e.g. `zwiftWriter`) |
+
+The result of `fromBinary`/`fromText` is validated against the KRD schema, and
+the input of `toBinary`/`toText` is validated before it reaches the writer.
+
 ### Single Format
 
 ```typescript
-import { createDefaultProviders } from "@kaiord/core";
-import { createFitProviders } from "@kaiord/fit";
+import { fromBinary, toBinary } from "@kaiord/core";
 import type { KRD } from "@kaiord/core";
-import { readFile } from "fs/promises";
-
-// Wire FIT adapter into core
-const providers = createDefaultProviders({
-  fit: createFitProviders(),
-});
+import { fitReader, fitWriter } from "@kaiord/fit";
+import { readFile } from "node:fs/promises";
 
 // Convert FIT to KRD
-const fitBuffer = await readFile("workout.fit");
-const krd: KRD = await providers.convertFitToKrd!({ fitBuffer });
+const fitBuffer = new Uint8Array(await readFile("workout.fit"));
+const krd: KRD = await fromBinary(fitBuffer, fitReader);
 
-// Convert KRD to FIT
-const output = await providers.convertKrdToFit!({ krd });
+// Convert KRD back to FIT
+const output: Uint8Array = await toBinary(krd, fitWriter);
 ```
 
 ### Multiple Formats
 
 ```typescript
-import { createDefaultProviders } from "@kaiord/core";
-import { createFitProviders } from "@kaiord/fit";
-import { createTcxProviders } from "@kaiord/tcx";
-import { createZwoProviders } from "@kaiord/zwo";
+import { fromBinary, toText } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
+import { tcxWriter } from "@kaiord/tcx";
+import { zwiftWriter } from "@kaiord/zwo";
 
-// Wire all adapters you need
-const providers = createDefaultProviders({
-  fit: createFitProviders(),
-  tcx: createTcxProviders(),
-  zwo: createZwoProviders(),
-});
+declare const fitBuffer: Uint8Array;
 
-// Convert between formats
-const krd = await providers.convertFitToKrd!({ fitBuffer });
-const tcx = await providers.convertKrdToTcx!({ krd });
-const zwo = await providers.convertKrdToZwift!({ krd });
+// FIT in, KRD in the middle, TCX and ZWO out
+const krd = await fromBinary(fitBuffer, fitReader);
+const tcx: string = await toText(krd, tcxWriter);
+const zwo: string = await toText(krd, zwiftWriter);
 ```
 
 ### Schema Validation
@@ -84,13 +87,15 @@ const zwo = await providers.convertKrdToZwift!({ krd });
 ```typescript
 import { krdSchema } from "@kaiord/core";
 
+declare const data: unknown;
+
 // Validate KRD data
 const result = krdSchema.safeParse(data);
 
 if (result.success) {
   console.log("Valid KRD:", result.data);
 } else {
-  console.error("Validation errors:", result.error.errors);
+  console.error("Validation errors:", result.error.issues);
 }
 ```
 
@@ -98,59 +103,51 @@ if (result.success) {
 
 ### Main Functions
 
-#### `createDefaultProviders(adapters?, logger?)`
+#### `fromBinary(buffer, reader, logger?)` / `fromText(text, reader, logger?)`
 
-Creates a provider container with optional format adapters wired in.
-
-```typescript
-import { createDefaultProviders } from "@kaiord/core";
-import { createFitProviders } from "@kaiord/fit";
-import { createTcxProviders } from "@kaiord/tcx";
-
-const providers = createDefaultProviders({
-  fit: createFitProviders(),
-  tcx: createTcxProviders(),
-});
-// Returns: { schemaValidator, toleranceChecker, logger, convertFitToKrd, ... }
-```
-
-#### `convertFitToKrd({ fitBuffer })`
-
-Converts a FIT workout file to KRD format.
+Converts a file in an adapter format to a validated KRD.
 
 ```typescript
-const krd = await providers.convertFitToKrd({ fitBuffer });
+import { fromBinary, fromText } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
+import { tcxReader } from "@kaiord/tcx";
+
+declare const fitBuffer: Uint8Array;
+declare const tcxString: string;
+
+const fromFit = await fromBinary(fitBuffer, fitReader);
+const fromTcx = await fromText(tcxString, tcxReader);
 ```
-
-**Parameters:**
-
-- `fitBuffer: Uint8Array` - Binary FIT file data
 
 **Returns:** `Promise<KRD>` - Validated KRD object
 
 **Throws:**
 
-- `FitParsingError` - When FIT file is corrupted or invalid
-- `KrdValidationError` - When converted data fails schema validation
+- the reader's own error (for example `FitParsingError`) when the input is corrupted or invalid
+- `KrdValidationError` - When the converted data fails schema validation
 
-#### `convertKrdToFit({ krd })`
+#### `toBinary(krd, writer, logger?)` / `toText(krd, writer, logger?)`
 
-Converts a KRD object to FIT workout file format.
+Converts a KRD object to an adapter format.
 
 ```typescript
-const fitBuffer = await providers.convertKrdToFit({ krd });
+import { toBinary, toText } from "@kaiord/core";
+import { fitWriter } from "@kaiord/fit";
+import { zwiftWriter } from "@kaiord/zwo";
+import type { KRD } from "@kaiord/core";
+
+declare const krd: KRD;
+
+const fitBuffer: Uint8Array = await toBinary(krd, fitWriter);
+const zwo: string = await toText(krd, zwiftWriter);
 ```
 
-**Parameters:**
-
-- `krd: KRD` - Valid KRD object
-
-**Returns:** `Promise<Uint8Array>` - Binary FIT file data
+**Returns:** `Promise<Uint8Array>` (binary) or `Promise<string>` (text)
 
 **Throws:**
 
-- `KrdValidationError` - When KRD data is invalid
-- `FitParsingError` - When FIT encoding fails
+- `KrdValidationError` - When the KRD data is invalid
+- the writer's own error when encoding fails
 
 #### `validateRoundTrip(reader, writer, checker, logger)`
 
@@ -160,13 +157,20 @@ tolerances. It compares sessions, laps, records and structured workout steps
 violations found; an empty array means the round-trip is lossless.
 
 ```typescript
-import { createToleranceChecker, validateRoundTrip } from "@kaiord/core";
+import {
+  createConsoleLogger,
+  createToleranceChecker,
+  validateRoundTrip,
+} from "@kaiord/core";
+import { fitReader, fitWriter } from "@kaiord/fit";
+
+declare const fitBuffer: Uint8Array;
 
 const violations = await validateRoundTrip(
   fitReader,
   fitWriter,
   createToleranceChecker(),
-  logger
+  createConsoleLogger()
 ).validateBinaryRoundTrip({ originalBinary: fitBuffer });
 ```
 
@@ -189,6 +193,8 @@ import {
   subSportSchema,
   intensitySchema,
 } from "@kaiord/core";
+
+declare const data: unknown;
 
 // Validate data
 const result = krdSchema.safeParse(data);
@@ -225,7 +231,7 @@ import {
 } from "@kaiord/core";
 ```
 
-For detailed API examples, see [docs/api-examples.md](./docs/api-examples.md) (coming soon).
+For more examples, see [docs/api-examples.md](./docs/api-examples.md).
 
 ## TypeScript Support
 
@@ -236,7 +242,7 @@ For detailed API examples, see [docs/api-examples.md](./docs/api-examples.md) (c
 Import types separately from values for optimal tree-shaking:
 
 ```typescript
-import { createDefaultProviders, krdSchema } from "@kaiord/core";
+import { krdSchema } from "@kaiord/core";
 import type { KRD, Workout, Duration } from "@kaiord/core";
 ```
 
@@ -247,10 +253,7 @@ Duration and Target types use discriminated unions for type safety:
 ```typescript
 import type { Duration } from "@kaiord/core";
 
-const duration: Duration =
-  | { type: "time"; seconds: number }
-  | { type: "distance"; meters: number }
-  | { type: "open" };
+declare const duration: Duration;
 
 // TypeScript narrows the type based on discriminator
 if (duration.type === "time") {
@@ -261,10 +264,7 @@ if (duration.type === "time") {
 ```typescript
 import type { Target } from "@kaiord/core";
 
-const target: Target =
-  | { type: "power"; value: { unit: "watts"; value: number } }
-  | { type: "heart_rate"; value: { unit: "bpm"; value: number } }
-  | { type: "open" };
+declare const target: Target;
 
 // Type narrowing works automatically
 if (target.type === "power") {
@@ -280,6 +280,8 @@ Zod schemas provide both runtime validation and TypeScript types:
 import { krdSchema, workoutSchema } from "@kaiord/core";
 import type { KRD, Workout } from "@kaiord/core";
 
+declare const data: unknown;
+
 // Parse with automatic type inference
 const krd = krdSchema.parse(data); // Type: KRD
 
@@ -288,7 +290,7 @@ const result = krdSchema.safeParse(data);
 if (result.success) {
   const krd: KRD = result.data; // Type: KRD
 } else {
-  console.error(result.error.errors);
+  console.error(result.error.issues);
 }
 
 // Validate nested objects
@@ -301,6 +303,9 @@ Access enum values via schema `.enum` property:
 
 ```typescript
 import { sportSchema, intensitySchema } from "@kaiord/core";
+import type { Workout } from "@kaiord/core";
+
+declare const workout: Workout;
 
 // Access enum values
 const sport = sportSchema.enum.cycling; // "cycling"
@@ -323,10 +328,13 @@ if (workout.sport === sportSchema.enum.running) {
 Thrown when FIT file parsing fails due to corrupted or invalid data.
 
 ```typescript
-import { FitParsingError } from "@kaiord/core";
+import { fromBinary, FitParsingError } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
+
+declare const fitBuffer: Uint8Array;
 
 try {
-  const krd = await providers.convertFitToKrd({ fitBuffer });
+  const krd = await fromBinary(fitBuffer, fitReader);
 } catch (error) {
   if (error instanceof FitParsingError) {
     console.error("Failed to parse FIT file:", error.message);
@@ -345,10 +353,13 @@ try {
 Thrown when KRD data fails schema validation.
 
 ```typescript
-import { KrdValidationError } from "@kaiord/core";
+import { fromBinary, KrdValidationError } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
+
+declare const fitBuffer: Uint8Array;
 
 try {
-  const krd = await providers.convertFitToKrd({ fitBuffer });
+  const krd = await fromBinary(fitBuffer, fitReader);
 } catch (error) {
   if (error instanceof KrdValidationError) {
     console.error("KRD validation failed:");
@@ -372,6 +383,8 @@ that wants to fail throws this error itself.
 
 ```typescript
 import { ToleranceExceededError } from "@kaiord/core";
+
+declare const runConversionThatThrowsOnViolations: () => Promise<void>;
 
 try {
   await runConversionThatThrowsOnViolations();
@@ -397,18 +410,12 @@ try {
 ### Complete Error Handling Example
 
 ```typescript
-import {
-  createDefaultProviders,
-  FitParsingError,
-  KrdValidationError,
-  ToleranceExceededError,
-} from "@kaiord/core";
+import { fromBinary, FitParsingError, KrdValidationError } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
 
 async function convertWorkout(fitBuffer: Uint8Array) {
   try {
-    const providers = createDefaultProviders();
-    const krd = await providers.convertFitToKrd({ fitBuffer });
-    return krd;
+    return await fromBinary(fitBuffer, fitReader);
   } catch (error) {
     if (error instanceof FitParsingError) {
       console.error("❌ FIT parsing failed:", error.message);
@@ -443,7 +450,7 @@ async function convertWorkout(fitBuffer: Uint8Array) {
 
 ### Package-Specific Documentation
 
-- **[API Examples](./docs/api-examples.md)** - Comprehensive code examples (coming soon)
+- **[API Examples](./docs/api-examples.md)** - Code examples for conversion, validation and error handling
 - **[Tree Shaking Guide](./docs/tree-shaking.md)** - Optimize bundle size
 - **[Zwift Format Extensions](./docs/zwift-format-extensions.md)** - Zwift-specific features
 - **[Zwift Kaiord Attributes](./docs/zwift-kaiord-attributes.md)** - Custom Zwift attributes
@@ -494,7 +501,7 @@ import * as Kaiord from "@kaiord/core";
 
 - Types only: 0 KB (compile-time)
 - Schema validation: ~15 KB
-- Full conversion: ~80 KB
+- Conversion functions (without adapters): small; each adapter package adds its own weight
 - Test utilities: Not included in production bundles
 
 See [docs/tree-shaking.md](./docs/tree-shaking.md) for detailed guide and best practices.
@@ -516,5 +523,5 @@ const fitBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
 
 // Load both for round-trip tests
-const { fit, krd } = loadFixturePair(FIXTURE_NAMES.INDIVIDUAL_STEPS);
+const pair = loadFixturePair(FIXTURE_NAMES.INDIVIDUAL_STEPS);
 ```
