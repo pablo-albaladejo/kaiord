@@ -4,4 +4,8 @@
  * a delimiter cannot be hidden by a control character that is removed later.
  */
 // eslint-disable-next-line no-control-regex
-export const CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
+const CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
+
+/** `text` without its control characters. */
+export const stripControlChars = (text: string): string =>
+  text.replace(CONTROL_CHARS, "");
