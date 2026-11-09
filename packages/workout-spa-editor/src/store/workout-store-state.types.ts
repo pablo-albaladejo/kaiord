@@ -45,8 +45,6 @@ export type WorkoutStoreState = {
   selectedStepId: string | null;
   selectedStepIds: Array<string>;
   isEditing: boolean;
-  safeMode: boolean;
-  lastBackup: UIWorkout | null;
   deletedSteps: Array<DeletedStep>;
   isModalOpen: boolean;
   modalConfig: ModalConfig | null;

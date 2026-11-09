@@ -13,7 +13,7 @@ Zustand stores for editor runtime ONLY. Holds the currently-edited workout, the 
 
 ### Workout store (the main slice)
 
-- `workout-store.ts` — `create<WorkoutStore>(...)` factory. Composes `createFocusSlice`, `createWorkoutMethods`, `createSelectionActions`, `createHistoryMethods`, `createRecoveryMethods`, `createModalActions`.
+- `workout-store.ts` — `create<WorkoutStore>(...)` factory. Composes `createFocusSlice`, `createWorkoutMethods`, `createSelectionActions`, `createHistoryMethods`, `createModalActions`.
 - `workout-state.types.ts`, `workout-store-state.types.ts`, `workout-store-types.ts`, `workout-store-actions.types.ts` — type contracts.
 - `workout-store-actions.ts`, `workout-store-step-actions.ts`, `workout-store-selection-actions.ts`, `workout-store-repetition-actions.ts`, `workout-store-modal-actions.ts`, `workout-store-history.ts`, `workout-actions.ts` — domain action surfaces.
 - `create-workout-method-helpers.ts`, `create-workout-method-helpers-basic.ts`, `create-workout-methods.ts` — composition helpers (one method per call so the per-file/per-function caps hold).
