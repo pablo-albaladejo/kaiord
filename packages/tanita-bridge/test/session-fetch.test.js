@@ -1,3 +1,9 @@
+// Kaiord Bridge Core — vendored unit tests for session-fetch.js.
+// Master: packages/_shared/bridge-core/test/session-fetch.test.js. Never edit
+// a vendored copy — edit the master and run `pnpm bridge:sync`. Every
+// cookie-session bridge runs this suite against its own vendored transport.
+// The origin and allowlist below are neutral stand-ins: each bridge supplies
+// its real ones, and its own background suite tests them.
 import { describe, it, expect } from "vitest";
 
 const {
@@ -7,10 +13,6 @@ const {
   cookieSessionFetch,
 } = require("../session-fetch.js");
 
-// Vendored master (packages/_shared/bridge-core/session-fetch.js) exercised
-// through the tanita-bridge copy — byte-identity is enforced separately by
-// scripts/check-bridge-core-parity.test.mjs.
-
 const OK_STATUS = 200;
 const FOUND_STATUS = 302;
 const UNAUTHORIZED_STATUS = 401;
@@ -18,9 +20,10 @@ const FORBIDDEN_STATUS = 403;
 const SERVER_ERROR_STATUS = 500;
 const OPAQUE_REDIRECT_STATUS = 0;
 
-const EXPORT_URL = "https://mytanita.eu/en/user/export-csv";
-const ALLOW_RULES = [{ method: "GET", pattern: /^\/en\/user\/export-csv$/ }];
-const SAMPLE_BODY = '"Date","Weight (kg)"\n"2026-07-01","70.5"';
+const EXPORT_PATH = "/export";
+const EXPORT_URL = `https://integration.invalid${EXPORT_PATH}`;
+const ALLOW_RULES = [{ method: "GET", pattern: /^\/export$/ }];
+const SAMPLE_BODY = '"Date","Value"\n"2026-07-01","70.5"';
 
 const makeResponse = ({
   ok = true,
@@ -38,14 +41,25 @@ const makeResponse = ({
   text: () => Promise.resolve(body),
 });
 
-describe("session-fetch (vendored master)", () => {
+describe("session-fetch (vendored)", () => {
   describe("isPathAllowed", () => {
     it("should allow a GET matching an allowlist rule", () => {
       // Arrange
       const method = "GET";
 
       // Act
-      const allowed = isPathAllowed(ALLOW_RULES, method, "/en/user/export-csv");
+      const allowed = isPathAllowed(ALLOW_RULES, method, EXPORT_PATH);
+
+      // Assert
+      expect(allowed).toBe(true);
+    });
+
+    it("should treat a missing method as GET", () => {
+      // Arrange
+      const method = undefined;
+
+      // Act
+      const allowed = isPathAllowed(ALLOW_RULES, method, EXPORT_PATH);
 
       // Assert
       expect(allowed).toBe(true);
@@ -56,7 +70,7 @@ describe("session-fetch (vendored master)", () => {
       const method = "POST";
 
       // Act
-      const allowed = isPathAllowed(ALLOW_RULES, method, "/en/user/export-csv");
+      const allowed = isPathAllowed(ALLOW_RULES, method, EXPORT_PATH);
 
       // Assert
       expect(allowed).toBe(false);
@@ -64,7 +78,7 @@ describe("session-fetch (vendored master)", () => {
 
     it("should deny a path mismatch", () => {
       // Arrange
-      const path = "/en/user/export-csv-all";
+      const path = `${EXPORT_PATH}-all`;
 
       // Act
       const allowed = isPathAllowed(ALLOW_RULES, "GET", path);
@@ -77,7 +91,10 @@ describe("session-fetch (vendored master)", () => {
   describe("isSessionRedirect", () => {
     it("should flag an opaqueredirect response", () => {
       // Arrange
-      const response = { type: "opaqueredirect", status: OPAQUE_REDIRECT_STATUS };
+      const response = {
+        type: "opaqueredirect",
+        status: OPAQUE_REDIRECT_STATUS,
+      };
 
       // Act
       const flagged = isSessionRedirect(response);
@@ -89,6 +106,17 @@ describe("session-fetch (vendored master)", () => {
     it("should flag a 3xx status", () => {
       // Arrange
       const response = { type: "basic", status: FOUND_STATUS };
+
+      // Act
+      const flagged = isSessionRedirect(response);
+
+      // Assert
+      expect(flagged).toBe(true);
+    });
+
+    it("should flag a response the runtime already followed", () => {
+      // Arrange
+      const response = { type: "basic", status: OK_STATUS, redirected: true };
 
       // Act
       const flagged = isSessionRedirect(response);
@@ -163,7 +191,11 @@ describe("session-fetch (vendored master)", () => {
       // Arrange
       const fetchImpl = () =>
         Promise.resolve(
-          makeResponse({ ok: false, type: "opaqueredirect", status: OPAQUE_REDIRECT_STATUS })
+          makeResponse({
+            ok: false,
+            type: "opaqueredirect",
+            status: OPAQUE_REDIRECT_STATUS,
+          })
         );
 
       // Act
@@ -176,7 +208,9 @@ describe("session-fetch (vendored master)", () => {
     it("should return needsReauth on a 401 auth challenge", async () => {
       // Arrange
       const fetchImpl = () =>
-        Promise.resolve(makeResponse({ ok: false, status: UNAUTHORIZED_STATUS }));
+        Promise.resolve(
+          makeResponse({ ok: false, status: UNAUTHORIZED_STATUS })
+        );
 
       // Act
       const result = await cookieSessionFetch({ url: EXPORT_URL, fetchImpl });
@@ -188,7 +222,9 @@ describe("session-fetch (vendored master)", () => {
     it("should surface a non-2xx status without needsReauth", async () => {
       // Arrange
       const fetchImpl = () =>
-        Promise.resolve(makeResponse({ ok: false, status: SERVER_ERROR_STATUS }));
+        Promise.resolve(
+          makeResponse({ ok: false, status: SERVER_ERROR_STATUS })
+        );
 
       // Act
       const result = await cookieSessionFetch({ url: EXPORT_URL, fetchImpl });
