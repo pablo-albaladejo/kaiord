@@ -1,4 +1,4 @@
-/** `useExpandCallback` — split out so `use-train2go-actions.ts` stays under cap. */
+/** `useExpandCallback` — the expand action of `use-train2go-actions.ts`. */
 import type { Analytics } from "@kaiord/core";
 import { useCallback } from "react";
 

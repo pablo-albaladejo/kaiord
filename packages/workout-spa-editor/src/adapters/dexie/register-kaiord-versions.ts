@@ -1,10 +1,9 @@
 /**
  * Kaiord Dexie Version Registration
  *
- * Wires the schema versions + upgrades onto a Dexie instance. Extracted
- * from `KaiordDatabase` so the constructor stays under the per-function
- * line cap. v10+ registrations live in `register-kaiord-versions-v10-plus.ts`
- * so this file stays under the per-file line cap as history grows.
+ * Wires the schema versions + upgrades onto a Dexie instance for
+ * `KaiordDatabase`. v10+ registrations live in
+ * `register-kaiord-versions-v10-plus.ts`.
  *
  * Pruned history: only versions with an upgrade function, plus the head, are
  * declared. Dexie >= 3 diffs from the INSTALLED schema to each declared

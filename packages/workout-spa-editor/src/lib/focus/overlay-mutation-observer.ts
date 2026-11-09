@@ -1,6 +1,6 @@
 /**
- * MutationObserver wiring isolated from the public `subscribeToOverlayCount`
- * entry point, so the public module stays under the 80-line limit.
+ * MutationObserver wiring behind the public `subscribeToOverlayCount`
+ * entry point.
  */
 
 import { logger } from "../../utils/logger";

@@ -1,7 +1,6 @@
 /**
  * Fetches, converts, and persists ONE calendar day of WHOOP heart-rate-series
- * for the syncWhoopHeartRate orchestrator. Split out to keep that use case's
- * loop body under the 40-LOC function cap (mirrors persist-whoop-cycle-
+ * for the syncWhoopHeartRate orchestrator (mirrors persist-whoop-cycle-
  * records.ts's role for the cycles sync). `metricsToHeartRateSeries`
  * returning `null` (no samples that day) and an already-imported day
  * (dedup) both surface as `{ status: "skipped" }` — the orchestrator counts
