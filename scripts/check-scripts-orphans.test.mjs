@@ -590,3 +590,84 @@ test("should still count a shell source of the script as wiring", () => {
     h.cleanup();
   }
 });
+
+/** Runs a harness and asserts the run passes. */
+function assertWired(prep) {
+  // Arrange
+  const h = mkHarness(prep);
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+}
+
+const writeWorkflow = (root, body) =>
+  writeFileSync(join(root, ".github", "workflows", "ci.yml"), body);
+
+test("should not count a commented-out workflow step as wiring", () => {
+  assertOrphan((root) => {
+    writeScript(root, "foo.mjs");
+    writeWorkflow(
+      root,
+      "jobs:\n  a:\n    steps:\n      # - run: node scripts/foo.mjs\n"
+    );
+  }, "scripts/foo.mjs");
+});
+
+test("should not let .github/scripts/foo.mjs wire scripts/foo.mjs", () => {
+  assertOrphan((root) => {
+    mkdirSync(join(root, ".github", "scripts"), { recursive: true });
+    writeFileSync(join(root, ".github", "scripts", "foo.mjs"), "// gh\n");
+    writeScript(root, "foo.mjs");
+    writeWorkflow(
+      root,
+      "jobs:\n  a:\n    steps:\n      - run: node .github/scripts/foo.mjs\n"
+    );
+  }, "scripts/foo.mjs");
+});
+
+test("should report two unwired scripts that only reference each other", () => {
+  assertOrphan((root) => {
+    writeScript(root, "a.mjs", 'import "./b.mjs";\n');
+    writeScript(root, "b.mjs", 'import "./a.mjs";\n');
+  }, "scripts/a.mjs");
+});
+
+test("should reach a script two hops from a wired caller", () => {
+  assertWired((root) => {
+    writeScript(root, "wired.mjs", 'import "./mid.mjs";\n');
+    writeScript(root, "mid.mjs", 'import "./leaf.mjs";\n');
+    writeScript(root, "leaf.mjs", "export {};\n");
+    setRootPackage(root, { "lint:wired": "node scripts/wired.mjs" });
+  });
+});
+
+test("should not treat a glob string containing /* as a block comment", () => {
+  assertWired((root) => {
+    writeScript(root, "helper.mjs", "export {};\n");
+    writeScript(
+      root,
+      "wired.mjs",
+      'const g = "src/*.mjs";\nimport "./helper.mjs";\nconst h = "dist/*/";\n'
+    );
+    setRootPackage(root, { "lint:wired": "node scripts/wired.mjs" });
+  });
+});
+
+test("should not treat a # inside a shell string as a comment", () => {
+  assertWired((root) => {
+    writeScript(root, "helper.sh", "echo helper\n");
+    writeScript(
+      root,
+      "wired.sh",
+      'echo "step #1"; bash "$(dirname "$0")/helper.sh"\n'
+    );
+    setRootPackage(root, { "lint:wired": "bash scripts/wired.sh" });
+  });
+});
