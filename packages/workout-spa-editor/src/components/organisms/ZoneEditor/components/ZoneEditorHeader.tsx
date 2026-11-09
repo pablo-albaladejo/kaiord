@@ -1,6 +1,4 @@
 /**
- * ZoneEditorHeader Component
- *
  * Header for zone editor.
  */
 

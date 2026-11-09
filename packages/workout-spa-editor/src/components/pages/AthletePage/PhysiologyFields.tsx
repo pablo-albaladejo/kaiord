@@ -1,6 +1,4 @@
 /**
- * PhysiologyFields Component
- *
  * Optional anthropometric inputs (height, birth date, sex, resting HR,
  * activity level) used for basal-metabolic-rate estimation. All optional —
  * empty values clear the field rather than persisting a zero.

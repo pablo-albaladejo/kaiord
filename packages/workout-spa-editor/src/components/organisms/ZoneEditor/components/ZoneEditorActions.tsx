@@ -1,6 +1,4 @@
 /**
- * ZoneEditorActions Component
- *
  * Action buttons for zone editor.
  */
 

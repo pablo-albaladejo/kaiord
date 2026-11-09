@@ -51,7 +51,6 @@ const generateStepId = (
 /**
  * Hook for managing drag-and-drop functionality in WorkoutList
  * Configures sensors and handles drag events
- * Requirement 3: Enable drag-and-drop functionality for workout steps
  */
 export const useWorkoutListDnd = (
   workout: Workout,

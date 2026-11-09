@@ -1,6 +1,4 @@
 /**
- * ZoneIndicator Component
- *
  * Shows profile name and thresholds for the selected sport in AI form.
  */
 

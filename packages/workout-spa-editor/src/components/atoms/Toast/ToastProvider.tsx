@@ -11,10 +11,7 @@ export type ToastProviderProps = {
 };
 
 /**
- * ToastProvider Component
- *
  * Wraps the application with Radix UI Toast provider
- * Requirement 39: Visual feedback system
  * - Manages toast notification lifecycle
  * - Handles swipe-to-dismiss gestures
  * - Provides viewport for toast rendering

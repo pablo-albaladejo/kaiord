@@ -1,12 +1,6 @@
 /**
- * ErrorMessage Component
- *
  * Displays error messages with optional retry functionality.
  * Used for validation errors, file loading errors, and other user-facing errors.
- *
- * Requirements:
- * - Requirement 7: Display validation errors with field references
- * - Requirement 36: Clear feedback when errors occur
  */
 
 import { AlertCircle } from "lucide-react";

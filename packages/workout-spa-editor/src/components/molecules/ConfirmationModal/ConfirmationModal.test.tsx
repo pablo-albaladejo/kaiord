@@ -3,11 +3,6 @@
  *
  * Tests modal rendering with different props, backdrop click dismissal,
  * and button click handlers.
- *
- * Requirements:
- * - Requirement 6.2: Modal displays with dim background
- * - Requirement 6.4: Modal has confirmation and cancel actions
- * - Requirement 6.8: Destructive actions use warning colors
  */
 
 import { render, screen } from "@testing-library/react";

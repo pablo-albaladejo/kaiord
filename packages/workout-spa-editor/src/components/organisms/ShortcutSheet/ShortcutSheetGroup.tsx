@@ -1,6 +1,4 @@
 /**
- * ShortcutSheetGroup Component
- *
  * One catalog group rendered as a column of the shortcut sheet.
  */
 

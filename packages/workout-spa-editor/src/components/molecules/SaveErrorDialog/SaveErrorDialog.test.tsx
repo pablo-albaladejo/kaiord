@@ -3,10 +3,6 @@
  *
  * Tests for the SaveErrorDialog component that displays validation errors
  * when saving a workout fails.
- *
- * Requirements:
- * - Requirement 6.3: Display specific validation errors with field references
- * - Requirement 36: Clear error feedback with retry options
  */
 
 import { render, screen } from "@testing-library/react";

@@ -1,6 +1,4 @@
 /**
- * ShortcutSheet Component
- *
  * The `?` sheet: every catalog shortcut, grouped, over the app.
  */
 

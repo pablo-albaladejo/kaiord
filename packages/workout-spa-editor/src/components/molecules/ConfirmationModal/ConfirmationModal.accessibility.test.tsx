@@ -3,11 +3,6 @@
  *
  * Tests focus trap, keyboard navigation, ARIA attributes, and screen reader support
  * for the confirmation modal dialog.
- *
- * Requirements:
- * - Requirement 6.3: Trap keyboard focus within modal
- * - Requirement 6.5: Allow Escape key to dismiss
- * - Requirement 6.7: Restore focus after dismissal
  */
 
 import { render, screen, waitFor } from "@testing-library/react";

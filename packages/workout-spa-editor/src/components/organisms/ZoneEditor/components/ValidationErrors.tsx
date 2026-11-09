@@ -1,6 +1,4 @@
 /**
- * ValidationErrors Component
- *
  * Displays zone validation errors.
  */
 

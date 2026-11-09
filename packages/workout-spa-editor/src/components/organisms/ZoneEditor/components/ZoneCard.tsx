@@ -1,6 +1,4 @@
 /**
- * ZoneCard Component
- *
  * Single zone editor card.
  */
 

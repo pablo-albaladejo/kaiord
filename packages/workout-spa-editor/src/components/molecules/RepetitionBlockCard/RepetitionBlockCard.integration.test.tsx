@@ -1,8 +1,5 @@
 /**
  * Integration tests for RepetitionBlockCard with context menu
- *
- * Requirements:
- * - Requirement 7.5: Context menu integration with block actions
  */
 
 import { render, screen } from "@testing-library/react";

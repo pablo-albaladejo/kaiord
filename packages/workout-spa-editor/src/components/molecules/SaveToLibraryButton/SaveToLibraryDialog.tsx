@@ -1,6 +1,4 @@
 /**
- * SaveToLibraryDialog Component
- *
  * Dialog for saving workouts to the library with tags and notes.
  */
 

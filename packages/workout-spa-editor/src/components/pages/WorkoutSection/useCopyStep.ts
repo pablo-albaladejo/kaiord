@@ -6,7 +6,6 @@ import { useWorkoutStore } from "../../../store/workout-store";
 
 /**
  * Hook for copying a step to clipboard with toast notification
- * Requirement 39.2: Copy step data as JSON to clipboard and show notification
  */
 export function useCopyStep() {
   const t = useTranslate("editor");
