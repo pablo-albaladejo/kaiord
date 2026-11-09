@@ -54,12 +54,6 @@ export type WorkoutStoreActions = {
   undo: () => void;
   redo: () => void;
 
-  // Error Recovery Actions
-  createBackup: () => void;
-  restoreFromBackup: () => boolean;
-  enableSafeMode: () => void;
-  disableSafeMode: () => void;
-
   // Modal Actions
   showConfirmationModal: (config: ModalConfig) => void;
   hideConfirmationModal: () => void;
@@ -72,5 +66,4 @@ export type WorkoutStoreActions = {
   // Computed
   canUndo: () => boolean;
   canRedo: () => boolean;
-  hasBackup: () => boolean;
 };

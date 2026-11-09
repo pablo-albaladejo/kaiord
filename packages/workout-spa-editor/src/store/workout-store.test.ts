@@ -1166,8 +1166,6 @@ describe("useWorkoutStore", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       });
     });
