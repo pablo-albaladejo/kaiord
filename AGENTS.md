@@ -52,7 +52,9 @@ Train2Go, and a VitePress documentation site.
 ### Non-negotiables
 
 - **Hexagonal architecture**: `domain` → `application` → `ports` → `adapters`.
-  Inner layers MUST NOT import outer layers or external libraries.
+  Inner layers MUST NOT import outer layers or external libraries; the only
+  exceptions are `zod` (schemas) and `@noble/hashes` (canonical hashing) in
+  `domain`.
 - **KRD is canonical**: every conversion goes through KRD
   (`application/vnd.kaiord+json`). Zod schemas guard runtime; JSON Schema is
   emitted for external consumers via AJV.
