@@ -214,8 +214,6 @@ See [Example GPX Plugin](./docs/example-plugin-gpx.md) for a complete plugin imp
 
 ### Package-Specific Documentation
 
-- **[npm Publish Verification](./docs/npm-publish-verification.md)** - Publishing checklist and verification
-
 ## Development
 
 ```bash
