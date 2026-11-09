@@ -88,7 +88,6 @@ src/
 ├── tests/
 │   ├── fixtures/
 │   │   ├── krd.fixtures.ts       # KRD fixtures
-│   │   ├── metadata.fixtures.ts  # Metadata fixtures
 │   │   ├── workout.fixtures.ts   # Workout fixtures
 │   │   └── fit-files/            # Binary FIT test files
 │   │       ├── WorkoutIndividualSteps.fit
