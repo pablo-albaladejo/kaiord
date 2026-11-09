@@ -157,23 +157,6 @@
     "intensityLabel": "Intensity",
     "intensityAria": "Select step intensity"
   },
-  "firstTimeHints": {
-    "dismiss": "Dismiss hints",
-    "progressDot": "Hint {{n}} of {{total}}",
-    "progressDotCurrent": "Hint {{n}} of {{total}} (current)",
-    "duration": {
-      "title": "Set Duration",
-      "message": "Choose how long this step should last - by time, distance, or open-ended."
-    },
-    "target": {
-      "title": "Set Target",
-      "message": "Define your training intensity using power, heart rate, pace, or cadence zones."
-    },
-    "save": {
-      "title": "Save Your Step",
-      "message": "Click Save to add this step to your workout. You can edit it anytime."
-    }
-  },
   "metadata": {
     "editAria": "Edit workout metadata",
     "nameLabel": "Workout Name",

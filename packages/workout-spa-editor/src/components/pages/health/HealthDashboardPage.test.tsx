@@ -23,7 +23,7 @@ vi.mock("./trends/use-trend-series", () => ({
   useTrendSeries: () => seriesMock,
 }));
 
-vi.mock("./trends/UplotChart", () => ({
+vi.mock("../../charts/uplot-base/uplot-chart", () => ({
   UplotChart: () => <div data-testid="uplot-chart-mock" />,
 }));
 
