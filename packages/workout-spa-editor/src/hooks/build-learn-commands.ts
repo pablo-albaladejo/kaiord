@@ -11,7 +11,7 @@ const LEARN_PAGES = [
   { id: "convert", path: "/convert/" },
 ] as const;
 
-export const openDocs = (path: string): void => {
+const openDocs = (path: string): void => {
   window.open(`${DOCS_ORIGIN}${path}`, "_blank", "noopener,noreferrer");
 };
 
