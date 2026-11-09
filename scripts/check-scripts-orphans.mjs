@@ -1,11 +1,14 @@
 #!/usr/bin/env node
-// R-ScriptsNoOrphans — every regular file under scripts/ MUST be reachable
-// from at least one of:
+// R-ScriptsNoOrphans — every regular file under scripts/ and .github/scripts/
+// MUST be reachable from at least one of:
 //   1. root or sub-package package.json scripts.* values
 //   2. .github/workflows/*.yml or .github/actions/**/action.yml
 //   3. .husky/* hook files
-//   4. .claude/settings.json (any string value)
-//   5. another file under scripts/ (transitive imports / source / invocation)
+//   4. .claude/settings.json (any string value), or the root
+//      eslint.config.js (which loads the custom rules in scripts/eslint-rules/)
+//   5. another non-test file under scripts/ or .github/scripts/ (transitive
+//      imports / source / invocation). A `*.test.mjs` importing a script is
+//      not wiring: a script reached only by its own test runs nowhere.
 //   6. an entry in scripts/README.md between the markers
 //      <!-- manual-tools:start --> and <!-- manual-tools:end -->,
 //      formatted as `- \`<filename>\` — When to run: <reason>`.
@@ -25,6 +28,7 @@ const EXCLUDED_SUBDIRS = new Set(["lib", "cws-api", "fixtures"]);
 const README_NAME = "README.md";
 const MARKER_START = "<!-- manual-tools:start -->";
 const MARKER_END = "<!-- manual-tools:end -->";
+const GITHUB_SCRIPTS = ".github/scripts";
 
 function listScriptCandidates(rootDir) {
   const out = [];
@@ -37,7 +41,8 @@ function listScriptCandidates(rootDir) {
       }
       const full = join(dir, entry.name);
       const rel = relative(rootDir, full);
-      if (entry.name === README_NAME && dir === rootDir) continue;
+      // Markdown is documentation, never a script to wire.
+      if (entry.name.endsWith(".md")) continue;
       if (entry.name.endsWith(".test.mjs")) continue;
       out.push(rel);
     }
@@ -107,10 +112,10 @@ function collectWorkflowSources(rootDir) {
     wf,
     (_, name) => name.endsWith(".yml") || name.endsWith(".yaml")
   )) {
-    blob += readSafe(f) + "\n";
+    blob += stripHashComments(readSafe(f)) + "\n";
   }
   for (const f of listFiles(ac, (_, name) => name === "action.yml")) {
-    blob += readSafe(f) + "\n";
+    blob += stripHashComments(readSafe(f)) + "\n";
   }
   return blob;
 }
@@ -122,22 +127,26 @@ function collectHuskySources(rootDir) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     if (!e.isFile()) continue;
     if (e.name.startsWith(".")) continue;
-    blob += readSafe(join(dir, e.name)) + "\n";
+    blob += stripHashComments(readSafe(join(dir, e.name))) + "\n";
   }
   return blob;
 }
 
-function collectClaudeSettings(rootDir) {
-  const p = join(rootDir, ".claude", "settings.json");
-  return readSafe(p);
+function collectRootConfigs(rootDir) {
+  return (
+    readSafe(join(rootDir, ".claude", "settings.json")) +
+    "\n" +
+    stripJsComments(readSafe(join(rootDir, "eslint.config.js")))
+  );
 }
 
-function collectScriptsTransitive(scriptsDir) {
-  // Read EVERY file under scripts/ (including .test.mjs and the README,
-  // but excluding the lib/cws-api/fixtures subdirs whose contents are
-  // internal to a single parent script and don't count as wiring).
-  // Test files import the script under test via `./check-X.mjs` —
-  // that counts as transitive wiring evidence.
+function collectScriptsTransitive(rootDir, scriptsDir) {
+  // Read every non-test file under scripts/ and .github/scripts/, excluding
+  // the lib/cws-api/fixtures subdirs (internal to a single parent script)
+  // and every Markdown file: a row in an inventory table (README.md,
+  // AGENTS.md) documents wiring, it is not wiring. Only the README's
+  // manual-tools block counts, as an allowlist, and it is parsed apart.
+  // Keys are repo-relative paths.
   const map = new Map();
   function walk(dir) {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -146,14 +155,88 @@ function collectScriptsTransitive(scriptsDir) {
         walk(join(dir, e.name));
         continue;
       }
+      if (e.name.endsWith(".test.mjs")) continue;
+      if (e.name.endsWith(".md")) continue;
       const full = join(dir, e.name);
-      const rel = relative(scriptsDir, full);
-      map.set(rel, readSafe(full));
+      map.set(relative(rootDir, full), stripComments(e.name, readSafe(full)));
     }
   }
-  walk(scriptsDir);
+  for (const dir of [scriptsDir, join(rootDir, GITHUB_SCRIPTS)]) {
+    if (existsSync(dir)) walk(dir);
+  }
   return map;
 }
+
+const JS_LIKE = /\.(?:[cm]?js|ts)$/;
+const HASH_COMMENTED = /\.(?:sh|bash|toml|ya?ml)$/;
+
+/**
+ * JS block and line comments removed, skipping '…', "…" and `…` strings.
+ * KNOWN gap: a regex literal holding a quote or `//` is misread; that can
+ * only drop a reference (a loud false orphan), never invent one.
+ */
+function stripJsComments(text) {
+  let out = "";
+  let quote = null;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quote) {
+      out += c;
+      if (c === "\\") out += text[++i] ?? "";
+      else if (c === quote) quote = null;
+    } else if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      out += c;
+    } else if (c === "/" && (text[i + 1] === "*" || text[i + 1] === "/")) {
+      const block = text[i + 1] === "*";
+      const end = text.indexOf(block ? "*/" : "\n", i + 2);
+      if (end === -1) break;
+      i = block ? end + 1 : end - 1;
+    } else out += c;
+  }
+  return out;
+}
+
+/**
+ * `#` comments removed: a `#` at line start or after whitespace, outside a
+ * '…' or "…" string on that line (`${#x}`, `a#b`, `"step #1"` are kept).
+ */
+const stripHashComments = (text) =>
+  text
+    .split("\n")
+    .map((line) => {
+      let quote = null;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (quote) {
+          if (c === "\\" && quote === '"') i++;
+          else if (c === quote) quote = null;
+        } else if (c === '"' || c === "'") quote = c;
+        else if (c === "#" && (i === 0 || /\s/.test(line[i - 1]))) {
+          return line.slice(0, i);
+        }
+      }
+      return line;
+    })
+    .join("\n");
+
+/** A comment naming a script is not wiring. */
+function stripComments(name, text) {
+  if (JS_LIKE.test(name)) return stripJsComments(text);
+  if (HASH_COMMENTED.test(name)) return stripHashComments(text);
+  return text;
+}
+
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * `name` as a whole path: not preceded or followed by a filename char, and
+ * not the tail of `.github/<name>` (so `.github/scripts/x` is not `scripts/x`).
+ */
+const mentions = (text, name) =>
+  new RegExp(
+    `(?<![\\w.-])(?<!\\.github/)${escapeRegExp(name)}(?![\\w.-])`
+  ).test(text);
 
 function parseAllowlist(readmeText) {
   const startIdx = readmeText.indexOf(MARKER_START);
@@ -185,29 +268,43 @@ function parseAllowlist(readmeText) {
   return { missingMarkers: false, entries, malformed };
 }
 
-function isReachable(rel, basename, sources, transitiveByRel) {
-  // Top-level wiring: package.json scripts.*, workflows, husky,
-  // .claude/settings.json. Match the canonical `scripts/<rel>` path.
-  const needleAbs = `scripts/${rel}`;
-  if (sources.includes(needleAbs)) return true;
-
-  // Transitive reachability: any OTHER file under scripts/ references
-  // this one. Match the basename — script filenames like
-  // `check-bridge-privacy-surface.mjs` are unique enough that the bare
-  // basename match is precise. This catches relative imports
-  // (`./check-X.mjs`), `join(HERE, "check-X.mjs")`, bash sources,
-  // documentation table rows in README, etc.
-  for (const [otherRel, text] of transitiveByRel.entries()) {
-    if (otherRel === rel) continue;
-    if (text.includes(basename)) return true;
-    if (text.includes(needleAbs)) return true;
+/**
+ * Reachability is a fixpoint from the roots (top-level wired or
+ * allowlisted): a script counts as reached only when a file ALREADY reached
+ * names it, so two orphans naming each other stay orphans.
+ */
+function reachableSet(candidates, roots, transitiveByRel) {
+  const reached = new Set(roots);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const path of candidates) {
+      if (reached.has(path)) continue;
+      const basename = path.slice(path.lastIndexOf("/") + 1);
+      for (const other of reached) {
+        if (other === path) continue;
+        if (mentions(transitiveByRel.get(other) ?? "", basename)) {
+          reached.add(path);
+          grew = true;
+          break;
+        }
+      }
+    }
   }
-  return false;
+  return reached;
 }
 
 export function findOrphans(rootDir = REPO_ROOT) {
   const scriptsDir = join(rootDir, "scripts");
-  const candidates = listScriptCandidates(scriptsDir);
+  const githubScriptsDir = join(rootDir, GITHUB_SCRIPTS);
+  const candidates = [
+    ...listScriptCandidates(scriptsDir).map((rel) => `scripts/${rel}`),
+    ...(existsSync(githubScriptsDir)
+      ? listScriptCandidates(githubScriptsDir).map(
+          (rel) => `${GITHUB_SCRIPTS}/${rel}`
+        )
+      : []),
+  ];
 
   const sources =
     collectPackageJsonScripts(rootDir) +
@@ -216,9 +313,9 @@ export function findOrphans(rootDir = REPO_ROOT) {
     "\n" +
     collectHuskySources(rootDir) +
     "\n" +
-    collectClaudeSettings(rootDir);
+    collectRootConfigs(rootDir);
 
-  const transitiveByRel = collectScriptsTransitive(scriptsDir);
+  const transitiveByRel = collectScriptsTransitive(rootDir, scriptsDir);
 
   const readmeText = readSafe(join(scriptsDir, README_NAME));
   const allow = parseAllowlist(readmeText);
@@ -237,15 +334,21 @@ export function findOrphans(rootDir = REPO_ROOT) {
     );
   }
 
-  const orphans = [];
-  for (const rel of candidates) {
-    const basename = rel.includes("/")
-      ? rel.slice(rel.lastIndexOf("/") + 1)
-      : rel;
-    if (isReachable(rel, basename, sources, transitiveByRel)) continue;
-    if (allow.entries.has(basename) || allow.entries.has(rel)) continue;
-    orphans.push(rel);
-  }
+  const isRoot = (path) => {
+    const basename = path.slice(path.lastIndexOf("/") + 1);
+    const rel = path.startsWith("scripts/")
+      ? path.slice("scripts/".length)
+      : path;
+    // package.json, workflows, husky, settings: the canonical repo path.
+    if (mentions(sources, path)) return true;
+    return allow.entries.has(basename) || allow.entries.has(rel);
+  };
+  const reached = reachableSet(
+    candidates,
+    candidates.filter(isRoot),
+    transitiveByRel
+  );
+  const orphans = candidates.filter((path) => !reached.has(path));
 
   return { orphans, errors };
 }
@@ -262,14 +365,14 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     console.error(
       `\norphan scripts (${orphans.length}) — R-ScriptsNoOrphans:\n`
     );
-    for (const o of orphans) console.error(`  scripts/${o}`);
+    for (const o of orphans) console.error(`  ${o}`);
     console.error(
       `\nEvery scripts/<file> MUST be reachable from one of:\n` +
         `  1. package.json scripts.* (root or any packages/*/package.json)\n` +
         `  2. .github/workflows/*.yml or .github/actions/**/action.yml\n` +
         `  3. .husky/* hooks\n` +
-        `  4. .claude/settings.json\n` +
-        `  5. another scripts/* file\n` +
+        `  4. .claude/settings.json or the root eslint.config.js\n` +
+        `  5. another non-test scripts/* or .github/scripts/* file\n` +
         `  6. an allowlist entry in scripts/README.md between\n` +
         `     ${MARKER_START} and ${MARKER_END}\n` +
         `     formatted as: - \`<filename>\` — When to run: <reason>\n`

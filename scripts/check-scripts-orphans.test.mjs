@@ -379,3 +379,295 @@ test("test-only invariant files (*.test.mjs without sibling .mjs) are skipped", 
     h.cleanup();
   }
 });
+
+test("script referenced only by its own test fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "check-lonely.mjs", "export const run = () => 0;\n");
+    writeScript(
+      root,
+      "check-lonely.test.mjs",
+      'import { run } from "./check-lonely.mjs";\nrun();\n'
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /scripts\/check-lonely\.mjs/);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("orphan .github/scripts/ file fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    mkdirSync(join(root, ".github", "scripts"), { recursive: true });
+    writeFileSync(join(root, ".github", "scripts", "x.sh"), "echo x\n");
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /\.github\/scripts\/x\.sh/);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test(".github/scripts/ file wired via workflow yml passes", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    mkdirSync(join(root, ".github", "scripts"), { recursive: true });
+    writeFileSync(join(root, ".github", "scripts", "x.sh"), "echo x\n");
+    writeFileSync(
+      join(root, ".github", "workflows", "ci.yml"),
+      "jobs:\n  a:\n    steps:\n      - run: bash .github/scripts/x.sh\n"
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("eslint rule loaded by the root eslint.config.js passes", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    mkdirSync(join(root, "scripts", "eslint-rules"), { recursive: true });
+    writeScript(root, "eslint-rules/my-rule.mjs", "export default {};\n");
+    writeFileSync(
+      join(root, "eslint.config.js"),
+      'import myRule from "./scripts/eslint-rules/my-rule.mjs";\nexport default [myRule];\n'
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("script named only in the README inventory table fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "check-documented.mjs");
+    writeFileSync(
+      join(root, "scripts", "README.md"),
+      "# scripts\n\n| `check-documented.mjs` | a guard | `pnpm test:scripts` |\n\n<!-- manual-tools:start -->\n<!-- manual-tools:end -->\n"
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /scripts\/check-documented\.mjs/);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("script named only in a Markdown table outside the README fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "check-documented.mjs");
+    writeFileSync(
+      join(root, "scripts", "AGENTS.md"),
+      "| `check-documented.mjs` | a guard |\n"
+    );
+    mkdirSync(join(root, "scripts", "notes"), { recursive: true });
+    writeFileSync(
+      join(root, "scripts", "notes", "guards.md"),
+      "Run `check-documented.mjs` by hand.\n"
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /scripts\/check-documented\.mjs/);
+  } finally {
+    h.cleanup();
+  }
+});
+
+/** Runs a harness and asserts the run fails naming `orphan`. */
+function assertOrphan(prep, orphan) {
+  // Arrange
+  const h = mkHarness(prep);
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(result.stderr, new RegExp(orphan.replace(".", "\\.")));
+  } finally {
+    h.cleanup();
+  }
+}
+
+test("should not count a longer filename ending in the basename as a reference", () => {
+  assertOrphan((root) => {
+    writeScript(root, "x.sh", "echo x\n");
+    writeScript(root, "max.sh", "echo max\n");
+    writeScript(root, "wired.mjs", 'spawnSync("bash", ["scripts/max.sh"]);\n');
+    setRootPackage(root, {
+      "lint:wired": "node scripts/wired.mjs",
+      "lint:max": "bash scripts/max.sh",
+    });
+  }, "x.sh");
+});
+
+test("should not count a JS comment naming the script as wiring", () => {
+  assertOrphan((root) => {
+    writeScript(root, "helper.mjs", "export const X = 1;\n");
+    writeScript(
+      root,
+      "wired.mjs",
+      '// import { X } from "./helper.mjs";\n/* see helper.mjs */\nconsole.log(1);\n'
+    );
+    setRootPackage(root, { "lint:wired": "node scripts/wired.mjs" });
+  }, "helper.mjs");
+});
+
+test("should not count a shell comment naming the script as wiring", () => {
+  assertOrphan((root) => {
+    writeScript(root, "helper.sh", "echo helper\n");
+    writeScript(
+      root,
+      "wired.sh",
+      "#!/bin/bash\n# calls helper.sh later\necho wired\n"
+    );
+    setRootPackage(root, { "lint:wired": "bash scripts/wired.sh" });
+  }, "helper.sh");
+});
+
+test("should still count a shell source of the script as wiring", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "helper.sh", "echo helper\n");
+    writeScript(
+      root,
+      "wired.sh",
+      '#!/bin/bash\nsource "$(dirname "$0")/helper.sh" # load\n'
+    );
+    setRootPackage(root, { "lint:wired": "bash scripts/wired.sh" });
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+});
+
+/** Runs a harness and asserts the run passes. */
+function assertWired(prep) {
+  // Arrange
+  const h = mkHarness(prep);
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+}
+
+const writeWorkflow = (root, body) =>
+  writeFileSync(join(root, ".github", "workflows", "ci.yml"), body);
+
+test("should not count a commented-out workflow step as wiring", () => {
+  assertOrphan((root) => {
+    writeScript(root, "foo.mjs");
+    writeWorkflow(
+      root,
+      "jobs:\n  a:\n    steps:\n      # - run: node scripts/foo.mjs\n"
+    );
+  }, "scripts/foo.mjs");
+});
+
+test("should not let .github/scripts/foo.mjs wire scripts/foo.mjs", () => {
+  assertOrphan((root) => {
+    mkdirSync(join(root, ".github", "scripts"), { recursive: true });
+    writeFileSync(join(root, ".github", "scripts", "foo.mjs"), "// gh\n");
+    writeScript(root, "foo.mjs");
+    writeWorkflow(
+      root,
+      "jobs:\n  a:\n    steps:\n      - run: node .github/scripts/foo.mjs\n"
+    );
+  }, "scripts/foo.mjs");
+});
+
+test("should report two unwired scripts that only reference each other", () => {
+  assertOrphan((root) => {
+    writeScript(root, "a.mjs", 'import "./b.mjs";\n');
+    writeScript(root, "b.mjs", 'import "./a.mjs";\n');
+  }, "scripts/a.mjs");
+});
+
+test("should reach a script two hops from a wired caller", () => {
+  assertWired((root) => {
+    writeScript(root, "wired.mjs", 'import "./mid.mjs";\n');
+    writeScript(root, "mid.mjs", 'import "./leaf.mjs";\n');
+    writeScript(root, "leaf.mjs", "export {};\n");
+    setRootPackage(root, { "lint:wired": "node scripts/wired.mjs" });
+  });
+});
+
+test("should not treat a glob string containing /* as a block comment", () => {
+  assertWired((root) => {
+    writeScript(root, "helper.mjs", "export {};\n");
+    writeScript(
+      root,
+      "wired.mjs",
+      'const g = "src/*.mjs";\nimport "./helper.mjs";\nconst h = "dist/*/";\n'
+    );
+    setRootPackage(root, { "lint:wired": "node scripts/wired.mjs" });
+  });
+});
+
+test("should not treat a # inside a shell string as a comment", () => {
+  assertWired((root) => {
+    writeScript(root, "helper.sh", "echo helper\n");
+    writeScript(
+      root,
+      "wired.sh",
+      'echo "step #1"; bash "$(dirname "$0")/helper.sh"\n'
+    );
+    setRootPackage(root, { "lint:wired": "bash scripts/wired.sh" });
+  });
+});
