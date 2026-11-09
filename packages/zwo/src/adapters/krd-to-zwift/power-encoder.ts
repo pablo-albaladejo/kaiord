@@ -1,7 +1,6 @@
-import type { Logger, WorkoutStep } from "@kaiord/core";
+import { type Logger, type WorkoutStep, zoneToPercentFtp } from "@kaiord/core";
 
 import { isPowerDescending } from "../interval/power-direction";
-import { convertPowerZoneToPercentFtp } from "../target/power.converter";
 
 // No FTP in KRD watts targets; 250 W is a conventional default road-cyclist FTP
 // used only to derive Zwift's required %FTP fraction.
@@ -21,15 +20,14 @@ export const encodeSteadyStatePowerTarget = (
     interval["@_kaiord:powerUnit"] = "zone";
     interval["@_kaiord:powerZone"] = step.target.value.value;
 
-    const percentFtp = convertPowerZoneToPercentFtp(step.target.value.value);
+    const percentFtp = zoneToPercentFtp(step.target.value.value);
     interval["@_Power"] = percentFtp / 100;
   } else if (step.target.value.unit === "watts") {
     interval["@_kaiord:powerUnit"] = "watts";
     interval["@_kaiord:originalWatts"] = step.target.value.value;
 
     interval["@_kaiord:assumedFtp"] = ASSUMED_FTP_WATTS;
-    const percentFtp = (step.target.value.value / ASSUMED_FTP_WATTS) * 100;
-    interval["@_Power"] = percentFtp / 100;
+    interval["@_Power"] = step.target.value.value / ASSUMED_FTP_WATTS;
 
     logger?.warn("Lossy conversion: watts converted to percent FTP", {
       originalWatts: step.target.value.value,
@@ -88,7 +86,7 @@ export const encodeRampPowerTarget = (
     interval["@_kaiord:powerUnit"] = "zone";
     interval["@_kaiord:powerZone"] = value.value;
 
-    const percentFtp = convertPowerZoneToPercentFtp(value.value);
+    const percentFtp = zoneToPercentFtp(value.value);
     interval["@_PowerLow"] = percentFtp / 100;
     interval["@_PowerHigh"] = percentFtp / 100;
   } else if (value.unit === "percent_ftp") {
