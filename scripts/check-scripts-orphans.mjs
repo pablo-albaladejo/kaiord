@@ -1,11 +1,14 @@
 #!/usr/bin/env node
-// R-ScriptsNoOrphans — every regular file under scripts/ MUST be reachable
-// from at least one of:
+// R-ScriptsNoOrphans — every regular file under scripts/ and .github/scripts/
+// MUST be reachable from at least one of:
 //   1. root or sub-package package.json scripts.* values
 //   2. .github/workflows/*.yml or .github/actions/**/action.yml
 //   3. .husky/* hook files
-//   4. .claude/settings.json (any string value)
-//   5. another file under scripts/ (transitive imports / source / invocation)
+//   4. .claude/settings.json (any string value), or the root
+//      eslint.config.js (which loads the custom rules in scripts/eslint-rules/)
+//   5. another non-test file under scripts/ or .github/scripts/ (transitive
+//      imports / source / invocation). A `*.test.mjs` importing a script is
+//      not wiring: a script reached only by its own test runs nowhere.
 //   6. an entry in scripts/README.md between the markers
 //      <!-- manual-tools:start --> and <!-- manual-tools:end -->,
 //      formatted as `- \`<filename>\` — When to run: <reason>`.
@@ -25,6 +28,7 @@ const EXCLUDED_SUBDIRS = new Set(["lib", "cws-api", "fixtures"]);
 const README_NAME = "README.md";
 const MARKER_START = "<!-- manual-tools:start -->";
 const MARKER_END = "<!-- manual-tools:end -->";
+const GITHUB_SCRIPTS = ".github/scripts";
 
 function listScriptCandidates(rootDir) {
   const out = [];
@@ -127,17 +131,20 @@ function collectHuskySources(rootDir) {
   return blob;
 }
 
-function collectClaudeSettings(rootDir) {
-  const p = join(rootDir, ".claude", "settings.json");
-  return readSafe(p);
+function collectRootConfigs(rootDir) {
+  return (
+    readSafe(join(rootDir, ".claude", "settings.json")) +
+    "\n" +
+    readSafe(join(rootDir, "eslint.config.js"))
+  );
 }
 
-function collectScriptsTransitive(scriptsDir) {
-  // Read EVERY file under scripts/ (including .test.mjs and the README,
-  // but excluding the lib/cws-api/fixtures subdirs whose contents are
-  // internal to a single parent script and don't count as wiring).
-  // Test files import the script under test via `./check-X.mjs` —
-  // that counts as transitive wiring evidence.
+function collectScriptsTransitive(rootDir, scriptsDir) {
+  // Read every non-test file under scripts/ and .github/scripts/, excluding
+  // the lib/cws-api/fixtures subdirs (internal to a single parent script)
+  // and scripts/README.md: a row in its inventory table documents wiring,
+  // it is not wiring. Only its manual-tools block counts, as an allowlist.
+  // Keys are repo-relative paths.
   const map = new Map();
   function walk(dir) {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -146,12 +153,15 @@ function collectScriptsTransitive(scriptsDir) {
         walk(join(dir, e.name));
         continue;
       }
+      if (e.name.endsWith(".test.mjs")) continue;
+      if (dir === scriptsDir && e.name === README_NAME) continue;
       const full = join(dir, e.name);
-      const rel = relative(scriptsDir, full);
-      map.set(rel, readSafe(full));
+      map.set(relative(rootDir, full), readSafe(full));
     }
   }
-  walk(scriptsDir);
+  for (const dir of [scriptsDir, join(rootDir, GITHUB_SCRIPTS)]) {
+    if (existsSync(dir)) walk(dir);
+  }
   return map;
 }
 
@@ -185,20 +195,18 @@ function parseAllowlist(readmeText) {
   return { missingMarkers: false, entries, malformed };
 }
 
-function isReachable(rel, basename, sources, transitiveByRel) {
+function isReachable(needleAbs, basename, sources, transitiveByRel) {
   // Top-level wiring: package.json scripts.*, workflows, husky,
-  // .claude/settings.json. Match the canonical `scripts/<rel>` path.
-  const needleAbs = `scripts/${rel}`;
+  // .claude/settings.json. Match the canonical repo-relative path.
   if (sources.includes(needleAbs)) return true;
 
   // Transitive reachability: any OTHER file under scripts/ references
   // this one. Match the basename — script filenames like
   // `check-bridge-privacy-surface.mjs` are unique enough that the bare
   // basename match is precise. This catches relative imports
-  // (`./check-X.mjs`), `join(HERE, "check-X.mjs")`, bash sources,
-  // documentation table rows in README, etc.
+  // (`./check-X.mjs`), `join(HERE, "check-X.mjs")`, bash sources, etc.
   for (const [otherRel, text] of transitiveByRel.entries()) {
-    if (otherRel === rel) continue;
+    if (otherRel === needleAbs) continue;
     if (text.includes(basename)) return true;
     if (text.includes(needleAbs)) return true;
   }
@@ -207,7 +215,15 @@ function isReachable(rel, basename, sources, transitiveByRel) {
 
 export function findOrphans(rootDir = REPO_ROOT) {
   const scriptsDir = join(rootDir, "scripts");
-  const candidates = listScriptCandidates(scriptsDir);
+  const githubScriptsDir = join(rootDir, GITHUB_SCRIPTS);
+  const candidates = [
+    ...listScriptCandidates(scriptsDir).map((rel) => `scripts/${rel}`),
+    ...(existsSync(githubScriptsDir)
+      ? listScriptCandidates(githubScriptsDir).map(
+          (rel) => `${GITHUB_SCRIPTS}/${rel}`
+        )
+      : []),
+  ];
 
   const sources =
     collectPackageJsonScripts(rootDir) +
@@ -216,9 +232,9 @@ export function findOrphans(rootDir = REPO_ROOT) {
     "\n" +
     collectHuskySources(rootDir) +
     "\n" +
-    collectClaudeSettings(rootDir);
+    collectRootConfigs(rootDir);
 
-  const transitiveByRel = collectScriptsTransitive(scriptsDir);
+  const transitiveByRel = collectScriptsTransitive(rootDir, scriptsDir);
 
   const readmeText = readSafe(join(scriptsDir, README_NAME));
   const allow = parseAllowlist(readmeText);
@@ -238,13 +254,14 @@ export function findOrphans(rootDir = REPO_ROOT) {
   }
 
   const orphans = [];
-  for (const rel of candidates) {
-    const basename = rel.includes("/")
-      ? rel.slice(rel.lastIndexOf("/") + 1)
-      : rel;
-    if (isReachable(rel, basename, sources, transitiveByRel)) continue;
+  for (const path of candidates) {
+    const basename = path.slice(path.lastIndexOf("/") + 1);
+    const rel = path.startsWith("scripts/")
+      ? path.slice("scripts/".length)
+      : path;
+    if (isReachable(path, basename, sources, transitiveByRel)) continue;
     if (allow.entries.has(basename) || allow.entries.has(rel)) continue;
-    orphans.push(rel);
+    orphans.push(path);
   }
 
   return { orphans, errors };
@@ -262,14 +279,14 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     console.error(
       `\norphan scripts (${orphans.length}) — R-ScriptsNoOrphans:\n`
     );
-    for (const o of orphans) console.error(`  scripts/${o}`);
+    for (const o of orphans) console.error(`  ${o}`);
     console.error(
       `\nEvery scripts/<file> MUST be reachable from one of:\n` +
         `  1. package.json scripts.* (root or any packages/*/package.json)\n` +
         `  2. .github/workflows/*.yml or .github/actions/**/action.yml\n` +
         `  3. .husky/* hooks\n` +
-        `  4. .claude/settings.json\n` +
-        `  5. another scripts/* file\n` +
+        `  4. .claude/settings.json or the root eslint.config.js\n` +
+        `  5. another non-test scripts/* or .github/scripts/* file\n` +
         `  6. an allowlist entry in scripts/README.md between\n` +
         `     ${MARKER_START} and ${MARKER_END}\n` +
         `     formatted as: - \`<filename>\` — When to run: <reason>\n`

@@ -40,7 +40,7 @@ notes.
 | `check-allowlists-empty.mjs`                   | Allowlists are not silently growing                                                           |
 | `check-build-portable.mjs`                     | Build artifacts are portable (no absolute paths)                                              |
 | `check-ci-fanout-invariants.mjs`               | CI fan-out matrix invariants                                                                  |
-| `check-scripts-orphans.mjs`                    | Every script under this folder has a sibling `*.test.mjs`                                     |
+| `check-scripts-orphans.mjs`                    | Every `scripts/*` and `.github/scripts/*` file is wired (a test importer is not wiring)       |
 | `check-workflow-timeouts.mjs`                  | `.github/workflows/*.yml` declare per-job timeouts                                            |
 | `check-overrides-stale.mjs`                    | `pnpm.overrides` entries match installed versions                                             |
 | `check-husky-no-bypass-hint.mjs`               | Husky hook content doesn't hint `--no-verify`                                                 |
@@ -79,8 +79,10 @@ notes.
 
 - **Test-or-it-doesn't-exist**: every non-trivial `*.mjs` (i.e. anything
   that does more than `console.log`) MUST have a sibling
-  `<name>.test.mjs` using `node:test`. `check-scripts-orphans.mjs` enforces
-  this; CI runs `pnpm test:scripts` in the lint job.
+  `<name>.test.mjs` using `node:test`; CI runs `pnpm test:scripts` in the
+  lint job. A test is not wiring: `check-scripts-orphans.mjs` fails a script
+  reached only by its own test, so a guard also needs a `lint:*` entry (or
+  another real caller).
 - **Pure Node, no TS**: scripts are ESM `.mjs` so they run without a build.
   Use the Node 22 standard library; avoid heavyweight deps.
 - **Exit codes**: lint guards exit non-zero on failure with a short summary

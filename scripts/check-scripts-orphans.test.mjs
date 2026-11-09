@@ -379,3 +379,111 @@ test("test-only invariant files (*.test.mjs without sibling .mjs) are skipped", 
     h.cleanup();
   }
 });
+
+test("script referenced only by its own test fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "check-lonely.mjs", "export const run = () => 0;\n");
+    writeScript(
+      root,
+      "check-lonely.test.mjs",
+      'import { run } from "./check-lonely.mjs";\nrun();\n'
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /scripts\/check-lonely\.mjs/);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("orphan .github/scripts/ file fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    mkdirSync(join(root, ".github", "scripts"), { recursive: true });
+    writeFileSync(join(root, ".github", "scripts", "x.sh"), "echo x\n");
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /\.github\/scripts\/x\.sh/);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test(".github/scripts/ file wired via workflow yml passes", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    mkdirSync(join(root, ".github", "scripts"), { recursive: true });
+    writeFileSync(join(root, ".github", "scripts", "x.sh"), "echo x\n");
+    writeFileSync(
+      join(root, ".github", "workflows", "ci.yml"),
+      "jobs:\n  a:\n    steps:\n      - run: bash .github/scripts/x.sh\n"
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("eslint rule loaded by the root eslint.config.js passes", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    mkdirSync(join(root, "scripts", "eslint-rules"), { recursive: true });
+    writeScript(root, "eslint-rules/my-rule.mjs", "export default {};\n");
+    writeFileSync(
+      join(root, "eslint.config.js"),
+      'import myRule from "./scripts/eslint-rules/my-rule.mjs";\nexport default [myRule];\n'
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("script named only in the README inventory table fails", () => {
+  // Arrange
+  const h = mkHarness((root) => {
+    writeScript(root, "check-documented.mjs");
+    writeFileSync(
+      join(root, "scripts", "README.md"),
+      "# scripts\n\n| `check-documented.mjs` | a guard | `pnpm test:scripts` |\n\n<!-- manual-tools:start -->\n<!-- manual-tools:end -->\n"
+    );
+  });
+
+  // Act
+  const result = h.run();
+
+  // Assert
+  try {
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /scripts\/check-documented\.mjs/);
+  } finally {
+    h.cleanup();
+  }
+});
