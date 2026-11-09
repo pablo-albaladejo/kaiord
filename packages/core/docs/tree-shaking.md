@@ -49,7 +49,7 @@ import { krdSchema } from "@kaiord/core";
 - `krdSchema` definition
 - `workoutSchema` (used by krdSchema)
 - `durationSchema` (used by workoutSchema)
-- Zod library (peer dependency)
+- Zod library (runtime dependency)
 
 **Excludes:**
 
@@ -143,11 +143,16 @@ Excludes the Garmin FIT SDK if `@kaiord/fit` is not imported.
 
 ### tsdown.config.ts
 
+Excerpt of the main-entry build (the real config has a second entry for
+`test-utils`):
+
 ```typescript
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
+  entry: { index: "src/index.ts" },
   format: ["esm"],
+  dts: true,
   treeshake: true,
 });
 ```
@@ -157,7 +162,7 @@ export default defineConfig({
 
 ## 📊 Bundle Size Examples
 
-Real-world bundle sizes (minified + gzipped):
+Approximate bundle sizes (minified + gzipped, indicative figures, not re-measured per release):
 
 | Import Pattern    | Size   | What's Included                  |
 | ----------------- | ------ | -------------------------------- |

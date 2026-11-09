@@ -7,13 +7,13 @@ import { z } from "zod";
  * minors (`2.0`, `2.1`, …) are accepted so forward-compatible fields can be
  * introduced without bumping the canonical KRD version, while any other
  * major (`1.x`, `3.x`) is rejected. Single-sourced here so the inevitable
- * v3 bump is a one-line change rather than ten edits.
+ * v3 bump is a one-line change rather than one edit per schema.
  */
 const HEALTH_SCHEMA_VERSION_PATTERN = /^2\.\d+$/;
 
 /**
  * Zod field schema enforcing {@link HEALTH_SCHEMA_VERSION_PATTERN}. Imported
- * by all ten health metric schemas as their `version` field.
+ * by every health metric schema as their `version` field.
  */
 export const healthVersionSchema = z
   .string()
