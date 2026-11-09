@@ -27,7 +27,8 @@ export const encodeSteadyStatePowerTarget = (
     interval["@_kaiord:originalWatts"] = step.target.value.value;
 
     interval["@_kaiord:assumedFtp"] = ASSUMED_FTP_WATTS;
-    interval["@_Power"] = step.target.value.value / ASSUMED_FTP_WATTS;
+    const percentFtp = (step.target.value.value / ASSUMED_FTP_WATTS) * 100;
+    interval["@_Power"] = percentFtp / 100;
 
     logger?.warn("Lossy conversion: watts converted to percent FTP", {
       originalWatts: step.target.value.value,
