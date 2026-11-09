@@ -142,6 +142,28 @@ describe("tanitaCsvToKrd", () => {
       );
     });
 
+    it("should keep a newline inside a quoted field within one row", () => {
+      // Arrange
+      const csv = [
+        'Date,Note,"Weight (kg)",BMI',
+        `${DATE},"first line\nsecond line",80.00,26.00`,
+        `"2021-01-29 08:04:11","",82.00,26.00`,
+      ].join("\n");
+
+      // Act
+      const result = tanitaCsvToKrd(csv);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0]?.extensions?.health?.weight?.weightKilograms).toBe(
+        WEIGHT_KG
+      );
+      expect(result[0]?.extensions?.health?.bodyComposition?.bmi).toBe(BMI);
+      expect(result[1]?.extensions?.health?.weight?.weightKilograms).toBe(
+        LATER_WEIGHT_KG
+      );
+    });
+
     it("should read CRLF line endings like LF", () => {
       // Arrange
       const csv = `Date,"Weight (kg)",BMI\r\n${DATE},80.00,26.00\r\n`;
