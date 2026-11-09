@@ -776,5 +776,17 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },
+  },
+  {
+    // Landing: browser-only static page. Declares the DOM globals its sources use.
+    files: ["packages/landing/src/**/*.ts"],
+    languageOptions: {
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        navigator: "readonly",
+        location: "readonly",
+      },
+    },
   }
 );
