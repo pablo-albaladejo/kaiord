@@ -631,9 +631,11 @@ jobs:
           # the load-bearing checks for these packages.
           # Every published library is named in an arm, so a new one cannot
           # fall to the default silently (scripts/check-bridge-ci-coverage.test.mjs).
-          # The integration libs' floors are their measured coverage on
-          # 2026-11-09 (lowest of the four metrics, rounded down; identical
-          # on Node 22.18.0 and 24.x), the day they joined this matrix.
+          # whoop and trainingpeaks sit above the 80 default at their measured
+          # coverage on 2026-11-09 (lowest of the four metrics, rounded down;
+          # identical on Node 22.18.0 and 24.x), the day they joined this
+          # matrix. tanita measured below 80 that day; its tests were raised
+          # to clear the library default, so it shares the 80 arm.
           # These floors only ratchet up: scripts/check-coverage-floors-ratchet.mjs
           # (pnpm lint) fails if one is lowered or removed.
           case "${{ matrix.package }}" in
