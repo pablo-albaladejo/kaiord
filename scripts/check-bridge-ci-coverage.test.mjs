@@ -22,6 +22,11 @@
 // The skip chain is also replayed end to end: the real 'Analyze changes'
 // bash runs against a list of changed files, so "a library change shipped
 // with a doc still tests" is checked, not inferred from string presence.
+//
+// The publish side enumerates the same libraries five more times: the
+// release.yml trigger paths, changeset-bot's PUBLISHABLE, the GitHub
+// release script's PUBLISHABLE_DIRS, the build job's verify loop and the
+// consume-build-artifacts default. Each is parsed and compared to disk.
 
 import { strict as assert } from "node:assert";
 import { execFileSync } from "node:child_process";
@@ -42,11 +47,20 @@ import { parse } from "yaml";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
-const CI_TEXT = readFileSync(
-  join(REPO_ROOT, ".github", "workflows", "ci.yml"),
-  "utf8"
-);
-const CODECOV_TEXT = readFileSync(join(REPO_ROOT, "codecov.yml"), "utf8");
+const readRepo = (...path) => readFileSync(join(REPO_ROOT, ...path), "utf8");
+const REAL = {
+  ci: readRepo(".github", "workflows", "ci.yml"),
+  codecov: readRepo("codecov.yml"),
+  release: readRepo(".github", "workflows", "release.yml"),
+  changesetBot: readRepo(".github", "workflows", "changeset-bot.yml"),
+  releasesJs: readRepo("scripts", "create-github-releases.js"),
+  consumeAction: readRepo(
+    ".github",
+    "actions",
+    "consume-build-artifacts",
+    "action.yml"
+  ),
+};
 
 const packageDirs = readdirSync(join(REPO_ROOT, "packages")).filter((name) =>
   statSync(join(REPO_ROOT, "packages", name)).isDirectory()
@@ -54,20 +68,31 @@ const packageDirs = readdirSync(join(REPO_ROOT, "packages")).filter((name) =>
 
 const BRIDGES = packageDirs.filter((name) => name.endsWith("-bridge"));
 
-// A published TS library: a non-private package with a tsconfig and a
-// `test` script. Private apps (SPA, docs, landing, mcp-worker, i18n) have
-// their own jobs and are outside this roster.
-const LIBS = packageDirs.filter((name) => {
-  const dir = join(REPO_ROOT, "packages", name);
-  const manifestPath = join(dir, "package.json");
-  if (!existsSync(manifestPath)) return false;
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-  return (
-    manifest.private !== true &&
-    typeof manifest.scripts?.test === "string" &&
-    existsSync(join(dir, "tsconfig.json"))
-  );
-});
+const MANIFESTS = Object.fromEntries(
+  packageDirs
+    .filter((name) =>
+      existsSync(join(REPO_ROOT, "packages", name, "package.json"))
+    )
+    .map((name) => [
+      name,
+      JSON.parse(readRepo("packages", name, "package.json")),
+    ])
+);
+
+// A published library is any non-private package. Private apps (SPA, docs,
+// landing, mcp-worker, i18n) have their own jobs and are outside this roster.
+const publishedOf = (manifests) =>
+  Object.entries(manifests)
+    .filter(([, manifest]) => manifest.private !== true)
+    .map(([name]) => name);
+
+/** A published package with no `test` script ships tests nobody runs. */
+export const findUntested = (manifests) =>
+  publishedOf(manifests)
+    .filter((name) => typeof manifests[name].scripts?.test !== "string")
+    .map((name) => `roster: published ${name} has no 'test' script`);
+
+const LIBS = publishedOf(MANIFESTS);
 
 const bridgeNames = (paths) =>
   paths
@@ -75,6 +100,44 @@ const bridgeNames = (paths) =>
     .filter(Boolean)
     .map((match) => match[1])
     .sort();
+
+const words = (text = "") => text.trim().split(/\s+/).filter(Boolean);
+
+/** The five publish-side enumerations, as package directory names. */
+const readPublishLists = ({
+  release,
+  changesetBot,
+  releasesJs,
+  consumeAction,
+}) => {
+  const releasePaths = parse(release).on.push.paths;
+  const botRun = Object.values(parse(changesetBot).jobs)
+    .flatMap((job) => job.steps ?? [])
+    .map((step) => String(step.run ?? ""))
+    .find((run) => run.includes("PUBLISHABLE="));
+  const dirsArray = /PUBLISHABLE_DIRS = \[([^\]]*)\]/.exec(releasesJs)?.[1];
+  return {
+    "release.yml paths": releasePaths
+      .map((path) => /^packages\/([^/]+)\/\*\*$/.exec(path)?.[1])
+      .filter(Boolean),
+    "changeset-bot PUBLISHABLE": words(
+      /PUBLISHABLE="([^"]*)"/.exec(botRun ?? "")?.[1]
+    ).map((dir) => dir.replace(/^packages\//, "")),
+    "create-github-releases PUBLISHABLE_DIRS": [
+      ...(dirsArray ?? "").matchAll(/"([^"]+)"/g),
+    ].map((match) => match[1]),
+    "consume-build-artifacts default": words(
+      parse(consumeAction).inputs["expected-packages"].default
+    ),
+  };
+};
+
+// These two lists drive publishing itself, so a private package in them
+// is as wrong as a missing library.
+const EXACT_LISTS = new Set([
+  "changeset-bot PUBLISHABLE",
+  "create-github-releases PUBLISHABLE_DIRS",
+]);
 
 const readCi = (ciText) => {
   const workflow = parse(ciText);
@@ -88,6 +151,9 @@ const readCi = (ciText) => {
   ).run;
   const thresholdRun = workflow.jobs.test.steps.find(
     (step) => step.name === "Check coverage threshold"
+  ).run;
+  const verifyRun = workflow.jobs.build.steps.find(
+    (step) => step.name === "Verify build outputs"
   ).run;
   const arms = [
     ...thresholdRun.matchAll(/^\s*([\w|-]+)\)\s*THRESHOLD=(\d+)\s*;;/gm),
@@ -109,17 +175,17 @@ const readCi = (ciText) => {
     matrix: workflow.jobs.test.strategy.matrix.package,
     arms,
     dedicatedJob,
+    verifyLoop: words(/for pkg in ([^;]+);/.exec(verifyRun)?.[1]),
   };
 };
 
-/** Every way ci.yml + codecov.yml fail to see the roster, as messages. */
+/** Every way the CI and publish files fail to see the roster, as messages. */
 export const findViolations = (
-  ciText,
-  codecovText,
+  texts,
   { bridges = BRIDGES, libs = LIBS } = {}
 ) => {
-  const ci = readCi(ciText);
-  const codecov = parse(codecovText);
+  const ci = readCi(texts.ci);
+  const codecov = parse(texts.codecov);
   const patch = codecov.coverage.status.patch;
   const violations = [];
   const bridgeArm = ci.arms.find((names) => names.includes("garmin-bridge"));
@@ -170,6 +236,21 @@ export const findViolations = (
   for (const [label, paths] of codecovLists) {
     if (bridgeNames(paths).join(",") !== want) {
       violations.push(`codecov: the ${label} drifted from packages/*-bridge`);
+    }
+  }
+
+  const publishLists = {
+    ...readPublishLists(texts),
+    "ci.yml verify-build loop": ci.verifyLoop,
+  };
+  for (const [label, list] of Object.entries(publishLists)) {
+    for (const pkg of libs.filter((lib) => !list.includes(lib))) {
+      violations.push(`${label}: missing published ${pkg}`);
+    }
+    if (EXACT_LISTS.has(label)) {
+      for (const pkg of list.filter((dir) => !libs.includes(dir))) {
+        violations.push(`${label}: lists ${pkg}, which is not published`);
+      }
     }
   }
   return violations;
@@ -235,60 +316,84 @@ test("roster discovery finds the bridges and the published libraries", () => {
   }
 });
 
-test("the real ci.yml and codecov.yml see every bridge and library", () => {
-  assert.deepEqual(findViolations(CI_TEXT, CODECOV_TEXT), []);
+test("every published package on disk has a test script", () => {
+  assert.deepEqual(findUntested(MANIFESTS), []);
+});
+
+test("plant: a published package without a test script is reported", () => {
+  const manifests = {
+    ...MANIFESTS,
+    whoop: { ...MANIFESTS.whoop, scripts: { build: "tsdown" } },
+  };
+  assert.deepEqual(findUntested(manifests), [
+    "roster: published whoop has no 'test' script",
+  ]);
+});
+
+test("the real CI and publish files see every bridge and library", () => {
+  assert.deepEqual(findViolations(REAL), []);
 });
 
 test("skip-chain replay: a docs-only diff skips the tests", () => {
-  assert.equal(replayShouldTest(CI_TEXT, ["README.md", "docs/a.md"]), "false");
+  assert.equal(replayShouldTest(REAL.ci, ["README.md", "docs/a.md"]), "false");
 });
 
 for (const pkg of [...BRIDGES, ...LIBS]) {
   test(`skip-chain replay: packages/${pkg}/src/x.ts + README.md tests`, () => {
     const files = [`packages/${pkg}/src/x.ts`, "README.md"];
-    assert.equal(replayShouldTest(CI_TEXT, files), "true");
+    assert.equal(replayShouldTest(REAL.ci, files), "true");
   });
 }
 
 // Planted violations: each removes whoop from one enumeration of the real
-// files and must be reported by name.
+// files and must be reported under that enumeration's label.
+const plantIn = (file, from, to) => ({
+  ...REAL,
+  [file]: replaceOnce(REAL[file], from, to),
+});
+
 const WHOOP_PLANTS = [
   [
     "filters",
-    () => [
-      replaceOnce(CI_TEXT, "- 'packages/whoop/**'", "- 'packages/whoop-x/**'"),
-      CODECOV_TEXT,
-    ],
+    () => plantIn("ci", "- 'packages/whoop/**'", "- 'packages/whoop-x/**'"),
   ],
   [
     "skip chain",
-    () => [
-      replaceOnce(
-        CI_TEXT,
-        "outputs.whoop_any_changed",
-        "outputs.docs_any_changed"
-      ),
-      CODECOV_TEXT,
-    ],
+    () =>
+      plantIn("ci", "outputs.whoop_any_changed", "outputs.docs_any_changed"),
   ],
-  ["matrix", () => [replaceOnce(CI_TEXT, '"whoop",\n', ""), CODECOV_TEXT]],
+  ["matrix", () => plantIn("ci", '"whoop",\n', "")],
   [
     "threshold",
-    () => [
-      replaceOnce(CI_TEXT, " whoop) THRESHOLD", " whoop-x) THRESHOLD"),
-      CODECOV_TEXT,
-    ],
+    () => plantIn("ci", " whoop) THRESHOLD", " whoop-x) THRESHOLD"),
+  ],
+  ["codecov", () => plantIn("codecov", "  whoop:\n", "  whoop-x:\n")],
+  [
+    "release.yml paths",
+    () => plantIn("release", '      - "packages/whoop/**"\n', ""),
   ],
   [
-    "codecov",
-    () => [CI_TEXT, replaceOnce(CODECOV_TEXT, "  whoop:\n", "  whoop-x:\n")],
+    "changeset-bot PUBLISHABLE",
+    () => plantIn("changesetBot", " packages/whoop packages/", " packages/"),
+  ],
+  [
+    "create-github-releases PUBLISHABLE_DIRS",
+    () => plantIn("releasesJs", '  "whoop",\n', ""),
+  ],
+  [
+    "ci.yml verify-build loop",
+    () => plantIn("ci", " i18n whoop tanita", " i18n tanita"),
+  ],
+  [
+    "consume-build-artifacts default",
+    () => plantIn("consumeAction", " ai whoop tanita", " ai tanita"),
   ],
 ];
 
+// Lazy: built inside each test, so a real-tree mutation still loads this file.
 for (const [label, plant] of WHOOP_PLANTS) {
   test(`plant: whoop missing from the ${label} enumeration is reported`, () => {
-    const [ci, codecov] = plant();
-    const violations = findViolations(ci, codecov);
+    const violations = findViolations(plant());
     assert.ok(
       violations.some((v) => v.startsWith(`${label}:`) && v.includes("whoop")),
       `expected a '${label}' violation naming whoop, got: ${violations.join("; ")}`
@@ -296,29 +401,43 @@ for (const [label, plant] of WHOOP_PLANTS) {
   });
 }
 
+test("plant: a private package in changeset-bot PUBLISHABLE is reported", () => {
+  const texts = plantIn(
+    "changesetBot",
+    'PUBLISHABLE="packages/core ',
+    'PUBLISHABLE="packages/landing packages/core '
+  );
+  assert.ok(
+    findViolations(texts).includes(
+      "changeset-bot PUBLISHABLE: lists landing, which is not published"
+    )
+  );
+});
+
 test("plant: a filter missing from the skip chain is reported", () => {
-  const ci = replaceOnce(
-    CI_TEXT,
+  const texts = plantIn(
+    "ci",
     "            i18n:\n",
     "            planted_filter:\n              - 'planted/**'\n            i18n:\n"
   );
   assert.ok(
-    findViolations(ci, CODECOV_TEXT).includes(
+    findViolations(texts).includes(
       "skip chain: filter 'planted_filter' is never consulted"
     )
   );
-  assert.equal(replayShouldTest(ci, ["planted/x.ts", "README.md"]), "false");
+  assert.equal(
+    replayShouldTest(texts.ci, ["planted/x.ts", "README.md"]),
+    "false"
+  );
 });
 
 test("plant: a library in the relaxed bridge arm is reported", () => {
-  const ci = replaceOnce(
-    CI_TEXT,
+  const texts = plantIn(
+    "ci",
     "tanita-bridge) THRESHOLD=60",
     "tanita-bridge|whoop) THRESHOLD=60"
   );
   assert.ok(
-    findViolations(ci, CODECOV_TEXT).includes(
-      "threshold: whoop is in the bridge arm"
-    )
+    findViolations(texts).includes("threshold: whoop is in the bridge arm")
   );
 });
