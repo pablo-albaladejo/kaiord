@@ -12,18 +12,23 @@
  * heart-rate and power `range` forms.
  */
 
+import { CONTROL_CHARS } from "./control-chars";
 import { PARSER_PROMPT_VERSION } from "./parser-prompt-version";
 
 export const PROMPT_VERSION = PARSER_PROMPT_VERSION;
 
 /**
- * Replaces every literal `</tag>` in `text` with `[/tag]`. The replacement has
- * no `<`, so a closing tag cannot re-form from the neighbours of a
- * replacement. Text that does not contain the closing tag is returned
- * unchanged.
+ * Strips control characters (input validation removes them later, which
+ * could otherwise re-join a delimiter split by one), then replaces every
+ * closing `tag`, in any case and with whitespace inside the brackets, with
+ * `[/tag]`. The replacement has no `<`, so a closing tag cannot re-form from
+ * the neighbours of a replacement. Text with neither control characters nor a
+ * closing tag is returned unchanged.
  */
 export const neutralizeClosingTag = (text: string, tag: string): string =>
-  text.replaceAll(`</${tag}>`, `[/${tag}]`);
+  text
+    .replace(CONTROL_CHARS, "")
+    .replace(new RegExp(`<\\s*/\\s*${tag}\\s*>`, "gi"), `[/${tag}]`);
 
 /**
  * @deprecated Never sent to the model. The workout-parser system prompt
