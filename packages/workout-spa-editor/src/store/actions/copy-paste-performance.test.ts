@@ -6,7 +6,7 @@
  * - Many steps
  * - Complex nested structures
  *
- * Requirement 39.2: Performance tests for copying large repetition blocks
+ * Performance tests for copying large repetition blocks
  */
 
 import { describe, expect, it, vi } from "vitest";

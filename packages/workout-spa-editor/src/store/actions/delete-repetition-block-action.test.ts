@@ -78,7 +78,6 @@ describe("deleteRepetitionBlockAction", () => {
   describe("Property 1: Correct block deletion by ID", () => {
     /**
      * Feature: 11-fix-repetition-block-deletion-index-bug, Property 1: Correct block deletion by ID
-     * Validates: Requirements 1.1, 1.2, 1.3, 1.4
      */
     it("should delete the correct block when identified by ID", () => {
       // Arrange
@@ -240,7 +239,6 @@ describe("deleteRepetitionBlockAction", () => {
   describe("Property 3: Block deletion removes all contained steps", () => {
     /**
      * Feature: 09-repetition-blocks-and-ui-polish, Property 3: Block deletion removes all contained steps
-     * Validates: Requirements 2.1
      */
     it("should remove the entire block and all its steps from the workout", () => {
       // Arrange
@@ -340,7 +338,6 @@ describe("deleteRepetitionBlockAction", () => {
   describe("Property 8: Step index recalculation", () => {
     /**
      * Feature: 11-fix-repetition-block-deletion-index-bug, Property 8: Step index recalculation
-     * Validates: Requirements 1.5
      */
     it("should recalculate step indices correctly after deleting any block", () => {
       // Arrange
@@ -485,7 +482,6 @@ describe("deleteRepetitionBlockAction", () => {
   describe("Property 4: Step indices remain sequential after deletion", () => {
     /**
      * Feature: 09-repetition-blocks-and-ui-polish, Property 4: Step indices remain sequential after deletion
-     * Validates: Requirements 2.2
      */
     it("should recalculate stepIndex for all remaining steps to be sequential", () => {
       // Arrange
@@ -546,7 +542,6 @@ describe("deleteRepetitionBlockAction", () => {
   describe("Property 5: Block deletion is undoable (round-trip)", () => {
     /**
      * Feature: 09-repetition-blocks-and-ui-polish, Property 5: Block deletion is undoable (round-trip)
-     * Validates: Requirements 2.3, 2.4
      */
     it("should restore exact original state after delete then undo", () => {
       // Arrange
@@ -659,7 +654,6 @@ describe("deleteRepetitionBlockAction", () => {
   describe("Property 6: Deletion clears affected selections", () => {
     /**
      * Feature: 09-repetition-blocks-and-ui-polish, Property 6: Deletion clears affected selections
-     * Validates: Requirements 2.5
      */
     it("should clear selections when deleting a block", () => {
       // Arrange
@@ -703,7 +697,6 @@ describe("deleteRepetitionBlockAction", () => {
   describe("Property 7: Statistics consistency after deletion", () => {
     /**
      * Feature: 09-repetition-blocks-and-ui-polish, Property 7: Statistics consistency after deletion
-     * Validates: Requirements 2.7
      */
     it("should maintain consistent workout statistics after deletion", () => {
       // Arrange

@@ -5,7 +5,7 @@
  *
  * Requirements:
  * - Requirement 4: Create repetition blocks from selected steps
- * - Requirement 2.4: Use block ID for operations
+ * - Use block ID for operations
  */
 
 import type { KRD, RepetitionBlock } from "../../types/krd";
