@@ -45,7 +45,7 @@ Private (not published to npm). Deployed to GitHub Pages.
 1. **Hexagonal layout inside the SPA.** Source is split `domain types → ports → adapters → application → components`. Adapters (Dexie, Garmin extension, Train2Go extension, Umami analytics) implement the ports under `src/ports/`. UI never imports adapters directly — it goes through ports via the `PersistenceProvider` context or hooks.
 2. **File-size + function-size caps.** ≤100 lines per file (tests exempt), <40 LOC per function, 60 LOC for React components. Split when needed (the `create-*` factories under `src/store/` exist for exactly this reason).
 3. **`type` not `interface`. Factories not classes.** Only Dexie's `KaiordDatabase` is a class because the library requires it.
-4. **Direct imports only.** No barrel `index.ts` imports — see `src/PROJECT_STRUCTURE.md`. Existing `index.ts` files are legacy and unused.
+4. **Prefer direct imports.** New code imports the source file, not a barrel `index.ts` — see `src/PROJECT_STRUCTURE.md`. Some barrels (e.g. `components/atoms/Icon`, `test-utils`) are still imported.
 5. **English everywhere.** Comments, identifiers, commit messages, changesets.
 
 ### Testing Requirements
