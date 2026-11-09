@@ -102,22 +102,12 @@ See `console-spy.example.test.tsx` for complete usage examples.
 
 ## Fixture Utilities
 
-Re-exports fixture utilities from `@kaiord/core` for loading test data.
-
-### Available Functions
-
-- `loadKrdFixture(name)` - Load a KRD fixture by name
-- `loadKrdFixtureRaw(name)` - Load raw KRD JSON string
-- `getFixturePath(name)` - Get path to fixture file
-- `loadFixturePair(name)` - Load both KRD and original format
-- `FIXTURE_NAMES` - Available fixture names
-
-**Usage:**
+Load KRD fixtures straight from `@kaiord/core/test-utils`:
 
 ```typescript
-import { loadKrdFixture } from "@/test-utils";
+import { loadKrdFixture } from "@kaiord/core/test-utils";
 
-const krd = loadKrdFixture("WorkoutIndividualSteps");
+const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
 ```
 
 ## Best Practices

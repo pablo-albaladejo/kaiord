@@ -1,48 +1,6 @@
 /**
- * Zod Schemas for Validation
- *
- * Re-exports the core schemas.
+ * The core Zod schemas and types the SPA validates against.
  */
 
-export type {
-  Duration,
-  DurationType,
-  Equipment,
-  Intensity,
-  KRD,
-  KRDEvent,
-  KRDLap,
-  KRDMetadata,
-  KRDRecord,
-  KRDSession,
-  RepetitionBlock,
-  Sport,
-  SubSport,
-  SwimStroke,
-  Target,
-  TargetType,
-  TargetUnit,
-  Workout,
-  WorkoutStep,
-} from "./schemas/core-exports";
-export {
-  durationSchema,
-  durationTypeSchema,
-  equipmentSchema,
-  intensitySchema,
-  krdEventSchema,
-  krdLapSchema,
-  krdMetadataSchema,
-  krdRecordSchema,
-  krdSchema,
-  krdSessionSchema,
-  repetitionBlockSchema,
-  sportSchema,
-  subSportSchema,
-  swimStrokeSchema,
-  targetSchema,
-  targetTypeSchema,
-  targetUnitSchema,
-  workoutSchema,
-  workoutStepSchema,
-} from "./schemas/core-exports";
+export type { KRD, Sport, SubSport } from "@kaiord/core";
+export { krdSchema, sportSchema } from "@kaiord/core";
