@@ -30,6 +30,7 @@ export type {
   SyncTanitaPhase,
   SyncTanitaResult,
 } from "./sync-tanita-body-composition-measurements";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 
 export const syncTanitaBodyComposition = async (
   deps: SyncTanitaBodyCompositionDeps,
@@ -39,7 +40,7 @@ export const syncTanitaBodyComposition = async (
     { policyRepo: deps.policyRepo },
     { profileId: input.profileId, dataType: BODY_COMPOSITION }
   );
-  if (!policies.some((p) => p.enabled && p.bridgeId === GARMIN_BRIDGE_ID)) {
+  if (!isRouteEnabled(policies, GARMIN_BRIDGE_ID)) {
     return { ok: false, reason: "route-inactive" };
   }
 
