@@ -1,4 +1,6 @@
 import type { LanguageModel } from "ai";
+import type { Logger } from "@kaiord/core";
+import { emitBestEffort } from "../observability/emit-best-effort";
 import { modelIdOf, providerOf } from "../agents/prelude";
 import type {
   AiTelemetrySink,
@@ -24,7 +26,8 @@ export const emitChatTurn = (
   sink: AiTelemetrySink | undefined,
   trace: ChatTurnTrace,
   status: ChatTurnStatus,
-  metrics?: TurnMetrics
+  metrics?: TurnMetrics,
+  logger?: Logger
 ): void => {
   if (!sink) return;
   const event: ChatTurnFinishedEvent = {
@@ -40,9 +43,5 @@ export const emitChatTurn = (
     outputTokens: metrics?.usage?.completionTokens ?? 0,
     latencyMs: Date.now() - trace.startedAt,
   };
-  try {
-    sink.emit(event);
-  } catch {
-    // Telemetry is best-effort: a faulty sink must never fail the turn.
-  }
+  emitBestEffort(sink, event, logger);
 };
