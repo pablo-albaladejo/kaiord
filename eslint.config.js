@@ -531,9 +531,11 @@ export default tseslint.config(
             },
             {
               from: [{ element: { type: "spa-application" } }],
-              disallow: [{ element: { type: ["spa-adapters"] } }],
+              disallow: [
+                { element: { type: ["spa-adapters", "spa-components"] } },
+              ],
               message:
-                "Application use cases must not depend on adapters. Inject through ports instead.",
+                "Application use cases must not depend on adapters or components. Inject through ports instead.",
             },
             {
               from: [{ element: { type: "spa-components" } }],
