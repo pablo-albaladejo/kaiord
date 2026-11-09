@@ -188,10 +188,6 @@ const preauthorized = async (ticket, fetchImpl) => {
 // to settle which is required; until then claim neither. (The data calls are
 // the deliberate contrast: bearer-fetch.js sends `credentials: "omit"` so the
 // Bearer really is the only credential there.)
-//
-// This comment used to say the refresh happened "without touching the
-// session". It was copied into the bridge spec on trust and shipped there
-// before anyone read the request ten lines below it.
 const exchange = async (oauth1, fetchImpl) => {
   const url = `${CONNECTAPI}/oauth-service/oauth/exchange/user/2.0`;
   const bodyParams = { audience: "GARMIN_CONNECT_MOBILE_ANDROID_DI" };
