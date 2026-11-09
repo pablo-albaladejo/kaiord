@@ -14,6 +14,10 @@ export const emitBestEffort = (
   try {
     sink.emit(event);
   } catch (error) {
-    logger?.warn("Telemetry sink failed", { type: event.type, error });
+    try {
+      logger?.warn("Telemetry sink failed", { type: event.type, error });
+    } catch {
+      // Best-effort: a faulty logger must not undo the swallow above.
+    }
   }
 };
