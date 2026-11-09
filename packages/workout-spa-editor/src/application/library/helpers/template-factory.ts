@@ -1,9 +1,7 @@
 /**
  * Template Factory
  *
- * Pure constructors / updaters for WorkoutTemplate. Relocated from
- * `store/library-store/helpers.ts` so the application use cases own
- * their inputs and the legacy Zustand store can be deleted.
+ * Pure constructors / updaters for WorkoutTemplate.
  */
 
 import { stripIds } from "../../../store/strip-ids";
