@@ -7,7 +7,7 @@ import type { WhoopStressResponse } from "../adapters/schemas/whoop-stress.schem
  * two-point `stress_graph` timeline the converter and extractor tests need.
  */
 
-export const STRESS_GAUGE_FRACTION = 0.47;
+const STRESS_GAUGE_FRACTION = 0.47;
 export const STRESS_POINT_LOW = 0.4;
 export const STRESS_POINT_HIGH = 0.62;
 

@@ -8,11 +8,11 @@
  * annotation) so the extra fields don't trip an excess-property check.
  */
 
-export const BIOMARKER_TEST_ID = "test-1";
-export const ALT_VALUE = 38;
-export const ALT_RANGE_LOW = 6;
-export const ALT_RANGE_HIGH = 35;
-export const HDL_VALUE = 58;
+const BIOMARKER_TEST_ID = "test-1";
+const ALT_VALUE = 38;
+const ALT_RANGE_LOW = 6;
+const ALT_RANGE_HIGH = 35;
+const HDL_VALUE = 58;
 
 export const BIOMARKER_SUMMARY_FIXTURE = {
   biomarker_test_id: BIOMARKER_TEST_ID,
