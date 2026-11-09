@@ -26,15 +26,15 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "i18next": "^26.4.7"
+    "i18next": "^26.7.2"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "@vitest/coverage-v8": "^5.0.5",
-    "tsdown": "^0.23.1",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.1.0",
+    "tsdown": "^0.23.7",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": ">=22.12.0"
