@@ -11,7 +11,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   ALLOWLIST_PACKAGE_ROOT,
@@ -78,7 +78,10 @@ export function checkBoundariesAllowlist(repoRoot = REPO_ROOT) {
   return problems;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   const problems = checkBoundariesAllowlist();
   if (problems.length > 0) {
     console.error("boundaries allowlist check failed:\n");
