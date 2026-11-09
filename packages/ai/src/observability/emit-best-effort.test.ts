@@ -105,4 +105,48 @@ describe("best-effort telemetry and warnings", () => {
       error,
     });
   });
+
+  it("should warn once when a sink thenable calls onRejected twice", () => {
+    // Arrange
+    const thenable = {
+      then: (_onFulfilled: unknown, onRejected: (e: unknown) => void) => {
+        onRejected(new Error("first"));
+        onRejected(new Error("second"));
+      },
+    };
+    const sink = { emit: () => thenable };
+    const warn = vi.fn();
+
+    // Act
+    emitBestEffort(
+      sink as unknown as Parameters<typeof emitBestEffort>[0],
+      EVENT,
+      loggerWith(warn)
+    );
+
+    // Assert
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it("should warn once when a sink thenable rejects and then throws", () => {
+    // Arrange
+    const thenable = {
+      then: (_onFulfilled: unknown, onRejected: (e: unknown) => void) => {
+        onRejected(new Error("rejected"));
+        throw new Error("then threw");
+      },
+    };
+    const sink = { emit: () => thenable };
+    const warn = vi.fn();
+
+    // Act
+    emitBestEffort(
+      sink as unknown as Parameters<typeof emitBestEffort>[0],
+      EVENT,
+      loggerWith(warn)
+    );
+
+    // Assert
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
 });

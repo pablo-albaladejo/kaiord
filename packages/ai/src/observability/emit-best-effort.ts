@@ -32,11 +32,17 @@ export const emitBestEffort = (
   event: AiTelemetryEvent,
   logger?: Logger
 ): void => {
-  const report = (error: unknown): void =>
+  // At most one warning per event, even from a thenable that calls its
+  // rejection callback twice or throws after calling it.
+  let reported = false;
+  const report = (error: unknown): void => {
+    if (reported) return;
+    reported = true;
     warnBestEffort(logger, "Telemetry sink failed", {
       type: event.type,
       error,
     });
+  };
   try {
     const result: unknown = sink.emit(event);
     if (isThenable(result)) result.then(undefined, report);
