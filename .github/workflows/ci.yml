@@ -80,6 +80,12 @@ jobs:
               - 'packages/ai/**'
             i18n:
               - 'packages/i18n/**'
+            whoop:
+              - 'packages/whoop/**'
+            tanita:
+              - 'packages/tanita/**'
+            trainingpeaks:
+              - 'packages/trainingpeaks/**'
             garmin_bridge:
               - 'packages/garmin-bridge/**'
             train2go_bridge:
@@ -210,6 +216,9 @@ jobs:
              [[ "${{ steps.changed-files.outputs.mcp_worker_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.i18n_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.whoop_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.tanita_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.trainingpeaks_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_bridge_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.train2go_bridge_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.whoop_bridge_any_changed }}" == "false" ]] && \
@@ -563,6 +572,9 @@ jobs:
             "mcp-worker",
             "ai",
             "i18n",
+            "whoop",
+            "tanita",
+            "trainingpeaks",
             "garmin-bridge",
             "train2go-bridge",
             "whoop-bridge",
@@ -617,10 +629,20 @@ jobs:
           # covered; the residual is stable pre-existing code. The
           # privacy-surface and icon-distinct mechanical guards remain
           # the load-bearing checks for these packages.
+          # Every published library is named in an arm, so a new one cannot
+          # fall to the default silently (scripts/check-bridge-ci-coverage.test.mjs).
+          # whoop and trainingpeaks sit above the 80 default at their measured
+          # coverage on 2026-11-09 (lowest of the four metrics, rounded down;
+          # identical on Node 22.18.0 and 24.x), the day they joined this
+          # matrix. tanita measured below 80 that day; its tests were raised
+          # to clear the library default, so it shares the 80 arm.
           # These floors only ratchet up: scripts/check-coverage-floors-ratchet.mjs
           # (pnpm lint) fails if one is lowered or removed.
           case "${{ matrix.package }}" in
             garmin-bridge|train2go-bridge|whoop-bridge|trainingpeaks-bridge|tanita-bridge) THRESHOLD=60 ;;
+            core|fit|tcx|zwo|garmin|garmin-connect|mcp|ai|tanita) THRESHOLD=80 ;;
+            whoop) THRESHOLD=94 ;;
+            trainingpeaks) THRESHOLD=83 ;;
             *) THRESHOLD=80 ;;
           esac
           node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json $THRESHOLD
@@ -666,6 +688,8 @@ jobs:
       # dist-reading docs and SPA tests skip. REQUIRE_DOCS_DIST=1 and
       # REQUIRE_SPA_DIST=1 turn that skip
       # into a failure here, so the guards cannot pass vacuously pre-merge.
+      # check-no-perf-marks-in-prod greps this job's SPA bundle, so it lives
+      # here too (--skip-build: the bundle was just built above).
       - name: Site guards
         env:
           REQUIRE_DOCS_DIST: "1"
@@ -675,6 +699,7 @@ jobs:
           node scripts/check-site-links.mjs --landing packages/landing/dist --app packages/workout-spa-editor/dist --docs packages/docs/.vitepress/dist
           node --test packages/docs/scripts/*.test.mjs
           node --test packages/workout-spa-editor/scripts/dist-pwa-manifest.test.mjs
+          node scripts/check-no-perf-marks-in-prod.mjs --skip-build
 
       - name: Verify build outputs
         # Verify every package whose dist/ a downstream consumer reads.
@@ -685,7 +710,7 @@ jobs:
         # source — they have no `build` script and produce no dist/, so
         # they are intentionally excluded.
         run: |
-          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai i18n landing workout-spa-editor; do
+          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai i18n whoop tanita trainingpeaks landing workout-spa-editor; do
             if [ ! -d "packages/$pkg/dist" ]; then
               echo "::error::@kaiord/$pkg build output not found"
               exit 1
