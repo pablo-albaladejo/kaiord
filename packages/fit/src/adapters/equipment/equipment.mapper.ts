@@ -26,7 +26,7 @@ export const mapEquipmentToKrd = (fitEquipment: unknown): Equipment => {
     return equipmentSchema.enum.none;
   }
 
-  return FIT_TO_KRD_EQUIPMENT_MAP[result.data] || equipmentSchema.enum.none;
+  return FIT_TO_KRD_EQUIPMENT_MAP[result.data];
 };
 
 export const mapEquipmentToFit = (krdEquipment: unknown): FitEquipment => {
