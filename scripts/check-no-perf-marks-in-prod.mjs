@@ -13,7 +13,7 @@
  * mock is moot).
  *
  * Invocation:
- *   pnpm test:scripts                    # included in the suite
+ *   CI: the `build` job's "Site guards" step, with --skip-build
  *   node scripts/check-no-perf-marks-in-prod.mjs  # direct
  *   node scripts/check-no-perf-marks-in-prod.mjs --skip-build
  *
