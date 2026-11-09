@@ -56,10 +56,16 @@ export const createChatAgent = (config: ChatAgentConfig): ChatAgent => {
       });
       result = classifyTurn(messages, raw, actions);
     } catch (error) {
-      emitChatTurn(config.telemetry, trace, "error", turnMetricsOf(error));
+      emitChatTurn(
+        config.telemetry,
+        trace,
+        "error",
+        turnMetricsOf(error),
+        config.logger
+      );
       throw error;
     }
-    emitChatTurn(config.telemetry, trace, result.status, raw);
+    emitChatTurn(config.telemetry, trace, result.status, raw, config.logger);
     config.logger?.info("Chat turn settled", { status: result.status });
     return result;
   };
