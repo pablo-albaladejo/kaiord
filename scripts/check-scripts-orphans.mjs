@@ -112,10 +112,10 @@ function collectWorkflowSources(rootDir) {
     wf,
     (_, name) => name.endsWith(".yml") || name.endsWith(".yaml")
   )) {
-    blob += readSafe(f) + "\n";
+    blob += stripHashComments(readSafe(f)) + "\n";
   }
   for (const f of listFiles(ac, (_, name) => name === "action.yml")) {
-    blob += readSafe(f) + "\n";
+    blob += stripHashComments(readSafe(f)) + "\n";
   }
   return blob;
 }
@@ -127,7 +127,7 @@ function collectHuskySources(rootDir) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     if (!e.isFile()) continue;
     if (e.name.startsWith(".")) continue;
-    blob += readSafe(join(dir, e.name)) + "\n";
+    blob += stripHashComments(readSafe(join(dir, e.name))) + "\n";
   }
   return blob;
 }
@@ -136,7 +136,7 @@ function collectRootConfigs(rootDir) {
   return (
     readSafe(join(rootDir, ".claude", "settings.json")) +
     "\n" +
-    readSafe(join(rootDir, "eslint.config.js"))
+    stripJsComments(readSafe(join(rootDir, "eslint.config.js")))
   );
 }
 
@@ -171,25 +171,72 @@ const JS_LIKE = /\.(?:[cm]?js|ts)$/;
 const HASH_COMMENTED = /\.(?:sh|bash|toml|ya?ml)$/;
 
 /**
- * A comment naming a script is not wiring. JS-like: block and line
- * comments (a `//` after `:` is kept, so URLs survive). Shell/TOML/YAML:
- * a `#` at line start or after whitespace (`${#x}` and `a#b` are kept).
+ * JS block and line comments removed, skipping '…', "…" and `…` strings.
+ * KNOWN gap: a regex literal holding a quote or `//` is misread; that can
+ * only drop a reference (a loud false orphan), never invent one.
  */
-function stripComments(name, text) {
-  if (JS_LIKE.test(name)) {
-    return text
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/(^|[^:\\])\/\/[^\n]*/g, "$1");
+function stripJsComments(text) {
+  let out = "";
+  let quote = null;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quote) {
+      out += c;
+      if (c === "\\") out += text[++i] ?? "";
+      else if (c === quote) quote = null;
+    } else if (c === '"' || c === "'" || c === "`") {
+      quote = c;
+      out += c;
+    } else if (c === "/" && (text[i + 1] === "*" || text[i + 1] === "/")) {
+      const block = text[i + 1] === "*";
+      const end = text.indexOf(block ? "*/" : "\n", i + 2);
+      if (end === -1) break;
+      i = block ? end + 1 : end - 1;
+    } else out += c;
   }
-  if (HASH_COMMENTED.test(name)) return text.replace(/(^|\s)#[^\n]*/g, "$1");
+  return out;
+}
+
+/**
+ * `#` comments removed: a `#` at line start or after whitespace, outside a
+ * '…' or "…" string on that line (`${#x}`, `a#b`, `"step #1"` are kept).
+ */
+const stripHashComments = (text) =>
+  text
+    .split("\n")
+    .map((line) => {
+      let quote = null;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (quote) {
+          if (c === "\\" && quote === '"') i++;
+          else if (c === quote) quote = null;
+        } else if (c === '"' || c === "'") quote = c;
+        else if (c === "#" && (i === 0 || /\s/.test(line[i - 1]))) {
+          return line.slice(0, i);
+        }
+      }
+      return line;
+    })
+    .join("\n");
+
+/** A comment naming a script is not wiring. */
+function stripComments(name, text) {
+  if (JS_LIKE.test(name)) return stripJsComments(text);
+  if (HASH_COMMENTED.test(name)) return stripHashComments(text);
   return text;
 }
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** `name` as a whole path segment: not preceded or followed by a filename char. */
+/**
+ * `name` as a whole path: not preceded or followed by a filename char, and
+ * not the tail of `.github/<name>` (so `.github/scripts/x` is not `scripts/x`).
+ */
 const mentions = (text, name) =>
-  new RegExp(`(?<![\\w.-])${escapeRegExp(name)}(?![\\w.-])`).test(text);
+  new RegExp(
+    `(?<![\\w.-])(?<!\\.github/)${escapeRegExp(name)}(?![\\w.-])`
+  ).test(text);
 
 function parseAllowlist(readmeText) {
   const startIdx = readmeText.indexOf(MARKER_START);
@@ -221,20 +268,30 @@ function parseAllowlist(readmeText) {
   return { missingMarkers: false, entries, malformed };
 }
 
-function isReachable(needleAbs, basename, sources, transitiveByRel) {
-  // Top-level wiring: package.json scripts.*, workflows, husky,
-  // .claude/settings.json. Match the canonical repo-relative path.
-  if (sources.includes(needleAbs)) return true;
-
-  // Transitive reachability: any OTHER file under scripts/ references
-  // this one outside a comment. The basename must stand as a whole path
-  // segment, so `max.sh` does not reach `x.sh`. This catches relative
-  // imports (`./check-X.mjs`), `join(HERE, "check-X.mjs")`, bash sources.
-  for (const [otherRel, text] of transitiveByRel.entries()) {
-    if (otherRel === needleAbs) continue;
-    if (mentions(text, basename)) return true;
+/**
+ * Reachability is a fixpoint from the roots (top-level wired or
+ * allowlisted): a script counts as reached only when a file ALREADY reached
+ * names it, so two orphans naming each other stay orphans.
+ */
+function reachableSet(candidates, roots, transitiveByRel) {
+  const reached = new Set(roots);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const path of candidates) {
+      if (reached.has(path)) continue;
+      const basename = path.slice(path.lastIndexOf("/") + 1);
+      for (const other of reached) {
+        if (other === path) continue;
+        if (mentions(transitiveByRel.get(other) ?? "", basename)) {
+          reached.add(path);
+          grew = true;
+          break;
+        }
+      }
+    }
   }
-  return false;
+  return reached;
 }
 
 export function findOrphans(rootDir = REPO_ROOT) {
@@ -277,16 +334,21 @@ export function findOrphans(rootDir = REPO_ROOT) {
     );
   }
 
-  const orphans = [];
-  for (const path of candidates) {
+  const isRoot = (path) => {
     const basename = path.slice(path.lastIndexOf("/") + 1);
     const rel = path.startsWith("scripts/")
       ? path.slice("scripts/".length)
       : path;
-    if (isReachable(path, basename, sources, transitiveByRel)) continue;
-    if (allow.entries.has(basename) || allow.entries.has(rel)) continue;
-    orphans.push(path);
-  }
+    // package.json, workflows, husky, settings: the canonical repo path.
+    if (mentions(sources, path)) return true;
+    return allow.entries.has(basename) || allow.entries.has(rel);
+  };
+  const reached = reachableSet(
+    candidates,
+    candidates.filter(isRoot),
+    transitiveByRel
+  );
+  const orphans = candidates.filter((path) => !reached.has(path));
 
   return { orphans, errors };
 }
