@@ -52,6 +52,7 @@ export const ConflictRow = ({
   onChange,
 }: ConflictRowProps) => {
   const hrUnit = useTranslate("common")("units.hr");
+  const t = useTranslate("zones");
   return (
     <li
       data-testid={`zones-conflict-row-${conflict.field}`}
@@ -71,14 +72,14 @@ export const ConflictRow = ({
           value="accept"
           current={decision}
           onChange={onChange}
-          label="Accept Train2Go"
+          label={t("conflict.accept")}
         />
         <DecisionRadio
           field={conflict.field}
           value="reject"
           current={decision}
           onChange={onChange}
-          label="Keep current"
+          label={t("conflict.keep")}
         />
       </div>
     </li>
