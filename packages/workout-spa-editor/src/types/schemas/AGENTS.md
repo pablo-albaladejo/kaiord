@@ -10,8 +10,6 @@ Zod schemas split into focused files so each file stays under the size cap.
 ## Key Files
 
 - `core-exports.ts` — re-export of `@kaiord/core` schemas, scoped for the SPA's use.
-- `form-schemas.ts` — form-specific schemas (`workoutMetadataFormSchema`, `partialWorkoutStepSchema`, etc.).
-- `ui-schemas.ts` — UI-augmented schemas (KRD + `id` field).
 - `repetition-block-id.test.ts` — pins the `RepetitionBlockId` brand semantics.
 
 ## For AI Agents

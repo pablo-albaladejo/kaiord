@@ -1,9 +1,7 @@
 /**
  * Zod Schemas for Validation
  *
- * Re-exports core schemas and adds UI-specific validation schemas.
- *
- * This module consolidates schema exports from focused submodules.
+ * Re-exports the core schemas.
  */
 
 export type {
@@ -48,21 +46,3 @@ export {
   workoutSchema,
   workoutStepSchema,
 } from "./schemas/core-exports";
-export type {
-  PartialRepetitionBlock,
-  PartialWorkoutStep,
-  WorkoutMetadataForm,
-} from "./schemas/form-schemas";
-export {
-  partialRepetitionBlockSchema,
-  partialWorkoutStepSchema,
-  workoutMetadataFormSchema,
-} from "./schemas/form-schemas";
-export type {
-  ValidationErrorType,
-  WorkoutStepWithId,
-} from "./schemas/ui-schemas";
-export {
-  validationErrorSchema,
-  workoutStepWithIdSchema,
-} from "./schemas/ui-schemas";

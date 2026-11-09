@@ -11,7 +11,7 @@
 import { stripIds } from "../store/strip-ids";
 import type { KRD, ValidationError } from "../types/krd";
 import { krdSchema } from "../types/schemas";
-import { formatZodError } from "../types/validation";
+import { formatZodError } from "../types/validation/formatters";
 import { sanitizeFilename, triggerDownload } from "./save-workout.helpers";
 import { getStructuredWorkout } from "./structured-workout";
 

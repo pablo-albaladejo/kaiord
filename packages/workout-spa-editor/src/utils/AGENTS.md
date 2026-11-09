@@ -23,7 +23,7 @@ Cross-cutting utilities used by the UI tree. Format detection, import/export pip
 
 ### Zone math
 
-- `calculate-hr-zones.ts` / `.test.ts`, `calculate-power-zones.ts` / `.test.ts`, `calculate-pace-zones.ts` / `.test.ts`, `calculate-zone-values.ts` / `.test.ts` — UI-side zone calculators (display only; canonical math lives in `lib/{hr,power,pace,zone}-methods.ts`).
+- `calculate-hr-zones.ts` / `.test.ts`, `calculate-power-zones.ts` / `.test.ts`, `calculate-pace-zones.ts` / `.test.ts` — UI-side zone calculators (display only; canonical math lives in `lib/{hr,power,pace,zone}-methods.ts`).
 
 ### Keyboard handlers
 
@@ -32,14 +32,10 @@ Cross-cutting utilities used by the UI tree. Format detection, import/export pip
 ### Validation
 
 - `krd-validator.ts` / `.test.ts` + `krd-validator-helpers.ts` — KRD-level cross-field validation.
-- `repetition-block-validation.ts` / `.test.ts` — block-specific validation.
 
 ### Storage + recovery
 
-- `library-storage.ts` / `.test.ts` — Library template read/write (delegates to `TemplateRepository`).
 - `backup-download.ts` / `.test.ts` — local-backup download flow.
-- `error-recovery.ts` / `.test.ts` — `safeMode` + `lastBackup` recovery wiring.
-- `workout-migration.ts` / `.test.ts` — workout-level migrations applied at load.
 
 ### Misc
 
