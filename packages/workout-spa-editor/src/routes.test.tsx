@@ -62,8 +62,6 @@ describe("Routing", () => {
       selectedStepId: null,
       selectedStepIds: [],
       isEditing: false,
-      safeMode: false,
-      lastBackup: null,
       deletedSteps: [],
     });
     localStorage.clear();

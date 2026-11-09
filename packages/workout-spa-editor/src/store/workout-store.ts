@@ -1,7 +1,6 @@
 import { create } from "zustand";
 
 import { createHistoryMethods } from "./create-history-methods";
-import { createRecoveryMethods } from "./create-recovery-methods";
 import { createWorkoutMethods } from "./create-workout-methods";
 import { createFocusSlice } from "./focus/focus-slice";
 import { createWorkoutStoreActions } from "./workout-store-actions";
@@ -19,8 +18,6 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
     selectedStepId: null,
     selectedStepIds: [],
     isEditing: false,
-    safeMode: false,
-    lastBackup: null,
     deletedSteps: [],
     isModalOpen: false,
     modalConfig: null,
@@ -30,7 +27,6 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
     ...createSelectionActions(set),
     setEditing: (editing) => set({ isEditing: editing }),
     ...createHistoryMethods(set, get),
-    ...createRecoveryMethods(set, get),
     ...createModalActions(set),
   };
 });

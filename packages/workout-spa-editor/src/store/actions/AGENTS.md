@@ -38,7 +38,6 @@ One file per workout-mutation action. Each action is a pure function that takes 
 
 - `clear-expired-deletes-action.ts` / `.test.ts` (+ `.test-fixtures.ts`) — purges `deletedSteps` entries past their TTL.
 - `history-actions.ts` — undo/redo action functions (kept here so the focus-rule wiring is co-located).
-- `error-recovery-actions.ts` / `.test.ts` — `safeMode` + restore-from-`lastBackup` flow.
 - `item-id-assignment.test.ts`, `block-id-stability.test.ts` — invariants pinned by tests rather than runtime code.
 - `block-operations-integration.test.ts`, `copy-paste-integration.test.ts` (+ `.test-fixtures.ts`), `copy-paste-performance.test.ts`, `performance.test.ts`, `creation-focus-intent.test.ts`, `delete-focus-intent.test.ts` — integration and focus-rule tests.
 

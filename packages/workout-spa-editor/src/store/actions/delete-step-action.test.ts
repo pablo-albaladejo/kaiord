@@ -57,8 +57,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
 
@@ -122,8 +120,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
 
@@ -201,8 +197,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [
           {
             step: existingDeletedStep,
@@ -258,8 +252,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
 
@@ -306,8 +298,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
 
@@ -353,8 +343,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: undefined as unknown as Array<never>,
       };
 
@@ -404,8 +392,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
       const result = deleteStepAction(krd, 0, state);
@@ -468,8 +454,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
       const result1 = deleteStepAction(krd, 1, state);
@@ -536,8 +520,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
       const result = deleteStepAction(krd, 1, state);
@@ -605,8 +587,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
       const result = deleteStepAction(krd, 1, state);
@@ -637,8 +617,6 @@ describe("deleteStepAction", () => {
         selectedStepId: null,
         selectedStepIds: [],
         isEditing: false,
-        safeMode: false,
-        lastBackup: null,
         deletedSteps: [],
       };
 
