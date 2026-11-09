@@ -4,7 +4,6 @@
  * Tests that validate block IDs remain constant across operations.
  *
  * **Feature: workout-spa-editor/11-fix-repetition-block-deletion-index-bug, Property 3: Block ID stability**
- * **Validates: Requirements 2.3**
  */
 
 import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
@@ -85,8 +84,6 @@ describe("Block ID Stability", () => {
      *
      * This ensures that block IDs are stable identifiers that don't change
      * when the block's properties are modified.
-     *
-     * **Validates: Requirements 2.3**
      */
     it("should preserve block ID when editing repeat count", () => {
       // Arrange
@@ -149,8 +146,6 @@ describe("Block ID Stability", () => {
      *
      * This ensures that block IDs don't change when the block's content
      * is modified.
-     *
-     * **Validates: Requirements 2.3**
      */
     it("should preserve block ID when adding steps to block", () => {
       // Arrange
@@ -207,8 +202,6 @@ describe("Block ID Stability", () => {
      *
      * This ensures that block IDs don't change when blocks are moved
      * to different positions in the workout.
-     *
-     * **Validates: Requirements 2.3**
      */
     it("should preserve block ID when reordering workout steps", () => {
       // Arrange
@@ -283,8 +276,6 @@ describe("Block ID Stability", () => {
      *
      * This tests that IDs remain stable even when multiple operations
      * are performed on the same block.
-     *
-     * **Validates: Requirements 2.3**
      */
     it("should preserve block ID across multiple operations", () => {
       // Arrange
@@ -376,8 +367,6 @@ describe("Block ID Stability", () => {
      *
      * This ensures that operations on one block don't affect the IDs
      * of other blocks in the workout.
-     *
-     * **Validates: Requirements 2.3**
      */
     it("should preserve all block IDs when operating on one block", () => {
       // Arrange

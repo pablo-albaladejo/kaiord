@@ -2,7 +2,7 @@
  * Reorder Steps in Repetition Block Action
  *
  * Action for reordering steps within a repetition block.
- * Requirement 3.4: Maintain repetition block integrity during reordering
+ * Maintain repetition block integrity during reordering
  */
 
 import type { KRD, RepetitionBlock } from "../../types/krd";

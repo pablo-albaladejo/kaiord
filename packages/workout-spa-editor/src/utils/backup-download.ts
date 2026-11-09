@@ -4,7 +4,7 @@
  * Utility for downloading workout backups before risky operations.
  *
  * Requirements:
- * - Requirement 36.5: Offer to download backup before risky operations
+ * - Offer to download backup before risky operations
  */
 
 import type { KRD } from "../types/krd";

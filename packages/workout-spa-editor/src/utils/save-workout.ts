@@ -44,16 +44,16 @@ export const saveWorkout = (krd: KRD, filename?: string): SaveResult => {
   // stripIds chokepoint: UIWorkout ids never leak into exported .krd files.
   const portable = stripIds(krd);
 
-  // Validate workout against KRD schema (Requirement 6.1)
+  // Validate workout against KRD schema
   const validationResult = krdSchema.safeParse(portable);
   if (!validationResult.success) {
     return { success: false, errors: formatZodError(validationResult.error) };
   }
 
-  // Generate filename (Requirement 6.5)
+  // Generate filename
   const finalFilename = resolveFilename(krd, filename);
   try {
-    // Generate and download KRD JSON file (Requirement 6.2, 6.4)
+    // Generate and download KRD JSON file
     const jsonContent = JSON.stringify(validationResult.data, null, 2);
     triggerDownload(jsonContent, finalFilename);
     return { success: true, filename: finalFilename };

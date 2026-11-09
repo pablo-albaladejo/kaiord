@@ -2,7 +2,7 @@
  * Copy Step Action
  *
  * Action for copying a workout step to the clipboard.
- * Requirement 39.2: Copy step data as JSON to clipboard
+ * Copy step data as JSON to clipboard
  */
 
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
