@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
-import { useTheme } from "../../../../contexts/ThemeContext";
 import { useTranslate } from "../../../../i18n/use-translate";
 import { UplotChart } from "../../../charts/uplot-base/uplot-chart";
+import { useThemedChartOptions } from "../../../charts/uplot-base/use-themed-chart-options";
 import { buildEnergyTrendOptions } from "./build-energy-trend-options";
 import {
   buildEnergyTrendData,
@@ -24,14 +24,10 @@ const presentKeys = (series: EnergyTrendSeries): EnergyTrendKey[] =>
 /** Renders the aligned multi-series Nutrition trends chart via uPlot. */
 export function EnergyTrendChartCard({ series }: EnergyTrendChartCardProps) {
   const t = useTranslate("nutrition");
-  const { resolvedTheme } = useTheme();
   const keys = useMemo(() => presentKeys(series), [series]);
-  const options = useMemo(
+  const options = useThemedChartOptions(
     () => buildEnergyTrendOptions(keys, t),
-    // resolvedTheme forces a rebuild so the series strokes follow .dark —
-    // seriesStroke resolves ink colors at build time.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [keys, t, resolvedTheme]
+    [keys, t]
   );
   const data = useMemo(
     () => buildEnergyTrendData(keys, series),
