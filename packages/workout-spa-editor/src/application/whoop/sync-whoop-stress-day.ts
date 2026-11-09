@@ -9,6 +9,7 @@
  */
 import { stressBffToEpisode, whoopStressResponseSchema } from "@kaiord/whoop";
 
+import { errorMessage } from "../../utils/error-message";
 import type { ImportedRecordRepository } from "../import/imported-record-repository.port";
 import { stampProvenance } from "../import/stamp-provenance";
 import { upsertImportedRecord } from "../import/upsert-imported-record.use-case";
@@ -41,7 +42,7 @@ export const syncStressDay = async (
   } catch (err) {
     return {
       status: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   if (!result.ok) return { status: "transport-error", error: result.error };
