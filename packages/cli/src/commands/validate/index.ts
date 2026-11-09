@@ -8,13 +8,16 @@ import {
 } from "../../utils/config-loader.js";
 import { ExitCode } from "../../utils/exit-codes.js";
 import { detectFormat } from "../../utils/format-detector.js";
+import {
+  handleCommandError,
+  resolveJsonFlag,
+} from "../../utils/handle-command-error.js";
 import { createLogger } from "../../utils/logger-factory.js";
 import { executeValidation } from "./execute-validation.js";
 import {
   formatValidationFailure,
   formatValidationSuccess,
 } from "./format-results.js";
-import { handleValidationError } from "./handle-error.js";
 import type { ValidateOptions } from "./types.js";
 import { validateOptionsSchema } from "./types.js";
 
@@ -108,7 +111,10 @@ export const validateCommand = async (options: unknown): Promise<number> => {
     return await runValidation(opts, logger, spinner);
   } catch (error) {
     logger?.error("Validation failed", { error });
-    return handleValidationError(error, options);
+    return handleCommandError(error, {
+      json: await resolveJsonFlag(options),
+      envelope: true,
+    });
   } finally {
     spinner?.stop();
   }

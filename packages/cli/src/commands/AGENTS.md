@@ -42,7 +42,7 @@ Validates round-trip conversion integrity with custom tolerances.
 - Custom tolerance config: `--tolerance-config` JSON file or defaults
 - Tolerance fields: `time`, `power`, `heartRate`, `cadence` (absolute/percentage)
 - Output: Summary with violations or pass message
-- Utilities: `execute-validation.ts` (round-trip logic), `format-results.ts` (output formatting), `handle-error.ts` (error mapping)
+- Utilities: `execute-validation.ts` (round-trip logic), `format-results.ts` (output formatting)
 
 ### diff
 
@@ -64,7 +64,7 @@ Introspects a workout file (metadata, summary, or full JSON output).
 
 - Load file, convert to KRD
 - Output: Summary (human-readable) or full JSON
-- Utilities: `build-summary.ts` (text summary), `handle-error.ts` (error mapping)
+- Utilities: `build-summary.ts` (text summary)
 
 ### extract-workout
 
@@ -75,7 +75,6 @@ Extracts a single `Workout` from a KRD multi-record file.
 
 - Load file, call `extractWorkout()` from `@kaiord/core`
 - Output: JSON workout object
-- Utilities: `handle-error.ts` (error mapping)
 
 ### garmin
 
@@ -117,9 +116,7 @@ try {
 } catch (error) {
   spinner?.fail("Failed");
   logger.error("Failed", { error });
-  const formatted = formatError(error, { json: opts.json });
-  console.error(formatted);
-  return mapErrorToExitCode(error);
+  return handleCommandError(error, { json: opts.json });
 } finally {
   spinner?.stop();
 }

@@ -1,5 +1,8 @@
 # Plugin Architecture for Custom Format Converters
 
+> **Status: design only.** None of this is implemented. The snippets below
+> sketch a proposed API; they do not compile against the current CLI.
+
 ## Overview
 
 The Kaiord CLI plugin system allows third-party developers to add support for custom workout file formats without modifying the core library or CLI code. Plugins are dynamically loaded at runtime and integrate seamlessly with the existing conversion pipeline.
@@ -113,8 +116,10 @@ const createPluginDiscovery = (logger: Logger): PluginDiscovery => ({
     const globalPlugins = await scanDirectory("~/.kaiord/plugins");
     plugins.push(...globalPlugins);
 
-    // 3. Load plugins from config
-    const config = await loadConfig();
+    // 3. Load plugins from config. Proposed: today's `configSchema` has no
+    //    `plugins` field and strips unknown keys from `.kaiordrc.json`, so the
+    //    schema would need a `plugins` entry before this step could work.
+    const config = (await loadConfigWithMetadata()).config;
     if (config.plugins) {
       plugins.push(...config.plugins);
     }

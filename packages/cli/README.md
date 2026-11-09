@@ -202,7 +202,19 @@ See [Example GPX Plugin](./docs/example-plugin-gpx.md) for a complete plugin imp
 ## Exit Codes
 
 - **0**: Success
-- **1**: Error (invalid arguments, file not found, parsing error, validation error)
+- **1**: Invalid arguments or usage error
+- **2**: File not found
+- **3**: Permission denied
+- **4**: Parsing error
+- **5**: Validation error
+- **6**: Tolerance exceeded
+- **7**: Authentication error
+- **10**: Differences found (`diff`)
+- **11**: Partial success (batch)
+- **12**: Directory creation failed
+- **13**: Environment error (missing bundled dependency)
+- **14**: External service error
+- **99**: Unknown error
 
 ## Documentation
 
@@ -211,10 +223,6 @@ See [Example GPX Plugin](./docs/example-plugin-gpx.md) for a complete plugin imp
 - **[Getting Started](../../docs/getting-started.md)** - Installation and basic usage
 - **[KRD Format Specification](../../docs/krd-format.md)** - Complete format documentation
 - **[Deployment Guide](../../docs/deployment.md)** - CI/CD and npm publishing
-
-### Package-Specific Documentation
-
-- **[npm Publish Verification](./docs/npm-publish-verification.md)** - Publishing checklist and verification
 
 ## Development
 

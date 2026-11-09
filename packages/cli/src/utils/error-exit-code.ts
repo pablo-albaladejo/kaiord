@@ -8,6 +8,7 @@ import {
   ServiceAuthError,
   ToleranceExceededError,
 } from "@kaiord/core";
+import { ZodError } from "zod";
 
 import {
   DirectoryCreateError,
@@ -52,6 +53,7 @@ const ERROR_NAME_TO_EXIT_CODE: Record<string, ExitCodeValue> = {
   ToleranceExceededError: ExitCode.TOLERANCE_EXCEEDED,
   InvalidArgumentError: ExitCode.INVALID_ARGUMENT,
   UnsupportedFormatError: ExitCode.INVALID_ARGUMENT,
+  ZodError: ExitCode.INVALID_ARGUMENT,
   ServiceAuthError: ExitCode.AUTH_ERROR,
   DirectoryCreateError: ExitCode.DIRECTORY_CREATE_ERROR,
   EnvironmentError: ExitCode.ENVIRONMENT_ERROR,
@@ -79,6 +81,7 @@ const INSTANCE_RULES: ReadonlyArray<InstanceRule> = [
   [KrdValidationError, ExitCode.VALIDATION_ERROR],
   [ToleranceExceededError, ExitCode.TOLERANCE_EXCEEDED],
   [UnsupportedFormatError, ExitCode.INVALID_ARGUMENT],
+  [ZodError, ExitCode.INVALID_ARGUMENT],
   [MissingFtpError, ExitCode.INVALID_ARGUMENT],
   [MissingMaxHeartRateError, ExitCode.INVALID_ARGUMENT],
   [DirectoryCreateError, ExitCode.DIRECTORY_CREATE_ERROR],
@@ -120,9 +123,3 @@ export const mapErrorToExitCode = (error: unknown): ExitCodeValue =>
   classifyBySignature(error) ??
   classifyByName(error) ??
   ExitCode.UNKNOWN_ERROR;
-
-/**
- * Backwards-compatible alias used by the CLI entrypoint.
- * @deprecated Prefer {@link mapErrorToExitCode}.
- */
-export const getExitCodeForError = mapErrorToExitCode;

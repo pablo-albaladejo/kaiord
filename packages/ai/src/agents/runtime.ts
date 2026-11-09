@@ -6,9 +6,13 @@ import type {
   GenerateAgentResult,
 } from "./definition-types";
 import type { AiTelemetrySink } from "../observability/telemetry-types";
+import {
+  emitBestEffort,
+  warnBestEffort,
+} from "../observability/emit-best-effort";
 import { createNoopTelemetrySink } from "../observability/noop-sink";
 import { modelIdOf, providerOf, resolveSystemPrompt } from "./prelude";
-import { runGenerateLoop } from "./generate-mode";
+import { runGenerateLoop, type GenerateOutcome } from "./generate-mode";
 import { AiAgentError } from "./errors";
 import type { OnGenerateProgress } from "./progress";
 import { createPhaseClock } from "./phase-clock";
@@ -49,8 +53,9 @@ export const runGenerateAgent = async <TOutput>(
 
   const clock = config.onProgress && createPhaseClock(config.onProgress);
 
+  let run: GenerateOutcome<TOutput>;
   try {
-    const { output, usage } = await runGenerateLoop({
+    run = await runGenerateLoop({
       model: config.model,
       system,
       input,
@@ -58,27 +63,37 @@ export const runGenerateAgent = async <TOutput>(
       signal: config.signal,
       onProgress: clock?.observe,
       onAttemptError: (attempt, error) =>
-        config.logger?.warn("Agent attempt failed", { attempt, error }),
+        warnBestEffort(config.logger, "Agent attempt failed", {
+          attempt,
+          error,
+        }),
     });
-    const latencyMs = Date.now() - start;
-    const timings = clock?.stop();
-    telemetry.emit({
-      type: "run_finished",
-      ...identity,
-      latencyMs,
-      usage,
-      timings,
-    });
-    return { output, usage, traceId };
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";
-    telemetry.emit({
-      type: "run_failed",
-      ...identity,
-      latencyMs: Date.now() - start,
-      timings: clock?.stop(),
-      error: { name, retriable: error instanceof AiAgentError },
-    });
+    emitBestEffort(
+      telemetry,
+      {
+        type: "run_failed",
+        ...identity,
+        latencyMs: Date.now() - start,
+        timings: clock?.stop(),
+        error: { name, retriable: error instanceof AiAgentError },
+      },
+      config.logger
+    );
     throw error;
   }
+  const { output, usage } = run;
+  emitBestEffort(
+    telemetry,
+    {
+      type: "run_finished",
+      ...identity,
+      latencyMs: Date.now() - start,
+      usage,
+      timings: clock?.stop(),
+    },
+    config.logger
+  );
+  return { output, usage, traceId };
 };

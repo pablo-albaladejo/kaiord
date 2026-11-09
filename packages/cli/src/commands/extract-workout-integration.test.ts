@@ -96,4 +96,24 @@ describe("extract-workout command integration tests", () => {
       expect(stderr).not.toContain("Extracting workout");
     }
   );
+
+  it(
+    "should report a missing file as JSON on stdout with --json",
+    { timeout: 30_000 },
+    async () => {
+      // Arrange
+      const args = [cliPath, "extract-workout", "--input", "nonexistent.fit"];
+
+      // Act
+      const result = await execa("tsx", [...args, "--json"], {
+        reject: false,
+      });
+
+      // Assert
+      expect(result.exitCode).toBe(2);
+      const output = JSON.parse(result.stdout);
+      expect(output.success).toBe(false);
+      expect(output.error.message).toContain("File not found");
+    }
+  );
 });
