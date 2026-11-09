@@ -80,8 +80,8 @@ describe("addDaysIso parity", () => {
     // Act
     const actual = addDaysIso(malformed, 1);
 
-    // Assert
-    expect(actual).toBe("NaN-NaN-NaN");
+    // Assert: the year is zero-padded to four characters, so "NaN" gains a 0
+    expect(actual).toBe("0NaN-NaN-NaN");
   });
 
   it.each(DATES)(
