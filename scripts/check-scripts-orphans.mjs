@@ -158,7 +158,7 @@ function collectScriptsTransitive(rootDir, scriptsDir) {
       if (e.name.endsWith(".test.mjs")) continue;
       if (e.name.endsWith(".md")) continue;
       const full = join(dir, e.name);
-      map.set(relative(rootDir, full), readSafe(full));
+      map.set(relative(rootDir, full), stripComments(e.name, readSafe(full)));
     }
   }
   for (const dir of [scriptsDir, join(rootDir, GITHUB_SCRIPTS)]) {
@@ -166,6 +166,30 @@ function collectScriptsTransitive(rootDir, scriptsDir) {
   }
   return map;
 }
+
+const JS_LIKE = /\.(?:[cm]?js|ts)$/;
+const HASH_COMMENTED = /\.(?:sh|bash|toml|ya?ml)$/;
+
+/**
+ * A comment naming a script is not wiring. JS-like: block and line
+ * comments (a `//` after `:` is kept, so URLs survive). Shell/TOML/YAML:
+ * a `#` at line start or after whitespace (`${#x}` and `a#b` are kept).
+ */
+function stripComments(name, text) {
+  if (JS_LIKE.test(name)) {
+    return text
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/(^|[^:\\])\/\/[^\n]*/g, "$1");
+  }
+  if (HASH_COMMENTED.test(name)) return text.replace(/(^|\s)#[^\n]*/g, "$1");
+  return text;
+}
+
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** `name` as a whole path segment: not preceded or followed by a filename char. */
+const mentions = (text, name) =>
+  new RegExp(`(?<![\\w.-])${escapeRegExp(name)}(?![\\w.-])`).test(text);
 
 function parseAllowlist(readmeText) {
   const startIdx = readmeText.indexOf(MARKER_START);
@@ -203,14 +227,12 @@ function isReachable(needleAbs, basename, sources, transitiveByRel) {
   if (sources.includes(needleAbs)) return true;
 
   // Transitive reachability: any OTHER file under scripts/ references
-  // this one. Match the basename — script filenames like
-  // `check-bridge-privacy-surface.mjs` are unique enough that the bare
-  // basename match is precise. This catches relative imports
-  // (`./check-X.mjs`), `join(HERE, "check-X.mjs")`, bash sources, etc.
+  // this one outside a comment. The basename must stand as a whole path
+  // segment, so `max.sh` does not reach `x.sh`. This catches relative
+  // imports (`./check-X.mjs`), `join(HERE, "check-X.mjs")`, bash sources.
   for (const [otherRel, text] of transitiveByRel.entries()) {
     if (otherRel === needleAbs) continue;
-    if (text.includes(basename)) return true;
-    if (text.includes(needleAbs)) return true;
+    if (mentions(text, basename)) return true;
   }
   return false;
 }
