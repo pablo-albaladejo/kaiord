@@ -24,7 +24,7 @@ Rosie factory builders for the KRD envelope and its child collections. Each buil
 
 - `buildKRD` builds a one-session/two-lap/three-record/one-event sample. If you need a multi-session envelope, override `.attr("sessions", () => ...)` at the call site.
 - The `event.fixtures.ts` enum subset is intentional — tests that need `event_workout_step_change` build the event by hand because that event also requires a `data` field referencing a step index.
-- `buildKRDMetadata` is the package-aware metadata builder. The looser `../metadata.fixtures.ts` is for non-KRD envelope tests (e.g., raw schema validation).
+- `buildKRDMetadata` is the package-aware metadata builder.
 - Cross-imports from `../../../test-utils/tolerance-constants` ARE allowed even though test-utils is a public subpath — these factories are themselves re-exported through test-utils, so the import direction is internal.
 
 <!-- MANUAL: -->

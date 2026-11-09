@@ -405,7 +405,7 @@ try {
 **Properties:**
 
 - `message: string` - Error description
-- `violations: Array<{ field: string; expected: number; actual: number; deviation: number; tolerance: number }>` - Tolerance violations
+- `violations: Array<{ field: string; expected: number; actual: number; deviation: number; tolerance: number; expectedValue?: string; actualValue?: string }>` - Tolerance violations
 
 ### Complete Error Handling Example
 
