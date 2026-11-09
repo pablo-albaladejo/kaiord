@@ -5,10 +5,8 @@ import type {
   GenerateAgentInput,
   GenerateAgentResult,
 } from "./definition-types";
-import type {
-  AiTelemetryEvent,
-  AiTelemetrySink,
-} from "../observability/telemetry-types";
+import type { AiTelemetrySink } from "../observability/telemetry-types";
+import { emitBestEffort } from "../observability/emit-best-effort";
 import { createNoopTelemetrySink } from "../observability/noop-sink";
 import { modelIdOf, providerOf, resolveSystemPrompt } from "./prelude";
 import { runGenerateLoop, type GenerateOutcome } from "./generate-mode";
@@ -23,18 +21,6 @@ export type GenerateAgentConfig = {
   signal?: AbortSignal;
   /** Streams the output and reports each phase change (see `progress.ts`). */
   onProgress?: OnGenerateProgress;
-};
-
-/** Telemetry is best-effort: a faulty sink must never change the run's outcome. */
-const emitBestEffort = (
-  sink: AiTelemetrySink,
-  event: AiTelemetryEvent
-): void => {
-  try {
-    sink.emit(event);
-  } catch {
-    // Swallowed on purpose: see above.
-  }
 };
 
 /**
@@ -78,22 +64,30 @@ export const runGenerateAgent = async <TOutput>(
     });
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";
-    emitBestEffort(telemetry, {
-      type: "run_failed",
-      ...identity,
-      latencyMs: Date.now() - start,
-      timings: clock?.stop(),
-      error: { name, retriable: error instanceof AiAgentError },
-    });
+    emitBestEffort(
+      telemetry,
+      {
+        type: "run_failed",
+        ...identity,
+        latencyMs: Date.now() - start,
+        timings: clock?.stop(),
+        error: { name, retriable: error instanceof AiAgentError },
+      },
+      config.logger
+    );
     throw error;
   }
   const { output, usage } = run;
-  emitBestEffort(telemetry, {
-    type: "run_finished",
-    ...identity,
-    latencyMs: Date.now() - start,
-    usage,
-    timings: clock?.stop(),
-  });
+  emitBestEffort(
+    telemetry,
+    {
+      type: "run_finished",
+      ...identity,
+      latencyMs: Date.now() - start,
+      usage,
+      timings: clock?.stop(),
+    },
+    config.logger
+  );
   return { output, usage, traceId };
 };

@@ -1,7 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { z } from "zod";
 import { definePrompt } from "../prompts/registry";
 import { runGenerateAgent } from "./runtime";
+import { AiAgentError } from "./errors";
 import type { AgentDefinition } from "./definition-types";
 import { createRingBufferTelemetrySink } from "../observability/ring-buffer-sink";
 import {
@@ -92,8 +93,10 @@ describe("runGenerateAgent telemetry", () => {
 
   it("should rethrow the run error, not the sink error, when the sink throws on a failed run", async () => {
     // Arrange
+    const types: string[] = [];
     const sink = {
-      emit: () => {
+      emit: (e: { type: string }) => {
+        types.push(e.type);
         throw new Error("sink down");
       },
     };
@@ -111,7 +114,33 @@ describe("runGenerateAgent telemetry", () => {
     ).catch((e: unknown) => e);
 
     // Assert
-    expect((error as Error).message).not.toBe("sink down");
+    expect(error).toBeInstanceOf(AiAgentError);
+    expect((error as Error).message).toMatch(/Failed after 3 attempts/);
+    expect(types).toEqual(["run_failed"]);
+  });
+
+  it("should warn through the logger when the sink throws", async () => {
+    // Arrange
+    const warn = vi.fn();
+    const logger = { debug: vi.fn(), info: vi.fn(), warn, error: vi.fn() };
+    const sink = {
+      emit: () => {
+        throw new Error("sink down");
+      },
+    };
+
+    // Act
+    await runGenerateAgent(
+      AGENT,
+      { text: "x" },
+      { model: mockModelReturning({ n: 5 }), telemetry: sink, logger }
+    );
+
+    // Assert
+    expect(warn).toHaveBeenCalledWith(
+      "Telemetry sink failed",
+      expect.objectContaining({ type: "run_finished" })
+    );
   });
 
   it("should emit exactly one run_finished event and no run_failed when the sink throws once", async () => {
