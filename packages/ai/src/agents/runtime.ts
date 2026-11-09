@@ -5,10 +5,13 @@ import type {
   GenerateAgentInput,
   GenerateAgentResult,
 } from "./definition-types";
-import type { AiTelemetrySink } from "../observability/telemetry-types";
+import type {
+  AiTelemetryEvent,
+  AiTelemetrySink,
+} from "../observability/telemetry-types";
 import { createNoopTelemetrySink } from "../observability/noop-sink";
 import { modelIdOf, providerOf, resolveSystemPrompt } from "./prelude";
-import { runGenerateLoop } from "./generate-mode";
+import { runGenerateLoop, type GenerateOutcome } from "./generate-mode";
 import { AiAgentError } from "./errors";
 import type { OnGenerateProgress } from "./progress";
 import { createPhaseClock } from "./phase-clock";
@@ -20,6 +23,18 @@ export type GenerateAgentConfig = {
   signal?: AbortSignal;
   /** Streams the output and reports each phase change (see `progress.ts`). */
   onProgress?: OnGenerateProgress;
+};
+
+/** Telemetry is best-effort: a faulty sink must never change the run's outcome. */
+const emitBestEffort = (
+  sink: AiTelemetrySink,
+  event: AiTelemetryEvent
+): void => {
+  try {
+    sink.emit(event);
+  } catch {
+    // Swallowed on purpose: see above.
+  }
 };
 
 /**
@@ -49,8 +64,9 @@ export const runGenerateAgent = async <TOutput>(
 
   const clock = config.onProgress && createPhaseClock(config.onProgress);
 
+  let run: GenerateOutcome<TOutput>;
   try {
-    const { output, usage } = await runGenerateLoop({
+    run = await runGenerateLoop({
       model: config.model,
       system,
       input,
@@ -60,19 +76,9 @@ export const runGenerateAgent = async <TOutput>(
       onAttemptError: (attempt, error) =>
         config.logger?.warn("Agent attempt failed", { attempt, error }),
     });
-    const latencyMs = Date.now() - start;
-    const timings = clock?.stop();
-    telemetry.emit({
-      type: "run_finished",
-      ...identity,
-      latencyMs,
-      usage,
-      timings,
-    });
-    return { output, usage, traceId };
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";
-    telemetry.emit({
+    emitBestEffort(telemetry, {
       type: "run_failed",
       ...identity,
       latencyMs: Date.now() - start,
@@ -81,4 +87,13 @@ export const runGenerateAgent = async <TOutput>(
     });
     throw error;
   }
+  const { output, usage } = run;
+  emitBestEffort(telemetry, {
+    type: "run_finished",
+    ...identity,
+    latencyMs: Date.now() - start,
+    usage,
+    timings: clock?.stop(),
+  });
+  return { output, usage, traceId };
 };
