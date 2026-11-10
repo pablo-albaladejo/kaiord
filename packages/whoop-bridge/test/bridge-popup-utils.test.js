@@ -1,11 +1,22 @@
+// @vitest-environment jsdom
+//
+// Kaiord Bridge Core — vendored unit tests for bridge-popup-utils.js.
+// Master: packages/_shared/bridge-core/test/bridge-popup-utils.test.js. Never
+// edit a vendored copy — edit the master and run `pnpm bridge:sync`. Every
+// bridge runs this suite against its own vendored utilities copy.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   applySubs,
   msg,
+  $,
+  withTimeout,
   relativeAgo,
   formatSinceDate,
+  renderRetry,
 } = require("../bridge-popup-utils.js");
+
+const TIMEOUT_MS = 1_000;
 
 const NOW_MS = new Date("2026-05-02T10:00:00Z").getTime();
 
@@ -20,6 +31,7 @@ describe("bridge-popup-utils (vendored)", () => {
       hoursAgo: "$1 hours ago",
       dayAgo: "$1 day ago",
       daysAgo: "$1 days ago",
+      retry: "Try again",
     };
   });
 
@@ -164,6 +176,99 @@ describe("bridge-popup-utils (vendored)", () => {
 
       // Assert
       expect(out).toBeNull();
+    });
+  });
+
+  describe("$", () => {
+    it("should resolve an element by id", () => {
+      // Arrange
+      document.body.innerHTML = '<p id="target">x</p>';
+
+      // Act
+      const el = $("target");
+
+      // Assert
+      expect(el?.textContent).toBe("x");
+    });
+  });
+
+  describe("withTimeout", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should resolve with the promise value when it settles first", async () => {
+      // Arrange
+      const promise = Promise.resolve("done");
+
+      // Act
+      const out = await withTimeout(promise, TIMEOUT_MS, "probe");
+
+      // Assert
+      expect(out).toBe("done");
+    });
+
+    it("should reject with the labelled timeout when the promise stalls", async () => {
+      // Arrange
+      const stalled = new Promise(() => {});
+      const raced = withTimeout(stalled, TIMEOUT_MS, "probe");
+      const assertion = expect(raced).rejects.toThrow("probe timeout");
+
+      // Act
+      await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
+
+      // Assert
+      await assertion;
+    });
+  });
+
+  describe("renderRetry", () => {
+    beforeEach(() => {
+      document.body.innerHTML =
+        '<button id="refresh-btn" type="button"></button><div id="footer-region"></div>';
+    });
+
+    it("should append a labelled retry button that runs the handler", () => {
+      // Arrange
+      const onClick = vi.fn();
+
+      // Act
+      renderRetry(onClick);
+      $("retry-btn").click();
+
+      // Assert
+      const btn = $("retry-btn");
+      expect(btn.parentElement?.id).toBe("footer-region");
+      expect(btn.type).toBe("button");
+      expect(btn.className).toBe("cta-retry");
+      expect(btn.textContent).toBe("Try again");
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it("should take focus when nothing else holds it", () => {
+      // Arrange
+      document.body.focus();
+
+      // Act
+      renderRetry(() => {});
+
+      // Assert
+      expect(document.activeElement?.id).toBe("retry-btn");
+    });
+
+    it("should leave focus on the element that already holds it", () => {
+      // Arrange
+      $("refresh-btn").focus();
+
+      // Act
+      renderRetry(() => {});
+
+      // Assert
+      expect(document.activeElement?.id).toBe("refresh-btn");
     });
   });
 });

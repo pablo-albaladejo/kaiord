@@ -1,5 +1,5 @@
 <!-- Parent: ../AGENTS.md -->
-<!-- Generated: 2026-05-14 | Updated: 2026-07-26 -->
+<!-- Generated: 2026-05-14 | Updated: 2026-11-09 -->
 
 # bridge-core
 
@@ -32,22 +32,28 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 
 ## Key Files
 
-| File                               | Consumers        | Description                                                                                                                     |
-| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `bridge-envelope.js`               | all bridges      | Response envelope builders + `createDispatch`/`createExternalDispatch` factories + SPA-origin guard.                            |
-| `kaiord-announce.js`               | all bridges      | Announce content script core; reads `globalThis.KAIORD_BRIDGE_IDENTITY`.                                                        |
-| `bridge-popup-utils.js`            | all bridges      | Popup i18n machinery (`msg` over `KAIORD_POPUP_MESSAGES`), `$`, `withTimeout`, `relativeAgo`, `formatSinceDate`, `renderRetry`. |
-| `bridge-popup-shell.js`            | all bridges      | Shell renderers: `renderStatusBlock`, `renderChips`, `renderConsequence`, `renderSkeleton`, `renderCtas`.                       |
-| `bridge-popup-health.js`           | all bridges      | Outage boundary (`bridgeHealth` in `chrome.storage.local`): when a bridge was first observed broken, cleared on success.        |
-| `bridge-popup-snapshot.js`         | garmin, train2go | Athlete card + snapshot freshness (`STALE_SNAPSHOT_THRESHOLD_DAYS` vendored literal).                                           |
-| `popup.css`                        | all bridges      | The unified 340px popup shell (`--kd-*` light + dark palettes, layout, components).                                             |
-| `bridge-theme.js`                  | all bridges      | App theme preference: `set-theme` validation + `chrome.storage.local` write (SW); `data-theme` before first paint (popup).      |
-| `profile-snapshot.js`              | garmin, train2go | Plain-JS snapshot validator mirroring the @kaiord/core Zod schema.                                                              |
-| `test/chrome-mock.js`              | all bridges      | Superset chrome API mock for vitest (neutral identity values).                                                                  |
-| `test/bridge-envelope.test.js`     | all bridges      | Vendored unit tests for the envelope module.                                                                                    |
-| `test/bridge-popup-shell.test.js`  | all bridges      | Vendored unit tests for the shell renderers (jsdom env, CJS `require`).                                                         |
-| `test/bridge-popup-health.test.js` | all bridges      | Vendored unit tests for the health record (callback-form storage stub, CJS `require`).                                          |
-| `test/bridge-theme.test.js`        | all bridges      | Vendored unit tests for the theme module (validation, storage, light/dark/system/missing, mirror).                              |
+| File                               | Consumers                       | Description                                                                                                                                                                |
+| ---------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bridge-envelope.js`               | all bridges                     | Response envelope builders + `createDispatch`/`createExternalDispatch` factories + SPA-origin guard.                                                                       |
+| `session-fetch.js`                 | tanita, train2go, trainingpeaks | Cookie-session transport for SW-direct bridges: `credentials:"include"`, `redirect:"manual"`, caller-supplied path allowlist; maps a redirect or 401/403 to `needsReauth`. |
+| `bearer-fetch.js`                  | garmin, trainingpeaks           | `Authorization: Bearer` transport (`credentials:"omit"`): JSON or multipart body, one retry on 401 via the caller's `refreshToken`, then `needsReauth`.                    |
+| `kaiord-announce.js`               | all bridges                     | Announce content script core; reads `globalThis.KAIORD_BRIDGE_IDENTITY`.                                                                                                   |
+| `bridge-popup-utils.js`            | all bridges                     | Popup i18n machinery (`msg` over `KAIORD_POPUP_MESSAGES`), `$`, `withTimeout`, `relativeAgo`, `formatSinceDate`, `renderRetry`.                                            |
+| `bridge-popup-shell.js`            | all bridges                     | Shell renderers: `renderStatusBlock`, `renderChips`, `renderConsequence`, `renderSkeleton`, `renderCtas`.                                                                  |
+| `bridge-popup-health.js`           | all bridges                     | Outage boundary (`bridgeHealth` in `chrome.storage.local`): when a bridge was first observed broken, cleared on success.                                                   |
+| `bridge-popup-snapshot.js`         | garmin, train2go                | Athlete card + snapshot freshness (`STALE_SNAPSHOT_THRESHOLD_DAYS` vendored literal).                                                                                      |
+| `popup.css`                        | all bridges                     | The unified 340px popup shell (`--kd-*` light + dark palettes, layout, components).                                                                                        |
+| `bridge-theme.js`                  | all bridges                     | App theme preference: `set-theme` validation + `chrome.storage.local` write (SW); `data-theme` before first paint (popup).                                                 |
+| `profile-snapshot.js`              | garmin, train2go                | Plain-JS snapshot validator mirroring the @kaiord/core Zod schema.                                                                                                         |
+| `test/chrome-mock.js`              | all bridges                     | Superset chrome API mock for vitest (neutral identity values).                                                                                                             |
+| `test/bridge-envelope.test.js`     | all bridges                     | Vendored unit tests for the envelope module.                                                                                                                               |
+| `test/bearer-fetch.test.js`        | garmin, trainingpeaks           | Vendored unit tests for the Bearer transport.                                                                                                                              |
+| `test/bridge-popup-shell.test.js`  | all bridges                     | Vendored unit tests for the shell renderers (jsdom env, CJS `require`).                                                                                                    |
+| `test/bridge-popup-health.test.js` | all bridges                     | Vendored unit tests for the health record (callback-form storage stub, CJS `require`).                                                                                     |
+| `test/bridge-theme.test.js`        | all bridges                     | Vendored unit tests for the theme module (validation, storage, light/dark/system/missing, mirror).                                                                         |
+| `test/session-fetch.test.js`       | tanita, train2go, trainingpeaks | Vendored unit tests for the cookie-session transport (neutral origin and allowlist).                                                                                       |
+| `test/bridge-popup-utils.test.js`  | all bridges                     | Vendored unit tests for the popup utilities, incl. `withTimeout` and `renderRetry` (jsdom env).                                                                            |
+| `test/kaiord-announce.test.js`     | all bridges                     | Vendored unit tests for the announce core; reads the bridge's own `bridge-identity.js` instead of repeating it.                                                            |
 
 ## For AI Agents
 
@@ -80,8 +86,8 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 ### Testing Requirements
 
 - `pnpm test:scripts` — parity (byte, purity, identity↔manifest) + sync unit
-  tests.
+  tests, including the check that each test master is vendored to exactly the
+  bridges of its runtime master.
 - Each consumer bridge's vitest suite exercises its vendored copies
-  (including the vendored `test/bridge-envelope.test.js` and
-  `test/bridge-popup-shell.test.js`), so a drifted copy fails where it is
+  (every `test/*.test.js` master listed above), so a drifted copy fails where it is
   actually used, not only in the parity guard.

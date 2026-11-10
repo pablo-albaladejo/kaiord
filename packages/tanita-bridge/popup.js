@@ -77,9 +77,9 @@ const showRefresh = (visible) => {
   $("refresh-btn").classList.toggle("popup-header__refresh--hidden", !visible);
 };
 
-// The monogram dims until the bridge's identity is established, which is the
-// same rule the V2 screen draws: a source that has never signed in reads as
-// provisional, one that is connected or interrupted reads as known.
+// The monogram dims until the bridge's identity is established: a source
+// that has never signed in reads as provisional, one that is connected or
+// interrupted reads as known.
 const setMarkEstablished = (established) => {
   $("brand-mark").classList.toggle(
     "popup-header__mark--muted",

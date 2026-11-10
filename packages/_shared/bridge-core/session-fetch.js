@@ -97,8 +97,6 @@ const cookieSessionFetch = async ({
 
 if (typeof module !== "undefined") {
   module.exports = {
-    REDIRECT_STATUS_MIN,
-    REDIRECT_STATUS_MAX,
     isPathAllowed,
     isSessionRedirect,
     isAuthChallenge,

@@ -1,7 +1,13 @@
+// Kaiord Bridge Core — vendored unit tests for kaiord-announce.js.
+// Master: packages/_shared/bridge-core/test/kaiord-announce.test.js. Never
+// edit a vendored copy — edit the master and run `pnpm bridge:sync`. Every
+// bridge runs this suite against its own announce copy and its own identity
+// file; the identity values themselves are pinned to BRIDGE_MANIFEST by
+// scripts/check-bridge-core-parity.test.mjs, so they are read, not repeated.
 import { beforeEach, describe, expect, it } from "vitest";
 
 // The identity file provides globalThis.KAIORD_BRIDGE_IDENTITY, which the
-// vendored announce core reads (manifest loads it first for the same reason).
+// announce core reads (the manifest loads it first for the same reason).
 require("../bridge-identity.js");
 const {
   buildAnnouncement,
@@ -10,13 +16,36 @@ const {
   isContextValid,
 } = require("../kaiord-announce.js");
 
-describe("kaiord-announce.js (whoop-bridge)", () => {
+const identity = globalThis.KAIORD_BRIDGE_IDENTITY;
+const SPA_ORIGIN = "https://kaiord.com";
+const CAPABILITY_SHAPE = /^(read|write):[a-z-]+$/;
+
+describe("kaiord-announce (vendored)", () => {
   beforeEach(() => {
     __resetChromeMock();
   });
 
+  describe("bridge identity", () => {
+    it("should load a complete identity before the announce core", () => {
+      // Arrange
+      const { id, name, capabilities } = identity ?? {};
+
+      // Act
+      const capabilityShapes = (capabilities ?? []).map((c) =>
+        CAPABILITY_SHAPE.test(c)
+      );
+
+      // Assert
+      expect(id).toMatch(/^[a-z0-9]+-bridge$/);
+      expect(typeof name).toBe("string");
+      expect(name.length).toBeGreaterThan(0);
+      expect(capabilities.length).toBeGreaterThan(0);
+      expect(capabilityShapes.every(Boolean)).toBe(true);
+    });
+  });
+
   describe("buildAnnouncement", () => {
-    it("should return a well-formed announcement with bridge metadata", () => {
+    it("should return a well-formed announcement carrying the bridge identity", () => {
       // Arrange
 
       // Act
@@ -25,12 +54,12 @@ describe("kaiord-announce.js (whoop-bridge)", () => {
       // Assert
       expect(ann).toEqual({
         type: "KAIORD_BRIDGE_ANNOUNCE",
-        bridgeId: "whoop-bridge",
+        bridgeId: identity.id,
         extensionId: "test-extension-id",
-        name: "WHOOP",
+        name: identity.name,
         version: "0.0.0",
         protocolVersion: 1,
-        capabilities: ["read:body", "read:sleep", "read:activities"],
+        capabilities: identity.capabilities,
       });
     });
 
@@ -50,42 +79,55 @@ describe("kaiord-announce.js (whoop-bridge)", () => {
   describe("onDiscoverRequest", () => {
     it("should re-announce when a KAIORD_BRIDGE_DISCOVER from window arrives", () => {
       // Arrange
-
-      // Act
-      onDiscoverRequest({
+      const event = {
         source: window,
         data: { type: "KAIORD_BRIDGE_DISCOVER" },
-      });
+      };
+
+      // Act
+      onDiscoverRequest(event);
 
       // Assert
       expect(window.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "KAIORD_BRIDGE_ANNOUNCE",
-          bridgeId: "whoop-bridge",
+          bridgeId: identity.id,
         }),
-        "https://kaiord.com"
+        SPA_ORIGIN
       );
     });
 
     it("should ignore messages from other sources", () => {
       // Arrange
-
-      // Act
-      onDiscoverRequest({
+      const event = {
         source: { fake: true },
         data: { type: "KAIORD_BRIDGE_DISCOVER" },
-      });
+      };
+
+      // Act
+      onDiscoverRequest(event);
 
       // Assert
       expect(window.postMessage).not.toHaveBeenCalled();
     });
 
-    it("should ignore unrelated message types and missing data", () => {
+    it("should ignore unrelated message types", () => {
       // Arrange
+      const event = { source: window, data: { type: "SOMETHING_ELSE" } };
 
       // Act
-      onDiscoverRequest({ source: window, data: { type: "SOMETHING_ELSE" } });
-      onDiscoverRequest({ source: window });
+      onDiscoverRequest(event);
+
+      // Assert
+      expect(window.postMessage).not.toHaveBeenCalled();
+    });
+
+    it("should ignore events without data", () => {
+      // Arrange
+      const event = { source: window };
+
+      // Act
+      onDiscoverRequest(event);
 
       // Assert
       expect(window.postMessage).not.toHaveBeenCalled();
@@ -103,9 +145,9 @@ describe("kaiord-announce.js (whoop-bridge)", () => {
       expect(window.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "KAIORD_BRIDGE_ANNOUNCE",
-          bridgeId: "whoop-bridge",
+          bridgeId: identity.id,
         }),
-        "https://kaiord.com"
+        SPA_ORIGIN
       );
     });
 
