@@ -6,11 +6,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/build-locales.mjs && node scripts/build-sitemap.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/build-locales.mjs && node scripts/build-sitemap.mjs",
     "i18n:extract": "node scripts/extract-strings.mjs",
     "preview": "vite preview",
     "test": "vitest --run",
-    "lint:fix": "prettier --write src public index.html"
+    "lint": "tsc --noEmit && eslint . && prettier --check src partials index.html",
+    "lint:fix": "eslint . --fix && prettier --write src partials public index.html"
   },
   "dependencies": {
     "@kaiord/core": "workspace:*"
