@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import authMd from "../public/auth.md?raw";
+import agentCardJson from "../public/.well-known/agent-card.json?raw";
 import catalogJson from "../public/.well-known/ai-catalog.json?raw";
 import skillsJson from "../public/.well-known/agent-skills/index.json?raw";
 import cardJson from "../public/.well-known/mcp/server-card.json?raw";
@@ -112,12 +113,26 @@ describe("well-known agent discovery documents", () => {
     // Assert
     expect(entry?.type).toBe("application/mcp-server-card+json");
   });
+
+  it("should list the agent card in the AI catalog", () => {
+    // Arrange
+    const cardUrl = `${ORIGIN}.well-known/agent-card.json`;
+
+    // Act
+    const entry = entries.find((e) => e.url === cardUrl);
+
+    // Assert
+    expect(entry?.identifier).toBe("urn:air:kaiord.com:agent:kaiord-a2a");
+    expect(entry?.type).toBe("application/a2a+json");
+  });
 });
 
 type Link = { href: string; type: string };
 type LinkContext = { anchor: string } & Record<string, Link[] | string>;
 
 const API_CATALOG = `${ORIGIN}.well-known/api-catalog`;
+const SHARED_BUDGET =
+  /10 requests per 10 s per IP per data center across .\/mcp. and .\/a2a./;
 const DOCS_PAGES = import.meta.glob<string>("../../docs/**/*.md", {
   query: "?raw",
   import: "default",
@@ -136,10 +151,12 @@ const hrefsOf = (context: LinkContext) =>
     .flat()
     .map((link) => link.href);
 
-const isPublished = (href: string) =>
-  href.startsWith(`${ORIGIN}docs/`)
-    ? `../../docs/${href.slice(`${ORIGIN}docs/`.length)}.md` in DOCS_PAGES
-    : publishedText(href) !== undefined;
+const isPublished = (href: string) => {
+  const [path = ""] = href.split("#");
+  return path.startsWith(`${ORIGIN}docs/`)
+    ? `../../docs/${path.slice(`${ORIGIN}docs/`.length)}.md` in DOCS_PAGES
+    : publishedText(path) !== undefined;
+};
 
 describe("RFC 9727 api-catalog", () => {
   it("should be published without an extension and parse as a linkset", () => {
@@ -154,15 +171,21 @@ describe("RFC 9727 api-catalog", () => {
     expect(contexts.length).toBeGreaterThan(0);
   });
 
-  it("should anchor only endpoints that have a server card", () => {
+  it("should anchor exactly the endpoints that have a card", () => {
     // Arrange
-    const card = JSON.parse(cardJson) as ServerCard;
+    const serverCard = JSON.parse(cardJson) as ServerCard;
+    const agentCard = JSON.parse(agentCardJson) as {
+      supportedInterfaces: { url: string }[];
+    };
 
     // Act
     const anchors = linkset().map((context) => context.anchor);
 
     // Assert
-    expect(anchors).toEqual(card.remotes.map((remote) => remote.url));
+    expect(anchors).toEqual([
+      ...serverCard.remotes.map((remote) => remote.url),
+      ...agentCard.supportedInterfaces.map((entry) => entry.url),
+    ]);
   });
 
   it("should point every link at a published file or docs page", () => {
@@ -251,5 +274,95 @@ describe("auth.md", () => {
     // Assert
     expect(authMd).toContain(MCP_ENDPOINT);
     expect(namesIssuer).toBe(false);
+  });
+
+  it("should state the rate budget shared by both endpoints", async () => {
+    // Arrange
+    const toolsPage = await DOCS_PAGES["../../docs/mcp/tools.md"]!();
+
+    // Act
+    const statesBudget = [authMd, toolsPage].map((text) =>
+      SHARED_BUDGET.test(text.replace(/\s+/g, " "))
+    );
+
+    // Assert
+    expect(statesBudget).toEqual([true, true]);
+  });
+
+  it("should link to an A2A section that exists on the tools page", async () => {
+    // Arrange
+    const toolsPage = await DOCS_PAGES["../../docs/mcp/tools.md"]!();
+
+    // Act
+    const hasSection = /^## A2A$/m.test(toolsPage);
+
+    // Assert
+    expect(authMd).toContain("docs/mcp/tools#a2a");
+    expect(hasSection).toBe(true);
+  });
+
+  it("should say which A2A version the endpoint serves", () => {
+    // Arrange
+    const statement = "A2A 1.0 only; 0.3 clients";
+
+    // Act
+    const flat = authMd.replace(/\s+/g, " ");
+
+    // Assert
+    expect(flat).toContain(statement);
+    expect(flat).toContain("get -32009");
+  });
+});
+
+type AgentCard = {
+  description: string;
+  supportedInterfaces: {
+    url: string;
+    protocolBinding: string;
+  }[];
+  defaultOutputModes: string[];
+  skills: unknown[];
+};
+
+const A2A_ENDPOINT = "https://kaiord.com/a2a";
+const SKILL_COUNT = 8;
+
+describe("A2A agent card", () => {
+  it("should expose one JSON-RPC interface at the A2A endpoint", () => {
+    // Arrange
+    const card = JSON.parse(agentCardJson) as AgentCard;
+
+    // Act
+    const [first, ...others] = card.supportedInterfaces;
+
+    // Assert
+    expect(others).toEqual([]);
+    expect(first?.url).toBe(A2A_ENDPOINT);
+    expect(first?.protocolBinding).toBe("JSONRPC");
+  });
+
+  it("should declare no security fields", () => {
+    // Arrange
+    const card = JSON.parse(agentCardJson) as AgentCard;
+
+    // Act
+    const keys = Object.keys(card);
+
+    // Assert
+    expect(keys).not.toContain("securitySchemes");
+    expect(keys).not.toContain("security");
+  });
+
+  it("should list every skill, answer in text and state its one version", () => {
+    // Arrange
+    const card = JSON.parse(agentCardJson) as AgentCard;
+
+    // Act
+    const skillCount = card.skills.length;
+
+    // Assert
+    expect(skillCount).toBe(SKILL_COUNT);
+    expect(card.defaultOutputModes).toContain("text/plain");
+    expect(card.description).toContain("A2A 1.0 only");
   });
 });
