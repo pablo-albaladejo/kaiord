@@ -3,6 +3,11 @@ import { XMLValidator } from "fast-xml-parser";
 
 import type { TcxValidationResult, TcxValidator } from "../types";
 
+/**
+ * Despite the name, this does not validate against the TCX XSD: it only
+ * checks that the document is well-formed XML (via fast-xml-parser's
+ * `XMLValidator`). The name is kept because it is part of the public API.
+ */
 export const createXsdTcxValidator =
   (logger: Logger): TcxValidator =>
   async (xmlString: string): Promise<TcxValidationResult> => {

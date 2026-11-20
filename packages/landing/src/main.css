@@ -8,6 +8,11 @@
    preflight `--default-font-family` both resolve to Inter unaided. The mono
    stack is Tailwind's default — the shared layer no longer carries one. */
 
+/* Status green for the marketing mockups and icon tiles. */
+:root {
+  --mkt-ok: var(--color-emerald-400);
+}
+
 /* Scroll behavior */
 html {
   scroll-behavior: smooth;
