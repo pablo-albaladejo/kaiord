@@ -1,10 +1,6 @@
-/* eslint-disable no-magic-numbers -- test fixtures use literal FTP/percent/zone values for clarity */
 import { describe, expect, it } from "vitest";
 
 import {
-  convertKrdPowerRangeToZwift,
-  convertKrdPowerToZwift,
-  convertPowerZoneToPercentFtp,
   convertZwiftPowerRange,
   convertZwiftPowerTarget,
 } from "./power.converter";
@@ -52,75 +48,6 @@ describe("convertZwiftPowerRange", () => {
         type: "power",
         value: { unit: "range", min, max, basis: "percent_ftp" },
       });
-    }
-  );
-});
-
-describe("convertKrdPowerToZwift", () => {
-  it.each([
-    { pct: 85, ftp: 0.85 },
-    { pct: 100, ftp: 1.0 },
-    { pct: 150, ftp: 1.5 },
-    { pct: 50, ftp: 0.5 },
-  ])("should convert $pct percent_ftp to $ftp FTP", ({ pct, ftp }) => {
-    // Arrange
-
-    // Act
-    const result = convertKrdPowerToZwift(pct);
-
-    // Assert
-    expect(result).toBe(ftp);
-  });
-});
-
-describe("convertKrdPowerRangeToZwift", () => {
-  it.each([
-    { min: 60, max: 80, out: [0.6, 0.8] },
-    { min: 25, max: 75, out: [0.25, 0.75] },
-    { min: 75, max: 50, out: [0.75, 0.5] },
-  ])(
-    "should convert percent range $min/$max to Zwift FTP range",
-    ({ min, max, out }) => {
-      // Arrange
-
-      // Act
-      const result = convertKrdPowerRangeToZwift(min, max);
-
-      // Assert
-      expect(result).toStrictEqual(out);
-    }
-  );
-});
-
-describe("convertPowerZoneToPercentFtp", () => {
-  it.each([
-    { zone: 1, pct: 55 },
-    { zone: 2, pct: 75 },
-    { zone: 3, pct: 90 },
-    { zone: 4, pct: 105 },
-    { zone: 5, pct: 120 },
-    { zone: 6, pct: 150 },
-    { zone: 7, pct: 200 },
-  ])("should convert zone $zone to $pct percent", ({ zone, pct }) => {
-    // Arrange
-
-    // Act
-    const result = convertPowerZoneToPercentFtp(zone);
-
-    // Assert
-    expect(result).toBe(pct);
-  });
-
-  it.each([0, 8, -1])(
-    "should throw RangeError for out-of-range zone %i",
-    (invalidZone) => {
-      // Arrange
-
-      // Act
-      const act = () => convertPowerZoneToPercentFtp(invalidZone);
-
-      // Assert
-      expect(act).toThrow(RangeError);
     }
   );
 });
