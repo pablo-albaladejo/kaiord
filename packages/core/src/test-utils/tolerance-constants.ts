@@ -11,11 +11,14 @@
  * sprinkling magic numbers across assertions.
  */
 
+/** @deprecated No known consumer; removed in the next major. */
 export const TOLERANCE_TIME_SEC = 1 as const;
 export const TOLERANCE_POWER_WATTS = 1 as const;
 export const TOLERANCE_HR_BPM = 1 as const;
 export const TOLERANCE_CADENCE_RPM = 1 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const TOLERANCE_DISTANCE_M = 1 as const;
+/** @deprecated No known consumer; removed in the next major. */
 export const TOLERANCE_PACE_SEC_PER_M = 0.01 as const;
 
 // === Buffer / arbitrary numeric literals used in tests ===

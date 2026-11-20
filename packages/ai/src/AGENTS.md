@@ -9,7 +9,7 @@ Source root for `@kaiord/ai`. Houses the public API export, type definitions, er
 
 ## Key Files
 
-- `index.ts` — Public API: `createTextToWorkout`, `AiParsingError`
+- `index.ts` — Public API: `createTextToWorkout` (deprecated), `createChatAgent`, `AiParsingError` / `createAiParsingError`, plus the generate-progress, athlete-context and chat types
 - `types.ts` — Type definitions: `TextToWorkoutConfig`, `TextToWorkoutOptions`
 - `errors.ts` — Error class and factory for parsing failures
 
@@ -30,7 +30,7 @@ Source root for `@kaiord/ai`. Houses the public API export, type definitions, er
 
 The module tree is:
 
-- Entry point: `index.ts` (3 re-exports)
+- Entry point: `index.ts` (root entry; the four other subpaths have their own `index.ts`)
 - Config/types: `types.ts`, `errors.ts`
 - Implementation: `agents/`, `chat/`, `providers/`, `observability/`, `prompts/`, `adapters/`, `evals/`, `test-utils/`
 

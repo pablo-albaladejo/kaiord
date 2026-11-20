@@ -41,7 +41,7 @@ Browser extension adapters SHALL enforce a path/method allowlist in the content 
 
 The Garmin GCN adapter (`@kaiord/garmin`) SHALL accept `isSessionTransitionEnabled: boolean` as an optional field on workout input and SHALL preserve its value through GCN read → write round-trip when present.
 
-The Garmin workout input schema (`garminWorkoutInputSchema` in `packages/garmin/src/adapters/schemas/input/workout-input.schema.ts`) SHALL declare `isSessionTransitionEnabled` as `z.boolean().optional()`.
+The Garmin GCN reader's parse schema (`garminWorkoutParseSchema` in `packages/garmin/src/adapters/schemas/garmin-workout-parse.schema.ts`) SHALL declare `isSessionTransitionEnabled` as `z.boolean().nullable().optional()`, and the GCN writer (`krd-to-garmin.converter.ts`) SHALL set it as a boolean on the emitted workout.
 
 The GCN writer SHALL emit the field at the workout root level when the input provides a value, and SHALL omit it from the emitted JSON when the input does not provide a value.
 
