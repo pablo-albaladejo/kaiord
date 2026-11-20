@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertSuccessorsInCatalog,
   chatModelIds,
+  matchDefinitionKeys,
   parseModelIds,
   renderCatalogModule,
 } from "../../scripts/model-catalog-extract.mjs";
@@ -40,6 +41,79 @@ describe("parseModelIds", () => {
 
     // Assert
     expect(act).toThrow();
+  });
+});
+
+describe("matchDefinitionKeys", () => {
+  const DEFINITIONS_DTS = [
+    "declare const languageModelDefinitions: {",
+    "  'claude-opus-5': {",
+    "    effort: true;",
+    "  };",
+    "  'claude-haiku-4-5': {",
+    "    effort: false;",
+    "  };",
+    "};",
+    "type AnthropicModelId = AnthropicModelIds['language'] | (string & {});",
+  ].join("\n");
+
+  it("should return the top-level keys of the definitions object", () => {
+    // Arrange
+    const dts = DEFINITIONS_DTS;
+
+    // Act
+    const ids = matchDefinitionKeys(dts, "languageModelDefinitions");
+
+    // Assert
+    expect(ids).toEqual(["claude-opus-5", "claude-haiku-4-5"]);
+  });
+
+  it("should return null when the definitions object is absent", () => {
+    // Arrange
+    const dts = "type X = 'a';";
+
+    // Act
+    const ids = matchDefinitionKeys(dts, "languageModelDefinitions");
+
+    // Assert
+    expect(ids).toBeNull();
+  });
+
+  it("should keep only readonly entries that serve the requested endpoint", () => {
+    // Arrange
+    const dts = [
+      "declare const openaiLanguageModelDefinitions: {",
+      "  readonly 'gpt-5': {",
+      '    readonly endpoints: readonly ["chat", "responses"];',
+      "    readonly definition: {};",
+      "  };",
+      "  readonly 'gpt-5-codex': {",
+      '    readonly endpoints: readonly ["responses"];',
+      "    readonly definition: {};",
+      "  };",
+      "};",
+    ].join("\n");
+
+    // Act
+    const ids = matchDefinitionKeys(
+      dts,
+      "openaiLanguageModelDefinitions",
+      "chat"
+    );
+
+    // Assert
+    expect(ids).toEqual(["gpt-5"]);
+  });
+
+  it("should prefer the definitions keys over the indexed-access union", () => {
+    // Arrange
+    const dts = DEFINITIONS_DTS;
+
+    // Act
+    const ids = chatModelIds("anthropic", dts);
+
+    // Assert
+    expect(ids).toEqual(["claude-opus-5", "claude-haiku-4-5"]);
   });
 });
 
