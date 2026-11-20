@@ -10,7 +10,7 @@ inputs:
   expected-packages:
     description: "Space-separated list of package names whose packages/<name>/dist/ MUST exist after download. Default covers all publishable packages."
     required: false
-    default: "core fit tcx zwo garmin garmin-connect cli mcp ai"
+    default: "core fit tcx zwo garmin garmin-connect cli mcp ai whoop tanita trainingpeaks"
 
 runs:
   using: "composite"

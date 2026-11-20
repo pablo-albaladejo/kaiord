@@ -13,7 +13,7 @@ Unit test suite for the train2go-bridge Chrome extension. All tests run in **vit
 | `background.test.js`       | Tests for SW-direct cookie fetch, path allowlist, message routing, parser orchestration |
 | `parser.test.js`           | Tests for HTML parsing: weekly, daily, tooltip, zones extraction                        |
 | `popup.test.js`            | Tests for popup UI: session display, "Check Session" action                             |
-| `kaiord-announce.test.js`  | Tests for SPA discovery and extension announcement resilience                           |
+| `kaiord-announce.test.js`  | Vendored from `_shared/bridge-core/test/` — edit the master, then `pnpm bridge:sync`    |
 | `profile-snapshot.test.js` | Tests for profile state validation and persistence                                      |
 | `fixtures/`                | Test data: HTML and JSON responses from Train2Go                                        |
 

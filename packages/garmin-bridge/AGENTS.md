@@ -33,7 +33,7 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
   - `chrome-mock.js` — Minimal Chrome Extension API mock (runtime, tabs, storage, scripting).
   - `background.test.js` — Service worker tests (allowlist, Bearer routing, ping/list/push/activities, calendar actions, the calendar read and their deadline under fake timers).
   - `garmin-oauth.test.js` — Signer (locked against `oauth-1.0a`), mint/refresh, 401 re-mint, token store.
-  - `kaiord-announce.test.js` — Announce script tests (runtime detection, context invalidation, re-injection).
+  - `kaiord-announce.test.js` — Vendored from `_shared/bridge-core/test/` — edit the master, then `pnpm bridge:sync` (runtime detection, context invalidation).
   - `popup.test.js` — Popup UI tests (status rendering, snapshot staleness, fetch timeouts).
   - `profile-snapshot.test.js` — Profile validator tests (shape validation, pollution detection, length cap).
 - **`icons/`** — Extension icons (16px, 48px, 128px PNG files referenced in manifest).

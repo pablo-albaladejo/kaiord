@@ -1,4 +1,5 @@
 import { definePrompt } from "./registry";
+import { PARSER_PROMPT_VERSION } from "./parser-prompt-version";
 import systemPromptRaw from "./parse-workout.md";
 
 /**
@@ -7,7 +8,7 @@ import systemPromptRaw from "./parse-workout.md";
  */
 export const WORKOUT_PARSER_SYSTEM = definePrompt({
   id: "workout-parser/system",
-  version: "1.3.0",
+  version: PARSER_PROMPT_VERSION,
   template: systemPromptRaw,
   variables: ["sport"],
 });

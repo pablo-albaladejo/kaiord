@@ -157,7 +157,7 @@ function stripComments(source) {
   return source.replace(BLOCK_COMMENT_RE, "").replace(LINE_COMMENT_RE, "$1");
 }
 
-function extractImports(source) {
+export function extractImports(source) {
   const cleaned = stripComments(source);
   const out = [];
   for (const m of cleaned.matchAll(STATIC_IMPORT_RE)) out.push(m[1]);
