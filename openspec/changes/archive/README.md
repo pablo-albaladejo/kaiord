@@ -8,6 +8,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | Date | Change | Summary |
 | ---- | ------ | ------- |
 | 2026-11-20 | [`add-trainingpeaks-moved-repush-guard`](./2026-11-20-add-trainingpeaks-moved-repush-guard/) | TrainingPeaks is create-only for Kaiord. The bridge allowlists a single workout |
+| 2026-11-20 | [`fix-ci-issue-bots`](./2026-11-20-fix-ci-issue-bots/) | Two GitHub automation bots have been silently broken for over a month. Both |
 | 2026-11-20 | [`fix-onboarding-routes`](./2026-11-20-fix-onboarding-routes/) | A brand-new user, on a fresh browser profile with the bridges installed, could |
 | 2026-10-30 | [`add-remote-mcp-endpoint`](./2026-10-30-add-remote-mcp-endpoint/) | @kaiord/mcp is stdio-only. An agent can use it only after the user installs |
 | 2026-10-25 | [`add-coach-session-reschedule`](./2026-10-25-add-coach-session-reschedule/) | The athlete needs to move a session to another day, coach sessions included, |

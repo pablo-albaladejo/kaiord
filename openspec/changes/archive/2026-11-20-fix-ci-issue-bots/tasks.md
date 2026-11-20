@@ -68,13 +68,13 @@
 - [x] 4.3 `pnpm -r build`.
 - [x] 4.4 `pnpm lint:specs`.
 
-## 5. Follow-up (NOT in this change)
+## 5. Follow-up (after merge)
 
-- [ ] 5.1 After merge, close the 8+ duplicate `CWS publish stalled: …` issues
+- [x] 5.1 After merge, close the 8+ duplicate `CWS publish stalled: …` issues
       and triage any stale `ci,automated` issues the fixed close-pass does not
-      pick up on its own. Deliberately deferred: cleaning up before the fix
-      merges just lets the duplicates regenerate on the next publish run.
+      pick up on its own. Deliberately deferred until after the merge: cleaning
+      up before the fix merges just lets the duplicates regenerate on the next
+      publish run. Done on 2026-11-20: issues #1539, #1538, #1366, #1365,
+      #1158, #1139 and #1032 were closed as duplicates of #967 and #963.
 
-      > Deferred to: post-merge cleanup
-
-> Tasks: 22 completed, 1 deferred
+> Tasks: 23 completed, 0 deferred
