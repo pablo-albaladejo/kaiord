@@ -74,7 +74,7 @@ methods, each taking a message and an optional context record.
 ```typescript
 import { fromBinary } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
-import { fitReader } from "@kaiord/fit";
+import { createFitReader } from "@kaiord/fit";
 
 declare const buffer: Uint8Array;
 
@@ -85,7 +85,9 @@ const logger: Logger = {
   error: (message, context) => console.error(`[error] ${message}`, context),
 };
 
-const krd = await fromBinary(buffer, fitReader, logger);
+// The reader logs too: build it with the same logger, or its FIT parsing
+// messages still go to the console.
+const krd = await fromBinary(buffer, createFitReader(logger), logger);
 ```
 
 ### Example 5: Console logger and silent logger
@@ -93,7 +95,7 @@ const krd = await fromBinary(buffer, fitReader, logger);
 ```typescript
 import { createConsoleLogger, fromBinary } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
-import { fitReader } from "@kaiord/fit";
+import { createFitReader, fitReader } from "@kaiord/fit";
 
 declare const buffer: Uint8Array;
 
@@ -107,7 +109,7 @@ const silent: Logger = {
   warn: () => {},
   error: () => {},
 };
-await fromBinary(buffer, fitReader, silent);
+await fromBinary(buffer, createFitReader(silent), silent);
 ```
 
 ### Example 6: Adapting a logging library

@@ -359,6 +359,10 @@ These schemas are fully consistent with the fixtures:
 
 **Schemas (21 files):**
 
+This tree records the files as they were analyzed, in a temporary directory
+that no longer exists. The current schemas are in
+`packages/garmin/src/adapters/schemas/`, including `input/types.ts`.
+
 ```text
 docs/garmin-schemas-temp/
 ├── common/ (9 schemas) ✅

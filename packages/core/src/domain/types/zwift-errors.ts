@@ -5,17 +5,25 @@ import { FormatParsingError, SchemaValidationError } from "./shared-errors";
  * Error thrown when Zwift workout file parsing fails.
  *
  * This error is thrown by Zwift readers when they encounter invalid XML,
- * malformed ZWO data, or unsupported Zwift features.
+ * malformed ZWO data, or unsupported Zwift features. The reader validates
+ * the input first, so a file that fails validation throws
+ * `ZwiftValidationError` before parsing starts.
  *
  * @example
  * ```typescript
- * import { ZwiftParsingError, fromText } from '@kaiord/core';
+ * import {
+ *   ZwiftParsingError,
+ *   ZwiftValidationError,
+ *   fromText,
+ * } from '@kaiord/core';
  * import { zwiftReader } from '@kaiord/zwo';
  *
  * try {
  *   const krd = await fromText(invalidXml, zwiftReader);
  * } catch (error) {
- *   if (error instanceof ZwiftParsingError) {
+ *   if (error instanceof ZwiftValidationError) {
+ *     console.error('Zwift validation failed:', error.message);
+ *   } else if (error instanceof ZwiftParsingError) {
  *     console.error('Zwift parsing failed:', error.message);
  *   }
  * }

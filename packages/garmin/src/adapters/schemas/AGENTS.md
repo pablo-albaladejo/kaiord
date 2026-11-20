@@ -90,14 +90,14 @@ This is by design and enforced at the schema level. The Garmin API has fundament
 ```typescript
 it("should parse input workout with flexible target types", () => {
   // Arrange
-  const payload = { sportType: { sportTypeId: 1 }, workoutName: "Run", ... };
+  const payload = { sportType: { sportTypeKey: "running" }, workoutName: "Run", ... };
 
   // Act
-  const result = workoutStepParseSchema.safeParse(payload);
+  const result = garminWorkoutParseSchema.safeParse(payload);
 
   // Assert
   expect(result.success).toBe(true);
-  expect(result.data.sportType.sportTypeId).toBe(1);
+  expect(result.data?.workoutName).toBe("Run");
 });
 ```
 
