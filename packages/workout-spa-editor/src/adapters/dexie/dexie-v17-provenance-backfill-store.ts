@@ -1,6 +1,6 @@
 /**
- * Per-store chunk iteration for the v17 provenance backfill.
- * Extracted from dexie-v17-provenance-backfill.ts to stay under line cap.
+ * Per-store chunk iteration for the v17 provenance backfill
+ * (dexie-v17-provenance-backfill.ts).
  */
 import { deriveExternalId } from "@kaiord/core";
 import type { Transaction } from "dexie";

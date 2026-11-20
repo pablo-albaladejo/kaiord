@@ -54,7 +54,6 @@ export type SportType = z.infer<typeof sportTypeSchema>;
 
 **No dedicated tests.** Enums are validated implicitly via:
 
-- Input/output schema tests (`../input/workout-input.schema.test.ts`, etc.).
 - Converter tests that use these schemas.
 
 ### Common Patterns

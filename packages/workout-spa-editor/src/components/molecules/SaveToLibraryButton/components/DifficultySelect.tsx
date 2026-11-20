@@ -1,6 +1,4 @@
 /**
- * DifficultySelect Component
- *
  * Select dropdown for workout difficulty level.
  */
 

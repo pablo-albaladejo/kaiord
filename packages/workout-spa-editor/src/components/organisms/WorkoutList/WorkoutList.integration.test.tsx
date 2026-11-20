@@ -13,7 +13,6 @@ const LARGE_RENDER_BUDGET_MS = 5000;
 /**
  * Integration tests for WorkoutList drag-and-drop functionality
  * Tests the complete drag-and-drop flow with DndContext
- * Requirement 3: Complete drag-and-drop flow
  */
 describe("WorkoutList - Drag and Drop Integration", () => {
   const createMockWorkout = (stepCount: number): Workout => ({

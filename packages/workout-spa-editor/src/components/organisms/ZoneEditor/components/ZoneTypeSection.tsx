@@ -1,6 +1,4 @@
 /**
- * ZoneTypeSection Component
- *
  * Wrapper for each zone type within a sport tab.
  * Shows method dropdown and editable zone content.
  */

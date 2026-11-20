@@ -3,11 +3,6 @@
  *
  * Tests keyboard navigation, ARIA attributes, and screen reader support
  * for repetition block operations including deletion.
- *
- * Requirements:
- * - Requirement 3.3: Delete button accessibility
- * - Requirement 4.1: Keyboard shortcuts for deletion
- * - Requirement 6.3: Modal focus trap
  */
 
 import { render, screen } from "@testing-library/react";

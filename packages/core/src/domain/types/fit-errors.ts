@@ -8,12 +8,11 @@ import { FormatParsingError } from "./shared-errors";
  *
  * @example
  * ```typescript
- * import { FitParsingError, convertFitToKrd } from '@kaiord/core';
+ * import { FitParsingError, fromBinary } from '@kaiord/core';
+ * import { fitReader } from '@kaiord/fit';
  *
  * try {
- *   const krd = await convertFitToKrd(fitReader, validator, logger)({
- *     fitBuffer: corruptedBuffer
- *   });
+ *   const krd = await fromBinary(corruptedBuffer, fitReader);
  * } catch (error) {
  *   if (error instanceof FitParsingError) {
  *     console.error('FIT parsing failed:', error.message);

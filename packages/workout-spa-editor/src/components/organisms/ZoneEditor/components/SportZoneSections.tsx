@@ -1,6 +1,4 @@
 /**
- * SportZoneSections Component
- *
  * Renders zone type sections based on sport capabilities.
  */
 

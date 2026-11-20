@@ -12,18 +12,18 @@
 | File               | Description                                                                                                                             |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/index.ts`     | Public API barrel — re-exports schemas, types, errors, ports, application functions, round-trip validator, and profile-snapshot DTO.    |
-| `package.json`     | Declares dual exports (`.` and `./test-utils`), `zod ^4.4.3` runtime dep, faker/rosie/tsdown/vitest devDeps, schema/fixture generators. |
+| `package.json`     | Declares dual exports (`.` and `./test-utils`), `zod ^4.4.3` runtime dep, faker/rosie/tsdown/vitest devDeps, the JSON Schema generator. |
 | `README.md`        | Public-facing API documentation with quick-start, schema validation, error types, and tree-shaking guidance.                            |
 | `tsdown.config.ts` | Build configuration (referenced by `package.json` build script — produces `dist/`).                                                     |
 
 ## Subdirectories
 
-| Directory  | Purpose                                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------------ |
-| `src/`     | TypeScript source (see `src/AGENTS.md`)                                                                            |
-| `docs/`    | Package-specific docs: API examples, tree-shaking, KRD fixture generation, Zwift extensions (see `docs/AGENTS.md`) |
-| `schema/`  | Published JSON Schema + XSD artifacts referenced from `package.json` `files` (see `schema/AGENTS.md`)              |
-| `scripts/` | Build-time generators: JSON Schema from Zod, KRD/Zwift fixtures from FIT (see `scripts/AGENTS.md`)                 |
+| Directory  | Purpose                                                                                               |
+| ---------- | ----------------------------------------------------------------------------------------------------- |
+| `src/`     | TypeScript source (see `src/AGENTS.md`)                                                               |
+| `docs/`    | Package-specific docs: API examples, tree-shaking, Zwift extensions (see `docs/AGENTS.md`)            |
+| `schema/`  | Published JSON Schema + XSD artifacts referenced from `package.json` `files` (see `schema/AGENTS.md`) |
+| `scripts/` | Build-time generator: JSON Schema from Zod (see `scripts/AGENTS.md`)                                  |
 
 ## For AI Agents
 
@@ -58,7 +58,7 @@ None. This is the root of the dependency DAG.
 ### External
 
 - `zod ^4.4.3` (runtime) — schema validation and type inference.
-- `@noble/hashes ^2.4.0` (runtime) — sync SHA-256 for `domain/hash/canonical-hash.ts`.
+- `@noble/hashes` (runtime) — sync SHA-256 behind the canonical hash in `domain/hash`.
 - `@faker-js/faker`, `rosie` (devDep, but RE-EXPORTED for tests under `./test-utils` via rosie factories).
 - `tsdown`, `tsx`, `typescript`, `vitest`, `@vitest/coverage-v8` (build/test only).
 
