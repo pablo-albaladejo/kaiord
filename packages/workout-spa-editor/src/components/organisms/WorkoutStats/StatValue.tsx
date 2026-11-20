@@ -1,6 +1,4 @@
 /**
- * StatValue Component
- *
  * Displays a statistic value with optional estimate indicator.
  */
 

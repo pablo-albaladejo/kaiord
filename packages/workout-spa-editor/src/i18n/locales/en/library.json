@@ -24,7 +24,6 @@
     "message": "Save a workout to your library to get started.",
     "create": "New workout",
     "import": "Import file",
-    "createMessage": "Create your first workout and save it to your library to get started.",
     "filteredTitle": "No workouts found",
     "filteredMessage": "No workouts match your current filters."
   },
@@ -32,8 +31,7 @@
     "schedule": "Schedule",
     "load": "Load",
     "loadAria": "Load {{name}} into editor",
-    "deleteAria": "Delete {{name}}",
-    "thumbnailAlt": "{{name}} preview"
+    "deleteAria": "Delete {{name}}"
   },
   "actions": {
     "cancel": "Cancel",
@@ -42,38 +40,7 @@
   },
   "deleteDialog": {
     "title": "Delete Workout",
-    "confirm": "Delete \"{{name}}\"? This cannot be undone.",
-    "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
-  },
-  "filters": {
-    "clearFilters": "Clear Filters",
-    "tagsLabel": "Tags:",
-    "sport": {
-      "label": "Sport",
-      "all": "All Sports",
-      "cycling": "Cycling",
-      "running": "Running",
-      "swimming": "Swimming",
-      "generic": "Generic"
-    },
-    "difficulty": {
-      "label": "Difficulty",
-      "all": "All Levels",
-      "easy": "Easy",
-      "medium": "Medium",
-      "hard": "Hard"
-    },
-    "sortBy": {
-      "label": "Sort By",
-      "name": "Name",
-      "dateCreated": "Date Created",
-      "difficulty": "Difficulty"
-    },
-    "sortOrder": {
-      "label": "Order",
-      "asc": "Ascending",
-      "desc": "Descending"
-    }
+    "confirm": "Delete \"{{name}}\"? This cannot be undone."
   },
   "saveDialog": {
     "title": "Save to Library",

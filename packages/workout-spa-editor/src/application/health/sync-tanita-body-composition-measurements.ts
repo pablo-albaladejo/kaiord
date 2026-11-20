@@ -1,6 +1,5 @@
 /**
- * Types + pure helpers for `syncTanitaBodyComposition`. Kept out of the
- * use-case file so that stays under the per-file line cap.
+ * Types + pure helpers for `syncTanitaBodyComposition`.
  */
 import type { KRD, ManagedDataType } from "@kaiord/core";
 import { canonicalHash } from "@kaiord/core";
@@ -79,6 +78,3 @@ export const readNeedsReauth = (err: unknown): boolean =>
   typeof err === "object" &&
   err !== null &&
   (err as { needsReauth?: unknown }).needsReauth === true;
-
-export const errorMessage = (err: unknown): string =>
-  err instanceof Error ? err.message : String(err);

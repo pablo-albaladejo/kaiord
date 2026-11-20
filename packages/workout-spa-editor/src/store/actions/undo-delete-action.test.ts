@@ -77,8 +77,6 @@ describe("undoDeleteAction", () => {
       selectedStepId: null,
       selectedStepIds: [],
       isEditing: false,
-      safeMode: false,
-      lastBackup: null,
       deletedSteps: [deletedStepEntry],
     };
 
@@ -115,8 +113,6 @@ describe("undoDeleteAction", () => {
       selectedStepId: null,
       selectedStepIds: [],
       isEditing: false,
-      safeMode: false,
-      lastBackup: null,
       deletedSteps: [],
     };
 
@@ -152,8 +148,6 @@ describe("undoDeleteAction", () => {
       selectedStepId: null,
       selectedStepIds: [],
       isEditing: false,
-      safeMode: false,
-      lastBackup: null,
       deletedSteps: [],
     };
 
@@ -219,8 +213,6 @@ describe("undoDeleteAction", () => {
       selectedStepId: null,
       selectedStepIds: [],
       isEditing: false,
-      safeMode: false,
-      lastBackup: null,
       deletedSteps: [deletedStepEntry],
     };
 

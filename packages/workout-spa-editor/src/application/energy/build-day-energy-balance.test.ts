@@ -1,13 +1,13 @@
 import { createWorkoutKRD, type Workout } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
 
-import { addDaysIso } from "../../components/pages/Daily/today-dates";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { HealthWeightRecord } from "../../types/health/health-records";
 import type { Profile } from "../../types/profile";
 import { saveManualHealthMetric } from "../health/save-manual-health-metric.use-case";
+import { addDaysIso } from "../shared/date-utils";
 import { buildDayEnergyBalance } from "./build-day-energy-balance";
 
 const PROFILE_ID = "p1";

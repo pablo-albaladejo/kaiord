@@ -5,15 +5,11 @@
 
 ## Purpose
 
-Validation helpers: formatters for Zod errors into UX-friendly shapes, helper utilities for partial form validation, and the canonical `ValidationError[]` carrier type.
+Formatters that turn Zod errors into UX-friendly `ValidationError[]` shapes.
 
 ## Key Files
 
-- `validators.ts` — `validateWorkout`, `validateWorkoutStep`, `validateRepetitionBlock`, `validatePartialWorkoutStep`, `validatePartialRepetitionBlock`, `validateWorkoutMetadata`.
-- `validate-helper.ts` — shared `safeParse → { success | errors }` adapter.
-- `validation-types.ts` — `ValidationError`, `ValidationResult` types.
-- `formatters.ts` / `.test.ts` — `formatZodError`, `formatValidationErrors`, `getFieldError`, `hasFieldError`, `getNestedErrors`, `mergeValidationErrors`.
-- `helpers.ts` / `.test.ts` (+ `.test-fixtures.ts`) — `createDebouncedValidator`, `validateField`.
+- `formatters.ts` / `.test.ts` — `formatZodError`, `formatValidationErrors`.
 
 ## For AI Agents
 
@@ -24,13 +20,13 @@ Validation helpers: formatters for Zod errors into UX-friendly shapes, helper ut
 
 ### Testing Requirements
 
-- Formatters and helpers each have `.test.ts` covering happy + error paths.
+- `formatters.test.ts` covers happy + error paths.
 
 ## Dependencies
 
 ### Internal
 
-- `../schemas/*`.
+- `../krd` (`ValidationError`).
 
 ### External
 

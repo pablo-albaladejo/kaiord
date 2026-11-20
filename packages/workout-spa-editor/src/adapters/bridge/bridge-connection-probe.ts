@@ -6,6 +6,7 @@
  * tab open, transient cookie issue) MUST NOT block the next probe, otherwise
  * the UI keeps offering "Connect" long after the user signed in.
  */
+import { errorMessage } from "../../utils/error-message";
 import { type RefreshContext, write } from "./bridge-connection-context";
 import { undiscoveredEntry } from "./bridge-connection-entries";
 import type { BridgeConnectionRuntime } from "./bridge-connection-types";
@@ -34,7 +35,7 @@ const runProbe = async (
   try {
     return await probe(extensionId);
   } catch (err) {
-    return inactive(err instanceof Error ? err.message : String(err));
+    return inactive(errorMessage(err));
   }
 };
 

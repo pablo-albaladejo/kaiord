@@ -9,11 +9,11 @@
  * same day SKIPs already-uploaded measurements. A dead mytanita.eu session
  * surfaces as `needs-reauth`. Pure: transports, parser, and encoder are injected.
  */
+import { errorMessage } from "../../utils/error-message";
 import { recordExport } from "../export/record-export.use-case";
 import { resolveExportPolicies } from "../integration-policy/resolve-export-policies.use-case";
 import {
   BODY_COMPOSITION,
-  errorMessage,
   GARMIN_BRIDGE_ID,
   GARMIN_UPLOAD_EXTERNAL_ID,
   measurementRecordId,
@@ -30,6 +30,7 @@ export type {
   SyncTanitaPhase,
   SyncTanitaResult,
 } from "./sync-tanita-body-composition-measurements";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 
 export const syncTanitaBodyComposition = async (
   deps: SyncTanitaBodyCompositionDeps,
@@ -39,7 +40,7 @@ export const syncTanitaBodyComposition = async (
     { policyRepo: deps.policyRepo },
     { profileId: input.profileId, dataType: BODY_COMPOSITION }
   );
-  if (!policies.some((p) => p.enabled && p.bridgeId === GARMIN_BRIDGE_ID)) {
+  if (!isRouteEnabled(policies, GARMIN_BRIDGE_ID)) {
     return { ok: false, reason: "route-inactive" };
   }
 

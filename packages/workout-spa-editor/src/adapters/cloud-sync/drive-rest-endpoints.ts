@@ -2,8 +2,7 @@
  * Drive REST endpoint helpers
  *
  * URL builders and the canonical snapshot file name for the Drive
- * `appDataFolder` I/O. Kept separate from `drive-rest.ts` to honor the
- * per-file line cap and to make the API surface obvious.
+ * `appDataFolder` I/O used by `drive-rest.ts`.
  */
 
 export const SNAPSHOT_FILE_NAME = "kaiord-snapshot.json";

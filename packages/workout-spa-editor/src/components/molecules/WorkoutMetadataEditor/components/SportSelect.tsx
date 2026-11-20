@@ -1,6 +1,4 @@
 /**
- * SportSelect Component
- *
  * Sport selection dropdown.
  */
 

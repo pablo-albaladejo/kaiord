@@ -1,6 +1,4 @@
 /**
- * DialogHeader Component
- *
  * Header section of the save to library dialog.
  */
 

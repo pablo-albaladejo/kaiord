@@ -162,5 +162,8 @@
     "blockedCompleted": "The coach marked it completed — it can't be moved.",
     "blockedProjected": "A recorded activity can't be moved.",
     "createFirst": "Create the workout first to move it."
+  },
+  "executed": {
+    "heading": "Completed activities"
   }
 }
