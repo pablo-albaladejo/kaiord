@@ -80,11 +80,9 @@
 
 ## 🗂️ Schema Files
 
-### Production-Ready Schemas (Temporary Location)
+### Schemas
 
-**Location:** `docs/garmin-schemas-temp/`
-
-These schemas are ready to be moved to the actual implementation:
+**Location:** `packages/garmin/src/adapters/schemas/`
 
 #### Common Schemas
 
@@ -94,7 +92,6 @@ These schemas are ready to be moved to the actual implementation:
 - `common/target-type.schema.ts` - Target type definitions
 - `common/stroke-type.schema.ts` - Swimming stroke types
 - `common/equipment-type.schema.ts` - Swimming equipment types
-- `common/drill-type.schema.ts` - Drill types
 - `common/unit.schema.ts` - Unit definitions
 
 #### Input Schemas (Flexible)
@@ -102,15 +99,11 @@ These schemas are ready to be moved to the actual implementation:
 - `input/step-input.schema.ts` - Step input schema
 - `input/types.ts` - Step input types (repeat-group included)
 
-#### Output Schemas (Strict)
+#### Parse Schema
 
-- `output/workout.schema.ts` - Workout output schema
-- `output/segment.schema.ts` - Segment output schema
-- `output/step.schema.ts` - Step output schema
-- `output/repeat.schema.ts` - Repeat block output schema
-- `output/author.schema.ts` - Author object schema
+- `garmin-workout-parse.schema.ts` - Workout, step and repeat-group parse schemas
 
-**README:** `garmin-schemas-temp/README.md` - Schema organization and usage
+**Guide:** `packages/garmin/src/adapters/schemas/AGENTS.md` - Schema organization and usage
 
 ---
 
