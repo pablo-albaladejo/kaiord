@@ -121,6 +121,21 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "test/bearer-fetch.test.js",
     bridges: ["garmin-bridge", "trainingpeaks-bridge"],
   },
+  {
+    master: "test/session-fetch.test.js",
+    dest: "test/session-fetch.test.js",
+    bridges: ["tanita-bridge", "train2go-bridge", "trainingpeaks-bridge"],
+  },
+  {
+    master: "test/bridge-popup-utils.test.js",
+    dest: "test/bridge-popup-utils.test.js",
+    bridges: ALL_BRIDGES,
+  },
+  {
+    master: "test/kaiord-announce.test.js",
+    dest: "test/kaiord-announce.test.js",
+    bridges: ALL_BRIDGES,
+  },
 ];
 
 export const DEFAULT_MASTERS_DIR = join(REPO, "packages/_shared/bridge-core");
