@@ -8,11 +8,11 @@
 import type { LabValue } from "@kaiord/core";
 import { useMemo } from "react";
 
-import { useTheme } from "../../../../../contexts/ThemeContext";
 import { useActiveLocale } from "../../../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../../../i18n/use-translate";
 import type { ChartMetricDef } from "../../../../charts/uplot-base/uplot-base";
 import { UplotChart } from "../../../../charts/uplot-base/uplot-chart";
+import { useThemedChartOptions } from "../../../../charts/uplot-base/use-themed-chart-options";
 import { labParameterLabel } from "../lab-parameter-label";
 import { buildLabChartData, countOutliers } from "./build-lab-chart-data";
 import { buildLabChartOptions } from "./build-lab-chart-options";
@@ -30,7 +30,6 @@ export const LabParameterChart = ({
 }) => {
   const locale = useActiveLocale();
   const t = useTranslate("labs-ui");
-  const { resolvedTheme } = useTheme();
   const def: ChartMetricDef = useMemo(
     () => ({
       key: parameterKey,
@@ -41,11 +40,9 @@ export const LabParameterChart = ({
   );
   const band = useMemo(() => resolveReferenceBand(values), [values]);
   const data = useMemo(() => buildLabChartData(values, band), [values, band]);
-  const options = useMemo(
+  const options = useThemedChartOptions(
     () => buildLabChartOptions(def, band, t("chart.outOfRange")),
-    // resolvedTheme forces a rebuild so axis/grid/series colors follow .dark.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [def, band, resolvedTheme, t]
+    [def, band, t]
   );
 
   if (values.length === 0)

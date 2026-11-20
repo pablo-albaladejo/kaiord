@@ -259,7 +259,10 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "error",
+      "react-hooks/exhaustive-deps": [
+        "error",
+        { additionalHooks: "^useThemedChartOptions$" },
+      ],
       ...importRules,
       "@typescript-eslint/no-restricted-imports": [
         "error",
@@ -390,6 +393,29 @@ export default tseslint.config(
               ],
               message:
                 "Coaching dialog must not consume the registry directly; receive `expandActivity` as a prop. Import `CoachingActivity` from `coaching-activity` instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // R-CaughtErrorTextHidden: check-model-facing-sinks is a text scan, so a
+    // shared helper that returns a caught value's text is a known gap. Keep
+    // errorMessage out of the chat paths whose results can reach the model.
+    files: [
+      "packages/workout-spa-editor/src/hooks/chat/**/*.{ts,tsx}",
+      "packages/workout-spa-editor/src/application/chat/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/utils/error-message", "**/utils/error-message.*"],
+              message:
+                "Chat code must not turn a caught error into text: its result can reach the model (R-CaughtErrorTextHidden).",
             },
           ],
         },
@@ -531,9 +557,15 @@ export default tseslint.config(
             },
             {
               from: [{ element: { type: "spa-application" } }],
-              disallow: [{ element: { type: ["spa-adapters"] } }],
+              disallow: [
+                {
+                  to: {
+                    element: { type: ["spa-adapters", "spa-components"] },
+                  },
+                },
+              ],
               message:
-                "Application use cases must not depend on adapters. Inject through ports instead.",
+                "Application use cases must not depend on adapters or components. Inject through ports instead.",
             },
             {
               from: [{ element: { type: "spa-components" } }],

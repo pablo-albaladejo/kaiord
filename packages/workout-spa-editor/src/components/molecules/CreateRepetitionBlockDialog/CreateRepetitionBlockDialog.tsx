@@ -1,10 +1,5 @@
 /**
- * CreateRepetitionBlockDialog Component
- *
  * Dialog for creating a repetition block from selected steps.
- *
- * Requirements:
- * - Requirement 4: Create repetition blocks from selected steps
  */
 
 import { useState } from "react";

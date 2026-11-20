@@ -129,9 +129,9 @@ Before any non-trivial change:
   directly (R-DexieImport / R-PersistStateImport / R-AppDexieImport).
 - `check-no-pii-leakage.mjs` — toast/`console.*` first args under SPA
   `{components,hooks,lib}/**` must be static literals (R-PIIInterpolation).
-- `check-no-library-dual-mount.mjs` — only `LibraryPage.tsx` and
-  `TemplatePickerDialog.tsx` may import the Library content component
-  (R-LibraryNoDualMount).
+- `check-no-library-dual-mount.mjs` — only `LibraryPage.tsx` may import the
+  Library content component `pages/Library/LibraryContent`, and the guard
+  fails if that path disappears (R-LibraryNoDualMount).
 - `check-session-match-id-shape.mjs` — every `coachingActivityId:` literal in a
   `sessionMatches` write call site and every `[profileId+coachingActivityId]`
   Dexie reader MUST be constructed via `buildCoachingActivityId(...)`,

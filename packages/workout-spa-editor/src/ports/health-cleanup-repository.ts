@@ -5,10 +5,9 @@
  * introduced in Dexie v16 (`healthSleep`, `healthWeight`, `healthHrv`,
  * `healthDaily`, `healthBodyComposition`, `healthStress`).
  *
- * The full per-metric repositories (one per store) ship in later
- * commits with the typed CRUD surface. This port covers ONLY the
- * delete-by-profile cascade so the `deleteProfile` orchestration can
- * already clean every health table when a profile is removed.
+ * The per-metric CRUD repositories live in `health-repositories.ts`.
+ * This port covers ONLY the delete-by-profile cascade the
+ * `deleteProfile` orchestration runs when a profile is removed.
  */
 export type HealthCleanupRepository = {
   /**

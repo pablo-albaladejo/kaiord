@@ -1,7 +1,7 @@
 /**
  * useDeleteCleanup Hook
  *
- * Requirement 39.3: Delete with Undo Notification
+ * Delete with Undo Notification
  * - Automatically cleans up expired deleted steps after 5 seconds
  * - Runs cleanup check every second
  */

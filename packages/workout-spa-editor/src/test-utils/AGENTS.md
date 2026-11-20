@@ -31,7 +31,6 @@ In-memory port implementations + console-spy + fixture loaders. The seam tests u
 ### Fixtures + canonical inputs
 
 - `application-fixtures.ts` — canonical inputs for application-layer tests.
-- `fixtures.ts` / `.test.ts` — fixture-loading helpers (delegates to `@kaiord/core/test-utils`).
 - `zone-fixtures.ts` — canonical zone configurations.
 - `mock-download.ts` — stubs the browser `<a download>` flow used by `backup-download.ts`.
 

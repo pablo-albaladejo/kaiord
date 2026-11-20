@@ -1,6 +1,4 @@
 /**
- * WorkoutPreview Component
- *
  * Renders a bar chart preview of the workout structure.
  * Each bar's width is proportional to duration and height to zone/intensity.
  */

@@ -1,7 +1,6 @@
 /**
  * Fetches, converts, and persists ONE calendar day of WHOOP stress for the
- * syncWhoopStress orchestrator. Split out to keep that use case's loop body
- * under the function-size cap (mirrors sync-whoop-heart-rate-day.ts's role
+ * syncWhoopStress orchestrator (mirrors sync-whoop-heart-rate-day.ts's role
  * for the heart-rate-series sync). `stressBffToEpisode` returning `null`
  * (no gauge reported that day) and an already-imported day (dedup) both
  * surface as `{ status: "skipped" }` — the orchestrator counts them
@@ -9,6 +8,7 @@
  */
 import { stressBffToEpisode, whoopStressResponseSchema } from "@kaiord/whoop";
 
+import { errorMessage } from "../../utils/error-message";
 import type { ImportedRecordRepository } from "../import/imported-record-repository.port";
 import { stampProvenance } from "../import/stamp-provenance";
 import { upsertImportedRecord } from "../import/upsert-imported-record.use-case";
@@ -41,7 +41,7 @@ export const syncStressDay = async (
   } catch (err) {
     return {
       status: "transport-error",
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   if (!result.ok) return { status: "transport-error", error: result.error };
