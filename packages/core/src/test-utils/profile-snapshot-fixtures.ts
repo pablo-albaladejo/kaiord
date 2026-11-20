@@ -2,8 +2,9 @@
  * Profile Snapshot Fixtures
  *
  * Shared positive/negative fixture set consumed by:
- * - The SPA's Zod parser tests (in `@kaiord/workout-spa-editor`).
- * - Each bridge's plain-JS structural validator parity test.
+ * - The core `protocol/profile-snapshot` Zod parser tests.
+ * - The garmin-bridge and train2go-bridge plain-JS structural validator
+ *   parity tests.
  *
  * Both validators MUST agree: positive fixtures parse with deep-equal
  * output; negative fixtures reject without throwing and without mutating

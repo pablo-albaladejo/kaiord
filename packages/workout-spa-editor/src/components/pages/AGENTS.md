@@ -27,7 +27,7 @@ Page components mounted by Wouter routes in `App.tsx`. Each page composes organi
 
 ### Library page
 
-- `LibraryPage.tsx` / `.test.tsx` — one of the two allowed mount sites for `WorkoutLibrary` (R-LibraryNoDualMount).
+- `LibraryPage.tsx` / `.test.tsx` — the routed Library page and the only allowed importer of `Library/LibraryContent` (R-LibraryNoDualMount).
 - `LibraryPageContent.tsx`, `LibraryPageHeader.tsx`, `LibraryPageGrid.tsx`, `LibraryPageCard.tsx` — sub-parts.
 - `use-schedule-template.ts` / `.test.tsx` — schedule-from-library handler.
 - `save-as-template.test.ts` — regression test for save-to-library.

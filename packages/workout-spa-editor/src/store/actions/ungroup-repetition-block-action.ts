@@ -4,8 +4,8 @@
  * Action for extracting steps from a repetition block back into individual steps.
  *
  * Requirements:
- * - Requirement 7.4: Ungroup repetition blocks
- * - Requirement 2.4: Use block ID for operations
+ * - Ungroup repetition blocks
+ * - Use block ID for operations
  */
 
 import type { KRD } from "../../types/krd";

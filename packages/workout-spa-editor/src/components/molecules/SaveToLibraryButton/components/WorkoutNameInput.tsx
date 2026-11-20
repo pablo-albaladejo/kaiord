@@ -1,6 +1,4 @@
 /**
- * WorkoutNameInput Component
- *
  * Input field for workout name.
  */
 

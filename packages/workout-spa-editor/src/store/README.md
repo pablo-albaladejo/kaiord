@@ -24,7 +24,7 @@ selection, history (undo/redo), and the focus-intent slice.
 - `pendingFocusTarget: FocusTarget | null` — focus intent written by
   mutating actions. A hook (`useFocusAfterAction`, §7) reads it after
   each React commit and moves DOM focus accordingly.
-- `isEditing`, `safeMode`, `lastBackup`, `deletedSteps`, `isModalOpen`,
+- `isEditing`, `deletedSteps`, `isModalOpen`,
   `modalConfig`, `createBlockDialogOpen` — misc UI slots.
 
 ### Actions

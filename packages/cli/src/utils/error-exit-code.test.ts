@@ -9,13 +9,14 @@ import {
   ToleranceExceededError,
 } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import {
   DirectoryCreateError,
   EnvironmentError,
   UnsupportedFormatError,
 } from "./cli-errors";
-import { getExitCodeForError, mapErrorToExitCode } from "./error-exit-code";
+import { mapErrorToExitCode } from "./error-exit-code";
 import { ExitCode } from "./exit-codes";
 
 const HTTP_SERVICE_UNAVAILABLE = 503;
@@ -214,6 +215,31 @@ describe("mapErrorToExitCode", () => {
     expect(code).toBe(ExitCode.FILE_NOT_FOUND);
   });
 
+  it("should map an option-schema ZodError to INVALID_ARGUMENT", () => {
+    // Arrange
+    const parsed = z.object({ input: z.string() }).safeParse({ input: 1 });
+    const error = parsed.success ? undefined : parsed.error;
+
+    // Act
+    const code = mapErrorToExitCode(error);
+
+    // Assert
+    expect(code).toBe(ExitCode.INVALID_ARGUMENT);
+  });
+
+  it("should map a ZodError from another zod copy by name", () => {
+    // Arrange
+    const error = Object.assign(new Error("invalid options"), {
+      name: "ZodError",
+    });
+
+    // Act
+    const code = mapErrorToExitCode(error);
+
+    // Assert
+    expect(code).toBe(ExitCode.INVALID_ARGUMENT);
+  });
+
   it("should map an unknown error to UNKNOWN_ERROR", () => {
     // Arrange
     const error = new Error("something unexpected");
@@ -266,16 +292,5 @@ describe("mapErrorToExitCode", () => {
     // Assert
     expect(rewordedCode).toBe(originalCode);
     expect(rewordedCode).toBe(ExitCode.INVALID_ARGUMENT);
-  });
-
-  it("should expose getExitCodeForError as an alias of the mapper", () => {
-    // Arrange
-    const error = createServiceApiError("Garmin 503", HTTP_SERVICE_UNAVAILABLE);
-
-    // Act
-    const code = getExitCodeForError(error);
-
-    // Assert
-    expect(code).toBe(mapErrorToExitCode(error));
   });
 });

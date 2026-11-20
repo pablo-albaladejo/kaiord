@@ -5,6 +5,7 @@
  * logged: ids, tokens and emails never reach the console.
  */
 import { scrubAnalyticsString } from "../../lib/scrub-analytics-string";
+import { errorMessage } from "../../utils/error-message";
 import { logger } from "../../utils/logger";
 
 const MAX_MESSAGE = 200;
@@ -12,8 +13,5 @@ const MAX_MESSAGE = 200;
 export const logGarminPushFailure = (error: unknown): void =>
   logger.error("[garmin-push] failed", {
     name: error instanceof Error ? error.name : typeof error,
-    message: scrubAnalyticsString(
-      error instanceof Error ? error.message : String(error),
-      MAX_MESSAGE
-    ),
+    message: scrubAnalyticsString(errorMessage(error), MAX_MESSAGE),
   });

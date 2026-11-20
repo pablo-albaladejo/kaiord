@@ -1,6 +1,4 @@
 /**
- * HeaderLogo Component
- *
  * Kaiord logo and title for the header. Uses wouter Link for SPA
  * navigation (no full page reload).
  *

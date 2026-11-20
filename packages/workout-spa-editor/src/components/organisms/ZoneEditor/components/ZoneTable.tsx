@@ -1,6 +1,4 @@
 /**
- * ZoneTable Component
- *
  * Renders editable zone rows with inline editing for names and values.
  */
 

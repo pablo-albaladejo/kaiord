@@ -1,6 +1,4 @@
 /**
- * CommandPalette Component
- *
  * The ⌘K palette: one searchable list that both runs editor commands and
  * links out to the docs, over the app rather than in place of it.
  */
