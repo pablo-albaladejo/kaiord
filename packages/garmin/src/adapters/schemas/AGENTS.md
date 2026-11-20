@@ -142,8 +142,8 @@ const workoutOutputSchema = z.object({
 export const sportTypeSchema = z.enum(["running", "cycling", "swimming", ...]);
 export type SportType = z.infer<typeof sportTypeSchema>;
 
-// output/workout.schema.ts
-import { sportTypeSchema } from "../common/sport-type.schema";
+// input/step-input.schema.ts
+import { garminTargetTypeSchema, garminUnitInputSchema } from "../common";
 ```
 
 ### Error Handling
