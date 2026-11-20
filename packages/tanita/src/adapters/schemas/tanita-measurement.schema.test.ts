@@ -64,4 +64,29 @@ describe("tanitaMeasurementSchema", () => {
     // Assert
     expect(result.success).toBe(false);
   });
+
+  it("should map a cell absent from the row to undefined", () => {
+    // Arrange
+    const input = Object.fromEntries(
+      Object.entries(RAW_ROW).filter(([key]) => key !== "bmi")
+    );
+
+    // Act
+    const result = tanitaMeasurementSchema.parse(input);
+
+    // Assert
+    expect(result.bmi).toBeUndefined();
+  });
+
+  it("should reject a row whose numeric cell is not a number", () => {
+    // Arrange
+    const input = { ...RAW_ROW, bodyFatPercent: "n/a" };
+
+    // Act
+    const result = tanitaMeasurementSchema.safeParse(input);
+
+    // Assert
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["bodyFatPercent"]);
+  });
 });

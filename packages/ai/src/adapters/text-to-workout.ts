@@ -50,14 +50,8 @@ const toDomainError = (error: unknown, inputText: string): unknown =>
  * `AiParsingError` semantics while delegating to the shared runtime.
  */
 export const createTextToWorkout = (config: TextToWorkoutConfig) => {
-  const {
-    model,
-    logger,
-    telemetry,
-    maxRetries = 2,
-    maxOutputTokens = 4096,
-    temperature = 0,
-  } = config;
+  const { model, logger, telemetry, maxRetries, maxOutputTokens, temperature } =
+    config;
 
   return async (
     text: string,
@@ -75,7 +69,6 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
       temperature,
     };
 
-    logger?.debug("Workout parse requested", { length: sanitized.length });
     logger?.info("Parsing workout text", { length: sanitized.length });
 
     try {

@@ -13,7 +13,7 @@ No pre-built singleton is exported because `model` (a `LanguageModel` from the V
 
 ## Key Files
 
-- `src/index.ts` — Public API exports: `createTextToWorkout`, `AiParsingError`
+- `src/index.ts` — Root-entry public API: `createTextToWorkout` (deprecated), `createChatAgent`, `AiParsingError` / `createAiParsingError`, and the progress, athlete-context and chat types; the other four subpaths have their own `index.ts`
 - `src/types.ts` — Config types: `TextToWorkoutConfig`, `TextToWorkoutOptions`
 - `src/errors.ts` — `AiParsingError` class and factory
 - `src/agents/` — `AgentDefinition` and the generate-mode runtime
