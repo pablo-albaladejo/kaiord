@@ -79,6 +79,22 @@ describe("landing sitemap", () => {
     expect(build).toThrow(/no commit dates https:\/\/kaiord.com\//);
   });
 
+  it("should date both landing pages from the shared partials too", () => {
+    // Arrange
+    const landing = PAGES.filter(
+      (page) => page.loc !== "https://kaiord.com/app/"
+    );
+
+    // Act
+    const sources = landing.map((page) => page.sources);
+
+    // Assert
+    expect(sources).toHaveLength(2);
+    sources.forEach((paths) =>
+      expect(paths).toContain("packages/landing/partials")
+    );
+  });
+
   it("should date the ES page from its locale build script too", () => {
     // Arrange
     const es = PAGES.find((page) => page.loc === "https://kaiord.com/es/");
