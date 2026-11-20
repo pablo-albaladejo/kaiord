@@ -129,4 +129,24 @@ describe("BRIDGE_CORE_MASTERS table", () => {
     assert.deepEqual([...shell.bridges].sort(), [...utils.bridges].sort());
     assert.equal(css.bridges.length, 5);
   });
+
+  it("vendors each test master to exactly the bridges of its runtime master", () => {
+    // A test master runs against the bridge's own vendored copy, so a bridge
+    // missing from the test row ships that copy untested, and one missing
+    // from the runtime row fails on require.
+    const byMaster = new Map(BRIDGE_CORE_MASTERS.map((e) => [e.master, e]));
+    const pairs = BRIDGE_CORE_MASTERS.flatMap((entry) => {
+      const match = entry.master.match(/^test\/(.+)\.test\.js$/);
+      const runtime = match && byMaster.get(`${match[1]}.js`);
+      return runtime ? [[entry, runtime]] : [];
+    });
+    assert.ok(pairs.length >= 8, `only ${pairs.length} test/runtime pairs`);
+    for (const [testEntry, runtime] of pairs) {
+      assert.deepEqual(
+        [...testEntry.bridges].sort(),
+        [...runtime.bridges].sort(),
+        `${testEntry.master} consumers differ from ${runtime.master}`
+      );
+    }
+  });
 });

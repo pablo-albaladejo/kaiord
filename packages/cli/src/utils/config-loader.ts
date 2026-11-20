@@ -64,15 +64,6 @@ export const loadConfigWithMetadata = async (): Promise<ConfigLoadResult> => {
 };
 
 /**
- * Load configuration from .kaiordrc.json (simplified API)
- * For debug logging support, use loadConfigWithMetadata instead.
- */
-export const loadConfig = async (): Promise<Config> => {
-  const result = await loadConfigWithMetadata();
-  return result.config;
-};
-
-/**
  * Merge CLI options with config file defaults
  * CLI options take precedence over config file
  */
