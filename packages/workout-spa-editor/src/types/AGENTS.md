@@ -45,7 +45,7 @@ Domain types, Zod schemas, type guards, validators, and module-augmentation decl
 
 ### Validation
 
-- `schemas.ts`, `validation.ts` / `.test.ts`, `validation-barrel.ts` — top-level validation entry points.
+- `schemas.ts` — re-exports of the core Zod schemas.
 - `errors.ts` / `.test.ts`, `invalid-input-error.ts` — domain error types.
 
 ### Ambient
@@ -58,8 +58,7 @@ Domain types, Zod schemas, type guards, validators, and module-augmentation decl
 
 ## Subdirectories
 
-- `schemas/` — Zod schemas split out for size (`core-exports`, `form-schemas`, `repetition-block-id.test`, `ui-schemas`).
-- `validation/` — validation helpers split out (`formatters`, `helpers`, `validate-helper`, `validation-types`, `validators`).
+- `validation/` — Zod error formatters (`formatters`).
 
 ## For AI Agents
 

@@ -499,6 +499,8 @@ const garminStrokeTypeInputSchema = z.object({
   displayOrder: z.number().optional(),
 });
 
+// Historical design sketch: the *InputSchema names below no longer exist in code;
+// the reader validates with `garminWorkoutParseSchema`.
 // Multisport segment
 const garminWorkoutSegmentInputSchema = z.object({
   segmentOrder: z.number(),
@@ -543,6 +545,8 @@ const garminStrokeTypeOutputSchema = z.object({
   displayOrder: z.number(),
 });
 
+// Historical design sketch: the *InputSchema names below no longer exist in code;
+// the reader validates with `garminWorkoutParseSchema`.
 // Server-assigned fields
 const garminWorkoutOutputSchema = garminWorkoutInputSchema.extend({
   workoutId: z.number(),

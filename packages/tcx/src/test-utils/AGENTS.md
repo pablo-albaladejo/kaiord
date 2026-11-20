@@ -25,13 +25,13 @@ None.
 
 - Centralize numeric fixtures used across test files.
 - Enable DRY test code (reuse same constant in multiple test suites).
-- Document semantics of numbers used in tests (e.g., `TIME_SECONDS_300` = 5 minutes).
+- Document semantics of numbers used in tests (e.g., `TIME_SECONDS_1800` = 30 minutes).
 
 **Constant Naming:**
 
 - Format: `{SEMANTIC}_{UNIT}_{VALUE}`.
 - Examples:
-  - `TIME_SECONDS_300` = 300 seconds (5 minutes).
+  - `TIME_SECONDS_1800` = 1800 seconds (30 minutes).
   - `DISTANCE_METERS_5000` = 5000 meters (5 km).
   - `HEART_RATE_ZONE_THREE` = zone 3 (applies to HR zone mapping).
   - `POWER_WATTS_250` = 250 watts.
@@ -40,17 +40,20 @@ None.
 **Usage Pattern:**
 
 ```typescript
-import { TIME_SECONDS_300, DISTANCE_METERS_5000 } from "@kaiord/tcx/test-utils";
+import {
+  TIME_SECONDS_1800,
+  DISTANCE_METERS_5000,
+} from "@kaiord/tcx/test-utils";
 
 it("should convert 5-minute time duration", () => {
   // Arrange
-  const tcxDuration = { TimeInSeconds: TIME_SECONDS_300 };
+  const tcxDuration = { TimeInSeconds: TIME_SECONDS_1800 };
 
   // Act
   const krdDuration = convertTcxDuration(tcxDuration);
 
   // Assert
-  expect(krdDuration.duration).toBe(TIME_SECONDS_300);
+  expect(krdDuration.duration).toBe(TIME_SECONDS_1800);
 });
 ```
 
@@ -66,7 +69,7 @@ it("should convert 5-minute time duration", () => {
 
 - Test-utils is a pure fixture module.
 - Tests depend on these constants; correctness validated indirectly by test passing.
-- Manual review: verify constant names match their values (e.g., `TIME_SECONDS_300 = 300`).
+- Manual review: verify constant names match their values (e.g., `TIME_SECONDS_1800 = 1800`).
 
 ### Common Patterns
 
@@ -79,7 +82,7 @@ it("should convert 5-minute time duration", () => {
 **Type Safety with `as const`:**
 
 ```typescript
-export const TIME_SECONDS_300 = 300 as const; // type: 300 (literal), not number
+export const TIME_SECONDS_1800 = 1800 as const; // type: 1800 (literal), not number
 export const HEART_RATE_ZONE_THREE = 3 as const;
 ```
 

@@ -1,8 +1,7 @@
 /**
  * Kaiord Dexie Version Registration — v10 onwards.
  *
- * Extracted from `register-kaiord-versions.ts` so each registration file
- * stays under the per-file line cap as the migration history grows.
+ * Called from `register-kaiord-versions.ts`.
  */
 
 import type Dexie from "dexie";

@@ -1,15 +1,15 @@
 import { clearExpiredDeletesAction } from "./actions/clear-expired-deletes-action";
 import { deleteStepsAction } from "./actions/delete-steps-action";
 import { undoDeleteAction } from "./actions/undo-delete-action";
-import { createAllBlockActions } from "./create-all-block-actions";
-import { createAllStepActions } from "./create-all-step-actions";
 import { createBaseWorkoutActions } from "./create-base-workout-actions";
 import type { WorkoutState } from "./workout-actions";
+import { createRepetitionBlockActions as blockActionsFor } from "./workout-store-repetition-actions";
+import { createStepActions as stepActionsFor } from "./workout-store-step-actions";
 
-const createStepActions = () => ({
-  createStep: (state: WorkoutState) => createAllStepActions(state).createStep(),
+const storeStepActions = () => ({
+  createStep: (state: WorkoutState) => stepActionsFor(state).createStep(),
   deleteStep: (stepIndex: number, state: WorkoutState) =>
-    createAllStepActions(state).deleteStep(stepIndex),
+    stepActionsFor(state).deleteStep(stepIndex),
   deleteSteps: (stepIndices: ReadonlyArray<number>, state: WorkoutState) => {
     const currentWorkout = state.currentWorkout;
     if (!currentWorkout) return {};
@@ -23,62 +23,53 @@ const createStepActions = () => ({
   clearExpiredDeletes: (state: WorkoutState) =>
     clearExpiredDeletesAction(state),
   duplicateStep: (stepIndex: number, state: WorkoutState) =>
-    createAllStepActions(state).duplicateStep(stepIndex),
+    stepActionsFor(state).duplicateStep(stepIndex),
   reorderStep: (activeIndex: number, overIndex: number, state: WorkoutState) =>
-    createAllStepActions(state).reorderStep(activeIndex, overIndex),
+    stepActionsFor(state).reorderStep(activeIndex, overIndex),
   reorderStepsInBlock: (
     blockId: string,
     activeIndex: number,
     overIndex: number,
     state: WorkoutState
   ) =>
-    createAllStepActions(state).reorderStepsInBlock(
-      blockId,
-      activeIndex,
-      overIndex
-    ),
+    stepActionsFor(state).reorderStepsInBlock(blockId, activeIndex, overIndex),
 });
 
 /** The two (blockId, stepIndex) block-step actions share one shape. */
 const blockStepAction =
   (name: "duplicateStepInRepetitionBlock" | "deleteStepInRepetitionBlock") =>
   (blockId: string, stepIndex: number, state: WorkoutState) =>
-    createAllBlockActions(state)[name](blockId, stepIndex);
+    blockActionsFor(state)[name](blockId, stepIndex);
 
-const createBlockActions = () => ({
+const storeBlockActions = () => ({
   createRepetitionBlock: (
     stepIndices: Array<number>,
     repeatCount: number,
     state: WorkoutState
-  ) =>
-    createAllBlockActions(state).createRepetitionBlock(
-      stepIndices,
-      repeatCount
-    ),
+  ) => blockActionsFor(state).createRepetitionBlock(stepIndices, repeatCount),
   createEmptyRepetitionBlock: (repeatCount: number, state: WorkoutState) =>
-    createAllBlockActions(state).createEmptyRepetitionBlock(repeatCount),
+    blockActionsFor(state).createEmptyRepetitionBlock(repeatCount),
   editRepetitionBlock: (
     blockId: string,
     repeatCount: number,
     state: WorkoutState
-  ) => createAllBlockActions(state).editRepetitionBlock(blockId, repeatCount),
+  ) => blockActionsFor(state).editRepetitionBlock(blockId, repeatCount),
   addStepToRepetitionBlock: (blockId: string, state: WorkoutState) =>
-    createAllBlockActions(state).addStepToRepetitionBlock(blockId),
+    blockActionsFor(state).addStepToRepetitionBlock(blockId),
   duplicateStepInRepetitionBlock: blockStepAction(
     "duplicateStepInRepetitionBlock"
   ),
   deleteStepInRepetitionBlock: blockStepAction("deleteStepInRepetitionBlock"),
   ungroupRepetitionBlock: (blockId: string, state: WorkoutState) =>
-    createAllBlockActions(state).ungroupRepetitionBlock(blockId),
+    blockActionsFor(state).ungroupRepetitionBlock(blockId),
   deleteRepetitionBlock: (blockId: string, state: WorkoutState) =>
-    createAllBlockActions(state).deleteRepetitionBlock(blockId),
+    blockActionsFor(state).deleteRepetitionBlock(blockId),
 });
 
 export function createWorkoutStoreActions() {
-  const baseActions = createBaseWorkoutActions();
   return {
-    ...baseActions,
-    ...createStepActions(),
-    ...createBlockActions(),
+    ...createBaseWorkoutActions(),
+    ...storeStepActions(),
+    ...storeBlockActions(),
   };
 }

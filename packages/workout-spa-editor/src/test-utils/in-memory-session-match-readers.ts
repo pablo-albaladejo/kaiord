@@ -1,8 +1,7 @@
 /**
  * In-Memory SessionMatchRepository — read-side projection.
  *
- * Extracted from the main factory so the entry file stays under the
- * 100-line cap. Pure Map-scan implementations; no IO.
+ * Pure Map-scan implementations; no IO.
  */
 
 import type { SessionMatchRepository } from "../ports/session-match-repository";

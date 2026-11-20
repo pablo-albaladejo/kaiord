@@ -210,7 +210,7 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
-  describe("copy shortcut (Requirement 39.2)", () => {
+  describe("copy shortcut", () => {
     it.each([
       { label: "Ctrl+C", init: { key: "c", ctrlKey: true } },
       { label: "Cmd+C", init: { key: "c", metaKey: true } },
@@ -245,7 +245,7 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
-  describe("paste shortcut (Requirement 39.2)", () => {
+  describe("paste shortcut", () => {
     it.each([
       { label: "Ctrl+V", init: { key: "v", ctrlKey: true } },
       { label: "Cmd+V", init: { key: "v", metaKey: true } },
@@ -280,7 +280,7 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
-  describe("create block shortcut (Requirement 7.6.1)", () => {
+  describe("create block shortcut", () => {
     it.each([
       { label: "Ctrl+G", init: { key: "g", ctrlKey: true } },
       { label: "Cmd+G", init: { key: "g", metaKey: true } },
@@ -333,7 +333,7 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
-  describe("ungroup block shortcut (Requirement 7.6.2)", () => {
+  describe("ungroup block shortcut", () => {
     it.each([
       {
         label: "Ctrl+Shift+G",
@@ -378,7 +378,7 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
-  describe("select all shortcut (Requirement 7.6.3)", () => {
+  describe("select all shortcut", () => {
     it.each([
       { label: "Ctrl+A", init: { key: "a", ctrlKey: true } },
       { label: "Cmd+A", init: { key: "a", metaKey: true } },
@@ -413,7 +413,7 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
-  describe("clear selection shortcut (Requirement 7.6.4)", () => {
+  describe("clear selection shortcut", () => {
     it("should call onClearSelection when Escape is pressed", () => {
       // Arrange
       const onClearSelection = vi.fn();

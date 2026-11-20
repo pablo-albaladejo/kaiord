@@ -20,8 +20,7 @@ Command-line interface for Kaiord workout file conversion. Wires format adapters
 - `src/commands/` — Modular command implementations (convert, validate, diff, inspect, extract, garmin)
 - `src/utils/` — Shared utilities: format detection, error formatting, config loading, logging, file handling
 - `src/adapters/logger/` — Pretty and structured logger implementations
-- `src/types/plugin.ts` — Plugin system interfaces (future extensibility)
-- `docs/` — Plugin architecture, publish verification, examples
+- `docs/` — Plugin architecture (design only), examples
 - `README.md` — User-facing CLI documentation
 
 ## Subdirectories
@@ -36,9 +35,9 @@ Command-line interface for Kaiord workout file conversion. Wires format adapters
   - `garmin/` — Garmin Connect integration (login, logout, list, push)
 - **`src/adapters/logger/`** — Logger adapters (pretty terminal, structured JSON)
 - **`src/utils/`** — Shared utilities (format detection, error handling, file I/O, config, logging)
-- **`src/types/`** — Type definitions (plugin system interfaces)
+- **`src/types/`** — Reserved for shared type definitions (currently empty)
 - **`src/tests/`** — Test utilities and smoke tests
-- **`docs/`** — Architecture docs (plugin system, publish verification)
+- **`docs/`** — Architecture docs (plugin system design, examples)
 
 ## For AI Agents: Working in This Directory
 
@@ -48,7 +47,7 @@ Command-line interface for Kaiord workout file conversion. Wires format adapters
 2. **Logger factory**: All commands use `createLogger()` which auto-detects pretty vs. structured based on CI environment
 3. **Config merging**: CLI args override `.kaiordrc.json` config file (searched in cwd and home)
 4. **Batch detection**: Convert command detects glob patterns (`*`, `?`) to route to batch vs. single-file handler
-5. **Error exit codes**: `ExitCode` enum (0=success, 1=error, 2=tolerance exceeded, 3=diff found) and `getExitCodeForError()` mapper
+5. **Error exit codes**: `ExitCode` enum (0=success, 1=invalid argument, 2=file not found, 3=permission denied, 4=parsing error, 5=validation error, 6=tolerance exceeded, 7=auth error, 10=differences found, 11=partial success, 12=directory create error, 13=environment error, 14=service error, 99=unknown) and `mapErrorToExitCode()` mapper
 6. **Format detection**: Infer format from file extension; override with `--input-format` / `--output-format`
 
 ### File Size Limits & Structure
@@ -101,9 +100,7 @@ export const myCommand = async (options: MyOptions): Promise<number> => {
   } catch (error) {
     spinner?.fail("Failed");
     logger.error("Failed", { error });
-    const formatted = formatError(error, { json: opts.json });
-    console.error(formatted);
-    return mapErrorToExitCode(error);
+    return handleCommandError(error, { json: opts.json });
   } finally {
     spinner?.stop();
   }
@@ -125,7 +122,7 @@ if (isBatchMode(validated.input)) {
 **Error formatting:**
 
 - Use `formatError(error, { json: boolean })` for user output
-- Use `getExitCodeForError(error)` to map errors to exit codes
+- Use `handleCommandError(error, { json })` (`utils/handle-command-error.ts`) to print a command failure and get its exit code
 - Pretty errors go to stderr, JSON errors to stdout (when `--json` flag)
 
 ## Dependencies

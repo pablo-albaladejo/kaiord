@@ -11,7 +11,6 @@ import type { MatchedSessionsReadModel } from "../../ports/matched-sessions-read
 import type { ActivityRecord } from "../../types/activity-record";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
-import type { SessionMatch } from "../../types/session-match";
 import type { KaiordDatabase } from "./dexie-database";
 
 export function createDexieMatchedSessionsReadModel(
@@ -21,7 +20,6 @@ export function createDexieMatchedSessionsReadModel(
     db.table<CoachingActivityRecord>("coachingActivities");
   const executedActivities = () => db.table<ActivityRecord>("activities");
   const workouts = () => db.table<WorkoutRecord>("workouts");
-  const sessionMatches = () => db.table<SessionMatch>("sessionMatches");
 
   return {
     loadJoinSources: async (activityIds, workoutIds) => {
@@ -53,21 +51,6 @@ export function createDexieMatchedSessionsReadModel(
         activitiesById: new Map(activityRows.map((a) => [a.id, a])),
         workoutsById,
       };
-    },
-
-    findActivityMatch: async (profileId, persistedCoachingActivityId) => {
-      const match = await sessionMatches()
-        .where("[profileId+coachingActivityId]")
-        .equals([profileId, persistedCoachingActivityId])
-        .first();
-      if (!match) return null;
-
-      const workout = await workouts().get(match.workoutId);
-      // Dangling-ref tolerance: the match exists but the workout is gone
-      // (mid-cascade race). Callers treat null as solo.
-      if (!workout) return null;
-
-      return { matchId: match.id, workout };
     },
   };
 }

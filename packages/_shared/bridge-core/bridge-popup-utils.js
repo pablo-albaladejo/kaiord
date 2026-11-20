@@ -53,8 +53,8 @@ const relativeAgo = (epochMs) => {
   return msg(day === 1 ? "dayAgo" : "daysAgo", [String(day)]);
 };
 
-// The absolute date an outage started, as "23 Jul" — the form the V2 screen
-// specifies. Pinned to en-GB rather than the browser locale because the
+// The absolute date an outage started, as "23 Jul" — the form the popup's
+// outage copy uses. Pinned to en-GB rather than the browser locale because the
 // bridges are English-only by rule (R-BridgeLocalesEnglishOnly): with an
 // undefined locale a US-configured Chrome would render "Jul 23" into copy the
 // rest of which is written day-first.

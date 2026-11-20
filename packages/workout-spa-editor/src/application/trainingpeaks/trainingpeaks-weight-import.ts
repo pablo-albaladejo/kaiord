@@ -1,6 +1,5 @@
 /**
- * Types + pure helpers for `syncTrainingPeaksWeight`. Kept out of the use-case
- * file so that stays under the per-file line cap.
+ * Types + pure helpers for `syncTrainingPeaksWeight`.
  */
 import type { KRD, ManagedDataType } from "@kaiord/core";
 import { canonicalHash } from "@kaiord/core";
@@ -10,6 +9,7 @@ import type { ImportedRecordRepository } from "../import/imported-record-reposit
 import { stampProvenance } from "../import/stamp-provenance";
 import { upsertImportedRecord } from "../import/upsert-imported-record.use-case";
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 
 export const TRAININGPEAKS_BRIDGE_ID = "trainingpeaks-bridge";
@@ -60,9 +60,7 @@ export const isTrainingPeaksWeightEnabled = async (
     { policyRepo },
     { profileId, dataType: WEIGHT }
   );
-  return policies.some(
-    (p) => p.enabled && p.bridgeId === TRAININGPEAKS_BRIDGE_ID
-  );
+  return isRouteEnabled(policies, TRAININGPEAKS_BRIDGE_ID);
 };
 
 export const persistWeightDocuments = async (

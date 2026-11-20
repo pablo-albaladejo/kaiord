@@ -4,7 +4,7 @@
  * Tests for ungrouping repetition blocks back into individual steps.
  *
  * Requirements:
- * - Requirement 7.4: Ungroup repetition blocks
+ * - Ungroup repetition blocks
  */
 
 import { describe, expect, it } from "vitest";

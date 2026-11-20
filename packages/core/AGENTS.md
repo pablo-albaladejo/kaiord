@@ -12,24 +12,24 @@
 | File               | Description                                                                                                                             |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/index.ts`     | Public API barrel — re-exports schemas, types, errors, ports, application functions, round-trip validator, and profile-snapshot DTO.    |
-| `package.json`     | Declares dual exports (`.` and `./test-utils`), `zod ^4.4.3` runtime dep, faker/rosie/tsdown/vitest devDeps, schema/fixture generators. |
+| `package.json`     | Declares dual exports (`.` and `./test-utils`), `zod ^4.4.3` runtime dep, faker/rosie/tsdown/vitest devDeps, the JSON Schema generator. |
 | `README.md`        | Public-facing API documentation with quick-start, schema validation, error types, and tree-shaking guidance.                            |
 | `tsdown.config.ts` | Build configuration (referenced by `package.json` build script — produces `dist/`).                                                     |
 
 ## Subdirectories
 
-| Directory  | Purpose                                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------------ |
-| `src/`     | TypeScript source (see `src/AGENTS.md`)                                                                            |
-| `docs/`    | Package-specific docs: API examples, tree-shaking, KRD fixture generation, Zwift extensions (see `docs/AGENTS.md`) |
-| `schema/`  | Published JSON Schema + XSD artifacts referenced from `package.json` `files` (see `schema/AGENTS.md`)              |
-| `scripts/` | Build-time generators: JSON Schema from Zod, KRD/Zwift fixtures from FIT (see `scripts/AGENTS.md`)                 |
+| Directory  | Purpose                                                                                               |
+| ---------- | ----------------------------------------------------------------------------------------------------- |
+| `src/`     | TypeScript source (see `src/AGENTS.md`)                                                               |
+| `docs/`    | Package-specific docs: API examples, tree-shaking, Zwift extensions (see `docs/AGENTS.md`)            |
+| `schema/`  | Published JSON Schema + XSD artifacts referenced from `package.json` `files` (see `schema/AGENTS.md`) |
+| `scripts/` | Build-time generator: JSON Schema from Zod (see `scripts/AGENTS.md`)                                  |
 
 ## For AI Agents
 
 ### Working In This Directory
 
-- This is the innermost layer of the monorepo. `domain` depends on nothing except `zod`. `application` MUST NOT import external libs or adapters. Adapter packages may depend on `@kaiord/core`; `@kaiord/core` MUST NOT import any other workspace package at runtime.
+- This is the innermost layer of the monorepo. `domain` depends on nothing except `zod` (schemas) and `@noble/hashes` (canonical hashing). `application` MUST NOT import external libs or adapters. Adapter packages may depend on `@kaiord/core`; `@kaiord/core` MUST NOT import any other workspace package at runtime.
 - Domain schemas use **snake_case** enum values (`indoor_cycling`, `lap_swimming`, `structured_workout`); access them via `sportSchema.enum.cycling`, never raw strings.
 - KRD's `metadata.sport` and `session.sport` are `z.string()` (not `sportSchema`) for forward compatibility with unknown sport values from FIT files.
 - All errors are exported as both a `class` (for `instanceof` checks) and a `create*` factory (for FP style) — see `src/domain/types/errors.ts`.
@@ -58,6 +58,7 @@ None. This is the root of the dependency DAG.
 ### External
 
 - `zod ^4.4.3` (runtime) — schema validation and type inference.
+- `@noble/hashes` (runtime) — sync SHA-256 behind the canonical hash in `domain/hash`.
 - `@faker-js/faker`, `rosie` (devDep, but RE-EXPORTED for tests under `./test-utils` via rosie factories).
 - `tsdown`, `tsx`, `typescript`, `vitest`, `@vitest/coverage-v8` (build/test only).
 

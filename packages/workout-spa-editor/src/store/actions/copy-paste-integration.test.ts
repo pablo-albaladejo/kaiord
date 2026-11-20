@@ -6,7 +6,7 @@
  * - Step index recalculation
  * - Repetition block handling
  *
- * Requirement 39.2: Complete copy/paste flow
+ * Complete copy/paste flow
  */
 
 import { describe, expect, it, vi } from "vitest";

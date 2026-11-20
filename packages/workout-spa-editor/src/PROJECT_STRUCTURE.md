@@ -54,7 +54,7 @@ import { useWorkout } from "@/hooks"; // ❌ NO
 
 ### Note on Existing index.ts Files
 
-Some `index.ts` files exist in the codebase for legacy reasons or future extensibility, but they are **not used** in imports. Always import directly from the source file (e.g., `Button.tsx`, `StepCard.tsx`) to ensure:
+Some `index.ts` barrels exist and are still imported (e.g. `components/atoms/Icon`, `test-utils`). New code should import directly from the source file (e.g., `Button.tsx`, `StepCard.tsx`) to ensure:
 
 - **Optimal tree-shaking**: Bundler can eliminate unused code more effectively
 - **Faster builds**: No intermediate re-export resolution

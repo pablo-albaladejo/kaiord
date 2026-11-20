@@ -157,23 +157,6 @@
     "intensityLabel": "Intensidad",
     "intensityAria": "Selecciona la intensidad del paso"
   },
-  "firstTimeHints": {
-    "dismiss": "Descartar sugerencias",
-    "progressDot": "Sugerencia {{n}} de {{total}}",
-    "progressDotCurrent": "Sugerencia {{n}} de {{total}} (actual)",
-    "duration": {
-      "title": "Define la duración",
-      "message": "Elige cuánto debe durar este paso: por tiempo, distancia o sin límite."
-    },
-    "target": {
-      "title": "Define el objetivo",
-      "message": "Define tu intensidad de entrenamiento con zonas de potencia, frecuencia cardiaca, ritmo o cadencia."
-    },
-    "save": {
-      "title": "Guarda tu paso",
-      "message": "Pulsa Guardar para añadir este paso a tu entreno. Puedes editarlo cuando quieras."
-    }
-  },
   "metadata": {
     "editAria": "Editar metadatos del entreno",
     "nameLabel": "Nombre del entreno",

@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Pure domain layer: Zod schemas and inferred types for the KRD canonical format, converters (length unit, workout → KRD wrapper), validation primitives (Zod validator, tolerance checker, KRD extractor), Coggan power-zone math, type guards, and the full error-class taxonomy. Depends on nothing except `zod`.
+Pure domain layer: Zod schemas and inferred types for the KRD canonical format, converters (length unit, workout → KRD wrapper), validation primitives (Zod validator, tolerance checker, KRD extractor), Coggan power-zone math, type guards, and the full error-class taxonomy. Depends on nothing except `zod` and `@noble/hashes`.
 
 ## Key Files
 
@@ -29,7 +29,7 @@ Pure domain layer: Zod schemas and inferred types for the KRD canonical format, 
 
 ### Working In This Directory
 
-- This is the innermost layer. The ONLY external dep allowed is `zod`. Importing from `../application`, `../ports`, `../adapters`, or any other workspace package is forbidden and will violate hexagonal layering.
+- This is the innermost layer. The ONLY external deps allowed are `zod` and `@noble/hashes` (`DOMAIN_EXTERNAL_ALLOWLIST` in `scripts/architecture.vocab.mjs`). Importing from `../application`, `../ports`, `../adapters`, or any other workspace package is forbidden and will violate hexagonal layering.
 - All public types are `z.infer<typeof schema>` — schema is the source of truth. Do NOT hand-write a type alongside its schema.
 - Domain schema enum values use snake_case (`indoor_cycling`, `structured_workout`, `repeat_until_power_greater_than`). Adapter packages may translate to camelCase or numeric codes for wire format.
 - Discriminated unions use a string discriminator: `Duration` discriminates on `type`, `Target` on `type`, `*Value` schemas on `unit`. Always use `z.discriminatedUnion("type", [...])` so error messages stay readable.
@@ -53,5 +53,6 @@ None (root of the dependency DAG within core).
 ### External
 
 - `zod` — schemas, validation, type inference.
+- `@noble/hashes` — sync SHA-256 for `hash/canonical-hash.ts`.
 
 <!-- MANUAL: -->

@@ -13,16 +13,16 @@ Zustand stores for editor runtime ONLY. Holds the currently-edited workout, the 
 
 ### Workout store (the main slice)
 
-- `workout-store.ts` — `create<WorkoutStore>(...)` factory. Composes `createFocusSlice`, `createWorkoutMethods`, `createSelectionActions`, `createHistoryMethods`, `createRecoveryMethods`, `createModalActions`.
+- `workout-store.ts` — `create<WorkoutStore>(...)` factory. Composes `createFocusSlice`, `createWorkoutMethods`, `createSelectionActions`, `createHistoryMethods`, `createModalActions`.
 - `workout-state.types.ts`, `workout-store-state.types.ts`, `workout-store-types.ts`, `workout-store-actions.types.ts` — type contracts.
 - `workout-store-actions.ts`, `workout-store-step-actions.ts`, `workout-store-selection-actions.ts`, `workout-store-repetition-actions.ts`, `workout-store-modal-actions.ts`, `workout-store-history.ts`, `workout-actions.ts` — domain action surfaces.
 - `create-workout-method-helpers.ts`, `create-workout-method-helpers-basic.ts`, `create-workout-methods.ts` — composition helpers (one method per call so the per-file/per-function caps hold).
-- `create-base-workout-actions.ts`, `create-all-step-actions.ts`, `create-all-block-actions.ts`, `create-block-action-handlers.ts`, `create-step-action-handlers.ts`, `create-workout-store-block-actions.ts`, `create-workout-store-step-actions.ts` — per-action-type factories.
-- `create-history-methods.ts`, `create-recovery-methods.ts` — undo/redo + last-backup recovery wiring.
+- `create-base-workout-actions.ts` — base workout action factory.
+- `create-history-methods.ts` — undo/redo wiring.
 - `hydrate-ui-workout.ts` / `.test.ts` — assigns fresh `ItemId`s when loading a KRD into the store.
 - `strip-ids.ts` / `.test.ts` — outbound chokepoint: removes `id` fields before any KRD crosses a boundary (Dexie write, `saveWorkout`, `exportWorkout`).
 - `find-by-id.ts` / `.test.ts` — typed lookup of a step or block by `ItemId`.
-- `workout-store-history.test.ts`, `workout-store-undo-history.test.ts`, `workout-store-modal-actions.test.ts`, `workout-store-recovery.test.ts`, `workout-store.test.ts`, `workout-loading-integration.test.ts`, `workout-actions.test.ts`, `selection-invariant.test.ts` — store test suite.
+- `workout-store-history.test.ts`, `workout-store-undo-history.test.ts`, `workout-store-modal-actions.test.ts`, `workout-store.test.ts`, `workout-loading-integration.test.ts`, `workout-actions.test.ts`, `selection-invariant.test.ts` — store test suite.
 - `index.ts` — module export surface (unused per direct-import rule; legacy).
 
 ### Auxiliary stores (still runtime-only)

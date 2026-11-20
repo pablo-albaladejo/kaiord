@@ -1,6 +1,5 @@
 /**
- * Pure helpers for `useMatchedSessions` hydrate join. Extracted so the
- * entry file stays under the per-file line cap.
+ * Pure helpers for `useMatchedSessions` hydrate join.
  */
 
 import type { WorkoutRecord } from "../types/calendar-record";

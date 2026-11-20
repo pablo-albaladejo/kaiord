@@ -1,4 +1,6 @@
 import { execa } from "execa";
+import { mkdtemp, rm, writeFile } from "fs/promises";
+import { tmpdir } from "os";
 import { dirname, join, resolve } from "path";
 import stripAnsi from "strip-ansi";
 import { fileURLToPath } from "url";
@@ -44,23 +46,19 @@ describe("diff command integration", () => {
       // Arrange
       const file1 = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
       const file2 = join(FIXTURES_PATH, "fit/WorkoutRepeatSteps.fit");
-      const { stdout, stderr, exitCode } = await execa(
+      const { stdout, exitCode } = await execa(
         "node",
         [CLI_PATH, "diff", "--file1", file1, "--file2", file2],
         { reject: false }
       );
-      if (![ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND].includes(exitCode)) {
-        console.error("Unexpected exit code", { exitCode, stderr, stdout });
-      }
-      expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(
-        exitCode
-      );
+      expect(exitCode).toBe(ExitCode.DIFFERENCES_FOUND);
 
       // Act
       const output = stripAnsi(stdout);
 
       // Assert
-      expect(output).toBeTruthy();
+      expect(output).toContain("Workout Steps Differences:");
+      expect(output).toContain("Step count: 4 vs 3");
     },
     INTEGRATION_TIMEOUT
   );
@@ -94,25 +92,99 @@ describe("diff command integration", () => {
   );
 
   it(
-    "should handle missing file error",
+    "should exit with FILE_NOT_FOUND when a file is missing",
     async () => {
       // Arrange
       const validFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
-
-      // Act
       const missingFile = join(FIXTURES_PATH, "nonexistent.fit");
 
+      // Act
+      const { stdout, stderr, exitCode } = await execa(
+        "node",
+        [CLI_PATH, "diff", "--file1", validFile, "--file2", missingFile],
+        { reject: false }
+      );
+
       // Assert
-      await expect(
-        execa("node", [
+      expect(exitCode).toBe(ExitCode.FILE_NOT_FOUND);
+      expect(stdout).toBe("");
+      expect(stripAnsi(stderr)).toContain("File not found");
+    },
+    INTEGRATION_TIMEOUT
+  );
+
+  it(
+    "should report the missing file as a JSON error with FILE_NOT_FOUND",
+    async () => {
+      // Arrange
+      const validFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
+      const missingFile = join(FIXTURES_PATH, "nonexistent.fit");
+
+      // Act
+      const { stdout, exitCode } = await execa(
+        "node",
+        [
           CLI_PATH,
           "diff",
           "--file1",
           validFile,
           "--file2",
           missingFile,
-        ])
-      ).rejects.toThrow();
+          "--json",
+        ],
+        { reject: false }
+      );
+
+      // Assert
+      expect(exitCode).toBe(ExitCode.FILE_NOT_FOUND);
+      const result = JSON.parse(stdout);
+      expect(result.success).toBe(false);
+      expect(result.error.message).toContain("File not found");
+    },
+    INTEGRATION_TIMEOUT
+  );
+
+  it(
+    "should exit with INVALID_ARGUMENT when the file format is unsupported",
+    async () => {
+      // Arrange
+      const validFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
+      const unsupported = join(FIXTURES_PATH, "README.md");
+
+      // Act
+      const { exitCode, stderr } = await execa(
+        "node",
+        [CLI_PATH, "diff", "--file1", validFile, "--file2", unsupported],
+        { reject: false }
+      );
+
+      // Assert
+      expect(exitCode).toBe(ExitCode.INVALID_ARGUMENT);
+      expect(stripAnsi(stderr)).toContain("Unable to detect format");
+    },
+    INTEGRATION_TIMEOUT
+  );
+
+  it(
+    "should exit with VALIDATION_ERROR when a file is not a valid KRD",
+    async () => {
+      // Arrange
+      const validFile = join(FIXTURES_PATH, "krd/WorkoutIndividualSteps.krd");
+      const dir = await mkdtemp(join(tmpdir(), "kaiord-diff-"));
+      const invalid = join(dir, "bad.krd");
+      await writeFile(invalid, '{"not":"krd"}');
+
+      // Act
+      const { exitCode, stderr } = await execa(
+        "node",
+        [CLI_PATH, "diff", "--file1", validFile, "--file2", invalid],
+        { reject: false }
+      );
+      await rm(dir, { recursive: true, force: true });
+
+      // Assert
+      expect(exitCode).toBe(ExitCode.VALIDATION_ERROR);
+      expect(stripAnsi(stderr)).toContain("Invalid KRD format");
     },
     INTEGRATION_TIMEOUT
   );
@@ -151,23 +223,18 @@ describe("diff command integration", () => {
       // Arrange
       const fitFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
       const krdFile = join(FIXTURES_PATH, "krd/WorkoutIndividualSteps.krd");
-      const { stdout, stderr, exitCode } = await execa(
+      const { stdout, exitCode } = await execa(
         "node",
         [CLI_PATH, "diff", "--file1", fitFile, "--file2", krdFile],
         { reject: false }
       );
-      if (![ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND].includes(exitCode)) {
-        console.error("Unexpected exit code", { exitCode, stderr, stdout });
-      }
-      expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(
-        exitCode
-      );
+      expect(exitCode).toBe(ExitCode.DIFFERENCES_FOUND);
 
       // Act
       const output = stripAnsi(stdout);
 
       // Assert
-      expect(output).toBeTruthy();
+      expect(output).toContain("Metadata Differences:");
     },
     INTEGRATION_TIMEOUT
   );

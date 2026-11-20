@@ -1,6 +1,4 @@
 /**
- * ZoneMethodSelect Component
- *
  * Dropdown to select a zone calculation method.
  */
 

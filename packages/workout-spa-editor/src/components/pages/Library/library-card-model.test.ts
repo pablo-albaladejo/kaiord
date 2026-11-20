@@ -47,4 +47,15 @@ describe("buildLibraryCardModel", () => {
     expect(model.duration).toBe("15m");
     expect(model.tss).toBeUndefined();
   });
+
+  it("should label a generic template as Other", () => {
+    // Arrange
+    const generic: WorkoutTemplate = { ...template, sport: "generic" };
+
+    // Act
+    const model = buildLibraryCardModel(generic, null, t);
+
+    // Assert
+    expect(model.sportLabel).toBe("Other");
+  });
 });
