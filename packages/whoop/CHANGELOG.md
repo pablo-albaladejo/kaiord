@@ -1,5 +1,12 @@
 # @kaiord/whoop
 
+## 10.5.2
+
+### Patch Changes
+
+- Updated dependencies [b482dfe]
+  - @kaiord/core@10.5.2
+
 ## 10.5.0
 
 ### Patch Changes
