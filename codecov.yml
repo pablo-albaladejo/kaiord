@@ -25,6 +25,11 @@ coverage:
         # already declares untestable — a stale list, not a coverage
         # regression. Adding a bridge package means adding it here and
         # to the `bridges` check and flag below, all three together.
+        #
+        # The integration libs (whoop, tanita, trainingpeaks) are plain TS
+        # with no extension boilerplate and measured 94-98% statements when
+        # they joined CI (2026-11-09), so they stay under this 80% default
+        # and each gets its own flag below.
         target: 80%
         paths:
           - "!packages/garmin-bridge/**"
@@ -81,6 +86,30 @@ flags:
   cli:
     paths:
       - packages/cli/src/
+    carryforward: true
+  garmin-connect:
+    paths:
+      - packages/garmin-connect/src/
+    carryforward: true
+  mcp:
+    paths:
+      - packages/mcp/src/
+    carryforward: true
+  ai:
+    paths:
+      - packages/ai/src/
+    carryforward: true
+  whoop:
+    paths:
+      - packages/whoop/src/
+    carryforward: true
+  tanita:
+    paths:
+      - packages/tanita/src/
+    carryforward: true
+  trainingpeaks:
+    paths:
+      - packages/trainingpeaks/src/
     carryforward: true
   frontend:
     paths:
