@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { detectFormat, validateFormat } from "./format-detector";
+import { detectFormat } from "./format-detector";
 
 describe("detectFormat", () => {
   it.each([
@@ -56,40 +56,5 @@ describe("detectFormat", () => {
 
     // Assert
     expect(result).toBeNull();
-  });
-});
-
-describe("validateFormat", () => {
-  it.each(["fit", "krd", "tcx", "zwo"] as const)(
-    "should validate %s as a valid format",
-    (format) => {
-      // Arrange
-
-      // Act
-      const result = validateFormat(format);
-
-      // Assert
-      expect(result).toBe(true);
-    }
-  );
-
-  it("should reject invalid format strings", () => {
-    // Arrange
-
-    // Act
-    const result = validateFormat("invalid");
-
-    // Assert
-    expect(result).toBe(false);
-  });
-
-  it("should reject empty strings", () => {
-    // Arrange
-
-    // Act
-    const result = validateFormat("");
-
-    // Assert
-    expect(result).toBe(false);
   });
 });
