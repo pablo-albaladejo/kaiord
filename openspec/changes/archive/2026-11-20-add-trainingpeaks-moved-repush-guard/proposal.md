@@ -1,3 +1,5 @@
+> Completed: 2026-11-20
+
 ## Why
 
 TrainingPeaks is create-only for Kaiord. The bridge allowlists a single workout
