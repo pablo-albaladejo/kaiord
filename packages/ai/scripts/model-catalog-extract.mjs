@@ -88,7 +88,10 @@ export const matchDefinitionKeys = (dtsText, constName, endpoint) => {
   if (!block) return null;
   // A key line opens an entry; its body runs to the next key line. Splitting
   // on key lines also covers a one-line entry such as `'id': {};`.
-  const keys = [...block[1].matchAll(/^ {2}(?:readonly )?'([^']+)':/gm)];
+  // A key that is a valid identifier (`o3`, `aqa`) is emitted without quotes.
+  const keys = [
+    ...block[1].matchAll(/^ {2}(?:readonly )?(?:'([^']+)'|([\w$]+)):/gm),
+  ];
   return keys
     .filter((key, i) => {
       if (!endpoint) return true;
@@ -96,7 +99,7 @@ export const matchDefinitionKeys = (dtsText, constName, endpoint) => {
       const tuple = /endpoints: readonly \[([^\]]*)\]/.exec(body);
       return tuple !== null && tuple[1].includes(`"${endpoint}"`);
     })
-    .map((key) => key[1]);
+    .map((key) => key[1] ?? key[2]);
 };
 
 /** Ids for one source: the definitions object when present, else a union. */
