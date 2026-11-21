@@ -28,8 +28,6 @@ describe("App", () => {
       selectedStepId: null,
       selectedStepIds: [],
       isEditing: false,
-      safeMode: false,
-      lastBackup: null,
       deletedSteps: [],
     });
 

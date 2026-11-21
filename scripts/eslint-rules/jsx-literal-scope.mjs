@@ -55,16 +55,10 @@ export const JSX_LITERAL_FILES = [
   ...TREES.map((dir) => `${SPA}/${dir}/**/*.tsx`),
 ];
 
-/**
- * Tests and stories render fixtures, not copy. The advanced duration picker
- * is not mounted by any screen (only its own tests render it), so it is out
- * until a screen uses it.
- */
+/** Tests and stories render fixtures, not copy. */
 export const JSX_LITERAL_IGNORES = [
   `${SPA}/**/*.test.tsx`,
   `${SPA}/**/*.stories.tsx`,
-  `${SPA}/components/molecules/DurationPicker/AdvancedDurationPicker.tsx`,
-  `${SPA}/components/molecules/DurationPicker/advanced/**`,
 ];
 
 /**

@@ -1,7 +1,6 @@
 /**
- * Early Dexie schema versions (v1–v16). Split out of `dexie-schemas.ts` so
- * that file stays under the per-file line cap as the migration history grows;
- * `dexie-schemas.ts` imports these and assembles the public `SCHEMAS` map.
+ * Early Dexie schema versions (v1–v16). `dexie-schemas.ts` imports these and
+ * assembles the public `SCHEMAS` map.
  */
 
 export const CORE_V1 = {

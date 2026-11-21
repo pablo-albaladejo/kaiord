@@ -1,8 +1,7 @@
 /**
  * Fetches one WHOOP `cycles/details` window and imports every workout it
  * carries into the `activities` store, resolving each `sport_id` through the
- * pre-fetched sports catalog. Split out of sync-whoop-activities.use-case.ts
- * to keep that file under the per-file line cap.
+ * pre-fetched sports catalog, for sync-whoop-activities.use-case.ts.
  */
 import {
   type WhoopCycleRecord,
@@ -11,6 +10,7 @@ import {
 } from "@kaiord/whoop";
 
 import type { ActivityRepository } from "../../ports/activity-repository";
+import { errorMessage } from "../../utils/error-message";
 import { mapWhoopActivity } from "../import/map-whoop-activity";
 import type { WhoopFetchResult } from "./whoop-fetch-result";
 
@@ -55,7 +55,7 @@ export const importWhoopCycleWorkouts = async (
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage(err),
     };
   }
   if (!result.ok) return { ok: false, error: result.error };

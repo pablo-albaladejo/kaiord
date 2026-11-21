@@ -63,9 +63,9 @@ const resolveState = async (
 
   if (match) {
     const workout = await deps.workouts.getById(match.workoutId);
-    // Dangling-ref tolerance (mirrors `useActivityMatchState`): if the
-    // match references a workout that no longer exists, fall through
-    // to the no-workout branch so the dialog re-offers AI/Manual/Match.
+    // Dangling-ref tolerance: if the match references a workout that no
+    // longer exists, fall through to the no-workout branch so the dialog
+    // re-offers AI/Manual/Match.
     // Stale-match cleanup belongs to the cascade hooks, not the dialog.
     if (!workout) return { kind: "no-workout" };
     const executedWorkoutIds = match.executedWorkoutIds ?? [];

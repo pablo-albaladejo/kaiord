@@ -41,7 +41,7 @@ Production source for the SPA. Internally follows the same hexagonal split the m
 
 ### Working In This Directory
 
-1. **`domain → application → ports → adapters` direction is enforced by file structure.** `types/` may not import from anywhere downstream. `application/` may import `types/` and `ports/` only. Adapters under `adapters/` may import `ports/` + `types/` + `lib/`. UI under `components/` consumes via hooks/contexts, never via direct adapter imports.
+1. **`domain → application → ports → adapters` direction is enforced by `eslint-plugin-boundaries`** (root `eslint.config.js`, exceptions in `scripts/boundaries-allowlist.mjs`). `types/` may not import from anywhere downstream. `application/` must not import `adapters/` or `components/`. Adapters under `adapters/` may import `ports/` + `types/` + `lib/`. UI under `components/` consumes via hooks/contexts, never via direct adapter imports.
 2. **Wouter, not React Router.** Imports come from `wouter`. Route params are read from the route function arg (`<Route path="/workout/:id">{(params) => …}</Route>`).
 3. **Lazy routes.** Page components use `React.lazy` + `Suspense` with `<RouteSpinner />`. The route boundary is the only place `RouteErrorBoundary` should wrap.
 4. **One live query per page.** `useLiveQuery` (from `dexie-react-hooks`) is the read primitive for persisted data. Components MUST NOT call Dexie directly.

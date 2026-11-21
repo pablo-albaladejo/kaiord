@@ -1,6 +1,4 @@
 /**
- * SportZoneTabs Component
- *
  * Tab selector for sport-specific zone editing.
  */
 

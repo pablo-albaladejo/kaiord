@@ -1,6 +1,4 @@
 /**
- * ZoneInputs Component
- *
  * Input fields for zone ranges.
  */
 

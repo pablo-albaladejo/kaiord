@@ -55,8 +55,6 @@ const buildState = (deletedSteps: DeletedStep[]): WorkoutState => ({
   selectedStepId: null,
   selectedStepIds: [],
   isEditing: false,
-  safeMode: false,
-  lastBackup: null,
   deletedSteps,
 });
 

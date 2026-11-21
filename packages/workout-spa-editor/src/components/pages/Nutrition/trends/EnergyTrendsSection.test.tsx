@@ -9,7 +9,7 @@ import { renderWithProviders } from "../../../../test-utils";
 import type { HealthWeightRecord } from "../../../../types/health/health-records";
 import { EnergyTrendsSection } from "./EnergyTrendsSection";
 
-vi.mock("../../health/trends/UplotChart", () => ({
+vi.mock("../../../charts/uplot-base/uplot-chart", () => ({
   UplotChart: () => <div data-testid="uplot-chart-mock" />,
 }));
 
