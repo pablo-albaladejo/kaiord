@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { dispatchMcp } from "../dispatch-mcp";
 import { REMOTE_TOOL_NAMES } from "../limits";
+import { sendSkill } from "../test-utils/a2a-request";
 import { buildAgentCard } from "./agent-card";
 import { SKILL_IDS, SKILLS } from "./skills";
 
-const SNAPSHOT = "../../test/agent-card.snapshot.json";
+const SNAPSHOT = "../../../landing/public/.well-known/agent-card.json";
 const JSON_INDENT = 2;
 
 type ToolsList = {
@@ -52,6 +53,26 @@ describe("agent card", () => {
     expect(after).toMatch(/^1\.0\.0\+[0-9a-f]{12}$/);
     expect(after).not.toBe(before);
   });
+
+  it.each(SKILLS.map((skill) => [skill.id, skill] as const))(
+    "should publish a %s example the endpoint can route",
+    async (id, skill) => {
+      // Arrange
+      const [example = "{}"] = skill.examples;
+      const { skill: named, ...args } = JSON.parse(example) as Record<
+        string,
+        unknown
+      >;
+
+      // Act
+      const { reply } = await sendSkill(id, args);
+
+      // Assert
+      expect(named).toBe(id);
+      expect(reply.result?.task).toBeDefined();
+      expect(JSON.stringify(reply)).not.toContain("Cannot detect format");
+    }
+  );
 
   it("should carry every 1.0 required field and declare no security", () => {
     // Arrange

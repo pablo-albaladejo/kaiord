@@ -5,9 +5,12 @@ import { readFileSync } from "node:fs";
 import {
   REMOTE_TOOLS,
   ROWS,
+  cardMatchesTools,
   checkRow,
+  isAgentCard,
   isAiCatalog,
   isApiCatalog,
+  isCompletedTask,
   isPoppy,
   isServerCard,
   isSkillsIndex,
@@ -121,6 +124,7 @@ describe("agent-surfaces", () => {
     ["agent-skills/index.json", isSkillsIndex],
     ["api-catalog", isApiCatalog],
     ["poppy.json", isPoppy],
+    ["agent-card.json", isAgentCard],
   ]) {
     it(`should accept the published ${file} and reject an empty object`, () => {
       // Arrange
@@ -137,6 +141,28 @@ describe("agent-surfaces", () => {
       assert.deepEqual(verdicts, [true, false]);
     });
   }
+
+  it("should reject an api-catalog anchor with no card of its own", () => {
+    // Arrange
+    const server = "https://kaiord.com/.well-known/mcp/server-card.json";
+    const agent = "https://kaiord.com/.well-known/agent-card.json";
+    const linkset = [
+      {
+        anchor: "https://kaiord.com/mcp",
+        "service-desc": [{ href: agent }],
+      },
+      {
+        anchor: "https://kaiord.com/a2a",
+        "service-desc": [{ href: server }],
+      },
+    ];
+
+    // Act
+    const ok = isApiCatalog({ linkset });
+
+    // Assert
+    assert.equal(ok, false);
+  });
 
   it("should fail a row whose reply stalls past the deadline", async () => {
     // Arrange
@@ -156,6 +182,206 @@ describe("agent-surfaces", () => {
 
     // Assert
     assert.match(result.reason, /^fetch failed: /);
+  });
+
+  const toolsReply = (names) => ({
+    result: { tools: names.map((name) => ({ name })) },
+  });
+  const cardOf = (ids) => ({ skills: ids.map((id) => ({ id })) });
+
+  it("should reject an agent card on another protocol binding", () => {
+    // Arrange
+    const card = {
+      supportedInterfaces: [
+        { url: "https://kaiord.com/a2a", protocolBinding: "GRPC" },
+      ],
+    };
+
+    // Act
+    const ok = isAgentCard(card);
+
+    // Assert
+    assert.equal(ok, false);
+  });
+
+  it("should reject a catalog that lost the A2A anchor", () => {
+    // Arrange
+    const catalog = {
+      linkset: [
+        {
+          anchor: "https://kaiord.com/mcp",
+          "service-desc": [
+            { href: "https://kaiord.com/.well-known/mcp/server-card.json" },
+          ],
+        },
+      ],
+    };
+
+    // Act
+    const ok = isApiCatalog(catalog);
+
+    // Assert
+    assert.equal(ok, false);
+  });
+
+  it("should send SendMessage with the version header and no contextId", () => {
+    // Arrange
+    const row = ROWS.find((r) => r.name === "POST /a2a SendMessage");
+
+    // Act
+    const { params } = JSON.parse(row.body);
+
+    // Assert
+    assert.equal(row.url, "https://kaiord.com/a2a");
+    assert.equal(row.headers["A2A-Version"], "1.0");
+    assert.deepEqual(params.message.parts, [
+      { data: { skill: "kaiord_list_formats" } },
+    ]);
+    assert.equal("contextId" in params.message, false);
+  });
+
+  for (const [label, body, expected] of [
+    [
+      "a completed task with text",
+      {
+        result: {
+          task: {
+            status: { state: "TASK_STATE_COMPLETED" },
+            artifacts: [{ parts: [{ text: "formats" }] }],
+          },
+        },
+      },
+      true,
+    ],
+    [
+      "a completed task with empty text",
+      {
+        result: {
+          task: {
+            status: { state: "TASK_STATE_COMPLETED" },
+            artifacts: [{ parts: [{ text: "" }] }],
+          },
+        },
+      },
+      false,
+    ],
+    [
+      "a failed task",
+      {
+        result: {
+          task: {
+            status: { state: "TASK_STATE_FAILED" },
+            artifacts: [{ parts: [{ text: "x" }] }],
+          },
+        },
+      },
+      false,
+    ],
+    ["a JSON-RPC error", { error: { code: -32009 } }, false],
+  ]) {
+    it(`should judge ${label} as ${expected}`, () => {
+      // Arrange
+      const judge = isCompletedTask;
+
+      // Act
+      const ok = judge(body);
+
+      // Assert
+      assert.equal(ok, expected);
+    });
+  }
+
+  it("should compare card skills with live tools in any order", () => {
+    // Arrange
+    const card = cardOf(["b", "a"]);
+
+    // Act
+    const verdicts = [
+      cardMatchesTools(card, toolsReply(["a", "b"])),
+      cardMatchesTools(card, toolsReply(["a"])),
+      cardMatchesTools(cardOf([]), toolsReply([])),
+      cardMatchesTools(card, {}),
+    ];
+
+    // Assert
+    assert.deepEqual(verdicts, [true, false, false, false]);
+  });
+
+  it("should fetch both replies for the card-vs-tools row", async () => {
+    // Arrange
+    const row = ROWS.find((r) => r.joins);
+    const card = JSON.stringify(cardOf(REMOTE_TOOLS));
+    const tools = JSON.stringify(toolsReply(REMOTE_TOOLS));
+    const fetch = async (url) =>
+      url.endsWith("/mcp") ? reply(tools)() : reply(card)();
+
+    // Act
+    const result = await checkRow(row, fetch);
+
+    // Assert
+    assert.equal(result.reason, null);
+  });
+
+  it("should fail the card-vs-tools row when the tools reply fails", async () => {
+    // Arrange
+    const row = ROWS.find((r) => r.joins);
+    const card = JSON.stringify(cardOf(REMOTE_TOOLS));
+    const fetch = async (url) =>
+      url.endsWith("/mcp") ? reply("", { status: 500 })() : reply(card)();
+
+    // Act
+    const result = await checkRow(row, fetch);
+
+    // Assert
+    assert.equal(result.reason, "joined reply: status 500");
+  });
+
+  it("should ask /mcp for the event stream too, or it answers 406", () => {
+    // Arrange
+    const { joins } = ROWS.find((r) => r.joins);
+
+    // Act
+    const { accept } = joins.headers;
+
+    // Assert
+    assert.equal(accept, "application/json, text/event-stream");
+  });
+
+  it("should fail the card-vs-tools row when the joined reply stalls", async () => {
+    // Arrange
+    const row = ROWS.find((r) => r.joins);
+    const card = JSON.stringify(cardOf(REMOTE_TOOLS));
+    const fetch = (url, { signal }) =>
+      url.endsWith("/mcp")
+        ? new Promise((_resolve, reject) => {
+            const socket = setInterval(() => {}, 1_000);
+            signal.addEventListener("abort", () => {
+              clearInterval(socket);
+              reject(signal.reason);
+            });
+          })
+        : reply(card)();
+
+    // Act
+    const result = await checkRow(row, fetch, 10);
+
+    // Assert
+    assert.match(result.reason, /^fetch failed: /);
+  });
+
+  it("should name a predicate that throws as a body check", async () => {
+    // Arrange
+    const row = ROWS.find((r) => r.joins);
+    const card = JSON.stringify({ skills: [null] });
+    const tools = JSON.stringify(toolsReply(REMOTE_TOOLS));
+    const fetch = async (url) =>
+      url.endsWith("/mcp") ? reply(tools)() : reply(card)();
+
+    // Act
+    const result = await checkRow(row, fetch);
+
+    // Assert
+    assert.match(result.reason, /^body check threw: /);
   });
 
   it("should accept the live tools/list reply shape", () => {
