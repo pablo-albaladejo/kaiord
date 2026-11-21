@@ -1,5 +1,14 @@
 # @kaiord/mcp-worker
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [12ff1c6]
+  - @kaiord/zwo@10.5.2
+  - @kaiord/fit@10.5.2
+  - @kaiord/tcx@10.5.2
+
 ## 0.0.2
 
 ### Patch Changes
