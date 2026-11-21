@@ -1,3 +1,5 @@
+> Completed: 2026-11-20
+
 ## Why
 
 Two GitHub automation bots have been silently broken for over a month. Both

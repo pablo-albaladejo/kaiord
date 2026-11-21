@@ -1,3 +1,5 @@
+> Completed: 2026-11-20
+
 ## Why
 
 A brand-new user, on a fresh browser profile with the bridges installed, could
