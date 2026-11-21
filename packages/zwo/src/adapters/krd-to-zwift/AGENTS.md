@@ -43,7 +43,7 @@ None.
 ### Testing Requirements
 
 - Vitest conventions: `it()` titles start with `"should "`, bodies have `// Arrange // Act // Assert` comments.
-- No individual encoder tests; integration tested via parent `krd-to-zwift.converter.test.ts`.
+- Encoders have co-located `*.test.ts` files; the full pipeline is also integration tested via parent `krd-to-zwift.converter.test.ts`.
 - Round-trip tests in `round-trip/` verify encoder output survives KRD → ZWO → KRD cycle with tolerance thresholds.
 
 ### Common Patterns

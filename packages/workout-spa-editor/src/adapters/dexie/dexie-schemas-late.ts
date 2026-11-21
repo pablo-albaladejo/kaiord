@@ -1,6 +1,5 @@
 /**
- * Latest Dexie schema versions (v24+), split out of `dexie-schemas.ts` so that
- * file stays under the per-file line cap as the migration history grows. Each
+ * Latest Dexie schema versions (v24+), composed by `dexie-schemas.ts`. Each
  * builder spreads the previous version's store map (passed in) to keep the
  * "additive, no rewrite" invariant explicit and avoid a circular import.
  */
@@ -140,8 +139,7 @@ export const buildCoreV35 = (
 });
 
 // Assemble the latest schemas (v30 → v31 → v32 → v33 → v34 → v35) from the
-// v27 base so `dexie-schemas.ts` composes them in one spread and stays under
-// its line cap.
+// v27 base so `dexie-schemas.ts` composes them in one spread.
 export const buildCoreV30ThroughV35 = (
   prev: Stores
 ): {

@@ -37,7 +37,7 @@ const asExternalId = (id: string | null | undefined): string =>
     caller's `pushWorkout` resolves `{ success: false }` and records its own
     error state, so the outer catch must not overwrite it with a generic
     message — throwing this marker lets it recognize and skip that. */
-export class BridgePushFailedError extends Error {}
+class BridgePushFailedError extends Error {}
 
 /** Wraps a bridge's `pushWorkout` into `executeWorkoutPush`'s `pushFn`
     contract. Falls back to a stable sentinel id when the bridge doesn't

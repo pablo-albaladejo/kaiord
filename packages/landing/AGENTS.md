@@ -10,6 +10,7 @@ Marketing landing page for kaiord.com — a static single-page site built with V
 ## Key Files
 
 - **`index.html`** - Main page structure, hero, features grid, format hub diagram, code example, differentiators, and footer. Hand-authored, semantic HTML. Includes JSON-LD schema and OG meta tags.
+- **`partials/phone-screen.html`** - The editor phone mockup, included twice in `index.html` (hero and feature slot) via `<!-- @include partials/phone-screen.html -->`, expanded at build time by `scripts/expand-includes.mjs` (Vite plugin and i18n extractor). Edit the mockup here only.
 - **`src/main.ts`** - Entrypoint. Manages package manager tabs (desktop WAI-ARIA tabs with arrow key navigation + mobile select), copy-to-clipboard, smooth anchor link scrolling, and analytics initialization.
 - **`src/main.css`** - Tailwind imports + custom animations (fade-in-left, fade-in-right, pulse-slow). Imports shared brand tokens from `styles/brand-tokens.css`. Focus-visible ring styling unified across landing/docs/editor.
 - **`src/analytics.ts`** - Creates the Umami analytics client, conditionally noop when no website id.
@@ -43,6 +44,7 @@ See:
 ### Testing Requirements
 
 - **vitest** — `pnpm --filter @kaiord/landing test`
+- **Typecheck and lint** — `build` runs `tsc --noEmit` first; `pnpm --filter @kaiord/landing lint` runs `tsc --noEmit`, eslint and `prettier --check` (also part of the root `lint:packages`).
 - **jsdom** — tests run in jsdom environment (suitable for DOM manipulation tests).
 - **Test coverage** — analytics adapter and DOM setup should be tested. No coverage minimum specified; aim for practical coverage.
 - **AAA pattern** — every test must have `// Arrange`, `// Act`, `// Assert` blocks.

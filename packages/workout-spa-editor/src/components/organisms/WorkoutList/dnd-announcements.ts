@@ -5,7 +5,6 @@ import { getTranslate, type Translate } from "../../../i18n/use-translate";
 /**
  * Accessibility announcements for drag-and-drop operations
  * Provides screen reader feedback during drag interactions
- * Requirement 3: Visual feedback and accessibility for step reordering
  */
 export const createDndAnnouncements = (
   t: Translate = getTranslate("workout-detail")

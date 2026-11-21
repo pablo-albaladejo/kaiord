@@ -1,6 +1,5 @@
 /**
- * Helpers for `useProfileSnapshotPush` — kept in a sibling file so the
- * hook itself stays under the per-file line cap.
+ * Helpers for `useProfileSnapshotPush`.
  *
  * The shared `OperationQueue` lives here so every push and clear goes
  * through a single 60-ops-per-bridge-per-hour cap, mandated by the

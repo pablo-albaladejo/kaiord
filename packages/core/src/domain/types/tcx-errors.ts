@@ -9,12 +9,11 @@ import { FormatParsingError, SchemaValidationError } from "./shared-errors";
  *
  * @example
  * ```typescript
- * import { TcxParsingError, convertTcxToKrd } from '@kaiord/core';
+ * import { TcxParsingError, fromText } from '@kaiord/core';
+ * import { tcxReader } from '@kaiord/tcx';
  *
  * try {
- *   const krd = await convertTcxToKrd(tcxReader, validator, logger)({
- *     tcxString: invalidXml
- *   });
+ *   const krd = await fromText(invalidXml, tcxReader);
  * } catch (error) {
  *   if (error instanceof TcxParsingError) {
  *     console.error('TCX parsing failed:', error.message);

@@ -43,32 +43,3 @@ export const convertZwiftCadenceTarget = (
     },
   };
 };
-
-/**
- * Convert KRD pace target to Zwift pace (seconds per kilometer)
- * KRD uses meters per second (m/s)
- * Zwift uses seconds per kilometer (sec/km)
- * Formula: sec/km = 1000 / m/s
- */
-export const convertKrdPaceToZwift = (metersPerSecond: number): number => {
-  return 1000 / metersPerSecond;
-};
-
-/**
- * Convert KRD cadence target to Zwift cadence.
- *
- * KRD uses RPM (revolutions/strides per minute) for all sports.
- * Zwift uses RPM for cycling, SPM (steps per minute) for running.
- *
- * Running conversion: SPM = RPM * 2
- * (One stride = two steps, so multiply RPM by 2 to get SPM)
- *
- * Example: 90 RPM = 180 SPM
- */
-export const convertKrdCadenceToZwift = (
-  rpm: number,
-  isRunning = false
-): number => {
-  // Convert RPM to SPM for running (SPM = 2 * RPM)
-  return isRunning ? rpm * 2 : rpm;
-};

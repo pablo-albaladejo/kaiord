@@ -1,6 +1,5 @@
 /**
- * Public arg + return types for `useChatTurn`, split out so the hook file
- * stays under the per-file line cap.
+ * Public arg + return types for `useChatTurn`.
  */
 import type { PendingAction } from "@kaiord/ai";
 

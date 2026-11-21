@@ -2,7 +2,6 @@
  * Modal Store Actions Tests
  *
  * Tests for modal state management in the workout store.
- * Requirements: 6.1
  */
 
 import { beforeEach, describe, expect, it } from "vitest";

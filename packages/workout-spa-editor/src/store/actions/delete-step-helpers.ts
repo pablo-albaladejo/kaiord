@@ -1,6 +1,5 @@
 /**
- * Helpers for `deleteStepAction` — split to keep the action file under
- * the ≤80-line ESLint max-lines rule.
+ * Helpers for `deleteStepAction`.
  */
 
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../types/krd";

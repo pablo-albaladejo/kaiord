@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { HTMLElement, parse, TextNode } from "node-html-parser";
 
+import { expandIncludes } from "./expand-includes.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const landingRoot = resolve(here, "..");
 const SOURCE = resolve(landingRoot, "index.html");
@@ -150,7 +152,7 @@ export const parseHtml = (html) =>
   });
 
 const main = () => {
-  const html = readFileSync(SOURCE, "utf8");
+  const html = expandIncludes(readFileSync(SOURCE, "utf8"), landingRoot);
   const root = parseHtml(html);
   const strings = new Set();
   walkTranslatable(root, ({ value }) => {

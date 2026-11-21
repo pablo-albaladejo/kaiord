@@ -12,7 +12,7 @@
  *    must be skipped, leaving a weight-only document).
  */
 
-export const TANITA_HEADER =
+const TANITA_HEADER =
   'Date,"Weight (kg)",BMI,"Body Fat (%)","Visc Fat","Muscle Mass (kg)",' +
   '"Muscle Quality","Bone Mass (kg)","BMR (kcal)","Metab Age",' +
   '"Body Water (%)","Physique Rating","Muscle mass - right arm",' +

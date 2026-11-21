@@ -1,8 +1,5 @@
 /**
- * Action signatures of the workout store.
- *
- * Split out of `workout-store-types.ts` so the types file stays under
- * the ≤80-line-per-file rule.
+ * Action signatures of the workout store, composed by `workout-store-types.ts`.
  */
 
 import type { KRD } from "../types/krd";
@@ -54,12 +51,6 @@ export type WorkoutStoreActions = {
   undo: () => void;
   redo: () => void;
 
-  // Error Recovery Actions
-  createBackup: () => void;
-  restoreFromBackup: () => boolean;
-  enableSafeMode: () => void;
-  disableSafeMode: () => void;
-
   // Modal Actions
   showConfirmationModal: (config: ModalConfig) => void;
   hideConfirmationModal: () => void;
@@ -72,5 +63,4 @@ export type WorkoutStoreActions = {
   // Computed
   canUndo: () => boolean;
   canRedo: () => boolean;
-  hasBackup: () => boolean;
 };
