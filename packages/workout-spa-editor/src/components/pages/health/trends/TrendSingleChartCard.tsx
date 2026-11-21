@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 
-import { useTheme } from "../../../../contexts/ThemeContext";
 import { useUnits } from "../../../../contexts/units-context";
 import type { HealthDateRange } from "../../../../hooks/health/health-live-query";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { type Translate, useTranslate } from "../../../../i18n/use-translate";
+import { UplotChart } from "../../../charts/uplot-base/uplot-chart";
+import { useThemedChartOptions } from "../../../charts/uplot-base/use-themed-chart-options";
 import {
   buildTrendChartData,
   type PerMetricPoints,
@@ -15,7 +16,6 @@ import {
   type TrendMetricDef,
   type TrendMetricKey,
 } from "./trend-metrics";
-import { UplotChart } from "./UplotChart";
 import type { TrendSeriesByMetric } from "./use-trend-series";
 
 const CHART_WIDTH = 880;
@@ -59,7 +59,6 @@ export const TrendSingleChartCard = ({
   const t = useTranslate("health");
   const units = useUnits();
   const locale = useActiveLocale();
-  const { resolvedTheme } = useTheme();
   const selectedKeys = TREND_METRICS.map((m) => m.key).filter((k) =>
     selected.has(k)
   );
@@ -75,15 +74,13 @@ export const TrendSingleChartCard = ({
     () => pointsByKey(presentKeys, series),
     [presentKeys, series]
   );
-  const options = useMemo(
+  const options = useThemedChartOptions(
     () =>
       buildTrendChartOptions(metrics, units, locale, {
         range,
         label: dateLabel,
       }),
-    // resolvedTheme forces a rebuild so axis/grid/series colors follow .dark.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [metrics, units, locale, range, dateLabel, resolvedTheme]
+    [metrics, units, locale, range, dateLabel]
   );
   const data = useMemo(
     () => buildTrendChartData(presentKeys, seriesByKey),

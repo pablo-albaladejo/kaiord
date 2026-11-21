@@ -1,10 +1,5 @@
 /**
- * RepetitionBlockContextMenu Component
- *
  * Context menu for repetition block actions.
- *
- * Requirements:
- * - Requirement 7.5: Display action menu with Edit Count, Add Step, Ungroup, Delete
  */
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";

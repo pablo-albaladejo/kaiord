@@ -104,8 +104,7 @@ export function createInMemoryPersistence(): PersistencePort {
     sessionMatch: createInMemorySessionMatchRepository(stores.sessionMatch),
     matchedSessionsReadModel: createInMemoryMatchedSessionsReadModel(
       stores.coaching,
-      stores.workouts,
-      stores.sessionMatch
+      stores.workouts
     ),
     autoMatchDismissal: createInMemoryAutoMatchDismissalRepository(
       stores.autoMatchDismissal

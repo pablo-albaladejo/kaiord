@@ -1,6 +1,4 @@
 /**
- * StatRow Component
- *
  * Displays a single statistic row with label and value.
  */
 

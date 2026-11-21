@@ -16,7 +16,7 @@ type UplotMockProps = {
 const { uplotMock } = vi.hoisted(() => ({
   uplotMock: vi.fn<(props: UplotMockProps) => void>(),
 }));
-vi.mock("./UplotChart", () => ({
+vi.mock("../../../charts/uplot-base/uplot-chart", () => ({
   UplotChart: (props: UplotMockProps) => {
     uplotMock(props);
     return (

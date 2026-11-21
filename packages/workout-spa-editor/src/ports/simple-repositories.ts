@@ -1,9 +1,8 @@
 /**
  * Simple Repository Ports
  *
- * Repository contracts that fit in a few lines each. Grouped here so
- * `persistence-port.ts` stays under the SPA workspace's per-file cap
- * as the port surface keeps growing. The richer repositories
+ * Repository contracts that fit in a few lines each, used by
+ * `persistence-port.ts`. The richer repositories
  * (workouts, coaching, session-match, user-preferences,
  * auto-match-dismissal, health-record, health-cleanup) each live in
  * their own file.
