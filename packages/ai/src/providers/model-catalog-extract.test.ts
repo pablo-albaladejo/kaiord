@@ -57,6 +57,27 @@ describe("matchDefinitionKeys", () => {
     "type AnthropicModelId = AnthropicModelIds['language'] | (string & {});",
   ].join("\n");
 
+  it("should read a key emitted without quotes", () => {
+    // Arrange
+    const dts = [
+      "declare const openaiLanguageModelDefinitions: {",
+      "  readonly o3: {",
+      '    readonly endpoints: readonly ["chat", "responses"];',
+      "  };",
+      "  readonly 'o3-mini': {",
+      '    readonly endpoints: readonly ["chat"];',
+      "  };",
+      "  aqa: undefined;",
+      "};",
+    ].join("\n");
+
+    // Act
+    const ids = matchDefinitionKeys(dts, "openaiLanguageModelDefinitions");
+
+    // Assert
+    expect(ids).toEqual(["o3", "o3-mini", "aqa"]);
+  });
+
   it("should return the top-level keys of the definitions object", () => {
     // Arrange
     const dts = DEFINITIONS_DTS;
