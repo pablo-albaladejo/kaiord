@@ -112,5 +112,9 @@
   },
   "toast": {
     "updateFailed": "Failed to update zones — please retry."
+  },
+  "conflict": {
+    "accept": "Accept Train2Go",
+    "keep": "Keep current"
   }
 }

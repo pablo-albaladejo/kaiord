@@ -1,4 +1,4 @@
-> Synced: 2026-05-03 (2026-05-03-repo-hygiene-tooling)
+> Synced: 2026-11-20 (fix-ci-issue-bots)
 
 # CI Failure Issue Bot
 
@@ -22,7 +22,8 @@ The script SHALL follow the project's repo-script convention: entry-point check 
 #### Scenario: Tests cover all decision branches
 
 - **WHEN** `pnpm test:scripts` runs
-- **THEN** the suite SHALL include at least 12 tests for `ci-failure-issue.mjs` covering create, comment-dedupe, close-on-fully-green, skip-on-partial-green, missing-footer, malformed-footer, race-closed, unknown-schema, absent-schema-back-compat, in-process dedupe, no-op-on-no-issue, and `--canary` flag behavior
+- **THEN** the suite SHALL include at least 12 tests for `ci-failure-issue.mjs` covering create, comment-dedupe, close-on-covered-run, skip-on-uncovered-run, missing-footer, malformed-footer, race-closed, unknown-schema, absent-schema-back-compat, in-process dedupe, no-op-on-no-issue, and `--canary` flag behavior
+- **AND** the suite SHALL cover the per-job coverage rule: display-name aliasing, matrix-shard collection, aggregator/real-job name collision, empty job set, and an unreadable job list
 
 ### Requirement: Footer marker grammar with explicit schema versioning
 
@@ -48,7 +49,9 @@ The close-pass SHALL parse the footer with these failure modes, in order:
 | Present, `failed-jobs` contains the synthetic `"canary-job"` token | Do not close. Log `skipped: canary-issue` (canary issues stay open until manually resolved by the DRI). |
 | Present, `schema: N` where N ≠ 1 and N is unknown to this bot      | Do not close. Log `skipped: unknown-schema`.                                                            |
 
-In v1, the footer is informational + forward-compatible (a future schema-2 bot MAY use `failed-jobs` for per-job matching). The v1 close-rule does NOT match against `failed-jobs` because the workflow_run jobs API returns display names that do not reliably map to the matrix-aware identifiers used in `notify-failure` aggregation. Per-job matching is deferred to v2; v1 uses the coarser "fully-green run" rule documented in the next requirement.
+`failed-jobs` is the close-pass's operative input: the bot matches each identifier against the green run's jobs per the per-job coverage rule. Identifiers are job IDs, reconciled to workflow_run display names by the close-pass; see "Footer job identifiers reconcile to workflow_run display names".
+
+Every job named in the `notify-failure` job's `if:` trigger condition SHALL also be recorded by its aggregation step. A trigger that is never recorded yields a footer no green run can satisfy, leaving a permanently unclosable issue. An empty failure set SHALL serialise as `[]`, never as `[""]`.
 
 #### Scenario: Footer absent → do not close
 
@@ -71,34 +74,20 @@ In v1, the footer is informational + forward-compatible (a future schema-2 bot M
 #### Scenario: Absent schema field is treated as schema 1
 
 - **GIVEN** an open issue with footer `failed-jobs: ["lint"]` and no `schema:` line
-- **WHEN** the close-pass runs against a fully-green run
+- **WHEN** the close-pass runs against a green run covering `lint`
 - **THEN** the bot SHALL parse as schema 1 and SHALL close the issue
 
 #### Scenario: Canary issue is preserved across green runs
 
 - **GIVEN** an open `ci,automated,canary` issue with footer `failed-jobs: ["canary-job"]`, `schema: 1`
-- **WHEN** any subsequent fully-green main run completes
+- **WHEN** any subsequent green main run completes
 - **THEN** the close-pass SHALL log `skipped: canary-issue` and SHALL NOT close the issue; only the DRI's manual close resolves it
 
-### Requirement: v1 close-rule — close only on a fully-green run
+#### Scenario: Every notify-failure trigger is recordable
 
-The close-pass SHALL close open `ci,automated` issues only when the workflow_run that triggered it executed every CI job (zero jobs with `conclusion == "skipped"`). If any CI job was skipped on the green run — typically due to path-filter or matrix gating — the close-pass SHALL log `skipped: jobs-skipped-on-green-run` and leave all issues open.
-
-The success listener SHALL detect the skipped-jobs condition by querying the GitHub Actions `repos/{owner}/{repo}/actions/runs/{run_id}/jobs` API for the green workflow_run and filtering `.conclusion == "skipped"`. The result is a single boolean (`anyJobsSkipped`) passed to the close-pass.
-
-This v1 rule is intentionally coarse: a path-filtered green run will leave issues open until the next all-jobs-ran green run. The trade-off avoids the v1 implementation cost of mapping workflow_run job display names back to the matrix-aware identifiers used by the failure listener (e.g., display name `"test (workout-spa-editor, 22.x)"` vs. emitted identifier `"test"`). v2 of the bot MAY refine this with per-job matching once a stable identifier scheme is in place.
-
-#### Scenario: Fully-green main run closes a stale issue
-
-- **GIVEN** an open `ci,automated` issue with a well-formed footer
-- **WHEN** a green main run completes with zero skipped jobs
-- **THEN** the close-pass SHALL close the issue and append the comment `Auto-closed: main green at <SHA>; jobs covered: <footer-jobs>.`
-
-#### Scenario: Partial-green run leaves issues open
-
-- **GIVEN** one or more open `ci,automated` issues
-- **WHEN** a green main run completes but at least one CI job had `conclusion == "skipped"` (e.g., path-filter or matrix gating)
-- **THEN** the close-pass SHALL skip every open issue with reason `jobs-skipped-on-green-run`; SHALL NOT close any of them
+- **GIVEN** the `notify-failure` job's `if:` condition names a job as a failure trigger
+- **WHEN** that job is the only one that failed
+- **THEN** the aggregation step SHALL emit a footer naming it; the footer SHALL NOT be empty and SHALL NOT be `[""]`
 
 ### Requirement: Cross-workflow concurrency + staleness re-check
 
@@ -155,3 +144,86 @@ The bot script's `--canary` flag SHALL prepend `[CANARY]` to the issue title AND
 - **GIVEN** the bot has been merged and main has been green for 7 days
 - **WHEN** the DRI triggers the `ci-issue-bot-canary` workflow via `workflow_dispatch`
 - **THEN** the bot SHALL create an issue titled `[CANARY] 🚨 CI Failure on main branch` with labels `ci,automated,canary` and footer `failed-jobs: ["canary-job"]`, `schema: 1`; the DRI SHALL inspect and manually close it
+
+### Requirement: v2 close-rule — per-job coverage on the green run
+
+The close-pass SHALL close an open `ci,automated` issue only when **every** job
+named in that issue's footer `failed-jobs` array both RAN and SUCCEEDED on the
+green workflow_run. Jobs not named in the issue's footer SHALL NOT affect the
+decision.
+
+The success listener SHALL query
+`repos/{owner}/{repo}/actions/runs/{run_id}/jobs` for the green run and pass
+the full `{name, conclusion}` list to the close-pass. The query SHALL use
+`--paginate`: the endpoint pages at 30 results and a full CI run exceeds that
+(54 jobs observed), so an unpaginated read silently truncates. The list SHALL
+be passed via the `GREEN_RUN_JOBS` environment variable rather than argv,
+because job display names contain spaces and parentheses.
+
+The close-pass SHALL treat each of the following as uncertainty and SHALL NOT
+close:
+
+| Coverage state                                       | Logged reason          |
+| ---------------------------------------------------- | ---------------------- |
+| Job list empty or unparseable                        | `run-jobs-unavailable` |
+| Footer `failed-jobs` is an empty array               | `empty-job-set`        |
+| A footer job has no counterpart job on the green run | `job-missing-on-run`   |
+| A footer job's counterpart is not `success`          | `job-not-green-on-run` |
+
+#### Scenario: Structurally-skipped jobs no longer block the close
+
+- **GIVEN** an open `ci,automated` issue with footer `failed-jobs: ["lint","test"]`
+- **AND** a green main run on which `log-bot-skip` and `Notify on Failure` are skipped (as they are on every green run) while all `lint` and `test` jobs succeeded
+- **THEN** the close-pass SHALL close the issue and append the comment `Auto-closed: main green at <SHA>; jobs covered: <footer-jobs>.`
+
+#### Scenario: Path-filtered green run closes an issue it fully covers
+
+- **GIVEN** an open issue with footer `failed-jobs: ["lint"]`
+- **WHEN** a green main run completes in which `bundle-analysis` and `e2e-prod-base` were skipped but every `lint` job succeeded
+- **THEN** the close-pass SHALL close the issue; partial coverage of the CI surface is irrelevant when it covers this issue's jobs
+
+#### Scenario: Aggregator success does not mask a skipped matrix job
+
+- **GIVEN** an open issue with footer `failed-jobs: ["test"]`
+- **WHEN** a docs-only green run completes in which `build` was skipped, so the `test-summary` job (display name `test`) exits 0 while the real `test` matrix job is reported `skipped` under the same display name
+- **THEN** the close-pass SHALL log `skipped: job-not-green-on-run` and SHALL NOT close the issue
+
+#### Scenario: Unreadable job list closes nothing
+
+- **GIVEN** one or more open `ci,automated` issues with well-formed footers
+- **WHEN** `GREEN_RUN_JOBS` is unset, empty, or not a JSON array
+- **THEN** the close-pass SHALL log `skipped: run-jobs-unavailable` for every issue; SHALL NOT throw; SHALL exit zero
+
+### Requirement: Footer job identifiers reconcile to workflow_run display names
+
+The create-pass records job **IDs** (from `needs.<job-id>.result`), while the
+workflow_run jobs API reports each job's **display name** (`name:`). The
+close-pass SHALL reconcile the two.
+
+A footer job identifier SHALL match a run job when the run job's name is
+either the identifier's display name exactly, or that display name followed by
+a parenthesised matrix suffix (`<name> (<matrix values>)`). Where `ci.yml`
+overrides a footer-recordable job's `name:`, the close-pass SHALL carry an
+explicit alias; today the only such job is `check-links` → `Link checker`.
+
+When several run jobs match one footer identifier — every shard of a matrix,
+or an aggregator job that shares a display name with the real job — ALL of
+them SHALL be `success` for the identifier to count as covered.
+
+#### Scenario: Matrix shards all count toward one footer job
+
+- **GIVEN** an open issue with footer `failed-jobs: ["e2e-frontend"]`
+- **WHEN** the green run reports `e2e-frontend (1)` … `e2e-frontend (4)`, all `success`
+- **THEN** the footer job SHALL count as covered
+
+#### Scenario: Renamed job resolves through the alias table
+
+- **GIVEN** an open issue with footer `failed-jobs: ["check-links"]`
+- **WHEN** the green run reports a successful job whose display name is `Link checker`
+- **THEN** the footer job SHALL count as covered; the bot SHALL NOT report `job-missing-on-run`
+
+#### Scenario: Prefix collision does not produce a false match
+
+- **GIVEN** a footer job identifier `test`
+- **WHEN** the green run contains a job named `test-cli`
+- **THEN** `test-cli` SHALL NOT be treated as a counterpart of `test`

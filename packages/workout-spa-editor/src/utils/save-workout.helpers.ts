@@ -2,8 +2,7 @@
  * Save Workout Helpers
  *
  * Pure helpers for the KRD save pipeline (filename sanitization, browser
- * download trigger). Co-located with `save-workout.ts` but split out so
- * the orchestrator stays under the per-file line cap.
+ * download trigger) used by `save-workout.ts`.
  */
 
 /** Trigger browser download of file. */

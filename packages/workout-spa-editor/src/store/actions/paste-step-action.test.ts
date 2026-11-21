@@ -2,7 +2,7 @@
  * Paste Step Action Tests
  *
  * Tests for pasting workout steps from clipboard.
- * Requirement 39.2: Read step data from clipboard and insert at current position
+ * Read step data from clipboard and insert at current position
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

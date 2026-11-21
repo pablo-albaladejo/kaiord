@@ -1,6 +1,4 @@
 /**
- * SubSportSelect Component
- *
  * Sub-sport selection dropdown.
  */
 

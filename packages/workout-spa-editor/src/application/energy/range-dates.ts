@@ -6,7 +6,7 @@
  * A `startDate` after `endDate` yields an empty list (no inverted ranges).
  */
 
-import { addDaysIso } from "../../components/pages/Daily/today-dates";
+import { addDaysIso } from "../shared/date-utils";
 
 const MAX_RANGE_DAYS = 366;
 

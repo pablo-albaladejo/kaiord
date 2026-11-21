@@ -1,11 +1,5 @@
 /**
- * ZoneEditor Component
- *
  * Visual editor for power and heart rate training zones.
- *
- * Requirements:
- * - Requirement 10: Zone configuration with visual editor
- * - Requirement 11: Multiple profiles with zone management
  */
 
 import type { HeartRateZone, PowerZone, Profile } from "../../../types/profile";

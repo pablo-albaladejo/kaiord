@@ -1,6 +1,4 @@
 /**
- * TagsInput Component
- *
  * Input field for workout tags.
  */
 

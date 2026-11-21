@@ -49,4 +49,4 @@ Workout-template CRUD + scheduling. Operates on the Library table via `TemplateR
 
 <!-- MANUAL: -->
 
-The Library is dual-mounted via the LibraryPage + the TemplatePickerDialog. Only those two call sites are allowed (R-LibraryNoDualMount).
+The Library has one mount: the routed `LibraryPage`, which renders `components/pages/Library/LibraryContent`. No other call site may import it (R-LibraryNoDualMount).

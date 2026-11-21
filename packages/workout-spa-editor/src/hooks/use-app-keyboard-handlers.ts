@@ -8,11 +8,11 @@
  * Requirements:
  * - Requirement 15: Undo/Redo with keyboard shortcuts
  * - Requirement 29: Reorder steps with Alt+Up/Down
- * - Requirement 39.2: Copy/Paste steps with Ctrl+C/V (with toast feedback)
- * - Requirement 7.6.1: Create repetition block with Ctrl+G
- * - Requirement 7.6.2: Ungroup repetition block with Ctrl+Shift+G
- * - Requirement 7.6.3: Select all steps with Ctrl+A
- * - Requirement 7.6.4: Clear selection with Escape
+ * - Copy/Paste steps with Ctrl+C/V (with toast feedback)
+ * - Create repetition block with Ctrl+G
+ * - Ungroup repetition block with Ctrl+Shift+G
+ * - Select all steps with Ctrl+A
+ * - Clear selection with Escape
  */
 
 import { useCallback, useMemo } from "react";

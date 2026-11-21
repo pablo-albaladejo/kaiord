@@ -5,12 +5,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
-import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type {
   ExpandActivity,
   ExpandFailureReason,
 } from "../../../types/coaching-expand-result";
+import type { ActivityMatchState } from "./activity-match-state";
 import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
 export const toMatchState = (

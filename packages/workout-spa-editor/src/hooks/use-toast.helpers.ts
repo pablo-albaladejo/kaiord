@@ -3,7 +3,7 @@ import type { ToastItem, ToastOptions } from "./use-toast.types";
 /**
  * Generate a unique ID for a toast
  */
-export const generateToastId = (): string => {
+const generateToastId = (): string => {
   return Math.random().toString(36).substring(2, 9);
 };
 

@@ -1,6 +1,4 @@
 /**
- * EditableZoneValue Component
- *
  * Inline editable numeric cell for zone min/max values.
  * Displays text normally; click to edit, blur/Enter to save.
  */

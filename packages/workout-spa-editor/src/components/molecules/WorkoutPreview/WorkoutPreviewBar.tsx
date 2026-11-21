@@ -1,6 +1,4 @@
 /**
- * WorkoutPreviewBar Component
- *
  * Renders a single SVG rect bar in the workout preview chart.
  */
 

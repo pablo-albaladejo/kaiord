@@ -1,10 +1,10 @@
 /**
  * Resolves which WHOOP-derived data types have an enabled import policy for
  * the profile, gating each one BEFORE `syncWhoopCycles` ever touches the
- * bridge. Split out of sync-whoop-cycles.use-case.ts to keep that file under
- * the per-file line cap.
+ * bridge.
  */
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
+import { isRouteEnabled } from "../integration-policy/is-route-enabled";
 import { resolveImportPolicies } from "../integration-policy/resolve-import-policies.use-case";
 import type { WhoopSyncFlags } from "./whoop-sync-flags";
 
@@ -19,7 +19,7 @@ const isEnabled = async (
     { policyRepo },
     { profileId, dataType }
   );
-  return policies.some((p) => p.enabled && p.bridgeId === WHOOP_BRIDGE_SOURCE);
+  return isRouteEnabled(policies, WHOOP_BRIDGE_SOURCE);
 };
 
 export const resolveWhoopSyncFlags = async (

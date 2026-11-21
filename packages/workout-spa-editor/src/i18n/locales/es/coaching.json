@@ -162,5 +162,8 @@
     "blockedCompleted": "El entrenador la marcó como completada: no se puede mover.",
     "blockedProjected": "Una actividad grabada no se puede mover.",
     "createFirst": "Crea primero el entreno para poder moverlo."
+  },
+  "executed": {
+    "heading": "Actividades completadas"
   }
 }

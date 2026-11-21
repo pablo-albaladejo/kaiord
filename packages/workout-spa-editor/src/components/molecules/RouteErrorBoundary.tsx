@@ -1,7 +1,9 @@
 /**
  * RouteErrorBoundary - Catches render errors in route components.
  *
- * Shows error details with retry and navigation escape hatch. When an
+ * Shows translated copy with retry and a navigation escape hatch; the
+ * error text itself goes only to the logger and the scrubbed analytics
+ * payload, never to the screen. When an
  * `analytics` prop is provided, the boundary forwards a `route-error`
  * event with a scrubbed payload (route + name + message + component
  * stack), allowing render errors to be tracked remotely without
@@ -66,12 +68,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.error) {
-      return (
-        <RouteErrorFallback
-          error={this.state.error}
-          onRetry={this.handleRetry}
-        />
-      );
+      return <RouteErrorFallback onRetry={this.handleRetry} />;
     }
     return <div key={this.state.retryCount}>{this.props.children}</div>;
   }

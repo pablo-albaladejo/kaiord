@@ -8,6 +8,7 @@
  */
 import { whoopBiomarkerTestsResponseSchema } from "@kaiord/whoop";
 
+import { errorMessage } from "../../utils/error-message";
 import { importOneWhoopLabTest, TESTS_PATH } from "./import-one-whoop-lab-test";
 import type { WhoopFetchResult } from "./whoop-fetch-result";
 import type {
@@ -31,7 +32,7 @@ export const importWhoopLabs = async (
   try {
     listed = await deps.fetchLabs(TESTS_PATH);
   } catch (err) {
-    return transportError(err instanceof Error ? err.message : String(err));
+    return transportError(errorMessage(err));
   }
   if (!listed.ok) return transportError(listed.error);
   const parsedList = whoopBiomarkerTestsResponseSchema.safeParse(listed.data);
@@ -46,7 +47,7 @@ export const importWhoopLabs = async (
       deps.profileId
     );
   } catch (err) {
-    return transportError(err instanceof Error ? err.message : String(err));
+    return transportError(errorMessage(err));
   }
   let imported = 0;
   let skipped = 0;
