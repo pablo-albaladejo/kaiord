@@ -101,7 +101,11 @@ module.exports = [
     // against 74.79 kB on main. The chat batch (#1513, #1508, #1501: deferred
     // parallel actions, stop/timeout watchdog, streamed generation progress)
     // had taken main from ~71.4 kB to 74.79 kB, leaving 0.2 kB of headroom.
-    limit: "80 kB",
+    // Bumped to 90 kB for the `ai` 7.0.143 -> 7.0.173 patch range (PR #1622),
+    // which measured 84.44 kB against 76.81 kB on main. The growth is the
+    // SDK core, not Kaiord code; 90 kB is sized to survive the next few `ai`
+    // patch ranges rather than to be raised again on the following one.
+    limit: "90 kB",
     import: "*",
     modifyEsbuildConfig: externalize(["zod", "@kaiord/core"]),
   },

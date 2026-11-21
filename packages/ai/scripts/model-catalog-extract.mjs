@@ -34,6 +34,7 @@ const requireFrom = createRequire(import.meta.url);
 export const SOURCES = {
   anthropic: {
     pkg: "@ai-sdk/anthropic",
+    definitions: "languageModelDefinitions",
     union: ["AnthropicModelId", "AnthropicMessagesModelId"],
     retired: {
       "claude-3-haiku-20240307": "claude-haiku-4-5",
@@ -52,12 +53,15 @@ export const SOURCES = {
   },
   openai: {
     pkg: "@ai-sdk/openai",
+    definitions: "openaiLanguageModelDefinitions",
+    endpoint: "chat",
     union: "OpenAIChatModelId",
     exclude:
       /(audio|search-preview|transcribe|tts|image|embedding|moderation|realtime)/,
   },
   google: {
     pkg: "@ai-sdk/google",
+    definitions: "languageModelDefinitions",
     union: ["GoogleModelId", "GoogleGenerativeAIModelId"],
     exclude:
       /(image|tts|audio|computer-use|robotics|embedding|imagen|veo|lyria|nano-banana|deep-research)/,
@@ -68,6 +72,44 @@ export const SOURCES = {
 const matchUnion = (dtsText, unionName) => {
   const match = new RegExp(`type ${unionName}\\s*=([^;]*);`).exec(dtsText);
   return match ? [...match[1].matchAll(/'([^']+)'/g)].map((m) => m[1]) : null;
+};
+
+/**
+ * Top-level keys of `declare const <constName>: { '<id>': {...}; ... };`, or
+ * null if absent. Newer `@ai-sdk/*` releases stopped spelling their ids as a
+ * literal union: the id type is `keyof typeof` this object, so the union now
+ * holds only an indexed access. With `endpoint`, an entry is kept only when
+ * its `endpoints` tuple names it (OpenAI lists responses-only models too).
+ */
+export const matchDefinitionKeys = (dtsText, constName, endpoint) => {
+  const block = new RegExp(
+    `declare const ${constName}:\\s*\\{\\n([\\s\\S]*?)\\n\\};`
+  ).exec(dtsText);
+  if (!block) return null;
+  // A key line opens an entry; its body runs to the next key line. Splitting
+  // on key lines also covers a one-line entry such as `'id': {};`.
+  // A key that is a valid identifier (`o3`, `aqa`) is emitted without quotes.
+  const keys = [
+    ...block[1].matchAll(/^ {2}(?:readonly )?(?:'([^']+)'|([\w$]+)):/gm),
+  ];
+  return keys
+    .filter((key, i) => {
+      if (!endpoint) return true;
+      const body = block[1].slice(key.index, keys[i + 1]?.index);
+      const tuple = /endpoints: readonly \[([^\]]*)\]/.exec(body);
+      return tuple !== null && tuple[1].includes(`"${endpoint}"`);
+    })
+    .map((key) => key[1] ?? key[2]);
+};
+
+/** Ids for one source: the definitions object when present, else a union. */
+const sourceIds = ({ definitions, endpoint, union }, dtsText) => {
+  const keys = definitions
+    ? matchDefinitionKeys(dtsText, definitions, endpoint)
+    : null;
+  if (keys && keys.length > 0) return keys;
+  const names = Array.isArray(union) ? union : [union];
+  return names.map((n) => matchUnion(dtsText, n)).find((v) => v !== null);
 };
 
 /** Extract single-quoted literals from `type <unionName> = '...' | ...;`. */
@@ -88,7 +130,7 @@ const unavailableIds = (type) =>
 export const chatModelIds = (type, dtsText) => {
   const { union, exclude } = SOURCES[type];
   const names = Array.isArray(union) ? union : [union];
-  const ids = names.map((n) => matchUnion(dtsText, n)).find((v) => v !== null);
+  const ids = sourceIds(SOURCES[type], dtsText);
   if (!ids) throw new Error(`union not found: ${names.join(" | ")}`);
   const unavailable = unavailableIds(type);
   return ids.filter(
