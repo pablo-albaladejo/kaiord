@@ -463,19 +463,49 @@ describe("tab-open", () => {
 });
 
 describe("isAllowedSenderOrigin", () => {
-  it.each([
-    { origin: "https://app.kaiord.com" },
-    { origin: "http://localhost:5173" },
-    { origin: "http://localhost:5174" },
-  ])("should accept the pinned origin $origin", ({ origin }) => {
+  const DEV_MANIFEST = {
+    version: "0.0.0",
+    externally_connectable: {
+      matches: [
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://kaiord.com/*",
+      ],
+    },
+  };
+
+  beforeEach(() => {
+    __resetChromeMock();
+    chrome.runtime.getManifest.mockReturnValue({ version: "0.0.0" });
+  });
+
+  it("should accept the exact Kaiord App origin", () => {
     // Arrange
+    const sender = { origin: "https://kaiord.com" };
 
     // Act
-    const allowed = isAllowedSenderOrigin({ origin });
+    const allowed = isAllowedSenderOrigin(sender);
 
     // Assert
     expect(allowed).toBe(true);
   });
+
+  it.each([
+    { origin: "http://localhost:5173" },
+    { origin: "http://localhost:5174" },
+  ])(
+    "should accept the dev origin $origin when the dev manifest is loaded",
+    ({ origin }) => {
+      // Arrange
+      chrome.runtime.getManifest.mockReturnValue(DEV_MANIFEST);
+
+      // Act
+      const allowed = isAllowedSenderOrigin({ origin });
+
+      // Assert
+      expect(allowed).toBe(true);
+    }
+  );
 
   it.each([
     {
@@ -485,6 +515,15 @@ describe("isAllowedSenderOrigin", () => {
     {
       label: "kaiord look-alike",
       sender: { origin: "https://kaiord.com.evil.example" },
+    },
+    {
+      label: "kaiord.com subdomain",
+      sender: { origin: "https://app.kaiord.com" },
+    },
+    { label: "www host", sender: { origin: "https://www.kaiord.com" } },
+    {
+      label: "dev origin in a packaged build",
+      sender: { origin: "http://localhost:5173" },
     },
     { label: "missing origin", sender: {} },
     { label: "undefined sender", sender: undefined },
@@ -504,25 +543,28 @@ describe("dispatchExternal origin pinning", () => {
     __resetChromeMock();
   });
 
-  it("should refuse messages from a non-pinned origin", () => {
+  it.each([
+    { label: "a foreign origin", origin: "https://evil.example" },
+    { label: "a kaiord.com subdomain", origin: "https://app.kaiord.com" },
+    { label: "the www host", origin: "https://www.kaiord.com" },
+    {
+      label: "a dev port in a packaged build",
+      origin: "http://localhost:5173",
+    },
+    { label: "an empty sender", origin: undefined },
+  ])("should give no answer to $label", async ({ origin }) => {
     // Arrange
     const respond = vi.fn();
+    const sender = origin === undefined ? {} : { origin };
 
     // Act
-    dispatchExternal(
-      { action: "ping" },
-      { origin: "https://evil.example" },
-      respond
-    );
+    const keepsChannelOpen = externalCb({ action: "status" }, sender, respond);
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert
+    expect(keepsChannelOpen).toBe(false);
+    expect(respond).not.toHaveBeenCalled();
     expect(chrome.tabs.query).not.toHaveBeenCalled();
-    expect(respond).toHaveBeenCalledWith({
-      ok: false,
-      protocolVersion: PROTOCOL_VERSION,
-      error: "Origin or action not permitted",
-      retryable: false,
-    });
   });
 
   it("should reject a non-allowlisted action from a pinned origin", () => {
@@ -532,7 +574,7 @@ describe("dispatchExternal origin pinning", () => {
     // Act
     dispatchExternal(
       { action: "open-whoop" },
-      { origin: "https://app.kaiord.com" },
+      { origin: "https://kaiord.com" },
       respond
     );
 
@@ -553,7 +595,7 @@ describe("dispatchExternal origin pinning", () => {
     // Act
     dispatchExternal(
       { action: "capture-token", token: "x" },
-      { origin: "https://app.kaiord.com" },
+      { origin: "https://kaiord.com" },
       respond
     );
 
@@ -575,7 +617,7 @@ describe("dispatchExternal origin pinning", () => {
     // Act
     dispatchExternal(
       { action: "status" },
-      { origin: "http://localhost:5173" },
+      { origin: "https://kaiord.com" },
       respond
     );
     await vi.waitFor(() => expect(respond).toHaveBeenCalled());
@@ -591,11 +633,7 @@ describe("dispatchExternal origin pinning", () => {
     const respond = vi.fn();
 
     // Act
-    externalCb(
-      { action: "status" },
-      { origin: "https://app.kaiord.com" },
-      respond
-    );
+    externalCb({ action: "status" }, { origin: "https://kaiord.com" }, respond);
     await vi.waitFor(() => expect(respond).toHaveBeenCalled());
 
     // Assert
@@ -702,18 +740,22 @@ describe("set-theme (the app's theme preference for the popup)", () => {
     expect(__chromeLocalStore.kaiordTheme).toBe("light");
   });
 
-  it("should refuse a preference sent from a foreign origin", async () => {
+  it("should store nothing and give no answer to a preference sent from a kaiord.com subdomain", async () => {
     // Arrange
     const message = { action: "set-theme", theme: "dark" };
+    const sendResponse = vi.fn();
 
     // Act
-    const response = await sendExternal(message, "https://attacker.example");
+    const keepsChannelOpen = externalCb(
+      message,
+      { origin: "https://app.kaiord.com" },
+      sendResponse
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert
-    expect(response).toMatchObject({
-      ok: false,
-      error: "Origin or action not permitted",
-    });
+    expect(keepsChannelOpen).toBe(false);
+    expect(sendResponse).not.toHaveBeenCalled();
     expect(__chromeLocalStore.kaiordTheme).toBeUndefined();
   });
 

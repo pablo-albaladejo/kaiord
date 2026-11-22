@@ -7,7 +7,7 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-11-01
+**Last updated:** 2026-11-22
 
 This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a), the Kaiord Garmin Bridge Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
@@ -105,9 +105,9 @@ The extensions only communicate with the following domains:
 - `https://tpapi.trainingpeaks.com/*` — TrainingPeaks Bridge service worker exchanges your existing session cookie for a short-lived access token and reads/writes your body metrics with it
 - `https://app.whoop.com/*` — WHOOP Bridge's main-world and isolated content scripts capture the session bearer, both from the headers of the WHOOP web app's own requests and from the access token WHOOP's sign-in library stores in this origin's `localStorage`; the bridge also opens this page when you sign in
 - `https://api.prod.whoop.com/*` — WHOOP Bridge relays allowlisted, read-only requests using that captured bearer, and reads (never modifies) the `Authorization` header of the WHOOP web app's own requests to this host via `chrome.webRequest`
-- `https://*.kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.
+- `https://kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. Each extension accepts that exact origin only, no subdomain (`www` included); a message from any other origin gets no answer. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.
 
-Each extension also injects a minimal **announce-only** content script (`kaiord-announce.js`) into `https://*.kaiord.com/*` so the editor can discover which extension IDs are installed at runtime. This content script only calls `window.postMessage` to publish a fixed announcement object (bridge id, extension id, version, declared capabilities) and re-announces on request. It does **not** read the editor's DOM, cookies, storage, or network traffic, does **not** modify the page, and does **not** enable any inbound data path from kaiord.com into the extension beyond what `externally_connectable` already allows.
+Each extension also injects a minimal **announce-only** content script (`kaiord-announce.js`) into `https://kaiord.com/*` only so the editor can discover which extension IDs are installed at runtime. This content script only calls `window.postMessage` to publish a fixed announcement object (bridge id, extension id, version, declared capabilities) and re-announces on request. It does **not** read the editor's DOM, cookies, storage, or network traffic, does **not** modify the page, and does **not** enable any inbound data path from kaiord.com into the extension beyond what `externally_connectable` already allows.
 
 Each extension declares `host_permissions` limited to the hosts listed above — no wildcard or `<all_urls>` access.
 

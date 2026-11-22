@@ -43,13 +43,13 @@
       "run_at": "document_start"
     },
     {
-      "matches": ["https://*.kaiord.com/*"],
+      "matches": ["https://kaiord.com/*"],
       "js": ["bridge-identity.js", "kaiord-announce.js"],
       "run_at": "document_start"
     }
   ],
 
   "externally_connectable": {
-    "matches": ["https://*.kaiord.com/*"]
+    "matches": ["https://kaiord.com/*"]
   }
 }

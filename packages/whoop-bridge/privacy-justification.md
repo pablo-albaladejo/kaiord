@@ -48,9 +48,9 @@ This document explains why each Chrome extension permission is required, for Chr
 
 **Why**: Development origins for the Kaiord SPA (Vite dev server). Stripped from the production manifest.
 
-### `https://*.kaiord.com/*`
+### `https://kaiord.com/*`
 
-**Why**: Production origin for the Kaiord SPA. Allows the deployed SPA to communicate with the extension.
+**Why**: Production origin for the Kaiord SPA. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed SPA to communicate with the extension.
 
 ## Data Handling
 

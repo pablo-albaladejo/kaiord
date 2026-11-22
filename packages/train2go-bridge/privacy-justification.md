@@ -18,9 +18,9 @@ This document explains why each Chrome extension permission is required, for Chr
 
 ## externally_connectable
 
-### `https://*.kaiord.com/*`
+### `https://kaiord.com/*`
 
-**Why**: Production origin for the Kaiord SPA. Allows the deployed SPA to communicate with the extension to receive imported workouts.
+**Why**: Production origin for the Kaiord SPA. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed SPA to communicate with the extension to receive imported workouts.
 
 ## Data Handling
 
