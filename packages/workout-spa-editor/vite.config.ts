@@ -1,7 +1,23 @@
 import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import type { Plugin } from "vite";
 import { defineConfig } from "vite";
+
+import { SITE_CSP, withCsp } from "../../scripts/lib/site-csp.mjs";
+
+// The dev server serves the App under the policy the site ships with, so the
+// whole end-to-end suite runs with it enforced. The production page gets it
+// from scripts/assemble-site.mjs, after the deploy rewrites its inline
+// scripts. `post` sees the final page, React's refresh preamble included.
+const devContentSecurityPolicy = (): Plugin => ({
+  name: "kaiord-dev-csp",
+  apply: "serve",
+  transformIndexHtml: {
+    order: "post",
+    handler: (html) => withCsp(html, SITE_CSP.app),
+  },
+});
 
 // The Umami website id is not baked at build time. It is injected at deploy
 // time into the placeholder in index.html and read at runtime via
@@ -11,6 +27,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [
     react(),
+    devContentSecurityPolicy(),
     codecovVitePlugin({
       enableBundleAnalysis: !!process.env.CODECOV_TOKEN,
       bundleName: "workout-spa-editor",

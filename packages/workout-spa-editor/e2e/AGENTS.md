@@ -31,6 +31,7 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 - `settings.spec.ts`, `onboarding.spec.ts` — settings + onboarding.
 - `button-improvements.spec.ts`, `modal-interactions.spec.ts`, `error-handling.spec.ts` — UX guardrails.
 - `spa-route-refresh.spec.ts` — F5/hard-reload preservation.
+- `content-security-policy.spec.ts` — `@csp`: the policy on the built App and the real landing build, served like the static host (no unsafe script source, an injected script is blocked, every page opens with no violation). Gated behind `E2E_PROD_BASE=1`; the landing half needs `packages/landing/dist`.
 - `fit-import-prod-bundle.spec.ts` — `@prod-bundle`: FIT import (workout, the app's own export, health) through the built bundle served like the static host. Gated behind `E2E_PROD_BASE=1`; the dev server pre-bundles `@garmin/fitsdk`, so only a built artifact exercises what the build does to the FIT SDK.
 
 ## Subdirectories
@@ -49,7 +50,8 @@ Playwright end-to-end tests. Runs against a `pnpm dev` Vite server on `http://lo
 4. **Bridge tests stub the extension** via `helpers/train2go-bridge-stub.ts` (Page-script injection from `train2go-bridge-stub-page-script.ts`).
 5. **AAA + `should ` titles** apply here too (vitest title rule). Playwright reads the titles for reporting.
 6. **Mobile projects (`Mobile Chrome`, `Mobile Safari`) have touch enabled** and exercise the touch-drag suite.
-7. **Flakiness measurement:** `pnpm test:e2e:flakiness*` runs the suite N times to surface flaky specs.
+7. **The content security policy is enforced in every spec.** The dev server serves the App's policy (`vite.config.ts`, from `scripts/lib/site-csp.mjs`) and `fixtures/base.ts` fails a test on any `securitypolicyviolation`. A spec that provokes one on purpose sets `test.use({ cspViolationsAllowed: true })`; a new remote origin goes in `scripts/lib/site-csp-policy.mjs`, never in a spec.
+8. **Flakiness measurement:** `pnpm test:e2e:flakiness*` runs the suite N times to surface flaky specs.
 
 ### Testing Requirements
 

@@ -14,6 +14,7 @@ import { pathToFileURL } from "node:url";
 
 import { emitLegacyEditorPage } from "./emit-legacy-editor-page.mjs";
 import { injectSpaFallback } from "./inject-spa-fallback.mjs";
+import { applySiteCsp } from "./lib/site-csp.mjs";
 
 // The one place that turns the three site builds into the tree Pages serves.
 // The deploy, CI and the e2e fixture all call it, so a guard run against its
@@ -87,6 +88,8 @@ export function assembleSite({ out, landing, app, docs, sha, umamiWebsiteId }) {
   const analytics = substituteAnalyticsId(out, umamiWebsiteId);
   injectSpaFallback(out);
   emitLegacyEditorPage(out);
+  // Last: the policy hashes the inline scripts the steps above wrote.
+  applySiteCsp(out);
   return { analytics };
 }
 

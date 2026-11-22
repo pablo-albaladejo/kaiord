@@ -17,6 +17,9 @@ on:
       - "scripts/assemble-site.mjs"
       - "scripts/inject-spa-fallback.mjs"
       - "scripts/emit-legacy-editor-page.mjs"
+      - "scripts/lib/site-csp.mjs"
+      - "scripts/lib/site-csp-policy.mjs"
+      - "scripts/check-site-csp.mjs"
       - "scripts/check-site-links.mjs"
       - "scripts/lib/site-links-resolve.mjs"
       - "scripts/lib/site-links-scan.mjs"
@@ -161,6 +164,7 @@ jobs:
           [ "$(cat "merged-dist/$KEY.txt" 2>/dev/null)" = "$KEY" ] || { echo "❌ Missing IndexNow key file $KEY.txt"; exit 1; }
           echo "✅ All required files present in merged artifact"
           node scripts/check-css-asset-urls.mjs --dist merged-dist/app --base /app/
+          node scripts/check-site-csp.mjs --merged merged-dist
 
       # Installability over the exact bytes Pages serves (after the fallback
       # rewrote app/index.html): the app's HTML links
