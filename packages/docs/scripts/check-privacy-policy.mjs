@@ -57,7 +57,7 @@ export const DOCS_POLICY_PATH = "/docs/legal/privacy-policy";
 // satisfy rules that are supposed to be about the section itself. Deleting
 // a whole section must fail the lint; before this anchoring it did not.
 const GARMIN_SECTION = "Kaiord for Garmin Extension";
-const TRAIN2GO_SECTION = "Kaiord Train2Go Bridge Extension";
+const TRAIN2GO_SECTION = "Kaiord for Train2Go Extension";
 const TANITA_SECTION = "Kaiord Tanita Bridge Extension";
 const TRAININGPEAKS_SECTION = "Kaiord TrainingPeaks Bridge Extension";
 const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
@@ -110,7 +110,7 @@ export const BRIDGE_REGISTRY = {
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
   [GARMIN_SECTION]: 14,
-  [TRAIN2GO_SECTION]: 8,
+  [TRAIN2GO_SECTION]: 11,
   [TANITA_SECTION]: 11,
   [TRAININGPEAKS_SECTION]: 13,
   [WHOOP_SECTION]: 8,
@@ -277,9 +277,10 @@ export const REQUIRED_RULES = [
     re: /app\.train2go\.com/,
   },
   {
-    label: "Train2Go capture path disclosed (on-demand page-DOM read)",
+    label:
+      "Train2Go capture path disclosed (service worker, own session cookie)",
     section: TRAIN2GO_SECTION,
-    re: /read on-demand from the Train2Go page DOM/i,
+    re: /with `credentials: "include"`, so Chrome attaches your own Train2Go session cookie/i,
   },
   {
     label: "Train2Go no-credentials guarantee stated",
@@ -292,14 +293,29 @@ export const REQUIRED_RULES = [
     re: /does not declare the `cookies` permission/i,
   },
   {
-    label: "Train2Go read-only DOM access stated (no page mutation)",
+    label: "Train2Go no-DOM-access stated",
     section: TRAIN2GO_SECTION,
-    re: /does not modify the page, submit forms/i,
+    re: /injects no script into Train2Go pages/i,
   },
   {
-    label: "Train2Go zero-persistence stated (nothing written to storage)",
+    label: "Train2Go read-only access stated (no page or account mutation)",
     section: TRAIN2GO_SECTION,
-    re: /nothing is written to `chrome\.storage`/i,
+    re: /does not modify the page, submit forms, or write to your account/i,
+  },
+  {
+    label: "Train2Go local storage disclosed (popup state only)",
+    section: TRAIN2GO_SECTION,
+    re: /keeps in `chrome\.storage\.local` only what its popup shows/i,
+  },
+  {
+    label: "Train2Go coach name and notes disclosed",
+    section: TRAIN2GO_SECTION,
+    re: /your coach's name and the notes your coach keeps about you/i,
+  },
+  {
+    label: "Train2Go profile-page read limited to zones and weight",
+    section: TRAIN2GO_SECTION,
+    re: /passes on only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight/i,
   },
   {
     label: "Train2Go no-third-party-sharing stated",

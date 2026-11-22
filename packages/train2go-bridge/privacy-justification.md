@@ -1,30 +1,58 @@
 # Permission Justification
 
-This document explains why each Chrome extension permission is required, for Chrome Web Store review.
+Why Kaiord for Train2Go asks for each permission in `manifest.prod.json`, and the other answers of the Chrome Web Store privacy form. Every paragraph and list item in this file is an entry in `claims/train2go.json`, with the code or test that proves it.
+
+## Single Purpose
+
+Lets the Kaiord App read the athlete's own Train2Go coaching plan, training zones and weight through the athlete's existing Train2Go sign-in.
 
 ## Permissions
 
-### `tabs`
+### `storage`
 
-**Why**: Query for open Train2Go tabs to route messages to the content script, and open new Train2Go tabs via the popup action.
+**Why**: Keep what the popup shows between openings, so it can draw at once.
 
-**Usage**: `chrome.tabs.query({ url: "https://app.train2go.com/*" })` and `chrome.tabs.create()`.
+**Stored in `chrome.storage.local`**: the profile summary the Kaiord App sends for the popup's athlete card, with the time and name of the last one received; this week's planned, completed and workload totals, reused for 5 minutes; the app's theme preference (`light`, `dark` or `system`); when the popup last could and could not read from Train2Go; and a log of the last 25 errors the extension handled without failing.
+
+**Not stored**: no password, cookie or token. The extension holds no credential of any kind.
+
+**Sent anywhere**: nothing stored by the extension is sent to Train2Go or to Kaiord.
+
+No other permission is declared. Opening Train2Go in a new tab from the popup or for the Kaiord App needs none.
 
 ## Host Permissions
 
 ### `https://app.train2go.com/*`
 
-**Why**: Required for the content script to execute on Train2Go pages and read the coaching plan DOM. The content script parses training plan data from the page and sends it to the extension popup via messaging.
+**Why**: The extension's service worker requests the athlete's own Train2Go data from this host with `credentials: "include"`, so Chrome attaches the athlete's Train2Go sign-in cookie. The extension cannot read that cookie: it does not declare the `cookies` permission.
+
+**Paths**: only five, all `GET`, checked against an allowlist in the service worker before any request is sent: `/api/v2/profile/ping` (who is signed in), `/api/v2/workplan/weekly/{date}` and `/api/v2/workplan/daily/{date}` (the coaching plan), `/api/v2/workplan/tooltip/activity/{id}`, and `/user/details` (zones and weight). Any other path or method is refused without a request.
+
+**No content script on Train2Go**: the extension injects nothing into Train2Go pages and does not read them.
+
+## Content Script
+
+### `kaiord-announce.js` on `https://kaiord.com/*`
+
+**Why**: Tells the Kaiord App that the extension is installed, posting its id, version and capabilities to the page. It reads nothing from the page.
 
 ## externally_connectable
 
 ### `https://kaiord.com/*`
 
-**Why**: Production origin for the Kaiord SPA. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed SPA to communicate with the extension to receive imported workouts.
+**Why**: Lets the Kaiord App at https://kaiord.com send messages to the extension. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer.
+
+### `http://localhost:5173/*`, `http://localhost:5174/*`
+
+**Why**: Development builds of the Kaiord App only. They are declared in `manifest.json` and absent from the published `manifest.prod.json`.
+
+## Remote Code
+
+No. The extension runs only the scripts in its package; it loads no remote script and evaluates no code.
 
 ## Data Handling
 
-- **No credentials stored**: The extension never reads, stores, or transmits user passwords or tokens.
-- **No data persistence**: The extension stores no data locally. Training plan data is read on-demand from the Train2Go page DOM.
-- **No external communication**: The extension only communicates with `app.train2go.com` (via content script) and allowed SPA origins (via `externally_connectable`).
-- **No analytics or tracking**: No telemetry of any kind.
+- **No password or cookie**: The extension never reads, stores, or transmits your Train2Go password, and cannot read your Train2Go cookie.
+- **Read only**: Every request is a `GET`; the extension never changes anything on Train2Go.
+- **Requests to Train2Go only**: Every request the extension makes goes to `app.train2go.com`. What it reads is passed only to the Kaiord App in your browser.
+- **No analytics or tracking**: Its error log stays in `chrome.storage.local` and is never sent.

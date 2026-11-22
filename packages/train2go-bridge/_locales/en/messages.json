@@ -4,7 +4,7 @@
     "description": "Extension name shown in the Chrome Web Store and toolbar."
   },
   "extDescription": {
-    "message": "Reads training plans from Train2Go and bridges them to the Kaiord workout editor",
+    "message": "Lets the Kaiord App read the plan your coach sets on Train2Go, your training zones and your weight, using your own Train2Go sign-in",
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {
