@@ -9,6 +9,7 @@ import { ConnectionSourceCard } from "./ConnectionSourceCard";
 import { ConnectionsScope } from "./ConnectionsScope";
 import { ConnectionsUnsupported } from "./ConnectionsUnsupported";
 import { DataTypeRoutingSection } from "./DataTypeRoutingSection";
+import { PlatformAccessLink } from "./PlatformAccessLink";
 
 const isUnsupported = (source: ConnectionSource): boolean =>
   source.status === "unsupported";
@@ -59,6 +60,7 @@ export const ConnectionsTab: React.FC = () => {
               />
             ))}
         </div>
+        <PlatformAccessLink />
       </section>
       <DataTypeRoutingSection profileId={profileId} byDataType={byDataType} />
       <ConnectionsUnsupported sources={sources.filter(isUnsupported)} />

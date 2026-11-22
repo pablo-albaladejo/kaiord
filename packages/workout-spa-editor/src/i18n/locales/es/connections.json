@@ -4,6 +4,7 @@
   "noProfile": "Crea un atleta para añadir una conexión.",
   "sources": "Fuentes",
   "sourcesHint": "La extensión de Kaiord y los permisos están dentro de cada conexión",
+  "platformAccess": "Cómo llega Kaiord a cada plataforma, y el riesgo",
   "unsupported": "Todavía no disponibles",
   "unsupportedHint": "Conectarlas necesita un servidor que Kaiord no tiene.",
   "summary": {

@@ -332,7 +332,10 @@ const config = {
       {
         text: "Legal",
         collapsed: true,
-        items: [{ text: "Privacy Policy", link: "/legal/privacy-policy" }],
+        items: [
+          { text: "Privacy Policy", link: "/legal/privacy-policy" },
+          { text: "Platform Access", link: "/legal/platform-access" },
+        ],
       },
     ],
 

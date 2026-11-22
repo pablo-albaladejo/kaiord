@@ -96,6 +96,7 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File          | Surfaces                                                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `garmin.json` | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625) |
+| File                   | Surfaces                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `garmin.json`          | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625) |
+| `platform-access.json` | The public register of unofficial access per Platform, `packages/docs/legal/platform-access.md` (#1631)                                             |
