@@ -56,7 +56,7 @@ export const DOCS_POLICY_PATH = "/docs/legal/privacy-policy";
 // shared Communication Scope section, which names every host, silently
 // satisfy rules that are supposed to be about the section itself. Deleting
 // a whole section must fail the lint; before this anchoring it did not.
-const GARMIN_SECTION = "Kaiord Garmin Bridge Extension";
+const GARMIN_SECTION = "Kaiord for Garmin Extension";
 const TRAIN2GO_SECTION = "Kaiord Train2Go Bridge Extension";
 const TANITA_SECTION = "Kaiord Tanita Bridge Extension";
 const TRAININGPEAKS_SECTION = "Kaiord TrainingPeaks Bridge Extension";
@@ -640,7 +640,7 @@ export function checkPolicy(src, rules = REQUIRED_RULES) {
 // really have none.
 export const NO_ANALYTICS_CLAIM =
   /(?:\b(?:no|not|without|never)\b|n['’]t\b)[^.]*\banalytics\b/i;
-const BRIDGE_HEADING = /^## Kaiord .+ Bridge Extension$/;
+const BRIDGE_HEADING = /^## Kaiord (?:.+ Bridge|for .+) Extension$/;
 
 export function checkNoAnalyticsClaim(src) {
   const violations = [];
