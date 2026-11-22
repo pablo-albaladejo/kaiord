@@ -11,13 +11,21 @@ one place.
 
 ## Key Files
 
-| File                     | Description                                                                                                                                                                       |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `find-package-files.mjs` | Enumerate files under `packages/**` honoring `.gitignore` and `node_modules` exclusion. Used by every guard that walks the workspace.                                             |
-| `strip-jsonc.mjs`        | Strip comments/trailing commas so `JSON.parse` can consume `.json` files that have JSONC syntax (e.g. `tsconfig.json`, `.changeset/config.json`).                                 |
-| `site-links-resolve.mjs` | GitHub Pages path resolution and link extraction for `check-site-links.mjs`. Split out to keep the guard under 100 lines; covered by `check-site-links.test.mjs`.                 |
-| `site-links-scan.mjs`    | Walks the built site (`*.html`, `*.md`, `llms*.txt`, `sitemap*.xml`, `robots.txt`) for `check-site-links.mjs` and counts what it checked; covered by `check-site-links.test.mjs`. |
-| `clean-git-env.mjs`      | `process.env` minus every `GIT_*` variable. Pass as `env` when a test spawns git (or a script that does): a hook's inherited `GIT_DIR` otherwise rewrites the shared `.git/config`. |
+| File                          | Description                                                                                                                                                                                                                            |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `find-package-files.mjs`      | Enumerate files under `packages/**` honoring `.gitignore` and `node_modules` exclusion. Used by every guard that walks the workspace.                                                                                                  |
+| `strip-jsonc.mjs`             | Strip comments/trailing commas so `JSON.parse` can consume `.json` files that have JSONC syntax (e.g. `tsconfig.json`, `.changeset/config.json`).                                                                                      |
+| `site-links-resolve.mjs`      | GitHub Pages path resolution and link extraction for `check-site-links.mjs`. Split out to keep the guard under 100 lines; covered by `check-site-links.test.mjs`.                                                                      |
+| `site-links-scan.mjs`         | Walks the built site (`*.html`, `*.md`, `llms*.txt`, `sitemap*.xml`, `robots.txt`) for `check-site-links.mjs` and counts what it checked; covered by `check-site-links.test.mjs`.                                                      |
+| `site-csp-policy.mjs`         | The landing, docs and App content security policy, one source list per directive, each remote origin traced to the code that calls it.                                                                                                 |
+| `site-csp.mjs`                | Writes that policy into a page as a `<meta>` first in `<head>`, with the sha256 of each inline script. Used by `assemble-site.mjs` and the SPA dev server (`vite.config.ts`).                                                          |
+| `site-csp-read.mjs`           | Reads a policy and the executable scripts back out of a served page for `check-site-csp.mjs`; shares no code with the injector. Covered by `check-site-csp.test.mjs`.                                                                  |
+| `guard-failure.mjs`           | The failing tail of a guard: a summary with the count, the first 3 problems, how many more, an optional remediation; exits 1. Used by the exact-origin, security-audit, security-policy and site-CSP guards.                           |
+| `app-origins.mjs`             | The Kaiord App origin and the two Vite dev origins for the Node-side guards (`check-bridge-exact-origin.mjs`, the docs `check-privacy-policy.mjs`); its test holds them equal to the copy in `_shared/bridge-core/bridge-envelope.js`. |
+| `bridge-manifest-origins.mjs` | The manifest half of `check-bridge-exact-origin.mjs`: the allowed `externally_connectable` and announce match patterns per manifest. Covered by `check-bridge-exact-origin.test.mjs`.                                                  |
+| `bridge-origin-scan.mjs`      | The source half of `check-bridge-exact-origin.mjs`: walks each bridge's shipped files and flags a partial test of the App origin outside `bridge-envelope.js`. Covered by `check-bridge-exact-origin.test.mjs`.                        |
+| `security-audit-rules.mjs`    | The trigger and job rules of `check-security-audit-required.mjs`. Covered by `check-security-audit-required.test.mjs`.                                                                                                                 |
+| `clean-git-env.mjs`           | `process.env` minus every `GIT_*` variable. Pass as `env` when a test spawns git (or a script that does): a hook's inherited `GIT_DIR` otherwise rewrites the shared `.git/config`.                                                    |
 
 ## For AI Agents
 

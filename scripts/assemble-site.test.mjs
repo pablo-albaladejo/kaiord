@@ -4,11 +4,13 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
 import {
@@ -16,10 +18,16 @@ import {
   assembleSite,
   parseAssembleArgs,
 } from "./assemble-site.mjs";
+import { checkSiteCsp } from "./check-site-csp.mjs";
 import { LEGACY_EDITOR_PAGE } from "./emit-legacy-editor-page.mjs";
 
 const HTML = (body) =>
   `<!DOCTYPE html><html><head><title>x</title></head><body>${body}</body></html>`;
+
+const filesNamed = (dir, names) =>
+  readdirSync(dir, { recursive: true }).filter((path) =>
+    names.includes(basename(path))
+  );
 
 const put = (path, content) => {
   mkdirSync(dirname(path), { recursive: true });
@@ -72,6 +80,53 @@ describe("assemble-site", () => {
     assert.ok(existsSync(join(inputs.out, "docs/index.html")));
   });
 
+  it("should leave out every internal agent note and keep the public agent surfaces", () => {
+    // Arrange
+    const notes = [
+      [inputs.landing, "AGENTS.md"],
+      [inputs.landing, "fonts/AGENTS.md"],
+      [inputs.landing, ".well-known/AGENTS.md"],
+      [inputs.app, "AGENTS.md"],
+      [inputs.docs, "AGENTS.md"],
+      [inputs.docs, "guide/CLAUDE.md"],
+    ];
+    for (const [dir, path] of notes) put(join(dir, path), "internal");
+    const surfaces = [
+      "llms.txt",
+      "auth.md",
+      ".well-known/security.txt",
+      ".well-known/mcp/server-card.json",
+      ".well-known/agent-skills/kaiord-workout-files/SKILL.md",
+    ];
+    for (const path of surfaces) put(join(inputs.landing, path), "public");
+
+    // Act
+    assembleSite(inputs);
+
+    // Assert
+    assert.deepEqual(filesNamed(inputs.out, ["AGENTS.md", "CLAUDE.md"]), []);
+    for (const path of surfaces) {
+      assert.equal(readFileSync(join(inputs.out, path), "utf8"), "public");
+    }
+  });
+
+  it("should leave out an internal agent note whatever the case of its name", () => {
+    // Arrange
+    const notes = ["agents.md", "Claude.md", "guide/Agents.MD", "CLAUDE.MD"];
+    for (const path of notes) put(join(inputs.docs, path), "internal");
+    put(join(inputs.landing, "agents-guide.md"), "public");
+
+    // Act
+    assembleSite(inputs);
+
+    // Assert
+    const left = readdirSync(inputs.out, { recursive: true }).filter((path) =>
+      /^(agents|claude)\.md$/i.test(basename(path))
+    );
+    assert.deepEqual(left, []);
+    assert.ok(existsSync(join(inputs.out, "agents-guide.md")));
+  });
+
   it("should write version.json exactly as the inline printf did", () => {
     assembleSite(inputs);
 
@@ -85,15 +140,34 @@ describe("assemble-site", () => {
     assembleSite(inputs);
 
     const fourOhFour = readFileSync(join(inputs.out, "404.html"), "utf8");
-    assert.match(fourOhFour, /<head>\n {4}<script>/);
+    assert.match(fourOhFour, /<head>(\n {4}<meta [^>]*>)*\n {4}<script>/);
     assert.match(
       readFileSync(join(inputs.out, "app/index.html"), "utf8"),
       /URLSearchParams/
     );
     assert.equal(
-      readFileSync(join(inputs.out, "editor/index.html"), "utf8"),
+      readFileSync(join(inputs.out, "editor/index.html"), "utf8").replace(
+        /\n {4}<meta http-equiv="Content-Security-Policy"[^>]*>/,
+        ""
+      ),
       LEGACY_EDITOR_PAGE
     );
+  });
+
+  it("should give every page, docs included, a policy the CSP guard accepts", () => {
+    put(join(inputs.landing, "es/index.html"), HTML("<script>1</script>"));
+    put(
+      join(inputs.docs, "guide/start.html"),
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>x</title>' +
+        '<script type="module" src="/docs/assets/app.js"></script>' +
+        '<script id="check-dark-mode">document.documentElement.classList.add(`dark`)</script>' +
+        '<script type="application/ld+json">{"@type":"WebSite"}</script>' +
+        "</head><body></body></html>"
+    );
+
+    assembleSite({ ...inputs, umamiWebsiteId: "w-1" });
+
+    assert.deepEqual(checkSiteCsp(inputs.out), []);
   });
 
   it("should leave placeholders untouched when no website id is set", () => {
@@ -203,5 +277,49 @@ describe("parseAssembleArgs", () => {
         ]),
       /Missing --sha/
     );
+  });
+});
+
+describe("the deploy's internal-notes check", () => {
+  const workflow = readFileSync(
+    new URL("../.github/workflows/deploy-site.yml", import.meta.url),
+    "utf8"
+  );
+  const line = workflow
+    .split("\n")
+    .find((l) => l.includes("Internal agent notes in merged artifact"))
+    ?.trim();
+
+  const runIn = (files) => {
+    const dir = mkdtempSync(join(tmpdir(), "deploy-notes-"));
+    try {
+      for (const path of files) put(join(dir, "merged-dist", path), "x");
+      return spawnSync("bash", ["-c", line], { cwd: dir }).status;
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  it("should fail the deploy on an agent note whatever the case of its name", () => {
+    // Arrange
+    const names = ["AGENTS.md", "agents.md", "docs/Claude.md", "x/CLAUDE.MD"];
+
+    // Act
+    const statuses = names.map((name) => runIn(["index.html", name]));
+
+    // Assert
+    assert.ok(line, "deploy-site.yml lost its internal-notes check");
+    assert.deepEqual(statuses, [1, 1, 1, 1]);
+  });
+
+  it("should pass the deploy on a tree with no agent note", () => {
+    // Arrange
+    const files = ["index.html", "agents-guide.md", "docs/llms.txt"];
+
+    // Act
+    const status = runIn(files);
+
+    // Assert
+    assert.equal(status, 0);
   });
 });

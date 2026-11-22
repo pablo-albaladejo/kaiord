@@ -40,9 +40,9 @@ password.
 **Why**: Development origins for the Kaiord SPA (Vite dev server). Stripped from
 the production manifest.
 
-### `https://*.kaiord.com/*`
+### `https://kaiord.com/*`
 
-**Why**: Production origin for the Kaiord editor. Allows the deployed SPA to
+**Why**: Production origin for the Kaiord editor. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed SPA to
 request metric reads/writes via Chrome's one-way inbound
 `externally_connectable` channel.
 

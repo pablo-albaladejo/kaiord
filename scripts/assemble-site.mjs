@@ -8,12 +8,13 @@ import {
   readdirSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 
 import { emitLegacyEditorPage } from "./emit-legacy-editor-page.mjs";
 import { injectSpaFallback } from "./inject-spa-fallback.mjs";
+import { applySiteCsp } from "./lib/site-csp.mjs";
 
 // The one place that turns the three site builds into the tree Pages serves.
 // The deploy, CI and the e2e fixture all call it, so a guard run against its
@@ -23,17 +24,31 @@ import { injectSpaFallback } from "./inject-spa-fallback.mjs";
 // dotfiles. Each `public/` carries a `.nojekyll`, and only the landing's is
 // meant to reach the site root, so it is copied by name, as is the landing's
 // `.well-known/` (agent discovery documents served from the origin root).
+//
+// AGENTS.md and CLAUDE.md are the repo's notes for coding agents; Vite copies
+// any that sit under a `public/` verbatim. They never ship. The surfaces meant
+// for agents that use Kaiord (llms.txt, auth.md, `.well-known/*`, the agent
+// skill SKILL.md) have other names and are copied as usual.
 
 export const UMAMI_PLACEHOLDER = "__UMAMI_WEBSITE_ID__";
 
+// Case-insensitive: macOS and Windows checkouts treat `agents.md` as AGENTS.md.
+const INTERNAL_AGENT_NOTE = /^(agents|claude)\.md$/i;
+const isNotInternalAgentNote = (path) =>
+  !INTERNAL_AGENT_NOTE.test(basename(path));
+const copyPublic = (from, to) =>
+  cpSync(from, to, { recursive: true, filter: isNotInternalAgentNote });
+
 const copyGlobContents = (from, to) => {
   if (!existsSync(from)) throw new Error(`Build output missing: ${from}`);
-  const entries = readdirSync(from).filter((entry) => !entry.startsWith("."));
+  const entries = readdirSync(from).filter(
+    (entry) => !entry.startsWith(".") && isNotInternalAgentNote(entry)
+  );
   // An unmatched glob is literal in sh, so `cp -r empty/*` fails too.
   if (entries.length === 0) throw new Error(`Build output empty: ${from}`);
   mkdirSync(to, { recursive: true });
   for (const entry of entries) {
-    cpSync(join(from, entry), join(to, entry), { recursive: true });
+    copyPublic(join(from, entry), join(to, entry));
   }
 };
 
@@ -67,7 +82,7 @@ export function assembleSite({ out, landing, app, docs, sha, umamiWebsiteId }) {
   }
   const landingWellKnown = join(landing, ".well-known");
   if (existsSync(landingWellKnown)) {
-    cpSync(landingWellKnown, join(out, ".well-known"), { recursive: true });
+    copyPublic(landingWellKnown, join(out, ".well-known"));
   }
   copyGlobContents(app, join(out, "app"));
   writeFileSync(join(out, "app/version.json"), `{"sha":"${sha}"}\n`);
@@ -75,6 +90,8 @@ export function assembleSite({ out, landing, app, docs, sha, umamiWebsiteId }) {
   const analytics = substituteAnalyticsId(out, umamiWebsiteId);
   injectSpaFallback(out);
   emitLegacyEditorPage(out);
+  // Last: the policy hashes the inline scripts the steps above wrote.
+  applySiteCsp(out);
   return { analytics };
 }
 

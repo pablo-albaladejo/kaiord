@@ -15,6 +15,12 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  APP_ORIGIN,
+  DEV_ORIGINS,
+  matchPattern,
+} from "../../../scripts/lib/app-origins.mjs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..", "..");
 const POLICY = join(
@@ -114,22 +120,14 @@ export const SECTION_RULE_FLOOR = {
 // clear this before it can be recorded — the 0 → 6 barrier.
 export const MIN_NEW_SECTION_RULES = 6;
 
-// externally_connectable.matches entries allowed in each extension.
-// kaiord.com covers the production editor; localhost entries are the
-// dev-server match patterns the policy discloses explicitly.
-const ALLOWED_EXTERNALLY_CONNECTABLE = new Set([
-  "https://*.kaiord.com/*",
-  "http://localhost:5173/*",
-  "http://localhost:5174/*",
-]);
-// content_scripts.matches entries allowed for the announce-only script
-// that injects into SPA origins so the editor can discover installed
-// extensions at runtime. Chrome match patterns do not accept a port in
-// the host, so localhost is expressed as `http://localhost/*`.
-const ALLOWED_ANNOUNCE_CONTENT_SCRIPT_MATCHES = new Set([
-  "https://*.kaiord.com/*",
-  "http://localhost/*",
-]);
+// externally_connectable.matches entries allowed in each extension: the
+// exact App origin (no subdomain) and the two Vite dev servers the policy
+// discloses. The announce-only content script that lets the editor discover
+// installed extensions is allowed on the same set; a match pattern without
+// a port (`http://localhost/*`) would match every port.
+const APP_MATCHES = [APP_ORIGIN, ...DEV_ORIGINS].map(matchPattern);
+const ALLOWED_EXTERNALLY_CONNECTABLE = new Set(APP_MATCHES);
+const ALLOWED_ANNOUNCE_CONTENT_SCRIPT_MATCHES = new Set(APP_MATCHES);
 // No extension may declare these under any circumstance: they let the
 // extension mutate, redirect, or block the user's traffic, which the
 // policy claims none of them can do.
@@ -529,8 +527,8 @@ export const REQUIRED_RULES = [
 
   // -------------------------- whole file --------------------------
   {
-    label: "Kaiord origin disclosed",
-    re: /\*\.kaiord\.com/,
+    label: "Exact Kaiord App origin disclosed, subdomains excluded",
+    re: /`https:\/\/kaiord\.com\/\*`[^\n]*that exact origin only, no subdomain/,
   },
   {
     label: "Host-permission narrowing stated (no <all_urls>)",
@@ -551,6 +549,11 @@ export const REQUIRED_RULES = [
   {
     label: "LLM provider data flow disclosed (Anthropic / OpenAI / Google)",
     re: /Anthropic.*OpenAI.*Google/s,
+  },
+  {
+    label:
+      "Provider API key storage disclosed (obfuscated, who can read it, Drive copy)",
+    re: /API key is stored in your browser[\s\S]*?obfuscated[\s\S]*?any script running on kaiord\.com[\s\S]*?browser extension[\s\S]*?never to Kaiord[\s\S]*?Google Drive/,
   },
   {
     label:

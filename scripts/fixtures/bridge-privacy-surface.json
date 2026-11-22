@@ -11,14 +11,15 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*",
-          "http://localhost/*"
+          "https://kaiord.com/*",
+          "http://localhost:5173/*",
+          "http://localhost:5174/*"
         ]
       ],
       "externally_connectable_matches": [
         "http://localhost:5173/*",
         "http://localhost:5174/*",
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "manifest_prod": {
@@ -32,11 +33,11 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*"
+          "https://kaiord.com/*"
         ]
       ],
       "externally_connectable_matches": [
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "allowed_paths": [
@@ -99,14 +100,15 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*",
-          "http://localhost/*"
+          "https://kaiord.com/*",
+          "http://localhost:5173/*",
+          "http://localhost:5174/*"
         ]
       ],
       "externally_connectable_matches": [
         "http://localhost:5173/*",
         "http://localhost:5174/*",
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "manifest_prod": {
@@ -118,11 +120,11 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*"
+          "https://kaiord.com/*"
         ]
       ],
       "externally_connectable_matches": [
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "allowed_paths": [
@@ -149,14 +151,15 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*",
-          "http://localhost/*"
+          "https://kaiord.com/*",
+          "http://localhost:5173/*",
+          "http://localhost:5174/*"
         ]
       ],
       "externally_connectable_matches": [
         "http://localhost:5173/*",
         "http://localhost:5174/*",
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "manifest_prod": {
@@ -168,11 +171,11 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*"
+          "https://kaiord.com/*"
         ]
       ],
       "externally_connectable_matches": [
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "allowed_paths": [
@@ -219,14 +222,15 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*",
-          "http://localhost/*"
+          "https://kaiord.com/*",
+          "http://localhost:5173/*",
+          "http://localhost:5174/*"
         ]
       ],
       "externally_connectable_matches": [
         "http://localhost:5173/*",
         "http://localhost:5174/*",
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "manifest_prod": {
@@ -238,11 +242,11 @@
       ],
       "content_scripts_matches": [
         [
-          "https://*.kaiord.com/*"
+          "https://kaiord.com/*"
         ]
       ],
       "externally_connectable_matches": [
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "allowed_paths": [
@@ -296,14 +300,15 @@
           "https://app.whoop.com/*"
         ],
         [
-          "https://*.kaiord.com/*",
-          "http://localhost/*"
+          "https://kaiord.com/*",
+          "http://localhost:5173/*",
+          "http://localhost:5174/*"
         ]
       ],
       "externally_connectable_matches": [
         "http://localhost:5173/*",
         "http://localhost:5174/*",
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "manifest_prod": {
@@ -325,11 +330,11 @@
           "https://app.whoop.com/*"
         ],
         [
-          "https://*.kaiord.com/*"
+          "https://kaiord.com/*"
         ]
       ],
       "externally_connectable_matches": [
-        "https://*.kaiord.com/*"
+        "https://kaiord.com/*"
       ]
     },
     "allowed_paths": [

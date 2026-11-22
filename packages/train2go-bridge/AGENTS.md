@@ -9,7 +9,7 @@
 
 - Fetch training-plan endpoints on `app.train2go.com` directly from the service worker with `credentials:"include"` (SW-direct) so the site's HttpOnly session cookie travels automatically — no content script on `app.train2go.com`, no relay hop
 - Expose a message-passing surface (`ping`, `read-week`, `read-day`, `read-details`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) that the SPA invokes via `chrome.runtime.sendMessage`
-- Restrict communication to Kaiord-controlled origins (`https://*.kaiord.com/*`, `http://localhost/*`)
+- Restrict communication to the exact Kaiord App origin (`https://kaiord.com/*`, no subdomain; `http://localhost:5173/*` and `http://localhost:5174/*` in dev builds only)
 - Persist the user profile snapshot via `chrome.storage.local`
 - Surface a dead session (redirect / login response) as `needsReauth` so the editor can prompt a re-login
 
@@ -48,7 +48,11 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
+      "matches": [
+        "https://kaiord.com/*",
+        "http://localhost:5173/*",
+        "http://localhost:5174/*"
+      ],
       "js": ["bridge-identity.js", "kaiord-announce.js"],
       "run_at": "document_start"
     }
@@ -57,7 +61,7 @@
     "matches": [
       "http://localhost:5173/*",
       "http://localhost:5174/*",
-      "https://*.kaiord.com/*"
+      "https://kaiord.com/*"
     ]
   }
 }

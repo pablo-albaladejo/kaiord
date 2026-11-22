@@ -53,7 +53,7 @@ jobs:
 
       - name: Detect changed files
         id: changed-files
-        uses: tj-actions/changed-files@v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           files_yaml: |
             core:
@@ -105,6 +105,10 @@ jobs:
               - 'scripts/assemble-site.mjs'
               - 'scripts/inject-spa-fallback.mjs'
               - 'scripts/emit-legacy-editor-page.mjs'
+              # The content security policy it writes, and the guard on it.
+              - 'scripts/lib/site-csp.mjs'
+              - 'scripts/lib/site-csp-policy.mjs'
+              - 'scripts/check-site-csp.mjs'
             docs_site:
               - 'packages/docs/**'
               - 'packages/landing/**'
@@ -739,6 +743,17 @@ jobs:
           # jobs only" stays usable; spec floor 14, ceiling 90.
           retention-days: 30
 
+      # The docs' VitePress build, apart from build-artifacts: only
+      # e2e-prod-base reads it, to judge the docs pages' content security
+      # policy in a browser and with check-site-csp.
+      - name: Upload docs build
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-dist
+          path: packages/docs/.vitepress/dist/
+          if-no-files-found: error
+          retention-days: 30
+
   test-frontend:
     runs-on: ubuntu-latest
     # The node 22.18.0 matrix leg runs ~50% slower than 24.x and the suite has
@@ -1008,6 +1023,17 @@ jobs:
         with:
           expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai landing workout-spa-editor"
 
+      - name: Download docs build
+        uses: actions/download-artifact@v8
+        with:
+          name: docs-dist
+          path: packages/docs/.vitepress/dist
+
+      - name: Verify docs build
+        run: |
+          test -f packages/docs/.vitepress/dist/index.html || { echo "::error::docs-dist did not land packages/docs/.vitepress/dist"; exit 1; }
+          if find packages/docs/.vitepress/dist -type l | grep -q .; then echo "::error::Symlinks in docs-dist are forbidden"; exit 1; fi
+
       - name: Install Playwright browsers
         timeout-minutes: 12
         uses: ./.github/actions/setup-playwright
@@ -1015,24 +1041,28 @@ jobs:
           browser: chromium
           system-deps: best-effort
 
-      - name: Run production-base SPA e2e (route refresh, prod bundle)
+      - name: Run production-base SPA e2e (route refresh, prod bundle, CSP)
         env:
           E2E_PROD_BASE: "1"
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle'
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle|@csp'
 
       # The global setup above left an /app/ build in .e2e-prod-dist/. Assemble it with
-      # the landing exactly as the deploy does (docs are not in the build
-      # artifact, hence --without docs), so the guards below read the shape
-      # Pages serves rather than a raw package dist.
-      - name: Assemble site (no docs)
+      # the landing and the docs exactly as the deploy does, so the guards
+      # below read the shape Pages serves rather than a raw package dist.
+      - name: Assemble site
         run: |
           node scripts/assemble-site.mjs \
             --out merged-dist \
             --landing packages/landing/dist \
             --app packages/workout-spa-editor/.e2e-prod-dist \
-            --without docs \
+            --docs packages/docs/.vitepress/dist \
             --sha "$GITHUB_SHA"
           test -f merged-dist/.nojekyll || { echo "❌ merged-dist/.nojekyll missing"; exit 1; }
+
+      # Every page (landing, docs, App) carries a content security policy
+      # that hashes its inline scripts and admits no unsafe script source.
+      - name: Check the content security policy (assembled site)
+        run: node scripts/check-site-csp.mjs --merged merged-dist
 
       # Every absolute url() in the app CSS must name a file the /app/ build
       # serves (R-CssAssetUrls).

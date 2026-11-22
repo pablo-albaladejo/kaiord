@@ -14,12 +14,12 @@ on:
     branches:
       - main
 
-  # PR with dependency changes
+  # Every pull request, with no paths filter. This job is a required check on
+  # main, and branch protection waits for a required check on every PR: a
+  # paths filter leaves a PR without the run and it can never merge. Scoping to
+  # dependency changes happens inside the job (see "Decide audit scope").
+  # Guarded by scripts/check-security-audit-required.mjs. See #1166.
   pull_request:
-    paths:
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "packages/*/package.json"
 
   # Manual trigger
   workflow_dispatch:
@@ -33,8 +33,9 @@ jobs:
   audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
-    # P95 = 44s; ceil(P95 × 1.5 / 60) = 2; capped at lint-family ceiling 10.
-    timeout-minutes: 2
+    # P95 = 44s; ceil(P95 × 1.5 / 60) = 2, plus 2 for the registry retries
+    # (10s + 20s backoff, three audit calls); capped at lint-family ceiling 10.
+    timeout-minutes: 4
     # One audit per ref at a time, so two runs cannot race on the alert issue.
     concurrency:
       group: security-audit-${{ github.ref }}
@@ -43,18 +44,75 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Same detector as ci.yml's detect-changes. It runs as a step, not as a
+      # separate job behind `needs:`, on purpose: a job skipped because its
+      # dependency failed reports "skipped", which branch protection counts as
+      # passing. Here a detector failure fails the required check itself.
+      - name: Detect dependency changes
+        id: deps
+        if: github.event_name == 'pull_request'
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
+        with:
+          files: |
+            package.json
+            **/package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+            .npmrc
+            patches/**
+            .github/workflows/security.yml
+            .github/actions/setup-pnpm/**
+
+      # A pull request that changes no dependency cannot introduce a vulnerable
+      # one, so it passes in seconds without touching the registry. An advisory
+      # landing on main's existing tree is caught by the push and the weekly
+      # schedule below, which always audit, and opens the alert issue.
+      - name: Decide audit scope
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          DEPS_CHANGED: ${{ steps.deps.outputs.any_changed }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            run=true
+          elif [ "$DEPS_CHANGED" = "true" ]; then
+            run=true
+          elif [ "$DEPS_CHANGED" = "false" ]; then
+            run=false
+          else
+            echo "::error::Could not tell whether this PR changes dependencies (any_changed='$DEPS_CHANGED')"
+            exit 1
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "Audit runs: $run (event: $EVENT, dependency files changed: ${DEPS_CHANGED:-n/a})"
 
       - name: Setup pnpm
+        if: steps.scope.outputs.run == 'true'
         uses: ./.github/actions/setup-pnpm
 
       - name: Run security audit
         id: audit
+        if: steps.scope.outputs.run == 'true'
         continue-on-error: true
         run: |
-          # Run npm audit and parse results
-          # Audit level: moderate (catches moderate, high, and critical vulnerabilities)
+          # Production dependencies only. Fails the job on high or critical;
+          # moderate and low are reported as a warning (see below).
+          # A registry or advisory-service outage returns no report: retry
+          # twice with backoff before failing with a message that says so.
           echo "Running pnpm audit (production dependencies only)..."
-          pnpm audit --prod --audit-level=moderate --json > audit-results.json || true
+          for attempt in 1 2 3; do
+            pnpm audit --prod --audit-level=moderate --json > audit-results.json || true
+            if jq -e 'type == "object" and (has("error") | not) and (.metadata.vulnerabilities | type == "object")' audit-results.json > /dev/null 2>&1; then
+              break
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::pnpm audit returned no report (attempt $attempt of 3); retrying in $((attempt * 10))s"
+              sleep $((attempt * 10))
+            fi
+          done
 
           # Parse audit results using jq
           # Extract vulnerability counts by severity for detailed reporting
@@ -107,7 +165,7 @@ jobs:
               } >> "$GITHUB_OUTPUT"
             fi
           else
-            echo "::error::pnpm audit did not produce a vulnerability report"
+            echo "::error title=Advisory database unreachable::pnpm audit returned no vulnerability report after 3 attempts. This is a registry or advisory-service outage, not a finding about this change. Re-run this job once the npm registry answers."
             head -c 2000 audit-results.json 2>/dev/null || true
             {
               echo "parsed=false"
@@ -118,6 +176,14 @@ jobs:
       - name: Display audit summary
         if: always()
         run: |
+          if [ "${{ steps.scope.outputs.run }}" = "false" ]; then
+            {
+              echo "## Security Audit Summary"
+              echo ""
+              echo "✅ **Status:** Skipped - this pull request changes no dependency manifest, lockfile or audit workflow"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           {
             echo "## Security Audit Summary"
             echo ""
@@ -380,9 +446,10 @@ jobs:
             core.info(`Closed security alert issue #${existing.number}`);
 
       - name: Fail workflow if the audit did not produce a report
-        if: steps.audit.outputs.parsed != 'true'
+        if: steps.scope.outputs.run == 'true' && steps.audit.outputs.parsed != 'true'
         run: |
-          echo "❌ Security audit failed: pnpm audit did not produce a vulnerability report"
+          echo "❌ Security audit failed: pnpm audit returned no vulnerability report after 3 attempts"
+          echo "This is a registry or advisory-service outage, not a finding about this change. Re-run the job."
           exit 1
 
       - name: Fail workflow if critical vulnerabilities found

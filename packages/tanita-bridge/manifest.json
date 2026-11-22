@@ -29,7 +29,11 @@
 
   "content_scripts": [
     {
-      "matches": ["https://*.kaiord.com/*", "http://localhost/*"],
+      "matches": [
+        "https://kaiord.com/*",
+        "http://localhost:5173/*",
+        "http://localhost:5174/*"
+      ],
       "js": ["bridge-identity.js", "kaiord-announce.js"],
       "run_at": "document_start"
     }
@@ -39,7 +43,7 @@
     "matches": [
       "http://localhost:5173/*",
       "http://localhost:5174/*",
-      "https://*.kaiord.com/*"
+      "https://kaiord.com/*"
     ]
   }
 }

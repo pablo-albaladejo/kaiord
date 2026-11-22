@@ -5,7 +5,7 @@
  * Never edit a vendored copy — edit the master and run `pnpm bridge:sync`.
  */
 import { readFileSync } from "node:fs";
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   isAllowedSenderOrigin,
@@ -16,32 +16,26 @@ const {
 
 describe("bridge-envelope (vendored)", () => {
   describe("isAllowedSenderOrigin", () => {
-    it("should accept kaiord.com subdomains over https", () => {
-      // Arrange
-      const senders = [
-        { origin: "https://app.kaiord.com" },
-        { origin: "https://staging.kaiord.com" },
-      ];
+    const withManifestMatches = (matches) =>
+      chrome.runtime.getManifest.mockReturnValue({
+        version: "0.0.0",
+        externally_connectable: { matches },
+      });
 
-      // Act
-      const allowed = senders.map(isAllowedSenderOrigin);
-
-      // Assert
-      expect(allowed).toEqual([true, true]);
+    beforeEach(() => {
+      __resetChromeMock();
+      chrome.runtime.getManifest.mockReturnValue({ version: "0.0.0" });
     });
 
-    it("should accept the apex production origin and www", () => {
+    it("should accept the exact Kaiord App origin", () => {
       // Arrange
-      const senders = [
-        { origin: "https://kaiord.com" },
-        { origin: "https://www.kaiord.com" },
-      ];
+      const sender = { origin: "https://kaiord.com" };
 
       // Act
-      const allowed = senders.map(isAllowedSenderOrigin);
+      const allowed = isAllowedSenderOrigin(sender);
 
       // Assert
-      expect(allowed).toEqual([true, true]);
+      expect(allowed).toBe(true);
     });
 
     it("should accept the origin the popup opens the editor at", () => {
@@ -63,8 +57,29 @@ describe("bridge-envelope (vendored)", () => {
       expect(allowed).toBe(true);
     });
 
-    it("should accept localhost dev ports 5173 and 5174", () => {
+    it("should reject every kaiord.com subdomain, www included", () => {
       // Arrange
+      const senders = [
+        { origin: "https://www.kaiord.com" },
+        { origin: "https://app.kaiord.com" },
+        { origin: "https://staging.kaiord.com" },
+        { origin: "https://a.b.kaiord.com" },
+      ];
+
+      // Act
+      const allowed = senders.map(isAllowedSenderOrigin);
+
+      // Assert
+      expect(allowed).toEqual(senders.map(() => false));
+    });
+
+    it("should accept localhost dev ports 5173 and 5174 when the loaded manifest declares them", () => {
+      // Arrange
+      withManifestMatches([
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://kaiord.com/*",
+      ]);
       const senders = [
         { origin: "http://localhost:5173" },
         { origin: "http://localhost:5174" },
@@ -75,6 +90,21 @@ describe("bridge-envelope (vendored)", () => {
 
       // Assert
       expect(allowed).toEqual([true, true]);
+    });
+
+    it("should reject localhost dev ports when the loaded manifest is the production one", () => {
+      // Arrange
+      withManifestMatches(["https://kaiord.com/*"]);
+      const senders = [
+        { origin: "http://localhost:5173" },
+        { origin: "http://localhost:5174" },
+      ];
+
+      // Act
+      const allowed = senders.map(isAllowedSenderOrigin);
+
+      // Assert
+      expect(allowed).toEqual([false, false]);
     });
 
     it("should reject a missing or undefined origin", () => {
@@ -90,6 +120,11 @@ describe("bridge-envelope (vendored)", () => {
 
     it("should reject foreign origins and other localhost ports", () => {
       // Arrange
+      withManifestMatches([
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://kaiord.com/*",
+      ]);
       const senders = [
         { origin: "https://attacker.example" },
         { origin: "http://localhost:9999" },
@@ -99,6 +134,8 @@ describe("bridge-envelope (vendored)", () => {
         { origin: "https://kaiord.com.evil.com" },
         { origin: "http://kaiord.com" },
         { origin: "https://kaiord.com:8443" },
+        { origin: "https://KAIORD.com" },
+        { origin: "https://kaiord.com/" },
       ];
 
       // Act
@@ -259,11 +296,7 @@ describe("bridge-envelope (vendored)", () => {
       const respond = vi.fn();
 
       // Act
-      external(
-        { action: "ping" },
-        { origin: "https://app.kaiord.com" },
-        respond
-      );
+      external({ action: "ping" }, { origin: "https://kaiord.com" }, respond);
       await vi.waitFor(() => expect(respond).toHaveBeenCalled());
 
       // Assert
@@ -273,42 +306,29 @@ describe("bridge-envelope (vendored)", () => {
       );
     });
 
-    it("should reject a foreign origin without invoking the handler", () => {
+    it.each([
+      {
+        label: "a foreign origin",
+        sender: { origin: "https://attacker.example" },
+      },
+      {
+        label: "a kaiord.com subdomain",
+        sender: { origin: "https://app.kaiord.com" },
+      },
+      { label: "the www host", sender: { origin: "https://www.kaiord.com" } },
+      { label: "an empty sender", sender: {} },
+    ])("should give no answer to $label", ({ sender }) => {
       // Arrange
       const { handleAction, external } = setup();
       const respond = vi.fn();
 
       // Act
-      const returns = external(
-        { action: "ping" },
-        { origin: "https://attacker.example" },
-        respond
-      );
+      const keepsChannelOpen = external({ action: "ping" }, sender, respond);
 
       // Assert
-      expect(returns).toBe(true);
+      expect(keepsChannelOpen).toBe(false);
       expect(handleAction).not.toHaveBeenCalled();
-      expect(respond).toHaveBeenCalledWith({
-        ok: false,
-        protocolVersion: 1,
-        error: "Origin or action not permitted",
-        retryable: false,
-      });
-    });
-
-    it("should reject an empty sender without invoking the handler", () => {
-      // Arrange
-      const { handleAction, external } = setup();
-      const respond = vi.fn();
-
-      // Act
-      external({ action: "ping" }, {}, respond);
-
-      // Assert
-      expect(handleAction).not.toHaveBeenCalled();
-      expect(respond).toHaveBeenCalledWith(
-        expect.objectContaining({ ok: false })
-      );
+      expect(respond).not.toHaveBeenCalled();
     });
 
     it("should reject actions outside the allowlist even from an allowed origin", () => {
@@ -319,7 +339,7 @@ describe("bridge-envelope (vendored)", () => {
       // Act
       external(
         { action: "set-credentials" },
-        { origin: "https://app.kaiord.com" },
+        { origin: "https://kaiord.com" },
         respond
       );
 
