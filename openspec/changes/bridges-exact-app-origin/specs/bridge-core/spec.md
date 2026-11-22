@@ -8,12 +8,17 @@ than the exact Kaiord App origin. In every `manifest.json` and
 `manifest.prod.json`, each `externally_connectable.matches` entry and each
 match of the content-script entry that loads `kaiord-announce.js` SHALL be
 `https://kaiord.com/*`, or, in the development `manifest.json` only, a Vite
-dev-server pattern (`http://localhost:5173/*`, `http://localhost:5174/*`,
-`http://localhost/*` for the announce script). `https://kaiord.com/*` SHALL be
+dev-server pattern (`http://localhost:5173/*`, `http://localhost:5174/*`; a
+pattern without a port, `http://localhost/*`, matches every port and SHALL
+fail). `https://kaiord.com/*` SHALL be
 declared in both places, and `externally_connectable.ids` SHALL NOT contain
-`*`. The shipped `*.js` of each bridge and the bridge-core masters SHALL NOT
-contain a `*.kaiord.com` literal or a regex over `kaiord\.com`, comments
-excluded. Finding no bridge, or a bridge without `manifest.json`, SHALL be a
+`*`. Every shipped `.js`/`.mjs` of each bridge and of the bridge-core masters,
+at any depth (tests, `node_modules` and tool configs excluded), SHALL NOT
+contain a `*.kaiord.com` literal or a regex over `kaiord\.com`, and outside
+the shared gate `bridge-envelope.js` SHALL NOT test the App origin by
+suffix, substring, prefix or pattern (`endsWith`, `includes`, `startsWith`,
+`indexOf`, `match`, `new RegExp`, a `hostname` comparison), directly or
+through a name bound to it, comments excluded. Finding no bridge, or a bridge without `manifest.json`, SHALL be a
 fault, not a pass.
 
 #### Scenario: A subdomain wildcard fails lint

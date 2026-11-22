@@ -27,7 +27,7 @@ exclude localhost origins.
 ### Requirement: Runtime announcement on SPA origins
 
 The extension SHALL inject `kaiord-announce.js` at `document_start` on SPA
-origins (`https://kaiord.com/*` and, in dev, `http://localhost/*`) and post a
+origins (`https://kaiord.com/*` and, in dev, `http://localhost:5173/*` and `http://localhost:5174/*`) and post a
 `KAIORD_BRIDGE_ANNOUNCE` message to the page origin with `bridgeId:
 "whoop-bridge"`, `extensionId: chrome.runtime.id`, `name: "WHOOP"`, `version`,
 `protocolVersion: 1`, and a `capabilities` array whose tokens are drawn ONLY

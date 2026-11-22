@@ -10,6 +10,8 @@
 - [x] 2.1 `scripts/check-bridge-exact-origin.test.mjs` (red first), then `scripts/check-bridge-exact-origin.mjs`, wired as `pnpm lint:bridge-exact-origin` in `lint:parallel`.
 - [x] 2.2 All ten manifests declare `https://kaiord.com/*` for `externally_connectable` and the announce content script.
 - [x] 2.3 Refresh `scripts/fixtures/bridge-privacy-surface.json`.
+- [x] 2.4 Review: the dev announce content script matches the two Vite dev ports only, not `http://localhost/*` (every port); guard case (m) and the privacy-policy check refuse the port-less pattern.
+- [x] 2.5 Review: the source scan recurses through each bridge's shipped files and fails on a suffix, substring, prefix or pattern test of the App origin outside `bridge-envelope.js` (cases (n)–(p)); the Node guards read the origins from `scripts/lib/app-origins.mjs`, held equal to the envelope by its test.
 
 ## 3. Truth
 

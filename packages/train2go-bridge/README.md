@@ -21,7 +21,7 @@ workflow packages it as a Chrome Web Store artifact.
   once it has discovered the extension ID at runtime through the
   `kaiord-announce.js` content script.
 - Restrict communication to Kaiord-controlled origins
-  (exactly `https://kaiord.com/*`, no subdomain, plus `http://localhost/*`
+  (exactly `https://kaiord.com/*`, no subdomain, plus `http://localhost:5173/*` and `http://localhost:5174/*`
   in dev builds only) so other websites cannot drive the bridge.
 - Surface a dead session (redirect / login response) as `needsReauth` so the
   editor can prompt a re-login.

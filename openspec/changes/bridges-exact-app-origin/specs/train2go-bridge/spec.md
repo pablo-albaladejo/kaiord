@@ -31,7 +31,7 @@ The extension SHALL NOT require `storage`, `webRequest`, or any permission beyon
 
 ### Requirement: Runtime extension ID announcement on SPA origins
 
-The extension SHALL inject a content script (`kaiord-announce.js`) at `document_start` on SPA origins (`https://kaiord.com/*` and, in dev, `http://localhost/*`). The script SHALL post a `KAIORD_BRIDGE_ANNOUNCE` message via `window.postMessage` to the page's own origin so the SPA can discover the extension's runtime ID without hardcoding it.
+The extension SHALL inject a content script (`kaiord-announce.js`) at `document_start` on SPA origins (`https://kaiord.com/*` and, in dev, `http://localhost:5173/*` and `http://localhost:5174/*`). The script SHALL post a `KAIORD_BRIDGE_ANNOUNCE` message via `window.postMessage` to the page's own origin so the SPA can discover the extension's runtime ID without hardcoding it.
 
 The announcement payload SHALL include: `type: "KAIORD_BRIDGE_ANNOUNCE"`, `bridgeId: "train2go-bridge"`, `extensionId: chrome.runtime.id`, `name: "Train2Go"`, `version` (from manifest), `protocolVersion: 1`, and `capabilities: ["read:training-plan"]`.
 
