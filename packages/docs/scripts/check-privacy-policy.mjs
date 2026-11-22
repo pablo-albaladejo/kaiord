@@ -554,6 +554,11 @@ export const REQUIRED_RULES = [
   },
   {
     label:
+      "Provider API key storage disclosed (obfuscated, who can read it, Drive copy)",
+    re: /API key is stored in your browser[\s\S]*?obfuscated[\s\S]*?any script running on kaiord\.com[\s\S]*?browser extension[\s\S]*?never to Kaiord[\s\S]*?Google Drive/,
+  },
+  {
+    label:
       "Chat assistant data flow disclosed (health summaries, user-initiated)",
     re: /chat assistant[\s\S]*?health/i,
   },

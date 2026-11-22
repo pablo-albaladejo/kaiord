@@ -46,10 +46,14 @@ Las conversaciones se guardan por perfil en tu navegador y se pueden buscar.
   [política de privacidad](/legal/privacy-policy) (en inglés) describe qué se
   envía: tus mensajes, y resúmenes de los datos que lee el asistente, van desde
   tu navegador al proveedor que configuraste, solo mientras chateas.
-- La clave guardada está ofuscada, no protegida de forma robusta: cualquiera con
-  acceso a tu perfil del navegador puede recuperarla. Si activas la
-  sincronización con Google Drive sin cifrado, la app te avisa de que las claves
-  se subirían en texto plano. **Ajustes → Privacidad** tiene un botón para
+- La clave guardada está ofuscada con una clave fija que va en el código
+  público de Kaiord, así que no está cifrada de verdad. Cualquier script que se
+  ejecute en kaiord.com (incluidos los de terceros que carga, como la
+  analítica), cualquier extensión del navegador con acceso a kaiord.com y
+  cualquiera con acceso a tu perfil del navegador pueden leerla. Solo se envía a
+  tu proveedor, nunca a Kaiord. Si activas la sincronización con Google Drive,
+  se sube una copia a tu propio Drive; sin cifrado de sincronización, la app te
+  avisa de que se subiría solo con esa ofuscación. **Ajustes → Privacidad** tiene un botón para
   borrar todas las claves guardadas.
 - Pagas directamente a tu proveedor. **Ajustes → IA → Uso** muestra los tokens
   por mes y un coste **estimado**; la factura de tu proveedor es la referencia.

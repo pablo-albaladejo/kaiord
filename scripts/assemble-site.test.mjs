@@ -4,11 +4,12 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
 import {
@@ -20,6 +21,11 @@ import { LEGACY_EDITOR_PAGE } from "./emit-legacy-editor-page.mjs";
 
 const HTML = (body) =>
   `<!DOCTYPE html><html><head><title>x</title></head><body>${body}</body></html>`;
+
+const filesNamed = (dir, names) =>
+  readdirSync(dir, { recursive: true }).filter((path) =>
+    names.includes(basename(path))
+  );
 
 const put = (path, content) => {
   mkdirSync(dirname(path), { recursive: true });
@@ -70,6 +76,36 @@ describe("assemble-site", () => {
     assert.ok(!existsSync(join(inputs.out, "docs/.nojekyll")));
     assert.ok(existsSync(join(inputs.out, "app/assets/.keep")));
     assert.ok(existsSync(join(inputs.out, "docs/index.html")));
+  });
+
+  it("should leave out every internal agent note and keep the public agent surfaces", () => {
+    // Arrange
+    const notes = [
+      [inputs.landing, "AGENTS.md"],
+      [inputs.landing, "fonts/AGENTS.md"],
+      [inputs.landing, ".well-known/AGENTS.md"],
+      [inputs.app, "AGENTS.md"],
+      [inputs.docs, "AGENTS.md"],
+      [inputs.docs, "guide/CLAUDE.md"],
+    ];
+    for (const [dir, path] of notes) put(join(dir, path), "internal");
+    const surfaces = [
+      "llms.txt",
+      "auth.md",
+      ".well-known/security.txt",
+      ".well-known/mcp/server-card.json",
+      ".well-known/agent-skills/kaiord-workout-files/SKILL.md",
+    ];
+    for (const path of surfaces) put(join(inputs.landing, path), "public");
+
+    // Act
+    assembleSite(inputs);
+
+    // Assert
+    assert.deepEqual(filesNamed(inputs.out, ["AGENTS.md", "CLAUDE.md"]), []);
+    for (const path of surfaces) {
+      assert.equal(readFileSync(join(inputs.out, path), "utf8"), "public");
+    }
   });
 
   it("should write version.json exactly as the inline printf did", () => {

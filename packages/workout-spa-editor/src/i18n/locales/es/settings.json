@@ -92,7 +92,7 @@
     "infoNoServer": "Tus registros están en este navegador, sin cifrar: si borras los datos del sitio, los borras. Kaiord no opera ningún servidor que guarde una copia. Lo único que sale es lo que enrutas a una conexión, lo que envías a tu proveedor de IA y las copias en Drive si activas la sincronización entre dispositivos.",
     "infoExtension": "Garmin, Train2Go, WHOOP, Tanita y TrainingPeaks se conectan con la extensión de Kaiord, que aprovecha la sesión que ya tienes abierta en cada sitio. Tus contraseñas nunca salen de tu navegador.",
     "infoApiKey": "intervals.icu se conecta con una clave de API que pegas tú. Se guarda cifrada en este navegador y solo se envía a intervals.icu.",
-    "infoLlmKeys": "Las claves de API de LLM se envían directamente al proveedor (Anthropic, OpenAI o Google) — Kaiord no recibe ni retransmite estos datos.",
+    "infoLlmKeys": "Tus claves de proveedor de IA se guardan en el almacenamiento de este navegador para kaiord.com, ofuscadas con una clave fija que va en el código público de Kaiord, así que no están cifradas de verdad. Cualquier script que se ejecute en kaiord.com (incluidos los de terceros que carga, como la analítica), cualquier extensión del navegador con acceso a kaiord.com y cualquiera con acceso a este perfil del navegador pueden leerlas. Cada clave se envía solo a su proveedor (Anthropic, OpenAI o Google), nunca a Kaiord. Si activas la sincronización con Google Drive, también se sube una copia a tu propio Google Drive.",
     "infoNotResponsible": "No nos hacemos responsables de la seguridad de las credenciales en tu dispositivo.",
     "privacyPolicyLink": "Lee la política de privacidad completa",
     "analytics": "Analíticas",
