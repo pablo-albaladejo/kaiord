@@ -14,8 +14,20 @@ same register file:
   row and paragraph is one unit. Whitespace is collapsed, so re-wrapping a
   paragraph changes nothing. Front matter and `<!-- comments -->` are not shown
   to a reader and are ignored.
-- JSON locale files (`_locales/*/messages.json`): the `message` of each key
-  the surface names.
+- HTML pages (`*.html`): each run of text between tags, in document order,
+  plus each text alternative (`aria-label`, `alt`, `title`) and each text a
+  search result or a link preview shows (`<title>`, the `description`,
+  `og:*` and `twitter:*` text metas). A `<pre>` code example is one unit.
+  Scripts (JSON-LD included), styles and comments are dropped. A unit holds a
+  letter or a digit: a lone `·` is not a claim, a lone `5` is. Text split by
+  an inline tag is two units (`Built by` and `Pablo Albaladejo`), so keep a
+  claim inside one element.
+- JSON files with `keys`: the text at each key, a string or the `message` of
+  an object (the shape of `_locales/*/messages.json`). A dotted key walks
+  into nested objects (`es.title` in `packages/landing/i18n/meta.json`).
+- JSON files without `keys`: every string value, never the object keys. This
+  is a translation file (`packages/landing/i18n/es.json` maps the English
+  source text to the Spanish a reader sees).
 
 There are no markers to forget: a sentence added to a surface without an entry
 fails the guard, and so does an edit to a registered sentence, because its

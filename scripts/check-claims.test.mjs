@@ -218,6 +218,132 @@ describe("check-claims", () => {
     ]);
   });
 
+  it("should hold every text a reader sees on an HTML page to the register, and no script", () => {
+    // Arrange
+    const page = "page.html";
+    const files = {
+      [page]:
+        '<html><head><script>var hidden = "x";</script><style>p{}</style></head><body><!-- a note --><h1>Your data, <span>one place</span></h1><p>Nothing\n   leaves.</p><p>5</p><p>·</p></body></html>',
+    };
+    const registers = register({
+      surfaces: [{ file: page }],
+      claims: [
+        { id: "h", text: "Your data,", proof: [{ file: page }] },
+        { id: "s", text: "one place", proof: [{ file: page }] },
+      ],
+    });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `${page}: unregistered claim "Nothing leaves."`,
+      `${page}: unregistered claim "5"`,
+    ]);
+  });
+
+  it("should hold the page title, its descriptions and its text alternatives to the register, entities decoded", () => {
+    // Arrange
+    const page = "page.html";
+    const files = {
+      [page]:
+        '<html><head><title>Kaiord &mdash; one place</title><meta name="description" content="Calendar &amp; health." /><meta property="og:title" content="Share title" /><meta name="robots" content="index, follow" /><meta property="og:url" content="https://kaiord.com/" /></head><body><div role="img" aria-label="A week of workouts"></div><img alt="Logo" src="x.png" /><a title="Open it">See &rarr;</a></body></html>',
+    };
+    const registers = register({
+      surfaces: [{ file: page }],
+      claims: [
+        { id: "t", text: "Kaiord — one place", proof: [{ file: page }] },
+      ],
+    });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `${page}: unregistered claim "Calendar & health."`,
+      `${page}: unregistered claim "Share title"`,
+      `${page}: unregistered claim "A week of workouts"`,
+      `${page}: unregistered claim "Logo"`,
+      `${page}: unregistered claim "Open it"`,
+      `${page}: unregistered claim "See →"`,
+    ]);
+  });
+
+  it("should hold a code example on an HTML page to the register as one claim", () => {
+    // Arrange
+    const page = "page.html";
+    const files = {
+      [page]:
+        '<p>Convert a file.</p><pre class="p-4"><code><span>const</span> <span>krd</span> =\n<span>await</span> fromBinary(file)</code></pre>',
+    };
+    const registers = register({
+      surfaces: [{ file: page }],
+      claims: [{ id: "p", text: "Convert a file.", proof: [{ file: page }] }],
+    });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `${page}: unregistered claim "const krd = await fromBinary(file)"`,
+    ]);
+  });
+
+  it("should hold every translation of a JSON translation file to the register, never its source keys", () => {
+    // Arrange
+    const translations = "es.json";
+    const files = {
+      [translations]: JSON.stringify({
+        "Nothing leaves.": "Nada sale.",
+        Health: "Salud",
+      }),
+    };
+    const registers = register({
+      surfaces: [{ file: translations }],
+      claims: [{ id: "s", text: "Salud", proof: [{ file: translations }] }],
+    });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `${translations}: unregistered claim "Nada sale."`,
+    ]);
+  });
+
+  it("should read the text at each dotted key of a nested JSON file, and fail on one that is missing or empty", () => {
+    // Arrange
+    const meta = "meta.json";
+    const files = {
+      [meta]: JSON.stringify({
+        es: { lang: "es", title: "Kaiord — un sitio", description: "" },
+      }),
+    };
+    const registers = register({
+      surfaces: [{ file: meta, keys: ["es.title"] }],
+      claims: [{ id: "t", text: "Kaiord — un sitio", proof: [{ file: meta }] }],
+    });
+    const broken = register({
+      surfaces: [{ file: meta, keys: ["es.title", "es.description"] }],
+      claims: [{ id: "t", text: "Kaiord — un sitio", proof: [{ file: meta }] }],
+    });
+
+    // Act
+    const problems = [registers, broken].map((r) =>
+      checkClaims({ registers: r, read: reader(files) })
+    );
+
+    // Assert
+    assert.deepEqual(problems, [
+      [],
+      [`${meta}: key(s) es.description missing`],
+    ]);
+  });
+
   it("should refuse a claim with no proof and a proof field it does not know", () => {
     // Arrange
     const files = { [LISTING]: "One.\n\nTwo.\n" };
