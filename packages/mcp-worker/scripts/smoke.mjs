@@ -5,6 +5,7 @@
 //
 //   node scripts/smoke.mjs https://kaiord.com/mcp
 //   node scripts/smoke.mjs https://kaiord.com/a2a
+//   pnpm smoke:prod   (both, after every deploy)
 //
 // Exits 0 when every check passes, 1 naming each failed check, 2 on usage.
 import { pathToFileURL } from "node:url";
@@ -67,24 +68,33 @@ export const runSmoke = async (base, fetchImpl = globalThis.fetch) => {
   return results;
 };
 
+// Several endpoints run one after another; with more than one, each line
+// names its endpoint, so a failure says which protocol broke.
 export const main = async (argv, fetchImpl, out = console) => {
-  const base = argv[0];
-  if (!base) {
-    out.error("usage: node scripts/smoke.mjs <endpoint-url>");
+  if (argv.length === 0) {
+    out.error(
+      "usage: node scripts/smoke.mjs <endpoint-url> [<endpoint-url>...]"
+    );
     return 2;
   }
-  const results = await runSmoke(base, fetchImpl);
-  for (const r of results)
-    out.log(
-      `${r.ok ? "PASS" : "FAIL"} ${r.name}${r.ok ? "" : `: ${r.detail}`}`
-    );
-  const failed = results.filter((r) => !r.ok).map((r) => r.name);
-  if (failed.length > 0) {
-    out.error(`smoke failed: ${failed.join(", ")}`);
-    return 1;
+  let total = 0;
+  let code = 0;
+  for (const base of argv) {
+    const label = argv.length > 1 ? `${base} ` : "";
+    const results = await runSmoke(base, fetchImpl);
+    total += results.length;
+    for (const r of results)
+      out.log(
+        `${r.ok ? "PASS" : "FAIL"} ${label}${r.name}${r.ok ? "" : `: ${r.detail}`}`
+      );
+    const failed = results.filter((r) => !r.ok).map((r) => r.name);
+    if (failed.length > 0) {
+      out.error(`smoke failed: ${label}${failed.join(", ")}`);
+      code = 1;
+    }
   }
-  out.log(`smoke passed: ${results.length} checks`);
-  return 0;
+  if (code === 0) out.log(`smoke passed: ${total} checks`);
+  return code;
 };
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
