@@ -2,11 +2,11 @@
 // claim and must match a register entry word for word (after whitespace is
 // collapsed), so nothing visible on the surface can escape the register.
 //
-// Markdown: a heading, a list item (with its indented continuation lines),
-// a table row, or a paragraph (a `>` quote marker is not text); one that
-// holds HTML tags is read as HTML.
-// YAML front matter, HTML comments and `<script>` / `<style>` blocks are not
-// shown to a reader and are dropped. JSON: see claims-json.mjs.
+// Markdown: a heading, a list item (with its continuation lines), a table
+// row or a paragraph; a `>` quote marker is not text, and a unit holding
+// HTML tags is read as HTML. Front matter, comments and script or style
+// blocks are dropped. HTML: claims-html.mjs, plus claims-jsonld.mjs for the
+// JSON-LD. JSON (named keys, or a keyless translation file): claims-json.mjs.
 
 import { htmlUnits } from "./claims-html.mjs";
 import { jsonUnits } from "./claims-json.mjs";
