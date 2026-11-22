@@ -4,7 +4,8 @@
  * Master: packages/_shared/bridge-core/kaiord-announce.js. Never edit a
  * vendored copy — edit the master and run `pnpm bridge:sync`.
  *
- * Injected at document_start on SPA origins (*.kaiord.com, localhost),
+ * Injected at document_start on the exact App origin (kaiord.com; the
+ * Vite dev server on localhost in dev builds only),
  * after the per-bridge `bridge-identity.js` (manifest content_scripts
  * order), whose globalThis.KAIORD_BRIDGE_IDENTITY provides id, name, and
  * capabilities. Posts KAIORD_BRIDGE_ANNOUNCE to the page so the SPA can

@@ -17,7 +17,7 @@ const pkg = require("../package.json");
 
 // External senders are origin-pinned by the vendored envelope guard; the
 // positive paths use an allowed SPA origin, the negative paths a foreign one.
-const SPA_ORIGIN = "https://app.kaiord.com";
+const SPA_ORIGIN = "https://kaiord.com";
 const FOREIGN_ORIGIN = "https://attacker.example";
 const SPA_SENDER = { origin: SPA_ORIGIN };
 
@@ -148,44 +148,32 @@ describe("background.js", () => {
       expect(actual).toEqual(expected);
     });
 
-    it("should reject a foreign origin without invoking the handler", async () => {
+    it.each([
+      { label: "a foreign origin", origin: FOREIGN_ORIGIN },
+      { label: "a kaiord.com subdomain", origin: "https://app.kaiord.com" },
+      { label: "the www host", origin: "https://www.kaiord.com" },
+      {
+        label: "a dev port in a packaged build",
+        origin: "http://localhost:5173",
+      },
+      { label: "an empty sender", origin: undefined },
+    ])("should give no answer to $label", async ({ origin }) => {
       // Arrange
       const sendResponse = vi.fn();
+      const sender = origin === undefined ? {} : { origin };
 
       // Act
-      externalCb(
+      const keepsChannelOpen = externalCb(
         { action: "read-export-csv" },
-        { origin: FOREIGN_ORIGIN },
+        sender,
         sendResponse
       );
-      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Assert
+      expect(keepsChannelOpen).toBe(false);
+      expect(sendResponse).not.toHaveBeenCalled();
       expect(fetch).not.toHaveBeenCalled();
-      expect(sendResponse).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ok: false,
-          error: "Origin or action not permitted",
-        })
-      );
-    });
-
-    it("should reject an empty sender for an allowlisted action", async () => {
-      // Arrange
-      const sendResponse = vi.fn();
-
-      // Act
-      externalCb({ action: "ping" }, {}, sendResponse);
-      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
-
-      // Assert
-      expect(fetch).not.toHaveBeenCalled();
-      expect(sendResponse).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ok: false,
-          error: "Origin or action not permitted",
-        })
-      );
     });
 
     it("should wrap a checkSession probe in the SPA envelope for an allowed origin", async () => {
@@ -426,18 +414,22 @@ describe("set-theme (the app's theme preference for the popup)", () => {
     expect(__chromeLocalStore.kaiordTheme).toBe("light");
   });
 
-  it("should refuse a preference sent from a foreign origin", async () => {
+  it("should store nothing and give no answer to a preference sent from a kaiord.com subdomain", async () => {
     // Arrange
     const message = { action: "set-theme", theme: "dark" };
+    const sendResponse = vi.fn();
 
     // Act
-    const response = await sendExternal(message, "https://attacker.example");
+    const keepsChannelOpen = externalCb(
+      message,
+      { origin: "https://app.kaiord.com" },
+      sendResponse
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert
-    expect(response).toMatchObject({
-      ok: false,
-      error: "Origin or action not permitted",
-    });
+    expect(keepsChannelOpen).toBe(false);
+    expect(sendResponse).not.toHaveBeenCalled();
     expect(__chromeLocalStore.kaiordTheme).toBeUndefined();
   });
 
