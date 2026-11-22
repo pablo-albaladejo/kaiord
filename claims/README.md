@@ -110,6 +110,16 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File          | Surfaces                                                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `garmin.json` | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625) |
+| File           | Surfaces                                                                                                                                                                                                                                     |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `garmin.json`  | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                          |
+| `landing.json` | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630) |
+| `readme.json`  | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README: core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai (#1630)                                                         |
+
+Scoped out of `readme.json`, as reference rather than pitch: install
+commands, usage and API sections, configuration, the per-format "Supported …
+Features" lists and the root README's FIT reference (each is a per-format
+capability claim the round-trip work of #1654 proves format by format), and
+the root README's documentation, tech-stack, layout, CI and contributing
+sections. The JSON-LD in the landing's `<head>` is a script and is not read;
+it repeats the visible FAQ word for word.

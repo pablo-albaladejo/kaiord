@@ -1,6 +1,6 @@
 # @kaiord/cli
 
-Command-line interface for Kaiord workout file conversion. Convert workout files between FIT, KRD, TCX, and ZWO formats with ease.
+Command-line interface for Kaiord workout file conversion. Convert workout files between FIT, KRD, TCX, and ZWO formats.
 
 ## Installation
 

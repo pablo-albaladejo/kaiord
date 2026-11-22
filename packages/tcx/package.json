@@ -1,7 +1,7 @@
 {
   "name": "@kaiord/tcx",
   "version": "10.5.2",
-  "description": "TCX format adapter for the Kaiord health & fitness data framework",
+  "description": "TCX format adapter for the Kaiord SDK",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
