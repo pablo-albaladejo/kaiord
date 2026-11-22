@@ -151,6 +151,21 @@ Before any non-trivial change:
   replayed so a package change plus a `.md` still tests.
 - `check-ux-glossary-shape.mjs` — the SPA UX glossary keeps its required
   sections (R-UXGlossaryShape, `pnpm lint:ux-glossary`).
+- `check-bridge-exact-origin.mjs` — every bridge answers the exact App origin
+  `https://kaiord.com` only: manifests declare `https://kaiord.com/*` (plus
+  the two Vite dev ports in `manifest.json`), and no shipped bridge source
+  outside `bridge-envelope.js` tests the origin by suffix, substring, prefix
+  or pattern (R-BridgeExactOrigin).
+- `check-security-audit-required.mjs` — the required `Dependency Security
+Audit` job keeps its exact name, reports on every pull request and on push
+  to `main`, and fails on a high/critical finding or a missing report
+  (R-SecurityAuditAlwaysReports).
+- `check-security-policy.mjs` — `SECURITY.md` and `/.well-known/security.txt`
+  name the same contact and `Expires` stays current (`pnpm lint:security-policy`).
+- `check-site-csp.mjs` — every page of the assembled site (landing, docs,
+  App) carries a content security policy first in `<head>` that hashes its
+  inline scripts and admits no unsafe script source (run by `e2e-prod-base`
+  and the deploy on the assembled site).
 
 ### Common patterns
 

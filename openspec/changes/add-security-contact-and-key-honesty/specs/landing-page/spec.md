@@ -20,8 +20,9 @@ neither SHALL hold an email address. The security.txt `Policy` SHALL point to
 
 ### Requirement: Internal agent notes are not served
 
-The assembled site SHALL contain no file named `AGENTS.md` or `CLAUDE.md`,
-wherever a build placed it. The surfaces meant for agents that use Kaiord
+The assembled site SHALL contain no file named `AGENTS.md` or `CLAUDE.md`, in
+any letter case (`agents.md`, `Claude.md`), wherever a build placed it; the
+deploy's artifact check SHALL match the same names case-insensitively. The surfaces meant for agents that use Kaiord
 (`llms.txt`, `auth.md`, every file under `/.well-known/`, the agent skill
 `SKILL.md`) SHALL still be served.
 
@@ -30,3 +31,9 @@ wherever a build placed it. The surfaces meant for agents that use Kaiord
 - **GIVEN** a build output with `AGENTS.md` at its root or in a subdirectory
 - **WHEN** `scripts/assemble-site.mjs` assembles the site
 - **THEN** the output SHALL hold no `AGENTS.md` and SHALL still hold `llms.txt`, `auth.md` and `.well-known/security.txt`
+
+#### Scenario: An agent note in another letter case
+
+- **GIVEN** a build output with `agents.md` or `Claude.md`
+- **WHEN** the site is assembled and the deploy checks the artifact
+- **THEN** the output SHALL hold neither, and the deploy check SHALL fail on either if present

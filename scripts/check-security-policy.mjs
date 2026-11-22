@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { failIfAny } from "./lib/guard-failure.mjs";
+
 // SECURITY.md (read on GitHub) and /.well-known/security.txt (RFC 9116, read
 // by scanners and researchers) must send a reporter to the same place, and
 // security.txt must not go stale: RFC 9116 makes Expires mandatory and a
@@ -70,10 +72,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     securityTxt: readFileSync(SECURITY_TXT, "utf8"),
     now: new Date(),
   });
-  if (problems.length > 0) {
-    console.error(`❌ Security policy check failed (${problems.length}):`);
-    for (const problem of problems.slice(0, 3)) console.error(`  ${problem}`);
-    process.exit(1);
-  }
+  failIfAny("security policy problem(s)", problems);
   console.log("✅ SECURITY.md and security.txt agree and are current");
 }

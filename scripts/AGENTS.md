@@ -35,6 +35,10 @@ notes.
 | `check-session-match-id-shape.mjs`             | R-SessionMatchIdShape (id construction via canonical helpers)                                 |
 | `check-no-perf-marks-in-prod.mjs`              | No `performance.mark()` in production builds                                                  |
 | `check-bridge-privacy-surface.mjs`             | Extension privacy surface matches `fixtures/bridge-privacy-surface.json`                      |
+| `check-bridge-exact-origin.mjs`                | R-BridgeExactOrigin: bridges answer `https://kaiord.com` only (manifests and shipped source)  |
+| `check-security-audit-required.mjs`            | R-SecurityAuditAlwaysReports: the required audit job always reports                           |
+| `check-security-policy.mjs`                    | `SECURITY.md` ⇄ `security.txt`, `Expires` current                                             |
+| `check-site-csp.mjs`                           | Every assembled page (landing, docs, App) carries a safe CSP (`--merged <dir>`)               |
 | `check-bridge-stale-threshold-parity.test.mjs` | Bridge stale-threshold parity (test-only)                                                     |
 | `check-extension-icons-distinct.mjs`           | `lint:icons-distinct` — each extension has unique icon set                                    |
 | `check-allowlists-empty.mjs`                   | Allowlists are not silently growing                                                           |

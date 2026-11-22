@@ -1,8 +1,10 @@
-// The content security policy of the landing and the Kaiord App, one list of
-// sources per directive. Every remote origin is one the code already talks to:
+// The content security policy of every page of the site (the landing, the
+// docs and the Kaiord App), one list of sources per directive. Every remote
+// origin is one the code already talks to:
 //
-//   Umami      landing + App   cloud.umami.is/script.js, which posts to
-//                              gateway.umami.is/api/send (its default host)
+//   Umami      every page      cloud.umami.is/script.js, which posts to
+//                              gateway.umami.is/api/send (its default host);
+//                              the docs load it from .vitepress/head-config
 //   Providers  App             @kaiord/ai createLanguageModel: the athlete's
 //                              Anthropic, OpenAI and Google keys, called from
 //                              the browser
@@ -51,7 +53,12 @@ const APP = {
   "frame-src": [GIS],
 };
 
-export const SITE_CSP = { landing: LANDING, app: APP };
+// The docs are a VitePress build: module scripts from 'self', two inline
+// scripts (theme and platform class) hashed like any other, the same Umami
+// tracker as the landing, and local search, so nothing else remote.
+const DOCS = LANDING;
+
+export const SITE_CSP = { landing: LANDING, docs: DOCS, app: APP };
 
 export function serializePolicy(directives, scriptHashes = []) {
   return Object.entries(directives)

@@ -8,6 +8,7 @@
 
 - [x] 2.1 Assembled-site test: no `AGENTS.md`/`CLAUDE.md`, public agent surfaces kept (red)
 - [x] 2.2 `assemble-site.mjs` filters them; deploy artifact check fails on any
+- [x] 2.3 Review: both match the names case-insensitively (`agents.md`, `Claude.md`), with tests on the filter and on the deploy's own shell line
 
 ## 3. Provider key wording
 

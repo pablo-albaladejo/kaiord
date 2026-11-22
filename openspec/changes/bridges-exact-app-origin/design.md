@@ -42,9 +42,9 @@ options:
   Chrome and in code.
 
 B is stricter and adds no build step, so B is chosen. The dev content-script
-match `http://localhost/*` stays as it is: it is dev-only, the guard keeps it
-out of `manifest.prod.json`, and narrowing it to ports is not part of this
-ticket.
+match is narrowed from `http://localhost/*` to the same two ports: a Chrome
+match pattern carries a port, and one without a port matches every port, so
+`http://localhost/*` announced the extension id to any local server.
 
 ### D4. The guard lives in the root `check-*` family
 

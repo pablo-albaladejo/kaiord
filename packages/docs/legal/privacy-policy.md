@@ -111,7 +111,7 @@ Each extension also injects a minimal **announce-only** content script (`kaiord-
 
 Each extension declares `host_permissions` limited to the hosts listed above — no wildcard or `<all_urls>` access.
 
-No other domains are contacted in production builds. During local development, the extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server), and the announce-only content script is also injected on `http://localhost/*` so locally-served editor builds can discover the extensions. These development-only matches are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
+No other domains are contacted in production builds. During local development, the extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server), and the announce-only content script is also injected on those two origins only (`http://localhost:5173/*` and `http://localhost:5174/*`, no other port) so locally-served editor builds can discover the extensions. These development-only matches are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
 
 ## Regulatory Compliance
 
