@@ -261,6 +261,55 @@ describe("check-claims", () => {
     ]);
   });
 
+  it("should let two register files own different sections of one file", () => {
+    // Arrange
+    const files = { [LISTING]: "# A\n\nOne.\n\n# B\n\nTwo.\n" };
+    const part = (section, id, text) => ({
+      surfaces: [{ file: LISTING, sections: [section] }],
+      claims: [{ id, text, proof: [{ file: LISTING }] }],
+    });
+    const registers = [
+      { name: "claims/a.json", data: part("A", "one", "One.") },
+      { name: "claims/b.json", data: part("B", "two", "Two.") },
+    ];
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, []);
+  });
+
+  it("should refuse a section or key owned by another register file, and a whole file overlapping one", () => {
+    // Arrange
+    const files = { [LISTING]: "# A\n\nOne.\n" };
+    const claims = [{ id: "x", text: "One.", proof: [{ file: LISTING }] }];
+    const surfaces = (surface, id) => ({
+      surfaces: [surface],
+      claims: [{ ...claims[0], id }],
+    });
+    const registers = [
+      {
+        name: "claims/a.json",
+        data: surfaces({ file: LISTING, sections: ["A"] }, "a"),
+      },
+      {
+        name: "claims/b.json",
+        data: surfaces({ file: LISTING, sections: ["A"] }, "b"),
+      },
+      { name: "claims/c.json", data: surfaces({ file: LISTING }, "c") },
+    ];
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `claims/b.json: surface ${LISTING} (A) is already registered in claims/a.json`,
+      `claims/c.json: surface ${LISTING} is already registered in claims/a.json`,
+    ]);
+  });
+
   it("should pass on the register and surfaces the repo ships", () => {
     // Arrange
     const registers = loadRegisters();

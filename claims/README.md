@@ -25,8 +25,10 @@ too (delete it), and so does a proof that no longer exists.
 ## A register file
 
 One JSON file per group of surfaces (`garmin.json`, later `landing.json`, …),
-so tickets working in parallel edit different files. A surface or a claim id
-belongs to one file only.
+so tickets working in parallel edit different files. A claim id, a whole
+file, or one section or key of a shared file belongs to one register file
+only; different sections of one file (the privacy policy) may belong to
+different register files.
 
 ```json
 {
@@ -96,6 +98,7 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File          | Surfaces                                                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `garmin.json` | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625) |
+| File            | Surfaces                                                                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `garmin.json`   | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)   |
+| `train2go.json` | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626) |

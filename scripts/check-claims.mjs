@@ -60,8 +60,25 @@ const claimProblems = (claim, read) => {
   ];
 };
 
-// A surface or a claim id belongs to one register file only, so two files
-// can never disagree about the same text.
+// A surface (a whole file, or one section or key of it) or a claim id
+// belongs to one register file only, so two files can never disagree about
+// the same text. Different sections of one shared file, such as the privacy
+// policy, may be owned by different register files.
+const surfaceOwner = (owners, surface, part) => {
+  const entry = owners.surfaces.get(surface.file);
+  if (!entry) return undefined;
+  if (entry.whole) return entry.whole;
+  if (part === undefined) return entry.parts.values().next().value;
+  return entry.parts.get(part);
+};
+
+const claimSurface = (owners, surface, part, name) => {
+  const entry = owners.surfaces.get(surface.file) ?? { parts: new Map() };
+  if (part === undefined) entry.whole = name;
+  else entry.parts.set(part, name);
+  owners.surfaces.set(surface.file, entry);
+};
+
 const duplicateProblems = (name, data, owners) => {
   const problems = [];
   for (const surface of data.surfaces) {
@@ -72,12 +89,16 @@ const duplicateProblems = (name, data, owners) => {
         SURFACE_FIELDS
       )
     );
-    const owner = owners.surfaces.get(surface.file);
-    if (owner)
-      problems.push(
-        `${name}: surface ${surface.file} is already registered in ${owner}`
-      );
-    else owners.surfaces.set(surface.file, name);
+    const parts = surface.sections ?? surface.keys ?? [undefined];
+    for (const part of parts) {
+      const owner = surfaceOwner(owners, surface, part);
+      const label = part === undefined ? "" : ` (${part})`;
+      if (owner)
+        problems.push(
+          `${name}: surface ${surface.file}${label} is already registered in ${owner}`
+        );
+      else claimSurface(owners, surface, part, name);
+    }
   }
   for (const { id } of data.claims) {
     const owner = owners.ids.get(id);
