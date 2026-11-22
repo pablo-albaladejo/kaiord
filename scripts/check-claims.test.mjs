@@ -149,6 +149,27 @@ describe("check-claims", () => {
     ]);
   });
 
+  it("should hold the title and the lead of a file to the register when its intro is registered", () => {
+    // Arrange
+    const files = {
+      [LISTING]:
+        "# Package\n\nThe lead sentence.\n\n## Install\n\nnpm i package\n\n## Features\n\n- One feature.\n",
+    };
+    const registers = register({
+      surfaces: [{ file: LISTING, intro: true, sections: ["Features"] }],
+      claims: [{ id: "title", text: "Package", proof: [{ file: LISTING }] }],
+    });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `${LISTING}: unregistered claim "The lead sentence."`,
+      `${LISTING}: unregistered claim "One feature."`,
+    ]);
+  });
+
   it("should fail when a registered section is missing rather than pass on no text", () => {
     // Arrange
     const files = { [LISTING]: "## Renamed\n\nPublic.\n" };

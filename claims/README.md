@@ -70,7 +70,9 @@ belongs to one file only.
 
 `sections` names headings by their exact text (any level); a section runs to
 the next heading of the same or a higher level, and its own sub-headings are
-units. A missing section or key fails; it never registers an empty surface.
+units. `"intro": true` adds the H1 and its lead (everything before the first
+sub-heading), which no section can select without taking the whole file: a
+README's pitch, without its install and API reference. A missing section or key fails; it never registers an empty surface.
 
 ## Proofs
 

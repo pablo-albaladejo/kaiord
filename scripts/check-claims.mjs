@@ -38,7 +38,7 @@ const surfaceProblems = (surfaces, read) => {
 };
 
 const CLAIM_FIELDS = ["id", "text", "proof"];
-const SURFACE_FIELDS = ["file", "sections", "keys"];
+const SURFACE_FIELDS = ["file", "intro", "sections", "keys"];
 
 const unknownFields = (what, object, allowed) => {
   const unknown = Object.keys(object).filter((k) => !allowed.includes(k));

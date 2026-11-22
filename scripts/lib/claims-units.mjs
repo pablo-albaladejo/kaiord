@@ -72,9 +72,14 @@ export const surfaceUnits = (surface, src) => {
   if (surface.keys || surface.file.endsWith(".json"))
     return jsonUnits(surface, src);
   const lines = withoutComments(withoutFrontMatter(src)).split("\n");
-  if (!surface.sections) return { units: markdownUnits(lines) };
-  const units = [];
-  for (const title of surface.sections) {
+  if (!surface.sections && !surface.intro)
+    return { units: markdownUnits(lines) };
+  // The intro is the H1 and its lead: everything before the first sub-heading.
+  const firstSub = lines.findIndex((line) => headingLevel(line) > 1);
+  const units = surface.intro
+    ? markdownUnits(firstSub === -1 ? lines : lines.slice(0, firstSub))
+    : [];
+  for (const title of surface.sections ?? []) {
     const section = sectionLines(lines, title);
     if (section === null)
       return { error: `${surface.file}: section "${title}" is missing` };
