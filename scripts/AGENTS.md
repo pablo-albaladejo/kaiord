@@ -39,6 +39,7 @@ notes.
 | `check-security-audit-required.mjs`            | R-SecurityAuditAlwaysReports: the required audit job always reports                           |
 | `check-security-policy.mjs`                    | `SECURITY.md` ⇄ `security.txt`, `Expires` current                                             |
 | `check-claims.mjs`                             | Every claim on a surface in `claims/*.json` has a register entry whose proof exists           |
+| `check-method-figures.mjs`                     | Every figure on the method note equals its command's output at the pinned commit              |
 | `check-site-csp.mjs`                           | Every assembled page (landing, docs, App) carries a safe CSP (`--merged <dir>`)               |
 | `check-bridge-stale-threshold-parity.test.mjs` | Bridge stale-threshold parity (test-only)                                                     |
 | `check-extension-icons-distinct.mjs`           | `lint:icons-distinct` — each extension has unique icon set                                    |

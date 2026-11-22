@@ -167,6 +167,11 @@ Audit` job keeps its exact name, reports on every pull request and on push
   justifications and privacy-policy section) equals a register entry, every
   entry is still on its surface, and every proof (file, test, endpoint) still
   exists (`pnpm lint:claims`; how to add a surface: `claims/README.md`).
+- `check-method-figures.mjs` — every figure on the method note
+  (`packages/docs/project/how-kaiord-is-built.md`) equals the output of its
+  stated command, and every command names the commit pinned in the note's
+  front matter, so new commits never move a figure (`pnpm lint:method-figures`;
+  needs full history, as the CI lint job has).
 - `check-site-csp.mjs` — every page of the assembled site (landing, docs,
   App) carries a content security policy first in `<head>` that hashes its
   inline scripts and admits no unsafe script source (run by `e2e-prod-base`

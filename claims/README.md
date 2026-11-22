@@ -101,6 +101,12 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 | File                 | Surfaces                                                                                                                                                   |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `garmin.json`        | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)        |
+| `method.json`        | The method note `packages/docs/project/how-kaiord-is-built.md`, which quotes the landing headline as `method.headline` (#1632)                             |
 | `tanita.json`        | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)        |
 | `train2go.json`      | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)      |
 | `trainingpeaks.json` | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628) |
+
+The landing headline "Every line — … written by AI agents." is proven by the
+method note: when the landing becomes a surface, its entry for that sentence
+points to the note and to `scripts/check-method-figures.test.mjs`. The note's
+figures are rerun by `pnpm lint:method-figures`.

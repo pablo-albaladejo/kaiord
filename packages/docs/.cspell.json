@@ -81,7 +81,10 @@
     "ivgc",
     "gcwb",
     "gcsend",
-    "gcapp"
+    "gcapp",
+    "kiro",
+    "valueonly",
+    "coderabbit"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"],
   "import": ["@cspell/dict-es-es/cspell-ext.json"],
