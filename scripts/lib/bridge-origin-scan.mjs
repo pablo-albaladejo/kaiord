@@ -41,12 +41,16 @@ const APP_HOST = /kaiord\.com/;
 const PARTIAL =
   /\.(endsWith|startsWith|includes|indexOf|lastIndexOf|match|matchAll|search)\s*\(|\bRegExp\s*\(|\.host(name)?\b/;
 
+// `$` is an identifier character: escape every one, and bound the name with
+// identifier characters, as `\b` does not see `$` as part of a word.
 const boundNames = (code) =>
   [
     ...code.matchAll(
       /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*[^;]*?kaiord\.com/g
     ),
-  ].map((m) => new RegExp(`(^|[^\\w$.])${m[1].replace("$", "\\$")}\\b`));
+  ].map(
+    (m) => new RegExp(`(^|[^\\w$.])${m[1].replace(/\$/g, "\\$")}(?![\\w$])`)
+  );
 
 const partialMatches = (code) => {
   const names = boundNames(code);
