@@ -61,7 +61,7 @@
     },
     {
       "id": "train2go.listing.week",
-      "text": "Reads the week your coach planned on Train2Go: each session's date, sport, title, duration, workload and completion status.",
+      "text": "Reads the week your coach planned on Train2Go: each coaching activity's date, sport, title, duration, workload and completion status.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/background.test.js",
@@ -824,7 +824,7 @@
     },
     {
       "id": "train2go.pp.plan",
-      "text": "**Coaching Plan**: When the Kaiord App asks, the extension reads the week your coach planned (each session's date, sport, title, duration, workload and completion status) and single days in full (the coach's description of each session, and that day's comments with who wrote them), and passes them to the Kaiord App.",
+      "text": "**Coaching Plan**: When the Kaiord App asks, the extension reads the week your coach planned (each coaching activity's date, sport, title, duration, workload and completion status) and single days in full (the coach's description of each coaching activity, and that day's comments with who wrote them), and passes them to the Kaiord App.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/background.test.js",

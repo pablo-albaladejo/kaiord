@@ -40,7 +40,7 @@ const packages = [
   {
     name: "garmin-connect",
     entryPoint: "packages/garmin-connect/src/index.ts",
-    summary: "the Garmin Connect API client",
+    summary: "the unofficial Garmin Connect client",
   },
   {
     name: "cli",
@@ -188,7 +188,7 @@ function main() {
         "| [@kaiord/tcx](./tcx/README.md) | TCX format adapter |",
         "| [@kaiord/zwo](./zwo/README.md) | ZWO format adapter |",
         "| [@kaiord/garmin](./garmin/README.md) | Garmin Connect (GCN) format adapter |",
-        "| [@kaiord/garmin-connect](./garmin-connect/README.md) | Garmin Connect API client |",
+        "| [@kaiord/garmin-connect](./garmin-connect/README.md) | Unofficial Garmin Connect client |",
         "| [@kaiord/cli](./cli/index.md) | Command-line interface |",
         "| [@kaiord/mcp](./mcp/README.md) | Model Context Protocol server |",
         "",

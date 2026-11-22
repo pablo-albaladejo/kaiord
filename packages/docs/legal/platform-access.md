@@ -32,7 +32,7 @@ If access to a Platform is cut off, the Kaiord App keeps working without that ex
 ### What you lose if access is cut off
 
 - Sending workouts from the Kaiord App to your Garmin Connect workout library, and placing them on their day in your Garmin Connect calendar.
-- Reading your recent Garmin Connect activities into the Kaiord App, where they are matched to the planned session.
+- Reading your recent Garmin Connect activities into the Kaiord App, where they are matched to what you planned.
 - Uploading a body-composition measurement from the Kaiord App to Garmin Connect.
 
 ## Train2Go
@@ -52,7 +52,7 @@ If access to a Platform is cut off, the Kaiord App keeps working without that ex
 
 - Reading your coach's weekly and daily plan, with the day's comments, into the Days of the Kaiord App.
 - Importing your training zones from your Train2Go profile.
-- The notice that the coach moved a session to another day.
+- The notice that the coach moved a coaching activity to another day.
 
 ## Tanita
 

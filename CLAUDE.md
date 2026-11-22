@@ -13,7 +13,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/tcx` - TCX format adapter (fast-xml-parser)
 - `@kaiord/zwo` - ZWO format adapter (fast-xml-parser, XSD validation)
 - `@kaiord/garmin` - Garmin Connect API (GCN) format adapter
-- `@kaiord/garmin-connect` - Garmin Connect API client (SSO auth, push/list workouts)
+- `@kaiord/garmin-connect` - unofficial Garmin Connect client (SSO auth, send/list workouts)
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
 - `@kaiord/mcp-worker` - Cloudflare Worker serving the stateless MCP tools at kaiord.com/mcp (private)

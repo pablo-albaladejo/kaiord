@@ -1,13 +1,13 @@
 # @kaiord/tanita-bridge
 
-Chrome extension (Manifest V3) that bridges the Kaiord editor to
-[MyTANITA](https://mytanita.eu). It fetches the user's own body-composition
-**CSV export** directly from their logged-in `mytanita.eu` session — no
-password is ever entered or sent to a Kaiord-hosted server — and returns the
-raw CSV to the Kaiord SPA for parsing.
+Kaiord for Tanita: the Chrome extension (Manifest V3) that lets the Kaiord
+App import your weight and body composition from
+[MyTANITA](https://mytanita.eu). It fetches your own body-composition **CSV
+export** from your signed-in `mytanita.eu` session, so no password is ever
+entered or sent to Kaiord, and hands the raw CSV to the Kaiord App, which
+parses it in your browser.
 
-This package is `private: true` and is not published to npm. The release
-workflow packages it as a Chrome Web Store artifact.
+This package is `private: true` and is not published to npm.
 
 ## Purpose
 

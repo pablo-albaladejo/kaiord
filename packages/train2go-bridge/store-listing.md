@@ -20,7 +20,7 @@ Kaiord for Train2Go connects the Kaiord App (https://kaiord.com/app) to your Tra
 
 What it does:
 
-• Reads the week your coach planned on Train2Go: each session's date, sport, title, duration, workload and completion status.
+• Reads the week your coach planned on Train2Go: each coaching activity's date, sport, title, duration, workload and completion status.
 • Reads one day in full when the Kaiord App asks: the coach's description of each session, and that day's comments with who wrote them.
 • Reads your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight from your Train2Go profile page. Nothing else on that page is passed on: gender, birthday, body fat, height, contact details, records and tests are dropped inside the extension.
 • Tells the Kaiord App who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them.

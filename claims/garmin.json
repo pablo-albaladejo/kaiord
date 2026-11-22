@@ -111,7 +111,7 @@
     },
     {
       "id": "garmin.listing.body",
-      "text": "Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you sync one from the Kaiord App.",
+      "text": "Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you send one from the Kaiord App.",
       "proof": [
         {
           "test": "packages/garmin-bridge/test/background.test.js",
@@ -811,7 +811,7 @@
     },
     {
       "id": "garmin.pp.body",
-      "text": "**Body-Composition Upload**: When you choose to sync a measurement, the extension uploads a body-composition record (your weight plus derived metrics such as body-fat percentage) to Garmin Connect as a FIT file, using the `write:body` capability. It only ever sends the data you supply from the Kaiord App; it never reads your Garmin body-composition history.",
+      "text": "**Body-Composition Upload**: When you send a measurement from the Kaiord App, the extension uploads a body-composition record (your weight plus derived metrics such as body-fat percentage) to Garmin Connect as a FIT file, using the `write:body` capability. It only ever sends the data you supply from the Kaiord App; it never reads your Garmin body-composition history.",
       "proof": [
         {
           "file": "packages/workout-spa-editor/src/hooks/use-tanita-garmin-sync.ts",
@@ -837,7 +837,7 @@
     },
     {
       "id": "garmin.pp.calendar-placement",
-      "text": "**Calendar Placement**: When you push or send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them: an entry of that same workout that you added by hand on that date may be treated as Kaiord's and removed. It never deletes entries of other workouts, and never deletes library workouts.",
+      "text": "**Calendar Placement**: When you send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them: an entry of that same workout that you added by hand on that date may be treated as Kaiord's and removed. It never deletes entries of other workouts, and never deletes library workouts.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",

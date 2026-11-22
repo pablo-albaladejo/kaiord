@@ -29,7 +29,7 @@ GCN ──> KRD ──> ZWO
 This means:
 
 - **One SDK** for reading and writing all formats
-- **Round-trip safe** conversions with defined tolerances
+- **Round-trip tests** within defined tolerances
 - **Type-safe** -- every field is validated with Zod schemas
 - **Extensible** -- add new formats without changing existing code
 

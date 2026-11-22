@@ -204,7 +204,7 @@
     },
     {
       "id": "access.garmin.lose.activities",
-      "text": "Reading your recent Garmin Connect activities into the Kaiord App, where they are matched to the planned session.",
+      "text": "Reading your recent Garmin Connect activities into the Kaiord App, where they are matched to what you planned.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/import/pull-garmin-activities.use-case.test.ts",
@@ -317,7 +317,7 @@
     },
     {
       "id": "access.train2go.lose.moved",
-      "text": "The notice that the coach moved a session to another day.",
+      "text": "The notice that the coach moved a coaching activity to another day.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/components/molecules/MovedFromChip/MovedFromChip.test.tsx",
@@ -500,8 +500,8 @@
           "contains": "marked experimental in the Kaiord App. Today that is WHOOP"
         },
         {
-          "file": "packages/whoop-bridge/README.md",
-          "contains": "registered with the Chrome Web Store"
+          "file": "packages/whoop-bridge/store-listing.md",
+          "contains": "**Status: NOT YET SUBMITTED.**"
         },
         {
           "file": "packages/whoop-bridge/README.md",

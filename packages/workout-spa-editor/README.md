@@ -1,8 +1,8 @@
 # @kaiord/workout-spa-editor
 
-A mobile-first single-page application for creating, editing, and managing KRD (Kaiord Representation Definition) workout files. Built with React, TypeScript, and modern web technologies.
+The Kaiord App: the browser application where an athlete plans the week on a calendar, builds workouts, talks to an assistant with their own key, sends workouts to Garmin Connect and follows their health. Built with React and TypeScript; the data stays in the browser's IndexedDB and leaves only to destinations the athlete sets up.
 
-**Live Demo**: [https://kaiord.com/app/](https://kaiord.com/app/)
+**Live**: [https://kaiord.com/app/](https://kaiord.com/app/)
 
 ## ✨ Features
 

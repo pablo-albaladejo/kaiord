@@ -11,8 +11,11 @@ Key facts:
 - The Kaiord App is free, needs no sign-up, and stores its data in the
   browser (IndexedDB). Data leaves the device only to destinations the
   athlete sets up: the AI provider whose key they enter, the platforms they
-  connect through browser extensions, and their own Google Drive if they turn
-  on sync. Kaiord keeps no accounts and stores no user data on its servers.
+  connect through browser extensions, intervals.icu to check the API key they
+  add for it, and their own Google Drive if they turn on sync. Separately,
+  every page loads Umami analytics, which records anonymous page views and
+  product events, never workouts, health data or keys. Kaiord keeps no
+  accounts and stores no user data on its servers.
 - The Kaiord SDK converts workout files between FIT, TCX, ZWO and GCN
   (Garmin Connect) through KRD, the SDK's internal canonical model.
 - A CLI (`kaiord convert`) and an MCP server (`@kaiord/mcp`) expose the same
@@ -36,7 +39,7 @@ Key facts:
 - [WHOOP recovery in your training plan](https://kaiord.com/docs/guide/whoop-recovery-in-plan):
   recovery, HRV and sleep next to your planned workouts
 - [Kaiord vs TrainingPeaks, intervals.icu and Garmin Connect](https://kaiord.com/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin):
-  a sourced comparison of price, workout builder, Garmin sync and data
+  a sourced comparison of price, workout builder, sending workouts to Garmin and data
 - [Guías en español](https://kaiord.com/docs/es/): the same three guides in
   Spanish
 - [Planifica tu entrenamiento con IA y tu propia clave de API](https://kaiord.com/docs/es/guide/ai-planning-byok):

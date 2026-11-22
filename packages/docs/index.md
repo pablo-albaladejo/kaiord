@@ -1,16 +1,16 @@
 ---
 layout: home
 title: "Kaiord Documentation"
-description: "Open-source health & fitness data framework for TypeScript. Convert FIT, TCX, ZWO, and GCN formats with one unified API."
+description: "Kaiord SDK documentation: open-source TypeScript libraries, a CLI and an MCP server that read, validate and convert FIT, TCX, ZWO and Garmin Connect workouts."
 ---
 
 <script setup>
 import { VPHomeHero, VPHomeFeatures } from 'vitepress/theme-without-fonts'
 </script>
 
-# One framework. Every fitness format.
+# One model. Four formats.
 
-Kaiord is an open-source TypeScript framework for reading, writing, and converting health and fitness data across FIT, TCX, ZWO, and Garmin Connect formats.
+The Kaiord SDK reads, validates and converts FIT, TCX, ZWO and Garmin Connect workouts in TypeScript, through KRD, its internal canonical model.
 
 <div class="hero-actions">
   <a class="action-btn primary" href="/docs/guide/quick-start">Quick Start</a>

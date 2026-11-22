@@ -23,6 +23,7 @@ export const SHOWN_KEYS = new Set([
   "slogan",
   "articleBody",
   "reviewBody",
+  "featureList",
 ]);
 
 const shownStrings = (value, key) => {

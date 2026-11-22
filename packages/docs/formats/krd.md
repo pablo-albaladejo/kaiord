@@ -1,6 +1,6 @@
 ---
 title: "KRD Format"
-description: "KRD (Kaiord Representation Definition) is a JSON-based canonical format for workout data. Round-trip safe, schema-validated, and extensible."
+description: "KRD (Kaiord Representation Definition) is a JSON-based canonical format for workout data. Schema-validated and extensible."
 ---
 
 # KRD Format Specification
@@ -11,7 +11,7 @@ description: "KRD (Kaiord Representation Definition) is a JSON-based canonical f
 
 ## Design principles
 
-- **Round-trip safe** -- convert FIT/TCX/ZWO to KRD and back without data loss
+- **Round-trip tested** -- CI converts workouts to KRD and back and compares them within declared tolerances; not every field of every format is covered yet (#1654)
 - **Schema-validated** -- all KRD files validate against Zod schemas
 - **Normalized** -- consistent units and naming across all source formats
 - **Extensible** -- custom fields via `extensions` object
