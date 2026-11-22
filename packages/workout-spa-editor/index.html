@@ -107,6 +107,16 @@
     </script>
 
     <!--
+      Zod probes for eval with Function("") as its schemas are built. The
+      content security policy forbids eval, so the probe always fails and each
+      page load logged a policy violation. Zod reads this global before any
+      schema exists (classic scripts run before the module bundle); with the
+      JIT off it skips the probe, which is the result the probe reached anyway.
+    -->
+    <script>
+      globalThis.__zod_globalConfig = { jitless: true };
+    </script>
+    <!--
       Runtime configuration. The placeholder __UMAMI_WEBSITE_ID__ is
       substituted by the deploy step (NOT by Vite). When the placeholder is
       still in place — local dev, preview builds, or deploys without a website

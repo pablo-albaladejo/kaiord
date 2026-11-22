@@ -105,6 +105,10 @@ jobs:
               - 'scripts/assemble-site.mjs'
               - 'scripts/inject-spa-fallback.mjs'
               - 'scripts/emit-legacy-editor-page.mjs'
+              # The content security policy it writes, and the guard on it.
+              - 'scripts/lib/site-csp.mjs'
+              - 'scripts/lib/site-csp-policy.mjs'
+              - 'scripts/check-site-csp.mjs'
             docs_site:
               - 'packages/docs/**'
               - 'packages/landing/**'
@@ -1015,10 +1019,10 @@ jobs:
           browser: chromium
           system-deps: best-effort
 
-      - name: Run production-base SPA e2e (route refresh, prod bundle)
+      - name: Run production-base SPA e2e (route refresh, prod bundle, CSP)
         env:
           E2E_PROD_BASE: "1"
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle'
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle|@csp'
 
       # The global setup above left an /app/ build in .e2e-prod-dist/. Assemble it with
       # the landing exactly as the deploy does (docs are not in the build
@@ -1033,6 +1037,11 @@ jobs:
             --without docs \
             --sha "$GITHUB_SHA"
           test -f merged-dist/.nojekyll || { echo "❌ merged-dist/.nojekyll missing"; exit 1; }
+
+      # Every landing and App page carries a content security policy that
+      # hashes its inline scripts and admits no unsafe script source.
+      - name: Check the content security policy (assembled site)
+        run: node scripts/check-site-csp.mjs --merged merged-dist
 
       # Every absolute url() in the app CSS must name a file the /app/ build
       # serves (R-CssAssetUrls).

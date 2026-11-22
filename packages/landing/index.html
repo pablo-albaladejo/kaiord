@@ -2,6 +2,16 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      The bundle reaches zod through @kaiord/core, and zod probes for eval with
+      Function("") as its schemas are built. The content security policy
+      forbids eval, so every load logged a violation. Zod reads this global
+      before any schema exists (a classic script runs before the module
+      bundle); with the JIT off it skips the probe, which would fail anyway.
+    -->
+    <script>
+      globalThis.__zod_globalConfig = { jitless: true };
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Kaiord — Your training cockpit. Every fitness format.</title>
