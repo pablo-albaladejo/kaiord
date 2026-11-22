@@ -3,7 +3,7 @@ Chrome Web Store — Privacy practices form answers (Train2Go bridge)
 Copy-paste reference for the item's "Privacy" tab in the CWS Developer
 Dashboard. Headings mirror the dashboard form fields. Keep this in sync
 with manifest.prod.json permissions: tabs, storage, scripting +
-host https://app.train2go.com/* and the *.kaiord.com content script.
+host https://app.train2go.com/* and the https://kaiord.com content script.
 
 
 Single purpose description
@@ -50,11 +50,12 @@ https://app.train2go.com/*
   the extension via messaging. No data is modified on the page, and no network
   requests are made to Train2Go servers — reading is from the already-loaded DOM.
 
-https://*.kaiord.com/*
+https://kaiord.com/*
   A small announce content script posts the extension's runtime ID, name, and
   capabilities to the Kaiord web app (via window.postMessage) so the app can
   discover and message the extension. It does NOT read or collect any page
-  content from kaiord.com.
+  content from kaiord.com. Only this exact origin is declared; subdomains
+  (www included) are not.
 
 
 Are you using remote code?
@@ -72,4 +73,5 @@ Data handling
 - The profile snapshot persisted via chrome.storage.local stays on the user's
   device and is removed on disconnect.
 - The extension communicates only with app.train2go.com (content script) and
-  *.kaiord.com (announce content script + externally_connectable messaging).
+  https://kaiord.com, that exact origin only (announce content script +
+  externally_connectable messaging).

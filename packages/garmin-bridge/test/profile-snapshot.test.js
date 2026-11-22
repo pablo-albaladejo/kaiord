@@ -22,7 +22,7 @@ afterEach(() => {
   globalThis.__resetChromeMock();
 });
 
-const ALLOWED_KEY_ORIGIN = { origin: "https://app.kaiord.com" };
+const ALLOWED_KEY_ORIGIN = { origin: "https://kaiord.com" };
 
 describe("validateSnapshot — parity with @kaiord/core fixtures", () => {
   it.each(positiveSnapshotFixtures)(
@@ -66,7 +66,7 @@ describe("validateSnapshot — parity with @kaiord/core fixtures", () => {
 describe("background — handleExternalMessage origin gate", () => {
   const validSnapshot = positiveSnapshotFixtures[0];
 
-  it("rejects profile-snapshot from a disallowed origin", async () => {
+  it("should give no answer to profile-snapshot from a disallowed origin", async () => {
     const sendResponse = vi.fn();
 
     const handled = bridge.handleExternalMessage(
@@ -75,17 +75,13 @@ describe("background — handleExternalMessage origin gate", () => {
       sendResponse
     );
 
-    expect(handled).toBe(true);
-    expect(sendResponse).toHaveBeenCalledWith({
-      ok: false,
-      protocolVersion: 1,
-      error: "Origin or action not permitted",
-      retryable: false,
-    });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(handled).toBe(false);
+    expect(sendResponse).not.toHaveBeenCalled();
     expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
   });
 
-  it("rejects when sender.origin is undefined (defense in depth)", async () => {
+  it("should give no answer when sender.origin is undefined (defense in depth)", async () => {
     const sendResponse = vi.fn();
 
     bridge.handleExternalMessage(
@@ -95,12 +91,7 @@ describe("background — handleExternalMessage origin gate", () => {
     );
 
     await new Promise((r) => setTimeout(r, 10));
-    expect(sendResponse).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ok: false,
-        error: "Origin or action not permitted",
-      })
-    );
+    expect(sendResponse).not.toHaveBeenCalled();
   });
 
   it("permits profile-snapshot from a kaiord.com origin", async () => {
@@ -118,7 +109,7 @@ describe("background — handleExternalMessage origin gate", () => {
     );
   });
 
-  it("should origin-gate every external action, not only snapshot writes", async () => {
+  it("should give no answer to any external action from a disallowed origin, not only snapshot writes", async () => {
     // Arrange
     const sendResponse = vi.fn();
 
@@ -132,12 +123,7 @@ describe("background — handleExternalMessage origin gate", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     // Assert
-    expect(sendResponse).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ok: false,
-        error: "Origin or action not permitted",
-      })
-    );
+    expect(sendResponse).not.toHaveBeenCalled();
   });
 
   it("propagates handler errors via sendError envelope", async () => {

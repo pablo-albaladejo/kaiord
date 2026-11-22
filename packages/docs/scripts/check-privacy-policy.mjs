@@ -115,10 +115,10 @@ export const SECTION_RULE_FLOOR = {
 export const MIN_NEW_SECTION_RULES = 6;
 
 // externally_connectable.matches entries allowed in each extension.
-// kaiord.com covers the production editor; localhost entries are the
-// dev-server match patterns the policy discloses explicitly.
+// The exact App origin covers the production editor (no subdomain);
+// localhost entries are the dev-server match patterns the policy discloses.
 const ALLOWED_EXTERNALLY_CONNECTABLE = new Set([
-  "https://*.kaiord.com/*",
+  "https://kaiord.com/*",
   "http://localhost:5173/*",
   "http://localhost:5174/*",
 ]);
@@ -127,7 +127,7 @@ const ALLOWED_EXTERNALLY_CONNECTABLE = new Set([
 // extensions at runtime. Chrome match patterns do not accept a port in
 // the host, so localhost is expressed as `http://localhost/*`.
 const ALLOWED_ANNOUNCE_CONTENT_SCRIPT_MATCHES = new Set([
-  "https://*.kaiord.com/*",
+  "https://kaiord.com/*",
   "http://localhost/*",
 ]);
 // No extension may declare these under any circumstance: they let the
@@ -529,8 +529,8 @@ export const REQUIRED_RULES = [
 
   // -------------------------- whole file --------------------------
   {
-    label: "Kaiord origin disclosed",
-    re: /\*\.kaiord\.com/,
+    label: "Exact Kaiord App origin disclosed, subdomains excluded",
+    re: /`https:\/\/kaiord\.com\/\*`[^\n]*that exact origin only, no subdomain/,
   },
   {
     label: "Host-permission narrowing stated (no <all_urls>)",
@@ -551,6 +551,11 @@ export const REQUIRED_RULES = [
   {
     label: "LLM provider data flow disclosed (Anthropic / OpenAI / Google)",
     re: /Anthropic.*OpenAI.*Google/s,
+  },
+  {
+    label:
+      "Provider API key storage disclosed (obfuscated, who can read it, Drive copy)",
+    re: /API key is stored in your browser[\s\S]*?obfuscated[\s\S]*?any script running on kaiord\.com[\s\S]*?browser extension[\s\S]*?never to Kaiord[\s\S]*?Google Drive/,
   },
   {
     label:
