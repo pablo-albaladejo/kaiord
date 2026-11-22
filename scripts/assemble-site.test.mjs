@@ -154,8 +154,16 @@ describe("assemble-site", () => {
     );
   });
 
-  it("should give every landing and App page a policy the CSP guard accepts", () => {
+  it("should give every page, docs included, a policy the CSP guard accepts", () => {
     put(join(inputs.landing, "es/index.html"), HTML("<script>1</script>"));
+    put(
+      join(inputs.docs, "guide/start.html"),
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>x</title>' +
+        '<script type="module" src="/docs/assets/app.js"></script>' +
+        '<script id="check-dark-mode">document.documentElement.classList.add(`dark`)</script>' +
+        '<script type="application/ld+json">{"@type":"WebSite"}</script>' +
+        "</head><body></body></html>"
+    );
 
     assembleSite({ ...inputs, umamiWebsiteId: "w-1" });
 

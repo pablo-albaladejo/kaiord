@@ -51,10 +51,14 @@ describe("check-site-csp", () => {
     ]);
   });
 
-  it("should not judge the docs, which carry their own build", () => {
+  it("should judge the docs pages like every other page", () => {
     put("docs/index.html", page("<script>1</script>"));
+    put("docs/guide/start.html", page(`${meta(SAFE)}<script>2</script>`));
 
-    assert.deepEqual(checkSiteCsp(site), []);
+    assert.deepEqual(checkSiteCsp(site), [
+      "docs/guide/start.html: inline script #1 is not in script-src",
+      "docs/index.html: no Content-Security-Policy meta",
+    ]);
   });
 
   for (const source of [
