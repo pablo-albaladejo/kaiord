@@ -16,7 +16,7 @@ Standards come first everywhere else: the core speaks KRD, open file formats, MC
 ## Consequences
 
 - A public register states, per Platform, that access is unofficial, what the Platform's terms say about it, and what the athlete loses if it is cut off.
-- A Bridge whose Platform expressly prohibits this access is not published to the extension store and is marked experimental in the Kaiord App. Today that is WHOOP; Garmin, Train2Go, Tanita and TrainingPeaks are published.
+- A Bridge whose Platform expressly prohibits this access is not published to the extension store and is marked experimental in the Kaiord App. Today that is WHOOP; Garmin and Train2Go are published, and Tanita and TrainingPeaks are to be published but are not yet.
 - The Garmin Bridge mints tokens with Garmin's consumer key and secret as published by third parties. The register says so in those words.
 - A Bridge may keep Session tokens in the athlete's browser. They never travel to Kaiord.
 - Every Bridge is disposable: the Kaiord App must stay usable with any Bridge missing.
