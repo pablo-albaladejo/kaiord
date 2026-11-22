@@ -58,7 +58,7 @@ export const DOCS_POLICY_PATH = "/docs/legal/privacy-policy";
 // a whole section must fail the lint; before this anchoring it did not.
 const GARMIN_SECTION = "Kaiord for Garmin Extension";
 const TRAIN2GO_SECTION = "Kaiord Train2Go Bridge Extension";
-const TANITA_SECTION = "Kaiord Tanita Bridge Extension";
+const TANITA_SECTION = "Kaiord for Tanita Extension";
 const TRAININGPEAKS_SECTION = "Kaiord TrainingPeaks Bridge Extension";
 const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
 
@@ -111,7 +111,7 @@ export const BRIDGE_REGISTRY = {
 export const SECTION_RULE_FLOOR = {
   [GARMIN_SECTION]: 14,
   [TRAIN2GO_SECTION]: 8,
-  [TANITA_SECTION]: 11,
+  [TANITA_SECTION]: 13,
   [TRAININGPEAKS_SECTION]: 13,
   [WHOOP_SECTION]: 8,
 };
@@ -367,6 +367,16 @@ export const REQUIRED_RULES = [
     label: "Tanita no-telemetry stated",
     section: TANITA_SECTION,
     re: NO_TELEMETRY,
+  },
+  {
+    label: "Tanita session check downloading the whole export disclosed",
+    section: TANITA_SECTION,
+    re: /Checking the Connection Downloads the Export/,
+  },
+  {
+    label: "Tanita chrome.storage.local contents disclosed",
+    section: TANITA_SECTION,
+    re: /keeps in `chrome\.storage\.local` only when its popup last could and could not reach your export, and the Kaiord App's theme preference/,
   },
 
   // ------------------------- TrainingPeaks ------------------------
