@@ -8,7 +8,8 @@
  * No TrainingPeaks tab, content script, or cookie access is involved.
  *
  * Routes SPA ↔ background messages for session probe, metric reads, the
- * (optional) weight write, and the structured-workout write. Metric JSON is
+ * (optional) weight write, the structured-workout write and the read of one
+ * workout Kaiord created. Metric JSON is
  * returned raw and workout payloads are relayed as built — both shapes live in
  * `@kaiord/trainingpeaks` and run SPA-side; this bridge never imports it. The
  * session cookie is never read or exposed; session presence is a boolean only.
@@ -72,8 +73,8 @@ try {
 //
 // Defense-in-depth allowlist (single-physical-line entries, locked by
 // scripts/check-bridge-privacy-surface.mjs): the cookie-only token endpoint,
-// the metric-range read, the single-metric write, and the structured-workout
-// write. The SPA never supplies a raw path — athlete id / date range are
+// the metric-range read, the single-metric write, the structured-workout
+// write, and the read of one workout by id. The SPA never supplies a raw path — athlete id / date range are
 // interpolated here — but the bridge still refuses any tpapi request outside
 // this set.
 // prettier-ignore — each entry MUST stay on one physical line so the privacy
@@ -91,6 +92,7 @@ const ALLOWED = [
   { method: "GET", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetrics\/[^\/]+\/[^\/]+$/ },
   { method: "POST", pattern: /^\/metrics\/v3\/athletes\/\d+\/consolidatedtimedmetric$/ },
   { method: "POST", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts$/ },
+  { method: "GET", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts\/\d+$/ },
 ];
 /* eslint-enable no-useless-escape */
 
@@ -140,14 +142,18 @@ const spaceReads = async (minIntervalMs) => {
 
 // Session probe for the SPA connection pill. Reports a boolean plus the
 // resolved athlete id (so the SPA can build write payloads); never the token.
+// When not authenticated, `needsReauth` says whether TrainingPeaks reported a
+// dead session or merely failed to answer.
 const checkSession = async () => {
   const result = { ...BRIDGE_MANIFEST };
   try {
     const probe = await tpAuth.checkTokenExchange(fetch);
     result.authenticated = probe.ok === true;
     if (probe.ok) result.athleteId = probe.athleteId;
+    else result.needsReauth = probe.needsReauth === true;
   } catch {
     result.authenticated = false;
+    result.needsReauth = false;
   }
   return result;
 };
@@ -217,6 +223,23 @@ const pushWorkout = async (message) => {
   return res.data;
 };
 
+// GET one workout by the id TrainingPeaks gave it when Kaiord created it, so
+// the Kaiord App can read the live state before deciding a write. Only the id
+// and day leave the service worker: the rest (titles, notes, what the athlete
+// recorded) is dropped here. A failure keeps its status (404: not there).
+const readWorkout = async (message) => {
+  const workoutId = String(message.workoutId ?? "");
+  if (!/^\d+$/.test(workoutId)) throw new Error("Missing workout id");
+  const athleteId = message.athleteId ?? (await tpAuth.ensureAthleteId(fetch));
+  if (athleteId === null || athleteId === undefined) {
+    throw new Error("Could not resolve TrainingPeaks athlete id");
+  }
+  const path = `/fitness/v6/athletes/${athleteId}/workouts/${workoutId}`;
+  const res = await tpFetch(path, "GET");
+  if (!res?.ok) throw toBridgeError("Workout read failed", res);
+  return { workoutId: res.data?.workoutId, workoutDay: res.data?.workoutDay };
+};
+
 const openTrainingPeaks = async () => {
   await chrome.tabs.create({ url: OPEN_TRAININGPEAKS_URL });
 };
@@ -232,6 +255,8 @@ const handleAction = async (message) => {
       return await pushWeight(message);
     case "push-workout":
       return await pushWorkout(message);
+    case "read-workout":
+      return await readWorkout(message);
     case "open-trainingpeaks":
       await openTrainingPeaks();
       return null;
@@ -252,6 +277,7 @@ const EXTERNAL_ACTIONS = new Set([
   "read-metrics",
   "push-weight",
   "push-workout",
+  "read-workout",
   "open-trainingpeaks",
   "set-theme",
 ]);
@@ -288,6 +314,7 @@ if (typeof module !== "undefined") {
     readMetrics,
     pushWeight,
     pushWorkout,
+    readWorkout,
     openTrainingPeaks,
     handleAction,
     dispatch,

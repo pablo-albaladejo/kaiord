@@ -20,6 +20,8 @@ const READ_METRICS_TIMEOUT_MS = 30_000;
 const trainingPeaksSessionSchema = z.object({
   authenticated: z.boolean(),
   athleteId: z.number().optional(),
+  /** Absent from an older extension, which cannot tell the two apart. */
+  needsReauth: z.boolean().optional(),
 });
 
 export type TrainingPeaksSession = z.infer<typeof trainingPeaksSessionSchema>;
@@ -28,11 +30,19 @@ export class TrainingPeaksBridgeError extends Error {
   readonly needsReauth: boolean;
   /** False when the extension never answered — it is gone, not signed out. */
   readonly delivered: boolean;
-  constructor(message: string, needsReauth = false, delivered = true) {
+  /** TrainingPeaks' HTTP status, when the extension reported one. */
+  readonly status: number | undefined;
+  constructor(
+    message: string,
+    needsReauth = false,
+    delivered = true,
+    status?: number
+  ) {
     super(message);
     this.name = "TrainingPeaksBridgeError";
     this.needsReauth = needsReauth;
     this.delivered = delivered;
+    this.status = status;
   }
 }
 

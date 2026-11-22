@@ -68,10 +68,14 @@ const bearerCore = () => {
   return bearerCoreCache;
 };
 
-// Auth errors carry needsReauth so the SPA can prompt a TrainingPeaks login.
-const authError = (message) => {
+// A failed exchange carries needsReauth only when the session-fetch master
+// saw a dead session (redirect/401/403); a 500 is TrainingPeaks failing, not a
+// revoked sign-in, and keeps its status instead. A 200 without a token (or
+// without JSON, such as a login page) still reads as no session.
+const authError = (message, res = {}) => {
   const err = new Error(message);
-  err.needsReauth = true;
+  if (res.needsReauth) err.needsReauth = true;
+  if (typeof res.status === "number") err.status = res.status;
   err.retryable = true;
   return err;
 };
@@ -108,18 +112,23 @@ const exchangeToken = async (fetchImpl) => {
   });
   if (!res.ok) {
     throw authError(
-      res.error || "TrainingPeaks session expired — sign in and retry"
+      res.error || "TrainingPeaks session expired — sign in and retry",
+      res
     );
   }
   let payload;
   try {
     payload = JSON.parse(res.body);
   } catch {
-    throw authError("TrainingPeaks token exchange returned a non-JSON body");
+    throw authError("TrainingPeaks token exchange returned a non-JSON body", {
+      needsReauth: true,
+    });
   }
   const accessToken = payload?.token?.access_token;
   if (!accessToken) {
-    throw authError("TrainingPeaks token exchange returned no access token");
+    throw authError("TrainingPeaks token exchange returned no access token", {
+      needsReauth: true,
+    });
   }
   const expiresIn = Number(payload?.token?.expires_in) || 0;
   const record = {
