@@ -168,30 +168,21 @@ describe("definite failures roll the claim back", () => {
 });
 
 describe("schedule 404 (AC-32)", () => {
-  it("should flag a library id from an earlier push as missing, then re-create it on the next push [S]", async () => {
+  it("should re-create a library workout Garmin no longer holds and place it in the same Send [S]", async () => {
     // Arrange
     const h = createPlacementHarness();
     await h.push(D1);
-    const previous = (await h.row())?.placement;
     h.calendar.scripts.schedule.push({ answer: { ok: false, status: 404 } });
-    const failedRun = await h.push(D2);
-    const flagged = await h.row();
 
     // Act
     const result = await h.push(D2);
 
     // Assert
-    expect(failedRun).toEqual({
-      kind: "failed",
-      reason: "library-missing",
-      retryable: true,
-    });
-    expect(flagged).toMatchObject({
-      forceRepush: true,
-      library: { kind: "missing" },
-      placement: previous,
-    });
     expect(result).toEqual({ kind: "moved" });
+    expect((await h.row())?.library).toEqual({
+      kind: "confirmed",
+      workoutId: "1700001",
+    });
     expect(h.library.pushes).toBe(2);
     expect((await h.row())?.forceRepush).toBeUndefined();
     expect(h.calendar.calls.slice(-LAST_THREE).map((c) => c.op)).toEqual([

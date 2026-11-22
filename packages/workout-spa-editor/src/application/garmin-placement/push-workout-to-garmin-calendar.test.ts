@@ -70,7 +70,7 @@ describe("pushWorkoutToGarminCalendar — happy paths", () => {
   );
 
   it.each(["C", "U"] as const)(
-    "should make 0 calls and keep updatedAt on an unchanged re-push [%s]",
+    "should make no write, only the read of its entry, and keep updatedAt on an unchanged re-push [%s]",
     async (path) => {
       // Arrange
       const h = createPlacementHarness();
@@ -86,7 +86,9 @@ describe("pushWorkoutToGarminCalendar — happy paths", () => {
 
       // Assert
       expect(result).toEqual({ kind: "unchanged" });
-      expect(h.calendar.calls.length).toBe(calls);
+      expect(h.calendar.calls.slice(calls)).toEqual([
+        { op: "find", workoutId: before?.library?.workoutId, date },
+      ]);
       expect(h.library.pushes).toBe(pushes);
       expect((await h.row())?.updatedAt).toBe(before?.updatedAt);
     }

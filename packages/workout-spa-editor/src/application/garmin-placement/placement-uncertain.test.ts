@@ -84,6 +84,7 @@ describe("resolving uncertain by reading the calendar (T5, spec 6.4)", () => {
     const s1 = h.calendar.mint(W, D3);
     const s2 = h.calendar.mint(W, D2);
     await uncertainAt(h, [held(s1, D3), held(s2, D2), held("4", "2026-11-03")]);
+    const finds = h.calendar.count("find");
 
     // Act
     const result = await h.push(D2);
@@ -102,7 +103,7 @@ describe("resolving uncertain by reading the calendar (T5, spec 6.4)", () => {
       "4": "gone",
     });
     expect(h.calendar.count("unschedule")).toBe(0);
-    expect(h.calendar.count("find")).toBe(2);
+    expect(h.calendar.count("find")).toBe(finds + 2);
   });
 
   it("should retire and drain a scheduled previous of the uncertain", async () => {

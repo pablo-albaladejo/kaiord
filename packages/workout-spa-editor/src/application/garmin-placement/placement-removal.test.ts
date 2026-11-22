@@ -245,6 +245,7 @@ describe("removal queue (AC-24)", () => {
 
     // Assert
     expect(h.calendar.calls.slice(calls).map((c) => c.op)).toEqual([
+      "find",
       "schedule",
       "find",
       "unschedule",
@@ -357,11 +358,26 @@ describe("verify before delete (design §3.5)", () => {
     return { oldId, placedId, deletes: h.calendar.count("unschedule") };
   };
 
+  /** The read before "unchanged" still sees the `Placed`; it is gone (or
+      replaced by `rest`) before the drain verifies it. */
+  const vanishAfterFirstRead = (
+    h: PlacementHarness,
+    ...rest: ReturnType<typeof idless>[]
+  ) => {
+    const find = h.calendar.port.find;
+    h.calendar.port.find = async (w, d) => {
+      const read = await find(w, d);
+      h.calendar.port.find = find;
+      h.calendar.items.splice(1, 1, ...rest);
+      return read;
+    };
+  };
+
   it("should turn a Placed absent from Garmin gone and uncertain, deleting nothing", async () => {
     // Arrange
     const h = createPlacementHarness();
     const { oldId, placedId, deletes } = await retireBehind(h);
-    h.calendar.items.splice(1, 1);
+    vanishAfterFirstRead(h);
 
     // Act
     const result = await h.push(D2);
@@ -383,7 +399,7 @@ describe("verify before delete (design §3.5)", () => {
     // Arrange
     const h = createPlacementHarness();
     const { placedId } = await retireBehind(h);
-    h.calendar.items.splice(1, 1, idless(D3));
+    vanishAfterFirstRead(h, idless(D3));
 
     // Act
     const result = await h.push(D2);
@@ -413,7 +429,11 @@ describe("verify before delete (design §3.5)", () => {
     // Arrange
     const h = createPlacementHarness();
     const { oldId, deletes } = await retireBehind(h);
-    h.calendar.scripts.find.push({ ok: false, status: 500 });
+    // The read before "unchanged", then the drain's verifying read.
+    h.calendar.scripts.find.push(
+      { ok: false, status: 500 },
+      { ok: false, status: 500 }
+    );
 
     // Act
     const result = await h.push(D2);
