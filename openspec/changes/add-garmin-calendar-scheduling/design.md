@@ -175,7 +175,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - flat optional fields
 - the date in the hash
 - the salvage in-`pushFn` gate
-- reading before every POST
+- reading before every POST (reversed by #1633: see "Safe writes settled in #1633")
 - always asking a human
 - a DELETE kill switch
 - detecting coach moves at convert or at push time
@@ -793,3 +793,71 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   count rules of §3.4 apply. A wrong `true` can at worst re-POST after the
   gate (a duplicate); it can never delete an entry the read did not see
   without an id.
+
+## Safe writes settled in #1633
+
+The review of 2026-11-22 found that scheduling decided some writes from the
+ledger alone. ADR 0004 requires the live state to be read before a write is
+decided, so this section reverses the alternative "reading before every
+POST" and refines §3.3 step 4 and the 404 row of step 6. The invariant is
+unchanged: never a gap, a duplicate at worst, and nothing deleted outside
+the record.
+
+What the review found, each shown by a test at the message contract
+(`hooks/garmin-safe-writes.test.ts`, a fake Garmin that holds state behind
+`chrome.runtime.sendMessage`):
+
+- An entry the athlete deleted in Garmin was never put back: a `Placed`
+  equal to the desired placement returned `unchanged` with no read, so
+  every later send left 0 entries.
+- A library workout the athlete deleted in Garmin took two sends: the
+  first answered `library-missing`, only the second re-created it.
+- A record that lost its placement (an older snapshot restored, a merge
+  that dropped an attempt) posted a second entry next to the one Garmin
+  still held.
+
+What changed:
+
+- **Read before a POST.** After the claim and before the `schedule`, one
+  `calendar-find` of the claimed workout and date. An entry the record does
+  not know (not `previous`, not in `supersedes`) is adopted through the
+  commit, no POST; a failed read restores the claim (verbatim when only
+  this run touched the row) and answers `failed{calendar-unreadable}`,
+  retryable, with no write. "Send anyway" skips the read: it is the
+  athlete's answer to an entry they do not see. Cost: one read per placed
+  workout.
+- **Read before "unchanged".** A `scheduled` `Placed` equal to the desired
+  placement is read first; absent on two reads `SETTLE_MS` apart, its id is
+  written `gone` and the placement cleared in one guarded write, and the
+  same run claims it again. This replaces, for an explicit send, "a hand
+  deletion stays the athlete's own act" and the `uncertain` of N3 (a
+  `Placed` dragged to another month): the athlete pressed Send, and Kaiord
+  had just proven the entry gone. The moved entry is left where the athlete
+  put it (a duplicate, never deleted). Cost: one read per unchanged send.
+- **A 404 re-creates in the same send.** A `library-missing` placement runs
+  Phase 1 once more (the 404 set `forceRepush`) and places the new library
+  workout; a second `library-missing` is reported as before.
+- **Key order.** The claim writes `placement` before `removalQueue`, the
+  order the merge emits, so a placement written over a cleared one stays
+  idempotent under the merge laws.
+
+Not changed, and why:
+
+- **A library push that died after Garmin created it** (the tab closed
+  between the library POST and its commit) still re-pushes once the pending
+  row is older than `PENDING_TTL_MS`, leaving one unscheduled duplicate in
+  the library (the calendar holds one entry). Reconciling it needs a read
+  that identifies the workout: the bridge's `list` returns 20 workouts in
+  an order never captured live, and its `createdDate` carries no time zone,
+  so a match by name and time would rest on unverified assumptions and
+  could adopt the athlete's own workout of the same name. Within the TTL a
+  second send is refused (`busy`) and nothing is written.
+- **An edit** creates a new library workout (the bridge has no update
+  path, and Kaiord never overwrites or deletes a library workout); the
+  calendar entry moves to it, so the calendar holds one entry and the
+  library keeps the old version (follow-up "cleaning up superseded library
+  workouts").
+- **Adopting an unknown entry** of Kaiord's own library workout on the
+  Workout's date brings it into the record, so a later move deletes it.
+  Only Kaiord's library workout id is matched; the athlete's own workouts
+  and activities are never matched.
