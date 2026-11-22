@@ -32,15 +32,17 @@ import { applySiteCsp } from "./lib/site-csp.mjs";
 
 export const UMAMI_PLACEHOLDER = "__UMAMI_WEBSITE_ID__";
 
-const INTERNAL_AGENT_NOTES = new Set(["AGENTS.md", "CLAUDE.md"]);
-const isPublic = (path) => !INTERNAL_AGENT_NOTES.has(basename(path));
+// Case-insensitive: macOS and Windows checkouts treat `agents.md` as AGENTS.md.
+const INTERNAL_AGENT_NOTE = /^(agents|claude)\.md$/i;
+const isNotInternalAgentNote = (path) =>
+  !INTERNAL_AGENT_NOTE.test(basename(path));
 const copyPublic = (from, to) =>
-  cpSync(from, to, { recursive: true, filter: isPublic });
+  cpSync(from, to, { recursive: true, filter: isNotInternalAgentNote });
 
 const copyGlobContents = (from, to) => {
   if (!existsSync(from)) throw new Error(`Build output missing: ${from}`);
   const entries = readdirSync(from).filter(
-    (entry) => !entry.startsWith(".") && isPublic(entry)
+    (entry) => !entry.startsWith(".") && isNotInternalAgentNote(entry)
   );
   // An unmatched glob is literal in sh, so `cp -r empty/*` fails too.
   if (entries.length === 0) throw new Error(`Build output empty: ${from}`);

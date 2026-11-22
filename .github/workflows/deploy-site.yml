@@ -152,7 +152,7 @@ jobs:
           test -f merged-dist/.well-known/api-catalog || { echo "❌ Missing .well-known/api-catalog"; exit 1; }
           test -f merged-dist/.well-known/poppy.json || { echo "❌ Missing .well-known/poppy.json"; exit 1; }
           test -f merged-dist/.well-known/security.txt || { echo "❌ Missing .well-known/security.txt"; exit 1; }
-          if find merged-dist -name AGENTS.md -o -name CLAUDE.md | grep -q .; then echo "❌ Internal agent notes in merged artifact"; exit 1; fi
+          if find merged-dist -iname AGENTS.md -o -iname CLAUDE.md | grep -q .; then echo "❌ Internal agent notes in merged artifact"; exit 1; fi
           test -f merged-dist/docs/llms.txt        || { echo "❌ Missing docs/llms.txt"; exit 1; }
           test -f merged-dist/docs/llms-full.txt   || { echo "❌ Missing docs/llms-full.txt"; exit 1; }
           test -f merged-dist/.well-known/ai-catalog.json || { echo "❌ Missing .well-known/ai-catalog.json"; exit 1; }
