@@ -47,7 +47,7 @@ const POLICY_PATH = join(REPO_ROOT, "packages/docs/legal/privacy-policy.md");
 // alone?" into a statement about the fixture rather than about the policy.
 const POLICY = readFileSync(POLICY_PATH, "utf8");
 
-const GARMIN = "Kaiord Garmin Bridge Extension";
+const GARMIN = "Kaiord for Garmin Extension";
 const TRAIN2GO = "Kaiord Train2Go Bridge Extension";
 const TANITA = "Kaiord Tanita Bridge Extension";
 const TRAININGPEAKS = "Kaiord TrainingPeaks Bridge Extension";
@@ -754,17 +754,21 @@ for (const [heading, oneLiner] of GUTTED_CASES) {
 // `^## Kaiord <Name> Bridge Extension$`, this mutation was invisible.
 
 const SECTION_CASES = [
-  { bridge: "Garmin", heading: GARMIN },
-  { bridge: "Train2Go", heading: TRAIN2GO },
-  { bridge: "Tanita", heading: TANITA },
-  { bridge: "TrainingPeaks", heading: TRAININGPEAKS },
-  { bridge: "WHOOP", heading: WHOOP },
+  { bridge: "Garmin", heading: GARMIN, intro: "Kaiord for Garmin" },
+  { bridge: "Train2Go", heading: TRAIN2GO, intro: "Kaiord Train2Go Bridge" },
+  { bridge: "Tanita", heading: TANITA, intro: "Kaiord Tanita Bridge" },
+  {
+    bridge: "TrainingPeaks",
+    heading: TRAININGPEAKS,
+    intro: "Kaiord TrainingPeaks Bridge",
+  },
+  { bridge: "WHOOP", heading: WHOOP, intro: "Kaiord WHOOP Bridge" },
 ];
 
-for (const { bridge, heading } of SECTION_CASES) {
+for (const { bridge, heading, intro } of SECTION_CASES) {
   test(`deleting the ${bridge} section is flagged even though the intro still names it`, () => {
     const src = dropSection(POLICY, heading);
-    assert.match(src, new RegExp(`Kaiord ${bridge} Bridge`));
+    assert.match(src, new RegExp(intro));
 
     const sectionRules = REQUIRED_RULES.filter((r) => r.section === heading);
     assert.ok(sectionRules.length > 0, `no rules anchored to ${heading}`);

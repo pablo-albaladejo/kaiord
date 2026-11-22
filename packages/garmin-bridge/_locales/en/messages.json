@@ -4,7 +4,7 @@
     "description": "Extension name shown in the Chrome Web Store and toolbar."
   },
   "extDescription": {
-    "message": "Connects the Kaiord workout editor to Garmin Connect via your browser session",
+    "message": "Lets the Kaiord App send workouts to Garmin Connect and read your activities, using your own Garmin sign-in",
     "description": "Extension description shown in the Chrome Web Store."
   },
   "checking": {

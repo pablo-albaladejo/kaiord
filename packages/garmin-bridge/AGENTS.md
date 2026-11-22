@@ -36,6 +36,7 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
   - `kaiord-announce.test.js` — Vendored from `_shared/bridge-core/test/` — edit the master, then `pnpm bridge:sync` (runtime detection, context invalidation).
   - `popup.test.js` — Popup UI tests (status rendering, snapshot staleness, fetch timeouts).
   - `profile-snapshot.test.js` — Profile validator tests (shape validation, pollution detection, length cap).
+  - `token-confinement.test.js` — The tokens stay in `chrome.storage.local`, no answer to any external action carries one, and every request goes to `sso.garmin.com` or `connectapi.garmin.com`. Proof for the listing and policy claims.
 - **`icons/`** — Extension icons (16px, 48px, 128px PNG files referenced in manifest).
 - **`assets/`** — Chrome Web Store marketing assets (promo images, screenshots for listing).
 
@@ -135,8 +136,8 @@ Non-generated files beyond the AI agent's responsibility:
 - `package.json` — npm metadata and version pinning.
 - `CHANGELOG.md` — Version history.
 - `TESTING.md` — Manual integration test checklist (not automated).
-- `store-listing.md` — Chrome Web Store listing copy (category, description, features).
-- `privacy-justification.md` — Privacy rationale for host permissions (required by Chrome Web Store).
+- `store-listing.md` — Chrome Web Store listing copy (category, description, features). Its Short and Detailed Description are a registered claims surface (`claims/garmin.json`, `pnpm lint:claims`).
+- `privacy-justification.md` — Permission justifications (required by Chrome Web Store). A registered claims surface: every paragraph needs an entry in `claims/garmin.json`.
 
 ### Vendored bridge-core files
 
