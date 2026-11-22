@@ -124,6 +124,22 @@ describe("useTrainingPeaksPush", () => {
     }
   );
 
+  it("should not ask to sign in when TrainingPeaks failed to answer the session check", async () => {
+    // Arrange
+    mocks.checkSession.mockResolvedValue({
+      authenticated: false,
+      needsReauth: false,
+    });
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    const outcome = await result.current.push();
+
+    // Assert
+    expect(outcome).toEqual({ ok: false, reason: "not-answering" });
+    expect(mocks.executePush).not.toHaveBeenCalled();
+  });
+
   it("should push and return the created workout id", async () => {
     // Arrange
     const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
@@ -180,9 +196,7 @@ describe("useTrainingPeaksPush", () => {
 
   it("should surface the thrown message and record the failure", async () => {
     // Arrange
-    mocks.executePush.mockRejectedValue(
-      new Error("402 beyond the account planning horizon")
-    );
+    mocks.executePush.mockRejectedValue(new Error("Workout push failed: 500"));
 
     // Act
     const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
@@ -191,8 +205,27 @@ describe("useTrainingPeaksPush", () => {
     // Assert
     expect(outcome).toEqual({
       ok: false,
-      message: "402 beyond the account planning horizon",
+      message: "Workout push failed: 500",
     });
+    expect(mocks.event).toHaveBeenCalledWith("trainingpeaks-workout-pushed", {
+      result: "failure",
+    });
+  });
+
+  it("should name the planning horizon when TrainingPeaks refuses the day with a 402", async () => {
+    // Arrange
+    mocks.executePush.mockRejectedValue(
+      Object.assign(new Error("TrainingPeaks refused the date"), {
+        status: 402,
+      })
+    );
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    const outcome = await result.current.push();
+
+    // Assert
+    expect(outcome).toEqual({ ok: false, reason: "horizon" });
     expect(mocks.event).toHaveBeenCalledWith("trainingpeaks-workout-pushed", {
       result: "failure",
     });

@@ -41,7 +41,12 @@
     "sendDisabled": {
       "noExtension": "Instala la Extensión de Kaiord para Garmin para enviar este entreno.",
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."
-    }
+    },
+    "trainingPeaksHorizon": {
+      "beforeSend": "En una cuenta Basic de TrainingPeaks solo se aceptan hoy y mañana, así que TrainingPeaks puede rechazar este día.",
+      "refused": "TrainingPeaks ha rechazado este día: una cuenta Basic solo acepta hoy y mañana. Programa el entrenamiento para uno de ellos."
+    },
+    "trainingPeaksNotAnswering": "TrainingPeaks no responde. Inténtalo de nuevo."
   },
   "summary": {
     "duration": "Duración",

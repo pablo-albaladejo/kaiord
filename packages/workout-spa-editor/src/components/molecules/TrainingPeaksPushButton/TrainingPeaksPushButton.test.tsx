@@ -9,7 +9,7 @@
 
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type {
   TrainingPeaksPushOptions,
@@ -175,6 +175,76 @@ describe("TrainingPeaksPushButton", () => {
     expect(
       await screen.findByText("footer.sentToTrainingPeaks")
     ).toBeInTheDocument();
+  });
+
+  describe("planning horizon", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-11-23T09:00:00"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should say before sending that a day after tomorrow may be refused", () => {
+      // Arrange
+      const later = { ...workout, date: "2026-11-25" } as WorkoutRecord;
+
+      // Act
+      render(<TrainingPeaksPushButton workout={later} />);
+
+      // Assert
+      expect(
+        screen.getByTestId("trainingpeaks-horizon-notice")
+      ).toHaveTextContent("footer.trainingPeaksHorizon.beforeSend");
+      expect(push).not.toHaveBeenCalled();
+      expect(screen.getByTestId("send-to-trainingpeaks-button")).toBeEnabled();
+    });
+
+    it.each(["2026-11-23", "2026-11-24"])(
+      "should not warn for %s, which every account accepts",
+      (date) => {
+        // Arrange
+        const near = { ...workout, date } as WorkoutRecord;
+
+        // Act
+        render(<TrainingPeaksPushButton workout={near} />);
+
+        // Assert
+        expect(
+          screen.queryByTestId("trainingpeaks-horizon-notice")
+        ).not.toBeInTheDocument();
+      }
+    );
+
+    it("should explain TrainingPeaks' refusal of the day with the same reason", async () => {
+      // Arrange
+      push.mockResolvedValue({ ok: false, reason: "horizon" });
+      render(<TrainingPeaksPushButton workout={workout} />);
+
+      // Act
+      await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+
+      // Assert
+      expect(
+        await screen.findByTestId("trainingpeaks-push-error")
+      ).toHaveTextContent("footer.trainingPeaksHorizon.refused");
+    });
+  });
+
+  it("should say TrainingPeaks is not answering when the cause is unknown", async () => {
+    // Arrange
+    push.mockResolvedValue({ ok: false, reason: "not-answering" });
+    render(<TrainingPeaksPushButton workout={workout} />);
+
+    // Act
+    await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+
+    // Assert
+    expect(
+      await screen.findByTestId("trainingpeaks-push-error")
+    ).toHaveTextContent("footer.trainingPeaksNotAnswering");
   });
 
   it("should send nothing when the athlete cancels the copy", async () => {

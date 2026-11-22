@@ -57,6 +57,10 @@ Required` for any `workoutDay` beyond the account's planning horizon — one day
   browser's. The gate is the date, not the structure: an unstructured workout at
   +2 days is refused identically. The bridge surfaces this with its own message
   so it is never mistaken for a malformed payload.
-- **Not in scope**: reading workouts back from TrainingPeaks, the exercise
+- **Added by #1636**: the Basic account limit is stated before sending, the
+  402 is explained in the athlete's language, a re-send reads back the one
+  workout Kaiord created (`read-workout`, by id only), and a failed token
+  exchange no longer reads as a revoked sign-in (#1105).
+- **Not in scope**: reading the athlete's other workouts back from TrainingPeaks, the exercise
   library (which has no date gate and is a candidate follow-up), the official
   partner API, and any Chrome Web Store release.
