@@ -122,7 +122,13 @@ async function inspect(row, fetch, timeoutMs) {
       return "body is not JSON";
     }
   }
-  return row.predicate(parsed) ? null : "body check failed";
+  // A predicate that throws read as a fetch failure and sent triage to the
+  // network; it is a body problem.
+  try {
+    return row.predicate(parsed) ? null : "body check failed";
+  } catch (error) {
+    return `body check threw: ${error.message}`;
+  }
 }
 
 export async function checkRow(row, fetch, timeoutMs = DEADLINE_MS) {
