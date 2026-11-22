@@ -282,6 +282,10 @@ const config = {
           { text: "Architecture", link: "/guide/architecture" },
           { text: "Testing", link: "/guide/testing" },
           { text: "Contributing", link: "/guide/contributing" },
+          {
+            text: "How Kaiord is built",
+            link: "/project/how-kaiord-is-built",
+          },
         ],
       },
       {

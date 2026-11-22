@@ -23,6 +23,7 @@ VitePress documentation site for Kaiord, published at https://kaiord.com/docs. R
 - **`cli/`** — CLI reference: commands.md (static, not auto-generated)
 - **`mcp/`** — MCP tools reference: tools.md
 - **`legal/`** — Privacy policy (single page, linted by check-privacy-policy.mjs)
+- **`project/`** — How Kaiord is built (the method note behind the landing's AI-coded line). Every paragraph is registered in `claims/method.json`, and every figure is rerun at its pinned commit by `pnpm lint:method-figures`
 - **`api/`** — Auto-generated TypeScript API reference (TypeDoc + markdown plugin)
   - `api/{cli,core,fit,garmin,garmin-connect,mcp,tcx,zwo}/` — Auto-generated; do NOT hand-edit
   - Each subdir contains classes/, functions/, type-aliases/, variables/ from TypeDoc
