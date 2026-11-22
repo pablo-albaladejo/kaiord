@@ -29,6 +29,17 @@
       ]
     },
     {
+      "identifier": "urn:air:kaiord.com:agent:kaiord-a2a",
+      "displayName": "Kaiord A2A endpoint",
+      "type": "application/a2a+json",
+      "url": "https://kaiord.com/.well-known/agent-card.json",
+      "representativeQueries": [
+        "A2A agent that converts FIT workouts to Zwift ZWO",
+        "A2A 1.0 agent for validating structured workout files",
+        "agent-to-agent workout file conversion with no account"
+      ]
+    },
+    {
       "identifier": "urn:air:kaiord.com:skills:index",
       "displayName": "Kaiord agent skills",
       "type": "application/agent-skills+json",

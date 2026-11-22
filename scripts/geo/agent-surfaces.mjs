@@ -20,7 +20,13 @@ export const REMOTE_TOOLS = [
 ];
 
 const MCP_ENDPOINT = `${ORIGIN}/mcp`;
+const A2A_ENDPOINT = `${ORIGIN}/a2a`;
 const SERVER_CARD = `${ORIGIN}/.well-known/mcp/server-card.json`;
+const AGENT_CARD = `${ORIGIN}/.well-known/agent-card.json`;
+const CARD_OF_ANCHOR = new Map([
+  [MCP_ENDPOINT, SERVER_CARD],
+  [A2A_ENDPOINT, AGENT_CARD],
+]);
 const DEADLINE_MS = 20_000;
 
 const json = (path, predicate) => ({
@@ -49,14 +55,18 @@ export const isSkillsIndex = (index) =>
     (skill) => skill?.url && /^sha256:[0-9a-f]{64}$/.test(skill.digest)
   );
 
-// Every anchor is an endpoint with a card; today that is /mcp alone.
+// Every anchor is an endpoint described by its own card.
 export const isApiCatalog = (catalog) =>
   Array.isArray(catalog?.linkset) &&
-  catalog.linkset.length > 0 &&
+  catalog.linkset.length === CARD_OF_ANCHOR.size &&
+  [...CARD_OF_ANCHOR.keys()].every((anchor) =>
+    catalog.linkset.some((context) => context?.anchor === anchor)
+  ) &&
   catalog.linkset.every(
     (context) =>
-      context?.anchor === MCP_ENDPOINT &&
-      context["service-desc"]?.[0]?.href === SERVER_CARD &&
+      CARD_OF_ANCHOR.has(context?.anchor) &&
+      context["service-desc"]?.[0]?.href ===
+        CARD_OF_ANCHOR.get(context.anchor) &&
       !("status" in context)
   );
 
@@ -68,6 +78,43 @@ export const isPoppy = (manifest) =>
   manifest.protocol_version === "0.1" &&
   manifest.organization?.domain === "kaiord.com" &&
   JSON.stringify(manifest.web) === "{}";
+
+export const isAgentCard = (card) => {
+  const entry = card?.supportedInterfaces?.[0];
+  return entry?.url === A2A_ENDPOINT && entry.protocolBinding === "JSONRPC";
+};
+
+export const isCompletedTask = (reply) => {
+  const task = reply?.result?.task;
+  const text = task?.artifacts?.[0]?.parts?.[0]?.text;
+  return (
+    task?.status?.state === "TASK_STATE_COMPLETED" &&
+    typeof text === "string" &&
+    text.length > 0
+  );
+};
+
+const sortedNames = (names) => JSON.stringify([...(names ?? [])].sort());
+
+export const cardMatchesTools = (card, reply) =>
+  Array.isArray(card?.skills) &&
+  card.skills.length > 0 &&
+  sortedNames(card.skills.map((skill) => skill.id)) ===
+    sortedNames(reply?.result?.tools?.map((tool) => tool.name));
+
+const TOOLS_LIST = {
+  method: "POST",
+  url: MCP_ENDPOINT,
+  headers: {
+    "content-type": "application/json",
+    accept: "application/json, text/event-stream",
+  },
+  body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+  typePrefix: "application/json",
+  parse: "json",
+};
+
+const AGENT_CARD_ROW = json("/.well-known/agent-card.json", isAgentCard);
 
 export const ROWS = [
   {
@@ -87,42 +134,75 @@ export const ROWS = [
   json("/.well-known/poppy.json", isPoppy),
   {
     name: "POST /mcp tools/list",
-    method: "POST",
-    url: MCP_ENDPOINT,
-    headers: {
-      "content-type": "application/json",
-      accept: "application/json, text/event-stream",
-    },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
-    typePrefix: "application/json",
-    parse: "json",
+    ...TOOLS_LIST,
     predicate: (body) =>
       JSON.stringify(body?.result?.tools?.map((t) => t.name).sort()) ===
       JSON.stringify(REMOTE_TOOLS),
   },
+  AGENT_CARD_ROW,
+  {
+    name: "POST /a2a SendMessage",
+    method: "POST",
+    url: A2A_ENDPOINT,
+    headers: { "content-type": "application/json", "A2A-Version": "1.0" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "SendMessage",
+      params: {
+        message: {
+          messageId: "agent-surfaces",
+          role: "ROLE_USER",
+          parts: [{ data: { skill: "kaiord_list_formats" } }],
+        },
+      },
+    }),
+    typePrefix: "application/json",
+    parse: "json",
+    predicate: isCompletedTask,
+  },
+  {
+    ...AGENT_CARD_ROW,
+    name: "agent card skills vs /mcp tools/list",
+    joins: TOOLS_LIST,
+    predicate: cardMatchesTools,
+  },
 ];
 
 // The signal also aborts the body read, so a stalled stream ends the row.
-async function inspect(row, fetch, timeoutMs) {
+async function read(row, fetch, signal) {
   const { method = "GET", headers, body } = row;
-  const signal = AbortSignal.timeout(timeoutMs);
   const response = await fetch(row.url, { method, headers, body, signal });
   if (response.status !== (row.status ?? 200))
-    return `status ${response.status}`;
+    return { reason: `status ${response.status}` };
   const type = response.headers.get("content-type") ?? "";
-  if (!type.startsWith(row.typePrefix)) return `content-type "${type}"`;
+  if (!type.startsWith(row.typePrefix))
+    return { reason: `content-type "${type}"` };
   if (row.cors && response.headers.get("access-control-allow-origin") !== "*")
-    return "missing CORS *";
+    return { reason: "missing CORS *" };
   const text = await response.text();
-  let parsed = text;
-  if (row.parse === "json") {
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      return "body is not JSON";
-    }
+  if (row.parse !== "json") return { parsed: text };
+  try {
+    return { parsed: JSON.parse(text) };
+  } catch {
+    return { reason: "body is not JSON" };
   }
-  return row.predicate(parsed) ? null : "body check failed";
+}
+
+// A row with `joins` reads a second reply and hands both to its predicate.
+async function inspect(row, fetch, timeoutMs) {
+  const signal = AbortSignal.timeout(timeoutMs);
+  const first = await read(row, fetch, signal);
+  if (first.reason) return first.reason;
+  const second = row.joins ? await read(row.joins, fetch, signal) : {};
+  if (second.reason) return `joined reply: ${second.reason}`;
+  try {
+    return row.predicate(first.parsed, second.parsed)
+      ? null
+      : "body check failed";
+  } catch (error) {
+    return `body check threw: ${error.message}`;
+  }
 }
 
 export async function checkRow(row, fetch, timeoutMs = DEADLINE_MS) {

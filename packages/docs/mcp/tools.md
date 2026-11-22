@@ -75,6 +75,64 @@ The remote server is a subset of the local one:
 The endpoint stores and logs nothing; see the
 [privacy policy](/legal/privacy-policy#remote-mcp-and-a2a-endpoints).
 
+## A2A
+
+The same eight remote tools are served as A2A 1.0 skills at
+`https://kaiord.com/a2a` (JSON-RPC, no install, no account), described by the
+[agent card](https://kaiord.com/.well-known/agent-card.json). No AI model runs
+behind it.
+
+Send `A2A-Version: 1.0` as a header on every request. This endpoint serves A2A
+1.0 only: a missing or different version gets `-32009`.
+
+Name the skill in the first data part of the message. Its other keys are the
+tool's arguments. A message needs a `messageId` and `parts`. An optional
+`contextId` must be 1-64 letters, digits, `_` or `-`.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "SendMessage",
+  "params": {
+    "message": {
+      "messageId": "m1",
+      "role": "ROLE_USER",
+      "parts": [{ "data": { "skill": "kaiord_list_formats" } }]
+    }
+  }
+}
+```
+
+Each task finishes inside the reply, in one of three states:
+
+- `TASK_STATE_COMPLETED`: the tool's output is in `artifacts[0].parts`.
+- `TASK_STATE_FAILED`: the tool reported an error, given in the status message.
+- `TASK_STATE_REJECTED`: the message names no known skill. The status message
+  lists the skills.
+
+Tasks are not retained, and the endpoint has no streaming and no push
+notifications:
+
+| Request                                            | Error    |
+| -------------------------------------------------- | -------- |
+| `GetTask`, `CancelTask`, a message with a `taskId` | `-32001` |
+| Push notification config methods                   | `-32003` |
+| `configuration.returnImmediately: true`            | `-32004` |
+| `SendStreamingMessage`, `SubscribeToTask`          | `-32004` |
+| `GetExtendedAgentCard`                             | `-32004` |
+| Not a JSON-RPC 2.0 request                         | `-32600` |
+| An unknown method                                  | `-32601` |
+| Invalid params, such as a message with no `parts`  | `-32602` |
+| The tool call could not run                        | `-32603` |
+
+`ListTasks` returns an empty list. A `pageSize` outside 1-100 gets `-32602`.
+
+The limits of the remote endpoint apply here too: inline content only,
+structured workouts only, and a request body of at most 65,536 bytes. The rate
+budget is shared: 10 requests per 10 s per IP per data center across `/mcp` and
+`/a2a`, then a 10 s block. Data centers do not share the count.
+
 ## Tools
 
 ### kaiord_convert
