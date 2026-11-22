@@ -48,7 +48,7 @@ export const APP_ICONS = [
   },
 ];
 
-export const LANDING_SUBTITLE = "One framework. Every fitness format.";
+export const LANDING_SUBTITLE = "Your training and health data, in one place.";
 
 // package public dir → the assets it serves verbatim.
 export const MIRRORS = {

@@ -122,5 +122,9 @@ test("the core-live mark defers to the token with an ink fallback", () => {
 });
 
 test("the landing card names the product, not a placeholder", () => {
-  assert.match(LANDING_SUBTITLE, /fitness format/);
+  assert.match(LANDING_SUBTITLE, /training and health data/);
+});
+
+test("the landing card uses none of the retired names", () => {
+  assert.doesNotMatch(LANDING_SUBTITLE, /framework|platform|cockpit/i);
 });
