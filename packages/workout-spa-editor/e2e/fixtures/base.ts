@@ -34,7 +34,9 @@
  */
 
 import type { Page, TestInfo } from "@playwright/test";
-import { test as base } from "@playwright/test";
+import { expect, test as base } from "@playwright/test";
+
+import { watchCspViolations } from "./csp-violations";
 
 const TRANSIENT_NAV_CRASH =
   /encountered an internal error|target crashed|page crashed|Frame load interrupted|is interrupted by another navigation|Navigation canceled by policy check/i;
@@ -92,8 +94,11 @@ function staysInSameDocument(current: string, target: string): boolean {
   }
 }
 
-export const test = base.extend({
-  page: async ({ page }, use, testInfo) => {
+export const test = base.extend<{ cspViolationsAllowed: boolean }>({
+  cspViolationsAllowed: [false, { option: true }],
+  page: async ({ page, cspViolationsAllowed }, use, testInfo) => {
+    const cspViolations = await watchCspViolations(page);
+
     const originalGoto = page.goto.bind(page);
     page.goto = (async (url, options) => {
       const target = appUrl(url);
@@ -126,6 +131,10 @@ export const test = base.extend({
       )) as Page["reload"];
 
     await use(page);
+
+    if (!cspViolationsAllowed) {
+      expect(cspViolations, "content security policy violations").toEqual([]);
+    }
   },
 });
 

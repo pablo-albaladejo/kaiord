@@ -16,6 +16,7 @@ import {
   assembleSite,
   parseAssembleArgs,
 } from "./assemble-site.mjs";
+import { checkSiteCsp } from "./check-site-csp.mjs";
 import { LEGACY_EDITOR_PAGE } from "./emit-legacy-editor-page.mjs";
 
 const HTML = (body) =>
@@ -85,15 +86,26 @@ describe("assemble-site", () => {
     assembleSite(inputs);
 
     const fourOhFour = readFileSync(join(inputs.out, "404.html"), "utf8");
-    assert.match(fourOhFour, /<head>\n {4}<script>/);
+    assert.match(fourOhFour, /<head>(\n {4}<meta [^>]*>)*\n {4}<script>/);
     assert.match(
       readFileSync(join(inputs.out, "app/index.html"), "utf8"),
       /URLSearchParams/
     );
     assert.equal(
-      readFileSync(join(inputs.out, "editor/index.html"), "utf8"),
+      readFileSync(join(inputs.out, "editor/index.html"), "utf8").replace(
+        /\n {4}<meta http-equiv="Content-Security-Policy"[^>]*>/,
+        ""
+      ),
       LEGACY_EDITOR_PAGE
     );
+  });
+
+  it("should give every landing and App page a policy the CSP guard accepts", () => {
+    put(join(inputs.landing, "es/index.html"), HTML("<script>1</script>"));
+
+    assembleSite({ ...inputs, umamiWebsiteId: "w-1" });
+
+    assert.deepEqual(checkSiteCsp(inputs.out), []);
   });
 
   it("should leave placeholders untouched when no website id is set", () => {

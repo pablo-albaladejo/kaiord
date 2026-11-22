@@ -1,16 +1,10 @@
 import { execFileSync } from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { prepareLanding } from "./landing-dist";
 import {
   startStaticPagesServer,
   type StaticPagesServer,
@@ -28,13 +22,6 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, "..", "..", "..", "..");
 
 export const APP_BASE = "/app/";
-
-// Stands in for the landing's error page. It carries a `<head>`, because the
-// legacy-path bridge is injected into it, and a marker so a test can name
-// what it must not see.
-const HOST_404 =
-  "<!DOCTYPE html><html><head><title>Page not found</title></head>" +
-  '<body><p data-testid="host-404">This page does not exist.</p></body></html>';
 
 export type MergedDist = {
   server: StaticPagesServer;
@@ -60,7 +47,10 @@ function assertBuiltForAppBase(indexHtml: string): void {
   }
 }
 
-export async function startMergedDist(label: string): Promise<MergedDist> {
+export async function startMergedDist(
+  label: string,
+  options: { realLanding?: boolean } = {}
+): Promise<MergedDist> {
   const builtIndex = join(builtDist, "index.html");
   if (!existsSync(builtIndex)) {
     throw new Error(
@@ -71,10 +61,8 @@ export async function startMergedDist(label: string): Promise<MergedDist> {
   assertBuiltForAppBase(readFileSync(builtIndex, "utf8"));
 
   const dir = mkdtempSync(join(tmpdir(), `merged-dist-${label}-`));
-  const landing = join(dir, "landing");
   const site = join(dir, "site");
-  mkdirSync(landing);
-  writeFileSync(join(landing, "404.html"), HOST_404);
+  const landing = prepareLanding(dir, repoRoot, options.realLanding === true);
 
   // The same assembly the deploy runs, so the served tree has its shape.
   execFileSync(

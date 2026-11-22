@@ -11,12 +11,14 @@ one place.
 
 ## Key Files
 
-| File                     | Description                                                                                                                                                                       |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `find-package-files.mjs` | Enumerate files under `packages/**` honoring `.gitignore` and `node_modules` exclusion. Used by every guard that walks the workspace.                                             |
-| `strip-jsonc.mjs`        | Strip comments/trailing commas so `JSON.parse` can consume `.json` files that have JSONC syntax (e.g. `tsconfig.json`, `.changeset/config.json`).                                 |
-| `site-links-resolve.mjs` | GitHub Pages path resolution and link extraction for `check-site-links.mjs`. Split out to keep the guard under 100 lines; covered by `check-site-links.test.mjs`.                 |
-| `site-links-scan.mjs`    | Walks the built site (`*.html`, `*.md`, `llms*.txt`, `sitemap*.xml`, `robots.txt`) for `check-site-links.mjs` and counts what it checked; covered by `check-site-links.test.mjs`. |
+| File                     | Description                                                                                                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `find-package-files.mjs` | Enumerate files under `packages/**` honoring `.gitignore` and `node_modules` exclusion. Used by every guard that walks the workspace.                                               |
+| `strip-jsonc.mjs`        | Strip comments/trailing commas so `JSON.parse` can consume `.json` files that have JSONC syntax (e.g. `tsconfig.json`, `.changeset/config.json`).                                   |
+| `site-links-resolve.mjs` | GitHub Pages path resolution and link extraction for `check-site-links.mjs`. Split out to keep the guard under 100 lines; covered by `check-site-links.test.mjs`.                   |
+| `site-links-scan.mjs`    | Walks the built site (`*.html`, `*.md`, `llms*.txt`, `sitemap*.xml`, `robots.txt`) for `check-site-links.mjs` and counts what it checked; covered by `check-site-links.test.mjs`.   |
+| `site-csp-policy.mjs`    | The landing and App content security policy, one source list per directive, each remote origin traced to the code that calls it.                                                    |
+| `site-csp.mjs`           | Writes that policy into a page as a `<meta>` first in `<head>`, with the sha256 of each inline script. Used by `assemble-site.mjs` and the SPA dev server (`vite.config.ts`).       |
 | `clean-git-env.mjs`      | `process.env` minus every `GIT_*` variable. Pass as `env` when a test spawns git (or a script that does): a hook's inherited `GIT_DIR` otherwise rewrites the shared `.git/config`. |
 
 ## For AI Agents
