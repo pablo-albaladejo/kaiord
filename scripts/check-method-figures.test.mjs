@@ -1,18 +1,25 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { gitEnv } from "./check-coverage-floors-ratchet.mjs";
 import {
   checkMethodFigures,
   NOTE,
   parseNote,
   repoGit,
 } from "./check-method-figures.mjs";
+import { cleanGitEnv } from "./lib/clean-git-env.mjs";
+import { parsePipeline } from "./lib/method-pipeline.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -24,7 +31,7 @@ const git = (...args) =>
     ["-c", "user.email=test@example.com", "-c", "commit.gpgsign=false"].concat(
       args
     ),
-    { cwd: repo, encoding: "utf8", stdio: "pipe", env: gitEnv() }
+    { cwd: repo, encoding: "utf8", stdio: "pipe", env: cleanGitEnv() }
   );
 
 const commit = (author, message) => {
@@ -179,7 +186,9 @@ describe("check-method-figures", () => {
     // Assert
     assert.equal(problems.length, unsafe.length);
     assert.ok(
-      problems.every((p) => p.includes("is not a pipeline of git, grep and wc"))
+      problems.every((p) =>
+        p.includes("is not an allowed pipeline of git, grep and wc")
+      )
     );
   });
 
@@ -187,9 +196,12 @@ describe("check-method-figures", () => {
     // Arrange
     const published = readFileSync(join(ROOT, NOTE), "utf8");
     const { rows } = parseNote(published);
-    const answers = new Map(rows.map((row) => [row.command, row.value]));
+    const key = (stages) => JSON.stringify(stages);
+    const answers = new Map(
+      rows.map((row) => [key(parsePipeline(row.command).stages), row.value])
+    );
     const historyFree = {
-      run: (command) => answers.get(command) ?? null,
+      run: (stages) => answers.get(key(stages)) ?? null,
       hasCommit: () => true,
     };
 
@@ -199,6 +211,44 @@ describe("check-method-figures", () => {
     // Assert
     assert.ok(rows.length >= 10, `only ${rows.length} figure rows parsed`);
     assert.deepEqual(problems, []);
+  });
+
+  it("should run no attack a note could carry, and write no file", () => {
+    // Arrange
+    const marker = join(repo, "PWNED");
+    const out = join(repo, "out.txt");
+    const attacks = [
+      `git -c alias.x='!touch ${marker}' x ${pinned} | wc -l`,
+      `git log --output=${out} ${pinned} | wc -l`,
+      `git log -o ${out} ${pinned} | wc -l`,
+      `git -C / log ${pinned} | wc -l`,
+      `git --git-dir=/tmp log ${pinned} | wc -l`,
+      `git --work-tree=/ log ${pinned} | wc -l`,
+      `git --config-env=core.pager=X log ${pinned} | wc -l`,
+      `git x ${pinned} | wc -l`,
+      `git log ${pinned} --upload-pack=touch | wc -l`,
+      `git log ${pinned} --exec=touch | wc -l`,
+      `git log ext::sh ${pinned} | wc -l`,
+      `git log ${pinned} | grep -f /etc/passwd`,
+      `git log ${pinned} | grep -r x .`,
+      `git log ${pinned} | grep --include=x x`,
+      `git log ${pinned} | grep x file.txt`,
+      `git log ${pinned} -- ../outside | wc -l`,
+      `git log ${pinned} -- /etc | wc -l`,
+    ];
+    const markdown = note(
+      pinned,
+      attacks.map((c, i) => [`A${i}`, "1", c])
+    );
+
+    // Act
+    const problems = check(markdown);
+
+    // Assert
+    assert.equal(problems.length, attacks.length);
+    assert.ok(problems.every((p) => p.includes("is not an allowed pipeline")));
+    assert.equal(existsSync(marker), false);
+    assert.equal(existsSync(out), false);
   });
 
   it("should fail when the note pins no commit or states no figure", () => {

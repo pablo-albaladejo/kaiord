@@ -35,8 +35,10 @@ format is detected from the file extension.
 
 ## Three ways to convert
 
-1. **Editor** — [kaiord.com/app](https://kaiord.com/app/#/convert). Choose a
-   file, pick the target format, download. Nothing leaves your browser.
+1. **Kaiord App** — [kaiord.com/app](https://kaiord.com/app/#/convert). Choose
+   a file, pick the target format, download. The conversion runs in your
+   browser and the file is never uploaded; Umami analytics records only an
+   anonymous event with the format.
 2. **CLI** — `kaiord convert -i workout.fit -o workout.zwo`. Formats are
    detected from the extensions. See the [CLI reference](/cli/commands#convert).
 3. **SDK** — `@kaiord/core` plus the reader/writer for each format. See the
@@ -55,11 +57,11 @@ activities, and the Kaiord app can import a recorded activity onto your
 calendar, but these pages do not turn a recorded ride or run into a workout,
 and a converted file carries no recorded data.
 
-## What is lossless?
+## What survives a conversion?
 
-KRD is designed to be round-trip safe, but the source and target formats are
-not identical — each pair page has a **"What survives the conversion"** table
-and the gotchas that matter for that direction. In short:
+The source and target formats are not identical, so a conversion keeps only
+what the target can hold. Each pair page has a **"What survives the
+conversion"** table and the gotchas that matter for that direction. In short:
 
 - **FIT** is the richest workout format (power, heart rate, cadence, speed, and
   distance/time durations).

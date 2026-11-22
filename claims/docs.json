@@ -1,0 +1,833 @@
+{
+  "surfaces": [
+    {
+      "file": "packages/docs/index.md",
+      "intro": true
+    },
+    {
+      "file": "packages/docs/guide/getting-started.md",
+      "intro": true
+    },
+    {
+      "file": "packages/docs/convert/index.md",
+      "sections": ["Three ways to convert"]
+    },
+    {
+      "file": "packages/landing/public/llms.txt"
+    }
+  ],
+  "claims": [
+    {
+      "id": "docs.home.h1",
+      "text": "One model. Four formats.",
+      "proof": [
+        {
+          "file": "docs/adr/0001-krd-as-internal-canonical-model.md",
+          "contains": "KRD is an internal model."
+        },
+        {
+          "test": "packages/core/src/application/from-format.test.ts",
+          "title": "should propagate reader errors"
+        },
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-list-formats.test.ts",
+          "title": "should list four formats besides KRD, the SDK's internal model"
+        }
+      ]
+    },
+    {
+      "id": "docs.home.lead",
+      "text": "The Kaiord SDK reads, validates and converts FIT, TCX, ZWO and Garmin Connect workouts in TypeScript, through KRD, its internal canonical model.",
+      "proof": [
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-list-formats.test.ts",
+          "title": "should list four formats besides KRD, the SDK's internal model"
+        },
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        },
+        {
+          "test": "packages/cli/src/tests/landing-code-example.test.ts",
+          "title": "should convert a FIT workout to TCX with the published entry points"
+        },
+        {
+          "file": "docs/adr/0001-krd-as-internal-canonical-model.md",
+          "contains": "KRD is an internal model."
+        },
+        {
+          "test": "packages/core/src/application/from-format.test.ts",
+          "title": "should propagate reader errors"
+        }
+      ]
+    },
+    {
+      "id": "docs.home.quick-start",
+      "text": "Quick Start",
+      "kind": "label"
+    },
+    {
+      "id": "docs.home.github",
+      "text": "GitHub",
+      "kind": "label"
+    },
+    {
+      "id": "docs.start.title",
+      "text": "Getting Started with Kaiord",
+      "kind": "label"
+    },
+    {
+      "id": "docs.start.lead",
+      "text": "The Kaiord SDK is a set of open-source TypeScript libraries and a CLI for training and health data. It helps you:",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        },
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        },
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        }
+      ]
+    },
+    {
+      "id": "docs.start.convert",
+      "text": "Convert files between formats (FIT, TCX, ZWO, GCN, KRD)",
+      "proof": [
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-list-formats.test.ts",
+          "title": "should return all five formats"
+        }
+      ]
+    },
+    {
+      "id": "docs.start.read-write",
+      "text": "Read and write health and fitness data in your programs",
+      "proof": [
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-list-formats.test.ts",
+          "title": "should list four formats besides KRD, the SDK's internal model"
+        },
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        },
+        {
+          "test": "packages/cli/src/tests/landing-code-example.test.ts",
+          "title": "should convert a FIT workout to TCX with the published entry points"
+        },
+        {
+          "file": "docs/adr/0001-krd-as-internal-canonical-model.md",
+          "contains": "KRD is an internal model."
+        },
+        {
+          "test": "packages/core/src/application/from-format.test.ts",
+          "title": "should propagate reader errors"
+        },
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        },
+        {
+          "test": "packages/tanita/src/adapters/converters/tanita-csv-to-krd.converter.test.ts",
+          "title": "should map the weight and full body composition of a complete row"
+        },
+        {
+          "test": "packages/trainingpeaks/src/adapters/converters/trainingpeaks-metrics-to-krd.converter.test.ts",
+          "title": "should map a weight detail to a KRD weight_measurement document"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/components/pages/health/health-source-badge.ts",
+          "contains": "\"whoop-bridge\": \"WHOOP\""
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/Daily/Daily.test.tsx",
+          "title": "should show the health record's real source badge on the HRV stat (F3.2/F3.3 resolver wiring)"
+        }
+      ]
+    },
+    {
+      "id": "docs.start.validate",
+      "text": "Validate and compare files across formats",
+      "proof": [
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        },
+        {
+          "test": "packages/cli/src/commands/diff/diff-executor.test.ts",
+          "title": "should fill every section that has a difference"
+        }
+      ]
+    },
+    {
+      "id": "docs.convert.app",
+      "text": "**Kaiord App** — [kaiord.com/app](https://kaiord.com/app/#/convert). Choose a file, pick the target format, download. The conversion runs in your browser and the file is never uploaded; Umami analytics records only an anonymous event with the format.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertPage.test.tsx",
+          "title": "should convert to the preselected format without touching the editor store"
+        },
+        {
+          "test": "scripts/lib/site-csp-policy.test.mjs",
+          "title": "should name in the landing's data statement, English and Spanish, the destination of every remote origin the site allows"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertFlow.tsx",
+          "contains": "analytics.event(\"workout-imported\", { format });"
+        }
+      ]
+    },
+    {
+      "id": "docs.convert.cli",
+      "text": "**CLI** — `kaiord convert -i workout.fit -o workout.zwo`. Formats are detected from the extensions. See the [CLI reference](/cli/commands#convert).",
+      "proof": [
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        }
+      ]
+    },
+    {
+      "id": "docs.convert.sdk",
+      "text": "**SDK** — `@kaiord/core` plus the reader/writer for each format. See the [Quick Start](/guide/quick-start).",
+      "proof": [
+        {
+          "test": "packages/cli/src/tests/landing-code-example.test.ts",
+          "title": "should convert a FIT workout to TCX with the published entry points"
+        }
+      ]
+    },
+    {
+      "id": "llms.title",
+      "text": "Kaiord",
+      "kind": "label"
+    },
+    {
+      "id": "llms.summary",
+      "text": "Kaiord gathers an athlete's training and health data from the platforms where it is scattered. It comes as two products: the Kaiord App, a browser application to plan, build and send workouts, with no account; and the Kaiord SDK, TypeScript libraries, a CLI and an MCP server for the FIT, TCX, ZWO and Garmin Connect workout formats. MIT licensed, by Pablo Albaladejo.",
+      "proof": [
+        {
+          "file": "GLOSSARY.md",
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ChatPage.test.tsx",
+          "title": "should render the active conversation transcript"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-convert.test.ts",
+          "title": "should convert KRD content to TCX"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-validate.test.ts",
+          "title": "should validate valid KRD content"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-inspect.test.ts",
+          "title": "should return a summary for a KRD file detected by extension"
+        },
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-list-formats.test.ts",
+          "title": "should list four formats besides KRD, the SDK's internal model"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Copyright (c) 2025 Pablo Albaladejo"
+        }
+      ]
+    },
+    {
+      "id": "llms.facts",
+      "text": "Key facts:",
+      "kind": "label"
+    },
+    {
+      "id": "llms.data",
+      "text": "The Kaiord App is free, needs no sign-up, and stores its data in the browser (IndexedDB). Data leaves the device only to destinations the athlete sets up: the AI provider whose key they enter, the platforms they connect through browser extensions, intervals.icu to check the API key they add for it, and their own Google Drive if they turn on sync. Separately, every page loads Umami analytics, which records anonymous page views and product events, never workouts, health data or keys. Kaiord keeps no accounts and stores no user data on its servers.",
+      "proof": [
+        {
+          "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts",
+          "contains": "export class KaiordDatabase extends Dexie"
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://api.anthropic.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://api.openai.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://generativelanguage.googleapis.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://www.googleapis.com\","
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "file": "scripts/fixtures/bridge-privacy-surface.json"
+        },
+        {
+          "test": "scripts/check-bridge-privacy-surface.test.mjs",
+          "title": "passes against the checked-in golden"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/lib/cloud-sync/google-oauth-config.test.ts",
+          "title": "should target the non-sensitive appdata scope"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/lib/cloud-sync/sync-connected-pref.test.ts",
+          "title": "should report not connected by default"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "file": "scripts/geo/wrangler.toml",
+          "contains": "name = \"kaiord-agent-edge\""
+        },
+        {
+          "test": "scripts/geo/agent-edge-worker.test.mjs",
+          "title": "should forward other methods to the origin unchanged"
+        },
+        {
+          "test": "scripts/lib/site-csp-policy.test.mjs",
+          "title": "should name in the landing's data statement, English and Spanish, the destination of every remote origin the site allows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/connections/intervals-icu-validate.test.ts",
+          "title": "should send Basic auth with the API_KEY username and report success"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should never send profileId to umami, whatever the call site passes"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should scrub an email out of an event property before umami sees it"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should submit the route pattern, not the record id, as the page URL"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        }
+      ]
+    },
+    {
+      "id": "llms.sdk",
+      "text": "The Kaiord SDK converts workout files between FIT, TCX, ZWO and GCN (Garmin Connect) through KRD, the SDK's internal canonical model.",
+      "proof": [
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-list-formats.test.ts",
+          "title": "should list four formats besides KRD, the SDK's internal model"
+        },
+        {
+          "file": "docs/adr/0001-krd-as-internal-canonical-model.md",
+          "contains": "KRD is an internal model."
+        },
+        {
+          "test": "packages/core/src/application/from-format.test.ts",
+          "title": "should propagate reader errors"
+        }
+      ]
+    },
+    {
+      "id": "llms.cli-mcp",
+      "text": "A CLI (`kaiord convert`) and an MCP server (`@kaiord/mcp`) expose the same conversion pipeline to scripts and AI agents.",
+      "proof": [
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-convert.test.ts",
+          "title": "should convert KRD content to TCX"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-validate.test.ts",
+          "title": "should validate valid KRD content"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-inspect.test.ts",
+          "title": "should return a summary for a KRD file detected by extension"
+        }
+      ]
+    },
+    {
+      "id": "llms.product",
+      "text": "Product",
+      "kind": "label"
+    },
+    {
+      "id": "llms.landing",
+      "text": "[Landing page](https://kaiord.com/): product overview in English",
+      "kind": "label"
+    },
+    {
+      "id": "llms.landing-es",
+      "text": "[Landing page (Spanish)](https://kaiord.com/es/): product overview in Spanish",
+      "kind": "label"
+    },
+    {
+      "id": "llms.app",
+      "text": "[Kaiord App](https://kaiord.com/app/): the browser application — training calendar, workout builder, assistant with your own key, sending to Garmin Connect",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        }
+      ]
+    },
+    {
+      "id": "llms.garmin",
+      "text": "[Kaiord for Garmin (Chrome extension)](https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe): lets the Kaiord App send workouts to Garmin Connect and read your activities, using your own Garmin sign-in",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "title": "should return the parsed feed and strip unknown garmin fields"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        }
+      ]
+    },
+    {
+      "id": "llms.guides",
+      "text": "Guides for athletes",
+      "kind": "label"
+    },
+    {
+      "id": "llms.guide-ai",
+      "text": "[Plan your training with AI using your own API key](https://kaiord.com/docs/guide/ai-planning-byok): the in-browser assistant with your own Anthropic, OpenAI or Google key",
+      "proof": [
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        }
+      ]
+    },
+    {
+      "id": "llms.guide-whoop",
+      "text": "[WHOOP recovery in your training plan](https://kaiord.com/docs/guide/whoop-recovery-in-plan): recovery, HRV and sleep next to your planned workouts",
+      "proof": [
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/Daily/Daily.test.tsx",
+          "title": "should render the Today route heading"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/Daily/Daily.test.tsx",
+          "title": "should show the health record's real source badge on the HRV stat (F3.2/F3.3 resolver wiring)"
+        }
+      ]
+    },
+    {
+      "id": "llms.guide-vs",
+      "text": "[Kaiord vs TrainingPeaks, intervals.icu and Garmin Connect](https://kaiord.com/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin): a sourced comparison of price, workout builder, sending workouts to Garmin and data",
+      "proof": [
+        {
+          "file": "packages/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin.md",
+          "contains": "with a source for every claim about another"
+        }
+      ]
+    },
+    {
+      "id": "llms.guides-es",
+      "text": "[Guías en español](https://kaiord.com/docs/es/): the same three guides in Spanish",
+      "proof": [
+        {
+          "file": "packages/docs/es/guide/ai-planning-byok.md",
+          "contains": "title: \"Planifica tu entrenamiento con IA y tu propia clave de API\""
+        },
+        {
+          "file": "packages/docs/es/guide/whoop-recovery-in-plan.md",
+          "contains": "title: \"La recuperación de WHOOP en tu plan de entrenamiento\""
+        },
+        {
+          "file": "packages/docs/es/guide/kaiord-vs-trainingpeaks-intervals-garmin.md",
+          "contains": "title: \"Kaiord frente a TrainingPeaks, intervals.icu y Garmin Connect\""
+        }
+      ]
+    },
+    {
+      "id": "llms.guide-ai-es",
+      "text": "[Planifica tu entrenamiento con IA y tu propia clave de API](https://kaiord.com/docs/es/guide/ai-planning-byok): Spanish version of the AI planning guide",
+      "kind": "label"
+    },
+    {
+      "id": "llms.guide-whoop-es",
+      "text": "[La recuperación de WHOOP en tu plan de entrenamiento](https://kaiord.com/docs/es/guide/whoop-recovery-in-plan): Spanish version of the WHOOP recovery guide",
+      "kind": "label"
+    },
+    {
+      "id": "llms.guide-vs-es",
+      "text": "[Kaiord frente a TrainingPeaks, intervals.icu y Garmin Connect](https://kaiord.com/docs/es/guide/kaiord-vs-trainingpeaks-intervals-garmin): Spanish version of the comparison",
+      "kind": "label"
+    },
+    {
+      "id": "llms.docs",
+      "text": "Documentation",
+      "kind": "label"
+    },
+    {
+      "id": "llms.docs-home",
+      "text": "[Docs home](https://kaiord.com/docs/): guides, format specs, API reference",
+      "kind": "label"
+    },
+    {
+      "id": "llms.quick-start",
+      "text": "[Quick start](https://kaiord.com/docs/guide/quick-start.md): convert a FIT file to TCX in TypeScript",
+      "kind": "label"
+    },
+    {
+      "id": "llms.converters",
+      "text": "[Converters](https://kaiord.com/docs/convert/): how to convert workout files between FIT, TCX, ZWO, and Garmin Connect (with per-pair fidelity notes)",
+      "kind": "label"
+    },
+    {
+      "id": "llms.why",
+      "text": "[Why Kaiord?](https://kaiord.com/docs/guide/why-kaiord.md): one SDK for every workout file format",
+      "kind": "label"
+    },
+    {
+      "id": "llms.krd",
+      "text": "[KRD format](https://kaiord.com/docs/formats/krd.md): the SDK's internal canonical model, which every conversion goes through",
+      "proof": [
+        {
+          "file": "docs/adr/0001-krd-as-internal-canonical-model.md",
+          "contains": "KRD is an internal model."
+        },
+        {
+          "test": "packages/core/src/application/from-format.test.ts",
+          "title": "should propagate reader errors"
+        },
+        {
+          "file": "packages/core/src/application/from-format.ts",
+          "contains": "reader: BinaryReader,"
+        },
+        {
+          "test": "packages/core/src/application/to-format.test.ts",
+          "title": "should convert validated KRD to text output"
+        }
+      ]
+    },
+    {
+      "id": "llms.mcp",
+      "text": "[MCP tools](https://kaiord.com/docs/mcp/tools.md): use Kaiord tools from AI assistants via the Model Context Protocol",
+      "kind": "label"
+    },
+    {
+      "id": "llms.docs-llms",
+      "text": "[Docs index for LLMs](https://kaiord.com/docs/llms.txt): per-page markdown mirrors of every docs page",
+      "kind": "label"
+    },
+    {
+      "id": "llms.docs-full",
+      "text": "[Full docs corpus](https://kaiord.com/docs/llms-full.txt): the entire documentation as a single markdown file",
+      "kind": "label"
+    },
+    {
+      "id": "llms.source",
+      "text": "Source & packages",
+      "kind": "label"
+    },
+    {
+      "id": "llms.github",
+      "text": "[GitHub repository](https://github.com/pablo-albaladejo/kaiord): monorepo with the Kaiord SDK and the Kaiord App",
+      "proof": [
+        {
+          "file": "packages/core/package.json",
+          "contains": "\"name\": \"@kaiord/core\","
+        },
+        {
+          "file": "packages/workout-spa-editor/package.json",
+          "contains": "\"name\": \"@kaiord/workout-spa-editor\","
+        }
+      ]
+    },
+    {
+      "id": "llms.npm",
+      "text": "[npm packages](https://www.npmjs.com/org/kaiord): @kaiord/core, @kaiord/fit, @kaiord/tcx, @kaiord/zwo, @kaiord/garmin, @kaiord/cli, @kaiord/mcp",
+      "proof": [
+        {
+          "file": "packages/core/package.json",
+          "contains": "\"name\": \"@kaiord/core\","
+        },
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "file": "packages/cli/package.json",
+          "contains": "\"name\": \"@kaiord/cli\","
+        },
+        {
+          "file": "packages/mcp/package.json",
+          "contains": "\"name\": \"@kaiord/mcp\","
+        }
+      ]
+    }
+  ]
+}

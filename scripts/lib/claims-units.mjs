@@ -2,21 +2,24 @@
 // claim and must match a register entry word for word (after whitespace is
 // collapsed), so nothing visible on the surface can escape the register.
 //
-// Markdown: a heading, a list item (with its indented continuation lines),
-// a table row, or a paragraph. YAML front matter and HTML comments are not
-// shown to a reader and are dropped. JSON: the `message` of each named key,
-// the shape of a Chrome `_locales/*/messages.json`.
+// Markdown: a heading, a list item (with its continuation lines), a table
+// row or a paragraph; a `>` quote marker is not text, and a unit holding
+// HTML tags is read as HTML. Front matter, comments and script or style
+// blocks are dropped. HTML: claims-html.mjs, plus claims-jsonld.mjs for the
+// JSON-LD. JSON (named keys, or a keyless translation file): claims-json.mjs.
 
 import { htmlUnits } from "./claims-html.mjs";
 import { jsonUnits } from "./claims-json.mjs";
+import { jsonLdUnits } from "./claims-jsonld.mjs";
+import { normalize } from "./claims-text.mjs";
 
 const LIST_ITEM = /^\s*(?:[-*+•]|\d+[.)])\s+/;
 const HEADING = /^#{1,6}\s+/;
 const TABLE_SEPARATOR = /^\|[\s:|-]+\|$/;
 
-export const normalize = (text) => text.replace(/\s+/g, " ").trim();
-
-const withoutComments = (src) => src.replace(/<!--[\s\S]*?-->/g, "");
+const HIDDEN = /<!--[\s\S]*?-->|<(script|style)\b[\s\S]*?<\/\1\s*>/gi;
+const HAS_TAG = /<\/?[a-z][^>]*>/i;
+const withoutHidden = (src) => src.replace(HIDDEN, "");
 
 const withoutFrontMatter = (src) =>
   src.startsWith("---\n") ? src.replace(/^---\n[\s\S]*?\n---\n/, "") : src;
@@ -45,11 +48,12 @@ export const markdownUnits = (lines) => {
   const units = [];
   let current = null;
   const flush = () => {
-    if (current !== null && normalize(current)) units.push(normalize(current));
+    const text = normalize(current ?? "");
+    if (text) units.push(...(HAS_TAG.test(text) ? htmlUnits(text) : [text]));
     current = null;
   };
   for (const line of lines) {
-    const trimmed = line.trim();
+    const trimmed = line.trim().replace(/^>\s?/, "");
     if (!trimmed || TABLE_SEPARATOR.test(trimmed)) {
       flush();
     } else if (HEADING.test(trimmed) || trimmed.startsWith("|")) {
@@ -68,10 +72,14 @@ export const markdownUnits = (lines) => {
 
 // Units of one surface, or an error string when the surface cannot be read.
 export const surfaceUnits = (surface, src) => {
-  if (surface.file.endsWith(".html")) return { units: htmlUnits(src) };
+  if (surface.file.endsWith(".html")) {
+    const ld = jsonLdUnits(src);
+    if (ld.error) return { error: `${surface.file}: ${ld.error}` };
+    return { units: [...htmlUnits(src), ...ld.units] };
+  }
   if (surface.keys || surface.file.endsWith(".json"))
     return jsonUnits(surface, src);
-  const lines = withoutComments(withoutFrontMatter(src)).split("\n");
+  const lines = withoutHidden(withoutFrontMatter(src)).split("\n");
   if (!surface.sections && !surface.intro)
     return { units: markdownUnits(lines) };
   // The intro is the H1 and its lead: everything before the first sub-heading.

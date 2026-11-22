@@ -8,11 +8,7 @@
     {
       "id": "access.title",
       "text": "Platform Access",
-      "proof": [
-        {
-          "file": "packages/docs/legal/platform-access.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "access.unofficial",
@@ -28,7 +24,7 @@
         },
         {
           "file": "packages/garmin-bridge/garmin-oauth.js",
-          "contains": "same as garth"
+          "contains": "(same as garth / thegarth.s3.amazonaws.com/oauth_consumer.json)"
         }
       ]
     },
@@ -84,39 +80,21 @@
       "text": "\"What its terms say\" is a reading of each Platform's own published terms on 2026-11-22, quoted narrowly and linked. It is not legal advice and draws no conclusion from them. A Platform can change its terms at any time, so the reading below may be out of date.",
       "proof": [
         {
-          "file": "packages/docs/legal/platform-access.md"
-        },
-        {
-          "endpoint": "https://www.garmin.com/en-US/legal/terms-of-use/"
-        },
-        {
-          "endpoint": "https://train2go.com/legal/"
-        },
-        {
-          "endpoint": "https://www.trainingpeaks.com/terms-of-use/"
-        },
-        {
-          "endpoint": "https://www.whoop.com/es/en/whoop-terms-of-use/"
+          "test": "packages/docs/scripts/platform-access.test.mjs",
+          "title": "should date every reading of a Platform's terms on the day the register says it was read"
         }
       ]
     },
     {
       "id": "access.garmin",
       "text": "Garmin",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "access.part.how",
       "text": "How Kaiord reaches it",
-      "proof": [
-        {
-          "file": "packages/docs/legal/platform-access.md"
-        }
-      ]
+      "kind": "label",
+      "count": 5
     },
     {
       "id": "access.garmin.session",
@@ -138,7 +116,7 @@
       "proof": [
         {
           "file": "packages/garmin-bridge/garmin-oauth.js",
-          "contains": "same as garth"
+          "contains": "(same as garth / thegarth.s3.amazonaws.com/oauth_consumer.json)"
         },
         {
           "file": "packages/garmin-bridge/garmin-oauth.js",
@@ -187,38 +165,28 @@
     {
       "id": "access.part.terms",
       "text": "What its terms say",
-      "proof": [
-        {
-          "file": "packages/docs/legal/platform-access.md"
-        }
-      ]
+      "kind": "label",
+      "count": 5
     },
     {
       "id": "access.garmin.terms",
       "text": "Garmin's [Terms of Use](https://www.garmin.com/en-US/legal/terms-of-use/) (effective April 1, 2026), Rules of Conduct, list as an example of a violation \"Using any process, whether automated or manual, that accesses, copies, or scrapes content from the Site through any means not purposely made available through the Site\". Under Your Account: \"You must not share your account credentials with any third party.\"",
-      "proof": [
-        {
-          "endpoint": "https://www.garmin.com/en-US/legal/terms-of-use/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://www.garmin.com/en-US/legal/terms-of-use/",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.garmin.developer-terms",
       "text": "Garmin's [Connect Developer Program Agreement](https://developerportal.garmin.com/sites/default/files/Garmin%20Connect%20Developer%20Program%20Agreement.pdf) (FRM-0952 Rev. B) governs Garmin's official API: Garmin delivers a license key to a developer who accepts it (§3.1) and may review an application before it is published (§4.2). Kaiord has not entered this agreement.",
-      "proof": [
-        {
-          "endpoint": "https://developerportal.garmin.com/sites/default/files/Garmin%20Connect%20Developer%20Program%20Agreement.pdf"
-        }
-      ]
+      "kind": "external",
+      "url": "https://developerportal.garmin.com/sites/default/files/Garmin%20Connect%20Developer%20Program%20Agreement.pdf",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.part.lose",
       "text": "What you lose if access is cut off",
-      "proof": [
-        {
-          "file": "packages/docs/legal/platform-access.md"
-        }
-      ]
+      "kind": "label",
+      "count": 5
     },
     {
       "id": "access.garmin.lose.send",
@@ -236,7 +204,7 @@
     },
     {
       "id": "access.garmin.lose.activities",
-      "text": "Reading your recent Garmin Connect activities into the Kaiord App, where they are matched to the planned session.",
+      "text": "Reading your recent Garmin Connect activities into the Kaiord App, where they are matched to what you planned.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/import/pull-garmin-activities.use-case.test.ts",
@@ -265,11 +233,7 @@
     {
       "id": "access.train2go",
       "text": "Train2Go",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/manifest.prod.json"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "access.train2go.session",
@@ -308,20 +272,16 @@
     {
       "id": "access.train2go.terms",
       "text": "Train2Go's [legal terms](https://train2go.com/legal/) (in Spanish, no date shown) contain, in the sections read, no general clause on automated access, scripts or unofficial clients. The one clause on scraping is in the section on Train2Go's own MCP connector, §4, which prohibits \"extracción masiva no autorizada de datos de la PLATAFORMA (scraping)\" (unauthorized mass extraction of the Platform's data).",
-      "proof": [
-        {
-          "endpoint": "https://train2go.com/legal/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://train2go.com/legal/",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.train2go.terms-credentials",
       "text": "On credentials, the user undertakes to use them diligently \"y a no ponerlos a disposición de terceros\" (and not to make them available to third parties). Train2Go may terminate the contract or suspend the account \"en caso de producirse un uso no autorizado de la PLATAFORMA\" (in the event of unauthorized use of the Platform).",
-      "proof": [
-        {
-          "endpoint": "https://train2go.com/legal/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://train2go.com/legal/",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.train2go.lose.plan",
@@ -357,7 +317,7 @@
     },
     {
       "id": "access.train2go.lose.moved",
-      "text": "The notice that the coach moved a session to another day.",
+      "text": "The notice that the coach moved a coaching activity to another day.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/components/molecules/MovedFromChip/MovedFromChip.test.tsx",
@@ -368,11 +328,7 @@
     {
       "id": "access.tanita",
       "text": "Tanita",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/manifest.prod.json"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "access.tanita.session",
@@ -427,14 +383,9 @@
     {
       "id": "access.tanita.terms-unread",
       "text": "We could not read them. mytanita.eu shows no link to terms of use, and tanita.eu, where TANITA Europe publishes its [Terms of Use for the TANITA App Universe](https://tanita.eu/terms-of-use-tanita-app-universe), answered our reading with a bot check (Anubis) that we did not pass. Nothing is said here about what Tanita's terms contain.",
-      "proof": [
-        {
-          "endpoint": "https://tanita.eu/terms-of-use-tanita-app-universe"
-        },
-        {
-          "endpoint": "https://mytanita.eu/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://tanita.eu/terms-of-use-tanita-app-universe",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.tanita.lose",
@@ -453,11 +404,7 @@
     {
       "id": "access.trainingpeaks",
       "text": "TrainingPeaks",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/manifest.prod.json"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "access.trainingpeaks.session",
@@ -508,20 +455,16 @@
     {
       "id": "access.trainingpeaks.terms",
       "text": "TrainingPeaks' [Terms of Use](https://www.trainingpeaks.com/terms-of-use/) (last updated July 28, 2026), §23 \"Your Obligations to Us\", list among what a user may not do: \"Access or attempt to access the Sites or Services by any means other than the interface provided or authorized by us\" and \"Access the Sites or Services by means of automated process, spiders, bots, or similar device\".",
-      "proof": [
-        {
-          "endpoint": "https://www.trainingpeaks.com/terms-of-use/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://www.trainingpeaks.com/terms-of-use/",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.trainingpeaks.terms-scripts",
       "text": "§18 restricts using \"automated scripts to collect information from or otherwise interact with the Technology\".",
-      "proof": [
-        {
-          "endpoint": "https://www.trainingpeaks.com/terms-of-use/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://www.trainingpeaks.com/terms-of-use/",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.trainingpeaks.lose.send",
@@ -546,11 +489,7 @@
     {
       "id": "access.whoop",
       "text": "WHOOP",
-      "proof": [
-        {
-          "file": "packages/whoop-bridge/manifest.prod.json"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "access.whoop.experimental",
@@ -561,8 +500,8 @@
           "contains": "marked experimental in the Kaiord App. Today that is WHOOP"
         },
         {
-          "file": "packages/whoop-bridge/README.md",
-          "contains": "registered with the Chrome Web Store"
+          "file": "packages/whoop-bridge/store-listing.md",
+          "contains": "**Status: NOT YET SUBMITTED.**"
         },
         {
           "file": "packages/whoop-bridge/README.md",
@@ -601,20 +540,16 @@
     {
       "id": "access.whoop.terms",
       "text": "WHOOP's [Terms of Use](https://www.whoop.com/es/en/whoop-terms-of-use/) (last updated August 3, 2026), §4.4 \"Actions you are specifically prohibited from taking\", expressly prohibit \"use of web scraping, web harvesting, or web data extraction methods from WHOOP Services even if the Account owner gives permission\", and reverse engineering the Services.",
-      "proof": [
-        {
-          "endpoint": "https://www.whoop.com/es/en/whoop-terms-of-use/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://www.whoop.com/es/en/whoop-terms-of-use/",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.whoop.api-terms",
       "text": "WHOOP's [API Terms of Use](https://developer.whoop.com/api-terms-of-use/) (effective October 6, 2026) govern its official API, §1.4: \"Company will only access (or attempt to access) any API by the means described in the WHOOP documentation for that API.\" Kaiord does not use WHOOP's official API.",
-      "proof": [
-        {
-          "endpoint": "https://developer.whoop.com/api-terms-of-use/"
-        }
-      ]
+      "kind": "external",
+      "url": "https://developer.whoop.com/api-terms-of-use/",
+      "read_on": "2026-11-22"
     },
     {
       "id": "access.whoop.lose.recovery",

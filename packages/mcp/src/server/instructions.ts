@@ -1,5 +1,5 @@
 const SHARED_INSTRUCTIONS = [
-  "Kaiord is a fitness data framework. KRD is the canonical JSON format — all conversions go through KRD.",
+  "The Kaiord SDK reads, validates and converts workout files. KRD is its internal canonical JSON model — all conversions go through KRD.",
   "BEFORE creating or editing KRD documents, call the kaiord_get_format_spec tool to get the full specification.",
   "Use kaiord_list_formats to discover all supported formats (FIT, TCX, ZWO, GCN, KRD).",
 ];

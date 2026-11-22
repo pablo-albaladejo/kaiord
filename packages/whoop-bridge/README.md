@@ -1,18 +1,16 @@
 # @kaiord/whoop-bridge
 
-Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to
-[WHOOP](https://www.whoop.com) health data. The extension piggybacks on the
-user's existing signed-in `app.whoop.com` browser session — a main-world
-content script captures the session bearer the WHOOP web app already
-attaches to its own `api.prod.whoop.com` requests, and the extension relays
-a fixed allowlist of read-only internal-API paths back to the SPA. There is
-no OAuth flow, no developer app, and no password or long-lived credential is
-ever entered, stored, or transmitted.
+The Chrome extension (Manifest V3) that lets the Kaiord App read your
+[WHOOP](https://www.whoop.com) health data, through your own signed-in
+`app.whoop.com` session: a main-world content script captures the session
+bearer the WHOOP web app already attaches to its own `api.prod.whoop.com`
+requests, and the extension relays a fixed allowlist of read-only
+internal-API paths back to the Kaiord App. There is no OAuth flow, no
+developer app, and no password or long-lived credential is ever entered,
+stored, or transmitted.
 
-This package is `private: true` and is not published to npm. **It is not yet
-registered with the Chrome Web Store** — unlike `@kaiord/garmin-bridge` and
-`@kaiord/train2go-bridge`, no extension ID or publish secret exists for it
-yet, so it is not built or uploaded by `cws-publish.yml`. Load it unpacked
+This package is `private: true` and is not published to npm. **It is not in
+the Chrome Web Store**: its listing has not been submitted. Load it unpacked
 for development and testing (see "Build entrypoint" below).
 
 ## Purpose

@@ -41,7 +41,8 @@
           "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
           "title": "sends the cookie, and no Authorization header, to that endpoint"
         }
-      ]
+      ],
+      "count": 2
     },
     {
       "id": "trainingpeaks.listing.intro",
@@ -64,11 +65,7 @@
     {
       "id": "trainingpeaks.listing.label-what",
       "text": "What it does:",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.listing.sends",
@@ -163,11 +160,7 @@
     {
       "id": "trainingpeaks.listing.label-how",
       "text": "How it works:",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.listing.step-sign-in",
@@ -214,11 +207,7 @@
     {
       "id": "trainingpeaks.listing.label-data",
       "text": "Your token and your data:",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.listing.token-local",
@@ -317,11 +306,9 @@
     {
       "id": "trainingpeaks.listing.uninstall",
       "text": "Removing the extension from Chrome deletes everything it stored.",
-      "proof": [
-        {
-          "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/storage"
-        }
-      ]
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
     },
     {
       "id": "trainingpeaks.listing.unofficial",
@@ -342,45 +329,33 @@
       "text": "Open source: https://github.com/pablo-albaladejo/kaiord",
       "proof": [
         {
-          "endpoint": "https://github.com/pablo-albaladejo/kaiord"
-        },
-        {
-          "file": "LICENSE"
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
     {
       "id": "trainingpeaks.pj.title",
       "text": "Permission Justification",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.pj.intro",
       "text": "Why Kaiord for TrainingPeaks asks for each permission in `manifest.prod.json`, for Chrome Web Store review. Every paragraph and list item in this file is an entry in `claims/trainingpeaks.json`, with the code or test that proves it.",
       "proof": [
         {
+          "test": "scripts/check-claims.test.mjs",
+          "title": "should pass on the register and surfaces the repo ships"
+        },
+        {
           "file": "packages/trainingpeaks-bridge/manifest.prod.json"
-        },
-        {
-          "file": "claims/trainingpeaks.json"
-        },
-        {
-          "file": "scripts/check-claims.mjs"
         }
       ]
     },
     {
       "id": "trainingpeaks.pj.permissions",
       "text": "Permissions",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.pj.storage",
@@ -449,11 +424,7 @@
     {
       "id": "trainingpeaks.pj.hosts",
       "text": "Host Permissions",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.pj.tpapi",
@@ -580,11 +551,7 @@
     {
       "id": "trainingpeaks.pj.content-script",
       "text": "Content Script",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.pj.announce",
@@ -621,11 +588,7 @@
     {
       "id": "trainingpeaks.pj.ec",
       "text": "externally_connectable",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.pj.ec-app",
@@ -686,11 +649,7 @@
     {
       "id": "trainingpeaks.pj.data",
       "text": "Data Handling",
-      "proof": [
-        {
-          "file": "packages/trainingpeaks-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "trainingpeaks.pj.no-password",

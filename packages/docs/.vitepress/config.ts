@@ -213,7 +213,7 @@ const config = {
   },
   title: "Kaiord",
   description:
-    "Open-source health & fitness data framework for TypeScript. Convert FIT, TCX, ZWO, and GCN formats.",
+    "Kaiord SDK: open-source TypeScript libraries, a CLI and an MCP server that read, validate and convert FIT, TCX, ZWO and Garmin Connect workouts.",
   base: DOCS_BASE,
 
   // AGENTS.md files are agent-facing documentation, not part of the public

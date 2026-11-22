@@ -1,0 +1,786 @@
+{
+  "surfaces": [
+    {
+      "file": "packages/workout-spa-editor/index.html"
+    }
+  ],
+  "claims": [
+    {
+      "id": "app.title",
+      "text": "Kaiord Editor — Training calendar, workout editor & fitness file converter",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertPage.test.tsx",
+          "title": "should convert to the preselected format without touching the editor store"
+        }
+      ],
+      "count": 3
+    },
+    {
+      "id": "app.description",
+      "text": "Free training app in your browser, with no account: weekly calendar, visual workout editor, an AI assistant with your own key that acts on your data once you confirm, workouts sent to Garmin Connect, WHOOP recovery and sleep, and health analytics. Create and convert FIT, TCX, ZWO, and Garmin Connect files in your browser. By Pablo Albaladejo.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should mark exactly the six action tools as requiring confirmation"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
+          "title": "should require confirmation for every action tool"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "title": "should return the parsed feed and strip unknown garmin fields"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        },
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        },
+        {
+          "file": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "contains": "EXPECTED_CORE_COUNT = 56"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "title": "should hold the closed core of 56 parameters"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-flag.test.ts",
+          "title": "should prefer the report range over the catalog fallback"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/labs/charts/LabParameterChart.test.tsx",
+          "title": "should render the chart with a band and marked outliers from canonical data"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/components/pages/health/trends/trend-metrics.ts",
+          "contains": "export type TrendMetricKey = \"sleep\" | \"hrv\" | \"weight\" | \"steps\";"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/trends/trend-series.test.ts",
+          "title": "should map HRV records to rMSSD points"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertPage.test.tsx",
+          "title": "should convert to the preselected format without touching the editor store"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Copyright (c) 2025 Pablo Albaladejo"
+        }
+      ]
+    },
+    {
+      "id": "app.og-description",
+      "text": "Free training app in your browser, with no account: weekly calendar, visual workout editor, AI assistant, workouts sent to Garmin Connect, WHOOP recovery and sleep, and health analytics.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should mark exactly the six action tools as requiring confirmation"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
+          "title": "should require confirmation for every action tool"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "title": "should return the parsed feed and strip unknown garmin fields"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        },
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        },
+        {
+          "file": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "contains": "EXPECTED_CORE_COUNT = 56"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "title": "should hold the closed core of 56 parameters"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-flag.test.ts",
+          "title": "should prefer the report range over the catalog fallback"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/labs/charts/LabParameterChart.test.tsx",
+          "title": "should render the chart with a band and marked outliers from canonical data"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/components/pages/health/trends/trend-metrics.ts",
+          "contains": "export type TrendMetricKey = \"sleep\" | \"hrv\" | \"weight\" | \"steps\";"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/trends/trend-series.test.ts",
+          "title": "should map HRV records to rMSSD points"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertPage.test.tsx",
+          "title": "should convert to the preselected format without touching the editor store"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "app.name",
+      "text": "Kaiord Editor",
+      "kind": "label",
+      "count": 2
+    },
+    {
+      "id": "app.noscript",
+      "text": "Kaiord Editor is a free training app that runs in your browser with no account: a weekly training calendar, a visual workout editor, an AI assistant with your own key that acts on your data once you confirm, workouts sent to Garmin Connect, WHOOP recovery and sleep, and health analytics. It creates and converts FIT, TCX, ZWO, and Garmin Connect workout files in your browser. JavaScript is required to run the app.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should mark exactly the six action tools as requiring confirmation"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
+          "title": "should require confirmation for every action tool"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "title": "should return the parsed feed and strip unknown garmin fields"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        },
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        },
+        {
+          "file": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "contains": "EXPECTED_CORE_COUNT = 56"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "title": "should hold the closed core of 56 parameters"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-flag.test.ts",
+          "title": "should prefer the report range over the catalog fallback"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/labs/charts/LabParameterChart.test.tsx",
+          "title": "should render the chart with a band and marked outliers from canonical data"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/components/pages/health/trends/trend-metrics.ts",
+          "contains": "export type TrendMetricKey = \"sleep\" | \"hrv\" | \"weight\" | \"steps\";"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/trends/trend-series.test.ts",
+          "title": "should map HRV records to rMSSD points"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertPage.test.tsx",
+          "title": "should convert to the preselected format without touching the editor store"
+        }
+      ]
+    },
+    {
+      "id": "app.noscript.more",
+      "text": "Learn more on the",
+      "kind": "label"
+    },
+    {
+      "id": "app.noscript.landing",
+      "text": "Kaiord landing page",
+      "kind": "label"
+    },
+    {
+      "id": "app.noscript.or",
+      "text": "or read the",
+      "kind": "label"
+    },
+    {
+      "id": "app.noscript.docs",
+      "text": "documentation",
+      "kind": "label"
+    },
+    {
+      "id": "app.jsonld.description",
+      "text": "Free training app in your browser, with no account: weekly calendar, visual workout editor, an AI assistant with your own key that acts on your data once you confirm, workouts sent to Garmin Connect, WHOOP recovery and sleep, and health analytics. Creates and converts FIT, TCX, ZWO, and Garmin Connect workout files in the browser.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should mark exactly the six action tools as requiring confirmation"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
+          "title": "should require confirmation for every action tool"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "title": "should return the parsed feed and strip unknown garmin fields"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        },
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        },
+        {
+          "file": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "contains": "EXPECTED_CORE_COUNT = 56"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "title": "should hold the closed core of 56 parameters"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-flag.test.ts",
+          "title": "should prefer the report range over the catalog fallback"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/labs/charts/LabParameterChart.test.tsx",
+          "title": "should render the chart with a band and marked outliers from canonical data"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/components/pages/health/trends/trend-metrics.ts",
+          "contains": "export type TrendMetricKey = \"sleep\" | \"hrv\" | \"weight\" | \"steps\";"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/trends/trend-series.test.ts",
+          "title": "should map HRV records to rMSSD points"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertPage.test.tsx",
+          "title": "should convert to the preselected format without touching the editor store"
+        }
+      ]
+    },
+    {
+      "id": "app.feature.calendar",
+      "text": "Weekly training calendar",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        }
+      ]
+    },
+    {
+      "id": "app.feature.editor",
+      "text": "Visual structured-workout editor",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        }
+      ]
+    },
+    {
+      "id": "app.feature.assistant",
+      "text": "AI assistant that edits and plans workouts",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-workout.test.ts",
+          "title": "should send the athlete's zones and instructions when supplied"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/lib/athlete/zones-formatter.test.ts",
+          "title": "should format power + HR zones with method names"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/lib/athlete/zones-formatter.test.ts",
+          "title": "should format pace + HR zones with method names"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should mark exactly the six action tools as requiring confirmation"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
+          "title": "should require confirmation for every action tool"
+        }
+      ]
+    },
+    {
+      "id": "app.feature.platforms",
+      "text": "Workouts sent to Garmin Connect, WHOOP recovery and sleep read in",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "title": "should return the parsed feed and strip unknown garmin fields"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        },
+        {
+          "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
+          "title": "should map a cycle's recovery and first sleep to a vitals summary"
+        }
+      ]
+    },
+    {
+      "id": "app.feature.health",
+      "text": "Health and lab analytics",
+      "proof": [
+        {
+          "file": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "contains": "EXPECTED_CORE_COUNT = 56"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-parameter-catalog.test.ts",
+          "title": "should hold the closed core of 56 parameters"
+        },
+        {
+          "test": "packages/core/src/domain/lab/lab-flag.test.ts",
+          "title": "should prefer the report range over the catalog fallback"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/labs/charts/LabParameterChart.test.tsx",
+          "title": "should render the chart with a band and marked outliers from canonical data"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/components/pages/health/trends/trend-metrics.ts",
+          "contains": "export type TrendMetricKey = \"sleep\" | \"hrv\" | \"weight\" | \"steps\";"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/health/trends/trend-series.test.ts",
+          "title": "should map HRV records to rMSSD points"
+        }
+      ]
+    },
+    {
+      "id": "app.feature.conversion",
+      "text": "FIT, TCX, ZWO, and Garmin Connect file conversion",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/ConvertPage/ConvertPage.test.tsx",
+          "title": "should convert to the preselected format without touching the editor store"
+        },
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-list-formats.test.ts",
+          "title": "should list four formats besides KRD, the SDK's internal model"
+        }
+      ]
+    },
+    {
+      "id": "app.feature.local",
+      "text": "Local-first storage: data stays in the browser and leaves only to destinations you set up",
+      "proof": [
+        {
+          "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts",
+          "contains": "export class KaiordDatabase extends Dexie"
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://api.anthropic.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://api.openai.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://generativelanguage.googleapis.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://www.googleapis.com\","
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "file": "scripts/fixtures/bridge-privacy-surface.json"
+        },
+        {
+          "test": "scripts/check-bridge-privacy-surface.test.mjs",
+          "title": "passes against the checked-in golden"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/lib/cloud-sync/google-oauth-config.test.ts",
+          "title": "should target the non-sensitive appdata scope"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/lib/cloud-sync/sync-connected-pref.test.ts",
+          "title": "should report not connected by default"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "file": "scripts/geo/wrangler.toml",
+          "contains": "name = \"kaiord-agent-edge\""
+        },
+        {
+          "test": "scripts/geo/agent-edge-worker.test.mjs",
+          "title": "should forward other methods to the origin unchanged"
+        },
+        {
+          "test": "scripts/lib/site-csp-policy.test.mjs",
+          "title": "should name in the landing's data statement, English and Spanish, the destination of every remote origin the site allows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/connections/intervals-icu-validate.test.ts",
+          "title": "should send Basic auth with the API_KEY username and report success"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should never send profileId to umami, whatever the call site passes"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should scrub an email out of an event property before umami sees it"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should submit the route pattern, not the record id, as the page URL"
+        }
+      ]
+    },
+    {
+      "id": "app.author",
+      "text": "Pablo Albaladejo",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Copyright (c) 2025 Pablo Albaladejo"
+        }
+      ]
+    }
+  ]
+}

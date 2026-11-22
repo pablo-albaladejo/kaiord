@@ -33,7 +33,8 @@
           "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
           "title": "runs ticket → preauthorized → exchange and returns both tokens"
         }
-      ]
+      ],
+      "count": 2
     },
     {
       "id": "garmin.listing.intro",
@@ -56,11 +57,7 @@
     {
       "id": "garmin.listing.label-what",
       "text": "What it does:",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.listing.sends",
@@ -114,7 +111,7 @@
     },
     {
       "id": "garmin.listing.body",
-      "text": "Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you sync one from the Kaiord App.",
+      "text": "Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you send one from the Kaiord App.",
       "proof": [
         {
           "test": "packages/garmin-bridge/test/background.test.js",
@@ -122,7 +119,7 @@
         },
         {
           "file": "packages/workout-spa-editor/src/hooks/use-tanita-garmin-sync.ts",
-          "contains": "for a MANUAL"
+          "contains": "the two bridge transports for a MANUAL"
         }
       ]
     },
@@ -143,11 +140,7 @@
     {
       "id": "garmin.listing.label-how",
       "text": "How it works:",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.listing.step-sign-in",
@@ -190,11 +183,7 @@
     {
       "id": "garmin.listing.label-tokens",
       "text": "Your tokens and your data:",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.tokens.local-never-kaiord",
@@ -257,11 +246,9 @@
     {
       "id": "garmin.listing.uninstall",
       "text": "Removing the extension from Chrome deletes everything it stored.",
-      "proof": [
-        {
-          "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/storage"
-        }
-      ]
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
     },
     {
       "id": "garmin.listing.unofficial",
@@ -273,7 +260,7 @@
         },
         {
           "file": "packages/garmin-bridge/garmin-oauth.js",
-          "contains": "same as garth"
+          "contains": "(same as garth / thegarth.s3.amazonaws.com/oauth_consumer.json)"
         }
       ]
     },
@@ -282,46 +269,33 @@
       "text": "Open source: https://github.com/pablo-albaladejo/kaiord",
       "proof": [
         {
-          "endpoint": "https://github.com/pablo-albaladejo/kaiord"
-        },
-        {
-          "file": "LICENSE"
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
     {
       "id": "garmin.pj.title",
       "text": "Permission Justification",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.pj.intro",
       "text": "Why Kaiord for Garmin asks for each permission in `manifest.prod.json`, for Chrome Web Store review. Every paragraph and list item in this file is an entry in `claims/garmin.json`, with the code or test that proves it.",
       "proof": [
         {
+          "test": "scripts/check-claims.test.mjs",
+          "title": "should pass on the register and surfaces the repo ships"
+        },
+        {
           "file": "packages/garmin-bridge/manifest.prod.json"
-        },
-        {
-          "file": "claims/garmin.json"
-        },
-        {
-          "file": "scripts/check-claims.mjs"
         }
       ]
     },
     {
       "id": "garmin.pj.permissions",
       "text": "Permissions",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json",
-          "contains": "\"permissions\": [\"storage\"]"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.pj.storage",
@@ -420,12 +394,7 @@
     {
       "id": "garmin.pj.hosts",
       "text": "Host Permissions",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json",
-          "contains": "\"host_permissions\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.pj.sso",
@@ -545,12 +514,7 @@
     {
       "id": "garmin.pj.content-script",
       "text": "Content Script",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json",
-          "contains": "\"content_scripts\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.pj.announce",
@@ -587,12 +551,7 @@
     {
       "id": "garmin.pj.ec",
       "text": "externally_connectable",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/manifest.prod.json",
-          "contains": "\"externally_connectable\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.pj.ec-app",
@@ -657,11 +616,7 @@
     {
       "id": "garmin.pj.data",
       "text": "Data Handling",
-      "proof": [
-        {
-          "file": "packages/garmin-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "garmin.pj.no-password",
@@ -763,7 +718,7 @@
         },
         {
           "file": "packages/garmin-bridge/garmin-oauth.js",
-          "contains": "same as garth"
+          "contains": "(same as garth / thegarth.s3.amazonaws.com/oauth_consumer.json)"
         }
       ]
     },
@@ -856,11 +811,11 @@
     },
     {
       "id": "garmin.pp.body",
-      "text": "**Body-Composition Upload**: When you choose to sync a measurement, the extension uploads a body-composition record (your weight plus derived metrics such as body-fat percentage) to Garmin Connect as a FIT file, using the `write:body` capability. It only ever sends the data you supply from the Kaiord App; it never reads your Garmin body-composition history.",
+      "text": "**Body-Composition Upload**: When you send a measurement from the Kaiord App, the extension uploads a body-composition record (your weight plus derived metrics such as body-fat percentage) to Garmin Connect as a FIT file, using the `write:body` capability. It only ever sends the data you supply from the Kaiord App; it never reads your Garmin body-composition history.",
       "proof": [
         {
           "file": "packages/workout-spa-editor/src/hooks/use-tanita-garmin-sync.ts",
-          "contains": "for a MANUAL"
+          "contains": "the two bridge transports for a MANUAL"
         },
         {
           "test": "packages/garmin-bridge/test/background.test.js",
@@ -882,7 +837,7 @@
     },
     {
       "id": "garmin.pp.calendar-placement",
-      "text": "**Calendar Placement**: When you push or send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them: an entry of that same workout that you added by hand on that date may be treated as Kaiord's and removed. It never deletes entries of other workouts, and never deletes library workouts.",
+      "text": "**Calendar Placement**: When you send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them: an entry of that same workout that you added by hand on that date may be treated as Kaiord's and removed. It never deletes entries of other workouts, and never deletes library workouts.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",

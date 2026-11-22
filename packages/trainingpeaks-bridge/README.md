@@ -1,13 +1,12 @@
 # @kaiord/trainingpeaks-bridge
 
-Chrome extension (Manifest V3) that bridges the Kaiord editor to
-[TrainingPeaks](https://www.trainingpeaks.com). It reads your own body metrics
-directly from your logged-in TrainingPeaks session — no password is ever
-entered or sent to a Kaiord-hosted server — and returns the raw JSON to the
-Kaiord SPA for parsing.
+Kaiord for TrainingPeaks: the Chrome extension (Manifest V3) that lets the
+Kaiord App send workouts to your [TrainingPeaks](https://www.trainingpeaks.com)
+calendar and read your weight. It works from your own signed-in TrainingPeaks
+session, so no password is ever entered or sent to Kaiord, and the access
+token it gets is sent only to TrainingPeaks.
 
-This package is `private: true` and is not published to npm. The release
-workflow packages it as a Chrome Web Store artifact.
+This package is `private: true` and is not published to npm.
 
 ## Purpose
 

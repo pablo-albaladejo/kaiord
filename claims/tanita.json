@@ -37,7 +37,8 @@
           "file": "packages/tanita-bridge/background.js",
           "contains": "capabilities: [\"read:body\"],"
         }
-      ]
+      ],
+      "count": 2
     },
     {
       "id": "tanita.listing.intro",
@@ -64,11 +65,7 @@
     {
       "id": "tanita.listing.label-what",
       "text": "What it does:",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.listing.export",
@@ -155,11 +152,7 @@
     {
       "id": "tanita.listing.label-how",
       "text": "How it works:",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.listing.step-sign-in",
@@ -214,11 +207,7 @@
     {
       "id": "tanita.listing.label-data",
       "text": "Your sign-in and your data:",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.listing.requests-only",
@@ -285,11 +274,9 @@
     {
       "id": "tanita.listing.uninstall",
       "text": "Removing the extension from Chrome deletes everything it stored.",
-      "proof": [
-        {
-          "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/storage"
-        }
-      ]
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
     },
     {
       "id": "tanita.listing.unofficial",
@@ -310,46 +297,33 @@
       "text": "Open source: https://github.com/pablo-albaladejo/kaiord",
       "proof": [
         {
-          "endpoint": "https://github.com/pablo-albaladejo/kaiord"
-        },
-        {
-          "file": "LICENSE"
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
     {
       "id": "tanita.pj.title",
       "text": "Permission Justification",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.pj.intro",
       "text": "Why Kaiord for Tanita asks for each permission in `manifest.prod.json`, for Chrome Web Store review. Every paragraph and list item in this file is an entry in `claims/tanita.json`, with the code or test that proves it.",
       "proof": [
         {
+          "test": "scripts/check-claims.test.mjs",
+          "title": "should pass on the register and surfaces the repo ships"
+        },
+        {
           "file": "packages/tanita-bridge/manifest.prod.json"
-        },
-        {
-          "file": "claims/tanita.json"
-        },
-        {
-          "file": "scripts/check-claims.mjs"
         }
       ]
     },
     {
       "id": "tanita.pj.permissions",
       "text": "Permissions",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/manifest.prod.json",
-          "contains": "\"permissions\": [\"storage\"]"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.pj.storage",
@@ -430,12 +404,7 @@
     {
       "id": "tanita.pj.hosts",
       "text": "Host Permissions",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/manifest.prod.json",
-          "contains": "\"host_permissions\": [\"https://mytanita.eu/*\"]"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.pj.mytanita",
@@ -506,12 +475,7 @@
     {
       "id": "tanita.pj.content-script",
       "text": "Content Script",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/manifest.prod.json",
-          "contains": "\"content_scripts\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.pj.announce",
@@ -562,12 +526,7 @@
     {
       "id": "tanita.pj.ec",
       "text": "externally_connectable",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/manifest.prod.json",
-          "contains": "\"externally_connectable\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.pj.ec-app",
@@ -632,11 +591,7 @@
     {
       "id": "tanita.pj.data",
       "text": "Data Handling",
-      "proof": [
-        {
-          "file": "packages/tanita-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "tanita.pj.no-password",

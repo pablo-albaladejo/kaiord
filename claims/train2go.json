@@ -33,7 +33,8 @@
           "test": "packages/train2go-bridge/test/session-fetch.test.js",
           "title": "should send cookies and return the raw body on a 2xx response"
         }
-      ]
+      ],
+      "count": 2
     },
     {
       "id": "train2go.listing.intro",
@@ -56,15 +57,11 @@
     {
       "id": "train2go.listing.label-what",
       "text": "What it does:",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.listing.week",
-      "text": "Reads the week your coach planned on Train2Go: each session's date, sport, title, duration, workload and completion status.",
+      "text": "Reads the week your coach planned on Train2Go: each coaching activity's date, sport, title, duration, workload and completion status.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/background.test.js",
@@ -165,11 +162,7 @@
     {
       "id": "train2go.listing.label-how",
       "text": "How it works:",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.listing.step-sign-in",
@@ -223,11 +216,7 @@
     {
       "id": "train2go.listing.label-data",
       "text": "Your session and your data:",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/store-listing.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.listing.stored",
@@ -312,11 +301,9 @@
     {
       "id": "train2go.listing.uninstall",
       "text": "Removing the extension from Chrome deletes everything it stored.",
-      "proof": [
-        {
-          "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/storage"
-        }
-      ]
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
     },
     {
       "id": "train2go.listing.unofficial",
@@ -337,45 +324,33 @@
       "text": "Open source: https://github.com/pablo-albaladejo/kaiord",
       "proof": [
         {
-          "endpoint": "https://github.com/pablo-albaladejo/kaiord"
-        },
-        {
-          "file": "LICENSE"
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
     {
       "id": "train2go.pj.title",
       "text": "Permission Justification",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.intro",
       "text": "Why Kaiord for Train2Go asks for each permission in `manifest.prod.json`, and the other answers of the Chrome Web Store privacy form. Every paragraph and list item in this file is an entry in `claims/train2go.json`, with the code or test that proves it.",
       "proof": [
         {
+          "test": "scripts/check-claims.test.mjs",
+          "title": "should pass on the register and surfaces the repo ships"
+        },
+        {
           "file": "packages/train2go-bridge/manifest.prod.json"
-        },
-        {
-          "file": "claims/train2go.json"
-        },
-        {
-          "file": "scripts/check-claims.mjs"
         }
       ]
     },
     {
       "id": "train2go.pj.single-purpose-heading",
       "text": "Single Purpose",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.single-purpose",
@@ -398,12 +373,7 @@
     {
       "id": "train2go.pj.permissions",
       "text": "Permissions",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/manifest.prod.json",
-          "contains": "\"permissions\": [\"storage\"]"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.storage",
@@ -519,12 +489,7 @@
     {
       "id": "train2go.pj.hosts",
       "text": "Host Permissions",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/manifest.prod.json",
-          "contains": "\"host_permissions\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.host",
@@ -600,12 +565,7 @@
     {
       "id": "train2go.pj.content-script",
       "text": "Content Script",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/manifest.prod.json",
-          "contains": "\"content_scripts\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.announce",
@@ -638,12 +598,7 @@
     {
       "id": "train2go.pj.ec",
       "text": "externally_connectable",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/manifest.prod.json",
-          "contains": "\"externally_connectable\""
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.ec-app",
@@ -712,11 +667,7 @@
     {
       "id": "train2go.pj.remote-code-heading",
       "text": "Remote Code",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.remote-code",
@@ -731,11 +682,7 @@
     {
       "id": "train2go.pj.data",
       "text": "Data Handling",
-      "proof": [
-        {
-          "file": "packages/train2go-bridge/privacy-justification.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "train2go.pj.no-password",
@@ -877,7 +824,7 @@
     },
     {
       "id": "train2go.pp.plan",
-      "text": "**Coaching Plan**: When the Kaiord App asks, the extension reads the week your coach planned (each session's date, sport, title, duration, workload and completion status) and single days in full (the coach's description of each session, and that day's comments with who wrote them), and passes them to the Kaiord App.",
+      "text": "**Coaching Plan**: When the Kaiord App asks, the extension reads the week your coach planned (each coaching activity's date, sport, title, duration, workload and completion status) and single days in full (the coach's description of each coaching activity, and that day's comments with who wrote them), and passes them to the Kaiord App.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/background.test.js",

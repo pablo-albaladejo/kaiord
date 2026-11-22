@@ -4,14 +4,9 @@
 // policy's per-extension sections) may sit in different register files, so
 // parallel tickets edit different files.
 
-const SURFACE_FIELDS = ["file", "intro", "sections", "keys"];
+import { unknownFields } from "./claims-shape.mjs";
 
-export const unknownFields = (what, object, allowed) => {
-  const unknown = Object.keys(object).filter((k) => !allowed.includes(k));
-  return unknown.length > 0
-    ? [`${what} has unknown field(s) ${unknown.join(", ")}`]
-    : [];
-};
+const SURFACE_FIELDS = ["file", "intro", "sections", "keys"];
 
 // The parts of a file a surface claims: its intro, its named sections or keys,
 // or the whole file (null) when it names none of them.

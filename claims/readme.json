@@ -40,35 +40,46 @@
     {
       "file": "packages/ai/README.md",
       "intro": true
+    },
+    {
+      "file": "packages/garmin-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/train2go-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/tanita-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/trainingpeaks-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/whoop-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/workout-spa-editor/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/landing/README.md",
+      "intro": true
     }
   ],
   "claims": [
     {
       "id": "readme.root.kaiord",
       "text": "Kaiord",
-      "proof": [
-        {
-          "file": "GLOSSARY.md",
-          "contains": "# Kaiord"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "readme.root.kaiord-com-kaiord-app",
       "text": "**[kaiord.com](https://kaiord.com)** | [Kaiord App](https://kaiord.com/app/) | [npm](https://www.npmjs.com/org/kaiord)",
-      "proof": [
-        {
-          "endpoint": "https://kaiord.com/",
-          "servedBy": "packages/landing/index.html"
-        },
-        {
-          "endpoint": "https://kaiord.com/app/",
-          "servedBy": "packages/workout-spa-editor/index.html"
-        },
-        {
-          "endpoint": "https://www.npmjs.com/org/kaiord"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "readme.root.license-mit-typescript-strict",
@@ -76,11 +87,11 @@
       "proof": [
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         },
         {
           "file": "tsconfig.base.json",
-          "contains": "\"strict\": true"
+          "contains": "\"strict\": true,\n    \"noUnusedLocals\": true,"
         }
       ]
     },
@@ -163,11 +174,11 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord SDK**:"
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
         },
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord App**:"
+          "contains": "**Kaiord App**:\nThe browser application an athlete uses to see, plan and move their data"
         }
       ]
     },
@@ -177,7 +188,7 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord SDK**:"
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
         },
         {
           "file": "packages/core/package.json",
@@ -215,7 +226,7 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord App**:"
+          "contains": "**Kaiord App**:\nThe browser application an athlete uses to see, plan and move their data"
         },
         {
           "endpoint": "https://kaiord.com/app/",
@@ -229,11 +240,8 @@
     {
       "id": "readme.root.rule",
       "text": "---",
-      "proof": [
-        {
-          "file": "README.md"
-        }
-      ]
+      "kind": "label",
+      "count": 3
     },
     {
       "id": "readme.root.kaiord-app-create-and",
@@ -262,8 +270,8 @@
           "contains": "KRD is an internal model."
         },
         {
-          "file": "packages/core/package.json",
-          "contains": "\"zod\": \""
+          "file": "packages/core/src/domain/lab/lab-parameter.ts",
+          "contains": "import { z } from \"zod\";"
         },
         {
           "test": "packages/core/src/application/from-format.test.ts",
@@ -328,11 +336,11 @@
         },
         {
           "file": ".github/workflows/ci.yml",
-          "contains": "pull_request:"
+          "contains": "on:\n  pull_request:\n    types: [opened, synchronize, reopened]"
         },
         {
           "file": "tsconfig.base.json",
-          "contains": "\"strict\": true"
+          "contains": "\"strict\": true,\n    \"noUnusedLocals\": true,"
         }
       ]
     },
@@ -386,7 +394,7 @@
       "proof": [
         {
           "file": "packages/workout-spa-editor/src/utils/import-workout-formats.ts",
-          "contains": "fromBinary"
+          "contains": "import { fromBinary, fromText } from \"@kaiord/core\";"
         },
         {
           "file": "packages/workout-spa-editor/src/utils/export-workout-formats.ts"
@@ -517,7 +525,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         },
         {
           "file": ".github/workflows/ci.yml"
@@ -530,7 +538,7 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord SDK**:"
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
         },
         {
           "file": "packages/core/src/index.ts",
@@ -544,7 +552,7 @@
     },
     {
       "id": "readme.core.note-as-of-v2",
-      "text": "> **Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages. Install only the adapters you need for optimal bundle size.",
+      "text": "**Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages. Install only the adapters you need for optimal bundle size.",
       "proof": [
         {
           "file": "packages/fit/package.json",
@@ -586,7 +594,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -630,7 +638,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -674,7 +682,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -714,7 +722,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -754,13 +762,13 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
     {
       "id": "readme.garmin-connect.garmin-connect-api-client",
-      "text": "Garmin Connect API client for the Kaiord SDK. Provides authentication, workout listing, and workout pushing via the Garmin Connect API.",
+      "text": "Unofficial Garmin Connect client for the Kaiord SDK: it signs in the way the Garmin Connect web app does and calls the endpoints that app uses, not an API Garmin publishes for this. Provides authentication, workout listing, and sending workouts to Garmin Connect.",
       "proof": [
         {
           "test": "packages/garmin-connect/src/adapters/auth/garmin-auth-provider.test.ts",
@@ -773,6 +781,14 @@
         {
           "test": "packages/garmin-connect/src/adapters/client/garmin-workout-service.test.ts",
           "title": "should push a workout"
+        },
+        {
+          "file": "packages/garmin-connect/src/adapters/http/urls.ts",
+          "contains": "export const SIGNIN_URL = \"https://sso.garmin.com/sso/signin\";"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "access is unofficial, can break without notice"
         }
       ]
     },
@@ -864,8 +880,332 @@
           "title": "should parse running workout from natural language"
         },
         {
-          "file": "packages/ai/package.json",
-          "contains": "\"ai\": \""
+          "file": "packages/ai/src/types.ts",
+          "contains": "import type { LanguageModel } from \"ai\";"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin-bridge.title",
+      "text": "@kaiord/garmin-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.garmin-bridge.intro",
+      "text": "Kaiord for Garmin: the Chrome extension (Manifest V3) that lets the Kaiord App send workouts to [Garmin Connect](https://connect.garmin.com) and read your activities. It mints an OAuth token from your own Garmin sign-in in the browser, so no password is ever entered or sent to Kaiord, and calls Garmin's API (`connectapi.garmin.com`) directly with `Authorization: Bearer`.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with a token, when Garmin answers"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "runs ticket → preauthorized → exchange and returns both tokens"
+        }
+      ]
+    },
+    {
+      "id": "readme.bridge.private-cws",
+      "text": "This package is `private: true` and is not published to npm. The Chrome Web Store workflow (`cws-publish.yml`) packages and uploads it.",
+      "proof": [
+        {
+          "file": "packages/garmin-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": "packages/train2go-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": ".github/workflows/cws-publish.yml",
+          "contains": "- name: garmin-bridge"
+        },
+        {
+          "file": ".github/workflows/cws-publish.yml",
+          "contains": "- name: train2go-bridge"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "readme.train2go-bridge.title",
+      "text": "@kaiord/train2go-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.train2go-bridge.intro",
+      "text": "Kaiord for Train2Go: the Chrome extension (Manifest V3) that lets the Kaiord App read the plan your coach sets on [Train2Go](https://app.train2go.com), through your own signed-in Train2Go session in the browser. It sends only `GET` requests, with the browser's own cookies, and never sends a Train2Go credential to Kaiord.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the weekly activities on read-week"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ]
+    },
+    {
+      "id": "readme.tanita-bridge.title",
+      "text": "@kaiord/tanita-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.tanita-bridge.intro",
+      "text": "Kaiord for Tanita: the Chrome extension (Manifest V3) that lets the Kaiord App import your weight and body composition from [MyTANITA](https://mytanita.eu). It fetches your own body-composition **CSV export** from your signed-in `mytanita.eu` session, so no password is ever entered or sent to Kaiord, and hands the raw CSV to the Kaiord App, which parses it in your browser.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+        },
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should hand the export to the Kaiord App exactly as MyTANITA sent it"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/tanita/sync-tanita-import.use-case.test.ts",
+          "title": "should persist both extensions of a single KRD when both routes are enabled"
+        },
+        {
+          "test": "packages/tanita-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/tanita-bridge/background.js",
+          "contains": "capabilities: [\"read:body\"],"
+        }
+      ]
+    },
+    {
+      "id": "readme.bridge.private",
+      "text": "This package is `private: true` and is not published to npm.",
+      "proof": [
+        {
+          "file": "packages/tanita-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/package.json",
+          "contains": "\"private\": true,"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "readme.trainingpeaks-bridge.title",
+      "text": "@kaiord/trainingpeaks-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.trainingpeaks-bridge.intro",
+      "text": "Kaiord for TrainingPeaks: the Chrome extension (Manifest V3) that lets the Kaiord App send workouts to your [TrainingPeaks](https://www.trainingpeaks.com) calendar and read your weight. It works from your own signed-in TrainingPeaks session, so no password is ever entered or sent to Kaiord, and the access token it gets is sent only to TrainingPeaks.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should report the sent state after a successful push"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        },
+        {
+          "test": "packages/trainingpeaks/src/adapters/converters/trainingpeaks-metrics-to-krd.converter.test.ts",
+          "title": "should emit one KRD document per entry that carries a weight reading"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        }
+      ]
+    },
+    {
+      "id": "readme.whoop-bridge.title",
+      "text": "@kaiord/whoop-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.whoop-bridge.intro",
+      "text": "The Chrome extension (Manifest V3) that lets the Kaiord App read your [WHOOP](https://www.whoop.com) health data, through your own signed-in `app.whoop.com` session: a main-world content script captures the session bearer the WHOOP web app already attaches to its own `api.prod.whoop.com` requests, and the extension relays a fixed allowlist of read-only internal-API paths back to the Kaiord App. There is no OAuth flow, no developer app, and no password or long-lived credential is ever entered, stored, or transmitted.",
+      "proof": [
+        {
+          "test": "packages/whoop-bridge/test/inject-main.test.js",
+          "title": "should post the extracted bearer to the WHOOP page origin, not a wildcard"
+        },
+        {
+          "test": "packages/whoop-bridge/test/content.test.js",
+          "title": "should reject any non-GET method on an allowlisted path"
+        },
+        {
+          "test": "packages/whoop-bridge/test/content.test.js",
+          "title": "should reject a disallowed path"
+        },
+        {
+          "file": "packages/whoop-bridge/content.js",
+          "contains": "const API_BASE = \"https://api.prod.whoop.com\";"
+        }
+      ]
+    },
+    {
+      "id": "readme.whoop-bridge.private",
+      "text": "This package is `private: true` and is not published to npm. **It is not in the Chrome Web Store**: its listing has not been submitted. Load it unpacked for development and testing (see \"Build entrypoint\" below).",
+      "proof": [
+        {
+          "file": "packages/whoop-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": "packages/whoop-bridge/store-listing.md",
+          "contains": "**Status: NOT YET SUBMITTED.**"
+        }
+      ]
+    },
+    {
+      "id": "readme.app.title",
+      "text": "@kaiord/workout-spa-editor",
+      "kind": "label"
+    },
+    {
+      "id": "readme.app.intro",
+      "text": "The Kaiord App: the browser application where an athlete plans the week on a calendar, builds workouts, talks to an assistant with their own key, sends workouts to Garmin Connect and follows their health. Built with React and TypeScript; the data stays in the browser's IndexedDB and leaves only to destinations the athlete sets up.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "test": "scripts/lib/site-csp-policy.test.mjs",
+          "title": "should name in the landing's data statement, English and Spanish, the destination of every remote origin the site allows"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts",
+          "contains": "export class KaiordDatabase extends Dexie"
+        }
+      ]
+    },
+    {
+      "id": "readme.app.live",
+      "text": "**Live**: [https://kaiord.com/app/](https://kaiord.com/app/)",
+      "kind": "label"
+    },
+    {
+      "id": "readme.landing.title",
+      "text": "@kaiord/landing",
+      "kind": "label"
+    },
+    {
+      "id": "readme.landing.intro",
+      "text": "Landing page for [kaiord.com](https://kaiord.com): a single-page static site built with Vite and Tailwind CSS that introduces Kaiord, links to the docs and the Kaiord App, and shows the install command for `@kaiord/core`.",
+      "proof": [
+        {
+          "file": "packages/landing/vite.config.ts",
+          "contains": "import tailwindcss from \"@tailwindcss/vite\";"
+        },
+        {
+          "file": "packages/landing/index.html",
+          "contains": "href=\"/docs/project/how-kaiord-is-built\""
+        },
+        {
+          "file": "packages/landing/index.html",
+          "contains": "npm i @kaiord/core @kaiord/fit @kaiord/tcx"
+        }
+      ]
+    },
+    {
+      "id": "readme.landing.private",
+      "text": "This package is `private: true` and is not published to npm. The site deploy (`deploy-site.yml`) builds it and serves it with the docs and the Kaiord App.",
+      "proof": [
+        {
+          "file": "packages/landing/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": ".github/workflows/deploy-site.yml",
+          "contains": "- \"packages/landing/**\""
         }
       ]
     }

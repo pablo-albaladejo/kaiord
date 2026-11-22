@@ -1,13 +1,13 @@
 # @kaiord/garmin-bridge
 
-Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to
-[Garmin Connect](https://connect.garmin.com). The extension mints an OAuth
-token from the user's existing Garmin browser session — no password is ever
-entered or sent to a Kaiord-hosted server — and calls Garmin's API
-(`connectapi.garmin.com`) directly with `Authorization: Bearer`.
+Kaiord for Garmin: the Chrome extension (Manifest V3) that lets the Kaiord
+App send workouts to [Garmin Connect](https://connect.garmin.com) and read
+your activities. It mints an OAuth token from your own Garmin sign-in in the
+browser, so no password is ever entered or sent to Kaiord, and calls Garmin's
+API (`connectapi.garmin.com`) directly with `Authorization: Bearer`.
 
-This package is `private: true` and is not published to npm. The release
-workflow packages it as a Chrome Web Store artifact.
+This package is `private: true` and is not published to npm. The Chrome Web
+Store workflow (`cws-publish.yml`) packages and uploads it.
 
 ## Purpose
 

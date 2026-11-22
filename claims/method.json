@@ -8,11 +8,7 @@
     {
       "id": "method.title",
       "text": "How Kaiord is built",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.landing-says",
@@ -45,20 +41,12 @@
     {
       "id": "method.intro",
       "text": "This page is what that sentence rests on: how the agents work, what a person does, and the commands that check it against the public history.",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.supports.heading",
       "text": "What the history supports",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.supports",
@@ -81,11 +69,7 @@
     {
       "id": "method.agents.heading",
       "text": "How agents build it",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.agents.openspec",
@@ -120,7 +104,7 @@
         },
         {
           "file": ".husky/pre-push",
-          "contains": "pnpm lint"
+          "contains": "echo \"🔍 Running lint check before push...\"\npnpm lint"
         },
         {
           "file": ".github/workflows/ci.yml",
@@ -156,7 +140,7 @@
         },
         {
           "file": ".coderabbit.yaml",
-          "contains": "auto_review"
+          "contains": "auto_review:\n    enabled: true"
         }
       ]
     },
@@ -191,11 +175,7 @@
     {
       "id": "method.person.heading",
       "text": "What a person does",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.person.decisions",
@@ -235,7 +215,8 @@
       "text": "Tests with real accounts. A run against a real Platform account is made by a person; a change that needs one says so in its tasks, as `openspec/changes/add-garmin-calendar-scheduling/manual-e2e.md` does.",
       "proof": [
         {
-          "file": "openspec/changes/add-garmin-calendar-scheduling/manual-e2e.md"
+          "file": "openspec/changes/add-garmin-calendar-scheduling/manual-e2e.md",
+          "contains": "Six checks against a real Train2Go week on the athlete's own Garmin account."
         }
       ]
     },
@@ -252,11 +233,7 @@
     {
       "id": "method.check.heading",
       "text": "Check it yourself",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.check.how",
@@ -289,20 +266,12 @@
     {
       "id": "method.figures.heading",
       "text": "The figures",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.figures.header",
       "text": "| Figure | Value | Command |",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.figures.commits",
@@ -577,20 +546,14 @@
     {
       "id": "method.limits.heading",
       "text": "What the figures do and do not show",
-      "proof": [
-        {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "method.limits.trailer",
       "text": "A co-author trailer is evidence, not proof. It is a line of text in the commit message: a person can add or delete it by hand, and a squash merge keeps it only if the merge message does.",
-      "proof": [
-        {
-          "endpoint": "https://git-scm.com/docs/git-interpret-trailers"
-        }
-      ]
+      "kind": "external",
+      "url": "https://git-scm.com/docs/git-interpret-trailers",
+      "read_on": "2026-11-22"
     },
     {
       "id": "method.limits.no-trailer",
@@ -623,18 +586,21 @@
     {
       "id": "method.limits.merger",
       "text": "A subject ending in a pull-request number means the commit landed through a pull request. Git does not record who merged it.",
-      "proof": [
-        {
-          "endpoint": "https://git-scm.com/docs/git-commit-tree"
-        }
-      ]
+      "kind": "external",
+      "url": "https://git-scm.com/docs/git-commit-tree",
+      "read_on": "2026-11-22"
     },
     {
       "id": "method.limits.lines",
       "text": "A commit count is not a line count: the figures say nothing about how many lines each commit changed.",
       "proof": [
         {
-          "file": "packages/docs/project/how-kaiord-is-built.md"
+          "file": "scripts/lib/method-pipeline.mjs",
+          "contains": "\"rev-list\": { flags: [\"--count\"], values: {}, paths: \"none\" },"
+        },
+        {
+          "test": "scripts/lib/method-pipeline.test.mjs",
+          "title": "should refuse every option that counts changed lines, so a figure stays a commit count"
         }
       ]
     }

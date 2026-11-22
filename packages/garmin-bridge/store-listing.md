@@ -23,7 +23,7 @@ What it does:
 • Sends the workouts you create in the Kaiord App to your Garmin Connect workout library.
 • Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries of workouts Kaiord sent, and never deletes a library workout.
 • Reads your 20 most recent Garmin Connect activities for the Kaiord App.
-• Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you sync one from the Kaiord App.
+• Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you send one from the Kaiord App.
 • Shows in its popup whether it can currently read from Garmin Connect.
 
 How it works:
