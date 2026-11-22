@@ -60,8 +60,38 @@ const claimProblems = (claim, read) => {
   ];
 };
 
-// A surface or a claim id belongs to one register file only, so two files
-// can never disagree about the same text.
+// The parts of a file a surface claims: its named sections or keys, or the
+// whole file (null) when it names neither.
+const surfaceParts = (surface) => {
+  if (surface.sections) return surface.sections.map((s) => `section "${s}"`);
+  if (surface.keys) return surface.keys.map((k) => `key "${k}"`);
+  return null;
+};
+
+// A whole file, or one section or key of it, belongs to one register file
+// only, so two files can never disagree about the same text. Different
+// sections of one file (the privacy policy's per-extension sections) may sit
+// in different register files, so parallel tickets edit different files.
+const surfaceOwnerProblem = (name, surface, owners) => {
+  const owned = owners.surfaces.get(surface.file) ?? { parts: new Map() };
+  owners.surfaces.set(surface.file, owned);
+  const taken = `${name}: surface ${surface.file}`;
+  const first = owned.whole ?? owned.parts.values().next().value;
+  const parts = surfaceParts(surface);
+  if (owned.whole || (parts === null && first))
+    return [`${taken} is already registered in ${first}`];
+  if (parts === null) {
+    owned.whole = name;
+    return [];
+  }
+  return parts.flatMap((part) => {
+    const owner = owned.parts.get(part);
+    if (owner) return [`${taken} (${part}) is already registered in ${owner}`];
+    owned.parts.set(part, name);
+    return [];
+  });
+};
+
 const duplicateProblems = (name, data, owners) => {
   const problems = [];
   for (const surface of data.surfaces) {
@@ -70,14 +100,9 @@ const duplicateProblems = (name, data, owners) => {
         `${name}: surface ${surface.file}`,
         surface,
         SURFACE_FIELDS
-      )
+      ),
+      ...surfaceOwnerProblem(name, surface, owners)
     );
-    const owner = owners.surfaces.get(surface.file);
-    if (owner)
-      problems.push(
-        `${name}: surface ${surface.file} is already registered in ${owner}`
-      );
-    else owners.surfaces.set(surface.file, name);
   }
   for (const { id } of data.claims) {
     const owner = owners.ids.get(id);

@@ -9,7 +9,7 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 **Last updated:** 2026-11-22
 
-This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a), the Kaiord for Garmin Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord Tanita Bridge Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
+This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a), the Kaiord for Garmin Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord for Tanita Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
 ## Data Controller
 
@@ -64,14 +64,17 @@ The Kaiord Train2Go Bridge Chrome extension imports coaching plans from Train2Go
 - **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `app.train2go.com` (via its content script) and allowed Kaiord origins (to deliver imported workouts to the editor).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
-## Kaiord Tanita Bridge Extension
+## Kaiord for Tanita Extension
 
-The Kaiord Tanita Bridge Chrome extension reads your MyTANITA body-composition CSV export and hands it to the Kaiord workout editor. Here is how it handles data:
+Kaiord for Tanita is the Chrome extension that connects the Kaiord App to your MyTANITA account at `mytanita.eu`; its extension name is currently Kaiord Tanita Bridge. Here is how it handles data:
 
-- **No Data Persistence**: The extension stores no measurement data locally. Its service worker fetches your own CSV export from `mytanita.eu` on demand and passes the raw text directly to the Kaiord workout editor (running in your browser). Nothing is transmitted to a Kaiord server; nothing is written to `chrome.storage`, cookies, or disk. Only the `read:body` capability is declared — the extension reads your body-composition export and nothing else.
-- **No Credentials, No Password**: The extension never asks for, reads, stores, or transmits your MyTANITA password or any authentication token. It rides your existing logged-in browser session: the request is sent with `credentials:"include"` so your own HttpOnly `TANITASESS` session cookie is attached by the browser. The extension cannot read that cookie's value (it does not declare the `cookies` permission), and it reports session presence to the editor only as a boolean. If the session has expired, the extension surfaces a re-authentication prompt rather than any credential.
-- **No mytanita.eu DOM Access**: The extension injects no content script on `mytanita.eu`. It only performs a single, fixed, read-only `GET` of your CSV export; it does not modify the page, submit forms, or call any other endpoint.
-- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `mytanita.eu` (to fetch your export) and allowed Kaiord origins (to deliver the export to the editor). The raw CSV is parsed in the editor, not by the extension.
+- **No Password, No Cookie Access**: The extension never asks for, reads, stores, or transmits your MyTANITA password or any authentication token. It reuses your existing MyTANITA sign-in: its request is sent with `credentials:"include"`, so Chrome attaches MyTANITA's own HttpOnly `TANITASESS` session cookie. The extension does not declare the `cookies` permission and cannot read that cookie's value.
+- **One Request, Your Whole Export**: The extension makes a single, fixed, read-only `GET` of `https://mytanita.eu/en/user/export-csv`; a request to any other path or with any other method is refused before it is sent. MyTANITA answers with your whole body-composition history: every measurement your account holds, weight included. Only the `read:body` capability is declared.
+- **Handed to the Kaiord App Unchanged**: When the Kaiord App asks for it, the extension passes the export on as raw text, without parsing it. The Kaiord App parses it in your browser and keeps the measurements there; nothing is sent to a Kaiord-operated server.
+- **Checking the Connection Downloads the Export**: Each time you open the extension's popup or press Refresh, and whenever the extension is asked whether it can reach MyTANITA, it downloads your whole export again, keeps only whether it arrived, and discards the rest.
+- **Stored in Your Browser**: The extension keeps in `chrome.storage.local` only when its popup last could and could not reach your export, and the Kaiord App's theme preference. It never stores the export, a measurement, a cookie or a password. Removing the extension from Chrome deletes what it stored.
+- **No mytanita.eu Page Access**: The extension injects no content script on `mytanita.eu`; it does not read or modify any MyTANITA page, and submits no form.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `mytanita.eu` (to download your export) and the Kaiord App (to hand the export over).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
 ## Kaiord TrainingPeaks Bridge Extension
@@ -105,7 +108,7 @@ The extensions only communicate with the following domains:
 - `https://connectapi.garmin.com/*` — Kaiord for Garmin exchanges the ticket for an OAuth token and makes the workout/activity API calls with it
 - `https://connect.garmin.com/*` — where you sign in to Garmin Connect; Kaiord for Garmin opens this page in a tab and sends it no request
 - `https://app.train2go.com/*` — Train2Go Bridge content script (runs on that domain) reads the coaching plan from the page
-- `https://mytanita.eu/*` — Tanita Bridge service worker fetches your body-composition CSV export using your existing session cookie
+- `https://mytanita.eu/*` — Kaiord for Tanita downloads your MyTANITA export using your existing session cookie
 - `https://tpapi.trainingpeaks.com/*` — TrainingPeaks Bridge service worker exchanges your existing session cookie for a short-lived access token and reads/writes your body metrics with it
 - `https://app.whoop.com/*` — WHOOP Bridge's main-world and isolated content scripts capture the session bearer, both from the headers of the WHOOP web app's own requests and from the access token WHOOP's sign-in library stores in this origin's `localStorage`; the bridge also opens this page when you sign in
 - `https://api.prod.whoop.com/*` — WHOOP Bridge relays allowlisted, read-only requests using that captured bearer, and reads (never modifies) the `Authorization` header of the WHOOP web app's own requests to this host via `chrome.webRequest`
