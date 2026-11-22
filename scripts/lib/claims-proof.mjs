@@ -5,6 +5,8 @@
 //   { endpoint, servedBy } an https URL; a kaiord.com URL names the repo file
 //                         that serves it. Not fetched: the guard stays hermetic.
 
+import { unknownFields } from "./claims-owners.mjs";
+
 const KINDS = {
   file: ["file", "contains"],
   test: ["test", "title"],
@@ -76,4 +78,20 @@ export const proofProblems = (proof, read) => {
       `proof ${JSON.stringify(proof)} has unknown field(s) ${unknown.join(", ")}`,
     ];
   return CHECK[kind](proof, read);
+};
+
+const CLAIM_FIELDS = ["id", "text", "proof"];
+
+// A claim: only its known fields, and at least one proof that still holds.
+export const claimProblems = (claim, read) => {
+  const where = `claim "${claim.id}"`;
+  const shape = unknownFields(where, claim, CLAIM_FIELDS);
+  if (!Array.isArray(claim.proof) || claim.proof.length === 0)
+    return [...shape, `${where}: has no proof`];
+  return [
+    ...shape,
+    ...claim.proof.flatMap((proof) =>
+      proofProblems(proof, read).map((p) => `${where}: ${p}`)
+    ),
+  ];
 };

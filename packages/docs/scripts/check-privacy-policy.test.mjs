@@ -48,8 +48,8 @@ const POLICY_PATH = join(REPO_ROOT, "packages/docs/legal/privacy-policy.md");
 const POLICY = readFileSync(POLICY_PATH, "utf8");
 
 const GARMIN = "Kaiord for Garmin Extension";
-const TRAIN2GO = "Kaiord Train2Go Bridge Extension";
-const TANITA = "Kaiord Tanita Bridge Extension";
+const TRAIN2GO = "Kaiord for Train2Go Extension";
+const TANITA = "Kaiord for Tanita Extension";
 const TRAININGPEAKS = "Kaiord TrainingPeaks Bridge Extension";
 const WHOOP = "Kaiord WHOOP Bridge Extension";
 
@@ -373,8 +373,8 @@ const SOLO_CASES = [
   [TRAIN2GO, "app.train2go.com", "redacted.example", "Train2Go host disclosed"],
   [
     TRAIN2GO,
-    "read on-demand from the Train2Go page DOM",
-    "obtained somehow",
+    'with `credentials: "include"`',
+    "somehow",
     "Train2Go capture path disclosed",
   ],
   [
@@ -391,15 +391,33 @@ const SOLO_CASES = [
   ],
   [
     TRAIN2GO,
-    "does not modify the page, submit forms",
-    "may act on the page",
-    "Train2Go read-only DOM access stated",
+    "injects no script into Train2Go pages",
+    "runs scripts on Train2Go",
+    "Train2Go no-DOM-access stated",
   ],
   [
     TRAIN2GO,
-    "nothing is written to `chrome.storage`",
-    "some things are stored",
-    "Train2Go zero-persistence stated",
+    "does not modify the page, submit forms",
+    "may act on the page",
+    "Train2Go read-only access stated",
+  ],
+  [
+    TRAIN2GO,
+    "keeps in `chrome.storage.local` only what its popup shows",
+    "stores some things",
+    "Train2Go local storage disclosed",
+  ],
+  [
+    TRAIN2GO,
+    "the notes your coach keeps about you",
+    "other things",
+    "Train2Go coach name and notes disclosed",
+  ],
+  [
+    TRAIN2GO,
+    "passes on only your heart-rate",
+    "passes on your heart-rate",
+    "Train2Go profile-page read limited to zones and weight",
   ],
   [
     TRAIN2GO,
@@ -474,6 +492,18 @@ const SOLO_CASES = [
     "does not include any analytics, error reporting, or telemetry",
     "reports a little",
     "Tanita no-telemetry stated",
+  ],
+  [
+    TANITA,
+    "Checking the Connection Downloads the Export",
+    "Checking the Connection",
+    "Tanita session check downloading the whole export disclosed",
+  ],
+  [
+    TANITA,
+    "keeps in `chrome.storage.local` only",
+    "keeps a few things",
+    "Tanita chrome.storage.local contents disclosed",
   ],
 
   [
@@ -756,7 +786,7 @@ for (const [heading, oneLiner] of GUTTED_CASES) {
 const SECTION_CASES = [
   { bridge: "Garmin", heading: GARMIN, intro: "Kaiord for Garmin" },
   { bridge: "Train2Go", heading: TRAIN2GO, intro: "Kaiord Train2Go Bridge" },
-  { bridge: "Tanita", heading: TANITA, intro: "Kaiord Tanita Bridge" },
+  { bridge: "Tanita", heading: TANITA, intro: "Kaiord for Tanita" },
   {
     bridge: "TrainingPeaks",
     heading: TRAININGPEAKS,
@@ -945,7 +975,7 @@ test("gutting the rule set for a section that still exists is flagged", () => {
 
   assert.equal(v.length, 1, v.join(" | "));
   assert.match(v[0], /tanita-bridge Bridge extension covered/);
-  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 11/);
+  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 13/);
 });
 
 test("the rule-count floor is shrink-only, not a flat minimum", () => {

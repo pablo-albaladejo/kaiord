@@ -27,6 +27,7 @@ one place.
 | `security-audit-rules.mjs`    | The trigger and job rules of `check-security-audit-required.mjs`. Covered by `check-security-audit-required.test.mjs`.                                                                                                                 |
 | `claims-units.mjs`            | The units of text a reader sees on a registered claims surface (Markdown blocks, locale messages). Covered by `check-claims.test.mjs`.                                                                                                 |
 | `claims-proof.mjs`            | Whether a claim's proof (file, test, endpoint) still exists. Covered by `check-claims.test.mjs`.                                                                                                                                       |
+| `claims-owners.mjs`           | Which register file owns each claim id, whole file, section or key; unknown-field checks. Covered by `check-claims.test.mjs`.                                                                                                          |
 | `clean-git-env.mjs`           | `process.env` minus every `GIT_*` variable. Pass as `env` when a test spawns git (or a script that does): a hook's inherited `GIT_DIR` otherwise rewrites the shared `.git/config`.                                                    |
 
 ## For AI Agents

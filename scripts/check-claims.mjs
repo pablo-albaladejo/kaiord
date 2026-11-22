@@ -3,7 +3,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { proofProblems } from "./lib/claims-proof.mjs";
+import { duplicateProblems } from "./lib/claims-owners.mjs";
+import { claimProblems } from "./lib/claims-proof.mjs";
 import { surfaceUnits } from "./lib/claims-units.mjs";
 import { failIfAny } from "./lib/guard-failure.mjs";
 
@@ -35,57 +36,6 @@ const surfaceProblems = (surfaces, read) => {
     surface.units = units;
   }
   return { problems, seen };
-};
-
-const CLAIM_FIELDS = ["id", "text", "proof"];
-const SURFACE_FIELDS = ["file", "intro", "sections", "keys"];
-
-const unknownFields = (what, object, allowed) => {
-  const unknown = Object.keys(object).filter((k) => !allowed.includes(k));
-  return unknown.length > 0
-    ? [`${what} has unknown field(s) ${unknown.join(", ")}`]
-    : [];
-};
-
-const claimProblems = (claim, read) => {
-  const where = `claim "${claim.id}"`;
-  const shape = unknownFields(where, claim, CLAIM_FIELDS);
-  if (!Array.isArray(claim.proof) || claim.proof.length === 0)
-    return [...shape, `${where}: has no proof`];
-  return [
-    ...shape,
-    ...claim.proof.flatMap((proof) =>
-      proofProblems(proof, read).map((p) => `${where}: ${p}`)
-    ),
-  ];
-};
-
-// A surface or a claim id belongs to one register file only, so two files
-// can never disagree about the same text.
-const duplicateProblems = (name, data, owners) => {
-  const problems = [];
-  for (const surface of data.surfaces) {
-    problems.push(
-      ...unknownFields(
-        `${name}: surface ${surface.file}`,
-        surface,
-        SURFACE_FIELDS
-      )
-    );
-    const owner = owners.surfaces.get(surface.file);
-    if (owner)
-      problems.push(
-        `${name}: surface ${surface.file} is already registered in ${owner}`
-      );
-    else owners.surfaces.set(surface.file, name);
-  }
-  for (const { id } of data.claims) {
-    const owner = owners.ids.get(id);
-    if (owner)
-      problems.push(`${name}: claim id "${id}" is already used in ${owner}`);
-    else owners.ids.set(id, name);
-  }
-  return problems;
 };
 
 export function checkClaims({ registers, read }) {

@@ -1,48 +1,47 @@
 # Permission Justification
 
-This document explains why each Chrome extension permission is required, for
-Chrome Web Store review.
+Why Kaiord for Tanita asks for each permission in `manifest.prod.json`, for Chrome Web Store review. Every paragraph and list item in this file is an entry in `claims/tanita.json`, with the code or test that proves it.
 
 ## Permissions
 
 ### `storage`
 
-**Why**: Reserved for lightweight local state (e.g. last-sync bookkeeping)
-kept entirely on the user's device via `chrome.storage`. No credential value
-is ever stored.
+**Why**: Remember, between popup opens, when the extension last could and could not reach your MyTANITA export, so the popup can say since when it has been unable to; and keep the Kaiord App's theme preference, so the popup matches it.
+
+**Stored in `chrome.storage.local`**: `bridgeHealth`, the time of the last check that reached the export and the time of the first check that failed after it; and `kaiordTheme`, the theme preference (`light`, `dark` or `system`). The popup also copies the theme into its own `localStorage`, so it opens in the right theme at once. No measurement, export, cookie or password is stored.
+
+**Sent anywhere**: nothing the extension stores is sent anywhere.
 
 ## Host Permissions
 
 ### `https://mytanita.eu/*`
 
-**Why**: The extension issues a single `GET https://mytanita.eu/en/user/export-csv`
-from its background service worker to read the user's own body-composition CSV
-export. The request rides the user's existing logged-in session cookie
-(`credentials: "include"`); the extension never reads, stores, or transmits the
-cookie or the user's password.
+**Why**: The extension's service worker makes one kind of request: `GET https://mytanita.eu/en/user/export-csv`, sent with `credentials: "include"` so that Chrome attaches your MyTANITA sign-in cookie. A request to any other path, or with any other method, is refused before it is sent.
+
+**What MyTANITA answers**: your whole measurement history. When the Kaiord App asks for it (`read-export-csv`), the extension hands it over unchanged. When the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), the extension downloads the same export, keeps only whether it arrived, and discards the rest.
+
+## Content Script
+
+### `kaiord-announce.js` on `https://kaiord.com/*`
+
+**Why**: Tells the Kaiord App that the extension is installed, posting its id, version and capabilities to the page. It reads nothing from the page.
+
+The extension runs no script on `mytanita.eu`.
 
 ## externally_connectable
 
-### `http://localhost:5173/*`, `http://localhost:5174/*`
-
-**Why**: Development origins for the Kaiord SPA (Vite dev server). Stripped from
-the production manifest.
-
 ### `https://kaiord.com/*`
 
-**Why**: Production origin for the Kaiord editor. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed SPA to
-request the CSV export via Chrome's one-way inbound `externally_connectable`
-channel.
+**Why**: Lets the Kaiord App at https://kaiord.com send messages to the extension. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer.
+
+### `http://localhost:5173/*`, `http://localhost:5174/*`
+
+**Why**: Development builds of the Kaiord App only. They are declared in `manifest.json` and absent from the published `manifest.prod.json`.
 
 ## Data Handling
 
-- **No passwords**: The extension never reads, stores, or transmits the user's
-  MyTANITA password. It reuses the browser's existing signed-in session.
-- **No cookie access**: The extension does NOT declare the `cookies` permission
-  and cannot read the HttpOnly `TANITASESS` session cookie; the cookie travels
-  automatically with the fetch and is never exposed to extension code.
-- **Raw CSV only**: The export text is handed to the Kaiord editor for parsing;
-  the extension does not interpret or persist body-composition data.
-- **No external communication**: The extension talks only to `mytanita.eu` and
-  the allowed Kaiord SPA origins. No third-party servers, no analytics, no
-  telemetry.
+- **No password**: The extension never reads, stores, or transmits your MyTANITA password. It reuses your existing MyTANITA sign-in in Chrome.
+- **No cookie access**: The extension does not declare the `cookies` permission and cannot read your MyTANITA session cookie; Chrome attaches it to the request without exposing it to the extension.
+- **The export is passed on, not kept**: The extension hands the export to the Kaiord App as MyTANITA sent it and never writes it to storage.
+- **Requests to MyTANITA only**: Every request the extension makes goes to `https://mytanita.eu/en/user/export-csv`.
+- **No analytics or tracking**: The extension contains no analytics, error reporting or tracking, and sends nothing anywhere else.

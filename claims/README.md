@@ -37,8 +37,10 @@ too (delete it), and so does a proof that no longer exists.
 ## A register file
 
 One JSON file per group of surfaces (`garmin.json`, later `landing.json`, …),
-so tickets working in parallel edit different files. A surface or a claim id
-belongs to one file only.
+so tickets working in parallel edit different files. A claim id, a whole file,
+and each section or key of a file belong to one register file only; different
+sections of one file (the privacy policy's per-extension sections) may sit in
+different register files.
 
 ```json
 {
@@ -110,11 +112,13 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File           | Surfaces                                                                                                                                                                                                                                     |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `garmin.json`  | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                          |
-| `landing.json` | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630) |
-| `readme.json`  | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README: core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai (#1630)                                                         |
+| File            | Surfaces                                                                                                                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `garmin.json`   | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                          |
+| `tanita.json`   | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)                                                                                          |
+| `train2go.json` | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)                                                                                        |
+| `landing.json`  | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630) |
+| `readme.json`   | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README: core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai (#1630)                                                         |
 
 Scoped out of `readme.json`, as reference rather than pitch: install
 commands, usage and API sections, configuration, the per-format "Supported …

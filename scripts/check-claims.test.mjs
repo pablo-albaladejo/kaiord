@@ -408,6 +408,99 @@ describe("check-claims", () => {
     ]);
   });
 
+  it("should let two register files own different sections or keys of one file", () => {
+    // Arrange
+    const locale = "messages.json";
+    const files = {
+      [LISTING]: "## A\n\nAlpha.\n\n## B\n\nBeta.\n",
+      [locale]: JSON.stringify({
+        one: { message: "1." },
+        two: { message: "2." },
+      }),
+    };
+    const part = (surface, id, text) => ({
+      surfaces: [surface],
+      claims: [{ id, text, proof: [{ file: surface.file }] }],
+    });
+    const registers = [
+      {
+        name: "claims/a.json",
+        data: part({ file: LISTING, sections: ["A"] }, "a.t", "Alpha."),
+      },
+      {
+        name: "claims/b.json",
+        data: part({ file: LISTING, sections: ["B"] }, "b.t", "Beta."),
+      },
+      {
+        name: "claims/c.json",
+        data: part({ file: locale, keys: ["one"] }, "c.t", "1."),
+      },
+      {
+        name: "claims/d.json",
+        data: part({ file: locale, keys: ["two"] }, "d.t", "2."),
+      },
+    ];
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, []);
+  });
+
+  it("should refuse a section or key another register file holds, and a whole file overlapping one", () => {
+    // Arrange
+    const locale = "messages.json";
+    const files = {
+      [LISTING]: "## A\n\nAlpha.\n",
+      [locale]: JSON.stringify({ one: { message: "1." } }),
+      "whole.md": "Whole.\n",
+    };
+    const owns = (...surfaces) => ({ surfaces, claims: [] });
+    const registers = [
+      {
+        name: "claims/a.json",
+        data: {
+          surfaces: [
+            { file: LISTING, sections: ["A"] },
+            { file: locale, keys: ["one"] },
+          ],
+          claims: [
+            { id: "a.t", text: "Alpha.", proof: [{ file: LISTING }] },
+            { id: "a.k", text: "1.", proof: [{ file: locale }] },
+          ],
+        },
+      },
+      { name: "claims/b.json", data: owns({ file: LISTING, sections: ["A"] }) },
+      { name: "claims/c.json", data: owns({ file: LISTING }) },
+      { name: "claims/d.json", data: owns({ file: locale, keys: ["one"] }) },
+      {
+        name: "claims/e.json",
+        data: {
+          surfaces: [{ file: "whole.md" }],
+          claims: [
+            { id: "e.t", text: "Whole.", proof: [{ file: "whole.md" }] },
+          ],
+        },
+      },
+      {
+        name: "claims/f.json",
+        data: owns({ file: "whole.md", sections: ["A"] }),
+      },
+    ];
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `claims/b.json: surface ${LISTING} (section "A") is already registered in claims/a.json`,
+      `claims/c.json: surface ${LISTING} is already registered in claims/a.json`,
+      `claims/d.json: surface ${locale} (key "one") is already registered in claims/a.json`,
+      "claims/f.json: surface whole.md is already registered in claims/e.json",
+    ]);
+  });
+
   it("should pass on the register and surfaces the repo ships", () => {
     // Arrange
     const registers = loadRegisters();
