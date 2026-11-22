@@ -65,7 +65,7 @@ rather than shown-then-failing.
    if the SPA doesn't detect the extension at all, re-check
    `externally_connectable` in `packages/garmin-bridge/manifest.json`
    matches the SPA origin you're running (`localhost:5173`/`5174` or
-   `*.kaiord.com`).
+   exactly `https://kaiord.com`; subdomains are refused).
 
 ## Smoke steps
 

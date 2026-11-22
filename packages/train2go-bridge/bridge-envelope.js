@@ -9,19 +9,30 @@
  *   { ok, protocolVersion, data?, error?, status?, retryable?,
  *     needsReauth?, resetSeconds? }
  *
- * External dispatch pins every sender against the allowed SPA origins and
- * rejects actions outside the bridge's external-actions allowlist before
- * the action handler runs (spec: bridge-core).
+ * External dispatch answers only the exact Kaiord App origin (no
+ * subdomain, www included) and rejects actions outside the bridge's
+ * external-actions allowlist before the action handler runs
+ * (spec: bridge-core).
  */
 
-// The production SPA is served from the apex (https://kaiord.com/app;
-// www 301s to the apex), so the subdomain label is optional.
-const ALLOWED_ORIGIN_REGEX =
-  /^(https:\/\/([a-z0-9-]+\.)?kaiord\.com|http:\/\/localhost:(5173|5174))$/;
+const APP_ORIGIN = "https://kaiord.com";
 
-const isAllowedSenderOrigin = (sender) =>
-  typeof sender?.origin === "string" &&
-  ALLOWED_ORIGIN_REGEX.test(sender.origin);
+// Accepted only when the loaded manifest declares them, so an unpacked dev
+// build (manifest.json) reaches the Vite dev server and a packaged build
+// (manifest.prod.json) refuses them at runtime too.
+const DEV_ORIGINS = ["http://localhost:5173", "http://localhost:5174"];
+
+const isDeclaredByManifest = (origin) => {
+  const manifest = globalThis.chrome?.runtime?.getManifest?.();
+  const matches = manifest?.externally_connectable?.matches;
+  return Array.isArray(matches) && matches.includes(`${origin}/*`);
+};
+
+const isAllowedSenderOrigin = (sender) => {
+  const origin = sender?.origin;
+  if (origin === APP_ORIGIN) return true;
+  return DEV_ORIGINS.includes(origin) && isDeclaredByManifest(origin);
+};
 
 const createEnvelope = (protocolVersion) => {
   const sendResult = (data, sendResponse) => {
@@ -63,10 +74,9 @@ const createExternalDispatch = ({
   protocolVersion,
 }) => {
   return (message, sender, sendResponse) => {
-    if (
-      !isAllowedSenderOrigin(sender) ||
-      !externalActions.has(message?.action)
-    ) {
+    // Any other origin gets no answer at all, not even an error envelope.
+    if (!isAllowedSenderOrigin(sender)) return false;
+    if (!externalActions.has(message?.action)) {
       sendResponse({
         ok: false,
         protocolVersion,

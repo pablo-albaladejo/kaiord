@@ -1100,7 +1100,7 @@ test("manifest with announce-only content script match on kaiord.com passes", ()
               js: ["content.js"],
             },
             {
-              matches: ["https://*.kaiord.com/*", "http://localhost/*"],
+              matches: ["https://kaiord.com/*", "http://localhost/*"],
               js: ["kaiord-announce.js"],
             },
           ],
