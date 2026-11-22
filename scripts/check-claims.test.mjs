@@ -122,7 +122,38 @@ describe("check-claims", () => {
 
     // Assert
     assert.deepEqual(problems, [
-      'claim "skipped": a.test.js has no running test titled "should skip it"',
+      'claim "skipped": a.test.js has no running test titled "should skip it" (the test is skipped, todo, conditional or excluded by .only)',
+    ]);
+  });
+
+  it("should not take a title inside a skipped describe, a comment or a string as a running test", () => {
+    // Arrange
+    const files = {
+      [LISTING]: "Skipped.\n\nCommented.\n\nQuoted.\n",
+      "a.test.js": [
+        'describe.skip("off", () => { it("should be off", () => {}); });',
+        '// it("should be commented", () => {});',
+        "const s = 'it(\"should be quoted\", () => {})';",
+      ].join("\n"),
+    };
+    const proof = (title) => [{ test: "a.test.js", title }];
+    const registers = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        { id: "a", text: "Skipped.", proof: proof("should be off") },
+        { id: "b", text: "Commented.", proof: proof("should be commented") },
+        { id: "c", text: "Quoted.", proof: proof("should be quoted") },
+      ],
+    });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      'claim "a": a.test.js has no running test titled "should be off" (the test is skipped, todo, conditional or excluded by .only)',
+      'claim "b": a.test.js has no running test titled "should be commented" (no test call with that title in code)',
+      'claim "c": a.test.js has no running test titled "should be quoted" (no test call with that title in code)',
     ]);
   });
 
