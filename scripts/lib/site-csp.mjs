@@ -13,7 +13,10 @@ export { SITE_CSP };
 const CSP_META =
   /\s*<meta\b[^>]*http-equiv=["']?content-security-policy["']?[^>]*>/gi;
 const CHARSET_META = /\s*<meta\s+charset=[^>]*>/i;
-const INLINE_SCRIPT = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+// The HTML spec ends script data at `</script` followed by tab, LF, FF, CR,
+// space, `/` or `>`; the tag then runs to its `>`, attributes and all.
+const INLINE_SCRIPT =
+  /<script\b([^>]*)>([\s\S]*?)<\/script(?:[\t\n\f\r /][^>]*)?>/gi;
 const DATA_BLOCK_TYPE =
   /\btype\s*=\s*["']?(?!text\/javascript|application\/javascript|module)[^"'\s>]/i;
 

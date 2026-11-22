@@ -273,3 +273,18 @@ test("(p) lets the shared gate compare lists and keeps a plain App URL legal", (
     (found) => assert.deepEqual(details(found), [])
   );
 });
+
+test("(q) follows a bound name holding `$` signs, and only that name", () => {
+  const code = (use) =>
+    `const $app$ = "https://kaiord.com";\nconst ok = sender.origin.startsWith(${use});\n`;
+  for (const [use, flagged] of [
+    ["$app$", true],
+    ["$app$Dev", false],
+    ["x$app$", false],
+  ]) {
+    withRepo(
+      bridge({ "packages/x-bridge/background.js": code(use) }),
+      (found) => assert.equal(found.length, flagged ? 1 : 0, use)
+    );
+  }
+});

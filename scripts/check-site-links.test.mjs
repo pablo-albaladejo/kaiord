@@ -242,6 +242,29 @@ describe("check-site-links", () => {
     );
   });
 
+  it("skips a match pattern but still checks the dead link beside it", () => {
+    // The privacy policy quotes the Chrome match pattern `https://kaiord.com/*`
+    // that each bridge manifest declares: a pattern of URLs, not a page.
+    writeFileSync(
+      join(dir, "docs", "legal.md"),
+      "Matches `https://kaiord.com/*` and `https://kaiord.com/docs/*/x`; " +
+        "see https://kaiord.com/docs/gone."
+    );
+
+    assert.deepEqual(reasons(), ["no page is served at /docs/gone"]);
+  });
+
+  it("still checks a link whose wildcard sits in the query or fragment", () => {
+    // Only the path makes a match pattern; `*` after `?` or `#` is data.
+    addDocsPage("query.html", "https://kaiord.com/docs/missing?q=*");
+    addDocsPage("hash.html", "https://kaiord.com/app/#/bogus/*");
+
+    assert.deepEqual(reasons(), [
+      'SPA route "/bogus" is not in route-segments.json',
+      "no page is served at /docs/missing",
+    ]);
+  });
+
   it("ends a link at an escaped quote", () => {
     assert.deepEqual(
       linksIn("{&quot;url&quot;:&quot;https://kaiord.com/mcp&quot;}"),

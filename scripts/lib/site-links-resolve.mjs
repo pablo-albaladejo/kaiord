@@ -63,12 +63,18 @@ const trimTrailingPunctuation = (url) => url.replace(/[.,;:!?]+$/, "");
 // An escaped quote (`&quot;`, `&#39;`) ends the URL it follows, as `"` does.
 const QUOTE_ENTITY = /&(?:quot|apos|#3[49]);?.*$/;
 
+// A `*` in the path makes a match pattern (`https://kaiord.com/*` in the
+// privacy policy), a set of URLs, not a page; after `?` or `#` it is data.
+const isMatchPattern = (url) => /^[^?#]*\*/.test(url);
+
 export function linksIn(text) {
-  return [...text.matchAll(SITE_LINK_PATTERN)].map((m) =>
-    trimTrailingPunctuation(
-      m[0].replace(QUOTE_ENTITY, "").replace(/&amp;/g, "&")
+  return [...text.matchAll(SITE_LINK_PATTERN)]
+    .map((m) =>
+      trimTrailingPunctuation(
+        m[0].replace(QUOTE_ENTITY, "").replace(/&amp;/g, "&")
+      )
     )
-  );
+    .filter((url) => !isMatchPattern(url));
 }
 
 const SPA_PATHS = new Set(["/app", "/app/", "/app/index.html"]);

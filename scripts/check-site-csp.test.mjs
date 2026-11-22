@@ -115,6 +115,34 @@ describe("check-site-csp", () => {
     ]);
   });
 
+  it("should see a script behind an end tag with whitespace or attributes", () => {
+    // `</script\t\n bar>` ends the first script in a browser, so the second
+    // one runs on its own and must be hashed on its own.
+    put(
+      "index.html",
+      page(
+        `${meta(SAFE)}<script>${INLINE}</script\t\n bar><script>evil()</script >`
+      )
+    );
+
+    assert.deepEqual(checkSiteCsp(site), [
+      "index.html: inline script #2 is not in script-src",
+    ]);
+  });
+
+  it("should not end a script at a tag that only starts with script", () => {
+    const text = 'a="</scripts>";';
+    const hash = `'sha256-${createHash("sha256").update(text).digest("base64")}'`;
+    put(
+      "index.html",
+      page(
+        `${meta(SAFE.replace("script-src 'self'", `script-src 'self' ${hash}`))}<script>${text}</script>`
+      )
+    );
+
+    assert.deepEqual(checkSiteCsp(site), []);
+  });
+
   it("should ignore JSON-LD data blocks and external scripts", () => {
     put(
       "index.html",
