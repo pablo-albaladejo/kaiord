@@ -162,6 +162,11 @@ Audit` job keeps its exact name, reports on every pull request and on push
   (R-SecurityAuditAlwaysReports).
 - `check-security-policy.mjs` — `SECURITY.md` and `/.well-known/security.txt`
   name the same contact and `Expires` stays current (`pnpm lint:security-policy`).
+- `check-claims.mjs` — every unit of text on a surface registered in
+  `claims/*.json` (today the Kaiord for Garmin listing, permission
+  justifications and privacy-policy section) equals a register entry, every
+  entry is still on its surface, and every proof (file, test, endpoint) still
+  exists (`pnpm lint:claims`; how to add a surface: `claims/README.md`).
 - `check-site-csp.mjs` — every page of the assembled site (landing, docs,
   App) carries a content security policy first in `<head>` that hashes its
   inline scripts and admits no unsafe script source (run by `e2e-prod-base`

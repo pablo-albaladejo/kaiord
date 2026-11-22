@@ -38,6 +38,7 @@ notes.
 | `check-bridge-exact-origin.mjs`                | R-BridgeExactOrigin: bridges answer `https://kaiord.com` only (manifests and shipped source)  |
 | `check-security-audit-required.mjs`            | R-SecurityAuditAlwaysReports: the required audit job always reports                           |
 | `check-security-policy.mjs`                    | `SECURITY.md` ⇄ `security.txt`, `Expires` current                                             |
+| `check-claims.mjs`                             | Every claim on a surface in `claims/*.json` has a register entry whose proof exists           |
 | `check-site-csp.mjs`                           | Every assembled page (landing, docs, App) carries a safe CSP (`--merged <dir>`)               |
 | `check-bridge-stale-threshold-parity.test.mjs` | Bridge stale-threshold parity (test-only)                                                     |
 | `check-extension-icons-distinct.mjs`           | `lint:icons-distinct` — each extension has unique icon set                                    |

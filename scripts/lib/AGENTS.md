@@ -25,6 +25,8 @@ one place.
 | `bridge-manifest-origins.mjs` | The manifest half of `check-bridge-exact-origin.mjs`: the allowed `externally_connectable` and announce match patterns per manifest. Covered by `check-bridge-exact-origin.test.mjs`.                                                  |
 | `bridge-origin-scan.mjs`      | The source half of `check-bridge-exact-origin.mjs`: walks each bridge's shipped files and flags a partial test of the App origin outside `bridge-envelope.js`. Covered by `check-bridge-exact-origin.test.mjs`.                        |
 | `security-audit-rules.mjs`    | The trigger and job rules of `check-security-audit-required.mjs`. Covered by `check-security-audit-required.test.mjs`.                                                                                                                 |
+| `claims-units.mjs`            | The units of text a reader sees on a registered claims surface (Markdown blocks, locale messages). Covered by `check-claims.test.mjs`.                                                                                                 |
+| `claims-proof.mjs`            | Whether a claim's proof (file, test, endpoint) still exists. Covered by `check-claims.test.mjs`.                                                                                                                                       |
 | `clean-git-env.mjs`           | `process.env` minus every `GIT_*` variable. Pass as `env` when a test spawns git (or a script that does): a hook's inherited `GIT_DIR` otherwise rewrites the shared `.git/config`.                                                    |
 
 ## For AI Agents
