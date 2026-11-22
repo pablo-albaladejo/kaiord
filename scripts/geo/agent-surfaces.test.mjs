@@ -68,6 +68,17 @@ describe("agent-surfaces", () => {
     });
   }
 
+  it("should name a predicate that throws as a body check, not a fetch", async () => {
+    // Arrange
+    const fetch = reply("null");
+
+    // Act
+    const result = await checkRow(ROW, fetch);
+
+    // Assert
+    assert.match(result.reason, /^body check threw: /);
+  });
+
   it("should report a fetch that throws instead of throwing", async () => {
     // Arrange
     const fetch = async () => {
