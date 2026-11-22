@@ -50,7 +50,7 @@ const POLICY = readFileSync(POLICY_PATH, "utf8");
 const GARMIN = "Kaiord for Garmin Extension";
 const TRAIN2GO = "Kaiord for Train2Go Extension";
 const TANITA = "Kaiord for Tanita Extension";
-const TRAININGPEAKS = "Kaiord TrainingPeaks Bridge Extension";
+const TRAININGPEAKS = "Kaiord for TrainingPeaks Extension";
 const WHOOP = "Kaiord WHOOP Bridge Extension";
 
 // Delete a whole `## <heading>` section (heading line included) up to the
@@ -550,15 +550,33 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
-    "`read:body` and `write:body` capabilities",
+    "`read:body`, `write:body` and `write:workouts` capabilities",
     "some capabilities",
-    "TrainingPeaks read+write body scopes disclosed",
+    "TrainingPeaks body and workout scopes disclosed",
   ],
   [
     TRAININGPEAKS,
-    "writes a single weight measurement back",
-    "writes things back",
-    "TrainingPeaks write path disclosed",
+    "adds each workout you send from the Kaiord App to your TrainingPeaks calendar",
+    "handles workouts",
+    "TrainingPeaks workout write disclosed",
+  ],
+  [
+    TRAININGPEAKS,
+    "cannot delete anything in TrainingPeaks or change a workout already there",
+    "is careful in TrainingPeaks",
+    "TrainingPeaks no delete or overwrite stated",
+  ],
+  [
+    TRAININGPEAKS,
+    "but the Kaiord App does not send it today",
+    "and the Kaiord App may send it",
+    "TrainingPeaks unused weight write disclosed",
+  ],
+  [
+    TRAININGPEAKS,
+    "the extension asks TrainingPeaks for a new token and stores it",
+    "the extension looks",
+    "TrainingPeaks token minted on every connection check disclosed",
   ],
   [
     TRAININGPEAKS,
@@ -790,7 +808,7 @@ const SECTION_CASES = [
   {
     bridge: "TrainingPeaks",
     heading: TRAININGPEAKS,
-    intro: "Kaiord TrainingPeaks Bridge",
+    intro: "Kaiord for TrainingPeaks",
   },
   { bridge: "WHOOP", heading: WHOOP, intro: "Kaiord WHOOP Bridge" },
 ];

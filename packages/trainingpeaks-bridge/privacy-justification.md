@@ -1,61 +1,50 @@
 # Permission Justification
 
-This document explains why each Chrome extension permission is required, for
-Chrome Web Store review.
+Why Kaiord for TrainingPeaks asks for each permission in `manifest.prod.json`, for Chrome Web Store review. Every paragraph and list item in this file is an entry in `claims/trainingpeaks.json`, with the code or test that proves it.
 
 ## Permissions
 
 ### `storage`
 
-**Why**: Holds the short-lived access token minted from the user's own
-TrainingPeaks session (in `chrome.storage.local`, so it survives service-worker
-restarts) plus lightweight local state. No password and no session cookie value
-is ever stored.
+**Why**: Keep the TrainingPeaks access token across service-worker restarts, so a request made before the token expires reuses it.
+
+**Stored in `chrome.storage.local`**: the access token, the time it expires and your TrainingPeaks athlete number; the app's theme preference (`light`, `dark` or `system`); and when the popup last could and could not use your TrainingPeaks sign-in.
+
+**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App, which needs it to place a workout. Nothing else the extension stores leaves your browser.
 
 ## Host Permissions
 
 ### `https://tpapi.trainingpeaks.com/*`
 
-**Why**: The extension's background service worker performs two kinds of request
-against the TrainingPeaks internal API:
+**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker, and a request outside these four is refused before it is sent:
 
-1. `GET https://tpapi.trainingpeaks.com/users/v3/token` — a cookie-only request
-   (`credentials: "include"`, no `Authorization` header) that exchanges the
-   user's existing `Production_tpAuth` session cookie for a short-lived access
-   token. The `Production_tpAuth` cookie is a domain-wide `.trainingpeaks.com`
-   cookie, so it is attached to this `tpapi.trainingpeaks.com` request
-   automatically by the browser — no `home.trainingpeaks.com` permission is
-   required.
-2. Data calls to `https://tpapi.trainingpeaks.com/metrics/v3/...` using
-   `Authorization: Bearer <token>` (`credentials: "omit"`) to read the user's
-   consolidated timed metrics and, on user action, write a weight measurement.
+- `GET /users/v3/token` exchanges your TrainingPeaks sign-in for an access token. It carries your TrainingPeaks cookie (`credentials: "include"`) and no `Authorization` header; Chrome attaches the cookie, and the extension cannot read it.
+- `GET /metrics/v3/athletes/{id}/consolidatedtimedmetrics/{start}/{end}` reads the metrics you logged over a date range. The answer may include metrics other than weight, such as pulse, sleep or steps; the extension passes it to the Kaiord App unread, and the Kaiord App keeps only your weight.
+- `POST /fitness/v6/athletes/{id}/workouts` adds a workout you send from the Kaiord App to your TrainingPeaks calendar.
+- `POST /metrics/v3/athletes/{id}/consolidatedtimedmetric` adds one weight measurement. The extension accepts this request, but the Kaiord App does not send it today.
 
-The extension never reads, stores, or transmits the cookie or the user's
-password.
+Every request except the token exchange carries the token as `Authorization: Bearer` and no cookies (`credentials: "omit"`).
+
+## Content Script
+
+### `kaiord-announce.js` on `https://kaiord.com/*`
+
+**Why**: Tells the Kaiord App that the extension is installed, posting its id, version and capabilities to the page. It reads nothing from the page. No content script runs on TrainingPeaks pages.
 
 ## externally_connectable
 
-### `http://localhost:5173/*`, `http://localhost:5174/*`
-
-**Why**: Development origins for the Kaiord SPA (Vite dev server). Stripped from
-the production manifest.
-
 ### `https://kaiord.com/*`
 
-**Why**: Production origin for the Kaiord editor. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed SPA to
-request metric reads/writes via Chrome's one-way inbound
-`externally_connectable` channel.
+**Why**: Lets the Kaiord App at https://kaiord.com send messages to the extension. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer.
+
+### `http://localhost:5173/*`, `http://localhost:5174/*`
+
+**Why**: Development builds of the Kaiord App only. They are declared in `manifest.json` and absent from the published `manifest.prod.json`.
 
 ## Data Handling
 
-- **No passwords**: The extension never reads, stores, or transmits the user's
-  TrainingPeaks password. It reuses the browser's existing signed-in session.
-- **No cookie access**: The extension does NOT declare the `cookies` permission
-  and cannot read the `Production_tpAuth` session cookie; the cookie travels
-  automatically with the token-exchange fetch and is never exposed to extension
-  code. Session presence is reported to the editor only as a boolean.
-- **Raw JSON only**: Metric JSON is handed to the Kaiord editor for parsing; the
-  extension does not interpret or persist body-composition data.
-- **No external communication**: The extension talks only to
-  `tpapi.trainingpeaks.com` and the allowed Kaiord SPA origins. No third-party
-  servers, no analytics, no telemetry.
+- **No password**: The extension never reads, stores, or transmits your TrainingPeaks password. It reuses the browser's existing TrainingPeaks sign-in to get a token.
+- **No cookie access**: The extension does not declare the `cookies` permission and cannot read your TrainingPeaks cookie; Chrome attaches it to the token request and to no other.
+- **Token stays in your browser**: The token lives in `chrome.storage.local` and is sent only to TrainingPeaks. No answer the extension gives the Kaiord App contains it.
+- **Requests to TrainingPeaks only**: Every request the extension makes goes to `tpapi.trainingpeaks.com`. Opening TrainingPeaks from the popup only opens `https://app.trainingpeaks.com/` in a new tab.
+- **No analytics or tracking**: The extension has no analytics, error reporting or telemetry.

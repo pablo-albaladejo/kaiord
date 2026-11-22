@@ -138,6 +138,20 @@ describe("useTrainingPeaksPush", () => {
     });
   });
 
+  it("should place the workout on the day it has in Kaiord", async () => {
+    // Arrange
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+
+    // Act
+    await result.current.push();
+
+    // Assert
+    expect(mocks.convert).toHaveBeenCalledWith(
+      RECORD.krd,
+      expect.objectContaining({ workoutDay: "2026-09-08" })
+    );
+  });
+
   it("should use the live session's athlete id, not one from storage", async () => {
     // Arrange
     const { result } = renderHook(() => useTrainingPeaksPush(RECORD));

@@ -59,7 +59,7 @@ export const DOCS_POLICY_PATH = "/docs/legal/privacy-policy";
 const GARMIN_SECTION = "Kaiord for Garmin Extension";
 const TRAIN2GO_SECTION = "Kaiord for Train2Go Extension";
 const TANITA_SECTION = "Kaiord for Tanita Extension";
-const TRAININGPEAKS_SECTION = "Kaiord TrainingPeaks Bridge Extension";
+const TRAININGPEAKS_SECTION = "Kaiord for TrainingPeaks Extension";
 const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
 
 // Bridge package -> its policy section and the hosts the policy claims the
@@ -112,7 +112,7 @@ export const SECTION_RULE_FLOOR = {
   [GARMIN_SECTION]: 14,
   [TRAIN2GO_SECTION]: 11,
   [TANITA_SECTION]: 13,
-  [TRAININGPEAKS_SECTION]: 13,
+  [TRAININGPEAKS_SECTION]: 16,
   [WHOOP_SECTION]: 8,
 };
 
@@ -432,14 +432,29 @@ export const REQUIRED_RULES = [
     re: /chrome\.storage\.local/,
   },
   {
-    label: "TrainingPeaks read+write body scopes disclosed",
+    label: "TrainingPeaks body and workout scopes disclosed",
     section: TRAININGPEAKS_SECTION,
-    re: /`read:body` and `write:body` capabilities/,
+    re: /`read:body`, `write:body` and `write:workouts` capabilities/,
   },
   {
-    label: "TrainingPeaks write path disclosed (single weight measurement)",
+    label: "TrainingPeaks workout write disclosed (calendar)",
     section: TRAININGPEAKS_SECTION,
-    re: /writes a single weight measurement back/i,
+    re: /adds each workout you send from the Kaiord App to your TrainingPeaks calendar/i,
+  },
+  {
+    label: "TrainingPeaks no delete or overwrite stated",
+    section: TRAININGPEAKS_SECTION,
+    re: /cannot delete anything in TrainingPeaks or change a workout already there/i,
+  },
+  {
+    label: "TrainingPeaks unused weight write disclosed",
+    section: TRAININGPEAKS_SECTION,
+    re: /accepts a request to add one weight measurement, but the Kaiord App does not send it today/i,
+  },
+  {
+    label: "TrainingPeaks token minted on every connection check disclosed",
+    section: TRAININGPEAKS_SECTION,
+    re: /Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it/i,
   },
   {
     label: "TrainingPeaks metrics read endpoint disclosed (metrics/v3)",

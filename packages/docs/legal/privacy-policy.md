@@ -9,7 +9,7 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 **Last updated:** 2026-11-22
 
-This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a), the Kaiord for Garmin Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord for Tanita Chrome extension, the Kaiord TrainingPeaks Bridge Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
+This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a), the Kaiord for Garmin Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord for Tanita Chrome extension, the Kaiord for TrainingPeaks Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
 ## Data Controller
 
@@ -81,14 +81,19 @@ Kaiord for Tanita is the Chrome extension that connects the Kaiord App to your M
 - **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `mytanita.eu` (to download your export) and the Kaiord App (to hand the export over).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
-## Kaiord TrainingPeaks Bridge Extension
+## Kaiord for TrainingPeaks Extension
 
-The Kaiord TrainingPeaks Bridge Chrome extension reads your TrainingPeaks body metrics and hands them to the Kaiord workout editor. Here is how it handles data:
+Kaiord for TrainingPeaks is the Chrome extension that connects the Kaiord App to TrainingPeaks; its Chrome Web Store name is Kaiord TrainingPeaks Bridge. Here is how it handles data:
 
-- **No Credentials, No Password**: The extension never asks for, reads, stores, or transmits your TrainingPeaks password. It rides your existing logged-in browser session: it exchanges your session cookie for a short-lived access token by issuing a single cookie-only `GET https://tpapi.trainingpeaks.com/users/v3/token` request (`credentials:"include"`, no `Authorization` header). The `Production_tpAuth` session cookie is a domain-wide `.trainingpeaks.com` cookie, so it reaches `tpapi.trainingpeaks.com` automatically; the extension cannot read that cookie's value (it does not declare the `cookies` permission). Only the minted access token is stored — locally, in `chrome.storage.local` — and it is sent only to TrainingPeaks as a Bearer credential.
-- **Body-Metric Read/Write**: Using the access token, the extension reads your consolidated timed metrics (weight and related body-composition channels) from `https://tpapi.trainingpeaks.com/metrics/v3/...` and, only when you choose to sync, writes a single weight measurement back (the `read:body` and `write:body` capabilities). The raw metric JSON is parsed in the editor, not by the extension. Session presence is reported to the editor only as a boolean.
-- **No TrainingPeaks DOM Access**: The extension injects no content script on TrainingPeaks. All requests are made from its background service worker against a fixed, disclosed set of `tpapi.trainingpeaks.com` endpoints; it does not modify any page or submit forms.
-- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` (to exchange the token and read/write metrics) and allowed Kaiord origins (to deliver the metrics to the editor).
+- **No Password**: The extension never asks for, reads, stores, or transmits your TrainingPeaks password. It reuses the session you already established by signing in to TrainingPeaks in your browser.
+- **Access Token**: The extension exchanges your session cookie for a short-lived access token with a single cookie-only request, `GET https://tpapi.trainingpeaks.com/users/v3/token` (`credentials:"include"`, no `Authorization` header). The `Production_tpAuth` session cookie is a domain-wide `.trainingpeaks.com` cookie, so the browser attaches it to that request; the extension cannot read its value, because it does not declare the `cookies` permission. The extension keeps the token, the time it expires and your TrainingPeaks athlete number in `chrome.storage.local`.
+- **Token Stays in Your Browser**: The token is sent only to TrainingPeaks, as a Bearer credential, and never travels to Kaiord: no answer the extension gives the Kaiord App contains it. Removing the extension from Chrome deletes it.
+- **Checking the Connection**: Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it, and gives the Kaiord App your athlete number, which it needs to place a workout.
+- **Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again adds a second copy, and the Kaiord App asks you first.
+- **Body Metrics**: When the Kaiord App asks, the extension reads the metrics you logged in TrainingPeaks over a date range from `https://tpapi.trainingpeaks.com/metrics/v3/...` (the Kaiord App asks for the last 30 days) and passes the answer to the Kaiord App unread. The answer may include metrics other than weight, such as pulse, sleep or steps; the Kaiord App keeps only your weight. The extension also accepts a request to add one weight measurement, but the Kaiord App does not send it today. These are the `read:body`, `write:body` and `write:workouts` capabilities.
+- **No TrainingPeaks Page Access**: The extension injects no content script on TrainingPeaks pages. Its service worker makes every request to a fixed list of `tpapi.trainingpeaks.com` paths; it does not modify any page or submit forms. Opening TrainingPeaks from the popup only opens `https://app.trainingpeaks.com/` in a new tab.
+- **Stored in Your Browser**: Besides the token, the extension keeps in `chrome.storage.local` the app's theme preference and when the popup last could and could not use your TrainingPeaks sign-in.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to pass it your metrics and to receive the workouts you send).
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
 
 ## Kaiord WHOOP Bridge Extension
@@ -113,7 +118,7 @@ The extensions only communicate with the following domains:
 - `https://connect.garmin.com/*` — where you sign in to Garmin Connect; Kaiord for Garmin opens this page in a tab and sends it no request
 - `https://app.train2go.com/*` — Kaiord for Train2Go's service worker reads your coaching plan, zones and weight with your existing session cookie; it runs no script on that domain
 - `https://mytanita.eu/*` — Kaiord for Tanita downloads your MyTANITA export using your existing session cookie
-- `https://tpapi.trainingpeaks.com/*` — TrainingPeaks Bridge service worker exchanges your existing session cookie for a short-lived access token and reads/writes your body metrics with it
+- `https://tpapi.trainingpeaks.com/*` — Kaiord for TrainingPeaks service worker exchanges your existing session cookie for a short-lived access token, reads your body metrics and adds the workouts you send with it
 - `https://app.whoop.com/*` — WHOOP Bridge's main-world and isolated content scripts capture the session bearer, both from the headers of the WHOOP web app's own requests and from the access token WHOOP's sign-in library stores in this origin's `localStorage`; the bridge also opens this page when you sign in
 - `https://api.prod.whoop.com/*` — WHOOP Bridge relays allowlisted, read-only requests using that captured bearer, and reads (never modifies) the `Authorization` header of the WHOOP web app's own requests to this host via `chrome.webRequest`
 - `https://kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. Each extension accepts that exact origin only, no subdomain (`www` included); a message from any other origin gets no answer. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.

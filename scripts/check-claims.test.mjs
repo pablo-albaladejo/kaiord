@@ -354,6 +354,35 @@ describe("check-claims", () => {
     ]);
   });
 
+  it("should refuse only the taken section when a register file names a free one beside it", () => {
+    // Arrange
+    const files = { [LISTING]: "## A\n\nOne.\n\n## B\n\nTwo.\n" };
+    const registers = [
+      {
+        name: "claims/a.json",
+        data: {
+          surfaces: [{ file: LISTING, sections: ["A"] }],
+          claims: [{ id: "one", text: "One.", proof: [{ file: LISTING }] }],
+        },
+      },
+      {
+        name: "claims/b.json",
+        data: {
+          surfaces: [{ file: LISTING, sections: ["B", "A"] }],
+          claims: [],
+        },
+      },
+    ];
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `claims/b.json: surface ${LISTING} (section "A") is already registered in claims/a.json`,
+    ]);
+  });
+
   it("should pass on the register and surfaces the repo ships", () => {
     // Arrange
     const registers = loadRegisters();
