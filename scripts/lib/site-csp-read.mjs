@@ -6,7 +6,8 @@ import { createHash } from "node:crypto";
 
 export const CSP_META =
   /<meta\b[^>]*http-equiv=["']?content-security-policy["']?[^>]*>/i;
-const SCRIPT = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+// An end tag is `</script` then an HTML space, `/` or `>`, up to its `>`.
+const SCRIPT = /<script\b([^>]*)>([\s\S]*?)<\/script(?=[\t\n\f\r />])[^>]*>/gi;
 const EXECUTABLE_TYPE = /^(|text\/javascript|application\/javascript|module)$/i;
 
 // A source that admits code nobody hashed: any inline or eval'd code, any
