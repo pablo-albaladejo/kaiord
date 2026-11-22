@@ -8,6 +8,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
@@ -109,6 +110,23 @@ describe("assemble-site", () => {
     }
   });
 
+  it("should leave out an internal agent note whatever the case of its name", () => {
+    // Arrange
+    const notes = ["agents.md", "Claude.md", "guide/Agents.MD", "CLAUDE.MD"];
+    for (const path of notes) put(join(inputs.docs, path), "internal");
+    put(join(inputs.landing, "agents-guide.md"), "public");
+
+    // Act
+    assembleSite(inputs);
+
+    // Assert
+    const left = readdirSync(inputs.out, { recursive: true }).filter((path) =>
+      /^(agents|claude)\.md$/i.test(basename(path))
+    );
+    assert.deepEqual(left, []);
+    assert.ok(existsSync(join(inputs.out, "agents-guide.md")));
+  });
+
   it("should write version.json exactly as the inline printf did", () => {
     assembleSite(inputs);
 
@@ -136,8 +154,16 @@ describe("assemble-site", () => {
     );
   });
 
-  it("should give every landing and App page a policy the CSP guard accepts", () => {
+  it("should give every page, docs included, a policy the CSP guard accepts", () => {
     put(join(inputs.landing, "es/index.html"), HTML("<script>1</script>"));
+    put(
+      join(inputs.docs, "guide/start.html"),
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>x</title>' +
+        '<script type="module" src="/docs/assets/app.js"></script>' +
+        '<script id="check-dark-mode">document.documentElement.classList.add(`dark`)</script>' +
+        '<script type="application/ld+json">{"@type":"WebSite"}</script>' +
+        "</head><body></body></html>"
+    );
 
     assembleSite({ ...inputs, umamiWebsiteId: "w-1" });
 
@@ -251,5 +277,49 @@ describe("parseAssembleArgs", () => {
         ]),
       /Missing --sha/
     );
+  });
+});
+
+describe("the deploy's internal-notes check", () => {
+  const workflow = readFileSync(
+    new URL("../.github/workflows/deploy-site.yml", import.meta.url),
+    "utf8"
+  );
+  const line = workflow
+    .split("\n")
+    .find((l) => l.includes("Internal agent notes in merged artifact"))
+    ?.trim();
+
+  const runIn = (files) => {
+    const dir = mkdtempSync(join(tmpdir(), "deploy-notes-"));
+    try {
+      for (const path of files) put(join(dir, "merged-dist", path), "x");
+      return spawnSync("bash", ["-c", line], { cwd: dir }).status;
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  it("should fail the deploy on an agent note whatever the case of its name", () => {
+    // Arrange
+    const names = ["AGENTS.md", "agents.md", "docs/Claude.md", "x/CLAUDE.MD"];
+
+    // Act
+    const statuses = names.map((name) => runIn(["index.html", name]));
+
+    // Assert
+    assert.ok(line, "deploy-site.yml lost its internal-notes check");
+    assert.deepEqual(statuses, [1, 1, 1, 1]);
+  });
+
+  it("should pass the deploy on a tree with no agent note", () => {
+    // Arrange
+    const files = ["index.html", "agents-guide.md", "docs/llms.txt"];
+
+    // Act
+    const status = runIn(files);
+
+    // Assert
+    assert.equal(status, 0);
   });
 });

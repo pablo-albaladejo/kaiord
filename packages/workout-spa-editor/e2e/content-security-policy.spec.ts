@@ -195,3 +195,119 @@ test.describe("@csp content security policy on the landing", () => {
     });
   }
 });
+
+test.describe("@csp content security policy on the docs", () => {
+  test.skip(!ENABLED, "Production-base e2e gated behind E2E_PROD_BASE=1");
+
+  let dist: MergedDist;
+
+  test.beforeAll(async () => {
+    dist = await startMergedDist("csp-docs", { withDocs: true });
+  });
+
+  test.afterAll(async () => {
+    await dist.close();
+  });
+
+  const docsUrl = (path: string) => `${dist.server.url}/docs/${path}`;
+
+  for (const path of [
+    "",
+    "guide/getting-started.html",
+    "es/",
+    "legal/privacy-policy.html",
+    "404.html",
+  ]) {
+    test(`should serve /docs/${path} under a safe policy and load it without a violation`, async ({
+      page,
+    }) => {
+      // Arrange
+      await recordViolations(page);
+
+      // Act
+      await page.goto(docsUrl(path), { waitUntil: "load" });
+      const sources = await scriptSources(page);
+
+      // Assert
+      expect(sources).toContain("'self'");
+      expect(
+        sources.filter((source) => UNSAFE_SCRIPT_SOURCE.test(source))
+      ).toEqual([]);
+      await expect(page.locator(".VPNavBarSearchButton")).toBeVisible();
+      expect(await violations(page)).toEqual([]);
+    });
+  }
+
+  test.describe("with a script injected on purpose", () => {
+    test.use({ cspViolationsAllowed: true });
+
+    test("should block a script injected into a docs page", async ({
+      page,
+    }) => {
+      // Arrange
+      await recordViolations(page);
+      await page.goto(docsUrl("guide/getting-started.html"), {
+        waitUntil: "load",
+      });
+
+      // Act
+      await page.evaluate(() => {
+        const script = document.createElement("script");
+        script.textContent = "window.__cspInjectedRan = true;";
+        document.body.appendChild(script);
+      });
+
+      // Assert
+      expect(
+        await page.evaluate(() => (window as unknown as Probe).__cspInjectedRan)
+      ).toBeUndefined();
+      await expect
+        .poll(async () => (await violations(page)).map((v) => v.directive))
+        .toContainEqual(expect.stringMatching(/^script-src/));
+    });
+  });
+
+  test("should find a page with the local search and open it", async ({
+    page,
+  }) => {
+    // Arrange
+    await recordViolations(page);
+    await page.goto(docsUrl(""), { waitUntil: "load" });
+
+    // Act
+    await page.locator(".VPNavBarSearchButton").click();
+    await page
+      .locator(".VPLocalSearchBox .search-input")
+      .fill("getting started");
+    const firstResult = page.locator(".VPLocalSearchBox .results li a").first();
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+
+    // Assert
+    await expect(page.locator(".VPLocalSearchBox")).toBeHidden();
+    await expect(page).not.toHaveURL(docsUrl(""));
+    await expect(page.locator(".vp-doc h1").first()).toBeVisible();
+    expect(await violations(page)).toEqual([]);
+  });
+
+  test("should switch the theme and keep it across a reload", async ({
+    page,
+  }) => {
+    // Arrange
+    await recordViolations(page);
+    await page.goto(docsUrl("guide/getting-started.html"), {
+      waitUntil: "load",
+    });
+    const html = page.locator("html");
+    await expect(html).toHaveClass(/\bdark\b/);
+
+    // Act
+    await page.locator(".VPNavBarAppearance .VPSwitchAppearance").click();
+    await expect(html).not.toHaveClass(/\bdark\b/);
+    await page.reload({ waitUntil: "load" });
+
+    // Assert
+    await expect(html).not.toHaveClass(/\bdark\b/);
+    expect(await violations(page)).toEqual([]);
+  });
+});

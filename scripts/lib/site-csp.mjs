@@ -41,14 +41,16 @@ export function withCsp(html, directives) {
   return bare.slice(0, end) + lead + rest;
 }
 
-const surfaceOf = (file) =>
-  file.startsWith("app/") ? SITE_CSP.app : SITE_CSP.landing;
+const surfaceOf = (file) => {
+  if (file.startsWith("app/")) return SITE_CSP.app;
+  return file.startsWith("docs/") ? SITE_CSP.docs : SITE_CSP.landing;
+};
 
-/** Applies the policy to every landing and App page; the docs are left alone. */
+/** Applies the policy to every page of the assembled site, docs included. */
 export function applySiteCsp(siteDir) {
   const pages = readdirSync(siteDir, { recursive: true })
     .map((entry) => String(entry).split(sep).join("/"))
-    .filter((file) => file.endsWith(".html") && !file.startsWith("docs/"));
+    .filter((file) => file.endsWith(".html"));
   for (const file of pages) {
     const path = join(siteDir, file);
     writeFileSync(path, withCsp(readFileSync(path, "utf8"), surfaceOf(file)));

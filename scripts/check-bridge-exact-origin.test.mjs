@@ -21,7 +21,7 @@ const manifest = ({ connect = [APP], announce = [APP], ids } = {}) =>
 
 const DEV_MANIFEST = manifest({
   connect: [...DEV, APP],
-  announce: [APP, "http://localhost/*"],
+  announce: [APP, ...DEV],
 });
 
 const withRepo = (files, run) => {
@@ -184,5 +184,92 @@ test("(l) treats a bridge without a manifest as a fault", () => {
       assert.equal(found.length, 1);
       assert.equal(found[0].file, "packages/y-bridge/manifest.json");
     }
+  );
+});
+
+test("(m) flags a dev announce pattern that matches every localhost port", () => {
+  withRepo(
+    bridge({
+      "packages/x-bridge/manifest.json": manifest({
+        connect: [...DEV, APP],
+        announce: [APP, "http://localhost/*"],
+      }),
+    }),
+    (found) => {
+      assert.equal(found.length, 1);
+      assert.match(found[0].detail, /http:\/\/localhost\/\*/);
+    }
+  );
+});
+
+const PARTIAL_MATCHES = {
+  endsWith: 'if (sender.origin.endsWith("kaiord.com")) ok();',
+  includes: 'const ok = sender.url.includes("https://kaiord.com");',
+  startsWith: 'const ok = sender.origin.startsWith("https://kaiord.com");',
+  indexOf: 'const ok = origin.indexOf("kaiord.com") !== -1;',
+  match: "const ok = origin.match(/kaiord.com/);",
+  RegExp: 'const ok = new RegExp("kaiord.com").test(origin);',
+  hostname: 'const ok = new URL(sender.url).hostname === "kaiord.com";',
+  "a bound name": [
+    'const APP = "https://kaiord.com";',
+    "const ok = sender.origin",
+    "  .startsWith(APP);",
+  ].join("\n"),
+  "a literal on the left": 'const ok = "https://kaiord.com/app".includes(o);',
+};
+
+test("(n) flags every suffix, substring or prefix match of the App origin", () => {
+  for (const [label, code] of Object.entries(PARTIAL_MATCHES)) {
+    withRepo(
+      bridge({ "packages/x-bridge/background.js": `${code}\n` }),
+      (found) => {
+        assert.deepEqual(
+          found.map((v) => v.file),
+          ["packages/x-bridge/background.js"],
+          label
+        );
+      }
+    );
+  }
+});
+
+test("(o) scans every shipped file under the bridge, nested folders included", () => {
+  withRepo(
+    bridge({
+      "packages/x-bridge/lib/deep/origin.js":
+        'export const ok = (o) => o.endsWith(".kaiord.com");\n',
+      "packages/_shared/bridge-core/sub/gate.js":
+        'const ok = (o) => o.includes("kaiord.com");\n',
+      "packages/x-bridge/node_modules/dep/index.js":
+        'const ok = (o) => o.endsWith("kaiord.com");\n',
+      "packages/x-bridge/test/deep/x.test.js":
+        'const ok = (o) => o.endsWith("kaiord.com");\n',
+      "packages/x-bridge/vitest.config.js":
+        'const ok = (o) => o.endsWith("kaiord.com");\n',
+    }),
+    (found) => {
+      assert.deepEqual(found.map((v) => v.file).sort(), [
+        "packages/_shared/bridge-core/sub/gate.js",
+        "packages/x-bridge/lib/deep/origin.js",
+      ]);
+    }
+  );
+});
+
+test("(p) lets the shared gate compare lists and keeps a plain App URL legal", () => {
+  withRepo(
+    bridge({
+      "packages/x-bridge/bridge-envelope.js": [
+        'const APP_ORIGIN = "https://kaiord.com";',
+        'const DEV_ORIGINS = ["http://localhost:5173"];',
+        "const ok = (o) => o === APP_ORIGIN || DEV_ORIGINS.includes(o);",
+      ].join("\n"),
+      "packages/x-bridge/popup.js": [
+        'const OPEN_EDITOR_URL = "https://kaiord.com/app/";',
+        "render({ primaryHref: OPEN_EDITOR_URL });",
+        'const names = ["a", "b"].includes(name);',
+      ].join("\n"),
+    }),
+    (found) => assert.deepEqual(details(found), [])
   );
 });

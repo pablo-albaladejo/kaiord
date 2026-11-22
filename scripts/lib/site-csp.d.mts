@@ -2,6 +2,7 @@ export type CspDirectives = Readonly<Record<string, readonly string[]>>;
 
 export declare const SITE_CSP: {
   readonly landing: CspDirectives;
+  readonly docs: CspDirectives;
   readonly app: CspDirectives;
 };
 

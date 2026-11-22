@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { prepareLanding } from "./landing-dist";
+import { builtDocs, builtLanding, stubLanding } from "./site-builds";
 import {
   startStaticPagesServer,
   type StaticPagesServer,
@@ -49,7 +49,7 @@ function assertBuiltForAppBase(indexHtml: string): void {
 
 export async function startMergedDist(
   label: string,
-  options: { realLanding?: boolean } = {}
+  options: { realLanding?: boolean; withDocs?: boolean } = {}
 ): Promise<MergedDist> {
   const builtIndex = join(builtDist, "index.html");
   if (!existsSync(builtIndex)) {
@@ -62,7 +62,12 @@ export async function startMergedDist(
 
   const dir = mkdtempSync(join(tmpdir(), `merged-dist-${label}-`));
   const site = join(dir, "site");
-  const landing = prepareLanding(dir, repoRoot, options.realLanding === true);
+  const landing = options.realLanding
+    ? builtLanding(repoRoot)
+    : stubLanding(dir);
+  const docs = options.withDocs
+    ? ["--docs", builtDocs(repoRoot)]
+    : ["--without", "docs"];
 
   // The same assembly the deploy runs, so the served tree has its shape.
   execFileSync(
@@ -70,7 +75,8 @@ export async function startMergedDist(
     [
       "scripts/assemble-site.mjs",
       ...["--out", site, "--landing", landing, "--app", builtDist],
-      ...["--without", "docs", "--sha", "e2e"],
+      ...docs,
+      ...["--sha", "e2e"],
     ],
     { cwd: repoRoot, stdio: "inherit" }
   );

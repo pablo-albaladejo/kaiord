@@ -2,7 +2,7 @@
 
 ### Requirement: Bridge announcement via content script
 
-Each bridge extension SHALL inject a content script into pages matching `https://kaiord.com/*` (that exact origin, no subdomain) and, in development builds only, `http://localhost:*/*`. The content script SHALL post a message to `window` on injection:
+Each bridge extension SHALL inject a content script into pages matching `https://kaiord.com/*` (that exact origin, no subdomain) and, in development builds only, `http://localhost:5173/*` and `http://localhost:5174/*` (a match pattern without a port would match every port). The content script SHALL post a message to `window` on injection:
 
 ```json
 {

@@ -8,7 +8,7 @@ The extension SHALL use Manifest V3 and SHALL request `storage` as its ONLY `per
 
 Host permissions SHALL be exactly `https://connect.garmin.com/*`, `https://connectapi.garmin.com/*` and `https://sso.garmin.com/*` — the sign-in origin the token is minted from, the API origin the reads and writes go to, and the dashboard the popup opens.
 
-Content scripts SHALL be injected on SPA origins ONLY (`https://kaiord.com/*` and, in dev, `http://localhost/*`), loading `bridge-identity.js` before `kaiord-announce.js` at `document_start`. No content script SHALL be injected on any Garmin origin.
+Content scripts SHALL be injected on SPA origins ONLY (`https://kaiord.com/*` and, in dev, `http://localhost:5173/*` and `http://localhost:5174/*`), loading `bridge-identity.js` before `kaiord-announce.js` at `document_start`. No content script SHALL be injected on any Garmin origin.
 
 The `externally_connectable` field SHALL declare `http://localhost:5173/*`, `http://localhost:5174/*` and `https://kaiord.com/*`.
 

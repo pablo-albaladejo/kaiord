@@ -1024,6 +1024,12 @@ test("the guard exits 1 when a new bridge package appears on disk", () => {
     const script = join(root, "packages/docs/scripts", SCRIPT_NAME);
     mkdirSync(dirname(script), { recursive: true });
     writeFileSync(script, readFileSync(SCRIPT, "utf8"));
+    const origins = "scripts/lib/app-origins.mjs";
+    mkdirSync(join(root, "scripts/lib"), { recursive: true });
+    writeFileSync(
+      join(root, origins),
+      readFileSync(join(REPO_ROOT, origins), "utf8")
+    );
     mkdirSync(join(root, "packages/docs/legal"), { recursive: true });
     writeFileSync(join(root, "packages/docs/legal/privacy-policy.md"), POLICY);
     mkdirSync(join(root, "packages/acme-bridge"), { recursive: true });
@@ -1100,7 +1106,11 @@ test("manifest with announce-only content script match on kaiord.com passes", ()
               js: ["content.js"],
             },
             {
-              matches: ["https://kaiord.com/*", "http://localhost/*"],
+              matches: [
+                "https://kaiord.com/*",
+                "http://localhost:5173/*",
+                "http://localhost:5174/*",
+              ],
               js: ["kaiord-announce.js"],
             },
           ],
@@ -1115,6 +1125,30 @@ test("manifest with announce-only content script match on kaiord.com passes", ()
       new Set(["https://app.train2go.com/*"])
     );
     assert.deepEqual(v, []);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("manifest whose announce script matches every localhost port is rejected", () => {
+  const dir = mkdtempSync(join(tmpdir(), "kaiord-priv-any-port-"));
+  try {
+    const path = join(dir, "manifest.json");
+    writeFileSync(
+      path,
+      JSON.stringify({
+        permissions: [],
+        content_scripts: [
+          {
+            matches: ["https://kaiord.com/*", "http://localhost/*"],
+            js: ["kaiord-announce.js"],
+          },
+        ],
+      })
+    );
+    const v = checkManifestPermissions(path, "x-bridge", new Set());
+    assert.equal(v.length, 1);
+    assert.match(v[0], /"http:\/\/localhost\/\*"/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
