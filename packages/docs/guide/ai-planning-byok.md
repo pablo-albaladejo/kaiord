@@ -44,9 +44,14 @@ Conversations are stored per profile in your browser and are searchable.
   Kaiord's [privacy policy](/legal/privacy-policy) describes what is sent: your
   prompts, and summaries of the data the assistant reads, go from your browser
   to the provider you configured, only while you are chatting.
-- The stored key is obfuscated, not strongly protected: anyone with access to
-  your browser profile can recover it. If you turn on Google Drive sync without
-  sync encryption, the app warns you that keys would be uploaded in plain text.
+- The stored key is obfuscated with a fixed key that ships in Kaiord's public
+  code, so it is not truly encrypted. Any script running on kaiord.com
+  (including the third-party scripts it loads, such as analytics), any browser
+  extension allowed on kaiord.com, and anyone with access to your browser
+  profile can read it. It is sent only to your provider, never to Kaiord. If
+  you turn on Google Drive sync, a copy goes to your own Drive; without sync
+  encryption the app warns you that it would be uploaded with only that
+  obfuscation.
   **Settings → Privacy** has a button to clear every stored key.
 - You pay your provider directly. **Settings → AI → Usage** shows tokens per
   month and an **estimated** cost; your provider's bill is the source of truth.
