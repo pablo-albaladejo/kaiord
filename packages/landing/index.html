@@ -132,7 +132,7 @@
                 "name": "Where is my training data stored?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "In your browser's IndexedDB. It leaves your device only to destinations you set up: your AI provider, the platforms you connect, and your own Google Drive if you turn on sync."
+                  "text": "In your browser's IndexedDB. It leaves your device only to destinations you set up: your AI provider, the platforms you connect, intervals.icu if you add its API key, and your own Google Drive if you turn on sync. Separately, Umami records anonymous page views and product events on every page, never your workouts, health data or keys."
                 }
               },
               {
@@ -1631,12 +1631,15 @@
               <p
                 class="mt-3 text-base leading-[1.6] text-[var(--text-secondary)]"
               >
-                Your data lives in IndexedDB on your device. It leaves only to
-                destinations you set up: the AI provider whose key you enter,
-                the platforms you connect through their extensions, and your own
-                Google Drive if you turn on sync. Kaiord's own servers only
-                serve this site and convert workouts in transit; they store
-                nothing.
+                Your training and health data lives in IndexedDB on your device.
+                It leaves only to destinations you set up: the AI provider whose
+                key you enter (Anthropic, OpenAI or Google), the platforms you
+                connect through their extensions, intervals.icu to check the API
+                key you add for it, and your own Google Drive if you turn on
+                sync. Separately, every page loads Umami analytics, which
+                records anonymous page views and product events, never your
+                workouts, health data or keys. Kaiord's own servers only serve
+                this site and convert workouts in transit; they store nothing.
               </p>
               <div class="mt-5 flex flex-wrap gap-2">
                 <span
@@ -1738,7 +1741,7 @@
               >
               <span
                 class="mt-1 block text-sm leading-[1.5] text-[var(--text-secondary)]"
-                >See recovery, HRV and sleep next to the sessions you
+                >See recovery, HRV and sleep next to the workouts you
                 planned.</span
               >
             </a>
@@ -1918,7 +1921,10 @@
               >
                 In your browser's IndexedDB. It leaves your device only to
                 destinations you set up: your AI provider, the platforms you
-                connect, and your own Google Drive if you turn on sync.
+                connect, intervals.icu if you add its API key, and your own
+                Google Drive if you turn on sync. Separately, Umami records
+                anonymous page views and product events on every page, never
+                your workouts, health data or keys.
               </p>
             </details>
             <details

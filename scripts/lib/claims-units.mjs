@@ -9,12 +9,12 @@
 
 import { htmlUnits } from "./claims-html.mjs";
 import { jsonUnits } from "./claims-json.mjs";
+import { jsonLdUnits } from "./claims-jsonld.mjs";
+import { normalize } from "./claims-text.mjs";
 
 const LIST_ITEM = /^\s*(?:[-*+•]|\d+[.)])\s+/;
 const HEADING = /^#{1,6}\s+/;
 const TABLE_SEPARATOR = /^\|[\s:|-]+\|$/;
-
-export const normalize = (text) => text.replace(/\s+/g, " ").trim();
 
 const withoutComments = (src) => src.replace(/<!--[\s\S]*?-->/g, "");
 
@@ -68,7 +68,11 @@ export const markdownUnits = (lines) => {
 
 // Units of one surface, or an error string when the surface cannot be read.
 export const surfaceUnits = (surface, src) => {
-  if (surface.file.endsWith(".html")) return { units: htmlUnits(src) };
+  if (surface.file.endsWith(".html")) {
+    const ld = jsonLdUnits(src);
+    if (ld.error) return { error: `${surface.file}: ${ld.error}` };
+    return { units: [...htmlUnits(src), ...ld.units] };
+  }
   if (surface.keys || surface.file.endsWith(".json"))
     return jsonUnits(surface, src);
   const lines = withoutComments(withoutFrontMatter(src)).split("\n");

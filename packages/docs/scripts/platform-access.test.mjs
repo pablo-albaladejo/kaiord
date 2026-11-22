@@ -62,3 +62,22 @@ test("should be listed in the Legal sidebar", () => {
   // Assert
   assert.equal(listed, true);
 });
+
+test("should date every reading of a Platform's terms on the day the register says it was read", () => {
+  // Arrange
+  const markdown = readFileSync(PAGE, "utf8");
+  const register = JSON.parse(
+    readFileSync(resolve(docsRoot, "../../claims/platform-access.json"), "utf8")
+  );
+
+  // Act
+  const stated = /published terms on (\d{4}-\d{2}-\d{2})/.exec(markdown)?.[1];
+  const readings = register.claims
+    .filter((claim) => claim.kind === "external")
+    .map((claim) => claim.read_on);
+
+  // Assert
+  assert.ok(stated, "the page states no reading date");
+  assert.ok(readings.length >= 9, `only ${readings.length} readings`);
+  assert.deepEqual([...new Set(readings)], [stated]);
+});

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  checkClaimRegisters,
   checkClaims,
   fsReader,
   loadRegisters,
@@ -22,7 +23,7 @@ describe("check-claims", () => {
     };
     const registers = register({
       surfaces: [{ file: LISTING }],
-      claims: [{ id: "t", text: "Title", proof: [{ file: LISTING }] }],
+      claims: [{ id: "t", text: "Title", kind: "label" }],
     });
 
     // Act
@@ -40,8 +41,8 @@ describe("check-claims", () => {
     const registers = register({
       surfaces: [{ file: LISTING }],
       claims: [
-        { id: "kept", text: "Kept.", proof: [{ file: LISTING }] },
-        { id: "gone", text: "Removed.", proof: [{ file: LISTING }] },
+        { id: "kept", text: "Kept.", kind: "label" },
+        { id: "gone", text: "Removed.", kind: "label" },
       ],
     });
 
@@ -166,8 +167,8 @@ describe("check-claims", () => {
     const registers = register({
       surfaces: [{ file: LISTING, sections: ["Description"] }],
       claims: [
-        { id: "public", text: "Public.", proof: [{ file: LISTING }] },
-        { id: "detail", text: "Detail", proof: [{ file: LISTING }] },
+        { id: "public", text: "Public.", kind: "label" },
+        { id: "detail", text: "Detail", kind: "label" },
       ],
     });
 
@@ -188,7 +189,7 @@ describe("check-claims", () => {
     };
     const registers = register({
       surfaces: [{ file: LISTING, intro: true, sections: ["Features"] }],
-      claims: [{ id: "title", text: "Package", proof: [{ file: LISTING }] }],
+      claims: [{ id: "title", text: "Package", kind: "label" }],
     });
 
     // Act
@@ -206,7 +207,7 @@ describe("check-claims", () => {
     const files = { [LISTING]: "## Renamed\n\nPublic.\n" };
     const registers = register({
       surfaces: [{ file: LISTING, sections: ["Description"] }],
-      claims: [{ id: "public", text: "Public.", proof: [{ file: LISTING }] }],
+      claims: [{ id: "public", text: "Public.", kind: "label" }],
     });
 
     // Act
@@ -230,10 +231,10 @@ describe("check-claims", () => {
         {
           id: "a",
           text: "One sentence wrapped here.",
-          proof: [{ file: LISTING }],
+          kind: "label",
         },
-        { id: "b", text: "First item continues.", proof: [{ file: LISTING }] },
-        { id: "c", text: "Second item.", proof: [{ file: LISTING }] },
+        { id: "b", text: "First item continues.", kind: "label" },
+        { id: "c", text: "Second item.", kind: "label" },
       ],
     });
 
@@ -255,9 +256,7 @@ describe("check-claims", () => {
     };
     const registers = register({
       surfaces: [{ file: locale, keys: ["extDescription"] }],
-      claims: [
-        { id: "d", text: "Does two things.", proof: [{ file: locale }] },
-      ],
+      claims: [{ id: "d", text: "Does two things.", kind: "label" }],
     });
 
     // Act
@@ -280,8 +279,8 @@ describe("check-claims", () => {
     const registers = register({
       surfaces: [{ file: page }],
       claims: [
-        { id: "h", text: "Your data,", proof: [{ file: page }] },
-        { id: "s", text: "one place", proof: [{ file: page }] },
+        { id: "h", text: "Your data,", kind: "label" },
+        { id: "s", text: "one place", kind: "label" },
       ],
     });
 
@@ -304,9 +303,7 @@ describe("check-claims", () => {
     };
     const registers = register({
       surfaces: [{ file: page }],
-      claims: [
-        { id: "t", text: "Kaiord — one place", proof: [{ file: page }] },
-      ],
+      claims: [{ id: "t", text: "Kaiord — one place", kind: "label" }],
     });
 
     // Act
@@ -332,7 +329,7 @@ describe("check-claims", () => {
     };
     const registers = register({
       surfaces: [{ file: page }],
-      claims: [{ id: "p", text: "Convert a file.", proof: [{ file: page }] }],
+      claims: [{ id: "p", text: "Convert a file.", kind: "label" }],
     });
 
     // Act
@@ -355,7 +352,7 @@ describe("check-claims", () => {
     };
     const registers = register({
       surfaces: [{ file: translations }],
-      claims: [{ id: "s", text: "Salud", proof: [{ file: translations }] }],
+      claims: [{ id: "s", text: "Salud", kind: "label" }],
     });
 
     // Act
@@ -377,11 +374,11 @@ describe("check-claims", () => {
     };
     const registers = register({
       surfaces: [{ file: meta, keys: ["es.title"] }],
-      claims: [{ id: "t", text: "Kaiord — un sitio", proof: [{ file: meta }] }],
+      claims: [{ id: "t", text: "Kaiord — un sitio", kind: "label" }],
     });
     const broken = register({
       surfaces: [{ file: meta, keys: ["es.title", "es.description"] }],
-      claims: [{ id: "t", text: "Kaiord — un sitio", proof: [{ file: meta }] }],
+      claims: [{ id: "t", text: "Kaiord — un sitio", kind: "label" }],
     });
 
     // Act
@@ -422,7 +419,7 @@ describe("check-claims", () => {
     const files = { [LISTING]: "One.\n" };
     const data = {
       surfaces: [{ file: LISTING }],
-      claims: [{ id: "one", text: "One.", proof: [{ file: LISTING }] }],
+      claims: [{ id: "one", text: "One.", kind: "label" }],
     };
     const registers = [
       { name: "claims/a.json", data },
@@ -451,7 +448,7 @@ describe("check-claims", () => {
     };
     const part = (surface, id, text) => ({
       surfaces: [surface],
-      claims: [{ id, text, proof: [{ file: surface.file }] }],
+      claims: [{ id, text, kind: "label" }],
     });
     const registers = [
       {
@@ -497,8 +494,8 @@ describe("check-claims", () => {
             { file: locale, keys: ["one"] },
           ],
           claims: [
-            { id: "a.t", text: "Alpha.", proof: [{ file: LISTING }] },
-            { id: "a.k", text: "1.", proof: [{ file: locale }] },
+            { id: "a.t", text: "Alpha.", kind: "label" },
+            { id: "a.k", text: "1.", kind: "label" },
           ],
         },
       },
@@ -509,9 +506,7 @@ describe("check-claims", () => {
         name: "claims/e.json",
         data: {
           surfaces: [{ file: "whole.md" }],
-          claims: [
-            { id: "e.t", text: "Whole.", proof: [{ file: "whole.md" }] },
-          ],
+          claims: [{ id: "e.t", text: "Whole.", kind: "label" }],
         },
       },
       {
@@ -540,7 +535,7 @@ describe("check-claims", () => {
         name: "claims/a.json",
         data: {
           surfaces: [{ file: LISTING, sections: ["A"] }],
-          claims: [{ id: "one", text: "One.", proof: [{ file: LISTING }] }],
+          claims: [{ id: "one", text: "One.", kind: "label" }],
         },
       },
       {
@@ -559,6 +554,223 @@ describe("check-claims", () => {
     assert.deepEqual(problems, [
       `claims/b.json: surface ${LISTING} (section "A") is already registered in claims/a.json`,
     ]);
+  });
+
+  it("should fail when a short unit appears more often than the register accounts for it", () => {
+    // Arrange
+    const files = {
+      [LISTING]: "Extensions\n\n5\n\nAlso 5\n\n5\n",
+      "count.test.js": 'it("should count five", () => {});',
+    };
+    const proof = [{ test: "count.test.js", title: "should count five" }];
+    const once = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        { id: "label", text: "Extensions", kind: "label" },
+        { id: "also", text: "Also 5", proof },
+        { id: "five", text: "5", proof },
+      ],
+    });
+    const counted = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        { id: "label", text: "Extensions", kind: "label" },
+        { id: "also", text: "Also 5", proof },
+        { id: "five", text: "5", proof, count: 2 },
+      ],
+    });
+
+    // Act
+    const problems = [once, counted].map((r) =>
+      checkClaims({ registers: r, read: reader(files) })
+    );
+
+    // Assert
+    assert.deepEqual(problems, [
+      [
+        'claims/sample.json: "5" appears 2 time(s) on its surfaces but the register accounts for 1; add an entry for each new occurrence (or a count when it is the same claim)',
+      ],
+      [],
+    ]);
+  });
+
+  it("should refuse a fact proven only by its own surface, a file existing, an endpoint or a short pin", () => {
+    // Arrange
+    const files = {
+      [LISTING]: "One.\n\nTwo.\n\nThree.\n\nFour.\n\nFive.\n",
+      "code.js": "export const LICENSE = 'MIT License';\n",
+    };
+    const registers = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        {
+          id: "own",
+          text: "One.",
+          proof: [{ file: LISTING, contains: "One. is here" }],
+        },
+        { id: "exists", text: "Two.", proof: [{ file: "code.js" }] },
+        {
+          id: "endpoint",
+          text: "Three.",
+          proof: [{ endpoint: "https://example.com/" }],
+        },
+        {
+          id: "short",
+          text: "Four.",
+          proof: [{ file: "code.js", contains: "MIT License" }],
+        },
+        {
+          id: "pinned",
+          text: "Five.",
+          proof: [{ file: "code.js", contains: "export const LICENSE = 'MIT" }],
+        },
+      ],
+    });
+    files[LISTING] = files[LISTING].replace("One.", "One. is here");
+    registers[0].data.claims[0].text = "One. is here";
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(
+      problems.map((p) => p.split(":")[0]),
+      ['claim "own"', 'claim "exists"', 'claim "endpoint"', 'claim "short"']
+    );
+    assert.ok(problems.every((p) => p.includes('declare it kind "label"')));
+  });
+
+  it("should take a label with no proof, and refuse a label that carries one or an unknown kind", () => {
+    // Arrange
+    const files = { [LISTING]: "# Title\n\nNext\n\nOdd\n" };
+    const registers = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        { id: "title", text: "Title", kind: "label" },
+        { id: "next", text: "Next", kind: "label", proof: [{ file: LISTING }] },
+        { id: "odd", text: "Odd", kind: "slogan" },
+      ],
+    });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      'claim "next" has unknown field(s) proof',
+      'claim "odd": kind "slogan" is none of label, external',
+    ]);
+  });
+
+  it("should hold an external claim to its url and a reading no older than 180 days", () => {
+    // Arrange
+    const files = { [LISTING]: "Fresh.\n\nStale.\n\nBare.\n" };
+    const url = "https://example.com/terms";
+    const registers = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        {
+          id: "fresh",
+          text: "Fresh.",
+          kind: "external",
+          url,
+          read_on: "2026-11-01",
+        },
+        {
+          id: "stale",
+          text: "Stale.",
+          kind: "external",
+          url,
+          read_on: "2026-03-01",
+        },
+        { id: "bare", text: "Bare.", kind: "external" },
+      ],
+    });
+    const today = Date.parse("2026-11-22T12:00:00Z");
+
+    // Act
+    const { problems } = checkClaimRegisters({
+      registers,
+      read: reader(files),
+      today,
+    });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `claim "stale": read on 2026-03-01, more than 180 days ago; read ${url} again and update read_on`,
+      'claim "bare": an external claim names the https url it read',
+      'claim "bare": an external claim has read_on (YYYY-MM-DD)',
+    ]);
+  });
+
+  it("should hold placeholders, aria descriptions, keywords and the JSON-LD a search engine shows to the register", () => {
+    // Arrange
+    const page = "page.html";
+    const files = {
+      [page]: [
+        '<meta name="keywords" content="training, health">',
+        '<input placeholder="Your key" aria-description="Stays in your browser">',
+        '<script type="application/ld+json">{"@type":"WebSite","url":"https://x.test/","name":"Kaiord","description":"A page."}</script>',
+      ].join("\n"),
+    };
+    const registers = register({ surfaces: [{ file: page }], claims: [] });
+
+    // Act
+    const problems = checkClaims({ registers, read: reader(files) });
+
+    // Assert
+    assert.deepEqual(problems, [
+      `${page}: unregistered claim "training, health"`,
+      `${page}: unregistered claim "Stays in your browser"`,
+      `${page}: unregistered claim "Your key"`,
+      `${page}: unregistered claim "Kaiord"`,
+      `${page}: unregistered claim "A page."`,
+    ]);
+  });
+
+  it("should sum up the claims by kind and by proof", () => {
+    // Arrange
+    const files = {
+      [LISTING]: "# Title\n\nTested.\n\nPinned.\n\nRead.\n",
+      "a.test.js": 'it("should hold", () => {});',
+      "code.js": "export const pinnedLine = true;\n",
+    };
+    const registers = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        { id: "t", text: "Title", kind: "label" },
+        {
+          id: "a",
+          text: "Tested.",
+          proof: [{ test: "a.test.js", title: "should hold" }],
+        },
+        {
+          id: "b",
+          text: "Pinned.",
+          proof: [{ file: "code.js", contains: "export const pinnedLine" }],
+        },
+        {
+          id: "c",
+          text: "Read.",
+          kind: "external",
+          url: "https://x.test/",
+          read_on: "2026-11-22",
+        },
+      ],
+    });
+
+    // Act
+    const { summary } = checkClaimRegisters({
+      registers,
+      read: reader(files),
+      today: Date.parse("2026-11-22T00:00:00Z"),
+    });
+
+    // Assert
+    assert.equal(
+      summary,
+      "4 claims: 1 labels, 1 external, 1 proven by test, 1 by pinned code, 0 unproven"
+    );
   });
 
   it("should pass on the register and surfaces the repo ships", () => {

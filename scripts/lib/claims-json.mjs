@@ -4,7 +4,7 @@
 // holds (a translation file maps source text to what the reader sees, so its
 // object keys are never shown and never units).
 
-const normalize = (text) => text.replace(/\s+/g, " ").trim();
+import { normalize } from "./claims-text.mjs";
 
 const stringValues = (value) => {
   if (typeof value === "string") return [value];

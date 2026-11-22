@@ -49,6 +49,19 @@ describe("method-pipeline", () => {
     });
   }
 
+  it("should refuse every option that counts changed lines, so a figure stays a commit count", () => {
+    // Arrange
+    const options = ["--stat", "--numstat", "--shortstat", "-p", "--patch"];
+
+    // Act
+    const errors = options.map(
+      (o) => parsePipeline(`git log ${o} ${SHA} | wc -l`).error
+    );
+
+    // Assert
+    assert.ok(errors.every((e) => typeof e === "string"));
+  });
+
   it("should allow every command of the published method note, naming its revision", () => {
     // Arrange
     const note = readFileSync(

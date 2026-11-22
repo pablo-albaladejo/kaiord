@@ -27,4 +27,27 @@ describe("kaiord_list_formats", () => {
     expect(names).toContain("gcn");
     expect(names).toContain("krd");
   });
+
+  it("should list four formats besides KRD, the SDK's internal model", async () => {
+    // Arrange
+    const client = await createTestClient();
+
+    // Act
+    const result = (await client.callTool({
+      name: "kaiord_list_formats",
+      arguments: {},
+    })) as McpToolResult;
+    const formats = JSON.parse(result.content[0].text) as Array<{
+      format: string;
+    }>;
+    const outside = formats.filter((f) => f.format !== "krd");
+
+    // Assert
+    expect(outside.map((f) => f.format).sort()).toEqual([
+      "fit",
+      "gcn",
+      "tcx",
+      "zwo",
+    ]);
+  });
 });

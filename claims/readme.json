@@ -46,29 +46,12 @@
     {
       "id": "readme.root.kaiord",
       "text": "Kaiord",
-      "proof": [
-        {
-          "file": "GLOSSARY.md",
-          "contains": "# Kaiord"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "readme.root.kaiord-com-kaiord-app",
       "text": "**[kaiord.com](https://kaiord.com)** | [Kaiord App](https://kaiord.com/app/) | [npm](https://www.npmjs.com/org/kaiord)",
-      "proof": [
-        {
-          "endpoint": "https://kaiord.com/",
-          "servedBy": "packages/landing/index.html"
-        },
-        {
-          "endpoint": "https://kaiord.com/app/",
-          "servedBy": "packages/workout-spa-editor/index.html"
-        },
-        {
-          "endpoint": "https://www.npmjs.com/org/kaiord"
-        }
-      ]
+      "kind": "label"
     },
     {
       "id": "readme.root.license-mit-typescript-strict",
@@ -76,11 +59,11 @@
       "proof": [
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         },
         {
           "file": "tsconfig.base.json",
-          "contains": "\"strict\": true"
+          "contains": "\"strict\": true,\n    \"noUnusedLocals\": true,"
         }
       ]
     },
@@ -163,11 +146,11 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord SDK**:"
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
         },
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord App**:"
+          "contains": "**Kaiord App**:\nThe browser application an athlete uses to see, plan and move their data"
         }
       ]
     },
@@ -177,7 +160,7 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord SDK**:"
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
         },
         {
           "file": "packages/core/package.json",
@@ -215,7 +198,7 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord App**:"
+          "contains": "**Kaiord App**:\nThe browser application an athlete uses to see, plan and move their data"
         },
         {
           "endpoint": "https://kaiord.com/app/",
@@ -229,11 +212,8 @@
     {
       "id": "readme.root.rule",
       "text": "---",
-      "proof": [
-        {
-          "file": "README.md"
-        }
-      ]
+      "kind": "label",
+      "count": 3
     },
     {
       "id": "readme.root.kaiord-app-create-and",
@@ -262,8 +242,8 @@
           "contains": "KRD is an internal model."
         },
         {
-          "file": "packages/core/package.json",
-          "contains": "\"zod\": \""
+          "file": "packages/core/src/domain/lab/lab-parameter.ts",
+          "contains": "import { z } from \"zod\";"
         },
         {
           "test": "packages/core/src/application/from-format.test.ts",
@@ -328,11 +308,11 @@
         },
         {
           "file": ".github/workflows/ci.yml",
-          "contains": "pull_request:"
+          "contains": "on:\n  pull_request:\n    types: [opened, synchronize, reopened]"
         },
         {
           "file": "tsconfig.base.json",
-          "contains": "\"strict\": true"
+          "contains": "\"strict\": true,\n    \"noUnusedLocals\": true,"
         }
       ]
     },
@@ -386,7 +366,7 @@
       "proof": [
         {
           "file": "packages/workout-spa-editor/src/utils/import-workout-formats.ts",
-          "contains": "fromBinary"
+          "contains": "import { fromBinary, fromText } from \"@kaiord/core\";"
         },
         {
           "file": "packages/workout-spa-editor/src/utils/export-workout-formats.ts"
@@ -517,7 +497,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         },
         {
           "file": ".github/workflows/ci.yml"
@@ -530,7 +510,7 @@
       "proof": [
         {
           "file": "GLOSSARY.md",
-          "contains": "**Kaiord SDK**:"
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
         },
         {
           "file": "packages/core/src/index.ts",
@@ -586,7 +566,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -630,7 +610,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -674,7 +654,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -714,7 +694,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -754,7 +734,7 @@
         },
         {
           "file": "LICENSE",
-          "contains": "MIT License"
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     },
@@ -864,8 +844,8 @@
           "title": "should parse running workout from natural language"
         },
         {
-          "file": "packages/ai/package.json",
-          "contains": "\"ai\": \""
+          "file": "packages/ai/src/types.ts",
+          "contains": "import type { LanguageModel } from \"ai\";"
         }
       ]
     }
