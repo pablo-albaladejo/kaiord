@@ -22,6 +22,19 @@ verbatim; parsing lives in `@kaiord/tanita`, called SPA-side.
 | `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair. |
 | `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://mytanita.eu/*`).            |
 
+### Public texts
+
+`store-listing.md` (Short and Detailed Description), `privacy-justification.md`,
+`extDescription` in `_locales/en/messages.json` and the "Kaiord for Tanita
+Extension" section of `packages/docs/legal/privacy-policy.md` are a registered
+claims surface: every sentence is an entry in `claims/tanita.json` with its
+proof (`pnpm lint:claims`, see `claims/README.md`). Athlete-facing prose says
+"Kaiord for Tanita"; the extension's own name is unchanged.
+`test/export-confinement.test.js` proves the listing's promises at the message
+contract: requests go only to the export, a session check downloads the whole
+export and answers only yes or no, the export is handed over unchanged, and
+only the theme is stored by the service worker.
+
 ### Vendored bridge-core files
 
 `bridge-envelope.js`, `session-fetch.js`, `kaiord-announce.js`,
