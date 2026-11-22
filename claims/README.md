@@ -26,7 +26,9 @@ too (delete it), and so does a proof that no longer exists.
 
 One JSON file per group of surfaces (`garmin.json`, later `landing.json`, …),
 so tickets working in parallel edit different files. A surface or a claim id
-belongs to one file only.
+belongs to one file only. A file shared by several groups, such as the privacy
+policy with one section per extension, is split by `sections` (or `keys`): each
+register file names its own, and no section or key may be in two.
 
 ```json
 {
@@ -96,6 +98,7 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File          | Surfaces                                                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `garmin.json` | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625) |
+| File                 | Surfaces                                                                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `garmin.json`        | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)        |
+| `trainingpeaks.json` | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628) |
