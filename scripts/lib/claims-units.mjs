@@ -7,6 +7,9 @@
 // shown to a reader and are dropped. JSON: the `message` of each named key,
 // the shape of a Chrome `_locales/*/messages.json`.
 
+import { htmlUnits } from "./claims-html.mjs";
+import { jsonUnits } from "./claims-json.mjs";
+
 const LIST_ITEM = /^\s*(?:[-*+•]|\d+[.)])\s+/;
 const HEADING = /^#{1,6}\s+/;
 const TABLE_SEPARATOR = /^\|[\s:|-]+\|$/;
@@ -65,22 +68,18 @@ export const markdownUnits = (lines) => {
 
 // Units of one surface, or an error string when the surface cannot be read.
 export const surfaceUnits = (surface, src) => {
-  if (surface.keys) {
-    let messages;
-    try {
-      messages = JSON.parse(src);
-    } catch {
-      return { error: `${surface.file}: not valid JSON` };
-    }
-    const missing = surface.keys.filter((k) => !messages[k]?.message);
-    if (missing.length > 0)
-      return { error: `${surface.file}: key(s) ${missing.join(", ")} missing` };
-    return { units: surface.keys.map((k) => normalize(messages[k].message)) };
-  }
+  if (surface.file.endsWith(".html")) return { units: htmlUnits(src) };
+  if (surface.keys || surface.file.endsWith(".json"))
+    return jsonUnits(surface, src);
   const lines = withoutComments(withoutFrontMatter(src)).split("\n");
-  if (!surface.sections) return { units: markdownUnits(lines) };
-  const units = [];
-  for (const title of surface.sections) {
+  if (!surface.sections && !surface.intro)
+    return { units: markdownUnits(lines) };
+  // The intro is the H1 and its lead: everything before the first sub-heading.
+  const firstSub = lines.findIndex((line) => headingLevel(line) > 1);
+  const units = surface.intro
+    ? markdownUnits(firstSub === -1 ? lines : lines.slice(0, firstSub))
+    : [];
+  for (const title of surface.sections ?? []) {
     const section = sectionLines(lines, title);
     if (section === null)
       return { error: `${surface.file}: section "${title}" is missing` };

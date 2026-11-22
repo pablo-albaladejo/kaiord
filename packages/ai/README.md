@@ -1,6 +1,6 @@
 # @kaiord/ai
 
-AI/LLM integration for the Kaiord health & fitness data framework. Converts natural language workout descriptions into structured KRD workout objects using the Vercel AI SDK.
+AI/LLM integration for the Kaiord SDK. Converts natural language workout descriptions into structured KRD workout objects using the Vercel AI SDK.
 
 ## Installation
 

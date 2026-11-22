@@ -1,17 +1,20 @@
 # Kaiord
 
-> Open-source, local-first training platform: a weekly training calendar, an
-> AI assistant that acts on your data, Garmin & WHOOP sync, and health/lab
-> analytics — plus a TypeScript SDK for the FIT, TCX, ZWO, and Garmin Connect
-> workout formats. Everything runs in the browser; no account or server is
-> required. MIT licensed, by Pablo Albaladejo.
+> Kaiord gathers an athlete's training and health data from the platforms
+> where it is scattered. It comes as two products: the Kaiord App, a browser
+> application to plan, build and send workouts, with no account; and the
+> Kaiord SDK, TypeScript libraries, a CLI and an MCP server for the FIT, TCX,
+> ZWO and Garmin Connect workout formats. MIT licensed, by Pablo Albaladejo.
 
 Key facts:
 
-- The web app (Kaiord Editor) is free and stores all data locally in the
-  browser (IndexedDB). No sign-up.
-- The SDK converts workout files between FIT, TCX, ZWO, GCN (Garmin Connect),
-  and KRD (Kaiord's canonical JSON format). Conversions are round-trip safe.
+- The Kaiord App is free, needs no sign-up, and stores its data in the
+  browser (IndexedDB). Data leaves the device only to destinations the
+  athlete sets up: the AI provider whose key they enter, the platforms they
+  connect through browser extensions, and their own Google Drive if they turn
+  on sync. Kaiord keeps no accounts and stores no user data on its servers.
+- The Kaiord SDK converts workout files between FIT, TCX, ZWO and GCN
+  (Garmin Connect) through KRD, the SDK's internal canonical model.
 - A CLI (`kaiord convert`) and an MCP server (`@kaiord/mcp`) expose the same
   conversion pipeline to scripts and AI agents.
 
@@ -19,10 +22,12 @@ Key facts:
 
 - [Landing page](https://kaiord.com/): product overview in English
 - [Landing page (Spanish)](https://kaiord.com/es/): product overview in Spanish
-- [Kaiord Editor](https://kaiord.com/app/): the web app — training
-  calendar, visual workout editor, AI assistant, Garmin & WHOOP sync
-- [Kaiord Garmin Bridge (Chrome extension)](https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe):
-  one-tap sync of Kaiord workouts into Garmin Connect
+- [Kaiord App](https://kaiord.com/app/): the browser application — training
+  calendar, workout builder, assistant with your own key, sending to Garmin
+  Connect
+- [Kaiord for Garmin (Chrome extension)](https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe):
+  lets the Kaiord App send workouts to Garmin Connect and read your
+  activities, using your own Garmin sign-in
 
 ## Guides for athletes
 
@@ -45,13 +50,13 @@ Key facts:
 
 - [Docs home](https://kaiord.com/docs/): guides, format specs, API reference
 - [Quick start](https://kaiord.com/docs/guide/quick-start.md): convert a FIT
-  file to TCX in 4 lines of TypeScript
+  file to TCX in TypeScript
 - [Converters](https://kaiord.com/docs/convert/): how to convert workout files
   between FIT, TCX, ZWO, and Garmin Connect (with per-pair fidelity notes)
 - [Why Kaiord?](https://kaiord.com/docs/guide/why-kaiord.md): one SDK for
   every workout file format
-- [KRD format](https://kaiord.com/docs/formats/krd.md): the canonical JSON
-  workout format all conversions go through
+- [KRD format](https://kaiord.com/docs/formats/krd.md): the SDK's internal
+  canonical model, which every conversion goes through
 - [MCP tools](https://kaiord.com/docs/mcp/tools.md): use Kaiord tools from
   AI assistants via the Model Context Protocol
 - [Docs index for LLMs](https://kaiord.com/docs/llms.txt): per-page markdown
@@ -62,6 +67,6 @@ Key facts:
 ## Source & packages
 
 - [GitHub repository](https://github.com/pablo-albaladejo/kaiord): monorepo
-  with SDK, CLI, MCP server, and web app
+  with the Kaiord SDK and the Kaiord App
 - [npm packages](https://www.npmjs.com/org/kaiord): @kaiord/core, @kaiord/fit,
   @kaiord/tcx, @kaiord/zwo, @kaiord/garmin, @kaiord/cli, @kaiord/mcp

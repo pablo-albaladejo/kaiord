@@ -14,10 +14,10 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Kaiord — Your training cockpit. Every fitness format.</title>
+    <title>Kaiord — Your training and health data, in one place</title>
     <meta
       name="description"
-      content="Open-source, local-first training platform: calendar, AI assistant, Garmin &amp; WHOOP sync, health analytics and a TypeScript SDK for FIT, TCX, ZWO and Garmin."
+      content="Kaiord App: plan and send workouts in your browser, no account. Kaiord SDK: convert FIT, TCX, ZWO and Garmin Connect workouts in TypeScript."
     />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://kaiord.com/" />
@@ -43,18 +43,18 @@
     <!-- Open Graph -->
     <meta
       property="og:title"
-      content="Kaiord — Your training cockpit. Every fitness format."
+      content="Kaiord — Your training and health data, in one place"
     />
     <meta
       property="og:description"
-      content="Open-source, local-first training platform: calendar, AI assistant, Garmin &amp; WHOOP sync, health analytics and a TypeScript SDK for FIT, TCX, ZWO and Garmin."
+      content="Kaiord App: plan and send workouts in your browser, no account. Kaiord SDK: convert FIT, TCX, ZWO and Garmin Connect workouts in TypeScript."
     />
     <meta property="og:image" content="https://kaiord.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Kaiord — Your training cockpit. Every fitness format."
+      content="Kaiord — Your training and health data, in one place"
     />
     <meta property="og:url" content="https://kaiord.com/" />
     <meta property="og:type" content="website" />
@@ -65,16 +65,16 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Kaiord — Your training cockpit. Every fitness format."
+      content="Kaiord — Your training and health data, in one place"
     />
     <meta
       name="twitter:description"
-      content="Open-source, local-first training platform: calendar, AI assistant, Garmin &amp; WHOOP sync, health analytics and a TypeScript SDK for FIT, TCX, ZWO and Garmin."
+      content="Kaiord App: plan and send workouts in your browser, no account. Kaiord SDK: convert FIT, TCX, ZWO and Garmin Connect workouts in TypeScript."
     />
     <meta name="twitter:image" content="https://kaiord.com/og-image.png" />
     <meta
       name="twitter:image:alt"
-      content="Kaiord — Your training cockpit. Every fitness format."
+      content="Kaiord — Your training and health data, in one place"
     />
 
     <!-- JSON-LD -->
@@ -87,7 +87,7 @@
             "@id": "https://kaiord.com/#website",
             "name": "Kaiord",
             "url": "https://kaiord.com/",
-            "description": "Open-source, local-first training platform and TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
+            "description": "Kaiord App, a browser application for training and health data with no account, and Kaiord SDK, TypeScript libraries for FIT, TCX, ZWO and Garmin Connect workouts.",
             "inLanguage": ["en", "es"],
             "publisher": { "@id": "https://kaiord.com/#organization" },
             "author": { "@id": "https://kaiord.com/#pablo" }
@@ -95,8 +95,8 @@
           {
             "@type": "WebApplication",
             "@id": "https://kaiord.com/#editor",
-            "name": "Kaiord Editor",
-            "description": "Local-first training platform: weekly calendar, an AI assistant that acts on your data, Garmin and WHOOP sync, health and lab analytics — all in your browser.",
+            "name": "Kaiord App",
+            "description": "Browser application for training and health data: a weekly calendar, a workout editor, an assistant with your own key, Garmin Connect sending, and health and lab charts. No account.",
             "url": "https://kaiord.com/app/",
             "applicationCategory": "HealthApplication",
             "operatingSystem": "Any",
@@ -116,7 +116,7 @@
                 "name": "What is Kaiord?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Kaiord is an open-source, local-first training platform: a weekly training calendar, a visual workout editor, an AI assistant that acts on your data, Garmin and WHOOP sync, and health and lab analytics. It also ships a TypeScript SDK, a CLI, and an MCP server for the FIT, TCX, ZWO, and Garmin Connect workout formats."
+                  "text": "Kaiord gathers your training and health data from the platforms where it is scattered. The Kaiord App is the browser application where you plan your week, build workouts, talk to an assistant and send workouts to Garmin Connect. The Kaiord SDK is the TypeScript libraries, CLI and MCP server that read and convert FIT, TCX, ZWO and Garmin Connect workouts."
                 }
               },
               {
@@ -124,7 +124,7 @@
                 "name": "Is Kaiord free?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. The editor is free to use, requires no account, and the entire platform is MIT-licensed open source."
+                  "text": "Yes. The Kaiord App is free to use and needs no account, and all of Kaiord is MIT-licensed open source."
                 }
               },
               {
@@ -132,7 +132,7 @@
                 "name": "Where is my training data stored?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Locally, in your browser's IndexedDB. Nothing leaves your device unless you enable sync with your own Google Drive."
+                  "text": "In your browser's IndexedDB. It leaves your device only to destinations you set up: your AI provider, the platforms you connect, and your own Google Drive if you turn on sync."
                 }
               },
               {
@@ -140,15 +140,15 @@
                 "name": "Which fitness file formats does Kaiord support?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "FIT, TCX, ZWO, and Garmin Connect (GCN), plus KRD — Kaiord's canonical JSON format that every conversion goes through. Conversions are round-trip safe."
+                  "text": "FIT, TCX, ZWO and Garmin Connect (GCN). Every conversion goes through KRD, the SDK's internal canonical model."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Does Kaiord sync with Garmin and WHOOP?",
+                "name": "Which platforms does Kaiord connect to?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. Browser extensions bridge Garmin Connect, WHOOP, and Train2Go using your own logged-in sessions — no third-party server sits in the middle."
+                  "text": "Garmin Connect, Train2Go, Tanita, TrainingPeaks and WHOOP, each through its own browser extension with your own sign-in. This access is unofficial and can stop without notice. The WHOOP extension is experimental and not in the Chrome Web Store."
                 }
               },
               {
@@ -156,7 +156,7 @@
                 "name": "Can AI assistants work with Kaiord?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. The editor has a built-in AI assistant that edits and plans workouts, and the @kaiord/mcp package — published in the official MCP registry — exposes the same tools to any MCP-compatible assistant, such as Claude or ChatGPT."
+                  "text": "Yes. The Kaiord App has an assistant that creates workouts with your own key, and the @kaiord/mcp server, published in the official MCP registry, offers conversion tools to any MCP-compatible assistant."
                 }
               }
             ]
@@ -165,7 +165,7 @@
             "@type": "SoftwareSourceCode",
             "@id": "https://kaiord.com/#sourcecode",
             "name": "Kaiord",
-            "description": "Open-source TypeScript framework for converting between FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
+            "description": "Kaiord SDK: open-source TypeScript libraries, a CLI and an MCP server that read, validate and convert FIT, TCX, ZWO and Garmin Connect workouts.",
             "url": "https://kaiord.com",
             "codeRepository": "https://github.com/pablo-albaladejo/kaiord",
             "programmingLanguage": "TypeScript",
@@ -179,7 +179,7 @@
             "name": "Kaiord",
             "url": "https://kaiord.com",
             "logo": "https://kaiord.com/apple-touch-icon.png",
-            "description": "Open-source, local-first training platform and TypeScript SDK for FIT, TCX, ZWO, and Garmin Connect fitness data formats.",
+            "description": "Kaiord App, a browser application for training and health data with no account, and Kaiord SDK, TypeScript libraries for FIT, TCX, ZWO and Garmin Connect workouts.",
             "founder": { "@id": "https://kaiord.com/#pablo" },
             "sameAs": [
               "https://github.com/pablo-albaladejo/kaiord",
@@ -201,8 +201,8 @@
           {
             "@type": "SoftwareApplication",
             "@id": "https://kaiord.com/#garmin-bridge",
-            "name": "Kaiord Garmin Bridge",
-            "description": "Chrome extension that syncs Kaiord workouts into Garmin Connect through your own logged-in session — no third-party server in the middle.",
+            "name": "Kaiord for Garmin",
+            "description": "Chrome extension that lets the Kaiord App send workouts to Garmin Connect and read your activities, using your own Garmin sign-in.",
             "applicationCategory": "BrowserApplication",
             "operatingSystem": "Chrome",
             "url": "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe",
@@ -301,7 +301,7 @@
           <a
             href="#data-hub"
             class="text-[var(--text-secondary)] transition-colors hover:text-[var(--text)]"
-            >Data Hub</a
+            >Connections</a
           >
           <a
             href="/docs/"
@@ -323,7 +323,7 @@
           <a
             href="/app/"
             class="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--mkt-cta)] px-4 py-2 text-sm font-semibold text-[var(--mkt-cta-ink)] transition-colors hover:bg-[var(--mkt-brand)]"
-            >Try the Editor</a
+            >Open the App</a
           >
         </div>
 
@@ -337,7 +337,7 @@
           <a
             href="/app/"
             class="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--mkt-cta)] px-4 py-2 text-sm font-semibold text-[var(--mkt-cta-ink)]"
-            >Try the Editor</a
+            >Open the App</a
           >
         </div>
       </nav>
@@ -372,13 +372,13 @@
                 d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"
               />
             </svg>
-            Open-source training platform
+            Open source, MIT licensed
           </span>
           <h1
             class="mx-auto mt-5 max-w-[760px] text-[40px] font-[850] leading-[1.05] tracking-[-0.03em] min-[860px]:text-[56px]"
           >
-            Your training cockpit.<br />
-            <span class="text-[var(--mkt-brand)]">Every fitness format.</span>
+            Your training and health data.<br />
+            <span class="text-[var(--mkt-brand)]">In one place.</span>
           </h1>
           <p
             class="mx-auto mt-5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--text-secondary)] min-[860px]:text-[18.5px]"
@@ -405,13 +405,14 @@
                 >For athletes</span
               >
               <h2 class="mt-4 text-[27px] font-semibold tracking-[-0.02em]">
-                Train with Kaiord
+                Kaiord App
               </h2>
               <p
                 class="mt-2 text-[15.5px] leading-[1.55] text-[var(--text-secondary)]"
               >
-                Plan your week on a calendar, talk to an assistant that acts,
-                sync Garmin &amp; WHOOP. No code, no account, no cloud.
+                Plan your week on a calendar, build workouts, and send them to
+                Garmin Connect. No account, and no data of yours stored by
+                Kaiord.
               </p>
               <div class="my-5 flex flex-1 justify-center">
                 <div class="h-[320px] overflow-hidden">
@@ -419,7 +420,7 @@
                     <!-- Editor mock (compact, no glow) -->
                     <div
                       role="img"
-                      aria-label="Kaiord editor on mobile showing the week at a glance, a WHOOP recovery score, a Sweet Spot workout ready to push to Garmin, and the assistant chat input"
+                      aria-label="The Kaiord App on a phone: the week at a glance, a WHOOP recovery score, a Sweet Spot workout ready to send to Garmin, and the assistant's input"
                       class="relative w-[270px]"
                     >
                       <div
@@ -440,7 +441,7 @@
                 href="/app/"
                 class="inline-flex min-h-[44px] items-center gap-2 self-start rounded-xl bg-[var(--mkt-cta)] px-5 py-3 text-base font-semibold text-[var(--mkt-cta-ink)] transition-colors hover:bg-[var(--mkt-brand)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
               >
-                Open the Editor
+                Open the App
                 <svg
                   class="h-4 w-4"
                   viewBox="0 0 24 24"
@@ -471,13 +472,13 @@
                 >For developers</span
               >
               <h2 class="mt-4 text-[27px] font-semibold tracking-[-0.02em]">
-                Build with the SDK
+                Kaiord SDK
               </h2>
               <p
                 class="mt-2 text-[15.5px] leading-[1.55] text-[var(--text-secondary)]"
               >
-                Convert between FIT, TCX, ZWO &amp; Garmin in 4 lines of
-                TypeScript. Strategy pattern, your adapters.
+                Read, validate and convert FIT, TCX, ZWO and Garmin Connect
+                workouts in TypeScript, through KRD, the SDK's internal model.
               </p>
               <div class="my-5 flex-1">
                 <!-- convert.ts code block -->
@@ -502,8 +503,9 @@
                   <div class="overflow-x-auto">
                     <pre
                       class="p-4 font-mono text-[13px] leading-[1.7]"
-                    ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/fit'</span>
-<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ toText, tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/tcx'</span>
+                    ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, toText }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/core'</span>
+<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/fit'</span>
+<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/tcx'</span>
 
 <span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">krd</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">fromBinary</span><span class="text-[var(--text-dim)]">(file, fitReader)</span>
 <span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">tcx</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">toText</span><span class="text-[var(--text-dim)]">(krd, tcxWriter)</span></code></pre>
@@ -515,7 +517,7 @@
                 >
                   <span
                     class="font-mono text-[13.5px] text-[var(--text-secondary)]"
-                    >npm i @kaiord/core</span
+                    >npm i @kaiord/core @kaiord/fit @kaiord/tcx</span
                   >
                 </div>
               </div>
@@ -557,14 +559,14 @@
             <h2
               class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
-              Your week is the cockpit.
+              Your week, from plan to watch.
             </h2>
             <p
               class="mx-auto mt-3.5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--text-secondary)]"
             >
-              Every session shows its whole story — planned by your coach,
-              adjusted by AI, pushed to your watch, matched against what you
-              actually did.
+              Each workout shows where it came from and where it is: from your
+              coach, made with the assistant, sent to Garmin, done and matched
+              to what you did.
             </p>
           </div>
 
@@ -575,7 +577,7 @@
             <div class="flex shrink-0 justify-center min-[860px]:order-2">
               <div
                 role="img"
-                aria-label="Kaiord editor on mobile showing the week at a glance, a WHOOP recovery score, a Sweet Spot workout ready to push to Garmin, and the assistant chat input"
+                aria-label="The Kaiord App on a phone: the week at a glance, a WHOOP recovery score, a Sweet Spot workout ready to send to Garmin, and the assistant's input"
                 class="relative w-[270px]"
               >
                 <div
@@ -618,12 +620,12 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">Visual workout editor</h3>
+                  <h3 class="text-lg font-semibold">Workout builder</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Drag-and-drop steps, intervals, and targets into structured
-                    sessions. Real-time validation and stats.
+                    Build workouts from steps, repeats and targets, and reorder
+                    them by dragging. Validation and totals update as you edit.
                   </p>
                 </div>
               </div>
@@ -647,13 +649,13 @@
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold">
-                    Session lifecycle at a glance
+                    Where each workout stands
                   </h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Badges trace each workout from plan to execution — coach
-                    origin, AI adjustments, on your watch, done and matched.
+                    Four badges: from your coach, made with the assistant, sent
+                    to Garmin, done and matched.
                   </p>
                 </div>
               </div>
@@ -677,12 +679,12 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">Library &amp; templates</h3>
+                  <h3 class="text-lg font-semibold">Templates</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Save any session as a template, schedule it from the
-                    library, and reuse it all season.
+                    Save a workout as a template and schedule it again on
+                    another day.
                   </p>
                 </div>
               </div>
@@ -701,17 +703,18 @@
             <p
               class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--mkt-brand)]"
             >
-              Conversational-first
+              Assistant
             </p>
             <h2
               class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
-              Don't fill forms. Just say it.
+              Say what you need.
             </h2>
             <p
               class="mx-auto mt-3.5 max-w-[520px] text-[16.5px] leading-[1.55] text-[var(--text-secondary)]"
             >
-              The assistant doesn't just answer — it acts on your data.
+              The assistant reads your plan and your health, and changes nothing
+              until you confirm.
             </p>
           </div>
 
@@ -724,7 +727,7 @@
             >
               <div
                 role="img"
-                aria-label="Chat with the Kaiord assistant: the athlete asks to make tomorrow easier and the assistant reschedules the week and pushes the change to Garmin"
+                aria-label="Chat with the Kaiord assistant: the athlete asks to make tomorrow easier, and the assistant creates an easier workout and sends it to Garmin once the athlete confirms"
                 class="rounded-[22px] border border-[var(--border)] bg-[var(--bg-surface)] p-5"
               >
                 <div aria-hidden="true" class="flex flex-col gap-3">
@@ -736,8 +739,8 @@
                   <div
                     class="max-w-[85%] self-start rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--bg-page)] px-4 py-2.5 text-[14px] leading-[1.5] text-[var(--text-secondary)]"
                   >
-                    Swapped Thursday's Sweet Spot 3×12 for a 45-minute recovery
-                    spin and moved the intervals to Saturday.
+                    Created a 45-minute recovery spin for tomorrow. You
+                    confirmed, so it is on its way to Garmin.
                     <span
                       class="mt-2 flex w-fit items-center gap-1 rounded-full bg-[var(--mkt-ok)]/10 px-2.5 py-1 text-[11.5px] font-semibold text-[var(--text-dim)]"
                     >
@@ -752,7 +755,7 @@
                       >
                         <path d="M5 13l4 4L19 7" />
                       </svg>
-                      Pushed to Garmin
+                      Sent to Garmin
                     </span>
                   </div>
                 </div>
@@ -782,14 +785,13 @@
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold">
-                    Natural-language workouts
+                    Workouts from plain words
                   </h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Describe a session in plain language — Kaiord builds it
-                    around your power, HR, and pace zones with Claude, GPT, or
-                    Gemini.
+                    Describe a workout in your own words; the assistant builds
+                    it on your power, heart-rate and pace zones.
                   </p>
                 </div>
               </div>
@@ -811,14 +813,12 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">
-                    Actions, not just answers
-                  </h3>
+                  <h3 class="text-lg font-semibold">Actions you confirm</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Push workouts to your watch, pull activities, reshuffle your
-                    week — straight from the conversation.
+                    Create a workout, log a health value or a meal, or send a
+                    workout to Garmin: each one waits for your confirmation.
                   </p>
                 </div>
               </div>
@@ -841,12 +841,13 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">Your model, your key</h3>
+                  <h3 class="text-lg font-semibold">Your provider, your key</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Bring your own API key. Conversations stay per-profile in
-                    your browser — and they're searchable.
+                    Bring your own Anthropic, OpenAI or Google key.
+                    Conversations stay in your browser, per profile, and you can
+                    search them.
                   </p>
                 </div>
               </div>
@@ -865,7 +866,7 @@
             <p
               class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
             >
-              Health hub
+              Health
             </p>
             <h2
               class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
@@ -875,9 +876,9 @@
             <p
               class="mx-auto mt-3.5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--text-secondary)]"
             >
-              Recovery, sleep, HRV, weight and activity flow in automatically
-              from WHOOP and Garmin — every data point wears its source. And
-              your lab reports live here too.
+              Recovery, sleep, HRV and weight come in from the platforms you
+              connect, each value marked with its source. Your lab results live
+              here too.
             </p>
           </div>
 
@@ -904,12 +905,13 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">Automatic ingestion</h3>
+                  <h3 class="text-lg font-semibold">From your platforms</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    WHOOP recovery and sleep, Garmin activity, manual entry —
-                    merged with a source badge on every data point.
+                    WHOOP recovery and sleep, Tanita body composition,
+                    TrainingPeaks weight, and what you enter by hand, each with
+                    its source.
                   </p>
                 </div>
               </div>
@@ -940,8 +942,7 @@
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Time-series charts for every health metric — sleep, weight,
-                    HRV, recovery, activity.
+                    Charts over time for sleep, HRV, weight and steps.
                   </p>
                 </div>
               </div>
@@ -970,12 +971,12 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">Lab analytics</h3>
+                  <h3 class="text-lg font-semibold">Lab results</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Log blood panels — 55+ parameters with reference ranges,
-                    out-of-range flags, and evolution charts.
+                    Log blood tests across 56 parameters, with reference ranges,
+                    out-of-range flags and charts over time.
                   </p>
                 </div>
               </div>
@@ -1009,8 +1010,8 @@
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Track intake against expenditure and see your daily energy
-                    balance.
+                    Log what you eat and see each day's energy balance against
+                    what you spent.
                   </p>
                 </div>
               </div>
@@ -1029,19 +1030,19 @@
             <p
               class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
             >
-              The data hub
+              Connections
             </p>
             <h2
               class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
-              You decide where your data flows.
+              You choose which platform decides.
             </h2>
             <p
               class="mx-auto mt-3.5 max-w-[560px] text-[16.5px] leading-[1.55] text-[var(--text-secondary)]"
             >
-              A routing matrix connects every source to every destination —
-              Garmin, WHOOP, Train2Go, manual entry. Pick priorities per data
-              type and see exactly what synced, when, and from where.
+              Each platform you connect brings its own kinds of data. When two
+              report the same kind, you rank them, and the App shows when each
+              one last brought data.
             </p>
           </div>
 
@@ -1052,7 +1053,7 @@
             <div class="w-full max-w-[460px] shrink-0 min-[860px]:w-[420px]">
               <div
                 role="img"
-                aria-label="Data routing matrix: Garmin syncs workouts and activities, WHOOP syncs health, Train2Go delivers coach workouts, and manual entry covers every data type"
+                aria-label="Where data comes from and goes: workouts go to Garmin, activities come from Garmin, health from WHOOP, your coach's workouts from Train2Go, and manual entry covers workouts, activities and health"
                 class="rounded-[22px] border border-[var(--border)] bg-[var(--bg-surface)] p-5"
               >
                 <div
@@ -1149,12 +1150,12 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">One-tap Garmin sync</h3>
+                  <h3 class="text-lg font-semibold">Send to Garmin Connect</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Push planned workouts straight to your watch, and pull
-                    completed activities back — no server in between.
+                    Send workouts to your Garmin Connect calendar on their day,
+                    and read your recent activities back.
                   </p>
                 </div>
               </div>
@@ -1178,13 +1179,13 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">Bridges, not middlemen</h3>
+                  <h3 class="text-lg font-semibold">Your own sign-in</h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Garmin, WHOOP and Train2Go connect through browser
-                    extensions using your own session — no OAuth proxy in the
-                    middle.
+                    Each platform is reached by its own browser extension, with
+                    your own sign-in. This access is unofficial and can stop
+                    without notice.
                   </p>
                 </div>
               </div>
@@ -1208,12 +1209,14 @@
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold">Source priorities</h3>
+                  <h3 class="text-lg font-semibold">
+                    One source per kind of data
+                  </h3>
                   <p
                     class="mt-1.5 text-[14.5px] leading-[1.55] text-[var(--text-secondary)]"
                   >
-                    Several sources for the same data type? Set the order once —
-                    routing is enforced, with visible sync status.
+                    When two platforms report the same day, the one you ranked
+                    first decides.
                   </p>
                 </div>
               </div>
@@ -1231,25 +1234,25 @@
             <p
               class="mb-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--text-dim)]"
             >
-              The hub model
+              Inside the SDK
             </p>
             <h2
               class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
-              One hub. Every format.
+              One model. Four formats.
             </h2>
             <p
               class="mx-auto mt-3.5 max-w-[540px] text-[16.5px] leading-[1.55] text-[var(--text-secondary)]"
             >
-              KRD is the canonical format. Every conversion flows through it —
-              lossless and round-trip safe.
+              Every format adapter converts to and from KRD, the SDK's internal
+              canonical model.
             </p>
           </div>
 
           <!-- Radial diagram -->
           <div
             role="img"
-            aria-label="Format conversion diagram: FIT, TCX, ZWO, and GCN formats all convert bidirectionally through the central KRD hub format"
+            aria-label="Format conversion diagram: FIT, TCX, ZWO and Garmin Connect (GCN) convert to and from KRD, the SDK's internal model"
             class="relative mx-auto h-[300px] w-[300px] min-[860px]:h-[360px] min-[860px]:w-[420px]"
           >
             <!-- connectors -->
@@ -1341,12 +1344,13 @@
             <h2
               class="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] min-[860px]:text-[40px]"
             >
-              Convert fitness data in 4 lines.
+              Convert a workout in TypeScript.
             </h2>
             <p
               class="mx-auto mt-3.5 mb-6 max-w-[520px] text-[16.5px] leading-[1.55] text-[var(--text-secondary)]"
             >
-              Strategy pattern — bring your own adapters. Type-safe end to end.
+              Readers and writers are passed in, so an adapter of your own plugs
+              in the same way.
             </p>
 
             <!-- Interactive install widget -->
@@ -1475,8 +1479,9 @@
             <div class="overflow-x-auto">
               <pre
                 class="p-4 font-mono text-[13px] leading-[1.7]"
-              ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/fit'</span>
-<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ toText, tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/tcx'</span>
+              ><code><span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fromBinary, toText }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/core'</span>
+<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ fitReader }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/fit'</span>
+<span class="text-[var(--mkt-brand)]">import</span> <span class="text-[var(--text)]">{ tcxWriter }</span> <span class="text-[var(--mkt-brand)]">from</span> <span class="text-[var(--text-dim)]">'@kaiord/tcx'</span>
 
 <span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">krd</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">fromBinary</span><span class="text-[var(--text-dim)]">(file, fitReader)</span>
 <span class="text-[var(--mkt-brand)]">const</span> <span class="text-[var(--mkt-brand)]">tcx</span> <span class="text-[var(--text-dim)]">=</span> <span class="text-[var(--mkt-brand)]">await</span> <span class="text-[var(--text)]">toText</span><span class="text-[var(--text-dim)]">(krd, tcxWriter)</span></code></pre>
@@ -1496,8 +1501,7 @@
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
-                  Strict types, Zod schemas, full IntelliSense. No
-                  <code>any</code>.
+                  Strict mode, Zod schemas, and no explicit any.
                 </p>
               </div>
             </div>
@@ -1514,7 +1518,8 @@
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
-                  Clean boundaries. Domain never depends on infrastructure.
+                  The domain never imports an adapter; a script checks it on
+                  every pull request.
                 </p>
               </div>
             </div>
@@ -1525,11 +1530,11 @@
                 &#x2699;
               </div>
               <div>
-                <h3 class="text-[15.5px] font-semibold">Plugin system</h3>
+                <h3 class="text-[15.5px] font-semibold">Your own adapters</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
-                  Strategy pattern: inject your own readers and writers.
+                  Pass in your own readers and writers.
                 </p>
               </div>
             </div>
@@ -1544,7 +1549,7 @@
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
-                  Convert files from your terminal. Pipe-friendly.
+                  Convert and validate files from your terminal.
                 </p>
               </div>
             </div>
@@ -1559,9 +1564,9 @@
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
-                  Convert, validate &amp; inspect via Model Context Protocol —
-                  listed in the official MCP registry. Claude, Cursor &amp;
-                  more.
+                  Convert, validate and inspect workouts from an AI assistant
+                  over the Model Context Protocol. Listed in the official MCP
+                  registry.
                 </p>
               </div>
             </div>
@@ -1569,14 +1574,14 @@
               <div
                 class="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] bg-cyan-500/10 font-mono text-sm font-semibold text-cyan-400"
               >
-                5
+                4
               </div>
               <div>
-                <h3 class="text-[15.5px] font-semibold">5 format adapters</h3>
+                <h3 class="text-[15.5px] font-semibold">4 formats</h3>
                 <p
                   class="mt-1 text-[13.5px] leading-[1.5] text-[var(--text-secondary)]"
                 >
-                  FIT, TCX, ZWO, GCN, KRD. All round-trip safe.
+                  FIT, TCX, ZWO and Garmin Connect, each converted through KRD.
                 </p>
               </div>
             </div>
@@ -1589,7 +1594,7 @@
         class="border-t border-[var(--border)] px-[22px] py-14 min-[860px]:px-12 min-[860px]:py-[88px]"
       >
         <div class="mx-auto max-w-[1180px]">
-          <!-- Zero infrastructure -->
+          <!-- No accounts -->
           <div
             class="relative overflow-hidden rounded-[22px] border border-[color-mix(in_srgb,var(--mkt-brand)_25%,transparent)] bg-[color-mix(in_srgb,var(--mkt-brand)_5%,transparent)] p-7 min-[860px]:p-11"
           >
@@ -1616,21 +1621,22 @@
                     d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"
                   />
                 </svg>
-                Zero infrastructure
+                No accounts
               </span>
               <h2
                 class="mt-4 text-2xl font-semibold tracking-[-0.02em] min-[860px]:text-3xl"
               >
-                No servers. No accounts. No cloud.
+                No accounts. No user data on Kaiord's servers.
               </h2>
               <p
                 class="mt-3 text-base leading-[1.6] text-[var(--text-secondary)]"
               >
-                Everything runs locally or in-browser. Your data lives in
-                IndexedDB on your device; integrations run through browser
-                extensions using your own sessions; the CLI and MCP server run
-                on your machine. Nothing leaves your device unless you turn on
-                sync with your own Google Drive.
+                Your data lives in IndexedDB on your device. It leaves only to
+                destinations you set up: the AI provider whose key you enter,
+                the platforms you connect through their extensions, and your own
+                Google Drive if you turn on sync. Kaiord's own servers only
+                serve this site and convert workouts in transit; they store
+                nothing.
               </p>
               <div class="mt-5 flex flex-wrap gap-2">
                 <span
@@ -1639,7 +1645,7 @@
                 >
                 <span
                   class="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--text-secondary)]"
-                  >Editor (PWA)</span
+                  >Kaiord App</span
                 >
                 <span
                   class="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--text-secondary)]"
@@ -1647,7 +1653,7 @@
                 >
                 <span
                   class="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--text-secondary)]"
-                  >3 browser extensions</span
+                  >Browser extensions</span
                 >
               </div>
             </div>
@@ -1746,7 +1752,7 @@
               >
               <span
                 class="mt-1 block text-sm leading-[1.5] text-[var(--text-secondary)]"
-                >An honest comparison, with a source for every claim.</span
+                >A comparison that cites a source for each point.</span
               >
             </a>
           </div>
@@ -1783,10 +1789,10 @@
               <div
                 class="text-3xl font-semibold tracking-[-0.02em] text-[var(--mkt-brand)]"
               >
-                5
+                4
               </div>
               <div class="mt-1 text-[12.5px] text-[var(--text-dim)]">
-                Format adapters
+                Formats
               </div>
             </div>
             <div
@@ -1795,10 +1801,10 @@
               <div
                 class="text-3xl font-semibold tracking-[-0.02em] text-[var(--text-dim)]"
               >
-                3
+                5
               </div>
               <div class="mt-1 text-[12.5px] text-[var(--text-dim)]">
-                Browser bridges
+                Browser extensions
               </div>
             </div>
             <div
@@ -1822,7 +1828,7 @@
                 0
               </div>
               <div class="mt-1 text-[12.5px] text-[var(--text-dim)]">
-                Backend services
+                Accounts
               </div>
             </div>
           </div>
@@ -1876,12 +1882,12 @@
               <p
                 class="mt-3 text-[15px] leading-[1.6] text-[var(--text-secondary)]"
               >
-                Kaiord is an open-source, local-first training platform: a
-                weekly training calendar, a visual workout editor, an AI
-                assistant that acts on your data, Garmin and WHOOP sync, and
-                health and lab analytics. It also ships a TypeScript SDK, a CLI,
-                and an MCP server for the FIT, TCX, ZWO, and Garmin Connect
-                workout formats.
+                Kaiord gathers your training and health data from the platforms
+                where it is scattered. The Kaiord App is the browser application
+                where you plan your week, build workouts, talk to an assistant
+                and send workouts to Garmin Connect. The Kaiord SDK is the
+                TypeScript libraries, CLI and MCP server that read and convert
+                FIT, TCX, ZWO and Garmin Connect workouts.
               </p>
             </details>
             <details
@@ -1895,8 +1901,8 @@
               <p
                 class="mt-3 text-[15px] leading-[1.6] text-[var(--text-secondary)]"
               >
-                Yes. The editor is free to use, requires no account, and the
-                entire platform is MIT-licensed open source.
+                Yes. The Kaiord App is free to use and needs no account, and all
+                of Kaiord is MIT-licensed open source.
               </p>
             </details>
             <details
@@ -1910,8 +1916,9 @@
               <p
                 class="mt-3 text-[15px] leading-[1.6] text-[var(--text-secondary)]"
               >
-                Locally, in your browser's IndexedDB. Nothing leaves your device
-                unless you enable sync with your own Google Drive.
+                In your browser's IndexedDB. It leaves your device only to
+                destinations you set up: your AI provider, the platforms you
+                connect, and your own Google Drive if you turn on sync.
               </p>
             </details>
             <details
@@ -1925,9 +1932,8 @@
               <p
                 class="mt-3 text-[15px] leading-[1.6] text-[var(--text-secondary)]"
               >
-                FIT, TCX, ZWO, and Garmin Connect (GCN), plus KRD — Kaiord's
-                canonical JSON format that every conversion goes through.
-                Conversions are round-trip safe.
+                FIT, TCX, ZWO and Garmin Connect (GCN). Every conversion goes
+                through KRD, the SDK's internal canonical model.
               </p>
             </details>
             <details
@@ -1936,14 +1942,15 @@
               <summary
                 class="cursor-pointer text-base font-semibold marker:text-[var(--mkt-brand)]"
               >
-                Does Kaiord sync with Garmin and WHOOP?
+                Which platforms does Kaiord connect to?
               </summary>
               <p
                 class="mt-3 text-[15px] leading-[1.6] text-[var(--text-secondary)]"
               >
-                Yes. Browser extensions bridge Garmin Connect, WHOOP, and
-                Train2Go using your own logged-in sessions — no third-party
-                server sits in the middle.
+                Garmin Connect, Train2Go, Tanita, TrainingPeaks and WHOOP, each
+                through its own browser extension with your own sign-in. This
+                access is unofficial and can stop without notice. The WHOOP
+                extension is experimental and not in the Chrome Web Store.
               </p>
             </details>
             <details
@@ -1957,10 +1964,10 @@
               <p
                 class="mt-3 text-[15px] leading-[1.6] text-[var(--text-secondary)]"
               >
-                Yes. The editor has a built-in AI assistant that edits and plans
-                workouts, and the @kaiord/mcp package — published in the
-                official MCP registry — exposes the same tools to any
-                MCP-compatible assistant, such as Claude or ChatGPT.
+                Yes. The Kaiord App has an assistant that creates workouts with
+                your own key, and the @kaiord/mcp server, published in the
+                official MCP registry, offers conversion tools to any
+                MCP-compatible assistant.
               </p>
             </details>
           </div>
@@ -2020,7 +2027,7 @@
               target="_blank"
               rel="noopener noreferrer"
               class="transition-colors hover:text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
-              >Chrome Extension</a
+              >Kaiord for Garmin</a
             >
             <a
               href="/docs/legal/platform-access"

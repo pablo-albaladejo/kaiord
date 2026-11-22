@@ -14,8 +14,20 @@ same register file:
   row and paragraph is one unit. Whitespace is collapsed, so re-wrapping a
   paragraph changes nothing. Front matter and `<!-- comments -->` are not shown
   to a reader and are ignored.
-- JSON locale files (`_locales/*/messages.json`): the `message` of each key
-  the surface names.
+- HTML pages (`*.html`): each run of text between tags, in document order,
+  plus each text alternative (`aria-label`, `alt`, `title`) and each text a
+  search result or a link preview shows (`<title>`, the `description`,
+  `og:*` and `twitter:*` text metas). A `<pre>` code example is one unit.
+  Scripts (JSON-LD included), styles and comments are dropped. A unit holds a
+  letter or a digit: a lone `·` is not a claim, a lone `5` is. Text split by
+  an inline tag is two units (`Built by` and `Pablo Albaladejo`), so keep a
+  claim inside one element.
+- JSON files with `keys`: the text at each key, a string or the `message` of
+  an object (the shape of `_locales/*/messages.json`). A dotted key walks
+  into nested objects (`es.title` in `packages/landing/i18n/meta.json`).
+- JSON files without `keys`: every string value, never the object keys. This
+  is a translation file (`packages/landing/i18n/es.json` maps the English
+  source text to the Spanish a reader sees).
 
 There are no markers to forget: a sentence added to a surface without an entry
 fails the guard, and so does an edit to a registered sentence, because its
@@ -60,7 +72,9 @@ different register files.
 
 `sections` names headings by their exact text (any level); a section runs to
 the next heading of the same or a higher level, and its own sub-headings are
-units. A missing section or key fails; it never registers an empty surface.
+units. `"intro": true` adds the H1 and its lead (everything before the first
+sub-heading), which no section can select without taking the whole file: a
+README's pitch, without its install and API reference. A missing section or key fails; it never registers an empty surface.
 
 ## Proofs
 
@@ -98,16 +112,27 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File                   | Surfaces                                                                                                                                                   |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `garmin.json`          | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)        |
-| `method.json`          | The method note `packages/docs/project/how-kaiord-is-built.md`, which quotes the landing headline as `method.headline` (#1632)                             |
-| `platform-access.json` | The public register of unofficial access per Platform, `packages/docs/legal/platform-access.md` (#1631)                                                    |
-| `tanita.json`          | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)        |
-| `train2go.json`        | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)      |
-| `trainingpeaks.json`   | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628) |
+| File                   | Surfaces                                                                                                                                                                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `garmin.json`          | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                          |
+| `landing.json`         | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630) |
+| `method.json`          | The method note `packages/docs/project/how-kaiord-is-built.md`, which quotes the landing headline as `method.headline` (#1632)                                                                                                               |
+| `platform-access.json` | The public register of unofficial access per Platform, `packages/docs/legal/platform-access.md` (#1631)                                                                                                                                      |
+| `readme.json`          | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README: core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai (#1630)                                                         |
+| `tanita.json`          | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)                                                                                          |
+| `train2go.json`        | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)                                                                                        |
+| `trainingpeaks.json`   | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628)                                                                                   |
 
 The landing headline "Every line — … written by AI agents." is proven by the
-method note: when the landing becomes a surface, its entry for that sentence
-points to the note and to `scripts/check-method-figures.test.mjs`. The note's
-figures are rerun by `pnpm lint:method-figures`.
+method note: the landing's entries for that sentence, `landing.en.ai.headline`
+and `landing.es.ai.headline`, point to the note and to
+`scripts/check-method-figures.test.mjs`. The note's figures are rerun by
+`pnpm lint:method-figures`.
+
+Scoped out of `readme.json`, as reference rather than pitch: install
+commands, usage and API sections, configuration, the per-format "Supported …
+Features" lists and the root README's FIT reference (each is a per-format
+capability claim the round-trip work of #1654 proves format by format), and
+the root README's documentation, tech-stack, layout, CI and contributing
+sections. The JSON-LD in the landing's `<head>` is a script and is not read;
+it repeats the visible FAQ word for word.

@@ -31,7 +31,7 @@ describe("expandIncludes", () => {
     // Assert
     expect(markers).toHaveLength(2);
     expect(expanded).not.toContain("@include");
-    expect(expanded.match(/Push to Garmin/g)).toHaveLength(2);
+    expect(expanded.match(/Send to Garmin(?! Connect)/g)).toHaveLength(2);
   });
 
   it("should indent every partial line to the marker's indentation", () => {

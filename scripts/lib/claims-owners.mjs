@@ -4,7 +4,7 @@
 // policy's per-extension sections) may sit in different register files, so
 // parallel tickets edit different files.
 
-const SURFACE_FIELDS = ["file", "sections", "keys"];
+const SURFACE_FIELDS = ["file", "intro", "sections", "keys"];
 
 export const unknownFields = (what, object, allowed) => {
   const unknown = Object.keys(object).filter((k) => !allowed.includes(k));
@@ -13,10 +13,13 @@ export const unknownFields = (what, object, allowed) => {
     : [];
 };
 
-// The parts of a file a surface claims: its named sections or keys, or the
-// whole file (null) when it names neither.
+// The parts of a file a surface claims: its intro, its named sections or keys,
+// or the whole file (null) when it names none of them.
 const surfaceParts = (surface) => {
-  if (surface.sections) return surface.sections.map((s) => `section "${s}"`);
+  const intro = surface.intro ? ["intro"] : [];
+  if (surface.sections)
+    return [...intro, ...surface.sections.map((s) => `section "${s}"`)];
+  if (surface.intro) return intro;
   if (surface.keys) return surface.keys.map((k) => `key "${k}"`);
   return null;
 };
