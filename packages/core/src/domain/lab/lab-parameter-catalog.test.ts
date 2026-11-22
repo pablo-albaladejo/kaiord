@@ -23,7 +23,7 @@ const VITAMIN_D_FACTOR = 0.4;
 const FACTOR_PRECISION = 4;
 
 describe("LAB_PARAMETER_CATALOG", () => {
-  it("should hold the closed core of ~55 parameters", () => {
+  it("should hold the closed core of 56 parameters", () => {
     // Arrange
     const count = LAB_PARAMETER_CATALOG.length;
 

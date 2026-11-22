@@ -1,13 +1,13 @@
 # @kaiord/train2go-bridge
 
-Chrome extension (Manifest V3) that reads training plans from
-[Train2Go](https://app.train2go.com) via the user's authenticated browser
-session and bridges them to the Kaiord workout editor SPA. It lets the SPA
-import this-week's planned activities without sending Train2Go credentials
-to a Kaiord-hosted server.
+Kaiord for Train2Go: the Chrome extension (Manifest V3) that lets the Kaiord
+App read the plan your coach sets on [Train2Go](https://app.train2go.com),
+through your own signed-in Train2Go session in the browser. It sends only
+`GET` requests, with the browser's own cookies, and never sends a Train2Go
+credential to Kaiord.
 
-This package is `private: true` and is not published to npm. The release
-workflow packages it as a Chrome Web Store artifact.
+This package is `private: true` and is not published to npm. The Chrome Web
+Store workflow (`cws-publish.yml`) packages and uploads it.
 
 ## Purpose
 

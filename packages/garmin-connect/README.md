@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@kaiord/garmin-connect.svg)](https://www.npmjs.com/package/@kaiord/garmin-connect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Garmin Connect API client for the Kaiord health & fitness data framework. Provides authentication, workout listing, and workout pushing via the Garmin Connect API.
+Unofficial Garmin Connect client for the Kaiord SDK: it signs in the way the Garmin Connect web app does and calls the endpoints that app uses, not an API Garmin publishes for this. Provides authentication, workout listing, and sending workouts to Garmin Connect.
 
 ## Installation
 

@@ -1,0 +1,1213 @@
+{
+  "surfaces": [
+    {
+      "file": "README.md",
+      "intro": true,
+      "sections": ["✨ Features", "🔒 Local-first architecture"]
+    },
+    {
+      "file": "packages/core/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/fit/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/tcx/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/zwo/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/garmin/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/garmin-connect/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/cli/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/mcp/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/ai/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/garmin-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/train2go-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/tanita-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/trainingpeaks-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/whoop-bridge/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/workout-spa-editor/README.md",
+      "intro": true
+    },
+    {
+      "file": "packages/landing/README.md",
+      "intro": true
+    }
+  ],
+  "claims": [
+    {
+      "id": "readme.root.kaiord",
+      "text": "Kaiord",
+      "kind": "label"
+    },
+    {
+      "id": "readme.root.kaiord-com-kaiord-app",
+      "text": "**[kaiord.com](https://kaiord.com)** | [Kaiord App](https://kaiord.com/app/) | [npm](https://www.npmjs.com/org/kaiord)",
+      "kind": "label"
+    },
+    {
+      "id": "readme.root.license-mit-typescript-strict",
+      "text": "[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE) [![TypeScript: strict](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)](./tsconfig.base.json)",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        },
+        {
+          "file": "tsconfig.base.json",
+          "contains": "\"strict\": true,\n    \"noUnusedLocals\": true,"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.ci-codecov-npm-version",
+      "text": "[![CI](https://github.com/pablo-albaladejo/kaiord/actions/workflows/ci.yml/badge.svg)](https://github.com/pablo-albaladejo/kaiord/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/pablo-albaladejo/kaiord/branch/main/graph/badge.svg)](https://codecov.io/gh/pablo-albaladejo/kaiord) [![npm version](https://badge.fury.io/js/@kaiord%2Fcore.svg)](https://www.npmjs.com/package/@kaiord/core) [![npm version](https://badge.fury.io/js/@kaiord%2Fcli.svg)](https://www.npmjs.com/package/@kaiord/cli) [![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.pablo--albaladejo%2Fkaiord-8A2BE2)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord) [![Glama MCP server](https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord/badges/score.svg)](https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord) [![Sponsor](https://img.shields.io/badge/Sponsor-❤️-pink?logo=github-sponsors)](https://github.com/sponsors/pablo-albaladejo)",
+      "proof": [
+        {
+          "file": ".github/workflows/ci.yml"
+        },
+        {
+          "file": "codecov.yml"
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/core"
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/cli"
+        },
+        {
+          "file": "packages/mcp/server.json",
+          "contains": "\"name\": \"io.github.pablo-albaladejo/kaiord\","
+        },
+        {
+          "test": "scripts/publish-mcp-registry.test.mjs",
+          "title": "should wait for npm, then login and publish in order"
+        },
+        {
+          "endpoint": "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord"
+        },
+        {
+          "endpoint": "https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord"
+        },
+        {
+          "endpoint": "https://github.com/sponsors/pablo-albaladejo"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.kaiord-gathers-an-athlete",
+      "text": "**Kaiord** gathers an athlete's training and health data from the platforms where it is scattered, and lets them plan, convert and move it between those platforms. It keeps no accounts and stores no user data on its own infrastructure.",
+      "proof": [
+        {
+          "file": "GLOSSARY.md",
+          "contains": "It keeps no accounts and stores no user data on its own infrastructure."
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/fit/src/adapters/garmin-fitsdk.test.ts",
+          "title": "should parse valid FIT file and return KRD"
+        },
+        {
+          "test": "packages/tcx/src/adapters/fast-xml-parser.test.ts",
+          "title": "should convert valid KRD to TCX XML string"
+        },
+        {
+          "test": "packages/zwo/src/browser.test.ts",
+          "title": "should read and write through the lazy default singletons"
+        },
+        {
+          "test": "packages/garmin/src/adapters/converters/garmin-to-krd.converter.test.ts",
+          "title": "should convert running workout to valid KRD"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.it-comes-as-two",
+      "text": "It comes as two products:",
+      "proof": [
+        {
+          "file": "GLOSSARY.md",
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
+        },
+        {
+          "file": "GLOSSARY.md",
+          "contains": "**Kaiord App**:\nThe browser application an athlete uses to see, plan and move their data"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.kaiord-sdk-the-published",
+      "text": "**Kaiord SDK**: the published libraries and tools that read, validate and convert training data. That is `@kaiord/core`, the format adapters (`@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`), the command-line tool `@kaiord/cli`, and the MCP server `@kaiord/mcp`.",
+      "proof": [
+        {
+          "file": "GLOSSARY.md",
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
+        },
+        {
+          "file": "packages/core/package.json",
+          "contains": "\"name\": \"@kaiord/core\","
+        },
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "file": "packages/cli/package.json",
+          "contains": "\"name\": \"@kaiord/cli\","
+        },
+        {
+          "file": "packages/mcp/package.json",
+          "contains": "\"name\": \"@kaiord/mcp\","
+        }
+      ]
+    },
+    {
+      "id": "readme.root.kaiord-app-the-browser",
+      "text": "**[Kaiord App](https://kaiord.com/app/)**: the browser application an athlete uses to see, plan and move their data, together with the browser extensions it relies on.",
+      "proof": [
+        {
+          "file": "GLOSSARY.md",
+          "contains": "**Kaiord App**:\nThe browser application an athlete uses to see, plan and move their data"
+        },
+        {
+          "endpoint": "https://kaiord.com/app/",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "file": "packages/garmin-bridge/manifest.prod.json"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.rule",
+      "text": "---",
+      "kind": "label",
+      "count": 3
+    },
+    {
+      "id": "readme.root.kaiord-app-create-and",
+      "text": "**[Kaiord App](https://kaiord.com/app/)**: create and edit workouts in your browser, with no account.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app/",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.krd-the-sdk-s",
+      "text": "**KRD**, the SDK's internal canonical model: every format adapter converts to and from it. It is JSON, validated by Zod schemas, and not offered to third parties as a standard.",
+      "proof": [
+        {
+          "file": "docs/adr/0001-krd-as-internal-canonical-model.md",
+          "contains": "KRD is an internal model."
+        },
+        {
+          "file": "packages/core/src/domain/lab/lab-parameter.ts",
+          "contains": "import { z } from \"zod\";"
+        },
+        {
+          "test": "packages/core/src/application/from-format.test.ts",
+          "title": "should propagate reader errors"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.conversions-between-fit-tcx",
+      "text": "Conversions between FIT, TCX, ZWO and Garmin Connect (GCN) workouts, each going through KRD.",
+      "proof": [
+        {
+          "test": "packages/fit/src/adapters/garmin-fitsdk.test.ts",
+          "title": "should parse valid FIT file and return KRD"
+        },
+        {
+          "test": "packages/tcx/src/adapters/fast-xml-parser.test.ts",
+          "title": "should convert valid KRD to TCX XML string"
+        },
+        {
+          "test": "packages/zwo/src/browser.test.ts",
+          "title": "should read and write through the lazy default singletons"
+        },
+        {
+          "test": "packages/garmin/src/adapters/converters/garmin-to-krd.converter.test.ts",
+          "title": "should convert running workout to valid KRD"
+        },
+        {
+          "file": "packages/core/src/application/from-format.ts",
+          "contains": "reader: BinaryReader,"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.kaiord-mcp-is-published",
+      "text": "`@kaiord/mcp` is published in the [official MCP registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord) as `io.github.pablo-albaladejo/kaiord`.",
+      "proof": [
+        {
+          "file": "packages/mcp/server.json",
+          "contains": "\"name\": \"io.github.pablo-albaladejo/kaiord\","
+        },
+        {
+          "test": "scripts/publish-mcp-registry.test.mjs",
+          "title": "should wait for npm, then login and publish in order"
+        },
+        {
+          "endpoint": "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.hexagonal-architecture-checked-by",
+      "text": "Hexagonal architecture, checked by a script on every pull request, and a TypeScript API in strict mode.",
+      "proof": [
+        {
+          "test": "scripts/check-architecture.test.mjs",
+          "title": "domain → adapters is rejected"
+        },
+        {
+          "file": "package.json",
+          "contains": "\"lint:architecture\": \"node scripts/check-architecture.mjs\","
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "contains": "on:\n  pull_request:\n    types: [opened, synchronize, reopened]"
+        },
+        {
+          "file": "tsconfig.base.json",
+          "contains": "\"strict\": true,\n    \"noUnusedLocals\": true,"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.kaiord-keeps-no-accounts",
+      "text": "Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp` and `kaiord.com/a2a`, which converts workouts in transit. Neither binds any storage. Your data leaves your device only to destinations you configured:",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "file": "scripts/geo/wrangler.toml",
+          "contains": "name = \"kaiord-agent-edge\""
+        },
+        {
+          "test": "scripts/geo/agent-edge-worker.test.mjs",
+          "title": "should forward other methods to the origin unchanged"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should route exactly kaiord.com/mcp and kaiord.com/a2a, off workers.dev"
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"connect-src\": ["
+        }
+      ]
+    },
+    {
+      "id": "readme.root.storage-is-your-browser",
+      "text": "**Storage is your browser's IndexedDB.** The [Kaiord App](https://kaiord.com/app/) persists every workout, template, profile, and setting in a local Dexie.js / IndexedDB database (`KaiordDatabase` in [`dexie-database.ts`](./packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts)).",
+      "proof": [
+        {
+          "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts",
+          "contains": "export class KaiordDatabase extends Dexie"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.conversions-run-on-your",
+      "text": "**Conversions run on your machine.** In the Kaiord App and in [`@kaiord/cli`](./packages/cli), FIT / TCX / ZWO / GCN ↔ KRD conversion happens in-process ([`import-workout-formats.ts`](./packages/workout-spa-editor/src/utils/import-workout-formats.ts), [`export-workout-formats.ts`](./packages/workout-spa-editor/src/utils/export-workout-formats.ts)).",
+      "proof": [
+        {
+          "file": "packages/workout-spa-editor/src/utils/import-workout-formats.ts",
+          "contains": "import { fromBinary, fromText } from \"@kaiord/core\";"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/utils/export-workout-formats.ts"
+        },
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.the-assistant-calls-the",
+      "text": "**The assistant calls the AI provider whose key you enter.** Anthropic, OpenAI or Google is called directly from your browser, with what the conversation needs, including summaries of your workouts and health data. The App's content security policy lists those three hosts and no other model service.",
+      "proof": [
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "file": "packages/docs/legal/privacy-policy.md",
+          "contains": "summaries of your locally stored history"
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://api.anthropic.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://api.openai.com\","
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://generativelanguage.googleapis.com\","
+        }
+      ]
+    },
+    {
+      "id": "readme.root.each-extension-reaches-one",
+      "text": "**Each extension reaches one platform, with your own session.** Garmin Connect, Train2Go, Tanita, TrainingPeaks and WHOOP each have their own browser extension, which may only reach that platform's hosts. The Garmin extension keeps its Garmin tokens in your browser; they never travel to Kaiord.",
+      "proof": [
+        {
+          "file": "packages/garmin-bridge/manifest.prod.json"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json"
+        },
+        {
+          "file": "packages/tanita-bridge/manifest.prod.json"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json"
+        },
+        {
+          "file": "packages/whoop-bridge/manifest.prod.json"
+        },
+        {
+          "file": "scripts/fixtures/bridge-privacy-surface.json"
+        },
+        {
+          "test": "scripts/check-bridge-privacy-surface.test.mjs",
+          "title": "passes against the checked-in golden"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should keep the minted tokens in chrome.storage.local"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.intervals-icu-if-you",
+      "text": "**intervals.icu, if you save its API key.** The App sends the key to intervals.icu to check it.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/connections/intervals-icu-validate.test.ts",
+          "title": "should send Basic auth with the API_KEY username and report success"
+        },
+        {
+          "file": "scripts/lib/site-csp-policy.mjs",
+          "contains": "\"https://intervals.icu\","
+        }
+      ]
+    },
+    {
+      "id": "readme.root.sync-is-opt-in",
+      "text": "**Sync is opt-in and goes to _your_ cloud.** If you connect Google Drive, the [cloud-sync adapter](./packages/workout-spa-editor/src/adapters/cloud-sync) uses the Google Identity Services `drive.appdata` scope, so synced data lands in your own Drive's app folder.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/cloud-sync/google-oauth-config.test.ts",
+          "title": "should target the non-sensitive appdata scope"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/lib/cloud-sync/sync-connected-pref.test.ts",
+          "title": "should report not connected by default"
+        }
+      ]
+    },
+    {
+      "id": "readme.core.title",
+      "text": "@kaiord/core",
+      "proof": [
+        {
+          "file": "packages/core/package.json",
+          "contains": "\"name\": \"@kaiord/core\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/core"
+        }
+      ]
+    },
+    {
+      "id": "readme.core.badges",
+      "text": "[![npm version](https://img.shields.io/npm/v/@kaiord/core.svg)](https://www.npmjs.com/package/@kaiord/core) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://github.com/pablo-albaladejo/kaiord/workflows/CI/badge.svg)](https://github.com/pablo-albaladejo/kaiord/actions)",
+      "proof": [
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/core"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        },
+        {
+          "file": ".github/workflows/ci.yml"
+        }
+      ]
+    },
+    {
+      "id": "readme.core.core-library-of-the",
+      "text": "Core library of the Kaiord SDK. Contains domain types, schemas, ports, use cases, and the plugin architecture for format adapters.",
+      "proof": [
+        {
+          "file": "GLOSSARY.md",
+          "contains": "**Kaiord SDK**:\nThe published libraries and tools that read, validate and convert training and health data"
+        },
+        {
+          "file": "packages/core/src/index.ts",
+          "contains": "export { fromBinary, fromText } from \"./application/from-format\";"
+        },
+        {
+          "test": "scripts/check-architecture.test.mjs",
+          "title": "domain → adapters is rejected"
+        }
+      ]
+    },
+    {
+      "id": "readme.core.note-as-of-v2",
+      "text": "**Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages. Install only the adapters you need for optimal bundle size.",
+      "proof": [
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "file": "packages/core/package.json",
+          "contains": "\"name\": \"@kaiord/core\","
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.title",
+      "text": "@kaiord/fit",
+      "proof": [
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"name\": \"@kaiord/fit\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/fit"
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.badges",
+      "text": "[![npm version](https://img.shields.io/npm/v/@kaiord/fit.svg)](https://www.npmjs.com/package/@kaiord/fit) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)",
+      "proof": [
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/fit"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.fit-format-adapter-for",
+      "text": "FIT format adapter for the Kaiord SDK. Provides reading and writing of Garmin FIT workout files using the official Garmin FIT SDK.",
+      "proof": [
+        {
+          "test": "packages/fit/src/adapters/garmin-fitsdk.test.ts",
+          "title": "should parse valid FIT file and return KRD"
+        },
+        {
+          "test": "packages/fit/src/adapters/create-encoder.test.ts",
+          "title": "should write byte-identical FIT with a 16 MiB cap and without one"
+        },
+        {
+          "file": "packages/fit/package.json",
+          "contains": "\"@garmin/fitsdk\""
+        }
+      ]
+    },
+    {
+      "id": "readme.tcx.title",
+      "text": "@kaiord/tcx",
+      "proof": [
+        {
+          "file": "packages/tcx/package.json",
+          "contains": "\"name\": \"@kaiord/tcx\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/tcx"
+        }
+      ]
+    },
+    {
+      "id": "readme.tcx.badges",
+      "text": "[![npm version](https://img.shields.io/npm/v/@kaiord/tcx.svg)](https://www.npmjs.com/package/@kaiord/tcx) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)",
+      "proof": [
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/tcx"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "readme.tcx.tcx-format-adapter-for",
+      "text": "TCX format adapter for the Kaiord SDK. Provides reading, writing, and XSD validation of Garmin Training Center XML files.",
+      "proof": [
+        {
+          "test": "packages/tcx/src/adapters/fast-xml-parser.test.ts",
+          "title": "should parse valid TCX XML structure and convert to KRD"
+        },
+        {
+          "test": "packages/tcx/src/adapters/fast-xml-parser.test.ts",
+          "title": "should convert valid KRD to TCX XML string"
+        },
+        {
+          "test": "packages/tcx/src/adapters/fast-xml-parser.test.ts",
+          "title": "should throw TcxValidationError when XSD validation fails"
+        }
+      ]
+    },
+    {
+      "id": "readme.zwo.title",
+      "text": "@kaiord/zwo",
+      "proof": [
+        {
+          "file": "packages/zwo/package.json",
+          "contains": "\"name\": \"@kaiord/zwo\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/zwo"
+        }
+      ]
+    },
+    {
+      "id": "readme.zwo.badges",
+      "text": "[![npm version](https://img.shields.io/npm/v/@kaiord/zwo.svg)](https://www.npmjs.com/package/@kaiord/zwo) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)",
+      "proof": [
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/zwo"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "readme.zwo.zwo-format-adapter-for",
+      "text": "ZWO format adapter for the Kaiord SDK. Provides reading, writing, and validation of Zwift workout XML files.",
+      "proof": [
+        {
+          "test": "packages/zwo/src/browser.test.ts",
+          "title": "should read and write through the lazy default singletons"
+        },
+        {
+          "test": "packages/zwo/src/adapters/fast-xml-parser.test.ts",
+          "title": "should validate XML against XSD before parsing"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin.title",
+      "text": "@kaiord/garmin",
+      "proof": [
+        {
+          "file": "packages/garmin/package.json",
+          "contains": "\"name\": \"@kaiord/garmin\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/garmin"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin.badges",
+      "text": "[![npm version](https://img.shields.io/npm/v/@kaiord/garmin.svg)](https://www.npmjs.com/package/@kaiord/garmin) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)",
+      "proof": [
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/garmin"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin.garmin-connect-api-format",
+      "text": "Garmin Connect API format adapter for the Kaiord SDK. Provides bidirectional conversion between Garmin Connect workout JSON format and KRD.",
+      "proof": [
+        {
+          "test": "packages/garmin/src/adapters/converters/garmin-to-krd.converter.test.ts",
+          "title": "should convert running workout to valid KRD"
+        },
+        {
+          "test": "packages/garmin/src/adapters/converters/krd-to-garmin.converter.test.ts",
+          "title": "should preserve step descriptions through GCN → KRD → GCN"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin-connect.title",
+      "text": "@kaiord/garmin-connect",
+      "proof": [
+        {
+          "file": "packages/garmin-connect/package.json",
+          "contains": "\"name\": \"@kaiord/garmin-connect\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/garmin-connect"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin-connect.badges",
+      "text": "[![npm version](https://img.shields.io/npm/v/@kaiord/garmin-connect.svg)](https://www.npmjs.com/package/@kaiord/garmin-connect) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)",
+      "proof": [
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/garmin-connect"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin-connect.garmin-connect-api-client",
+      "text": "Unofficial Garmin Connect client for the Kaiord SDK: it signs in the way the Garmin Connect web app does and calls the endpoints that app uses, not an API Garmin publishes for this. Provides authentication, workout listing, and sending workouts to Garmin Connect.",
+      "proof": [
+        {
+          "test": "packages/garmin-connect/src/adapters/auth/garmin-auth-provider.test.ts",
+          "title": "should call setTokens after login"
+        },
+        {
+          "test": "packages/garmin-connect/src/adapters/client/garmin-workout-service.test.ts",
+          "title": "should list workouts"
+        },
+        {
+          "test": "packages/garmin-connect/src/adapters/client/garmin-workout-service.test.ts",
+          "title": "should push a workout"
+        },
+        {
+          "file": "packages/garmin-connect/src/adapters/http/urls.ts",
+          "contains": "export const SIGNIN_URL = \"https://sso.garmin.com/sso/signin\";"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "access is unofficial, can break without notice"
+        }
+      ]
+    },
+    {
+      "id": "readme.cli.title",
+      "text": "@kaiord/cli",
+      "proof": [
+        {
+          "file": "packages/cli/package.json",
+          "contains": "\"name\": \"@kaiord/cli\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/cli"
+        }
+      ]
+    },
+    {
+      "id": "readme.cli.command-line-interface-for",
+      "text": "Command-line interface for Kaiord workout file conversion. Convert workout files between FIT, KRD, TCX, and ZWO formats.",
+      "proof": [
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should convert FIT to KRD with WorkoutIndividualSteps.fit fixture"
+        },
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should produce a TCX document when converting KRD to TCX"
+        },
+        {
+          "test": "packages/cli/src/commands/convert-integration.test.ts",
+          "title": "should produce a ZWO document when converting KRD to ZWO"
+        },
+        {
+          "test": "packages/cli/src/commands/validate-integration.test.ts",
+          "title": "should validate FIT file successfully with exit code 0"
+        }
+      ]
+    },
+    {
+      "id": "readme.mcp.title",
+      "text": "@kaiord/mcp",
+      "proof": [
+        {
+          "file": "packages/mcp/package.json",
+          "contains": "\"name\": \"@kaiord/mcp\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/mcp"
+        }
+      ]
+    },
+    {
+      "id": "readme.mcp.model-context-protocol-mcp",
+      "text": "Model Context Protocol (MCP) server for Kaiord. Exposes fitness file conversion, validation, and inspection tools to AI agents (Claude Desktop, Claude Code, etc.).",
+      "proof": [
+        {
+          "test": "packages/mcp/src/tools/kaiord-convert.test.ts",
+          "title": "should convert KRD content to TCX"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-validate.test.ts",
+          "title": "should validate valid KRD content"
+        },
+        {
+          "test": "packages/mcp/src/tools/kaiord-inspect.test.ts",
+          "title": "should return a summary for a KRD file detected by extension"
+        }
+      ]
+    },
+    {
+      "id": "readme.ai.title",
+      "text": "@kaiord/ai",
+      "proof": [
+        {
+          "file": "packages/ai/package.json",
+          "contains": "\"name\": \"@kaiord/ai\","
+        },
+        {
+          "endpoint": "https://www.npmjs.com/package/@kaiord/ai"
+        }
+      ]
+    },
+    {
+      "id": "readme.ai.ai-llm-integration-for",
+      "text": "AI/LLM integration for the Kaiord SDK. Converts natural language workout descriptions into structured KRD workout objects using the Vercel AI SDK.",
+      "proof": [
+        {
+          "test": "packages/ai/src/adapters/text-to-workout.test.ts",
+          "title": "should parse running workout from natural language"
+        },
+        {
+          "file": "packages/ai/src/types.ts",
+          "contains": "import type { LanguageModel } from \"ai\";"
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin-bridge.title",
+      "text": "@kaiord/garmin-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.garmin-bridge.intro",
+      "text": "Kaiord for Garmin: the Chrome extension (Manifest V3) that lets the Kaiord App send workouts to [Garmin Connect](https://connect.garmin.com) and read your activities. It mints an OAuth token from your own Garmin sign-in in the browser, so no password is ever entered or sent to Kaiord, and calls Garmin's API (`connectapi.garmin.com`) directly with `Authorization: Bearer`.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with a token, when Garmin answers"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "runs ticket → preauthorized → exchange and returns both tokens"
+        }
+      ]
+    },
+    {
+      "id": "readme.bridge.private-cws",
+      "text": "This package is `private: true` and is not published to npm. The Chrome Web Store workflow (`cws-publish.yml`) packages and uploads it.",
+      "proof": [
+        {
+          "file": "packages/garmin-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": "packages/train2go-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": ".github/workflows/cws-publish.yml",
+          "contains": "- name: garmin-bridge"
+        },
+        {
+          "file": ".github/workflows/cws-publish.yml",
+          "contains": "- name: train2go-bridge"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "readme.train2go-bridge.title",
+      "text": "@kaiord/train2go-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.train2go-bridge.intro",
+      "text": "Kaiord for Train2Go: the Chrome extension (Manifest V3) that lets the Kaiord App read the plan your coach sets on [Train2Go](https://app.train2go.com), through your own signed-in Train2Go session in the browser. It sends only `GET` requests, with the browser's own cookies, and never sends a Train2Go credential to Kaiord.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the weekly activities on read-week"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ]
+    },
+    {
+      "id": "readme.tanita-bridge.title",
+      "text": "@kaiord/tanita-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.tanita-bridge.intro",
+      "text": "Kaiord for Tanita: the Chrome extension (Manifest V3) that lets the Kaiord App import your weight and body composition from [MyTANITA](https://mytanita.eu). It fetches your own body-composition **CSV export** from your signed-in `mytanita.eu` session, so no password is ever entered or sent to Kaiord, and hands the raw CSV to the Kaiord App, which parses it in your browser.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+        },
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should hand the export to the Kaiord App exactly as MyTANITA sent it"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/tanita/sync-tanita-import.use-case.test.ts",
+          "title": "should persist both extensions of a single KRD when both routes are enabled"
+        },
+        {
+          "test": "packages/tanita-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/tanita-bridge/background.js",
+          "contains": "capabilities: [\"read:body\"],"
+        }
+      ]
+    },
+    {
+      "id": "readme.bridge.private",
+      "text": "This package is `private: true` and is not published to npm.",
+      "proof": [
+        {
+          "file": "packages/tanita-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/package.json",
+          "contains": "\"private\": true,"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "readme.trainingpeaks-bridge.title",
+      "text": "@kaiord/trainingpeaks-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.trainingpeaks-bridge.intro",
+      "text": "Kaiord for TrainingPeaks: the Chrome extension (Manifest V3) that lets the Kaiord App send workouts to your [TrainingPeaks](https://www.trainingpeaks.com) calendar and read your weight. It works from your own signed-in TrainingPeaks session, so no password is ever entered or sent to Kaiord, and the access token it gets is sent only to TrainingPeaks.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should report the sent state after a successful push"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        },
+        {
+          "test": "packages/trainingpeaks/src/adapters/converters/trainingpeaks-metrics-to-krd.converter.test.ts",
+          "title": "should emit one KRD document per entry that carries a weight reading"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        }
+      ]
+    },
+    {
+      "id": "readme.whoop-bridge.title",
+      "text": "@kaiord/whoop-bridge",
+      "kind": "label"
+    },
+    {
+      "id": "readme.whoop-bridge.intro",
+      "text": "The Chrome extension (Manifest V3) that lets the Kaiord App read your [WHOOP](https://www.whoop.com) health data, through your own signed-in `app.whoop.com` session: a main-world content script captures the session bearer the WHOOP web app already attaches to its own `api.prod.whoop.com` requests, and the extension relays a fixed allowlist of read-only internal-API paths back to the Kaiord App. There is no OAuth flow, no developer app, and no password or long-lived credential is ever entered, stored, or transmitted.",
+      "proof": [
+        {
+          "test": "packages/whoop-bridge/test/inject-main.test.js",
+          "title": "should post the extracted bearer to the WHOOP page origin, not a wildcard"
+        },
+        {
+          "test": "packages/whoop-bridge/test/content.test.js",
+          "title": "should reject any non-GET method on an allowlisted path"
+        },
+        {
+          "test": "packages/whoop-bridge/test/content.test.js",
+          "title": "should reject a disallowed path"
+        },
+        {
+          "file": "packages/whoop-bridge/content.js",
+          "contains": "const API_BASE = \"https://api.prod.whoop.com\";"
+        }
+      ]
+    },
+    {
+      "id": "readme.whoop-bridge.private",
+      "text": "This package is `private: true` and is not published to npm. **It is not in the Chrome Web Store**: its listing has not been submitted. Load it unpacked for development and testing (see \"Build entrypoint\" below).",
+      "proof": [
+        {
+          "file": "packages/whoop-bridge/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": "packages/whoop-bridge/store-listing.md",
+          "contains": "**Status: NOT YET SUBMITTED.**"
+        }
+      ]
+    },
+    {
+      "id": "readme.app.title",
+      "text": "@kaiord/workout-spa-editor",
+      "kind": "label"
+    },
+    {
+      "id": "readme.app.intro",
+      "text": "The Kaiord App: the browser application where an athlete plans the week on a calendar, builds workouts, talks to an assistant with their own key, sends workouts to Garmin Connect and follows their health. Built with React and TypeScript; the data stays in the browser's IndexedDB and leaves only to destinations the athlete sets up.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render 7 day columns"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
+          "title": "should render workout cards in correct day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutList/WorkoutList.drag-integration.test.tsx",
+          "title": "should pass onReorderStepsInBlock to repetition blocks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/WorkoutStats/WorkoutStats.test.tsx",
+          "title": "should calculate duration including repetitions"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/StepEditor/StepEditor.test.tsx",
+          "title": "should disable done when there are validation errors"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
+          "title": "should recreate the default profile when a reopen finds none"
+        },
+        {
+          "test": "packages/mcp-worker/src/wrangler-config.test.ts",
+          "title": "should bind no storage"
+        },
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "contradicts keeping no accounts and no stored user data"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should add the browser-access header for Anthropic when browser is true"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create an OpenAI model"
+        },
+        {
+          "test": "packages/ai/src/providers/create-language-model.test.ts",
+          "title": "should create a Google model"
+        },
+        {
+          "test": "scripts/lib/site-csp-policy.test.mjs",
+          "title": "should name in the landing's data statement, English and Spanish, the destination of every remote origin the site allows"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts",
+          "contains": "export class KaiordDatabase extends Dexie"
+        }
+      ]
+    },
+    {
+      "id": "readme.app.live",
+      "text": "**Live**: [https://kaiord.com/app/](https://kaiord.com/app/)",
+      "kind": "label"
+    },
+    {
+      "id": "readme.landing.title",
+      "text": "@kaiord/landing",
+      "kind": "label"
+    },
+    {
+      "id": "readme.landing.intro",
+      "text": "Landing page for [kaiord.com](https://kaiord.com): a single-page static site built with Vite and Tailwind CSS that introduces Kaiord, links to the docs and the Kaiord App, and shows the install command for `@kaiord/core`.",
+      "proof": [
+        {
+          "file": "packages/landing/vite.config.ts",
+          "contains": "import tailwindcss from \"@tailwindcss/vite\";"
+        },
+        {
+          "file": "packages/landing/index.html",
+          "contains": "href=\"/docs/project/how-kaiord-is-built\""
+        },
+        {
+          "file": "packages/landing/index.html",
+          "contains": "npm i @kaiord/core @kaiord/fit @kaiord/tcx"
+        }
+      ]
+    },
+    {
+      "id": "readme.landing.private",
+      "text": "This package is `private: true` and is not published to npm. The site deploy (`deploy-site.yml`) builds it and serves it with the docs and the Kaiord App.",
+      "proof": [
+        {
+          "file": "packages/landing/package.json",
+          "contains": "\"private\": true,"
+        },
+        {
+          "file": ".github/workflows/deploy-site.yml",
+          "contains": "- \"packages/landing/**\""
+        }
+      ]
+    }
+  ]
+}

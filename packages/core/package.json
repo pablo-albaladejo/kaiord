@@ -1,7 +1,7 @@
 {
   "name": "@kaiord/core",
   "version": "10.5.2",
-  "description": "Core library for the Kaiord health & fitness data framework",
+  "description": "Core library for the Kaiord SDK",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

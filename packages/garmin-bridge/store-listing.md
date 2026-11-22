@@ -1,32 +1,44 @@
 # Chrome Web Store Listing
 
+The **Short Description** and **Detailed Description** below are a registered
+claims surface: every paragraph and list item in them is an entry in
+[`claims/garmin.json`](../../claims/garmin.json) with the code or test that
+proves it, and `pnpm lint:claims` fails on any sentence that is not. See
+[`claims/README.md`](../../claims/README.md).
+
 ## Extension Name
 
 Kaiord Garmin Bridge
 
 ## Short Description (132 chars max)
 
-Connects the Kaiord workout editor to Garmin Connect via your browser session
+Lets the Kaiord App send workouts to Garmin Connect and read your activities, using your own Garmin sign-in
 
 ## Detailed Description
 
-Kaiord Garmin Bridge connects the Kaiord workout editor (https://kaiord.com/app) to your Garmin Connect account through your existing browser session. No passwords or API keys needed — the extension uses your active Garmin Connect login.
+Kaiord for Garmin connects the Kaiord App (https://kaiord.com/app) to your Garmin Connect account. You sign in to Garmin Connect in Chrome as usual; the extension never sees your password.
 
-Features:
-• Push structured workouts from the Kaiord editor directly to Garmin Connect
-• Place pushed workouts on their day in your Garmin Connect calendar, and move them when the date changes (the extension adds the new calendar entry first, then removes the old one it placed)
-• List your existing Garmin Connect workouts
-• Session status indicator in the popup
+What it does:
+
+• Sends the workouts you create in the Kaiord App to your Garmin Connect workout library.
+• Places those workouts on their day in your Garmin Connect calendar, and moves them when the date changes. It removes only calendar entries of workouts Kaiord sent, and never deletes a library workout.
+• Reads your 20 most recent Garmin Connect activities for the Kaiord App.
+• Uploads a body-composition measurement (your weight and related values) to Garmin Connect when you send one from the Kaiord App.
+• Shows in its popup whether it can currently read from Garmin Connect.
 
 How it works:
 
-1. Log into Garmin Connect in your browser
-2. Open the Kaiord workout editor
-3. Push workouts to Garmin Connect with one click
+1. Sign in to Garmin Connect in Chrome.
+2. The extension exchanges that sign-in for Garmin access tokens. No password is entered or seen.
+3. Open the Kaiord App and send a workout.
 
-Privacy:
-• No data collection, no analytics, no telemetry
-• No passwords or tokens stored — uses your existing browser session
+Your tokens and your data:
+
+• The Garmin tokens are kept in your browser (chrome.storage.local) and are sent only to Garmin. They never travel to Kaiord.
+• The extension sends requests only to Garmin, and answers only the Kaiord App at https://kaiord.com.
+• No analytics and no tracking. The extension keeps a short log of its own errors in your browser and sends it nowhere.
+• Removing the extension from Chrome deletes everything it stored.
+• Access through your own Garmin sign-in is unofficial: it is not a Garmin partner API, and it can stop working without notice.
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
 ## Metadata
@@ -57,15 +69,21 @@ After initial setup, updates are published automatically via GitHub Actions:
 2. Merge to main — changesets creates a "Version Packages" PR
 3. Merge the Version Packages PR — `cws-publish.yml` detects the version bump and uploads to CWS
 
+The workflow uploads the package only. The Short Description reaches the store
+through `extDescription` in `_locales/en/messages.json`; the Detailed
+Description and the permission justifications are pasted into the CWS
+dashboard by hand.
+
 See `docs/cws-credentials-setup.md` for the one-time CWS API credentials setup.
 
 ## Screenshots
 
-Capture popup screenshots at 640x400 or 1280x800:
+`assets/screenshot-1280x800.png` shows an older popup (a green "Connected to
+Garmin Connect" bar and "List Workouts" / "Check Session" buttons) that no
+longer exists. Replace it with captures of the current popup:
 
-1. **Connected state**: Open Garmin Connect, click extension icon, capture popup showing "Connected to Garmin Connect"
-2. **Disconnected state**: Close all Garmin Connect tabs, click extension icon, capture popup showing "Not connected"
-3. **Workout list**: In connected state, click "List Workouts", capture popup showing workout names
+1. **Connected**: signed in to Garmin Connect, click the extension icon; the popup shows "Connected" and "Open Kaiord editor".
+2. **No access**: signed out of Garmin with no stored token; the popup shows "No access to Garmin Connect" and "Sign in to Garmin Connect".
 
 Steps to capture:
 

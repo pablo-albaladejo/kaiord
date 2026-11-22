@@ -1,5 +1,5 @@
 /**
- * @kaiord/garmin-connect - Garmin Connect API client for Kaiord
+ * @kaiord/garmin-connect - unofficial Garmin Connect client for Kaiord
  */
 
 // Types

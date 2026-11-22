@@ -1,7 +1,7 @@
 {
   "name": "@kaiord/tanita",
   "version": "10.5.2",
-  "description": "MyTANITA export-csv health adapter for the Kaiord health & fitness data framework",
+  "description": "MyTANITA export-csv health adapter for the Kaiord SDK",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

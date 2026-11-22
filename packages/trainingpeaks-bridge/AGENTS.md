@@ -24,15 +24,18 @@ called SPA-side.
 
 ## Key Files
 
-| File                                    | Description                                                                    |
-| --------------------------------------- | ------------------------------------------------------------------------------ |
-| `background.js`                         | Service worker: path allowlist, read throttle, action routing.                 |
-| `tp-auth.js`                            | Bridge-specific dual transport (cookie→token→Bearer). Holds the TP host/paths. |
-| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).                  |
-| `bearer-fetch.js`                       | Vendored identity-free Bearer transport (bridge-core master).                  |
-| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                    |
-| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair.       |
-| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://tpapi.trainingpeaks.com/*`).      |
+| File                                    | Description                                                                                                                                                                                                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `background.js`                         | Service worker: path allowlist, read throttle, action routing.                                                                                                                                                               |
+| `tp-auth.js`                            | Bridge-specific dual transport (cookie→token→Bearer). Holds the TP host/paths.                                                                                                                                               |
+| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).                                                                                                                                                                |
+| `bearer-fetch.js`                       | Vendored identity-free Bearer transport (bridge-core master).                                                                                                                                                                |
+| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                                                                                                                  |
+| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair.                                                                                                                                                     |
+| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://tpapi.trainingpeaks.com/*`).                                                                                                                                                    |
+| `store-listing.md`                      | Store listing copy. Short and Detailed Description are a registered claims surface (`claims/trainingpeaks.json`, `pnpm lint:claims`).                                                                                        |
+| `privacy-justification.md`              | Permission justifications. A registered claims surface: every paragraph needs an entry in `claims/trainingpeaks.json`.                                                                                                       |
+| `test/token-confinement.test.js`        | The token stays in `chrome.storage.local`, no answer to any external action carries it, every request goes to `tpapi.trainingpeaks.com`, and the allowlist has no DELETE/PUT/PATCH. Proof for the listing and policy claims. |
 
 ### Vendored bridge-core files
 
@@ -62,3 +65,7 @@ match `BRIDGE_MANIFEST` in `background.js`.
 - Weight-unit assumption: the type-9 metric value is kilograms (see
   `@kaiord/trainingpeaks` `TRAININGPEAKS_WEIGHT_UNITS`).
 - English-only: `_locales/en/` is the sole locale (hard constraint).
+- Changing what the extension does (a new path, action or stored key) changes
+  the registered texts: rewrite the sentence and its entry in
+  `claims/trainingpeaks.json`, or `pnpm lint:claims` and
+  `check-privacy-policy` fail. `extDescription` is a registered claim too.

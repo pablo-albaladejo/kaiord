@@ -1,9 +1,9 @@
-# Kaiord — Open-Source Health & Fitness Data Framework
+# Kaiord
 
-**[kaiord.com](https://kaiord.com)** | [Editor](https://kaiord.com/app/) | [npm](https://www.npmjs.com/org/kaiord)
+**[kaiord.com](https://kaiord.com)** | [Kaiord App](https://kaiord.com/app/) | [npm](https://www.npmjs.com/org/kaiord)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript: strict](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)](./tsconfig.base.json)
 
 [![CI](https://github.com/pablo-albaladejo/kaiord/actions/workflows/ci.yml/badge.svg)](https://github.com/pablo-albaladejo/kaiord/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/pablo-albaladejo/kaiord/branch/main/graph/badge.svg)](https://codecov.io/gh/pablo-albaladejo/kaiord)
@@ -13,24 +13,26 @@
 [![Glama MCP server](https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord/badges/score.svg)](https://glama.ai/mcp/servers/@pablo-albaladejo/kaiord)
 [![Sponsor](https://img.shields.io/badge/Sponsor-❤️-pink?logo=github-sponsors)](https://github.com/sponsors/pablo-albaladejo)
 
-**Kaiord** is an open-source framework for creating, converting, and managing health & fitness data.
+**Kaiord** gathers an athlete's training and health data from the platforms where it is scattered, and lets them plan, convert and move it between those platforms. It keeps no accounts and stores no user data on its own infrastructure.
 
-It provides:
+It comes as two products:
 
-- `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, and **.krd** (Kaiord) files, plus Garmin Connect API integration.
-- `@kaiord/cli`: a command-line tool to convert, validate, and compare files across formats.
-- `@kaiord/mcp`: an MCP server exposing Kaiord tools to AI agents (Claude Desktop, Claude Code, etc.). Published in the [official MCP registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord) as `io.github.pablo-albaladejo/kaiord`.
-- **[Workout Editor](https://kaiord.com/app/)**: a web application to create and edit workout files visually.
+- **Kaiord SDK**: the published libraries and tools that read, validate and convert training data. That is `@kaiord/core`, the format adapters (`@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`), the command-line tool `@kaiord/cli`, and the MCP server `@kaiord/mcp`.
+- **[Kaiord App](https://kaiord.com/app/)**: the browser application an athlete uses to see, plan and move their data, together with the browser extensions it relies on.
 
 ---
 
 ## ✨ Features
 
-- **[Visual Workout Editor](https://kaiord.com/app/)** - Create and edit workouts in your browser
-- Unified JSON-based format `.krd` (Kaiord Representation Definition)
-- Schema validation (Zod)
-- Round-trip safe conversions between FIT / TCX / ZWO / GCN / KRD
-- Hexagonal architecture & fully typed API
+- **[Kaiord App](https://kaiord.com/app/)**: create and edit workouts in your browser, with no account.
+- **KRD**, the SDK's internal canonical model: every format adapter converts to and from it. It is JSON, validated by Zod schemas, and not offered to third parties as a standard.
+- Conversions between FIT, TCX, ZWO and Garmin Connect (GCN) workouts, each going through KRD.
+- `@kaiord/mcp` is published in the [official MCP registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.pablo-albaladejo/kaiord) as `io.github.pablo-albaladejo/kaiord`.
+- Hexagonal architecture, checked by a script on every pull request, and a TypeScript API in strict mode.
+
+---
+
+## 📋 FIT reference
 
 ### Supported FIT Fields
 
@@ -60,13 +62,14 @@ It provides:
 
 ## 🔒 Local-first architecture
 
-Kaiord is local-first: your data lives on your device, because there is no Kaiord server to send it to. There are no accounts and no backend.
+Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp` and `kaiord.com/a2a`, which converts workouts in transit. Neither binds any storage. Your data leaves your device only to destinations you configured:
 
-- **Storage is your browser's IndexedDB.** The [Workout Editor](https://kaiord.com/app/) persists every workout, template, profile, and setting in a local Dexie.js / IndexedDB database (`new KaiordDatabase()` in [`dexie-database.ts`](./packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts)), and the UI reads it reactively through `useLiveQuery`. Nothing is written to a remote database — see the "Persisted data → Dexie" rule in [State Management](./CLAUDE.md).
-- **Conversions run entirely on your machine.** FIT / TCX / ZWO / GCN ↔ KRD conversion happens in-process — client-side in the editor ([`import-workout-formats.ts`](./packages/workout-spa-editor/src/utils/import-workout-formats.ts), [`export-workout-formats.ts`](./packages/workout-spa-editor/src/utils/export-workout-formats.ts)) or locally in the [`@kaiord/cli`](./packages/cli). Files never leave your device to be converted.
-- **Sync is opt-in and goes to _your_ cloud.** Data leaves the device only if you connect Google Drive. The [cloud-sync adapter](./packages/workout-spa-editor/src/adapters/cloud-sync) uses the Google Identity Services `drive.appdata` scope, so synced data lands in your own Drive's app folder; the access token lives only in memory for the session and is never persisted by Kaiord.
-- **Integrations use _your_ logged-in session — no credential proxy.** Garmin, WHOOP, and Train2Go connect through browser-extension "bridges" ([`garmin-bridge`](./packages/garmin-bridge), [`whoop-bridge`](./packages/whoop-bridge), [`train2go-bridge`](./packages/train2go-bridge)) that piggyback on your existing browser session. Per [`openspec/specs/adapter-contracts/spec.md`](./openspec/specs/adapter-contracts/spec.md), a bridge "SHALL NOT store, transmit, or manage user credentials"; authentication is "delegated entirely to the browser's cookie jar." No third-party server proxies your credentials or your data.
-- **Works offline.** Because all logic and storage are client-side, the editor keeps working with no network connection once loaded.
+- **Storage is your browser's IndexedDB.** The [Kaiord App](https://kaiord.com/app/) persists every workout, template, profile, and setting in a local Dexie.js / IndexedDB database (`KaiordDatabase` in [`dexie-database.ts`](./packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts)).
+- **Conversions run on your machine.** In the Kaiord App and in [`@kaiord/cli`](./packages/cli), FIT / TCX / ZWO / GCN ↔ KRD conversion happens in-process ([`import-workout-formats.ts`](./packages/workout-spa-editor/src/utils/import-workout-formats.ts), [`export-workout-formats.ts`](./packages/workout-spa-editor/src/utils/export-workout-formats.ts)).
+- **The assistant calls the AI provider whose key you enter.** Anthropic, OpenAI or Google is called directly from your browser, with what the conversation needs, including summaries of your workouts and health data. The App's content security policy lists those three hosts and no other model service.
+- **Each extension reaches one platform, with your own session.** Garmin Connect, Train2Go, Tanita, TrainingPeaks and WHOOP each have their own browser extension, which may only reach that platform's hosts. The Garmin extension keeps its Garmin tokens in your browser; they never travel to Kaiord.
+- **intervals.icu, if you save its API key.** The App sends the key to intervals.icu to check it.
+- **Sync is opt-in and goes to _your_ cloud.** If you connect Google Drive, the [cloud-sync adapter](./packages/workout-spa-editor/src/adapters/cloud-sync) uses the Google Identity Services `drive.appdata` scope, so synced data lands in your own Drive's app folder.
 
 ---
 
@@ -90,7 +93,7 @@ Comprehensive documentation is available in the `/docs` directory:
 | --------------- | ---------------------------------- |
 | Core            | TypeScript, tsdown, Zod            |
 | CLI             | yargs                              |
-| Web App         | React, Zustand, Tailwind, Radix UI |
+| Kaiord App      | React, Zustand, Tailwind, Radix UI |
 | Testing         | Vitest, Playwright                 |
 | Package manager | pnpm                               |
 
@@ -108,7 +111,7 @@ kaiord/
 │  ├─ garmin/              → Garmin Connect API adapter
 │  ├─ cli/                 → command-line interface
 │  ├─ mcp/                 → MCP server for AI/LLM integration
-│  └─ workout-spa-editor/  → web application (https://kaiord.com/app/)
+│  └─ workout-spa-editor/  → the Kaiord App (https://kaiord.com/app/)
 ├─ docs/   → documentation
 ├─ LICENSE
 ├─ README.md
@@ -119,11 +122,11 @@ kaiord/
 
 ## 🚀 Quick Start
 
-### Try the Web App
+### Try the Kaiord App
 
-**[Launch Workout Editor →](https://kaiord.com/app/)**
+**[Open the Kaiord App →](https://kaiord.com/app/)**
 
-Create and edit workouts visually in your browser. No installation required.
+Create and edit workouts in your browser. No installation required.
 
 ### Use the Library
 
@@ -144,16 +147,16 @@ For detailed installation instructions and usage examples, see the **[Getting St
 
 Kaiord uses GitHub Actions for continuous integration and deployment:
 
-- **Automated Testing**: Multi-version testing on Node.js 22.x (Maintenance LTS) and 24.x (Active LTS)
+- **Automated Testing**: Tests on Node.js 22 and 24
 - **Code Quality**: ESLint, Prettier, and TypeScript strict mode validation
 - **Release Automation**: Changesets for version management and npm publishing
-- **Security**: Weekly dependency vulnerability audits, CodeQL static analysis, and automated dependency updates
+- **Security**: Dependency vulnerability audits on every pull request, on every push to `main` and weekly, CodeQL static analysis, and automated dependency updates
 
 For complete CI/CD documentation, deployment guides, and npm publishing instructions, see **[Deployment](./docs/deployment.md)**.
 
 ### Mechanical invariant guards
 
-Beyond linting, the repo enforces its architecture and conventions with **60+ purpose-built guard scripts** under [`scripts/`](./scripts/README.md), each with its own co-located test suite. They run on every commit (husky pre-commit) and in CI (`pnpm test:scripts`), and cover, among others:
+Beyond linting, the repo enforces its architecture and conventions with **purpose-built guard scripts** under [`scripts/`](./scripts/README.md), each with its own co-located test suite. They run on every commit (husky pre-commit) and in CI (`pnpm test:scripts`), and cover, among others:
 
 - **Hexagonal architecture** — layer purity, adapter isolation, and the `packages/core/src/` directory allowlist (`check-architecture.mjs`)
 - **Package dependency graph** — every `@kaiord/*` dependency must match the spec table (`check-package-deps.mjs`)

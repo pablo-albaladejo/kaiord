@@ -162,6 +162,27 @@ Audit` job keeps its exact name, reports on every pull request and on push
   (R-SecurityAuditAlwaysReports).
 - `check-security-policy.mjs` — `SECURITY.md` and `/.well-known/security.txt`
   name the same contact and `Expires` stays current (`pnpm lint:security-policy`).
+- `check-claims.mjs` — every unit of text on a surface registered in one of
+  the ten `claims/*.json` files (the five extensions' listings and policy
+  sections, the landing, the App page, the docs intros and `llms.txt`, the
+  READMEs, the method note, the platform-access register) equals a register
+  entry, as many times as it appears; every entry is still on its surface; a
+  label carries no proof, an external claim is read again within 180 days,
+  and any other claim is proven by a running test or pinned code
+  (`pnpm lint:claims`, which prints a proof summary; how to add a surface:
+  `claims/README.md`).
+- `check-method-figures.mjs` — every figure on the method note
+  (`packages/docs/project/how-kaiord-is-built.md`) equals the output of its
+  stated command, and every command names the commit pinned in the note's
+  front matter, so new commits never move a figure. Commands run without a
+  shell, only from an allowlist of git, grep and wc words, with no user or
+  system git config (`pnpm lint:method-figures`; needs full history, as the CI
+  lint job has).
+- `check-retired-terms.mjs` — no registered claims surface (English or
+  Spanish) and no file listed in `scripts/retired-terms.vocab.mjs` uses a term
+  GLOSSARY.md retired or withdrew: framework, cockpit, lossless, zero data
+  loss, round-trip safe, open standard, interchange format, platform for
+  Kaiord itself (`pnpm lint:retired-terms`).
 - `check-site-csp.mjs` — every page of the assembled site (landing, docs,
   App) carries a content security policy first in `<head>` that hashes its
   inline scripts and admits no unsafe script source (run by `e2e-prod-base`

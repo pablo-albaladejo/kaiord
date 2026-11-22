@@ -5,7 +5,7 @@ description: "Install Kaiord, convert your first workout file, and learn the bas
 
 # Getting Started with Kaiord
 
-Kaiord is an open-source framework for health and fitness data. It helps you:
+The Kaiord SDK is a set of open-source TypeScript libraries and a CLI for training and health data. It helps you:
 
 - Convert files between formats (FIT, TCX, ZWO, GCN, KRD)
 - Read and write health and fitness data in your programs

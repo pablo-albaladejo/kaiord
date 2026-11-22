@@ -257,6 +257,43 @@ describe("Tanita popup", () => {
     expect(doc.querySelector(".cta-primary").textContent).toBe("Open MyTANITA");
   });
 
+  it("should ask the extension to check the session each time the popup opens and on Refresh", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      sessionResponse: { ok: true, data: { authenticated: true } },
+    });
+
+    // Act
+    const doc = await open(chromeMock);
+    const onOpen = chromeMock.runtime.sendMessage.mock.calls.length;
+    doc.getElementById("refresh-btn").click();
+    await flushAsync();
+    await flushAsync();
+    const messages = chromeMock.runtime.sendMessage.mock.calls.map(
+      ([message]) => message
+    );
+
+    // Assert
+    expect(onOpen).toBeGreaterThan(0);
+    expect(messages).toHaveLength(onOpen + 1);
+    expect(messages.filter((m) => m.action !== "checkSession")).toEqual([]);
+  });
+
+  it("should record only when the export was last reachable and unreachable", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      sessionResponse: { ok: true, data: { authenticated: true } },
+    });
+
+    // Act
+    await open(chromeMock);
+
+    // Assert
+    expect(chromeMock.__store).toEqual({
+      bridgeHealth: { lastOkAt: MOCK_NOW_MS },
+    });
+  });
+
   it("carries no provider hue in its markup", () => {
     // The five brand-coloured header dots were the last item of the V2
     // repaint inventory; the monogram replaced them.

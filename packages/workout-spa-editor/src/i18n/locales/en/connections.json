@@ -4,6 +4,7 @@
   "noProfile": "Create an athlete to add a connection.",
   "sources": "Sources",
   "sourcesHint": "The Kaiord extension and permissions live inside each connection",
+  "platformAccess": "How Kaiord reaches each platform, and the risk",
   "unsupported": "Not available yet",
   "unsupportedHint": "Connecting these needs a server Kaiord does not run.",
   "summary": {

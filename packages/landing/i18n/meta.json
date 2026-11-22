@@ -1,12 +1,12 @@
 {
   "es": {
     "lang": "es",
-    "title": "Kaiord — Tu centro de mando para entrenar. Todos los formatos deportivos.",
-    "description": "App de entrenamiento libre y local-first: calendario, asistente de IA, sincronización con Garmin y WHOOP, analíticas de salud y SDK para FIT, TCX, ZWO y Garmin.",
+    "title": "Kaiord — Tus datos de entrenamiento y salud, en un solo lugar",
+    "description": "Kaiord App: planifica y envía entrenamientos en tu navegador, sin cuenta. Kaiord SDK: convierte entrenamientos FIT, TCX, ZWO y Garmin Connect en TypeScript.",
     "canonical": "https://kaiord.com/es/",
     "ogUrl": "https://kaiord.com/es/",
     "ogLocale": "es_ES",
-    "ogTitle": "Kaiord — Tu centro de mando para entrenar. Todos los formatos deportivos.",
-    "ogDescription": "App de entrenamiento libre y local-first: calendario, asistente de IA, sincronización con Garmin y WHOOP, analíticas de salud y SDK para FIT, TCX, ZWO y Garmin."
+    "ogTitle": "Kaiord — Tus datos de entrenamiento y salud, en un solo lugar",
+    "ogDescription": "Kaiord App: planifica y envía entrenamientos en tu navegador, sin cuenta. Kaiord SDK: convierte entrenamientos FIT, TCX, ZWO y Garmin Connect en TypeScript."
   }
 }

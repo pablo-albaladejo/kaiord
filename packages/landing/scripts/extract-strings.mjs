@@ -54,6 +54,10 @@ const EXCLUDE = new Set([
   "GitHub",
   "Pablo Albaladejo",
   "Umami",
+  // Product names (GLOSSARY.md), kept in English in every locale
+  "Kaiord App",
+  "Kaiord SDK",
+  "Kaiord for Garmin",
   // Acronyms kept in English
   "AI",
   "TS",
@@ -65,6 +69,7 @@ const EXCLUDE = new Set([
   "yarn",
   "bun",
   "npm i @kaiord/core",
+  "npm i @kaiord/core @kaiord/fit @kaiord/tcx",
   "convert.ts",
   "<!doctype html>",
   // Numeric / jargon stat labels
@@ -151,14 +156,19 @@ export const parseHtml = (html) =>
     },
   });
 
-const main = () => {
-  const html = expandIncludes(readFileSync(SOURCE, "utf8"), landingRoot);
-  const root = parseHtml(html);
+// The sorted, de-duplicated translatable copy of a landing page (includes
+// already expanded): what i18n/en-strings.json must hold.
+export const extractInventory = (html) => {
   const strings = new Set();
-  walkTranslatable(root, ({ value }) => {
+  walkTranslatable(parseHtml(html), ({ value }) => {
     if (isTranslatable(value)) strings.add(value);
   });
-  const inventory = [...strings].sort((a, b) => a.localeCompare(b, "en"));
+  return [...strings].sort((a, b) => a.localeCompare(b, "en"));
+};
+
+const main = () => {
+  const html = expandIncludes(readFileSync(SOURCE, "utf8"), landingRoot);
+  const inventory = extractInventory(html);
   mkdirSync(dirname(OUTPUT), { recursive: true });
   writeFileSync(OUTPUT, `${JSON.stringify(inventory, null, 2)}\n`, "utf8");
   console.log(`extract-strings: ${inventory.length} strings -> ${OUTPUT}`);

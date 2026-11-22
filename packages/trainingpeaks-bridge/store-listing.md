@@ -1,36 +1,46 @@
 # Chrome Web Store Listing
 
+The **Short Description** and **Detailed Description** below are a registered
+claims surface: every paragraph and list item in them is an entry in
+[`claims/trainingpeaks.json`](../../claims/trainingpeaks.json) with the code or
+test that proves it, and `pnpm lint:claims` fails on any sentence that is not.
+See [`claims/README.md`](../../claims/README.md).
+
 ## Extension Name
 
 Kaiord TrainingPeaks Bridge
 
 ## Short Description (132 chars max)
 
-Import your TrainingPeaks body metrics into the Kaiord editor via your own browser session
+Lets the Kaiord App send workouts to your TrainingPeaks calendar and read your weight, using your own TrainingPeaks sign-in
 
 ## Detailed Description
 
-Kaiord TrainingPeaks Bridge connects the Kaiord editor (https://kaiord.com) to
-your TrainingPeaks account through your existing browser session. No passwords or
-API keys needed — the extension mints a short-lived access token from your active
-TrainingPeaks login and reads your own body metrics.
+Kaiord for TrainingPeaks connects the Kaiord App (https://kaiord.com/app) to your TrainingPeaks account. You sign in to TrainingPeaks in Chrome as usual; the extension never sees your password.
 
-Features:
-• Import your body metrics (weight and more) from TrainingPeaks with one click
-• Optionally push a weight measurement back to TrainingPeaks
-• Session status indicator in the popup
+What it does:
+
+• Sends the workouts you create in the Kaiord App to your TrainingPeaks calendar, each on its day.
+• Each send adds a new workout in TrainingPeaks. Sending an unchanged workout again adds nothing; before sending one you changed, the Kaiord App asks you, because TrainingPeaks would then hold two copies. The extension cannot delete anything in TrainingPeaks or change a workout already there.
+• On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow; the Kaiord App shows you that refusal.
+• Reads the metrics you logged in TrainingPeaks over the last 30 days, from which the Kaiord App keeps only your weight.
+• Shows in its popup whether your TrainingPeaks sign-in can be used.
 
 How it works:
 
-1. Log into TrainingPeaks in your browser
-2. Open the Kaiord editor
-3. Import your latest measurements
+1. Sign in to TrainingPeaks in Chrome.
+2. The extension exchanges that sign-in for a short-lived TrainingPeaks access token. No password is entered or seen.
+3. Open the Kaiord App and send a workout to TrainingPeaks.
 
-Privacy:
-• No data collection, no analytics, no telemetry
-• No passwords or cookies stored — the extension exchanges your existing session
-cookie for a short-lived access token, held locally
-• Reads only your metrics; parsing happens in the editor on your device
+Your token and your data:
+
+• The access token is kept in your browser (chrome.storage.local) and is sent only to TrainingPeaks. It never travels to Kaiord.
+• Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it.
+• The extension gives the Kaiord App your TrainingPeaks athlete number, which TrainingPeaks needs to place a workout, and never the token.
+• The extension sends requests only to TrainingPeaks, and answers only the Kaiord App at https://kaiord.com.
+• No analytics and no tracking.
+• Removing the extension from Chrome deletes everything it stored.
+• Access through your own TrainingPeaks sign-in is unofficial: it is not a TrainingPeaks partner API, and it can stop working without notice.
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
 ## Metadata
@@ -41,6 +51,22 @@ cookie for a short-lived access token, held locally
 - **Privacy policy URL**: https://kaiord.com/docs/legal/privacy-policy
 - **Website**: https://kaiord.com
 - **Support URL**: https://github.com/pablo-albaladejo/kaiord/issues
+
+## Submission Checklist (first publish, not done)
+
+This extension has never been published. A maintainer completes these by hand:
+
+- [ ] Create the Chrome Web Store Developer Dashboard listing
+- [ ] Fill in the listing fields from this document
+- [ ] Upload icon (128x128 from `packages/trainingpeaks-bridge/icons/icon128.png`)
+- [ ] Capture and upload at least one screenshot (1280x800 or 640x400) of the current popup; none exists yet
+- [ ] Paste the permission justifications from `privacy-justification.md` into the dashboard
+- [ ] Set privacy policy URL to `https://kaiord.com/docs/legal/privacy-policy`
+- [ ] Submit for review
+
+The Short Description reaches the store through `extDescription` in
+`_locales/en/messages.json`; the Detailed Description and the permission
+justifications are pasted into the dashboard by hand.
 
 ## Automated Publishing (not wired yet)
 

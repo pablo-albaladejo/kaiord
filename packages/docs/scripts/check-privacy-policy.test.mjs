@@ -47,10 +47,10 @@ const POLICY_PATH = join(REPO_ROOT, "packages/docs/legal/privacy-policy.md");
 // alone?" into a statement about the fixture rather than about the policy.
 const POLICY = readFileSync(POLICY_PATH, "utf8");
 
-const GARMIN = "Kaiord Garmin Bridge Extension";
-const TRAIN2GO = "Kaiord Train2Go Bridge Extension";
-const TANITA = "Kaiord Tanita Bridge Extension";
-const TRAININGPEAKS = "Kaiord TrainingPeaks Bridge Extension";
+const GARMIN = "Kaiord for Garmin Extension";
+const TRAIN2GO = "Kaiord for Train2Go Extension";
+const TANITA = "Kaiord for Tanita Extension";
+const TRAININGPEAKS = "Kaiord for TrainingPeaks Extension";
 const WHOOP = "Kaiord WHOOP Bridge Extension";
 
 // Delete a whole `## <heading>` section (heading line included) up to the
@@ -373,8 +373,8 @@ const SOLO_CASES = [
   [TRAIN2GO, "app.train2go.com", "redacted.example", "Train2Go host disclosed"],
   [
     TRAIN2GO,
-    "read on-demand from the Train2Go page DOM",
-    "obtained somehow",
+    'with `credentials: "include"`',
+    "somehow",
     "Train2Go capture path disclosed",
   ],
   [
@@ -391,15 +391,33 @@ const SOLO_CASES = [
   ],
   [
     TRAIN2GO,
-    "does not modify the page, submit forms",
-    "may act on the page",
-    "Train2Go read-only DOM access stated",
+    "injects no script into Train2Go pages",
+    "runs scripts on Train2Go",
+    "Train2Go no-DOM-access stated",
   ],
   [
     TRAIN2GO,
-    "nothing is written to `chrome.storage`",
-    "some things are stored",
-    "Train2Go zero-persistence stated",
+    "does not modify the page, submit forms",
+    "may act on the page",
+    "Train2Go read-only access stated",
+  ],
+  [
+    TRAIN2GO,
+    "keeps in `chrome.storage.local` only what its popup shows",
+    "stores some things",
+    "Train2Go local storage disclosed",
+  ],
+  [
+    TRAIN2GO,
+    "the notes your coach keeps about you",
+    "other things",
+    "Train2Go coach name and notes disclosed",
+  ],
+  [
+    TRAIN2GO,
+    "passes on only your heart-rate",
+    "passes on your heart-rate",
+    "Train2Go profile-page read limited to zones and weight",
   ],
   [
     TRAIN2GO,
@@ -475,6 +493,18 @@ const SOLO_CASES = [
     "reports a little",
     "Tanita no-telemetry stated",
   ],
+  [
+    TANITA,
+    "Checking the Connection Downloads the Export",
+    "Checking the Connection",
+    "Tanita session check downloading the whole export disclosed",
+  ],
+  [
+    TANITA,
+    "keeps in `chrome.storage.local` only",
+    "keeps a few things",
+    "Tanita chrome.storage.local contents disclosed",
+  ],
 
   [
     TRAININGPEAKS,
@@ -520,15 +550,33 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
-    "`read:body` and `write:body` capabilities",
+    "`read:body`, `write:body` and `write:workouts` capabilities",
     "some capabilities",
-    "TrainingPeaks read+write body scopes disclosed",
+    "TrainingPeaks body and workout scopes disclosed",
   ],
   [
     TRAININGPEAKS,
-    "writes a single weight measurement back",
-    "writes things back",
-    "TrainingPeaks write path disclosed",
+    "adds each workout you send from the Kaiord App to your TrainingPeaks calendar",
+    "handles workouts",
+    "TrainingPeaks workout write disclosed",
+  ],
+  [
+    TRAININGPEAKS,
+    "cannot delete anything in TrainingPeaks or change a workout already there",
+    "is careful in TrainingPeaks",
+    "TrainingPeaks no delete or overwrite stated",
+  ],
+  [
+    TRAININGPEAKS,
+    "but the Kaiord App does not send it today",
+    "and the Kaiord App may send it",
+    "TrainingPeaks unused weight write disclosed",
+  ],
+  [
+    TRAININGPEAKS,
+    "the extension asks TrainingPeaks for a new token and stores it",
+    "the extension looks",
+    "TrainingPeaks token minted on every connection check disclosed",
   ],
   [
     TRAININGPEAKS,
@@ -754,17 +802,21 @@ for (const [heading, oneLiner] of GUTTED_CASES) {
 // `^## Kaiord <Name> Bridge Extension$`, this mutation was invisible.
 
 const SECTION_CASES = [
-  { bridge: "Garmin", heading: GARMIN },
-  { bridge: "Train2Go", heading: TRAIN2GO },
-  { bridge: "Tanita", heading: TANITA },
-  { bridge: "TrainingPeaks", heading: TRAININGPEAKS },
-  { bridge: "WHOOP", heading: WHOOP },
+  { bridge: "Garmin", heading: GARMIN, intro: "Kaiord for Garmin" },
+  { bridge: "Train2Go", heading: TRAIN2GO, intro: "Kaiord Train2Go Bridge" },
+  { bridge: "Tanita", heading: TANITA, intro: "Kaiord for Tanita" },
+  {
+    bridge: "TrainingPeaks",
+    heading: TRAININGPEAKS,
+    intro: "Kaiord for TrainingPeaks",
+  },
+  { bridge: "WHOOP", heading: WHOOP, intro: "Kaiord WHOOP Bridge" },
 ];
 
-for (const { bridge, heading } of SECTION_CASES) {
+for (const { bridge, heading, intro } of SECTION_CASES) {
   test(`deleting the ${bridge} section is flagged even though the intro still names it`, () => {
     const src = dropSection(POLICY, heading);
-    assert.match(src, new RegExp(`Kaiord ${bridge} Bridge`));
+    assert.match(src, new RegExp(intro));
 
     const sectionRules = REQUIRED_RULES.filter((r) => r.section === heading);
     assert.ok(sectionRules.length > 0, `no rules anchored to ${heading}`);
@@ -941,7 +993,7 @@ test("gutting the rule set for a section that still exists is flagged", () => {
 
   assert.equal(v.length, 1, v.join(" | "));
   assert.match(v[0], /tanita-bridge Bridge extension covered/);
-  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 11/);
+  assert.match(v[0], /constrained by 0 rule\(s\), down from the recorded 13/);
 });
 
 test("the rule-count floor is shrink-only, not a flat minimum", () => {

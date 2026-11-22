@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/pablo-albaladejo/kaiord/workflows/CI/badge.svg)](https://github.com/pablo-albaladejo/kaiord/actions)
 
-Core library for the Kaiord health & fitness data framework. Contains domain types, schemas, ports, use cases, and the plugin architecture for format adapters.
+Core library of the Kaiord SDK. Contains domain types, schemas, ports, use cases, and the plugin architecture for format adapters.
 
 > **Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages. Install only the adapters you need for optimal bundle size.
 
@@ -154,7 +154,8 @@ const zwo: string = await toText(krd, zwiftWriter);
 Validates that a binary → KRD → binary round-trip preserves data within
 tolerances. It compares sessions, laps, records and structured workout steps
 (step count, repeat blocks, durations, targets and intensity) and returns the
-violations found; an empty array means the round-trip is lossless.
+violations found; an empty array means every compared value stayed within
+the tolerances.
 
 ```typescript
 import {

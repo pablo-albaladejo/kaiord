@@ -1,0 +1,965 @@
+{
+  "surfaces": [
+    {
+      "file": "packages/train2go-bridge/_locales/en/messages.json",
+      "keys": ["extDescription"]
+    },
+    {
+      "file": "packages/train2go-bridge/store-listing.md",
+      "sections": ["Short Description (132 chars max)", "Detailed Description"]
+    },
+    {
+      "file": "packages/train2go-bridge/privacy-justification.md"
+    },
+    {
+      "file": "packages/docs/legal/privacy-policy.md",
+      "sections": ["Kaiord for Train2Go Extension"]
+    }
+  ],
+  "claims": [
+    {
+      "id": "train2go.listing.short",
+      "text": "Lets the Kaiord App read the plan your coach sets on Train2Go, your training zones and your weight, using your own Train2Go sign-in",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the weekly activities on read-week"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "train2go.listing.intro",
+      "text": "Kaiord for Train2Go connects the Kaiord App (https://kaiord.com/app) to your Train2Go account. You sign in to Train2Go in Chrome as usual; the extension never sees your password.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.label-what",
+      "text": "What it does:",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.listing.week",
+      "text": "Reads the week your coach planned on Train2Go: each coaching activity's date, sport, title, duration, workload and completion status.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the weekly activities on read-week"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "contains": "\"read-week\" | \"read-day\""
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.day",
+      "text": "Reads one day in full when the Kaiord App asks: the coach's description of each session, and that day's comments with who wrote them.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should return the parsed day comment thread alongside activities"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should backfill the date param onto every parsed activity from read-day"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "contains": "\"read-week\" | \"read-day\""
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.zones",
+      "text": "Reads your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight from your Train2Go profile page. Nothing else on that page is passed on: gender, birthday, body fat, height, contact details, records and tests are dropped inside the extension.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+        },
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "redacts forbidden fields recursively at any nesting depth"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.who",
+      "text": "Tells the Kaiord App who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should tell the Kaiord App the coach's name and notes on every connection check"
+        },
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "extracts coachName from data.user.coach.name when present"
+        },
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "extracts notes from data.user.user_notes (HTML stripped to text)"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.popup",
+      "text": "Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "renders connected state with athlete card and weekly rollup"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "renders coach notes inside a collapsible <details> when ping carries notes"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "renders disconnected state with Retry when session is inactive"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.read-only",
+      "text": "Only reads. It never changes anything on Train2Go.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should deny disallowed paths, non-GET methods, and injection attempts"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.label-how",
+      "text": "How it works:",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.listing.step-sign-in",
+      "text": "Sign in to Train2Go in Chrome.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.step-request",
+      "text": "When the Kaiord App asks, the extension requests the page from Train2Go and Chrome adds your own Train2Go sign-in cookie. The extension cannot read that cookie.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "endpoint": "https://fetch.spec.whatwg.org/#forbidden-response-header-name"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.step-open",
+      "text": "Open the Kaiord App; it reads your plan through the extension.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "contains": "\"read-week\" | \"read-day\""
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "contains": "{ action: \"read-details\", externalUserId }"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.label-data",
+      "text": "Your session and your data:",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.listing.stored",
+      "text": "The extension stores no password, cookie or token. It keeps in your browser (chrome.storage.local) only what its popup shows: the profile summary the Kaiord App sends, this week's totals, the app's theme preference, when it last could and could not read from Train2Go, and a log of its last 25 errors.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should store only its popup state in chrome.storage.local, never a credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/profile-snapshot.test.js",
+          "title": "writes lastPushReceipt atomically with the snapshot"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "falls back to read-week when cache is stale"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-theme.test.js",
+          "title": "should write a valid preference to chrome.storage.local"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "dates the outage once an earlier open already recorded it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.hosts",
+      "text": "The extension sends requests only to app.train2go.com, and answers only the Kaiord App at https://kaiord.com.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"host_permissions\": [\"https://app.train2go.com/*\"]"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"externally_connectable\": {\n    \"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject foreign origins and other localhost ports"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.app-only",
+      "text": "What it reads goes only to the Kaiord App in your browser; the extension sends nothing to a Kaiord server.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.no-analytics",
+      "text": "No analytics and no tracking. The extension keeps a short log of its own errors in your browser and sends it nowhere.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.uninstall",
+      "text": "Removing the extension from Chrome deletes everything it stored.",
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
+    },
+    {
+      "id": "train2go.listing.unofficial",
+      "text": "Access through your own Train2Go sign-in is unofficial: it is not a Train2Go partner API, and it can stop working without notice.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "access is unofficial, can break without notice"
+        },
+        {
+          "file": "packages/train2go-bridge/session-fetch.js",
+          "contains": "credentials: \"include\""
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.open-source",
+      "text": "Open source: https://github.com/pablo-albaladejo/kaiord",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.title",
+      "text": "Permission Justification",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.intro",
+      "text": "Why Kaiord for Train2Go asks for each permission in `manifest.prod.json`, and the other answers of the Chrome Web Store privacy form. Every paragraph and list item in this file is an entry in `claims/train2go.json`, with the code or test that proves it.",
+      "proof": [
+        {
+          "test": "scripts/check-claims.test.mjs",
+          "title": "should pass on the register and surfaces the repo ships"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.single-purpose-heading",
+      "text": "Single Purpose",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.single-purpose",
+      "text": "Lets the Kaiord App read the athlete's own Train2Go coaching plan, training zones and weight through the athlete's existing Train2Go sign-in.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the weekly activities on read-week"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.permissions",
+      "text": "Permissions",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.storage",
+      "text": "`storage`",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.storage-why",
+      "text": "**Why**: Keep what the popup shows between openings, so it can draw at once.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "uses cached rollup when fresh and skips read-week"
+        },
+        {
+          "file": "packages/train2go-bridge/popup.js",
+          "contains": "chrome.storage.local.get([\"profileSnapshot\", \"lastWeeklyRollup\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.storage-local",
+      "text": "**Stored in `chrome.storage.local`**: the profile summary the Kaiord App sends for the popup's athlete card, with the time and name of the last one received; this week's planned, completed and workload totals, reused for 5 minutes; the app's theme preference (`light`, `dark` or `system`); when the popup last could and could not read from Train2Go; and a log of the last 25 errors the extension handled without failing.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should store only its popup state in chrome.storage.local, never a credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/profile-snapshot.test.js",
+          "title": "writes lastPushReceipt atomically with the snapshot"
+        },
+        {
+          "file": "packages/train2go-bridge/popup.js",
+          "contains": "const ROLLUP_TTL_MS = 5 * 60 * 1_000;"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "uses cached rollup when fresh and skips read-week"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "falls back to read-week when cache is stale"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-theme.test.js",
+          "title": "should write a valid preference to chrome.storage.local"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "dates the outage once an earlier open already recorded it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "clears the outage when the session comes back"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.not-stored",
+      "text": "**Not stored**: no password, cookie or token. The extension holds no credential of any kind.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should store only its popup state in chrome.storage.local, never a credential"
+        },
+        {
+          "file": "packages/train2go-bridge/background.js",
+          "contains": "const AUTH_ENDPOINTS = [];"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.sent",
+      "text": "**Sent anywhere**: nothing stored by the extension is sent to Train2Go or to Kaiord.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.no-other",
+      "text": "No other permission is declared. Opening Train2Go in a new tab from the popup or for the Kaiord App needs none.",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should open the Train2Go dashboard tab on open-train2go"
+        },
+        {
+          "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/tabs"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.hosts",
+      "text": "Host Permissions",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.host",
+      "text": "`https://app.train2go.com/*`",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"host_permissions\": [\"https://app.train2go.com/*\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.host-why",
+      "text": "**Why**: The extension's service worker requests the athlete's own Train2Go data from this host with `credentials: \"include\"`, so Chrome attaches the athlete's Train2Go sign-in cookie. The extension cannot read that cookie: it does not declare the `cookies` permission.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "endpoint": "https://fetch.spec.whatwg.org/#forbidden-response-header-name"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.paths",
+      "text": "**Paths**: only five, all `GET`, checked against an allowlist in the service worker before any request is sent: `/api/v2/profile/ping` (who is signed in), `/api/v2/workplan/weekly/{date}` and `/api/v2/workplan/daily/{date}` (the coaching plan), `/api/v2/workplan/tooltip/activity/{id}`, and `/user/details` (zones and weight). Any other path or method is refused without a request.",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/background.js",
+          "contains": "const ALLOWED = ["
+        },
+        {
+          "file": "packages/train2go-bridge/background.js",
+          "contains": "{ method: \"GET\", pattern: /^\\/user\\/details$/ },"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should deny disallowed paths, non-GET methods, and injection attempts"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should reject a disallowed path without fetching"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.no-content-script",
+      "text": "**No content script on Train2Go**: the extension injects nothing into Train2Go pages and does not read them.",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"],\n      \"js\": [\"bridge-identity.js\", \"kaiord-announce.js\"]"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should run only scripts shipped in its own package, and evaluate no code"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.content-script",
+      "text": "Content Script",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.announce",
+      "text": "`kaiord-announce.js` on `https://kaiord.com/*`",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"],\n      \"js\": [\"bridge-identity.js\", \"kaiord-announce.js\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.announce-why",
+      "text": "**Why**: Tells the Kaiord App that the extension is installed, posting its id, version and capabilities to the page. It reads nothing from the page.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/kaiord-announce.test.js",
+          "title": "should return a well-formed announcement carrying the bridge identity"
+        },
+        {
+          "test": "packages/train2go-bridge/test/kaiord-announce.test.js",
+          "title": "should post the announcement to the current origin"
+        },
+        {
+          "file": "packages/train2go-bridge/kaiord-announce.js",
+          "contains": "window.postMessage(buildAnnouncement(), window.location.origin)"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.ec",
+      "text": "externally_connectable",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.ec-app",
+      "text": "`https://kaiord.com/*`",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"externally_connectable\": {\n    \"matches\": [\"https://kaiord.com/*\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.ec-app-why",
+      "text": "**Why**: Lets the Kaiord App at https://kaiord.com send messages to the extension. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer.",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"externally_connectable\": {\n    \"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject foreign origins and other localhost ports"
+        },
+        {
+          "test": "scripts/check-bridge-exact-origin.test.mjs",
+          "title": "(a) the real bridges answer the exact App origin only"
+        },
+        {
+          "test": "packages/train2go-bridge/test/profile-snapshot.test.js",
+          "title": "should give no answer to profile-snapshot from a disallowed origin"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.ec-dev",
+      "text": "`http://localhost:5173/*`, `http://localhost:5174/*`",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.json",
+          "contains": "\"http://localhost:5174/*\""
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.ec-dev-why",
+      "text": "**Why**: Development builds of the Kaiord App only. They are declared in `manifest.json` and absent from the published `manifest.prod.json`.",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/manifest.json",
+          "contains": "\"http://localhost:5173/*\""
+        },
+        {
+          "test": "scripts/check-bridge-exact-origin.test.mjs",
+          "title": "(f) flags a dev origin in the production manifest"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject localhost dev ports when the loaded manifest is the production one"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.remote-code-heading",
+      "text": "Remote Code",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.remote-code",
+      "text": "No. The extension runs only the scripts in its package; it loads no remote script and evaluates no code.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should run only scripts shipped in its own package, and evaluate no code"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.data",
+      "text": "Data Handling",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.pj.no-password",
+      "text": "**No password or cookie**: The extension never reads, stores, or transmits your Train2Go password, and cannot read your Train2Go cookie.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should store only its popup state in chrome.storage.local, never a credential"
+        },
+        {
+          "endpoint": "https://fetch.spec.whatwg.org/#forbidden-response-header-name"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.read-only",
+      "text": "**Read only**: Every request is a `GET`; the extension never changes anything on Train2Go.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should deny disallowed paths, non-GET methods, and injection attempts"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.train2go-only",
+      "text": "**Requests to Train2Go only**: Every request the extension makes goes to `app.train2go.com`. What it reads is passed only to the Kaiord App in your browser.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.no-analytics",
+      "text": "**No analytics or tracking**: Its error log stays in `chrome.storage.local` and is never sent.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.intro",
+      "text": "Kaiord for Train2Go is the Chrome extension that lets the Kaiord App read your Train2Go coaching plan; its Chrome Web Store name is currently Kaiord Train2Go Bridge. Here is how it handles data:",
+      "proof": [
+        {
+          "file": "packages/train2go-bridge/_locales/en/messages.json",
+          "contains": "\"message\": \"Kaiord Train2Go Bridge\""
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the weekly activities on read-week"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.session",
+      "text": "**Your Own Session**: The extension's service worker requests your data from `app.train2go.com` with `credentials: \"include\"`, so Chrome attaches your own Train2Go session cookie. It does not declare the `cookies` permission and cannot read that cookie. It injects no script into Train2Go pages and does not read them.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "endpoint": "https://fetch.spec.whatwg.org/#forbidden-response-header-name"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"],\n      \"js\": [\"bridge-identity.js\", \"kaiord-announce.js\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.no-credentials",
+      "text": "**No Credentials**: The extension never reads, stores, or transmits your Train2Go password, and stores no cookie or token.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should store only its popup state in chrome.storage.local, never a credential"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "file": "packages/train2go-bridge/background.js",
+          "contains": "const AUTH_ENDPOINTS = [];"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.read-only",
+      "text": "**Read Only**: Every request is a `GET` to one of five allowlisted paths; a request outside them is refused before it is sent. The extension never changes anything on Train2Go: it does not modify the page, submit forms, or write to your account.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        },
+        {
+          "file": "packages/train2go-bridge/background.js",
+          "contains": "const ALLOWED = ["
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should deny disallowed paths, non-GET methods, and injection attempts"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should reject a disallowed path without fetching"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.plan",
+      "text": "**Coaching Plan**: When the Kaiord App asks, the extension reads the week your coach planned (each coaching activity's date, sport, title, duration, workload and completion status) and single days in full (the coach's description of each coaching activity, and that day's comments with who wrote them), and passes them to the Kaiord App.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the weekly activities on read-week"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should return the parsed day comment thread alongside activities"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should backfill the date param onto every parsed activity from read-day"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "contains": "\"read-week\" | \"read-day\""
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.zones",
+      "text": "**Zones and Weight**: When the Kaiord App asks, the extension reads your Train2Go profile page and passes on only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. Gender, birthday, body fat, height, contact details, records and tests on that page are dropped inside the extension.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+        },
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "redacts forbidden fields recursively at any nesting depth"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "contains": "{ action: \"read-details\", externalUserId }"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.check",
+      "text": "**Checking the Connection**: When the Kaiord App or the extension's popup checks the connection, the extension asks Train2Go who is signed in, and passes on your Train2Go user id and name, your coach's name and the notes your coach keeps about you when Train2Go provides them. The popup then also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should tell the Kaiord App the coach's name and notes on every connection check"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should return the live session on ping"
+        },
+        {
+          "file": "packages/train2go-bridge/popup.js",
+          "contains": "const ROLLUP_TTL_MS = 5 * 60 * 1_000;"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "uses cached rollup when fresh and skips read-week"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "falls back to read-week when cache is stale"
+        },
+        {
+          "file": "packages/train2go-bridge/popup.js",
+          "contains": "loadPopupData({ bypassTtl: true })"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.stored",
+      "text": "**Stored in Your Browser**: The extension keeps in `chrome.storage.local` only what its popup shows: the profile summary the Kaiord App sends for its popup, this week's totals, the app's theme preference, when it last could and could not read from Train2Go, and a log of the last 25 errors it handled without failing. Removing the extension from Chrome deletes them.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should store only its popup state in chrome.storage.local, never a credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/profile-snapshot.test.js",
+          "title": "writes lastPushReceipt atomically with the snapshot"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "falls back to read-week when cache is stale"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-theme.test.js",
+          "title": "should write a valid preference to chrome.storage.local"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "dates the outage once an earlier open already recorded it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        },
+        {
+          "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/storage"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.no-third-party",
+      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `app.train2go.com` (to read your data) and the Kaiord App (to pass it on), and sends nothing to a Kaiord-operated server.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"externally_connectable\": {\n    \"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.no-telemetry",
+      "text": "**No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind. Its error log stays in your browser and is never sent.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 # @kaiord/landing
 
-Marketing landing page for [kaiord.com](https://kaiord.com) — a single-page
-static site built with Vite and Tailwind CSS that introduces Kaiord, links to
-the docs and editor, and shows the install command for `@kaiord/core`.
+Landing page for [kaiord.com](https://kaiord.com): a single-page static site
+built with Vite and Tailwind CSS that introduces Kaiord, links to the docs and
+the Kaiord App, and shows the install command for `@kaiord/core`.
 
-This package is `private: true` and is not published to npm. It is built by
-the release workflow and deployed alongside the rest of the public surface.
+This package is `private: true` and is not published to npm. The site deploy
+(`deploy-site.yml`) builds it and serves it with the docs and the Kaiord App.
 
 ## Purpose
 

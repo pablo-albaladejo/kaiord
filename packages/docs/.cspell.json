@@ -81,7 +81,11 @@
     "ivgc",
     "gcwb",
     "gcsend",
-    "gcapp"
+    "gcapp",
+    "kiro",
+    "valueonly",
+    "coderabbit",
+    "umami"
   ],
   "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"],
   "import": ["@cspell/dict-es-es/cspell-ext.json"],
@@ -95,7 +99,7 @@
   "patterns": [
     {
       "name": "es-crosslink",
-      "pattern": "/_Leer en español: .*_/"
+      "pattern": "/_Leer en espa\u00f1ol: .*_/"
     },
     {
       "name": "footnote-label",

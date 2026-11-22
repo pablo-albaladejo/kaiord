@@ -213,7 +213,7 @@ const config = {
   },
   title: "Kaiord",
   description:
-    "Open-source health & fitness data framework for TypeScript. Convert FIT, TCX, ZWO, and GCN formats.",
+    "Kaiord SDK: open-source TypeScript libraries, a CLI and an MCP server that read, validate and convert FIT, TCX, ZWO and Garmin Connect workouts.",
   base: DOCS_BASE,
 
   // AGENTS.md files are agent-facing documentation, not part of the public
@@ -282,6 +282,10 @@ const config = {
           { text: "Architecture", link: "/guide/architecture" },
           { text: "Testing", link: "/guide/testing" },
           { text: "Contributing", link: "/guide/contributing" },
+          {
+            text: "How Kaiord is built",
+            link: "/project/how-kaiord-is-built",
+          },
         ],
       },
       {
@@ -332,7 +336,10 @@ const config = {
       {
         text: "Legal",
         collapsed: true,
-        items: [{ text: "Privacy Policy", link: "/legal/privacy-policy" }],
+        items: [
+          { text: "Privacy Policy", link: "/legal/privacy-policy" },
+          { text: "Platform Access", link: "/legal/platform-access" },
+        ],
       },
     ],
 

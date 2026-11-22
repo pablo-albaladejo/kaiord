@@ -1,0 +1,986 @@
+{
+  "surfaces": [
+    {
+      "file": "packages/trainingpeaks-bridge/_locales/en/messages.json",
+      "keys": ["extDescription"]
+    },
+    {
+      "file": "packages/trainingpeaks-bridge/store-listing.md",
+      "sections": ["Short Description (132 chars max)", "Detailed Description"]
+    },
+    {
+      "file": "packages/trainingpeaks-bridge/privacy-justification.md"
+    },
+    {
+      "file": "packages/docs/legal/privacy-policy.md",
+      "sections": ["Kaiord for TrainingPeaks Extension"]
+    }
+  ],
+  "claims": [
+    {
+      "id": "trainingpeaks.description",
+      "text": "Lets the Kaiord App send workouts to your TrainingPeaks calendar and read your weight, using your own TrainingPeaks sign-in",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should report the sent state after a successful push"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        },
+        {
+          "test": "packages/trainingpeaks/src/adapters/converters/trainingpeaks-metrics-to-krd.converter.test.ts",
+          "title": "should emit one KRD document per entry that carries a weight reading"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "trainingpeaks.listing.intro",
+      "text": "Kaiord for TrainingPeaks connects the Kaiord App (https://kaiord.com/app) to your TrainingPeaks account. You sign in to TrainingPeaks in Chrome as usual; the extension never sees your password.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.label-what",
+      "text": "What it does:",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.listing.sends",
+      "text": "Sends the workouts you create in the Kaiord App to your TrainingPeaks calendar, each on its day.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
+          "title": "should place the workout on the day it has in Kaiord"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should report the sent state after a successful push"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.adds-only",
+      "text": "Each send adds a new workout in TrainingPeaks. Sending an unchanged workout again adds nothing; before sending one you changed, the Kaiord App asks you, because TrainingPeaks would then hold two copies. The extension cannot delete anything in TrainingPeaks or change a workout already there.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push-guard.test.tsx",
+          "title": "should keep an unchanged re-send as the existing skip"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push-guard.test.tsx",
+          "title": "should block an edited workout on the same day as changed"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should send a copy only after the athlete confirms it"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should allow no DELETE, PUT or PATCH request to TrainingPeaks"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.basic",
+      "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow; the Kaiord App shows you that refusal.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should explain a 402 as a planning-horizon limit, not a payload error"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/background.js",
+          "contains": "one day ahead on a Basic account"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should surface the planning-horizon refusal instead of going quiet"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.weight",
+      "text": "Reads the metrics you logged in TrainingPeaks over the last 30 days, from which the Kaiord App keeps only your weight.",
+      "proof": [
+        {
+          "file": "packages/workout-spa-editor/src/hooks/bridge-import/run-trainingpeaks-import.ts",
+          "contains": "const WINDOW_DAYS = 30;"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        },
+        {
+          "test": "packages/trainingpeaks/src/adapters/converters/trainingpeaks-metrics-to-krd.converter.test.ts",
+          "title": "should emit one KRD document per entry that carries a weight reading"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.popup",
+      "text": "Shows in its popup whether your TrainingPeaks sign-in can be used.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/popup.test.js",
+          "title": "renders connected state with feed chips and the editor as primary CTA"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/popup.test.js",
+          "title": "renders not-signed-in state with the value prop and TrainingPeaks as primary CTA"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.label-how",
+      "text": "How it works:",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.listing.step-sign-in",
+      "text": "Sign in to TrainingPeaks in Chrome.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.step-token",
+      "text": "The extension exchanges that sign-in for a short-lived TrainingPeaks access token. No password is entered or seen.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.step-send",
+      "text": "Open the Kaiord App and send a workout to TrainingPeaks.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should offer the send action before anything is pushed"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.label-data",
+      "text": "Your token and your data:",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.listing.token-local",
+      "text": "The access token is kept in your browser (chrome.storage.local) and is sent only to TrainingPeaks. It never travels to Kaiord.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks refuses the token"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.mint-on-check",
+      "text": "Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/tp-auth.js",
+          "contains": "const record = await exchangeAndSave(fetchImpl);"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/popup.js",
+          "contains": "sendMessage({ action: \"checkSession\" })"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.athlete-number",
+      "text": "The extension gives the Kaiord App your TrainingPeaks athlete number, which TrainingPeaks needs to place a workout, and never the token.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should report authenticated and the athlete id on a live session"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should never expose the access token in the probe response"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
+          "title": "should use the live session's athlete id, not one from storage"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.hosts",
+      "text": "The extension sends requests only to TrainingPeaks, and answers only the Kaiord App at https://kaiord.com.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-envelope.test.js",
+          "title": "should reject foreign origins and other localhost ports"
+        },
+        {
+          "test": "scripts/check-bridge-exact-origin.test.mjs",
+          "title": "(a) the real bridges answer the exact App origin only"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.no-analytics",
+      "text": "No analytics and no tracking.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.uninstall",
+      "text": "Removing the extension from Chrome deletes everything it stored.",
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
+    },
+    {
+      "id": "trainingpeaks.listing.unofficial",
+      "text": "Access through your own TrainingPeaks sign-in is unofficial: it is not a TrainingPeaks partner API, and it can stop working without notice.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "access is unofficial, can break without notice"
+        },
+        {
+          "file": "openspec/changes/add-trainingpeaks-workout-push/design.md",
+          "contains": "The API is undocumented and can change without notice."
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.open-source",
+      "text": "Open source: https://github.com/pablo-albaladejo/kaiord",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.title",
+      "text": "Permission Justification",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.pj.intro",
+      "text": "Why Kaiord for TrainingPeaks asks for each permission in `manifest.prod.json`, for Chrome Web Store review. Every paragraph and list item in this file is an entry in `claims/trainingpeaks.json`, with the code or test that proves it.",
+      "proof": [
+        {
+          "test": "scripts/check-claims.test.mjs",
+          "title": "should pass on the register and surfaces the repo ships"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.permissions",
+      "text": "Permissions",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.pj.storage",
+      "text": "`storage`",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.storage-why",
+      "text": "**Why**: Keep the TrainingPeaks access token across service-worker restarts, so a request made before the token expires reuses it.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should reuse a cached token without re-exchanging the cookie"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.storage-local",
+      "text": "**Stored in `chrome.storage.local`**: the access token, the time it expires and your TrainingPeaks athlete number; the app's theme preference (`light`, `dark` or `system`); and when the popup last could and could not use your TrainingPeaks sign-in.",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/tp-auth.js",
+          "contains": "athleteId: payload?.athleteId ?? null,"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/tp-auth.js",
+          "contains": "const TOKEN_KEY = \"tpAccessToken\";"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should store a valid preference sent from a Kaiord origin"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-popup-health.test.js",
+          "title": "should persist the folded record"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.storage-sent",
+      "text": "**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App, which needs it to place a workout. Nothing else the extension stores leaves your browser.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should report authenticated and the athlete id on a live session"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.hosts",
+      "text": "Host Permissions",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.pj.tpapi",
+      "text": "`https://tpapi.trainingpeaks.com/*`",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"host_permissions\": [\"https://tpapi.trainingpeaks.com/*\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.tpapi-why",
+      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker, and a request outside these four is refused before it is sent:",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should allow the cookie-only token endpoint"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should allow the metrics range read and single-metric write"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should block a disallowed path before hitting the network"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should deny method mismatches and look-alike paths"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.token-path",
+      "text": "`GET /users/v3/token` exchanges your TrainingPeaks sign-in for an access token. It carries your TrainingPeaks cookie (`credentials: \"include\"`) and no `Authorization` header; Chrome attaches the cookie, and the extension cannot read it.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "matches every URL the token exchange actually requests"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.metrics-path",
+      "text": "`GET /metrics/v3/athletes/{id}/consolidatedtimedmetrics/{start}/{end}` reads the metrics you logged over a date range. The answer may include metrics other than weight, such as pulse, sleep or steps; the extension passes it to the Kaiord App unread, and the Kaiord App keeps only your weight.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/background.js",
+          "contains": "Returns the raw JSON"
+        },
+        {
+          "file": "packages/trainingpeaks/src/adapters/schemas/trainingpeaks-metric.schema.ts",
+          "contains": "TRAININGPEAKS_METRIC_TYPE.sleep,"
+        },
+        {
+          "test": "packages/trainingpeaks/src/adapters/converters/trainingpeaks-metrics-to-krd.converter.test.ts",
+          "title": "should emit one KRD document per entry that carries a weight reading"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.workouts-path",
+      "text": "`POST /fitness/v6/athletes/{id}/workouts` adds a workout you send from the Kaiord App to your TrainingPeaks calendar.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should report the sent state after a successful push"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.weight-path",
+      "text": "`POST /metrics/v3/athletes/{id}/consolidatedtimedmetric` adds one weight measurement. The extension accepts this request, but the Kaiord App does not send it today.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/integrations/bridge-supported-routes.ts",
+          "contains": "\"trainingpeaks-bridge\": [\"workout\"],"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.bearer",
+      "text": "Every request except the token exchange carries the token as `Authorization: Bearer` and no cookies (`credentials: \"omit\"`).",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.content-script",
+      "text": "Content Script",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.pj.announce",
+      "text": "`kaiord-announce.js` on `https://kaiord.com/*`",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"js\": [\"bridge-identity.js\", \"kaiord-announce.js\"]"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.announce-why",
+      "text": "**Why**: Tells the Kaiord App that the extension is installed, posting its id, version and capabilities to the page. It reads nothing from the page. No content script runs on TrainingPeaks pages.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/kaiord-announce.test.js",
+          "title": "should return a well-formed announcement carrying the bridge identity"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"js\": [\"bridge-identity.js\", \"kaiord-announce.js\"]"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.ec",
+      "text": "externally_connectable",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.pj.ec-app",
+      "text": "`https://kaiord.com/*`",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.ec-app-why",
+      "text": "**Why**: Lets the Kaiord App at https://kaiord.com send messages to the extension. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer.",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-envelope.test.js",
+          "title": "should reject foreign origins and other localhost ports"
+        },
+        {
+          "test": "scripts/check-bridge-exact-origin.test.mjs",
+          "title": "(a) the real bridges answer the exact App origin only"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.ec-dev",
+      "text": "`http://localhost:5173/*`, `http://localhost:5174/*`",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.json",
+          "contains": "\"http://localhost:5174/*\""
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.ec-dev-why",
+      "text": "**Why**: Development builds of the Kaiord App only. They are declared in `manifest.json` and absent from the published `manifest.prod.json`.",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.json",
+          "contains": "\"http://localhost:5174/*\""
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-envelope.test.js",
+          "title": "should reject localhost dev ports when the loaded manifest is the production one"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.data",
+      "text": "Data Handling",
+      "kind": "label"
+    },
+    {
+      "id": "trainingpeaks.pj.no-password",
+      "text": "**No password**: The extension never reads, stores, or transmits your TrainingPeaks password. It reuses the browser's existing TrainingPeaks sign-in to get a token.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.no-cookie",
+      "text": "**No cookie access**: The extension does not declare the `cookies` permission and cannot read your TrainingPeaks cookie; Chrome attaches it to the token request and to no other.",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.token-local",
+      "text": "**Token stays in your browser**: The token lives in `chrome.storage.local` and is sent only to TrainingPeaks. No answer the extension gives the Kaiord App contains it.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks refuses the token"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.requests",
+      "text": "**Requests to TrainingPeaks only**: Every request the extension makes goes to `tpapi.trainingpeaks.com`. Opening TrainingPeaks from the popup only opens `https://app.trainingpeaks.com/` in a new tab.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should route open-trainingpeaks to a new tab"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/popup.js",
+          "contains": "const OPEN_TRAININGPEAKS_URL = \"https://app.trainingpeaks.com/\";"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.no-analytics",
+      "text": "**No analytics or tracking**: The extension has no analytics, error reporting or telemetry.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.intro",
+      "text": "Kaiord for TrainingPeaks is the Chrome extension that connects the Kaiord App to TrainingPeaks; its Chrome Web Store name is Kaiord TrainingPeaks Bridge. Here is how it handles data:",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/_locales/en/messages.json",
+          "contains": "\"message\": \"Kaiord TrainingPeaks Bridge\""
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.no-password",
+      "text": "**No Password**: The extension never asks for, reads, stores, or transmits your TrainingPeaks password. It reuses the session you already established by signing in to TrainingPeaks in your browser.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.token",
+      "text": "**Access Token**: The extension exchanges your session cookie for a short-lived access token with a single cookie-only request, `GET https://tpapi.trainingpeaks.com/users/v3/token` (`credentials:\"include\"`, no `Authorization` header). The `Production_tpAuth` session cookie is a domain-wide `.trainingpeaks.com` cookie, so the browser attaches it to that request; the extension cannot read its value, because it does not declare the `cookies` permission. The extension keeps the token, the time it expires and your TrainingPeaks athlete number in `chrome.storage.local`.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/tp-auth.test.js",
+          "title": "sends the cookie, and no Authorization header, to that endpoint"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/tp-auth.js",
+          "contains": "`Production_tpAuth` session cookie (a domain-wide `.trainingpeaks.com`"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/tp-auth.js",
+          "contains": "athleteId: payload?.athleteId ?? null,"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.token-local",
+      "text": "**Token Stays in Your Browser**: The token is sent only to TrainingPeaks, as a Bearer credential, and never travels to Kaiord: no answer the extension gives the Kaiord App contains it. Removing the extension from Chrome deletes it.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks refuses the token"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/storage"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.check",
+      "text": "**Checking the Connection**: Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it, and gives the Kaiord App your athlete number, which it needs to place a workout.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/tp-auth.js",
+          "contains": "const record = await exchangeAndSave(fetchImpl);"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should report authenticated and the athlete id on a live session"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should never expose the access token in the probe response"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.workouts",
+      "text": "**Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again adds a second copy, and the Kaiord App asks you first.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
+          "title": "should place the workout on the day it has in Kaiord"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should allow no DELETE, PUT or PATCH request to TrainingPeaks"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push-guard.test.tsx",
+          "title": "should keep an unchanged re-send as the existing skip"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push-guard.test.tsx",
+          "title": "should block an edited workout on the same day as changed"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should send a copy only after the athlete confirms it"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.metrics",
+      "text": "**Body Metrics**: When the Kaiord App asks, the extension reads the metrics you logged in TrainingPeaks over a date range from `https://tpapi.trainingpeaks.com/metrics/v3/...` (the Kaiord App asks for the last 30 days) and passes the answer to the Kaiord App unread. The answer may include metrics other than weight, such as pulse, sleep or steps; the Kaiord App keeps only your weight. The extension also accepts a request to add one weight measurement, but the Kaiord App does not send it today. These are the `read:body`, `write:body` and `write:workouts` capabilities.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/hooks/bridge-import/run-trainingpeaks-import.ts",
+          "contains": "const WINDOW_DAYS = 30;"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/background.js",
+          "contains": "Returns the raw JSON"
+        },
+        {
+          "file": "packages/trainingpeaks/src/adapters/schemas/trainingpeaks-metric.schema.ts",
+          "contains": "TRAININGPEAKS_METRIC_TYPE.sleep,"
+        },
+        {
+          "test": "packages/trainingpeaks/src/adapters/converters/trainingpeaks-metrics-to-krd.converter.test.ts",
+          "title": "should emit one KRD document per entry that carries a weight reading"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/integrations/bridge-supported-routes.ts",
+          "contains": "\"trainingpeaks-bridge\": [\"workout\"],"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should have the pinned trainingpeaks-bridge shape"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.no-page",
+      "text": "**No TrainingPeaks Page Access**: The extension injects no content script on TrainingPeaks pages. Its service worker makes every request to a fixed list of `tpapi.trainingpeaks.com` paths; it does not modify any page or submit forms. Opening TrainingPeaks from the popup only opens `https://app.trainingpeaks.com/` in a new tab.",
+      "proof": [
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should allow the cookie-only token endpoint"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should allow the metrics range read and single-metric write"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should block a disallowed path before hitting the network"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should route open-trainingpeaks to a new tab"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/popup.js",
+          "contains": "const OPEN_TRAININGPEAKS_URL = \"https://app.trainingpeaks.com/\";"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.stored",
+      "text": "**Stored in Your Browser**: Besides the token, the extension keeps in `chrome.storage.local` the app's theme preference and when the popup last could and could not use your TrainingPeaks sign-in.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should store a valid preference sent from a Kaiord origin"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-popup-health.test.js",
+          "title": "should persist the folded record"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.no-third-party",
+      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to pass it your metrics and to receive the workouts you send).",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.no-telemetry",
+      "text": "**No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
+        }
+      ]
+    }
+  ]
+}
