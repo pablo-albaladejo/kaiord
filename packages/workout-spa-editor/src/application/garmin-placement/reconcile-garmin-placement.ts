@@ -6,6 +6,7 @@
  * proven absent goes back to its `previous` and the claim runs again too.
  */
 import { claimPlacement, type Uncertain } from "./placement-claim";
+import { confirmUnchanged } from "./placement-confirm-unchanged";
 import type { PlacementRun } from "./placement-deps";
 import { finishPlacement } from "./placement-finish";
 import { postAttempt } from "./placement-post-flow";
@@ -41,6 +42,12 @@ export const reconcileGarminPlacement = async (
   for (let round = 0; round < MAX_ROUNDS; round++) {
     const claim = await claimPlacement(run);
     if (claim.kind === "absent") return recordDeleted();
+    if (
+      claim.kind === "unchanged" &&
+      !adopted &&
+      (await confirmUnchanged(run, claim.placed)) === "gone"
+    )
+      continue;
     if (claim.kind === "unchanged")
       return finishPlacement(
         run,
@@ -49,7 +56,13 @@ export const reconcileGarminPlacement = async (
         leftBehind
       );
     if (claim.kind === "claimed")
-      return postAttempt(run, claim.attempt, claim.preClaim, leftBehind);
+      return postAttempt(
+        run,
+        claim.attempt,
+        claim.preClaim,
+        leftBehind,
+        claim.written
+      );
     if (claim.kind === "uncertain") {
       const t5 = await resolveUncertain(run, claim.placement);
       if (t5 === "undecided") return stillUncertain(run, claim.placement);

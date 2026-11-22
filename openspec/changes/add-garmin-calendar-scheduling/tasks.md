@@ -170,3 +170,22 @@
       tokens, and test entities removed afterwards. Steps, evidence and
       cleanup: `manual-e2e.md`.
 - [x] 9.5 `pnpm -r test && pnpm -r build && pnpm lint` pass (AC-48).
+
+## 10. Safe writes (#1633)
+
+- [x] 10.1 A fake Garmin that holds state at the message contract
+      (`test-utils/fake-garmin-platform.ts`) and the Connector wired to it
+      as the App runs it (`test-utils/message-seam-placement.ts`); the
+      characterisation in `hooks/garmin-safe-writes.test.ts`: send twice,
+      a crash between created and recorded, hand deletions, a lost record,
+      a move, an edit and foreign entries.
+- [x] 10.2 Read before a `schedule` POST: adopt an unknown entry of the
+      workout at the date, or restore the claim and answer
+      `calendar-unreadable` (en and es copy) when the read fails.
+- [x] 10.3 Read before `unchanged`: a `Placed` proven absent twice is
+      written `gone`, cleared and placed again in the same send.
+- [x] 10.4 A `library-missing` placement re-runs Phase 1 once and places the
+      re-created library workout in the same send.
+- [x] 10.5 Update the spec delta, the call-count tests, the N3 scenario and
+      the 404 scenario; the merge laws and the placement-world simulator
+      still pass.

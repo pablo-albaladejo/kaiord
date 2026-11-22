@@ -141,7 +141,7 @@ test.describe("Garmin calendar placement", () => {
     await releaseGarminStub(page);
     await expect
       .poll(() => garminStubActions(page), { timeout: PLACEMENT_TIMEOUT_MS })
-      .toEqual(["push", "schedule"]);
+      .toEqual(["push", "calendar-find", "schedule"]);
     expect((await readGarminStubState(page))?.entries).toHaveLength(1);
   });
 

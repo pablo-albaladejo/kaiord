@@ -7,6 +7,7 @@ import type { DefiniteReason } from "./classify-bridge-write";
 import { commitPlacement, placedFrom } from "./placement-commit";
 import type { PlacementRun } from "./placement-deps";
 import { finishPlacement, unconfirmedLeftBehind } from "./placement-finish";
+import { readBeforePost } from "./placement-read-before-post";
 import { resolveAttempt } from "./placement-resolve-step";
 import {
   failed,
@@ -46,8 +47,17 @@ export const postAttempt = async (
   run: PlacementRun,
   claimed: Attempt,
   preClaim: Row | undefined,
-  leftBehind: readonly string[]
+  leftBehind: readonly string[],
+  claimWritten?: Row
 ): Promise<PlacementResult> => {
+  const settled = await readBeforePost(
+    run,
+    claimed,
+    claimWritten,
+    preClaim,
+    leftBehind
+  );
+  if (settled) return settled;
   const posted = await postSchedule(run, claimed);
   if (posted.kind === "absent") return recordDeleted();
   if (posted.kind === "busy") return failed("busy", true);

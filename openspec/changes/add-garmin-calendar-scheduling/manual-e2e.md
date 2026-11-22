@@ -163,6 +163,25 @@ Evidence:
 - A screenshot of each tab.
 - The entry count for the workout's date.
 
+### 7. Your own entries stay, and a hand deletion is put back once (#1633)
+
+1. In Garmin Connect, create a workout of your own with the same name as one
+   of the test week's workouts and schedule it on the same day. Note its id.
+2. Delete, in Garmin Connect, the calendar entry Kaiord created for another
+   test workout (not the library workout).
+3. In Kaiord, choose **Send week** twice.
+
+Expected:
+
+- The workout whose entry you deleted is on its day again, once; the second
+  **Send week** adds nothing.
+- Your own workout and its entry are still there, unchanged.
+
+Evidence:
+
+- The entry count per date after each send, and your workout's id before
+  and after.
+
 ## Cleanup
 
 1. In Garmin Connect, delete the calendar entries created for the test week,
@@ -170,8 +189,9 @@ Evidence:
 2. Delete the library workouts the test created, if they are not wanted.
 3. Delete the stray **Run Workout (13)** library workout if it is still
    there.
-4. Put the service worker's throttling back to **No throttling**.
-5. Record each deleted entry's date and Garmin id with the evidence.
+4. Delete the workout of your own from check 7.
+5. Put the service worker's throttling back to **No throttling**.
+6. Record each deleted entry's date and Garmin id with the evidence.
 
 ## Evidence template for `tasks.md` (under 9.4)
 
@@ -186,6 +206,8 @@ Manual E2E, <YYYY-MM-DD>, week of <Monday YYYY-MM-DD>, bridge <version>:
    <old: 0, new: 1>; notice shown: yes/no. A6: holds / false.
 5. Offline retry: message <which>; entries <old: 0, new: 1>.
 6. Two tabs: second tab busy: yes/no; entries <1>.
+7. Own entries: <own id> unchanged: yes/no; re-placed entry count <1>
+   after each send.
    Cleanup: <deleted entries and library workouts: date + id>.
    "Run Workout (13)": deleted / not present.
 ```
