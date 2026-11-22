@@ -28,6 +28,8 @@
 | `profile-snapshot.js`                   | Validates + persists user profile state (ID, name, zones)                                                                                                                                                 |
 | `popup.html` / `popup.js` / `popup.css` | Toolbar popup on the shared bridge shell: status block, capability chips, athlete card, weekly rollup with completion bar, coach notes, fix-first CTA pair. Its session probe re-wakes the service worker |
 | `vitest.config.js`                      | Vitest configuration; jsdom environment for DOM mocking                                                                                                                                                   |
+| `store-listing.md`                      | Chrome Web Store listing copy. Its Short and Detailed Description are a registered claims surface (`claims/train2go.json`, `pnpm lint:claims`)                                                            |
+| `privacy-justification.md`              | Single purpose, permission justifications and remote-code answer for the CWS privacy form. A registered claims surface: every paragraph needs an entry in `claims/train2go.json`                          |
 
 ## Manifest Entries (MV3)
 
@@ -75,6 +77,7 @@ Unit tests for all extension scripts (vitest + jsdom + chrome-API mock).
 
 - `chrome-mock.js` — Mock `chrome.*` APIs for testing
 - `*.test.js` — Test files for `background.js`, `parser.js`, `popup.js`, `kaiord-announce.js`, `profile-snapshot.js`
+- `request-confinement.test.js` — Every request goes to `app.train2go.com` with the browser's cookies and no other credential, only `GET`; `chrome.storage.local` holds popup state only; each connection check hands the App the coach's name and notes; only packaged scripts run. Proof for the listing and policy claims.
 - `fixtures/` — HTML and JSON test data
 
 See [TESTING.md](./TESTING.md) for integration / smoke test procedures on real Train2Go sessions.

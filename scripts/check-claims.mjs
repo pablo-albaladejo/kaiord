@@ -3,7 +3,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { proofProblems } from "./lib/claims-proof.mjs";
+import { duplicateProblems } from "./lib/claims-owners.mjs";
+import { claimProblems } from "./lib/claims-proof.mjs";
 import { surfaceUnits } from "./lib/claims-units.mjs";
 import { failIfAny } from "./lib/guard-failure.mjs";
 
@@ -35,82 +36,6 @@ const surfaceProblems = (surfaces, read) => {
     surface.units = units;
   }
   return { problems, seen };
-};
-
-const CLAIM_FIELDS = ["id", "text", "proof"];
-const SURFACE_FIELDS = ["file", "sections", "keys"];
-
-const unknownFields = (what, object, allowed) => {
-  const unknown = Object.keys(object).filter((k) => !allowed.includes(k));
-  return unknown.length > 0
-    ? [`${what} has unknown field(s) ${unknown.join(", ")}`]
-    : [];
-};
-
-const claimProblems = (claim, read) => {
-  const where = `claim "${claim.id}"`;
-  const shape = unknownFields(where, claim, CLAIM_FIELDS);
-  if (!Array.isArray(claim.proof) || claim.proof.length === 0)
-    return [...shape, `${where}: has no proof`];
-  return [
-    ...shape,
-    ...claim.proof.flatMap((proof) =>
-      proofProblems(proof, read).map((p) => `${where}: ${p}`)
-    ),
-  ];
-};
-
-// The parts of a file a surface claims: its named sections or keys, or the
-// whole file (null) when it names neither.
-const surfaceParts = (surface) => {
-  if (surface.sections) return surface.sections.map((s) => `section "${s}"`);
-  if (surface.keys) return surface.keys.map((k) => `key "${k}"`);
-  return null;
-};
-
-// A whole file, or one section or key of it, belongs to one register file
-// only, so two files can never disagree about the same text. Different
-// sections of one file (the privacy policy's per-extension sections) may sit
-// in different register files, so parallel tickets edit different files.
-const surfaceOwnerProblem = (name, surface, owners) => {
-  const owned = owners.surfaces.get(surface.file) ?? { parts: new Map() };
-  owners.surfaces.set(surface.file, owned);
-  const taken = `${name}: surface ${surface.file}`;
-  const first = owned.whole ?? owned.parts.values().next().value;
-  const parts = surfaceParts(surface);
-  if (owned.whole || (parts === null && first))
-    return [`${taken} is already registered in ${first}`];
-  if (parts === null) {
-    owned.whole = name;
-    return [];
-  }
-  return parts.flatMap((part) => {
-    const owner = owned.parts.get(part);
-    if (owner) return [`${taken} (${part}) is already registered in ${owner}`];
-    owned.parts.set(part, name);
-    return [];
-  });
-};
-
-const duplicateProblems = (name, data, owners) => {
-  const problems = [];
-  for (const surface of data.surfaces) {
-    problems.push(
-      ...unknownFields(
-        `${name}: surface ${surface.file}`,
-        surface,
-        SURFACE_FIELDS
-      ),
-      ...surfaceOwnerProblem(name, surface, owners)
-    );
-  }
-  for (const { id } of data.claims) {
-    const owner = owners.ids.get(id);
-    if (owner)
-      problems.push(`${name}: claim id "${id}" is already used in ${owner}`);
-    else owners.ids.set(id, name);
-  }
-  return problems;
 };
 
 export function checkClaims({ registers, read }) {

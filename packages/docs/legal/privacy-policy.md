@@ -54,15 +54,19 @@ Kaiord for Garmin is the Chrome extension that connects the Kaiord App to Garmin
 - **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with Garmin (`sso.garmin.com`, `connectapi.garmin.com`) and the Kaiord App (to exchange workout and body-composition data); `connect.garmin.com` is only opened in a tab for you to sign in.
 - **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind. Its error log stays in your browser and is never sent.
 
-## Kaiord Train2Go Bridge Extension
+## Kaiord for Train2Go Extension
 
-The Kaiord Train2Go Bridge Chrome extension imports coaching plans from Train2Go pages you are already viewing into the Kaiord workout editor. Here is how it handles data:
+Kaiord for Train2Go is the Chrome extension that lets the Kaiord App read your Train2Go coaching plan; its Chrome Web Store name is currently Kaiord Train2Go Bridge. Here is how it handles data:
 
-- **No Data Persistence**: The extension stores no data locally. Training plan data is read on-demand from the Train2Go page DOM and delivered directly to the Kaiord workout editor (running in your browser). Nothing is transmitted to a Kaiord server; nothing is written to `chrome.storage`, cookies, or disk.
-- **No Credentials**: The extension never reads, stores, or transmits your Train2Go password or authentication tokens. It does not declare the `cookies` permission and cannot access your session cookie directly. It only reads the training plan rendered on the page.
-- **Read-Only DOM Access**: The content script only reads the coaching plan from pages on `app.train2go.com`. It does not modify the page, submit forms, or make authenticated API calls on your behalf.
-- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `app.train2go.com` (via its content script) and allowed Kaiord origins (to deliver imported workouts to the editor).
-- **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind.
+- **Your Own Session**: The extension's service worker requests your data from `app.train2go.com` with `credentials: "include"`, so Chrome attaches your own Train2Go session cookie. It does not declare the `cookies` permission and cannot read that cookie. It injects no script into Train2Go pages and does not read them.
+- **No Credentials**: The extension never reads, stores, or transmits your Train2Go password, and stores no cookie or token.
+- **Read Only**: Every request is a `GET` to one of five allowlisted paths; a request outside them is refused before it is sent. The extension never changes anything on Train2Go: it does not modify the page, submit forms, or write to your account.
+- **Coaching Plan**: When the Kaiord App asks, the extension reads the week your coach planned (each session's date, sport, title, duration, workload and completion status) and single days in full (the coach's description of each session, and that day's comments with who wrote them), and passes them to the Kaiord App.
+- **Zones and Weight**: When the Kaiord App asks, the extension reads your Train2Go profile page and passes on only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. Gender, birthday, body fat, height, contact details, records and tests on that page are dropped inside the extension.
+- **Checking the Connection**: When the Kaiord App or the extension's popup checks the connection, the extension asks Train2Go who is signed in, and passes on your Train2Go user id and name, your coach's name and the notes your coach keeps about you when Train2Go provides them. The popup then also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.
+- **Stored in Your Browser**: The extension keeps in `chrome.storage.local` only what its popup shows: the profile summary the Kaiord App sends for its popup, this week's totals, the app's theme preference, when it last could and could not read from Train2Go, and a log of the last 25 errors it handled without failing. Removing the extension from Chrome deletes them.
+- **No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `app.train2go.com` (to read your data) and the Kaiord App (to pass it on), and sends nothing to a Kaiord-operated server.
+- **No Telemetry**: The extension does not include any analytics, error reporting, or telemetry of any kind. Its error log stays in your browser and is never sent.
 
 ## Kaiord for Tanita Extension
 
@@ -107,7 +111,7 @@ The extensions only communicate with the following domains:
 - `https://sso.garmin.com/*` — Kaiord for Garmin exchanges your existing Garmin sign-in session for a short-lived service ticket (no password is entered or seen)
 - `https://connectapi.garmin.com/*` — Kaiord for Garmin exchanges the ticket for an OAuth token and makes the workout/activity API calls with it
 - `https://connect.garmin.com/*` — where you sign in to Garmin Connect; Kaiord for Garmin opens this page in a tab and sends it no request
-- `https://app.train2go.com/*` — Train2Go Bridge content script (runs on that domain) reads the coaching plan from the page
+- `https://app.train2go.com/*` — Kaiord for Train2Go's service worker reads your coaching plan, zones and weight with your existing session cookie; it runs no script on that domain
 - `https://mytanita.eu/*` — Kaiord for Tanita downloads your MyTANITA export using your existing session cookie
 - `https://tpapi.trainingpeaks.com/*` — TrainingPeaks Bridge service worker exchanges your existing session cookie for a short-lived access token and reads/writes your body metrics with it
 - `https://app.whoop.com/*` — WHOOP Bridge's main-world and isolated content scripts capture the session bearer, both from the headers of the WHOOP web app's own requests and from the access token WHOOP's sign-in library stores in this origin's `localStorage`; the bridge also opens this page when you sign in
