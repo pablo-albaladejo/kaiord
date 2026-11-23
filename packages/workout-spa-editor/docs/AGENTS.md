@@ -16,7 +16,6 @@ Package-local documentation. The monorepo's general docs (architecture, KRD form
 - `modal-system.md` — confirmation-modal patterns and Radix-Dialog conventions.
 - `performance-optimization.md` — perf-baseline + measure-test guide (paired with `src/__perf__/`).
 - `repetition-block-deletion.md` — design + UX rationale for the block-deletion flow.
-- `kiroween-theme.md` — empty placeholder (legacy / WIP).
 
 ## Subdirectories
 
