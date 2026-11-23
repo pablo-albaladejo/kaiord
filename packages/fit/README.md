@@ -66,8 +66,7 @@ Creates a FIT file writer using the Garmin FIT SDK.
   workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm,
   cadence ±1 rpm, pace ±0.01 m/s), for every duration, target,
   intensity and sport.
-- Fields FIT cannot carry: the step numbers after a repeat block, which FIT
-  renumbers; notes beyond the 254 bytes of a FIT string.
+- Fields FIT cannot carry: the step numbers after a repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT string; the name of a repeat step; a custom heart-rate range given as a share of maximum, which is read as bpm.
 
 ## License
 
