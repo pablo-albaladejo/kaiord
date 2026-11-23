@@ -7,12 +7,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
-import type { LastSyncedZonesSnapshot } from "../../types/coaching-account";
-import type {
-  ConflictDecision,
-  FieldKey,
-  ZonesPayload,
-} from "../../types/coaching-zones";
+import type { ZonesPayload } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import { DEFAULT_HEART_RATE_ZONES } from "../../types/profile";
 import { calculatePowerZones } from "../../utils/calculate-power-zones";
@@ -30,6 +25,15 @@ const T2G_HR = {
   z4: { lower: 161, upper: 174 },
   z5: { lower: 175, upper: 187 },
 };
+
+// The same bands as stored, written out independently.
+const T2G_HR_BANDS_EXPECTED = [
+  { minBpm: 107, maxBpm: 133 },
+  { minBpm: 134, maxBpm: 147 },
+  { minBpm: 148, maxBpm: 160 },
+  { minBpm: 161, maxBpm: 174 },
+  { minBpm: 175, maxBpm: 187 },
+];
 
 const T2G_POWER = {
   z1: { lower: 111, upper: 149 },
@@ -172,161 +176,64 @@ describe("syncZones method-aware — re-sync stability (3.4b)", () => {
   });
 });
 
-describe("commitConflictResolution method-aware — accept-all (3.4g)", () => {
-  it("should set method = 'train2go' when ALL band conflicts of a table are accepted", async () => {
-    // Arrange
-    // Profile already user-customized; conflicts emitted; user
-    // accepts all 5 cycling-HR band-bound conflicts.
-    const persistence = createInMemoryPersistence();
-    const repo = persistence.profiles;
-    await repo.put(
-      makeProfile({
-        sportZones: {
-          cycling: {
-            thresholds: {},
-            heartRateZones: {
-              method: "user",
-              zones: [
-                { zone: 1, name: "Recovery", minBpm: 100, maxBpm: 130 },
-                { zone: 2, name: "Aerobic", minBpm: 131, maxBpm: 145 },
-                { zone: 3, name: "Tempo", minBpm: 146, maxBpm: 160 },
-                { zone: 4, name: "Threshold", minBpm: 161, maxBpm: 170 },
-                { zone: 5, name: "VO2 Max", minBpm: 171, maxBpm: 187 },
-              ],
-            },
+const seedUserCustomizedHr = async () => {
+  const persistence = createInMemoryPersistence();
+  await persistence.profiles.put(
+    makeProfile({
+      sportZones: {
+        cycling: {
+          thresholds: {},
+          heartRateZones: {
+            method: "user",
+            zones: [
+              { zone: 1, name: "Recovery", minBpm: 100, maxBpm: 130 },
+              { zone: 2, name: "Aerobic", minBpm: 131, maxBpm: 145 },
+              { zone: 3, name: "Tempo", minBpm: 146, maxBpm: 160 },
+              { zone: 4, name: "Threshold", minBpm: 161, maxBpm: 170 },
+              { zone: 5, name: "VO2 Max", minBpm: 171, maxBpm: 187 },
+            ],
           },
         },
-      })
-    );
-    const decisions = {
-      "cycling.heartRateZones.z1.minBpm": "accept",
-      "cycling.heartRateZones.z1.maxBpm": "accept",
-      "cycling.heartRateZones.z2.maxBpm": "accept",
-      "cycling.heartRateZones.z4.maxBpm": "accept",
-      "cycling.heartRateZones.z5.minBpm": "accept",
-    } as Record<FieldKey, ConflictDecision>;
+      },
+    })
+  );
+  return persistence;
+};
+
+describe("commitConflictResolution method-aware — every band taken (3.4g)", () => {
+  it("should set method = 'train2go' and record the snapshot when every differing band is taken", async () => {
+    // Arrange
+    const persistence = await seedUserCustomizedHr();
+    const sync = await syncZones(PROFILE_ID, makeTransport(), persistence);
+    if (!sync.ok) throw new Error("expected ok");
 
     // Act
-    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
+    await commitConflictResolution(PROFILE_ID, sync.conflicts, persistence);
 
     // Assert
-    const persisted = await repo.getById(PROFILE_ID);
-    expect(persisted?.sportZones.cycling?.heartRateZones?.method).toBe(
-      "train2go"
+    const persisted = await persistence.profiles.getById(PROFILE_ID);
+    const hr = persisted?.sportZones.cycling?.heartRateZones;
+    expect(hr?.method).toBe("train2go");
+    expect(hr?.zones.map(({ minBpm, maxBpm }) => ({ minBpm, maxBpm }))).toEqual(
+      T2G_HR_BANDS_EXPECTED
     );
     expect(
       persisted?.linkedAccounts[0]?.lastSyncedZonesSnapshot?.cyclingHr
-    ).toBeDefined();
+    ).toEqual(hr?.zones);
   });
-});
 
-describe("commitConflictResolution method-aware — mixed accept/reject (3.4f)", () => {
-  it("should set method = 'user' when SOME but NOT ALL band conflicts are accepted", async () => {
+  it("should offer nothing on the next sync once Train2Go's bands are taken", async () => {
     // Arrange
-    // User accepts Z1 (both bounds) and Z2.maxBpm; rejects Z4.maxBpm and Z5.minBpm.
-    const persistence = createInMemoryPersistence();
-    const repo = persistence.profiles;
-    await repo.put(
-      makeProfile({
-        sportZones: {
-          cycling: {
-            thresholds: {},
-            heartRateZones: {
-              method: "user",
-              zones: [
-                { zone: 1, name: "Recovery", minBpm: 100, maxBpm: 130 },
-                { zone: 2, name: "Aerobic", minBpm: 131, maxBpm: 145 },
-                { zone: 3, name: "Tempo", minBpm: 146, maxBpm: 160 },
-                { zone: 4, name: "Threshold", minBpm: 161, maxBpm: 170 },
-                { zone: 5, name: "VO2 Max", minBpm: 171, maxBpm: 187 },
-              ],
-            },
-          },
-        },
-      })
-    );
-    const decisions = {
-      "cycling.heartRateZones.z1.minBpm": "accept",
-      "cycling.heartRateZones.z1.maxBpm": "accept",
-      "cycling.heartRateZones.z2.maxBpm": "accept",
-      "cycling.heartRateZones.z4.maxBpm": "reject",
-      "cycling.heartRateZones.z5.minBpm": "reject",
-    } as Record<FieldKey, ConflictDecision>;
+    const persistence = await seedUserCustomizedHr();
+    const sync = await syncZones(PROFILE_ID, makeTransport(), persistence);
+    if (!sync.ok) throw new Error("expected ok");
+    await commitConflictResolution(PROFILE_ID, sync.conflicts, persistence);
 
     // Act
-    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
+    const again = await syncZones(PROFILE_ID, makeTransport(), persistence);
 
     // Assert
-    const persisted = await repo.getById(PROFILE_ID);
-    expect(persisted?.sportZones.cycling?.heartRateZones?.method).toBe("user");
-    // Accepted bands took T2G value; rejected bands kept pre-sync.
-    const zones = persisted?.sportZones.cycling?.heartRateZones?.zones;
-    const ACCEPTED_Z1_MIN = 107;
-    const PRESYNC_Z4_MAX = 170;
-    const PRESYNC_Z5_MIN = 171;
-    expect(zones?.[0].minBpm).toBe(ACCEPTED_Z1_MIN); // accepted
-    expect(zones?.[3].maxBpm).toBe(PRESYNC_Z4_MAX); // rejected → pre-sync
-    expect(zones?.[4].minBpm).toBe(PRESYNC_Z5_MIN); // rejected → pre-sync
-  });
-});
-
-describe("commitConflictResolution method-aware — all-reject (3.4d)", () => {
-  it("should leave method and snapshot untouched when ALL band decisions are reject", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const repo = persistence.profiles;
-    const preSnapshot: LastSyncedZonesSnapshot = {
-      syncedAt: "2025-01-01T00:00:00.000Z",
-      cyclingHr: [],
-      runningHr: [],
-      swimmingHr: [],
-      cyclingPower: [],
-      runningPace: [],
-      swimmingPace: [],
-    } as LastSyncedZonesSnapshot;
-    await repo.put(
-      makeProfile({
-        sportZones: {
-          cycling: {
-            thresholds: {},
-            heartRateZones: {
-              method: "user",
-              zones: [
-                { zone: 1, name: "Recovery", minBpm: 100, maxBpm: 130 },
-                { zone: 2, name: "Aerobic", minBpm: 131, maxBpm: 145 },
-                { zone: 3, name: "Tempo", minBpm: 146, maxBpm: 160 },
-                { zone: 4, name: "Threshold", minBpm: 161, maxBpm: 170 },
-                { zone: 5, name: "VO2 Max", minBpm: 171, maxBpm: 187 },
-              ],
-            },
-          },
-        },
-        linkedAccounts: [
-          {
-            source: "train2go",
-            externalUserId: "99999",
-            externalUserName: "Pablo",
-            linkedAt: NOW,
-            syncZones: true,
-            lastSyncedZonesSnapshot: preSnapshot,
-          },
-        ],
-      })
-    );
-    const decisions = {
-      "cycling.heartRateZones.z1.minBpm": "reject",
-      "cycling.heartRateZones.z1.maxBpm": "reject",
-    } as Record<FieldKey, ConflictDecision>;
-
-    // Act
-    await commitConflictResolution(PROFILE_ID, decisions, persistence, PAYLOAD);
-
-    // Assert
-    const persisted = await repo.getById(PROFILE_ID);
-    expect(persisted?.sportZones.cycling?.heartRateZones?.method).toBe("user");
-    // Snapshot stays untouched (syncedAt unchanged) per D-MA4 all-reject rule.
-    expect(
-      persisted?.linkedAccounts[0]?.lastSyncedZonesSnapshot?.syncedAt
-    ).toBe("2025-01-01T00:00:00.000Z");
+    if (!again.ok) throw new Error("expected ok");
+    expect(again.conflicts).toEqual([]);
   });
 });

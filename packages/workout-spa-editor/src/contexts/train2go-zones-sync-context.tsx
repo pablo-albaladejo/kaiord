@@ -2,9 +2,10 @@
  * Train2GoZonesSyncProvider — the one zones-sync orchestrator for the whole
  * App, so the calendar's sync button and the Athlete page share it.
  *
- * Where Train2Go reports numbers different from the ones the athlete set,
- * Kaiord keeps the athlete's and says so once, with one action to take
- * Train2Go's instead: no dialog asks which one decides.
+ * Where Train2Go reports zones or thresholds different from the ones the
+ * athlete set, Kaiord keeps the athlete's and says so once, naming which, with
+ * one action to take Train2Go's instead: no dialog asks which one decides.
+ * The offer stays on the Athlete page after the notice is gone.
  */
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
@@ -15,6 +16,8 @@ import {
   useZonesSyncOrchestrator,
   type ZonesSyncOrchestrator,
 } from "../adapters/train2go/use-zones-sync-orchestrator";
+import { KEPT_COPY } from "../adapters/train2go/zones-offer-copy";
+import type { ZonesOfferKind } from "../adapters/train2go/zones-offer-kind";
 import { useTranslate } from "../i18n/use-translate";
 import { usePersistence } from "./persistence-context";
 import { useToastContext } from "./ToastContext";
@@ -42,8 +45,8 @@ export const Train2GoZonesSyncProvider = ({
     []
   );
   const offerTheirs = useMemo(
-    () => (takeTheirs: () => Promise<void>) => {
-      toasts.info(t("zonesSync.keptYours"), t("zonesSync.keptYoursHint"), {
+    () => (kind: ZonesOfferKind, takeTheirs: () => Promise<void>) => {
+      toasts.info(t(KEPT_COPY[kind]), t("zonesSync.keptHint"), {
         duration: OFFER_MS,
         action: (
           <button

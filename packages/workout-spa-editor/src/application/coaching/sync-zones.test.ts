@@ -6,18 +6,14 @@
  *   empty-fill, no-op, single-conflict, multi-conflict, mixed-fill-and-
  *   conflict, ftp-fallback-absent, ftp-fallback-zero, transport-error,
  *   shape-mismatch, unsupported-transport, profile-deleted-mid-sync.
- * 4 commitConflictResolution cases:
- *   all-accept, all-reject, mixed, profile-deleted-mid-commit.
+ * 3 commitConflictResolution cases:
+ *   every-item, only-given-items (idempotent), profile-deleted-mid-commit.
  */
 import { describe, expect, it, vi } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
-import type {
-  ConflictDecision,
-  FieldKey,
-  ZonesPayload,
-} from "../../types/coaching-zones";
+import type { ConflictItem } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import { ProfileNotFoundError } from "../profile/errors";
 import type { CoachingTransport } from "./coaching-transport-port";
@@ -422,9 +418,15 @@ describe("syncZones — a profile edit made during the fetch", () => {
 });
 
 describe("commitConflictResolution", () => {
-  const conflictPayload: ZonesPayload = {
-    paces: { cycling: { z4Upper: VALUES.cyclingZ5Lower } },
-    hrZones: { running: { z4Upper: VALUES.runningHrZ4Upper } },
+  const ftp: ConflictItem = {
+    field: FIELDS.cyclingFtp,
+    current: VALUES.cyclingZ4UpperLow,
+    incoming: VALUES.cyclingZ5Lower,
+  };
+  const lthr: ConflictItem = {
+    field: FIELDS.runningLthr,
+    current: VALUES.cyclingHrLthrLow,
+    incoming: VALUES.runningHrZ4Upper,
   };
 
   const seedConflictedProfile = async (): Promise<{
@@ -450,24 +452,15 @@ describe("commitConflictResolution", () => {
     return { persistence, repo };
   };
 
-  it("should write every accepted field (all-accept)", async () => {
+  it("should write Train2Go's number for every item it is given (every-item)", async () => {
     // Arrange
     const { persistence, repo } = await seedConflictedProfile();
-    const decisions: Record<FieldKey, ConflictDecision> = {
-      [FIELDS.cyclingFtp]: "accept",
-      [FIELDS.runningLthr]: "accept",
-    } as Record<FieldKey, ConflictDecision>;
-    await commitConflictResolution(
-      PROFILE_ID,
-      decisions,
-      persistence,
-      conflictPayload
-    );
 
     // Act
-    const after = await repo.getById(PROFILE_ID);
+    await commitConflictResolution(PROFILE_ID, [ftp, lthr], persistence);
 
     // Assert
+    const after = await repo.getById(PROFILE_ID);
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
       VALUES.cyclingZ5Lower
     );
@@ -476,56 +469,16 @@ describe("commitConflictResolution", () => {
     );
   });
 
-  it("should leave the profile untouched (all-reject)", async () => {
+  it("should leave a number it is not given untouched, idempotent on a second call (only-given-items)", async () => {
     // Arrange
     const { persistence, repo } = await seedConflictedProfile();
-    const decisions: Record<FieldKey, ConflictDecision> = {
-      [FIELDS.cyclingFtp]: "reject",
-      [FIELDS.runningLthr]: "reject",
-    } as Record<FieldKey, ConflictDecision>;
-    await commitConflictResolution(
-      PROFILE_ID,
-      decisions,
-      persistence,
-      conflictPayload
-    );
 
     // Act
-    const after = await repo.getById(PROFILE_ID);
+    await commitConflictResolution(PROFILE_ID, [lthr], persistence);
+    await commitConflictResolution(PROFILE_ID, [lthr], persistence);
 
     // Assert
-    expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
-      VALUES.cyclingZ4UpperLow
-    );
-    expect(after?.sportZones.running?.thresholds.lthr).toBe(
-      VALUES.cyclingHrLthrLow
-    );
-  });
-
-  it("should accept some and reject others, idempotent on second call (mixed)", async () => {
-    // Arrange
-    const { persistence, repo } = await seedConflictedProfile();
-    const decisions: Record<FieldKey, ConflictDecision> = {
-      [FIELDS.cyclingFtp]: "reject",
-      [FIELDS.runningLthr]: "accept",
-    } as Record<FieldKey, ConflictDecision>;
-    await commitConflictResolution(
-      PROFILE_ID,
-      decisions,
-      persistence,
-      conflictPayload
-    );
-    await commitConflictResolution(
-      PROFILE_ID,
-      decisions,
-      persistence,
-      conflictPayload
-    );
-
-    // Act
     const after = await repo.getById(PROFILE_ID);
-
-    // Assert
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(
       VALUES.cyclingZ4UpperLow
     );
@@ -539,18 +492,9 @@ describe("commitConflictResolution", () => {
     const persistence = createInMemoryPersistence();
 
     // Act
-    const decisions: Record<FieldKey, ConflictDecision> = {
-      [FIELDS.cyclingFtp]: "accept",
-    } as Record<FieldKey, ConflictDecision>;
+    const commit = commitConflictResolution(PROFILE_ID, [ftp], persistence);
 
     // Assert
-    await expect(
-      commitConflictResolution(
-        PROFILE_ID,
-        decisions,
-        persistence,
-        conflictPayload
-      )
-    ).rejects.toThrow(ProfileNotFoundError);
+    await expect(commit).rejects.toThrow(ProfileNotFoundError);
   });
 });

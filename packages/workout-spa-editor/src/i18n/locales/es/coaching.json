@@ -170,9 +170,19 @@
     "shapeMismatch": "Train2Go ha enviado unas zonas que Kaiord no puede leer, así que no se han sincronizado.",
     "unsupported": "Esta plataforma de entrenamiento no comparte zonas.",
     "notSynced": "Tus zonas no se han sincronizado.",
-    "keptYours": "Train2Go tiene números distintos de los tuyos. Kaiord ha mantenido los tuyos.",
-    "keptYoursHint": "Tus zonas se siguen calculando con los números que pusiste.",
-    "takeTheirs": "Usar los de Train2Go"
+    "kept": {
+      "thresholds": "Train2Go tiene umbrales distintos de los que pusiste. Kaiord ha mantenido los tuyos.",
+      "zones": "Train2Go tiene zonas distintas de las que pusiste. Kaiord ha mantenido las tuyas.",
+      "both": "Train2Go tiene zonas y umbrales distintos de los que pusiste. Kaiord ha mantenido los tuyos."
+    },
+    "keptHint": "Puedes usar los de Train2Go más tarde desde la página Atleta.",
+    "takeTheirs": "Usar los de Train2Go",
+    "keepYours": "Mantener los míos",
+    "taken": {
+      "thresholds": "Kaiord usa ahora los umbrales de Train2Go.",
+      "zones": "Kaiord usa ahora las zonas de Train2Go.",
+      "both": "Kaiord usa ahora las zonas y los umbrales de Train2Go."
+    }
   },
   "sync": {
     "defaultLabel": "Coach",

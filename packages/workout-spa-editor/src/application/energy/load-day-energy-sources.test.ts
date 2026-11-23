@@ -186,3 +186,34 @@ describe("loadDayEnergySources daily wellness", () => {
     expect(after.wellness?.krd.activeCalories).toBe(WHOOP_ACTIVE_KCAL);
   });
 });
+
+describe("loadDayEnergySources weight", () => {
+  it("should read the day two sources weighed by the Authority rule, not by when a row was recorded", async () => {
+    // Arrange
+    const OWN_KG = 75;
+    const RELAYED_KG = 83;
+    const persistence: PersistencePort = createInMemoryPersistence();
+    const weighIn = (source: string, kg: number, time: string) => ({
+      id: `${source}-weight`,
+      profileId: PROFILE_ID,
+      date: DATE,
+      sourceBridgeId: source,
+      krd: {
+        kind: "weight" as const,
+        version: "2.0" as const,
+        measuredAt: `${DATE}T${time}.000Z`,
+        weightKilograms: kg,
+      },
+    });
+    await persistence.healthWeight.put(weighIn("manual", OWN_KG, "07:00:00"));
+    await persistence.healthWeight.put(
+      weighIn("train2go-bridge", RELAYED_KG, "09:00:00")
+    );
+
+    // Act
+    const sources = await loadDayEnergySources(persistence, PROFILE_ID, DATE);
+
+    // Assert
+    expect(sources.latestWeight?.krd.weightKilograms).toBe(OWN_KG);
+  });
+});
