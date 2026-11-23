@@ -1059,6 +1059,86 @@
           "title": "should not send the document when the athlete does not share health data"
         }
       ]
+    },
+    {
+      "id": "app.dataflows.en.kept.title",
+      "text": "Kept on this device",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of the sync snapshot"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of a backup file"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.kept.traces",
+      "text": "Traces: what each run of the assistant did, when, with what result and at what cost. They never leave this browser: not to an AI provider, not to Drive sync, not in a backup. The newest 200 are kept, none older than 90 days.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/trace/trace-run.test.ts",
+          "title": "should store one Trace with the cost, the unit, the retries and what was sent"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of the sync snapshot"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of a backup file"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/trace/prune-traces.test.ts",
+          "title": "should keep the newest 200 Traces and delete the older ones"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/trace/prune-traces.test.ts",
+          "title": "should delete a Trace started more than 90 days ago"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.kept.title",
+      "text": "Se queda en este dispositivo",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of the sync snapshot"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of a backup file"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.kept.traces",
+      "text": "Trazas: lo que hizo cada ejecución del asistente, cuándo, con qué resultado y a qué coste. Nunca salen de este navegador: ni a un proveedor de IA, ni a la sincronización con Drive, ni en una copia de seguridad. Se guardan las 200 más recientes, ninguna de más de 90 días.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/trace/trace-run.test.ts",
+          "title": "should store one Trace with the cost, the unit, the retries and what was sent"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of the sync snapshot"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/trace-stays-on-device.test.ts",
+          "title": "should leave the Traces out of a backup file"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/trace/prune-traces.test.ts",
+          "title": "should keep the newest 200 Traces and delete the older ones"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/trace/prune-traces.test.ts",
+          "title": "should delete a Trace started more than 90 days ago"
+        }
+      ]
     }
   ]
 }

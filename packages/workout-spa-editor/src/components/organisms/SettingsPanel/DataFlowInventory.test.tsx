@@ -76,4 +76,20 @@ describe("DataFlowInventory", () => {
     expect(healthSharingStore.read()).toEqual({ anthropic: "always" });
     expect(select).toHaveValue("always");
   });
+
+  it("should list the Traces as kept on this device, never sent", () => {
+    // Arrange
+    const active = () => false;
+
+    // Act
+    render(<DataFlowInventory active={active} />);
+
+    // Assert
+    expect(screen.getByTestId("kept-on-device")).toHaveTextContent(
+      "Kept on this device"
+    );
+    expect(screen.getByTestId("kept-on-device")).toHaveTextContent(
+      "They never leave this browser: not to an AI provider, not to Drive sync, not in a backup."
+    );
+  });
 });

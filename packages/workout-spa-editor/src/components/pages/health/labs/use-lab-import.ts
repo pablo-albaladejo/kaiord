@@ -13,6 +13,7 @@ import { useMemo, useRef, useState } from "react";
 import { createDexiePersistence } from "../../../../adapters/dexie/dexie-persistence-adapter";
 import { createDexieUsageTelemetrySink } from "../../../../adapters/telemetry/dexie-usage-telemetry-sink";
 import { runLabExtraction } from "../../../../application/lab/extraction/run-lab-extraction.use-case";
+import { startTraceRun } from "../../../../application/trace/trace-run";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
 import { useAiModelBindingsLive } from "../../../../hooks/use-ai-model-bindings-live";
@@ -34,9 +35,10 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const [isRunning, setIsRunning] = useState(false);
   useUnsavedWork(isRunning);
   const controllerRef = useRef<AbortController | null>(null);
+  const persistence = useMemo(() => createDexiePersistence(), []);
   const telemetry = useMemo(
-    () => createDexieUsageTelemetrySink(createDexiePersistence()),
-    []
+    () => createDexieUsageTelemetrySink(persistence),
+    [persistence]
   );
 
   const canImport =
@@ -58,6 +60,10 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
         bindings,
         signal: controller.signal,
         telemetry,
+        trace: startTraceRun({
+          feature: "lab_import",
+          traces: persistence.traces,
+        }),
         askHealth: (providerType) =>
           healthSharingGate.request({ flow: "labImport", providerType }),
       });

@@ -24,8 +24,9 @@ const PASSPHRASE = "kaiord-spa-v1";
 // the legacy `usage` store, making `usageEvents` the synced usage source, v34
 // added the healthStrain + healthVitals stores (included), v35 added the
 // healthHeartRateSeries store (included), v36 normalized Garmin ledger rows
-// (no store change), and v37 backfilled the nutrition `updatedAt` sync clock.
-const SCHEMA_HEAD = 37;
+// (no store change), v37 backfilled the nutrition `updatedAt` sync clock,
+// and v38 added the device-local `traces` store (excluded).
+const SCHEMA_HEAD = 38;
 
 describe("createDexieSnapshotPort", () => {
   const db = sharedKaiordDatabase("snapshot");

@@ -9,6 +9,7 @@ import {
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { listKinds } from "../HealthSharingNotice/health-notice-copy";
+import { KeptOnDevice } from "./KeptOnDevice";
 import { ProviderHealthChoice } from "./ProviderHealthChoice";
 
 const DestinationRow = ({ dest }: { dest: InventoryDestination }) => {
@@ -71,6 +72,7 @@ export const DataFlowInventory = (props: {
           </ul>
         </div>
       ))}
+      <KeptOnDevice />
     </section>
   );
 };

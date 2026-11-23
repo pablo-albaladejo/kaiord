@@ -234,5 +234,53 @@
     "saving": "Guardando…",
     "saved": "Guardado ✓",
     "failed": "No se pudo guardar. Inténtalo de nuevo."
+  },
+  "traces": {
+    "title": "Trazas",
+    "intro": "Lo que hizo cada ejecución del asistente: cuándo, con qué resultado y a qué coste.",
+    "empty": "Aún no hay trazas. Cada ejecución del asistente deja una aquí.",
+    "export": "Exportar todas (JSON)",
+    "exportFailed": "No se pudieron exportar las trazas.",
+    "deleteAll": "Borrar todas",
+    "deleteConfirm": "¿Borrar todas las trazas de este navegador? No se puede deshacer.",
+    "deleteConfirmAction": "Borrar trazas",
+    "deleteCancel": "Cancelar",
+    "feature": {
+      "chat": "Chat",
+      "generation": "Generación de entrenamiento",
+      "batch": "Generación por lotes",
+      "lab_import": "Documento de laboratorio"
+    },
+    "outcome": {
+      "ok": "Terminada",
+      "failed": "Fallida",
+      "stopped": "Detenida"
+    },
+    "model": "Proveedor y modelo",
+    "unit": "Versión del prompt",
+    "latency": "Duración",
+    "latencyValue": "{{seconds}} s",
+    "calls": "Peticiones al proveedor",
+    "retries": "Reintentos",
+    "cost": "Coste",
+    "costUnknown": "desconocido",
+    "tokens": "{{input}} tokens de entrada y {{output}} de salida",
+    "tools": "Herramientas",
+    "noTools": "No se llamó a ninguna herramienta.",
+    "toolLine": "{{name}}: {{confirmation}}, {{result}}",
+    "confirmation": {
+      "athlete": "confirmada por ti",
+      "automatic": "aprobada automáticamente",
+      "not_needed": "sin confirmación necesaria"
+    },
+    "result": {
+      "ok": "hecha",
+      "refused": "rechazada",
+      "failed": "fallida",
+      "unanswered": "sin respuesta"
+    },
+    "sent": "Enviado",
+    "sentNothing": "No se envió nada.",
+    "sentLine": "A {{provider}}: {{kinds}}"
   }
 }

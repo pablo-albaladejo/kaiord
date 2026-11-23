@@ -29,6 +29,7 @@ import { createDexieSessionMatchRepository } from "./dexie-session-match-reposit
 import { createDexieSyncStateRepository } from "./dexie-sync-state-repository";
 import { createDexieTemplateRepository } from "./dexie-template-repository";
 import { createDexieTombstoneRepository } from "./dexie-tombstone-repository";
+import { createDexieTraceRepository } from "./dexie-trace-repository";
 import { createTransactionRunner } from "./dexie-transaction-runner";
 import { createDexieUsageEventRepository } from "./dexie-usage-event-repository";
 import { createDexieUserPreferencesRepository } from "./dexie-user-preferences-repository";
@@ -44,6 +45,7 @@ export function createDexiePersistence(
     aiProviders: createDexieAiProviderRepository(database),
     syncState: createDexieSyncStateRepository(database),
     usageEvents: createDexieUsageEventRepository(database),
+    traces: createDexieTraceRepository(database),
     coaching: createDexieCoachingRepository(database),
     coachingSyncState: createDexieCoachingSyncStateRepository(database),
     coachingDayNotes: createDexieCoachingDayNotesRepository(database),

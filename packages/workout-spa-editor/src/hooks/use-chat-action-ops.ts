@@ -8,12 +8,13 @@
  * case directly rather than `useTrain2GoSource`, whose
  * `Train2GoZonesSyncProvider` is not in the global provider tree.
  */
-import { useCallback, useMemo } from "react";
+import { type MutableRefObject, useCallback, useMemo } from "react";
 
 import type {
   ChatActionOps,
   CreateWorkoutInput,
 } from "../application/chat/tools/chat-tool-deps";
+import type { TraceRun } from "../application/trace/trace-run";
 import { usePersistence } from "../contexts/persistence-context";
 import { useActiveLocale } from "../i18n/LocaleProvider";
 import { getTranslate } from "../i18n/use-translate";
@@ -37,7 +38,8 @@ export type ChatGenerationModel = {
 
 export const useChatActionOps = (
   profileId: string | null,
-  generation: ChatGenerationModel
+  generation: ChatGenerationModel,
+  traceRef?: MutableRefObject<TraceRun | null>
 ): ChatActionOps => {
   const persistence = usePersistence();
   const pushToGarmin = usePushToGarminOp(profileId);
@@ -60,10 +62,11 @@ export const useChatActionOps = (
         provider,
         modelId,
         input,
-        getTranslate("chat", locale)("draft.workoutTitle")
+        getTranslate("chat", locale)("draft.workoutTitle"),
+        traceRef?.current ?? undefined
       );
     },
-    [persistence, profileId, provider, modelId, locale]
+    [persistence, profileId, provider, modelId, locale, traceRef]
   );
 
   return useMemo(

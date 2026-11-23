@@ -14,7 +14,7 @@ import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 import { seededConversationId } from "./dexie-v25-migration";
 
 const SCHEMA_SEED = 23;
-const SCHEMA_HEAD = 37;
+const SCHEMA_HEAD = 38;
 const STORES_SEED = {
   profiles: "id, updatedAt",
   chatMessages: "id, profileId, [profileId+createdAt]",

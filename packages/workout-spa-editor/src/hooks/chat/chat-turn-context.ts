@@ -7,6 +7,7 @@ import type { ChatTurnResult } from "@kaiord/ai";
 
 import { appendAssistantTurn } from "../../application/chat/append-turn-messages";
 import { categorizeChatError } from "./chat-error";
+import { awaitAthlete, closeChatTrace } from "./chat-trace";
 import { autoApprove, isAutoApproved } from "./chat-turn-approve";
 import type { ChatTurnCtx } from "./chat-turn-types";
 
@@ -22,10 +23,12 @@ const applyResult = async (
       const next = await autoApprove(ctx, result.pendingAction, signal);
       return applyResult(ctx, next, signal);
     }
+    awaitAthlete(ctx.traceRef, result.pendingAction.toolName);
     ctx.set.pendingAction(result.pendingAction);
     ctx.set.state("awaiting_confirmation");
     return;
   }
+  closeChatTrace(ctx.traceRef);
   ctx.set.pendingAction(null);
   await appendAssistantTurn(
     ctx.persistence,
@@ -55,6 +58,7 @@ export const runAgent = async (
   try {
     await applyResult(ctx, await run(controller.signal), controller.signal);
   } catch (e) {
+    closeChatTrace(ctx.traceRef, "failed");
     ctx.set.streamingText("");
     ctx.set.state("error");
     ctx.set.error(categorizeChatError(e));

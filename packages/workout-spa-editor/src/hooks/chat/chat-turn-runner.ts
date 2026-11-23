@@ -13,34 +13,11 @@ import { appendUserMessage } from "../../application/chat/append-turn-messages";
 import { recordsToModelMessages } from "../../application/chat/chat-message-mapper";
 import { ensureConversationForTurn } from "../../application/chat/ensure-conversation";
 import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
-import { buildChatAgent } from "./build-chat-agent";
-import { buildDataRouteSignals } from "./build-data-route-signals";
 import { askHealth } from "./chat-health-share";
+import { openChatTrace } from "./chat-trace";
 import { runAgent } from "./chat-turn-context";
+import { buildAndSend } from "./chat-turn-send";
 import type { ChatTurnCtx } from "./chat-turn-types";
-
-const buildAndSend = async (
-  ctx: ChatTurnCtx,
-  messages: ModelMessage[],
-  signal: AbortSignal,
-  healthShared: boolean
-) => {
-  const built = await buildChatAgent({
-    persistence: ctx.persistence,
-    profileId: ctx.profileId,
-    today: ctx.today,
-    provider: ctx.provider,
-    modelId: ctx.modelId,
-    actions: ctx.ops,
-    healthShared,
-    getMatrixSignals: () =>
-      buildDataRouteSignals(ctx.persistence, ctx.profileId),
-    onTextDelta: (d) => ctx.set.streamingText((p) => p + d),
-  });
-  ctx.agentRef.current = built.agent;
-  ctx.toolsRef.current = built.tools;
-  return built.agent.sendTurn(messages, { signal });
-};
 
 /** Asks about health data, then replays the history it allows and sends. */
 const askAndSend = async (
@@ -49,11 +26,17 @@ const askAndSend = async (
   tail: ModelMessage[],
   signal: AbortSignal
 ) => {
+  const trace = openChatTrace(ctx.traceRef, ctx.persistence);
   const healthShared = await askHealth(ctx);
   const replay = recordsToModelMessages(history, {
     withholdHealth: !healthShared,
   });
-  return buildAndSend(ctx, [...replay, ...tail], signal, healthShared);
+  return buildAndSend(ctx, {
+    messages: [...replay, ...tail],
+    signal,
+    healthShared,
+    trace,
+  });
 };
 
 export const sendTurn = async (

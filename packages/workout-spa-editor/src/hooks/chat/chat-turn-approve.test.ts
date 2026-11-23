@@ -52,6 +52,7 @@ const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
     messagesRef: { current: [] },
     abortRef: { current: null },
     disposedRef: { current: false },
+    traceRef: { current: null },
     set: {
       state: (s) => states.push(s),
       streamingText: () => undefined,

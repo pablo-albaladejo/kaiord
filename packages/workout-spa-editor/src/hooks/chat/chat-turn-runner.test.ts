@@ -45,6 +45,7 @@ const makeCtx = (
     messagesRef: { current: [] },
     abortRef: { current: null },
     disposedRef: { current: false },
+    traceRef: { current: null },
     set: {
       state: (s) => states.push(s),
       streamingText: () => undefined,
@@ -450,5 +451,126 @@ describe("chat-turn-runner", () => {
       { role: "user", content: "Sleep?" },
       { role: "user", content: "Plan tomorrow" },
     ]);
+  });
+
+  describe("the Trace of a chat turn", () => {
+    const tracesOf = async (
+      persistence: ReturnType<typeof createInMemoryPersistence>,
+      count = 1
+    ) => {
+      await vi.waitFor(async () =>
+        expect(await persistence.traces.list()).toHaveLength(count)
+      );
+      return persistence.traces.list();
+    };
+
+    it("should leave one Trace per turn naming what went to the Provider", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx } = makeCtx(persistence);
+      fakeAgent.sendTurn.mockResolvedValueOnce({
+        status: "complete",
+        text: "hi",
+        messages: [],
+      });
+
+      // Act
+      await sendTurn(ctx, [], "hello");
+      const [trace] = await tracesOf(persistence);
+
+      // Assert
+      expect(trace).toMatchObject({
+        feature: "chat",
+        outcome: "ok",
+        sent: [
+          {
+            to: "anthropic",
+            kinds: ["messages", "workouts", "coachingPlan", "dataSources"],
+          },
+        ],
+      });
+      expect(ctx.traceRef.current).toBeNull();
+    });
+
+    it("should keep the Trace open while the athlete decides, and record the confirmed Tool", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx } = makeCtx(persistence);
+      const pending: PendingAction = {
+        toolName: "sync_coaching",
+        toolCallId: "c1",
+        input: {},
+      };
+      fakeAgent.sendTurn.mockResolvedValueOnce({
+        status: "pending_action",
+        pendingAction: pending,
+        messages: [],
+      });
+      fakeAgent.resume.mockResolvedValueOnce({
+        status: "complete",
+        text: "done",
+        messages: [],
+      });
+
+      // Act
+      await sendTurn(ctx, [], "sync my plan");
+      ctx.toolsRef.current = [
+        { name: "sync_coaching", execute: vi.fn() } as unknown as ChatTool,
+      ];
+      const openWhilePending = await persistence.traces.list();
+      await approveAction(ctx, pending);
+      const [trace] = await tracesOf(persistence);
+
+      // Assert
+      expect(openWhilePending).toHaveLength(0);
+      expect(trace?.tools).toEqual([
+        { name: "sync_coaching", confirmation: "athlete", result: "ok" },
+      ]);
+    });
+
+    it("should record a Tool the athlete refused", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx } = makeCtx(persistence);
+      const pending: PendingAction = {
+        toolName: "create_workout",
+        toolCallId: "c1",
+        input: {},
+      };
+      fakeAgent.sendTurn.mockResolvedValueOnce({
+        status: "pending_action",
+        pendingAction: pending,
+        messages: [],
+      });
+      fakeAgent.resume.mockResolvedValueOnce({
+        status: "complete",
+        text: "ok",
+        messages: [],
+      });
+
+      // Act
+      await sendTurn(ctx, [], "make me a ride");
+      await denyAction(ctx, pending);
+      const [trace] = await tracesOf(persistence);
+
+      // Assert
+      expect(trace?.tools).toEqual([
+        { name: "create_workout", confirmation: "athlete", result: "refused" },
+      ]);
+    });
+
+    it("should record a failed turn as failed", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx } = makeCtx(persistence);
+      fakeAgent.sendTurn.mockRejectedValueOnce(new Error("provider down"));
+
+      // Act
+      await sendTurn(ctx, [], "hello");
+      const [trace] = await tracesOf(persistence);
+
+      // Assert
+      expect(trace?.outcome).toBe("failed");
+    });
   });
 });

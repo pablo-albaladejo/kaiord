@@ -1,6 +1,7 @@
 import type { ChatTurnResult, PendingAction } from "@kaiord/ai";
 
 import { appendToolEvent } from "../../application/chat/append-turn-messages";
+import { recordAction } from "./chat-trace";
 import type { ChatTurnCtx } from "./chat-turn-types";
 import { runConfirmedTool } from "./run-confirmed-tool";
 
@@ -57,6 +58,12 @@ export const autoApprove = async (
     ctx.toolsRef.current,
     pending.toolName,
     pending.input
+  );
+  recordAction(
+    ctx.traceRef,
+    pending.toolName,
+    "automatic",
+    outcome.ok ? "ok" : "failed"
   );
   return resumeWithOutcome(ctx, pending, outcome, signal);
 };

@@ -35,6 +35,7 @@ The trace and reflection that motivate this glossary live in
 | **Zone**             | A training intensity band (HR or power), defined per profile   |
 | **Profile**          | The athlete identity (zones · linked accounts · personal data) |
 | **Calendar week**    | The Monday-anchored week shown on `/calendar`                  |
+| **Trace**            | What one run of the assistant did; Spanish "Traza"             |
 
 ## State labels (visible to user)
 

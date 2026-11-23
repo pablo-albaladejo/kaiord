@@ -42,6 +42,7 @@ import { createInMemorySessionMatchRepository } from "./in-memory-session-match-
 import { createInMemorySyncStateRepository } from "./in-memory-sync-state-repository";
 import { createInMemoryTombstoneRepository } from "./in-memory-tombstone-repository";
 import { createInMemoryTemplateRepository } from "./in-memory-template-repository";
+import { createInMemoryTraceRepository } from "./in-memory-trace-repository";
 import { createInMemoryUsageEventRepository } from "./in-memory-usage-event-repository";
 import { createInMemoryUserPreferencesRepository } from "./in-memory-user-preferences-repository";
 import { createInMemoryWorkoutRepository } from "./in-memory-workout-repository";
@@ -90,6 +91,7 @@ export function createInMemoryPersistence(): PersistencePort {
     ),
     syncState: createInMemorySyncStateRepository(stores.syncState),
     usageEvents: createInMemoryUsageEventRepository(stores.usageEvents),
+    traces: createInMemoryTraceRepository(),
     coaching: createInMemoryCoachingRepository(stores.coaching),
     coachingSyncState: createInMemoryCoachingSyncStateRepository(
       stores.coachingSyncState

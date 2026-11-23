@@ -29,6 +29,8 @@ Your health data goes to your AI provider only once you allow it. The first time
 
 Settings, Privacy also lists every destination your data can leave your device for, drawn from the code that sends it: Anthropic, OpenAI and Google (your AI provider); Garmin Connect, TrainingPeaks, Train2Go, Tanita and WHOOP (through their extensions); intervals.icu, which receives only the API key you add, to check it; Google Drive, while cross-device sync is on; and Umami, which receives page views and product events, never your data. For each one it says what can go there, when, and whether you have set it up.
 
+Each run of the Kaiord App's assistant (a chat turn, a workout generation, a batch of generations, a lab document read) leaves a Trace in your browser: when it ran, for which feature, with which provider and model and prompt version, each tool it called with whether you confirmed it and how it ended, its retries, how long it took, how it ended, its cost, and which kinds of data went to which provider. A Trace holds no message, prompt, document or model answer. Traces are never sent anywhere: they are left out of the cross-device sync snapshot and out of a backup file. The newest 200 are kept, none older than 90 days. Settings, Privacy lists them, opens each one, exports them all as a JSON file and deletes them all.
+
 ## Remote MCP and A2A Endpoints
 
 `https://kaiord.com/mcp` is a stateless Model Context Protocol endpoint, hosted on Cloudflare Workers, that converts and inspects workout definitions an AI agent sends to it. Here is how it handles data:
