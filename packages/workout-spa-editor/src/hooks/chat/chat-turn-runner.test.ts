@@ -15,11 +15,14 @@ vi.mock("./build-chat-agent", () => ({
   buildChatAgent: vi.fn(async () => ({ agent: fakeAgent, tools: [] })),
 }));
 
-const healthRequest = vi.fn<(question: unknown) => Promise<string>>(
-  async () => "withhold"
-);
+type HealthOptions = { signal?: AbortSignal; onWait?: () => void };
+const healthRequest = vi.fn<
+  (question: unknown, options?: HealthOptions) => Promise<string>
+>(async () => "withhold");
 vi.mock("../../lib/health-sharing-gate", () => ({
-  healthSharingGate: { request: (q: unknown) => healthRequest(q) },
+  healthSharingGate: {
+    request: (q: unknown, options?: HealthOptions) => healthRequest(q, options),
+  },
 }));
 
 const provider = { id: "prov-1", type: "anthropic" } as LlmProviderConfig;
@@ -428,10 +431,10 @@ describe("chat-turn-runner", () => {
     await running;
 
     // Assert
-    expect(healthRequest).toHaveBeenCalledWith({
-      flow: "assistant",
-      providerType: "anthropic",
-    });
+    expect(healthRequest).toHaveBeenCalledWith(
+      { flow: "assistant", providerType: "anthropic" },
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
     expect(sentWhileAsking).toBe(0);
     expect(vi.mocked(buildChatAgent)).toHaveBeenCalledWith(
       expect.objectContaining({ healthShared: true })
@@ -539,14 +542,82 @@ describe("chat-turn-runner", () => {
       expect(trace).toMatchObject({
         feature: "chat",
         outcome: "ok",
-        sent: [
-          {
-            to: "anthropic",
-            kinds: ["messages", "workouts", "coachingPlan", "dataSources"],
-          },
-        ],
+        sent: [{ to: "anthropic", kinds: ["messages"] }],
       });
       expect(ctx.traceRef.current).toBeNull();
+    });
+
+    it("should set apart the health data earlier replies replayed to the Provider may quote", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx } = makeCtx(persistence);
+      healthRequest.mockResolvedValueOnce("send");
+      fakeAgent.sendTurn.mockResolvedValueOnce({
+        status: "complete",
+        toolNames: [],
+        text: "ok",
+        messages: [],
+      });
+      const at = "2026-06-13T10:00:00.000Z";
+      const base = { profileId: "p1", conversationId: "c1", createdAt: at };
+      const history = [
+        { ...base, id: "1", role: "user" as const, content: "Sleep?" },
+        { ...base, id: "2", role: "assistant" as const, content: "6 h." },
+      ];
+
+      // Act
+      await sendTurn(ctx, history, "Plan tomorrow");
+      const [trace] = await tracesOf(persistence);
+
+      // Assert
+      expect(trace?.sent).toEqual([
+        {
+          to: "anthropic",
+          kinds: ["messages"],
+          declared: [
+            "sleep",
+            "restingHeartRate",
+            "weight",
+            "hrv",
+            "dailyActivity",
+            "bodyComposition",
+            "stress",
+            "meals",
+            "energyBalance",
+          ],
+        },
+      ]);
+    });
+
+    it("should cancel the waiting question on Stop, send nothing, and leave a stopped Trace", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx, states, errors } = makeCtx(persistence);
+      healthRequest.mockImplementationOnce(
+        (_q, options) =>
+          new Promise((_resolve, reject) => {
+            options?.onWait?.();
+            options?.signal?.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError"))
+            );
+          })
+      );
+      const running = sendTurn(ctx, [], "How did I sleep?");
+      await vi.waitFor(() => expect(healthRequest).toHaveBeenCalled());
+      const waiting = await tracesOf(persistence);
+
+      // Act
+      stopTurn(ctx);
+      await running;
+      const [trace] = await persistence.traces.list();
+
+      // Assert
+      expect(waiting[0]?.outcome).toBe("stopped");
+      expect(fakeAgent.sendTurn).not.toHaveBeenCalled();
+      expect(vi.mocked(buildChatAgent)).not.toHaveBeenCalled();
+      expect(trace).toMatchObject({ outcome: "stopped", sent: [] });
+      expect(states.at(-1)).toBe("idle");
+      expect(errors.filter(Boolean)).toEqual([]);
     });
 
     it("should keep the Trace open while the athlete decides, and record the confirmed Tool", async () => {
