@@ -21,6 +21,7 @@ const OCT_LAST = "2026-10-31";
 const NOV_FIRST = "2026-11-01";
 /** Two settled reads leave the entry out: confirmed absent. */
 const OMIT_UNTIL_CLAIM = 2;
+const HOUR_MS = 3_600_000;
 /** The read before the POST leaves it out too: a second entry is posted. */
 const OMIT_PAST_POST = 3;
 
@@ -103,6 +104,29 @@ describe("an entry the athlete placed of the same library workout", () => {
     expect(moved).toEqual({ kind: "foreign-left", dates: [OCT_LAST] });
     expect(entries(c).map((e) => e.date)).toEqual([OCT_LAST, NOV_FIRST]);
     expect(unscheduled(c)).not.toContain(athletes);
+  });
+});
+
+describe("an entry the athlete placed while Kaiord's post was unanswered", () => {
+  it("should never be deleted when the Workout moves on", async () => {
+    // Arrange
+    const c = createMessageSeamConnector(db);
+    c.garmin.state.loseOn = "schedule";
+    void c.send(TEMPO, D1, "Tempo");
+    await vi.waitFor(() => expect(c.garmin.count("schedule")).toBe(1));
+    c.restartTab();
+    const { workoutId } = c.garmin.library[0];
+    const athletes = c.garmin.athlete.placeLibraryWorkout(workoutId, D1);
+    vi.setSystemTime(Date.now() + HOUR_MS);
+    await c.send(TEMPO, D1, "Tempo");
+
+    // Act
+    await c.send(TEMPO, D2, "Tempo");
+
+    // Assert
+    expect(unscheduled(c)).not.toContain(athletes);
+    expect(entries(c).map((e) => e.id)).toContain(athletes);
+    expect(entries(c).map((e) => e.date)).toContain(D2);
   });
 });
 

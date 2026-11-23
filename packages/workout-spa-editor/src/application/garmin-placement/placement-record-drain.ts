@@ -2,8 +2,8 @@
  * One drain outcome, written as its own entry's state on the re-read row
  * (join by max: concurrent queue additions survive). After
  * `MAX_DELETE_ATTEMPTS` failed sends the entry is `abandoned`. A delete
- * Garmin answered ok marks the entry `deleted`: a stale read that still
- * shows it never revives it.
+ * Garmin answered ok, or a 404 a read confirms, marks the entry `deleted`:
+ * a stale read that still shows it never revives it.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";

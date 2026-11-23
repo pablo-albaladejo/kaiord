@@ -56,7 +56,7 @@ const sendOne = async (
   )
     return "reauth";
   if (answer.status === 404 && (await absentFromCalendar(run, entry)))
-    return "gone";
+    return "deleted";
   return "count";
 };
 

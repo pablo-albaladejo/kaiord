@@ -64,6 +64,7 @@ export const readBeforePost = async (
     found.entries
   );
   if (verdict === "absent") return recordDeleted(claimed.date);
+  if (verdict === "stale") return undefined;
   const kind = claimed.previous ? "moved" : "scheduled";
   return finishPlacement(run, placed, kind, context.leftBehind);
 };

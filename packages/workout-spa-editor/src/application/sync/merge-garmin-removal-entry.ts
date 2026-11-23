@@ -34,9 +34,11 @@ const canonical = (
   ...(e.revival ? { revival: e.revival } : {}),
 });
 
-/** A higher revival wins whole (its own attempts and `deleted`); within
-    one revival the higher state, the larger `attempts` and the OR of
-    `abandoned` and `deleted`. Who made the entry is ORed always. */
+/** An entry seen deleted wins whole: Garmin never reuses an id, so no
+    revival elsewhere can bring it back. Then a higher revival wins whole
+    (its own attempts); within one revival the higher state, the larger
+    `attempts` and the OR of `abandoned`. Who made the entry is ORed
+    always. */
 export const joinEntries = (
   x: GarminRemovalEntry,
   y: GarminRemovalEntry
@@ -46,7 +48,9 @@ export const joinEntries = (
     recognized: x.recognized || y.recognized,
     noticed: x.noticed || y.noticed,
   };
-  const epoch = revivalOf(x) - revivalOf(y);
+  const epoch =
+    Number(x.deleted ?? false) - Number(y.deleted ?? false) ||
+    revivalOf(x) - revivalOf(y);
   if (epoch !== 0) {
     const w = epoch > 0 ? x : y;
     return canonical(w, { ...who, deleted: w.deleted });

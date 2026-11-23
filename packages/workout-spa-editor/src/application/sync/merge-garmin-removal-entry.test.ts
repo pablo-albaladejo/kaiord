@@ -112,4 +112,22 @@ describe("joining two states of one removal entry", () => {
     // Assert
     expect(joined).toEqual({ ...base, state: "retire", revival: 1 });
   });
+
+  it("should keep an entry another device saw deleted gone, whatever revival it meets", () => {
+    // Arrange
+    const deleted: GarminRemovalEntry = {
+      ...base,
+      state: "gone",
+      created: true,
+      deleted: true,
+    };
+    const revived: GarminRemovalEntry = { ...base, state: "keep", revival: 1 };
+
+    // Act
+    const joined = joinEntries(revived, deleted);
+
+    // Assert
+    expect(joined).toMatchObject({ state: "gone", deleted: true });
+    expect(joinEntries(deleted, revived)).toEqual(joined);
+  });
 });

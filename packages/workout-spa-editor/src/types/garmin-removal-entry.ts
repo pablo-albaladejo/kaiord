@@ -19,9 +19,10 @@ import {
  * entry its record holds as created: `created`, or never `recognized` (an
  * entry of Kaiord's own record from before these facts were kept).
  * `noticed`: the athlete was told once that such an entry stayed behind.
- * `deleted`: Kaiord's delete of it succeeded (or the athlete said they
- * removed it), so a read that still shows it is stale and never revives
- * it. `revival`: how many times a `gone` entry of Kaiord's was seen live
+ * `deleted`: Garmin confirmed it gone (a delete answered ok, or a 404
+ * with a read that lacks it) or the athlete said they removed it; it
+ * outranks every revival, so a read that still shows it is stale and never
+ * revives it, on any device. `revival`: how many times a `gone` entry of Kaiord's was seen live
  * again; a higher revival outranks any state of a lower one, so a revived
  * entry can be the `Placed` or be drained like any other.
  */

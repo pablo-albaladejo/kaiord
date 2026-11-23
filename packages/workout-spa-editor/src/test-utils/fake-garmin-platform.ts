@@ -7,7 +7,8 @@
  * may hold entries Kaiord did not create (the athlete's own workouts,
  * activities); the athlete can delete by hand. `crashOn` makes Garmin
  * commit a write and the App never hear the answer (a tab that died between
- * "created" and "recorded"); `calendarDown` fails the calendar read,
+ * "created" and "recorded"), `loseOn` loses one message entirely (a POST
+ * that never landed); `calendarDown` fails the calendar read,
  * `downMonths` fails it for some months only (a partial read), and
  * `omitFromReads` makes the month read leave out a live entry for its next
  * N reads (Garmin's read lagging or flickering). The athlete can put a
@@ -43,6 +44,9 @@ export const createFakeGarminPlatform = () => {
     crashOn: undefined as string | undefined,
     /** The calendar month read fails (Garmin not answering). */
     calendarDown: false,
+    /** The next message of this action is lost: Garmin never writes it and
+        the App never hears back (a POST that did not land). */
+    loseOn: undefined as string | undefined,
     /** Months (`YYYY-MM`) whose read fails while the others answer. */
     downMonths: new Set<string>(),
     /** Entry id → how many more month reads leave it out. */
@@ -121,6 +125,10 @@ export const createFakeGarminPlatform = () => {
     callback: (raw: unknown) => void
   ) => {
     log.push(message);
+    if (state.loseOn === message.action) {
+      state.loseOn = undefined;
+      return;
+    }
     const envelope = answer(message);
     if (state.crashOn === message.action) {
       state.crashOn = undefined;
