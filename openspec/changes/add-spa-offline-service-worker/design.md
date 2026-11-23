@@ -108,14 +108,15 @@ Mechanism:
 **How a waiting worker is detected.** There are two signals:
 
 - `registration.waiting` is already set at registration time;
-- `updatefound`, followed by `installed`, fires while a controller exists.
+- `updatefound`, followed by `installed`, fires while a controller exists;
+- `registration.installing` is already set at registration time: the navigation's own update check started the install before the page registered (seen in Firefox), so its `statechange` is watched too. Without it that deploy waited for the next hourly check.
 
 **When an update is found.**
 
 1. **Silent apply on a cold start.** The update is applied with no toast only when all of these hold:
    - it is found within 10 s of load;
-   - there has been no `pointerdown` or `keydown` yet;
-   - the unsaved flag is clear;
+   - there has been no input yet: `pointerdown`, `keydown`, `touchstart`, `wheel`, `dragenter`, `drop`, `paste`, or a text field taking focus (`lib/service-worker/first-input.ts`). A file dragged in from the desktop fires no pointer or key event, so counting only those let a silent update reload over a drop;
+   - the registry of unsaved work is empty;
    - the worker reports exactly **one** window client (`clients.matchAll({type: "window"})`, answered to a `CLIENT_COUNT` message).
 
    With other windows open, a silent `SKIP_WAITING` would swap the controller under them, so the toast is shown instead. This is accepted per the review: one window and no input means nothing to lose.
@@ -124,7 +125,12 @@ Mechanism:
 
 **On click, in this order. The gate always comes before `SKIP_WAITING`, never after it.**
 
-1. **Unsaved edits block the update.** If the module-level unsaved flag is set, the click shows "Save your changes to update" ("Guarda los cambios para actualizar") and stops. Nothing is posted to the worker. The flag lives in `lib/unsaved-edits.ts`. It is written by the same effect that arms `beforeunload` in `use-editor-save.ts` (`useBeforeUnloadGuard(armed)`), so the two can never disagree. There is no discard confirmation; this is the team-lead's decision. The editor has no autosave: `isDirty` lives in `use-editor-edit-mode.ts`.
+1. **Unsaved work blocks the update.** If the registry holds anything, the click shows "Save your changes to update" ("Guarda los cambios para actualizar") and stops. Nothing is posted to the worker. There is no discard confirmation; this is the team-lead's decision.
+   - **One registry.** `lib/unsaved-edits.ts` holds armed tokens and read-time probes; `hasUnsavedEdits()` is true while any token is armed or any probe answers true. Surfaces report with `useUnsavedWork(active)` (`lib/use-unsaved-work.ts`). The scheduled-workout editor arms it from the same effect that arms `beforeunload` in `use-editor-save.ts`, so the two never disagree.
+   - **Reporters.** A new workout with a step and no record (`use-editor-page.ts`: scratch, an import loaded into the editor, a coaching draft, a library template); a workout import in flight (`useFileUpload`, which every import screen and Convert use); a lab extraction and a WHOOP lab pull in flight; the lab entry form once typed, added or loaded until saved or reset; the nutrition intake logger while its fields are not empty; a backup import in flight or awaiting its profile choice; the assistant's turn while it streams or waits for the athlete to approve or deny an action (`use-chat-turn.ts`); the Create sheet while its prompt is typed or its generation is running or unsaved; the batch's cost confirmation and the batch run; a move awaiting the same-sport answer; a zones-sync conflict awaiting its decisions; a Garmin send, a connection link or unlink, an API key typed or being checked, a profile choice and a wipe in flight.
+   - **Dialogs.** `lib/unsaved-dialog-input.ts` listens for `input` at the document and counts any text field inside `[role=dialog]`, `[role=alertdialog]` or `<dialog>` that the athlete typed into, while it is still in the document. Saving or cancelling a dialog removes its fields, so it releases by itself, and a dialog added later is covered without reporting.
+   - **The guard.** `src/lib/unsaved-work-reporters.test.ts` scans the App's source for the shapes of unsaved work: a Zustand store, a draft in React state, a workout or a pending answer in state, a form's fields in state, a file input, and an `isLoading`/`isRunning`/`isProcessing`/`busy` flag. Each file found must report itself, be reported for by a named file (the workout store by `use-editor-page.ts`, a record's baseline by `use-editor-save.ts`, a file input by its import hook), or be listed with why a reload loses nothing (runtime stores read again at boot, inline fields that commit on blur, an autosave the update awaits, a dialog's own form). Stale entries fail too.
+   - **Not counted.** Typing outside a dialog in a field no surface reports, such as a search box or the chat composer's unsent text: a search is not work, and the composer's text was left out because it is one message the athlete still sees typed above the toast.
 2. **Pending debounced autosaves are flushed.** `use-prompt-autosave` registers its `flush` in `lib/pending-flushes.ts` while a timer is pending. The update path awaits every registered flush. A reload runs no React cleanup, so without this the timer would be lost.
 3. **The worker is told to skip waiting.** `{type: "SKIP_WAITING"}` is posted to the waiting worker.
 4. **Only the clicking tab reloads.** On `controllerchange`, the tab whose click set the module flag calls `location.reload()`. No other tab reloads.

@@ -81,6 +81,11 @@
 
 - [x] 3.9 Add `docs/runbooks/spa-service-worker.md` and its row in `docs/runbooks/AGENTS.md`. It covers the ≈10-minute edge delay, that `navigate()` drops unsaved edits, and the manual fallback.
 
+- [x] 3.10 One registry of unsaved work (review item 3): `lib/unsaved-edits.ts` gains read-time probes, surfaces report through `lib/use-unsaved-work.ts`, `lib/unsaved-dialog-input.ts` counts text typed into any open dialog, and every draft, import, generation, send, pending answer and form listed in design D4 reports. `src/lib/unsaved-work-reporters.test.ts` fails on a draft-shaped file that neither reports nor says why a reload loses nothing.
+- [x] 3.11 Count a touch, a wheel, a drag, a drop, a paste and a text field taking focus as input for the silent update (`lib/service-worker/first-input.ts`), and watch a worker already installing when the page registers. E2E: a file dropped right after load is not reloaded over and holds the deploy while unsaved; a new workout's draft holds the deploy until it is scheduled (Chromium, Firefox, WebKit locally).
+- [x] 3.12 The App's `worker-src` names `<origin>/app/sw.js` (`assemble-site.mjs --origin`, default `https://kaiord.com`), and `check-site-csp.mjs --origin` fails any other value on an App page and anything but `'none'` elsewhere (review item 5).
+- [x] 3.13 Split `emit-spa-service-worker.mjs` and `check-spa-service-worker.mjs` under the line cap through `scripts/lib/sw-manifest.mjs` and `scripts/lib/sw-precache-audit.mjs`, each with a sibling test (review item 12).
+
 ## Every PR
 
 - [x] 4.1 Run all mobile e2e projects locally and report the result. 2026-11-23, dev server, Mobile Chrome + Mobile Safari + Mobile-768: 1131 passed, 169 skipped, 2 failed. `zones-sync` (c) on Mobile Chrome passed 3 of 3 on a rerun (flaky). `scheduled-lifecycle` on Mobile Safari fails at a keyboard `toBeFocused` on the Move dialog, and fails the same way on the base commit `1bdd733b4` without this change: pre-existing, not caused by it.
