@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { answerHealthSharing } from "./helpers/health-sharing";
 import { pollKaiordStore, readKaiordStore } from "./helpers/kaiord-idb";
 
 /**
@@ -54,6 +55,8 @@ async function setMainModel(page: Page, label: string, modelId: string) {
 }
 
 async function setUpTwoAccounts(page: Page) {
+  // The first-time health notice has its own spec.
+  await answerHealthSharing(page, { anthropic: "never", openai: "never" });
   for (const host of PROVIDER_HOSTS) {
     await page.route(host, (route) => route.abort());
   }
