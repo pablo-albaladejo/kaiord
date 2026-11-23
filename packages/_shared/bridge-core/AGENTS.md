@@ -10,7 +10,10 @@ vendored **byte-identically** into its consumer bridges by
 `scripts/sync-bridge-core.mjs` (`pnpm bridge:sync`) and locked by
 `scripts/check-bridge-core-parity.test.mjs`. Bridges never import across
 packages at runtime — sharing is copy-at-sync-time, keeping
-`scripts/package-extension.sh`'s flat-file packaging untouched. Normative
+`scripts/package-extension.sh`'s flat-file packaging untouched. The same
+holds for the one workspace package that reads a master: `@kaiord/i18n`
+imports its copy of `connection-notices.js` from `src/generated/`, written by
+the same sync (`PACKAGE_COPIES`) and held byte-identical by the same guard. Normative
 contract: `openspec/specs/bridge-core/spec.md`.
 
 Per-bridge identity (`id`, `name`, `capabilities`) lives ONLY in each
@@ -43,7 +46,7 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 | `bridge-popup-shell.js`            | all bridges                          | Shell renderers: `renderStatusBlock`, `renderChips`, `renderConsequence`, `renderSkeleton`, `renderCtas`, `renderNotice`.                                                                                                                                       |
 | `bridge-popup-health.js`           | all bridges                          | Outage boundary (`bridgeHealth` in `chrome.storage.local`): when a bridge was first observed broken, cleared on success.                                                                                                                                        |
 | `bridge-popup-snapshot.js`         | garmin, train2go                     | Athlete card + snapshot freshness (`STALE_SNAPSHOT_THRESHOLD_DAYS` vendored literal).                                                                                                                                                                           |
-| `connection-notices.js`            | all bridges                          | The four Connection fixes and their one en/es wording, read by every popup and by the App via `@kaiord/i18n`; typed by `.d.ts`.                                                                                                                                 |
+| `connection-notices.js`            | all bridges, `@kaiord/i18n`          | The four Connection fixes and their one en/es wording, read by every popup and by the App via `@kaiord/i18n`'s generated copy (`src/generated/`); typed by `.d.ts`, copied with it.                                                                             |
 | `popup.css`                        | all bridges                          | The unified 340px popup shell (`--kd-*` light + dark palettes, layout, components).                                                                                                                                                                             |
 | `bridge-theme.js`                  | all bridges                          | App theme preference: `set-theme` validation + `chrome.storage.local` write (SW); `data-theme` before first paint (popup).                                                                                                                                      |
 | `profile-snapshot.js`              | garmin, train2go                     | Plain-JS snapshot validator mirroring the @kaiord/core Zod schema.                                                                                                                                                                                              |

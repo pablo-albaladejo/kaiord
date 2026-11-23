@@ -2,7 +2,7 @@ import notices, {
   type ConnectionFix,
   type ConnectionNotice,
   type ConnectionState,
-} from "../../_shared/bridge-core/connection-notices.js";
+} from "./generated/connection-notices.js";
 import type { Locale } from "./types";
 
 export type { ConnectionFix, ConnectionNotice, ConnectionState };
