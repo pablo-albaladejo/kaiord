@@ -926,6 +926,21 @@ Decisions:
   `present | absent | unknown`). The read before the POST shares its guard
   (`readsById`).
 
-Known limit: when the Workout moves back to a date where a recognized entry
+- **After an independent review of this pass.** Only the run that sent
+  the POST, after a read that found no unknown entry, marks the one entry
+  it then finds `created`; a leftover attempt from an earlier run or a
+  "Send anyway" cannot tell it from one the athlete placed in between, so
+  it is `recognized`. `deleted` (a delete answered ok, a 404 a read
+  confirms, "I removed it") outranks every revival in the join, so a
+  device that has not synced cannot revive an entry another device saw
+  deleted; the commit re-checks a revival against the re-read row and,
+  when it is stale, posts instead. The Update Garmin toast, the main path
+  of a move, states `foreign-left` itself, since that run marks the entry
+  `noticed`.
+
+Known limits: a device still on an older App build drains a `recognized`
+entry (it does not know the fact) and, if its parser strips unknown keys
+before a sync, erases it from the row it uploads; the facts protect the
+athlete's entries once every device runs this build. When the Workout moves back to a date where a recognized entry
 stays, that entry is already in the record (superseded), so Kaiord posts its
 own entry next to it; the athlete was told once that it stayed.
