@@ -1,7 +1,7 @@
 {
   "extName": {
-    "message": "Kaiord Train2Go Bridge",
-    "description": "Extension name shown in the Chrome Web Store and toolbar."
+    "message": "Kaiord for Train2Go",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
   },
   "extDescription": {
     "message": "Lets the Kaiord App read the plan your coach sets on Train2Go, your training zones and your weight, using your own Train2Go sign-in",

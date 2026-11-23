@@ -1,0 +1,72 @@
+{
+  "extName": {
+    "message": "Kaiord for TrainingPeaks",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
+  },
+  "extDescription": {
+    "message": "Kaiord App envía entrenamientos a tu calendario de TrainingPeaks y lee tu peso, con tu propio inicio de sesión de TrainingPeaks",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Comprobando tu sesión…",
+    "description": "Status verdict while the popup probes the session."
+  },
+  "checkingCause": {
+    "message": "Suele tardar menos de un segundo.",
+    "description": "Status cause sentence shown while the probe runs."
+  },
+  "connected": {
+    "message": "Conectado",
+    "description": "Status verdict when the TrainingPeaks session can mint a token."
+  },
+  "connectedCause": {
+    "message": "Leyendo tus métricas corporales a través de tu sesión.",
+    "description": "Status cause sentence for the connected state."
+  },
+  "notChecked": {
+    "message": "Todavía sin comprobar",
+    "description": "Status verdict when no token is held: the check asks TrainingPeaks nothing, because its only Session request mints a token."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord pregunta a TrainingPeaks la primera vez que lee o envía, así que mirar aquí no genera ningún token.",
+    "description": "Status cause sentence for the not-checked state."
+  },
+  "captionFeeds": {
+    "message": "Envía a Kaiord",
+    "description": "Caption above the capability chips in the connected state."
+  },
+  "captionWillFeed": {
+    "message": "Enviará a Kaiord",
+    "description": "Caption above the capability chips before the bridge is connected."
+  },
+  "typeWeight": {
+    "message": "Peso",
+    "description": "Capability chip for the Weight data type imported into Kaiord."
+  },
+  "typeWeightBack": {
+    "message": "Peso ↑ de vuelta a TrainingPeaks",
+    "description": "Capability chip for the Weight push-back this bridge supports but that no Kaiord export route drives yet; shown dashed under \"Will feed Kaiord\"."
+  },
+  "openEditor": {
+    "message": "Abrir el editor de Kaiord",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "openTrainingPeaks": {
+    "message": "Abrir TrainingPeaks ↗",
+    "description": "Secondary footer link opening app.trainingpeaks.com in a new tab."
+  },
+  "refresh": {
+    "message": "Actualizar",
+    "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Desde el $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  }
+}

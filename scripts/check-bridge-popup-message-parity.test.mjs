@@ -8,12 +8,15 @@ import {
   DEFAULT_PACKAGES_DIR,
 } from "./sync-bridge-core.mjs";
 
-// Every bridge popup carries its strings twice: `_locales/en/messages.json`
-// is what Chrome renders through chrome.i18n, and the
-// `globalThis.KAIORD_POPUP_MESSAGES` literal in popup.js is the byte-identical
-// English fallback the vitest/jsdom suites (and any locale-less environment)
-// resolve instead. A key added to one and forgotten in the other renders as
-// `undefined` in exactly one of the two worlds — the drift this guard kills.
+// Every bridge popup carries its strings in three places: `_locales/en` and
+// `_locales/es` are what Chrome renders through chrome.i18n (in the browser's
+// UI language), and the `globalThis.KAIORD_POPUP_MESSAGES` literal in popup.js
+// is the English fallback the vitest/jsdom suites (and any locale-less
+// environment) resolve instead. A key added to one and forgotten in another
+// renders as `undefined` in exactly one of those worlds — the drift this
+// guard kills. That the fallback repeats the English words, and that en and
+// es agree, is R-BridgeLocalesEnglishSpanish
+// (check-bridge-locales-en-es.test.mjs).
 //
 // The bridge list is derived from the popup-shell master's consumer set so a
 // newly onboarded popup bridge is covered without editing this file.
@@ -22,7 +25,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = dirname(HERE);
 
 // Manifest-level strings; they never appear in the popup's runtime table.
-const MANIFEST_ONLY_KEYS = ["extName", "extDescription"];
+// `extName` does: the popup's title and header are the extension's name.
+const MANIFEST_ONLY_KEYS = ["extDescription"];
+const LOCALES = ["en", "es"];
 
 const shellMaster = BRIDGE_CORE_MASTERS.find(
   (entry) => entry.master === "bridge-popup-shell.js"
@@ -102,8 +107,13 @@ const readFallbackKeys = (bridge) =>
     `${bridge}/popup.js`
   );
 
-const readLocaleKeys = (bridge) => {
-  const path = join(REPO, "packages", bridge, "_locales/en/messages.json");
+const readLocaleKeys = (bridge, locale = "en") => {
+  const path = join(
+    REPO,
+    "packages",
+    bridge,
+    `_locales/${locale}/messages.json`
+  );
   const catalog = JSON.parse(readFileSync(path, "utf8"));
   return Object.keys(catalog).filter((k) => !MANIFEST_ONLY_KEYS.includes(k));
 };
@@ -177,22 +187,24 @@ describe("bridge popup message parity", () => {
     );
   });
 
-  it("each popup.js fallback table has the same keys as its en catalog", () => {
+  it("each popup.js fallback table has the same keys as its en and es catalogs", () => {
     for (const bridge of BRIDGES) {
       const fallback = readFallbackKeys(bridge);
-      const locale = readLocaleKeys(bridge);
-      const missingFromTable = locale.filter((k) => !fallback.includes(k));
-      const missingFromLocale = fallback.filter((k) => !locale.includes(k));
-      assert.deepEqual(
-        missingFromTable,
-        [],
-        `${bridge}: keys in _locales/en/messages.json but not in KAIORD_POPUP_MESSAGES`
-      );
-      assert.deepEqual(
-        missingFromLocale,
-        [],
-        `${bridge}: keys in KAIORD_POPUP_MESSAGES but not in _locales/en/messages.json`
-      );
+      for (const code of LOCALES) {
+        const locale = readLocaleKeys(bridge, code);
+        const missingFromTable = locale.filter((k) => !fallback.includes(k));
+        const missingFromLocale = fallback.filter((k) => !locale.includes(k));
+        assert.deepEqual(
+          missingFromTable,
+          [],
+          `${bridge}: keys in _locales/${code}/messages.json but not in KAIORD_POPUP_MESSAGES`
+        );
+        assert.deepEqual(
+          missingFromLocale,
+          [],
+          `${bridge}: keys in KAIORD_POPUP_MESSAGES but not in _locales/${code}/messages.json`
+        );
+      }
     }
   });
 
@@ -207,15 +219,15 @@ describe("bridge popup message parity", () => {
     }
   });
 
-  it("declares the manifest-only keys in every en catalog", () => {
+  it("declares the manifest-only keys in every en and es catalog", () => {
     for (const bridge of BRIDGES) {
-      const path = join(REPO, "packages", bridge, "_locales/en/messages.json");
-      const catalog = JSON.parse(readFileSync(path, "utf8"));
-      for (const key of MANIFEST_ONLY_KEYS) {
-        assert.ok(
-          catalog[key],
-          `${bridge}: _locales/en/messages.json lacks ${key}`
-        );
+      for (const code of LOCALES) {
+        const where = `_locales/${code}/messages.json`;
+        const path = join(REPO, "packages", bridge, where);
+        const catalog = JSON.parse(readFileSync(path, "utf8"));
+        for (const key of ["extName", ...MANIFEST_ONLY_KEYS]) {
+          assert.ok(catalog[key], `${bridge}: ${where} lacks ${key}`);
+        }
       }
     }
   });

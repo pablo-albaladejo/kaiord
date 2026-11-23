@@ -1,7 +1,7 @@
 {
   "extName": {
-    "message": "Kaiord TrainingPeaks Bridge",
-    "description": "Extension name shown in the Chrome Web Store and toolbar."
+    "message": "Kaiord for TrainingPeaks",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
   },
   "extDescription": {
     "message": "Lets the Kaiord App send workouts to your TrainingPeaks calendar and read your weight, using your own TrainingPeaks sign-in",

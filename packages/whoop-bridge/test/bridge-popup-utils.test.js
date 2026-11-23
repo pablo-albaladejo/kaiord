@@ -14,7 +14,15 @@ const {
   relativeAgo,
   formatSinceDate,
   renderRetry,
+  uiLocale,
+  localizePage,
 } = require("../bridge-popup-utils.js");
+
+// Chrome renders the catalog of the browser's UI language; these suites set
+// that language through the one i18n call the utilities read.
+const setUiLanguage = (language) => {
+  globalThis.chrome.i18n = { getUILanguage: () => language };
+};
 
 const TIMEOUT_MS = 1_000;
 
@@ -37,6 +45,74 @@ describe("bridge-popup-utils (vendored)", () => {
 
   afterEach(() => {
     delete globalThis.KAIORD_POPUP_MESSAGES;
+    delete globalThis.chrome.i18n;
+  });
+
+  describe("uiLocale", () => {
+    it.each([
+      ["es", "es"],
+      ["es-419", "es"],
+      ["es_ES", "es"],
+      ["en-US", "en"],
+      ["fr", "en"],
+      ["est", "en"],
+    ])("should map the UI language %s to the %s catalog", (language, expected) => {
+      // Arrange
+      setUiLanguage(language);
+
+      // Act
+      const locale = uiLocale();
+
+      // Assert
+      expect(locale).toBe(expected);
+    });
+
+    it("should fall back to en where the browser exposes no UI language", () => {
+      // Arrange
+      delete globalThis.chrome.i18n;
+
+      // Act
+      const locale = uiLocale();
+
+      // Assert
+      expect(locale).toBe("en");
+    });
+  });
+
+  describe("localizePage", () => {
+    it("should fill every data-i18n text and aria-label and set the page language", () => {
+      // Arrange
+      globalThis.KAIORD_POPUP_MESSAGES = {
+        extName: "Kaiord for Example",
+        refresh: "Refresh",
+      };
+      document.head.innerHTML = '<title data-i18n="extName"></title>';
+      document.body.innerHTML =
+        '<h1 data-i18n="extName"></h1><button data-i18n-aria-label="refresh"></button>';
+
+      // Act
+      localizePage();
+
+      // Assert
+      expect(document.title).toBe("Kaiord for Example");
+      expect(document.querySelector("h1").textContent).toBe("Kaiord for Example");
+      expect(document.querySelector("button").getAttribute("aria-label")).toBe(
+        "Refresh"
+      );
+      expect(document.documentElement.lang).toBe("en");
+    });
+
+    it("should mark the page Spanish when the browser's UI language is Spanish", () => {
+      // Arrange
+      setUiLanguage("es-ES");
+      document.body.innerHTML = "<p></p>";
+
+      // Act
+      localizePage();
+
+      // Assert
+      expect(document.documentElement.lang).toBe("es");
+    });
   });
 
   describe("applySubs", () => {
@@ -149,7 +225,7 @@ describe("bridge-popup-utils (vendored)", () => {
       const out = formatSinceDate(epoch, NOW_MS);
 
       // Assert
-      // Day-first: pinned to en-GB rather than the browser locale, because
+      // Day-first: English is en-GB rather than the browser's region, because
       // a US-configured Chrome would otherwise render "Apr 23" into copy the
       // rest of which is written day-first.
       expect(out).toBe("23 Apr");
@@ -165,6 +241,18 @@ describe("bridge-popup-utils (vendored)", () => {
       // Assert
       // Without the year a fourteen-month-old outage reads as this month's.
       expect(out).toBe("30 Dec 2025");
+    });
+
+    it("should render day and short month in Spanish when the UI language is Spanish", () => {
+      // Arrange
+      setUiLanguage("es");
+      const epoch = new Date("2026-04-23T08:00:00Z").getTime();
+
+      // Act
+      const out = formatSinceDate(epoch, NOW_MS);
+
+      // Assert
+      expect(out).toBe("23 abr");
     });
 
     it("should return null for a stamp that is not a date", () => {

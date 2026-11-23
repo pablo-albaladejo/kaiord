@@ -38,7 +38,7 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 | `session-fetch.js`                 | tanita, train2go, trainingpeaks | Cookie-session transport for SW-direct bridges: `credentials:"include"`, `redirect:"manual"`, caller-supplied path allowlist; maps a redirect or 401/403 to `needsReauth`. |
 | `bearer-fetch.js`                  | garmin, trainingpeaks           | `Authorization: Bearer` transport (`credentials:"omit"`): JSON or multipart body, one retry on 401 via the caller's `refreshToken`, then `needsReauth`.                    |
 | `kaiord-announce.js`               | all bridges                     | Announce content script core; reads `globalThis.KAIORD_BRIDGE_IDENTITY` (its `protocolVersion`, default 1).                                                                |
-| `bridge-popup-utils.js`            | all bridges                     | Popup i18n machinery (`msg` over `KAIORD_POPUP_MESSAGES`), `$`, `withTimeout`, `relativeAgo`, `formatSinceDate`, `renderRetry`.                                            |
+| `bridge-popup-utils.js`            | all bridges                     | Popup i18n machinery (`msg`, `uiLocale`, `localizePage`), `$`, `withTimeout`, `relativeAgo`, `formatSinceDate`, `renderRetry`.                                             |
 | `bridge-popup-shell.js`            | all bridges                     | Shell renderers: `renderStatusBlock`, `renderChips`, `renderConsequence`, `renderSkeleton`, `renderCtas`, `renderNotice`.                                                  |
 | `bridge-popup-health.js`           | all bridges                     | Outage boundary (`bridgeHealth` in `chrome.storage.local`): when a bridge was first observed broken, cleared on success.                                                   |
 | `bridge-popup-snapshot.js`         | garmin, train2go                | Athlete card + snapshot freshness (`STALE_SNAPSHOT_THRESHOLD_DAYS` vendored literal).                                                                                      |
@@ -55,6 +55,7 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
 | `test/session-fetch.test.js`       | tanita, train2go, trainingpeaks | Vendored unit tests for the cookie-session transport (neutral origin and allowlist).                                                                                       |
 | `test/bridge-popup-utils.test.js`  | all bridges                     | Vendored unit tests for the popup utilities, incl. `withTimeout` and `renderRetry` (jsdom env).                                                                            |
 | `test/kaiord-announce.test.js`     | all bridges                     | Vendored unit tests for the announce core; reads the bridge's own `bridge-identity.js` instead of repeating it.                                                            |
+| `test/popup-locales.test.js`       | all bridges                     | Each popup in English and Spanish, against the bridge's own `popup.html`, scripts and `_locales`: name, page language, notice.                                             |
 
 ## For AI Agents
 
@@ -79,10 +80,15 @@ pinned by `scripts/check-bridge-popup-tokens-parity.test.mjs`.
   privacy-surface guard enumerates. Only a CONCLUSIVE probe is folded in — a
   worker timeout says nothing about the upstream session and must not open an
   outage.
-- **Popup strings live per bridge.** Every string a shell renderer displays
-  arrives as a message key from that bridge's `KAIORD_POPUP_MESSAGES` table,
-  which must stay key-for-key identical to its `_locales/en/messages.json`
-  (`scripts/check-bridge-popup-message-parity.test.mjs`).
+- **Popup strings live per bridge, in English and Spanish.** Every string a
+  popup shows arrives as a message key from that bridge's `_locales/en` or
+  `_locales/es` (Chrome picks the catalog from the browser's UI language), or
+  from the shared Connection notices in the language `uiLocale()` reads.
+  `popup.html` holds no words: an element names its message with `data-i18n`
+  or `data-i18n-aria-label`, filled by `localizePage()`. The
+  `KAIORD_POPUP_MESSAGES` table is the English fallback for jsdom and repeats
+  `_locales/en` word for word (`scripts/check-bridge-popup-message-parity.test.mjs`,
+  `scripts/check-bridge-locales-en-es.test.mjs`, R-BridgeLocalesEnglishSpanish).
 
 ### Testing Requirements
 

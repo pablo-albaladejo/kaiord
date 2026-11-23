@@ -1,7 +1,7 @@
 {
   "extName": {
-    "message": "Kaiord Tanita Bridge",
-    "description": "Extension name shown in the Chrome Web Store and toolbar."
+    "message": "Kaiord for Tanita",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
   },
   "extDescription": {
     "message": "Lets the Kaiord App import your weight and body composition from MyTANITA, using your own MyTANITA sign-in",

@@ -143,6 +143,12 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "test/kaiord-announce.test.js",
     bridges: ALL_BRIDGES,
   },
+  // Each popup in English and Spanish, against its own markup and _locales.
+  {
+    master: "test/popup-locales.test.js",
+    dest: "test/popup-locales.test.js",
+    bridges: ALL_BRIDGES,
+  },
 ];
 
 export const DEFAULT_MASTERS_DIR = join(REPO, "packages/_shared/bridge-core");

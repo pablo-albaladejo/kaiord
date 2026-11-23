@@ -79,7 +79,7 @@ describe("background service worker (SW-direct)", () => {
       // Arrange
       const expected = {
         id: "train2go-bridge",
-        name: "Kaiord Train2Go Bridge",
+        name: "Train2Go",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
         capabilities: [
@@ -419,7 +419,7 @@ describe("background service worker (SW-direct)", () => {
       // Assert
       expect(result).toMatchObject({
         id: "train2go-bridge",
-        name: "Kaiord Train2Go Bridge",
+        name: "Train2Go",
         version: pkg.version,
         protocolVersion: EXPECTED_PROTOCOL_VERSION,
         capabilities: [

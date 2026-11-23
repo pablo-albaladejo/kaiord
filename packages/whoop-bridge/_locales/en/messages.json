@@ -1,7 +1,7 @@
 {
   "extName": {
-    "message": "Kaiord WHOOP Bridge",
-    "description": "Extension name shown in the Chrome Web Store and toolbar."
+    "message": "Kaiord for WHOOP",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
   },
   "extDescription": {
     "message": "Connects the Kaiord editor to your WHOOP recovery & sleep data through your open WHOOP session — no developer app, no passwords.",

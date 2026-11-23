@@ -17,7 +17,7 @@
  * order).
  */
 
-/* global msg, $, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
+/* global msg, $, uiLocale, localizePage, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
    renderConsequence, renderSkeleton, renderCtas, renderNotice,
    KAIORD_CONNECTION_NOTICES */
 
@@ -29,6 +29,7 @@ const PLATFORM = "Tanita";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
+  extName: "Kaiord for Tanita",
   checking: "Checking your session…",
   checkingCause: "Usually under a second.",
   connected: "Connected",
@@ -116,7 +117,7 @@ const renderBroken = (state, since) => {
   const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
     state,
     PLATFORM,
-    KAIORD_CONNECTION_NOTICES.EXTENSION_LOCALE
+    uiLocale()
   );
   setMarkEstablished(since !== null);
   renderNotice($, notice, {
@@ -148,6 +149,6 @@ const refresh = async () => {
 $("refresh-btn").addEventListener("click", () => refresh());
 
 window.addEventListener("DOMContentLoaded", () => {
-  $("refresh-btn").setAttribute("aria-label", msg("refresh"));
+  localizePage();
   refresh();
 });

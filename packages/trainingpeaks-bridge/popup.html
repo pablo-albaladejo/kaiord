@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="popup.css" />
     <!-- Blocking, in <head>: the app's theme lands before first paint. -->
     <script src="bridge-theme.js"></script>
-    <title>Kaiord TrainingPeaks Bridge</title>
+    <title data-i18n="extName"></title>
   </head>
   <body>
     <!-- Icon sprite. The shell's renderers reference these by id rather than
@@ -50,11 +50,11 @@
         aria-hidden="true"
         >TP</span
       >
-      <h1 class="popup-header__title">Kaiord · TrainingPeaks</h1>
+      <h1 class="popup-header__title" data-i18n="extName"></h1>
       <button
         id="refresh-btn"
         class="popup-header__refresh popup-header__refresh--hidden"
-        aria-label="Refresh"
+        data-i18n-aria-label="refresh"
         type="button"
       >
         <svg width="14" height="14" aria-hidden="true">
@@ -76,9 +76,11 @@
           aria-hidden="true"
         ></span>
         <span class="status-block__body">
-          <span class="status-block__verdict" id="status-text"
-            >Checking your session…</span
-          >
+          <span
+            class="status-block__verdict"
+            id="status-text"
+            data-i18n="checking"
+          ></span>
           <span class="status-block__cause tnum" id="status-sub" hidden></span>
         </span>
       </div>

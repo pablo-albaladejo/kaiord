@@ -116,7 +116,7 @@ describe("verifyAnnouncement", () => {
         protocolVersion: version,
         data: {
           id: "train2go-bridge",
-          name: "Kaiord Train2Go Bridge",
+          name: "Train2Go",
           version: "10.5.0",
           protocolVersion: version,
           capabilities: ["read:training-plan"],
