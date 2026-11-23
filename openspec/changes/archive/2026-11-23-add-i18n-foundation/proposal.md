@@ -1,3 +1,5 @@
+> Completed: 2026-11-23
+
 ## Why
 
 Every user-facing surface of kaiord ships English-only, hardcoded copy: the SPA
@@ -45,6 +47,12 @@ translate their failures.
   to accept a translation call with a static key (`t("literal.key")`) as a
   valid toast first argument, preserving its intent (no interpolated PII).
 
+- **Guard the mechanism**: two local ESLint rules fail `pnpm lint` on any
+  athlete-visible string of the Kaiord App that does not come from the
+  dictionaries (JSX copy, toasts, error and message setters, copy
+  properties and label maps), and the App's own copy is moved into `en` and
+  `es` so the guard holds.
+
 Out of scope (follow-up proposals, in order): full SPA dictionary migration,
 landing per-locale build, CLI/MCP dictionaries, extension `_locales`, docs
 site. This change makes them mechanical.
@@ -60,8 +68,9 @@ site. This change makes them mechanical.
 
 ### Modified Capabilities
 
-- `spa-user-preferences`: the `UserPreferences` aggregate gains a `locale`
-  field with a `setLocale` use case, lazy row creation, and reactive reads.
+- `spa-user-preferences`: no delta at archive time. The per-profile `locale`
+  this change first added was moved to a device preference by
+  `move-display-preferences-to-device`, which owns that requirement.
 - `failure-semantics`: validation errors carry stable machine codes so
   presentation layers localize by code, never by message text — extending the
   existing "never message substrings" rule from CLI exit codes to the SPA.

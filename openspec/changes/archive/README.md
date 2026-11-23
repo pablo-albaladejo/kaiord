@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-11-23 | [`add-i18n-foundation`](./2026-11-23-add-i18n-foundation/) | Every user-facing surface of kaiord ships English-only, hardcoded copy: the SPA |
 | 2026-11-20 | [`add-trainingpeaks-moved-repush-guard`](./2026-11-20-add-trainingpeaks-moved-repush-guard/) | TrainingPeaks is create-only for Kaiord. The bridge allowlists a single workout |
 | 2026-11-20 | [`fix-ci-issue-bots`](./2026-11-20-fix-ci-issue-bots/) | Two GitHub automation bots have been silently broken for over a month. Both |
 | 2026-11-20 | [`fix-onboarding-routes`](./2026-11-20-fix-onboarding-routes/) | A brand-new user, on a fresh browser profile with the bridges installed, could |
