@@ -30,7 +30,7 @@ path, body? }`, which runs only an entry of the closed `ALLOWED` list in
 schema the vendored `bridge-request-gate.js` checks it against) and answers
 WHOOP's answer unread but for its Session secrets (removed by
 the vendored `bridge-answer.js`) as `{ status, contentType, body }`. What to ask for,
-how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/bridge/whoop-transport.ts` and `whoop-connector/`). The App
+how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/whoop/connector/`). The App
 falls back to the protocol-1 actions for the store version. The internal
 channel uses `createInternalDispatch`: only the popup is answered, never a
 content script (`test/thin-bridge.test.js`).
