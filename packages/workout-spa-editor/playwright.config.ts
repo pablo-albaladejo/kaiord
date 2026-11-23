@@ -43,6 +43,9 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     actionTimeout: 10000, // 10 seconds for actions (click, fill, etc.)
+    // No spec runs under the App's service worker except the one about it
+    // (`offline-service-worker.spec.ts`, `@service-worker`), which allows it.
+    serviceWorkers: "block",
   },
 
   expect: {
