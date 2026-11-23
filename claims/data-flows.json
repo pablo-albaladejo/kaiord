@@ -1,0 +1,1064 @@
+{
+  "surfaces": [
+    {
+      "file": "packages/workout-spa-editor/src/i18n/locales/en/dataFlows.json"
+    },
+    {
+      "file": "packages/workout-spa-editor/src/i18n/locales/es/dataFlows.json"
+    },
+    {
+      "file": "packages/workout-spa-editor/src/i18n/locales/en/errors.json",
+      "keys": ["labImport.withheld"]
+    },
+    {
+      "file": "packages/workout-spa-editor/src/i18n/locales/es/errors.json",
+      "keys": ["labImport.withheld"]
+    }
+  ],
+  "claims": [
+    {
+      "id": "app.dataflows.en.kinds.sleep",
+      "text": "sleep",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.restingHeartRate",
+      "text": "resting heart rate",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.weight",
+      "text": "weight",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.hrv",
+      "text": "HRV",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.dailyActivity",
+      "text": "steps and daily calories",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.bodyComposition",
+      "text": "body composition",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.stress",
+      "text": "stress",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.meals",
+      "text": "the meals you log",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.energyBalance",
+      "text": "energy balance and goal",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.heartRateZones",
+      "text": "heart-rate threshold and zones",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.labResults",
+      "text": "lab results",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.messages",
+      "text": "your messages",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.workouts",
+      "text": "workouts",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.coachingPlan",
+      "text": "your coach's plan and comments",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.dataSources",
+      "text": "which source feeds each kind of data",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.workoutDescription",
+      "text": "the workout you describe",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.aiInstructions",
+      "text": "your instructions for the AI",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.powerPaceZones",
+      "text": "power and pace zones",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.providerKey",
+      "text": "the key",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.intervalsKey",
+      "text": "the API key",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.readRequests",
+      "text": "requests for the data Kaiord reads",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should make every extension a destination and every write it serves a flow"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.kinds.syncSnapshot",
+      "text": "a copy of your data in this browser, AI keys included",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/dexie-snapshot-port.test.ts",
+          "title": "should preserve an encrypted aiProviders key that decrypts after import"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.kinds.pageViews",
+      "text": "page views",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.kinds.productEvents",
+      "text": "product events, never your data",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should never send profileId to umami, whatever the call site passes"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should scrub an email out of an event property before umami sees it"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.assistant",
+      "text": "While you chat with the assistant, what it reads to answer you",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-turn-runner.test.ts",
+          "title": "should ask about health data before the turn and send nothing until answered"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.generation",
+      "text": "When you generate a workout with AI",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
+          "title": "should ask before a generation that carries heart-rate data, and send it when shared"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.labImport",
+      "text": "When you read a lab document with AI",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should ask before the document goes, naming its Provider"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.providerKeyCheck",
+      "text": "When you save a key, to check it",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.garminWorkouts",
+      "text": "When you send a workout to Garmin Connect",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.garminBody",
+      "text": "When you send a body-composition measurement to Garmin Connect",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.trainingpeaksWorkouts",
+      "text": "When you send a workout to TrainingPeaks",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.platformReads",
+      "text": "When Kaiord reads your data there",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.intervalsKeyCheck",
+      "text": "When you save your API key, to check it",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.driveSync",
+      "text": "While cross-device sync is on",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.analytics",
+      "text": "On every page",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.groups.provider",
+      "text": "AI providers",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.groups.platform",
+      "text": "Platforms, through their extensions",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.groups.service",
+      "text": "Services you connect",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.groups.analytics",
+      "text": "Analytics",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.notice.title",
+      "text": "Send your health data to {{provider}}?",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.notice.assistant",
+      "text": "To answer you, the assistant can read this health data and send it to {{provider}}: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/HealthSharingNotice/HealthSharingNotice.test.tsx",
+          "title": "should name the Provider and each kind of health data the assistant can send"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should hand the model stored health values when the athlete shares them"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.generation",
+      "text": "To generate this workout, Kaiord sends this health data to {{provider}}: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
+          "title": "should ask before a generation that carries heart-rate data, and send it when shared"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.labImport",
+      "text": "To read this document, Kaiord sends this health data to {{provider}}: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should ask before the document goes, naming its Provider"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.terms",
+      "text": "It goes from your browser straight to {{provider}}, which handles it under its own terms. Kaiord never receives it.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should give every remote origin of the App's policy to one destination, and back"
+        },
+        {
+          "file": "packages/ai/src/providers/create-language-model.ts",
+          "contains": "\"anthropic-dangerous-direct-browser-access\": \"true\""
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.once",
+      "text": "Send this time",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.notice.onceResult",
+      "text": "Kaiord asks again next time.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/health-sharing-gate.test.ts",
+          "title": "should ask the first time and send once without keeping the answer"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.always",
+      "text": "Always allow {{provider}}",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.notice.alwaysResult",
+      "text": "From now on {{provider}} can receive, without asking: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/health-sharing-gate.test.ts",
+          "title": "should never ask again once the athlete always allows a Provider"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/HealthSharingNotice/HealthSharingNotice.test.tsx",
+          "title": "should keep the athlete's always-allow answer for that Provider and close"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.never",
+      "text": "Don't send",
+      "kind": "label",
+      "count": 2
+    },
+    {
+      "id": "app.dataflows.en.notice.neverResult.assistant",
+      "text": "The assistant answers without your health data.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should answer every health tool without a stored value when the athlete does not share"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-turn-runner.test.ts",
+          "title": "should send the turn without health tools or the answers that used them when the athlete does not share"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.neverResult.generation",
+      "text": "The workout is generated without your heart-rate threshold and zones.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
+          "title": "should generate without the heart-rate threshold and zones when not shared, keeping power"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.neverResult.labImport",
+      "text": "The document is not sent; you can enter the results by hand.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should not send the document when the athlete does not share health data"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/HealthSharingNotice/HealthSharingNotice.test.tsx",
+          "title": "should say what don't send does for a lab document, and withhold it"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.neverStays",
+      "text": "Kaiord won't ask again for {{provider}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/health-sharing-gate.test.ts",
+          "title": "should keep a don't-send answer and withhold without asking again"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.changeLater",
+      "text": "You can change this in Settings, Privacy.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/SettingsPanel/DataFlowInventory.test.tsx",
+          "title": "should let the athlete change a Provider's standing health answer"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.inventory.title",
+      "text": "Where your data goes",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.inventory.intro",
+      "text": "Your data stays in this browser except what is listed here: each destination, what it can receive and when.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should give every remote origin of the App's policy to one destination, and back"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.inventory.active",
+      "text": "Active",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.inventory.notSetUp",
+      "text": "Not set up",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.inventory.healthLabel",
+      "text": "Health data to {{provider}}",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.inventory.healthAsk",
+      "text": "Ask first",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.inventory.healthAlways",
+      "text": "Always send",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.en.labImport.withheld",
+      "text": "The document was not sent: you chose not to share health data with your AI provider. You can enter the results by hand.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should not send the document when the athlete does not share health data"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.kinds.sleep",
+      "text": "sueño",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.restingHeartRate",
+      "text": "frecuencia cardiaca en reposo",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.weight",
+      "text": "peso",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.hrv",
+      "text": "VFC",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.dailyActivity",
+      "text": "pasos y calorías del día",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.bodyComposition",
+      "text": "composición corporal",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.stress",
+      "text": "estrés",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.meals",
+      "text": "las comidas que registras",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.energyBalance",
+      "text": "balance energético y objetivo",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.heartRateZones",
+      "text": "umbral y zonas de frecuencia cardiaca",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.labResults",
+      "text": "resultados de analíticas",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.messages",
+      "text": "tus mensajes",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.workouts",
+      "text": "entrenamientos",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.coachingPlan",
+      "text": "el plan y los comentarios de tu entrenador",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.dataSources",
+      "text": "de qué fuente llega cada tipo de dato",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.workoutDescription",
+      "text": "el entrenamiento que describes",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.aiInstructions",
+      "text": "tus instrucciones para la IA",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.powerPaceZones",
+      "text": "zonas de potencia y ritmo",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.providerKey",
+      "text": "la clave",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.intervalsKey",
+      "text": "la clave de API",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.readRequests",
+      "text": "las peticiones de los datos que Kaiord lee",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should make every extension a destination and every write it serves a flow"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.kinds.syncSnapshot",
+      "text": "una copia de tus datos de este navegador, claves de IA incluidas",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/dexie-snapshot-port.test.ts",
+          "title": "should preserve an encrypted aiProviders key that decrypts after import"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.kinds.pageViews",
+      "text": "páginas vistas",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.kinds.productEvents",
+      "text": "eventos de uso, nunca tus datos",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should never send profileId to umami, whatever the call site passes"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/analytics/umami-analytics.test.ts",
+          "title": "should scrub an email out of an event property before umami sees it"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.assistant",
+      "text": "Mientras hablas con el asistente, lo que lee para responderte",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-turn-runner.test.ts",
+          "title": "should ask about health data before the turn and send nothing until answered"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.generation",
+      "text": "Cuando generas un entrenamiento con IA",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
+          "title": "should ask before a generation that carries heart-rate data, and send it when shared"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.labImport",
+      "text": "Cuando lees un documento de analíticas con IA",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should ask before the document goes, naming its Provider"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.providerKeyCheck",
+      "text": "Cuando guardas una clave, para comprobarla",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.garminWorkouts",
+      "text": "Cuando envías un entrenamiento a Garmin Connect",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.garminBody",
+      "text": "Cuando envías una medición de composición corporal a Garmin Connect",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.trainingpeaksWorkouts",
+      "text": "Cuando envías un entrenamiento a TrainingPeaks",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.platformReads",
+      "text": "Cuando Kaiord lee allí tus datos",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.intervalsKeyCheck",
+      "text": "Cuando guardas tu clave de API, para comprobarla",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.driveSync",
+      "text": "Mientras la sincronización entre dispositivos está activada",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.analytics",
+      "text": "En cada página",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.groups.provider",
+      "text": "Proveedores de IA",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.groups.platform",
+      "text": "Plataformas, a través de sus extensiones",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.groups.service",
+      "text": "Servicios que conectas",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.groups.analytics",
+      "text": "Analítica web",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.notice.title",
+      "text": "¿Enviar tus datos de salud a {{provider}}?",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.notice.assistant",
+      "text": "Para responderte, el asistente puede leer estos datos de salud y enviarlos a {{provider}}: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/HealthSharingNotice/HealthSharingNotice.test.tsx",
+          "title": "should name the Provider and each kind of health data the assistant can send"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should hand the model stored health values when the athlete shares them"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.generation",
+      "text": "Para generar este entrenamiento, Kaiord envía estos datos de salud a {{provider}}: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
+          "title": "should ask before a generation that carries heart-rate data, and send it when shared"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.labImport",
+      "text": "Para leer este documento, Kaiord envía estos datos de salud a {{provider}}: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should ask before the document goes, naming its Provider"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.terms",
+      "text": "Van desde tu navegador directamente a {{provider}}, que los trata según sus propias condiciones. Kaiord nunca los recibe.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should give every remote origin of the App's policy to one destination, and back"
+        },
+        {
+          "file": "packages/ai/src/providers/create-language-model.ts",
+          "contains": "\"anthropic-dangerous-direct-browser-access\": \"true\""
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.once",
+      "text": "Enviar esta vez",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.notice.onceResult",
+      "text": "Kaiord volverá a preguntar la próxima vez.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/health-sharing-gate.test.ts",
+          "title": "should ask the first time and send once without keeping the answer"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.always",
+      "text": "Permitir siempre a {{provider}}",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.notice.alwaysResult",
+      "text": "A partir de ahora {{provider}} puede recibir, sin preguntar: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/health-sharing-gate.test.ts",
+          "title": "should never ask again once the athlete always allows a Provider"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/HealthSharingNotice/HealthSharingNotice.test.tsx",
+          "title": "should keep the athlete's always-allow answer for that Provider and close"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.never",
+      "text": "No enviar",
+      "kind": "label",
+      "count": 2
+    },
+    {
+      "id": "app.dataflows.es.notice.neverResult.assistant",
+      "text": "El asistente responde sin tus datos de salud.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
+          "title": "should answer every health tool without a stored value when the athlete does not share"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-turn-runner.test.ts",
+          "title": "should send the turn without health tools or the answers that used them when the athlete does not share"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.neverResult.generation",
+      "text": "El entrenamiento se genera sin tu umbral ni tus zonas de frecuencia cardiaca.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/generate-workout.health.test.ts",
+          "title": "should generate without the heart-rate threshold and zones when not shared, keeping power"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.neverResult.labImport",
+      "text": "El documento no se envía; puedes introducir los resultados a mano.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should not send the document when the athlete does not share health data"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/HealthSharingNotice/HealthSharingNotice.test.tsx",
+          "title": "should say what don't send does for a lab document, and withhold it"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.neverStays",
+      "text": "Kaiord no volverá a preguntar por {{provider}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/lib/health-sharing-gate.test.ts",
+          "title": "should keep a don't-send answer and withhold without asking again"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.changeLater",
+      "text": "Puedes cambiarlo en Ajustes, Privacidad.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/components/organisms/SettingsPanel/DataFlowInventory.test.tsx",
+          "title": "should let the athlete change a Provider's standing health answer"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.inventory.title",
+      "text": "Adónde van tus datos",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.inventory.intro",
+      "text": "Tus datos se quedan en este navegador salvo lo que aparece aquí: cada destino, qué puede recibir y cuándo.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should declare every file that sends data off the device against its flows"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/build-inventory.test.ts",
+          "title": "should list every destination once and every flow under each destination it reaches"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-flows/data-flows-coverage.test.ts",
+          "title": "should give every remote origin of the App's policy to one destination, and back"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.inventory.active",
+      "text": "Activo",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.inventory.notSetUp",
+      "text": "Sin configurar",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.inventory.healthLabel",
+      "text": "Datos de salud para {{provider}}",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.inventory.healthAsk",
+      "text": "Preguntar antes",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.inventory.healthAlways",
+      "text": "Enviar siempre",
+      "kind": "label"
+    },
+    {
+      "id": "app.dataflows.es.labImport.withheld",
+      "text": "El documento no se ha enviado: elegiste no compartir tus datos de salud con tu proveedor de IA. Puedes introducir los resultados a mano.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/lab/extraction/run-lab-extraction.use-case.test.ts",
+          "title": "should not send the document when the athlete does not share health data"
+        }
+      ]
+    }
+  ]
+}
