@@ -5,6 +5,7 @@
  * `attempting.previous`.
  */
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
+import { isKaiords } from "../sync/merge-garmin-removal-queue";
 import type { LedgerKey, PlacementDeps } from "./placement-deps";
 import { protectedIds } from "./placement-removal-step";
 import { decide, type Row, withEntries } from "./placement-row";
@@ -15,6 +16,7 @@ export const isDismissable = (
 ): boolean =>
   entry.abandoned &&
   entry.state === "retire" &&
+  isKaiords(entry) &&
   !protectedIds(row).has(entry.workoutScheduleId);
 
 export const dismissableEntries = (row: Row | undefined) =>
@@ -33,7 +35,11 @@ export const dismissRemovalEntry = async (
       );
       if (!row || !entry || !isDismissable(row, entry))
         return { verdict: false };
-      const gone: GarminRemovalEntry = { ...entry, state: "gone" };
+      const gone: GarminRemovalEntry = {
+        ...entry,
+        state: "gone",
+        deleted: true,
+      };
       return { write: withEntries(row, [gone]), verdict: true };
     })
   ).verdict;

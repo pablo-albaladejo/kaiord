@@ -178,6 +178,7 @@
       "moved": "Movido a su fecha",
       "unchanged": "Ya estaba en su fecha",
       "duplicate-left": "En su fecha, queda una entrada de más",
+      "foreign-left": "En su fecha; una entrada que Kaiord no tiene registrada como suya sigue en otra",
       "uncertain": "Necesita revisión",
       "library-only": "Solo en tu biblioteca",
       "not-eligible": "No enviado",

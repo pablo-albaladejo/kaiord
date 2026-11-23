@@ -93,6 +93,7 @@
     "moved": "Moved on your Garmin calendar to {{date}}",
     "unchanged": "Already on your Garmin calendar on {{date}}",
     "duplicateLeft": "On your Garmin calendar on {{date}}, but an older entry is still on {{dates}}. Remove it in Garmin Connect.",
+    "foreignLeft": "On your Garmin calendar on {{date}}. An entry Kaiord has no record of creating is still on {{dates}}: Kaiord leaves it as it is.",
     "uncertain": "Garmin did not confirm the entry on {{date}}. Check your Garmin calendar before sending again.",
     "confirm": "It's in Garmin",
     "sendAnyway": "Send anyway",

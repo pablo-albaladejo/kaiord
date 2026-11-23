@@ -178,6 +178,7 @@
       "moved": "Moved to its date",
       "unchanged": "Already on its date",
       "duplicate-left": "On its date, extra entry left",
+      "foreign-left": "On its date; an entry Kaiord has no record of creating stays on another",
       "uncertain": "Needs a look",
       "library-only": "In your library only",
       "not-eligible": "Not sent",

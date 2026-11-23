@@ -7,7 +7,12 @@
  * may hold entries Kaiord did not create (the athlete's own workouts,
  * activities); the athlete can delete by hand. `crashOn` makes Garmin
  * commit a write and the App never hear the answer (a tab that died between
- * "created" and "recorded"); `calendarDown` fails the calendar read.
+ * "created" and "recorded"); `calendarDown` fails the calendar read,
+ * `downMonths` fails it for some months only (a partial read), and
+ * `omitFromReads` makes the month read leave out a live entry for its next
+ * N reads (Garmin's read lagging or flickering). The athlete can put a
+ * library workout Kaiord created on another date (`placeLibraryWorkout`):
+ * the same library workout id, an entry Kaiord did not create.
  */
 import { vi } from "vitest";
 
@@ -38,6 +43,16 @@ export const createFakeGarminPlatform = () => {
     crashOn: undefined as string | undefined,
     /** The calendar month read fails (Garmin not answering). */
     calendarDown: false,
+    /** Months (`YYYY-MM`) whose read fails while the others answer. */
+    downMonths: new Set<string>(),
+    /** Entry id → how many more month reads leave it out. */
+    omitFromReads: new Map<number, number>(),
+  };
+  const visible = (id: number) => {
+    const left = state.omitFromReads.get(id) ?? 0;
+    if (left <= 0) return true;
+    state.omitFromReads.set(id, left - 1);
+    return false;
   };
 
   const fail = (status: number, error: string): Envelope => ({
@@ -78,19 +93,23 @@ export const createFakeGarminPlatform = () => {
         calendar.splice(at, 1);
         return { ok: true, data: null };
       }
-      case "calendar-find":
-        if (state.calendarDown) return fail(503, "Calendar read failed");
+      case "calendar-find": {
+        const read = month(String(m.date));
+        if (state.calendarDown || state.downMonths.has(read))
+          return fail(503, "Calendar read failed");
+        const inMonth = calendar.filter(
+          (i) =>
+            i.itemType === "workout" &&
+            String(i.workoutId) === m.workoutId &&
+            month(i.date) === read
+        );
         return {
           ok: true,
-          data: calendar
-            .filter(
-              (i) =>
-                i.itemType === "workout" &&
-                String(i.workoutId) === m.workoutId &&
-                month(i.date) === month(String(m.date))
-            )
+          data: inMonth
+            .filter((i) => visible(i.id))
             .map((i) => ({ workoutScheduleId: String(i.id), date: i.date })),
         };
+      }
       default:
         return { ok: false, error: `Unknown action: ${m.action}` };
     }
@@ -126,6 +145,13 @@ export const createFakeGarminPlatform = () => {
           date,
         });
       return w;
+    },
+    /** The athlete puts an existing library workout (one Kaiord created,
+        for instance) on a date: an entry Kaiord did not create. */
+    placeLibraryWorkout: (workoutId: number, date: string) => {
+      const id = ids.schedule++;
+      calendar.push({ id, itemType: "workout", workoutId, date });
+      return id;
     },
     addActivity: (date: string, title: string) =>
       calendar.push({

@@ -4,20 +4,25 @@
  * `attempting.previous` (skip rule), and only while the row still carries
  * this run's `Placed`. Each outcome writes only its own entry's state on the
  * re-read row, so concurrent queue additions survive. A reauth answer ends
- * the drain, abandoned-entry re-checks included. No entry is sent unless
+ * the drain, abandoned-entry re-checks included. An entry its record does
+ * not hold as created (`isKaiords`) is never sent, whatever its state. No entry is sent unless
  * the `Placed` was seen on Garmin right before it (`verifyPlaced`, verify
  * before delete); `ownPost` marks this run's own ok POST.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
-import { joinQueues, sortedQueue } from "../sync/merge-garmin-removal-queue";
+import {
+  isKaiords,
+  joinQueues,
+  sortedQueue,
+} from "../sync/merge-garmin-removal-queue";
 import { absentFromCalendar } from "./placement-absence";
 import type { PlacementRun } from "./placement-deps";
 import { recordDrain } from "./placement-record-drain";
 import { holdsPlaced, type Row } from "./placement-row";
 import { verifyPlaced } from "./placement-verify-placed";
 
-type DrainOutcome = "gone" | "count" | "reauth";
+type DrainOutcome = "deleted" | "gone" | "count" | "reauth";
 
 /** The skip rule: the current `Placed` and `attempting.previous`. */
 export const protectedIds = (row: Row | undefined) => {
@@ -33,6 +38,7 @@ const drainable = (row: Row | undefined, abandoned: boolean) => {
   return sortedQueue(joinQueues(row?.removalQueue)).filter(
     (e) =>
       e.state === "retire" &&
+      isKaiords(e) &&
       e.abandoned === abandoned &&
       !skip.has(e.workoutScheduleId)
   );
@@ -43,7 +49,7 @@ const sendOne = async (
   entry: GarminRemovalEntry
 ): Promise<DrainOutcome> => {
   const answer = await run.deps.calendar.unschedule(entry.workoutScheduleId);
-  if (answer.ok) return "gone";
+  if (answer.ok) return "deleted";
   if (
     answer.status === 401 ||
     (answer.status === undefined && answer.needsReauth)

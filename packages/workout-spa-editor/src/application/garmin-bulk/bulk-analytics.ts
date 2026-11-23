@@ -13,6 +13,7 @@ const STATUSES: readonly BulkStatus[] = [
   "moved",
   "unchanged",
   "duplicate-left",
+  "foreign-left",
   "uncertain",
   "library-only",
   "not-eligible",

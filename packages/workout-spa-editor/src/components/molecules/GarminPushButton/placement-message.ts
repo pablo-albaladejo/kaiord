@@ -14,7 +14,7 @@ export type PlacementMessage = {
   key: string;
   /** The date the message names, `YYYY-MM-DD`. */
   date?: string;
-  /** Where entries were left behind (`duplicate-left`). */
+  /** Where entries were left behind (`duplicate-left`, `foreign-left`). */
   dates?: string[];
 };
 
@@ -31,6 +31,13 @@ export const placementMessage = (
       return {
         tone: "warning",
         key: "placement.duplicateLeft",
+        date,
+        dates: result.dates,
+      };
+    case "foreign-left":
+      return {
+        tone: "warning",
+        key: "placement.foreignLeft",
         date,
         dates: result.dates,
       };

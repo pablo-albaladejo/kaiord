@@ -5,17 +5,16 @@
  * `chrome.runtime.sendMessage`, the real Phase 1 (`recordExport`) and the
  * real placement pipeline. Only the clock is faked: `sleep` advances it.
  * `restartTab()` models a tab that died: a fresh in-tab join map and lock
- * manager over the same device storage.
+ * manager over the same device storage. `openTab()` is a second tab of the
+ * same browser: its own join map, the browser's one lock manager.
  */
 import { vi } from "vitest";
 
 import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-export-ledger-repository";
 import type { KaiordDatabase } from "../adapters/dexie/dexie-database";
 import { recordExport } from "../application/export/record-export.use-case";
-import {
-  type PlacementPipelineDeps,
-  pushWorkoutToGarminCalendar,
-} from "../application/garmin-placement/push-workout-to-garmin-calendar";
+import { pushWorkoutToGarminCalendar } from "../application/garmin-placement/push-workout-to-garmin-calendar";
+import type { PlacementPipelineDeps } from "../application/garmin-placement/placement-pipeline-deps";
 import { SCHEDULE_IDS_IN_FIND } from "../application/garmin-placement/placement-timing";
 import { executePush } from "../hooks/garmin-bridge-operations";
 import { createGarminCalendarPort } from "../hooks/garmin-calendar-operations";
@@ -38,8 +37,12 @@ export const createMessageSeamConnector = (db: KaiordDatabase) => {
   const garmin = createFakeGarminPlatform();
   garmin.install();
   const ledgerRepo = createDexieExportLedgerRepository(db);
-  const tab = { joins: new Map(), locks: createInMemoryLockManager() };
-  const deps = (): PlacementPipelineDeps => ({
+  type Tab = {
+    joins: PlacementPipelineDeps["joins"];
+    locks: ReturnType<typeof createInMemoryLockManager>;
+  };
+  const tab: Tab = { joins: new Map(), locks: createInMemoryLockManager() };
+  const deps = (on: Tab = tab): PlacementPipelineDeps => ({
     ledgerRepo,
     calendar: createGarminCalendarPort(() => EXTENSION_ID),
     scheduleIdsInFind: SCHEDULE_IDS_IN_FIND,
@@ -48,18 +51,19 @@ export const createMessageSeamConnector = (db: KaiordDatabase) => {
       vi.setSystemTime(Date.now() + ms);
     },
     features: ALL_FEATURES,
-    locks: tab.locks.port(),
+    locks: on.locks.port(),
     secureContext: true,
-    joins: tab.joins,
+    joins: on.joins,
   });
   /** The athlete presses Send on Workout `recordId` for `date`. */
-  const send = (
+  const sendOn = (
+    on: Tab,
     recordId: string,
     date: string,
     workoutName: string,
     content = "v1"
   ) =>
-    pushWorkoutToGarminCalendar(deps(), {
+    pushWorkoutToGarminCalendar(deps(on), {
       kaiordRecordId: recordId,
       date,
       runLibraryPush: () =>
@@ -74,6 +78,19 @@ export const createMessageSeamConnector = (db: KaiordDatabase) => {
           }
         ),
     });
+  const send = (
+    recordId: string,
+    date: string,
+    workoutName: string,
+    content = "v1"
+  ) => sendOn(tab, recordId, date, workoutName, content);
+  const openTab = () => {
+    const other: Tab = { joins: new Map(), locks: tab.locks };
+    return {
+      send: (recordId: string, date: string, workoutName: string) =>
+        sendOn(other, recordId, date, workoutName),
+    };
+  };
   const restartTab = () => {
     tab.joins = new Map();
     tab.locks = createInMemoryLockManager();
@@ -83,5 +100,5 @@ export const createMessageSeamConnector = (db: KaiordDatabase) => {
       kaiordRecordId: recordId,
       destinationBridgeId: GARMIN_LEDGER_BRIDGE_ID,
     });
-  return { garmin, send, restartTab, row };
+  return { garmin, send, openTab, restartTab, row };
 };

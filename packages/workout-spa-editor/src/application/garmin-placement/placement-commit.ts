@@ -8,13 +8,8 @@ import type { ExportLedgerEntry } from "../../types/export-ledger";
 import type { GarminPlaced, GarminScheduleId } from "../../types/garmin-ledger";
 import { mergeGarminLedgerRows } from "../sync/merge-garmin-ledger-rows";
 import { isoAt, type PlacementRun } from "./placement-deps";
-import {
-  type Attempt,
-  decide,
-  isAttemptAt,
-  placedRow,
-  type Row,
-} from "./placement-row";
+import { type PlacedEntries, placedRow } from "./placement-placed-row";
+import { type Attempt, decide, isAttemptAt, type Row } from "./placement-row";
 
 export const placedFrom = (
   attempt: Attempt,
@@ -39,17 +34,18 @@ export const commitPlacement = async (
   run: PlacementRun,
   attempt: Attempt,
   placed: GarminPlaced,
-  written: Row | undefined
+  written: Row | undefined,
+  entries: PlacedEntries = {}
 ): Promise<"committed" | "absent"> => {
   const now = isoAt(run.deps.now());
   const { verdict } = await decide(run.deps, run.key, (row) => {
     if (!row) return { verdict: "absent" as const };
     if (isAttemptAt(row, attempt.at))
       return {
-        write: placedRow(row, placed, attempt.previous),
+        write: placedRow(row, placed, attempt.previous, entries),
         verdict: "committed" as const,
       };
-    const ours = placedRow(written ?? row, placed, attempt.previous);
+    const ours = placedRow(written ?? row, placed, attempt.previous, entries);
     return {
       // Two ledger rows merge into a ledger row; the hook is untyped.
       write: mergeGarminLedgerRows(row, {
