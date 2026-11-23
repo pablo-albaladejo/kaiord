@@ -447,7 +447,7 @@
     },
     {
       "id": "garmin.pj.connectapi-why",
-      "text": "**Why**: Garmin's API host. The extension exchanges the ticket for tokens here, then makes every workout, activity, calendar and upload request with `Authorization: Bearer`. A request outside the allowlist of paths in the service worker is refused before it is sent, and a write is sent only with a body of the one shape declared for its path: a workout, a FIT file or a date.",
+      "text": "**Why**: Garmin's API host. The extension exchanges the ticket for tokens here, then makes every workout, activity, calendar and upload request with `Authorization: Bearer`. A request outside the allowlist of paths in the service worker is refused before it is sent, and a write is sent only with a body of the one shape declared for its path: a workout in the shape the Kaiord App builds (named fields of Garmin's own step, target and condition types, at most 100 steps), a body-composition FIT file (file type weight with one weight measurement, at most 4 KB; an activity or any other FIT file is refused) or a date.",
       "proof": [
         {
           "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
@@ -471,6 +471,18 @@
         {
           "test": "packages/garmin-bridge/test/thin-bridge.test.js",
           "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/garmin-bridge/test/request-bodies.test.js",
+          "title": "should send the FIT file the App's body-composition encoder builds"
+        },
+        {
+          "test": "packages/garmin-bridge/test/request-bodies.test.js",
+          "title": "should refuse an activity FIT file with nothing sent"
+        },
+        {
+          "test": "packages/garmin-bridge/test/request-bodies.test.js",
+          "title": "should refuse a body larger than one measurement could be"
         }
       ]
     },
@@ -858,7 +870,7 @@
     },
     {
       "id": "garmin.pp.answers-unread",
-      "text": "**Answers Handed Over Unread, Sign-In Secrets Removed**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a workout, a FIT file or a date); a request outside the extension's list of paths is refused before it is sent. The extension hands the Kaiord App Garmin's answer as it came, without reading it, except that it first removes anything in it tied to your Garmin sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Garmin's answers carry none today. Reading the answer happens in the Kaiord App, in your browser.",
+      "text": "**Answers Handed Over Unread, Sign-In Secrets Removed**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a workout in the shape the Kaiord App builds (named fields of Garmin's own step, target and condition types, at most 100 steps), a body-composition FIT file (file type weight with one weight measurement, at most 4 KB; an activity or any other FIT file is refused) or a date); a request outside the extension's list of paths is refused before it is sent. The extension hands the Kaiord App Garmin's answer as it came, without reading it, except that it first removes anything in it tied to your Garmin sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Garmin's answers carry none today. Reading the answer happens in the Kaiord App, in your browser.",
       "proof": [
         {
           "test": "packages/garmin-bridge/test/thin-bridge.test.js",
@@ -887,6 +899,18 @@
         {
           "test": "packages/garmin-bridge/test/bridge-answer.test.js",
           "title": "should drop credential keys at any depth and keep everything else"
+        },
+        {
+          "test": "packages/garmin-bridge/test/request-bodies.test.js",
+          "title": "should send the FIT file the App's body-composition encoder builds"
+        },
+        {
+          "test": "packages/garmin-bridge/test/request-bodies.test.js",
+          "title": "should refuse an activity FIT file with nothing sent"
+        },
+        {
+          "test": "packages/garmin-bridge/test/request-bodies.test.js",
+          "title": "should refuse a body larger than one measurement could be"
         }
       ]
     },

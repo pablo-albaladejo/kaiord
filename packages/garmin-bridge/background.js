@@ -201,73 +201,25 @@ const ALLOWED = [
   { method: "GET", pattern: /^\/calendar-service\/year\/\d{4}\/month\/\d{1,2}$/ },
 ];
 
-// ── Declared body schemas ──
+// ── Declared body schemas (garmin-request-bodies.js) ──
 //
-// The shape each write entry accepts, so the extension forwards a workout,
-// a FIT file or a date and never an arbitrary payload. A workout's steps are
-// bounded JSON: their shape is the App's Garmin writer's, read by Garmin.
-const SPORT_TYPE = {
-  type: "object",
-  fields: {
-    sportTypeId: { type: "integer", min: 0 },
-    sportTypeKey: { type: "string", min: 1, max: 64 },
-    displayOrder: { type: "integer", min: 0, optional: true },
-  },
-};
-
-const WORKOUT_SEGMENT = {
-  type: "object",
-  fields: {
-    segmentOrder: { type: "integer", min: 1 },
-    sportType: SPORT_TYPE,
-    workoutSteps: {
-      type: "array",
-      min: 1,
-      max: 500,
-      items: { type: "json", maxChars: 65536 },
-    },
-  },
-};
-
-const FIT_SIGNATURE = ".FIT";
-const FIT_MAX_BYTES = 1048576;
-
-// A FIT file: bytes 8-11 of every FIT header spell ".FIT".
-const isFitFile = (bytes) =>
-  requestGate.matchesShape(bytes, {
-    type: "bytes",
-    min: 14,
-    max: FIT_MAX_BYTES,
-  }) && String.fromCharCode(...bytes.slice(8, 12)) === FIT_SIGNATURE;
-
-const BODY_SCHEMAS = {
-  workout: {
-    type: "object",
-    fields: {
-      workoutName: { type: "string", min: 1, max: 255 },
-      sportType: SPORT_TYPE,
-      workoutSegments: {
-        type: "array",
-        min: 1,
-        max: 20,
-        items: WORKOUT_SEGMENT,
-      },
-      poolLength: { type: "number", min: 0, optional: true },
-      poolLengthUnit: {
-        type: "object",
-        optional: true,
-        fields: {
-          unitId: { type: "integer", min: 0 },
-          unitKey: { type: "string", min: 1, max: 32 },
-          factor: { type: "number" },
-        },
-      },
-      isSessionTransitionEnabled: { type: "boolean", optional: true },
-    },
-  },
-  "fit-file": { type: "custom", test: isFitFile },
-  schedule: { type: "object", fields: { date: { type: "date" } } },
-};
+// The shape each write entry accepts, so the extension forwards the workout
+// the App's GCN writer builds, the body-composition FIT file or a date, and
+// never an arbitrary payload.
+let requestBodies;
+try {
+  importScripts("garmin-fit-check.js", "garmin-request-bodies.js");
+  requestBodies = globalThis.garminRequestBodies;
+} catch (e) {
+  requestBodies =
+    typeof require !== "undefined" ? require("./garmin-request-bodies.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-garmin-request-bodies",
+    e
+  );
+}
+const BODY_SCHEMAS = requestBodies.BODY_SCHEMAS;
 
 const admitRequest = (message) =>
   requestGate.createRequestGate({

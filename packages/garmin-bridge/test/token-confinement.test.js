@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 // The privacy promise behind the store listing and the policy: the Garmin
@@ -50,17 +53,13 @@ const fakeGarmin = (dataStatus = 200) =>
     return response(dataStatus, [{ workoutId: 1, workoutName: "Easy run" }]);
   });
 
-const WORKOUT = {
-  workoutName: "Easy run",
-  sportType: { sportTypeId: 1, sportTypeKey: "running" },
-  workoutSegments: [
-    {
-      segmentOrder: 1,
-      sportType: { sportTypeId: 1, sportTypeKey: "running" },
-      workoutSteps: [{ stepOrder: 1 }],
-    },
-  ],
-};
+// The GCN the App's writer builds (@kaiord/garmin), see test/fixtures.
+const WORKOUT = JSON.parse(
+  readFileSync(
+    join(import.meta.dirname, "fixtures/workout-repeat-steps.gcn.json"),
+    "utf8"
+  )
+);
 
 const req = (method, path, body) => ({
   action: "request",

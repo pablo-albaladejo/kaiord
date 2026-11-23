@@ -20,7 +20,7 @@ Why Kaiord for Garmin asks for each permission in `manifest.prod.json`, for Chro
 
 ### `https://connectapi.garmin.com/*`
 
-**Why**: Garmin's API host. The extension exchanges the ticket for tokens here, then makes every workout, activity, calendar and upload request with `Authorization: Bearer`. A request outside the allowlist of paths in the service worker is refused before it is sent, and a write is sent only with a body of the one shape declared for its path: a workout, a FIT file or a date.
+**Why**: Garmin's API host. The extension exchanges the ticket for tokens here, then makes every workout, activity, calendar and upload request with `Authorization: Bearer`. A request outside the allowlist of paths in the service worker is refused before it is sent, and a write is sent only with a body of the one shape declared for its path: a workout in the shape the Kaiord App builds (named fields of Garmin's own step, target and condition types, at most 100 steps), a body-composition FIT file (file type weight with one weight measurement, at most 4 KB; an activity or any other FIT file is refused) or a date.
 
 **Calendar write and delete**: When you place workouts on your Garmin Connect calendar from the Kaiord App, the extension calls two calendar endpoints on this host. `POST /workout-service/schedule/{workoutId}` places a library workout on a date, sending only that date. `DELETE /workout-service/schedule/{workoutScheduleId}` removes one calendar entry. The allowlist accepts both paths only with a numeric id, and neither path can delete a library workout.
 
