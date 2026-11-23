@@ -242,6 +242,17 @@
       ]
     },
     {
+      "id": "readme.root.personal-project",
+      "text": "Kaiord is a personal project, not affiliated with any employer.",
+      "proof": [
+        {
+          "author-statement": "Kaiord is a personal project, not affiliated with any employer.",
+          "by": "the repository's owner",
+          "on": "2026-11-23"
+        }
+      ]
+    },
+    {
       "id": "readme.root.rule",
       "text": "---",
       "kind": "label",

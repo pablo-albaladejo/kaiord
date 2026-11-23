@@ -20,6 +20,8 @@ It comes as two products:
 - **Kaiord SDK**: the published libraries and tools that read, validate and convert training data. That is `@kaiord/core`, the format adapters (`@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`), the command-line tool `@kaiord/cli`, and the MCP server `@kaiord/mcp`.
 - **[Kaiord App](https://kaiord.com/app/)**: the browser application an athlete uses to see, plan and move their data, together with the browser extensions it relies on.
 
+Kaiord is a personal project, not affiliated with any employer.
+
 ---
 
 ## ✨ Features
