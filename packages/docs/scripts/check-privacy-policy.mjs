@@ -251,13 +251,12 @@ export const REQUIRED_RULES = [
   {
     label: "Garmin calendar read purposes named",
     section: GARMIN_SECTION,
-    re: /to confirm a placement Garmin did not clearly confirm, to check the calendar before removing an entry Kaiord replaced, and to re-check entries whose earlier removal did not complete/i,
+    re: /before placing it on a date, so no second entry is added there; when you send again a workout that has not changed, to check that its entry is still there; to confirm a placement Garmin did not clearly confirm; to check the calendar before removing an entry Kaiord replaced; and to re-check entries whose earlier removal did not complete/i,
   },
   {
-    label:
-      "Garmin calendar delete scoped to Kaiord-sent workouts and placed dates",
+    label: "Garmin calendar delete scoped to entries Kaiord placed",
     section: GARMIN_SECTION,
-    re: /deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them[\s\S]*?added by hand on that date may be treated as Kaiord's/i,
+    re: /deletes only entries that Kaiord's record holds as placed by Kaiord[\s\S]*?added yourself is recognised[\s\S]*?never moved or deleted/i,
   },
   {
     label: "Garmin no-third-party-sharing stated",
