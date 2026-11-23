@@ -281,9 +281,7 @@ describe("ConnectionsTab", () => {
     expect(screen.getByTestId("connection-bridge-tanita")).toHaveTextContent(
       /detected on load/i
     );
-    expect(
-      screen.getByText(/may have been removed since/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/may have been removed/i)).toBeInTheDocument();
   });
 
   it("should claim no counts while discovery is still in its opening window", () => {

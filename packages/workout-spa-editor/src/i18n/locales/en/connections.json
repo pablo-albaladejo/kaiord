@@ -39,7 +39,7 @@
     "unsupported": "Not supported yet"
   },
   "detail": {
-    "installed": "This extension announced itself when the page loaded. Kaiord cannot re-check it without downloading your whole export, so it may have been removed since.",
+    "installed": "This extension announced itself when the page loaded. Kaiord has not checked it since, so it may have been removed.",
     "checking": "Asking the extension whether it still has a session.",
     "disconnected": "You disconnected this source in Kaiord. The extension may still be installed.",
     "manual": "Anything you type into Kaiord yourself. Never switched off.",

@@ -39,7 +39,7 @@
     "unsupported": "Todavía no compatible"
   },
   "detail": {
-    "installed": "Esta extensión se anunció al cargar la página. Kaiord no puede volver a comprobarla sin descargar tu exportación completa, así que puede que se haya eliminado desde entonces.",
+    "installed": "Esta extensión se anunció al cargar la página. Kaiord no la ha vuelto a comprobar, así que puede que se haya eliminado desde entonces.",
     "checking": "Preguntando a la extensión si todavía tiene sesión.",
     "disconnected": "Desconectaste esta fuente en Kaiord. Puede que la extensión siga instalada.",
     "manual": "Todo lo que escribes tú mismo en Kaiord. Nunca se desactiva.",

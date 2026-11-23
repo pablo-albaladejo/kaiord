@@ -108,19 +108,24 @@ const KAIORD_CONNECTION_NOTICES = (() => {
 
   // Why a check asked nothing. "would-mint-token": the only request that
   // tells would issue a credential. "no-token-captured": nothing to check
-  // until a tab of the Platform sends its own request.
+  // until a tab of the Platform sends its own request. "would-download-data":
+  // an extension one protocol behind checks by downloading the athlete's data.
   const NOT_CHECKED = Object.freeze({
     en: Object.freeze({
       "would-mint-token":
         "Kaiord has not checked your {platform} sign-in yet: checking it would create a new access token, so the first import or send checks it.",
       "no-token-captured":
         "Kaiord has not checked your {platform} sign-in yet: it learns it from the first request a {platform} tab sends.",
+      "would-download-data":
+        "Kaiord has not checked your {platform} sign-in yet: with this version of the extension, checking it would download your data, so the first import checks it.",
     }),
     es: Object.freeze({
       "would-mint-token":
         "Kaiord aún no ha comprobado tu inicio de sesión en {platform}: comprobarlo crearía un nuevo token de acceso, así que lo comprueba la primera importación o envío.",
       "no-token-captured":
         "Kaiord aún no ha comprobado tu inicio de sesión en {platform}: lo sabe con la primera petición que envía una pestaña de {platform}.",
+      "would-download-data":
+        "Kaiord aún no ha comprobado tu inicio de sesión en {platform}: con esta versión de la extensión, comprobarlo descargaría tus datos, así que lo comprueba la primera importación.",
     }),
   });
 

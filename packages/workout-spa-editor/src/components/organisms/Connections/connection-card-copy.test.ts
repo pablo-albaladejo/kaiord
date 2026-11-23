@@ -45,7 +45,7 @@ describe("detailKeyFor", () => {
     }
   );
 
-  it("should keep the announced-on-load wording for a Tanita extension whose check would download the export", () => {
+  it("should give a Tanita extension whose check would download the export its own not-checked reason", () => {
     // Arrange
     const unchecked = source("installed", {
       bridgeId: "tanita-bridge",
@@ -56,7 +56,7 @@ describe("detailKeyFor", () => {
     const said = [notCheckedReasonFor(unchecked), detailKeyFor(unchecked)];
 
     // Assert
-    expect(said).toEqual([null, "detail.installed"]);
+    expect(said).toEqual(["would-download-data", null]);
   });
 
   it("should keep the announced-on-load wording for a bridge with no prober", () => {

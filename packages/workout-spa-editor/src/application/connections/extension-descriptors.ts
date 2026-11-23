@@ -39,6 +39,7 @@ export const EXTENSIONS = {
   "tanita-bridge": {
     protocols: CURRENT_AND_PREVIOUS,
     signInUrl: "https://mytanita.eu/en/user",
+    notChecked: "would-download-data",
   },
   "trainingpeaks-bridge": {
     protocols: CURRENT_AND_PREVIOUS,

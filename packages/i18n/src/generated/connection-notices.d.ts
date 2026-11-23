@@ -26,7 +26,8 @@ export type ReasonNotice = ConnectionNotice & {
 };
 
 /** Why a check asked the Platform nothing. */
-export type NotCheckedReason = "would-mint-token" | "no-token-captured";
+export type NotCheckedReason =
+  "would-mint-token" | "no-token-captured" | "would-download-data";
 
 /** The one exception to the four fixes: open the Platform's own tab. */
 export type NoTabNotice = NoticeWording & { readonly fix: "open-platform" };

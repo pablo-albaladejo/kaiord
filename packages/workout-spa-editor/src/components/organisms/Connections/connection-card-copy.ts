@@ -57,8 +57,7 @@ export type DetailKey =
 /**
  * Why a probed bridge's check asked nothing, worded per reason by the shared
  * notices (`connectionNotCheckedText`): `null` when the card says something
- * else. A Tanita extension one protocol behind has no reason of its own: its
- * check would download the export, which `detail.installed` already says.
+ * else.
  */
 export const notCheckedReasonFor = (
   source: ConnectionSource
