@@ -132,4 +132,33 @@ describe("doCreateWorkout", () => {
     expect(askHealth).not.toHaveBeenCalled();
     expect(mockGenerate).toHaveBeenCalledOnce();
   });
+
+  it("should ask the generation Provider again when a later description may hold health data it never got", async () => {
+    // Arrange
+    const { run, trace, askHealth } = setUp("openai");
+    trace.sent("openai", ["workoutDescription", "heartRateZones"]);
+    trace.sent("anthropic", ["messages", "sleep"]);
+
+    // Act
+    const error = await doCreateWorkout(run, INPUT).catch((e: unknown) => e);
+
+    // Assert
+    expect(askHealth).toHaveBeenCalledOnce();
+    expect(healthWithheldTo(error)).toBe("openai");
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
+  it("should record the health a description may hold even when its Provider already got it", async () => {
+    // Arrange
+    const { run, trace } = setUp("anthropic");
+    trace.sent("anthropic", ["messages", "hrv"]);
+
+    // Act
+    await doCreateWorkout(run, INPUT);
+
+    // Assert
+    expect(trace.sentSoFar()).toEqual([
+      { to: "anthropic", kinds: ["messages", "hrv", "workoutDescription"] },
+    ]);
+  });
 });

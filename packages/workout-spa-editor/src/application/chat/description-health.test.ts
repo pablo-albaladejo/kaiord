@@ -51,4 +51,47 @@ describe("descriptionHealth", () => {
     // Assert
     expect(result).toEqual({ kinds: [], alreadyAt: false });
   });
+
+  it("should ask again when the Provider got some health data this turn but not what the description may hold", () => {
+    // Arrange
+    const sent = [
+      {
+        to: "openai" as const,
+        kinds: ["workoutDescription" as const, "heartRateZones" as const],
+      },
+      {
+        to: "anthropic" as const,
+        kinds: ["messages" as const, "sleep" as const],
+      },
+    ];
+
+    // Act
+    const result = descriptionHealth(sent, "openai");
+
+    // Assert
+    expect(result).toEqual({ kinds: ["sleep"], alreadyAt: false });
+  });
+
+  it("should count as already sent only when every kind the description may hold went there", () => {
+    // Arrange
+    const sent = [
+      {
+        to: "anthropic" as const,
+        kinds: ["messages" as const, "hrv" as const, "sleep" as const],
+      },
+      {
+        to: "openai" as const,
+        kinds: ["workoutDescription" as const],
+        declared: ["hrv" as const],
+      },
+    ];
+
+    // Act
+    const toOpenAi = descriptionHealth(sent, "openai");
+    const toAnthropic = descriptionHealth(sent, "anthropic");
+
+    // Assert
+    expect(toOpenAi.alreadyAt).toBe(false);
+    expect(toAnthropic.alreadyAt).toBe(true);
+  });
 });

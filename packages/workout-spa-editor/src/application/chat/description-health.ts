@@ -1,29 +1,41 @@
 /**
  * The health data a description the model writes in a turn may hold: every
- * health kind the turn's requests carried, counted or only declared (an
- * earlier reply replayed). Any text written after reading health data is
- * health data for every Provider it reaches.
+ * kind the assistant can read that the turn's requests carried, counted or
+ * only declared (an earlier reply replayed). Any text written after reading
+ * health data is health data for every Provider it reaches. It is already at
+ * a destination only when every one of those kinds already went there this
+ * run, under the athlete's answer for it.
  */
 import type { TraceSent } from "../../types/trace-schemas";
-import { type HealthDataKind, isHealthKind } from "../data-flows/data-kinds";
+import { healthKindsOf } from "../data-flows/data-flows";
+import type { HealthDataKind } from "../data-flows/data-kinds";
 import type { DestinationId } from "../data-flows/destinations";
 
 export type DescriptionHealth = {
   kinds: HealthDataKind[];
-  /** That destination already received health data in this turn, under the
-   * athlete's own decision for it. */
+  /** Every kind in `kinds` already went to that destination this run. */
   alreadyAt: boolean;
 };
 
-const healthOf = (entry: TraceSent): HealthDataKind[] =>
-  [...entry.kinds, ...(entry.declared ?? [])].filter(isHealthKind);
+const READABLE: ReadonlySet<string> = new Set(
+  healthKindsOf("assistantWorkout")
+);
+
+const carried = (entry: TraceSent): string[] => [
+  ...entry.kinds,
+  ...(entry.declared ?? []),
+];
 
 export const descriptionHealth = (
   sent: readonly TraceSent[],
   to: DestinationId
-): DescriptionHealth => ({
-  kinds: [...new Set(sent.flatMap(healthOf))],
-  alreadyAt: sent.some(
-    (entry) => entry.to === to && healthOf(entry).length > 0
-  ),
-});
+): DescriptionHealth => {
+  const kinds = [
+    ...new Set(sent.flatMap(carried).filter((kind) => READABLE.has(kind))),
+  ] as HealthDataKind[];
+  const there = new Set(sent.filter((e) => e.to === to).flatMap(carried));
+  return {
+    kinds,
+    alreadyAt: kinds.length > 0 && kinds.every((kind) => there.has(kind)),
+  };
+};
