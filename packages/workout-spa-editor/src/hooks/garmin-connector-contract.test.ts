@@ -105,6 +105,27 @@ describe("Garmin Connector, current extension (protocol 2)", () => {
     });
   });
 
+  it.each([
+    { status: 403, error: "Request failed: 403" },
+    { status: 401, error: "Request failed: 401" },
+  ])(
+    "should say Garmin is not answering, not signed out, when the extension refuses a write with a bare $status",
+    async (refusal) => {
+      // Arrange
+      currentExtension({ [`POST ${GARMIN_WORKOUT_PATH}`]: { refuse: refusal } });
+
+      // Act
+      const res = await executePush(EXT, GCN);
+
+      // Assert
+      expect(res).toMatchObject({
+        status: "error",
+        reason: "not-answering",
+        redetect: true,
+      });
+    }
+  );
+
   it("should list the athlete's workouts from Garmin's raw answer", async () => {
     // Arrange
     currentExtension({

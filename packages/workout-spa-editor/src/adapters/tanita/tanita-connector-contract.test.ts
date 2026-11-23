@@ -19,7 +19,7 @@ import { readTanitaExportCsv, TanitaBridgeError } from "./tanita-transport";
 
 const EXT = "tanita-ext";
 const CSV = '"Date","Weight (kg)"\n"2026-07-01","70.5"';
-const LOGIN_HTML = "<!doctype html><html><body>please sign in</body></html>";
+const HTML_PAGE = "<!doctype html><html><body>please sign in</body></html>";
 const EXPORT = `GET ${TANITA_EXPORT_PATH}`;
 
 afterEach(() => uninstallFakeExtension());
@@ -41,11 +41,14 @@ describe("Tanita Connector, current extension (protocol 2)", () => {
     expect(csv).toBe(CSV);
   });
 
+  // MyTANITA's verified sign-out is a redirect to /en/user/login
+  // (docs/connectors-research/tanita.md), which the extension reports; a 200
+  // HTML page in place of the export is no evidence of one.
   it.each([
-    ["an html content type", { contentType: "text/html", body: LOGIN_HTML }],
-    ["a body that is an html page", { contentType: "", body: LOGIN_HTML }],
+    ["an html content type", { contentType: "text/html", body: HTML_PAGE }],
+    ["a body that is an html page", { contentType: "", body: HTML_PAGE }],
   ])(
-    "should ask the athlete to sign in when MyTANITA serves a login page by %s",
+    "should say MyTANITA is not answering, not signed out, when it serves a page by %s in place of the export",
     async (_label, reply) => {
       // Arrange
       currentExtension({ [EXPORT]: reply });
@@ -55,9 +58,22 @@ describe("Tanita Connector, current extension (protocol 2)", () => {
 
       // Assert
       expect(error).toBeInstanceOf(TanitaBridgeError);
-      expect((error as TanitaBridgeError).needsReauth).toBe(true);
+      expect((error as TanitaBridgeError).needsReauth).toBe(false);
     }
   );
+
+  it("should say MyTANITA is not answering, not signed out, when the extension refuses with a bare 403", async () => {
+    // Arrange
+    currentExtension({
+      [EXPORT]: { refuse: { error: "Request failed: 403", status: 403 } },
+    });
+
+    // Act
+    const error = await readTanitaExportCsv(EXT).catch((e: unknown) => e);
+
+    // Assert
+    expect((error as TanitaBridgeError).needsReauth).toBe(false);
+  });
 
   it("should ask the athlete to sign in when the extension saw the Session bounce", async () => {
     // Arrange

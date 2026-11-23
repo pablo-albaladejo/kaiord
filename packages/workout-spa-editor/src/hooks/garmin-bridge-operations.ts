@@ -43,8 +43,10 @@ export const executePush: PushWorkout = async function executePush(
   }
 
   if (!res.ok) {
+    // A 401/403 re-detects, but only the extension's verified `needsReauth`
+    // says the Session ended: a bare status is Garmin not answering.
     const redetect = res.status === 401 || res.status === 403;
-    const reason = redetect ? "sign-in" : "not-answering";
+    const reason = res.needsReauth === true ? "sign-in" : "not-answering";
     return { status: "error", reason, detail: res.error ?? "", redetect };
   }
 

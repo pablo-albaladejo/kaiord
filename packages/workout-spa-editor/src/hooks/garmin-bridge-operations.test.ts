@@ -202,9 +202,14 @@ describe("executePush", () => {
     expect(result).toEqual({ status: "invalidated" });
   });
 
-  it("should flag redetect on auth-shaped failures", async () => {
+  it("should flag redetect and ask for a sign-in when the extension verified the Session ended", async () => {
     // Arrange
-    mockedSend.mockResolvedValue({ ok: false, status: 401, error: "Nope" });
+    mockedSend.mockResolvedValue({
+      ok: false,
+      status: 401,
+      needsReauth: true,
+      error: "Nope",
+    });
 
     // Act
     const result = await executePush("ext-1", {});
