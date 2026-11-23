@@ -1,12 +1,12 @@
 /**
  * TrainingPeaks bridge read transport.
  *
- * Relays `checkSession` to the discovered trainingpeaks-bridge extension
- * (the metric read is trainingpeaks-metrics-transport.ts). The cookie→token exchange stays inside the extension; this layer
- * holds no credentials and only transports + validates the envelope. A dead
+ * Relays `checkSession` to the discovered trainingpeaks-bridge extension.
+ * The cookie→token exchange stays inside the extension; this layer holds no
+ * credentials and only transports + validates the envelope. A dead
  * trainingpeaks.com session surfaces as `{ ok: false, needsReauth: true }`;
  * that flag rides the thrown `TrainingPeaksBridgeError` so the sync use case
- * can prompt a re-login instead of retrying. Modeled on `tanita-transport.ts`.
+ * can prompt a re-login instead of retrying.
  */
 import { z } from "zod";
 
