@@ -82,6 +82,8 @@ export type ChatActionOps = {
 
 export type ChatToolDeps = ReadToolDeps & {
   actions: ChatActionOps;
+  /** The athlete lets this Provider read their health data; absent, it may not. */
+  healthShared?: boolean;
   /** One-shot snapshot provider for the get_data_routes read tool. */
   getMatrixSignals: () => Promise<DataHubMatrixSignals>;
 };

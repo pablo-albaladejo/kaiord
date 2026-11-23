@@ -41,11 +41,18 @@ const modelContent = (
     .join("\n\n");
 };
 
+export type ReplayOptions = {
+  /** Leave out the replies that may quote stored health data. */
+  withholdHealth?: boolean;
+};
+
 export const recordsToModelMessages = (
-  records: ChatMessageRecord[]
+  records: ChatMessageRecord[],
+  options: ReplayOptions = {}
 ): ModelMessage[] =>
   records.flatMap((r, index) =>
-    r.role === "user" || r.role === "assistant"
+    (r.role === "user" || r.role === "assistant") &&
+    !(options.withholdHealth && r.readHealth)
       ? [{ role: r.role, content: modelContent(records, r, index) }]
       : []
   );
@@ -61,6 +68,7 @@ export type NewChatMessageInput = {
   toolResult?: unknown;
   usage?: ChatMessageUsage;
   stopReason?: ChatStopReason;
+  readHealth?: boolean;
 };
 
 export const newChatMessage = (
@@ -76,4 +84,5 @@ export const newChatMessage = (
   ...(input.toolResult !== undefined ? { toolResult: input.toolResult } : {}),
   ...(input.usage ? { usage: input.usage } : {}),
   ...(input.stopReason ? { stopReason: input.stopReason } : {}),
+  ...(input.readHealth ? { readHealth: true } : {}),
 });
