@@ -17,6 +17,10 @@ import {
   startMergedDist,
 } from "./fixtures/merged-dist-server";
 import { workoutCardsOn } from "./helpers/calendar-day";
+import {
+  kaiordNativeVersion,
+  nextMajorNative,
+} from "./helpers/kaiord-idb-version";
 import { toLocalDateString } from "./helpers/local-date";
 import {
   cacheNames,
@@ -41,8 +45,6 @@ const INSTALL_SETTLE_MS = 3_000;
 const REREGISTER_MS = 5_000;
 // A deploy found this soon after load, with nothing done, applies silently.
 const SILENT_WINDOW_MS = 10_000;
-// Native IndexedDB version of the next major schema (Dexie stores verno * 10).
-const NEXT_MAJOR_NATIVE = 390;
 // The lazy route chunk a later deploy no longer ships.
 const SETTINGS_CHUNK = /^SettingsPage-[\w-]+\.js$/;
 
@@ -373,6 +375,8 @@ test.describe("@service-worker the App's service worker", () => {
   }) => {
     // Arrange
     await takeControl(page, dist.routeUrl("/daily"));
+    // The next major after what this build installed, so it stays newer.
+    const nextMajor = nextMajorNative(await kaiordNativeVersion(page));
     const newer = await context.newPage();
     await newer.goto(`${dist.server.url}/no-such-page`);
 
@@ -389,7 +393,7 @@ test.describe("@service-worker the App's service worker", () => {
           };
           request.onerror = () => reject(request.error);
         }),
-      NEXT_MAJOR_NATIVE
+      nextMajor
     );
     const dialog = page.getByTestId("stale-schema-dialog");
     await expect(dialog).toBeVisible();
