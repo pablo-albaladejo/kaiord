@@ -1484,3 +1484,15 @@ test("sidebar config missing privacy-policy is flagged", () => {
   assert.equal(v.length, 1);
   assert.match(v[0], /no sidebar link/);
 });
+
+test("the assistant's Traces must be disclosed as kept on the device only", () => {
+  const src = POLICY.replace(
+    "Traces are never sent anywhere",
+    "Traces may be sent"
+  );
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, [
+    "Assistant Traces disclosed as device-only (never sent, not synced, not in a backup)",
+  ]);
+});
