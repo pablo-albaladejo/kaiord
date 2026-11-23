@@ -204,12 +204,6 @@ const train2goFetch = async (path, method = "GET") => {
 
 // ── Actions ──
 
-// The Session check, answered to `ping`: one GET of the profile ping, the
-// cheapest Train2Go request that tells a live session from a dead one. Only
-// the outcome leaves the service worker; the profile in the body is dropped
-// here. Train2Go saying the session is gone (a redirect, 401/403, or
-// `success: false`) is a verified "signed-out"; anything else that fails is
-// "not-answering", never signed out.
 // The typed outcome of one profile-ping answer, shared by the Session check
 // and the popup's profile read so both word one answer the same way.
 const sessionOutcomeOf = (res) => {
@@ -220,6 +214,12 @@ const sessionOutcomeOf = (res) => {
   return res?.needsReauth ? "signed-out" : "not-answering";
 };
 
+// The Session check, answered to `ping`: one GET of the profile ping, the
+// cheapest Train2Go request that tells a live session from a dead one. Only
+// the outcome leaves the service worker; the profile in the body is dropped
+// here. Train2Go saying the session is gone (a redirect, 401/403, or
+// `success: false`) is a verified "signed-out"; anything else that fails is
+// "not-answering", never signed out.
 const checkSession = async () => {
   let session;
   try {
