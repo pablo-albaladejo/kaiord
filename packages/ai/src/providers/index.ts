@@ -3,6 +3,21 @@ export {
   type CreateLanguageModelOptions,
 } from "./create-language-model";
 export { listedModels, modelDisplayName } from "./model-names";
+export {
+  type CostBasis,
+  type PricedRequest,
+  priceRun,
+  type PriceRunInput,
+  type RunCost,
+} from "./pricing/price-run";
+export {
+  findModelPrice,
+  MODEL_PRICES,
+  type ModelPriceEntry,
+  periodAt,
+  type PricePeriod,
+  type TokenPrices,
+} from "./pricing/price-table";
 export { isModelNotFoundError, namesMissingModel } from "./model-not-found";
 export {
   DEPRECATED_MODELS,

@@ -5,6 +5,8 @@ import {
   MAX_ERROR_LENGTH,
   truncate,
 } from "./retry-policy";
+import type { AiRequest } from "../observability/telemetry-types";
+import { failedRequest } from "./attempt-usage";
 import { createAiAgentError } from "./errors";
 import { keepUnderlyingFailure } from "./underlying-failure";
 import {
@@ -28,6 +30,8 @@ export type { GenerateOutcome };
 
 export type GenerateLoopArgs<TOutput> = CallModelArgs<TOutput> & {
   onAttemptError?: (attempt: number, message: string) => void;
+  /** Each request that reached the Provider, as it ends: ok or failed. */
+  onRequest?: (request: AiRequest) => void;
   /** When set, output streams and each phase change is reported. */
   onProgress?: OnGenerateProgress;
 };
@@ -72,10 +76,17 @@ export const runGenerateLoop = async <TOutput>(
     emit({ phase: "requesting", attempt, retryReason });
     try {
       const call = { ...args, maxOutputTokens: budget };
-      return await callOnce(call, lastError, mode, (phase, items, partial) =>
-        emit({ phase, attempt, retryReason, items, partial })
+      const outcome = await callOnce(
+        call,
+        lastError,
+        mode,
+        (phase, items, partial) =>
+          emit({ phase, attempt, retryReason, items, partial })
       );
+      args.onRequest?.({ outcome: "ok", usage: outcome.usage });
+      return outcome;
     } catch (error) {
+      args.onRequest?.(failedRequest(error, args.signal?.aborted === true));
       // An aborted signal stops the run whatever its reason was: a caller may
       // abort with a non-AbortError reason, which must not read as retryable.
       if (args.signal?.aborted) throw error;

@@ -24,7 +24,8 @@
     "noProvider": "No provider selected",
     "tokens": "Estimated tokens",
     "cost": "Estimated cost",
-    "costValue": "${{amount}} USD"
+    "costValue": "${{amount}} USD",
+    "priceUnknown": "Price unknown for this model"
   },
   "batch": {
     "dismiss": "Dismiss",

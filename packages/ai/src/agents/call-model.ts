@@ -2,6 +2,7 @@ import { generateText, Output } from "ai";
 import type { LanguageModel } from "ai";
 import type { AgentDefinition, GenerateAgentInput } from "./definition-types";
 import type { AiUsage } from "../observability/telemetry-types";
+import { sdkErrorUsage, toUsage, withUsage } from "./attempt-usage";
 import type { GenerateProgressPhase } from "./progress";
 import { buildUserMessage } from "./build-user-message";
 import {
@@ -29,14 +30,6 @@ export type ReportPhase = (
   items?: number,
   partial?: unknown
 ) => void;
-
-export const toUsage = (raw: {
-  inputTokens?: number;
-  outputTokens?: number;
-}): AiUsage => ({
-  promptTokens: raw?.inputTokens ?? 0,
-  completionTokens: raw?.outputTokens ?? 0,
-});
 
 // `validate`, when present, owns validation and receives the RAW model output
 // (so an agent whose wire schema is permissive can validate against a stricter
@@ -81,12 +74,14 @@ export const callModel = async <TOutput>(
 ): Promise<GenerateOutcome<TOutput>> => {
   const result = await generateText(callSettings(args, feedback)).catch(
     (error: unknown) => {
-      throw toOutputError(error);
+      throw withUsage(toOutputError(error), sdkErrorUsage(error));
     }
   );
-  throwIfTruncated(result.finishReason);
-  return {
-    output: validateOutput(args.definition, result.output),
-    usage: toUsage(result.usage),
-  };
+  const usage = toUsage(result.usage);
+  try {
+    throwIfTruncated(result.finishReason);
+    return { output: validateOutput(args.definition, result.output), usage };
+  } catch (error) {
+    throw withUsage(error, usage);
+  }
 };

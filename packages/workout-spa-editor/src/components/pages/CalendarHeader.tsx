@@ -71,6 +71,7 @@ export function CalendarHeader({
         open={s.batch.pending !== null}
         workouts={s.batch.pending?.workouts ?? []}
         provider={s.batch.pending?.provider ?? null}
+        modelId={s.batch.pending?.modelId}
         onConfirm={s.batch.confirmStart}
         onCancel={s.batch.cancelRequest}
       />

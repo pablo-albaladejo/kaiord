@@ -6,10 +6,14 @@ import type { MonthUsage } from "./usage-table-types";
 import { UsageTable } from "./UsageTable";
 
 const ZERO: UsageTotals = {
+  runs: 0,
   inputTokens: 0,
   outputTokens: 0,
   totalTokens: 0,
   totalCost: 0,
+  unknownCostRuns: 0,
+  failedRequests: 0,
+  unmeasuredRequests: 0,
 };
 
 const totals = (over: Partial<UsageTotals>): UsageTotals => ({
