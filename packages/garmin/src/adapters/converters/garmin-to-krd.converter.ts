@@ -32,6 +32,7 @@ export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
 
   const workout: Workout = {
     name: truncateName(gcn.workoutName ?? "", logger),
+    ...(gcn.description ? { notes: gcn.description } : {}),
     sport,
     steps,
   };

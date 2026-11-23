@@ -1,12 +1,16 @@
+import { useDestinationStatus } from "../../../hooks/use-destination-status";
 import { useTranslate } from "../../../i18n/use-translate";
+import { DataFlowInventory } from "./DataFlowInventory";
 import { PrivacyInformationSection } from "./PrivacyInformationSection";
 
-/** Information only: what leaves this browser and what is measured. */
+/** What leaves this browser, where it goes, and what is measured. */
 export const PrivacyTab: React.FC = () => {
   const t = useTranslate("settings");
+  const active = useDestinationStatus();
 
   return (
     <div className="space-y-6">
+      <DataFlowInventory active={active} />
       <PrivacyInformationSection />
 
       <section>

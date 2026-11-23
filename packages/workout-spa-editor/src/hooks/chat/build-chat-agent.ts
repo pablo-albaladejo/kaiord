@@ -28,6 +28,8 @@ export type BuildChatAgentArgs = {
   provider: ProviderCredential;
   modelId: string;
   actions: ChatActionOps;
+  /** The athlete lets this Provider read their health data. */
+  healthShared: boolean;
   getMatrixSignals: () => Promise<DataHubMatrixSignals>;
   onTextDelta: (delta: string) => void;
 };
@@ -40,6 +42,7 @@ export const buildChatAgent = async (
     profileId: args.profileId,
     today: args.today,
     actions: args.actions,
+    healthShared: args.healthShared,
     getMatrixSignals: args.getMatrixSignals,
   });
   const model = await createLanguageModel(args.provider, args.modelId, {

@@ -66,6 +66,7 @@ export const garminWorkoutParseSchema = z.object({
     .nullable()
     .optional(),
   workoutName: z.string().optional(),
+  description: z.string().nullable().optional(),
   workoutSegments: z
     .array(
       z

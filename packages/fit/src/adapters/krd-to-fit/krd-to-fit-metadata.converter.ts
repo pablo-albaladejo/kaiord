@@ -1,9 +1,11 @@
+import { Profile } from "@garmin/fitsdk";
 import type { KRD, Logger, Workout } from "@kaiord/core";
 
 import type { FitFileType } from "../schemas/fit-file-type";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { mapSportToFit } from "../sport/sport.mapper";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
+import { fitStringPrefix } from "./fit-string";
 import { mapManufacturer } from "./krd-to-fit-manufacturer.converter";
 import { countValidSteps } from "./krd-to-fit-step-count.helpers";
 
@@ -12,6 +14,13 @@ const resolveFitFileType = (krdType: KRD["type"]): FitFileType => {
   if (krdType === "recorded_activity") return "activity";
   if (krdType === "course") return "course";
   return "workout";
+};
+
+/** A Garmin product name (as the FIT reader names it) back to its number. */
+const garminProductNumber = (name: string): number | undefined => {
+  const products = Profile.types.garminProduct as Record<string, string>;
+  const entry = Object.entries(products).find(([, value]) => value === name);
+  return entry ? Number(entry[0]) : undefined;
 };
 
 const assignParsedNumber = (
@@ -40,7 +49,9 @@ export const convertMetadataToFileId = (
   };
 
   if (krd.metadata.product !== undefined) {
-    assignParsedNumber(fileId, "product", krd.metadata.product);
+    const named = garminProductNumber(krd.metadata.product);
+    if (named !== undefined) fileId.product = named;
+    else assignParsedNumber(fileId, "product", krd.metadata.product);
   }
 
   if (krd.metadata.serialNumber) {
@@ -60,6 +71,8 @@ export const convertWorkoutMetadata = (
 
   const workoutMesg: Record<string, unknown> = {
     wktName: workout.name,
+    wktDescription:
+      workout.notes === undefined ? undefined : fitStringPrefix(workout.notes),
     sport: mapSportToFit(workout.sport),
     numValidSteps,
   };

@@ -1,5 +1,6 @@
 import { mockLlmFailure } from "./fixtures/api-mocks";
 import { expect, test } from "./fixtures/base";
+import { answerHealthSharing } from "./helpers/health-sharing";
 import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -47,6 +48,8 @@ test.describe("AI provider key check", () => {
   }) => {
     const pageErrors: string[] = [];
     page.on("pageerror", (error) => pageErrors.push(error.message));
+    // The first-time health notice has its own spec.
+    await answerHealthSharing(page, { anthropic: "never" });
     await page.goto("/calendar");
     await waitForDexieReady(page);
     await clearDexie(page);

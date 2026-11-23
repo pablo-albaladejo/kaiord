@@ -11,19 +11,23 @@
     },
     {
       "file": "packages/fit/README.md",
-      "intro": true
+      "intro": true,
+      "sections": ["Supported FIT Features"]
     },
     {
       "file": "packages/tcx/README.md",
-      "intro": true
+      "intro": true,
+      "sections": ["Supported TCX Features"]
     },
     {
       "file": "packages/zwo/README.md",
-      "intro": true
+      "intro": true,
+      "sections": ["Supported ZWO Features"]
     },
     {
       "file": "packages/garmin/README.md",
-      "intro": true
+      "intro": true,
+      "sections": ["Supported Garmin Features"]
     },
     {
       "file": "packages/garmin-connect/README.md",
@@ -1240,6 +1244,172 @@
         {
           "file": ".github/workflows/deploy-site.yml",
           "contains": "- \"packages/landing/**\""
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.reads-writes",
+      "text": "Reads FIT workout, activity and health files into KRD, and writes FIT workouts.",
+      "proof": [
+        {
+          "test": "packages/fit/src/adapters/messages/activity-fixtures.test.ts",
+          "title": "should import activity_truncated.fit (records and events, no session)"
+        },
+        {
+          "test": "packages/fit/src/adapters/health/weight/weight-round-trip.test.ts",
+          "title": "should produce a valid KRD weight_measurement from the SDK fixture"
+        },
+        {
+          "test": "packages/fit/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every FIT workout within the declared tolerances"
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.round-trip.tested",
+      "text": "Round-trip tested: converting FIT → KRD → FIT keeps every value of a workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm, pace ±0.01 m/s), for every duration, target, intensity and sport.",
+      "proof": [
+        {
+          "test": "packages/fit/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every FIT workout within the declared tolerances"
+        },
+        {
+          "test": "packages/fit/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the FIT contract declares unsupported"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/fit.contract.ts",
+          "contains": "field: \"extensions.structured_workout.**.stepIndex\""
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.round-trip.not-carried",
+      "text": "Fields FIT cannot carry: the step numbers after a repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT string.",
+      "proof": [
+        {
+          "test": "packages/fit/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the FIT contract declares unsupported"
+        },
+        {
+          "test": "packages/fit/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every FIT workout within the declared tolerances"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/fit.contract.ts",
+          "contains": "field: \"extensions.structured_workout.**.stepIndex\""
+        },
+        {
+          "test": "packages/fit/src/adapters/round-trip/round-trip-workout-notes.test.ts",
+          "title": "should write a 256-character step note cut to the 254 bytes a FIT string holds"
+        }
+      ]
+    },
+    {
+      "id": "readme.tcx.round-trip.tested",
+      "text": "Round-trip tested: converting TCX → KRD → TCX keeps every value of a Running, Biking or Other workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm, pace ±0.01 m/s).",
+      "proof": [
+        {
+          "test": "packages/tcx/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every TCX workout within the declared tolerances"
+        },
+        {
+          "test": "packages/tcx/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the TCX contract declares unsupported"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/tcx.contract.ts",
+          "contains": "field: \"extensions.structured_workout.steps.**.notes\""
+        }
+      ]
+    },
+    {
+      "id": "readme.tcx.round-trip.not-carried",
+      "text": "Fields TCX cannot carry: power targets other than a single watt value; a single heart rate, which comes back as a range from that value to itself; heart rate as a share of maximum; pace zones; repeat-until durations; step notes; the sub-sport; the recovery, interval and other intensities.",
+      "proof": [
+        {
+          "test": "packages/tcx/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the TCX contract declares unsupported"
+        },
+        {
+          "test": "packages/tcx/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every TCX workout within the declared tolerances"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/tcx.contract.ts",
+          "contains": "field: \"extensions.structured_workout.steps.**.notes\""
+        }
+      ]
+    },
+    {
+      "id": "readme.zwo.round-trip.tested",
+      "text": "Round-trip tested: converting ZWO → KRD → ZWO keeps every value of a bike or run workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm, pace ±0.01 m/s).",
+      "proof": [
+        {
+          "test": "packages/zwo/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every ZWO workout within the declared tolerances"
+        },
+        {
+          "test": "packages/zwo/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the ZWO contract declares unsupported"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/zwo.contract.ts",
+          "contains": "field: \"extensions.structured_workout.steps.**.notes\""
+        }
+      ]
+    },
+    {
+      "id": "readme.zwo.round-trip.not-carried",
+      "text": "Fields ZWO cannot carry: cadence and pace targets; calorie, power-above and repeat-until durations; step notes; the sub-sport.",
+      "proof": [
+        {
+          "test": "packages/zwo/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the ZWO contract declares unsupported"
+        },
+        {
+          "test": "packages/zwo/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every ZWO workout within the declared tolerances"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/zwo.contract.ts",
+          "contains": "field: \"extensions.structured_workout.steps.**.notes\""
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin.round-trip.tested",
+      "text": "Round-trip tested: converting GCN → KRD → GCN keeps every value of a running, cycling, swimming or cardio workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm, pace ±0.01 m/s).",
+      "proof": [
+        {
+          "test": "packages/garmin/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every GCN workout within the declared tolerances"
+        },
+        {
+          "test": "packages/garmin/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the GCN contract declares unsupported"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/gcn.contract.ts",
+          "contains": "field: \"extensions.structured_workout.steps.**.name\""
+        }
+      ]
+    },
+    {
+      "id": "readme.garmin.round-trip.not-carried",
+      "text": "Fields GCN cannot carry: a single target value, which is sent as a band and comes back as that range; power as a share of FTP and heart rate as a share of maximum, which are sent in watts and bpm; pace zones; heart-rate, power and repeat-until durations; step names; the sub-sport; the created date; the interval and other intensities, which come back as active.",
+      "proof": [
+        {
+          "test": "packages/garmin/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should not carry any kind of step the GCN contract declares unsupported"
+        },
+        {
+          "test": "packages/garmin/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every GCN workout within the declared tolerances"
+        },
+        {
+          "file": "packages/core/src/application/round-trip/contract/formats/gcn.contract.ts",
+          "contains": "field: \"extensions.structured_workout.steps.**.name\""
         }
       ]
     }

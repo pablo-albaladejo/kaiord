@@ -3,8 +3,10 @@
  * frozen lab-extractor agent over one uploaded document, returning the raw
  * extraction. Mapping the extraction to the entry-form draft is a UI concern
  * and stays in the labs component layer, so this use case never depends on it.
- * Returns a typed no-provider result instead of throwing for the expected "no
- * model configured" case; a run failure propagates as a throw.
+ * The document is health data: it goes only once the athlete lets its
+ * Provider have it (`askHealth`), and not at all when they do not. Returns a
+ * typed result instead of throwing for "no model configured" and for
+ * "withheld"; a run failure propagates as a throw.
  */
 import {
   type AgentFileInput,
@@ -15,6 +17,7 @@ import {
 import type { AiTelemetrySink } from "@kaiord/ai/observability";
 import {
   createLanguageModel,
+  type LlmProviderType,
   resolveModelForPurpose,
 } from "@kaiord/ai/providers";
 
@@ -27,11 +30,12 @@ export type RunLabExtractionInput = {
   bindings: AiModelBinding[];
   signal?: AbortSignal;
   telemetry?: AiTelemetrySink;
+  askHealth: (providerType: LlmProviderType) => Promise<"send" | "withhold">;
 };
 
 export type RunLabExtractionResult =
   | { ok: true; extraction: LabExtraction }
-  | { ok: false; reason: "no_provider" };
+  | { ok: false; reason: "no_provider" | "withheld" };
 
 export const runLabExtraction = async (
   input: RunLabExtractionInput
@@ -42,6 +46,8 @@ export const runLabExtraction = async (
     input.bindings
   );
   if (!resolved) return { ok: false, reason: "no_provider" };
+  if ((await input.askHealth(resolved.provider.type)) === "withhold")
+    return { ok: false, reason: "withheld" };
 
   const model = await createLanguageModel(resolved.provider, resolved.modelId, {
     browser: true,

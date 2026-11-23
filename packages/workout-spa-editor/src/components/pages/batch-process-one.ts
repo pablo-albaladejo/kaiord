@@ -13,6 +13,7 @@ import type {
 import { updateWorkoutRecord } from "../../application/save-workout-edits";
 import { transitionToStructured } from "../../application/workout-transitions";
 import { generateWorkoutKrd } from "../../lib/generate-workout";
+import { askGenerationHealth, askOnce } from "../../lib/health-sharing-gate";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
@@ -22,6 +23,8 @@ export function createProcessOne(
   modelId: string,
   persistence: Pick<PersistencePort, "workouts" | "transaction">
 ): ProcessOneFn {
+  // One question for the whole batch, asked when heart-rate data would first go.
+  const askHealth = askOnce(() => askGenerationHealth(provider.type));
   return async (
     workout: WorkoutRecord,
     allowRetry: boolean
@@ -34,6 +37,7 @@ export function createProcessOne(
         provider,
         modelId,
         profileId: workout.profileId,
+        askHealth,
         sport: sport as Parameters<typeof generateWorkoutKrd>[0]["sport"],
       });
 

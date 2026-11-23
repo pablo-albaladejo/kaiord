@@ -137,18 +137,18 @@ guard, update the entry's `text` and, if the meaning changed, its proof.
 
 ## Registered today
 
-| File                   | Surfaces                                                                                                                                                                                                                                     |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app.json`             | The Kaiord App page `packages/workout-spa-editor/index.html`: title, metas, JSON-LD and the `<noscript>` text                                                                                                                                |
-| `docs.json`            | The docs home and getting-started intros, the converters page's "Three ways to convert", the install guide for the extensions (English and Spanish), and `packages/landing/public/llms.txt`                                                  |
-| `garmin.json`          | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                          |
-| `landing.json`         | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630) |
-| `method.json`          | The method note `packages/docs/project/how-kaiord-is-built.md`, which quotes the landing headline as `method.headline` (#1632)                                                                                                               |
-| `platform-access.json` | The public register of unofficial access per Platform, `packages/docs/legal/platform-access.md` (#1631)                                                                                                                                      |
-| `readme.json`          | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai), of the five extensions, of the App and of the landing (#1630) |
-| `tanita.json`          | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)                                                                                          |
-| `train2go.json`        | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)                                                                                        |
-| `trainingpeaks.json`   | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628)                                                                                   |
+| File                   | Surfaces                                                                                                                                                                                                                                                                                                              |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app.json`             | The Kaiord App page `packages/workout-spa-editor/index.html`: title, metas, JSON-LD and the `<noscript>` text                                                                                                                                                                                                         |
+| `docs.json`            | The docs home and getting-started intros, the converters page's "Three ways to convert" and "What survives a conversion?", the install guide for the extensions (English and Spanish), and `packages/landing/public/llms.txt`                                                                                         |
+| `garmin.json`          | Kaiord for Garmin: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1625)                                                                                                                                                                   |
+| `landing.json`         | The landing, English and Spanish: `packages/landing/index.html` (with its head and text alternatives), `partials/phone-screen.html`, every translation in `i18n/es.json`, and the Spanish title and descriptions in `i18n/meta.json` (#1630)                                                                          |
+| `method.json`          | The method note `packages/docs/project/how-kaiord-is-built.md`, which quotes the landing headline as `method.headline` (#1632)                                                                                                                                                                                        |
+| `platform-access.json` | The public register of unofficial access per Platform, `packages/docs/legal/platform-access.md` (#1631)                                                                                                                                                                                                               |
+| `readme.json`          | The root `README.md` (intro, Features, Local-first architecture) and the intro of each published package's README (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai) with the per-format features section of fit, tcx, zwo and garmin (#1654), of the five extensions, of the App and of the landing (#1630) |
+| `tanita.json`          | Kaiord for Tanita: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1627)                                                                                                                                                                   |
+| `train2go.json`        | Kaiord for Train2Go: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1626)                                                                                                                                                                 |
+| `trainingpeaks.json`   | Kaiord for TrainingPeaks: `extDescription`, store listing (Short and Detailed Description), `privacy-justification.md`, its privacy-policy section (#1628)                                                                                                                                                            |
 
 The landing headline "Every line — … written by AI agents." is proven by the
 method note: the landing's entries for that sentence, `landing.en.ai.headline`
@@ -157,15 +157,25 @@ and `landing.es.ai.headline`, point to the note and to
 `pnpm lint:method-figures`.
 
 Scoped out of `readme.json`, as reference rather than pitch: install
-commands, usage and API sections, configuration, the per-format "Supported …
-Features" lists and the root README's FIT reference (each is a per-format
-capability claim the round-trip work of #1654 proves format by format), and
-the root README's documentation, tech-stack, layout, CI and contributing
-sections. Scoped out of `docs.json`: the converters page's per-format "What
-survives a conversion?" list (the same #1654 work). The JSON-LD in the
+commands, usage and API sections, configuration and the root README's FIT
+reference, and the root README's documentation, tech-stack, layout, CI and
+contributing sections. The per-format "Supported … Features" sections of the
+fit, tcx, zwo and garmin READMEs, and the converters page's "What survives a
+conversion?", are registered since #1654, each Round-trip sentence proven by
+its format's Round-trip test. The JSON-LD in the
 landing's `<head>` is read: its FAQ questions and answers repeat the visible
 FAQ (those entries say `"count": 2`), and its five `description` strings are
 entries of their own (`landing.jsonld.*`).
+
+## Round-trip claims
+
+A unit that says Round-trip and names a format (FIT, TCX, ZWO or Zwift, GCN
+or Garmin Connect) is a Round-trip claim for that format. Its entry must be
+proven by the format's contract test listed in
+`scripts/lib/round-trip-formats.vocab.mjs`, and that format's package must have a
+shard in the CI `round-trip` job. A format the Kaiord SDK reads but does not
+write (WHOOP, Tanita, TrainingPeaks, Train2Go) cannot carry the claim, and
+neither can a label (`lib/claims-round-trip.mjs`).
 
 Words GLOSSARY.md retired or withdrew are held off every registered surface,
 and off a few non-prose files, by `scripts/check-retired-terms.mjs`

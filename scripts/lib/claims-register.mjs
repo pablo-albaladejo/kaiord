@@ -4,6 +4,7 @@
 // per entry, or the entry's `count`), so a short unit ("5", "Accounts") added
 // a second time cannot ride on the first one's proof.
 
+import { roundTripProblems } from "./claims-round-trip.mjs";
 import { kindOfClaim } from "./claims-shape.mjs";
 import { claimProblems, proofStrength } from "./claims-strength.mjs";
 import { surfaceUnits } from "./claims-units.mjs";
@@ -69,8 +70,10 @@ export const registerProblems = (name, data, read, today) => {
       for (const unit of new Set(units))
         if (!claims.some((c) => c.text === unit))
           problems.push(`${file}: unregistered claim "${unit}"`);
-  for (const claim of claims)
+  for (const claim of claims) {
     problems.push(...claimProblems(claim, read, { ownFiles, today }));
+    problems.push(...roundTripProblems(claim));
+  }
   const strength = claims.map((c) =>
     kindOfClaim(c) === "claim"
       ? (proofStrength(c, ownFiles) ?? "weak")

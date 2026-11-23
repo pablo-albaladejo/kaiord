@@ -21,6 +21,7 @@
   "labImport": {
     "tooLarge": "File is too large — use a file under 10 MB",
     "runFailed": "Could not extract the lab report — please retry",
-    "noModel": "No lab-extraction model is configured"
+    "noModel": "No lab-extraction model is configured",
+    "withheld": "The document was not sent: you chose not to share health data with your AI provider. You can enter the results by hand."
   }
 }

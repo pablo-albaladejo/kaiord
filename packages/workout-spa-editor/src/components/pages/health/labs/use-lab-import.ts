@@ -19,6 +19,7 @@ import { useAiModelBindingsLive } from "../../../../hooks/use-ai-model-bindings-
 import { useAiProvidersLive } from "../../../../hooks/use-ai-providers-live";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../../i18n/use-translate";
+import { healthSharingGate } from "../../../../lib/health-sharing-gate";
 import { useUnsavedWork } from "../../../../lib/use-unsaved-work";
 import { validateFileSize } from "../../../molecules/FileUpload/file-upload-constants";
 import { type LabDraft, mapExtractionToDraft } from "./map-extraction-to-draft";
@@ -57,9 +58,14 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
         bindings,
         signal: controller.signal,
         telemetry,
+        askHealth: (providerType) =>
+          healthSharingGate.request({ flow: "labImport", providerType }),
       });
-      if (!result.ok) toast.error(t("labImport.noModel"));
-      else onDraft(mapExtractionToDraft(result.extraction, { locale }));
+      if (result.ok)
+        onDraft(mapExtractionToDraft(result.extraction, { locale }));
+      else if (result.reason === "withheld")
+        toast.info(t("labImport.withheld"));
+      else toast.error(t("labImport.noModel"));
     } catch (error) {
       if (controller.signal.aborted) return;
       if (isModelNotFoundError(error)) toast.error(t("ai.modelUnavailable"));

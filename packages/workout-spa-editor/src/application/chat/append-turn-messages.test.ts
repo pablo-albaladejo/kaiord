@@ -129,4 +129,32 @@ describe("appendAssistantTurn", () => {
     // Assert
     expect(row?.stopReason).toBeUndefined();
   });
+
+  describe("appendAssistantTurn and health data", () => {
+    it("should mark a reply whose turn ran a health-reading tool", async () => {
+      // Arrange
+      const messages = [
+        { role: "user", content: "How did I sleep?" },
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "t1",
+              toolName: "query_health",
+              input: { metric: "sleep" },
+            },
+          ],
+        },
+      ];
+
+      // Act
+      const health = await persisted(result({ messages } as never));
+      const plain = await persisted(result());
+
+      // Assert
+      expect(health?.readHealth).toBe(true);
+      expect(plain?.readHealth).toBeUndefined();
+    });
+  });
 });

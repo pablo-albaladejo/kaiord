@@ -6,7 +6,7 @@ import { convertWorkoutStep } from "./krd-to-fit-step.converter";
 
 const MESSAGE_INDEX = 4;
 const DURATION_SECONDS = 300;
-const FIT_NOTES_LIMIT = 256;
+const FIT_NOTES_LIMIT = 254;
 const OVERSIZED_NOTES_LENGTH = 300;
 
 const createSpyLogger = (): Logger => ({
@@ -78,7 +78,7 @@ describe("convertWorkoutStep", () => {
     expect(message.notes).toBe("easy spin");
   });
 
-  it("should truncate oversized notes to 256 characters by default", () => {
+  it("should truncate oversized notes to the 254 bytes of a FIT string by default", () => {
     // Arrange
     const logger = createSpyLogger();
     const longNotes = "x".repeat(OVERSIZED_NOTES_LENGTH);
@@ -91,7 +91,7 @@ describe("convertWorkoutStep", () => {
     expect(message.notes).toBe("x".repeat(FIT_NOTES_LIMIT));
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining("Notes truncated"),
-      { stepIndex: 0, originalLength: OVERSIZED_NOTES_LENGTH }
+      { stepIndex: 0, originalBytes: OVERSIZED_NOTES_LENGTH }
     );
   });
 
@@ -105,6 +105,8 @@ describe("convertWorkoutStep", () => {
       convertWorkoutStep(step, 0, logger, { notesTruncation: "error" });
 
     // Assert
-    expect(act).toThrowError(/Notes exceed 256 characters at step 0/);
+    expect(act).toThrowError(
+      /Notes exceed the 254 bytes of a FIT string at step 0/
+    );
   });
 });

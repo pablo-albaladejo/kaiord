@@ -1,8 +1,11 @@
 /**
  * `sendTurn` for `useChatTurn`: ensures the conversation exists (persisting a
- * draft on its first message), appends the user message, builds the agent, and
- * runs the turn. `retryTurn` re-runs a failed turn whose user message is
- * already persisted, without appending it again.
+ * draft on its first message), appends the user message, asks, if the athlete
+ * has not answered for this Provider, whether the assistant may send their
+ * health data, builds the agent, and runs the turn. Without health data the
+ * health tools read nothing and the earlier answers that used them are not
+ * replayed. `retryTurn` re-runs a failed turn whose user message
+ * is already persisted, without appending it again.
  */
 import type { ModelMessage } from "ai";
 
@@ -12,13 +15,15 @@ import { ensureConversationForTurn } from "../../application/chat/ensure-convers
 import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
 import { buildChatAgent } from "./build-chat-agent";
 import { buildDataRouteSignals } from "./build-data-route-signals";
+import { askHealth } from "./chat-health-share";
 import { runAgent } from "./chat-turn-context";
 import type { ChatTurnCtx } from "./chat-turn-types";
 
 const buildAndSend = async (
   ctx: ChatTurnCtx,
   messages: ModelMessage[],
-  signal: AbortSignal
+  signal: AbortSignal,
+  healthShared: boolean
 ) => {
   const built = await buildChatAgent({
     persistence: ctx.persistence,
@@ -27,6 +32,7 @@ const buildAndSend = async (
     provider: ctx.provider,
     modelId: ctx.modelId,
     actions: ctx.ops,
+    healthShared,
     getMatrixSignals: () =>
       buildDataRouteSignals(ctx.persistence, ctx.profileId),
     onTextDelta: (d) => ctx.set.streamingText((p) => p + d),
@@ -34,6 +40,20 @@ const buildAndSend = async (
   ctx.agentRef.current = built.agent;
   ctx.toolsRef.current = built.tools;
   return built.agent.sendTurn(messages, { signal });
+};
+
+/** Asks about health data, then replays the history it allows and sends. */
+const askAndSend = async (
+  ctx: ChatTurnCtx,
+  history: ChatMessageRecord[],
+  tail: ModelMessage[],
+  signal: AbortSignal
+) => {
+  const healthShared = await askHealth(ctx);
+  const replay = recordsToModelMessages(history, {
+    withholdHealth: !healthShared,
+  });
+  return buildAndSend(ctx, [...replay, ...tail], signal, healthShared);
 };
 
 export const sendTurn = async (
@@ -56,11 +76,7 @@ export const sendTurn = async (
       ctx.conversationId,
       text
     );
-    return buildAndSend(
-      ctx,
-      [...recordsToModelMessages(history), { role: "user", content: text }],
-      signal
-    );
+    return askAndSend(ctx, history, [{ role: "user", content: text }], signal);
   });
 };
 
@@ -76,9 +92,8 @@ export const retryTurn = async (
   history: ChatMessageRecord[],
   text: string
 ): Promise<void> => {
-  const replay = recordsToModelMessages(history);
-  const last = replay.at(-1);
+  const last = recordsToModelMessages(history).at(-1);
   if (last?.role !== "user" || last.content !== text)
     return sendTurn(ctx, history, text);
-  await runAgent(ctx, (signal) => buildAndSend(ctx, replay, signal));
+  await runAgent(ctx, (signal) => askAndSend(ctx, history, [], signal));
 };

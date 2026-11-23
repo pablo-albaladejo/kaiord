@@ -65,6 +65,10 @@ const convertSteps = (
   return steps;
 };
 
+/** The parser reads "400" as a number; notes are text either way. */
+const readNotes = (raw: unknown): { notes?: string } =>
+  raw === undefined || raw === null || raw === "" ? {} : { notes: String(raw) };
+
 export const convertTcxWorkout = (
   tcxWorkout: Record<string, unknown>,
   logger: Logger
@@ -78,6 +82,7 @@ export const convertTcxWorkout = (
 
   const workout: Workout = {
     name,
+    ...readNotes(tcxWorkout.Notes),
     sport,
     steps,
   };

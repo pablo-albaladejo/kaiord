@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { Router } from "wouter";
 
 import App from "./App.tsx";
+import { HealthSharingNotice } from "./components/organisms/HealthSharingNotice/HealthSharingNotice";
 import { StaleSchemaGate } from "./components/organisms/StaleSchemaDialog/StaleSchemaGate";
 import { UpdatePrompt } from "./components/organisms/UpdatePrompt/UpdatePrompt";
 import {
@@ -50,6 +51,7 @@ export const AppRoot = (props: AppRootProps) => (
                       <UnitsProvider>
                         <StaleSchemaGate />
                         <UpdatePrompt />
+                        <HealthSharingNotice />
                         <Router hook={useFragmentLocation}>
                           <App />
                         </Router>
