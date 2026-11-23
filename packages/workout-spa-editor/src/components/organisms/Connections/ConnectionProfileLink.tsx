@@ -54,9 +54,9 @@ function UnlinkedProfileNotice({
           name,
         })}
       </span>
-      {source.error && (
+      {source.error === "outdated" && (
         <span role="alert" className="text-danger-text">
-          {source.error}
+          {t("profileLink.updateExtension", { name })}
         </span>
       )}
       {source.connected && (

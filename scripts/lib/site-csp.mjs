@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, sep } from "node:path";
 
-import { SITE_CSP, serializePolicy } from "./site-csp-policy.mjs";
+import { appPolicyFor, SITE_CSP, serializePolicy } from "./site-csp-policy.mjs";
 
 export { SITE_CSP };
 
@@ -44,19 +44,22 @@ export function withCsp(html, directives) {
   return bare.slice(0, end) + lead + rest;
 }
 
-const surfaceOf = (file) => {
-  if (file.startsWith("app/")) return SITE_CSP.app;
+const surfaceOf = (file, origin) => {
+  if (file.startsWith("app/")) return appPolicyFor(origin);
   return file.startsWith("docs/") ? SITE_CSP.docs : SITE_CSP.landing;
 };
 
-/** Applies the policy to every page of the assembled site, docs included. */
-export function applySiteCsp(siteDir) {
+/** Applies the policy to every page of a site served from `origin`. */
+export function applySiteCsp(siteDir, { origin }) {
   const pages = readdirSync(siteDir, { recursive: true })
     .map((entry) => String(entry).split(sep).join("/"))
     .filter((file) => file.endsWith(".html"));
   for (const file of pages) {
     const path = join(siteDir, file);
-    writeFileSync(path, withCsp(readFileSync(path, "utf8"), surfaceOf(file)));
+    writeFileSync(
+      path,
+      withCsp(readFileSync(path, "utf8"), surfaceOf(file, origin))
+    );
   }
   return pages;
 }

@@ -15,6 +15,8 @@ import { startApp } from "./boot/start-app";
 import { defaultProfileName } from "./i18n/default-profile-name";
 import { reloadOnceForChunkError } from "./lib/chunk-reload";
 import { getUmamiWebsiteId } from "./lib/runtime-config";
+import { browserStartOptions } from "./lib/service-worker/browser-start-options";
+import { startServiceWorker } from "./lib/service-worker/start-service-worker";
 import { clearStaleReloadAttempt } from "./lib/stale-reload-mark";
 
 // Recover from stale lazy chunks after a deploy: Vite fires `vite:preloadError`
@@ -24,6 +26,9 @@ window.addEventListener("vite:preloadError", (event) => {
   event.preventDefault();
   reloadOnceForChunkError();
 });
+
+// Offline shell and assets in production (spa-offline); a no-op elsewhere.
+startServiceWorker(browserStartOptions(import.meta.env));
 
 const analytics = createUmamiAnalytics(getUmamiWebsiteId());
 

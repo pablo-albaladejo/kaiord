@@ -1,0 +1,5 @@
+---
+"@kaiord/workout-spa-editor": patch
+---
+
+The Kaiord App words its own copy from the English and Spanish dictionaries, and `pnpm lint` fails on an English string typed into the App's toasts, state setters, copy properties, label maps or JSX, including one built with `+`, held in a `const` of the same file or returned by a function of the same file. The remaining English surfaces are translated: toasts, import and file errors, the zones-conflict and repetition-block dialogs, Train2Go sport names, trend metric names, the swim step editor, the activity dialog and the TrainingPeaks send refusals. A failed send to Garmin or TrainingPeaks, a failed Tanita sync, a failed connect, delete, save or export now says what happened and "Try again" in the athlete's language instead of showing an extension's or a library's English message, which goes to the console only. Some text still arrives in English from upstream: the detail of an import failure, an AI generation error or a validation error without a stable code, until each converter or provider reports one.

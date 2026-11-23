@@ -25,7 +25,7 @@ export type ClaimVerdict =
   | { kind: "unchanged"; placed: GarminPlaced }
   | { kind: "resolve"; attempt: Attempt }
   | { kind: "uncertain"; placement: Uncertain }
-  | { kind: "claimed"; attempt: Attempt; preClaim: Row };
+  | { kind: "claimed"; attempt: Attempt; preClaim: Row; written?: Row };
 
 const previousOf = (p: GarminPlacement | undefined) =>
   isGarminPlaced(p) ? p : p?.previous;
@@ -54,13 +54,24 @@ const claimDecision = (
       (row.removalQueue ?? []).map((e) => e.workoutScheduleId)
     ),
   });
+  // The merge's key order (placement before the queue), so a placement
+  // written over a cleared one serialises as the merge would emit it.
+  const { removalQueue, ...base } = row;
   return {
-    write: { ...row, placement: attempt },
+    write: {
+      ...base,
+      placement: attempt,
+      ...(removalQueue ? { removalQueue } : {}),
+    },
     verdict: { kind: "claimed", attempt, preClaim: row },
   };
 };
 
 export const claimPlacement = async (
   run: PlacementRun
-): Promise<ClaimVerdict> =>
-  (await decide(run.deps, run.key, (row) => claimDecision(run, row))).verdict;
+): Promise<ClaimVerdict> => {
+  const { verdict, after } = await decide(run.deps, run.key, (row) =>
+    claimDecision(run, row)
+  );
+  return verdict.kind === "claimed" ? { ...verdict, written: after } : verdict;
+};

@@ -16,6 +16,8 @@ export const PLACEMENT_FAILURE_REASONS = [
   "library-push-failed",
   "no-export-route",
   "placement-interrupted",
+  /** The calendar read before a write failed: nothing was sent. */
+  "calendar-unreadable",
   /** Pace zone targets the profile cannot resolve to ranges: no zones
       and no threshold pace, a referenced zone undefined, or a sport
       without pace zones (`PaceZonesUnavailableReason`). */
@@ -40,6 +42,8 @@ export type PlacementResult =
   | { kind: "unchanged" }
   /** `dates`: where the entries left behind sit, for the UI. */
   | { kind: "duplicate-left"; dates: string[] }
+  /** Placed; an entry Kaiord did not create stays on `dates` (told once). */
+  | { kind: "foreign-left"; dates: string[] }
   /** `canConfirm`: "It's in Garmin" is offered; `sendAfter`: the gate. */
   | { kind: "uncertain"; date: string; canConfirm: boolean; sendAfter?: number }
   | { kind: "library-only"; reason: LibraryOnlyReason }

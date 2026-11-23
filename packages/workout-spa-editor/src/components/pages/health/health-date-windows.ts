@@ -8,15 +8,10 @@
  * Days are LOCAL calendar days, like the calendar and Daily: a record
  * entered for "today" after local midnight must fall inside the window.
  */
-const PAD = 2;
+import { localIsoDate } from "../../../application/shared/date-utils";
+
 const DAYS_IN_WEEK = 7;
 const DAYS_IN_QUARTER = 90;
-
-const localIsoDate = (date: Date): string => {
-  const month = String(date.getMonth() + 1).padStart(PAD, "0");
-  const day = String(date.getDate()).padStart(PAD, "0");
-  return `${date.getFullYear()}-${month}-${day}`;
-};
 
 const daysAgo = (n: number): Date => {
   const d = new Date();

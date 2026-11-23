@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import { Card } from "../../atoms/Card";
 import { ALERT_ICON } from "../../atoms/Icon/alert-icon";
 import { Icon } from "../../atoms/Icon/Icon";
@@ -27,6 +28,7 @@ export type IntakeLoggerFormProps = {
 export function IntakeLoggerForm({ date, actions }: IntakeLoggerFormProps) {
   const t = useTranslate("nutrition");
   const [fields, setFields] = useState<Fields>(EMPTY_INTAKE_FIELDS);
+  useUnsavedWork(fields !== EMPTY_INTAKE_FIELDS);
   const result = validateIntakeForm(fields, t);
   const error = "error" in result ? result.error : null;
   const [justLogged, setJustLogged] = useState<IntakeLoggerEntry | null>(null);

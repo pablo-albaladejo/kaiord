@@ -24,7 +24,6 @@ export const renderNoWorkoutBody = (props: CoachingDialogBodyProps) => {
     return (
       <AiErrorState
         reason={props.aiFailure.reason}
-        detail={props.aiFailure.error}
         onRetry={props.onAiProcess}
         onEditManually={props.onEditManually}
         onMatchExisting={props.onOpenPicker}

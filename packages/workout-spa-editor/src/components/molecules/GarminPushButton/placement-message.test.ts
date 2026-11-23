@@ -20,6 +20,11 @@ describe("placementMessage", () => {
       { tone: "warning", key: "placement.duplicateLeft", dates: [OTHER] },
     ],
     [
+      "foreign-left",
+      { kind: "foreign-left", dates: [OTHER] },
+      { tone: "warning", key: "placement.foreignLeft", dates: [OTHER] },
+    ],
+    [
       "uncertain",
       { kind: "uncertain", date: OTHER, canConfirm: true },
       { tone: "warning", key: "placement.uncertain", date: OTHER },

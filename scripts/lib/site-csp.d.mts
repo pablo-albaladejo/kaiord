@@ -13,4 +13,7 @@ export declare function withCsp(
   directives: CspDirectives
 ): string;
 
-export declare function applySiteCsp(siteDir: string): string[];
+export declare function applySiteCsp(
+  siteDir: string,
+  options: { origin: string }
+): string[];

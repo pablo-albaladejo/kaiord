@@ -9,7 +9,7 @@
 
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type {
   TrainingPeaksPushOptions,
@@ -45,8 +45,7 @@ const MOVED: TrainingPeaksPushOutcome = {
   block: { blocked: true, reason: "moved", recordedDate: "2026-10-20" },
 };
 
-const HORIZON_MESSAGE =
-  "TrainingPeaks refused the date: planning that far ahead needs a paid account";
+const HORIZON_REFUSAL = "footer.trainingPeaksHorizon.refused";
 
 describe("TrainingPeaksPushButton", () => {
   beforeEach(() => {
@@ -83,7 +82,7 @@ describe("TrainingPeaksPushButton", () => {
 
   it("should surface the planning-horizon refusal instead of going quiet", async () => {
     // Arrange
-    push.mockResolvedValue({ ok: false, message: HORIZON_MESSAGE });
+    push.mockResolvedValue({ ok: false, reason: "horizon" });
     render(<TrainingPeaksPushButton workout={workout} />);
 
     // Act
@@ -92,14 +91,14 @@ describe("TrainingPeaksPushButton", () => {
     // Assert
     expect(
       await screen.findByTestId("trainingpeaks-push-error")
-    ).toHaveTextContent(HORIZON_MESSAGE);
+    ).toHaveTextContent(HORIZON_REFUSAL);
     expect(screen.getByTestId("send-to-trainingpeaks-button")).toBeEnabled();
   });
 
   it("should notify the caller only when the push succeeded", async () => {
     // Arrange
     const onSent = vi.fn();
-    push.mockResolvedValue({ ok: false, message: HORIZON_MESSAGE });
+    push.mockResolvedValue({ ok: false, reason: "horizon" });
     render(<TrainingPeaksPushButton workout={workout} onSent={onSent} />);
 
     // Act
@@ -175,6 +174,77 @@ describe("TrainingPeaksPushButton", () => {
     expect(
       await screen.findByText("footer.sentToTrainingPeaks")
     ).toBeInTheDocument();
+  });
+
+  describe("planning horizon", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      // 13:00 UTC: every time zone, down to UTC-12, is already on 2026-11-23.
+      vi.setSystemTime(new Date("2026-11-23T13:00:00Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should say before sending that a day after tomorrow may be refused", () => {
+      // Arrange
+      const later = { ...workout, date: "2026-11-25" } as WorkoutRecord;
+
+      // Act
+      render(<TrainingPeaksPushButton workout={later} />);
+
+      // Assert
+      expect(
+        screen.getByTestId("trainingpeaks-horizon-notice")
+      ).toHaveTextContent("footer.trainingPeaksHorizon.beforeSend");
+      expect(push).not.toHaveBeenCalled();
+      expect(screen.getByTestId("send-to-trainingpeaks-button")).toBeEnabled();
+    });
+
+    it.each(["2026-11-23", "2026-11-24"])(
+      "should not warn for %s, which every account accepts",
+      (date) => {
+        // Arrange
+        const near = { ...workout, date } as WorkoutRecord;
+
+        // Act
+        render(<TrainingPeaksPushButton workout={near} />);
+
+        // Assert
+        expect(
+          screen.queryByTestId("trainingpeaks-horizon-notice")
+        ).not.toBeInTheDocument();
+      }
+    );
+
+    it("should explain TrainingPeaks' refusal of the day with the same reason", async () => {
+      // Arrange
+      push.mockResolvedValue({ ok: false, reason: "horizon" });
+      render(<TrainingPeaksPushButton workout={workout} />);
+
+      // Act
+      await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+
+      // Assert
+      expect(
+        await screen.findByTestId("trainingpeaks-push-error")
+      ).toHaveTextContent("footer.trainingPeaksHorizon.refused");
+    });
+  });
+
+  it("should say TrainingPeaks is not answering when the cause is unknown", async () => {
+    // Arrange
+    push.mockResolvedValue({ ok: false, reason: "not-answering" });
+    render(<TrainingPeaksPushButton workout={workout} />);
+
+    // Act
+    await userEvent.click(screen.getByTestId("send-to-trainingpeaks-button"));
+
+    // Assert
+    expect(
+      await screen.findByTestId("trainingpeaks-push-error")
+    ).toHaveTextContent("footer.trainingPeaksNotAnswering");
   });
 
   it("should send nothing when the athlete cancels the copy", async () => {

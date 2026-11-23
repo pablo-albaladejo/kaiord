@@ -10,6 +10,7 @@ import type {
   LabProvenanceSource,
   LabReportHeaderInput,
 } from "../../../../application/lab/build-lab-report";
+import { useUnsavedWork } from "../../../../lib/use-unsaved-work";
 import { createEmptyRow, type LabRowState } from "./lab-row-model";
 import type { LabDraft } from "./map-extraction-to-draft";
 import { useLabEntrySave } from "./use-lab-entry-save";
@@ -26,15 +27,27 @@ let rowSeq = 0;
 const nextRowId = (): string => `row-${++rowSeq}`;
 
 export function useLabEntryForm() {
-  const [header, setHeader] = useState<LabReportHeaderInput>(EMPTY_HEADER);
-  const [rows, setRows] = useState<LabRowState[]>([
+  const [header, setHeaderState] = useState<LabReportHeaderInput>(EMPTY_HEADER);
+  const [rows, setRowsState] = useState<LabRowState[]>([
     createEmptyRow(nextRowId()),
   ]);
   const [provenance, setProvenance] = useState<LabProvenanceSource>("manual");
+  // Anything typed, added or loaded stays unsaved until Save or reset.
+  const [dirty, setDirty] = useState(false);
+  useUnsavedWork(dirty);
+  const setHeader = (next: LabReportHeaderInput) => {
+    setDirty(true);
+    setHeaderState(next);
+  };
+  const setRows = (next: (prev: LabRowState[]) => LabRowState[]) => {
+    setDirty(true);
+    setRowsState(next);
+  };
 
   const reset = () => {
-    setHeader(EMPTY_HEADER);
-    setRows([createEmptyRow(nextRowId())]);
+    setDirty(false);
+    setHeaderState(EMPTY_HEADER);
+    setRowsState([createEmptyRow(nextRowId())]);
     setProvenance("manual");
   };
   const { save, isSaving, sex } = useLabEntrySave(reset);
@@ -48,7 +61,7 @@ export function useLabEntryForm() {
 
   const loadDraft = (draft: LabDraft) => {
     setHeader(draft.header);
-    setRows(draft.rows.map((row) => ({ ...row, rowId: nextRowId() })));
+    setRows(() => draft.rows.map((row) => ({ ...row, rowId: nextRowId() })));
     setProvenance("ai-extracted");
   };
 

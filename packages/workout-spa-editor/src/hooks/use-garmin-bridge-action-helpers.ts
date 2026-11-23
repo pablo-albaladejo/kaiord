@@ -9,6 +9,7 @@ import type {
   GarminPushOutcome,
   PushState,
 } from "../contexts/garmin-bridge-types";
+import { logFailure } from "../lib/log-failure";
 import { ping } from "../store/garmin-extension-transport";
 import { evaluatePingResult, executePush } from "./garmin-bridge-operations";
 
@@ -60,15 +61,13 @@ export const runPush = async (
   const result = await executePush(getGarminExtensionId(), gcn);
   if (result.status === "invalidated") {
     await redetect();
-    setPushing({
-      status: "error",
-      message: "Extension was updated. Please try again.",
-    });
+    setPushing({ status: "error", reason: "updated" });
     return { success: false, garminWorkoutId: null };
   }
   if (result.status === "error") {
     if (result.redetect) await redetect();
-    setPushing({ status: "error", message: result.message });
+    logFailure("garmin-send", result.detail);
+    setPushing({ status: "error", reason: result.reason });
     return { success: false, garminWorkoutId: null };
   }
   setPushing({ status: "success" });

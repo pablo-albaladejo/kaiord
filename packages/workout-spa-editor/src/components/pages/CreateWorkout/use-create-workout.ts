@@ -15,6 +15,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import { ATHLETE_SPORTS } from "../../../lib/athlete";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 
 export type CreatePhase = "input" | "generating" | "result";
 
@@ -23,6 +24,7 @@ export function useCreateWorkout() {
   const [promptText, setPromptText] = useState("");
   const [sport, setSport] = useState<ActiveSport>(ATHLETE_SPORTS[0]!.value);
   const [generatedKrd, setGeneratedKrd] = useState<KRD | null>(null);
+  useUnsavedWork(phase !== "input" || promptText.trim() !== "");
 
   const active = useActiveProfileLive();
   const providers = useAiProvidersLive();

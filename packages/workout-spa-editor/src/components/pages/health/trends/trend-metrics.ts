@@ -2,7 +2,7 @@ import type { ChartMetricDef } from "../../../charts/uplot-base/uplot-base";
 
 export type TrendMetricKey = "sleep" | "hrv" | "weight" | "steps";
 
-export type TrendMetricDef = ChartMetricDef<TrendMetricKey> & {
+export type TrendMetricDef = Omit<ChartMetricDef<TrendMetricKey>, "label"> & {
   /** Ladder step shared by the canvas stroke and the selector's swatch. */
   strokeStep: number;
   /** Set on the series that wraps onto an already-used step. */
@@ -16,14 +16,13 @@ export type TrendMetricDef = ChartMetricDef<TrendMetricKey> & {
 // metric keeps the same swatch whatever else is toggled on.
 const WRAP_DASH = [5, 4];
 
-/** `label` is the English fallback; surfaces localize via `trends.metric.*`. */
+/** Each metric is named by `health:trends.metric.<key>`. */
 export const TREND_METRICS: ReadonlyArray<TrendMetricDef> = [
-  { key: "sleep", label: "Sleep", unit: "score", strokeStep: 0 },
-  { key: "hrv", label: "HRV", unit: "ms", strokeStep: 1 },
-  { key: "weight", label: "Weight", unit: "kg", strokeStep: 2 },
+  { key: "sleep", unit: "score", strokeStep: 0 },
+  { key: "hrv", unit: "ms", strokeStep: 1 },
+  { key: "weight", unit: "kg", strokeStep: 2 },
   {
     key: "steps",
-    label: "Steps",
     unit: "steps",
     strokeStep: 0,
     dash: WRAP_DASH,

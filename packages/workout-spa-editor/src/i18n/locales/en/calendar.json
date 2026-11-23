@@ -29,6 +29,8 @@
     "workoutsProcessed": "{{count}} workouts",
     "workoutsProcessedSkipped": "{{count}} workouts, {{skipped}} skipped because they changed meanwhile",
     "noProvider": "Configure an AI provider in Settings to process workouts.",
+    "noModel": "Configure an AI provider in Settings.",
+    "nothingToPrepare": "Nothing to prepare this week.",
     "error": "Batch processing encountered an unexpected error."
   },
   "reschedule": {
@@ -56,6 +58,7 @@
     "moved": "Workout moved",
     "update": "Update Garmin",
     "updated": "Garmin updated",
+    "updatedForeignLeft": "Garmin updated. An entry Kaiord has no record of creating stays in Garmin: Kaiord leaves it as it is.",
     "notUpdated": "Garmin was not updated. Open the workout to see why."
   },
   "lifecycle": {
@@ -176,6 +179,7 @@
       "moved": "Moved to its date",
       "unchanged": "Already on its date",
       "duplicate-left": "On its date, extra entry left",
+      "foreign-left": "On its date; an entry Kaiord has no record of creating stays in Garmin",
       "uncertain": "Needs a look",
       "library-only": "In your library only",
       "not-eligible": "Not sent",

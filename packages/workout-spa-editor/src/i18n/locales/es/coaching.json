@@ -86,6 +86,10 @@
   },
   "dialog": {
     "closeAria": "Cerrar",
+    "srTitle": "Actividad de coaching",
+    "srDescription": "Detalles de la actividad de coaching: crea su entreno con IA o a mano, emparéjala o divídela.",
+    "comments": "Comentarios",
+    "aiHint": "ℹ La IA usará solo el título y el deporte",
     "loadingDescription": "Cargando descripción…",
     "retryDescription": "Reintentar",
     "descriptionError": {
@@ -132,13 +136,46 @@
     "swimming": "Natación",
     "strength": "Fuerza"
   },
+  "sport": {
+    "cycling": "Ciclismo",
+    "running": "Carrera",
+    "swimming": "Natación",
+    "gym": "Gimnasio",
+    "stretching": "Estiramientos",
+    "yoga": "Yoga",
+    "pilates": "Pilates",
+    "rest": "Descanso",
+    "walk": "Caminata",
+    "mountainwalk": "Senderismo",
+    "trail": "Trail",
+    "mountainbike": "BTT",
+    "stationarybike": "Bici estática",
+    "rowing": "Remo",
+    "indoorrowing": "Remo indoor",
+    "climbing": "Escalada",
+    "ski": "Esquí",
+    "mountainski": "Esquí de travesía",
+    "sprint": "Sprint",
+    "tennis": "Tenis",
+    "cardio": "Cardio",
+    "canicross": "Canicross",
+    "canibike": "Canibike",
+    "dog": "Deporte con perro",
+    "activity": "Actividad"
+  },
   "picker": {
     "ariaLabel": "Emparejar con entreno",
     "empty": "No hay entrenos del mismo día y deporte disponibles para emparejar."
   },
+  "zonesSync": {
+    "fetchFailed": "Train2Go no responde, así que tus zonas no se han sincronizado. Inténtalo de nuevo.",
+    "shapeMismatch": "Train2Go ha enviado unas zonas que Kaiord no puede leer, así que no se han sincronizado.",
+    "unsupported": "Esta plataforma de entrenamiento no comparte zonas."
+  },
   "sync": {
     "defaultLabel": "Coach",
     "connectTo": "Conectar con {{label}}",
+    "updateExtension": "Actualiza la extensión de Kaiord para {{label}}.",
     "routeInactiveTitle": "{{label}} · ruta inactiva",
     "routeInactiveAria": "{{label}} — ruta inactiva",
     "syncAria": "Sincronizar {{label}}"
@@ -146,6 +183,8 @@
   "hooks": {
     "aiProcessFailed": "No se pudo procesar la actividad con IA",
     "workoutMatched": "Entreno emparejado",
+    "migratedOne": "1 entreno emparejado con una actividad de coaching",
+    "migratedMany": "Entrenos emparejados con actividades de coaching",
     "manualFailed": "La creación manual falló",
     "conversionFailed": "La conversión falló",
     "invalidActivityId": "ID de actividad no válido",
@@ -164,6 +203,13 @@
     "createFirst": "Crea primero el entreno para poder moverlo."
   },
   "executed": {
-    "heading": "Actividades completadas"
+    "heading": "Actividades completadas",
+    "srDescription": "Detalles de la actividad. Una actividad es lo que hiciste, así que no se puede editar ni reprogramar.",
+    "close": "Cerrar",
+    "summary": "{{sport}} el {{date}}",
+    "readOnly": "Es una actividad que hiciste: sus datos son de solo lectura.",
+    "executedChip": "Hecho",
+    "planPrefix": "Plan ·",
+    "actualPrefix": "Real ·"
   }
 }

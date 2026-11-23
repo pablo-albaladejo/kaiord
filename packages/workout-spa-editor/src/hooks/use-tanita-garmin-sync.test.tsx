@@ -117,12 +117,13 @@ describe("useTanitaGarminSync", () => {
         error: "boom",
       } as SyncResult,
       status: "error",
-      lastError: "boom",
+      lastError: "Sync failed. Try again in a moment.",
     },
   ])(
     "should land on $status and expose lastError $lastError for $scenario",
     async ({ syncResult, status, lastError }) => {
       // Arrange
+      vi.spyOn(console, "error").mockImplementation(() => {});
       discover(BOTH_DISCOVERED);
       mockedSync.mockResolvedValue(syncResult);
       const { result } = renderHook(() => useTanitaGarminSync("p1"), {

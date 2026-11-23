@@ -3,6 +3,7 @@ import type { Sport } from "@kaiord/core";
 
 import type { CreateWorkoutInput } from "../../application/chat/tools/chat-tool-deps";
 import { buildWorkoutRecord } from "../../components/pages/CreateWorkout/build-workout-record";
+import { getTranslate } from "../../i18n/use-translate";
 import { generateWorkoutKrd } from "../../lib/generate-workout";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
@@ -19,7 +20,8 @@ export const doCreateWorkout = async (
   profileId: string,
   provider: LlmProviderConfig,
   modelId: string,
-  input: CreateWorkoutInput
+  input: CreateWorkoutInput,
+  title = getTranslate("chat")("draft.workoutTitle")
 ): Promise<unknown> => {
   const krd = await generateWorkoutKrd({
     text: input.description,
@@ -32,7 +34,7 @@ export const doCreateWorkout = async (
     profileId,
     sport: sportOf(krd, input.sport),
     prompt: input.description,
-    title: "Chat workout",
+    title,
     krd,
     date: input.date,
   });

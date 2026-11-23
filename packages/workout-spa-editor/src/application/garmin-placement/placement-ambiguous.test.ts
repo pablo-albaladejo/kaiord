@@ -72,7 +72,13 @@ describe("ambiguous schedule, A3 true (AC-25)", () => {
       const h = createPlacementHarness();
       const { date, content } = await preparePath(h, path);
       const workoutId = path === "U" ? "1700001" : "1700000";
-      const stray = h.calendar.mint(workoutId as never, date);
+      // Another writer's entry lands after the read before the POST.
+      let stray: string | undefined;
+      const schedule = h.calendar.port.schedule;
+      h.calendar.port.schedule = (w, d) => {
+        stray = h.calendar.mint(workoutId as never, date);
+        return schedule(w, d);
+      };
       const unschedules = h.calendar.count("unschedule");
       h.calendar.scripts.schedule.push({
         answer: { ok: false, status: 503 },
@@ -321,7 +327,8 @@ describe("absent in the same run, A3 true (AC-27, AC-28)", () => {
     await h.push(D1);
 
     // Assert
-    expect(readAt).toEqual([T0.getTime() + SETTLE_MS]);
+    // The read before the POST, then the resolve read after SETTLE_MS.
+    expect(readAt).toEqual([T0.getTime(), T0.getTime() + SETTLE_MS]);
   });
 });
 
@@ -348,7 +355,7 @@ describe("leftover attempting from a closed tab (AC-29)", () => {
     return h;
   };
 
-  it("should re-claim a posted:false leftover with 1 schedule and no leftover read", async () => {
+  it("should re-claim a posted:false leftover with 1 schedule, read before it, and no leftover resolve", async () => {
     // Arrange
     const h = await leave(false);
     const calls = h.calendar.calls.length;
@@ -359,6 +366,7 @@ describe("leftover attempting from a closed tab (AC-29)", () => {
     // Assert
     expect(result).toEqual({ kind: "moved" });
     expect(h.calendar.calls.slice(calls).map((c) => c.op)).toEqual([
+      "find",
       "schedule",
       "find",
       "unschedule",
@@ -379,6 +387,7 @@ describe("leftover attempting from a closed tab (AC-29)", () => {
     expect(early).toMatchObject({ kind: "failed", reason: "settling" });
     expect(late).toEqual({ kind: "moved" });
     expect(h.calendar.calls.slice(calls).map((c) => c.op)).toEqual([
+      "find",
       "find",
       "find",
       "schedule",

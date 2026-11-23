@@ -87,8 +87,16 @@
     },
     {
       "id": "trainingpeaks.listing.adds-only",
-      "text": "Each send adds a new workout in TrainingPeaks. Sending an unchanged workout again adds nothing; before sending one you changed, the Kaiord App asks you, because TrainingPeaks would then hold two copies. The extension cannot delete anything in TrainingPeaks or change a workout already there.",
+      "text": "Each send adds a new workout in TrainingPeaks. Before sending a workout again, the Kaiord App checks whether TrainingPeaks still has the copy it sent: if it does, an unchanged workout adds nothing, and for one you changed the Kaiord App asks you first, because TrainingPeaks would then hold two copies. The extension cannot delete anything in TrainingPeaks or change a workout already there.",
       "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
+          "title": "should leave one workout on TrainingPeaks when the same workout is sent twice"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
+          "title": "should ask before a changed workout whose earlier copy is still there"
+        },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push-guard.test.tsx",
           "title": "should keep an unchanged re-send as the existing skip"
@@ -109,7 +117,7 @@
     },
     {
       "id": "trainingpeaks.listing.basic",
-      "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow; the Kaiord App shows you that refusal.",
+      "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -121,7 +129,23 @@
         },
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
-          "title": "should surface the planning-horizon refusal instead of going quiet"
+          "title": "should say before sending that a day after tomorrow may be refused"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/trainingpeaks/trainingpeaks-planning-horizon.test.ts",
+          "title": "should flag the browser's tomorrow while an account at UTC-12 is still on yesterday"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksHorizonCopy.locale.test.tsx",
+          "title": "should name the consequence and the account's time zone when TrainingPeaks refuses the day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
+          "title": "should explain TrainingPeaks' refusal of the day with the same reason"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
+          "title": "should name the planning horizon when TrainingPeaks refuses the day with a 402"
         }
       ]
     },
@@ -438,7 +462,7 @@
     },
     {
       "id": "trainingpeaks.pj.tpapi-why",
-      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker, and a request outside these four is refused before it is sent:",
+      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker, and a request outside these five is refused before it is sent:",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -459,6 +483,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
           "title": "should deny method mismatches and look-alike paths"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should allow only the single-workout read, not a range or a delete"
         }
       ]
     },
@@ -513,6 +541,24 @@
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
           "title": "should report the sent state after a successful push"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.workout-read-path",
+      "text": "`GET /fitness/v6/athletes/{id}/workouts/{workoutId}` reads one workout the Kaiord App sent earlier, to learn whether TrainingPeaks still has it before that workout is sent again. Only the workout's id and day reach the Kaiord App; the rest of the answer is discarded in your browser.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should GET the one workout by its id with a Bearer header"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should pass the Kaiord App only the workout's id and day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
+          "title": "should send again when the athlete deleted Kaiord's copy on TrainingPeaks"
         }
       ]
     },
@@ -844,7 +890,7 @@
     },
     {
       "id": "trainingpeaks.pp.workouts",
-      "text": "**Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again adds a second copy, and the Kaiord App asks you first.",
+      "text": "**Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. Before a workout is sent again, it reads the copy the Kaiord App sent earlier with `GET /fitness/v6/athletes/{id}/workouts/{workoutId}`, and passes the Kaiord App only that workout's id and day. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again while its earlier copy is there adds a second copy, and the Kaiord App asks you first.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -869,6 +915,14 @@
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
           "title": "should send a copy only after the athlete confirms it"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should pass the Kaiord App only the workout's id and day"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
+          "title": "should send a changed workout without asking when its earlier copy is gone"
         }
       ]
     },
@@ -960,7 +1014,7 @@
     },
     {
       "id": "trainingpeaks.pp.no-third-party",
-      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to pass it your metrics and to receive the workouts you send).",
+      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to pass it your metrics and the id and day of a workout it sent, and to receive the workouts you send).",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",

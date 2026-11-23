@@ -7,8 +7,9 @@
 
 Private Cloudflare Worker that serves `@kaiord/mcp`'s remote toolset (the
 eight stateless tools, no prompts, three resources) over stateless
-Streamable HTTP at `https://kaiord.com/mcp`, and the same eight tools as A2A
-1.0 skills at `https://kaiord.com/a2a`. It is a second transport for the
+Streamable HTTP at `https://kaiord.com/mcp`. Its code also serves the same
+eight tools as A2A 1.0 skills at `https://kaiord.com/a2a`, a route that is
+not deployed yet (`add-a2a-endpoint` task 4). It is a second transport for the
 same server the `kaiord-mcp` stdio bin runs; it adds no tool of its own.
 OpenSpec changes: `add-remote-mcp-endpoint` (design D1, D6, D8, D9) and
 `add-a2a-endpoint` (D1-D11).
@@ -41,8 +42,14 @@ OpenSpec changes: `add-remote-mcp-endpoint` (design D1, D6, D8, D9) and
   logger.
 - `src/content-free-log.ts`, `src/log-failure.ts` — the only log lines: event,
   JSON-RPC method, tool name and error class, each from an allowlist.
-- `scripts/smoke.mjs` — post-deploy smoke test (`pnpm smoke <url>`); a URL
-  ending in `/a2a` runs `scripts/smoke-a2a-checks.mjs` instead.
+- `scripts/smoke.mjs` — post-deploy smoke test (`pnpm smoke <url>...`); a URL
+  ending in `/a2a` runs `scripts/smoke-a2a-checks.mjs` instead. `pnpm
+smoke:prod` runs both production endpoints and is the step after every
+  deploy: `npx wrangler@4 deploy && pnpm smoke:prod`.
+- `ops/` — the owner's Cloudflare scripts for `/a2a` (WAF widening, SVCB
+  record): a dry run unless `--apply`, nothing account-specific in the repo,
+  tested against a fake `curl` by `scripts/a2a-ops.test.mjs`. Never run them
+  against Cloudflare; see `ops/README.md`.
 - `test/agent-card.snapshot.json` — the rendered agent card, pinned by
   `src/a2a/agent-card.test.ts` (`vitest -u` rewrites it).
 

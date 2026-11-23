@@ -76,7 +76,7 @@ describe("useTrainingPeaksPush", () => {
     const outcome = await result.current.push();
 
     // Assert
-    expect(outcome).toEqual({ ok: false, message: "Workout has no KRD" });
+    expect(outcome).toEqual({ ok: false, reason: "no-steps" });
     expect(mocks.executePush).not.toHaveBeenCalled();
   });
 
@@ -91,7 +91,7 @@ describe("useTrainingPeaksPush", () => {
     // Assert
     expect(outcome).toEqual({
       ok: false,
-      message: "TrainingPeaks bridge is not installed",
+      reason: "install",
     });
     expect(mocks.checkSession).not.toHaveBeenCalled();
   });
@@ -118,11 +118,27 @@ describe("useTrainingPeaksPush", () => {
       // Assert
       expect(outcome).toEqual({
         ok: false,
-        message: "Sign in to TrainingPeaks and retry",
+        reason: "sign-in",
       });
       expect(mocks.executePush).not.toHaveBeenCalled();
     }
   );
+
+  it("should not ask to sign in when TrainingPeaks failed to answer the session check", async () => {
+    // Arrange
+    mocks.checkSession.mockResolvedValue({
+      authenticated: false,
+      needsReauth: false,
+    });
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    const outcome = await result.current.push();
+
+    // Assert
+    expect(outcome).toEqual({ ok: false, reason: "not-answering" });
+    expect(mocks.executePush).not.toHaveBeenCalled();
+  });
 
   it("should push and return the created workout id", async () => {
     // Arrange
@@ -178,10 +194,59 @@ describe("useTrainingPeaksPush", () => {
     expect(outcome).toEqual({ ok: true, workoutId: undefined });
   });
 
-  it("should surface the thrown message and record the failure", async () => {
+  it("should say TrainingPeaks is not answering, never the thrown text, and record the failure", async () => {
+    // Arrange
+    mocks.executePush.mockRejectedValue(new Error("Workout push failed: 500"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    const outcome = await result.current.push();
+
+    // Assert
+    expect(outcome).toEqual({ ok: false, reason: "not-answering" });
+    expect(mocks.event).toHaveBeenCalledWith("trainingpeaks-workout-pushed", {
+      result: "failure",
+    });
+  });
+
+  it("should ask to sign in when the bridge says the Session is gone", async () => {
     // Arrange
     mocks.executePush.mockRejectedValue(
-      new Error("402 beyond the account planning horizon")
+      Object.assign(new Error("Unauthorized"), { needsReauth: true })
+    );
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    const outcome = await result.current.push();
+
+    // Assert
+    expect(outcome).toEqual({ ok: false, reason: "sign-in" });
+  });
+
+  it("should keep the thrown text in the console only", async () => {
+    // Arrange
+    mocks.executePush.mockRejectedValue(new Error("Workout push failed: 500"));
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    await result.current.push();
+
+    // Assert
+    expect(spy).toHaveBeenCalledWith(
+      "[failure]",
+      expect.objectContaining({ message: "Workout push failed: 500" })
+    );
+  });
+
+  it("should name the planning horizon when TrainingPeaks refuses the day with a 402", async () => {
+    // Arrange
+    mocks.executePush.mockRejectedValue(
+      Object.assign(new Error("TrainingPeaks refused the date"), {
+        status: 402,
+      })
     );
 
     // Act
@@ -189,10 +254,7 @@ describe("useTrainingPeaksPush", () => {
     const outcome = await result.current.push();
 
     // Assert
-    expect(outcome).toEqual({
-      ok: false,
-      message: "402 beyond the account planning horizon",
-    });
+    expect(outcome).toEqual({ ok: false, reason: "horizon" });
     expect(mocks.event).toHaveBeenCalledWith("trainingpeaks-workout-pushed", {
       result: "failure",
     });
@@ -209,7 +271,7 @@ describe("useTrainingPeaksPush", () => {
     // Assert
     expect(outcome).toEqual({
       ok: false,
-      message: "TrainingPeaks push failed",
+      reason: "not-answering",
     });
   });
 });

@@ -13,6 +13,7 @@ import { addTemplate } from "../../../application/library/add-template";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
+import { logFailure } from "../../../lib/log-failure";
 import type { KRD } from "../../../types/krd";
 import type { DifficultyLevel } from "../../../types/workout-library";
 import {
@@ -67,11 +68,10 @@ export function useSaveToLibrary(
       resetForm();
       onClose();
     } catch (err) {
-      showError(
-        t("toast.saveFailed"),
-        err instanceof Error ? err.message : t("toast.saveFailedDescription"),
-        { duration: 5000 }
-      );
+      logFailure("save-as-template", err);
+      showError(t("toast.saveFailed"), t("toast.saveFailedDescription"), {
+        duration: 5000,
+      });
     } finally {
       setIsSaving(false);
     }

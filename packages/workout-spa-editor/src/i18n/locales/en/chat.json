@@ -115,7 +115,8 @@
     "generic": "The assistant hit an error. Try again."
   },
   "draft": {
-    "saveWorkout": "Save workout"
+    "saveWorkout": "Save workout",
+    "workoutTitle": "Chat workout"
   },
   "coaching": {
     "noDescription": "No description provided.",

@@ -7,6 +7,7 @@ import {
   deleteSymbol,
   modifierSymbol,
 } from "../../../utils/platform";
+import { shortcutKey } from "../../../utils/shortcut-key";
 import type { ContextMenuContentProps } from "./context-menu-content.types";
 import { deleteItemClass, shortcutClass } from "./context-menu-styles";
 import { EditorMenuItem } from "./EditorMenuItem";
@@ -30,28 +31,28 @@ export const EditActions = (p: Props) => {
       {p.showCut && (
         <EditorMenuItem
           onSelect={p.onCut}
-          aria={`${ariaModifier}+X`}
+          aria={`${ariaModifier}+${shortcutKey("cut")}`}
           icon={Scissors}
           label={t("contextMenu.cut")}
-          hint={`${modifierSymbol}X`}
+          hint={`${modifierSymbol}${shortcutKey("cut")}`}
         />
       )}
       {p.showCopy && (
         <EditorMenuItem
           onSelect={p.onCopy}
-          aria={`${ariaModifier}+C`}
+          aria={`${ariaModifier}+${shortcutKey("copy")}`}
           icon={ClipboardCopy}
           label={t("contextMenu.copy")}
-          hint={`${modifierSymbol}C`}
+          hint={`${modifierSymbol}${shortcutKey("copy")}`}
         />
       )}
       {p.showPaste && (
         <EditorMenuItem
           onSelect={p.onPaste}
-          aria={`${ariaModifier}+V`}
+          aria={`${ariaModifier}+${shortcutKey("paste")}`}
           icon={ClipboardPaste}
           label={t("contextMenu.paste")}
-          hint={`${modifierSymbol}V`}
+          hint={`${modifierSymbol}${shortcutKey("paste")}`}
         />
       )}
       {p.showDelete && (

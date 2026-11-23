@@ -60,6 +60,7 @@ const EXTERNAL_MESSAGES = [
     action: "push-workout",
     workout: { workoutDay: "2026-11-23", title: "Easy run", structure: "{}" },
   },
+  { action: "read-workout", workoutId: "4242" },
   { action: "set-theme", theme: "dark" },
   { action: "open-trainingpeaks" },
 ];

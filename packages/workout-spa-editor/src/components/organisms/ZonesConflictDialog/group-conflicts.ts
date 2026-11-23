@@ -12,13 +12,11 @@ export type BandGroup = {
   groupKey: string;
   sport: "cycling" | "running" | "swimming";
   kind: "heartRateZones" | "powerZones" | "paceZones";
-  label: string;
   conflicts: ConflictItem[];
 };
 
 export type CoupledFtpGroup = {
   groupKey: "cycling.threshold-and-zones";
-  label: "Cycling threshold + zones";
   ftpConflict: ConflictItem;
   powerBandConflicts: ConflictItem[];
 };
@@ -65,7 +63,6 @@ export const groupConflicts = (
       bandGroups: Array.from(bandTables.values()),
       ftpCoupled: {
         groupKey: "cycling.threshold-and-zones",
-        label: "Cycling threshold + zones",
         ftpConflict: ftpScalar,
         powerBandConflicts: cyclingPower.conflicts,
       },

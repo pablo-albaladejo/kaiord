@@ -29,6 +29,8 @@
     "workoutsProcessed": "{{count}} entrenamientos",
     "workoutsProcessedSkipped": "{{count}} entrenamientos, {{skipped}} omitidos porque cambiaron mientras tanto",
     "noProvider": "Configura un proveedor de IA en Ajustes para procesar entrenamientos.",
+    "noModel": "Configura un proveedor de IA en Ajustes.",
+    "nothingToPrepare": "No hay nada que preparar esta semana.",
     "error": "El procesamiento por lotes encontró un error inesperado."
   },
   "reschedule": {
@@ -56,6 +58,7 @@
     "moved": "Entrenamiento movido",
     "update": "Actualizar Garmin",
     "updated": "Garmin actualizado",
+    "updatedForeignLeft": "Garmin actualizado. Una entrada que Kaiord no tiene registrada como suya sigue en Garmin: Kaiord la deja como está.",
     "notUpdated": "Garmin no se ha actualizado. Abre el entrenamiento para ver por qué."
   },
   "lifecycle": {
@@ -176,6 +179,7 @@
       "moved": "Movido a su fecha",
       "unchanged": "Ya estaba en su fecha",
       "duplicate-left": "En su fecha, queda una entrada de más",
+      "foreign-left": "En su fecha; una entrada que Kaiord no tiene registrada como suya sigue en Garmin",
       "uncertain": "Necesita revisión",
       "library-only": "Solo en tu biblioteca",
       "not-eligible": "No enviado",

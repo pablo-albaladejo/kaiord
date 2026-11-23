@@ -6,6 +6,9 @@
     "subtitle": "Añadir un nuevo informe de laboratorio",
     "loading": "Cargando…",
     "noProfile": "Crea primero un atleta para registrar analíticas.",
+    "noValues": "Añade al menos un valor de parámetro antes de guardar",
+    "saveFailed": "No se pudo guardar la analítica — inténtalo de nuevo",
+    "saved": "Analítica guardada",
     "typedNote": "Las analíticas son la única superficie de salud sin fuente que sincronizar: cada valor de aquí se escribió a mano, así que lleva la fecha en que lo introdujiste en lugar del nombre de una fuente."
   },
   "form": {
@@ -49,6 +52,11 @@
   },
   "report": {
     "fasting": "en ayunas",
+    "origin": {
+      "report": "del informe",
+      "catalog": "rango del catálogo",
+      "none": "sin rango"
+    },
     "emptyValues": "Este informe no tiene parámetros.",
     "hide": "Ocultar",
     "view": "Ver",

@@ -54,7 +54,9 @@ export const UpdateGarminToastAction = forwardRef<HTMLButtonElement, Props>(
       } catch {
         result = undefined;
       }
-      if (movedOnCalendar(result)) toast.success(t("garminDrift.updated"));
+      if (result?.kind === "foreign-left")
+        toast.warning(t("garminDrift.updatedForeignLeft"));
+      else if (movedOnCalendar(result)) toast.success(t("garminDrift.updated"));
       else toast.warning(t("garminDrift.notUpdated"));
     };
     if (reason)

@@ -1,7 +1,8 @@
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
+import { useActiveLocale } from "../../i18n/LocaleProvider";
 import { useTranslate } from "../../i18n/use-translate";
 import { thresholdsForSport } from "../../lib/athlete";
-import { buildReviewModel } from "../../lib/workout-review";
+import { buildReviewModel, reviewCopyFor } from "../../lib/workout-review";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type { KRD } from "../../types/krd";
 import type { ProposalMetric } from "../molecules/SessionProposalCard/SessionProposalCard";
@@ -23,11 +24,17 @@ export function CoachingDraftProposal({
   krd,
 }: CoachingDraftProposalProps) {
   const t = useTranslate("chat");
+  const locale = useActiveLocale();
   const profile = useActiveProfileLive()?.profile ?? null;
 
   if (!activity || !krd) return null;
   const thresholds = thresholdsForSport(profile, activity.sport);
-  const model = buildReviewModel(krd, thresholds, activity.title);
+  const model = buildReviewModel(
+    krd,
+    thresholds,
+    activity.title,
+    reviewCopyFor(locale)
+  );
   if (!model) return null;
 
   const metrics: ProposalMetric[] = [

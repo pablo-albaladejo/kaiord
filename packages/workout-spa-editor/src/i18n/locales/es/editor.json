@@ -28,6 +28,7 @@
   "selection": {
     "createBlockAria": "Crear bloque de repetición con los pasos seleccionados",
     "createBlock": "Crear bloque de repetición ({{count}} pasos)",
+    "createBlockCountAria": "Crear bloque de repetición con {{count}} pasos seleccionados",
     "orPress": "o pulsa",
     "ctrlG": "Ctrl+G",
     "ctrlClickHint": "Ctrl+clic en otro paso para crear un bloque de repetición"
@@ -83,7 +84,7 @@
     "savedTitle": "Archivo descargado",
     "savedDescription": "Descargado como {{filename}}",
     "exportFailedTitle": "Error de exportación",
-    "exportFailedFallback": "No se pudo exportar el entreno",
+    "exportFailedFallback": "El entrenamiento no se ha exportado. Inténtalo de nuevo.",
     "paceZones": {
       "missing-pace-zones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN.",
       "incomplete-pace-zones": "Este entreno usa una zona de ritmo que el atleta no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",
@@ -109,6 +110,7 @@
     "invalidDescription": "No se pudo programar — la fecha no es un día válido del calendario.",
     "saveFailedTitle": "Error al guardar",
     "saveFailedDescription": "No se pudo programar el entreno — inténtalo de nuevo.",
+    "draftSaveFailedDescription": "No se pudo guardar el entreno — inténtalo de nuevo.",
     "noProfileReason": "Selecciona o crea un atleta para programar este entreno."
   },
   "raw": {
@@ -155,7 +157,28 @@
     "fixErrorsTitle": "Corrige primero los errores de validación",
     "saveTitle": "Cerrar el formulario del paso",
     "intensityLabel": "Intensidad",
-    "intensityAria": "Selecciona la intensidad del paso"
+    "intensityAria": "Selecciona la intensidad del paso",
+    "swim": {
+      "strokeType": "Estilo",
+      "equipment": "Material",
+      "stroke": {
+        "freestyle": "Libre",
+        "backstroke": "Espalda",
+        "breaststroke": "Braza",
+        "butterfly": "Mariposa",
+        "drill": "Técnica",
+        "mixed": "Mixto",
+        "im": "Estilos (IM)"
+      },
+      "gear": {
+        "none": "Ninguno",
+        "swim_fins": "Aletas",
+        "swim_kickboard": "Tabla",
+        "swim_paddles": "Palas",
+        "swim_pull_buoy": "Pullbuoy",
+        "swim_snorkel": "Tubo frontal"
+      }
+    }
   },
   "metadata": {
     "editAria": "Editar metadatos del entreno",
@@ -302,7 +325,17 @@
     "countAria": "Número de repeticiones",
     "ungroup": "Desagrupar",
     "deleteShort": "Eliminar",
-    "actionsAria": "Acciones del bloque"
+    "actionsAria": "Acciones del bloque",
+    "createTitle": "Crear bloque de repetición",
+    "createFromSteps_one": "Crear un bloque de repetición con {{count}} paso.",
+    "createFromSteps_other": "Crear un bloque de repetición con {{count}} pasos.",
+    "createEmpty": "Crear un bloque de repetición vacío. Puedes añadirle pasos más tarde.",
+    "repeatCountLabel": "Repeticiones",
+    "minRepeatHint": "Mínimo: 2 repeticiones",
+    "minRepeatError": "El número de repeticiones debe ser al menos 2",
+    "createConfirm": "Crear bloque",
+    "cancel": "Cancelar",
+    "close": "Cerrar"
   },
   "convert": {
     "heading": "Convertir {{from}} a {{to}}",

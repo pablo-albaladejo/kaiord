@@ -1,65 +1,22 @@
 /**
  * T5 (design §3.9): resolves an `uncertain` placement by reading Garmin over
  * the dates of the `uncertain` and of its `held` entries. One match is
- * adopted (`keep`, a `scheduled` previous `retire`); `held` ids the reads
- * do not see become `gone` — only when the reads carry ids (A3); several
+ * adopted (`keep`, a `scheduled` previous `retire`; `placement-t5-adoption`
+ * says which entry and how it is recorded); `held` ids the reads do not
+ * see become `gone` — only when the reads carry ids (A3); several
  * matches are a `duplicate-left`; none, or a failed read, stays `uncertain`.
  */
 import { canonicalHash } from "@kaiord/core";
 
-import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { Uncertain } from "./placement-claim";
 import type { PlacementRun } from "./placement-deps";
 import type { Settled } from "./placement-resolve-step";
 import { type PlacementResult, recordDeleted } from "./placement-result";
-import {
-  canConfirmAt,
-  decide,
-  placedRow,
-  type Row,
-  withEntries,
-} from "./placement-row";
+import { decide } from "./placement-row";
+import { adoption } from "./placement-t5-adoption";
 import { readHeldMonths } from "./placement-t5-read";
 
-type Reads = NonNullable<Awaited<ReturnType<typeof readHeldMonths>>>;
 type Verdict = Settled | "undecided";
-
-const adoption = (u: Uncertain, row: Row, reads: Reads, a3: boolean) => {
-  const dead = new Set(
-    (row.removalQueue ?? [])
-      .filter((e) => e.state === "retire" || e.state === "gone")
-      .map((e) => e.workoutScheduleId)
-  );
-  const matches = reads.entries.filter(
-    (e) =>
-      e.workoutId === u.workoutId &&
-      e.date === u.date &&
-      !(e.workoutScheduleId && dead.has(e.workoutScheduleId))
-  );
-  const [match] = matches;
-  if (!match || matches.length > 1) return matches.length;
-  const id = match.workoutScheduleId;
-  if (!id && !canConfirmAt(row, u.workoutId, u.date)) return 0;
-  const placed: GarminPlaced = id
-    ? {
-        kind: "scheduled",
-        workoutScheduleId: id,
-        workoutId: u.workoutId,
-        date: u.date,
-      }
-    : {
-        kind: "unconfirmed",
-        workoutId: u.workoutId,
-        date: u.date,
-        supersedes: [],
-      };
-  const unseen = (row.removalQueue ?? []).filter(
-    (e) =>
-      e.state === "held" && id && a3 && !reads.seen.has(e.workoutScheduleId)
-  );
-  const gone = unseen.map((e) => ({ ...e, state: "gone" as const }));
-  return { placed, row: withEntries(placedRow(row, placed, u.previous), gone) };
-};
 
 export const resolveUncertain = async (
   run: PlacementRun,

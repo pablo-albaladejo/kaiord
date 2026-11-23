@@ -11,7 +11,7 @@ import {
   createPlacementHarness,
   type PlacementHarness,
 } from "../../test-utils/placement-harness";
-import type { PlacementPipelineDeps } from "../garmin-placement/push-workout-to-garmin-calendar";
+import type { PlacementPipelineDeps } from "../garmin-placement/placement-pipeline-deps";
 import { mergeOutcomes, retryCandidates } from "./bulk-retry";
 import type { WeekPushCandidate } from "./select-week-push-candidates";
 import { sendWeekToGarmin } from "./send-week-to-garmin";

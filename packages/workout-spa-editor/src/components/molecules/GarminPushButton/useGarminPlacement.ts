@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 
 import type { PlacementResult } from "../../../application/garmin-placement/placement-result";
 import type { GarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { useGarminPlacementActions } from "./useGarminPlacementActions";
 import { useGarminPush } from "./useGarminPush";
@@ -29,6 +30,7 @@ export const useGarminPlacement = (
   const { push } = useGarminPush(workout, onSent);
   const actions = useGarminPlacementActions(workout?.id);
   const [busy, setBusy] = useState(false);
+  useUnsavedWork(busy);
   const { setLastRun, result, placedDate } = notice;
   const date = workout?.date;
 

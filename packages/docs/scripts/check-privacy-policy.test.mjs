@@ -353,9 +353,21 @@ const SOLO_CASES = [
   ],
   [
     GARMIN,
-    "deletes only entries of workouts Kaiord sent, on the dates Kaiord placed them",
+    "before placing it on a date, so no second entry is added there",
+    "now and then",
+    "Garmin calendar read purposes named",
+  ],
+  [
+    GARMIN,
+    "deletes only entries that Kaiord's record holds as placed by Kaiord",
     "deletes entries",
-    "Garmin calendar delete scoped to Kaiord-sent workouts and placed dates",
+    "Garmin calendar delete scoped to entries Kaiord placed",
+  ],
+  [
+    GARMIN,
+    "but it is never moved or deleted",
+    "and it may be removed",
+    "Garmin calendar delete scoped to entries Kaiord placed",
   ],
   [
     GARMIN,
@@ -712,7 +724,7 @@ test("deleting the remote MCP endpoint section fails every endpoint rule", () =>
   }
 });
 
-test("deleting the A2A sentence fails the A2A rule alone", () => {
+test("deleting the A2A sentence fails the A2A rules alone", () => {
   const src = mutateInSection(
     POLICY,
     REMOTE_MCP,
@@ -724,15 +736,29 @@ test("deleting the A2A sentence fails the A2A rule alone", () => {
 
   assert.deepEqual(v, [
     "Remote A2A endpoint: same tools and terms, tasks not retained",
+    "Remote A2A endpoint: stated as not deployed yet",
   ]);
+});
+
+test("the A2A sentence must say the endpoint is not deployed yet", () => {
+  const src = mutateInSection(
+    POLICY,
+    REMOTE_MCP,
+    "it is not deployed yet, so nothing answers there today. Once deployed, it",
+    "it"
+  );
+
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, ["Remote A2A endpoint: stated as not deployed yet"]);
 });
 
 test("the regulatory statement must name both remote endpoints", () => {
   const src = mutateInSection(
     POLICY,
     "Regulatory Compliance",
-    "MCP (kaiord.com/mcp) and A2A (kaiord.com/a2a)",
-    "MCP (kaiord.com/mcp)"
+    ", like the A2A endpoint (kaiord.com/a2a) once it is deployed,",
+    ""
   );
 
   const v = checkPolicy(src);

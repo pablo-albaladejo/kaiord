@@ -1,7 +1,7 @@
 {
   "name": "Kaiord",
   "description": "Deterministic workout conversion and validation for FIT, TCX, ZWO, Garmin Connect (GCN) and KRD. No AI model runs behind it: name a skill in the first data part of a message, {\"skill\": \"<id>\", ...arguments}. A2A 1.0 only: send A2A-Version: 1.0 (0.3 clients get -32009). Tasks finish inside the reply and are not retained.",
-  "version": "1.0.0+d4cef1272d59",
+  "version": "1.0.0+1cb4b6e95a41",
   "supportedInterfaces": [
     {
       "url": "https://kaiord.com/a2a",
@@ -46,19 +46,19 @@
     {
       "id": "kaiord_diff",
       "name": "Compare two workouts",
-      "description": "Compare two workout files and list their differences. Arguments: content1, content2, optional format1 and format2.",
+      "description": "Compare two workout files and list their differences. Arguments: content1, content2, format1, format2.",
       "tags": [
         "diff",
         "compare"
       ],
       "examples": [
-        "{\"skill\":\"kaiord_diff\",\"content1\":\"<krd>\",\"content2\":\"<krd>\"}"
+        "{\"skill\":\"kaiord_diff\",\"content1\":\"<krd>\",\"format1\":\"krd\",\"content2\":\"<krd>\",\"format2\":\"krd\"}"
       ]
     },
     {
       "id": "kaiord_extract_workout",
       "name": "Extract a workout",
-      "description": "Extract the structured workout from a file as JSON. Arguments: input_content (text, or base64 for FIT), optional input_format.",
+      "description": "Extract the structured workout from a file as JSON. Arguments: input_content (text, or base64 for FIT), input_format.",
       "tags": [
         "extract",
         "workout",
@@ -84,7 +84,7 @@
     {
       "id": "kaiord_inspect",
       "name": "Inspect a workout",
-      "description": "Return a human-readable summary of a workout file. Arguments: input_content (text, or base64 for FIT), optional input_format.",
+      "description": "Return a human-readable summary of a workout file. Arguments: input_content (text, or base64 for FIT), input_format.",
       "tags": [
         "inspect",
         "summary"

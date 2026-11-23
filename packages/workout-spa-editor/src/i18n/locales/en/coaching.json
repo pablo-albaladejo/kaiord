@@ -86,6 +86,10 @@
   },
   "dialog": {
     "closeAria": "Close",
+    "srTitle": "Coaching activity",
+    "srDescription": "Coaching activity details: create its workout with AI or by hand, match it, or split it.",
+    "comments": "Comments",
+    "aiHint": "ℹ AI will use only the title + sport",
     "loadingDescription": "Loading description…",
     "retryDescription": "Retry",
     "descriptionError": {
@@ -132,13 +136,46 @@
     "swimming": "Swimming",
     "strength": "Strength"
   },
+  "sport": {
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swimming",
+    "gym": "Gym",
+    "stretching": "Stretching",
+    "yoga": "Yoga",
+    "pilates": "Pilates",
+    "rest": "Rest",
+    "walk": "Walk",
+    "mountainwalk": "Hiking",
+    "trail": "Trail",
+    "mountainbike": "MTB",
+    "stationarybike": "Indoor Bike",
+    "rowing": "Rowing",
+    "indoorrowing": "Indoor Rowing",
+    "climbing": "Climbing",
+    "ski": "Ski",
+    "mountainski": "Ski Touring",
+    "sprint": "Sprint",
+    "tennis": "Tennis",
+    "cardio": "Cardio",
+    "canicross": "Canicross",
+    "canibike": "Canibike",
+    "dog": "Dog Sport",
+    "activity": "Activity"
+  },
   "picker": {
     "ariaLabel": "Match to workout",
     "empty": "No same-day, same-sport workouts available to match."
   },
+  "zonesSync": {
+    "fetchFailed": "Train2Go is not answering, so your zones were not synced. Try again.",
+    "shapeMismatch": "Train2Go sent zones Kaiord cannot read, so they were not synced.",
+    "unsupported": "This coaching platform does not share zones."
+  },
   "sync": {
     "defaultLabel": "Coach",
     "connectTo": "Connect to {{label}}",
+    "updateExtension": "Update the Kaiord extension for {{label}}.",
     "routeInactiveTitle": "{{label}} · route inactive",
     "routeInactiveAria": "{{label}} — route inactive",
     "syncAria": "Sync {{label}}"
@@ -146,6 +183,8 @@
   "hooks": {
     "aiProcessFailed": "Failed to process activity with AI",
     "workoutMatched": "Workout matched",
+    "migratedOne": "1 workout matched to a coaching activity",
+    "migratedMany": "Workouts matched to coaching activities",
     "manualFailed": "Manual creation failed",
     "conversionFailed": "Conversion failed",
     "invalidActivityId": "Invalid activity id",
@@ -164,6 +203,13 @@
     "createFirst": "Create the workout first to move it."
   },
   "executed": {
-    "heading": "Completed activities"
+    "heading": "Completed activities",
+    "srDescription": "Activity details. An activity is what you did, so it cannot be edited or rescheduled.",
+    "close": "Close",
+    "summary": "{{sport}} on {{date}}",
+    "readOnly": "This is an activity you did — its data is read-only.",
+    "executedChip": "Executed",
+    "planPrefix": "Plan ·",
+    "actualPrefix": "Actual ·"
   }
 }

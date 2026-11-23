@@ -13,6 +13,7 @@ import { useCallback, useState } from "react";
 import { db } from "../../adapters/dexie/dexie-database";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useTranslate } from "../../i18n/use-translate";
+import { useUnsavedWork } from "../../lib/use-unsaved-work";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import { prepareBatch } from "./batch-prepare";
@@ -28,6 +29,7 @@ export function useBatchState(weekStart: string, weekEnd: string) {
   const t = useTranslate("calendar");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState<BatchPending | null>(null);
+  useUnsavedWork(pending !== null);
   const { success: showSuccess } = useToastContext();
   // The static translation-key title satisfies the R-PIIInterpolation
   // guard; the dynamic counts flow through the description field. A row
@@ -50,7 +52,13 @@ export function useBatchState(weekStart: string, weekEnd: string) {
     }
     const prep = await prepareBatch(weekStart, weekEnd);
     if (!prep.ok) {
-      setMessage(prep.message);
+      setMessage(
+        t(
+          prep.reason === "no-model"
+            ? "batch.noModel"
+            : "batch.nothingToPrepare"
+        )
+      );
       return;
     }
     setMessage(null);

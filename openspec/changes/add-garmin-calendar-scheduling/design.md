@@ -175,7 +175,7 @@ The salvage ADR (add-only). Creating before deleting removes the window in which
 - flat optional fields
 - the date in the hash
 - the salvage in-`pushFn` gate
-- reading before every POST
+- reading before every POST (reversed by #1633: see "Safe writes settled in #1633")
 - always asking a human
 - a DELETE kill switch
 - detecting coach moves at convert or at push time
@@ -793,3 +793,154 @@ a duplicate". None changes an invariant of §3.3–§3.9.
   count rules of §3.4 apply. A wrong `true` can at worst re-POST after the
   gate (a duplicate); it can never delete an entry the read did not see
   without an id.
+
+## Safe writes settled in #1633
+
+The review of 2026-11-22 found that scheduling decided some writes from the
+ledger alone. ADR 0004 requires the live state to be read before a write is
+decided, so this section reverses the alternative "reading before every
+POST" and refines §3.3 step 4 and the 404 row of step 6. The invariant is
+unchanged: never a gap, a duplicate at worst, and nothing deleted outside
+the record.
+
+What the review found, each shown by a test at the message contract
+(`hooks/garmin-safe-writes.test.ts`, a fake Garmin that holds state behind
+`chrome.runtime.sendMessage`):
+
+- An entry the athlete deleted in Garmin was never put back: a `Placed`
+  equal to the desired placement returned `unchanged` with no read, so
+  every later send left 0 entries.
+- A library workout the athlete deleted in Garmin took two sends: the
+  first answered `library-missing`, only the second re-created it.
+- A record that lost its placement (an older snapshot restored, a merge
+  that dropped an attempt) posted a second entry next to the one Garmin
+  still held.
+
+What changed:
+
+- **Read before a POST.** After the claim and before the `schedule`, one
+  `calendar-find` of the claimed workout and date. An entry the record does
+  not know (not `previous`, not in `supersedes`) is adopted through the
+  commit, no POST; a failed read restores the claim (verbatim when only
+  this run touched the row) and answers `failed{calendar-unreadable}`,
+  retryable, with no write. "Send anyway" skips the read: it is the
+  athlete's answer to an entry they do not see. Cost: one read per placed
+  workout.
+- **Read before "unchanged".** A `scheduled` `Placed` equal to the desired
+  placement is read first; absent on two reads `SETTLE_MS` apart, its id is
+  written `gone` and the placement cleared in one guarded write, and the
+  same run claims it again. This replaces, for an explicit send, "a hand
+  deletion stays the athlete's own act" and the `uncertain` of N3 (a
+  `Placed` dragged to another month): the athlete pressed Send, and Kaiord
+  had just proven the entry gone. The moved entry is left where the athlete
+  put it (a duplicate, never deleted). Cost: one read per unchanged send.
+- **A 404 re-creates in the same send.** A `library-missing` placement runs
+  Phase 1 once more (the 404 set `forceRepush`) and places the new library
+  workout; a second `library-missing` is reported as before.
+- **Key order.** The claim writes `placement` before `removalQueue`, the
+  order the merge emits, so a placement written over a cleared one stays
+  idempotent under the merge laws.
+
+Not changed, and why:
+
+- **A library push that died after Garmin created it** (the tab closed
+  between the library POST and its commit) still re-pushes once the pending
+  row is older than `PENDING_TTL_MS`, leaving one unscheduled duplicate in
+  the library (the calendar holds one entry). Reconciling it needs a read
+  that identifies the workout: the bridge's `list` returns 20 workouts in
+  an order never captured live, and its `createdDate` carries no time zone,
+  so a match by name and time would rest on unverified assumptions and
+  could adopt the athlete's own workout of the same name. Within the TTL a
+  second send is refused (`busy`) and nothing is written.
+- **An edit** creates a new library workout (the bridge has no update
+  path, and Kaiord never overwrites or deletes a library workout); the
+  calendar entry moves to it, so the calendar holds one entry and the
+  library keeps the old version (follow-up "cleaning up superseded library
+  workouts").
+- **Adopting an unknown entry** (superseded below, "Ownership and
+  flickering reads"): it brought the athlete's own entry into the record, so
+  a later move deleted it.
+
+## Ownership and flickering reads settled in the review fix pass
+
+The code review of 2026-11-23 found two sequences, each now a test at the
+message contract (`hooks/garmin-safe-writes-ownership.test.ts`; the fake
+Garmin can hold an entry the athlete placed of the same library workout id,
+`placeLibraryWorkout`, and leave a live entry out of its next N month reads,
+`omitFromReads`, or fail one month only, `downMonths`):
+
+- **An entry the athlete placed was taken over and later deleted.** Kaiord
+  places Tempo on D1; the athlete puts the same library workout on D2 in
+  Garmin Connect; the Workout moves to D2 (the athlete's entry was adopted
+  as `keep`, D1 retired), then to D3 (the adopted D2 entry was retired and
+  deleted). ADR 0004 is absolute: nothing outside the record of what Kaiord
+  created is deleted or overwritten.
+- **A flickering read duplicated.** `confirmUnchanged` marked a live entry
+  `gone` after two reads left it out; the read before the POST then treated
+  it as known, a second entry was posted, and the first was never drained
+  because `gone` is never sent.
+
+Decisions:
+
+- **Who made an entry is two facts, not a state.** `created` (a POST of
+  Kaiord answered with this id, or the only unknown entry after this
+  attempt's own ambiguous POST) and `recognized` (found on the calendar,
+  never posted by Kaiord), both joined by OR. An entry may be sent a delete
+  only when it is `created` or was never `recognized` (`isKaiords`): legacy
+  rows carry neither and keep draining as before. Considered and rejected:
+  a single absorbing `foreign` flag. Two devices break it: device B, not yet
+  synced, recognizes the entry device A just posted; an absorbing flag would
+  mark A's own entry foreign forever and tell the athlete, falsely, that
+  Kaiord did not create it. With two facts the merge keeps A's `created`
+  and the entry stays Kaiord's. Also rejected: a new state on the lattice
+  (`foreign` between `retire` and `gone`): a recognized entry must still be
+  superseded (`retire`, so a stale device's `Placed` on it cannot win the
+  merge) while never being drainable, which one total order cannot express.
+- **A recognized entry is the `Placed`, so no duplicate is posted on its
+  date**, and `drainQueue`, `isDismissable` and the `duplicate-left` report
+  skip it. When the Workout moves on, Kaiord posts on the new date and the
+  entry stays; `finishPlacement` reports `foreign-left` with its dates once,
+  marking it `noticed` in the same guarded write so no later run or device
+  repeats it. The copy says "an entry Kaiord has no record of creating"
+  rather than "did not create": before a sync, the entry may be another
+  device's, and a cause that was not verified is never stated.
+- **Ambiguous POSTs.** One unknown entry after this attempt's own POST is
+  the POST's (`created`); several cannot tell which one is, so the adopted
+  one is only `recognized` and none is ever deleted (a duplicate at worst).
+  T5 records an entry the queue does not know as `recognized` too.
+- **A `gone` entry seen live again is revived.** `revival` orders entries
+  before the state: a revived entry outranks its `gone`, carrying fresh
+  `attempts`. The read before the POST revives Kaiord's own `gone` entry on
+  the date as the `Placed` (no POST); `confirmUnchanged`, when it sees the
+  `Placed`, revives any other `gone` entry of Kaiord's on the date as
+  `retire`, so the drain removes the surplus and one entry remains; T5
+  revives it as its match. Only an entry whose removal Kaiord never saw
+  succeed is revived: a delete answered ok, or "I removed it", sets
+  `deleted`, so a stale read right after a delete cannot revive it into a
+  `Placed` with no entry behind it (a gap). Rejected: requiring three
+  settled reads before `gone`, which narrows the window without closing it.
+- **One live read.** `readPlacedLive` (`placement-live-read.ts`) is the one
+  guard/read/settle/read sequence `confirmUnchanged` and `verifyPlaced`
+  share, over `readLiveState` (`application/safe-writes/live-state.ts`),
+  which TrainingPeaks' copy check uses too (one tri-state vocabulary,
+  `present | absent | unknown`). The read before the POST shares its guard
+  (`readsById`).
+
+- **After an independent review of this pass.** Only the run that sent
+  the POST, after a read that found no unknown entry, marks the one entry
+  it then finds `created`; a leftover attempt from an earlier run or a
+  "Send anyway" cannot tell it from one the athlete placed in between, so
+  it is `recognized`. `deleted` (a delete answered ok, a 404 a read
+  confirms, "I removed it") outranks every revival in the join, so a
+  device that has not synced cannot revive an entry another device saw
+  deleted; the commit re-checks a revival against the re-read row and,
+  when it is stale, posts instead. The Update Garmin toast, the main path
+  of a move, states `foreign-left` itself, since that run marks the entry
+  `noticed`.
+
+Known limits: a device still on an older App build drains a `recognized`
+entry (it does not know the fact) and, if its parser strips unknown keys
+before a sync, erases it from the row it uploads; the facts protect the
+athlete's entries once every device runs this build. When the Workout moves back to a date where a recognized entry
+stays, that entry is already in the record (superseded), so Kaiord posts its
+own entry next to it; the athlete was told once that it stayed.

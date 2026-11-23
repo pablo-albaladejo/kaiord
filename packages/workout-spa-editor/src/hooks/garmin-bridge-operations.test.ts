@@ -158,12 +158,13 @@ describe("executePush", () => {
     // Assert
     expect(result).toEqual({
       status: "error",
-      message: "Nope",
+      reason: "sign-in",
+      detail: "Nope",
       redetect: true,
     });
   });
 
-  it("should translate a transport timeout into the retry guidance message", async () => {
+  it("should report a transport timeout as Garmin not answering", async () => {
     // Arrange
     mockedSend.mockResolvedValue({
       ok: false,
@@ -176,8 +177,8 @@ describe("executePush", () => {
     // Assert
     expect(result).toEqual({
       status: "error",
-      message:
-        "Extension did not respond. Check Garmin Connect before retrying.",
+      reason: "not-answering",
+      detail: "Extension did not respond",
       redetect: false,
     });
   });

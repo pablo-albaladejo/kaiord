@@ -70,12 +70,12 @@
   },
   "toast": {
     "deleteFailed": "Delete Failed",
-    "deleteFailedDescription": "Failed to delete template",
+    "deleteFailedDescription": "The template was not deleted. Try again.",
     "templateLoaded": "Template loaded",
     "workoutSaved": "Workout Saved",
     "workoutSavedDescription": "\"{{name}}\" has been added to your library",
     "saveFailed": "Save Failed",
-    "saveFailedDescription": "Failed to save workout"
+    "saveFailedDescription": "The workout was not saved as a template. Try again."
   },
   "keepHint": {
     "title": "Anything you keep from the editor lands here",
@@ -89,7 +89,13 @@
     "cancel": "Cancel",
     "confirm": "Schedule",
     "close": "Close",
-    "invalidDate": "Pick a valid date to schedule this workout."
+    "invalidDate": "Pick a valid date to schedule this workout.",
+    "scheduled": "Workout scheduled",
+    "scheduledDescription": "Added to your calendar.",
+    "failed": "Schedule failed",
+    "failedDescription": "Could not schedule the workout — please retry.",
+    "noAthlete": "No active athlete",
+    "noAthleteDescription": "Select or create an athlete before scheduling."
   },
   "picker": {
     "hintDated": "Choose a template to schedule on {{date}}.",

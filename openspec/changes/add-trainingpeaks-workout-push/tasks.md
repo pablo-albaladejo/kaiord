@@ -59,12 +59,13 @@
 - [x] 4.3 Changeset.
 - [x] 4.4 Full `pnpm -r test && pnpm -r build && pnpm lint` — all exit 0.
 
-## 5. End-to-end validation (manual) — NOT EXECUTED, by decision
+## 5. End-to-end validation (manual) — the owner's, with a real account
 
-> Closed 2026-09-07: work on this destination stops here. The steps below are
-> left as a runbook should anyone pick it up, but a Basic account can only reach
-> today and tomorrow, so step 5.4 cannot place a real coaching-plan date without
-> Premium (14-day trial available). See design.md, "Why the work stops here".
+> Reopened 2026-11-23 by #1636. These steps need a real TrainingPeaks account
+> and are left to the owner; no agent runs them. A Basic account reaches only
+> today and tomorrow, so step 5.4 places a real coaching-plan date only on
+> Premium (14-day trial available). See design.md, "Why the work stops here"
+> and "The limit is stated before sending".
 
 - [ ] 5.1 Load `train2go-bridge` and `trainingpeaks-bridge` unpacked; run the
       SPA on `localhost:5173` (both manifests already allow that origin).
@@ -77,3 +78,39 @@
       tomorrow, in the ATHLETE's timezone.
 - [ ] 5.5 Confirm the intervals render in TrainingPeaks' own builder, then push
       again and confirm no duplicate.
+- [ ] 5.6 On a Basic account, open a workout dated two days ahead: confirm the
+      notice shows before sending, then send and confirm TrainingPeaks' 402 is
+      shown with the same reason, in English and in Spanish.
+- [ ] 5.7 Delete the pushed copy in TrainingPeaks, send again from Kaiord, and
+      confirm one copy exists. Confirm `read-workout` on a deleted id answers
+      `404` (the only status the App treats as gone).
+- [ ] 5.8 (#1105) Sign out of TrainingPeaks and confirm the App still asks to
+      sign in (the exchange is redirected or answers 401/403, so
+      `needsReauth` is still set).
+
+## 6. Limit stated before sending, safe re-send, honest session failure (#1636)
+
+- [x] 6.1 `isPastBasicHorizon` and the send control's notice for a day after
+      tomorrow, shown before any request, in English and Spanish.
+- [x] 6.2 Carry TrainingPeaks' status on `TrainingPeaksBridgeError`; map a 402
+      to the same explanation (`reason: "horizon"`).
+- [x] 6.3 Bridge `read-workout` action and its single-workout `GET`
+      allowlist entry, returning only id and day; privacy golden refreshed;
+      token-confinement test covers the action.
+- [x] 6.4 `checkTrainingPeaksCopy`: read the recorded copy before a re-send,
+      mark `forceRepush` only on a 404.
+- [x] 6.5 Safe-writes test against a fake TrainingPeaks holding state (send
+      twice leaves one; deleted copy re-sent; unreadable copy assumed present).
+- [x] 6.6 #1105: `tp-auth` sets `needsReauth` only for a dead session;
+      `checkSession` reports the distinction; the push says TrainingPeaks is
+      not answering instead of asking to sign in.
+- [x] 6.7 Store listing, permission justification, privacy policy and
+      `claims/trainingpeaks.json` updated; `pnpm lint:claims` passes.
+- [x] 6.8 Spec deltas for the above; `openspec validate --strict` passes.
+- [x] 6.9 Decide the notice from the earliest "tomorrow" in any time zone
+      (UTC-12:00), not the browser's, so the browser's tomorrow is announced
+      while the account may still be on yesterday; unit tests across zones.
+- [x] 6.10 The 402 refusal names the consequence (not sent) and the rule
+      counted in the account's time zone, with no "schedule it for today or
+      tomorrow"; notice and refusal copy tested in English and Spanish; store
+      listing sentence and its claim updated.

@@ -8,6 +8,8 @@
  * two different numbers.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
+import { CoachingSportIcon } from "../CoachingCard/CoachingSportIcon";
 import { deriveWorkoutLifecycle } from "../WorkoutCard/session-lifecycle";
 import { SessionLifecycleBadges } from "../WorkoutCard/SessionLifecycleBadges";
 import {
@@ -17,14 +19,19 @@ import {
   planDurationText,
 } from "./matched-session-text";
 
+const RowPrefix = ({ part }: { part: "planPrefix" | "actualPrefix" }) => {
+  const t = useTranslate("coaching");
+  return (
+    <span className="text-[10px] text-ink-muted">{t(`executed.${part}`)}</span>
+  );
+};
+
 const lifecycleOf = (s: MatchedSession) =>
   deriveWorkoutLifecycle(s.workout, s.executed?.length ?? 0);
 
 export const renderTitleRow = (s: MatchedSession) => (
   <>
-    <span role="img" aria-label={s.activity.sport.label}>
-      {s.activity.sport.icon}
-    </span>
+    <CoachingSportIcon sport={s.activity.sport} />
     <span className="min-w-0 flex-1 line-clamp-2 wrap-anywhere">
       {actualTitle(s)}
     </span>
@@ -33,7 +40,7 @@ export const renderTitleRow = (s: MatchedSession) => (
 
 export const renderComfortableMetadata = (s: MatchedSession) => (
   <>
-    <span className="text-[10px] text-ink-muted">Plan ·</span>
+    <RowPrefix part="planPrefix" />
     <span>{planDurationText(s)}</span>
     <SessionLifecycleBadges flags={lifecycleOf(s)} />
   </>
@@ -41,7 +48,7 @@ export const renderComfortableMetadata = (s: MatchedSession) => (
 
 export const renderComfortableSecondary = (s: MatchedSession) => (
   <>
-    <span className="text-[10px] text-ink-muted">Actual ·</span>
+    <RowPrefix part="actualPrefix" />
     <span>{actualDurationText(s)}</span>
   </>
 );

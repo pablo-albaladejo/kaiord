@@ -57,7 +57,7 @@ describe("garmin-bridge-context", () => {
     act(() =>
       result.current.setPushing({
         status: "error",
-        message: "Push failed",
+        reason: "not-answering",
       })
     );
 
@@ -65,7 +65,7 @@ describe("garmin-bridge-context", () => {
 
     expect(result.current.pushing).toEqual({
       status: "error",
-      message: "Push failed",
+      reason: "not-answering",
     });
   });
 

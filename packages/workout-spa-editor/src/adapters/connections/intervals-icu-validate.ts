@@ -2,11 +2,13 @@
  * Validates an intervals.icu API key from the browser. intervals.icu uses HTTP
  * Basic auth with username `API_KEY` and the key as the password; `/athlete/0`
  * resolves to the authenticated athlete. A 2xx means the key works (CORS is
- * permitted for browser origins — see the change's CORS spike). `fetch` is
- * injectable for tests.
+ * permitted for browser origins — see the change's CORS spike), a 401/403
+ * that it does not; any other answer says nothing about the key, so it
+ * throws. `fetch` is injectable for tests.
  */
 const ATHLETE_URL = "https://intervals.icu/api/v1/athlete/0";
 const REQUEST_TIMEOUT_MS = 10000;
+const KEY_REFUSED = new Set([401, 403]);
 
 export const validateIntervalsIcuKey = async (
   credential: string,
@@ -17,5 +19,7 @@ export const validateIntervalsIcuKey = async (
     headers: { Authorization: `Basic ${auth}` },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
-  return response.ok;
+  if (response.ok) return true;
+  if (KEY_REFUSED.has(response.status)) return false;
+  throw new Error(`intervals.icu answered ${response.status}`);
 };

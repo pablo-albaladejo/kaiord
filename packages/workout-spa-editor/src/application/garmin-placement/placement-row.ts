@@ -13,11 +13,7 @@ import {
   isGarminPlaced,
 } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
-import {
-  entryOf,
-  joinQueues,
-  sortedQueue,
-} from "../sync/merge-garmin-removal-queue";
+import { joinQueues, sortedQueue } from "../sync/merge-garmin-removal-queue";
 import type { LedgerKey, PlacementDeps } from "./placement-deps";
 
 export type Row = ExportLedgerEntry;
@@ -60,27 +56,6 @@ export const samePlaced = (x: GarminPlaced, y: GarminPlaced): boolean =>
 /** The row still carries this run's `Placed` (the post-commit guard). */
 export const holdsPlaced = (row: Row | undefined, placed: GarminPlaced) =>
   isGarminPlaced(row?.placement) && samePlaced(row.placement, placed);
-
-/** A superseded `scheduled` previous is retired with the new `Placed`. */
-export const retiredBy = (
-  previous: GarminPlaced | undefined,
-  placed: GarminPlaced
-): GarminRemovalEntry[] =>
-  previous?.kind === "scheduled" &&
-  !(placed.kind === "scheduled" && samePlaced(previous, placed))
-    ? [entryOf(previous, "retire")]
-    : [];
-
-/** A new `Placed` with its id `keep` and a superseded previous `retire`. */
-export const placedRow = (
-  row: Row,
-  placed: GarminPlaced,
-  previous: GarminPlaced | undefined
-): Row =>
-  withEntries({ ...row, placement: placed }, [
-    ...(placed.kind === "scheduled" ? [entryOf(placed, "keep")] : []),
-    ...retiredBy(previous, placed),
-  ]);
 
 /** "It's in Garmin" is safe: no non-`keep` entry shares workout and date. */
 export const canConfirmAt = (

@@ -8,34 +8,25 @@
  * timezone.
  */
 
-import { DEFAULT_LOCALE, type Locale } from "@kaiord/i18n";
+import type { Locale } from "@kaiord/i18n";
 
 const noonUtc = (date: string): Date => new Date(`${date}T12:00:00Z`);
 
-export const shortWeekdayName = (
-  date: string,
-  locale: Locale = DEFAULT_LOCALE
-): string =>
+export const shortWeekdayName = (date: string, locale: Locale): string =>
   new Intl.DateTimeFormat(locale, {
     weekday: "short",
     timeZone: "UTC",
   }).format(noonUtc(date));
 
 /** One-letter weekday ("M" in English, "X" for miércoles in Spanish). */
-export const narrowWeekdayName = (
-  date: string,
-  locale: Locale = DEFAULT_LOCALE
-): string =>
+export const narrowWeekdayName = (date: string, locale: Locale): string =>
   new Intl.DateTimeFormat(locale, {
     weekday: "narrow",
     timeZone: "UTC",
   }).format(noonUtc(date));
 
 /** Day and month, for prose that names a date ("your last session was 12 Jul"). */
-export const shortDate = (
-  date: string,
-  locale: Locale = DEFAULT_LOCALE
-): string =>
+export const shortDate = (date: string, locale: Locale): string =>
   new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
@@ -43,10 +34,7 @@ export const shortDate = (
   }).format(noonUtc(date));
 
 /** Weekday, day and month in the locale's own order ("Mon, Oct 5", "lun, 5 oct"). */
-export const weekdayDate = (
-  date: string,
-  locale: Locale = DEFAULT_LOCALE
-): string =>
+export const weekdayDate = (date: string, locale: Locale): string =>
   new Intl.DateTimeFormat(locale, {
     weekday: "short",
     day: "numeric",

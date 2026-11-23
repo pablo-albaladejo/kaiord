@@ -11,9 +11,9 @@
  *   (parity with the deleted header modal's onLoadWorkout affordance)
  */
 
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
@@ -323,6 +323,33 @@ describe("LibraryPage", () => {
     await waitFor(() => {
       expect(screen.queryByText("Template loaded")).not.toBeInTheDocument();
     });
+  });
+
+  it("should word a failed delete from the dictionary, never the storage error's text", async () => {
+    // Arrange
+    const template = makeTemplate({ id: "t-fail", name: "Threshold" });
+    await db.table("templates").add(template);
+    const persistence = createDexiePersistence(db);
+    persistence.templates.delete = vi.fn(async () => {
+      throw new Error("QuotaExceededError: internal storage detail");
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const user = userEvent.setup();
+    renderWithProviders(<LibraryPage />, { persistence });
+    await user.click(await screen.findByLabelText("Delete Threshold"));
+
+    // Act
+    const backdrop = await screen.findByTestId("modal-backdrop");
+    await user.click(within(backdrop.parentElement!).getByText("Delete"));
+
+    // Assert
+    expect(
+      await screen.findByText("The template was not deleted. Try again.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/internal storage detail/)
+    ).not.toBeInTheDocument();
+    vi.restoreAllMocks();
   });
 
   it("should render the page heading with the route-heading attribute", async () => {

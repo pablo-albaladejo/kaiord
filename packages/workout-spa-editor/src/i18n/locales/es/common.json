@@ -1,4 +1,7 @@
 {
+  "storage": {
+    "unavailable": "Almacenamiento no disponible: los cambios de esta sesión no se guardarán"
+  },
   "language": {
     "label": "Idioma",
     "auto": "Automático",
@@ -7,6 +10,7 @@
   },
   "actions": {
     "close": "Cerrar",
+    "cancel": "Cancelar",
     "action": "Acción",
     "tryAgain": "Reintentar",
     "dismiss": "Descartar",
@@ -59,7 +63,8 @@
     "download": "Descargar un archivo"
   },
   "units": {
-    "hr": "ppm"
+    "hr": "ppm",
+    "wattsRange": "{{min}} W - {{max}} W"
   },
   "durationPicker": {
     "maxHeartRate": "Máximo {{max}} {{unit}}",
@@ -68,6 +73,11 @@
   "markdown": {
     "table": "Tabla",
     "code": "Bloque de código"
+  },
+  "appUpdate": {
+    "available": "Nueva versión disponible",
+    "reload": "Recargar",
+    "saveFirst": "Guarda los cambios para actualizar"
   },
   "staleSchema": {
     "title": "Kaiord se ha actualizado en otra ventana",

@@ -346,7 +346,7 @@
     },
     {
       "id": "readme.root.kaiord-keeps-no-accounts",
-      "text": "Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp` and `kaiord.com/a2a`, which converts workouts in transit. Neither binds any storage. Your data leaves your device only to destinations you configured:",
+      "text": "Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp`, which converts workouts in transit. That second Worker's code also has an A2A endpoint for `kaiord.com/a2a`, which is not deployed yet. Neither binds any storage. Your data leaves your device only to destinations you configured:",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
@@ -385,6 +385,28 @@
         {
           "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts",
           "contains": "export class KaiordDatabase extends Dexie"
+        }
+      ]
+    },
+    {
+      "id": "readme.root.opens-offline-after-one-visit",
+      "text": "**Opens offline after one visit.** A service worker scoped to the [Kaiord App](https://kaiord.com/app/) keeps the files of the version you loaded, checked byte for byte, so the App opens and shows the Day and the Calendar with no network. Connections, sync and the assistant still need one.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/e2e/offline-service-worker.spec.ts",
+          "title": "should open the Day, then the Calendar and Settings never opened online, with no network"
+        },
+        {
+          "test": "packages/workout-spa-editor/e2e/offline-service-worker.spec.ts",
+          "title": "should leave the landing uncontrolled and cache nothing outside the precache"
+        },
+        {
+          "test": "packages/workout-spa-editor/e2e/offline-service-worker.spec.ts",
+          "title": "should keep the running worker when the host serves other bytes than it lists"
+        },
+        {
+          "test": "scripts/check-spa-service-worker.test.mjs",
+          "title": "should fail and name index.html when it was rewritten after emit"
         }
       ]
     },

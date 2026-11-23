@@ -35,7 +35,7 @@ const LOADING_STATE: PushState = { status: "loading" };
 const SUCCESS_STATE: PushState = { status: "success" };
 const ERROR_STATE: PushState = {
   status: "error",
-  message: "Push failed: 403",
+  reason: "sign-in",
 };
 
 /**

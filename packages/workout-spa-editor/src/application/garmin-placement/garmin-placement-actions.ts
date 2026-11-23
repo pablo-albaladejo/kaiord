@@ -6,9 +6,9 @@
 import { GARMIN_LEDGER_BRIDGE_ID } from "../../types/export-ledger";
 import { confirmInGarmin } from "./placement-confirm";
 import { dismissRemovalEntry } from "./placement-dismiss";
+import type { PlacementPipelineDeps } from "./placement-pipeline-deps";
 import { failed, type PlacementResult } from "./placement-result";
 import { CALENDAR_FIND_FEATURE } from "./placement-timing";
-import type { PlacementPipelineDeps } from "./push-workout-to-garmin-calendar";
 import { placementLockName } from "./record-lock-port";
 
 const keyOf = (kaiordRecordId: string) => ({

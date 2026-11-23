@@ -146,9 +146,83 @@ Placement would stay manual regardless: no endpoint applies a library item to a
 date (`…/items/{id}/apply` 404s), so reaching the calendar is the same
 `POST …/workouts` under the same ceiling.
 
+### The limit is stated before sending (#1636)
+
+The SPA cannot know the account type. The token exchange answers
+`{ token, athleteId, userId, username }` and nothing about the tier;
+`GET /users/v3/user` reports `settings.account.isPremium`, but it is a second
+request that downloads the athlete's whole profile (email, coaches, FTPs), and
+the session check must transfer no athlete data. So the limit is stated to
+every athlete for a day after tomorrow, worded as a fact about Basic accounts
+("TrainingPeaks may refuse this day"), never as a claim about theirs. The
+send stays enabled: a paid account accepts the date. TrainingPeaks' own 402
+is mapped to the same explanation.
+
+### The notice assumes the account's time zone is the furthest behind (#1636)
+
+The cut-off is the account's "tomorrow", and the App does not know the
+account's time zone either. Deciding from the browser's date (the first
+version) missed a day: from a browser ahead of the account, the browser's
+tomorrow can already be "after tomorrow" for TrainingPeaks, so the athlete saw
+no notice, got the 402, and was then told to schedule the workout for today
+or tomorrow, which they had done.
+
+UTC offsets in use span -12:00 to +14:00. At any instant the earliest date
+anywhere is the UTC date of `now - 12 h`, and no account can be on an earlier
+day, so the last day every account accepts is that date plus one. The notice
+shows for every later day. The browser's own zone is not consulted: it only
+decides which label the athlete reads for a date, not what TrainingPeaks
+accepts. Consequences, accepted as the honest trade:
+
+- The browser's tomorrow carries the notice until 12:00 UTC (13:00 in Madrid
+  in winter), when UTC-12:00 reaches today. The notice says "may", so a day
+  the athlete's own account accepts is not misdescribed.
+- From UTC+12:00 or later early in the day, even the browser's today can carry
+  it, because UTC-12:00 is still two dates behind.
+
+Options weighed and discarded: the browser's tomorrow (misses refused days);
+the browser's offset minus a guess at the account's (no data to guess from);
+reading `GET /users/v3/user` for the account's zone (downloads the profile,
+which the session check must not do). The refusal now names the consequence
+(the workout was not sent) and the rule, counted in the TrainingPeaks
+account's time zone, and gives no instruction to pick a day.
+
+### A re-send reads the copy it made (#1636)
+
+TrainingPeaks is create-only for Kaiord (no `PUT`/`DELETE` in the allowlist),
+so the export ledger row is the record of what Kaiord created there, keyed by
+workout, the same shape Garmin uses. Before this change a re-send never read
+TrainingPeaks: an unchanged workout was skipped even when the athlete had
+deleted the copy (the App said "On TrainingPeaks" while TrainingPeaks held
+nothing), and a changed one was blocked over a copy that might be gone. Now
+the SPA reads that one workout by its recorded id first
+(`GET …/workouts/{workoutId}`, answer reduced to id and day in the service
+worker). Only a 404 marks the row `forceRepush`, as Garmin does for a lost
+copy; any other answer keeps the old decision, so a read failure never turns
+into a second copy. A by-id read was chosen over the measured range read
+(`GET …/workouts/{from}/{to}`) because it moves one workout Kaiord created
+instead of a day of the athlete's planned and completed workouts.
+
+Not covered: a push whose answer never arrived (the 20 s timeout fired after
+the extension got the message). The ledger row is rolled back, so the next
+send POSTs again and can add a second copy if the first one landed. Closing it
+would need the range read and a match on title and day, which can mistake an
+entry the athlete made for Kaiord's.
+
 ### Status
 
 The code in this change is complete and verified. The manual end-to-end
 validation in `tasks.md` §5 and the library route are deliberately left
 unexecuted — a decision taken on 2026-09-07 to stop investing in this
 destination, not an oversight.
+
+## The copy check shares Garmin's safe-write decision
+
+The live read before a send (`checkTrainingPeaksCopy`) was a hook that
+imported the adapter and named its states `present | gone | unknown`. It is
+now an application use case (`application/trainingpeaks/check-trainingpeaks-copy.ts`)
+behind `TrainingPeaksCopyPort`, over `readLiveState`
+(`application/safe-writes/live-state.ts`), the decision Garmin's placement
+uses: read live, only a confirmed absence counts (here TrainingPeaks' own
+404; Garmin also settles two reads apart), then a guarded record update.
+The vocabulary is one, `present | absent | unknown`. Behaviour is unchanged.

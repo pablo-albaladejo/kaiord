@@ -1,4 +1,5 @@
 import { getTranslate, type Translate } from "../../../i18n/use-translate";
+import { logFailure } from "../../../lib/log-failure";
 import { FtpUnavailableError } from "../../../types/ftp-unavailable-error";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { MaxHrUnavailableError } from "../../../types/max-hr-unavailable-error";
@@ -8,6 +9,7 @@ import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { generateWorkoutFilename } from "./workout-filename";
 
+/** A known cause names its fix; any other failure states none. */
 const exportErrorMessage = (err: unknown, t: Translate): string => {
   if (!(err instanceof Error)) return t("save.exportFailedFallback");
   if (err.cause instanceof PaceZonesUnavailableError)
@@ -16,7 +18,8 @@ const exportErrorMessage = (err: unknown, t: Translate): string => {
     return t(`save.ftp.${err.cause.reason}`);
   if (err.cause instanceof MaxHrUnavailableError)
     return t(`save.maxHr.${err.cause.reason}`);
-  return err.message;
+  logFailure("export", err);
+  return t("save.exportFailedFallback");
 };
 
 export function createSaveHandler(
@@ -59,7 +62,7 @@ export function createSaveHandler(
       showError(t("save.exportFailedTitle"), errorMessage);
       setSaveErrors([
         {
-          path: ["export"],
+          path: [],
           message: errorMessage,
         },
       ]);

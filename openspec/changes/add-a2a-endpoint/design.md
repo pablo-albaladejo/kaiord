@@ -15,7 +15,13 @@ A2A **1.0.0**, tag `v1.0.0`, commit
 - proto: <https://github.com/a2aproject/A2A/blob/v1.0.0/specification/a2a.proto>
 - prose: <https://github.com/a2aproject/A2A/blob/v1.0.0/docs/specification.md>
 
-`https://a2a-protocol.org/latest/` moves; this change cites the tag. The
+`https://a2a-protocol.org/latest/` moves; this change cites the tag.
+Re-checked on 2026-11-23 against `v1.0.1` (2026-05-28), the latest release:
+its fixes (the HTTP+JSON binding prefers `application/a2a+json`, transcoding
+errors, the TaskStatus prose) leave the JSON-RPC binding, the method names,
+the `-32001`..`-32009` codes, the `TaskState` enum, `return_immediately` and
+the required AgentCard and AgentInterface fields unchanged. Version
+negotiation uses `Major.Minor`, so `1.0` covers `1.0.1`. The
 facts below were checked against the tag and against a sibling card that the
 isitagentready scanner accepts. Two deviations in the sibling implementation
 are **not** copied: it sends `-32004` for the push-notification methods
@@ -188,6 +194,20 @@ Never arguments, results or the context id.
 
 The card and the public A2A docs merge only after the deployed Worker passes
 its production smoke. Written into `packages/mcp-worker/AGENTS.md`.
+
+Until the production smoke passes, every public sentence about `/a2a`
+says the endpoint is not deployed yet (the README's local-first paragraph
+and the privacy policy), and a privacy-lint rule holds that statement in
+place; task 4.5 restores the present tense once it is served. The
+Cloudflare changes the owner makes by hand are tracked scripts in
+`packages/mcp-worker/ops/`: a dry run unless `--apply`, with the token,
+zone id and apex taken from the environment and the token passed to
+`curl` through a file descriptor, never its command line.
+
+- _Rejected:_ keeping the scripts in an untracked local folder (the ticks of
+  tasks 3.1 and 6.1 could not be checked); describing `/a2a` as served
+  before it is (the privacy disclosure must precede the route, task 1.4,
+  but it must also be true on the day it is read).
 
 ### D11. Exact route, failing closed
 

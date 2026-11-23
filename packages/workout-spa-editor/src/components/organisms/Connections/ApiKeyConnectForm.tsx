@@ -1,8 +1,23 @@
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { logFailure } from "../../../lib/log-failure";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
+import { isApiKeyRefused } from "../../../types/api-key-refused-error";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
+
+const REFUSAL_KEYS = {
+  "missing-key": "manage.apiKeyMissing",
+  rejected: "manage.apiKeyRejected",
+} as const;
+
+/** A verified refusal names its fix; anything else states no cause. */
+const failureKey = (caught: unknown) => {
+  if (isApiKeyRefused(caught)) return REFUSAL_KEYS[caught.reason];
+  logFailure("api-key-connect", caught);
+  return "manage.connectFailed";
+};
 
 type ApiKeyConnectFormProps = {
   /** Resolves on success; rejects (throwing) on an invalid key. */
@@ -18,6 +33,7 @@ export function ApiKeyConnectForm({
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  useUnsavedWork(busy || apiKey !== "");
 
   const submit = async () => {
     setBusy(true);
@@ -25,9 +41,7 @@ export function ApiKeyConnectForm({
     try {
       await onConnect(apiKey.trim());
     } catch (caught) {
-      setError(
-        caught instanceof Error ? caught.message : t("manage.connectFailed")
-      );
+      setError(t(failureKey(caught)));
     } finally {
       setBusy(false);
     }

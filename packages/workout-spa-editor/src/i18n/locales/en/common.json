@@ -1,4 +1,7 @@
 {
+  "storage": {
+    "unavailable": "Storage unavailable — changes in this session won't be saved"
+  },
   "language": {
     "label": "Language",
     "auto": "Auto",
@@ -7,6 +10,7 @@
   },
   "actions": {
     "close": "Close",
+    "cancel": "Cancel",
     "action": "Action",
     "tryAgain": "Try Again",
     "dismiss": "Dismiss",
@@ -59,7 +63,8 @@
     "download": "Download a file"
   },
   "units": {
-    "hr": "bpm"
+    "hr": "bpm",
+    "wattsRange": "{{min}}W - {{max}}W"
   },
   "durationPicker": {
     "maxHeartRate": "Maximum {{max}} {{unit}}",
@@ -68,6 +73,11 @@
   "markdown": {
     "table": "Table",
     "code": "Code block"
+  },
+  "appUpdate": {
+    "available": "New version available",
+    "reload": "Reload",
+    "saveFirst": "Save your changes to update"
   },
   "staleSchema": {
     "title": "Kaiord was updated in another window",

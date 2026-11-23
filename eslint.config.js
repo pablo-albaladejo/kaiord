@@ -12,8 +12,12 @@ import {
   JSX_LITERAL_ALLOW,
   JSX_LITERAL_FILES,
   JSX_LITERAL_IGNORES,
+  LITERAL_COPY_FILES,
+  LITERAL_COPY_IGNORES,
+  SCOPED_ALLOW,
 } from "./scripts/eslint-rules/jsx-literal-scope.mjs";
 import noJsxLiteralText from "./scripts/eslint-rules/no-jsx-literal-text.mjs";
+import noLiteralCopy from "./scripts/eslint-rules/no-literal-copy.mjs";
 import noNarrativeComments from "./scripts/eslint-rules/no-narrative-comments.mjs";
 
 /**
@@ -676,13 +680,14 @@ export default tseslint.config(
         rules: {
           "no-narrative-comments": noNarrativeComments,
           "no-jsx-literal-text": noJsxLiteralText,
+          "no-literal-copy": noLiteralCopy,
         },
       },
     },
     rules: { "local/no-narrative-comments": "error" },
   },
   {
-    // i18n guard: user-facing copy in the translated SPA surfaces comes from
+    // i18n guard: copy the athlete reads in the Kaiord App comes from
     // `t(...)`. The scope and the allow list live in jsx-literal-scope.mjs.
     files: JSX_LITERAL_FILES,
     ignores: JSX_LITERAL_IGNORES,
@@ -690,6 +695,38 @@ export default tseslint.config(
       "local/no-jsx-literal-text": ["error", { allow: JSX_LITERAL_ALLOW }],
     },
   },
+  {
+    files: LITERAL_COPY_FILES,
+    ignores: LITERAL_COPY_IGNORES,
+    rules: {
+      "local/no-literal-copy": ["error", { allow: JSX_LITERAL_ALLOW }],
+    },
+  },
+  // A word allowed on one surface only (keyboard keys, file types).
+  ...SCOPED_ALLOW.flatMap(({ files, allow }) => [
+    {
+      files: files
+        .filter((glob) => glob.endsWith("/**"))
+        .map((glob) => `${glob}/*.tsx`),
+      ignores: JSX_LITERAL_IGNORES,
+      rules: {
+        "local/no-jsx-literal-text": [
+          "error",
+          { allow: [...JSX_LITERAL_ALLOW, ...allow] },
+        ],
+      },
+    },
+    {
+      files,
+      ignores: LITERAL_COPY_IGNORES,
+      rules: {
+        "local/no-literal-copy": [
+          "error",
+          { allow: [...JSX_LITERAL_ALLOW, ...allow] },
+        ],
+      },
+    },
+  ]),
   {
     // Held-out path: Dexie migration adapters document the immutable
     // forward-only migration contract (`// v8 —` changelog, legacy
@@ -807,6 +844,30 @@ export default tseslint.config(
     files: [".design-sync/previews/*.tsx"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
+    // The App's service worker sources: plain scripts the emitter prefixes
+    // with `const SW = {...};` and ships unbundled as app/sw.js.
+    files: ["packages/workout-spa-editor/sw/**/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: {
+        self: "readonly",
+        caches: "readonly",
+        crypto: "readonly",
+        fetch: "readonly",
+        Response: "readonly",
+        URL: "readonly",
+        setTimeout: "readonly",
+        SW: "readonly",
+      },
+    },
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 100, skipBlankLines: true, skipComments: true },
+      ],
     },
   },
   {

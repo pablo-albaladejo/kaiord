@@ -1,5 +1,3 @@
-/** Import error transformation utilities */
-
 import {
   FitParsingError,
   GarminParsingError,
@@ -15,7 +13,7 @@ import {
 } from "../types/errors";
 import { errorMessage } from "./error-message";
 import type { WorkoutFileFormat } from "./file-format-detector";
-import { ImportError } from "./import-workout";
+import { ImportError, type ImportErrorCopy } from "./import-workout";
 
 const fmtValidation = (
   errors: Array<{ field: string; message: string }>
@@ -29,54 +27,64 @@ const parsingErrors: ReadonlyArray<[new (...args: never[]) => Error, string]> =
     [GarminParsingError, "GCN"],
   ];
 
-export const transformError = (
-  error: unknown,
-  format: WorkoutFileFormat
-): ImportError => {
-  if (error instanceof ImportError) return error;
+type WrapInput = {
+  key: ImportErrorCopy["key"];
+  label: string;
+  detail: string;
+  /** The Error's own message, for diagnostics; the athlete reads `key`. */
+  diagnostic: string;
+  format: WorkoutFileFormat;
+  cause: unknown;
+};
+
+type ImportErrorFacts = Omit<WrapInput, "format" | "cause">;
+
+const wrap = ({ key, label, detail, diagnostic, format, cause }: WrapInput) =>
+  new ImportError(diagnostic, format, cause, {
+    key,
+    params: { format: label, detail },
+  });
+
+const parseFailed = (
+  label: string,
+  detail: string,
+  loc = ""
+): ImportErrorFacts => {
+  const diagnostic = `Failed to parse ${label} file: ${detail}${loc}`;
+  return { key: "parseFailed", label, detail, diagnostic };
+};
+
+const describeError = (error: unknown, label: string): ImportErrorFacts => {
   if (error instanceof FileParsingError) {
     const loc =
       error.line !== undefined && error.column !== undefined
         ? ` (line ${error.line}, column ${error.column})`
         : "";
-    const msg = `Failed to parse ${format.toUpperCase()} file: ${error.message}`;
-    return new ImportError(msg + loc, format, error);
+    return parseFailed(label, error.message, loc);
   }
-  if (error instanceof ValidationError) {
-    return new ImportError(
-      `Validation failed: ${fmtValidation(error.errors)}`,
-      format,
-      error
-    );
+  if (error instanceof ValidationError || error instanceof KrdValidationError) {
+    const detail = fmtValidation(error.errors);
+    const diagnostic = `Validation failed: ${detail}`;
+    return { key: "validationFailed", label, detail, diagnostic };
   }
   if (error instanceof ConversionError) {
-    const details = error.details ? ` (${error.details})` : "";
-    return new ImportError(
-      `Conversion failed: ${error.message}${details}`,
-      format,
-      error
-    );
+    const detail = error.message + (error.details ? ` (${error.details})` : "");
+    const diagnostic = `Conversion failed: ${detail}`;
+    return { key: "conversionFailed", label, detail, diagnostic };
   }
-  for (const [cls, label] of parsingErrors) {
-    if (error instanceof cls) {
-      return new ImportError(
-        `Failed to parse ${label} file: ${error.message}`,
-        format,
-        error
-      );
-    }
+  for (const [cls, name] of parsingErrors) {
+    if (error instanceof cls) return parseFailed(name, error.message);
   }
-  if (error instanceof KrdValidationError) {
-    return new ImportError(
-      `Validation failed: ${fmtValidation(error.errors)}`,
-      format,
-      error
-    );
-  }
-  const msg = errorMessage(error);
-  return new ImportError(
-    `Failed to import ${format.toUpperCase()} file: ${msg}`,
-    format,
-    error
-  );
+  const detail = errorMessage(error);
+  const diagnostic = `Failed to import ${label} file: ${detail}`;
+  return { key: "importFailed", label, detail, diagnostic };
+};
+
+export const transformError = (
+  error: unknown,
+  format: WorkoutFileFormat
+): ImportError => {
+  if (error instanceof ImportError) return error;
+  const facts = describeError(error, format.toUpperCase());
+  return wrap({ ...facts, format, cause: error });
 };

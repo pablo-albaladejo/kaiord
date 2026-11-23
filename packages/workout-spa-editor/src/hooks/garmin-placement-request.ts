@@ -6,7 +6,7 @@
  */
 import { executeWorkoutPush } from "../application/export/execute-workout-push";
 import type { ExportLedgerRepository } from "../application/export/export-ledger-repository.port";
-import type { PlacementRequest } from "../application/garmin-placement/push-workout-to-garmin-calendar";
+import type { PlacementRequest } from "../application/garmin-placement/placement-phase-one";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 import type { WorkoutRecord } from "../types/calendar-record";
 import {

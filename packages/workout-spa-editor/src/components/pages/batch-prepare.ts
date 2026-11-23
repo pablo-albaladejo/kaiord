@@ -1,8 +1,8 @@
 /**
  * Stage a batch AI run: resolve the `workout_generation` model for the
  * active profile and gather every RAW workout in the given week. Returns a
- * tagged result so the caller can surface a user-friendly message when
- * either piece is missing.
+ * tagged result whose `reason` the caller words when either piece is
+ * missing.
  */
 
 import { resolveModelForPurpose } from "@kaiord/ai/providers";
@@ -21,7 +21,7 @@ export type BatchPrep =
       modelId: string;
       workouts: WorkoutRecord[];
     }
-  | { ok: false; message: string };
+  | { ok: false; reason: "no-model" | "nothing-to-prepare" };
 
 export async function prepareBatch(
   weekStart: string,
@@ -38,7 +38,7 @@ export async function prepareBatch(
     bindings
   );
   if (!resolved) {
-    return { ok: false, message: "Configure an AI provider in Settings." };
+    return { ok: false, reason: "no-model" };
   }
 
   const workouts = await db
@@ -49,7 +49,7 @@ export async function prepareBatch(
     .toArray();
 
   if (workouts.length === 0) {
-    return { ok: false, message: "No raw workouts to process this week." };
+    return { ok: false, reason: "nothing-to-prepare" };
   }
 
   return {

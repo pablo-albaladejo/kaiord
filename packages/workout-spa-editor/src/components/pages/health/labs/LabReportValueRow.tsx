@@ -6,6 +6,7 @@
 import type { LabValue } from "@kaiord/core";
 
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
+import { getTranslate } from "../../../../i18n/use-translate";
 import { isOutOfRange } from "./lab-flag-display";
 import { labParameterLabel } from "./lab-parameter-label";
 import { formatRefRange, refSourceLabel } from "./lab-ref-range-display";
@@ -29,7 +30,8 @@ export const LabReportValueRow = ({ value }: { value: LabValue }) => {
         {value.valueCanonical} {value.unitCanonical}
       </span>
       <span className="whitespace-nowrap text-xs text-ink-muted">
-        {formatRefRange(value)} · {refSourceLabel(value.refSource)}
+        {formatRefRange(value)} ·{" "}
+        {refSourceLabel(value.refSource, getTranslate("labs-ui", locale))}
       </span>
       <LabFlagBadge flag={value.flag} />
     </li>

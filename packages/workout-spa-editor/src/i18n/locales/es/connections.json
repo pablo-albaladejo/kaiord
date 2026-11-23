@@ -90,7 +90,9 @@
     "cancel": "Cancelar",
     "apiKey": "Clave de API",
     "connecting": "Conectando…",
-    "connectFailed": "No se pudo conectar"
+    "connectFailed": "No se pudo conectar. Inténtalo de nuevo.",
+    "apiKeyMissing": "Introduce una clave de API.",
+    "apiKeyRejected": "El proveedor no ha aceptado esta clave de API. Revísala y vuelve a intentarlo."
   },
   "routing": {
     "title": "De dónde viene cada tipo de dato",
@@ -154,6 +156,7 @@
     "heart-rate-series": "Serie de frecuencia cardiaca"
   },
   "profileLink": {
+    "updateExtension": "Actualiza la extensión de Kaiord para {{name}}.",
     "notLinked": "{{name}} tiene sesión en este navegador pero no está vinculado a este atleta, así que todavía no se sincroniza nada.",
     "link": "Vincular a este atleta",
     "signIn": "{{name}} no está vinculado a este atleta. Inicia sesión en {{name}} en este navegador y luego vincúlalo aquí.",

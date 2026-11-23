@@ -165,7 +165,7 @@ describe("AutoMatchBanner", () => {
           source: "train2go",
           sourceBadge: "T2G",
           date: "2026-04-29",
-          sport: { label: "Cycling", icon: "\u{1F6B4}" },
+          sport: { id: "cycling", icon: "\u{1F6B4}" },
           title: "FTP test plan",
           status: "pending",
         })}

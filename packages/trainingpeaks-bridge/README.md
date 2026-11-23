@@ -21,8 +21,9 @@ This package is `private: true` and is not published to npm.
   `GET /users/v3/token`, then calls the data endpoints with
   `Authorization: Bearer` (`credentials:"omit"`). On a 401 it re-runs the
   exchange once. The extension never reads or stores the cookie.
-- Return **raw JSON only**. Parsing lives in `@kaiord/trainingpeaks` and runs
-  SPA-side; this bridge does not import it.
+- Return **raw JSON** (except `read-workout`, which keeps only a workout's id
+  and day). Parsing lives in `@kaiord/trainingpeaks` and runs SPA-side; this
+  bridge does not import it.
 - Report session presence as a boolean (`ping` / `checkSession`) plus the
   resolved athlete id, for the SPA connection pill — never exposing any token.
 
@@ -32,7 +33,13 @@ The only contract is the `chrome.runtime` message shape, documented inline in
 - `read-metrics` → `{ ok: true, data: <raw consolidatedtimedmetrics JSON> }`,
   or an error envelope with `needsReauth: true` when the session is dead.
 - `push-weight` → posts a `type 9` weight metric (`write:body`).
-- `ping` / `checkSession` → the bridge manifest plus `{ authenticated, athleteId }`.
+- `push-workout` → posts a structured planned workout (`write:workouts`); a
+  `402` is a date past the account's planning horizon.
+- `read-workout` → `{ workoutId, workoutDay }` of one workout by id, or an error
+  envelope carrying `status` (a `404` means TrainingPeaks does not have it).
+- `ping` / `checkSession` → the bridge manifest plus `{ authenticated, athleteId }`;
+  when not authenticated, `needsReauth` says whether TrainingPeaks reported a
+  dead session or only failed to answer.
 
 ## Least-privilege manifest
 

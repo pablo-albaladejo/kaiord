@@ -13,6 +13,7 @@ import { createAppPersistence } from "../../adapters/create-app-persistence";
 import { db } from "../../adapters/dexie/dexie-database";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { ToastContextProvider } from "../../contexts/ToastContext";
+import { hasUnsavedEdits } from "../../lib/unsaved-edits";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KRD } from "../../types/krd";
@@ -119,6 +120,23 @@ describe("useEditorSave", () => {
       saved?.krd?.extensions?.structured_workout as { steps: unknown[] }
     ).steps;
     expect(steps).toHaveLength(2);
+  });
+
+  it("should hold the unsaved-edits flag exactly while the unload prompt is armed", async () => {
+    // Arrange
+    const { result } = await renderLoaded();
+    const cleanAtLoad = hasUnsavedEdits();
+    act(() => useWorkoutStore.getState().createStep());
+    await waitFor(() => expect(result.current.isDirty).toBe(true));
+    const flaggedWhileDirty = hasUnsavedEdits();
+
+    // Act
+    await act(() => result.current.save());
+
+    // Assert
+    expect(cleanAtLoad).toBe(false);
+    expect(flaggedWhileDirty).toBe(true);
+    expect(hasUnsavedEdits()).toBe(false);
   });
 
   it("should reload the baseline into the store on Discard", async () => {

@@ -408,7 +408,7 @@ describe("SaveButton", () => {
       expect(errorTitle).toBeInTheDocument();
       // Find error message in toast description (more specific)
       const errorMessages = await screen.findAllByText(
-        "Export failed",
+        "The workout was not exported. Try again.",
         {},
         { timeout: TOAST_WAIT_MS }
       );

@@ -3,51 +3,35 @@
  * drain (ok), roll back (definite), or settle and read (ambiguous — never a
  * second POST in the same run).
  */
-import type { DefiniteReason } from "./classify-bridge-write";
 import { commitPlacement, placedFrom } from "./placement-commit";
+import { definiteFailure } from "./placement-definite-failure";
 import type { PlacementRun } from "./placement-deps";
 import { finishPlacement, unconfirmedLeftBehind } from "./placement-finish";
+import { createdBy } from "./placement-placed-row";
+import { readBeforePost } from "./placement-read-before-post";
 import { resolveAttempt } from "./placement-resolve-step";
 import {
   failed,
   type PlacementResult,
   recordDeleted,
 } from "./placement-result";
-import { restorePrevious } from "./placement-rollback";
 import type { Attempt, Row } from "./placement-row";
 import { postSchedule } from "./placement-schedule-step";
 import { SETTLE_MS } from "./placement-timing";
-
-const definiteFailure = async (
-  run: PlacementRun,
-  attempt: Attempt,
-  written: Row | undefined,
-  preClaim: Row | undefined,
-  reason: DefiniteReason
-): Promise<PlacementResult> => {
-  const missing = reason === "not-found" && !run.minted;
-  const verdict = await restorePrevious(
-    run,
-    attempt,
-    written,
-    preClaim,
-    missing ? attempt.workoutId : undefined
-  );
-  if (verdict === "absent") return recordDeleted();
-  if (verdict === "changed") return failed("guard-failed", true);
-  if (reason === "not-found")
-    return missing
-      ? failed("library-missing", true)
-      : failed("schedule-endpoint", false);
-  return failed(reason, reason !== "schedule-rejected");
-};
 
 export const postAttempt = async (
   run: PlacementRun,
   claimed: Attempt,
   preClaim: Row | undefined,
-  leftBehind: readonly string[]
+  leftBehind: readonly string[],
+  claimWritten?: Row
 ): Promise<PlacementResult> => {
+  const settled = await readBeforePost(run, claimed, {
+    written: claimWritten,
+    preClaim,
+    leftBehind,
+  });
+  if (settled) return settled;
   const posted = await postSchedule(run, claimed);
   if (posted.kind === "absent") return recordDeleted();
   if (posted.kind === "busy") return failed("busy", true);
@@ -55,7 +39,13 @@ export const postAttempt = async (
   const kind = attempt.previous ? "moved" : "scheduled";
   if (cls.kind === "ok" && answer.ok) {
     const placed = placedFrom(attempt, answer.workoutScheduleId);
-    const verdict = await commitPlacement(run, attempt, placed, written);
+    const verdict = await commitPlacement(
+      run,
+      attempt,
+      placed,
+      written,
+      createdBy(placed)
+    );
     if (verdict === "absent") return recordDeleted(attempt.date);
     const behind = [
       ...leftBehind,

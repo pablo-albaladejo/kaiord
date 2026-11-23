@@ -15,6 +15,8 @@ import type {
   CreateWorkoutInput,
 } from "../application/chat/tools/chat-tool-deps";
 import { usePersistence } from "../contexts/persistence-context";
+import { useActiveLocale } from "../i18n/LocaleProvider";
+import { getTranslate } from "../i18n/use-translate";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import { doSyncCoaching } from "./chat/chat-action-ops-impl";
 import { doCreateWorkout } from "./chat/chat-create-workout";
@@ -48,6 +50,7 @@ export const useChatActionOps = (
     [persistence, transport, profileId]
   );
   const { provider, modelId } = generation;
+  const locale = useActiveLocale();
   const createWorkout = useCallback(
     (input: CreateWorkoutInput) => {
       if (!provider || !modelId) throw new Error("No AI provider configured");
@@ -56,10 +59,11 @@ export const useChatActionOps = (
         requireProfile(profileId),
         provider,
         modelId,
-        input
+        input,
+        getTranslate("chat", locale)("draft.workoutTitle")
       );
     },
-    [persistence, profileId, provider, modelId]
+    [persistence, profileId, provider, modelId, locale]
   );
 
   return useMemo(

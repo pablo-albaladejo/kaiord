@@ -39,6 +39,53 @@ naming the account limit, rather than the generic push-failure message.
 - **WHEN** the bridge receives the 402
 - **THEN** it SHALL throw an error whose message attributes the refusal to the account tier, carrying the HTTP status
 
+### Requirement: One created workout can be read back
+
+The bridge SHALL expose a `read-workout` action that issues
+`GET /fitness/v6/athletes/{athleteId}/workouts/{workoutId}` for a numeric
+`workoutId`, so the SPA can read the live state of a workout it created
+before deciding a re-send. Only the workout's `workoutId` and `workoutDay`
+SHALL leave the service worker. A failure SHALL carry TrainingPeaks' HTTP
+status. The allowlist SHALL admit that single-workout path only: no range
+read, and no `DELETE`, `PUT` or `PATCH`. The read serves the workout write
+and declares no new capability.
+
+#### Scenario: The read returns only id and day
+
+- **GIVEN** a live session and a workout TrainingPeaks holds
+- **WHEN** the SPA sends `{ action: "read-workout", workoutId }`
+- **THEN** the bridge SHALL GET that one workout with a Bearer and return only `{ workoutId, workoutDay }`
+
+#### Scenario: A missing workout keeps its status
+
+- **WHEN** TrainingPeaks answers the read with `404`
+- **THEN** the bridge SHALL reject with an error carrying `status: 404` and no `needsReauth`
+
+#### Scenario: A malformed id is refused before any request
+
+- **WHEN** `read-workout` arrives without a numeric `workoutId`
+- **THEN** the bridge SHALL throw `Missing workout id` and SHALL NOT issue a request
+
+### Requirement: A failed token exchange keeps its cause
+
+A token exchange SHALL set `needsReauth` only when the session-fetch master
+reports a dead session (a redirect, `401` or `403`), or when a `200` carries
+no token or no JSON. Any other failure, such as a `500`, SHALL keep its HTTP
+status and SHALL NOT set `needsReauth`. When `checkSession` is not
+authenticated it SHALL report `needsReauth` as that distinction.
+
+#### Scenario: A server error is not a revoked sign-in
+
+- **GIVEN** the token exchange answers `500`
+- **WHEN** a workout write needs a token
+- **THEN** the bridge SHALL reject with `status: 500` and without `needsReauth`
+
+#### Scenario: A dead session still asks for a sign-in
+
+- **GIVEN** the token exchange is redirected to the login page
+- **WHEN** `checkSession` or a workout write runs
+- **THEN** the answer SHALL carry `needsReauth: true`
+
 ### Requirement: Workout write is declared in every capability surface
 
 The bridge SHALL advertise `write:workouts` in `BRIDGE_MANIFEST.capabilities`

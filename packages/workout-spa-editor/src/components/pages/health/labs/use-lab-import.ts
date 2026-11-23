@@ -19,12 +19,9 @@ import { useAiModelBindingsLive } from "../../../../hooks/use-ai-model-bindings-
 import { useAiProvidersLive } from "../../../../hooks/use-ai-providers-live";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../../lib/use-unsaved-work";
 import { validateFileSize } from "../../../molecules/FileUpload/file-upload-constants";
 import { type LabDraft, mapExtractionToDraft } from "./map-extraction-to-draft";
-
-const TOO_LARGE_MSG = "File is too large — use a file under 10 MB";
-const RUN_FAILED_MSG = "Could not extract the lab report — please retry";
-const NO_PROVIDER_MSG = "No lab-extraction model is configured";
 
 export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const toast = useToastContext();
@@ -34,6 +31,7 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const active = useActiveProfileLive();
   const bindings = useAiModelBindingsLive(active?.id ?? null) ?? [];
   const [isRunning, setIsRunning] = useState(false);
+  useUnsavedWork(isRunning);
   const controllerRef = useRef<AbortController | null>(null);
   const telemetry = useMemo(
     () => createDexieUsageTelemetrySink(createDexiePersistence()),
@@ -45,7 +43,7 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
 
   const run = async (file: File) => {
     if (validateFileSize(file)) {
-      toast.error(TOO_LARGE_MSG);
+      toast.error(t("labImport.tooLarge"));
       return;
     }
     const controller = new AbortController();
@@ -60,12 +58,12 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
         signal: controller.signal,
         telemetry,
       });
-      if (!result.ok) toast.error(NO_PROVIDER_MSG);
+      if (!result.ok) toast.error(t("labImport.noModel"));
       else onDraft(mapExtractionToDraft(result.extraction, { locale }));
     } catch (error) {
       if (controller.signal.aborted) return;
       if (isModelNotFoundError(error)) toast.error(t("ai.modelUnavailable"));
-      else toast.error(RUN_FAILED_MSG);
+      else toast.error(t("labImport.runFailed"));
     } finally {
       setIsRunning(false);
       controllerRef.current = null;

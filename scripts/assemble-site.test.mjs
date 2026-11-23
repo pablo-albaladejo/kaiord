@@ -18,6 +18,7 @@ import {
   assembleSite,
   parseAssembleArgs,
 } from "./assemble-site.mjs";
+import { checkServiceWorker } from "./check-spa-service-worker.mjs";
 import { checkSiteCsp } from "./check-site-csp.mjs";
 import { LEGACY_EDITOR_PAGE } from "./emit-legacy-editor-page.mjs";
 
@@ -170,6 +171,72 @@ describe("assemble-site", () => {
     assert.deepEqual(checkSiteCsp(inputs.out), []);
   });
 
+  it("should name the App's worker by its exact URL at the origin the site is assembled for", () => {
+    // Arrange
+    const local = "http://127.0.0.1:4173";
+    const appPolicy = (out) =>
+      /content="([^"]*)"/.exec(
+        readFileSync(join(out, "app/index.html"), "utf8")
+      )[1];
+
+    // Act
+    const localOut = join(root, "out-local");
+    assembleSite(inputs);
+    const atKaiord = appPolicy(inputs.out);
+    assembleSite({ ...inputs, out: localOut, origin: local });
+    const atLocal = appPolicy(localOut);
+
+    // Assert
+    assert.match(atKaiord, /worker-src https:\/\/kaiord\.com\/app\/sw\.js;/);
+    assert.match(
+      atLocal,
+      /worker-src http:\/\/127\.0\.0\.1:4173\/app\/sw\.js;/
+    );
+    assert.deepEqual(checkSiteCsp(localOut, { origin: local }), []);
+    assert.deepEqual(
+      parseAssembleArgs([
+        ...["--out", "o", "--landing", "l", "--app", "a"],
+        ...["--without", "docs", "--sha", "s", "--origin", local],
+      ]).origin,
+      local
+    );
+  });
+
+  it("should emit the App's service worker last, over the bytes that ship", () => {
+    // Arrange
+    const umamiWebsiteId = "site-id";
+
+    // Act
+    assembleSite({ ...inputs, umamiWebsiteId });
+
+    // Assert
+    assert.deepEqual(
+      checkServiceWorker(join(inputs.out, "app"), {
+        base: "/app/",
+        mode: "normal",
+      }),
+      []
+    );
+    assert.equal(existsSync(join(inputs.out, "sw.js")), false);
+  });
+
+  it("should emit the kill worker when asked to", () => {
+    // Arrange
+    const swKill = true;
+
+    // Act
+    assembleSite({ ...inputs, swKill });
+
+    // Assert
+    assert.deepEqual(
+      checkServiceWorker(join(inputs.out, "app"), {
+        base: "/app/",
+        mode: "kill",
+      }),
+      []
+    );
+  });
+
   it("should leave placeholders untouched when no website id is set", () => {
     const { analytics } = assembleSite(inputs);
 
@@ -260,6 +327,19 @@ describe("parseAssembleArgs", () => {
     assert.equal(parsed.docs, null);
     assert.equal(parsed.out, resolve("o"));
     assert.equal(parsed.sha, "s");
+  });
+
+  it("should read --sw-kill as the kill switch, off by default", () => {
+    // Arrange
+    const args = [...base, "--without", "docs"];
+
+    // Act
+    const off = parseAssembleArgs(args);
+    const on = parseAssembleArgs([...args, "--sw-kill"]);
+
+    // Assert
+    assert.equal(off.swKill, false);
+    assert.equal(on.swKill, true);
   });
 
   it("should require a sha", () => {

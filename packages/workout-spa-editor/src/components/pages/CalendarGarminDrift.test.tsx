@@ -19,7 +19,7 @@ const plan = (overrides: Partial<CoachingActivity> = {}): CoachingActivity => ({
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-10-08",
-  sport: { label: "Bike", icon: "🚴" },
+  sport: { id: "cycling", icon: "🚴" },
   title: "Threshold",
   status: "pending",
   ...overrides,

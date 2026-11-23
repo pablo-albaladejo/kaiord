@@ -9,6 +9,7 @@
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { PlacementRun } from "./placement-deps";
 import { finishPlacement, unconfirmedLeftBehind } from "./placement-finish";
+import { placedRow } from "./placement-placed-row";
 import { gateOf } from "./placement-resolve";
 import {
   failed,
@@ -16,7 +17,7 @@ import {
   recordDeleted,
   settling,
 } from "./placement-result";
-import { canConfirmAt, decide, placedRow } from "./placement-row";
+import { canConfirmAt, decide } from "./placement-row";
 
 type Verdict =
   | { kind: "placed"; placed: GarminPlaced; previous?: GarminPlaced }

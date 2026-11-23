@@ -2,7 +2,6 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import { TOAST_ZONES_FETCH_FAILED } from "../../application/coaching/sync-zones-toasts";
 import type { useToast } from "../../hooks/use-toast";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { ConflictItem, ZonesPayload } from "../../types/coaching-zones";
@@ -14,6 +13,9 @@ vi.mock("../../lib/lazy-import", () => ({
 }));
 
 import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
+
+const ZONES_FETCH_FAILED =
+  "Train2Go is not answering, so your zones were not synced. Try again.";
 
 type ToastSpy = ReturnType<typeof useToast>;
 
@@ -49,7 +51,7 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(TOAST_ZONES_FETCH_FAILED);
+    expect(toasts.error).toHaveBeenCalledWith(ZONES_FETCH_FAILED);
     expect(result.current.pending).toBeNull();
   });
 
@@ -79,7 +81,7 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(TOAST_ZONES_FETCH_FAILED);
+    expect(toasts.error).toHaveBeenCalledWith(ZONES_FETCH_FAILED);
     expect(result.current.pending).toEqual({
       profileId: "p1",
       conflicts: [conflict],

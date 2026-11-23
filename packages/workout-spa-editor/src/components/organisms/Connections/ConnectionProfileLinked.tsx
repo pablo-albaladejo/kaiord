@@ -5,6 +5,7 @@ import { useAnalytics } from "../../../contexts";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useTranslate } from "../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import type { LinkedCoachingAccount } from "../../../types/coaching-account";
 import type { Profile } from "../../../types/profile";
 
@@ -19,6 +20,7 @@ export function ConnectionProfileLinked({ profile, link }: Props) {
   const toasts = useToastContext();
   const analytics = useAnalytics();
   const [busy, setBusy] = useState(false);
+  useUnsavedWork(busy);
 
   const unlink = async () => {
     setBusy(true);

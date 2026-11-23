@@ -1,16 +1,19 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
 import { test } from "node:test";
 
 import { ESLint } from "eslint";
 
-import { JSX_LITERAL_FILES } from "./jsx-literal-scope.mjs";
+const SPA = "packages/workout-spa-editor/src";
+const IN_SCOPE = `${SPA}/components/molecules/WellnessEntryDialog/WellnessEntryForm.tsx`;
+const ANY_COMPONENT = `${SPA}/components/organisms/ZonesConflictDialog/ConflictGroup.tsx`;
+const HOOK = `${SPA}/hooks/use-push-to-garmin-op.ts`;
+const USE_CASE = `${SPA}/application/ai-workout-processor.ts`;
 
-const SPA = "packages/workout-spa-editor/src/components";
-const IN_SCOPE = `${SPA}/molecules/WellnessEntryDialog/WellnessEntryForm.tsx`;
-const OUT_OF_SCOPE = `${SPA}/organisms/ZonesConflictDialog/ConflictGroup.tsx`;
-
-const literalsIn = async (code, filePath) => {
+const literalsIn = async (
+  code,
+  filePath,
+  ruleId = "local/no-jsx-literal-text"
+) => {
   const eslint = new ESLint({ overrideConfigFile: "eslint.config.js" });
   const [result] = await eslint.lintText(code, { filePath });
   // A parse failure reports no rule hits at all, which would pass the
@@ -19,9 +22,7 @@ const literalsIn = async (code, filePath) => {
     result.messages.filter((m) => m.fatal),
     []
   );
-  return result.messages.filter(
-    (m) => m.ruleId === "local/no-jsx-literal-text"
-  );
+  return result.messages.filter((m) => m.ruleId === ruleId);
 };
 
 const component = (body) => `export function Probe() {\n  return ${body};\n}\n`;
@@ -38,12 +39,36 @@ test("should reject literal copy in a translated directory", async () => {
   assert.equal(messages[0].severity, 2);
 });
 
-test("should leave a directory outside the scope alone", async () => {
+test("should reject literal copy in any component of the App", async () => {
   // Arrange
-  const code = component("<p>Save wellness</p>");
+  const code = component('<p>{open ? "Hide" : "Detail"}</p>');
 
   // Act
-  const messages = await literalsIn(code, OUT_OF_SCOPE);
+  const messages = await literalsIn(code, ANY_COMPONENT);
+
+  // Assert
+  assert.equal(messages.length, 2);
+});
+
+test("should reject a literal toast in a hook of the App", async () => {
+  // Arrange
+  const code = 'export const probe = (toast) => toast.error("Save failed");\n';
+
+  // Act
+  const messages = await literalsIn(code, HOOK, "local/no-literal-copy");
+
+  // Assert
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0].severity, 2);
+});
+
+test("should leave a pure use case to the layer that words it", async () => {
+  // Arrange
+  const code =
+    'export const probe = () => ({ ok: false, message: "No steps" });\n';
+
+  // Act
+  const messages = await literalsIn(code, USE_CASE, "local/no-literal-copy");
 
   // Assert
   assert.equal(messages.length, 0);
@@ -72,17 +97,35 @@ test("should skip test files inside the scope", async () => {
   assert.equal(messages.length, 0);
 });
 
-test("should name only directories that exist in the scope", () => {
+test("should allow a keyboard letter on the shortcut sheet only", async () => {
   // Arrange
-  // A misspelled or moved directory matches no file, so the rule would
-  // silently stop guarding it.
-  const dirs = JSX_LITERAL_FILES.map((glob) =>
-    glob.replace(/\/(\*\*\/)?\*\.tsx$/, "")
-  );
+  const code = component("<kbd>{`${mod}G`}</kbd>");
+  const sheet = `${SPA}/components/organisms/ShortcutSheet/ShortcutSheetGroup.tsx`;
+  const menu = `${SPA}/components/organisms/EditorContextMenu/EditActions.tsx`;
 
   // Act
-  const missing = dirs.filter((dir) => !existsSync(dir));
+  const onSheet = await literalsIn(code, sheet);
+  const onMenu = await literalsIn(code, menu);
 
   // Assert
-  assert.deepEqual(missing, []);
+  assert.equal(onSheet.length, 0);
+  assert.equal(onMenu.length, 1);
+});
+
+test("should allow KRD and GCN on import and export file-type surfaces only", async () => {
+  // Arrange
+  const code = 'export const LABELS = { krd: "KRD", gcn: "GCN" };\n';
+  const exportSurface = `${SPA}/components/molecules/ExportFormatSelector/format-options.ts`;
+
+  // Act
+  const onExport = await literalsIn(
+    code,
+    exportSurface,
+    "local/no-literal-copy"
+  );
+  const onOther = await literalsIn(code, HOOK, "local/no-literal-copy");
+
+  // Assert
+  assert.equal(onExport.length, 0);
+  assert.equal(onOther.length, 2);
 });

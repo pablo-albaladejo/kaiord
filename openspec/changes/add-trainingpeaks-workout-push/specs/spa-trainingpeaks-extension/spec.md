@@ -34,6 +34,90 @@ enabled export route SHALL mean the push never reaches the bridge, surfacing
 - **WHEN** the user pushes it again
 - **THEN** the export ledger SHALL recognise the prior push rather than creating a duplicate
 
+### Requirement: The live copy is read before a re-send
+
+TrainingPeaks is create-only for Kaiord, so the export ledger row keyed by
+`(kaiordRecordId, "trainingpeaks-bridge")` is the record of what Kaiord
+created there. Before sending a workout that row already confirms, the SPA
+SHALL read that one workout by its recorded id through the bridge's
+`read-workout` action. Only a `404` SHALL mean the copy is gone: the row is
+then marked `forceRepush`, so the send creates the workout again without the
+re-push block. Any other answer — present, a server error, a timeout, an
+extension too old to know the action — SHALL keep the existing decision, so
+a re-send never adds a second copy silently.
+
+#### Scenario: Sending twice leaves one
+
+- **GIVEN** a workout sent to TrainingPeaks and still there, unchanged
+- **WHEN** the athlete sends it again
+- **THEN** TrainingPeaks SHALL still hold one copy of it
+
+#### Scenario: A copy the athlete deleted is sent again
+
+- **GIVEN** a workout Kaiord sent whose copy the athlete deleted on TrainingPeaks
+- **WHEN** the athlete sends it again, changed or not
+- **THEN** the SPA SHALL send it without the re-push block, and TrainingPeaks SHALL hold one copy
+
+#### Scenario: An unreadable copy is assumed present
+
+- **GIVEN** a workout Kaiord sent, and a read of its copy that fails with anything but a `404`
+- **WHEN** the athlete sends it again unchanged
+- **THEN** the SPA SHALL add nothing to TrainingPeaks
+
+### Requirement: The planning horizon is stated before sending
+
+The SPA cannot know the athlete's TrainingPeaks account type: the token
+exchange does not report it, and reading it would take a request that
+downloads the athlete's profile. Nor can it know the account's time zone,
+in which TrainingPeaks counts "tomorrow". For a workout dated after the
+earliest "tomorrow" in any time zone (UTC offsets reach back to -12:00), the
+send control SHALL therefore state, before any request, that a Basic account
+accepts only today and tomorrow, counted in the account's time zone, and that
+TrainingPeaks may refuse the day, without claiming the athlete's account is
+Basic. The browser's own time zone SHALL NOT narrow this, so the browser's
+tomorrow is announced while any zone may still be on the browser's yesterday.
+The control SHALL stay enabled. A `402` from the workout write SHALL be shown
+with its consequence (the workout was not sent) and the same rule, in the
+athlete's language, rather than the raw error text, and SHALL NOT tell the
+athlete to pick today or tomorrow, which they may already have done.
+
+#### Scenario: A later day is announced before sending
+
+- **GIVEN** a workout dated two days after today
+- **WHEN** the send control is shown
+- **THEN** it SHALL state the Basic account limit, and nothing SHALL have been sent
+
+#### Scenario: Today and tomorrow carry no notice once every zone has reached today
+
+- **GIVEN** a workout dated today or tomorrow, at an hour when every time zone down to UTC-12:00 is on today
+- **WHEN** the send control is shown
+- **THEN** no planning-horizon notice SHALL be shown
+
+#### Scenario: The browser's tomorrow is announced while a zone is on yesterday
+
+- **GIVEN** a browser at 09:00 in Madrid, when UTC-12:00 is still on the previous day
+- **WHEN** the send control is shown for a workout dated the browser's tomorrow
+- **THEN** it SHALL state the Basic account limit, counted in the account's time zone
+
+#### Scenario: The refusal names the same reason
+
+- **WHEN** TrainingPeaks answers the workout write with `402`
+- **THEN** the SPA SHALL show the planning-horizon explanation, not the bridge's message
+
+### Requirement: An unanswered session check is not a sign-in prompt
+
+When the bridge's `checkSession` reports `authenticated: false` with
+`needsReauth: false`, TrainingPeaks failed to answer rather than reporting a
+dead session. The push SHALL then say that TrainingPeaks is not answering,
+with Try again as the fix, and SHALL NOT ask the athlete to sign in. An
+older bridge that omits `needsReauth` keeps the sign-in prompt.
+
+#### Scenario: A server error does not ask for a sign-in
+
+- **GIVEN** a `checkSession` answer of `authenticated: false, needsReauth: false`
+- **WHEN** the athlete sends a workout
+- **THEN** the SPA SHALL say TrainingPeaks is not answering and SHALL NOT send `push-workout`
+
 ### Requirement: Athlete id comes from a live session probe
 
 The push SHALL resolve the TrainingPeaks athlete id by calling `checkSession`

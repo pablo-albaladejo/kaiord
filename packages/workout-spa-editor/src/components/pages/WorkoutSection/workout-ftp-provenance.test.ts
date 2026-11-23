@@ -38,7 +38,8 @@ describe("buildFtpProvenance", () => {
       "Cycling",
       editorT,
       commonT,
-      NOW
+      NOW,
+      "en"
     );
 
     // Assert
@@ -56,7 +57,8 @@ describe("buildFtpProvenance", () => {
       "Cycling",
       editorT,
       commonT,
-      NOW
+      NOW,
+      "en"
     );
 
     // Assert
@@ -74,7 +76,8 @@ describe("buildFtpProvenance", () => {
       "Cycling",
       editorT,
       commonT,
-      NOW
+      NOW,
+      "en"
     );
 
     // Assert
@@ -94,7 +97,8 @@ describe("buildFtpProvenance", () => {
       "Cycling",
       editorT,
       commonT,
-      NOW
+      NOW,
+      "en"
     );
 
     // Assert
@@ -118,10 +122,30 @@ describe("buildFtpProvenance", () => {
       "Cycling",
       editorT,
       commonT,
-      NOW
+      NOW,
+      "en"
     );
 
     // Assert
     expect(text).toContain("No FTP set for Cycling");
+  });
+
+  it("should date an old update in the athlete's locale", () => {
+    // Arrange
+    const profile = makeProfile({ updatedAt: "2026-03-02T12:00:00.000Z" });
+
+    // Act
+    const text = buildFtpProvenance(
+      profile,
+      "cycling",
+      "Cycling",
+      editorT,
+      commonT,
+      NOW,
+      "es"
+    );
+
+    // Assert
+    expect(text).toContain("2 de marzo de 2026");
   });
 });

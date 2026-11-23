@@ -1,9 +1,9 @@
-import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { assembleForE2e, type AssembleOptions } from "./assemble-for-e2e";
 import { builtDocs, builtLanding, stubLanding } from "./site-builds";
 import {
   startStaticPagesServer,
@@ -25,6 +25,10 @@ export const APP_BASE = "/app/";
 
 export type MergedDist = {
   server: StaticPagesServer;
+  /** The assembled tree the server reads on every request. */
+  site: string;
+  /** Assembles the tree again in place: the next deploy. */
+  reassemble: (options?: AssembleOptions) => void;
   /** The address-bar URL of an in-app route on the served artifact. */
   routeUrl: (route: string) => string;
   close: () => Promise<void>;
@@ -69,22 +73,20 @@ export async function startMergedDist(
     ? ["--docs", builtDocs(repoRoot)]
     : ["--without", "docs"];
 
-  // The same assembly the deploy runs, so the served tree has its shape.
-  execFileSync(
-    process.execPath,
-    [
-      "scripts/assemble-site.mjs",
-      ...["--out", site, "--landing", landing, "--app", builtDist],
-      ...docs,
-      ...["--sha", "e2e"],
-    ],
-    { cwd: repoRoot, stdio: "inherit" }
-  );
-
+  // The server reads the tree per request, so it listens first and the
+  // assembly (the deploy's own) knows the origin the App's worker-src names.
   const server = await startStaticPagesServer(site);
+  const assemble = (assembly?: AssembleOptions) =>
+    assembleForE2e(
+      { site, origin: server.url, landing, app: builtDist, docs, scratch: dir },
+      assembly
+    );
+  assemble();
 
   return {
     server,
+    site,
+    reassemble: assemble,
     routeUrl: (route) => `${server.url}${APP_BASE}#${route}`,
     close: async () => {
       await server.close();

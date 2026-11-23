@@ -28,11 +28,8 @@ export const executePush: PushWorkout = async function executePush(
 
   if (!res.ok) {
     const redetect = res.status === 401 || res.status === 403;
-    const message =
-      res.error === "Extension did not respond"
-        ? "Extension did not respond. Check Garmin Connect before retrying."
-        : (res.error ?? "Push failed");
-    return { status: "error", message, redetect };
+    const reason = redetect ? "sign-in" : "not-answering";
+    return { status: "error", reason, detail: res.error ?? "", redetect };
   }
 
   return { status: "success", garminWorkoutId: parseGarminWorkoutId(res.data) };

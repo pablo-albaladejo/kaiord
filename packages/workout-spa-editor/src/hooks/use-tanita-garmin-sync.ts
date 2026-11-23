@@ -6,7 +6,8 @@
  * `@kaiord/tanita` (parser) + `@kaiord/fit` (encoder) so neither lands in the
  * main chunk (matching `export-workout-formats.ts`). The exposed `status`
  * reflects the `idle | reading | parsing | encoding | uploading | done |
- * needsReauth | error` state machine.
+ * needsReauth | error` state machine. A failure shows the dictionary's
+ * "Sync failed" wording; its own text goes to the console only.
  */
 import { useCallback, useState } from "react";
 
@@ -16,7 +17,9 @@ import { readTanitaExportCsv } from "../adapters/tanita/tanita-transport";
 import type { SyncTanitaPhase } from "../application/health/sync-tanita-body-composition.use-case";
 import { syncTanitaBodyComposition } from "../application/health/sync-tanita-body-composition.use-case";
 import { usePersistence } from "../contexts/persistence-context";
-import { errorMessage } from "../utils/error-message";
+import { useActiveLocale } from "../i18n/LocaleProvider";
+import { getTranslate } from "../i18n/use-translate";
+import { logFailure } from "../lib/log-failure";
 import { ledgerRepo } from "./garmin-push-fn";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
 
@@ -48,6 +51,8 @@ export const useTanitaGarminSync = (
   const discovered = useDiscoveredBridges();
   const [status, setStatus] = useState<TanitaGarminSyncStatus>("idle");
   const [lastError, setLastError] = useState<string | null>(null);
+  const locale = useActiveLocale();
+  const failed = getTranslate("connections", locale)("manage.syncFailed");
 
   const tanitaReady = discovered.some((d) => d.bridgeId === TANITA_BRIDGE_ID);
   const garminReady = discovered.some((d) => d.bridgeId === GARMIN_BRIDGE_ID);
@@ -85,13 +90,13 @@ export const useTanitaGarminSync = (
         setStatus("needsReauth");
         return;
       }
-      setStatus("error");
-      setLastError(result.error ?? "Sync failed");
+      throw result.error ?? result.reason;
     } catch (err) {
+      logFailure("tanita-sync", err);
       setStatus("error");
-      setLastError(errorMessage(err));
+      setLastError(failed);
     }
-  }, [persistence, profileId]);
+  }, [persistence, profileId, failed]);
 
   return { status, lastError, canSync, sync };
 };

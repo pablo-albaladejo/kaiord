@@ -26,7 +26,7 @@ describe("buildTrendChartOptions", () => {
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV, WEIGHT];
 
     // Act
-    const options = buildTrendChartOptions(metrics);
+    const options = buildTrendChartOptions(metrics, "metric", "en");
 
     // Assert
     expect(options.axes).toHaveLength(EXPECTED_AXES_COUNT_3_METRICS);
@@ -40,7 +40,7 @@ describe("buildTrendChartOptions", () => {
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV];
 
     // Act
-    const options = buildTrendChartOptions(metrics);
+    const options = buildTrendChartOptions(metrics, "metric", "en");
 
     // Assert
     const ySeriesScales = (options.series ?? []).slice(1).map((s) => s.scale);
@@ -52,7 +52,7 @@ describe("buildTrendChartOptions", () => {
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV, WEIGHT];
 
     // Act
-    const options = buildTrendChartOptions(metrics);
+    const options = buildTrendChartOptions(metrics, "metric", "en");
 
     // Assert
     const strokes = (options.series ?? []).slice(1).map((s) => s.stroke);
@@ -69,8 +69,12 @@ describe("buildTrendChartOptions", () => {
     const metrics: ReadonlyArray<TrendMetricDef> = [WEIGHT];
 
     // Act
-    const alone = buildTrendChartOptions(metrics);
-    const withOthers = buildTrendChartOptions([SLEEP, HRV, WEIGHT]);
+    const alone = buildTrendChartOptions(metrics, "metric", "en");
+    const withOthers = buildTrendChartOptions(
+      [SLEEP, HRV, WEIGHT],
+      "metric",
+      "en"
+    );
 
     // Assert
     expect(alone.series?.[1]?.stroke).toBe(withOthers.series?.[3]?.stroke);
@@ -81,7 +85,7 @@ describe("buildTrendChartOptions", () => {
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, STEPS];
 
     // Act
-    const options = buildTrendChartOptions(metrics);
+    const options = buildTrendChartOptions(metrics, "metric", "en");
 
     // Assert
     expect(options.series?.[1]?.stroke).toBe(options.series?.[2]?.stroke);
@@ -94,7 +98,7 @@ describe("buildTrendChartOptions", () => {
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV, WEIGHT];
 
     // Act
-    const options = buildTrendChartOptions(metrics);
+    const options = buildTrendChartOptions(metrics, "metric", "en");
 
     // Assert
     const sides = (options.axes ?? []).slice(1).map((a) => a.side);
@@ -106,7 +110,7 @@ describe("buildTrendChartOptions", () => {
     const metrics: ReadonlyArray<TrendMetricDef> = [SLEEP, HRV];
 
     // Act
-    const options = buildTrendChartOptions(metrics);
+    const options = buildTrendChartOptions(metrics, "metric", "en");
 
     // Assert
     for (const axis of options.axes ?? []) {

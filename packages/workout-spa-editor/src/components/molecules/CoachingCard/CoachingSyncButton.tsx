@@ -18,6 +18,7 @@
 
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
+import type { CoachingSourceError } from "../../../types/coaching-source";
 import {
   buildSyncTooltip,
   usePrefersReducedMotion,
@@ -27,7 +28,7 @@ import { CoachingSyncIconButton } from "./CoachingSyncIconButton";
 export type CoachingSyncButtonProps = {
   connected: boolean;
   loading: boolean;
-  error: string | null;
+  error: CoachingSourceError | null;
   onSync: () => void;
   onConnect: () => void;
   label?: string;
@@ -62,7 +63,11 @@ export function CoachingSyncButton({
         >
           {t("sync.connectTo", { label })}
         </button>
-        {error && <span className="text-xs text-danger-text">{error}</span>}
+        {error === "outdated" && (
+          <span className="text-xs text-danger-text">
+            {t("sync.updateExtension", { label })}
+          </span>
+        )}
       </div>
     );
   }

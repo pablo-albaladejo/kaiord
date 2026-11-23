@@ -9,6 +9,10 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { AiErrorState } from "./AiErrorState";
+import {
+  type CoachingDialogBodyProps,
+  renderNoWorkoutBody,
+} from "./coaching-dialog-body";
 
 const noopProps = {
   onRetry: vi.fn(),
@@ -30,22 +34,19 @@ describe("AiErrorState", () => {
     );
   });
 
-  it("should append the optional detail string in parentheses", () => {
+  it("should show the typed reason and never the failure's own text", () => {
     // Arrange
+    const props = {
+      ...noopProps,
+      aiFailure: { reason: "transport-error", error: "econnreset" },
+    } as unknown as CoachingDialogBodyProps;
 
     // Act
-    render(
-      <AiErrorState
-        reason="transport-error"
-        detail="econnreset"
-        {...noopProps}
-      />
-    );
+    render(<>{renderNoWorkoutBody(props)}</>);
 
     // Assert
-    expect(screen.getByTestId("coaching-dialog-ai-error")).toHaveTextContent(
-      "(econnreset)"
-    );
+    const state = screen.getByTestId("coaching-dialog-ai-error");
+    expect(state).not.toHaveTextContent("econnreset");
   });
 
   it("should fire onRetry when Retry AI is clicked", async () => {

@@ -70,12 +70,12 @@
   },
   "toast": {
     "deleteFailed": "Error al eliminar",
-    "deleteFailedDescription": "No se pudo eliminar la plantilla",
+    "deleteFailedDescription": "La plantilla no se ha eliminado. Inténtalo de nuevo.",
     "templateLoaded": "Plantilla cargada",
     "workoutSaved": "Entrenamiento guardado",
     "workoutSavedDescription": "\"{{name}}\" se ha añadido a tu biblioteca",
     "saveFailed": "Error al guardar",
-    "saveFailedDescription": "No se pudo guardar el entrenamiento"
+    "saveFailedDescription": "El entrenamiento no se ha guardado como plantilla. Inténtalo de nuevo."
   },
   "keepHint": {
     "title": "Todo lo que guardes desde el editor aterriza aquí",
@@ -89,7 +89,13 @@
     "cancel": "Cancelar",
     "confirm": "Programar",
     "close": "Cerrar",
-    "invalidDate": "Elige una fecha válida para programar este entreno."
+    "invalidDate": "Elige una fecha válida para programar este entreno.",
+    "scheduled": "Entreno programado",
+    "scheduledDescription": "Añadido a tu calendario.",
+    "failed": "No se pudo programar",
+    "failedDescription": "No se pudo programar el entreno — inténtalo de nuevo.",
+    "noAthlete": "Ningún atleta activo",
+    "noAthleteDescription": "Selecciona o crea un atleta antes de programar."
   },
   "picker": {
     "hintDated": "Elige una plantilla para programarla el {{date}}.",

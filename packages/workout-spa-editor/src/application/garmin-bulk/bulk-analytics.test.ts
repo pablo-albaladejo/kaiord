@@ -28,6 +28,7 @@ describe("bulkEvent", () => {
       moved: 0,
       unchanged: 0,
       "duplicate-left": 0,
+      "foreign-left": 0,
       uncertain: 0,
       "library-only": 0,
       "not-eligible": 0,

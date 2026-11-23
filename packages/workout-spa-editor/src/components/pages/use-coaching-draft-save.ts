@@ -12,10 +12,8 @@ import { persistCoachingWorkout } from "../../application/coaching/persist-coach
 import { useAnalytics } from "../../contexts/analytics-context";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
+import { useTranslate } from "../../i18n/use-translate";
 import { useCurrentWorkout } from "../../store/selectors/workout-selectors";
-
-const SAVE_FAIL_TITLE = "Save failed";
-const SAVE_FAIL_DESC = "Could not save the workout — please retry.";
 
 export type UseCoachingDraftSave = {
   canSave: boolean;
@@ -29,6 +27,7 @@ export function useCoachingDraftSave(
   const persistence = usePersistence();
   const analytics = useAnalytics();
   const toast = useToastContext();
+  const t = useTranslate("editor");
   const [, navigate] = useLocation();
 
   const canSave = activity !== undefined && currentWorkout !== null;
@@ -51,7 +50,10 @@ export function useCoachingDraftSave(
       );
       navigate(`/workout/${result.workoutId}`, { replace: true });
     } catch {
-      toast.error(SAVE_FAIL_TITLE, SAVE_FAIL_DESC);
+      toast.error(
+        t("scratch.saveFailedTitle"),
+        t("scratch.draftSaveFailedDescription")
+      );
     }
   };
 

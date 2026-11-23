@@ -1,79 +1,105 @@
 /**
- * Where `local/no-jsx-literal-text` runs, and what it lets through.
+ * Where the i18n guard runs, and what it lets through.
  *
- * The scope is the set of SPA directories the journey-audit fixes touched
- * (PR1.5 to PR6), each of which was translated end to end. A directory with
- * a trailing `*.tsx` is checked flat, because its subdirectories belong to
- * other surfaces that are not translated yet; `**` takes the whole subtree.
- * Widen the list as other surfaces are translated, never narrow it.
+ * `local/no-jsx-literal-text` runs on every component of the Kaiord App, and
+ * `local/no-literal-copy` on every source file of the App that builds copy
+ * outside JSX. Both skip the code that never reaches the athlete:
+ *
+ * - tests, stories and test helpers render fixtures, not copy;
+ * - `application/**` holds pure use cases, which may not import the
+ *   translator (R-ArchAppPure); the presentation layer words their results;
+ * - `store/**` returns diagnostic results that a hook words before showing;
+ * - `types/**` holds schema refinements read by developers, not athletes;
+ * - `adapters/dexie/**` holds frozen migrations, whose seeded rows are data;
+ * - `i18n/**` is the mechanism itself;
+ * - a chat tool's error result is read by the model, which words it for
+ *   the athlete in their language; it is the tool's contract, not copy.
  */
 
 const SPA = "packages/workout-spa-editor/src";
 
-const FLAT = ["components/pages", "components/pages/health"];
+export const JSX_LITERAL_FILES = [`${SPA}/**/*.tsx`];
 
-const TREES = [
-  "components/molecules/BottomNav",
-  "components/molecules/CalendarEmptyStates",
-  "components/molecules/ChatFab",
-  "components/molecules/DefaultProfileNotice",
-  "components/molecules/DurationPicker",
-  "components/molecules/ExportFormatSelector",
-  "components/molecules/GoalSetupDialog",
-  "components/molecules/InlineNameEdit",
-  "components/molecules/PasteButton",
-  "components/molecules/ProfileChoiceBanner",
-  "components/molecules/PushButton",
-  "components/molecules/RepetitionBlockCard",
-  "components/molecules/SaveToLibraryButton",
-  "components/molecules/ScheduleDateDialog",
-  "components/molecules/SetupChecklist",
-  "components/molecules/StepCard",
-  "components/molecules/StepNotesEditor",
-  "components/molecules/TargetPicker",
-  "components/molecules/WellnessEntryDialog",
-  "components/molecules/WorkoutCard",
-  "components/organisms/ScratchEditorSurface",
-  "components/organisms/SettingsPanel",
-  "components/organisms/StepEditor",
-  "components/organisms/ZoneEditor",
-  "components/organisms/ZoneMap",
-  "components/pages/AthletePage",
-  "components/pages/AthletesPage",
-  "components/pages/CreateWorkout",
-  "components/pages/Daily",
-  "components/pages/Library",
-  "components/pages/Nutrition",
-  "components/pages/WorkoutDetail",
-  "components/pages/WorkoutSection",
-  "components/pages/health/trends",
-  "components/templates/MainLayout",
+export const LITERAL_COPY_FILES = [`${SPA}/**/*.ts`, `${SPA}/**/*.tsx`];
+
+const NEVER_COPY = [
+  "**/*.test.ts",
+  "**/*.test.tsx",
+  "**/*.stories.tsx",
+  "**/*.test-helpers.ts",
+  "**/*.test-fixtures.ts",
+  "**/test-helpers.ts",
+  "**/test-fixtures.ts",
+  "test-utils/**",
+  "test-utils.tsx",
+  "test-setup.ts",
+  "test-fixtures/**",
+  "__perf__/**",
+  "__regressions__/**",
 ];
 
-export const JSX_LITERAL_FILES = [
-  ...FLAT.map((dir) => `${SPA}/${dir}/*.tsx`),
-  ...TREES.map((dir) => `${SPA}/${dir}/**/*.tsx`),
-];
+export const JSX_LITERAL_IGNORES = NEVER_COPY.map((glob) => `${SPA}/${glob}`);
 
-/** Tests and stories render fixtures, not copy. */
-export const JSX_LITERAL_IGNORES = [
-  `${SPA}/**/*.test.tsx`,
-  `${SPA}/**/*.stories.tsx`,
+export const LITERAL_COPY_IGNORES = [
+  ...JSX_LITERAL_IGNORES,
+  ...["application", "store", "types", "adapters/dexie", "i18n"].map(
+    (dir) => `${SPA}/${dir}/**`
+  ),
 ];
 
 /**
- * Copy that is the same in every language: the product name, an API-key
- * shape, units, the zone prefix ("Z3"), the remove glyph, a time format and
- * the threshold acronyms ("LTHR", "FTP") that coaches use untranslated.
+ * Copy that is the same in every language: the product and Platform names,
+ * the Provider names, the shared file types, an API-key shape, units, the
+ * zone prefix ("Z3"), the remove glyph, a time format, the operating
+ * systems of the shortcut sheet, and the threshold acronyms ("LTHR", "FTP",
+ * "HRV") that coaches use untranslated.
  */
 export const JSX_LITERAL_ALLOW = [
   "Kaiord Editor",
+  "Train2Go",
+  "Anthropic (Claude)",
+  "OpenAI (GPT)",
+  "Google (Gemini)",
+  "FIT",
+  "TCX",
+  "ZWO",
+  "ZWO (Zwift)",
+  "Garmin Connect",
   "sk-...",
   "kcal",
   "ms",
+  "W",
   "Z",
   "x",
   "mm:ss",
+  "macOS",
+  "Windows / Linux",
   "LTHR",
   "FTP",
+  "HRV",
+];
+
+/**
+ * Words allowed on one surface only. The single letters are keyboard keys,
+ * read on the shortcut sheet (the context menu takes them from its
+ * catalog). KRD and GCN are formats, which appear only as file types on
+ * import and export (ADR 0003).
+ */
+export const SCOPED_ALLOW = [
+  {
+    files: [
+      `${SPA}/components/organisms/ShortcutSheet/**`,
+      `${SPA}/components/atoms/KeyChips/**`,
+      `${SPA}/constants/shortcut-*.ts`,
+    ],
+    allow: ["A", "C", "G", "V", "X"],
+  },
+  {
+    files: [
+      `${SPA}/components/molecules/ExportFormatSelector/**`,
+      `${SPA}/components/molecules/FileUpload/**`,
+      `${SPA}/components/pages/ConvertPage/**`,
+    ],
+    allow: ["KRD", "GCN"],
+  },
 ];

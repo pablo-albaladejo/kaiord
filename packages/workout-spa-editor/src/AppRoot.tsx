@@ -4,6 +4,7 @@ import { Router } from "wouter";
 
 import App from "./App.tsx";
 import { StaleSchemaGate } from "./components/organisms/StaleSchemaDialog/StaleSchemaGate";
+import { UpdatePrompt } from "./components/organisms/UpdatePrompt/UpdatePrompt";
 import {
   AnalyticsProvider,
   GarminBridgeProvider,
@@ -48,6 +49,7 @@ export const AppRoot = (props: AppRootProps) => (
                     <LocaleProvider>
                       <UnitsProvider>
                         <StaleSchemaGate />
+                        <UpdatePrompt />
                         <Router hook={useFragmentLocation}>
                           <App />
                         </Router>

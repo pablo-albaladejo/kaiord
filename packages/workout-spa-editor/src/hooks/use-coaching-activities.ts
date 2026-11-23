@@ -14,6 +14,7 @@ import { useCallback, useMemo } from "react";
 import { useCoachingSourceFactories } from "../contexts/coaching-registry-context";
 import type { CoachingActivity } from "../types/coaching-activity";
 import type { ExpandDayResult } from "../types/coaching-expand-result";
+import type { CoachingSourceError } from "../types/coaching-source";
 import { useActiveProfileLive } from "./use-active-profile-live";
 
 export type CoachingSyncState = {
@@ -25,7 +26,7 @@ export type CoachingSyncState = {
   /** Whether an enabled import route governs this source (F1.3). */
   routeActive?: boolean;
   loading: boolean;
-  error: string | null;
+  error: CoachingSourceError | null;
   /** ISO timestamp of the last successful sync for the active profile. */
   lastSyncedAt: string | undefined;
   sync: (weekStart: string) => Promise<void>;

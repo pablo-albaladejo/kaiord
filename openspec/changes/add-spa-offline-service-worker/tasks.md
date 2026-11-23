@@ -47,7 +47,7 @@
 
 ## B3. Service worker
 
-- [ ] 3.1 Add `packages/workout-spa-editor/sw/sw.js`:
+- [x] 3.1 Add the worker, `packages/workout-spa-editor/sw/sw-precache.js`, `sw-retention.js` and `sw.js` (one classic script once the emitter concatenates them, each part under the file cap):
   - a verified install with `cache: "reload"`, a digest check and copy-forward;
   - `?__rev=` keys;
   - shell matching for `/app/` and `/app/index.html` only;
@@ -55,30 +55,38 @@
   - per-client `HELLO` records, with the "unrecorded live client → delete nothing" prune rule;
   - `SKIP_WAITING`;
   - `CLIENT_COUNT`.
-- [ ] 3.2 Add `scripts/emit-spa-service-worker.mjs` with `node:test` coverage, plus its `--kill` body (navigates only controlled clients, no claim, no fetch handler). `assemble-site.mjs` calls it as the last step, with `--sw-kill`.
-- [ ] 3.3 Add the `scripts/dist-service-worker.test.mjs` guard with negative fixtures. Wire it as the last step before `upload-pages-artifact` and into `e2e-prod-base`, with the expected mode taken from `vars.SPA_SW_KILL_SWITCH`.
-- [ ] 3.4 Add the registration module:
+- [x] 3.2 Add `scripts/emit-spa-service-worker.mjs` with `node:test` coverage, plus its `--kill` body (navigates only controlled clients, no claim, no fetch handler). `assemble-site.mjs` calls it as the last step, with `--sw-kill`.
+- [x] 3.3 Add the guard, `scripts/check-spa-service-worker.mjs` (a CLI like `check-site-csp`, so it always runs on the tree it is given), with negative fixtures in `scripts/check-spa-service-worker.test.mjs`. Wire it as the last step before `upload-pages-artifact` and into `e2e-prod-base`, with the expected mode taken from `vars.SPA_SW_KILL_SWITCH`.
+- [x] 3.4 Add the registration module (`src/lib/service-worker/`):
   - PROD and Save-Data gates;
   - registration after `load`, once the browser is idle;
   - hello at boot and on every `controllerchange`;
   - update checks on visibility and on a throttled 60-minute timer.
-- [ ] 3.5 Add `lib/unsaved-edits.ts`, fed by `useBeforeUnloadGuard`, and `lib/pending-flushes.ts`, used by `use-prompt-autosave`.
-- [ ] 3.6 Implement the update flow:
+- [x] 3.5 Add `lib/unsaved-edits.ts`, fed by `useBeforeUnloadGuard`, and `lib/pending-flushes.ts`, used by `use-prompt-autosave`.
+- [x] 3.6 Implement the update flow (`UpdatePrompt`, a persistent region of its own rather than a toast from the queue, so nothing can dismiss it):
   - a silent cold-start apply, only within 10 s, with no input, nothing unsaved and a single window client;
   - otherwise a persistent toast;
   - on click, in order: gate, flush, `SKIP_WAITING`, then reload only the clicking tab;
   - en/es strings.
-- [ ] 3.7 Optional, LOW: broadcast the unsaved flag on a `BroadcastChannel`, so the toast can mention unsaved changes in another window.
-- [ ] 3.8 Set Playwright `use.serviceWorkers: "block"` and add `e2e/offline-service-worker.spec.ts` (`@service-worker`, added to the `e2e-prod-base` grep). It covers:
+- [x] 3.7 Optional, LOW: broadcast the unsaved flag on a `BroadcastChannel`, so the toast can mention unsaved changes in another window. Decided against: it gates nothing (each tab blocks its own reload on its own edits, and other tabs never reload), and it would add a channel to the initial JS for an informational line.
+- [x] 3.8 Set Playwright `use.serviceWorkers: "block"` and add `e2e/offline-service-worker.spec.ts` (`@service-worker`, added to the `e2e-prod-base` grep). It covers:
   - offline cold start, including a lazy route never visited;
   - an update while dirty, then while clean, with a second page;
   - retention across two activations;
   - install integrity;
   - a mid-session schema bump to 380 or higher;
   - the kill switch, with exactly one navigation.
-- [ ] 3.9 Add `docs/runbooks/spa-service-worker.md` and its row in `docs/runbooks/AGENTS.md`. It covers the ≈10-minute edge delay, that `navigate()` drops unsaved edits, and the manual fallback.
+
+  CI runs it on Chromium; it also passes on Firefox and WebKit locally (the kill switch leaves the reloaded page under the dying worker, which has no fetch handler, until its next load in those two).
+
+- [x] 3.9 Add `docs/runbooks/spa-service-worker.md` and its row in `docs/runbooks/AGENTS.md`. It covers the ≈10-minute edge delay, that `navigate()` drops unsaved edits, and the manual fallback.
+
+- [x] 3.10 One registry of unsaved work (review item 3): `lib/unsaved-edits.ts` gains read-time probes, surfaces report through `lib/use-unsaved-work.ts`, `lib/unsaved-dialog-input.ts` counts text typed into any open dialog, and every draft, import, generation, send, pending answer and form listed in design D4 reports. `src/lib/unsaved-work-reporters.test.ts` fails on a draft-shaped file that neither reports nor says why a reload loses nothing.
+- [x] 3.11 Count a touch, a wheel, a drag, a drop, a paste and a text field taking focus as input for the silent update (`lib/service-worker/first-input.ts`), and watch a worker already installing when the page registers. E2E: a file dropped right after load is not reloaded over and holds the deploy while unsaved; a new workout's draft holds the deploy until it is scheduled (Chromium, Firefox, WebKit locally).
+- [x] 3.12 The App's `worker-src` names `<origin>/app/sw.js` (`assemble-site.mjs --origin`, default `https://kaiord.com`), and `check-site-csp.mjs --origin` fails any other value on an App page and anything but `'none'` elsewhere (review item 5).
+- [x] 3.13 Split `emit-spa-service-worker.mjs` and `check-spa-service-worker.mjs` under the line cap through `scripts/lib/sw-manifest.mjs` and `scripts/lib/sw-precache-audit.mjs`, each with a sibling test (review item 12).
 
 ## Every PR
 
-- [ ] 4.1 Run all mobile e2e projects locally and report the result.
-- [ ] 4.2 Run `pnpm lint`, `pnpm test:scripts`, the affected package tests and `openspec validate --strict`.
+- [x] 4.1 Run all mobile e2e projects locally and report the result. 2026-11-23, dev server, Mobile Chrome + Mobile Safari + Mobile-768: 1131 passed, 169 skipped, 2 failed. `zones-sync` (c) on Mobile Chrome passed 3 of 3 on a rerun (flaky). `scheduled-lifecycle` on Mobile Safari fails at a keyboard `toBeFocused` on the Move dialog, and fails the same way on the base commit `1bdd733b4` without this change: pre-existing, not caused by it.
+- [x] 4.2 Run `pnpm lint`, `pnpm test:scripts`, the affected package tests and `openspec validate --strict`.

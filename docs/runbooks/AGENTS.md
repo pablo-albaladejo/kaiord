@@ -11,10 +11,11 @@ external service.
 
 ## Key Files
 
-| File                        | Description                                                                                                                                                                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cws-service-account.md`    | Chrome Web Store service-account setup, key rotation, emergency `force_upload` re-publish, and compromised-key response. Required reading before touching `.github/workflows/cws-publish.yml`. |
-| `required-status-checks.md` | Recipe for the manual `main`-branch protection settings change tracked by issue #623 (required-checks list, rollback, verification).                                                           |
+| File                        | Description                                                                                                                                                                                                                                                           |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cws-service-account.md`    | Chrome Web Store service-account setup, key rotation, emergency `force_upload` re-publish, and compromised-key response. Required reading before touching `.github/workflows/cws-publish.yml`.                                                                        |
+| `spa-service-worker.md`     | The Kaiord App's service worker: the update flow, the `SPA_SW_KILL_SWITCH` kill switch (on, check, timing, unsaved edits it drops, rollback) and the manual fallback. Required reading before touching `.github/workflows/deploy-site.yml`'s assembly or guard steps. |
+| `required-status-checks.md` | Recipe for the manual `main`-branch protection settings change tracked by issue #623 (required-checks list, rollback, verification).                                                                                                                                  |
 
 ## For AI Agents
 

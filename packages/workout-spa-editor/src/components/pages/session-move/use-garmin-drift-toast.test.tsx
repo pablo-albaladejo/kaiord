@@ -163,6 +163,27 @@ describe("useGarminDriftToast", () => {
     expect(await screen.findByText("Garmin updated")).toBeInTheDocument();
   });
 
+  it("should say Garmin was updated and that an entry Kaiord did not record stays", async () => {
+    // Arrange
+    await db.table("exportLedger").put(placedOn(TUE));
+    const persistence = await seedSession({ workout: { date: THU } });
+    await showToastWithAction(persistence);
+    pushTo.mockResolvedValueOnce({ kind: "foreign-left", dates: [TUE] });
+
+    // Act
+    await userEvent.click(
+      screen.getByRole("button", { name: "Update Garmin" })
+    );
+
+    // Assert
+    expect(
+      await screen.findByText(
+        "Garmin updated. An entry Kaiord has no record of creating stays in Garmin: Kaiord leaves it as it is."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Garmin was not updated/)).toBeNull();
+  });
+
   it.each([
     ["the workout was deleted", (p: PersistencePort) => p.workouts.delete("w")],
     [

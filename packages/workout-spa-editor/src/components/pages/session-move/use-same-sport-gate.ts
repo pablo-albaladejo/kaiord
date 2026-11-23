@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { readDayInputs } from "../../../application/read-day-inputs";
 import { sameSportOnDay } from "../../../application/same-sport-on-day";
 import { canonicalizeSport } from "../../../lib/canonicalize-sport";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import type { PersistencePort } from "../../../ports/persistence-port";
 
 export type SameSportPending = {
@@ -27,6 +28,7 @@ export function useSameSportGate(
   onError: () => void
 ) {
   const [pending, setPending] = useState<SameSportPending | null>(null);
+  useUnsavedWork(pending !== null);
 
   const check = useCallback(
     async (workoutId: string, day: string): Promise<void> => {

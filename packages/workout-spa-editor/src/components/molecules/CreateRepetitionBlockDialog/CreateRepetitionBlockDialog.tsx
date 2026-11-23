@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { DialogContent } from "./DialogContent";
 import { DialogFooter } from "./DialogFooter";
 import { DialogHeader } from "./DialogHeader";
@@ -26,6 +27,7 @@ export function CreateRepetitionBlockDialog({
 }: CreateRepetitionBlockDialogProps) {
   const [repeatCount, setRepeatCount] = useState("2");
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslate("editor");
 
   if (!isOpen) {
     return null;
@@ -34,7 +36,7 @@ export function CreateRepetitionBlockDialog({
   const handleConfirm = () => {
     const count = Number.parseInt(repeatCount, 10);
     if (Number.isNaN(count) || count < 2) {
-      setError("Repeat count must be at least 2");
+      setError(t("block.minRepeatError"));
       return;
     }
     onConfirm(count);

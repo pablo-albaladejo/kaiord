@@ -12,6 +12,7 @@
  */
 import { z } from "zod";
 
+import type { LiveState } from "../../application/safe-writes/live-state";
 import { sendBridgeMessage } from "../bridge/bridge-transport";
 import { TrainingPeaksBridgeError } from "./trainingpeaks-transport";
 
@@ -42,7 +43,8 @@ export const pushTrainingPeaksWorkout = async (
     throw new TrainingPeaksBridgeError(
       res.error ?? "TrainingPeaks workout push failed",
       res.needsReauth === true,
-      res.delivered !== false
+      res.delivered !== false,
+      res.status
     );
   }
   const parsed = pushedWorkoutSchema.safeParse(res.data);
@@ -52,4 +54,25 @@ export const pushTrainingPeaksWorkout = async (
     );
   }
   return parsed.data.workoutId;
+};
+
+const READ_WORKOUT_TIMEOUT_MS = 10_000;
+const NOT_FOUND_STATUS = 404;
+
+/**
+ * Reads one workout Kaiord created, to learn whether TrainingPeaks still
+ * holds it. Only a 404 means absent; any other failure is "unknown", which
+ * a caller must treat as present so it never adds a second copy.
+ */
+export const readTrainingPeaksCopyState = async (
+  extensionId: string,
+  workoutId: string
+): Promise<LiveState> => {
+  const res = await sendBridgeMessage(
+    extensionId,
+    { action: "read-workout", workoutId },
+    READ_WORKOUT_TIMEOUT_MS
+  );
+  if (res.ok) return "present";
+  return res.status === NOT_FOUND_STATUS ? "absent" : "unknown";
 };

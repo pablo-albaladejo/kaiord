@@ -28,6 +28,7 @@
   "selection": {
     "createBlockAria": "Create repetition block from selected steps",
     "createBlock": "Create Repetition Block ({{count}} steps)",
+    "createBlockCountAria": "Create repetition block from {{count}} selected steps",
     "orPress": "or press",
     "ctrlG": "Ctrl+G",
     "ctrlClickHint": "Ctrl+click another step to create a repetition block"
@@ -83,7 +84,7 @@
     "savedTitle": "File downloaded",
     "savedDescription": "Downloaded as {{filename}}",
     "exportFailedTitle": "Export Failed",
-    "exportFailedFallback": "Failed to export workout",
+    "exportFailedFallback": "The workout was not exported. Try again.",
     "paceZones": {
       "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to export it as GCN.",
       "incomplete-pace-zones": "This workout uses a pace zone the athlete doesn't define. Complete your pace zones in Athlete to export it as GCN.",
@@ -109,6 +110,7 @@
     "invalidDescription": "Could not schedule — the date is not a valid calendar day.",
     "saveFailedTitle": "Save failed",
     "saveFailedDescription": "Could not schedule the workout — please retry.",
+    "draftSaveFailedDescription": "Could not save the workout — please retry.",
     "noProfileReason": "Select or create an athlete to schedule this workout."
   },
   "raw": {
@@ -155,7 +157,28 @@
     "fixErrorsTitle": "Fix validation errors first",
     "saveTitle": "Close the step form",
     "intensityLabel": "Intensity",
-    "intensityAria": "Select step intensity"
+    "intensityAria": "Select step intensity",
+    "swim": {
+      "strokeType": "Stroke Type",
+      "equipment": "Equipment",
+      "stroke": {
+        "freestyle": "Freestyle",
+        "backstroke": "Backstroke",
+        "breaststroke": "Breaststroke",
+        "butterfly": "Butterfly",
+        "drill": "Drill",
+        "mixed": "Mixed",
+        "im": "IM (Individual Medley)"
+      },
+      "gear": {
+        "none": "None",
+        "swim_fins": "Fins",
+        "swim_kickboard": "Kickboard",
+        "swim_paddles": "Paddles",
+        "swim_pull_buoy": "Pull Buoy",
+        "swim_snorkel": "Snorkel"
+      }
+    }
   },
   "metadata": {
     "editAria": "Edit workout metadata",
@@ -302,7 +325,17 @@
     "countAria": "Repeat count",
     "ungroup": "Ungroup",
     "deleteShort": "Delete",
-    "actionsAria": "Block actions"
+    "actionsAria": "Block actions",
+    "createTitle": "Create Repetition Block",
+    "createFromSteps_one": "Create a repetition block from {{count}} step.",
+    "createFromSteps_other": "Create a repetition block from {{count}} steps.",
+    "createEmpty": "Create an empty repetition block. You can add steps to it later.",
+    "repeatCountLabel": "Repeat Count",
+    "minRepeatHint": "Minimum: 2 repetitions",
+    "minRepeatError": "Repeat count must be at least 2",
+    "createConfirm": "Create Block",
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "convert": {
     "heading": "Convert {{from}} to {{to}}",

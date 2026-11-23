@@ -8,6 +8,7 @@ import {
 import type { BackupImportSummary } from "../../../application/backup/summarize-backup-import";
 import type { ProfileChoice } from "../../../application/sync/reconcile-auto-profile";
 import { useSnapshotSource, useSync } from "../../../contexts/sync-context";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import type { KaiordBackup } from "../../../types/backup";
 
 export type ImportProblem =
@@ -28,6 +29,7 @@ export function useImportBackup() {
   const { snapshotPort, deviceId, afterImport } = useSnapshotSource();
   const { requestPush } = useSync();
   const [state, setState] = useState<ImportBackupState>({ kind: "idle" });
+  useUnsavedWork(state.kind === "busy" || state.kind === "choose");
 
   const run = useCallback(
     async (backup: KaiordBackup, choice: string | null) => {

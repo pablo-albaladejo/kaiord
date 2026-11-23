@@ -44,11 +44,21 @@
       (including workerd), lint, the `--dry-run` build under 3 MiB, and
       `pnpm test:scripts`. The Free limit applies to the compressed size:
       547 KiB gzip (3,454 KiB raw, against 3,442 KiB on `main`).
+- [x] 2.9 Every card example runs through the endpoint in a test (the
+      `kaiord_diff` example failed: formats are detected only from a path,
+      so the format arguments are required remotely).
+- [x] 2.10 `pnpm smoke` takes several endpoints and names the failing one;
+      `pnpm smoke:prod` runs `/mcp` and `/a2a`, and the deploy command is
+      `npx wrangler@4 deploy && pnpm smoke:prod`. Both pass locally against
+      `wrangler dev` (13 checks).
 
 ## 3. WAF widening, before the deploy (Pablo)
 
-- [ ] 3.1 Write `.omc/scripts/waf-widen-a2a.sh`: assert the current rule
-      exactly, patch only `expression`, and save the before and after JSON.
+- [x] 3.1 Write `packages/mcp-worker/ops/waf-widen-a2a.sh` (dry run unless
+      `--apply`; token, zone id from the environment): assert the one `/mcp`
+      rule and its budget, patch only `expression`, read it back, and save
+      the before and after JSON. Tested against a fake `curl` in
+      `packages/mcp-worker/scripts/a2a-ops.test.mjs`.
 - [ ] 3.2 **Pablo** runs it with a scoped Zone WAF Edit token, then revokes
       the token.
 - [ ] 3.3 A burst on `/a2a` shows about 10 non-`429` replies then `429`s;
@@ -63,6 +73,15 @@
       Pages), the `/a2a` smoke passes, and the `/mcp` smoke passes.
 - [ ] 4.4 CPU: 20 paced `/mcp` calls and 20 paced `/a2a` calls with the
       largest smoke FIT, all `200` with no Error 1102; durations recorded.
+- [ ] 4.5 **Pablo**, once 4.3 passes: restore the present tense ("is
+      served") in every sentence that now says `/a2a` is not deployed yet:
+      `README.md` ("Local-first architecture", with its `claims/readme.json`
+      entry) and `packages/docs/legal/privacy-policy.md` (the intro list,
+      Data Controller, the A2A sentence, Regulatory Compliance, **Last
+      updated** bumped). Retire the privacy-lint rule "Remote A2A endpoint:
+      stated as not deployed yet" and its test, restore the regulatory rule
+      to name both endpoints as served, and update the `privacy-policy`
+      delta. `pnpm lint:claims` and `pnpm -C packages/docs lint` pass.
 
 ## 5. Card and public docs, only after 4 passes (PR `feat/a2a-discovery`)
 
@@ -82,8 +101,10 @@
 
 ## 6. `_a2a` SVCB record (optional, Pablo)
 
-- [ ] 6.1 Write `.omc/scripts/dns-a2a-svcb.sh`, mirroring the `_mcp`
-      record.
+- [x] 6.1 Write `packages/mcp-worker/ops/dns-a2a-svcb.sh` (dry run unless
+      `--apply`; token, zone id and apex from the environment), copying the
+      `_mcp` record. Tested against a fake `curl` in
+      `packages/mcp-worker/scripts/a2a-ops.test.mjs`.
 - [ ] 6.2 **Pablo** runs it with a scoped DNS token, then revokes it.
 - [ ] 6.3 The record resolves with `AD == true` five times a minute apart,
       and `_mcp` still does.

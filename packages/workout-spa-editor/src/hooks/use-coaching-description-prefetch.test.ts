@@ -14,7 +14,7 @@ const plan = (
   source: "train2go",
   sourceBadge: "T2G",
   date,
-  sport: { label: "Running", icon: "R" },
+  sport: { id: "running", icon: "R" },
   title: id,
   status: "pending",
   ...extra,

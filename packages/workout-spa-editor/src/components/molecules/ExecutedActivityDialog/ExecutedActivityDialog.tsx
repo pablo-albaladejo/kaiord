@@ -7,6 +7,8 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
+import { sportLabel } from "../../../lib/format-sport";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import {
   formatDistance,
@@ -18,10 +20,20 @@ export type ExecutedActivityDialogProps = {
   onClose: () => void;
 };
 
+const CloseButton = ({ label }: { label: string }) => (
+  <Dialog.Close asChild>
+    <button type="button" aria-label={label} className="rounded p-1">
+      <X className="h-4 w-4" />
+    </button>
+  </Dialog.Close>
+);
+
 export function ExecutedActivityDialog({
   workout,
   onClose,
 }: ExecutedActivityDialogProps) {
+  const t = useTranslate("coaching");
+  const editorT = useTranslate("editor");
   return (
     <Dialog.Root
       open={workout !== null}
@@ -31,8 +43,7 @@ export function ExecutedActivityDialog({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <Dialog.Description className="sr-only">
-            Recorded activity details. Executions are read-only and cannot be
-            edited or rescheduled.
+            {t("executed.srDescription")}
           </Dialog.Description>
           {workout && (
             <div data-testid="executed-activity-dialog" className="space-y-3">
@@ -40,18 +51,13 @@ export function ExecutedActivityDialog({
                 <Dialog.Title className="text-lg font-semibold">
                   {workout.raw?.title ?? workout.sport}
                 </Dialog.Title>
-                <Dialog.Close asChild>
-                  <button
-                    type="button"
-                    aria-label="Close"
-                    className="rounded p-1"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </Dialog.Close>
+                <CloseButton label={t("executed.close")} />
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Recorded {workout.sport} on {workout.date}
+                {t("executed.summary", {
+                  sport: sportLabel(workout.sport, editorT),
+                  date: workout.date,
+                })}
               </p>
               <div className="flex gap-4 text-sm">
                 {workout.raw?.duration && (
@@ -66,7 +72,7 @@ export function ExecutedActivityDialog({
                 )}
               </div>
               <p className="text-xs text-gray-400 dark:text-gray-500">
-                This is a completed execution — recorded data is read-only.
+                {t("executed.readOnly")}
               </p>
             </div>
           )}
