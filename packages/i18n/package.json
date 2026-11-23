@@ -29,12 +29,12 @@
     "i18next": "^26.4.7"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "@vitest/coverage-v8": "^5.0.5",
-    "tsdown": "^0.23.1",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.1.1",
+    "tsdown": "^0.23.7",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.1"
   },
   "engines": {
     "node": ">=22.12.0"
