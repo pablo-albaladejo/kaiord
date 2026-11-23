@@ -5,6 +5,7 @@
 // writer), and each `break*` option breaks exactly one behaviour.
 import { strict as assert } from "node:assert";
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
@@ -125,6 +126,55 @@ describe("smoke CLI", () => {
     );
     assert.equal(code, 1);
     assert.deepEqual(lines, ["smoke failed: oversized-413"]);
+  });
+
+  it("should check every endpoint given and name the one that failed", async () => {
+    // Arrange
+    const errors = [];
+    const passes = [];
+    const out = {
+      log: (line) => passes.push(line),
+      error: (line) => errors.push(line),
+    };
+    const mcp = fakeEndpoint();
+    const fetch = async (url, init) =>
+      url.endsWith("/a2a")
+        ? new Response("down", { status: 502 })
+        : mcp(url, init);
+
+    // Act
+    const code = await main(
+      ["https://kaiord.com/mcp", "https://kaiord.com/a2a"],
+      fetch,
+      out
+    );
+
+    // Assert
+    assert.equal(code, 1);
+    for (const name of CHECK_NAMES)
+      assert.ok(passes.includes(`PASS https://kaiord.com/mcp ${name}`), name);
+    assert.equal(errors.length, 1);
+    assert.match(
+      errors[0],
+      /^smoke failed: https:\/\/kaiord\.com\/a2a get-task-not-found, /
+    );
+    assert.ok(!errors[0].includes("kaiord.com/mcp"), errors[0]);
+  });
+
+  it("should declare the production smoke over /mcp and /a2a", () => {
+    // Arrange
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    );
+
+    // Act
+    const command = pkg.scripts["smoke:prod"];
+
+    // Assert
+    assert.equal(
+      command,
+      "node scripts/smoke.mjs https://kaiord.com/mcp https://kaiord.com/a2a"
+    );
   });
 
   for (const mode of ["error", "text"]) {

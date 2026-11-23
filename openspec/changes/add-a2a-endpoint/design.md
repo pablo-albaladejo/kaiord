@@ -15,7 +15,13 @@ A2A **1.0.0**, tag `v1.0.0`, commit
 - proto: <https://github.com/a2aproject/A2A/blob/v1.0.0/specification/a2a.proto>
 - prose: <https://github.com/a2aproject/A2A/blob/v1.0.0/docs/specification.md>
 
-`https://a2a-protocol.org/latest/` moves; this change cites the tag. The
+`https://a2a-protocol.org/latest/` moves; this change cites the tag.
+Re-checked on 2026-11-23 against `v1.0.1` (2026-05-28), the latest release:
+its fixes (the HTTP+JSON binding prefers `application/a2a+json`, transcoding
+errors, the TaskStatus prose) leave the JSON-RPC binding, the method names,
+the `-32001`..`-32009` codes, the `TaskState` enum, `return_immediately` and
+the required AgentCard and AgentInterface fields unchanged. Version
+negotiation uses `Major.Minor`, so `1.0` covers `1.0.1`. The
 facts below were checked against the tag and against a sibling card that the
 isitagentready scanner accepts. Two deviations in the sibling implementation
 are **not** copied: it sends `-32004` for the push-notification methods

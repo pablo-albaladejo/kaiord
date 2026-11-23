@@ -16,6 +16,8 @@ export const PLACEMENT_FAILURE_REASONS = [
   "library-push-failed",
   "no-export-route",
   "placement-interrupted",
+  /** The calendar read before a write failed: nothing was sent. */
+  "calendar-unreadable",
   /** Pace zone targets the profile cannot resolve to ranges: no zones
       and no threshold pace, a referenced zone undefined, or a sport
       without pace zones (`PaceZonesUnavailableReason`). */

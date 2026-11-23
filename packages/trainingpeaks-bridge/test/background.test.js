@@ -9,6 +9,7 @@ const {
   readMetrics,
   pushWeight,
   pushWorkout,
+  readWorkout,
   handleAction,
   EXTERNAL_ACTIONS,
 } = require("../background.js");
@@ -154,6 +155,7 @@ describe("background.js", () => {
         "read-metrics",
         "push-weight",
         "push-workout",
+        "read-workout",
         "open-trainingpeaks",
         "set-theme",
       ];
@@ -439,6 +441,34 @@ describe("background.js", () => {
       await expect(attempt).rejects.toThrow(/paid account/);
     });
 
+    it("should not report a server error on the token exchange as a revoked sign-in", async () => {
+      // Arrange
+      fetch.mockResolvedValueOnce(tokenResponse({}, { status: 500 }));
+
+      // Act
+      const error = await pushWorkout({ workout: workoutPayload() }).catch(
+        (e) => e
+      );
+
+      // Assert
+      expect(error.needsReauth).toBeUndefined();
+      expect(error.status).toBe(500);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("should still ask to sign in when a redirect kills the token exchange", async () => {
+      // Arrange
+      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+
+      // Act
+      const error = await pushWorkout({ workout: workoutPayload() }).catch(
+        (e) => e
+      );
+
+      // Assert
+      expect(error.needsReauth).toBe(true);
+    });
+
     it("should reject a push without a workout payload", async () => {
       // Arrange
       const message = { action: "push-workout" };
@@ -448,6 +478,97 @@ describe("background.js", () => {
 
       // Assert
       await expect(attempt).rejects.toThrow("Missing workout payload");
+    });
+  });
+
+  describe("read-workout", () => {
+    const WORKOUT_ID = 4242;
+    const WORKOUT_READ_URL = `${WORKOUT_WRITE_URL}/${WORKOUT_ID}`;
+
+    it("should GET the one workout by its id with a Bearer header", async () => {
+      // Arrange
+      await seedToken("bear");
+      fetch.mockResolvedValueOnce(jsonResp({ workoutId: WORKOUT_ID }));
+
+      // Act
+      const result = await readWorkout({ workoutId: String(WORKOUT_ID) });
+
+      // Assert
+      expect(result).toEqual({ workoutId: WORKOUT_ID, workoutDay: undefined });
+      const [url, init] = fetch.mock.calls[0];
+      expect(url).toBe(WORKOUT_READ_URL);
+      expect(init.method).toBe("GET");
+      expect(init.credentials).toBe("omit");
+      expect(init.headers.Authorization).toBe("Bearer bear");
+    });
+
+    it("should pass the Kaiord App only the workout's id and day", async () => {
+      // Arrange
+      await seedToken("bear");
+      fetch.mockResolvedValueOnce(
+        jsonResp({
+          workoutId: WORKOUT_ID,
+          workoutDay: "2026-11-24T00:00:00",
+          title: "Easy run",
+          heartRateAverage: 151,
+          description: "felt good",
+        })
+      );
+
+      // Act
+      const result = await readWorkout({ workoutId: String(WORKOUT_ID) });
+
+      // Assert
+      expect(result).toEqual({
+        workoutId: WORKOUT_ID,
+        workoutDay: "2026-11-24T00:00:00",
+      });
+    });
+
+    it("should carry TrainingPeaks' 404 when the workout is not there", async () => {
+      // Arrange
+      await seedToken("bear");
+      fetch.mockResolvedValueOnce(jsonResp({}, false, 404));
+
+      // Act
+      const error = await readWorkout({ workoutId: String(WORKOUT_ID) }).catch(
+        (e) => e
+      );
+
+      // Assert
+      expect(error.status).toBe(404);
+      expect(error.needsReauth).toBeUndefined();
+    });
+
+    it.each([
+      { label: "no id", message: {} },
+      { label: "an id that is not a number", message: { workoutId: "1/x" } },
+    ])("should refuse $label before any request", async ({ message }) => {
+      // Arrange
+      await seedToken("bear");
+
+      // Act
+      const attempt = readWorkout(message);
+
+      // Assert
+      await expect(attempt).rejects.toThrow("Missing workout id");
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("should allow only the single-workout read, not a range or a delete", () => {
+      // Arrange
+      const base = `/fitness/v6/athletes/${ATHLETE_ID}/workouts`;
+
+      // Act
+      const results = [
+        isAllowed("GET", `${base}/${WORKOUT_ID}`),
+        isAllowed("GET", `${base}/2026-11-01/2026-11-30`),
+        isAllowed("DELETE", `${base}/${WORKOUT_ID}`),
+        isAllowed("PUT", `${base}/${WORKOUT_ID}`),
+      ];
+
+      // Assert
+      expect(results).toEqual([true, false, false, false]);
     });
   });
 
@@ -480,6 +601,29 @@ describe("background.js", () => {
 
       // Assert
       expect(result.authenticated).toBe(false);
+    });
+
+    it("should say the session is dead only when TrainingPeaks said so", async () => {
+      // Arrange
+      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+
+      // Act
+      const result = await checkSession();
+
+      // Assert
+      expect(result.needsReauth).toBe(true);
+    });
+
+    it("should not call a server error on the token exchange a dead session", async () => {
+      // Arrange
+      fetch.mockResolvedValueOnce(tokenResponse({}, { status: 500 }));
+
+      // Act
+      const result = await checkSession();
+
+      // Assert
+      expect(result.authenticated).toBe(false);
+      expect(result.needsReauth).toBe(false);
     });
 
     it("should never expose the access token in the probe response", async () => {

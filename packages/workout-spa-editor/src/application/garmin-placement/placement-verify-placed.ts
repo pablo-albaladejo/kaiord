@@ -27,7 +27,7 @@ const markDead = (run: PlacementRun, placed: Scheduled) =>
     return { write: { ...dead, placement }, verdict: undefined };
   });
 
-const readPlaced = async (run: PlacementRun, placed: Scheduled) => {
+export const readPlaced = async (run: PlacementRun, placed: Scheduled) => {
   const read = await run.deps.calendar.find(placed.workoutId, placed.date);
   if (!read.ok) return "unknown";
   const id = placed.workoutScheduleId;

@@ -4,8 +4,9 @@
 # and more specific than kaiord-agent-edge's kaiord.com/*, so they win for
 # /mcp and /a2a only; /a2a/... falls through to the site.
 #
-# Deploying is a production change (prod-deploy class): Pablo runs it himself.
-#   npx wrangler@4 deploy
+# Deploying is a production change (prod-deploy class): Pablo runs it himself,
+# and the smoke of both endpoints runs right after every deploy:
+#   npx wrangler@4 deploy && pnpm smoke:prod
 # `pnpm build` runs `wrangler deploy --dry-run --outdir dist`, which bundles
 # without deploying.
 name = "kaiord-mcp"

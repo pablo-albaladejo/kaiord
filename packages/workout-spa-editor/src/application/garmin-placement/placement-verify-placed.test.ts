@@ -122,7 +122,7 @@ describe("a proof of absence is read twice (N1)", () => {
 });
 
 describe("a placement moved inside Garmin (N3, documented behaviour)", () => {
-  it("should read a Placed dragged to another month as deleted and send nothing", async () => {
+  it("should read a Placed dragged to another month as deleted, place it again on its date and leave the moved entry", async () => {
     // Arrange
     const h = createPlacementHarness();
     await h.push(D1);
@@ -136,10 +136,16 @@ describe("a placement moved inside Garmin (N3, documented behaviour)", () => {
     const result = await h.push(D2);
 
     // Assert
-    expect(result).toMatchObject({ kind: "uncertain", date: D2 });
-    expect(h.calendar.count("unschedule")).toBe(unschedules);
+    expect(result).toEqual({ kind: "scheduled" });
+    const sent = h.calendar.calls
+      .filter((c) => c.op === "unschedule")
+      .slice(unschedules);
+    expect(sent).not.toContainEqual({ op: "unschedule", id: placedId });
     expect(await queueEntry(h, placedId)).toMatchObject({ state: "gone" });
-    expect(h.calendar.items).toHaveLength(2);
+    expect(h.calendar.items.map((i) => i.date).sort()).toEqual([
+      D2,
+      NEXT_MONTH,
+    ]);
   });
 });
 
@@ -159,7 +165,8 @@ describe("a verifying read before each delete (N2)", () => {
 
     // Assert
     const ops = h.calendar.calls.slice(from).map((c) => c.op);
-    expect(ops).toEqual(["find", "unschedule", "find", "unschedule"]);
+    // The read before "unchanged", then one before each delete.
+    expect(ops).toEqual(["find", "find", "unschedule", "find", "unschedule"]);
     expect(h.calendar.items.map((i) => i.date)).toEqual([D3]);
   });
 

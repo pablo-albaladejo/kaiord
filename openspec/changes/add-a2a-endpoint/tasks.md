@@ -44,10 +44,17 @@
       (including workerd), lint, the `--dry-run` build under 3 MiB, and
       `pnpm test:scripts`. The Free limit applies to the compressed size:
       547 KiB gzip (3,454 KiB raw, against 3,442 KiB on `main`).
+- [x] 2.9 Every card example runs through the endpoint in a test (the
+      `kaiord_diff` example failed: formats are detected only from a path,
+      so the format arguments are required remotely).
+- [x] 2.10 `pnpm smoke` takes several endpoints and names the failing one;
+      `pnpm smoke:prod` runs `/mcp` and `/a2a`, and the deploy command is
+      `npx wrangler@4 deploy && pnpm smoke:prod`. Both pass locally against
+      `wrangler dev` (13 checks).
 
 ## 3. WAF widening, before the deploy (Pablo)
 
-- [ ] 3.1 Write `.omc/scripts/waf-widen-a2a.sh`: assert the current rule
+- [x] 3.1 Write `.omc/scripts/waf-widen-a2a.sh`: assert the current rule
       exactly, patch only `expression`, and save the before and after JSON.
 - [ ] 3.2 **Pablo** runs it with a scoped Zone WAF Edit token, then revokes
       the token.
@@ -82,7 +89,7 @@
 
 ## 6. `_a2a` SVCB record (optional, Pablo)
 
-- [ ] 6.1 Write `.omc/scripts/dns-a2a-svcb.sh`, mirroring the `_mcp`
+- [x] 6.1 Write `.omc/scripts/dns-a2a-svcb.sh`, mirroring the `_mcp`
       record.
 - [ ] 6.2 **Pablo** runs it with a scoped DNS token, then revokes it.
 - [ ] 6.3 The record resolves with `AD == true` five times a minute apart,

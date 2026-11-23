@@ -265,6 +265,10 @@
       {
         "method": "POST",
         "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts\\/\\d+$"
       }
     ],
     "external_actions": [
@@ -273,6 +277,7 @@
       "read-metrics",
       "push-weight",
       "push-workout",
+      "read-workout",
       "open-trainingpeaks",
       "set-theme"
     ],
