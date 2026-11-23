@@ -6,6 +6,8 @@
  * `BridgeConnectionState` is what consumers see: the same shape plus the
  * `lastSyncAt` timestamp read from the existing `coachingSyncState` rows.
  */
+import type { ConnectionReason } from "@kaiord/i18n";
+
 import type { SessionProber } from "./bridge-session-probe-types";
 
 export type BridgeConnectionRuntime = {
@@ -19,6 +21,8 @@ export type BridgeConnectionRuntime = {
   readonly outdated: boolean;
   /** The last check asked the Platform nothing; see `SessionProbeResult`. */
   readonly notChecked?: true;
+  /** The Session works but cannot serve; see `SessionProbeResult`. */
+  readonly reason?: ConnectionReason;
   readonly lastCheckedAt: number | null;
 };
 
@@ -38,6 +42,7 @@ export type CreateBridgeConnectionStoreOptions = {
   probes?: Record<string, SessionProber>;
   bridgeIds?: readonly string[];
   getExtensionId?: (bridgeId: string) => string | null;
+  getProtocolVersion?: (bridgeId: string) => number | null;
   subscribeDiscovery?: (listener: () => void) => () => void;
   now?: () => number;
 };

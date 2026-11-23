@@ -43,6 +43,46 @@ describe("ConnectionCardHeader", () => {
 
   afterEach(() => resetDiscoveryClock());
 
+  it("should say WHOOP was not checked because no token is captured, never that checking would mint one", () => {
+    // Arrange
+    const unchecked = source({
+      status: "installed",
+      connection: "not-checked",
+    });
+
+    // Act
+    render(<ConnectionCardHeader source={unchecked} />);
+
+    // Assert
+    const detail = screen.getByTestId("connection-detail-whoop");
+    expect(detail).toHaveTextContent(
+      "Kaiord has not checked your WHOOP sign-in yet: it learns it from the first request a WHOOP tab sends."
+    );
+    expect(detail).not.toHaveTextContent(/token/i);
+    expect(notice()).toBeNull();
+  });
+
+  it("should say imports cannot run and offer Sign in when the WHOOP sign-in names no account", () => {
+    // Arrange
+    const noAccount = source({
+      status: "attention",
+      connection: "working",
+      reason: "no-account-id",
+    });
+
+    // Act
+    render(<ConnectionCardHeader source={noAccount} />);
+
+    // Assert
+    const region = notice();
+    expect(region).toHaveTextContent(
+      "You cannot import from WHOOP in Kaiord until you sign in to WHOOP again in this browser."
+    );
+    const link = within(region as HTMLElement).getByRole("link");
+    expect(link).toHaveAttribute("href", "https://app.whoop.com/");
+    expect(link).toHaveTextContent("Sign in to WHOOP");
+  });
+
   it("should offer the Platform's own sign-in page when the Platform refused the sign-in", () => {
     // Arrange
     const signedOut = source({ status: "attention", connection: "signed-out" });

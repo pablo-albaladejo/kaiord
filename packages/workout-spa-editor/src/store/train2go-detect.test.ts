@@ -9,10 +9,12 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ping } from "../adapters/train2go/connector/train2go-extension-transport";
 import { createDetectAction } from "./train2go-detect";
-import { ping } from "./train2go-extension-transport";
 
-vi.mock("./train2go-extension-transport", () => ({ ping: vi.fn() }));
+vi.mock("../adapters/train2go/connector/train2go-extension-transport", () => ({
+  ping: vi.fn(),
+}));
 const mockPing = vi.mocked(ping);
 
 const CACHE_TTL_EXPIRED_OFFSET_MS = 31_000;

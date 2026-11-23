@@ -11,6 +11,8 @@
  * states the failed read and offers both possible causes; see
  * `connection-card-copy`.
  */
+import type { ConnectionReason } from "@kaiord/i18n";
+
 import type { IntegrationRegistryEntry } from "../../integrations/integration-registry";
 import type { ConnectionSourceStatus } from "./connection-source";
 
@@ -28,6 +30,8 @@ export type BridgeSessionSignal = {
   readonly outdated: boolean;
   /** The check asked the Platform nothing; known at the first real use. */
   readonly notChecked?: true;
+  /** The Session works but cannot serve (a WHOOP token with no account id). */
+  readonly reason?: ConnectionReason;
   readonly lastCheckedAt: number | null;
 };
 
@@ -54,6 +58,7 @@ export const bridgeSourceStatus = (
   // known, and "checking" is the only state that says so.
   if (state.lastCheckedAt === null) return "checking";
   if (state.error !== null || state.needsReauth) return "attention";
+  if (state.reason !== undefined) return "attention";
   return state.sessionActive ? "connected" : "attention";
 };
 

@@ -1,5 +1,8 @@
+import type { NotCheckedReason } from "@kaiord/i18n";
+
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import type { ConnectionSourceStatus } from "../../../application/connections/connection-source";
+import { extensionOf } from "../../../application/connections/extension-descriptors";
 
 /**
  * Two ink levels, no hues. A source that works is not news, so "connected" is
@@ -46,19 +49,28 @@ export const STATUS_TEXT: Record<ConnectionSourceStatus, string> = {
  */
 export type DetailKey =
   | "detail.installed"
-  | "detail.notChecked"
   | "detail.checking"
   | "detail.manual"
   | "detail.unsupported"
   | "detail.disconnected";
 
+/**
+ * Why a probed bridge's check asked nothing, worded per reason by the shared
+ * notices (`connectionNotCheckedText`): `null` when the card says something
+ * else. A Tanita extension one protocol behind has no reason of its own: its
+ * check would download the export, which `detail.installed` already says.
+ */
+export const notCheckedReasonFor = (
+  source: ConnectionSource
+): NotCheckedReason | null =>
+  source.status === "installed" && source.sessionVerifiable
+    ? (extensionOf(source.bridgeId)?.notChecked ?? null)
+    : null;
+
 export const detailKeyFor = (source: ConnectionSource): DetailKey | null => {
   switch (source.status) {
     case "installed":
-      // A probed bridge is `installed` only when its check asked nothing.
-      return source.sessionVerifiable
-        ? "detail.notChecked"
-        : "detail.installed";
+      return notCheckedReasonFor(source) === null ? "detail.installed" : null;
     case "checking":
       return "detail.checking";
     case "attention":

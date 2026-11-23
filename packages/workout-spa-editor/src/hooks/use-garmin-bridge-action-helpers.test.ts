@@ -5,8 +5,11 @@ import { runPush } from "./use-garmin-bridge-action-helpers";
 
 const executePush = vi.hoisted(() => vi.fn());
 
-vi.mock("./garmin-bridge-operations", () => ({
+vi.mock("../adapters/garmin/connector/garmin-workout-operations", () => ({
   executePush,
+}));
+
+vi.mock("../adapters/garmin/connector/garmin-ping-evaluation", () => ({
   evaluatePingResult: vi.fn(),
 }));
 

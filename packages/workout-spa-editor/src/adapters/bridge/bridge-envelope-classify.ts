@@ -2,17 +2,16 @@
  * The classification of one Session-check answer: delivery, then the
  * protocol version from the envelope, then the typed outcome an extension
  * with the cheap check answers, then an older extension's own booleans
- * through the one adapter over them (`application/connections/session-outcome`).
+ * through the readers over them (`bridge-legacy-session-readers`).
  */
-import {
-  readFailedEnvelope,
-  type SessionOutcome,
-} from "../../application/connections/session-outcome";
+import type { SessionOutcome } from "../../application/connections/session-outcome";
+import { readFailedEnvelope } from "./bridge-legacy-session-readers";
 import { isAcceptedBridgeProtocol } from "./bridge-protocol";
 import { probeResultOf, sessionOutcomeOf } from "./bridge-session-outcome";
 import {
   active,
   inactive,
+  notChecked,
   outdatedExtension,
   type SessionProbeResult,
   unreachable,
@@ -24,7 +23,8 @@ const fromOutcome = (
   error: string | null = null
 ): SessionProbeResult => {
   if (outcome === "signed-in") return active();
-  return inactive(error, outcome === "signed-out-verified");
+  if (outcome === "not-checked") return notChecked();
+  return inactive(error, outcome === "signed-out");
 };
 
 /** The whole classification of one answer, exported for the message-contract

@@ -1,7 +1,7 @@
 /**
  * The Garmin Connect paths the Connector asks the Garmin Bridge for, each one
  * an entry of the extension's closed list (checked by
- * hooks/garmin-connector-contract.test.ts against background.js).
+ * adapters/garmin/connector/garmin-connector-contract.test.ts against background.js).
  */
 export const GARMIN_WORKOUTS_PATH =
   "/workout-service/workouts?start=0&limit=20";

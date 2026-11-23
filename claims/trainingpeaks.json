@@ -35,7 +35,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -89,7 +89,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -137,11 +137,11 @@
       "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should explain a 402 as a planning-horizon limit, not a payload error"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-workout-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-workout-transport.ts",
           "contains": "one day ahead on a Basic account"
         },
         {
@@ -244,7 +244,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
@@ -554,7 +554,7 @@
           "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-metrics-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-metrics-transport.ts",
           "contains": "the raw JSON is read here"
         },
         {
@@ -576,7 +576,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -590,11 +590,11 @@
       "text": "`GET /fitness/v6/athletes/{id}/workouts/{workoutId}` reads one workout the Kaiord App sent earlier, to learn whether TrainingPeaks still has it before that workout is sent again. TrainingPeaks' answer reaches the Kaiord App in your browser, which keeps only the workout's id and day and drops the rest there.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should read one workout Kaiord created as present, keeping only its id and day"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should build every request so that the extension's list admits it"
         },
         {
@@ -626,7 +626,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -773,7 +773,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -849,7 +849,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
@@ -915,7 +915,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -958,7 +958,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -982,7 +982,7 @@
           "title": "should send a copy only after the athlete confirms it"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should read one workout Kaiord created as present, keeping only its id and day"
         },
         {
@@ -1004,7 +1004,7 @@
           "contains": "const WINDOW_DAYS = 30;"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-metrics-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-metrics-transport.ts",
           "contains": "the raw JSON is read here"
         },
         {
@@ -1144,7 +1144,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -1198,7 +1198,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -1246,11 +1246,11 @@
       "text": "En una cuenta Basic de TrainingPeaks, TrainingPeaks solo acepta entrenamientos para hoy y mañana, contados en la zona horaria de la cuenta; para cualquier día que allí pueda ser posterior, Kaiord App te lo dice antes de enviar, y dice lo mismo si TrainingPeaks lo rechaza.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should explain a 402 as a planning-horizon limit, not a payload error"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-workout-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-workout-transport.ts",
           "contains": "one day ahead on a Basic account"
         },
         {
@@ -1353,7 +1353,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]

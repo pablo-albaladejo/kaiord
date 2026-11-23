@@ -24,6 +24,8 @@ const answer = (session: string) => ({
     session,
     authenticated: session === "signed-in",
     connected: session === "signed-in",
+    // A WHOOP status names the account its token is for.
+    userId: 7,
   },
 });
 

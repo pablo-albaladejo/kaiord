@@ -7,7 +7,7 @@
  * every extension popup calls. So two surfaces can never word one Connection
  * two ways, and none can state a cause the check did not establish.
  */
-import type { ConnectionState } from "@kaiord/i18n";
+import type { ConnectionReason, ConnectionState } from "@kaiord/i18n";
 
 import type { BridgeSessionSignal } from "./connection-source-status";
 import type { SessionOutcome } from "./session-outcome";
@@ -16,8 +16,9 @@ export type { ConnectionState };
 
 const STATE_OF: Record<SessionOutcome, ConnectionState> = {
   "signed-in": "working",
-  "signed-out-verified": "signed-out",
-  "could-not-tell": "not-answering",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+  "not-checked": "not-checked",
 };
 
 export const stateOfOutcome = (outcome: SessionOutcome): ConnectionState =>
@@ -31,7 +32,7 @@ export const sessionOutcomeOf = (
   signal: Pick<BridgeSessionSignal, "sessionActive" | "needsReauth">
 ): SessionOutcome => {
   if (signal.sessionActive) return "signed-in";
-  return signal.needsReauth ? "signed-out-verified" : "could-not-tell";
+  return signal.needsReauth ? "signed-out" : "not-answering";
 };
 
 export type ConnectionPresence = {
@@ -64,6 +65,13 @@ export const connectionStateOf = (
   if (signal.notChecked === true) return "not-checked";
   return stateOfOutcome(sessionOutcomeOf(signal));
 };
+
+/** Why a working Session cannot serve, or `null`: a WHOOP sign-in whose
+    token names no account id shows its own notice, with the sign-in fix. */
+export const connectionReasonOf = (
+  signal: Pick<BridgeSessionSignal, "sessionActive" | "reason"> | undefined
+): ConnectionReason | null =>
+  signal?.sessionActive === true ? (signal.reason ?? null) : null;
 
 /** Whether a read or send may start: a working Connection, or one whose
     check asked nothing and leaves the answer to the use itself. */

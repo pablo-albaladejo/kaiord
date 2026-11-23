@@ -4,11 +4,11 @@
  * HTML. A body that is not what Train2Go sends throws, which the request
  * layer reports as a malformed answer.
  */
+import type { RawAnswer } from "../../bridge/thin-bridge-request";
 import { extractComments } from "./extract-comments";
 import { parseDailyHtml } from "./parse-daily-html";
 import { parseDetailsHtml } from "./parse-details-html";
 import { parseWeeklyHtml } from "./parse-weekly-html";
-import type { RawAnswer } from "./train2go-bridge-request";
 import type { Train2GoActivity, Train2GoComment } from "./train2go-wire-types";
 import type { Train2GoZonesPayload } from "./train2go-zones-payload";
 

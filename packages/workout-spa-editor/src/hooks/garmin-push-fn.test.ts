@@ -3,15 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 
 vi.mock("../adapters/dexie/dexie-database", () => ({ db: {} }));
-vi.mock("./garmin-bridge-operations", () => ({ executePush: vi.fn() }));
+vi.mock("../adapters/garmin/connector/garmin-workout-operations", () => ({
+  executePush: vi.fn(),
+}));
 vi.mock("./use-garmin-bridge-action-helpers", () => ({
   getGarminExtensionId: () => "ext-id",
   runPush: vi.fn(),
 }));
 
+import { executePush } from "../adapters/garmin/connector/garmin-workout-operations";
 import { recordExport } from "../application/export/record-export.use-case";
 import { createInMemoryExportLedgerRepository } from "../test-utils/in-memory-export-ledger-repository";
-import { executePush } from "./garmin-bridge-operations";
 import { buildGarminPushFn, pushQuiet } from "./garmin-push-fn";
 import { runPush } from "./use-garmin-bridge-action-helpers";
 

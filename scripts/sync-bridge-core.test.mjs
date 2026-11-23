@@ -9,7 +9,11 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { syncBridgeCore, BRIDGE_CORE_MASTERS } from "./sync-bridge-core.mjs";
+import {
+  syncBridgeCore,
+  syncPackageCopies,
+  BRIDGE_CORE_MASTERS,
+} from "./sync-bridge-core.mjs";
 
 const FIXTURE_MASTERS = [
   {
@@ -89,6 +93,39 @@ describe("syncBridgeCore", () => {
         syncBridgeCore({ mastersDir, packagesDir, masters: FIXTURE_MASTERS }),
       /beta\.js/
     );
+  });
+});
+
+describe("syncPackageCopies", () => {
+  let root;
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), "bridge-core-package-copy-"));
+    mkdirSync(join(root, "masters"), { recursive: true });
+    writeFileSync(join(root, "masters", "notices.js"), "notices();\n");
+  });
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("should copy a master byte-for-byte into the package that reads it", () => {
+    // Arrange
+    const copies = [{ master: "notices.js", dest: "lib/src/notices.js" }];
+
+    // Act
+    const copied = syncPackageCopies({
+      mastersDir: join(root, "masters"),
+      packagesDir: join(root, "packages"),
+      copies,
+    });
+
+    // Assert
+    assert.equal(
+      readFileSync(join(root, "packages", "lib/src/notices.js"), "utf8"),
+      "notices();\n"
+    );
+    assert.equal(copied.length, 1);
   });
 });
 

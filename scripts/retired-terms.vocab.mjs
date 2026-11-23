@@ -103,10 +103,10 @@ export const ATHLETE_ALLOWED = [
       "chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe",
     why: STORE_ADDRESS,
   },
-  {
-    phrase: "github.com/pablo-albaladejo/kaiord/tree/main/packages/whoop-bridge",
+  ...["tanita", "trainingpeaks", "whoop"].map((p) => ({
+    phrase: `github.com/pablo-albaladejo/kaiord/tree/main/packages/${p}-bridge`,
     why: "the source folder an unpublished extension is loaded from",
-  },
+  })),
 ];
 
 // Athlete-facing files read whole, or only in the named sections, beyond the
@@ -134,6 +134,8 @@ export const ATHLETE_FILES = [
     ],
   },
   "packages/docs/legal/privacy-policy.md",
+  "packages/docs/guide/install-extensions.md",
+  "packages/docs/es/guide/install-extensions.md",
   "packages/docs/guide/whoop-recovery-in-plan.md",
   "packages/docs/es/guide/whoop-recovery-in-plan.md",
   "packages/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin.md",

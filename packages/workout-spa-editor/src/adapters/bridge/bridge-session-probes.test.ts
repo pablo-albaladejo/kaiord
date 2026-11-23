@@ -9,10 +9,13 @@ describe("SESSION_PROBES", () => {
     vi.clearAllMocks();
   });
 
-  it("should expose a prober for every cheaply-probeable bridge", () => {
+  // What each check costs an extension one protocol behind, and that such
+  // an extension is then asked nothing, is bridge-session-check-cost.test.ts.
+  it("should expose a prober for every extension", () => {
     // Arrange
     const expected = [
       "garmin-bridge",
+      "tanita-bridge",
       "train2go-bridge",
       "whoop-bridge",
       "trainingpeaks-bridge",
@@ -23,18 +26,5 @@ describe("SESSION_PROBES", () => {
 
     // Assert
     expect(keys.sort()).toEqual(expected.sort());
-  });
-
-  it("should not expose a prober for tanita-bridge", () => {
-    // Arrange
-    const bridgeId = "tanita-bridge";
-
-    // Act
-    const prober = SESSION_PROBES[bridgeId];
-
-    // Assert
-    // an older tanita extension's checkSession downloads the whole export
-    // CSV — polling it could re-fetch the athlete's entire history every pass.
-    expect(prober).toBeUndefined();
   });
 });

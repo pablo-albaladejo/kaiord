@@ -12,6 +12,12 @@ import {
 
 export { checkSiteLinks, mountsFromArgs };
 
+// App source files that ship a kaiord.com link the athlete follows, beyond
+// the built pages: the Install and Update fixes' destination.
+export const SHIPPED_SOURCES = [
+  "packages/workout-spa-editor/src/application/connections/connection-fix-target.ts",
+];
+
 // Every absolute `kaiord.com` link shipped in the built site must resolve.
 //
 // lychee runs offline and excludes `https?://` (lychee.toml), so it never
@@ -20,7 +26,8 @@ export { checkSiteLinks, mountsFromArgs };
 // dists as the one tree GitHub Pages serves, resolves each link the way
 // Pages does, checks `/app/#/<segment>` against the SPA route registry, and
 // rejects `/editor` as a link target outright: that path only exists for
-// URLs already in the wild.
+// URLs already in the wild. The kaiord.com links in SHIPPED_SOURCES, which
+// the App ships in its bundle, are checked against the same tree.
 //
 // Usage:
 //   node scripts/check-site-links.mjs --landing <dir> --app <dir> --docs <dir>
@@ -67,22 +74,28 @@ function main() {
     problems,
     filesScanned,
     linksChecked,
+    sourceLinksChecked,
     switchersChecked,
     pagesWithoutSwitcher,
   } = checkSiteLinks({
     mounts,
     segments,
+    sources: SHIPPED_SOURCES.map((file) => ({
+      file,
+      text: readFileSync(join(REPO_ROOT, file), "utf8"),
+    })),
   });
-  for (const { file, link, reason } of problems) {
-    console.error(`❌ ${relative(process.cwd(), file)}: ${link} ${reason}`);
-  }
-  if (problems.length > 0) process.exit(1);
+  // An empty site is the first failure: source links alone check nothing.
   if (strict && (filesScanned === 0 || linksChecked === 0)) {
     console.error(
       `❌ Scanned ${filesScanned} files and ${linksChecked} links: nothing was checked`
     );
     process.exit(1);
   }
+  for (const { file, link, reason } of problems) {
+    console.error(`❌ ${relative(process.cwd(), file)}: ${link} ${reason}`);
+  }
+  if (problems.length > 0) process.exit(1);
   if (strict && pagesWithoutSwitcher.length > 0) {
     const shown = pagesWithoutSwitcher
       .slice(0, 5)
@@ -94,7 +107,7 @@ function main() {
     process.exit(1);
   }
   console.log(
-    `✅ Every kaiord.com link resolves (${linksChecked} links, ${switchersChecked} language-switcher links, in ${filesScanned} files)`
+    `✅ Every kaiord.com link resolves (${linksChecked} links, ${switchersChecked} language-switcher links, in ${filesScanned} files; ${sourceLinksChecked} links shipped from App source)`
   );
 }
 

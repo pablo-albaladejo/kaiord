@@ -4,7 +4,7 @@ import type {
   ConnectionSource,
   ConnectionSourceStatus,
 } from "../../../application/connections/connection-source";
-import { detailKeyFor } from "./connection-card-copy";
+import { detailKeyFor, notCheckedReasonFor } from "./connection-card-copy";
 
 const source = (
   status: ConnectionSourceStatus,
@@ -22,17 +22,41 @@ const source = (
   }) as ConnectionSource;
 
 describe("detailKeyFor", () => {
-  it("should explain a probed bridge that is installed as known only at first use", () => {
+  // A probed bridge reaches `installed` only when its check asked nothing;
+  // why it asked nothing is the shared notices' wording for its reason.
+  it.each([
+    ["garmin-bridge", "would-mint-token"],
+    ["trainingpeaks-bridge", "would-mint-token"],
+    ["whoop-bridge", "no-token-captured"],
+  ] as const)(
+    "should say why %s's check asked nothing by its own reason, %s",
+    (bridgeId, reason) => {
+      // Arrange
+      const unchecked = source("installed", {
+        bridgeId,
+        sessionVerifiable: true,
+      });
+
+      // Act
+      const said = [notCheckedReasonFor(unchecked), detailKeyFor(unchecked)];
+
+      // Assert
+      expect(said).toEqual([reason, null]);
+    }
+  );
+
+  it("should keep the announced-on-load wording for a Tanita extension whose check would download the export", () => {
     // Arrange
-    // A probed bridge reaches `installed` only when its check asked nothing;
-    // the unprobed wording (about never re-checking) would be false for it.
-    const unchecked = source("installed", { sessionVerifiable: true });
+    const unchecked = source("installed", {
+      bridgeId: "tanita-bridge",
+      sessionVerifiable: true,
+    });
 
     // Act
-    const key = detailKeyFor(unchecked);
+    const said = [notCheckedReasonFor(unchecked), detailKeyFor(unchecked)];
 
     // Assert
-    expect(key).toBe("detail.notChecked");
+    expect(said).toEqual([null, "detail.installed"]);
   });
 
   it("should keep the announced-on-load wording for a bridge with no prober", () => {

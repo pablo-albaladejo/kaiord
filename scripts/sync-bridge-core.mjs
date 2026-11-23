@@ -181,6 +181,21 @@ export const BRIDGE_CORE_MASTERS = [
   },
 ];
 
+// Masters a workspace package reads at runtime, copied into its source so it
+// imports its own file instead of reaching into _shared/ by relative path
+// (packages/_shared/AGENTS.md). `dest` is relative to packages/; the parity
+// guard holds each copy byte-identical to its master.
+export const PACKAGE_COPIES = [
+  {
+    master: "connection-notices.js",
+    dest: "i18n/src/generated/connection-notices.js",
+  },
+  {
+    master: "connection-notices.d.ts",
+    dest: "i18n/src/generated/connection-notices.d.ts",
+  },
+];
+
 export const DEFAULT_MASTERS_DIR = join(REPO, "packages/_shared/bridge-core");
 export const DEFAULT_PACKAGES_DIR = join(REPO, "packages");
 
@@ -205,11 +220,23 @@ export const syncBridgeCore = ({
   return copied;
 };
 
+export const syncPackageCopies = ({
+  mastersDir = DEFAULT_MASTERS_DIR,
+  packagesDir = DEFAULT_PACKAGES_DIR,
+  copies = PACKAGE_COPIES,
+} = {}) =>
+  copies.map(({ master, dest }) => {
+    const target = join(packagesDir, dest);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(join(mastersDir, master), target);
+    return target;
+  });
+
 const isCliEntry =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isCliEntry) {
-  const copied = syncBridgeCore();
+  const copied = [...syncBridgeCore(), ...syncPackageCopies()];
   for (const target of copied) {
     console.log(`  ✓ ${target.replace(`${REPO}/`, "")}`);
   }

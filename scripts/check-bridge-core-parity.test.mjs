@@ -7,6 +7,7 @@ import {
   BRIDGE_CORE_MASTERS,
   DEFAULT_MASTERS_DIR,
   DEFAULT_PACKAGES_DIR,
+  PACKAGE_COPIES,
 } from "./sync-bridge-core.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -73,6 +74,39 @@ describe("bridge-core parity", () => {
         );
       }
     }
+  });
+
+  it("should keep each package's copy of a master byte-identical to it", () => {
+    // Arrange
+    const copies = PACKAGE_COPIES.map(({ master, dest }) => ({
+      dest,
+      master: readFileSync(join(DEFAULT_MASTERS_DIR, master)),
+      copy: readFileSync(join(DEFAULT_PACKAGES_DIR, dest)),
+    }));
+
+    // Act
+    const drifted = copies.filter((c) => !c.copy.equals(c.master));
+
+    // Assert
+    assert.deepEqual(
+      drifted.map((c) => c.dest),
+      [],
+      "a package copy drifts from its master — run pnpm bridge:sync"
+    );
+  });
+
+  it("should vendor the Connection notices into @kaiord/i18n, where the App reads them", () => {
+    // Arrange
+    const expected = [
+      "i18n/src/generated/connection-notices.js",
+      "i18n/src/generated/connection-notices.d.ts",
+    ];
+
+    // Act
+    const dests = PACKAGE_COPIES.map(({ dest }) => dest);
+
+    // Assert
+    assert.deepEqual(dests, expected);
   });
 
   it("masters contain no per-bridge identity values", () => {

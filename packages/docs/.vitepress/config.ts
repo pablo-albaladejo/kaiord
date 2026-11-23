@@ -158,6 +158,7 @@ function sitemapItems(items: SitemapItem[]): SitemapItem[] {
 }
 
 const ATHLETE_GUIDES = [
+  ["install-extensions", "Install the extensions", "Instala las extensiones"],
   ["ai-planning-byok", "AI planning with your key", "IA con tu propia clave"],
   ["whoop-recovery-in-plan", "WHOOP recovery", "Recuperación de WHOOP"],
   [

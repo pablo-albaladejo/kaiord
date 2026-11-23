@@ -63,7 +63,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -278,7 +278,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -320,7 +320,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -453,7 +453,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -693,7 +693,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -1095,11 +1095,11 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
@@ -1159,7 +1159,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -1225,7 +1225,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -1243,11 +1243,11 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
@@ -2287,7 +2287,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -2869,7 +2869,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -3822,7 +3822,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -4216,7 +4216,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -4419,7 +4419,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -4437,7 +4437,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -4455,11 +4455,11 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
@@ -4481,7 +4481,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -4593,7 +4593,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -4700,11 +4700,11 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
@@ -5151,7 +5151,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -5238,7 +5238,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -5304,7 +5304,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -5432,11 +5432,11 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {

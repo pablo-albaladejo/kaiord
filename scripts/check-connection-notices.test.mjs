@@ -340,6 +340,40 @@ describe("check-connection-notices", () => {
     assert.ok(problems.some((p) => p.includes("tanita-bridge/popup.html")));
   });
 
+  it("should read each sign-in page from the App's descriptor of that extension", () => {
+    // Arrange
+    const root = mkdtempSync(join(tmpdir(), "notices-descriptor-"));
+    for (const dir of [
+      "packages/workout-spa-editor/src/integrations",
+      "packages/workout-spa-editor/src/application/connections",
+      ...["garmin", "train2go", "whoop", "tanita", "trainingpeaks"].map(
+        (b) => `packages/${b}-bridge`
+      ),
+    ]) {
+      cpSync(join(ROOT, dir), join(root, dir), { recursive: true });
+    }
+    const descriptors = join(
+      root,
+      "packages/workout-spa-editor/src/application/connections/extension-descriptors.ts"
+    );
+    writeFileSync(
+      descriptors,
+      readFileSync(descriptors, "utf8").replace(
+        'signInUrl: "https://app.train2go.com/user/index"',
+        'signInUrl: "https://example.test/"'
+      )
+    );
+
+    // Act
+    const problems = popupProblems(root);
+    rmSync(root, { recursive: true, force: true });
+
+    // Assert
+    assert.deepEqual(problems, [
+      "packages/train2go-bridge/popup.js: does not open the App's sign-in page https://example.test/",
+    ]);
+  });
+
   it("should load the single source every extension vendors", () => {
     // Arrange
     const master = readFileSync(join(ROOT, MASTER));

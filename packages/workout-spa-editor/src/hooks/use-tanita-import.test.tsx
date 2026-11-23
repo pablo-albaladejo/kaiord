@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { readTanitaExportCsv } from "../adapters/tanita/tanita-transport";
+import { readTanitaExportCsv } from "../adapters/tanita/connector/tanita-transport";
 import { syncTanitaImport } from "../application/tanita/sync-tanita-import.use-case";
 import { PersistenceProvider } from "../contexts/persistence-context";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
@@ -14,7 +14,7 @@ import { useTanitaImport } from "./use-tanita-import";
 vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: vi.fn() },
 }));
-vi.mock("../adapters/tanita/tanita-transport", () => ({
+vi.mock("../adapters/tanita/connector/tanita-transport", () => ({
   readTanitaExportCsv: vi.fn(),
 }));
 vi.mock("../application/tanita/sync-tanita-import.use-case", () => ({

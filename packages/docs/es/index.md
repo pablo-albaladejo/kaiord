@@ -10,6 +10,8 @@ funciona en tu navegador, sin cuenta. Estas guías explican cómo usarlo en el
 día a día. El resto de la documentación (formatos, CLI, SDK y servidor MCP)
 está [en inglés](/).
 
+- [Instala la extensión de cada plataforma](/es/guide/install-extensions):
+  dónde conseguir cada extensión y cómo cargar las que no están publicadas.
 - [Planifica tu entrenamiento con IA y tu propia clave de API](/es/guide/ai-planning-byok):
   genera y ajusta sesiones con Anthropic, OpenAI o Google.
 - [La recuperación de WHOOP en tu plan de entrenamiento](/es/guide/whoop-recovery-in-plan):

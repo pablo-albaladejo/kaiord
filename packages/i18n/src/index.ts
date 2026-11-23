@@ -18,8 +18,15 @@ export {
 export {
   CONNECTION_FIXES,
   connectionFix,
+  connectionNoTabNotice,
+  connectionNotCheckedText,
   connectionNotice,
+  connectionReasonNotice,
   type ConnectionFix,
   type ConnectionNotice,
+  type ConnectionReason,
   type ConnectionState,
+  type NotCheckedReason,
+  type NoTabNotice,
+  type ReasonNotice,
 } from "./connection-notice";

@@ -29,6 +29,12 @@ export const bridgeManifestSchema = z.object({
   version: z.string(),
   protocolVersion: z.number().int().positive(),
   capabilities: z.array(bridgeCapabilitySchema),
+  // The contracts a Garmin extension supports beyond its capabilities; any
+  // entry that is not a string is dropped, and other bridges send none.
+  features: z
+    .array(z.unknown())
+    .transform((all) => all.filter((f): f is string => typeof f === "string"))
+    .optional(),
 });
 
 export type BridgeManifest = z.infer<typeof bridgeManifestSchema>;

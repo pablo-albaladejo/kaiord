@@ -14,7 +14,11 @@ type Props = { source: ConnectionSource };
  * install itself.
  */
 export function ConnectionCardNotice({ source }: Props) {
-  const notice = useConnectionNotice(source.connection, source.name);
+  const notice = useConnectionNotice(
+    source.connection,
+    source.name,
+    source.reason ?? null
+  );
   const settled = useDiscoverySettled(0);
   const refresh = useConnectionsRefresh();
 

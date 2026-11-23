@@ -16,9 +16,12 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: mocks.getExtensionId },
 }));
 
-vi.mock("../adapters/trainingpeaks/trainingpeaks-athlete-transport", () => ({
-  readTrainingPeaksAthleteId: mocks.readAthleteId,
-}));
+vi.mock(
+  "../adapters/trainingpeaks/connector/trainingpeaks-athlete-transport",
+  () => ({
+    readTrainingPeaksAthleteId: mocks.readAthleteId,
+  })
+);
 
 vi.mock("../application/export/execute-workout-push", () => ({
   executeWorkoutPush: mocks.executePush,

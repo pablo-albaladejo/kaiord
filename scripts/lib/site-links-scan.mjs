@@ -32,12 +32,26 @@ function docsDirOf(mounts) {
   return root && join(root.dir, "docs");
 }
 
+// Links the App ships from its source (a fix's destination) are in its JS
+// bundle, which the page scan does not read; `sources` are `{ file, text }`.
+function checkSources(ordered, segments, sources, problems) {
+  let checked = 0;
+  for (const { file, text } of sources) {
+    for (const link of new Set(linksIn(text))) {
+      checked += 1;
+      const reason = brokenReason(ordered, segments, link);
+      if (reason) problems.push({ file, link, reason });
+    }
+  }
+  return checked;
+}
+
 /**
  * `problems` holds `{ file, link, reason }` for every broken kaiord.com link;
  * the counts let the caller refuse a run that checked nothing, and
  * `pagesWithoutSwitcher` lists docs pages whose switcher went unchecked.
  */
-export function checkSiteLinks({ mounts, segments }) {
+export function checkSiteLinks({ mounts, segments, sources = [] }) {
   const ordered = [...mounts].sort((a, b) => b.prefix.length - a.prefix.length);
   const docsDir = docsDirOf(mounts);
   const problems = [];
@@ -84,10 +98,12 @@ export function checkSiteLinks({ mounts, segments }) {
       }
     }
   }
+  const sourceLinksChecked = checkSources(ordered, segments, sources, problems);
   return {
     problems,
     filesScanned: seenFiles.size,
     linksChecked,
+    sourceLinksChecked,
     switchersChecked,
     pagesWithoutSwitcher,
   };

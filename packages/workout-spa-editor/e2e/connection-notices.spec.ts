@@ -3,13 +3,16 @@
  * and the editor's send), driven through the Garmin extension stub at the
  * message contract. An outdated extension is offered Update, never a sign-in
  * (#1098); a read Garmin failed is "not answering" with Try again, never
- * "signed out" (#1100); a working Connection shows no notice at all.
+ * "signed out" (#1100); a working Connection shows no notice at all. The
+ * store extension (protocol 1) is asked no Session check, whose `ping` would
+ * read a workout; the current one (protocol 2) is.
  */
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
 import {
   type GarminStubOptions,
+  getGarminBridgeCallActions,
   installGarminBridgeStub,
 } from "./helpers/garmin-bridge-stub";
 import { seedEnabledGarminExportPolicy } from "./helpers/garmin-ready-gate";
@@ -27,6 +30,7 @@ const UPDATE =
 const NOT_ANSWERING =
   "Garmin is not answering, so you cannot use it in Kaiord right now.";
 const NOTICE_TIMEOUT_MS = 20_000;
+const CURRENT_PROTOCOL = 2;
 
 const openConnections = async (page: Page, options: GarminStubOptions) => {
   await installGarminBridgeStub(page, options);
@@ -79,7 +83,10 @@ test.describe("Connection notices", () => {
     page,
   }) => {
     // Arrange
-    const failedRead = { gcApi: { ok: false, status: 503 } };
+    const failedRead = {
+      protocolVersion: CURRENT_PROTOCOL,
+      gcApi: { ok: false, status: 503 },
+    };
 
     // Act
     await openConnections(page, failedRead);
@@ -100,7 +107,7 @@ test.describe("Connection notices", () => {
     page,
   }) => {
     // Arrange
-    const working = {};
+    const working = { protocolVersion: CURRENT_PROTOCOL };
 
     // Act
     await openConnections(page, working);
@@ -112,6 +119,27 @@ test.describe("Connection notices", () => {
       { timeout: NOTICE_TIMEOUT_MS }
     );
     await expect(garminNotice(page)).toHaveCount(0);
+  });
+
+  test("should ask the store extension no Session check beyond discovery's verification", async ({
+    page,
+  }) => {
+    // Arrange
+    const store = { protocolVersion: 1 };
+
+    // Act
+    await openConnections(page, store);
+
+    // Assert
+    await expect(page.getByTestId("connection-card-garmin")).toHaveAttribute(
+      "data-status",
+      "installed",
+      { timeout: NOTICE_TIMEOUT_MS }
+    );
+    const pings = (await getGarminBridgeCallActions(page)).filter(
+      (action) => action === "ping"
+    );
+    expect(pings).toHaveLength(1);
   });
 
   test("should keep the send closed with the Update notice for an outdated extension", async ({
