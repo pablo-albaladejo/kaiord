@@ -1,18 +1,24 @@
 /**
- * Connections page with NO Kaiord extension — the Playwright default, since
- * browsers run without extension runtimes. The page must say what is missing
- * once, offer the install action, and not repeat a paragraph on every card.
+ * Connections page with NO extension — the Playwright default, since browsers
+ * run without extension runtimes. Every extension card shows its own Install
+ * notice, worded by the one source of Connection notices and naming its
+ * Platform; nothing says "the Kaiord extension".
  */
 import { expect, test } from "./fixtures/base";
 import { seedDefaultProfile } from "./helpers/seed-profile";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
 const ROUTE = "/connections";
-const BRIDGE_CARDS = ["garmin", "train2go", "whoop", "tanita", "trainingpeaks"];
-const INSTALL = "Install Kaiord extension";
+const BRIDGE_CARDS = [
+  ["garmin", "Garmin"],
+  ["train2go", "Train2Go"],
+  ["whoop", "WHOOP"],
+  ["tanita", "Tanita"],
+  ["trainingpeaks", "TrainingPeaks"],
+] as const;
 
-test.describe("Connections without the Kaiord extension", () => {
-  test("should show one banner and an install action on every extension card", async ({
+test.describe("Connections without the extensions", () => {
+  test("should show one Install notice with its one fix on every extension card", async ({
     page,
   }) => {
     // Arrange
@@ -23,18 +29,16 @@ test.describe("Connections without the Kaiord extension", () => {
     // Act
     await page.goto(ROUTE);
 
-    // Assert — the banner waits for the discovery window, so it appears once.
-    const banner = page.getByTestId("connections-extension-banner");
-    await expect(banner).toBeVisible({ timeout: 20_000 });
-    await expect(banner.getByRole("link", { name: INSTALL })).toHaveAttribute(
-      "href",
-      /kaiord\.com\/docs\/bridges/
-    );
-    for (const id of BRIDGE_CARDS) {
-      const card = page.getByTestId(`connection-card-${id}`);
-      await expect(card).toContainText("Requires the Kaiord extension");
-      await expect(card.getByRole("link", { name: INSTALL })).toBeVisible();
+    // Assert — the notice waits for the discovery window, then appears once.
+    for (const [id, platform] of BRIDGE_CARDS) {
+      const notice = page.getByTestId(`connection-notice-${id}`);
+      await expect(notice).toHaveText(
+        `You cannot use ${platform} in Kaiord until Kaiord for ${platform} is installed in this browser.Install Kaiord for ${platform}`,
+        { timeout: 20_000 }
+      );
+      await expect(notice.getByRole("link")).toHaveCount(1);
     }
-    await expect(page.getByText(/not running in this browser/i)).toHaveCount(0);
+    await expect(page.getByText(/the kaiord extension/i)).toHaveCount(0);
+    await expect(page.getByText(/signed out/i)).toHaveCount(0);
   });
 });

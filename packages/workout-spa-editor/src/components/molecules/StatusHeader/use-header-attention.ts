@@ -10,6 +10,7 @@
  */
 import { attentionCauseText } from "../../../application/connections/attention-cause-copy";
 import { useConnectionAttention } from "../../../hooks/connections/use-connection-attention";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 
 export type HeaderAttention = {
@@ -21,6 +22,7 @@ export type HeaderAttention = {
 export const useHeaderAttention = (): HeaderAttention | null => {
   const t = useTranslate("nav");
   const tCommon = useTranslate("common");
+  const locale = useActiveLocale();
   const attention = useConnectionAttention();
 
   if (attention === null) return null;
@@ -29,6 +31,6 @@ export const useHeaderAttention = (): HeaderAttention | null => {
     title: t(attention.count === 1 ? "alert.title_one" : "alert.title_other", {
       count: attention.count,
     }),
-    detail: attentionCauseText(attention.cause, tCommon),
+    detail: attentionCauseText(attention.cause, tCommon, locale),
   };
 };

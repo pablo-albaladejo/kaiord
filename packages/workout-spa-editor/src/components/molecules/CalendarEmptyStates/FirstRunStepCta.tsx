@@ -2,6 +2,7 @@ import { useLocation } from "wouter";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import { useConnectionNotice } from "../ConnectionNotice/use-connection-notice";
 import type { FirstRunStep } from "./first-run-steps";
 
 export type FirstRunStepCtaProps = {
@@ -17,7 +18,12 @@ const PRIMARY = `${CTA} bg-accent text-surface hover:opacity-90`;
 export function FirstRunStepCta({ step, primary, done }: FirstRunStepCtaProps) {
   const t = useTranslate("calendar");
   const [, navigate] = useLocation();
-  const label = t(`firstRun.steps.${step.key}.cta`);
+  // The bridge step is the Install fix, worded once for the App and popups.
+  const install = useConnectionNotice("not-installed", "Garmin");
+  const label =
+    step.key === "bridge" && install
+      ? install.action
+      : t(`firstRun.steps.${step.key}.cta`);
   const className = primary ? PRIMARY : SECONDARY;
 
   if (done) {

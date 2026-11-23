@@ -22,7 +22,8 @@ const NO_DAYS: string[] = [];
  *
  * The linked check reads the profile alone, so the linked case never mounts
  * the coaching source; only the notice does, for the source's session state
- * and its connect, which is the calendar's own link flow.
+ * and its connect, which is the calendar's own link flow. A source that
+ * cannot be read says so once, through its card's Connection notice.
  */
 export function ConnectionProfileLink({ sourceId, name, canLink }: Props) {
   const live = useActiveProfileLive();
@@ -42,35 +43,26 @@ function UnlinkedProfileNotice({
   const t = useTranslate("connections");
   const { syncSources } = useCoachingActivities(NO_DAYS);
   const source = syncSources.find((s) => s.id === sourceId);
-  if (!source) return null;
+  // A source that cannot be read shows its Connection notice on the card;
+  // linking is offered only once the Connection works.
+  if (!source?.connected) return null;
 
   return (
     <div
       data-testid={`connection-profile-link-${sourceId}`}
       className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-edge bg-surface-elevated px-3 py-2 text-[12px] text-ink-strong"
     >
-      <span>
-        {t(source.connected ? "profileLink.notLinked" : "profileLink.signIn", {
-          name,
-        })}
-      </span>
-      {source.error === "outdated" && (
-        <span role="alert" className="text-danger-text">
-          {t("profileLink.updateExtension", { name })}
-        </span>
-      )}
-      {source.connected && (
-        <button
-          type="button"
-          disabled={source.loading}
-          aria-busy={source.loading}
-          onClick={() => void source.connect()}
-        >
-          <Pill tone="accent" icon="link">
-            {t(source.loading ? "profileLink.linking" : "profileLink.link")}
-          </Pill>
-        </button>
-      )}
+      <span>{t("profileLink.notLinked", { name })}</span>
+      <button
+        type="button"
+        disabled={source.loading}
+        aria-busy={source.loading}
+        onClick={() => void source.connect()}
+      >
+        <Pill tone="accent" icon="link">
+          {t(source.loading ? "profileLink.linking" : "profileLink.link")}
+        </Pill>
+      </button>
     </div>
   );
 }

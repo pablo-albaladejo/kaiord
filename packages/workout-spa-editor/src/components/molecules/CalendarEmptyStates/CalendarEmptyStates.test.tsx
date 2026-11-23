@@ -120,9 +120,9 @@ describe("FirstRunGuide", () => {
 
     // Assert
     expect(screen.getByTestId("first-run-step-aiKey-done")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Install" })).not.toHaveClass(
-      "bg-accent"
-    );
+    expect(
+      screen.getByRole("link", { name: "Install Kaiord for Garmin" })
+    ).not.toHaveClass("bg-accent");
   });
 });
 
@@ -246,7 +246,11 @@ describe("NoBridgesState", () => {
         `${READY_COUNT} sessions are ready but can't reach your watch`
       )
     ).toBeInTheDocument();
-    expect(screen.getByText(/no public API for workouts/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser."
+      )
+    ).toBeInTheDocument();
   });
 
   it("should make installing the bridge the primary route", () => {
@@ -256,11 +260,15 @@ describe("NoBridgesState", () => {
 
     // Act
 
-    const link = screen.getByText("Install the Kaiord extension");
+    const link = screen.getByText("Install Kaiord for Garmin");
 
     // Assert
 
-    expect(link).toHaveAttribute("href", "https://kaiord.com/docs/bridges");
+    // Garmin's store listing: the same place every Install for Garmin opens.
+    expect(link).toHaveAttribute(
+      "href",
+      "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe"
+    );
     expect(link).toHaveAttribute("target", "_blank");
   });
 });

@@ -149,9 +149,12 @@ describe("GarminPushButton", () => {
     // Assert
     expect(
       screen.getByText(
-        "Sign in to Garmin Connect in this browser, then try again."
+        "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser."
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Sign in to Garmin" })
+    ).toHaveAttribute("href", "https://connect.garmin.com/modern/");
   });
 
   it("should say Garmin is not answering when no cause is known", () => {
@@ -163,7 +166,9 @@ describe("GarminPushButton", () => {
 
     // Assert
     expect(
-      screen.getByText("Garmin is not answering. Try again.")
+      screen.getByText(
+        "Garmin is not answering, so you cannot use it in Kaiord right now."
+      )
     ).toBeInTheDocument();
   });
 

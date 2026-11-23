@@ -27,8 +27,11 @@ vi.mock("../../application/coaching/commit-conflict-resolution", () => ({
 
 import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
 
-const ZONES_FETCH_FAILED =
-  "Train2Go is not answering, so your zones were not synced. Try again.";
+// The toast's title, and the Train2Go Connection's own notice as its detail.
+const ZONES_FETCH_FAILED = [
+  "Your zones were not synced.",
+  "Train2Go is not answering, so you cannot use it in Kaiord right now.",
+] as const;
 const ZONES_SHAPE_MISMATCH =
   "Train2Go sent zones Kaiord cannot read, so they were not synced.";
 const ZONES_UNSUPPORTED = "This coaching platform does not share zones.";
@@ -78,7 +81,7 @@ describe("useZonesSyncOrchestrator", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(ZONES_FETCH_FAILED);
+    expect(toasts.error).toHaveBeenCalledWith(...ZONES_FETCH_FAILED);
     expect(result.current.pending).toBeNull();
   });
 

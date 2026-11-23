@@ -89,12 +89,9 @@ describe("connection attention over the real registry", () => {
 
   it("should count a probed bridge whose session came back inactive", () => {
     // Arrange
-    // Reachable state: WHOOP is installed and its read did not come back.
-    // Which of the two possible reasons it was is not observable —
-    // `probeWhoopSession`
-    // reads `readWhoopStatus`, gets `connected: false`, and writes
-    // `inactive()` — sessionActive false, error null, needsReauth false —
-    // stamped with `lastCheckedAt`.
+    // Reachable state: WHOOP is installed and its check came back inactive
+    // with no refusal from the Platform — sessionActive false, error null,
+    // needsReauth false — stamped with `lastCheckedAt`: it could not tell why.
     const signals: ConnectionSourceSignals = {
       ...coldSignals(),
       session: (bridgeId) => ({
@@ -109,7 +106,10 @@ describe("connection attention over the real registry", () => {
     const attention = attentionOf(signals);
 
     // Assert
-    expect(attention).toEqual({ count: 1, cause: { kind: "noAccess" } });
+    expect(attention).toEqual({
+      count: 1,
+      cause: { kind: "notice", connection: "not-answering", name: "WHOOP" },
+    });
   });
 
   it("should stay silent for a bridge whose extension id changed mid-probe", () => {

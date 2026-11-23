@@ -83,19 +83,23 @@ describe("verifyAnnouncement", () => {
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
-  it("should return false when the protocol version is unsupported", async () => {
+  it("should accept an extension on another protocol version so its probe can offer Update", async () => {
     // Arrange
-
-    // Act
+    const otherVersion = validManifest.data.protocolVersion + 1;
     mockSend.mockResolvedValue({
       ok: true,
       data: {
         ...validManifest.data,
-        protocolVersion: 99,
+        protocolVersion: otherVersion,
       },
     });
 
+    // Act
+    const manifest = await verifyAnnouncement(ann);
+
     // Assert
-    await expect(verifyAnnouncement(ann)).resolves.toBeNull();
+    // Rejecting it made an outdated extension look absent, so the App said
+    // Install where only Update can help (#1098).
+    expect(manifest?.protocolVersion).toBe(otherVersion);
   });
 });

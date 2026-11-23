@@ -1,11 +1,16 @@
 /**
  * The three optional integrations, each with its own destination; the copy —
- * including what each one adds — lives in `calendar.firstRun`.
+ * including what each one adds — lives in `calendar.firstRun`, except the
+ * bridge step's Install, which is the Garmin Connection's own fix.
  *
  * `href` is external for the bridge because a web page cannot install an
  * extension; the other two are in-app settings sections.
  */
-export const BRIDGE_DOCS_URL = "https://kaiord.com/docs/bridges";
+import { connectionFixHref } from "../../../application/connections/connection-fix-target";
+
+/** Where the bridge step's Install goes: the same place as every Install. */
+export const BRIDGE_DOCS_URL =
+  connectionFixHref("install", "garmin-bridge") ?? "";
 
 export type FirstRunStep = {
   /** Key under `calendar.firstRun.steps`. */

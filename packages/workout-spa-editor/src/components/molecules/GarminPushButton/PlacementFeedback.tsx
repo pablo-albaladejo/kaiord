@@ -6,14 +6,16 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { GarminRemovalEntry } from "../../../types/garmin-removal-entry";
 import { AttentionMark } from "../../atoms/AttentionMark";
 import { Button } from "../../atoms/Button";
+import { GarminConnectionNotice } from "../ConnectionNotice/GarminConnectionNotice";
 import { formatDateLabel } from "../TemplatePickerDialog/format-date-label";
-import { placementMessage, type PlacementTone } from "./placement-message";
+import {
+  placementConnection,
+  placementMessage,
+  type PlacementTone,
+} from "./placement-message";
 import { UncertainActions } from "./UncertainActions";
 
 const CONNECTIONS_HREF = "/connections";
-
-export const GARMIN_BRIDGE_STORE_URL =
-  "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe";
 
 export type PlacementFeedbackProps = {
   result: PlacementResult;
@@ -39,6 +41,7 @@ export const PlacementFeedback: React.FC<PlacementFeedbackProps> = (props) => {
   const locale = useActiveLocale();
   const day = (d: string) => formatDateLabel(d, locale);
   const message = placementMessage(result, props.date);
+  const connection = placementConnection(result);
   const text = t(message.key, {
     date: message.date ? day(message.date) : "",
     dates: (message.dates ?? []).map(day).join(", "),
@@ -46,9 +49,14 @@ export const PlacementFeedback: React.FC<PlacementFeedbackProps> = (props) => {
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs">
       {message.tone === "warning" && <AttentionMark size="xs" />}
-      <span className={TONE_CLASS[message.tone]} role="status">
-        {text}
-      </span>
+      {(connection === null || result.kind === "library-only") && (
+        <span className={TONE_CLASS[message.tone]} role="status">
+          {text}
+        </span>
+      )}
+      {connection !== null && (
+        <GarminConnectionNotice connection={connection} />
+      )}
       {result.kind === "uncertain" && (
         <UncertainActions
           result={result}
@@ -56,17 +64,6 @@ export const PlacementFeedback: React.FC<PlacementFeedbackProps> = (props) => {
           onSendAnyway={onSendAnyway}
         />
       )}
-      {result.kind === "library-only" &&
-        result.reason === "bridge-outdated" && (
-          <a
-            className="underline"
-            href={GARMIN_BRIDGE_STORE_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("placement.updateExtension")}
-          </a>
-        )}
       {result.kind === "failed" && result.reason === "no-export-route" && (
         <Link className="underline" href={CONNECTIONS_HREF}>
           {t("placement.openConnections")}

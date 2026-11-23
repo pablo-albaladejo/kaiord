@@ -28,10 +28,7 @@
     "sending": "Enviando…",
     "sent": "En tu Garmin",
     "garminPushError": {
-      "updated": "Kaiord para Garmin se ha actualizado. Inténtalo de nuevo.",
-      "signIn": "Inicia sesión en Garmin Connect en este navegador y vuelve a intentarlo.",
-      "notPrepared": "Este entrenamiento no se pudo preparar para Garmin. Inténtalo de nuevo.",
-      "notAnswering": "Garmin no responde. Inténtalo de nuevo."
+      "notPrepared": "Este entrenamiento no se pudo preparar para Garmin. Inténtalo de nuevo."
     },
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
@@ -45,19 +42,12 @@
       "cancel": "Cancelar"
     },
     "trainingPeaksPushError": {
-      "noSteps": "Este entreno todavía no tiene pasos que enviar.",
-      "install": "Instala Kaiord para TrainingPeaks para enviar este entreno.",
-      "signIn": "Inicia sesión en TrainingPeaks y vuelve a intentarlo."
-    },
-    "sendDisabled": {
-      "noExtension": "Instala la Extensión de Kaiord para Garmin para enviar este entreno.",
-      "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."
+      "noSteps": "Este entreno todavía no tiene pasos que enviar."
     },
     "trainingPeaksHorizon": {
       "beforeSend": "Una cuenta Basic de TrainingPeaks solo acepta hoy y mañana, contados en la zona horaria de la cuenta, así que TrainingPeaks puede rechazar este día.",
       "refused": "TrainingPeaks ha rechazado este día, así que el entreno no se ha enviado: una cuenta Basic solo acepta hoy y mañana, contados en la zona horaria de la cuenta de TrainingPeaks."
-    },
-    "trainingPeaksNotAnswering": "TrainingPeaks no responde. Inténtalo de nuevo."
+    }
   },
   "summary": {
     "duration": "Duración",
@@ -108,9 +98,8 @@
     "libraryOnly": {
       "insecure-context": "En tu biblioteca de Garmin, sin fecha: colocarlo en el calendario requiere una página segura (https).",
       "unsupported-browser": "En tu biblioteca de Garmin, sin fecha: este navegador no puede colocarlo en el calendario. Un navegador actualizado sí puede.",
-      "bridge-outdated": "En tu biblioteca de Garmin, sin fecha: actualiza la Extensión de Kaiord para Garmin para colocarlo en el calendario."
+      "bridge-outdated": "En tu biblioteca de Garmin, sin fecha."
     },
-    "updateExtension": "Actualizar la extensión",
     "openConnections": "Abrir Conexiones",
     "recordDeletedOn": "Este entrenamiento se eliminó mientras se enviaba. Puede seguir en tu calendario de Garmin el {{date}}: elimínalo en Garmin Connect.",
     "failed": {
@@ -122,12 +111,9 @@
       "library-id-unknown": "Garmin no devolvió el id del entrenamiento. Envíalo de nuevo.",
       "schedule-endpoint": "El calendario de Garmin no aceptó el entrenamiento.",
       "schedule-rejected": "Garmin rechazó esta fecha para el entrenamiento.",
-      "needs-reauth": "Vuelve a iniciar sesión en Garmin Connect y reinténtalo.",
-      "deadline-before-send": "La extensión agotó el tiempo antes de enviar. Inténtalo de nuevo.",
       "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
       "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Conexiones, en Entrenamiento → También se envía a.",
       "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
-      "calendar-unreadable": "Garmin no responde, así que no se ha enviado nada. Inténtalo de nuevo.",
       "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo.",
       "incomplete-pace-zones": "Este entrenamiento usa una zona de ritmo que el atleta no define. Completa tus zonas de ritmo en Atleta para enviarlo.",
       "unsupported-pace-zone-sport": "Solo se pueden enviar zonas de ritmo a Garmin en entrenamientos de carrera o natación.",
@@ -160,7 +146,6 @@
     "blockedCompleted": "El entrenador lo marcó como completado: no se puede mover."
   },
   "garminDrift": {
-    "update": "Actualizar Garmin",
-    "bridgeOutdated": "Actualiza la extensión de Kaiord para Garmin para mover este entrenamiento en el calendario de Garmin."
+    "update": "Actualizar Garmin"
   }
 }

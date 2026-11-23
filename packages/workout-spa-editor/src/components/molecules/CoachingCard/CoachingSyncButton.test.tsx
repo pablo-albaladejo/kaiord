@@ -69,7 +69,12 @@ describe("CoachingSyncButton — not-connected state", () => {
     // Assert
 
     expect(
-      screen.getByText("Update the Kaiord extension for Train2Go.")
+      screen.getByText(
+        "You cannot use Train2Go in Kaiord until Kaiord for Train2Go is updated."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Update Kaiord for Train2Go" })
     ).toBeInTheDocument();
   });
 

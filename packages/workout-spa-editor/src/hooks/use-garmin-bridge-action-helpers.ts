@@ -5,6 +5,7 @@
  */
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
+import type { ConnectionState } from "../application/connections/connection-state";
 import type {
   GarminPushOutcome,
   PushState,
@@ -20,29 +21,28 @@ export type DetectSetters = {
   setExtensionInstalled: (v: boolean) => void;
   setSessionActive: (v: boolean) => void;
   setFeatures: (v: readonly string[]) => void;
-  setLastError: (v: string | null) => void;
+  setConnection: (v: ConnectionState) => void;
 };
 
 export const runDetect = async ({
   setExtensionInstalled,
   setSessionActive,
   setFeatures,
-  setLastError,
+  setConnection,
 }: DetectSetters): Promise<void> => {
   const extensionId = getGarminExtensionId();
   if (!extensionId) {
     setExtensionInstalled(false);
     setSessionActive(false);
     setFeatures([]);
-    setLastError(null);
+    setConnection("not-installed");
     return;
   }
-  const res = await ping(extensionId);
-  const result = evaluatePingResult(res);
+  const result = evaluatePingResult(await ping(extensionId));
   setExtensionInstalled(result.installed);
-  setSessionActive(result.installed && result.session);
-  setFeatures(result.installed ? result.features : []);
-  setLastError(result.installed ? result.error : null);
+  setSessionActive(result.session);
+  setFeatures(result.features);
+  setConnection(result.connection);
 };
 
 /**

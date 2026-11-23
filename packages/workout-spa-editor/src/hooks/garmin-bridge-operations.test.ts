@@ -25,31 +25,34 @@ const NON_STRING = 7;
 const mockedSend = vi.mocked(sendMessage);
 
 describe("evaluatePingResult", () => {
-  it("should return installed=false when response is not ok", () => {
+  it("should report a ping that never reached the extension as not installed", () => {
     // Arrange
+    const res = { ok: false, delivered: false, error: "No response" };
 
     // Act
-    const result = evaluatePingResult({ ok: false });
+    const result = evaluatePingResult(res);
 
     // Assert
-    expect(result).toEqual({ installed: false });
+    expect(result).toEqual({
+      installed: false,
+      session: false,
+      connection: "not-installed",
+      features: [],
+    });
   });
 
-  it("should detect supported protocol version", () => {
+  it("should detect a working Connection on the supported protocol", () => {
     // Arrange
+    const res = { ok: true, protocolVersion: 1, data: { gcApi: { ok: true } } };
 
     // Act
-    const result = evaluatePingResult({
-      ok: true,
-      protocolVersion: 1,
-      data: { gcApi: { ok: true } },
-    });
+    const result = evaluatePingResult(res);
 
     // Assert
     expect(result).toEqual({
       installed: true,
       session: true,
-      error: null,
+      connection: "working",
       features: [],
     });
   });
@@ -76,40 +79,54 @@ describe("evaluatePingResult", () => {
     { res: { ok: true, protocolVersion: 999, data: { gcApi: { ok: true } } } },
     { res: { ok: true, data: { gcApi: { ok: true } } } },
   ])(
-    "should flag an outdated bridge when the protocol version is unsupported or missing",
+    "should call a bridge on an unsupported or missing protocol outdated",
     ({ res }) => {
       // Arrange
+      const answer = res;
 
       // Act
-      const result = evaluatePingResult(res);
+      const result = evaluatePingResult(answer);
 
       // Assert
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         installed: true,
         session: false,
-        error: "Update your Kaiord extension for Garmin",
-        features: [],
+        connection: "outdated",
       });
     }
   );
 
-  it("should report session=false when gcApi is not ok", () => {
+  it("should call a failed Garmin read not answering, never signed out", () => {
     // Arrange
-
-    // Act
-    const result = evaluatePingResult({
+    const res = {
       ok: true,
       protocolVersion: 1,
-      data: { gcApi: { ok: false } },
-    });
+      data: { gcApi: { ok: false, status: 503 } },
+    };
+
+    // Act
+    const result = evaluatePingResult(res);
 
     // Assert
-    expect(result).toEqual({
-      installed: true,
+    expect(result).toMatchObject({
       session: false,
-      error: null,
-      features: [],
+      connection: "not-answering",
     });
+  });
+
+  it("should ask for a sign-in only when Garmin refused it", () => {
+    // Arrange
+    const res = {
+      ok: true,
+      protocolVersion: 1,
+      data: { gcApi: { ok: false, needsReauth: true } },
+    };
+
+    // Act
+    const result = evaluatePingResult(res);
+
+    // Assert
+    expect(result).toMatchObject({ session: false, connection: "signed-out" });
   });
 });
 

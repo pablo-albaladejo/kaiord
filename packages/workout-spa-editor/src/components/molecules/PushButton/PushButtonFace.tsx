@@ -1,4 +1,4 @@
-import { forwardRef, useId } from "react";
+import { forwardRef, type ReactNode, useId } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button, type ButtonSize } from "../../atoms/Button";
@@ -11,15 +11,17 @@ type PushButtonFaceProps = {
   size: Extract<ButtonSize, "md" | "lg">;
   full: boolean;
   onPush: () => void;
-  /** Idle only: why the send is unavailable (no bridge, or signed out). */
-  disabledReason?: "noExtension" | "signedOut";
+  /** Idle only: the send cannot start (the Garmin Connection does not work). */
+  disabled?: boolean;
+  /** Why, as the Connection's own notice with its one fix. */
+  reason?: ReactNode;
 };
 
 /** The send button's three looks: send, sending and sent. */
 export const PushButtonFace = forwardRef<
   HTMLButtonElement,
   PushButtonFaceProps
->(({ status, size, full, onPush, disabledReason }, ref) => {
+>(({ status, size, full, onPush, disabled = false, reason }, ref) => {
   const t = useTranslate("workout-detail");
   const reasonId = useId();
   const common = { ref, size, className: full ? "w-full" : "" };
@@ -48,18 +50,14 @@ export const PushButtonFace = forwardRef<
       <Button
         {...common}
         variant="primary"
-        disabled={disabledReason !== undefined}
-        aria-describedby={disabledReason ? reasonId : undefined}
+        disabled={disabled}
+        aria-describedby={disabled && reason ? reasonId : undefined}
         onClick={onPush}
       >
         <Icon icon={ICON_MAP.watch} size="sm" color="inherit" />
         {t("footer.send")}
       </Button>
-      {disabledReason && (
-        <p id={reasonId} className="text-xs text-ink-muted">
-          {t(`footer.sendDisabled.${disabledReason}`)}
-        </p>
-      )}
+      {disabled && reason && <div id={reasonId}>{reason}</div>}
     </>
   );
 });

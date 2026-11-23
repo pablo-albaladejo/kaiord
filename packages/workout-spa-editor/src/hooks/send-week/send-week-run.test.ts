@@ -28,8 +28,7 @@ const context = (overrides = {}) => ({
   analytics: { event: vi.fn() } as unknown as Analytics,
   features: [],
   routeActive: true,
-  bridgeInstalled: true,
-  sessionActive: true,
+  connection: "working" as const,
   ...overrides,
 });
 
@@ -64,13 +63,13 @@ describe("runSendWeek", () => {
       secureContext: true,
       sleep: vi.fn(),
     });
-    const ctx = context({ sessionActive: false });
+    const ctx = context({ connection: "not-answering" as const });
 
     // Act
     const run = await runSendWeek(ctx, WEEK, handlers);
 
     // Assert
-    expect(run).toBe("no-session");
+    expect(run).toBe("not-answering");
     expect(mockPlace).not.toHaveBeenCalled();
     expect(ctx.analytics.event).not.toHaveBeenCalled();
   });

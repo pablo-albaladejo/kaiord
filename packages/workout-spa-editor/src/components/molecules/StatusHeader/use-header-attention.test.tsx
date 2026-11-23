@@ -25,8 +25,7 @@ const source = (
   status: "connected",
   bridgeDetected: true,
   disconnected: false,
-  needsReauth: false,
-  outdated: false,
+  connection: "working",
   sessionVerifiable: true,
   lastSyncAt: undefined,
   importTypes: [],
@@ -50,10 +49,15 @@ describe("useHeaderAttention", () => {
 
   it("should word one affected source in the singular", () => {
     // Arrange
-    // Reachable state: WHOOP installed, read did not come back —
-    // `probeWhoopSession`
-    // writes `inactive()`, which `bridgeSourceStatus` reads as attention.
-    store.value = [source({ id: "whoop", status: "attention" })];
+    // Reachable state: WHOOP installed, its check could not tell why it failed.
+    store.value = [
+      source({
+        id: "whoop",
+        name: "WHOOP",
+        status: "attention",
+        connection: "not-answering",
+      }),
+    ];
 
     // Act
     const { result } = renderHook(() => useHeaderAttention());
@@ -63,7 +67,7 @@ describe("useHeaderAttention", () => {
       count: 1,
       title: "1 source down",
       detail:
-        "Kaiord cannot read from a source — signing in again may restore it",
+        "WHOOP is not answering, so you cannot use it in Kaiord right now.",
     });
   });
 
@@ -87,7 +91,12 @@ describe("useHeaderAttention", () => {
     // A source the header calls down is one Settings calls needing
     // attention, never one it calls healthy.
     store.value = [
-      source({ id: "trainingpeaks", status: "attention", needsReauth: true }),
+      source({
+        id: "trainingpeaks",
+        name: "TrainingPeaks",
+        status: "attention",
+        connection: "signed-out",
+      }),
     ];
 
     // Act
@@ -95,7 +104,7 @@ describe("useHeaderAttention", () => {
 
     // Assert
     expect(result.current?.detail).toBe(
-      "Kaiord cannot read from a source — signing in again may restore it"
+      "You cannot use TrainingPeaks in Kaiord until you sign in to TrainingPeaks in this browser."
     );
   });
 });

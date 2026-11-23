@@ -94,7 +94,7 @@ test.describe("Garmin calendar — send week", () => {
     for (const item of await statuses(page).all())
       await expect(item).toContainText("In your library only");
     const links = panel(page).getByRole("link", {
-      name: "Update the extension",
+      name: "Update Kaiord for Garmin",
     });
     await expect(links).toHaveCount(1);
     await expect(links).toHaveAttribute("href", GARMIN_BRIDGE_STORE_URL);

@@ -6,6 +6,7 @@
  * connected: no state backs any of those, so the card cannot claim them.
  */
 import type { ManagedDataType } from "@kaiord/core";
+import type { ConnectionState } from "@kaiord/i18n";
 
 import type { ConnectionMechanism } from "../../types/connection";
 
@@ -30,14 +31,13 @@ export type ConnectionSource = {
   /** A stored record explicitly says the user unlinked this source. Separates
       "you disconnected it" from "the extension is not here". */
   readonly disconnected: boolean;
-  /** Only `trainingpeaks-bridge` ever propagates this today. */
-  readonly needsReauth: boolean;
   /**
-   * The extension answered with a protocol version this build cannot read.
-   * A diagnosis, not a failure — the fix is updating the extension, which no
-   * other attention cause shares.
+   * The Connection's verified state, which words its one notice through
+   * `connectionNotice` (`@kaiord/i18n`). `null` for a source that is not an
+   * extension, and for one the athlete disconnected while it is installed:
+   * its card offers Reconnect instead of a fix.
    */
-  readonly outdated: boolean;
+  readonly connection: ConnectionState | null;
   /**
    * Can this source's presence and session be re-checked at all? False for a
    * bridge with no prober: after its initial announcement nothing can learn it

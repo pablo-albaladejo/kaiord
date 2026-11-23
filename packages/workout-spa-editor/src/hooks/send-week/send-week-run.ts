@@ -5,6 +5,7 @@
  */
 import type { Analytics } from "@kaiord/core";
 
+import type { ConnectionState } from "../../application/connections/connection-state";
 import { bulkEvent } from "../../application/garmin-bulk/bulk-analytics";
 import {
   bulkPreflight,
@@ -26,8 +27,7 @@ export type SendWeekContext = {
   analytics: Analytics;
   features: readonly string[];
   routeActive: boolean;
-  bridgeInstalled: boolean;
-  sessionActive: boolean;
+  connection: ConnectionState;
 };
 
 export type SendWeekHandlers = {

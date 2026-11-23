@@ -18,6 +18,10 @@ export type GarminStubScriptArgs = {
   activities?: readonly unknown[];
   /** The ping's calendar features; `null` omits them (an older bridge). */
   features: readonly string[] | null;
+  /** The protocol every answer reports (default 1; another is outdated). */
+  protocolVersion?: number;
+  /** The ping's `gcApi` read result (default `{ ok: true }`). */
+  gcApi?: Record<string, unknown>;
 };
 
 export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
@@ -28,10 +32,11 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
     id: args.bridgeId,
     name: "Garmin (stub)",
     version: "0.0.0-stub",
-    protocolVersion: 1,
+    protocolVersion: args.protocolVersion ?? 1,
     capabilities: args.caps,
   };
-  const wrap = (data: unknown) => ({ ok: true, protocolVersion: 1, data });
+  const protocolVersion = args.protocolVersion ?? 1;
+  const wrap = (data: unknown) => ({ ok: true, protocolVersion, data });
   const features = args.features ? { features: args.features } : {};
   type Handled =
     { response: unknown; delayMs: number; ready?: Promise<void> } | undefined;
@@ -39,7 +44,7 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
     .__GARMIN_STUB__ as
     { handle: (a: string, m: unknown) => Handled } | undefined;
   const responses: Record<string, () => unknown> = {
-    ping: () => wrap({ ...m, gcApi: { ok: true }, ...features }),
+    ping: () => wrap({ ...m, gcApi: args.gcApi ?? { ok: true }, ...features }),
     "push-body-composition": () => wrap({ uploadId: "stub-body-composition" }),
     list: () => wrap([]),
     activities: () =>
@@ -64,7 +69,7 @@ export const installGarminStubScript = (args: GarminStubScriptArgs): void => {
           ? handled.response
           : (responses[action]?.() ?? {
               ok: false,
-              protocolVersion: 1,
+              protocolVersion,
               error: `Unknown action: ${action}`,
             });
         const answer = () => setTimeout(() => cb?.(r), handled?.delayMs ?? 0);

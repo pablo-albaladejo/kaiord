@@ -22,8 +22,12 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
     );
 
     // Assert
-    expect(screen.getByTestId("trainingpeaks-push-error")).toHaveTextContent(
-      "Inicia sesión en TrainingPeaks y vuelve a intentarlo."
+    const notice = screen.getByTestId("trainingpeaks-push-error");
+    expect(notice).toHaveTextContent(
+      "No puedes usar TrainingPeaks en Kaiord hasta que inicies sesión en TrainingPeaks en este navegador."
+    );
+    expect(screen.getByRole("link")).toHaveTextContent(
+      "Iniciar sesión en TrainingPeaks"
     );
   });
 
@@ -38,7 +42,8 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
 
     // Assert
     const text = screen.getByTestId("trainingpeaks-push-error").textContent;
-    expect(text).toMatch(/TrainingPeaks no responde/);
-    expect(text).toMatch(/Inténtalo de nuevo/);
+    expect(text).toBe(
+      "TrainingPeaks no responde, así que ahora mismo no puedes usarlo en Kaiord."
+    );
   });
 });

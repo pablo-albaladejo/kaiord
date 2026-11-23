@@ -28,10 +28,7 @@
     "sending": "Sending…",
     "sent": "On your Garmin",
     "garminPushError": {
-      "updated": "Kaiord for Garmin was updated. Try again.",
-      "signIn": "Sign in to Garmin Connect in this browser, then try again.",
-      "notPrepared": "This workout could not be prepared for Garmin. Try again.",
-      "notAnswering": "Garmin is not answering. Try again."
+      "notPrepared": "This workout could not be prepared for Garmin. Try again."
     },
     "sendToTrainingPeaks": "Send to TrainingPeaks",
     "sentToTrainingPeaks": "On TrainingPeaks",
@@ -45,19 +42,12 @@
       "cancel": "Cancel"
     },
     "trainingPeaksPushError": {
-      "noSteps": "This workout has no steps to send yet.",
-      "install": "Install Kaiord for TrainingPeaks to send this workout.",
-      "signIn": "Sign in to TrainingPeaks, then try again."
-    },
-    "sendDisabled": {
-      "noExtension": "Install the Kaiord extension for Garmin to send this workout.",
-      "signedOut": "Sign in to Garmin Connect in this browser to send this workout."
+      "noSteps": "This workout has no steps to send yet."
     },
     "trainingPeaksHorizon": {
       "beforeSend": "A Basic TrainingPeaks account accepts only today and tomorrow, counted in the account's time zone, so TrainingPeaks may refuse this day.",
       "refused": "TrainingPeaks refused this day, so the workout was not sent: a Basic account accepts only today and tomorrow, counted in the TrainingPeaks account's time zone."
-    },
-    "trainingPeaksNotAnswering": "TrainingPeaks is not answering. Try again."
+    }
   },
   "summary": {
     "duration": "Duration",
@@ -108,9 +98,8 @@
     "libraryOnly": {
       "insecure-context": "In your Garmin library, with no date: placing it on the calendar needs a secure (https) page.",
       "unsupported-browser": "In your Garmin library, with no date: this browser cannot place it on the calendar. An up-to-date browser can.",
-      "bridge-outdated": "In your Garmin library, with no date: update the Kaiord extension for Garmin to place it on the calendar."
+      "bridge-outdated": "In your Garmin library, with no date."
     },
-    "updateExtension": "Update the extension",
     "openConnections": "Open Connections",
     "recordDeletedOn": "This workout was deleted while it was being sent. It may still be on your Garmin calendar on {{date}}: remove it in Garmin Connect.",
     "failed": {
@@ -122,12 +111,9 @@
       "library-id-unknown": "Garmin did not return the workout's id. Send it again.",
       "schedule-endpoint": "Garmin's calendar did not accept the workout.",
       "schedule-rejected": "Garmin rejected this date for the workout.",
-      "needs-reauth": "Sign in to Garmin Connect again, then retry.",
-      "deadline-before-send": "The extension timed out before sending. Try again.",
       "library-push-failed": "The workout could not be sent to Garmin.",
       "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Connections, under Workout → Also sent to.",
       "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish.",
-      "calendar-unreadable": "Garmin is not answering, so nothing was sent. Try again.",
       "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to send it.",
       "incomplete-pace-zones": "This workout uses a pace zone the athlete doesn't define. Complete your pace zones in Athlete to send it.",
       "unsupported-pace-zone-sport": "Pace zones can only be sent to Garmin in running or swimming workouts.",
@@ -160,7 +146,6 @@
     "blockedCompleted": "The coach marked it completed — it can't be moved."
   },
   "garminDrift": {
-    "update": "Update Garmin",
-    "bridgeOutdated": "Update the Kaiord extension for Garmin to move this workout on the Garmin calendar."
+    "update": "Update Garmin"
   }
 }

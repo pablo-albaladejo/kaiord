@@ -42,6 +42,10 @@ export type GarminStubOptions = {
   delays?: Record<string, number>;
   /** Actions that commit on receipt but answer only after `releaseGarminStub`. */
   holds?: readonly string[];
+  /** The protocol every answer reports (default 1; another is outdated). */
+  protocolVersion?: number;
+  /** The ping's `gcApi` read result (default `{ ok: true }`). */
+  gcApi?: Record<string, unknown>;
 };
 
 /**
@@ -66,6 +70,8 @@ export const installGarminBridgeStub = async (
     activities: options.activities ?? [],
     features:
       options.features === undefined ? CALENDAR_FEATURES : options.features,
+    protocolVersion: options.protocolVersion,
+    gcApi: options.gcApi,
   });
   await target.addInitScript(installGarminAnnounceScript, {
     extensionId: GARMIN_EXTENSION_ID,

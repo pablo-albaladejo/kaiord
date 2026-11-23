@@ -53,9 +53,7 @@
     "since": "desde el {{date}}"
   },
   "sourceHealth": {
-    "noNewDataSince": "Sin datos nuevos desde {{date}}",
-    "noAccess": "Kaiord no puede leer de una fuente: volver a iniciar sesión puede restaurarlo",
-    "extensionOutdated": "Una extensión está desactualizada: actualízala para reanudar"
+    "several": "Cada una muestra su arreglo en Conexiones."
   },
   "verbs": {
     "send": "Enviar a Garmin",

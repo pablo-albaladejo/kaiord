@@ -3,7 +3,7 @@
   "intro": "Every source you have linked, what it is sending right now, and which one wins when two sources report the same thing.",
   "noProfile": "Create an athlete to add a connection.",
   "sources": "Sources",
-  "sourcesHint": "The Kaiord extension and permissions live inside each connection",
+  "sourcesHint": "Each connection holds its own extension and permissions",
   "platformAccess": "How Kaiord reaches each platform, and the risk",
   "unsupported": "Not available yet",
   "unsupportedHint": "Connecting these needs a server Kaiord does not run.",
@@ -23,8 +23,6 @@
     "refreshCooldown": "Just refreshed. Try again in a minute."
   },
   "banner": {
-    "one": "Kaiord cannot read from {{name}}",
-    "oneOutdated": "{{name}}'s Kaiord extension is out of date",
     "many": "{{count}} sources need attention",
     "paused": "No source is sending {{types}} right now.",
     "covered": "Nothing has stopped: every affected type also has another source switched on.",
@@ -43,15 +41,12 @@
   "detail": {
     "installed": "This extension announced itself when the page loaded. Kaiord cannot re-check it without downloading your whole export, so it may have been removed since.",
     "checking": "Asking the extension whether it still has a session.",
-    "noAccess": "Kaiord could not read from this source. Signing in again on its site can restore access; if you are already signed in, the source may be temporarily unavailable.",
-    "outdated": "This Kaiord extension is out of date. Update the extension to resume — signing in again will not help.",
     "disconnected": "You disconnected this source in Kaiord. The extension may still be installed.",
     "manual": "Anything you type into Kaiord yourself. Never switched off.",
     "unsupported": "Kaiord has no way to connect this account yet."
   },
-  "fixAtSource": "Sign in at {{name}} ↗",
-  "bridgeDetected": "{{name}} Kaiord extension · detected",
-  "bridgeAnnounced": "{{name}} Kaiord extension · detected on load",
+  "bridgeDetected": "Kaiord for {{name}} · detected",
+  "bridgeAnnounced": "Kaiord for {{name}} · detected on load",
   "lastSync": "Last data received {{when}}",
   "neverSynced": "No data received yet",
   "chips": {
@@ -80,7 +75,6 @@
       "encoding": "Encoding for Garmin…",
       "uploading": "Uploading to Garmin…",
       "done": "Sync complete",
-      "needsReauth": "Your mytanita.eu session expired — sign in there and try again.",
       "error": "Sync failed"
     },
     "disconnect": "Disconnect",
@@ -156,10 +150,8 @@
     "heart-rate-series": "Heart Rate Series"
   },
   "profileLink": {
-    "updateExtension": "Update the Kaiord extension for {{name}}.",
     "notLinked": "{{name}} is signed in on this browser but not linked to this athlete, so nothing syncs yet.",
     "link": "Link to this athlete",
-    "signIn": "{{name}} is not linked to this athlete. Sign in to {{name}} in this browser first, then link it here.",
     "linking": "Linking…",
     "linked": "Linked to this athlete as {{user}}. Unlike the rest of this page, the link is saved with the athlete, not just in this browser.",
     "unlink": "Unlink",
@@ -169,12 +161,6 @@
   },
   "sourceName": {
     "manual": "Manual Entry"
-  },
-  "ext": {
-    "requires": "Requires the Kaiord extension",
-    "install": "Install Kaiord extension",
-    "bannerTitle": "The Kaiord extension is not installed",
-    "bannerDetail": "Garmin, Train2Go, WHOOP, Tanita and TrainingPeaks connect through the Kaiord extension. Install it in this browser to connect them."
   },
   "scope": {
     "title": "{{name}}'s connections · in this browser",

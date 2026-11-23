@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 
+import type { ConnectionState } from "../application/connections/connection-state";
 import type { PushState } from "../contexts/garmin-bridge-types";
 import { executeList, INITIAL_PUSH_STATE } from "./garmin-bridge-operations";
 import {
@@ -13,7 +14,9 @@ export const useGarminBridgeActions = () => {
   const [sessionActive, setSessionActive] = useState(false);
   const [features, setFeatures] = useState<readonly string[]>([]);
   const [pushing, setPushing] = useState<PushState>(INITIAL_PUSH_STATE);
-  const [lastError, setLastError] = useState<string | null>(null);
+  // As `extensionInstalled` starts false: no extension has answered yet.
+  const [connection, setConnection] =
+    useState<ConnectionState>("not-installed");
 
   const detectExtension = useCallback(
     () =>
@@ -21,7 +24,7 @@ export const useGarminBridgeActions = () => {
         setExtensionInstalled,
         setSessionActive,
         setFeatures,
-        setLastError,
+        setConnection,
       }),
     []
   );
@@ -48,7 +51,7 @@ export const useGarminBridgeActions = () => {
     sessionActive,
     features,
     pushing,
-    lastError,
+    connection,
     detectExtension,
     pushWorkout,
     listWorkouts,

@@ -96,9 +96,25 @@ describe("useTrainingPeaksPush", () => {
     expect(mocks.checkSession).not.toHaveBeenCalled();
   });
 
+  it("should ask the athlete to sign in only when TrainingPeaks refused the sign-in", async () => {
+    // Arrange
+    mocks.checkSession.mockResolvedValue({
+      authenticated: false,
+      needsReauth: true,
+    });
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    const outcome = await result.current.push();
+
+    // Assert
+    expect(outcome).toEqual({ ok: false, reason: "sign-in" });
+    expect(mocks.executePush).not.toHaveBeenCalled();
+  });
+
   it.each([
     {
-      scenario: "the session is not authenticated",
+      scenario: "an older extension omits why it is not authenticated",
       session: { authenticated: false },
     },
     {
@@ -106,7 +122,7 @@ describe("useTrainingPeaksPush", () => {
       session: { authenticated: true, athleteId: undefined },
     },
   ])(
-    "should ask the athlete to sign in when $scenario",
+    "should not state a cause it did not verify when $scenario",
     async ({ session }) => {
       // Arrange
       mocks.checkSession.mockResolvedValue(session);
@@ -116,10 +132,7 @@ describe("useTrainingPeaksPush", () => {
       const outcome = await result.current.push();
 
       // Assert
-      expect(outcome).toEqual({
-        ok: false,
-        reason: "sign-in",
-      });
+      expect(outcome).toEqual({ ok: false, reason: "not-answering" });
       expect(mocks.executePush).not.toHaveBeenCalled();
     }
   );

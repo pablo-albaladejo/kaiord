@@ -195,13 +195,11 @@ describe("EditorPage", () => {
 
     expect(
       within(ribbon).getByText(
-        /Nothing can reach your watch from this browser/i
+        "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser."
       )
     ).toBeInTheDocument();
     expect(
-      within(ribbon).getByRole("button", {
-        name: /install the kaiord extension/i,
-      })
+      within(ribbon).getByRole("button", { name: "Install Kaiord for Garmin" })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();
     const stored = await db.table<WorkoutRecord>("workouts").get("w-test");
@@ -250,7 +248,7 @@ describe("EditorPage", () => {
 
     expect(
       within(ribbon).getByRole("button", {
-        name: /install the kaiord extension/i,
+        name: "Install Kaiord for Garmin",
       })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();

@@ -103,7 +103,7 @@ describe("EditorStateRibbon", () => {
 
   it("should still announce a broken chain's headline, without its fix", () => {
     // Arrange
-    gate.current = "no-extension";
+    gate.current = "not-installed";
 
     // Act
     render(<EditorStateRibbon state="ready" onSent={vi.fn()} />);
@@ -113,7 +113,10 @@ describe("EditorStateRibbon", () => {
       name: "Workout delivery status",
     });
     expect(region).toHaveTextContent(
-      /Nothing can reach your watch from this browser/
+      "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser."
+    );
+    expect(screen.getByRole("button")).toHaveTextContent(
+      "Install Kaiord for Garmin"
     );
     expect(within(region).queryAllByRole("button")).toEqual([]);
     expect(screen.getByRole("button")).toBeInTheDocument();

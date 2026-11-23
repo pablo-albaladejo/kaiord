@@ -122,8 +122,8 @@ describe("buildConnectionSources", () => {
     const sources = buildConnectionSources(INTEGRATIONS, s);
 
     // Assert
-    expect(byId(sources, "garmin")?.outdated).toBe(true);
-    expect(byId(sources, "tanita")?.outdated).toBe(false);
+    expect(byId(sources, "garmin")?.connection).toBe("outdated");
+    expect(byId(sources, "tanita")?.connection).toBe("working");
   });
 
   it("should claim no routes for an undiscovered extension", () => {

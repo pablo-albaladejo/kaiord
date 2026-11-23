@@ -18,6 +18,7 @@ import {
   type BridgeSessionSignal,
   sourceStatus,
 } from "./connection-source-status";
+import { sourceConnectionOf } from "./source-connection";
 
 export type ConnectionSourceSignals = BridgeRouteSignals & {
   record: (integrationId: string) => ConnectionRecord | undefined;
@@ -58,8 +59,7 @@ const buildOne = (
     bridgeDetected: detected,
     disconnected: record?.status === "disconnected",
     sessionVerifiable: bridgeId !== null && s.hasSessionProbe(bridgeId),
-    needsReauth: state?.needsReauth === true,
-    outdated: state?.outdated === true,
+    connection: sourceConnectionOf(entry, s, record?.status === "disconnected"),
     lastSyncAt: bridgeId === null ? undefined : s.lastSyncAt(bridgeId),
     importTypes:
       detected && bridgeId !== null
