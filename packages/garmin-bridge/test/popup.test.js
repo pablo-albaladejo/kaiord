@@ -83,6 +83,35 @@ describe("Garmin popup", () => {
     Date.now = originalNow;
   });
 
+  it("should say the session is not checked yet, and record no outage, when the check asked nothing", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      pingResponse: {
+        ok: true,
+        data: { session: "not-checked", gcApi: { ok: false } },
+      },
+    });
+    const dom = setupDom(chromeMock);
+
+    // Act
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+    const doc = dom.window.document;
+
+    // Assert
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Not checked yet"
+    );
+    expect(doc.body.textContent).not.toContain("No access to Garmin Connect");
+    expect(chromeMock.__store.bridgeHealth).toBeUndefined();
+    const actions = chromeMock.runtime.sendMessage.mock.calls.map(
+      ([m]) => m.action
+    );
+    expect(new Set(actions)).toEqual(new Set(["ping"]));
+  });
+
   it("renders connected state with athlete card and rollup", async () => {
     const dom = setupDom(
       buildChromeMock({
@@ -363,9 +392,9 @@ describe("Garmin popup", () => {
     expect(doc.getElementById("status-sub").textContent).toContain(
       "Garmin may be temporarily unavailable"
     );
-    expect(
-      doc.querySelector("[data-status-mark]").tagName.toLowerCase()
-    ).toBe("svg");
+    expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
+      "svg"
+    );
   });
 
   it("does not date an outage it has only just noticed", async () => {

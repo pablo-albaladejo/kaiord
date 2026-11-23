@@ -24,8 +24,10 @@ This package is `private: true` and is not published to npm.
 - Return **raw JSON** (except `read-workout`, which keeps only a workout's id
   and day). Parsing lives in `@kaiord/trainingpeaks` and runs SPA-side; this
   bridge does not import it.
-- Report session presence as a boolean (`ping` / `checkSession`) plus the
-  resolved athlete id, for the SPA connection pill — never exposing any token.
+- Check the Session without a request (`ping` / `checkSession`): the only
+  request the cookie authenticates mints a token, so the check reads only
+  whether a token minted for an earlier read or send is still valid, and
+  never exposes any token or the athlete id.
 
 The only contract is the `chrome.runtime` message shape, documented inline in
 `background.js`:
@@ -37,9 +39,12 @@ The only contract is the `chrome.runtime` message shape, documented inline in
   `402` is a date past the account's planning horizon.
 - `read-workout` → `{ workoutId, workoutDay }` of one workout by id, or an error
   envelope carrying `status` (a `404` means TrainingPeaks does not have it).
-- `ping` / `checkSession` → the bridge manifest plus `{ authenticated, athleteId }`;
-  when not authenticated, `needsReauth` says whether TrainingPeaks reported a
-  dead session or only failed to answer.
+- `ping` / `checkSession` → the bridge manifest plus `{ session, authenticated }`:
+  `session` is `signed-in` (a valid token is held) or `not-checked` (none is,
+  and the first real read or send finds out).
+- `read-athlete-id` → `{ athleteId }`, read when the Kaiord App is about to
+  send a workout; this is where the token is minted. A dead session answers
+  an error envelope with `needsReauth: true`.
 
 ## Least-privilege manifest
 

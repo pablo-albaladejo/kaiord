@@ -48,7 +48,7 @@ const buildChromeMock = ({ statusResponse, tabOpen = true, health } = {}) => {
   return {
     runtime: {
       sendMessage: vi.fn((msg, cb) => {
-        if (msg.action === "status") cb(statusResponse);
+        if (msg.action === "popup-status") cb(statusResponse);
         else if (msg.action === "tab-open")
           cb({ ok: true, data: { open: tabOpen } });
         else cb({ ok: false, error: "unknown" });
@@ -295,7 +295,7 @@ describe("WHOOP popup", () => {
     const dom = setupDom({
       runtime: {
         sendMessage: vi.fn((msg, cb) => {
-          if (msg.action === "status") {
+          if (msg.action === "popup-status") {
             cb({ ok: true, data: { connected: true } });
           } else {
             cb({ ok: false, error: "no response" });

@@ -42,6 +42,7 @@
   },
   "detail": {
     "installed": "Esta extensión se anunció al cargar la página. Kaiord no puede volver a comprobarla sin descargar tu exportación completa, así que puede que se haya eliminado desde entonces.",
+    "notChecked": "Kaiord no pregunta nada a través de esta extensión hasta que lee o envía: comprobarlo aquí generaría un token. Si la sesión funciona se sabe en la primera lectura o envío.",
     "checking": "Preguntando a la extensión si todavía tiene sesión.",
     "noAccess": "Kaiord no pudo leer de esta fuente. Volver a iniciar sesión en su web puede restaurar el acceso; si ya has iniciado sesión, puede que la fuente no esté disponible temporalmente.",
     "outdated": "Esta extensión de Kaiord está desactualizada. Actualiza la extensión para reanudar: volver a iniciar sesión no ayudará.",

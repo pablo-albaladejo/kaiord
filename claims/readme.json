@@ -489,7 +489,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
@@ -1003,7 +1003,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",

@@ -37,7 +37,13 @@ const useWhoopConnected = (isDiscovered: boolean): boolean => {
     let cancelled = false;
     readWhoopStatus(extensionId)
       .then((status) => {
-        if (!cancelled) setConnected(status.connected && status.userId != null);
+        // The typed outcome when the extension sends one; an older one is
+        // read through its id.
+        const signedIn =
+          status.session !== undefined
+            ? status.session === "signed-in"
+            : status.connected && status.userId != null;
+        if (!cancelled) setConnected(signedIn);
       })
       .catch(() => {
         if (!cancelled) setConnected(false);

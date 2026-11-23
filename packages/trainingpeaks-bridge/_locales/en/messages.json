@@ -31,6 +31,14 @@
     "message": "Sign in at trainingpeaks.com once — the bridge mints its token from that session, no password stored.",
     "description": "Status cause sentence explaining how to establish a session."
   },
+  "notChecked": {
+    "message": "Not checked yet",
+    "description": "Status verdict when no token is held: the check asks TrainingPeaks nothing, because its only Session request mints a token."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord asks TrainingPeaks the first time it reads or sends, so looking here mints no token.",
+    "description": "Status cause sentence for the not-checked state."
+  },
   "sessionEnded": {
     "message": "Session ended",
     "description": "Status verdict when the TrainingPeaks session cannot mint a token AND an earlier popup open already recorded the outage. Distinct from notSignedIn, which is a setup step still pending rather than something that broke."

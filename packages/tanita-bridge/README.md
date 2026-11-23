@@ -20,15 +20,18 @@ This package is `private: true` and is not published to npm.
   the connector research) is sufficient.
 - Return **raw CSV text only**. Parsing lives in `@kaiord/tanita` and runs
   SPA-side; this bridge does not import it.
-- Report session presence as a boolean (`ping` / `checkSession`) for the SPA
-  connection pill, never exposing any cookie value.
+- Check the Session with a `HEAD` of the export (`ping` / `checkSession`),
+  which downloads none of it, and report only the outcome, never any cookie
+  value.
 
 The only contract is the `chrome.runtime` message shape, documented inline in
 `background.js`:
 
 - `read-export-csv` → `{ ok: true, data: { csv: "<raw text>" } }`, or an error
   envelope with `needsReauth: true` when the session is dead.
-- `ping` / `checkSession` → the bridge manifest plus `{ authenticated }`.
+- `ping` / `checkSession` → the bridge manifest plus `{ session, authenticated }`:
+  `session` is `signed-in`, `signed-out` (MyTANITA sent the check to its
+  sign-in page) or `not-answering`, and `authenticated` its boolean.
 
 ## Least-privilege manifest
 

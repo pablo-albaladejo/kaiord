@@ -38,16 +38,17 @@ for development and testing (see "Build entrypoint" below).
 - Hold the bearer only in `chrome.storage.session` (memory-only; survives
   service-worker restarts, cleared on browser restart) and decode the
   numeric WHOOP user id from its JWT `custom:user_id` claim. The token is
-  never logged and its value is never returned to the SPA; the status
-  response carries `{ connected, userId, capturedAt }` — a boolean plus the
-  decoded account id and capture time — see `background.js`.
+  never logged and its value is never returned to the SPA. The status
+  response (the Session check) carries `{ connected, session, authenticated }`
+  only; the account id is answered to `read-user-id`, which the SPA sends
+  when it is about to import — see `background.js`.
 - Relay allowlisted `GET` reads to `api.prod.whoop.com` from the tab origin
   so the request carries the tab's own credentials: cycle details
   (recovery/HRV, sleep, strain, workouts), metric series (e.g. heart rate),
   the sports catalog, Advanced-Labs biomarker tests, and daily stress. Any
   other path or method is rejected before a network call is made.
 - Expose a small message-passing surface, split by caller. The SPA reaches
-  only `ping`, `status`, `whoop-fetch`, and `set-theme` (the app's theme
+  only `ping`, `status`, `read-user-id`, `whoop-fetch`, and `set-theme` (the app's theme
   preference for the popup) via `chrome.runtime.sendMessage`
   — `EXTERNAL_ACTIONS` in `background.js` — once it has discovered the
   extension ID at runtime through the vendored `kaiord-announce.js` content

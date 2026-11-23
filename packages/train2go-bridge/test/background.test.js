@@ -347,7 +347,7 @@ describe("background service worker (SW-direct)", () => {
   });
 
   describe("handleAction", () => {
-    it("should return the live session on ping", async () => {
+    it("should return the live profile on read-profile", async () => {
       // Arrange
       fetch.mockResolvedValueOnce(
         jsonResponse({
@@ -357,7 +357,7 @@ describe("background service worker (SW-direct)", () => {
       );
 
       // Act
-      const result = await handleAction({ action: "ping" });
+      const result = await handleAction({ action: "read-profile" });
 
       // Assert
       expect(result).toMatchObject({
@@ -414,7 +414,7 @@ describe("background service worker (SW-direct)", () => {
       fetch.mockResolvedValueOnce(jsonResponse({ success: true }));
 
       // Act
-      const result = await handleAction({ action: "ping" });
+      const result = await handleAction({ action: "read-profile" });
 
       // Assert
       expect(result).toMatchObject({

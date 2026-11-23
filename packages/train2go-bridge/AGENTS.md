@@ -9,7 +9,7 @@
 
 - Fetch `app.train2go.com` directly from the service worker with `credentials:"include"` (SW-direct) so the site's HttpOnly session cookie travels automatically — no content script on `app.train2go.com`, no relay hop
 - Expose an external message surface (`ping`, `request`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) for the App. `request` takes `{ method, path }` only, refuses anything outside `ALLOWED` (and any header or body) without a request, and answers `{ status, contentType, body }` unread
-- Answer the internal channel only from the extension's own pages (the popup), never a content script, and only `ping` and `read-week`: the popup's Session check and weekly figures are the one thing still read inside the extension
+- Answer the internal channel only from the extension's own pages (the popup), never a content script, and only `ping`, `read-profile` and `read-week`: the popup's Session check, the profile it shows (athlete, coach's name and notes) and its weekly figures are the one thing still read inside the extension. `ping` is the Session check and answers yes or no only (`{ session, authenticated, sessionActive }`, #1643)
 - Restrict communication to the exact Kaiord App origin (`https://kaiord.com/*`, no subdomain; `http://localhost:5173/*` and `http://localhost:5174/*` in dev builds only)
 - Persist the user profile snapshot via `chrome.storage.local`
 - Surface a dead session (redirect / login response) as `needsReauth` so the editor can prompt a re-login
@@ -78,7 +78,7 @@ Unit tests for all extension scripts (vitest + jsdom + chrome-API mock).
 
 - `chrome-mock.js` — Mock `chrome.*` APIs for testing
 - `*.test.js` — Test files for `background.js`, `parser.js`, `popup.js`, `kaiord-announce.js`, `profile-snapshot.js`
-- `request-confinement.test.js` — Every request goes to `app.train2go.com` with the browser's cookies and no other credential, only `GET`; `chrome.storage.local` holds popup state only; each connection check hands the App the coach's name and notes; only packaged scripts run. Proof for the listing and policy claims.
+- `request-confinement.test.js` — Every request goes to `app.train2go.com` with the browser's cookies and no other credential, only `GET`; `chrome.storage.local` holds popup state only; a connection check (`ping`) is one profile ping answering yes or no only; the athlete's profile and the coach's name and notes go only to `read-profile`; only packaged scripts run. Proof for the listing and policy claims.
 - `fixtures/` — HTML and JSON test data
 
 See [TESTING.md](./TESTING.md) for integration / smoke test procedures on real Train2Go sessions.

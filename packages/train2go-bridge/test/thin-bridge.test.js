@@ -139,7 +139,11 @@ describe("thin Bridge: closed path list", () => {
     const answers = [];
     for (const path of outside) {
       answers.push(
-        await answer(externalCb, { action: "request", method: "GET", path }, APP)
+        await answer(
+          externalCb,
+          { action: "request", method: "GET", path },
+          APP
+        )
       );
     }
 

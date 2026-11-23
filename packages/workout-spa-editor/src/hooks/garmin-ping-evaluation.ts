@@ -1,3 +1,8 @@
+import {
+  sessionMayBeUsed,
+  sessionOutcomeOf,
+} from "../adapters/bridge/bridge-session-outcome";
+
 /**
  * Reads the bridge's ping answer: installed, session, protocol and the
  * calendar `features` it supports (`[]` for a bridge that predates them).
@@ -32,10 +37,14 @@ export function evaluatePingResult(res: {
       error: "Update your Kaiord extension for Garmin",
       features,
     };
+  // `session` gates a send. A check that asked Garmin nothing ("not-checked")
+  // does not stop one: the send itself mints access and finds out.
+  const outcome = sessionOutcomeOf(res.data);
   const data = res.data as { gcApi?: { ok: boolean } } | undefined;
   return {
     installed: true,
-    session: data?.gcApi?.ok === true,
+    session:
+      outcome !== null ? sessionMayBeUsed(outcome) : data?.gcApi?.ok === true,
     error: null,
     features,
   };

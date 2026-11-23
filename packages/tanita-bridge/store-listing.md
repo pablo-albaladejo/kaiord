@@ -22,7 +22,7 @@ What it does:
 
 • Downloads your MyTANITA export, which holds every measurement in your history, and hands it to the Kaiord App exactly as MyTANITA sent it. The extension does not interpret the measurements; the Kaiord App does.
 • The Kaiord App asks for the export when you open its calendar, if Tanita is switched on for weight or body composition, and when you press Sync now. The Kaiord App turns it into weight and body-composition entries kept in your browser.
-• Each time you open the extension's popup or press Refresh, it downloads your whole export again only to learn whether it can still reach it. It keeps nothing of the export and shows only the answer.
+• Each time you open the extension's popup or press Refresh, it asks MyTANITA only for the export's headers, without downloading it, to learn whether you are still signed in. It shows only the answer.
 
 How it works:
 

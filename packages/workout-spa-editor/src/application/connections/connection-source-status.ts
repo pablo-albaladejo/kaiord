@@ -26,6 +26,8 @@ export type BridgeSessionSignal = {
   readonly needsReauth: boolean;
   /** The extension answered, in a protocol version this build cannot read. */
   readonly outdated: boolean;
+  /** The check asked the Platform nothing; known at the first real use. */
+  readonly notChecked?: true;
   readonly lastCheckedAt: number | null;
 };
 
@@ -45,6 +47,9 @@ export const bridgeSourceStatus = (
   if (!connected || state === undefined) return "available";
   if (state.checking) return "checking";
   if (!hasProbe) return "installed";
+  // The check could not tell without minting a token: the extension is
+  // there, and whether its Session works is learned at the first real use.
+  if (state.notChecked === true) return "installed";
   // Probed, but no answer on record yet: what its session is doing is not
   // known, and "checking" is the only state that says so.
   if (state.lastCheckedAt === null) return "checking";

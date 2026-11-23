@@ -11,3 +11,5 @@ export const dailyPath = (date: string, userId: string): string =>
   `/api/v2/workplan/daily/${date}?user=${userId}&source=sidebar`;
 
 export const DETAILS_PATH = "/user/details";
+
+export const PROFILE_PING_PATH = "/api/v2/profile/ping";

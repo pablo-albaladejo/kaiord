@@ -61,7 +61,10 @@ try {
 // path (no caller-supplied path reaches fetch), but the bridge still
 // refuses any mytanita.eu request outside this set. Locked against drift by
 // scripts/check-bridge-privacy-surface.mjs (single-physical-line entries).
-const ALLOWED = [{ method: "GET", pattern: /^\/en\/user\/export-csv$/ }];
+const ALLOWED = [
+  { method: "GET", pattern: /^\/en\/user\/export-csv$/ },
+  { method: "HEAD", pattern: /^\/en\/user\/export-csv$/ },
+];
 
 const isAllowed = (method, path) =>
   sessionFetch.isPathAllowed(ALLOWED, method, path);
@@ -115,19 +118,41 @@ const readExportCsv = async () => {
   return { csv: res.csv };
 };
 
-// Session probe for the SPA connection pill. Reports only a boolean — the
-// extension never sees the HttpOnly cookie, so no credential value can leak.
-// Manifest identity keys are spread FIRST and the boolean added after, and
-// the probe result is a boolean literal (never the response body).
-const checkSession = async () => {
-  const result = { ...BRIDGE_MANIFEST };
+// The Session check: a HEAD of the export, so MyTANITA answers with headers
+// and no body. A bounce to the login page (redirect, 401/403, or an HTML page
+// in place of the export) is a verified "signed-out"; any other failure means
+// MyTANITA did not answer, which is never reported as signed out.
+const probeExport = async () => {
+  if (!isAllowed("HEAD", EXPORT_CSV_PATH)) return "not-answering";
   try {
-    const res = await fetchExportCsv("GET");
-    result.authenticated = res.ok === true;
+    const response = await fetch(`${TANITA_ORIGIN}${EXPORT_CSV_PATH}`, {
+      method: "HEAD",
+      credentials: "include",
+      redirect: "manual",
+    });
+    if (
+      sessionFetch.isSessionRedirect(response) ||
+      sessionFetch.isAuthChallenge(response)
+    ) {
+      return "signed-out";
+    }
+    if (!response.ok) return "not-answering";
+    const contentType = response.headers?.get?.("content-type") || "";
+    return looksLikeHtml(contentType, "") ? "signed-out" : "signed-in";
   } catch {
-    result.authenticated = false;
+    return "not-answering";
   }
-  return result;
+};
+
+// Answers yes or no and nothing else: the manifest, the typed outcome and the
+// legacy boolean older Kaiord Apps read. No byte of the export is read.
+const checkSession = async () => {
+  const session = await probeExport();
+  return {
+    ...BRIDGE_MANIFEST,
+    session,
+    authenticated: session === "signed-in",
+  };
 };
 
 const handleAction = async (message) => {

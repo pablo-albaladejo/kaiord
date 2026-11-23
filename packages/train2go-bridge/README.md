@@ -21,6 +21,9 @@ Store workflow (`cws-publish.yml`) packages and uploads it.
   `open-train2go`, ...) that the SPA reaches via `chrome.runtime.sendMessage`
   once it has discovered the extension ID at runtime through the
   `kaiord-announce.js` content script.
+- Answer the connection check (`ping`) with yes or no only. The connect
+  flow reads the profile ping through `request`; the popup reads it through
+  the internal `read-profile` to show the coach's name and notes.
 - Restrict communication to Kaiord-controlled origins
   (exactly `https://kaiord.com/*`, no subdomain, plus `http://localhost:5173/*` and `http://localhost:5174/*`
   in dev builds only) so other websites cannot drive the bridge.

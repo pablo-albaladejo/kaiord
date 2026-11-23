@@ -131,6 +131,10 @@
       {
         "method": "GET",
         "pattern": "^\\/en\\/user\\/export-csv$"
+      },
+      {
+        "method": "HEAD",
+        "pattern": "^\\/en\\/user\\/export-csv$"
       }
     ],
     "external_actions": [
@@ -276,6 +280,7 @@
       "push-weight",
       "push-workout",
       "read-workout",
+      "read-athlete-id",
       "open-trainingpeaks",
       "set-theme"
     ],
@@ -365,6 +370,7 @@
     "external_actions": [
       "ping",
       "status",
+      "read-user-id",
       "whoop-fetch",
       "set-theme"
     ],

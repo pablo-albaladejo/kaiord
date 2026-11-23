@@ -140,22 +140,26 @@ const spaceReads = async (minIntervalMs) => {
 
 // ── Actions ──
 
-// Session probe for the SPA connection pill. Reports a boolean plus the
-// resolved athlete id (so the SPA can build write payloads); never the token.
-// When not authenticated, `needsReauth` says whether TrainingPeaks reported a
-// dead session or merely failed to answer.
+// The Session check: no request, no token minted, nothing stored. Answers
+// only the manifest, the typed outcome and the legacy boolean older Kaiord
+// Apps read; never the token, never the athlete id.
 const checkSession = async () => {
-  const result = { ...BRIDGE_MANIFEST };
-  try {
-    const probe = await tpAuth.checkTokenExchange(fetch);
-    result.authenticated = probe.ok === true;
-    if (probe.ok) result.athleteId = probe.athleteId;
-    else result.needsReauth = probe.needsReauth === true;
-  } catch {
-    result.authenticated = false;
-    result.needsReauth = false;
+  const session = await tpAuth.checkStoredToken();
+  return {
+    ...BRIDGE_MANIFEST,
+    session,
+    authenticated: session === "signed-in",
+  };
+};
+
+// The athlete id a write is built against, read when the Kaiord App is about
+// to send: this is where the token is minted, because a write follows.
+const readAthleteId = async () => {
+  const athleteId = await tpAuth.ensureAthleteId(fetch);
+  if (athleteId === null || athleteId === undefined) {
+    throw new Error("Could not resolve TrainingPeaks athlete id");
   }
-  return result;
+  return { athleteId };
 };
 
 // GET the consolidated timed metrics for a date range. Returns the raw JSON —
@@ -257,6 +261,8 @@ const handleAction = async (message) => {
       return await pushWorkout(message);
     case "read-workout":
       return await readWorkout(message);
+    case "read-athlete-id":
+      return await readAthleteId();
     case "open-trainingpeaks":
       await openTrainingPeaks();
       return null;
@@ -278,6 +284,7 @@ const EXTERNAL_ACTIONS = new Set([
   "push-weight",
   "push-workout",
   "read-workout",
+  "read-athlete-id",
   "open-trainingpeaks",
   "set-theme",
 ]);
@@ -315,6 +322,7 @@ if (typeof module !== "undefined") {
     pushWeight,
     pushWorkout,
     readWorkout,
+    readAthleteId,
     openTrainingPeaks,
     handleAction,
     dispatch,

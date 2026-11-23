@@ -57,6 +57,83 @@ describe("createTrain2GoCoachingTransport", () => {
     });
   });
 
+  it("should link from Train2Go's profile ping read through the thin Bridge, never from the yes-or-no ping", async () => {
+    // Arrange
+    const profilePing = {
+      success: true,
+      data: { user: { id: 28035, name: "Pablo", user_notes: "Knee" } },
+    };
+    const mockSend = vi.fn(
+      (_id: string, msg: { action: string }, cb: (r: unknown) => void) => {
+        cb(
+          msg.action === "request"
+            ? {
+                ok: true,
+                protocolVersion: 2,
+                data: {
+                  status: 200,
+                  contentType: "application/json",
+                  body: JSON.stringify(profilePing),
+                },
+              }
+            : { ok: true, protocolVersion: 2, data: { sessionActive: true } }
+        );
+      }
+    );
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: { lastError: null, sendMessage: mockSend },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    // Act
+    const result = await t.ping();
+
+    // Assert
+    expect(result).toEqual({
+      sessionActive: true,
+      externalUserId: "28035",
+      externalUserName: "Pablo",
+    });
+    expect(mockSend.mock.calls.map(([, msg]) => msg)).toEqual([
+      { action: "request", method: "GET", path: "/api/v2/profile/ping" },
+    ]);
+  });
+
+  it("should fall back to an older extension's ping, which still carries the profile", async () => {
+    // Arrange
+    const mockSend = vi.fn(
+      (_id: string, msg: { action: string }, cb: (r: unknown) => void) => {
+        cb(
+          msg.action === "request"
+            ? {
+                ok: false,
+                protocolVersion: 1,
+                error: "Origin or action not permitted",
+              }
+            : {
+                ok: true,
+                protocolVersion: 1,
+                data: { sessionActive: true, userId: 28035, userName: "Pablo" },
+              }
+        );
+      }
+    );
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: { lastError: null, sendMessage: mockSend },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    // Act
+    const result = await t.ping();
+
+    // Assert
+    expect(result.externalUserName).toBe("Pablo");
+    expect(mockSend.mock.calls.map(([, msg]) => msg.action)).toEqual([
+      "request",
+      "ping",
+    ]);
+  });
+
   it("should preserve a userId larger than Number.MAX_SAFE_INTEGER as a string at the JSON parse boundary", async () => {
     // Arrange
     const mockSend = vi.fn(

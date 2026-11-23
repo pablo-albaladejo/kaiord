@@ -41,6 +41,14 @@
       }
     }
   },
+  "notChecked": {
+    "message": "Not checked yet",
+    "description": "Status verdict when no still-valid access is held: the check asks Garmin nothing, because refreshing or minting access would issue a credential."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access.",
+    "description": "Status cause sentence for the not-checked state."
+  },
   "bridgeNotResponding": {
     "message": "Bridge not responding",
     "description": "Status verdict when the extension's background worker times out."

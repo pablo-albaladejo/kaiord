@@ -56,8 +56,8 @@ describe("connection attention over the real registry", () => {
     // Reachable state: the Tanita extension is installed and has announced
     // itself, so `refreshBridge` writes `{...undiscoveredEntry, discovered:
     // true}` — the no-prober branch — and never messages it again. There is
-    // no entry for it in `SESSION_PROBES` because its only session call
-    // downloads the whole export CSV.
+    // no entry for it in `SESSION_PROBES` because an older extension's
+    // session call downloads the whole export CSV.
     //
     // The card's STATUS is asserted as well as the count. Tanita's row is
     // permanently `lastCheckedAt: null`, which two separate guards reject,

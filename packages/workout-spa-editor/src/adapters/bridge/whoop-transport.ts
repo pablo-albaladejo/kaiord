@@ -14,19 +14,23 @@ import { z } from "zod";
 
 import type { WhoopFetchResult } from "../../application/whoop/whoop-fetch-result";
 import { whoopFetchResultSchema } from "../../application/whoop/whoop-fetch-result";
+import { SESSION_OUTCOMES } from "./bridge-session-outcome";
 import { sendBridgeMessage } from "./bridge-transport";
 
 const WHOOP_FETCH_TIMEOUT_MS = 30_000;
 const WHOOP_STATUS_TIMEOUT_MS = 5_000;
 
+// An extension with the cheap check answers `connected` and the typed
+// `session` only; an older one also sends the WHOOP id and capture time.
 const whoopStatusSchema = z.object({
   connected: z.boolean(),
-  userId: z.number().nullable(),
+  session: z.enum(SESSION_OUTCOMES).optional(),
+  userId: z.number().nullable().optional(),
   // The extension stores `whoopCapturedAt: Date.now()` and returns it verbatim,
   // so this is an epoch-millis NUMBER (or null before a session is captured) —
   // NOT a string. Getting this wrong makes safeParse reject a real connected
   // envelope, which would throw in readWhoopStatus and silently kill the sync.
-  capturedAt: z.number().nullable(),
+  capturedAt: z.number().nullable().optional(),
 });
 
 export type WhoopStatus = z.infer<typeof whoopStatusSchema>;

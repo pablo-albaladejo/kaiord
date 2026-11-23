@@ -42,6 +42,7 @@
   },
   "detail": {
     "installed": "This extension announced itself when the page loaded. Kaiord cannot re-check it without downloading your whole export, so it may have been removed since.",
+    "notChecked": "Kaiord asks nothing through this extension until it reads or sends: checking here would mint a token. Whether the session works is known at the first read or send.",
     "checking": "Asking the extension whether it still has a session.",
     "noAccess": "Kaiord could not read from this source. Signing in again on its site can restore access; if you are already signed in, the source may be temporarily unavailable.",
     "outdated": "This Kaiord extension is out of date. Update the extension to resume — signing in again will not help.",

@@ -9,9 +9,9 @@
  *
  * A bridge with NO prober is reported as discovered-only and is never
  * messaged. `tanita-bridge` is that bridge, and it cannot be pinged either:
- * its background script routes `ping` into the same `checkSession` that
- * downloads the whole export CSV, so a liveness ping would re-fetch the
- * user's entire body-composition history every pass. Its presence is
+ * an extension older than the cheap check routes `ping` into a
+ * `checkSession` that downloads the whole export CSV, so a liveness ping
+ * could re-fetch the athlete's entire body-composition history every pass. Its presence is
  * consequently NOT verifiable after the initial announcement, and the UI is
  * required to word its state accordingly rather than assert the extension is
  * still there. Lifting that needs a cheap `ping` in the extension.

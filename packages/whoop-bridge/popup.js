@@ -235,7 +235,7 @@ const refresh = async () => {
   setPausedBox(false);
   renderChips($, [], { region: "paused-region" });
   const [statusRes, tabRes] = await Promise.all([
-    sendMessage({ action: "status" }),
+    sendMessage({ action: "popup-status" }),
     sendMessage({ action: "tab-open" }),
   ]);
   const status = statusRes.ok ? (statusRes.data ?? {}) : {};

@@ -374,9 +374,9 @@ export const REQUIRED_RULES = [
     re: /injects no content script/i,
   },
   {
-    label: "Tanita single fixed read-only GET disclosed",
+    label: "Tanita read-only requests to one fixed export address disclosed",
     section: TANITA_SECTION,
-    re: /single, fixed, read-only `GET`/i,
+    re: /read-only requests to one fixed address, `[^`]+`: a `GET` that downloads the export and a `HEAD` that checks the connection/i,
   },
   {
     label: "Tanita no-third-party-sharing stated",
@@ -389,9 +389,9 @@ export const REQUIRED_RULES = [
     re: NO_TELEMETRY,
   },
   {
-    label: "Tanita session check downloading the whole export disclosed",
+    label: "Tanita session check by HEAD, downloading nothing, disclosed",
     section: TANITA_SECTION,
-    re: /Checking the Connection Downloads the Export/,
+    re: /Checking the Connection Downloads Nothing\*\*: .*it sends a `HEAD` request for the export, which returns no measurement/,
   },
   {
     label: "Tanita chrome.storage.local contents disclosed",
@@ -456,9 +456,9 @@ export const REQUIRED_RULES = [
     re: /accepts a request to add one weight measurement, but the Kaiord App does not send it today/i,
   },
   {
-    label: "TrainingPeaks token minted on every connection check disclosed",
+    label: "TrainingPeaks connection check minting no token disclosed",
     section: TRAININGPEAKS_SECTION,
-    re: /Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it/i,
+    re: /When the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks nothing and mints no token/i,
   },
   {
     label: "TrainingPeaks metrics read endpoint disclosed (metrics/v3)",

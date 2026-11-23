@@ -6,7 +6,7 @@ import { useTrainingPeaksPush } from "./use-trainingpeaks-push";
 
 const mocks = vi.hoisted(() => ({
   getExtensionId: vi.fn<() => string | undefined>(),
-  checkSession: vi.fn(),
+  readAthleteId: vi.fn(),
   executePush: vi.fn(),
   convert: vi.fn(),
   event: vi.fn(),
@@ -16,8 +16,8 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: mocks.getExtensionId },
 }));
 
-vi.mock("../adapters/trainingpeaks/trainingpeaks-transport", () => ({
-  checkTrainingPeaksSession: mocks.checkSession,
+vi.mock("../adapters/trainingpeaks/trainingpeaks-athlete-transport", () => ({
+  readTrainingPeaksAthleteId: mocks.readAthleteId,
 }));
 
 vi.mock("../application/export/execute-workout-push", () => ({
@@ -59,10 +59,7 @@ describe("useTrainingPeaksPush", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getExtensionId.mockReturnValue(EXTENSION_ID);
-    mocks.checkSession.mockResolvedValue({
-      authenticated: true,
-      athleteId: ATHLETE_ID,
-    });
+    mocks.readAthleteId.mockResolvedValue(ATHLETE_ID);
     mocks.convert.mockReturnValue({ title: "x" });
     mocks.executePush.mockResolvedValue({ externalId: WORKOUT_ID });
   });
@@ -93,43 +90,29 @@ describe("useTrainingPeaksPush", () => {
       ok: false,
       reason: "install",
     });
-    expect(mocks.checkSession).not.toHaveBeenCalled();
+    expect(mocks.readAthleteId).not.toHaveBeenCalled();
   });
 
-  it.each([
-    {
-      scenario: "the session is not authenticated",
-      session: { authenticated: false },
-    },
-    {
-      scenario: "the session is authenticated but names no athlete",
-      session: { authenticated: true, athleteId: undefined },
-    },
-  ])(
-    "should ask the athlete to sign in when $scenario",
-    async ({ session }) => {
-      // Arrange
-      mocks.checkSession.mockResolvedValue(session);
-
-      // Act
-      const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
-      const outcome = await result.current.push();
-
-      // Assert
-      expect(outcome).toEqual({
-        ok: false,
-        reason: "sign-in",
-      });
-      expect(mocks.executePush).not.toHaveBeenCalled();
-    }
-  );
-
-  it("should not ask to sign in when TrainingPeaks failed to answer the session check", async () => {
+  it("should ask the athlete to sign in when TrainingPeaks says the Session is gone as the athlete is read", async () => {
     // Arrange
-    mocks.checkSession.mockResolvedValue({
-      authenticated: false,
-      needsReauth: false,
-    });
+    mocks.readAthleteId.mockRejectedValue(
+      Object.assign(new Error("gone"), { needsReauth: true })
+    );
+
+    // Act
+    const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
+    const outcome = await result.current.push();
+
+    // Assert
+    expect(outcome).toEqual({ ok: false, reason: "sign-in" });
+    expect(mocks.executePush).not.toHaveBeenCalled();
+  });
+
+  it("should not ask to sign in when TrainingPeaks did not answer the athlete read", async () => {
+    // Arrange
+    mocks.readAthleteId.mockRejectedValue(
+      Object.assign(new Error("down"), { needsReauth: false })
+    );
 
     // Act
     const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
@@ -168,7 +151,7 @@ describe("useTrainingPeaksPush", () => {
     );
   });
 
-  it("should use the live session's athlete id, not one from storage", async () => {
+  it("should use the athlete id read just before the write, not one from storage", async () => {
     // Arrange
     const { result } = renderHook(() => useTrainingPeaksPush(RECORD));
 

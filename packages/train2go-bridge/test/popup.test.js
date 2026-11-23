@@ -58,7 +58,7 @@ const buildChromeMock = ({
   return {
     runtime: {
       sendMessage: vi.fn((msg, cb) => {
-        if (msg.action === "ping") cb(pingResponse);
+        if (msg.action === "read-profile") cb(pingResponse);
         else if (msg.action === "read-week") cb(readWeekResponse);
         else cb({ ok: false, error: "unknown" });
       }),
@@ -361,7 +361,8 @@ describe("Train2Go popup", () => {
     await flushAsync();
 
     const calls = mock.runtime.sendMessage.mock.calls.map((c) => c[0].action);
-    expect(calls).toContain("ping");
+    expect(calls).toContain("read-profile");
+    expect(calls).not.toContain("ping");
     expect(calls).not.toContain("read-week");
     expect(readFigures(dom)).toEqual([
       ["3", "planned"],

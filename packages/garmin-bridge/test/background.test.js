@@ -346,18 +346,19 @@ describe("background.js", () => {
   });
 
   describe("checkSession (ping)", () => {
-    it("reports authenticated + gcApi on the happy path", async () => {
+    it("should report signed-in from held, still-valid tokens without a request", async () => {
+      // Arrange
       seedTokens();
-      fetch.mockResolvedValueOnce(jsonResp([{ workoutId: 1 }]));
+      const before = fetch.mock.calls.length;
 
+      // Act
       const result = await checkSession();
 
+      // Assert
+      expect(result.session).toBe("signed-in");
       expect(result.authenticated).toBe(true);
-      expect(result.gcApi).toEqual({
-        ok: true,
-        status: 200,
-        data: [{ workoutId: 1 }],
-      });
+      expect(result.gcApi).toEqual({ ok: true });
+      expect(fetch.mock.calls.length).toBe(before);
       expect(result).toMatchObject({
         id: "garmin-bridge",
         name: "Garmin Connect",
@@ -370,7 +371,6 @@ describe("background.js", () => {
     it("should report the calendar feature flags outside the manifest", async () => {
       // Arrange
       seedTokens();
-      fetch.mockResolvedValueOnce(jsonResp([]));
 
       // Act
       const result = await checkSession();
@@ -387,39 +387,50 @@ describe("background.js", () => {
       expect(BRIDGE_MANIFEST).not.toHaveProperty("features");
     });
 
-    it("reports not-authenticated when there is no session to mint from", async () => {
-      // No stored tokens → mint from session → SSO page has no ticket.
-      fetch.mockResolvedValue(textResp("<html><form>sign in</form></html>"));
+    it("should report not-checked, minting nothing, when no token is held", async () => {
+      // Arrange
+      const before = fetch.mock.calls.length;
 
+      // Act
       const result = await checkSession();
 
+      // Assert
+      expect(result.session).toBe("not-checked");
       expect(result.authenticated).toBe(false);
-      expect(result.gcApi.ok).toBe(false);
+      expect(result.gcApi).toEqual({ ok: false });
+      expect(fetch.mock.calls.length).toBe(before);
     });
 
-    it("keeps manifest fields authoritative if the upstream API leaks id/version", async () => {
-      seedTokens();
-      fetch.mockResolvedValueOnce(
-        jsonResp({ id: "ATTACKER", version: "99.9.9", workouts: [] })
-      );
+    it("should report not-checked, refreshing nothing, when the OAuth2 token has expired", async () => {
+      // Arrange
+      await chrome.storage.local.set({
+        garminOAuth1: { oauth_token: "t", oauth_token_secret: "s" },
+        garminOAuth2: {
+          access_token: "bear",
+          expires_at: Math.floor(Date.now() / 1000) - 1,
+        },
+      });
+      const before = fetch.mock.calls.length;
 
+      // Act
       const result = await checkSession();
 
-      expect(result.id).toBe("garmin-bridge");
-      expect(result.version).toBe(pkg.version);
-      // The rogue keys stay nested in gcApi.data (Zod strips gcApi SPA-side).
-      expect(result.gcApi.data.id).toBe("ATTACKER");
+      // Assert
+      expect(result.session).toBe("not-checked");
+      expect(fetch.mock.calls.length).toBe(before);
     });
 
-    it("wraps checkSession in the full SPA envelope via externalCb", async () => {
+    it("should wrap checkSession in the full SPA envelope via externalCb", async () => {
+      // Arrange
       seedTokens();
-      fetch.mockResolvedValueOnce(jsonResp([{ workoutId: 1 }]));
       const sendResponse = vi.fn();
 
+      // Act
       externalCb({ action: "ping" }, SPA_SENDER, sendResponse);
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 
-      expect(sendResponse.mock.calls[0][0]).toMatchObject({
+      // Assert
+      expect(sendResponse.mock.calls[0][0]).toEqual({
         ok: true,
         protocolVersion: 1,
         data: {
@@ -429,8 +440,9 @@ describe("background.js", () => {
           protocolVersion: 1,
           capabilities: ["write:workouts", "read:activities", "write:body"],
           features: ["calendar-write-v1", "calendar-find-v1"],
+          session: "signed-in",
           authenticated: true,
-          gcApi: { ok: true, status: 200, data: [{ workoutId: 1 }] },
+          gcApi: { ok: true },
         },
       });
     });

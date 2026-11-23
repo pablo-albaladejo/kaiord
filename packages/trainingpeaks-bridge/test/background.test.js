@@ -156,6 +156,7 @@ describe("background.js", () => {
         "push-weight",
         "push-workout",
         "read-workout",
+        "read-athlete-id",
         "open-trainingpeaks",
         "set-theme",
       ];
@@ -573,16 +574,17 @@ describe("background.js", () => {
   });
 
   describe("checkSession", () => {
-    it("should report authenticated and the athlete id on a live session", async () => {
+    it("should report not-checked and make no request when no token is held", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce(tokenResponse(tokenPayload("tok")));
+      const before = fetch.mock.calls.length;
 
       // Act
       const result = await checkSession();
 
       // Assert
-      expect(result.authenticated).toBe(true);
-      expect(result.athleteId).toBe(ATHLETE_ID);
+      expect(result.session).toBe("not-checked");
+      expect(result.authenticated).toBe(false);
+      expect(fetch.mock.calls.length).toBe(before);
       expect(result).toMatchObject({
         id: "trainingpeaks-bridge",
         name: "TrainingPeaks",
@@ -592,49 +594,65 @@ describe("background.js", () => {
       });
     });
 
-    it("should report not-authenticated when the session is dead", async () => {
+    it("should report signed-in while a token a real request minted is still valid", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+      await chrome.storage.local.set({
+        tpAccessToken: {
+          accessToken: SECRET_TOKEN,
+          expiresAt: Math.floor(Date.now() / 1000) + 3600,
+          athleteId: ATHLETE_ID,
+        },
+      });
 
       // Act
       const result = await checkSession();
 
       // Assert
-      expect(result.authenticated).toBe(false);
+      expect(result.session).toBe("signed-in");
+      expect(result.authenticated).toBe(true);
+      expect(result.athleteId).toBeUndefined();
+      expect(JSON.stringify(result)).not.toContain(SECRET_TOKEN);
     });
 
-    it("should say the session is dead only when TrainingPeaks said so", async () => {
+    it("should report not-checked once the held token has expired", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+      await chrome.storage.local.set({
+        tpAccessToken: {
+          accessToken: SECRET_TOKEN,
+          expiresAt: Math.floor(Date.now() / 1000) - 1,
+          athleteId: ATHLETE_ID,
+        },
+      });
 
       // Act
       const result = await checkSession();
 
       // Assert
-      expect(result.needsReauth).toBe(true);
+      expect(result.session).toBe("not-checked");
     });
+  });
 
-    it("should not call a server error on the token exchange a dead session", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(tokenResponse({}, { status: 500 }));
-
-      // Act
-      const result = await checkSession();
-
-      // Assert
-      expect(result.authenticated).toBe(false);
-      expect(result.needsReauth).toBe(false);
-    });
-
-    it("should never expose the access token in the probe response", async () => {
+  describe("readAthleteId", () => {
+    it("should mint the token and answer only the athlete id", async () => {
       // Arrange
       fetch.mockResolvedValueOnce(tokenResponse(tokenPayload(SECRET_TOKEN)));
 
       // Act
-      const result = await checkSession();
+      const result = await handleAction({ action: "read-athlete-id" });
 
       // Assert
-      expect(JSON.stringify(result)).not.toContain(SECRET_TOKEN);
+      expect(result).toEqual({ athleteId: ATHLETE_ID });
+    });
+
+    it("should carry needsReauth when TrainingPeaks says the session is dead", async () => {
+      // Arrange
+      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
+
+      // Act
+      const attempt = handleAction({ action: "read-athlete-id" });
+
+      // Assert
+      await expect(attempt).rejects.toMatchObject({ needsReauth: true });
     });
   });
 

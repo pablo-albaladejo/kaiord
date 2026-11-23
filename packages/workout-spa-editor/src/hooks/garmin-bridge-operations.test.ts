@@ -35,6 +35,29 @@ describe("evaluatePingResult", () => {
     expect(result).toEqual({ installed: false });
   });
 
+  it.each([
+    { outcome: "signed-in", session: true },
+    { outcome: "not-checked", session: true },
+    { outcome: "signed-out", session: false },
+    { outcome: "not-answering", session: false },
+  ])(
+    "should let a send go ahead on $outcome only when nothing verified it cannot",
+    ({ outcome, session }) => {
+      // Arrange
+      const res = {
+        ok: true,
+        protocolVersion: 1,
+        data: { session: outcome, gcApi: { ok: outcome === "signed-in" } },
+      };
+
+      // Act
+      const result = evaluatePingResult(res);
+
+      // Assert
+      expect(result).toMatchObject({ installed: true, session, error: null });
+    }
+  );
+
   it("should detect supported protocol version", () => {
     // Arrange
 

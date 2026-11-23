@@ -5,8 +5,10 @@
  * athlete card from cached profile-snapshot, weekly figures
  * (planned / done / workload) over a completion bar with a 5-minute
  * `lastWeeklyRollup` TTL cache, collapsible coach notes, CTA pair.
- * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s, ping
- * 3 s, rollup 8 s). Retry only appears on user-resolvable failures;
+ * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s,
+ * profile read 3 s, rollup 8 s). The profile read is an explicit read the
+ * athlete asks for by opening the popup, not the Session check the Kaiord
+ * App runs: the check answers only yes or no. Retry only appears on user-resolvable failures;
  * rollup-only timeout preserves the connected state.
  *
  * The primary CTA is whatever fixes the current state: logging back in at
@@ -330,7 +332,7 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
   let ping;
   try {
     ping = await withTimeout(
-      sendMessage({ action: "ping" }),
+      sendMessage({ action: "read-profile" }),
       PHASE_TIMEOUT_MS,
       "ping"
     );
