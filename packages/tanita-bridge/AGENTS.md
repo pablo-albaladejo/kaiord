@@ -16,7 +16,8 @@ version 2): the App reaches it only through `{ action: "request", method,
 path, body? }`, which runs only an entry of the closed `ALLOWED` list in
 `background.js` (method + path pattern, and for a write the name of the body
 schema the vendored `bridge-request-gate.js` checks it against) and answers
-MyTANITA's answer unread as `{ status, contentType, body }`. What to ask for,
+MyTANITA's answer unread but for its Session secrets (removed by
+the vendored `bridge-answer.js`) as `{ status, contentType, body }`. What to ask for,
 how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/tanita/`, which also tells a login page from the export). The App
 falls back to the protocol-1 actions for the store version. The internal
 channel uses `createInternalDispatch`: only the popup is answered, never a
@@ -51,7 +52,7 @@ only the theme is stored by the service worker.
 
 ### Vendored bridge-core files
 
-`bridge-envelope.js`, `session-fetch.js`, `kaiord-announce.js`,
+`bridge-envelope.js`, `bridge-answer.js`, `session-fetch.js`, `kaiord-announce.js`,
 `bridge-popup-utils.js`, `bridge-popup-shell.js`, `popup.css`, and
 `test/{chrome-mock,bridge-envelope.test,bridge-popup-shell.test}.js` are
 byte-identical vendored copies of `packages/_shared/bridge-core/` masters —

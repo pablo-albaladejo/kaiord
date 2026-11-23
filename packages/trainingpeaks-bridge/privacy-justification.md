@@ -47,5 +47,6 @@ Every request except the token exchange carries the token as `Authorization: Bea
 - **No password**: The extension never reads, stores, or transmits your TrainingPeaks password. It reuses the browser's existing TrainingPeaks sign-in to get a token.
 - **No cookie access**: The extension does not declare the `cookies` permission and cannot read your TrainingPeaks cookie; Chrome attaches it to the token request and to no other.
 - **Token stays in your browser**: The token lives in `chrome.storage.local` and is sent only to TrainingPeaks. No answer the extension gives the Kaiord App contains it.
+- **Sign-in secrets removed from answers**: Before the extension hands the Kaiord App an answer, it removes anything in it tied to your TrainingPeaks sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today.
 - **Requests to TrainingPeaks only**: Every request the extension makes goes to `tpapi.trainingpeaks.com`. Opening TrainingPeaks from the popup only opens `https://app.trainingpeaks.com/` in a new tab.
 - **No analytics or tracking**: The extension has no analytics, error reporting or telemetry.

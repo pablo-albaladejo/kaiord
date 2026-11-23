@@ -36,6 +36,7 @@ Your tokens and your data:
 
 • The Garmin tokens are kept in your browser (chrome.storage.local) and are sent only to Garmin. They never travel to Kaiord.
 • The extension sends requests only to Garmin, and answers only the Kaiord App at https://kaiord.com.
+• Before it hands the Kaiord App an answer, the extension removes anything in it tied to your Garmin sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. Garmin's answers carry none today.
 • No analytics and no tracking. The extension keeps a short log of its own errors in your browser and sends it nowhere.
 • Removing the extension from Chrome deletes everything it stored.
 • Access through your own Garmin sign-in is unofficial: it is not a Garmin partner API, and it can stop working without notice.
@@ -67,6 +68,7 @@ Tus tokens y tus datos:
 
 • Los tokens de Garmin se guardan en tu navegador (chrome.storage.local) y solo se envían a Garmin. Nunca viajan a Kaiord.
 • La extensión solo envía peticiones a Garmin, y solo responde a Kaiord App en https://kaiord.com.
+• Antes de entregar una respuesta a Kaiord App, la extensión quita lo que en ella esté ligado a tu inicio de sesión de Garmin: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de Garmin no traen ninguno.
 • Sin analítica y sin rastreo. La extensión guarda en tu navegador un breve registro de sus propios errores y no lo envía a ningún sitio.
 • Quitar la extensión de Chrome borra todo lo que guardó.
 • El acceso a través de tu propio inicio de sesión de Garmin no es oficial: no es una API de socio de Garmin, y puede dejar de funcionar sin aviso.

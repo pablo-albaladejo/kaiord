@@ -73,6 +73,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+}
+
 // ── Dual-transport auth (bridge-specific; cookie→token→Bearer) ──
 let tpAuth;
 try {
@@ -155,15 +165,6 @@ const isAllowed = (method, path) =>
     (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
   );
 
-const toBridgeError = (fallback, res) => {
-  const msg =
-    res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
-  const err = new Error(msg);
-  if (typeof res?.status === "number") err.status = res.status;
-  if (res?.needsReauth) err.needsReauth = true;
-  return err;
-};
-
 // ── Actions ──
 
 // The Session check: no request, no token minted, nothing stored. Answers
@@ -195,8 +196,8 @@ const request = async (message) => {
     bodySchemas: BODY_SCHEMAS,
   })(message);
   const res = await tpAuth.tpapiFetch(path, method, body, fetch, { raw: true });
-  if (!res?.ok) throw toBridgeError("Request failed", res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  if (!res?.ok) throw answerCore.toBridgeError(res);
+  return answerCore.toAnswer(res);
 };
 
 const openTrainingPeaks = async () => {

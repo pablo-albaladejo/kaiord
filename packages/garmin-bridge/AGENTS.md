@@ -16,7 +16,8 @@ version 2): the App reaches it only through `{ action: "request", method,
 path, body? }`, which runs only an entry of the closed `ALLOWED` list in
 `background.js` (method + path pattern, and for a write the name of the body
 schema the vendored `bridge-request-gate.js` checks it against) and answers
-Garmin's answer unread as `{ status, contentType, body }`. What to ask for,
+Garmin's answer unread but for its Session secrets (removed by
+the vendored `bridge-answer.js`) as `{ status, contentType, body }`. What to ask for,
 how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/garmin/connector/`, `hooks/garmin-bridge-operations.ts`, `hooks/garmin-calendar-operations.ts`). The App
 falls back to the protocol-1 actions for the store version. The internal
 channel uses `createInternalDispatch`: only the popup is answered, never a
@@ -29,6 +30,9 @@ content script (`test/thin-bridge.test.js`).
 - `manifest.json` — Development manifest (MV3, service worker, `storage` permission, host permissions for `connect.garmin.com`, `connectapi.garmin.com`, `sso.garmin.com`).
 - `manifest.prod.json` — Production manifest for Chrome Web Store release (same surface, no localhost origins).
 - `background.js` — Service worker. The closed list with body schemas (`workout`, `fit-file`, `schedule`), `request` under one deadline and send cut-off, action routing for `ping`/`request`/`open-garmin`/`profile-snapshot(-clear)`/`set-theme`, swallowed-error telemetry.
+- `garmin-deadline.js` — The one deadline every request runs under (`boundedCall`: 25 s, no write after 15 s, `deadline-before-send` / `deadline-exceeded`).
+- `garmin-request-bodies.js` — The body schemas of the write entries: `workout` is the GCN @kaiord/garmin's writer emits (one segment; executable steps and repeat groups of executable steps; every key named, Garmin's own type keys; name ≤255, step notes ≤256, ≤100 steps, ≤50 per repeat), `fit-file` is `garmin-fit-check.js`, `schedule` is one date.
+- `garmin-fit-check.js` — Admits only the App's body-composition upload: a FIT file (≤4 KB, header and file CRC valid) of file type 9 "weight" holding one `file_id` then one `weight_scale` message, no other message, no developer field.
 - `garmin-oauth.js` — OAuth token minting (bridge-specific, NOT vendored). OAuth1 HMAC-SHA1 signer, session→ticket→OAuth1→OAuth2 mint, refresh-and-persist, `connectapiFetch` (optional abort `signal`, raced against the token lifecycle by `raceAbort`).
 - `kaiord-announce.js` — Content script injected on SPA origins (exactly `https://kaiord.com/*`; `http://localhost:5173/*` and `http://localhost:5174/*` in the dev manifest only). Announces extension ID and capabilities to the page via window message.
 - `profile-snapshot.js` — Hand-rolled validator for profile snapshot objects (plain JS, parity-tested against `@kaiord/core` Zod schema).
@@ -48,6 +52,11 @@ content script (`test/thin-bridge.test.js`).
   - `kaiord-announce.test.js` — Vendored from `_shared/bridge-core/test/` — edit the master, then `pnpm bridge:sync` (runtime detection, context invalidation).
   - `popup.test.js` — Popup UI tests (status rendering, snapshot staleness, fetch timeouts).
   - `profile-snapshot.test.js` — Profile validator tests (shape validation, pollution detection, length cap).
+  - `request-bodies.test.js` — The write bodies at the message contract: the App's own body-composition FIT and GCN writer output are sent; an activity, settings, workout or truncated FIT, a changed byte, an oversized body, unknown keys, wrong types, long strings and too many steps are refused with nothing sent.
+  - `answer-secrets.test.js` — Every answer is Garmin's, byte for byte, but for a credential member, which is dropped.
+  - `signed-out-verified.test.js` — needsReauth only when Garmin's sign-in page issues no ticket or a step answers 401; a 429, 403 or 5xx keeps its status.
+  - `legacy-ping.test.js` — The ping an older App tab reads never implies signed out.
+  - `fixtures/` — `body-composition-upload.fit` (output of @kaiord/fit `encodeBodyCompositionFit`) and `*.gcn.json` (output of @kaiord/garmin's writer), regenerated from those packages, never hand-edited.
   - `token-confinement.test.js` — A Session check (`ping`) makes no request, mints and stores nothing and carries no workout; tokens a real request minted stay in `chrome.storage.local`; no answer to any external action carries one; every request goes to `sso.garmin.com` or `connectapi.garmin.com`. Proof for the listing and policy claims.
 - **`icons/`** — Extension icons (16px, 48px, 128px PNG files referenced in manifest).
 - **`assets/`** — Chrome Web Store marketing assets (promo images, screenshots for listing).
@@ -154,7 +163,7 @@ Non-generated files beyond the AI agent's responsibility:
 
 ### Vendored bridge-core files
 
-`bridge-envelope.js`, `bridge-request-gate.js`, `bearer-fetch.js`,
+`bridge-envelope.js`, `bridge-answer.js`, `bridge-telemetry.js`, `bridge-request-gate.js`, `bearer-fetch.js`,
 `kaiord-announce.js`, `bridge-popup-utils.js`,
 `bridge-popup-shell.js`, `bridge-popup-snapshot.js`, `popup.css`,
 `profile-snapshot.js`, and

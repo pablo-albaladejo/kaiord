@@ -6,9 +6,11 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   ALLOWED,
+  EXCEPTION,
   FIXES,
   LOCALES,
   PATTERNS,
+  SOURCE_TABLES,
 } from "./connection-notices.vocab.mjs";
 import { failIfAny } from "./lib/guard-failure.mjs";
 
@@ -19,7 +21,9 @@ import { failIfAny } from "./lib/guard-failure.mjs";
 // @kaiord/i18n and every extension popup loads its vendored copy. This guard
 // fails on a fifth fix, on a second wording of a fix anywhere the athlete
 // reads the App or an extension, and on a popup that does not read the
-// source or names its Platform or sign-in page unlike the App.
+// source or names its Platform or sign-in page unlike the App. Beside the
+// fixes the source holds only the reasons that resolve by one of them, the
+// not-checked wordings, and the one exception, NO_TAB (vocab: EXCEPTION).
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 export const MASTER = "packages/_shared/bridge-core/connection-notices.js";
@@ -39,6 +43,89 @@ const words = (wording) =>
 
 const sameSet = (a, b) =>
   a.length === b.length && [...a].sort().join() === [...b].sort().join();
+
+const BANNED =
+  /\bbridge\b|kaiord extension|extensión de kaiord|signed out|sesión cerrada/i;
+
+const textProblems = (where, text) => {
+  const problems = [];
+  if (!String(text ?? "").includes("{platform}")) {
+    problems.push(`${MASTER}: ${where} does not name the Platform`);
+  }
+  if (/\{(?!platform\})[^}]*\}/.test(text ?? "")) {
+    problems.push(
+      `${MASTER}: ${where} uses a placeholder other than {platform}`
+    );
+  }
+  const banned = BANNED.exec(text ?? "");
+  if (banned) problems.push(`${MASTER}: "${banned[0]}" in "${text}"`);
+  return problems;
+};
+
+// One wording per key in each locale, the same keys in every locale.
+const tableProblems = (name, table, keys) => {
+  if (!sameSet(Object.keys(table ?? {}), LOCALES)) {
+    return [
+      `${MASTER}: ${name} locales are [${Object.keys(table ?? {})}], must be [${LOCALES}]`,
+    ];
+  }
+  return Object.entries(table).flatMap(([locale, byKey]) =>
+    !sameSet(Object.keys(byKey), keys)
+      ? [
+          `${MASTER}: ${name} ${locale} words [${Object.keys(byKey)}], must be [${keys}]`,
+        ]
+      : Object.entries(byKey).flatMap(([key, text]) =>
+          textProblems(`${name} ${locale}.${key}`, text)
+        )
+  );
+};
+
+/** Reasons, not-checked wordings, the one exception, and nothing else. */
+export function besideFixesProblems(api) {
+  const problems = Object.keys(api)
+    .filter((k) => typeof api[k] !== "function" && !SOURCE_TABLES.includes(k))
+    .map(
+      (k) =>
+        `${MASTER}: ${k} is neither one of the four fixes nor the one exception (${EXCEPTION})`
+    );
+  for (const [reason, fix] of Object.entries(api.REASONS ?? {})) {
+    if (!FIXES.includes(fix)) {
+      problems.push(
+        `${MASTER}: reason "${reason}" resolves by "${fix}", not one of [${FIXES}]`
+      );
+    }
+  }
+  problems.push(
+    ...tableProblems(
+      "REASON_WORDING",
+      api.REASON_WORDING,
+      Object.keys(api.REASONS ?? {})
+    ),
+    ...tableProblems(
+      "NOT_CHECKED",
+      api.NOT_CHECKED,
+      Object.keys(api.NOT_CHECKED?.en ?? {})
+    )
+  );
+  const exception = api[EXCEPTION] ?? {};
+  if (!sameSet(Object.keys(exception), LOCALES)) {
+    problems.push(
+      `${MASTER}: ${EXCEPTION} locales are [${Object.keys(exception)}], must be [${LOCALES}]`
+    );
+  }
+  for (const [locale, words] of Object.entries(exception)) {
+    if (!sameSet(Object.keys(words), ["message", "action"])) {
+      problems.push(
+        `${MASTER}: ${EXCEPTION} ${locale} must hold exactly one message and one action`
+      );
+    }
+    problems.push(
+      ...textProblems(`${EXCEPTION} ${locale}.message`, words.message),
+      ...textProblems(`${EXCEPTION} ${locale}.action`, words.action)
+    );
+  }
+  return problems;
+}
 
 /** The single source itself: four fixes, two locales, one wording each. */
 export function masterProblems(api) {
@@ -95,13 +182,10 @@ export function masterProblems(api) {
     }
   }
   for (const text of words(api.WORDING)) {
-    const banned =
-      /\bbridge\b|kaiord extension|extensión de kaiord|signed out|sesión cerrada/i.exec(
-        text
-      );
+    const banned = BANNED.exec(text);
     if (banned) problems.push(`${MASTER}: "${banned[0]}" in "${text}"`);
   }
-  return problems;
+  return [...problems, ...besideFixesProblems(api)];
 }
 
 const isAllowed = (where, text) =>

@@ -33,21 +33,9 @@
       }
     }
   },
-  "noTab": {
-    "message": "No WHOOP tab open",
-    "description": "Status verdict when a session bearer is held but no app.whoop.com tab is open to run reads in."
-  },
-  "noTabCause": {
-    "message": "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
-    "description": "Status cause sentence for the no-tab state."
-  },
   "keepsImported": {
     "message": "Everything already imported stays in Kaiord.",
     "description": "Consequence line: losing the session or the tab deletes nothing that has already arrived."
-  },
-  "resumeOpenTab": {
-    "message": "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
-    "description": "Consequence line naming what ends the no-tab state."
   },
   "readsNeedTab": {
     "message": "Kaiord reads through that open tab. Close every app.whoop.com tab and reads stop until you open one again.",
