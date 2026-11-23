@@ -72,5 +72,9 @@
     "healthAsk": "Ask first",
     "healthAlways": "Always send",
     "healthNever": "Don't send"
+  },
+  "kept": {
+    "title": "Kept on this device",
+    "traces": "Traces: what each run of the assistant did, when, with what result and at what cost. They never leave this browser: not to an AI provider, not to Drive sync, not in a backup. The newest 200 are kept, none older than 90 days."
   }
 }

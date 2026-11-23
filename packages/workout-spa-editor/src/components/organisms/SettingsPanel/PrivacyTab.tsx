@@ -2,6 +2,7 @@ import { useDestinationStatus } from "../../../hooks/use-destination-status";
 import { useTranslate } from "../../../i18n/use-translate";
 import { DataFlowInventory } from "./DataFlowInventory";
 import { PrivacyInformationSection } from "./PrivacyInformationSection";
+import { TracesSection } from "./traces/TracesSection";
 
 /** What leaves this browser, where it goes, and what is measured. */
 export const PrivacyTab: React.FC = () => {
@@ -11,6 +12,7 @@ export const PrivacyTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <DataFlowInventory active={active} />
+      <TracesSection />
       <PrivacyInformationSection />
 
       <section>

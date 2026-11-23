@@ -234,5 +234,53 @@
     "saving": "Saving…",
     "saved": "Saved ✓",
     "failed": "Could not save. Try again."
+  },
+  "traces": {
+    "title": "Traces",
+    "intro": "What each run of the assistant did: when, with what result and at what cost.",
+    "empty": "No Traces yet. Each run of the assistant leaves one here.",
+    "export": "Export all (JSON)",
+    "exportFailed": "The Traces could not be exported.",
+    "deleteAll": "Delete all",
+    "deleteConfirm": "Delete every Trace in this browser? This cannot be undone.",
+    "deleteConfirmAction": "Delete Traces",
+    "deleteCancel": "Cancel",
+    "feature": {
+      "chat": "Chat",
+      "generation": "Workout generation",
+      "batch": "Batch generation",
+      "lab_import": "Lab document"
+    },
+    "outcome": {
+      "ok": "Finished",
+      "failed": "Failed",
+      "stopped": "Stopped"
+    },
+    "model": "Provider and model",
+    "unit": "Prompt version",
+    "latency": "Took",
+    "latencyValue": "{{seconds}} s",
+    "calls": "Requests to the Provider",
+    "retries": "Retries",
+    "cost": "Cost",
+    "costUnknown": "unknown",
+    "tokens": "{{input}} input and {{output}} output tokens",
+    "tools": "Tools",
+    "noTools": "No Tool was called.",
+    "toolLine": "{{name}}: {{confirmation}}, {{result}}",
+    "confirmation": {
+      "athlete": "confirmed by you",
+      "automatic": "approved automatically",
+      "not_needed": "no confirmation needed"
+    },
+    "result": {
+      "ok": "done",
+      "refused": "refused",
+      "failed": "failed",
+      "unanswered": "not answered"
+    },
+    "sent": "Sent",
+    "sentNothing": "Nothing was sent.",
+    "sentLine": "To {{provider}}: {{kinds}}"
   }
 }

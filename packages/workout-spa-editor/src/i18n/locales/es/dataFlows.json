@@ -72,5 +72,9 @@
     "healthAsk": "Preguntar antes",
     "healthAlways": "Enviar siempre",
     "healthNever": "No enviar"
+  },
+  "kept": {
+    "title": "Se queda en este dispositivo",
+    "traces": "Trazas: lo que hizo cada ejecución del asistente, cuándo, con qué resultado y a qué coste. Nunca salen de este navegador: ni a un proveedor de IA, ni a la sincronización con Drive, ni en una copia de seguridad. Se guardan las 200 más recientes, ninguna de más de 90 días."
   }
 }
