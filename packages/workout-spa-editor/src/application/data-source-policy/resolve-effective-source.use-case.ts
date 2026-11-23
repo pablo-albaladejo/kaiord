@@ -2,37 +2,37 @@
  * resolveEffectiveSource — the multi-source read resolver (F3.2).
  *
  * Given (profileId, dataType, day), returns the effective record(s):
- *   - "union" (default, no companion row): every source's record for
- *     that day, each tagged with its real sourceBridgeId.
- *   - "priority": the record from the first source in `sourceOrder`
- *     that has data that day — falls back to the next source
- *     automatically when the preferred one has none; no source with
- *     data ⇒ an explicit empty result (never a silent guess).
+ *   - a choice in force (the matrix is not off, see `readAuthorityChoice`):
+ *     "union" keeps every source's record; "priority" reads the first
+ *     source in `sourceOrder` that has data that day, falls back to the next,
+ *     and with no source with data returns an explicit empty result.
+ *   - no choice in force: "automatic" for a kind the App picks an Authority
+ *     for (`automatic-authority.ts`), else "union".
  *
- * Reconciliation invariant (Architect): the order actually consulted is
- * `sourceOrder ∩ enabled import policies` — a source in the order
- * without an active import policy is skipped. "manual" is exempt from
- * this filter (it has no bridge/policy row; it's always active by
- * product decision, same as everywhere else in the hub).
+ * Under "priority" the order consulted is `sourceOrder ∩ enabled import
+ * policies`, "manual" exempt (it has no policy row). Under "automatic" no
+ * record is dropped: a source the rule does not name, or whose import is
+ * off, is read last rather than never.
  *
- * `getRecordsForDay` is injected so this stays a pure, adapter-free
- * function — the hooks layer wires it to the actual per-metric Dexie
- * table query (health records live in type-specific tables).
+ * `getRecordsForDay` is injected so this stays adapter-free.
  */
 import type { ManagedDataType } from "@kaiord/core";
 
 import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
-import type { DataTypeSourcePolicyRepository } from "./data-type-source-policy-repository.port";
+import { automaticOrder, hasAutomaticAuthority } from "./automatic-authority";
 import { effectiveSourceOrder } from "./effective-source-order";
+import {
+  type AuthorityChoiceDeps,
+  readAuthorityChoice,
+} from "./read-authority-choice";
 
 export type SourcedRecord<T> = {
   sourceBridgeId: string;
   record: T;
 };
 
-export type ResolveEffectiveSourceDeps<T> = {
-  sourcePolicyRepo: DataTypeSourcePolicyRepository;
-  policyRepo: IntegrationPolicyRepository;
+export type ResolveEffectiveSourceDeps<T> = AuthorityChoiceDeps & {
+  policyRepo: Pick<IntegrationPolicyRepository, "findByProfileDirection">;
   getRecordsForDay: (input: {
     profileId: string;
     dataType: ManagedDataType;
@@ -46,52 +46,62 @@ export type ResolveEffectiveSourceInput = {
   day: string;
 };
 
+type Ranked = "priority" | "automatic";
+
 export type ResolveEffectiveSourceResult<T> =
   | { mode: "union"; records: SourcedRecord<T>[] }
-  | { mode: "priority"; effective: SourcedRecord<T>; usedFallback: boolean }
-  | { mode: "priority"; effective: undefined; usedFallback: false };
+  | { mode: Ranked; effective: SourcedRecord<T>; usedFallback: boolean }
+  | { mode: Ranked; effective: undefined; usedFallback: false };
 
-const resolvePriority = <T>(
+const resolveInOrder = <T>(
+  mode: Ranked,
   order: readonly string[],
   recordsForDay: readonly SourcedRecord<T>[]
 ): ResolveEffectiveSourceResult<T> => {
   for (let i = 0; i < order.length; i++) {
     const match = recordsForDay.find((r) => r.sourceBridgeId === order[i]);
-    if (match)
-      return { mode: "priority", effective: match, usedFallback: i > 0 };
+    // Under "automatic" the order IS the rule, so no match is a fallback.
+    if (match) {
+      return {
+        mode,
+        effective: match,
+        usedFallback: mode === "priority" && i > 0,
+      };
+    }
   }
-  return { mode: "priority", effective: undefined, usedFallback: false };
+  const unnamed = mode === "automatic" ? recordsForDay.at(-1) : undefined;
+  return unnamed
+    ? { mode, effective: unnamed, usedFallback: true }
+    : { mode, effective: undefined, usedFallback: false };
 };
 
 export const resolveEffectiveSource = async <T>(
   deps: ResolveEffectiveSourceDeps<T>,
   input: ResolveEffectiveSourceInput
 ): Promise<ResolveEffectiveSourceResult<T>> => {
-  const { profileId, dataType, day } = input;
-  const recordsForDay = await deps.getRecordsForDay({
-    profileId,
-    dataType,
-    day,
-  });
-  const sourcePolicy = await deps.sourcePolicyRepo.findByProfileAndType({
-    profileId,
-    dataType,
-  });
-  const mode = sourcePolicy?.mode ?? "union";
-
-  if (mode === "union") {
+  const { profileId, dataType } = input;
+  const recordsForDay = await deps.getRecordsForDay(input);
+  const choice = await readAuthorityChoice(deps, { profileId, dataType });
+  if (choice === undefined && !hasAutomaticAuthority(dataType)) {
     return { mode: "union", records: recordsForDay };
   }
-
+  if (choice?.mode === "union") {
+    return { mode: "union", records: recordsForDay };
+  }
   const importPolicies = await deps.policyRepo.findByProfileDirection({
     profileId,
     dataType,
     direction: "import",
   });
-  const effectiveOrder = effectiveSourceOrder(
-    sourcePolicy?.sourceOrder ?? [],
-    importPolicies
-  );
-
-  return resolvePriority(effectiveOrder, recordsForDay);
+  return choice === undefined
+    ? resolveInOrder(
+        "automatic",
+        automaticOrder(dataType, importPolicies),
+        recordsForDay
+      )
+    : resolveInOrder(
+        "priority",
+        effectiveSourceOrder(choice.sourceOrder, importPolicies),
+        recordsForDay
+      );
 };

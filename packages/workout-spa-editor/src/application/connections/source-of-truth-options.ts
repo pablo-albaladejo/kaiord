@@ -16,10 +16,9 @@ import type { ManagedDataType } from "@kaiord/core";
 import { MANAGED_DATA_REGISTRY } from "@kaiord/core";
 
 import type {
-  DataTypeSourceMode,
   DataTypeSourcePolicy,
+  StoredSourceMode,
 } from "../../types/data-type-source-policy";
-import { DEFAULT_DATA_TYPE_SOURCE_MODE } from "../../types/data-type-source-policy";
 import type { IntegrationPolicyDirection } from "../../types/integration-policy";
 import { MANUAL_SOURCE_ID, rankedHead } from "./data-type-sources";
 import { orderSources } from "./order-sources";
@@ -35,7 +34,8 @@ export type SourceCapabilitySignals = {
 };
 
 export type SourceOfTruthOptions = {
-  readonly mode: DataTypeSourceMode;
+  /** "automatic" when the athlete has not chosen (the App's rule decides). */
+  readonly mode: StoredSourceMode;
   /** Storage keys, in the order the type is read today. */
   readonly choices: readonly string[];
   /** The choice ranked first, when the stored order ranks one of them. */
@@ -69,7 +69,7 @@ export const buildSourceOfTruthOptions = (
 ): SourceOfTruthOptions => {
   const saved = policy?.sourceOrder ?? [];
   const capable = sources.filter((id) => canServe(id, dataType, signals));
-  const mode = policy?.mode ?? DEFAULT_DATA_TYPE_SOURCE_MODE;
+  const mode = policy?.mode ?? "automatic";
   return {
     mode,
     choices: orderSources(capable, saved),
@@ -80,7 +80,7 @@ export const buildSourceOfTruthOptions = (
 /**
  * Offered only where the row has a decision to make: two or more sources, or
  * one source under a ranking already stored — which must stay reversible
- * however few sources are left. A lone source under the DEFAULT mode has
+ * however few sources are left. A lone source under the automatic rule has
  * nothing to choose between, so a control there could only change the stored
  * semantics without changing what is read.
  *

@@ -18,7 +18,11 @@ import {
 
 export type EffectiveSourceAnswer =
   | { mode: "union"; sources: string[] }
-  | { mode: "priority"; effectiveSource?: string; usedFallback: boolean };
+  | {
+      mode: "priority" | "automatic";
+      effectiveSource?: string;
+      usedFallback: boolean;
+    };
 
 const summarize = (
   result: ResolveEffectiveSourceResult<unknown>
@@ -26,7 +30,7 @@ const summarize = (
   result.mode === "union"
     ? { mode: "union", sources: result.records.map((r) => r.sourceBridgeId) }
     : {
-        mode: "priority",
+        mode: result.mode,
         effectiveSource: result.effective?.sourceBridgeId,
         usedFallback: result.usedFallback,
       };
@@ -42,6 +46,7 @@ export const getEffectiveSourceToday = async (
     {
       sourcePolicyRepo: persistence.dataTypeSourcePolicy,
       policyRepo: persistence.integrationPolicy,
+      userPreferences: persistence.userPreferences,
       getRecordsForDay: (i) => getHealthRecordsForDay(persistence, i),
     },
     { profileId, dataType, day }

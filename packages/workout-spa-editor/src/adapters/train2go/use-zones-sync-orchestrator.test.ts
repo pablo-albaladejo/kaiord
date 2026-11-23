@@ -62,6 +62,7 @@ const samplePayload = { cycling: { ftp: 210 } } as unknown as ZonesPayload;
 
 describe("useZonesSyncOrchestrator", () => {
   beforeEach(() => {
+    localStorage.clear();
     mockSyncZones.mockReset();
     mockCommit.mockReset();
     mockCommit.mockResolvedValue(undefined);
@@ -74,7 +75,7 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -82,7 +83,6 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Assert
     expect(toasts.error).toHaveBeenCalledWith(...ZONES_FETCH_FAILED);
-    expect(result.current.pending).toBeNull();
   });
 
   it("should call toasts.warning with ZONES_SHAPE_MISMATCH when reason is shape-mismatch", async () => {
@@ -92,7 +92,7 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -100,7 +100,6 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Assert
     expect(toasts.warning).toHaveBeenCalledWith(ZONES_SHAPE_MISMATCH);
-    expect(result.current.pending).toBeNull();
   });
 
   it("should call toasts.info with ZONES_UNSUPPORTED when reason is unsupported", async () => {
@@ -110,7 +109,7 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
     );
     await act(async () => {
       await result.current.runSync("p1");
@@ -118,10 +117,9 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Assert
     expect(toasts.info).toHaveBeenCalledWith(ZONES_UNSUPPORTED);
-    expect(result.current.pending).toBeNull();
   });
 
-  it("should set pending state when syncZones succeeds with conflicts", async () => {
+  it("should keep the athlete's numbers and ask nothing when Train2Go reports different ones", async () => {
     // Arrange
     mockSyncZones.mockResolvedValue({
       ok: true,
@@ -129,47 +127,22 @@ describe("useZonesSyncOrchestrator", () => {
       conflicts: [sampleConflict],
       payload: samplePayload,
     });
-    const toasts = buildToasts();
+    const offer = vi.fn();
 
     // Act
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
     );
     await act(async () => {
       await result.current.runSync("p1");
     });
 
     // Assert
-    expect(result.current.pending).toEqual({
-      profileId: "p1",
-      conflicts: [sampleConflict],
-      payload: samplePayload,
-    });
+    expect(mockCommit).not.toHaveBeenCalled();
+    expect(offer).toHaveBeenCalledTimes(1);
   });
 
-  it("should NOT set pending when syncZones succeeds with empty conflicts", async () => {
-    // Arrange
-    mockSyncZones.mockResolvedValue({
-      ok: true,
-      applied: [],
-      conflicts: [],
-      payload: samplePayload,
-    });
-    const toasts = buildToasts();
-
-    // Act
-    const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
-    );
-    await act(async () => {
-      await result.current.runSync("p1");
-    });
-
-    // Assert
-    expect(result.current.pending).toBeNull();
-  });
-
-  it("should call commitConflictResolution and clear pending when confirmDecisions runs with pending state", async () => {
+  it("should take Train2Go's numbers when the athlete uses the offer", async () => {
     // Arrange
     mockSyncZones.mockResolvedValue({
       ok: true,
@@ -177,17 +150,18 @@ describe("useZonesSyncOrchestrator", () => {
       conflicts: [sampleConflict],
       payload: samplePayload,
     });
-    const toasts = buildToasts();
+    const offer = vi.fn();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
     );
     await act(async () => {
       await result.current.runSync("p1");
     });
+    const takeTheirs = offer.mock.calls[0]?.[0] as () => Promise<void>;
 
     // Act
     await act(async () => {
-      await result.current.confirmDecisions({ "cycling.ftp": "accept" });
+      await takeTheirs();
     });
 
     // Assert
@@ -197,27 +171,9 @@ describe("useZonesSyncOrchestrator", () => {
       persistence,
       samplePayload
     );
-    expect(result.current.pending).toBeNull();
   });
 
-  it("should be a no-op when confirmDecisions runs without pending state", async () => {
-    // Arrange
-    const toasts = buildToasts();
-
-    // Act
-    const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
-    );
-    await act(async () => {
-      await result.current.confirmDecisions({ "cycling.ftp": "accept" });
-    });
-
-    // Assert
-    expect(mockCommit).not.toHaveBeenCalled();
-    expect(result.current.pending).toBeNull();
-  });
-
-  it("should clear pending state when cancel is called", async () => {
+  it("should not offer the same different numbers twice", async () => {
     // Arrange
     mockSyncZones.mockResolvedValue({
       ok: true,
@@ -225,20 +181,42 @@ describe("useZonesSyncOrchestrator", () => {
       conflicts: [sampleConflict],
       payload: samplePayload,
     });
-    const toasts = buildToasts();
+    const offer = vi.fn();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
     );
     await act(async () => {
       await result.current.runSync("p1");
     });
 
     // Act
-    act(() => {
-      result.current.cancel();
+    await act(async () => {
+      await result.current.runSync("p1");
     });
 
     // Assert
-    expect(result.current.pending).toBeNull();
+    expect(offer).toHaveBeenCalledTimes(1);
+  });
+
+  it("should offer nothing when Train2Go agrees with the athlete", async () => {
+    // Arrange
+    mockSyncZones.mockResolvedValue({
+      ok: true,
+      applied: [],
+      conflicts: [],
+      payload: samplePayload,
+    });
+    const offer = vi.fn();
+
+    // Act
+    const { result } = renderHook(() =>
+      useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
+    );
+    await act(async () => {
+      await result.current.runSync("p1");
+    });
+
+    // Assert
+    expect(offer).not.toHaveBeenCalled();
   });
 });

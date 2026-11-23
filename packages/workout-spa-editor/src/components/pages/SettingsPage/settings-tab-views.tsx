@@ -1,4 +1,6 @@
 import { CONNECTIONS_PATH } from "../../../routing/constants";
+import { CapabilityGate } from "../../atoms/CapabilityGate/CapabilityGate";
+import { AuthorityTab } from "../../organisms/AuthorityMatrix/AuthorityTab";
 import { AboutTab } from "../../organisms/SettingsPanel/AboutTab";
 import { AiTab } from "../../organisms/SettingsPanel/AiTab";
 import { CapabilitiesTab } from "../../organisms/SettingsPanel/CapabilitiesTab";
@@ -15,9 +17,18 @@ const TAB_ORDER: ReadonlyArray<SettingsTab> = [
   ...SETTINGS_PAGE_ROWS.map((row) => row.key),
 ];
 
+/* The section index never offers an off Capability's section; the gate keeps
+   its screen unreachable too. */
+const AuthoritySection = () => (
+  <CapabilityGate id="authority-matrix">
+    <AuthorityTab />
+  </CapabilityGate>
+);
+
 const TAB_VIEWS: Record<SettingsTab, React.FC> = {
   general: GeneralTab,
   capabilities: CapabilitiesTab,
+  authority: AuthoritySection,
   ai: AiTab,
   sync: SyncTab,
   data: DataTab,

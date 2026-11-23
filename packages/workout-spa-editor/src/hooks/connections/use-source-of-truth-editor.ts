@@ -1,14 +1,11 @@
 /**
- * The two `dataTypeSourcePolicy` writes the row's "Change" control performs,
- * through the same port the `set_data_route` chat tool writes — no new write
- * path. Switching a source on or off is a different store entirely
- * (`IntegrationPolicy`, see use-policy-toggle).
+ * The two `dataTypeSourcePolicy` writes the Authority matrix performs,
+ * through the same port the `set_data_route` Tool writes — no new write path.
  *
- * `pick` stores `priority`, which genuinely changes how the type is READ: the
- * resolver stops returning every source's record and starts consulting the
- * order. That consequence is stated in the panel before either button is
- * reachable. `keepAll` is the way back, and clears the stored order as it goes,
- * so a stale ranking cannot resurface.
+ * `pick` stores `priority`, led by the picked source. `automatic` hands the
+ * type back to the App's rule and clears the stored order as it goes, so a
+ * stale ranking cannot resurface; it is a row rather than a deletion so the
+ * hand-back syncs to the athlete's other devices like any other choice.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { useCallback } from "react";
@@ -25,7 +22,7 @@ export type SourceOfTruthEditor = {
     options: SourceOfTruthOptions,
     sourceId: string
   ) => Promise<void>;
-  keepAll: (dataType: ManagedDataType) => Promise<void>;
+  automatic: (dataType: ManagedDataType) => Promise<void>;
 };
 
 export const useSourceOfTruthEditor = (
@@ -49,17 +46,17 @@ export const useSourceOfTruthEditor = (
     [persistence, profileId]
   );
 
-  const keepAll = useCallback(
+  const automatic = useCallback(
     async (dataType: ManagedDataType) => {
       await persistence.dataTypeSourcePolicy.put({
         profileId,
         dataType,
-        mode: "union",
+        mode: "automatic",
         sourceOrder: [],
       });
     },
     [persistence, profileId]
   );
 
-  return { pick, keepAll };
+  return { pick, automatic };
 };

@@ -49,11 +49,12 @@ const makeDeps = (
   } as unknown as {
     findByProfileDirection: (input: unknown) => Promise<IntegrationPolicy[]>;
   },
+  userPreferences: { get: vi.fn(async () => undefined) },
   getRecordsForDay: vi.fn(async () => records),
 });
 
 describe("resolveEffectiveSource — union mode", () => {
-  it("should default to union with all sources when no companion row exists", async () => {
+  it("should keep every source of a kind with no Authority when no companion row exists", async () => {
     // Arrange
     const records = [
       { sourceBridgeId: "whoop-bridge", record: { score: 80 } },
@@ -64,7 +65,7 @@ describe("resolveEffectiveSource — union mode", () => {
     // Act
     const result = await resolveEffectiveSource(deps, {
       profileId: PROFILE_ID,
-      dataType: "sleep",
+      dataType: "activity",
       day: DAY,
     });
 

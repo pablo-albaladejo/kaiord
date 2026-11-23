@@ -44,8 +44,8 @@
     "keep": "Mantener {{value}}"
   },
   "autoImport": {
-    "title": "Deja que una fuente conectada actualice estos números",
-    "hint": "Apagado significa que nada sobrescribe un número que escribiste tú."
+    "title": "Traer números nuevos de una Plataforma conectada sin pedirlo",
+    "hint": "Los números que pones tú se mantienen siempre."
   },
   "connections": {
     "title": "Conexiones",

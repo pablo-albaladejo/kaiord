@@ -1,2 +1,9 @@
 export type SettingsTab =
-  "general" | "capabilities" | "ai" | "sync" | "data" | "privacy" | "about";
+  | "general"
+  | "capabilities"
+  | "authority"
+  | "ai"
+  | "sync"
+  | "data"
+  | "privacy"
+  | "about";

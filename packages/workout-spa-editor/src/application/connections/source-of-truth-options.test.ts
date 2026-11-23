@@ -96,7 +96,7 @@ describe("buildSourceOfTruthOptions", () => {
 
     // Assert
     expect(options.choices).toEqual(["whoop-bridge", "manual"]);
-    expect(options.mode).toBe("union");
+    expect(options.mode).toBe("automatic");
     expect(options.current).toBeUndefined();
   });
 

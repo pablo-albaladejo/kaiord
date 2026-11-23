@@ -37,6 +37,7 @@ const loadFailure = new Error("lazy import failed");
 
 describe("useZonesSyncOrchestrator with a failed import", () => {
   beforeEach(() => {
+    localStorage.clear();
     mockLazyImport.mockReset();
   });
 
@@ -45,7 +46,7 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
     mockLazyImport.mockRejectedValue(loadFailure);
     const toasts = buildToasts();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, toasts, vi.fn())
     );
 
     // Act
@@ -55,10 +56,9 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
 
     // Assert
     expect(toasts.error).toHaveBeenCalledWith(...ZONES_FETCH_FAILED);
-    expect(result.current.pending).toBeNull();
   });
 
-  it("should toast a failed fetch and keep the decisions pending when the commit fails to load", async () => {
+  it("should toast a failed fetch when taking Train2Go's numbers fails to load", async () => {
     // Arrange
     mockLazyImport
       .mockResolvedValueOnce({
@@ -71,24 +71,21 @@ describe("useZonesSyncOrchestrator with a failed import", () => {
       })
       .mockRejectedValueOnce(loadFailure);
     const toasts = buildToasts();
+    const offer = vi.fn();
     const { result } = renderHook(() =>
-      useZonesSyncOrchestrator(persistence, transport, toasts)
+      useZonesSyncOrchestrator(persistence, transport, toasts, offer)
     );
     await act(async () => {
       await result.current.runSync("p1");
     });
+    const takeTheirs = offer.mock.calls[0]?.[0] as () => Promise<void>;
 
     // Act
     await act(async () => {
-      await result.current.confirmDecisions({ "cycling.ftp": "accept" });
+      await takeTheirs();
     });
 
     // Assert
     expect(toasts.error).toHaveBeenCalledWith(...ZONES_FETCH_FAILED);
-    expect(result.current.pending).toEqual({
-      profileId: "p1",
-      conflicts: [conflict],
-      payload,
-    });
   });
 });

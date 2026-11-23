@@ -68,7 +68,7 @@ describe("optionsByType", () => {
 
     // Assert
     expect(options.get("weight")?.mode).toBe("priority");
-    expect(options.get("sleep")?.mode).toBe("union");
+    expect(options.get("sleep")?.mode).toBe("automatic");
   });
 });
 

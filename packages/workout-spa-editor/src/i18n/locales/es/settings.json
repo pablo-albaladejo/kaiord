@@ -13,6 +13,7 @@
   "tabs": {
     "general": "General",
     "capabilities": "Capacidades",
+    "authority": "Qué Plataforma decide",
     "ai": "IA",
     "sync": "Sincronización",
     "data": "Datos y copia de seguridad",
@@ -305,7 +306,21 @@
       "templates": {
         "name": "Plantillas",
         "hint": "Guarda un entreno como plantilla en la Biblioteca y prográmalo en cualquier día."
+      },
+      "authority-matrix": {
+        "name": "Elegir qué Plataforma decide",
+        "hint": "Cuando más de una Plataforma informa del mismo tipo de dato, Kaiord elige la que decide. Actívala para elegirla tú en cada tipo."
       }
     }
+  },
+  "authority": {
+    "intro": "Cuando más de una Plataforma informa del mismo tipo de dato, Kaiord elige la que decide. Lo que elijas aquí manda sobre Kaiord mientras esto siga activado; si lo desactivas, Kaiord vuelve a decidir y tus elecciones se guardan para la próxima vez.",
+    "empty": "Cada tipo de dato llega de una sola fuente, así que no hay nada que elegir.",
+    "choose": "Qué fuente decide {{type}}",
+    "automatic": "Automático",
+    "automaticNow": "Kaiord elige {{name}} para {{type}}; un valor que introduces tú gana ese día.",
+    "picked": "{{name}} decide {{type}}; las demás se usan los días en que no tenga nada.",
+    "keepsAll": "Kaiord guarda {{type}} de todas las fuentes a la vez.",
+    "stalled": "No se está leyendo nada de {{type}}: la fuente que elegiste está apagada. Elige otra, o Automático."
   }
 }

@@ -98,6 +98,7 @@
     "noSource": "No source",
     "manySources": "{{count}} sources",
     "unrankedNote": "kept side by side, none ranked first",
+    "automaticNote": "chosen by Kaiord; a value you enter yourself wins on its day",
     "noUsableSource": "No usable source",
     "rankedUnavailableNote": "ranked to sources that are switched off — nothing is being read",
     "sourceLastSent": "{{name}} last sent data {{when}}",
@@ -117,7 +118,8 @@
       "training": "Training",
       "recovery": "Recovery",
       "body": "Body"
-    }
+    },
+    "chooseAuthority": "Choose which Platform decides each kind of data"
   },
   "dataTypeHints": {
     "workout": "Completed structured sessions",

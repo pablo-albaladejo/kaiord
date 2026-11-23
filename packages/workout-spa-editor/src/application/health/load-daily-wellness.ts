@@ -10,7 +10,10 @@ import { mergeDailyWellnessByDay } from "./merge-daily-wellness";
 
 export type DailyWellnessReadDeps = Pick<
   PersistencePort,
-  "healthDaily" | "dataTypeSourcePolicy" | "integrationPolicy"
+  | "healthDaily"
+  | "dataTypeSourcePolicy"
+  | "integrationPolicy"
+  | "userPreferences"
 >;
 
 export const loadDailyWellness = async (
@@ -28,6 +31,7 @@ export const loadDailyWellness = async (
       {
         sourcePolicyRepo: deps.dataTypeSourcePolicy,
         policyRepo: deps.integrationPolicy,
+        userPreferences: deps.userPreferences,
       },
       { profileId, dataType: "daily-wellness" }
     ),

@@ -1,108 +1,79 @@
 /**
- * Two-phase orchestrator for the Train2Go zones-sync flow.
+ * The Train2Go zones sync. `syncZones` writes what fills an empty number
+ * and returns, unwritten, the numbers where Train2Go differs from what the
+ * athlete set: the athlete's own numbers always win, so nothing is asked.
+ * Once per set of different numbers the App offers to take Train2Go's
+ * instead (`offerTheirs`, a toast with one action: decide and offer undo,
+ * ADR 0003); using it commits every one of them as accepted.
  *
- * Phase 1 — `runSync(profileId)`: invokes the application's
- * `syncZones` use case. Silent fills land in the profile eagerly;
- * conflicts come back unwritten and are stashed in component state
- * to drive the dialog.
- *
- * Phase 2 — `confirmDecisions(decisions)`: invokes
- * `commitConflictResolution` with the user's per-row choices, then
- * clears the pending state. `cancel()` clears state without writing.
- *
- * Both use cases load on first call, outside the initial JS: the provider
- * mounting this hook is app-wide, but a zones sync only runs on a user
- * action or an opted-in auto-import. A failed load toasts like a failed
- * fetch; a failed commit load keeps the decisions pending for a retry.
- *
- * Failure toasts (`zones-sync-failure.ts`) are worded from the `coaching`
- * dictionary by reason, never from a failure's own text.
+ * Both use cases load on first call, outside the initial JS. Failure toasts
+ * (`zones-sync-failure.ts`) are worded from the `coaching` dictionary by
+ * reason, never from a failure's own text.
  */
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import type { useToast } from "../../hooks/use-toast";
 import { useActiveLocale } from "../../i18n/LocaleProvider";
 import { useTranslate } from "../../i18n/use-translate";
 import { lazyImport } from "../../lib/lazy-import";
-import { useUnsavedWork } from "../../lib/use-unsaved-work";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
   ConflictDecision,
   ConflictItem,
   FieldKey,
-  ZonesPayload,
 } from "../../types/coaching-zones";
+import { firstOffer } from "./zones-offer-memo";
 import { handleFailure } from "./zones-sync-failure";
 
-type Pending = {
-  profileId: string;
-  conflicts: readonly ConflictItem[];
-  payload: ZonesPayload;
-};
+export type OfferTheirs = (takeTheirs: () => Promise<void>) => void;
 
 export type ZonesSyncOrchestrator = {
-  pending: Pending | null;
   runSync: (profileId: string) => Promise<void>;
-  confirmDecisions: (
-    decisions: Record<FieldKey, ConflictDecision>
-  ) => Promise<void>;
-  cancel: () => void;
 };
+
+const acceptAll = (conflicts: readonly ConflictItem[]) =>
+  Object.fromEntries(conflicts.map((c) => [c.field, "accept"])) as Record<
+    FieldKey,
+    ConflictDecision
+  >;
 
 export const useZonesSyncOrchestrator = (
   persistence: PersistencePort,
   transport: CoachingTransport,
-  toasts: ReturnType<typeof useToast>
+  toasts: ReturnType<typeof useToast>,
+  offerTheirs: OfferTheirs
 ): ZonesSyncOrchestrator => {
-  const [pending, setPending] = useState<Pending | null>(null);
   const t = useTranslate("coaching");
   const locale = useActiveLocale();
-  useUnsavedWork(pending !== null);
 
   const runSync = useCallback(
     async (profileId: string) => {
+      const fail = (reason: string) => handleFailure(reason, toasts, t, locale);
       const loaded = await lazyImport(
         () => import("../../application/coaching/sync-zones")
       ).catch(() => null);
-      if (!loaded) {
-        handleFailure("transport-error", toasts, t, locale);
-        return;
-      }
+      if (!loaded) return fail("transport-error");
       const r = await loaded.syncZones(profileId, transport, persistence);
-      if (!r.ok) {
-        handleFailure(r.reason, toasts, t, locale);
+      if (!r.ok) return fail(r.reason);
+      if (r.conflicts.length === 0 || !firstOffer(profileId, r.conflicts)) {
         return;
       }
-      if (r.conflicts.length > 0) {
-        setPending({ profileId, conflicts: r.conflicts, payload: r.payload });
-      }
+      offerTheirs(async () => {
+        const commit = await lazyImport(
+          () => import("../../application/coaching/commit-conflict-resolution")
+        ).catch(() => null);
+        if (!commit) return fail("transport-error");
+        await commit.commitConflictResolution(
+          profileId,
+          acceptAll(r.conflicts),
+          persistence,
+          r.payload
+        );
+      });
     },
-    [transport, persistence, toasts, t, locale]
+    [transport, persistence, toasts, t, locale, offerTheirs]
   );
 
-  const confirmDecisions = useCallback(
-    async (decisions: Record<FieldKey, ConflictDecision>) => {
-      if (!pending) return;
-      const loaded = await lazyImport(
-        () => import("../../application/coaching/commit-conflict-resolution")
-      ).catch(() => null);
-      if (!loaded) {
-        handleFailure("transport-error", toasts, t, locale);
-        return;
-      }
-      await loaded.commitConflictResolution(
-        pending.profileId,
-        decisions,
-        persistence,
-        pending.payload
-      );
-      setPending(null);
-    },
-    [pending, persistence, toasts, t, locale]
-  );
-
-  const cancel = useCallback(() => setPending(null), []);
-
-  return { pending, runSync, confirmDecisions, cancel };
+  return { runSync };
 };

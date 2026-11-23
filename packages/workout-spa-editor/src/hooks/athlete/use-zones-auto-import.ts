@@ -9,7 +9,7 @@ const TRAINING_ZONES = "training-zones" as const;
 export type ZonesAutoImport = {
   /** At least one source can send zones, so the control has something to govern. */
   available: boolean;
-  /** True when a source is allowed to overwrite these numbers unasked. */
+  /** True when a source brings in new numbers by itself (never over the athlete's). */
   enabled: boolean;
   setEnabled: (next: boolean) => Promise<void>;
 };
