@@ -6,7 +6,8 @@ const consumeMock = vi.fn();
 const infoToast = vi.fn();
 const event = vi.fn();
 
-vi.mock("../adapters/dexie/dexie-v10-migration", () => ({
+vi.mock("../adapters/dexie/dexie-v10-migration", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   consumeLastV10Result: () => consumeMock(),
 }));
 
@@ -67,7 +68,7 @@ describe("useV10MigrationToast", () => {
       count: 1,
     });
     expect(infoToast).toHaveBeenCalledWith(
-      "1 workout linked to coaching activities"
+      "1 workout matched to a coaching activity"
     );
   });
 
@@ -85,7 +86,7 @@ describe("useV10MigrationToast", () => {
       count: 3,
     });
     expect(infoToast).toHaveBeenCalledWith(
-      "Workouts linked to coaching activities"
+      "Workouts matched to coaching activities"
     );
   });
 });

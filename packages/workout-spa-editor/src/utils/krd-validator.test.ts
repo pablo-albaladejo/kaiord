@@ -119,7 +119,9 @@ describe("validateKRD", () => {
         // Assert
         expect(caught).toBeInstanceOf(ValidationError);
         if (caught instanceof ValidationError) {
-          expect(caught.errors).toContainEqual({ field, message });
+          expect(caught.errors).toContainEqual(
+            expect.objectContaining({ field, message })
+          );
         }
       }
     );
@@ -195,7 +197,9 @@ describe("validateKRD", () => {
         // Assert
         expect(caught).toBeInstanceOf(ValidationError);
         if (caught instanceof ValidationError) {
-          expect(caught.errors).toContainEqual({ field, message });
+          expect(caught.errors).toContainEqual(
+            expect.objectContaining({ field, message })
+          );
         }
       }
     );

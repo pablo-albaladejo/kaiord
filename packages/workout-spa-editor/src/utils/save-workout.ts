@@ -8,10 +8,12 @@
  * - Requirement 36: Clear error feedback with retry options
  */
 
+import enErrors from "../i18n/locales/en/errors.json";
 import { stripIds } from "../store/strip-ids";
 import type { KRD, ValidationError } from "../types/krd";
 import { krdSchema } from "../types/schemas";
 import { formatZodError } from "../types/validation/formatters";
+import { errorMessage } from "./error-message";
 import { sanitizeFilename, triggerDownload } from "./save-workout.helpers";
 import { getStructuredWorkout } from "./structured-workout";
 
@@ -27,10 +29,8 @@ const resolveFilename = (krd: KRD, override?: string): string => {
 
 const saveErrorFromException = (error: unknown): ValidationError => ({
   path: ["save"],
-  message:
-    error instanceof Error
-      ? `Failed to save file: ${error.message}`
-      : "Failed to save file: Unknown error",
+  code: "save_failed",
+  message: `${enErrors.validation.save_failed}: ${errorMessage(error)}`,
 });
 
 /**

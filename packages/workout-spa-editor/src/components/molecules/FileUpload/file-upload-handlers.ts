@@ -1,3 +1,4 @@
+import type { Translate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { createParseError, parseFile } from "./file-parser";
 import { validateFileSize } from "./file-upload-constants";
@@ -41,12 +42,13 @@ export function createFileChangeHandler(
   handleError: (errorState: ErrorState) => void,
   createAbortController: () => AbortController,
   onImported?: (format: string) => void,
-  onWarnings?: (warnings: Array<string>) => void
+  onWarnings?: (warnings: Array<string>) => void,
+  t?: Translate
 ) {
   return async (file: File | undefined) => {
     if (!file) return;
 
-    const sizeError = validateFileSize(file);
+    const sizeError = validateFileSize(file, t);
     if (sizeError) {
       handleError(sizeError);
       return;
@@ -73,7 +75,7 @@ export function createFileChangeHandler(
     } catch (error) {
       // AbortError is an expected cancellation, not a real failure.
       if (error instanceof Error && error.name === "AbortError") return;
-      handleError(createParseError(error));
+      handleError(createParseError(error, t));
       return;
     }
     // Fire analytics outside the parse try so a throwing callback cannot

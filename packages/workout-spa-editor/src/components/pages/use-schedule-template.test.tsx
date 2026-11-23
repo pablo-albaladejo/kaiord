@@ -77,8 +77,8 @@ describe("useScheduleTemplate", () => {
     // Assert
     expect(mockToastError).toHaveBeenCalledTimes(1);
     expect(mockToastError).toHaveBeenCalledWith(
-      "No active profile",
-      "Open the profile manager to select or create one."
+      "No active athlete",
+      "Select or create an athlete before scheduling."
     );
     expect(mockPut).not.toHaveBeenCalled();
   });

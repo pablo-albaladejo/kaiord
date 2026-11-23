@@ -29,6 +29,8 @@
     "workoutsProcessed": "{{count}} entrenamientos",
     "workoutsProcessedSkipped": "{{count}} entrenamientos, {{skipped}} omitidos porque cambiaron mientras tanto",
     "noProvider": "Configura un proveedor de IA en Ajustes para procesar entrenamientos.",
+    "noModel": "Configura un proveedor de IA en Ajustes.",
+    "nothingToPrepare": "No hay nada que preparar esta semana.",
     "error": "El procesamiento por lotes encontró un error inesperado."
   },
   "reschedule": {

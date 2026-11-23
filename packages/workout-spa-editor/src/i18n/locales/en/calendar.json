@@ -29,6 +29,8 @@
     "workoutsProcessed": "{{count}} workouts",
     "workoutsProcessedSkipped": "{{count}} workouts, {{skipped}} skipped because they changed meanwhile",
     "noProvider": "Configure an AI provider in Settings to process workouts.",
+    "noModel": "Configure an AI provider in Settings.",
+    "nothingToPrepare": "Nothing to prepare this week.",
     "error": "Batch processing encountered an unexpected error."
   },
   "reschedule": {

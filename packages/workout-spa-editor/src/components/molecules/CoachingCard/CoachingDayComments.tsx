@@ -8,6 +8,7 @@
  * drives alignment styling only.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingDayComment } from "../../../types/coaching-day-notes-record";
 import { renderCoachingInline } from "../../organisms/CoachingSidebar/coaching-inline";
 import { formatCoachingDescription } from "../../organisms/CoachingSidebar/format-coaching-description";
@@ -35,6 +36,7 @@ export function CoachingDayComments({
 }: {
   comments: CoachingDayComment[];
 }) {
+  const t = useTranslate("coaching");
   if (comments.length === 0) return null;
   return (
     <div
@@ -42,7 +44,7 @@ export function CoachingDayComments({
       className="space-y-3 border-t border-edge pt-3"
     >
       <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-        Comments
+        {t("dialog.comments")}
       </h3>
       {comments.map((comment, ci) => (
         <div

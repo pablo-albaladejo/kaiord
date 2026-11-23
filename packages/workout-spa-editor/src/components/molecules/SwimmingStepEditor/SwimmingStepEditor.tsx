@@ -1,3 +1,4 @@
+import { useTranslate } from "../../../i18n/use-translate";
 import type { Equipment, SwimStroke } from "../../../types/krd";
 
 export type SwimmingStepEditorProps = {
@@ -7,23 +8,23 @@ export type SwimmingStepEditorProps = {
   onEquipmentChange: (equipment: Equipment) => void;
 };
 
-const STROKE_TYPES: Array<{ value: SwimStroke; label: string }> = [
-  { value: "freestyle", label: "Freestyle" },
-  { value: "backstroke", label: "Backstroke" },
-  { value: "breaststroke", label: "Breaststroke" },
-  { value: "butterfly", label: "Butterfly" },
-  { value: "drill", label: "Drill" },
-  { value: "mixed", label: "Mixed" },
-  { value: "im", label: "IM (Individual Medley)" },
+const STROKE_TYPES: ReadonlyArray<SwimStroke> = [
+  "freestyle",
+  "backstroke",
+  "breaststroke",
+  "butterfly",
+  "drill",
+  "mixed",
+  "im",
 ];
 
-const EQUIPMENT_TYPES: Array<{ value: Equipment; label: string }> = [
-  { value: "none", label: "None" },
-  { value: "swim_fins", label: "Fins" },
-  { value: "swim_kickboard", label: "Kickboard" },
-  { value: "swim_paddles", label: "Paddles" },
-  { value: "swim_pull_buoy", label: "Pull Buoy" },
-  { value: "swim_snorkel", label: "Snorkel" },
+const EQUIPMENT_TYPES: ReadonlyArray<Equipment> = [
+  "none",
+  "swim_fins",
+  "swim_kickboard",
+  "swim_paddles",
+  "swim_pull_buoy",
+  "swim_snorkel",
 ];
 
 export const SwimmingStepEditor = ({
@@ -32,6 +33,7 @@ export const SwimmingStepEditor = ({
   onStrokeTypeChange,
   onEquipmentChange,
 }: SwimmingStepEditorProps) => {
+  const t = useTranslate("editor");
   return (
     <div className="space-y-4">
       <div>
@@ -39,7 +41,7 @@ export const SwimmingStepEditor = ({
           htmlFor="stroke-type"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
         >
-          Stroke Type
+          {t("stepEditor.swim.strokeType")}
         </label>
         <select
           id="stroke-type"
@@ -48,8 +50,8 @@ export const SwimmingStepEditor = ({
           className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
           {STROKE_TYPES.map((stroke) => (
-            <option key={stroke.value} value={stroke.value}>
-              {stroke.label}
+            <option key={stroke} value={stroke}>
+              {t(`stepEditor.swim.stroke.${stroke}`)}
             </option>
           ))}
         </select>
@@ -60,7 +62,7 @@ export const SwimmingStepEditor = ({
           htmlFor="equipment"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
         >
-          Equipment
+          {t("stepEditor.swim.equipment")}
         </label>
         <select
           id="equipment"
@@ -69,8 +71,8 @@ export const SwimmingStepEditor = ({
           className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
           {EQUIPMENT_TYPES.map((equip) => (
-            <option key={equip.value} value={equip.value}>
-              {equip.label}
+            <option key={equip} value={equip}>
+              {t(`stepEditor.swim.gear.${equip}`)}
             </option>
           ))}
         </select>

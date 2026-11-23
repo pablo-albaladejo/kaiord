@@ -9,6 +9,7 @@
 
 import { Repeat } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 
 export type CreateRepetitionBlockButtonProps = {
@@ -28,6 +29,7 @@ export function CreateRepetitionBlockButton({
   disabled = false,
   className = "",
 }: CreateRepetitionBlockButtonProps) {
+  const t = useTranslate("editor");
   // Only show button when 2+ steps selected
   if (selectedCount < 2) {
     return null;
@@ -38,12 +40,12 @@ export function CreateRepetitionBlockButton({
       variant="primary"
       onClick={onClick}
       disabled={disabled}
-      aria-label={`Create repetition block from ${selectedCount} selected steps`}
+      aria-label={t("selection.createBlockCountAria", { count: selectedCount })}
       data-testid="create-repetition-block-button"
       className={className}
     >
       <Repeat className="h-4 w-4" />
-      Create Repetition Block ({selectedCount} steps)
+      {t("selection.createBlock", { count: selectedCount })}
     </Button>
   );
 }

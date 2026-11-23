@@ -6,6 +6,9 @@
     "subtitle": "Add a new lab report",
     "loading": "Loading…",
     "noProfile": "Create an athlete first to log lab analytics.",
+    "noValues": "Add at least one parameter value before saving",
+    "saveFailed": "Could not save the lab report — please retry",
+    "saved": "Lab report saved",
     "typedNote": "Labs are the one health surface with no source to sync from — every value here was typed, so it carries the date you entered it rather than a source name."
   },
   "form": {
@@ -49,6 +52,11 @@
   },
   "report": {
     "fasting": "fasting",
+    "origin": {
+      "report": "from report",
+      "catalog": "catalog fallback",
+      "none": "no range"
+    },
     "emptyValues": "This report has no parameters.",
     "hide": "Hide",
     "view": "View",

@@ -3,7 +3,7 @@
  *
  * Lives in its own file to keep the dialog under the editor's 80-line
  * component cap. Same XSS contract as the parent: labels from the
- * static `FIELD_LABELS` map, values rendered as React children.
+ * `zones` dictionary via `fieldLabel`, values rendered as React children.
  */
 import { useTranslate } from "../../../i18n/use-translate";
 import type {
@@ -11,7 +11,7 @@ import type {
   ConflictItem,
   FieldKey,
 } from "../../../types/coaching-zones";
-import { FIELD_LABELS, formatFieldValue } from "./field-labels";
+import { fieldLabel, formatFieldValue } from "./field-labels";
 
 type DecisionRadioProps = {
   field: FieldKey;
@@ -58,7 +58,7 @@ export const ConflictRow = ({
       data-testid={`zones-conflict-row-${conflict.field}`}
       className="rounded border border-edge p-2"
     >
-      <div className="text-sm font-medium">{FIELD_LABELS[conflict.field]}</div>
+      <div className="text-sm font-medium">{fieldLabel(conflict.field, t)}</div>
       <div className="mt-1 text-xs text-muted-foreground">
         {formatFieldValue(conflict.field, conflict.current, hrUnit)}
         <span aria-hidden="true"> → </span>

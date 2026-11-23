@@ -28,15 +28,12 @@ describe("isOutOfRange", () => {
 });
 
 describe("LAB_FLAG_STYLES", () => {
-  it("should provide a label and classes for every flag", () => {
+  it("should provide classes for every flag", () => {
     // Arrange
     const flags: LabFlag[] = ["in", "low", "high", "unknown"];
 
     // Act
-    const complete = flags.every(
-      (f) =>
-        LAB_FLAG_STYLES[f].label !== "" && LAB_FLAG_STYLES[f].className !== ""
-    );
+    const complete = flags.every((f) => LAB_FLAG_STYLES[f].className !== "");
 
     // Assert
     expect(complete).toBe(true);

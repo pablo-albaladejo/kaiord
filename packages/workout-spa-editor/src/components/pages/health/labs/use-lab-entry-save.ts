@@ -15,12 +15,10 @@ import { saveLabReport } from "../../../../application/lab/save-lab-report.use-c
 import { usePersistence } from "../../../../contexts/persistence-context";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
-
-const NO_VALUES_MSG = "Add at least one parameter value before saving";
-const SAVE_FAILED_MSG = "Could not save the lab report — please retry";
-const SAVED_MSG = "Lab report saved";
+import { useTranslate } from "../../../../i18n/use-translate";
 
 export function useLabEntrySave(onSaved: () => void) {
+  const t = useTranslate("labs-ui");
   const persistence = usePersistence();
   const toast = useToastContext();
   const active = useActiveProfileLive();
@@ -33,7 +31,7 @@ export function useLabEntrySave(onSaved: () => void) {
   ) => {
     const profileId = active?.id;
     if (!profileId) {
-      toast.error(SAVE_FAILED_MSG);
+      toast.error(t("entry.saveFailed"));
       return;
     }
     setIsSaving(true);
@@ -46,14 +44,14 @@ export function useLabEntrySave(onSaved: () => void) {
         provenance,
       });
       if (!submission) {
-        toast.error(NO_VALUES_MSG);
+        toast.error(t("entry.noValues"));
         return;
       }
       await saveLabReport(persistence, submission.report, submission.values);
-      toast.success(SAVED_MSG);
+      toast.success(t("entry.saved"));
       onSaved();
     } catch {
-      toast.error(SAVE_FAILED_MSG);
+      toast.error(t("entry.saveFailed"));
     } finally {
       setIsSaving(false);
     }

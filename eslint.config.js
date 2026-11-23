@@ -12,8 +12,11 @@ import {
   JSX_LITERAL_ALLOW,
   JSX_LITERAL_FILES,
   JSX_LITERAL_IGNORES,
+  LITERAL_COPY_FILES,
+  LITERAL_COPY_IGNORES,
 } from "./scripts/eslint-rules/jsx-literal-scope.mjs";
 import noJsxLiteralText from "./scripts/eslint-rules/no-jsx-literal-text.mjs";
+import noLiteralCopy from "./scripts/eslint-rules/no-literal-copy.mjs";
 import noNarrativeComments from "./scripts/eslint-rules/no-narrative-comments.mjs";
 
 /**
@@ -676,18 +679,26 @@ export default tseslint.config(
         rules: {
           "no-narrative-comments": noNarrativeComments,
           "no-jsx-literal-text": noJsxLiteralText,
+          "no-literal-copy": noLiteralCopy,
         },
       },
     },
     rules: { "local/no-narrative-comments": "error" },
   },
   {
-    // i18n guard: user-facing copy in the translated SPA surfaces comes from
+    // i18n guard: copy the athlete reads in the Kaiord App comes from
     // `t(...)`. The scope and the allow list live in jsx-literal-scope.mjs.
     files: JSX_LITERAL_FILES,
     ignores: JSX_LITERAL_IGNORES,
     rules: {
       "local/no-jsx-literal-text": ["error", { allow: JSX_LITERAL_ALLOW }],
+    },
+  },
+  {
+    files: LITERAL_COPY_FILES,
+    ignores: LITERAL_COPY_IGNORES,
+    rules: {
+      "local/no-literal-copy": ["error", { allow: JSX_LITERAL_ALLOW }],
     },
   },
   {

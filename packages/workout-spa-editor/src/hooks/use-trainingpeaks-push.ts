@@ -56,12 +56,12 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
     async (
       options?: TrainingPeaksPushOptions
     ): Promise<TrainingPeaksPushOutcome> => {
-      if (!workout?.krd) return { ok: false, message: "Workout has no KRD" };
+      if (!workout?.krd) return { ok: false, reason: "no-steps" };
       const extensionId = bridgeDiscovery.getExtensionId(
         TRAININGPEAKS_BRIDGE_ID
       );
       if (!extensionId) {
-        return { ok: false, message: "TrainingPeaks bridge is not installed" };
+        return { ok: false, reason: "install" };
       }
 
       try {

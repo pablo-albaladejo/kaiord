@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { appI18n, setActiveLocale } from "../../i18n/i18n";
 import { getT2GSportDisplay } from "./train2go-sport-map";
 
 describe("getT2GSportDisplay", () => {
@@ -81,5 +82,21 @@ describe("getT2GSportDisplay", () => {
       const result = getT2GSportDisplay(sport);
       expect(result.label).not.toBe("Activity");
     }
+  });
+});
+
+describe("getT2GSportDisplay in Spanish", () => {
+  beforeAll(() => setActiveLocale("es"));
+  afterAll(() => appI18n.changeLanguage("en"));
+
+  it("should name the sport and the fallback in Spanish", () => {
+    // Arrange
+    const sports = ["mountainwalk", "quidditch"];
+
+    // Act
+    const labels = sports.map((s) => getT2GSportDisplay(s, "es").label);
+
+    // Assert
+    expect(labels).toEqual(["Senderismo", "Actividad"]);
   });
 });

@@ -1,8 +1,6 @@
-> Status: foundation + locale-preference domain + pilot dictionaries + SPA
-> Status: all sections landed and green (1–8 complete; 9 quality gates below).
-> Converter parse-message localization (6.1) is resolved per the fallback
-> contract — it renders verbatim English until a converter emits a stable code
-> (tracked as the `add-converter-error-codes` follow-up).
+> Status: all sections landed and green (1–11). The converters' free-text
+> parse detail stays verbatim English inside localized wording until each
+> converter emits a stable code (#1165, `add-converter-error-codes`).
 
 ## 1. `@kaiord/i18n` package (mechanism)
 
@@ -21,6 +19,11 @@
 
 ## 3. SPA: locale preference (spa-user-preferences delta)
 
+> The per-profile locale of this section was later moved to a device
+> preference by `2026-10-12-move-display-preferences-to-device`, which owns the
+> canonical requirement; this change therefore carries no
+> `spa-user-preferences` delta at archive time.
+
 - [x] 3.1 Extend `UserPreferences` with `locale: "auto" | "en" | "es"` (optional; absent reads as `auto`; no Dexie version bump).
 - [x] 3.2 Persist `locale` through the existing `setUserPreferenceFields` partial-patch use case (added `locale` to the patch Pick + merge), which already does lazy creation, profile-existence check, injected clock, and field-merge. (No bespoke `setLocale`; the generic patch is the current idiom and preserves other fields — spec delta updated to match.)
 - [x] 3.3 Add `resolveLocale(preference, navigatorLanguage)` pure helper (`auto` + `es*` → `es`, otherwise `en`; explicit value wins); unit tests.
@@ -30,7 +33,7 @@
 - [x] 4.1 Create `src/i18n/`: `resources.ts` (namespaces per locale from JSON), `i18n.ts` (react-i18next instance + `setActiveLocale` updating `<html lang>`).
 - [x] 4.2 `LocaleProvider` (`src/i18n/LocaleProvider.tsx`) mounted in `main.tsx`: wraps `I18nextProvider` + a `LocaleSync` that reads the active profile's preference via `useLiveQuery`, `resolveLocale`, `setActiveLocale` on change, and publishes the active locale through a context (`useActiveLocale`, defaults `en` outside a provider). Tested: resolves `es` + sets `<html lang>`; defaults `en` unwrapped.
 - [x] 4.3 Language switcher (`LanguageRow`) in `SettingsPanel/PreferencesTab` (Auto / English / Español) wired through `useSetUserPreferenceFields({ locale })`; UI tests (reflects Auto default, persists `es` on change).
-- [ ] 4.4 e2e: pin locale explicitly in Playwright config/fixtures so existing English assertions stay deterministic.
+- [x] 4.4 e2e: pin locale explicitly in Playwright config/fixtures so existing English assertions stay deterministic. `playwright.config.ts` sets `use.locale: "en-US"` for every project, so `auto` resolves to English; the Spanish specs opt in per file with `test.use({ locale: "es-ES" })` (`profile-zones-es`, `empty-states-mobile`, `workout-detail-layout`, `ai-settings-layout`), and `device-preferences` / `wipe-all-data` switch the language through Settings and assert `<html lang>`.
 
 ## 5. SPA: locale-aware formatting
 
@@ -61,3 +64,14 @@
 - [x] 9.1 Coverage: `@kaiord/i18n` 100% lines / 86.95% branches (≥80%); `@kaiord/ai` 85 tests; full SPA suite green (≥70%). `pnpm -r build` and `pnpm -r test` verified green in QA.
 - [x] 9.2 `pnpm lint` clean across the repo (ESLint `--max-warnings=0`, tsc, Prettier, `pnpm lint:specs`, `pnpm test:scripts`); caps respected. `@kaiord/i18n` added to CI (`.github/workflows/ci.yml`: detect-changes filter + should-test gate + build-verify loop + test matrix). Private package → correctly excluded from the publishable/changeset/release lists.
 - [x] 9.3 End-to-end behavior verified via a fresh SPA production build (`vite build`) plus the locale-switching integration tests: `LocaleProvider.test` (es resolution + `<html lang>`), `PreferencesTab.test` (switcher reflects/persists the choice), and the labs/formatter/error `es` rendering tests. Playwright locale pinned to `en-US` keeps the English e2e assertions deterministic. (A manual browser walkthrough is the one step a headless run cannot perform.)
+
+## 10. Guard: athlete-visible copy comes from the dictionaries
+
+- [x] 10.1 Widen `local/no-jsx-literal-text` from a directory list (it left every untranslated surface unguarded, and its integration test asserted that hole) to every component of the App; catch copy in either branch of a conditional or a fallback, the static part of a template, `aria-valuetext`, and the `message`/`subtitle`/`hint`/`confirmLabel`/`cancelLabel` props. Rule tests + integration tests through the real ESLint config.
+- [x] 10.2 Add `local/no-literal-copy` for copy built outside JSX: toast titles and descriptions (member, destructured and `const`-held), state setters for an error or a message, copy properties of object literals and every value of a label map. Scoped to every App source file except `application/`, `store/`, `types/`, `adapters/dexie/` and `i18n/`; one shared allow list for strings that are the same in every language. Rule tests + integration tests.
+- [x] 10.3 Move the 157 strings the tightened guard found into the `en`/`es` dictionaries (toasts, import and validation errors, the zones-conflict dialog, the repetition-block dialog, Train2Go sport names, trend metric names, the swim editor, the executed-activity dialog, TrainingPeaks push refusals); delete two prompts and a description table that only tests used. Spanish tests for each moved surface; parity test green.
+
+## 11. Import errors worded by the App (SPA side of #1165)
+
+- [x] 11.1 `transformError` attaches a language-free `ImportError.copy` (key + params) per converter error class; the upload error builders word it with `import:errors.*` in the active locale, keeping the converter's detail verbatim. `ImportError.message` stays English for logs.
+- [x] 11.2 The SPA's own KRD shape checks and the save failure carry stable `krd_*` / `save_failed` codes that `ValidationErrorList` localizes through `errors:validation`.

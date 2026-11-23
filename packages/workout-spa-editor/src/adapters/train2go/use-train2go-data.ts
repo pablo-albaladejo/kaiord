@@ -2,6 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 
 import { hasEnabledPlannedSessionImportRoute } from "../../application/coaching/planned-session-import-route";
+import { useActiveLocale } from "../../i18n/LocaleProvider";
 import { syncSourceFor } from "../../integrations/bridge-sync-sources";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { CoachingActivity } from "../../types/coaching-activity";
@@ -25,7 +26,11 @@ export const useCoachingActivities = (
     );
   }, [activeProfileId, start, end]);
 
-  return useMemo(() => (records ?? []).map(toCoachingActivity), [records]);
+  const locale = useActiveLocale();
+  return useMemo(
+    () => (records ?? []).map((record) => toCoachingActivity(record, locale)),
+    [records, locale]
+  );
 };
 
 export const useTrain2GoSyncState = (

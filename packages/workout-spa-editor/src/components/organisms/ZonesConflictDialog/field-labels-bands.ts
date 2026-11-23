@@ -1,67 +1,48 @@
 /**
- * Band-level FieldKey label and unit cross-products. Generated at
- * module-load time from a small set of hardcoded label parts; never
- * interpolates an external string. PR 3 will polish the label format.
+ * Band-level FieldKey labels and unit cross-products. A label is composed
+ * from dictionary parts (`zones:conflict.band*`); it never interpolates an
+ * external string.
  */
+import type { Translate } from "../../../i18n/use-translate";
 import type { BandFieldKey } from "../../../types/coaching-zones";
-
-const SPORT_LABEL = {
-  cycling: "Cycling",
-  running: "Running",
-  swimming: "Swimming",
-} as const;
-
-const KIND_LABEL = {
-  heartRateZones: "HR",
-  powerZones: "Power",
-  paceZones: "Pace",
-} as const;
-
-const BOUND_LABEL = {
-  minBpm: "min",
-  maxBpm: "max",
-  minPercent: "min",
-  maxPercent: "max",
-  minPace: "min",
-  maxPace: "max",
-} as const;
 
 const SPORTS = ["cycling", "running", "swimming"] as const;
 const BANDS = ["z1", "z2", "z3", "z4", "z5"] as const;
 
-const buildLabel = (field: BandFieldKey): string => {
+export const bandLabel = (field: BandFieldKey, t: Translate): string => {
   const [sport, kind, band, bound] = field.split(".") as [
-    keyof typeof SPORT_LABEL,
-    keyof typeof KIND_LABEL,
-    `z${1 | 2 | 3 | 4 | 5}`,
-    keyof typeof BOUND_LABEL,
+    string,
+    string,
+    string,
+    string,
   ];
-  return `${SPORT_LABEL[sport]} ${KIND_LABEL[kind]} ${band.toUpperCase()} ${BOUND_LABEL[bound]}`;
+  return t("conflict.band", {
+    sport: t(`conflict.sport.${sport}`),
+    kind: t(`conflict.bandKind.${kind}`),
+    zone: band.toUpperCase(),
+    bound: t(`conflict.bound.${bound.startsWith("min") ? "min" : "max"}`),
+  });
 };
 
-export const buildBandLabels = (): Record<BandFieldKey, string> => {
-  const out: Partial<Record<BandFieldKey, string>> = {};
+export const buildBandFieldKeys = (): BandFieldKey[] => {
+  const out: BandFieldKey[] = [];
   for (const band of BANDS) {
-    for (const sport of SPORTS) {
-      const minHr = `${sport}.heartRateZones.${band}.minBpm` as BandFieldKey;
-      const maxHr = `${sport}.heartRateZones.${band}.maxBpm` as BandFieldKey;
-      out[minHr] = buildLabel(minHr);
-      out[maxHr] = buildLabel(maxHr);
-    }
-    out[`cycling.powerZones.${band}.minPercent`] = buildLabel(
-      `cycling.powerZones.${band}.minPercent` as BandFieldKey
+    for (const sport of SPORTS)
+      out.push(
+        `${sport}.heartRateZones.${band}.minBpm`,
+        `${sport}.heartRateZones.${band}.maxBpm`
+      );
+    out.push(
+      `cycling.powerZones.${band}.minPercent`,
+      `cycling.powerZones.${band}.maxPercent`
     );
-    out[`cycling.powerZones.${band}.maxPercent`] = buildLabel(
-      `cycling.powerZones.${band}.maxPercent` as BandFieldKey
-    );
-    for (const sport of ["running", "swimming"] as const) {
-      const minPc = `${sport}.paceZones.${band}.minPace` as BandFieldKey;
-      const maxPc = `${sport}.paceZones.${band}.maxPace` as BandFieldKey;
-      out[minPc] = buildLabel(minPc);
-      out[maxPc] = buildLabel(maxPc);
-    }
+    for (const sport of ["running", "swimming"] as const)
+      out.push(
+        `${sport}.paceZones.${band}.minPace`,
+        `${sport}.paceZones.${band}.maxPace`
+      );
   }
-  return out as Record<BandFieldKey, string>;
+  return out;
 };
 
 export const buildBandUnits = (): Record<BandFieldKey, string> => {

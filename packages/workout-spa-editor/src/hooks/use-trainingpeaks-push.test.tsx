@@ -76,7 +76,7 @@ describe("useTrainingPeaksPush", () => {
     const outcome = await result.current.push();
 
     // Assert
-    expect(outcome).toEqual({ ok: false, message: "Workout has no KRD" });
+    expect(outcome).toEqual({ ok: false, reason: "no-steps" });
     expect(mocks.executePush).not.toHaveBeenCalled();
   });
 
@@ -91,7 +91,7 @@ describe("useTrainingPeaksPush", () => {
     // Assert
     expect(outcome).toEqual({
       ok: false,
-      message: "TrainingPeaks bridge is not installed",
+      reason: "install",
     });
     expect(mocks.checkSession).not.toHaveBeenCalled();
   });
@@ -118,7 +118,7 @@ describe("useTrainingPeaksPush", () => {
       // Assert
       expect(outcome).toEqual({
         ok: false,
-        message: "Sign in to TrainingPeaks and retry",
+        reason: "sign-in",
       });
       expect(mocks.executePush).not.toHaveBeenCalled();
     }
@@ -242,7 +242,7 @@ describe("useTrainingPeaksPush", () => {
     // Assert
     expect(outcome).toEqual({
       ok: false,
-      message: "TrainingPeaks push failed",
+      reason: "not-answering",
     });
   });
 });

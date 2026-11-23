@@ -11,8 +11,6 @@
 import type { LabFlag } from "@kaiord/core";
 
 export type LabFlagStyle = {
-  /** English fallback; surfaces render `t("flag.<flag>")`. */
-  label: string;
   className: string;
   /** Whether the badge draws the alert glyph beside its word. */
   showsGlyph: boolean;
@@ -22,10 +20,10 @@ const NEEDS_YOU = "font-medium text-ink-strong";
 const SILENT = "text-ink-muted";
 
 export const LAB_FLAG_STYLES: Record<LabFlag, LabFlagStyle> = {
-  in: { label: "In range", className: SILENT, showsGlyph: false },
-  low: { label: "Low", className: NEEDS_YOU, showsGlyph: true },
-  high: { label: "High", className: NEEDS_YOU, showsGlyph: true },
-  unknown: { label: "No range", className: SILENT, showsGlyph: false },
+  in: { className: SILENT, showsGlyph: false },
+  low: { className: NEEDS_YOU, showsGlyph: true },
+  high: { className: NEEDS_YOU, showsGlyph: true },
+  unknown: { className: SILENT, showsGlyph: false },
 };
 
 /** Whether a flag marks a value outside its reference range (highlightable). */

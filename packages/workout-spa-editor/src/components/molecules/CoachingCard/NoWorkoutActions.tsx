@@ -46,7 +46,7 @@ export function NoWorkoutActions(props: NoWorkoutActionsProps) {
           data-testid="coaching-dialog-ai-hint"
           className="text-xs text-slate-500 dark:text-slate-400"
         >
-          ℹ AI will use only the title + sport
+          {t("dialog.aiHint")}
         </p>
       )}
       {props.showMoveHint && (

@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
 import {
   createErrorHandler,
@@ -39,6 +40,7 @@ export function useFileUploadActions({
   onImported,
   onWarnings,
 }: FileUploadActionsParams) {
+  const t = useTranslate("import");
   const handleError = createErrorHandler(
     setError,
     setIsLoading,
@@ -57,25 +59,24 @@ export function useFileUploadActions({
     handleError,
     createAbortController,
     onImported,
-    onWarnings
+    onWarnings,
+    t
   );
-
-  const triggerFileInput = () => {
-    setError(null);
-    setConversionProgress(0);
-    fileInputRef.current?.click();
-  };
-
-  const handleRetry = () => {
-    setError(null);
-    setConversionProgress(0);
-    resetInput(); // Reset input to allow selecting the same file again
-    fileInputRef.current?.click();
-  };
 
   const handleDismiss = () => {
     setError(null);
     setConversionProgress(0);
+  };
+
+  const triggerFileInput = () => {
+    handleDismiss();
+    fileInputRef.current?.click();
+  };
+
+  const handleRetry = () => {
+    handleDismiss();
+    resetInput(); // Reset input to allow selecting the same file again
+    fileInputRef.current?.click();
   };
 
   return {

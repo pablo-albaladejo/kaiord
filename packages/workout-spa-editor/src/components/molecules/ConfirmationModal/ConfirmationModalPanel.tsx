@@ -1,6 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button/Button";
 
 export type ConfirmationModalPanelProps = {
@@ -22,6 +23,7 @@ export function ConfirmationModalPanel({
   onCancel,
   variant,
 }: ConfirmationModalPanelProps) {
+  const t = useTranslate("common");
   return (
     <div className="w-full max-w-md rounded-lg bg-white p-0 shadow-xl dark:bg-gray-800 sm:max-w-lg">
       <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
@@ -31,7 +33,7 @@ export function ConfirmationModalPanel({
         <button
           onClick={onCancel}
           className="min-h-[44px] min-w-[44px] rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-          aria-label="Close"
+          aria-label={t("actions.close")}
         >
           <X className="h-5 w-5" />
         </button>

@@ -89,7 +89,13 @@
     "cancel": "Cancelar",
     "confirm": "Programar",
     "close": "Cerrar",
-    "invalidDate": "Elige una fecha válida para programar este entreno."
+    "invalidDate": "Elige una fecha válida para programar este entreno.",
+    "scheduled": "Entreno programado",
+    "scheduledDescription": "Añadido a tu calendario.",
+    "failed": "No se pudo programar",
+    "failedDescription": "No se pudo programar el entreno — inténtalo de nuevo.",
+    "noAthlete": "Ningún atleta activo",
+    "noAthleteDescription": "Selecciona o crea un atleta antes de programar."
   },
   "picker": {
     "hintDated": "Elige una plantilla para programarla el {{date}}.",

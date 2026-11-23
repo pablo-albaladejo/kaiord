@@ -1,4 +1,12 @@
-## ADDED Requirements
+> Synced: 2026-11-23 (add-i18n-foundation)
+
+# Internationalization
+
+## Purpose
+
+English and Spanish across the Kaiord App through one translation mechanism: the supported locales and fallback chain, the dictionary format and its parity test, the framework-agnostic translator factory, locale resolution and switching, locale-aware formatting, the contract that localizes upstream failures by code, and the lint guard that keeps every athlete-visible string inside the dictionaries.
+
+## Requirements
 
 ### Requirement: Supported locales and fallback chain
 
@@ -74,8 +82,9 @@ SHALL NOT be imported by `@kaiord/core`, the format converters, or any
 
 ### Requirement: SPA locale resolution and live switching
 
-The SPA SHALL derive its active locale from the persisted preference
-(`"auto" | "en" | "es"`, see `spa-user-preferences`): an explicit value wins;
+The SPA SHALL derive its active locale from the persisted device preference
+(`"auto" | "en" | "es"`, see `spa-user-preferences`, "Language, units and
+notifications are device preferences"): an explicit value wins;
 `"auto"` SHALL resolve via `navigator.language` (`es*` → `es`, anything else
 → `en`). Changing the preference SHALL take effect immediately — re-rendering
 translated copy and updating `<html lang>` — without a page reload.
@@ -121,10 +130,12 @@ stable code — a `ValidationError.code` or an `AiParsingError.reason` — never
 by matching message text. When no mapping exists for a code, the SPA SHALL
 render the upstream English `message` verbatim. Core, the converters, and
 `@kaiord/ai` SHALL NOT gain any i18n dependency or locale-specific display
-copy. Localizing an upstream failure whose useful content is a free-text
-technical detail (e.g. the format converters' parse messages) requires that
-package to first emit a stable code for the detail; until then such failures
-fall under the verbatim-English rule above.
+copy. A failure of the format converters is worded by its error class: the
+SPA's import pipeline maps the class to a language-free copy key with
+parameters (`ImportError.copy`), and the App renders that key in the active
+locale around the converter's own detail. The detail itself is free text;
+localizing it requires the converter to first emit a stable code for it, so
+until then the detail stays verbatim English inside the localized wording.
 
 #### Scenario: Known AI input-validation reason renders localized copy
 
@@ -132,11 +143,11 @@ fall under the verbatim-English rule above.
 - **WHEN** the generation error is displayed
 - **THEN** the SPA SHALL render the Spanish copy for that reason, interpolating the length details
 
-#### Scenario: Converter parse error without a code degrades to the upstream message
+#### Scenario: Converter parse error is worded around its upstream detail
 
-- **GIVEN** the active locale is `es` and a TCX import throws `TcxParsingError` (which carries no stable code)
+- **GIVEN** the active locale is `es` and a FIT import throws `FitParsingError("bad header")` (which carries no stable code)
 - **WHEN** the import error is displayed
-- **THEN** the SPA SHALL render the upstream English `message` verbatim, per the fallback rule
+- **THEN** the SPA SHALL render the Spanish title and wording for a parse failure, with the detail `bad header` verbatim
 
 #### Scenario: Known validation code renders localized copy
 
@@ -173,3 +184,45 @@ and identical across locales.
 - **GIVEN** any supported locale
 - **WHEN** a lab parameter label is rendered
 - **THEN** the abbreviation SHALL be identical to the `en` rendering
+
+### Requirement: Athlete-visible copy comes only from the dictionaries
+
+Every string the athlete reads in the Kaiord App SHALL be produced by the
+translator from the `en` and `es` dictionaries. Two local ESLint rules SHALL
+enforce this on every source file of `packages/workout-spa-editor/src`,
+failing `pnpm lint`:
+
+- `local/no-jsx-literal-text` on every component: JSX text, a string child,
+  a copy attribute (`aria-label`, `title`, `placeholder`, `alt`,
+  `aria-description`, `aria-roledescription`, `aria-valuetext`) or a copy
+  prop of a component (`label`, `description`, `title`, `heading`,
+  `message`, `subtitle`, `hint`, `confirmLabel`, `cancelLabel`), including
+  either branch of a conditional or a fallback and the static part of a
+  template literal;
+- `local/no-literal-copy` on every file outside `application/`, `store/`,
+  `types/`, `adapters/dexie/` and `i18n/`: a toast title or description, a
+  state setter for an error or a message (`setError`, `setMessage`, …), a
+  copy property of an object literal and every value of a label map.
+
+Tests, stories and test helpers are out of scope. A string that is the same
+in every language (a product or Platform name, a file type, a unit, a
+keyboard key) SHALL be listed once in the shared allow list, and a dictionary
+key (`stroke.freestyle`) is never copy.
+
+#### Scenario: A hard-coded string in a component fails lint
+
+- **GIVEN** a component of the App renders `<p>{open ? "Hide" : "Detail"}</p>`
+- **WHEN** `pnpm lint` runs
+- **THEN** it SHALL fail with `local/no-jsx-literal-text` once for each branch
+
+#### Scenario: A hard-coded toast fails lint
+
+- **GIVEN** a hook of the App calls `toast.error("Save failed")`
+- **WHEN** `pnpm lint` runs
+- **THEN** it SHALL fail with `local/no-literal-copy`
+
+#### Scenario: A pure use case is left to the layer that words it
+
+- **GIVEN** a use case under `application/` returns `{ ok: false, message: "No steps" }`
+- **WHEN** `pnpm lint` runs
+- **THEN** `local/no-literal-copy` SHALL NOT report it, and the hook or component that shows the result SHALL word it with `t(...)`

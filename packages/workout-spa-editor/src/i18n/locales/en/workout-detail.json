@@ -38,6 +38,11 @@
       "confirmSend": "Send a copy",
       "cancel": "Cancel"
     },
+    "trainingPeaksPushError": {
+      "noSteps": "This workout has no steps to send yet.",
+      "install": "Install Kaiord for TrainingPeaks to send this workout.",
+      "signIn": "Sign in to TrainingPeaks, then try again."
+    },
     "sendDisabled": {
       "noExtension": "Install the Kaiord extension for Garmin to send this workout.",
       "signedOut": "Sign in to Garmin Connect in this browser to send this workout."

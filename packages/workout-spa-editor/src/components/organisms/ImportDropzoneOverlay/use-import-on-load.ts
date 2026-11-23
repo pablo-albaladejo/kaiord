@@ -29,13 +29,6 @@ import { getStructuredWorkout } from "../../../utils/structured-workout";
 import { healthDestinationFor } from "./health-destination";
 import { persistImportedWorkout } from "./persist-imported-workout";
 
-const TOAST_IMPORT_FAIL_TITLE = "Import failed";
-const TOAST_IMPORT_FAIL_DESC =
-  "Could not save the imported workout — please retry.";
-const TOAST_HEALTH_FAIL_TITLE = "Health import failed";
-const TOAST_HEALTH_FAIL_DESC =
-  "Could not save the imported health record — please retry.";
-
 export function useImportOnLoad(date: string | null, from: string | null) {
   const { handleFileLoad } = useAppHandlers();
   const persistence = usePersistence();
@@ -56,7 +49,10 @@ export function useImportOnLoad(date: string | null, from: string | null) {
         })
         .catch((error) => {
           if (error instanceof UnsupportedHealthKrdError) return;
-          toast.error(TOAST_HEALTH_FAIL_TITLE, TOAST_HEALTH_FAIL_DESC);
+          toast.error(
+            t("healthSaveFailed.title"),
+            t("healthSaveFailed.description")
+          );
         });
       return;
     }
@@ -86,7 +82,7 @@ export function useImportOnLoad(date: string | null, from: string | null) {
         );
       })
       .catch(() => {
-        toast.error(TOAST_IMPORT_FAIL_TITLE, TOAST_IMPORT_FAIL_DESC);
+        toast.error(t("saveFailed.title"), t("saveFailed.description"));
       });
   };
 }

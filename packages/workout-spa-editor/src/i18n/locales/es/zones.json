@@ -115,6 +115,60 @@
   },
   "conflict": {
     "accept": "Aceptar Train2Go",
-    "keep": "Mantener actual"
+    "keep": "Mantener actual",
+    "title": "Resolver conflictos de zonas",
+    "intro": "Train2Go tiene valores distintos en estos campos. Elige cuál conservar: Kaiord (actual) o Train2Go (entrante).",
+    "cancel": "Cancelar",
+    "apply": "Aplicar",
+    "hide": "Ocultar",
+    "detail": "Detalle",
+    "bandsDiffer_one": "{{count}} banda distinta",
+    "bandsDiffer_other": "{{count}} bandas distintas",
+    "ftpGroup": "Umbral y zonas de ciclismo",
+    "group": "{{kind}} de {{sport}}",
+    "sport": {
+      "cycling": "ciclismo",
+      "running": "carrera",
+      "swimming": "natación"
+    },
+    "kind": {
+      "heartRateZones": "Zonas de FC",
+      "powerZones": "Zonas de potencia",
+      "paceZones": "Zonas de ritmo"
+    },
+    "field": {
+      "cycling": {
+        "thresholds": {
+          "ftp": "FTP",
+          "lthr": "LTHR de ciclismo"
+        }
+      },
+      "running": {
+        "thresholds": {
+          "lthr": "LTHR de carrera",
+          "thresholdPaceSecPerKm": "Ritmo umbral de carrera"
+        }
+      },
+      "swimming": {
+        "thresholds": {
+          "lthr": "LTHR de natación",
+          "cssPaceSecPer100m": "CSS de natación"
+        }
+      },
+      "heartRate": {
+        "max": "FC máx."
+      },
+      "bodyWeight": "Peso corporal"
+    },
+    "band": "{{kind}} {{zone}} {{bound}} ({{sport}})",
+    "bandKind": {
+      "heartRateZones": "FC",
+      "powerZones": "Potencia",
+      "paceZones": "Ritmo"
+    },
+    "bound": {
+      "min": "mín.",
+      "max": "máx."
+    }
   }
 }

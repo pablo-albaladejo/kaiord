@@ -1,4 +1,4 @@
-> Synced: 2026-05-01 (guidelines-compliance-harden)
+> Synced: 2026-11-23 (add-i18n-foundation)
 
 # Hexagonal Architecture
 
@@ -114,9 +114,10 @@ Each package SHALL respect the following dependency rules:
 | `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` | `@kaiord/core` only                                                                                                          |
 | `@kaiord/garmin-connect`                                      | `@kaiord/core`, `@kaiord/garmin`                                                                                             |
 | `@kaiord/ai`                                                  | `@kaiord/core` only (+ `ai` as peer dependency; + `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/google` as optional peers) |
+| `@kaiord/i18n`                                                | No workspace deps (framework-agnostic i18n mechanism; wraps `i18next` only)                                                  |
 | `@kaiord/mcp`                                                 | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect`                                                              |
 | `@kaiord/cli`                                                 | `@kaiord/core` + all adapters + `@kaiord/garmin-connect`                                                                     |
-| `@kaiord/workout-spa-editor`                                  | `@kaiord/core`, `@kaiord/ai`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/tcx`, `@kaiord/zwo`                                  |
+| `@kaiord/workout-spa-editor`                                  | `@kaiord/core`, `@kaiord/ai`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/i18n`, `@kaiord/tcx`, `@kaiord/zwo`                  |
 | `@kaiord/docs`                                                | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` + `@kaiord/cli` + `@kaiord/mcp`                                     |
 | `@kaiord/landing`                                             | `@kaiord/core`                                                                                                               |
 | `@kaiord/garmin-bridge`                                       | No workspace deps (Chrome extension, communicates via `externally_connectable`)                                              |
@@ -139,6 +140,18 @@ Each package SHALL respect the following dependency rules:
 - **WHEN** its `peerDependencies` and `peerDependenciesMeta` blocks are inspected
 - **THEN** `@ai-sdk/anthropic`, `@ai-sdk/openai`, and `@ai-sdk/google` appear as peers marked
   optional, and none of them appears in `dependencies`
+
+#### Scenario: i18n package declares no workspace dependencies
+
+- **GIVEN** `packages/i18n/package.json`
+- **WHEN** its `dependencies` block is inspected
+- **THEN** no `@kaiord/*` workspace package appears (only `i18next`)
+
+#### Scenario: SPA editor may depend on the i18n package
+
+- **GIVEN** `packages/workout-spa-editor/package.json`
+- **WHEN** its `dependencies` block is inspected
+- **THEN** `@kaiord/i18n` is an allowed workspace dependency
 
 ### Requirement: Architecture mechanical guard exists
 

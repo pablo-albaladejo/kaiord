@@ -6,10 +6,11 @@
 
 import { KrdValidationError } from "@kaiord/core";
 
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import { ValidationError as CustomValidationError } from "../../../types/errors";
 import type { ValidationError } from "../../../types/krd";
-import { getFormatName } from "../../../utils/file-format-metadata";
 import type { ImportError } from "../../../utils/import-workout";
+import { withLocation } from "./file-parser-error-location";
 
 type ErrorState = {
   title: string;
@@ -27,28 +28,15 @@ const convertToValidationErrors = (
   }));
 };
 
-const addPositionInfo = (
-  message: string,
-  parsingError: { line?: number; column?: number; message?: string }
-): string => {
-  let result = message;
-  if (parsingError.line !== undefined && parsingError.column !== undefined) {
-    result += ` (line ${parsingError.line}, column ${parsingError.column})`;
-  } else if (parsingError.line !== undefined) {
-    result += ` (line ${parsingError.line})`;
-  }
-  if (parsingError.message) {
-    const positionRegex = /position (\d+)/i;
-    const positionMatch = positionRegex.exec(parsingError.message);
-    if (positionMatch && !result.includes("position")) {
-      result += ` at position ${positionMatch[1]}`;
-    }
-  }
-  return result;
+const wordImportError = (error: ImportError, t: Translate): string => {
+  if (error.copy) return t(`errors.${error.copy.key}`, error.copy.params);
+  return t("errors.unsupportedFile");
 };
 
-export const createImportErrorState = (error: ImportError): ErrorState => {
-  const formatName = error.format ? getFormatName(error.format) : "file";
+export const createImportErrorState = (
+  error: ImportError,
+  t: Translate = getTranslate("import")
+): ErrorState => {
   let validationErrors: Array<ValidationError> | undefined;
 
   if (
@@ -59,11 +47,7 @@ export const createImportErrorState = (error: ImportError): ErrorState => {
     validationErrors = convertToValidationErrors(cause.errors);
   }
 
-  let message =
-    error.message.startsWith("Failed to import") ||
-    error.message.startsWith("Failed to parse")
-      ? error.message
-      : `Failed to import ${formatName} file: ${error.message}`;
+  let message = wordImportError(error, t);
 
   if (error.cause && typeof error.cause === "object" && "line" in error.cause) {
     const parsingError = error.cause as {
@@ -71,7 +55,7 @@ export const createImportErrorState = (error: ImportError): ErrorState => {
       column?: number;
       message?: string;
     };
-    message = addPositionInfo(message, parsingError);
+    message = withLocation(message, parsingError, t);
   }
 
   const isUnrecoverable =
@@ -80,11 +64,11 @@ export const createImportErrorState = (error: ImportError): ErrorState => {
     error.message.includes("corrupted");
 
   if (isUnrecoverable) {
-    message += ". Please check your file and try again.";
+    message += t("errors.checkFile");
   }
 
   return {
-    title: "Import Failed",
+    title: t("errors.importFailedTitle"),
     message,
     validationErrors,
   };

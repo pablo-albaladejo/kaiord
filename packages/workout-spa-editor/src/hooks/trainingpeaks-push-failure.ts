@@ -1,9 +1,17 @@
 import { TRAININGPEAKS_HORIZON_STATUS } from "../application/trainingpeaks/trainingpeaks-planning-horizon";
 
+/**
+ * Why a send stopped, worded by the App (`TrainingPeaksPushFeedback`):
+ * TrainingPeaks refused the day (a 402), did not answer (no cause known), the
+ * workout has no steps, the extension is missing, or the Session is gone.
+ */
+export type TrainingPeaksPushRefusal =
+  "horizon" | "not-answering" | "no-steps" | "install" | "sign-in";
+
 export type TrainingPeaksPushFailureOutcome =
+  /** An upstream error's own message, shown as is. */
   | { ok: false; message: string }
-  /** TrainingPeaks refused the day (a 402), or did not answer: no cause known. */
-  | { ok: false; reason: "horizon" | "not-answering" };
+  | { ok: false; reason: TrainingPeaksPushRefusal };
 
 const statusOf = (error: unknown): unknown =>
   (error as { status?: unknown } | null)?.status;
@@ -15,9 +23,8 @@ export const toTrainingPeaksPushFailure = (
   if (statusOf(error) === TRAININGPEAKS_HORIZON_STATUS) {
     return { ok: false, reason: "horizon" };
   }
-  const message =
-    error instanceof Error ? error.message : "TrainingPeaks push failed";
-  return { ok: false, message };
+  if (!(error instanceof Error)) return { ok: false, reason: "not-answering" };
+  return { ok: false, message: error.message };
 };
 
 type ProbedSession = {
@@ -35,7 +42,7 @@ export const athleteIdOrRefusal = (
     return { ok: false, reason: "not-answering" };
   }
   if (!session.authenticated || session.athleteId === undefined) {
-    return { ok: false, message: "Sign in to TrainingPeaks and retry" };
+    return { ok: false, reason: "sign-in" };
   }
   return { athleteId: session.athleteId };
 };

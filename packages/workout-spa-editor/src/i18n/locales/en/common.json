@@ -7,6 +7,7 @@
   },
   "actions": {
     "close": "Close",
+    "cancel": "Cancel",
     "action": "Action",
     "tryAgain": "Try Again",
     "dismiss": "Dismiss",
@@ -59,7 +60,8 @@
     "download": "Download a file"
   },
   "units": {
-    "hr": "bpm"
+    "hr": "bpm",
+    "wattsRange": "{{min}}W - {{max}}W"
   },
   "durationPicker": {
     "maxHeartRate": "Maximum {{max}} {{unit}}",

@@ -6,6 +6,8 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import type { ReactNode } from "react";
 
+import { useTranslate } from "../../../i18n/use-translate";
+
 export type CoachingDialogShellProps = {
   onClose: () => void;
   children: ReactNode;
@@ -15,6 +17,7 @@ export function CoachingDialogShell({
   onClose,
   children,
 }: CoachingDialogShellProps) {
+  const t = useTranslate("coaching");
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
@@ -23,10 +26,9 @@ export function CoachingDialogShell({
           data-testid="coaching-activity-dialog"
           className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
         >
-          <Dialog.Title className="sr-only">Coaching activity</Dialog.Title>
+          <Dialog.Title className="sr-only">{t("dialog.srTitle")}</Dialog.Title>
           <Dialog.Description className="sr-only">
-            Coaching activity details with AI/manual creation, match, and split
-            actions.
+            {t("dialog.srDescription")}
           </Dialog.Description>
           {children}
         </Dialog.Content>
