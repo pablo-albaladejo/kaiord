@@ -29,19 +29,23 @@ const setupChrome = (
 
 describe("readZones", () => {
   beforeEach(() => {
-    setupChrome((_msg, cb) => cb({ ok: true, data: {} }));
+    setupChrome((_msg, cb) => cb({ ok: true, protocolVersion: 1, data: {} }));
   });
 
   afterEach(() => {
     delete (globalThis as Record<string, unknown>).chrome;
   });
 
-  it("should send a read-details action with externalUserId payload", async () => {
+  it("should send a read-details action with externalUserId payload to an extension on the previous protocol", async () => {
     // Arrange
     const sent: unknown[] = [];
     setupChrome((msg, cb) => {
       sent.push(msg);
-      cb({ ok: true, data: { physiological: { weight: 83 } } });
+      cb({
+        ok: true,
+        protocolVersion: 1,
+        data: { physiological: { weight: 83 } },
+      });
     });
     const queue = createOperationQueue(0);
 
@@ -50,7 +54,10 @@ describe("readZones", () => {
 
     // Assert
     expect(res.ok).toBe(true);
-    expect(sent).toEqual([{ action: "read-details", externalUserId: "99999" }]);
+    expect(sent).toEqual([
+      { action: "request", method: "GET", path: "/user/details" },
+      { action: "read-details", externalUserId: "99999" },
+    ]);
   });
 
   it("should return the bridge envelope verbatim on transport failure", async () => {

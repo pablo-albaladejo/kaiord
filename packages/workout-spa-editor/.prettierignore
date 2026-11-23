@@ -11,3 +11,7 @@ package-lock.json
 # Generated: SDK-sourced model catalog. Regenerate via
 # `pnpm --filter @kaiord/workout-spa-editor generate:model-catalog`.
 src/lib/generated/
+
+# Train2Go answers as Train2Go serves them: the Connector parser is tested
+# on these exact bytes.
+src/adapters/train2go/connector/fixtures/

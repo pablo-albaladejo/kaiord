@@ -11,6 +11,7 @@ Discovers, verifies, and talks to the in-page Chrome extension bridges (`@kaiord
 
 - `bridge-discovery.ts` / `bridge-discovery-types.ts` — singleton that listens for `kaiord-announce` events from installed extensions and emits a verified registry via `useSyncExternalStore`.
 - `bridge-discovery-verify.ts` — `ping` round-trip that confirms an announced bridge is live before exposing it to the UI.
+- `bridge-protocol.ts` — the protocol versions the App accepts per extension: current and previous (`train2go-bridge` 1 and 2, others 1); used by discovery, the ping Session probes and the Train2Go detection.
 - `bridge-transport.ts` — request/response transport over `chrome.runtime.sendMessage` (with timeout + error wrapping).
 - `operation-queue.ts` / `operation-queue-helpers.ts` / `shared-operation-queue.ts` — token-bucket rate limiter shared across bridges (60/h-per-bridge ceiling mandated by the SPA Bridge Protocol).
 - `bridge-store-persistence-boundary.test.ts` — non-regression guard pinning the rule "bridge registry is never persisted."
