@@ -84,4 +84,3 @@ export const probeTanitaSession = probeBy({
   readSession: readTanitaSession,
   costlyOnPrevious: true,
 });
-
