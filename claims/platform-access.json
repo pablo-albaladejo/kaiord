@@ -41,8 +41,8 @@
           "title": "should answer no external action with a token, when Garmin refuses the token"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should never expose the access token in the probe response"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
         },
         {
           "test": "packages/whoop-bridge/test/background.test.js",
@@ -133,7 +133,7 @@
       "proof": [
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
@@ -429,8 +429,8 @@
           "contains": "const TOKEN_KEY = \"tpAccessToken\";"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should never expose the access token in the probe response"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
         },
         {
           "file": "packages/trainingpeaks-bridge/manifest.prod.json",

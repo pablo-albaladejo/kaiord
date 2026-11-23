@@ -6,6 +6,7 @@ type Signals = {
   isDiscovered: (bridgeId: string) => boolean;
   session: (bridgeId: string) => BridgeSessionSignal | undefined;
   hasSessionProbe: (bridgeId: string) => boolean;
+  isOutdated?: (bridgeId: string) => boolean;
 };
 
 /**
@@ -22,6 +23,9 @@ export const sourceConnectionOf = (
   if (entry.mechanism !== "bridge" || bridgeId === null) return null;
   const installed = s.isDiscovered(bridgeId);
   if (installed && disconnected) return null;
+  // Discovery does not register an extension on a protocol it does not
+  // accept; it is there, and only Update can help.
+  if (!installed && s.isOutdated?.(bridgeId) === true) return "outdated";
   return connectionStateOf(s.session(bridgeId), {
     installed,
     settled: true,

@@ -5,10 +5,10 @@
  * extensionId and checking that the returned manifest matches the
  * declared bridgeId and schema. Rejects spoofed announcements.
  *
- * The protocol version is deliberately NOT a reason to reject: an extension
- * on another version is still that Kaiord extension, and rejecting it made an
- * outdated one look absent, so the App offered Install instead of Update. Its
- * Session probe reads the version and reports it outdated (#1098).
+ * The protocol version is deliberately NOT checked here: an extension on
+ * another version is still that Kaiord extension. Discovery decides what to do
+ * with it (it does not register it, and remembers it as outdated), so the App
+ * offers Update rather than Install (#1098).
  */
 
 import type { BridgeManifest } from "../../types/bridge-schemas";

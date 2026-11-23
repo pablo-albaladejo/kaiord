@@ -195,7 +195,7 @@
       "proof": [
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
@@ -331,7 +331,7 @@
       "proof": [
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "file": "packages/garmin-bridge/background.js",
@@ -654,7 +654,7 @@
       "proof": [
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
@@ -730,7 +730,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "file": "packages/garmin-bridge/garmin-oauth.js",
@@ -779,23 +779,23 @@
     },
     {
       "id": "garmin.pp.check",
-      "text": "**Checking the Connection**: When the Kaiord App or the extension's popup checks the connection, the extension reads one entry of your Garmin Connect workout library, minting a token first if it holds none.",
+      "text": "**Checking the Connection**: When the Kaiord App or the extension's popup checks the connection, the extension sends Garmin no request and mints no token: it answers only whether it holds Garmin access that has not expired. When it holds none, the answer is that it has not checked, and the first read or send finds out.",
       "proof": [
         {
-          "file": "packages/garmin-bridge/background.js",
-          "contains": "\"/workout-service/workouts?start=0&limit=1\""
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should check a session with no request, minting nothing and storing nothing, when no token is held"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should report signed in from a token a real request minted while it is still valid, and hand over no workout"
         },
         {
           "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "reports authenticated + gcApi on the happy path"
-        },
-        {
-          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
-          "title": "mints and persists when there are no stored tokens"
+          "title": "should report not-checked, refreshing nothing, when the OAuth2 token has expired"
         },
         {
           "test": "packages/garmin-bridge/test/popup.test.js",
-          "title": "renders connected state with athlete card and rollup"
+          "title": "should say the session is not checked yet, and record no outage, when the check asked nothing"
         }
       ]
     },

@@ -23,6 +23,14 @@
     "message": "Reading your Garmin Connect data with access Kaiord minted from an earlier sign-in.",
     "description": "Status cause sentence for the connected state. Names the minted access rather than a live session: the bridge holds OAuth tokens, not a browser session."
   },
+  "notChecked": {
+    "message": "Not checked yet",
+    "description": "Status verdict when no still-valid access is held: the check asks Garmin nothing, because refreshing or minting access would issue a credential."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access.",
+    "description": "Status cause sentence for the not-checked state."
+  },
   "captionFeeds": {
     "message": "Feeds Kaiord",
     "description": "Caption above the capability chips."

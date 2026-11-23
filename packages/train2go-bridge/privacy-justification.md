@@ -28,6 +28,8 @@ No other permission is declared. Opening Train2Go in a new tab from the popup or
 
 **Paths**: only five, all `GET`, checked against an allowlist in the service worker before any request is sent: `/api/v2/profile/ping` (who is signed in), `/api/v2/workplan/weekly/{date}` and `/api/v2/workplan/daily/{date}` (the coaching plan), `/api/v2/workplan/tooltip/activity/{id}`, and `/user/details` (zones and weight). Any other path or method is refused without a request.
 
+**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it. A request with any other path or method, or with headers or a body, is refused without a request. Only the popup's own check of who is signed in and of this week's totals is read inside the extension.
+
 **No content script on Train2Go**: the extension injects nothing into Train2Go pages and does not read them.
 
 ## Content Script

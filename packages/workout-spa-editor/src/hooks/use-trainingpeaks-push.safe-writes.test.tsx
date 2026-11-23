@@ -26,8 +26,8 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
 
 vi.mock("../adapters/bridge/bridge-transport", () => ({
   sendBridgeMessage: async (_id: string, message: Record<string, unknown>) => {
-    if (message.action === "checkSession")
-      return { ok: true, data: { authenticated: true, athleteId: 77 } };
+    if (message.action === "read-athlete-id")
+      return { ok: true, data: { athleteId: 77 } };
     if (message.action === "push-workout") {
       const workoutId = tp.nextId++;
       tp.workouts.set(workoutId, {

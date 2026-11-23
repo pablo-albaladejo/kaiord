@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { readGarminSession } from "../../application/connections/session-outcome";
+import { classifyEnvelope } from "./bridge-envelope-classify";
 import {
-  classifyEnvelope,
   probeGarminSession,
   probeTrain2GoSession,
   probeTrainingPeaksSession,
@@ -107,9 +107,9 @@ const PROBERS: readonly (readonly [string, SessionProber, string, Case[]])[] = [
         ACTIVE,
       ],
       [
-        "no sign-in held",
+        "no sign-in held by an older extension",
         ok({ connected: false, userId: null, capturedAt: null }),
-        SIGNED_OUT,
+        COULD_NOT_TELL,
       ],
     ],
   ],
@@ -140,7 +140,7 @@ describe("session probers at the message contract", () => {
       mockedSend.mockResolvedValue({
         ok: false,
         delivered: true,
-        protocolVersion: 2,
+        protocolVersion: 99,
         error: `Unknown action: ${action}`,
       });
 
@@ -204,7 +204,7 @@ describe("classifyEnvelope", () => {
     };
 
     // Act
-    const result = classifyEnvelope(answer, readGarminSession);
+    const result = classifyEnvelope(answer, "garmin-bridge", readGarminSession);
 
     // Assert
     expect(result).toEqual({ ...SIGNED_OUT, error: "redirected to login" });
@@ -215,9 +215,79 @@ describe("classifyEnvelope", () => {
     const answer: ExtensionResponse = { ok: true, delivered: true, data: {} };
 
     // Act
-    const result = classifyEnvelope(answer, readGarminSession);
+    const result = classifyEnvelope(answer, "garmin-bridge", readGarminSession);
 
     // Assert
     expect(result.outdated).toBe(true);
+  });
+});
+
+describe("protocols and typed outcomes", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it.each([1, 2])(
+    "should read a Train2Go extension on protocol %i, the current one or the one before it",
+    async (version) => {
+      // Arrange
+      mockedSend.mockResolvedValue({
+        ok: true,
+        delivered: true,
+        protocolVersion: version,
+        data: { sessionActive: true },
+      });
+
+      // Act
+      const result = await probeTrain2GoSession("ext-2");
+
+      // Assert
+      expect(result).toMatchObject({ sessionActive: true, outdated: false });
+    }
+  );
+
+  it("should offer Update to a Train2Go extension on a protocol the App does not know", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: true,
+      delivered: true,
+      protocolVersion: 3,
+      data: { sessionActive: true },
+    });
+
+    // Act
+    const result = await probeTrain2GoSession("ext-2");
+
+    // Assert
+    expect(result).toMatchObject({ sessionActive: false, outdated: true });
+  });
+
+  it.each([
+    ["signed-in", ACTIVE],
+    ["signed-out", SIGNED_OUT],
+    ["not-checked", { ...COULD_NOT_TELL, notChecked: true }],
+  ] as const)(
+    "should read the typed %s outcome before the extension's own booleans",
+    async (session, expected) => {
+      // Arrange
+      mockedSend.mockResolvedValue(ok({ session, gcApi: { ok: false } }));
+
+      // Act
+      const result = await probeGarminSession("ext-1");
+
+      // Assert
+      expect(result).toEqual(expected);
+    }
+  );
+
+  it("should never read a typed not-answering outcome as signed out", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue(ok({ session: "not-answering" }));
+
+    // Act
+    const result = await probeWhoopSession("ext-1");
+
+    // Assert
+    expect(result).toMatchObject({ sessionActive: false, needsReauth: false });
   });
 });

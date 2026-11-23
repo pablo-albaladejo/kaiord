@@ -93,9 +93,18 @@ const renderConnected = () => {
   });
 };
 
-// The Connection's state from this popup's own check. Today's check folds a refused sign-in
-// into the same `authenticated: false` as an outage, so it cannot say which.
+// The Connection's state from this popup's own check: the typed `session`
+// outcome, where only "signed-out" is MyTANITA's own refusal. An older
+// extension's `authenticated: false` cannot tell a refusal from an outage.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+};
+
 const connectionStateOf = (res) => {
+  const typed = res.ok ? TYPED_STATE[res.data?.session] : undefined;
+  if (typed) return typed;
   if (res.ok && res.data?.authenticated) return "working";
   return "not-answering";
 };

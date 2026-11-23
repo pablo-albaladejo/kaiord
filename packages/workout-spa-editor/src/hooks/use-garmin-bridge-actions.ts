@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { ConnectionState } from "../application/connections/connection-state";
 import type { PushState } from "../contexts/garmin-bridge-types";
 import { executeList, INITIAL_PUSH_STATE } from "./garmin-bridge-operations";
+import { msUntilDiscoverySettled } from "./garmin-discovery-window";
 import {
   getGarminExtensionId,
   runDetect,
@@ -14,9 +15,8 @@ export const useGarminBridgeActions = () => {
   const [sessionActive, setSessionActive] = useState(false);
   const [features, setFeatures] = useState<readonly string[]>([]);
   const [pushing, setPushing] = useState<PushState>(INITIAL_PUSH_STATE);
-  // As `extensionInstalled` starts false: no extension has answered yet.
-  const [connection, setConnection] =
-    useState<ConnectionState>("not-installed");
+  // Nothing has answered yet: "checking" until a ping or discovery's window.
+  const [connection, setConnection] = useState<ConnectionState>("checking");
 
   const detectExtension = useCallback(
     () =>
@@ -30,6 +30,16 @@ export const useGarminBridgeActions = () => {
   );
 
   const redetect = useCallback(() => detectExtension(), [detectExtension]);
+
+  // Re-detect once discovery's window closes, so an extension that never
+  // announced turns from "checking" into "not-installed" without a reload.
+  useEffect(() => {
+    const timer = setTimeout(
+      () => void detectExtension(),
+      msUntilDiscoverySettled()
+    );
+    return () => clearTimeout(timer);
+  }, [detectExtension]);
 
   const pushWorkout = useCallback(
     (gcn: unknown) => runPush(gcn, setPushing, redetect),

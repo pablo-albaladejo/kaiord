@@ -113,6 +113,27 @@ describe("createDetectAction", () => {
     expect(state.lastError).toBe("outdated");
   });
 
+  it.each([1, 2])(
+    "should read the session from an extension on protocol %i, the current one or the one before it",
+    async (version) => {
+      // Arrange
+      mockPing.mockResolvedValue({
+        ok: true,
+        protocolVersion: version,
+        sessionActive: true,
+        externalUserId: null,
+        externalUserName: null,
+      });
+
+      // Act
+      await detect();
+
+      // Assert
+      expect(state.sessionActive).toBe(true);
+      expect(state.lastError).toBeNull();
+    }
+  );
+
   it("should use detection cache within 30s", async () => {
     // Arrange
     mockPing.mockResolvedValue({

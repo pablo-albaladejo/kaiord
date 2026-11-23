@@ -6,12 +6,13 @@
  * failure: each eligible item then ends `library-only{bridge-outdated}`.
  */
 import type { ConnectionState } from "../connections/connection-state";
+import { connectionMayBeUsed } from "../connections/connection-state";
 import { libraryOnlyReason } from "../garmin-placement/placement-preflight";
 import { CALENDAR_WRITE_FEATURE } from "../garmin-placement/placement-timing";
 
 export type BulkPreflightFailure =
   | "no-export-route"
-  | Exclude<ConnectionState, "working">
+  | Exclude<ConnectionState, "working" | "not-checked">
   | "insecure-context"
   | "unsupported-browser";
 
@@ -22,7 +23,7 @@ export const bulkPreflight = (input: {
   secureContext: boolean;
 }): BulkPreflightFailure | undefined => {
   if (!input.routeActive) return "no-export-route";
-  if (input.connection !== "working") return input.connection;
+  if (!connectionMayBeUsed(input.connection)) return input.connection;
   // Only the Web Locks half of the single-push check applies here: an
   // outdated bridge is not a pre-flight failure (see above).
   const noLocks = libraryOnlyReason({

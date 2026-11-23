@@ -26,6 +26,8 @@ export type ConnectionSourceSignals = BridgeRouteSignals & {
   isDiscovered: (bridgeId: string) => boolean;
   /** Injected rather than inferred — see connection-source-status. */
   hasSessionProbe: (bridgeId: string) => boolean;
+  /** Announced on a protocol the App does not accept, so not registered. */
+  isOutdated?: (bridgeId: string) => boolean;
   lastSyncAt: (bridgeId: string) => string | undefined;
 };
 

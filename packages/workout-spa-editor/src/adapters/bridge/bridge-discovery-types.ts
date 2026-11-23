@@ -26,6 +26,9 @@ export type BridgeDiscovery = {
    * spoofable). `null` until verification completes for this bridge.
    */
   getCapabilities: (bridgeId: string) => readonly string[] | null;
+  /** The extension announced itself on a protocol this App does not accept:
+      not registered, but its Connection is "outdated", not absent. */
+  isOutdated?: (bridgeId: string) => boolean;
   subscribe: (listener: DiscoveryListener) => () => void;
 };
 

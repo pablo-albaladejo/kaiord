@@ -1,18 +1,21 @@
 /**
  * Kaiord Train2Go Bridge — Background Service Worker
  *
- * SW-direct Train2Go read bridge: the service worker fetches the user's
- * training-plan endpoints on app.train2go.com directly with
- * `credentials:"include"`, so the site's HttpOnly session cookie travels
- * automatically. No content script on app.train2go.com, no `tabs` or
- * `scripting` permission, and no credentials ever handled by the extension.
+ * Thin Bridge (docs/adr/0004-thin-bridge-smart-connector.md): the service
+ * worker lends the athlete's Train2Go Session and executes requests from a
+ * closed list of method + path patterns (`ALLOWED`), answering the Kaiord
+ * App with Train2Go's raw answer. What to ask for, how to read the answer,
+ * retries and the mapping to KRD are the App's Train2Go Connector.
  *
- * The raw response body is parsed into structured activity data via
- * parser.js. The session cookie is never read or exposed; a dead session
- * (redirect / login response) is surfaced to callers as needsReauth.
+ * Requests go to app.train2go.com with `credentials:"include"`, so the
+ * site's HttpOnly session cookie travels automatically; the cookie is never
+ * read. A dead session (redirect / login response) is surfaced as
+ * needsReauth. What still parses here (parser.js) serves the popup only.
  */
 
-const PROTOCOL_VERSION = 1;
+// 2: the generic `request` action replaced read-week / read-day /
+// read-details for the App. The App accepts version 1 as well.
+const PROTOCOL_VERSION = 2;
 const TRAIN2GO_ORIGIN = "https://app.train2go.com";
 const TRAIN2GO_DASHBOARD = "https://app.train2go.com/user/index";
 
@@ -139,10 +142,11 @@ try {
   );
 }
 
-// ── Train2Go call surface ──
+// ── Train2Go call surface: the closed list ──
 //
-// Defense-in-depth path allowlist, enforced in the service worker before any
-// fetch runs (it used to live in the now-deleted content-script relay). Locked
+// Method + path pattern, nothing else: every request, the App's included,
+// is checked against it before any fetch runs; anything else is refused
+// without a request. Locked
 // against drift by scripts/check-bridge-privacy-surface.mjs, which parses
 // `method: "..."` and `pattern: /.../` off each single physical line — don't
 // let prettier wrap the long regexes.
@@ -153,17 +157,16 @@ const ALLOWED = [
   // prettier-ignore
   { method: "GET", pattern: /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
   { method: "GET", pattern: /^\/api\/v2\/workplan\/tooltip\/activity\/\d+$/ },
-  // Server-rendered HTML page used by the zones-sync feature; data is
-  // extracted by parseDetailsHtml below.
+  // Server-rendered HTML page the App's Connector reads zones and weight
+  // from.
   { method: "GET", pattern: /^\/user\/details$/ },
 ];
 
 const isAllowed = (method, path) =>
   sessionFetch.isPathAllowed(ALLOWED, method, path);
 
-// Reads the response body dispatching by Content-Type: text/html pages are
-// returned verbatim (the details page is parsed downstream by
-// parseDetailsHtml); everything else is a JSON API payload.
+// Reads the response body of the popup's own reads (ping, weekly) by
+// Content-Type: text/html verbatim, everything else as a JSON API payload.
 const parseBody = (contentType, body) =>
   /^\s*text\/html\b/i.test(contentType || "") ? body : JSON.parse(body);
 
@@ -201,33 +204,71 @@ const train2goFetch = async (path, method = "GET") => {
 
 // ── Actions ──
 
-// Spread session FIRST, then BRIDGE_MANIFEST, so manifest fields
-// (id/name/version/protocolVersion/capabilities) cannot be spoofed by
-// a future Train2Go API change that returns its own keys with the same
-// names. This matches the garmin-bridge precedence and is enforced by
-// the "manifest fields take precedence" test.
-const ping = async () => {
+// The Session check, answered to `ping`: one GET of the profile ping, the
+// cheapest Train2Go request that tells a live session from a dead one. Only
+// the outcome leaves the service worker; the profile in the body is dropped
+// here. Train2Go saying the session is gone (a redirect, 401/403, or
+// `success: false`) is a verified "signed-out"; anything else that fails is
+// "not-answering", never signed out.
+// The typed outcome of one profile-ping answer, shared by the Session check
+// and the popup's profile read so both word one answer the same way.
+const sessionOutcomeOf = (res) => {
+  if (res?.ok) {
+    if (parser.parsePingJson(res.data).sessionActive) return "signed-in";
+    return res.data?.success === false ? "signed-out" : "not-answering";
+  }
+  return res?.needsReauth ? "signed-out" : "not-answering";
+};
+
+const checkSession = async () => {
+  let session;
+  try {
+    session = sessionOutcomeOf(await train2goFetch("/api/v2/profile/ping"));
+  } catch (e) {
+    void logSwallowed("warn", "ping", e);
+    session = "not-answering";
+  }
+  const signedIn = session === "signed-in";
+  return {
+    ...BRIDGE_MANIFEST,
+    session,
+    authenticated: signedIn,
+    sessionActive: signedIn,
+  };
+};
+
+// Popup only (internal channel): the explicit read behind what the popup
+// shows when the athlete opens it, the athlete's name, the coach's name and
+// notes, and the id its weekly figures are read for. The Kaiord App never
+// gets this: it reads the profile ping raw through `request` when it links.
+// Spread session FIRST, then BRIDGE_MANIFEST, so manifest fields cannot be
+// spoofed by a future Train2Go API change that returns keys of the same name.
+const readProfile = async () => {
   try {
     const res = await train2goFetch("/api/v2/profile/ping");
     if (!res?.ok) {
-      return { ...BRIDGE_MANIFEST, sessionActive: false };
+      return {
+        ...BRIDGE_MANIFEST,
+        sessionActive: false,
+        session: sessionOutcomeOf(res),
+      };
     }
     const session = parser.parsePingJson(res.data);
     return {
       ...session,
       ...BRIDGE_MANIFEST,
+      session: sessionOutcomeOf(res),
       sessionActive: session.sessionActive,
       userId: session.userId,
       userName: session.userName,
     };
-    // session may also carry coachName / notes — both are spread above
-    // and only the BRIDGE_MANIFEST keys are explicitly overwritten.
   } catch (e) {
-    // Network failure, malformed response, or parser error — degrade to
-    // "no session" rather than throwing, so a transient Train2Go outage
-    // doesn't break the popup/detection flow. The cause is still recorded.
-    void logSwallowed("warn", "ping", e);
-    return { ...BRIDGE_MANIFEST, sessionActive: false };
+    void logSwallowed("warn", "read-profile", e);
+    return {
+      ...BRIDGE_MANIFEST,
+      sessionActive: false,
+      session: "not-answering",
+    };
   }
 };
 
@@ -242,6 +283,7 @@ const toBridgeError = (fallback, res) => {
   return err;
 };
 
+// Popup only (internal channel): the inputs of its weekly figures.
 const readWeek = async (date, userId) => {
   const path = `/api/v2/workplan/weekly/${date}?user=${userId}`;
   const res = await train2goFetch(path);
@@ -251,37 +293,35 @@ const readWeek = async (date, userId) => {
   return { activities: parser.parseWeeklyHtml(html) };
 };
 
-const readDay = async (date, userId) => {
-  const path = `/api/v2/workplan/daily/${date}?user=${userId}&source=sidebar`;
-  const res = await train2goFetch(path);
-  if (!res?.ok) throw toBridgeError("Read day failed", res);
+// ── The App's one read: a request from the closed list, answered raw ──
+const REQUEST_KEYS = new Set(["action", "method", "path"]);
 
-  const html = res.data?.data?.content ?? "";
-  // Backfill `date` from the request param: the daily HTML fragment
-  // is single-day, so `parseDailyHtml` cannot extract the date the
-  // way `parseWeeklyHtml` does (via the `workplan-table-date-YYYY-MM-DD`
-  // CSS-class anchor — absent in the daily endpoint). Without this
-  // step, `expandDay` upserts records with `date: ""`, causing the
-  // activity to drop out of every per-day calendar bucket — the
-  // visible symptom is the card disappearing the moment the user
-  // opens its detail dialog (which lazy-fetches via expandDay).
-  const activities = parser.parseDailyHtml(html).map((a) => ({ ...a, date }));
-  // The day-scoped comment thread lives in the same fragment (right
-  // column). Additive payload — older SPAs ignore `comments`.
-  const comments = parser.extractComments(html);
-  return { activities, comments };
+const refuseRequest = () => {
+  const err = new Error("Request not allowed");
+  err.retryable = false;
+  return err;
 };
 
-// Reads the server-rendered /user/details page and extracts a raw-shape
-// `ZonesPayload` per the parser's allowlist. The SPA-side syncZones use
-// case maps this to Kaiord-domain thresholds; the bridge stays
-// platform-shaped.
-const readDetails = async () => {
-  const res = await train2goFetch("/user/details");
-  if (!res?.ok) throw toBridgeError("Read details failed", res);
-  // train2goFetch returns the raw HTML body for text/html responses.
-  const html = typeof res.data === "string" ? res.data : "";
-  return parser.parseDetailsHtml(html);
+const request = async (message) => {
+  const { method, path } = message;
+  const onlyMethodAndPath = Object.keys(message).every((k) =>
+    REQUEST_KEYS.has(k)
+  );
+  if (
+    !onlyMethodAndPath ||
+    typeof method !== "string" ||
+    typeof path !== "string" ||
+    !isAllowed(method, path)
+  ) {
+    throw refuseRequest();
+  }
+  const res = await sessionFetch.cookieSessionFetch({
+    url: `${TRAIN2GO_ORIGIN}${path}`,
+    method,
+    fetchImpl: fetch,
+  });
+  if (!res.ok) throw toBridgeError("Request failed", res);
+  return { status: res.status, contentType: res.contentType, body: res.body };
 };
 
 const openTrain2Go = async () => {
@@ -315,15 +355,14 @@ const clearSnapshot = async () => {
 const handleAction = async (message) => {
   switch (message.action) {
     case "ping":
-      return await ping();
+      return await checkSession();
+    case "read-profile":
+      return await readProfile();
+    case "request":
+      return await request(message);
     case "read-week":
       if (!message.userId) throw new Error("Missing userId");
       return await readWeek(message.date, message.userId);
-    case "read-day":
-      if (!message.userId) throw new Error("Missing userId");
-      return await readDay(message.date, message.userId);
-    case "read-details":
-      return await readDetails();
     case "open-train2go":
       await openTrain2Go();
       return null;
@@ -340,14 +379,11 @@ const handleAction = async (message) => {
 
 // ── External messages (SPA ↔ Extension) ──
 // Every external message is origin-pinned and action-allowlisted by the
-// vendored guard (spec: bridge-core). The allowlist equals this bridge's
-// full action surface — the popup uses the internal channel.
+// vendored guard (spec: bridge-core). `request` is reachable only here.
 
 const EXTERNAL_ACTIONS = new Set([
   "ping",
-  "read-week",
-  "read-day",
-  "read-details",
+  "request",
   "open-train2go",
   "profile-snapshot",
   "profile-snapshot-clear",
@@ -380,9 +416,17 @@ const handleExternalMessage = bridgeEnvelope.createExternalDispatch({
 chrome.runtime.onMessageExternal.addListener(handleExternalMessage);
 
 // ── Internal messages (popup) ──
+// Only the extension's own pages are answered, never a content script, and
+// only the three actions the popup sends.
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) =>
-  dispatch(message, sendResponse)
+const INTERNAL_ACTIONS = new Set(["ping", "read-profile", "read-week"]);
+
+chrome.runtime.onMessage.addListener(
+  bridgeEnvelope.createInternalDispatch({
+    dispatch,
+    internalActions: INTERNAL_ACTIONS,
+    protocolVersion: PROTOCOL_VERSION,
+  })
 );
 
 // Exported for testing
@@ -392,6 +436,7 @@ if (typeof module !== "undefined") {
     BRIDGE_MANIFEST,
     TRAIN2GO_ORIGIN,
     EXTERNAL_ACTIONS,
+    INTERNAL_ACTIONS,
     AUTH_ENDPOINTS,
     ALLOWED,
     isAllowed,
@@ -399,10 +444,11 @@ if (typeof module !== "undefined") {
     handleAction,
     handleExternalMessage,
     train2goFetch,
-    ping,
+    ping: checkSession,
+    checkSession,
+    readProfile,
     readWeek,
-    readDay,
-    readDetails,
+    request,
     openTrain2Go,
     persistSnapshot,
     clearSnapshot,

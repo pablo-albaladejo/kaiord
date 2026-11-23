@@ -31,10 +31,15 @@ const popupStateOf = (bridge: string): ((res: PopupAnswer) => string) => {
     join(process.cwd(), "..", bridge, "popup.js"),
     "utf8"
   );
-  const start = src.indexOf("const connectionStateOf = ");
+  const typed = src.indexOf("const TYPED_STATE = ");
+  const start = typed >= 0 ? typed : src.indexOf("const connectionStateOf = ");
   const close = "\n};";
-  const end = src.indexOf(`${close}\n`, start);
-  if (start < 0 || end < 0) throw new Error(`${bridge}: no connectionStateOf`);
+  const end = src.indexOf(
+    `${close}\n`,
+    src.indexOf("const connectionStateOf = ")
+  );
+  if (start < 0 || end < 0 || !src.includes("const connectionStateOf = "))
+    throw new Error(`${bridge}: no connectionStateOf`);
   const body = src.slice(start, end + close.length);
   return new Function(`${body}\nreturn connectionStateOf;`)() as (
     res: PopupAnswer
@@ -87,7 +92,6 @@ const BRIDGES: readonly (readonly [
     [
       { ok: true, data: { connected: true, userId: 1 } },
       { ok: true, data: { connected: true, userId: null } },
-      { ok: true, data: { connected: false, userId: null } },
       { ok: false, error: "No response" },
     ],
   ],

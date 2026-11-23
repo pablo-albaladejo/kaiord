@@ -33,8 +33,8 @@ describe("SESSION_PROBES", () => {
     const prober = SESSION_PROBES[bridgeId];
 
     // Assert
-    // tanita's checkSession downloads the whole export CSV — polling it would
-    // re-fetch the user's entire history every pass.
+    // an older tanita extension's checkSession downloads the whole export
+    // CSV — polling it could re-fetch the athlete's entire history every pass.
     expect(prober).toBeUndefined();
   });
 });

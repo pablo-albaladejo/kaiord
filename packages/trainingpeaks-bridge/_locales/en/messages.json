@@ -23,6 +23,14 @@
     "message": "Reading your body metrics through your session.",
     "description": "Status cause sentence for the connected state."
   },
+  "notChecked": {
+    "message": "Not checked yet",
+    "description": "Status verdict when no token is held: the check asks TrainingPeaks nothing, because its only Session request mints a token."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord asks TrainingPeaks the first time it reads or sends, so looking here mints no token.",
+    "description": "Status cause sentence for the not-checked state."
+  },
   "captionFeeds": {
     "message": "Feeds Kaiord",
     "description": "Caption above the capability chips in the connected state."

@@ -73,6 +73,9 @@ export const probeBridge = async (
   // stay "discovered" for the life of the page.
   write(ctx, bridgeId, {
     ...result,
+    // Written even when absent, or a previous "not checked" would survive
+    // the merge into a later, answered check.
+    notChecked: result.notChecked,
     discovered: result.reachable,
     checking: false,
     lastCheckedAt: result.reachable ? ctx.now() : null,

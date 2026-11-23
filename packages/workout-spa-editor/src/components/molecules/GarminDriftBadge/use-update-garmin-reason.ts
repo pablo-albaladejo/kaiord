@@ -1,4 +1,5 @@
 import type { ConnectionState } from "../../../application/connections/connection-state";
+import { connectionMayBeUsed } from "../../../application/connections/connection-state";
 import { CALENDAR_WRITE_FEATURE } from "../../../application/garmin-placement/placement-timing";
 import { useGarminBridge } from "../../../contexts";
 
@@ -10,7 +11,7 @@ import { useGarminBridge } from "../../../contexts";
  */
 export const useUpdateGarminReason = (): ConnectionState | undefined => {
   const { connection, features } = useGarminBridge();
-  if (connection !== "working") return connection;
+  if (!connectionMayBeUsed(connection)) return connection;
   if (!features.includes(CALENDAR_WRITE_FEATURE)) return "outdated";
   return undefined;
 };

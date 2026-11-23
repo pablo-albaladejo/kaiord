@@ -21,6 +21,7 @@ import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes"
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
 import { useBridgeConnections } from "../use-bridge-connections";
 import { useConnectionStatus } from "../use-connection-status";
+import { useOutdatedBridges } from "../use-outdated-bridges";
 import { localizeSourceNames } from "./localize-source-names";
 
 export const useConnectionSources = (
@@ -29,6 +30,7 @@ export const useConnectionSources = (
   const connections = useBridgeConnections(profileId);
   const records = useConnectionStatus(profileId);
   const locale = useActiveLocale();
+  const outdated = useOutdatedBridges();
 
   return useMemo(() => {
     const byBridge = new Map(connections.map((row) => [row.bridgeId, row]));
@@ -37,11 +39,12 @@ export const useConnectionSources = (
       session: (bridgeId) => byBridge.get(bridgeId),
       isDiscovered: (bridgeId) => byBridge.get(bridgeId)?.discovered === true,
       hasSessionProbe,
+      isOutdated: (bridgeId) => outdated.split(",").includes(bridgeId),
       lastSyncAt: (bridgeId) => byBridge.get(bridgeId)?.lastSyncAt,
       announces: (bridgeId, token) =>
         (bridgeDiscovery.getCapabilities(bridgeId) ?? []).includes(token),
       supportsRoute: bridgeSupportsRoute,
     });
     return localizeSourceNames(sources, getTranslate("connections", locale));
-  }, [connections, records, locale]);
+  }, [connections, records, locale, outdated]);
 };

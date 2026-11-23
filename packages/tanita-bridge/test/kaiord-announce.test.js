@@ -58,7 +58,7 @@ describe("kaiord-announce (vendored)", () => {
         extensionId: "test-extension-id",
         name: identity.name,
         version: "0.0.0",
-        protocolVersion: 1,
+        protocolVersion: identity.protocolVersion ?? 1,
         capabilities: identity.capabilities,
       });
     });

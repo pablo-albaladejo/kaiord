@@ -28,8 +28,9 @@ R-BridgeLocalesEnglishOnly is lifted.
 
 ### Requirement: The notice follows the verified state, never an unverified cause
 
-A Connection's verified state SHALL decide its notice: working or still being
-checked shows no notice; not installed shows Install; an extension on another
+A Connection's verified state SHALL decide its notice: working, still being
+checked, or not checked (the check asked the Platform nothing and the first
+real use decides) shows no notice; not installed shows Install; an extension on another
 protocol version shows Update; a sign-in the Platform itself refused shows
 Sign in to the Platform; anything else — no answer, a timeout, a server error,
 an extension that did not reply, a state the table does not know — SHALL show

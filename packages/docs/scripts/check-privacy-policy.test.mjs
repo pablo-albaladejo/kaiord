@@ -427,9 +427,15 @@ const SOLO_CASES = [
   ],
   [
     TRAIN2GO,
-    "passes on only your heart-rate",
-    "passes on your heart-rate",
-    "Train2Go profile-page read limited to zones and weight",
+    "which keeps only your heart-rate",
+    "which keeps your heart-rate",
+    "Train2Go profile page kept by the App to zones and weight only",
+  ],
+  [
+    TRAIN2GO,
+    "hands it Train2Go's answer as it came, without reading it",
+    "hands it Train2Go's answer after reading it",
+    "Train2Go answers handed to the App unread",
   ],
   [
     TRAIN2GO,
@@ -489,9 +495,9 @@ const SOLO_CASES = [
   ],
   [
     TANITA,
-    "single, fixed, read-only `GET`",
-    "request",
-    "Tanita single fixed read-only GET disclosed",
+    "a `HEAD` that checks the connection",
+    "a request that checks the connection",
+    "Tanita read-only requests to one fixed export address disclosed",
   ],
   [
     TANITA,
@@ -507,9 +513,9 @@ const SOLO_CASES = [
   ],
   [
     TANITA,
-    "Checking the Connection Downloads the Export",
-    "Checking the Connection",
-    "Tanita session check downloading the whole export disclosed",
+    "it sends a `HEAD` request for the export, which returns no measurement",
+    "it downloads your whole export again",
+    "Tanita session check by HEAD, downloading nothing, disclosed",
   ],
   [
     TANITA,
@@ -586,9 +592,9 @@ const SOLO_CASES = [
   ],
   [
     TRAININGPEAKS,
+    "the extension asks TrainingPeaks nothing and mints no token",
     "the extension asks TrainingPeaks for a new token and stores it",
-    "the extension looks",
-    "TrainingPeaks token minted on every connection check disclosed",
+    "TrainingPeaks connection check minting no token disclosed",
   ],
   [
     TRAININGPEAKS,

@@ -23,9 +23,10 @@ and the WHOOP popup and card disagreed on the same answer (#1091). Ticket
   (`application/connections/session-outcome.ts`): only the Platform's own
   refusal is "signed-out"; anything not verified is "not-answering". The
   protocol version is read from the envelope of every probe, so an outdated
-  extension is "outdated" on every bridge whatever its action answers;
-  discovery no longer rejects an extension on another protocol version, which
-  made it look absent.
+  extension is "outdated" on every bridge whatever its action answers; an
+  extension that discovery does not register for its protocol version is
+  remembered as outdated instead of looking absent. The typed Session outcome
+  of #1643 is read first; "not-checked" shows no notice.
 - Every App surface that worded a broken Connection — Connections cards and
   banner, header pill and Settings banner, editor ribbon, send buttons, Send
   week, placement feedback, Update Garmin, TrainingPeaks send, coaching dialog
@@ -50,10 +51,8 @@ and the WHOOP popup and card disagreed on the same answer (#1091). Ticket
 
 - `spa-connections-page`: a broken card and the consequence banner word the
   Connection through its notice.
-- `bridge-runtime-discovery`: an announcement is not rejected for its protocol
-  version.
-- `spa-bridge-protocol`: an outdated extension is offered Update, worded by the
-  notice.
+- `bridge-runtime-discovery`: an announcement refused for its protocol version
+  is remembered as outdated.
 - `bridge-core`: the notices master and the `renderNotice` shell renderer.
 
 ## Impact

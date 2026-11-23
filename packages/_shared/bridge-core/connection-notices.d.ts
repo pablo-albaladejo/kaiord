@@ -3,6 +3,7 @@ export type ConnectionFix = "install" | "update" | "sign-in" | "try-again";
 export type ConnectionState =
   | "working"
   | "checking"
+  | "not-checked"
   | "not-installed"
   | "outdated"
   | "signed-out"

@@ -46,6 +46,7 @@ export const STATUS_TEXT: Record<ConnectionSourceStatus, string> = {
  */
 export type DetailKey =
   | "detail.installed"
+  | "detail.notChecked"
   | "detail.checking"
   | "detail.manual"
   | "detail.unsupported"
@@ -54,7 +55,10 @@ export type DetailKey =
 export const detailKeyFor = (source: ConnectionSource): DetailKey | null => {
   switch (source.status) {
     case "installed":
-      return "detail.installed";
+      // A probed bridge is `installed` only when its check asked nothing.
+      return source.sessionVerifiable
+        ? "detail.notChecked"
+        : "detail.installed";
     case "checking":
       return "detail.checking";
     case "attention":

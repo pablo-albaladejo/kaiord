@@ -35,8 +35,8 @@ How it works:
 Your token and your data:
 
 • The access token is kept in your browser (chrome.storage.local) and is sent only to TrainingPeaks. It never travels to Kaiord.
-• Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it.
-• The extension gives the Kaiord App your TrainingPeaks athlete number, which TrainingPeaks needs to place a workout, and never the token.
+• Checking your sign-in, from the Kaiord App or the popup, asks TrainingPeaks nothing and mints no token. The extension asks TrainingPeaks for a token, and stores it, only when the Kaiord App is about to read or send.
+• The extension gives the Kaiord App your TrainingPeaks athlete number just before a workout is placed, because TrainingPeaks needs it, and never the token.
 • The extension sends requests only to TrainingPeaks, and answers only the Kaiord App at https://kaiord.com.
 • No analytics and no tracking.
 • Removing the extension from Chrome deletes everything it stored.

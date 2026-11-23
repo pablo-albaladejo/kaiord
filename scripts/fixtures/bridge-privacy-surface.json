@@ -131,6 +131,10 @@
       {
         "method": "GET",
         "pattern": "^\\/en\\/user\\/export-csv$"
+      },
+      {
+        "method": "HEAD",
+        "pattern": "^\\/en\\/user\\/export-csv$"
       }
     ],
     "external_actions": [
@@ -202,9 +206,7 @@
     ],
     "external_actions": [
       "ping",
-      "read-week",
-      "read-day",
-      "read-details",
+      "request",
       "open-train2go",
       "profile-snapshot",
       "profile-snapshot-clear",
@@ -278,6 +280,7 @@
       "push-weight",
       "push-workout",
       "read-workout",
+      "read-athlete-id",
       "open-trainingpeaks",
       "set-theme"
     ],
@@ -367,6 +370,7 @@
     "external_actions": [
       "ping",
       "status",
+      "read-user-id",
       "whoop-fetch",
       "set-theme"
     ],

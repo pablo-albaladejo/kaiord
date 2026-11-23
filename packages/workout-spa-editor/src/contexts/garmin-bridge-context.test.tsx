@@ -30,7 +30,7 @@ describe("garmin-bridge-context", () => {
     expect(result.current.extensionInstalled).toBe(false);
     expect(result.current.sessionActive).toBe(false);
     expect(result.current.pushing).toEqual({ status: "idle" });
-    expect(result.current.connection).toBe("not-installed");
+    expect(result.current.connection).toBe("checking");
   });
 
   it("should update pushing state", () => {

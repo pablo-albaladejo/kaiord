@@ -60,6 +60,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   connectedCause:
     "Reading your Garmin Connect data with access Kaiord minted from an earlier sign-in.",
   outageSince: "Since $1.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access.",
   captionFeeds: "Feeds Kaiord",
   typeActivity: "Activity",
   typeWorkoutBack: "Workout ↑ to Garmin",
@@ -176,7 +179,18 @@ const setMarkEstablished = (established) => {
 // Only a check Garmin itself answered may say the sign-in is gone: a failed
 // read, a timeout or a worker that did not answer is "not-answering", because
 // Garmin being unavailable always explains it too (#1100).
+// An extension with the cheap check answers the typed `session` outcome;
+// only "signed-out" there is Garmin's own refusal.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+  "not-checked": "not-checked",
+};
+
 const connectionStateOf = (ping) => {
+  const typed = ping?.ok ? TYPED_STATE[ping?.data?.session] : undefined;
+  if (typed) return typed;
   if (ping?.ok && ping?.data?.gcApi?.ok) return "working";
   if (ping?.ok && ping?.data?.gcApi?.needsReauth === true) return "signed-out";
   return "not-answering";
@@ -197,6 +211,29 @@ const renderBroken = (state, since = null) => {
     onRetry: () => loadPopupData(),
   });
   renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
+};
+
+/* The check asked nothing: no still-valid access is held, and minting one to
+   look would be the cost the check exists to avoid. Nothing was learned, so
+   no outage is recorded and nothing claims the athlete is signed out. */
+const renderNotChecked = (storage) => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
+  });
+  renderChips($, feedChips(), { caption: msg("captionFeeds") });
+  renderAthleteCard(storage.profileSnapshot);
+  renderRollup(undefined, storage.lastPushReceipt);
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openGarmin"),
+    secondaryHref: OPEN_GARMIN_URL,
+  });
+  showRefresh(true);
 };
 
 const loadPopupData = async () => {
@@ -232,6 +269,10 @@ const loadPopupData = async () => {
   }
 
   const state = connectionStateOf(ping);
+  if (state === "not-checked") {
+    renderNotChecked(storage);
+    return;
+  }
   const health = await recordProbe(state === "working");
   if (state !== "working") {
     renderAthleteCard(storage.profileSnapshot);

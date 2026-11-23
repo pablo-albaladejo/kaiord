@@ -20,10 +20,11 @@ Kaiord for Train2Go connects the Kaiord App (https://kaiord.com/app) to your Tra
 
 What it does:
 
-• Reads the week your coach planned on Train2Go: each coaching activity's date, sport, title, duration, workload and completion status.
-• Reads one day in full when the Kaiord App asks: the coach's description of each session, and that day's comments with who wrote them.
-• Reads your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight from your Train2Go profile page. Nothing else on that page is passed on: gender, birthday, body fat, height, contact details, records and tests are dropped inside the extension.
-• Tells the Kaiord App who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them.
+• Fetches the week your coach planned on Train2Go when the Kaiord App asks, and the Kaiord App reads from it each coaching activity's date, sport, title, duration, workload and completion status.
+• Fetches one day in full when the Kaiord App asks, and the Kaiord App reads from it the coach's description of each session, and that day's comments with who wrote them.
+• Fetches your Train2Go profile page when the Kaiord App asks, and the Kaiord App keeps from it only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. The rest of that page (gender, birthday, body fat, height, contact details, records and tests) reaches the Kaiord App in your browser and is dropped there as the page is read.
+• Hands the Kaiord App what Train2Go answers, as it came, and makes only the requests on its fixed list of read-only Train2Go addresses. It refuses any other request without sending it.
+• Checking the connection tells the Kaiord App only whether you are signed in. When you connect Train2Go, the Kaiord App reads who is signed in from Train2Go's answer, which also holds your coach's name and the notes your coach keeps about you when Train2Go provides them, and keeps only your id and name.
 • Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload.
 • Only reads. It never changes anything on Train2Go.
 

@@ -30,21 +30,23 @@ sign-in to lend) is `signed-out`. A failed read, a timeout, a server error or
 an extension that did not reply is `not-answering`, whose wording names the
 outage and nothing else.
 
-### D3. One small adapter over today's answers
+### D3. The typed outcome first, one small adapter for older extensions
 
-`session-outcome.ts` turns each extension's current answer into
-`signed-in` / `signed-out-verified` / `could-not-tell`. #1643 will return that
-outcome from the extensions; each reader then becomes a field read. Until then
-Train2Go and Tanita fold a refused sign-in into the same answer as an outage,
-so both show Try again where Sign in would also help; that is honest, and it
-ends with #1643.
+An extension with the cheap Session check (#1643) answers `session`
+(signed-in / signed-out / not-answering / not-checked), read first by every
+probe and every popup. `session-outcome.ts` reads an older extension's own
+booleans into the same three outcomes; only the Platform's refusal is
+signed-out. "not-checked" (nothing was asked, the first real use decides) is
+its own state with no notice, and a send may go ahead on it.
 
-### D4. The protocol version is read from the envelope, and discovery accepts it
+### D4. The protocol version is read from the envelope, and discovery remembers it
 
-Every envelope carries `protocolVersion`, so the probers read it first, for
-every bridge (#1098). Discovery's verification ping rejected a manifest on
-another version, which made an outdated extension absent and the App offered
-Install; it now accepts any version and the probe reports it outdated.
+Every envelope carries `protocolVersion`, so the probers read it first
+against the versions accepted per extension (`bridge-protocol.ts`), for every
+bridge (#1098). Discovery still does not register an extension on another
+version (thin-bridge-train2go), which made it look absent and the App offered
+Install; it now remembers it as outdated (`isOutdated`), and the card and the
+Garmin send path show Update.
 
 ### D5. The popup and the App read the same answer the same way
 

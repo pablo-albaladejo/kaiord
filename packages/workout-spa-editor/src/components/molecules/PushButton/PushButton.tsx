@@ -1,5 +1,6 @@
 import { forwardRef, useState } from "react";
 
+import { connectionMayBeUsed } from "../../../application/connections/connection-state";
 import { isPlacementSent } from "../../../application/garmin-placement/placement-result";
 import { useGarminBridge } from "../../../contexts";
 import { useGarminPlacementNotice } from "../../../hooks/use-garmin-placement-notice";
@@ -57,7 +58,7 @@ export const PushButton = forwardRef<HTMLButtonElement, PushButtonProps>(
           size={size}
           full={full}
           onPush={() => void onPush()}
-          disabled={connection !== "working"}
+          disabled={!connectionMayBeUsed(connection)}
           reason={<GarminConnectionNotice connection={connection} />}
         />
         {result && workout && (

@@ -489,7 +489,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
-          "title": "should keep the minted tokens in chrome.storage.local"
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
         },
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
@@ -979,12 +979,12 @@
           "title": "should send only GET requests, so nothing on Train2Go is changed"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the weekly activities on read-week"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
           "test": "packages/train2go-bridge/test/session-fetch.test.js",
@@ -1003,7 +1003,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",

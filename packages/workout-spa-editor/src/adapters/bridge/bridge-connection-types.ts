@@ -17,6 +17,8 @@ export type BridgeConnectionRuntime = {
   readonly needsReauth: boolean;
   /** The extension answered with an unsupported protocol version. */
   readonly outdated: boolean;
+  /** The last check asked the Platform nothing; see `SessionProbeResult`. */
+  readonly notChecked?: true;
   readonly lastCheckedAt: number | null;
 };
 

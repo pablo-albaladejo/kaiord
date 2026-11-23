@@ -3,12 +3,13 @@
 
 # @kaiord/train2go-bridge
 
-**Private Chrome Extension (Manifest V3)** that reads training plans from Train2Go (https://app.train2go.com) and bridges them to the Kaiord workout editor SPA via `chrome.runtime.sendMessage`.
+**Private Chrome Extension (Manifest V3)**, a thin Bridge (`docs/adr/0004-thin-bridge-smart-connector.md`, protocol version 2): it lends the athlete's Train2Go (https://app.train2go.com) Session and executes requests from a closed list of method + path patterns, handing the Kaiord App Train2Go's raw answer. What to ask for, how to read it and the mapping to KRD are the App's Train2Go Connector (`packages/workout-spa-editor/src/adapters/train2go/connector/`).
 
 ## Purpose
 
-- Fetch training-plan endpoints on `app.train2go.com` directly from the service worker with `credentials:"include"` (SW-direct) so the site's HttpOnly session cookie travels automatically — no content script on `app.train2go.com`, no relay hop
-- Expose a message-passing surface (`ping`, `read-week`, `read-day`, `read-details`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) that the SPA invokes via `chrome.runtime.sendMessage`
+- Fetch `app.train2go.com` directly from the service worker with `credentials:"include"` (SW-direct) so the site's HttpOnly session cookie travels automatically — no content script on `app.train2go.com`, no relay hop
+- Expose an external message surface (`ping`, `request`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) for the App. `request` takes `{ method, path }` only, refuses anything outside `ALLOWED` (and any header or body) without a request, and answers `{ status, contentType, body }` unread
+- Answer the internal channel only from the extension's own pages (the popup), never a content script, and only `ping`, `read-profile` and `read-week`: the popup's Session check, the profile it shows (athlete, coach's name and notes) and its weekly figures are the one thing still read inside the extension. `ping` is the Session check and answers yes or no only (`{ session, authenticated, sessionActive }`, #1643)
 - Restrict communication to the exact Kaiord App origin (`https://kaiord.com/*`, no subdomain; `http://localhost:5173/*` and `http://localhost:5174/*` in dev builds only)
 - Persist the user profile snapshot via `chrome.storage.local`
 - Surface a dead session (redirect / login response) as `needsReauth` so the editor can prompt a re-login
@@ -21,9 +22,9 @@
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `manifest.json`                         | Development manifest (MV3, Load Unpacked mode)                                                                                                                                                            |
 | `manifest.prod.json`                    | Production manifest (Chrome Web Store)                                                                                                                                                                    |
-| `background.js`                         | Service worker; SW-direct cookie fetch, path allowlist, message router, parser orchestration                                                                                                              |
+| `background.js`                         | Service worker; SW-direct cookie fetch, closed path list, `request` action, external and internal (popup-only) message routers                                                                            |
 | `session-fetch.js`                      | Vendored bridge-core cookie transport (`credentials:"include"` fetch + redirect detection)                                                                                                                |
-| `parser.js`                             | DOM-to-domain parser; extracts activities from Train2Go HTML fragments                                                                                                                                    |
+| `parser.js`                             | Popup-only reader: who is signed in (ping JSON) and this week's done/workload counts                                                                                                                      |
 | `kaiord-announce.js`                    | Content script on Kaiord origins; announces extension ID to SPA via `window.postMessage`                                                                                                                  |
 | `profile-snapshot.js`                   | Validates + persists user profile state (ID, name, zones)                                                                                                                                                 |
 | `popup.html` / `popup.js` / `popup.css` | Toolbar popup on the shared bridge shell: status block, capability chips, athlete card, weekly rollup with completion bar, coach notes, fix-first CTA pair. Its session probe re-wakes the service worker |
@@ -77,7 +78,7 @@ Unit tests for all extension scripts (vitest + jsdom + chrome-API mock).
 
 - `chrome-mock.js` — Mock `chrome.*` APIs for testing
 - `*.test.js` — Test files for `background.js`, `parser.js`, `popup.js`, `kaiord-announce.js`, `profile-snapshot.js`
-- `request-confinement.test.js` — Every request goes to `app.train2go.com` with the browser's cookies and no other credential, only `GET`; `chrome.storage.local` holds popup state only; each connection check hands the App the coach's name and notes; only packaged scripts run. Proof for the listing and policy claims.
+- `request-confinement.test.js` — Every request goes to `app.train2go.com` with the browser's cookies and no other credential, only `GET`; `chrome.storage.local` holds popup state only; a connection check (`ping`) is one profile ping answering yes or no only; the athlete's profile and the coach's name and notes go only to `read-profile`; only packaged scripts run. Proof for the listing and policy claims.
 - `fixtures/` — HTML and JSON test data
 
 See [TESTING.md](./TESTING.md) for integration / smoke test procedures on real Train2Go sessions.
@@ -114,11 +115,12 @@ Extension icons for the Chrome Web Store and browser toolbar.
 
 **Key architectural patterns:**
 
-1. **Service Worker (SW-direct) ↔ SPA**
-   - `kaiord-announce.js` discovers extension at runtime (resilient to service-worker reload)
-   - SPA calls `chrome.runtime.sendMessage({ action: "read-week", date, ... })`
-   - `background.js` fetches `app.train2go.com` directly with `credentials:"include"` (via the vendored `session-fetch` master), parses the response, returns to SPA
-2. **Parser graceful degradation**
+1. **Service Worker (SW-direct) ↔ SPA (thin Bridge)**
+   - `kaiord-announce.js` discovers extension at runtime (resilient to service-worker reload); it announces protocol version 2 from `bridge-identity.js`
+   - SPA calls `chrome.runtime.sendMessage({ action: "request", method: "GET", path })`
+   - `background.js` checks `ALLOWED`, fetches `app.train2go.com` with `credentials:"include"` (via the vendored `session-fetch` master), and returns the raw answer; the App parses it
+   - The App accepts protocol 1 too: an extension not yet updated refuses `request` in a version-1 envelope and the App falls back to `read-week` / `read-day` / `read-details`
+2. **Popup parser graceful degradation**
    - `parser.js` returns empty arrays on malformed HTML
    - No exceptions thrown; safe for jsdom mocking
 3. **Session validation**
@@ -173,7 +175,7 @@ const train2goFetch = async (path, method = "GET") => {
     method,
     fetchImpl: fetch, // credentials:"include" + redirect:"manual"
   });
-  // res.needsReauth on a dead session; parse res.body by content-type.
+  // res.needsReauth on a dead session; res.body is handed over unread.
 };
 ```
 

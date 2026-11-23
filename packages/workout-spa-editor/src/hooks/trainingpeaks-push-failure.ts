@@ -32,28 +32,3 @@ export const toTrainingPeaksPushFailure = (
   if (failure?.needsReauth === true) return { ok: false, reason: "sign-in" };
   return { ok: false, reason: "not-answering" };
 };
-
-type ProbedSession = {
-  authenticated: boolean;
-  athleteId?: number;
-  needsReauth?: boolean;
-};
-
-/** The athlete id to write against, or why the push must stop here. Only
-    TrainingPeaks' own refusal (`needsReauth: true`) may ask for a sign-in;
-    any other unauthenticated answer — an older extension omits the flag — has
-    no verified cause, so TrainingPeaks is "not answering". */
-export const athleteIdOrRefusal = (
-  session: ProbedSession
-): { athleteId: number } | TrainingPeaksPushFailureOutcome => {
-  if (!session.authenticated) {
-    return {
-      ok: false,
-      reason: session.needsReauth === true ? "sign-in" : "not-answering",
-    };
-  }
-  if (session.athleteId === undefined) {
-    return { ok: false, reason: "not-answering" };
-  }
-  return { athleteId: session.athleteId };
-};

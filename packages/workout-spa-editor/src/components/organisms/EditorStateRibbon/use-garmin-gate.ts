@@ -10,6 +10,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import type { ConnectionState } from "../../../application/connections/connection-state";
+import { connectionMayBeUsed } from "../../../application/connections/connection-state";
 import { resolveExportPolicies } from "../../../application/integration-policy/resolve-export-policies.use-case";
 import { useGarminBridge } from "../../../contexts";
 import { policyRepo } from "../../../hooks/integration-policy-repo";
@@ -19,7 +20,9 @@ const GARMIN_BRIDGE_ID = "garmin-bridge";
 /** "ready", the route switched off, or the Connection's own state (its
     notice and fix come from `connectionNotice`). */
 export type GarminGate =
-  "ready" | "export-disabled" | Exclude<ConnectionState, "working">;
+  | "ready"
+  | "export-disabled"
+  | Exclude<ConnectionState, "working" | "not-checked">;
 
 export function useGarminGate(profileId: string | undefined): GarminGate {
   const { connection } = useGarminBridge();
@@ -43,5 +46,5 @@ export function useGarminGate(profileId: string | undefined): GarminGate {
     exportPolicies.some((p) => p.enabled && p.bridgeId === GARMIN_BRIDGE_ID);
   if (!hasEnabledPolicy) return "export-disabled";
 
-  return connection === "working" ? "ready" : connection;
+  return connectionMayBeUsed(connection) ? "ready" : connection;
 }

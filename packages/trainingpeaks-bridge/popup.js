@@ -33,6 +33,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   connected: "Connected",
   connectedCause: "Reading your body metrics through your session.",
   outageSince: "Since $1.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord asks TrainingPeaks the first time it reads or sends, so looking here mints no token.",
   captionFeeds: "Feeds Kaiord",
   captionWillFeed: "Will feed Kaiord",
   typeWeight: "Weight",
@@ -104,7 +107,18 @@ const renderConnected = () => {
 
 // The Connection's state from this popup's own check. When it is not, `needsReauth` says
 // whether the Platform refused the sign-in or merely failed to answer.
+// An extension with the cheap check answers the typed `session` outcome;
+// only "signed-out" there is TrainingPeaks' own refusal.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+  "not-checked": "not-checked",
+};
+
 const connectionStateOf = (res) => {
+  const typed = res.ok ? TYPED_STATE[res.data?.session] : undefined;
+  if (typed) return typed;
   if (res.ok && res.data?.authenticated) return "working";
   if (res.ok && res.data?.needsReauth === true) return "signed-out";
   return "not-answering";
@@ -130,6 +144,32 @@ const renderBroken = (state, since) => {
   renderConsequence($, []);
 };
 
+/* The check asked nothing: TrainingPeaks offers no request that tells a
+   Session apart without minting a token, and no token is held. Nothing was
+   learned, so no outage is recorded and nothing claims the athlete is signed
+   out; the chips and actions are the signed-in ones a first read would use. */
+const renderNotChecked = () => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
+  });
+  renderChips($, chipsFor(FEED_KEYS), { caption: msg("captionFeeds") });
+  renderChips($, chipsFor(FUTURE_KEYS, "dashed"), {
+    caption: msg("captionWillFeed"),
+    region: "future-region",
+  });
+  renderConsequence($, []);
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openTrainingPeaks"),
+    secondaryHref: OPEN_TRAININGPEAKS_URL,
+  });
+};
+
 const refresh = async () => {
   showRefresh(false);
   setMarkEstablished(false);
@@ -141,6 +181,11 @@ const refresh = async () => {
   renderSkeleton($, SKELETON_REGIONS);
   const res = await sendMessage({ action: "checkSession" });
   const state = connectionStateOf(res);
+  if (state === "not-checked") {
+    renderNotChecked();
+    showRefresh(true);
+    return;
+  }
   const health = await recordProbe(state === "working");
   if (state === "working") renderConnected();
   else renderBroken(state, health.since);

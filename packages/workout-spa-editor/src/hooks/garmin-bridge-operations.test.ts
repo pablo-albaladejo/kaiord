@@ -25,19 +25,44 @@ const NON_STRING = 7;
 const mockedSend = vi.mocked(sendMessage);
 
 describe("evaluatePingResult", () => {
-  it("should report a ping that never reached the extension as not installed", () => {
+  it.each([
+    { outcome: "signed-in", session: true },
+    { outcome: "not-checked", session: true },
+    { outcome: "signed-out", session: false },
+    { outcome: "not-answering", session: false },
+  ])(
+    "should let a send go ahead on $outcome only when nothing verified it cannot",
+    ({ outcome, session }) => {
+      // Arrange
+      const res = {
+        ok: true,
+        protocolVersion: 1,
+        data: { session: outcome, gcApi: { ok: outcome === "signed-in" } },
+      };
+
+      // Act
+      const result = evaluatePingResult(res);
+
+      // Assert
+      expect(result).toMatchObject({ installed: true, session });
+    }
+  );
+
+  it("should call a ping that got no answer not answering, never not installed", () => {
     // Arrange
-    const res = { ok: false, delivered: false, error: "No response" };
+    const res = {
+      ok: false,
+      delivered: false,
+      error: "Extension did not respond",
+    };
 
     // Act
     const result = evaluatePingResult(res);
 
     // Assert
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       installed: false,
-      session: false,
-      connection: "not-installed",
-      features: [],
+      connection: "not-answering",
     });
   });
 

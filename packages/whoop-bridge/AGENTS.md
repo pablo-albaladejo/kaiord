@@ -52,7 +52,10 @@ edit the master and run `pnpm bridge:sync` (guard:
 - Plain JavaScript by design (strict-TS exception in root `CLAUDE.md`);
   correctness lives in the vitest suite (`pnpm test` / `test:coverage`).
 - External dispatch is origin-pinned and action-allowlisted via the vendored
-  envelope (`EXTERNAL_ACTIONS`: ping/status/whoop-fetch/set-theme).
+  envelope (`EXTERNAL_ACTIONS`: ping/status/read-user-id/whoop-fetch/set-theme).
+  `ping` / `status` are the Session check: no request, `{ connected, session,
+authenticated }` only; the WHOOP id travels only to `read-user-id`, the
+  capture time only to the internal `popup-status` (#1643).
 - Versioning: covered by `scripts/sync-extension-version.mjs` (package.json →
   both manifests → `BRIDGE_MANIFEST.version`). Still absent from the CWS
   publish pipeline (`cws-publish.yml`) — unpublished.

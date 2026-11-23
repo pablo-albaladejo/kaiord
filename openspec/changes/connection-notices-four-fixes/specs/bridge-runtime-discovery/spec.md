@@ -23,11 +23,12 @@ The SPA SHALL listen for `KAIORD_BRIDGE_ANNOUNCE` messages on `window` at applic
 
 - **WHEN** the SPA receives an announcement and sends a verification ping to the announced `extensionId`
 - **THEN** the SPA only registers the bridge if the ping response:
-  - validates against the BridgeManifest schema, and
+  - validates against the BridgeManifest schema,
+  - has a compatible `protocolVersion`, and
   - has `data.id` equal to the announced `bridgeId`
 - **AND** if any check fails, the SPA SHALL reject the announcement and not register the bridge
 
-#### Scenario: An extension on another protocol version is registered
+#### Scenario: An extension on a protocol the App does not accept is remembered as outdated
 
-- **WHEN** a genuine announcement's verification ping reports a `protocolVersion` this build does not support
-- **THEN** the SPA SHALL still register the bridge, so its Session probe reports it outdated and the App offers Update rather than Install
+- **WHEN** a genuine announcement's verification ping reports a `protocolVersion` outside the versions the App accepts for that extension
+- **THEN** the SPA SHALL NOT register the bridge, and SHALL remember it as outdated, so its Connection shows the Update notice rather than Install

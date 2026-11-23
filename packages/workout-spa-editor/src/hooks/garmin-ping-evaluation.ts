@@ -5,15 +5,18 @@
  * Connections page's probe uses, so the send path and the Garmin card can
  * never word one ping two ways.
  */
-import { classifyEnvelope } from "../adapters/bridge/bridge-ping-session-probes";
+import { classifyEnvelope } from "../adapters/bridge/bridge-envelope-classify";
 import type { ExtensionResponse } from "../adapters/bridge/bridge-transport";
-import type { ConnectionState } from "../application/connections/connection-state";
-import { connectionStateOf } from "../application/connections/connection-state";
+import {
+  connectionMayBeUsed,
+  type ConnectionState,
+  connectionStateOf,
+} from "../application/connections/connection-state";
 import { readGarminSession } from "../application/connections/session-outcome";
 
 export type DetectionResult = {
   installed: boolean;
-  /** The Connection works: the only case a send may start. */
+  /** A send may start: the Connection works, or its check asked nothing. */
   session: boolean;
   connection: ConnectionState;
   features: string[];
@@ -26,21 +29,19 @@ const featuresOf = (data: unknown): string[] => {
 };
 
 /**
- * A ping that never reached the extension is "not-installed": the send path
- * only pings an extension discovery already announced, so an undelivered
- * ping is the extension gone. Everything after delivery is the probe's rule.
+ * Only an extension discovery announced is pinged, so a ping that got no
+ * answer is "not-answering" (Garmin's ping makes a live read, which can be
+ * slow), never "not-installed": the same rule the Connections card applies.
  */
 export function evaluatePingResult(res: ExtensionResponse): DetectionResult {
-  const probe = classifyEnvelope(res, readGarminSession);
-  const connection = probe.reachable
-    ? connectionStateOf(
-        { ...probe, checking: false, lastCheckedAt: 0 },
-        { installed: true, settled: true, hasProbe: true }
-      )
-    : "not-installed";
+  const probe = classifyEnvelope(res, "garmin-bridge", readGarminSession);
+  const connection = connectionStateOf(
+    { ...probe, checking: false, lastCheckedAt: 0 },
+    { installed: probe.reachable, settled: true, hasProbe: true }
+  );
   return {
     installed: probe.reachable,
-    session: connection === "working",
+    session: connectionMayBeUsed(connection),
     connection,
     features: probe.reachable ? featuresOf(res.data) : [],
   };

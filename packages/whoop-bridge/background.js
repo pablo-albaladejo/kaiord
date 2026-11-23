@@ -115,6 +115,31 @@ const getSessionStatus = async () => {
   };
 };
 
+// The Session check: reads chrome.storage.session and makes no request. A
+// bearer captured from WHOOP's own traffic is "signed-in"; none captured yet
+// is "not-checked" (the WHOOP tab has not sent a request since the service
+// worker started), never signed out. Only yes or no leaves: no id, no time.
+const checkSession = async () => {
+  const { connected } = await getSessionStatus();
+  return {
+    connected,
+    session: connected ? "signed-in" : "not-checked",
+    authenticated: connected,
+  };
+};
+
+// The WHOOP id every read path is built on, read when the Kaiord App is about
+// to import.
+const readUserId = async () => {
+  const { connected, userId } = await getSessionStatus();
+  if (!connected || userId === null) {
+    throw new Error(
+      "no session token captured — open app.whoop.com and reload it"
+    );
+  }
+  return { userId };
+};
+
 // ── Tab relay ──
 
 const findWhoopTab = () =>
@@ -175,9 +200,13 @@ const handleAction = async (message) => {
     case "ping":
       // Manifest identity keys are spread LAST so they win on collision and
       // no upstream value can spoof the bridge identity.
-      return { ...(await getSessionStatus()), ...BRIDGE_MANIFEST };
+      return { ...(await checkSession()), ...BRIDGE_MANIFEST };
     case "status":
+      return checkSession();
+    case "popup-status":
       return getSessionStatus();
+    case "read-user-id":
+      return readUserId();
     case "capture-token":
       await storeToken(message.token);
       return { captured: true };
@@ -205,6 +234,7 @@ const handleAction = async (message) => {
 const EXTERNAL_ACTIONS = new Set([
   "ping",
   "status",
+  "read-user-id",
   "whoop-fetch",
   "set-theme",
 ]);

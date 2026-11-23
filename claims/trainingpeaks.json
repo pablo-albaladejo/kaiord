@@ -239,7 +239,7 @@
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
-          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+          "title": "should mint a token and keep it in chrome.storage.local only when a real request is about to use it"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -256,38 +256,46 @@
       ]
     },
     {
-      "id": "trainingpeaks.listing.mint-on-check",
-      "text": "Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it.",
+      "id": "trainingpeaks.listing.mint-on-use",
+      "text": "Checking your sign-in, from the Kaiord App or the popup, asks TrainingPeaks nothing and mints no token. The extension asks TrainingPeaks for a token, and stores it, only when the Kaiord App is about to read or send.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
-          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+          "title": "should check a session with no request, minting nothing and storing nothing"
         },
         {
-          "file": "packages/trainingpeaks-bridge/tp-auth.js",
-          "contains": "const record = await exchangeAndSave(fetchImpl);"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should mint a token and keep it in chrome.storage.local only when a real request is about to use it"
         },
         {
           "file": "packages/trainingpeaks-bridge/popup.js",
           "contains": "sendMessage({ action: \"checkSession\" })"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/popup.test.js",
+          "title": "should say the session is not checked yet, and record no outage, when the check asked nothing"
         }
       ]
     },
     {
       "id": "trainingpeaks.listing.athlete-number",
-      "text": "The extension gives the Kaiord App your TrainingPeaks athlete number, which TrainingPeaks needs to place a workout, and never the token.",
+      "text": "The extension gives the Kaiord App your TrainingPeaks athlete number just before a workout is placed, because TrainingPeaks needs it, and never the token.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should report authenticated and the athlete id on a live session"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should hand the athlete id only to the read the Kaiord App makes just before a write"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should never expose the access token in the probe response"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should report signed in from a token a real request minted while it is still valid, and hand over no athlete id"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
-          "title": "should use the live session's athlete id, not one from storage"
+          "title": "should use the athlete id read just before the write, not one from storage"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with the token, when TrainingPeaks answers"
         }
       ]
     },
@@ -401,7 +409,7 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
-          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+          "title": "should mint a token and keep it in chrome.storage.local only when a real request is about to use it"
         }
       ]
     },
@@ -429,7 +437,7 @@
     },
     {
       "id": "trainingpeaks.pj.storage-sent",
-      "text": "**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App, which needs it to place a workout. Nothing else the extension stores leaves your browser.",
+      "text": "**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App just before it places a workout, which needs it. Nothing else the extension stores leaves your browser.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -440,8 +448,12 @@
           "title": "should answer no external action with the token, when TrainingPeaks answers"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should report authenticated and the athlete id on a live session"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should hand the athlete id only to the read the Kaiord App makes just before a write"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should report signed in from a token a real request minted while it is still valid, and hand over no athlete id"
         }
       ]
     },
@@ -743,7 +755,7 @@
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
-          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+          "title": "should mint a token and keep it in chrome.storage.local only when a real request is about to use it"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -833,7 +845,7 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
-          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+          "title": "should mint a token and keep it in chrome.storage.local only when a real request is about to use it"
         },
         {
           "file": "packages/trainingpeaks-bridge/tp-auth.js",
@@ -868,23 +880,27 @@
     },
     {
       "id": "trainingpeaks.pp.check",
-      "text": "**Checking the Connection**: Every time the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks for a new token and stores it, and gives the Kaiord App your athlete number, which it needs to place a workout.",
+      "text": "**Checking the Connection**: When the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks nothing and mints no token. It answers only whether it holds a token, minted for an earlier read or send, that has not expired; when it holds none, the answer is that it has not checked, and the first read or send finds out. It gives the Kaiord App your athlete number only just before placing a workout, which needs it.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
-          "title": "should mint a token and keep it in chrome.storage.local when the session is checked"
+          "title": "should check a session with no request, minting nothing and storing nothing"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should report signed in from a token a real request minted while it is still valid, and hand over no athlete id"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "title": "should report not-checked once the held token has expired"
         },
         {
           "file": "packages/trainingpeaks-bridge/tp-auth.js",
-          "contains": "const record = await exchangeAndSave(fetchImpl);"
+          "contains": "return isExpired(await loadToken()) ? \"not-checked\" : \"signed-in\";"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should report authenticated and the athlete id on a live session"
-        },
-        {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should never expose the access token in the probe response"
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should hand the athlete id only to the read the Kaiord App makes just before a write"
         }
       ]
     },

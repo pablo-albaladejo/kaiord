@@ -23,6 +23,9 @@ const KAIORD_CONNECTION_NOTICES = (() => {
   const FIX_FOR_STATE = Object.freeze({
     working: null,
     checking: null,
+    // The check asked the Platform nothing (it would have minted a token or
+    // downloaded data); the first real read or send finds out.
+    "not-checked": null,
     "not-installed": "install",
     outdated: "update",
     "signed-out": "sign-in",

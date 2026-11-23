@@ -19,6 +19,13 @@ export type SessionProbeResult = {
    * extension" instead of "the check failed".
    */
   outdated: boolean;
+  /**
+   * The check asked the Platform nothing, because the only request that
+   * could tell would mint a token or download data. Whether the Session works
+   * is learned at the first real read or send, so this is neither working
+   * nor broken. Absent on every other result.
+   */
+  notChecked?: true;
 };
 
 export type SessionProber = (
@@ -67,4 +74,14 @@ export const unreachable = (
   error,
   needsReauth: false,
   outdated: false,
+});
+
+/** The check could not tell without a real use; see `notChecked`. */
+export const notChecked = (): SessionProbeResult => ({
+  reachable: true,
+  sessionActive: false,
+  error: null,
+  needsReauth: false,
+  outdated: false,
+  notChecked: true,
 });

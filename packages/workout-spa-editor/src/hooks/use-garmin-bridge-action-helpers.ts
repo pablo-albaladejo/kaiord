@@ -13,6 +13,7 @@ import type {
 import { logFailure } from "../lib/log-failure";
 import { ping } from "../store/garmin-extension-transport";
 import { evaluatePingResult, executePush } from "./garmin-bridge-operations";
+import { msUntilDiscoverySettled } from "./garmin-discovery-window";
 
 export const getGarminExtensionId = (): string =>
   bridgeDiscovery.getExtensionId("garmin-bridge") ?? "";
@@ -35,7 +36,15 @@ export const runDetect = async ({
     setExtensionInstalled(false);
     setSessionActive(false);
     setFeatures([]);
-    setConnection("not-installed");
+    // An extension on a protocol the App does not accept is not registered,
+    // but it is there: Update. Absent only once discovery had its window.
+    if (bridgeDiscovery.isOutdated?.("garmin-bridge") === true) {
+      setConnection("outdated");
+    } else {
+      setConnection(
+        msUntilDiscoverySettled() > 0 ? "checking" : "not-installed"
+      );
+    }
     return;
   }
   const result = evaluatePingResult(await ping(extensionId));

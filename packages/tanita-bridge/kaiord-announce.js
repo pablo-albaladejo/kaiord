@@ -7,8 +7,8 @@
  * Injected at document_start on the exact App origin (kaiord.com; the
  * Vite dev server on localhost in dev builds only),
  * after the per-bridge `bridge-identity.js` (manifest content_scripts
- * order), whose globalThis.KAIORD_BRIDGE_IDENTITY provides id, name, and
- * capabilities. Posts KAIORD_BRIDGE_ANNOUNCE to the page so the SPA can
+ * order), whose globalThis.KAIORD_BRIDGE_IDENTITY provides id, name,
+ * capabilities and, when not 1, the protocol version. Posts KAIORD_BRIDGE_ANNOUNCE to the page so the SPA can
  * discover the extension ID at runtime. Re-announces on
  * KAIORD_BRIDGE_DISCOVER.
  *
@@ -23,7 +23,8 @@
  * host_permissions).
  */
 
-const PROTOCOL_VERSION = 1;
+// A bridge that moved to a newer protocol declares it in bridge-identity.js.
+const DEFAULT_PROTOCOL_VERSION = 1;
 
 const bridgeIdentity = () => globalThis.KAIORD_BRIDGE_IDENTITY ?? {};
 
@@ -43,7 +44,7 @@ const buildAnnouncement = () => {
     extensionId: chrome.runtime.id,
     name: identity.name,
     version: chrome.runtime.getManifest().version,
-    protocolVersion: PROTOCOL_VERSION,
+    protocolVersion: identity.protocolVersion ?? DEFAULT_PROTOCOL_VERSION,
     capabilities: identity.capabilities,
   };
 };

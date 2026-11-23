@@ -275,6 +275,20 @@ const ensureToken = async (fetchImpl) => {
   return tokens;
 };
 
+// The Session check: reads the tokens a real request minted and makes no
+// request. A refresh or a mint would itself issue a credential, so without a
+// still-valid OAuth2 token the answer is "not-checked" and the first real
+// request finds out. No token value leaves this function.
+const checkStoredTokens = async () => {
+  try {
+    const { oauth1, oauth2 } = await loadTokens();
+    if (!oauth1 || isOAuth2Expired(oauth2)) return "not-checked";
+    return "signed-in";
+  } catch {
+    return "not-checked";
+  }
+};
+
 // ── Bearer transport (shared identity-free master) ──
 //
 // The raw Bearer fetch + 401→re-mint retry live in the vendored bridge-core
@@ -378,6 +392,7 @@ const api = {
   clearTokens,
   isOAuth2Expired,
   ensureToken,
+  checkStoredTokens,
   isAbortError,
   raceAbort,
   connectapiFetch,

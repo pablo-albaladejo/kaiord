@@ -180,5 +180,13 @@
         "example": "23 Jul"
       }
     }
+  },
+  "notChecked": {
+    "message": "Not checked yet",
+    "description": "Status verdict when no WHOOP bearer has been captured since the service worker started: nothing was learned, so no notice."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord learns whether WHOOP works the first time an app.whoop.com tab sends a request.",
+    "description": "Status cause sentence for the not-checked state."
   }
 }

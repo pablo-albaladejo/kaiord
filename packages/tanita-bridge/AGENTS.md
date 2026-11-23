@@ -31,8 +31,9 @@ claims surface: every sentence is an entry in `claims/tanita.json` with its
 proof (`pnpm lint:claims`, see `claims/README.md`). Athlete-facing prose says
 "Kaiord for Tanita"; the extension's own name is unchanged.
 `test/export-confinement.test.js` proves the listing's promises at the message
-contract: requests go only to the export, a session check downloads the whole
-export and answers only yes or no, the export is handed over unchanged, and
+contract: requests go only to the export (a GET or a HEAD), a session check is
+one HEAD that reads no body and answers only the typed outcome (`signed-out`
+only on a bounce to the login page), the export is handed over unchanged, and
 only the theme is stored by the service worker.
 
 ### Vendored bridge-core files
@@ -56,6 +57,7 @@ never in the master. Identity values in `bridge-identity.js` must match
 - External dispatch is origin-pinned and action-allowlisted via the vendored
   envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `read-export-csv` /
   `set-theme`.
-- The session cookie is never read, stored, or logged; session presence is a
-  boolean only.
+- The session cookie is never read, stored, or logged; a Session check is a
+  `HEAD` of the export and answers only `{ session, authenticated }`. It
+  never downloads the export (#1643, spec: bridge-core).
 - English-only: `_locales/en/` is the sole locale (hard constraint).

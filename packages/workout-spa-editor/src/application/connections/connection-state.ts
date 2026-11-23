@@ -61,5 +61,13 @@ export const connectionStateOf = (
   if (signal === undefined || signal.checking) return "checking";
   if (signal.lastCheckedAt === null) return "checking";
   if (signal.outdated) return "outdated";
+  if (signal.notChecked === true) return "not-checked";
   return stateOfOutcome(sessionOutcomeOf(signal));
 };
+
+/** Whether a read or send may start: a working Connection, or one whose
+    check asked nothing and leaves the answer to the use itself. */
+export const connectionMayBeUsed = (
+  state: ConnectionState
+): state is "working" | "not-checked" =>
+  state === "working" || state === "not-checked";

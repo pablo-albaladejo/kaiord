@@ -5,8 +5,10 @@
  * athlete card from cached profile-snapshot, weekly figures
  * (planned / done / workload) over a completion bar with a 5-minute
  * `lastWeeklyRollup` TTL cache, collapsible coach notes, CTA pair.
- * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s, ping
- * 3 s, rollup 8 s). Retry only appears on user-resolvable failures;
+ * Auto-fetches on open with bounded per-phase timeouts (snapshot 1 s,
+ * profile read 3 s, rollup 8 s). The profile read is an explicit read the
+ * athlete asks for by opening the popup, not the Session check the Kaiord
+ * App runs: the check answers only yes or no. Retry only appears on user-resolvable failures;
  * rollup-only timeout preserves the connected state.
  *
  * A working Connection keeps its useful content and the editor link.
@@ -231,10 +233,19 @@ const setMarkEstablished = (established) => {
   $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
 };
 
-// Only a check Train2Go itself answered may say the sign-in is gone. Today's
-// ping folds a Train2Go outage into the same `sessionActive: false` as a lapsed
-// sign-in, so that answer cannot tell them apart and stays "not-answering".
+// The profile read carries the typed `session` outcome the Session check
+// uses, so popup and App word one answer alike; only "signed-out" is Train2Go's
+// own refusal. An older extension's `sessionActive: false` stays
+// "not-answering": it folds an outage into the same answer.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+};
+
 const connectionStateOf = (ping) => {
+  const typed = ping?.ok ? TYPED_STATE[ping?.data?.session] : undefined;
+  if (typed) return typed;
   if (ping?.ok && ping?.data?.sessionActive) return "working";
   if (ping?.ok && ping?.data?.needsReauth === true) return "signed-out";
   return "not-answering";
@@ -315,7 +326,7 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
   let ping;
   try {
     ping = await withTimeout(
-      sendMessage({ action: "ping" }),
+      sendMessage({ action: "read-profile" }),
       PHASE_TIMEOUT_MS,
       "ping"
     );

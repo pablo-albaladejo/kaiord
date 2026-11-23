@@ -120,3 +120,17 @@ describe("sessionOutcomeOf", () => {
     expect(outcome).toBe(expected);
   });
 });
+
+describe("connectionStateOf with a check that asked nothing", () => {
+  it("should show no notice and let the first use decide", () => {
+    // Arrange
+    const signal = row({ notChecked: true });
+
+    // Act
+    const state = connectionStateOf(signal, INSTALLED);
+
+    // Assert
+    expect(state).toBe("not-checked");
+    expect(connectionNotice(state, "TrainingPeaks", "en")).toBeNull();
+  });
+});

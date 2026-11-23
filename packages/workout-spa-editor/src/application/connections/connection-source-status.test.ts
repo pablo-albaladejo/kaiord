@@ -51,6 +51,17 @@ describe("bridgeSourceStatus", () => {
     expect(result).toBe("connected");
   });
 
+  it("should report a probed bridge whose check asked nothing as installed, not as needing attention", () => {
+    // Arrange
+    const state = session({ sessionActive: false, notChecked: true });
+
+    // Act
+    const result = bridgeSourceStatus(state, LINKED, PROBED);
+
+    // Assert
+    expect(result).toBe("installed");
+  });
+
   it("should report a bridge with no prober as installed", () => {
     // Arrange
     // A bridge with no prober can never report a live session, so "installed"

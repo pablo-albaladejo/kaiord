@@ -54,6 +54,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   noTabCause:
     "Your session is still held, but Kaiord reads WHOOP from inside an app.whoop.com tab.",
   outageSince: "Since $1.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord learns whether WHOOP works the first time an app.whoop.com tab sends a request.",
   keepsImported: "Everything already imported stays in Kaiord.",
   resumeOpenTab:
     "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
@@ -184,12 +187,34 @@ const renderNoTab = () => {
   });
 };
 
-// The Connection's state, read exactly as the Kaiord App's probe reads it:
-// `connected` says the extension holds a WHOOP sign-in, and nothing else. A
-// worker that did not answer is "not-answering", never a signed-out session.
+// The Connection's state, read as the Session check answers the Kaiord App:
+// a held bearer is "signed-in", none captured yet is "not-checked" (no WHOOP
+// request has passed since the worker started), never signed out. A worker
+// that did not answer is "not-answering".
 const connectionStateOf = (statusRes) => {
   if (!statusRes.ok) return "not-answering";
-  return statusRes.data?.connected ? "working" : "signed-out";
+  return statusRes.data?.connected ? "working" : "not-checked";
+};
+
+/* Nothing captured yet: nothing was learned, so no notice, no outage. */
+const renderNotChecked = () => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
+  });
+  renderChips($, feedChips(), { caption: msg("captionFeeds") });
+  setPausedBox(false);
+  renderChips($, [], { region: "paused-region" });
+  renderConsequence($, []);
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openWhoop"),
+    secondaryHref: OPEN_WHOOP_URL,
+  });
 };
 
 /* One notice, one fix. A held bearer with no tab open is not this branch:
@@ -224,7 +249,7 @@ const refresh = async () => {
   setPausedBox(false);
   renderChips($, [], { region: "paused-region" });
   const [statusRes, tabRes] = await Promise.all([
-    sendMessage({ action: "status" }),
+    sendMessage({ action: "popup-status" }),
     sendMessage({ action: "tab-open" }),
   ]);
   const state = connectionStateOf(statusRes);
@@ -235,6 +260,7 @@ const refresh = async () => {
   // nothing about it, and a missing tab is not a lapsed session, so neither
   // starts nor clears an outage.
   if (state === "not-answering") renderBroken(state, null);
+  else if (state === "not-checked") renderNotChecked();
   else {
     const health = await recordProbe(state === "working");
     if (state !== "working") renderBroken(state, health.since);

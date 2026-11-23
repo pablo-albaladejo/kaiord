@@ -7,7 +7,7 @@
  * each reader below becomes a field read and nothing downstream changes.
  *
  * "signed-out-verified" means the Platform itself said the sign-in is gone (a
- * redirect, a 401/403, or an extension that holds no sign-in to lend). Every
+ * redirect, a 401/403). Every
  * other failure is "could-not-tell": a Platform that is down answers the same
  * way as one that refused, so no cause may be stated for it.
  */
@@ -53,10 +53,11 @@ export const readTrainingPeaksSession = (data: unknown): SessionOutcome =>
     field(data, "needsReauth") === true
   );
 
-/** WHOOP's `status`: `connected` says the extension holds a WHOOP sign-in.
-    Read exactly as the WHOOP popup reads it, so the two never disagree. */
+/** An older WHOOP extension's `status`: `connected` says it holds a WHOOP
+    sign-in. Holding none is not the Platform's refusal (a newer extension
+    answers "not-checked" for it), so it is "could-not-tell". */
 export const readWhoopSession = (data: unknown): SessionOutcome =>
-  field(data, "connected") === true ? "signed-in" : "signed-out-verified";
+  field(data, "connected") === true ? "signed-in" : "could-not-tell";
 
 /** A delivered `ok: false` envelope: refused only if it carries the flag. */
 export const readFailedEnvelope = (needsReauth: boolean): SessionOutcome =>
