@@ -19,7 +19,9 @@ export const healthWithheldError = (to: LlmProviderType): Error => {
 };
 
 /** The Provider a refused description was for, or undefined. */
-export const healthWithheldTo = (error: unknown): LlmProviderType | undefined =>
+export const healthWithheldTo = (
+  error: unknown
+): LlmProviderType | undefined =>
   typeof error === "object" && error !== null ? WITHHELD.get(error) : undefined;
 
 /** What the model is told, app-authored: the Provider name is a fixed one. */

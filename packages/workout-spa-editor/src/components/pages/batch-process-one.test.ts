@@ -76,7 +76,12 @@ describe("createProcessOne (Train2Go coaching path)", () => {
       PROVIDER,
       "m",
       createInMemoryPersistence(),
-      { deps: { persistence: mockPersistence as never, usage: { emit: vi.fn() } } }
+      {
+        deps: {
+          persistence: mockPersistence as never,
+          usage: { emit: vi.fn() },
+        },
+      }
     );
     const workout = makeWorkoutRecord({
       raw: {

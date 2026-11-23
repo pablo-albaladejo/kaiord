@@ -60,7 +60,8 @@ describe("generationContext", () => {
 
     // Act
     const unchecked = fields.filter(
-      (field) => !(field in OUTSIDE_ZONES) && !NOT_SENT_BY_DESIGN.includes(field)
+      (field) =>
+        !(field in OUTSIDE_ZONES) && !NOT_SENT_BY_DESIGN.includes(field)
     );
 
     // Assert

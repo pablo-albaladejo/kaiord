@@ -44,7 +44,8 @@ import { DESTINATION_IDS, DESTINATIONS } from "./destinations";
 const SRC = resolve(__dirname, "../..");
 const REPO = resolve(SRC, "../../..");
 
-const MODEL_CALL = /\b(generateText|streamText|generateObject|streamObject)\s*\(/;
+const MODEL_CALL =
+  /\b(generateText|streamText|generateObject|streamObject)\s*\(/;
 const OUTBOUND = new RegExp(
   [
     /createLanguageModel\(|verifyProviderKey/.source,

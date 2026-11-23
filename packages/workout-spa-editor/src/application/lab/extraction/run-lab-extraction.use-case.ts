@@ -54,12 +54,12 @@ export const runLabExtraction = async (
   );
   if (!resolved) return { ok: false, reason: "no_provider" };
   const { trace } = input;
-  const share = await input.askHealth(resolved.provider.type).catch(
-    async (error: unknown) => {
+  const share = await input
+    .askHealth(resolved.provider.type)
+    .catch(async (error: unknown) => {
       await trace?.finish("stopped");
       throw error;
-    }
-  );
+    });
   if (share === "withhold") {
     await trace?.discard();
     return { ok: false, reason: "withheld" };

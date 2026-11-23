@@ -23,5 +23,7 @@ export const descriptionHealth = (
   to: DestinationId
 ): DescriptionHealth => ({
   kinds: [...new Set(sent.flatMap(healthOf))],
-  alreadyAt: sent.some((entry) => entry.to === to && healthOf(entry).length > 0),
+  alreadyAt: sent.some(
+    (entry) => entry.to === to && healthOf(entry).length > 0
+  ),
 });
