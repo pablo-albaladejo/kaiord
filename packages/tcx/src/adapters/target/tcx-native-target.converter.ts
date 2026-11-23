@@ -46,11 +46,8 @@ export const convertCadenceTarget = (
   tcxTarget: Record<string, unknown>,
   sport: Sport
 ): Target | null => {
-  const bounds = readZoneBounds(
-    tcxTarget.CadenceZone as Record<string, unknown> | undefined,
-    "Low",
-    "High"
-  );
+  const zone = (tcxTarget.CadenceZone ?? tcxTarget) as Record<string, unknown>;
+  const bounds = readZoneBounds(zone, "Low", "High");
   if (!bounds) return null;
 
   // TCX expresses running cadence in steps per minute while KRD standardizes
