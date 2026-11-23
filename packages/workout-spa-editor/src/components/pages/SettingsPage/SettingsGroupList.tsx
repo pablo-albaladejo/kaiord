@@ -1,3 +1,4 @@
+import { useCapabilities } from "../../../contexts/capabilities-context";
 import { useTranslate } from "../../../i18n/use-translate";
 import { SectionHead } from "../../molecules/SectionHead/SectionHead";
 import { GeneralTab } from "../../organisms/SettingsPanel/GeneralTab";
@@ -16,6 +17,10 @@ const CARD_CLASS =
 export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
   const values = useSettingsRowValues();
   const t = useTranslate("settings");
+  const capabilities = useCapabilities();
+  const rows = SETTINGS_PAGE_ROWS.filter((row) =>
+    capabilities.offers("settings", row.key)
+  );
 
   const card = (rows: ReadonlyArray<SettingsRowDef>) => (
     <div className={CARD_CLASS}>
@@ -42,7 +47,7 @@ export const SettingsGroupList = ({ onNavigate }: SettingsGroupListProps) => {
         />
         <GeneralTab />
       </section>
-      {card(SETTINGS_PAGE_ROWS)}
+      {card(rows)}
       <p className="px-4 text-center text-xs text-ink-muted">
         {SETTINGS_VERSION_LABEL}
       </p>

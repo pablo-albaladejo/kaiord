@@ -14,6 +14,7 @@ import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
 import { toLocalDateString } from "./helpers/local-date";
+import { activateTemplates } from "./helpers/seed-capabilities";
 import {
   clearDexie,
   getWeekDates,
@@ -62,6 +63,7 @@ test.describe("New session keeps its context", () => {
     await page.goto("/calendar");
     await clearDexie(page);
     await seedDefaultProfile(page);
+    await activateTemplates(page);
   });
 
   test("should schedule a Blank session on the chosen day with the chosen sport", async ({

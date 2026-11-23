@@ -9,6 +9,7 @@
  * redirect. `coaching` writers pass no week by design.
  */
 
+import { capabilityHome } from "../lib/capabilities/capability-catalogue";
 import type { BackOrigin } from "./back-origin";
 import { buildPickerHref } from "./picker-href";
 
@@ -29,7 +30,7 @@ export function resolveBackTarget({
 }: ResolveBackInput): string {
   switch (origin) {
     case "library":
-      return "/library";
+      return capabilityHome("templates");
     case "detail":
       return detailId ? `/workout/view/${detailId}` : DEFAULT_TARGET;
     case "calendar-day":

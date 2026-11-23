@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 
+import { useCapabilities } from "../../../contexts/capabilities-context";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { SettingsTab } from "../../organisms/SettingsPanel/types";
 import { SETTINGS_TAB_ORDER } from "./settings-tab-views";
@@ -32,6 +33,7 @@ export const SettingsSectionRail = ({
   attention,
 }: SettingsSectionRailProps) => {
   const t = useTranslate("settings");
+  const capabilities = useCapabilities();
 
   return (
     <nav
@@ -41,7 +43,9 @@ export const SettingsSectionRail = ({
     >
       <SettingsAttention attention={attention} variant="chip" />
       <div className="space-y-1">
-        {SETTINGS_TAB_ORDER.map((section) => {
+        {SETTINGS_TAB_ORDER.filter((section) =>
+          capabilities.offers("settings", section)
+        ).map((section) => {
           const active = section === activeSection;
           return (
             <Link

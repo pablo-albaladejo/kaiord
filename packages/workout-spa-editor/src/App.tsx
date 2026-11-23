@@ -9,6 +9,7 @@ import { SilentErrorBoundary } from "./components/molecules/SilentErrorBoundary"
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
+import { CapabilitiesProvider } from "./contexts/capabilities-context";
 import { useActiveProfileLive } from "./hooks/use-active-profile-live";
 import { useBridgeThemePush } from "./hooks/use-bridge-theme-push";
 import { useMatchDatesHeal } from "./hooks/use-match-dates-heal";
@@ -16,6 +17,7 @@ import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useSyncAutoPush } from "./hooks/use-sync-auto-push";
 import { AppKeyboardShortcuts } from "./lazy-pages";
+import { CapabilityRouteGate } from "./routing/capability-route-gate";
 
 function App() {
   useStoreHydration();
@@ -40,17 +42,22 @@ function App() {
 
   return (
     <AppToastProvider>
-      <MigrationBoot />
-      <SilentErrorBoundary name="keyboard-shortcuts">
-        <Suspense fallback={null}>
-          <AppKeyboardShortcuts />
-        </Suspense>
-      </SilentErrorBoundary>
-      <MainLayout>
-        <ProfileChoiceBanner />
-        <DefaultProfileNotice />
-        <AppRoutes analytics={analytics} />
-      </MainLayout>
+      <CapabilitiesProvider>
+        <MigrationBoot />
+        <SilentErrorBoundary name="keyboard-shortcuts">
+          <Suspense fallback={null}>
+            <AppKeyboardShortcuts />
+          </Suspense>
+        </SilentErrorBoundary>
+        <MainLayout>
+          <ProfileChoiceBanner />
+          <DefaultProfileNotice />
+          {/* A route an off Capability owns redirects to the Day. */}
+          <CapabilityRouteGate>
+            <AppRoutes analytics={analytics} />
+          </CapabilityRouteGate>
+        </MainLayout>
+      </CapabilitiesProvider>
     </AppToastProvider>
   );
 }

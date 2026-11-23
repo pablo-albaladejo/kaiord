@@ -28,7 +28,10 @@ export function checkServiceWorker(app, { base, mode }) {
     problems.push(`scope is ${config.scope} but the base is ${base}`);
   }
   if (config.mode !== mode) {
-    return [...problems, `mode is ${config.mode} but the deploy asked for ${mode}`];
+    return [
+      ...problems,
+      `mode is ${config.mode} but the deploy asked for ${mode}`,
+    ];
   }
   if (mode === "kill") return [...problems, ...checkKill(source)];
   return [...problems, ...checkManifest(app, base, config.manifest ?? [])];
@@ -48,7 +51,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     );
     process.exit(1);
   }
-  failIfAny("service worker problem(s)", checkServiceWorker(values.app, values));
+  failIfAny(
+    "service worker problem(s)",
+    checkServiceWorker(values.app, values)
+  );
   console.log(
     values.mode === "kill"
       ? `✅ ${values.app}/sw.js is the kill worker`

@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { activateTemplates } from "./helpers/seed-capabilities";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 /**
@@ -47,6 +48,8 @@ const WORKOUT = {
 const loadWorkout = async (page: Page) => {
   await page.goto("/workout/new?source=scratch");
   await seedEmptyWorkout(page);
+  // "Keep in library" belongs to Templates, which an athlete turns on.
+  await activateTemplates(page);
   await page.locator('input[type="file"]').setInputFiles({
     name: "action-row.krd",
     mimeType: "application/json",

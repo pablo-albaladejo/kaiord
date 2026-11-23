@@ -5,7 +5,7 @@ import { BAR_WRAPPER_CLASS } from "./header-menu-styles";
 import { NavMenu } from "./NavMenu";
 import { isEntryActive } from "./status-entry-active";
 import { EntryButton } from "./status-entry-button";
-import { BAR_ENTRIES, OVERFLOW_ENTRIES } from "./status-entry-defs";
+import { useStatusEntries } from "./use-status-entries";
 
 /**
  * The single primary nav row.
@@ -18,13 +18,14 @@ import { BAR_ENTRIES, OVERFLOW_ENTRIES } from "./status-entry-defs";
  */
 export function HeaderNavBar() {
   const [location, navigate] = useLocation();
-  const overflowActive = OVERFLOW_ENTRIES.some((entry) =>
+  const { bar, overflow } = useStatusEntries();
+  const overflowActive = overflow.some((entry) =>
     isEntryActive(entry, location)
   );
 
   return (
     <>
-      {BAR_ENTRIES.map((entry) =>
+      {bar.map((entry) =>
         entry.children.length > 0 ? (
           <NavMenu
             key={entry.id}
@@ -48,7 +49,7 @@ export function HeaderNavBar() {
       <NavMenu
         id="more"
         icon={ICON_MAP.dots}
-        entries={OVERFLOW_ENTRIES}
+        entries={overflow}
         wrapperClass="lg:hidden"
         active={overflowActive}
       />

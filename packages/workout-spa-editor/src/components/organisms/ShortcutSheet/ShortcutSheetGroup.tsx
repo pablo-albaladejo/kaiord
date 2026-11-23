@@ -4,6 +4,7 @@
 
 import type { ShortcutGroup } from "../../../constants/shortcut-catalog";
 import { SHORTCUT_CATALOG } from "../../../constants/shortcut-catalog";
+import { useCapabilities } from "../../../contexts/capabilities-context";
 import { useTranslate } from "../../../i18n/use-translate";
 import { KeyChips } from "../../atoms/KeyChips";
 
@@ -13,6 +14,10 @@ type ShortcutSheetGroupProps = {
 
 export function ShortcutSheetGroup({ group }: ShortcutSheetGroupProps) {
   const t = useTranslate("help");
+  const capabilities = useCapabilities();
+  const rows = SHORTCUT_CATALOG.filter(
+    (def) => def.group === group && capabilities.offers("shortcut", def.id)
+  );
 
   return (
     <section aria-labelledby={`shortcut-group-${group}`}>
@@ -23,7 +28,7 @@ export function ShortcutSheetGroup({ group }: ShortcutSheetGroupProps) {
         {t(`shortcuts.${group}.heading`)}
       </h3>
       <ul className="space-y-1.5">
-        {SHORTCUT_CATALOG.filter((def) => def.group === group).map((def) => (
+        {rows.map((def) => (
           <li
             key={def.id}
             className="flex items-center justify-between gap-3 text-sm text-ink-body"

@@ -4,20 +4,46 @@ import { describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
+import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
 import { renderWithProviders } from "../../../test-utils";
 import { HeaderNavBar } from "./HeaderNavBar";
 
-function renderAt(path: string) {
+function renderAt(path: string, on: readonly string[] = ["templates"]) {
   const loc = memoryLocation({ path, record: true });
   renderWithProviders(
-    <Router hook={loc.hook}>
-      <HeaderNavBar />
-    </Router>
+    <CapabilitiesFixture on={on}>
+      <Router hook={loc.hook}>
+        <HeaderNavBar />
+      </Router>
+    </CapabilitiesFixture>
   );
   return loc;
 }
 
 describe("HeaderNavBar", () => {
+  it("should show no Library entry while Templates is off", () => {
+    // Arrange
+    renderAt("/daily", []);
+
+    // Act
+    const library = screen.queryByTestId("status-header-library-button");
+
+    // Assert
+    expect(library).toBeNull();
+    expect(screen.getByTestId("status-header-calendar-button")).toBeVisible();
+  });
+
+  it("should show the Library entry once Templates is on", () => {
+    // Arrange
+    renderAt("/daily");
+
+    // Act
+    const library = screen.getByTestId("status-header-library-button");
+
+    // Assert
+    expect(library).toBeInTheDocument();
+  });
+
   it.each([
     { route: "/daily", testId: "status-header-daily-button" },
     { route: "/calendar/2026-W23", testId: "status-header-calendar-button" },

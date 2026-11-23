@@ -24,6 +24,7 @@ const tools = () =>
       setDataRoute: vi.fn(),
     },
     getMatrixSignals: vi.fn(),
+    offersTool: () => true,
   });
 
 const catalog: Record<string, ChatCapability> = CHAT_CAPABILITIES;
@@ -80,7 +81,7 @@ describe("chatCapabilitySections", () => {
     const order = ["consult", "log", "do"];
 
     // Act
-    const sections = chatCapabilitySections();
+    const sections = chatCapabilitySections(() => true);
 
     // Assert
     expect(sections.map((s) => s.group)).toEqual(order);
@@ -88,5 +89,29 @@ describe("chatCapabilitySections", () => {
     expect(sections[1].tools).toEqual(["log_health_metric", "log_intake"]);
     expect(sections[1].examples).toEqual(["logWeight", "logSleep", "logMeal"]);
     expect(sections[0].tools).not.toContain("get_today");
+  });
+
+  it("should name no Tool an off Capability owns, nor its examples", () => {
+    // Arrange
+    const offersTool = (name: string) => name !== "log_intake";
+
+    // Act
+    const sections = chatCapabilitySections(offersTool);
+
+    // Assert
+    expect(sections[1].tools).toEqual(["log_health_metric"]);
+    expect(sections[1].examples).not.toContain("logMeal");
+  });
+
+  it("should drop a group left with no offered Tool", () => {
+    // Arrange
+    const offersTool = (name: string) =>
+      !["log_health_metric", "log_intake"].includes(name);
+
+    // Act
+    const sections = chatCapabilitySections(offersTool);
+
+    // Assert
+    expect(sections.map((s) => s.group)).toEqual(["consult", "do"]);
   });
 });

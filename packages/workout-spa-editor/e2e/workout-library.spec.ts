@@ -17,6 +17,7 @@
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkout } from "./helpers/load-test-workout";
 import { openHeaderAction } from "./helpers/mobile-menu";
+import { activateTemplates } from "./helpers/seed-capabilities";
 import { makeTemplate, seedTemplates } from "./helpers/seed-dexie";
 
 test.describe("Workout Library", () => {
@@ -28,6 +29,7 @@ test.describe("Workout Library", () => {
       localStorage.clear();
     });
     await loadTestWorkout(page, "Library Test Workout");
+    await activateTemplates(page);
   });
 
   test.describe("saving workouts", () => {

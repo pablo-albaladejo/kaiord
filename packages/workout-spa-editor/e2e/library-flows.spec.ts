@@ -17,6 +17,7 @@
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkout } from "./helpers/load-test-workout";
 import { openHeaderAction } from "./helpers/mobile-menu";
+import { activateTemplates, libraryEntry } from "./helpers/seed-capabilities";
 import {
   clearDexie,
   getWeekDates,
@@ -33,6 +34,7 @@ test.describe("Library flows", () => {
     await page.goto("/calendar");
     await clearDexie(page);
     await seedDefaultProfile(page);
+    await activateTemplates(page);
   });
 
   test("Test A: header Library navigates to /library (no modal)", async ({
@@ -40,6 +42,7 @@ test.describe("Library flows", () => {
     browserName,
   }) => {
     await page.goto("/daily");
+    await expect(libraryEntry(page)).toBeVisible();
 
     // Use the mobile-aware helper so the test works on mobile
     // emulators where the Library button lives behind the hamburger menu.

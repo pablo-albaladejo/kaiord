@@ -2,6 +2,7 @@ import { render, type RenderOptions } from "@testing-library/react";
 import React, { type ReactElement } from "react";
 
 import { AppToastProvider } from "./components/providers/AppToastProvider";
+import { CapabilitiesFixture } from "./contexts/capabilities-context";
 import { CoachingRegistryProvider } from "./contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { PersistenceProvider } from "./contexts/persistence-context";
@@ -36,6 +37,8 @@ export type RenderWithProvidersOptions = Omit<RenderOptions, "wrapper"> & {
   cloud?: CloudSyncPort;
   snapshotPort?: SnapshotPort;
   afterImport?: () => Promise<void>;
+  /** Capabilities on for this render; every other one is off. */
+  capabilities?: readonly string[];
 };
 
 /**
@@ -57,6 +60,7 @@ export function renderWithProviders(
       tombstones: [],
     }),
     afterImport,
+    capabilities = [],
     ...renderOptions
   } = options ?? {};
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -71,7 +75,11 @@ export function renderWithProviders(
           >
             <GarminBridgeProvider>
               <CoachingRegistryProvider factories={[]}>
-                <AppToastProvider>{children}</AppToastProvider>
+                <AppToastProvider>
+                  <CapabilitiesFixture on={capabilities}>
+                    {children}
+                  </CapabilitiesFixture>
+                </AppToastProvider>
               </CoachingRegistryProvider>
             </GarminBridgeProvider>
           </SyncProvider>

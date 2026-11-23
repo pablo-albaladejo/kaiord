@@ -12,6 +12,7 @@
   },
   "tabs": {
     "general": "General",
+    "capabilities": "Capacidades",
     "ai": "IA",
     "sync": "Sincronización",
     "data": "Datos y copia de seguridad",
@@ -293,5 +294,18 @@
     "estimated_other": "{{count}} peticiones se cortaron antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de cada petición y del texto recibido.",
     "unmeasured_one": "{{count}} petición falló antes de que su proveedor informara de los tokens usados, así que no se cuenta en el coste.",
     "unmeasured_other": "{{count}} peticiones fallaron antes de que su proveedor informara de los tokens usados, así que no se cuentan en el coste."
+  },
+  "capabilities": {
+    "intro": "Activa las partes de Kaiord que uses más allá de tus días y tu calendario. Si vuelves a desactivar una, se oculta y sus datos se conservan.",
+    "grade": {
+      "advanced": "Avanzada",
+      "experimental": "Experimental"
+    },
+    "items": {
+      "templates": {
+        "name": "Plantillas",
+        "hint": "Guarda un entreno como plantilla en la Biblioteca y prográmalo en cualquier día."
+      }
+    }
   }
 }

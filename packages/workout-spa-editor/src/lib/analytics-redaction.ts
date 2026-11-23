@@ -1,6 +1,7 @@
 import type { AnalyticsEvent } from "@kaiord/core";
 
 import { isSportKey } from "../types/sport-zones";
+import { CAPABILITY_ROUTES } from "./capabilities/capability-catalogue";
 import { scrubAnalyticsString } from "./scrub-analytics-string";
 
 // Allowlist mirroring AppRoutes.tsx and HealthSubRouter. A path that
@@ -14,7 +15,7 @@ const STATIC_PATHS: ReadonlySet<string> = new Set([
   "/athlete",
   "/nutrition",
   "/chat",
-  "/library",
+  ...CAPABILITY_ROUTES,
   "/workout/new",
   "/settings",
   "/settings/profile",
@@ -30,6 +31,7 @@ const STATIC_PATHS: ReadonlySet<string> = new Set([
 
 // Settings sections, including the retired ones SettingsPage redirects.
 const SETTINGS_SECTIONS: ReadonlySet<string> = new Set([
+  "capabilities",
   "ai",
   "sync",
   "connections",

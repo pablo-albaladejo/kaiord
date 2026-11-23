@@ -63,12 +63,16 @@ export function catalogProblems(where, catalogs) {
   const problems = [];
   const [en, es] = REQUIRED_LOCALES.map((locale) => catalogs[locale] ?? {});
   for (const key of Object.keys(en))
-    if (!(key in es)) problems.push(`${where}: "${key}" is in en but not in es`);
+    if (!(key in es))
+      problems.push(`${where}: "${key}" is in en but not in es`);
   for (const key of Object.keys(es))
-    if (!(key in en)) problems.push(`${where}: "${key}" is in es but not in en`);
+    if (!(key in en))
+      problems.push(`${where}: "${key}" is in es but not in en`);
   for (const key of Object.keys(en).filter((k) => k in es))
     if (placeholdersOf(en[key]) !== placeholdersOf(es[key]))
-      problems.push(`${where}: "${key}" has different placeholders in en and es`);
+      problems.push(
+        `${where}: "${key}" has different placeholders in en and es`
+      );
   for (const locale of REQUIRED_LOCALES)
     for (const [key, entry] of Object.entries(catalogs[locale] ?? {}))
       if (typeof entry?.message !== "string" || entry.message.trim() === "")
@@ -111,7 +115,10 @@ export function fallbackDrift(where, table, en) {
   return Object.entries(table)
     .filter(([key]) => key in en)
     .filter(([key, value]) => value !== positional(en[key]))
-    .map(([key]) => `${where}: KAIORD_POPUP_MESSAGES.${key} differs from _locales/en`);
+    .map(
+      ([key]) =>
+        `${where}: KAIORD_POPUP_MESSAGES.${key} differs from _locales/en`
+    );
 }
 
 const platformOf = (bridge) =>
@@ -122,7 +129,13 @@ const platformOf = (bridge) =>
 const catalogsOf = (bridge) =>
   Object.fromEntries(
     REQUIRED_LOCALES.map((locale) => {
-      const path = join(PACKAGES_DIR, bridge, "_locales", locale, "messages.json");
+      const path = join(
+        PACKAGES_DIR,
+        bridge,
+        "_locales",
+        locale,
+        "messages.json"
+      );
       return [locale, existsSync(path) ? readJson(path) : undefined];
     })
   );
@@ -177,7 +190,10 @@ describe("R-BridgeLocalesEnglishSpanish helpers", () => {
   it("should accept a fallback value that is the catalog message with positional placeholders", () => {
     // Arrange
     const en = {
-      ok: { message: "Updated $phrase$", placeholders: { phrase: { content: "$1" } } },
+      ok: {
+        message: "Updated $phrase$",
+        placeholders: { phrase: { content: "$1" } },
+      },
       off: { message: "Feeds Kaiord" },
     };
 
@@ -185,7 +201,9 @@ describe("R-BridgeLocalesEnglishSpanish helpers", () => {
     const drift = fallbackDrift("x", { ok: "Updated $1", off: "Feeds it" }, en);
 
     // Assert
-    assert.deepEqual(drift, ["x: KAIORD_POPUP_MESSAGES.off differs from _locales/en"]);
+    assert.deepEqual(drift, [
+      "x: KAIORD_POPUP_MESSAGES.off differs from _locales/en",
+    ]);
   });
 });
 
@@ -221,7 +239,11 @@ describe("R-BridgeLocalesEnglishSpanish", () => {
     }
 
     // Assert
-    assert.deepEqual(wrong, [], `every extension ships en and es only:\n  ${wrong.join("\n  ")}`);
+    assert.deepEqual(
+      wrong,
+      [],
+      `every extension ships en and es only:\n  ${wrong.join("\n  ")}`
+    );
   });
 
   it("should declare the same keys and placeholders in en and es, none empty", () => {
@@ -230,7 +252,9 @@ describe("R-BridgeLocalesEnglishSpanish", () => {
 
     // Act
     for (const bridge of bridges)
-      problems.push(...catalogProblems(`packages/${bridge}/_locales`, catalogsOf(bridge)));
+      problems.push(
+        ...catalogProblems(`packages/${bridge}/_locales`, catalogsOf(bridge))
+      );
 
     // Assert
     assert.deepEqual(problems, []);
@@ -248,10 +272,21 @@ describe("R-BridgeLocalesEnglishSpanish", () => {
           problems.push(`${bridge} ${locale}: extName is not "${name}"`);
       for (const file of ["manifest.json", "manifest.prod.json"]) {
         const m = readJson(join(PACKAGES_DIR, bridge, file));
-        if (m.name !== "__MSG_extName__" || m.description !== "__MSG_extDescription__" || m.default_locale !== "en")
-          problems.push(`${bridge}/${file}: name, description or default_locale is not from _locales`);
-        if (m.action?.default_title !== undefined && m.action.default_title !== "__MSG_extName__")
-          problems.push(`${bridge}/${file}: action.default_title is not from _locales`);
+        if (
+          m.name !== "__MSG_extName__" ||
+          m.description !== "__MSG_extDescription__" ||
+          m.default_locale !== "en"
+        )
+          problems.push(
+            `${bridge}/${file}: name, description or default_locale is not from _locales`
+          );
+        if (
+          m.action?.default_title !== undefined &&
+          m.action.default_title !== "__MSG_extName__"
+        )
+          problems.push(
+            `${bridge}/${file}: action.default_title is not from _locales`
+          );
       }
     }
 
@@ -283,15 +318,26 @@ describe("R-BridgeLocalesEnglishSpanish", () => {
 
     // Act
     for (const bridge of bridges) {
-      const html = readFileSync(join(PACKAGES_DIR, bridge, "popup.html"), "utf8");
+      const html = readFileSync(
+        join(PACKAGES_DIR, bridge, "popup.html"),
+        "utf8"
+      );
       for (const text of literalHtmlText(html))
         problems.push(`packages/${bridge}/popup.html: literal ${text}`);
-      for (const [, key] of html.matchAll(/data-i18n(?:-[a-z-]+)?="([A-Za-z0-9_]+)"/g))
+      for (const [, key] of html.matchAll(
+        /data-i18n(?:-[a-z-]+)?="([A-Za-z0-9_]+)"/g
+      ))
         if (!(key in catalogsOf(bridge).en))
-          problems.push(`packages/${bridge}/popup.html: data-i18n "${key}" is not in _locales/en`);
+          problems.push(
+            `packages/${bridge}/popup.html: data-i18n "${key}" is not in _locales/en`
+          );
       const src = readFileSync(join(PACKAGES_DIR, bridge, "popup.js"), "utf8");
       problems.push(
-        ...fallbackDrift(`packages/${bridge}/popup.js`, extractTableEntries(src, bridge), catalogsOf(bridge).en)
+        ...fallbackDrift(
+          `packages/${bridge}/popup.js`,
+          extractTableEntries(src, bridge),
+          catalogsOf(bridge).en
+        )
       );
     }
 

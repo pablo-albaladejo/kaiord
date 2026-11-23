@@ -12,6 +12,7 @@
   },
   "tabs": {
     "general": "General",
+    "capabilities": "Capabilities",
     "ai": "AI",
     "sync": "Sync",
     "data": "Data & backup",
@@ -293,5 +294,18 @@
     "estimated_other": "{{count}} requests were cut before their Provider reported the tokens used (a Stop, a timeout or a dropped connection); their cost is an estimate from the length of each request and of the text received.",
     "unmeasured_one": "{{count}} request failed before its Provider reported the tokens used, so it is not counted in the cost.",
     "unmeasured_other": "{{count}} requests failed before their Provider reported the tokens used, so they are not counted in the cost."
+  },
+  "capabilities": {
+    "intro": "Turn on the parts of Kaiord you use beyond your days and your calendar. Turning one off again hides it and keeps its data.",
+    "grade": {
+      "advanced": "Advanced",
+      "experimental": "Experimental"
+    },
+    "items": {
+      "templates": {
+        "name": "Templates",
+        "hint": "Keep a Workout as a Template in the Library and schedule it on any Day."
+      }
+    }
   }
 }

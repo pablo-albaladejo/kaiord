@@ -6,6 +6,7 @@
 
 import { expect, test } from "./fixtures/base";
 import { openHeaderAction } from "./helpers/mobile-menu";
+import { activateTemplates, libraryEntry } from "./helpers/seed-capabilities";
 import {
   clearDexie,
   getWeekDates,
@@ -22,6 +23,7 @@ test.describe("Library-Calendar Integration", () => {
     await page.goto("/calendar");
     await clearDexie(page);
     await seedDefaultProfile(page);
+    await activateTemplates(page);
   });
 
   test("/library route shows library page", async ({ page }) => {
@@ -100,6 +102,7 @@ test.describe("Library-Calendar Integration", () => {
     page,
   }) => {
     await page.goto("/calendar");
+    await expect(libraryEntry(page)).toBeVisible();
 
     // Per surface-classification rule, Library is a routed page —
     // the header click navigates, it does not open a modal.

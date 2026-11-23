@@ -7,13 +7,14 @@
  */
 import type { ChatAgent, ChatTool, PendingAction } from "@kaiord/ai";
 import type { ModelMessage } from "ai";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import type { TraceRun } from "../application/trace/trace-run";
 import { useAnalytics } from "../contexts/analytics-context";
 import { usePersistence } from "../contexts/persistence-context";
 import { useUnsavedWork } from "../lib/use-unsaved-work";
-import { type ChatTurnState, makeChatTurnCtx } from "./chat/chat-turn-types";
+import type { ChatTurnState } from "./chat/chat-turn-types";
+import { useChatTurnCtx } from "./chat/use-chat-turn-ctx";
 import { useStopTurnOnLeave } from "./chat/use-stop-turn-on-leave";
 import { useChatActionOps } from "./use-chat-action-ops";
 import { useChatTurnActions } from "./use-chat-turn-actions";
@@ -40,36 +41,10 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
   const disposedRef = useStopTurnOnLeave(abortRef, traceRef);
-
-  const { profileId, conversationId, provider, modelId, pinModel, today } =
-    args;
-  const ctx = useMemo(
-    () =>
-      makeChatTurnCtx(
-        {
-          persistence,
-          profileId,
-          conversationId,
-          provider,
-          modelId,
-          pinModel,
-          today,
-          ops,
-        },
-        { agentRef, toolsRef, messagesRef, abortRef, disposedRef, traceRef },
-        { setState, setStreamingText, setPendingAction, setError }
-      ),
-    [
-      persistence,
-      profileId,
-      conversationId,
-      provider,
-      modelId,
-      pinModel,
-      today,
-      ops,
-      disposedRef,
-    ]
+  const ctx = useChatTurnCtx(
+    { ...args, persistence, ops },
+    { agentRef, toolsRef, messagesRef, abortRef, disposedRef, traceRef },
+    { setState, setStreamingText, setPendingAction, setError }
   );
 
   const actions = useChatTurnActions(

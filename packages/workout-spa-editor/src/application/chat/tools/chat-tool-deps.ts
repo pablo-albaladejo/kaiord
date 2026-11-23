@@ -86,4 +86,6 @@ export type ChatToolDeps = ReadToolDeps & {
   healthShared?: boolean;
   /** One-shot snapshot provider for the get_data_routes read tool. */
   getMatrixSignals: () => Promise<DataHubMatrixSignals>;
+  /** False for a Tool an off Capability owns: it is not offered at all. */
+  offersTool: (toolName: string) => boolean;
 };

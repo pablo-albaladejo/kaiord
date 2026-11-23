@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
+import { activateTemplates } from "./helpers/seed-capabilities";
 import { seedEmptyWorkout } from "./helpers/seed-empty-workout";
 
 const WCAG_MIN_TOUCH_TARGET_PX = 44;
@@ -342,6 +343,8 @@ test.describe("Workout Actions Overflow", () => {
 
   async function loadWorkout(page: Page) {
     await seedEmptyWorkout(page);
+    // The widest row: "Keep in library" shows once Templates is on.
+    await activateTemplates(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
       name: "overflow-test.krd",

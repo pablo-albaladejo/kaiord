@@ -23,13 +23,20 @@ const KILL_PARTS = ["sw-kill.js"];
 
 export function emitServiceWorker(appDir, { scope, kill = false }) {
   if (!/^\/(?:[^/]+\/)*$/.test(scope ?? "")) {
-    throw new Error(`emitServiceWorker: scope must be like /app/, got ${scope}`);
+    throw new Error(
+      `emitServiceWorker: scope must be like /app/, got ${scope}`
+    );
   }
   const config = kill
     ? { mode: "kill", scope }
     : (() => {
         const manifest = buildManifest(appDir, scope);
-        return { mode: "normal", scope, version: versionOf(manifest), manifest };
+        return {
+          mode: "normal",
+          scope,
+          version: versionOf(manifest),
+          manifest,
+        };
       })();
   const body = (kill ? KILL_PARTS : NORMAL_PARTS)
     .map((part) => readFileSync(join(SOURCE_DIR, part), "utf8"))

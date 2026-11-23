@@ -1,6 +1,6 @@
 import { waitFor } from "@testing-library/react";
 import { render, screen } from "@testing-library/react";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
@@ -12,6 +12,10 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContextProvider } from "./contexts/ToastContext";
 import { useWorkoutStore } from "./store/workout-store";
 import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
+import {
+  clearCapabilities,
+  seedCapabilities,
+} from "./test-utils/seed-capabilities";
 import { TestSyncProvider } from "./test-utils/sync-test-provider";
 
 function renderAtPath(path: string) {
@@ -54,6 +58,8 @@ describe("Routing", () => {
     ]);
   }, COLD_IMPORT_TIMEOUT_MS);
 
+  afterEach(clearCapabilities);
+
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
@@ -95,16 +101,28 @@ describe("Routing", () => {
     expect(location.history.filter((p) => p === "/calendar")).toHaveLength(0);
   });
 
-  it("should render LibraryPage at /library", async () => {
+  it("should render LibraryPage at /library once Templates is on", async () => {
     // Arrange
+    await seedCapabilities(["templates"]);
 
     // Act
-
     renderAtPath("/library");
 
     // Assert
-
     expect(await screen.findByTestId("library-page")).toBeInTheDocument();
+  });
+
+  it("should send /library to the Day while Templates is off", async () => {
+    // Arrange
+    await seedCapabilities([]);
+
+    // Act
+    const { location } = renderAtPath("/library");
+
+    // Assert
+    expect(await screen.findByTestId("daily-page")).toBeInTheDocument();
+    expect(location.history.at(-1)).toBe("/daily");
+    expect(screen.queryByTestId("library-page")).toBeNull();
   });
 
   it("should render the Create overlay at /workout/new", async () => {

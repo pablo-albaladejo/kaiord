@@ -1,4 +1,5 @@
 import type { IconName } from "../components/atoms/Icon/icon-map";
+import { capabilityHome } from "../lib/capabilities/capability-catalogue";
 import { CONNECTIONS_PATH } from "./constants";
 
 /**
@@ -41,7 +42,14 @@ export type NavRow = readonly [
 export const NAV_ROWS: readonly NavRow[] = [
   ["daily", "/daily", "Go to daily", "today", "bar", true],
   ["calendar", "/calendar", "Go to calendar", "calendar", "bar", true],
-  ["library", "/library", "Open workout library", "cards", "bar", true],
+  [
+    "library",
+    capabilityHome("templates"),
+    "Open workout library",
+    "cards",
+    "bar",
+    true,
+  ],
   ["nutrition", "/nutrition", "Open nutrition", "nutrition", "overflow", true],
   ["trends", "/health", "Open wellness trends", "trend", "overflow", false],
   ["labs", "/health/labs", "Open labs", "labs", "nested", false, "trends"],
