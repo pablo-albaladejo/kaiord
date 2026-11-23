@@ -868,15 +868,20 @@ jobs:
 
   round-trip:
     runs-on: ubuntu-latest
-    # P95 = 47s (worst matrix shard); ceil(P95 × 1.5 / 60) = 2; capped at
-    # test-family ceiling 30.
-    timeout-minutes: 2
+    # P95 = 47s (worst matrix shard) before fit, tcx and zwo joined; the zwo
+    # shard adds ~25s of XSD-validated Round-trip cases, so the estimate is
+    # ~75s; ceil(75 × 1.5 / 60) = 2, raised to 3 until a measured P95 exists;
+    # capped at test-family ceiling 30.
+    timeout-minutes: 3
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
       fail-fast: false
       matrix:
-        package: ["core", "garmin"]
+        # Every format the Kaiord SDK reads and writes has a shard: its
+        # `Round-trip contract` suite proves the per-format claim
+        # (scripts/lib/round-trip-formats.vocab.mjs, checked by pnpm lint:claims).
+        package: ["core", "fit", "tcx", "zwo", "garmin"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -890,7 +895,7 @@ jobs:
       - name: Run round-trip tests
         run: |
           echo "Running round-trip tests for @kaiord/${{ matrix.package }}..."
-          echo "Tolerance validation: +/-1s (time), +/-1W (power), +/-1bpm (heart rate), +/-1rpm (cadence)"
+          echo "Tolerances: DECLARED_TOLERANCES in @kaiord/core (time +/-1s, distance +/-1m, power +/-1W or +/-1% FTP, heart rate +/-1bpm, cadence +/-1rpm, pace +/-0.01 m/s)"
 
           # Run tests matching round-trip pattern
           pnpm --filter @kaiord/${{ matrix.package }} exec vitest --run --reporter=verbose \

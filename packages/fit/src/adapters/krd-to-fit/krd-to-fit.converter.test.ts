@@ -16,6 +16,7 @@ import {
   FIT_REPEATED_MESSAGES_5,
   FIT_REPEATED_MESSAGES_6,
   FIT_STEPS_COUNT_4,
+  FIT_STRING_MAX_BYTES,
   FIT_TARGET_VALUE_1200,
   FIT_TARGET_VALUE_1250,
 } from "../../test-utils/constants";
@@ -496,7 +497,7 @@ describe("convertKRDToMessages", () => {
       expect(() => convertKRDToMessages(krd, logger)).toThrow(/notes.*256/i);
     });
 
-    it("should accept notes at exactly 256 characters", () => {
+    it("should cut a 256-character note to the 254 bytes a FIT string holds", () => {
       // Arrange
       const logger = createMockLogger();
       const maxNotes = "a".repeat(FIT_NOTES_MAX_LENGTH);
@@ -528,8 +529,7 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      expect(stepMsg.notes).toBe(maxNotes);
-      expect(stepMsg.notes.length).toBe(FIT_NOTES_MAX_LENGTH);
+      expect(stepMsg.notes).toBe(maxNotes.substring(0, FIT_STRING_MAX_BYTES));
     });
 
     it("should convert distance-based duration step", () => {

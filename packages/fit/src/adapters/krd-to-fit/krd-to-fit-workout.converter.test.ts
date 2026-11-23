@@ -77,7 +77,7 @@ describe("convertWorkoutSteps", () => {
   });
 });
 
-const FIT_NOTES_MAX = 256;
+const FIT_NOTES_MAX = 254;
 const NOTES_OVERFLOW = 50;
 
 describe("convertWorkoutSteps workout-level notes", () => {
@@ -101,7 +101,7 @@ describe("convertWorkoutSteps workout-level notes", () => {
     expect(messages[1].notes).toBeUndefined();
   });
 
-  it("should truncate workout-level notes over 256 chars without error", () => {
+  it("should truncate workout-level notes over the 254 bytes of a FIT string without error", () => {
     // Arrange
     const logger = createMockLogger();
     const longNotes = "x".repeat(FIT_NOTES_MAX + NOTES_OVERFLOW);

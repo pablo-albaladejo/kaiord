@@ -60,12 +60,15 @@ Creates a Garmin Connect JSON writer.
 
 ## Supported Garmin Features
 
-- Workout definitions with structured steps
-- Power, heart rate, speed, and cadence targets
-- Time-based, distance-based, and calorie-based durations
-- Repeat blocks (intervals)
-- Multiple sport types
-- Custom step names and notes
+- Round-trip tested: converting GCN → KRD → GCN keeps every value of a
+  running, cycling, swimming or cardio workout within the declared tolerances
+  (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm,
+  cadence ±1 rpm, pace ±0.01 m/s).
+- Fields GCN cannot carry: a single target value, which is sent as a band and
+  comes back as that range; power as a share of FTP and heart rate as a share
+  of maximum, which are sent in watts and bpm; pace zones; heart-rate, power
+  and repeat-until durations; step names; the sub-sport; the created date;
+  the interval and other intensities, which come back as active.
 
 ## License
 

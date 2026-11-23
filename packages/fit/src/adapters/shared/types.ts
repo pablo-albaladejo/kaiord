@@ -15,6 +15,7 @@ export type FitMessages = {
   }>;
   [fitMessageKeySchema.enum.workoutMesgs]?: Array<{
     wktName?: string;
+    wktDescription?: string;
     numValidSteps?: number;
     sport?: string;
     subSport?: string;

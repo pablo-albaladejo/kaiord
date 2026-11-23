@@ -19,12 +19,13 @@ export const mapManufacturer = (
   const manufacturerValues = Object.values(manufacturerEnum);
   const normalized = manufacturer.toLowerCase();
 
-  const matched = manufacturerValues.find(
-    (value) =>
-      value.toLowerCase() === normalized ||
-      value.toLowerCase().startsWith(normalized) ||
-      normalized.startsWith(value.toLowerCase())
-  );
+  const matched =
+    manufacturerValues.find((value) => value.toLowerCase() === normalized) ??
+    manufacturerValues.find(
+      (value) =>
+        value.toLowerCase().startsWith(normalized) ||
+        normalized.startsWith(value.toLowerCase())
+    );
 
   if (matched) return matched;
 

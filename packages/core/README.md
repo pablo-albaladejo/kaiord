@@ -180,6 +180,25 @@ KRDs, for a round-trip through a text format. A categorical mismatch, such as a
 duration that changed type, has `tolerance: 0` and carries the two values in
 `expectedValue` and `actualValue`.
 
+#### `diffRoundTrip(before, after, contract)`
+
+The strict comparison behind each format's Round-trip test. It compares every
+value of two KRDs: numbers within the first matching rule of
+`DECLARED_TOLERANCES`, everything else exactly. A value lost, added or moved is
+a difference unless the format's contract (`FIT_ROUND_TRIP`, `TCX_ROUND_TRIP`,
+`ZWO_ROUND_TRIP`, `GCN_ROUND_TRIP`, or `ROUND_TRIP_CONTRACTS` by format)
+declares the field, with its reason.
+
+```typescript
+import { diffRoundTrip, TCX_ROUND_TRIP } from "@kaiord/core";
+import type { KRD } from "@kaiord/core";
+
+declare const original: KRD;
+declare const afterTcx: KRD;
+
+const { differences } = diffRoundTrip(original, afterTcx, TCX_ROUND_TRIP);
+```
+
 ### Schema Exports
 
 All domain schemas are exported for validation and type inference:
