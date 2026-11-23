@@ -30,10 +30,11 @@ const isCacheFresh = (entry: BridgeConnectionRuntime, at: number): boolean =>
  */
 const runProbe = async (
   probe: SessionProber,
-  extensionId: string
+  extensionId: string,
+  protocolVersion: number | null
 ): Promise<SessionProbeResult> => {
   try {
-    return await probe(extensionId);
+    return await probe(extensionId, protocolVersion);
   } catch (err) {
     return inactive(errorMessage(err));
   }
@@ -55,7 +56,11 @@ export const probeBridge = async (
   if (current?.checking) return;
   if (!force && current && isCacheFresh(current, ctx.now())) return;
   write(ctx, bridgeId, { discovered: true, checking: true });
-  const result = await runProbe(probe, extensionId);
+  const result = await runProbe(
+    probe,
+    extensionId,
+    ctx.getProtocolVersion(bridgeId)
+  );
   const liveId = ctx.getExtensionId(bridgeId);
   if (liveId !== extensionId) {
     // The extension vanished or was swapped while the probe was in flight, so

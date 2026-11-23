@@ -28,8 +28,10 @@ export type SessionProbeResult = {
   notChecked?: true;
 };
 
+/** `protocolVersion` is the one discovery verified, when it knows it. */
 export type SessionProber = (
-  extensionId: string
+  extensionId: string,
+  protocolVersion?: number | null
 ) => Promise<SessionProbeResult>;
 
 export const inactive = (

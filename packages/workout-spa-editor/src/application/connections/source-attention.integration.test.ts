@@ -51,25 +51,22 @@ describe("connection attention over the real registry", () => {
     expect(attention).toBeNull();
   });
 
-  it("should read Tanita as installed and never count it", () => {
+  it("should read a Tanita extension one protocol behind as installed and never count it", () => {
     // Arrange
-    // Reachable state: the Tanita extension is installed and has announced
-    // itself, so `refreshBridge` writes `{...undiscoveredEntry, discovered:
-    // true}` — the no-prober branch — and never messages it again. There is
-    // no entry for it in `SESSION_PROBES` because an older extension's
-    // session call downloads the whole export CSV.
+    // Reachable state: a Tanita extension on protocol 1 is installed and has
+    // announced itself. Its check would download the whole export CSV, so
+    // its prober asks it nothing and answers "not checked"; `probeBridge`
+    // writes that row, stamped with `lastCheckedAt`.
     //
-    // The card's STATUS is asserted as well as the count. Tanita's row is
-    // permanently `lastCheckedAt: null`, which two separate guards reject,
-    // so a count-only assertion survives deleting the no-prober guard and
-    // proves nothing about it. The status is what tells them apart:
-    // "installed" (nothing can check this) versus "checking" (we asked and
-    // are waiting).
+    // The card's STATUS is asserted as well as the count: "installed"
+    // (nothing was asked) versus "checking" (we asked and are waiting).
     const signals: ConnectionSourceSignals = {
       ...coldSignals(),
       session: (bridgeId) => ({
         ...undiscoveredEntry(bridgeId),
         discovered: true,
+        notChecked: true,
+        lastCheckedAt: PROBED_AT,
       }),
       isDiscovered: (bridgeId) => bridgeId === "tanita-bridge",
     };
@@ -82,7 +79,7 @@ describe("connection attention over the real registry", () => {
     const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(hasSessionProbe("tanita-bridge")).toBe(false);
+    expect(hasSessionProbe("tanita-bridge")).toBe(true);
     expect(tanita?.status).toBe("installed");
     expect(attention).toBeNull();
   });

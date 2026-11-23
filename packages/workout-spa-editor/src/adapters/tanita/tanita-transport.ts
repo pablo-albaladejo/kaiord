@@ -39,10 +39,10 @@ export class TanitaBridgeError extends Error {
 
 /**
  * A current extension answers `checkSession` with a `HEAD` of the export, but
- * an older one implements it as a full `GET /en/user/export-csv` and discards
- * the body, re-downloading the athlete's entire MyTANITA history. The App
- * cannot tell which is installed before asking, so this MUST NOT be polled,
- * which is why tanita-bridge is absent from `SESSION_PROBES`.
+ * one protocol behind implements it as a full `GET /en/user/export-csv` and
+ * discards the body, re-downloading the athlete's entire MyTANITA history.
+ * So this MUST NOT be polled; the Connections check (`SESSION_PROBES`) asks
+ * only an extension discovery verified on the current protocol.
  */
 export const checkTanitaSession = async (
   extensionId: string

@@ -60,6 +60,32 @@ describe("createBridgeDiscovery", () => {
     // Assert
   });
 
+  it("should remember the protocol version and features the verification answer carried", async () => {
+    // Arrange
+    const verify = vi.fn().mockResolvedValue({
+      id: "garmin-bridge",
+      name: "Garmin",
+      version: "10.4.0",
+      protocolVersion: 1,
+      capabilities: ["write:workouts"],
+      features: ["calendar-write-v1"],
+    });
+    const discovery = createBridgeDiscovery({ verify });
+    discovery.start();
+
+    // Act
+    emit(ANNOUNCE_GARMIN);
+    await vi.runOnlyPendingTimersAsync();
+
+    // Assert
+    expect(discovery.getVerified?.("garmin-bridge")).toEqual({
+      protocolVersion: 1,
+      features: ["calendar-write-v1"],
+    });
+    expect(discovery.getVerified?.("train2go-bridge")).toBeNull();
+    discovery.stop();
+  });
+
   it("should not register an extension on an unaccepted protocol, but remember it as outdated", async () => {
     // Arrange
     const verify = vi.fn().mockResolvedValue({

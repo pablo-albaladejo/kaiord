@@ -38,6 +38,7 @@ export type CreateBridgeConnectionStoreOptions = {
   probes?: Record<string, SessionProber>;
   bridgeIds?: readonly string[];
   getExtensionId?: (bridgeId: string) => string | null;
+  getProtocolVersion?: (bridgeId: string) => number | null;
   subscribeDiscovery?: (listener: () => void) => () => void;
   now?: () => number;
 };

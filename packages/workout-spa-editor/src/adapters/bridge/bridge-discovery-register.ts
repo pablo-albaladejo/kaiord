@@ -1,11 +1,15 @@
 import type { BridgeManifest } from "../../types/bridge-schemas";
-import type { BridgeAnnouncement } from "./bridge-discovery-types";
+import type {
+  BridgeAnnouncement,
+  VerifiedBridge,
+} from "./bridge-discovery-types";
 import { isAcceptedBridgeProtocol } from "./bridge-protocol";
 
 export type DiscoveryState = {
   ids: Map<string, string>;
   caps: Map<string, readonly string[]>;
   outdated: Set<string>;
+  verified: Map<string, VerifiedBridge>;
 };
 
 /**
@@ -15,7 +19,7 @@ export type DiscoveryState = {
  * outdated, so its Connection offers Update rather than Install (#1098).
  */
 export const register = (
-  { ids, caps, outdated }: DiscoveryState,
+  { ids, caps, outdated, verified }: DiscoveryState,
   ann: BridgeAnnouncement,
   manifest: BridgeManifest
 ): boolean => {
@@ -27,5 +31,9 @@ export const register = (
   outdated.delete(ann.bridgeId);
   ids.set(ann.bridgeId, ann.extensionId);
   caps.set(ann.bridgeId, manifest.capabilities);
+  verified.set(ann.bridgeId, {
+    protocolVersion: manifest.protocolVersion,
+    features: manifest.features ?? [],
+  });
   return true;
 };

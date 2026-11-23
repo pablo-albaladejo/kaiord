@@ -12,6 +12,8 @@ export type RefreshContext = {
   probes: Record<string, SessionProber>;
   bridgeIds: readonly string[];
   getExtensionId: (bridgeId: string) => string | null;
+  /** The protocol discovery verified for a registered extension. */
+  getProtocolVersion: (bridgeId: string) => number | null;
   now: () => number;
   notify: () => void;
 };
