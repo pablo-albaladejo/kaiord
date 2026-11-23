@@ -17,6 +17,8 @@ on:
       - "scripts/assemble-site.mjs"
       - "scripts/inject-spa-fallback.mjs"
       - "scripts/emit-legacy-editor-page.mjs"
+      - "scripts/emit-spa-service-worker.mjs"
+      - "scripts/check-spa-service-worker.mjs"
       - "scripts/lib/site-csp.mjs"
       - "scripts/lib/site-csp-policy.mjs"
       - "scripts/check-site-csp.mjs"
@@ -118,17 +120,22 @@ jobs:
       # the legacy path bridge and emits the bare /editor/ page.
       # When the secret is absent the placeholders remain and the noop
       # analytics adapter wins — see packages/workout-spa-editor/docs/analytics.md.
+      # It emits the App's service worker last, app/sw.js. The repository
+      # variable SPA_SW_KILL_SWITCH=1 emits the self-removing kill worker
+      # instead: docs/runbooks/spa-service-worker.md.
       - name: Assemble site
         env:
           BUILD_SHA: ${{ github.sha }}
           UMAMI_WEBSITE_ID: ${{ secrets.UMAMI_WEBSITE_ID }}
+          SW_KILL: ${{ vars.SPA_SW_KILL_SWITCH == '1' && '--sw-kill' || '' }}
         run: |
           node scripts/assemble-site.mjs \
             --out merged-dist \
             --landing packages/landing/dist \
             --app packages/workout-spa-editor/dist \
             --docs packages/docs/.vitepress/dist \
-            --sha "$BUILD_SHA"
+            --sha "$BUILD_SHA" \
+            $SW_KILL
           ls -la merged-dist/
 
       - name: Verify merged artifact
@@ -241,6 +248,13 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v6
 
+      # Last before upload: the App's service worker lists the exact bytes
+      # that ship, in the mode the deploy asked for (normal, or the kill
+      # switch). Runbook: docs/runbooks/spa-service-worker.md.
+      - name: Check the App's service worker
+        env:
+          SW_MODE: ${{ vars.SPA_SW_KILL_SWITCH == '1' && 'kill' || 'normal' }}
+        run: node scripts/check-spa-service-worker.mjs --app merged-dist/app --base /app/ --mode "$SW_MODE"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:

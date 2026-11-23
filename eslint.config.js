@@ -810,6 +810,30 @@ export default tseslint.config(
     },
   },
   {
+    // The App's service worker sources: plain scripts the emitter prefixes
+    // with `const SW = {...};` and ships unbundled as app/sw.js.
+    files: ["packages/workout-spa-editor/sw/**/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: {
+        self: "readonly",
+        caches: "readonly",
+        crypto: "readonly",
+        fetch: "readonly",
+        Response: "readonly",
+        URL: "readonly",
+        setTimeout: "readonly",
+        SW: "readonly",
+      },
+    },
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 100, skipBlankLines: true, skipComments: true },
+      ],
+    },
+  },
+  {
     // Landing: browser-only static page. Declares the DOM globals its sources use.
     files: ["packages/landing/src/**/*.ts"],
     languageOptions: {
