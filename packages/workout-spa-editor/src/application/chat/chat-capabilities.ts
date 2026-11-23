@@ -48,7 +48,8 @@ export const CHAT_CAPABILITIES = {
   create_workout: { group: "do", writes: true, examples: ["createWorkout"] },
   push_to_garmin: { group: "do", writes: true, examples: ["pushGarmin"] },
   sync_coaching: { group: "do", writes: true, examples: ["syncCoaching"] },
-  set_data_route: { group: "do", writes: true, examples: ["setRoute"] },
+  set_data_route: { group: "do", writes: true, examples: ["stopImport"] },
+  set_authority: { group: "do", writes: true, examples: ["setRoute"] },
 } as const satisfies Record<string, ChatCapability>;
 
 export type ChatCapabilityToolName = keyof typeof CHAT_CAPABILITIES;

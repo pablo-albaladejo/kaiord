@@ -1,11 +1,10 @@
 /**
- * set_data_route — action tool (confirmation-gated) for changing data
- * routing: enable/disable a (dataType, integration, direction) route, or
- * set a data type's multi-source semantics (union, or a priority order of
- * integrations with automatic fallback). Delegates to the injected
+ * set_data_route — action Tool (confirmation-gated) that switches one
+ * (data type, integration, direction) route on or off: whether a source is
+ * read at all, not which one decides (that is `set_authority`). Offered
+ * whatever Capabilities are on. Delegates to the injected
  * `ChatActionOps.setDataRoute`, which wraps the same IntegrationPolicy upsert
- * and DataTypeSourcePolicy write paths the Connections page's routing rows use
- * — no new write path.
+ * the Connections page's switches use.
  */
 import type { ChatTool } from "@kaiord/ai";
 
@@ -15,11 +14,11 @@ import { setDataRouteInputSchema } from "./set-data-route-schema";
 export const createSetDataRouteTool = (ops: ChatActionOps): ChatTool => ({
   name: "set_data_route",
   description:
-    "Change data routing for the active profile. enable_route / " +
-    "disable_route turn a (data type, integration, direction) route on or " +
-    "off. set_source_policy sets whether a data type merges every enabled " +
-    "source (union, the default) or reads a priority order with automatic " +
-    "fallback (priority). Requires the user to confirm before running; " +
+    "Switch one source on or off for a kind of data on the active profile: " +
+    "enable_route / disable_route turn a (data type, integration, " +
+    "direction) route on or off, so that source's data is imported (or " +
+    "sent) or not. It does not choose which source decides when several " +
+    "report the same kind. Requires the user to confirm before running; " +
     "the result reflects the new persisted state.",
   inputSchema: setDataRouteInputSchema,
   requiresConfirmation: true,

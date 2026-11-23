@@ -9,6 +9,7 @@ import type { ConnectionRepository } from "../application/connections/connection
 import type { IntegrationPolicyRepository } from "../application/integration-policy/integration-policy-repository.port";
 import type { AiModelBindingRepository } from "./ai-model-binding-repository";
 import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
+import type { CapabilityDecisionRepository } from "./capability-decision-repository";
 import type { ChatConversationRepository } from "./chat-conversation-repository";
 import type { ChatMessageRepository } from "./chat-message-repository";
 import type {
@@ -34,7 +35,6 @@ import type { UserPreferencesRepository } from "./user-preferences-repository";
 import type { WorkoutRepository } from "./workout-repository";
 
 export type { AiModelBindingRepository } from "./ai-model-binding-repository";
-export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 export type { ChatConversationRepository } from "./chat-conversation-repository";
 export type { ChatMessageRepository } from "./chat-message-repository";
 export type {
@@ -86,6 +86,7 @@ export type PersistencePort = HealthRepositories &
     matchedSessionsReadModel: MatchedSessionsReadModel;
     autoMatchDismissal: AutoMatchDismissalRepository;
     userPreferences: UserPreferencesRepository;
+    capabilityDecisions: CapabilityDecisionRepository;
     // Cross-table cleanup for the six v16 health-domain stores —
     // single-shot deleteByProfile invoked by the profile-delete cascade.
     healthCleanup: HealthCleanupRepository;

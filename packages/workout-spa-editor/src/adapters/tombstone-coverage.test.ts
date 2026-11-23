@@ -127,6 +127,9 @@ const OFF_PORT_TABLES: Record<string, string> = {
   autoMatchDismissals: "composite PK; cascade-only delete",
   coachingSyncState: "composite PK; cascade-only delete",
   dataTypeSourcePolicy: "composite PK; cascade-only delete",
+  // A decision is never deleted, only turned on or off (a newer row wins the
+  // merge); the profile cascade removes them with the profile.
+  capabilityDecisions: "composite PK; never deleted, cascade-only delete",
   // Legacy and write-dead: the only writer left is the v6 migration backfill
   // (`register-kaiord-versions.ts`). Despite holding device-scoped extension
   // state it is NOT in DEVICE_LOCAL, so it rides the snapshot — harmless only

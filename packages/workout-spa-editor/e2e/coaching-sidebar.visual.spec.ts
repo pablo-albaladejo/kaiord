@@ -8,6 +8,8 @@
  * Closes #554.
  */
 
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures/base";
 import { clearDexie, getWeekDates } from "./helpers/seed-dexie";
 import { seedMatchedCoachingWorkout } from "./helpers/seed-matched-coaching-workout";
@@ -17,6 +19,29 @@ const PROFILE_ID = "visual-sidebar-profile";
 const SOURCE = "train2go";
 const SOURCE_ID = "visual-sidebar-activity";
 const WORKOUT_ID = "visual-sidebar-workout";
+const INSTALL_NOTICE =
+  "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser.";
+// Same ceiling `connection-notices.spec.ts` gives the notice: the discovery
+// window is a few seconds, and a cold CI runner can stretch it.
+const NOTICE_TIMEOUT_MS = 20_000;
+
+/**
+ * Waits for the Garmin Connection to settle before a screenshot. While it is
+ * "checking" (the discovery window after load) the ribbon renders nothing, so
+ * the layout above the sidebar is shorter than its settled form. Playwright
+ * runs without the extension, so the settled state is always `not-installed`,
+ * whose Install notice the ribbon shows only once discovery has had its
+ * window: seeing the notice is the signal that the state can no longer change.
+ */
+const waitForGarminConnectionSettled = async (page: Page): Promise<void> => {
+  const ribbon = page.getByTestId("editor-state-ribbon");
+  await expect(ribbon).toContainText(INSTALL_NOTICE, {
+    timeout: NOTICE_TIMEOUT_MS,
+  });
+  await expect(
+    ribbon.getByRole("button", { name: "Install Kaiord for Garmin" })
+  ).toBeVisible();
+};
 
 test.describe("CoachingSidebar visual regression", () => {
   // Playwright requires the first argument to be a destructuring pattern so it
@@ -59,6 +84,7 @@ test.describe("CoachingSidebar visual regression", () => {
     await expect(page.getByTestId("coaching-sidebar")).toBeVisible({
       timeout: 10_000,
     });
+    await waitForGarminConnectionSettled(page);
 
     // Assert
     await expect(page).toHaveScreenshot("coaching-sidebar-desktop.png");
@@ -88,6 +114,7 @@ test.describe("CoachingSidebar visual regression", () => {
     await expect(page.getByTestId("coaching-sidebar")).toBeVisible({
       timeout: 10_000,
     });
+    await waitForGarminConnectionSettled(page);
 
     // Assert
     await expect(page).toHaveScreenshot("coaching-sidebar-mobile.png");

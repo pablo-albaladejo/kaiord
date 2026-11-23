@@ -48,7 +48,8 @@ export function useSetupChecklist(): SetupChecklist {
         hasTemplate: facts.templateCount > 0,
       }).filter(
         (item) =>
-          item.capability === undefined || capabilities.isOn(item.capability)
+          item.surface === undefined ||
+          capabilities.offers("inScreen", item.surface)
       ),
     [facts, profile, capabilities]
   );

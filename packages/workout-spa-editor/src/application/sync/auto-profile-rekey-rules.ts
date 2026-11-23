@@ -65,6 +65,10 @@ export const AUTO_PROFILE_REKEY_RULES: Readonly<Record<string, RekeyRule>> = {
   intakeEntries: BY_ID,
   intakePresets: BY_ID,
   userPreferences: { key: ["profileId"], onCollision: "lww" },
+  capabilityDecisions: {
+    key: ["profileId", "capabilityId"],
+    onCollision: "lww",
+  },
   energyTargets: { key: ["profileId"], onCollision: "lww" },
   aiModelBindings: { key: ["profileId", "purpose"], onCollision: "target" },
   dataTypeSourcePolicy: {

@@ -1,6 +1,6 @@
 /**
  * Record the active athlete's Capability decisions the way Settings,
- * Capabilities does: on their `userPreferences` row. A spec about a
+ * Capabilities does: one `capabilityDecisions` row per Capability. A spec about a
  * Capability's screens turns it on first, as an athlete would; every other
  * spec runs as a new athlete, with every Capability off.
  */
@@ -32,19 +32,12 @@ export async function setCapabilities(
     const meta = await db.table("meta").get("activeProfileId");
     const profileId = meta?.value as string | undefined;
     if (!profileId) throw new Error("no active athlete to decide for");
-    const row = (await db.table("userPreferences").get(profileId)) ?? {
-      profileId,
-      calendarView: "grid",
-    };
-    const capabilities = {
-      ...(row.capabilities as Record<string, boolean> | undefined),
-      ...next,
-    };
-    await db.table("userPreferences").put({
-      ...row,
-      capabilities,
-      updatedAt: new Date().toISOString(),
-    });
+    const updatedAt = new Date().toISOString();
+    for (const [capabilityId, on] of Object.entries(next)) {
+      await db
+        .table("capabilityDecisions")
+        .put({ profileId, capabilityId, on, updatedAt });
+    }
   }, decisions);
 }
 

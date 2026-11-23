@@ -1,7 +1,6 @@
 /**
- * buildDataRouteAnswer — one managed-data-type's routing state, shared by
- * the `get_data_routes` read tool and the `set_data_route` confirmation
- * result. Reuses the exact cell derivation the retired routing matrix was built
+ * buildDataRouteAnswer — one managed-data-type's routing state, as the
+ * `get_data_routes` read tool answers it. Reuses the exact cell derivation the retired routing matrix was built
  * on (application/data-hub) plus the F3.2 multi-source resolver — the chat
  * answer is never a second source of truth against the Connections page.
  */
@@ -18,9 +17,8 @@ import type {
 } from "../../data-hub/build-data-hub-matrix";
 import {
   type AuthorityInForce,
-  authorityInForce,
+  loadAuthorityInForce,
 } from "../../data-source-policy/authority-in-force";
-import { readAuthorityChoice } from "../../data-source-policy/read-authority-choice";
 import {
   type EffectiveSourceAnswer,
   getEffectiveSourceToday,
@@ -41,7 +39,7 @@ export type DataRouteAnswer = {
   routes: DataRouteEntry[];
   /** What decides the type today: the athlete's choice while the matrix is
       on, else the automatic Authority, else every source kept. */
-  sourcePolicy: AuthorityInForce;
+  sourcePolicy: Pick<AuthorityInForce, "mode" | "sourceOrder">;
   effectiveSourceToday?: EffectiveSourceAnswer;
 };
 
@@ -55,10 +53,11 @@ export const buildDataRouteAnswer = async (
   row: DataHubRow,
   deps: DataRouteAnswerDeps
 ): Promise<DataRouteAnswer> => {
-  const choice = await readAuthorityChoice(
+  const { mode, sourceOrder } = await loadAuthorityInForce(
     {
       sourcePolicyRepo: deps.persistence.dataTypeSourcePolicy,
-      userPreferences: deps.persistence.userPreferences,
+      capabilityDecisions: deps.persistence.capabilityDecisions,
+      policyRepo: deps.persistence.integrationPolicy,
     },
     { profileId: deps.profileId, dataType: row.dataType }
   );
@@ -75,7 +74,7 @@ export const buildDataRouteAnswer = async (
         mode: cell.routeMode,
         lastSyncedAt: cell.lastSyncedAt,
       })),
-    sourcePolicy: authorityInForce(row.dataType, choice),
+    sourcePolicy: { mode, sourceOrder },
     effectiveSourceToday: await getEffectiveSourceToday(
       deps.persistence,
       deps.profileId,

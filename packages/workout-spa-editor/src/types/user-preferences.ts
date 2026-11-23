@@ -65,13 +65,6 @@ export const userPreferencesSchema = z.object({
    * Settings → "Show tips again" empties the array rather than deleting it.
    */
   dismissedCoachMarks: z.array(z.string()).optional(),
-  /**
-   * The athlete's decision per Capability id (`lib/capabilities`); absent
-   * means never decided, which reads as off unless the Capability adopts
-   * existing data. Optional and unindexed — no Dexie version bump — and it
-   * rides the cloud snapshot and the backup with the rest of the row.
-   */
-  capabilities: z.record(z.string(), z.boolean()).optional(),
   updatedAt: z.iso.datetime(),
 });
 

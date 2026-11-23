@@ -9,11 +9,9 @@ const TEMPLATES: CapabilityDeclaration = {
     nav: ["library"],
     routes: ["/library"],
     settings: [],
-    commands: [],
-    shortcuts: [],
     tools: [],
+    inScreen: ["workout-save-as-template"],
   },
-  modules: [],
   adoptsExistingData: "templates",
 };
 
@@ -24,11 +22,9 @@ const MATRIX: CapabilityDeclaration = {
     nav: [],
     routes: [],
     settings: ["data-routes"],
-    commands: ["open-matrix"],
-    shortcuts: ["matrix"],
     tools: ["set_data_route"],
+    inScreen: ["connections-authority-link"],
   },
-  modules: [],
 };
 
 const CATALOGUE = [TEMPLATES, MATRIX];
@@ -61,8 +57,7 @@ describe("resolveCapabilities", () => {
     // Assert
     expect(active.isOn("authority-matrix")).toBe(true);
     expect(active.offers("settings", "data-routes")).toBe(true);
-    expect(active.offers("command", "open-matrix")).toBe(true);
-    expect(active.offers("shortcut", "matrix")).toBe(true);
+    expect(active.offers("inScreen", "connections-authority-link")).toBe(true);
     expect(active.offers("tool", "set_data_route")).toBe(true);
   });
 
@@ -146,7 +141,59 @@ describe("resolveCapabilities", () => {
     const active = resolveCapabilities(input, CATALOGUE);
 
     // Assert
-    expect(active.isOn("retired")).toBe(false);
     expect(active.on).toEqual([]);
+  });
+
+  it("should withhold a part of another screen an off Capability owns", () => {
+    // Arrange
+    const active = resolveCapabilities(
+      { decisions: {}, withData: new Set<string>() },
+      CATALOGUE
+    );
+
+    // Act
+    const button = active.offers("inScreen", "workout-save-as-template");
+
+    // Assert
+    expect(button).toBe(false);
+  });
+
+  it.each([
+    ["/Library", "a different case"],
+    ["/LIBRARY/abc", "a different case below the owned path"],
+    ["/library/", "a trailing slash"],
+    ["/%6Cibrary", "an encoded character"],
+    ["/library?view=list", "a query"],
+    ["/library#top", "a hash"],
+    ["/Library/?q=1#x", "all of them at once"],
+  ])(
+    "should treat %s as the owned route, as the router does with %s",
+    (path) => {
+      // Arrange
+      const active = resolveCapabilities(
+        { decisions: {}, withData: new Set<string>() },
+        CATALOGUE
+      );
+
+      // Act
+      const offered = active.offers("route", path);
+
+      // Assert
+      expect(offered).toBe(false);
+    }
+  );
+
+  it("should still offer a path that only shares the owned prefix in another case", () => {
+    // Arrange
+    const active = resolveCapabilities(
+      { decisions: {}, withData: new Set<string>() },
+      CATALOGUE
+    );
+
+    // Act
+    const sibling = active.offers("route", "/LIBRARY-old");
+
+    // Assert
+    expect(sibling).toBe(true);
   });
 });

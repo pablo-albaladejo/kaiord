@@ -51,6 +51,7 @@ Leaf libraries: small, focused, mostly-pure modules used across the SPA. No Reac
 
 ## Subdirectories
 
+- `capabilities/` — the Capability mechanism: `capability-catalogue.ts` (every Capability and the surfaces it owns, `inScreen` parts of other screens included; `CapabilityId`, `InScreenSurfaceId`, `capabilityHome`), `resolve-capabilities.ts` (the read API's one rule `isCapabilityOn`, `resolveCapabilities`, `decisionsFrom`) and `capability-route-path.ts` (a location matched as the router matches it: decoded, case-insensitive, query and hash dropped). The modules of each Capability's screens live in `scripts/capability-surfaces.vocab.mjs`, read only by the guard.
 - `athlete/` — thresholds per sport, the fixed 5-zone display models and the zone-map builder.
 - `focus/` — overlay-observer + fallback-chain helpers used by `hooks/focus/`.
 - `profile-snapshot/` — `profile-to-snapshot` mapper (used by `use-profile-snapshot-push`).

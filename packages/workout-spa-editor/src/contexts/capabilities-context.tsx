@@ -1,71 +1,61 @@
-import { createContext, type ReactNode, useContext, useMemo } from "react";
-
-import { db } from "../adapters/dexie/dexie-database";
-import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adapter";
-import { createDexieUserPreferencesRepository } from "../adapters/dexie/dexie-user-preferences-repository";
-import { setCapability } from "../application/capabilities/set-capability";
-import { useCapabilityInputsLive } from "../hooks/use-capability-inputs-live";
 import {
-  type ActiveCapabilities,
-  NO_CAPABILITIES,
-  resolveCapabilities,
-} from "../lib/capabilities/resolve-capabilities";
+  createContext,
+  type ReactNode,
+  useContext,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
+
+import { setCapability } from "../application/capabilities/set-capability";
+import {
+  type Capabilities,
+  type CapabilityStore,
+  createFixedCapabilityStore,
+  createLiveCapabilityStore,
+} from "../hooks/capabilities/capability-store";
+import { observeCapabilityInputs } from "../hooks/use-capability-inputs-live";
+import type { CapabilityId } from "../lib/capabilities/capability-catalogue";
+import { usePersistence } from "./persistence-context";
+
+export type { Capabilities } from "../hooks/capabilities/capability-store";
 
 /**
- * The read API every screen, route, settings section, command, shortcut,
- * Tool and link goes through before showing a Capability's surface
- * (`scripts/check-capability-surfaces.mjs` holds the line).
+ * The read API every screen, route, settings section, Tool and link goes
+ * through before showing a Capability's surface
+ * (`scripts/check-capability-surfaces.mjs` holds the line). The context
+ * carries a handle, never the athlete's data: the decisions are read live
+ * from Dexie and written through the `PersistencePort`.
  */
-export type Capabilities = ActiveCapabilities & {
-  /** `loading` until the athlete's decisions are read: show nothing yet. */
-  status: "loading" | "ready";
-  /** Records one decision for the active athlete; data is never touched. */
-  set: (id: string, on: boolean) => Promise<void>;
-};
-
-const OUTSIDE_PROVIDER: Capabilities = {
-  ...NO_CAPABILITIES,
-  status: "ready",
-  set: async () => {},
-};
-
-const CapabilitiesContext = createContext<Capabilities>(OUTSIDE_PROVIDER);
-
-const writeDecision = async (profileId: string, id: string, on: boolean) =>
-  setCapability(
-    { profileId, id, on },
-    {
-      clock: () => new Date().toISOString(),
-      repository: createDexieUserPreferencesRepository(db),
-      profileRepository: createDexiePersistence(db).profiles,
-    }
-  );
+const CapabilitiesContext = createContext<CapabilityStore | null>(null);
 
 export function CapabilitiesProvider({ children }: { children: ReactNode }) {
-  const live = useCapabilityInputsLive();
-  const value = useMemo<Capabilities>(() => {
-    if (live === undefined) {
-      return { ...OUTSIDE_PROVIDER, status: "loading" };
-    }
-    const { profileId } = live;
-    return {
-      ...resolveCapabilities(live.inputs),
-      status: "ready",
-      set: async (id, on) => {
-        if (profileId !== null) await writeDecision(profileId, id, on);
-      },
-    };
-  }, [live]);
+  const persistence = usePersistence();
+  const store = useMemo(
+    () =>
+      createLiveCapabilityStore(
+        () => observeCapabilityInputs(),
+        (profileId, id, on) =>
+          setCapability(
+            { profileId, id, on },
+            { ...persistence, clock: () => new Date().toISOString() }
+          )
+      ),
+    [persistence]
+  );
   return (
-    <CapabilitiesContext.Provider value={value}>
+    <CapabilitiesContext.Provider value={store}>
       {children}
     </CapabilitiesContext.Provider>
   );
 }
 
-/** Outside a provider every Capability reads as off. */
-export const useCapabilities = (): Capabilities =>
-  useContext(CapabilitiesContext);
+export const useCapabilities = (): Capabilities => {
+  const store = useContext(CapabilitiesContext);
+  if (!store) {
+    throw new Error("useCapabilities must be used within CapabilitiesProvider");
+  }
+  return useSyncExternalStore(store.subscribe, store.get, store.get);
+};
 
 /** Fixed Capabilities for a story or a test that renders one surface. */
 export function CapabilitiesFixture({
@@ -73,18 +63,21 @@ export function CapabilitiesFixture({
   loading = false,
   children,
 }: {
-  on: readonly string[];
+  on: readonly CapabilityId[];
   loading?: boolean;
   children: ReactNode;
 }) {
-  const decisions = Object.fromEntries(on.map((id) => [id, true]));
-  const value: Capabilities = {
-    ...resolveCapabilities({ decisions, withData: new Set() }),
-    status: loading ? "loading" : "ready",
-    set: async () => {},
-  };
+  const key = on.join(" ");
+  const store = useMemo(
+    () =>
+      createFixedCapabilityStore(
+        key === "" ? [] : (key.split(" ") as CapabilityId[]),
+        loading
+      ),
+    [key, loading]
+  );
   return (
-    <CapabilitiesContext.Provider value={value}>
+    <CapabilitiesContext.Provider value={store}>
       {children}
     </CapabilitiesContext.Provider>
   );

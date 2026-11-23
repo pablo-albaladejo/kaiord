@@ -1,19 +1,22 @@
 /**
  * Every Capability of the Kaiord App: a part beyond the core path from
  * Coaching Activity to Workout on the watch, off and out of sight until the
- * athlete activates it (GLOSSARY.md, ADR 0003). Adding one is one entry here
- * plus its two strings in `settings.json` (`capabilities.items.<id>`).
+ * athlete activates it (GLOSSARY.md, ADR 0003). Adding one is one entry here,
+ * its `modules` in `scripts/capability-surfaces.vocab.mjs`, and its two
+ * strings in `settings.json` (`capabilities.items.<id>`).
  *
  * `owns` names, by the id each registry already uses, every surface the App
- * offers only while the Capability is on. `modules` lists the source files
- * (relative to `src/`, a trailing `/` for a folder) that make up its screens;
- * `scripts/check-capability-surfaces.mjs` fails when anything outside them
- * reaches one without going through the read API (`useCapabilities`).
+ * offers only while the Capability is on; `inScreen` names the parts of other
+ * screens that belong to it (a button, a tile, a setup step, a link), each
+ * asked for with `<CapabilityGate surface>` or `offers("inScreen", id)`.
  */
 
-export type CapabilitySurfaceKind =
-  "nav" | "route" | "settings" | "command" | "shortcut" | "tool";
+import { DAILY_PATH, SETTINGS_PATH } from "../../routing/constants";
 
+export type CapabilitySurfaceKind =
+  "nav" | "route" | "settings" | "tool" | "inScreen";
+
+/** `experimental` is kept for WHOOP (#1664), the one Capability that needs it. */
 export type CapabilityGrade = "advanced" | "experimental";
 
 export type CapabilityDeclaration = {
@@ -27,14 +30,11 @@ export type CapabilityDeclaration = {
     routes: readonly string[];
     /** Settings section keys (`SETTINGS_PAGE_ROWS`). */
     settings: readonly string[];
-    /** Editor command ids (`useEditorCommands`). */
-    commands: readonly string[];
-    /** `SHORTCUT_CATALOG` row ids. */
-    shortcuts: readonly string[];
     /** The assistant's Tool names (`buildChatTools`). */
     tools: readonly string[];
+    /** Parts of other screens, by an id named here. */
+    inScreen: readonly string[];
   };
-  modules: readonly string[];
   /**
    * A Dexie table whose rows mean the athlete already used this part of the
    * App before it became a Capability: with no decision recorded, any row
@@ -50,21 +50,14 @@ export const CAPABILITY_CATALOGUE = [
       nav: ["library"],
       routes: ["/library"],
       settings: [],
-      commands: [],
-      shortcuts: [],
       tools: [],
+      inScreen: [
+        "workout-save-as-template",
+        "ai-result-save-as-template",
+        "create-from-template",
+        "setup-save-to-library",
+      ],
     },
-    modules: [
-      "components/pages/LibraryPage.tsx",
-      "components/pages/Library/",
-      "components/pages/use-library-schedule.ts",
-      "components/pages/use-picker-schedule.ts",
-      "components/pages/use-library-short-circuit.ts",
-      "components/pages/use-schedule-template.ts",
-      "components/molecules/LibraryCard/",
-      "components/molecules/SaveToLibraryButton/",
-      "hooks/use-library-templates-live.ts",
-    ],
     adoptsExistingData: "templates",
   },
   {
@@ -74,25 +67,34 @@ export const CAPABILITY_CATALOGUE = [
       nav: [],
       routes: [],
       settings: ["authority"],
-      commands: [],
-      shortcuts: [],
-      tools: ["set_data_route"],
+      tools: ["set_authority"],
+      inScreen: ["connections-authority-link"],
     },
-    modules: [
-      "components/organisms/AuthorityMatrix/",
-      "hooks/connections/use-source-of-truth-editor.ts",
-    ],
     adoptsExistingData: "dataTypeSourcePolicy",
   },
 ] as const satisfies readonly CapabilityDeclaration[];
 
-export type CapabilityId = (typeof CAPABILITY_CATALOGUE)[number]["id"];
+type Catalogue = (typeof CAPABILITY_CATALOGUE)[number];
+
+export type CapabilityId = Catalogue["id"];
+
+/** A part of another screen a Capability owns: a typo fails typecheck. */
+export type InScreenSurfaceId = Catalogue["owns"]["inScreen"][number];
 
 /** Every route path prefix a Capability owns. */
 export const CAPABILITY_ROUTES: readonly string[] =
   CAPABILITY_CATALOGUE.flatMap((capability) => capability.owns.routes);
 
-/** The first route a Capability owns: where a link into it points. */
-export const capabilityHome = (id: CapabilityId): string =>
-  CAPABILITY_CATALOGUE.find((capability) => capability.id === id)?.owns
-    .routes[0] ?? "/daily";
+/**
+ * Where a link into a Capability points: its first route, else its first
+ * settings section, else the Day.
+ */
+export const capabilityHome = (id: CapabilityId): string => {
+  const owns: CapabilityDeclaration["owns"] | undefined =
+    CAPABILITY_CATALOGUE.find((capability) => capability.id === id)?.owns;
+  if (owns?.routes[0] !== undefined) return owns.routes[0];
+  if (owns?.settings[0] !== undefined) {
+    return `${SETTINGS_PATH}/${owns.settings[0]}`;
+  }
+  return DAILY_PATH;
+};

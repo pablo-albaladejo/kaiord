@@ -13,6 +13,7 @@ Leaf UI primitives. No business logic; no Dexie reads; no Zustand selectors beyo
 
 ## Subdirectories
 
+- `CapabilityGate/` — `CapabilityGate.tsx` (renders a part of another screen an `inScreen` surface id names only while its Capability is on) and `CapabilityRouteGate.tsx` (sends a route an off Capability owns to the Day, after the decisions are read) + tests.
 - `Badge/` — `Badge.tsx` (status pill) + styles + stories + tests + README.
 - `Button/` — `Button.tsx` + `LoadingSpinner.tsx` + styles + stories + tests + README. Primary, secondary, ghost, danger variants.
 - `ErrorMessage/` — `ErrorMessage.tsx` + `ErrorActions.tsx` + `ValidationErrorList.tsx` + stories + tests.

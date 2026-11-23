@@ -4,8 +4,8 @@
  */
 import { describe, expect, it } from "vitest";
 
+import { createInMemoryCapabilityDecisionRepository } from "../../test-utils/in-memory-capability-decision-repository";
 import { createInMemoryDataTypeSourcePolicyRepository } from "../../test-utils/in-memory-data-type-source-policy-repository";
-import { createInMemoryUserPreferencesRepository } from "../../test-utils/in-memory-user-preferences-repository";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 import { AUTHORITY_MATRIX_ID } from "./automatic-authority";
@@ -40,19 +40,19 @@ const resolveWeight = async ({
 }: Setup) => {
   const sourcePolicyRepo = createInMemoryDataTypeSourcePolicyRepository();
   if (chosen) await sourcePolicyRepo.put(chosen);
-  const userPreferences = createInMemoryUserPreferencesRepository();
+  const capabilityDecisions = createInMemoryCapabilityDecisionRepository();
   if (matrix !== undefined) {
-    await userPreferences.put({
+    await capabilityDecisions.put({
       profileId: PROFILE_ID,
-      calendarView: "grid",
+      capabilityId: AUTHORITY_MATRIX_ID,
+      on: matrix,
       updatedAt: "2026-11-01T00:00:00.000Z",
-      capabilities: { [AUTHORITY_MATRIX_ID]: matrix },
     });
   }
   return resolveEffectiveSource(
     {
       sourcePolicyRepo,
-      userPreferences,
+      capabilityDecisions,
       policyRepo: {
         findByProfileDirection: async () => routes,
       } as never,
@@ -183,5 +183,26 @@ describe("automatic Authority", () => {
     // Assert
     expect(result.mode).toBe("automatic");
     expect(effectiveOf(result)).toBe("tanita-bridge");
+  });
+
+  it("should keep every source for an athlete who chose that before and never turned the matrix off", async () => {
+    // Arrange
+    const setup: Setup = {
+      routes: [route("trainingpeaks-bridge"), route("tanita-bridge")],
+      records: [TANITA, TRAININGPEAKS],
+      chosen: {
+        profileId: PROFILE_ID,
+        dataType: "weight",
+        mode: "union",
+        sourceOrder: [],
+      },
+    };
+
+    // Act
+    const result = await resolveWeight(setup);
+
+    // Assert
+    expect(result.mode).toBe("union");
+    expect(result.mode === "union" ? result.records : []).toHaveLength(2);
   });
 });

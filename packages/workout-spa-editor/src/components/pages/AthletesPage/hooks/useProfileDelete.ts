@@ -55,6 +55,7 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
               sessionMatch: persistence.sessionMatch,
               autoMatchDismissal: persistence.autoMatchDismissal,
               userPreferences: persistence.userPreferences,
+              capabilityDecisions: persistence.capabilityDecisions,
               healthCleanup: persistence.healthCleanup,
               chatMessages: persistence.chatMessages,
               chatConversations: persistence.chatConversations,

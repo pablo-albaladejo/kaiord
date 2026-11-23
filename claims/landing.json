@@ -610,7 +610,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -740,7 +740,7 @@
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -1056,21 +1056,45 @@
     },
     {
       "id": "landing.en.connections.h2",
-      "text": "Kaiord picks which platform decides.",
+      "text": "Kaiord picks which platform decides, unless you already chose.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should let the scale decide weight when two Platforms report it and nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who already chose an Authority"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who chose to keep every source"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
         }
       ]
     },
     {
       "id": "landing.en.connections.lead",
-      "text": "Each platform you connect brings its own kinds of data. When two report the same kind, Kaiord picks the one that decides, and the App shows when each one last brought data.",
+      "text": "Each platform you connect brings its own kinds of data. When two report the same kind, Kaiord picks the one that decides, unless you already chose, and the App shows when each one last brought data.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should let the scale decide weight when two Platforms report it and nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who already chose an Authority"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who chose to keep every source"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
         },
         {
           "test": "packages/workout-spa-editor/src/application/data-hub/build-data-hub-matrix.test.ts",
@@ -1281,21 +1305,12 @@
     },
     {
       "id": "landing.en.connections.authority",
-      "text": "One source per kind of data",
-      "proof": [
-        {
-          "test": "packages/workout-spa-editor/src/application/data-source-policy/resolve-effective-source.use-case.test.ts",
-          "title": "should pick the first-ranked source when both sources have a record for the day (tie)"
-        },
-        {
-          "test": "packages/workout-spa-editor/src/application/data-hub/build-data-hub-matrix.test.ts",
-          "title": "should mark an enabled route active and surface its freshness"
-        }
-      ]
+      "text": "Who decides each kind of data",
+      "kind": "label"
     },
     {
       "id": "landing.en.connections.authority-text",
-      "text": "When two platforms report the same day, Kaiord picks one; an advanced setting lets you choose.",
+      "text": "When two platforms report the same day, Kaiord picks one; an advanced setting lets you choose, and a choice you already made keeps applying.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -1304,6 +1319,18 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should let a choice in the matrix override the automatic one"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who already chose an Authority"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who chose to keep every source"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
         }
       ]
     },
@@ -2957,7 +2984,7 @@
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -3271,11 +3298,23 @@
     },
     {
       "id": "landing.es.connections.lead",
-      "text": "Cada plataforma que conectas aporta sus propios tipos de datos. Cuando dos informan del mismo tipo, Kaiord elige la que decide, y la App muestra cuándo aportó datos cada una por última vez.",
+      "text": "Cada plataforma que conectas aporta sus propios tipos de datos. Cuando dos informan del mismo tipo, Kaiord elige la que decide, salvo que ya lo hayas elegido tú, y la App muestra cuándo aportó datos cada una por última vez.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should let the scale decide weight when two Platforms report it and nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who already chose an Authority"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who chose to keep every source"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
         },
         {
           "test": "packages/workout-spa-editor/src/application/data-hub/build-data-hub-matrix.test.ts",
@@ -4099,17 +4138,8 @@
     },
     {
       "id": "landing.es.connections.authority",
-      "text": "Una fuente por tipo de dato",
-      "proof": [
-        {
-          "test": "packages/workout-spa-editor/src/application/data-source-policy/resolve-effective-source.use-case.test.ts",
-          "title": "should pick the first-ranked source when both sources have a record for the day (tie)"
-        },
-        {
-          "test": "packages/workout-spa-editor/src/application/data-hub/build-data-hub-matrix.test.ts",
-          "title": "should mark an enabled route active and surface its freshness"
-        }
-      ]
+      "text": "Quién decide cada tipo de dato",
+      "kind": "label"
     },
     {
       "id": "landing.es.oss.eyebrow",
@@ -4538,7 +4568,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -4671,7 +4701,7 @@
     },
     {
       "id": "landing.es.connections.authority-text",
-      "text": "Cuando dos plataformas informan del mismo día, Kaiord elige una; un ajuste avanzado te deja elegir.",
+      "text": "Cuando dos plataformas informan del mismo día, Kaiord elige una; un ajuste avanzado te deja elegir, y una elección que ya hiciste se sigue aplicando.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
@@ -4680,6 +4710,18 @@
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should let a choice in the matrix override the automatic one"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who already chose an Authority"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who chose to keep every source"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
         }
       ]
     },
@@ -4949,11 +4991,23 @@
     },
     {
       "id": "landing.es.connections.h2",
-      "text": "Kaiord elige qué plataforma decide.",
+      "text": "Kaiord elige qué plataforma decide, salvo que ya lo hayas elegido tú.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
           "title": "should let the scale decide weight when two Platforms report it and nobody chose"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who already chose an Authority"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/contexts/capabilities-context.test.tsx",
+          "title": "should turn the Authority matrix on for an athlete who chose to keep every source"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/data-source-policy/automatic-authority.test.ts",
+          "title": "should keep every source for an athlete who chose that before and never turned the matrix off"
         }
       ]
     },

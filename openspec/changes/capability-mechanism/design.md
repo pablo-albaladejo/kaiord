@@ -19,12 +19,22 @@ A Capability is one entry in `CAPABILITY_CATALOGUE`:
 {
   id: "templates",
   grade?: "advanced" | "experimental",
-  owns: { nav: ["library"], routes: ["/library"], settings: [],
-          commands: [], shortcuts: [], tools: [] },
-  modules: ["components/pages/LibraryPage.tsx", "components/pages/Library/", …],
+  owns: { nav: ["library"], routes: ["/library"], settings: [], tools: [],
+          inScreen: ["workout-save-as-template", "create-from-template", …] },
   adoptsExistingData?: "templates",
 }
 ```
+
+`inScreen` names each part of another screen the Capability owns (a button,
+a tile, a setup step, a link); `<CapabilityGate surface>` and
+`offers("inScreen", id)` take those ids, typed from the catalogue
+(`InScreenSurfaceId`), so a typo fails typecheck and ownership lives here
+only. The modules of a Capability's screens (`MODULES`) live in
+`scripts/capability-surfaces.vocab.mjs`: only the guard reads them, and the
+App's first load does not need them. Editor commands and keyboard shortcuts
+are not a kind: no Capability owns one, and a kind with nothing in it was a
+filter that decided nothing; the first Capability that owns one adds the
+kind (D8).
 
 The registries stay where they are and keep their ids; the catalogue says
 which of their entries a Capability owns. Rejected: a flag per registry row
@@ -37,41 +47,48 @@ the glossary says to avoid "plugin" for a reason.
 ### D2. One read API, asked at each registry's single read point
 
 `useCapabilities()` returns `{ status, on, isOn(id), offers(kind, id), set }`
-from one provider at the App root (one live query for the whole App).
+from one provider at the App root. The provider carries a handle, not data
+(contexts hold no persisted data): one live Dexie read shared by every
+reader, the last answer kept, and writes through the `PersistencePort`
+from `usePersistence()`. Every id is a `CapabilityId`.
 `offers` is false only when an off Capability owns that surface, so a
 surface no Capability owns needs nothing. Each registry is filtered once,
 where it is read: `useOfferedNavDestinations` (header, More, avatar menu,
 bottom bar), `CapabilityRouteGate` around the route switch,
 `SettingsGroupList` and `SettingsSectionRail` (and `useSettingsSection` for
-a deep link), `useEditorCommands` (palette, context menu, coach marks),
-`offeredShortcutHandlers` and the `?` sheet, `buildChatTools` (a required
-`offersTool`, threaded from `useChatTurn`) and `chatCapabilitySections`.
+a deep link), `buildChatTools` (a required `offersTool`, threaded from
+`useChatTurn`) and `chatCapabilitySections`.
 A link from another screen asks with `<CapabilityGate id>` or `isOn(id)` and
 builds its href with `capabilityHome(id)`.
 
-Outside the provider every Capability reads as off, and tests and stories
-turn one on with `CapabilitiesFixture` or `renderWithProviders({ capabilities })`.
+`useCapabilities()` throws outside its provider; tests and stories turn
+one on with `CapabilitiesFixture` or `renderWithProviders({ capabilities })`.
 
-### D3. The decision is the athlete's: per profile, on `userPreferences`
+### D3. The decision is the athlete's: per profile, in a store of its own
 
 Story 22 says "as an athlete, I want to activate a Capability": the athlete,
 not the browser, grows the App, and on a second device they expect the same
-App. So the decision is per profile, stored as `capabilities:
-Record<id, boolean>` on the `userPreferences` row. That row is already
-per profile, already in the Drive snapshot (merged by its `updatedAt`) and
-already `include` in the backup table policy, and it is optional and
-unindexed, so no Dexie version is needed (the precedent of
-`setupChecklistDismissed` and `dismissedCoachMarks`). `setCapability` merges
-one decision into the map so turning one on never forgets another.
+App. So the decision is per profile, one `capabilityDecisions` row per
+(profile, Capability), `[profileId+capabilityId]`, in the Drive snapshot
+(merged per row by its `updatedAt`, so two devices deciding different
+Capabilities keep both), `include` in the backup table policy, cascaded on
+profile delete and re-keyed with the auto profile. Dexie v40 adds the store
+and moves any `capabilities` map off the preferences row.
 
-Rejected: device preferences in localStorage, which neither sync nor travel
-in a backup, so a phone would show a different App from the laptop. Rejected:
-a new `capabilities` Dexie table, which costs a schema version, a policy row
-and a cascade entry for what a field already does.
+Rejected, after shipping it first: a `capabilities` map on the
+`userPreferences` row. Every older build rewrites that row from a fixed
+list of fields (and `setCalendarView` from three), so a later write there
+from an older device won the sync and dropped the map: the decision was
+gone, and with templates stored Templates came back on. A store of its own
+is one older builds never write. The preferences writers now also keep
+every field of the row they do not know, so a newer build's field survives
+this one. Rejected: device preferences in localStorage, which neither sync
+nor travel in a backup, so a phone would show a different App from the
+laptop.
 
-Known limit: the row merges as a whole by `updatedAt`, so two devices editing
-different preferences of the same athlete within one sync window keep the
-later row. That is how every other preference on the row behaves today.
+Known limit: a device on a build older than v40 cannot import a v40
+snapshot (as with every schema version); it carries the store through a
+merge it pushes, and never writes it.
 
 ### D4. Existing athletes keep Templates: data means on until they decide
 
@@ -92,8 +109,11 @@ until they decide. That matches what the Library showed them before.
 
 ### D5. An off route lands on the Day, after the decision is known
 
-`CapabilityRouteGate` redirects (with `replace`) any route an off Capability
-owns to `/daily`. While the athlete's decisions are still loading it renders
+`CapabilityRouteGate` (beside `CapabilityGate` in `components/atoms/`)
+redirects (with `replace`) any route an off Capability owns to the Day
+(`DAILY_PATH`), matching the location as the router does: wouter decodes
+it and matches case-insensitively with an optional trailing slash; the
+query and a stray hash are dropped. While the athlete's decisions are still loading it renders
 the route spinner: redirecting then would bounce a deep link of a Capability
 that is on. A settings section an off Capability owns reads as unknown (the
 index), after the same wait.
@@ -105,10 +125,14 @@ index), after the same wait.
 R-CapabilityModuleThroughReadApi (a file outside a Capability importing one
 of its `modules` imports the read API; the lazy route table is exempt only
 while the route switch sits inside `CapabilityRouteGate`),
-R-CapabilityRouteLiteral (a Capability's route is spelled only in the
-catalogue) and R-CapabilityRegistryGate (a surface registry is named only
-where it is defined, by its gate readers, each importing the read API, and by
-declared lookups with a reason). A declared module, reader or lookup that is
+R-CapabilityRouteLiteral (a Capability's route, or an owned settings path,
+is spelled only in the catalogue), R-CapabilityRegistryGate (a surface
+registry is named only where it is defined, by its gate readers, each
+asking the read API or handed its answer by a declared file that does, and
+by declared lookups with a reason) and R-CapabilityDecisionThroughReadApi
+(a file reading the decisions, `application/` included, resolves them
+through the read API). Only a value import of the read API counts: a
+type-only import asks nothing. A declared module, reader or lookup that is
 missing, or no longer names its registry, fails, as does a catalogue that
 parses to nothing. Known gap: a file that imports the read API for one
 surface and reaches another without asking passes.
@@ -119,6 +143,10 @@ Settings, Capabilities is a section of the one settings place, not a
 navigation destination. A switch is not a Workout state. Turning a
 Capability off deletes nothing, so it asks nothing first: the switch is its
 own undo ("decide and offer undo"). The record needs no change.
+
+ADR 0003's consequence that "a guard enforces" a change to the record for a
+new destination, visible state or confirmation dialog does not hold yet: no
+such guard exists; ticket #1668 adds it.
 
 ### D8. How the next Capabilities are added
 

@@ -3,8 +3,10 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adapter";
 import type { Profile } from "../types/profile";
 import { CapabilitiesProvider, useCapabilities } from "./capabilities-context";
+import { PersistenceProvider } from "./persistence-context";
 
 const PROFILE_ID = "00000000-0000-4000-8000-00000000ca01";
 const OTHER_ID = "00000000-0000-4000-8000-00000000ca02";
@@ -21,6 +23,7 @@ const TABLES = [
   "profiles",
   "meta",
   "userPreferences",
+  "capabilityDecisions",
   "templates",
   "dataTypeSourcePolicy",
 ];
@@ -32,7 +35,9 @@ const seedAthlete = async (id = PROFILE_ID) => {
 };
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <CapabilitiesProvider>{children}</CapabilitiesProvider>
+  <PersistenceProvider persistence={createDexiePersistence(db)}>
+    <CapabilitiesProvider>{children}</CapabilitiesProvider>
+  </PersistenceProvider>
 );
 
 const renderReady = async () => {
@@ -101,15 +106,31 @@ describe("CapabilitiesProvider", () => {
     await waitFor(() => expect(result.current.isOn("templates")).toBe(false));
   });
 
-  it("should offer nothing a Capability owns outside the provider", () => {
+  it("should throw when read outside its provider", () => {
     // Arrange
+    const outside = () => renderHook(() => useCapabilities());
 
     // Act
-    const { result } = renderHook(() => useCapabilities());
+    const read = () => outside();
 
     // Assert
-    expect(result.current.status).toBe("ready");
-    expect(result.current.offers("nav", "library")).toBe(false);
+    expect(read).toThrow(/CapabilitiesProvider/);
+  });
+
+  it("should show a decision to a reader mounted after it was made", async () => {
+    // Arrange
+    await seedAthlete();
+    const { result: first } = await renderReady();
+
+    // Act
+    await act(() => first.current.set("templates", true));
+    const second = renderHook(() => useCapabilities(), { wrapper });
+
+    // Assert
+    await waitFor(() => expect(first.current.isOn("templates")).toBe(true));
+    await waitFor(() =>
+      expect(second.result.current.isOn("templates")).toBe(true)
+    );
   });
 
   it("should keep the Authority matrix off and its Tool unoffered for a new athlete", async () => {
@@ -122,7 +143,8 @@ describe("CapabilitiesProvider", () => {
     // Assert
     expect(result.current.isOn("authority-matrix")).toBe(false);
     expect(result.current.offers("settings", "authority")).toBe(false);
-    expect(result.current.offers("tool", "set_data_route")).toBe(false);
+    expect(result.current.offers("tool", "set_authority")).toBe(false);
+    expect(result.current.offers("tool", "set_data_route")).toBe(true);
   });
 
   it("should turn the Authority matrix on for an athlete who already chose an Authority", async () => {
@@ -140,7 +162,25 @@ describe("CapabilitiesProvider", () => {
 
     // Assert
     expect(result.current.isOn("authority-matrix")).toBe(true);
-    expect(result.current.offers("tool", "set_data_route")).toBe(true);
+    expect(result.current.offers("tool", "set_authority")).toBe(true);
+  });
+
+  it("should turn the Authority matrix on for an athlete who chose to keep every source", async () => {
+    // Arrange
+    await seedAthlete();
+    await db.table("dataTypeSourcePolicy").put({
+      profileId: PROFILE_ID,
+      dataType: "weight",
+      mode: "union",
+      sourceOrder: [],
+    });
+
+    // Act
+    const { result } = await renderReady();
+
+    // Assert
+    expect(result.current.isOn("authority-matrix")).toBe(true);
+    expect(result.current.offers("tool", "set_authority")).toBe(true);
   });
 
   it("should not turn the Authority matrix on from another athlete's choice", async () => {

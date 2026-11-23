@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
 import type { ChatMessageRecord } from "../../../types/chat/chat-message-record";
 import { ChatConversation } from "./ChatConversation";
 
@@ -31,16 +32,18 @@ const message: ChatMessageRecord = {
 
 const renderConversation = (messages: ChatMessageRecord[]) =>
   render(
-    <ChatConversation
-      profileId="p1"
-      conversationId="c1"
-      provider={null}
-      modelId={null}
-      pinModel={false}
-      generationProvider={null}
-      generationModelId={null}
-      messages={messages}
-    />
+    <CapabilitiesFixture on={[]}>
+      <ChatConversation
+        profileId="p1"
+        conversationId="c1"
+        provider={null}
+        modelId={null}
+        pinModel={false}
+        generationProvider={null}
+        generationModelId={null}
+        messages={messages}
+      />
+    </CapabilitiesFixture>
   );
 
 describe("ChatConversation capabilities", () => {

@@ -132,8 +132,15 @@ describe("AuthorityTab", () => {
     expect(state.put).toHaveBeenCalledWith({
       profileId: PROFILE_ID,
       dataType: "weight",
-      mode: "automatic",
-      sourceOrder: [],
+      mode: "priority",
+      sourceOrder: [
+        "manual",
+        "fit-import",
+        "tanita-bridge",
+        "trainingpeaks-bridge",
+        "train2go-bridge",
+      ],
+      automatic: true,
     });
   });
 

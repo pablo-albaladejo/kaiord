@@ -29,7 +29,7 @@ export function useEffectiveHealthRecordLive<T>(
         {
           sourcePolicyRepo: persistence.dataTypeSourcePolicy,
           policyRepo: persistence.integrationPolicy,
-          userPreferences: persistence.userPreferences,
+          capabilityDecisions: persistence.capabilityDecisions,
           getRecordsForDay: (input) =>
             getHealthRecordsForDay<T>(persistence, input),
         },

@@ -5,7 +5,13 @@
  *   (a) toggle-off-link        → manual sync MUST NOT issue `read-details`
  *   (b) toggle-on, empty       → silent fills, nothing offered
  *   (c) toggle-on, manual FTP  → nothing asks: the athlete's FTP stays, and
- *                                one notice offers "Use Train2Go's"
+ *                                one notice naming the thresholds offers
+ *                                "Use Train2Go's"; using it says what changed
+ *   (e) own weigh-in today     → the weight is never offered: Train2Go's is
+ *                                stored as its own weigh-in and the Athlete
+ *                                page still reads the athlete's
+ *   (f) notice gone            → the offer stays on the Athlete page, after a
+ *                                reload, until it is used
  *
  * Closes #478. Bridge stub at `helpers/train2go-bridge-stub.ts` paves over
  * the missing Chrome extension (Playwright Chromium runs unloaded), so the
@@ -38,6 +44,9 @@ const MANUAL_HR_BAND_Z4_MAX_BPM = 180;
 const MANUAL_HR_BAND_ZONE = 4;
 const STABILITY_REREAD_TICK_MS = 50;
 const ORCHESTRATOR_PUT_SETTLE_MS = 150;
+const OWN_WEIGHT_KG = 75;
+const KEPT_THRESHOLDS =
+  "Train2Go has different thresholds from the ones you set. Kaiord kept yours.";
 // Long enough for a manual re-sync to read Train2Go and return its conflicts.
 const RESYNC_SETTLE_MS = 600;
 // The first bridge action (read-week) only fires once bridge discovery has
@@ -403,20 +412,91 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     await expect(offer).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(
-      page.getByText(
-        "Train2Go has different numbers from yours. Kaiord kept yours.",
-        { exact: true }
-      )
+      page.getByText(KEPT_THRESHOLDS, { exact: true })
     ).toBeVisible();
     expect(await readCyclingFtp(page)).toBe(200);
 
     // Act: take Train2Go's numbers from the notice.
     await offer.click();
 
-    // Assert
+    // Assert: the FTP changed, and the App says so.
     await expect
       .poll(() => readCyclingFtp(page), { timeout: 10_000 })
       .toBe(FIXTURE_CYCLING_FTP);
+    await expect(
+      page.getByText("Kaiord now uses Train2Go's thresholds.", { exact: true })
+    ).toBeVisible();
+  });
+
+  test("(e) own weigh-in today — the weight is never offered, Train2Go's is its own weigh-in", async ({
+    page,
+  }) => {
+    // Arrange: the athlete weighed in by hand today; their FTP differs.
+    await seedProfile(page, true, 200);
+    const today = await localToday(page);
+    await seedOwnWeighIn(page, today, OWN_WEIGHT_KG);
+    await navigateToWeek(page);
+    await waitForSyncButton(page);
+
+    // Act: the mount-time sync offers the thresholds; take them.
+    const offer = page.getByTestId("zones-use-theirs");
+    await expect(offer).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByText(KEPT_THRESHOLDS, { exact: true })
+    ).toBeVisible();
+    await offer.click();
+    await expect
+      .poll(() => readCyclingFtp(page), { timeout: 10_000 })
+      .toBe(FIXTURE_CYCLING_FTP);
+
+    // Assert: both weigh-ins are stored, the athlete's untouched, and the
+    // Athlete page reads the athlete's own entry for today.
+    const weighIns = (await readWeighIns(page)).sort((a, b) =>
+      (a.source ?? "").localeCompare(b.source ?? "")
+    );
+    expect(weighIns).toEqual([
+      { date: today, kg: OWN_WEIGHT_KG, source: "manual" },
+      {
+        date: today,
+        kg: FIXTURE_ZONES_PAYLOAD.physiological.weight,
+        source: "train2go-bridge",
+      },
+    ]);
+    await page.goto("/athlete");
+    await expect(page.getByLabel("Current weight (kg)")).toHaveValue(
+      String(OWN_WEIGHT_KG)
+    );
+  });
+
+  test("(f) the notice is gone — the offer stays on the Athlete page until it is used", async ({
+    page,
+  }) => {
+    // Arrange: the notice is shown once and closed.
+    await seedProfile(page, true, 200);
+    await navigateToWeek(page);
+    await waitForSyncButton(page);
+    const notice = page.getByTestId("zones-use-theirs");
+    await expect(notice).toBeVisible({ timeout: 10_000 });
+    await page.getByRole("button", { name: /close/i }).first().click();
+    await expect(notice).toHaveCount(0);
+
+    // Act: come back later, after a reload, to the Athlete page.
+    await page.reload();
+    await page.goto("/athlete");
+    const row = page.getByTestId("athlete-zones-offer");
+    await expect(row).toBeVisible({ timeout: 10_000 });
+    await expect(row.getByText(KEPT_THRESHOLDS, { exact: true })).toBeVisible();
+    expect(await readCyclingFtp(page)).toBe(200);
+    await row.getByRole("button", { name: "Use Train2Go's" }).click();
+
+    // Assert: the FTP changed, the App says so, and the offer is closed.
+    await expect
+      .poll(() => readCyclingFtp(page), { timeout: 10_000 })
+      .toBe(FIXTURE_CYCLING_FTP);
+    await expect(
+      page.getByText("Kaiord now uses Train2Go's thresholds.", { exact: true })
+    ).toBeVisible();
+    await expect(row).toHaveCount(0);
   });
 
   test("(d) FTP scalar + cycling.powerZones bands → taken together in one action", async ({
@@ -1101,6 +1181,36 @@ const readWeighIns = async (
         source: r.sourceBridgeId,
       }));
   }, PROFILE_ID);
+
+// A weigh-in the athlete typed today, measured this morning.
+const seedOwnWeighIn = async (
+  page: Page,
+  date: string,
+  kg: number
+): Promise<void> => {
+  await page.evaluate(
+    async ({ profileId, day, weight }) => {
+      type Db = {
+        table: (n: string) => { put: (r: unknown) => Promise<unknown> };
+      };
+      const db = (window as unknown as Record<string, unknown>)
+        .__KAIORD_DB__ as Db;
+      await db.table("healthWeight").put({
+        id: "zones-sync-own-weigh-in",
+        profileId,
+        date: day,
+        sourceBridgeId: "manual",
+        krd: {
+          kind: "weight",
+          version: "2.0",
+          measuredAt: `${day}T00:00:01.000Z`,
+          weightKilograms: weight,
+        },
+      });
+    },
+    { profileId: PROFILE_ID, day: date, weight: kg }
+  );
+};
 
 // The browser's local calendar day, the day the SPA stamps a weigh-in with.
 const localToday = async (page: Page): Promise<string> =>

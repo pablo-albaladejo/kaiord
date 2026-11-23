@@ -8,11 +8,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
-import type { ConflictDecision, FieldKey } from "../../types/coaching-zones";
+import type { FieldKey } from "../../types/coaching-zones";
 import type { HealthWeightRecord } from "../../types/health/health-records";
 import type { Profile } from "../../types/profile";
 import type { CoachingTransport } from "./coaching-transport-port";
-import { commitConflictResolution } from "./commit-conflict-resolution";
 import { syncZones } from "./sync-zones";
 import { SYNC_ZONES_IDS as IDS } from "./sync-zones.test-fixtures";
 
@@ -23,10 +22,6 @@ const WEIGHT_FIELD = "bodyWeight" as FieldKey;
 const TRAIN2GO_BRIDGE = "train2go-bridge";
 const SYNC_AT = "2026-10-14T09:00:00.000Z";
 const PAYLOAD = { physiological: { weight: T2G_KG } };
-const ACCEPT = { [WEIGHT_FIELD]: "accept" } as Record<
-  FieldKey,
-  ConflictDecision
->;
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] });
@@ -117,7 +112,7 @@ describe("syncZones — the Train2Go weight route", () => {
 
   it("should neither apply nor ask about the weight when the route is off", async () => {
     // Arrange
-    // The profile weight differs: with the route on this is a conflict.
+    // The profile weight differs: with the route on it would be recorded.
     const persistence = await seed("off", PROFILE_KG);
 
     // Act
@@ -129,7 +124,7 @@ describe("syncZones — the Train2Go weight route", () => {
     expect(result.conflicts).toEqual([]);
   });
 
-  it("should still raise the weight conflict when the route is on", async () => {
+  it("should record, not offer, a different weight when the route is on", async () => {
     // Arrange
     const persistence = await seed("on", PROFILE_KG);
 
@@ -138,30 +133,7 @@ describe("syncZones — the Train2Go weight route", () => {
 
     // Assert
     if (!result.ok) throw new Error("expected ok");
-    expect(result.conflicts).toEqual([
-      { field: WEIGHT_FIELD, current: PROFILE_KG, incoming: T2G_KG },
-    ]);
+    expect(result.conflicts).toEqual([]);
+    expect(result.applied).toEqual([{ field: WEIGHT_FIELD, value: T2G_KG }]);
   });
-});
-
-describe("commitConflictResolution — the Train2Go weight route", () => {
-  it.each<{ route: Route; recorded: number[] }>([
-    { route: "on", recorded: [T2G_KG] },
-    { route: "absent", recorded: [T2G_KG] },
-    { route: "off", recorded: [] },
-  ])(
-    "should record $recorded for an accepted weight when the route is $route",
-    async ({ route, recorded }) => {
-      // Arrange
-      // The route may be switched off between the dialog and the commit.
-      const persistence = await seed(route, PROFILE_KG);
-
-      // Act
-      await commitConflictResolution(PROFILE_ID, ACCEPT, persistence, PAYLOAD);
-
-      // Assert
-      const weighIns = await train2goWeighIns(persistence);
-      expect(weighIns.map((r) => r.krd.weightKilograms)).toEqual(recorded);
-    }
-  );
 });

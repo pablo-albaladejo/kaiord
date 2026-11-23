@@ -11,17 +11,12 @@ const ON = "border-transparent bg-accent/15 text-accent";
 const OFF = "border-edge bg-surface text-ink-body";
 
 /**
- * The one pressed-state button both routing controls use. `aria-pressed` rather
- * than a checkbox: each button's own label names what it does, and the two
- * controls read as one family so a row cannot look like it has two unrelated
- * kinds of switch.
+ * The one pressed-state button the Connections switches and the Authority
+ * matrix use. `aria-pressed` rather than a checkbox: each button's own label
+ * names what it does, and the controls read as one family so a row cannot
+ * look like it has two unrelated kinds of switch.
  */
-export const RoutingChoiceButton = ({
-  testId,
-  selected,
-  label,
-  onClick,
-}: Props) => (
+export const ChoiceButton = ({ testId, selected, label, onClick }: Props) => (
   <button
     type="button"
     aria-pressed={selected}

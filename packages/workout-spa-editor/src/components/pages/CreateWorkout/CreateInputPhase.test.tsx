@@ -7,6 +7,7 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
 import { profileWith } from "../../../lib/athlete/test-profile";
+import type { CapabilityId } from "../../../lib/capabilities/capability-catalogue";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { KRD } from "../../../types/krd";
@@ -24,13 +25,17 @@ const PROVIDER: LlmProviderConfig = {
 
 const withRouter = (ui: ReactNode) => {
   const loc = memoryLocation({ path: "/workout/new", record: true });
-  return <Router hook={loc.hook}>{ui}</Router>;
+  return (
+    <CapabilitiesFixture on={[]}>
+      <Router hook={loc.hook}>{ui}</Router>
+    </CapabilitiesFixture>
+  );
 };
 
 const renderAt = (
   path: string,
   ui: ReactNode,
-  on: readonly string[] = ["templates"]
+  on: readonly CapabilityId[] = ["templates"]
 ) => {
   const loc = memoryLocation({ path, record: true });
   render(

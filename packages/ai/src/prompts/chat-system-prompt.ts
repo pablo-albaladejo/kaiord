@@ -9,7 +9,7 @@
  */
 import { UNTRUSTED_CLOSE, UNTRUSTED_OPEN } from "./fence";
 
-export const CHAT_PROMPT_VERSION = "1.1.0";
+export const CHAT_PROMPT_VERSION = "1.2.0";
 
 /**
  * Every confirmation-gated chat tool, by name. The prompt's action list is
@@ -24,6 +24,7 @@ export const CHAT_ACTION_TOOL_NAMES = [
   "log_intake",
   "push_to_garmin",
   "set_data_route",
+  "set_authority",
 ] as const;
 
 const actionList = CHAT_ACTION_TOOL_NAMES.join(", ");

@@ -4,8 +4,8 @@ import type { DataTypeRouteToggle } from "../../../application/connections/data-
 import { usePolicyToggle } from "../../../hooks/connections/use-policy-toggle";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Pill } from "../../atoms/Pill";
+import { ChoiceButton } from "./ChoiceButton";
 import { sourceName } from "./routing-copy";
-import { RoutingChoiceButton } from "./RoutingChoiceButton";
 
 type Props = {
   dataType: ManagedDataType;
@@ -59,7 +59,7 @@ export function RoutingExportTargets({
       {toggles.length > 0 ? (
         <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
           {toggles.map((toggle) => (
-            <RoutingChoiceButton
+            <ChoiceButton
               key={toggle.bridgeId}
               testId={`routing-export-${dataType}-${toggle.integrationId}`}
               selected={toggle.enabled}

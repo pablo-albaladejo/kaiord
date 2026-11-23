@@ -8,6 +8,7 @@ import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { SyncProvider } from "./contexts/sync-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
+import type { CapabilityId } from "./lib/capabilities/capability-catalogue";
 import type { CloudSyncPort } from "./ports/cloud-sync-port";
 import type { PersistencePort } from "./ports/persistence-port";
 import type { SnapshotPort } from "./ports/snapshot-port";
@@ -38,7 +39,7 @@ export type RenderWithProvidersOptions = Omit<RenderOptions, "wrapper"> & {
   snapshotPort?: SnapshotPort;
   afterImport?: () => Promise<void>;
   /** Capabilities on for this render; every other one is off. */
-  capabilities?: readonly string[];
+  capabilities?: readonly CapabilityId[];
 };
 
 /**

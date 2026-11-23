@@ -39,11 +39,7 @@ import {
 } from "../../test-utils/application-fixtures";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { LinkedCoachingAccount } from "../../types/coaching-account";
-import type {
-  ConflictDecision,
-  FieldKey,
-  ZonesPayload,
-} from "../../types/coaching-zones";
+import type { FieldKey, ZonesPayload } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { commitConflictResolution } from "./commit-conflict-resolution";
@@ -323,7 +319,7 @@ describe("syncZones full-bands — power-zone count mismatch", () => {
 });
 
 describe("commitConflictResolution full-bands — band-level merge", () => {
-  it("should accept Z4 maxBpm and reject Z2 maxBpm — merged array reflects both decisions (4.7l)", async () => {
+  it("should write the band it is given and keep a band it is not given (4.7l)", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     const repo = persistence.profiles;
@@ -343,23 +339,24 @@ describe("commitConflictResolution full-bands — band-level merge", () => {
     );
 
     // Act
-    // Accept Z4 maxBpm (170 → 174), reject Z2 maxBpm (145 → 147).
-    const decisions = {
-      "cycling.heartRateZones.z4.maxBpm": "accept",
-      "cycling.heartRateZones.z2.maxBpm": "reject",
-    } as Record<FieldKey, ConflictDecision>;
+    // Given Z4 maxBpm (170 → 174) only; Z2 maxBpm (145) is not given.
     await commitConflictResolution(
       PROFILE_ID,
-      decisions,
-      persistence,
-      PAYLOAD_TRIATHLETE
+      [
+        {
+          field: "cycling.heartRateZones.z4.maxBpm" as FieldKey,
+          current: 170,
+          incoming: Z4_MAXBPM_ACCEPTED_174,
+        },
+      ],
+      persistence
     );
 
     // Assert
     const persisted = await repo.getById(PROFILE_ID);
     const zones = persisted?.sportZones.cycling?.heartRateZones.zones;
-    expect(zones?.[3].maxBpm).toBe(Z4_MAXBPM_ACCEPTED_174); // accepted
-    expect(zones?.[1].maxBpm).toBe(Z2_MAXBPM_REJECTED_145); // rejected — pre-sync value
+    expect(zones?.[3].maxBpm).toBe(Z4_MAXBPM_ACCEPTED_174); // given
+    expect(zones?.[1].maxBpm).toBe(Z2_MAXBPM_REJECTED_145); // not given — pre-sync value
   });
 });
 

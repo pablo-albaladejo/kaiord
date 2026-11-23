@@ -15,6 +15,7 @@ import { ThresholdAutoRow } from "./ThresholdAutoRow";
 import { ThresholdFields } from "./ThresholdFields";
 import { ThresholdReconcileRow } from "./ThresholdReconcileRow";
 import { useThresholdWrites } from "./use-threshold-writes";
+import { ZonesOfferRow } from "./ZonesOfferRow";
 
 type ThresholdCardProps = {
   profile: Profile;
@@ -80,6 +81,7 @@ export function ThresholdCard({
             onKeep={() => setDismissed(key)}
           />
         )}
+        <ZonesOfferRow profile={profile} />
         <ThresholdAutoRow profileId={profileId} />
       </Card>
     </div>

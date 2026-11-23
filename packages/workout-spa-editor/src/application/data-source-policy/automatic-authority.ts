@@ -14,11 +14,12 @@
  */
 import type { ManagedDataType } from "@kaiord/core";
 
+import type { CapabilityId } from "../../lib/capabilities/capability-catalogue";
 import type { IntegrationPolicy } from "../../types/integration-policy";
 import { MANUAL_SOURCE_BRIDGE_ID } from "../import/stamp-provenance";
 
 /** The Capability whose choices, while it is on, override this rule. */
-export const AUTHORITY_MATRIX_ID = "authority-matrix";
+export const AUTHORITY_MATRIX_ID: CapabilityId = "authority-matrix";
 
 const FIT_IMPORT = "fit-import";
 
@@ -56,14 +57,18 @@ export const AUTOMATIC_AUTHORITY: Partial<
 export const hasAutomaticAuthority = (dataType: ManagedDataType): boolean =>
   AUTOMATIC_AUTHORITY[dataType] !== undefined;
 
+/** The bridges whose import route is switched off. */
+export const disabledImports = (
+  importPolicies: readonly IntegrationPolicy[]
+): ReadonlySet<string> =>
+  new Set(importPolicies.filter((p) => !p.enabled).map((p) => p.bridgeId));
+
 /** The order the rule reads a kind in, given its import routes. */
 export const automaticOrder = (
   dataType: ManagedDataType,
   importPolicies: readonly IntegrationPolicy[]
 ): string[] => {
-  const off = new Set(
-    importPolicies.filter((p) => !p.enabled).map((p) => p.bridgeId)
-  );
+  const off = disabledImports(importPolicies);
   const platforms = AUTOMATIC_AUTHORITY[dataType] ?? [];
   return [
     ...OWN_ENTRY_SOURCES,

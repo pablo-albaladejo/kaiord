@@ -2,8 +2,8 @@ import type { ManagedDataType } from "@kaiord/core";
 
 import type { DataTypeRouteToggle } from "../../../application/connections/data-type-route-toggles";
 import { useTranslate } from "../../../i18n/use-translate";
+import { ChoiceButton } from "./ChoiceButton";
 import { sourceName } from "./routing-copy";
-import { RoutingChoiceButton } from "./RoutingChoiceButton";
 
 type Props = {
   dataType: ManagedDataType;
@@ -33,7 +33,7 @@ export function RoutingSourceSwitches({ dataType, toggles, onToggle }: Props) {
       </p>
       <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
         {toggles.map((toggle) => (
-          <RoutingChoiceButton
+          <ChoiceButton
             key={toggle.bridgeId}
             testId={`routing-route-${dataType}-${toggle.integrationId}`}
             selected={toggle.enabled}

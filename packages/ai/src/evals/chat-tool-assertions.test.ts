@@ -21,9 +21,8 @@ const actionBenchmark: ChatToolBenchmark = {
   id: "action-1",
   userText: "read sleep only from whoop",
   category: "action",
-  expectedTool: "set_data_route",
+  expectedTool: "set_authority",
   expectedActionInput: {
-    action: "set_source_policy",
     dataType: "sleep",
     mode: "priority",
   },
@@ -135,10 +134,9 @@ describe("evaluateChatToolBenchmark — action scenario", () => {
     const result: ChatTurnResult = {
       status: "pending_action",
       pendingAction: {
-        toolName: "set_data_route",
+        toolName: "set_authority",
         toolCallId: "c1",
         input: {
-          action: "set_source_policy",
           dataType: "sleep",
           mode: "priority",
           sourceOrder: ["whoop"],
@@ -156,7 +154,7 @@ describe("evaluateChatToolBenchmark — action scenario", () => {
 
     // Assert
     expect(evalResult.pass).toBe(true);
-    expect(evalResult.toolCalled).toBe("set_data_route");
+    expect(evalResult.toolCalled).toBe("set_authority");
   });
 
   it("should fail when a different tool is proposed", () => {
@@ -190,10 +188,9 @@ describe("evaluateChatToolBenchmark — action scenario", () => {
     const result: ChatTurnResult = {
       status: "pending_action",
       pendingAction: {
-        toolName: "set_data_route",
+        toolName: "set_authority",
         toolCallId: "c1",
         input: {
-          action: "set_source_policy",
           dataType: "sleep",
           mode: "union",
         },

@@ -17,7 +17,7 @@ import { V37_STORES } from "./dexie-v37-migration";
 import { V38_STORES } from "./register-kaiord-v38";
 
 const SEED_VERSION = 38;
-const SCHEMA_HEAD = 39;
+const SCHEMA_HEAD = 40;
 
 const ROW = {
   id: "u-1",

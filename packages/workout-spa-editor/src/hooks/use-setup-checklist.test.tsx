@@ -38,6 +38,9 @@ const PROFILE_ID = "33333333-3333-3333-3333-333333333333";
 const TemplatesOn = ({ children }: { children: ReactNode }) => (
   <CapabilitiesFixture on={["templates"]}>{children}</CapabilitiesFixture>
 );
+const TemplatesOff = ({ children }: { children: ReactNode }) => (
+  <CapabilitiesFixture on={[]}>{children}</CapabilitiesFixture>
+);
 const TOTAL_ITEMS = 4;
 
 const DEFAULT_CYCLING_ZONES = {
@@ -102,7 +105,9 @@ describe("useSetupChecklist", () => {
     await seedProfile();
 
     // Act
-    const { result } = renderHook(() => useSetupChecklist());
+    const { result } = renderHook(() => useSetupChecklist(), {
+      wrapper: TemplatesOff,
+    });
 
     // Assert
     await waitFor(() => {

@@ -2,12 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
+import type { CapabilityId } from "../../../lib/capabilities/capability-catalogue";
 import { CapabilityGate } from "./CapabilityGate";
 
-const renderWith = (on: readonly string[]) =>
+const renderWith = (on: readonly CapabilityId[]) =>
   render(
     <CapabilitiesFixture on={on}>
-      <CapabilityGate id="templates">
+      <CapabilityGate surface="workout-save-as-template">
         <button type="button">Keep</button>
       </CapabilityGate>
     </CapabilitiesFixture>

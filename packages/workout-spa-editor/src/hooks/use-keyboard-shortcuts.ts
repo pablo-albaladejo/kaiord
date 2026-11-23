@@ -1,12 +1,10 @@
 import { useEffect, useRef } from "react";
 
-import { useCapabilities } from "../contexts/capabilities-context";
 import type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
 import {
   createEscapeHandler,
   createKeyDownHandler,
 } from "./keyboard-shortcut-handlers";
-import { offeredShortcutHandlers } from "./offered-shortcut-handlers";
 
 export type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
 
@@ -16,10 +14,8 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
   // re-binding on every parent render (which the previous explicit-deps
   // form was trying to manage manually) and satisfies exhaustive-deps
   // cleanly because the effect references only the ref (stable).
-  const capabilities = useCapabilities();
-  const offered = offeredShortcutHandlers(handlers, capabilities.offers);
-  const handlersRef = useRef(offered);
-  handlersRef.current = offered;
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
 
   useEffect(() => {
     // Listeners read handlersRef.current at FIRE-TIME (not at mount-time)

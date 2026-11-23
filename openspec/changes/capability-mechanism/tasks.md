@@ -21,3 +21,12 @@
 - [x] 3.1 `check-capability-surfaces.mjs` in `pnpm lint`, listed in CLAUDE.md, AGENTS.md and `scripts/README.md`
 - [x] 3.2 Existing Library e2e specs turn Templates on first
 - [x] 3.3 GLOSSARY.md names the Capability in both languages
+
+## 4. Review fixes
+
+- [x] 4.1 Decisions in their own `capabilityDecisions` store (Dexie v40 moves the old map), synced, backed up, cascaded and re-keyed; preferences writes keep unknown fields; the older-writer sequence tested for Templates and the matrix
+- [x] 4.2 The route gate matches as the router does (case, trailing slash, encoding, query, hash), back and forward included
+- [x] 4.3 The provider writes through `usePersistence()`, carries no data, and `useCapabilities()` throws outside it
+- [x] 4.4 `CapabilityRouteGate` lives in `components/atoms/CapabilityGate/`
+- [x] 4.5 Every id typed (`CapabilityId`, `InScreenSurfaceId`); in-screen ownership in the catalogue's `owns.inScreen`; empty `commands`/`shortcuts` kinds removed
+- [x] 4.6 Guard: value imports only, owned settings paths, decision reads, `MODULES` beside the guard, rules split under 100 lines, `guard-failure.mjs` output

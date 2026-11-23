@@ -118,9 +118,9 @@
       "training": "Training",
       "recovery": "Recovery",
       "body": "Body"
-    },
-    "chooseAuthority": "Choose which Platform decides each kind of data"
+    }
   },
+  "authorityMatrixLink": "Choose which Platform decides each kind of data",
   "dataTypeHints": {
     "workout": "Completed structured sessions",
     "planned-session": "What you or your coach scheduled",

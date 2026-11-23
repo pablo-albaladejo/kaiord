@@ -1,40 +1,30 @@
 /**
- * setCalendarView — upserts the per-profile UserPreferences row.
- *
- * The profile-existence read is sequenced before the write so a
- * concurrent profile delete surfaces as `ProfileNotFoundError` rather
- * than silently leaving an orphan row. The Dexie adapter wraps both
- * operations in a single `rw` transaction; the in-memory test double
- * inherits the same sequencing.
+ * setCalendarView — sets the calendar view on the per-profile
+ * UserPreferences row, keeping every other field of the row (including
+ * those this build does not know) through `setUserPreferenceFields`, which
+ * also sequences the profile-existence read before the write so a
+ * concurrent profile delete surfaces as `ProfileNotFoundError`.
  */
 
-import type { ProfileRepository } from "../ports/persistence-port";
-import type { UserPreferencesRepository } from "../ports/user-preferences-repository";
-import { ProfileNotFoundError } from "../types/session-match-errors";
 import type { CalendarView } from "../types/user-preferences";
+import {
+  setUserPreferenceFields,
+  type SetUserPreferenceFieldsDeps,
+} from "./set-user-preference-fields";
 
 export type SetCalendarViewInput = {
   profileId: string;
   view: CalendarView;
 };
 
-export type SetCalendarViewDeps = {
-  clock: () => string;
-  repository: UserPreferencesRepository;
-  profileRepository: ProfileRepository;
-};
+export type SetCalendarViewDeps = SetUserPreferenceFieldsDeps;
 
 export async function setCalendarView(
   input: SetCalendarViewInput,
   deps: SetCalendarViewDeps
 ): Promise<void> {
-  const profile = await deps.profileRepository.getById(input.profileId);
-  if (!profile) {
-    throw new ProfileNotFoundError(input.profileId);
-  }
-  await deps.repository.put({
-    profileId: input.profileId,
-    calendarView: input.view,
-    updatedAt: deps.clock(),
-  });
+  await setUserPreferenceFields(
+    { profileId: input.profileId, patch: { calendarView: input.view } },
+    deps
+  );
 }

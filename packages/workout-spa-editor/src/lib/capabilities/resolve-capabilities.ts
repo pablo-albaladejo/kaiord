@@ -1,8 +1,11 @@
 import type {
   CapabilityDeclaration,
+  CapabilityId,
   CapabilitySurfaceKind,
+  InScreenSurfaceId,
 } from "./capability-catalogue";
 import { CAPABILITY_CATALOGUE } from "./capability-catalogue";
+import { isUnderRoute } from "./capability-route-path";
 
 /** What the athlete chose, per Capability id; absent means never decided. */
 export type CapabilityDecisions = Readonly<Record<string, boolean>>;
@@ -13,28 +16,35 @@ export type CapabilityInputs = {
   withData: ReadonlySet<string>;
 };
 
+type SurfaceIdOf<K extends CapabilitySurfaceKind> = K extends "inScreen"
+  ? InScreenSurfaceId
+  : string;
+
 /** The one read the App makes before showing any Capability's surface. */
 export type ActiveCapabilities = {
   /** The ids that are on, in catalogue order. */
-  on: readonly string[];
-  isOn: (id: string) => boolean;
+  on: readonly CapabilityId[];
+  isOn: (id: CapabilityId) => boolean;
   /** False only when an off Capability owns this surface. */
-  offers: (kind: CapabilitySurfaceKind, id: string) => boolean;
+  offers: <K extends CapabilitySurfaceKind>(
+    kind: K,
+    id: SurfaceIdOf<K>
+  ) => boolean;
 };
 
-const KIND_KEY = {
+const OWNS_FIELD_OF_KIND = {
   nav: "nav",
   route: "routes",
   settings: "settings",
-  command: "commands",
-  shortcut: "shortcuts",
   tool: "tools",
+  inScreen: "inScreen",
 } as const satisfies Record<
   CapabilitySurfaceKind,
   keyof CapabilityDeclaration["owns"]
 >;
 
-const isActive = (
+/** The one rule: a recorded decision wins; else its adopted data turns it on. */
+export const isCapabilityOn = (
   capability: CapabilityDeclaration,
   { decisions, withData }: CapabilityInputs
 ): boolean => {
@@ -45,17 +55,14 @@ const isActive = (
   );
 };
 
-const ownsRoute = (prefix: string, path: string): boolean =>
-  path === prefix || path.startsWith(`${prefix}/`);
-
 const owns = (
   capability: CapabilityDeclaration,
   kind: CapabilitySurfaceKind,
   id: string
 ): boolean => {
-  const surfaces = capability.owns[KIND_KEY[kind]];
+  const surfaces: readonly string[] = capability.owns[OWNS_FIELD_OF_KIND[kind]];
   return kind === "route"
-    ? surfaces.some((prefix) => ownsRoute(prefix, id))
+    ? surfaces.some((prefix) => isUnderRoute(prefix, id))
     : surfaces.includes(id);
 };
 
@@ -63,8 +70,10 @@ export const resolveCapabilities = (
   inputs: CapabilityInputs,
   catalogue: readonly CapabilityDeclaration[] = CAPABILITY_CATALOGUE
 ): ActiveCapabilities => {
-  const off = catalogue.filter((c) => !isActive(c, inputs));
-  const on = catalogue.filter((c) => isActive(c, inputs)).map((c) => c.id);
+  const off = catalogue.filter((c) => !isCapabilityOn(c, inputs));
+  const on = catalogue
+    .filter((c) => isCapabilityOn(c, inputs))
+    .map((c) => c.id as CapabilityId);
   return {
     on,
     isOn: (id) => on.includes(id),
@@ -77,3 +86,9 @@ export const NO_CAPABILITIES: ActiveCapabilities = resolveCapabilities({
   decisions: {},
   withData: new Set(),
 });
+
+/** The decisions recorded for one athlete, by Capability id. */
+export const decisionsFrom = (
+  rows: readonly { capabilityId: string; on: boolean }[]
+): CapabilityDecisions =>
+  Object.fromEntries(rows.map((row) => [row.capabilityId, row.on]));

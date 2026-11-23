@@ -10,9 +10,9 @@
  */
 import type { BridgeConnectionState } from "../../adapters/bridge/bridge-connection-types";
 import { bridgeDiscovery } from "../../adapters/bridge/bridge-discovery";
+import type { SourceCapabilitySignals } from "../../application/connections/authority-options";
 import { isBridgeConnected } from "../../application/connections/connected-source";
 import type { RouteToggleSignals } from "../../application/connections/data-type-route-toggles";
-import type { SourceCapabilitySignals } from "../../application/connections/source-of-truth-options";
 import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
 import { integrationIdForBridge } from "../../integrations/integration-registry";
 import type { ConnectionRecord } from "../../types/connection";

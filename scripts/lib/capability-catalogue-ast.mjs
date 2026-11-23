@@ -33,13 +33,14 @@ const toCapability = (element) => {
   if (!ts.isObjectLiteralExpression(object)) return null;
   const id = property(object, "id");
   const owns = property(object, "owns");
+  const owned = (name) =>
+    owns && ts.isObjectLiteralExpression(owns)
+      ? strings(property(owns, name))
+      : [];
   return {
     id: id && ts.isStringLiteralLike(id) ? id.text : "",
-    routes:
-      owns && ts.isObjectLiteralExpression(owns)
-        ? strings(property(owns, "routes"))
-        : [],
-    modules: strings(property(object, "modules")),
+    routes: owned("routes"),
+    settings: owned("settings"),
   };
 };
 
@@ -59,7 +60,7 @@ const findCatalogue = (source) => {
   return found && ts.isArrayLiteralExpression(found) ? found : undefined;
 };
 
-/** `[{ id, routes, modules }]`, or `[]` when the catalogue cannot be read. */
+/** `[{ id, routes, settings }]`, or `[]` when the catalogue cannot be read. */
 export function readCatalogue(srcRoot, catalogueFile) {
   let text;
   try {

@@ -10,6 +10,7 @@
 import type { ManagedDataType } from "@kaiord/core";
 import { useMemo } from "react";
 
+import type { AuthorityOptions } from "../../application/connections/authority-options";
 import type { DataTypeRouteToggle } from "../../application/connections/data-type-route-toggles";
 import {
   buildDataTypeRoutingRows,
@@ -19,8 +20,8 @@ import {
   optionsByType,
   togglesByType,
 } from "../../application/connections/routing-by-type";
-import type { SourceOfTruthOptions } from "../../application/connections/source-of-truth-options";
 import { AUTHORITY_MATRIX_ID } from "../../application/data-source-policy/automatic-authority";
+import { choiceInForce } from "../../application/data-source-policy/read-authority-choice";
 import { useCapabilities } from "../../contexts/capabilities-context";
 import { usePersistence } from "../../contexts/persistence-context";
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
@@ -36,7 +37,7 @@ export type DataTypeRouting = {
   readonly rows: readonly DataTypeRoutingRow[];
   /** Integration id → when that SOURCE last sent anything (not this type). */
   readonly lastSyncedAt: ReadonlyMap<string, string | undefined>;
-  readonly options: ReadonlyMap<ManagedDataType, SourceOfTruthOptions>;
+  readonly options: ReadonlyMap<ManagedDataType, AuthorityOptions>;
   /** Which sources MAY send each type, and whether each is switched on. */
   readonly toggles: ReadonlyMap<
     ManagedDataType,
@@ -49,7 +50,11 @@ export type DataTypeRouting = {
   >;
 };
 
-const NO_CHOICES: readonly DataTypeSourcePolicy[] = [];
+const inForce = (
+  stored: readonly DataTypeSourcePolicy[],
+  matrixOn: boolean
+): readonly DataTypeSourcePolicy[] =>
+  stored.flatMap((row) => choiceInForce(row, matrixOn) ?? []);
 
 export const useDataTypeRouting = (
   profileId: string | null,
@@ -58,9 +63,9 @@ export const useDataTypeRouting = (
   const persistence = usePersistence();
   const lastSyncedAt = useBridgeSyncStates(persistence, profileId);
   const stored = useDataTypeSourcePolicies(profileId);
-  // A choice applies only while the matrix is on (`readAuthorityChoice`).
+  // Rows read only the choices in force, as every reader does.
   const matrixOn = useCapabilities().isOn(AUTHORITY_MATRIX_ID);
-  const policies = matrixOn ? stored : NO_CHOICES;
+  const policies = useMemo(() => inForce(stored, matrixOn), [stored, matrixOn]);
   const connections = useBridgeConnections(profileId);
   const records = useConnectionStatus(profileId);
 

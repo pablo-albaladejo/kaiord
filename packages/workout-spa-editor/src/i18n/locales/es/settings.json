@@ -299,8 +299,7 @@
   "capabilities": {
     "intro": "Activa las partes de Kaiord que uses más allá de tus días y tu calendario. Si vuelves a desactivar una, se oculta y sus datos se conservan.",
     "grade": {
-      "advanced": "Avanzada",
-      "experimental": "Experimental"
+      "advanced": "Avanzada"
     },
     "items": {
       "templates": {

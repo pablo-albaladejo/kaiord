@@ -1,11 +1,15 @@
 import { useCapabilities } from "../../../contexts/capabilities-context";
 import { useTranslate } from "../../../i18n/use-translate";
-import type { CapabilityDeclaration } from "../../../lib/capabilities/capability-catalogue";
-import { CAPABILITY_CATALOGUE } from "../../../lib/capabilities/capability-catalogue";
+import {
+  CAPABILITY_CATALOGUE,
+  type CapabilityDeclaration,
+  type CapabilityId,
+} from "../../../lib/capabilities/capability-catalogue";
 import { logger } from "../../../utils/logger";
 import { Toggle } from "../../atoms/Toggle";
 
-const CATALOGUE: readonly CapabilityDeclaration[] = CAPABILITY_CATALOGUE;
+const CATALOGUE: readonly (CapabilityDeclaration & { id: CapabilityId })[] =
+  CAPABILITY_CATALOGUE;
 
 /**
  * The one place a Capability is turned on or off. A switch is its own undo:
@@ -17,7 +21,7 @@ export const CapabilitiesTab = () => {
   const capabilities = useCapabilities();
   const ready = capabilities.status === "ready";
 
-  const change = (id: string, on: boolean) => {
+  const change = (id: CapabilityId, on: boolean) => {
     void capabilities.set(id, on).catch((error: unknown) => {
       logger.warn("Failed to record a Capability decision", { error });
     });

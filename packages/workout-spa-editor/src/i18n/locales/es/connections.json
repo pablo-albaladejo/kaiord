@@ -118,9 +118,9 @@
       "training": "Entrenamiento",
       "recovery": "Recuperación",
       "body": "Cuerpo"
-    },
-    "chooseAuthority": "Elige qué Plataforma decide cada tipo de dato"
+    }
   },
+  "authorityMatrixLink": "Elige qué Plataforma decide cada tipo de dato",
   "dataTypeHints": {
     "workout": "Sesiones estructuradas completadas",
     "planned-session": "Lo que has programado tú o tu entrenador",

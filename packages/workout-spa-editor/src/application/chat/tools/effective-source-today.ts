@@ -46,7 +46,7 @@ export const getEffectiveSourceToday = async (
     {
       sourcePolicyRepo: persistence.dataTypeSourcePolicy,
       policyRepo: persistence.integrationPolicy,
-      userPreferences: persistence.userPreferences,
+      capabilityDecisions: persistence.capabilityDecisions,
       getRecordsForDay: (i) => getHealthRecordsForDay(persistence, i),
     },
     { profileId, dataType, day }

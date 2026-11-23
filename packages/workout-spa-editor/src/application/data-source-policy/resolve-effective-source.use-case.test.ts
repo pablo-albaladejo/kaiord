@@ -49,7 +49,7 @@ const makeDeps = (
   } as unknown as {
     findByProfileDirection: (input: unknown) => Promise<IntegrationPolicy[]>;
   },
-  userPreferences: { get: vi.fn(async () => undefined) },
+  capabilityDecisions: { listByProfile: vi.fn(async () => []) },
   getRecordsForDay: vi.fn(async () => records),
 });
 
