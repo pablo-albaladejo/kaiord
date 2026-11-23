@@ -11,7 +11,9 @@
  * - `store/**` returns diagnostic results that a hook words before showing;
  * - `types/**` holds schema refinements read by developers, not athletes;
  * - `adapters/dexie/**` holds frozen migrations, whose seeded rows are data;
- * - `i18n/**` is the mechanism itself.
+ * - `i18n/**` is the mechanism itself;
+ * - a chat tool's error result is read by the model, which words it for
+ *   the athlete in their language; it is the tool's contract, not copy.
  */
 
 const SPA = "packages/workout-spa-editor/src";
@@ -38,8 +40,11 @@ const NEVER_COPY = [
 
 export const JSX_LITERAL_IGNORES = NEVER_COPY.map((glob) => `${SPA}/${glob}`);
 
+const MODEL_FACING = ["hooks/chat/garmin-library-error.ts"];
+
 export const LITERAL_COPY_IGNORES = [
   ...JSX_LITERAL_IGNORES,
+  ...MODEL_FACING.map((file) => `${SPA}/${file}`),
   ...["application", "store", "types", "adapters/dexie", "i18n"].map(
     (dir) => `${SPA}/${dir}/**`
   ),
@@ -47,10 +52,10 @@ export const LITERAL_COPY_IGNORES = [
 
 /**
  * Copy that is the same in every language: the product and Platform names,
- * the Provider names, the file types, an API-key shape, units, the zone
- * prefix ("Z3"), the remove glyph, a time format, the keyboard keys and
- * operating systems of the shortcut sheet, and the threshold acronyms
- * ("LTHR", "FTP", "HRV") that coaches use untranslated.
+ * the Provider names, the shared file types, an API-key shape, units, the
+ * zone prefix ("Z3"), the remove glyph, a time format, the operating
+ * systems of the shortcut sheet, and the threshold acronyms ("LTHR", "FTP",
+ * "HRV") that coaches use untranslated.
  */
 export const JSX_LITERAL_ALLOW = [
   "Kaiord Editor",
@@ -61,8 +66,6 @@ export const JSX_LITERAL_ALLOW = [
   "FIT",
   "TCX",
   "ZWO",
-  "GCN",
-  "KRD",
   "ZWO (Zwift)",
   "Garmin Connect",
   "sk-...",
@@ -72,14 +75,34 @@ export const JSX_LITERAL_ALLOW = [
   "Z",
   "x",
   "mm:ss",
-  "A",
-  "C",
-  "G",
-  "V",
-  "X",
   "macOS",
   "Windows / Linux",
   "LTHR",
   "FTP",
   "HRV",
+];
+
+/**
+ * Words allowed on one surface only. The single letters are keyboard keys,
+ * read on the shortcut sheet (the context menu takes them from its
+ * catalog). KRD and GCN are formats, which appear only as file types on
+ * import and export (ADR 0003).
+ */
+export const SCOPED_ALLOW = [
+  {
+    files: [
+      `${SPA}/components/organisms/ShortcutSheet/**`,
+      `${SPA}/components/atoms/KeyChips/**`,
+      `${SPA}/constants/shortcut-*.ts`,
+    ],
+    allow: ["A", "C", "G", "V", "X"],
+  },
+  {
+    files: [
+      `${SPA}/components/molecules/ExportFormatSelector/**`,
+      `${SPA}/components/molecules/FileUpload/**`,
+      `${SPA}/components/pages/ConvertPage/**`,
+    ],
+    allow: ["KRD", "GCN"],
+  },
 ];

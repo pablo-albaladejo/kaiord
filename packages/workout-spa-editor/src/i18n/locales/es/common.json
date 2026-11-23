@@ -1,4 +1,7 @@
 {
+  "storage": {
+    "unavailable": "Almacenamiento no disponible: los cambios de esta sesión no se guardarán"
+  },
   "language": {
     "label": "Idioma",
     "auto": "Automático",

@@ -5,63 +5,30 @@
  * half). Copy built outside JSX reaches the athlete through these shapes,
  * and all of them must come from the translator:
  *
- * - a toast: the title and the description of `toast.error(…)`,
- *   `toasts.info(…)`, `useToastContext().success(…)`, either written in
- *   place or through a `const` that holds the string;
- * - a state setter for an error or a message (`setError("…")`,
- *   `setMessage(…)`, `setLastError(…)`), whose value a component renders;
- * - a copy property of an object literal (`label`, `title`, `message`, …)
+ * - a toast: `toast(…)` and the title and the description of
+ *   `toast.error(…)`, `toasts.info(…)`, `useToastContext().success(…)`;
+ * - a state setter for copy (`setError`, `setMessage`, `setNotice`,
+ *   `setWarning`, …), and a status setter (`setStatus`) handed prose;
+ * - a copy property of an object literal (`label`, `title`, `text`, …)
  *   that a component later renders (`{ value: "drill", label: "Drill" }`);
- * - every value of a label map, a `const` named like one (`SPORT_LABELS`,
- *   `KIND_LABEL`, `statusLabels`, `ERROR_COPY`).
+ * - every value of a label map (`SPORT_LABELS`, `KIND_LABEL`, `ERROR_COPY`)
+ *   and the prose of a names map (`SPORT_NAMES`).
  *
- * A dictionary key (`stroke.freestyle`), text without a letter and the
- * `allow` list are not copy. Types are not values and are not checked.
+ * Each is read in place, through `+`, through a `const` that holds the
+ * string and through a local function that returns it. A dictionary key
+ * (`stroke.freestyle`), text without a letter and the `allow` list are not
+ * copy. Types are not values and are not checked.
  */
 
-import { ALLOW_SCHEMA, copyStrings, copyText } from "./copy-strings.mjs";
-import { constStrings, isToastCall } from "./toast-call.mjs";
-
-const COPY_KEYS = new Set([
-  "label",
-  "title",
-  "description",
-  "heading",
-  "message",
-  "subtitle",
-  "hint",
-  "placeholder",
-  "ariaLabel",
-  "confirmLabel",
-  "cancelLabel",
-  "actionLabel",
-]);
-
-/** `setError`, `setMessage`, `setLastError`, `setSaveError`, … */
-const COPY_SETTER = /^set(?:[A-Z]\w*)?(?:Error|Message)$/;
-
-const isCopySetter = ({ callee }) =>
-  callee.type === "Identifier" && COPY_SETTER.test(callee.name);
-
-const LABEL_MAP = /(?:LABELS?|_COPY|Labels?|Copy)$/;
-
-const WRAPPERS = new Set([
-  "TSAsExpression",
-  "TSSatisfiesExpression",
-  "TSNonNullExpression",
-]);
-
-/** The object literal a label-map `const` is initialised with, if any. */
-const labelMapOf = (declarator) => {
-  if (declarator.id.type !== "Identifier") return null;
-  if (!LABEL_MAP.test(declarator.id.name)) return null;
-  let init = declarator.init;
-  while (init && WRAPPERS.has(init.type)) init = init.expression;
-  return init?.type === "ObjectExpression" ? init : null;
-};
-
-const keyName = (property) =>
-  property.key.type === "Identifier" ? property.key.name : property.key.value;
+import { resolverFor } from "./copy-resolve.mjs";
+import { COPY_KEYS, keyName, labelMapOf, setterKind } from "./copy-shapes.mjs";
+import {
+  ALLOW_SCHEMA,
+  copyStrings,
+  copyText,
+  isProse,
+} from "./copy-strings.mjs";
+import { isToastCall } from "./toast-call.mjs";
 
 const noLiteralCopy = {
   meta: {
@@ -75,35 +42,35 @@ const noLiteralCopy = {
   },
   create(context) {
     const allow = new Set(context.options[0]?.allow ?? []);
-    const check = (node, strings) => {
-      for (const raw of strings) {
+    const resolve = resolverFor(context);
+    const check = (node, kind = "copy") => {
+      for (const raw of copyStrings(node, resolve)) {
         const text = copyText(raw, allow);
-        if (text)
+        if (text && (kind === "copy" || isProse(text)))
           context.report({ node, messageId: "literal", data: { text } });
       }
     };
     return {
       CallExpression(node) {
-        if (isCopySetter(node)) {
-          const [arg] = node.arguments;
-          if (arg) check(arg, copyStrings(arg));
+        const kind = setterKind(node);
+        if (kind) {
+          if (node.arguments[0]) check(node.arguments[0], kind);
           return;
         }
         if (!isToastCall(context, node)) return;
-        for (const arg of node.arguments.slice(0, 2))
-          check(arg, [...copyStrings(arg), ...constStrings(context, arg)]);
+        for (const arg of node.arguments.slice(0, 2)) check(arg);
       },
       VariableDeclarator(node) {
-        const map = labelMapOf(node);
-        if (!map) return;
-        for (const property of map.properties)
+        const found = labelMapOf(node);
+        if (!found) return;
+        for (const property of found.map.properties)
           if (property.type === "Property" && !COPY_KEYS.has(keyName(property)))
-            check(property.value, copyStrings(property.value));
+            check(property.value, found.kind);
       },
       Property(node) {
         if (node.parent.type !== "ObjectExpression" || node.computed) return;
         if (!COPY_KEYS.has(keyName(node))) return;
-        check(node.value, copyStrings(node.value));
+        check(node.value);
       },
     };
   },
