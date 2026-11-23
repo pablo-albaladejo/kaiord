@@ -1,7 +1,7 @@
 /**
  * Safe writes to Garmin at the message contract, for the entries Kaiord did
  * not create and for a calendar read that is not reliable: an entry the
- * athlete placed may be recognised but is never moved or deleted; a read
+ * athlete placed may be recognized but is never moved or deleted; a read
  * that leaves out a live entry never ends in two entries of one Workout.
  */
 import "fake-indexeddb/auto";
@@ -73,7 +73,7 @@ describe("an entry the athlete placed of the same library workout", () => {
     expect(unscheduled(c)).not.toContain(athletes);
   });
 
-  it("should post no duplicate on the date it is recognised on", async () => {
+  it("should post no duplicate on the date it is recognized on", async () => {
     // Arrange
     const c = createMessageSeamConnector(db);
     await c.send(TEMPO, D1, "Tempo");

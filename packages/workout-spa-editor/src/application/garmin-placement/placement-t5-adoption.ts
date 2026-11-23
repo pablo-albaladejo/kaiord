@@ -2,7 +2,7 @@
  * The T5 adoption, pure: the one entry of the `uncertain`'s workout on its
  * date that the reads show and the queue does not hold dead. Kaiord's own
  * entry the record holds `gone` but the reads show is revived; one the
- * record does not know is only `recognised` and never deleted. `held` ids
+ * record does not know is only `recognized` and never deleted. `held` ids
  * the reads do not see become `gone` (A3 only). A number: how many matched.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
@@ -11,7 +11,7 @@ import type { Uncertain } from "./placement-claim";
 import {
   type PlacedEntries,
   placedRow,
-  recognisedBy,
+  recognizedBy,
 } from "./placement-placed-row";
 import { revivable, revived } from "./placement-revival";
 import { canConfirmAt, type Row, withEntries } from "./placement-row";
@@ -19,7 +19,7 @@ import type { readHeldMonths } from "./placement-t5-read";
 
 type Reads = NonNullable<Awaited<ReturnType<typeof readHeldMonths>>>;
 /** The adopted entry: Kaiord's own revived, or one the record does not
-    know recorded `recognised` (never deleted); else as the queue holds it. */
+    know recorded `recognized` (never deleted); else as the queue holds it. */
 const entriesFor = (
   row: Row,
   placed: GarminPlaced,
@@ -32,7 +32,7 @@ const entriesFor = (
   const known = (row.removalQueue ?? []).some(
     (e) => e.workoutScheduleId === id
   );
-  return known ? {} : recognisedBy(placed);
+  return known ? {} : recognizedBy(placed);
 };
 
 export const adoption = (u: Uncertain, row: Row, reads: Reads, a3: boolean) => {

@@ -256,7 +256,7 @@ export const REQUIRED_RULES = [
   {
     label: "Garmin calendar delete scoped to entries Kaiord placed",
     section: GARMIN_SECTION,
-    re: /deletes only entries that Kaiord's record holds as placed by Kaiord[\s\S]*?added yourself is recognised[\s\S]*?never moved or deleted/i,
+    re: /deletes only entries that Kaiord's record holds as placed by Kaiord[\s\S]*?added yourself is recognized[\s\S]*?never moved or deleted/i,
   },
   {
     label: "Garmin no-third-party-sharing stated",

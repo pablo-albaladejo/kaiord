@@ -853,7 +853,7 @@
     },
     {
       "id": "garmin.pp.calendar-placement",
-      "text": "**Calendar Placement**: When you send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries that Kaiord's record holds as placed by Kaiord. An entry of that same workout that you added yourself is recognised, so no second one is added on its date, but it is never moved or deleted: when the workout moves on, Kaiord leaves it where it is and tells you once. It never deletes entries of other workouts, and never deletes library workouts.",
+      "text": "**Calendar Placement**: When you send workouts from the Kaiord App, the extension places each workout on its date in your Garmin Connect calendar (a calendar write). When a workout moves to another day, it adds the new calendar entry first and then deletes the old entry that Kaiord itself placed and has since superseded (a calendar delete). It deletes only entries that Kaiord's record holds as placed by Kaiord. An entry of that same workout that you added yourself is recognized, so no second one is added on its date, but it is never moved or deleted: when the workout moves on, Kaiord leaves it where it is and tells you once. It never deletes entries of other workouts, and never deletes library workouts.",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
@@ -889,7 +889,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/garmin-safe-writes-ownership.test.ts",
-          "title": "should post no duplicate on the date it is recognised on"
+          "title": "should post no duplicate on the date it is recognized on"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/garmin-safe-writes-ownership.test.ts",

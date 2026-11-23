@@ -18,7 +18,7 @@ export const retiredBy = (
     : [];
 
 /** What a recognition writes beside the `Placed`: its own entry (a
-    revived, `created` or `recognised` one) and other entries to raise. */
+    revived, `created` or `recognized` one) and other entries to raise. */
 export type PlacedEntries = {
   own?: GarminRemovalEntry;
   extra?: GarminRemovalEntry[];
@@ -47,7 +47,7 @@ export const createdBy = (placed: GarminPlaced): PlacedEntries =>
     : {};
 
 /** The entry of a `Placed` Kaiord found without having posted it. */
-export const recognisedBy = (placed: GarminPlaced): PlacedEntries =>
+export const recognizedBy = (placed: GarminPlaced): PlacedEntries =>
   placed.kind === "scheduled"
-    ? { own: { ...entryOf(placed, "keep"), recognised: true } }
+    ? { own: { ...entryOf(placed, "keep"), recognized: true } }
     : {};

@@ -3,8 +3,8 @@
  * not idempotent, so when Garmin already holds an entry of this library
  * workout on the date, no second one is created: Kaiord's own entry that a
  * read had left out is revived, and an entry Kaiord did not create is
- * recognised as the `Placed` but recorded so, and it is never moved,
- * unscheduled or deleted (`placement-recognise`). A read that fails decides
+ * recognized as the `Placed` but recorded so, and it is never moved,
+ * unscheduled or deleted (`placement-recognize`). A read that fails decides
  * nothing: the claim goes back and no write is sent. "Send anyway" is the
  * athlete's explicit answer to an entry they do not see, so it posts
  * without this read. Without `calendar-find` or A3 there is nothing to read
@@ -14,7 +14,7 @@ import { commitPlacement, placedFrom } from "./placement-commit";
 import type { PlacementRun } from "./placement-deps";
 import { finishPlacement } from "./placement-finish";
 import { readsById } from "./placement-live-read";
-import { recognise } from "./placement-recognise";
+import { recognize } from "./placement-recognize";
 import {
   failed,
   type PlacementResult,
@@ -41,7 +41,7 @@ const unreadable = async (
   return failed("calendar-unreadable", true);
 };
 
-/** A result when the read settles the claim (recognised, or unreadable);
+/** A result when the read settles the claim (recognized, or unreadable);
     `undefined` when the POST is still needed. */
 export const readBeforePost = async (
   run: PlacementRun,
@@ -52,7 +52,7 @@ export const readBeforePost = async (
   const read = await run.deps.calendar.find(claimed.workoutId, claimed.date);
   if (!read.ok) return unreadable(run, claimed, context);
   const row = context.written ?? context.preClaim;
-  const found = recognise(claimed, row, read.entries);
+  const found = recognize(claimed, row, read.entries);
   if (!found) return undefined;
   const placed = placedFrom(claimed, found.id);
   const { written } = context;

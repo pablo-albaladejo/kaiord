@@ -4,13 +4,13 @@
  * happens first; the decision is taken inside the guarded write, against
  * the re-read queue. One entry the record does not know after this
  * attempt's POST is the POST's own (`created`); several cannot tell which
- * one is, so the adopted one is only `recognised` and none is ever deleted.
+ * one is, so the adopted one is only `recognized` and none is ever deleted.
  * `repost`: what proven absence means to a leftover's
  * resolve; without it (this run already posted) there is no re-POST.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { PlacementRun } from "./placement-deps";
-import { createdBy, placedRow, recognisedBy } from "./placement-placed-row";
+import { createdBy, placedRow, recognizedBy } from "./placement-placed-row";
 import {
   decideResolve,
   gateOf,
@@ -49,7 +49,7 @@ const decideInWrite = (
     );
     if (verdict.kind !== "adopt") return { verdict };
     const { placed, many } = verdict;
-    const entries = many ? recognisedBy(placed) : createdBy(placed);
+    const entries = many ? recognizedBy(placed) : createdBy(placed);
     return {
       write: placedRow(row, placed, attempt.previous, entries),
       verdict,

@@ -1,6 +1,6 @@
 /**
  * An entry Kaiord's record does not hold as created that a move left
- * behind (recognised, superseded to `retire`) stays where it is; the athlete is told once, in
+ * behind (recognized, superseded to `retire`) stays where it is; the athlete is told once, in
  * the run that finds it not yet `noticed`, and the guarded write that marks
  * it `noticed` keeps the notice from repeating on any later run or device.
  */

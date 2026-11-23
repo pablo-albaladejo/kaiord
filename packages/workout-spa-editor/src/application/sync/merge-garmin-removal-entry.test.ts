@@ -13,10 +13,10 @@ const base = {
 
 const POOL: GarminRemovalEntry[] = [
   { ...base, state: "keep" },
-  { ...base, state: "keep", recognised: true },
+  { ...base, state: "keep", recognized: true },
   { ...base, state: "keep", created: true },
   { ...base, state: "retire", attempts: 2 },
-  { ...base, state: "retire", recognised: true, noticed: true },
+  { ...base, state: "retire", recognized: true, noticed: true },
   { ...base, state: "gone" },
   { ...base, state: "gone", deleted: true },
   { ...base, state: "keep", revival: 1 },
@@ -54,12 +54,12 @@ describe("joining two states of one removal entry", () => {
     expect([...new Set(broken)]).toEqual([]);
   });
 
-  it("should keep an entry recognised on one device and created on another as Kaiord's", () => {
+  it("should keep an entry recognized on one device and created on another as Kaiord's", () => {
     // Arrange
-    const recognised: GarminRemovalEntry = {
+    const recognized: GarminRemovalEntry = {
       ...base,
       state: "keep",
-      recognised: true,
+      recognized: true,
     };
     const created: GarminRemovalEntry = {
       ...base,
@@ -68,24 +68,24 @@ describe("joining two states of one removal entry", () => {
     };
 
     // Act
-    const joined = joinEntries(recognised, created);
+    const joined = joinEntries(recognized, created);
 
     // Assert
-    expect(joined).toMatchObject({ state: "retire", recognised: true });
+    expect(joined).toMatchObject({ state: "retire", recognized: true });
     expect(isKaiords(joined)).toBe(true);
   });
 
-  it("should never let a merge make a recognised entry deletable", () => {
+  it("should never let a merge make a recognized entry deletable", () => {
     // Arrange
-    const recognised: GarminRemovalEntry = {
+    const recognized: GarminRemovalEntry = {
       ...base,
       state: "keep",
-      recognised: true,
+      recognized: true,
     };
     const superseded: GarminRemovalEntry = { ...base, state: "retire" };
 
     // Act
-    const joined = joinEntries(recognised, superseded);
+    const joined = joinEntries(recognized, superseded);
 
     // Assert
     expect(joined.state).toBe("retire");

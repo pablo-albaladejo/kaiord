@@ -189,8 +189,8 @@
 - [x] 10.5 Update the spec delta, the call-count tests, the N3 scenario and
       the 404 scenario; the merge laws and the placement-world simulator
       still pass.
-- [x] 10.6 An entry Kaiord did not create is recognised (no duplicate on its
-      date) but recorded `recognised`, never moved, unscheduled or
+- [x] 10.6 An entry Kaiord did not create is recognized (no duplicate on its
+      date) but recorded `recognized`, never moved, unscheduled or
       deleted; a move leaves it and reports `foreign-left` once (en and
       es). The fake Garmin holds an athlete entry of the same library
       workout id; `hooks/garmin-safe-writes-ownership.test.ts`.

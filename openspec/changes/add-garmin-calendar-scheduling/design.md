@@ -884,19 +884,19 @@ Decisions:
 
 - **Who made an entry is two facts, not a state.** `created` (a POST of
   Kaiord answered with this id, or the only unknown entry after this
-  attempt's own ambiguous POST) and `recognised` (found on the calendar,
+  attempt's own ambiguous POST) and `recognized` (found on the calendar,
   never posted by Kaiord), both joined by OR. An entry may be sent a delete
-  only when it is `created` or was never `recognised` (`isKaiords`): legacy
+  only when it is `created` or was never `recognized` (`isKaiords`): legacy
   rows carry neither and keep draining as before. Considered and rejected:
   a single absorbing `foreign` flag. Two devices break it: device B, not yet
-  synced, recognises the entry device A just posted; an absorbing flag would
+  synced, recognizes the entry device A just posted; an absorbing flag would
   mark A's own entry foreign forever and tell the athlete, falsely, that
   Kaiord did not create it. With two facts the merge keeps A's `created`
   and the entry stays Kaiord's. Also rejected: a new state on the lattice
-  (`foreign` between `retire` and `gone`): a recognised entry must still be
+  (`foreign` between `retire` and `gone`): a recognized entry must still be
   superseded (`retire`, so a stale device's `Placed` on it cannot win the
   merge) while never being drainable, which one total order cannot express.
-- **A recognised entry is the `Placed`, so no duplicate is posted on its
+- **A recognized entry is the `Placed`, so no duplicate is posted on its
   date**, and `drainQueue`, `isDismissable` and the `duplicate-left` report
   skip it. When the Workout moves on, Kaiord posts on the new date and the
   entry stays; `finishPlacement` reports `foreign-left` with its dates once,
@@ -906,8 +906,8 @@ Decisions:
   device's, and a cause that was not verified is never stated.
 - **Ambiguous POSTs.** One unknown entry after this attempt's own POST is
   the POST's (`created`); several cannot tell which one is, so the adopted
-  one is only `recognised` and none is ever deleted (a duplicate at worst).
-  T5 records an entry the queue does not know as `recognised` too.
+  one is only `recognized` and none is ever deleted (a duplicate at worst).
+  T5 records an entry the queue does not know as `recognized` too.
 - **A `gone` entry seen live again is revived.** `revival` orders entries
   before the state: a revived entry outranks its `gone`, carrying fresh
   `attempts`. The read before the POST revives Kaiord's own `gone` entry on
@@ -926,6 +926,6 @@ Decisions:
   `present | absent | unknown`). The read before the POST shares its guard
   (`readsById`).
 
-Known limit: when the Workout moves back to a date where a recognised entry
+Known limit: when the Workout moves back to a date where a recognized entry
 stays, that entry is already in the record (superseded), so Kaiord posts its
 own entry next to it; the athlete was told once that it stayed.

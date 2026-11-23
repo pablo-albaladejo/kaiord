@@ -28,7 +28,7 @@ const canonical = (
   abandoned: facts.abandoned ?? e.abandoned,
   state: e.state,
   ...(facts.created ? { created: true } : {}),
-  ...(facts.recognised ? { recognised: true } : {}),
+  ...(facts.recognized ? { recognized: true } : {}),
   ...(facts.noticed ? { noticed: true } : {}),
   ...(facts.deleted ? { deleted: true } : {}),
   ...(e.revival ? { revival: e.revival } : {}),
@@ -43,7 +43,7 @@ export const joinEntries = (
 ): GarminRemovalEntry => {
   const who = {
     created: x.created || y.created,
-    recognised: x.recognised || y.recognised,
+    recognized: x.recognized || y.recognized,
     noticed: x.noticed || y.noticed,
   };
   const epoch = revivalOf(x) - revivalOf(y);
@@ -62,4 +62,4 @@ export const joinEntries = (
 
 /** Kaiord may delete the entry: its record holds it as created. */
 export const isKaiords = (e: GarminRemovalEntry) =>
-  e.created === true || !e.recognised;
+  e.created === true || !e.recognized;

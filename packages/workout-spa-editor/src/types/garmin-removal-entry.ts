@@ -13,10 +13,10 @@ import {
  * (tombstone). Garmin never reuses an id, so the merge joins by max.
  *
  * Who made the entry, two facts only ever set (ORed by the merge):
- * `created`, a POST of Kaiord made it; `recognised`, Kaiord found it on the
+ * `created`, a POST of Kaiord made it; `recognized`, Kaiord found it on the
  * calendar without having posted it (the athlete placed the library
  * workout, or a record was lost). Kaiord may send a delete only for an
- * entry its record holds as created: `created`, or never `recognised` (an
+ * entry its record holds as created: `created`, or never `recognized` (an
  * entry of Kaiord's own record from before these facts were kept).
  * `noticed`: the athlete was told once that such an entry stayed behind.
  * `deleted`: Kaiord's delete of it succeeded (or the athlete said they
@@ -41,7 +41,7 @@ export const garminRemovalEntrySchema = z.object({
   abandoned: z.boolean(),
   state: z.enum(GARMIN_REMOVAL_STATES),
   created: z.literal(true).optional(),
-  recognised: z.literal(true).optional(),
+  recognized: z.literal(true).optional(),
   noticed: z.literal(true).optional(),
   deleted: z.literal(true).optional(),
   revival: z.number().int().positive().optional(),
