@@ -174,7 +174,8 @@ Audit` job keeps its exact name, reports on every pull request and on push
   READMEs, the method note, the platform-access register) equals a register
   entry, as many times as it appears; every entry is still on its surface; a
   label carries no proof, an external claim is read again within 180 days,
-  and any other claim is proven by a running test or pinned code
+  and any other claim is proven by a running test or pinned code, or declared
+  by the owner's author statement, counted apart and never as proven
   (`pnpm lint:claims`, which prints a proof summary; how to add a surface:
   `claims/README.md`).
 - `check-method-figures.mjs` — every figure on the method note

@@ -769,7 +769,46 @@ describe("check-claims", () => {
     // Assert
     assert.equal(
       summary,
-      "4 claims: 1 labels, 1 external, 1 proven by test, 1 by pinned code, 0 unproven"
+      "4 claims: 1 labels, 1 external, 1 proven by test, 1 by pinned code, 0 declared by author statement, 0 unproven"
+    );
+  });
+
+  it("should count a claim that rests on an author statement as declared, never as proven, even beside a test", () => {
+    // Arrange
+    const files = {
+      [LISTING]: "# Title\n\nDeclared.\n\nDeclared and tested.\n",
+      "a.test.js": 'it("should hold", () => {});',
+    };
+    const statement = {
+      "author-statement": "Every commit was written by an AI agent.",
+      by: "the repository's owner",
+      on: "2026-11-23",
+    };
+    const registers = register({
+      surfaces: [{ file: LISTING }],
+      claims: [
+        { id: "t", text: "Title", kind: "label" },
+        { id: "a", text: "Declared.", proof: [statement] },
+        {
+          id: "b",
+          text: "Declared and tested.",
+          proof: [{ test: "a.test.js", title: "should hold" }, statement],
+        },
+      ],
+    });
+
+    // Act
+    const { problems, summary } = checkClaimRegisters({
+      registers,
+      read: reader(files),
+      today: Date.parse("2026-11-23T00:00:00Z"),
+    });
+
+    // Assert
+    assert.deepEqual(problems, []);
+    assert.equal(
+      summary,
+      "3 claims: 1 labels, 0 external, 0 proven by test, 0 by pinned code, 2 declared by author statement, 0 unproven"
     );
   });
 

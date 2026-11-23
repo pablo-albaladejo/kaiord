@@ -16,6 +16,17 @@ This page is what that sentence rests on: how the agents work, what a person doe
 
 Git records commits, not who typed each line, so the history cannot prove "every line". What it shows is narrower. Since 2026-02-01, 1067 of the 1205 commits not made by a bot carry an AI agent co-author trailer. Before that date no commit carries one, and the repository was set up for an AI coding assistant, Kiro. The figures, the commands behind them and their limits follow.
 
+## The owner's statement
+
+This section is a declaration by the repository's owner, not a figure: git cannot check it. On 2026-11-23 the owner stated:
+
+> Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.
+
+What the history shows beside it:
+
+- 197 commits before 2026-02-01 touch the Kiro setup in `.kiro/`.
+- 201 commits are made by bots and are counted apart: they are automation, not the agents' work. 127 are dependency updates from Dependabot, 28 come from the release bot and 46 from GitHub Actions workflows, such as version releases and weekly SEO snapshots.
+
 ## How agents build it
 
 - Work starts as an OpenSpec change in `openspec/changes/`: a proposal, spec deltas and a task list. When the work ships, the change is archived under `openspec/changes/archive/`.
@@ -48,6 +59,9 @@ On 2026-11-22 the history was rewritten to correct author metadata. Every commit
 | Commits with an AI agent co-author trailer                          | 1076  | `git log b9b38f824 --format='%(trailers:key=Co-authored-by,valueonly,separator=%x2C)' \| grep -c Claude`                                                                      |
 | Commits with no agent trailer                                       | 724   | `git log b9b38f824 --format='%(trailers:key=Co-authored-by,valueonly,separator=%x2C)' \| grep -c -v Claude`                                                                   |
 | Commits made by a bot                                               | 201   | `git log b9b38f824 --format=%an \| grep -c '\[bot\]$'`                                                                                                                        |
+| Commits made by Dependabot                                          | 127   | `git log b9b38f824 --format=%an \| grep -c '^dependabot\[bot\]$'`                                                                                                             |
+| Commits made by the release bot                                     | 28    | `git log b9b38f824 --format=%an \| grep -c '^kaiord-release-bot\[bot\]$'`                                                                                                     |
+| Commits made by GitHub Actions workflows                            | 46    | `git log b9b38f824 --format=%an \| grep -c '^github-actions\[bot\]$'`                                                                                                         |
 | Commits made by a bot, with no agent trailer                        | 192   | `git log b9b38f824 --format='%an\|%(trailers:key=Co-authored-by,valueonly,separator=%x2C)' \| grep -v Claude \| grep -c '\[bot\]\|'`                                          |
 | Commits not made by a bot, before 2026-02-01, with no agent trailer | 394   | `git log b9b38f824 --until=2026-02-01T00:00:00Z --format='%an\|%(trailers:key=Co-authored-by,valueonly,separator=%x2C)' \| grep -v Claude \| grep -c -v '\[bot\]\|'`          |
 | Commits before 2026-02-01 that touch the Kiro setup in `.kiro/`     | 197   | `git log b9b38f824 --until=2026-02-01T00:00:00Z --format=%h -- .kiro \| wc -l`                                                                                                |
