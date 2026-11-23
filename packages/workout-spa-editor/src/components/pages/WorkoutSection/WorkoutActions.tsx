@@ -36,7 +36,7 @@ export function WorkoutActions({
   const label = editDiscard ? t("edits.discardAction") : t("actions.discard");
   return (
     <div className="flex flex-wrap items-center gap-2.5">
-      <CapabilityGate id="templates">
+      <CapabilityGate surface="workout-save-as-template">
         <SaveToLibraryButton workout={krd} />
       </CapabilityGate>
       <SaveButton workout={krd} ownerProfileId={ownerProfileId} />

@@ -3,37 +3,38 @@
  * through the same port the `set_data_route` Tool writes — no new write path.
  *
  * `pick` stores `priority`, led by the picked source. `automatic` hands the
- * type back to the App's rule and clears the stored order as it goes, so a
- * stale ranking cannot resurface; it is a row rather than a deletion so the
- * hand-back syncs to the athlete's other devices like any other choice.
+ * kind back to the App's rule with `automaticChoiceRow`: a row rather than a
+ * deletion, so the hand-back syncs to the athlete's other devices like any
+ * other choice, and shaped so an older build reads the same Authority.
  */
 import type { ManagedDataType } from "@kaiord/core";
 import { useCallback } from "react";
 
 import {
+  type AuthorityOptions,
   promoteSource,
-  type SourceOfTruthOptions,
-} from "../../application/connections/source-of-truth-options";
+} from "../../application/connections/authority-options";
+import { automaticChoiceRow } from "../../application/data-source-policy/automatic-choice-row";
 import { usePersistence } from "../../contexts/persistence-context";
 
-export type SourceOfTruthEditor = {
+export type AuthorityChoiceEditor = {
   pick: (
     dataType: ManagedDataType,
-    options: SourceOfTruthOptions,
+    options: AuthorityOptions,
     sourceId: string
   ) => Promise<void>;
   automatic: (dataType: ManagedDataType) => Promise<void>;
 };
 
-export const useSourceOfTruthEditor = (
+export const useAuthorityChoiceEditor = (
   profileId: string
-): SourceOfTruthEditor => {
+): AuthorityChoiceEditor => {
   const persistence = usePersistence();
 
   const pick = useCallback(
     async (
       dataType: ManagedDataType,
-      options: SourceOfTruthOptions,
+      options: AuthorityOptions,
       sourceId: string
     ) => {
       await persistence.dataTypeSourcePolicy.put({
@@ -48,12 +49,9 @@ export const useSourceOfTruthEditor = (
 
   const automatic = useCallback(
     async (dataType: ManagedDataType) => {
-      await persistence.dataTypeSourcePolicy.put({
-        profileId,
-        dataType,
-        mode: "automatic",
-        sourceOrder: [],
-      });
+      await persistence.dataTypeSourcePolicy.put(
+        automaticChoiceRow(profileId, dataType)
+      );
     },
     [persistence, profileId]
   );

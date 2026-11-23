@@ -20,6 +20,7 @@ import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { CapabilitiesFixture } from "../../contexts/capabilities-context";
 import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { ToastContextProvider } from "../../contexts/ToastContext";
@@ -74,15 +75,17 @@ function renderEditor(id?: string, path?: string) {
   const loc = memoryLocation({ path: resolvedPath, record: true });
   const utils = render(
     <PersistenceProvider persistence={createDexiePersistence(db)}>
-      <GarminBridgeProvider>
-        <ToastProvider>
-          <ToastContextProvider>
-            <Router hook={loc.hook}>
-              <EditorPage id={id} />
-            </Router>
-          </ToastContextProvider>
-        </ToastProvider>
-      </GarminBridgeProvider>
+      <CapabilitiesFixture on={[]}>
+        <GarminBridgeProvider>
+          <ToastProvider>
+            <ToastContextProvider>
+              <Router hook={loc.hook}>
+                <EditorPage id={id} />
+              </Router>
+            </ToastContextProvider>
+          </ToastProvider>
+        </GarminBridgeProvider>
+      </CapabilitiesFixture>
     </PersistenceProvider>
   );
   return { ...utils, location: loc };

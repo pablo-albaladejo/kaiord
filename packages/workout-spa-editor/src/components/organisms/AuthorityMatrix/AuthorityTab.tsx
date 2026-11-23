@@ -1,7 +1,7 @@
-import { canChooseSource } from "../../../application/connections/source-of-truth-options";
+import { canChooseSource } from "../../../application/connections/authority-options";
+import { useAuthorityChoiceEditor } from "../../../hooks/connections/use-authority-choice-editor";
 import { useDataFlows } from "../../../hooks/connections/use-data-flows";
 import { useDataTypeRouting } from "../../../hooks/connections/use-data-type-routing";
-import { useSourceOfTruthEditor } from "../../../hooks/connections/use-source-of-truth-editor";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useTranslate } from "../../../i18n/use-translate";
 import { AuthorityRow } from "./AuthorityRow";
@@ -17,7 +17,7 @@ export function AuthorityTab() {
   const profileId = active?.id ?? null;
   const { byDataType } = useDataFlows(profileId ?? "");
   const { options } = useDataTypeRouting(profileId, byDataType);
-  const editor = useSourceOfTruthEditor(profileId ?? "");
+  const editor = useAuthorityChoiceEditor(profileId ?? "");
   const rows = [...options].filter(([, o]) => canChooseSource(o));
 
   return (

@@ -9,6 +9,7 @@ export const PER_PROFILE_TABLES: ReadonlyArray<string> = [
   "activities",
   "aiModelBindings",
   "autoMatchDismissals",
+  "capabilityDecisions",
   "chatConversations",
   "chatMessages",
   "coachingActivities",

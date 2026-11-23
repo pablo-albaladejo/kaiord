@@ -5,14 +5,14 @@ import type { DataFlowsByType } from "../../hooks/connections/use-data-flows";
 import { bridgeSupportsRoute } from "../../integrations/bridge-supported-routes";
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicy } from "../../types/integration-policy";
-import { buildDataTypeRoutingRows } from "./data-type-routing";
-import { availableSources } from "./data-type-sources";
 import {
-  buildSourceOfTruthOptions,
+  buildAuthorityOptions,
   canChooseSource,
   promoteSource,
   type SourceCapabilitySignals,
-} from "./source-of-truth-options";
+} from "./authority-options";
+import { buildDataTypeRoutingRows } from "./data-type-routing";
+import { availableSources } from "./data-type-sources";
 
 const route = (bridgeId: string, enabled = true): IntegrationPolicy =>
   ({ bridgeId, enabled }) as IntegrationPolicy;
@@ -53,14 +53,14 @@ const optionsFor = (
   policy?: DataTypeSourcePolicy,
   caps: SourceCapabilitySignals = PERMISSIVE
 ) =>
-  buildSourceOfTruthOptions(
+  buildAuthorityOptions(
     dataType,
     availableSources(byDataType, dataType),
     policy,
     caps
   );
 
-describe("buildSourceOfTruthOptions", () => {
+describe("buildAuthorityOptions", () => {
   it("should let Train2Go's weight be ranked first once its extension announces read:body", async () => {
     // Arrange
     const byDataType = flows({
@@ -81,6 +81,27 @@ describe("buildSourceOfTruthOptions", () => {
     // Assert
     expect(options.choices).toContain("train2go-bridge");
     expect(options.current).toBe("train2go-bridge");
+  });
+
+  it("should say which source decides: the rule's pick, or the athlete's", () => {
+    // Arrange
+    const byDataType = flows({
+      weight: {
+        import: [route("train2go-bridge"), route("tanita-bridge")],
+      },
+    });
+
+    // Act
+    const automatic = optionsFor("weight", byDataType);
+    const chosen = optionsFor(
+      "weight",
+      byDataType,
+      priority("weight", ["train2go-bridge"])
+    );
+
+    // Assert
+    expect(automatic.decides).toBe("tanita-bridge");
+    expect(chosen.decides).toBe("train2go-bridge");
   });
 
   it("should offer every source the row already reads from, manual included", () => {

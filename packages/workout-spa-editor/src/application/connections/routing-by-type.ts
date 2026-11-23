@@ -12,27 +12,27 @@ import type { IntegrationRegistryEntry } from "../../integrations/integration-re
 import type { DataTypeSourcePolicy } from "../../types/data-type-source-policy";
 import type { IntegrationPolicyDirection } from "../../types/integration-policy";
 import {
+  type AuthorityOptions,
+  buildAuthorityOptions,
+  type SourceCapabilitySignals,
+} from "./authority-options";
+import {
   buildRouteToggles,
   type DataTypeRouteToggle,
   type RouteToggleSignals,
 } from "./data-type-route-toggles";
 import { availableSources } from "./data-type-sources";
-import {
-  buildSourceOfTruthOptions,
-  type SourceCapabilitySignals,
-  type SourceOfTruthOptions,
-} from "./source-of-truth-options";
 
 export const optionsByType = (
   byDataType: DataFlowsByType,
   policies: readonly DataTypeSourcePolicy[],
   signals: SourceCapabilitySignals
-): ReadonlyMap<ManagedDataType, SourceOfTruthOptions> => {
+): ReadonlyMap<ManagedDataType, AuthorityOptions> => {
   const byType = new Map(policies.map((policy) => [policy.dataType, policy]));
   return new Map(
     managedDataTypes.map((dataType) => [
       dataType,
-      buildSourceOfTruthOptions(
+      buildAuthorityOptions(
         dataType,
         availableSources(byDataType, dataType),
         byType.get(dataType),

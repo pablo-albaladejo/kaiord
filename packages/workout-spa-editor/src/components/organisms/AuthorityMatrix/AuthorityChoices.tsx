@@ -1,13 +1,13 @@
 import type { ManagedDataType } from "@kaiord/core";
 
-import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
+import type { AuthorityOptions } from "../../../application/connections/authority-options";
 import { useTranslate } from "../../../i18n/use-translate";
-import { RoutingChoiceButton } from "../Connections/RoutingChoiceButton";
+import { ChoiceButton } from "../Connections/ChoiceButton";
 import { choiceLabel } from "./authority-copy";
 
 type Props = {
   dataType: ManagedDataType;
-  options: SourceOfTruthOptions;
+  options: AuthorityOptions;
   onPick: (sourceId: string) => void;
   onAutomatic: () => void;
 };
@@ -33,14 +33,14 @@ export function AuthorityChoices({
         type: tConnections(`dataTypes.${dataType}`),
       })}
     >
-      <RoutingChoiceButton
+      <ChoiceButton
         testId={`authority-choice-${dataType}-automatic`}
         selected={options.mode === "automatic"}
         label={t("authority.automatic")}
         onClick={onAutomatic}
       />
       {options.choices.map((sourceId) => (
-        <RoutingChoiceButton
+        <ChoiceButton
           key={sourceId}
           testId={`authority-choice-${dataType}-${sourceId}`}
           selected={options.current === sourceId}

@@ -37,11 +37,11 @@ const seed = async (matrix?: boolean) => {
     sourceOrder: ["garmin-bridge"],
   });
   if (matrix !== undefined) {
-    await persistence.userPreferences.put({
+    await persistence.capabilityDecisions.put({
       profileId: PROFILE_ID,
-      calendarView: "grid",
+      capabilityId: AUTHORITY_MATRIX_ID,
+      on: matrix,
       updatedAt: "2026-11-01T00:00:00.000Z",
-      capabilities: { [AUTHORITY_MATRIX_ID]: matrix },
     });
   }
   return persistence;

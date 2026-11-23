@@ -18,9 +18,8 @@ import type {
 } from "../../data-hub/build-data-hub-matrix";
 import {
   type AuthorityInForce,
-  authorityInForce,
+  loadAuthorityInForce,
 } from "../../data-source-policy/authority-in-force";
-import { readAuthorityChoice } from "../../data-source-policy/read-authority-choice";
 import {
   type EffectiveSourceAnswer,
   getEffectiveSourceToday,
@@ -41,7 +40,7 @@ export type DataRouteAnswer = {
   routes: DataRouteEntry[];
   /** What decides the type today: the athlete's choice while the matrix is
       on, else the automatic Authority, else every source kept. */
-  sourcePolicy: AuthorityInForce;
+  sourcePolicy: Pick<AuthorityInForce, "mode" | "sourceOrder">;
   effectiveSourceToday?: EffectiveSourceAnswer;
 };
 
@@ -55,10 +54,11 @@ export const buildDataRouteAnswer = async (
   row: DataHubRow,
   deps: DataRouteAnswerDeps
 ): Promise<DataRouteAnswer> => {
-  const choice = await readAuthorityChoice(
+  const { mode, sourceOrder } = await loadAuthorityInForce(
     {
       sourcePolicyRepo: deps.persistence.dataTypeSourcePolicy,
-      userPreferences: deps.persistence.userPreferences,
+      capabilityDecisions: deps.persistence.capabilityDecisions,
+      policyRepo: deps.persistence.integrationPolicy,
     },
     { profileId: deps.profileId, dataType: row.dataType }
   );
@@ -75,7 +75,7 @@ export const buildDataRouteAnswer = async (
         mode: cell.routeMode,
         lastSyncedAt: cell.lastSyncedAt,
       })),
-    sourcePolicy: authorityInForce(row.dataType, choice),
+    sourcePolicy: { mode, sourceOrder },
     effectiveSourceToday: await getEffectiveSourceToday(
       deps.persistence,
       deps.profileId,

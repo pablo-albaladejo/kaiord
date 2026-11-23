@@ -110,6 +110,8 @@ const makeSeedRow = (
       };
     case "userPreferences":
       return { profileId, calendarView: "grid", updatedAt: NOW };
+    case "capabilityDecisions":
+      return { profileId, capabilityId: "templates", on: true, updatedAt: NOW };
     case "autoMatchDismissals":
       return {
         profileId,
@@ -287,6 +289,7 @@ const performCascadeOrchestration = async (
         sessionMatch: persistence.sessionMatch,
         autoMatchDismissal: persistence.autoMatchDismissal,
         userPreferences: persistence.userPreferences,
+        capabilityDecisions: persistence.capabilityDecisions,
         healthCleanup: persistence.healthCleanup,
         chatMessages: persistence.chatMessages,
         chatConversations: persistence.chatConversations,

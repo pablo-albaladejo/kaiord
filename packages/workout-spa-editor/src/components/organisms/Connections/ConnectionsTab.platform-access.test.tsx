@@ -10,6 +10,7 @@ import {
   vi,
 } from "vitest";
 
+import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
 import { useDataFlows } from "../../../hooks/connections/use-data-flows";
@@ -27,7 +28,7 @@ const REGISTER = "https://kaiord.com/docs/legal/platform-access";
 const render = (ui: ReactElement) =>
   rtlRender(
     <PersistenceProvider persistence={createInMemoryPersistence()}>
-      {ui}
+      <CapabilitiesFixture on={[]}>{ui}</CapabilitiesFixture>
     </PersistenceProvider>
   );
 

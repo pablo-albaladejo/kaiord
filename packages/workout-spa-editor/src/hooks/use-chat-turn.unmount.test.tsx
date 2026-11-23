@@ -1,6 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { CapabilitiesFixture } from "../contexts/capabilities-context";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import { runConfirmedTool } from "./chat/run-confirmed-tool";
@@ -37,6 +39,10 @@ const args = {
   messages: [],
 };
 
+const NoCapabilities = ({ children }: { children: ReactNode }) => (
+  <CapabilitiesFixture on={[]}>{children}</CapabilitiesFixture>
+);
+
 describe("useChatTurn unmount", () => {
   it("should abort the running turn and keep it in its own conversation", async () => {
     // Arrange
@@ -53,7 +59,9 @@ describe("useChatTurn unmount", () => {
           );
         })
     );
-    const { result, unmount } = renderHook(() => useChatTurn(args));
+    const { result, unmount } = renderHook(() => useChatTurn(args), {
+      wrapper: NoCapabilities,
+    });
     result.current.send("plan my week");
     await waitFor(() => expect(fakeAgent.sendTurn).toHaveBeenCalled());
 
@@ -95,8 +103,9 @@ describe("useChatTurn unmount", () => {
         return { status: "aborted", toolNames: [], text: "", messages: [] };
       }
     );
-    const { result, unmount } = renderHook(() =>
-      useChatTurn({ ...args, conversationId: "conv-b" })
+    const { result, unmount } = renderHook(
+      () => useChatTurn({ ...args, conversationId: "conv-b" }),
+      { wrapper: NoCapabilities }
     );
     result.current.send("add an easy run tomorrow");
     await waitFor(() => expect(result.current.pendingAction).not.toBeNull());

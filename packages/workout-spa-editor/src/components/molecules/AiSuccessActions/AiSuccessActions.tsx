@@ -52,7 +52,7 @@ export function AiSuccessActions({
         <Trash2 className="h-4 w-4" />
         {t("result.discard")}
       </Button>
-      <CapabilityGate id="templates">
+      <CapabilityGate surface="ai-result-save-as-template">
         <SaveToLibraryButton workout={workout} />
       </CapabilityGate>
     </div>

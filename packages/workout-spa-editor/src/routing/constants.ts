@@ -21,3 +21,9 @@ export const ATHLETES_PATH = "/athletes" as const;
 
 /** The active athlete: body, thresholds, zones. */
 export const ATHLETE_PATH = "/athlete" as const;
+
+/** The Day: where the athlete lands, and where an off Capability's route goes. */
+export const DAILY_PATH = "/daily" as const;
+
+/** The one settings place; a section is a segment below it. */
+export const SETTINGS_PATH = "/settings" as const;

@@ -205,11 +205,12 @@ Audit` job keeps its exact name, reports on every pull request and on push
   sign-in page unlike the App fails (`pnpm lint:connection-notices`,
   R-ConnectionNoticesSingleSource).
 - `check-capability-surfaces.mjs` — every screen, route, settings section,
-  command, shortcut, Tool and link reaches a Capability's surface only through
-  the read API (`useCapabilities()` / `<CapabilityGate>`): no import of a
-  Capability's modules without it, no route spelled outside the catalogue
-  (`capabilityHome(id)`), no surface registry read outside its gate
-  (`pnpm lint:capability-surfaces`; registries in
+  Tool, in-screen part and link reaches a Capability's surface only through a
+  value import of the read API (`useCapabilities()` / `<CapabilityGate>`): no
+  import of a Capability's modules without it, no route or owned settings
+  path spelled outside the catalogue (`capabilityHome(id)`), no surface
+  registry read outside its gate, no decision read without resolving it
+  there (`pnpm lint:capability-surfaces`; modules and registries in
   `scripts/capability-surfaces.vocab.mjs`).
 - `local/no-jsx-literal-text` + `local/no-literal-copy` (ESLint rules in
   `scripts/eslint-rules/`) — every string the athlete reads in the Kaiord App

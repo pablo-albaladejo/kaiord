@@ -1,36 +1,31 @@
-import type { ManagedDataType } from "@kaiord/core";
-
+import type { AuthorityOptions } from "../../../application/connections/authority-options";
 import { toIntegrationId } from "../../../application/connections/data-type-sources";
-import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
-import { automaticHead } from "../../../application/data-source-policy/automatic-authority";
 import type { Translate } from "../../../i18n/use-translate";
 import { sourceName } from "../Connections/routing-copy";
 
 export const choiceLabel = (sourceId: string, t: Translate): string =>
   sourceName(toIntegrationId(sourceId), t);
 
+const SENTENCE = {
+  union: "authority.keepsAll",
+  priority: "authority.picked",
+  automatic: "authority.automaticNow",
+} as const;
+
 /** What decides the kind today, said before any button can change it. */
 export const authorityNow = (
-  dataType: ManagedDataType,
-  options: SourceOfTruthOptions,
+  options: AuthorityOptions,
   type: string,
   t: Translate,
   tConnections: Translate
 ): string => {
-  if (options.mode === "union") return t("authority.keepsAll", { type });
-  if (options.mode === "priority") {
-    return options.current === undefined
+  if (options.decides === undefined || options.mode === "union") {
+    return options.mode === "priority"
       ? t("authority.stalled", { type })
-      : t("authority.picked", {
-          type,
-          name: choiceLabel(options.current, tConnections),
-        });
+      : t("authority.keepsAll", { type });
   }
-  const head = automaticHead(dataType, options.choices);
-  return head === undefined
-    ? t("authority.keepsAll", { type })
-    : t("authority.automaticNow", {
-        type,
-        name: choiceLabel(head, tConnections),
-      });
+  return t(SENTENCE[options.mode], {
+    type,
+    name: choiceLabel(options.decides, tConnections),
+  });
 };

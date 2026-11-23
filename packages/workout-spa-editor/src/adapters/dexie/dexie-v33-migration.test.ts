@@ -15,7 +15,7 @@ import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
 
 const SEED_VERSION = 32;
-const SCHEMA_HEAD = 39;
+const SCHEMA_HEAD = 40;
 const MIGRATED_COUNT = 2;
 const AGG_INPUT_TOKENS = 700;
 const AGG_COST = 0.0021;

@@ -282,6 +282,13 @@
       "version": 39,
       "upgrade": true,
       "stores": {}
+    },
+    {
+      "version": 40,
+      "upgrade": true,
+      "stores": {
+        "capabilityDecisions": "[profileId+capabilityId], profileId"
+      }
     }
   ]
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ProfileRepository } from "../../ports/persistence-port";
+import { createInMemoryCapabilityDecisionRepository } from "../../test-utils/in-memory-capability-decision-repository";
 import { createInMemoryUserPreferencesRepository } from "../../test-utils/in-memory-user-preferences-repository";
 import type { Profile } from "../../types/profile";
 import { ProfileNotFoundError } from "../../types/session-match-errors";
@@ -27,12 +28,20 @@ const profilesOf = (rows: Profile[]): ProfileRepository => ({
 
 const depsFor = (rows: Profile[] = [PROFILE]) => ({
   clock: () => "2026-11-23T10:00:00.000Z",
-  repository: createInMemoryUserPreferencesRepository(),
-  profileRepository: profilesOf(rows),
+  capabilityDecisions: createInMemoryCapabilityDecisionRepository(),
+  profiles: profilesOf(rows),
 });
 
+const decisionsOf = async (deps: ReturnType<typeof depsFor>) =>
+  Object.fromEntries(
+    (await deps.capabilityDecisions.listByProfile("p1")).map((d) => [
+      d.capabilityId,
+      d.on,
+    ])
+  );
+
 describe("setCapability", () => {
-  it("should record the activation on the athlete's preferences row", async () => {
+  it("should record the activation as the athlete's decision, stamped by the clock", async () => {
     // Arrange
     const deps = depsFor();
 
@@ -40,26 +49,36 @@ describe("setCapability", () => {
     await setCapability({ profileId: "p1", id: "templates", on: true }, deps);
 
     // Assert
-    const row = await deps.repository.get("p1");
-    expect(row?.capabilities).toEqual({ templates: true });
-    expect(row?.updatedAt).toBe("2026-11-23T10:00:00.000Z");
+    expect(await deps.capabilityDecisions.listByProfile("p1")).toEqual([
+      {
+        profileId: "p1",
+        capabilityId: "templates",
+        on: true,
+        updatedAt: "2026-11-23T10:00:00.000Z",
+      },
+    ]);
   });
 
   it("should keep the other decisions when one Capability changes", async () => {
     // Arrange
     const deps = depsFor();
     await setCapability({ profileId: "p1", id: "templates", on: true }, deps);
-    await setCapability({ profileId: "p1", id: "labs", on: true }, deps);
+    await setCapability(
+      { profileId: "p1", id: "authority-matrix", on: true },
+      deps
+    );
 
     // Act
     await setCapability({ profileId: "p1", id: "templates", on: false }, deps);
 
     // Assert
-    const row = await deps.repository.get("p1");
-    expect(row?.capabilities).toEqual({ templates: false, labs: true });
+    expect(await decisionsOf(deps)).toEqual({
+      templates: false,
+      "authority-matrix": true,
+    });
   });
 
-  it("should keep the decisions when another preference is written", async () => {
+  it("should leave the decisions alone when another preference is written", async () => {
     // Arrange
     const deps = depsFor();
     await setCapability({ profileId: "p1", id: "templates", on: true }, deps);
@@ -67,13 +86,15 @@ describe("setCapability", () => {
     // Act
     await setUserPreferenceFields(
       { profileId: "p1", patch: { calendarView: "list" } },
-      deps
+      {
+        clock: deps.clock,
+        repository: createInMemoryUserPreferencesRepository(),
+        profileRepository: deps.profiles,
+      }
     );
 
     // Assert
-    const row = await deps.repository.get("p1");
-    expect(row?.capabilities).toEqual({ templates: true });
-    expect(row?.calendarView).toBe("list");
+    expect(await decisionsOf(deps)).toEqual({ templates: true });
   });
 
   it("should refuse a profile that no longer exists", async () => {

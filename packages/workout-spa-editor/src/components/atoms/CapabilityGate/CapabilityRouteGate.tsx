@@ -1,11 +1,9 @@
 import type { ReactNode } from "react";
 import { Redirect, useLocation } from "wouter";
 
-import { RouteSpinner } from "../components/atoms/RouteSpinner";
-import { useCapabilities } from "../contexts/capabilities-context";
-
-/** Where a route of an off Capability lands: the Day. */
-export const CAPABILITY_OFF_TARGET = "/daily";
+import { useCapabilities } from "../../../contexts/capabilities-context";
+import { DAILY_PATH } from "../../../routing/constants";
+import { RouteSpinner } from "../RouteSpinner";
 
 /**
  * Every route an off Capability owns redirects to the Day, read from the
@@ -18,5 +16,5 @@ export function CapabilityRouteGate({ children }: { children: ReactNode }) {
   const capabilities = useCapabilities();
   if (capabilities.offers("route", location)) return <>{children}</>;
   if (capabilities.status === "loading") return <RouteSpinner />;
-  return <Redirect to={CAPABILITY_OFF_TARGET} replace />;
+  return <Redirect to={DAILY_PATH} replace />;
 }

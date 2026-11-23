@@ -116,6 +116,40 @@ for (const [language, locale, words] of [
       expect(await templateCount(page)).toBe(1);
     });
 
+    test("should land on the Day for every spelling of the Library's address, and on back and forward", async ({
+      page,
+    }) => {
+      // Arrange
+      await freshAthlete(page);
+      await seedTemplates(page, [makeTemplate({ name: "Tempo Ride" })]);
+      await setCapabilities(page, { templates: true });
+      await page.goto("/library");
+      await expect(page.getByTestId("library-page")).toBeVisible();
+      await page.goto("/daily");
+      await expect(page.getByTestId("daily-page")).toBeVisible();
+      await setCapabilities(page, { templates: false });
+
+      // Act
+      await page.goBack();
+
+      // Assert
+      await expect(page).toHaveURL(/#\/daily$/);
+      await expect(page.getByTestId("library-page")).toHaveCount(0);
+      await page.goForward();
+      await expect(page).toHaveURL(/#\/daily$/);
+      for (const spelling of [
+        "/Library",
+        "/LIBRARY/x",
+        "/library/",
+        "/%6Cibrary",
+        "/library?view=list",
+      ]) {
+        await page.goto(spelling);
+        await expect(page).toHaveURL(/#\/daily$/);
+        await expect(page.getByTestId("library-page")).toHaveCount(0);
+      }
+    });
+
     test("should keep Templates on for an athlete who already kept templates", async ({
       page,
     }) => {

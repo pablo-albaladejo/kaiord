@@ -52,12 +52,12 @@ export function CreateInputPhase({
   const [, navigate] = useLocation();
   const context = { ...sheetContext(useSearch()), sport };
   const clearWorkout = useClearWorkout();
-  const templatesOn = useCapabilities().isOn("templates");
+  const { offers } = useCapabilities();
   const startFrom = (
     <CreateStartFrom
       lead={!provider}
       onTemplate={
-        templatesOn
+        offers("inScreen", "create-from-template")
           ? () => navigate(buildNewSessionHref("template", context))
           : undefined
       }

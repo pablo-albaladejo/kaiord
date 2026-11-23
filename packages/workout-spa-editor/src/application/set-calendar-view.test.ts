@@ -70,6 +70,34 @@ describe("setCalendarView", () => {
     });
   });
 
+  it("should keep every other field of the row, known or not", async () => {
+    // Arrange
+    const repo = createInMemoryUserPreferencesRepository();
+    const profileRepo = createInMemoryPersistence().profiles;
+    await profileRepo.put(stubProfile());
+    const row = {
+      profileId: "p1",
+      calendarView: "grid" as const,
+      setupChecklistDismissed: true,
+      writtenByANewerBuild: { kept: true },
+      updatedAt: "2026-05-01T10:00:00.000Z",
+    };
+    await repo.put(row);
+
+    // Act
+    await setCalendarView(
+      { profileId: "p1", view: "list" },
+      { clock: fixedClock, repository: repo, profileRepository: profileRepo }
+    );
+
+    // Assert
+    expect(await repo.get("p1")).toEqual({
+      ...row,
+      calendarView: "list",
+      updatedAt: "2026-05-01T12:00:00.000Z",
+    });
+  });
+
   it("should still refresh updatedAt when idempotent on same value", async () => {
     // Arrange
     const repo = createInMemoryUserPreferencesRepository();

@@ -18,21 +18,17 @@
  */
 import type { ManagedDataType } from "@kaiord/core";
 
-import type { IntegrationPolicyRepository } from "../integration-policy/integration-policy-repository.port";
-import { automaticOrder, hasAutomaticAuthority } from "./automatic-authority";
-import { effectiveSourceOrder } from "./effective-source-order";
 import {
-  type AuthorityChoiceDeps,
-  readAuthorityChoice,
-} from "./read-authority-choice";
+  type AuthorityInForceDeps,
+  loadAuthorityInForce,
+} from "./authority-in-force";
 
 export type SourcedRecord<T> = {
   sourceBridgeId: string;
   record: T;
 };
 
-export type ResolveEffectiveSourceDeps<T> = AuthorityChoiceDeps & {
-  policyRepo: Pick<IntegrationPolicyRepository, "findByProfileDirection">;
+export type ResolveEffectiveSourceDeps<T> = AuthorityInForceDeps & {
   getRecordsForDay: (input: {
     profileId: string;
     dataType: ManagedDataType;
@@ -80,28 +76,15 @@ export const resolveEffectiveSource = async <T>(
   input: ResolveEffectiveSourceInput
 ): Promise<ResolveEffectiveSourceResult<T>> => {
   const { profileId, dataType } = input;
-  const recordsForDay = await deps.getRecordsForDay(input);
-  const choice = await readAuthorityChoice(deps, { profileId, dataType });
-  if (choice === undefined && !hasAutomaticAuthority(dataType)) {
-    return { mode: "union", records: recordsForDay };
-  }
-  if (choice?.mode === "union") {
-    return { mode: "union", records: recordsForDay };
-  }
-  const importPolicies = await deps.policyRepo.findByProfileDirection({
-    profileId,
-    dataType,
-    direction: "import",
-  });
-  return choice === undefined
-    ? resolveInOrder(
-        "automatic",
-        automaticOrder(dataType, importPolicies),
-        recordsForDay
-      )
+  const [recordsForDay, authority] = await Promise.all([
+    deps.getRecordsForDay(input),
+    loadAuthorityInForce(deps, { profileId, dataType }),
+  ]);
+  return authority.mode === "union"
+    ? { mode: "union", records: recordsForDay }
     : resolveInOrder(
-        "priority",
-        effectiveSourceOrder(choice.sourceOrder, importPolicies),
+        authority.mode === "priority" ? "priority" : "automatic",
+        authority.sourceOrder,
         recordsForDay
       );
 };

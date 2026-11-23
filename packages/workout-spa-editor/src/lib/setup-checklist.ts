@@ -13,7 +13,7 @@ import { withOrigin } from "../routing/with-origin";
 import type { Profile } from "../types/profile";
 import {
   capabilityHome,
-  type CapabilityId,
+  type InScreenSurfaceId,
 } from "./capabilities/capability-catalogue";
 
 export type SetupChecklistItemId =
@@ -25,8 +25,8 @@ export type SetupChecklistItem = {
   readonly hintKey: string;
   readonly done: boolean;
   readonly href: string;
-  /** Shown only while this Capability is on. */
-  readonly capability?: CapabilityId;
+  /** Shown only while the Capability owning this part is on. */
+  readonly surface?: InScreenSurfaceId;
 };
 
 export type SetupChecklistSignals = {
@@ -87,6 +87,6 @@ export const buildSetupChecklistItems = (
     hintKey: "items.saveToLibrary.hint",
     done: signals.hasTemplate,
     href: capabilityHome("templates"),
-    capability: "templates",
+    surface: "setup-save-to-library",
   },
 ];

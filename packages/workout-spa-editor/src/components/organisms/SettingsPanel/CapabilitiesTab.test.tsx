@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
 import { CapabilitiesProvider } from "../../../contexts/capabilities-context";
 import { renderWithProviders } from "../../../test-utils";
 import {
@@ -16,12 +17,20 @@ const renderTab = () =>
   renderWithProviders(
     <CapabilitiesProvider>
       <CapabilitiesTab />
-    </CapabilitiesProvider>
+    </CapabilitiesProvider>,
+    { persistence: createDexiePersistence(db) }
   );
 
 const decisions = async () =>
-  (await db.table("userPreferences").get(CAPABILITY_TEST_PROFILE_ID))
-    ?.capabilities;
+  Object.fromEntries(
+    (
+      await db
+        .table("capabilityDecisions")
+        .where("profileId")
+        .equals(CAPABILITY_TEST_PROFILE_ID)
+        .toArray()
+    ).map((d) => [d.capabilityId, d.on])
+  );
 
 describe("CapabilitiesTab", () => {
   afterEach(clearCapabilities);

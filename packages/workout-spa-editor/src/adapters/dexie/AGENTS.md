@@ -5,7 +5,7 @@
 
 ## Purpose
 
-The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 → v39), every per-table repository, the cascade-on-profile-delete logic, the storage probe, and the migration runner.
+The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 → v40), every per-table repository, the cascade-on-profile-delete logic, the storage probe, and the migration runner.
 
 ## Key Files
 
@@ -31,6 +31,7 @@ The Dexie/IndexedDB implementation of `PersistencePort`. Owns the schema (v1 →
 - `dexie-session-match-repository.ts` + `dexie-session-match-append-executed.ts` + `dexie-session-match-update.ts` — links between coaching activities and executed workouts; enforces uniqueness per `(profileId, coachingActivityId)` and `(profileId, workoutId)`.
 - `dexie-auto-match-dismissal-repository.ts` — per `(profileId, weekStart)` dismissals.
 - `dexie-user-preferences-repository.ts` — per-profile UI prefs (calendar density).
+- `dexie-capability-decision-repository.ts` — the v40 `capabilityDecisions` store: one row per (profile, Capability), apart from the preferences row so no older build rewriting that row can erase a decision; `dexie-v40-migration.ts` moves the old `capabilities` map off the preferences row.
 - `session-match-conflict.ts` — `SessionAlreadyMatchedError` mapping.
 - `storage-probe.ts` — quick "is IndexedDB usable?" check for the `StorageAvailabilityBanner`.
 

@@ -20,6 +20,7 @@ import type {
   StoredSourceMode,
 } from "../../types/data-type-source-policy";
 import type { IntegrationPolicyDirection } from "../../types/integration-policy";
+import { automaticHead } from "../data-source-policy/automatic-authority";
 import { MANUAL_SOURCE_ID, rankedHead } from "./data-type-sources";
 import { orderSources } from "./order-sources";
 
@@ -33,13 +34,15 @@ export type SourceCapabilitySignals = {
   ) => boolean;
 };
 
-export type SourceOfTruthOptions = {
+export type AuthorityOptions = {
   /** "automatic" when the athlete has not chosen (the App's rule decides). */
   readonly mode: StoredSourceMode;
   /** Storage keys, in the order the type is read today. */
   readonly choices: readonly string[];
   /** The choice ranked first, when the stored order ranks one of them. */
   readonly current: string | undefined;
+  /** The source that decides today: the athlete's head, or the rule's pick. */
+  readonly decides: string | undefined;
 };
 
 /**
@@ -61,19 +64,21 @@ const canServe = (
   return token !== undefined && announced.includes(token);
 };
 
-export const buildSourceOfTruthOptions = (
+export const buildAuthorityOptions = (
   dataType: ManagedDataType,
   sources: readonly string[],
   policy: DataTypeSourcePolicy | undefined,
   signals: SourceCapabilitySignals
-): SourceOfTruthOptions => {
+): AuthorityOptions => {
   const saved = policy?.sourceOrder ?? [];
   const capable = sources.filter((id) => canServe(id, dataType, signals));
   const mode = policy?.mode ?? "automatic";
+  const current = mode === "priority" ? rankedHead(capable, saved) : undefined;
   return {
     mode,
     choices: orderSources(capable, saved),
-    current: mode === "priority" ? rankedHead(capable, saved) : undefined,
+    current,
+    decides: mode === "automatic" ? automaticHead(dataType, capable) : current,
   };
 };
 
@@ -95,7 +100,7 @@ export const buildSourceOfTruthOptions = (
  * nothing: `picked` is always one of `choices`, and where `choices` is empty
  * there is no control to pick from.
  */
-export const canChooseSource = (options: SourceOfTruthOptions): boolean =>
+export const canChooseSource = (options: AuthorityOptions): boolean =>
   options.choices.length >= (options.mode === "priority" ? 1 : 2);
 
 /**
@@ -105,7 +110,7 @@ export const canChooseSource = (options: SourceOfTruthOptions): boolean =>
  * survives underneath the new head.
  */
 export const promoteSource = (
-  options: SourceOfTruthOptions,
+  options: AuthorityOptions,
   picked: string
 ): string[] => [
   picked,

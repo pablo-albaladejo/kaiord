@@ -1,15 +1,15 @@
 import type { ManagedDataType } from "@kaiord/core";
 
-import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
-import type { SourceOfTruthEditor } from "../../../hooks/connections/use-source-of-truth-editor";
+import type { AuthorityOptions } from "../../../application/connections/authority-options";
+import type { AuthorityChoiceEditor } from "../../../hooks/connections/use-authority-choice-editor";
 import { useTranslate } from "../../../i18n/use-translate";
 import { authorityNow } from "./authority-copy";
 import { AuthorityChoices } from "./AuthorityChoices";
 
 type Props = {
   dataType: ManagedDataType;
-  options: SourceOfTruthOptions;
-  editor: SourceOfTruthEditor;
+  options: AuthorityOptions;
+  editor: AuthorityChoiceEditor;
 };
 
 export function AuthorityRow({ dataType, options, editor }: Props) {
@@ -27,7 +27,7 @@ export function AuthorityRow({ dataType, options, editor }: Props) {
         className="text-[12.5px] text-ink-muted"
         data-testid={`authority-now-${dataType}`}
       >
-        {authorityNow(dataType, options, type, t, tConnections)}
+        {authorityNow(options, type, t, tConnections)}
       </p>
       <AuthorityChoices
         dataType={dataType}
