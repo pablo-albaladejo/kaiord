@@ -15,23 +15,20 @@ one declaration each.
 
 - **One catalogue of Capabilities** (`lib/capabilities/capability-catalogue.ts`):
   each entry names, by the id its registry already uses, the navigation
-  destinations, routes, settings sections, editor commands, keyboard
-  shortcuts and assistant Tools it owns, the source modules of its screens,
-  an optional `advanced` or `experimental` grade, and optionally a Dexie
+  destinations, routes, settings sections and assistant Tools it owns, the
+  parts of other screens it owns (`inScreen`), an optional `advanced` or `experimental` grade, and optionally a Dexie
   table whose rows mean the athlete already used it.
 - **One read API** (`useCapabilities()`, `<CapabilityGate>`): `isOn(id)` and
   `offers(kind, id)`. Navigation (header bar, More menu, avatar menu, bottom
-  bar), the route switch, the settings index and rail, the editor commands
-  (palette, context menu, coach marks), keyboard shortcuts and the `?` sheet,
-  the assistant's Tools and its "what can I do" list, the setup checklist and
+  bar), the route switch, the settings index and rail, the assistant's Tools and its "what can I do" list, the setup checklist and
   every link into a Capability from another screen read it.
 - **Off leaves no trace**: an off Capability is absent from navigation and
-  settings, its routes redirect to the Day (`/daily`), its commands and
-  shortcuts do nothing, its Tools are not offered to the model, and nothing
+  settings, its routes redirect to the Day (`/daily`), its Tools are not offered to the model, and nothing
   links to it.
-- **The athlete's decision** lives on their `userPreferences` row
-  (`capabilities`, optional and unindexed: no Dexie version), so it survives
-  reload, syncs between their devices with Drive and travels in a backup file.
+- **The athlete's decision** lives in a store of its own
+  (`capabilityDecisions`, Dexie v40, one row per athlete and Capability), so
+  it survives reload, syncs between their devices with Drive, travels in a
+  backup file, and no older build rewriting the preferences row can erase it.
 - **Settings, Capabilities** is the one place to turn one on or off, in one
   step. A switch is its own undo; nothing asks first.
 - **Templates is the first Capability**: the Library destination and route,
@@ -57,9 +54,8 @@ None.
 ## Impact
 
 - `@kaiord/workout-spa-editor` (private): the catalogue, the provider and
-  read API, the route gate, the nav, settings, commands, shortcuts, chat
-  tools and setup checklist wiring, the `capabilities` field of
-  `userPreferences`, the `settings` dictionaries (English and Spanish), a new
+  read API, the route gate, the nav, settings, chat tools and setup checklist
+  wiring, the `capabilityDecisions` store (Dexie v40), the `settings` dictionaries (English and Spanish), a new
   e2e spec, existing e2e specs of the Library turn Templates on first.
 - `scripts/`: the guard, its vocab, its test; `package.json` `lint`.
 - GLOSSARY.md: the athlete-facing word for Capability in each language.

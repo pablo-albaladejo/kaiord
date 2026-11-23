@@ -83,19 +83,30 @@ a day nobody else reported. Reconnecting restores the routes
 
 ```ts
 { id: "authority-matrix", grade: "advanced",
-  owns: { settings: ["authority"], tools: ["set_data_route"], … },
-  modules: ["components/organisms/AuthorityMatrix/",
-            "hooks/connections/use-source-of-truth-editor.ts"],
+  owns: { settings: ["authority"], tools: ["set_data_route"],
+          inScreen: ["connections-authority-link"], … },
   adoptsExistingData: "dataTypeSourcePolicy" }
+// MODULES (scripts/capability-surfaces.vocab.mjs):
+//   ["components/organisms/AuthorityMatrix/",
+//    "hooks/connections/use-authority-choice-editor.ts"]
 ```
 
 The section "Which Platform decides" (Settings) lists each kind with more
 than one source it can be read from, says what decides it now, and offers
-"Automatic" first and each source. "Automatic" writes a row with mode
-`automatic` rather than deleting it, so the hand-back syncs like any other
-choice. Connections links to it only inside `<CapabilityGate>`.
+"Automatic" first and each source. "Automatic" writes a row rather than
+deleting it, so the hand-back syncs like any other choice. The row is marked
+`automatic: true` and carries the rule itself, so a device on an older build
+(whose resolver reads any row that is not `union` as a ranking) shows the
+same Authority: `priority` with the athlete's own entry and the kind's
+Platforms in the rule's order, or `union` for a kind kept side by side
+(`automaticChoiceRow`). Rejected: a row with mode `automatic` and an empty
+order, which an older build read as a ranking of nothing, so its Day showed
+no weight. Such rows, written before the marker, still read as automatic.
+Connections links to it only inside `<CapabilityGate surface>`.
 
-**Off, the stored choices stop applying** (`readAuthorityChoice`). Rejected:
+**Off, the stored choices stop applying** (`readAuthorityChoice`, which
+asks the Capabilities' read API, and `authorityInForce`, the one function
+every reader uses to decide what decides a kind). Rejected:
 keep applying them. An athlete who turns an advanced part of the App off
 expects the App to stop doing what that part did; choices that keep deciding
 while nothing on screen shows them, or lets them be changed, are a hidden

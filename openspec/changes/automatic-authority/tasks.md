@@ -17,3 +17,9 @@
 - [x] 2.3 Connections rows without the ranking control, naming the automatic Authority, linking to the matrix while on
 - [x] 2.4 The zones conflict dialog removed; one notice with "Use Train2Go's"; the auto-import switch worded for what it does
 - [x] 2.5 Existing e2e specs of Connections and zones sync follow the new behaviour
+
+## 3. Review fixes (Authority)
+
+- [x] 3.1 "Automatic" stores `automaticChoiceRow`: an older build's resolver reads it with the same Authority (tested against that resolver copied as a fixture)
+- [x] 3.2 One function decides the Authority in force (`authorityInForce` / `loadAuthorityInForce`), used by the resolver, the daily-wellness reading and the assistant's answer; `readAuthorityChoice` asks the Capabilities' read API; the rule's pick is computed in the options, not in the copy
+- [x] 3.3 Authority vocabulary: `useAuthorityChoiceEditor`, `AuthorityOptions`, `ChoiceButton`, `authorityMatrixLink`
