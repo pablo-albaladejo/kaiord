@@ -1,0 +1,76 @@
+{
+  "kinds": {
+    "sleep": "sueño",
+    "restingHeartRate": "frecuencia cardiaca en reposo",
+    "weight": "peso",
+    "hrv": "VFC",
+    "dailyActivity": "pasos y calorías del día",
+    "bodyComposition": "composición corporal",
+    "stress": "estrés",
+    "meals": "las comidas que registras",
+    "energyBalance": "balance energético y objetivo",
+    "heartRateZones": "umbral y zonas de frecuencia cardiaca",
+    "labResults": "resultados de analíticas",
+    "messages": "tus mensajes",
+    "workouts": "entrenamientos",
+    "coachingPlan": "el plan y los comentarios de tu entrenador",
+    "dataSources": "de qué fuente llega cada tipo de dato",
+    "workoutDescription": "el entrenamiento que describes",
+    "aiInstructions": "tus instrucciones para la IA",
+    "powerPaceZones": "zonas de potencia y ritmo",
+    "providerKey": "la clave",
+    "intervalsKey": "la clave de API",
+    "readRequests": "las peticiones de los datos que Kaiord lee",
+    "syncSnapshot": "una copia de tus datos de este navegador, claves de IA incluidas",
+    "pageViews": "páginas vistas",
+    "productEvents": "eventos de uso, nunca tus datos"
+  },
+  "flows": {
+    "assistant": "Mientras hablas con el asistente, lo que lee para responderte",
+    "generation": "Cuando generas un entrenamiento con IA",
+    "labImport": "Cuando lees un documento de analíticas con IA",
+    "providerKeyCheck": "Cuando guardas una clave, para comprobarla",
+    "garminWorkouts": "Cuando envías un entrenamiento a Garmin Connect",
+    "garminBody": "Cuando envías una medición de composición corporal a Garmin Connect",
+    "trainingpeaksWorkouts": "Cuando envías un entrenamiento a TrainingPeaks",
+    "platformReads": "Cuando Kaiord lee allí tus datos",
+    "intervalsKeyCheck": "Cuando guardas tu clave de API, para comprobarla",
+    "driveSync": "Mientras la sincronización entre dispositivos está activada",
+    "analytics": "En cada página"
+  },
+  "groups": {
+    "provider": "Proveedores de IA",
+    "platform": "Plataformas, a través de sus extensiones",
+    "service": "Servicios que conectas",
+    "analytics": "Analítica web"
+  },
+  "notice": {
+    "title": "¿Enviar tus datos de salud a {{provider}}?",
+    "assistant": "Para responderte, el asistente puede leer estos datos de salud y enviarlos a {{provider}}: {{kinds}}.",
+    "generation": "Para generar este entrenamiento, Kaiord envía estos datos de salud a {{provider}}: {{kinds}}.",
+    "labImport": "Para leer este documento, Kaiord envía estos datos de salud a {{provider}}: {{kinds}}.",
+    "terms": "Van desde tu navegador directamente a {{provider}}, que los trata según sus propias condiciones. Kaiord nunca los recibe.",
+    "once": "Enviar esta vez",
+    "onceResult": "Kaiord volverá a preguntar la próxima vez.",
+    "always": "Permitir siempre a {{provider}}",
+    "alwaysResult": "A partir de ahora {{provider}} puede recibir, sin preguntar: {{kinds}}.",
+    "never": "No enviar",
+    "neverResult": {
+      "assistant": "El asistente responde sin tus datos de salud.",
+      "generation": "El entrenamiento se genera sin tu umbral ni tus zonas de frecuencia cardiaca.",
+      "labImport": "El documento no se envía; puedes introducir los resultados a mano."
+    },
+    "neverStays": "Kaiord no volverá a preguntar por {{provider}}.",
+    "changeLater": "Puedes cambiarlo en Ajustes, Privacidad."
+  },
+  "inventory": {
+    "title": "Adónde van tus datos",
+    "intro": "Tus datos se quedan en este navegador salvo lo que aparece aquí: cada destino, qué puede recibir y cuándo.",
+    "active": "Activo",
+    "notSetUp": "Sin configurar",
+    "healthLabel": "Datos de salud para {{provider}}",
+    "healthAsk": "Preguntar antes",
+    "healthAlways": "Enviar siempre",
+    "healthNever": "No enviar"
+  }
+}

@@ -950,7 +950,7 @@ test("missing GDPR/CCPA reference is flagged", () => {
 });
 
 test("missing LLM provider disclosure is flagged", () => {
-  const src = POLICY.replace(/\(Anthropic, OpenAI, or Google\)/, "");
+  const src = POLICY.replace(/Anthropic/g, "a provider");
   const v = checkPolicy(src);
   assert.ok(v.some((r) => r.includes("LLM provider data flow")));
 });

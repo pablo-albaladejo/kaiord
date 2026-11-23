@@ -95,4 +95,50 @@ describe("buildChatTools", () => {
     // Assert
     expect(declared).toEqual([...gated].sort());
   });
+
+  it("should hand the model stored health values when the athlete shares them", async () => {
+    // Arrange
+    const deps = { ...makeDeps(), healthShared: true };
+    await deps.persistence.healthWeight.put({
+      id: "w1",
+      profileId: "p1",
+      date: "2026-06-10",
+      krd: { weightKilograms: 71.4 },
+    } as never);
+    const tool = buildChatTools(deps).find((t) => t.name === "query_health");
+
+    // Act
+    const result = await tool?.execute({ metric: "weight" });
+
+    // Assert
+    expect(JSON.stringify(result)).toContain("71.4");
+  });
+
+  it("should answer every health tool without a stored value when the athlete does not share", async () => {
+    // Arrange
+    const deps = { ...makeDeps(), healthShared: false };
+    await deps.persistence.healthWeight.put({
+      id: "w1",
+      profileId: "p1",
+      date: "2026-06-10",
+      krd: { weightKilograms: 71.4 },
+    } as never);
+    const tools = buildChatTools(deps).filter((t) =>
+      ["query_health", "query_energy_balance"].includes(t.name)
+    );
+
+    // Act
+    const results = await Promise.all(
+      tools.map((t) => t.execute({ metric: "weight" }))
+    );
+
+    // Assert
+    expect(results).toHaveLength(2);
+    for (const result of results) {
+      expect(result).toEqual({
+        withheld: true,
+        reason: expect.stringContaining("chose not to share"),
+      });
+    }
+  });
 });

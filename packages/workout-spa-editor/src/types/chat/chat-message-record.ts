@@ -44,4 +44,10 @@ export type ChatMessageRecord = {
    * to the model appends a fixed marker (see `recordsToModelMessages`).
    */
   stopReason?: ChatStopReason;
+  /**
+   * Set on an assistant reply whose turn ran a tool that reads stored health
+   * data, so it may quote it: a replay to a Provider the athlete does not
+   * share health data with leaves it out.
+   */
+  readHealth?: boolean;
 };

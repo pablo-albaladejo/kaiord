@@ -30,6 +30,7 @@ const makeInput = (): RunLabExtractionInput => ({
   file: { data: PDF_BYTES, mediaType: "application/pdf", filename: "labs.pdf" },
   providers: [],
   bindings: [],
+  askHealth: async () => "send",
 });
 
 describe("runLabExtraction", () => {
@@ -120,5 +121,33 @@ describe("runLabExtraction", () => {
 
     // Assert
     await expect(run).rejects.toThrow("model exploded");
+  });
+
+  it("should ask before the document goes, naming its Provider", async () => {
+    // Arrange
+    const askHealth = vi.fn(async () => "send" as const);
+
+    // Act
+    await runLabExtraction({ ...makeInput(), askHealth });
+
+    // Assert
+    expect(askHealth).toHaveBeenCalledWith("anthropic");
+    expect(mockRunGenerateAgent).toHaveBeenCalled();
+  });
+
+  it("should not send the document when the athlete does not share health data", async () => {
+    // Arrange
+    const input = {
+      ...makeInput(),
+      askHealth: async () => "withhold" as const,
+    };
+
+    // Act
+    const result = await runLabExtraction(input);
+
+    // Assert
+    expect(result).toEqual({ ok: false, reason: "withheld" });
+    expect(mockCreateLanguageModel).not.toHaveBeenCalled();
+    expect(mockRunGenerateAgent).not.toHaveBeenCalled();
   });
 });

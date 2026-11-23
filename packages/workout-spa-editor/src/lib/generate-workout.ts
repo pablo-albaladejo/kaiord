@@ -12,10 +12,9 @@ import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adap
 import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { AthleteInput } from "./athlete-generation-context";
-import {
-  loadAthleteInput,
-  toAthleteContext,
-} from "./athlete-generation-context";
+import { loadAthleteInput } from "./athlete-generation-context";
+import { generationContext } from "./athlete-health-context";
+import { askGenerationHealth, type HealthShare } from "./health-sharing-gate";
 
 export type GenerateWorkoutOptions = {
   text: string;
@@ -37,6 +36,9 @@ export type GenerateWorkoutOptions = {
   abortSignal?: AbortSignal;
   // When set, the output streams and real progress is reported per phase.
   onProgress?: OnGenerateProgress;
+  // Asks whether heart-rate data may go, called only when it would; a batch
+  // passes one that asks once for all its generations. Omitted, the gate asks.
+  askHealth?: () => Promise<HealthShare>;
 };
 
 const defaultTelemetry = (usage: AiTelemetrySink): AiTelemetrySink => {
@@ -52,20 +54,25 @@ const defaultTelemetry = (usage: AiTelemetrySink): AiTelemetrySink => {
 export const generateWorkoutKrd = async (
   options: GenerateWorkoutOptions
 ): Promise<KRD> => {
+  const persistence = createDexiePersistence();
+  const athlete =
+    options.athlete ?? (await loadAthleteInput(persistence, options.profileId));
+  const context = await generationContext(
+    athlete,
+    options.sport,
+    options.askHealth ?? (() => askGenerationHealth(options.provider.type))
+  );
   const model = await createLanguageModel(options.provider, options.modelId, {
     browser: true,
   });
-  const persistence = createDexiePersistence();
   const telemetry =
     options.telemetry ??
     defaultTelemetry(createDexieUsageTelemetrySink(persistence));
-  const athlete =
-    options.athlete ?? (await loadAthleteInput(persistence, options.profileId));
   const textToWorkout = createTextToWorkout({ model, telemetry });
 
   const workout = await textToWorkout(options.text, {
     sport: options.sport,
-    athlete: toAthleteContext(athlete, options.sport),
+    athlete: context,
     signal: options.abortSignal,
     onProgress: options.onProgress,
   });

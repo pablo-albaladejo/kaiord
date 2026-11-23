@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
+import { buildChatAgent } from "./build-chat-agent";
 import { stopTurn } from "./chat-turn-context";
 import { approveAction, denyAction } from "./chat-turn-resume";
 import { retryTurn, sendTurn } from "./chat-turn-runner";
@@ -12,6 +13,13 @@ const fakeAgent = { sendTurn: vi.fn(), resume: vi.fn() };
 
 vi.mock("./build-chat-agent", () => ({
   buildChatAgent: vi.fn(async () => ({ agent: fakeAgent, tools: [] })),
+}));
+
+const healthRequest = vi.fn<(question: unknown) => Promise<string>>(
+  async () => "withhold"
+);
+vi.mock("../../lib/health-sharing-gate", () => ({
+  healthSharingGate: { request: (q: unknown) => healthRequest(q) },
 }));
 
 const provider = { id: "prov-1", type: "anthropic" } as LlmProviderConfig;
@@ -374,5 +382,73 @@ describe("chat-turn-runner", () => {
       ],
       { signal: expect.any(AbortSignal) }
     );
+  });
+
+  it("should ask about health data before the turn and send nothing until answered", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence);
+    let answer: (share: string) => void = () => undefined;
+    healthRequest.mockImplementationOnce(
+      () => new Promise((resolve) => (answer = resolve))
+    );
+    fakeAgent.sendTurn.mockResolvedValueOnce({
+      status: "complete",
+      text: "ok",
+      messages: [],
+    });
+
+    // Act
+    const running = sendTurn(ctx, [], "How did I sleep?");
+    await vi.waitFor(() => expect(healthRequest).toHaveBeenCalled());
+    const sentWhileAsking = fakeAgent.sendTurn.mock.calls.length;
+    answer("send");
+    await running;
+
+    // Assert
+    expect(healthRequest).toHaveBeenCalledWith({
+      flow: "assistant",
+      providerType: "anthropic",
+    });
+    expect(sentWhileAsking).toBe(0);
+    expect(vi.mocked(buildChatAgent)).toHaveBeenCalledWith(
+      expect.objectContaining({ healthShared: true })
+    );
+  });
+
+  it("should send the turn without health tools or the answers that used them when the athlete does not share", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence);
+    healthRequest.mockResolvedValueOnce("withhold");
+    fakeAgent.sendTurn.mockResolvedValueOnce({
+      status: "complete",
+      text: "ok",
+      messages: [],
+    });
+    const at = "2026-06-13T10:00:00.000Z";
+    const base = { profileId: "p1", conversationId: "c1", createdAt: at };
+    const history = [
+      { ...base, id: "1", role: "user" as const, content: "Sleep?" },
+      {
+        ...base,
+        id: "2",
+        role: "assistant" as const,
+        content: "You slept 6 h.",
+        readHealth: true,
+      },
+    ];
+
+    // Act
+    await sendTurn(ctx, history, "Plan tomorrow");
+
+    // Assert
+    expect(vi.mocked(buildChatAgent)).toHaveBeenCalledWith(
+      expect.objectContaining({ healthShared: false })
+    );
+    expect(fakeAgent.sendTurn.mock.calls[0]?.[0]).toEqual([
+      { role: "user", content: "Sleep?" },
+      { role: "user", content: "Plan tomorrow" },
+    ]);
   });
 });

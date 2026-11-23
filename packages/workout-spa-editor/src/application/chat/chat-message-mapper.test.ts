@@ -266,4 +266,31 @@ describe("newChatMessage", () => {
     });
     expect(resultWithout).not.toHaveProperty("toolResult");
   });
+
+  describe("recordsToModelMessages without health data", () => {
+    it("should leave out the answers that read health data and keep the athlete's messages", () => {
+      // Arrange
+      const records = [
+        record("1", "user", "How did I sleep?"),
+        {
+          ...record("2", "assistant", "You slept 6 h 12 min."),
+          readHealth: true,
+        },
+        record("3", "user", "Plan tomorrow"),
+      ];
+
+      // Act
+      const shared = recordsToModelMessages(records);
+      const withheld = recordsToModelMessages(records, {
+        withholdHealth: true,
+      });
+
+      // Assert
+      expect(shared).toHaveLength(records.length);
+      expect(withheld).toEqual([
+        { role: "user", content: "How did I sleep?" },
+        { role: "user", content: "Plan tomorrow" },
+      ]);
+    });
+  });
 });
