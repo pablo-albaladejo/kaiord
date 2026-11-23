@@ -42,7 +42,7 @@ const REREGISTER_MS = 5_000;
 // A deploy found this soon after load, with nothing done, applies silently.
 const SILENT_WINDOW_MS = 10_000;
 // Native IndexedDB version of the next major schema (Dexie stores verno * 10).
-const NEXT_MAJOR_NATIVE = 380;
+const NEXT_MAJOR_NATIVE = 390;
 // The lazy route chunk a later deploy no longer ships.
 const SETTINGS_CHUNK = /^SettingsPage-[\w-]+\.js$/;
 

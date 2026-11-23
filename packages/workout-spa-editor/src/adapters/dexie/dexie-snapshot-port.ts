@@ -42,7 +42,9 @@ const TOMBSTONES = "tombstones";
 // 12-month tombstoning prune bounds its growth (see prune-usage-events).
 // Exported so the tombstone-coverage guard can tell a table that never leaves
 // the device (no tombstone needed) from one that rides the snapshot.
-export const DEVICE_LOCAL = new Set([TOMBSTONES, "connections"]);
+// `traces` never leaves the device either: the athlete's Traces are theirs,
+// read and exported in Settings, Privacy, and never sent (#1652).
+export const DEVICE_LOCAL = new Set([TOMBSTONES, "connections", "traces"]);
 
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive
 // transaction overloads (TS2589). Same pattern as dexie-persistence-adapter.

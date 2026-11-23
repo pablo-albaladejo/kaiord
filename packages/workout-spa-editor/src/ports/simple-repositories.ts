@@ -11,6 +11,7 @@
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { SyncState } from "../types/bridge-schemas";
 import type { Profile } from "../types/profile";
+import type { TraceRecord } from "../types/trace-schemas";
 import type { UsageEventRecord } from "../types/usage-event-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 
@@ -67,7 +68,19 @@ export type UsageEventRepository = {
   delete: (id: string) => Promise<void>;
 };
 
-// The usage event log is the single usage-accounting store after the cutover.
+// Device-local: the Traces never ride the sync snapshot nor a backup file,
+// so no write here is tombstoned. `list` is newest first.
+export type TraceRepository = {
+  put: (record: TraceRecord) => Promise<void>;
+  list: () => Promise<TraceRecord[]>;
+  getById: (id: string) => Promise<TraceRecord | undefined>;
+  deleteMany: (ids: readonly string[]) => Promise<void>;
+  clear: () => Promise<void>;
+};
+
+// What the App keeps about runs of the assistant: the synced usage events
+// (the single usage-accounting store after the cutover) and the Traces.
 export type UsageEventRepositories = {
   usageEvents: UsageEventRepository;
+  traces: TraceRepository;
 };
