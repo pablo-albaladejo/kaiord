@@ -270,7 +270,7 @@ Rule: "Editor runtime -> Zustand. Persisted data -> Dexie. Local UI -> React sta
 
 ## Testing
 
-- **Round-trip tolerances**: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm
+- **Round-trip tolerances**: time ±1s, power ±1W or ±1%FTP, HR ±1bpm (±0.5% as a share of maximum: FIT stores whole percent), cadence ±1rpm, distance ±1m and pace ±0.01m/s (FIT stores distance in whole centimetres and speed in whole mm/s; both bounds are the round-trip validator's defaults); declared once in `DECLARED_TOLERANCES` (`@kaiord/core`)
 - **Coverage**: 80% for core, 70% for frontend
 - Test utilities: `@kaiord/core/test-utils` exports fixture loaders
 

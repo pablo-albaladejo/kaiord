@@ -1,5 +1,5 @@
+import { DECLARED_TOLERANCES } from "./declared-tolerances";
 import { matchesField } from "./field-pattern";
-import type { RoundTripContract } from "./round-trip-contract";
 
 const valueAt = (root: unknown, segments: ReadonlyArray<string>): unknown =>
   segments.reduce<unknown>(
@@ -20,14 +20,10 @@ const targetContext = (root: unknown, field: string) => {
   return { type: target?.type, unit: target?.value?.unit };
 };
 
-/** The tolerance of the first rule that covers `field`, or 0 (exact). */
-export const toleranceOf = (
-  field: string,
-  root: unknown,
-  contract: RoundTripContract
-): number => {
+/** The tolerance of the first declared rule that covers `field`, or 0 (exact). */
+export const toleranceOf = (field: string, root: unknown): number => {
   const { type, unit } = targetContext(root, field);
-  const rule = contract.tolerances.find(
+  const rule = DECLARED_TOLERANCES.find(
     (t) =>
       matchesField(field, t.field) &&
       (t.targetType === undefined || t.targetType === type) &&

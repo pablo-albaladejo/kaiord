@@ -1,4 +1,3 @@
-import { DECLARED_TOLERANCES } from "../declared-tolerances";
 import type { RoundTripContract } from "../round-trip-contract";
 
 const NO_REPEAT_UNTIL =
@@ -14,7 +13,6 @@ const POWER =
 export const TCX_ROUND_TRIP: RoundTripContract = {
   format: "tcx",
   name: "TCX",
-  tolerances: DECLARED_TOLERANCES,
   notCarried: [
     {
       field: "extensions.structured_workout.steps.**.notes",

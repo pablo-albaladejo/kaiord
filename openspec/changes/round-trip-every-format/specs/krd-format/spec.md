@@ -9,7 +9,9 @@ tolerances, `DECLARED_TOLERANCES` in `@kaiord/core`:
 - Time: ±1 second
 - Distance: ±1 meter
 - Power: ±1W or ±1% FTP
-- Heart rate: ±1 bpm or ±1% of maximum
+- Heart rate: ±1 bpm, or ±0.5% as a share of maximum (FIT stores whole
+  percent, so rounding moves it at most half a percent: under 1 bpm for any
+  maximum up to 200 bpm)
 - Cadence: ±1 rpm
 - Pace: ±0.01 m/s
 

@@ -276,6 +276,7 @@ export type {
   FieldTolerance,
   RoundTripContract,
   RoundTripDifference,
+  RoundTripFormat,
   UnsupportedTarget,
 } from "./application/round-trip/contract/round-trip-contract";
 export type { ValidateRoundTrip } from "./application/round-trip/validate-round-trip";

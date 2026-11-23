@@ -1,4 +1,3 @@
-import { DECLARED_TOLERANCES } from "../declared-tolerances";
 import type { RoundTripContract } from "../round-trip-contract";
 
 /**
@@ -9,7 +8,6 @@ import type { RoundTripContract } from "../round-trip-contract";
 export const FIT_ROUND_TRIP: RoundTripContract = {
   format: "fit",
   name: "FIT",
-  tolerances: DECLARED_TOLERANCES,
   notCarried: [
     {
       field: "extensions.structured_workout.**.stepIndex",
