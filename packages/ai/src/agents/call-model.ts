@@ -3,6 +3,7 @@ import type { LanguageModel } from "ai";
 import type { AgentDefinition, GenerateAgentInput } from "./definition-types";
 import type { AiUsage } from "../observability/telemetry-types";
 import { sdkErrorUsage, toUsage, withUsage } from "./attempt-usage";
+import { cutUsage, requestChars } from "./cut-request";
 import type { GenerateProgressPhase } from "./progress";
 import { buildUserMessage } from "./build-user-message";
 import {
@@ -72,11 +73,18 @@ export const callModel = async <TOutput>(
   args: CallModelArgs<TOutput>,
   feedback?: string
 ): Promise<GenerateOutcome<TOutput>> => {
-  const result = await generateText(callSettings(args, feedback)).catch(
-    (error: unknown) => {
-      throw withUsage(toOutputError(error), sdkErrorUsage(error));
-    }
-  );
+  const settings = callSettings(args, feedback);
+  const result = await generateText(settings).catch((error: unknown) => {
+    const reported = sdkErrorUsage(error);
+    // A stop leaves no usage: the request's text is what it was billed for.
+    const cut = !reported && args.signal?.aborted;
+    const sent = requestChars(settings.system, settings.messages);
+    throw withUsage(
+      toOutputError(error),
+      cut ? cutUsage(sent, 0) : reported,
+      Boolean(cut)
+    );
+  });
   const usage = toUsage(result.usage);
   try {
     throwIfTruncated(result.finishReason);

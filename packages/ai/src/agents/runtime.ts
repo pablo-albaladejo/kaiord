@@ -9,7 +9,7 @@ import type {
   AiRequest,
   AiTelemetrySink,
 } from "../observability/telemetry-types";
-import { sumUsage } from "./attempt-usage";
+import { compactUsage, sumUsage } from "../observability/sum-usage";
 import {
   emitBestEffort,
   warnBestEffort,
@@ -93,7 +93,7 @@ export const runGenerateAgent = async <TOutput>(
     throw error;
   }
   const { output } = run;
-  const usage = sumUsage(requests);
+  const usage = compactUsage(sumUsage(requests));
   emitBestEffort(
     telemetry,
     {
