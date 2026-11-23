@@ -34,6 +34,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   notSignedIn: "Not signed in",
   notSignedInCause:
     "Sign in at trainingpeaks.com once — the bridge mints its token from that session, no password stored.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord asks TrainingPeaks the first time it reads or sends, so looking here mints no token.",
   sessionEnded: "Session ended",
   sessionEndedCause:
     "Nothing has reached Kaiord since $1. Sign in at trainingpeaks.com again and the bridge mints a fresh token.",
@@ -135,6 +138,32 @@ const renderNotSignedIn = (since) => {
   });
 };
 
+/* The check asked nothing: TrainingPeaks offers no request that tells a
+   Session apart without minting a token, and no token is held. Nothing was
+   learned, so no outage is recorded and nothing claims the athlete is signed
+   out; the chips and actions are the signed-in ones a first read would use. */
+const renderNotChecked = () => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
+  });
+  renderChips($, chipsFor(FEED_KEYS), { caption: msg("captionFeeds") });
+  renderChips($, chipsFor(FUTURE_KEYS, "dashed"), {
+    caption: msg("captionWillFeed"),
+    region: "future-region",
+  });
+  renderConsequence($, []);
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openTrainingPeaks"),
+    secondaryHref: OPEN_TRAININGPEAKS_URL,
+  });
+};
+
 const refresh = async () => {
   showRefresh(false);
   setMarkEstablished(false);
@@ -145,6 +174,11 @@ const refresh = async () => {
   });
   renderSkeleton($, SKELETON_REGIONS);
   const res = await sendMessage({ action: "checkSession" });
+  if (res.ok && res.data?.session === "not-checked") {
+    renderNotChecked();
+    showRefresh(true);
+    return;
+  }
   const authenticated = res.ok ? !!res.data?.authenticated : false;
   const health = await recordProbe(authenticated);
   if (authenticated) renderConnected();

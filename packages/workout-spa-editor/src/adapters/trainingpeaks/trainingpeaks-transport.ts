@@ -10,15 +10,19 @@
  */
 import { z } from "zod";
 
+import { SESSION_OUTCOMES } from "../bridge/bridge-session-outcome";
 import { sendBridgeMessage } from "../bridge/bridge-transport";
 
 const CHECK_SESSION_TIMEOUT_MS = 5_000;
 const READ_METRICS_TIMEOUT_MS = 30_000;
 
-// The bridge answers `checkSession` with its whole BRIDGE_MANIFEST plus these
-// two keys; the non-strict object drops the manifest noise.
+// The bridge answers `checkSession` with its whole BRIDGE_MANIFEST plus the
+// typed outcome and its boolean; the non-strict object drops the manifest
+// noise. An extension older than the cheap check also sends `athleteId` (the
+// check minted a token to learn it) and `needsReauth`.
 const trainingPeaksSessionSchema = z.object({
   authenticated: z.boolean(),
+  session: z.enum(SESSION_OUTCOMES).optional(),
   athleteId: z.number().optional(),
   /** Absent from an older extension, which cannot tell the two apart. */
   needsReauth: z.boolean().optional(),

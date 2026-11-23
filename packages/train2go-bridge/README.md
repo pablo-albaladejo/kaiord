@@ -16,10 +16,13 @@ Store workflow (`cws-publish.yml`) packages and uploads it.
   `credentials:"include"` (SW-direct) — the site's HttpOnly session cookie
   travels automatically, with no content script on `app.train2go.com` — and
   parse activities into a normalized shape (see `parser.js`).
-- Expose a small message-passing surface (`ping`, `read-week`, `read-day`,
-  `read-details`, ...) that the SPA reaches via `chrome.runtime.sendMessage`
+- Expose a small message-passing surface (`ping`, `read-profile`,
+  `read-week`, `read-day`, `read-details`, ...) that the SPA reaches via `chrome.runtime.sendMessage`
   once it has discovered the extension ID at runtime through the
   `kaiord-announce.js` content script.
+- Answer the connection check (`ping`) with yes or no only: the athlete id
+  and name, the coach's name and notes travel only to `read-profile`, which
+  the connect flow and the popup ask for.
 - Restrict communication to Kaiord-controlled origins
   (exactly `https://kaiord.com/*`, no subdomain, plus `http://localhost:5173/*` and `http://localhost:5174/*`
   in dev builds only) so other websites cannot drive the bridge.

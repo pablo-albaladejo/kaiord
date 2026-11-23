@@ -201,12 +201,43 @@ const train2goFetch = async (path, method = "GET") => {
 
 // ── Actions ──
 
-// Spread session FIRST, then BRIDGE_MANIFEST, so manifest fields
-// (id/name/version/protocolVersion/capabilities) cannot be spoofed by
-// a future Train2Go API change that returns its own keys with the same
-// names. This matches the garmin-bridge precedence and is enforced by
-// the "manifest fields take precedence" test.
-const ping = async () => {
+// The Session check, answered to `ping`: one GET of the profile ping, the
+// cheapest Train2Go request that tells a live session from a dead one. Only
+// the outcome leaves the service worker; the profile in the body is dropped
+// here. Train2Go saying the session is gone (a redirect, 401/403, or
+// `success: false`) is a verified "signed-out"; anything else that fails is
+// "not-answering", never signed out.
+const checkSession = async () => {
+  let session;
+  try {
+    const res = await train2goFetch("/api/v2/profile/ping");
+    if (res?.ok) {
+      session = parser.parsePingJson(res.data).sessionActive
+        ? "signed-in"
+        : res.data?.success === false
+          ? "signed-out"
+          : "not-answering";
+    } else {
+      session = res?.needsReauth ? "signed-out" : "not-answering";
+    }
+  } catch (e) {
+    void logSwallowed("warn", "ping", e);
+    session = "not-answering";
+  }
+  const signedIn = session === "signed-in";
+  return {
+    ...BRIDGE_MANIFEST,
+    session,
+    authenticated: signedIn,
+    sessionActive: signedIn,
+  };
+};
+
+// The explicit profile read: the athlete id and name the connect flow links
+// to, and the coach's name and notes the popup shows. Spread session FIRST,
+// then BRIDGE_MANIFEST, so manifest fields cannot be spoofed by a future
+// Train2Go API change that returns its own keys with the same names.
+const readProfile = async () => {
   try {
     const res = await train2goFetch("/api/v2/profile/ping");
     if (!res?.ok) {
@@ -220,13 +251,8 @@ const ping = async () => {
       userId: session.userId,
       userName: session.userName,
     };
-    // session may also carry coachName / notes — both are spread above
-    // and only the BRIDGE_MANIFEST keys are explicitly overwritten.
   } catch (e) {
-    // Network failure, malformed response, or parser error — degrade to
-    // "no session" rather than throwing, so a transient Train2Go outage
-    // doesn't break the popup/detection flow. The cause is still recorded.
-    void logSwallowed("warn", "ping", e);
+    void logSwallowed("warn", "read-profile", e);
     return { ...BRIDGE_MANIFEST, sessionActive: false };
   }
 };
@@ -315,7 +341,9 @@ const clearSnapshot = async () => {
 const handleAction = async (message) => {
   switch (message.action) {
     case "ping":
-      return await ping();
+      return await checkSession();
+    case "read-profile":
+      return await readProfile();
     case "read-week":
       if (!message.userId) throw new Error("Missing userId");
       return await readWeek(message.date, message.userId);
@@ -345,6 +373,7 @@ const handleAction = async (message) => {
 
 const EXTERNAL_ACTIONS = new Set([
   "ping",
+  "read-profile",
   "read-week",
   "read-day",
   "read-details",
@@ -399,7 +428,9 @@ if (typeof module !== "undefined") {
     handleAction,
     handleExternalMessage,
     train2goFetch,
-    ping,
+    ping: checkSession,
+    checkSession,
+    readProfile,
     readWeek,
     readDay,
     readDetails,

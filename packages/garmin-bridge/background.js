@@ -179,29 +179,24 @@ const garminFetch = async (path, method, body) => {
 // ── Actions ──
 
 /**
- * Ping handler. Response data shape:
- *   BridgeManifest ∪ { authenticated: boolean, gcApi: object }
+ * The Session check, answered to `ping`: no request, no token minted, nothing
+ * stored. Response data shape:
+ *   BridgeManifest ∪ { features, session, authenticated, gcApi: { ok } }
  *
- * The SPA reads `response.data` and passes it to `bridgeManifestSchema`
- * (Zod strips the session-status fields authenticated/gcApi). The popup
- * reads `data.gcApi.ok` for the connection pill. Manifest keys take
- * precedence on collision — the spread writes them last so a rogue
- * id/version from the upstream API cannot spoof the manifest.
+ * `session` is the typed outcome; `authenticated` and `gcApi.ok` are the
+ * booleans older Kaiord Apps and the popup read. No workout, no token and no
+ * id is in the answer. Manifest keys come from the bridge's own constant.
  */
 const checkSession = async () => {
-  const results = { ...BRIDGE_MANIFEST, features: [...BRIDGE_FEATURES] };
-  try {
-    const res = await garminFetch(
-      "/workout-service/workouts?start=0&limit=1",
-      "GET"
-    );
-    results.gcApi = res;
-    results.authenticated = res.ok === true;
-  } catch (e) {
-    results.gcApi = { ok: false, error: e.message };
-    results.authenticated = false;
-  }
-  return results;
+  const session = await garminOAuth.checkStoredTokens();
+  const signedIn = session === "signed-in";
+  return {
+    ...BRIDGE_MANIFEST,
+    features: [...BRIDGE_FEATURES],
+    session,
+    authenticated: signedIn,
+    gcApi: { ok: signedIn },
+  };
 };
 
 const toBridgeError = (fallback, res) => {

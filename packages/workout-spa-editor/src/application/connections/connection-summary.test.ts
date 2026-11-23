@@ -30,8 +30,8 @@ const source = (over: Partial<ConnectionSource> = {}): ConnectionSource => ({
 describe("buildConnectionSummary", () => {
   it("should count detected bridges rather than live sessions", () => {
     // Arrange
-    // `tanita-bridge` has no session prober by design — its only session call
-    // downloads the whole export CSV — so it is permanently session-inactive.
+    // `tanita-bridge` has no session prober by design — an older extension's session
+    // call downloads the whole export CSV — so it is permanently session-inactive.
     // A live-session count would report 1 of 2 with both extensions running.
     const sources = [
       source(),

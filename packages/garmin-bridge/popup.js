@@ -61,6 +61,9 @@ globalThis.KAIORD_POPUP_MESSAGES = {
     "Kaiord could not read from Garmin Connect. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
   noGarminAccessCauseSince:
     "Kaiord has read nothing from Garmin Connect since $1. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
+  notChecked: "Not checked yet",
+  notCheckedCause:
+    "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access.",
   bridgeNotResponding: "Bridge not responding",
   bridgeNotRespondingCause:
     "The extension's background worker did not answer. Try again.",
@@ -210,6 +213,29 @@ const renderNoAccess = (since) => {
   });
 };
 
+/* The check asked nothing: no still-valid access is held, and minting one to
+   look would be the cost the check exists to avoid. Nothing was learned, so
+   no outage is recorded and nothing claims the athlete is signed out. */
+const renderNotChecked = (storage) => {
+  setMarkEstablished(false);
+  renderStatusBlock($, msg, {
+    tone: "muted",
+    mark: "dot",
+    verdictKey: "notChecked",
+    causeKey: "notCheckedCause",
+  });
+  renderChips($, feedChips(), { caption: msg("captionFeeds") });
+  renderAthleteCard(storage.profileSnapshot);
+  renderRollup(undefined, storage.lastPushReceipt);
+  renderCtas($, {
+    primaryLabel: msg("openEditor"),
+    primaryHref: OPEN_EDITOR_URL,
+    secondaryLabel: msg("openGarmin"),
+    secondaryHref: OPEN_GARMIN_URL,
+  });
+  showRefresh(true);
+};
+
 const loadPopupData = async () => {
   showRefresh(false);
   setMarkEstablished(false);
@@ -245,6 +271,11 @@ const loadPopupData = async () => {
       verdictKey: "bridgeNotResponding",
       causeKey: "bridgeNotRespondingCause",
     });
+    return;
+  }
+
+  if (ping?.ok && ping.data?.session === "not-checked") {
+    renderNotChecked(storage);
     return;
   }
 

@@ -22,6 +22,17 @@ const POPUP_STATE_KEYS = new Set([
   "bridgeTelemetry",
 ]);
 
+const CHECK_KEYS = [
+  "authenticated",
+  "capabilities",
+  "id",
+  "name",
+  "protocolVersion",
+  "session",
+  "sessionActive",
+  "version",
+];
+
 const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
 
@@ -65,6 +76,7 @@ const fakeTrain2Go = () =>
 
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
+  { action: "read-profile" },
   { action: "read-week", date: DATE, userId: USER_ID },
   { action: "read-day", date: DATE, userId: USER_ID },
   { action: "read-details" },
@@ -143,12 +155,61 @@ describe("request confinement", () => {
     expect(JSON.stringify(__chromeLocalStore)).not.toMatch(/cookie|token/i);
   });
 
-  it("should tell the Kaiord App the coach's name and notes on every connection check", async () => {
+  it("should answer a connection check with one ping of Train2Go and only yes or no", async () => {
     // Arrange
     fakeTrain2Go();
 
     // Act
     const answer = await send({ action: "ping" });
+
+    // Assert
+    expect(fetch.mock.calls.map(([url]) => new URL(url).pathname)).toEqual([
+      "/api/v2/profile/ping",
+    ]);
+    expect(Object.keys(answer.data).sort()).toEqual(CHECK_KEYS);
+    expect(answer.data).toMatchObject({
+      session: "signed-in",
+      authenticated: true,
+      sessionActive: true,
+    });
+    expect(JSON.stringify(answer)).not.toMatch(/Pablo|Coach Dani|Knee|28035/);
+  });
+
+  it("should report signed out only when Train2Go said the session is gone", async () => {
+    // Arrange
+    fetch.mockResolvedValue(
+      reply(
+        "application/json",
+        JSON.stringify({ success: false, redirect: "/login", data: null })
+      )
+    );
+
+    // Act
+    const answer = await send({ action: "ping" });
+
+    // Assert
+    expect(answer.data.session).toBe("signed-out");
+    expect(answer.data.sessionActive).toBe(false);
+  });
+
+  it("should report that Train2Go is not answering, never signed out, when the check fails", async () => {
+    // Arrange
+    fetch.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    // Act
+    const answer = await send({ action: "ping" });
+
+    // Assert
+    expect(answer.data.session).toBe("not-answering");
+    expect(answer.data.sessionActive).toBe(false);
+  });
+
+  it("should hand the athlete's profile, with the coach's name and notes, only to the explicit profile read", async () => {
+    // Arrange
+    fakeTrain2Go();
+
+    // Act
+    const answer = await send({ action: "read-profile" });
 
     // Assert
     expect(answer.data).toMatchObject({

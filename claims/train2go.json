@@ -111,11 +111,19 @@
     },
     {
       "id": "train2go.listing.who",
-      "text": "Tells the Kaiord App who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them.",
+      "text": "When you connect Train2Go in the Kaiord App, tells it who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them. Checking the connection tells it only whether you are signed in.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
-          "title": "should tell the Kaiord App the coach's name and notes on every connection check"
+          "title": "should hand the athlete's profile, with the coach's name and notes, only to the explicit profile read"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should answer a connection check with one ping of Train2Go and only yes or no"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.test.ts",
+          "title": "should link from the explicit profile read, never from the yes-or-no ping"
         },
         {
           "test": "packages/train2go-bridge/test/parser.test.js",
@@ -868,15 +876,27 @@
     },
     {
       "id": "train2go.pp.check",
-      "text": "**Checking the Connection**: When the Kaiord App or the extension's popup checks the connection, the extension asks Train2Go who is signed in, and passes on your Train2Go user id and name, your coach's name and the notes your coach keeps about you when Train2Go provides them. The popup then also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
+      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, it passes on your Train2Go user id and name, your coach's name and the notes your coach keeps about you when Train2Go provides them. When you open the extension's popup, it reads the same to show your coach's name and notes, and also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
-          "title": "should tell the Kaiord App the coach's name and notes on every connection check"
+          "title": "should answer a connection check with one ping of Train2Go and only yes or no"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the athlete's profile, with the coach's name and notes, only to the explicit profile read"
         },
         {
           "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should return the live session on ping"
+          "title": "should return the live profile on read-profile"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.test.ts",
+          "title": "should link from the explicit profile read, never from the yes-or-no ping"
+        },
+        {
+          "file": "packages/train2go-bridge/popup.js",
+          "contains": "sendMessage({ action: \"read-profile\" }),"
         },
         {
           "file": "packages/train2go-bridge/popup.js",

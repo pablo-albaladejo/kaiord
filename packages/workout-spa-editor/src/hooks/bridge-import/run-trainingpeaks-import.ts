@@ -1,3 +1,4 @@
+import { checkAllowsUse } from "../../adapters/bridge/bridge-session-outcome";
 import {
   checkTrainingPeaksSession,
   readTrainingPeaksMetrics,
@@ -23,8 +24,10 @@ export const runTrainingPeaksImport = async (
     {
       policyRepo: persistence.integrationPolicy,
       importedRecords: persistence.importedRecords,
+      // The check mints nothing: "not-checked" lets the read itself mint the
+      // token and find out.
       checkSession: async () =>
-        (await checkTrainingPeaksSession(extensionId)).authenticated,
+        checkAllowsUse(await checkTrainingPeaksSession(extensionId)),
       readMetrics: (start, end) =>
         readTrainingPeaksMetrics(extensionId, start, end),
       parse: trainingPeaksMetricsToKrd,

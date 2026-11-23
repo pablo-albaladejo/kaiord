@@ -63,6 +63,7 @@ export type AttentionDetailKey = (typeof ATTENTION_DETAIL_KEYS)[number];
 export type DetailKey =
   | AttentionDetailKey
   | "detail.installed"
+  | "detail.notChecked"
   | "detail.checking"
   | "detail.manual"
   | "detail.unsupported"
@@ -88,7 +89,10 @@ const attentionDetailKey = (source: ConnectionSource): AttentionDetailKey =>
 export const detailKeyFor = (source: ConnectionSource): DetailKey | null => {
   switch (source.status) {
     case "installed":
-      return "detail.installed";
+      // A probed bridge is `installed` only when its check asked nothing.
+      return source.sessionVerifiable
+        ? "detail.notChecked"
+        : "detail.installed";
     case "checking":
       return "detail.checking";
     case "attention":

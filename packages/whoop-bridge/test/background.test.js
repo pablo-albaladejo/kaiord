@@ -441,7 +441,14 @@ describe("tab-open", () => {
 
     // Assert
     expect(external).not.toContain("tab-open");
-    expect(external).toEqual(["ping", "status", "whoop-fetch", "set-theme"]);
+    expect(external).not.toContain("popup-status");
+    expect(external).toEqual([
+      "ping",
+      "status",
+      "read-user-id",
+      "whoop-fetch",
+      "set-theme",
+    ]);
   });
 
   // The credential-handshake surface, recorded in the bridge privacy golden.

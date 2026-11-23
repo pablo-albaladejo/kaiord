@@ -29,8 +29,7 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
   // navigates to the target week. sessionStorage survives same-tab
   // navigations, so those actions stay visible to the assertion (this is the
   // flake `zones-sync (a)` hit on slow/cold engines that synced pre-nav).
-  // The script can also run on an opaque origin (initial about:blank) where
-  // storage access throws, so both paths fall back to the in-memory array.
+  // On an opaque origin (initial about:blank) storage throws: in-memory then.
   const STORE_KEY = "__T2G_STUB_CALLS_STORE__";
   win.__T2G_STUB_CALLS__ = [];
   try {
@@ -40,8 +39,7 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
   } catch {
     // opaque-origin storage unavailable — keep the empty in-memory log.
   }
-  // BridgeManifest shape (`id` etc.) — the wire announcement adds
-  // `type`, `bridgeId`, `extensionId` on top of these same fields.
+  // BridgeManifest shape; the announcement adds type, bridgeId, extensionId.
   const m = {
     id: args.bridgeId,
     name: "Train2Go (stub)",
@@ -55,15 +53,13 @@ export const installStubScript = (args: T2GStubScriptArgs): void => {
     extensionId: args.extensionId,
     ...m,
   };
+  // `ping` answers yes or no; the profile comes only from `read-profile`.
   const wrap = (data: unknown) => ({ ok: true, protocolVersion: 1, data });
+  const yes = { session: "signed-in", sessionActive: true };
   const responses: Record<string, () => unknown> = {
-    ping: () =>
-      wrap({
-        ...m,
-        sessionActive: true,
-        userId: "99999",
-        userName: "Test User",
-      }),
+    ping: () => wrap({ ...m, ...yes, authenticated: true }),
+    "read-profile": () =>
+      wrap({ ...m, ...yes, userId: "99999", userName: "Test User" }),
     "read-week": () =>
       wrap({ activities: win.__T2G_STUB_WEEK__ ?? args.activities ?? [] }),
     "read-day": () => wrap({ activities: [] }),

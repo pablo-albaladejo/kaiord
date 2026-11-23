@@ -11,6 +11,7 @@
  */
 import { z } from "zod";
 
+import { probeResultOf, sessionOutcomeOf } from "./bridge-session-outcome";
 import {
   active,
   inactive,
@@ -53,6 +54,8 @@ const probeByPing = async (
   if (data.protocolVersion !== SUPPORTED_PROTOCOL_VERSION) {
     return outdatedExtension(outdatedMessage);
   }
+  const outcome = sessionOutcomeOf(res.data);
+  if (outcome !== null) return probeResultOf(outcome);
   return readSession(data) ? active() : inactive();
 };
 

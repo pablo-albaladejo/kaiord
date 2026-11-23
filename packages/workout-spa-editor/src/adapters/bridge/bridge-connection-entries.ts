@@ -27,6 +27,7 @@ const signatureOf = (entry: BridgeConnectionRuntime): string =>
     entry.error,
     entry.needsReauth,
     entry.outdated,
+    entry.notChecked === true,
     entry.lastCheckedAt,
   ].join("|");
 

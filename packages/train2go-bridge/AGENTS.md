@@ -8,7 +8,7 @@
 ## Purpose
 
 - Fetch training-plan endpoints on `app.train2go.com` directly from the service worker with `credentials:"include"` (SW-direct) so the site's HttpOnly session cookie travels automatically — no content script on `app.train2go.com`, no relay hop
-- Expose a message-passing surface (`ping`, `read-week`, `read-day`, `read-details`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) that the SPA invokes via `chrome.runtime.sendMessage`
+- Expose a message-passing surface (`ping`, `read-profile`, `read-week`, `read-day`, `read-details`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) that the SPA invokes via `chrome.runtime.sendMessage`
 - Restrict communication to the exact Kaiord App origin (`https://kaiord.com/*`, no subdomain; `http://localhost:5173/*` and `http://localhost:5174/*` in dev builds only)
 - Persist the user profile snapshot via `chrome.storage.local`
 - Surface a dead session (redirect / login response) as `needsReauth` so the editor can prompt a re-login
@@ -77,7 +77,7 @@ Unit tests for all extension scripts (vitest + jsdom + chrome-API mock).
 
 - `chrome-mock.js` — Mock `chrome.*` APIs for testing
 - `*.test.js` — Test files for `background.js`, `parser.js`, `popup.js`, `kaiord-announce.js`, `profile-snapshot.js`
-- `request-confinement.test.js` — Every request goes to `app.train2go.com` with the browser's cookies and no other credential, only `GET`; `chrome.storage.local` holds popup state only; each connection check hands the App the coach's name and notes; only packaged scripts run. Proof for the listing and policy claims.
+- `request-confinement.test.js` — Every request goes to `app.train2go.com` with the browser's cookies and no other credential, only `GET`; `chrome.storage.local` holds popup state only; a connection check (`ping`) is one profile ping answering yes or no only; the athlete's profile and the coach's name and notes go only to `read-profile`; only packaged scripts run. Proof for the listing and policy claims.
 - `fixtures/` — HTML and JSON test data
 
 See [TESTING.md](./TESTING.md) for integration / smoke test procedures on real Train2Go sessions.

@@ -109,6 +109,29 @@ describe("TrainingPeaks popup", () => {
     );
   });
 
+  it("should say the session is not checked yet, and record no outage, when the check asked nothing", async () => {
+    // Arrange
+    const chromeMock = buildChromeMock({
+      sessionResponse: {
+        ok: true,
+        data: { session: "not-checked", authenticated: false },
+      },
+    });
+
+    // Act
+    const doc = await open(chromeMock);
+
+    // Assert
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Not checked yet"
+    );
+    expect(doc.getElementById("status-sub").textContent).toContain(
+      "mints no token"
+    );
+    expect(doc.body.textContent).not.toContain("Not signed in");
+    expect(chromeMock.__store.bridgeHealth).toBeUndefined();
+  });
+
   it("renders not-signed-in state with the value prop and TrainingPeaks as primary CTA", async () => {
     const doc = await open(
       buildChromeMock({

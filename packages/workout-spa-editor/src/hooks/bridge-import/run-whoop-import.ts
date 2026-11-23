@@ -1,7 +1,5 @@
-import {
-  readWhoopFetch,
-  readWhoopStatus,
-} from "../../adapters/bridge/whoop-transport";
+import { readWhoopFetch } from "../../adapters/bridge/whoop-transport";
+import { readWhoopUserId } from "../../adapters/bridge/whoop-user-transport";
 import { syncWhoopActivities } from "../../application/whoop/sync-whoop-activities.use-case";
 import { syncWhoopCycles } from "../../application/whoop/sync-whoop-cycles.use-case";
 import { syncWhoopHeartRate } from "../../application/whoop/sync-whoop-heart-rate.use-case";
@@ -24,8 +22,8 @@ export const runWhoopImport = async (
   extensionId: string,
   profileId: string
 ): Promise<void> => {
-  const status = await readWhoopStatus(extensionId);
-  if (!status.connected || status.userId == null) return;
+  const userId = await readWhoopUserId(extensionId);
+  if (userId === null) return;
 
   const endTime = new Date().toISOString();
   const startTime = isoDaysAgo(CYCLES_WINDOW_DAYS);
@@ -39,11 +37,11 @@ export const runWhoopImport = async (
 
   await syncWhoopCycles(
     { ...importDeps, fetchCycles: fetch },
-    { profileId, userId: status.userId, startTime, endTime }
+    { profileId, userId, startTime, endTime }
   );
   await syncWhoopHeartRate(
     { ...importDeps, fetchMetrics: fetch },
-    { profileId, userId: status.userId, startTime: hrStartTime, endTime }
+    { profileId, userId, startTime: hrStartTime, endTime }
   );
   await syncWhoopActivities(
     {
@@ -53,10 +51,10 @@ export const runWhoopImport = async (
       fetchCycles: fetch,
       fetchSports: () => readWhoopFetch(extensionId, SPORTS_HISTORY_PATH),
     },
-    { profileId, userId: status.userId, startTime, endTime }
+    { profileId, userId, startTime, endTime }
   );
   await syncWhoopStress(
     { ...importDeps, fetchStress: fetch },
-    { profileId, userId: status.userId, startTime: stressStartTime, endTime }
+    { profileId, userId, startTime: stressStartTime, endTime }
   );
 };

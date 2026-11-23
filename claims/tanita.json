@@ -128,8 +128,8 @@
       ]
     },
     {
-      "id": "tanita.listing.check-downloads",
-      "text": "Each time you open the extension's popup or press Refresh, it downloads your whole export again only to learn whether it can still reach it. It keeps nothing of the export and shows only the answer.",
+      "id": "tanita.listing.check-headers-only",
+      "text": "Each time you open the extension's popup or press Refresh, it asks MyTANITA only for the export's headers, without downloading it, to learn whether you are still signed in. It shows only the answer.",
       "proof": [
         {
           "test": "packages/tanita-bridge/test/popup.test.js",
@@ -137,7 +137,7 @@
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should download the whole export to answer a session check, and answer only yes or no"
+          "title": "should check a session with one HEAD of the export, reading no body and answering only yes or no"
         },
         {
           "test": "packages/tanita-bridge/test/popup.test.js",
@@ -215,7 +215,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "file": "packages/tanita-bridge/manifest.prod.json",
@@ -263,7 +263,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
@@ -393,7 +393,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "file": "packages/tanita-bridge/background.js",
@@ -418,11 +418,11 @@
     },
     {
       "id": "tanita.pj.mytanita-why",
-      "text": "**Why**: The extension's service worker makes one kind of request: `GET https://mytanita.eu/en/user/export-csv`, sent with `credentials: \"include\"` so that Chrome attaches your MyTANITA sign-in cookie. A request to any other path, or with any other method, is refused before it is sent.",
+      "text": "**Why**: The extension's service worker makes requests to one address, `https://mytanita.eu/en/user/export-csv`: a `GET` that downloads the export, and a `HEAD` that asks only whether you are signed in. Both are sent with `credentials: \"include\"` so that Chrome attaches your MyTANITA sign-in cookie. A request to any other path, or with any other method, is refused before it is sent.",
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "test": "packages/tanita-bridge/test/background.test.js",
@@ -442,13 +442,17 @@
         },
         {
           "file": "packages/tanita-bridge/background.js",
-          "contains": "const ALLOWED = [{ method: \"GET\", pattern: /^\\/en\\/user\\/export-csv$/ }];"
+          "contains": "{ method: \"HEAD\", pattern: /^\\/en\\/user\\/export-csv$/ },"
+        },
+        {
+          "file": "packages/tanita-bridge/background.js",
+          "contains": "method: \"HEAD\",\n      credentials: \"include\","
         }
       ]
     },
     {
       "id": "tanita.pj.mytanita-answer",
-      "text": "**What MyTANITA answers**: your whole measurement history. When the Kaiord App asks for it (`read-export-csv`), the extension hands it over unchanged. When the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), the extension downloads the same export, keeps only whether it arrived, and discards the rest.",
+      "text": "**What MyTANITA answers**: to the `GET`, your whole measurement history. When the Kaiord App asks for it (`read-export-csv`), the extension hands it over unchanged. To the `HEAD`, sent when the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), only headers: the extension keeps only whether you are signed in, and no measurement is downloaded.",
       "proof": [
         {
           "file": "docs/connectors-research/tanita.md",
@@ -460,7 +464,7 @@
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should download the whole export to answer a session check, and answer only yes or no"
+          "title": "should check a session with one HEAD of the export, reading no body and answering only yes or no"
         },
         {
           "test": "packages/tanita-bridge/test/popup.test.js",
@@ -603,7 +607,7 @@
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
@@ -653,7 +657,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         }
       ]
     },
@@ -663,7 +667,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
@@ -716,16 +720,16 @@
       ]
     },
     {
-      "id": "tanita.pp.one-request",
-      "text": "**One Request, Your Whole Export**: The extension makes a single, fixed, read-only `GET` of `https://mytanita.eu/en/user/export-csv`; a request to any other path or with any other method is refused before it is sent. MyTANITA answers with your whole body-composition history: every measurement your account holds, weight included. Only the `read:body` capability is declared.",
+      "id": "tanita.pp.one-address",
+      "text": "**One Address, Your Whole Export**: The extension sends read-only requests to one fixed address, `https://mytanita.eu/en/user/export-csv`: a `GET` that downloads the export and a `HEAD` that checks the connection without downloading it; a request to any other path or with any other method is refused before it is sent. To the `GET`, MyTANITA answers with your whole body-composition history: every measurement your account holds, weight included. Only the `read:body` capability is declared.",
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "file": "packages/tanita-bridge/background.js",
-          "contains": "const ALLOWED = [{ method: \"GET\", pattern: /^\\/en\\/user\\/export-csv$/ }];"
+          "contains": "{ method: \"HEAD\", pattern: /^\\/en\\/user\\/export-csv$/ },"
         },
         {
           "test": "packages/tanita-bridge/test/background.test.js",
@@ -767,13 +771,13 @@
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         }
       ]
     },
     {
-      "id": "tanita.pp.check-downloads",
-      "text": "**Checking the Connection Downloads the Export**: Each time you open the extension's popup or press Refresh, and whenever the extension is asked whether it can reach MyTANITA, it downloads your whole export again, keeps only whether it arrived, and discards the rest.",
+      "id": "tanita.pp.check-downloads-nothing",
+      "text": "**Checking the Connection Downloads Nothing**: Each time you open the extension's popup or press Refresh, and whenever the extension is asked whether it can reach MyTANITA, it sends a `HEAD` request for the export, which returns no measurement, and keeps only whether you are signed in. It reports you signed out only when MyTANITA sends it to the sign-in page.",
       "proof": [
         {
           "test": "packages/tanita-bridge/test/popup.test.js",
@@ -781,7 +785,15 @@
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should download the whole export to answer a session check, and answer only yes or no"
+          "title": "should check a session with one HEAD of the export, reading no body and answering only yes or no"
+        },
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should report signed out only when MyTANITA bounced the check to its login page"
+        },
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should report that MyTANITA is not answering, never signed out, when the check fails"
         },
         {
           "test": "packages/tanita-bridge/test/background.test.js",
@@ -828,17 +840,17 @@
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         }
       ]
     },
     {
       "id": "tanita.pp.no-third-party",
-      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `mytanita.eu` (to download your export) and the Kaiord App (to hand the export over).",
+      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `mytanita.eu` (to check the connection and download your export) and the Kaiord App (to hand the export over).",
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "file": "packages/tanita-bridge/manifest.prod.json",
@@ -856,7 +868,7 @@
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
-          "title": "should send every request to the MyTANITA export as a GET, and nothing anywhere else"
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
         },
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",

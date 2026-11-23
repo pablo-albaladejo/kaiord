@@ -5,18 +5,19 @@
 The privacy policy SHALL have a `## Kaiord for Tanita Extension` section,
 registered in `claims/tanita.json`. It SHALL state that the extension uses no
 password and cannot read the `TANITASESS` cookie (no `cookies` permission);
-that it makes a single fixed read-only `GET` of
-`https://mytanita.eu/en/user/export-csv`, which returns the athlete's whole
-body-composition history; that it hands the export to the Kaiord App
-unparsed; that each popup open, Refresh, and session check downloads the whole
-export and keeps only whether it arrived; that `chrome.storage.local` holds
+that it sends read-only requests only to
+`https://mytanita.eu/en/user/export-csv`, a `GET` that returns the athlete's
+whole body-composition history and a `HEAD` that checks the connection; that
+it hands the export to the Kaiord App unparsed; that each popup open, Refresh,
+and session check sends only the `HEAD`, downloads no measurement and keeps
+only whether the athlete is signed in (#1643); that `chrome.storage.local` holds
 only the popup's health stamps and the theme preference; that it injects no
 content script on `mytanita.eu`; and that it has no telemetry.
 
 #### Scenario: The check is no longer disclosed
 
-- **WHEN** the Tanita section stops saying that checking the connection downloads the export
-- **THEN** `check-privacy-policy` SHALL fail on "Tanita session check downloading the whole export disclosed"
+- **WHEN** the Tanita section stops saying that checking the connection sends only a `HEAD` and downloads nothing
+- **THEN** `check-privacy-policy` SHALL fail on "Tanita session check by HEAD, downloading nothing, disclosed"
 
 #### Scenario: The storage disclosure is dropped
 

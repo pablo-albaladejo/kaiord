@@ -185,16 +185,17 @@ const tpapiFetch = (path, method, body, fetchImpl) =>
   });
 
 /**
- * Session probe for the SPA connection pill: forces a cookie→token exchange to
- * confirm the session is live. Returns { ok, athleteId } or a needsReauth
- * envelope. Never returns any credential value.
+ * The Session check: reads the token record a real request minted and makes
+ * no request. The token endpoint is the only one the session cookie
+ * authenticates, and calling it mints a token, so without a still-valid token
+ * there is no cheaper way to tell: the answer is "not-checked", and the first
+ * real request finds out. Never returns any credential value.
  */
-const checkTokenExchange = async (fetchImpl) => {
+const checkStoredToken = async () => {
   try {
-    const record = await exchangeAndSave(fetchImpl);
-    return { ok: true, athleteId: record.athleteId };
-  } catch (e) {
-    return { ok: false, needsReauth: !!e.needsReauth, error: e.message };
+    return isExpired(await loadToken()) ? "not-checked" : "signed-in";
+  } catch {
+    return "not-checked";
   }
 };
 
@@ -213,7 +214,7 @@ const api = {
   ensureToken,
   ensureAthleteId,
   tpapiFetch,
-  checkTokenExchange,
+  checkStoredToken,
 };
 
 if (typeof module !== "undefined") {

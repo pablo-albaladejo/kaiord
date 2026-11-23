@@ -23,7 +23,7 @@ What it does:
 • Reads the week your coach planned on Train2Go: each coaching activity's date, sport, title, duration, workload and completion status.
 • Reads one day in full when the Kaiord App asks: the coach's description of each session, and that day's comments with who wrote them.
 • Reads your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight from your Train2Go profile page. Nothing else on that page is passed on: gender, birthday, body fat, height, contact details, records and tests are dropped inside the extension.
-• Tells the Kaiord App who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them.
+• When you connect Train2Go in the Kaiord App, tells it who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them. Checking the connection tells it only whether you are signed in.
 • Shows in its popup whether it can currently read from Train2Go, your coach's name and notes, and this week's planned and completed sessions and workload.
 • Only reads. It never changes anything on Train2Go.
 

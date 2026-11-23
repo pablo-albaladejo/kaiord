@@ -57,6 +57,71 @@ describe("createTrain2GoCoachingTransport", () => {
     });
   });
 
+  it("should link from the explicit profile read, never from the yes-or-no ping", async () => {
+    // Arrange
+    const mockSend = vi.fn(
+      (_id: string, msg: { action: string }, cb: (r: unknown) => void) => {
+        cb(
+          msg.action === "read-profile"
+            ? {
+                ok: true,
+                protocolVersion: 1,
+                data: { sessionActive: true, userId: 28035, userName: "Pablo" },
+              }
+            : { ok: true, protocolVersion: 1, data: { sessionActive: true } }
+        );
+      }
+    );
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: { lastError: null, sendMessage: mockSend },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    // Act
+    const result = await t.ping();
+
+    // Assert
+    expect(result.externalUserId).toBe("28035");
+    expect(mockSend.mock.calls.map(([, msg]) => msg.action)).toEqual([
+      "read-profile",
+    ]);
+  });
+
+  it("should fall back to an older extension's ping, which still carries the profile", async () => {
+    // Arrange
+    const mockSend = vi.fn(
+      (_id: string, msg: { action: string }, cb: (r: unknown) => void) => {
+        cb(
+          msg.action === "read-profile"
+            ? {
+                ok: false,
+                protocolVersion: 1,
+                error: "Origin or action not permitted",
+              }
+            : {
+                ok: true,
+                protocolVersion: 1,
+                data: { sessionActive: true, userId: 28035, userName: "Pablo" },
+              }
+        );
+      }
+    );
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: { lastError: null, sendMessage: mockSend },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    // Act
+    const result = await t.ping();
+
+    // Assert
+    expect(result.externalUserName).toBe("Pablo");
+    expect(mockSend.mock.calls.map(([, msg]) => msg.action)).toEqual([
+      "read-profile",
+      "ping",
+    ]);
+  });
+
   it("should preserve a userId larger than Number.MAX_SAFE_INTEGER as a string at the JSON parse boundary", async () => {
     // Arrange
     const mockSend = vi.fn(
