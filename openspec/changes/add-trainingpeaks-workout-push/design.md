@@ -215,3 +215,14 @@ The code in this change is complete and verified. The manual end-to-end
 validation in `tasks.md` §5 and the library route are deliberately left
 unexecuted — a decision taken on 2026-09-07 to stop investing in this
 destination, not an oversight.
+
+## The copy check shares Garmin's safe-write decision
+
+The live read before a send (`checkTrainingPeaksCopy`) was a hook that
+imported the adapter and named its states `present | gone | unknown`. It is
+now an application use case (`application/trainingpeaks/check-trainingpeaks-copy.ts`)
+behind `TrainingPeaksCopyPort`, over `readLiveState`
+(`application/safe-writes/live-state.ts`), the decision Garmin's placement
+uses: read live, only a confirmed absence counts (here TrainingPeaks' own
+404; Garmin also settles two reads apart), then a guarded record update.
+The vocabulary is one, `present | absent | unknown`. Behaviour is unchanged.
