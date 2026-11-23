@@ -125,7 +125,10 @@ for (const [language, locale, words] of [
       await setCapabilities(page, { templates: true });
       await page.goto("/library");
       await expect(page.getByTestId("library-page")).toBeVisible();
-      await page.goto("/daily");
+      // In-document navigation, so the browser's history holds the Library.
+      await page.evaluate(() => {
+        window.location.hash = "#/daily";
+      });
       await expect(page.getByTestId("daily-page")).toBeVisible();
       await setCapabilities(page, { templates: false });
 
