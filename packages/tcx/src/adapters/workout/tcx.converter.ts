@@ -19,6 +19,9 @@ const buildTcxWorkout = (
     Step: tcxSteps,
   };
 
+  // Workout_t orders Name, Step, ScheduledOn, Notes, Creator, Extensions.
+  if (workout.notes) tcxWorkout.Notes = workout.notes;
+
   if (workout.extensions?.tcx) {
     logger.debug("Restoring workout-level TCX extensions");
     tcxWorkout.Extensions = workout.extensions.tcx;
