@@ -157,7 +157,7 @@ const parse = (text: string): Rec => {
 const logger = createMockLogger();
 const read = createFastXmlZwiftReader(logger, createXsdZwiftValidator(logger));
 
-describe("First read: ZWO", () => {
+describe("Round-trip first read: ZWO", () => {
   it("should read every value of every ZWO workout fixture that KRD can hold", async () => {
     // Arrange
     const fixtures = await Promise.all(

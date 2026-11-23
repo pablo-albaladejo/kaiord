@@ -173,7 +173,7 @@ const decode = (data: Uint8Array): Rec => {
 };
 const read = createGarminFitSdkReader(createMockLogger());
 
-describe("First read: FIT", () => {
+describe("Round-trip first read: FIT", () => {
   it("should read every value of every FIT workout fixture that KRD can hold", async () => {
     // Arrange
     const fixtures = await Promise.all(

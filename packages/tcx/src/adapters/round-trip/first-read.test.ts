@@ -174,7 +174,7 @@ const parser = new XMLParser({
 });
 const read = createFastXmlTcxReader(createMockLogger());
 
-describe("First read: TCX", () => {
+describe("Round-trip first read: TCX", () => {
   it("should read every value of every TCX workout fixture that KRD can hold", async () => {
     // Arrange
     const fixtures = await Promise.all(

@@ -346,7 +346,7 @@ const GCN_SOURCE_FIELDS: ReadonlyArray<SourceField> = [
 const fixturesDir = join(__dirname, "../../../../../test-fixtures/gcn");
 const read = createGarminReader(createMockLogger());
 
-describe("First read: GCN", () => {
+describe("Round-trip first read: GCN", () => {
   it("should read every value of every GCN workout fixture that KRD can hold", async () => {
     // Arrange
     const fixtures = await Promise.all(
