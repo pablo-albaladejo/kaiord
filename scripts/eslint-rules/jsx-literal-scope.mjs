@@ -40,11 +40,8 @@ const NEVER_COPY = [
 
 export const JSX_LITERAL_IGNORES = NEVER_COPY.map((glob) => `${SPA}/${glob}`);
 
-const MODEL_FACING = ["hooks/chat/garmin-library-error.ts"];
-
 export const LITERAL_COPY_IGNORES = [
   ...JSX_LITERAL_IGNORES,
-  ...MODEL_FACING.map((file) => `${SPA}/${file}`),
   ...["application", "store", "types", "adapters/dexie", "i18n"].map(
     (dir) => `${SPA}/${dir}/**`
   ),
