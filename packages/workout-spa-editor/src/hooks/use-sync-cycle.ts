@@ -1,6 +1,7 @@
 /**
  * useSyncCycle — one pull-merge-push cycle and the state it reports
- * (status, last success, error, and a pending default-profile choice).
+ * (status, last success, and a pending default-profile choice). A failure
+ * is `status: "error"`; its own text goes to the console only.
  * `chooseProfile` stores the user's pick through the SnapshotPort and runs
  * the cycle again, so the re-key goes through the same sync pipeline.
  */
@@ -12,6 +13,7 @@ import {
   type ProfileChoice,
 } from "../application/sync/reconcile-auto-profile";
 import { syncWithCloud } from "../application/sync/sync-with-cloud";
+import { logFailure } from "../lib/log-failure";
 import type { CloudSyncPort } from "../ports/cloud-sync-port";
 import type { SnapshotPort } from "../ports/snapshot-port";
 import { isCloudAuthRequired } from "../types/cloud-auth-required-error";
@@ -24,14 +26,10 @@ export type UseSyncCycleDeps = {
   afterImport?: () => Promise<void>;
 };
 
-const errorText = (cause: unknown): string =>
-  cause instanceof Error ? cause.message : "Sync failed";
-
 export function useSyncCycle(deps: UseSyncCycleDeps) {
   const { cloud, snapshotPort, deviceId, afterImport } = deps;
   const [status, setStatus] = useState<SyncStatus>("idle");
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [profileChoice, setProfileChoice] = useState<ProfileChoice[] | null>(
     null
   );
@@ -40,7 +38,6 @@ export function useSyncCycle(deps: UseSyncCycleDeps) {
 
   const runCycle = useCallback(async (): Promise<SyncOutcome> => {
     setStatus("syncing");
-    setError(null);
     try {
       const result = await syncWithCloud({
         cloud,
@@ -55,7 +52,7 @@ export function useSyncCycle(deps: UseSyncCycleDeps) {
       return "synced";
     } catch (cause) {
       const needsAuth = isCloudAuthRequired(cause);
-      setError(needsAuth ? null : errorText(cause));
+      if (!needsAuth) logFailure("cloud-sync", cause);
       setStatus(needsAuth ? "needsAuth" : "error");
       return needsAuth ? "needsAuth" : "failed";
     }
@@ -86,7 +83,6 @@ export function useSyncCycle(deps: UseSyncCycleDeps) {
   return {
     status,
     lastSyncedAt,
-    error,
     profileChoice,
     syncNow,
     chooseProfile,

@@ -27,9 +27,9 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
     );
   });
 
-  it("should show an upstream message as is", () => {
+  it("should word an unrecognised failure as not answering, with no cause", () => {
     // Arrange
-    const failure = { ok: false, message: "HTTP 500" } as const;
+    const failure = { ok: false, reason: "not-answering" } as const;
 
     // Act
     render(
@@ -37,8 +37,8 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
     );
 
     // Assert
-    expect(screen.getByTestId("trainingpeaks-push-error")).toHaveTextContent(
-      "HTTP 500"
-    );
+    const text = screen.getByTestId("trainingpeaks-push-error").textContent;
+    expect(text).toMatch(/TrainingPeaks no responde/);
+    expect(text).toMatch(/Inténtalo de nuevo/);
   });
 });

@@ -97,8 +97,9 @@ describe("useCoachingConvert", () => {
     expect(result.current.error).toBeNull();
   });
 
-  it("should set error and does NOT navigate or close on convertCoachingActivity rejection", async () => {
+  it("should set the dictionary's error, never the rejection's text, and not navigate or close", async () => {
     // Arrange
+    vi.spyOn(console, "error").mockImplementation(() => {});
 
     const onClose = vi.fn();
     const persistence = createInMemoryPersistence();
@@ -120,7 +121,7 @@ describe("useCoachingConvert", () => {
     // Assert
 
     await waitFor(() => {
-      expect(result.current.error).toBe("quota exceeded");
+      expect(result.current.error).toBe("Conversion failed");
     });
     expect(navigate).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();

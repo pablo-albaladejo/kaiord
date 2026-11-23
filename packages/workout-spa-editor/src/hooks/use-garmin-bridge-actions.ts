@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 
 import type { PushState } from "../contexts/garmin-bridge-types";
-import { useActiveLocale } from "../i18n/LocaleProvider";
 import { executeList, INITIAL_PUSH_STATE } from "./garmin-bridge-operations";
 import {
   getGarminExtensionId,
@@ -28,11 +27,10 @@ export const useGarminBridgeActions = () => {
   );
 
   const redetect = useCallback(() => detectExtension(), [detectExtension]);
-  const locale = useActiveLocale();
 
   const pushWorkout = useCallback(
-    (gcn: unknown) => runPush(gcn, setPushing, redetect, locale),
-    [redetect, locale]
+    (gcn: unknown) => runPush(gcn, setPushing, redetect),
+    [redetect]
   );
 
   const listWorkouts = useCallback(async (): Promise<unknown[]> => {

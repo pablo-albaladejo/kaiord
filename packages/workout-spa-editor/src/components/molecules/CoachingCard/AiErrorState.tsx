@@ -1,5 +1,6 @@
 /**
- * Inline AI failure state (per design D3): shows the typed reason and
+ * Inline AI failure state (per design D3): shows the typed reason (never
+ * the failure's own text, which stays in analytics and the console) and
  * the four recovery actions: Retry AI, Edit manually, Match existing,
  * Close. No workout was persisted, so the activity remains in the
  * "no-workout" state — these actions are exactly the same starting
@@ -10,7 +11,6 @@ import { useTranslate } from "../../../i18n/use-translate";
 
 export type AiErrorStateProps = {
   reason: AiFailureReason | "not-found" | "no-provider";
-  detail?: string;
   onRetry: () => void;
   onEditManually: () => void;
   onMatchExisting: () => void;
@@ -26,7 +26,6 @@ export function AiErrorState(props: AiErrorStateProps) {
     >
       <p className="text-danger-text">
         ⚠ {t("aiError.heading")}: {t(`aiError.${props.reason}`)}
-        {props.detail ? ` (${props.detail})` : ""}
       </p>
       <div className="flex flex-wrap justify-end gap-2">
         <button

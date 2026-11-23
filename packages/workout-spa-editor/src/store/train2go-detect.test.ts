@@ -94,7 +94,7 @@ describe("createDetectAction", () => {
     expect(state.sessionActive).toBe(false);
   });
 
-  it("should show update message on protocol mismatch", async () => {
+  it("should mark the extension outdated on protocol mismatch", async () => {
     // Arrange
     mockPing.mockResolvedValue({
       ok: true,
@@ -110,7 +110,7 @@ describe("createDetectAction", () => {
     // Assert
     expect(state.extensionInstalled).toBe(true);
     expect(state.sessionActive).toBe(false);
-    expect(state.lastError).toContain("Update");
+    expect(state.lastError).toBe("outdated");
   });
 
   it("should use detection cache within 30s", async () => {

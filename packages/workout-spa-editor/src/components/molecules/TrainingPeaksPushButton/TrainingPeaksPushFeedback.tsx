@@ -39,9 +39,7 @@ export const TrainingPeaksPushFeedback = ({
   if (!("block" in failure)) {
     return (
       <span className={ERROR_CLASS} data-testid="trainingpeaks-push-error">
-        {"reason" in failure
-          ? t(REFUSAL_KEYS[failure.reason])
-          : failure.message}
+        {t(REFUSAL_KEYS[failure.reason])}
       </span>
     );
   }

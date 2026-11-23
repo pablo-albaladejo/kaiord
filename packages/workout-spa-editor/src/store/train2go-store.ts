@@ -10,6 +10,7 @@
 import { create } from "zustand";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
+import type { CoachingSourceError } from "../types/coaching-source";
 import { createTrain2GoActions } from "./train2go-store-actions";
 
 const getTrain2GoExtensionId = (): string =>
@@ -19,7 +20,7 @@ export type Train2GoStore = {
   extensionInstalled: boolean;
   sessionActive: boolean;
   loading: boolean;
-  lastError: string | null;
+  lastError: CoachingSourceError | null;
   lastDetectionTimestamp: number | null;
   detectExtension: (opts?: { force?: boolean }) => Promise<void>;
   openTrain2Go: () => Promise<void>;
