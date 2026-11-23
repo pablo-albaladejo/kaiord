@@ -104,7 +104,7 @@ There are none yet (no `assets/` folder). Capture the current popup. Its states,
 
 1. **Connected**: signed in to MyTANITA, click the extension icon; the popup shows "Connected" ["Conectado"] and "Open Kaiord editor" ["Abrir el editor de Kaiord"].
 2. **Signed out**: signed out of MyTANITA (its check is redirected to the sign-in page); the popup shows "You cannot use Tanita in Kaiord until you sign in to Tanita in this browser." ["No puedes usar Tanita en Kaiord hasta que inicies sesión en Tanita en este navegador."] and "Sign in to Tanita" ["Iniciar sesión en Tanita"].
-3. **Not answering**: only when MyTANITA answers anything else (a maintenance page, an error); the popup shows "Tanita is not answering, so you cannot use it in Kaiord right now." ["Tanita no responde, así que ahora mismo no puedes usarlo en Kaiord."] and "Try again" ["Reintentar"]. Not needed for the listing.
+3. **Not answering**: only when MyTANITA answers anything else (a maintenance page, an error); the popup shows "Tanita is not answering, so you cannot use it in Kaiord right now." ["Tanita no responde, así que ahora mismo no puedes usar Tanita en Kaiord."] and "Try again" ["Reintentar"]. Not needed for the listing.
 
 Capture each state twice: once with Chrome's interface in English, for the English listing, and once in Spanish (`chrome://settings/languages`, "Display Google Chrome in this language"), for the Spanish listing. The Spanish popup shows the text in brackets.
 

@@ -143,7 +143,7 @@ describe("connectionNotice", () => {
         {
           fix: "try-again",
           message:
-            "TrainingPeaks no responde, así que ahora mismo no puedes usarlo en Kaiord.",
+            "TrainingPeaks no responde, así que ahora mismo no puedes usar TrainingPeaks en Kaiord.",
           action: "Reintentar",
         },
       ],

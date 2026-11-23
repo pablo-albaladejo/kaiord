@@ -119,7 +119,7 @@ longer exists. Replace it with captures of the current popup. Its states, from `
 
 1. **Connected**: after the Kaiord App has read from or sent to Garmin Connect once, the extension holds access that has not expired; the popup shows "Connected" ["Conectado"] and "Open Kaiord editor" ["Abrir el editor de Kaiord"].
 2. **Not checked yet**: with no access held yet (a fresh install), the popup shows "Not checked yet" ["Todavía sin comprobar"] and "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access." ["Kaiord pregunta a Garmin Connect la primera vez que lee o envía, así que mirar aquí no genera ningún acceso."]. The check asks Garmin nothing, so the popup never shows "Sign in to Garmin".
-3. **Not answering**: only when the extension's own worker does not answer; the popup shows "Garmin is not answering, so you cannot use it in Kaiord right now." ["Garmin no responde, así que ahora mismo no puedes usarlo en Kaiord."] and "Try again" ["Reintentar"]. It is hard to stage and not needed for the listing.
+3. **Not answering**: only when the extension's own worker does not answer; the popup shows "Garmin is not answering, so you cannot use it in Kaiord right now." ["Garmin no responde, así que ahora mismo no puedes usar Garmin en Kaiord."] and "Try again" ["Reintentar"]. It is hard to stage and not needed for the listing.
 
 Capture each state twice: once with Chrome's interface in English, for the English listing, and once in Spanish (`chrome://settings/languages`, "Display Google Chrome in this language"), for the Spanish listing. The Spanish popup shows the text in brackets.
 

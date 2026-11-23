@@ -68,7 +68,7 @@ const PINNED: Readonly<Record<string, Readonly<Record<string, string>>>> = {
     "connections:banner.many": "{{count}} fuentes necesitan atención",
     "common:sourceHealth.several": "Cada una muestra su arreglo en Conexiones.",
     "notice:not-answering":
-      "Garmin no responde, así que ahora mismo no puedes usarlo en Kaiord. · Reintentar",
+      "Garmin no responde, así que ahora mismo no puedes usar Garmin en Kaiord. · Reintentar",
   },
 };
 
