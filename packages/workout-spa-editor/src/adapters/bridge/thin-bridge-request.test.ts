@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ExtensionResponse } from "./bridge-transport";
 import {
-  BridgeAnswerRefusal,
+  bridgeAnswerRefusal,
   callThroughBridge,
   MALFORMED_ANSWER,
 } from "./thin-bridge-request";
@@ -137,7 +137,7 @@ describe("callThroughBridge", () => {
     // Arrange
     const send = vi.fn(async () => raw("<html>", 200, "text/html"));
     const read = () => {
-      throw new BridgeAnswerRefusal("Session expired", { needsReauth: true });
+      throw bridgeAnswerRefusal("Session expired", { needsReauth: true });
     };
 
     // Act
@@ -151,5 +151,22 @@ describe("callThroughBridge", () => {
       error: "Session expired",
       needsReauth: true,
     });
+  });
+
+  it("should not take an error that merely carries a refusal for one", async () => {
+    // Arrange
+    const send = vi.fn(async () => raw("{}"));
+    const read = () => {
+      throw Object.assign(new Error("Session expired"), {
+        refusal: { needsReauth: true },
+      });
+    };
+
+    // Act
+    const res = await callThroughBridge(send, { ...call, read });
+
+    // Assert
+    expect(res).toMatchObject({ ok: false, error: MALFORMED_ANSWER });
+    expect(res.needsReauth).toBeUndefined();
   });
 });

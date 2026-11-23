@@ -6,7 +6,7 @@
  * a workout only on a proven absence.
  */
 import type { RawAnswer } from "../../bridge/thin-bridge-request";
-import { BridgeAnswerRefusal } from "../../bridge/thin-bridge-request";
+import { bridgeAnswerRefusal } from "../../bridge/thin-bridge-request";
 import { isIsoDate, toScheduleId } from "./garmin-ids";
 
 export const readJson = (answer: RawAnswer): unknown =>
@@ -22,7 +22,7 @@ export const readScheduleId = (
 };
 
 const unreadable = () =>
-  new BridgeAnswerRefusal("unexpected-payload", { retryable: true });
+  bridgeAnswerRefusal("unexpected-payload", { retryable: true });
 
 type CalendarItem = {
   itemType?: unknown;

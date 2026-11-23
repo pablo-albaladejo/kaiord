@@ -7,17 +7,17 @@
  * content type or a leading HTML tag.
  */
 import type { RawAnswer } from "../../bridge/thin-bridge-request";
-import { BridgeAnswerRefusal } from "../../bridge/thin-bridge-request";
+import { bridgeAnswerRefusal } from "../../bridge/thin-bridge-request";
 
 const HTML_CONTENT_TYPE_RE = /^\s*text\/html\b/i;
 const HTML_BODY_RE = /^\s*<(?:!doctype|html)\b/i;
 
-export const NOT_THE_EXPORT = "MyTANITA answered a page in place of the export";
+const NOT_THE_EXPORT = "MyTANITA answered a page in place of the export";
 
 const isHtmlPage = ({ contentType, body }: RawAnswer): boolean =>
   HTML_CONTENT_TYPE_RE.test(contentType) || HTML_BODY_RE.test(body);
 
 export const readTanitaExport = (answer: RawAnswer): { csv: string } => {
-  if (isHtmlPage(answer)) throw new BridgeAnswerRefusal(NOT_THE_EXPORT);
+  if (isHtmlPage(answer)) throw bridgeAnswerRefusal(NOT_THE_EXPORT);
   return { csv: answer.body };
 };
