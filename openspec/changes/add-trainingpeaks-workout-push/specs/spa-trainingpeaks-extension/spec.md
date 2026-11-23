@@ -68,13 +68,18 @@ a re-send never adds a second copy silently.
 
 The SPA cannot know the athlete's TrainingPeaks account type: the token
 exchange does not report it, and reading it would take a request that
-downloads the athlete's profile. For a workout dated after tomorrow (the
-browser's date), the send control SHALL therefore state, before any request,
-that a Basic account accepts only today and tomorrow and that TrainingPeaks
-may refuse the day, without claiming the athlete's account is Basic. The
-control SHALL stay enabled. A `402` from the workout write SHALL be shown
-with the same reason and one fix (schedule the workout for today or
-tomorrow), in the athlete's language, rather than the raw error text.
+downloads the athlete's profile. Nor can it know the account's time zone,
+in which TrainingPeaks counts "tomorrow". For a workout dated after the
+earliest "tomorrow" in any time zone (UTC offsets reach back to -12:00), the
+send control SHALL therefore state, before any request, that a Basic account
+accepts only today and tomorrow, counted in the account's time zone, and that
+TrainingPeaks may refuse the day, without claiming the athlete's account is
+Basic. The browser's own time zone SHALL NOT narrow this, so the browser's
+tomorrow is announced while any zone may still be on the browser's yesterday.
+The control SHALL stay enabled. A `402` from the workout write SHALL be shown
+with its consequence (the workout was not sent) and the same rule, in the
+athlete's language, rather than the raw error text, and SHALL NOT tell the
+athlete to pick today or tomorrow, which they may already have done.
 
 #### Scenario: A later day is announced before sending
 
@@ -82,11 +87,17 @@ tomorrow), in the athlete's language, rather than the raw error text.
 - **WHEN** the send control is shown
 - **THEN** it SHALL state the Basic account limit, and nothing SHALL have been sent
 
-#### Scenario: Today and tomorrow carry no notice
+#### Scenario: Today and tomorrow carry no notice once every zone has reached today
 
-- **GIVEN** a workout dated today or tomorrow
+- **GIVEN** a workout dated today or tomorrow, at an hour when every time zone down to UTC-12:00 is on today
 - **WHEN** the send control is shown
 - **THEN** no planning-horizon notice SHALL be shown
+
+#### Scenario: The browser's tomorrow is announced while a zone is on yesterday
+
+- **GIVEN** a browser at 09:00 in Madrid, when UTC-12:00 is still on the previous day
+- **WHEN** the send control is shown for a workout dated the browser's tomorrow
+- **THEN** it SHALL state the Basic account limit, counted in the account's time zone
 
 #### Scenario: The refusal names the same reason
 

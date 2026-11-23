@@ -180,7 +180,8 @@ describe("TrainingPeaksPushButton", () => {
   describe("planning horizon", () => {
     beforeEach(() => {
       vi.useFakeTimers({ toFake: ["Date"] });
-      vi.setSystemTime(new Date("2026-11-23T09:00:00"));
+      // 13:00 UTC: every time zone, down to UTC-12, is already on 2026-11-23.
+      vi.setSystemTime(new Date("2026-11-23T13:00:00Z"));
     });
 
     afterEach(() => {
