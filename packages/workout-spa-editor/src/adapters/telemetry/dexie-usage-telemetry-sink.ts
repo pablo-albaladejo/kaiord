@@ -29,7 +29,6 @@ type UsageFields = Omit<AppendUsageEventInput, "providerType">;
 const usageOf = (event: AiTelemetryEvent): UsageFields => ({
   purpose: event.type === "chat_turn_finished" ? "chat" : event.purpose,
   modelId: event.modelId,
-  traceId: event.traceId,
   requests: event.requests,
 });
 

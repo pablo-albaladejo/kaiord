@@ -125,12 +125,13 @@ describe("createDexieUsageTelemetrySink", () => {
 
     // Act
     const rows = await rowsAfter(clean, retried);
-    const cost = (id: string) => rows.find((r) => r.traceId === id)!.cost;
+    const cost = (requests: number) =>
+      rows.find((r) => r.requestCount === requests)!.cost!;
 
     // Assert
-    expect(cost("clean")).toBeCloseTo(SONNET_5_ATTEMPT_USD, DIGITS);
-    expect(cost("retried")).toBeCloseTo(2 * SONNET_5_ATTEMPT_USD, DIGITS);
-    expect(cost("retried")).toBeGreaterThan(cost("clean"));
+    expect(cost(1)).toBeCloseTo(SONNET_5_ATTEMPT_USD, DIGITS);
+    expect(cost(2)).toBeCloseTo(2 * SONNET_5_ATTEMPT_USD, DIGITS);
+    expect(cost(2)).toBeGreaterThan(cost(1));
   });
 
   it("should record a failed attempt with no usage as unmeasured, not as zero", async () => {
@@ -214,12 +215,12 @@ describe("createDexieUsageTelemetrySink", () => {
       purpose: "chat",
       providerType: "anthropic",
       modelId: "claude-sonnet-5",
-      traceId: "chat-1",
       promptTokens: 500,
       completionTokens: 80,
       tokens: 580,
       requestCount: 2,
     });
+    expect(row).not.toHaveProperty("traceId");
   });
 
   it("should skip a chat turn that made no request", async () => {

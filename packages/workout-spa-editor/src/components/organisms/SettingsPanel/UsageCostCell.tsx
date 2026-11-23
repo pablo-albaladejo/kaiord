@@ -4,8 +4,9 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { formatUsageCost } from "./format-usage-cost";
 
 /**
- * The cost, and how many runs it leaves out because their price is unknown.
- * When no run has a known price there is no cost to show, so "—", never $0.
+ * The cost, whether it includes an estimate, and how many runs it leaves out
+ * because their price is unknown. When no run has a known price there is no
+ * cost to show, so "—", never $0.
  */
 export function CostCell({
   totals,
@@ -21,6 +22,11 @@ export function CostCell({
       {unknown > 0 && unknown === totals.runs
         ? "—"
         : formatUsageCost(totals.totalCost, locale)}
+      {totals.estimatedRequests > 0 && (
+        <span className="block text-ink-muted">
+          {t("usage.includesEstimate")}
+        </span>
+      )}
       {unknown > 0 && (
         <span className="block text-ink-muted">
           {t(pluralKey("usage.unknownCost", unknown), { count: unknown })}

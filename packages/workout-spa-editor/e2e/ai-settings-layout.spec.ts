@@ -118,7 +118,7 @@ test.describe("AI settings layout", () => {
       settings.getByText("on Anthropic", { exact: true })
     ).toBeVisible();
     await expect(
-      settings.getByText("No AI use yet this month, by any athlete.")
+      settings.getByText("No AI use yet this month on this device, by any athlete.")
     ).toBeVisible();
 
     // Per-task models stay folded until a task has its own.

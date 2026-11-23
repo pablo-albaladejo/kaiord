@@ -75,6 +75,7 @@
   },
   "kept": {
     "title": "Kept on this device",
-    "traces": "Traces: what each run of the assistant did, when, with what result and at what cost. They never leave this browser: not to an AI provider, not to Drive sync, not in a backup. The newest 200 are kept, none older than 90 days."
+    "traces": "Traces: what each run of the assistant did, when, with what result and at what cost. They never leave this browser: not to an AI provider, not to Drive sync, not in a backup. The newest 200 are kept, none older than 90 days.",
+    "usageEvents": "Usage log: for each run of the assistant, when, for which feature, with which provider and model, how many tokens and requests and at what cost, for the usage in Settings, AI. It never leaves this browser: not to an AI provider, not to Drive sync, not in a backup, so each device shows its own usage. Runs older than 12 months are removed."
   }
 }
