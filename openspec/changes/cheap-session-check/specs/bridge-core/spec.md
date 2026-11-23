@@ -32,8 +32,7 @@ captured bearer, decides between `"signed-in"` and `"not-checked"`).
 
 What a check used to hand over travels only to an explicit read made when it
 is about to be used: `read-athlete-id` (TrainingPeaks, before a write; this is
-where the token is minted), `read-user-id` (WHOOP, before an import) and
-`read-profile` (Train2Go, for the connect flow and the popup).
+where the token is minted) and `read-user-id` (WHOOP, before an import). On Train2Go the Kaiord App links from the profile ping read raw through `request`, and the popup reads it through the internal-only `read-profile`.
 
 #### Scenario: Tanita checks with headers only
 

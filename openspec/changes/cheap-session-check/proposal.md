@@ -32,11 +32,8 @@ works cost the athlete their data or a credential:
   otherwise `not-checked`.
 - **Explicit reads for what checks used to hand over.** `read-athlete-id`
   (TrainingPeaks, read just before a send; the token is minted here),
-  `read-user-id` (WHOOP, before an import), `read-profile` (Train2Go, for the
-  connect flow and the popup). Each App caller falls back to the old action
-  when an older extension answers "Origin or action not permitted".
-- **Popups keep what they show.** Train2Go's popup reads `read-profile` and
-  the week as before. The TrainingPeaks and Garmin popups gain a "Not checked
+  `read-user-id` (WHOOP, before an import). Train2Go's connect flow reads the profile ping raw through the thin Bridge's `request` (#1641), and its popup through the internal `read-profile`. Each App caller falls back to the old action for an older extension.
+- **Popups keep what they show.** Train2Go's popup reads the internal `read-profile` and the week as before. The TrainingPeaks and Garmin popups gain a "Not checked
   yet" state instead of claiming a sign-out they did not verify; they record
   no outage for it.
 - **Kaiord App.** Probers read `session`; `not-checked` is the `installed`
@@ -60,7 +57,7 @@ None.
 
 - `bridge-core`: the Session check contract.
 - `garmin-bridge`: the `ping` envelope.
-- `spa-train2go-extension`: the connect flow links from `read-profile`.
+- `spa-train2go-extension`: the connect flow links from the profile ping read through `request`, not from `ping`.
 - `spa-connections-page`: a check that asked nothing.
 - `privacy-policy`: each section states what checking costs.
 

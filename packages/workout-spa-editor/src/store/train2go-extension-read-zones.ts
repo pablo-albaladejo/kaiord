@@ -1,5 +1,6 @@
 /**
- * Train2Go `read-details` wire fetch.
+ * Train2Go zones-and-weight read: the profile page, read by the Connector
+ * (or, from an extension on the previous protocol, its `read-details`).
  *
  * Routes the action through the shared `OperationQueue` so the per-bridge
  * 60/h cap covers zones-sync alongside any other queue consumer (today:
@@ -11,6 +12,9 @@
  * completion to avoid leaving the rolling-window counter inconsistent.
  */
 import type { OperationQueue } from "../adapters/bridge/operation-queue";
+import { readDetailsAnswer } from "../adapters/train2go/connector/read-train2go-answers";
+import { readThroughBridge } from "../adapters/train2go/connector/train2go-bridge-request";
+import { DETAILS_PATH } from "../adapters/train2go/connector/train2go-paths";
 import {
   type Train2GoExtensionResponse,
   train2goSendMessage,
@@ -30,10 +34,13 @@ export const readZones = (
   return queue.enqueue({
     bridgeId: extensionId,
     execute: () =>
-      train2goSendMessage(
-        extensionId,
-        { action: "read-details", externalUserId },
-        ACTION_T
+      readThroughBridge(
+        (message) => train2goSendMessage(extensionId, message, ACTION_T),
+        {
+          path: DETAILS_PATH,
+          legacy: { action: "read-details", externalUserId },
+          read: readDetailsAnswer,
+        }
       ),
   });
 };

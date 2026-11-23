@@ -43,7 +43,7 @@ while no bearer is captured.
 - **Garmin**: nothing (stored tokens; the athlete card and last push come
   from `chrome.storage.local`). The library count row reads
   `gcApi.totalCount`, which no background ever produced; it is unchanged.
-- **Train2Go**: `GET /api/v2/profile/ping` through `read-profile` (the
+- **Train2Go**: `GET /api/v2/profile/ping` through the internal `read-profile` (the
   athlete's name, the coach's name and notes it shows), and the week through
   `read-week` at most once every 5 minutes unless Refresh: the same requests
   as before, now an explicit read rather than the check.

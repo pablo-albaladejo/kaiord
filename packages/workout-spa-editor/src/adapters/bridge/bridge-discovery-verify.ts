@@ -9,9 +9,8 @@
 import type { BridgeManifest } from "../../types/bridge-schemas";
 import { bridgeManifestSchema } from "../../types/bridge-schemas";
 import type { BridgeAnnouncement } from "./bridge-discovery-types";
+import { isAcceptedBridgeProtocol } from "./bridge-protocol";
 import { sendBridgeMessage } from "./bridge-transport";
-
-const SUPPORTED_PROTOCOLS = [1] as const;
 
 /**
  * Verifies an announcement and returns the pinged manifest on success
@@ -29,8 +28,12 @@ export async function verifyAnnouncement(
   if (!manifest.success) return null;
 
   if (manifest.data.id !== announcement.bridgeId) return null;
-  if (!SUPPORTED_PROTOCOLS.includes(manifest.data.protocolVersion as 1)) {
+  if (
+    !isAcceptedBridgeProtocol(
+      announcement.bridgeId,
+      manifest.data.protocolVersion
+    )
+  )
     return null;
-  }
   return manifest.data;
 }

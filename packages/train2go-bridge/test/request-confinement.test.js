@@ -76,15 +76,32 @@ const fakeTrain2Go = () =>
 
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
-  { action: "read-profile" },
-  { action: "read-week", date: DATE, userId: USER_ID },
-  { action: "read-day", date: DATE, userId: USER_ID },
-  { action: "read-details" },
+  {
+    action: "request",
+    method: "GET",
+    path: `/api/v2/workplan/weekly/${DATE}?user=${USER_ID}`,
+  },
+  {
+    action: "request",
+    method: "GET",
+    path: `/api/v2/workplan/daily/${DATE}?user=${USER_ID}&source=sidebar`,
+  },
+  { action: "request", method: "GET", path: "/user/details" },
   { action: "open-train2go" },
   { action: "profile-snapshot", snapshot: SNAPSHOT },
   { action: "profile-snapshot-clear" },
   { action: "set-theme", theme: "dark" },
 ];
+
+const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
+const POPUP_SENDER = {
+  id: "test-extension-id",
+  origin: "chrome-extension://test-extension-id",
+  url: "chrome-extension://test-extension-id/popup.html",
+};
+
+const sendFromPopup = (message) =>
+  new Promise((resolve) => internalCb(message, POPUP_SENDER, resolve));
 
 const send = (message) =>
   new Promise((resolve) => externalCb(message, SPA_SENDER, resolve));
@@ -204,20 +221,43 @@ describe("request confinement", () => {
     expect(answer.data.sessionActive).toBe(false);
   });
 
-  it("should hand the athlete's profile, with the coach's name and notes, only to the explicit profile read", async () => {
+  it("should hand the athlete's profile, with the coach's name and notes, only to its own popup's explicit read", async () => {
     // Arrange
     fakeTrain2Go();
 
     // Act
-    const answer = await send({ action: "read-profile" });
+    const popup = await sendFromPopup({ action: "read-profile" });
+    const app = await send({ action: "read-profile" });
 
     // Assert
-    expect(answer.data).toMatchObject({
+    expect(popup.data).toMatchObject({
       sessionActive: true,
       userId: USER_ID,
       userName: "Pablo",
       coachName: "Coach Dani",
       notes: "Knee: no hills",
+    });
+    expect(app.ok).toBe(false);
+    expect(JSON.stringify(app)).not.toMatch(/Pablo|Coach Dani|Knee/);
+  });
+
+  it("should hand the Kaiord App Train2Go's answer as it came, without reading it", async () => {
+    // Arrange
+    const page = '<main><input name="birthday" value="1990-01-01"></main>';
+    fetch.mockResolvedValueOnce(reply("text/html", page));
+
+    // Act
+    const answer = await send({
+      action: "request",
+      method: "GET",
+      path: "/user/details",
+    });
+
+    // Assert
+    expect(answer.data).toEqual({
+      status: 200,
+      contentType: "text/html",
+      body: page,
     });
   });
 });

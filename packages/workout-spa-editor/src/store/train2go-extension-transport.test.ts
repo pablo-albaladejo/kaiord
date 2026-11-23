@@ -164,11 +164,15 @@ describe("train2go-extension-transport", () => {
   });
 
   describe("readWeek", () => {
-    it("should send read-week with stringified userId", async () => {
+    it("should send read-week with stringified userId to an extension on the previous protocol", async () => {
       // Arrange
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
-          cb({ ok: true, data: { activities: [{ id: 1 }] } });
+          cb({
+            ok: true,
+            protocolVersion: 1,
+            data: { activities: [{ id: 1 }] },
+          });
         }
       );
       (globalThis as Record<string, unknown>).chrome = {
@@ -180,7 +184,7 @@ describe("train2go-extension-transport", () => {
 
       // Assert
       expect(result.ok).toBe(true);
-      expect(mockSend).toHaveBeenCalledWith(
+      expect(mockSend).toHaveBeenLastCalledWith(
         "ext-id",
         { action: "read-week", date: "2026-04-13", userId: "28035" },
         expect.any(Function)
@@ -209,11 +213,15 @@ describe("train2go-extension-transport", () => {
   });
 
   describe("readDay", () => {
-    it("should send read-day with stringified userId", async () => {
+    it("should send read-day with stringified userId to an extension on the previous protocol", async () => {
       // Arrange
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
-          cb({ ok: true, data: { activities: [{ id: 2 }] } });
+          cb({
+            ok: true,
+            protocolVersion: 1,
+            data: { activities: [{ id: 2 }] },
+          });
         }
       );
       (globalThis as Record<string, unknown>).chrome = {
@@ -225,7 +233,7 @@ describe("train2go-extension-transport", () => {
 
       // Assert
       expect(result.ok).toBe(true);
-      expect(mockSend).toHaveBeenCalledWith(
+      expect(mockSend).toHaveBeenLastCalledWith(
         "ext-id",
         { action: "read-day", date: "2026-04-13", userId: "42" },
         expect.any(Function)

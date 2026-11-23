@@ -22,12 +22,12 @@
       "text": "Lets the Kaiord App read the plan your coach sets on Train2Go, your training zones and your weight, using your own Train2Go sign-in",
       "proof": [
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the weekly activities on read-week"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
           "test": "packages/train2go-bridge/test/session-fetch.test.js",
@@ -61,61 +61,91 @@
     },
     {
       "id": "train2go.listing.week",
-      "text": "Reads the week your coach planned on Train2Go: each coaching activity's date, sport, title, duration, workload and completion status.",
+      "text": "Fetches the week your coach planned on Train2Go when the Kaiord App asks, and the Kaiord App reads from it each coaching activity's date, sport, title, duration, workload and completion status.",
       "proof": [
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the weekly activities on read-week"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
           "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
-          "contains": "\"read-week\" | \"read-day\""
+          "contains": "path: weeklyPath(date, externalUserId),"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
         }
       ]
     },
     {
       "id": "train2go.listing.day",
-      "text": "Reads one day in full when the Kaiord App asks: the coach's description of each session, and that day's comments with who wrote them.",
+      "text": "Fetches one day in full when the Kaiord App asks, and the Kaiord App reads from it the coach's description of each session, and that day's comments with who wrote them.",
       "proof": [
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should return the parsed day comment thread alongside activities"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should return the day's comment thread alongside its activities"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should backfill the date param onto every parsed activity from read-day"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should backfill the date param onto every activity read from a day"
         },
         {
           "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
-          "contains": "\"read-week\" | \"read-day\""
+          "contains": "path: weeklyPath(date, externalUserId),"
         }
       ]
     },
     {
       "id": "train2go.listing.zones",
-      "text": "Reads your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight from your Train2Go profile page. Nothing else on that page is passed on: gender, birthday, body fat, height, contact details, records and tests are dropped inside the extension.",
+      "text": "Fetches your Train2Go profile page when the Kaiord App asks, and the Kaiord App keeps from it only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. The rest of that page (gender, birthday, body fat, height, contact details, records and tests) reaches the Kaiord App in your browser and is dropped there as the page is read.",
       "proof": [
         {
-          "test": "packages/train2go-bridge/test/parser.test.js",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
-          "test": "packages/train2go-bridge/test/parser.test.js",
-          "title": "redacts forbidden fields recursively at any nesting depth"
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
+          "title": "should redact forbidden fields recursively at any nesting depth"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        }
+      ]
+    },
+    {
+      "id": "train2go.listing.raw",
+      "text": "Hands the Kaiord App what Train2Go answers, as it came, and makes only the requests on its fixed list of read-only Train2Go addresses. It refuses any other request without sending it.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse any path outside its closed list without sending a request"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse a request with headers or a body without sending it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should list only GET rules"
         }
       ]
     },
     {
       "id": "train2go.listing.who",
-      "text": "When you connect Train2Go in the Kaiord App, tells it who is signed in, with your coach's name and the notes your coach keeps about you when Train2Go provides them. Checking the connection tells it only whether you are signed in.",
+      "text": "Checking the connection tells the Kaiord App only whether you are signed in. When you connect Train2Go, the Kaiord App reads who is signed in from Train2Go's answer, which also holds your coach's name and the notes your coach keeps about you when Train2Go provides them, and keeps only your id and name.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
-          "title": "should hand the athlete's profile, with the coach's name and notes, only to the explicit profile read"
+          "title": "should hand the athlete's profile, with the coach's name and notes, only to its own popup's explicit read"
         },
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -123,7 +153,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.test.ts",
-          "title": "should link from the explicit profile read, never from the yes-or-no ping"
+          "title": "should link from Train2Go's profile ping read through the thin Bridge, never from the yes-or-no ping"
         },
         {
           "test": "packages/train2go-bridge/test/parser.test.js",
@@ -213,11 +243,11 @@
         },
         {
           "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
-          "contains": "\"read-week\" | \"read-day\""
+          "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
           "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
-          "contains": "{ action: \"read-details\", externalUserId }"
+          "contains": "path: DETAILS_PATH,"
         }
       ]
     },
@@ -365,12 +395,12 @@
       "text": "Lets the Kaiord App read the athlete's own Train2Go coaching plan, training zones and weight through the athlete's existing Train2Go sign-in.",
       "proof": [
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the weekly activities on read-week"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
           "test": "packages/train2go-bridge/test/session-fetch.test.js",
@@ -553,6 +583,36 @@
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
           "title": "should send only GET requests, so nothing on Train2Go is changed"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse any path outside its closed list without sending a request"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pj.app-receives",
+      "text": "**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it. A request with any other path or method, or with headers or a body, is refused without a request. Only the popup's own check of who is signed in and of this week's totals is read inside the extension.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse any path outside its closed list without sending a request"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse a request with headers or a body without sending it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should answer the popup's weekly read with the planned, done and workload inputs"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse the generic request to the popup, as it is reachable only through the App origin gate"
         }
       ]
     },
@@ -760,8 +820,8 @@
           "contains": "\"message\": \"Kaiord Train2Go Bridge\""
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the weekly activities on read-week"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
         }
       ]
     },
@@ -831,52 +891,78 @@
       ]
     },
     {
-      "id": "train2go.pp.plan",
-      "text": "**Coaching Plan**: When the Kaiord App asks, the extension reads the week your coach planned (each coaching activity's date, sport, title, duration, workload and completion status) and single days in full (the coach's description of each coaching activity, and that day's comments with who wrote them), and passes them to the Kaiord App.",
+      "id": "train2go.pp.unread",
+      "text": "**Answers Handed Over Unread**: The Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it. Reading the answer happens in the Kaiord App, in your browser.",
       "proof": [
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the weekly activities on read-week"
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should return the parsed day comment thread alongside activities"
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse any path outside its closed list without sending a request"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should backfill the date param onto every parsed activity from read-day"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
+        }
+      ]
+    },
+    {
+      "id": "train2go.pp.plan",
+      "text": "**Coaching Plan**: When the Kaiord App asks, the extension fetches the week your coach planned and single days in full. The Kaiord App reads from them each coaching activity's date, sport, title, duration, workload and completion status, the coach's description of each coaching activity, and that day's comments with who wrote them.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should return the day's comment thread alongside its activities"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should backfill the date param onto every activity read from a day"
         },
         {
           "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
-          "contains": "\"read-week\" | \"read-day\""
+          "contains": "path: weeklyPath(date, externalUserId),"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
         }
       ]
     },
     {
       "id": "train2go.pp.zones",
-      "text": "**Zones and Weight**: When the Kaiord App asks, the extension reads your Train2Go profile page and passes on only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. Gender, birthday, body fat, height, contact details, records and tests on that page are dropped inside the extension.",
+      "text": "**Zones and Weight**: When the Kaiord App asks, the extension fetches your Train2Go profile page and hands it to the Kaiord App, which keeps only your heart-rate, power and pace zones per sport, your maximum and resting heart rate, and your weight. Gender, birthday, body fat, height, contact details, records and tests on that page reach the Kaiord App in your browser and are dropped there as the page is read.",
       "proof": [
         {
-          "test": "packages/train2go-bridge/test/parser.test.js",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
-          "test": "packages/train2go-bridge/test/parser.test.js",
-          "title": "redacts forbidden fields recursively at any nesting depth"
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
+          "title": "should redact forbidden fields recursively at any nesting depth"
         },
         {
           "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
-          "contains": "{ action: \"read-details\", externalUserId }"
+          "contains": "path: DETAILS_PATH,"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
         }
       ]
     },
     {
       "id": "train2go.pp.check",
-      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, it passes on your Train2Go user id and name, your coach's name and the notes your coach keeps about you when Train2Go provides them. When you open the extension's popup, it reads the same to show your coach's name and notes, and also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
+      "text": "**Checking the Connection**: When the Kaiord App checks the connection, the extension asks Train2Go who is signed in and passes on only whether you are. When you connect Train2Go in the Kaiord App, the Kaiord App fetches the same answer through the extension and keeps from it your Train2Go user id and name; the answer also holds your coach's name and the notes your coach keeps about you when Train2Go provides them, which reach the Kaiord App in your browser and are dropped there. When you open the extension's popup, it reads the same answer to show your coach's name and notes, and also reads this week's plan to show its totals, at most once every 5 minutes unless you press Refresh.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -884,7 +970,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
-          "title": "should hand the athlete's profile, with the coach's name and notes, only to the explicit profile read"
+          "title": "should hand the athlete's profile, with the coach's name and notes, only to its own popup's explicit read"
         },
         {
           "test": "packages/train2go-bridge/test/background.test.js",
@@ -892,7 +978,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.test.ts",
-          "title": "should link from the explicit profile read, never from the yes-or-no ping"
+          "title": "should link from Train2Go's profile ping read through the thin Bridge, never from the yes-or-no ping"
         },
         {
           "file": "packages/train2go-bridge/popup.js",

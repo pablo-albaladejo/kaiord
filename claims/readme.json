@@ -979,12 +979,12 @@
           "title": "should send only GET requests, so nothing on Train2Go is changed"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the weekly activities on read-week"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/train2go-bridge/test/background.test.js",
-          "title": "should parse the details HTML body into a ZonesPayload on read-details"
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
           "test": "packages/train2go-bridge/test/session-fetch.test.js",

@@ -20,7 +20,7 @@ const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
 const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 
-const EXPECTED_PROTOCOL_VERSION = 1;
+const EXPECTED_PROTOCOL_VERSION = 2;
 const HTTP_OK = 200;
 const HTTP_MULTIPLE_CHOICES = 300;
 const HTTP_FOUND = 302;
@@ -30,7 +30,6 @@ const HTTP_SERVER_ERROR = 500;
 const OPAQUE_REDIRECT_STATUS = 0;
 const USER_ID = 28035;
 const WEEK_ACTIVITY_ID = 123;
-const DAY_ACTIVITY_ID = 9001;
 
 const PING_DATE = "2026-04-13";
 
@@ -97,7 +96,7 @@ describe("background service worker (SW-direct)", () => {
       expect(actual).toEqual(expected);
     });
 
-    it("should expose protocolVersion 1", () => {
+    it("should expose protocolVersion 2", () => {
       // Arrange
       const expected = EXPECTED_PROTOCOL_VERSION;
 
@@ -434,7 +433,7 @@ describe("background service worker (SW-direct)", () => {
       });
     });
 
-    it("should parse the weekly activities on read-week", async () => {
+    it("should read the popup's weekly inputs on read-week", async () => {
       // Arrange
       fetch.mockResolvedValueOnce(
         jsonResponse({
@@ -456,11 +455,11 @@ describe("background service worker (SW-direct)", () => {
 
       // Assert
       expect(result.activities).toHaveLength(1);
-      expect(result.activities[0]).toMatchObject({
+      expect(result.activities[0]).toEqual({
         id: WEEK_ACTIVITY_ID,
         date: PING_DATE,
-        sport: "cycling",
-        title: "Test Ride",
+        workload: 2,
+        status: 0,
       });
     });
 
@@ -473,124 +472,6 @@ describe("background service worker (SW-direct)", () => {
 
       // Assert
       await expect(attempt).rejects.toThrow("Missing userId");
-    });
-
-    it("should require userId for read-day", async () => {
-      // Arrange
-      const message = { action: "read-day", date: PING_DATE };
-
-      // Act
-      const attempt = handleAction(message);
-
-      // Assert
-      await expect(attempt).rejects.toThrow("Missing userId");
-    });
-
-    it("should backfill the date param onto every parsed activity from read-day", async () => {
-      // Arrange
-      // The daily HTML fragment lacks a date anchor; without backfill,
-      // expandDay would upsert records with date:"" and the activity would
-      // drop out of every per-day calendar bucket. Regression for that bug.
-      const html = `<div data-id="9001" data-status="0" class="activity activity-default">
-        <span class="activity-title"><strong>Test workout</strong></span>
-        <figure class="icon-sportscycling"></figure>
-        <span class="measured">60min</span>
-        <span class="workload-default" data-value="3"></span>
-      </div>`;
-      fetch.mockResolvedValueOnce(jsonResponse({ data: { content: html } }));
-
-      // Act
-      const result = await handleAction({
-        action: "read-day",
-        date: "2026-05-07",
-        userId: USER_ID,
-      });
-
-      // Assert
-      expect(result.activities).toHaveLength(1);
-      expect(result.activities[0]).toMatchObject({
-        id: DAY_ACTIVITY_ID,
-        date: "2026-05-07",
-      });
-    });
-
-    it("should return an empty comments array from read-day when the day has no thread", async () => {
-      // Arrange
-      const html = `<div data-id="9002" data-status="0" class="activity activity-default">
-        <span class="activity-title"><strong>No comments here</strong></span>
-        <figure class="icon-sportscycling"></figure>
-        <span class="measured">60min</span>
-      </div>`;
-      fetch.mockResolvedValueOnce(jsonResponse({ data: { content: html } }));
-
-      // Act
-      const result = await handleAction({
-        action: "read-day",
-        date: "2026-05-07",
-        userId: USER_ID,
-      });
-
-      // Assert
-      expect(result.comments).toEqual([]);
-    });
-
-    it("should return the parsed day comment thread alongside activities", async () => {
-      // Arrange
-      const html =
-        `<div data-id="9003" data-status="0" class="activity activity-default">` +
-        `<span class="activity-title"><strong>Race</strong></span>` +
-        `<figure class="icon-sportsrunning"></figure>` +
-        `<span class="measured">90min</span></div>` +
-        `<div class="comments "><div class="comment" id="c1">` +
-        `<picture class="image" title="Coach Dani"></picture>` +
-        `<div class="content">` +
-        `<time datetime="2026-06-08 13:02:21">Mon</time>` +
-        `<p>Great race!</p></div></div></div>`;
-      fetch.mockResolvedValueOnce(jsonResponse({ data: { content: html } }));
-
-      // Act
-      const result = await handleAction({
-        action: "read-day",
-        date: "2026-06-07",
-        userId: USER_ID,
-      });
-
-      // Assert
-      expect(result.activities).toHaveLength(1);
-      expect(result.comments).toEqual([
-        {
-          author: "Coach Dani",
-          isOwn: false,
-          timestamp: "2026-06-08 13:02:21",
-          text: "Great race!",
-        },
-      ]);
-    });
-
-    it("should parse the details HTML body into a ZonesPayload on read-details", async () => {
-      // Arrange
-      const html = `<main><section><div id="physio-99999" class="details-physio"><form>
-        <input name="weight" type="number" value="83">
-        <input name="bpm_max" type="number" value="187">
-      </form></div></section></main>`;
-      fetch.mockResolvedValueOnce(htmlResponse(html));
-
-      // Act
-      const result = await handleAction({ action: "read-details" });
-
-      // Assert
-      expect(result.physiological).toEqual({ weight: 83, bpmMax: 187 });
-    });
-
-    it("should throw needsReauth from read-details when the session is dead", async () => {
-      // Arrange
-      fetch.mockResolvedValueOnce(opaqueRedirectResponse());
-
-      // Act
-      const attempt = handleAction({ action: "read-details" });
-
-      // Assert
-      await expect(attempt).rejects.toMatchObject({ needsReauth: true });
     });
 
     it("should open the Train2Go dashboard tab on open-train2go", async () => {
@@ -621,10 +502,7 @@ describe("background service worker (SW-direct)", () => {
       // Arrange
       const expected = [
         "ping",
-        "read-profile",
-        "read-week",
-        "read-day",
-        "read-details",
+        "request",
         "open-train2go",
         "profile-snapshot",
         "profile-snapshot-clear",
@@ -670,7 +548,7 @@ describe("background service worker (SW-direct)", () => {
 
       // Act
       const keepsChannelOpen = externalCb(
-        { action: "read-week", date: PING_DATE, userId: USER_ID },
+        { action: "request", method: "GET", path: "/user/details" },
         sender,
         sendResponse
       );
@@ -795,9 +673,13 @@ describe("background service worker (SW-direct)", () => {
     it("should return true to keep the internal response channel open", () => {
       // Arrange
       const sendResponse = vi.fn();
+      const popup = {
+        id: "test-extension-id",
+        origin: "chrome-extension://test-extension-id",
+      };
 
       // Act
-      const result = internalCb({ action: "ping" }, {}, sendResponse);
+      const result = internalCb({ action: "ping" }, popup, sendResponse);
 
       // Assert
       expect(result).toBe(true);

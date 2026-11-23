@@ -57,18 +57,26 @@ describe("createTrain2GoCoachingTransport", () => {
     });
   });
 
-  it("should link from the explicit profile read, never from the yes-or-no ping", async () => {
+  it("should link from Train2Go's profile ping read through the thin Bridge, never from the yes-or-no ping", async () => {
     // Arrange
+    const profilePing = {
+      success: true,
+      data: { user: { id: 28035, name: "Pablo", user_notes: "Knee" } },
+    };
     const mockSend = vi.fn(
       (_id: string, msg: { action: string }, cb: (r: unknown) => void) => {
         cb(
-          msg.action === "read-profile"
+          msg.action === "request"
             ? {
                 ok: true,
-                protocolVersion: 1,
-                data: { sessionActive: true, userId: 28035, userName: "Pablo" },
+                protocolVersion: 2,
+                data: {
+                  status: 200,
+                  contentType: "application/json",
+                  body: JSON.stringify(profilePing),
+                },
               }
-            : { ok: true, protocolVersion: 1, data: { sessionActive: true } }
+            : { ok: true, protocolVersion: 2, data: { sessionActive: true } }
         );
       }
     );
@@ -81,9 +89,13 @@ describe("createTrain2GoCoachingTransport", () => {
     const result = await t.ping();
 
     // Assert
-    expect(result.externalUserId).toBe("28035");
-    expect(mockSend.mock.calls.map(([, msg]) => msg.action)).toEqual([
-      "read-profile",
+    expect(result).toEqual({
+      sessionActive: true,
+      externalUserId: "28035",
+      externalUserName: "Pablo",
+    });
+    expect(mockSend.mock.calls.map(([, msg]) => msg)).toEqual([
+      { action: "request", method: "GET", path: "/api/v2/profile/ping" },
     ]);
   });
 
@@ -92,7 +104,7 @@ describe("createTrain2GoCoachingTransport", () => {
     const mockSend = vi.fn(
       (_id: string, msg: { action: string }, cb: (r: unknown) => void) => {
         cb(
-          msg.action === "read-profile"
+          msg.action === "request"
             ? {
                 ok: false,
                 protocolVersion: 1,
@@ -117,7 +129,7 @@ describe("createTrain2GoCoachingTransport", () => {
     // Assert
     expect(result.externalUserName).toBe("Pablo");
     expect(mockSend.mock.calls.map(([, msg]) => msg.action)).toEqual([
-      "read-profile",
+      "request",
       "ping",
     ]);
   });
@@ -194,6 +206,7 @@ describe("createTrain2GoCoachingTransport", () => {
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({
           ok: true,
+          protocolVersion: 1,
           data: {
             activities: [
               {
@@ -232,7 +245,7 @@ describe("createTrain2GoCoachingTransport", () => {
     // Arrange
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
-        cb({ ok: true, data: { activities: [] } });
+        cb({ ok: true, protocolVersion: 1, data: { activities: [] } });
       }
     );
     (globalThis as Record<string, unknown>).chrome = {
@@ -261,7 +274,11 @@ describe("createTrain2GoCoachingTransport", () => {
     ];
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
-        cb({ ok: true, data: { activities: [], comments } });
+        cb({
+          ok: true,
+          protocolVersion: 1,
+          data: { activities: [], comments },
+        });
       }
     );
     (globalThis as Record<string, unknown>).chrome = {
@@ -339,6 +356,7 @@ describe("createTrain2GoCoachingTransport", () => {
           (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
             cb({
               ok: true,
+              protocolVersion: 1,
               data: { physiological: { weight: "not-a-number" } },
             });
           }

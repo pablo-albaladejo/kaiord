@@ -11,6 +11,7 @@
  */
 import { z } from "zod";
 
+import { isAcceptedBridgeProtocol } from "./bridge-protocol";
 import { probeResultOf, sessionOutcomeOf } from "./bridge-session-outcome";
 import {
   active,
@@ -22,7 +23,6 @@ import {
 import { sendBridgeMessage } from "./bridge-transport";
 
 const PING_TIMEOUT_MS = 2_000;
-const SUPPORTED_PROTOCOL_VERSION = 1;
 
 const pingDataSchema = z.object({
   protocolVersion: z.number().optional(),
@@ -34,6 +34,7 @@ type PingData = z.infer<typeof pingDataSchema>;
 
 const probeByPing = async (
   extensionId: string,
+  bridgeId: string,
   outdatedMessage: string,
   readSession: (data: PingData) => boolean
 ): Promise<SessionProbeResult> => {
@@ -51,7 +52,7 @@ const probeByPing = async (
   }
   const parsed = pingDataSchema.safeParse(res.data);
   const data: PingData = parsed.success ? parsed.data : {};
-  if (data.protocolVersion !== SUPPORTED_PROTOCOL_VERSION) {
+  if (!isAcceptedBridgeProtocol(bridgeId, data.protocolVersion)) {
     return outdatedExtension(outdatedMessage);
   }
   const outcome = sessionOutcomeOf(res.data);
@@ -64,6 +65,7 @@ export const probeGarminSession = (
 ): Promise<SessionProbeResult> =>
   probeByPing(
     extensionId,
+    "garmin-bridge",
     "Update your Kaiord extension for Garmin",
     (data) => data.gcApi?.ok === true
   );
@@ -73,6 +75,7 @@ export const probeTrain2GoSession = (
 ): Promise<SessionProbeResult> =>
   probeByPing(
     extensionId,
+    "train2go-bridge",
     "Update your Kaiord Train2Go Bridge extension",
     (data) => data.sessionActive === true
   );

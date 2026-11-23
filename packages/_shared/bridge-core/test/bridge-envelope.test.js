@@ -12,6 +12,7 @@ const {
   createEnvelope,
   createDispatch,
   createExternalDispatch,
+  createInternalDispatch,
 } = require("../bridge-envelope.js");
 
 describe("bridge-envelope (vendored)", () => {
@@ -350,6 +351,76 @@ describe("bridge-envelope (vendored)", () => {
           ok: false,
           error: "Origin or action not permitted",
         })
+      );
+    });
+  });
+  describe("createInternalDispatch", () => {
+    const ID = "test-extension-id";
+    const popup = { id: ID, origin: `chrome-extension://${ID}` };
+    const setup = () => {
+      const handleAction = vi.fn().mockResolvedValue(null);
+      const dispatch = createDispatch({ handleAction, protocolVersion: 1 });
+      const internal = createInternalDispatch({
+        dispatch,
+        internalActions: new Set(["ping"]),
+        protocolVersion: 1,
+      });
+      return { handleAction, internal };
+    };
+
+    it("should dispatch an internal action from the extension's own page", async () => {
+      // Arrange
+      const { handleAction, internal } = setup();
+      const respond = vi.fn();
+
+      // Act
+      internal({ action: "ping" }, popup, respond);
+      await vi.waitFor(() => expect(respond).toHaveBeenCalled());
+
+      // Assert
+      expect(handleAction).toHaveBeenCalledWith({ action: "ping" });
+    });
+
+    it.each([
+      {
+        label: "a content script in a web page",
+        sender: { id: ID, origin: "https://kaiord.com", tab: { id: 1 } },
+      },
+      {
+        label: "an extension page opened in a tab",
+        sender: { ...popup, tab: { id: 1 } },
+      },
+      {
+        label: "another extension",
+        sender: { id: "other", origin: "chrome-extension://other" },
+      },
+      { label: "an empty sender", sender: {} },
+    ])("should give no answer to $label", ({ sender }) => {
+      // Arrange
+      const { handleAction, internal } = setup();
+      const respond = vi.fn();
+
+      // Act
+      const keepsChannelOpen = internal({ action: "ping" }, sender, respond);
+
+      // Assert
+      expect(keepsChannelOpen).toBe(false);
+      expect(handleAction).not.toHaveBeenCalled();
+      expect(respond).not.toHaveBeenCalled();
+    });
+
+    it("should refuse an action outside the internal allowlist", () => {
+      // Arrange
+      const { handleAction, internal } = setup();
+      const respond = vi.fn();
+
+      // Act
+      internal({ action: "request" }, popup, respond);
+
+      // Assert
+      expect(handleAction).not.toHaveBeenCalled();
+      expect(respond).toHaveBeenCalledWith(
+        expect.objectContaining({ ok: false, retryable: false })
       );
     });
   });
