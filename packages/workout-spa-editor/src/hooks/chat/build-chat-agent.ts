@@ -49,7 +49,7 @@ export const buildChatAgent = async (
     healthShared: args.healthShared,
     getMatrixSignals: args.getMatrixSignals,
   });
-  const tools = traceReadTools(built, args.trace);
+  const tools = traceReadTools(built, args.trace, args.provider.type);
   const model = await createLanguageModel(args.provider, args.modelId, {
     browser: true,
   });

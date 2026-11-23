@@ -35,7 +35,7 @@ const EN: Copy = {
   reply: "Rest today.",
   summary: /^Chat · .+ · Finished · /,
   model: `Anthropic ${MODEL}`,
-  sent: "To Anthropic: your messages, workouts, your coach's plan and comments, and which source feeds each kind of data",
+  sent: "To Anthropic: your messages",
   noTools: "No Tool was called.",
   export: "Export all (JSON)",
 };
@@ -46,7 +46,7 @@ const ES: Copy = {
   reply: "Descansa hoy.",
   summary: /^Chat · .+ · Terminada · /,
   model: `Anthropic ${MODEL}`,
-  sent: "A Anthropic: tus mensajes, entrenamientos, el plan y los comentarios de tu entrenador y de qué fuente llega cada tipo de dato",
+  sent: "A Anthropic: tus mensajes",
   noTools: "No se llamó a ninguna herramienta.",
   export: "Exportar todas (JSON)",
 };

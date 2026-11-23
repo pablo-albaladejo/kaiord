@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { createInMemoryTraceRepository } from "../../test-utils/in-memory-trace-repository";
+import { HEALTH_WITHHELD } from "../chat/tools/withhold-health";
 import { traceReadTools } from "./trace-read-tools";
 import { startTraceRun } from "./trace-run";
 
@@ -31,7 +32,8 @@ describe("traceReadTools", () => {
         }),
         tool("create_workout", true, async () => ({ id: "w" })),
       ],
-      run
+      run,
+      "anthropic"
     );
 
     // Act
@@ -45,6 +47,40 @@ describe("traceReadTools", () => {
     expect(trace?.tools).toEqual([
       { name: "query_health", confirmation: "not_needed", result: "ok" },
       { name: "get_workouts", confirmation: "not_needed", result: "failed" },
+    ]);
+  });
+
+  it("should count what each read Tool handed the Provider, and nothing for a withheld one", async () => {
+    // Arrange
+    const run = startTraceRun({
+      feature: "chat",
+      traces: createInMemoryTraceRepository(),
+    });
+    const [sleep, workouts] = traceReadTools(
+      [
+        tool("query_health", false, async () => ({ records: [] })),
+        tool("query_workouts", false, async () => ({ rows: [] })),
+      ],
+      run,
+      "openai"
+    );
+    const [withheld] = traceReadTools(
+      [tool("query_health", false, async () => HEALTH_WITHHELD)],
+      run,
+      "openai"
+    );
+
+    // Act
+    await sleep?.execute({ metric: "sleep" });
+    await workouts?.execute({});
+    await withheld?.execute({ metric: "weight" });
+
+    // Assert
+    expect(run.sentSoFar()).toEqual([
+      {
+        to: "openai",
+        kinds: ["sleep", "restingHeartRate", "workouts"],
+      },
     ]);
   });
 });
