@@ -12,6 +12,24 @@ export const FIXES = ["install", "update", "sign-in", "try-again"];
 
 export const LOCALES = ["en", "es"];
 
+// Beside the four fixes the single source holds only these tables. REASONS
+// map a Connection that looks signed in but cannot serve to one of the four
+// fixes; NOT_CHECKED words why a check asked nothing (no notice). NO_TAB is
+// the one exception to the four fixes: WHOOP (unpublished, experimental)
+// holds a working sign-in but reads only through an open WHOOP tab, which
+// the App cannot open for it, so its fix is "Open {platform}". A second
+// exception fails the guard.
+export const EXCEPTION = "NO_TAB";
+export const SOURCE_TABLES = [
+  "FIXES",
+  "FIX_FOR_STATE",
+  "WORDING",
+  "REASONS",
+  "REASON_WORDING",
+  "NOT_CHECKED",
+  EXCEPTION,
+];
+
 export const PATTERNS = [
   { fix: "install", pattern: /\binstall\w*\b[^.]*\b(extension|kaiord for)\b/i },
   {
@@ -88,17 +106,5 @@ export const ALLOWED = [
       "packages/workout-spa-editor/src/i18n/locales/en/connections.json#manage.reconnect",
     phrase: "Reconnect",
     why: "re-links a source the athlete disconnected in Kaiord; no Connection failed",
-  },
-  {
-    where: "packages/whoop-bridge/popup.js",
-    phrase:
-      "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
-    why: "WHOOP (unpublished, experimental) holds a working sign-in but reads only through an open app.whoop.com tab, which the App cannot see; the owner decides whether this becomes one of the four fixes",
-  },
-  {
-    where: "packages/whoop-bridge/_locales/en/messages.json#resumeOpenTab",
-    phrase:
-      "Open app.whoop.com and Kaiord reads from that tab again — nothing here is lost meanwhile.",
-    why: "the same WHOOP no-tab line, as Chrome renders it",
   },
 ];

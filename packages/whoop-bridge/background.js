@@ -64,6 +64,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+}
+
 // ── WHOOP call surface: the closed list ──
 //
 // Method + path pattern, nothing else, GET only: every request is checked
@@ -233,24 +243,20 @@ const hasWhoopTab = async () => ({ open: (await findWhoopTab()) !== null });
 
 const UNAUTHORIZED_STATUS = 401;
 
-const toBridgeError = (res) => {
-  const status = typeof res?.status === "number" ? res.status : undefined;
-  const err = new Error(
-    res?.error ?? `Request failed${status ? `: ${status}` : ""}`
-  );
-  if (status !== undefined) err.status = status;
-  if (status === UNAUTHORIZED_STATUS) err.needsReauth = true;
-  return err;
-};
-
 // ── The App's one read: a request from the closed list, answered raw ──
 // Run by the content script in the open WHOOP tab, which hands back the
 // answer unread.
 const request = async (message) => {
   const { path } = requestGate.createRequestGate({ allowed: ALLOWED })(message);
   const res = await whoopFetch(path);
-  if (!res?.ok) throw toBridgeError(res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  // A 401 is WHOOP refusing the captured bearer: a verified sign-out.
+  if (!res?.ok) {
+    throw answerCore.toBridgeError({
+      ...res,
+      needsReauth: res?.status === UNAUTHORIZED_STATUS,
+    });
+  }
+  return answerCore.toAnswer(res);
 };
 
 // ── Actions ──

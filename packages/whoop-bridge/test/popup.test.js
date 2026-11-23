@@ -92,6 +92,7 @@ describe("WHOOP popup", () => {
           ok: true,
           data: {
             connected: true,
+            userId: 42,
             capturedAt: new Date("2026-05-02T07:00:00Z").getTime(),
           },
         },
@@ -154,7 +155,7 @@ describe("WHOOP popup", () => {
 
   it("does not start an outage when only the tab is missing", async () => {
     const chromeMock = buildChromeMock({
-      statusResponse: { ok: true, data: { connected: true } },
+      statusResponse: { ok: true, data: { connected: true, userId: 42 } },
       tabOpen: false,
     });
     const dom = setupDom(chromeMock);
@@ -170,7 +171,7 @@ describe("WHOOP popup", () => {
 
   it("clears the outage when the session comes back", async () => {
     const chromeMock = buildChromeMock({
-      statusResponse: { ok: true, data: { connected: true } },
+      statusResponse: { ok: true, data: { connected: true, userId: 42 } },
       health: { brokenSince: BROKEN_AT_MS },
     });
     const dom = setupDom(chromeMock);
@@ -190,7 +191,7 @@ describe("WHOOP popup", () => {
   it("renders the no-tab state when the bearer is held but no WHOOP tab is open", async () => {
     const dom = setupDom(
       buildChromeMock({
-        statusResponse: { ok: true, data: { connected: true } },
+        statusResponse: { ok: true, data: { connected: true, userId: 42 } },
         tabOpen: false,
       })
     );
@@ -200,28 +201,19 @@ describe("WHOOP popup", () => {
     await flushAsync();
 
     const doc = dom.window.document;
-    // Muted, not warn: the session is intact and one click restores reads, so
-    // this is a paused bridge rather than a broken one. The alert mark is
-    // reserved for a state the user has actually lost something to.
-    expect(doc.getElementById("status").className).toContain(
-      "status-block--muted"
-    );
+    // The shared no-tab notice: its one fix is opening WHOOP, and the mark
+    // stays a dot because the sign-in itself is intact.
     expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
       "span"
     );
     expect(doc.getElementById("status-text").textContent).toBe(
-      "No WHOOP tab open"
+      "You cannot use WHOOP in Kaiord until a WHOOP tab is open in this browser."
     );
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "reads WHOOP from inside an app.whoop.com tab"
-    );
-    // Fix-first: the thing that ends this state is opening WHOOP.
-    expect(doc.querySelector(".cta-primary").textContent).toBe("Open WHOOP ↗");
+    expect(doc.querySelector(".cta-primary").textContent).toBe("Open WHOOP");
     const consequence = doc.getElementById("consequence-region").textContent;
     expect(consequence).toContain(
       "Everything already imported stays in Kaiord"
     );
-    expect(consequence).toContain("Open app.whoop.com and Kaiord reads");
   });
 
   // A probe that errors stands for a read that would error too, so the popup
@@ -231,7 +223,7 @@ describe("WHOOP popup", () => {
       runtime: {
         sendMessage: vi.fn((msg, cb) => {
           if (msg.action === "popup-status") {
-            cb({ ok: true, data: { connected: true } });
+            cb({ ok: true, data: { connected: true, userId: 42 } });
           } else {
             cb({ ok: false, error: "no response" });
           }
@@ -244,7 +236,7 @@ describe("WHOOP popup", () => {
     await flushAsync();
 
     expect(dom.window.document.getElementById("status-text").textContent).toBe(
-      "No WHOOP tab open"
+      "You cannot use WHOOP in Kaiord until a WHOOP tab is open in this browser."
     );
   });
 
@@ -256,7 +248,7 @@ describe("WHOOP popup", () => {
   it("renders the checking skeleton in every region a resolved state fills", () => {
     const dom = setupDom(
       buildChromeMock({
-        statusResponse: { ok: true, data: { connected: true } },
+        statusResponse: { ok: true, data: { connected: true, userId: 42 } },
       })
     );
 
@@ -286,7 +278,7 @@ describe("WHOOP popup", () => {
 
   it("still renders when chrome.storage is unavailable", async () => {
     const chromeMock = buildChromeMock({
-      statusResponse: { ok: true, data: { connected: true } },
+      statusResponse: { ok: true, data: { connected: true, userId: 42 } },
     });
     delete chromeMock.storage;
     const dom = setupDom(chromeMock);

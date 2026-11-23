@@ -33,21 +33,9 @@
       }
     }
   },
-  "noTab": {
-    "message": "No hay ninguna pestaña de WHOOP abierta",
-    "description": "Status verdict when a session bearer is held but no app.whoop.com tab is open to run reads in."
-  },
-  "noTabCause": {
-    "message": "Tu sesión sigue guardada, pero Kaiord lee WHOOP desde dentro de una pestaña de app.whoop.com.",
-    "description": "Status cause sentence for the no-tab state."
-  },
   "keepsImported": {
     "message": "Todo lo que ya se importó se queda en Kaiord.",
     "description": "Consequence line: losing the session or the tab deletes nothing that has already arrived."
-  },
-  "resumeOpenTab": {
-    "message": "Abre app.whoop.com y Kaiord vuelve a leer desde esa pestaña — mientras tanto no se pierde nada de lo que hay aquí.",
-    "description": "Consequence line naming what ends the no-tab state."
   },
   "readsNeedTab": {
     "message": "Kaiord lee a través de esa pestaña abierta. Cierra todas las pestañas de app.whoop.com y las lecturas se paran hasta que vuelvas a abrir una.",

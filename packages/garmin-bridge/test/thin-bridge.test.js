@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 // The thin Bridge at the message contract (ADR 0004): the extension lends
@@ -50,24 +53,21 @@ const answer = (cb, message, sender) =>
     if (open === false) resolve("no answer");
   });
 
-const fitBytes = () => {
-  const bytes = new Array(16).fill(0);
-  bytes[0] = 14;
-  [".", "F", "I", "T"].forEach((c, i) => (bytes[8 + i] = c.charCodeAt(0)));
-  return bytes;
-};
+// The body-composition upload the App's encoder builds (@kaiord/fit).
+const fitBytes = () =>
+  Array.from(
+    readFileSync(
+      join(import.meta.dirname, "fixtures/body-composition-upload.fit")
+    )
+  );
 
-const WORKOUT = {
-  workoutName: "Tempo",
-  sportType: { sportTypeId: 1, sportTypeKey: "running", displayOrder: 1 },
-  workoutSegments: [
-    {
-      segmentOrder: 1,
-      sportType: { sportTypeId: 1, sportTypeKey: "running", displayOrder: 1 },
-      workoutSteps: [{ type: "ExecutableStepDTO", stepOrder: 1 }],
-    },
-  ],
-};
+// The GCN the App's writer builds (@kaiord/garmin), see test/fixtures.
+const WORKOUT = JSON.parse(
+  readFileSync(
+    join(import.meta.dirname, "fixtures/workout-repeat-steps.gcn.json"),
+    "utf8"
+  )
+);
 
 describe("thin Bridge: closed path list", () => {
   beforeEach(() => __resetChromeMock());

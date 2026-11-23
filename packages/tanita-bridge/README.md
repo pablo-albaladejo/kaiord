@@ -29,7 +29,7 @@ The only contract is the `chrome.runtime` message shape, documented inline in
 
 - `request` → `{ action: "request", method, path, body? }`, only for an entry
   of `ALLOWED` (reads only), answered `{ ok: true, protocolVersion: 2, data: { status,
-contentType, body } }` with the body unread; a dead Session is
+contentType, body } }` with the body unread but for its Session secrets, which it removes; a dead Session is
   `needsReauth: true`, another failure keeps its `status`, and anything outside
   the list is `Request not allowed` with nothing sent. The App's Connector
   builds the path and reads the answer; it falls back to the protocol-1

@@ -28,7 +28,8 @@ version 2): the App reaches it only through `{ action: "request", method,
 path, body? }`, which runs only an entry of the closed `ALLOWED` list in
 `background.js` (method + path pattern, and for a write the name of the body
 schema the vendored `bridge-request-gate.js` checks it against) and answers
-WHOOP's answer unread as `{ status, contentType, body }`. What to ask for,
+WHOOP's answer unread but for its Session secrets (removed by
+the vendored `bridge-answer.js`) as `{ status, contentType, body }`. What to ask for,
 how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/bridge/whoop-transport.ts` and `whoop-connector/`). The App
 falls back to the protocol-1 actions for the store version. The internal
 channel uses `createInternalDispatch`: only the popup is answered, never a
@@ -43,14 +44,14 @@ Announces itself to the SPA via the vendored bridge-core announce script.
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `background.js`                         | Service worker: session state, closed list, `request` relayed to the WHOOP tab, popup gate, token capture listener.        |
 | `inject-main.js`                        | MAIN-world interceptor on app.whoop.com; captures the session bearer.                                                      |
-| `content.js`                            | Isolated-world relay; runs each listed read from the tab origin and hands the answer back unread.                          |
+| `content.js`                            | Isolated-world relay; runs a read on its own copy of the closed list (equal to `background.js`) and hands the answer back. |
 | `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                |
 | `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, "Feeds Kaiord" chips, "What Kaiord is missing" box when signed out, fix-first CTA pair. |
 | `manifest.json` / `manifest.prod.json`  | MV3 manifests (`tabs`, `webRequest`, `scripting`, `storage`; WHOOP hosts). Prod strips localhost.                          |
 
 ## Vendored bridge-core files
 
-`bridge-envelope.js`, `kaiord-announce.js`, `bridge-popup-utils.js`,
+`bridge-envelope.js`, `bridge-answer.js`, `kaiord-announce.js`, `bridge-popup-utils.js`,
 `bridge-popup-shell.js`, `popup.css`, and
 `test/{chrome-mock,bridge-envelope.test,bridge-popup-shell.test}.js` are
 byte-identical vendored

@@ -23,9 +23,11 @@
 // a bare 3xx is treated the same way.
 const REDIRECT_STATUS_MIN = 300;
 const REDIRECT_STATUS_MAX = 399;
-// Auth-challenge statuses that likewise mean the cookie session is dead.
-const UNAUTHORIZED_STATUS = 401;
-const FORBIDDEN_STATUS = 403;
+// The auth challenge that likewise means the cookie session is dead. A 403
+// is not one: it refuses this request (a permission, a firewall, an
+// anti-forgery check), not the sign-in, so it keeps its status like any
+// other failure.
+const SESSION_UNAUTHORIZED_STATUS = 401;
 
 // Defense-in-depth path-allowlist matcher. The rules array (method + RegExp
 // pattern) belongs to the caller; this only applies it.
@@ -44,10 +46,9 @@ const isSessionRedirect = (response) =>
     response.status >= REDIRECT_STATUS_MIN &&
     response.status <= REDIRECT_STATUS_MAX);
 
-// 401/403 mean the request was received but the session is not authorized.
+// 401 means the request was received but the session is not authenticated.
 const isAuthChallenge = (response) =>
-  response.status === UNAUTHORIZED_STATUS ||
-  response.status === FORBIDDEN_STATUS;
+  response.status === SESSION_UNAUTHORIZED_STATUS;
 
 /**
  * Fetch a first-party resource on the user's existing cookie session.

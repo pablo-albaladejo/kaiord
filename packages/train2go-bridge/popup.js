@@ -25,7 +25,7 @@
  */
 
 /* global msg, $, uiLocale, localizePage, withTimeout, formatSinceDate, recordProbe,
-   renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderNotice,
+   renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderBrokenConnection,
    renderAthleteCard, KAIORD_CONNECTION_NOTICES */
 
 const PHASE_TIMEOUT_MS = 3_000;
@@ -257,17 +257,17 @@ const connectionStateOf = (ping) => {
 // null for a state the health record cannot date — including every worker
 // timeout, which is inconclusive about the session rather than evidence.
 const renderBroken = (state, since = null) => {
-  const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
-    state,
-    PLATFORM,
-    uiLocale()
+  renderBrokenConnection(
+    $,
+    msg,
+    KAIORD_CONNECTION_NOTICES.noticeFor(state, PLATFORM, uiLocale()),
+    {
+      since,
+      href: OPEN_TRAIN2GO_URL,
+      onRetry: () => loadPopupData(),
+      formatSince: formatSinceDate,
+    }
   );
-  setMarkEstablished(since !== null);
-  renderNotice($, notice, {
-    since: since === null ? null : msg("outageSince", [formatSinceDate(since)]),
-    href: OPEN_TRAIN2GO_URL,
-    onRetry: () => loadPopupData(),
-  });
   renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
 };
 

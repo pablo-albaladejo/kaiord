@@ -21,7 +21,7 @@ This package is `private: true` and is not published to npm.
   `GET /users/v3/token`, then calls the data endpoints with
   `Authorization: Bearer` (`credentials:"omit"`). On a 401 it re-runs the
   exchange once. The extension never reads or stores the cookie.
-- Hand TrainingPeaks' answer to the Kaiord App **unread**; the App's
+- Hand TrainingPeaks' answer to the Kaiord App **unread**, but for any Session secret in it, which it removes; the App's
   Connector reads it (a workout's id and day, the metrics through
   `@kaiord/trainingpeaks`). This bridge does not import it.
 - Check the Session without a request (`ping` / `checkSession`): the only
@@ -35,7 +35,7 @@ The only contract is the `chrome.runtime` message shape, documented inline in
 - `request` → `{ action: "request", method, path, body? }`, only for an entry
   of `ALLOWED` (a body only where the entry declares a schema, and only in that
   shape), answered `{ ok: true, protocolVersion: 2, data: { status,
-contentType, body } }` with the body unread; a dead Session is
+contentType, body } }` with the body unread but for its Session secrets, which it removes; a dead Session is
   `needsReauth: true`, another failure keeps its `status`, and anything outside
   the list is `Request not allowed` with nothing sent. The App's Connector
   builds the path and reads the answer; it falls back to the protocol-1

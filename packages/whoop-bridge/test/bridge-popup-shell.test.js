@@ -14,6 +14,7 @@ const {
   renderSkeleton,
   renderCtas,
   renderNotice,
+  renderBrokenConnection,
 } = require("../bridge-popup-shell.js");
 const { noticeFor } = require("../connection-notices.js");
 
@@ -159,9 +160,9 @@ describe("bridge-popup-shell (vendored)", () => {
       renderStatusBlock($, msg, options);
 
       // Assert
-      expect($("status").firstElementChild.getAttribute("data-status-mark")).toBe(
-        ""
-      );
+      expect(
+        $("status").firstElementChild.getAttribute("data-status-mark")
+      ).toBe("");
     });
 
     it("should hide the mark from assistive tech, which reads the sentence", () => {
@@ -173,7 +174,9 @@ describe("bridge-popup-shell (vendored)", () => {
 
       // Assert
       expect(
-        $("status").querySelector("[data-status-mark]").getAttribute("aria-hidden")
+        $("status")
+          .querySelector("[data-status-mark]")
+          .getAttribute("aria-hidden")
       ).toBe("true");
     });
 
@@ -351,9 +354,9 @@ describe("bridge-popup-shell (vendored)", () => {
 
       // Assert
       expect(
-        [
-          ...$("consequence-region").querySelectorAll(".consequence__line"),
-        ].map((p) => p.textContent)
+        [...$("consequence-region").querySelectorAll(".consequence__line")].map(
+          (p) => p.textContent
+        )
       ).toEqual(lines);
     });
 
@@ -421,6 +424,47 @@ describe("bridge-popup-shell (vendored)", () => {
       expect($("footer-region").querySelectorAll(".skeleton").length).toBe(0);
     });
   });
+  describe("renderBrokenConnection", () => {
+    const withMark = () => {
+      const mark = document.createElement("span");
+      mark.id = "brand-mark";
+      document.body.appendChild(mark);
+      return mark;
+    };
+    const msg = (key, subs = []) =>
+      key === "outageSince" ? `Since ${subs[0]}.` : key;
+
+    it("should show the notice undated with a muted mark on the first failure", () => {
+      // Arrange
+      const mark = withMark();
+      const notice = noticeFor("signed-out", "Example", "en");
+
+      // Act
+      renderBrokenConnection($, msg, notice, { href: "https://example.test" });
+
+      // Assert
+      expect($("status-text").textContent).toBe(notice.message);
+      expect($("status-sub").hidden).toBe(true);
+      expect(mark.classList.contains("popup-header__mark--muted")).toBe(true);
+    });
+
+    it("should date a known outage and establish the mark", () => {
+      // Arrange
+      const mark = withMark();
+      const notice = noticeFor("not-answering", "Example", "en");
+
+      // Act
+      renderBrokenConnection($, msg, notice, {
+        since: 1,
+        formatSince: () => "May 1",
+      });
+
+      // Assert
+      expect($("status-sub").textContent).toBe("Since May 1.");
+      expect(mark.classList.contains("popup-header__mark--muted")).toBe(false);
+    });
+  });
+
   describe("renderNotice", () => {
     it("should show the sign-in notice with its one fix as a link", () => {
       // Arrange
