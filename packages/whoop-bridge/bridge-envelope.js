@@ -12,7 +12,9 @@
  * External dispatch answers only the exact Kaiord App origin (no
  * subdomain, www included) and rejects actions outside the bridge's
  * external-actions allowlist before the action handler runs
- * (spec: bridge-core).
+ * (spec: bridge-core). Internal dispatch answers only the extension's own
+ * pages (the popup), never a content script, so an action reachable only
+ * through the external gate stays reachable only from the App origin.
  */
 
 const APP_ORIGIN = "https://kaiord.com";
@@ -89,9 +91,43 @@ const createExternalDispatch = ({
   };
 };
 
+// A content script is internal too, but it runs in a web page (`sender.tab`
+// is set and `sender.origin` is the page's), so neither passes this check.
+const isOwnExtensionPage = (sender) => {
+  const id = globalThis.chrome?.runtime?.id;
+  return (
+    typeof id === "string" &&
+    sender?.id === id &&
+    !sender.tab &&
+    sender.origin === `chrome-extension://${id}`
+  );
+};
+
+const createInternalDispatch = ({
+  dispatch,
+  internalActions,
+  protocolVersion,
+}) => {
+  return (message, sender, sendResponse) => {
+    if (!isOwnExtensionPage(sender)) return false;
+    if (!internalActions.has(message?.action)) {
+      sendResponse({
+        ok: false,
+        protocolVersion,
+        error: "Action not permitted",
+        retryable: false,
+      });
+      return true;
+    }
+    return dispatch(message, sendResponse);
+  };
+};
+
 if (typeof module !== "undefined") {
   module.exports = {
     isAllowedSenderOrigin,
+    isOwnExtensionPage,
+    createInternalDispatch,
     createEnvelope,
     createDispatch,
     createExternalDispatch,
@@ -103,4 +139,6 @@ if (typeof self !== "undefined" && typeof module === "undefined") {
   self.createEnvelope = createEnvelope;
   self.createDispatch = createDispatch;
   self.createExternalDispatch = createExternalDispatch;
+  self.isOwnExtensionPage = isOwnExtensionPage;
+  self.createInternalDispatch = createInternalDispatch;
 }
