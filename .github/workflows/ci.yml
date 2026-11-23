@@ -105,6 +105,9 @@ jobs:
               - 'scripts/assemble-site.mjs'
               - 'scripts/inject-spa-fallback.mjs'
               - 'scripts/emit-legacy-editor-page.mjs'
+              # The App's service worker it emits last, and the guard on it.
+              - 'scripts/emit-spa-service-worker.mjs'
+              - 'scripts/check-spa-service-worker.mjs'
               # The content security policy it writes, and the guard on it.
               - 'scripts/lib/site-csp.mjs'
               - 'scripts/lib/site-csp-policy.mjs'
@@ -1041,10 +1044,10 @@ jobs:
           browser: chromium
           system-deps: best-effort
 
-      - name: Run production-base SPA e2e (route refresh, prod bundle, CSP)
+      - name: Run production-base SPA e2e (route refresh, prod bundle, CSP, service worker)
         env:
           E2E_PROD_BASE: "1"
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle|@csp'
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --grep '@spa-route-refresh|@prod-bundle|@csp|@service-worker'
 
       # The global setup above left an /app/ build in .e2e-prod-dist/. Assemble it with
       # the landing and the docs exactly as the deploy does, so the guards
@@ -1063,6 +1066,11 @@ jobs:
       # that hashes its inline scripts and admits no unsafe script source.
       - name: Check the content security policy (assembled site)
         run: node scripts/check-site-csp.mjs --merged merged-dist
+
+      # The App's service worker precaches exactly the bytes of this tree
+      # (spa-offline). The deploy runs the same guard as its last step.
+      - name: Check the App's service worker (assembled site)
+        run: node scripts/check-spa-service-worker.mjs --app merged-dist/app --base /app/ --mode normal
 
       # Every absolute url() in the app CSS must name a file the /app/ build
       # serves (R-CssAssetUrls).

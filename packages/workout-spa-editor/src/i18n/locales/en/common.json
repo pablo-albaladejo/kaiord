@@ -71,6 +71,11 @@
     "table": "Table",
     "code": "Code block"
   },
+  "appUpdate": {
+    "available": "New version available",
+    "reload": "Reload",
+    "saveFirst": "Save your changes to update"
+  },
   "staleSchema": {
     "title": "Kaiord was updated in another window",
     "body": "This window is running an older version. Reload to keep working with your data.",

@@ -395,6 +395,19 @@ The net effect is that N-1 code reads and writes rows that N's `upgrade()` has a
   - Workbox would not provide D1.3's digest check, D2's copy-forward or D3's client-keyed retention anyway. They would be custom code inside it.
 - **Hand-written is chosen.** It is ≈120 lines of worker in `packages/workout-spa-editor/sw/sw.js`, outside `src/` so Vite never bundles it, plus ≈80 lines of emitter. It adds 0 dependencies. The page-side registration and the hello together stay well under 2 KB.
 
+## Implementation notes (B3)
+
+What the implementation settled that the decisions above left open, or changed.
+
+- **Assembly order with the content security policy.** The site CSP (`site-content-security-policy`) landed after this design and hashes each page's inline scripts, so it rewrites `app/index.html`. The order is therefore merge, `version.json`, analytics id, route fallback, legacy `/editor/`, **CSP**, then the worker. The worker is still the last mutation.
+- **CSP.** The App's policy gains `worker-src 'self'` and the landing's and the docs' gain `worker-src 'none'`: without the directive a worker falls back to `script-src`, which admits `'self'` on every page. `connect-src` does not change: the worker's own fetches fall under the worker's policy (Pages sends none), it fetches only same-origin files it precaches, and it never answers a request outside the precache, so `/mcp`, `/a2a`, the landing and the docs always reach the network.
+- **Guard shape.** The guard is `scripts/check-spa-service-worker.mjs --app <dir> --base /app/ --mode normal|kill`, a CLI like `check-site-csp`, with its negative fixtures in a `node:test` file. An env-gated `*.test.mjs` would skip silently whenever its variables were missing.
+- **Worker source.** Three files (`sw-precache.js`, `sw-retention.js`, `sw.js`) that the emitter concatenates after the config line, so each stays under the file cap. ESLint lints them as classic scripts with the worker globals.
+- **A cache being installed is not pruned.** D3's prune keeps only the worker's own cache and the versions live windows recorded, so the active worker could delete the cache a newer worker is still filling. Install writes a `pending` marker for its cache in `kaiord-app-meta`; prune keeps a cache whose marker is under an hour old, activation removes the worker's own marker, and a failed install removes its cache and marker.
+- **Kill switch, two browser facts.** Chromium did not activate a worker that called `skipWaiting()` only while installing (it stayed waiting under Playwright), so the kill worker asks again 100 ms later, once installed. Firefox holds a navigation until the worker has activated, so the reload is made after `activate`'s `waitUntil` settles, not inside it. Firefox and WebKit keep the dying worker as the reloaded page's controller until its next load; it has no fetch handler, so the page loads from the network either way, and the registration and the caches are already gone.
+- **The prompt** is its own persistent region (`UpdatePrompt`) mounted next to the stale-schema gate, fed by a small external store. The toast queue was not used, so nothing can dismiss it.
+- **Browsers in the e2e.** CI runs `@service-worker` on Chromium in `e2e-prod-base`, as planned. The same spec passes on Firefox and WebKit locally.
+
 ## Delivery
 
 One OpenSpec change ships as three PRs. Each PR is cut from `main` after the previous one merges.

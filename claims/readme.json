@@ -389,6 +389,28 @@
       ]
     },
     {
+      "id": "readme.root.opens-offline-after-one-visit",
+      "text": "**Opens offline after one visit.** A service worker scoped to the [Kaiord App](https://kaiord.com/app/) keeps the files of the version you loaded, checked byte for byte, so the App opens and shows the Day and the Calendar with no network. Connections, sync and the assistant still need one.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/e2e/offline-service-worker.spec.ts",
+          "title": "should open the Day, then the Calendar and Settings never opened online, with no network"
+        },
+        {
+          "test": "packages/workout-spa-editor/e2e/offline-service-worker.spec.ts",
+          "title": "should leave the landing uncontrolled and cache nothing outside the precache"
+        },
+        {
+          "test": "packages/workout-spa-editor/e2e/offline-service-worker.spec.ts",
+          "title": "should keep the running worker when the host serves other bytes than it lists"
+        },
+        {
+          "test": "scripts/check-spa-service-worker.test.mjs",
+          "title": "should fail and name index.html when it was rewritten after emit"
+        }
+      ]
+    },
+    {
       "id": "readme.root.conversions-run-on-your",
       "text": "**Conversions run on your machine.** In the Kaiord App and in [`@kaiord/cli`](./packages/cli), FIT / TCX / ZWO / GCN ↔ KRD conversion happens in-process ([`import-workout-formats.ts`](./packages/workout-spa-editor/src/utils/import-workout-formats.ts), [`export-workout-formats.ts`](./packages/workout-spa-editor/src/utils/export-workout-formats.ts)).",
       "proof": [

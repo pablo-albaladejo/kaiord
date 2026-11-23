@@ -13,6 +13,7 @@ import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 
 import { emitLegacyEditorPage } from "./emit-legacy-editor-page.mjs";
+import { emitServiceWorker } from "./emit-spa-service-worker.mjs";
 import { injectSpaFallback } from "./inject-spa-fallback.mjs";
 import { applySiteCsp } from "./lib/site-csp.mjs";
 
@@ -73,7 +74,17 @@ const substituteAnalyticsId = (out, websiteId) => {
   return true;
 };
 
-export function assembleSite({ out, landing, app, docs, sha, umamiWebsiteId }) {
+export const APP_SCOPE = "/app/";
+
+export function assembleSite({
+  out,
+  landing,
+  app,
+  docs,
+  sha,
+  umamiWebsiteId,
+  swKill = false,
+}) {
   if (!sha) throw new Error("assembleSite: a build sha is required");
   copyGlobContents(landing, out);
   const landingNojekyll = join(landing, ".nojekyll");
@@ -90,8 +101,11 @@ export function assembleSite({ out, landing, app, docs, sha, umamiWebsiteId }) {
   const analytics = substituteAnalyticsId(out, umamiWebsiteId);
   injectSpaFallback(out);
   emitLegacyEditorPage(out);
-  // Last: the policy hashes the inline scripts the steps above wrote.
+  // The policy hashes the inline scripts the steps above wrote.
   applySiteCsp(out);
+  // Last of all: the worker records the SHA-256 of every App file as it
+  // ships, so no step may touch app/ after it.
+  emitServiceWorker(join(out, "app"), { scope: APP_SCOPE, kill: swKill });
   return { analytics };
 }
 
@@ -105,6 +119,7 @@ export function parseAssembleArgs(argv) {
       docs: { type: "string" },
       without: { type: "string", multiple: true, default: [] },
       sha: { type: "string" },
+      "sw-kill": { type: "boolean", default: false },
     },
   });
   const withoutDocs = values.without.includes("docs");
@@ -120,6 +135,7 @@ export function parseAssembleArgs(argv) {
     app: resolve(values.app),
     docs: withoutDocs ? null : resolve(values.docs),
     sha: values.sha,
+    swKill: values["sw-kill"],
   };
 }
 
@@ -134,5 +150,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       ? "Analytics website id injected"
       : "UMAMI_WEBSITE_ID unset; leaving placeholders (analytics disabled)"
   );
+  if (options.swKill) console.log("Service worker: KILL SWITCH emitted");
   console.log(`✅ Site assembled in ${options.out}`);
 }

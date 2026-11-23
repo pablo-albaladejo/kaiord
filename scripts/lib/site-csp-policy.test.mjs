@@ -53,6 +53,17 @@ describe("site-csp-policy", () => {
     });
   }
 
+  it("should let only the App start a worker, and only its own", () => {
+    // Arrange
+    const { landing, docs, app } = SITE_CSP;
+
+    // Act
+    const workers = [landing, docs, app].map((d) => d["worker-src"]);
+
+    // Assert
+    assert.deepEqual(workers, [["'none'"], ["'none'"], ["'self'"]]);
+  });
+
   it("should name in the landing's data statement, English and Spanish, the destination of every remote origin the site allows", () => {
     // Arrange
     const origins = new Set(

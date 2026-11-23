@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useToastContext } from "../../contexts/ToastContext";
 import { useTranslate } from "../../i18n/use-translate";
+import { armUnsavedEdits } from "../../lib/unsaved-edits";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { KRD } from "../../types/krd";
 
@@ -27,7 +28,12 @@ function useBeforeUnloadGuard(armed: boolean) {
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    // The same effect feeds the update gate, so the two never disagree.
+    const disarm = armUnsavedEdits();
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      disarm();
+    };
   }, [armed]);
 }
 

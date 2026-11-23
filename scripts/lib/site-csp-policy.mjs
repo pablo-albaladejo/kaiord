@@ -17,7 +17,8 @@
 // App. Inline scripts are allowed by their sha256 only, computed from the
 // page that ships. Styles keep 'unsafe-inline': the landing carries style
 // attributes and the App's UI libraries insert <style> elements at run time;
-// a style cannot run code. frame-ancestors, report-uri and sandbox are not
+// a style cannot run code. Only the App may start a worker, its own service
+// worker; the landing and the docs may start none. frame-ancestors, report-uri and sandbox are not
 // listed because a <meta> policy ignores them.
 
 const UMAMI_SCRIPT = "https://cloud.umami.is/script.js";
@@ -32,6 +33,8 @@ const LANDING = {
   "font-src": ["'self'"],
   "connect-src": ["'self'", ...UMAMI_CONNECT],
   "manifest-src": ["'self'"],
+  // Without it a worker falls back to script-src, which admits 'self'.
+  "worker-src": ["'none'"],
   "base-uri": ["'none'"],
   "form-action": ["'none'"],
   "object-src": ["'none'"],
@@ -51,6 +54,10 @@ const APP = {
     "https://intervals.icu",
   ],
   "frame-src": [GIS],
+  // The App's own service worker, /app/sw.js (spa-offline). Its fetches are
+  // governed by its own (empty) policy, not this one: it only fetches
+  // same-origin files it precaches, and passes every other request through.
+  "worker-src": ["'self'"],
 };
 
 // The docs are a VitePress build: module scripts from 'self', two inline
