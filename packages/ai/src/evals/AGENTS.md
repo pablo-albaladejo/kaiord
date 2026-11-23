@@ -5,17 +5,19 @@
 
 ## Purpose
 
-Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (25 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **No runner here runs in CI.** This project holds no provider API key. The parser runner (`run-evals.ts`) is the live lane: it runs only on the maintainer's machine, over the local Claude Code subscription (`claude -p`, see `claude-cli/` below), and is INERT anywhere else. The chat-tool and lab-extraction runners need tool calling and document file parts, which `claude -p` cannot carry: they report every case unmeasured and exit 0. What runs on every commit is the assertion logic, the fixtures' own structural invariants and the keyless replay lane, none of which needs a credential.
+Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (35 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy, the numbers code computes), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **No runner here runs in CI.** This project holds no provider API key. The parser runner (`run-evals.ts`) is the live lane: it runs only on the maintainer's machine, over the local Claude Code subscription (`claude -p`, see `claude-cli/` below), and is INERT anywhere else. The chat-tool and lab-extraction runners need tool calling and document file parts, which `claude -p` cannot carry: they report every case unmeasured and exit 0. What runs on every commit is the assertion logic, the fixtures' own structural invariants and the keyless replay lane, none of which needs a credential.
 
 ## Key Files
 
-- `benchmarks.json` — 25 curated workout descriptions across sports (cycling, running, swimming, generic), complexity (simple, intervals, repetition blocks, mixed), languages (English, Spanish, mixed), and edge cases
+- `benchmarks.json` — 35 curated workout descriptions across sports (cycling, running, swimming, generic), complexity (simple, intervals, repetition blocks, mixed), languages (English, Spanish, mixed), and edge cases; the ten `category: "pace"` cases (five English, five Spanish) carry `expectedNumbers`: paces, splits, speeds, references, durations, a % max HR midpoint and a filled block whose numbers only correct arithmetic produces
 - `types.ts` — Type definitions: `Benchmark`, `EvalResult`, `EvalReport`, `ZoneCheck`
 - `assertions.ts` — `evaluateBenchmark(benchmark, workout, durationMs)` validates schema, sport, step count, zone ranges
 - `reporter.ts` — Report generation (`createReport`, `formatReport`) with category/language breakdowns; reused as-is by the chat-tool evals (both result shapes carry `id`/`pass`/`errors`/`durationMs`)
 - `run-evals.ts` — the live parser runner (`eval:live`): per-case counts with `--repeat N`, cassettes with `--record`, the calibration capture with `--calibrate`; INERT in CI and without `EVAL_LIVE=1`; exits on a literal and carries no threshold
 - `benchmark-invariants.ts` — keyless structural checks over `benchmarks.json`; a `zoneCheck` with no bound the comparison can use is rejected
 - `target-assertions.ts` — the `targets` and `structure` dimensions
+- `number-assertions.ts` / `number-check-invariants.ts` — the `numbers` dimension: each `expectedNumbers` check must be met exactly (to 1e-9; code rounds to 0.001) by some step, so a pace a model computed or rounded itself fails; a check naming no number, a non-positive one or a reversed range is rejected keylessly
+- `pace-arithmetic.test.ts` — keyless end-to-end over the ten pace cases: a `MockLanguageModelV4` returns the literals a rule-following model emits (`test-utils/pace-arithmetic-outputs.ts`, hand-written doubles, not cassettes), `createTextToWorkout` computes the numbers, and each case passes its benchmark; a pace in m/s is refused, a model-rounded pace fails `numbers`, an overfilled block fails `structure`. Whether a real model emits those literals is measured only by `eval:live -- --record`
 - `train2go-contrasts.test.ts` — keyless end-to-end case: a `MockLanguageModelV4` returns the zone numbers a rule-following model emits for the Train2Go "rodaje con contrastes" session, `createTextToWorkout` resolves them against the benchmark's `athleteZones`, and the result passes its benchmark; the pre-fix output (open targets) fails `targets`
 - `dimension-outcomes.ts` — the `passed` / `failed` / `unmeasured` constructors, the per-dimension tally, and `dimensionRatePercent`, which returns `null` rather than a number when nothing was measured
 - `chat-tool-benchmarks.json` — Data Hub hub-conversation scenarios (F6): "where do my planned sessions come from" (read) and "read sleep only from Whoop" (action)
@@ -26,7 +28,7 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 
 ## Cassettes and replay (`cassettes/`)
 
-Keyless replay of recorded model responses through `MockLanguageModelV4` and the real runtime. It imports nothing from `evals/claude-cli/` (pinned by `replay-imports.test.ts`), so it MAY gate. The replay lane over the committed cassettes is part of `pnpm test` (`committed-replay.test.ts`: `replayCommitted` over `committed/` must measure every benchmark with no fault; a case without a cassette is an `uncovered cases` fault); the 25 committed cassettes are the first official `--record` (claude-sonnet-5, CLI 2.1.310, prompt 1.3.0).
+Keyless replay of recorded model responses through `MockLanguageModelV4` and the real runtime. It imports nothing from `evals/claude-cli/` (pinned by `replay-imports.test.ts`), so it MAY gate. The replay lane over the committed cassettes is part of `pnpm test` (`committed-replay.test.ts`: `replayCommitted` over `committed/` must measure every benchmark with no fault; a case without a cassette is an `uncovered cases` fault); the 25 committed cassettes are the first official `--record` (claude-sonnet-5, CLI 2.1.310, prompt 1.3.0). Prompt 1.4.0 (the model copies the coach's numbers, code computes them) and its ten pace cases are not recorded yet: until the maintainer runs `eval:live -- --record`, the replay faults on 25 stale cassettes and 10 uncovered cases.
 
 - `cassette-schema.ts` — the strict allowlisted cassette schema; every provenance and envelope key is allowlisted and an unknown one is rejected and named by `validate-cassette.ts`. `response.structuredOutput` is the model's answer (any JSON), validated by the runtime on replay
 - `validate-cassette.ts` — `validateCassette` (schema only, for in-memory and fixture cassettes) and `validateCommittedCassette` (plus: recorder `claude-cli` only, requested `claude-sonnet-5`, served the pinned form of `claude-sonnet-5`: `"bare"`, so a dated snapshot `claude-sonnet-5-YYYYMMDD` is refused)
@@ -65,16 +67,17 @@ Each benchmark is evaluated against:
 4. **Targets** (optional): if `targetCheck` is defined, every step (repetition steps included) must carry `targetType`; with `requireRange`, as an explicit `range`, so a zone left unresolved fails. `benchmark-invariants.ts` rejects a required range whose `athleteZones` has no table of that type.
 5. **Structure** (optional): if `expectedRepeatCounts` is defined, the repetition blocks' `repeatCount`s must match it in order.
 6. **Zone accuracy** (±5% tolerance, optional): if `zoneCheck` is defined, active and interval steps of the target type must fall within `[minValue*0.95, maxValue*1.05]`. Optional `unit` and `basis` must equal the target value's (a % FTP range keeps `basis: "percent_ftp"`; one that lost it reads as watts). A zone check with no matching active or interval step **fails** — it is not skipped.
+7. **Numbers** (optional): if `expectedNumbers` is defined, each check (`seconds`, `meters`, `paceMps`, `paceRange`, `percentMax`, narrowed by `intensity`) must be met exactly by at least one step.
 
 Each dimension yields one outcome: `passed`, `failed` with a message, or
 `unmeasured` with a reason. `unmeasured` is a member of the union, not a flag
 beside a score, so there is no field on it a caller could average or compare —
 a criterion nobody measured cannot enter a rate by looking like a zero.
 
-Four dimensions are routinely unmeasured and say so: `sport` when the benchmark
+Five dimensions are routinely unmeasured and say so: `sport` when the benchmark
 declares no `expectedSport`, `zone` when it declares no `zoneCheck`, `targets`
-when it declares no `targetCheck`, and `structure` when it declares no
-`expectedRepeatCounts`. A schema failure marks the other five unmeasured rather than leaving them out,
+when it declares no `targetCheck`, `structure` when it declares no
+`expectedRepeatCounts`, and `numbers` when it declares no `expectedNumbers`. A schema failure marks the other six unmeasured rather than leaving them out,
 so the short-circuit is visible in the report instead of being inferred from
 an absence.
 

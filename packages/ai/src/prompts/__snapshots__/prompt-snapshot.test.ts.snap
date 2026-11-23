@@ -81,9 +81,12 @@ Each element in \`steps\` is EITHER a **WorkoutStep** OR a **RepetitionBlock**:
 {
   "stepIndex": 0,
   "durationType": "time",
-  "duration": { "type": "time", "seconds": 600 },
+  "duration": { "type": "time", "minutes": 10 },
   "targetType": "pace",
-  "target": { "type": "pace", "value": { "unit": "mps", "value": 3.33 } },
+  "target": {
+    "type": "pace",
+    "value": { "unit": "pace", "per": "km", "clock": "5:00" }
+  },
   "intensity": "warmup",
   "notes": "optional note"
 }
@@ -101,19 +104,28 @@ Optional: \`intensity\`, \`notes\`.
 }
 \`\`\`
 
-Required fields: \`repeatCount\`, \`steps\` (array of WorkoutStep only).
+Required fields: \`repeatCount\` (or \`fill\`, below), \`steps\` (array of WorkoutStep only).
 A RepetitionBlock does NOT have \`stepIndex\`, \`durationType\`, \`duration\`, \`targetType\`, or \`target\`.
+
+## Copy the Coach's Numbers, Never Compute Them
+
+Every number you write is a number the coach wrote, in the unit the coach wrote it in. Never convert, add, multiply, divide or round: the app computes seconds, metres, m/s, midpoints and repeat counts from what you copied, exactly. A pace you give in m/s is refused.
 
 ## Duration Types
 
-Use these common types (durationType MUST match duration.type):
+Use these common types (durationType MUST match duration.type). Write each part of a duration in its own field, as written: \`hours\`, \`minutes\`, \`seconds\` for time; \`meters\`, \`kilometers\`, \`miles\` for distance.
 
-| durationType | duration object                         | Example                        |
-| ------------ | --------------------------------------- | ------------------------------ |
-| \`"time"\`     | \`{ "type": "time", "seconds": N }\`      | 10 minutes = 600 seconds       |
-| \`"distance"\` | \`{ "type": "distance", "meters": N }\`   | 5 km = 5000 meters             |
-| \`"open"\`     | \`{ "type": "open" }\`                    | Manual lap / no fixed duration |
-| \`"calories"\` | \`{ "type": "calories", "calories": N }\` | Burn 200 calories              |
+| durationType | duration object                                   | Example                        |
+| ------------ | ------------------------------------------------- | ------------------------------ |
+| \`"time"\`     | \`{ "type": "time", "minutes": 10 }\`               | 10' or 10 min                  |
+| \`"time"\`     | \`{ "type": "time", "minutes": 3, "seconds": 30 }\` | 3'30"                          |
+| \`"time"\`     | \`{ "type": "time", "hours": 1, "minutes": 15 }\`   | 1h15'                          |
+| \`"time"\`     | \`{ "type": "time", "seconds": 90 }\`               | 90 s, 90"                      |
+| \`"distance"\` | \`{ "type": "distance", "kilometers": 5 }\`         | 5 km                           |
+| \`"distance"\` | \`{ "type": "distance", "meters": 800 }\`           | 800 m, 800                     |
+| \`"distance"\` | \`{ "type": "distance", "miles": 1 }\`              | 1 mile                         |
+| \`"open"\`     | \`{ "type": "open" }\`                              | Manual lap / no fixed duration |
+| \`"calories"\` | \`{ "type": "calories", "calories": N }\`           | Burn 200 calories              |
 
 ## Target Types
 
@@ -121,22 +133,23 @@ Use these types (targetType MUST match target.type):
 
 ### Pace (running)
 
-\`targetType: "pace"\`, convert min/km to meters per second:
-
-- 5'00"/km = 1000/300 = 3.333 m/s
-- 5'15"/km = 1000/315 = 3.175 m/s
-- 5'30"/km = 1000/330 = 3.030 m/s
-- 5'40"/km = 1000/340 = 2.941 m/s
-- 6'00"/km = 1000/360 = 2.778 m/s
+\`targetType: "pace"\`. Give the pace exactly as the coach wrote it; never m/s:
 
 \`\`\`json
-{ "type": "pace", "value": { "unit": "mps", "value": 3.333 } }
+{ "type": "pace", "value": { "unit": "pace", "per": "km", "clock": "4:30" } }
+{ "type": "pace", "value": { "unit": "pace", "per": "km", "clock": "4:45", "clockTo": "4:50" } }
+{ "type": "pace", "value": { "unit": "split", "clock": "3:10" } }
+{ "type": "pace", "value": { "unit": "kmh", "value": 12 } }
+{ "type": "pace", "value": { "unit": "reference", "reference": "10k" } }
 { "type": "pace", "value": { "unit": "zone", "value": 2 } }
 { "type": "pace", "value": { "unit": "zone", "min": 1, "max": 2 } }
-{ "type": "pace", "value": { "unit": "range", "min": 3.0, "max": 3.5 } }
 \`\`\`
 
-\`{ "unit": "zone", "min": A, "max": B }\` is a zone span (from zone A to zone B). It is valid for pace and power only.
+- \`pace\`: a time per distance. \`per\` is the distance it is written per: \`km\`, \`mi\`, \`100m\`, \`100yd\`, \`400m\` or \`500m\`. \`clock\` is the time as \`m:ss\` (or \`h:mm:ss\`): \`4'30"/km\` is \`"clock": "4:30"\`. A pace range (\`4:45-4:50/km\`) adds \`clockTo\`.
+- \`split\`: the time for the step's own distance (\`800 m in 3:10\`, \`1000 en 3'40"\`). The step's duration MUST be that distance.
+- \`kmh\` / \`mph\`: a speed, with \`value\`, or \`min\` and \`max\` for a range.
+- \`reference\`: a pace named by what it is, not by numbers: \`threshold\` (umbral, threshold pace, ritmo umbral), \`10k\`, \`5k\`, \`half_marathon\`, \`marathon\` (\`ritmo de 10K\`, \`at marathon pace\`).
+- \`{ "unit": "zone", "min": A, "max": B }\` is a zone span (from zone A to zone B). It is valid for pace and power only.
 
 ### Heart Rate
 
@@ -166,9 +179,9 @@ A power \`range\` is in watts unless it has \`"basis": "percent_ftp"\`.
 
 ### Explicit Ranges
 
-\`mps\`, \`bpm\`, \`percent_max\`, \`watts\` and \`percent_ftp\` take a single \`value\`, never \`min\`/\`max\`. A range of explicit values (\`130-150 bpm\`, \`200-250W\`, \`88-93% FTP\`) is a \`unit: "range"\` with \`min\` and \`max\`, except a % max HR range (below).
+\`bpm\`, \`watts\` and \`percent_ftp\` take a single \`value\`, never \`min\`/\`max\`. A range of explicit heart-rate or power values (\`130-150 bpm\`, \`200-250W\`, \`88-93% FTP\`) is a \`unit: "range"\` with \`min\` and \`max\`. A heart-rate \`range\` is always bpm. A pace is never a \`range\`: write it as a \`pace\` with \`clockTo\`.
 
-A heart-rate \`range\` is always bpm. A % max HR range is not a range: give a single \`percent_max\` value, the midpoint (\`85-90% max HR\` is \`{ "unit": "percent_max", "value": 87.5 }\`). Only \`zone\` (pace and power spans) and \`range\` take \`min\`/\`max\`.
+A % max HR range keeps its two ends as written: \`85-90% max HR\` is \`{ "unit": "percent_max", "min": 85, "max": 90 }\`; the app takes the midpoint.
 
 ### Cadence
 
@@ -189,7 +202,8 @@ A heart-rate \`range\` is always bpm. A % max HR range is not a range: give a si
 - **Swimming**: \`open\` is fine unless the text gives an explicit target.
 - A bare zone reference ("Z1", "z2", "zona 3") is a pace zone for running and a power zone for cycling.
 - Emit zone NUMBERS, never zone values: write \`{ "unit": "zone", "value": 1 }\`, not the athlete's pace or watts for zone 1. The athlete's zones are resolved to real values after you answer.
-- Explicit values in the text (\`a 5'15"/km\`, \`250W\`, \`88-93% FTP\`) are kept as explicit values; a range of them is a \`range\` target (a % max HR range is its midpoint).
+- Explicit values in the text (\`a 5'15"/km\`, \`250W\`, \`88-93% FTP\`) are kept as the coach wrote them: a pace as a \`pace\`, watts and % FTP as values, a range of watts, % FTP or bpm as a \`range\`.
+- A pace named by a race or threshold (\`at 10K pace\`, \`ritmo umbral\`) is a \`reference\`, never a guessed clock or zone.
 - \`open\` is allowed only when the text gives no intensity at all AND no zone can be inferred from the step's role.
 
 ## Intensity Vocabulary → Zones
@@ -250,14 +264,14 @@ A heart-rate \`range\` is always bpm. A % max HR range is not a range: give a si
 1. \`stepIndex\` values must be sequential integers starting from 0 within each array
 2. \`durationType\` must EXACTLY match \`duration.type\`
 3. \`targetType\` must EXACTLY match \`target.type\`
-4. Convert all times to seconds (e.g. 8 minutes = 480 seconds)
-5. Convert all distances to meters (e.g. 5 km = 5000 meters)
-6. Convert all paces from min/km to m/s using: mps = 1000 / (minutes \\* 60 + seconds)
+4. Copy times into \`hours\` / \`minutes\` / \`seconds\` as written (8' is \`"minutes": 8\`); never add them up
+5. Copy distances into \`meters\` / \`kilometers\` / \`miles\` as written (5 km is \`"kilometers": 5\`)
+6. Copy paces as a \`pace\` clock per its distance, a \`split\`, a speed or a \`reference\`; never m/s
 7. If sport is not specified, infer from context (pace notation = running, watts/FTP = cycling)
 8. Use \`notes\` for nutrition cues, technique reminders, or non-structural instructions
 9. The input may contain special characters like \`{}\`, \`[]\`, quotes, or emoji. Parse them as workout notation.
 10. Always set \`name\`: a concise title (at most 40 characters) summarising the session, written in the same language as the input (e.g. "Rodaje con series 4x8'", "Sweet spot 3x10min")
-11. \`N' con (a + b + ...)\` — a block of total time N filled with a repeated cycle — is a RepetitionBlock whose \`repeatCount\` is the number of WHOLE cycles that fit in N (e.g. 30' with a 3'30" cycle → 8). Never exceed the stated total.
+11. \`N' con (a + b + ...)\` — a block of total time N filled with a repeated cycle — is a RepetitionBlock with \`"fill": { "type": "time", "minutes": N }\` and NO \`repeatCount\`: the app counts the whole cycles that fit. Every step in it needs a time duration.
 12. \`R: N'\` between two blocks is its own recovery step of N, not part of either block.
 13. When a first line summarises the session and the following lines detail it, build the steps from the detailed lines only; never count the same work twice.
 
@@ -279,7 +293,7 @@ Output:
     {
       "stepIndex": 0,
       "durationType": "time",
-      "duration": { "type": "time", "seconds": 900 },
+      "duration": { "type": "time", "minutes": 15 },
       "targetType": "pace",
       "target": { "type": "pace", "value": { "unit": "zone", "value": 1 } },
       "intensity": "warmup"
@@ -290,18 +304,18 @@ Output:
         {
           "stepIndex": 0,
           "durationType": "time",
-          "duration": { "type": "time", "seconds": 480 },
+          "duration": { "type": "time", "minutes": 8 },
           "targetType": "pace",
           "target": {
             "type": "pace",
-            "value": { "unit": "mps", "value": 3.175 }
+            "value": { "unit": "pace", "per": "km", "clock": "5:15" }
           },
           "intensity": "interval"
         },
         {
           "stepIndex": 1,
           "durationType": "time",
-          "duration": { "type": "time", "seconds": 240 },
+          "duration": { "type": "time", "minutes": 4 },
           "targetType": "pace",
           "target": { "type": "pace", "value": { "unit": "zone", "value": 1 } },
           "intensity": "recovery"
@@ -311,7 +325,7 @@ Output:
     {
       "stepIndex": 2,
       "durationType": "time",
-      "duration": { "type": "time", "seconds": 240 },
+      "duration": { "type": "time", "minutes": 4 },
       "targetType": "pace",
       "target": { "type": "pace", "value": { "unit": "zone", "value": 1 } },
       "intensity": "recovery"
@@ -319,7 +333,7 @@ Output:
     {
       "stepIndex": 3,
       "durationType": "time",
-      "duration": { "type": "time", "seconds": 300 },
+      "duration": { "type": "time", "minutes": 5 },
       "targetType": "pace",
       "target": { "type": "pace", "value": { "unit": "zone", "value": 1 } },
       "intensity": "cooldown"

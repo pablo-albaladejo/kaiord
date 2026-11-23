@@ -6,6 +6,7 @@ import {
   targetCheckViolation,
   zoneCheckViolation,
 } from "./benchmark-invariants";
+import { numberCheckViolation } from "./number-check-invariants";
 import type { Benchmark, ZoneCheck } from "./types";
 
 const FIXTURE = benchmarks as Benchmark[];
@@ -162,7 +163,73 @@ describe("targetCheckViolation", () => {
   });
 });
 
+describe("numberCheckViolation", () => {
+  it("should accept a check naming a duration and a pace", () => {
+    // Arrange
+    const check = { seconds: 1200, paceMps: 3.704 };
+
+    // Act
+    const violation = numberCheckViolation(check);
+
+    // Assert
+    expect(violation).toBeNull();
+  });
+
+  it("should reject a check that names no number", () => {
+    // Arrange
+    const check = { intensity: "active" };
+
+    // Act
+    const violation = numberCheckViolation(check);
+
+    // Assert
+    expect(violation).toBe("an expectedNumbers check names no number");
+  });
+
+  it("should reject a number no step can carry", () => {
+    // Arrange
+    const check = { seconds: 0 };
+
+    // Act
+    const violation = numberCheckViolation(check);
+
+    // Assert
+    expect(violation).toBe(
+      "expectedNumbers seconds 0 is not a positive number"
+    );
+  });
+
+  it("should reject a pace range whose bounds are reversed", () => {
+    // Arrange
+    const check = { paceRange: { min: 3.5, max: 3.4 } };
+
+    // Act
+    const violation = numberCheckViolation(check);
+
+    // Assert
+    expect(violation).toBe(
+      "expectedNumbers paceRange min 3.5 is above max 3.4"
+    );
+  });
+});
+
 describe("benchmarks.json", () => {
+  it.each(["en", "es"])(
+    "should hold at least four pace-arithmetic cases in %s",
+    (language) => {
+      // Arrange
+      const minimum = 4;
+
+      // Act
+      const cases = FIXTURE.filter(
+        (b) => b.language === language && b.expectedNumbers !== undefined
+      );
+
+      // Assert
+      expect(cases.length).toBeGreaterThanOrEqual(minimum);
+    }
+  );
+
   it("should declare a usable bound on every zone check", () => {
     // Arrange
     const fixture = FIXTURE;

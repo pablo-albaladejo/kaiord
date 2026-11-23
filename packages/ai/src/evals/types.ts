@@ -21,6 +21,20 @@ export type TargetCheck = {
   requireRange?: boolean;
 };
 
+/**
+ * Numbers code must have computed from the coach's literals: at least one
+ * step (repetition steps included) carries every field declared here, exactly
+ * (`intensity` narrows the steps looked at).
+ */
+export type NumberCheck = {
+  intensity?: string;
+  seconds?: number;
+  meters?: number;
+  paceMps?: number;
+  paceRange?: { min: number; max: number };
+  percentMax?: number;
+};
+
 export type Benchmark = {
   id: string;
   text: string;
@@ -33,13 +47,22 @@ export type Benchmark = {
   targetCheck?: TargetCheck;
   /** The repetition blocks' `repeatCount`s, in workout order. */
   expectedRepeatCounts?: Array<number>;
+  /** Durations and targets that only correct arithmetic produces. */
+  expectedNumbers?: Array<NumberCheck>;
   /** Zones handed to the generation, as the SPA does for the athlete. */
   athleteZones?: AthleteZoneTables;
 };
 
 /** The capability a failure is attributed to, so a red result says which one. */
 export type EvalDimension =
-  "schema" | "sport" | "steps" | "zone" | "targets" | "structure" | "run";
+  | "schema"
+  | "sport"
+  | "steps"
+  | "zone"
+  | "targets"
+  | "structure"
+  | "numbers"
+  | "run";
 
 /**
  * What one dimension produced for one benchmark.

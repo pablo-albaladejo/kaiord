@@ -6,6 +6,7 @@ import {
   passed,
   unmeasured,
 } from "./dimension-outcomes";
+import { numbersOutcome } from "./number-assertions";
 import { structureOutcome, targetOutcome } from "./target-assertions";
 import type {
   Benchmark,
@@ -24,6 +25,7 @@ const DOWNSTREAM: ReadonlyArray<EvalDimension> = [
   "zone",
   "targets",
   "structure",
+  "numbers",
 ];
 
 export const evaluateBenchmark = (
@@ -62,6 +64,7 @@ export const evaluateBenchmark = (
     ...zoneOutcomes(benchmark, workout),
     targetOutcome(benchmark, workout),
     structureOutcome(benchmark, workout),
+    numbersOutcome(benchmark, workout),
   ];
 
   return {

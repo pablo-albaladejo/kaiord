@@ -44,4 +44,42 @@ describe("aiWorkoutSchema", () => {
     // Assert
     expect(result.success).toBe(false);
   });
+
+  it("should carry the coach's literal numbers through to the code that computes", () => {
+    // Arrange
+    const pace = { unit: "pace", per: "km", clock: "4:45", clockTo: "4:50" };
+    const reference = { unit: "reference", reference: "10k" };
+    const raw = {
+      sport: "running",
+      steps: [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", hours: 1, minutes: 5, seconds: 30 },
+          targetType: "pace",
+          target: { type: "pace", value: pace },
+          intensity: "active",
+        },
+        {
+          fill: { type: "time", minutes: 30 },
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "distance",
+              duration: { type: "distance", kilometers: 1, miles: 1 },
+              targetType: "pace",
+              target: { type: "pace", value: reference },
+              intensity: "interval",
+            },
+          ],
+        },
+      ],
+    };
+
+    // Act
+    const parsed = aiWorkoutSchema.parse(raw);
+
+    // Assert
+    expect(parsed).toEqual(raw);
+  });
 });

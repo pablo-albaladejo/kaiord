@@ -9,7 +9,9 @@
  * `PROMPT_VERSION` is persisted on each AI-converted workout; 1.2.0 is the
  * first version whose generation carries the athlete's zones, their custom
  * instructions and the sport target rules; 1.3.0 teaches the explicit
- * heart-rate and power `range` forms.
+ * heart-rate and power `range` forms; 1.4.0 has the model copy the coach's
+ * numbers (time and distance parts, pace clocks, splits, speeds, references,
+ * block totals) and leaves every computation to code.
  */
 
 import { stripControlChars } from "./control-chars";

@@ -14,6 +14,8 @@ Core implementation of the text-to-workout conversion pipeline. Orchestrates LLM
 - `ai-workout-schema.ts` — Zod schema for LLM structured output (permissive, to stay within Anthropic limits)
 - `validate-input.ts` — Input sanitization and bounds checking (max 2000 chars, strips control chars)
 - `reindex-steps.ts` — Corrects `stepIndex` sequentially; handles nested steps in repetition blocks
+- `resolve-coach-literals.ts` — The model interprets, the code computes: turns the coach's literals the model copied into a Workout's numbers. `resolve-durations.ts` (time and distance parts to seconds and metres), `resolve-pace-literals.ts` + `coach-clock.ts` (a pace clock per km/mi/100m/100yd/400m/500m, a range, a split over the step's distance, km/h and mph to m/s, rounded to 0.001), `resolve-references.ts` (a race or threshold pace to the athlete's zone; a % max HR range to its midpoint), `resolve-repeat-fill.ts` (a block's total time to the whole cycles that fit). An unreadable literal throws, so the retry loop asks the model again
+- `resolve-zone-targets.ts` — A zone (or span) to the athlete's range from the same table the Garmin export uses
 
 ## Data Flow
 
@@ -25,6 +27,10 @@ validateInput (sanitize, check bounds)
 buildSystemPrompt (inject sport hint if provided)
   ↓
 executeWithRetry (call LLM with structured output schema)
+  ↓
+assertNoComputedSpeeds (a pace in m/s from the model is refused)
+  ↓
+resolveCoachLiterals → resolveZoneTargets (code computes every number)
   ↓
 workoutSchema.parse (strict validation)
   ↓

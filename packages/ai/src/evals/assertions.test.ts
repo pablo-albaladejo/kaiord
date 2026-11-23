@@ -568,7 +568,7 @@ describe("evaluateBenchmark — absence of measurement", () => {
       .filter((o) => o.status === "unmeasured")
       .map((o) => o.dimension);
     expect(new Set(unmeasured)).toEqual(
-      new Set(["sport", "steps", "zone", "targets", "structure"])
+      new Set(["sport", "steps", "zone", "targets", "structure", "numbers"])
     );
   });
 

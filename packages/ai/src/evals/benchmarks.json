@@ -337,5 +337,445 @@
         }
       ]
     }
+  },
+  {
+    "id": "pace-en-explicit",
+    "text": "Warm up 10 min easy. 20 min at 4:30/km. Then 5 x 800 m in 3:10 with 2 min standing rest. Cool down 10 min.",
+    "expectedSport": "running",
+    "minSteps": 5,
+    "maxSteps": 8,
+    "category": "pace",
+    "language": "en",
+    "expectedRepeatCounts": [5],
+    "expectedNumbers": [
+      {
+        "intensity": "warmup",
+        "seconds": 600
+      },
+      {
+        "seconds": 1200,
+        "paceMps": 3.704
+      },
+      {
+        "meters": 800,
+        "paceMps": 4.211
+      },
+      {
+        "seconds": 120
+      },
+      {
+        "intensity": "cooldown",
+        "seconds": 600
+      }
+    ],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
+  },
+  {
+    "id": "pace-en-10k-reps",
+    "text": "15 min warm-up jog, 4 x 1 km at 10K pace with 90 s jog recovery, 10 min cool-down.",
+    "expectedSport": "running",
+    "minSteps": 4,
+    "maxSteps": 7,
+    "category": "pace",
+    "language": "en",
+    "targetCheck": {
+      "targetType": "pace",
+      "requireRange": true
+    },
+    "expectedRepeatCounts": [4],
+    "expectedNumbers": [
+      {
+        "intensity": "warmup",
+        "seconds": 900,
+        "paceRange": {
+          "min": 2.564,
+          "max": 2.899
+        }
+      },
+      {
+        "meters": 1000,
+        "paceRange": {
+          "min": 3.448,
+          "max": 4.255
+        }
+      },
+      {
+        "intensity": "recovery",
+        "seconds": 90
+      },
+      {
+        "intensity": "cooldown",
+        "seconds": 600
+      }
+    ],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
+  },
+  {
+    "id": "pace-en-mile",
+    "text": "Run 3 x 1 mile at 7:00/mi with 3 min easy jog between.",
+    "expectedSport": "running",
+    "minSteps": 2,
+    "maxSteps": 5,
+    "category": "pace",
+    "language": "en",
+    "expectedRepeatCounts": [3],
+    "expectedNumbers": [
+      {
+        "meters": 1609.344,
+        "paceMps": 3.832
+      },
+      {
+        "seconds": 180
+      }
+    ]
+  },
+  {
+    "id": "pace-en-speed-hr",
+    "text": "40 min treadmill at 12 km/h, then 10 min at 75-80% max HR.",
+    "expectedSport": "running",
+    "minSteps": 2,
+    "maxSteps": 3,
+    "category": "pace",
+    "language": "en",
+    "expectedNumbers": [
+      {
+        "seconds": 2400,
+        "paceMps": 3.333
+      },
+      {
+        "seconds": 600,
+        "percentMax": 77.5
+      }
+    ]
+  },
+  {
+    "id": "pace-en-swim",
+    "text": "10 x 100 m at 1:45/100m with 20 s rest",
+    "expectedSport": "swimming",
+    "minSteps": 2,
+    "maxSteps": 4,
+    "category": "pace",
+    "language": "en",
+    "expectedRepeatCounts": [10],
+    "expectedNumbers": [
+      {
+        "meters": 100,
+        "paceMps": 0.952
+      },
+      {
+        "seconds": 20
+      }
+    ]
+  },
+  {
+    "id": "pace-es-explicit",
+    "text": "Calentamiento 2 km a 5:30/km. 3x(2 km a 4'45\"-4'50\" + 3' trote). Vuelta a la calma 1,5 km a 12 km/h.",
+    "expectedSport": "running",
+    "minSteps": 4,
+    "maxSteps": 7,
+    "category": "pace",
+    "language": "es",
+    "expectedRepeatCounts": [3],
+    "expectedNumbers": [
+      {
+        "meters": 2000,
+        "paceMps": 3.03
+      },
+      {
+        "meters": 2000,
+        "paceRange": {
+          "min": 3.448,
+          "max": 3.509
+        }
+      },
+      {
+        "seconds": 180
+      },
+      {
+        "meters": 1500,
+        "paceMps": 3.333
+      }
+    ],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
+  },
+  {
+    "id": "pace-es-reference",
+    "text": "Rodaje 20' suave + 6x1000 a ritmo de 10K, rec 1'30\" + 10' VC",
+    "expectedSport": "running",
+    "minSteps": 4,
+    "maxSteps": 7,
+    "category": "pace",
+    "language": "es",
+    "targetCheck": {
+      "targetType": "pace",
+      "requireRange": true
+    },
+    "expectedRepeatCounts": [6],
+    "expectedNumbers": [
+      {
+        "seconds": 1200,
+        "paceRange": {
+          "min": 2.564,
+          "max": 2.899
+        }
+      },
+      {
+        "meters": 1000,
+        "paceRange": {
+          "min": 3.448,
+          "max": 4.255
+        }
+      },
+      {
+        "intensity": "recovery",
+        "seconds": 90
+      },
+      {
+        "intensity": "cooldown",
+        "seconds": 600
+      }
+    ],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
+  },
+  {
+    "id": "pace-es-fill",
+    "text": "15' suave. 30' con (1' rápido a 3:50/km + 2' suave). 10' VC",
+    "expectedSport": "running",
+    "minSteps": 4,
+    "maxSteps": 7,
+    "category": "pace",
+    "language": "es",
+    "expectedRepeatCounts": [10],
+    "expectedNumbers": [
+      {
+        "seconds": 60,
+        "paceMps": 4.348
+      },
+      {
+        "seconds": 120
+      },
+      {
+        "seconds": 900
+      },
+      {
+        "intensity": "cooldown",
+        "seconds": 600
+      }
+    ],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
+  },
+  {
+    "id": "pace-es-total",
+    "text": "1h15' de rodaje a 5'10\"/km",
+    "expectedSport": "running",
+    "minSteps": 1,
+    "maxSteps": 3,
+    "category": "pace",
+    "language": "es",
+    "expectedNumbers": [
+      {
+        "seconds": 4500,
+        "paceMps": 3.226
+      }
+    ]
+  },
+  {
+    "id": "pace-es-umbral",
+    "text": "Calentamiento 15'. 3x8' a ritmo umbral, rec 2'. 10' VC.",
+    "expectedSport": "running",
+    "minSteps": 4,
+    "maxSteps": 7,
+    "category": "pace",
+    "language": "es",
+    "expectedRepeatCounts": [3],
+    "expectedNumbers": [
+      {
+        "intensity": "warmup",
+        "seconds": 900
+      },
+      {
+        "seconds": 480,
+        "paceRange": {
+          "min": 3.448,
+          "max": 3.774
+        }
+      },
+      {
+        "seconds": 120
+      },
+      {
+        "intensity": "cooldown",
+        "seconds": 600
+      }
+    ],
+    "athleteZones": {
+      "pace": [
+        {
+          "zone": 1,
+          "minMps": 2.564,
+          "maxMps": 2.899
+        },
+        {
+          "zone": 2,
+          "minMps": 2.899,
+          "maxMps": 3.175
+        },
+        {
+          "zone": 3,
+          "minMps": 3.175,
+          "maxMps": 3.448
+        },
+        {
+          "zone": 4,
+          "minMps": 3.448,
+          "maxMps": 3.774
+        },
+        {
+          "zone": 5,
+          "minMps": 3.774,
+          "maxMps": 4.255
+        }
+      ]
+    }
   }
 ]

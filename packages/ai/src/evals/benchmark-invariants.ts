@@ -1,3 +1,4 @@
+import { numberCheckViolation } from "./number-check-invariants";
 import type { Benchmark, ZoneCheck } from "./types";
 
 /**
@@ -61,6 +62,7 @@ export const benchmarkViolations = (
     const violations = [
       b.zoneCheck ? zoneCheckViolation(b.zoneCheck) : null,
       targetCheckViolation(b),
+      ...(b.expectedNumbers ?? []).map(numberCheckViolation),
     ].filter((v): v is string => v !== null);
     return violations.map((v) => `${b.id}: ${v}`);
   });
