@@ -15,3 +15,11 @@ export {
   type LocaleResources,
   type NamespaceDictionary,
 } from "./types";
+export {
+  CONNECTION_FIXES,
+  connectionFix,
+  connectionNotice,
+  type ConnectionFix,
+  type ConnectionNotice,
+  type ConnectionState,
+} from "./connection-notice";

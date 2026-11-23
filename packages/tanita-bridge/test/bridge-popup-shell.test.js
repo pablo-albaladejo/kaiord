@@ -13,7 +13,9 @@ const {
   renderConsequence,
   renderSkeleton,
   renderCtas,
+  renderNotice,
 } = require("../bridge-popup-shell.js");
+const { noticeFor } = require("../connection-notices.js");
 
 // Minimal shell markup: the regions every popup.html declares. The renderers
 // resolve elements through the injected `$`, so this stands in for the real
@@ -417,6 +419,60 @@ describe("bridge-popup-shell (vendored)", () => {
 
       // Assert
       expect($("footer-region").querySelectorAll(".skeleton").length).toBe(0);
+    });
+  });
+  describe("renderNotice", () => {
+    it("should show the sign-in notice with its one fix as a link", () => {
+      // Arrange
+      const notice = noticeFor("signed-out", "Example", "en");
+
+      // Act
+      renderNotice($, notice, { href: "https://example.test/in" });
+
+      // Assert
+      const fixes = $("footer-region").children;
+      expect($("status-text").textContent).toBe(notice.message);
+      expect($("status-sub").hidden).toBe(true);
+      expect(fixes.length).toBe(1);
+      expect(fixes[0].textContent).toBe("Sign in to Example");
+      expect(fixes[0].getAttribute("href")).toBe("https://example.test/in");
+    });
+
+    it("should offer try-again as a button that re-runs the check", () => {
+      // Arrange
+      const notice = noticeFor("not-answering", "Example", "en");
+      let runs = 0;
+
+      // Act
+      renderNotice($, notice, {
+        href: "https://example.test/in",
+        onRetry: () => {
+          runs += 1;
+        },
+      });
+      $("notice-fix").click();
+
+      // Assert
+      expect($("status-text").textContent).toBe(
+        "Example is not answering, so you cannot use it in Kaiord right now."
+      );
+      expect($("notice-fix").tagName).toBe("BUTTON");
+      expect($("notice-fix").textContent).toBe("Try again");
+      expect($("footer-region").children.length).toBe(1);
+      expect(runs).toBe(1);
+    });
+
+    it("should date an outage already known and raise the alert mark", () => {
+      // Arrange
+      const notice = noticeFor("not-answering", "Example", "en");
+
+      // Act
+      renderNotice($, notice, { since: "Since 23 Jul." });
+
+      // Assert
+      expect($("status-sub").hidden).toBe(false);
+      expect($("status-sub").textContent).toBe("Since 23 Jul.");
+      expect($("status").querySelector(".status-block__icon")).not.toBeNull();
     });
   });
 });
