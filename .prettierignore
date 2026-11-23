@@ -18,6 +18,10 @@ openspec/changes/archive/README.md
 openspec/specs/README.md
 scripts/fixtures/bridge-privacy-surface.json
 
+# Train2Go answers captured as Train2Go serves them: the Connector's parser
+# is tested on the exact bytes, so formatting them would change the input.
+packages/workout-spa-editor/src/adapters/train2go/connector/fixtures/
+
 # Recorded eval cassettes and their manifest: the recorder writes them and the
 # manifest holds the SHA-256 of their exact bytes, so formatting them would
 # break the digest (lint-staged runs prettier --write on staged JSON).

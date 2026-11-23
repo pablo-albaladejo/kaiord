@@ -129,6 +129,7 @@ describe("createTrain2GoCoachingTransport", () => {
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({
           ok: true,
+          protocolVersion: 1,
           data: {
             activities: [
               {
@@ -167,7 +168,7 @@ describe("createTrain2GoCoachingTransport", () => {
     // Arrange
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
-        cb({ ok: true, data: { activities: [] } });
+        cb({ ok: true, protocolVersion: 1, data: { activities: [] } });
       }
     );
     (globalThis as Record<string, unknown>).chrome = {
@@ -196,7 +197,11 @@ describe("createTrain2GoCoachingTransport", () => {
     ];
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
-        cb({ ok: true, data: { activities: [], comments } });
+        cb({
+          ok: true,
+          protocolVersion: 1,
+          data: { activities: [], comments },
+        });
       }
     );
     (globalThis as Record<string, unknown>).chrome = {
@@ -274,6 +279,7 @@ describe("createTrain2GoCoachingTransport", () => {
           (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
             cb({
               ok: true,
+              protocolVersion: 1,
               data: { physiological: { weight: "not-a-number" } },
             });
           }

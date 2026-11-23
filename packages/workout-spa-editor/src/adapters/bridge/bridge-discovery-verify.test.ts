@@ -98,4 +98,46 @@ describe("verifyAnnouncement", () => {
     // Assert
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
+  it.each([1, 2])(
+    "should accept a Train2Go extension on protocol %i, the current one or the one before it",
+    async (version) => {
+      // Arrange
+      const t2g = {
+        ...ann,
+        bridgeId: "train2go-bridge",
+        protocolVersion: version,
+      };
+      mockSend.mockResolvedValue({
+        ok: true,
+        protocolVersion: version,
+        data: {
+          id: "train2go-bridge",
+          name: "Kaiord Train2Go Bridge",
+          version: "10.5.0",
+          protocolVersion: version,
+          capabilities: ["read:training-plan"],
+        },
+      });
+
+      // Act
+      const manifest = await verifyAnnouncement(t2g);
+
+      // Assert
+      expect(manifest?.protocolVersion).toBe(version);
+    }
+  );
+
+  it("should not accept protocol 2 from an extension still on protocol 1", async () => {
+    // Arrange
+    mockSend.mockResolvedValue({
+      ok: true,
+      data: { ...validManifest.data, protocolVersion: 2 },
+    });
+
+    // Act
+    const manifest = await verifyAnnouncement(ann);
+
+    // Assert
+    expect(manifest).toBeNull();
+  });
 });

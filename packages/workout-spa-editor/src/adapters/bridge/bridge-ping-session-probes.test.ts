@@ -104,6 +104,39 @@ describe("probeTrain2GoSession", () => {
     vi.clearAllMocks();
   });
 
+  it.each([1, 2])(
+    "should read the session from a Train2Go extension on protocol %i, the current one or the one before it",
+    async (version) => {
+      // Arrange
+      mockedSend.mockResolvedValue({
+        ok: true,
+        protocolVersion: version,
+        data: { protocolVersion: version, sessionActive: true },
+      });
+
+      // Act
+      const result = await probeTrain2GoSession("ext-2");
+
+      // Assert
+      expect(result).toMatchObject({ sessionActive: true, outdated: false });
+    }
+  );
+
+  it("should offer Update to a Train2Go extension on a protocol the App does not know", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: true,
+      protocolVersion: 3,
+      data: { protocolVersion: 3, sessionActive: true },
+    });
+
+    // Act
+    const result = await probeTrain2GoSession("ext-2");
+
+    // Assert
+    expect(result).toMatchObject({ sessionActive: false, outdated: true });
+  });
+
   it("should report an active session when sessionActive is true", async () => {
     // Arrange
     mockedSend.mockResolvedValue({

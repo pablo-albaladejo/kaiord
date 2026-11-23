@@ -202,9 +202,7 @@
     ],
     "external_actions": [
       "ping",
-      "read-week",
-      "read-day",
-      "read-details",
+      "request",
       "open-train2go",
       "profile-snapshot",
       "profile-snapshot-clear",

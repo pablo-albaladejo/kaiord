@@ -65,9 +65,17 @@ const fakeTrain2Go = () =>
 
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
-  { action: "read-week", date: DATE, userId: USER_ID },
-  { action: "read-day", date: DATE, userId: USER_ID },
-  { action: "read-details" },
+  {
+    action: "request",
+    method: "GET",
+    path: `/api/v2/workplan/weekly/${DATE}?user=${USER_ID}`,
+  },
+  {
+    action: "request",
+    method: "GET",
+    path: `/api/v2/workplan/daily/${DATE}?user=${USER_ID}&source=sidebar`,
+  },
+  { action: "request", method: "GET", path: "/user/details" },
   { action: "open-train2go" },
   { action: "profile-snapshot", snapshot: SNAPSHOT },
   { action: "profile-snapshot-clear" },
@@ -157,6 +165,30 @@ describe("request confinement", () => {
       userName: "Pablo",
       coachName: "Coach Dani",
       notes: "Knee: no hills",
+    });
+  });
+});
+
+describe("raw answers", () => {
+  beforeEach(() => __resetChromeMock());
+
+  it("should hand the Kaiord App Train2Go's answer as it came, without reading it", async () => {
+    // Arrange
+    const page = "<main><input name=\"birthday\" value=\"1990-01-01\"></main>";
+    fetch.mockResolvedValueOnce(reply("text/html", page));
+
+    // Act
+    const answer = await send({
+      action: "request",
+      method: "GET",
+      path: "/user/details",
+    });
+
+    // Assert
+    expect(answer.data).toEqual({
+      status: 200,
+      contentType: "text/html",
+      body: page,
     });
   });
 });
