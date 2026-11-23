@@ -27,8 +27,14 @@ This package is `private: true` and is not published to npm.
 The only contract is the `chrome.runtime` message shape, documented inline in
 `background.js`:
 
-- `read-export-csv` → `{ ok: true, data: { csv: "<raw text>" } }`, or an error
-  envelope with `needsReauth: true` when the session is dead.
+- `request` → `{ action: "request", method, path, body? }`, only for an entry
+  of `ALLOWED` (reads only), answered `{ ok: true, protocolVersion: 2, data: { status,
+contentType, body } }` with the body unread; a dead Session is
+  `needsReauth: true`, another failure keeps its `status`, and anything outside
+  the list is `Request not allowed` with nothing sent. The App's Connector
+  builds the path and reads the answer; it falls back to the protocol-1
+  actions for the store version.
+  The App tells a login page served in place of the export from the CSV.
 - `ping` / `checkSession` → the bridge manifest plus `{ session, authenticated }`:
   `session` is `signed-in`, `signed-out` (MyTANITA sent the check to its
   sign-in page) or `not-answering`, and `authenticated` its boolean.

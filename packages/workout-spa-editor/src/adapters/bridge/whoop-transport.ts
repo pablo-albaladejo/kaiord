@@ -1,10 +1,11 @@
 /**
  * WHOOP bridge read transport (Wave 1, extended Wave 5 with status reads).
  *
- * Relays a `{ action: "whoop-fetch", path }` message to the discovered
- * whoop-bridge extension and resolves with the relayed `{ ok, status, data }`
- * envelope. The session token stays inside the extension; this layer holds
- * none and only transports + validates the envelope. A bridge-level failure
+ * Asks the discovered WHOOP Bridge for one read through `request`
+ * (protocol 2), reading WHOOP's raw answer here (whoop-connector/), or through
+ * the legacy `whoop-fetch` (protocol 1), and resolves with the
+ * `{ ok, status, data }` result the sync reads either way. The session token
+ * stays inside the extension; this layer holds none. A bridge-level failure
  * (no session token captured, blocked origin, timeout) is surfaced as a typed
  * `WhoopBridgeError` carrying the bridge message so the sync use case persists
  * nothing. `readWhoopStatus` relays the extension's `status` action the same
@@ -16,6 +17,11 @@ import type { WhoopFetchResult } from "../../application/whoop/whoop-fetch-resul
 import { whoopFetchResultSchema } from "../../application/whoop/whoop-fetch-result";
 import { SESSION_OUTCOMES } from "./bridge-session-outcome";
 import { sendBridgeMessage } from "./bridge-transport";
+import { callThroughBridge } from "./thin-bridge-request";
+import {
+  readWhoopAnswer,
+  whoopRefusal,
+} from "./whoop-connector/read-whoop-answer";
 
 const WHOOP_FETCH_TIMEOUT_MS = 30_000;
 const WHOOP_STATUS_TIMEOUT_MS = 5_000;
@@ -26,10 +32,8 @@ const whoopStatusSchema = z.object({
   connected: z.boolean(),
   session: z.enum(SESSION_OUTCOMES).optional(),
   userId: z.number().nullable().optional(),
-  // The extension stores `whoopCapturedAt: Date.now()` and returns it verbatim,
-  // so this is an epoch-millis NUMBER (or null before a session is captured) —
-  // NOT a string. Getting this wrong makes safeParse reject a real connected
-  // envelope, which would throw in readWhoopStatus and silently kill the sync.
+  // `whoopCapturedAt: Date.now()` verbatim: epoch millis (or null), NOT a
+  // string — a string schema rejects a real envelope and kills the sync.
   capturedAt: z.number().nullable().optional(),
 });
 
@@ -49,11 +53,18 @@ export const readWhoopFetch = async (
   extensionId: string,
   path: string
 ): Promise<WhoopFetchResult> => {
-  const res = await sendBridgeMessage(
-    extensionId,
-    { action: "whoop-fetch", path },
-    WHOOP_FETCH_TIMEOUT_MS
+  const res = await callThroughBridge(
+    (message) =>
+      sendBridgeMessage(extensionId, message, WHOOP_FETCH_TIMEOUT_MS),
+    {
+      method: "GET",
+      path,
+      legacy: { action: "whoop-fetch", path },
+      read: readWhoopAnswer,
+    }
   );
+  const refusal = whoopRefusal(res);
+  if (refusal) return refusal;
   if (!res.ok) {
     throw new WhoopBridgeError(
       res.error ?? "WHOOP bridge read failed",

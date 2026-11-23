@@ -1,17 +1,20 @@
 /**
  * Garmin bridge transport for the body-composition upload.
  *
- * Sends the `push-body-composition` action to the garmin-bridge extension with
- * the pre-encoded `weight_scale` FIT bytes (passed as a `number[]` — the bridge
- * `toUint8Array` accepts either a base64 string or a byte array). The bridge
- * uploads to Garmin's upload endpoint on the user's existing session; this layer
- * only transports the request. A 401/403 marks the OAuth session as stale, so the
+ * Sends the pre-encoded `weight_scale` FIT bytes (a `number[]`) as the body of
+ * the upload request of the Garmin Bridge's closed list (protocol 2), or as
+ * the legacy `push-body-composition` action (protocol 1). The extension wraps
+ * them in a multipart file on the athlete's existing session. A 401/403 marks the OAuth session as stale, so the
  * thrown error carries `redetect` for the caller to re-run detection — mirroring
  * `garmin-bridge-operations.executePush`.
  */
-import { sendBridgeMessage } from "../bridge/bridge-transport";
+import { SPA_ACTION_TIMEOUT_MS } from "../../application/garmin-placement/placement-timing";
+import { callGarmin } from "./connector/garmin-bridge-call";
+import { GARMIN_UPLOAD_PATH } from "./connector/garmin-paths";
+import { readNothing } from "./connector/read-garmin-answers";
 
-const PUSH_BODY_COMPOSITION_TIMEOUT_MS = 15_000;
+// Longer than the extension's own deadline on a write.
+const PUSH_BODY_COMPOSITION_TIMEOUT_MS = SPA_ACTION_TIMEOUT_MS;
 
 export class GarminBodyCompositionError extends Error {
   readonly redetect: boolean;
@@ -26,9 +29,16 @@ export const pushGarminBodyComposition = async (
   extensionId: string,
   fitBytes: Uint8Array
 ): Promise<void> => {
-  const res = await sendBridgeMessage(
+  const fit = Array.from(fitBytes);
+  const res = await callGarmin(
     extensionId,
-    { action: "push-body-composition", fit: Array.from(fitBytes) },
+    {
+      method: "POST",
+      path: GARMIN_UPLOAD_PATH,
+      body: fit,
+      legacy: { action: "push-body-composition", fit },
+      read: readNothing,
+    },
     PUSH_BODY_COMPOSITION_TIMEOUT_MS
   );
   if (!res.ok) {

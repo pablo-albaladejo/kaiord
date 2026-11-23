@@ -24,6 +24,12 @@ const ALL_BRIDGES = [
   "trainingpeaks-bridge",
 ];
 const SNAPSHOT_BRIDGES = ["garmin-bridge", "train2go-bridge"];
+const GATE_BRIDGES = [
+  "garmin-bridge",
+  "whoop-bridge",
+  "tanita-bridge",
+  "trainingpeaks-bridge",
+];
 
 export const BRIDGE_CORE_MASTERS = [
   {
@@ -47,6 +53,13 @@ export const BRIDGE_CORE_MASTERS = [
     master: "bearer-fetch.js",
     dest: "bearer-fetch.js",
     bridges: ["garmin-bridge", "trainingpeaks-bridge"],
+  },
+  // The thin Bridge's one `request` gate: closed list + declared body schema.
+  // Train2Go keeps its own read-only gate (#1641); the other four use this.
+  {
+    master: "bridge-request-gate.js",
+    dest: "bridge-request-gate.js",
+    bridges: GATE_BRIDGES,
   },
   {
     master: "kaiord-announce.js",
@@ -127,6 +140,11 @@ export const BRIDGE_CORE_MASTERS = [
     master: "test/bearer-fetch.test.js",
     dest: "test/bearer-fetch.test.js",
     bridges: ["garmin-bridge", "trainingpeaks-bridge"],
+  },
+  {
+    master: "test/bridge-request-gate.test.js",
+    dest: "test/bridge-request-gate.test.js",
+    bridges: GATE_BRIDGES,
   },
   {
     master: "test/session-fetch.test.js",

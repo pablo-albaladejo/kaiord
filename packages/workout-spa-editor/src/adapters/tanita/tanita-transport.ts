@@ -1,17 +1,21 @@
 /**
  * Tanita bridge read transport.
  *
- * Relays a `{ action: "read-export-csv" }` message to the discovered
- * tanita-bridge extension and resolves with the raw MyTANITA export CSV. The
- * cookie session stays inside the extension; this layer holds no credentials
- * and only transports + validates the `{ csv }` envelope. A dead mytanita.eu
- * session surfaces as `{ ok: false, needsReauth: true }` on the envelope; that
- * flag is carried on the thrown `TanitaBridgeError` so the sync use case can
- * prompt a re-login instead of retrying. Modeled on `whoop-transport.ts`.
+ * Asks the discovered Tanita Bridge for the athlete's MyTANITA export
+ * through `request` (protocol 2), reading the raw answer here
+ * (connector/read-tanita-export), or through the legacy `read-export-csv`
+ * action (protocol 1), and resolves with the raw CSV. The cookie session
+ * stays inside the extension; this layer holds no credentials. A dead
+ * mytanita.eu session, a bounce or a login page in place of the export,
+ * surfaces as `needsReauth`, carried on the thrown `TanitaBridgeError` so the
+ * sync use case can prompt a re-login instead of retrying.
  */
 import { z } from "zod";
 
 import { sendBridgeMessage } from "../bridge/bridge-transport";
+import { callThroughBridge } from "../bridge/thin-bridge-request";
+import { readTanitaExport } from "./connector/read-tanita-export";
+import { TANITA_EXPORT_PATH } from "./connector/tanita-paths";
 
 const READ_EXPORT_CSV_TIMEOUT_MS = 30_000;
 const CHECK_SESSION_TIMEOUT_MS = 5_000;
@@ -64,10 +68,15 @@ export const checkTanitaSession = async (
 export const readTanitaExportCsv = async (
   extensionId: string
 ): Promise<string> => {
-  const res = await sendBridgeMessage(
-    extensionId,
-    { action: "read-export-csv" },
-    READ_EXPORT_CSV_TIMEOUT_MS
+  const res = await callThroughBridge(
+    (message) =>
+      sendBridgeMessage(extensionId, message, READ_EXPORT_CSV_TIMEOUT_MS),
+    {
+      method: "GET",
+      path: TANITA_EXPORT_PATH,
+      legacy: { action: "read-export-csv" },
+      read: readTanitaExport,
+    }
   );
   if (!res.ok) {
     throw new TanitaBridgeError(

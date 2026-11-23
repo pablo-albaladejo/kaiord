@@ -341,9 +341,15 @@ const SOLO_CASES = [
   ],
   [
     GARMIN,
-    "filtered inside the extension's service worker",
+    "filtered in the Kaiord App, in your browser",
     "processed somewhere",
     "Garmin calendar read filtered on the device",
+  ],
+  [
+    GARMIN,
+    "hands the Kaiord App Garmin's answer as it came, without reading it",
+    "hands the Kaiord App Garmin's answer after reading it",
+    "Garmin answers handed to the App unread",
   ],
   [
     GARMIN,
@@ -524,6 +530,24 @@ const SOLO_CASES = [
     "Tanita chrome.storage.local contents disclosed",
   ],
 
+  [
+    TRAININGPEAKS,
+    "hands the Kaiord App TrainingPeaks' answer as it came, without reading it",
+    "hands the Kaiord App TrainingPeaks' answer after reading it",
+    "TrainingPeaks answers handed to the App unread",
+  ],
+  [
+    TRAININGPEAKS,
+    "which keeps only that workout's id and day",
+    "which keeps that workout",
+    "TrainingPeaks workout read kept by the App to its id and day",
+  ],
+  [
+    WHOOP,
+    "WHOOP's answer is handed to the Kaiord editor as it came, without being read",
+    "WHOOP's answer is read and handed on",
+    "WHOOP answers handed to the editor unread",
+  ],
   [
     TRAININGPEAKS,
     "tpapi.trainingpeaks.com",

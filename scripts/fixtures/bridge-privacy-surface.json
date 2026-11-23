@@ -43,27 +43,30 @@
     "allowed_paths": [
       {
         "method": "GET",
-        "pattern": "^\\/workout-service\\/workouts(\\?.*)?$"
+        "pattern": "^\\/workout-service\\/workouts\\?start=\\d+&limit=\\d+$"
       },
       {
         "method": "POST",
-        "pattern": "^\\/workout-service\\/workout$"
+        "pattern": "^\\/workout-service\\/workout$",
+        "body": "workout"
       },
       {
         "method": "POST",
-        "pattern": "^\\/upload-service\\/upload(\\/.*)?$"
+        "pattern": "^\\/upload-service\\/upload\\/\\.fit$",
+        "body": "fit-file"
       },
       {
         "method": "GET",
-        "pattern": "^\\/activitylist-service\\/activities\\/search\\/activities(\\?.*)?$"
+        "pattern": "^\\/activitylist-service\\/activities\\/search\\/activities\\?start=\\d+&limit=\\d+$"
       },
       {
         "method": "POST",
-        "pattern": "^\\/workout-service\\/schedule\\/\\d+$"
+        "pattern": "^\\/workout-service\\/schedule\\/[1-9]\\d*$",
+        "body": "schedule"
       },
       {
         "method": "DELETE",
-        "pattern": "^\\/workout-service\\/schedule\\/\\d+$"
+        "pattern": "^\\/workout-service\\/schedule\\/[1-9]\\d*$"
       },
       {
         "method": "GET",
@@ -72,16 +75,10 @@
     ],
     "external_actions": [
       "ping",
-      "list",
-      "activities",
-      "push",
-      "push-body-composition",
+      "request",
       "open-garmin",
       "profile-snapshot",
       "profile-snapshot-clear",
-      "schedule",
-      "unschedule",
-      "calendar-find",
       "set-theme"
     ],
     "auth_endpoints": [
@@ -140,7 +137,7 @@
     "external_actions": [
       "ping",
       "checkSession",
-      "read-export-csv",
+      "request",
       "set-theme"
     ],
     "auth_endpoints": []
@@ -254,19 +251,17 @@
     "allowed_paths": [
       {
         "method": "GET",
-        "pattern": "^\\/users\\/v3\\/token$"
-      },
-      {
-        "method": "GET",
-        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetrics\\/[^\\/]+\\/[^\\/]+$"
+        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetrics\\/\\d{4}-\\d{2}-\\d{2}\\/\\d{4}-\\d{2}-\\d{2}$"
       },
       {
         "method": "POST",
-        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetric$"
+        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetric$",
+        "body": "weight"
       },
       {
         "method": "POST",
-        "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts$"
+        "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts$",
+        "body": "workout"
       },
       {
         "method": "GET",
@@ -276,10 +271,7 @@
     "external_actions": [
       "ping",
       "checkSession",
-      "read-metrics",
-      "push-weight",
-      "push-workout",
-      "read-workout",
+      "request",
       "read-athlete-id",
       "open-trainingpeaks",
       "set-theme"
@@ -348,30 +340,34 @@
     "allowed_paths": [
       {
         "method": "GET",
-        "prefix": "/core-details-bff/v0/cycles/details"
+        "pattern": "^\\/core-details-bff\\/v0\\/cycles\\/details\\?id=\\d+&startTime=[\\w%.-]+&endTime=[\\w%.-]+$"
       },
       {
         "method": "GET",
-        "prefix": "/metrics-service/v1/metrics/user/"
+        "pattern": "^\\/metrics-service\\/v1\\/metrics\\/user\\/\\d+\\?name=heart_rate&start=[\\w%.-]+&end=[\\w%.-]+&step=\\d+$"
       },
       {
         "method": "GET",
-        "prefix": "/activities-service/v1/sports/history"
+        "pattern": "^\\/activities-service\\/v1\\/sports\\/history\\?countryCode=[A-Z]{2}$"
       },
       {
         "method": "GET",
-        "prefix": "/advanced-labs-service/v1/biomarker-tests"
+        "pattern": "^\\/advanced-labs-service\\/v1\\/biomarker-tests$"
       },
       {
         "method": "GET",
-        "prefix": "/health-service/v2/stress-bff"
+        "pattern": "^\\/advanced-labs-service\\/v1\\/biomarker-tests\\/[\\w-]+\\/summary$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/health-service\\/v2\\/stress-bff\\/\\d{4}-\\d{2}-\\d{2}$"
       }
     ],
     "external_actions": [
       "ping",
       "status",
       "read-user-id",
-      "whoop-fetch",
+      "request",
       "set-theme"
     ],
     "auth_endpoints": []

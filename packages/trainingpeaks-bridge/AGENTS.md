@@ -19,14 +19,26 @@ vendored masters:
    (`credentials:"omit"` + `Authorization: Bearer`). A 401 re-runs the token
    exchange once (the "refresh").
 
-Raw metric JSON is returned verbatim; parsing lives in `@kaiord/trainingpeaks`,
-called SPA-side.
+**Thin Bridge** (`docs/adr/0004-thin-bridge-smart-connector.md`, protocol
+version 2): the App reaches it only through `{ action: "request", method,
+path, body? }`, which runs only an entry of the closed `ALLOWED` list in
+`background.js` (method + path pattern, and for a write the name of the body
+schema the vendored `bridge-request-gate.js` checks it against) and answers
+TrainingPeaks's answer unread as `{ status, contentType, body }`. What to ask for,
+how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/trainingpeaks/`). The App
+falls back to the protocol-1 actions for the store version. The internal
+channel uses `createInternalDispatch`: only the popup is answered, never a
+content script (`test/thin-bridge.test.js`).
+
+The token endpoint is not in `ALLOWED` (its answer is the token); the token is
+minted only for a real request or `read-athlete-id`, which the App sends just
+before a send or an import. Parsing lives in `@kaiord/trainingpeaks`, App-side.
 
 ## Key Files
 
 | File                                    | Description                                                                                                                                                                                                                                                                                                            |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `background.js`                         | Service worker: path allowlist, read throttle, action routing.                                                                                                                                                                                                                                                         |
+| `background.js`                         | Service worker: closed list with body schemas, `request`, `read-athlete-id`, popup-only internal channel.                                                                                                                                                                                                              |
 | `tp-auth.js`                            | Bridge-specific dual transport (cookie→token→Bearer). Holds the TP host/paths.                                                                                                                                                                                                                                         |
 | `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).                                                                                                                                                                                                                                                          |
 | `bearer-fetch.js`                       | Vendored identity-free Bearer transport (bridge-core master).                                                                                                                                                                                                                                                          |
@@ -58,12 +70,10 @@ match `BRIDGE_MANIFEST` in `background.js`.
 - The bridge NEVER parses metrics and NEVER imports `@kaiord/trainingpeaks` — it
   returns raw JSON; the SPA parses.
 - External dispatch is origin-pinned and action-allowlisted via the vendored
-  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `read-metrics` /
-  `push-weight` / `push-workout` / `read-workout` / `read-athlete-id` /
+  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `request` / `read-athlete-id` /
   `open-trainingpeaks` / `set-theme`. `read-athlete-id` is read just before a
   send and is where the token is minted; `checkSession` asks TrainingPeaks
-  nothing (`signed-in` from a valid stored token, else `not-checked`). `read-workout` reads one workout by id and returns only its id
-  and day, so the App can check its own copy before a re-send.
+  nothing (`signed-in` from a valid stored token, else `not-checked`). The App's Connector reads one workout by id and keeps only its id and day.
 - The session cookie is never read, stored, or logged; the extension only holds
   the minted access token. A Session check never mints it (#1643).
 - Weight-unit assumption: the type-9 metric value is kilograms (see

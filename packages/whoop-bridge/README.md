@@ -48,7 +48,8 @@ for development and testing (see "Build entrypoint" below).
   the sports catalog, Advanced-Labs biomarker tests, and daily stress. Any
   other path or method is rejected before a network call is made.
 - Expose a small message-passing surface, split by caller. The SPA reaches
-  only `ping`, `status`, `read-user-id`, `whoop-fetch`, and `set-theme` (the app's theme
+  only `ping`, `status`, `read-user-id`, `request` (a `GET` of an entry of the closed list,
+  run from the open WHOOP tab and answered unread), and `set-theme` (the app's theme
   preference for the popup) via `chrome.runtime.sendMessage`
   — `EXTERNAL_ACTIONS` in `background.js` — once it has discovered the
   extension ID at runtime through the vendored `kaiord-announce.js` content
@@ -79,7 +80,7 @@ Manifest entrypoints:
   packaging once the extension is registered (see "Chrome Web Store
   registration" in `store-listing.md`).
 - `background.js` — service worker (session-bearer store, the `webRequest`
-  header-capture listener, `whoop-fetch` relay, action routing).
+  header-capture listener, closed list and `request` relay, action routing).
 - `inject-main.js` — `world: "MAIN"` interceptor that captures the session
   bearer from the WHOOP web app's own requests.
 - `content.js` — isolated-world relay between `inject-main.js` and the

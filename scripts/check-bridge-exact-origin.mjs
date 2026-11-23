@@ -16,10 +16,17 @@
  * is scanned as well (lib/bridge-origin-scan.mjs). Finding no bridge, or a
  * bridge without `manifest.json`, is a fault, not a pass.
  *
+ * The exact-origin gate holds only if the internal channel is not a second
+ * door: a content script is "internal" too, and runs in a web page. So each
+ * bridge's background.js answers `chrome.runtime.onMessage` only through the
+ * vendored `createInternalDispatch` (the extension's own pages, never a
+ * content script); any other listener there must be unable to answer (two
+ * parameters at most, no `sendResponse`). Rule id: R-BridgeInternalDispatch.
+ *
  * Rule id: R-BridgeExactOrigin.
  */
 
-import { readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -34,6 +41,53 @@ import { failIfAny } from "./lib/guard-failure.mjs";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const RULE = "R-BridgeExactOrigin";
+const INTERNAL_RULE = "R-BridgeInternalDispatch";
+const LISTENER_CALL = "chrome.runtime.onMessage.addListener(";
+const INTERNAL_DISPATCH = "bridgeEnvelope.createInternalDispatch(";
+
+// A listener given by name answers nothing when it takes at most two
+// parameters: without the third, `sendResponse`, it cannot reply.
+const isMuteListener = (src, name) => {
+  const decl = new RegExp(
+    `const ${name} = (?:async )?\\(([^)]*)\\)\\s*=>`
+  ).exec(src);
+  if (!decl) return false;
+  const params = decl[1].split(",").filter((p) => p.trim() !== "");
+  return params.length <= 2;
+};
+
+export const checkInternalDispatch = (repoRoot, name) => {
+  const rel = join("packages", name, "background.js");
+  const path = join(repoRoot, rel);
+  if (!existsSync(path)) return [];
+  const src = readFileSync(path, "utf8");
+  const found = [];
+  if (!src.includes(INTERNAL_DISPATCH)) {
+    found.push({
+      rule: INTERNAL_RULE,
+      file: rel,
+      detail: "answers its popup without createInternalDispatch",
+    });
+  }
+  let at = src.indexOf(LISTENER_CALL);
+  while (at >= 0) {
+    const arg = src.slice(at + LISTENER_CALL.length).trimStart();
+    const named = /^([A-Za-z_$][\w$]*)\s*\)/.exec(arg);
+    const ok =
+      arg.startsWith(INTERNAL_DISPATCH) ||
+      (named !== null && isMuteListener(src, named[1]));
+    if (!ok) {
+      found.push({
+        rule: INTERNAL_RULE,
+        file: rel,
+        detail:
+          "an onMessage listener can answer without createInternalDispatch, so a content script reaches the dispatch",
+      });
+    }
+    at = src.indexOf(LISTENER_CALL, at + LISTENER_CALL.length);
+  }
+  return found;
+};
 
 const checkSources = (repoRoot, dirs) =>
   dirs.flatMap(shippedSources).flatMap((file) =>
@@ -60,16 +114,19 @@ export function runCheck({ repoRoot = REPO } = {}) {
     join(packages, "_shared", "bridge-core"),
   ];
   return [
-    ...bridges.flatMap((name) => checkManifests(repoRoot, name)),
-    ...checkSources(repoRoot, dirs),
-  ].map((v) => ({ rule: RULE, ...v }));
+    ...[
+      ...bridges.flatMap((name) => checkManifests(repoRoot, name)),
+      ...checkSources(repoRoot, dirs),
+    ].map((v) => ({ rule: RULE, ...v })),
+    ...bridges.flatMap((name) => checkInternalDispatch(repoRoot, name)),
+  ];
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   failIfAny(
     "place(s) where a bridge accepts more than the exact Kaiord App origin",
     runCheck().map((v) => `[${v.rule}] ${v.file} — ${v.detail}`),
-    `Remediation: declare only ${APP} (plus the two Vite dev ports in manifest.json) and compare sender.origin to "${APP_ORIGIN}" as a whole string in ${GATE_FILE} (spec: bridge-core).`
+    `Remediation: declare only ${APP} (plus the two Vite dev ports in manifest.json), compare sender.origin to "${APP_ORIGIN}" as a whole string in ${GATE_FILE}, and register chrome.runtime.onMessage only through bridgeEnvelope.createInternalDispatch (spec: bridge-core).`
   );
   console.log("✅ Every bridge answers the exact Kaiord App origin only.");
 }

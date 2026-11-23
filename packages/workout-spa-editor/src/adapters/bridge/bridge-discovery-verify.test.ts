@@ -131,20 +131,21 @@ describe("verifyAnnouncement", () => {
     }
   );
 
-  it("should register a Garmin extension on protocol 2 so its probe can say it is outdated", async () => {
+  it("should register a Garmin extension on a protocol it does not accept so its probe can say it is outdated", async () => {
     // Arrange
-    // Garmin accepts only protocol 1; refusing the announcement here would
+    // Garmin accepts protocols 1 and 2; refusing the announcement here would
     // make the extension look absent and offer Install (#1098). The Session
     // probe reads the same version and reports it outdated instead.
+    const UNKNOWN_PROTOCOL = 3;
     mockSend.mockResolvedValue({
       ok: true,
-      data: { ...validManifest.data, protocolVersion: 2 },
+      data: { ...validManifest.data, protocolVersion: UNKNOWN_PROTOCOL },
     });
 
     // Act
     const manifest = await verifyAnnouncement(ann);
 
     // Assert
-    expect(manifest?.protocolVersion).toBe(2);
+    expect(manifest?.protocolVersion).toBe(UNKNOWN_PROTOCOL);
   });
 });

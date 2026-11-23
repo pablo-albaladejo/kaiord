@@ -31,8 +31,12 @@
       "text": "Lets the Kaiord App send workouts to your TrainingPeaks calendar and read your weight, using your own TrainingPeaks sign-in",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
@@ -81,8 +85,12 @@
       "text": "Sends the workouts you create in the Kaiord App to your TrainingPeaks calendar, each on its day.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
@@ -129,11 +137,11 @@
       "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
           "title": "should explain a 402 as a planning-horizon limit, not a payload error"
         },
         {
-          "file": "packages/trainingpeaks-bridge/background.js",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-workout-transport.ts",
           "contains": "one day ahead on a Basic account"
         },
         {
@@ -232,8 +240,12 @@
           "title": "should offer the send action before anything is pushed"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
     },
@@ -483,7 +495,7 @@
     },
     {
       "id": "trainingpeaks.pj.tpapi-why",
-      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker, and a request outside these five is refused before it is sent:",
+      "text": "**Why**: TrainingPeaks' API host. Every request the extension makes goes here, from its service worker: the token exchange, which only the extension makes, and the four requests the Kaiord App may ask for. A request outside these five, or a write whose body is not the one shape declared for it, is refused before it is sent:",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -491,15 +503,15 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should allow the cookie-only token endpoint"
+          "title": "should never list the token endpoint, whose answer is the token"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
           "title": "should allow the metrics range read and single-metric write"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should block a disallowed path before hitting the network"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should refuse a path outside its closed list without minting or sending anything"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -508,6 +520,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
           "title": "should allow only the single-workout read, not a range or a delete"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should declare a body schema for exactly the write entries"
         }
       ]
     },
@@ -538,8 +554,8 @@
           "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
         },
         {
-          "file": "packages/trainingpeaks-bridge/background.js",
-          "contains": "Returns the raw JSON"
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-metrics-transport.ts",
+          "contains": "the raw JSON is read here"
         },
         {
           "file": "packages/trainingpeaks/src/adapters/schemas/trainingpeaks-metric.schema.ts",
@@ -556,8 +572,12 @@
       "text": "`POST /fitness/v6/athletes/{id}/workouts` adds a workout you send from the Kaiord App to your TrainingPeaks calendar.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
@@ -567,15 +587,15 @@
     },
     {
       "id": "trainingpeaks.pj.workout-read-path",
-      "text": "`GET /fitness/v6/athletes/{id}/workouts/{workoutId}` reads one workout the Kaiord App sent earlier, to learn whether TrainingPeaks still has it before that workout is sent again. Only the workout's id and day reach the Kaiord App; the rest of the answer is discarded in your browser.",
+      "text": "`GET /fitness/v6/athletes/{id}/workouts/{workoutId}` reads one workout the Kaiord App sent earlier, to learn whether TrainingPeaks still has it before that workout is sent again. TrainingPeaks' answer reaches the Kaiord App in your browser, which keeps only the workout's id and day and drops the rest there.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should GET the one workout by its id with a Bearer header"
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should read one workout Kaiord created as present, keeping only its id and day"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should pass the Kaiord App only the workout's id and day"
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should build every request so that the extension's list admits it"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
@@ -588,8 +608,8 @@
       "text": "`POST /metrics/v3/athletes/{id}/consolidatedtimedmetric` adds one weight measurement. The extension accepts this request, but the Kaiord App does not send it today.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a weight that matches its declared shape as JSON"
         },
         {
           "file": "packages/workout-spa-editor/src/integrations/bridge-supported-routes.ts",
@@ -602,12 +622,16 @@
       "text": "Every request except the token exchange carries the token as `Authorization: Bearer` and no cookies (`credentials: \"omit\"`).",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a weight that matches its declared shape as JSON"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -745,12 +769,16 @@
           "title": "sends the cookie, and no Authorization header, to that endpoint"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a weight that matches its declared shape as JSON"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -817,8 +845,12 @@
           "contains": "\"message\": \"Kaiord for TrainingPeaks\""
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
     },
@@ -879,8 +911,12 @@
           "title": "should send requests to tpapi.trainingpeaks.com only, and nothing anywhere else"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
           "endpoint": "https://developer.chrome.com/docs/extensions/reference/api/storage"
@@ -915,11 +951,15 @@
     },
     {
       "id": "trainingpeaks.pp.workouts",
-      "text": "**Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. Before a workout is sent again, it reads the copy the Kaiord App sent earlier with `GET /fitness/v6/athletes/{id}/workouts/{workoutId}`, and passes the Kaiord App only that workout's id and day. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again while its earlier copy is there adds a second copy, and the Kaiord App asks you first.",
+      "text": "**Workouts**: The extension adds each workout you send from the Kaiord App to your TrainingPeaks calendar, on its day, with `POST /fitness/v6/athletes/{id}/workouts`. Before a workout is sent again, it reads the copy the Kaiord App sent earlier with `GET /fitness/v6/athletes/{id}/workouts/{workoutId}` and hands TrainingPeaks' answer to the Kaiord App, which keeps only that workout's id and day; the rest of the answer, such as its title, notes and what you recorded, is dropped there, in your browser. It cannot delete anything in TrainingPeaks or change a workout already there: sending a changed workout again while its earlier copy is there adds a second copy, and the Kaiord App asks you first.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
@@ -942,8 +982,8 @@
           "title": "should send a copy only after the athlete confirms it"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should pass the Kaiord App only the workout's id and day"
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should read one workout Kaiord created as present, keeping only its id and day"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.safe-writes.test.tsx",
@@ -964,8 +1004,8 @@
           "contains": "const WINDOW_DAYS = 30;"
         },
         {
-          "file": "packages/trainingpeaks-bridge/background.js",
-          "contains": "Returns the raw JSON"
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-metrics-transport.ts",
+          "contains": "the raw JSON is read here"
         },
         {
           "file": "packages/trainingpeaks/src/adapters/schemas/trainingpeaks-metric.schema.ts",
@@ -976,8 +1016,8 @@
           "title": "should emit one KRD document per entry that carries a weight reading"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the weight metric to the write endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a weight that matches its declared shape as JSON"
         },
         {
           "file": "packages/workout-spa-editor/src/integrations/bridge-supported-routes.ts",
@@ -986,6 +1026,28 @@
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
           "title": "should have the pinned trainingpeaks-bridge shape"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pp.answers-unread",
+      "text": "**Answers Handed Over Unread**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a new planned workout or one weight); a request outside the extension's list of paths, the token exchange included, is refused before it is sent. The extension hands the Kaiord App TrainingPeaks' answer as it came, without reading it. Reading the answer happens in the Kaiord App, in your browser.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should return TrainingPeaks' raw answer for a request on a listed path"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should refuse a path outside its closed list without minting or sending anything"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
+          "title": "should refuse the App a request to the token endpoint, whose answer is the token"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should declare a body schema for exactly the write entries"
         }
       ]
     },
@@ -1003,15 +1065,15 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should allow the cookie-only token endpoint"
+          "title": "should never list the token endpoint, whose answer is the token"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
           "title": "should allow the metrics range read and single-metric write"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should block a disallowed path before hitting the network"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should refuse a path outside its closed list without minting or sending anything"
         },
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -1039,7 +1101,7 @@
     },
     {
       "id": "trainingpeaks.pp.no-third-party",
-      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to pass it your metrics and the id and day of a workout it sent, and to receive the workouts you send).",
+      "text": "**No Third-Party Sharing**: No data is shared with any third party. The extension only communicates with `tpapi.trainingpeaks.com` and the Kaiord App (to hand it TrainingPeaks' answers about your metrics and about a workout it sent, and to receive the workouts you send).",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -1066,8 +1128,12 @@
       "text": "Kaiord App envía entrenamientos a tu calendario de TrainingPeaks y lee tu peso, con tu propio inicio de sesión de TrainingPeaks",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
@@ -1116,8 +1182,12 @@
       "text": "Envía los entrenamientos que creas en Kaiord App a tu calendario de TrainingPeaks, cada uno en su día.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
           "test": "packages/workout-spa-editor/src/hooks/use-trainingpeaks-push.test.tsx",
@@ -1164,11 +1234,11 @@
       "text": "En una cuenta Basic de TrainingPeaks, TrainingPeaks solo acepta entrenamientos para hoy y mañana, contados en la zona horaria de la cuenta; para cualquier día que allí pueda ser posterior, Kaiord App te lo dice antes de enviar, y dice lo mismo si TrainingPeaks lo rechaza.",
       "proof": [
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
           "title": "should explain a 402 as a planning-horizon limit, not a payload error"
         },
         {
-          "file": "packages/trainingpeaks-bridge/background.js",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-workout-transport.ts",
           "contains": "one day ahead on a Basic account"
         },
         {
@@ -1267,8 +1337,12 @@
           "title": "should offer the send action before anything is pushed"
         },
         {
-          "test": "packages/trainingpeaks-bridge/test/background.test.js",
-          "title": "should POST the workout to the v6 endpoint with a Bearer header"
+          "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
     },

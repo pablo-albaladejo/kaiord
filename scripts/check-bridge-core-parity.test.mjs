@@ -143,3 +143,58 @@ describe("bridge-core parity", () => {
     }
   });
 });
+
+// A service worker loads its scripts with importScripts into ONE global
+// scope, where two top-level `const`s of the same name are a SyntaxError
+// that only the real extension sees (the vitest suites `require` each file
+// in its own module scope). Every bridge's service worker is evaluated here
+// as Chrome does: background.js, each importScripts file in order, one
+// shared context. session-fetch.js and bearer-fetch.js once both declared
+// UNAUTHORIZED_STATUS, so the TrainingPeaks worker could not load its
+// Bearer transport.
+describe("bridge service worker scope", () => {
+  const stubChrome = () => {
+    const listener = { addListener: () => {} };
+    return {
+      runtime: {
+        id: "scope-test",
+        onMessage: listener,
+        onMessageExternal: listener,
+        onInstalled: listener,
+        getManifest: () => ({}),
+      },
+      webRequest: { onBeforeSendHeaders: listener },
+      storage: { local: {}, session: {} },
+      tabs: {},
+    };
+  };
+
+  for (const bridge of IDENTITY_BRIDGES) {
+    it(`${bridge}: background.js and its imports evaluate in one worker scope`, async () => {
+      const vm = await import("node:vm");
+      const dir = join(REPO, "packages", bridge);
+      const errors = [];
+      const context = vm.createContext({ chrome: stubChrome(), console });
+      context.self = context;
+      context.globalThis = context;
+      context.importScripts = (...files) => {
+        for (const file of files) {
+          try {
+            vm.runInContext(readFileSync(join(dir, file), "utf8"), context, {
+              filename: file,
+            });
+          } catch (e) {
+            errors.push(`${file}: ${e.message}`);
+            throw e;
+          }
+        }
+      };
+      vm.runInContext(
+        readFileSync(join(dir, "background.js"), "utf8"),
+        context,
+        { filename: "background.js" }
+      );
+      assert.deepEqual(errors, [], `${bridge}: a worker import failed`);
+    });
+  }
+});

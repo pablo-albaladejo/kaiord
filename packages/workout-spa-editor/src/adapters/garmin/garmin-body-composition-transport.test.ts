@@ -1,15 +1,28 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { sendBridgeMessage } from "../bridge/bridge-transport";
+import { SPA_ACTION_TIMEOUT_MS } from "../../application/garmin-placement/placement-timing";
 import {
   GarminBodyCompositionError,
   pushGarminBodyComposition,
 } from "./garmin-body-composition-transport";
 
-vi.mock("../bridge/bridge-transport", () => ({ sendBridgeMessage: vi.fn() }));
+// An extension one protocol behind (the store version): it refuses the
+// thin Bridge's `request`, so each case is its legacy action's answer.
+const { legacySend } = vi.hoisted(() => ({ legacySend: vi.fn() }));
+vi.mock("../bridge/bridge-transport", () => ({
+  sendBridgeMessage: (id: string, message: { action?: string }, t: number) =>
+    message?.action === "request"
+      ? Promise.resolve({
+          ok: false,
+          protocolVersion: 1,
+          error: "Origin or action not permitted",
+          retryable: false,
+        })
+      : legacySend(id, message, t),
+}));
 
-const mockedSend = vi.mocked(sendBridgeMessage);
-const PUSH_BODY_COMPOSITION_TIMEOUT_MS = 15_000;
+const mockedSend = legacySend;
+const PUSH_BODY_COMPOSITION_TIMEOUT_MS = SPA_ACTION_TIMEOUT_MS;
 const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN = 403;
 // eslint-disable-next-line no-magic-numbers -- fixed FIT byte payload for the assertion

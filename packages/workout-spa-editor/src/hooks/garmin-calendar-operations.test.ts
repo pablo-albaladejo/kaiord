@@ -9,8 +9,19 @@ const WORKOUT = "1707805999" as GarminWorkoutId;
 const SCHEDULE = "5000" as GarminScheduleId;
 const DATE = "2026-10-05";
 
+// An extension one protocol behind (the store version): it refuses the
+// thin Bridge's `request`, so each case is its legacy action's answer.
+const PREVIOUS = {
+  ok: false,
+  protocolVersion: 1,
+  error: "Origin or action not permitted",
+  retryable: false,
+};
+
 const portWith = (answer: unknown) => {
-  const send = vi.fn().mockResolvedValue(answer);
+  const send = vi.fn(async (_id: string, message: { action?: string }) =>
+    message.action === "request" ? PREVIOUS : answer
+  );
   return { send, port: createGarminCalendarPort(() => EXTENSION_ID, send) };
 };
 
@@ -89,7 +100,7 @@ describe("createGarminCalendarPort", () => {
     const answer = await port.unschedule(SCHEDULE);
 
     // Assert
-    expect(send.mock.calls[0]![1]).toEqual({
+    expect(send.mock.calls[1]![1]).toEqual({
       action: "unschedule",
       scheduleId: SCHEDULE,
     });
@@ -110,7 +121,7 @@ describe("createGarminCalendarPort", () => {
     const answer = await port.find(WORKOUT, DATE);
 
     // Assert
-    expect(send.mock.calls[0]![1]).toEqual({
+    expect(send.mock.calls[1]![1]).toEqual({
       action: "calendar-find",
       workoutId: WORKOUT,
       date: DATE,

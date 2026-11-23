@@ -5,14 +5,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 // WHOOP id and no capture time. The id travels only to the read the App makes
 // when it is about to import.
 
-require("../background.js");
+const { storeToken } = require("../background.js");
 
 const SPA_SENDER = { origin: "https://kaiord.com" };
 const USER_ID = 7654321;
 
 const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
-const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 
 const makeJwt = (payload) => {
   const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
@@ -34,14 +33,8 @@ const PING_KEYS = [
 const send = (message) =>
   new Promise((resolve) => externalCb(message, SPA_SENDER, resolve));
 
-const sendInternal = (message) =>
-  new Promise((resolve) => internalCb(message, {}, resolve));
-
 const captureSession = () =>
-  sendInternal({
-    action: "capture-token",
-    token: makeJwt({ "custom:user_id": String(USER_ID) }),
-  });
+  storeToken(makeJwt({ "custom:user_id": String(USER_ID) }));
 
 describe("session confinement", () => {
   beforeEach(() => {

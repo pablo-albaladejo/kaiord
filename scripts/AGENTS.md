@@ -35,7 +35,7 @@ notes.
 | `check-session-match-id-shape.mjs`             | R-SessionMatchIdShape (id construction via canonical helpers)                                 |
 | `check-no-perf-marks-in-prod.mjs`              | No `performance.mark()` in production builds                                                  |
 | `check-bridge-privacy-surface.mjs`             | Extension privacy surface matches `fixtures/bridge-privacy-surface.json`                      |
-| `check-bridge-exact-origin.mjs`                | R-BridgeExactOrigin: bridges answer `https://kaiord.com` only (manifests and shipped source)  |
+| `check-bridge-exact-origin.mjs`                | R-BridgeExactOrigin + R-BridgeInternalDispatch: exact App origin; popup-only internal channel |
 | `check-security-audit-required.mjs`            | R-SecurityAuditAlwaysReports: the required audit job always reports                           |
 | `check-security-policy.mjs`                    | `SECURITY.md` ⇄ `security.txt`, `Expires` current                                             |
 | `check-claims.mjs`                             | Every claim on a surface in `claims/*.json` has a register entry whose proof holds            |

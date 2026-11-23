@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   discoverBridges,
+  allowlistSource,
   extractPatternAllowlist,
 } from "./check-bridge-privacy-surface.mjs";
 
@@ -25,7 +26,7 @@ const REPO = dirname(HERE);
 const SCRIPT_NAME = "check-bridge-privacy-surface.mjs";
 const SCRIPT = join(HERE, SCRIPT_NAME);
 const GOLDEN = join(HERE, "fixtures/bridge-privacy-surface.json");
-const WHOOP_CONTENT = join(REPO, "packages/whoop-bridge/content.js");
+const WHOOP_BACKGROUND = join(REPO, "packages/whoop-bridge/background.js");
 
 const runGuard = () =>
   spawnSync("node", [SCRIPT], {
@@ -417,6 +418,38 @@ describe("bridge privacy surface guard", () => {
         ),
       /field `alt` has a value this guard cannot read/
     );
+  });
+
+  it("records the body schema a thin Bridge's write entry names", () => {
+    assert.deepEqual(
+      extractPatternAllowlist(
+        'const ALLOWED = [{ method: "POST", pattern: /^\\/a$/, body: "workout" }, { method: "GET", pattern: /^\\/b$/ }];'
+      ),
+      [
+        { method: "POST", pattern: "^\\/a$", body: "workout" },
+        { method: "GET", pattern: "^\\/b$" },
+      ]
+    );
+  });
+
+  it("refuses a body that does not name a schema as a string literal", () => {
+    assert.throws(
+      () =>
+        extractPatternAllowlist(
+          'const ALLOWED = [{ method: "POST", pattern: /^\\/a$/, body: /any/ }];'
+        ),
+      /`body` must name a schema as a string literal/
+    );
+  });
+
+  it("reads the closed list from background.js before content.js", () => {
+    const dir = mkdtempSync(join(tmpdir(), "privacy-source-"));
+    writeFileSync(
+      join(dir, "background.js"),
+      'const ALLOWED = [{ method: "GET", pattern: /^\\/a$/ }];\n'
+    );
+    writeFileSync(join(dir, "content.js"), "const nothing = 1;\n");
+    assert.equal(allowlistSource(dir), join(dir, "background.js"));
   });
 
   it("refuses an entry carrying a field it does not understand", () => {
@@ -1021,13 +1054,11 @@ describe("bridge privacy surface guard", () => {
     // `pattern:` per entry", which the extractor does not get to define.
     const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
     for (const bridge of Object.keys(golden)) {
-      // Content-script bridges keep the allowlist in content.js; SW-direct
-      // bridges (garmin, train2go, tanita, trainingpeaks) keep it in
-      // background.js. Cross-count against whichever the guard reads.
-      const contentPath = join(REPO, "packages", bridge, "content.js");
-      const backgroundPath = join(REPO, "packages", bridge, "background.js");
-      const sourcePath = existsSync(contentPath) ? contentPath : backgroundPath;
-      if (!existsSync(sourcePath)) {
+      // Every bridge now keeps its closed list in background.js; a
+      // relay-based one may keep it in content.js. Cross-count against
+      // whichever the guard reads.
+      const sourcePath = allowlistSource(join(REPO, "packages", bridge));
+      if (!sourcePath || !existsSync(sourcePath)) {
         // Bridges without any allowlist source declare an empty allowlist in
         // the golden; nothing to cross-count.
         assert.deepEqual(golden[bridge].allowed_paths, []);
@@ -1070,23 +1101,21 @@ describe("bridge privacy surface guard", () => {
     }
   });
 
-  it("records whoop's GET-only prefix allowlist, matching content.js exactly", () => {
+  it("records whoop's GET-only closed list, matching background.js exactly", () => {
     const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
     const entries = golden["whoop-bridge"].allowed_paths;
     assert.ok(entries.length > 0, "whoop allowed_paths must not be empty");
-    // Every whoop read is gated to GET by isAllowed(); the golden records
-    // that, and records `prefix` (not `pattern`) so swapping the matching
-    // semantics is itself visible drift.
+    // Every whoop read is a GET of an anchored pattern in the service
+    // worker's closed list: no prefix matching, no write, no body.
+    const src = readFileSync(WHOOP_BACKGROUND, "utf8");
     for (const e of entries) {
       assert.equal(e.method, "GET");
-      assert.ok(typeof e.prefix === "string" && e.prefix.startsWith("/"));
-      assert.equal(e.pattern, undefined);
-    }
-    const src = readFileSync(WHOOP_CONTENT, "utf8");
-    for (const e of entries) {
+      assert.equal(e.prefix, undefined);
+      assert.equal(e.body, undefined);
+      assert.ok(e.pattern.startsWith("^") && e.pattern.endsWith("$"));
       assert.ok(
-        src.includes(`"${e.prefix}"`),
-        `golden lists ${e.prefix} but content.js does not declare it`
+        src.includes(`pattern: /${e.pattern}/`),
+        `golden lists ${e.pattern} but background.js does not declare it`
       );
     }
   });

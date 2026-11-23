@@ -24,29 +24,55 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: () => "tp-extension" },
 }));
 
-vi.mock("../adapters/bridge/bridge-transport", () => ({
-  sendBridgeMessage: async (_id: string, message: Record<string, unknown>) => {
-    if (message.action === "read-athlete-id")
-      return { ok: true, data: { athleteId: 77 } };
-    if (message.action === "push-workout") {
-      const workoutId = tp.nextId++;
-      tp.workouts.set(workoutId, {
-        ...(message.workout as object),
-        workoutId,
-      });
-      return { ok: true, data: { workoutId } };
-    }
-    if (message.action === "read-workout") {
-      if (tp.readStatus !== undefined)
-        return { ok: false, status: tp.readStatus, error: "failed" };
-      const found = tp.workouts.get(Number(message.workoutId));
-      return found
-        ? { ok: true, data: found }
-        : { ok: false, status: 404, error: "Workout read failed: 404" };
-    }
-    return { ok: false, error: "unexpected action" };
-  },
-}));
+// The current extension (protocol 2) over a TrainingPeaks that holds
+// state: the athlete id read it still answers, and `request` on the two
+// workout entries of its closed list, answered raw.
+vi.mock("../adapters/bridge/bridge-transport", () => {
+  const raw = (payload: unknown) => ({
+    ok: true,
+    protocolVersion: 2,
+    data: {
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(payload),
+    },
+  });
+  const failure = (status: number) => ({
+    ok: false,
+    protocolVersion: 2,
+    status,
+    error: `Request failed: ${status}`,
+  });
+  return {
+    sendBridgeMessage: async (
+      _id: string,
+      message: Record<string, unknown>
+    ) => {
+      if (message.action === "read-athlete-id")
+        return { ok: true, protocolVersion: 2, data: { athleteId: 77 } };
+      if (message.action !== "request") return failure(400);
+      const path = String(message.path);
+      if (
+        message.method === "POST" &&
+        path === "/fitness/v6/athletes/77/workouts"
+      ) {
+        const workoutId = tp.nextId++;
+        tp.workouts.set(workoutId, {
+          ...(message.body as object),
+          workoutId,
+        });
+        return raw({ workoutId });
+      }
+      const read = /^\/fitness\/v6\/athletes\/77\/workouts\/(\d+)$/.exec(path);
+      if (message.method === "GET" && read) {
+        if (tp.readStatus !== undefined) return failure(tp.readStatus);
+        const found = tp.workouts.get(Number(read[1]));
+        return found ? raw(found) : failure(404);
+      }
+      return failure(400);
+    },
+  };
+});
 
 vi.mock("@kaiord/trainingpeaks", () => ({
   krdToTrainingPeaksWorkout: (

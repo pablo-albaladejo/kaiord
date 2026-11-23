@@ -1,63 +1,81 @@
 /**
- * GarminCalendarPort over the bridge's `schedule`, `unschedule` and
- * `calendar-find` actions. Each waits `SPA_ACTION_TIMEOUT_MS`, longer than
- * the bridge's own deadline, so the SPA hears the bridge's answer before
- * it gives up. Never throws: a failure is the envelope's fields, and an
- * answer that is not the expected shape is a failed read, never "found 0".
+ * GarminCalendarPort over the Garmin Bridge: the schedule POST and DELETE
+ * and the month read through `request` (protocol 2), or the legacy
+ * `schedule`, `unschedule` and `calendar-find` actions (protocol 1). Each
+ * waits `SPA_ACTION_TIMEOUT_MS`, longer than the bridge's own deadline, so
+ * the App hears the bridge's answer before it gives up. Never throws: a
+ * failure is the envelope's fields, an invalid id or date is refused before
+ * anything is sent, and an answer that is not the expected shape is a
+ * failed read, never "found 0".
  */
+import { sendBridgeMessage } from "../adapters/bridge/bridge-transport";
+import type { BridgeCall } from "../adapters/bridge/thin-bridge-request";
+import type { GarminSend } from "../adapters/garmin/connector/garmin-bridge-call";
+import { callGarmin } from "../adapters/garmin/connector/garmin-bridge-call";
+import { isGarminId, isIsoDate } from "../adapters/garmin/connector/garmin-ids";
+import {
+  garminMonthPath,
+  garminSchedulePath,
+} from "../adapters/garmin/connector/garmin-paths";
+import {
+  readNothing,
+  readScheduleId,
+  readWorkoutEntries,
+} from "../adapters/garmin/connector/read-garmin-answers";
 import type {
-  BridgeFailure,
   CalendarEntry,
   GarminCalendarPort,
 } from "../application/garmin-placement/garmin-calendar-port";
 import { SPA_ACTION_TIMEOUT_MS } from "../application/garmin-placement/placement-timing";
-import { sendMessage } from "../store/garmin-extension-transport";
-import { calendarDate, parseGarminScheduleId } from "../types/garmin-ledger";
-
-type Send = typeof sendMessage;
-
-const UNREADABLE: BridgeFailure = {
-  ok: false,
-  error: "unexpected-payload",
-  retryable: true,
-};
-
-const failureOf = (res: Awaited<ReturnType<Send>>): BridgeFailure => ({
-  ok: false,
-  ...(res.error !== undefined ? { error: res.error } : {}),
-  ...(res.status !== undefined ? { status: res.status } : {}),
-  ...(typeof res.retryable === "boolean" ? { retryable: res.retryable } : {}),
-  ...(res.needsReauth ? { needsReauth: true } : {}),
-  ...(res.delivered === false ? { delivered: false } : {}),
-});
-
-const entryOf = (raw: unknown): CalendarEntry | undefined => {
-  const item = raw as { workoutScheduleId?: unknown; date?: unknown } | null;
-  if (!calendarDate.safeParse(item?.date).success) return undefined;
-  const id = parseGarminScheduleId(item?.workoutScheduleId) ?? null;
-  return { workoutScheduleId: id, date: item!.date as string };
-};
+import { parseGarminScheduleId } from "../types/garmin-ledger";
+import {
+  entryOf,
+  failureOf,
+  refused,
+  UNREADABLE,
+} from "./garmin-calendar-answers";
 
 export const createGarminCalendarPort = (
   extensionId: () => string,
-  send: Send = sendMessage
+  send: GarminSend = sendBridgeMessage
 ): GarminCalendarPort => {
-  const call = (message: Record<string, unknown>) =>
-    send(extensionId(), message, SPA_ACTION_TIMEOUT_MS);
+  const call = <T>(c: BridgeCall<T>) =>
+    callGarmin(extensionId(), c, SPA_ACTION_TIMEOUT_MS, send);
   return {
     schedule: async (workoutId, date) => {
-      const res = await call({ action: "schedule", workoutId, date });
+      if (!isGarminId(workoutId)) return refused("Invalid workoutId");
+      if (!isIsoDate(date)) return refused("Invalid date");
+      const res = await call({
+        method: "POST",
+        path: garminSchedulePath(workoutId),
+        body: { date },
+        legacy: { action: "schedule", workoutId, date },
+        read: readScheduleId,
+      });
       if (!res.ok) return failureOf(res);
       const data = res.data as { workoutScheduleId?: unknown } | null;
       const id = parseGarminScheduleId(data?.workoutScheduleId) ?? null;
       return { ok: true, workoutScheduleId: id };
     },
     unschedule: async (scheduleId) => {
-      const res = await call({ action: "unschedule", scheduleId });
+      if (!isGarminId(scheduleId)) return refused("Invalid scheduleId");
+      const res = await call({
+        method: "DELETE",
+        path: garminSchedulePath(scheduleId),
+        legacy: { action: "unschedule", scheduleId },
+        read: readNothing,
+      });
       return res.ok ? { ok: true } : failureOf(res);
     },
     find: async (workoutId, date) => {
-      const res = await call({ action: "calendar-find", workoutId, date });
+      if (!isGarminId(workoutId)) return refused("Invalid workoutId");
+      if (!isIsoDate(date)) return refused("Invalid date");
+      const res = await call({
+        method: "GET",
+        path: garminMonthPath(date),
+        legacy: { action: "calendar-find", workoutId, date },
+        read: readWorkoutEntries(workoutId),
+      });
       if (!res.ok) return failureOf(res);
       if (!Array.isArray(res.data)) return UNREADABLE;
       const entries = res.data.map(entryOf);

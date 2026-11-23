@@ -57,7 +57,8 @@ test.describe("Connection notices", () => {
     page,
   }) => {
     // Arrange
-    const outdated = { protocolVersion: 2 };
+    // A protocol the App does not accept (it accepts 1 and 2).
+    const outdated = { protocolVersion: 3 };
 
     // Act
     await openConnections(page, outdated);
@@ -117,7 +118,8 @@ test.describe("Connection notices", () => {
     page,
   }) => {
     // Arrange
-    const outdated = { protocolVersion: 2 };
+    // A protocol the App does not accept (it accepts 1 and 2).
+    const outdated = { protocolVersion: 3 };
 
     // Act
     await openReadyWorkout(page, outdated);

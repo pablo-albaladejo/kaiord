@@ -8,21 +8,33 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { sendMessage } from "../store/garmin-extension-transport";
+import { SPA_ACTION_TIMEOUT_MS } from "../application/garmin-placement/placement-timing";
 import {
   evaluatePingResult,
   executeList,
   executePush,
 } from "./garmin-bridge-operations";
 
-vi.mock("../store/garmin-extension-transport", () => ({
-  sendMessage: vi.fn(),
+// An extension one protocol behind (the store version): it refuses the
+// thin Bridge's `request`, and the transport falls back to the legacy
+// action, whose answer each case sets.
+const { legacySend } = vi.hoisted(() => ({ legacySend: vi.fn() }));
+vi.mock("../adapters/bridge/bridge-transport", () => ({
+  sendBridgeMessage: (id: string, message: { action?: string }, t: number) =>
+    message?.action === "request"
+      ? Promise.resolve({
+          ok: false,
+          protocolVersion: 1,
+          error: "Origin or action not permitted",
+          retryable: false,
+        })
+      : legacySend(id, message, t),
 }));
 
-const PUSH_TIMEOUT_MS = 15_000;
+const PUSH_TIMEOUT_MS = SPA_ACTION_TIMEOUT_MS;
 const NON_STRING = 7;
 
-const mockedSend = vi.mocked(sendMessage);
+const mockedSend = legacySend;
 
 describe("evaluatePingResult", () => {
   it.each([

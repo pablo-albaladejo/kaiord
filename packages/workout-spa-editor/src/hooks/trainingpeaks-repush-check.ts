@@ -31,7 +31,7 @@ export const checkBeforeTrainingPeaksSend = async (
   payload: Record<string, unknown>,
   allowCopy: boolean
 ): Promise<RepushVerdict> => {
-  await checkTrainingPeaksCopy(extensionId, workout);
+  await checkTrainingPeaksCopy(extensionId, workout, payload.athleteId);
   return allowCopy
     ? { blocked: false }
     : checkTrainingPeaksRepush(workout, payload);

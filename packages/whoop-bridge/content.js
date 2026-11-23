@@ -8,8 +8,10 @@
  *      relay it to the background.
  *   2. Secondary capture: scan the Cognito localStorage entry for the access
  *      token in case the interceptor missed the live request.
- *   3. Execute background-relayed `whoop-fetch` reads against the internal API
- *      from this tab's origin, enforcing a read-only GET allowlist.
+ *   3. Execute the reads the service worker relays (`whoop-fetch`) against
+ *      the internal API from this tab's origin, and hand the answer back
+ *      unread. The closed list of paths is the service worker's `ALLOWED`;
+ *      this script only refuses anything that is not a GET of an API path.
  */
 
 // Capture pristine fetch before page scripts can monkey-patch it.
@@ -19,34 +21,16 @@ const WHOOP_ORIGIN = "https://app.whoop.com";
 const API_BASE = "https://api.prod.whoop.com";
 const FETCH_TIMEOUT_MS = 30000;
 
-// Read-only allowlist of internal-API prefixes (design D3). Every WHOOP path
-// kaiord reads is a GET under one of these. Prefixes ending in "/" match any
-// sub-path; the others match the exact path or an explicit sub-path segment so
-// a look-alike like ".../detailsX" cannot slip through.
-const ALLOWED_PREFIXES = [
-  "/core-details-bff/v0/cycles/details",
-  "/metrics-service/v1/metrics/user/",
-  "/activities-service/v1/sports/history",
-  "/advanced-labs-service/v1/biomarker-tests",
-  "/health-service/v2/stress-bff",
-];
-
-const matchesPrefix = (pathname, prefix) =>
-  prefix.endsWith("/")
-    ? pathname.startsWith(prefix)
-    : pathname === prefix || pathname.startsWith(`${prefix}/`);
-
+// A second, coarse check under the service worker's closed list: a GET of a
+// path on the API host, never another host or a scheme-relative URL.
 const isAllowed = (method, path) => {
   if ((method || "GET").toUpperCase() !== "GET") return false;
-  let pathname;
+  if (typeof path !== "string" || !path.startsWith("/")) return false;
   try {
-    // Parse against a dummy base so `..` segments are collapsed the same way
-    // fetch will and the query string is dropped before the prefix check.
-    pathname = new URL(path, "https://x").pathname;
+    return new URL(path, API_BASE).origin === API_BASE;
   } catch {
     return false;
   }
-  return ALLOWED_PREFIXES.some((prefix) => matchesPrefix(pathname, prefix));
 };
 
 const handleWhoopFetch = async (msg) => {
@@ -67,14 +51,9 @@ const handleWhoopFetch = async (msg) => {
       credentials: "include",
       signal: controller.signal,
     });
-    const text = await r.text();
-    let data;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text.slice(0, 500);
-    }
-    return { ok: r.ok, status: r.status, data };
+    const contentType = r.headers?.get?.("content-type") || "";
+    const body = r.ok ? await r.text() : "";
+    return { ok: r.ok, status: r.status, contentType, body };
   } catch (e) {
     return {
       ok: false,
@@ -135,6 +114,5 @@ if (typeof module !== "undefined") {
     handleWhoopFetch,
     onWindowMessage,
     scanCognitoStorage,
-    ALLOWED_PREFIXES,
   };
 }

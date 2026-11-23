@@ -31,11 +31,10 @@ const EXPIRY_SKEW_SEC = 60;
 // to in exchange for a Bearer. Read by
 // scripts/check-bridge-privacy-surface.mjs into the golden fixture.
 //
-// This path also appears in background.js's ALLOWED, but only so the
-// editor's own session probe can reach it — a coincidence, not a guarantee.
+// This path is deliberately absent from background.js's ALLOWED: the App's
+// `request` may never reach it, because its answer is the token itself.
 // `exchangeToken` below calls `cookieSessionFetch` directly and never
-// consults `isAllowed`, so removing that allowlist entry would drop the
-// endpoint from the golden while the credential kept travelling to it.
+// consults `isAllowed`; this declaration is what keeps it in the golden.
 //
 // Written out rather than composed from TPAPI/TOKEN_PATH: the guard records
 // string literals, and an interpolated `${TPAPI}${TOKEN_PATH}` would reach
@@ -171,9 +170,10 @@ const ensureAthleteId = async (fetchImpl) =>
 /**
  * Data-call surface: a Bearer request against tpapi with a single
  * 401→re-exchange retry, delegated to the vendored bearer-fetch master. Returns
- * the same envelope the master does: { ok, status, data } | { ok:false, … }.
+ * the same envelope the master does: { ok, status, data } | { ok:false, … },
+ * or with `raw` the answer unread: { ok, status, contentType, body }.
  */
-const tpapiFetch = (path, method, body, fetchImpl) =>
+const tpapiFetch = (path, method, body, fetchImpl, { raw = false } = {}) =>
   bearerCore().bearerRequest({
     baseUrl: TPAPI,
     path,
@@ -182,6 +182,7 @@ const tpapiFetch = (path, method, body, fetchImpl) =>
     getToken: accessTokenAfterEnsure,
     refreshToken: accessTokenAfterExchange,
     fetchImpl,
+    raw,
   });
 
 /**

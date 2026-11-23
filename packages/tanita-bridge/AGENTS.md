@@ -9,14 +9,25 @@ flagship **SW-direct** source transport: the background service worker fetches
 the user's own body-composition **CSV export** from
 `https://mytanita.eu/en/user/export-csv` with `credentials:"include"`, so the
 HttpOnly `TANITASESS` session cookie travels automatically. No password, no
-`cookies` permission, no content script on `mytanita.eu`. Raw CSV is returned
-verbatim; parsing lives in `@kaiord/tanita`, called SPA-side.
+`cookies` permission, no content script on `mytanita.eu`.
+
+**Thin Bridge** (`docs/adr/0004-thin-bridge-smart-connector.md`, protocol
+version 2): the App reaches it only through `{ action: "request", method,
+path, body? }`, which runs only an entry of the closed `ALLOWED` list in
+`background.js` (method + path pattern, and for a write the name of the body
+schema the vendored `bridge-request-gate.js` checks it against) and answers
+MyTANITA's answer unread as `{ status, contentType, body }`. What to ask for,
+how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/tanita/`, which also tells a login page from the export). The App
+falls back to the protocol-1 actions for the store version. The internal
+channel uses `createInternalDispatch`: only the popup is answered, never a
+content script (`test/thin-bridge.test.js`).
+Parsing lives in `@kaiord/tanita`, App-side.
 
 ## Key Files
 
 | File                                    | Description                                                              |
 | --------------------------------------- | ------------------------------------------------------------------------ |
-| `background.js`                         | Service worker: SW-direct CSV fetch, path allowlist, action routing.     |
+| `background.js`                         | Service worker: closed list, `request`, HEAD Session check, popup gate.  |
 | `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).            |
 | `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.              |
 | `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair. |
@@ -55,9 +66,10 @@ never in the master. Identity values in `bridge-identity.js` must match
 - Plain JavaScript by design (strict-TS exception in root `CLAUDE.md`);
   correctness lives in the vitest suite (`pnpm test` / `test:coverage`).
 - The bridge NEVER parses CSV and NEVER imports `@kaiord/tanita` — it returns
-  raw text; the SPA parses.
+  MyTANITA's answer unread; the App's Connector tells a login page from the
+  export and parses it.
 - External dispatch is origin-pinned and action-allowlisted via the vendored
-  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `read-export-csv` /
+  envelope. `EXTERNAL_ACTIONS`: `ping` / `checkSession` / `request` /
   `set-theme`.
 - The session cookie is never read, stored, or logged; a Session check is a
   `HEAD` of the export and answers only `{ session, authenticated }`. It

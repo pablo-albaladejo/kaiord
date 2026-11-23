@@ -1,24 +1,40 @@
 /**
- * Garmin Bridge Operations - Transport-level helpers for the bridge hook.
+ * Garmin Bridge Operations - Transport-level helpers for the bridge hook:
+ * send a workout and list the athlete's workouts through the Garmin Bridge
+ * (a raw request on protocol 2, the legacy action on protocol 1).
  */
+import { callGarmin } from "../adapters/garmin/connector/garmin-bridge-call";
+import {
+  GARMIN_WORKOUT_PATH,
+  GARMIN_WORKOUTS_PATH,
+} from "../adapters/garmin/connector/garmin-paths";
+import { readJson } from "../adapters/garmin/connector/read-garmin-answers";
+import { SPA_ACTION_TIMEOUT_MS } from "../application/garmin-placement/placement-timing";
 import type {
   PushWorkout,
   PushWorkoutResult,
 } from "../application/integrations/integration-ports";
 import type { PushState } from "../contexts/garmin-bridge-types";
-import { sendMessage } from "../store/garmin-extension-transport";
 import { parseGarminWorkoutId } from "./garmin-push-id";
 
-const PUSH_TIMEOUT = 15_000;
+// A write waits longer than the extension's own deadline, so the App hears
+// how it ended before it gives up.
+const PUSH_TIMEOUT = SPA_ACTION_TIMEOUT_MS;
 const LIST_TIMEOUT = 10_000;
 
 export const executePush: PushWorkout = async function executePush(
   extensionId: string,
   gcn: unknown
 ): Promise<PushWorkoutResult> {
-  const res = await sendMessage(
+  const res = await callGarmin(
     extensionId,
-    { action: "push", gcn },
+    {
+      method: "POST",
+      path: GARMIN_WORKOUT_PATH,
+      body: gcn,
+      legacy: { action: "push", gcn },
+      read: readJson,
+    },
     PUSH_TIMEOUT
   );
 
@@ -38,7 +54,16 @@ export const executePush: PushWorkout = async function executePush(
 export async function executeList(
   extensionId: string
 ): Promise<{ data: unknown[]; redetect: boolean }> {
-  const res = await sendMessage(extensionId, { action: "list" }, LIST_TIMEOUT);
+  const res = await callGarmin(
+    extensionId,
+    {
+      method: "GET",
+      path: GARMIN_WORKOUTS_PATH,
+      legacy: { action: "list" },
+      read: readJson,
+    },
+    LIST_TIMEOUT
+  );
 
   if (res.error === "Extension context invalidated") {
     throw new Error("Extension was updated. Please try again.");

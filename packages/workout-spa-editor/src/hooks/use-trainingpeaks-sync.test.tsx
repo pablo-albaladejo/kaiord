@@ -16,6 +16,8 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
 }));
 vi.mock("../adapters/trainingpeaks/trainingpeaks-transport", () => ({
   checkTrainingPeaksSession: vi.fn(),
+}));
+vi.mock("../adapters/trainingpeaks/trainingpeaks-metrics-transport", () => ({
   readTrainingPeaksMetrics: vi.fn(),
 }));
 vi.mock(

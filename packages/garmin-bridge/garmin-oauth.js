@@ -347,7 +347,7 @@ const connectapiFetch = (
   method,
   body,
   fetchImpl,
-  { signal, tokenFetchImpl = fetchImpl } = {}
+  { signal, tokenFetchImpl = fetchImpl, raw = false } = {}
 ) =>
   bearerCore().bearerRequest({
     baseUrl: CONNECTAPI,
@@ -359,22 +359,7 @@ const connectapiFetch = (
     refreshToken: () =>
       raceAbort(() => accessTokenAfterMint(tokenFetchImpl), signal),
     fetchImpl,
-  });
-
-/**
- * Multipart upload surface: POSTs a `FormData` (e.g. a FIT file) through the
- * SAME Bearer + 401→re-mint lifecycle as `connectapiFetch`. The master leaves
- * the Content-Type unset so the runtime attaches the multipart boundary.
- */
-const connectapiUpload = (path, formData, fetchImpl) =>
-  bearerCore().bearerRequest({
-    baseUrl: CONNECTAPI,
-    path,
-    method: "POST",
-    body: formData,
-    getToken: accessTokenAfterEnsure,
-    refreshToken: accessTokenAfterMint,
-    fetchImpl,
+    raw,
   });
 
 const api = {
@@ -396,7 +381,6 @@ const api = {
   isAbortError,
   raceAbort,
   connectapiFetch,
-  connectapiUpload,
 };
 
 if (typeof module !== "undefined") {

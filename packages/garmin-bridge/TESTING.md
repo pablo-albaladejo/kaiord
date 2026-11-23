@@ -59,6 +59,6 @@
 
 ## Test: Path Allowlist
 
-- [ ] From console: `chrome.runtime.sendMessage("EXTENSION_ID", { action: "list" }, console.log)`
+- [ ] From console: `chrome.runtime.sendMessage("EXTENSION_ID", { action: "request", method: "GET", path: "/workout-service/workouts?start=0&limit=20" }, console.log)`
 - [ ] Verify: succeeds (allowed path)
 - [ ] `garminFetch` blocks disallowed paths internally (not reachable via the external API; covered by unit tests)

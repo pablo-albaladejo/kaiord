@@ -66,7 +66,7 @@ describe("createBridgeDiscovery", () => {
       id: "garmin-bridge",
       name: "x",
       version: "9.0.0",
-      protocolVersion: 2,
+      protocolVersion: 3,
       capabilities: ["write:workouts"],
     });
     const discovery = createBridgeDiscovery({ verify });

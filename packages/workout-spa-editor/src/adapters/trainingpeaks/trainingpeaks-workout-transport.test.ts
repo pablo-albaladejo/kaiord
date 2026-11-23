@@ -1,15 +1,37 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { sendBridgeMessage } from "../bridge/bridge-transport";
 import { TrainingPeaksBridgeError } from "./trainingpeaks-transport";
 import {
   pushTrainingPeaksWorkout,
   readTrainingPeaksCopyState,
 } from "./trainingpeaks-workout-transport";
 
-vi.mock("../bridge/bridge-transport", () => ({ sendBridgeMessage: vi.fn() }));
+// An extension one protocol behind (the store version): it refuses the
+// thin Bridge's `request` and still answers the athlete id read, so each
+// case is its legacy workout action's answer.
+const { legacySend } = vi.hoisted(() => ({ legacySend: vi.fn() }));
+vi.mock("../bridge/bridge-transport", () => ({
+  sendBridgeMessage: (id: string, message: { action?: string }, t: number) => {
+    if (message?.action === "request") {
+      return Promise.resolve({
+        ok: false,
+        protocolVersion: 1,
+        error: "Origin or action not permitted",
+        retryable: false,
+      });
+    }
+    if (message?.action === "read-athlete-id") {
+      return Promise.resolve({
+        ok: true,
+        protocolVersion: 1,
+        data: { athleteId: 77 },
+      });
+    }
+    return legacySend(id, message, t);
+  },
+}));
 
-const mockedSend = vi.mocked(sendBridgeMessage);
+const mockedSend = legacySend;
 const EXTENSION_ID = "tp-extension-id";
 const PUSH_WORKOUT_TIMEOUT_MS = 20_000;
 const WORKOUT_ID = 4_242_424;
@@ -158,7 +180,7 @@ describe("readTrainingPeaksCopyState", () => {
     // Assert
     expect(mockedSend).toHaveBeenCalledWith(
       EXTENSION_ID,
-      { action: "read-workout", workoutId: String(WORKOUT_ID) },
+      { action: "read-workout", workoutId: String(WORKOUT_ID), athleteId: 77 },
       expect.any(Number)
     );
   });

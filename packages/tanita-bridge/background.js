@@ -1,19 +1,22 @@
 /**
  * Kaiord Tanita Bridge — Background Service Worker
  *
- * SW-direct MyTANITA export capture: the service worker fetches the user's
- * own CSV export from their logged-in mytanita.eu session with
- * `credentials:"include"`, so the HttpOnly `TANITASESS` session cookie
- * travels automatically. No password, no `cookies` permission, no content
- * script on mytanita.eu.
+ * Thin Bridge (docs/adr/0004-thin-bridge-smart-connector.md): the service
+ * worker lends the athlete's MyTANITA Session and executes requests from a
+ * closed list of method + path patterns (`ALLOWED`), handing the Kaiord App
+ * MyTANITA's raw answer. Telling an export from a login page, parsing it and
+ * the mapping to KRD are the App's Tanita Connector (@kaiord/tanita runs
+ * there; this bridge does not import it).
  *
- * The raw CSV text is returned verbatim — never parsed here. Parsing lives
- * in @kaiord/tanita and runs SPA-side; this bridge does not import it. The
- * session cookie is never read or exposed; session presence is reported to
- * callers only as a boolean.
+ * Requests go to mytanita.eu with `credentials:"include"`, so the HttpOnly
+ * `TANITASESS` session cookie travels automatically. No password, no
+ * `cookies` permission, no content script on mytanita.eu. The cookie is
+ * never read or exposed; a Session check answers yes or no only.
  */
 
-const PROTOCOL_VERSION = 1;
+// 2: the generic `request` action replaced read-export-csv for the App. The
+// App accepts version 1 as well.
+const PROTOCOL_VERSION = 2;
 const TANITA_ORIGIN = "https://mytanita.eu";
 const EXPORT_CSV_PATH = "/en/user/export-csv";
 
@@ -55,11 +58,21 @@ try {
     typeof require !== "undefined" ? require("./session-fetch.js") : {};
 }
 
-// ── Tanita call surface ──
+// ── The `request` gate: closed list (vendored bridge-core) ──
+let requestGate;
+try {
+  importScripts("bridge-request-gate.js");
+  requestGate = globalThis.bridgeRequestGate;
+} catch {
+  requestGate =
+    typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
+}
+
+// ── Tanita call surface: the closed list ──
 //
-// Defense-in-depth allowlist: the SPA only ever triggers the fixed export
-// path (no caller-supplied path reaches fetch), but the bridge still
-// refuses any mytanita.eu request outside this set. Locked against drift by
+// Method + path pattern, nothing else: every request, the App's included,
+// is checked against it before any fetch runs; anything else is refused
+// without a request. HEAD serves the Session check. Locked against drift by
 // scripts/check-bridge-privacy-surface.mjs (single-physical-line entries).
 const ALLOWED = [
   { method: "GET", pattern: /^\/en\/user\/export-csv$/ },
@@ -69,54 +82,14 @@ const ALLOWED = [
 const isAllowed = (method, path) =>
   sessionFetch.isPathAllowed(ALLOWED, method, path);
 
-// A 200 whose body is an HTML document (not CSV) means mytanita served a
-// login page in place of the export — the session is dead even though no
-// redirect fired. Detected by content-type or a leading HTML tag.
+// The Session check reads headers only: an HTML page in place of the export
+// means MyTANITA bounced it to its login page.
 const HTML_CONTENT_TYPE_RE = /^\s*text\/html\b/i;
-const HTML_BODY_RE = /^\s*<(?:!doctype|html)\b/i;
 
-const looksLikeHtml = (contentType, body) =>
-  HTML_CONTENT_TYPE_RE.test(contentType || "") || HTML_BODY_RE.test(body || "");
-
-// GET the CSV export on the user's cookie session. Returns raw CSV text —
-// never parsed here. On a dead session (opaqueredirect / 3xx / login HTML)
-// returns needsReauth so the SPA can prompt a re-login.
-const fetchExportCsv = async (method = "GET") => {
-  if (!isAllowed(method, EXPORT_CSV_PATH)) {
-    return { ok: false, error: "Blocked: disallowed path or method" };
-  }
-  const res = await sessionFetch.cookieSessionFetch({
-    url: `${TANITA_ORIGIN}${EXPORT_CSV_PATH}`,
-    method,
-    headers: { Accept: "text/csv,*/*" },
-    fetchImpl: fetch,
-  });
-  if (!res.ok) {
-    return { ok: false, needsReauth: !!res.needsReauth, error: res.error };
-  }
-  if (looksLikeHtml(res.contentType, res.body)) {
-    return {
-      ok: false,
-      needsReauth: true,
-      error: "Session expired — open mytanita.eu, sign in, and retry",
-    };
-  }
-  return { ok: true, csv: res.body };
-};
+const isHtmlContentType = (contentType) =>
+  HTML_CONTENT_TYPE_RE.test(contentType || "");
 
 // ── Actions ──
-
-// The single read action. Returns { csv } with the raw export text; throws
-// (carrying needsReauth) so the envelope surfaces the reauth flag SPA-side.
-const readExportCsv = async () => {
-  const res = await fetchExportCsv("GET");
-  if (!res.ok) {
-    const err = new Error(res.error || "Export failed");
-    if (res.needsReauth) err.needsReauth = true;
-    throw err;
-  }
-  return { csv: res.csv };
-};
 
 // The Session check: a HEAD of the export, so MyTANITA answers with headers
 // and no body. A bounce to the login page (redirect, 401/403, or an HTML page
@@ -138,7 +111,7 @@ const probeExport = async () => {
     }
     if (!response.ok) return "not-answering";
     const contentType = response.headers?.get?.("content-type") || "";
-    return looksLikeHtml(contentType, "") ? "signed-out" : "signed-in";
+    return isHtmlContentType(contentType) ? "signed-out" : "signed-in";
   } catch {
     return "not-answering";
   }
@@ -155,13 +128,35 @@ const checkSession = async () => {
   };
 };
 
+const toBridgeError = (res) => {
+  const err = new Error(res?.error ?? "Request failed");
+  if (typeof res?.status === "number") err.status = res.status;
+  if (res?.needsReauth) err.needsReauth = true;
+  return err;
+};
+
+// ── The App's one read: a request from the closed list, answered raw ──
+const request = async (message) => {
+  const { method, path } = requestGate.createRequestGate({ allowed: ALLOWED })(
+    message
+  );
+  const res = await sessionFetch.cookieSessionFetch({
+    url: `${TANITA_ORIGIN}${path}`,
+    method,
+    headers: { Accept: "text/csv,*/*" },
+    fetchImpl: fetch,
+  });
+  if (!res.ok) throw toBridgeError(res);
+  return { status: res.status, contentType: res.contentType, body: res.body };
+};
+
 const handleAction = async (message) => {
   switch (message.action) {
     case "ping":
     case "checkSession":
       return await checkSession();
-    case "read-export-csv":
-      return await readExportCsv();
+    case "request":
+      return await request(message);
     case "set-theme":
       return await bridgeTheme.storeThemePreference(message.theme);
     default:
@@ -173,14 +168,18 @@ const handleAction = async (message) => {
 //
 // Every external message is origin-pinned and action-allowlisted by the
 // vendored guard as a second layer over the manifest's
-// externally_connectable. The allowlist equals this bridge's full action
-// surface — there is no popup-only action.
+// externally_connectable. `request` is reachable only here.
 const EXTERNAL_ACTIONS = new Set([
   "ping",
   "checkSession",
-  "read-export-csv",
+  "request",
   "set-theme",
 ]);
+
+// ── Internal messages (popup) ──
+// Only the extension's own pages are answered, never a content script, and
+// only the Session check the popup sends.
+const INTERNAL_ACTIONS = new Set(["checkSession"]);
 
 // No credential handshake: this bridge mints nothing and exchanges nothing.
 // The MyTANITA session cookie rides along on the export fetch itself
@@ -208,8 +207,12 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onMessageExternal) {
   chrome.runtime.onMessageExternal.addListener((message, sender, respond) =>
     dispatchExternal(message, sender, respond)
   );
-  chrome.runtime.onMessage.addListener((message, _sender, respond) =>
-    dispatch(message, respond)
+  chrome.runtime.onMessage.addListener(
+    bridgeEnvelope.createInternalDispatch({
+      dispatch,
+      internalActions: INTERNAL_ACTIONS,
+      protocolVersion: PROTOCOL_VERSION,
+    })
   );
 }
 
@@ -222,15 +225,15 @@ if (typeof module !== "undefined") {
     EXPORT_CSV_PATH,
     ALLOWED,
     isAllowed,
-    looksLikeHtml,
-    fetchExportCsv,
-    readExportCsv,
+    isHtmlContentType,
+    request,
     checkSession,
     handleAction,
     dispatch,
     dispatchExternal,
     isAllowedSenderOrigin: bridgeEnvelope.isAllowedSenderOrigin,
     EXTERNAL_ACTIONS,
+    INTERNAL_ACTIONS,
     AUTH_ENDPOINTS,
   };
 }

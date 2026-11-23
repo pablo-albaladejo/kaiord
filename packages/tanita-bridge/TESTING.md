@@ -23,7 +23,7 @@
 
 - [ ] Open the browser console on `http://localhost:5173` (Kaiord SPA)
 - [ ] Run:
-      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "read-export-csv" }, console.log)`
+      `chrome.runtime.sendMessage("EXTENSION_ID", { action: "request", method: "GET", path: "/en/user/export-csv" }, console.log)`
 - [ ] Verify: response is `{ ok: true, protocolVersion: 1, data: { csv: "…" } }`
       and `data.csv` contains the raw CSV header row followed by rows
 
@@ -32,7 +32,7 @@
 - [ ] Sign out of MyTANITA (or use a fresh profile)
 - [ ] Open the extension popup
 - [ ] Verify: status shows "No MyTANITA session"
-- [ ] Via SPA console, `read-export-csv` returns an error envelope with
+- [ ] Via SPA console, `request` returns an error envelope with
       `needsReauth: true`
 
 ## Test: SPA Communication (ping)
@@ -45,6 +45,6 @@
 ## Test: Origin Pinning
 
 - [ ] From a non-Kaiord origin (e.g. `https://example.com` console), send
-      `read-export-csv` to the extension ID
+      `request` to the extension ID
 - [ ] Verify: response is
       `{ ok: false, error: "Origin or action not permitted" }`

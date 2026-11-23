@@ -4,22 +4,44 @@
  * (spec: spa-integration-adapters — adapter implements FetchActivities).
  */
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { sendBridgeMessage } from "../bridge/bridge-transport";
 import { readGarminActivities } from "./garmin-activities-transport";
 
+// An extension one protocol behind (the store version): it refuses the
+// thin Bridge's `request`, and the transport falls back to the legacy
+// action, whose answer each case sets.
+const { legacySend } = vi.hoisted(() => ({ legacySend: vi.fn() }));
 vi.mock("../bridge/bridge-transport", () => ({
-  sendBridgeMessage: vi.fn(),
+  sendBridgeMessage: (id: string, message: { action?: string }, t: number) =>
+    message?.action === "request"
+      ? Promise.resolve({
+          ok: false,
+          protocolVersion: 1,
+          error: "Origin or action not permitted",
+          retryable: false,
+        })
+      : legacySend(id, message, t),
 }));
 
 const ACTIVITIES_TIMEOUT_MS = 15_000;
 
-const mockedSend = vi.mocked(sendBridgeMessage);
+const mockedSend = legacySend;
+
+// Each case pulls a minute after the last, past the Connector's pacing.
+const A_MINUTE_MS = 60_000;
+let clock = Date.parse("2026-11-23T08:00:00Z");
 
 describe("readGarminActivities", () => {
   beforeEach(() => {
     mockedSend.mockReset();
+    clock += A_MINUTE_MS;
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(clock);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should return the parsed feed and strip unknown garmin fields", async () => {

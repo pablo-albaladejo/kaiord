@@ -50,15 +50,47 @@ const fakeGarmin = (dataStatus = 200) =>
     return response(dataStatus, [{ workoutId: 1, workoutName: "Easy run" }]);
   });
 
+const WORKOUT = {
+  workoutName: "Easy run",
+  sportType: { sportTypeId: 1, sportTypeKey: "running" },
+  workoutSegments: [
+    {
+      segmentOrder: 1,
+      sportType: { sportTypeId: 1, sportTypeKey: "running" },
+      workoutSteps: [{ stepOrder: 1 }],
+    },
+  ],
+};
+
+const req = (method, path, body) => ({
+  action: "request",
+  method,
+  path,
+  ...(body === undefined ? {} : { body }),
+});
+
+// Every entry of the closed list, the token endpoints the App may never
+// reach, and the actions an older App still sends.
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
+  req("GET", "/workout-service/workouts?start=0&limit=20"),
+  req(
+    "GET",
+    "/activitylist-service/activities/search/activities?start=0&limit=20"
+  ),
+  req("POST", "/workout-service/workout", WORKOUT),
+  req(
+    "POST",
+    "/upload-service/upload/.fit",
+    [14, 0, 0, 0, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0]
+  ),
+  req("POST", "/workout-service/schedule/1", { date: "2026-11-23" }),
+  req("GET", "/calendar-service/year/2026/month/10"),
+  req("DELETE", "/workout-service/schedule/2"),
+  req("GET", "/oauth-service/oauth/preauthorized"),
+  req("POST", "/oauth-service/oauth/exchange/user/2.0"),
   { action: "list" },
-  { action: "activities" },
-  { action: "push", gcn: { workoutName: "Easy run" } },
-  { action: "push-body-composition", fit: "AAAA" },
   { action: "schedule", workoutId: "1", date: "2026-11-23" },
-  { action: "calendar-find", workoutId: "1", date: "2026-11-23" },
-  { action: "unschedule", scheduleId: "2" },
   { action: "profile-snapshot", snapshot: { profile: { name: "A" } } },
   { action: "profile-snapshot-clear" },
   { action: "set-theme", theme: "dark" },
@@ -103,7 +135,7 @@ describe("token confinement", () => {
     fakeGarmin();
 
     // Act
-    await send({ action: "list" });
+    await send(req("GET", "/workout-service/workouts?start=0&limit=20"));
     const stored = await chrome.storage.local.get([
       "garminOAuth1",
       "garminOAuth2",
@@ -131,7 +163,7 @@ describe("token confinement", () => {
   it("should report signed in from a token a real request minted while it is still valid, and hand over no workout", async () => {
     // Arrange
     fakeGarmin();
-    await send({ action: "list" });
+    await send(req("GET", "/workout-service/workouts?start=0&limit=20"));
     fetch.mockClear();
     chrome.storage.local.set.mockClear();
 

@@ -9,7 +9,18 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
 
 **What lives here:** Service worker (background script), the OAuth token-minting module, a content script for the SPA origin (identity announce only), extension popup UI, profile snapshot validator, and unit tests against a Chrome API mock.
 
-**Core responsibility:** Mint + refresh a Garmin OAuth token from the user's session, persist it across service worker restarts, enforce a path allowlist, and relay `list`/`push`/`activities`/`profile-snapshot`/`schedule`/`unschedule`/`calendar-find` messages between the SPA and Garmin.
+**Core responsibility:** Mint + refresh a Garmin OAuth token from the user's session (only for a real request), persist it across service worker restarts, and run the App's `request` against the closed list.
+
+**Thin Bridge** (`docs/adr/0004-thin-bridge-smart-connector.md`, protocol
+version 2): the App reaches it only through `{ action: "request", method,
+path, body? }`, which runs only an entry of the closed `ALLOWED` list in
+`background.js` (method + path pattern, and for a write the name of the body
+schema the vendored `bridge-request-gate.js` checks it against) and answers
+Garmin's answer unread as `{ status, contentType, body }`. What to ask for,
+how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/garmin/connector/`, `hooks/garmin-bridge-operations.ts`, `hooks/garmin-calendar-operations.ts`). The App
+falls back to the protocol-1 actions for the store version. The internal
+channel uses `createInternalDispatch`: only the popup is answered, never a
+content script (`test/thin-bridge.test.js`).
 
 **Dependency direction:** Depends on `@kaiord/core` (test setup only, via devDependencies). No runtime dependencies on external libraries (plain JavaScript + Web Crypto for security and bundle size). Built files loaded directly into Chrome via manifest entry points.
 
@@ -17,7 +28,7 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
 
 - `manifest.json` — Development manifest (MV3, service worker, `storage` permission, host permissions for `connect.garmin.com`, `connectapi.garmin.com`, `sso.garmin.com`).
 - `manifest.prod.json` — Production manifest for Chrome Web Store release (same surface, no localhost origins).
-- `background.js` — Service worker. `garminFetch` (Bearer call to connectapi + path allowlist), action routing for `ping`/`list`/`push`/`activities`/`open-garmin`/`profile-snapshot(-clear)`/`schedule`/`unschedule`/`calendar-find`, the calendar-action deadline, swallowed-error telemetry.
+- `background.js` — Service worker. The closed list with body schemas (`workout`, `fit-file`, `schedule`), `request` under one deadline and send cut-off, action routing for `ping`/`request`/`open-garmin`/`profile-snapshot(-clear)`/`set-theme`, swallowed-error telemetry.
 - `garmin-oauth.js` — OAuth token minting (bridge-specific, NOT vendored). OAuth1 HMAC-SHA1 signer, session→ticket→OAuth1→OAuth2 mint, refresh-and-persist, `connectapiFetch` (optional abort `signal`, raced against the token lifecycle by `raceAbort`).
 - `kaiord-announce.js` — Content script injected on SPA origins (exactly `https://kaiord.com/*`; `http://localhost:5173/*` and `http://localhost:5174/*` in the dev manifest only). Announces extension ID and capabilities to the page via window message.
 - `profile-snapshot.js` — Hand-rolled validator for profile snapshot objects (plain JS, parity-tested against `@kaiord/core` Zod schema).
@@ -31,7 +42,8 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
 
 - **`test/`** — Unit test suite (vitest)
   - `chrome-mock.js` — Minimal Chrome Extension API mock (runtime, tabs, storage, scripting).
-  - `background.test.js` — Service worker tests (allowlist, Bearer routing, ping/list/push/activities, calendar actions, the calendar read and their deadline under fake timers).
+  - `thin-bridge.test.js` — The message contract: protocol 2, the closed list and body schemas refusing anything else without a request, raw answers, needsReauth, the popup-only internal channel.
+  - `background.test.js` — Service worker tests (manifest, Session check, the request deadline and send cut-off under fake timers, telemetry).
   - `garmin-oauth.test.js` — Signer (locked against `oauth-1.0a`), mint/refresh, 401 re-mint, token store.
   - `kaiord-announce.test.js` — Vendored from `_shared/bridge-core/test/` — edit the master, then `pnpm bridge:sync` (runtime detection, context invalidation).
   - `popup.test.js` — Popup UI tests (status rendering, snapshot staleness, fetch timeouts).
@@ -46,9 +58,9 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
 
 1. **Manifest V3**: Service worker (not background page). Host permissions for the three Garmin hosts. `externally_connectable` matches SPA origins and localhost dev server. Only the `storage` permission — no `tabs`/`webRequest`/`scripting`.
 2. **OAuth token lifecycle** (`garmin-oauth.js`): the user's SSO session (cookie `CASTGC` on `sso.garmin.com`) is exchanged — WITHOUT a password — for a service ticket, then for an OAuth1 token (2-legged signed), then for an OAuth2 Bearer (3-legged signed). Tokens live in `chrome.storage.local` and survive cold starts. The Bearer is refreshed by re-running `exchange` with the long-lived OAuth1 (~1 year); if that fails, the bridge re-mints from the session. A 401 triggers one re-mint + retry.
-3. **Path allowlist**: `background.js` refuses any path outside the `ALLOWED` array (GET `/workout-service/workouts*`, POST `/workout-service/workout`, POST the FIT upload, GET the activities-search endpoint, POST and DELETE `/workout-service/schedule/<digits>`, GET `/calendar-service/year/<yyyy>/month/<m>`). Locked against drift by `scripts/check-bridge-privacy-surface.mjs`; refresh its golden (`scripts/fixtures/bridge-privacy-surface.json`) deliberately when the surface changes, keeping each allowlist entry on one physical line.
+3. **Closed list**: `background.js` refuses any request outside the `ALLOWED` array (GET `/workout-service/workouts?start=N&limit=N`, POST `/workout-service/workout` with a `workout` body, POST `/upload-service/upload/.fit` with a `fit-file` body, GET the activities search with `start`/`limit`, POST `/workout-service/schedule/<id>` with a `schedule` body and DELETE it, GET `/calendar-service/year/<yyyy>/month/<m>`; ids canonical, no leading zero). A body is refused on every entry that declares none, and on a write it must match the declared schema (`BODY_SCHEMAS`). Locked against drift by `scripts/check-bridge-privacy-surface.mjs`, which records each entry's body schema; refresh its golden (`scripts/fixtures/bridge-privacy-surface.json`) deliberately when the surface changes, keeping each allowlist entry on one physical line.
 4. **Profile snapshot**: Hand-rolled validator ensures no prototype pollution and an 8192-code-unit JSON cap; output uses `Object.create(null)`.
-5. **Calendar placement** (`schedule`/`unschedule`): the schedule POST is NOT idempotent — two identical calls make two calendar entries — so the bridge never retries it. Each calendar action runs under one deadline `CALENDAR_DEADLINE_MS` (25 s, below Chrome's ~30 s pending-fetch limit in an MV3 service worker) from handler entry. The deadline signal is injected into the request itself; the token lifecycle runs on the untimed `fetch` and only the calendar caller's wait is raced against the signal (`raceAbort`), so a mint other callers join is never aborted by one caller's deadline, and an aborted refresh never falls back to a session re-mint. No write starts after `CALENDAR_SEND_CUTOFF_MS` (15 s, measured with `performance.now()`). The outcome travels in the envelope's `error` string because the vendored envelope has no `code` field: `deadline-before-send` (nothing reached Garmin) or `deadline-exceeded` (sent, then aborted — no status, so the SPA treats it as ambiguous). Inputs are validated before any fetch (ids `^[1-9]\d*$`, a real `YYYY-MM-DD` date). `schedule` returns only `{ workoutScheduleId }` (a digit string or `null`); library workouts are never deleted. `calendar-find{workoutId, date}` GETs the month holding `date` (the month parameter is 0-based: October is 9) under the same deadline, with no send cut-off, and returns only `[{ workoutScheduleId, date }]` for `itemType: "workout"` entries of that workout, ids as digit strings; every other calendar item stays in the service worker. A payload without a `calendarItems` array, or a matching entry without a `YYYY-MM-DD` date, fails the read rather than answering an empty list, so the SPA never mistakes a bad read for absence.
+5. **One deadline for every request**: a write is NOT idempotent (two schedule POSTs make two calendar entries), so the bridge never retries one. Every `request` runs under one deadline `REQUEST_DEADLINE_MS` (25 s, below Chrome's ~30 s pending-fetch limit in an MV3 service worker) from handler entry. The deadline signal is injected into the request itself; the token lifecycle runs on the untimed `fetch` and only this caller's wait is raced against the signal (`raceAbort`), so a mint other callers join is never aborted by one caller's deadline, and an aborted refresh never falls back to a session re-mint. No write starts after `REQUEST_SEND_CUTOFF_MS` (15 s, measured with `performance.now()`). The outcome travels in the envelope's `error` string: `deadline-before-send` (nothing reached Garmin) or `deadline-exceeded` (sent, then aborted — no status, so the App treats it as ambiguous). Reading the schedule id, picking one workout's entries out of a calendar month, pacing and retrying the activities pull are the App's Garmin Connector, not this extension.
 6. **Feature flags**: `ping` reports `features` (`BRIDGE_FEATURES`, today `["calendar-write-v1", "calendar-find-v1"]`) next to the manifest. They are NOT capabilities: `BRIDGE_MANIFEST.capabilities` and `bridge-identity.js` stay in lockstep and do not change for a new calendar contract.
 7. **Service worker cold start**: modules are re-imported via `importScripts()` on every `background.js` load; tokens are reloaded from `chrome.storage.local`.
 
@@ -75,16 +87,14 @@ Chrome extension (Manifest V3) that bridges the Kaiord workout editor SPA to Gar
 
 ### Common Patterns
 
-**Action handler in background.js:**
+**The one App action in background.js:**
 
 ```javascript
-const listWorkouts = async () => {
-  const res = await garminFetch(
-    "/workout-service/workouts?start=0&limit=20",
-    "GET"
-  );
-  if (!res?.ok) throw toBridgeError("List failed", res);
-  return res.data;
+const request = async (message) => {
+  const { method, path, body } = admitRequest(message); // closed list + body schema
+  const res = await boundedCall(path, method, toWireBody(path, body)); // deadline
+  if (!res?.ok) throw toBridgeError("Request failed", res);
+  return { status: res.status, contentType: res.contentType, body: res.body };
 };
 ```
 
@@ -96,12 +106,15 @@ const res = await garminOAuth.connectapiFetch(path, method, body, fetch);
 // → { ok, status, data } | { ok:false, status, body }
 ```
 
-**Path allowlist (background.js):**
+**Closed list (background.js):**
 
 ```javascript
 const ALLOWED = [
-  { method: "GET", pattern: /^\/workout-service\/workouts(\?.*)?$/ },
-  { method: "POST", pattern: /^\/workout-service\/workout$/ },
+  {
+    method: "GET",
+    pattern: /^\/workout-service\/workouts\?start=\d+&limit=\d+$/,
+  },
+  { method: "POST", pattern: /^\/workout-service\/workout$/, body: "workout" },
 ];
 ```
 
@@ -141,7 +154,8 @@ Non-generated files beyond the AI agent's responsibility:
 
 ### Vendored bridge-core files
 
-`bridge-envelope.js`, `kaiord-announce.js`, `bridge-popup-utils.js`,
+`bridge-envelope.js`, `bridge-request-gate.js`, `bearer-fetch.js`,
+`kaiord-announce.js`, `bridge-popup-utils.js`,
 `bridge-popup-shell.js`, `bridge-popup-snapshot.js`, `popup.css`,
 `profile-snapshot.js`, and
 `test/{chrome-mock,bridge-envelope.test,bridge-popup-shell.test}.js` are

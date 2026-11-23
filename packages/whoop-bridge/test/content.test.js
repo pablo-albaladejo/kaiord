@@ -13,7 +13,7 @@ const messageCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 
 const WHOOP_ORIGIN = "https://app.whoop.com";
 
-describe("content.js allowlist", () => {
+describe("content.js coarse check under the service worker's closed list", () => {
   beforeEach(() => {
     __resetChromeMock();
   });
@@ -45,31 +45,24 @@ describe("content.js allowlist", () => {
     expect(allowed).toBe(true);
   });
 
-  it("should reject a disallowed path", () => {
-    // Arrange
+  it.each(["https://evil.example/x", "//evil.example/x", "x/y"])(
+    "should reject %s, which is not a path on the API host",
+    (path) => {
+      // Arrange
 
-    // Act
-    const allowed = isAllowed("GET", "/membership-service/v1/affiliate");
+      // Act
+      const allowed = isAllowed("GET", path);
 
-    // Assert
-    expect(allowed).toBe(false);
-  });
+      // Assert
+      expect(allowed).toBe(false);
+    }
+  );
 
   it("should reject any non-GET method on an allowlisted path", () => {
     // Arrange
 
     // Act
     const allowed = isAllowed("POST", "/core-details-bff/v0/cycles/details");
-
-    // Assert
-    expect(allowed).toBe(false);
-  });
-
-  it("should reject a prefix-string look-alike", () => {
-    // Arrange
-
-    // Act
-    const allowed = isAllowed("GET", "/core-details-bff/v0/cycles/detailsX");
 
     // Assert
     expect(allowed).toBe(false);
@@ -92,11 +85,11 @@ describe("content.js handleWhoopFetch", () => {
     __resetChromeMock();
   });
 
-  it("should block a disallowed path without making a network call", async () => {
+  it("should block a path on another host without making a network call", async () => {
     // Arrange
     const msg = {
       action: "whoop-fetch",
-      path: "/membership-service/v1/affiliate",
+      path: "//evil.example/steal",
       token: "t",
     };
 
@@ -136,6 +129,7 @@ describe("content.js handleWhoopFetch", () => {
     fetch.mockResolvedValue({
       ok: true,
       status: 200,
+      headers: { get: () => "application/json" },
       text: () => Promise.resolve(JSON.stringify({ records: [] })),
     });
 
@@ -147,7 +141,12 @@ describe("content.js handleWhoopFetch", () => {
     });
 
     // Assert
-    expect(result).toEqual({ ok: true, status: 200, data: { records: [] } });
+    expect(result).toEqual({
+      ok: true,
+      status: 200,
+      contentType: "application/json",
+      body: '{"records":[]}',
+    });
     expect(fetch).toHaveBeenCalledWith(
       "https://api.prod.whoop.com/core-details-bff/v0/cycles/details?id=1",
       expect.objectContaining({
@@ -176,10 +175,15 @@ describe("content.js handleWhoopFetch", () => {
     });
 
     // Assert
-    expect(result).toEqual({ ok: false, status: 401, data: null });
+    expect(result).toEqual({
+      ok: false,
+      status: 401,
+      contentType: "",
+      body: "",
+    });
   });
 
-  it("should fall back to a truncated raw body when the response is not JSON", async () => {
+  it("should hand a body that is not JSON back unread", async () => {
     // Arrange
     fetch.mockResolvedValue({
       ok: true,
@@ -195,7 +199,12 @@ describe("content.js handleWhoopFetch", () => {
     });
 
     // Assert
-    expect(result).toEqual({ ok: true, status: 200, data: "not-json-body" });
+    expect(result).toEqual({
+      ok: true,
+      status: 200,
+      contentType: "",
+      body: "not-json-body",
+    });
   });
 
   it("should report a timeout when the request is aborted after 30s", async () => {
@@ -348,7 +357,10 @@ describe("content.js scanCognitoStorage", () => {
 
   it("should relay the Cognito access token found in localStorage", () => {
     // Arrange
-    const keys = ["unrelated-key", "CognitoIdentityServiceProvider.abc.accessToken"];
+    const keys = [
+      "unrelated-key",
+      "CognitoIdentityServiceProvider.abc.accessToken",
+    ];
     globalThis.localStorage = {
       length: keys.length,
       key: (i) => keys[i],
@@ -427,6 +439,7 @@ describe("content.js registered onMessage listener", () => {
     fetch.mockResolvedValue({
       ok: true,
       status: 200,
+      headers: { get: () => "application/json" },
       text: () => Promise.resolve(JSON.stringify({ records: [] })),
     });
     const sendResponse = vi.fn();

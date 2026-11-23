@@ -89,8 +89,8 @@
           "contains": "Returns the **entire measurement history** as CSV"
         },
         {
-          "file": "packages/tanita-bridge/background.js",
-          "contains": "The raw CSV text is returned verbatim — never parsed here."
+          "file": "packages/workout-spa-editor/src/adapters/tanita/connector/read-tanita-export.ts",
+          "contains": "return { csv: answer.body };"
         },
         {
           "file": "packages/workout-spa-editor/src/hooks/bridge-import/run-tanita-import.ts",
@@ -461,7 +461,7 @@
     },
     {
       "id": "tanita.pj.mytanita-answer",
-      "text": "**What MyTANITA answers**: to the `GET`, your whole measurement history. When the Kaiord App asks for it (`read-export-csv`), the extension hands it over unchanged. To the `HEAD`, sent when the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), only headers: the extension keeps only whether you are signed in, and no measurement is downloaded.",
+      "text": "**What MyTANITA answers**: to the `GET`, your whole measurement history. When the Kaiord App asks for it (`request`), the extension hands it over unchanged. To the `HEAD`, sent when the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), only headers: the extension keeps only whether you are signed in, and no measurement is downloaded.",
       "proof": [
         {
           "file": "docs/connectors-research/tanita.md",
@@ -767,8 +767,8 @@
           "title": "should hand the export to the Kaiord App exactly as MyTANITA sent it"
         },
         {
-          "file": "packages/tanita-bridge/background.js",
-          "contains": "The raw CSV text is returned verbatim — never parsed here."
+          "file": "packages/workout-spa-editor/src/adapters/tanita/connector/read-tanita-export.ts",
+          "contains": "return { csv: answer.body };"
         },
         {
           "file": "packages/workout-spa-editor/src/hooks/bridge-import/run-tanita-import.ts",
@@ -948,8 +948,8 @@
           "contains": "Returns the **entire measurement history** as CSV"
         },
         {
-          "file": "packages/tanita-bridge/background.js",
-          "contains": "The raw CSV text is returned verbatim — never parsed here."
+          "file": "packages/workout-spa-editor/src/adapters/tanita/connector/read-tanita-export.ts",
+          "contains": "return { csv: answer.body };"
         },
         {
           "file": "packages/workout-spa-editor/src/hooks/bridge-import/run-tanita-import.ts",

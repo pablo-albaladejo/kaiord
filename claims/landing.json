@@ -59,8 +59,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
@@ -270,8 +274,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
@@ -308,8 +316,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/components/pages/ChatPage.test.tsx",
@@ -437,8 +449,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -673,8 +689,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -1071,16 +1091,20 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-pull.test.ts",
+          "title": "should return the raw feed on the happy path"
         },
         {
           "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
@@ -1131,8 +1155,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -1193,8 +1221,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -1207,16 +1239,20 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-pull.test.ts",
+          "title": "should return the raw feed on the happy path"
         }
       ]
     },
@@ -2247,8 +2283,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/cli/src/commands/convert-integration.test.ts",
@@ -2825,8 +2865,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -3774,8 +3818,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/cli/src/commands/convert-integration.test.ts",
@@ -4164,8 +4212,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
@@ -4363,8 +4415,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -4377,8 +4433,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -4391,16 +4451,20 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-pull.test.ts",
+          "title": "should return the raw feed on the happy path"
         }
       ]
     },
@@ -4413,8 +4477,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -4521,8 +4589,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/components/pages/ChatPage.test.tsx",
@@ -4624,16 +4696,20 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-pull.test.ts",
+          "title": "should return the raw feed on the happy path"
         },
         {
           "test": "packages/whoop/src/adapters/converters/cycle-to-vitals.converter.test.ts",
@@ -5071,8 +5147,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
     },
@@ -5154,8 +5234,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
@@ -5216,8 +5300,12 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
@@ -5340,16 +5428,20 @@
           "title": "should place a first push on its date with 1 library push and 1 schedule"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "handles push with gcn payload"
+          "test": "packages/garmin-bridge/test/thin-bridge.test.js",
+          "title": "should send a workout that matches its declared shape as JSON"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
           "test": "packages/workout-spa-editor/src/adapters/garmin/garmin-activities-transport.test.ts",
           "title": "should return the parsed feed and strip unknown garmin fields"
         },
         {
-          "test": "packages/garmin-bridge/test/background.test.js",
-          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-activities-pull.test.ts",
+          "title": "should return the raw feed on the happy path"
         },
         {
           "test": "packages/garmin-bridge/test/garmin-oauth.test.js",

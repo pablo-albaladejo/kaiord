@@ -58,7 +58,7 @@ const CHECK_KEYS = [
 const EXTERNAL_MESSAGES = [
   { action: "ping" },
   { action: "checkSession" },
-  { action: "read-export-csv" },
+  { action: "request", method: "GET", path: "/en/user/export-csv" },
   { action: "set-theme", theme: "dark" },
 ];
 
@@ -138,10 +138,18 @@ describe("export confinement", () => {
     fakeMyTanita();
 
     // Act
-    const answer = await send({ action: "read-export-csv" });
+    const answer = await send({
+      action: "request",
+      method: "GET",
+      path: "/en/user/export-csv",
+    });
 
     // Assert
-    expect(answer.data).toEqual({ csv: EXPORT_BODY });
+    expect(answer.data).toEqual({
+      status: 200,
+      contentType: "application/csvm+json",
+      body: EXPORT_BODY,
+    });
   });
 
   it("should keep only the theme preference in chrome.storage.local, never the export", async () => {

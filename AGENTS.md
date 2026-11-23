@@ -155,7 +155,9 @@ Before any non-trivial change:
   `https://kaiord.com` only: manifests declare `https://kaiord.com/*` (plus
   the two Vite dev ports in `manifest.json`), and no shipped bridge source
   outside `bridge-envelope.js` tests the origin by suffix, substring, prefix
-  or pattern (R-BridgeExactOrigin).
+  or pattern (R-BridgeExactOrigin); every bridge answers its internal channel
+  only through `createInternalDispatch`, so a content script gets no answer,
+  and any other `onMessage` listener cannot answer (R-BridgeInternalDispatch).
 - `check-security-audit-required.mjs` — the required `Dependency Security
 Audit` job keeps its exact name, reports on every pull request and on push
   to `main`, and fails on a high/critical finding or a missing report

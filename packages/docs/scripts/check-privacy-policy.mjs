@@ -109,11 +109,11 @@ export const BRIDGE_REGISTRY = {
 // its 13 rules with the guard silent — a floor with no regression power,
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
-  [GARMIN_SECTION]: 14,
+  [GARMIN_SECTION]: 15,
   [TRAIN2GO_SECTION]: 12,
   [TANITA_SECTION]: 13,
-  [TRAININGPEAKS_SECTION]: 16,
-  [WHOOP_SECTION]: 8,
+  [TRAININGPEAKS_SECTION]: 18,
+  [WHOOP_SECTION]: 9,
 };
 
 // A section with no recorded floor is a bridge being onboarded. It has to
@@ -246,7 +246,12 @@ export const REQUIRED_RULES = [
   {
     label: "Garmin calendar read filtered on the device",
     section: GARMIN_SECTION,
-    re: /filtered inside the extension's service worker[\s\S]*?nothing is sent to a Kaiord-operated server/i,
+    re: /filtered in the Kaiord App, in your browser[\s\S]*?nothing is sent to a Kaiord-operated server/i,
+  },
+  {
+    label: "Garmin answers handed to the App unread (thin Bridge)",
+    section: GARMIN_SECTION,
+    re: /hands the Kaiord App Garmin's answer as it came, without reading it/i,
   },
   {
     label: "Garmin calendar read purposes named",
@@ -461,6 +466,16 @@ export const REQUIRED_RULES = [
     re: /When the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks nothing and mints no token/i,
   },
   {
+    label: "TrainingPeaks answers handed to the App unread (thin Bridge)",
+    section: TRAININGPEAKS_SECTION,
+    re: /hands the Kaiord App TrainingPeaks' answer as it came, without reading it/i,
+  },
+  {
+    label: "TrainingPeaks workout read kept by the App to its id and day",
+    section: TRAININGPEAKS_SECTION,
+    re: /to the Kaiord App, which keeps only that workout's id and day/i,
+  },
+  {
     label: "TrainingPeaks metrics read endpoint disclosed (metrics/v3)",
     section: TRAININGPEAKS_SECTION,
     re: /metrics\/v3/,
@@ -486,6 +501,11 @@ export const REQUIRED_RULES = [
     label: "WHOOP host disclosed",
     section: WHOOP_SECTION,
     re: /app\.whoop\.com/,
+  },
+  {
+    label: "WHOOP answers handed to the editor unread (thin Bridge)",
+    section: WHOOP_SECTION,
+    re: /WHOOP's answer is handed to the Kaiord editor as it came, without being read/i,
   },
   {
     label: "WHOOP no-OAuth session-bearer nature disclosed",
