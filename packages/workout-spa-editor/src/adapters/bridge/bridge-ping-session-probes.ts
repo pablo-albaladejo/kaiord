@@ -22,7 +22,6 @@ import {
   readTanitaSession,
   readTrain2GoSession,
   readTrainingPeaksSession,
-  readWhoopSession,
 } from "./bridge-legacy-session-readers";
 import { notChecked, type SessionProber } from "./bridge-session-probe-types";
 import { sendBridgeMessage } from "./bridge-transport";
@@ -86,9 +85,3 @@ export const probeTanitaSession = probeBy({
   costlyOnPrevious: true,
 });
 
-export const probeWhoopSession = probeBy({
-  bridgeId: "whoop-bridge",
-  action: "status",
-  timeoutMs: STATUS_TIMEOUT_MS,
-  readSession: readWhoopSession,
-});

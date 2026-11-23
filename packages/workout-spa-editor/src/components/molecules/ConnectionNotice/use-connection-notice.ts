@@ -1,16 +1,19 @@
-import {
-  type ConnectionNotice,
-  connectionNotice,
-  type ConnectionState,
+import type {
+  ConnectionNotice,
+  ConnectionReason,
+  ConnectionState,
 } from "@kaiord/i18n";
 
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
+import { connectionNoticeOf } from "./connection-notice-of";
 
-/** The notice a Connection in `state` shows, in the App's active locale. */
+/** The notice a Connection in `state` shows, in the App's active locale; a
+    working Session that cannot serve shows its `reason`'s notice. */
 export const useConnectionNotice = (
   state: ConnectionState | null,
-  platform: string
+  platform: string,
+  reason: ConnectionReason | null = null
 ): ConnectionNotice | null => {
   const locale = useActiveLocale();
-  return state === null ? null : connectionNotice(state, platform, locale);
+  return connectionNoticeOf(state, reason, platform, locale);
 };

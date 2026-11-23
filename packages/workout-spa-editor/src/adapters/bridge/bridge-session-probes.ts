@@ -18,9 +18,9 @@ import {
   probeTanitaSession,
   probeTrain2GoSession,
   probeTrainingPeaksSession,
-  probeWhoopSession,
 } from "./bridge-ping-session-probes";
 import type { SessionProber } from "./bridge-session-probe-types";
+import { probeWhoopSession } from "./whoop-session-probe";
 
 export type { SessionProbeResult } from "./bridge-session-probe-types";
 

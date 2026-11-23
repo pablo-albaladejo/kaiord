@@ -31,19 +31,46 @@ describe("readWhoopUserId", () => {
     expect(mockedSend.mock.calls[0][1]).toEqual({ action: "read-user-id" });
   });
 
-  it("should answer no id when the extension holds no captured session", async () => {
+  it("should answer no id when the extension holds no sign-in", async () => {
     // Arrange
-    mockedSend.mockResolvedValue({
-      ok: false,
-      protocolVersion: 2,
-      error: "no session token captured — open app.whoop.com and reload it",
-    });
+    mockedSend
+      .mockResolvedValueOnce({
+        ok: false,
+        protocolVersion: 2,
+        error: "no session token captured — open app.whoop.com and reload it",
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        protocolVersion: 2,
+        data: { connected: false, session: "not-checked" },
+      });
 
     // Act
     const userId = await readWhoopUserId("ext");
 
     // Assert
     expect(userId).toBeNull();
+  });
+
+  it("should say imports cannot run when the extension holds a sign-in with no account id", async () => {
+    // Arrange
+    mockedSend
+      .mockResolvedValueOnce({
+        ok: false,
+        protocolVersion: 2,
+        error: "no session token captured — open app.whoop.com and reload it",
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        protocolVersion: 2,
+        data: { connected: true, session: "signed-in" },
+      });
+
+    // Act
+    const attempt = readWhoopUserId("ext");
+
+    // Assert
+    await expect(attempt).rejects.toMatchObject({ reason: "no-account-id" });
   });
 
   it("should fall back to an older extension's status, which still carries the id", async () => {
@@ -70,18 +97,25 @@ describe("readWhoopUserId", () => {
 
   it("should tell an older extension by its protocol version, not by the words of its refusal", async () => {
     // Arrange
-    mockedSend.mockResolvedValue({
-      ok: false,
-      protocolVersion: 2,
-      error: "Origin or action not permitted",
-    });
+    mockedSend
+      .mockResolvedValueOnce({
+        ok: false,
+        protocolVersion: 2,
+        error: "Origin or action not permitted",
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        protocolVersion: 2,
+        data: { connected: true, userId: USER_ID, capturedAt: 1 },
+      });
 
     // Act
-    const userId = await readWhoopUserId("ext");
+    const attempt = readWhoopUserId("ext");
 
     // Assert
-    expect(userId).toBeNull();
-    expect(mockedSend).toHaveBeenCalledTimes(1);
+    // An older extension's status id would be taken; the current one's
+    // refusal means it holds none.
+    await expect(attempt).rejects.toMatchObject({ reason: "no-account-id" });
   });
 
   it("should throw when the extension did not answer", async () => {

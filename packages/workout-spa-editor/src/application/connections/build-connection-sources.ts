@@ -18,6 +18,7 @@ import {
   type BridgeSessionSignal,
   sourceStatus,
 } from "./connection-source-status";
+import { connectionReasonOf } from "./connection-state";
 import { sourceConnectionOf } from "./source-connection";
 
 export type ConnectionSourceSignals = BridgeRouteSignals & {
@@ -62,6 +63,7 @@ const buildOne = (
     disconnected: record?.status === "disconnected",
     sessionVerifiable: bridgeId !== null && s.hasSessionProbe(bridgeId),
     connection: sourceConnectionOf(entry, s, record?.status === "disconnected"),
+    reason: connectionReasonOf(state),
     lastSyncAt: bridgeId === null ? undefined : s.lastSyncAt(bridgeId),
     importTypes:
       detected && bridgeId !== null

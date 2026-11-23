@@ -15,6 +15,12 @@ vi.mock("../../adapters/bridge/bridge-discovery", () => ({
 vi.mock("../bridge-import/bridge-importers", () => ({
   bridgeImporterFor: vi.fn(),
 }));
+const { refreshConnections } = vi.hoisted(() => ({
+  refreshConnections: vi.fn(async () => undefined),
+}));
+vi.mock("../../adapters/bridge/bridge-connection-store", () => ({
+  bridgeConnections: { refresh: refreshConnections },
+}));
 
 const PROFILE_ID = "p1";
 const persistence = createInMemoryPersistence();
@@ -152,5 +158,25 @@ describe("useBridgeImport", () => {
       release?.();
     });
     await waitFor(() => expect(second.result.current.status).toBe("done"));
+  });
+
+  it("should leave a pull that cannot run to the Connection's notice, re-checking it, never saying try again", async () => {
+    // Arrange
+    const cannotRun = Object.assign(new Error("no account"), {
+      reason: "no-account-id",
+    });
+    vi.mocked(bridgeImporterFor).mockReturnValue(
+      vi.fn().mockRejectedValue(cannotRun)
+    );
+    const { result } = mountFor("whoop-bridge");
+
+    // Act
+    act(() => result.current.run());
+
+    // Assert
+    await waitFor(() =>
+      expect(refreshConnections).toHaveBeenCalledWith({ force: true })
+    );
+    expect(result.current.status).toBe("cannot-run");
   });
 });

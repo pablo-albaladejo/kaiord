@@ -6,10 +6,10 @@ import {
   probeGarminSession,
   probeTrain2GoSession,
   probeTrainingPeaksSession,
-  probeWhoopSession,
 } from "./bridge-ping-session-probes";
 import type { SessionProber } from "./bridge-session-probe-types";
 import { type ExtensionResponse, sendBridgeMessage } from "./bridge-transport";
+import { probeWhoopSession } from "./whoop-session-probe";
 
 vi.mock("./bridge-transport", () => ({ sendBridgeMessage: vi.fn() }));
 
@@ -100,11 +100,12 @@ const PROBERS: readonly (readonly [string, SessionProber, string, Case[]])[] = [
         ok({ connected: true, userId: 12, capturedAt: 1 }),
         ACTIVE,
       ],
-      // #1091: the popup calls this Connected, so the App must too.
+      // #1091: a token with no account id cannot import; the popup shows
+      // its no-account-id notice, and so must the App.
       [
         "a held sign-in with no user id",
         ok({ connected: true, userId: null, capturedAt: 1 }),
-        ACTIVE,
+        { ...ACTIVE, reason: "no-account-id" },
       ],
       [
         "no sign-in held by an older extension",

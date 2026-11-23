@@ -81,6 +81,7 @@ export const probeBridge = async (
     // Written even when absent, or a previous "not checked" would survive
     // the merge into a later, answered check.
     notChecked: result.notChecked,
+    reason: result.reason,
     discovered: result.reachable,
     checking: false,
     lastCheckedAt: result.reachable ? ctx.now() : null,
