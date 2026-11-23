@@ -13,7 +13,7 @@
 - [x] 1.13 E2E `zones-sync.spec.ts`: the notice names the thresholds and says what changed; an own weigh-in today stays the current weight; the offer stays on the Athlete page after the notice and a reload
 - [x] 1.8 `data-route-answer.test.ts`: `get_data_routes` reports the automatic Authority
 - [x] 1.9 E2E `authority-automatic.spec.ts`: two Platforms never asked; the matrix on and off; English and Spanish, desktop and mobile
-- [x] 1.10 `build-chat-tools.test.ts`, `set-authority-tool.test.ts`: with the matrix off the assistant still switches a source on or off with confirmation and `set_authority` is absent; on, both; the `set_authority` description matches the rule for every kind
+- [x] 1.14 `build-chat-tools.test.ts`, `set-authority-tool.test.ts`: with the matrix off the assistant still switches a source on or off with confirmation and `set_authority` is absent; on, both; the `set_authority` description matches the rule for every kind
 
 ## 2. Kaiord App
 

@@ -299,8 +299,7 @@
   "capabilities": {
     "intro": "Turn on the parts of Kaiord you use beyond your days and your calendar. Turning one off again hides it and keeps its data.",
     "grade": {
-      "advanced": "Advanced",
-      "experimental": "Experimental"
+      "advanced": "Advanced"
     },
     "items": {
       "templates": {

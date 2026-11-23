@@ -1,6 +1,6 @@
 /**
  * The athlete's own choice of Authority for a kind, when one applies: a row
- * stored by the matrix (or by the assistant's `set_data_route`), honoured
+ * stored by the matrix (or by the assistant's `set_authority`), honoured
  * only while the matrix Capability is on, read through the Capabilities'
  * read API (`resolveCapabilities`). A row means the athlete used the matrix,
  * so with no decision recorded it reads as on, as the catalogue's

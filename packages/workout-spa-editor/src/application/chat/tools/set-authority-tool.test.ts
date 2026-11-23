@@ -120,7 +120,7 @@ describe("createSetAuthorityTool", () => {
 
     // Act
     const mismatched = managedDataTypes.filter((dataType) => {
-      const { mode } = authorityInForce(dataType, undefined);
+      const { mode } = authorityInForce(dataType, undefined, []);
       const inAutomatic = automatic.includes(dataType);
       const inUnion = union.includes(dataType);
       if (inAutomatic === inUnion) return true;

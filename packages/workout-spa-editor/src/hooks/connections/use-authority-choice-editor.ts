@@ -1,6 +1,6 @@
 /**
  * The two `dataTypeSourcePolicy` writes the Authority matrix performs,
- * through the same port the `set_data_route` Tool writes — no new write path.
+ * through the same port the `set_authority` Tool writes — no new write path.
  *
  * `pick` stores `priority`, led by the picked source. `automatic` hands the
  * kind back to the App's rule with `automaticChoiceRow`: a row rather than a
