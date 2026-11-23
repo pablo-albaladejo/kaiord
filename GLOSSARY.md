@@ -24,6 +24,7 @@ _Avoid_: Today page, daily view, dashboard
 
 **Capability**:
 A part of the Kaiord App beyond the core path from Coaching Activity to Workout on the watch, which stays off and out of sight until the athlete activates it.
+The athlete reads "Capability" in English and "Capacidad" in Spanish; each one is turned on or off in Settings, Capabilities.
 _Avoid_: Feature flag, module, plugin, add-on
 
 ### Training
