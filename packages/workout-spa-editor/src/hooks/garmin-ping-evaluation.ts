@@ -6,13 +6,13 @@
  * never word one ping two ways.
  */
 import { classifyEnvelope } from "../adapters/bridge/bridge-envelope-classify";
+import { readGarminSession } from "../adapters/bridge/bridge-legacy-session-readers";
 import type { ExtensionResponse } from "../adapters/bridge/bridge-transport";
 import {
   connectionMayBeUsed,
   type ConnectionState,
   connectionStateOf,
 } from "../application/connections/connection-state";
-import { readGarminSession } from "../application/connections/session-outcome";
 
 export type DetectionResult = {
   installed: boolean;

@@ -13,9 +13,9 @@
  */
 import { z } from "zod";
 
+import { SESSION_OUTCOMES } from "../../application/connections/session-outcome";
 import type { WhoopFetchResult } from "../../application/whoop/whoop-fetch-result";
 import { whoopFetchResultSchema } from "../../application/whoop/whoop-fetch-result";
-import { SESSION_OUTCOMES } from "./bridge-session-outcome";
 import { sendBridgeMessage } from "./bridge-transport";
 import { callThroughBridge } from "./thin-bridge-request";
 import {

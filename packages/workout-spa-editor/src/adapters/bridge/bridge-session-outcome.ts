@@ -11,20 +11,15 @@
 import { z } from "zod";
 
 import {
+  SESSION_OUTCOMES,
+  type SessionOutcome,
+} from "../../application/connections/session-outcome";
+import {
   active,
   inactive,
   notChecked,
   type SessionProbeResult,
 } from "./bridge-session-probe-types";
-
-export const SESSION_OUTCOMES = [
-  "signed-in",
-  "signed-out",
-  "not-answering",
-  "not-checked",
-] as const;
-
-export type SessionOutcome = (typeof SESSION_OUTCOMES)[number];
 
 const outcomeSchema = z.object({ session: z.enum(SESSION_OUTCOMES) });
 

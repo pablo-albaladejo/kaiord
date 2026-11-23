@@ -6,8 +6,8 @@
  * outdated on every bridge — whatever action it answers, and even when that
  * action fails — instead of looking like a signed-out Session. Then the
  * typed outcome an extension with the cheap check answers
- * (`bridge-session-outcome`); an older extension is read through the one
- * adapter over its own booleans (`application/connections/session-outcome`).
+ * (`bridge-session-outcome`); an older extension is read through its own
+ * booleans (`bridge-legacy-session-readers`).
  *
  * A check never downloads data and never mints a token (ADR 0004). An
  * extension one protocol behind answers Garmin's `ping` with a read of one
@@ -15,14 +15,15 @@
  * downloading the export, so those three are asked nothing when discovery
  * verified protocol 1: their check is "not checked".
  */
+import type { SessionOutcome } from "../../application/connections/session-outcome";
+import { classifyEnvelope } from "./bridge-envelope-classify";
 import {
   readGarminSession,
+  readTanitaSession,
   readTrain2GoSession,
   readTrainingPeaksSession,
   readWhoopSession,
-  type SessionOutcome,
-} from "../../application/connections/session-outcome";
-import { classifyEnvelope } from "./bridge-envelope-classify";
+} from "./bridge-legacy-session-readers";
 import { notChecked, type SessionProber } from "./bridge-session-probe-types";
 import { sendBridgeMessage } from "./bridge-transport";
 import { PREVIOUS_BRIDGE_PROTOCOL_VERSION } from "./thin-bridge-request";
@@ -50,13 +51,6 @@ const probeBy =
     const res = await sendBridgeMessage(extensionId, { action }, timeoutMs);
     return classifyEnvelope(res, bridgeId, readSession);
   };
-
-/** Tanita's check is a HEAD of the export; its `authenticated` is the
-    outcome's boolean, and nothing else in its answer says why. */
-const readTanitaSession = (data: unknown): SessionOutcome =>
-  (data as { authenticated?: unknown } | undefined)?.authenticated === true
-    ? "signed-in"
-    : "could-not-tell";
 
 export const probeGarminSession = probeBy({
   bridgeId: "garmin-bridge",

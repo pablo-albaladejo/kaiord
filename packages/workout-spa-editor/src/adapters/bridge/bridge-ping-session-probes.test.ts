@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { readGarminSession } from "../../application/connections/session-outcome";
 import { classifyEnvelope } from "./bridge-envelope-classify";
+import { readGarminSession } from "./bridge-legacy-session-readers";
 import {
   probeGarminSession,
   probeTrain2GoSession,

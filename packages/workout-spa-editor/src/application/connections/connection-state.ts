@@ -16,8 +16,9 @@ export type { ConnectionState };
 
 const STATE_OF: Record<SessionOutcome, ConnectionState> = {
   "signed-in": "working",
-  "signed-out-verified": "signed-out",
-  "could-not-tell": "not-answering",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+  "not-checked": "not-checked",
 };
 
 export const stateOfOutcome = (outcome: SessionOutcome): ConnectionState =>
@@ -31,7 +32,7 @@ export const sessionOutcomeOf = (
   signal: Pick<BridgeSessionSignal, "sessionActive" | "needsReauth">
 ): SessionOutcome => {
   if (signal.sessionActive) return "signed-in";
-  return signal.needsReauth ? "signed-out-verified" : "could-not-tell";
+  return signal.needsReauth ? "signed-out" : "not-answering";
 };
 
 export type ConnectionPresence = {

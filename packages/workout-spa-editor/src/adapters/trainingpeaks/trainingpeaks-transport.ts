@@ -10,7 +10,7 @@
  */
 import { z } from "zod";
 
-import { SESSION_OUTCOMES } from "../bridge/bridge-session-outcome";
+import { SESSION_OUTCOMES } from "../../application/connections/session-outcome";
 import { sendBridgeMessage } from "../bridge/bridge-transport";
 
 const CHECK_SESSION_TIMEOUT_MS = 5_000;
