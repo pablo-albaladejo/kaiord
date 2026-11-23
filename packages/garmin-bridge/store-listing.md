@@ -115,14 +115,17 @@ See `docs/cws-credentials-setup.md` for the one-time CWS API credentials setup.
 
 `assets/screenshot-1280x800.png` shows an older popup (a green "Connected to
 Garmin Connect" bar and "List Workouts" / "Check Session" buttons) that no
-longer exists. Replace it with captures of the current popup:
+longer exists. Replace it with captures of the current popup. Its states, from `popup.js`:
 
-1. **Connected**: signed in to Garmin Connect, click the extension icon; the popup shows "Connected" and "Open Kaiord editor".
-2. **Not answering**: with no usable stored token the popup shows "Garmin is not answering, so you cannot use it in Kaiord right now." and "Try again"; when Garmin refused the sign-in, "Sign in to Garmin".
+1. **Connected**: after the Kaiord App has read from or sent to Garmin Connect once, the extension holds access that has not expired; the popup shows "Connected" ["Conectado"] and "Open Kaiord editor" ["Abrir el editor de Kaiord"].
+2. **Not checked yet**: with no access held yet (a fresh install), the popup shows "Not checked yet" ["Todavía sin comprobar"] and "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access." ["Kaiord pregunta a Garmin Connect la primera vez que lee o envía, así que mirar aquí no genera ningún acceso."]. The check asks Garmin nothing, so the popup never shows "Sign in to Garmin".
+3. **Not answering**: only when the extension's own worker does not answer; the popup shows "Garmin is not answering, so you cannot use it in Kaiord right now." ["Garmin no responde, así que ahora mismo no puedes usarlo en Kaiord."] and "Try again" ["Reintentar"]. It is hard to stage and not needed for the listing.
+
+Capture each state twice: once with Chrome's interface in English, for the English listing, and once in Spanish (`chrome://settings/languages`, "Display Google Chrome in this language"), for the Spanish listing. The Spanish popup shows the text in brackets.
 
 Steps to capture:
 
 1. Load the extension from the extracted zip (`chrome://extensions` → Load unpacked)
-2. Open Garmin Connect and log in
+2. Open Garmin Connect and log in, then send one workout from the Kaiord App
 3. Use Chrome DevTools "Capture screenshot" or a screenshot tool
 4. Crop to 1280x800 or 640x400

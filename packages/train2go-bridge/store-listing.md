@@ -115,10 +115,13 @@ See `docs/cws-credentials-setup.md` for the one-time CWS API credentials setup.
 
 ## Screenshots
 
-Capture popup screenshots at 640x400 or 1280x800:
+Capture popup screenshots at 640x400 or 1280x800. The states, from `popup.js`:
 
-1. **Connected state**: Sign in to Train2Go, click the extension icon, capture the popup showing "Connected as …", the coach line and this week's figures
-2. **Not-answering state**: Sign out of Train2Go, click the extension icon, capture the popup showing "Train2Go is not answering, so you cannot use it in Kaiord right now." and "Try again"
+1. **Connected**: signed in to Train2Go, click the extension icon; the popup shows "Connected as …" ["Conectado como …"], the coach line and this week's figures.
+2. **Signed out**: signed out of Train2Go (its check answers "Unauthenticated"); the popup shows "You cannot use Train2Go in Kaiord until you sign in to Train2Go in this browser." ["No puedes usar Train2Go en Kaiord hasta que inicies sesión en Train2Go en este navegador."] and "Sign in to Train2Go" ["Iniciar sesión en Train2Go"].
+3. **Not answering**: only when Train2Go answers anything else; the popup shows "Train2Go is not answering, so you cannot use it in Kaiord right now." ["Train2Go no responde, así que ahora mismo no puedes usarlo en Kaiord."] and "Try again" ["Reintentar"]. Not needed for the listing.
+
+Capture each state twice: once with Chrome's interface in English, for the English listing, and once in Spanish (`chrome://settings/languages`, "Display Google Chrome in this language"), for the Spanish listing. The Spanish popup shows the text in brackets.
 
 Steps to capture:
 

@@ -10,7 +10,7 @@ Why Kaiord for TrainingPeaks asks for each permission in `manifest.prod.json`, f
 
 **Stored in `chrome.storage.local`**: the access token, the time it expires and your TrainingPeaks athlete number; the app's theme preference (`light`, `dark` or `system`); and when the popup last could and could not use your TrainingPeaks sign-in.
 
-**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App just before it places a workout, which needs it. Nothing else the extension stores leaves your browser.
+**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App just before it places a workout or imports your weight, which both need it. Nothing else the extension stores leaves your browser.
 
 ## Host Permissions
 

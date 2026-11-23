@@ -100,10 +100,20 @@ pasted into the CWS dashboard by hand.
 
 ## Screenshots
 
-There are none yet (no `assets/` folder). Capture the current popup:
+There are none yet (no `assets/` folder). Capture the current popup. Its states, from `popup.js`:
 
-1. **Connected**: signed in to MyTANITA, click the extension icon; the popup shows "Connected" and "Open Kaiord editor".
-2. **Not answering**: signed out of MyTANITA; the popup shows "Tanita is not answering, so you cannot use it in Kaiord right now." and "Try again".
+1. **Connected**: signed in to MyTANITA, click the extension icon; the popup shows "Connected" ["Conectado"] and "Open Kaiord editor" ["Abrir el editor de Kaiord"].
+2. **Signed out**: signed out of MyTANITA (its check is redirected to the sign-in page); the popup shows "You cannot use Tanita in Kaiord until you sign in to Tanita in this browser." ["No puedes usar Tanita en Kaiord hasta que inicies sesión en Tanita en este navegador."] and "Sign in to Tanita" ["Iniciar sesión en Tanita"].
+3. **Not answering**: only when MyTANITA answers anything else (a maintenance page, an error); the popup shows "Tanita is not answering, so you cannot use it in Kaiord right now." ["Tanita no responde, así que ahora mismo no puedes usarlo en Kaiord."] and "Try again" ["Reintentar"]. Not needed for the listing.
+
+Capture each state twice: once with Chrome's interface in English, for the English listing, and once in Spanish (`chrome://settings/languages`, "Display Google Chrome in this language"), for the Spanish listing. The Spanish popup shows the text in brackets.
+
+Steps to capture:
+
+1. Load the extension from the extracted zip (`chrome://extensions` → Load unpacked)
+2. Open MyTANITA (`https://mytanita.eu`) and log in
+3. Use Chrome DevTools "Capture screenshot" or a screenshot tool
+4. Crop to 1280x800 or 640x400
 
 ## Automated Publishing (not wired yet)
 

@@ -503,9 +503,9 @@ export const REQUIRED_RULES = [
     re: /app\.whoop\.com/,
   },
   {
-    label: "WHOOP answers handed to the editor unread (thin Bridge)",
+    label: "WHOOP answers handed to the Kaiord App unread (thin Bridge)",
     section: WHOOP_SECTION,
-    re: /WHOOP's answer is handed to the Kaiord editor as it came, without being read/i,
+    re: /WHOOP's answer is handed to the Kaiord App as it came, without being read/i,
   },
   {
     label: "WHOOP no-OAuth session-bearer nature disclosed",
