@@ -85,7 +85,7 @@ to KRD and back, and every value must come back within the declared tolerances
   which is sent as a band and comes back as that range; power as a share of
   FTP and heart rate as a share of maximum, which are sent in watts and bpm;
   pace zones; heart-rate, power and repeat-until durations; step names; the
-  sub-sport; the created date; the interval and other intensities, which come back as active; a second target on a step; the count of a repeat inside a repeat; a step that ends after a number of repetitions, read as a lap-button step; strength and multisport workouts, read as generic; a workout name beyond 255 characters.
+  sub-sport; the created date; the interval and other intensities, which come back as active; a second target on a step; the count of a repeat inside a repeat; a step that ends after a number of repetitions, read as a lap-button step; strength and multi-sport workouts, read as generic; a workout name beyond 255 characters.
 
 These tests cover workouts: each format's writer refuses a recorded activity,
 so no Round-trip is claimed for recorded activities or health data.

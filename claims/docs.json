@@ -1237,7 +1237,7 @@
     },
     {
       "id": "docs.convert.round-trip.gcn",
-      "text": "**Garmin Connect (GCN)**: Round-trip tested. Converting GCN → KRD → GCN keeps every value of a running, cycling, swimming or cardio workout within the declared tolerances. Fields GCN cannot carry: a single target value, which is sent as a band and comes back as that range; power as a share of FTP and heart rate as a share of maximum, which are sent in watts and bpm; pace zones; heart-rate, power and repeat-until durations; step names; the sub-sport; the created date; the interval and other intensities, which come back as active; a second target on a step; the count of a repeat inside a repeat; a step that ends after a number of repetitions, read as a lap-button step; strength and multisport workouts, read as generic; a workout name beyond 255 characters.",
+      "text": "**Garmin Connect (GCN)**: Round-trip tested. Converting GCN → KRD → GCN keeps every value of a running, cycling, swimming or cardio workout within the declared tolerances. Fields GCN cannot carry: a single target value, which is sent as a band and comes back as that range; power as a share of FTP and heart rate as a share of maximum, which are sent in watts and bpm; pace zones; heart-rate, power and repeat-until durations; step names; the sub-sport; the created date; the interval and other intensities, which come back as active; a second target on a step; the count of a repeat inside a repeat; a step that ends after a number of repetitions, read as a lap-button step; strength and multi-sport workouts, read as generic; a workout name beyond 255 characters.",
       "proof": [
         {
           "test": "packages/garmin/src/adapters/round-trip/round-trip-contract.test.ts",
