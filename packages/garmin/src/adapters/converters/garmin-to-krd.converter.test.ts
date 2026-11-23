@@ -43,6 +43,17 @@ describe("convertGarminToKRD", () => {
       expect(krd.metadata.sport).toBe("running");
     });
 
+    it("should read the createdDate Garmin Connect stamped as the KRD creation time", () => {
+      // Arrange
+      const gcn = loadFixture("WorkoutRunningNestedRepeatsOutput.gcn");
+
+      // Act
+      const krd = convertGarminToKRD(gcn, mockLogger);
+
+      // Assert
+      expect(krd.metadata.created).toBe("2026-02-08T00:57:16.000Z");
+    });
+
     it("should extract workout name", () => {
       // Arrange
       const gcn = loadFixture("WorkoutRunningNestedRepeatsOutput.gcn");
