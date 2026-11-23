@@ -266,6 +266,17 @@ describe("mapExecutableStep", () => {
       expect(result.equipment).toBe("swim_fins");
     });
 
+    it("should read the equipment from its Garmin id when the step names no equipment key", () => {
+      // Arrange
+      const step = buildStep({ equipmentType: { equipmentTypeId: 2 } });
+
+      // Act
+      const result = mapExecutableStep(step, 0);
+
+      // Assert
+      expect(result.equipment).toBe("swim_kickboard");
+    });
+
     it("should not include equipment when equipmentType is absent", () => {
       // Arrange
       const step = buildStep();
@@ -294,6 +305,20 @@ describe("mapExecutableStep", () => {
       expect(result.target).toStrictEqual({
         type: "stroke_type",
         value: { unit: "swim_stroke", value: 0 },
+      });
+    });
+
+    it("should read the stroke from its Garmin id when the step names no stroke key", () => {
+      // Arrange
+      const step = buildStep({ strokeType: { strokeTypeId: 5 } });
+
+      // Act
+      const result = mapExecutableStep(step, 0);
+
+      // Assert
+      expect(result.target).toStrictEqual({
+        type: "stroke_type",
+        value: { unit: "swim_stroke", value: 3 },
       });
     });
 
