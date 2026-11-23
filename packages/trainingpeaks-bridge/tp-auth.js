@@ -68,9 +68,11 @@ const bearerCore = () => {
 };
 
 // A failed exchange carries needsReauth only when the session-fetch master
-// saw a dead session (redirect/401/403); a 500 is TrainingPeaks failing, not a
-// revoked sign-in, and keeps its status instead. A 200 without a token (or
-// without JSON, such as a login page) still reads as no session.
+// saw a dead session (a redirect or a 401, the answer
+// docs/connectors-research/trainingpeaks.md documents for an expired
+// cookie). A 403 or a 500 is TrainingPeaks failing, not a revoked sign-in,
+// and keeps its status instead; so does a 200 without a token (or without
+// JSON), which no research or fixture identifies as the sign-in page.
 const authError = (message, res = {}) => {
   const err = new Error(message);
   if (res.needsReauth) err.needsReauth = true;
@@ -98,7 +100,7 @@ const isExpired = (record) =>
 // ── Cookie-only token exchange (NO Authorization header) ──
 //
 // Uses the session-fetch master with `credentials:"include"` so the domain
-// cookie travels automatically; a dead cookie (redirect/401/403) surfaces as
+// cookie travels automatically; a dead cookie (a redirect or a 401) surfaces as
 // needsReauth. The JSON body carries `{ token:{access_token,expires_in},
 // athleteId, … }` — we keep only the access token, its expiry, and the athlete
 // id (`user.personId`) used to build data-endpoint paths.
@@ -119,15 +121,11 @@ const exchangeToken = async (fetchImpl) => {
   try {
     payload = JSON.parse(res.body);
   } catch {
-    throw authError("TrainingPeaks token exchange returned a non-JSON body", {
-      needsReauth: true,
-    });
+    throw authError("TrainingPeaks token exchange returned a non-JSON body");
   }
   const accessToken = payload?.token?.access_token;
   if (!accessToken) {
-    throw authError("TrainingPeaks token exchange returned no access token", {
-      needsReauth: true,
-    });
+    throw authError("TrainingPeaks token exchange returned no access token");
   }
   const expiresIn = Number(payload?.token?.expires_in) || 0;
   const record = {

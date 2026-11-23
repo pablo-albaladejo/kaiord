@@ -219,12 +219,24 @@ const train2goFetch = async (path, method = "GET") => {
 
 // ── Actions ──
 
+// Train2Go's own "Unauthenticated" answer to the profile ping
+// (test/fixtures/ping-expired.json): a failure that names the sign-in.
+const SIGNED_OUT_REDIRECT = /^\/login\b/;
+const SIGNED_OUT_ERROR = /^unauthenticated\.?$/i;
+
+const saysUnauthenticated = (data) =>
+  data?.success === false &&
+  (SIGNED_OUT_REDIRECT.test(String(data.redirect ?? "")) ||
+    SIGNED_OUT_ERROR.test(String(data.message ?? "")) ||
+    (Array.isArray(data.errors) &&
+      data.errors.some((e) => SIGNED_OUT_ERROR.test(String(e)))));
+
 // The typed outcome of one profile-ping answer, shared by the Session check
 // and the popup's profile read so both word one answer the same way.
 const sessionOutcomeOf = (res) => {
   if (res?.ok) {
     if (parser.parsePingJson(res.data).sessionActive) return "signed-in";
-    return res.data?.success === false ? "signed-out" : "not-answering";
+    return saysUnauthenticated(res.data) ? "signed-out" : "not-answering";
   }
   return res?.needsReauth ? "signed-out" : "not-answering";
 };
@@ -232,9 +244,10 @@ const sessionOutcomeOf = (res) => {
 // The Session check, answered to `ping`: one GET of the profile ping, the
 // cheapest Train2Go request that tells a live session from a dead one. Only
 // the outcome leaves the service worker; the profile in the body is dropped
-// here. Train2Go saying the session is gone (a redirect, 401/403, or
-// `success: false`) is a verified "signed-out"; anything else that fails is
-// "not-answering", never signed out.
+// here. Train2Go saying the session is gone (a redirect to its sign-in page,
+// a 401, or its "Unauthenticated" ping body) is a verified "signed-out";
+// anything else that fails, a 403 included, is "not-answering", never signed
+// out.
 const checkSession = async () => {
   let session;
   try {

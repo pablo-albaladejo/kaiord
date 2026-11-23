@@ -802,7 +802,7 @@
     },
     {
       "id": "tanita.pp.check-downloads-nothing",
-      "text": "**Checking the Connection Downloads Nothing**: Each time you open the extension's popup or press Refresh, and whenever the extension is asked whether it can reach MyTANITA, it sends a `HEAD` request for the export, which returns no measurement, and keeps only whether you are signed in. It reports you signed out only when MyTANITA sends it to the sign-in page.",
+      "text": "**Checking the Connection Downloads Nothing**: Each time you open the extension's popup or press Refresh, and whenever the extension is asked whether it can reach MyTANITA, it sends a `HEAD` request for the export, which returns no measurement, and keeps only whether you are signed in. It reports you signed out only when MyTANITA sends it to the sign-in page or refuses the sign-in (a 401); any other answer, an HTML page in place of the export included, is reported as MyTANITA not answering.",
       "proof": [
         {
           "test": "packages/tanita-bridge/test/popup.test.js",
@@ -823,6 +823,10 @@
         {
           "test": "packages/tanita-bridge/test/background.test.js",
           "title": "should report only a boolean flag, never the csv body"
+        },
+        {
+          "test": "packages/tanita-bridge/test/signed-out-verified.test.js",
+          "title": "should answer the popup's check not-answering on an HTML page"
         }
       ]
     },
