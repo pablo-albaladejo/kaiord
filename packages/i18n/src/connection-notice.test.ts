@@ -3,9 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   CONNECTION_FIXES,
   connectionFix,
-  type ConnectionState,
+  connectionNoTabNotice,
+  connectionNotCheckedText,
   connectionNotice,
+  connectionReasonNotice,
+  type ConnectionState,
 } from "./connection-notice";
+import notices from "./generated/connection-notices.js";
 import { SUPPORTED_LOCALES } from "./types";
 
 const STATES: readonly ConnectionState[] = [
@@ -159,5 +163,58 @@ describe("connectionNotice", () => {
 
     // Assert
     expect(text).not.toMatch(/signed out|sesión cerrada|bridge|extension/i);
+  });
+});
+
+describe("the notices beyond the four fixes", () => {
+  it.each(SUPPORTED_LOCALES)(
+    "should word a WHOOP sign-in with no account id as the popup does, in %s",
+    (locale) => {
+      // Arrange
+      const reason = "no-account-id" as const;
+
+      // Act
+      const notice = connectionReasonNotice(reason, "WHOOP", locale);
+
+      // Assert
+      expect(notice).toEqual(
+        notices.noticeForReason("no-account-id", "WHOOP", locale)
+      );
+      expect(notice.fix).toBe("sign-in");
+    }
+  );
+
+  it.each([
+    ["would-mint-token", "Garmin"],
+    ["no-token-captured", "WHOOP"],
+  ] as const)(
+    "should word why a %s check asked %s nothing, in English and Spanish",
+    (reason, platform) => {
+      // Arrange
+      const locales = ["en", "es"] as const;
+
+      // Act
+      const texts = locales.map((l) =>
+        connectionNotCheckedText(reason, platform, l)
+      );
+
+      // Assert
+      expect(texts).toEqual(
+        locales.map((l) => notices.notCheckedFor(reason, platform, l))
+      );
+      expect(texts.every((t) => t.includes(platform))).toBe(true);
+    }
+  );
+
+  it("should word the one exception, opening the Platform's tab, as the popup does", () => {
+    // Arrange
+    const platform = "WHOOP";
+
+    // Act
+    const notice = connectionNoTabNotice(platform, "en");
+
+    // Assert
+    expect(notice).toEqual(notices.noTabNotice(platform, "en"));
+    expect(notice.fix).toBe("open-platform");
   });
 });
