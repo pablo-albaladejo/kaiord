@@ -1,0 +1,579 @@
+{
+  "entry": {
+    "date": "2026-11-02",
+    "source": "ai-visibility",
+    "provider": "perplexity",
+    "questions": 23,
+    "kaiordMentions": 6,
+    "mentionRate": 0.26,
+    "citedCount": 3,
+    "core": {
+      "questions": 5,
+      "kaiordMentions": 3,
+      "mentionRate": 0.6,
+      "citedCount": 1
+    },
+    "brand": {
+      "questions": 2,
+      "kaiordMentions": 2
+    },
+    "byLang": {
+      "en": {
+        "questions": 14,
+        "kaiordMentions": 5
+      },
+      "es": {
+        "questions": 9,
+        "kaiordMentions": 1
+      }
+    },
+    "topCompetitors": [
+      {
+        "name": "fit-file-parser",
+        "count": 3
+      },
+      {
+        "name": "python-fitparse",
+        "count": 2
+      },
+      {
+        "name": "GoldenCheetah",
+        "count": 2
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": "convert-fit",
+      "lang": "en",
+      "q": "What tools can convert FIT files to TCX or ZWO?",
+      "kaiordMentioned": true,
+      "kaiordCited": true,
+      "competitorsMentioned": [
+        "python-fitparse"
+      ],
+      "answer": "The most direct option for converting **FIT to either TCX or ZWO** is **Kaiord**:\n\n- **Kaiord CLI** — open-source, local conversion tool supporting FIT, TCX, ZWO, Garmin Connect, and KRD. Example:\n  ```bash\n  kaiord convert --input workout.fit --output workout.tcx\n  kaiord convert --input workout.fit --output workout.zwo\n  ```\n  Conversion runs locally on your computer.[1][2]\n- **Kaiord web editor/MCP server** — provides FIT↔TCX and FIT↔ZWO conversion, with FIT supplied as base64 when using the MCP interface.[1]\n- **FIT-to-TCX** — a lightweight command-line utility specifically for FIT→TCX:\n  ```bash\n  fittotcx workout.fit > workout.tcx\n  ```\n  It does not appear to support ZWO output.[6]\n- **Dart `fit_converter` package** — supports FIT↔TCX, but not ZWO.[7]\n\nFor **FIT to ZWO**, Kaiord is the clearest current choice. Note that converting an activity recording into a ZWO workout may require interpretation of the recorded data; ZWO is intended for structured Zwift workouts, so the result may need manual cleanup.",
+      "citations": [
+        "https://kaiord.com/docs/mcp/tools",
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://libraries.io/npm/@kaiord%2Ffit",
+        "https://verifymcp.io/servers/pablo-albaladejo-kaiord/kaiord-mcp",
+        "https://trailsplits.com/tools",
+        "https://github.com/Tigge/FIT-to-TCX",
+        "https://pub.dev/packages/fit_converter/versions/0.4.0",
+        "https://github.com/BikeCodersLife/BikeCodersLife-FitParser",
+        "https://github.com/topics/fitness-data",
+        "https://github.com/pablo-albaladejo/kaiord/blob/main/docs/getting-started.md"
+      ]
+    },
+    {
+      "id": "mcp-workout",
+      "lang": "en",
+      "q": "Is there an MCP server for workout files?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Yes. There are several MCP servers, depending on what you mean by “workout files”:\n\n- **Apple `.workout` files:** `@dotworkout/mcp` can generate Apple Workout files and offers a hosted MCP endpoint at `https://mcp.javierferrersb.dev/mcp`.[1]\n- **Cycling workout formats:** `yourtrainer-mcp` supports ZWO, ERG/MRC, FIT, GPX, TCX, KML, and related activity/workout files, including building, validating, scaling, and analyzing workouts.[2]\n- **Garmin workouts:** `garmin-workouts-mcp` is a local stdio MCP server focused on Garmin Connect workout payloads, particularly strength workouts.[3]\n- **Workout tracking data:** `workout-mcp` imports Hevy CSV exports and lets AI agents query workout history, training patterns, and personal records.[4]\n- **Hevy API access:** `hevy-mcp-server` can read, create, and update workouts through Hevy.[5]\n\nFor **creating Apple Health `.workout` files**, `@dotworkout/mcp` appears to be the closest match. For **cycling files**, use `yourtrainer-mcp`.",
+      "citations": [
+        "https://github.com/Ramir0/workout-mcp",
+        "https://github.com/edankert/yourtrainer-mcp",
+        "https://github.com/ipdelete/workout_mcp_server",
+        "https://github.com/phaiel/hevy-mcp-server",
+        "https://github.com/wromansky/mcp-server",
+        "https://github.com/pranciskus/garmin-workouts-mcp",
+        "https://github.com/javierferrersb/dotworkout/blob/main/packages/mcp/README.md",
+        "https://github.com/nitinchakravarthy/workout_tracker_mcp/blob/main/ARCHITECTURE.md",
+        "https://manufact.com/leaderboard/coros",
+        "https://github.com/JamsusMaximus/trainingpeaks-mcp"
+      ]
+    },
+    {
+      "id": "ts-fit-lib",
+      "lang": "en",
+      "q": "What open-source library parses Garmin FIT files in TypeScript?",
+      "kaiordMentioned": true,
+      "kaiordCited": false,
+      "competitorsMentioned": [
+        "fit-file-parser"
+      ],
+      "answer": "**`fit-parser`** by `jimmykane` is an open-source JavaScript/TypeScript library for parsing and encoding Garmin FIT files. It supports developer fields, raw message access, and both ESM and CommonJS builds.[1][2]\n\nAn alternative is **`@kaiord/fit`**, a TypeScript FIT adapter within the Kaiord framework.[4][9]",
+      "citations": [
+        "https://libraries.io/npm/fit-file-parser",
+        "https://github.com/topics/fit",
+        "https://github.com/topics/fit-file?l=typescript&o=asc&s=forks",
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://npm.io/package/ts-watches",
+        "https://www.libhunt.com/topic/fit",
+        "https://github.com/topics/tcx?l=typescript",
+        "https://www.simon-neutert.de/starred-repos.html",
+        "https://libraries.io/npm/@kaiord%2Ffit",
+        "https://github.com/abordage/awesome-garmin"
+      ]
+    },
+    {
+      "id": "garmin-connect-sync",
+      "lang": "en",
+      "q": "How can I sync workouts from Garmin Connect to other platforms?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "You can sync Garmin Connect workouts to other platforms in two main ways:\n\n1. **Connect the platform directly**\n   - Open the destination app’s settings.\n   - Find **Connected apps**, **Accounts**, or **Integrations**.\n   - Select **Garmin Connect**, sign in, and authorize data sharing.\n   - Most integrations are **one-way**: the other platform receives Garmin activities, but cannot send data back.[4]\n\n2. **Export and upload files manually**\n   - In Garmin Connect Web, open the activity.\n   - Use the activity menu to export a compatible file, typically **FIT**, **TCX**, or **GPX**.\n   - Upload that file to the destination platform.\n\n### Important limitations\n\n- Garmin Connect does not forward data received from one third-party service to another, so connecting Platform A to Garmin and Platform B to Garmin may not transfer data between A and B.[4]\n- Supported data varies by platform; some services receive activities but not structured workouts, heart-rate data, routes, or training metrics.[4]\n- To send a workout **to a Garmin device**, use **Garmin Connect → Training & Planning → Workouts**, select the workout, choose the send icon, and select the compatible device.[1][3]\n- On the web, Garmin may require **Garmin Express** to transfer workouts to the device.[1][5]\n\nFor the most reliable setup, link the destination platform directly to Garmin Connect first; use manual FIT/TCX/GPX export when direct synchronization is unavailable.",
+      "citations": [
+        "https://support.garmin.com/en-US/?faq=Oyqt6jUjOF8L1Rnuc9Sms8",
+        "https://support.garmin.com/en-US/?productID=707174&faq=wZ52AaLbLG2GC1Lxu2l4k7&tab=topics",
+        "https://support.garmin.com/en-US/?productID=873008&faq=Oyqt6jUjOF8L1Rnuc9Sms8&tab=topics",
+        "https://support.garmin.com/en-GB/?faq=8L3Z4gEmTk6sXV7ido1Uz6",
+        "https://support.garmin.com/en-US/?faq=wZ52AaLbLG2GC1Lxu2l4k7"
+      ]
+    },
+    {
+      "id": "workout-toolkit",
+      "lang": "en",
+      "q": "What is the best open-source toolkit for converting and editing workout files?",
+      "kaiordMentioned": true,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "**Kaiord** is the best overall open-source toolkit for converting and editing structured workout files. It supports FIT, TCX, ZWO, Garmin Connect workouts, and its own KRD format, with a TypeScript SDK, command-line converter, validation/comparison tools, and a browser-based visual editor.[1]\n\nWhy it stands out:\n\n- **Broad format support:** FIT, TCX, ZWO, GCN, and KRD.[1]\n- **Round-trip conversions:** Designed to preserve workout data when converting between formats.[1]\n- **Editing:** Includes a visual web editor for creating and modifying workouts.[1]\n- **Automation:** The CLI supports conversion, validation, and comparison; the SDK is useful for custom applications.[1]\n- **Local and open source:** Suitable for privacy-conscious workflows and self-hosting.[1]\n\nUse **Kaiord** if the files are Garmin, Zwift, or endurance-training workouts. For ordinary strength-training plans—sets, reps, weights, and rest periods—**Forme** is a better fit, but it primarily uses versioned JSON rather than FIT/TCX/ZWO interchange formats.[2]",
+      "citations": [
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://github.com/apnatvar/open-workout",
+        "https://github.com/jarima27/opengym",
+        "https://github.com/topics/fitness?o=desc&s=updated",
+        "https://github.com/topics/workout-editor",
+        "https://www.opensourcealternatives.to/item/opengym",
+        "https://howtoconvert.co/blog/best-open-source-file-converter-apps",
+        "https://arvids-unavailable.github.io/openGym/",
+        "https://opensourceprojects.cc/blog/best-open-source-software",
+        "https://github.com/genspark-ai/genoffice/blob/main/skills/genoffice/SKILL.md"
+      ]
+    },
+    {
+      "id": "panel-01-en",
+      "lang": "en",
+      "q": "How do I send a Zwift workout to my Garmin?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "You generally **can’t send a native Zwift workout directly to Garmin Connect**. Zwift’s Garmin connection is primarily for importing completed activities into Zwift, while Zwift workout files use the `.zwo` format—not Garmin’s workout format.[2][7]\n\nTo use the workout on a Garmin device:\n\n1. **Find or create the workout in Garmin Connect** rather than Zwift.\n2. In the Garmin Connect app, open **More → Training & Planning → Workouts**.\n3. Select the workout, tap the **send** icon, and choose your Garmin device.[1]\n4. Sync the device; the workout should then appear under its saved workouts or for the scheduled date.\n\nIf the workout exists only in Zwift, you’ll need to recreate its intervals in Garmin Connect or use a compatible third-party training platform that can export/sync structured workouts to Garmin. Afterward, you can ride it on Garmin while separately running Zwift.",
+      "citations": [
+        "https://support.garmin.com/en-US/?faq=Oyqt6jUjOF8L1Rnuc9Sms8",
+        "https://support.zwift.com/en_us/custom-workouts-ryGOTVEPs.md",
+        "https://support.zwift.com/tracking-outdoor-activities-in-zwift-faq-HJdC_S_61g",
+        "https://fascatcoaching.com/blogs/training-tips/how-to-export-your-training-plan/",
+        "https://www.formbeat.com/help/send-your-plan-to-your-device",
+        "https://support.zwift.com/custom-workouts-ryGOTVEPs",
+        "https://support.zwift.com/en_us/zwift-and-third-party-platforms-SypU0LdVr.md",
+        "https://help.trainingpeaks.com/hc/en-us/articles/115000325647-Structured-Workout-sync-and-Manual-Export",
+        "https://forums.zwift.com/t/zwift-garmin-how-to-use/609490",
+        "https://forums.garmin.com/apps-software/mobile-apps-web/f/garmin-connect-web/252557/how-to-export-training-plan-custom-workouts-to-zwift-training-peaks"
+      ]
+    },
+    {
+      "id": "panel-01-es",
+      "lang": "es",
+      "q": "¿Cómo envío un entrenamiento de Zwift a mi Garmin?",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Sí. **Zwift puede enviar automáticamente tus actividades a Garmin Connect**, pero debes vincular ambas cuentas:\n\n1. Entra en **Zwift** y abre **Configuración/Perfil**.\n2. Ve a **Conexiones** o **Connected Accounts**.\n3. Selecciona **Garmin Connect** y autoriza el acceso.\n4. Completa un entrenamiento en Zwift y guárdalo.\n5. La actividad debería aparecer automáticamente en Garmin Connect; desde allí se sincronizará con tu reloj o Edge.[1][10]\n\nSi no aparece:\n\n- Desvincula Garmin Connect de Zwift y vuelve a vincularlo; Zwift recomienda este procedimiento cuando las actividades no se sincronizan.[1]\n- Comprueba que la actividad esté guardada correctamente en Zwift.\n- Como alternativa, descarga el archivo **.FIT** de la actividad y, en Garmin Connect web, ve a **Actividades → Importar → Elegir archivo** para subirlo manualmente.[6]\n\n**Nota:** esto envía la actividad terminada a Garmin Connect; no descarga el entrenamiento estructurado de Zwift al Garmin para ejecutarlo desde el dispositivo. Para enviar entrenamientos creados en Garmin Connect, usa **Garmin Connect → Entrenamiento y planificación → Entrenamientos → Enviar a dispositivo**.[2]",
+      "citations": [
+        "https://support.zwift.com/tracking-outdoor-activities-in-zwift-faq-HJdC_S_61g",
+        "https://support.garmin.com/en-US/?faq=Oyqt6jUjOF8L1Rnuc9Sms8",
+        "https://support.garmin.com/es-AR/?faq=wZ52AaLbLG2GC1Lxu2l4k7",
+        "https://www8.garmin.com/manuals/webhelp/GUID-2492EDA1-1182-400B-8F43-D8B3211E4F3C/ES-XM/GUID-6E339F62-28D2-4C2A-8534-F90D8C27D6E2.html",
+        "https://support.zwift.com/en_us/tracking-outdoor-activities-in-zwift-faq-HJdC_S_61g.md",
+        "https://zwiftinsider.com/uploading-your-zwift-rides-to-garmin-connect/",
+        "https://forums.garmin.com/apps-software/mobile-apps-web/f/garmin-connect-web/252557/how-to-export-training-plan-custom-workouts-to-zwift-training-peaks",
+        "https://support.zwift.com/en_us/custom-workouts-ryGOTVEPs",
+        "https://forums.zwift.com/t/zwift-garmin-how-to-use/609490",
+        "https://support.garmin.com/es-ES/?faq=8L3Z4gEmTk6sXV7ido1Uz6"
+      ]
+    },
+    {
+      "id": "panel-02-en",
+      "lang": "en",
+      "q": "Convert ZWO to FIT.",
+      "kaiordMentioned": true,
+      "kaiordCited": true,
+      "competitorsMentioned": [],
+      "answer": "To convert a Zwift **`.zwo`** workout to **`.fit`**:\n\n1. Open a ZWO-to-FIT converter such as Kaiord or What’s on Zwift.[1][3]\n2. Upload or drag in your `.zwo` file.\n3. Select **FIT** as the output format.\n4. Enter your **FTP in watts**—ZWO uses percentage-based targets, while FIT requires absolute watt values.[3]\n5. Convert and download the resulting `.fit` file.\n6. For a Garmin device, copy the file to its **`GARMIN/Workouts`** folder, then safely eject the device.[8]\n\nFor command-line conversion with Kaiord:\n\n```bash\npnpm add -g @kaiord/cli\nkaiord convert -i workout.zwo -o workout.fit\n```\n\n[1]",
+      "citations": [
+        "https://kaiord.com/docs/convert/zwo-to-fit",
+        "https://github.com/andrewgy8/zwift2fit",
+        "https://whatsonzwift.com/convert/workouts",
+        "https://kaiord.com/docs/convert/fit-to-zwo",
+        "https://sport-calculator.com/converters/zwo-to-fit",
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://forums.zwift.com/t/zwo-converter/669728",
+        "https://tempocyclist.com/2022/03/08/how-to-convert-zwift-zwo-workouts-for-use-on-garmin-edge-head-units/",
+        "https://libraries.io/npm/@kaiord%2Ffit",
+        "https://forums.zwift.com/t/zwo-file-imported-via-email-copies-to-user-id-file-but-not-appearing-in-custom-workouts/641107/4"
+      ]
+    },
+    {
+      "id": "panel-02-es",
+      "lang": "es",
+      "q": "Convertir ZWO a FIT.",
+      "kaiordMentioned": true,
+      "kaiordCited": true,
+      "competitorsMentioned": [],
+      "answer": "Puedes convertir un archivo **Zwift `.zwo`** a **Garmin `.fit`** de estas formas:\n\n- **En línea:** abre el editor de Kaiord, selecciona tu archivo `.zwo`, elige **FIT** como formato de salida y descarga el archivo convertido. El procesamiento se realiza en el navegador.[1][2]\n- **Por línea de comandos:**\n  ```bash\n  pnpm add -g @kaiord/cli\n  kaiord convert -i entrenamiento.zwo -o entrenamiento.fit\n  ```\n  [1]\n- **Otra opción:** el conversor de What’s on Zwift admite archivos ZWO y FIT, pero requiere introducir tu **FTP** porque FIT guarda los objetivos en vatios absolutos.[4]\n\nPara usarlo en un Garmin, copia normalmente el archivo `.fit` en la carpeta **NewFiles** del dispositivo y desconéctalo de forma segura; después debería aparecer en los entrenamientos.[7]",
+      "citations": [
+        "https://kaiord.com/docs/convert/zwo-to-fit",
+        "https://kaiord.com/docs/convert/",
+        "https://kaiord.com/docs/convert/fit-to-zwo",
+        "https://whatsonzwift.com/convert/workouts",
+        "https://github.com/andrewgy8/zwift2fit",
+        "https://tempocyclist.com/2022/03/08/how-to-convert-zwift-zwo-workouts-for-use-on-garmin-edge-head-units/",
+        "https://sport-calculator.com/blog/how-to-convert-zwo-to-fit",
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://forums.zwift.com/t/garmin-entrainement/642987",
+        "https://github.com/steffenr/zwo-trainer"
+      ]
+    },
+    {
+      "id": "panel-03-en",
+      "lang": "en",
+      "q": "Free open-source alternative to TrainingPeaks.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [
+        "GoldenCheetah"
+      ],
+      "answer": "**GoldenCheetah** is the strongest free, open-source alternative to TrainingPeaks for detailed endurance-data analysis. It runs locally on Windows, macOS, and Linux, supports cycling and multisport data, and includes metrics such as training load, power curves, critical power, and performance charts.[1][2]\n\nOther options:\n\n- **OpenAthlete** — best if you want a web-based, self-hostable TrainingPeaks-style platform with workout planning, activity syncing, and training-load analysis. It is AGPLv3-licensed and can be self-hosted for free.[3]\n- **OpenTracks** — best for private GPS activity recording on Android, but it is primarily a tracker rather than a full training-planning platform.[1]\n- **FitoTrack** — a free, ad-free, open-source mobile workout logger with charts and statistics.[1]\n\n**Recommendation:** choose **GoldenCheetah** for analysis and privacy; choose **OpenAthlete** if you specifically need an online training calendar and TrainingPeaks-like workflow. Free but not open-source alternatives such as **Intervals.icu** may offer a more polished cloud experience, including CTL/ATL/TSB and deep analytics.[2][4]",
+      "citations": [
+        "https://alternativeto.net/software/trainingpeaks/",
+        "https://lachart.net/blog/trainingpeaks-alternatives",
+        "https://endurancedebrief.app/guides/trainingpeaks-alternative",
+        "https://joinvekta.com/alternatives/trainingpeaks",
+        "https://cyclingarchives.com/ie/what-you-ll-build-a-personal-training-stress-score-and-performance-man/",
+        "https://www.openathlete.org/",
+        "https://github.com/topics/endurance-training",
+        "https://alternativeto.net/software/garmin-connect/?p=4",
+        "https://alternativeto.net/software/strava/?p=3",
+        "https://alternativeto.net/software/formbeat/"
+      ]
+    },
+    {
+      "id": "panel-03-es",
+      "lang": "es",
+      "q": "Alternativa gratuita y open source a TrainingPeaks.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [
+        "GoldenCheetah"
+      ],
+      "answer": "La mejor alternativa **gratuita y open source** a TrainingPeaks es **OpenAthlete**: ofrece planificación y análisis de entrenamiento de resistencia, permite exportar tus datos y puede instalarse en tu propio servidor bajo licencia AGPLv3.[4]\n\nOtras opciones:\n\n- **GoldenCheetah**: aplicación open source de escritorio, especialmente potente para ciclismo; incluye análisis detallado de potencia, carga y rendimiento.[10]\n- **TrainingGeeks**: proyecto autoalojable con calendario, zonas, métricas de fitness/fatiga/forma y paneles de análisis.[9]\n- **FitoTrack**: aplicación Android gratuita y sin anuncios para registrar carreras, ciclismo y senderismo; es open source, aunque no sustituye completamente la planificación avanzada de TrainingPeaks.[1]\n- **Intervals.icu**: probablemente el sustituto gratuito más completo para análisis web, con integraciones con Garmin, Strava, Polar, Suunto, COROS, Wahoo y Zwift; no es open source.[2]\n\n**Recomendación rápida:**  \n- Para reemplazo completo y control de tus datos: **OpenAthlete**.  \n- Para análisis avanzado de ciclismo en local: **GoldenCheetah**.  \n- Para una alternativa web gratuita, aunque cerrada: **Intervals.icu**.",
+      "citations": [
+        "https://alternativeto.net/software/trainingpeaks/",
+        "https://www.ccomplete.app/guides/trainingpeaks-alternatives",
+        "https://alternativeto.net/software/openathlete/about/",
+        "https://github.com/openathleteorg/openathlete/blob/main/README.md",
+        "https://github.com/openathleteorg",
+        "https://www.tredict.com/trainingpeaks-alternative/",
+        "https://pheidi.training/articles/trainingpeaks-alternatives/",
+        "https://coachbox.app/en/compare/trainingpeaks-alternatives/",
+        "https://github.com/topics/strava-alternative",
+        "https://www.mymottiv.com/blog/trainingpeaks-alternatives"
+      ]
+    },
+    {
+      "id": "panel-04-en",
+      "lang": "en",
+      "q": "AI training planner that syncs with Garmin and WHOOP.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Several AI training planners now support **both Garmin and WHOOP**:\n\n| Best for | Option | Garmin | WHOOP | Notable features |\n|---|---|---:|---:|---|\n| Endurance training | **AI Endurance** | Yes, two-way sync | Yes, recovery data | Adaptive running, cycling, and triathlon plans; pushes workouts to Garmin[2] |\n| Broad multi-sport coaching | **athletedata** | Yes | Yes | Rewrites plans based on sleep, recovery, missed sessions, and schedule; sends workouts to Garmin[3] |\n| Cycling-focused coaching | **Analog Sports** | Yes | Yes | AI coach with fatigue, recovery, CTL/ATL/TSB, and personalized cycling plans[1] |\n| Strength + endurance | **HYBRD** | Yes | Yes | Combines lifting and cardio, adapts plans, and syncs planned workouts to Garmin[9] |\n| Advanced analytics/planning | **Intervals.icu** | Yes | Yes, with integration support | Strong fitness-fatigue analysis and customizable training calendars; AI features are more limited than dedicated coaches[4] |\n\n**Best overall starting point:** **AI Endurance** if the priority is running, cycling, or triathlon and you want genuine two-way Garmin workout synchronization plus WHOOP recovery data.[2]\n\nChoose **athletedata** if you want broader lifestyle-based adaptation, including sleep, missed sessions, scheduling, strength, and nutrition integrations.[3] Choose **HYBRD** for a combined strength-and-endurance program.[9]\n\nCheck whether the app supports the specific Garmin workflow needed—importing completed activities, reading Garmin metrics, or sending structured workouts back to the watch—as these capabilities differ by product.",
+      "citations": [
+        "https://apps.apple.com/ch/app/analog-sports/id6766551715",
+        "https://apps.apple.com/us/app/ai-endurance/id6714485075",
+        "https://www.athletedata.health/",
+        "https://eliteai.tools/tool/intervalsicu",
+        "https://github.com/topics/garmin-connect?o=desc&s=updated",
+        "https://github.com/topics/training-plan",
+        "https://play.google.com/store/apps/details?id=com.humango.humangoandriod&hl=en_US",
+        "https://support.whoop.com/s/article/How-to-Use-the-AI-Powered-WHOOP-Coach?language=en_US",
+        "https://apps.apple.com/pa/app/hybrd-get-faster-stronger/id6670271875?platform=vision"
+      ]
+    },
+    {
+      "id": "panel-04-es",
+      "lang": "es",
+      "q": "Planificador de entrenamiento con IA que se sincronice con Garmin y WHOOP.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Una opción especialmente adecuada es **IntervalCoach**: crea planes adaptativos con IA, analiza señales de recuperación de WHOOP y sincroniza los entrenamientos estructurados con Garmin, normalmente mediante **Intervals.icu**.[2][6]\n\n| Opción | Garmin | WHOOP | Mejor para |\n|---|---|---|---|\n| **IntervalCoach** | Sí, mediante Intervals.icu | Sí, directo o mediante Intervals.icu | Running, ciclismo, triatlón, natación y fuerza; adaptación diaria según recuperación.[2][4] |\n| **athletedata** | Sí | Sí | Un plan único que combina entrenamiento, sueño y recuperación; puede enviar la sesión adaptada a Garmin.[3] |\n| **SensAI** | Sí, a través de Apple HealthKit | Sí, a través de Apple HealthKit | Fitness general y planificación según objetivos, agenda y recuperación.[1][9] |\n\n**Recomendación:**  \n- Elige **IntervalCoach** si quieres entrenamientos estructurados que lleguen al Garmin y una planificación deportiva más avanzada.  \n- Elige **athletedata** si prefieres un coach más general que integre Garmin y WHOOP directamente en un mismo plan.  \n- Elige **SensAI** si usas iPhone y buscas una experiencia sencilla de entrenador personal.\n\nTen en cuenta que, en IntervalCoach, la conexión de Garmin puede requerir configurar primero **Intervals.icu**; WHOOP puede conectarse directamente o a través de ese servicio.[2][6]",
+      "citations": [
+        "https://www.sensai.fit/es",
+        "https://www.intervalcoach.app/es",
+        "https://www.athletedata.health/",
+        "https://www.intervalcoach.app/es/platform/ai-coaching",
+        "https://github.com/topics/training-plan",
+        "https://www.intervalcoach.app/es/intervals-icu",
+        "https://www.intervalcoach.app/es/platform",
+        "https://www.intervalcoach.app/es/best-ai-cycling-coach",
+        "https://www.sensai.fit/es/blog/best-ai-personal-trainer-apps-2026",
+        "https://www.sensai.fit/es/blog/sensai-review-2026"
+      ]
+    },
+    {
+      "id": "panel-05-en",
+      "lang": "en",
+      "q": "TypeScript library to read and write FIT workout files.",
+      "kaiordMentioned": true,
+      "kaiordCited": false,
+      "competitorsMentioned": [
+        "fit-file-parser"
+      ],
+      "answer": "For a **TypeScript library that reads and writes Garmin FIT workout files**, the strongest direct option is **`fit-file-parser`** (`jimmykane/fit-parser`). It supports FIT parsing and encoding, TypeScript declarations, ESM/CommonJS, developer fields, raw messages, and CRC generation.[2]\n\n```bash\nnpm install fit-file-parser\n```\n\nIt is a good low-level choice when you need to create or modify FIT messages yourself. Its encoder is profile-agnostic, so you must supply FIT message/field definitions and apply scales and offsets correctly.[2]\n\nOther options:\n\n- **`@kaiord/core`** — better for structured workout-file conversion between FIT, TCX, ZWO, and KRD rather than raw FIT protocol work.[3]\n- **`@glandais/fit-kotlin-sdk`** — provides profile-aware typed FIT decoding/encoding through a JavaScript/TypeScript package, including streaming and developer-field support.[4]\n- **`ts-health`** — broader health-data tooling with FIT activity parsing, but it appears more focused on reading and analyzing activities than authoring FIT workout files.[1]\n\n**Recommendation:** use `fit-file-parser` for direct FIT read/write control; use `@kaiord/core` if your application needs a higher-level workout model and format conversion.",
+      "citations": [
+        "https://github.com/stacksjs/ts-health",
+        "https://github.com/jimmykane/fit-parser",
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://klibs.io/project/glandais/fit-kotlin-sdk",
+        "https://github.com/cemergin/open-trainer-ftms",
+        "https://github.com/stacksjs/ts-watches",
+        "https://www.npmjs.com/package/fit-file-parser-typescript",
+        "https://github.com/fab77/jsfitsio",
+        "https://himcp.ai/server/kaiord",
+        "https://libraries.io/npm/fit-file-parser"
+      ]
+    },
+    {
+      "id": "panel-05-es",
+      "lang": "es",
+      "q": "Librería de TypeScript para leer y escribir archivos de entrenamiento FIT.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [
+        "python-fitparse",
+        "fit-file-parser"
+      ],
+      "answer": "La opción más completa para TypeScript es **`fit-file-parser`**. Permite **leer y escribir archivos `.FIT`**, funciona en Node.js y navegador, incluye declaraciones TypeScript, admite archivos de Garmin, Polar y Suunto, y soporta campos definidos por desarrolladores.[1][4]\n\n```bash\nnpm install fit-file-parser\n```\n\nEjemplo de lectura:\n\n```ts\nimport { readFile } from \"node:fs/promises\";\nimport FitParser from \"fit-file-parser\";\n\nconst buffer = await readFile(\"entrenamiento.fit\");\n\nconst parser = new FitParser({\n  force: true,\n  mode: \"both\",\n});\n\nconst result = await parser.parseAsync(buffer);\n\nconsole.log(result);\n```\n\nPara **generar archivos FIT**, utiliza el `FitEncoder` incluido:\n\n```ts\nimport { FitEncoder } from \"fit-file-parser\";\n\nconst encoder = new FitEncoder();\n\nconst data = encoder.encode([\n  {\n    name: \"file_id\",\n    fields: {\n      type: \"activity\",\n      manufacturer: \"development\",\n      product: 1,\n    },\n  },\n]);\n\nawait Bun.write(\"salida.fit\", data);\n```\n\nSi solo necesitas escribir archivos de forma especializada, otra alternativa es **`@markw65/fit-file-writer`**, una biblioteca JavaScript/TypeScript enfocada en generar `.FIT` directamente.[7] Para lectura de bajo nivel, `fit-decoder` es ligera, pero no ofrece la misma orientación a escritura.[5]",
+      "citations": [
+        "https://github.com/jimmykane/fit-parser",
+        "https://github.com/topics/fit-file?l=typescript&o=asc&s=forks",
+        "https://www.jsdelivr.com/package/npm/fit-file-parser",
+        "https://libraries.io/npm/fit-file-parser",
+        "https://github.com/ask77nl/fit-decoder",
+        "https://github.com/JHarp199345/S-Bike-Training-Hub/blob/main/fit.py",
+        "https://github.com/markw65/fit-file-writer",
+        "https://www.npmjs.com/package/fit-file-parser-typescript",
+        "https://github.com/tuna-f1sh/fit_tool",
+        "https://app.unpkg.com/fit-file-parser@2.3.2"
+      ]
+    },
+    {
+      "id": "panel-06-en",
+      "lang": "en",
+      "q": "MCP server for Garmin workouts.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "For **Garmin workouts**, the most directly relevant option is **`st3v/garmin-workouts-mcp`**. It supports creating structured workouts from natural language, listing and inspecting workouts, scheduling or deleting them, and viewing Garmin calendar data. It runs locally via `uvx` and works with MCP clients such as Claude Desktop.[1]\n\n```bash\nuvx garmin-workouts-mcp\n```\n\nA typical Claude Desktop configuration is:\n\n```json\n{\n  \"mcpServers\": {\n    \"garmin-workouts\": {\n      \"command\": \"uvx\",\n      \"args\": [\"garmin-workouts-mcp\"],\n      \"env\": {\n        \"GARMIN_EMAIL\": \"your_email@example.com\",\n        \"GARMIN_PASSWORD\": \"your_password\"\n      }\n    }\n  }\n}\n```\n\nOther useful choices:\n\n- **`GarminMCP`** — broader read access to activities, health metrics, fitness data, and file exports, with 29 tools.[2]\n- **`endurancetools/garmin-mcp`** — training analysis plus structured workouts that can be sent to the Garmin calendar and watch.[3]\n- **`garmin-personal-mcp`** — read-only Garmin access using the Personal API, avoiding storage of the Garmin password, but it is not intended for creating workouts.[4]\n- **`garmin-mcp` by Bartolome69** — local read/write server that can build and schedule structured workouts.[5]\n\nFor **creating and scheduling workouts**, start with `st3v/garmin-workouts-mcp`; for safer read-only analysis, use a Personal API-based server. These are unofficial community projects, so review credential handling and Garmin account permissions before deployment.",
+      "citations": [
+        "https://github.com/JohanBellander/GarminMCP",
+        "https://github.com/indaco/garmin-personal-mcp",
+        "https://github.com/endurancetools/garmin-mcp/blob/main/apps/mcp-server/README.md",
+        "https://github.com/holdenstirling/garmin-mcp",
+        "https://github.com/st3v/garmin-workouts-mcp",
+        "https://github.com/getsomecat/garmin-connect-mcp",
+        "https://github.com/Bartolome69/garmin-mcp",
+        "https://github.com/LePomas/garminconnect-mcp",
+        "https://github.com/stitrace/garmin-mcp-server",
+        "https://github.com/Mason-Levyy/garmin-personal-mcp"
+      ]
+    },
+    {
+      "id": "panel-06-es",
+      "lang": "es",
+      "q": "Servidor MCP para entrenamientos de Garmin.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Sí: hay varios **servidores MCP para Garmin Connect**. Para entrenamientos, la opción más completa parece ser **endurancetools/garmin-mcp**: permite consultar carga, forma, HRV, estado de entrenamiento y crear/enviar entrenamientos estructurados al calendario y al reloj Garmin.[1]\n\n### Opciones recomendadas\n\n- **EnduranceTools Garmin MCP**: lectura de actividades, sueño, salud, carga y entrenamientos; también permite enviar entrenamientos estructurados a Garmin. Requiere Node.js 22+ y un navegador Chromium para iniciar sesión.[1]\n- **garmin-personal-mcp**: opción local y de solo lectura basada en la API Personal oficial de Garmin; permite consultar actividades, series, sueño, HRV y sesiones de fuerza.[2]\n- **apratico/garmin-mcp**: orientado a Claude Desktop/Claude Code, con panel de entrenamiento y acceso a actividades, archivos FIT, HRV, sueño y zonas cardíacas.[3]\n- **srichards2103/garmin-mcp**: alternativa en Python, de solo lectura, con herramientas para actividades, métricas diarias, sueño, HRV, carga y preparación.[4]\n\nPara instalar la opción de EnduranceTools en Claude Code:\n\n```bash\nclaude mcp add garmin -- npx -y garmin-mcp-server\n```\n\nPara **crear o programar entrenamientos en Garmin**, conviene elegir una implementación que documente explícitamente operaciones de escritura; muchas alternativas solo permiten leer datos y usan APIs no oficiales. Verifica permisos y evita entregar tu contraseña a servidores remotos: es preferible autenticación local, tokens revocables y acceso limitado.",
+      "citations": [
+        "https://github.com/indaco/garmin-personal-mcp",
+        "https://github.com/apratico/garmin-mcp",
+        "https://github.com/Mason-Levyy/garmin-personal-mcp",
+        "https://github.com/srichards2103/garmin-mcp",
+        "https://github.com/endurancetools/garmin-mcp",
+        "https://github.com/stitrace/garmin-mcp-server",
+        "https://github.com/getsomecat/garmin-connect-mcp",
+        "https://mcp.ai/garmin/es",
+        "https://github.com/taxuspt/garmin_mcp",
+        "https://github.com/endurancetools/garmin-mcp/blob/main/apps/mcp-server/README.md"
+      ]
+    },
+    {
+      "id": "panel-07-en",
+      "lang": "en",
+      "q": "What is Kaiord?",
+      "kaiordMentioned": true,
+      "kaiordCited": true,
+      "competitorsMentioned": [],
+      "answer": "Kaiord is an **open-source, local-first platform and TypeScript framework for health and fitness data**. It lets users create workouts, manage training calendars, and convert or validate files between formats such as **FIT, TCX, ZWO, Garmin Connect, and its native KRD format**.[1][2]\n\nIts main components include:\n\n- A visual workout editor\n- A canonical JSON-based **KRD** format for cross-platform conversions\n- A command-line interface and TypeScript SDK\n- Garmin and WHOOP integrations\n- An MCP server for connecting fitness-data tools to AI assistants\n- Browser-based, account-free storage with no Kaiord backend by default[1][3][4]\n\nIn short, Kaiord is intended to make fragmented fitness data easier to edit, convert, and use across Garmin, Zwift, TrainingPeaks, and other platforms.",
+      "citations": [
+        "https://kaiord.com/",
+        "https://github.com/pablo-albaladejo/kaiord/blob/main/docs/getting-started.md",
+        "https://kaiord.com/docs/",
+        "https://libraries.io/npm/@kaiord%2Ffit",
+        "https://devpost.com/software/kaiord",
+        "https://kaiord.com/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin",
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://mcphq.ai/mcp/pablo-albaladejo-kaiord",
+        "https://github.com/pablo-albaladejo/kaiord/blob/main/CLAUDE.md",
+        "https://kaiord.com/docs/guide/why-kaiord.html"
+      ]
+    },
+    {
+      "id": "panel-07-es",
+      "lang": "es",
+      "q": "¿Qué es Kaiord?",
+      "kaiordMentioned": true,
+      "kaiordCited": true,
+      "competitorsMentioned": [],
+      "answer": "Kaiord es una **plataforma de código abierto para crear, editar, convertir y gestionar entrenamientos y datos deportivos**. Funciona con un enfoque *local-first*: no requiere cuenta ni nube, y los datos se guardan en el dispositivo o en el navegador.[1][3]\n\nSus principales funciones son:\n\n- Editor visual y calendario semanal de entrenamientos.\n- Asistente de IA para planificar o modificar sesiones.\n- Sincronización con Garmin y WHOOP.\n- Conversión entre formatos FIT, TCX, ZWO, Garmin Connect y su formato propio KRD.\n- SDK de TypeScript, CLI y servidor MCP para integrarlo con herramientas de desarrollo o agentes de IA.[1][3]\n\nEn resumen, Kaiord busca ser una herramienta unificada para trabajar con entrenamientos estructurados de ciclismo, carrera y otros deportes, especialmente útil para deportistas, entrenadores y desarrolladores.[7]",
+      "citations": [
+        "https://kaiord.com/es/",
+        "https://kaiord.com/",
+        "https://github.com/pablo-albaladejo/kaiord",
+        "https://devpost.com/software/kaiord",
+        "https://github.com/pablo-albaladejo/kaiord/blob/main/docs/getting-started.md",
+        "https://libraries.io/npm/@kaiord%2Ffit",
+        "https://kaiord.com/docs/",
+        "https://github.com/pablo-albaladejo/kaiord/blob/main/CLAUDE.md",
+        "https://mcphq.ai/mcp/pablo-albaladejo-kaiord",
+        "https://kaiord.com/docs/es/"
+      ]
+    },
+    {
+      "id": "panel-08-en",
+      "lang": "en",
+      "q": "Convert a Zwift workout to Garmin.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "To convert a Zwift workout for Garmin:\n\n1. **Find the Zwift workout file**  \n   Zwift workouts are usually `.zwo` files, commonly stored in:\n   - Windows: `Documents\\Zwift\\Workouts`\n   - macOS: `Documents/Zwift/Workouts`\n\n2. **Convert the `.zwo` file**\n   - Use a ZWO-to-FIT converter such as What’s on Zwift.\n   - Enter your current FTP, since Zwift targets are generally expressed as percentages of FTP while Garmin workouts use watt targets.[1]\n   - Export the workout as `.FIT`.\n\n3. **Copy it to your Garmin**\n   - Connect the Garmin device to your computer.\n   - Copy the `.FIT` file into the device’s `GARMIN\\WORKOUTS` folder.\n   - Safely eject the device and open the workout from the Garmin workout menu.\n\n4. **Alternative: import directly into Garmin Connect**\n   - A Garmin workout importer can accept `.zwo` files, convert FTP percentages into watt targets, and import the structured workout into Garmin Connect.[1]\n   - Review ramps, cadence targets, and notes afterward: Garmin approximates Zwift’s continuous ramps with several flat steps.[1]\n\n**Note:** This transfers the workout structure, not the completed Zwift activity. To transfer a finished ride, export the activity file separately and upload it to Garmin Connect.",
+      "citations": [
+        "https://chromewebstore.google.com/detail/garmin-workout-importer/faebbfokokipdpkbolpbpfadmgdbanpo",
+        "https://www.reddit.com/r/Zwift/comments/1i9kmce/garmin_coach_zwift_connection/",
+        "https://forums.zwift.com/t/garmin-entrainement/642987",
+        "https://www.reddit.com/r/Zwift/comments/1bhnxnh/take_your_zwift_rides_outdoor_with_garmin/",
+        "https://github.com/estruyf/garmin-workout-browser-extension/blob/main/README.md",
+        "https://support.zwift.com/en_us/custom-workouts-ryGOTVEPs",
+        "https://www.reddit.com/r/Zwift/comments/rrunc0/possible_to_sync_a_zwift_workout_plan_such_as/",
+        "https://www.reddit.com/r/Zwift/comments/1lkblii/zwift_workouts_outdoor/",
+        "https://github.com/marcelorodrigo/zwift-to-garmin",
+        "https://github.com/estruyf/garmin-workout-browser-extension"
+      ]
+    },
+    {
+      "id": "panel-08-es",
+      "lang": "es",
+      "q": "Convertir un entrenamiento de Zwift a Garmin.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Para pasar un **entrenamiento estructurado de Zwift a Garmin**, el procedimiento habitual es convertir el archivo **`.zwo` a `.fit`** y copiarlo al dispositivo Garmin. Zwift no ofrece una exportación directa y general de sus entrenamientos a Garmin, aunque las actividades terminadas sí pueden exportarse a Garmin Connect. [3][7]\n\n1. **Obtén el archivo `.zwo`** del entrenamiento de Zwift.\n2. **Convierte `.zwo` a `.fit`** con un conversor compatible, como el de What’s on Zwift. Define correctamente tu FTP, porque Zwift suele expresar la intensidad como porcentaje del FTP y Garmin necesita objetivos concretos, normalmente en vatios. [3][7]\n3. **Conecta el Garmin al ordenador** mediante USB.\n4. Copia el archivo `.fit` a la carpeta:\n   ```text\n   GARMIN/NewFiles\n   ```\n   En algunos dispositivos puede ser necesario usar `GARMIN/Workouts`.\n5. Expulsa el dispositivo de forma segura y reinícialo.\n6. Busca el entrenamiento en **Entrenamiento > Mis entrenamientos** y ejecútalo.\n\n**Alternativa:** recrea manualmente el entrenamiento en Garmin Connect y sincronízalo con el dispositivo. Es la opción más fiable si el conversor no interpreta bien calentamientos, recuperaciones, cadencia o bloques complejos.\n\nSi solo quieres pasar una **actividad ya realizada en Zwift**, exporta el archivo FIT desde Zwift y súbelo a Garmin Connect desde la versión web. La vinculación Zwift–Garmin también permite sincronizar automáticamente ciertas actividades exteriores, pero no convierte automáticamente todos los entrenamientos estructurados de Zwift en sesiones para el Garmin. [1][3]",
+      "citations": [
+        "https://support.zwift.com/tracking-outdoor-activities-in-zwift-faq-HJdC_S_61g",
+        "https://support.zwift.com/en_us/tracking-outdoor-activities-in-zwift-faq-HJdC_S_61g.md",
+        "https://forums.zwift.com/t/garmin-entrainement/642987",
+        "https://github.com/marcelorodrigo/zwift-to-garmin",
+        "https://support.zwift.com/en_us/setting-up-your-garmin-watch-for-zwift-rkUxKJzN8",
+        "https://support.zwift.com/en_us/garmin-watch-setup-rkUxKJzN8",
+        "https://www.reddit.com/r/Zwift/comments/rrunc0/possible_to_sync_a_zwift_workout_plan_such_as/",
+        "https://www.reddit.com/r/Zwift/comments/1i9kmce/garmin_coach_zwift_connection/",
+        "https://www.trainingpeaks.com/training-plans/cycling/indoor/tp-205222/zwift-ftp-power-threshold-improvement-8-weeks-to-your-peak?srcv=pausedcontrol",
+        "https://forums.zwift.com/t/zwift-training-plans-question/59401"
+      ]
+    },
+    {
+      "id": "panel-09-en",
+      "lang": "en",
+      "q": "Free AI training planner with no account.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "Here are good **free AI training/workout planners that require no account**:\n\n- **MyWorkoutCalendar** — Generates up to **3 free AI workouts per week** without signing up; includes goals, equipment, experience level, and scheduling options.[2]\n- **Free Anonymous AI Workout Planner** — Creates a structured weekly plan from your goal, fitness level, schedule, and equipment; no account or payment required.[5]\n- **Rewind.ai Workout Planner** — Generates plans around your goals, gear, and schedule; no sign-up is needed to start, with a free daily usage allowance.[6]\n- **Hybrid Coach** — Best for combining **running, strength, mobility, and other sports**; browser-local, open source, and requires no account or subscription.[7]\n- **Free.ai Fitness Plan Generator** — No sign-up required; lets you describe your needs and copy or download the generated plan.[4]\n\n**Best overall:** Try **MyWorkoutCalendar** for a guided gym plan, or **Hybrid Coach** if you want running and lifting in one schedule. Always review AI-generated routines for suitability, especially if you have an injury or medical condition.",
+      "citations": [
+        "https://play.google.com/store/apps/details?id=app.duzz",
+        "https://myworkoutcalendar.com/",
+        "https://planfit.ai/en",
+        "https://free.ai/health/fitness-plan/",
+        "https://www.freeanonymousai.com/productivity/workout-planner",
+        "https://rewind.ai/health/workout/",
+        "https://hybridcoach.ai/",
+        "https://myworkoutcalendar.com/blog/myworkoutcalendar-review",
+        "https://aitoolsay.com/tools/teaching-curriculum-tools",
+        "https://formabuild.net/"
+      ]
+    },
+    {
+      "id": "panel-09-es",
+      "lang": "es",
+      "q": "Planificador de entrenamiento con IA gratis y sin cuenta.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "**Gymkee** parece la opción más adecuada: genera un plan personalizado gratis, sin registro ni tarjeta, según objetivo, días disponibles, nivel y equipamiento; puedes regenerarlo tantas veces como quieras.[1]\n\nOtras alternativas:\n\n- **Kinoku**: no requiere cuenta, funciona gratis y ofrece plantillas de entrenamiento; su IA genera un texto para ChatGPT, Claude o Gemini e importa el plan como rutina.[2]\n- **Planfit**: crea gratis un plan semanal con músculos, series y descansos, aunque algunas opciones de personalización son premium.[3]\n- **CoachTruly**: permite crear sesiones con IA, guardarlas y compartirlas sin que quien las consulte necesite una cuenta.[4]\n\n**Recomendación rápida:** usa **Gymkee** si quieres un generador web inmediato sin cuenta; usa **Kinoku** si prefieres una aplicación móvil para guardar el historial. Adapta cualquier plan si tienes lesiones o condiciones médicas, idealmente con asesoramiento profesional.",
+      "citations": [
+        "https://gymadapt.com/es/learn/planificador-entrenamiento-ia-gratis/",
+        "https://trainerplan.co/es/",
+        "https://triathlonpace.com/es",
+        "https://play.google.com/store/apps/details?id=app.kinoku&hl=es&referrer=utm_source=site",
+        "https://planfit.ai/es/ai-workout-planner",
+        "https://www.iweaver.ai/es/agents/training-planner/",
+        "https://gymkee.com/es/tools/generador-rutinas-ia/",
+        "https://apps.apple.com/es/app/sportsreflector-ai-coach/id6759809796",
+        "https://play.google.com/store/apps/details?id=fitxai.app&hl=es_SV",
+        "https://coachtruly.com/es/product/session-planner"
+      ]
+    },
+    {
+      "id": "panel-10-en",
+      "lang": "en",
+      "q": "Local-first fitness app that keeps data in the browser.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "**Progressive** is a strong match: it is a local-first workout-tracking PWA that works offline and stores all data in the browser’s `localStorage`, with customizable workout plans and progression tracking.[3]\n\nOther options:\n\n- **Local-first Workout Tracker PWA** — installable, offline-capable, no account or backend; uses IndexedDB through Dexie.[4]\n- **FitSnap Coach** — broader fitness app with meal logging, workout plans, recovery scores, form checks, and trend charts; stores health data locally in IndexedDB.[1]\n- **Cycle Coach** — mobile-first strength-training app with set-by-set logging and cycle progression; workout progress remains in browser `localStorage`.[8]\n- **nobro.app** — minimalist offline-first workout tracker whose program and state stay in browser storage.[2]\n\nFor the simplest privacy-focused workout log, choose **Progressive**. For a more complete fitness dashboard, choose **FitSnap Coach**.",
+      "citations": [
+        "https://github.com/Gloria72/fitsnap-coach",
+        "https://github.com/alantriesagain/awesome-local-first",
+        "https://github.com/Schroedingberg/progressive",
+        "https://github.com/brunocpf/local-first-workout-tracker-pwa",
+        "https://github.com/otomir23/wellfit",
+        "https://github.com/xcc3641/awesome-local-first",
+        "https://github.com/richducat/microfit-ai",
+        "https://github.com/aleksandar-todorovic-dev/training-app",
+        "https://github.com/p3cStudio/opengym/blob/main/docs/MOBILE.md",
+        "https://github.com/TheodorAbel/PulseFit-Fitness-App/blob/main/README.md"
+      ]
+    },
+    {
+      "id": "panel-10-es",
+      "lang": "es",
+      "q": "App de fitness local-first que guarda los datos en el navegador.",
+      "kaiordMentioned": false,
+      "kaiordCited": false,
+      "competitorsMentioned": [],
+      "answer": "**Kinesis** encaja exactamente con lo que buscas: es una PWA de fitness local-first para planificar rutinas, registrar series y consultar el progreso. Guarda los datos en el navegador mediante IndexedDB y `localStorage`, funciona sin conexión y no requiere cuenta, servidor, anuncios ni rastreo.[1]\n\nCaracterísticas principales:\n\n- Registro de peso, repeticiones, RPE/RIR y ejercicios por tiempo.[1]\n- Rutinas programables por día y 292 ejercicios con animaciones.[1]\n- Instalación como aplicación desde el navegador.[1]\n- Copias de seguridad desde **Ajustes → Copia de seguridad**.[1]\n- Almacenamiento estrictamente local: borrar los datos del sitio elimina la información, por lo que conviene exportar respaldos periódicamente.[1]\n\nAlternativas:\n\n- **Progressive**: tracker minimalista que guarda los entrenamientos en `localStorage` y funciona completamente offline.[2]\n- **local-first-workout-tracker-pwa**: PWA instalable para móvil y escritorio basada en IndexedDB, sin cuenta ni backend.[4]\n- **Fitness Memo**: registro de entrenamientos offline cuya información permanece únicamente en `localStorage` del dispositivo.[5]",
+      "citations": [
+        "https://github.com/LuisDuran-code/kinesis",
+        "https://github.com/Schroedingberg/progressive",
+        "https://github.com/msrofficial/openGym-V2/blob/main/docs/MOBILE.md",
+        "https://github.com/brunocpf/local-first-workout-tracker-pwa",
+        "https://github.com/Asugawara/fitness-memo",
+        "https://github.com/jlgarciavalverde/cheluisfit-app",
+        "https://github.com/OutSystems/docs-odc/blob/main/src/eap/integration-with-systems/mobile-plugins/health-fitness/intro.md",
+        "https://github.com/alexanderop/awesome-local-first/blob/main/README.md",
+        "https://github.com/alantriesagain/awesome-local-first",
+        "https://github.com/sasogu/entrena"
+      ]
+    }
+  ]
+}
