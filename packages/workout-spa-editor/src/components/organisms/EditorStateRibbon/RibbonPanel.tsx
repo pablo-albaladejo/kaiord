@@ -4,9 +4,10 @@ import { Button } from "../../atoms/Button/Button";
 import type { RibbonContent } from "./ribbon-content";
 
 type RibbonPanelProps = {
-  content: RibbonContent;
+  content: Pick<RibbonContent, "tone">;
   headline: string;
-  detail: string;
+  /** Absent for a Connection notice, whose one sentence is the headline. */
+  detail?: string;
   fixLabel?: string;
   onFix?: () => void;
   /** The single send control, supplied by the ribbon. */
@@ -44,9 +45,11 @@ export function RibbonPanel({
         <p className="m-0 text-[13px] font-semibold text-ink-strong">
           {headline}
         </p>
-        <p className="m-0 text-[12.5px] leading-relaxed text-ink-muted text-pretty">
-          {detail}
-        </p>
+        {detail !== undefined && (
+          <p className="m-0 text-[12.5px] leading-relaxed text-ink-muted text-pretty">
+            {detail}
+          </p>
+        )}
       </div>
       <div className="flex flex-none flex-wrap items-center gap-2">
         {action}

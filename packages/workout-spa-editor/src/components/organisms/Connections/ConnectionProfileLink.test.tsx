@@ -102,7 +102,7 @@ describe("ConnectionProfileLink", () => {
     expect(state.connect).toHaveBeenCalledOnce();
   });
 
-  it("should ask for a sign-in first when the source has no session", () => {
+  it("should leave a source with no session to its card's Connection notice", () => {
     // Arrange
     state.connected = false;
 
@@ -110,9 +110,11 @@ describe("ConnectionProfileLink", () => {
     renderLink();
 
     // Assert
-    const notice = screen.getByTestId("connection-profile-link-train2go");
-    expect(notice).toHaveTextContent("Sign in to Train2Go in this browser");
-    expect(notice).not.toHaveTextContent("signed in on this browser");
+    // The card already shows the one notice and fix; a second sign-in line
+    // here would word the same Connection twice.
+    expect(
+      screen.queryByTestId("connection-profile-link-train2go")
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
@@ -127,7 +129,7 @@ describe("ConnectionProfileLink", () => {
     expect(screen.getByRole("button", { name: "Linking…" })).toBeDisabled();
   });
 
-  it("should word an outdated extension with its one fix", () => {
+  it("should not word an outdated extension a second time beside the card's notice", () => {
     // Arrange
     state.error = "outdated";
 
@@ -135,9 +137,8 @@ describe("ConnectionProfileLink", () => {
     renderLink();
 
     // Assert
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Update the Kaiord extension for Train2Go."
-    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByText(/update/i)).not.toBeInTheDocument();
   });
 
   // P-07: the link used to be shown, and undone, only in the Profile

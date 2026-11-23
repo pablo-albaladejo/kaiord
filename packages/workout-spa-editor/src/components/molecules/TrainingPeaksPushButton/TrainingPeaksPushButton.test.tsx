@@ -244,7 +244,9 @@ describe("TrainingPeaksPushButton", () => {
     // Assert
     expect(
       await screen.findByTestId("trainingpeaks-push-error")
-    ).toHaveTextContent("footer.trainingPeaksNotAnswering");
+    ).toHaveTextContent(
+      "TrainingPeaks is not answering, so you cannot use it in Kaiord right now."
+    );
   });
 
   it("should send nothing when the athlete cancels the copy", async () => {

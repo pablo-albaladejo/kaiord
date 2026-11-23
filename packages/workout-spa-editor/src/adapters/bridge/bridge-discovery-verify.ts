@@ -4,12 +4,16 @@
  * Confirms a bridge announcement is legitimate by pinging the announced
  * extensionId and checking that the returned manifest matches the
  * declared bridgeId and schema. Rejects spoofed announcements.
+ *
+ * The protocol version is deliberately NOT checked here: an extension on
+ * another version is still that Kaiord extension. Discovery decides what to do
+ * with it (it does not register it, and remembers it as outdated), so the App
+ * offers Update rather than Install (#1098).
  */
 
 import type { BridgeManifest } from "../../types/bridge-schemas";
 import { bridgeManifestSchema } from "../../types/bridge-schemas";
 import type { BridgeAnnouncement } from "./bridge-discovery-types";
-import { isAcceptedBridgeProtocol } from "./bridge-protocol";
 import { sendBridgeMessage } from "./bridge-transport";
 
 /**
@@ -28,12 +32,5 @@ export async function verifyAnnouncement(
   if (!manifest.success) return null;
 
   if (manifest.data.id !== announcement.bridgeId) return null;
-  if (
-    !isAcceptedBridgeProtocol(
-      announcement.bridgeId,
-      manifest.data.protocolVersion
-    )
-  )
-    return null;
   return manifest.data;
 }

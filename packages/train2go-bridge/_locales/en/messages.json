@@ -23,45 +23,21 @@
     "message": "Connected as $name$",
     "description": "Status verdict when connected, naming the signed-in user.",
     "placeholders": {
-      "name": { "content": "$1", "example": "Pablo" }
+      "name": {
+        "content": "$1",
+        "example": "Pablo"
+      }
     }
   },
   "coachSub": {
     "message": "Coach · $name$",
     "description": "Status cause line naming the athlete's coach.",
     "placeholders": {
-      "name": { "content": "$1", "example": "Aritz Mardaras" }
-    }
-  },
-  "sessionSignedOut": {
-    "message": "Session signed out",
-    "description": "Status verdict when the Train2Go session is inactive."
-  },
-  "sessionSignedOutCause": {
-    "message": "Your Train2Go tab is logged out, so no new plan is reaching Kaiord.",
-    "description": "Status cause sentence naming the consequence of a logged-out session."
-  },
-  "sessionExpired": {
-    "message": "Session expired",
-    "description": "Status verdict when the Train2Go session is inactive AND an earlier popup open already recorded the outage, so its start date is known."
-  },
-  "sessionExpiredCause": {
-    "message": "No new plan has reached Kaiord since $date$. Logging back in at Train2Go starts it again.",
-    "description": "Dated cause sentence for the signed-out state. Names Kaiord's own intake, which the stored stamp establishes.",
-    "placeholders": {
-      "date": {
+      "name": {
         "content": "$1",
-        "example": "23 Jul"
+        "example": "Aritz Mardaras"
       }
     }
-  },
-  "bridgeNotResponding": {
-    "message": "Bridge not responding",
-    "description": "Status verdict when the extension's background worker times out."
-  },
-  "bridgeNotRespondingCause": {
-    "message": "The extension's background worker did not answer. Try again.",
-    "description": "Status cause sentence for a background-worker timeout."
   },
   "captionFeeds": {
     "message": "Feeds Kaiord",
@@ -135,7 +111,10 @@
     "message": "Updated $phrase$",
     "description": "Athlete-card freshness line, e.g. 'Updated 10 minutes ago'.",
     "placeholders": {
-      "phrase": { "content": "$1", "example": "10 minutes ago" }
+      "phrase": {
+        "content": "$1",
+        "example": "10 minutes ago"
+      }
     }
   },
   "updatedJustNow": {
@@ -146,62 +125,82 @@
     "message": "$count$ minute ago",
     "description": "Relative time, singular minutes.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "minutesAgo": {
     "message": "$count$ minutes ago",
     "description": "Relative time, plural minutes.",
     "placeholders": {
-      "count": { "content": "$1", "example": "10" }
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
     }
   },
   "hourAgo": {
     "message": "$count$ hour ago",
     "description": "Relative time, singular hours.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "hoursAgo": {
     "message": "$count$ hours ago",
     "description": "Relative time, plural hours.",
     "placeholders": {
-      "count": { "content": "$1", "example": "5" }
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
     }
   },
   "dayAgo": {
     "message": "$count$ day ago",
     "description": "Relative time, singular days.",
     "placeholders": {
-      "count": { "content": "$1", "example": "1" }
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
     }
   },
   "daysAgo": {
     "message": "$count$ days ago",
     "description": "Relative time, plural days.",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "openEditor": {
     "message": "Open Kaiord editor",
     "description": "Footer link that opens the Kaiord editor."
   },
-  "signInTrain2go": {
-    "message": "Log in to Train2Go",
-    "description": "Primary footer link that fixes a logged-out Train2Go session."
-  },
   "openTrain2go": {
     "message": "Open Train2Go ↗",
     "description": "Secondary footer link opening Train2Go."
   },
-  "retry": {
-    "message": "Retry",
-    "description": "Button that retries the connection check."
-  },
   "refresh": {
     "message": "Refresh",
     "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Since $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
   }
 }

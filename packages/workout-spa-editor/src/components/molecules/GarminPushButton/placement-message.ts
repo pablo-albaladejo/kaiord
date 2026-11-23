@@ -4,6 +4,7 @@
  * in Garmin but needs the athlete (a duplicate, an unconfirmed entry, no
  * date) is a warning, never an error; only a failed run is danger.
  */
+import type { ConnectionState } from "../../../application/connections/connection-state";
 import type { PlacementNotice } from "../../../application/garmin-placement/placement-notice";
 import type { PlacementResult } from "../../../application/garmin-placement/placement-result";
 
@@ -62,3 +63,25 @@ export const needsAthlete = (notice: PlacementNotice): boolean =>
   notice.removable.length > 0 ||
   (notice.result !== undefined &&
     placementMessage(notice.result, "").tone !== "plain");
+
+/**
+ * A placement that stopped because of the Garmin Connection carries that
+ * Connection's notice, the words every other surface shows: Garmin refused the
+ * sign-in, did not answer in time, or the extension cannot write the calendar.
+ */
+export const placementConnection = (
+  result: PlacementResult
+): ConnectionState | null => {
+  if (result.kind === "library-only") {
+    return result.reason === "bridge-outdated" ? "outdated" : null;
+  }
+  if (result.kind !== "failed") return null;
+  if (result.reason === "needs-reauth") return "signed-out";
+  if (
+    result.reason === "deadline-before-send" ||
+    result.reason === "calendar-unreadable"
+  ) {
+    return "not-answering";
+  }
+  return null;
+};

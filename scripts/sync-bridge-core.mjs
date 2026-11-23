@@ -73,6 +73,13 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "bridge-popup-health.js",
     bridges: ALL_BRIDGES,
   },
+  // The four Connection fixes and their one wording, read by every popup and,
+  // through @kaiord/i18n, by the Kaiord App (scripts/check-connection-notices.mjs).
+  {
+    master: "connection-notices.js",
+    dest: "connection-notices.js",
+    bridges: ALL_BRIDGES,
+  },
   { master: "popup.css", dest: "popup.css", bridges: ALL_BRIDGES },
   // The app's theme preference: stored by background.js on the external
   // `set-theme` action, applied by popup.html before first paint.

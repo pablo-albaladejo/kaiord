@@ -4,6 +4,7 @@ import type { ConnectionSource } from "../../../application/connections/connecti
 import { buildConnectionSummary } from "../../../application/connections/connection-summary";
 import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import { useDiscoverySettled } from "../../../hooks/connections/use-discovery-settled";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { ConnectionRefreshButton } from "./ConnectionRefreshButton";
 import { ConnectionsBanner } from "./ConnectionsBanner";
@@ -29,6 +30,7 @@ type Props = {
  */
 export function ConnectionsHealth({ sources, byDataType }: Props) {
   const t = useTranslate("connections");
+  const locale = useActiveLocale();
   const coverage = buildConnectionCoverage(sources, byDataType);
   const summary = buildConnectionSummary(sources, coverage);
   const settled = useDiscoverySettled(summary.detected);
@@ -41,7 +43,7 @@ export function ConnectionsHealth({ sources, byDataType }: Props) {
       </div>
       <ConnectionSummaryRow summary={settled ? summary : null} />
       <ConnectionsBanner
-        consequence={buildConnectionConsequence(sources, coverage, t)}
+        consequence={buildConnectionConsequence(sources, coverage, t, locale)}
       />
     </div>
   );

@@ -83,20 +83,24 @@ describe("verifyAnnouncement", () => {
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
-  it("should return false when the protocol version is unsupported", async () => {
+  it("should accept an extension on another protocol version so its probe can offer Update", async () => {
     // Arrange
-
-    // Act
+    const otherVersion = validManifest.data.protocolVersion + 1;
     mockSend.mockResolvedValue({
       ok: true,
       data: {
         ...validManifest.data,
-        protocolVersion: 99,
+        protocolVersion: otherVersion,
       },
     });
 
+    // Act
+    const manifest = await verifyAnnouncement(ann);
+
     // Assert
-    await expect(verifyAnnouncement(ann)).resolves.toBeNull();
+    // Rejecting it made an outdated extension look absent, so the App said
+    // Install where only Update can help (#1098).
+    expect(manifest?.protocolVersion).toBe(otherVersion);
   });
   it.each([1, 2])(
     "should accept a Train2Go extension on protocol %i, the current one or the one before it",
@@ -127,8 +131,11 @@ describe("verifyAnnouncement", () => {
     }
   );
 
-  it("should not accept protocol 2 from an extension still on protocol 1", async () => {
+  it("should register a Garmin extension on protocol 2 so its probe can say it is outdated", async () => {
     // Arrange
+    // Garmin accepts only protocol 1; refusing the announcement here would
+    // make the extension look absent and offer Install (#1098). The Session
+    // probe reads the same version and reports it outdated instead.
     mockSend.mockResolvedValue({
       ok: true,
       data: { ...validManifest.data, protocolVersion: 2 },
@@ -138,6 +145,6 @@ describe("verifyAnnouncement", () => {
     const manifest = await verifyAnnouncement(ann);
 
     // Assert
-    expect(manifest).toBeNull();
+    expect(manifest?.protocolVersion).toBe(2);
   });
 });

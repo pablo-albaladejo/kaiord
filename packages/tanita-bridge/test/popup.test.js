@@ -12,6 +12,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "connection-notices.js",
   "bridge-popup-health.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
@@ -98,32 +99,42 @@ describe("Tanita popup", () => {
     );
   });
 
-  it("renders not-signed-in state with the value prop and MyTANITA as primary CTA", async () => {
+  it("offers Try again, never a sign-out it cannot verify, when the export is out of reach", async () => {
     const doc = await open(
       buildChromeMock({
         sessionResponse: { ok: true, data: { authenticated: false } },
       })
     );
 
+    // Today's check folds a refused sign-in into the same answer as a Tanita
+    // outage, so the notice names no cause and offers Try again.
     expect(doc.getElementById("status").className).toContain(
-      "status-block--muted"
+      "status-block--warn"
     );
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "no password stored"
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Tanita is not answering, so you cannot use it in Kaiord right now."
     );
-    expect(doc.getElementById("chips-region").textContent).toContain(
-      "Will feed Kaiord"
-    );
-    expect(doc.querySelectorAll(".chip--dashed").length).toBe(2);
-    expect(doc.getElementById("consequence-region").textContent).toBe(
-      "Both currently come from manual entry."
-    );
-    // The fix lives at MyTANITA, not in the editor, so it takes the primary.
-    expect(doc.querySelector(".cta-primary").textContent).toBe("Open MyTANITA");
-    expect(doc.querySelector(".cta-secondary").textContent).toBe(
-      "Set up in Kaiord ↗"
-    );
+    expect(doc.getElementById("status-sub").hidden).toBe(true);
+    expect(doc.body.textContent).not.toMatch(/signed out|not signed in/i);
+    expect(doc.getElementById("chips-region").children.length).toBe(0);
+    expect(doc.getElementById("consequence-region").children.length).toBe(0);
+    const footer = doc.getElementById("footer-region");
+    expect(footer.children.length).toBe(1);
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
+  });
+
+  it("re-runs the check from Try again", async () => {
+    const chromeMock = buildChromeMock({
+      sessionResponse: { ok: true, data: { authenticated: false } },
+    });
+    const doc = await open(chromeMock);
+    const before = chromeMock.runtime.sendMessage.mock.calls.length;
+
+    doc.getElementById("notice-fix").click();
+    await flushAsync();
+    await flushAsync();
+
+    expect(chromeMock.runtime.sendMessage.mock.calls.length).toBe(before + 1);
   });
 
   it("dates the outage once an earlier open already recorded it", async () => {
@@ -134,10 +145,10 @@ describe("Tanita popup", () => {
       })
     );
 
-    expect(doc.getElementById("status-text").textContent).toBe("Session ended");
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "Nothing has reached Kaiord since 23 Apr."
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Tanita is not answering, so you cannot use it in Kaiord right now."
     );
+    expect(doc.getElementById("status-sub").textContent).toBe("Since 23 Apr.");
     // A state that needs the user is a shape, not a colour: the palette has
     // no warning hue to promote the dot with.
     const mark = doc.querySelector("[data-status-mark]");
@@ -152,9 +163,9 @@ describe("Tanita popup", () => {
 
     const doc = await open(chromeMock);
 
-    // "Nothing has reached Kaiord since today" is a vacuous sentence, so the
-    // first observation renders the dateless copy...
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
+    // "Since today" is a vacuous date, so the first observation renders the
+    // dateless notice...
+    expect(doc.getElementById("status-sub").hidden).toBe(true);
     expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
       "span"
     );
@@ -235,13 +246,15 @@ describe("Tanita popup", () => {
     );
   });
 
-  it("falls back to not-signed-in when the background answers with an error", async () => {
+  it("never says signed out when the background answers with an error", async () => {
     const doc = await open(
       buildChromeMock({ sessionResponse: { ok: false, error: "boom" } })
     );
 
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
-    expect(doc.querySelector(".cta-primary").textContent).toBe("Open MyTANITA");
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Tanita is not answering, so you cannot use it in Kaiord right now."
+    );
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
   });
 
   it("still renders when chrome.storage is unavailable", async () => {
@@ -253,8 +266,10 @@ describe("Tanita popup", () => {
     const doc = await open(chromeMock);
 
     // Storage is best-effort: losing it costs the date, not the popup.
-    expect(doc.getElementById("status-text").textContent).toBe("Not signed in");
-    expect(doc.querySelector(".cta-primary").textContent).toBe("Open MyTANITA");
+    expect(doc.getElementById("status-text").textContent).toBe(
+      "Tanita is not answering, so you cannot use it in Kaiord right now."
+    );
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
   });
 
   it("should ask the extension to check the session each time the popup opens and on Refresh", async () => {

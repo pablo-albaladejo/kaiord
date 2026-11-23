@@ -1,11 +1,16 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { connectionFixHref } from "../../../application/connections/connection-fix-target";
 import type { BulkOutcome } from "../../../application/garmin-bulk/send-week-to-garmin";
 import { failed } from "../../../application/garmin-placement/placement-result";
 import { CALENDAR_WRITE_FEATURE } from "../../../application/garmin-placement/placement-timing";
-import { GARMIN_BRIDGE_STORE_URL } from "../../molecules/GarminPushButton/PlacementFeedback";
 import { SendWeekPanel, type SendWeekPanelProps } from "./SendWeekPanel";
+
+vi.mock("../../../contexts", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  useGarminBridge: () => ({ detectExtension: vi.fn() }),
+}));
 
 const T0 = new Date("2026-10-01T08:00:00.000Z");
 const WAIT_MS = 30_000;
@@ -39,15 +44,18 @@ afterEach(() => vi.useRealTimers());
 describe("SendWeekPanel", () => {
   it("should show one pre-flight message", () => {
     // Arrange
-    const state = { phase: "blocked", failure: "no-session" } as const;
+    const state = { phase: "blocked", failure: "signed-out" } as const;
 
     // Act
     renderPanel([], { state });
 
     // Assert
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Sign in to Garmin Connect in this browser, then send the week."
+      "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser."
     );
+    expect(
+      screen.getByRole("link", { name: "Sign in to Garmin" })
+    ).toBeInTheDocument();
   });
 
   it("should point a missing export route at Connections", () => {
@@ -91,8 +99,12 @@ describe("SendWeekPanel", () => {
 
     // Assert
     expect(
-      screen.getAllByRole("link", { name: "Update the extension" })
-    ).toEqual([expect.objectContaining({ href: GARMIN_BRIDGE_STORE_URL })]);
+      screen.getAllByRole("link", { name: "Update Kaiord for Garmin" })
+    ).toEqual([
+      expect.objectContaining({
+        href: connectionFixHref("update", "garmin-bridge"),
+      }),
+    ]);
     expect(screen.getByText("Library only: 2")).toBeInTheDocument();
     expect(screen.queryByText(/Needs attention/)).not.toBeInTheDocument();
     expect(

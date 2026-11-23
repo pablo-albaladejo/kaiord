@@ -27,8 +27,7 @@ const source = (
   status: "connected",
   bridgeDetected: true,
   disconnected: false,
-  needsReauth: false,
-  outdated: false,
+  connection: "working",
   sessionVerifiable: true,
   lastSyncAt: undefined,
   importTypes: [],
@@ -59,8 +58,10 @@ describe("useSettingsAttention", () => {
     store.value = [
       source({
         id: "whoop",
+        name: "WHOOP",
         bridgeId: "whoop-bridge",
         status: "attention",
+        connection: "outdated",
         lastSyncAt: LAST_SYNC_AT,
       }),
     ];
@@ -71,7 +72,8 @@ describe("useSettingsAttention", () => {
     // Assert
     expect(result.current).toEqual({
       title: "1 connection needs attention",
-      detail: "No new data since 2026-07-20",
+      detail:
+        "You cannot use WHOOP in Kaiord until Kaiord for WHOOP is updated.",
       action: {
         label: "Open connections",
         onSelect: expect.any(Function),

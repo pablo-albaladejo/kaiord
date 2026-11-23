@@ -17,8 +17,7 @@ const source = (
     status,
     bridgeDetected: true,
     disconnected: false,
-    needsReauth: false,
-    outdated: false,
+    connection: "working",
     ...overrides,
   }) as ConnectionSource;
 
@@ -47,54 +46,21 @@ describe("detailKeyFor", () => {
     expect(key).toBe("detail.installed");
   });
 
-  it("should tell an outdated bridge to update rather than to sign in", () => {
-    // Arrange
-    // The discriminating state, and the one the product actually produces:
-    // `outdatedExtension()` returns `{outdated: true, needsReauth: false}`, and
-    // its `error` drives the card to `attention`. A fixture with both flags set
-    // would prove nothing — `needsReauth` is read first among the survivors.
-    const outdated = source("attention", { outdated: true });
+  it.each(["outdated", "signed-out", "not-answering"] as const)(
+    "should leave a %s Connection's words to its notice, with no detail line",
+    (connection) => {
+      // Arrange
+      const broken = source("attention", { connection });
 
-    // Act
-    const key = detailKeyFor(outdated);
+      // Act
+      const key = detailKeyFor(broken);
 
-    // Assert
-    expect(key).toBe("detail.outdated");
-    expect(key).not.toBe("detail.noAccess");
-  });
+      // Assert
+      expect(key).toBeNull();
+    }
+  );
 
-  it("should state a failed read without naming its cause when nothing else is known", () => {
-    // Arrange
-    // The same status reached without a version mismatch. Without this the
-    // outdated branch could swallow every attention card and still look green.
-    // This is also the branch the Garmin card lands on: `gcApi.ok === false`
-    // is all the probe has, and it is set by an unusable token, a Garmin 5xx
-    // and a network blip alike.
-    const readFailed = source("attention");
-
-    // Act
-    const key = detailKeyFor(readFailed);
-
-    // Assert
-    expect(key).toBe("detail.noAccess");
-  });
-
-  it("should not treat a re-auth flag as a cause of its own", () => {
-    // Arrange
-    // Its only producer forces the flag true for any non-2xx (#1105), and that
-    // provider authenticates with a session cookie rather than a grant, so
-    // "authorise again" was both uninformative and less accurate than the
-    // sign-in `noAccess` already offers.
-    const reauth = source("attention", { needsReauth: true });
-
-    // Act
-    const key = detailKeyFor(reauth);
-
-    // Assert
-    expect(key).toBe("detail.noAccess");
-  });
-
-  it("should leave an absent extension to the extension line rather than say disconnected", () => {
+  it("should leave an absent extension to its Install notice rather than say disconnected", () => {
     // Arrange
     // Both are true of a source the user unlinked and then uninstalled; the
     // blocking one is the missing extension, which is the one with no control.

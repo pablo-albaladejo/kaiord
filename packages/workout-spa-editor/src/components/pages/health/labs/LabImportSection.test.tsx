@@ -40,6 +40,7 @@ vi.mock("./map-extraction-to-draft", () => ({
 
 vi.mock("../../../../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: vi.fn() },
+  DISCOVER_REQUEST_DELAY_MS: 3_000,
 }));
 vi.mock("../../../../adapters/bridge/whoop-transport", () => ({
   readWhoopStatus: vi.fn(),

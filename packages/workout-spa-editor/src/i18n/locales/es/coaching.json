@@ -93,9 +93,7 @@
     "loadingDescription": "Cargando descripción…",
     "retryDescription": "Reintentar",
     "descriptionError": {
-      "not-linked": "Este coach no está vinculado a este atleta.",
-      "session-expired": "Tu sesión de coaching caducó: reconéctate y reintenta.",
-      "transport-error": "No se pudo cargar la descripción. Revisa que la extensión del navegador esté instalada y activa."
+      "not-linked": "Este coach no está vinculado a este atleta."
     },
     "showAll": "Ver todo",
     "showLess": "Ver menos"
@@ -168,14 +166,13 @@
     "empty": "No hay entrenos del mismo día y deporte disponibles para emparejar."
   },
   "zonesSync": {
-    "fetchFailed": "Train2Go no responde, así que tus zonas no se han sincronizado. Inténtalo de nuevo.",
     "shapeMismatch": "Train2Go ha enviado unas zonas que Kaiord no puede leer, así que no se han sincronizado.",
-    "unsupported": "Esta plataforma de entrenamiento no comparte zonas."
+    "unsupported": "Esta plataforma de entrenamiento no comparte zonas.",
+    "notSynced": "Tus zonas no se han sincronizado."
   },
   "sync": {
     "defaultLabel": "Coach",
     "connectTo": "Conectar con {{label}}",
-    "updateExtension": "Actualiza la extensión de Kaiord para {{label}}.",
     "routeInactiveTitle": "{{label}} · ruta inactiva",
     "routeInactiveAria": "{{label}} — ruta inactiva",
     "syncAria": "Sincronizar {{label}}"

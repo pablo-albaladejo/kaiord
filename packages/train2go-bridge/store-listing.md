@@ -77,7 +77,7 @@ See `docs/cws-credentials-setup.md` for the one-time CWS API credentials setup.
 Capture popup screenshots at 640x400 or 1280x800:
 
 1. **Connected state**: Sign in to Train2Go, click the extension icon, capture the popup showing "Connected as …", the coach line and this week's figures
-2. **Signed-out state**: Sign out of Train2Go, click the extension icon, capture the popup showing "Session signed out"
+2. **Not-answering state**: Sign out of Train2Go, click the extension icon, capture the popup showing "Train2Go is not answering, so you cannot use it in Kaiord right now." and "Try again"
 
 Steps to capture:
 

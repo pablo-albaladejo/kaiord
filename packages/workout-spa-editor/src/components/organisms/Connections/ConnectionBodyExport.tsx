@@ -2,6 +2,7 @@ import type { TanitaGarminSyncStatus } from "../../../hooks/use-tanita-garmin-sy
 import { useTanitaGarminSync } from "../../../hooks/use-tanita-garmin-sync";
 import { useTranslate } from "../../../i18n/use-translate";
 import { Button } from "../../atoms/Button";
+import { PlatformConnectionNotice } from "../../molecules/ConnectionNotice/PlatformConnectionNotice";
 
 const IN_FLIGHT: readonly TanitaGarminSyncStatus[] = [
   "reading",
@@ -41,9 +42,17 @@ export function ConnectionBodyExport({ sourceId, profileId }: Props) {
       >
         {t("manage.bodyExport")}
       </Button>
-      <p className="text-[12px] text-ink-muted" role="status">
-        {t(`manage.bodyExportStatus.${status}`)}
-      </p>
+      {status === "needsReauth" ? (
+        <PlatformConnectionNotice
+          bridgeId="tanita-bridge"
+          platform="Tanita"
+          connection="signed-out"
+        />
+      ) : (
+        <p className="text-[12px] text-ink-muted" role="status">
+          {t(`manage.bodyExportStatus.${status}`)}
+        </p>
+      )}
       {status === "error" && lastError !== null && (
         <p className="text-[12px] text-[var(--danger-text)]">{lastError}</p>
       )}

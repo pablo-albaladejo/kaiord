@@ -76,7 +76,7 @@ further workflow changes required at that point.
 Capture popup screenshots at 640x400 or 1280x800:
 
 1. **Connected state**: Open WHOOP, log in, click extension icon, capture popup showing "Connected"
-2. **Signed-out state**: Close all WHOOP tabs / sign out, click extension icon, capture popup showing "Session signed out"
+2. **Sign-in state**: Sign out of WHOOP, click extension icon, capture popup showing "You cannot use WHOOP in Kaiord until you sign in to WHOOP in this browser." and "Sign in to WHOOP"
 
 Steps to capture:
 

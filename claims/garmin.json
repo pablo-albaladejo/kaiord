@@ -137,7 +137,7 @@
         },
         {
           "test": "packages/garmin-bridge/test/popup.test.js",
-          "title": "renders disconnected state with Retry when ping fails"
+          "title": "offers Try again, not a sign-in, when Garmin's read fails"
         }
       ]
     },

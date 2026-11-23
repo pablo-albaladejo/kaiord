@@ -2,6 +2,7 @@ import { render as rtlRender, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { connectionFixHref } from "../../../application/connections/connection-fix-target";
 import type { ConnectionSource } from "../../../application/connections/connection-source";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { useConnectionSources } from "../../../hooks/connections/use-connection-sources";
@@ -10,7 +11,6 @@ import { DISCOVERY_SETTLE_MS } from "../../../hooks/connections/use-discovery-se
 import { resetDiscoveryClock } from "../../../hooks/discovery-clock";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
-import { BRIDGE_DOCS_URL } from "../../molecules/CalendarEmptyStates/first-run-steps";
 import { ConnectionsTab } from "./ConnectionsTab";
 
 const render = (ui: ReactElement) =>
@@ -48,8 +48,7 @@ const bridge = (id: string, detected: boolean): ConnectionSource => ({
   status: "available",
   bridgeDetected: detected,
   disconnected: false,
-  needsReauth: false,
-  outdated: false,
+  connection: detected ? "working" : "not-installed",
   lastSyncAt: undefined,
   sessionVerifiable: true,
   importTypes: ["activity"],
@@ -58,7 +57,7 @@ const bridge = (id: string, detected: boolean): ConnectionSource => ({
 
 const IDS = ["garmin", "train2go", "whoop", "tanita", "trainingpeaks"];
 
-describe("ConnectionsTab without the Kaiord extension", () => {
+describe("ConnectionsTab without its extensions", () => {
   beforeEach(() => {
     vi.mocked(useActiveProfileLive).mockReturnValue({
       id: "p1",
@@ -73,24 +72,7 @@ describe("ConnectionsTab without the Kaiord extension", () => {
 
   afterEach(() => resetDiscoveryClock());
 
-  it("should show one banner with the install action when no extension is detected", () => {
-    // Arrange
-    vi.mocked(useConnectionSources).mockReturnValue(
-      IDS.map((id) => bridge(id, false))
-    );
-
-    // Act
-    render(<ConnectionsTab />);
-
-    // Assert
-    const banner = screen.getByTestId("connections-extension-banner");
-    const link = within(banner).getByRole("link", {
-      name: "Install Kaiord extension",
-    });
-    expect(link).toHaveAttribute("href", BRIDGE_DOCS_URL);
-  });
-
-  it("should say each card requires the extension without repeating the long paragraph", () => {
+  it("should give every card its own Install notice, naming its Platform", () => {
     // Arrange
     vi.mocked(useConnectionSources).mockReturnValue(
       IDS.map((id) => bridge(id, false))
@@ -101,18 +83,18 @@ describe("ConnectionsTab without the Kaiord extension", () => {
 
     // Assert
     for (const id of IDS) {
-      const card = screen.getByTestId(`connection-card-${id}`);
-      expect(card).toHaveTextContent("Requires the Kaiord extension");
+      const notice = screen.getByTestId(`connection-notice-${id}`);
+      expect(notice).toHaveTextContent(
+        `You cannot use ${id} in Kaiord until Kaiord for ${id} is installed in this browser.`
+      );
       expect(
-        within(card).getByRole("link", { name: "Install Kaiord extension" })
-      ).toHaveAttribute("href", BRIDGE_DOCS_URL);
+        within(notice).getByRole("link", { name: `Install Kaiord for ${id}` })
+      ).toHaveAttribute("href", connectionFixHref("install", `${id}-bridge`));
     }
-    expect(
-      screen.queryByText(/not running in this browser/i)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/the kaiord extension/i)).not.toBeInTheDocument();
   });
 
-  it("should show no banner once any extension is detected", () => {
+  it("should offer no install on a card whose extension answered", () => {
     // Arrange
     vi.mocked(useConnectionSources).mockReturnValue([
       bridge("garmin", true),
@@ -123,9 +105,8 @@ describe("ConnectionsTab without the Kaiord extension", () => {
     render(<ConnectionsTab />);
 
     // Assert
-    expect(
-      screen.queryByTestId("connections-extension-banner")
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("connection-notice-garmin")).toBeNull();
+    expect(screen.getByTestId("connection-notice-whoop")).toBeInTheDocument();
   });
 
   it("should not call the jargon word bridge in the copy it shows", () => {

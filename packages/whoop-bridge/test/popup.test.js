@@ -12,6 +12,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "connection-notices.js",
   "bridge-popup-health.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
@@ -126,76 +127,10 @@ describe("WHOOP popup", () => {
     );
   });
 
-  it("renders signed-out state with the consequence chips and sign-in as primary CTA", async () => {
-    const dom = setupDom(
-      buildChromeMock({
-        statusResponse: { ok: true, data: { connected: false } },
-      })
-    );
-
-    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
-    await flushAsync();
-    await flushAsync();
-
-    const doc = dom.window.document;
-    expect(doc.getElementById("status").className).toContain(
-      "status-block--warn"
-    );
-    expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
-    );
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "not holding a WHOOP session"
-    );
-    const paused = doc.getElementById("paused-region");
-    expect(paused.className).toBe("chips-box");
-    expect(paused.textContent).toContain("What Kaiord is missing");
-    expect(paused.querySelectorAll(".chip--muted").length).toBeGreaterThan(0);
-    expect(doc.getElementById("chips-region").children.length).toBe(0);
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
-      "Sign in to WHOOP"
-    );
-    expect(doc.querySelector(".cta-secondary").textContent).toBe(
-      "Review in Kaiord ↗"
-    );
-    const consequence = doc.getElementById("consequence-region").textContent;
-    expect(consequence).toContain(
-      "Everything already imported stays in Kaiord"
-    );
-    expect(consequence).toContain("Sign in at app.whoop.com");
-  });
-
-  it("dates the outage once an earlier open already recorded it", async () => {
-    const dom = setupDom(
-      buildChromeMock({
-        statusResponse: { ok: true, data: { connected: false } },
-        health: { brokenSince: BROKEN_AT_MS },
-      })
-    );
-
-    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
-
-    const doc = dom.window.document;
-    expect(doc.getElementById("status-text").textContent).toBe(
-      "Session expired"
-    );
-    // The stamp records when KAIORD observed the failure, so the sentence is
-    // written about Kaiord's own intake — not about when the WHOOP session
-    // actually lapsed, which nothing here can establish.
-    expect(doc.getElementById("status-sub").textContent).toBe(
-      "Kaiord stopped receiving WHOOP data on 23 Apr and has held no session since."
-    );
-    const mark = doc.querySelector("[data-status-mark]");
-    expect(mark.tagName.toLowerCase()).toBe("svg");
-    expect(mark.querySelector("use").getAttribute("href")).toBe("#i-attn");
-  });
-
-  it("does not date an outage it has only just noticed", async () => {
+  it("says not checked yet, with no notice and no outage, when no WHOOP sign-in has been captured", async () => {
     const chromeMock = buildChromeMock({
       statusResponse: { ok: true, data: { connected: false } },
+      health: { brokenSince: BROKEN_AT_MS },
     });
     const dom = setupDom(chromeMock);
 
@@ -205,18 +140,18 @@ describe("WHOOP popup", () => {
     await flushAsync();
 
     const doc = dom.window.document;
+    // The Kaiord App's Session check answers "not-checked" for the same state,
+    // so neither may claim a signed-out session nor offer a fix.
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "Not checked yet"
     );
-    expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
-      "span"
-    );
-    expect(chromeMock.__store.bridgeHealth.brokenSince).toBe(MOCK_NOW_MS);
+    expect(doc.body.textContent).not.toMatch(/signed out|sign in/i);
+    expect(doc.getElementById("notice-fix")).toBeNull();
+    expect(chromeMock.__store.bridgeHealth).toEqual({
+      brokenSince: BROKEN_AT_MS,
+    });
   });
 
-  // The bearer is what `connected` reports and what the health record tracks.
-  // A missing tab is one click from reading again, so folding it into the
-  // record would start an outage the user never had.
   it("does not start an outage when only the tab is missing", async () => {
     const chromeMock = buildChromeMock({
       statusResponse: { ok: true, data: { connected: true } },
@@ -318,29 +253,6 @@ describe("WHOOP popup", () => {
   // true` here would assert nothing (it survived the swapped-branch mutant).
   // Signing out and closing the tab is the ordinary way to leave WHOOP, and
   // naming the tab there sends the user to do something that fixes nothing.
-  it("reports signed out, not no-tab, when the bearer and the tab are both gone", async () => {
-    const dom = setupDom(
-      buildChromeMock({
-        statusResponse: { ok: true, data: { connected: false } },
-        tabOpen: false,
-      })
-    );
-
-    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
-    await flushAsync();
-    await flushAsync();
-
-    const doc = dom.window.document;
-    expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
-    );
-    // The reachable falsehood this replaced: a browser restart empties
-    // chrome.storage.session, so the commonest way to reach this state has no
-    // WHOOP tab at all — and the old cause told the user their tab was signed
-    // out. The cause may describe the bridge, never a tab that is not there.
-    expect(doc.getElementById("status-sub").textContent).not.toContain("tab");
-  });
-
   it("renders the checking skeleton in every region a resolved state fills", () => {
     const dom = setupDom(
       buildChromeMock({
@@ -374,7 +286,7 @@ describe("WHOOP popup", () => {
 
   it("still renders when chrome.storage is unavailable", async () => {
     const chromeMock = buildChromeMock({
-      statusResponse: { ok: true, data: { connected: false } },
+      statusResponse: { ok: true, data: { connected: true } },
     });
     delete chromeMock.storage;
     const dom = setupDom(chromeMock);
@@ -386,7 +298,7 @@ describe("WHOOP popup", () => {
 
     // Storage is best-effort: losing it costs the date, not the popup.
     expect(dom.window.document.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "Connected"
     );
   });
 
@@ -398,10 +310,11 @@ describe("WHOOP popup", () => {
     expect(POPUP_HTML).toContain(">Wh</span");
   });
 
-  it("falls back to the signed-out state when the background answers with an error", async () => {
-    const dom = setupDom(
-      buildChromeMock({ statusResponse: { ok: false, error: "boom" } })
-    );
+  it("never says signed out when the background answers with an error", async () => {
+    const chromeMock = buildChromeMock({
+      statusResponse: { ok: false, error: "boom" },
+    });
+    const dom = setupDom(chromeMock);
 
     dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
     await flushAsync();
@@ -409,10 +322,10 @@ describe("WHOOP popup", () => {
 
     const doc = dom.window.document;
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "WHOOP is not answering, so you cannot use it in Kaiord right now."
     );
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
-      "Sign in to WHOOP"
-    );
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
+    // A worker that did not answer says nothing about the sign-in.
+    expect(chromeMock.__store.bridgeHealth).toBeUndefined();
   });
 });

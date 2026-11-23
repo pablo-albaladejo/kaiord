@@ -83,7 +83,7 @@ Garmin Connect" bar and "List Workouts" / "Check Session" buttons) that no
 longer exists. Replace it with captures of the current popup:
 
 1. **Connected**: signed in to Garmin Connect, click the extension icon; the popup shows "Connected" and "Open Kaiord editor".
-2. **No access**: signed out of Garmin with no stored token; the popup shows "No access to Garmin Connect" and "Sign in to Garmin Connect".
+2. **Not answering**: with no usable stored token the popup shows "Garmin is not answering, so you cannot use it in Kaiord right now." and "Try again"; when Garmin refused the sign-in, "Sign in to Garmin".
 
 Steps to capture:
 

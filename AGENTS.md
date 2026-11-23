@@ -183,6 +183,14 @@ Audit` job keeps its exact name, reports on every pull request and on push
   GLOSSARY.md retired or withdrew: framework, cockpit, lossless, zero data
   loss, round-trip safe, open standard, interchange format, platform for
   Kaiord itself (`pnpm lint:retired-terms`).
+- `check-connection-notices.mjs` — a Connection that does not work shows one
+  of four fixes (Install, Update, Sign in to the Platform, Try again), each
+  worded once in English and Spanish by
+  `packages/_shared/bridge-core/connection-notices.js`, which the App reads
+  through `@kaiord/i18n` and every popup vendors; a fifth fix, a second
+  wording in the App or an extension, or a popup naming its Platform or
+  sign-in page unlike the App fails (`pnpm lint:connection-notices`,
+  R-ConnectionNoticesSingleSource).
 - `local/no-jsx-literal-text` + `local/no-literal-copy` (ESLint rules in
   `scripts/eslint-rules/`) — every string the athlete reads in the Kaiord App
   comes from the `en`/`es` dictionaries: JSX copy, toasts, error and message

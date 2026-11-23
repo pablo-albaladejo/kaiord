@@ -4,10 +4,10 @@ import type { WorkoutState } from "../../../types/calendar-enums";
 import { resolveRibbonContent } from "./ribbon-content";
 import type { GarminGate } from "./use-garmin-gate";
 
-const BROKEN_GATES: Exclude<GarminGate, "ready">[] = [
-  "no-extension",
+const BROKEN_GATES: Exclude<GarminGate, "ready" | "checking">[] = [
+  "not-installed",
   "export-disabled",
-  "no-session",
+  "signed-out",
 ];
 
 describe("resolveRibbonContent", () => {
@@ -67,10 +67,11 @@ describe("resolveRibbonContent", () => {
     );
 
     // Assert
-    expect(contents.map((c) => c?.fixLabelKey)).toEqual([
-      "ribbon.noBridgeAction",
-      "ribbon.exportOffAction",
-      "ribbon.noSessionAction",
+    // A Connection state is its own notice; only the route is the ribbon's.
+    expect(contents).toEqual([
+      { connection: "not-installed", tone: "quiet" },
+      expect.objectContaining({ fixLabelKey: "ribbon.exportOffAction" }),
+      { connection: "signed-out", tone: "quiet" },
     ]);
   });
 
@@ -107,9 +108,20 @@ describe("resolveRibbonContent", () => {
     const state: WorkoutState = "pushed";
 
     // Act
-    const content = resolveRibbonContent("no-session", state, true);
+    const content = resolveRibbonContent("not-answering", state, true);
 
     // Assert
-    expect(content?.fixLabelKey).toBe("ribbon.noSessionAction");
+    expect(content).toEqual({ connection: "not-answering", tone: "quiet" });
+  });
+
+  it("should word nothing before the first check answers", () => {
+    // Arrange
+    const state: WorkoutState = "structured";
+
+    // Act
+    const content = resolveRibbonContent("checking", state);
+
+    // Assert
+    expect(content).toBeNull();
   });
 });

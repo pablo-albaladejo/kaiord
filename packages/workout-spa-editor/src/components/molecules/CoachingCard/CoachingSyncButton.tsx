@@ -19,6 +19,7 @@
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingSourceError } from "../../../types/coaching-source";
+import { PlatformConnectionNotice } from "../ConnectionNotice/PlatformConnectionNotice";
 import {
   buildSyncTooltip,
   usePrefersReducedMotion,
@@ -64,9 +65,11 @@ export function CoachingSyncButton({
           {t("sync.connectTo", { label })}
         </button>
         {error === "outdated" && (
-          <span className="text-xs text-danger-text">
-            {t("sync.updateExtension", { label })}
-          </span>
+          <PlatformConnectionNotice
+            bridgeId="train2go-bridge"
+            platform={label}
+            connection="outdated"
+          />
         )}
       </div>
     );

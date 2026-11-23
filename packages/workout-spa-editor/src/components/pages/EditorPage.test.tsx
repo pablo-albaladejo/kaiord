@@ -14,7 +14,7 @@
 
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
@@ -23,6 +23,8 @@ import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-a
 import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { ToastContextProvider } from "../../contexts/ToastContext";
+import { DISCOVERY_SETTLE_MS } from "../../hooks/connections/use-discovery-settled";
+import { resetDiscoveryClock } from "../../hooks/discovery-clock";
 import { hasUnsavedEdits } from "../../lib/unsaved-edits";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
@@ -112,6 +114,11 @@ function makeStepfulKrd(stepCount: number): KRD {
 }
 
 describe("EditorPage", () => {
+  // Discovery's window has passed, so a Garmin extension that never
+  // announced is "not-installed" at once rather than still being checked.
+  beforeEach(() => resetDiscoveryClock(Date.now() - DISCOVERY_SETTLE_MS));
+  afterEach(() => resetDiscoveryClock());
+
   beforeEach(async () => {
     await db.table("workouts").clear();
     useWorkoutStore.setState({
@@ -195,13 +202,11 @@ describe("EditorPage", () => {
 
     expect(
       within(ribbon).getByText(
-        /Nothing can reach your watch from this browser/i
+        "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser."
       )
     ).toBeInTheDocument();
     expect(
-      within(ribbon).getByRole("button", {
-        name: /install the kaiord extension/i,
-      })
+      within(ribbon).getByRole("button", { name: "Install Kaiord for Garmin" })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();
     const stored = await db.table<WorkoutRecord>("workouts").get("w-test");
@@ -250,7 +255,7 @@ describe("EditorPage", () => {
 
     expect(
       within(ribbon).getByRole("button", {
-        name: /install the kaiord extension/i,
+        name: "Install Kaiord for Garmin",
       })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("send-to-garmin-button")).toBeNull();

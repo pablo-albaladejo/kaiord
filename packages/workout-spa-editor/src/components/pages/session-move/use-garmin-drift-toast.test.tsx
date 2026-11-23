@@ -38,8 +38,7 @@ vi.mock("../../molecules/GarminPushButton/useGarminPush", () => ({
 }));
 
 const READY = {
-  extensionInstalled: true,
-  sessionActive: true,
+  connection: "working",
   features: [CALENDAR_WRITE_FEATURE],
 };
 const bridge = { ...READY };
@@ -224,18 +223,18 @@ describe("useGarminDriftToast", () => {
   it.each([
     [
       "the extension is not detected",
-      { extensionInstalled: false },
-      "Install the Kaiord extension for Garmin to send this workout.",
+      { connection: "not-installed" },
+      "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser.",
     ],
     [
       "Garmin is signed out",
-      { sessionActive: false },
-      "Sign in to Garmin Connect in this browser to send this workout.",
+      { connection: "signed-out" },
+      "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser.",
     ],
     [
       "the extension cannot write the calendar",
       { features: [] },
-      "Update the Kaiord extension for Garmin to move this workout on the Garmin calendar.",
+      "You cannot use Garmin in Kaiord until Kaiord for Garmin is updated.",
     ],
   ])(
     "should disable the toast's Update Garmin and say why while %s",
@@ -256,7 +255,7 @@ describe("useGarminDriftToast", () => {
 
   it("should hand the toast primitive's ref and props to the disabled button", async () => {
     // Arrange
-    Object.assign(bridge, { sessionActive: false });
+    Object.assign(bridge, { connection: "signed-out" });
     const ref = createRef<HTMLButtonElement>();
     const onClick = vi.fn();
     const persistence = await seedSession({ workout: { date: THU } });

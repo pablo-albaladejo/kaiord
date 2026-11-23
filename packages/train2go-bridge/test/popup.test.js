@@ -12,6 +12,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "connection-notices.js",
   "bridge-popup-health.js",
   "bridge-popup-snapshot.js",
   "popup.js",
@@ -172,23 +173,7 @@ describe("Train2Go popup", () => {
     ).toBe(true);
   });
 
-  it("renders disconnected state with Retry when session is inactive", async () => {
-    const dom = setupDom(
-      buildChromeMock({
-        pingResponse: { ok: true, data: { sessionActive: false } },
-      })
-    );
-
-    await flushAsync();
-    await flushAsync();
-    await flushAsync();
-
-    const status = dom.window.document.getElementById("status");
-    expect(status.className).toContain("status-block--warn");
-    expect(dom.window.document.getElementById("retry-btn")).not.toBeNull();
-  });
-
-  it("makes logging back in the primary CTA and mutes the chips when the session is inactive", async () => {
+  it("offers Try again, not a sign-in, when the check cannot tell why", async () => {
     const dom = setupDom(
       buildChromeMock({
         pingResponse: { ok: true, data: { sessionActive: false } },
@@ -200,24 +185,46 @@ describe("Train2Go popup", () => {
     await flushAsync();
 
     const doc = dom.window.document;
+    // Today's ping answers `sessionActive: false` for a Train2Go outage too,
+    // so the popup must not state a lapsed sign-in it never verified.
+    expect(doc.getElementById("status").className).toContain(
+      "status-block--warn"
+    );
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "Train2Go is not answering, so you cannot use it in Kaiord right now."
     );
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "no new plan is reaching Kaiord"
-    );
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
-      "Log in to Train2Go"
-    );
-    expect(doc.querySelector(".cta-secondary").textContent).toBe(
-      "Open Kaiord editor"
-    );
+    expect(doc.body.textContent).not.toMatch(/signed out|logged out|log in/i);
+    expect(doc.getElementById("footer-region").children.length).toBe(1);
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
     expect(
       doc.getElementById("chips-region").querySelectorAll(".chip--muted").length
     ).toBe(3);
   });
 
-  it("does not accumulate a retry button or CTA set across failure cycles", async () => {
+  it("offers the sign-in when Train2Go itself refused the session", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: {
+          ok: true,
+          data: { sessionActive: false, needsReauth: true },
+        },
+      })
+    );
+
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const fix = dom.window.document.querySelector(
+      "#footer-region .cta-primary"
+    );
+    expect(fix.textContent).toBe("Sign in to Train2Go");
+    expect(fix.getAttribute("href")).toBe(
+      "https://app.train2go.com/user/index"
+    );
+  });
+
+  it("re-runs the check from Try again without piling up controls", async () => {
     const dom = setupDom(
       buildChromeMock({
         pingResponse: { ok: true, data: { sessionActive: false } },
@@ -228,21 +235,15 @@ describe("Train2Go popup", () => {
     await flushAsync();
     await flushAsync();
     const doc = dom.window.document;
-    doc.getElementById("retry-btn").click();
+    doc.getElementById("notice-fix").click();
     await flushAsync();
     await flushAsync();
     await flushAsync();
 
-    // The skeleton and CTA renders each clear the footer; losing BOTH
-    // clears duplicates controls, and losing only the CTA clear leaves
-    // skeleton bars behind — the zero-skeleton assert catches that half.
-    expect(doc.querySelectorAll("#retry-btn").length).toBe(1);
     const footer = doc.getElementById("footer-region");
-    expect(footer.querySelectorAll(".cta-primary").length).toBe(1);
-    expect(footer.querySelectorAll(".cta-secondary").length).toBe(1);
-    expect(footer.querySelectorAll(".cta-retry").length).toBe(1);
+    expect(doc.querySelectorAll("#notice-fix").length).toBe(1);
+    expect(footer.children.length).toBe(1);
     expect(footer.querySelectorAll(".skeleton").length).toBe(0);
-    expect(doc.activeElement.id).toBe("retry-btn");
   });
 
   it("renders the checking skeleton before the probe resolves", () => {
@@ -430,7 +431,7 @@ describe("Train2Go popup", () => {
     expect(
       dom.window.document.getElementById("week-region").textContent
     ).toContain("Rollup unavailable");
-    expect(dom.window.document.getElementById("retry-btn")).toBeNull();
+    expect(dom.window.document.getElementById("notice-fix")).toBeNull();
   });
 
   it("dates the outage once an earlier open already recorded it", async () => {
@@ -448,11 +449,9 @@ describe("Train2Go popup", () => {
 
     const doc = dom.window.document;
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session expired"
+      "Train2Go is not answering, so you cannot use it in Kaiord right now."
     );
-    expect(doc.getElementById("status-sub").textContent).toBe(
-      "No new plan has reached Kaiord since 23 Apr. Logging back in at Train2Go starts it again."
-    );
+    expect(doc.getElementById("status-sub").textContent).toBe("Since 23 Apr.");
     expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
       "svg"
     );
@@ -469,9 +468,7 @@ describe("Train2Go popup", () => {
     await flushAsync();
     await flushAsync();
 
-    expect(dom.window.document.getElementById("status-text").textContent).toBe(
-      "Session signed out"
-    );
+    expect(dom.window.document.getElementById("status-sub").hidden).toBe(true);
     expect(mock.__store.bridgeHealth.brokenSince).toBe(FRESH_NOW);
   });
 
@@ -489,7 +486,9 @@ describe("Train2Go popup", () => {
       () =>
         expect(
           dom.window.document.getElementById("status-text").textContent
-        ).toBe("Bridge not responding"),
+        ).toBe(
+          "Train2Go is not answering, so you cannot use it in Kaiord right now."
+        ),
       { timeout: 2_500 }
     );
 

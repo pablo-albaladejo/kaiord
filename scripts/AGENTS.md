@@ -41,6 +41,7 @@ notes.
 | `check-claims.mjs`                             | Every claim on a surface in `claims/*.json` has a register entry whose proof holds            |
 | `check-method-figures.mjs`                     | Every figure on the method note equals its command's output at the pinned commit, no shell    |
 | `check-retired-terms.mjs`                      | No public text uses a retired or withdrawn GLOSSARY.md term (`retired-terms.vocab.mjs`)       |
+| `check-connection-notices.mjs`                 | Four Connection fixes, one wording each, read only from `_shared/bridge-core`                 |
 | `check-site-csp.mjs`                           | Every assembled page (landing, docs, App) carries a safe CSP (`--merged <dir>`)               |
 | `check-bridge-stale-threshold-parity.test.mjs` | Bridge stale-threshold parity (test-only)                                                     |
 | `check-extension-icons-distinct.mjs`           | `lint:icons-distinct` — each extension has unique icon set                                    |

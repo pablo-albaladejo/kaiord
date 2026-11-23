@@ -23,24 +23,6 @@
     "message": "Reading your Garmin Connect data with access Kaiord minted from an earlier sign-in.",
     "description": "Status cause sentence for the connected state. Names the minted access rather than a live session: the bridge holds OAuth tokens, not a browser session."
   },
-  "noGarminAccess": {
-    "message": "No access to Garmin Connect",
-    "description": "Status verdict when the bridge's last read of Garmin Connect did not succeed. Deliberately cause-neutral — the extension cannot tell an expired token from a Garmin outage."
-  },
-  "noGarminAccessCause": {
-    "message": "Kaiord could not read from Garmin Connect. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
-    "description": "Status cause sentence for the no-access state. Names both possibilities without asserting either, and keeps the sign-in action meaningful."
-  },
-  "noGarminAccessCauseSince": {
-    "message": "Kaiord has read nothing from Garmin Connect since $date$. Signing in again mints fresh access; if you are already signed in, Garmin may be temporarily unavailable.",
-    "description": "Dated variant of the no-access cause, used once an earlier popup open already recorded the outage. Claims only what the extension can establish — that IT has read nothing since that date — not that Garmin access expired then.",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "23 Jul"
-      }
-    }
-  },
   "notChecked": {
     "message": "Not checked yet",
     "description": "Status verdict when no still-valid access is held: the check asks Garmin nothing, because refreshing or minting access would issue a credential."
@@ -48,14 +30,6 @@
   "notCheckedCause": {
     "message": "Kaiord asks Garmin Connect the first time it reads or sends, so looking here mints no access.",
     "description": "Status cause sentence for the not-checked state."
-  },
-  "bridgeNotResponding": {
-    "message": "Bridge not responding",
-    "description": "Status verdict when the extension's background worker times out."
-  },
-  "bridgeNotRespondingCause": {
-    "message": "The extension's background worker did not answer. Try again.",
-    "description": "Status cause sentence for a background-worker timeout."
   },
   "captionFeeds": {
     "message": "Feeds Kaiord",
@@ -201,20 +175,22 @@
     "message": "Open Kaiord editor",
     "description": "Footer link that opens the Kaiord editor."
   },
-  "signInGarmin": {
-    "message": "Sign in to Garmin Connect",
-    "description": "Primary footer link in the no-access state. It is the useful action because signing in lets the bridge mint fresh OAuth access — NOT because the user is known to be signed out, which the extension cannot determine."
-  },
   "openGarmin": {
     "message": "Open Garmin Connect ↗",
     "description": "Secondary footer link opening Garmin Connect."
   },
-  "retry": {
-    "message": "Retry",
-    "description": "Button that retries the connection check."
-  },
   "refresh": {
     "message": "Refresh",
     "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Since $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
   }
 }

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { IntegrationPolicy } from "../../../types/integration-policy";
 import { useGarminGate } from "./use-garmin-gate";
 
-const mockState = { extensionInstalled: false, sessionActive: false };
+const mockState: { connection: string } = { connection: "not-installed" };
 let mockPolicies: IntegrationPolicy[] = [];
 
 vi.mock("../../../contexts", () => ({
@@ -37,8 +37,7 @@ const ENABLED_POLICY: IntegrationPolicy = {
 
 describe("useGarminGate", () => {
   beforeEach(() => {
-    mockState.extensionInstalled = false;
-    mockState.sessionActive = false;
+    mockState.connection = "not-installed";
     mockPolicies = [];
   });
 
@@ -50,12 +49,12 @@ describe("useGarminGate", () => {
     const { result } = renderHook(() => useGarminGate("p1"));
 
     // Assert
-    expect(result.current).toBe("no-extension");
+    expect(result.current).toBe("not-installed");
   });
 
   it("should report a missing export route once the bridge is present", () => {
     // Arrange
-    mockState.extensionInstalled = true;
+    mockState.connection = "signed-out";
     mockPolicies = [];
 
     // Act
@@ -76,8 +75,7 @@ describe("useGarminGate", () => {
     },
   ])("should report export-disabled when $label", ({ policy }) => {
     // Arrange
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
+    mockState.connection = "working";
     mockPolicies = [policy];
 
     // Act
@@ -87,23 +85,21 @@ describe("useGarminGate", () => {
     expect(result.current).toBe("export-disabled");
   });
 
-  it("should report the expired session last, once bridge and route are in place", () => {
+  it("should report the Connection's own state last, once extension and route are in place", () => {
     // Arrange
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = false;
+    mockState.connection = "not-answering";
     mockPolicies = [ENABLED_POLICY];
 
     // Act
     const { result } = renderHook(() => useGarminGate("p1"));
 
     // Assert
-    expect(result.current).toBe("no-session");
+    expect(result.current).toBe("not-answering");
   });
 
   it("should report a reachable watch when the whole chain is intact", () => {
     // Arrange
-    mockState.extensionInstalled = true;
-    mockState.sessionActive = true;
+    mockState.connection = "working";
     mockPolicies = [ENABLED_POLICY];
 
     // Act

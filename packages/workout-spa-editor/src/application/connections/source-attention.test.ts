@@ -14,8 +14,7 @@ const source = (
   status: "connected",
   bridgeDetected: true,
   disconnected: false,
-  needsReauth: false,
-  outdated: false,
+  connection: "working",
   sessionVerifiable: true,
   lastSyncAt: undefined,
   importTypes: [],
@@ -23,12 +22,7 @@ const source = (
   ...overrides,
 });
 
-/**
- * A date-time with no timezone designator parses as LOCAL time, so this is
- * local noon on 2026-07-25 wherever the runner is. Both properties matter:
- * the asserted calendar day holds in every timezone, and it is the LOCAL day
- * being asserted, which is the point of the formatter.
- */
+/** A last sync exists, and still never outranks the Connection's own state. */
 const LAST_SYNC_AT = new Date("2026-07-25T12:00:00").toISOString();
 
 describe("needsAttention", () => {
@@ -95,30 +89,12 @@ describe("buildConnectionAttention", () => {
     expect(attention?.count).toBe(2);
   });
 
-  it("should date the consequence from the last data that arrived", () => {
+  it("should name a lone source by its own Connection state", () => {
     // Arrange
-    const sources = [source({ status: "attention", lastSyncAt: LAST_SYNC_AT })];
-
-    // Act
-    const attention = buildConnectionAttention(sources);
-
-    // Assert
-    expect(attention?.cause).toEqual({
-      kind: "noNewDataSince",
-      date: "2026-07-25",
-    });
-  });
-
-  it("should keep the sign-in cause when a last-sync date also exists", () => {
-    // Arrange
-    // The ordinary case: you only get a re-auth demand for an account you
-    // were already syncing, so both facts are present and the actionable one
-    // must win.
     const sources = [
       source({
-        id: "trainingpeaks",
         status: "attention",
-        needsReauth: true,
+        connection: "not-answering",
         lastSyncAt: LAST_SYNC_AT,
       }),
     ];
@@ -127,46 +103,64 @@ describe("buildConnectionAttention", () => {
     const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.cause).toEqual({ kind: "noAccess" });
+    expect(attention?.cause).toEqual({
+      kind: "notice",
+      connection: "not-answering",
+      name: "Garmin",
+    });
+  });
+
+  it("should keep a sign-in the Platform refused as its cause", () => {
+    // Arrange
+    const sources = [
+      source({
+        id: "trainingpeaks",
+        name: "TrainingPeaks",
+        status: "attention",
+        connection: "signed-out",
+        lastSyncAt: LAST_SYNC_AT,
+      }),
+    ];
+
+    // Act
+    const attention = buildConnectionAttention(sources);
+
+    // Assert
+    expect(attention?.cause).toEqual({
+      kind: "notice",
+      connection: "signed-out",
+      name: "TrainingPeaks",
+    });
   });
 
   it("should report an outdated extension instead of blaming the session", () => {
     // Arrange
     // The probe SUCCEEDED here — the extension answered with an unsupported
     // protocol version — and signing in again would fix nothing.
+    const sources = [source({ status: "attention", connection: "outdated" })];
+
+    // Act
+    const attention = buildConnectionAttention(sources);
+
+    // Assert
+    expect(attention?.cause).toEqual({
+      kind: "notice",
+      connection: "outdated",
+      name: "Garmin",
+    });
+  });
+
+  it("should claim no cause for several affected sources", () => {
+    // Arrange
     const sources = [
-      source({ status: "attention", outdated: true, lastSyncAt: LAST_SYNC_AT }),
+      source({ status: "attention", connection: "outdated" }),
+      source({ id: "whoop", status: "attention", connection: "not-answering" }),
     ];
 
     // Act
     const attention = buildConnectionAttention(sources);
 
     // Assert
-    expect(attention?.cause).toEqual({ kind: "extensionOutdated" });
-  });
-
-  it("should fall back to the cause-free read failure for several affected sources", () => {
-    // Arrange
-    const sources = [
-      source({ status: "attention", lastSyncAt: LAST_SYNC_AT }),
-      source({ id: "whoop", status: "attention" }),
-    ];
-
-    // Act
-    const attention = buildConnectionAttention(sources);
-
-    // Assert
-    expect(attention?.cause).toEqual({ kind: "noAccess" });
-  });
-
-  it("should ignore a stored timestamp that does not parse as a date", () => {
-    // Arrange
-    const sources = [source({ status: "attention", lastSyncAt: "not-a-date" })];
-
-    // Act
-    const attention = buildConnectionAttention(sources);
-
-    // Assert
-    expect(attention?.cause).toEqual({ kind: "noAccess" });
+    expect(attention?.cause).toEqual({ kind: "several" });
   });
 });

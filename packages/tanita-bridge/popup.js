@@ -6,15 +6,11 @@
  * user's own logged-in session. All logic talks to background.js via internal
  * runtime messages.
  *
- * The primary CTA is whatever fixes the current state: going to MyTANITA when
- * the session is missing, opening the Kaiord editor when the export is
- * reachable.
- *
- * Two shapes of "not signed in", told apart by the stored health record. A
- * bridge that has never been observed working gets the dot and the dateless
- * invitation; one that HAS worked and stopped gets the alert icon and the date
- * Kaiord last heard from it, because that is an outage rather than a setup
- * step still pending.
+ * A working Connection opens the Kaiord editor. Anything else shows one
+ * notice with one fix, worded by the vendored connection-notices.js — the
+ * same wording the Kaiord App shows. A bridge never observed working gets the
+ * dot and no date; one that HAS worked and stopped gets the alert icon and
+ * the date Kaiord first saw the check fail.
  *
  * Shared helpers load first from the vendored bridge-popup-utils.js,
  * bridge-popup-shell.js and bridge-popup-health.js (see popup.html script
@@ -22,10 +18,14 @@
  */
 
 /* global msg, $, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
-   renderConsequence, renderSkeleton, renderCtas */
+   renderConsequence, renderSkeleton, renderCtas, renderNotice,
+   KAIORD_CONNECTION_NOTICES */
 
 const OPEN_TANITA_URL = "https://mytanita.eu/en/user";
 const OPEN_EDITOR_URL = "https://kaiord.com/app/";
+// The Platform's name exactly as the Kaiord App's registry spells it, so a
+// notice reads the same in both (scripts/check-connection-notices.mjs).
+const PLATFORM = "Tanita";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
@@ -33,20 +33,12 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   checkingCause: "Usually under a second.",
   connected: "Connected",
   connectedCause: "Reading your body-composition export through your session.",
-  notSignedIn: "Not signed in",
-  notSignedInCause:
-    "Sign in at mytanita.eu once — the bridge reads your export from that session, no password stored.",
-  sessionEnded: "Session ended",
-  sessionEndedCause:
-    "Nothing has reached Kaiord since $1. Sign in at mytanita.eu again and the bridge picks your export back up.",
+  outageSince: "Since $1.",
   captionFeeds: "Feeds Kaiord",
   captionWillFeed: "Will feed Kaiord",
   typeWeight: "Weight",
   typeBodyComposition: "Body Composition",
-  manualFallback: "Both currently come from manual entry.",
   openEditor: "Open Kaiord editor",
-  openTanitaPrimary: "Open MyTANITA",
-  setUpInKaiord: "Set up in Kaiord ↗",
   openTanita: "Open MyTANITA ↗",
   refresh: "Refresh",
 };
@@ -81,10 +73,7 @@ const showRefresh = (visible) => {
 // that has never signed in reads as provisional, one that is connected or
 // interrupted reads as known.
 const setMarkEstablished = (established) => {
-  $("brand-mark").classList.toggle(
-    "popup-header__mark--muted",
-    !established
-  );
+  $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
 };
 
 const renderConnected = () => {
@@ -104,26 +93,39 @@ const renderConnected = () => {
   });
 };
 
-/* `since` is the outage start Kaiord already knew about, or null when this is
-   the first probe that ever failed. Only the first case may name a date. */
-const renderNotSignedIn = (since) => {
-  const dated = since !== null;
-  setMarkEstablished(dated);
-  renderStatusBlock($, msg, {
-    tone: dated ? "warn" : "muted",
-    mark: dated ? "alert" : "dot",
-    verdictKey: dated ? "sessionEnded" : "notSignedIn",
-    causeKey: dated ? "sessionEndedCause" : "notSignedInCause",
-    causeSubs: dated ? [formatSinceDate(since)] : undefined,
+// The Connection's state from this popup's own check: the typed `session`
+// outcome, where only "signed-out" is MyTANITA's own refusal. An older
+// extension's `authenticated: false` cannot tell a refusal from an outage.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
+};
+
+const connectionStateOf = (res) => {
+  const typed = res.ok ? TYPED_STATE[res.data?.session] : undefined;
+  if (typed) return typed;
+  if (res.ok && res.data?.authenticated) return "working";
+  return "not-answering";
+};
+
+/* One notice, one fix. `since` is the outage start Kaiord already knew about,
+   or null when this is the first probe that ever failed; only then may the
+   notice carry a date. */
+const renderBroken = (state, since) => {
+  const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
+    state,
+    PLATFORM,
+    KAIORD_CONNECTION_NOTICES.EXTENSION_LOCALE
+  );
+  setMarkEstablished(since !== null);
+  renderNotice($, notice, {
+    since: since === null ? null : msg("outageSince", [formatSinceDate(since)]),
+    href: OPEN_TANITA_URL,
+    onRetry: () => refresh(),
   });
-  renderChips($, feedChips("dashed"), { caption: msg("captionWillFeed") });
-  renderConsequence($, [msg("manualFallback")]);
-  renderCtas($, {
-    primaryLabel: msg("openTanitaPrimary"),
-    primaryHref: OPEN_TANITA_URL,
-    secondaryLabel: msg("setUpInKaiord"),
-    secondaryHref: OPEN_EDITOR_URL,
-  });
+  renderChips($, []);
+  renderConsequence($, []);
 };
 
 const refresh = async () => {
@@ -136,10 +138,10 @@ const refresh = async () => {
   });
   renderSkeleton($, SKELETON_REGIONS);
   const res = await sendMessage({ action: "checkSession" });
-  const authenticated = res.ok ? !!res.data?.authenticated : false;
-  const health = await recordProbe(authenticated);
-  if (authenticated) renderConnected();
-  else renderNotSignedIn(health.since);
+  const state = connectionStateOf(res);
+  const health = await recordProbe(state === "working");
+  if (state === "working") renderConnected();
+  else renderBroken(state, health.since);
   showRefresh(true);
 };
 

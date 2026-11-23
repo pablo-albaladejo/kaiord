@@ -21,7 +21,10 @@ type Deferred = {
 let deferred: Deferred;
 const pushMock = vi.fn(() => deferred.promise);
 const confirmMock = vi.fn(async () => undefined);
-const bridge = { extensionInstalled: true, sessionActive: true };
+const bridge = {
+  connection: "working",
+  detectExtension: vi.fn(async () => undefined),
+};
 
 vi.mock("../../../contexts", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -61,20 +64,24 @@ describe("PushButton", () => {
     pushMock.mockClear();
     confirmMock.mockClear();
     deferred = makeDeferred();
-    bridge.extensionInstalled = true;
-    bridge.sessionActive = true;
+    bridge.connection = "working";
   });
 
   it.each([
     [
-      "the bridge is not detected",
-      { extensionInstalled: false },
-      "Install the Kaiord extension for Garmin to send this workout.",
+      "the extension is not installed",
+      { connection: "not-installed" },
+      "You cannot use Garmin in Kaiord until Kaiord for Garmin is installed in this browser. Install Kaiord for Garmin",
     ],
     [
-      "Garmin is signed out",
-      { sessionActive: false },
-      "Sign in to Garmin Connect in this browser to send this workout.",
+      "Garmin refused the sign-in",
+      { connection: "signed-out" },
+      "You cannot use Garmin in Kaiord until you sign in to Garmin in this browser. Sign in to Garmin",
+    ],
+    [
+      "Garmin is not answering",
+      { connection: "not-answering" },
+      "Garmin is not answering, so you cannot use it in Kaiord right now. Try again",
     ],
   ])(
     "should keep the send disabled and say why while %s",
@@ -288,12 +295,18 @@ describe("PushButton", () => {
     const { rerender } = render(page("first"));
     fireEvent.click(screen.getByText("Send to Garmin"));
     deferred.resolve({ kind: "library-only", reason: "bridge-outdated" });
-    const warning = (await screen.findByRole("status")).textContent;
+    const warning = (await screen.findAllByRole("status")).map(
+      (status) => status.textContent
+    );
 
     // Act
     rerender(page("reopened"));
 
     // Assert
-    expect(screen.getByRole("status").textContent).toBe(warning);
+    // The dateless sentence and its Update notice both survive the reopen.
+    expect(warning).toHaveLength(2);
+    expect(screen.getAllByRole("status").map((s) => s.textContent)).toEqual(
+      warning
+    );
   });
 });

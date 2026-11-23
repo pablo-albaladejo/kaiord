@@ -5,6 +5,7 @@
  */
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
+import type { ConnectionState } from "../application/connections/connection-state";
 import type {
   GarminPushOutcome,
   PushState,
@@ -12,6 +13,7 @@ import type {
 import { logFailure } from "../lib/log-failure";
 import { ping } from "../store/garmin-extension-transport";
 import { evaluatePingResult, executePush } from "./garmin-bridge-operations";
+import { msUntilDiscoverySettled } from "./garmin-discovery-window";
 
 export const getGarminExtensionId = (): string =>
   bridgeDiscovery.getExtensionId("garmin-bridge") ?? "";
@@ -20,29 +22,36 @@ export type DetectSetters = {
   setExtensionInstalled: (v: boolean) => void;
   setSessionActive: (v: boolean) => void;
   setFeatures: (v: readonly string[]) => void;
-  setLastError: (v: string | null) => void;
+  setConnection: (v: ConnectionState) => void;
 };
 
 export const runDetect = async ({
   setExtensionInstalled,
   setSessionActive,
   setFeatures,
-  setLastError,
+  setConnection,
 }: DetectSetters): Promise<void> => {
   const extensionId = getGarminExtensionId();
   if (!extensionId) {
     setExtensionInstalled(false);
     setSessionActive(false);
     setFeatures([]);
-    setLastError(null);
+    // An extension on a protocol the App does not accept is not registered,
+    // but it is there: Update. Absent only once discovery had its window.
+    if (bridgeDiscovery.isOutdated?.("garmin-bridge") === true) {
+      setConnection("outdated");
+    } else {
+      setConnection(
+        msUntilDiscoverySettled() > 0 ? "checking" : "not-installed"
+      );
+    }
     return;
   }
-  const res = await ping(extensionId);
-  const result = evaluatePingResult(res);
+  const result = evaluatePingResult(await ping(extensionId));
   setExtensionInstalled(result.installed);
-  setSessionActive(result.installed && result.session);
-  setFeatures(result.installed ? result.features : []);
-  setLastError(result.installed ? result.error : null);
+  setSessionActive(result.session);
+  setFeatures(result.features);
+  setConnection(result.connection);
 };
 
 /**

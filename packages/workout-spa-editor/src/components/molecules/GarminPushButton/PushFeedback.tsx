@@ -1,17 +1,24 @@
+import type { ConnectionState } from "../../../application/connections/connection-state";
 import type { PushState } from "../../../contexts";
 import type { GarminPushFailure } from "../../../contexts/garmin-bridge-types";
 import { useTranslate } from "../../../i18n/use-translate";
+import { GarminConnectionNotice } from "../ConnectionNotice/GarminConnectionNotice";
 
 type PushFeedbackProps = {
   push: PushState;
   onReset: () => void;
 };
 
-const FAILURE_KEYS: Record<GarminPushFailure, string> = {
-  updated: "footer.garminPushError.updated",
-  "sign-in": "footer.garminPushError.signIn",
-  "not-prepared": "footer.garminPushError.notPrepared",
-  "not-answering": "footer.garminPushError.notAnswering",
+/** A failure of the Connection is its notice; an extension that was updated
+    mid-send did not answer, which is "not-answering". Only a workout that
+    could not be converted is the send's own failure. */
+const CONNECTION_OF: Record<
+  Exclude<GarminPushFailure, "not-prepared">,
+  ConnectionState
+> = {
+  updated: "not-answering",
+  "sign-in": "signed-out",
+  "not-answering": "not-answering",
 };
 
 /* Success left the palette along with warning: a green tick borrowed a hue
@@ -35,13 +42,13 @@ export const PushFeedback: React.FC<PushFeedbackProps> = ({
     );
   }
 
-  if (push.status === "error") {
+  if (push.status !== "error") return null;
+  if (push.reason === "not-prepared") {
     return (
       <span className="text-xs text-[var(--danger-text)]">
-        {t(FAILURE_KEYS[push.reason])}
+        {t("footer.garminPushError.notPrepared")}
       </span>
     );
   }
-
-  return null;
+  return <GarminConnectionNotice connection={CONNECTION_OF[push.reason]} />;
 };

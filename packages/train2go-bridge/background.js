@@ -210,19 +210,20 @@ const train2goFetch = async (path, method = "GET") => {
 // here. Train2Go saying the session is gone (a redirect, 401/403, or
 // `success: false`) is a verified "signed-out"; anything else that fails is
 // "not-answering", never signed out.
+// The typed outcome of one profile-ping answer, shared by the Session check
+// and the popup's profile read so both word one answer the same way.
+const sessionOutcomeOf = (res) => {
+  if (res?.ok) {
+    if (parser.parsePingJson(res.data).sessionActive) return "signed-in";
+    return res.data?.success === false ? "signed-out" : "not-answering";
+  }
+  return res?.needsReauth ? "signed-out" : "not-answering";
+};
+
 const checkSession = async () => {
   let session;
   try {
-    const res = await train2goFetch("/api/v2/profile/ping");
-    if (res?.ok) {
-      session = parser.parsePingJson(res.data).sessionActive
-        ? "signed-in"
-        : res.data?.success === false
-          ? "signed-out"
-          : "not-answering";
-    } else {
-      session = res?.needsReauth ? "signed-out" : "not-answering";
-    }
+    session = sessionOutcomeOf(await train2goFetch("/api/v2/profile/ping"));
   } catch (e) {
     void logSwallowed("warn", "ping", e);
     session = "not-answering";
@@ -246,19 +247,28 @@ const readProfile = async () => {
   try {
     const res = await train2goFetch("/api/v2/profile/ping");
     if (!res?.ok) {
-      return { ...BRIDGE_MANIFEST, sessionActive: false };
+      return {
+        ...BRIDGE_MANIFEST,
+        sessionActive: false,
+        session: sessionOutcomeOf(res),
+      };
     }
     const session = parser.parsePingJson(res.data);
     return {
       ...session,
       ...BRIDGE_MANIFEST,
+      session: sessionOutcomeOf(res),
       sessionActive: session.sessionActive,
       userId: session.userId,
       userName: session.userName,
     };
   } catch (e) {
     void logSwallowed("warn", "read-profile", e);
-    return { ...BRIDGE_MANIFEST, sessionActive: false };
+    return {
+      ...BRIDGE_MANIFEST,
+      sessionActive: false,
+      session: "not-answering",
+    };
   }
 };
 

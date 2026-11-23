@@ -190,6 +190,36 @@ const renderCtas = (
   kdReplace($("footer-region"), nodes);
 };
 
+const kdFixButton = (label, onClick) => {
+  const btn = kdBlock("button", "cta-primary", label);
+  btn.id = "notice-fix";
+  btn.type = "button";
+  btn.addEventListener("click", onClick);
+  return btn;
+};
+
+// One notice, one fix. `notice` comes from KAIORD_CONNECTION_NOTICES.noticeFor
+// (connection-notices.js), so the wording is the App's. A fix done on another
+// site (signing in) is a link to `href`; "try-again" re-runs the check through
+// `onRetry`. `since` is an already-worded outage date, or null on the first
+// failed check, which is too soon to date anything.
+const renderNotice = ($, notice, { since = null, href = null, onRetry } = {}) => {
+  const el = $("status");
+  el.className = "status-block status-block--warn";
+  renderStatusMark(el, since ? "alert" : "dot");
+  $("status-text").textContent = notice.message;
+  const cause = $("status-sub");
+  if (cause) {
+    cause.textContent = since ?? "";
+    cause.hidden = !since;
+  }
+  const fix =
+    notice.fix === "try-again" || !href
+      ? kdFixButton(notice.action, () => onRetry?.())
+      : kdLink("cta-primary", notice.action, href);
+  kdReplace($("footer-region"), [fix]);
+};
+
 if (typeof module !== "undefined") {
   module.exports = {
     renderStatusBlock,
@@ -197,5 +227,6 @@ if (typeof module !== "undefined") {
     renderConsequence,
     renderSkeleton,
     renderCtas,
+    renderNotice,
   };
 }

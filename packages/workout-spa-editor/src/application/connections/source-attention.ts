@@ -14,41 +14,30 @@
  * `attention` until a probe has answered for it, so the silence is
  * structural. Adding a clock on top would guard a state that cannot occur.
  *
- * The result is i18n-free on purpose: the Settings banner and the header
- * pill word the same fact differently, and only the wording may differ.
+ * The result is i18n-free on purpose: the wording comes from the one source
+ * of Connection notices, through `attentionCauseText`.
  */
-import { calendarDay } from "./calendar-day";
 import type { ConnectionSource } from "./connection-source";
 import { sourceNeedsAttention } from "./connection-source";
+import type { ConnectionState } from "./connection-state";
 
 // Aliased, not redefined: the summary, the banner and the header pill answer
 // the same question as the cards, so there is one predicate to change.
 export const needsAttention = sourceNeedsAttention;
 
 /**
- * Why the affected sources are affected, ranked by what the reader can do
- * about it: an instruction outranks a date. Both instructions routinely
- * coexist with a `lastSyncAt` — you only get a re-auth demand for an account
- * you were already syncing — so ranking the date first would hide the only
- * actionable line in the ordinary case.
- *
- * `noAccess` is the fallback, and it names no cause on purpose: every
- * remaining case is a reachable extension whose probe came back without a
- * usable read, and not one bridge can say why. It never says "expired" — no
- * bridge distinguishes an expired credential from one that was never issued —
- * and it never says "signed out" either, which is the stronger version of the
- * same overreach: garmin mints bearers from a stored OAuth1 token rather than
- * a cookie, so its reads survive signing out of connect.garmin.com and a
- * failed read says nothing about the user's session.
- *
- * There is no "broken since": `lastSyncAt` is persisted, so the date is when
- * data last arrived; `lastCheckedAt` is when the SPA last probed and reads as
- * seconds ago after a reload however long a source has been down.
+ * Why the affected sources are affected. A lone source is named by its own
+ * Connection state, so the pill and the banner word it exactly as its card
+ * and its extension popup do. With several, no single cause holds for all of
+ * them, so only the count is claimed.
  */
 export type AttentionCause =
-  | { readonly kind: "noAccess" }
-  | { readonly kind: "extensionOutdated" }
-  | { readonly kind: "noNewDataSince"; readonly date: string };
+  | {
+      readonly kind: "notice";
+      readonly connection: ConnectionState;
+      readonly name: string;
+    }
+  | { readonly kind: "several" };
 
 export type ConnectionAttention = {
   /** Always ≥ 1: a healthy app produces no model at all. */
@@ -57,15 +46,9 @@ export type ConnectionAttention = {
 };
 
 const causeOf = (affected: readonly ConnectionSource[]): AttentionCause => {
-  if (affected.some((source) => source.needsReauth))
-    return { kind: "noAccess" };
-  if (affected.some((source) => source.outdated))
-    return { kind: "extensionOutdated" };
-  const date =
-    affected.length === 1 ? calendarDay(affected[0]?.lastSyncAt) : undefined;
-  return date === undefined
-    ? { kind: "noAccess" }
-    : { kind: "noNewDataSince", date };
+  const only = affected.length === 1 ? affected[0] : undefined;
+  if (only?.connection == null) return { kind: "several" };
+  return { kind: "notice", connection: only.connection, name: only.name };
 };
 
 export const buildConnectionAttention = (

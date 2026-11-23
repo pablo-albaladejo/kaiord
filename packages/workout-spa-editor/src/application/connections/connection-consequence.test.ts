@@ -24,8 +24,7 @@ const source = (over: Partial<ConnectionSource> = {}): ConnectionSource => ({
   status: "attention",
   bridgeDetected: true,
   disconnected: false,
-  needsReauth: false,
-  outdated: false,
+  connection: "not-answering",
   sessionVerifiable: true,
   lastSyncAt: undefined,
   importTypes: [],
@@ -44,7 +43,12 @@ describe("buildConnectionConsequence", () => {
     const sources = [source({ status: "connected" })];
 
     // Act
-    const consequence = buildConnectionConsequence(sources, coverage([]), t);
+    const consequence = buildConnectionConsequence(
+      sources,
+      coverage([]),
+      t,
+      "en"
+    );
 
     // Assert
     // A banner that renders on a healthy page is a permanent false alarm.
@@ -61,7 +65,8 @@ describe("buildConnectionConsequence", () => {
     const consequence = buildConnectionConsequence(
       sources,
       coverage(["sleep", "hrv"]),
-      t
+      t,
+      "en"
     );
 
     // Assert
@@ -71,16 +76,22 @@ describe("buildConnectionConsequence", () => {
 
   it("should name the source and the failed read without naming a cause", () => {
     // Arrange
-    // No bridge distinguishes an expired credential from one never issued —
-    // `probeWhoopSession` leaves `needsReauth` false either way — and none
-    // distinguishes either from a provider outage.
+    // A check that could not tell why is "not-answering": its notice names the
+    // outage and no cause.
     const sources = [source()];
 
     // Act
-    const consequence = buildConnectionConsequence(sources, coverage([]), t);
+    const consequence = buildConnectionConsequence(
+      sources,
+      coverage([]),
+      t,
+      "en"
+    );
 
     // Assert
-    expect(consequence?.title).toBe("Kaiord cannot read from WHOOP");
+    expect(consequence?.title).toBe(
+      "WHOOP is not answering, so you cannot use it in Kaiord right now."
+    );
     // Stems, not whole punctuated words: /expired/ alone lets "expires" and
     // "expiry" through, and /signed out,/ lets "signed out." through.
     expect(consequence?.title).not.toMatch(/expir/i);
@@ -98,7 +109,8 @@ describe("buildConnectionConsequence", () => {
     const consequence = buildConnectionConsequence(
       sources,
       coverage(["sleep"]),
-      t
+      t,
+      "en"
     );
 
     // Assert
@@ -119,7 +131,8 @@ describe("buildConnectionConsequence", () => {
     const consequence = buildConnectionConsequence(
       sources,
       coverage(["weight"]),
-      t
+      t,
+      "en"
     );
 
     // Assert
@@ -135,7 +148,8 @@ describe("buildConnectionConsequence", () => {
     const consequence = buildConnectionConsequence(
       sources,
       coverage(["sleep"]),
-      t
+      t,
+      "en"
     );
 
     // Assert
@@ -147,25 +161,37 @@ describe("buildConnectionConsequence", () => {
     // The probe SUCCEEDED and answered in a protocol version this build cannot
     // read. Signing in again fixes nothing, so the sign-in line would send the
     // reader round a loop that cannot end.
-    const sources = [source({ outdated: true })];
+    const sources = [source({ connection: "outdated" })];
 
     // Act
-    const consequence = buildConnectionConsequence(sources, coverage([]), t);
+    const consequence = buildConnectionConsequence(
+      sources,
+      coverage([]),
+      t,
+      "en"
+    );
 
     // Assert
-    expect(consequence?.title).toBe("WHOOP's Kaiord extension is out of date");
+    expect(consequence?.title).toBe(
+      "You cannot use WHOOP in Kaiord until Kaiord for WHOOP is updated."
+    );
   });
 
   it("should not name a cause that holds for only one of several sources", () => {
     // Arrange
     // One out-of-date extension does not make the other one out of date.
     const sources = [
-      source({ outdated: true }),
+      source({ connection: "outdated" }),
       source({ id: "trainingpeaks", name: "TrainingPeaks" }),
     ];
 
     // Act
-    const consequence = buildConnectionConsequence(sources, coverage([]), t);
+    const consequence = buildConnectionConsequence(
+      sources,
+      coverage([]),
+      t,
+      "en"
+    );
 
     // Assert
     expect(consequence?.title).toBe("2 sources need attention");
@@ -183,7 +209,8 @@ describe("buildConnectionConsequence", () => {
     const consequence = buildConnectionConsequence(
       sources,
       coverage([], ["weight"]),
-      t
+      t,
+      "en"
     );
 
     // Assert
@@ -204,7 +231,8 @@ describe("buildConnectionConsequence", () => {
     const consequence = buildConnectionConsequence(
       sources,
       coverage([], []),
-      t
+      t,
+      "en"
     );
 
     // Assert

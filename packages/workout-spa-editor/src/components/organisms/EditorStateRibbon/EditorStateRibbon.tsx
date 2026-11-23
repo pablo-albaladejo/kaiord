@@ -4,8 +4,9 @@
  *
  * It replaces `EditorWorkflowBar` (Accept / Push) and `ModifiedIndicator`
  * (Re-push) — three buttons for one intention, none of which could be seen
- * at the same time as another. Every fix lives on the Connections page,
- * where the bridge and its routes already live (principle 5).
+ * at the same time as another. A Connection that does not work shows its own
+ * notice, the words its Garmin card and popup show, and its one fix runs
+ * from here; only the route switch lives on the Connections page.
  */
 
 import { useLocation } from "wouter";
@@ -17,6 +18,7 @@ import type { ExportLedgerEntry } from "../../../types/export-ledger";
 import { GarminPushButton } from "../../molecules/GarminPushButton";
 import { needsAthlete } from "../../molecules/GarminPushButton/placement-message";
 import { resolveRibbonContent } from "./ribbon-content";
+import { RibbonNoticePanel } from "./RibbonNoticePanel";
 import { RibbonPanel } from "./RibbonPanel";
 import { useGarminGate } from "./use-garmin-gate";
 
@@ -51,6 +53,14 @@ export function EditorStateRibbon({
   const content = resolveRibbonContent(gate, state, needsAthlete(notice));
 
   if (!content) return null;
+  if (content.connection !== undefined) {
+    return (
+      <RibbonNoticePanel
+        connection={content.connection}
+        regionLabel={t("ribbon.region")}
+      />
+    );
+  }
 
   return (
     <RibbonPanel

@@ -11,9 +11,9 @@
  * App runs: the check answers only yes or no. Retry only appears on user-resolvable failures;
  * rollup-only timeout preserves the connected state.
  *
- * The primary CTA is whatever fixes the current state: logging back in at
- * Train2Go when the session is gone, opening the Kaiord editor when the plan
- * is flowing.
+ * A working Connection keeps its useful content and the editor link.
+ * Anything else shows one notice with one fix, worded by the vendored
+ * connection-notices.js — the same wording the Kaiord App shows.
  *
  * Only the session verdict is folded into the health record. A background
  * worker that did not answer is inconclusive — it says nothing about whether
@@ -24,9 +24,9 @@
  * (see popup.html script order).
  */
 
-/* global msg, $, withTimeout, formatSinceDate, recordProbe, renderRetry,
-   renderStatusBlock, renderChips, renderSkeleton, renderCtas,
-   renderAthleteCard */
+/* global msg, $, withTimeout, formatSinceDate, recordProbe,
+   renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderNotice,
+   renderAthleteCard, KAIORD_CONNECTION_NOTICES */
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
@@ -35,6 +35,9 @@ const ROLLUP_TTL_MS = 5 * 60 * 1_000;
 
 const OPEN_EDITOR_URL = "https://kaiord.com/app/";
 const OPEN_TRAIN2GO_URL = "https://app.train2go.com/user/index";
+// The Platform's name exactly as the Kaiord App's registry spells it, so a
+// notice reads the same in both (scripts/check-connection-notices.mjs).
+const PLATFORM = "Train2Go";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
@@ -43,15 +46,7 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   connected: "Connected",
   connectedAs: "Connected as $1",
   coachSub: "Coach · $1",
-  sessionSignedOut: "Session signed out",
-  sessionSignedOutCause:
-    "Your Train2Go tab is logged out, so no new plan is reaching Kaiord.",
-  sessionExpired: "Session expired",
-  sessionExpiredCause:
-    "No new plan has reached Kaiord since $1. Logging back in at Train2Go starts it again.",
-  bridgeNotResponding: "Bridge not responding",
-  bridgeNotRespondingCause:
-    "The extension's background worker did not answer. Try again.",
+  outageSince: "Since $1.",
   captionFeeds: "Feeds Kaiord",
   typePlannedSession: "Planned Session",
   typeTrainingZones: "Training Zones",
@@ -79,9 +74,7 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   dayAgo: "$1 day ago",
   daysAgo: "$1 days ago",
   openEditor: "Open Kaiord editor",
-  signInTrain2go: "Log in to Train2Go",
   openTrain2go: "Open Train2Go ↗",
-  retry: "Retry",
   refresh: "Refresh",
 };
 
@@ -240,37 +233,41 @@ const setMarkEstablished = (established) => {
   $("brand-mark").classList.toggle("popup-header__mark--muted", !established);
 };
 
-// Any non-connected state pauses the plan feed, so the chips go muted and the
-// primary CTA becomes the fix rather than the editor link. `since` is null for
-// a state the health record cannot date — including every worker timeout,
-// which is inconclusive about the session rather than evidence against it.
-const renderBroken = ({ verdictKey, causeKey, causeSubs, mark = "dot" }) => {
-  renderStatusBlock($, msg, {
-    tone: "warn",
-    mark,
-    verdictKey,
-    causeKey,
-    causeSubs,
-  });
-  renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
-  renderCtas($, {
-    primaryLabel: msg("signInTrain2go"),
-    primaryHref: OPEN_TRAIN2GO_URL,
-    secondaryLabel: msg("openEditor"),
-    secondaryHref: OPEN_EDITOR_URL,
-  });
-  renderRetry(() => loadPopupData());
+// The profile read carries the typed `session` outcome the Session check
+// uses, so popup and App word one answer alike; only "signed-out" is Train2Go's
+// own refusal. An older extension's `sessionActive: false` stays
+// "not-answering": it folds an outage into the same answer.
+const TYPED_STATE = {
+  "signed-in": "working",
+  "signed-out": "signed-out",
+  "not-answering": "not-answering",
 };
 
-const renderSignedOut = (since) => {
-  const dated = since !== null;
-  setMarkEstablished(dated);
-  renderBroken({
-    mark: dated ? "alert" : "dot",
-    verdictKey: dated ? "sessionExpired" : "sessionSignedOut",
-    causeKey: dated ? "sessionExpiredCause" : "sessionSignedOutCause",
-    causeSubs: dated ? [formatSinceDate(since)] : undefined,
+const connectionStateOf = (ping) => {
+  const typed = ping?.ok ? TYPED_STATE[ping?.data?.session] : undefined;
+  if (typed) return typed;
+  if (ping?.ok && ping?.data?.sessionActive) return "working";
+  if (ping?.ok && ping?.data?.needsReauth === true) return "signed-out";
+  return "not-answering";
+};
+
+// Any non-working state pauses the plan feed, so the chips go muted and the
+// notice replaces the verdict; its one fix is the whole footer. `since` is
+// null for a state the health record cannot date — including every worker
+// timeout, which is inconclusive about the session rather than evidence.
+const renderBroken = (state, since = null) => {
+  const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
+    state,
+    PLATFORM,
+    KAIORD_CONNECTION_NOTICES.EXTENSION_LOCALE
+  );
+  setMarkEstablished(since !== null);
+  renderNotice($, notice, {
+    since: since === null ? null : msg("outageSince", [formatSinceDate(since)]),
+    href: OPEN_TRAIN2GO_URL,
+    onRetry: () => loadPopupData(),
   });
+  renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
 };
 
 const fetchRollup = async (userId, bypassTtl) => {
@@ -322,10 +319,7 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
     storage = await withTimeout(readStorage(), SNAPSHOT_TIMEOUT_MS, "snapshot");
   } catch {
     renderAthleteCard(undefined);
-    renderBroken({
-      verdictKey: "bridgeNotResponding",
-      causeKey: "bridgeNotRespondingCause",
-    });
+    renderBroken("not-answering");
     return;
   }
 
@@ -338,18 +332,15 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
     );
   } catch {
     renderAthleteCard(storage.profileSnapshot);
-    renderBroken({
-      verdictKey: "bridgeNotResponding",
-      causeKey: "bridgeNotRespondingCause",
-    });
+    renderBroken("not-answering");
     return;
   }
 
-  const sessionActive = Boolean(ping?.ok && ping?.data?.sessionActive);
-  const health = await recordProbe(sessionActive);
-  if (!sessionActive) {
+  const state = connectionStateOf(ping);
+  const health = await recordProbe(state === "working");
+  if (state !== "working") {
     renderAthleteCard(storage.profileSnapshot);
-    renderSignedOut(health.since);
+    renderBroken(state, health.since);
     return;
   }
 
