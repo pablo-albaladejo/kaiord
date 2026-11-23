@@ -62,7 +62,7 @@ It comes as two products:
 
 ## 🔒 Local-first architecture
 
-Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp` and `kaiord.com/a2a`, which converts workouts in transit. Neither binds any storage. Your data leaves your device only to destinations you configured:
+Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp`, which converts workouts in transit. That second Worker's code also has an A2A endpoint for `kaiord.com/a2a`, which is not deployed yet. Neither binds any storage. Your data leaves your device only to destinations you configured:
 
 - **Storage is your browser's IndexedDB.** The [Kaiord App](https://kaiord.com/app/) persists every workout, template, profile, and setting in a local Dexie.js / IndexedDB database (`KaiordDatabase` in [`dexie-database.ts`](./packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts)).
 - **Opens offline after one visit.** A service worker scoped to the [Kaiord App](https://kaiord.com/app/) keeps the files of the version you loaded, checked byte for byte, so the App opens and shows the Day and the Calendar with no network. Connections, sync and the assistant still need one.

@@ -1,3 +1,5 @@
+> Tasks: 36 completed, 0 deferred
+
 > Status: all sections landed and green (1–11). The converters' free-text
 > parse detail stays verbatim English inside localized wording until each
 > converter emits a stable code (#1165, `add-converter-error-codes`).

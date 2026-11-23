@@ -4,7 +4,7 @@
 
 The privacy policy SHALL cover the following topics:
 
-- **Data controller identity**: The policy SHALL state that Kaiord operates no backend that stores user data. Processing is client-side, with one exception: the stateless remote MCP and A2A endpoints, which process a request in transit and keep nothing (see Remote MCP endpoint, and the Remote A2A endpoint disclosure requirement). So there is no Kaiord-held record of the user
+- **Data controller identity**: The policy SHALL state that Kaiord operates no backend that stores user data. Processing is client-side, with one exception: the stateless remote MCP endpoint, which processes a request in transit and keeps nothing (see Remote MCP endpoint; the A2A endpoint is covered by the Remote A2A endpoint disclosure requirement and is named as not deployed until it is). So there is no Kaiord-held record of the user
 - **Data collection**: The policy SHALL disclose that the website, docs and web editor use Umami, a cookie-less analytics tool that records anonymous page views and product events (e.g. 'workout exported'), and that it never records the user's workouts, health data or API keys. The policy SHALL state that no cookies are used for tracking. The Chrome extensions include no telemetry (see each extension's section)
 - **Client-side storage disclosure**: The policy SHALL state that workout-editor state (workouts, templates, profiles, AI provider keys, sync state, chat transcripts) is stored locally in the user's browser via IndexedDB / Dexie, and that nothing is sent to a Kaiord-operated server
 - **LLM provider data flow**: The policy SHALL disclose that, when the user configures AI features, prompts and workout content are sent directly from the browser to the chosen LLM provider (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service, and that Kaiord does not receive or relay this data. For the chat assistant specifically, the policy SHALL disclose that summaries of the user's locally stored history — including workout, coaching, and health data (e.g. sleep) — are sent to the configured provider only when the user converses with the assistant, and never in the background. The policy SHALL also state that chat transcripts are stored locally and, when the user enables cross-device sync, are included in the sync snapshot stored in the user's own cloud storage — never on a Kaiord-operated server
@@ -22,7 +22,7 @@ The privacy policy SHALL cover the following topics:
 - **Communication scope**: Each extension only communicates with its declared hosts (`connect.garmin.com`, `connectapi.garmin.com`, `sso.garmin.com` / `app.train2go.com` / `mytanita.eu` / `tpapi.trainingpeaks.com` / `app.whoop.com`, `api.prod.whoop.com`) and allowed Kaiord origins. The Kaiord-origin channel (`externally_connectable`) SHALL be described as one-way inbound (editor → extension)
 - **Runtime discovery disclosure**: The policy SHALL disclose the announce-only content script injected into SPA origins (`https://kaiord.com/*` in production, that exact origin only, additionally `http://localhost/*` in development) and SHALL state that the script only posts a fixed announcement object via `window.postMessage`, does not read SPA DOM / cookies / storage / network, and does not modify the page
 - **Localhost dev disclosure**: The policy SHALL disclose that local-development manifests additionally accept messages from `http://localhost:5173` / `http://localhost:5174` via `externally_connectable`, that the announce content script injects on `http://localhost/*`, and SHALL state that these development-only matches are stripped from the production manifest before CWS submission
-- **Regulatory compliance**: Statement of compliance with applicable data protection regulations (GDPR, CCPA) — specifically that because no personal data is retained server-side, there is no personal data held by Kaiord to protect, share, or delete. The policy SHALL state that each remote endpoint, MCP (`kaiord.com/mcp`) and A2A (`kaiord.com/a2a`), processes the client IP address for rate limiting and any personal content a caller places in a workout, in transit only, and retains neither
+- **Regulatory compliance**: Statement of compliance with applicable data protection regulations (GDPR, CCPA) — specifically that because no personal data is retained server-side, there is no personal data held by Kaiord to protect, share, or delete. The policy SHALL state that the remote MCP endpoint (`kaiord.com/mcp`), like the A2A endpoint (`kaiord.com/a2a`) once it is deployed, processes the client IP address for rate limiting and any personal content a caller places in a workout, in transit only, and retains neither
 - **Data-subject rights**: The policy SHALL explicitly enumerate GDPR/CCPA rights (access, rectification, erasure, portability) and state that, because Kaiord holds no records (the remote MCP endpoint included), such requests have no data to act upon
 - **Retention guidance**: The policy SHALL describe how the user can remove local data — at minimum the editor's API-key clear action, per-workout delete, the per-conversation chat delete action (delete an individual conversation), and the browser-level "clear site data" path
 - **Host-permission narrowing**: The policy SHALL state that each extension declares `host_permissions` limited to its disclosed hosts (no wildcard, no `<all_urls>`)
@@ -162,7 +162,7 @@ The privacy policy SHALL cover the following topics:
 
 ### Requirement: Remote A2A endpoint disclosure
 
-The privacy policy SHALL disclose `https://kaiord.com/a2a` before any route serves it. It SHALL state that the A2A endpoint runs the same tools under the same terms as the remote MCP endpoint (structured workouts only, processed in transit, never stored or logged, client IP used transiently for rate limiting, traffic through Cloudflare), and that A2A tasks finish inside the reply and are not retained. The regulatory compliance statement SHALL name both endpoints. The policy lint SHALL fail when the A2A sentence is removed.
+The privacy policy SHALL disclose `https://kaiord.com/a2a` before any route serves it. It SHALL state that the A2A endpoint runs the same tools under the same terms as the remote MCP endpoint (structured workouts only, processed in transit, never stored or logged, client IP used transiently for rate limiting, traffic through Cloudflare), and that A2A tasks finish inside the reply and are not retained. Until the production smoke of `/a2a` passes, every sentence naming the A2A endpoint SHALL say it is not deployed yet, and the A2A sentence SHALL say nothing answers there today. The regulatory compliance statement SHALL name both endpoints. The policy lint SHALL fail when the A2A sentence or its not-deployed statement is removed.
 
 #### Scenario: Policy discloses the A2A endpoint
 
@@ -175,6 +175,12 @@ The privacy policy SHALL disclose `https://kaiord.com/a2a` before any route serv
 - **GIVEN** a copy of the policy with the A2A sentence deleted
 - **WHEN** the policy lint runs on it
 - **THEN** it SHALL exit non-zero and name the missing A2A disclosure
+
+#### Scenario: The policy does not describe the undeployed endpoint as served
+
+- **GIVEN** the `kaiord.com/a2a` route is not deployed
+- **WHEN** the A2A sentence's not-deployed statement is removed
+- **THEN** the policy lint SHALL exit non-zero and name the missing not-deployed statement
 
 #### Scenario: Disclosure precedes the route
 

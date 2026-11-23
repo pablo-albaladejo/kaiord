@@ -13,6 +13,8 @@
     "lint:fix": "eslint . --fix && prettier --write src",
     "smoke": "node scripts/smoke.mjs",
     "smoke:prod": "node scripts/smoke.mjs https://kaiord.com/mcp https://kaiord.com/a2a",
+    "ops:waf-widen-a2a": "bash ops/waf-widen-a2a.sh",
+    "ops:dns-a2a-svcb": "bash ops/dns-a2a-svcb.sh",
     "clean": "rm -rf dist",
     "test:workerd": "node --test test/*.test.mjs"
   },
