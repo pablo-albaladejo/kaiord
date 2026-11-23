@@ -48,8 +48,8 @@
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."
     },
     "trainingPeaksHorizon": {
-      "beforeSend": "En una cuenta Basic de TrainingPeaks solo se aceptan hoy y mañana, así que TrainingPeaks puede rechazar este día.",
-      "refused": "TrainingPeaks ha rechazado este día: una cuenta Basic solo acepta hoy y mañana. Programa el entrenamiento para uno de ellos."
+      "beforeSend": "Una cuenta Basic de TrainingPeaks solo acepta hoy y mañana, contados en la zona horaria de la cuenta, así que TrainingPeaks puede rechazar este día.",
+      "refused": "TrainingPeaks ha rechazado este día, así que el entreno no se ha enviado: una cuenta Basic solo acepta hoy y mañana, contados en la zona horaria de la cuenta de TrainingPeaks."
     },
     "trainingPeaksNotAnswering": "TrainingPeaks no responde. Inténtalo de nuevo."
   },

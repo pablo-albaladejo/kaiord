@@ -47,16 +47,16 @@ describe("localizeValidationMessage", () => {
 });
 
 describe("validationHeading", () => {
-  it.each<{ scenario: string; locale?: "en" | "es"; expected: string }>([
+  it.each<{ scenario: string; locale: "en" | "es"; expected: string }>([
+    {
+      scenario: "the English heading for en",
+      locale: "en",
+      expected: "Validation errors:",
+    },
     {
       scenario: "the Spanish heading for es",
       locale: "es",
       expected: "Errores de validación:",
-    },
-    {
-      scenario: "the English heading by default",
-      locale: undefined,
-      expected: "Validation errors:",
     },
   ])("should return $scenario", ({ locale, expected }) => {
     // Arrange

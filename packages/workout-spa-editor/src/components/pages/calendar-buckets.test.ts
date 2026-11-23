@@ -20,7 +20,7 @@ const activity = (
   source: "train2go",
   sourceBadge: "T2G",
   date: DAY,
-  sport: { label: "Cycling", icon: "bike" },
+  sport: { id: "cycling", icon: "bike" },
   title: "FTP test",
   status: "pending",
   ...overrides,

@@ -24,7 +24,7 @@
  * Per design D17 of calendar-coaching-redesign-completion.
  */
 
-import { DEFAULT_LOCALE, type Locale } from "@kaiord/i18n";
+import type { Locale } from "@kaiord/i18n";
 
 const ONE_MINUTE_MS = 60 * 1000;
 const ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
@@ -48,7 +48,7 @@ const pluralKey = (base: string, count: number): string =>
 export const formatRelativeTime = (
   date: Date | undefined,
   now: Date,
-  locale: Locale = DEFAULT_LOCALE
+  locale: Locale
 ): RelativeTimeResult => {
   if (date === undefined) return { key: "relativeTime.neverSynced" };
 

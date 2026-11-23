@@ -1,16 +1,13 @@
 /**
  * Train2Go Sport Map — Adapter-level mapping.
  *
- * Maps Train2Go sport identifiers to generic { label, icon } display, the
- * label read from `coaching:sport.<id>` in the given locale.
- * This file lives in adapters/ because it is platform-specific.
+ * Maps Train2Go sport identifiers to a neutral `{ id, icon }`: the id is a
+ * known Train2Go sport or `activity`, and the presentation layer words it
+ * from `coaching:sport.<id>`. This file lives in adapters/ because it is
+ * platform-specific.
  */
 
-import type { Locale } from "@kaiord/i18n";
-
-import { getTranslate } from "../../i18n/use-translate";
-
-type SportDisplay = { label: string; icon: string };
+import type { CoachingSport } from "../../types/coaching-activity";
 
 const SPORT_ICONS: Record<string, string> = {
   cycling: "\u{1F6B4}",
@@ -42,14 +39,9 @@ const SPORT_ICONS: Record<string, string> = {
 const FALLBACK = "activity";
 const FALLBACK_ICON = "\u{1F4AA}";
 
-export const getT2GSportDisplay = (
-  sport: string,
-  locale: Locale = "en"
-): SportDisplay => {
+export const getT2GSportDisplay = (sport: string): CoachingSport => {
   const id = sport?.toLowerCase();
   const icon = id ? SPORT_ICONS[id] : undefined;
-  const t = getTranslate("coaching", locale);
-  if (!id || !icon)
-    return { label: t(`sport.${FALLBACK}`), icon: FALLBACK_ICON };
-  return { label: t(`sport.${id}`), icon };
+  if (!id || !icon) return { id: FALLBACK, icon: FALLBACK_ICON };
+  return { id, icon };
 };

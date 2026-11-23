@@ -35,7 +35,7 @@ const makeActivity = (): CoachingActivity => ({
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-04-13",
-  sport: { label: "Cycling", icon: "🚴" },
+  sport: { id: "cycling", icon: "🚴" },
   title: "FTP test",
   status: "pending",
   description: "x",

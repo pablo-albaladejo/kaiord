@@ -107,3 +107,10 @@
 - [x] 6.7 Store listing, permission justification, privacy policy and
       `claims/trainingpeaks.json` updated; `pnpm lint:claims` passes.
 - [x] 6.8 Spec deltas for the above; `openspec validate --strict` passes.
+- [x] 6.9 Decide the notice from the earliest "tomorrow" in any time zone
+      (UTC-12:00), not the browser's, so the browser's tomorrow is announced
+      while the account may still be on yesterday; unit tests across zones.
+- [x] 6.10 The 402 refusal names the consequence (not sent) and the rule
+      counted in the account's time zone, with no "schedule it for today or
+      tomorrow"; notice and refusal copy tested in English and Spanish; store
+      listing sentence and its claim updated.

@@ -20,7 +20,7 @@ const activity = (o: Partial<CoachingActivity> = {}): CoachingActivity => ({
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-04-29",
-  sport: { label: "Swim", icon: "swim" },
+  sport: { id: "swimming", icon: "swim" },
   title: "Swim 1500m",
   status: "pending",
   ...o,

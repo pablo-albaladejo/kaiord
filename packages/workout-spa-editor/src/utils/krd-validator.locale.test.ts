@@ -35,7 +35,7 @@ describe("validateKRD error copy", () => {
     const errors = errorsOf(null);
 
     // Act
-    const words = errors.map((e) => localizeValidationMessage(e));
+    const words = errors.map((e) => localizeValidationMessage(e, "en"));
 
     // Assert
     expect(words).toEqual(["Expected an object"]);

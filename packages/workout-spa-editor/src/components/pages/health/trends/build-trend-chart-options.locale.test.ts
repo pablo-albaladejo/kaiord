@@ -29,7 +29,7 @@ describe("buildTrendChartOptions metric names", () => {
     const metrics = TREND_METRICS;
 
     // Act
-    const options = buildTrendChartOptions(metrics);
+    const options = buildTrendChartOptions(metrics, "metric", "en");
 
     // Assert
     expect(options.series?.slice(1).map((s) => s.label)).toEqual([

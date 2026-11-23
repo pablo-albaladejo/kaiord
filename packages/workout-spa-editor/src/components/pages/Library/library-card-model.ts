@@ -1,6 +1,6 @@
 import type { Translate } from "../../../i18n/use-translate";
 import { thresholdsForSport } from "../../../lib/athlete";
-import { buildReviewModel } from "../../../lib/workout-review";
+import { buildReviewModel, type ReviewCopy } from "../../../lib/workout-review";
 import type { Profile } from "../../../types/profile";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 
@@ -30,12 +30,18 @@ const sportLabelFor = (sport: string, t: Translate): string => {
 export function buildLibraryCardModel(
   template: WorkoutTemplate,
   profile: Profile | null,
-  t: Translate
+  t: Translate,
+  copy: ReviewCopy
 ): LibraryCardModel {
   const tag = template.tags[0];
   const sportLabel = sportLabelFor(template.sport, t);
   const thresholds = thresholdsForSport(profile, template.sport);
-  const review = buildReviewModel(template.krd, thresholds, template.name);
+  const review = buildReviewModel(
+    template.krd,
+    thresholds,
+    template.name,
+    copy
+  );
 
   if (!review) {
     return { title: template.name, sportLabel, tag };

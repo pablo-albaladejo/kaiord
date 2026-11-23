@@ -35,6 +35,16 @@ describe("toCoachingActivity (record → view-model)", () => {
     expect(result.source).toBe("train2go");
   });
 
+  it("should carry the sport as a neutral id and icon, with no words", () => {
+    // Arrange
+
+    // Act
+    const result = toCoachingActivity(baseRecord);
+
+    // Assert
+    expect(result.sport).toEqual({ id: "cycling", icon: "\u{1F6B4}" });
+  });
+
   it("should use T2G as badge for train2go source", () => {
     // Arrange
 

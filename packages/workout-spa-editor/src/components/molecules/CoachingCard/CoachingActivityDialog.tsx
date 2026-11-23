@@ -9,7 +9,9 @@
 
 import { useCallback, useMemo } from "react";
 
+import { coachingSportKey } from "../../../hooks/use-coaching-sport-label";
 import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { ExpandActivity } from "../../../types/coaching-expand-result";
@@ -36,10 +38,11 @@ export function CoachingActivityDialog({
   onOpenExecuted,
 }: CoachingActivityDialogProps) {
   const dialog = useCoachingDialog(activity, onClose, expandActivity);
+  const tc = useTranslate("coaching");
   const pickable = usePickableWorkouts(
     dialog.targetProfileId,
     activity?.date ?? null,
-    activity?.sport.label ?? null
+    activity ? tc(coachingSportKey(activity.sport)) : null
   );
   const matchedWorkout =
     dialog.dialogState?.kind === "matched" ? dialog.dialogState.workout : null;

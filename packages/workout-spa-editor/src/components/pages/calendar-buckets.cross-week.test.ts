@@ -23,7 +23,7 @@ const plan = (date: string): CoachingActivity => ({
   source: "train2go",
   sourceBadge: "T2G",
   date,
-  sport: { label: "Cycling", icon: "bike" },
+  sport: { id: "cycling", icon: "bike" },
   title: "Threshold",
   status: "pending",
 });

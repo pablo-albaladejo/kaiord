@@ -13,9 +13,10 @@
  * UTC midnight and shifts the local day at timezone boundaries).
  */
 
+import { localIsoDate } from "../../../application/shared/date-utils";
+
 const DAYS_PER_WEEK = 7;
 const MONDAY_OFFSET = 1;
-const PAD = 2;
 
 export type WeekDay = {
   iso: string;
@@ -24,12 +25,7 @@ export type WeekDay = {
   isRealToday: boolean;
 };
 
-export function toIsoDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + MONDAY_OFFSET).padStart(PAD, "0");
-  const day = String(date.getDate()).padStart(PAD, "0");
-  return `${year}-${month}-${day}`;
-}
+export const toIsoDate = localIsoDate;
 
 const finitePart = (value: number | undefined, fallback: number): number =>
   value !== undefined && Number.isFinite(value) ? value : fallback;

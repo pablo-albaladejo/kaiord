@@ -1,21 +1,15 @@
 import type { Target, WorkoutStep } from "@kaiord/core";
 
-import { type ReviewCopy, reviewCopyFor } from "./review-copy";
+import type { ReviewCopy } from "./review-copy";
 
 /** Display name for a step: explicit name, else humanized intensity. */
-export function stepKind(
-  step: WorkoutStep,
-  { t }: ReviewCopy = reviewCopyFor()
-): string {
+export function stepKind(step: WorkoutStep, { t }: ReviewCopy): string {
   if (step.name) return step.name;
   return t(`kind.${step.intensity ?? "other"}`);
 }
 
 /** Concise target description, e.g. "@ 250 W", "@ 85% FTP", "@ Z3", "Easy". */
-export function stepDetail(
-  target: Target,
-  copy: ReviewCopy = reviewCopyFor()
-): string {
+export function stepDetail(target: Target, copy: ReviewCopy): string {
   if (target.type === "power") return powerDetail(target.value);
   if (target.type === "heart_rate") return hrDetail(target.value, copy);
   if (target.type === "pace") return paceDetail(target.value);

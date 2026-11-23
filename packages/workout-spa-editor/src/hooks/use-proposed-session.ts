@@ -13,9 +13,10 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
+import { useActiveLocale } from "../i18n/LocaleProvider";
 import { thresholdsForSport } from "../lib/athlete";
-import type { ReviewModel } from "../lib/workout-review";
-import { buildReviewModel } from "../lib/workout-review";
+import type { ReviewCopy, ReviewModel } from "../lib/workout-review";
+import { buildReviewModel, reviewCopyFor } from "../lib/workout-review";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { Profile } from "../types/profile";
 import { selectPriorSummary } from "./select-prior-session";
@@ -33,13 +34,14 @@ export type ProposedSession = ProposedSessionSummary & {
 };
 
 const summarizeWith =
-  (profile: Profile | null, fallbackTitle: string) =>
+  (profile: Profile | null, fallbackTitle: string, copy: ReviewCopy) =>
   (record: WorkoutRecord): ReviewModel | null => {
     if (!record.krd) return null;
     return buildReviewModel(
       record.krd,
       thresholdsForSport(profile, record.sport),
-      fallbackTitle
+      fallbackTitle,
+      copy
     );
   };
 
@@ -54,6 +56,7 @@ export function useProposedSession(
   fallbackTitle: string
 ): ProposedSession | null {
   const profile = useActiveProfileLive()?.profile ?? null;
+  const locale = useActiveLocale();
   const day = useLiveQuery(async () => {
     const table = db.table<WorkoutRecord>("workouts");
     const proposed = await table.get(workoutId);
@@ -67,7 +70,11 @@ export function useProposedSession(
 
   if (!day) return null;
 
-  const summarize = summarizeWith(profile, fallbackTitle);
+  const summarize = summarizeWith(
+    profile,
+    fallbackTitle,
+    reviewCopyFor(locale)
+  );
   const model = summarize(day.proposed);
   if (!model) return null;
 

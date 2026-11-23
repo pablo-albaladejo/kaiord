@@ -48,8 +48,8 @@
       "signedOut": "Sign in to Garmin Connect in this browser to send this workout."
     },
     "trainingPeaksHorizon": {
-      "beforeSend": "On a Basic TrainingPeaks account only today and tomorrow are accepted, so TrainingPeaks may refuse this day.",
-      "refused": "TrainingPeaks refused this day: a Basic account accepts only today and tomorrow. Schedule the workout for one of them."
+      "beforeSend": "A Basic TrainingPeaks account accepts only today and tomorrow, counted in the account's time zone, so TrainingPeaks may refuse this day.",
+      "refused": "TrainingPeaks refused this day, so the workout was not sent: a Basic account accepts only today and tomorrow, counted in the TrainingPeaks account's time zone."
     },
     "trainingPeaksNotAnswering": "TrainingPeaks is not answering. Try again."
   },

@@ -1,4 +1,5 @@
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import { sportLabel } from "../../../lib/format-sport";
 import type { Workout } from "../../../types/krd";
@@ -26,6 +27,7 @@ export function CanvasShapeHead({
 }: CanvasShapeHeadProps) {
   const t = useTranslate("editor");
   const commonT = useTranslate("common");
+  const locale = useActiveLocale();
   const profile = useActiveProfileLive()?.profile;
   const provenance = buildFtpProvenance(
     profile,
@@ -33,7 +35,8 @@ export function CanvasShapeHead({
     sportLabel(workout.sport, t),
     t,
     commonT,
-    new Date()
+    new Date(),
+    locale
   );
 
   return (

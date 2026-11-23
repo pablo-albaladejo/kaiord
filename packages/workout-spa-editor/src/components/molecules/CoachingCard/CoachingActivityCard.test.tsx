@@ -10,7 +10,7 @@ const baseActivity: CoachingActivity = {
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-04-13",
-  sport: { label: "Cycling", icon: "\u{1F6B4}" },
+  sport: { id: "cycling", icon: "\u{1F6B4}" },
   title: "Intervals",
   duration: "1:30 h",
   effort: 3,

@@ -23,7 +23,9 @@ describe("loadLabel", () => {
     // Arrange
 
     // Act
-    const labels = TSS_SAMPLES.map((tss) => loadLabel(tss));
+    const labels = TSS_SAMPLES.map((tss) =>
+      loadLabel(tss, reviewCopyFor("en"))
+    );
 
     // Assert
     expect(labels).toEqual(["Recovery", "Moderate", "Hard", "Very Hard"]);
