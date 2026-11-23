@@ -23,7 +23,7 @@ describe("labParameterLabel", () => {
     // Arrange
 
     // Act
-    const label = labParameterLabel(key);
+    const label = labParameterLabel(key, "en");
 
     // Assert
     expect(label).toBe(expected);

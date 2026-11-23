@@ -39,7 +39,7 @@ export const formatPaneValue = (
   metric: TrendMetricDef,
   v: number | null | undefined,
   units: Units = "metric",
-  locale: Locale = "en"
+  locale: Locale
 ): string =>
   formatOrEmpty(v, (n) =>
     // Weight values are stored in kilograms; relabel in the active units.

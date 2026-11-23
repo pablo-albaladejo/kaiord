@@ -53,7 +53,7 @@ describe("formatRelativeTime", () => {
     // Act
 
     // Assert
-    expect(formatRelativeTime(undefined, NOW)).toEqual({
+    expect(formatRelativeTime(undefined, NOW, "en")).toEqual({
       key: "relativeTime.neverSynced",
     });
   });
@@ -65,10 +65,14 @@ describe("formatRelativeTime", () => {
 
     // Assert
     expect(
-      formatRelativeTime(new Date(NOW.getTime() - HALF_MINUTE_MS), NOW)
+      formatRelativeTime(new Date(NOW.getTime() - HALF_MINUTE_MS), NOW, "en")
     ).toEqual({ key: "relativeTime.justNow" });
     expect(
-      formatRelativeTime(new Date(NOW.getTime() - ALMOST_ONE_MINUTE_MS), NOW)
+      formatRelativeTime(
+        new Date(NOW.getTime() - ALMOST_ONE_MINUTE_MS),
+        NOW,
+        "en"
+      )
     ).toEqual({ key: "relativeTime.justNow" });
   });
 
@@ -78,15 +82,17 @@ describe("formatRelativeTime", () => {
     // Act
 
     // Assert
-    expect(formatRelativeTime(minutesAgo(MINUTES_ONE), NOW)).toEqual({
+    expect(formatRelativeTime(minutesAgo(MINUTES_ONE), NOW, "en")).toEqual({
       key: "relativeTime.minutesAgo_one",
       params: { count: 1 },
     });
-    expect(formatRelativeTime(minutesAgo(MINUTES_FIVE), NOW)).toEqual({
+    expect(formatRelativeTime(minutesAgo(MINUTES_FIVE), NOW, "en")).toEqual({
       key: "relativeTime.minutesAgo_other",
       params: { count: 5 },
     });
-    expect(formatRelativeTime(minutesAgo(MINUTES_FIFTY_NINE), NOW)).toEqual({
+    expect(
+      formatRelativeTime(minutesAgo(MINUTES_FIFTY_NINE), NOW, "en")
+    ).toEqual({
       key: "relativeTime.minutesAgo_other",
       params: { count: 59 },
     });
@@ -98,18 +104,20 @@ describe("formatRelativeTime", () => {
     // Act
 
     // Assert
-    expect(formatRelativeTime(hoursAgo(HOURS_ONE), NOW)).toEqual({
+    expect(formatRelativeTime(hoursAgo(HOURS_ONE), NOW, "en")).toEqual({
       key: "relativeTime.hoursAgo_one",
       params: { count: 1 },
     });
-    expect(formatRelativeTime(hoursAgo(HOURS_TWELVE), NOW)).toEqual({
+    expect(formatRelativeTime(hoursAgo(HOURS_TWELVE), NOW, "en")).toEqual({
       key: "relativeTime.hoursAgo_other",
       params: { count: 12 },
     });
-    expect(formatRelativeTime(hoursAgo(HOURS_TWENTY_THREE), NOW)).toEqual({
-      key: "relativeTime.hoursAgo_other",
-      params: { count: 23 },
-    });
+    expect(formatRelativeTime(hoursAgo(HOURS_TWENTY_THREE), NOW, "en")).toEqual(
+      {
+        key: "relativeTime.hoursAgo_other",
+        params: { count: 23 },
+      }
+    );
   });
 
   it("should return the yesterday key for cross-day differences under 48h", () => {
@@ -119,7 +127,9 @@ describe("formatRelativeTime", () => {
     // Act
 
     // Assert
-    expect(formatRelativeTime(hoursAgo(HOURS_NEAR_TWO_DAYS), NOW)).toEqual({
+    expect(
+      formatRelativeTime(hoursAgo(HOURS_NEAR_TWO_DAYS), NOW, "en")
+    ).toEqual({
       key: "relativeTime.yesterday",
     });
   });
@@ -131,7 +141,7 @@ describe("formatRelativeTime", () => {
     // Act
 
     // Assert
-    expect(formatRelativeTime(daysAgo(DAYS_TWO), NOW)).toEqual({
+    expect(formatRelativeTime(daysAgo(DAYS_TWO), NOW, "en")).toEqual({
       key: "relativeTime.daysAgo_other",
       params: { count: 2 },
     });
@@ -143,11 +153,11 @@ describe("formatRelativeTime", () => {
     // Act
 
     // Assert
-    expect(formatRelativeTime(daysAgo(DAYS_THREE), NOW)).toEqual({
+    expect(formatRelativeTime(daysAgo(DAYS_THREE), NOW, "en")).toEqual({
       key: "relativeTime.daysAgo_other",
       params: { count: 3 },
     });
-    expect(formatRelativeTime(daysAgo(DAYS_SIX), NOW)).toEqual({
+    expect(formatRelativeTime(daysAgo(DAYS_SIX), NOW, "en")).toEqual({
       key: "relativeTime.daysAgo_other",
       params: { count: 6 },
     });

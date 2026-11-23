@@ -17,7 +17,7 @@ const ERRORS: Record<Locale, typeof enErrors> = {
 };
 
 /** Localized "Validation errors:" heading for the active locale. */
-export const validationHeading = (locale: Locale = "en"): string =>
+export const validationHeading = (locale: Locale): string =>
   ERRORS[locale].validationHeading;
 
 /**
@@ -26,7 +26,7 @@ export const validationHeading = (locale: Locale = "en"): string =>
  */
 export function localizeValidationMessage(
   entry: { code?: string; message: string },
-  locale: Locale = "en"
+  locale: Locale
 ): string {
   if (!entry.code) return entry.message;
   const table = ERRORS[locale].validation as Record<string, string>;
@@ -55,7 +55,7 @@ type AiErrorLike = {
  * A provider rejecting the model as unknown points the user at Settings → AI.
  * Falls back to the upstream English message, then to a generic string.
  */
-export function localizeAiError(error: unknown, locale: Locale = "en"): string {
+export function localizeAiError(error: unknown, locale: Locale): string {
   const err = (error ?? {}) as AiErrorLike;
   const message = typeof err.message === "string" ? err.message : undefined;
   const reason = typeof err.reason === "string" ? err.reason : undefined;

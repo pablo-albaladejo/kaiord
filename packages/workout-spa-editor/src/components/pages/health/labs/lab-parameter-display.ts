@@ -31,7 +31,7 @@ export const formatLabParameterLabel = (d: LabParameterDisplay): string =>
  */
 export function getLabParameterDisplay(
   key: string,
-  locale: Locale = "en"
+  locale: Locale
 ): LabParameterDisplay | undefined {
   const name = NAMES_BY_LOCALE[locale][key] ?? NAMES_BY_LOCALE.en[key];
   const abbrev = LAB_ABBREVIATIONS[key];

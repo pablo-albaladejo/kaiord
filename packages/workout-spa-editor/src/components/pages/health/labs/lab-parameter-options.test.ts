@@ -12,7 +12,7 @@ describe("labParameterOptions", () => {
     // Arrange
 
     // Act
-    const labels = labParameterOptions().map((o) => o.label);
+    const labels = labParameterOptions("en").map((o) => o.label);
     const sorted = [...labels].sort((a, b) => a.localeCompare(b));
 
     // Assert
@@ -37,7 +37,7 @@ describe("findParameterByLabel", () => {
     const label = "Glucose (fasting) (GLU)";
 
     // Act
-    const param = findParameterByLabel(label);
+    const param = findParameterByLabel(label, "en");
 
     // Assert
     expect(param?.key).toBe("glucose");
@@ -48,7 +48,7 @@ describe("findParameterByLabel", () => {
     const label = "not a real parameter";
 
     // Act
-    const param = findParameterByLabel(label);
+    const param = findParameterByLabel(label, "en");
 
     // Assert
     expect(param).toBeUndefined();
@@ -58,7 +58,7 @@ describe("findParameterByLabel", () => {
 describe("unitOptionsFor", () => {
   it("should list the canonical unit first, then known alternates", () => {
     // Arrange
-    const hba1c = findParameterByLabel("Glycated hemoglobin (HbA1c)")!;
+    const hba1c = findParameterByLabel("Glycated hemoglobin (HbA1c)", "en")!;
 
     // Act
     const units = unitOptionsFor(hba1c);

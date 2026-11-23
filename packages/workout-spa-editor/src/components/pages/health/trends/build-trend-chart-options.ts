@@ -50,8 +50,8 @@ const buildTrendSeries = (
 
 export const buildTrendChartOptions = (
   metrics: ReadonlyArray<TrendMetricDef>,
-  units: Units = "metric",
-  locale: Locale = "en",
+  units: Units,
+  locale: Locale,
   window?: TrendWindow
 ): uPlot.Options => {
   const scales: uPlot.Scales = trendXScale(window);

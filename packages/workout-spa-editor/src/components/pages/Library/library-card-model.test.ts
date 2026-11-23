@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { getTranslate } from "../../../i18n/use-translate";
+import { reviewCopyFor } from "../../../lib/workout-review";
 import type { WorkoutStep } from "../../../types/krd";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 import { buildLibraryCardModel } from "./library-card-model";
@@ -41,7 +42,7 @@ describe("buildLibraryCardModel", () => {
     // Arrange
 
     // Act
-    const model = buildLibraryCardModel(template, null, t);
+    const model = buildLibraryCardModel(template, null, t, reviewCopyFor("en"));
 
     // Assert
     expect(model.duration).toBe("15m");
@@ -53,7 +54,7 @@ describe("buildLibraryCardModel", () => {
     const generic: WorkoutTemplate = { ...template, sport: "generic" };
 
     // Act
-    const model = buildLibraryCardModel(generic, null, t);
+    const model = buildLibraryCardModel(generic, null, t, reviewCopyFor("en"));
 
     // Assert
     expect(model.sportLabel).toBe("Other");

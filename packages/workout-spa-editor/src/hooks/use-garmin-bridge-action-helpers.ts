@@ -58,7 +58,7 @@ export const runPush = async (
   gcn: unknown,
   setPushing: (s: PushState) => void,
   redetect: () => Promise<void>,
-  locale: Locale = "en"
+  locale: Locale
 ): Promise<GarminPushOutcome> => {
   setPushing({ status: "loading" });
   const result = await executePush(getGarminExtensionId(), gcn);

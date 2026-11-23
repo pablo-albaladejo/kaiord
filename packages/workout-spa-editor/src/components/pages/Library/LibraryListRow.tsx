@@ -1,6 +1,8 @@
 import { Play } from "lucide-react";
 
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
+import { reviewCopyFor } from "../../../lib/workout-review";
 import type { Profile } from "../../../types/profile";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 import { Button } from "../../atoms/Button";
@@ -26,7 +28,13 @@ export function LibraryListRow({
   onDelete,
 }: LibraryListRowProps) {
   const t = useTranslate("library");
-  const model = buildLibraryCardModel(template, profile, t);
+  const locale = useActiveLocale();
+  const model = buildLibraryCardModel(
+    template,
+    profile,
+    t,
+    reviewCopyFor(locale)
+  );
 
   return (
     <div className="space-y-2">
