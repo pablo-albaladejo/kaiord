@@ -35,6 +35,18 @@ describe("mapManufacturer", () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it("should prefer the exact manufacturer over a longer one it prefixes", () => {
+    // Arrange
+    const logger = createMockLogger();
+
+    // Act
+    // "dynastreamOem" precedes "dynastream" in the FIT enum and starts with it
+    const result = mapManufacturer("dynastream", logger);
+
+    // Assert
+    expect(result).toBe("dynastream");
+  });
+
   it("should match by enum-prefix when input is shorter than enum value", () => {
     // Arrange
     const logger = createMockLogger();

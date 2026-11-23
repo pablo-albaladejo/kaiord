@@ -3,16 +3,18 @@ import type { Logger } from "@kaiord/core";
 import { createFitParsingError } from "@kaiord/core";
 
 import { mapEquipmentToFit } from "../equipment/equipment.mapper";
+import {
+  FIT_STRING_MAX_BYTES,
+  fitStringBytes,
+  fitStringPrefix,
+} from "./fit-string";
 import { convertDuration } from "./krd-to-fit-duration.converter";
 import { convertTarget } from "./krd-to-fit-target.converter";
-
-/** FIT protocol maximum length for notes field */
-export const FIT_NOTES_MAX_LENGTH = 256;
 
 export type TruncationBehavior = "truncate" | "error";
 
 export type ConvertWorkoutStepOptions = {
-  /** How to handle notes exceeding 256 characters. Default: "truncate" */
+  /** How to handle notes over the 254 bytes of a FIT string. Default: "truncate" */
   notesTruncation?: TruncationBehavior;
 };
 
@@ -66,20 +68,21 @@ export const convertNotes = (
   behavior: TruncationBehavior,
   logger: Logger
 ): string => {
-  if (notes.length <= FIT_NOTES_MAX_LENGTH) {
+  const bytes = fitStringBytes(notes);
+  if (bytes <= FIT_STRING_MAX_BYTES) {
     return notes;
   }
 
   if (behavior === "error") {
     throw createFitParsingError(
-      `Notes exceed ${FIT_NOTES_MAX_LENGTH} characters at step ${stepIndex} ` +
-        `(length: ${notes.length}). Use notesTruncation: "truncate" to auto-truncate.`
+      `Notes exceed the ${FIT_STRING_MAX_BYTES} bytes of a FIT string at step ${stepIndex} ` +
+        `(${bytes} bytes). Use notesTruncation: "truncate" to auto-truncate.`
     );
   }
 
   logger.warn(
-    `Notes truncated from ${notes.length} to ${FIT_NOTES_MAX_LENGTH} characters`,
-    { stepIndex, originalLength: notes.length }
+    `Notes truncated from ${bytes} to ${FIT_STRING_MAX_BYTES} bytes, the most a FIT string holds`,
+    { stepIndex, originalBytes: bytes }
   );
-  return notes.substring(0, FIT_NOTES_MAX_LENGTH);
+  return fitStringPrefix(notes);
 };
