@@ -885,7 +885,7 @@
           "contains": "Garmin and Train2Go are published"
         },
         {
-          "file": "packages/workout-spa-editor/src/application/connections/connection-fix-target.ts",
+          "file": "packages/workout-spa-editor/src/application/connections/extension-descriptors.ts",
           "contains": "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe"
         }
       ]
@@ -1014,7 +1014,7 @@
           "contains": "Garmin and Train2Go are published"
         },
         {
-          "file": "packages/workout-spa-editor/src/application/connections/connection-fix-target.ts",
+          "file": "packages/workout-spa-editor/src/application/connections/extension-descriptors.ts",
           "contains": "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe"
         }
       ]

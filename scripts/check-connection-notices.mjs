@@ -283,8 +283,8 @@ const registryName = (registry, bridge) =>
 export function popupProblems(root = ROOT) {
   const read = (path) => readFileSync(join(root, path), "utf8");
   const registry = read(`${SPA}/integrations/integration-registry-entries.ts`);
-  const targets = read(
-    `${SPA}/application/connections/connection-fix-target.ts`
+  const descriptors = read(
+    `${SPA}/application/connections/extension-descriptors.ts`
   );
   return BRIDGES.flatMap((bridge) => {
     const problems = [];
@@ -311,7 +311,9 @@ export function popupProblems(root = ROOT) {
         `packages/${bridge}/popup.js: PLATFORM is ${JSON.stringify(platform)}, the App names it ${JSON.stringify(name)}`
       );
     }
-    const signIn = new RegExp(`"${bridge}":\\s*"([^"]+)"`).exec(targets)?.[1];
+    const signIn = new RegExp(
+      `"${bridge}":\\s*\\{[^}]*?signInUrl:\\s*"([^"]+)"`
+    ).exec(descriptors)?.[1];
     if (signIn === undefined || !popup.includes(`"${signIn}"`)) {
       problems.push(
         `packages/${bridge}/popup.js: does not open the App's sign-in page ${signIn}`
