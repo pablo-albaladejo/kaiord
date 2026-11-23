@@ -16,6 +16,15 @@ export const addDaysIso = (iso: string, days: number): string => {
   const [y, m, d] = iso.split("-").map(Number);
   const date = new Date(y!, (m ?? 1) - 1, d ?? 1);
   date.setDate(date.getDate() + days);
+  return localIsoDate(date);
+};
+
+/**
+ * The `YYYY-MM-DD` of a `Date` in the user's local timezone, built from local
+ * components (not `toISOString()`, which gives the UTC day and is off by one
+ * near midnight outside UTC).
+ */
+export const localIsoDate = (date: Date): string => {
   const yyyy = String(date.getFullYear()).padStart(4, "0");
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
