@@ -67,7 +67,7 @@ export const CAPABILITY_CATALOGUE = [
       nav: [],
       routes: [],
       settings: ["authority"],
-      tools: ["set_data_route"],
+      tools: ["set_authority"],
       inScreen: ["connections-authority-link"],
     },
     adoptsExistingData: "dataTypeSourcePolicy",

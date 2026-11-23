@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (25 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_data_route` correctly for the spec's two hub-conversation scenarios. **No runner here runs in CI.** This project holds no provider API key. The parser runner (`run-evals.ts`) is the live lane: it runs only on the maintainer's machine, over the local Claude Code subscription (`claude -p`, see `claude-cli/` below), and is INERT anywhere else. The chat-tool and lab-extraction runners need tool calling and document file parts, which `claude -p` cannot carry: they report every case unmeasured and exit 0. What runs on every commit is the assertion logic, the fixtures' own structural invariants and the keyless replay lane, none of which needs a credential.
+Evaluation and benchmarking suite for validating LLM output quality. Defines benchmark cases (25 curated workout descriptions), runs assertions (schema validation, sport correctness, step count, zone accuracy), and produces JSON reports. A second suite (`chat-tool-*`) evaluates the Data Hub chat tools (F6): does the model call `get_data_routes`/`set_authority` correctly for the spec's two hub-conversation scenarios. **No runner here runs in CI.** This project holds no provider API key. The parser runner (`run-evals.ts`) is the live lane: it runs only on the maintainer's machine, over the local Claude Code subscription (`claude -p`, see `claude-cli/` below), and is INERT anywhere else. The chat-tool and lab-extraction runners need tool calling and document file parts, which `claude -p` cannot carry: they report every case unmeasured and exit 0. What runs on every commit is the assertion logic, the fixtures' own structural invariants and the keyless replay lane, none of which needs a credential.
 
 ## Key Files
 
@@ -20,7 +20,7 @@ Evaluation and benchmarking suite for validating LLM output quality. Defines ben
 - `dimension-outcomes.ts` — the `passed` / `failed` / `unmeasured` constructors, the per-dimension tally, and `dimensionRatePercent`, which returns `null` rather than a number when nothing was measured
 - `chat-tool-benchmarks.json` — Data Hub hub-conversation scenarios (F6): "where do my planned sessions come from" (read) and "read sleep only from Whoop" (action)
 - `chat-tool-types.ts` — Type definitions: `ChatToolBenchmark`, `ChatToolEvalResult`
-- `chat-tool-fixtures.ts` — local `get_data_routes`/`set_data_route` `ChatTool` fixtures mirroring the real schemas registered in `@kaiord/workout-spa-editor` (hand-kept in sync; that package cannot be a dependency here)
+- `chat-tool-fixtures.ts` — local `get_data_routes`/`set_data_route`/`set_authority` `ChatTool` fixtures mirroring the real schemas registered in `@kaiord/workout-spa-editor` (hand-kept in sync; that package cannot be a dependency here)
 - `chat-tool-assertions.ts` — `evaluateChatToolBenchmark(benchmark, chatTurnResult, durationMs)`: read scenarios check the expected tool was called and the final answer names the real source; action scenarios check the paused `pendingAction` matches the expected tool + input fields
 - `run-chat-tool-evals.ts` / `run-lab-extraction-evals.ts` — report every case unmeasured (tool calling; document file parts) and exit 0; they import no live code, so they never reach the `EVAL_LIVE` opt-in
 
@@ -136,10 +136,9 @@ belongs on the keyless replay lane, derived from a measured A/A run.
   "id": "unique-id",
   "userText": "Natural language user message",
   "category": "read|action",
-  "expectedTool": "get_data_routes|set_data_route",
+  "expectedTool": "get_data_routes|set_authority",
   "expectedAnswerIncludes": ["train2go"],
   "expectedActionInput": {
-    "action": "set_source_policy",
     "dataType": "sleep",
     "mode": "priority"
   }

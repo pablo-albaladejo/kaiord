@@ -14,6 +14,7 @@ import { createQueryCoachingTool } from "./query-coaching-tool";
 import { createQueryEnergyBalanceTool } from "./query-energy-balance-tool";
 import { createQueryHealthTool } from "./query-health-tool";
 import { createQueryWorkoutsTool } from "./query-workouts-tool";
+import { createSetAuthorityTool } from "./set-authority-tool";
 import { createSetDataRouteTool } from "./set-data-route-tool";
 import { withholdHealth } from "./withhold-health";
 
@@ -47,6 +48,7 @@ export const buildChatTools = (deps: ChatToolDeps): ChatTool[] => {
     createLogIntakeTool(deps.actions),
     createPushToGarminTool(deps.actions),
     createSetDataRouteTool(deps.actions),
+    createSetAuthorityTool(deps.actions),
   ];
   return withholdHealth(
     tools.filter((tool) => deps.offersTool(tool.name)),

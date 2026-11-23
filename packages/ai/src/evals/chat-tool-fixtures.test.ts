@@ -36,7 +36,7 @@ describe("hub chat-tool fixtures", () => {
     }
   );
 
-  it("should keep set_data_route action-discriminated", async () => {
+  it("should keep set_data_route to switching one source on or off", () => {
     // Arrange
     const tool = createHubChatToolFixtures().find(
       (t) => t.name === "set_data_route"
@@ -48,7 +48,7 @@ describe("hub chat-tool fixtures", () => {
       dataType: "sleep",
       integrationId: "whoop",
     });
-    const valid = tool?.inputSchema.safeParse({
+    const choosingAuthority = tool?.inputSchema.safeParse({
       action: "set_source_policy",
       dataType: "sleep",
       mode: "priority",
@@ -57,29 +57,34 @@ describe("hub chat-tool fixtures", () => {
 
     // Assert
     expect(missingDirection?.success).toBe(false);
-    expect(valid?.success).toBe(true);
+    expect(choosingAuthority?.success).toBe(false);
   });
 
-  it("should reject a priority policy without a sourceOrder, like the SPA tool", () => {
+  it("should reject a priority order without a sourceOrder, like the SPA tool", () => {
     // Arrange
     const tool = createHubChatToolFixtures().find(
-      (t) => t.name === "set_data_route"
+      (t) => t.name === "set_authority"
     );
 
     // Act
-    const parsed = tool?.inputSchema.safeParse({
-      action: "set_source_policy",
+    const missing = tool?.inputSchema.safeParse({
       dataType: "sleep",
       mode: "priority",
     });
+    const valid = tool?.inputSchema.safeParse({
+      dataType: "sleep",
+      mode: "priority",
+      sourceOrder: ["whoop"],
+    });
 
     // Assert
-    expect(parsed?.success).toBe(false);
+    expect(missing?.success).toBe(false);
+    expect(valid?.success).toBe(true);
   });
 
-  it("should tell the model which fields each action requires", async () => {
+  it("should tell the model what each field of set_authority means", async () => {
     // Arrange
-    const tool = buildSdkTools(createHubChatToolFixtures()).set_data_route;
+    const tool = buildSdkTools(createHubChatToolFixtures()).set_authority;
 
     // Act
     const jsonSchema = (await asSchema(tool?.inputSchema).jsonSchema) as {
@@ -87,9 +92,7 @@ describe("hub chat-tool fixtures", () => {
     };
 
     // Assert
-    expect(jsonSchema.properties.action?.description).toMatch(
-      /integrationId.*direction.*mode/s
-    );
-    expect(jsonSchema.properties.direction?.description).toMatch(/Required/);
+    expect(jsonSchema.properties.mode?.description).toMatch(/priority.*union/s);
+    expect(jsonSchema.properties.sourceOrder?.description).toMatch(/Required/);
   });
 });

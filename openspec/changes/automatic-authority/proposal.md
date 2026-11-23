@@ -20,7 +20,7 @@ the Authority Capability the mechanism of #1659 was built to hold.
   stay and are still read on a day nobody else reported.
 - **The matrix is an advanced Capability** (`authority-matrix`, off by
   default): a Settings section "Which Platform decides" with "Automatic" and
-  each source per kind, and the `set_data_route` Tool. On, its choices
+  each source per kind, and the `set_authority` Tool. On, its choices
   override the rule; off, it leaves no trace and its choices are kept without
   applying. An athlete with a stored choice reads it as on.
 - **Nothing asks**: Connections keeps the per-kind switches and names the
@@ -49,5 +49,6 @@ the Authority Capability the mechanism of #1659 was built to hold.
   the zones sync orchestrator, the `connections`, `settings`, `coaching`,
   `athlete` and `zones` dictionaries, unit and e2e specs.
 - The assistant's `get_data_routes` reports `automatic` where the rule
-  decides; `set_data_route` is unchanged and offered only while the matrix is
-  on.
+  decides; choosing the Authority moves from `set_data_route` to a new Tool,
+  `set_authority`, offered only while the matrix is on; `set_data_route`
+  keeps switching a source's import on or off, offered always.

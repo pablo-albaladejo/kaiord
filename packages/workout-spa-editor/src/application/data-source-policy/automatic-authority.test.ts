@@ -184,4 +184,25 @@ describe("automatic Authority", () => {
     expect(result.mode).toBe("automatic");
     expect(effectiveOf(result)).toBe("tanita-bridge");
   });
+
+  it("should keep every source for an athlete who chose that before and never turned the matrix off", async () => {
+    // Arrange
+    const setup: Setup = {
+      routes: [route("trainingpeaks-bridge"), route("tanita-bridge")],
+      records: [TANITA, TRAININGPEAKS],
+      chosen: {
+        profileId: PROFILE_ID,
+        dataType: "weight",
+        mode: "union",
+        sourceOrder: [],
+      },
+    };
+
+    // Act
+    const result = await resolveWeight(setup);
+
+    // Assert
+    expect(result.mode).toBe("union");
+    expect(result.mode === "union" ? result.records : []).toHaveLength(2);
+  });
 });

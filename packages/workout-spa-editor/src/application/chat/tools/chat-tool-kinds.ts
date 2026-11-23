@@ -32,6 +32,7 @@ const TOOL_KINDS: Readonly<
   query_coaching: () => ["coachingPlan"],
   get_data_routes: () => ["dataSources"],
   set_data_route: () => ["dataSources"],
+  set_authority: () => ["dataSources"],
   query_health: (input) => {
     const metric = metricOf(input);
     return metric ? HEALTH_METRIC_KINDS[metric] : [];

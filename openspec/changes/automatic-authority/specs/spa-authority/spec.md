@@ -41,14 +41,15 @@ When the Authority Platform of a kind disconnects (its import is switched off), 
 
 ### Requirement: The Authority matrix is an advanced Capability, off by default
 
-Choosing the Authority by hand SHALL be the Capability `authority-matrix`, graded advanced, owning the settings section `authority` and the assistant Tool `set_data_route`, and off for a new athlete. While it is on, a choice made in it (or through `set_data_route`) SHALL override the automatic rule for that kind, and "Automatic" SHALL hand the kind back to the rule. While it is off, its settings section, its link from Connections and its Tool SHALL be absent, and its stored choices SHALL be kept but SHALL NOT apply: the automatic rule decides every kind, and turning the Capability on again SHALL make the kept choices apply again. An athlete with a stored choice and no decision recorded SHALL read the Capability as on, so the update changes nothing they chose.
+Choosing the Authority by hand SHALL be the Capability `authority-matrix`, graded advanced, owning the settings section `authority` and the assistant Tool `set_authority`, and off for a new athlete. While it is on, a choice made in it (or through `set_authority`) SHALL override the automatic rule for that kind, and "Automatic" SHALL hand the kind back to the rule. While it is off, its settings section, its link from Connections and its Tool SHALL be absent, and its stored choices SHALL be kept but SHALL NOT apply: the automatic rule decides every kind, and turning the Capability on again SHALL make the kept choices apply again. An athlete with a stored choice and no decision recorded SHALL read the Capability as on, so the update changes nothing they chose.
 
 #### Scenario: The matrix appears only after activation
 
 - **GIVEN** a new athlete
 - **WHEN** they open Settings and Connections
 - **THEN** no section or link to choose which Platform decides SHALL show
-- **AND** the assistant SHALL NOT be offered `set_data_route`
+- **AND** the assistant SHALL NOT be offered `set_authority`
+- **AND** the assistant SHALL still be offered `set_data_route`, which switches a source's import on or off and waits for the athlete to confirm
 - **WHEN** they turn "Choose which Platform decides" on in Settings, Capabilities
 - **THEN** the section SHALL show each kind more than one source reports, with "Automatic" chosen
 
@@ -68,7 +69,7 @@ Choosing the Authority by hand SHALL be the Capability `authority-matrix`, grade
 
 #### Scenario: An existing athlete keeps their choice
 
-- **GIVEN** an athlete who chose an Authority before the update
+- **GIVEN** an athlete who chose an Authority before the update, including "Keep every source"
 - **WHEN** they open the updated App
 - **THEN** the matrix SHALL be on and their choice SHALL apply
 

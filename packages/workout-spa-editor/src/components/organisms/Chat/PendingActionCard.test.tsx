@@ -88,14 +88,18 @@ describe("PendingActionCard", () => {
       "“Lunch”: 650 kcal (protein 40 g · carbs 80 g · fat 18 g) on Oct 16",
     ],
     [
-      "set_data_route",
+      "set_authority",
       {
-        action: "set_source_policy",
         dataType: "sleep",
         mode: "priority",
         sourceOrder: ["whoop", "garmin"],
       },
       "Sleep: read from whoop → garmin, in that order",
+    ],
+    [
+      "set_authority",
+      { dataType: "weight", mode: "union" },
+      "Weight: merge every enabled source",
     ],
     [
       "set_data_route",
@@ -173,6 +177,7 @@ describe("PendingActionCard", () => {
     "log_health_metric",
     "log_intake",
     "set_data_route",
+    "set_authority",
   ])("should not warn about leaving the device for local %s", (tool) => {
     // Arrange
     const action = pending(tool, {});
@@ -228,14 +233,18 @@ describe("PendingActionCard", () => {
     ],
     [
       "the data type is unknown",
+      "set_authority",
+      { dataType: "mood", mode: "union" },
+    ],
+    [
+      "switching a source names the Authority instead",
       "set_data_route",
-      { action: "set_source_policy", dataType: "mood", mode: "union" },
+      { action: "set_source_policy", dataType: "sleep", mode: "union" },
     ],
     [
       "the source order holds a non-name",
-      "set_data_route",
+      "set_authority",
       {
-        action: "set_source_policy",
         dataType: "sleep",
         mode: "priority",
         sourceOrder: ["whoop", null],

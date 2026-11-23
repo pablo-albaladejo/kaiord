@@ -83,7 +83,7 @@ a day nobody else reported. Reconnecting restores the routes
 
 ```ts
 { id: "authority-matrix", grade: "advanced",
-  owns: { settings: ["authority"], tools: ["set_data_route"],
+  owns: { settings: ["authority"], tools: ["set_authority"],
           inScreen: ["connections-authority-link"], … },
   adoptsExistingData: "dataTypeSourcePolicy" }
 // MODULES (scripts/capability-surfaces.vocab.mjs):
@@ -120,9 +120,16 @@ Capability reads as on and their choices keep winning (the #1659
 `adoptsExistingData` reading, counted per athlete by the table's `profileId`
 index). An explicit off wins.
 
-The assistant: `set_data_route` is owned by the Capability, so it leaves the
-model's Tools and "what can I do" while off, with no change to its schema or
-description. `get_data_routes` reports `mode: "automatic"` and the rule's
+The assistant: choosing the Authority is its own Tool, `set_authority`,
+owned by the Capability, so it leaves the model's Tools and "what can I do"
+while off. Switching a source's import on or off stays `set_data_route`,
+offered whatever is on (with confirmation): it decides whether a source is
+read at all, not which one decides, like the Connections switches (D4).
+Rejected: the Capability owning the whole `set_data_route`, which took the
+switches away from the assistant of every athlete with the matrix off. The
+`set_authority` description names, from the rule itself, the kinds the App
+decides and the kinds that keep every source, so it never calls `union` the
+default. `get_data_routes` reports `mode: "automatic"` and the rule's
 order where the rule decides, so it never says `union` for a kind the App
 reads one Authority for.
 

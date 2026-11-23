@@ -4,6 +4,7 @@ import {
 } from "@kaiord/ai/prompts";
 import { describe, expect, it, vi } from "vitest";
 
+import { resolveCapabilities } from "../../../lib/capabilities/resolve-capabilities";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { buildChatTools } from "./build-chat-tools";
 
@@ -18,25 +19,65 @@ const makeDeps = () => ({
     logIntake: vi.fn(),
     pushToGarmin: vi.fn(),
     setDataRoute: vi.fn(),
+    setAuthority: vi.fn(),
   },
   getMatrixSignals: vi.fn(),
   offersTool: () => true,
 });
+
+const withMatrix = (decision: boolean | undefined) => {
+  const active = resolveCapabilities({
+    decisions: decision === undefined ? {} : { "authority-matrix": decision },
+    withData: new Set<string>(),
+  });
+  return {
+    ...makeDeps(),
+    offersTool: (name: string) => active.offers("tool", name),
+  };
+};
 
 describe("buildChatTools", () => {
   it("should not offer the assistant a Tool an off Capability owns", () => {
     // Arrange
     const deps = {
       ...makeDeps(),
-      offersTool: (name: string) => name !== "set_data_route",
+      offersTool: (name: string) => name !== "set_authority",
     };
 
     // Act
     const names = buildChatTools(deps).map((t) => t.name);
 
     // Assert
-    expect(names).not.toContain("set_data_route");
+    expect(names).not.toContain("set_authority");
     expect(names).toContain("get_data_routes");
+  });
+
+  it("should offer switching an import on or off, with confirmation, while the matrix is off", () => {
+    // Arrange
+    const deps = withMatrix(undefined);
+
+    // Act
+    const tools = buildChatTools(deps);
+
+    // Assert
+    const toggle = tools.find((t) => t.name === "set_data_route");
+    expect(toggle?.requiresConfirmation).toBe(true);
+    expect(tools.map((t) => t.name)).not.toContain("set_authority");
+  });
+
+  it("should offer both switching an import and choosing the Authority while the matrix is on", () => {
+    // Arrange
+    const deps = withMatrix(true);
+
+    // Act
+    const tools = buildChatTools(deps);
+
+    // Assert
+    const gated = tools
+      .filter((t) => t.requiresConfirmation)
+      .map((t) => t.name);
+    expect(gated).toContain("set_data_route");
+    expect(gated).toContain("set_authority");
   });
 
   it("should assemble the full read + action tool registry", () => {
@@ -58,12 +99,13 @@ describe("buildChatTools", () => {
       "query_energy_balance",
       "query_health",
       "query_workouts",
+      "set_authority",
       "set_data_route",
       "sync_coaching",
     ]);
   });
 
-  it("should mark exactly the six action tools as requiring confirmation", () => {
+  it("should mark exactly the action tools as requiring confirmation", () => {
     // Arrange
     const deps = makeDeps();
 
@@ -79,6 +121,7 @@ describe("buildChatTools", () => {
       "log_health_metric",
       "log_intake",
       "push_to_garmin",
+      "set_authority",
       "set_data_route",
       "sync_coaching",
     ]);

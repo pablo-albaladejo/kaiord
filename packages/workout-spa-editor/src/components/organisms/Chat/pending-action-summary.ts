@@ -7,6 +7,7 @@ import {
   text,
 } from "./action-input";
 import { summarizeLogIntake } from "./summarize-log-intake";
+import { summarizeSetAuthority } from "./summarize-set-authority";
 import { summarizeSetDataRoute } from "./summarize-set-data-route";
 
 type Summarize = (input: ActionInput, ctx: SummaryContext) => string | null;
@@ -35,6 +36,7 @@ const TEXT_SUMMARIES = {
   },
   log_intake: summarizeLogIntake,
   set_data_route: summarizeSetDataRoute,
+  set_authority: summarizeSetAuthority,
 } satisfies Record<TextActionName, Summarize>;
 
 /** Every confirmation-gated tool the card can describe, taken from the
