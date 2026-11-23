@@ -3,9 +3,9 @@ import type { KRD, Logger, Workout } from "@kaiord/core";
 
 import type { FitFileType } from "../schemas/fit-file-type";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
+import { fitStringPrefix } from "../shared/fit-string";
 import { mapSportToFit } from "../sport/sport.mapper";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
-import { fitStringPrefix } from "./fit-string";
 import { mapManufacturer } from "./krd-to-fit-manufacturer.converter";
 import { countValidSteps } from "./krd-to-fit-step-count.helpers";
 

@@ -16,12 +16,12 @@ import {
   FIT_REPEATED_MESSAGES_5,
   FIT_REPEATED_MESSAGES_6,
   FIT_STEPS_COUNT_4,
-  FIT_STRING_MAX_BYTES,
   FIT_TARGET_VALUE_1200,
   FIT_TARGET_VALUE_1250,
 } from "../../test-utils/constants";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
+import { FIT_STRING_MAX_BYTES } from "../shared/fit-string";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import { convertKRDToMessages } from "./krd-to-fit.converter";
 

@@ -105,8 +105,6 @@ export const FIT_POOL_LENGTH_33_33 = 33.33 as const;
 // === Workout step notes lengths (round-trip + krd-to-fit) ===
 export const FIT_NOTES_OVERSIZED_LENGTH = 300 as const;
 export const FIT_NOTES_MAX_LENGTH = 256 as const;
-/** A FIT string holds 254 bytes of text (255 with its NUL terminator). */
-export const FIT_STRING_MAX_BYTES = 254 as const;
 
 // === krd-to-fit watts/percent FTP scaling samples ===
 export const FIT_DURATION_VALUE_1000 = 1000 as const;
