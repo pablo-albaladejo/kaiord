@@ -1,5 +1,6 @@
 import { Pencil, RotateCcw, Trash2 } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { SaveToLibraryButton } from "../SaveToLibraryButton/SaveToLibraryButton";
@@ -17,6 +18,7 @@ export function AiSuccessActions({
   onEdit,
   onDiscard,
 }: AiSuccessActionsProps) {
+  const t = useTranslate("create-workout");
   return (
     <div
       className="flex flex-wrap items-center gap-2 rounded-lg border border-edge bg-surface p-3"
@@ -29,7 +31,7 @@ export function AiSuccessActions({
         data-testid="ai-action-regenerate"
       >
         <RotateCcw className="h-4 w-4" />
-        Regenerate
+        {t("result.regenerate")}
       </Button>
       <Button
         variant="secondary"
@@ -38,7 +40,7 @@ export function AiSuccessActions({
         data-testid="ai-action-edit"
       >
         <Pencil className="h-4 w-4" />
-        Edit
+        {t("result.edit")}
       </Button>
       <Button
         variant="danger"
@@ -47,7 +49,7 @@ export function AiSuccessActions({
         data-testid="ai-action-discard"
       >
         <Trash2 className="h-4 w-4" />
-        Discard
+        {t("result.discard")}
       </Button>
       <SaveToLibraryButton workout={workout} />
     </div>

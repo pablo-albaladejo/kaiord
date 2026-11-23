@@ -38,6 +38,12 @@
       "confirmSend": "Enviar una copia",
       "cancel": "Cancelar"
     },
+    "trainingPeaksPushError": {
+      "noSteps": "Este entreno todavía no tiene pasos que enviar.",
+      "install": "Instala Kaiord para TrainingPeaks para enviar este entreno.",
+      "signIn": "Inicia sesión en TrainingPeaks y vuelve a intentarlo.",
+      "notAnswering": "TrainingPeaks no responde. Vuelve a intentarlo."
+    },
     "sendDisabled": {
       "noExtension": "Instala la Extensión de Kaiord para Garmin para enviar este entreno.",
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."

@@ -2,6 +2,8 @@
  * File Upload Constants and Validation
  */
 
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
+
 /** Maximum file size in bytes (10 MB) */
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -16,12 +18,15 @@ type FileSizeError = {
 /**
  * Validate file size before processing
  */
-export function validateFileSize(file: File): FileSizeError {
+export function validateFileSize(
+  file: File,
+  t: Translate = getTranslate("import")
+): FileSizeError {
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    const size = (file.size / (1024 * 1024)).toFixed(2);
     return {
-      title: "File too large",
-      message: `The file is ${fileSizeMB} MB, which exceeds the ${MAX_FILE_SIZE_MB} MB limit. Please use a smaller file.`,
+      title: t("errors.tooLargeTitle"),
+      message: t("errors.tooLarge", { size, limit: MAX_FILE_SIZE_MB }),
     };
   }
   return null;

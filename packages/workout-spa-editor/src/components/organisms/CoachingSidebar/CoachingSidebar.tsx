@@ -11,6 +11,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { toCoachingActivity } from "../../../adapters/train2go/coaching-record-to-activity.converter";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivityRecord } from "../../../types/coaching-activity-record";
 import { CoachingDescription } from "./CoachingDescription";
@@ -28,6 +29,7 @@ export type CoachingSidebarProps = {
 
 export function CoachingSidebar({ activity }: CoachingSidebarProps) {
   const t = useTranslate("chat");
+  const locale = useActiveLocale();
   const { collapsed, toggle } = useSidebarCollapse();
   if (collapsed) {
     return (
@@ -42,7 +44,7 @@ export function CoachingSidebar({ activity }: CoachingSidebarProps) {
       </button>
     );
   }
-  const view = toCoachingActivity(activity);
+  const view = toCoachingActivity(activity, locale);
   const sport = view.sport;
   const statusKey = STATUS_LABEL_KEY[activity.status];
   const status = statusKey ? t(statusKey) : activity.status;

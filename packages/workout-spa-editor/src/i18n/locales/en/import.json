@@ -23,6 +23,34 @@
     "title": "Imported with warnings",
     "description": "Some parts of this file could not be imported exactly. Review the workout before you use it."
   },
+  "saveFailed": {
+    "title": "Import failed",
+    "description": "Could not save the imported workout — please retry."
+  },
+  "healthSaveFailed": {
+    "title": "Health import failed",
+    "description": "Could not save the imported health record — please retry."
+  },
+  "errors": {
+    "importFailedTitle": "Import Failed",
+    "invalidFormatTitle": "Invalid File Format",
+    "fileReadTitle": "File Read Error",
+    "tooLargeTitle": "File too large",
+    "tooLarge": "The file is {{size}} MB, which exceeds the {{limit}} MB limit. Please use a smaller file.",
+    "parseFailed": "Failed to parse {{format}} file: {{detail}}",
+    "validationFailed": "Validation failed: {{detail}}",
+    "conversionFailed": "Conversion failed: {{detail}}",
+    "importFailed": "Failed to import {{format}} file: {{detail}}",
+    "unsupportedFile": "This file type is not supported. Use a .fit, .tcx, .zwo, .krd, .json or .gcn file.",
+    "parseJson": "Failed to parse JSON: {{detail}}",
+    "parseJsonPlain": "Failed to parse JSON",
+    "readFailed": "Failed to read file: {{detail}}",
+    "unknownError": "Unknown error",
+    "atLineColumn": " (line {{line}}, column {{column}})",
+    "atLine": " (line {{line}})",
+    "atPosition": " at position {{position}}",
+    "checkFile": ". Please check your file and try again."
+  },
   "noActiveAthlete": {
     "title": "No active athlete",
     "description": "Select or create an athlete before importing a file."

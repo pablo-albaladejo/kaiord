@@ -24,6 +24,9 @@
     "tapToTune": "Tap any step to fine-tune",
     "timeInZone": "Time in zone",
     "redo": "Redo",
+    "regenerate": "Regenerate",
+    "edit": "Edit",
+    "discard": "Discard",
     "savePush": "Send to Garmin"
   },
   "summary": {

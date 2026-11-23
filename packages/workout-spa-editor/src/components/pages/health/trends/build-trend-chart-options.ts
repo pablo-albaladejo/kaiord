@@ -1,6 +1,7 @@
 import type { Locale } from "@kaiord/i18n";
 import type uPlot from "uplot";
 
+import { getTranslate } from "../../../../i18n/use-translate";
 import type { Units } from "../../../../lib/units/units";
 import { themedAxis } from "../../../charts/uplot-base/chart-theme";
 import { seriesStroke } from "../../../charts/uplot-base/series-strokes";
@@ -26,6 +27,9 @@ const legendFormatter =
 // A health metric is not a training zone, so the series are told apart by
 // lightness, dash and label — never by hue. The step is the metric's own
 // (see trend-metrics), so it does not shift as metrics are toggled.
+const metricLabel = (metric: TrendMetricDef, locale: Locale): string =>
+  getTranslate("health", locale)(`trends.metric.${metric.key}`);
+
 const buildTrendSeries = (
   metrics: ReadonlyArray<TrendMetricDef>,
   units: Units,
@@ -35,7 +39,7 @@ const buildTrendSeries = (
   const series: uPlot.Series[] = [trendXSeries(locale, window)];
   for (const m of metrics)
     series.push({
-      label: m.label,
+      label: metricLabel(m, locale),
       scale: m.key,
       stroke: seriesStroke(m.strokeStep),
       ...(m.dash ? { dash: m.dash } : {}),
@@ -59,7 +63,7 @@ export const buildTrendChartOptions = (
       themedAxis({
         scale: m.key,
         side: 1,
-        label: m.label,
+        label: metricLabel(m, locale),
         values: tickFormatter(m, units, locale),
       })
     );

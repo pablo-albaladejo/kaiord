@@ -3,12 +3,24 @@
   "validation": {
     "min_gt_max": "min must be less than or equal to max",
     "duration_type_mismatch": "durationType must match duration.type",
-    "target_type_mismatch": "targetType must match target.type"
+    "target_type_mismatch": "targetType must match target.type",
+    "krd_required": "Missing required field",
+    "krd_required_for_workout": "Missing required field for workout type",
+    "krd_invalid_value": "Invalid value",
+    "krd_expected_object": "Expected an object",
+    "krd_not_object": "Must be an object",
+    "krd_not_array": "Must be an array",
+    "save_failed": "Failed to save file"
   },
   "ai": {
     "generationFailed": "Generation failed",
     "modelUnavailable": "This model is no longer available — pick another in Settings → AI",
     "input_empty": "Input text is empty",
     "input_too_long": "Input text exceeds {{maxLength}} characters (got {{actualLength}})"
+  },
+  "labImport": {
+    "tooLarge": "File is too large — use a file under 10 MB",
+    "runFailed": "Could not extract the lab report — please retry",
+    "noModel": "No lab-extraction model is configured"
   }
 }

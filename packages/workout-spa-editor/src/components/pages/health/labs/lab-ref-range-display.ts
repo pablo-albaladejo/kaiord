@@ -5,6 +5,7 @@
  */
 import type { LabValue } from "@kaiord/core";
 
+import { getTranslate, type Translate } from "../../../../i18n/use-translate";
 import { EMPTY } from "../../../charts/uplot-base/uplot-base";
 
 export type RefRangeFields = Pick<
@@ -21,12 +22,8 @@ export const formatRefRange = (value: RefRangeFields): string => {
   return EMPTY;
 };
 
-const ORIGIN_LABELS = {
-  report: "from report",
-  catalog: "catalog fallback",
-  none: "no range",
-} as const;
-
-/** Human label for where the effective range came from (DoD-3). */
-export const refSourceLabel = (source: LabValue["refSource"]): string =>
-  ORIGIN_LABELS[source];
+/** Where the effective range came from (DoD-3), in the athlete's language. */
+export const refSourceLabel = (
+  source: LabValue["refSource"],
+  t: Translate = getTranslate("labs-ui")
+): string => t(`report.origin.${source}`);

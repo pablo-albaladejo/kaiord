@@ -50,7 +50,13 @@ export function useBatchState(weekStart: string, weekEnd: string) {
     }
     const prep = await prepareBatch(weekStart, weekEnd);
     if (!prep.ok) {
-      setMessage(prep.message);
+      setMessage(
+        t(
+          prep.reason === "no-model"
+            ? "batch.noModel"
+            : "batch.nothingToPrepare"
+        )
+      );
       return;
     }
     setMessage(null);

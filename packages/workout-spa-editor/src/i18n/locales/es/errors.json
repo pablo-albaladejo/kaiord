@@ -3,12 +3,24 @@
   "validation": {
     "min_gt_max": "el mínimo debe ser menor o igual que el máximo",
     "duration_type_mismatch": "durationType debe coincidir con duration.type",
-    "target_type_mismatch": "targetType debe coincidir con target.type"
+    "target_type_mismatch": "targetType debe coincidir con target.type",
+    "krd_required": "Falta un campo obligatorio",
+    "krd_required_for_workout": "Falta un campo obligatorio para el tipo de entreno",
+    "krd_invalid_value": "Valor no válido",
+    "krd_expected_object": "Se esperaba un objeto",
+    "krd_not_object": "Debe ser un objeto",
+    "krd_not_array": "Debe ser una lista",
+    "save_failed": "No se pudo guardar el archivo"
   },
   "ai": {
     "generationFailed": "No se pudo generar",
     "modelUnavailable": "Este modelo ya no está disponible: elige otro en Ajustes → IA",
     "input_empty": "El texto de entrada está vacío",
     "input_too_long": "El texto supera los {{maxLength}} caracteres (introducidos {{actualLength}})"
+  },
+  "labImport": {
+    "tooLarge": "El archivo es demasiado grande: usa uno de menos de 10 MB",
+    "runFailed": "No se pudo extraer la analítica — inténtalo de nuevo",
+    "noModel": "No hay ningún modelo de extracción de analíticas configurado"
   }
 }

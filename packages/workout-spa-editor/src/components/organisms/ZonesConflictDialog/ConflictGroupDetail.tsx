@@ -4,7 +4,7 @@
  */
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ConflictItem } from "../../../types/coaching-zones";
-import { formatFieldValue } from "./field-labels";
+import { fieldLabel, formatFieldValue } from "./field-labels";
 
 export type ConflictGroupDetailProps = {
   conflicts: readonly ConflictItem[];
@@ -16,6 +16,7 @@ export const ConflictGroupDetail = ({
   expanded,
 }: ConflictGroupDetailProps) => {
   const hrUnit = useTranslate("common")("units.hr");
+  const t = useTranslate("zones");
   return (
     <ul
       className={
@@ -29,7 +30,8 @@ export const ConflictGroupDetail = ({
           data-testid={`zones-conflict-row-${c.field}`}
           className="text-muted-foreground"
         >
-          {c.field}: {formatFieldValue(c.field, c.current, hrUnit)}
+          {fieldLabel(c.field, t)}:{" "}
+          {formatFieldValue(c.field, c.current, hrUnit)}
           <span aria-hidden="true"> → </span>
           <span className="font-medium">
             {formatFieldValue(c.field, c.incoming, hrUnit)}

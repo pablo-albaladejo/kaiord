@@ -18,19 +18,31 @@ import {
   importZwoFile,
 } from "./import-workout-formats";
 
+/**
+ * What the athlete is told, as a language-free key of `import:errors.*` plus
+ * its params; the English `message` stays for logs and diagnostics.
+ */
+export type ImportErrorCopy = {
+  key: "parseFailed" | "validationFailed" | "conversionFailed" | "importFailed";
+  params: { format: string; detail: string };
+};
+
 export class ImportError extends Error {
   public readonly format: WorkoutFileFormat | null;
   public readonly cause?: unknown;
+  public readonly copy?: ImportErrorCopy;
 
   constructor(
     message: string,
     format: WorkoutFileFormat | null,
-    cause?: unknown
+    cause?: unknown,
+    copy?: ImportErrorCopy
   ) {
     super(message);
     this.name = "ImportError";
     this.format = format;
     this.cause = cause;
+    this.copy = copy;
   }
 }
 

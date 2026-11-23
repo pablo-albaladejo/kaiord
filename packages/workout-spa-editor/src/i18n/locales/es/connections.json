@@ -170,6 +170,7 @@
   "ext": {
     "requires": "Requiere la extensión de Kaiord",
     "install": "Instalar la extensión de Kaiord",
+    "garminUpdated": "Kaiord para Garmin se ha actualizado. Vuelve a intentarlo.",
     "bannerTitle": "La extensión de Kaiord no está instalada",
     "bannerDetail": "Garmin, Train2Go, WHOOP, Tanita y TrainingPeaks se conectan mediante la extensión de Kaiord. Instálala en este navegador para conectarlos."
   },

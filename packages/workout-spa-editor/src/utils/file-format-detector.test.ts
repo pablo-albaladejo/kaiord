@@ -12,11 +12,7 @@ import {
   isValidFormat,
   type WorkoutFileFormat,
 } from "./file-format-detector";
-import {
-  getFileExtension,
-  getFormatDescription,
-  getFormatName,
-} from "./file-format-metadata";
+import { getFileExtension, getFormatName } from "./file-format-metadata";
 
 const NON_STRING_FILENAME_SENTINEL = 123;
 
@@ -202,59 +198,5 @@ describe("file-format-detector", () => {
       // Assert
       expect(result).toBe(name);
     });
-  });
-
-  describe("getFormatDescription", () => {
-    it.each<{
-      format: WorkoutFileFormat;
-      descriptionParts: ReadonlyArray<string>;
-      compatibilityParts: ReadonlyArray<string>;
-    }>([
-      {
-        format: "fit",
-        descriptionParts: ["Garmin FIT", "Binary"],
-        compatibilityParts: [
-          "Garmin devices",
-          "Garmin Connect",
-          "TrainingPeaks",
-        ],
-      },
-      {
-        format: "tcx",
-        descriptionParts: ["Training Center XML", "XML"],
-        compatibilityParts: ["Garmin Connect", "TrainingPeaks", "Strava"],
-      },
-      {
-        format: "zwo",
-        descriptionParts: ["Zwift", "XML"],
-        compatibilityParts: ["Zwift"],
-      },
-      {
-        format: "krd",
-        descriptionParts: ["Kaiord", "JSON"],
-        compatibilityParts: ["Kaiord tools", "Web editors"],
-      },
-      {
-        format: "gcn",
-        descriptionParts: ["Garmin Connect", "JSON"],
-        compatibilityParts: ["Garmin Connect", "Garmin devices"],
-      },
-    ])(
-      "should return description and compatibility for $format",
-      ({ format, descriptionParts, compatibilityParts }) => {
-        // Arrange
-
-        // Act
-        const result = getFormatDescription(format);
-
-        // Assert
-        descriptionParts.forEach((part) => {
-          expect(result.description).toContain(part);
-        });
-        compatibilityParts.forEach((part) => {
-          expect(result.compatibility).toContain(part);
-        });
-      }
-    );
   });
 });

@@ -24,6 +24,9 @@
     "tapToTune": "Toca cualquier paso para ajustarlo",
     "timeInZone": "Tiempo en zona",
     "redo": "Rehacer",
+    "regenerate": "Regenerar",
+    "edit": "Editar",
+    "discard": "Descartar",
     "savePush": "Enviar a Garmin"
   },
   "summary": {

@@ -18,14 +18,35 @@ describe("createParseError", () => {
   it("should delegate to createImportErrorState for ImportError instances", () => {
     // Arrange
     const cause = new Error("inner");
-    const err = new ImportError("Failed to import foo", "fit", cause);
+    const err = new ImportError(
+      "Failed to import FIT file: foo",
+      "fit",
+      cause,
+      {
+        key: "importFailed",
+        params: { format: "FIT", detail: "foo" },
+      }
+    );
 
     // Act
     const result = createParseError(err);
 
     // Assert
     expect(result.title).toBe("Import Failed");
-    expect(result.message).toBe("Failed to import foo");
+    expect(result.message).toBe("Failed to import FIT file: foo");
+  });
+
+  it("should word an ImportError without copy as an unsupported file", () => {
+    // Arrange
+    const err = new ImportError("Unsupported file format: .txt", null);
+
+    // Act
+    const result = createParseError(err);
+
+    // Assert
+    expect(result.message).toBe(
+      "This file type is not supported. Use a .fit, .tcx, .zwo, .krd, .json or .gcn file."
+    );
   });
 
   it("should delegate to createFileParsingErrorState for FileParsingError-shaped objects", () => {

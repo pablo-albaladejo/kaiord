@@ -127,7 +127,7 @@ describe("prepareBatch", () => {
     // Assert
     expect(result).toEqual({
       ok: false,
-      message: "Configure an AI provider in Settings.",
+      reason: "no-model",
     });
   });
 
@@ -142,7 +142,7 @@ describe("prepareBatch", () => {
     // Assert
     expect(result).toEqual({
       ok: false,
-      message: "No raw workouts to process this week.",
+      reason: "nothing-to-prepare",
     });
   });
 });

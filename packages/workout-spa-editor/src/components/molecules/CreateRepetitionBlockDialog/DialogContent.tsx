@@ -1,3 +1,5 @@
+import { pluralKey } from "../../../i18n/plural-key";
+import { useTranslate } from "../../../i18n/use-translate";
 import { Input } from "../../atoms/Input/Input";
 
 type DialogContentProps = {
@@ -15,15 +17,16 @@ export function DialogContent({
   onRepeatCountChange,
   onKeyDown,
 }: DialogContentProps) {
+  const t = useTranslate("editor");
   const isCreatingFromSteps = stepCount !== undefined && stepCount > 0;
   return (
     <div className="p-4">
       <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
         {isCreatingFromSteps
-          ? `Create a repetition block from ${stepCount} ${
-              stepCount === 1 ? "step" : "steps"
-            }.`
-          : "Create an empty repetition block. You can add steps to it later."}
+          ? t(pluralKey("block.createFromSteps", stepCount), {
+              count: stepCount,
+            })
+          : t("block.createEmpty")}
       </p>
 
       <div className="space-y-2">
@@ -31,7 +34,7 @@ export function DialogContent({
           htmlFor="repeat-count-input"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
-          Repeat Count
+          {t("block.repeatCountLabel")}
         </label>
         <Input
           id="repeat-count-input"
@@ -46,7 +49,7 @@ export function DialogContent({
         />
         {error && <p className="text-sm text-danger-text">{error}</p>}
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Minimum: 1 repetition
+          {t("block.minRepeatHint")}
         </p>
       </div>
     </div>

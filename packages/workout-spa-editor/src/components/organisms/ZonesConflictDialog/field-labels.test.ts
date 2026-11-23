@@ -10,11 +10,15 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { FIELD_LABELS } from "./field-labels";
+import { FIELD_KEYS, fieldLabel } from "./field-labels";
+
+const FIELD_LABELS = Object.fromEntries(
+  FIELD_KEYS.map((field) => [field, fieldLabel(field)])
+);
 
 const FIELD_LABELS_TOTAL = 68;
 
-describe("FIELD_LABELS", () => {
+describe("fieldLabel", () => {
   it("should contain the 8 threshold-scalar labels plus exactly 60 band-level entries (5.1a)", () => {
     // Arrange
 

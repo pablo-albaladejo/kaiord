@@ -24,7 +24,10 @@ export type TrainingPeaksPushOutcome =
    * own the id. Callers must not assume an id is always there.
    */
   | { ok: true; workoutId: string | undefined }
+  /** An upstream error's own message, shown as is. */
   | { ok: false; message: string }
+  /** A refusal the App words: `workout-detail:footer.trainingPeaksPushError.*`. */
+  | { ok: false; refusal: "noSteps" | "install" | "signIn" | "notAnswering" }
   /** A changed workout TrainingPeaks already holds; `allowCopy` overrides. */
   | { ok: false; block: Extract<RepushVerdict, { blocked: true }> };
 
@@ -52,18 +55,18 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
     async (
       options?: TrainingPeaksPushOptions
     ): Promise<TrainingPeaksPushOutcome> => {
-      if (!workout?.krd) return { ok: false, message: "Workout has no KRD" };
+      if (!workout?.krd) return { ok: false, refusal: "noSteps" };
       const extensionId = bridgeDiscovery.getExtensionId(
         TRAININGPEAKS_BRIDGE_ID
       );
       if (!extensionId) {
-        return { ok: false, message: "TrainingPeaks bridge is not installed" };
+        return { ok: false, refusal: "install" };
       }
 
       try {
         const session = await checkTrainingPeaksSession(extensionId);
         if (!session.authenticated || session.athleteId === undefined) {
-          return { ok: false, message: "Sign in to TrainingPeaks and retry" };
+          return { ok: false, refusal: "signIn" };
         }
         const payload = krdToTrainingPeaksWorkout(workout.krd, {
           athleteId: session.athleteId,
@@ -94,9 +97,9 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
         return { ok: true, workoutId: result.externalId };
       } catch (error: unknown) {
         analytics.event("trainingpeaks-workout-pushed", { result: "failure" });
-        const message =
-          error instanceof Error ? error.message : "TrainingPeaks push failed";
-        return { ok: false, message };
+        if (!(error instanceof Error))
+          return { ok: false, refusal: "notAnswering" };
+        return { ok: false, message: error.message };
       }
     },
     [workout, profile, analytics]

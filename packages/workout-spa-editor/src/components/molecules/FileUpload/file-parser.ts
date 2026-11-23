@@ -2,6 +2,7 @@
  * File Parsing Utilities
  */
 
+import type { Translate } from "../../../i18n/use-translate";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { ImportError, importWorkout } from "../../../utils/import-workout";
 import { createImportErrorState } from "./file-parser-error-builders";
@@ -29,13 +30,13 @@ export const parseFile = async (
   return await importWorkout(file, onProgress, signal, onWarning);
 };
 
-export const createParseError = (error: unknown): ErrorState => {
+export const createParseError = (error: unknown, t?: Translate): ErrorState => {
   if (error && typeof error === "object" && "title" in error) {
     return error as ErrorState;
   }
 
   if (error instanceof ImportError) {
-    return createImportErrorState(error);
+    return createImportErrorState(error, t);
   }
 
   // Handle FileParsingError directly (from json-parser)
@@ -51,11 +52,11 @@ export const createParseError = (error: unknown): ErrorState => {
       line?: number;
       column?: number;
     };
-    return createFileParsingErrorState(parsingError);
+    return createFileParsingErrorState(parsingError, t);
   }
 
   if (error instanceof SyntaxError) {
-    return createSyntaxErrorState(error);
+    return createSyntaxErrorState(error, t);
   }
 
   // For unrecoverable errors (like corrupted FIT files), add helpful message
@@ -65,8 +66,8 @@ export const createParseError = (error: unknown): ErrorState => {
       error.message.includes("not a FIT file") ||
       error.message.includes("input is not a FIT file"))
   ) {
-    return createUnrecoverableErrorState(error);
+    return createUnrecoverableErrorState(error, t);
   }
 
-  return createGenericErrorState(error);
+  return createGenericErrorState(error, t);
 };

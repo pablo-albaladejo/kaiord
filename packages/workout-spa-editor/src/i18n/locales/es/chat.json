@@ -115,7 +115,8 @@
     "generic": "El asistente tuvo un error. Inténtalo de nuevo."
   },
   "draft": {
-    "saveWorkout": "Guardar entrenamiento"
+    "saveWorkout": "Guardar entrenamiento",
+    "workoutTitle": "Entreno del chat"
   },
   "coaching": {
     "noDescription": "No se proporcionó descripción.",

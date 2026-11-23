@@ -16,6 +16,8 @@ import { readTanitaExportCsv } from "../adapters/tanita/tanita-transport";
 import type { SyncTanitaPhase } from "../application/health/sync-tanita-body-composition.use-case";
 import { syncTanitaBodyComposition } from "../application/health/sync-tanita-body-composition.use-case";
 import { usePersistence } from "../contexts/persistence-context";
+import { useActiveLocale } from "../i18n/LocaleProvider";
+import { getTranslate } from "../i18n/use-translate";
 import { errorMessage } from "../utils/error-message";
 import { ledgerRepo } from "./garmin-push-fn";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
@@ -48,6 +50,8 @@ export const useTanitaGarminSync = (
   const discovered = useDiscoveredBridges();
   const [status, setStatus] = useState<TanitaGarminSyncStatus>("idle");
   const [lastError, setLastError] = useState<string | null>(null);
+  const locale = useActiveLocale();
+  const failed = getTranslate("connections", locale)("manage.syncFailed");
 
   const tanitaReady = discovered.some((d) => d.bridgeId === TANITA_BRIDGE_ID);
   const garminReady = discovered.some((d) => d.bridgeId === GARMIN_BRIDGE_ID);
@@ -86,12 +90,12 @@ export const useTanitaGarminSync = (
         return;
       }
       setStatus("error");
-      setLastError(result.error ?? "Sync failed");
+      setLastError(result.error ?? failed);
     } catch (err) {
       setStatus("error");
       setLastError(errorMessage(err));
     }
-  }, [persistence, profileId]);
+  }, [persistence, profileId, failed]);
 
   return { status, lastError, canSync, sync };
 };

@@ -7,6 +7,7 @@
   },
   "actions": {
     "close": "Cerrar",
+    "cancel": "Cancelar",
     "action": "Acción",
     "tryAgain": "Reintentar",
     "dismiss": "Descartar",
@@ -59,7 +60,8 @@
     "download": "Descargar un archivo"
   },
   "units": {
-    "hr": "ppm"
+    "hr": "ppm",
+    "wattsRange": "{{min}} W - {{max}} W"
   },
   "durationPicker": {
     "maxHeartRate": "Máximo {{max}} {{unit}}",

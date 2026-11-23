@@ -4,11 +4,14 @@
  * Extension IDs come from the bridge discovery singleton at call time.
  */
 
+import type { Locale } from "@kaiord/i18n";
+
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import type {
   GarminPushOutcome,
   PushState,
 } from "../contexts/garmin-bridge-types";
+import { getTranslate } from "../i18n/use-translate";
 import { ping } from "../store/garmin-extension-transport";
 import { evaluatePingResult, executePush } from "./garmin-bridge-operations";
 
@@ -54,7 +57,8 @@ export const runDetect = async ({
 export const runPush = async (
   gcn: unknown,
   setPushing: (s: PushState) => void,
-  redetect: () => Promise<void>
+  redetect: () => Promise<void>,
+  locale: Locale = "en"
 ): Promise<GarminPushOutcome> => {
   setPushing({ status: "loading" });
   const result = await executePush(getGarminExtensionId(), gcn);
@@ -62,7 +66,7 @@ export const runPush = async (
     await redetect();
     setPushing({
       status: "error",
-      message: "Extension was updated. Please try again.",
+      message: getTranslate("connections", locale)("ext.garminUpdated"),
     });
     return { success: false, garminWorkoutId: null };
   }

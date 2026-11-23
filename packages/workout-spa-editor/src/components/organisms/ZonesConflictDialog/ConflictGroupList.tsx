@@ -3,6 +3,7 @@
  * inside the conflict dialog. Extracted so `ZonesConflictDialog` stays
  * under the 60-line React component cap.
  */
+import { useTranslate } from "../../../i18n/use-translate";
 import type {
   ConflictDecision,
   ConflictItem,
@@ -31,30 +32,38 @@ export const ConflictGroupList = ({
   expanded,
   onSetGroup,
   onToggleExpand,
-}: ConflictGroupListProps) => (
-  <>
-    {ftpCoupled && (
-      <ConflictGroup
-        groupKey={ftpCoupled.groupKey}
-        label={ftpCoupled.label}
-        conflicts={flattenCoupledConflicts(ftpCoupled)}
-        decision={groupDecisions[ftpCoupled.groupKey] ?? "reject"}
-        expanded={expanded.has(ftpCoupled.groupKey)}
-        onChange={(d) => onSetGroup(ftpCoupled.groupKey, d)}
-        onToggleExpand={() => onToggleExpand(ftpCoupled.groupKey)}
-      />
-    )}
-    {bandGroups.map((g) => (
-      <ConflictGroup
-        key={g.groupKey}
-        groupKey={g.groupKey}
-        label={g.label}
-        conflicts={g.conflicts}
-        decision={groupDecisions[g.groupKey] ?? "reject"}
-        expanded={expanded.has(g.groupKey)}
-        onChange={(d) => onSetGroup(g.groupKey, d)}
-        onToggleExpand={() => onToggleExpand(g.groupKey)}
-      />
-    ))}
-  </>
-);
+}: ConflictGroupListProps) => {
+  const t = useTranslate("zones");
+  const bandLabel = (g: BandGroup) =>
+    t("conflict.group", {
+      sport: t(`conflict.sport.${g.sport}`),
+      kind: t(`conflict.kind.${g.kind}`),
+    });
+  return (
+    <>
+      {ftpCoupled && (
+        <ConflictGroup
+          groupKey={ftpCoupled.groupKey}
+          label={t("conflict.ftpGroup")}
+          conflicts={flattenCoupledConflicts(ftpCoupled)}
+          decision={groupDecisions[ftpCoupled.groupKey] ?? "reject"}
+          expanded={expanded.has(ftpCoupled.groupKey)}
+          onChange={(d) => onSetGroup(ftpCoupled.groupKey, d)}
+          onToggleExpand={() => onToggleExpand(ftpCoupled.groupKey)}
+        />
+      )}
+      {bandGroups.map((g) => (
+        <ConflictGroup
+          key={g.groupKey}
+          groupKey={g.groupKey}
+          label={bandLabel(g)}
+          conflicts={g.conflicts}
+          decision={groupDecisions[g.groupKey] ?? "reject"}
+          expanded={expanded.has(g.groupKey)}
+          onChange={(d) => onSetGroup(g.groupKey, d)}
+          onToggleExpand={() => onToggleExpand(g.groupKey)}
+        />
+      ))}
+    </>
+  );
+};

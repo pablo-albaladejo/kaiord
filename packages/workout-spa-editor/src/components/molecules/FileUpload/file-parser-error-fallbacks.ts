@@ -4,7 +4,9 @@
  * Fallback error handlers for generic and unrecoverable errors.
  */
 
+import { getTranslate, type Translate } from "../../../i18n/use-translate";
 import type { ValidationError } from "../../../types/krd";
+import { positionIn, withLocation } from "./file-parser-error-location";
 
 type ErrorState = {
   title: string;
@@ -12,53 +14,54 @@ type ErrorState = {
   validationErrors?: Array<ValidationError>;
 };
 
-export const createFileParsingErrorState = (error: {
-  message: string;
-  line?: number;
-  column?: number;
-}): ErrorState => {
-  let message = `Failed to parse JSON: ${error.message}`;
-  const positionRegex = /position (\d+)/i;
-  const positionMatch = positionRegex.exec(error.message);
-  const positionText = positionMatch ? ` at position ${positionMatch[1]}` : "";
-  if (error.line !== undefined && error.column !== undefined) {
-    message = `Failed to parse JSON${positionText} (line ${error.line}, column ${error.column})`;
-  } else if (error.line !== undefined) {
-    message = `Failed to parse JSON${positionText} (line ${error.line})`;
-  } else if (positionText) {
-    message = `Failed to parse JSON${positionText}`;
+const importT = (t?: Translate): Translate => t ?? getTranslate("import");
+
+export const createFileParsingErrorState = (
+  error: { message: string; line?: number; column?: number },
+  t?: Translate
+): ErrorState => {
+  const tr = importT(t);
+  const position = positionIn(error.message);
+  if (error.line === undefined && !position) {
+    const message = tr("errors.parseJson", { detail: error.message });
+    return { title: tr("errors.invalidFormatTitle"), message };
   }
+  const at = position ? tr("errors.atPosition", { position }) : "";
+  const where = { line: error.line, column: error.column };
+  const message = withLocation(tr("errors.parseJsonPlain") + at, where, tr);
+  return { title: tr("errors.invalidFormatTitle"), message };
+};
+
+export const createSyntaxErrorState = (
+  error: SyntaxError,
+  t?: Translate
+): ErrorState => {
+  const tr = importT(t);
+  let message = tr("errors.parseJson", { detail: error.message });
+  if (positionIn(error.message)) message += tr("errors.checkFile");
+  return { title: tr("errors.invalidFormatTitle"), message };
+};
+
+export const createUnrecoverableErrorState = (
+  error: Error,
+  t?: Translate
+): ErrorState => {
+  const tr = importT(t);
   return {
-    title: "Invalid File Format",
-    message,
+    title: tr("errors.importFailedTitle"),
+    message: `${error.message}${tr("errors.checkFile")}`,
   };
 };
 
-export const createSyntaxErrorState = (error: SyntaxError): ErrorState => {
-  let message = `Failed to parse JSON: ${error.message}`;
-  const positionRegex = /position (\d+)/i;
-  const positionMatch = positionRegex.exec(error.message);
-
-  if (positionMatch) {
-    message += `. Please check your file and try again.`;
-  }
-
+export const createGenericErrorState = (
+  error: unknown,
+  t?: Translate
+): ErrorState => {
+  const tr = importT(t);
+  const detail =
+    error instanceof Error ? error.message : tr("errors.unknownError");
   return {
-    title: "Invalid File Format",
-    message,
-  };
-};
-
-export const createUnrecoverableErrorState = (error: Error): ErrorState => {
-  return {
-    title: "Import Failed",
-    message: `${error.message}. Please check your file and try again.`,
-  };
-};
-
-export const createGenericErrorState = (error: unknown): ErrorState => {
-  return {
-    title: "File Read Error",
-    message: `Failed to read file: ${error instanceof Error ? error.message : "Unknown error"}. Please check your file and try again.`,
+    title: tr("errors.fileReadTitle"),
+    message: `${tr("errors.readFailed", { detail })}${tr("errors.checkFile")}`,
   };
 };

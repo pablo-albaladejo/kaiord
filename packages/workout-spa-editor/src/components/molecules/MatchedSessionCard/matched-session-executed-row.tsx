@@ -10,6 +10,7 @@
  * the parent button's `onClick`.
  */
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { formatDuration } from "../WorkoutCard/workout-card-utils";
 
@@ -22,6 +23,7 @@ export type ExecutedRowsProps = {
 };
 
 export function ExecutedRows({ executed }: ExecutedRowsProps) {
+  const t = useTranslate("coaching");
   if (executed.length === 0) return null;
   return (
     <div
@@ -29,7 +31,7 @@ export function ExecutedRows({ executed }: ExecutedRowsProps) {
       className="mt-1 border-t border-slate-200 pt-1 dark:border-slate-700"
     >
       <div className="flex items-center gap-1 text-[10px] text-ink-muted">
-        <span>Executed</span>
+        <span>{t("executed.executedChip")}</span>
         {executed.length > 1 ? (
           <span
             data-testid="matched-card-executed-count"

@@ -30,7 +30,9 @@ export const TrainingPeaksPushFeedback = ({
   if (!("block" in failure)) {
     return (
       <span className={ERROR_CLASS} data-testid="trainingpeaks-push-error">
-        {failure.message}
+        {"refusal" in failure
+          ? t(`footer.trainingPeaksPushError.${failure.refusal}`)
+          : failure.message}
       </span>
     );
   }

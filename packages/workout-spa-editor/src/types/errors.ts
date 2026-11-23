@@ -44,12 +44,16 @@ export class FileParsingError extends Error {
  */
 export class ValidationError extends Error {
   public override readonly name = "ValidationError";
-  public readonly errors: Array<{ field: string; message: string }>;
+  public readonly errors: Array<{
+    field: string;
+    message: string;
+    code?: string;
+  }>;
   public readonly cause?: unknown;
 
   constructor(
     message: string,
-    errors: Array<{ field: string; message: string }>,
+    errors: Array<{ field: string; message: string; code?: string }>,
     cause?: unknown
   ) {
     super(message);

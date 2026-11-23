@@ -113,7 +113,7 @@ describe("useBatchState (two-phase start)", () => {
     // Arrange
 
     mockProviderCount = 1;
-    mockPrep = { ok: false, message: "No raw workouts to process this week." };
+    mockPrep = { ok: false, reason: "nothing-to-prepare" };
 
     const { result } = renderHook(() =>
       useBatchState("2026-04-13", "2026-04-19")
@@ -127,9 +127,7 @@ describe("useBatchState (two-phase start)", () => {
 
     // Assert
 
-    expect(result.current.message).toBe(
-      "No raw workouts to process this week."
-    );
+    expect(result.current.message).toBe("Nothing to prepare this week.");
     expect(result.current.pending).toBeNull();
     expect(runSpy).not.toHaveBeenCalled();
   });
