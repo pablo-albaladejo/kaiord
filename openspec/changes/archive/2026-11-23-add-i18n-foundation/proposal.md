@@ -27,10 +27,12 @@ translate their failures.
   fallback locale, and Spanish as the first translation target. Namespaced
   JSON resources; typed keys.
 - Add a **locale preference** (`"auto" | "en" | "es"`, default `"auto"`) to
-  the `spa-user-preferences` aggregate, with a `setLocale` use case following
-  the existing calendar-density pattern, a switcher in
-  `SettingsPanel/PreferencesTab`, and `navigator.language` resolution for
-  `auto`. `<html lang>` tracks the active locale.
+  the `spa-user-preferences` aggregate, persisted through the existing
+  `setUserPreferenceFields` partial-patch use case (no bespoke `setLocale`
+  use case), a switcher in `SettingsPanel/PreferencesTab`, and
+  `navigator.language` resolution for `auto`. `<html lang>` tracks the
+  active locale. (`move-display-preferences-to-device` later moved the
+  preference to the device; see Modified Capabilities.)
 - Establish the **error translation contract**: core `ValidationError` entries
   gain a stable, language-free `code`; the SPA localizes failures by error
   class/code (never message text), falling back to the upstream English
