@@ -3,9 +3,10 @@
  *
  * Two-phase contract (design D1):
  *   1. `syncZones`  — fetches the bridge payload, eagerly writes silent
- *                     fills, returns conflicts UNWRITTEN for the UI.
- *   2. `commitConflictResolution` — applies the user's per-row
- *                                   accept/reject decisions. Idempotent.
+ *                     fills and Train2Go's weigh-in, returns the zones and
+ *                     thresholds that differ UNWRITTEN for the UI.
+ *   2. `commitConflictResolution` — "Use Train2Go's": writes every one of
+ *                                   them. Idempotent.
  *
  * Heartbeat-safe: the use case mutates the profile only via the
  * supplied repo, never via a side channel. Callers are responsible for
@@ -21,11 +22,7 @@ import { todayIsoDate } from "../../utils/today-iso-date";
 import type { CoachingTransport } from "./coaching-transport-port";
 import { reconcile } from "./sync-zones-helpers";
 import { mapPayloadToIncoming } from "./sync-zones-payload-mapper";
-import {
-  reconcileWeight,
-  recordSyncedWeight,
-  splitWeight,
-} from "./sync-zones-weight";
+import { recordTrain2GoWeight, splitWeight } from "./sync-zones-weight";
 
 const errorMessage = (e: unknown): string =>
   e instanceof Error ? e.message : String(e);
@@ -65,7 +62,6 @@ export const syncZones = async (
   return persistence.transaction<SyncZonesResult>(async () => {
     const fresh = await repo.getById(profileId);
     if (!fresh) return { ok: false, reason: "profile-deleted" };
-    const weight = await reconcileWeight(persistence, fresh, weightKg, today);
     const result = reconcile(fresh, rest, transport.source);
     // Persist whenever reconcile mutated the profile — covers silent-fills
     // (applied), method-flips on default-template/method-derived tables,
@@ -76,14 +72,16 @@ export const syncZones = async (
         updatedAt: new Date().toISOString(),
       });
     }
-    for (const { value } of weight.applied) {
-      await recordSyncedWeight(persistence, profileId, value, today);
-    }
+    const weight = await recordTrain2GoWeight(
+      persistence,
+      fresh,
+      weightKg,
+      today
+    );
     return {
       ok: true,
-      applied: [...weight.applied, ...result.applied],
-      conflicts: [...weight.conflicts, ...result.conflicts],
-      payload,
+      applied: [...weight, ...result.applied],
+      conflicts: result.conflicts,
     };
   });
 };

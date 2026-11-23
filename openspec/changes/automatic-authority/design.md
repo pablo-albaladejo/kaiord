@@ -44,10 +44,15 @@ its day; then the Platforms in a fixed order per kind:
 | training zones                                                        | Train2Go (the athlete's own numbers first) | the coach's Platform; a number the athlete set is never overwritten (D5) |
 | Activities, planned sessions, Workouts                                | none: every one kept and shown             | separate events, not one value; hiding one would lose it                 |
 
-The athlete's current weight (zones, energy) stays the most recent weigh-in
-from any source (`current-weight.ts`), because a later measurement is the
-truth about today; the order above decides the reading of a day two sources
-weighed.
+The athlete's current weight (zones, energy, the Athlete page) is the
+weigh-in of the most recent day anyone weighed (`current-weight.ts`), because
+a later day's measurement is the truth about today; within that day the rule
+decides, exactly as the Day reads it, never the row recorded last. Rejected:
+the most recent `measuredAt` within the day. A Train2Go weigh-in is stamped
+when the sync records it, not when anyone stood on a scale, so it would beat
+this morning's Tanita reading or the athlete's own entry by being synced
+later, and the Athlete page and energy would read a different weight from the
+Day.
 
 It never loses or silently overwrites: the rule only picks which stored
 record is read. A Platform whose import is off drops to the end of the order,
@@ -146,18 +151,53 @@ choices in force, so with the matrix off they name the automatic Authority.
 
 `syncZones` already writes fills and returns differing numbers unwritten.
 The dialog that asked about each is removed; the athlete's numbers stay (the
-dialog's own default). Once per set of differing numbers (a per-device memo,
-`zones-offer-memo.ts`), an info toast says "Train2Go has different numbers
-from yours. Kaiord kept yours." with "Use Train2Go's", which commits every
-differing field as accepted (so FTP and its power bands stay together). This
-is ADR 0003's "decide and offer undo": no confirmation dialog, and the
-Athlete page's per-threshold "Use / Keep" row stays as the pointer to a
-difference. The auto-import switch stays, worded for what it does: it brings
-new numbers in by itself and never overwrites the athlete's.
+dialog's own default).
+
+**What is compared: only the numbers the athlete sets.** Thresholds (FTP,
+LTHR, threshold pace, CSS, maximum heart rate) and zone bands. Weight is not
+one of them: it is a kind with an Authority (D1). `syncZones` stores
+Train2Go's weight as Train2Go's own weigh-in for today (only when it is news:
+not Train2Go's last report, not the current weight) and never returns it as a
+conflict; which weigh-in a day reads is the rule's. Rejected: keep weight in
+the notice. Its "yours" was often a Tanita reading, every new weigh-in
+changed the compared set and raised the notice again, and "Use Train2Go's"
+wrote a weigh-in Tanita outranks, so the Day showed no change.
+
+**The notice says exactly what differs.** Once per set of differing values
+(a per-device memo, per athlete, `zones-offer-memo.ts`, loaded on first use
+inside the sync callback so it stays out of the initial JS), an info toast
+says "Train2Go has different thresholds from the ones you set. Kaiord kept
+yours." ("zones", or "zones and thresholds", in English and Spanish) with
+"Use Train2Go's". The action writes Train2Go's value for every differing
+field (so FTP and its power bands stay together), each written table takes
+`method = "train2go"` and its snapshot, and a success toast says what
+changed ("Kaiord now uses Train2Go's thresholds."). `commitConflictResolution`
+takes the conflicts to write; its per-field reject path is removed, since
+nothing in the App rejects a field.
+
+**The offer outlives the toast.** The memo keeps the set open on that device
+until the athlete uses it or keeps theirs; the Athlete page shows it under
+the thresholds with "Use Train2Go's" and "Keep mine", for the numbers that
+still differ, after the 12 s toast and after a reload. A sync where Train2Go
+agrees forgets it, so a later difference is offered again. Rejected: the
+existing per-threshold "Use / Keep" row as the pointer: it reads Train2Go's
+scalars from `lastSyncedZonesSnapshot`, which the sync never writes, so it
+never appears after a sync, and it covers one threshold at a time and no
+bands. Rejected: a Dexie record of the offer, so it would follow the athlete
+across devices: a schema version for a hint, while another change is adding
+one; the memo was already per device.
+
+This is ADR 0003's "decide and offer undo": no confirmation dialog. The
+auto-import switch stays, worded for what it does: it brings new numbers in
+by itself and never overwrites the athlete's.
 
 ## Risks
 
-- The memo is per device: a second device shows the notice once more.
+- The memo is per device: a second device shows the notice once more, and the
+  Athlete page's offer is on the device that saw the notice only.
+- "The ones you set" is the profile's number: a threshold an earlier sync
+  filled from Train2Go and Train2Go later changed is offered as the athlete's,
+  because the sync records no per-threshold provenance.
 - A union row stored by an older "Keep every source" applies while the
   matrix is on; the matrix shows no button pressed for it and says every
   source is kept.

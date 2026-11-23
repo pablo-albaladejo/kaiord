@@ -46,8 +46,6 @@ export type ConflictItem = {
   incoming: number;
 };
 
-export type ConflictDecision = "accept" | "reject";
-
 export type SyncZonesFailureReason =
   "unsupported" | "transport-error" | "shape-mismatch" | "profile-deleted";
 
@@ -59,7 +57,6 @@ export type SyncZonesResult =
       ok: true;
       applied: WrittenField[];
       conflicts: ConflictItem[];
-      payload: ZonesPayload;
     }
   | { ok: false; reason: SyncZonesFailureReason; error?: string };
 

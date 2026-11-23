@@ -1,7 +1,8 @@
 /**
  * Loads every persisted source `buildDayEnergyBalance` needs for one day:
  * the profile, that day's daily-wellness reading (combined across sources),
- * the latest body-composition record up to the date, the day's intake
+ * the latest body-composition record up to the date, the current weigh-in
+ * (`current-weight.ts`), the day's intake
  * entries, and the active goal.
  *
  * All reads go through the `PersistencePort` so the use-case never touches
@@ -20,6 +21,8 @@ import type {
 } from "../../types/health/health-records";
 import type { IntakeEntryRecord } from "../../types/intake-entry-record";
 import type { Profile } from "../../types/profile";
+import { loadLatestWeighIn } from "../health/current-weight";
+import { latestUpTo } from "../health/latest-measurement";
 import { loadDailyWellness } from "../health/load-daily-wellness";
 
 const EARLIEST_DATE = "0000-01-01";
@@ -33,25 +36,6 @@ export type DayEnergySources = {
   target: EnergyTargetRecord | undefined;
 };
 
-type Measured = { id: string; date: string; krd: { measuredAt?: string } };
-
-const instant = (r: Measured): number =>
-  Date.parse(r.krd.measuredAt ?? "") || 0;
-
-/** Orders by day, then by measurement instant, then by id: never by row order. */
-const isLater = (a: Measured, b: Measured): boolean => {
-  if (a.date !== b.date) return a.date > b.date;
-  if (instant(a) !== instant(b)) return instant(a) > instant(b);
-  return a.id > b.id;
-};
-
-/** The most recent measurement; same-day rows from several sources are ordered deterministically. */
-export const latestUpTo = <T extends Measured>(records: T[]): T | undefined =>
-  records.reduce<T | undefined>(
-    (latest, record) => (latest && !isLater(record, latest) ? latest : record),
-    undefined
-  );
-
 export const loadDayEnergySources = async (
   persistence: PersistencePort,
   profileId: string,
@@ -61,7 +45,7 @@ export const loadDayEnergySources = async (
     profile,
     wellnessRows,
     bodyCompRows,
-    weightRows,
+    latestWeight,
     intakeEntries,
     target,
   ] = await Promise.all([
@@ -72,11 +56,7 @@ export const loadDayEnergySources = async (
       EARLIEST_DATE,
       date
     ),
-    persistence.healthWeight.getByProfileAndDateRange(
-      profileId,
-      EARLIEST_DATE,
-      date
-    ),
+    loadLatestWeighIn(persistence, profileId, date),
     persistence.intakeEntries.getByProfileAndDate(profileId, date),
     persistence.energyTargets.get(profileId),
   ]);
@@ -84,7 +64,7 @@ export const loadDayEnergySources = async (
     profile,
     wellness: wellnessRows[0],
     bodyComposition: latestUpTo(bodyCompRows),
-    latestWeight: latestUpTo(weightRows),
+    latestWeight,
     intakeEntries,
     target,
   };

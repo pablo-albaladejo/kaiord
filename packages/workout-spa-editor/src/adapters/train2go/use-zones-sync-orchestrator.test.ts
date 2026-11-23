@@ -4,11 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import type { useToast } from "../../hooks/use-toast";
 import type { PersistencePort } from "../../ports/persistence-port";
-import type {
-  ConflictItem,
-  SyncZonesResult,
-  ZonesPayload,
-} from "../../types/coaching-zones";
+import type { ConflictItem, SyncZonesResult } from "../../types/coaching-zones";
 
 const mockSyncZones = vi.fn<(...args: unknown[]) => Promise<SyncZonesResult>>();
 const mockCommit = vi.fn<(...args: unknown[]) => Promise<void>>();
@@ -26,6 +22,7 @@ vi.mock("../../application/coaching/commit-conflict-resolution", () => ({
 }));
 
 import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
+import { openZonesOffer, rememberZonesOffer } from "./zones-offer-memo";
 
 // The toast's title, and the Train2Go Connection's own notice as its detail.
 const ZONES_FETCH_FAILED = [
@@ -54,11 +51,29 @@ const persistence = { profiles: {} as object } as unknown as PersistencePort;
 const transport = {} as CoachingTransport;
 
 const sampleConflict: ConflictItem = {
-  field: "cycling.ftp",
+  field: "cycling.thresholds.ftp",
   current: 200,
   incoming: 210,
 };
-const samplePayload = { cycling: { ftp: 210 } } as unknown as ZonesPayload;
+const TAKEN_THRESHOLDS = "Kaiord now uses Train2Go's thresholds.";
+
+const differing = (conflicts: ConflictItem[]): SyncZonesResult => ({
+  ok: true,
+  applied: [],
+  conflicts,
+});
+
+const syncedWithOffer = async (toasts = buildToasts()) => {
+  mockSyncZones.mockResolvedValue(differing([sampleConflict]));
+  const offer = vi.fn();
+  const { result } = renderHook(() =>
+    useZonesSyncOrchestrator(persistence, transport, toasts, offer)
+  );
+  await act(async () => {
+    await result.current.runSync("p1");
+  });
+  return { offer, result, toasts };
+};
 
 describe("useZonesSyncOrchestrator", () => {
   beforeEach(() => {
@@ -121,12 +136,7 @@ describe("useZonesSyncOrchestrator", () => {
 
   it("should keep the athlete's numbers and ask nothing when Train2Go reports different ones", async () => {
     // Arrange
-    mockSyncZones.mockResolvedValue({
-      ok: true,
-      applied: [],
-      conflicts: [sampleConflict],
-      payload: samplePayload,
-    });
+    mockSyncZones.mockResolvedValue(differing([sampleConflict]));
     const offer = vi.fn();
 
     // Act
@@ -140,16 +150,12 @@ describe("useZonesSyncOrchestrator", () => {
     // Assert
     expect(mockCommit).not.toHaveBeenCalled();
     expect(offer).toHaveBeenCalledTimes(1);
+    expect(offer.mock.calls[0]?.[0]).toBe("thresholds");
   });
 
   it("should take Train2Go's numbers when the athlete uses the offer", async () => {
     // Arrange
-    mockSyncZones.mockResolvedValue({
-      ok: true,
-      applied: [],
-      conflicts: [sampleConflict],
-      payload: samplePayload,
-    });
+    mockSyncZones.mockResolvedValue(differing([sampleConflict]));
     const offer = vi.fn();
     const { result } = renderHook(() =>
       useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
@@ -157,7 +163,7 @@ describe("useZonesSyncOrchestrator", () => {
     await act(async () => {
       await result.current.runSync("p1");
     });
-    const takeTheirs = offer.mock.calls[0]?.[0] as () => Promise<void>;
+    const takeTheirs = offer.mock.calls[0]?.[1] as () => Promise<void>;
 
     // Act
     await act(async () => {
@@ -167,20 +173,14 @@ describe("useZonesSyncOrchestrator", () => {
     // Assert
     expect(mockCommit).toHaveBeenCalledWith(
       "p1",
-      { "cycling.ftp": "accept" },
-      persistence,
-      samplePayload
+      [sampleConflict],
+      persistence
     );
   });
 
   it("should not offer the same different numbers twice", async () => {
     // Arrange
-    mockSyncZones.mockResolvedValue({
-      ok: true,
-      applied: [],
-      conflicts: [sampleConflict],
-      payload: samplePayload,
-    });
+    mockSyncZones.mockResolvedValue(differing([sampleConflict]));
     const offer = vi.fn();
     const { result } = renderHook(() =>
       useZonesSyncOrchestrator(persistence, transport, buildToasts(), offer)
@@ -200,12 +200,7 @@ describe("useZonesSyncOrchestrator", () => {
 
   it("should offer nothing when Train2Go agrees with the athlete", async () => {
     // Arrange
-    mockSyncZones.mockResolvedValue({
-      ok: true,
-      applied: [],
-      conflicts: [],
-      payload: samplePayload,
-    });
+    mockSyncZones.mockResolvedValue(differing([]));
     const offer = vi.fn();
 
     // Act
@@ -218,5 +213,46 @@ describe("useZonesSyncOrchestrator", () => {
 
     // Assert
     expect(offer).not.toHaveBeenCalled();
+  });
+
+  it("should keep the offer open for the Athlete page once its notice is gone", async () => {
+    // Arrange
+    // Act
+    await syncedWithOffer();
+
+    // Assert
+    expect(openZonesOffer("p1")).toEqual([sampleConflict]);
+  });
+
+  it("should close the offer and say what changed once Train2Go's numbers are taken", async () => {
+    // Arrange
+    const { offer, toasts } = await syncedWithOffer();
+    const takeTheirs = offer.mock.calls[0]?.[1] as () => Promise<void>;
+
+    // Act
+    await act(async () => {
+      await takeTheirs();
+    });
+
+    // Assert
+    expect(openZonesOffer("p1")).toEqual([]);
+    expect(toasts.success).toHaveBeenCalledWith(TAKEN_THRESHOLDS);
+  });
+
+  it("should forget an open offer once Train2Go agrees with the athlete", async () => {
+    // Arrange
+    rememberZonesOffer("p1", [sampleConflict]);
+    mockSyncZones.mockResolvedValue(differing([]));
+    const { result } = renderHook(() =>
+      useZonesSyncOrchestrator(persistence, transport, buildToasts(), vi.fn())
+    );
+
+    // Act
+    await act(async () => {
+      await result.current.runSync("p1");
+    });
+
+    // Assert
+    expect(openZonesOffer("p1")).toEqual([]);
   });
 });

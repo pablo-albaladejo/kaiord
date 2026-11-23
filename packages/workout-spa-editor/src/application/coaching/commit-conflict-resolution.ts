@@ -1,78 +1,40 @@
 /**
- * Phase-2 of the zones-sync flow: applies the user's per-row decisions
- * from the conflict dialog. Updates `method` and snapshot per
- * sport-kind table per design D-MA4 of zones-method-aware-reconcile:
- *   - All-accept     → method = "train2go"; snapshot.<sportKind> := T2G's array.
- *   - Mixed (partial accept) → method = "user"; snapshot.<sportKind> :=
- *     post-merge persisted zones (accepted bands take T2G; rejected
- *     bands keep pre-sync user value).
- *   - All-reject     → method/snapshot untouched.
+ * "Use Train2Go's": writes Train2Go's number for every zone and threshold
+ * the sync found different, the athlete's one action on the offer. Each
+ * sport-kind table it writes a band of takes `method = "train2go"` and its
+ * snapshot is the post-write table (D-MA4), so the next sync reads it as
+ * synced-clean and offers nothing. Weight is never here: it is a Train2Go
+ * weigh-in read by the Authority rule (`sync-zones-weight.ts`).
  *
- * Idempotent — calling twice with the same `decisions` produces the
- * same final state.
+ * Idempotent — calling twice with the same items produces the same state.
  */
 import type { PersistencePort } from "../../ports/persistence-port";
-import type {
-  ConflictDecision,
-  FieldKey,
-  ZonesPayload,
-} from "../../types/coaching-zones";
-import type { Profile } from "../../types/profile";
-import { todayIsoDate } from "../../utils/today-iso-date";
+import type { ConflictItem } from "../../types/coaching-zones";
 import { ProfileNotFoundError } from "../profile/errors";
-import { applyBandTableDecisions } from "./commit-conflict-band-tables";
-import { partitionDecisions } from "./commit-conflict-partition";
-import { mapPayloadToIncoming } from "./sync-zones-payload-mapper";
+import { applyBandTables } from "./commit-conflict-band-tables";
+import { partitionFields } from "./commit-conflict-partition";
 import { writeField } from "./sync-zones-profile-fields";
-import {
-  recordSyncedWeight,
-  splitWeight,
-  WEIGHT_FIELD,
-} from "./sync-zones-weight";
-
-const applyThresholdDecisions = (
-  profile: Profile,
-  thresholdKeys: FieldKey[],
-  decisions: Record<FieldKey, ConflictDecision>,
-  incoming: Map<FieldKey, number>
-): Profile => {
-  let next = profile;
-  for (const key of thresholdKeys) {
-    if (decisions[key] !== "accept") continue;
-    const value = incoming.get(key);
-    if (value === undefined) continue;
-    next = writeField(next, key, value);
-  }
-  return next;
-};
+import { WEIGHT_FIELD } from "./sync-zones-weight";
 
 export const commitConflictResolution = async (
   profileId: string,
-  decisions: Record<FieldKey, ConflictDecision>,
+  conflicts: readonly ConflictItem[],
   persistence: PersistencePort,
-  transportPayload: ZonesPayload,
   source = "train2go"
 ): Promise<void> => {
   const repo = persistence.profiles;
-  const { weightKg, rest: incoming } = splitWeight(
-    mapPayloadToIncoming(transportPayload)
-  );
-  const { thresholdKeys, bandTableKeys } = partitionDecisions(decisions);
-  const today = todayIsoDate();
+  const taken = conflicts.filter((c) => c.field !== WEIGHT_FIELD);
+  const { thresholds, bandTables } = partitionFields(taken);
   await persistence.transaction(async () => {
     const profile = await repo.getById(profileId);
     if (!profile) throw new ProfileNotFoundError(profileId);
-    const next = applyBandTableDecisions(
-      applyThresholdDecisions(profile, thresholdKeys, decisions, incoming),
-      bandTableKeys,
-      decisions,
-      incoming,
-      source
+    const withThresholds = thresholds.reduce(
+      (next, c) => writeField(next, c.field, c.incoming),
+      profile
     );
+    const next = applyBandTables(withThresholds, bandTables, source);
     if (next !== profile) {
       await repo.put({ ...next, updatedAt: new Date().toISOString() });
     }
-    if (decisions[WEIGHT_FIELD] === "accept" && weightKg !== undefined)
-      await recordSyncedWeight(persistence, profileId, weightKg, today);
   });
 };
