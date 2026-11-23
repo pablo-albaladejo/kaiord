@@ -118,7 +118,9 @@ describe("convertWorkoutSteps workout-level notes", () => {
 
     // Assert
     expect((messages[0].notes as string).length).toBe(FIT_STRING_MAX_BYTES);
-    expect(messages[0].notes).toBe(longNotes.substring(0, FIT_STRING_MAX_BYTES));
+    expect(messages[0].notes).toBe(
+      longNotes.substring(0, FIT_STRING_MAX_BYTES)
+    );
   });
 
   it("should not overwrite a first step that already has its own notes", () => {
