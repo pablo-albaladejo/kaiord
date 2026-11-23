@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { LlmProviderType } from "../types";
+import { LLM_PROVIDER_TYPES, type LlmProviderType } from "../types";
 import table from "./model-prices.json";
 
 const USD_PER_MTOK = z.number().nonnegative();
@@ -27,10 +27,13 @@ const periodSchema = tokenPricesSchema
 
 const entrySchema = z
   .object({
-    provider: z.enum(["anthropic", "openai", "google"]),
+    provider: z.enum(LLM_PROVIDER_TYPES),
     ids: z.array(z.string()).min(1),
     source: z.url(),
     readOn: ISO_DATE,
+    // The page's exact line(s) for these prices; null on an entry read before
+    // quotes were kept (`pnpm lint:model-prices` asks for one once renewed).
+    quote: z.array(z.string().min(1)).min(1).nullable(),
     note: z.string().optional(),
     periods: z
       .array(periodSchema)
