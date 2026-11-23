@@ -47,9 +47,6 @@ export const TOMBSTONED_TABLES = {
   aiProviders: "aiProviders",
   coaching: "coachingActivities",
   sessionMatch: "sessionMatches",
-  // Retention prune deletes old usage events by id; the tombstone suppresses
-  // them in merge so a dormant device cannot resurrect them (see D5).
-  usageEvents: "usageEvents",
   intakeEntries: "intakeEntries",
   intakePresets: "intakePresets",
   // Keyed by `profileId`: the tombstone id is the goal's profile id.

@@ -8,11 +8,11 @@
     },
     {
       "file": "packages/workout-spa-editor/src/i18n/locales/en/errors.json",
-      "keys": ["labImport.withheld"]
+      "keys": ["labImport.withheld", "assistantWorkout.withheld"]
     },
     {
       "file": "packages/workout-spa-editor/src/i18n/locales/es/errors.json",
-      "keys": ["labImport.withheld"]
+      "keys": ["labImport.withheld", "assistantWorkout.withheld"]
     }
   ],
   "claims": [
@@ -1101,6 +1101,28 @@
       ]
     },
     {
+      "id": "app.dataflows.en.kept.usageEvents",
+      "text": "Usage log: for each run of the assistant, when, for which feature, with which provider and model, how many tokens and requests and at what cost, for the usage in Settings, AI. It never leaves this browser: not to an AI provider, not to Drive sync, not in a backup, so each device shows its own usage. Runs older than 12 months are removed.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/telemetry/dexie-usage-telemetry-sink.test.ts",
+          "title": "should append an event for a finished run, priced at its model's prices"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/usage-stays-on-device.test.ts",
+          "title": "should push no usage row, no Trace and no Trace id to Drive"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/usage-stays-on-device.test.ts",
+          "title": "should leave the usage log and the Traces out of a backup file"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/usage/prune-usage-events.test.ts",
+          "title": "should delete events older than the retention window, with no tombstone"
+        }
+      ]
+    },
+    {
       "id": "app.dataflows.es.kept.title",
       "text": "Se queda en este dispositivo",
       "proof": [
@@ -1137,6 +1159,108 @@
         {
           "test": "packages/workout-spa-editor/src/application/trace/prune-traces.test.ts",
           "title": "should delete a Trace started more than 90 days ago"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.kept.usageEvents",
+      "text": "Registro de uso: de cada ejecución del asistente, cuándo, para qué función, con qué proveedor y modelo, cuántos tokens y peticiones y a qué coste, para el uso en Ajustes, IA. Nunca sale de este navegador: ni a un proveedor de IA, ni a la sincronización con Drive, ni en una copia de seguridad, así que cada dispositivo muestra su propio uso. Se borran las ejecuciones de más de 12 meses.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/telemetry/dexie-usage-telemetry-sink.test.ts",
+          "title": "should append an event for a finished run, priced at its model's prices"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/usage-stays-on-device.test.ts",
+          "title": "should push no usage row, no Trace and no Trace id to Drive"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/dexie/usage-stays-on-device.test.ts",
+          "title": "should leave the usage log and the Traces out of a backup file"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/usage/prune-usage-events.test.ts",
+          "title": "should delete events older than the retention window, with no tombstone"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.assistantWorkout",
+      "text": "When the assistant creates a workout after reading your health data",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.assistantWorkout",
+      "text": "The assistant wrote this workout's description after reading your health data, so it may quote it. To create the workout, Kaiord sends the description to {{provider}}, and it may hold: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.neverResult.assistantWorkout",
+      "text": "The workout is not created.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.assistantWorkout.withheld",
+      "text": "The workout was not created: this conversation read your health data, and you chose not to send health data to {{provider}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.assistantWorkout",
+      "text": "Cuando el asistente crea un entrenamiento después de leer tus datos de salud",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.assistantWorkout",
+      "text": "El asistente escribió la descripción de este entrenamiento después de leer tus datos de salud, así que puede citarlos. Para crear el entrenamiento, Kaiord envía la descripción a {{provider}}, y puede contener: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.neverResult.assistantWorkout",
+      "text": "El entrenamiento no se crea.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.assistantWorkout.withheld",
+      "text": "No se ha creado el entrenamiento: esta conversación leyó tus datos de salud y elegiste no enviar datos de salud a {{provider}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
         }
       ]
     }

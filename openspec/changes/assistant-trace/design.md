@@ -45,11 +45,14 @@ single write.
 - `outcome`: `failed` when any model call failed or the run threw, `stopped`
   when it was stopped, `ok` otherwise. A batch fails only when nothing in it
   went through; its failed attempts are in its cost.
-- `sent`: per Provider, the kinds the flow carries in the registry
-  (`kindsSent(flow, healthSent)`), less its health kinds when the athlete did
-  not let them go. It names what the flow can carry, not a field-by-field
-  audit of the request: an athlete with no custom instructions still reads
-  "your instructions for the AI" for a generation.
+- `sent`: per destination, the kinds the code that built the requests put
+  in them (`kinds`): a generation's athlete context names what it included,
+  each read Tool the kinds its answer handed the model (none when withheld),
+  a lab document its lab results, a chat turn its messages. Apart
+  (`declared`), the kinds a run may have carried but cannot count: health
+  data earlier replies replayed to the Provider may quote, and health data a
+  description the assistant wrote after reading it may hold. The athlete
+  reads them apart ("may also have carried …, which Kaiord cannot count").
 
 ### D3. Device only
 
@@ -74,13 +77,23 @@ UX glossary; never "log" or "registro".
 
 ### D6. What stays
 
-`usageEvents` stay as they are: synced, monthly, read by the Usage tab, the
-assistant card and the batch estimate. Each now carries the Trace's id as
-its `traceId`. The generation `console.debug` line is removed: its phase
-timings and retries are in the Trace.
+`usageEvents` stay the store the Usage tab, the assistant card and the batch
+estimate read, but no row names a Trace: the run's sink passes each event on
+as it came, never under the Trace's id. A per-run usage row describes what
+the athlete did as a Trace does, so the store became device-local too
+(cost-per-model D6, Dexie v39, which strips the `traceId` stored before).
+The generation `console.debug` line is removed: its phase timings and
+retries are in the Trace.
+
+Rejected: the first version of this decision, which kept `usageEvents`
+synced and stamped each row with its Trace's id. It sent a per-run record
+of the assistant to Drive and into backup files, against D3.
 
 ## Risks
 
 - A turn left while an action waits is closed on leaving the conversation;
-  closing the tab first leaves no Trace for that turn.
-- `sent` is the flow's declared kinds (D2), coarser than the request.
+  closing the tab first leaves no Trace for that turn. A run waiting on the
+  health notice is stored as `stopped` while it waits (`checkpoint`), so a
+  reload then leaves its Trace.
+- `declared` (D2) names what may have gone, coarser than a count: what a
+  model quotes in free text cannot be counted.

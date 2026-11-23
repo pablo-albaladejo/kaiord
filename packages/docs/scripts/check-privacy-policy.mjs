@@ -635,6 +635,11 @@ export const REQUIRED_RULES = [
     re: /leaves a Trace in your browser[\s\S]*?Traces are never sent anywhere[\s\S]*?sync snapshot[\s\S]*?backup file/,
   },
   {
+    label:
+      "Assistant usage log disclosed as device-only (not synced, not in a backup)",
+    re: /The usage log stays on this device[\s\S]*?sync snapshot[\s\S]*?backup file/,
+  },
+  {
     label: "Chat transcripts client-side storage disclosed",
     re: /chat transcripts?/i,
   },

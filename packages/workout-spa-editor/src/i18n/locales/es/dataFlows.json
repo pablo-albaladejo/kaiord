@@ -28,6 +28,7 @@
   "flows": {
     "assistant": "Mientras hablas con el asistente, lo que lee para responderte",
     "generation": "Cuando generas un entrenamiento con IA",
+    "assistantWorkout": "Cuando el asistente crea un entrenamiento después de leer tus datos de salud",
     "labImport": "Cuando lees un documento de analíticas con IA",
     "providerKeyCheck": "Cuando guardas una clave, para comprobarla",
     "garminWorkouts": "Cuando envías un entrenamiento a Garmin Connect",
@@ -48,6 +49,7 @@
     "title": "¿Enviar tus datos de salud a {{provider}}?",
     "assistant": "Para responderte, el asistente puede leer estos datos de salud y enviarlos a {{provider}}: {{kinds}}.",
     "generation": "Para generar este entrenamiento, Kaiord envía estos datos de salud a {{provider}}: {{kinds}}.",
+    "assistantWorkout": "El asistente escribió la descripción de este entrenamiento después de leer tus datos de salud, así que puede citarlos. Para crear el entrenamiento, Kaiord envía la descripción a {{provider}}, y puede contener: {{kinds}}.",
     "labImport": "Para leer este documento, Kaiord envía estos datos de salud a {{provider}}: {{kinds}}.",
     "terms": "Van desde tu navegador directamente a {{provider}}, que los trata según sus propias condiciones. Kaiord nunca los recibe.",
     "once": "Enviar esta vez",
@@ -58,7 +60,8 @@
     "neverResult": {
       "assistant": "El asistente responde sin tus datos de salud.",
       "generation": "El entrenamiento se genera sin tu umbral ni tus zonas de frecuencia cardiaca.",
-      "labImport": "El documento no se envía; puedes introducir los resultados a mano."
+      "labImport": "El documento no se envía; puedes introducir los resultados a mano.",
+      "assistantWorkout": "El entrenamiento no se crea."
     },
     "neverStays": "Kaiord no volverá a preguntar por {{provider}}.",
     "changeLater": "Puedes cambiarlo en Ajustes, Privacidad."
@@ -75,6 +78,7 @@
   },
   "kept": {
     "title": "Se queda en este dispositivo",
-    "traces": "Trazas: lo que hizo cada ejecución del asistente, cuándo, con qué resultado y a qué coste. Nunca salen de este navegador: ni a un proveedor de IA, ni a la sincronización con Drive, ni en una copia de seguridad. Se guardan las 200 más recientes, ninguna de más de 90 días."
+    "traces": "Trazas: lo que hizo cada ejecución del asistente, cuándo, con qué resultado y a qué coste. Nunca salen de este navegador: ni a un proveedor de IA, ni a la sincronización con Drive, ni en una copia de seguridad. Se guardan las 200 más recientes, ninguna de más de 90 días.",
+    "usageEvents": "Registro de uso: de cada ejecución del asistente, cuándo, para qué función, con qué proveedor y modelo, cuántos tokens y peticiones y a qué coste, para el uso en Ajustes, IA. Nunca sale de este navegador: ni a un proveedor de IA, ni a la sincronización con Drive, ni en una copia de seguridad, así que cada dispositivo muestra su propio uso. Se borran las ejecuciones de más de 12 meses."
   }
 }

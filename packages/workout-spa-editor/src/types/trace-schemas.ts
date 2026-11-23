@@ -5,12 +5,20 @@
  * schema is `.strict()` and parsed at the single write.
  *
  * `cost` is `priceRun`'s `RunCost` as is, one per model the run reached
- * (a chat turn that generates a workout may reach two). `sent` names the
- * kinds of data from the data-flow registry that went to each Provider.
+ * (a chat turn that generates a workout may reach two). `sent` names, per
+ * Provider, the kinds of data the code that built the requests put in them
+ * (`kinds`), and apart the kinds it may have carried but cannot count
+ * (`declared`, read from the flow registry): earlier replies replayed, and
+ * text the model wrote after reading health data.
  */
+import { runCostSchema } from "@kaiord/ai/providers";
 import { z } from "zod";
 
-import { runCostSchema } from "./run-cost-schema";
+import { DATA_KINDS } from "../application/data-flows/data-kinds";
+import {
+  DESTINATION_IDS,
+  type DestinationId,
+} from "../application/data-flows/destinations";
 
 const unitSchema = z
   .object({
@@ -29,6 +37,10 @@ const toolCallSchema = z
   })
   .strict();
 
+const destinationSchema = z.enum(
+  DESTINATION_IDS as [DestinationId, ...DestinationId[]]
+);
+
 const TRACE_FEATURES = ["chat", "generation", "batch", "lab_import"] as const;
 
 export const traceSchema = z
@@ -46,7 +58,13 @@ export const traceSchema = z
     cost: z.array(runCostSchema),
     totalUsd: z.number().nonnegative().nullable(),
     sent: z.array(
-      z.object({ to: z.string(), kinds: z.array(z.string()) }).strict()
+      z
+        .object({
+          to: destinationSchema,
+          kinds: z.array(z.enum(DATA_KINDS)),
+          declared: z.array(z.enum(DATA_KINDS)).optional(),
+        })
+        .strict()
     ),
   })
   .strict();
@@ -56,3 +74,4 @@ export type TraceFeature = TraceRecord["feature"];
 export type TraceOutcome = TraceRecord["outcome"];
 export type TraceToolCall = TraceRecord["tools"][number];
 export type TraceUnit = TraceRecord["units"][number];
+export type TraceSent = TraceRecord["sent"][number];

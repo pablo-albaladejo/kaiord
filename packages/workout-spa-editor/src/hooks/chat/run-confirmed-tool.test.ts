@@ -2,6 +2,7 @@ import type { ChatTool } from "@kaiord/ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
+import { healthWithheldError } from "../../application/chat/health-withheld";
 import { logger } from "../../utils/logger";
 import { runConfirmedTool } from "./run-confirmed-tool";
 
@@ -88,5 +89,25 @@ describe("runConfirmedTool", () => {
     );
     const context = vi.mocked(logger.error).mock.calls[0]?.[1];
     expect(JSON.stringify(context)).not.toContain("athlete@example.com");
+  });
+
+  it("should tell the model, in fixed words, that the athlete chose not to send health data to that Provider", async () => {
+    // Arrange
+    const tools = [
+      tool(async () => {
+        throw healthWithheldError("openai");
+      }),
+    ];
+
+    // Act
+    const result = await runConfirmedTool(tools, "log_intake", {});
+
+    // Assert
+    expect(result.ok).toBe(false);
+    expect(result.output).toEqual({
+      error: "health_withheld",
+      reason:
+        "The athlete chose not to send health data to OpenAI, and this conversation has read their health data, so the workout was not created. Tell the athlete; do not try again in this conversation.",
+    });
   });
 });

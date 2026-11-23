@@ -13,20 +13,35 @@ import type {
 import { updateWorkoutRecord } from "../../application/save-workout-edits";
 import type { TraceRun } from "../../application/trace/trace-run";
 import { transitionToStructured } from "../../application/workout-transitions";
-import { generateWorkoutKrd } from "../../lib/generate-workout";
+import {
+  generateWorkoutKrd,
+  type GenerationDeps,
+} from "../../lib/generate-workout";
 import { askGenerationHealth, askOnce } from "../../lib/health-sharing-gate";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { WorkoutRecord } from "../../types/calendar-record";
 
+export type BatchRunDeps = {
+  deps: GenerationDeps;
+  trace?: TraceRun;
+  /** Cancels the batch, and its heart-rate question while it waits. */
+  signal?: AbortSignal;
+};
+
 export function createProcessOne(
   provider: LlmProviderConfig,
   modelId: string,
   persistence: Pick<PersistencePort, "workouts" | "transaction">,
-  trace?: TraceRun
+  { deps, trace, signal }: BatchRunDeps
 ): ProcessOneFn {
   // One question for the whole batch, asked when heart-rate data would first go.
-  const askHealth = askOnce(() => askGenerationHealth(provider.type));
+  const askHealth = askOnce(() =>
+    askGenerationHealth(provider.type, {
+      signal,
+      onWait: () => void trace?.checkpoint(),
+    })
+  );
   return async (
     workout: WorkoutRecord,
     allowRetry: boolean
@@ -36,6 +51,7 @@ export function createProcessOne(
     // batch's one Trace.
     const generateFn = (prompt: string, sport: string) =>
       generateWorkoutKrd({
+        deps,
         text: prompt,
         provider,
         modelId,

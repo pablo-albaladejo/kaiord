@@ -82,6 +82,20 @@ describe("convertCadenceTarget", () => {
     });
   });
 
+  it("should read the Low and High that a TCX Cadence_t holds directly", () => {
+    // Arrange
+    const tcxTarget = { "@_xsi:type": "Cadence_t", Low: 80, High: 90 };
+
+    // Act
+    const result = convertCadenceTarget(tcxTarget, "cycling");
+
+    // Assert
+    expect(result).toStrictEqual({
+      type: "cadence",
+      value: { unit: "range", min: 80, max: 90 },
+    });
+  });
+
   it("should keep cycling cadence unchanged", () => {
     // Arrange
     const tcxTarget = {

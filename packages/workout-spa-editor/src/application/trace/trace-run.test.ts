@@ -140,18 +140,18 @@ describe("startTraceRun", () => {
     expect(trace?.cost[0]?.unmeasuredRequests).toBe(1);
   });
 
-  it("should pass each event on under the Trace's id", () => {
+  it("should pass each event on as it came, never under the Trace's id", () => {
     // Arrange
     const { run } = start();
     const forward = { emit: vi.fn() };
+    const event = generation();
 
     // Act
-    run.sink(forward).emit(generation());
+    run.sink(forward).emit(event);
 
     // Assert
-    expect(forward.emit).toHaveBeenCalledWith(
-      expect.objectContaining({ traceId: "trace-1", modelId: "claude-fable-5" })
-    );
+    expect(forward.emit).toHaveBeenCalledWith(event);
+    expect(JSON.stringify(forward.emit.mock.calls)).not.toContain("trace-1");
   });
 
   it("should record each Tool with its confirmation and result, and the chat unit once", async () => {
@@ -202,5 +202,66 @@ describe("startTraceRun", () => {
     // Assert
     expect(trace?.totalUsd).toBeNull();
     expect(trace?.cost[0]?.basis.kind).toBe("unknown");
+  });
+
+  it("should keep a stopped Trace of a run left while it waits, and replace it when the run finishes", async () => {
+    // Arrange
+    const { traces, run } = start("chat");
+    run.sent("anthropic", ["messages"]);
+
+    // Act
+    await run.checkpoint();
+    const waiting = await traces.list();
+    await run.finish();
+    const finished = await traces.list();
+
+    // Assert
+    expect(waiting).toHaveLength(1);
+    expect(waiting[0]).toMatchObject({ id: "trace-1", outcome: "stopped" });
+    expect(finished).toHaveLength(1);
+    expect(finished[0]).toMatchObject({ id: "trace-1", outcome: "ok" });
+  });
+
+  it("should write nothing more once finished, even when asked to keep a checkpoint", async () => {
+    // Arrange
+    const { traces, run } = start();
+    await run.finish();
+
+    // Act
+    await run.checkpoint();
+    const [trace] = await traces.list();
+
+    // Assert
+    expect(trace?.outcome).toBe("ok");
+  });
+
+  it("should leave no Trace of a run discarded after a checkpoint", async () => {
+    // Arrange
+    const { traces, run } = start();
+    await run.checkpoint();
+
+    // Act
+    await run.discard();
+    await run.finish();
+
+    // Assert
+    expect(await traces.list()).toEqual([]);
+  });
+
+  it("should list apart the kinds a run may have carried but could not count", async () => {
+    // Arrange
+    const { traces, run } = start("chat");
+    run.sent("anthropic", ["messages"], ["sleep", "hrv"]);
+    run.sent("anthropic", ["hrv"]);
+
+    // Act
+    await run.finish();
+    const [trace] = await traces.list();
+
+    // Assert
+    expect(trace?.sent).toEqual([
+      { to: "anthropic", kinds: ["messages", "hrv"], declared: ["sleep"] },
+    ]);
+    expect(run.sentSoFar()).toEqual(trace?.sent);
   });
 });

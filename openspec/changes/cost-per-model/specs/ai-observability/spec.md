@@ -17,16 +17,22 @@ is configured, with `status` one of `complete`, `pending_action`,
 `step_limit`, `aborted`, `timeout`, or `error`.
 
 `requests` SHALL list every request the run or turn sent to the Provider, in
-order, as `{ outcome, usage? }`: one per attempt of a generate run (`ok`,
-`invalid` for an output that did not validate, `truncated` for one cut at the
-token limit, `error` for a Provider or transport failure, `stopped` for an
-abort), and one per model step of a chat turn (`ok` for a finished step, and
-`error` or `stopped` for a step still running when the turn threw or
-stopped). `usage` SHALL be the Provider-reported usage of that request
-(`promptTokens` counting every input token, `completionTokens`, and
-`cacheReadTokens` / `cacheWriteTokens` when reported), and SHALL be absent
-when the Provider reported none. A run's `usage` SHALL be the sum over all its
-requests.
+order, as `{ outcome, usage?, estimated? }`: one per attempt of a generate
+run (`ok`, `invalid` for an output that did not validate, `truncated` for one
+cut at the token limit, `error` for a Provider or transport failure, the chat
+inactivity watchdog included, `stopped` for a stop the athlete asked for),
+and one per model step of a chat turn (`ok` for a finished step, `error` for
+a step still running when the turn threw or timed out, `stopped` for one the
+athlete stopped). `usage` SHALL be the Provider-reported usage of that
+request (`promptTokens` counting every input token, `completionTokens`, and
+`cacheReadTokens` / `cacheWriteTokens` when reported). The installed AI SDK
+reports usage only with a request's final chunk, so a request cut before it
+(a Stop, the watchdog, a stream dropped after output began) SHALL carry
+`estimated: true` and a `usage` estimated at 3 characters a token from the
+text of the request (system prompt and messages; documents left out) and of
+the output streamed before the cut. `usage` SHALL be absent only when the
+Provider answered with an error before any output. A run's `usage` SHALL be
+the sum over all its requests.
 
 #### Scenario: Every run emits exactly one event
 
@@ -44,7 +50,13 @@ requests.
 
 - **GIVEN** a chat turn that finished one step, then threw a provider error, was stopped, or went idle past the inactivity watchdog
 - **WHEN** its `chat_turn_finished` event is emitted
-- **THEN** `steps`, `toolNames`, and the token counts SHALL reflect the steps that finished; tokens of a step cut mid-stream are not reported by the provider and SHALL NOT be estimated; the cut step SHALL appear in `requests` with no `usage`
+- **THEN** `steps`, `toolNames`, and the token counts SHALL reflect the steps that finished, and the cut step SHALL appear in `requests` as `error` (thrown after output began, or timed out) or `stopped` with `estimated: true` and an estimated `usage`, or as `error` with no `usage` when the Provider answered with an error before any output
+
+#### Scenario: A request cut mid-stream is estimated, never zero
+
+- **GIVEN** a chat step or a streamed generate attempt that streamed output and was then cut by the watchdog, a dropped connection or a Stop
+- **WHEN** the event is emitted
+- **THEN** the request SHALL be `error` for the watchdog or the dropped connection and `stopped` for the Stop, with `estimated: true` and `usage` of `ceil(request characters / 3)` input and `ceil(streamed characters / 3)` output tokens
 
 #### Scenario: A validation retry is reported with its usage
 

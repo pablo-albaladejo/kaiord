@@ -1,6 +1,6 @@
 import type { ModelMessage } from "ai";
 
-import { kindsSent } from "../../application/data-flows/kinds-sent";
+import { healthKindsOf } from "../../application/data-flows/data-flows";
 import type { TraceRun } from "../../application/trace/trace-run";
 import { buildChatAgent } from "./build-chat-agent";
 import { buildDataRouteSignals } from "./build-data-route-signals";
@@ -10,13 +10,19 @@ type Send = {
   messages: ModelMessage[];
   signal: AbortSignal;
   healthShared: boolean;
+  /** The replayed history holds replies that may quote health data. */
+  historyHealth: boolean;
   trace: TraceRun;
 };
 
-/** Builds the turn's agent over its Trace and sends the turn. */
+/**
+ * Builds the turn's agent over its Trace and sends the turn. The Trace
+ * counts the messages here and each read Tool's kinds as it runs; health
+ * data earlier replies may quote is declared, since it cannot be counted.
+ */
 export const buildAndSend = async (
   ctx: ChatTurnCtx,
-  { messages, signal, healthShared, trace }: Send
+  { messages, signal, healthShared, historyHealth, trace }: Send
 ) => {
   const built = await buildChatAgent({
     trace,
@@ -33,6 +39,7 @@ export const buildAndSend = async (
   });
   ctx.agentRef.current = built.agent;
   ctx.toolsRef.current = built.tools;
-  trace.sent(ctx.provider.type, kindsSent("assistant", healthShared));
+  const declared = historyHealth ? healthKindsOf("assistant") : [];
+  trace.sent(ctx.provider.type, ["messages"], declared);
   return built.agent.sendTurn(messages, { signal });
 };

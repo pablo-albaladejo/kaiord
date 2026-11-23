@@ -23,5 +23,8 @@
     "runFailed": "No se pudo extraer la analítica — inténtalo de nuevo",
     "noModel": "No hay ningún modelo de extracción de analíticas configurado",
     "withheld": "El documento no se ha enviado: elegiste no compartir tus datos de salud con tu proveedor de IA. Puedes introducir los resultados a mano."
+  },
+  "assistantWorkout": {
+    "withheld": "No se ha creado el entrenamiento: esta conversación leyó tus datos de salud y elegiste no enviar datos de salud a {{provider}}."
   }
 }

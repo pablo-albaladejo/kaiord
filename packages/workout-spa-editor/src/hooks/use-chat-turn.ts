@@ -23,10 +23,11 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const persistence = usePersistence();
   const analytics = useAnalytics();
   const traceRef = useRef<TraceRun | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const ops = useChatActionOps(
     args.profileId,
     { provider: args.generationProvider, modelId: args.generationModelId },
-    traceRef
+    { traceRef, abortRef }
   );
   const [state, setState] = useState<ChatTurnState>("idle");
   const [streamingText, setStreamingText] = useState("");
@@ -38,7 +39,6 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const agentRef = useRef<ChatAgent | null>(null);
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
-  const abortRef = useRef<AbortController | null>(null);
   const disposedRef = useStopTurnOnLeave(abortRef, traceRef);
 
   const { profileId, conversationId, provider, modelId, pinModel, today } =

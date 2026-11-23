@@ -19,10 +19,13 @@ const provider: LlmProviderConfig = {
   apiKey: "secret",
 } as unknown as LlmProviderConfig;
 
+const DEPS = { persistence: {} as never, usage: { emit: () => undefined } };
+
 describe("buildGenerateKrdPort", () => {
   it("should populate aiMeta with provider type, resolved model, prompt version and timestamp", async () => {
     // Arrange
     const port = buildGenerateKrdPort(
+      DEPS,
       provider,
       "gpt-4o-mini",
       () => "2026-05-07T12:00:00Z"
@@ -43,6 +46,7 @@ describe("buildGenerateKrdPort", () => {
   it("should drop the sport hint when the value is not a known Sport", async () => {
     // Arrange
     const port = buildGenerateKrdPort(
+      DEPS,
       provider,
       "gpt-4o-mini",
       () => "2026-05-07T12:00:00Z"
@@ -61,6 +65,7 @@ describe("buildGenerateKrdPort", () => {
     // Arrange
     const onProgress = vi.fn();
     const port = buildGenerateKrdPort(
+      DEPS,
       provider,
       "gpt-4o-mini",
       () => "2026-05-07T12:00:00Z",

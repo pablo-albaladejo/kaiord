@@ -7,16 +7,10 @@ vi.mock("@kaiord/ai", () => ({
   createTextToWorkout: vi.fn(() => mockTextToWorkout),
 }));
 
-vi.mock("@kaiord/ai/providers", () => ({
+// The schemas the App parses with stay real; only the model is stubbed.
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
-}));
-
-vi.mock("../adapters/dexie/dexie-persistence-adapter", () => ({
-  createDexiePersistence: vi.fn(() => ({})),
-}));
-
-vi.mock("../adapters/telemetry/dexie-usage-telemetry-sink", () => ({
-  createDexieUsageTelemetrySink: vi.fn(() => ({ emit: vi.fn() })),
 }));
 
 vi.mock("./health-sharing-gate", () => ({
@@ -26,6 +20,7 @@ vi.mock("./health-sharing-gate", () => ({
 
 import { createLanguageModel } from "@kaiord/ai/providers";
 
+import { createInMemoryTraceRepository } from "../test-utils/in-memory-trace-repository";
 import type { Profile } from "../types/profile";
 import type { GenerateWorkoutOptions } from "./generate-workout";
 import { generateWorkoutKrd } from "./generate-workout";
@@ -56,6 +51,10 @@ const profileWith = (maxBpm: number) =>
   }) as unknown as Profile;
 
 const options = (profile: Profile): GenerateWorkoutOptions => ({
+  deps: {
+    persistence: { traces: createInMemoryTraceRepository() } as never,
+    usage: { emit: vi.fn() },
+  },
   text: "1h endurance ride",
   provider: { id: "a", type: "anthropic", apiKey: "k" } as never,
   modelId: "claude",

@@ -7,8 +7,8 @@ import { DECLARED_VERNO, KaiordDatabase } from "./dexie-database";
 import { isNewerSchema } from "./schema-probe";
 import { onStaleSchema, StaleSchemaError } from "./stale-schema-guard";
 
-const NEWER = 390;
-const PATCHED = 371;
+const NEWER = 400;
+const PATCHED = 381;
 let name = "";
 let counter = 0;
 let stopListening: () => void = () => undefined;

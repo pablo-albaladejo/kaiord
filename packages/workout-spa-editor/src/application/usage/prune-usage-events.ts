@@ -1,10 +1,9 @@
 /**
- * pruneUsageEvents — bound the synced usage log to a retention window. Computes
- * the cutoff yearMonth (`retentionMonths` before now), lists every event whose
- * month sorts strictly before it, and deletes each by id. Deletes flow through
- * the tombstoning `delete(id)` so the removal propagates cross-device and the
- * merged snapshot stays bounded (design D5). Opportunistic and idempotent — an
- * empty or already-pruned log is a no-op.
+ * pruneUsageEvents — bound this device's usage log to a retention window.
+ * Computes the cutoff yearMonth (`retentionMonths` before now), lists every
+ * event whose month sorts strictly before it, and deletes each by id. The log
+ * never leaves the device, so a delete writes no tombstone. Opportunistic and
+ * idempotent — an empty or already-pruned log is a no-op.
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 

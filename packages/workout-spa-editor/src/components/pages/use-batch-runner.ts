@@ -7,6 +7,7 @@ import type {
 import { processBatch } from "../../application/batch-processor";
 import { startTraceRun } from "../../application/trace/trace-run";
 import { usePersistence } from "../../contexts/persistence-context";
+import { useGenerationDeps } from "../../hooks/use-generation-deps";
 import { useTranslate } from "../../i18n/use-translate";
 import { useUnsavedWork } from "../../lib/use-unsaved-work";
 import { createProcessOne } from "./batch-process-one";
@@ -26,6 +27,7 @@ export function useBatchRunner(
 ) {
   const t = useTranslate("calendar");
   const persistence = usePersistence();
+  const deps = useGenerationDeps();
   const [progress, setProgress] = useState<BatchProgress | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   useUnsavedWork(isProcessing);
@@ -46,7 +48,7 @@ export function useBatchRunner(
           batch.provider,
           batch.modelId,
           persistence,
-          trace
+          { deps, trace, signal: controller.signal }
         );
         const result = await processBatch(
           batch.workouts,
@@ -67,7 +69,7 @@ export function useBatchRunner(
         setIsProcessing(false);
       }
     },
-    [setMessage, onSuccess, t, persistence]
+    [setMessage, onSuccess, t, persistence, deps]
   );
 
   const cancel = useCallback(() => {

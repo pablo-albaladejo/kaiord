@@ -16,6 +16,7 @@ import {
   EMPTY_NUTRITION_STUB,
   type KaiordBackup,
 } from "../../types/backup";
+import { withoutDeviceLocal } from "../sync/device-local-tables";
 import { dropDeletedProfileRows } from "../sync/drop-deleted-profile-rows";
 import { exportSnapshot } from "../sync/export-snapshot";
 import { applyBackupTablePolicy } from "./backup-table-policy";
@@ -32,9 +33,11 @@ export const exportBackup = ({
   now,
 }: ExportBackupDeps): Promise<KaiordBackup> =>
   port.transaction("r", async () => {
-    const snapshot = dropDeletedProfileRows(
-      await exportSnapshot({ port, deviceId, now }),
-      port.perProfileTables()
+    const snapshot = withoutDeviceLocal(
+      dropDeletedProfileRows(
+        await exportSnapshot({ port, deviceId, now }),
+        port.perProfileTables()
+      )
     );
     return {
       format: BACKUP_FORMAT,

@@ -12,10 +12,10 @@ import { useLocation } from "wouter";
 
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import { useAnalytics } from "../../../contexts/analytics-context";
-import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useGenerationDeps } from "../../../hooks/use-generation-deps";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { type AiRunProgress, cancelAiRun } from "./ai-run-progress";
@@ -41,7 +41,7 @@ export const useCoachingAi = (
   onClose: () => void,
   expandActivity: (activity: CoachingActivity) => void
 ): UseCoachingAi => {
-  const persistence = usePersistence();
+  const deps = useGenerationDeps();
   const analytics = useAnalytics();
   const toast = useToastContext();
   const t = useTranslate("coaching");
@@ -59,7 +59,7 @@ export const useCoachingAi = (
       expandActivity,
       providers,
       bindings,
-      persistence,
+      deps,
       analytics,
       abortRef,
       setFailure,
@@ -75,7 +75,7 @@ export const useCoachingAi = (
     profileId,
     providers,
     bindings,
-    persistence,
+    deps,
     analytics,
     toast,
     onClose,

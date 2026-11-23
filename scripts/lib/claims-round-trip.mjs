@@ -5,14 +5,37 @@
 // proof, or its package has no shard in the CI `round-trip` job.
 
 import {
+  EXTENSION,
+  KNOWN_EXTENSIONS,
   NO_ROUND_TRIP,
   ROUND_TRIP_FORMATS,
   ROUND_TRIP_WORD,
 } from "./round-trip-formats.vocab.mjs";
 
+const proofs = (claim) => (Array.isArray(claim.proof) ? claim.proof : []);
+
 const provenBy = (claim, format) =>
-  (Array.isArray(claim.proof) ? claim.proof : []).some(
-    (p) => p.test === format.test && p.title === format.title
+  proofs(claim).some((p) => p.test === format.test && p.title === format.title);
+
+// The formats a sentence names that no Round-trip test covers.
+const refusedIn = (text) => [
+  ...NO_ROUND_TRIP.filter((f) => f.pattern.test(text)),
+  ...[...text.matchAll(EXTENSION)]
+    .map((m) => m[1].toLowerCase())
+    .filter((ext) => !KNOWN_EXTENSIONS.includes(ext))
+    .map((ext) => ({
+      format: `.${ext}`,
+      reason: "it is no format the Kaiord SDK reads",
+    })),
+];
+
+// A Round-trip claim naming no format speaks of every format.
+const everyFormatProblems = (claim, where) =>
+  ROUND_TRIP_FORMATS.filter(
+    (f) => !proofs(claim).some((p) => p.test === f.test)
+  ).map(
+    (f) =>
+      `${where}: a Round-trip claim that names no format speaks of every format, so it is proven by a test of ${f.test}`
   );
 
 export const roundTripProblems = (claim) => {
@@ -20,11 +43,12 @@ export const roundTripProblems = (claim) => {
   if (!ROUND_TRIP_WORD.test(text)) return [];
   const where = `claim "${claim.id}"`;
   const named = ROUND_TRIP_FORMATS.filter((f) => f.pattern.test(text));
-  const refused = NO_ROUND_TRIP.filter((f) => f.pattern.test(text));
-  if (named.length === 0 && refused.length === 0) return [];
+  const refused = refusedIn(text);
+  if (named.length === 0 && refused.length === 0)
+    return claim.kind === "label" ? [] : everyFormatProblems(claim, where);
   const problems = refused.map(
     (f) =>
-      `${where}: ${f.format} has no Round-trip test, so no sentence may claim a Round-trip for it`
+      `${where}: ${f.format} has no Round-trip test (${f.reason}), so no sentence may claim a Round-trip for it`
   );
   if (claim.kind === "label" && named.length > 0)
     problems.push(`${where}: a label cannot carry a Round-trip claim`);

@@ -39,6 +39,11 @@ function ModelRow({ usage }: { usage: ModelUsage }) {
       </td>
       <td className={CELL}>
         {priced ? formatUsageCost(usage.totals.totalCost, locale) : "—"}
+        {priced && usage.totals.estimatedRequests > 0 && (
+          <span className="block text-ink-muted">
+            {t("usage.includesEstimate")}
+          </span>
+        )}
       </td>
       <td className={`${CELL} text-ink-muted`}>
         <PriceBasisText basis={basis} />

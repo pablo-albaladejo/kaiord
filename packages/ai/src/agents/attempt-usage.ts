@@ -32,15 +32,23 @@ export const toUsage = (raw: RawUsage | undefined): AiUsage => {
   };
 };
 
-const BILLED = new WeakMap<object, AiUsage>();
+type Billed = { usage: AiUsage; estimated?: true };
+
+const BILLED = new WeakMap<object, Billed>();
 
 /**
- * Tags a failed attempt's error with the usage the Provider billed for it,
- * without wrapping it, so retry classification still sees the real error.
+ * Tags a failed attempt's error with the usage the Provider billed for it
+ * (or, `estimated`, the estimate for an attempt cut before it reported
+ * any), without wrapping it, so retry classification still sees the real
+ * error.
  */
-export const withUsage = <E>(error: E, usage: AiUsage | undefined): E => {
+export const withUsage = <E>(
+  error: E,
+  usage: AiUsage | undefined,
+  estimated = false
+): E => {
   if (usage && typeof error === "object" && error !== null)
-    BILLED.set(error, usage);
+    BILLED.set(error, { usage, ...(estimated ? { estimated: true } : {}) });
   return error;
 };
 
@@ -59,22 +67,7 @@ const outcomeOf = (error: unknown, aborted: boolean): AiRequestOutcome => {
 
 /** The request a failed attempt made; no `usage` when none was reported. */
 export const failedRequest = (error: unknown, aborted: boolean): AiRequest => {
-  const usage =
+  const billed =
     typeof error === "object" && error !== null ? BILLED.get(error) : undefined;
-  return { outcome: outcomeOf(error, aborted), ...(usage ? { usage } : {}) };
-};
-
-const total = (requests: readonly AiRequest[], field: keyof AiUsage): number =>
-  requests.reduce((sum, r) => sum + (r.usage?.[field] ?? 0), 0);
-
-/** The run's usage: every request summed, cache counts only when non-zero. */
-export const sumUsage = (requests: readonly AiRequest[]): AiUsage => {
-  const cacheRead = total(requests, "cacheReadTokens");
-  const cacheWrite = total(requests, "cacheWriteTokens");
-  return {
-    promptTokens: total(requests, "promptTokens"),
-    completionTokens: total(requests, "completionTokens"),
-    ...(cacheRead > 0 ? { cacheReadTokens: cacheRead } : {}),
-    ...(cacheWrite > 0 ? { cacheWriteTokens: cacheWrite } : {}),
-  };
+  return { outcome: outcomeOf(error, aborted), ...billed };
 };

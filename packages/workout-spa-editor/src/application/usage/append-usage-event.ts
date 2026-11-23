@@ -1,5 +1,5 @@
 /**
- * appendUsageEvent — the single writer of the synced `usageEvents` log, shared
+ * appendUsageEvent — the single writer of this device's `usageEvents` log, shared
  * by the Dexie telemetry sink (generation/batch/lab runs and chat turns). It
  * prices the run's requests with `priceRun` at the model's own prices, failed
  * attempts included, and skips a run that made no request. A model or
@@ -7,10 +7,13 @@
  * Ids/timestamps are injected for deterministic tests.
  */
 import type { AiRequest } from "@kaiord/ai/observability";
-import { priceRun, type RunCost } from "@kaiord/ai/providers";
+import {
+  type LlmProviderType,
+  priceRun,
+  type RunCost,
+} from "@kaiord/ai/providers";
 
 import type { PersistencePort } from "../../ports/persistence-port";
-import type { LlmProviderType } from "../../store/ai-store-types";
 import type { AiModelPurpose } from "../../types/ai-model-binding";
 import { usageEventSchema } from "../../types/usage-event-schemas";
 
@@ -18,7 +21,6 @@ export type AppendUsageEventInput = {
   purpose: AiModelPurpose;
   providerType?: LlmProviderType;
   modelId: string;
-  traceId?: string;
   requests: readonly AiRequest[];
 };
 
@@ -32,7 +34,7 @@ const costFieldsOf = (cost: RunCost) => ({
   ...(cost.usage.cacheWriteTokens > 0
     ? { cacheWriteTokens: cost.usage.cacheWriteTokens }
     : {}),
-  cost: cost.usd ?? 0,
+  ...(cost.usd === null ? {} : { cost: cost.usd }),
   costBasis: cost.basis.kind,
   ...(cost.basis.kind === "price_table"
     ? { priceReadOn: cost.basis.readOn }
@@ -40,6 +42,7 @@ const costFieldsOf = (cost: RunCost) => ({
   requestCount: cost.requests.length,
   failedRequests: cost.failedRequests,
   unmeasuredRequests: cost.unmeasuredRequests,
+  estimatedRequests: cost.estimatedRequests,
 });
 
 export const appendUsageEvent = async (
@@ -63,7 +66,6 @@ export const appendUsageEvent = async (
   // by the TypeScript type alone.
   const record = usageEventSchema.parse({
     id: newId(),
-    ...(input.traceId !== undefined ? { traceId: input.traceId } : {}),
     yearMonth: iso.slice(0, 7),
     date: iso.slice(0, 10),
     purpose: input.purpose,

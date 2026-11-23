@@ -139,8 +139,8 @@
     "replayTipsHint": "Shows again the tips you already dismissed."
   },
   "usage": {
-    "title": "AI Usage — all athletes",
-    "heading": "AI Usage — all athletes, last {{count}} months",
+    "title": "AI usage on this device — all athletes",
+    "heading": "AI usage on this device — all athletes, last {{count}} months",
     "empty": "No AI usage recorded yet for the last {{count}} months. It fills in once you use the AI assistant or create a workout with AI.",
     "month": "Month",
     "input": "Input",
@@ -155,6 +155,10 @@
     "unknownCost_one": "+ {{count}} run at an unknown price",
     "unknownCost_other": "+ {{count}} runs at an unknown price",
     "costBasis": "Each run is priced at its own model’s input, output and cache prices, and the cost includes every attempt the Provider billed: retries, failed attempts and each step of a chat turn.",
+    "thisDevice": "This is the usage of this browser only: the log stays on this device, not in Drive sync or a backup file, so another device shows its own.",
+    "includesEstimate": "includes an estimate",
+    "estimated_one": "{{count}} request was cut before its Provider reported the tokens used (a Stop, a timeout or a dropped connection); its cost is an estimate from the length of the request and of the text received.",
+    "estimated_other": "{{count}} requests were cut before their Provider reported the tokens used (a Stop, a timeout or a dropped connection); their cost is an estimate from the length of each request and of the text received.",
     "unmeasured_one": "{{count}} request failed before its Provider reported the tokens used, so it is not counted in the cost.",
     "unmeasured_other": "{{count}} requests failed before their Provider reported the tokens used, so they are not counted in the cost.",
     "byModel": {
@@ -200,9 +204,10 @@
     "missingKey": "“{{account}}” has no API key: backups never carry keys. Enter it below with “Replace key” to choose the model your assistant uses.",
     "noAthlete": "Choose an athlete to pick the model your assistant uses.",
     "runsOn": "on {{account}}",
-    "usage_one": "Total this month (all athletes): {{count}} request · {{tokens}} tokens · ~{{cost}}",
-    "usage_other": "Total this month (all athletes): {{count}} requests · {{tokens}} tokens · ~{{cost}}",
-    "usageNone": "No AI use yet this month, by any athlete.",
+    "usage_one": "Total this month on this device (all athletes): {{count}} request · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "Total this month on this device (all athletes): {{count}} requests · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "No AI use yet this month on this device, by any athlete.",
+    "usageEstimate": "includes an estimate",
     "usageUnknown_one": "{{count}} run at an unknown price is not included.",
     "usageUnknown_other": "{{count}} runs at an unknown price are not included."
   },
@@ -281,6 +286,12 @@
     },
     "sent": "Sent",
     "sentNothing": "Nothing was sent.",
-    "sentLine": "To {{provider}}: {{kinds}}"
+    "sentLine": "To {{provider}}: {{kinds}}",
+    "sentDeclared": "To {{provider}}: {{kinds}}; it may also have carried {{declared}}, which Kaiord cannot count",
+    "includesEstimate": "includes an estimate",
+    "estimated_one": "{{count}} request was cut before its Provider reported the tokens used (a Stop, a timeout or a dropped connection); its cost is an estimate from the length of the request and of the text received.",
+    "estimated_other": "{{count}} requests were cut before their Provider reported the tokens used (a Stop, a timeout or a dropped connection); their cost is an estimate from the length of each request and of the text received.",
+    "unmeasured_one": "{{count}} request failed before its Provider reported the tokens used, so it is not counted in the cost.",
+    "unmeasured_other": "{{count}} requests failed before their Provider reported the tokens used, so they are not counted in the cost."
   }
 }

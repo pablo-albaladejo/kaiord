@@ -34,7 +34,9 @@ const MODEL_OUTPUT = {
   ],
 };
 
-vi.mock("@kaiord/ai/providers", () => ({
+// The schemas the App parses with stay real; only the model is stubbed.
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   createLanguageModel: vi.fn(
     async () =>
       new MockLanguageModelV4({
@@ -48,6 +50,7 @@ vi.mock("@kaiord/ai/providers", () => ({
   ),
 }));
 
+import { createInMemoryTraceRepository } from "../test-utils/in-memory-trace-repository";
 import type { Profile } from "../types/profile";
 import { garminPaceZonesFor } from "../utils/garmin-pace-zones";
 import { generateWorkoutKrd } from "./generate-workout";
@@ -58,6 +61,10 @@ describe("generateWorkoutKrd for a runner without pace zones", () => {
   it("should produce a workout the Garmin push accepts", async () => {
     // Arrange
     const options = {
+      deps: {
+        persistence: { traces: createInMemoryTraceRepository() } as never,
+        usage: { emit: () => undefined },
+      },
       text: "Rodaje 12' z1 + 30\" fuerte + R: 2'",
       provider: { type: "anthropic" } as never,
       modelId: "m",

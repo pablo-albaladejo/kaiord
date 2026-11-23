@@ -49,6 +49,10 @@ vi.mock("../../../store/selectors", () => ({
   useLoadWorkout: vi.fn(() => mockLoadWorkout),
 }));
 
+vi.mock("../../../hooks/use-generation-deps", () => ({
+  useGenerationDeps: () => ({ persistence: {}, usage: { emit: vi.fn() } }),
+}));
+
 const mockGenerateWorkoutKrd = vi.fn();
 vi.mock("../../../lib/generate-workout", () => ({
   generateWorkoutKrd: (...args: unknown[]) =>

@@ -27,7 +27,10 @@ export const executableStepParseSchema = z
       .nullable()
       .optional(),
     equipmentType: z
-      .object({ equipmentTypeKey: z.string().nullable().optional() })
+      .object({
+        equipmentTypeKey: z.string().nullable().optional(),
+        equipmentTypeId: z.number().nullable().optional(),
+      })
       .passthrough()
       .nullable()
       .optional(),
@@ -66,6 +69,7 @@ export const garminWorkoutParseSchema = z.object({
     .nullable()
     .optional(),
   workoutName: z.string().optional(),
+  createdDate: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   workoutSegments: z
     .array(

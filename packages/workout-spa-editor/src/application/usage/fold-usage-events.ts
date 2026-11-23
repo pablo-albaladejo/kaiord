@@ -20,6 +20,8 @@ export type UsageTotals = {
   unknownCostRuns: number;
   failedRequests: number;
   unmeasuredRequests: number;
+  /** Requests cut before the Provider reported usage, priced at an estimate. */
+  estimatedRequests: number;
 };
 
 export type FoldUsageEventsOptions = {
@@ -35,6 +37,7 @@ const EMPTY: UsageTotals = {
   unknownCostRuns: 0,
   failedRequests: 0,
   unmeasuredRequests: 0,
+  estimatedRequests: 0,
 };
 
 const byCreatedAt = (a: UsageEventRecord, b: UsageEventRecord) =>
@@ -51,6 +54,7 @@ const add = (totals: UsageTotals, e: UsageEventRecord): UsageTotals => {
     unknownCostRuns: totals.unknownCostRuns + (cost === null ? 1 : 0),
     failedRequests: totals.failedRequests + (e.failedRequests ?? 0),
     unmeasuredRequests: totals.unmeasuredRequests + (e.unmeasuredRequests ?? 0),
+    estimatedRequests: totals.estimatedRequests + (e.estimatedRequests ?? 0),
   };
 };
 

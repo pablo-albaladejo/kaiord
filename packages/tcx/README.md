@@ -71,8 +71,7 @@ Creates an XSD schema validator for TCX files.
   cadence ±1 rpm, pace ±0.01 m/s).
 - Fields TCX cannot carry: power targets other than a single watt value; a
   single heart rate, which comes back as a range from that value to itself;
-  heart rate as a share of maximum; pace zones; repeat-until durations; step
-  notes; the sub-sport; the recovery, interval and other intensities.
+  heart rate as a share of maximum; pace zones; repeat-until durations; step notes; the sub-sport; the recovery, interval and other intensities; a step that ends when heart rate rises above a value, which is skipped.
 
 ## License
 

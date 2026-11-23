@@ -1280,12 +1280,16 @@
         {
           "file": "packages/core/src/application/round-trip/contract/formats/fit.contract.ts",
           "contains": "field: \"extensions.structured_workout.**.stepIndex\""
+        },
+        {
+          "test": "packages/fit/src/adapters/round-trip/first-read.test.ts",
+          "title": "should read every value of every FIT workout fixture that KRD can hold"
         }
       ]
     },
     {
       "id": "readme.fit.round-trip.not-carried",
-      "text": "Fields FIT cannot carry: the step numbers after a repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT string.",
+      "text": "Fields FIT cannot carry: the step numbers after a repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT string; the name of a repeat step; a custom heart-rate range given as a share of maximum, which is read as bpm.",
       "proof": [
         {
           "test": "packages/fit/src/adapters/round-trip/round-trip-contract.test.ts",
@@ -1320,12 +1324,16 @@
         {
           "file": "packages/core/src/application/round-trip/contract/formats/tcx.contract.ts",
           "contains": "field: \"extensions.structured_workout.steps.**.notes\""
+        },
+        {
+          "test": "packages/tcx/src/adapters/round-trip/first-read.test.ts",
+          "title": "should read every value of every TCX workout fixture that KRD can hold"
         }
       ]
     },
     {
       "id": "readme.tcx.round-trip.not-carried",
-      "text": "Fields TCX cannot carry: power targets other than a single watt value; a single heart rate, which comes back as a range from that value to itself; heart rate as a share of maximum; pace zones; repeat-until durations; step notes; the sub-sport; the recovery, interval and other intensities.",
+      "text": "Fields TCX cannot carry: power targets other than a single watt value; a single heart rate, which comes back as a range from that value to itself; heart rate as a share of maximum; pace zones; repeat-until durations; step notes; the sub-sport; the recovery, interval and other intensities; a step that ends when heart rate rises above a value, which is skipped.",
       "proof": [
         {
           "test": "packages/tcx/src/adapters/round-trip/round-trip-contract.test.ts",
@@ -1343,7 +1351,7 @@
     },
     {
       "id": "readme.zwo.round-trip.tested",
-      "text": "Round-trip tested: converting ZWO → KRD → ZWO keeps every value of a bike or run workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm, pace ±0.01 m/s).",
+      "text": "Round-trip tested: converting KRD → ZWO → KRD keeps every value of a bike or run workout within the declared tolerances (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm, pace ±0.01 m/s); the ZWO test files were written by Kaiord, so a file from Zwift is not checked field by field.",
       "proof": [
         {
           "test": "packages/zwo/src/adapters/round-trip/round-trip-contract.test.ts",
@@ -1356,6 +1364,10 @@
         {
           "file": "packages/core/src/application/round-trip/contract/formats/zwo.contract.ts",
           "contains": "field: \"extensions.structured_workout.steps.**.notes\""
+        },
+        {
+          "test": "packages/zwo/src/adapters/round-trip/first-read.test.ts",
+          "title": "should read every value of every ZWO workout fixture that KRD can hold"
         }
       ]
     },
@@ -1392,12 +1404,16 @@
         {
           "file": "packages/core/src/application/round-trip/contract/formats/gcn.contract.ts",
           "contains": "field: \"extensions.structured_workout.steps.**.name\""
+        },
+        {
+          "test": "packages/garmin/src/adapters/round-trip/first-read.test.ts",
+          "title": "should read every value of every GCN workout fixture that KRD can hold"
         }
       ]
     },
     {
       "id": "readme.garmin.round-trip.not-carried",
-      "text": "Fields GCN cannot carry: a single target value, which is sent as a band and comes back as that range; power as a share of FTP and heart rate as a share of maximum, which are sent in watts and bpm; pace zones; heart-rate, power and repeat-until durations; step names; the sub-sport; the created date; the interval and other intensities, which come back as active.",
+      "text": "Fields GCN cannot carry: a single target value, which is sent as a band and comes back as that range; power as a share of FTP and heart rate as a share of maximum, which are sent in watts and bpm; pace zones; heart-rate, power and repeat-until durations; step names; the sub-sport; the created date; the interval and other intensities, which come back as active; a second target on a step; the count of a repeat inside a repeat; a step that ends after a number of repetitions, read as a lap-button step; strength and multi-sport workouts, read as generic; a workout name beyond 255 characters.",
       "proof": [
         {
           "test": "packages/garmin/src/adapters/round-trip/round-trip-contract.test.ts",

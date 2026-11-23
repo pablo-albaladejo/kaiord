@@ -21,18 +21,32 @@ export type AiUsage = {
 
 /**
  * How one request to the Provider ended: `ok`, an output that did not
- * validate (`invalid`) or was cut at the token limit (`truncated`), a thrown
- * Provider or transport failure (`error`), or a stop by abort or watchdog.
+ * validate (`invalid`) or was cut at the token limit (`truncated`), a
+ * Provider or transport failure, the inactivity watchdog included (`error`),
+ * or a stop the athlete asked for (`stopped`).
  */
-export type AiRequestOutcome =
-  "ok" | "invalid" | "truncated" | "error" | "stopped";
+export const AI_REQUEST_OUTCOMES = [
+  "ok",
+  "invalid",
+  "truncated",
+  "error",
+  "stopped",
+] as const;
+
+export type AiRequestOutcome = (typeof AI_REQUEST_OUTCOMES)[number];
 
 /**
  * One request that reached the Provider. `usage` is what the Provider
- * reported; it is absent when the Provider reported none (a failure before
- * the final chunk), and then the request is unmeasured, never zero.
+ * reported, or, with `estimated`, an estimate for a request cut mid-stream
+ * before the Provider reported it (see `agents/cut-request.ts`). It is
+ * absent when the Provider answered with an error before any output, which
+ * it does not bill; the request is then unmeasured, never zero.
  */
-export type AiRequest = { outcome: AiRequestOutcome; usage?: AiUsage };
+export type AiRequest = {
+  outcome: AiRequestOutcome;
+  usage?: AiUsage;
+  estimated?: true;
+};
 
 type RunIdentity = {
   traceId: string;

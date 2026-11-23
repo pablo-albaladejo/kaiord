@@ -11,13 +11,16 @@ import {
   EXPECTED_TOKENS_BASELINE_PLUS_10,
   EXPECTED_TOKENS_ZERO,
 } from "../test-utils/application-fixtures";
-import { estimateTokens, estimateTokenSplit } from "./cost-estimation";
+import { estimateWorkoutRequests } from "./cost-estimation";
 import { makeWorkoutRecord } from "./test-helpers";
 
-const estimateTokens = (workouts: Parameters<typeof estimateTokenSplit>[0]) => {
-  const { input, output } = estimateTokenSplit(workouts);
-  return input + output;
-};
+const estimateTokens = (
+  workouts: Parameters<typeof estimateWorkoutRequests>[0]
+) =>
+  estimateWorkoutRequests(workouts, 0).reduce(
+    (sum, r) => sum + r.input + r.output,
+    0
+  );
 
 describe("estimateTokens", () => {
   it("should estimate tokens from description length", () => {
@@ -133,27 +136,32 @@ describe("estimateTokens", () => {
   });
 });
 
-describe("estimateTokenSplit", () => {
-  it("should keep the input estimate apart from the output allowance", () => {
+describe("estimateWorkoutRequests", () => {
+  it("should estimate each workout as its own request, the system prompt included", () => {
     // Arrange
-    const workout = makeWorkoutRecord({
-      raw: {
-        title: "Run",
-        description: "A".repeat(DESCRIPTION_LEN_300),
-        comments: [],
-        distance: null,
-        duration: null,
-        prescribedRpe: null,
-        rawHash: "h",
-      },
+    const raw = (description: string) => ({
+      title: "Run",
+      description,
+      comments: [],
+      distance: null,
+      duration: null,
+      prescribedRpe: null,
+      rawHash: "h",
     });
+    const workouts = [
+      makeWorkoutRecord({ raw: raw("A".repeat(DESCRIPTION_LEN_300)) }),
+      makeWorkoutRecord({ raw: raw("B".repeat(DESCRIPTION_LEN_600)) }),
+    ];
+    const systemChars = 3000;
 
     // Act
-    const split = estimateTokenSplit([workout]);
+    const requests = estimateWorkoutRequests(workouts, systemChars);
 
     // Assert
-
-    // 300 chars / 3 of input, 500 of output
-    expect(split).toEqual({ input: 100, output: 500 });
+    // (3000 + 300) / 3 and (3000 + 600) / 3 of input, 500 of output each
+    expect(requests).toEqual([
+      { input: 1100, output: 500 },
+      { input: 1200, output: 500 },
+    ]);
   });
 });

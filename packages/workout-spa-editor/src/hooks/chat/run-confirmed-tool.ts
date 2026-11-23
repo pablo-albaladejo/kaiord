@@ -1,6 +1,10 @@
 import type { ChatTool } from "@kaiord/ai";
 import { ZodError } from "zod";
 
+import {
+  healthWithheldAnswer,
+  healthWithheldTo,
+} from "../../application/chat/health-withheld";
 import { scrubAnalyticsString } from "../../lib/scrub-analytics-string";
 import { logger } from "../../utils/logger";
 
@@ -30,7 +34,9 @@ const logFailure = (toolName: string, error: unknown): void =>
  * explain the failure to the user, per the "tool execution fails" scenario.
  * The model receives an app error code, never the exception's text: that
  * text can come from a bridge, a provider or a parsed file. The cause is
- * logged, scrubbed and bounded, so the failure stays diagnosable.
+ * logged, scrubbed and bounded, so the failure stays diagnosable. A
+ * description refused for health data gets the fixed answer naming its
+ * Provider (`health-withheld`).
  */
 export const runConfirmedTool = async (
   tools: ChatTool[],
@@ -42,6 +48,9 @@ export const runConfirmedTool = async (
   try {
     return { output: await tool.execute(input), ok: true };
   } catch (error) {
+    const withheldFrom = healthWithheldTo(error);
+    if (withheldFrom)
+      return { output: healthWithheldAnswer(withheldFrom), ok: false };
     logFailure(toolName, error);
     return { output: { error: errorCodeOf(error) }, ok: false };
   }

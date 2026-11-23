@@ -2,12 +2,17 @@
 
 ### Requirement: Every run of the assistant leaves one Trace on the device
 
-The Kaiord App SHALL write exactly one Trace per run of the assistant: a chat turn (from the athlete's message to the reply, across any action they confirm or refuse), a workout generation, a batch of generations, and a lab document read that reaches the Provider. A Trace SHALL hold when the run started and finished, its feature, its latency, its outcome (`ok`, `failed`, `stopped`), the number of requests and retries, the versioned prompt unit of each model call, each Tool called with its confirmation (`athlete`, `automatic`, `not_needed`) and result (`ok`, `refused`, `failed`, `unanswered`), `priceRun`'s `RunCost` for each model reached, the total cost or null when unknown, and the kinds of data from the data-flow registry that went to each Provider. It SHALL NOT hold a message, prompt, document or model answer, and its schema SHALL be strict.
+The Kaiord App SHALL write exactly one Trace per run of the assistant: a chat turn (from the athlete's message to the reply, across any action they confirm or refuse), a workout generation, a batch of generations, and a lab document read that reaches the Provider. A Trace SHALL hold when the run started and finished, its feature, its latency, its outcome (`ok`, `failed`, `stopped`), the number of requests and retries, the versioned prompt unit of each model call, each Tool called with its confirmation (`athlete`, `automatic`, `not_needed`) and result (`ok`, `refused`, `failed`, `unanswered`), `priceRun`'s `RunCost` for each model reached, the total cost or null when unknown, and, per Provider, the kinds of data from the data-flow registry the App put in the run's requests, with apart the kinds it may have carried but cannot count (health data replayed replies may quote, or a description the assistant wrote after reading it may hold). A run waiting on the athlete's health answer SHALL already be stored with outcome `stopped`, replaced when it finishes. It SHALL NOT hold a message, prompt, document or model answer, and its schema SHALL be strict.
 
 #### Scenario: A generation's Trace
 
 - **WHEN** a workout is generated with one invalid attempt and one valid one on a priced model
 - **THEN** one Trace SHALL be stored with two requests, one retry, the agent's prompt unit, the summed cost and the generation's kinds sent to the Provider
+
+#### Scenario: A page closed while the health notice waits
+
+- **WHEN** the page is reloaded while a run waits on the health notice
+- **THEN** that run's Trace SHALL be stored with outcome `stopped`
 
 #### Scenario: A batch is one run
 
@@ -22,12 +27,17 @@ The Kaiord App SHALL write exactly one Trace per run of the assistant: a chat tu
 
 ### Requirement: The Trace never leaves the device
 
-The `traces` store SHALL be device-local: left out of the cloud sync snapshot, never written by a snapshot import, and excluded from a backup file and from a backup import.
+The `traces` store SHALL be device-local: left out of the cloud sync snapshot, never written by a snapshot import, and excluded from a backup file and from a backup import. Nothing synced or backed up SHALL name a Trace or be derived from one: the run's telemetry sink SHALL pass each event on without the Trace's id, and the usage log it feeds is device-local as well.
 
 #### Scenario: Not in the sync snapshot nor a backup
 
 - **WHEN** a sync snapshot or a backup file is exported from a device holding Traces
 - **THEN** neither SHALL carry the `traces` table or any Trace
+
+#### Scenario: No Trace id leaves the device
+
+- **WHEN** a run's sink passes an event on to the usage log, and the device then syncs and exports a backup file
+- **THEN** the event SHALL be passed on unchanged, and neither the pushed snapshot nor the file SHALL carry a `traceId`, a `usageEvents` row or a `traces` row
 
 ### Requirement: Traces are kept bounded and the athlete can delete them
 

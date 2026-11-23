@@ -92,7 +92,7 @@ export const appendAssistantTurn = async (
         result.status === "aborted" || result.status === "timeout"
           ? result.status
           : undefined,
-      readHealth: turnReadHealth(result.messages),
+      readHealth: turnReadHealth(result),
     })
   );
 };

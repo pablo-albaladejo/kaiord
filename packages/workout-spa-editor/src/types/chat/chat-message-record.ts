@@ -45,9 +45,12 @@ export type ChatMessageRecord = {
    */
   stopReason?: ChatStopReason;
   /**
-   * Set on an assistant reply whose turn ran a tool that reads stored health
-   * data, so it may quote it: a replay to a Provider the athlete does not
-   * share health data with leaves it out.
+   * On an assistant reply: whether its turn ran a tool that reads stored
+   * health data (stopped or not), so it may quote it. Every new reply stores
+   * it, `false` included; absent (a reply stored or synced by an older build)
+   * means unknown and counts as true. A replay to a Provider the athlete does
+   * not share health data with leaves out every reply from the first one that
+   * may quote it.
    */
   readHealth?: boolean;
 };

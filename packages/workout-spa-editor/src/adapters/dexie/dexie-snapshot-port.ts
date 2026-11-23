@@ -6,14 +6,15 @@
  * the snapshot use cases. The `tombstones` store is handled by the
  * dedicated tombstone methods, not by `exportTables`/`importTables`.
  *
- * The `connections` store is deliberately EXCLUDED (device-local): it holds
- * provider account linkage + encrypted credentials that must never be written
- * to remote snapshot storage (#714, design D5). The energy-balance stores
+ * The device-local stores (`DEVICE_LOCAL_TABLES`: `connections`, `traces`,
+ * `usageEvents`) are deliberately EXCLUDED: they never reach remote snapshot
+ * storage. The energy-balance stores
  * (`intakeEntries`, `intakePresets`, `energyTargets`) ride the snapshot since
  * v37: nutrition syncs across devices like the other health data, merged
  * last-write-wins on `updatedAt` with tombstoned deletes.
  */
 
+import { DEVICE_LOCAL_TABLES } from "../../application/sync/device-local-tables";
 import type { SnapshotPort } from "../../ports/snapshot-port";
 import type { SnapshotTables, Tombstone } from "../../types/snapshot";
 import { createDexieClearAllTables } from "./dexie-clear-all-tables";
@@ -36,15 +37,14 @@ const TOMBSTONES = "tombstones";
 // twin WorkoutRecord, which syncs), so `activities` staying in the snapshot set
 // preserves cross-device parity. Snapshot-at-rest encryption of this fitness
 // data is tracked as a separate epic (Phase-4 security note, LOW).
-// `usageEvents` is intentionally NOT listed: after the usage-accounting cutover
-// it is the synced, authoritative usage store. Its uuid `id` + `createdAt` drop
-// into the generic append-only merge (union by id, tombstone-suppressed), and a
-// 12-month tombstoning prune bounds its growth (see prune-usage-events).
-// Exported so the tombstone-coverage guard can tell a table that never leaves
-// the device (no tombstone needed) from one that rides the snapshot.
-// `traces` never leaves the device either: the athlete's Traces are theirs,
-// read and exported in Settings, Privacy, and never sent (#1652).
-export const DEVICE_LOCAL = new Set([TOMBSTONES, "connections", "traces"]);
+// The device-local stores are listed, with why, in
+// `application/sync/device-local-tables.ts`. Exported so the tombstone-coverage
+// guard can tell a table that never leaves the device (no tombstone needed)
+// from one that rides the snapshot.
+export const DEVICE_LOCAL: ReadonlySet<string> = new Set([
+  TOMBSTONES,
+  ...DEVICE_LOCAL_TABLES,
+]);
 
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive
 // transaction overloads (TS2589). Same pattern as dexie-persistence-adapter.

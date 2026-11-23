@@ -6,11 +6,8 @@ import type { RoundTripContract } from "./round-trip-contract";
 const contract = (
   over: Partial<RoundTripContract> = {}
 ): RoundTripContract => ({
-  format: "test",
+  format: "fit",
   name: "TEST",
-  tolerances: [
-    { field: "**.seconds", tolerance: 1, reason: "time is kept to ±1 s" },
-  ],
   notCarried: [],
   filledIn: [],
   unsupported: { durations: [], targets: [], intensities: [] },
@@ -18,11 +15,20 @@ const contract = (
   ...over,
 });
 
+const SECONDS = 60;
+const workout = (step: Record<string, unknown>, extra = {}) => ({
+  extensions: { structured_workout: { steps: [step] } },
+  ...extra,
+});
+const timed = (seconds: number) => ({
+  duration: { type: "time", seconds },
+});
+
 describe("diffRoundTrip", () => {
   it("should report nothing when every value is equal or within its tolerance", () => {
     // Arrange
-    const before = { a: { seconds: 60 }, name: "x", list: [1, 2] };
-    const after = { a: { seconds: 61 }, name: "x", list: [1, 2] };
+    const before = workout(timed(SECONDS), { name: "x", list: [1, 2] });
+    const after = workout(timed(SECONDS + 1), { name: "x", list: [1, 2] });
 
     // Act
     const result = diffRoundTrip(before, after, contract());
@@ -33,8 +39,8 @@ describe("diffRoundTrip", () => {
 
   it("should report a number outside its tolerance and a number with no tolerance that moved", () => {
     // Arrange
-    const before = { a: { seconds: 60 }, watts: 250 };
-    const after = { a: { seconds: 62 }, watts: 251 };
+    const before = workout(timed(SECONDS), { watts: 250 });
+    const after = workout(timed(SECONDS + 2), { watts: 251 });
 
     // Act
     const result = diffRoundTrip(before, after, contract());
@@ -42,10 +48,10 @@ describe("diffRoundTrip", () => {
     // Assert
     expect(result.differences).toEqual([
       {
-        field: "a.seconds",
+        field: "extensions.structured_workout.steps.0.duration.seconds",
         kind: "changed",
-        before: 60,
-        after: 62,
+        before: SECONDS,
+        after: SECONDS + 2,
         tolerance: 1,
       },
       {
@@ -106,50 +112,45 @@ describe("diffRoundTrip", () => {
 });
 
 const WATTS = 250;
-const WATTS_AFTER = 251;
 const ZONE = 3;
-const ZONE_AFTER = 4;
+
+const targeted = (type: string, unit: string, value: number) =>
+  workout({ target: { type, value: { unit, value } } });
+const moved = (type: string, unit: string, from: number, to: number) =>
+  diffRoundTrip(
+    targeted(type, unit, from),
+    targeted(type, unit, to),
+    contract()
+  ).differences.map((d) => d.tolerance);
 
 describe("diffRoundTrip on targets", () => {
   it("should apply a target tolerance only to the target type and units it names", () => {
     // Arrange
-    const rules = contract({
-      tolerances: [
-        {
-          field: "**.target.value.*",
-          targetType: "power",
-          units: ["watts", "range"],
-          tolerance: 1,
-          reason: "power is kept to ±1 W",
-        },
-      ],
-    });
-    const target = (unit: string, value: number) => ({
-      steps: [{ target: { type: "power", value: { unit, value } } }],
-    });
+    const watts = { from: WATTS, to: WATTS + 1 };
+    const zone = { from: ZONE, to: ZONE + 1 };
 
     // Act
-    const watts = diffRoundTrip(
-      target("watts", WATTS),
-      target("watts", WATTS_AFTER),
-      rules
-    );
-    const zone = diffRoundTrip(
-      target("zone", ZONE),
-      target("zone", ZONE_AFTER),
-      rules
-    );
+    const results = [
+      moved("power", "watts", watts.from, watts.to),
+      moved("power", "zone", zone.from, zone.to),
+    ];
 
     // Assert
-    expect(watts.differences).toEqual([]);
-    expect(zone.differences).toEqual([
-      {
-        field: "steps.0.target.value.value",
-        kind: "changed",
-        before: ZONE,
-        after: ZONE_AFTER,
-        tolerance: 0,
-      },
-    ]);
+    expect(results).toEqual([[], [0]]);
+  });
+
+  it("should hold heart rate as a share of maximum to the half percent FIT rounds to", () => {
+    // Arrange
+    const share = { value: 75, half: 75.5, over: 75.6, tolerance: 0.5 };
+
+    // Act
+    const results = [
+      moved("heart_rate", "percent_max", share.value, share.half),
+      moved("heart_rate", "percent_max", share.value, share.over),
+      moved("heart_rate", "bpm", share.value, share.value + 1),
+    ];
+
+    // Assert
+    expect(results).toEqual([[], [share.tolerance], []]);
   });
 });

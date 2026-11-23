@@ -7,7 +7,7 @@ import {
   FIT_STRING_MAX_BYTES,
   fitStringBytes,
   fitStringPrefix,
-} from "./fit-string";
+} from "../shared/fit-string";
 import { convertDuration } from "./krd-to-fit-duration.converter";
 import { convertTarget } from "./krd-to-fit-target.converter";
 

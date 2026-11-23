@@ -8,38 +8,28 @@
  * case directly rather than `useTrain2GoSource`, whose
  * `Train2GoZonesSyncProvider` is not in the global provider tree.
  */
-import { type MutableRefObject, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
-import type {
-  ChatActionOps,
-  CreateWorkoutInput,
-} from "../application/chat/tools/chat-tool-deps";
-import type { TraceRun } from "../application/trace/trace-run";
+import type { ChatActionOps } from "../application/chat/tools/chat-tool-deps";
 import { usePersistence } from "../contexts/persistence-context";
-import { useActiveLocale } from "../i18n/LocaleProvider";
-import { getTranslate } from "../i18n/use-translate";
-import type { LlmProviderConfig } from "../store/ai-store-types";
 import { doSyncCoaching } from "./chat/chat-action-ops-impl";
-import { doCreateWorkout } from "./chat/chat-create-workout";
+import type {
+  ChatGenerationModel,
+  ChatTurnRunRefs,
+} from "./use-create-workout-op";
+import { requireProfile } from "./use-create-workout-op";
+import { useCreateWorkoutOp } from "./use-create-workout-op";
 import { useLogOps } from "./use-log-ops";
 import { usePushToGarminOp } from "./use-push-to-garmin-op";
 import { useSetDataRouteOp } from "./use-set-data-route-op";
 import { useTrain2GoCoachingTransport } from "./use-train2go-coaching-transport";
 
-const requireProfile = (profileId: string | null): string => {
-  if (!profileId) throw new Error("No active profile");
-  return profileId;
-};
-
-export type ChatGenerationModel = {
-  provider: LlmProviderConfig | null;
-  modelId: string | null;
-};
+export type { ChatGenerationModel } from "./use-create-workout-op";
 
 export const useChatActionOps = (
   profileId: string | null,
   generation: ChatGenerationModel,
-  traceRef?: MutableRefObject<TraceRun | null>
+  refs?: ChatTurnRunRefs
 ): ChatActionOps => {
   const persistence = usePersistence();
   const pushToGarmin = usePushToGarminOp(profileId);
@@ -51,23 +41,7 @@ export const useChatActionOps = (
     () => doSyncCoaching(persistence, transport, requireProfile(profileId)),
     [persistence, transport, profileId]
   );
-  const { provider, modelId } = generation;
-  const locale = useActiveLocale();
-  const createWorkout = useCallback(
-    (input: CreateWorkoutInput) => {
-      if (!provider || !modelId) throw new Error("No AI provider configured");
-      return doCreateWorkout(
-        persistence,
-        requireProfile(profileId),
-        provider,
-        modelId,
-        input,
-        getTranslate("chat", locale)("draft.workoutTitle"),
-        traceRef?.current ?? undefined
-      );
-    },
-    [persistence, profileId, provider, modelId, locale, traceRef]
-  );
+  const createWorkout = useCreateWorkoutOp(profileId, generation, refs);
 
   return useMemo(
     () => ({

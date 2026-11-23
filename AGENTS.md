@@ -64,7 +64,11 @@ Train2Go, and a VitePress documentation site.
   the rule.
 - **Zero tolerance**: zero ESLint warnings, zero TS errors, zero test warnings,
   zero build warnings, zero IDE warnings.
-- **Round-trip safety**: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm.
+- **Round-trip safety**: time ±1s, power ±1W or ±1%FTP, HR ±1bpm (±0.5% as
+  a share of maximum: FIT stores whole percent), cadence ±1rpm, distance ±1m
+  and pace ±0.01m/s (FIT stores distance in whole centimetres and speed in
+  whole mm/s; both bounds are the round-trip validator's defaults). Declared
+  once, with reasons, in `DECLARED_TOLERANCES` (`@kaiord/core`).
 - **Never auto-remediate**: an agent never runs, on its own, an npm publish, a
   release tag, a push to `main`, a production deploy (kaiord.com, Chrome Web
   Store), a force-push, a change to repo settings, rules or secrets, a weakened

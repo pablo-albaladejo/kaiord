@@ -100,6 +100,29 @@ describe("convertTcxTarget (mapper)", () => {
       });
     });
 
+    it("should convert a CustomHeartRateZone_t whose bounds are HeartRateInBeatsPerMinute_t values to a range target", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const bpm = "HeartRateInBeatsPerMinute_t";
+      const tcxTarget = {
+        "@_xsi:type": "HeartRate_t",
+        HeartRateZone: {
+          "@_xsi:type": "CustomHeartRateZone_t",
+          Low: { "@_xsi:type": bpm, Value: 150 },
+          High: { "@_xsi:type": bpm, Value: 165 },
+        },
+      };
+
+      // Act
+      const result = convertTcxTarget(tcxTarget, "running", logger);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "heart_rate",
+        value: { unit: "range", min: 150, max: 165 },
+      });
+    });
+
     it("should return open for HeartRate_t without valid zone data", () => {
       // Arrange
       const logger = createMockLogger();

@@ -1,4 +1,3 @@
-import { DECLARED_TOLERANCES } from "../declared-tolerances";
 import type { RoundTripContract } from "../round-trip-contract";
 
 const END =
@@ -16,7 +15,6 @@ const FTP =
 export const GCN_ROUND_TRIP: RoundTripContract = {
   format: "gcn",
   name: "GCN",
-  tolerances: DECLARED_TOLERANCES,
   notCarried: [
     {
       field: "metadata.created",

@@ -43,7 +43,7 @@ describe("health sharing gate", () => {
 
     // Assert
     expect(share).toBe("send");
-    expect(ask).toHaveBeenCalledWith(CHAT);
+    expect(ask).toHaveBeenCalledWith(CHAT, expect.any(AbortSignal));
     expect(store.read()).toEqual({});
   });
 
@@ -89,7 +89,10 @@ describe("health sharing gate", () => {
     await gate.request({ ...CHAT, providerType: "openai" });
 
     // Assert
-    expect(ask).toHaveBeenLastCalledWith({ ...CHAT, providerType: "openai" });
+    expect(ask).toHaveBeenLastCalledWith(
+      { ...CHAT, providerType: "openai" },
+      expect.any(AbortSignal)
+    );
     expect(ask).toHaveBeenCalledTimes(2);
   });
 
@@ -160,5 +163,119 @@ describe("health sharing gate", () => {
     // Assert
     expect(shares).toEqual(["send", "send", "send"]);
     expect(ask).toHaveBeenCalledTimes(1);
+  });
+
+  describe("while the question waits", () => {
+    const deferred = () => {
+      const answers: Array<(value: "once" | "always" | "never") => void> = [];
+      const signals: AbortSignal[] = [];
+      const ask = vi.fn(
+        (_q: HealthQuestion, signal: AbortSignal) =>
+          new Promise<"once" | "always" | "never">((resolve, reject) => {
+            answers.push(resolve);
+            signals.push(signal);
+            signal.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError"))
+            );
+          })
+      );
+      return { ask, answers, signals };
+    };
+
+    it("should cancel the question when the run that asked is stopped", async () => {
+      // Arrange
+      const { gate } = setUp();
+      const { ask, signals } = deferred();
+      gate.setAsker(ask);
+      const stop = new AbortController();
+      const waiting = gate.request(CHAT, { signal: stop.signal });
+      await vi.waitFor(() => expect(ask).toHaveBeenCalledOnce());
+
+      // Act
+      stop.abort();
+
+      // Assert
+      await expect(waiting).rejects.toThrow(/abort/i);
+      expect(signals[0]?.aborted).toBe(true);
+      expect(hasUnsavedEdits()).toBe(false);
+    });
+
+    it("should keep the question for a run that still waits on it", async () => {
+      // Arrange
+      const { gate } = setUp();
+      const { ask, answers, signals } = deferred();
+      gate.setAsker(ask);
+      const stop = new AbortController();
+      const stopped = gate.request(CHAT, { signal: stop.signal });
+      const kept = gate.request(CHAT);
+      await vi.waitFor(() => expect(ask).toHaveBeenCalledOnce());
+
+      // Act
+      stop.abort();
+      answers[0]?.("always");
+
+      // Assert
+      await expect(stopped).rejects.toThrow(/abort/i);
+      await expect(kept).resolves.toBe("send");
+      expect(signals[0]?.aborted).toBe(false);
+    });
+
+    it("should not ask a second path for the same Provider once the first is always allowed", async () => {
+      // Arrange
+      const { gate } = setUp();
+      const { ask, answers } = deferred();
+      gate.setAsker(ask);
+      const chat = gate.request(CHAT);
+      const generation = gate.request({ ...CHAT, flow: "generation" });
+      await vi.waitFor(() => expect(ask).toHaveBeenCalledOnce());
+
+      // Act
+      answers[0]?.("always");
+
+      // Assert
+      await expect(chat).resolves.toBe("send");
+      await expect(generation).resolves.toBe("send");
+      expect(ask).toHaveBeenCalledOnce();
+    });
+
+    it("should ask the second path after the first is sent this time only", async () => {
+      // Arrange
+      const { gate } = setUp();
+      const { ask, answers } = deferred();
+      gate.setAsker(ask);
+      const chat = gate.request(CHAT);
+      const generation = gate.request({ ...CHAT, flow: "generation" });
+      await vi.waitFor(() => expect(ask).toHaveBeenCalledOnce());
+
+      // Act
+      answers[0]?.("once");
+      await chat;
+      await vi.waitFor(() => expect(ask).toHaveBeenCalledTimes(2));
+      answers[1]?.("never");
+
+      // Assert
+      await expect(generation).resolves.toBe("withhold");
+    });
+
+    it("should tell the run it waits, and not when a standing answer decides", async () => {
+      // Arrange
+      const { gate, store } = setUp();
+      const { ask, answers } = deferred();
+      gate.setAsker(ask);
+      const onWait = vi.fn();
+      const waiting = gate.request(CHAT, { onWait });
+      await vi.waitFor(() => expect(ask).toHaveBeenCalledOnce());
+      answers[0]?.("always");
+      await waiting;
+      const decided = vi.fn();
+
+      // Act
+      await gate.request({ ...CHAT, flow: "labImport" }, { onWait: decided });
+
+      // Assert
+      expect(onWait).toHaveBeenCalledOnce();
+      expect(decided).not.toHaveBeenCalled();
+      expect(store.read()).toEqual({ anthropic: "always" });
+    });
   });
 });

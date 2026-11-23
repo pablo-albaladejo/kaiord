@@ -5,7 +5,8 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import { MAX_AGE_DAYS, runCheck } from "./check-model-prices.mjs";
+import { runCheck } from "./check-model-prices.mjs";
+import { MAX_AGE_DAYS } from "./lib/model-price-entry.mjs";
 
 const CATALOG = "catalog.ts";
 const PRICES = "prices.json";
@@ -28,6 +29,7 @@ const priced = (provider, ids, readOn = "2026-11-23") => ({
   ids,
   source: "https://example.test/pricing",
   readOn,
+  quote: null,
   periods: [{ input: 1, output: 2 }],
 });
 

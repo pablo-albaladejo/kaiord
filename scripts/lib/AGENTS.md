@@ -42,6 +42,7 @@ one place.
 | `method-pipeline-words.mjs`   | A method-note command split into pipeline stages of words without a shell, and the options refused by name. Covered by its sibling `*.test.mjs`.                                                                                       |
 | `method-pipeline.mjs`         | Whether a method-note command is an allowed pipeline: git rev-list/log/ls-tree with the note's options, then grep and wc on their input. Covered by its sibling `*.test.mjs`.                                                          |
 | `method-pipeline-run.mjs`     | Runs an allowed pipeline with no shell, stage by stage, git with a clean environment and no user or system config. Covered by its sibling `*.test.mjs`.                                                                                |
+| `model-price-entry.mjs`       | The checks of one `model-prices.json` entry for `check-model-prices.mjs`: prices or an unpriced reason, `readOn` within 120 days, and a quote holding every price once renewed. Covered by its sibling `*.test.mjs`.                   |
 | `clean-git-env.mjs`           | `process.env` minus every `GIT_*` variable. Pass as `env` when a test spawns git (or a script that does): a hook's inherited `GIT_DIR` otherwise rewrites the shared `.git/config`.                                                    |
 
 ## For AI Agents

@@ -133,7 +133,7 @@ describe("runJunkCleanupOnce", () => {
     expect(workout).toBeDefined();
   });
 
-  it("should prune usage events older than the retention window and tombstone them", async () => {
+  it("should prune usage events older than the retention window without a tombstone", async () => {
     // Arrange
     await db.open();
     const currentMonth = new Date().toISOString().slice(0, YEAR_MONTH_LENGTH);
@@ -146,9 +146,10 @@ describe("runJunkCleanupOnce", () => {
     // Assert
     expect(await db.table("usageEvents").get("evt-old")).toBeUndefined();
     expect(await db.table("usageEvents").get("evt-recent")).toBeDefined();
+    // The log never leaves the device, so a prune has no delete to sync.
     expect(
       await db.table("tombstones").get(["usageEvents", "evt-old"])
-    ).toBeDefined();
+    ).toBeUndefined();
   });
 
   it("should not throw when an error occurs inside the cleanup", async () => {

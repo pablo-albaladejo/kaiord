@@ -66,22 +66,17 @@ direction.
 Every format below has a Round-trip test in CI: a workout goes from the format
 to KRD and back, and every value must come back within the declared tolerances
 (time ±1 s, distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence
-±1 rpm, pace ±0.01 m/s). A field a format cannot carry is listed by name; the
-test fails on any other value that changes.
+±1 rpm, pace ±0.01 m/s). The first read of each format's test files must also keep every field KRD can hold. A field a format cannot carry is listed by name; the test fails on any other value that changes.
 
 - **FIT**: Round-trip tested. Converting FIT → KRD → FIT keeps every value of a
   workout within the declared tolerances, for every duration, target,
-  intensity and sport. Fields FIT cannot carry: the step numbers after a
-  repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT
-  string.
+  intensity and sport. Fields FIT cannot carry: the step numbers after a repeat block, which FIT renumbers; notes beyond the 254 bytes of a FIT string; the name of a repeat step; a custom heart-rate range given as a share of maximum, which is read as bpm.
 - **TCX**: Round-trip tested. Converting TCX → KRD → TCX keeps every value of
   a Running, Biking or Other workout within the declared tolerances. Fields
   TCX cannot carry: power targets other than a single watt value; a single
   heart rate, which comes back as a range from that value to itself; heart
-  rate as a share of maximum; pace zones; repeat-until durations; step notes;
-  the sub-sport; the recovery, interval and other intensities.
-- **ZWO**: Round-trip tested. Converting ZWO → KRD → ZWO keeps every value of
-  a bike or run workout within the declared tolerances. Fields ZWO cannot
+  rate as a share of maximum; pace zones; repeat-until durations; step notes; the sub-sport; the recovery, interval and other intensities; a step that ends when heart rate rises above a value, which is skipped.
+- **ZWO**: Round-trip tested. Converting KRD → ZWO → KRD keeps every value of a bike or run workout within the declared tolerances; the ZWO test files were written by Kaiord, so a file from Zwift is not checked field by field. Fields ZWO cannot
   carry: cadence and pace targets; calorie, power-above and repeat-until
   durations; step notes; the sub-sport.
 - **Garmin Connect (GCN)**: Round-trip tested. Converting GCN → KRD → GCN
@@ -90,8 +85,7 @@ test fails on any other value that changes.
   which is sent as a band and comes back as that range; power as a share of
   FTP and heart rate as a share of maximum, which are sent in watts and bpm;
   pace zones; heart-rate, power and repeat-until durations; step names; the
-  sub-sport; the created date; the interval and other intensities, which come
-  back as active.
+  sub-sport; the created date; the interval and other intensities, which come back as active; a second target on a step; the count of a repeat inside a repeat; a step that ends after a number of repetitions, read as a lap-button step; strength and multi-sport workouts, read as generic; a workout name beyond 255 characters.
 
 These tests cover workouts: each format's writer refuses a recorded activity,
 so no Round-trip is claimed for recorded activities or health data.

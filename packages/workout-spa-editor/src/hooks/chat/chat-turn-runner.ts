@@ -7,17 +7,27 @@
  * replayed. `retryTurn` re-runs a failed turn whose user message
  * is already persisted, without appending it again.
  */
+import type { ChatTurnResult } from "@kaiord/ai";
 import type { ModelMessage } from "ai";
 
 import { appendUserMessage } from "../../application/chat/append-turn-messages";
 import { recordsToModelMessages } from "../../application/chat/chat-message-mapper";
 import { ensureConversationForTurn } from "../../application/chat/ensure-conversation";
+import { firstHealthBearingReply } from "../../application/chat/turn-read-health";
 import type { ChatMessageRecord } from "../../types/chat/chat-message-record";
 import { askHealth } from "./chat-health-share";
-import { openChatTrace } from "./chat-trace";
+import { closeChatTrace, openChatTrace } from "./chat-trace";
 import { runAgent } from "./chat-turn-context";
 import { buildAndSend } from "./chat-turn-send";
 import type { ChatTurnCtx } from "./chat-turn-types";
+
+/** What a turn stopped while the athlete was asked leaves: nothing sent. */
+const STOPPED_BEFORE_SENDING: ChatTurnResult = {
+  status: "aborted",
+  text: "",
+  messages: [],
+  toolNames: [],
+};
 
 /** Asks about health data, then replays the history it allows and sends. */
 const askAndSend = async (
@@ -25,16 +35,25 @@ const askAndSend = async (
   history: ChatMessageRecord[],
   tail: ModelMessage[],
   signal: AbortSignal
-) => {
+): Promise<ChatTurnResult> => {
   const trace = openChatTrace(ctx.traceRef, ctx.persistence);
-  const healthShared = await askHealth(ctx);
+  let healthShared: boolean;
+  try {
+    healthShared = await askHealth(ctx, signal, trace);
+  } catch (error) {
+    if (!signal.aborted) throw error;
+    closeChatTrace(ctx.traceRef, "stopped");
+    return STOPPED_BEFORE_SENDING;
+  }
   const replay = recordsToModelMessages(history, {
     withholdHealth: !healthShared,
   });
+  const historyHealth = healthShared && firstHealthBearingReply(history) >= 0;
   return buildAndSend(ctx, {
     messages: [...replay, ...tail],
     signal,
     healthShared,
+    historyHealth,
     trace,
   });
 };

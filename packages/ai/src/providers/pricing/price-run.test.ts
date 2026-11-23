@@ -245,4 +245,30 @@ describe("priceRun", () => {
     expect(cost.failedRequests).toBe(0);
     expect(cost.unmeasuredRequests).toBe(1);
   });
+
+  it("should price a cut request at its estimate and count it as estimated", () => {
+    // Arrange
+    // Claude-sonnet-5 at $2 in and $10 out per 1M: 1000 in + 500 out is $0.007.
+    const requests = [
+      {
+        outcome: "stopped" as const,
+        estimated: true as const,
+        usage: { promptTokens: 1000, completionTokens: 500 },
+      },
+    ];
+
+    // Act
+    const cost = priceRun({
+      provider: "anthropic",
+      modelId: "claude-sonnet-5",
+      requests,
+      at: AT,
+    });
+
+    // Assert
+    expect(cost.usd).toBeCloseTo(SONNET_5_ATTEMPT_USD, DIGITS);
+    expect(cost.estimatedRequests).toBe(1);
+    expect(cost.unmeasuredRequests).toBe(0);
+    expect(cost.failedRequests).toBe(0);
+  });
 });
