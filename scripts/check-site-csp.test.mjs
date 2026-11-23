@@ -13,7 +13,9 @@ const HASH = `'sha256-${createHash("sha256").update(INLINE).digest("base64")}'`;
 const meta = (policy) =>
   `<meta http-equiv="Content-Security-Policy" content="${policy}">`;
 
-const SAFE = `default-src 'none'; script-src 'self' ${HASH}; object-src 'none'; base-uri 'none'`;
+const SAFE = `default-src 'none'; script-src 'self' ${HASH}; object-src 'none'; base-uri 'none'; worker-src 'none'`;
+const WORKER = "https://kaiord.com/app/sw.js";
+const APP_SAFE = SAFE.replace("worker-src 'none'", `worker-src ${WORKER}`);
 
 const page = (head) =>
   `<!doctype html><html><head><meta charset="UTF-8">${head}<title>x</title></head><body></body></html>`;
@@ -30,7 +32,7 @@ describe("check-site-csp", () => {
   beforeEach(() => {
     site = mkdtempSync(join(tmpdir(), "site-csp-"));
     put("index.html", page(`${meta(SAFE)}<script>${INLINE}</script>`));
-    put("app/index.html", page(`${meta(SAFE)}<script>${INLINE}</script>`));
+    put("app/index.html", page(`${meta(APP_SAFE)}<script>${INLINE}</script>`));
   });
 
   afterEach(() => {
@@ -94,16 +96,18 @@ describe("check-site-csp", () => {
 
     assert.deepEqual(checkSiteCsp(site), [
       "index.html: unsafe script source *",
+      "index.html: worker-src is not 'none'",
     ]);
   });
 
   it("should flag a policy without object-src 'none' or base-uri", () => {
     put("index.html", page(meta(`script-src 'self' ${HASH}`)));
-    put("app/index.html", page(meta(SAFE)));
+    put("app/index.html", page(meta(APP_SAFE)));
 
     assert.deepEqual(checkSiteCsp(site), [
       "index.html: object-src is not 'none'",
       "index.html: no base-uri",
+      "index.html: worker-src is not 'none'",
     ]);
   });
 
@@ -160,5 +164,42 @@ describe("check-site-csp", () => {
     assert.deepEqual(checkSiteCsp(site), [
       "index.html: a script precedes the Content-Security-Policy meta",
     ]);
+  });
+
+  it("should let the App start only its own worker, by its exact URL at the site origin", () => {
+    // Arrange
+    const local = "http://127.0.0.1:4173";
+    put(
+      "app/index.html",
+      page(meta(SAFE.replace("worker-src 'none'", "worker-src 'self'")))
+    );
+    put(
+      "app/editor.html",
+      page(meta(APP_SAFE.replace(WORKER, `${local}/app/sw.js`)))
+    );
+
+    // Act
+    const atKaiord = checkSiteCsp(site);
+    const atLocal = checkSiteCsp(site, { origin: local });
+
+    // Assert
+    assert.deepEqual(atKaiord, [
+      `app/editor.html: worker-src is not exactly ${WORKER}`,
+      `app/index.html: worker-src is not exactly ${WORKER}`,
+    ]);
+    assert.deepEqual(atLocal, [
+      `app/index.html: worker-src is not exactly ${local}/app/sw.js`,
+    ]);
+  });
+
+  it("should let no page outside the App start a worker", () => {
+    // Arrange
+    put("docs/index.html", page(meta(APP_SAFE)));
+
+    // Act
+    const problems = checkSiteCsp(site);
+
+    // Assert
+    assert.deepEqual(problems, ["docs/index.html: worker-src is not 'none'"]);
   });
 });

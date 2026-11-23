@@ -51,9 +51,9 @@ A page under `<base>` SHALL report the URL of its entry module to the worker whe
 
 ### Requirement: Gated, prompted update
 
-The editor SHALL NOT reload on its own while the user has interacted or has unsaved edits. A newer worker SHALL be applied without a prompt only when it is found within 10 seconds of load, before any pointer or key input, with no unsaved edits, and while the worker reports exactly one window client. Otherwise, while a newer worker is waiting, the editor SHALL show a persistent toast titled "New version available" with a "Reload" action ("Nueva versión disponible" and "Recargar" in Spanish). Activating it SHALL go through these steps, in order:
+The editor SHALL NOT reload on its own while the user has interacted or has unsaved work. Unsaved work SHALL be read from one registry that every surface holding work a reload would lose reports to: a scheduled workout's edits, a new workout with a step, an import, extraction, generation, send or wipe in flight, a question awaiting the athlete's answer (the assistant's pending confirmation included), a form with typed entries, and any dialog with text typed into it until it closes. A test SHALL fail when the source holds a draft, a pending answer, a file input or a flag for work in flight that neither reports nor is listed with the reason a reload loses nothing. A newer worker SHALL be applied without a prompt only when it is found within 10 seconds of load, before any input (a pointer, a key, a touch, a wheel, a drag, a drop, a paste, or a text field taking focus), with no unsaved work, and while the worker reports exactly one window client. Otherwise, while a newer worker is waiting, the editor SHALL show a persistent toast titled "New version available" with a "Reload" action ("Nueva versión disponible" and "Recargar" in Spanish). Activating it SHALL go through these steps, in order:
 
-1. While the unsaved-edits flag is set (the same condition that arms `beforeunload`), it SHALL show "Save your changes to update" and stop, without messaging the worker.
+1. While the registry holds unsaved work, it SHALL show "Save your changes to update" and stop, without messaging the worker.
 2. It SHALL await every pending debounced autosave.
 3. It SHALL post `SKIP_WAITING` to the waiting worker.
 4. It SHALL reload only the tab where it was activated, once that worker takes control.
@@ -71,6 +71,18 @@ The page SHALL check for an update on navigation, when it becomes visible, and e
 - **GIVEN** the editor with unsaved edits and the update toast shown
 - **WHEN** the user activates "Reload"
 - **THEN** the editor SHALL show "Save your changes to update", SHALL NOT post `SKIP_WAITING`, and SHALL NOT reload
+
+#### Scenario: A file dropped right after load is not reloaded over
+
+- **GIVEN** a controlled tab just loaded on the import screen, with a newer worker installing
+- **WHEN** the athlete drops a workout file from the desktop, with no click or key, and the worker is found within 10 seconds of load
+- **THEN** the tab SHALL NOT reload, the toast SHALL appear, and while the imported workout is unsaved "Reload" SHALL show "Save your changes to update"
+
+#### Scenario: A new workout's draft blocks the update
+
+- **GIVEN** a new workout with a step, not yet saved or scheduled, and the update toast shown
+- **WHEN** the user activates "Reload"
+- **THEN** the editor SHALL show "Save your changes to update" and SHALL NOT reload; once the workout is scheduled, "Reload" SHALL reload the tab
 
 #### Scenario: Other tabs keep their version unless the schema moved
 

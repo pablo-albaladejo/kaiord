@@ -39,6 +39,8 @@ const TEST_TIMEOUT_MS = 120_000;
 // Time for a failed install to settle, and for a reloaded page to register.
 const INSTALL_SETTLE_MS = 3_000;
 const REREGISTER_MS = 5_000;
+// A deploy found this soon after load, with nothing done, applies silently.
+const SILENT_WINDOW_MS = 10_000;
 // Native IndexedDB version of the next major schema (Dexie stores verno * 10).
 const NEXT_MAJOR_NATIVE = 380;
 // The lazy route chunk a later deploy no longer ships.
@@ -66,6 +68,53 @@ async function scheduleAndEdit(page: Page) {
   await page.getByRole("button", { name: "Edit" }).click();
   await page.getByTestId("add-step-button").click();
   await expect(page.getByTestId("editor-unsaved")).toBeVisible();
+}
+
+// A workout as an athlete would drop it from the desktop: one KRD file.
+const DROPPED_WORKOUT = {
+  name: "dropped.krd",
+  mimeType: "application/json",
+  buffer: Buffer.from(
+    JSON.stringify({
+      version: "1.0",
+      type: "structured_workout",
+      metadata: { created: "2026-01-01T00:00:00Z", sport: "running" },
+      extensions: {
+        structured_workout: {
+          name: "Dropped Tempo",
+          sport: "running",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 600 },
+              targetType: "open",
+              target: { type: "open" },
+              intensity: "active",
+            },
+          ],
+        },
+      },
+    })
+  ),
+};
+
+/** A drop from the desktop: drag events, then the file lands in the input. */
+async function dropWorkout(page: Page) {
+  const input = page.getByTestId("file-upload-input");
+  for (const type of ["dragenter", "dragover", "drop"]) {
+    await input.dispatchEvent(type);
+  }
+  await input.setInputFiles(DROPPED_WORKOUT);
+}
+
+/** Counts this page's document loads from now on. */
+function countLoads(page: Page): () => number {
+  let loads = 0;
+  page.on("load", () => {
+    loads += 1;
+  });
+  return () => loads;
 }
 
 test.describe("@service-worker the App's service worker", () => {
@@ -192,6 +241,68 @@ test.describe("@service-worker the App's service worker", () => {
     await expect(page.getByTestId("update-prompt")).toBeHidden();
     expect(await isSameDocument(other)).toBe(true);
     await openRoute(other, "/calendar", "calendar-page");
+  });
+
+  test("should not reload over a file dropped right after load, and hold the deploy while it is unsaved", async ({
+    page,
+  }) => {
+    // Arrange
+    await takeControl(page, dist.routeUrl("/workout/new?action=import"));
+    const loads = countLoads(page);
+    await markDocument(page);
+
+    // Act
+    await dropWorkout(page);
+    dist.reassemble({ build: nextBuild("v2") });
+    await checkForUpdate(page);
+    const prompt = page.getByTestId("update-prompt");
+    await expect(prompt).toBeVisible({ timeout: INSTALL_TIMEOUT_MS });
+    const foundAfterMs = await page.evaluate(() => performance.now());
+    await expect(page.getByText("Dropped Tempo")).toBeVisible();
+    await prompt.getByRole("button", { name: "Reload" }).click();
+
+    // Assert
+    // Found inside the silent window, so only the drop kept it from applying.
+    expect(foundAfterMs).toBeLessThan(SILENT_WINDOW_MS);
+    await expect(page.getByTestId("update-save-first")).toBeVisible();
+    expect(await isSameDocument(page)).toBe(true);
+    expect(loads()).toBe(0);
+    await expect(page.getByText("Dropped Tempo")).toBeVisible();
+  });
+
+  test("should hold a deploy while a new workout is not saved, and reload once it is scheduled", async ({
+    page,
+  }) => {
+    // Arrange
+    const today = toLocalDateString(new Date());
+    await takeControl(
+      page,
+      dist.routeUrl(`/workout/new?source=scratch&date=${today}`)
+    );
+    await page.getByTestId("add-first-step-button").click();
+    await markDocument(page);
+    dist.reassemble({ build: nextBuild("v2") });
+
+    // Act
+    await checkForUpdate(page);
+    const prompt = page.getByTestId("update-prompt");
+    await expect(prompt).toBeVisible({ timeout: INSTALL_TIMEOUT_MS });
+    await prompt.getByRole("button", { name: "Reload" }).click();
+
+    // Assert
+    await expect(page.getByTestId("update-save-first")).toBeVisible();
+    expect(await isSameDocument(page)).toBe(true);
+
+    // Act
+    await page.getByTestId("scratch-schedule-button").click();
+    await expect(page.getByTestId("calendar-page")).toBeVisible();
+    await reloadsOn(page, () =>
+      prompt.getByRole("button", { name: "Reload" }).click()
+    );
+
+    // Assert
+    expect(await isSameDocument(page)).toBe(false);
+    await expect(workoutCardsOn(page, today)).toHaveCount(1);
   });
 
   test("should keep an open window's version across two deploys that drop one of its chunks", async ({

@@ -2,6 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import { Button } from "../../atoms/Button";
 import { WipeConfirmField } from "./WipeConfirmField";
 
@@ -28,6 +29,7 @@ export const WipeAllDataDialog = ({
   const t = useTranslate("settings");
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
+  useUnsavedWork(busy);
   const word = t("data.wipeDialog.confirmWord");
   const close = () => {
     setTyped("");

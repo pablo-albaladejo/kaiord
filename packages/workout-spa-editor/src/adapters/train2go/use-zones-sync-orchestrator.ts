@@ -24,6 +24,7 @@ import type { CoachingTransport } from "../../application/coaching/coaching-tran
 import type { useToast } from "../../hooks/use-toast";
 import { useTranslate } from "../../i18n/use-translate";
 import { lazyImport } from "../../lib/lazy-import";
+import { useUnsavedWork } from "../../lib/use-unsaved-work";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
   ConflictDecision,
@@ -55,6 +56,7 @@ export const useZonesSyncOrchestrator = (
 ): ZonesSyncOrchestrator => {
   const [pending, setPending] = useState<Pending | null>(null);
   const t = useTranslate("coaching");
+  useUnsavedWork(pending !== null);
 
   const runSync = useCallback(
     async (profileId: string) => {

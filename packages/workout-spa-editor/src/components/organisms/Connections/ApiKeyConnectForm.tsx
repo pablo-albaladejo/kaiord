@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
 import { logFailure } from "../../../lib/log-failure";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import { isApiKeyRefused } from "../../../types/api-key-refused-error";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
@@ -32,6 +33,7 @@ export function ApiKeyConnectForm({
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  useUnsavedWork(busy || apiKey !== "");
 
   const submit = async () => {
     setBusy(true);
