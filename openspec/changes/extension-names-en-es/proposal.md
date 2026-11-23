@@ -44,6 +44,8 @@ user stories 36, 42 and 48 of #1670.
 ### Modified Capabilities
 
 - `extension-store-publish`: the Garmin listing's name and languages.
+- `train2go-bridge`: the manifest `name` the protocol-2 `ping` answers
+  (`"Train2Go"`, as `background.js` declares it).
 
 ## Impact
 
