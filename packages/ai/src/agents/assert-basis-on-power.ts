@@ -1,18 +1,8 @@
+import { flatRawSteps } from "./raw-steps";
+
 type RawStep = {
   stepIndex?: unknown;
   target?: { type?: string; value?: { unit?: string; basis?: unknown } };
-};
-
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const stepsOf = (raw: unknown): Array<RawStep> => {
-  const steps = isObject(raw) ? raw.steps : undefined;
-  if (!Array.isArray(steps)) return [];
-  return steps
-    .filter(isObject)
-    .flatMap((s) => (Array.isArray(s.steps) ? s.steps : [s]))
-    .filter(isObject) as Array<RawStep>;
 };
 
 const misplaced = (s: RawStep): boolean =>
@@ -26,7 +16,7 @@ const misplaced = (s: RawStep): boolean =>
  * errors are left to the strict schema.
  */
 export const assertBasisOnPowerOnly = (raw: unknown): void => {
-  const offending = stepsOf(raw).find(misplaced);
+  const offending = flatRawSteps<RawStep>(raw).find(misplaced);
   if (!offending) return;
   const target = offending.target;
   const where =

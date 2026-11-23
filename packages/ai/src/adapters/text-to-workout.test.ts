@@ -9,7 +9,8 @@ import {
   MAX_OUTPUT_TOKENS_DEFAULT,
 } from "../test-utils/constants";
 
-const RUNNING_WORKOUT: Workout = {
+// What the model returns: the coach's own numbers, which code computes.
+const RUNNING_WORKOUT = {
   sport: "running",
   steps: [
     {
@@ -26,9 +27,12 @@ const RUNNING_WORKOUT: Workout = {
         {
           stepIndex: 0,
           durationType: "time",
-          duration: { type: "time", seconds: 480 },
+          duration: { type: "time", minutes: 8 },
           targetType: "pace",
-          target: { type: "pace", value: { unit: "mps", value: 3.175 } },
+          target: {
+            type: "pace",
+            value: { unit: "pace", per: "km", clock: "5:15" },
+          },
           intensity: "interval",
         },
         {
@@ -88,6 +92,28 @@ describe("createTextToWorkout", () => {
     expect(result.sport).toBe("running");
     expect(result.steps).toHaveLength(EXPECTED_STEP_COUNT_THREE);
     expect(mockGenerateText).toHaveBeenCalledOnce();
+  });
+
+  it("should compute the interval's seconds and m/s from the coach's 8' at 5'15\"", async () => {
+    // Arrange
+    mockGenerateText.mockResolvedValueOnce({
+      output: RUNNING_WORKOUT,
+    } as never);
+    const parse = createTextToWorkout({ model: mockModel });
+
+    // Act
+    const result = await parse("Rodaje 15' Z1 + 4x(8' a 5'15\" + 4' R)");
+
+    // Assert
+    expect(result.steps[1]).toMatchObject({
+      steps: [
+        {
+          duration: { type: "time", seconds: 480 },
+          target: { type: "pace", value: { unit: "mps", value: 3.175 } },
+        },
+        {},
+      ],
+    });
   });
 
   it("should keep the percent_ftp basis of a power range in the KRD", async () => {
