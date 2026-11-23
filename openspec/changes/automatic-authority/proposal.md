@@ -25,9 +25,13 @@ the Authority Capability the mechanism of #1659 was built to hold.
   applying. An athlete with a stored choice reads it as on.
 - **Nothing asks**: Connections keeps the per-kind switches and names the
   Platform that decides; the ranking control and "Keep every source" leave it.
-  The zones conflict dialog is removed: the athlete's own numbers stay, and
-  one notice offers "Use Train2Go's". The auto-import switch says what it
-  does: it never overwrites the athlete's numbers.
+  The zones conflict dialog is removed: the athlete's own zones and
+  thresholds stay, and one notice naming them offers "Use Train2Go's"; the
+  offer stays on the Athlete page until used or declined. Train2Go's weight is
+  not in it: it is stored as Train2Go's weigh-in and read by the rule, and the
+  current weight reads a day two sources weighed by the rule too. The
+  auto-import switch says what it does: it never overwrites the athlete's
+  numbers.
 - English and Spanish.
 
 ## Capabilities
@@ -40,13 +44,18 @@ the Authority Capability the mechanism of #1659 was built to hold.
 
 - `spa-connections-page`: rows name the automatic Authority; the
   source-of-truth control and its two companion requirements are removed.
-- `train2go-zones-sync`: no conflict dialog; one notice and one action.
+- `train2go-zones-sync`: no conflict dialog; one notice and one action for
+  zones and thresholds, kept open on the Athlete page; weight is a Train2Go
+  weigh-in read by the rule; no reject path.
+- `energy-expenditure`: the current weight reads a day two sources weighed by
+  the Authority.
 
 ## Impact
 
 - `@kaiord/workout-spa-editor` (private): the resolver and the daily-wellness
   read, the Connections rows, a new Settings section, the catalogue entry,
-  the zones sync orchestrator, the `connections`, `settings`, `coaching`,
+  the zones sync orchestrator and its offer memo, the Athlete page's offer
+  row, the current weight, the `connections`, `settings`, `coaching`,
   `athlete` and `zones` dictionaries, unit and e2e specs.
 - The assistant's `get_data_routes` reports `automatic` where the rule
   decides; `set_data_route` is unchanged and offered only while the matrix is

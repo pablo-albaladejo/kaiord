@@ -81,4 +81,5 @@ No dialog, banner or prompt on connect, on sync or on the Connections page SHALL
 - **GIVEN** an athlete who set their own FTP, and Train2Go reporting another
 - **WHEN** the zones sync runs
 - **THEN** no dialog SHALL open, the athlete's FTP SHALL stay
-- **AND** one notice SHALL say Kaiord kept their numbers, with "Use Train2Go's"
+- **AND** one notice SHALL say Kaiord kept their thresholds, with "Use Train2Go's"
+- **AND** the offer SHALL stay on the Athlete page after the notice is gone
