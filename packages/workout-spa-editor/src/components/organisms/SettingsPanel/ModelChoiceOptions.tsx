@@ -1,6 +1,6 @@
 import { modelDisplayName } from "@kaiord/ai/providers";
 
-import { PROVIDER_TYPE_NAMES } from "../../../application/ai/provider-label";
+import { providerName } from "../../../application/ai/provider-label";
 import { useTranslate } from "../../../i18n/use-translate";
 import {
   encodeChoice,
@@ -14,7 +14,7 @@ export function ModelChoiceOptions({ groups }: { groups: ModelChoiceGroup[] }) {
   return groups.map(({ provider, models }) => (
     <optgroup
       key={provider.id}
-      label={`${provider.label} · ${PROVIDER_TYPE_NAMES[provider.type]}`}
+      label={`${provider.label} · ${providerName(provider.type)}`}
     >
       {models.map((modelId) => (
         <option

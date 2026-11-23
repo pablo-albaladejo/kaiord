@@ -281,6 +281,7 @@
     },
     "sent": "Enviado",
     "sentNothing": "No se envió nada.",
-    "sentLine": "A {{provider}}: {{kinds}}"
+    "sentLine": "A {{provider}}: {{kinds}}",
+    "sentDeclared": "A {{provider}}: {{kinds}}; puede haber llevado también {{declared}}, que Kaiord no puede contar"
   }
 }

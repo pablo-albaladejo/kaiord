@@ -25,6 +25,7 @@ import {
 
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { AiModelBinding } from "../../../types/ai-model-binding";
+import type { HealthShare } from "../../data-flows/data-flows";
 import { kindsSent } from "../../data-flows/kinds-sent";
 import type { TraceRun } from "../../trace/trace-run";
 
@@ -35,7 +36,7 @@ export type RunLabExtractionInput = {
   signal?: AbortSignal;
   telemetry?: AiTelemetrySink;
   trace?: TraceRun;
-  askHealth: (providerType: LlmProviderType) => Promise<"send" | "withhold">;
+  askHealth: (providerType: LlmProviderType) => Promise<HealthShare>;
 };
 
 export type RunLabExtractionResult =

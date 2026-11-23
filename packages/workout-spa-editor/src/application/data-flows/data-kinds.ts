@@ -33,6 +33,8 @@ export const OTHER_DATA_KINDS = [
   "productEvents",
 ] as const;
 
+export const DATA_KINDS = [...HEALTH_DATA_KINDS, ...OTHER_DATA_KINDS] as const;
+
 export type HealthDataKind = (typeof HEALTH_DATA_KINDS)[number];
 export type DataKind = HealthDataKind | (typeof OTHER_DATA_KINDS)[number];
 

@@ -10,6 +10,7 @@ import type {
   TraceFeature,
   TraceOutcome,
   TraceRecord,
+  TraceSent,
   TraceToolCall,
   TraceUnit,
 } from "../../types/trace-schemas";
@@ -23,7 +24,7 @@ export type TraceParts = {
   finishedAt: Date;
   events: readonly AiTelemetryEvent[];
   tools: readonly TraceToolCall[];
-  sent: ReadonlyMap<string, readonly string[]>;
+  sent: readonly TraceSent[];
   outcome?: TraceOutcome;
 };
 
@@ -68,6 +69,6 @@ export const buildTrace = (parts: TraceParts): TraceRecord => {
     tools: [...parts.tools],
     cost,
     totalUsd: totalOf(cost),
-    sent: [...parts.sent].map(([to, kinds]) => ({ to, kinds: [...kinds] })),
+    sent: [...parts.sent],
   };
 };

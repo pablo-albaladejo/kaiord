@@ -39,6 +39,7 @@ export {
 export { resolveModelForPurpose } from "./resolve-model-for-purpose";
 export type { ProviderKeyCheck } from "./verify-provider-key";
 export { verifyProviderKey } from "./verify-provider-key";
+export { LLM_PROVIDER_TYPES } from "./types";
 export type {
   AiModelBinding,
   AiModelPurpose,

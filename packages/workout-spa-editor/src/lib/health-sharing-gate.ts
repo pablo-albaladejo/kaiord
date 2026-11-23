@@ -7,7 +7,10 @@
  */
 import type { LlmProviderType } from "@kaiord/ai/providers";
 
-import type { HealthFlowId } from "../application/data-flows/data-flows";
+import type {
+  HealthFlowId,
+  HealthShare,
+} from "../application/data-flows/data-flows";
 import {
   type HealthSharingStore,
   healthSharingStore,
@@ -19,7 +22,7 @@ export type HealthQuestion = {
   providerType: LlmProviderType;
 };
 export type HealthShareAnswer = "once" | "always" | "never";
-export type HealthShare = "send" | "withhold";
+export type { HealthShare };
 export type HealthAsker = (
   question: HealthQuestion
 ) => Promise<HealthShareAnswer>;

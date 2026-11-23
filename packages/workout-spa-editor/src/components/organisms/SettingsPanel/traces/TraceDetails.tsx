@@ -1,12 +1,8 @@
-import type { DataKind } from "../../../../application/data-flows/data-kinds";
-import {
-  type DestinationId,
-  DESTINATIONS,
-} from "../../../../application/data-flows/destinations";
+import { DESTINATIONS } from "../../../../application/data-flows/destinations";
+import { listKinds } from "../../../../i18n/list-data-kinds";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../../i18n/use-translate";
-import type { TraceRecord } from "../../../../types/trace-schemas";
-import { listKinds } from "../../HealthSharingNotice/health-notice-copy";
+import type { TraceRecord, TraceSent } from "../../../../types/trace-schemas";
 import { TraceCost } from "./TraceCost";
 
 const Row = (props: { label: string; children: React.ReactNode }) => (
@@ -16,8 +12,14 @@ const Row = (props: { label: string; children: React.ReactNode }) => (
   </div>
 );
 
-const nameOf = (to: string): string =>
-  DESTINATIONS[to as DestinationId]?.name ?? to;
+type Translate = ReturnType<typeof useTranslate>;
+
+const sentLine = (s: TraceSent, t: Translate, tf: Translate, locale: string) =>
+  t(s.declared ? "traces.sentDeclared" : "traces.sentLine", {
+    provider: DESTINATIONS[s.to].name,
+    kinds: listKinds(s.kinds, tf, locale),
+    declared: listKinds(s.declared ?? [], tf, locale),
+  });
 
 /** Everything one Trace holds, in the athlete's words. */
 export const TraceDetails = ({ trace }: { trace: TraceRecord }) => {
@@ -25,7 +27,9 @@ export const TraceDetails = ({ trace }: { trace: TraceRecord }) => {
   const tf = useTranslate("dataFlows");
   const locale = useActiveLocale();
   const models = trace.cost.map((c) =>
-    [c.provider && nameOf(c.provider), c.modelId].filter(Boolean).join(" ")
+    [c.provider && DESTINATIONS[c.provider].name, c.modelId]
+      .filter(Boolean)
+      .join(" ")
   );
   return (
     <dl className="mt-2 space-y-1 text-sm" data-testid="trace-details">
@@ -59,14 +63,7 @@ export const TraceDetails = ({ trace }: { trace: TraceRecord }) => {
       <Row label={t("traces.sent")}>
         {trace.sent.length === 0
           ? t("traces.sentNothing")
-          : trace.sent
-              .map((s) =>
-                t("traces.sentLine", {
-                  provider: nameOf(s.to),
-                  kinds: listKinds(s.kinds as DataKind[], tf, locale),
-                })
-              )
-              .join("; ")}
+          : trace.sent.map((s) => sentLine(s, t, tf, locale)).join("; ")}
       </Row>
     </dl>
   );

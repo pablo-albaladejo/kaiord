@@ -6,9 +6,9 @@ import {
   type DestinationId,
   DESTINATIONS,
 } from "../../../application/data-flows/destinations";
+import { listKinds } from "../../../i18n/list-data-kinds";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
-import { listKinds } from "../HealthSharingNotice/health-notice-copy";
 import { KeptOnDevice } from "./KeptOnDevice";
 import { ProviderHealthChoice } from "./ProviderHealthChoice";
 

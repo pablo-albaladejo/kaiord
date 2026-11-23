@@ -4,15 +4,15 @@
  * this list, the first-time notice reads a health flow's kinds from it, and
  * `data-flows-coverage.test.ts` fails on a flow the code has and this list
  * does not. Each id is worded under `flows.<id>` in the `dataFlows`
- * dictionary.
- *
- * `withheld` says what a health flow to a Provider does when the athlete
- * says no: it goes without its health data, or it does not go.
+ * dictionary. `withheld` marks a health flow to a Provider: what it does
+ * when the athlete says no (goes without its health data, or does not go).
  */
+import { LLM_PROVIDER_TYPES } from "@kaiord/ai/providers";
+
 import { type DataKind, type HealthDataKind, isHealthKind } from "./data-kinds";
 import { type DestinationId, DESTINATIONS } from "./destinations";
 
-const PROVIDERS = ["anthropic", "openai", "google"] as const;
+const PROVIDERS = LLM_PROVIDER_TYPES;
 const READ_PLATFORMS = [
   "garmin",
   "trainingpeaks",
@@ -73,7 +73,14 @@ export type DataFlowId = keyof typeof DATA_FLOWS;
 export const DATA_FLOW_IDS = Object.keys(DATA_FLOWS) as DataFlowId[];
 
 /** The flows that carry health data to a Provider: the notice's paths. */
-export type HealthFlowId = "assistant" | "generation" | "labImport";
+export type HealthFlowId = {
+  [Id in DataFlowId]: (typeof DATA_FLOWS)[Id] extends { withheld: string }
+    ? Id
+    : never;
+}[DataFlowId];
+
+/** Whether one request may carry the athlete's health data. */
+export type HealthShare = "send" | "withhold";
 
 export const healthKindsOf = (flow: DataFlowId): HealthDataKind[] =>
   (DATA_FLOWS[flow].kinds as readonly DataKind[]).filter(isHealthKind);

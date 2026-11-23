@@ -281,6 +281,7 @@
     },
     "sent": "Sent",
     "sentNothing": "Nothing was sent.",
-    "sentLine": "To {{provider}}: {{kinds}}"
+    "sentLine": "To {{provider}}: {{kinds}}",
+    "sentDeclared": "To {{provider}}: {{kinds}}; it may also have carried {{declared}}, which Kaiord cannot count"
   }
 }
