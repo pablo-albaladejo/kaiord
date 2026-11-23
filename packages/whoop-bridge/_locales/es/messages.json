@@ -1,0 +1,192 @@
+{
+  "extName": {
+    "message": "Kaiord for WHOOP",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
+  },
+  "extDescription": {
+    "message": "Lleva tu recuperación y sueño de WHOOP al editor de Kaiord con tu sesión abierta de WHOOP, sin app de desarrollador ni contraseñas.",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Comprobando tu sesión…",
+    "description": "Status verdict while the popup probes the session."
+  },
+  "checkingCause": {
+    "message": "Suele tardar menos de un segundo.",
+    "description": "Status cause sentence shown while the probe runs."
+  },
+  "connected": {
+    "message": "Conectado",
+    "description": "Status verdict when a WHOOP session bearer has been captured."
+  },
+  "connectedCause": {
+    "message": "Leyendo tus datos de WHOOP a través de tu sesión abierta.",
+    "description": "Status cause sentence for the connected state."
+  },
+  "connectedCauseAgo": {
+    "message": "Leyendo tus datos de WHOOP a través de tu sesión abierta. Capturada $phrase$.",
+    "description": "Status cause sentence for the connected state, naming when the session token was captured.",
+    "placeholders": {
+      "phrase": {
+        "content": "$1",
+        "example": "3 hours ago"
+      }
+    }
+  },
+  "noTab": {
+    "message": "No hay ninguna pestaña de WHOOP abierta",
+    "description": "Status verdict when a session bearer is held but no app.whoop.com tab is open to run reads in."
+  },
+  "noTabCause": {
+    "message": "Tu sesión sigue guardada, pero Kaiord lee WHOOP desde dentro de una pestaña de app.whoop.com.",
+    "description": "Status cause sentence for the no-tab state."
+  },
+  "keepsImported": {
+    "message": "Todo lo que ya se importó se queda en Kaiord.",
+    "description": "Consequence line: losing the session or the tab deletes nothing that has already arrived."
+  },
+  "resumeOpenTab": {
+    "message": "Abre app.whoop.com y Kaiord vuelve a leer desde esa pestaña — mientras tanto no se pierde nada de lo que hay aquí.",
+    "description": "Consequence line naming what ends the no-tab state."
+  },
+  "readsNeedTab": {
+    "message": "Kaiord lee a través de esa pestaña abierta. Cierra todas las pestañas de app.whoop.com y las lecturas se paran hasta que vuelvas a abrir una.",
+    "description": "Consequence line in the connected state naming what the reads depend on."
+  },
+  "captionFeeds": {
+    "message": "Envía a Kaiord",
+    "description": "Caption above the capability chips."
+  },
+  "captionMissing": {
+    "message": "Lo que le falta a Kaiord",
+    "description": "Caption above the paused-capability chips in the signed-out state."
+  },
+  "typeSleep": {
+    "message": "Sueño",
+    "description": "Capability chip for the Sleep data type imported into Kaiord."
+  },
+  "typeHrv": {
+    "message": "VFC",
+    "description": "Capability chip for the HRV data type imported into Kaiord."
+  },
+  "typeStrain": {
+    "message": "Esfuerzo",
+    "description": "Capability chip for the Strain data type imported into Kaiord."
+  },
+  "typeVitals": {
+    "message": "Constantes vitales",
+    "description": "Capability chip for the Vitals data type imported into Kaiord."
+  },
+  "typeStress": {
+    "message": "Estrés",
+    "description": "Capability chip for the Stress data type imported into Kaiord."
+  },
+  "typeHeartRateSeries": {
+    "message": "Serie de frecuencia cardiaca",
+    "description": "Capability chip for the Heart Rate Series data type imported into Kaiord."
+  },
+  "typeActivity": {
+    "message": "Actividad",
+    "description": "Capability chip for the Activity data type imported into Kaiord."
+  },
+  "moreTypes": {
+    "message": "+$count$ más",
+    "description": "Chip collapsing the data types that do not fit the popup width.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "minuteAgo": {
+    "message": "hace $count$ minuto",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "minutesAgo": {
+    "message": "hace $count$ minutos",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "hourAgo": {
+    "message": "hace $count$ hora",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "hoursAgo": {
+    "message": "hace $count$ horas",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "dayAgo": {
+    "message": "hace $count$ día",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "daysAgo": {
+    "message": "hace $count$ días",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "openEditor": {
+    "message": "Abrir el editor de Kaiord",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "openWhoop": {
+    "message": "Abrir WHOOP ↗",
+    "description": "Secondary footer link opening app.whoop.com in a new tab."
+  },
+  "refresh": {
+    "message": "Actualizar",
+    "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Desde el $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  },
+  "notChecked": {
+    "message": "Todavía sin comprobar",
+    "description": "Status verdict when no WHOOP bearer has been captured since the service worker started: nothing was learned, so no notice."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord sabe si WHOOP funciona la primera vez que una pestaña de app.whoop.com envía una petición.",
+    "description": "Status cause sentence for the not-checked state."
+  }
+}

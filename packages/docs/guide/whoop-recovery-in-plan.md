@@ -12,14 +12,14 @@ keep the session, swap it or make it easier.
 _Leer en español: [La recuperación de WHOOP en tu plan de entrenamiento](/es/guide/whoop-recovery-in-plan)._
 
 ::: warning Early access
-The Kaiord WHOOP Bridge extension is **not yet published** on the Chrome Web
+Kaiord for WHOOP is **not yet published** on the Chrome Web
 Store. Today it can only be loaded unpacked from the
 [source repository](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/whoop-bridge).
 :::
 
 ## How the data gets in
 
-The WHOOP Bridge is a read-only Chrome extension. It uses the session you
+Kaiord for WHOOP is a read-only Chrome extension. It uses the session you
 already have open on `app.whoop.com`: there is no WHOOP developer account, no
 OAuth app, and you never give Kaiord your WHOOP password. With the extension
 installed, the Kaiord app syncs when you open the calendar, and on demand from

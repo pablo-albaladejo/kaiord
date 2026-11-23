@@ -79,10 +79,6 @@ const KAIORD_CONNECTION_NOTICES = (() => {
     }),
   });
 
-  // The extensions are English-only until R-BridgeLocalesEnglishOnly is lifted
-  // (#1646); the App passes its own locale.
-  const EXTENSION_LOCALE = "en";
-
   const fill = (template, platform) =>
     template.split("{platform}").join(String(platform));
 
@@ -106,7 +102,6 @@ const KAIORD_CONNECTION_NOTICES = (() => {
     FIXES,
     FIX_FOR_STATE,
     WORDING,
-    EXTENSION_LOCALE,
     fixFor,
     noticeFor,
   });

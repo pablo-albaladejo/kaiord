@@ -1,7 +1,7 @@
 {
   "extName": {
-    "message": "Kaiord Garmin Bridge",
-    "description": "Extension name shown in the Chrome Web Store and toolbar."
+    "message": "Kaiord for Garmin",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
   },
   "extDescription": {
     "message": "Lets the Kaiord App send workouts to Garmin Connect and read your activities, using your own Garmin sign-in",

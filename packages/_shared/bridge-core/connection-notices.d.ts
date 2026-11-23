@@ -26,7 +26,6 @@ declare const KAIORD_CONNECTION_NOTICES: {
   readonly WORDING: Readonly<
     Record<NoticeLocale, Readonly<Record<ConnectionFix, NoticeWording>>>
   >;
-  readonly EXTENSION_LOCALE: NoticeLocale;
   readonly fixFor: (state: string) => ConnectionFix | null;
   readonly noticeFor: (
     state: string,

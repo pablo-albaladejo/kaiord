@@ -24,12 +24,14 @@ verbatim; parsing lives in `@kaiord/tanita`, called SPA-side.
 
 ### Public texts
 
-`store-listing.md` (Short and Detailed Description), `privacy-justification.md`,
-`extDescription` in `_locales/en/messages.json` and the "Kaiord for Tanita
+`store-listing.md` (Short and Detailed Description, English and Spanish),
+`privacy-justification.md`, `extDescription` in `_locales/en/messages.json`
+and `_locales/es/messages.json`, and the "Kaiord for Tanita
 Extension" section of `packages/docs/legal/privacy-policy.md` are a registered
 claims surface: every sentence is an entry in `claims/tanita.json` with its
-proof (`pnpm lint:claims`, see `claims/README.md`). Athlete-facing prose says
-"Kaiord for Tanita"; the extension's own name is unchanged.
+proof (`pnpm lint:claims`, see `claims/README.md`). The extension is named
+"Kaiord for Tanita" in both languages, and no athlete-facing text says "bridge"
+(`pnpm lint:retired-terms`).
 `test/export-confinement.test.js` proves the listing's promises at the message
 contract: requests go only to the export (a GET or a HEAD), a session check is
 one HEAD that reads no body and answers only the typed outcome (`signed-out`
@@ -60,4 +62,6 @@ never in the master. Identity values in `bridge-identity.js` must match
 - The session cookie is never read, stored, or logged; a Session check is a
   `HEAD` of the export and answers only `{ session, authenticated }`. It
   never downloads the export (#1643, spec: bridge-core).
-- English-only: `_locales/en/` is the sole locale (hard constraint).
+- English and Spanish: `_locales/en/` (default) and `_locales/es/`, same keys,
+  chosen by the browser's UI language; the name is "Kaiord for Tanita" in both
+  (R-BridgeLocalesEnglishSpanish, `scripts/check-bridge-locales-en-es.test.mjs`).

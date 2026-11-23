@@ -8,7 +8,7 @@ proves it, and `pnpm lint:claims` fails on any sentence that is not. See
 
 ## Extension Name
 
-Kaiord Garmin Bridge
+Kaiord for Garmin
 
 ## Short Description (132 chars max)
 
@@ -41,10 +41,41 @@ Your tokens and your data:
 • Access through your own Garmin sign-in is unofficial: it is not a Garmin partner API, and it can stop working without notice.
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
+## Short Description, Spanish (132 chars max)
+
+Permite que Kaiord App envíe entrenamientos a Garmin Connect y lea tus actividades, con tu propio inicio de sesión de Garmin
+
+## Detailed Description, Spanish
+
+Kaiord for Garmin conecta Kaiord App (https://kaiord.com/app) con tu cuenta de Garmin Connect. Inicias sesión en Garmin Connect en Chrome como siempre; la extensión nunca ve tu contraseña.
+
+Qué hace:
+
+• Envía los entrenamientos que creas en Kaiord App a tu biblioteca de entrenamientos de Garmin Connect.
+• Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú, y nunca borra un entrenamiento de la biblioteca.
+• Lee tus 20 actividades más recientes de Garmin Connect para Kaiord App.
+• Sube una medición de composición corporal (tu peso y los valores relacionados) a Garmin Connect cuando envías una desde Kaiord App.
+• Muestra en su ventana emergente si ahora mismo puede leer de Garmin Connect.
+
+Cómo funciona:
+
+1. Inicia sesión en Garmin Connect en Chrome.
+2. La extensión cambia ese inicio de sesión por tokens de acceso de Garmin. No se introduce ni se ve ninguna contraseña.
+3. Abre Kaiord App y envía un entrenamiento.
+
+Tus tokens y tus datos:
+
+• Los tokens de Garmin se guardan en tu navegador (chrome.storage.local) y solo se envían a Garmin. Nunca viajan a Kaiord.
+• La extensión solo envía peticiones a Garmin, y solo responde a Kaiord App en https://kaiord.com.
+• Sin analítica y sin rastreo. La extensión guarda en tu navegador un breve registro de sus propios errores y no lo envía a ningún sitio.
+• Quitar la extensión de Chrome borra todo lo que guardó.
+• El acceso a través de tu propio inicio de sesión de Garmin no es oficial: no es una API de socio de Garmin, y puede dejar de funcionar sin aviso.
+• Código abierto: https://github.com/pablo-albaladejo/kaiord
+
 ## Metadata
 
 - **Category**: Productivity
-- **Language**: English
+- **Languages**: English and Spanish (`_locales/en` is the default; the store and Chrome pick the locale from the browser language)
 - **Publisher**: Pablo Albaladejo
 - **Privacy policy URL**: https://kaiord.com/docs/legal/privacy-policy
 - **Website**: https://kaiord.com
@@ -69,10 +100,12 @@ After initial setup, updates are published automatically via GitHub Actions:
 2. Merge to main — changesets creates a "Version Packages" PR
 3. Merge the Version Packages PR — `cws-publish.yml` detects the version bump and uploads to CWS
 
-The workflow uploads the package only. The Short Description reaches the store
-through `extDescription` in `_locales/en/messages.json`; the Detailed
-Description and the permission justifications are pasted into the CWS
-dashboard by hand.
+The workflow uploads the package only. The name and the Short Description reach the store through `extName` and
+`extDescription` in `_locales/en/messages.json` and
+`_locales/es/messages.json`. The name is "Kaiord for Garmin" in both: it is
+the product name and is not translated. The Detailed Description (English
+and Spanish, one per store language) and the permission justifications are
+pasted into the CWS dashboard by hand.
 
 See `docs/cws-credentials-setup.md` for the one-time CWS API credentials setup.
 

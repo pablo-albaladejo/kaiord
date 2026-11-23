@@ -40,7 +40,7 @@
  * popup.js fetch sites and asserts only relative paths.
  */
 
-/* global msg, $, withTimeout, relativeAgo, formatSinceDate, recordProbe,
+/* global msg, $, uiLocale, localizePage, withTimeout, relativeAgo, formatSinceDate, recordProbe,
    renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderNotice,
    renderAthleteCard, KAIORD_CONNECTION_NOTICES */
 
@@ -54,6 +54,7 @@ const PLATFORM = "Garmin";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
+  extName: "Kaiord for Garmin",
   checking: "Checking your session…",
   checkingCause: "Usually under a second.",
   connected: "Connected",
@@ -202,7 +203,7 @@ const renderBroken = (state, since = null) => {
   const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
     state,
     PLATFORM,
-    KAIORD_CONNECTION_NOTICES.EXTENSION_LOCALE
+    uiLocale()
   );
   setMarkEstablished(since !== null);
   renderNotice($, notice, {
@@ -302,6 +303,6 @@ const loadPopupData = async () => {
 $("refresh-btn").addEventListener("click", () => loadPopupData());
 
 window.addEventListener("DOMContentLoaded", () => {
-  $("refresh-btn").setAttribute("aria-label", msg("refresh"));
+  localizePage();
   loadPopupData();
 });

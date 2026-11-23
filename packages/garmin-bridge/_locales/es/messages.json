@@ -1,0 +1,196 @@
+{
+  "extName": {
+    "message": "Kaiord for Garmin",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
+  },
+  "extDescription": {
+    "message": "Permite que Kaiord App envíe entrenamientos a Garmin Connect y lea tus actividades, con tu propio inicio de sesión de Garmin",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Comprobando tu sesión…",
+    "description": "Status verdict while the popup probes the connection."
+  },
+  "checkingCause": {
+    "message": "Suele tardar menos de un segundo.",
+    "description": "Status cause sentence shown while the probe runs."
+  },
+  "connected": {
+    "message": "Conectado",
+    "description": "Status verdict when the bridge is connected."
+  },
+  "connectedCause": {
+    "message": "Leyendo tus datos de Garmin Connect con un acceso que Kaiord obtuvo de un inicio de sesión anterior.",
+    "description": "Status cause sentence for the connected state. Names the minted access rather than a live session: the bridge holds OAuth tokens, not a browser session."
+  },
+  "notChecked": {
+    "message": "Todavía sin comprobar",
+    "description": "Status verdict when no still-valid access is held: the check asks Garmin nothing, because refreshing or minting access would issue a credential."
+  },
+  "notCheckedCause": {
+    "message": "Kaiord pregunta a Garmin Connect la primera vez que lee o envía, así que mirar aquí no genera ningún acceso.",
+    "description": "Status cause sentence for the not-checked state."
+  },
+  "captionFeeds": {
+    "message": "Envía a Kaiord",
+    "description": "Caption above the capability chips."
+  },
+  "typeActivity": {
+    "message": "Actividad",
+    "description": "Capability chip for the Activity data type imported into Kaiord."
+  },
+  "typeWorkoutBack": {
+    "message": "Entrenamiento ↑ a Garmin",
+    "description": "Capability chip for the Workout data type Kaiord pushes to Garmin Connect."
+  },
+  "typeBodyCompositionBack": {
+    "message": "Composición corporal ↑ a Garmin",
+    "description": "Capability chip for the Body Composition data type Kaiord pushes to Garmin Connect."
+  },
+  "profileStale": {
+    "message": "Los datos del perfil son antiguos. Abre Kaiord para traer los últimos.",
+    "description": "Athlete-card placeholder when the cached snapshot is stale."
+  },
+  "noProfile": {
+    "message": "Todavía no hay perfil. Abre Kaiord para configurar FTP, ritmo y FC.",
+    "description": "Athlete-card placeholder when no snapshot exists."
+  },
+  "noThresholds": {
+    "message": "El perfil todavía no tiene umbrales. Abre Kaiord para configurar FTP, ritmo y FC.",
+    "description": "Athlete-card placeholder when the snapshot has no threshold fields."
+  },
+  "labelSport": {
+    "message": "Deporte",
+    "description": "Athlete-card field label for the active sport."
+  },
+  "labelPace": {
+    "message": "Ritmo",
+    "description": "Athlete-card field label for threshold running pace."
+  },
+  "labelMaxHr": {
+    "message": "FC máx.",
+    "description": "Athlete-card field label for maximum heart rate."
+  },
+  "labelWeight": {
+    "message": "Peso",
+    "description": "Athlete-card field label for body weight."
+  },
+  "workoutLibrary": {
+    "message": "Biblioteca de entrenamientos · $count$ entrenamientos",
+    "description": "Rollup line showing the total number of stored workouts.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "47"
+      }
+    }
+  },
+  "lastPush": {
+    "message": "Último envío",
+    "description": "Rollup line prefix for the most recent workout push."
+  },
+  "captionSync": {
+    "message": "Sincronización",
+    "description": "Caption above the sync rollup section."
+  },
+  "updatedAgo": {
+    "message": "Actualizado $phrase$",
+    "description": "Athlete-card freshness line, e.g. 'Updated 10 minutes ago'.",
+    "placeholders": {
+      "phrase": {
+        "content": "$1",
+        "example": "10 minutes ago"
+      }
+    }
+  },
+  "updatedJustNow": {
+    "message": "Actualizado ahora mismo",
+    "description": "Athlete-card freshness line for a very recent update."
+  },
+  "momentsAgo": {
+    "message": "hace unos instantes",
+    "description": "Relative time used in the last-push rollup line."
+  },
+  "minuteAgo": {
+    "message": "hace $count$ minuto",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "minutesAgo": {
+    "message": "hace $count$ minutos",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "hourAgo": {
+    "message": "hace $count$ hora",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "hoursAgo": {
+    "message": "hace $count$ horas",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "dayAgo": {
+    "message": "hace $count$ día",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "daysAgo": {
+    "message": "hace $count$ días",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "openEditor": {
+    "message": "Abrir el editor de Kaiord",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "openGarmin": {
+    "message": "Abrir Garmin Connect ↗",
+    "description": "Secondary footer link opening Garmin Connect."
+  },
+  "refresh": {
+    "message": "Actualizar",
+    "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Desde el $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  }
+}

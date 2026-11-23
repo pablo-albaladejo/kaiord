@@ -5,8 +5,17 @@
       "keys": ["extDescription"]
     },
     {
+      "file": "packages/train2go-bridge/_locales/es/messages.json",
+      "keys": ["extDescription"]
+    },
+    {
       "file": "packages/train2go-bridge/store-listing.md",
-      "sections": ["Short Description (132 chars max)", "Detailed Description"]
+      "sections": [
+        "Short Description (132 chars max)",
+        "Detailed Description",
+        "Short Description, Spanish (132 chars max)",
+        "Detailed Description, Spanish"
+      ]
     },
     {
       "file": "packages/train2go-bridge/privacy-justification.md"
@@ -813,11 +822,11 @@
     },
     {
       "id": "train2go.pp.intro",
-      "text": "Kaiord for Train2Go is the Chrome extension that lets the Kaiord App read your Train2Go coaching plan; its Chrome Web Store name is currently Kaiord Train2Go Bridge. Here is how it handles data:",
+      "text": "Kaiord for Train2Go is the Chrome extension that lets the Kaiord App read your Train2Go coaching plan. Here is how it handles data:",
       "proof": [
         {
           "file": "packages/train2go-bridge/_locales/en/messages.json",
-          "contains": "\"message\": \"Kaiord Train2Go Bridge\""
+          "contains": "\"message\": \"Kaiord for Train2Go\""
         },
         {
           "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
@@ -1064,6 +1073,356 @@
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
           "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.short",
+      "text": "Permite que Kaiord App lea el plan de tu entrenador en Train2Go, tus zonas y tu peso, con tu propio inicio de sesión de Train2Go",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "train2go.es.listing.intro",
+      "text": "Kaiord for Train2Go conecta Kaiord App (https://kaiord.com/app) con tu cuenta de Train2Go. Inicias sesión en Train2Go en Chrome como siempre; la extensión nunca ve tu contraseña.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.label-what",
+      "text": "Qué hace:",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.es.listing.week",
+      "text": "Pide a Train2Go la semana que tu entrenador planificó cuando Kaiord App lo solicita, y Kaiord App lee de ella la fecha, el deporte, el título, la duración, la carga y el estado de cada actividad de entrenamiento.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should read the week your coach planned from Train2Go's raw answer"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "contains": "path: weeklyPath(date, externalUserId),"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.day",
+      "text": "Pide un día completo cuando Kaiord App lo solicita, y Kaiord App lee de él la descripción que hace tu entrenador de cada sesión, y los comentarios de ese día con quién los escribió.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should return the day's comment thread alongside its activities"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should backfill the date param onto every activity read from a day"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "contains": "path: weeklyPath(date, externalUserId),"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.zones",
+      "text": "Pide tu página de perfil de Train2Go cuando Kaiord App lo solicita, y Kaiord App guarda de ella solo tus zonas de frecuencia cardiaca, potencia y ritmo por deporte, tu frecuencia cardiaca máxima y en reposo, y tu peso. El resto de esa página (género, cumpleaños, grasa corporal, altura, datos de contacto, marcas y tests) llega a Kaiord App en tu navegador y se descarta allí al leer la página.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
+          "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/parse-details-html.test.ts",
+          "title": "should redact forbidden fields recursively at any nesting depth"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.raw",
+      "text": "Entrega a Kaiord App lo que responde Train2Go, tal como llegó, y solo hace las peticiones de su lista fija de direcciones de Train2Go de solo lectura. Rechaza cualquier otra petición sin enviarla.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the Kaiord App Train2Go's answer as it came, without reading it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse any path outside its closed list without sending a request"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should refuse a request with headers or a body without sending it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/thin-bridge.test.js",
+          "title": "should list only GET rules"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.who",
+      "text": "Comprobar la conexión solo le dice a Kaiord App si tienes la sesión iniciada. Cuando conectas Train2Go, Kaiord App lee quién tiene la sesión iniciada en la respuesta de Train2Go, que también contiene el nombre de tu entrenador y las notas que tu entrenador guarda sobre ti cuando Train2Go las da, y guarda solo tu id y tu nombre.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should hand the athlete's profile, with the coach's name and notes, only to its own popup's explicit read"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should answer a connection check with one ping of Train2Go and only yes or no"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.test.ts",
+          "title": "should link from Train2Go's profile ping read through the thin Bridge, never from the yes-or-no ping"
+        },
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "extracts coachName from data.user.coach.name when present"
+        },
+        {
+          "test": "packages/train2go-bridge/test/parser.test.js",
+          "title": "extracts notes from data.user.user_notes (HTML stripped to text)"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.popup",
+      "text": "Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "renders connected state with athlete card and weekly rollup"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "renders coach notes inside a collapsible <details> when ping carries notes"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "offers Try again, not a sign-in, when the check cannot tell why"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.read-only",
+      "text": "Solo lee. Nunca cambia nada en Train2Go.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send only GET requests, so nothing on Train2Go is changed"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should deny disallowed paths, non-GET methods, and injection attempts"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.label-how",
+      "text": "Cómo funciona:",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.es.listing.step-sign-in",
+      "text": "Inicia sesión en Train2Go en Chrome.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.step-request",
+      "text": "Cuando Kaiord App lo solicita, la extensión pide la página a Train2Go y Chrome añade tu propia cookie de inicio de sesión de Train2Go. La extensión no puede leer esa cookie.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        },
+        {
+          "endpoint": "https://fetch.spec.whatwg.org/#forbidden-response-header-name"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.step-open",
+      "text": "Abre Kaiord App; lee tu plan a través de la extensión.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "contains": "path: weeklyPath(date, externalUserId),"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "contains": "path: DETAILS_PATH,"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.label-data",
+      "text": "Tu sesión y tus datos:",
+      "kind": "label"
+    },
+    {
+      "id": "train2go.es.listing.stored",
+      "text": "La extensión no guarda ninguna contraseña, cookie ni token. Solo guarda en tu navegador (chrome.storage.local) lo que muestra su ventana emergente: el resumen del perfil que envía Kaiord App, los totales de esta semana, la preferencia de tema de la app, cuándo pudo y cuándo no pudo leer de Train2Go por última vez, y un registro de sus últimos 25 errores.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should store only its popup state in chrome.storage.local, never a credential"
+        },
+        {
+          "test": "packages/train2go-bridge/test/profile-snapshot.test.js",
+          "title": "writes lastPushReceipt atomically with the snapshot"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "falls back to read-week when cache is stale"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-theme.test.js",
+          "title": "should write a valid preference to chrome.storage.local"
+        },
+        {
+          "test": "packages/train2go-bridge/test/popup.test.js",
+          "title": "dates the outage once an earlier open already recorded it"
+        },
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.hosts",
+      "text": "La extensión solo envía peticiones a app.train2go.com, y solo responde a Kaiord App en https://kaiord.com.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"host_permissions\": [\"https://app.train2go.com/*\"]"
+        },
+        {
+          "file": "packages/train2go-bridge/manifest.prod.json",
+          "contains": "\"externally_connectable\": {\n    \"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-envelope.test.js",
+          "title": "should reject foreign origins and other localhost ports"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.app-only",
+      "text": "Lo que lee va solo a Kaiord App en tu navegador; la extensión no envía nada a un servidor de Kaiord.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.no-analytics",
+      "text": "Sin analítica y sin rastreo. La extensión guarda en tu navegador un breve registro de sus propios errores y no lo envía a ningún sitio.",
+      "proof": [
+        {
+          "test": "packages/train2go-bridge/test/background.test.js",
+          "title": "should cap the log to the most recent 25 entries"
+        },
+        {
+          "test": "packages/train2go-bridge/test/request-confinement.test.js",
+          "title": "should send every request to app.train2go.com with the browser's own cookies and no other credential"
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.uninstall",
+      "text": "Quitar la extensión de Chrome borra todo lo que guardó.",
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
+    },
+    {
+      "id": "train2go.es.listing.unofficial",
+      "text": "El acceso a través de tu propio inicio de sesión de Train2Go no es oficial: no es una API de socio de Train2Go, y puede dejar de funcionar sin aviso.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "access is unofficial, can break without notice"
+        },
+        {
+          "file": "packages/train2go-bridge/session-fetch.js",
+          "contains": "credentials: \"include\""
+        }
+      ]
+    },
+    {
+      "id": "train2go.es.listing.open-source",
+      "text": "Código abierto: https://github.com/pablo-albaladejo/kaiord",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     }

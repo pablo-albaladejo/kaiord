@@ -30,6 +30,28 @@ const msg = (key, subs) =>
 
 const $ = (id) => document.getElementById(id);
 
+// The catalog Chrome renders follows the browser's UI language and falls back
+// to `en`; the extensions ship `en` and `es` (R-BridgeLocalesEnglishSpanish).
+// The Connection notice and the outage date follow the same choice, so one
+// popup never mixes two languages.
+const uiLocale = () => {
+  const language = globalThis.chrome?.i18n?.getUILanguage?.() ?? "";
+  return /^es(?:[-_]|$)/i.test(language) ? "es" : "en";
+};
+
+// popup.html carries no words: each element that shows text names its message
+// with `data-i18n` (text) or `data-i18n-aria-label`, filled here before the
+// first render.
+const localizePage = () => {
+  for (const el of document.querySelectorAll("[data-i18n]")) {
+    el.textContent = msg(el.dataset.i18n);
+  }
+  for (const el of document.querySelectorAll("[data-i18n-aria-label]")) {
+    el.setAttribute("aria-label", msg(el.dataset.i18nAriaLabel));
+  }
+  document.documentElement.lang = uiLocale();
+};
+
 const withTimeout = (promise, ms, label) =>
   Promise.race([
     promise,
@@ -53,11 +75,10 @@ const relativeAgo = (epochMs) => {
   return msg(day === 1 ? "dayAgo" : "daysAgo", [String(day)]);
 };
 
-// The absolute date an outage started, as "23 Jul" — the form the popup's
-// outage copy uses. Pinned to en-GB rather than the browser locale because the
-// bridges are English-only by rule (R-BridgeLocalesEnglishOnly): with an
-// undefined locale a US-configured Chrome would render "Jul 23" into copy the
-// rest of which is written day-first.
+// The absolute date an outage started, as "23 Jul" ("23 jul" in Spanish) —
+// the form the popup's outage copy uses. English is pinned to en-GB rather
+// than the browser's region: with an undefined locale a US-configured Chrome
+// would render "Jul 23" into copy the rest of which is written day-first.
 //
 // The year is appended only when the outage did not start in the current one,
 // so the common case stays short and a stale one cannot read as recent.
@@ -65,7 +86,7 @@ const formatSinceDate = (epochMs, now = Date.now()) => {
   const date = new Date(epochMs);
   if (Number.isNaN(date.getTime())) return null;
   const sameYear = date.getFullYear() === new Date(now).getFullYear();
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat(uiLocale() === "es" ? "es-ES" : "en-GB", {
     day: "numeric",
     month: "short",
     ...(sameYear ? {} : { year: "numeric" }),
@@ -100,5 +121,7 @@ if (typeof module !== "undefined") {
     relativeAgo,
     formatSinceDate,
     renderRetry,
+    uiLocale,
+    localizePage,
   };
 }

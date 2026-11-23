@@ -8,7 +8,7 @@ proves it, and `pnpm lint:claims` fails on any sentence that is not. See
 
 ## Extension Name
 
-Kaiord Train2Go Bridge
+Kaiord for Train2Go
 
 ## Short Description (132 chars max)
 
@@ -44,14 +44,55 @@ Your session and your data:
 • Access through your own Train2Go sign-in is unofficial: it is not a Train2Go partner API, and it can stop working without notice.
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
+## Short Description, Spanish (132 chars max)
+
+Permite que Kaiord App lea el plan de tu entrenador en Train2Go, tus zonas y tu peso, con tu propio inicio de sesión de Train2Go
+
+## Detailed Description, Spanish
+
+Kaiord for Train2Go conecta Kaiord App (https://kaiord.com/app) con tu cuenta de Train2Go. Inicias sesión en Train2Go en Chrome como siempre; la extensión nunca ve tu contraseña.
+
+Qué hace:
+
+• Pide a Train2Go la semana que tu entrenador planificó cuando Kaiord App lo solicita, y Kaiord App lee de ella la fecha, el deporte, el título, la duración, la carga y el estado de cada actividad de entrenamiento.
+• Pide un día completo cuando Kaiord App lo solicita, y Kaiord App lee de él la descripción que hace tu entrenador de cada sesión, y los comentarios de ese día con quién los escribió.
+• Pide tu página de perfil de Train2Go cuando Kaiord App lo solicita, y Kaiord App guarda de ella solo tus zonas de frecuencia cardiaca, potencia y ritmo por deporte, tu frecuencia cardiaca máxima y en reposo, y tu peso. El resto de esa página (género, cumpleaños, grasa corporal, altura, datos de contacto, marcas y tests) llega a Kaiord App en tu navegador y se descarta allí al leer la página.
+• Entrega a Kaiord App lo que responde Train2Go, tal como llegó, y solo hace las peticiones de su lista fija de direcciones de Train2Go de solo lectura. Rechaza cualquier otra petición sin enviarla.
+• Comprobar la conexión solo le dice a Kaiord App si tienes la sesión iniciada. Cuando conectas Train2Go, Kaiord App lee quién tiene la sesión iniciada en la respuesta de Train2Go, que también contiene el nombre de tu entrenador y las notas que tu entrenador guarda sobre ti cuando Train2Go las da, y guarda solo tu id y tu nombre.
+• Muestra en su ventana emergente si ahora mismo puede leer de Train2Go, el nombre y las notas de tu entrenador, y las sesiones planificadas y completadas y la carga de esta semana.
+• Solo lee. Nunca cambia nada en Train2Go.
+
+Cómo funciona:
+
+1. Inicia sesión en Train2Go en Chrome.
+2. Cuando Kaiord App lo solicita, la extensión pide la página a Train2Go y Chrome añade tu propia cookie de inicio de sesión de Train2Go. La extensión no puede leer esa cookie.
+3. Abre Kaiord App; lee tu plan a través de la extensión.
+
+Tu sesión y tus datos:
+
+• La extensión no guarda ninguna contraseña, cookie ni token. Solo guarda en tu navegador (chrome.storage.local) lo que muestra su ventana emergente: el resumen del perfil que envía Kaiord App, los totales de esta semana, la preferencia de tema de la app, cuándo pudo y cuándo no pudo leer de Train2Go por última vez, y un registro de sus últimos 25 errores.
+• La extensión solo envía peticiones a app.train2go.com, y solo responde a Kaiord App en https://kaiord.com.
+• Lo que lee va solo a Kaiord App en tu navegador; la extensión no envía nada a un servidor de Kaiord.
+• Sin analítica y sin rastreo. La extensión guarda en tu navegador un breve registro de sus propios errores y no lo envía a ningún sitio.
+• Quitar la extensión de Chrome borra todo lo que guardó.
+• El acceso a través de tu propio inicio de sesión de Train2Go no es oficial: no es una API de socio de Train2Go, y puede dejar de funcionar sin aviso.
+• Código abierto: https://github.com/pablo-albaladejo/kaiord
+
 ## Metadata
 
 - **Category**: Productivity
-- **Language**: English
+- **Languages**: English and Spanish (`_locales/en` is the default; the store and Chrome pick the locale from the browser language)
 - **Publisher**: Pablo Albaladejo
 - **Privacy policy URL**: https://kaiord.com/docs/legal/privacy-policy
 - **Website**: https://kaiord.com
 - **Support URL**: https://github.com/pablo-albaladejo/kaiord/issues
+
+The name and the Short Description reach the store through `extName` and
+`extDescription` in `_locales/en/messages.json` and
+`_locales/es/messages.json`. The name is "Kaiord for Train2Go" in both: it is
+the product name and is not translated. The Detailed Description (English
+and Spanish, one per store language) and the permission justifications are
+pasted into the dashboard by hand.
 
 ## Submission Checklist (Initial Setup)
 

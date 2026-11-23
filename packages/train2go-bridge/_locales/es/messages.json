@@ -1,0 +1,206 @@
+{
+  "extName": {
+    "message": "Kaiord for Train2Go",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
+  },
+  "extDescription": {
+    "message": "Permite que Kaiord App lea el plan de tu entrenador en Train2Go, tus zonas y tu peso, con tu propio inicio de sesión de Train2Go",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Comprobando tu sesión…",
+    "description": "Status verdict while the popup probes the connection."
+  },
+  "checkingCause": {
+    "message": "Suele tardar menos de un segundo.",
+    "description": "Status cause sentence shown while the probe runs."
+  },
+  "connected": {
+    "message": "Conectado",
+    "description": "Status verdict when connected but no user name is available."
+  },
+  "connectedAs": {
+    "message": "Conectado como $name$",
+    "description": "Status verdict when connected, naming the signed-in user.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Pablo"
+      }
+    }
+  },
+  "coachSub": {
+    "message": "Entrenador · $name$",
+    "description": "Status cause line naming the athlete's coach.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Aritz Mardaras"
+      }
+    }
+  },
+  "captionFeeds": {
+    "message": "Envía a Kaiord",
+    "description": "Caption above the capability chips."
+  },
+  "typePlannedSession": {
+    "message": "Sesión planificada",
+    "description": "Capability chip for the Planned Session data type imported into Kaiord."
+  },
+  "typeTrainingZones": {
+    "message": "Zonas de entrenamiento",
+    "description": "Capability chip for the Training Zones data type imported into Kaiord."
+  },
+  "typeWeight": {
+    "message": "Peso",
+    "description": "Capability chip for the Weight data type imported into Kaiord."
+  },
+  "profileStale": {
+    "message": "Los datos del perfil son antiguos. Abre Kaiord para traer los últimos.",
+    "description": "Athlete-card placeholder when the cached snapshot is stale."
+  },
+  "noProfile": {
+    "message": "Todavía no hay perfil. Abre Kaiord para configurar FTP, ritmo y FC.",
+    "description": "Athlete-card placeholder when no snapshot exists."
+  },
+  "noThresholds": {
+    "message": "El perfil todavía no tiene umbrales. Abre Kaiord para configurar FTP, ritmo y FC.",
+    "description": "Athlete-card placeholder when the snapshot has no threshold fields."
+  },
+  "labelSport": {
+    "message": "Deporte",
+    "description": "Athlete-card field label for the active sport."
+  },
+  "labelPace": {
+    "message": "Ritmo",
+    "description": "Athlete-card field label for threshold running pace."
+  },
+  "labelMaxHr": {
+    "message": "FC máx.",
+    "description": "Athlete-card field label for maximum heart rate."
+  },
+  "labelWeight": {
+    "message": "Peso",
+    "description": "Athlete-card field label for body weight."
+  },
+  "captionThisWeek": {
+    "message": "Esta semana",
+    "description": "Caption above the weekly rollup section."
+  },
+  "weekPlanned": {
+    "message": "planificadas",
+    "description": "Label under the weekly count of planned sessions. Lower-case: it sits beneath its figure rather than starting a sentence."
+  },
+  "weekDone": {
+    "message": "hechas",
+    "description": "Label under the weekly count of completed sessions."
+  },
+  "weekWorkload": {
+    "message": "carga",
+    "description": "Label under the weekly workload total."
+  },
+  "rollupUnavailable": {
+    "message": "Resumen no disponible — inténtalo de nuevo",
+    "description": "Weekly rollup fallback when the week read fails."
+  },
+  "coachNotes": {
+    "message": "Notas del entrenador",
+    "description": "Summary label of the collapsible coach-notes box."
+  },
+  "updatedAgo": {
+    "message": "Actualizado $phrase$",
+    "description": "Athlete-card freshness line, e.g. 'Updated 10 minutes ago'.",
+    "placeholders": {
+      "phrase": {
+        "content": "$1",
+        "example": "10 minutes ago"
+      }
+    }
+  },
+  "updatedJustNow": {
+    "message": "Actualizado ahora mismo",
+    "description": "Athlete-card freshness line for a very recent update."
+  },
+  "minuteAgo": {
+    "message": "hace $count$ minuto",
+    "description": "Relative time, singular minutes.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "minutesAgo": {
+    "message": "hace $count$ minutos",
+    "description": "Relative time, plural minutes.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "hourAgo": {
+    "message": "hace $count$ hora",
+    "description": "Relative time, singular hours.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "hoursAgo": {
+    "message": "hace $count$ horas",
+    "description": "Relative time, plural hours.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "dayAgo": {
+    "message": "hace $count$ día",
+    "description": "Relative time, singular days.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "daysAgo": {
+    "message": "hace $count$ días",
+    "description": "Relative time, plural days.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "openEditor": {
+    "message": "Abrir el editor de Kaiord",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "openTrain2go": {
+    "message": "Abrir Train2Go ↗",
+    "description": "Secondary footer link opening Train2Go."
+  },
+  "refresh": {
+    "message": "Actualizar",
+    "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Desde el $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  }
+}

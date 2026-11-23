@@ -68,7 +68,9 @@ match `BRIDGE_MANIFEST` in `background.js`.
   the minted access token. A Session check never mints it (#1643).
 - Weight-unit assumption: the type-9 metric value is kilograms (see
   `@kaiord/trainingpeaks` `TRAININGPEAKS_WEIGHT_UNITS`).
-- English-only: `_locales/en/` is the sole locale (hard constraint).
+- English and Spanish: `_locales/en/` (default) and `_locales/es/`, same keys,
+  chosen by the browser's UI language; the name is "Kaiord for TrainingPeaks" in both
+  (R-BridgeLocalesEnglishSpanish, `scripts/check-bridge-locales-en-es.test.mjs`).
 - Changing what the extension does (a new path, action or stored key) changes
   the registered texts: rewrite the sentence and its entry in
   `claims/trainingpeaks.json`, or `pnpm lint:claims` and

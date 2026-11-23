@@ -1,0 +1,64 @@
+{
+  "extName": {
+    "message": "Kaiord for Tanita",
+    "description": "Extension name shown in the Chrome Web Store, the toolbar and the popup header. The product name: never translated."
+  },
+  "extDescription": {
+    "message": "Permite que Kaiord App importe tu peso y tu composición corporal de MyTANITA, con tu propio inicio de sesión de MyTANITA",
+    "description": "Extension description shown in the Chrome Web Store."
+  },
+  "checking": {
+    "message": "Comprobando tu sesión…",
+    "description": "Status verdict while the popup probes the session."
+  },
+  "checkingCause": {
+    "message": "Suele tardar menos de un segundo.",
+    "description": "Status cause sentence shown while the probe runs."
+  },
+  "connected": {
+    "message": "Conectado",
+    "description": "Status verdict when the MyTANITA session can reach the export."
+  },
+  "connectedCause": {
+    "message": "Leyendo tu exportación de composición corporal a través de tu sesión.",
+    "description": "Status cause sentence for the connected state."
+  },
+  "captionFeeds": {
+    "message": "Envía a Kaiord",
+    "description": "Caption above the capability chips in the connected state."
+  },
+  "captionWillFeed": {
+    "message": "Enviará a Kaiord",
+    "description": "Caption above the capability chips before the bridge is connected."
+  },
+  "typeWeight": {
+    "message": "Peso",
+    "description": "Capability chip for the Weight data type imported into Kaiord."
+  },
+  "typeBodyComposition": {
+    "message": "Composición corporal",
+    "description": "Capability chip for the Body Composition data type imported into Kaiord."
+  },
+  "openEditor": {
+    "message": "Abrir el editor de Kaiord",
+    "description": "Footer link that opens the Kaiord editor."
+  },
+  "openTanita": {
+    "message": "Abrir MyTANITA ↗",
+    "description": "Secondary footer link opening mytanita.eu in a new tab."
+  },
+  "refresh": {
+    "message": "Actualizar",
+    "description": "Accessible label for the header refresh button."
+  },
+  "outageSince": {
+    "message": "Desde el $date$.",
+    "description": "Dates an outage under the Connection notice, once an earlier popup open already recorded it. Claims only when this extension first saw the check fail.",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "23 Jul"
+      }
+    }
+  }
+}

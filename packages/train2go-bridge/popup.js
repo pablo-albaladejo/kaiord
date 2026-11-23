@@ -24,7 +24,7 @@
  * (see popup.html script order).
  */
 
-/* global msg, $, withTimeout, formatSinceDate, recordProbe,
+/* global msg, $, uiLocale, localizePage, withTimeout, formatSinceDate, recordProbe,
    renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderNotice,
    renderAthleteCard, KAIORD_CONNECTION_NOTICES */
 
@@ -41,6 +41,7 @@ const PLATFORM = "Train2Go";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
+  extName: "Kaiord for Train2Go",
   checking: "Checking your session…",
   checkingCause: "Usually under a second.",
   connected: "Connected",
@@ -259,7 +260,7 @@ const renderBroken = (state, since = null) => {
   const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
     state,
     PLATFORM,
-    KAIORD_CONNECTION_NOTICES.EXTENSION_LOCALE
+    uiLocale()
   );
   setMarkEstablished(since !== null);
   renderNotice($, notice, {
@@ -371,6 +372,6 @@ $("refresh-btn").addEventListener("click", () =>
 );
 
 window.addEventListener("DOMContentLoaded", () => {
-  $("refresh-btn").setAttribute("aria-label", msg("refresh"));
+  localizePage();
   loadPopupData();
 });
