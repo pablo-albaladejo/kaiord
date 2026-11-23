@@ -20,6 +20,7 @@ import type { SnapshotPort } from "../../ports/snapshot-port";
 import { isCloudAuthRequired } from "../../types/cloud-auth-required-error";
 import type { Snapshot } from "../../types/snapshot";
 import { isAutoProfile } from "../profile/helpers/claim-profile";
+import { deviceLocalStaysHome } from "./device-local-tables";
 import { dropDeletedProfileRows } from "./drop-deleted-profile-rows";
 import { exportSnapshot } from "./export-snapshot";
 import { importReconciledSnapshot } from "./import-reconciled-snapshot";
@@ -50,9 +51,8 @@ const assertNoAutoProfile = (snapshot: Snapshot): void => {
   const profiles = (snapshot.tables.profiles ?? []) as Array<{
     origin?: unknown;
   }>;
-  if (profiles.some(isAutoProfile)) {
+  if (profiles.some(isAutoProfile))
     throw new Error("invariant: an origin:auto profile reached cloud.push");
-  }
 };
 
 const storedChoice = (local: Snapshot): string | null => {
@@ -62,7 +62,8 @@ const storedChoice = (local: Snapshot): string | null => {
 };
 
 async function attempt(deps: SyncWithCloudDeps): Promise<SyncWithCloudResult> {
-  const { cloud, snapshotPort, deviceId, now } = deps;
+  const { snapshotPort, deviceId, now } = deps;
+  const cloud = deviceLocalStaysHome(deps.cloud);
   const remote = await cloud.pull();
   const local = await exportSnapshot({ port: snapshotPort, deviceId, now });
   const merged: Snapshot = remote

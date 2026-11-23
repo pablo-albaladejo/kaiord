@@ -1,6 +1,8 @@
-import { findModelPrice, periodAt } from "@kaiord/ai/providers";
-
-import type { LlmProviderType } from "../../store/ai-store-types";
+import {
+  findModelPrice,
+  type LlmProviderType,
+  periodAt,
+} from "@kaiord/ai/providers";
 
 /** What a model's cost is computed from, as the athlete is shown it. */
 export type PriceBasis =

@@ -5,7 +5,10 @@
  * key and label) satisfy `ResolvableProvider` structurally.
  */
 
-export type LlmProviderType = "anthropic" | "openai" | "google";
+/** Every Provider the App can call, in the order the App lists them. */
+export const LLM_PROVIDER_TYPES = ["anthropic", "openai", "google"] as const;
+
+export type LlmProviderType = (typeof LLM_PROVIDER_TYPES)[number];
 
 export type ProviderCredential = {
   type: LlmProviderType;

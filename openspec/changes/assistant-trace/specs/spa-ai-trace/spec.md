@@ -22,12 +22,17 @@ The Kaiord App SHALL write exactly one Trace per run of the assistant: a chat tu
 
 ### Requirement: The Trace never leaves the device
 
-The `traces` store SHALL be device-local: left out of the cloud sync snapshot, never written by a snapshot import, and excluded from a backup file and from a backup import.
+The `traces` store SHALL be device-local: left out of the cloud sync snapshot, never written by a snapshot import, and excluded from a backup file and from a backup import. Nothing synced or backed up SHALL name a Trace or be derived from one: the run's telemetry sink SHALL pass each event on without the Trace's id, and the usage log it feeds is device-local as well.
 
 #### Scenario: Not in the sync snapshot nor a backup
 
 - **WHEN** a sync snapshot or a backup file is exported from a device holding Traces
 - **THEN** neither SHALL carry the `traces` table or any Trace
+
+#### Scenario: No Trace id leaves the device
+
+- **WHEN** a run's sink passes an event on to the usage log, and the device then syncs and exports a backup file
+- **THEN** the event SHALL be passed on unchanged, and neither the pushed snapshot nor the file SHALL carry a `traceId`, a `usageEvents` row or a `traces` row
 
 ### Requirement: Traces are kept bounded and the athlete can delete them
 

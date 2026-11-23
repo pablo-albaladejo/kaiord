@@ -17,7 +17,7 @@ import type { KaiordDatabase } from "./dexie-database";
 import { SCHEMAS } from "./dexie-schemas";
 
 const SEED_VERSION = 36;
-const SCHEMA_HEAD = 38;
+const SCHEMA_HEAD = 39;
 
 const ENTRY = {
   id: "i-1",

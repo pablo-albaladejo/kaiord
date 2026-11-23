@@ -3,9 +3,9 @@
  *
  * Two independent jobs, both fail-open (errors are logged, never thrown, so
  * they cannot block app startup):
- *   1. Retention prune of the synced `usageEvents` log — runs EVERY session
- *      (not gated by the once-only flag) so tombstones for events past the
- *      12-month window ride the next sync push and keep the snapshot bounded.
+ *   1. Retention prune of this device's `usageEvents` log — runs EVERY
+ *      session (not gated by the once-only flag) so events past the 12-month
+ *      window go.
  *   2. One-time junk cleanup of untouched coaching template workouts, guarded
  *      by a `meta` flag so it runs at most once per browser profile.
  */
@@ -19,8 +19,7 @@ import { createDexieWorkoutRepository } from "./dexie-workout-repository";
 
 const META_KEY = "junk-cleanup-v1";
 
-// Deletes go through the tombstoning port so a pruned event's removal
-// propagates cross-device. Runs opportunistically; swallows its own errors.
+// Runs opportunistically; swallows its own errors.
 const pruneOldUsageEvents = async (db: KaiordDatabase): Promise<void> => {
   try {
     await pruneUsageEvents(createAppPersistence(db));

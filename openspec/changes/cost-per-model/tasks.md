@@ -31,3 +31,11 @@
 
 - [x] 5.1 `pnpm lint`, `pnpm test:scripts`, `@kaiord/ai` tests, App unit suite, usage and settings E2E, `pnpm lint:claims`
 - [x] 5.2 `openspec validate cost-per-model --strict`
+
+## 6. Review fixes
+
+- [x] 6.1 A cut request (Stop, watchdog, dropped stream) is estimated and labelled; a watchdog timeout is a failed request (`runtime.cut-cost.test.ts`, `run-turn.cut-cost.test.ts`, `price-run.test.ts`, `UsageTab.test.tsx`)
+- [x] 6.2 `usageEvents` device-local, no `traceId`, v39 upgrade (`usage-stays-on-device.test.ts`, `dexie-v39-migration.test.ts`); privacy policy and the kept-on-device inventory say so
+- [x] 6.3 The batch estimate prices each workout as its own request with the system prompt (`use-batch-cost-estimate.test.ts`, Haiku 5.5 at 100K)
+- [x] 6.4 Each price entry carries `quote`; a renewed entry must quote every price (`scripts/lib/model-price-entry.test.mjs`)
+- [x] 6.5 One Provider list (`LLM_PROVIDER_TYPES`), one `sumUsage`, `runCostSchema` exported by `@kaiord/ai`, no `cost: 0` for an unknown price

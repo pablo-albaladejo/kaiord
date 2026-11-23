@@ -127,7 +127,7 @@ describe("AssistantCard", () => {
 
     // Assert
     expect(screen.getByTestId("assistant-usage")).toHaveTextContent(
-      "Total this month (all athletes): 2 requests · 1,500 tokens · ~$0.25"
+      "Total this month on this device (all athletes): 2 requests · 1,500 tokens · ~$0.25"
     );
   });
 
@@ -186,7 +186,9 @@ describe("AssistantCard", () => {
 
     // Assert
     expect(
-      screen.getByText("No AI use yet this month, by any athlete.")
+      screen.getByText(
+        "No AI use yet this month on this device, by any athlete."
+      )
     ).toBeInTheDocument();
   });
 

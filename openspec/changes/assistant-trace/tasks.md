@@ -20,3 +20,4 @@
 - [x] 3.1 Privacy policy paragraph and check rule with its test
 - [x] 3.2 `claims/data-flows.json` entries for the new inventory sentence
 - [x] 3.3 GLOSSARY.md and the UX glossary name the Trace in both languages
+- [x] Review fix: the run's sink forwards events without the Trace's id; `usageEvents` device-local with no `traceId` (v39); the policy and the kept-on-device inventory list the usage log (`usage-stays-on-device.test.ts`, `trace-run.test.ts`, `check-privacy-policy.test.mjs`)

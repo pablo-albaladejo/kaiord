@@ -277,6 +277,11 @@
       "stores": {
         "traces": "id, startedAt"
       }
+    },
+    {
+      "version": 39,
+      "upgrade": true,
+      "stores": {}
     }
   ]
 }

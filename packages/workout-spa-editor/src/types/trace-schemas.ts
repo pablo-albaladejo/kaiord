@@ -8,9 +8,8 @@
  * (a chat turn that generates a workout may reach two). `sent` names the
  * kinds of data from the data-flow registry that went to each Provider.
  */
+import { runCostSchema } from "@kaiord/ai/providers";
 import { z } from "zod";
-
-import { runCostSchema } from "./run-cost-schema";
 
 const unitSchema = z
   .object({

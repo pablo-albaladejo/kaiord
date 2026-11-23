@@ -3,29 +3,27 @@
  * Mechanical guard: every model the App offers has a current price entry
  * (R-ModelPricesFresh).
  *
- * The cost the athlete sees is priced from each model's own input, output and
- * cache prices, read from the Provider's official pricing page and recorded
- * with that page and the day it was read. Prices change, and a new model can
- * arrive with an `@ai-sdk/*` bump, so the table goes stale silently unless
- * something looks:
+ * Prices change and an `@ai-sdk/*` bump can add a model, so the table goes
+ * stale silently unless something looks:
  *
  * - every id in the generated catalog has exactly one entry, priced or marked
  *   `unpriced` with a reason (the App then shows its cost as unknown);
  * - every entry was read within the last 120 days, and not in the future;
  * - no entry names a model the catalog no longer offers;
- * - an entry carries prices or an unpriced reason, never both or neither.
+ * - an entry carries prices or an unpriced reason, never both or neither;
+ * - a priced entry read after quotes were kept carries the page's own line(s)
+ *   for it, holding every one of its prices (`lib/model-price-entry.mjs`).
  *
- * Not looking is not a pass: an unreadable file and a catalog that parses to
- * zero ids are faults.
+ * An unreadable file and a catalog that parses to zero ids are faults.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { entryViolations, MAX_AGE_DAYS } from "./lib/model-price-entry.mjs";
+
 const CATALOG = "packages/ai/src/providers/generated/model-catalog.ts";
 const PRICES = "packages/ai/src/providers/pricing/model-prices.json";
-export const MAX_AGE_DAYS = 120;
-const DAY_MS = 86_400_000;
 
 const BLOCK = /^ {2}(anthropic|openai|google): \[([\s\S]*?)^ {2}\],/gm;
 const CATALOG_ID = /\bid:\s*"([^"]+)"/g;
@@ -37,22 +35,6 @@ export const catalogKeys = (source) =>
       [...body.matchAll(CATALOG_ID)].map(([, id]) => `${provider}:${id}`)
     )
   );
-
-const ageDays = (readOn, today) =>
-  Math.floor((today.getTime() - Date.parse(`${readOn}T00:00:00Z`)) / DAY_MS);
-
-const entryViolations = (entry, today) => {
-  const id = entry.ids?.[0];
-  const priced = Array.isArray(entry.periods) && entry.periods.length > 0;
-  if (priced === (typeof entry.unpriced === "string"))
-    return [{ kind: "price-malformed", id }];
-  const age = ageDays(entry.readOn, today);
-  if (Number.isNaN(age)) return [{ kind: "price-malformed", id }];
-  if (age < 0) return [{ kind: "price-future", id, readOn: entry.readOn }];
-  if (age > MAX_AGE_DAYS)
-    return [{ kind: "price-stale", id, readOn: entry.readOn }];
-  return [];
-};
 
 const read = (root, file) => readFileSync(join(root, file), "utf8");
 
@@ -101,12 +83,14 @@ const main = () => {
     );
     return;
   }
-  for (const v of violations) {
-    console.error(`  [${v.kind}] ${v.provider ?? ""} ${v.id ?? v.detail ?? ""} ${v.readOn ?? ""}`);
-  }
+  for (const v of violations)
+    console.error(
+      `  [${v.kind}] ${v.provider ?? ""} ${v.id ?? v.detail ?? ""} ${v.readOn ?? v.value ?? ""}`
+    );
   console.error(
     `\nRead each Provider's official pricing page again and update\n${PRICES}:\n` +
-      "the prices, `readOn` (the day you read it) and `source`. A model the\n" +
+      "the prices, `readOn` (the day you read it), `source` and `quote`: the\n" +
+      "page's exact line(s) for the model, holding every price. A model the\n" +
       "page does not list goes in an `unpriced` entry with a reason, so the\n" +
       "App shows its cost as unknown. Never guess a price."
   );

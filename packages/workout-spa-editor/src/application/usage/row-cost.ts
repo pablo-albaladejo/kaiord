@@ -11,7 +11,7 @@ import type { UsageEventRecord } from "../../types/usage-event-schemas";
  * uncached: higher than it was billed, and not recoverable.
  */
 export const costOfRow = (row: UsageEventRecord): number | null => {
-  if (row.costBasis === "price_table") return row.cost;
+  if (row.costBasis === "price_table") return row.cost ?? null;
   if (row.costBasis === "unknown") return null;
   const usage = {
     promptTokens: row.promptTokens,

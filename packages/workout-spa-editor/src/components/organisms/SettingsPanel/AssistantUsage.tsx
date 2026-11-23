@@ -8,8 +8,8 @@ import { formatUsageCost } from "./format-usage-cost";
 /**
  * This month's AI use in one line: requests, tokens and cost, priced per
  * model, and how many runs the cost leaves out because their model's price is
- * unknown. The usage log is not kept per athlete, so the line says it is the
- * total.
+ * unknown, and whether it includes an estimate. The usage log is not kept per
+ * athlete and stays on this device, so the line says it is this device's total.
  */
 export function AssistantUsage() {
   const t = useTranslate("settings");
@@ -32,6 +32,7 @@ export function AssistantUsage() {
         tokens: totals.totalTokens.toLocaleString(locale),
         cost,
       })}
+      {totals.estimatedRequests > 0 && ` · ${t("assistant.usageEstimate")}`}
       {unknown > 0 &&
         ` · ${t(pluralKey("assistant.usageUnknown", unknown), { count: unknown })}`}
     </p>

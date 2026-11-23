@@ -171,4 +171,43 @@ describe("UsageTab", () => {
       "1 request failed before its Provider reported the tokens used"
     );
   });
+
+  it("should label a cost that includes an estimate and say which requests it estimates", () => {
+    // Arrange
+    const ym = currentMonth();
+    mockEvents = [
+      makeEvent({
+        id: "a",
+        providerType: "anthropic",
+        modelId: "claude-sonnet-5",
+        costBasis: "price_table",
+        requestCount: 1,
+        estimatedRequests: 1,
+      }),
+    ];
+
+    // Act
+    render(<UsageTab />);
+
+    // Assert
+    expect(screen.getByTestId(`usage-row-${ym}`)).toHaveTextContent(
+      "includes an estimate"
+    );
+    expect(screen.getByTestId("usage-estimated")).toHaveTextContent(
+      "1 request was cut before its Provider reported the tokens used"
+    );
+  });
+
+  it("should say the usage shown is this device's", () => {
+    // Arrange
+    mockEvents = [makeEvent({ id: "a" })];
+
+    // Act
+    render(<UsageTab />);
+
+    // Assert
+    expect(screen.getByTestId("usage-this-device")).toHaveTextContent(
+      "not in Drive sync or a backup file"
+    );
+  });
 });

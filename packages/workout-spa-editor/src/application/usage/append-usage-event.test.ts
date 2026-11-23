@@ -93,6 +93,7 @@ describe("appendUsageEvent", () => {
 
     // Assert
     expect(row).toMatchObject({ costBasis: "unknown", tokens: 120 });
+    expect(row).not.toHaveProperty("cost");
   });
 
   it("should keep cache read and write tokens on the row", async () => {

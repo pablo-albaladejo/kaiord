@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { DECLARED_VERNO, KaiordDatabase } from "./dexie-database";
 
 // Bump with each new schema version: the stale guard compares against it.
-const HIGHEST_DECLARED = 38;
+const HIGHEST_DECLARED = 39;
 
 describe("DECLARED_VERNO", () => {
   it("should equal the highest version the code declares", () => {

@@ -34,7 +34,9 @@ const MODEL_OUTPUT = {
   ],
 };
 
-vi.mock("@kaiord/ai/providers", () => ({
+// The schemas the App parses with stay real; only the model is stubbed.
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   createLanguageModel: vi.fn(
     async () =>
       new MockLanguageModelV4({

@@ -1496,3 +1496,15 @@ test("the assistant's Traces must be disclosed as kept on the device only", () =
     "Assistant Traces disclosed as device-only (never sent, not synced, not in a backup)",
   ]);
 });
+
+test("the assistant's usage log must be disclosed as kept on the device only", () => {
+  const src = POLICY.replace(
+    "The usage log stays on this device",
+    "The usage log may be synced"
+  );
+  const v = checkPolicy(src);
+
+  assert.deepEqual(v, [
+    "Assistant usage log disclosed as device-only (not synced, not in a backup)",
+  ]);
+});
