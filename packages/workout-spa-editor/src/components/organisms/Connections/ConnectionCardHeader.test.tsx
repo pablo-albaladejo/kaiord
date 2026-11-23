@@ -43,6 +43,25 @@ describe("ConnectionCardHeader", () => {
 
   afterEach(() => resetDiscoveryClock());
 
+  it("should say WHOOP was not checked because no token is captured, never that checking would mint one", () => {
+    // Arrange
+    const unchecked = source({
+      status: "installed",
+      connection: "not-checked",
+    });
+
+    // Act
+    render(<ConnectionCardHeader source={unchecked} />);
+
+    // Assert
+    const detail = screen.getByTestId("connection-detail-whoop");
+    expect(detail).toHaveTextContent(
+      "Kaiord has not checked your WHOOP sign-in yet: it learns it from the first request a WHOOP tab sends."
+    );
+    expect(detail).not.toHaveTextContent(/token/i);
+    expect(notice()).toBeNull();
+  });
+
   it("should offer the Platform's own sign-in page when the Platform refused the sign-in", () => {
     // Arrange
     const signedOut = source({ status: "attention", connection: "signed-out" });

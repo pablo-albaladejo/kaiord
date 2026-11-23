@@ -1,8 +1,10 @@
+import { connectionNotCheckedText } from "@kaiord/i18n";
 import type { ReactNode } from "react";
 
 import type { ConnectionSource } from "../../../application/connections/connection-source";
+import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
-import { detailKeyFor } from "./connection-card-copy";
+import { detailKeyFor, notCheckedReasonFor } from "./connection-card-copy";
 import { ConnectionCardNotice } from "./ConnectionCardNotice";
 import { ConnectionMark } from "./ConnectionMark";
 import { ConnectionStatusLine } from "./ConnectionStatusLine";
@@ -11,7 +13,15 @@ type Props = { source: ConnectionSource; action?: ReactNode };
 
 export function ConnectionCardHeader({ source, action }: Props) {
   const t = useTranslate("connections");
+  const locale = useActiveLocale();
   const detailKey = detailKeyFor(source);
+  const notChecked = notCheckedReasonFor(source);
+  const detail =
+    notChecked !== null
+      ? connectionNotCheckedText(notChecked, source.name, locale)
+      : detailKey !== null
+        ? t(detailKey)
+        : null;
 
   return (
     <div className="flex items-start gap-3">
@@ -21,9 +31,12 @@ export function ConnectionCardHeader({ source, action }: Props) {
           {source.name}
         </div>
         <ConnectionStatusLine source={source} />
-        {detailKey !== null && (
-          <p className="text-[12.5px] leading-snug text-ink-muted">
-            {t(detailKey)}
+        {detail !== null && (
+          <p
+            className="text-[12.5px] leading-snug text-ink-muted"
+            data-testid={`connection-detail-${source.id}`}
+          >
+            {detail}
           </p>
         )}
         <ConnectionCardNotice source={source} />
