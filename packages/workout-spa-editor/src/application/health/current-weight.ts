@@ -52,7 +52,7 @@ const readDay = async (
     {
       sourcePolicyRepo: persistence.dataTypeSourcePolicy,
       policyRepo: persistence.integrationPolicy,
-      userPreferences: persistence.userPreferences,
+      capabilityDecisions: persistence.capabilityDecisions,
       getRecordsForDay: async () =>
         day.map((record) => ({ sourceBridgeId: sourceOf(record), record })),
     },
