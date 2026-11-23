@@ -171,6 +171,37 @@ describe("assemble-site", () => {
     assert.deepEqual(checkSiteCsp(inputs.out), []);
   });
 
+  it("should name the App's worker by its exact URL at the origin the site is assembled for", () => {
+    // Arrange
+    const local = "http://127.0.0.1:4173";
+    const appPolicy = (out) =>
+      /content="([^"]*)"/.exec(
+        readFileSync(join(out, "app/index.html"), "utf8")
+      )[1];
+
+    // Act
+    const localOut = join(root, "out-local");
+    assembleSite(inputs);
+    const atKaiord = appPolicy(inputs.out);
+    assembleSite({ ...inputs, out: localOut, origin: local });
+    const atLocal = appPolicy(localOut);
+
+    // Assert
+    assert.match(atKaiord, /worker-src https:\/\/kaiord\.com\/app\/sw\.js;/);
+    assert.match(
+      atLocal,
+      /worker-src http:\/\/127\.0\.0\.1:4173\/app\/sw\.js;/
+    );
+    assert.deepEqual(checkSiteCsp(localOut, { origin: local }), []);
+    assert.deepEqual(
+      parseAssembleArgs([
+        ...["--out", "o", "--landing", "l", "--app", "a"],
+        ...["--without", "docs", "--sha", "s", "--origin", local],
+      ]).origin,
+      local
+    );
+  });
+
   it("should emit the App's service worker last, over the bytes that ship", () => {
     // Arrange
     const umamiWebsiteId = "site-id";
@@ -180,7 +211,10 @@ describe("assemble-site", () => {
 
     // Assert
     assert.deepEqual(
-      checkServiceWorker(join(inputs.out, "app"), { base: "/app/", mode: "normal" }),
+      checkServiceWorker(join(inputs.out, "app"), {
+        base: "/app/",
+        mode: "normal",
+      }),
       []
     );
     assert.equal(existsSync(join(inputs.out, "sw.js")), false);
@@ -195,7 +229,10 @@ describe("assemble-site", () => {
 
     // Assert
     assert.deepEqual(
-      checkServiceWorker(join(inputs.out, "app"), { base: "/app/", mode: "kill" }),
+      checkServiceWorker(join(inputs.out, "app"), {
+        base: "/app/",
+        mode: "kill",
+      }),
       []
     );
   });

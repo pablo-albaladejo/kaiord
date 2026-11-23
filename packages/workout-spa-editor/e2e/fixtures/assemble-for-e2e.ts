@@ -18,6 +18,8 @@ export type AssembleOptions = {
 
 export type AssemblyInputs = {
   site: string;
+  /** The origin the tree is served from: the App's worker-src names it. */
+  origin: string;
   landing: string;
   app: string;
   /** `["--docs", dir]` or `["--without", "docs"]`. */
@@ -28,7 +30,7 @@ export type AssemblyInputs = {
 
 /** Runs `scripts/assemble-site.mjs` into `site`, replacing what was there. */
 export function assembleForE2e(
-  { site, landing, app, docs, scratch }: AssemblyInputs,
+  { site, origin, landing, app, docs, scratch }: AssemblyInputs,
   assembly: AssembleOptions = {}
 ): void {
   rmSync(site, { recursive: true, force: true });
@@ -45,7 +47,7 @@ export function assembleForE2e(
       "scripts/assemble-site.mjs",
       ...["--out", site, "--landing", landing, "--app", build],
       ...docs,
-      ...["--sha", "e2e"],
+      ...["--sha", "e2e", "--origin", origin],
       ...(assembly.swKill ? ["--sw-kill"] : []),
     ],
     { cwd: repoRoot, stdio: "inherit" }
