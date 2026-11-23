@@ -29,12 +29,7 @@ const toolCallSchema = z
   })
   .strict();
 
-const TRACE_FEATURES = [
-  "chat",
-  "generation",
-  "batch",
-  "lab_import",
-] as const;
+const TRACE_FEATURES = ["chat", "generation", "batch", "lab_import"] as const;
 
 export const traceSchema = z
   .object({
