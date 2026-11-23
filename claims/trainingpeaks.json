@@ -1031,7 +1031,7 @@
     },
     {
       "id": "trainingpeaks.pp.answers-unread",
-      "text": "**Answers Handed Over Unread**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a new planned workout or one weight); a request outside the extension's list of paths, the token exchange included, is refused before it is sent. The extension hands the Kaiord App TrainingPeaks' answer as it came, without reading it. Reading the answer happens in the Kaiord App, in your browser.",
+      "text": "**Answers Handed Over Unread, Sign-In Secrets Removed**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a new planned workout or one weight); a request outside the extension's list of paths, the token exchange included, is refused before it is sent. The extension hands the Kaiord App TrainingPeaks' answer as it came, without reading it, except that it first removes anything in it tied to your TrainingPeaks sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today. Reading the answer happens in the Kaiord App, in your browser.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
@@ -1048,6 +1048,18 @@
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
           "title": "should declare a body schema for exactly the write entries"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     },
@@ -1481,6 +1493,60 @@
         {
           "file": "LICENSE",
           "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.secrets-removed",
+      "text": "Before it hands the Kaiord App an answer, the extension removes anything in it tied to your TrainingPeaks sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.es.listing.secrets-removed",
+      "text": "Antes de entregar una respuesta a Kaiord App, la extensión quita lo que en ella esté ligado a tu inicio de sesión de TrainingPeaks: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de TrainingPeaks no traen ninguno.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.secrets-removed",
+      "text": "**Sign-in secrets removed from answers**: Before the extension hands the Kaiord App an answer, it removes anything in it tied to your TrainingPeaks sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     }

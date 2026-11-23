@@ -61,6 +61,13 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "bridge-request-gate.js",
     bridges: GATE_BRIDGES,
   },
+  // The `request` answer every thin Bridge hands the App, with the
+  // Session-bound secrets (anti-forgery tokens, credential keys) removed.
+  {
+    master: "bridge-answer.js",
+    dest: "bridge-answer.js",
+    bridges: ALL_BRIDGES,
+  },
   {
     master: "kaiord-announce.js",
     dest: "kaiord-announce.js",
@@ -140,6 +147,11 @@ export const BRIDGE_CORE_MASTERS = [
     master: "test/bearer-fetch.test.js",
     dest: "test/bearer-fetch.test.js",
     bridges: ["garmin-bridge", "trainingpeaks-bridge"],
+  },
+  {
+    master: "test/bridge-answer.test.js",
+    dest: "test/bridge-answer.test.js",
+    bridges: ALL_BRIDGES,
   },
   {
     master: "test/bridge-request-gate.test.js",

@@ -3,15 +3,17 @@
 
 # test/fixtures/
 
-Test data: HTML fragments and JSON responses from Train2Go APIs, used to validate what the extension still reads for its popup and Session check, without a live session. The daily and profile-page fixtures moved with their parsers to the Kaiord App's Train2Go Connector (`packages/workout-spa-editor/src/adapters/train2go/connector/fixtures/`).
+Test data: HTML fragments and JSON responses from Train2Go APIs, used to validate what the extension still reads for its popup and Session check, without a live session. The daily and profile-page fixtures moved with their parsers to the Kaiord App's Train2Go Connector (`packages/workout-spa-editor/src/adapters/train2go/connector/fixtures/`); a copy of two of them stays here to prove that the extension removes Train2Go's anti-forgery token from every answer.
 
 ## Files
 
-| File                | Source                                             | Purpose                                    |
-| ------------------- | -------------------------------------------------- | ------------------------------------------ |
-| `weekly.html`       | Train2Go `/api/v2/workplan/weekly/{date}` response | Tests the popup's `parseWeeklyHtml` counts |
-| `ping-active.json`  | Train2Go `/api/v2/profile/ping` response           | Tests active session detection             |
-| `ping-expired.json` | Train2Go `/api/v2/profile/ping` response           | Tests expired session detection            |
+| File                       | Source                                                       | Purpose                                       |
+| -------------------------- | ------------------------------------------------------------ | --------------------------------------------- |
+| `weekly.html`              | Train2Go `/api/v2/workplan/weekly/{date}` response           | Tests the popup's `parseWeeklyHtml` counts    |
+| `ping-active.json`         | Train2Go `/api/v2/profile/ping` response                     | Tests active session detection                |
+| `ping-expired.json`        | Train2Go `/api/v2/profile/ping` response                     | Tests expired session detection               |
+| `details-active.html`      | Train2Go `/user/details` page (copy of the App's fixture)    | Its `_token` field is removed from the answer |
+| `daily-with-comments.html` | Train2Go daily workplan fragment (copy of the App's fixture) | Its `_token` field is removed from the answer |
 
 ## Usage in Tests
 

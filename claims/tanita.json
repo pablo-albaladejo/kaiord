@@ -461,7 +461,7 @@
     },
     {
       "id": "tanita.pj.mytanita-answer",
-      "text": "**What MyTANITA answers**: to the `GET`, your whole measurement history. When the Kaiord App asks for it (`request`), the extension hands it over unchanged. To the `HEAD`, sent when the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), only headers: the extension keeps only whether you are signed in, and no measurement is downloaded.",
+      "text": "**What MyTANITA answers**: to the `GET`, your whole measurement history. When the Kaiord App asks for it (`request`), the extension hands it over unchanged. A page MyTANITA serves in place of the export reaches the Kaiord App without anything in it tied to your MyTANITA sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. To the `HEAD`, sent when the popup opens, when you press Refresh, and when anything asks whether it can reach MyTANITA (`ping`, `checkSession`), only headers: the extension keeps only whether you are signed in, and no measurement is downloaded.",
       "proof": [
         {
           "file": "docs/connectors-research/tanita.md",
@@ -482,6 +482,14 @@
         {
           "file": "packages/tanita-bridge/background.js",
           "contains": "case \"ping\":\n    case \"checkSession\":\n      return await checkSession();"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery field of an HTML page served in its place"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
         }
       ]
     },
@@ -760,7 +768,7 @@
     },
     {
       "id": "tanita.pp.unchanged",
-      "text": "**Handed to the Kaiord App Unchanged**: When the Kaiord App asks for it, the extension passes the export on as raw text, without parsing it. The Kaiord App parses it in your browser and keeps the measurements there; nothing is sent to a Kaiord-operated server.",
+      "text": "**Handed to the Kaiord App Unchanged**: When the Kaiord App asks for it, the extension passes the export on as raw text, without parsing it. A page MyTANITA serves in place of the export is passed on without anything in it tied to your MyTANITA sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. The Kaiord App parses it in your browser and keeps the measurements there; nothing is sent to a Kaiord-operated server.",
       "proof": [
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
@@ -781,6 +789,14 @@
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
           "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery field of an HTML page served in its place"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
         }
       ]
     },
@@ -1167,6 +1183,34 @@
         {
           "file": "LICENSE",
           "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "tanita.listing.page-secrets-removed",
+      "text": "If MyTANITA sends a page in place of the export, the extension removes from it any field named as a token, CSRF, session or nonce value before handing it to the Kaiord App.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery field of an HTML page served in its place"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.page-secrets-removed",
+      "text": "Si MyTANITA envía una página en lugar de la exportación, la extensión quita de ella cualquier campo con nombre de token, CSRF, sesión o nonce antes de entregársela a Kaiord App.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery field of an HTML page served in its place"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
         }
       ]
     }

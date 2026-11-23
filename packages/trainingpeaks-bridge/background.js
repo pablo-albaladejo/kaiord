@@ -73,6 +73,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+}
+
 // ── Dual-transport auth (bridge-specific; cookie→token→Bearer) ──
 let tpAuth;
 try {
@@ -196,7 +206,7 @@ const request = async (message) => {
   })(message);
   const res = await tpAuth.tpapiFetch(path, method, body, fetch, { raw: true });
   if (!res?.ok) throw toBridgeError("Request failed", res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  return answerCore.toAnswer(res);
 };
 
 const openTrainingPeaks = async () => {

@@ -68,6 +68,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+}
+
 // ── Tanita call surface: the closed list ──
 //
 // Method + path pattern, nothing else: every request, the App's included,
@@ -147,7 +157,7 @@ const request = async (message) => {
     fetchImpl: fetch,
   });
   if (!res.ok) throw toBridgeError(res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  return answerCore.toAnswer(res);
 };
 
 const handleAction = async (message) => {

@@ -142,6 +142,21 @@ try {
   );
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch (e) {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-bridge-answer",
+    e
+  );
+}
+
 // ── Profile snapshot validator (plain JS, parity-tested via shared fixtures) ──
 let snapshotValidator;
 try {
@@ -389,7 +404,7 @@ const request = async (message) => {
   const { method, path, body } = admitRequest(message);
   const res = await boundedCall(path, method, toWireBody(path, body));
   if (!res?.ok) throw toBridgeError("Request failed", res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  return answerCore.toAnswer(res);
 };
 
 const openGarmin = async () => {

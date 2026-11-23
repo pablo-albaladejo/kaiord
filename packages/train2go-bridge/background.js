@@ -142,6 +142,21 @@ try {
   );
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch (e) {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+  void logSwallowed(
+    typeof require !== "undefined" ? "debug" : "error",
+    "load-bridge-answer",
+    e
+  );
+}
+
 // ── Train2Go call surface: the closed list ──
 //
 // Method + path pattern, nothing else: every request, the App's included,
@@ -321,7 +336,7 @@ const request = async (message) => {
     fetchImpl: fetch,
   });
   if (!res.ok) throw toBridgeError("Request failed", res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  return answerCore.toAnswer(res);
 };
 
 const openTrain2Go = async () => {

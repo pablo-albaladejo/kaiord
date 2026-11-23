@@ -49,7 +49,7 @@ for development and testing (see "Build entrypoint" below).
   other path or method is rejected before a network call is made.
 - Expose a small message-passing surface, split by caller. The SPA reaches
   only `ping`, `status`, `read-user-id`, `request` (a `GET` of an entry of the closed list,
-  run from the open WHOOP tab and answered unread), and `set-theme` (the app's theme
+  run from the open WHOOP tab and answered unread but for its Session secrets, which it removes), and `set-theme` (the app's theme
   preference for the popup) via `chrome.runtime.sendMessage`
   — `EXTERNAL_ACTIONS` in `background.js` — once it has discovered the
   extension ID at runtime through the vendored `kaiord-announce.js` content

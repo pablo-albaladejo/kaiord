@@ -16,7 +16,8 @@ version 2): the App reaches it only through `{ action: "request", method,
 path, body? }`, which runs only an entry of the closed `ALLOWED` list in
 `background.js` (method + path pattern, and for a write the name of the body
 schema the vendored `bridge-request-gate.js` checks it against) and answers
-Garmin's answer unread as `{ status, contentType, body }`. What to ask for,
+Garmin's answer unread but for its Session secrets (removed by
+the vendored `bridge-answer.js`) as `{ status, contentType, body }`. What to ask for,
 how to read it, pacing and retries are the App's Connector (`packages/workout-spa-editor/src/adapters/garmin/connector/`, `hooks/garmin-bridge-operations.ts`, `hooks/garmin-calendar-operations.ts`). The App
 falls back to the protocol-1 actions for the store version. The internal
 channel uses `createInternalDispatch`: only the popup is answered, never a
@@ -154,7 +155,7 @@ Non-generated files beyond the AI agent's responsibility:
 
 ### Vendored bridge-core files
 
-`bridge-envelope.js`, `bridge-request-gate.js`, `bearer-fetch.js`,
+`bridge-envelope.js`, `bridge-answer.js`, `bridge-request-gate.js`, `bearer-fetch.js`,
 `kaiord-announce.js`, `bridge-popup-utils.js`,
 `bridge-popup-shell.js`, `bridge-popup-snapshot.js`, `popup.css`,
 `profile-snapshot.js`, and

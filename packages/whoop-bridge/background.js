@@ -64,6 +64,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+}
+
 // ── WHOOP call surface: the closed list ──
 //
 // Method + path pattern, nothing else, GET only: every request is checked
@@ -250,7 +260,7 @@ const request = async (message) => {
   const { path } = requestGate.createRequestGate({ allowed: ALLOWED })(message);
   const res = await whoopFetch(path);
   if (!res?.ok) throw toBridgeError(res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  return answerCore.toAnswer(res);
 };
 
 // ── Actions ──

@@ -38,6 +38,7 @@ Privacy:
 • No data collection, no analytics, no telemetry
 • No OAuth, no developer API key, no password stored — the extension captures the session bearer your own signed-in WHOOP tab already uses, and holds it only in memory (`chrome.storage.session`), never on disk
 • Read-only: the extension exposes no path to write to WHOOP
+• Before it hands the editor an answer, the extension removes anything in it tied to your WHOOP sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. WHOOP's answers carry none today
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
 ## Short Description, Spanish (132 chars max)
@@ -64,6 +65,7 @@ Privacidad:
 • Sin recogida de datos, sin analítica, sin telemetría
 • Sin OAuth, sin clave de API de desarrollador y sin contraseña guardada: la extensión captura el token de sesión que ya usa tu propia pestaña de WHOOP con la sesión iniciada, y lo guarda solo en memoria (`chrome.storage.session`), nunca en disco
 • Solo lectura: la extensión no ofrece ninguna forma de escribir en WHOOP
+• Antes de entregar una respuesta al editor, la extensión quita lo que en ella esté ligado a tu inicio de sesión de WHOOP: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de WHOOP no traen ninguno
 • Código abierto: https://github.com/pablo-albaladejo/kaiord
 
 ## Metadata
