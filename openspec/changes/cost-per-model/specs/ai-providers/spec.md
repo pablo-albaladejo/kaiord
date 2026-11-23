@@ -20,7 +20,7 @@ cache writes and output SHALL each be priced at their own price, a missing
 cache price meaning ordinary input. It SHALL return a `RunCost` with each
 request's cost, the summed usage, `usd` (null when the provider is unknown,
 the model is absent from the table, or the model is `unpriced`),
-`failedRequests`, `unmeasuredRequests` (requests with no usage, which add
+`failedRequests` (outcomes `invalid`, `truncated` and `error`; a request the athlete stopped is not a failure), `unmeasuredRequests` (requests with no usage, which add
 nothing) and the basis (`price_table` with source and date, or `unknown` with
 its reason).
 

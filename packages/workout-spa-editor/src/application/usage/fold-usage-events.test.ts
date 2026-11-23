@@ -90,6 +90,7 @@ describe("foldUsageEvents", () => {
 
     // Assert
     expect(totals).toEqual({
+      runs: 0,
       inputTokens: 0,
       outputTokens: 0,
       totalTokens: 0,
@@ -171,7 +172,7 @@ describe("foldUsageByModel", () => {
     expect(
       models.map((m) => ({
         modelId: m.modelId,
-        runs: m.runs,
+        runs: m.totals.runs,
         tokens: m.totals.totalTokens,
       }))
     ).toEqual([

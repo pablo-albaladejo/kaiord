@@ -1,6 +1,6 @@
 import { streamText } from "ai";
 import type { AiUsage } from "../observability/telemetry-types";
-import { toUsage, withUsage } from "./attempt-usage";
+import { sdkErrorUsage, toUsage, withUsage } from "./attempt-usage";
 import {
   callSettings,
   validateOutput,
@@ -74,7 +74,10 @@ export const streamModel = async <TOutput>(
     return Promise.all([result.output, result.usage]);
   };
   const [raw, usage] = await settled().catch((e: unknown) => {
-    throw withUsage(streamError ?? toOutputError(e), billed);
+    throw withUsage(
+      streamError ?? toOutputError(e),
+      billed ?? sdkErrorUsage(e)
+    );
   });
   if (streamError !== undefined) throw withUsage(streamError, billed);
   try {

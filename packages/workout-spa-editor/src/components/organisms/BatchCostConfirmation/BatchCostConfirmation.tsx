@@ -18,6 +18,8 @@ export type BatchCostConfirmationProps = {
   open: boolean;
   workouts: WorkoutRecord[];
   provider: LlmProviderConfig | null;
+  /** The model the batch runs on, which the estimate is priced at. */
+  modelId?: string;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -26,10 +28,11 @@ export function BatchCostConfirmation({
   open,
   workouts,
   provider,
+  modelId,
   onConfirm,
   onCancel,
 }: BatchCostConfirmationProps) {
-  const estimate = useBatchCostEstimate(workouts, provider);
+  const estimate = useBatchCostEstimate(workouts, provider, modelId);
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onCancel()}>

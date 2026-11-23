@@ -222,4 +222,27 @@ describe("priceRun", () => {
     expect(cost.failedRequests).toBe(1);
     expect(cost.requests[1]).toEqual({ outcome: "error", usd: null });
   });
+
+  it("should not count a request the athlete stopped as a failed one", () => {
+    // Arrange
+    const requests = [
+      {
+        outcome: "ok" as const,
+        usage: { promptTokens: 1000, completionTokens: 500 },
+      },
+      { outcome: "stopped" as const },
+    ];
+
+    // Act
+    const cost = priceRun({
+      provider: "anthropic",
+      modelId: "claude-sonnet-5",
+      requests,
+      at: AT,
+    });
+
+    // Assert
+    expect(cost.failedRequests).toBe(0);
+    expect(cost.unmeasuredRequests).toBe(1);
+  });
 });

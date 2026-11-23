@@ -32,7 +32,23 @@ const entrySchema = z
     source: z.url(),
     readOn: ISO_DATE,
     note: z.string().optional(),
-    periods: z.array(periodSchema).min(1).optional(),
+    periods: z
+      .array(periodSchema)
+      .min(1)
+      .refine(
+        (ps) =>
+          ps[0]!.from === undefined &&
+          ps
+            .slice(1)
+            .every(
+              (p, i) => p.from !== undefined && p.from > (ps[i]!.from ?? "")
+            ),
+        {
+          message:
+            "the first period is open and the next start in ascending order",
+        }
+      )
+      .optional(),
     unpriced: z.string().optional(),
   })
   .strict()

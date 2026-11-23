@@ -2,7 +2,8 @@
  * useBatchCostEstimate — compute token + cost estimates for a pending
  * batch of RAW workouts against a configured LLM provider. Thin React
  * adapter over the pure `estimateTokenSplit` heuristic, priced with
- * `priceRun` at the provider's model's own input and output prices.
+ * `priceRun` at the input and output prices of the model the batch runs
+ * on (`modelId`, resolved for workout generation), else the provider's.
  *
  * `costUsd` is null when no provider is configured, and also when the
  * model has no price; `priceUnknown` tells the second case apart so the
@@ -25,7 +26,8 @@ export type BatchCostEstimate = {
 
 export function useBatchCostEstimate(
   workouts: WorkoutRecord[],
-  provider: LlmProviderConfig | null
+  provider: LlmProviderConfig | null,
+  modelId?: string
 ): BatchCostEstimate {
   return useMemo(() => {
     const split = estimateTokenSplit(workouts);
@@ -40,7 +42,7 @@ export function useBatchCostEstimate(
     }
     const { usd } = priceRun({
       provider: provider.type,
-      modelId: modelForProvider(provider),
+      modelId: modelId ?? modelForProvider(provider),
       requests: [
         {
           outcome: "ok",
@@ -55,5 +57,5 @@ export function useBatchCostEstimate(
       providerLabel: provider.label,
       priceUnknown: usd === null,
     };
-  }, [workouts, provider]);
+  }, [workouts, provider, modelId]);
 }

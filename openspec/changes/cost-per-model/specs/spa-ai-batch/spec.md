@@ -2,7 +2,7 @@
 
 ### Requirement: Cost estimation before batch processing
 
-The system SHALL display an estimated token count and cost before the user confirms batch processing. The input tokens SHALL be estimated with the chars/3 heuristic and the output with a fixed allowance per workout, and the cost SHALL be priced with `priceRun` at the input and output prices of the provider's model. When that model has no price the dialog SHALL say the price is unknown instead of showing a cost.
+The system SHALL display an estimated token count and cost before the user confirms batch processing. The input tokens SHALL be estimated with the chars/3 heuristic and the output with a fixed allowance per workout, and the cost SHALL be priced with `priceRun` at the input and output prices of the model the batch runs on (the one resolved for `workout_generation`). When that model has no price the dialog SHALL say the price is unknown instead of showing a cost.
 
 #### Scenario: Batch confirmation dialog
 

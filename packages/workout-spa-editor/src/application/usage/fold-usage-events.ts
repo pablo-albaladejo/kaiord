@@ -12,6 +12,7 @@ import type { UsageEventRecord } from "../../types/usage-event-schemas";
 import { costOfRow } from "./row-cost";
 
 export type UsageTotals = {
+  runs: number;
   inputTokens: number;
   outputTokens: number;
   totalTokens: number;
@@ -26,6 +27,7 @@ export type FoldUsageEventsOptions = {
 };
 
 const EMPTY: UsageTotals = {
+  runs: 0,
   inputTokens: 0,
   outputTokens: 0,
   totalTokens: 0,
@@ -41,6 +43,7 @@ const byCreatedAt = (a: UsageEventRecord, b: UsageEventRecord) =>
 const add = (totals: UsageTotals, e: UsageEventRecord): UsageTotals => {
   const cost = costOfRow(e);
   return {
+    runs: totals.runs + 1,
     inputTokens: totals.inputTokens + e.promptTokens,
     outputTokens: totals.outputTokens + e.completionTokens,
     totalTokens: totals.totalTokens + e.tokens,
@@ -64,7 +67,6 @@ export const foldUsageEvents = (
 export type ModelUsage = {
   providerType?: UsageEventRecord["providerType"];
   modelId?: string;
-  runs: number;
   totals: UsageTotals;
 };
 
@@ -81,7 +83,6 @@ export const foldUsageByModel = (
     .map((rows) => ({
       providerType: rows[0]!.providerType,
       modelId: rows[0]!.modelId,
-      runs: rows.length,
       totals: foldUsageEvents(rows),
     }))
     .sort((a, b) => b.totals.totalCost - a.totals.totalCost);

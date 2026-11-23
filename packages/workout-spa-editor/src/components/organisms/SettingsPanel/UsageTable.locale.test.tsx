@@ -10,13 +10,19 @@ vi.mock("../../../i18n/LocaleProvider", () => ({
 }));
 
 const ZERO: UsageTotals = {
+  runs: 0,
   inputTokens: 0,
   outputTokens: 0,
   totalTokens: 0,
   totalCost: 0,
+  unknownCostRuns: 0,
+  failedRequests: 0,
+  unmeasuredRequests: 0,
 };
 
 const chat: UsageTotals = {
+  ...ZERO,
+  runs: 1,
   inputTokens: 1215000,
   outputTokens: 455000,
   totalTokens: 1670000,

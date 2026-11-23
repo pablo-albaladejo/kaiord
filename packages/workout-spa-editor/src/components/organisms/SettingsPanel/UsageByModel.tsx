@@ -24,7 +24,7 @@ function ModelRow({ usage }: { usage: ModelUsage }) {
   const t = useTranslate("settings");
   const locale = useActiveLocale();
   const basis = priceBasisOf(usage.providerType, usage.modelId);
-  const priced = usage.totals.unknownCostRuns < usage.runs;
+  const priced = usage.totals.unknownCostRuns < usage.totals.runs;
   return (
     <tr data-testid={rowId(usage)} className="border-b border-edge-soft">
       <td className={CELL}>
@@ -32,7 +32,7 @@ function ModelRow({ usage }: { usage: ModelUsage }) {
           ? modelDisplayName(usage.modelId)
           : t("usage.byModel.unknownModel")}
       </td>
-      <td className={`${CELL} ${WIDE}`}>{usage.runs}</td>
+      <td className={`${CELL} ${WIDE}`}>{usage.totals.runs}</td>
       <td className={`${CELL} ${WIDE}`}>{usage.totals.failedRequests}</td>
       <td className={`${CELL} ${WIDE}`}>
         {usage.totals.totalTokens.toLocaleString(locale)}

@@ -8,6 +8,7 @@ import { useBatchCostEstimate } from "./use-batch-cost-estimate";
 const DIGITS = 10;
 const EXPECTED_TOKENS_ONE_WORKOUT = 501;
 const SONNET_5_ESTIMATE_USD = 0.005002;
+const HAIKU_4_5_ESTIMATE_USD = 0.002501;
 
 const makeWorkout = (description: string): WorkoutRecord =>
   ({
@@ -73,6 +74,21 @@ describe("useBatchCostEstimate", () => {
     expect(result.current.costUsd).toBeCloseTo(SONNET_5_ESTIMATE_USD, DIGITS);
     expect(result.current.providerLabel).toBe("My Claude");
     expect(result.current.priceUnknown).toBe(false);
+  });
+
+  it("should price the model the batch runs on, not the provider's own model", () => {
+    // Arrange
+    const workouts = [makeWorkout("abc")];
+    const boundModel = "claude-haiku-4-5";
+
+    // Act
+    const { result } = renderHook(() =>
+      useBatchCostEstimate(workouts, anthropic, boundModel)
+    );
+
+    // Assert
+    // 1 input token at $1 and 500 output tokens at $5 per 1M
+    expect(result.current.costUsd).toBeCloseTo(HAIKU_4_5_ESTIMATE_USD, DIGITS);
   });
 
   it("should say the price is unknown, not zero, for a model with no price", () => {

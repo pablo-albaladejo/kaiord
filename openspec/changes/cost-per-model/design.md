@@ -73,7 +73,7 @@ type RunCost = {
   requests: Array<AiRequest & { usd: number | null }>;
   usage: { promptTokens; completionTokens; cacheReadTokens; cacheWriteTokens };
   usd: number | null; // null when the model's price is unknown
-  failedRequests: number;
+  failedRequests: number; // invalid, truncated or error; a stop is not a failure
   unmeasuredRequests: number;
   basis:
     | { kind: "price_table"; source: string; readOn: string }

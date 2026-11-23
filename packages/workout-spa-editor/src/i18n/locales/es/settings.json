@@ -169,9 +169,9 @@
     }
   },
   "price": {
-    "priced": "{{input}} de entrada · {{output}} de salida por millón de tokens, según la lista oficial de precios leída el {{date}}.",
-    "pricedCache": "{{input}} de entrada · {{output}} de salida · {{cacheRead}} de entrada en caché por millón de tokens, según la lista oficial de precios leída el {{date}}.",
-    "unknown": "Precio desconocido: este modelo no está en la lista de precios de su proveedor, así que su coste no se cuenta.",
+    "priced": "Precio actual: {{input}} de entrada · {{output}} de salida por millón de tokens, según la lista oficial de precios leída el {{date}}.",
+    "pricedCache": "Precio actual: {{input}} de entrada · {{output}} de salida · {{cacheRead}} de entrada en caché por millón de tokens, según la lista oficial de precios leída el {{date}}.",
+    "unknown": "Precio desconocido: este modelo no está en la lista de precios de su proveedor.",
     "source": "Lista de precios"
   },
   "preferences": {

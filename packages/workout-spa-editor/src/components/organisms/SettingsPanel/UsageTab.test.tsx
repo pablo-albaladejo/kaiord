@@ -142,8 +142,9 @@ describe("UsageTab", () => {
       "Price unknown"
     );
     expect(screen.getByTestId(`usage-row-${ym}`)).toHaveTextContent(
-      "+ 1 run at an unknown price"
+      "—+ 1 run at an unknown price"
     );
+    expect(screen.getByTestId(`usage-row-${ym}`)).not.toHaveTextContent("$0");
   });
 
   it("should say that failed attempts are counted and which requests are not", () => {

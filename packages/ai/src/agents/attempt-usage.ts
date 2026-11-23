@@ -64,11 +64,17 @@ export const failedRequest = (error: unknown, aborted: boolean): AiRequest => {
   return { outcome: outcomeOf(error, aborted), ...(usage ? { usage } : {}) };
 };
 
-export const sumUsage = (requests: readonly AiRequest[]): AiUsage =>
-  requests.reduce<AiUsage>(
-    (sum, { usage }) => ({
-      promptTokens: sum.promptTokens + (usage?.promptTokens ?? 0),
-      completionTokens: sum.completionTokens + (usage?.completionTokens ?? 0),
-    }),
-    { promptTokens: 0, completionTokens: 0 }
-  );
+const total = (requests: readonly AiRequest[], field: keyof AiUsage): number =>
+  requests.reduce((sum, r) => sum + (r.usage?.[field] ?? 0), 0);
+
+/** The run's usage: every request summed, cache counts only when non-zero. */
+export const sumUsage = (requests: readonly AiRequest[]): AiUsage => {
+  const cacheRead = total(requests, "cacheReadTokens");
+  const cacheWrite = total(requests, "cacheWriteTokens");
+  return {
+    promptTokens: total(requests, "promptTokens"),
+    completionTokens: total(requests, "completionTokens"),
+    ...(cacheRead > 0 ? { cacheReadTokens: cacheRead } : {}),
+    ...(cacheWrite > 0 ? { cacheWriteTokens: cacheWrite } : {}),
+  };
+};

@@ -197,6 +197,7 @@ describe("runGenerateAgent cost reporting", () => {
           },
         },
       ],
+      usage: { cacheReadTokens: 40, cacheWriteTokens: 10 },
     });
   });
 });

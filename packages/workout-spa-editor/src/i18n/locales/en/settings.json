@@ -169,9 +169,9 @@
     }
   },
   "price": {
-    "priced": "{{input}} input · {{output}} output per million tokens, from the official price list read on {{date}}.",
-    "pricedCache": "{{input}} input · {{output}} output · {{cacheRead}} cached input per million tokens, from the official price list read on {{date}}.",
-    "unknown": "Price unknown: this model is not on its Provider’s price list, so its cost is not counted.",
+    "priced": "Current price: {{input}} input · {{output}} output per million tokens, from the official price list read on {{date}}.",
+    "pricedCache": "Current price: {{input}} input · {{output}} output · {{cacheRead}} cached input per million tokens, from the official price list read on {{date}}.",
+    "unknown": "Price unknown: this model is not on its Provider’s price list.",
     "source": "Price list"
   },
   "preferences": {

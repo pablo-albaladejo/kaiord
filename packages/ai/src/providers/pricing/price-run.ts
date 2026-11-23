@@ -3,6 +3,8 @@ import type { LlmProviderType } from "../types";
 import { findModelPrice, periodAt, type PricePeriod } from "./price-table";
 
 const PER_MILLION = 1_000_000;
+// A request the athlete stopped did not fail; it is unmeasured when cut.
+const FAILED = new Set<AiRequest["outcome"]>(["invalid", "truncated", "error"]);
 
 export type CostBasis =
   | { kind: "price_table"; source: string; readOn: string }
@@ -98,7 +100,7 @@ export const priceRun = (input: PriceRunInput): RunCost => {
     requests,
     usage: sumUsage(input.requests),
     usd,
-    failedRequests: input.requests.filter((r) => r.outcome !== "ok").length,
+    failedRequests: input.requests.filter((r) => FAILED.has(r.outcome)).length,
     unmeasuredRequests: input.requests.filter((r) => !r.usage).length,
     basis,
   };
