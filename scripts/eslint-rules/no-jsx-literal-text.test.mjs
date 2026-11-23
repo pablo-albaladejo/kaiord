@@ -28,7 +28,10 @@ test("should report literal UI copy in JSX and leave translated copy alone", () 
       { code: 'const a = <div className={"text-sm"} />;' },
       { code: 'const a = <img alt="" />;' },
       { code: "const a = <p>{label}</p>;" },
-      { code: 'const a = <option label="kg" />;', options: [{ allow: ["kg"] }] },
+      {
+        code: 'const a = <option label="kg" />;',
+        options: [{ allow: ["kg"] }],
+      },
       { code: 'const a = <input label="Weight" />;' },
       { code: 'const a = <Input label={t("weight")} heading={h} />;' },
       { code: 'const a = <Card variant="Outline" />;' },
@@ -50,6 +53,48 @@ test("should report literal UI copy in JSX and leave translated copy alone", () 
       { code: 'const a = <Field description={"Resting"} />;', errors: literal },
       { code: 'const a = <Section heading="Profile" />;', errors: literal },
       { code: 'const a = <Ui.Dialog title="Edit" />;', errors: literal },
+    ],
+  };
+
+  // Act + Assert
+  ruleTester.run("no-jsx-literal-text", rule, cases);
+});
+
+test("should report copy hidden in conditionals, fallbacks and templates", () => {
+  // Arrange
+  const literal = [{ messageId: "literal" }];
+  const cases = {
+    valid: [
+      { code: 'const a = <p>{open ? t("hide") : t("show")}</p>;' },
+      { code: 'const a = <p>{name || t("untitled")}</p>;' },
+      { code: "const a = <p>{`${hours}:${minutes}`}</p>;" },
+      { code: 'const a = <p>{ok ? "·" : "—"}</p>;' },
+      { code: 'const a = <Banner message={t("sync.failed")} />;' },
+      { code: 'const a = <p>{t(open ? "a.hide" : "a.show")}</p>;' },
+    ],
+    invalid: [
+      {
+        code: 'const a = <p>{open ? "Hide" : "Detail"}</p>;',
+        errors: [...literal, ...literal],
+      },
+      { code: 'const a = <p>{open && "Open"}</p>;', errors: literal },
+      { code: 'const a = <p>{name || "Untitled"}</p>;', errors: literal },
+      { code: 'const a = <p>{name ?? "Untitled"}</p>;', errors: literal },
+      { code: "const a = <p>{`${count} steps`}</p>;", errors: literal },
+      {
+        code: 'const a = <button aria-label={open ? "Close" : t("open")} />;',
+        errors: literal,
+      },
+      { code: "const a = <button title={`Edit ${name}`} />;", errors: literal },
+      { code: 'const a = <Banner message="Sync failed" />;', errors: literal },
+      {
+        code: 'const a = <Dialog confirmLabel="Apply" cancelLabel="Cancel" />;',
+        errors: [...literal, ...literal],
+      },
+      {
+        code: 'const a = <div aria-valuetext="Half done" />;',
+        errors: literal,
+      },
     ],
   };
 

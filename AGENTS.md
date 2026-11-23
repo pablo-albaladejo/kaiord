@@ -183,6 +183,11 @@ Audit` job keeps its exact name, reports on every pull request and on push
   GLOSSARY.md retired or withdrew: framework, cockpit, lossless, zero data
   loss, round-trip safe, open standard, interchange format, platform for
   Kaiord itself (`pnpm lint:retired-terms`).
+- `local/no-jsx-literal-text` + `local/no-literal-copy` (ESLint rules in
+  `scripts/eslint-rules/`) — every string the athlete reads in the Kaiord App
+  comes from the `en`/`es` dictionaries: JSX copy, toasts, error and message
+  setters, copy properties and label maps fail `pnpm lint` (scope and allow
+  list: `jsx-literal-scope.mjs`).
 - `check-site-csp.mjs` — every page of the assembled site (landing, docs,
   App) carries a content security policy first in `<head>` that hashes its
   inline scripts and admits no unsafe script source (run by `e2e-prod-base`
