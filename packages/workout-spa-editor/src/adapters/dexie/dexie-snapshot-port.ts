@@ -43,7 +43,7 @@ const TOMBSTONES = "tombstones";
 // Exported so the tombstone-coverage guard can tell a table that never leaves
 // the device (no tombstone needed) from one that rides the snapshot.
 // `traces` never leaves the device either: the athlete's Traces are theirs,
-// read and exported in Settings, Privacy, and never sent (#1652).
+// read and exported in Settings, Privacy, and never sent.
 export const DEVICE_LOCAL = new Set([TOMBSTONES, "connections", "traces"]);
 
 // Narrow to a single explicit signature so tsc sidesteps Dexie's recursive
