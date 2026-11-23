@@ -22,7 +22,7 @@ describe("readTrainingPeaksAthleteId", () => {
     // Arrange
     mockedSend.mockResolvedValue({
       ok: true,
-      protocolVersion: 1,
+      protocolVersion: 2,
       data: { athleteId: ATHLETE_ID },
     });
 
@@ -39,7 +39,7 @@ describe("readTrainingPeaksAthleteId", () => {
     // Arrange
     mockedSend.mockResolvedValue({
       ok: false,
-      protocolVersion: 1,
+      protocolVersion: 2,
       error: "TrainingPeaks session expired",
       needsReauth: true,
     });
@@ -68,14 +68,23 @@ describe("readTrainingPeaksAthleteId", () => {
   });
 
   it.each([
-    { session: { authenticated: false }, needsReauth: true },
-    { session: { authenticated: false, needsReauth: true }, needsReauth: true },
     {
+      label: "it could not tell",
+      session: { authenticated: false },
+      needsReauth: false,
+    },
+    {
+      label: "TrainingPeaks ended the Session",
+      session: { authenticated: false, needsReauth: true },
+      needsReauth: true,
+    },
+    {
+      label: "TrainingPeaks did not answer",
       session: { authenticated: false, needsReauth: false },
       needsReauth: false,
     },
   ])(
-    "should say why an older extension named no athlete ($needsReauth)",
+    "should say why an older extension named no athlete: $label",
     async ({ session, needsReauth }) => {
       // Arrange
       mockedSend
@@ -89,4 +98,20 @@ describe("readTrainingPeaksAthleteId", () => {
       await expect(attempt).rejects.toMatchObject({ needsReauth });
     }
   );
+
+  it("should tell an older extension by its protocol version, not by the words of its refusal", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: false,
+      protocolVersion: 2,
+      error: "Origin or action not permitted",
+    });
+
+    // Act
+    const attempt = readTrainingPeaksAthleteId("ext");
+
+    // Assert
+    await expect(attempt).rejects.toMatchObject({ needsReauth: false });
+    expect(mockedSend).toHaveBeenCalledTimes(1);
+  });
 });

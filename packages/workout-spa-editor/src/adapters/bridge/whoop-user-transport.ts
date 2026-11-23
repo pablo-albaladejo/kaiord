@@ -4,16 +4,16 @@
  *
  * Resolves `null` when the extension holds no captured session (nothing to
  * import with); throws only when the extension did not answer. An extension
- * older than the cheap check refuses the action and is asked through its
+ * one protocol behind does not know the action and is asked through its
  * `status`, which still carries the id.
  */
 import { z } from "zod";
 
 import { sendBridgeMessage } from "./bridge-transport";
+import { speaksPreviousProtocol } from "./thin-bridge-request";
 import { readWhoopStatus, WhoopBridgeError } from "./whoop-transport";
 
 const READ_USER_TIMEOUT_MS = 5_000;
-const OLDER_EXTENSION = "Origin or action not permitted";
 
 const userSchema = z.object({ userId: z.number() });
 
@@ -25,7 +25,7 @@ export const readWhoopUserId = async (
     { action: "read-user-id" },
     READ_USER_TIMEOUT_MS
   );
-  if (!res.ok && res.error === OLDER_EXTENSION) {
+  if (!res.ok && speaksPreviousProtocol(res)) {
     const status = await readWhoopStatus(extensionId);
     return status.connected ? (status.userId ?? null) : null;
   }

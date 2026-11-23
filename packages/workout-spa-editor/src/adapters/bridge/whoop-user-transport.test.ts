@@ -17,7 +17,7 @@ describe("readWhoopUserId", () => {
     // Arrange
     mockedSend.mockResolvedValue({
       ok: true,
-      protocolVersion: 1,
+      protocolVersion: 2,
       data: { userId: USER_ID },
     });
 
@@ -33,7 +33,7 @@ describe("readWhoopUserId", () => {
     // Arrange
     mockedSend.mockResolvedValue({
       ok: false,
-      protocolVersion: 1,
+      protocolVersion: 2,
       error: "no session token captured — open app.whoop.com and reload it",
     });
 
@@ -64,6 +64,22 @@ describe("readWhoopUserId", () => {
     // Assert
     expect(userId).toBe(USER_ID);
     expect(mockedSend.mock.calls[1][1]).toEqual({ action: "status" });
+  });
+
+  it("should tell an older extension by its protocol version, not by the words of its refusal", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: false,
+      protocolVersion: 2,
+      error: "Origin or action not permitted",
+    });
+
+    // Act
+    const userId = await readWhoopUserId("ext");
+
+    // Assert
+    expect(userId).toBeNull();
+    expect(mockedSend).toHaveBeenCalledTimes(1);
   });
 
   it("should throw when the extension did not answer", async () => {
