@@ -13,6 +13,12 @@
       "sections": ["Three ways to convert"]
     },
     {
+      "file": "packages/docs/guide/install-extensions.md"
+    },
+    {
+      "file": "packages/docs/es/guide/install-extensions.md"
+    },
+    {
       "file": "packages/landing/public/llms.txt"
     }
   ],
@@ -838,6 +844,264 @@
         {
           "file": "packages/mcp/package.json",
           "contains": "\"name\": \"@kaiord/mcp\","
+        }
+      ]
+    },
+    {
+      "id": "docs.install.title",
+      "text": "Install the extension for each Platform",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.one-per-platform",
+      "text": "The Kaiord App reaches each Platform through a Chrome extension that uses your own sign-in on that Platform. There is one extension per Platform, called Kaiord for that Platform.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Kaiord reaches every Platform through the athlete's authenticated Session in their own browser"
+        },
+        {
+          "test": "scripts/check-bridge-locales-en-es.test.mjs",
+          "title": "should name every extension Kaiord for its Platform in both locales and every manifest"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.spanish-link",
+      "text": "_Leer en español: [Instala la extensión de cada plataforma](/es/guide/install-extensions)._",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.store",
+      "text": "In the Chrome Web Store",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.garmin",
+      "text": "[Kaiord for Garmin](https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe) is published in the Chrome Web Store.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Garmin and Train2Go are published"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/application/connections/connection-fix-target.ts",
+          "contains": "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.train2go",
+      "text": "Kaiord for Train2Go is published in the Chrome Web Store: search for it there by its name.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Garmin and Train2Go are published"
+        },
+        {
+          "file": ".github/workflows/cws-publish.yml",
+          "contains": "extension_id_secret: CWS_TRAIN2GO_EXTENSION_ID"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.not-yet",
+      "text": "Not in the Chrome Web Store yet",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.tanita-trainingpeaks",
+      "text": "Kaiord for Tanita and Kaiord for TrainingPeaks are not published in the Chrome Web Store yet.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Tanita and TrainingPeaks are to be published but are not yet"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.whoop",
+      "text": "Kaiord for WHOOP is not published in the Chrome Web Store, because WHOOP's terms prohibit this kind of access. It is experimental.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "A Bridge whose Platform expressly prohibits this access is not published to the extension store and is marked experimental in the Kaiord App. Today that is WHOOP"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.unpacked",
+      "text": "Load an extension that is not published",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.step-download",
+      "text": "Download the Kaiord source code from [GitHub](https://github.com/pablo-albaladejo/kaiord).",
+      "proof": [
+        {
+          "file": "package.json",
+          "contains": "\"url\": \"https://github.com/pablo-albaladejo/kaiord.git\""
+        }
+      ]
+    },
+    {
+      "id": "docs.install.step-developer-mode",
+      "text": "In Chrome, open `chrome://extensions` and turn on **Developer mode**.",
+      "proof": [
+        {
+          "file": "packages/tanita-bridge/TESTING.md",
+          "contains": "1. Open `chrome://extensions/`"
+        },
+        {
+          "file": "packages/tanita-bridge/TESTING.md",
+          "contains": "Enable \"Developer mode\" (toggle top-right)"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.step-load-unpacked",
+      "text": "Choose **Load unpacked** and select the folder of the extension: [Kaiord for Tanita](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/tanita-bridge), [Kaiord for TrainingPeaks](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/trainingpeaks-bridge) or [Kaiord for WHOOP](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/whoop-bridge).",
+      "proof": [
+        {
+          "file": "packages/tanita-bridge/TESTING.md",
+          "contains": "Click \"Load unpacked\" and select `packages/tanita-bridge/`"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/TESTING.md",
+          "contains": "Click \"Load unpacked\" and select `packages/trainingpeaks-bridge/`"
+        },
+        {
+          "file": "packages/whoop-bridge/README.md",
+          "contains": "Load it unpacked"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.title",
+      "text": "Instala la extensión de cada plataforma",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.es.one-per-platform",
+      "text": "La aplicación Kaiord llega a cada plataforma a través de una extensión de Chrome que usa tu propio inicio de sesión en esa plataforma. Hay una extensión por plataforma, llamada «Kaiord for» y el nombre de esa plataforma.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Kaiord reaches every Platform through the athlete's authenticated Session in their own browser"
+        },
+        {
+          "test": "scripts/check-bridge-locales-en-es.test.mjs",
+          "title": "should name every extension Kaiord for its Platform in both locales and every manifest"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.english-link",
+      "text": "_Read in English: [Install the extension for each Platform](/guide/install-extensions)._",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.es.store",
+      "text": "En Chrome Web Store",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.es.garmin",
+      "text": "[Kaiord for Garmin](https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe) está publicada en Chrome Web Store.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Garmin and Train2Go are published"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/application/connections/connection-fix-target.ts",
+          "contains": "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.train2go",
+      "text": "Kaiord for Train2Go está publicada en Chrome Web Store: búscala allí por su nombre.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Garmin and Train2Go are published"
+        },
+        {
+          "file": ".github/workflows/cws-publish.yml",
+          "contains": "extension_id_secret: CWS_TRAIN2GO_EXTENSION_ID"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.not-yet",
+      "text": "Aún no están en Chrome Web Store",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.es.tanita-trainingpeaks",
+      "text": "Kaiord for Tanita y Kaiord for TrainingPeaks aún no están publicadas en Chrome Web Store.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "Tanita and TrainingPeaks are to be published but are not yet"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.whoop",
+      "text": "Kaiord for WHOOP no está publicada en Chrome Web Store, porque las condiciones de WHOOP prohíben este tipo de acceso. Es experimental.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "A Bridge whose Platform expressly prohibits this access is not published to the extension store and is marked experimental in the Kaiord App. Today that is WHOOP"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.unpacked",
+      "text": "Carga una extensión que no está publicada",
+      "kind": "label"
+    },
+    {
+      "id": "docs.install.es.step-download",
+      "text": "Descarga el código fuente de Kaiord desde [GitHub](https://github.com/pablo-albaladejo/kaiord).",
+      "proof": [
+        {
+          "file": "package.json",
+          "contains": "\"url\": \"https://github.com/pablo-albaladejo/kaiord.git\""
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.step-developer-mode",
+      "text": "En Chrome, abre `chrome://extensions` y activa el **modo de desarrollador**.",
+      "proof": [
+        {
+          "file": "packages/tanita-bridge/TESTING.md",
+          "contains": "1. Open `chrome://extensions/`"
+        },
+        {
+          "file": "packages/tanita-bridge/TESTING.md",
+          "contains": "Enable \"Developer mode\" (toggle top-right)"
+        }
+      ]
+    },
+    {
+      "id": "docs.install.es.step-load-unpacked",
+      "text": "Elige **Cargar descomprimida** y selecciona la carpeta de la extensión: [Kaiord for Tanita](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/tanita-bridge), [Kaiord for TrainingPeaks](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/trainingpeaks-bridge) o [Kaiord for WHOOP](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/whoop-bridge).",
+      "proof": [
+        {
+          "file": "packages/tanita-bridge/TESTING.md",
+          "contains": "Click \"Load unpacked\" and select `packages/tanita-bridge/`"
+        },
+        {
+          "file": "packages/trainingpeaks-bridge/TESTING.md",
+          "contains": "Click \"Load unpacked\" and select `packages/trainingpeaks-bridge/`"
+        },
+        {
+          "file": "packages/whoop-bridge/README.md",
+          "contains": "Load it unpacked"
         }
       ]
     }

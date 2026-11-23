@@ -6,7 +6,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { checkSiteLinks, mountsFromArgs } from "./check-site-links.mjs";
+import {
+  checkSiteLinks,
+  mountsFromArgs,
+  SHIPPED_SOURCES,
+} from "./check-site-links.mjs";
 import { linksIn } from "./lib/site-links-resolve.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -284,6 +288,39 @@ describe("check-site-links", () => {
     addDocsPage("under.html", "https://kaiord.com/a2a/tasks");
 
     assert.deepEqual(reasons(), ["no page is served at /a2a/tasks"]);
+  });
+
+  it("should reject a link the App ships from its source to a page the site does not serve", () => {
+    // Arrange
+    // The Install and Update fixes linked kaiord.com/docs/bridges from App
+    // code, which the built HTML never shows, so no page scan saw the 404.
+    const sources = [
+      {
+        file: "connection-fix-target.ts",
+        text: 'const A = "https://kaiord.com/docs/guide/quick-start";\nconst B = "https://kaiord.com/docs/bridges";',
+      },
+    ];
+
+    // Act
+    const result = checkSiteLinks({ mounts, segments: SEGMENTS, sources });
+
+    // Assert
+    assert.deepEqual(
+      result.problems.map((p) => [p.file, p.reason]),
+      [["connection-fix-target.ts", "no page is served at /docs/bridges"]]
+    );
+  });
+
+  it("should check the App's Connection fix targets among the shipped sources", () => {
+    // Arrange
+    const fixTargets =
+      "packages/workout-spa-editor/src/application/connections/connection-fix-target.ts";
+
+    // Act
+    const listed = SHIPPED_SOURCES.includes(fixTargets);
+
+    // Assert
+    assert.equal(listed, true);
   });
 
   it("fails on a missing dist only when REQUIRE_DOCS_DIST=1", () => {

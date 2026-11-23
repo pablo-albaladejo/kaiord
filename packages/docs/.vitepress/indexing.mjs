@@ -125,6 +125,7 @@ export function apiSourcePaths(url, packages) {
 // alternates: every other page exists in English alone, and an hreflang to a
 // page that does not exist is ignored by engines at best.
 export const HREFLANG_PAIRS = [
+  "guide/install-extensions",
   "guide/ai-planning-byok",
   "guide/whoop-recovery-in-plan",
   "guide/move-coach-sessions",
