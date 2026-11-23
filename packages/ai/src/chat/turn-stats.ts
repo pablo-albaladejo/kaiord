@@ -72,7 +72,11 @@ export const createTurnStats = (
       const steps = requests.length;
       const cutStep =
         cut && flight.started > steps
-          ? inFlightRequest(cut, sentChars + flight.priorChars, flight.stepChars)
+          ? inFlightRequest(
+              cut,
+              sentChars + flight.priorChars,
+              flight.stepChars
+            )
           : undefined;
       const { promptTokens, completionTokens } = sumUsage(requests);
       return {

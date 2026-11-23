@@ -27,8 +27,7 @@ export const requestChars = (
   system: string | undefined,
   messages: readonly ModelMessage[]
 ): number =>
-  (system?.length ?? 0) +
-  messages.reduce((n, m) => n + messageChars(m), 0);
+  (system?.length ?? 0) + messages.reduce((n, m) => n + messageChars(m), 0);
 
 /** Characters of output a stream part carries (text, reasoning, tool input). */
 export const streamedChars = (part: object): number => {
@@ -39,7 +38,10 @@ export const streamedChars = (part: object): number => {
 };
 
 /** The estimated usage of a request cut before the Provider reported it. */
-export const cutUsage = (sentChars: number, receivedChars: number): AiUsage => ({
+export const cutUsage = (
+  sentChars: number,
+  receivedChars: number
+): AiUsage => ({
   promptTokens: estimateTokens(sentChars),
   completionTokens: estimateTokens(receivedChars),
 });

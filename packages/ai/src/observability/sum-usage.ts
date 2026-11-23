@@ -4,7 +4,9 @@ const total = (requests: readonly AiRequest[], field: keyof AiUsage): number =>
   requests.reduce((sum, r) => sum + (r.usage?.[field] ?? 0), 0);
 
 /** Every request's usage summed, estimated requests included. */
-export const sumUsage = (requests: readonly AiRequest[]): Required<AiUsage> => ({
+export const sumUsage = (
+  requests: readonly AiRequest[]
+): Required<AiUsage> => ({
   promptTokens: total(requests, "promptTokens"),
   completionTokens: total(requests, "completionTokens"),
   cacheReadTokens: total(requests, "cacheReadTokens"),

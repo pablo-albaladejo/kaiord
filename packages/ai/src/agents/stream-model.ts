@@ -66,7 +66,10 @@ export const streamModel = async <TOutput>(
   // answer the Provider does not bill, and stays unmeasured.
   const cut = () =>
     billed === undefined && (args.signal?.aborted || received.chars > 0)
-      ? cutUsage(requestChars(settings.system, settings.messages), received.chars)
+      ? cutUsage(
+          requestChars(settings.system, settings.messages),
+          received.chars
+        )
       : undefined;
   const result = streamText({
     ...settings,
