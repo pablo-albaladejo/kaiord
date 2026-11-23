@@ -168,7 +168,7 @@ describe("readTrainingPeaksCopyState", () => {
     {
       label: "TrainingPeaks answers 404",
       res: { ok: false, status: 404 },
-      state: "gone",
+      state: "absent",
     },
     {
       label: "TrainingPeaks answers 500",
