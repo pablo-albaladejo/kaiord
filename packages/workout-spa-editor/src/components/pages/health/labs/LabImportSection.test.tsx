@@ -8,7 +8,7 @@ import { I18nextProvider } from "react-i18next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { bridgeDiscovery } from "../../../../adapters/bridge/bridge-discovery";
-import { readWhoopStatus } from "../../../../adapters/bridge/whoop-transport";
+import { readWhoopStatus } from "../../../../adapters/whoop/connector/whoop-transport";
 import { importWhoopLabs } from "../../../../application/whoop/import-whoop-labs.use-case";
 import type { DiscoveredBridge } from "../../../../hooks/use-discovered-bridges";
 import { useDiscoveredBridges } from "../../../../hooks/use-discovered-bridges";
@@ -42,7 +42,7 @@ vi.mock("../../../../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: vi.fn() },
   DISCOVER_REQUEST_DELAY_MS: 3_000,
 }));
-vi.mock("../../../../adapters/bridge/whoop-transport", () => ({
+vi.mock("../../../../adapters/whoop/connector/whoop-transport", () => ({
   readWhoopStatus: vi.fn(),
   readWhoopFetch: vi.fn(),
 }));

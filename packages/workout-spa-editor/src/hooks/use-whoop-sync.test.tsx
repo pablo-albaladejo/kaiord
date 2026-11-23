@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { readWhoopUserId } from "../adapters/bridge/whoop-user-transport";
+import { readWhoopUserId } from "../adapters/whoop/connector/whoop-user-transport";
 import { syncWhoopActivities } from "../application/whoop/sync-whoop-activities.use-case";
 import { syncWhoopCycles } from "../application/whoop/sync-whoop-cycles.use-case";
 import { syncWhoopHeartRate } from "../application/whoop/sync-whoop-heart-rate.use-case";
@@ -17,7 +17,7 @@ import { useWhoopSync } from "./use-whoop-sync";
 vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: vi.fn() },
 }));
-vi.mock("../adapters/bridge/whoop-user-transport", () => ({
+vi.mock("../adapters/whoop/connector/whoop-user-transport", () => ({
   readWhoopUserId: vi.fn(),
   readWhoopFetch: vi.fn(),
 }));

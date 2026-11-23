@@ -107,8 +107,8 @@ describe("connectionStateOf", () => {
 describe("sessionOutcomeOf", () => {
   it.each([
     [{ sessionActive: true, needsReauth: false }, "signed-in"],
-    [{ sessionActive: false, needsReauth: true }, "signed-out-verified"],
-    [{ sessionActive: false, needsReauth: false }, "could-not-tell"],
+    [{ sessionActive: false, needsReauth: true }, "signed-out"],
+    [{ sessionActive: false, needsReauth: false }, "not-answering"],
   ] as const)("should read %o as %s", (signal, expected) => {
     // Arrange
     const input = signal;

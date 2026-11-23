@@ -7,8 +7,8 @@
  * and "open the Train2Go tab" remain on the store surface.
  */
 
+import { openTrain2Go } from "../adapters/train2go/connector/train2go-extension-transport";
 import { createDetectAction } from "./train2go-detect";
-import { openTrain2Go } from "./train2go-extension-transport";
 import type { Train2GoStore } from "./train2go-store";
 
 type Set = (fn: Partial<Train2GoStore>) => void;

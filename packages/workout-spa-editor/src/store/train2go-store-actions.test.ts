@@ -10,7 +10,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./train2go-extension-transport", () => ({
+vi.mock("../adapters/train2go/connector/train2go-extension-transport", () => ({
   openTrain2Go: vi.fn(),
 }));
 
@@ -18,7 +18,7 @@ vi.mock("./train2go-detect", () => ({
   createDetectAction: vi.fn(() => vi.fn()),
 }));
 
-import { openTrain2Go } from "./train2go-extension-transport";
+import { openTrain2Go } from "../adapters/train2go/connector/train2go-extension-transport";
 import { createTrain2GoActions } from "./train2go-store-actions";
 
 const mockOpenTrain2Go = vi.mocked(openTrain2Go);

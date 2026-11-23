@@ -35,7 +35,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -89,7 +89,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -137,11 +137,11 @@
       "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should explain a 402 as a planning-horizon limit, not a payload error"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-workout-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-workout-transport.ts",
           "contains": "one day ahead on a Basic account"
         },
         {
@@ -244,7 +244,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
@@ -300,7 +300,7 @@
     },
     {
       "id": "trainingpeaks.listing.athlete-number",
-      "text": "The extension gives the Kaiord App your TrainingPeaks athlete number just before a workout is placed, because TrainingPeaks needs it, and never the token.",
+      "text": "The extension gives the Kaiord App your TrainingPeaks athlete number just before it places a workout or imports your weight, because TrainingPeaks needs it for both, and never the token.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -317,6 +317,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
@@ -458,7 +462,7 @@
     },
     {
       "id": "trainingpeaks.pj.storage-sent",
-      "text": "**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App just before it places a workout, which needs it. Nothing else the extension stores leaves your browser.",
+      "text": "**Sent anywhere**: the token only to TrainingPeaks. The athlete number is also given to the Kaiord App just before it places a workout or imports your weight, which both need it. Nothing else the extension stores leaves your browser.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -475,6 +479,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should report signed in from a token a real request minted while it is still valid, and hand over no athlete id"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
@@ -554,7 +562,7 @@
           "title": "should exchange the cookie for a token then call the metrics API with the Bearer"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-metrics-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-metrics-transport.ts",
           "contains": "the raw JSON is read here"
         },
         {
@@ -576,7 +584,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -590,11 +598,11 @@
       "text": "`GET /fitness/v6/athletes/{id}/workouts/{workoutId}` reads one workout the Kaiord App sent earlier, to learn whether TrainingPeaks still has it before that workout is sent again. TrainingPeaks' answer reaches the Kaiord App in your browser, which keeps only the workout's id and day and drops the rest there.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should read one workout Kaiord created as present, keeping only its id and day"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should build every request so that the extension's list admits it"
         },
         {
@@ -626,7 +634,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -773,7 +781,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -849,7 +857,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
@@ -915,7 +923,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -925,7 +933,7 @@
     },
     {
       "id": "trainingpeaks.pp.check",
-      "text": "**Checking the Connection**: When the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks nothing and mints no token. It answers only whether it holds a token, minted for an earlier read or send, that has not expired; when it holds none, the answer is that it has not checked, and the first read or send finds out. It gives the Kaiord App your athlete number only just before placing a workout, which needs it.",
+      "text": "**Checking the Connection**: When the Kaiord App or the popup checks your sign-in, the extension asks TrainingPeaks nothing and mints no token. It answers only whether it holds a token, minted for an earlier read or send, that has not expired; when it holds none, the answer is that it has not checked, and the first read or send finds out. It gives the Kaiord App your athlete number only just before placing a workout or importing your weight, which both need it.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -946,6 +954,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should hand the athlete id only to the read the Kaiord App makes just before a write"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
@@ -958,7 +970,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -982,7 +994,7 @@
           "title": "should send a copy only after the athlete confirms it"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should read one workout Kaiord created as present, keeping only its id and day"
         },
         {
@@ -1004,7 +1016,7 @@
           "contains": "const WINDOW_DAYS = 30;"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-metrics-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-metrics-transport.ts",
           "contains": "the raw JSON is read here"
         },
         {
@@ -1031,7 +1043,7 @@
     },
     {
       "id": "trainingpeaks.pp.answers-unread",
-      "text": "**Answers Handed Over Unread**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a new planned workout or one weight); a request outside the extension's list of paths, the token exchange included, is refused before it is sent. The extension hands the Kaiord App TrainingPeaks' answer as it came, without reading it. Reading the answer happens in the Kaiord App, in your browser.",
+      "text": "**Answers Handed Over Unread, Sign-In Secrets Removed**: The Kaiord App names the method and the path of each request, and for a write its body, which the extension checks against the one shape it accepts for that path (a new planned workout or one weight); a request outside the extension's list of paths, the token exchange included, is refused before it is sent. The extension hands the Kaiord App TrainingPeaks' answer as it came, without reading it, except that it first removes anything in it tied to your TrainingPeaks sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today. Reading the answer happens in the Kaiord App, in your browser.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
@@ -1048,6 +1060,18 @@
         {
           "test": "packages/trainingpeaks-bridge/test/thin-bridge.test.js",
           "title": "should declare a body schema for exactly the write entries"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     },
@@ -1132,7 +1156,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -1186,7 +1210,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -1234,11 +1258,11 @@
       "text": "En una cuenta Basic de TrainingPeaks, TrainingPeaks solo acepta entrenamientos para hoy y mañana, contados en la zona horaria de la cuenta; para cualquier día que allí pueda ser posterior, Kaiord App te lo dice antes de enviar, y dice lo mismo si TrainingPeaks lo rechaza.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should explain a 402 as a planning-horizon limit, not a payload error"
         },
         {
-          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-workout-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-workout-transport.ts",
           "contains": "one day ahead on a Basic account"
         },
         {
@@ -1341,7 +1365,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         }
       ]
@@ -1397,7 +1421,7 @@
     },
     {
       "id": "trainingpeaks.es.listing.athlete-number",
-      "text": "La extensión le da a Kaiord App tu número de atleta de TrainingPeaks justo antes de colocar un entrenamiento, porque TrainingPeaks lo necesita, y nunca el token.",
+      "text": "La extensión le da a Kaiord App tu número de atleta de TrainingPeaks justo antes de colocar un entrenamiento o importar tu peso, porque TrainingPeaks lo necesita para ambos, y nunca el token.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
@@ -1414,6 +1438,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
@@ -1481,6 +1509,60 @@
         {
           "file": "LICENSE",
           "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.listing.secrets-removed",
+      "text": "Before it hands the Kaiord App an answer, the extension removes anything in it tied to your TrainingPeaks sign-in: a field named as a token, CSRF, session or nonce value, or a JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.es.listing.secrets-removed",
+      "text": "Antes de entregar una respuesta a Kaiord App, la extensión quita lo que en ella esté ligado a tu inicio de sesión de TrainingPeaks: un campo con nombre de token, CSRF, sesión o nonce, o una entrada JSON con nombre de token, clave, contraseña, cookie o id de sesión. Hoy las respuestas de TrainingPeaks no traen ninguno.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
+        }
+      ]
+    },
+    {
+      "id": "trainingpeaks.pj.secrets-removed",
+      "text": "**Sign-in secrets removed from answers**: Before the extension hands the Kaiord App an answer, it removes anything in it tied to your TrainingPeaks sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. TrainingPeaks' answers carry none today.",
+      "proof": [
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should drop a token TrainingPeaks echoes in an answer"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/answer-secrets.test.js",
+          "title": "should hand TrainingPeaks' metrics over byte for byte"
+        },
+        {
+          "test": "packages/trainingpeaks-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     }

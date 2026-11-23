@@ -64,6 +64,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+}
+
 // ── WHOOP call surface: the closed list ──
 //
 // Method + path pattern, nothing else, GET only: every request is checked
@@ -157,12 +167,16 @@ const getSessionStatus = async () => {
 // bearer captured from WHOOP's own traffic is "signed-in"; none captured yet
 // is "not-checked" (the WHOOP tab has not sent a request since the service
 // worker started), never signed out. Only yes or no leaves: no id, no time.
+// `hasAccountId` and `tabOpen` say whether a held sign-in can serve a read,
+// so the Kaiord App shows the popup's notice at the same moment.
 const checkSession = async () => {
-  const { connected } = await getSessionStatus();
+  const { connected, userId } = await getSessionStatus();
   return {
     connected,
     session: connected ? "signed-in" : "not-checked",
     authenticated: connected,
+    hasAccountId: connected && userId !== null,
+    tabOpen: (await findWhoopTab()) !== null,
   };
 };
 
@@ -225,23 +239,12 @@ const openWhoop = async () => {
  * script's own-origin fetch). With the token held and no tab open, the popup
  * would otherwise report a healthy session over reads that all throw.
  *
- * Internal only — deliberately absent from EXTERNAL_ACTIONS. The SPA has no
- * use for it, and adding a field to the externally reachable `status` payload
- * would widen what this bridge discloses beyond privacy-justification.md.
+ * Internal only: the Kaiord App learns the same yes or no from the
+ * `tabOpen` of its Session check, never which tab it is.
  */
 const hasWhoopTab = async () => ({ open: (await findWhoopTab()) !== null });
 
 const UNAUTHORIZED_STATUS = 401;
-
-const toBridgeError = (res) => {
-  const status = typeof res?.status === "number" ? res.status : undefined;
-  const err = new Error(
-    res?.error ?? `Request failed${status ? `: ${status}` : ""}`
-  );
-  if (status !== undefined) err.status = status;
-  if (status === UNAUTHORIZED_STATUS) err.needsReauth = true;
-  return err;
-};
 
 // ── The App's one read: a request from the closed list, answered raw ──
 // Run by the content script in the open WHOOP tab, which hands back the
@@ -249,8 +252,14 @@ const toBridgeError = (res) => {
 const request = async (message) => {
   const { path } = requestGate.createRequestGate({ allowed: ALLOWED })(message);
   const res = await whoopFetch(path);
-  if (!res?.ok) throw toBridgeError(res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  // A 401 is WHOOP refusing the captured bearer: a verified sign-out.
+  if (!res?.ok) {
+    throw answerCore.toBridgeError({
+      ...res,
+      needsReauth: res?.status === UNAUTHORIZED_STATUS,
+    });
+  }
+  return answerCore.toAnswer(res);
 };
 
 // ── Actions ──

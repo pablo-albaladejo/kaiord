@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ping } from "./train2go-extension-transport";
+import { ping } from "../adapters/train2go/connector/train2go-extension-transport";
 
 // Known PII values planted into mock responses.
 const PII = {

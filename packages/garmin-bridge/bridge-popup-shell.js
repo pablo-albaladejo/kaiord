@@ -68,7 +68,14 @@ const renderStatusMark = (el, mark) => {
 const renderStatusBlock = (
   $,
   msg,
-  { tone = "muted", mark = "dot", verdictKey, verdictSubs, causeKey, causeSubs } = {}
+  {
+    tone = "muted",
+    mark = "dot",
+    verdictKey,
+    verdictSubs,
+    causeKey,
+    causeSubs,
+  } = {}
 ) => {
   const el = $("status");
   el.className = `status-block status-block--${tone}`;
@@ -161,7 +168,9 @@ const renderSkeleton = ($, regions = KD_DEFAULT_SKELETON) => {
     if (!host) continue;
     kdReplace(
       host,
-      parts.filter((name) => KD_SKELETON_PARTS[name]).map((name) => KD_SKELETON_PARTS[name]())
+      parts
+        .filter((name) => KD_SKELETON_PARTS[name])
+        .map((name) => KD_SKELETON_PARTS[name]())
     );
   }
 };
@@ -203,7 +212,11 @@ const kdFixButton = (label, onClick) => {
 // site (signing in) is a link to `href`; "try-again" re-runs the check through
 // `onRetry`. `since` is an already-worded outage date, or null on the first
 // failed check, which is too soon to date anything.
-const renderNotice = ($, notice, { since = null, href = null, onRetry } = {}) => {
+const renderNotice = (
+  $,
+  notice,
+  { since = null, href = null, onRetry } = {}
+) => {
   const el = $("status");
   el.className = "status-block status-block--warn";
   renderStatusMark(el, since ? "alert" : "dot");
@@ -220,6 +233,28 @@ const renderNotice = ($, notice, { since = null, href = null, onRetry } = {}) =>
   kdReplace($("footer-region"), [fix]);
 };
 
+// One notice for a Connection that does not work. `since` is the outage
+// start Kaiord already knew of, or null on the first failed probe: only then
+// does the notice carry a date, and the monogram stays muted until it does.
+// The popup words the notice (KAIORD_CONNECTION_NOTICES.noticeFor) and fills
+// its own chips after this.
+const renderBrokenConnection = (
+  $,
+  msg,
+  notice,
+  { since = null, href = null, onRetry, formatSince } = {}
+) => {
+  $("brand-mark")?.classList.toggle(
+    "popup-header__mark--muted",
+    since === null
+  );
+  renderNotice($, notice, {
+    since: since === null ? null : msg("outageSince", [formatSince(since)]),
+    href,
+    onRetry,
+  });
+};
+
 if (typeof module !== "undefined") {
   module.exports = {
     renderStatusBlock,
@@ -228,5 +263,6 @@ if (typeof module !== "undefined") {
     renderSkeleton,
     renderCtas,
     renderNotice,
+    renderBrokenConnection,
   };
 }

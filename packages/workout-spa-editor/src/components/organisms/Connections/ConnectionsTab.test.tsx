@@ -258,10 +258,10 @@ describe("ConnectionsTab", () => {
   });
   it("should not assert an unverifiable extension is still present", () => {
     // Arrange
-    // Tanita has no prober AND cannot be pinged — its background script routes
-    // `ping` into the whole-CSV `checkSession` — so after the initial
-    // announcement the SPA has no way to learn it was uninstalled. Present
-    // tense would be a claim it cannot support.
+    // A Tanita extension one protocol behind is asked nothing — its `ping`
+    // is the whole-CSV `checkSession` — so after the initial announcement
+    // the SPA has no way to learn it was uninstalled. Present tense would be
+    // a claim it cannot support.
     setSources([
       source({
         id: "tanita",
@@ -281,9 +281,7 @@ describe("ConnectionsTab", () => {
     expect(screen.getByTestId("connection-bridge-tanita")).toHaveTextContent(
       /detected on load/i
     );
-    expect(
-      screen.getByText(/may have been removed since/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/may have been removed/i)).toBeInTheDocument();
   });
 
   it("should claim no counts while discovery is still in its opening window", () => {

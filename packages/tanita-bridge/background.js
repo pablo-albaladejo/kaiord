@@ -68,6 +68,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
 }
 
+// ── The answer handed to the App, Session secrets removed (vendored) ──
+let answerCore;
+try {
+  importScripts("bridge-answer.js");
+  answerCore = globalThis.bridgeAnswer;
+} catch {
+  answerCore =
+    typeof require !== "undefined" ? require("./bridge-answer.js") : {};
+}
+
 // ── Tanita call surface: the closed list ──
 //
 // Method + path pattern, nothing else: every request, the App's included,
@@ -82,19 +92,16 @@ const ALLOWED = [
 const isAllowed = (method, path) =>
   sessionFetch.isPathAllowed(ALLOWED, method, path);
 
-// The Session check reads headers only: an HTML page in place of the export
-// means MyTANITA bounced it to its login page.
+// A 2xx HTML page where the export should be is not the export.
 const HTML_CONTENT_TYPE_RE = /^\s*text\/html\b/i;
-
-const isHtmlContentType = (contentType) =>
-  HTML_CONTENT_TYPE_RE.test(contentType || "");
 
 // ── Actions ──
 
 // The Session check: a HEAD of the export, so MyTANITA answers with headers
-// and no body. A bounce to the login page (redirect, 401/403, or an HTML page
-// in place of the export) is a verified "signed-out"; any other failure means
-// MyTANITA did not answer, which is never reported as signed out.
+// and no body. A bounce to the sign-in page (a redirect) or a 401 is a
+// verified "signed-out". Any other answer is "not-answering", never signed
+// out: a 403, a 5xx, no answer, and a 2xx HTML page in place of the export,
+// which a HEAD cannot tell from a maintenance page because it has no body.
 const probeExport = async () => {
   if (!isAllowed("HEAD", EXPORT_CSV_PATH)) return "not-answering";
   try {
@@ -111,7 +118,9 @@ const probeExport = async () => {
     }
     if (!response.ok) return "not-answering";
     const contentType = response.headers?.get?.("content-type") || "";
-    return isHtmlContentType(contentType) ? "signed-out" : "signed-in";
+    return HTML_CONTENT_TYPE_RE.test(contentType)
+      ? "not-answering"
+      : "signed-in";
   } catch {
     return "not-answering";
   }
@@ -128,13 +137,6 @@ const checkSession = async () => {
   };
 };
 
-const toBridgeError = (res) => {
-  const err = new Error(res?.error ?? "Request failed");
-  if (typeof res?.status === "number") err.status = res.status;
-  if (res?.needsReauth) err.needsReauth = true;
-  return err;
-};
-
 // ── The App's one read: a request from the closed list, answered raw ──
 const request = async (message) => {
   const { method, path } = requestGate.createRequestGate({ allowed: ALLOWED })(
@@ -146,8 +148,8 @@ const request = async (message) => {
     headers: { Accept: "text/csv,*/*" },
     fetchImpl: fetch,
   });
-  if (!res.ok) throw toBridgeError(res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  if (!res.ok) throw answerCore.toBridgeError(res);
+  return answerCore.toAnswer(res);
 };
 
 const handleAction = async (message) => {
@@ -225,7 +227,6 @@ if (typeof module !== "undefined") {
     EXPORT_CSV_PATH,
     ALLOWED,
     isAllowed,
-    isHtmlContentType,
     request,
     checkSession,
     handleAction,

@@ -24,12 +24,6 @@ const ALL_BRIDGES = [
   "trainingpeaks-bridge",
 ];
 const SNAPSHOT_BRIDGES = ["garmin-bridge", "train2go-bridge"];
-const GATE_BRIDGES = [
-  "garmin-bridge",
-  "whoop-bridge",
-  "tanita-bridge",
-  "trainingpeaks-bridge",
-];
 
 export const BRIDGE_CORE_MASTERS = [
   {
@@ -55,11 +49,24 @@ export const BRIDGE_CORE_MASTERS = [
     bridges: ["garmin-bridge", "trainingpeaks-bridge"],
   },
   // The thin Bridge's one `request` gate: closed list + declared body schema.
-  // Train2Go keeps its own read-only gate (#1641); the other four use this.
   {
     master: "bridge-request-gate.js",
     dest: "bridge-request-gate.js",
-    bridges: GATE_BRIDGES,
+    bridges: ALL_BRIDGES,
+  },
+  // The `request` answer every thin Bridge hands the App, with the
+  // Session-bound secrets (anti-forgery tokens, credential keys) removed.
+  {
+    master: "bridge-answer.js",
+    dest: "bridge-answer.js",
+    bridges: ALL_BRIDGES,
+  },
+  // Swallowed-error telemetry and the worker's script loader, for the two
+  // service workers that keep an error log.
+  {
+    master: "bridge-telemetry.js",
+    dest: "bridge-telemetry.js",
+    bridges: SNAPSHOT_BRIDGES,
   },
   {
     master: "kaiord-announce.js",
@@ -142,9 +149,14 @@ export const BRIDGE_CORE_MASTERS = [
     bridges: ["garmin-bridge", "trainingpeaks-bridge"],
   },
   {
+    master: "test/bridge-answer.test.js",
+    dest: "test/bridge-answer.test.js",
+    bridges: ALL_BRIDGES,
+  },
+  {
     master: "test/bridge-request-gate.test.js",
     dest: "test/bridge-request-gate.test.js",
-    bridges: GATE_BRIDGES,
+    bridges: ALL_BRIDGES,
   },
   {
     master: "test/session-fetch.test.js",
@@ -166,6 +178,21 @@ export const BRIDGE_CORE_MASTERS = [
     master: "test/popup-locales.test.js",
     dest: "test/popup-locales.test.js",
     bridges: ALL_BRIDGES,
+  },
+];
+
+// Masters a workspace package reads at runtime, copied into its source so it
+// imports its own file instead of reaching into _shared/ by relative path
+// (packages/_shared/AGENTS.md). `dest` is relative to packages/; the parity
+// guard holds each copy byte-identical to its master.
+export const PACKAGE_COPIES = [
+  {
+    master: "connection-notices.js",
+    dest: "i18n/src/generated/connection-notices.js",
+  },
+  {
+    master: "connection-notices.d.ts",
+    dest: "i18n/src/generated/connection-notices.d.ts",
   },
 ];
 
@@ -193,11 +220,23 @@ export const syncBridgeCore = ({
   return copied;
 };
 
+export const syncPackageCopies = ({
+  mastersDir = DEFAULT_MASTERS_DIR,
+  packagesDir = DEFAULT_PACKAGES_DIR,
+  copies = PACKAGE_COPIES,
+} = {}) =>
+  copies.map(({ master, dest }) => {
+    const target = join(packagesDir, dest);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(join(mastersDir, master), target);
+    return target;
+  });
+
 const isCliEntry =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isCliEntry) {
-  const copied = syncBridgeCore();
+  const copied = [...syncBridgeCore(), ...syncPackageCopies()];
   for (const target of copied) {
     console.log(`  ✓ ${target.replace(`${REPO}/`, "")}`);
   }

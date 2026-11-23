@@ -1,4 +1,4 @@
-import { readTrainingPeaksCopyState } from "../adapters/trainingpeaks/trainingpeaks-workout-transport";
+import { readTrainingPeaksCopyState } from "../adapters/trainingpeaks/connector/trainingpeaks-workout-transport";
 import { checkTrainingPeaksCopy as checkCopy } from "../application/trainingpeaks/check-trainingpeaks-copy";
 import type { WorkoutRecord } from "../types/calendar-record";
 import { ledgerRepo, TRAININGPEAKS_BRIDGE_ID } from "./trainingpeaks-push-fn";

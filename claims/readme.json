@@ -929,7 +929,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -983,11 +983,11 @@
           "title": "should send only GET requests, so nothing on Train2Go is changed"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -1064,7 +1064,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/trainingpeaks-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
           "title": "should send a workout as the body of the write and read its TrainingPeaks id"
         },
         {
@@ -1164,7 +1164,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {

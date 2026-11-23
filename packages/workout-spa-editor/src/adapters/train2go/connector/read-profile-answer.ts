@@ -4,7 +4,7 @@
  * else names no one. Only the id and name are kept; the coach's name and
  * notes in the same answer are dropped here.
  */
-import type { RawAnswer } from "./train2go-bridge-request";
+import type { RawAnswer } from "../../bridge/thin-bridge-request";
 
 type ProfilePing = {
   success?: boolean;

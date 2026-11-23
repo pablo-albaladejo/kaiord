@@ -7,18 +7,26 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { connectionNotice } from "@kaiord/i18n";
+import {
+  connectionNoTabNotice,
+  connectionNotice,
+  connectionReasonNotice,
+} from "@kaiord/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { connectionStateOf } from "../../application/connections/connection-state";
+import {
+  connectionReasonOf,
+  connectionStateOf,
+} from "../../application/connections/connection-state";
+import { connectionNoticeOf } from "../../components/molecules/ConnectionNotice/connection-notice-of";
 import {
   probeGarminSession,
   probeTrain2GoSession,
   probeTrainingPeaksSession,
-  probeWhoopSession,
 } from "./bridge-ping-session-probes";
 import type { SessionProber } from "./bridge-session-probe-types";
 import { sendBridgeMessage } from "./bridge-transport";
+import { probeWhoopSession } from "./whoop-session-probe";
 
 vi.mock("./bridge-transport", () => ({ sendBridgeMessage: vi.fn() }));
 
@@ -137,4 +145,100 @@ describe("popup and App parity", () => {
       expect(app).toEqual(popup);
     }
   );
+});
+
+// #1091: WHOOP holds a sign-in whose token carries no account id, or no
+// WHOOP tab is open to read through. The popup reads its own `popup-status`
+// (with `userId`) and `tab-open`; the App reads the yes-or-no `hasAccountId`
+// and `tabOpen` of the same check, and must show the same notice at the same
+// moment, asking WHOOP nothing and the extension for no id.
+describe("popup and App parity, a WHOOP sign-in that cannot serve", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const appNoticeOf = (probed: Awaited<ReturnType<SessionProber>>) => {
+    const row = { ...probed, checking: false, lastCheckedAt: 1 };
+    const state = connectionStateOf(row, {
+      installed: true,
+      settled: true,
+      hasProbe: true,
+    });
+    return connectionNoticeOf(state, connectionReasonOf(row), "WHOOP", "en");
+  };
+
+  const popupSrc = () =>
+    readFileSync(join(process.cwd(), "..", "whoop-bridge", "popup.js"), "utf8");
+
+  const current = (data: Record<string, unknown>) => ({
+    ok: true,
+    delivered: true,
+    protocolVersion: 2,
+    data: { connected: true, session: "signed-in", ...data },
+  });
+
+  it.each([
+    [
+      "the current extension (a check that names no account)",
+      current({ hasAccountId: false, tabOpen: true }),
+    ],
+    [
+      "the extension one protocol behind (status with a null id)",
+      {
+        ok: true,
+        delivered: true,
+        protocolVersion: 1,
+        data: { connected: true, userId: null, capturedAt: 1 },
+      },
+    ],
+  ])(
+    "should show the popup's no-account-id notice in the App for %s",
+    async (_label, answer) => {
+      // Arrange
+      mockedSend.mockResolvedValueOnce(answer);
+      const popup = connectionReasonNotice("no-account-id", "WHOOP", "en");
+
+      // Act
+      const probed = await probeWhoopSession("ext-1");
+      const app = appNoticeOf(probed);
+
+      // Assert
+      expect(popupSrc()).toMatch(/statusRes\.data\.userId != null/);
+      expect(popupSrc()).toMatch(/noticeForReason\(\s*"no-account-id"/);
+      expect(app).toEqual(popup);
+      expect(mockedSend).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("should show the popup's Open WHOOP notice in the App when no WHOOP tab is open", async () => {
+    // Arrange
+    mockedSend.mockResolvedValueOnce(
+      current({ hasAccountId: true, tabOpen: false })
+    );
+    const popup = connectionNoTabNotice("WHOOP", "en");
+
+    // Act
+    const probed = await probeWhoopSession("ext-1");
+    const app = appNoticeOf(probed);
+
+    // Assert
+    expect(popupSrc()).toMatch(/else if \(!tabOpen\) renderNoTab\(\)/);
+    expect(app).toEqual(popup);
+    expect(mockedSend).toHaveBeenCalledTimes(1);
+  });
+
+  it("should keep a WHOOP sign-in that names its account, with a tab open, Connected and with no notice", async () => {
+    // Arrange
+    mockedSend.mockResolvedValueOnce(
+      current({ hasAccountId: true, tabOpen: true })
+    );
+
+    // Act
+    const probed = await probeWhoopSession("ext-1");
+    const app = appNoticeOf(probed);
+
+    // Assert
+    expect(app).toBeNull();
+    expect(mockedSend).toHaveBeenCalledTimes(1);
+  });
 });

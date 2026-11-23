@@ -8,26 +8,25 @@
  * prober never throws, so one unreachable bridge cannot abort a refresh pass.
  *
  * An extension that answers the typed `session` outcome is read through it
- * (`bridge-session-outcome`); an older one through its own booleans.
- *
- * `tanita-bridge` is deliberately ABSENT: an extension older than the cheap
- * check implements `checkSession` as a full export-CSV download, and the App
- * cannot tell which one is installed before asking, so polling it could
- * re-fetch the athlete's entire body-composition history every pass. Bridges
- * without an entry are reported as discovered-only and are never messaged.
+ * (`bridge-session-outcome`); an older one through its own booleans. A
+ * prober is handed the protocol version discovery verified, and asks an
+ * extension one protocol behind nothing when its check would cost data or a
+ * token (`bridge-ping-session-probes`).
  */
 import {
   probeGarminSession,
+  probeTanitaSession,
   probeTrain2GoSession,
   probeTrainingPeaksSession,
-  probeWhoopSession,
 } from "./bridge-ping-session-probes";
 import type { SessionProber } from "./bridge-session-probe-types";
+import { probeWhoopSession } from "./whoop-session-probe";
 
 export type { SessionProbeResult } from "./bridge-session-probe-types";
 
 export const SESSION_PROBES: Record<string, SessionProber> = {
   "garmin-bridge": probeGarminSession,
+  "tanita-bridge": probeTanitaSession,
   "train2go-bridge": probeTrain2GoSession,
   "whoop-bridge": probeWhoopSession,
   "trainingpeaks-bridge": probeTrainingPeaksSession,

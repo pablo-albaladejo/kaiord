@@ -318,7 +318,7 @@ describe("background service worker (SW-direct)", () => {
       expect(res).toMatchObject({ ok: false, needsReauth: true });
     });
 
-    it("should surface needsReauth on a 401 or 403 auth challenge", async () => {
+    it("should surface needsReauth on a 401 and a plain failure on a 403", async () => {
       // Arrange
       fetch
         .mockResolvedValueOnce(statusResponse(HTTP_UNAUTHORIZED))
@@ -330,7 +330,8 @@ describe("background service worker (SW-direct)", () => {
 
       // Assert
       expect(unauthorized).toMatchObject({ ok: false, needsReauth: true });
-      expect(forbidden).toMatchObject({ ok: false, needsReauth: true });
+      expect(forbidden).toMatchObject({ ok: false, status: HTTP_FORBIDDEN });
+      expect(forbidden.needsReauth).toBeUndefined();
     });
 
     it("should return a plain failure (no needsReauth) on a 500", async () => {

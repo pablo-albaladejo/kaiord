@@ -36,16 +36,23 @@ export type BridgeCall<T> = {
 
 type Refusal = { needsReauth?: boolean; status?: number; retryable?: boolean };
 
-/** Thrown by a reader for an answer that says no (a login page, a payload
-    that is not the expected shape); carried on the envelope as it is. */
-export class BridgeAnswerRefusal extends Error {
+const REFUSAL = "BridgeAnswerRefusal";
+
+/** What a reader throws for an answer that says no (a payload that is not
+    the expected shape); carried on the envelope as it is. */
+export type BridgeAnswerRefusal = Error & {
+  readonly name: typeof REFUSAL;
   readonly refusal: Refusal;
-  constructor(message: string, refusal: Refusal = {}) {
-    super(message);
-    this.name = "BridgeAnswerRefusal";
-    this.refusal = refusal;
-  }
-}
+};
+
+export const bridgeAnswerRefusal = (
+  message: string,
+  refusal: Refusal = {}
+): BridgeAnswerRefusal =>
+  Object.assign(new Error(message), { name: REFUSAL, refusal } as const);
+
+const isBridgeAnswerRefusal = (e: unknown): e is BridgeAnswerRefusal =>
+  e instanceof Error && e.name === REFUSAL && "refusal" in e;
 
 export const speaksPreviousProtocol = (res: ExtensionResponse): boolean =>
   res.protocolVersion === PREVIOUS_BRIDGE_PROTOCOL_VERSION;
@@ -71,7 +78,7 @@ const readRaw = <T>(
   try {
     return { ...res, data: read(answer.data) };
   } catch (e) {
-    return e instanceof BridgeAnswerRefusal
+    return isBridgeAnswerRefusal(e)
       ? failed(res, e.message, e.refusal)
       : failed(res, MALFORMED_ANSWER);
   }

@@ -544,9 +544,9 @@ const SOLO_CASES = [
   ],
   [
     WHOOP,
-    "WHOOP's answer is handed to the Kaiord editor as it came, without being read",
+    "WHOOP's answer is handed to the Kaiord App as it came, without being read",
     "WHOOP's answer is read and handed on",
-    "WHOOP answers handed to the editor unread",
+    "WHOOP answers handed to the Kaiord App unread",
   ],
   [
     TRAININGPEAKS,

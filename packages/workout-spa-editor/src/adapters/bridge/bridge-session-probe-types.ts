@@ -6,6 +6,8 @@
  * store can render one uniform state per bridge.
  */
 
+import type { ConnectionReason } from "@kaiord/i18n";
+
 export type SessionProbeResult = {
   /** Did the extension answer? `false` means it is gone, not signed out. */
   reachable: boolean;
@@ -26,10 +28,15 @@ export type SessionProbeResult = {
    * nor broken. Absent on every other result.
    */
   notChecked?: true;
+  /** The Session works but cannot serve: a WHOOP sign-in whose token names
+      no account id, which every import is built on. */
+  reason?: ConnectionReason;
 };
 
+/** `protocolVersion` is the one discovery verified, when it knows it. */
 export type SessionProber = (
-  extensionId: string
+  extensionId: string,
+  protocolVersion?: number | null
 ) => Promise<SessionProbeResult>;
 
 export const inactive = (

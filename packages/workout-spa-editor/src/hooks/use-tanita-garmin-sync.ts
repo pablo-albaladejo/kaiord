@@ -12,8 +12,8 @@
 import { useCallback, useState } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { pushGarminBodyComposition } from "../adapters/garmin/garmin-body-composition-transport";
-import { readTanitaExportCsv } from "../adapters/tanita/tanita-transport";
+import { pushGarminBodyComposition } from "../adapters/garmin/connector/garmin-body-composition-transport";
+import { readTanitaExportCsv } from "../adapters/tanita/connector/tanita-transport";
 import type { SyncTanitaPhase } from "../application/health/sync-tanita-body-composition.use-case";
 import { syncTanitaBodyComposition } from "../application/health/sync-tanita-body-composition.use-case";
 import { usePersistence } from "../contexts/persistence-context";

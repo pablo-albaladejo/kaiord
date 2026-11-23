@@ -35,127 +35,42 @@ const BRIDGE_MANIFEST = {
   capabilities: ["write:workouts", "read:activities", "write:body"],
 };
 
-// ── Swallowed-error telemetry ──
-//
-// Several catch{} blocks below intentionally swallow errors so a single
-// failure doesn't break the whole bridge (see the comment at each call
-// site). This keeps the swallow behavior but records a structured, capped
-// log so the cause is inspectable — e.g.
-// `chrome.storage.local.get("bridgeTelemetry")` from the popup or
-// chrome://extensions devtools.
-const TELEMETRY_KEY = "bridgeTelemetry";
-const TELEMETRY_MAX_ENTRIES = 25;
-
-// Writes are chained so concurrent calls cannot interleave their
-// read-modify-write cycles and silently drop each other's entries.
-let telemetryWrite = Promise.resolve();
-
-const logSwallowed = (level, action, cause) => {
-  const entry = {
-    level,
-    action,
-    cause: String(cause?.message ?? cause),
-    at: Date.now(),
-  };
-  telemetryWrite = telemetryWrite
-    .then(() => chrome.storage.local.get(TELEMETRY_KEY))
-    .then(({ [TELEMETRY_KEY]: existing = [] }) =>
-      chrome.storage.local.set({
-        [TELEMETRY_KEY]: [...existing, entry].slice(-TELEMETRY_MAX_ENTRIES),
-      })
-    )
-    .catch(() => {
-      // Storage itself unavailable (e.g. quota); nothing more we can do.
-    });
-  return telemetryWrite;
-};
-
-// ── Shared envelope/dispatch (vendored bridge-core) ──
-let bridgeEnvelope;
+// ── Swallowed-error telemetry and script loading (vendored bridge-core) ──
+let telemetry;
 try {
-  importScripts("bridge-envelope.js");
-  bridgeEnvelope = globalThis;
-} catch (e) {
-  bridgeEnvelope =
-    typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-bridge-envelope",
-    e
-  );
+  importScripts("bridge-telemetry.js");
+  telemetry = globalThis.bridgeTelemetry;
+} catch {
+  // Only a missing bridge-telemetry.js lands here in the worker; under Node
+  // (tests) it is the normal path.
+  telemetry =
+    typeof require !== "undefined"
+      ? require("./bridge-telemetry.js")
+      : { TELEMETRY_KEY: "", logSwallowed: () => {}, loadScript: () => ({}) };
 }
+const { TELEMETRY_KEY, logSwallowed, loadScript } = telemetry;
 
-// ── App theme preference for the popup (vendored bridge-core) ──
-let bridgeTheme;
-try {
-  importScripts("bridge-theme.js");
-  bridgeTheme = globalThis;
-} catch (e) {
-  bridgeTheme =
-    typeof require !== "undefined" ? require("./bridge-theme.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-bridge-theme",
-    e
-  );
-}
+// Vendored bridge-core: envelope/dispatch, the popup's theme, the Bearer
+// transport (read by garmin-oauth.js, so loaded first), the `request` gate
+// and the answer handed to the App.
+const bridgeEnvelope = loadScript("bridge-envelope.js");
+const bridgeTheme = loadScript("bridge-theme.js");
+loadScript("bearer-fetch.js");
+const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
+const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
+const snapshotValidator = loadScript("profile-snapshot.js");
 
-// ── Bearer transport (vendored bridge-core; consumed by garmin-oauth.js) ──
-// Loaded before garmin-oauth so the SW exposes self.bearerFetch/bearerRequest.
-try {
-  importScripts("bearer-fetch.js");
-} catch (e) {
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-bearer-fetch",
-    e
-  );
-}
-
-// ── OAuth token minting + connectapi Bearer calls (bridge-specific) ──
-let garminOAuth;
-try {
-  importScripts("garmin-oauth.js");
-  garminOAuth = globalThis.garminOAuth;
-} catch (e) {
-  garminOAuth =
-    typeof require !== "undefined" ? require("./garmin-oauth.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-garmin-oauth",
-    e
-  );
-}
-
-// ── The `request` gate: closed list + declared body schemas (vendored) ──
-let requestGate;
-try {
-  importScripts("bridge-request-gate.js");
-  requestGate = globalThis.bridgeRequestGate;
-} catch (e) {
-  requestGate =
-    typeof require !== "undefined" ? require("./bridge-request-gate.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-bridge-request-gate",
-    e
-  );
-}
-
-// ── Profile snapshot validator (plain JS, parity-tested via shared fixtures) ──
-let snapshotValidator;
-try {
-  importScripts("profile-snapshot.js");
-  snapshotValidator = globalThis;
-} catch (e) {
-  snapshotValidator =
-    typeof require !== "undefined" ? require("./profile-snapshot.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-profile-snapshot",
-    e
-  );
-}
+// Garmin's own: OAuth token minting + connectapi Bearer calls, the body
+// schemas of the write entries (the FIT check loads before them), and the
+// one deadline every request runs under.
+const garminOAuth = loadScript("garmin-oauth.js", "garminOAuth");
+loadScript("garmin-fit-check.js", "garminFitCheck");
+const requestBodies = loadScript(
+  "garmin-request-bodies.js",
+  "garminRequestBodies"
+);
+const deadline = loadScript("garmin-deadline.js", "garminDeadline");
+const BODY_SCHEMAS = requestBodies.BODY_SCHEMAS;
 
 // ── Garmin call surface: the closed list ──
 //
@@ -186,74 +101,9 @@ const ALLOWED = [
   { method: "GET", pattern: /^\/calendar-service\/year\/\d{4}\/month\/\d{1,2}$/ },
 ];
 
-// ── Declared body schemas ──
-//
-// The shape each write entry accepts, so the extension forwards a workout,
-// a FIT file or a date and never an arbitrary payload. A workout's steps are
-// bounded JSON: their shape is the App's Garmin writer's, read by Garmin.
-const SPORT_TYPE = {
-  type: "object",
-  fields: {
-    sportTypeId: { type: "integer", min: 0 },
-    sportTypeKey: { type: "string", min: 1, max: 64 },
-    displayOrder: { type: "integer", min: 0, optional: true },
-  },
-};
-
-const WORKOUT_SEGMENT = {
-  type: "object",
-  fields: {
-    segmentOrder: { type: "integer", min: 1 },
-    sportType: SPORT_TYPE,
-    workoutSteps: {
-      type: "array",
-      min: 1,
-      max: 500,
-      items: { type: "json", maxChars: 65536 },
-    },
-  },
-};
-
-const FIT_SIGNATURE = ".FIT";
-const FIT_MAX_BYTES = 1048576;
-
-// A FIT file: bytes 8-11 of every FIT header spell ".FIT".
-const isFitFile = (bytes) =>
-  requestGate.matchesShape(bytes, {
-    type: "bytes",
-    min: 14,
-    max: FIT_MAX_BYTES,
-  }) && String.fromCharCode(...bytes.slice(8, 12)) === FIT_SIGNATURE;
-
-const BODY_SCHEMAS = {
-  workout: {
-    type: "object",
-    fields: {
-      workoutName: { type: "string", min: 1, max: 255 },
-      sportType: SPORT_TYPE,
-      workoutSegments: {
-        type: "array",
-        min: 1,
-        max: 20,
-        items: WORKOUT_SEGMENT,
-      },
-      poolLength: { type: "number", min: 0, optional: true },
-      poolLengthUnit: {
-        type: "object",
-        optional: true,
-        fields: {
-          unitId: { type: "integer", min: 0 },
-          unitKey: { type: "string", min: 1, max: 32 },
-          factor: { type: "number" },
-        },
-      },
-      isSessionTransitionEnabled: { type: "boolean", optional: true },
-    },
-  },
-  "fit-file": { type: "custom", test: isFitFile },
-  schedule: { type: "object", fields: { date: { type: "date" } } },
-};
-
+// The declared body schemas (garmin-request-bodies.js) let a write carry
+// only the workout the App's GCN writer builds, the body-composition FIT
+// file or a date, never an arbitrary payload.
 const admitRequest = (message) =>
   requestGate.createRequestGate({
     allowed: ALLOWED,
@@ -288,87 +138,6 @@ const checkSession = async () => {
   };
 };
 
-const toBridgeError = (fallback, res) => {
-  const msg =
-    res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
-  const err = new Error(msg);
-  if (typeof res?.status === "number") err.status = res.status;
-  if (res?.needsReauth) err.needsReauth = true;
-  return err;
-};
-
-// ── One deadline for every request ──
-//
-// A write is NOT idempotent (two schedule POSTs make two calendar entries),
-// so a write whose outcome is unknown must be told apart from one that never
-// left, and nothing may start a write the App has already given up waiting
-// for. Each request therefore runs under one hard deadline D from handler
-// entry, delivered as an abort signal on the request itself and raced
-// against the token lifecycle — a joined mint included, see garmin-oauth.js
-// `connectapiFetch`. The lifecycle runs on the untimed `fetch`, so a mint
-// other callers join is never aborted by this caller's deadline. No write
-// starts after SEND_CUTOFF_MS.
-//
-// D stays below the ~30 s Chrome gives a pending fetch in an MV3 service
-// worker, so the bridge, not Chrome, decides how a hung request ends. The
-// vendored envelope has no `code` field, so the outcome travels in `error`:
-// DEADLINE_BEFORE_SEND (definite — nothing reached Garmin) or
-// DEADLINE_EXCEEDED (ambiguous — sent, then aborted; no status). This is
-// transport, not reading: what the App does with either is the Connector's.
-const REQUEST_DEADLINE_MS = 25000;
-const REQUEST_SEND_CUTOFF_MS = 15000;
-const DEADLINE_BEFORE_SEND = "deadline-before-send";
-const DEADLINE_EXCEEDED = "deadline-exceeded";
-
-const deadlineError = (code) => {
-  const err = new Error(code);
-  err.retryable = true;
-  return err;
-};
-
-const boundedCall = async (path, method, body) => {
-  const startedAt = performance.now();
-  const controller = new AbortController();
-  const timer = setTimeout(
-    () => controller.abort(new DOMException(DEADLINE_EXCEEDED, "AbortError")),
-    REQUEST_DEADLINE_MS
-  );
-  const callUrl = `${garminOAuth.CONNECTAPI}${path}`;
-  const isWrite = method !== "GET";
-  // `sent`: the call left without a definitive refusal. A 401 means Garmin
-  // rejected the token before processing it, so it resets it.
-  let sent = false;
-  let cutOff = false;
-  const fetchImpl = async (url, init = {}) => {
-    const isCall = url === callUrl;
-    if (isCall) {
-      if (isWrite && performance.now() - startedAt >= REQUEST_SEND_CUTOFF_MS) {
-        cutOff = true;
-        throw deadlineError(DEADLINE_BEFORE_SEND);
-      }
-      sent = true;
-    }
-    const res = await fetch(url, { ...init, signal: controller.signal });
-    if (isCall && res.status === 401) sent = false;
-    return res;
-  };
-  try {
-    return await garminOAuth.connectapiFetch(path, method, body, fetchImpl, {
-      signal: controller.signal,
-      tokenFetchImpl: fetch,
-      raw: true,
-    });
-  } catch (e) {
-    // Nothing sent: any abort — ours or not — is definite.
-    const aborted = controller.signal.aborted || garminOAuth.isAbortError(e);
-    if (cutOff || (aborted && !sent)) throw deadlineError(DEADLINE_BEFORE_SEND);
-    if (controller.signal.aborted) throw deadlineError(DEADLINE_EXCEEDED);
-    throw e;
-  } finally {
-    clearTimeout(timer);
-  }
-};
-
 // The FIT bytes travel to Garmin as the `file` field of a multipart body;
 // the runtime sets the boundary.
 const UPLOAD_FILE_NAME = "body-composition.fit";
@@ -387,9 +156,14 @@ const toWireBody = (path, body) => {
 // ── The App's one call: a request from the closed list, answered raw ──
 const request = async (message) => {
   const { method, path, body } = admitRequest(message);
-  const res = await boundedCall(path, method, toWireBody(path, body));
-  if (!res?.ok) throw toBridgeError("Request failed", res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  const res = await deadline.boundedCall(
+    garminOAuth,
+    path,
+    method,
+    toWireBody(path, body)
+  );
+  if (!res?.ok) throw answerCore.toBridgeError(res);
+  return answerCore.toAnswer(res);
 };
 
 const openGarmin = async () => {
@@ -495,10 +269,10 @@ if (typeof module !== "undefined") {
     handleExternalMessage,
     checkSession,
     request,
-    REQUEST_DEADLINE_MS,
-    REQUEST_SEND_CUTOFF_MS,
-    DEADLINE_BEFORE_SEND,
-    DEADLINE_EXCEEDED,
+    REQUEST_DEADLINE_MS: deadline.REQUEST_DEADLINE_MS,
+    REQUEST_SEND_CUTOFF_MS: deadline.REQUEST_SEND_CUTOFF_MS,
+    DEADLINE_BEFORE_SEND: deadline.DEADLINE_BEFORE_SEND,
+    DEADLINE_EXCEEDED: deadline.DEADLINE_EXCEEDED,
     openGarmin,
     persistSnapshot,
     clearSnapshot,

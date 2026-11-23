@@ -1,36 +1,29 @@
 /**
- * Where each fix takes the athlete, per extension.
+ * Where each fix takes the athlete, per extension (`extension-descriptors`).
  *
- * A sign-in URL is the page the extension's own popup opens for the same fix,
- * so the App and the popup send the athlete to one place
- * (`scripts/check-connection-notices.mjs` holds them equal). Install and
- * Update open the extension's store listing where one is known, and the
- * extensions page otherwise. "try-again" has no destination: it re-runs the
- * check where the notice is shown.
+ * Sign in opens the page the extension's own popup opens for the same fix.
+ * Install and Update open the extension's store listing where its address is
+ * known, and otherwise the docs guide that lists every extension and how to
+ * load one that is not published (`scripts/check-site-links.mjs` checks the
+ * site serves it). "open-platform" (no tab of the Platform open) opens the
+ * same page as Sign in. "try-again" has no destination: it re-runs the check
+ * where the notice is shown.
  */
-import type { ConnectionFix } from "@kaiord/i18n";
+import type { ShownNotice } from "@kaiord/i18n";
 
-export const EXTENSIONS_PAGE_URL = "https://kaiord.com/docs/bridges";
+import { extensionOf } from "./extension-descriptors";
 
-export const SIGN_IN_URL: Readonly<Record<string, string>> = {
-  "garmin-bridge": "https://connect.garmin.com/modern/",
-  "train2go-bridge": "https://app.train2go.com/user/index",
-  "whoop-bridge": "https://app.whoop.com/",
-  "tanita-bridge": "https://mytanita.eu/en/user",
-  "trainingpeaks-bridge": "https://app.trainingpeaks.com/",
-};
-
-export const STORE_URL: Readonly<Record<string, string>> = {
-  "garmin-bridge":
-    "https://chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe",
-};
+export const EXTENSIONS_PAGE_URL =
+  "https://kaiord.com/docs/guide/install-extensions";
 
 export const connectionFixHref = (
-  fix: ConnectionFix,
+  fix: ShownNotice["fix"],
   bridgeId: string | null
 ): string | null => {
   if (fix === "try-again") return null;
-  const id = bridgeId ?? "";
-  if (fix === "sign-in") return SIGN_IN_URL[id] ?? null;
-  return STORE_URL[id] ?? EXTENSIONS_PAGE_URL;
+  const extension = extensionOf(bridgeId);
+  if (fix === "sign-in" || fix === "open-platform") {
+    return extension?.signInUrl ?? null;
+  }
+  return extension?.storeUrl ?? EXTENSIONS_PAGE_URL;
 };

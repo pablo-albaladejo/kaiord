@@ -127,6 +127,63 @@ describe("check-connection-notices", () => {
     );
   });
 
+  it("should fail a reason that resolves by a fifth fix or is worded in one locale only", () => {
+    // Arrange
+    const api = clone(loadMaster(), (copy) => {
+      copy.REASONS["no-account-id"] = "reinstall";
+      delete copy.REASON_WORDING.es["no-account-id"];
+    });
+
+    // Act
+    const problems = masterProblems(api);
+
+    // Assert
+    assert.ok(problems.some((p) => p.includes('reason "no-account-id"')));
+    assert.ok(problems.some((p) => p.includes("REASON_WORDING es")));
+  });
+
+  it("should fail a not-checked wording missing in Spanish or naming no Platform", () => {
+    // Arrange
+    const api = clone(loadMaster(), (copy) => {
+      delete copy.NOT_CHECKED.es["would-mint-token"];
+      copy.NOT_CHECKED.en["no-token-captured"] = "Nothing was checked.";
+    });
+
+    // Act
+    const problems = masterProblems(api);
+
+    // Assert
+    assert.ok(problems.some((p) => p.includes("NOT_CHECKED es")));
+    assert.ok(
+      problems.some((p) =>
+        p.includes(
+          "NOT_CHECKED en.no-token-captured does not name the Platform"
+        )
+      )
+    );
+  });
+
+  it("should allow the no-tab notice as the one exception and fail a second one", () => {
+    // Arrange
+    const api = clone(loadMaster(), (copy) => {
+      copy.NO_TAB.en.hint = "Or reload.";
+      copy.EXTRA_EXCEPTION = { en: { message: "x" } };
+    });
+
+    // Act
+    const problems = masterProblems(api);
+    const clean = masterProblems(loadMaster());
+
+    // Assert
+    assert.deepEqual(clean, []);
+    assert.ok(
+      problems.some((p) =>
+        p.includes("NO_TAB en must hold exactly one message and one action")
+      )
+    );
+    assert.ok(problems.some((p) => p.includes("EXTRA_EXCEPTION")));
+  });
+
   it("should fail on a second wording of each fix, in English and in Spanish", () => {
     // Arrange
     const texts = [
@@ -281,6 +338,40 @@ describe("check-connection-notices", () => {
       problems.some((p) => p.includes("without KAIORD_CONNECTION_NOTICES"))
     );
     assert.ok(problems.some((p) => p.includes("tanita-bridge/popup.html")));
+  });
+
+  it("should read each sign-in page from the App's descriptor of that extension", () => {
+    // Arrange
+    const root = mkdtempSync(join(tmpdir(), "notices-descriptor-"));
+    for (const dir of [
+      "packages/workout-spa-editor/src/integrations",
+      "packages/workout-spa-editor/src/application/connections",
+      ...["garmin", "train2go", "whoop", "tanita", "trainingpeaks"].map(
+        (b) => `packages/${b}-bridge`
+      ),
+    ]) {
+      cpSync(join(ROOT, dir), join(root, dir), { recursive: true });
+    }
+    const descriptors = join(
+      root,
+      "packages/workout-spa-editor/src/application/connections/extension-descriptors.ts"
+    );
+    writeFileSync(
+      descriptors,
+      readFileSync(descriptors, "utf8").replace(
+        'signInUrl: "https://app.train2go.com/user/index"',
+        'signInUrl: "https://example.test/"'
+      )
+    );
+
+    // Act
+    const problems = popupProblems(root);
+    rmSync(root, { recursive: true, force: true });
+
+    // Assert
+    assert.deepEqual(problems, [
+      "packages/train2go-bridge/popup.js: does not open the App's sign-in page https://example.test/",
+    ]);
   });
 
   it("should load the single source every extension vendors", () => {

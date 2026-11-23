@@ -27,7 +27,7 @@ export type PushWorkoutResult =
   | { status: "success"; garminWorkoutId: string | null }
   | {
       status: "error";
-      /** `sign-in` on a 401/403; no other cause is verified. */
+      /** `sign-in` only when the extension verified the Session ended. */
       reason: "sign-in" | "not-answering";
       /** The bridge's own text, for diagnosis only, never shown. */
       detail: string;

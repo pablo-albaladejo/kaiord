@@ -5,10 +5,8 @@
  * created workout, and of one workout Kaiord created only its id and day —
  * its title, notes and what the athlete recorded are dropped here.
  */
+import { readJson } from "../../bridge/connector-call";
 import type { RawAnswer } from "../../bridge/thin-bridge-request";
-
-export const readJson = (answer: RawAnswer): unknown =>
-  answer.body === "" ? null : (JSON.parse(answer.body) as unknown);
 
 export const readWorkoutIdentity = (
   answer: RawAnswer

@@ -15,7 +15,8 @@ Store workflow (`cws-publish.yml`) packages and uploads it.
   `credentials:"include"` (SW-direct) — the site's HttpOnly session cookie
   travels automatically, with no content script on `app.train2go.com` — only
   for requests on its closed list (`ALLOWED` in `background.js`), handing
-  Train2Go's answer to the App unread. The App's Train2Go Connector reads it
+  Train2Go's answer to the App unread but for its Session secrets (the `_token`
+  anti-forgery field), which it removes. The App's Train2Go Connector reads it
   (`packages/workout-spa-editor/src/adapters/train2go/connector/`).
 - Expose a small message-passing surface (`ping`, `request`,
   `open-train2go`, ...) that the SPA reaches via `chrome.runtime.sendMessage`

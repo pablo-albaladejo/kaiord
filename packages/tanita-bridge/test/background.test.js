@@ -5,7 +5,6 @@ const {
   BRIDGE_MANIFEST,
   EXPORT_CSV_PATH,
   isAllowed,
-  isHtmlContentType,
   request,
   checkSession,
   handleAction,
@@ -210,19 +209,6 @@ describe("background.js", () => {
 
       // Assert
       expect(results).toEqual([false, false, false]);
-    });
-  });
-
-  describe("isHtmlContentType", () => {
-    it("should flag only an html content type", () => {
-      // Arrange
-      const types = ["text/html; charset=utf-8", "text/csv", ""];
-
-      // Act
-      const results = types.map(isHtmlContentType);
-
-      // Assert
-      expect(results).toEqual([true, false, false]);
     });
   });
 

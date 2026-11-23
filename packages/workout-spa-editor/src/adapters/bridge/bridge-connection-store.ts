@@ -34,6 +34,9 @@ export function createBridgeConnectionStore(
     bridgeIds: options.bridgeIds ?? KNOWN_BRIDGE_IDS,
     getExtensionId:
       options.getExtensionId ?? ((id) => bridgeDiscovery.getExtensionId(id)),
+    getProtocolVersion:
+      options.getProtocolVersion ??
+      ((id) => bridgeDiscovery.getVerified?.(id)?.protocolVersion ?? null),
     now: options.now ?? (() => Date.now()),
     notify: () => listeners.forEach((listener) => listener()),
   };

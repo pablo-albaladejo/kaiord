@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import type { Train2GoActivity } from "../../store/train2go-extension-transport";
+import type { Train2GoActivity } from "./connector/train2go-extension-transport";
 import { toCoachingActivityRecord } from "./train2go-record.converter";
 
 const base: Train2GoActivity = {

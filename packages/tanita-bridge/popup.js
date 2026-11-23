@@ -18,7 +18,7 @@
  */
 
 /* global msg, $, uiLocale, localizePage, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
-   renderConsequence, renderSkeleton, renderCtas, renderNotice,
+   renderConsequence, renderSkeleton, renderCtas, renderBrokenConnection,
    KAIORD_CONNECTION_NOTICES */
 
 const OPEN_TANITA_URL = "https://mytanita.eu/en/user";
@@ -114,17 +114,17 @@ const connectionStateOf = (res) => {
    or null when this is the first probe that ever failed; only then may the
    notice carry a date. */
 const renderBroken = (state, since) => {
-  const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
-    state,
-    PLATFORM,
-    uiLocale()
+  renderBrokenConnection(
+    $,
+    msg,
+    KAIORD_CONNECTION_NOTICES.noticeFor(state, PLATFORM, uiLocale()),
+    {
+      since,
+      href: OPEN_TANITA_URL,
+      onRetry: () => refresh(),
+      formatSince: formatSinceDate,
+    }
   );
-  setMarkEstablished(since !== null);
-  renderNotice($, notice, {
-    since: since === null ? null : msg("outageSince", [formatSinceDate(since)]),
-    href: OPEN_TANITA_URL,
-    onRetry: () => refresh(),
-  });
   renderChips($, []);
   renderConsequence($, []);
 };

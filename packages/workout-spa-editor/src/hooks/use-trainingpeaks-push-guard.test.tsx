@@ -20,9 +20,12 @@ vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: () => "tp-extension" },
 }));
 
-vi.mock("../adapters/trainingpeaks/trainingpeaks-athlete-transport", () => ({
-  readTrainingPeaksAthleteId: mocks.readAthleteId,
-}));
+vi.mock(
+  "../adapters/trainingpeaks/connector/trainingpeaks-athlete-transport",
+  () => ({
+    readTrainingPeaksAthleteId: mocks.readAthleteId,
+  })
+);
 
 vi.mock("@kaiord/trainingpeaks", () => ({
   krdToTrainingPeaksWorkout: (

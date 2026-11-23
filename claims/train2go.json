@@ -31,11 +31,11 @@
       "text": "Lets the Kaiord App read the plan your coach sets on Train2Go, your training zones and your weight, using your own Train2Go sign-in",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -73,11 +73,11 @@
       "text": "Fetches the week your coach planned on Train2Go when the Kaiord App asks, and the Kaiord App reads from it each coaching activity's date, sport, title, duration, workload and completion status.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
@@ -91,15 +91,15 @@
       "text": "Fetches one day in full when the Kaiord App asks, and the Kaiord App reads from it the coach's description of each session, and that day's comments with who wrote them.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should return the day's comment thread alongside its activities"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should backfill the date param onto every activity read from a day"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         }
       ]
@@ -113,7 +113,7 @@
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -128,7 +128,7 @@
     },
     {
       "id": "train2go.listing.raw",
-      "text": "Hands the Kaiord App what Train2Go answers, as it came, and makes only the requests on its fixed list of read-only Train2Go addresses. It refuses any other request without sending it.",
+      "text": "Hands the Kaiord App what Train2Go answers, as it came, except that it first removes the anti-forgery token tied to your Train2Go sign-in (the hidden _token field of Train2Go's pages) and any other field named as a token, CSRF, session or nonce value. It makes only the requests on its fixed list of read-only Train2Go addresses. It refuses any other request without sending it.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -145,6 +145,18 @@
         {
           "test": "packages/train2go-bridge/test/thin-bridge.test.js",
           "title": "should list only GET rules"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the token from the HTML a daily answer wraps in JSON"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     },
@@ -251,11 +263,11 @@
           "servedBy": "packages/workout-spa-editor/index.html"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-read-zones.ts",
           "contains": "path: DETAILS_PATH,"
         }
       ]
@@ -404,11 +416,11 @@
       "text": "Lets the Kaiord App read the athlete's own Train2Go coaching plan, training zones and weight through the athlete's existing Train2Go sign-in.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -601,7 +613,7 @@
     },
     {
       "id": "train2go.pj.app-receives",
-      "text": "**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it. A request with any other path or method, or with headers or a body, is refused without a request. Only the popup's own check of who is signed in and of this week's totals is read inside the extension.",
+      "text": "**What the Kaiord App receives**: the Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it, except that it first removes anything in it tied to your Train2Go sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Train2Go's pages carry one, the hidden `_token` anti-forgery field, which never reaches the Kaiord App. A request with any other path or method, or with headers or a body, is refused without a request. Only the popup's own check of who is signed in and of this week's totals is read inside the extension.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -622,6 +634,18 @@
         {
           "test": "packages/train2go-bridge/test/thin-bridge.test.js",
           "title": "should refuse the generic request to the popup, as it is reachable only through the App origin gate"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the token from the HTML a daily answer wraps in JSON"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     },
@@ -829,7 +853,7 @@
           "contains": "\"message\": \"Kaiord for Train2Go\""
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         }
       ]
@@ -901,7 +925,7 @@
     },
     {
       "id": "train2go.pp.unread",
-      "text": "**Answers Handed Over Unread**: The Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it. Reading the answer happens in the Kaiord App, in your browser.",
+      "text": "**Answers Handed Over Unread, Sign-In Secrets Removed**: The Kaiord App names the method and the path of each request, and the extension hands it Train2Go's answer as it came, without reading it, except that it first removes anything in it tied to your Train2Go sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id. Train2Go's pages carry one, the hidden `_token` anti-forgery field, which never reaches the Kaiord App. Reading the answer happens in the Kaiord App, in your browser.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -912,8 +936,20 @@
           "title": "should refuse any path outside its closed list without sending a request"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the token from the HTML a daily answer wraps in JSON"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     },
@@ -922,19 +958,19 @@
       "text": "**Coaching Plan**: When the Kaiord App asks, the extension fetches the week your coach planned and single days in full. The Kaiord App reads from them each coaching activity's date, sport, title, duration, workload and completion status, the coach's description of each coaching activity, and that day's comments with who wrote them.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should return the day's comment thread alongside its activities"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should backfill the date param onto every activity read from a day"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
@@ -952,7 +988,7 @@
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -960,7 +996,7 @@
           "title": "should redact forbidden fields recursively at any nesting depth"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-read-zones.ts",
           "contains": "path: DETAILS_PATH,"
         },
         {
@@ -1081,11 +1117,11 @@
       "text": "Permite que Kaiord App lea el plan de tu entrenador en Train2Go, tus zonas y tu peso, con tu propio inicio de sesión de Train2Go",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -1123,11 +1159,11 @@
       "text": "Pide a Train2Go la semana que tu entrenador planificó cuando Kaiord App lo solicita, y Kaiord App lee de ella la fecha, el deporte, el título, la duración, la carga y el estado de cada actividad de entrenamiento.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
@@ -1141,15 +1177,15 @@
       "text": "Pide un día completo cuando Kaiord App lo solicita, y Kaiord App lee de él la descripción que hace tu entrenador de cada sesión, y los comentarios de ese día con quién los escribió.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should return the day's comment thread alongside its activities"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should backfill the date param onto every activity read from a day"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         }
       ]
@@ -1163,7 +1199,7 @@
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -1178,7 +1214,7 @@
     },
     {
       "id": "train2go.es.listing.raw",
-      "text": "Entrega a Kaiord App lo que responde Train2Go, tal como llegó, y solo hace las peticiones de su lista fija de direcciones de Train2Go de solo lectura. Rechaza cualquier otra petición sin enviarla.",
+      "text": "Entrega a Kaiord App lo que responde Train2Go, tal como llegó, salvo que antes quita el token antifalsificación ligado a tu inicio de sesión de Train2Go (el campo oculto _token de las páginas de Train2Go) y cualquier otro campo con nombre de token, CSRF, sesión o nonce. Solo hace las peticiones de su lista fija de direcciones de Train2Go de solo lectura. Rechaza cualquier otra petición sin enviarla.",
       "proof": [
         {
           "test": "packages/train2go-bridge/test/request-confinement.test.js",
@@ -1195,6 +1231,18 @@
         {
           "test": "packages/train2go-bridge/test/thin-bridge.test.js",
           "title": "should list only GET rules"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the anti-forgery token from the profile page and keep the rest"
+        },
+        {
+          "test": "packages/train2go-bridge/test/answer-secrets.test.js",
+          "title": "should remove the token from the HTML a daily answer wraps in JSON"
+        },
+        {
+          "test": "packages/train2go-bridge/test/bridge-answer.test.js",
+          "title": "should drop credential keys at any depth and keep everything else"
         }
       ]
     },
@@ -1301,11 +1349,11 @@
           "servedBy": "packages/workout-spa-editor/index.html"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-read-zones.ts",
           "contains": "path: DETAILS_PATH,"
         }
       ]

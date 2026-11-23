@@ -1,4 +1,4 @@
-import type { ConnectionNotice as Notice } from "@kaiord/i18n";
+import type { ShownNotice as Notice } from "@kaiord/i18n";
 
 type Props = {
   notice: Notice;

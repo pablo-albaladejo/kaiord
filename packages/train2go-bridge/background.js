@@ -27,120 +27,31 @@ const BRIDGE_MANIFEST = {
   capabilities: ["read:training-plan", "read:training-zones", "read:body"],
 };
 
-// ── Swallowed-error telemetry ──
-//
-// Several catch{} blocks below intentionally swallow errors so a single
-// failure doesn't break the whole bridge (see the comment at each call
-// site). That used to make root-causing "why doesn't X work" impossible
-// without opening the service worker's devtools console. This keeps the
-// swallow behavior but records a structured, capped log so the cause is
-// inspectable — e.g. `chrome.storage.local.get("bridgeTelemetry")` from
-// the popup or chrome://extensions devtools.
-const TELEMETRY_KEY = "bridgeTelemetry";
-const TELEMETRY_MAX_ENTRIES = 25;
-
-// Writes are chained so concurrent calls cannot interleave their
-// read-modify-write cycles and silently drop each other's entries.
-let telemetryWrite = Promise.resolve();
-
-const logSwallowed = (level, action, cause) => {
-  const entry = {
-    level,
-    action,
-    cause: String(cause?.message ?? cause),
-    at: Date.now(),
-  };
-  telemetryWrite = telemetryWrite
-    .then(() => chrome.storage.local.get(TELEMETRY_KEY))
-    .then(({ [TELEMETRY_KEY]: existing = [] }) =>
-      chrome.storage.local.set({
-        [TELEMETRY_KEY]: [...existing, entry].slice(-TELEMETRY_MAX_ENTRIES),
-      })
-    )
-    .catch(() => {
-      // Storage itself unavailable (e.g. quota); nothing more we can do.
-    });
-  return telemetryWrite;
-};
-
-// ── Parser (loaded inline for service worker) ──
-// In the extension, parser.js is loaded via importScripts or inlined.
-// For testing, it's required via module.exports.
-let parser;
+// ── Swallowed-error telemetry and script loading (vendored bridge-core) ──
+let telemetry;
 try {
-  importScripts("parser.js");
-  parser = globalThis;
-} catch (e) {
-  parser = typeof require !== "undefined" ? require("./parser.js") : {};
-  // In the packaged extension this only fires if the bundled file is
-  // missing or fails to parse — a real misconfiguration. Under Node
-  // (tests, build tooling) it fires on every load and is expected, so
-  // it's logged at "debug" rather than "error".
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-parser",
-    e
-  );
+  importScripts("bridge-telemetry.js");
+  telemetry = globalThis.bridgeTelemetry;
+} catch {
+  // Only a missing bridge-telemetry.js lands here in the worker; under Node
+  // (tests) it is the normal path.
+  telemetry =
+    typeof require !== "undefined"
+      ? require("./bridge-telemetry.js")
+      : { TELEMETRY_KEY: "", logSwallowed: () => {}, loadScript: () => ({}) };
 }
+const { TELEMETRY_KEY, logSwallowed, loadScript } = telemetry;
 
-let snapshotValidator;
-try {
-  importScripts("profile-snapshot.js");
-  snapshotValidator = globalThis;
-} catch (e) {
-  snapshotValidator =
-    typeof require !== "undefined" ? require("./profile-snapshot.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-profile-snapshot",
-    e
-  );
-}
-
-// ── Shared envelope/dispatch (vendored bridge-core) ──
-let bridgeEnvelope;
-try {
-  importScripts("bridge-envelope.js");
-  bridgeEnvelope = globalThis;
-} catch (e) {
-  bridgeEnvelope =
-    typeof require !== "undefined" ? require("./bridge-envelope.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-bridge-envelope",
-    e
-  );
-}
-
-// ── App theme preference for the popup (vendored bridge-core) ──
-let bridgeTheme;
-try {
-  importScripts("bridge-theme.js");
-  bridgeTheme = globalThis;
-} catch (e) {
-  bridgeTheme =
-    typeof require !== "undefined" ? require("./bridge-theme.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-bridge-theme",
-    e
-  );
-}
-
-// ── Identity-free cookie transport (vendored bridge-core) ──
-let sessionFetch;
-try {
-  importScripts("session-fetch.js");
-  sessionFetch = globalThis;
-} catch (e) {
-  sessionFetch =
-    typeof require !== "undefined" ? require("./session-fetch.js") : {};
-  void logSwallowed(
-    typeof require !== "undefined" ? "debug" : "error",
-    "load-session-fetch",
-    e
-  );
-}
+// The popup's own reader and the snapshot validator, then the vendored
+// bridge-core: envelope/dispatch, the popup's theme, the cookie transport,
+// the `request` gate and the answer handed to the App.
+const parser = loadScript("parser.js");
+const snapshotValidator = loadScript("profile-snapshot.js");
+const bridgeEnvelope = loadScript("bridge-envelope.js");
+const bridgeTheme = loadScript("bridge-theme.js");
+const sessionFetch = loadScript("session-fetch.js");
+const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
+const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
 
 // ── Train2Go call surface: the closed list ──
 //
@@ -204,22 +115,35 @@ const train2goFetch = async (path, method = "GET") => {
 
 // ── Actions ──
 
-// The Session check, answered to `ping`: one GET of the profile ping, the
-// cheapest Train2Go request that tells a live session from a dead one. Only
-// the outcome leaves the service worker; the profile in the body is dropped
-// here. Train2Go saying the session is gone (a redirect, 401/403, or
-// `success: false`) is a verified "signed-out"; anything else that fails is
-// "not-answering", never signed out.
+// Train2Go's own "Unauthenticated" answer to the profile ping
+// (test/fixtures/ping-expired.json): a failure that names the sign-in.
+const SIGNED_OUT_REDIRECT = /^\/login\b/;
+const SIGNED_OUT_ERROR = /^unauthenticated\.?$/i;
+
+const saysUnauthenticated = (data) =>
+  data?.success === false &&
+  (SIGNED_OUT_REDIRECT.test(String(data.redirect ?? "")) ||
+    SIGNED_OUT_ERROR.test(String(data.message ?? "")) ||
+    (Array.isArray(data.errors) &&
+      data.errors.some((e) => SIGNED_OUT_ERROR.test(String(e)))));
+
 // The typed outcome of one profile-ping answer, shared by the Session check
 // and the popup's profile read so both word one answer the same way.
 const sessionOutcomeOf = (res) => {
   if (res?.ok) {
     if (parser.parsePingJson(res.data).sessionActive) return "signed-in";
-    return res.data?.success === false ? "signed-out" : "not-answering";
+    return saysUnauthenticated(res.data) ? "signed-out" : "not-answering";
   }
   return res?.needsReauth ? "signed-out" : "not-answering";
 };
 
+// The Session check, answered to `ping`: one GET of the profile ping, the
+// cheapest Train2Go request that tells a live session from a dead one. Only
+// the outcome leaves the service worker; the profile in the body is dropped
+// here. Train2Go saying the session is gone (a redirect to its sign-in page,
+// a 401, or its "Unauthenticated" ping body) is a verified "signed-out";
+// anything else that fails, a 403 included, is "not-answering", never signed
+// out.
 const checkSession = async () => {
   let session;
   try {
@@ -272,56 +196,30 @@ const readProfile = async () => {
   }
 };
 
-const toBridgeError = (fallback, res) => {
-  const msg =
-    res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
-  const err = new Error(msg);
-  if (typeof res?.status === "number") err.status = res.status;
-  // Preserve the session-expiry signal end-to-end: the envelope surfaces
-  // needsReauth so the SPA can prompt a re-login.
-  if (res?.needsReauth) err.needsReauth = true;
-  return err;
-};
-
 // Popup only (internal channel): the inputs of its weekly figures.
 const readWeek = async (date, userId) => {
   const path = `/api/v2/workplan/weekly/${date}?user=${userId}`;
   const res = await train2goFetch(path);
-  if (!res?.ok) throw toBridgeError("Read week failed", res);
+  if (!res?.ok) throw answerCore.toBridgeError(res, "Read week failed");
 
   const html = res.data?.data?.replace?.["#workplan"] ?? "";
   return { activities: parser.parseWeeklyHtml(html) };
 };
 
 // ── The App's one read: a request from the closed list, answered raw ──
-const REQUEST_KEYS = new Set(["action", "method", "path"]);
-
-const refuseRequest = () => {
-  const err = new Error("Request not allowed");
-  err.retryable = false;
-  return err;
-};
-
+// The vendored gate admits only `method` and `path` of a listed entry; no
+// entry declares a body, so a body (or any other key) is refused unsent.
 const request = async (message) => {
-  const { method, path } = message;
-  const onlyMethodAndPath = Object.keys(message).every((k) =>
-    REQUEST_KEYS.has(k)
+  const { method, path } = requestGate.createRequestGate({ allowed: ALLOWED })(
+    message
   );
-  if (
-    !onlyMethodAndPath ||
-    typeof method !== "string" ||
-    typeof path !== "string" ||
-    !isAllowed(method, path)
-  ) {
-    throw refuseRequest();
-  }
   const res = await sessionFetch.cookieSessionFetch({
     url: `${TRAIN2GO_ORIGIN}${path}`,
     method,
     fetchImpl: fetch,
   });
-  if (!res.ok) throw toBridgeError("Request failed", res);
-  return { status: res.status, contentType: res.contentType, body: res.body };
+  if (!res.ok) throw answerCore.toBridgeError(res);
+  return answerCore.toAnswer(res);
 };
 
 const openTrain2Go = async () => {

@@ -21,6 +21,7 @@ Kaiord for Tanita connects the Kaiord App (https://kaiord.com/app) to your MyTAN
 What it does:
 
 • Downloads your MyTANITA export, which holds every measurement in your history, and hands it to the Kaiord App exactly as MyTANITA sent it. The extension does not interpret the measurements; the Kaiord App does.
+• If MyTANITA sends a page in place of the export, the extension removes from it any field named as a token, CSRF, session or nonce value before handing it to the Kaiord App.
 • The Kaiord App asks for the export when you open its calendar, if Tanita is switched on for weight or body composition, and when you press Sync now. The Kaiord App turns it into weight and body-composition entries kept in your browser.
 • Each time you open the extension's popup or press Refresh, it asks MyTANITA only for the export's headers, without downloading it, to learn whether you are still signed in. It shows only the answer.
 
@@ -50,6 +51,7 @@ Kaiord for Tanita conecta Kaiord App (https://kaiord.com/app) con tu cuenta de M
 Qué hace:
 
 • Descarga tu exportación de MyTANITA, que contiene todas las mediciones de tu historial, y se la entrega a Kaiord App tal como la envió MyTANITA. La extensión no interpreta las mediciones; lo hace Kaiord App.
+• Si MyTANITA envía una página en lugar de la exportación, la extensión quita de ella cualquier campo con nombre de token, CSRF, sesión o nonce antes de entregársela a Kaiord App.
 • Kaiord App pide la exportación cuando abres su calendario, si Tanita está activado para el peso o la composición corporal, y cuando pulsas Sincronizar ahora. Kaiord App la convierte en entradas de peso y de composición corporal que se guardan en tu navegador.
 • Cada vez que abres la ventana emergente de la extensión o pulsas Actualizar, pide a MyTANITA solo las cabeceras de la exportación, sin descargarla, para saber si sigues con la sesión iniciada. Solo muestra la respuesta.
 
@@ -98,10 +100,20 @@ pasted into the CWS dashboard by hand.
 
 ## Screenshots
 
-There are none yet (no `assets/` folder). Capture the current popup:
+There are none yet (no `assets/` folder). Capture the current popup. Its states, from `popup.js`:
 
-1. **Connected**: signed in to MyTANITA, click the extension icon; the popup shows "Connected" and "Open Kaiord editor".
-2. **Not answering**: signed out of MyTANITA; the popup shows "Tanita is not answering, so you cannot use it in Kaiord right now." and "Try again".
+1. **Connected**: signed in to MyTANITA, click the extension icon; the popup shows "Connected" ["Conectado"] and "Open Kaiord editor" ["Abrir el editor de Kaiord"].
+2. **Signed out**: signed out of MyTANITA (its check is redirected to the sign-in page); the popup shows "You cannot use Tanita in Kaiord until you sign in to Tanita in this browser." ["No puedes usar Tanita en Kaiord hasta que inicies sesión en Tanita en este navegador."] and "Sign in to Tanita" ["Iniciar sesión en Tanita"].
+3. **Not answering**: only when MyTANITA answers anything else (a maintenance page, an error); the popup shows "Tanita is not answering, so you cannot use it in Kaiord right now." ["Tanita no responde, así que ahora mismo no puedes usarlo en Kaiord."] and "Try again" ["Reintentar"]. Not needed for the listing.
+
+Capture each state twice: once with Chrome's interface in English, for the English listing, and once in Spanish (`chrome://settings/languages`, "Display Google Chrome in this language"), for the Spanish listing. The Spanish popup shows the text in brackets.
+
+Steps to capture:
+
+1. Load the extension from the extracted zip (`chrome://extensions` → Load unpacked)
+2. Open MyTANITA (`https://mytanita.eu`) and log in
+3. Use Chrome DevTools "Capture screenshot" or a screenshot tool
+4. Crop to 1280x800 or 640x400
 
 ## Automated Publishing (not wired yet)
 

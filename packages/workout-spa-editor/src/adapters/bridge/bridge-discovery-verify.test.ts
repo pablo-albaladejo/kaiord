@@ -21,6 +21,8 @@ const ann: BridgeAnnouncement = {
   capabilities: ["write:workouts"],
 };
 
+const NOT_A_FEATURE = 7;
+
 const validManifest = {
   ok: true,
   protocolVersion: 1,
@@ -42,6 +44,27 @@ describe("verifyAnnouncement", () => {
 
     // Assert
     await expect(verifyAnnouncement(ann)).resolves.toEqual(validManifest.data);
+  });
+
+  it("should keep the features the ping reports and drop its Session fields", async () => {
+    // Arrange
+    mockSend.mockResolvedValue({
+      ...validManifest,
+      data: {
+        ...validManifest.data,
+        features: ["calendar-write-v1", NOT_A_FEATURE],
+        gcApi: { ok: true },
+      },
+    });
+
+    // Act
+    const manifest = await verifyAnnouncement(ann);
+
+    // Assert
+    expect(manifest).toEqual({
+      ...validManifest.data,
+      features: ["calendar-write-v1"],
+    });
   });
 
   it("should return false when the ping fails", async () => {

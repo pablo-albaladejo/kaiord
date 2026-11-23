@@ -59,7 +59,11 @@ None.
 - `garmin-bridge`: the `ping` envelope.
 - `spa-train2go-extension`: the connect flow links from the profile ping read through `request`, not from `ping`.
 - `spa-connections-page`: a check that asked nothing.
-- `privacy-policy`: each section states what checking costs.
+- `privacy-policy`: each section states what checking costs; the Tanita and
+  TrainingPeaks section requirements of `tanita-texts-from-code` and
+  `trainingpeaks-texts-from-code` are modified here, in this change's delta.
+- `train2go-bridge`: the internal `read-profile` and the yes-or-no `ping` of
+  the protocol-2 API that `thin-bridge-train2go` adds, modified here.
 
 ## Impact
 

@@ -22,7 +22,7 @@ This document explains why each Chrome extension permission is required, for Chr
 
 **Why**: Hold the captured session bearer in `chrome.storage.session` — memory-only storage that survives service-worker restarts but is cleared when the browser closes. No password, developer API key, or long-lived token is ever stored.
 
-**Data stored**: the session bearer, the decoded numeric WHOOP user id, and the capture timestamp. All three live only in `chrome.storage.session`. The bearer is never written to disk and is transmitted nowhere except back to WHOOP as part of an allowlisted read; the user id and capture timestamp are also returned to the allowed Kaiord SPA origins as part of the bridge's status response (see "Data Handling" below). Separately, `chrome.storage.local` holds the Kaiord app's theme preference (`light`, `dark` or `system`) so the popup matches the app; it is not personal data and is sent nowhere.
+**Data stored**: the session bearer, the decoded numeric WHOOP user id, and the capture timestamp. All three live only in `chrome.storage.session`. The bearer is never written to disk and is transmitted nowhere except back to WHOOP as part of an allowlisted read; the user id is returned to the Kaiord App only in answer to `read-user-id`, when it is about to import, and the capture timestamp is never returned (see "Data Handling" below). Separately, `chrome.storage.local` holds the Kaiord app's theme preference (`light`, `dark` or `system`) so the popup matches the app; it is not personal data and is sent nowhere.
 
 ## Website Access
 
@@ -46,18 +46,18 @@ This document explains why each Chrome extension permission is required, for Chr
 
 ### `http://localhost:5173/*`, `http://localhost:5174/*`
 
-**Why**: Development origins for the Kaiord SPA (Vite dev server). Stripped from the production manifest.
+**Why**: Development origins for the Kaiord App (Vite dev server). Stripped from the production manifest.
 
 ### `https://kaiord.com/*`
 
-**Why**: Production origin for the Kaiord SPA. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed SPA to communicate with the extension.
+**Why**: Production origin for the Kaiord App. Only this exact origin is declared; subdomains (`www` included) cannot reach the extension, and a message from any other origin gets no answer. Allows the deployed Kaiord App to communicate with the extension.
 
 ## Data Handling
 
 - **No OAuth, no developer API key, no password**: The extension performs no OAuth flow, never asks for a WHOOP client id or secret, and never reads, stores, or transmits the user's WHOOP password. It reuses the browser's existing signed-in `app.whoop.com` session by capturing the bearer that session already holds.
 - **Three capture paths, all local**: the main-world request interceptor (`inject-main.js`), the `chrome.webRequest.onBeforeSendHeaders` header reader (`background.js`), and the `localStorage` Cognito-token scan (`content.js`). The first two read a credential in flight; the third reads one at rest. All three are justified above, and all three feed the same memory-only session store.
-- **Session bearer stays local and in memory**: The captured bearer lives only in `chrome.storage.session` on the user's device and is sent only to WHOOP (`api.prod.whoop.com`) as part of an allowlisted read. It is never logged, even truncated, and its value is never returned to the SPA.
-- **What the SPA does receive**: the bridge's status response (the Session check) carries only a boolean `connected` flag and its typed outcome; the numeric WHOOP user id decoded from the bearer's JWT `custom:user_id` claim is answered only to `read-user-id`, which the SPA sends when it is about to import; and, for an allowlisted read, WHOOP's response as it came, unread, which the SPA reads. Never the token itself, and never the capture time.
+- **Session bearer stays local and in memory**: The captured bearer lives only in `chrome.storage.session` on the user's device and is sent only to WHOOP (`api.prod.whoop.com`) as part of an allowlisted read. It is never logged, even truncated, and its value is never returned to the Kaiord App.
+- **What the Kaiord App does receive**: the bridge's status response (the Session check) carries only a boolean `connected` flag, its typed outcome, and two more yes-or-no answers, whether the held sign-in names a WHOOP account (`hasAccountId`) and whether an `app.whoop.com` tab is open (`tabOpen`), so the Kaiord App shows the same notice as the popup; the numeric WHOOP user id decoded from the bearer's JWT `custom:user_id` claim is answered only to `read-user-id`, which the Kaiord App sends when it is about to import; and, for an allowlisted read, WHOOP's response as it came, unread, which the Kaiord App reads, except that the bridge first removes anything in it tied to the WHOOP sign-in: each form field and meta tag named as a token, CSRF, session or nonce value, an inline CSRF token's value, and each JSON entry named as a token, key, password, cookie or session id (WHOOP's answers carry none today). Never the token itself, and never the capture time.
 - **Read-only, allowlisted**: Only a fixed list of `GET` paths of the `/core-details-bff`, `/metrics-service`, `/activities-service`, `/advanced-labs-service`, and `/health-service` internal APIs, each matched as a whole path with its query, is ever requested. The bridge exposes no path to write to WHOOP.
-- **No external communication**: The extension talks only to WHOOP hosts and the allowed Kaiord SPA origins (via `externally_connectable`). No third-party servers.
+- **No external communication**: The extension talks only to WHOOP hosts and the allowed Kaiord App origins (via `externally_connectable`). No third-party servers.
 - **No analytics or tracking**: No telemetry of any kind leaves the device.

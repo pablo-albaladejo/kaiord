@@ -6,7 +6,7 @@
  * connected: no state backs any of those, so the card cannot claim them.
  */
 import type { ManagedDataType } from "@kaiord/core";
-import type { ConnectionState } from "@kaiord/i18n";
+import type { ConnectionReason, ConnectionState } from "@kaiord/i18n";
 
 import type { ConnectionMechanism } from "../../types/connection";
 
@@ -38,6 +38,9 @@ export type ConnectionSource = {
    * its card offers Reconnect instead of a fix.
    */
   readonly connection: ConnectionState | null;
+  /** Why a working Session cannot serve (a WHOOP token with no account id),
+      which words the card's notice instead of its state. */
+  readonly reason?: ConnectionReason | null;
   /**
    * Can this source's presence and session be re-checked at all? False for a
    * bridge with no prober: after its initial announcement nothing can learn it

@@ -13,7 +13,7 @@ import { bridgeDiscovery } from "../../../../adapters/bridge/bridge-discovery";
 import {
   readWhoopFetch,
   readWhoopStatus,
-} from "../../../../adapters/bridge/whoop-transport";
+} from "../../../../adapters/whoop/connector/whoop-transport";
 import { importWhoopLabs } from "../../../../application/whoop/import-whoop-labs.use-case";
 import { WHOOP_BRIDGE_ID } from "../../../../application/whoop/whoop-lab-provenance";
 import { usePersistence } from "../../../../contexts/persistence-context";

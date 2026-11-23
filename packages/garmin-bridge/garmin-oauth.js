@@ -125,7 +125,13 @@ const sign = async (method, url, extraParams, token) => {
   );
 };
 
-// ── Auth errors carry needsReauth so the SPA can prompt a Garmin login ──
+// ── Auth errors carry needsReauth only when Garmin said the sign-in is gone ──
+//
+// Garmin's own sign-in page answering with no ticket (it has no single
+// sign-on session to issue one from) and a 401 are verified. A 429 (Garmin
+// rate-limits its sign-in), a 403 or a 5xx is Garmin failing, not a revoked
+// sign-in: it keeps its status and no needsReauth.
+const AUTH_UNAUTHORIZED_STATUS = 401;
 
 const authError = (stage, status) => {
   const err = new Error(
@@ -133,7 +139,10 @@ const authError = (stage, status) => {
       ? "No Garmin session. Open Garmin Connect, sign in, then retry."
       : `Garmin auth failed at ${stage}${status ? ` (${status})` : ""}`
   );
-  err.needsReauth = true;
+  if (stage === "ticket" || status === AUTH_UNAUTHORIZED_STATUS) {
+    err.needsReauth = true;
+  }
+  if (typeof status === "number") err.status = status;
   err.retryable = true;
   return err;
 };
@@ -153,6 +162,7 @@ const getTicketFromSession = async (fetchImpl) => {
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     },
   });
+  if (!r.ok) throw authError("sign-in", r.status);
   const html = await r.text();
   const m = html.match(/ticket=([A-Za-z0-9-]+)/);
   if (!m) throw authError("ticket");
