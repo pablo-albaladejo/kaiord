@@ -40,8 +40,6 @@ import { gzipSync } from "node:zlib";
 // in code that only runs on a user action or on an editor route:
 // - `src/hooks/use-app-keyboard-handlers.ts` (`AppKeyboardShortcuts`, which
 //   drags the whole workout store and its actions)
-// - `src/components/organisms/ZonesConflictDialog/ZonesConflictDialog.tsx`
-//   (`LazyZonesConflictDialog`, loaded the first time a conflict opens it)
 // - `src/application/coaching/{sync-zones,commit-conflict-resolution,
 //   sync-week,attempt-link,expand-day}.ts` (dynamic imports inside the
 //   Train2Go action callbacks)
@@ -68,7 +66,6 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/new-workout-route.tsx",
   "src/components/pages/ConvertPage/ConvertPage.tsx",
   "src/hooks/use-app-keyboard-handlers.ts",
-  "src/components/organisms/ZonesConflictDialog/ZonesConflictDialog.tsx",
   "src/application/coaching/sync-zones.ts",
   "src/application/coaching/commit-conflict-resolution.ts",
   "src/application/coaching/sync-week.ts",

@@ -2,8 +2,10 @@ import type { ManagedDataType } from "@kaiord/core";
 import { managedDataTypes } from "@kaiord/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Router } from "wouter";
 
 import type { BridgeConnectionState } from "../../../adapters/bridge/bridge-connection-types";
+import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
 import type { DataFlowsByType } from "../../../hooks/connections/use-data-flows";
 import type { ConnectionRecord } from "../../../types/connection";
 import type { DataTypeSourcePolicy } from "../../../types/data-type-source-policy";
@@ -21,6 +23,7 @@ const state = vi.hoisted(() => ({
   connections: [] as unknown[],
   records: new Map<string, unknown>(),
   capabilities: new Map<string, readonly string[]>(),
+  matrix: undefined as boolean | undefined,
   policyPut: vi.fn(),
   findByNaturalKey: vi.fn(),
 }));
@@ -90,14 +93,28 @@ const flows = (
     ])
   );
 
+// A stored choice reads the matrix as on unless it was turned off, as the
+// catalogue's `adoptsExistingData` does.
 const renderSection = (byDataType: DataFlowsByType = flows({})) =>
   render(
-    <DataTypeRoutingSection profileId={PROFILE_ID} byDataType={byDataType} />
+    <CapabilitiesFixture
+      on={
+        (state.matrix ?? state.policies.length > 0) ? ["authority-matrix"] : []
+      }
+    >
+      <Router>
+        <DataTypeRoutingSection
+          profileId={PROFILE_ID}
+          byDataType={byDataType}
+        />
+      </Router>
+    </CapabilitiesFixture>
   );
 
 describe("DataTypeRoutingSection", () => {
   beforeEach(() => {
     state.policies = [];
+    state.matrix = undefined;
     state.syncedAt = new Map();
     state.put = vi.fn();
     state.connections = [];
@@ -125,20 +142,32 @@ describe("DataTypeRoutingSection", () => {
     }
   });
 
-  it("should count union-mode sources instead of naming one of them", () => {
+  it("should name the Platform Kaiord picks when nobody chose", () => {
     // Arrange
     // WHOOP is the only bridge announcing `read:sleep`; with the manual path
-    // that is two sources under the DEFAULT union mode, which has no winner.
-    // This is the exact row on which the design shows "From: Garmin".
+    // that is two sources and no choice, so the App's rule names WHOOP.
     renderSection(flows({ sleep: { import: [route("whoop-bridge")] } }));
 
     // Act
     const pill = screen.getByTestId("routing-from-sleep");
 
     // Assert
-    expect(pill).toHaveTextContent("2 sources");
-    expect(pill).not.toHaveTextContent("WHOOP");
+    expect(pill).toHaveTextContent("WHOOP");
     expect(screen.getByTestId("routing-note-sleep")).toHaveTextContent(
+      "chosen by Kaiord; a value you enter yourself wins on its day"
+    );
+  });
+
+  it("should count the sources of a kind that keeps every one", () => {
+    // Arrange
+    renderSection(flows({ activity: { import: [route("garmin-bridge")] } }));
+
+    // Act
+    const pill = screen.getByTestId("routing-from-activity");
+
+    // Assert
+    expect(pill).toHaveTextContent("2 sources");
+    expect(screen.getByTestId("routing-note-activity")).toHaveTextContent(
       "none ranked first"
     );
   });
@@ -182,16 +211,18 @@ describe("DataTypeRoutingSection", () => {
     // here. The empty-map version of this test could not have caught it.
     state.syncedAt = new Map([
       ["whoop", new Date().toISOString()],
-      ["tanita", new Date().toISOString()],
+      ["garmin", new Date().toISOString()],
     ]);
     renderSection(
       flows({
-        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
+        activity: {
+          import: [route("whoop-bridge"), route("garmin-bridge")],
+        },
       })
     );
 
     // Act
-    const row = screen.getByTestId("routing-row-weight");
+    const row = screen.getByTestId("routing-row-activity");
 
     // Assert
     expect(row).toHaveAttribute("data-origin", "unranked");
@@ -291,34 +322,8 @@ describe("DataTypeRoutingSection", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should say that picking a source changes how the type is read, before anything is stored", () => {
+  it("should ask nothing about which source decides a type with several", () => {
     // Arrange
-    // Writer: the Data Hub sleep/WHOOP import cell. Two sources under the
-    // DEFAULT union mode, so picking one really does change the read
-    // semantics — the row must say so while nothing has been written yet.
-    renderSection(flows({ sleep: { import: [route("whoop-bridge")] } }));
-
-    // Act
-    fireEvent.click(screen.getByTestId("routing-change-sleep"));
-    const panel = screen.getByTestId("routing-picker-sleep");
-
-    // Assert
-    expect(panel).toHaveTextContent(
-      "keeps every source's Sleep and ranks none"
-    );
-    expect(panel).toHaveTextContent(
-      "use the others only on days it has nothing"
-    );
-    expect(panel).toHaveTextContent("go back to keeping every source");
-    expect(state.put).not.toHaveBeenCalled();
-  });
-
-  it("should store a ranked order led by the picked source", () => {
-    // Arrange
-    // Writer: two Data Hub weight import cells (TrainingPeaks and Tanita both
-    // announce read:body and both serve weight), union by default. Tanita is
-    // picked second on purpose: an order stored in candidate sequence would
-    // still look correct if the pick already happened to lead it.
     renderSection(
       flows({
         weight: {
@@ -326,109 +331,60 @@ describe("DataTypeRoutingSection", () => {
         },
       })
     );
-    fireEvent.click(screen.getByTestId("routing-change-weight"));
 
     // Act
-    fireEvent.click(screen.getByTestId("routing-choice-weight-tanita-bridge"));
+    fireEvent.click(screen.getByTestId("routing-change-weight"));
 
     // Assert
-    // Every other source stays in the order behind it: they remain fallbacks
-    // rather than being dropped from a type they can still serve.
-    expect(state.put).toHaveBeenCalledWith({
-      profileId: PROFILE_ID,
-      dataType: "weight",
-      mode: "priority",
-      sourceOrder: ["tanita-bridge", "trainingpeaks-bridge", "manual"],
-    });
-  });
-
-  it("should offer the way back to keeping every source from a ranked row", () => {
-    // Arrange
-    // Writer: this control, or the Data Hub priority editor, having ranked
-    // weight. Returning to union must clear the order too — a surviving
-    // ranking would decide the row again the moment the mode flipped back.
-    state.policies = [
-      {
-        dataType: "weight",
-        mode: "priority",
-        sourceOrder: ["tanita-bridge", "whoop-bridge"],
-      } as DataTypeSourcePolicy,
-    ];
-    renderSection(
-      flows({
-        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
-      })
+    expect(screen.getByTestId("routing-picker-weight")).not.toHaveTextContent(
+      "Keep every source"
     );
-    fireEvent.click(screen.getByTestId("routing-change-weight"));
-
-    // Act
-    fireEvent.click(screen.getByTestId("routing-choice-weight-union"));
-
-    // Assert
-    expect(state.put).toHaveBeenCalledWith({
-      profileId: PROFILE_ID,
-      dataType: "weight",
-      mode: "union",
-      sourceOrder: [],
-    });
-  });
-
-  it("should not warn about a change of meaning on a row that is already ranked", () => {
-    // Arrange
-    // Same ranked weight row. Reordering a ranked type changes which source
-    // leads and nothing else, so repeating the union warning here would be
-    // describing a consequence that cannot happen.
-    state.policies = [
-      {
-        dataType: "weight",
-        mode: "priority",
-        sourceOrder: ["tanita-bridge", "whoop-bridge"],
-      } as DataTypeSourcePolicy,
-    ];
-    renderSection(
-      flows({
-        weight: { import: [route("whoop-bridge"), route("tanita-bridge")] },
-      })
-    );
-
-    // Act
-    fireEvent.click(screen.getByTestId("routing-change-weight"));
-    const panel = screen.getByTestId("routing-picker-weight");
-
-    // Assert
-    expect(panel).toHaveTextContent("reads Weight from Tanita first");
-    expect(panel).not.toHaveTextContent("ranks none of them");
     expect(
-      screen.getByTestId("routing-choice-weight-tanita-bridge")
-    ).toHaveAttribute("aria-pressed", "true");
+      screen.queryByTestId("routing-choice-weight-tanita-bridge")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("authority-matrix-link")).toBeNull();
   });
 
-  it("should let a row that is ranked to nothing available pick a source that works", () => {
+  it("should link to the matrix only while it is on", () => {
     // Arrange
-    // Writer: chat `set_source_policy stress priority ["garmin"]` — it
-    // resolves, so no writer guard stops it, but a Garmin stress import can
-    // never be enabled and the resolver reads nothing. This is the one row
-    // Wave 2a could only report; it must now be fixable.
-    state.policies = [
-      {
-        dataType: "stress",
-        mode: "priority",
-        sourceOrder: ["garmin-bridge"],
-      } as DataTypeSourcePolicy,
-    ];
-    renderSection();
-    fireEvent.click(screen.getByTestId("routing-change-stress"));
+    state.matrix = true;
 
     // Act
-    fireEvent.click(screen.getByTestId("routing-choice-stress-manual"));
+    renderSection();
 
     // Assert
-    expect(state.put).toHaveBeenCalledWith({
-      profileId: PROFILE_ID,
-      dataType: "stress",
-      mode: "priority",
-      sourceOrder: ["manual"],
-    });
+    expect(screen.getByTestId("authority-matrix-link")).toHaveAttribute(
+      "href",
+      "/settings/authority"
+    );
+  });
+
+  it("should name the Platform Kaiord picks once the matrix is off, whatever was chosen", () => {
+    // Arrange
+    state.matrix = false;
+    state.policies = [
+      {
+        dataType: "weight",
+        mode: "priority",
+        sourceOrder: ["trainingpeaks-bridge"],
+      } as DataTypeSourcePolicy,
+    ];
+    renderSection(
+      flows({
+        weight: {
+          import: [route("trainingpeaks-bridge"), route("tanita-bridge")],
+        },
+      })
+    );
+
+    // Act
+    const pill = screen.getByTestId("routing-from-weight");
+
+    // Assert
+    expect(pill).toHaveTextContent("Tanita");
+    expect(screen.getByTestId("routing-note-weight")).toHaveTextContent(
+      "chosen by Kaiord"
+    );
   });
 
   it("should offer a newly installed source a way to start sending a type", () => {

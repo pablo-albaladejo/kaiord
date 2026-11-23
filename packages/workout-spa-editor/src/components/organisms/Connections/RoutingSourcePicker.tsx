@@ -2,14 +2,12 @@ import type { ManagedDataType } from "@kaiord/core";
 import { useState } from "react";
 
 import type { DataTypeRouteToggle } from "../../../application/connections/data-type-route-toggles";
-import type { SourceOfTruthOptions } from "../../../application/connections/source-of-truth-options";
 import { useTranslate } from "../../../i18n/use-translate";
 import { RoutingPickerPanel } from "./RoutingPickerPanel";
 
 type Props = {
   dataType: ManagedDataType;
   profileId: string;
-  options: SourceOfTruthOptions;
   toggles: readonly DataTypeRouteToggle[];
 };
 
@@ -18,12 +16,7 @@ type Props = {
  * is on screen, in this row's own words, above the buttons that would cause it.
  * Nothing is stored by opening the control.
  */
-export function RoutingSourcePicker({
-  dataType,
-  profileId,
-  options,
-  toggles,
-}: Props) {
+export function RoutingSourcePicker({ dataType, profileId, toggles }: Props) {
   const t = useTranslate("connections");
   const [open, setOpen] = useState(false);
 
@@ -42,7 +35,6 @@ export function RoutingSourcePicker({
         <RoutingPickerPanel
           dataType={dataType}
           profileId={profileId}
-          options={options}
           toggles={toggles}
         />
       )}

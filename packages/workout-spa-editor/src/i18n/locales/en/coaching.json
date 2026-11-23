@@ -169,7 +169,10 @@
   "zonesSync": {
     "shapeMismatch": "Train2Go sent zones Kaiord cannot read, so they were not synced.",
     "unsupported": "This coaching platform does not share zones.",
-    "notSynced": "Your zones were not synced."
+    "notSynced": "Your zones were not synced.",
+    "keptYours": "Train2Go has different numbers from yours. Kaiord kept yours.",
+    "keptYoursHint": "Your zones are still derived from the numbers you set.",
+    "takeTheirs": "Use Train2Go's"
   },
   "sync": {
     "defaultLabel": "Coach",

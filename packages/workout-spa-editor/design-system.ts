@@ -167,7 +167,6 @@ export { RoutingExportTargets } from "./src/components/organisms/Connections/Rou
 export { RoutingFreshness } from "./src/components/organisms/Connections/RoutingFreshness";
 export { RoutingOriginLine } from "./src/components/organisms/Connections/RoutingOriginLine";
 export { RoutingPickerPanel } from "./src/components/organisms/Connections/RoutingPickerPanel";
-export { RoutingSourceChoices } from "./src/components/organisms/Connections/RoutingSourceChoices";
 export { RoutingSourcePicker } from "./src/components/organisms/Connections/RoutingSourcePicker";
 export { RoutingSourceSwitches } from "./src/components/organisms/Connections/RoutingSourceSwitches";
 export { EditorContextMenu } from "./src/components/organisms/EditorContextMenu/EditorContextMenu";
@@ -221,7 +220,6 @@ export { WorkoutList } from "./src/components/organisms/WorkoutList/WorkoutList"
 export { WorkoutStats } from "./src/components/organisms/WorkoutStats/WorkoutStats";
 export { ZoneEditor } from "./src/components/organisms/ZoneEditor/ZoneEditor";
 export { ZoneMap } from "./src/components/organisms/ZoneMap/ZoneMap";
-export { ZonesConflictDialog } from "./src/components/organisms/ZonesConflictDialog/ZonesConflictDialog";
 
 // templates
 export { MainLayout } from "./src/components/templates/MainLayout/MainLayout";

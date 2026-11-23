@@ -106,7 +106,7 @@ describe("buildDataRouteAnswer", () => {
     expect(answer.effectiveSourceToday).toBeUndefined();
   });
 
-  it("should summarize union sources for a health data type", async () => {
+  it("should summarize the automatic Authority for a health data type nobody chose for", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.healthSleep.put({
@@ -132,9 +132,14 @@ describe("buildDataRouteAnswer", () => {
     });
 
     // Assert
+    expect(answer.sourcePolicy).toEqual({
+      mode: "automatic",
+      sourceOrder: ["manual", "fit-import", "whoop-bridge", "garmin-bridge"],
+    });
     expect(answer.effectiveSourceToday).toEqual({
-      mode: "union",
-      sources: ["whoop-bridge", "garmin-bridge"],
+      mode: "automatic",
+      effectiveSource: "whoop-bridge",
+      usedFallback: false,
     });
   });
 

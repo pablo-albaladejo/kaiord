@@ -17,7 +17,13 @@ const profile = (id: string): Profile => ({
   updatedAt: "2026-11-01T00:00:00Z",
 });
 
-const TABLES = ["profiles", "meta", "userPreferences", "templates"];
+const TABLES = [
+  "profiles",
+  "meta",
+  "userPreferences",
+  "templates",
+  "dataTypeSourcePolicy",
+];
 const clear = () => Promise.all(TABLES.map((name) => db.table(name).clear()));
 
 const seedAthlete = async (id = PROFILE_ID) => {
@@ -104,5 +110,53 @@ describe("CapabilitiesProvider", () => {
     // Assert
     expect(result.current.status).toBe("ready");
     expect(result.current.offers("nav", "library")).toBe(false);
+  });
+
+  it("should keep the Authority matrix off and its Tool unoffered for a new athlete", async () => {
+    // Arrange
+    await seedAthlete();
+
+    // Act
+    const { result } = await renderReady();
+
+    // Assert
+    expect(result.current.isOn("authority-matrix")).toBe(false);
+    expect(result.current.offers("settings", "authority")).toBe(false);
+    expect(result.current.offers("tool", "set_data_route")).toBe(false);
+  });
+
+  it("should turn the Authority matrix on for an athlete who already chose an Authority", async () => {
+    // Arrange
+    await seedAthlete();
+    await db.table("dataTypeSourcePolicy").put({
+      profileId: PROFILE_ID,
+      dataType: "sleep",
+      mode: "priority",
+      sourceOrder: ["whoop-bridge"],
+    });
+
+    // Act
+    const { result } = await renderReady();
+
+    // Assert
+    expect(result.current.isOn("authority-matrix")).toBe(true);
+    expect(result.current.offers("tool", "set_data_route")).toBe(true);
+  });
+
+  it("should not turn the Authority matrix on from another athlete's choice", async () => {
+    // Arrange
+    await seedAthlete();
+    await db.table("dataTypeSourcePolicy").put({
+      profileId: OTHER_ID,
+      dataType: "sleep",
+      mode: "priority",
+      sourceOrder: ["whoop-bridge"],
+    });
+
+    // Act
+    const { result } = await renderReady();
+
+    // Assert
+    expect(result.current.isOn("authority-matrix")).toBe(false);
   });
 });

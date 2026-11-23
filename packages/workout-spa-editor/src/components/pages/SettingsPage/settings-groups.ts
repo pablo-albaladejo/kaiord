@@ -7,6 +7,7 @@ import type { SettingsRowDef } from "./settings-group-types";
  */
 export const SETTINGS_PAGE_ROWS: ReadonlyArray<SettingsRowDef> = [
   { icon: "zap", key: "capabilities" },
+  { icon: "route", key: "authority" },
   { icon: "sparkle", key: "ai", valueKey: "ai" },
   { icon: "sync", key: "sync", valueKey: "sync" },
   { icon: "upload", key: "data", valueKey: "data" },

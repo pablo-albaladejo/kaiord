@@ -67,6 +67,23 @@ export const CAPABILITY_CATALOGUE = [
     ],
     adoptsExistingData: "templates",
   },
+  {
+    id: "authority-matrix",
+    grade: "advanced",
+    owns: {
+      nav: [],
+      routes: [],
+      settings: ["authority"],
+      commands: [],
+      shortcuts: [],
+      tools: ["set_data_route"],
+    },
+    modules: [
+      "components/organisms/AuthorityMatrix/",
+      "hooks/connections/use-source-of-truth-editor.ts",
+    ],
+    adoptsExistingData: "dataTypeSourcePolicy",
+  },
 ] as const satisfies readonly CapabilityDeclaration[];
 
 export type CapabilityId = (typeof CAPABILITY_CATALOGUE)[number]["id"];

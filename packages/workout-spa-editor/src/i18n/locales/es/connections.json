@@ -98,6 +98,7 @@
     "noSource": "Sin fuente",
     "manySources": "{{count}} fuentes",
     "unrankedNote": "se guardan a la vez, ninguna tiene prioridad",
+    "automaticNote": "elegida por Kaiord; un valor que introduces tú gana ese día",
     "noUsableSource": "Sin fuente utilizable",
     "rankedUnavailableNote": "prioriza fuentes que están apagadas: no se está leyendo nada",
     "sourceLastSent": "{{name}} envió datos por última vez {{when}}",
@@ -117,7 +118,8 @@
       "training": "Entrenamiento",
       "recovery": "Recuperación",
       "body": "Cuerpo"
-    }
+    },
+    "chooseAuthority": "Elige qué Plataforma decide cada tipo de dato"
   },
   "dataTypeHints": {
     "workout": "Sesiones estructuradas completadas",

@@ -1,9 +1,9 @@
 /**
  * pickEffectiveHealthRecord — collapses the F3.2 resolver's result into
- * a single record for a headline stat. Priority mode already picked one
- * winner; union mode (today's default — no companion row exists yet)
- * has no ranked winner, so this takes the most recently written record,
- * matching the pre-resolver `.at(-1)` behavior when there's only one.
+ * a single record for a headline stat. A ranked read (the athlete's choice or
+ * the automatic Authority) already picked one winner; union mode (a kind
+ * with no Authority, or an athlete who chose to keep every source) has no
+ * ranked winner, so this takes the most recently written record.
  */
 import type { ResolveEffectiveSourceResult } from "../../../application/data-source-policy/resolve-effective-source.use-case";
 
@@ -23,7 +23,7 @@ export function pickEffectiveHealthRecord<T>(
       usedFallback: false,
     };
   }
-  if (result.mode === "priority") {
+  if (result.mode !== "union") {
     return {
       record: result.effective?.record,
       sourceBridgeId: result.effective?.sourceBridgeId,
