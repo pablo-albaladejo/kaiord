@@ -44,7 +44,7 @@ export const workoutSchema = z.object({
    * Workout-level free-text coaching instructions (e.g. Train2Go coach
    * descriptions, possibly containing markdown `[label](url)` links). Distinct
    * from per-step `notes` and from the short `name`. No length cap here; format
-   * adapters whose target imposes one (FIT step notes: 256) truncate best-effort
+   * adapters whose target imposes one (a FIT string: 254 bytes) truncate best-effort
    * at export rather than rejecting the KRD.
    */
   notes: z.string().optional(),
