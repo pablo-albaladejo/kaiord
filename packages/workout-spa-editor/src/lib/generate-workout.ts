@@ -1,15 +1,13 @@
 import type { OnGenerateProgress } from "@kaiord/ai";
 import { createTextToWorkout } from "@kaiord/ai";
-import {
-  type AiTelemetrySink,
-  createConsoleTelemetrySink,
-} from "@kaiord/ai/observability";
 import { createLanguageModel } from "@kaiord/ai/providers";
 import type { KRD, Sport } from "@kaiord/core";
 import { createWorkoutKRD } from "@kaiord/core";
 
 import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adapter";
 import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
+import { kindsSent } from "../application/data-flows/kinds-sent";
+import { startTraceRun, type TraceRun } from "../application/trace/trace-run";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { AthleteInput } from "./athlete-generation-context";
 import { loadAthleteInput } from "./athlete-generation-context";
@@ -27,11 +25,10 @@ export type GenerateWorkoutOptions = {
   // The profile the workout is generated for, when it is not the active one
   // (batch and chat write the workout to a given profile).
   profileId?: string;
-  // Telemetry sink override; defaults to the Dexie usage sink over the app db so
-  // every generation call site is accounted without bolting on its own writer,
-  // plus a console.debug line per run with its phase timings (ids and metrics
-  // only), so where a slow run spent its time can be read in DevTools.
-  telemetry?: AiTelemetrySink;
+  // The run this generation belongs to (a batch, a chat turn). Omitted, the
+  // generation is a run of its own and leaves its own Trace, so no call site
+  // can forget it. Its usage lands in the usage events either way.
+  trace?: TraceRun;
   // Aborts the provider request itself, not just the caller's wait.
   abortSignal?: AbortSignal;
   // When set, the output streams and real progress is reported per phase.
@@ -41,34 +38,27 @@ export type GenerateWorkoutOptions = {
   askHealth?: () => Promise<HealthShare>;
 };
 
-const defaultTelemetry = (usage: AiTelemetrySink): AiTelemetrySink => {
-  const debugLine = createConsoleTelemetrySink();
-  return {
-    emit: (event) => {
-      usage.emit(event);
-      debugLine.emit(event);
-    },
-  };
-};
-
-export const generateWorkoutKrd = async (
-  options: GenerateWorkoutOptions
+const generate = async (
+  options: GenerateWorkoutOptions,
+  trace: TraceRun
 ): Promise<KRD> => {
   const persistence = createDexiePersistence();
   const athlete =
     options.athlete ?? (await loadAthleteInput(persistence, options.profileId));
-  const context = await generationContext(
-    athlete,
-    options.sport,
-    options.askHealth ?? (() => askGenerationHealth(options.provider.type))
-  );
+  const ask =
+    options.askHealth ?? (() => askGenerationHealth(options.provider.type));
+  let healthSent = false;
+  const context = await generationContext(athlete, options.sport, async () => {
+    const share = await ask();
+    healthSent = share === "send";
+    return share;
+  });
   const model = await createLanguageModel(options.provider, options.modelId, {
     browser: true,
   });
-  const telemetry =
-    options.telemetry ??
-    defaultTelemetry(createDexieUsageTelemetrySink(persistence));
+  const telemetry = trace.sink(createDexieUsageTelemetrySink(persistence));
   const textToWorkout = createTextToWorkout({ model, telemetry });
+  trace.sent(options.provider.type, kindsSent("generation", healthSent));
 
   const workout = await textToWorkout(options.text, {
     sport: options.sport,
@@ -78,4 +68,22 @@ export const generateWorkoutKrd = async (
   });
 
   return createWorkoutKRD(workout);
+};
+
+export const generateWorkoutKrd = async (
+  options: GenerateWorkoutOptions
+): Promise<KRD> => {
+  if (options.trace) return generate(options, options.trace);
+  const trace = startTraceRun({
+    feature: "generation",
+    traces: createDexiePersistence().traces,
+  });
+  try {
+    const krd = await generate(options, trace);
+    await trace.finish();
+    return krd;
+  } catch (error) {
+    await trace.finish(options.abortSignal?.aborted ? "stopped" : "failed");
+    throw error;
+  }
 };

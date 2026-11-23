@@ -9,6 +9,7 @@ import type { ChatAgent, ChatTool, PendingAction } from "@kaiord/ai";
 import type { ModelMessage } from "ai";
 import { useMemo, useRef, useState } from "react";
 
+import type { TraceRun } from "../application/trace/trace-run";
 import { useAnalytics } from "../contexts/analytics-context";
 import { usePersistence } from "../contexts/persistence-context";
 import { useUnsavedWork } from "../lib/use-unsaved-work";
@@ -21,10 +22,12 @@ import type { UseChatTurn, UseChatTurnArgs } from "./use-chat-turn-types";
 export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const persistence = usePersistence();
   const analytics = useAnalytics();
-  const ops = useChatActionOps(args.profileId, {
-    provider: args.generationProvider,
-    modelId: args.generationModelId,
-  });
+  const traceRef = useRef<TraceRun | null>(null);
+  const ops = useChatActionOps(
+    args.profileId,
+    { provider: args.generationProvider, modelId: args.generationModelId },
+    traceRef
+  );
   const [state, setState] = useState<ChatTurnState>("idle");
   const [streamingText, setStreamingText] = useState("");
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(
@@ -36,7 +39,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const toolsRef = useRef<ChatTool[]>([]);
   const messagesRef = useRef<ModelMessage[]>([]);
   const abortRef = useRef<AbortController | null>(null);
-  const disposedRef = useStopTurnOnLeave(abortRef);
+  const disposedRef = useStopTurnOnLeave(abortRef, traceRef);
 
   const { profileId, conversationId, provider, modelId, pinModel, today } =
     args;
@@ -53,7 +56,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
           today,
           ops,
         },
-        { agentRef, toolsRef, messagesRef, abortRef, disposedRef },
+        { agentRef, toolsRef, messagesRef, abortRef, disposedRef, traceRef },
         { setState, setStreamingText, setPendingAction, setError }
       ),
     [

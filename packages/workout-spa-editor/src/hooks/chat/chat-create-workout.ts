@@ -2,6 +2,7 @@
 import type { Sport } from "@kaiord/core";
 
 import type { CreateWorkoutInput } from "../../application/chat/tools/chat-tool-deps";
+import type { TraceRun } from "../../application/trace/trace-run";
 import { buildWorkoutRecord } from "../../components/pages/CreateWorkout/build-workout-record";
 import { getTranslate } from "../../i18n/use-translate";
 import { generateWorkoutKrd } from "../../lib/generate-workout";
@@ -21,7 +22,8 @@ export const doCreateWorkout = async (
   provider: LlmProviderConfig,
   modelId: string,
   input: CreateWorkoutInput,
-  title = getTranslate("chat")("draft.workoutTitle")
+  title = getTranslate("chat")("draft.workoutTitle"),
+  trace?: TraceRun
 ): Promise<unknown> => {
   const krd = await generateWorkoutKrd({
     text: input.description,
@@ -29,6 +31,7 @@ export const doCreateWorkout = async (
     modelId,
     profileId,
     sport: input.sport as Sport | undefined,
+    trace,
   });
   const record = await buildWorkoutRecord({
     profileId,

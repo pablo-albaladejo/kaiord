@@ -7,6 +7,7 @@ import type { ModelMessage } from "ai";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 
 import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps";
+import type { TraceRun } from "../../application/trace/trace-run";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 
@@ -29,6 +30,8 @@ export type ChatTurnRefs = {
   /** True once the conversation is left; a turn started after it (a
    * resume once its confirmed tool finishes) is aborted at once. */
   disposedRef: MutableRefObject<boolean>;
+  /** The open Trace of the turn in progress, if any. */
+  traceRef: MutableRefObject<TraceRun | null>;
 };
 
 export type ChatTurnDeps = {

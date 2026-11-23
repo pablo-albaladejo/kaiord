@@ -6,7 +6,9 @@
  * The document is health data: it goes only once the athlete lets its
  * Provider have it (`askHealth`), and not at all when they do not. Returns a
  * typed result instead of throwing for "no model configured" and for
- * "withheld"; a run failure propagates as a throw.
+ * "withheld"; a run failure propagates as a throw. A run that reaches the
+ * Provider leaves one Trace (`trace`), finished here whatever the outcome;
+ * one that never goes leaves none.
  */
 import {
   type AgentFileInput,
@@ -23,6 +25,8 @@ import {
 
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { AiModelBinding } from "../../../types/ai-model-binding";
+import { kindsSent } from "../../data-flows/kinds-sent";
+import type { TraceRun } from "../../trace/trace-run";
 
 export type RunLabExtractionInput = {
   file: AgentFileInput;
@@ -30,6 +34,7 @@ export type RunLabExtractionInput = {
   bindings: AiModelBinding[];
   signal?: AbortSignal;
   telemetry?: AiTelemetrySink;
+  trace?: TraceRun;
   askHealth: (providerType: LlmProviderType) => Promise<"send" | "withhold">;
 };
 
@@ -49,13 +54,26 @@ export const runLabExtraction = async (
   if ((await input.askHealth(resolved.provider.type)) === "withhold")
     return { ok: false, reason: "withheld" };
 
-  const model = await createLanguageModel(resolved.provider, resolved.modelId, {
-    browser: true,
-  });
-  const { output } = await runGenerateAgent(
-    labExtractorAgent,
-    { files: [input.file] },
-    { model, signal: input.signal, telemetry: input.telemetry }
-  );
-  return { ok: true, extraction: output };
+  const { trace } = input;
+  try {
+    const model = await createLanguageModel(
+      resolved.provider,
+      resolved.modelId,
+      {
+        browser: true,
+      }
+    );
+    trace?.sent(resolved.provider.type, kindsSent("labImport", true));
+    const telemetry = trace ? trace.sink(input.telemetry) : input.telemetry;
+    const { output } = await runGenerateAgent(
+      labExtractorAgent,
+      { files: [input.file] },
+      { model, signal: input.signal, telemetry }
+    );
+    await trace?.finish();
+    return { ok: true, extraction: output };
+  } catch (error) {
+    await trace?.finish(input.signal?.aborted ? "stopped" : "failed");
+    throw error;
+  }
 };

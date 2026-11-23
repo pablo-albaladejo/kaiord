@@ -17,6 +17,8 @@ vi.mock("@kaiord/ai/providers", () => ({
 
 import { labExtractorAgent } from "@kaiord/ai/agents";
 
+import { createInMemoryTraceRepository } from "../../../test-utils/in-memory-trace-repository";
+import { startTraceRun } from "../../trace/trace-run";
 import type { RunLabExtractionInput } from "./run-lab-extraction.use-case";
 import { runLabExtraction } from "./run-lab-extraction.use-case";
 
@@ -149,5 +151,53 @@ describe("runLabExtraction", () => {
     expect(result).toEqual({ ok: false, reason: "withheld" });
     expect(mockCreateLanguageModel).not.toHaveBeenCalled();
     expect(mockRunGenerateAgent).not.toHaveBeenCalled();
+  });
+
+  it("should leave one Trace naming the lab results sent to the Provider", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+
+    // Act
+    await runLabExtraction({ ...makeInput(), trace });
+    const stored = await traces.list();
+
+    // Assert
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({
+      feature: "lab_import",
+      outcome: "ok",
+      sent: [{ to: "anthropic", kinds: ["labResults"] }],
+    });
+  });
+
+  it("should leave no Trace when the athlete withholds the document", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+
+    // Act
+    await runLabExtraction({
+      ...makeInput(),
+      trace,
+      askHealth: async () => "withhold",
+    });
+
+    // Assert
+    expect(await traces.list()).toHaveLength(0);
+  });
+
+  it("should record a failed run in its Trace", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+    mockRunGenerateAgent.mockRejectedValueOnce(new Error("down"));
+
+    // Act
+    const run = runLabExtraction({ ...makeInput(), trace });
+
+    // Assert
+    await expect(run).rejects.toThrow("down");
+    expect((await traces.list())[0]?.outcome).toBe("failed");
   });
 });

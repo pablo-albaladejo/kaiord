@@ -63,7 +63,6 @@ describe("generateWorkoutKrd for a runner without pace zones", () => {
       modelId: "m",
       sport: "running" as const,
       athlete: { profile: RUNNER_WITHOUT_ZONES, customPrompt: null },
-      telemetry: { emit: vi.fn() },
     };
 
     // Act

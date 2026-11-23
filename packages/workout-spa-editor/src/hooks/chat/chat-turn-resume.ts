@@ -5,6 +5,7 @@
  */
 import type { PendingAction } from "@kaiord/ai";
 
+import { recordAction } from "./chat-trace";
 import { resumeWithOutcome } from "./chat-turn-approve";
 import { runAgent } from "./chat-turn-context";
 import type { ChatTurnCtx } from "./chat-turn-types";
@@ -21,6 +22,7 @@ export const approveAction = async (
     pending.toolName,
     pending.input
   );
+  recordAction(ctx.traceRef, pending.toolName, "athlete", ok ? "ok" : "failed");
   ctx.set.pendingAction(null);
   await runAgent(ctx, (signal) =>
     resumeWithOutcome(ctx, pending, { output, ok }, signal)
@@ -33,6 +35,7 @@ export const denyAction = async (
 ): Promise<void> => {
   const agent = ctx.agentRef.current;
   if (!agent) return;
+  recordAction(ctx.traceRef, pending.toolName, "athlete", "refused");
   ctx.set.pendingAction(null);
   await runAgent(ctx, (signal) =>
     agent.resume(
