@@ -24,6 +24,7 @@ import { useCallback, useState } from "react";
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
 import type { useToast } from "../../hooks/use-toast";
 import { lazyImport } from "../../lib/lazy-import";
+import { useUnsavedWork } from "../../lib/use-unsaved-work";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
   ConflictDecision,
@@ -54,6 +55,7 @@ export const useZonesSyncOrchestrator = (
   toasts: ReturnType<typeof useToast>
 ): ZonesSyncOrchestrator => {
   const [pending, setPending] = useState<Pending | null>(null);
+  useUnsavedWork(pending !== null);
 
   const runSync = useCallback(
     async (profileId: string) => {

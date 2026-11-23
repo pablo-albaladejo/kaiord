@@ -113,6 +113,7 @@ describe("startServiceWorker", () => {
 
   afterEach(() => {
     document.head.innerHTML = "";
+    document.body.innerHTML = "";
     vi.useRealTimers();
   });
 
@@ -239,6 +240,24 @@ describe("startServiceWorker", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
+  it("should offer a worker that was still installing when the page registered", async () => {
+    // Arrange
+    const container = new FakeContainer();
+    container.control();
+    const worker = new FakeWorker();
+    container.registration.installing = worker;
+    const { mod } = await boot(container, { sinceLoadMs: 20_000 });
+
+    // Act
+    container.registration.installing = null;
+    container.registration.waiting = worker;
+    worker.moveTo("installed");
+    await settle();
+
+    // Assert
+    expect(mod.getUpdateState()).toBe("available");
+  });
+
   it("should apply silently a worker found within 10 s, with no input, nothing unsaved and one window", async () => {
     // Arrange
     const container = new FakeContainer();
@@ -256,8 +275,21 @@ describe("startServiceWorker", () => {
     expect(mod.getUpdateState()).toBe("applying");
   });
 
+  const firstInput = (type: string) => () =>
+    window.dispatchEvent(new Event(type, { bubbles: true }));
+  const focusField = () => {
+    const field = document.createElement("textarea");
+    document.body.appendChild(field);
+    field.focus();
+  };
   for (const [name, setup] of [
-    ["input came first", () => window.dispatchEvent(new Event("keydown"))],
+    ["input came first", firstInput("keydown")],
+    ["a file was dragged over the page", firstInput("dragenter")],
+    ["a file was dropped", firstInput("drop")],
+    ["something was pasted", firstInput("paste")],
+    ["the screen was touched", firstInput("touchstart")],
+    ["the page was scrolled by wheel", firstInput("wheel")],
+    ["a text field took focus", focusField],
     ["another window is open", (c: FakeContainer) => (c.windows = 2)],
   ] as const) {
     it(`should show the prompt instead of applying silently when ${name}`, async () => {
@@ -277,6 +309,71 @@ describe("startServiceWorker", () => {
       expect(reload).not.toHaveBeenCalled();
     });
   }
+
+  it("should still apply silently when focus lands on something that is not a text field", async () => {
+    // Arrange
+    const container = new FakeContainer();
+    container.control();
+    const { reload } = await boot(container);
+    const button = document.createElement("button");
+    document.body.appendChild(button);
+    button.focus();
+
+    // Act
+    container.installNewWorker();
+    await settle();
+    container.dispatchEvent(new Event("controllerchange"));
+
+    // Assert
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("should block the update while text typed into an open dialog is there, and allow it once the dialog closes", async () => {
+    // Arrange
+    const container = new FakeContainer();
+    container.control();
+    const { mod } = await boot(container);
+    window.dispatchEvent(new Event("pointerdown"));
+    const worker = container.installNewWorker();
+    await settle();
+    const dialog = document.createElement("div");
+    dialog.setAttribute("role", "dialog");
+    const field = document.createElement("input");
+    dialog.appendChild(field);
+    document.body.appendChild(dialog);
+    field.value = "Tempo";
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+
+    // Act
+    const whileOpen = await mod.applyUpdate();
+    dialog.remove();
+    const afterClose = await mod.applyUpdate();
+
+    // Assert
+    expect(whileOpen).toBe("blocked");
+    expect(afterClose).toBe("applying");
+    expect(worker.messages).toEqual([{ type: "SKIP_WAITING" }]);
+  });
+
+  it("should not count typing outside a dialog, which each surface reports itself", async () => {
+    // Arrange
+    const container = new FakeContainer();
+    container.control();
+    const { mod } = await boot(container);
+    window.dispatchEvent(new Event("pointerdown"));
+    container.installNewWorker();
+    await settle();
+    const search = document.createElement("input");
+    document.body.appendChild(search);
+    search.value = "tempo";
+    search.dispatchEvent(new Event("input", { bubbles: true }));
+
+    // Act
+    const outcome = await mod.applyUpdate();
+
+    // Assert
+    expect(outcome).toBe("applying");
+  });
 
   it("should show the prompt when the worker is found more than 10 s after load", async () => {
     // Arrange

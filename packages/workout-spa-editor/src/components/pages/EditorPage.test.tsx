@@ -23,6 +23,7 @@ import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-a
 import { GarminBridgeProvider } from "../../contexts/garmin-bridge-context";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { ToastContextProvider } from "../../contexts/ToastContext";
+import { hasUnsavedEdits } from "../../lib/unsaved-edits";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KRD } from "../../types/krd";
@@ -388,6 +389,38 @@ describe("EditorPage", () => {
       expect(useWorkoutStore.getState().isModalOpen).toBe(true);
     });
     expect(await screen.findByTestId("modal-backdrop")).toBeInTheDocument();
+  });
+
+  it("should hold an update while a new workout with steps is open, and not for an empty one", async () => {
+    // Arrange
+    const empty = renderEditor(undefined, "/workout/new?source=scratch");
+    await waitFor(() => {
+      expect(useWorkoutStore.getState().currentWorkout).not.toBeNull();
+    });
+    const whileEmpty = hasUnsavedEdits();
+
+    // Act
+    useWorkoutStore.setState({ currentWorkout: makeStepfulKrd(1) });
+    await waitFor(() => expect(hasUnsavedEdits()).toBe(true));
+    empty.unmount();
+
+    // Assert
+    expect(whileEmpty).toBe(false);
+    expect(hasUnsavedEdits()).toBe(false);
+  });
+
+  it("should not count a scheduled workout opened unchanged as a new draft", async () => {
+    // Arrange
+    await db
+      .table("workouts")
+      .put(makeRecord({ krd: makeStepfulKrd(2) as WorkoutRecord["krd"] }));
+
+    // Act
+    renderEditor("w-test");
+    await screen.findByTestId("add-step-button");
+
+    // Assert
+    expect(hasUnsavedEdits()).toBe(false);
   });
 
   it("should clear the store after the discard confirmation is confirmed and then navigate", async () => {

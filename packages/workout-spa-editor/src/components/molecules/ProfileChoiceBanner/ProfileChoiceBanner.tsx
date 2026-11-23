@@ -8,12 +8,14 @@ import { useState } from "react";
 
 import { useSync } from "../../../contexts/sync-context";
 import { useTranslate } from "../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import { Button } from "../../atoms/Button/Button";
 
 export function ProfileChoiceBanner() {
   const t = useTranslate("settings");
   const { profileChoice, chooseProfile } = useSync();
   const [busy, setBusy] = useState(false);
+  useUnsavedWork(busy);
   if (!profileChoice || profileChoice.length === 0) return null;
 
   const choose = async (id: string) => {

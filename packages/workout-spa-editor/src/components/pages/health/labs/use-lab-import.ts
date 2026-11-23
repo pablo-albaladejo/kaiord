@@ -19,6 +19,7 @@ import { useAiModelBindingsLive } from "../../../../hooks/use-ai-model-bindings-
 import { useAiProvidersLive } from "../../../../hooks/use-ai-providers-live";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../../lib/use-unsaved-work";
 import { validateFileSize } from "../../../molecules/FileUpload/file-upload-constants";
 import { type LabDraft, mapExtractionToDraft } from "./map-extraction-to-draft";
 
@@ -30,6 +31,7 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const active = useActiveProfileLive();
   const bindings = useAiModelBindingsLive(active?.id ?? null) ?? [];
   const [isRunning, setIsRunning] = useState(false);
+  useUnsavedWork(isRunning);
   const controllerRef = useRef<AbortController | null>(null);
   const telemetry = useMemo(
     () => createDexieUsageTelemetrySink(createDexiePersistence()),

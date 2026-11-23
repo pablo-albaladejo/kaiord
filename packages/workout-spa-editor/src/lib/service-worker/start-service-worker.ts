@@ -1,6 +1,8 @@
+import { watchDialogInput } from "../unsaved-dialog-input";
+import { trackFirstInput } from "./first-input";
 import { sayHello } from "./hello";
 import { isReloadRequested } from "./update-store";
-import { trackFirstInput, watchRegistration } from "./watch-registration";
+import { watchRegistration } from "./watch-registration";
 
 export type StartOptions = {
   prod: boolean;
@@ -22,6 +24,7 @@ export function startServiceWorker(options: StartOptions): void {
   const { container, base } = options;
   if (!options.prod || !container || options.saveData) return;
   trackFirstInput();
+  watchDialogInput();
   let reloading = false;
   void sayHello(container).catch(() => undefined);
   container.addEventListener("controllerchange", () => {

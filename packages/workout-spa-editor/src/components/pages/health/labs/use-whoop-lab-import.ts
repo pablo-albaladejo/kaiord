@@ -21,6 +21,7 @@ import { useToastContext } from "../../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
 import { useDiscoveredBridges } from "../../../../hooks/use-discovered-bridges";
 import { useTranslate } from "../../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../../lib/use-unsaved-work";
 
 const useWhoopConnected = (isDiscovered: boolean): boolean => {
   const [connected, setConnected] = useState(false);
@@ -58,6 +59,7 @@ export function useWhoopLabImport() {
   const isDiscovered = discovered.some((d) => d.bridgeId === WHOOP_BRIDGE_ID);
   const connected = useWhoopConnected(isDiscovered);
   const [isRunning, setIsRunning] = useState(false);
+  useUnsavedWork(isRunning);
 
   const run = async () => {
     const extensionId = bridgeDiscovery.getExtensionId(WHOOP_BRIDGE_ID);

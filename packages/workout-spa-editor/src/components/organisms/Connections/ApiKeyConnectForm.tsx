@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 
@@ -18,6 +19,7 @@ export function ApiKeyConnectForm({
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  useUnsavedWork(busy || apiKey !== "");
 
   const submit = async () => {
     setBusy(true);

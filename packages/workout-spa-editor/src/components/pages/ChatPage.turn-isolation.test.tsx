@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ChatTurnCtx } from "../../hooks/chat/chat-turn-types";
+import { hasUnsavedEdits } from "../../lib/unsaved-edits";
 import { renderWithProviders } from "../../test-utils";
 import type { ChatConversationRecord } from "../../types/chat/chat-conversation-record";
 import ChatPage from "./ChatPage";
@@ -109,6 +110,26 @@ describe("ChatPage turn isolation", () => {
       screen.queryByRole("button", { name: "Approve" })
     ).not.toBeInTheDocument();
     expect(screen.getByLabelText("Message")).toBeEnabled();
+  });
+
+  it("should hold an update while the assistant waits for an answer, and release it once the thread is left", async () => {
+    // Arrange
+    const switchTo = await sendInFirstConversation((ctx) => {
+      ctx.set.pendingAction({
+        toolName: "create_workout",
+        toolCallId: "t1",
+        input: {},
+      });
+      ctx.set.state("awaiting_confirmation");
+    });
+    const whilePending = hasUnsavedEdits();
+
+    // Act
+    switchTo("c2");
+
+    // Assert
+    expect(whilePending).toBe(true);
+    expect(hasUnsavedEdits()).toBe(false);
   });
 
   it("should not stream one conversation's reply into another", async () => {

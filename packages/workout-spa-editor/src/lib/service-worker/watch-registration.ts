@@ -1,22 +1,11 @@
 import { hasUnsavedEdits } from "../unsaved-edits";
 import { applyUpdate } from "./apply-update";
+import { hasInteracted } from "./first-input";
 import { countWindows } from "./hello";
 import { setRegistration, setUpdateState } from "./update-store";
 
 const SILENT_WINDOW_MS = 10_000;
 const CHECK_EVERY_MS = 60 * 60 * 1000;
-
-let interacted = false;
-
-/** Any pointer or key input ends the chance of a silent update. */
-export function trackFirstInput(): void {
-  const mark = () => {
-    interacted = true;
-  };
-  for (const type of ["pointerdown", "keydown"]) {
-    window.addEventListener(type, mark, { capture: true, once: true });
-  }
-}
 
 export type WatchDeps = {
   container: ServiceWorkerContainer;
@@ -24,7 +13,7 @@ export type WatchDeps = {
 };
 
 async function offerUpdate({ container, sinceLoadMs }: WatchDeps) {
-  const early = sinceLoadMs() <= SILENT_WINDOW_MS && !interacted;
+  const early = sinceLoadMs() <= SILENT_WINDOW_MS && !hasInteracted();
   if (early && !hasUnsavedEdits() && (await countWindows(container)) === 1) {
     await applyUpdate();
     return;
@@ -57,13 +46,16 @@ export function watchRegistration(
   if (registration.waiting && deps.container.controller) {
     void offerUpdate(deps);
   }
-  registration.addEventListener("updatefound", () => {
+  const watchInstalling = () => {
     const worker = registration.installing;
     worker?.addEventListener("statechange", () => {
       if (worker.state === "installed" && deps.container.controller) {
         void offerUpdate(deps);
       }
     });
-  });
+  };
+  // A navigation may have started an install before the page registered.
+  watchInstalling();
+  registration.addEventListener("updatefound", watchInstalling);
   scheduleUpdateChecks(registration);
 }

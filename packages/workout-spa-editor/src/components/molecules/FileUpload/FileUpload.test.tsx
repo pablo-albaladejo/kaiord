@@ -2,6 +2,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { hasUnsavedEdits } from "../../../lib/unsaved-edits";
 import type { KRD } from "../../../types/krd";
 import { FileUpload } from "./FileUpload";
 import {
@@ -109,6 +110,31 @@ describe("FileUpload", () => {
     await waitFor(() => {
       expect(onFileLoad).toHaveBeenCalledWith(mockKRD);
     });
+  });
+
+  it("should hold an update while a file is being imported, and release it once it loads", async () => {
+    // Arrange
+    const { importWorkout } = await import("../../../utils/import-workout");
+    let finish: (krd: KRD) => void = () => undefined;
+    vi.mocked(importWorkout).mockReturnValue(
+      new Promise<KRD>((resolve) => {
+        finish = resolve;
+      })
+    );
+    const onFileLoad = vi.fn();
+    render(<FileUpload onFileLoad={onFileLoad} />);
+    const file = new File([JSON.stringify(mockKRD)], "workout.krd", {
+      type: "application/json",
+    });
+
+    // Act
+    await userEvent.upload(screen.getByLabelText(/upload workout file/i), file);
+    await waitFor(() => expect(hasUnsavedEdits()).toBe(true));
+    finish(mockKRD);
+
+    // Assert
+    await waitFor(() => expect(onFileLoad).toHaveBeenCalledWith(mockKRD));
+    await waitFor(() => expect(hasUnsavedEdits()).toBe(false));
   });
 
   it("should report reader warnings through onWarnings after the load", async () => {
