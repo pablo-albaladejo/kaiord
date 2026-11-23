@@ -1,4 +1,5 @@
 import type { ChatTool, PendingAction } from "@kaiord/ai";
+import { CHAT_ACTION_TOOL_NAMES } from "@kaiord/ai/prompts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
@@ -8,8 +9,7 @@ import { sendTurn } from "./chat-turn-runner";
 import type { ChatTurnCtx, ChatTurnState } from "./chat-turn-types";
 
 const fakeAgent = { sendTurn: vi.fn(), resume: vi.fn() };
-const push = vi.fn();
-const create = vi.fn();
+const execute = vi.fn();
 
 const actionTool = (name: string, execute: ChatTool["execute"]): ChatTool => ({
   name,
@@ -22,10 +22,7 @@ const actionTool = (name: string, execute: ChatTool["execute"]): ChatTool => ({
 vi.mock("./build-chat-agent", () => ({
   buildChatAgent: vi.fn(async () => ({
     agent: fakeAgent,
-    tools: [
-      actionTool("push_to_garmin", push),
-      actionTool("create_workout", create),
-    ],
+    tools: CHAT_ACTION_TOOL_NAMES.map((name) => actionTool(name, execute)),
   })),
 }));
 
@@ -62,69 +59,30 @@ const makeCtx = (persistence: ReturnType<typeof createInMemoryPersistence>) => {
   return { ctx, states, pendings };
 };
 
-describe("auto-approved chat actions", () => {
+describe("chat actions wait for the athlete", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("should push to Garmin without a confirmation card and resume as approved", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const { ctx, states, pendings } = makeCtx(persistence);
-    const output = { workoutId: "w1", garminPushId: "123" };
-    push.mockResolvedValueOnce(output);
-    fakeAgent.sendTurn.mockResolvedValueOnce({
-      status: "pending_action",
-      pendingAction: pendingFor("push_to_garmin"),
-      messages: [],
-    });
-    fakeAgent.resume.mockResolvedValueOnce({
-      status: "complete",
-      text: "Sent to Garmin.",
-      messages: [],
-    });
+  it.each(CHAT_ACTION_TOOL_NAMES.map((name) => [name]))(
+    "should park %s at a confirmation card without running it",
+    async (toolName) => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx, states, pendings } = makeCtx(persistence);
+      const pending = pendingFor(toolName);
+      fakeAgent.sendTurn.mockResolvedValueOnce({
+        status: "pending_action",
+        pendingAction: pending,
+        messages: [],
+      });
 
-    // Act
-    await sendTurn(ctx, [], "send it to garmin");
+      // Act
+      await sendTurn(ctx, [], "do it");
 
-    // Assert
-    expect(push).toHaveBeenCalledWith({ workoutId: "w1" });
-    expect(fakeAgent.resume).toHaveBeenCalledWith(
-      [],
-      {
-        toolCallId: "call-push_to_garmin",
-        toolName: "push_to_garmin",
-        status: "approved",
-        output,
-      },
-      expect.anything()
-    );
-    expect(pendings.filter(Boolean)).toEqual([]);
-    expect(states).not.toContain("awaiting_confirmation");
-    const stored = await persistence.chatMessages.listByProfile("p1");
-    expect(stored.map((m) => m.role)).toEqual(["user", "tool", "assistant"]);
-    expect(stored[1]).toMatchObject({
-      toolName: "push_to_garmin",
-      toolResult: output,
-    });
-  });
-
-  it("should still ask before any other action", async () => {
-    // Arrange
-    const persistence = createInMemoryPersistence();
-    const { ctx, states, pendings } = makeCtx(persistence);
-    const pending = pendingFor("create_workout");
-    fakeAgent.sendTurn.mockResolvedValueOnce({
-      status: "pending_action",
-      pendingAction: pending,
-      messages: [],
-    });
-
-    // Act
-    await sendTurn(ctx, [], "make me a workout");
-
-    // Assert
-    expect(create).not.toHaveBeenCalled();
-    expect(fakeAgent.resume).not.toHaveBeenCalled();
-    expect(pendings.at(-1)).toEqual(pending);
-    expect(states.at(-1)).toBe("awaiting_confirmation");
-  });
+      // Assert
+      expect(execute).not.toHaveBeenCalled();
+      expect(fakeAgent.resume).not.toHaveBeenCalled();
+      expect(pendings.at(-1)).toEqual(pending);
+      expect(states.at(-1)).toBe("awaiting_confirmation");
+    }
+  );
 });

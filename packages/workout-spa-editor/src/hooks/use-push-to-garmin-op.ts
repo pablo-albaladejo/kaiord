@@ -12,8 +12,8 @@ import { isPushFailure } from "./chat/is-push-failure";
 import { buildPlacementDeps } from "./garmin-placement-deps";
 
 /**
- * Binds the push_to_garmin chat action, which runs without a confirmation
- * card: contexts are touched only here, then injected into the plain
+ * Binds the push_to_garmin chat action, which runs once the athlete
+ * approves its confirmation card: contexts are touched only here, then injected into the plain
  * `doPushToGarmin`, which refuses a workout that is not the active
  * athlete's. A toast tells the athlete the push happened, or that it failed;
  * a failure while the Garmin Connection does not work carries that

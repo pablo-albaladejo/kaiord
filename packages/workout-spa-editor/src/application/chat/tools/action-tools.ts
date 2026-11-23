@@ -26,7 +26,12 @@ const createWorkoutSchema = z.object({
   description: z
     .string()
     .min(1)
-    .describe("Natural-language workout description to generate from"),
+    .describe(
+      "Natural-language workout description to generate from, in the " +
+        "user's or coach's words, with every number exactly as written " +
+        "(paces, times, distances, repetitions): never convert or compute " +
+        "them, the app does"
+    ),
   date: z.string().describe("Target date YYYY-MM-DD"),
   sport: z.string().optional().describe("Optional sport hint"),
 });

@@ -19,8 +19,8 @@ export const createSetDataRouteTool = (ops: ChatActionOps): ChatTool => ({
     "disable_route turn a (data type, integration, direction) route on or " +
     "off. set_source_policy sets whether a data type merges every enabled " +
     "source (union, the default) or reads a priority order with automatic " +
-    "fallback (priority). Requires the user to confirm before running; " +
-    "the result reflects the new persisted state.",
+    "fallback (priority). The result reflects the new persisted state. " +
+    "Requires the user to confirm before running.",
   inputSchema: setDataRouteInputSchema,
   requiresConfirmation: true,
   execute: (raw) => ops.setDataRoute(setDataRouteInputSchema.parse(raw)),
