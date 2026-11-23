@@ -8,6 +8,7 @@ import type { Sport } from "@kaiord/core";
 import type { CreateWorkoutInput } from "../../application/chat/tools/chat-tool-deps";
 import { buildWorkoutRecord } from "../../components/pages/CreateWorkout/build-workout-record";
 import { generateWorkoutKrd } from "../../lib/generate-workout";
+import { abortError } from "../../lib/health-question-queue";
 import type { KRD } from "../../types/krd";
 import { type ChatWorkoutRun, clearDescription } from "./chat-workout-run";
 
@@ -24,6 +25,7 @@ export const doCreateWorkout = async (
   input: CreateWorkoutInput
 ): Promise<unknown> => {
   await clearDescription(run);
+  if (run.signal?.aborted) throw abortError();
   const krd = await generateWorkoutKrd({
     deps: run.deps,
     text: input.description,
@@ -32,6 +34,7 @@ export const doCreateWorkout = async (
     profileId: run.profileId,
     sport: input.sport as Sport | undefined,
     trace: run.trace,
+    abortSignal: run.signal,
   });
   const record = await buildWorkoutRecord({
     profileId: run.profileId,

@@ -26,6 +26,12 @@ export const requireProfile = (profileId: string | null): string => {
   return profileId;
 };
 
+/** The turn's open Trace and the controller its confirmed action runs under. */
+export type ChatTurnRunRefs = {
+  traceRef?: MutableRefObject<TraceRun | null>;
+  abortRef?: MutableRefObject<AbortController | null>;
+};
+
 export type ChatGenerationModel = {
   provider: LlmProviderConfig | null;
   modelId: string | null;
@@ -34,8 +40,9 @@ export type ChatGenerationModel = {
 export const useCreateWorkoutOp = (
   profileId: string | null,
   generation: ChatGenerationModel,
-  traceRef?: MutableRefObject<TraceRun | null>
+  refs: ChatTurnRunRefs = {}
 ) => {
+  const { traceRef, abortRef } = refs;
   const persistence = usePersistence();
   const { provider, modelId } = generation;
   const locale = useActiveLocale();
@@ -50,6 +57,7 @@ export const useCreateWorkoutOp = (
         profileId: requireProfile(profileId),
         title: getTranslate("chat", locale)("draft.workoutTitle"),
         trace: traceRef?.current ?? undefined,
+        signal: abortRef?.current?.signal,
       };
       try {
         return await doCreateWorkout(run, input);
@@ -70,6 +78,7 @@ export const useCreateWorkoutOp = (
       modelId,
       locale,
       traceRef,
+      abortRef,
       toast,
       t,
     ]

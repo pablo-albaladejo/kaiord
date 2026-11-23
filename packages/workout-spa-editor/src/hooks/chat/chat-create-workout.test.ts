@@ -161,4 +161,49 @@ describe("doCreateWorkout", () => {
       { to: "anthropic", kinds: ["messages", "hrv", "workoutDescription"] },
     ]);
   });
+
+  it("should send nothing and write no workout when stopped while the health question waits", async () => {
+    // Arrange
+    const { run, trace, askHealth } = setUp("openai");
+    trace.sent("anthropic", ["messages", "hrv"]);
+    const stop = new AbortController();
+    askHealth.mockImplementationOnce(
+      (_q, options) =>
+        new Promise((_resolve, reject) =>
+          options.signal?.addEventListener("abort", () =>
+            reject(new DOMException("Aborted", "AbortError"))
+          )
+        ) as never
+    );
+
+    // Act
+    const created = doCreateWorkout({ ...run, signal: stop.signal }, INPUT);
+    stop.abort();
+    const error = await created.catch((e: unknown) => e);
+
+    // Assert
+    expect(String(error)).toMatch(/abort/i);
+    expect(mockGenerate).not.toHaveBeenCalled();
+    expect(run.persistence.workouts.put).not.toHaveBeenCalled();
+    expect(trace.sentSoFar().map((s) => s.to)).toEqual(["anthropic"]);
+  });
+
+  it("should not generate once stopped, and hand the generation the stop signal", async () => {
+    // Arrange
+    const { run } = setUp("anthropic");
+    const stop = new AbortController();
+    const going = { ...run, signal: stop.signal };
+
+    // Act
+    await doCreateWorkout(going, INPUT);
+    stop.abort();
+    const later = await doCreateWorkout(going, INPUT).catch((e: unknown) => e);
+
+    // Assert
+    expect(mockGenerate).toHaveBeenCalledOnce();
+    expect(mockGenerate).toHaveBeenCalledWith(
+      expect.objectContaining({ abortSignal: stop.signal })
+    );
+    expect(String(later)).toMatch(/abort/i);
+  });
 });

@@ -7,7 +7,7 @@ import {
   answerHealthSharing,
   HEALTH_SHARING_KEY,
 } from "./helpers/health-sharing";
-import { countKaiordStore } from "./helpers/kaiord-idb";
+import { countKaiordStore, readKaiordStore } from "./helpers/kaiord-idb";
 import { clearDexie } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
 
@@ -203,6 +203,38 @@ test.describe("A workout the assistant creates after reading health data", () =>
     await expect
       .poll(() => createResult(anthropic))
       .toContain("The athlete chose not to send health data to OpenAI");
+    expect(await countKaiordStore(page, "workouts")).toBe(0);
+  });
+});
+
+test.describe("Leaving while OpenAI's health question waits", () => {
+  test("takes the question away, sends nothing and leaves a stopped Trace", async ({
+    page,
+  }) => {
+    await answerHealthSharing(page, { anthropic: "always" });
+    const { openai } = await openChat(page);
+
+    await page.getByLabel("Message").fill("Plan tomorrow from my HRV");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await page.getByRole("button", { name: "Approve" }).click();
+    const notice = page.getByTestId("health-sharing-notice");
+    await expect(notice).toContainText("Send your health data to OpenAI?");
+
+    // Leave the conversation the way the App's own links do.
+    await page.evaluate(() => {
+      window.history.pushState({}, "", "/calendar");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    await expect(notice).toHaveCount(0);
+    await expect
+      .poll(async () =>
+        (await readKaiordStore<{ outcome: string }>(page, "traces")).map(
+          (t) => t.outcome
+        )
+      )
+      .toEqual(["stopped"]);
+    expect(openai).toHaveLength(0);
     expect(await countKaiordStore(page, "workouts")).toBe(0);
   });
 });

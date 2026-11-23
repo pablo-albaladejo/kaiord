@@ -658,6 +658,52 @@ describe("chat-turn-runner", () => {
       ]);
     });
 
+    it("should stop an approved action while it waits, resume nothing and leave a stopped Trace", async () => {
+      // Arrange
+      const persistence = createInMemoryPersistence();
+      const { ctx, states } = makeCtx(persistence);
+      const pending: PendingAction = {
+        toolName: "create_workout",
+        toolCallId: "c1",
+        input: {},
+      };
+      fakeAgent.sendTurn.mockResolvedValueOnce({
+        status: "pending_action",
+        toolNames: [],
+        pendingAction: pending,
+        messages: [],
+      });
+      let heldSignal: AbortSignal | undefined;
+      const execute = vi.fn(
+        () =>
+          new Promise((_resolve, reject) => {
+            heldSignal = ctx.abortRef.current?.signal;
+            heldSignal?.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError"))
+            );
+          })
+      );
+      await sendTurn(ctx, [], "plan tomorrow");
+      ctx.toolsRef.current = [
+        { name: "create_workout", execute } as unknown as ChatTool,
+      ];
+
+      // Act
+      const approving = approveAction(ctx, pending);
+      await vi.waitFor(() => expect(execute).toHaveBeenCalled());
+      stopTurn(ctx);
+      await approving;
+      const [trace] = await tracesOf(persistence);
+      const rows = await persistence.chatMessages.listByProfile("p1");
+
+      // Assert
+      expect(heldSignal?.aborted).toBe(true);
+      expect(fakeAgent.resume).not.toHaveBeenCalled();
+      expect(trace?.outcome).toBe("stopped");
+      expect(rows.filter((r) => r.role === "tool")).toEqual([]);
+      expect(states.at(-1)).toBe("idle");
+    });
+
     it("should record a Tool the athlete refused", async () => {
       // Arrange
       const persistence = createInMemoryPersistence();

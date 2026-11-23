@@ -26,6 +26,8 @@ export type ChatWorkoutRun = {
   title: string;
   /** The turn's Trace: what it sent so far says what the description holds. */
   trace?: TraceRun;
+  /** Stops the action: a waiting health question, then the generation. */
+  signal?: AbortSignal;
   askHealth?: (
     question: HealthQuestion,
     options: HealthRequestOptions
@@ -46,7 +48,7 @@ export const clearDescription = async (run: ChatWorkoutRun): Promise<void> => {
     const ask = run.askHealth ?? healthSharingGate.request;
     const share = await ask(
       { flow: "assistantWorkout", providerType: to },
-      { onWait: () => void run.trace?.checkpoint() }
+      { signal: run.signal, onWait: () => void run.trace?.checkpoint() }
     );
     if (share === "withhold") throw healthWithheldError(to);
   }
