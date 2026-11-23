@@ -7,13 +7,13 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-11-22
+**Last updated:** 2026-11-23
 
-This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a), the Kaiord for Garmin Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord for Tanita Chrome extension, the Kaiord for TrainingPeaks Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
+This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the remote MCP endpoint (kaiord.com/mcp), the remote A2A endpoint (kaiord.com/a2a, not deployed yet), the Kaiord for Garmin Chrome extension, the Kaiord Train2Go Bridge Chrome extension, the Kaiord for Tanita Chrome extension, the Kaiord for TrainingPeaks Chrome extension, and the Kaiord WHOOP Bridge Chrome extension.
 
 ## Data Controller
 
-Kaiord operates no backend that stores your data. All processing of your workouts, health data and editor state is client-side — on your device, inside your browser — with one exception: the stateless [remote MCP and A2A endpoints](#remote-mcp-and-a2a-endpoints), which process a request in transit and keep nothing. The only other flows are the ones described below: anonymous analytics, and, if you configure them, requests to your chosen AI provider. So there is no Kaiord-held record of you. For GDPR purposes there is therefore no Kaiord-operated data controller. The maintainer (Pablo Albaladejo) is the point of contact for privacy inquiries; see the [Contact](#contact) section.
+Kaiord operates no backend that stores your data. All processing of your workouts, health data and editor state is client-side — on your device, inside your browser — with one exception: the stateless [remote MCP endpoint](#remote-mcp-and-a2a-endpoints), which processes a request in transit and keeps nothing (the A2A endpoint described there is not deployed yet). The only other flows are the ones described below: anonymous analytics, and, if you configure them, requests to your chosen AI provider. So there is no Kaiord-held record of you. For GDPR purposes there is therefore no Kaiord-operated data controller. The maintainer (Pablo Albaladejo) is the point of contact for privacy inquiries; see the [Contact](#contact) section.
 
 ## Data Collection
 
@@ -36,7 +36,7 @@ When you use the in-app chat assistant, summaries of your locally stored history
 - **Cloudflare as Infrastructure Provider**: Requests travel through Cloudflare's network, which is the endpoint's network and hosting provider, subject to [Cloudflare's own privacy policy](https://www.cloudflare.com/privacypolicy/). Kaiord gives Cloudflare no other data.
 - **No Garmin or Health Tools**: The endpoint offers no Garmin or health tools. Garmin Connect access and health data stay with the local `@kaiord/mcp` server and the browser extensions.
 
-`https://kaiord.com/a2a` is an Agent2Agent (A2A) endpoint on the same Worker. It runs the same tools under the same terms described above, and its tasks finish inside the reply and are not retained.
+`https://kaiord.com/a2a` is an Agent2Agent (A2A) endpoint whose code is in the same Worker; it is not deployed yet, so nothing answers there today. Once deployed, it runs the same tools under the same terms described above, and its tasks finish inside the reply and are not retained.
 
 ## Kaiord for Garmin Extension
 
@@ -131,7 +131,7 @@ No other domains are contacted in production builds. During local development, t
 
 ## Regulatory Compliance
 
-Because no personal data is retained server-side, there is no personal data held by us to protect, share, or delete. Each remote endpoint, MCP (kaiord.com/mcp) and A2A (kaiord.com/a2a), processes the client IP address for rate limiting, and any personal content a caller places in a workout, in transit only, and retains neither. This applies as long as Kaiord retains no personal data server-side (the state of the system today and at every release), under all applicable data protection regulations, including the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
+Because no personal data is retained server-side, there is no personal data held by us to protect, share, or delete. The remote MCP endpoint (kaiord.com/mcp), like the A2A endpoint (kaiord.com/a2a) once it is deployed, processes the client IP address for rate limiting, and any personal content a caller places in a workout, in transit only, and retains neither. This applies as long as Kaiord retains no personal data server-side (the state of the system today and at every release), under all applicable data protection regulations, including the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
 
 You retain all data-subject rights under GDPR and CCPA (access, rectification, erasure, portability). Because Kaiord holds no records about you, a request would return nothing to act upon; if you believe data has been collected or processed in error, please contact us and we will investigate immediately.
 

@@ -558,8 +558,12 @@ export const REQUIRED_RULES = [
     re: /`https:\/\/kaiord\.com\/a2a`[^\n]*same tools under the same terms[^\n]*tasks finish inside the reply and are not retained/i,
   },
   {
+    label: "Remote A2A endpoint: stated as not deployed yet",
+    re: /`https:\/\/kaiord\.com\/a2a`[^\n]*it is not deployed yet, so nothing answers there today\. Once deployed, it runs/,
+  },
+  {
     label: "Regulatory statement names both remote endpoints",
-    re: /Each remote endpoint, MCP \(kaiord\.com\/mcp\) and A2A \(kaiord\.com\/a2a\)/,
+    re: /The remote MCP endpoint \(kaiord\.com\/mcp\), like the A2A endpoint \(kaiord\.com\/a2a\) once it is deployed,/,
   },
   {
     label: "Regulatory statement covers remote MCP in-transit data",

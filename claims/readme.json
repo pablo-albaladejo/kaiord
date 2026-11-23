@@ -346,7 +346,7 @@
     },
     {
       "id": "readme.root.kaiord-keeps-no-accounts",
-      "text": "Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp` and `kaiord.com/a2a`, which converts workouts in transit. Neither binds any storage. Your data leaves your device only to destinations you configured:",
+      "text": "Kaiord keeps no accounts and stores no user data on its own infrastructure. It runs two Cloudflare Workers: one in front of the site, which adds headers for AI agents, and one at `kaiord.com/mcp`, which converts workouts in transit. That second Worker's code also has an A2A endpoint for `kaiord.com/a2a`, which is not deployed yet. Neither binds any storage. Your data leaves your device only to destinations you configured:",
       "proof": [
         {
           "test": "packages/workout-spa-editor/src/adapters/dexie/default-profile-boot.test.ts",
