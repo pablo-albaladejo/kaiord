@@ -10,7 +10,7 @@ import {
   type ConnectionState,
 } from "./connection-notice";
 import notices from "./generated/connection-notices.js";
-import { SUPPORTED_LOCALES } from "./types";
+import { type Locale, SUPPORTED_LOCALES } from "./types";
 
 const STATES: readonly ConnectionState[] = [
   "working",
@@ -216,5 +216,73 @@ describe("the notices beyond the four fixes", () => {
     // Assert
     expect(notice).toEqual(notices.noTabNotice(platform, "en"));
     expect(notice.fix).toBe("open-platform");
+  });
+
+  it("should word the no-tab reason as the one exception, opening the Platform's tab", () => {
+    // Arrange
+    const platform = "WHOOP";
+
+    // Act
+    const notice = connectionReasonNotice("no-tab", platform, "es");
+
+    // Assert
+    expect(notice).toEqual(connectionNoTabNotice(platform, "es"));
+    expect(notice.fix).toBe("open-platform");
+  });
+
+  it("should give no notice for a reason the shared notices do not know", () => {
+    // Arrange
+    const unknown = "token-expired" as "no-account-id";
+
+    // Act
+    const notice = notices.noticeForReason(unknown, "WHOOP", "en");
+
+    // Assert
+    expect(notice).toBeNull();
+  });
+
+  it("should give no text for a not-checked reason the shared notices do not know", () => {
+    // Arrange
+    const unknown = "token-expired" as "would-mint-token";
+
+    // Act
+    const text = notices.notCheckedFor(unknown, "Garmin", "en");
+
+    // Assert
+    expect(text).toBeNull();
+  });
+});
+
+describe("a locale the shared notices do not word", () => {
+  const unknown = "fr" as Locale;
+
+  it("should word the four fixes in English", () => {
+    // Arrange
+    const state = "signed-out" as const;
+
+    // Act
+    const notice = connectionNotice(state, "Garmin", unknown);
+
+    // Assert
+    expect(notice).toEqual(connectionNotice(state, "Garmin", "en"));
+  });
+
+  it("should word the notices beyond the four fixes in English", () => {
+    // Arrange
+    const platform = "WHOOP";
+
+    // Act
+    const words = [
+      connectionReasonNotice("no-account-id", platform, unknown),
+      connectionNotCheckedText("would-download-data", platform, unknown),
+      connectionNoTabNotice(platform, unknown),
+    ];
+
+    // Assert
+    expect(words).toEqual([
+      connectionReasonNotice("no-account-id", platform, "en"),
+      connectionNotCheckedText("would-download-data", platform, "en"),
+      connectionNoTabNotice(platform, "en"),
+    ]);
   });
 });

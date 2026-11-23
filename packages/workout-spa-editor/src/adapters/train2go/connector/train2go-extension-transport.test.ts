@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { loadTrain2GoAnswers } from "./load-train2go-answers";
 import {
   openTrain2Go,
   ping,
@@ -197,8 +198,11 @@ describe("train2go-extension-transport", () => {
       (globalThis as Record<string, unknown>).chrome = {
         runtime: { lastError: null, sendMessage: mockSend },
       };
+      // The parsers load before the message is sent: load them first, so
+      // the timeout is armed once the pending microtasks run.
+      await loadTrain2GoAnswers();
       const promise = readWeek("ext-id", "2026-04-13", "42");
-      vi.advanceTimersByTime(TRANSPORT_LONG_TICK_MS);
+      await vi.advanceTimersByTimeAsync(TRANSPORT_LONG_TICK_MS);
 
       // Act
       const result = await promise;

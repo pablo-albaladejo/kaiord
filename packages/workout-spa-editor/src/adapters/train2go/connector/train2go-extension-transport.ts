@@ -17,7 +17,7 @@ import {
 } from "../../bridge/bridge-transport";
 import { callConnector } from "../../bridge/connector-call";
 import type { BridgeCall } from "../../bridge/thin-bridge-request";
-import { readDayAnswer, readWeekAnswer } from "./read-train2go-answers";
+import { loadTrain2GoAnswers } from "./load-train2go-answers";
 import { dailyPath, weeklyPath } from "./train2go-paths";
 import { toPingResult, type Train2GoPingResult } from "./train2go-ping-result";
 import type { Train2GoActivity, Train2GoComment } from "./train2go-wire-types";
@@ -63,27 +63,31 @@ const readGet = (
     ACTION_T
   ) as Promise<ReadResponse>;
 
-export const readWeek = (
+export const readWeek = async (
   extensionId: string,
   date: string,
   externalUserId: string
-): Promise<ReadResponse> =>
-  readGet(extensionId, {
+): Promise<ReadResponse> => {
+  const { readWeekAnswer } = await loadTrain2GoAnswers();
+  return readGet(extensionId, {
     path: weeklyPath(date, externalUserId),
     legacy: { action: "read-week", date, userId: externalUserId },
     read: readWeekAnswer,
   });
+};
 
-export const readDay = (
+export const readDay = async (
   extensionId: string,
   date: string,
   externalUserId: string
-): Promise<ReadResponse> =>
-  readGet(extensionId, {
+): Promise<ReadResponse> => {
+  const { readDayAnswer } = await loadTrain2GoAnswers();
+  return readGet(extensionId, {
     path: dailyPath(date, externalUserId),
     legacy: { action: "read-day", date, userId: externalUserId },
     read: readDayAnswer(date),
   });
+};
 
 export const openTrain2Go = (extensionId: string): Promise<ExtensionResponse> =>
   sendBridgeMessage(extensionId, { action: "open-train2go" }, PING_T1);
