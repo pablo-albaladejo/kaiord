@@ -23,10 +23,12 @@ const SAFE_GIT = [
   "--no-pager",
 ];
 
+// Node treats an empty `input` as absent and lets the child inherit stdin,
+// so a first stage that reads it would wait on the caller's terminal.
 const spawn = (root, [name, ...args], input) =>
   spawnSync(name, name === "git" ? [...SAFE_GIT, ...args] : args, {
     cwd: root,
-    input,
+    ...(input ? { input } : { stdio: ["ignore", "pipe", "pipe"] }),
     encoding: "utf8",
     env: pipelineEnv(),
     maxBuffer: 64 * 1024 * 1024,
