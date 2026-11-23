@@ -17,6 +17,20 @@ const HEALTH_DATA_KINDS = [
   "labResults",
 ] as const;
 
+/** What the assistant's read tools can hand the model; a description it
+ * writes after reading them may hold any of them. */
+export const ASSISTANT_HEALTH_KINDS = [
+  "sleep",
+  "restingHeartRate",
+  "weight",
+  "hrv",
+  "dailyActivity",
+  "bodyComposition",
+  "stress",
+  "meals",
+  "energyBalance",
+] as const satisfies readonly HealthDataKind[];
+
 export const OTHER_DATA_KINDS = [
   "messages",
   "workouts",

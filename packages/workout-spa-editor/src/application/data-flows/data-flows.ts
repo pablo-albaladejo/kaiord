@@ -9,7 +9,12 @@
  */
 import { LLM_PROVIDER_TYPES } from "@kaiord/ai/providers";
 
-import { type DataKind, type HealthDataKind, isHealthKind } from "./data-kinds";
+import {
+  ASSISTANT_HEALTH_KINDS,
+  type DataKind,
+  type HealthDataKind,
+  isHealthKind,
+} from "./data-kinds";
 import { type DestinationId, DESTINATIONS } from "./destinations";
 
 const PROVIDERS = LLM_PROVIDER_TYPES;
@@ -35,15 +40,7 @@ export const DATA_FLOWS = {
       "workouts",
       "coachingPlan",
       "dataSources",
-      "sleep",
-      "restingHeartRate",
-      "weight",
-      "hrv",
-      "dailyActivity",
-      "bodyComposition",
-      "stress",
-      "meals",
-      "energyBalance",
+      ...ASSISTANT_HEALTH_KINDS,
     ],
     withheld: "goesWithout",
   },
@@ -56,6 +53,11 @@ export const DATA_FLOWS = {
       "heartRateZones",
     ],
     withheld: "goesWithout",
+  },
+  assistantWorkout: {
+    to: PROVIDERS,
+    kinds: ["workoutDescription", ...ASSISTANT_HEALTH_KINDS],
+    withheld: "doesNotGo",
   },
   labImport: { to: PROVIDERS, kinds: ["labResults"], withheld: "doesNotGo" },
   providerKeyCheck: { to: PROVIDERS, kinds: ["providerKey"] },

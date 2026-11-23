@@ -20,3 +20,8 @@
 - [x] 3.1 Privacy policy paragraph and check rule with its test
 - [x] 3.2 `claims/data-flows.json` entries for the new inventory sentence
 - [x] 3.3 GLOSSARY.md and the UX glossary name the Trace in both languages
+
+## 4. Review fixes
+
+- [x] 4.1 `sent` counts the kinds each request carried, with the uncountable ones apart as `declared`, typed by destination and kind (tests red first)
+- [x] 4.2 A run waiting on the health notice keeps a stopped Trace; Stop then leaves a stopped Trace and sends nothing
