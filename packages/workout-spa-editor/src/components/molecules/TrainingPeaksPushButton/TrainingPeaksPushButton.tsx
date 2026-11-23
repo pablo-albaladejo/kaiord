@@ -8,6 +8,7 @@ import { useTranslate } from "../../../i18n/use-translate";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { Button, type ButtonSize } from "../../atoms/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
+import { TrainingPeaksHorizonNotice } from "./TrainingPeaksHorizonNotice";
 import {
   type TrainingPeaksPushFailure,
   TrainingPeaksPushFeedback,
@@ -85,6 +86,7 @@ export const TrainingPeaksPushButton = forwardRef<
           ? t("footer.sending")
           : t("footer.sendToTrainingPeaks")}
       </Button>
+      {failure === null && <TrainingPeaksHorizonNotice date={workout?.date} />}
       {failure !== null && (
         <TrainingPeaksPushFeedback
           failure={failure}

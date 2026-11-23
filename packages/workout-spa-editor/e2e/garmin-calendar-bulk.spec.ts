@@ -75,7 +75,8 @@ test.describe("Garmin calendar — send week", () => {
     await expect(statuses(page).nth(1)).toContainText("On its date");
     await expect(statuses(page).nth(2)).toContainText("On its date");
     const retried = (await garminStubActions(page)).slice(before.length);
-    expect(retried).toEqual(["schedule"]);
+    // The calendar is read before the one write it decides.
+    expect(retried).toEqual(["calendar-find", "schedule"]);
     expect(await entryDates(page)).toEqual(WEEK);
   });
 

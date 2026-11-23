@@ -14,7 +14,7 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
 
   it("should word a refusal with its one fix in Spanish", () => {
     // Arrange
-    const failure = { ok: false, refusal: "signIn" } as const;
+    const failure = { ok: false, reason: "sign-in" } as const;
 
     // Act
     render(

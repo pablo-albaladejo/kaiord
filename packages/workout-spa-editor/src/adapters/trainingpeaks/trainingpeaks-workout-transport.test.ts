@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sendBridgeMessage } from "../bridge/bridge-transport";
 import { TrainingPeaksBridgeError } from "./trainingpeaks-transport";
-import { pushTrainingPeaksWorkout } from "./trainingpeaks-workout-transport";
+import {
+  pushTrainingPeaksWorkout,
+  readTrainingPeaksCopyState,
+} from "./trainingpeaks-workout-transport";
 
 vi.mock("../bridge/bridge-transport", () => ({ sendBridgeMessage: vi.fn() }));
 
@@ -10,6 +13,7 @@ const mockedSend = vi.mocked(sendBridgeMessage);
 const EXTENSION_ID = "tp-extension-id";
 const PUSH_WORKOUT_TIMEOUT_MS = 20_000;
 const WORKOUT_ID = 4_242_424;
+const HTTP_PAYMENT_REQUIRED = 402;
 
 /** `structure` arrives already JSON-encoded; the API requires that shape. */
 const PAYLOAD = {
@@ -84,6 +88,23 @@ describe("pushTrainingPeaksWorkout", () => {
     expect(error.needsReauth).toBe(true);
   });
 
+  it("should carry TrainingPeaks' status through to the raised error", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({
+      ok: false,
+      error: "TrainingPeaks refused the date",
+      status: HTTP_PAYMENT_REQUIRED,
+    });
+
+    // Act
+    const error = await pushTrainingPeaksWorkout(EXTENSION_ID, PAYLOAD).catch(
+      (e: unknown) => e as TrainingPeaksBridgeError
+    );
+
+    // Assert
+    expect(error.status).toBe(HTTP_PAYMENT_REQUIRED);
+  });
+
   it("should mark the push undelivered when the bridge says so", async () => {
     // Arrange
     mockedSend.mockResolvedValue({
@@ -120,4 +141,53 @@ describe("pushTrainingPeaksWorkout", () => {
       await expect(act).rejects.toThrow("returned no id");
     }
   );
+});
+
+describe("readTrainingPeaksCopyState", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should ask the extension for the one recorded workout", async () => {
+    // Arrange
+    mockedSend.mockResolvedValue({ ok: true, data: { workoutId: WORKOUT_ID } });
+
+    // Act
+    await readTrainingPeaksCopyState(EXTENSION_ID, String(WORKOUT_ID));
+
+    // Assert
+    expect(mockedSend).toHaveBeenCalledWith(
+      EXTENSION_ID,
+      { action: "read-workout", workoutId: String(WORKOUT_ID) },
+      expect.any(Number)
+    );
+  });
+
+  it.each([
+    { label: "TrainingPeaks returns it", res: { ok: true }, state: "present" },
+    {
+      label: "TrainingPeaks answers 404",
+      res: { ok: false, status: 404 },
+      state: "gone",
+    },
+    {
+      label: "TrainingPeaks answers 500",
+      res: { ok: false, status: 500 },
+      state: "unknown",
+    },
+    {
+      label: "the extension does not answer",
+      res: { ok: false, delivered: false },
+      state: "unknown",
+    },
+  ])("should report $state when $label", async ({ res, state }) => {
+    // Arrange
+    mockedSend.mockResolvedValue(res);
+
+    // Act
+    const result = await readTrainingPeaksCopyState(EXTENSION_ID, "1");
+
+    // Assert
+    expect(result).toBe(state);
+  });
 });

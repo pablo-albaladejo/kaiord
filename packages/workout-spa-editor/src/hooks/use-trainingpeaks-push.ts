@@ -1,20 +1,24 @@
-import { krdToTrainingPeaksWorkout } from "@kaiord/trainingpeaks";
 import { useCallback } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import { checkTrainingPeaksSession } from "../adapters/trainingpeaks/trainingpeaks-transport";
 import { executeWorkoutPush } from "../application/export/execute-workout-push";
 import type { RepushVerdict } from "../application/trainingpeaks/trainingpeaks-repush-guard";
-import { toTrainingPeaksThresholds } from "../application/trainingpeaks/trainingpeaks-thresholds";
 import { useAnalytics } from "../contexts";
 import type { WorkoutRecord } from "../types/calendar-record";
+import { buildTrainingPeaksPayload } from "./trainingpeaks-payload";
+import {
+  athleteIdOrRefusal,
+  toTrainingPeaksPushFailure,
+  type TrainingPeaksPushFailureOutcome,
+} from "./trainingpeaks-push-failure";
 import {
   buildTrainingPeaksPushFn,
   ledgerRepo,
   policyRepo,
   TRAININGPEAKS_BRIDGE_ID,
 } from "./trainingpeaks-push-fn";
-import { checkTrainingPeaksRepush } from "./trainingpeaks-repush-check";
+import { checkBeforeTrainingPeaksSend } from "./trainingpeaks-repush-check";
 import { useActiveProfileLive } from "./use-active-profile-live";
 
 export type TrainingPeaksPushOutcome =
@@ -24,10 +28,7 @@ export type TrainingPeaksPushOutcome =
    * own the id. Callers must not assume an id is always there.
    */
   | { ok: true; workoutId: string | undefined }
-  /** An upstream error's own message, shown as is. */
-  | { ok: false; message: string }
-  /** A refusal the App words: `workout-detail:footer.trainingPeaksPushError.*`. */
-  | { ok: false; refusal: "noSteps" | "install" | "signIn" | "notAnswering" }
+  | TrainingPeaksPushFailureOutcome
   /** A changed workout TrainingPeaks already holds; `allowCopy` overrides. */
   | { ok: false; block: Extract<RepushVerdict, { blocked: true }> };
 
@@ -55,41 +56,38 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
     async (
       options?: TrainingPeaksPushOptions
     ): Promise<TrainingPeaksPushOutcome> => {
-      if (!workout?.krd) return { ok: false, refusal: "noSteps" };
+      if (!workout?.krd) return { ok: false, reason: "no-steps" };
       const extensionId = bridgeDiscovery.getExtensionId(
         TRAININGPEAKS_BRIDGE_ID
       );
       if (!extensionId) {
-        return { ok: false, refusal: "install" };
+        return { ok: false, reason: "install" };
       }
 
       try {
-        const session = await checkTrainingPeaksSession(extensionId);
-        if (!session.authenticated || session.athleteId === undefined) {
-          return { ok: false, refusal: "signIn" };
-        }
-        const payload = krdToTrainingPeaksWorkout(workout.krd, {
-          athleteId: session.athleteId,
-          workoutDay: workout.date,
-          thresholds: toTrainingPeaksThresholds(
-            profile?.sportZones,
-            workout.sport,
-            profile?.maxHeartRate
-          ),
-        });
-        if (!options?.allowCopy) {
-          const verdict = await checkTrainingPeaksRepush(workout, {
-            ...payload,
-          });
-          if (verdict.blocked) return { ok: false, block: verdict };
-        }
+        const probed = athleteIdOrRefusal(
+          await checkTrainingPeaksSession(extensionId)
+        );
+        if ("ok" in probed) return probed;
+        const payload = buildTrainingPeaksPayload(
+          { ...workout, krd: workout.krd },
+          probed.athleteId,
+          profile
+        );
+        const verdict = await checkBeforeTrainingPeaksSend(
+          extensionId,
+          workout,
+          payload,
+          options?.allowCopy === true
+        );
+        if (verdict.blocked) return { ok: false, block: verdict };
         const result = await executeWorkoutPush(
           { policyRepo, ledgerRepo },
           {
             profileId: workout.profileId,
             kaiordRecordId: workout.id,
             destinationBridgeId: TRAININGPEAKS_BRIDGE_ID,
-            payload: { ...payload },
+            payload,
             pushFn: buildTrainingPeaksPushFn(extensionId),
           }
         );
@@ -97,9 +95,7 @@ export const useTrainingPeaksPush = (workout: WorkoutRecord | undefined) => {
         return { ok: true, workoutId: result.externalId };
       } catch (error: unknown) {
         analytics.event("trainingpeaks-workout-pushed", { result: "failure" });
-        if (!(error instanceof Error))
-          return { ok: false, refusal: "notAnswering" };
-        return { ok: false, message: error.message };
+        return toTrainingPeaksPushFailure(error);
       }
     },
     [workout, profile, analytics]

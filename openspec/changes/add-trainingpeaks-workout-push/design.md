@@ -146,6 +146,42 @@ Placement would stay manual regardless: no endpoint applies a library item to a
 date (`…/items/{id}/apply` 404s), so reaching the calendar is the same
 `POST …/workouts` under the same ceiling.
 
+### The limit is stated before sending (#1636)
+
+The SPA cannot know the account type. The token exchange answers
+`{ token, athleteId, userId, username }` and nothing about the tier;
+`GET /users/v3/user` reports `settings.account.isPremium`, but it is a second
+request that downloads the athlete's whole profile (email, coaches, FTPs), and
+the session check must transfer no athlete data. So the limit is stated to
+every athlete for a day after tomorrow, worded as a fact about Basic accounts
+("TrainingPeaks may refuse this day"), never as a claim about theirs. The
+send stays enabled: a paid account accepts the date. TrainingPeaks' own 402
+is mapped to the same explanation. "Tomorrow" is the browser's date; the
+cut-off is the account's, so in a timezone ahead of the account the notice
+can miss a day that is refused. The refusal is still explained.
+
+### A re-send reads the copy it made (#1636)
+
+TrainingPeaks is create-only for Kaiord (no `PUT`/`DELETE` in the allowlist),
+so the export ledger row is the record of what Kaiord created there, keyed by
+workout, the same shape Garmin uses. Before this change a re-send never read
+TrainingPeaks: an unchanged workout was skipped even when the athlete had
+deleted the copy (the App said "On TrainingPeaks" while TrainingPeaks held
+nothing), and a changed one was blocked over a copy that might be gone. Now
+the SPA reads that one workout by its recorded id first
+(`GET …/workouts/{workoutId}`, answer reduced to id and day in the service
+worker). Only a 404 marks the row `forceRepush`, as Garmin does for a lost
+copy; any other answer keeps the old decision, so a read failure never turns
+into a second copy. A by-id read was chosen over the measured range read
+(`GET …/workouts/{from}/{to}`) because it moves one workout Kaiord created
+instead of a day of the athlete's planned and completed workouts.
+
+Not covered: a push whose answer never arrived (the 20 s timeout fired after
+the extension got the message). The ledger row is rolled back, so the next
+send POSTs again and can add a second copy if the first one landed. Closing it
+would need the range read and a match on title and day, which can mistake an
+entry the athlete made for Kaiord's.
+
 ### Status
 
 The code in this change is complete and verified. The manual end-to-end

@@ -41,13 +41,17 @@
     "trainingPeaksPushError": {
       "noSteps": "This workout has no steps to send yet.",
       "install": "Install Kaiord for TrainingPeaks to send this workout.",
-      "signIn": "Sign in to TrainingPeaks, then try again.",
-      "notAnswering": "TrainingPeaks is not answering. Try again."
+      "signIn": "Sign in to TrainingPeaks, then try again."
     },
     "sendDisabled": {
       "noExtension": "Install the Kaiord extension for Garmin to send this workout.",
       "signedOut": "Sign in to Garmin Connect in this browser to send this workout."
-    }
+    },
+    "trainingPeaksHorizon": {
+      "beforeSend": "On a Basic TrainingPeaks account only today and tomorrow are accepted, so TrainingPeaks may refuse this day.",
+      "refused": "TrainingPeaks refused this day: a Basic account accepts only today and tomorrow. Schedule the workout for one of them."
+    },
+    "trainingPeaksNotAnswering": "TrainingPeaks is not answering. Try again."
   },
   "summary": {
     "duration": "Duration",
@@ -116,6 +120,7 @@
       "library-push-failed": "The workout could not be sent to Garmin.",
       "no-export-route": "Sending workouts to Garmin is turned off. Turn it on in Connections, under Workout → Also sent to.",
       "placement-interrupted": "In your Garmin library, but placing it on its date was interrupted. Send it again to finish.",
+      "calendar-unreadable": "Garmin is not answering, so nothing was sent. Try again.",
       "missing-pace-zones": "This workout uses pace zones. Set your threshold pace in Athlete to send it.",
       "incomplete-pace-zones": "This workout uses a pace zone the athlete doesn't define. Complete your pace zones in Athlete to send it.",
       "unsupported-pace-zone-sport": "Pace zones can only be sent to Garmin in running or swimming workouts.",

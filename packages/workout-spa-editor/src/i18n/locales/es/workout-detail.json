@@ -41,13 +41,17 @@
     "trainingPeaksPushError": {
       "noSteps": "Este entreno todavía no tiene pasos que enviar.",
       "install": "Instala Kaiord para TrainingPeaks para enviar este entreno.",
-      "signIn": "Inicia sesión en TrainingPeaks y vuelve a intentarlo.",
-      "notAnswering": "TrainingPeaks no responde. Vuelve a intentarlo."
+      "signIn": "Inicia sesión en TrainingPeaks y vuelve a intentarlo."
     },
     "sendDisabled": {
       "noExtension": "Instala la Extensión de Kaiord para Garmin para enviar este entreno.",
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."
-    }
+    },
+    "trainingPeaksHorizon": {
+      "beforeSend": "En una cuenta Basic de TrainingPeaks solo se aceptan hoy y mañana, así que TrainingPeaks puede rechazar este día.",
+      "refused": "TrainingPeaks ha rechazado este día: una cuenta Basic solo acepta hoy y mañana. Programa el entrenamiento para uno de ellos."
+    },
+    "trainingPeaksNotAnswering": "TrainingPeaks no responde. Inténtalo de nuevo."
   },
   "summary": {
     "duration": "Duración",
@@ -116,6 +120,7 @@
       "library-push-failed": "No se pudo enviar el entrenamiento a Garmin.",
       "no-export-route": "El envío de entrenamientos a Garmin está desactivado. Actívalo en Conexiones, en Entrenamiento → También se envía a.",
       "placement-interrupted": "En tu biblioteca de Garmin, pero se interrumpió su colocación en la fecha. Envíalo de nuevo para terminar.",
+      "calendar-unreadable": "Garmin no responde, así que no se ha enviado nada. Inténtalo de nuevo.",
       "missing-pace-zones": "Este entrenamiento usa zonas de ritmo. Configura tu ritmo umbral en Atleta para enviarlo.",
       "incomplete-pace-zones": "Este entrenamiento usa una zona de ritmo que el atleta no define. Completa tus zonas de ritmo en Atleta para enviarlo.",
       "unsupported-pace-zone-sport": "Solo se pueden enviar zonas de ritmo a Garmin en entrenamientos de carrera o natación.",

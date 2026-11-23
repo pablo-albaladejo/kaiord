@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import type { TrainingPeaksPushRefusal } from "../../../hooks/trainingpeaks-push-failure";
 import type { TrainingPeaksPushOutcome } from "../../../hooks/use-trainingpeaks-push";
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -17,6 +18,14 @@ export type TrainingPeaksPushFeedbackProps = {
   onSendCopy: () => void;
 };
 
+const REFUSAL_KEYS: Record<TrainingPeaksPushRefusal, string> = {
+  horizon: "footer.trainingPeaksHorizon.refused",
+  "not-answering": "footer.trainingPeaksNotAnswering",
+  "no-steps": "footer.trainingPeaksPushError.noSteps",
+  install: "footer.trainingPeaksPushError.install",
+  "sign-in": "footer.trainingPeaksPushError.signIn",
+};
+
 const ERROR_CLASS = "text-xs text-[var(--danger-text)]";
 
 /** The refusal message, or the re-push block and its "send a copy" override. */
@@ -30,8 +39,8 @@ export const TrainingPeaksPushFeedback = ({
   if (!("block" in failure)) {
     return (
       <span className={ERROR_CLASS} data-testid="trainingpeaks-push-error">
-        {"refusal" in failure
-          ? t(`footer.trainingPeaksPushError.${failure.refusal}`)
+        {"reason" in failure
+          ? t(REFUSAL_KEYS[failure.reason])
           : failure.message}
       </span>
     );
