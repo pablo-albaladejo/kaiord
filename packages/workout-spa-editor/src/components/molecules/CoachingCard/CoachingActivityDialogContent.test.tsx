@@ -27,7 +27,7 @@ const activity: CoachingActivity = {
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-04-13",
-  sport: { label: "Cycling", icon: "🚴" },
+  sport: { id: "cycling", icon: "🚴" },
   title: "Threshold blocks",
   status: "pending",
   description: "Two 20 min blocks at threshold.",

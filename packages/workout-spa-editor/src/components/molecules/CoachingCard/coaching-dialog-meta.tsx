@@ -1,3 +1,4 @@
+import { useCoachingSportLabel } from "../../../hooks/use-coaching-sport-label";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { LifecycleChip } from "../CardShell/LifecycleChip";
@@ -10,13 +11,14 @@ export const DialogMeta = ({
   duration: string | undefined;
 }) => {
   const t = useTranslate("coaching");
+  const sportLabel = useCoachingSportLabel(activity.sport);
   return (
     <div
       data-testid="coaching-dialog-meta"
       className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
     >
       <span aria-hidden="true">{activity.sport.icon}</span>
-      <span>{activity.sport.label}</span>
+      <span>{sportLabel}</span>
       {duration && <span>· {duration}</span>}
       <span className="ml-auto flex items-center gap-2">
         <LifecycleChip label={t(`status.${activity.status}`)} />

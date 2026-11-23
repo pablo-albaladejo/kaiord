@@ -59,7 +59,7 @@ const makeActivity = (
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-04-13",
-  sport: { label: "Cycling", icon: "🚴" },
+  sport: { id: "cycling", icon: "🚴" },
   title: "x",
   status: "pending",
   ...overrides,

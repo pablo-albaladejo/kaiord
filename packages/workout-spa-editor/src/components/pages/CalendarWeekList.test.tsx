@@ -32,7 +32,7 @@ const makeCoaching = (id: string, date: string): CoachingActivity => ({
   source: "train2go",
   sourceBadge: "T2G",
   date,
-  sport: { label: "Cycling", icon: "\u{1F6B4}" },
+  sport: { id: "cycling", icon: "\u{1F6B4}" },
   title: "Coach intervals",
   duration: "1:30 h",
   effort: 3,

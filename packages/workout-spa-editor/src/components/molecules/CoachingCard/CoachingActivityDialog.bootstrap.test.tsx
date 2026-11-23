@@ -54,7 +54,7 @@ const baseActivity: CoachingActivity = {
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-04-13",
-  sport: { label: "Cycling", icon: "🚴" },
+  sport: { id: "cycling", icon: "🚴" },
   title: "FTP test",
   duration: "01:00:00",
   effort: 4,

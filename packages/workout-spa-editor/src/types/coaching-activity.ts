@@ -8,6 +8,9 @@
 
 export type ActivityStatus = "pending" | "completed" | "skipped";
 
+/** A sport by its neutral id; the athlete reads `coaching:sport.<id>`. */
+export type CoachingSport = { id: string; icon: string };
+
 export type CoachingActivity = {
   /** Unique across platforms: "{source}:{platformId}" */
   id: string;
@@ -17,7 +20,7 @@ export type CoachingActivity = {
   sourceBadge: string;
   /** ISO date string YYYY-MM-DD */
   date: string;
-  sport: { label: string; icon: string };
+  sport: CoachingSport;
   title: string;
   duration?: string;
   /** Normalized effort 1-5. Mappers must clamp to this range. */

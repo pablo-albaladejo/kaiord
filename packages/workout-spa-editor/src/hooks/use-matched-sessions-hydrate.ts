@@ -9,8 +9,6 @@
  * `.omc/autopilot/bug-trace.md` §H8 for the original symptom.
  */
 
-import type { Locale } from "@kaiord/i18n";
-
 import { toCoachingActivity } from "../adapters/train2go/coaching-record-to-activity.converter";
 import { computeComplianceScore } from "../application/compute-compliance-score";
 import { parseCoachingDuration } from "../application/parse-coaching-duration";
@@ -32,8 +30,7 @@ const DROP_WARN = "[matched-sessions] dropping match — dangling ref";
 
 export const hydrateMatchedSessions = async (
   matches: SessionMatch[],
-  readModel: MatchedSessionsReadModel,
-  locale: Locale = "en"
+  readModel: MatchedSessionsReadModel
 ): Promise<{
   matched: MatchedSessionWithMetadata[];
   dangling: DanglingMatch[];
@@ -62,7 +59,7 @@ export const hydrateMatchedSessions = async (
     const executed = resolveExecuted(match, wById);
     matched.push({
       match,
-      activity: toCoachingActivity(record, locale),
+      activity: toCoachingActivity(record),
       workout,
       complianceScore: computeComplianceScore(
         parseCoachingDuration(record.duration),

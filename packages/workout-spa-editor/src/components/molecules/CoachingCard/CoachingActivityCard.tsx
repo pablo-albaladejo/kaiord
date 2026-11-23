@@ -14,6 +14,7 @@
  * than a coloured badge.
  */
 
+import { useCoachingSportLabel } from "../../../hooks/use-coaching-sport-label";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { CalendarView } from "../../../types/user-preferences";
@@ -42,6 +43,7 @@ export function CoachingActivityCard({
   const t = useTranslate("coaching");
   const intensity = Math.min(activity.effort ?? 0, MAX_EFFORT);
   const statusLabel = t(`status.${activity.status}`);
+  const sportLabel = useCoachingSportLabel(activity.sport);
   const lifecycle = deriveCoachingActivityLifecycle(activity);
   const estimate = useCoachTextEstimate(activity.description);
   const estimateCaption =
@@ -50,7 +52,7 @@ export function CoachingActivityCard({
   return (
     <CardShell
       borderClass={zoneBorderClass(null)}
-      ariaLabel={[activity.title, activity.sport.label, statusLabel]
+      ariaLabel={[activity.title, sportLabel, statusLabel]
         .concat(estimateCaption ?? [])
         .join(", ")}
       onClick={() => onClick?.(activity)}
@@ -58,7 +60,7 @@ export function CoachingActivityCard({
       originChip={activity.sourceBadge}
       titleRow={
         <>
-          <span role="img" aria-label={activity.sport.label}>
+          <span role="img" aria-label={sportLabel}>
             {activity.sport.icon}
           </span>
           <span className="min-w-0 flex-1 line-clamp-2 wrap-anywhere">

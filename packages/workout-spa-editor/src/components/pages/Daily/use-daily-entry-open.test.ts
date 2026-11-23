@@ -18,7 +18,7 @@ const ACTIVITY: CoachingActivity = {
   source: "train2go",
   sourceBadge: "T2G",
   date: FOCUS,
-  sport: { label: "Cycling", icon: "bike" },
+  sport: { id: "cycling", icon: "bike" },
   title: "Intervals",
   status: "pending",
 };

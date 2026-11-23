@@ -33,7 +33,7 @@ const activity: CoachingActivity = {
   source: "train2go",
   sourceBadge: "T2G",
   date: "2026-10-06",
-  sport: { label: "Cycling", icon: "🚴" },
+  sport: { id: "cycling", icon: "🚴" },
   title: "Threshold",
   status: "pending",
   description: "Two blocks.",
