@@ -12,6 +12,7 @@ const POPUP_HTML = readFileSync(join(PKG, "popup.html"), "utf8");
 const POPUP_SCRIPTS = [
   "bridge-popup-utils.js",
   "bridge-popup-shell.js",
+  "connection-notices.js",
   "bridge-popup-health.js",
   "popup.js",
 ].map((file) => readFileSync(join(PKG, file), "utf8"));
@@ -126,7 +127,7 @@ describe("WHOOP popup", () => {
     );
   });
 
-  it("renders signed-out state with the consequence chips and sign-in as primary CTA", async () => {
+  it("shows the sign-in notice with its one fix when the extension holds no WHOOP sign-in", async () => {
     const dom = setupDom(
       buildChromeMock({
         statusResponse: { ok: true, data: { connected: false } },
@@ -142,27 +143,20 @@ describe("WHOOP popup", () => {
       "status-block--warn"
     );
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "You cannot use WHOOP in Kaiord until you sign in to WHOOP in this browser."
     );
-    expect(doc.getElementById("status-sub").textContent).toContain(
-      "not holding a WHOOP session"
-    );
-    const paused = doc.getElementById("paused-region");
-    expect(paused.className).toBe("chips-box");
-    expect(paused.textContent).toContain("What Kaiord is missing");
-    expect(paused.querySelectorAll(".chip--muted").length).toBeGreaterThan(0);
+    expect(doc.getElementById("status-sub").hidden).toBe(true);
+    expect(doc.getElementById("paused-region").children.length).toBe(0);
     expect(doc.getElementById("chips-region").children.length).toBe(0);
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
+    expect(doc.getElementById("consequence-region").children.length).toBe(0);
+    const footer = doc.getElementById("footer-region");
+    expect(footer.children.length).toBe(1);
+    expect(footer.querySelector(".cta-primary").textContent).toBe(
       "Sign in to WHOOP"
     );
-    expect(doc.querySelector(".cta-secondary").textContent).toBe(
-      "Review in Kaiord ↗"
+    expect(footer.querySelector(".cta-primary").getAttribute("href")).toBe(
+      "https://app.whoop.com/"
     );
-    const consequence = doc.getElementById("consequence-region").textContent;
-    expect(consequence).toContain(
-      "Everything already imported stays in Kaiord"
-    );
-    expect(consequence).toContain("Sign in at app.whoop.com");
   });
 
   it("dates the outage once an earlier open already recorded it", async () => {
@@ -180,14 +174,11 @@ describe("WHOOP popup", () => {
 
     const doc = dom.window.document;
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session expired"
+      "You cannot use WHOOP in Kaiord until you sign in to WHOOP in this browser."
     );
-    // The stamp records when KAIORD observed the failure, so the sentence is
-    // written about Kaiord's own intake — not about when the WHOOP session
-    // actually lapsed, which nothing here can establish.
-    expect(doc.getElementById("status-sub").textContent).toBe(
-      "Kaiord stopped receiving WHOOP data on 23 Apr and has held no session since."
-    );
+    // The stamp records when KAIORD observed the failure, not when the WHOOP
+    // sign-in actually lapsed, which nothing here can establish.
+    expect(doc.getElementById("status-sub").textContent).toBe("Since 23 Apr.");
     const mark = doc.querySelector("[data-status-mark]");
     expect(mark.tagName.toLowerCase()).toBe("svg");
     expect(mark.querySelector("use").getAttribute("href")).toBe("#i-attn");
@@ -205,9 +196,7 @@ describe("WHOOP popup", () => {
     await flushAsync();
 
     const doc = dom.window.document;
-    expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
-    );
+    expect(doc.getElementById("status-sub").hidden).toBe(true);
     expect(doc.querySelector("[data-status-mark]").tagName.toLowerCase()).toBe(
       "span"
     );
@@ -332,7 +321,7 @@ describe("WHOOP popup", () => {
 
     const doc = dom.window.document;
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "You cannot use WHOOP in Kaiord until you sign in to WHOOP in this browser."
     );
     // The reachable falsehood this replaced: a browser restart empties
     // chrome.storage.session, so the commonest way to reach this state has no
@@ -386,7 +375,7 @@ describe("WHOOP popup", () => {
 
     // Storage is best-effort: losing it costs the date, not the popup.
     expect(dom.window.document.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "You cannot use WHOOP in Kaiord until you sign in to WHOOP in this browser."
     );
   });
 
@@ -398,10 +387,11 @@ describe("WHOOP popup", () => {
     expect(POPUP_HTML).toContain(">Wh</span");
   });
 
-  it("falls back to the signed-out state when the background answers with an error", async () => {
-    const dom = setupDom(
-      buildChromeMock({ statusResponse: { ok: false, error: "boom" } })
-    );
+  it("never says signed out when the background answers with an error", async () => {
+    const chromeMock = buildChromeMock({
+      statusResponse: { ok: false, error: "boom" },
+    });
+    const dom = setupDom(chromeMock);
 
     dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
     await flushAsync();
@@ -409,10 +399,10 @@ describe("WHOOP popup", () => {
 
     const doc = dom.window.document;
     expect(doc.getElementById("status-text").textContent).toBe(
-      "Session signed out"
+      "WHOOP is not answering, so you cannot use it in Kaiord right now."
     );
-    expect(doc.querySelector(".cta-primary").textContent).toBe(
-      "Sign in to WHOOP"
-    );
+    expect(doc.getElementById("notice-fix").textContent).toBe("Try again");
+    // A worker that did not answer says nothing about the sign-in.
+    expect(chromeMock.__store.bridgeHealth).toBeUndefined();
   });
 });

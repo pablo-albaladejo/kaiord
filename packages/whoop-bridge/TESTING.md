@@ -58,7 +58,8 @@
 - [ ] Use a fresh Chrome profile (or clear `chrome.storage.session` via the
       service worker devtools) and do not open `app.whoop.com`
 - [ ] Open the extension popup
-- [ ] Verify: status shows "Session signed out"
+- [ ] Verify: status shows "You cannot use WHOOP in Kaiord until you sign in
+      to WHOOP in this browser." with the one fix "Sign in to WHOOP"
 - [ ] Verify: a `whoop-fetch` attempt fails with "no session token
       captured — open app.whoop.com and reload it"
 
@@ -85,7 +86,7 @@ gate, send a **disallowed action** from an allowed origin.
       and no WHOOP tab opens — `open-whoop` is internal-only and absent from
       `EXTERNAL_ACTIONS`
 - [ ] Repeat with `{ action: "capture-token", token: "x" }` and verify the
-      same envelope, and that the popup still shows "Session signed out"
+      same envelope, and that the popup still shows the sign-in notice
       (no token was stored)
 
 ## Test: Origin Pinning

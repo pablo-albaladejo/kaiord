@@ -177,7 +177,7 @@
         },
         {
           "test": "packages/trainingpeaks-bridge/test/popup.test.js",
-          "title": "renders not-signed-in state with the value prop and TrainingPeaks as primary CTA"
+          "title": "offers the sign-in when TrainingPeaks itself refused the sign-in"
         }
       ]
     },

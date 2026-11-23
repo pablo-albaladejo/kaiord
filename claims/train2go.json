@@ -141,7 +141,7 @@
         },
         {
           "test": "packages/train2go-bridge/test/popup.test.js",
-          "title": "renders disconnected state with Retry when session is inactive"
+          "title": "offers Try again, not a sign-in, when the check cannot tell why"
         }
       ]
     },

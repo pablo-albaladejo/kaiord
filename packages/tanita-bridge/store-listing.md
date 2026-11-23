@@ -69,7 +69,7 @@ justifications are pasted into the CWS dashboard by hand.
 There are none yet (no `assets/` folder). Capture the current popup:
 
 1. **Connected**: signed in to MyTANITA, click the extension icon; the popup shows "Connected" and "Open Kaiord editor".
-2. **Not signed in**: signed out of MyTANITA; the popup shows "Not signed in" and "Open MyTANITA".
+2. **Not answering**: signed out of MyTANITA; the popup shows "Tanita is not answering, so you cannot use it in Kaiord right now." and "Try again".
 
 ## Automated Publishing (not wired yet)
 

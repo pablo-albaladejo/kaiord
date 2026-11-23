@@ -68,7 +68,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/components/organisms/Connections/ConnectionsTab.no-extension.test.tsx",
-          "title": "should show one banner with the install action when no extension is detected"
+          "title": "should give every card its own Install notice, naming its Platform"
         },
         {
           "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-persistence-adapter.ts"

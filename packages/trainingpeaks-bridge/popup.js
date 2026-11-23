@@ -6,13 +6,10 @@
  * user's own logged-in session cookie. All logic talks to background.js via
  * internal runtime messages.
  *
- * The primary CTA is whatever fixes the current state: going to TrainingPeaks
- * when the session is missing, opening the Kaiord editor when the metrics API
- * is reachable.
- *
- * Two shapes of "not signed in", told apart by the stored health record: a
- * bridge never observed working is still being set up, while one that worked
- * and stopped is an outage and says since when.
+ * A working Connection opens the Kaiord editor. Anything else shows one
+ * notice with one fix, worded by the vendored connection-notices.js — the
+ * same wording the Kaiord App shows — and, once an earlier open recorded the
+ * outage in the health record, since when.
  *
  * Shared helpers load first from the vendored bridge-popup-utils.js,
  * bridge-popup-shell.js and bridge-popup-health.js (see popup.html script
@@ -20,10 +17,14 @@
  */
 
 /* global msg, $, formatSinceDate, recordProbe, renderStatusBlock, renderChips,
-   renderConsequence, renderSkeleton, renderCtas */
+   renderConsequence, renderSkeleton, renderCtas, renderNotice,
+   KAIORD_CONNECTION_NOTICES */
 
 const OPEN_TRAININGPEAKS_URL = "https://app.trainingpeaks.com/";
 const OPEN_EDITOR_URL = "https://kaiord.com/app/";
+// The Platform's name exactly as the Kaiord App's registry spells it, so a
+// notice reads the same in both (scripts/check-connection-notices.mjs).
+const PLATFORM = "TrainingPeaks";
 
 // English fallback table consumed by the vendored msg() helper.
 globalThis.KAIORD_POPUP_MESSAGES = {
@@ -31,20 +32,12 @@ globalThis.KAIORD_POPUP_MESSAGES = {
   checkingCause: "Usually under a second.",
   connected: "Connected",
   connectedCause: "Reading your body metrics through your session.",
-  notSignedIn: "Not signed in",
-  notSignedInCause:
-    "Sign in at trainingpeaks.com once — the bridge mints its token from that session, no password stored.",
-  sessionEnded: "Session ended",
-  sessionEndedCause:
-    "Nothing has reached Kaiord since $1. Sign in at trainingpeaks.com again and the bridge mints a fresh token.",
+  outageSince: "Since $1.",
   captionFeeds: "Feeds Kaiord",
   captionWillFeed: "Will feed Kaiord",
   typeWeight: "Weight",
   typeWeightBack: "Weight ↑ back to TrainingPeaks",
-  weightManualFallback: "Weight currently comes from manual entry.",
   openEditor: "Open Kaiord editor",
-  openTrainingPeaksPrimary: "Open TrainingPeaks",
-  setUpInKaiord: "Set up in Kaiord ↗",
   openTrainingPeaks: "Open TrainingPeaks ↗",
   refresh: "Refresh",
 };
@@ -109,30 +102,32 @@ const renderConnected = () => {
   });
 };
 
-/* `since` is the outage start Kaiord already knew about, or null when this is
-   the first probe that ever failed. Only the first case may name a date. */
-const renderNotSignedIn = (since) => {
-  const dated = since !== null;
-  setMarkEstablished(dated);
-  renderStatusBlock($, msg, {
-    tone: dated ? "warn" : "muted",
-    mark: dated ? "alert" : "dot",
-    verdictKey: dated ? "sessionEnded" : "notSignedIn",
-    causeKey: dated ? "sessionEndedCause" : "notSignedInCause",
-    causeSubs: dated ? [formatSinceDate(since)] : undefined,
+// The Connection's state from this popup's own check. When it is not, `needsReauth` says
+// whether the Platform refused the sign-in or merely failed to answer.
+const connectionStateOf = (res) => {
+  if (res.ok && res.data?.authenticated) return "working";
+  if (res.ok && res.data?.needsReauth === true) return "signed-out";
+  return "not-answering";
+};
+
+/* One notice, one fix. `since` is the outage start Kaiord already knew about,
+   or null when this is the first probe that ever failed; only then may the
+   notice carry a date. */
+const renderBroken = (state, since) => {
+  const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
+    state,
+    PLATFORM,
+    KAIORD_CONNECTION_NOTICES.EXTENSION_LOCALE
+  );
+  setMarkEstablished(since !== null);
+  renderNotice($, notice, {
+    since: since === null ? null : msg("outageSince", [formatSinceDate(since)]),
+    href: OPEN_TRAININGPEAKS_URL,
+    onRetry: () => refresh(),
   });
-  // Nothing flows in either direction yet, so one dashed row covers both.
-  renderChips($, chipsFor([...FEED_KEYS, ...FUTURE_KEYS], "dashed"), {
-    caption: msg("captionWillFeed"),
-  });
+  renderChips($, []);
   renderChips($, [], { region: "future-region" });
-  renderConsequence($, [msg("weightManualFallback")]);
-  renderCtas($, {
-    primaryLabel: msg("openTrainingPeaksPrimary"),
-    primaryHref: OPEN_TRAININGPEAKS_URL,
-    secondaryLabel: msg("setUpInKaiord"),
-    secondaryHref: OPEN_EDITOR_URL,
-  });
+  renderConsequence($, []);
 };
 
 const refresh = async () => {
@@ -145,10 +140,10 @@ const refresh = async () => {
   });
   renderSkeleton($, SKELETON_REGIONS);
   const res = await sendMessage({ action: "checkSession" });
-  const authenticated = res.ok ? !!res.data?.authenticated : false;
-  const health = await recordProbe(authenticated);
-  if (authenticated) renderConnected();
-  else renderNotSignedIn(health.since);
+  const state = connectionStateOf(res);
+  const health = await recordProbe(state === "working");
+  if (state === "working") renderConnected();
+  else renderBroken(state, health.since);
   showRefresh(true);
 };
 
