@@ -21,7 +21,7 @@ cache price meaning ordinary input. It SHALL return a `RunCost` with each
 request's cost, the summed usage, `usd` (null when the provider is unknown,
 the model is absent from the table, or the model is `unpriced`),
 `failedRequests` (outcomes `invalid`, `truncated` and `error`; a request the athlete stopped is not a failure), `unmeasuredRequests` (requests with no usage, which add
-nothing) and the basis (`price_table` with source and date, or `unknown` with
+nothing), `estimatedRequests` (requests priced at an estimated usage) and the basis (`price_table` with source and date, or `unknown` with
 its reason).
 
 `scripts/check-model-prices.mjs` (`pnpm lint:model-prices`, R-ModelPricesFresh)
@@ -29,7 +29,12 @@ SHALL fail when a model in the generated catalog has no entry or more than
 one, when an entry was read more than 120 days ago or on a future day, when an
 entry names a model the catalog does not offer, when an entry has both or
 neither of prices and an unpriced reason, and when the catalog parses to no
-model or a file cannot be read.
+model or a file cannot be read. Each entry SHALL carry `quote`: the exact
+line(s) of the official page its prices were read from, or null for an entry
+read on or before 2026-11-23, when the table kept no quotes. A priced entry
+read after 2026-11-23 SHALL fail the guard when its quote is null and when any
+number of its periods does not appear in its quote, so renewing `readOn`
+requires reading the page again. The guard SHALL stay offline.
 
 #### Scenario: Two models with the same tokens cost differently
 
@@ -57,3 +62,9 @@ model or a file cannot be read.
 - **GIVEN** an entry read 121 days before today
 - **WHEN** `pnpm lint:model-prices` runs
 - **THEN** it SHALL fail naming that entry
+
+#### Scenario: Renewing a date without the page's words fails the guard
+
+- **GIVEN** a priced entry whose `readOn` was moved past 2026-11-23 with `quote: null`, or with a quote that does not hold one of its prices
+- **WHEN** `pnpm lint:model-prices` runs
+- **THEN** it SHALL fail with `price-unquoted` or `price-not-in-quote` naming that entry
