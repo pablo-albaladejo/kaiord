@@ -8,7 +8,7 @@
 ## Purpose
 
 - Fetch `app.train2go.com` directly from the service worker with `credentials:"include"` (SW-direct) so the site's HttpOnly session cookie travels automatically — no content script on `app.train2go.com`, no relay hop
-- Expose an external message surface (`ping`, `request`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) for the App. `request` takes `{ method, path }` only, refuses anything outside `ALLOWED` (and any header or body) without a request, and answers `{ status, contentType, body }` unread
+- Expose an external message surface (`ping`, `request`, `open-train2go`, `profile-snapshot`, `profile-snapshot-clear`, `set-theme`) for the App. `request` goes through the vendored `bridge-request-gate.js` and takes `{ method, path }` only, refuses anything outside `ALLOWED` (and any header or body) without a request, and answers `{ status, contentType, body }` unread
 - Answer the internal channel only from the extension's own pages (the popup), never a content script, and only `ping`, `read-profile` and `read-week`: the popup's Session check, the profile it shows (athlete, coach's name and notes) and its weekly figures are the one thing still read inside the extension. `ping` is the Session check and answers yes or no only (`{ session, authenticated, sessionActive }`, #1643)
 - Restrict communication to the exact Kaiord App origin (`https://kaiord.com/*`, no subdomain; `http://localhost:5173/*` and `http://localhost:5174/*` in dev builds only)
 - Persist the user profile snapshot via `chrome.storage.local`
@@ -223,7 +223,7 @@ const validateSnapshot = (obj) => {
 
 ### Vendored bridge-core files
 
-`bridge-envelope.js`, `bridge-answer.js`, `session-fetch.js`, `kaiord-announce.js`,
+`bridge-envelope.js`, `bridge-answer.js`, `bridge-telemetry.js`, `bridge-request-gate.js`, `session-fetch.js`, `kaiord-announce.js`,
 `bridge-popup-utils.js`, `bridge-popup-shell.js`,
 `bridge-popup-snapshot.js`, `popup.css`,
 `profile-snapshot.js`, and

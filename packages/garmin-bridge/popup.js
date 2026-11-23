@@ -41,7 +41,7 @@
  */
 
 /* global msg, $, uiLocale, localizePage, withTimeout, relativeAgo, formatSinceDate, recordProbe,
-   renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderNotice,
+   renderStatusBlock, renderChips, renderSkeleton, renderCtas, renderBrokenConnection,
    renderAthleteCard, KAIORD_CONNECTION_NOTICES */
 
 const PHASE_TIMEOUT_MS = 3_000;
@@ -200,17 +200,17 @@ const connectionStateOf = (ping) => {
 // Any non-working state pauses the flow, so the chips go muted and the notice
 // replaces the verdict; its one fix is the whole footer.
 const renderBroken = (state, since = null) => {
-  const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
-    state,
-    PLATFORM,
-    uiLocale()
+  renderBrokenConnection(
+    $,
+    msg,
+    KAIORD_CONNECTION_NOTICES.noticeFor(state, PLATFORM, uiLocale()),
+    {
+      since,
+      href: OPEN_GARMIN_URL,
+      onRetry: () => loadPopupData(),
+      formatSince: formatSinceDate,
+    }
   );
-  setMarkEstablished(since !== null);
-  renderNotice($, notice, {
-    since: since === null ? null : msg("outageSince", [formatSinceDate(since)]),
-    href: OPEN_GARMIN_URL,
-    onRetry: () => loadPopupData(),
-  });
   renderChips($, feedChips("muted"), { caption: msg("captionFeeds") });
 };
 

@@ -30,6 +30,7 @@ content script (`test/thin-bridge.test.js`).
 - `manifest.json` — Development manifest (MV3, service worker, `storage` permission, host permissions for `connect.garmin.com`, `connectapi.garmin.com`, `sso.garmin.com`).
 - `manifest.prod.json` — Production manifest for Chrome Web Store release (same surface, no localhost origins).
 - `background.js` — Service worker. The closed list with body schemas (`workout`, `fit-file`, `schedule`), `request` under one deadline and send cut-off, action routing for `ping`/`request`/`open-garmin`/`profile-snapshot(-clear)`/`set-theme`, swallowed-error telemetry.
+- `garmin-deadline.js` — The one deadline every request runs under (`boundedCall`: 25 s, no write after 15 s, `deadline-before-send` / `deadline-exceeded`).
 - `garmin-request-bodies.js` — The body schemas of the write entries: `workout` is the GCN @kaiord/garmin's writer emits (one segment; executable steps and repeat groups of executable steps; every key named, Garmin's own type keys; name ≤255, step notes ≤256, ≤100 steps, ≤50 per repeat), `fit-file` is `garmin-fit-check.js`, `schedule` is one date.
 - `garmin-fit-check.js` — Admits only the App's body-composition upload: a FIT file (≤4 KB, header and file CRC valid) of file type 9 "weight" holding one `file_id` then one `weight_scale` message, no other message, no developer field.
 - `garmin-oauth.js` — OAuth token minting (bridge-specific, NOT vendored). OAuth1 HMAC-SHA1 signer, session→ticket→OAuth1→OAuth2 mint, refresh-and-persist, `connectapiFetch` (optional abort `signal`, raced against the token lifecycle by `raceAbort`).
@@ -162,7 +163,7 @@ Non-generated files beyond the AI agent's responsibility:
 
 ### Vendored bridge-core files
 
-`bridge-envelope.js`, `bridge-answer.js`, `bridge-request-gate.js`, `bearer-fetch.js`,
+`bridge-envelope.js`, `bridge-answer.js`, `bridge-telemetry.js`, `bridge-request-gate.js`, `bearer-fetch.js`,
 `kaiord-announce.js`, `bridge-popup-utils.js`,
 `bridge-popup-shell.js`, `bridge-popup-snapshot.js`, `popup.css`,
 `profile-snapshot.js`, and

@@ -17,6 +17,10 @@
  * An answer with nothing to remove is handed over byte for byte. Cookies
  * never pass: the transports never read a `set-cookie` header.
  *
+ * A failed request becomes the Error the envelope serialises: the
+ * transport's message (or the fallback with the status), the status, and
+ * needsReauth only when the transport set it.
+ *
  * This module holds ZERO identity: no host names, bridge ids or paths.
  */
 
@@ -88,7 +92,17 @@ const bridgeAnswer = (() => {
     body: stripSessionSecrets(res.contentType, res.body),
   });
 
-  return { stripSessionSecrets, toAnswer };
+  const toBridgeError = (res, fallback = "Request failed") => {
+    const status = typeof res?.status === "number" ? res.status : undefined;
+    const err = new Error(
+      res?.error ?? `${fallback}${status ? `: ${status}` : ""}`
+    );
+    if (status !== undefined) err.status = status;
+    if (res?.needsReauth) err.needsReauth = true;
+    return err;
+  };
+
+  return { stripSessionSecrets, toAnswer, toBridgeError };
 })();
 
 if (typeof module !== "undefined") {

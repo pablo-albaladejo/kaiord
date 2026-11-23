@@ -24,12 +24,6 @@ const ALL_BRIDGES = [
   "trainingpeaks-bridge",
 ];
 const SNAPSHOT_BRIDGES = ["garmin-bridge", "train2go-bridge"];
-const GATE_BRIDGES = [
-  "garmin-bridge",
-  "whoop-bridge",
-  "tanita-bridge",
-  "trainingpeaks-bridge",
-];
 
 export const BRIDGE_CORE_MASTERS = [
   {
@@ -55,11 +49,10 @@ export const BRIDGE_CORE_MASTERS = [
     bridges: ["garmin-bridge", "trainingpeaks-bridge"],
   },
   // The thin Bridge's one `request` gate: closed list + declared body schema.
-  // Train2Go keeps its own read-only gate (#1641); the other four use this.
   {
     master: "bridge-request-gate.js",
     dest: "bridge-request-gate.js",
-    bridges: GATE_BRIDGES,
+    bridges: ALL_BRIDGES,
   },
   // The `request` answer every thin Bridge hands the App, with the
   // Session-bound secrets (anti-forgery tokens, credential keys) removed.
@@ -67,6 +60,13 @@ export const BRIDGE_CORE_MASTERS = [
     master: "bridge-answer.js",
     dest: "bridge-answer.js",
     bridges: ALL_BRIDGES,
+  },
+  // Swallowed-error telemetry and the worker's script loader, for the two
+  // service workers that keep an error log.
+  {
+    master: "bridge-telemetry.js",
+    dest: "bridge-telemetry.js",
+    bridges: SNAPSHOT_BRIDGES,
   },
   {
     master: "kaiord-announce.js",
@@ -156,7 +156,7 @@ export const BRIDGE_CORE_MASTERS = [
   {
     master: "test/bridge-request-gate.test.js",
     dest: "test/bridge-request-gate.test.js",
-    bridges: GATE_BRIDGES,
+    bridges: ALL_BRIDGES,
   },
   {
     master: "test/session-fetch.test.js",

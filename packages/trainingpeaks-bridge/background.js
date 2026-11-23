@@ -165,15 +165,6 @@ const isAllowed = (method, path) =>
     (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
   );
 
-const toBridgeError = (fallback, res) => {
-  const msg =
-    res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
-  const err = new Error(msg);
-  if (typeof res?.status === "number") err.status = res.status;
-  if (res?.needsReauth) err.needsReauth = true;
-  return err;
-};
-
 // ── Actions ──
 
 // The Session check: no request, no token minted, nothing stored. Answers
@@ -205,7 +196,7 @@ const request = async (message) => {
     bodySchemas: BODY_SCHEMAS,
   })(message);
   const res = await tpAuth.tpapiFetch(path, method, body, fetch, { raw: true });
-  if (!res?.ok) throw toBridgeError("Request failed", res);
+  if (!res?.ok) throw answerCore.toBridgeError(res);
   return answerCore.toAnswer(res);
 };
 

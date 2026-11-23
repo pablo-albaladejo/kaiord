@@ -56,16 +56,19 @@ describe("bridge-popup-utils (vendored)", () => {
       ["en-US", "en"],
       ["fr", "en"],
       ["est", "en"],
-    ])("should map the UI language %s to the %s catalog", (language, expected) => {
-      // Arrange
-      setUiLanguage(language);
+    ])(
+      "should map the UI language %s to the %s catalog",
+      (language, expected) => {
+        // Arrange
+        setUiLanguage(language);
 
-      // Act
-      const locale = uiLocale();
+        // Act
+        const locale = uiLocale();
 
-      // Assert
-      expect(locale).toBe(expected);
-    });
+        // Assert
+        expect(locale).toBe(expected);
+      }
+    );
 
     it("should fall back to en where the browser exposes no UI language", () => {
       // Arrange
@@ -95,7 +98,9 @@ describe("bridge-popup-utils (vendored)", () => {
 
       // Assert
       expect(document.title).toBe("Kaiord for Example");
-      expect(document.querySelector("h1").textContent).toBe("Kaiord for Example");
+      expect(document.querySelector("h1").textContent).toBe(
+        "Kaiord for Example"
+      );
       expect(document.querySelector("button").getAttribute("aria-label")).toBe(
         "Refresh"
       );

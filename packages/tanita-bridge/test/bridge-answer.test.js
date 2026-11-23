@@ -6,7 +6,11 @@
  */
 import { describe, expect, it } from "vitest";
 
-const { stripSessionSecrets, toAnswer } = require("../bridge-answer.js");
+const {
+  stripSessionSecrets,
+  toAnswer,
+  toBridgeError,
+} = require("../bridge-answer.js");
 
 describe("bridge-answer: Session secrets in HTML", () => {
   it.each([
@@ -155,4 +159,46 @@ describe("bridge-answer: toAnswer", () => {
       expect(answer.body).toBe(body);
     }
   );
+});
+
+describe("bridge-answer: toBridgeError", () => {
+  it("should keep the transport's message, status and needsReauth", () => {
+    // Arrange
+    const res = { ok: false, status: 401, needsReauth: true, error: "gone" };
+
+    // Act
+    const err = toBridgeError(res);
+
+    // Assert
+    expect(err).toMatchObject({
+      message: "gone",
+      status: 401,
+      needsReauth: true,
+    });
+  });
+
+  it("should word a failure with no message by the fallback and its status", () => {
+    // Arrange
+    const res = { ok: false, status: 503 };
+
+    // Act
+    const err = toBridgeError(res, "Read week failed");
+
+    // Assert
+    expect(err.message).toBe("Read week failed: 503");
+    expect(err.status).toBe(503);
+    expect(err.needsReauth).toBeUndefined();
+  });
+
+  it("should fall back to Request failed with no status at all", () => {
+    // Arrange
+    const res = { ok: false };
+
+    // Act
+    const err = toBridgeError(res);
+
+    // Assert
+    expect(err.message).toBe("Request failed");
+    expect("status" in err).toBe(false);
+  });
 });

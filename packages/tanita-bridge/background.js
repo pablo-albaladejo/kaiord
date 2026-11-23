@@ -137,13 +137,6 @@ const checkSession = async () => {
   };
 };
 
-const toBridgeError = (res) => {
-  const err = new Error(res?.error ?? "Request failed");
-  if (typeof res?.status === "number") err.status = res.status;
-  if (res?.needsReauth) err.needsReauth = true;
-  return err;
-};
-
 // ── The App's one read: a request from the closed list, answered raw ──
 const request = async (message) => {
   const { method, path } = requestGate.createRequestGate({ allowed: ALLOWED })(
@@ -155,7 +148,7 @@ const request = async (message) => {
     headers: { Accept: "text/csv,*/*" },
     fetchImpl: fetch,
   });
-  if (!res.ok) throw toBridgeError(res);
+  if (!res.ok) throw answerCore.toBridgeError(res);
   return answerCore.toAnswer(res);
 };
 

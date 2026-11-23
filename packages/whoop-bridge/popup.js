@@ -33,7 +33,7 @@
  */
 
 /* global msg, $, uiLocale, localizePage, relativeAgo, formatSinceDate, recordProbe, renderStatusBlock,
-   renderChips, renderConsequence, renderSkeleton, renderCtas, renderNotice,
+   renderChips, renderConsequence, renderSkeleton, renderCtas, renderNotice, renderBrokenConnection,
    KAIORD_CONNECTION_NOTICES */
 
 const OPEN_WHOOP_URL = "https://app.whoop.com/";
@@ -230,17 +230,17 @@ const renderNotChecked = () => {
 /* One notice, one fix. A held bearer with no tab open is not this branch:
    the sign-in is intact, so renderNoTab says what the bridge needs instead. */
 const renderBroken = (state, since) => {
-  const notice = KAIORD_CONNECTION_NOTICES.noticeFor(
-    state,
-    PLATFORM,
-    uiLocale()
+  renderBrokenConnection(
+    $,
+    msg,
+    KAIORD_CONNECTION_NOTICES.noticeFor(state, PLATFORM, uiLocale()),
+    {
+      since,
+      href: OPEN_WHOOP_URL,
+      onRetry: () => refresh(),
+      formatSince: formatSinceDate,
+    }
   );
-  setMarkEstablished(since !== null);
-  renderNotice($, notice, {
-    since: since === null ? null : msg("outageSince", [formatSinceDate(since)]),
-    href: OPEN_WHOOP_URL,
-    onRetry: () => refresh(),
-  });
   renderChips($, []);
   setPausedBox(false);
   renderChips($, [], { region: "paused-region" });
