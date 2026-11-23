@@ -87,7 +87,7 @@ describe("WorkoutSection", () => {
     expect(screen.getByText(/Sport:/)).toBeInTheDocument();
   });
 
-  it("should render SaveToLibraryButton when workout is loaded", () => {
+  it("should render SaveToLibraryButton when workout is loaded and Templates is on", () => {
     // Arrange
     const workout = createMockWorkout([createMockStep(0)]);
     const krd = createMockKRD(workout);
@@ -99,7 +99,8 @@ describe("WorkoutSection", () => {
         krd={krd}
         selectedStepId={null}
         onStepSelect={vi.fn()}
-      />
+      />,
+      { capabilities: ["templates"] }
     );
 
     // Assert

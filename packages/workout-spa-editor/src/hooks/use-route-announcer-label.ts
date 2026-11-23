@@ -18,6 +18,7 @@
 import { useLocation } from "wouter";
 
 import { useTranslate } from "../i18n/use-translate";
+import { capabilityHome } from "../lib/capabilities/capability-catalogue";
 
 export function useRouteAnnouncerLabel(): string {
   const [pathname] = useLocation();
@@ -31,7 +32,7 @@ function normalizePath(pathname: string): string {
 }
 
 const EXACT: Record<string, string> = {
-  "/library": "library",
+  [capabilityHome("templates")]: "library",
   "/chat": "chat",
   "/athlete": "athlete",
   "/athletes": "athletes",

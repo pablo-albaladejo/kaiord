@@ -20,9 +20,25 @@ const makeDeps = () => ({
     setDataRoute: vi.fn(),
   },
   getMatrixSignals: vi.fn(),
+  offersTool: () => true,
 });
 
 describe("buildChatTools", () => {
+  it("should not offer the assistant a Tool an off Capability owns", () => {
+    // Arrange
+    const deps = {
+      ...makeDeps(),
+      offersTool: (name: string) => name !== "set_data_route",
+    };
+
+    // Act
+    const names = buildChatTools(deps).map((t) => t.name);
+
+    // Assert
+    expect(names).not.toContain("set_data_route");
+    expect(names).toContain("get_data_routes");
+  });
+
   it("should assemble the full read + action tool registry", () => {
     // Arrange
     const deps = makeDeps();

@@ -4,21 +4,54 @@ import { describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
+import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
 import { BottomNav } from "./BottomNav";
 
 const TAB_COUNT = 5;
 
-function renderAt(path: string) {
+function renderAt(path: string, on: readonly string[] = ["templates"]) {
   const { hook, history } = memoryLocation({ path, record: true });
   const view = render(
-    <Router hook={hook}>
-      <BottomNav />
-    </Router>
+    <CapabilitiesFixture on={on}>
+      <Router hook={hook}>
+        <BottomNav />
+      </Router>
+    </CapabilitiesFixture>
   );
   return { ...view, history };
 }
 
 describe("BottomNav", () => {
+  it("should leave out the Library tab while Templates is off", () => {
+    // Arrange
+    renderAt("/daily", []);
+
+    // Act
+    const tabs = screen
+      .getAllByRole("button")
+      .map((button) => button.getAttribute("aria-label") ?? button.textContent);
+    const library = screen.queryByRole("button", { name: "Library" });
+
+    // Assert
+    expect(library).toBeNull();
+    expect(tabs).toHaveLength(TAB_COUNT); // four tabs and the FAB
+  });
+
+  it("should seat the FAB between Calendar and Nutrition when four tabs remain", () => {
+    // Arrange
+    renderAt("/daily", []);
+
+    // Act
+    const nutritionWrapper = screen.getByRole("button", {
+      name: "Nutrition",
+    }).parentElement;
+
+    // Assert
+    expect(
+      nutritionWrapper?.querySelector('[data-testid="bottom-nav-notch"]')
+    ).not.toBeNull();
+  });
+
   it("should render five tabs and the create FAB", () => {
     // Arrange
     renderAt("/daily");

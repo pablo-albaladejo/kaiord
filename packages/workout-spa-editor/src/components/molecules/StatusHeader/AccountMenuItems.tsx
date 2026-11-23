@@ -11,7 +11,7 @@ import {
   MENU_SEPARATOR_CLASS,
 } from "./header-menu-styles";
 import { isEntryActive } from "./status-entry-active";
-import { ACCOUNT_ENTRIES } from "./status-entry-defs";
+import { useStatusEntries } from "./use-status-entries";
 
 const DOCS_URL = "https://kaiord.com/docs/";
 
@@ -25,10 +25,11 @@ type AccountMenuItemsProps = {
 export function AccountMenuItems({ attention }: AccountMenuItemsProps) {
   const t = useTranslate("nav");
   const [location, navigate] = useLocation();
+  const { account } = useStatusEntries();
 
   return (
     <>
-      {ACCOUNT_ENTRIES.map((entry) => (
+      {account.map((entry) => (
         <MenuItem
           key={entry.id}
           className={MENU_ITEM_CLASS}

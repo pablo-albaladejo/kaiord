@@ -20,7 +20,8 @@ const renderActions = (
     onRegenerate: () => void;
     onEdit: () => void;
     onDiscard: () => void;
-  }> = {}
+  }> = {},
+  capabilities: readonly string[] = ["templates"]
 ) => {
   const onRegenerate = overrides.onRegenerate ?? vi.fn();
   const onEdit = overrides.onEdit ?? vi.fn();
@@ -31,12 +32,24 @@ const renderActions = (
       onRegenerate={onRegenerate}
       onEdit={onEdit}
       onDiscard={onDiscard}
-    />
+    />,
+    { capabilities }
   );
   return { onRegenerate, onEdit, onDiscard };
 };
 
 describe("AiSuccessActions", () => {
+  it("should not offer keeping in the library while Templates is off", () => {
+    // Arrange
+    renderActions({}, []);
+
+    // Act
+    const keep = screen.queryByRole("button", { name: /Keep in library/i });
+
+    // Assert
+    expect(keep).toBeNull();
+  });
+
   it("should render all four action buttons (Regenerate / Edit / Discard / Save)", () => {
     // Arrange
 

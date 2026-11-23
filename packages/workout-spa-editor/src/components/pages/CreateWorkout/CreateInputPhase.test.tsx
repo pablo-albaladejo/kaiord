@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
+import { CapabilitiesFixture } from "../../../contexts/capabilities-context";
 import { profileWith } from "../../../lib/athlete/test-profile";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { useWorkoutStore } from "../../../store/workout-store";
@@ -26,9 +27,17 @@ const withRouter = (ui: ReactNode) => {
   return <Router hook={loc.hook}>{ui}</Router>;
 };
 
-const renderAt = (path: string, ui: ReactNode) => {
+const renderAt = (
+  path: string,
+  ui: ReactNode,
+  on: readonly string[] = ["templates"]
+) => {
   const loc = memoryLocation({ path, record: true });
-  render(<Router hook={loc.hook}>{ui}</Router>);
+  render(
+    <CapabilitiesFixture on={on}>
+      <Router hook={loc.hook}>{ui}</Router>
+    </CapabilitiesFixture>
+  );
   return loc;
 };
 
@@ -208,5 +217,18 @@ describe("CreateInputPhase", () => {
       "/library?source=template-picker&week=2026-W41&from=calendar"
     );
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("should offer no Template tile while Templates is off", () => {
+    // Arrange
+    const ui = <CreateInputPhase {...baseProps} onClose={vi.fn()} />;
+    renderAt("/workout/new", ui, []);
+
+    // Act
+    const tile = screen.queryByRole("button", { name: "Template" });
+
+    // Assert
+    expect(tile).toBeNull();
+    expect(screen.getByRole("button", { name: "Blank" })).toBeInTheDocument();
   });
 });

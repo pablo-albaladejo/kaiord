@@ -24,9 +24,25 @@ describe("WorkoutActions", () => {
   const defaultProps = { krd: mockKRD, onDiscard: vi.fn() };
 
   describe("the three verbs", () => {
-    it("should offer keeping and downloading, and nothing that sends", () => {
+    it("should not offer keeping in the library while Templates is off", () => {
       // Arrange
       renderWithProviders(<WorkoutActions {...defaultProps} />);
+
+      // Act
+      const labels = screen
+        .getAllByRole("button")
+        .map((b) => b.textContent ?? "");
+
+      // Assert
+      expect(labels.some((l) => l.includes("Keep in library"))).toBe(false);
+      expect(labels.some((l) => l.includes("Download a file"))).toBe(true);
+    });
+
+    it("should offer keeping and downloading, and nothing that sends", () => {
+      // Arrange
+      renderWithProviders(<WorkoutActions {...defaultProps} />, {
+        capabilities: ["templates"],
+      });
 
       // Act
       const labels = screen
@@ -41,7 +57,9 @@ describe("WorkoutActions", () => {
 
     it("should keep the send path out of this row entirely", () => {
       // Arrange
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />, {
+        capabilities: ["templates"],
+      });
 
       // Act
       const sendButton = screen.queryByTestId("send-to-garmin-button");
@@ -52,7 +70,9 @@ describe("WorkoutActions", () => {
 
     it("should render keep before download", () => {
       // Arrange
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />, {
+        capabilities: ["templates"],
+      });
 
       // Act
       const buttons = screen.getAllByRole("button");
@@ -69,7 +89,9 @@ describe("WorkoutActions", () => {
 
     it("should render discard last", () => {
       // Arrange
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />, {
+        capabilities: ["templates"],
+      });
 
       // Act
       const buttons = screen.getAllByRole("button");
@@ -86,7 +108,9 @@ describe("WorkoutActions", () => {
       { className: "gap-2.5" },
     ])("should apply $className to the action row", ({ className }) => {
       // Arrange
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />, {
+        capabilities: ["templates"],
+      });
 
       // Act
       const container = screen.getByTestId(
@@ -99,7 +123,9 @@ describe("WorkoutActions", () => {
 
     it("should paint discard from the role layer rather than a raw red", () => {
       // Arrange
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />, {
+        capabilities: ["templates"],
+      });
 
       // Act
       const discardButton = screen.getByTestId("discard-workout-button");

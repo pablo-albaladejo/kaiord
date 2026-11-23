@@ -35,6 +35,7 @@ export const buildAndSend = async (
     healthShared,
     getMatrixSignals: () =>
       buildDataRouteSignals(ctx.persistence, ctx.profileId),
+    offers: ctx.offers,
     onTextDelta: (d) => ctx.set.streamingText((p) => p + d),
   });
   ctx.agentRef.current = built.agent;

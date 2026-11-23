@@ -61,19 +61,25 @@ export type ChatCapabilitySection = {
   examples: string[];
 };
 
-/** The catalog grouped in display order, with each group's example ids. */
-export const chatCapabilitySections = (): ChatCapabilitySection[] =>
+/**
+ * The catalog grouped in display order, with each group's example ids, among
+ * the Tools offered: one an off Capability owns is never named, and a group
+ * left empty is dropped.
+ */
+export const chatCapabilitySections = (
+  offersTool: (toolName: string) => boolean
+): ChatCapabilitySection[] =>
   CHAT_CAPABILITY_GROUPS.map((group) => {
     const entries = (
       Object.entries(CHAT_CAPABILITIES) as [
         ChatCapabilityToolName,
         ChatCapability,
       ][]
-    ).filter(([, c]) => c.group === group && !c.hidden);
+    ).filter(([name, c]) => c.group === group && !c.hidden && offersTool(name));
     return {
       group,
       writes: entries.some(([, c]) => c.writes),
       tools: entries.map(([name]) => name),
       examples: entries.flatMap(([, c]) => c.examples),
     };
-  });
+  }).filter((section) => section.tools.length > 0);

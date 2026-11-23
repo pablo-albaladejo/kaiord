@@ -13,6 +13,7 @@ import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures/base";
 import { toLocalDateString } from "./helpers/local-date";
+import { activateTemplates } from "./helpers/seed-capabilities";
 
 const PHONE = { width: 390, height: 664 };
 // Spanish: its longer copy wraps more, so it is the tighter fit.
@@ -31,6 +32,11 @@ async function navTop(page: Page): Promise<number> {
 }
 
 test.describe("Empty library", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/daily");
+    await activateTemplates(page);
+  });
+
   test("should start a new session from the empty library", async ({
     page,
   }) => {
@@ -60,6 +66,9 @@ test.describe("Phone layout above the bottom nav", () => {
   test("should show the non-AI starts above the nav without scrolling", async ({
     page,
   }) => {
+    // With Templates on the sheet holds all three starts: the tallest case.
+    await page.goto("/daily");
+    await activateTemplates(page);
     await page.goto("/workout/new");
     await expect(page.getByTestId("default-profile-notice")).toBeVisible();
     await expect(page.getByText(/configura un proveedor de ia/i)).toBeVisible();

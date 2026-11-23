@@ -4,7 +4,8 @@ import { Icon, ICON_MAP, type IconName } from "../../atoms/Icon";
 export type CreateStartFromProps = {
   /** First block of the sheet (no AI provider): drop the "or". */
   lead?: boolean;
-  onTemplate: () => void;
+  /** Absent while Templates is off: the tile is not offered. */
+  onTemplate?: () => void;
   onBlank: () => void;
   onImport: () => void;
 };
@@ -21,13 +22,18 @@ export function CreateStartFrom({
   onImport,
 }: CreateStartFromProps) {
   const t = useTranslate("create-workout");
+  const templateTile: Tile[] = onTemplate
+    ? [
+        {
+          key: "template",
+          label: t("startFrom.template"),
+          icon: "cards",
+          onClick: onTemplate,
+        },
+      ]
+    : [];
   const tiles: Tile[] = [
-    {
-      key: "template",
-      label: t("startFrom.template"),
-      icon: "cards",
-      onClick: onTemplate,
-    },
+    ...templateTile,
     {
       key: "blank",
       label: t("startFrom.blank"),

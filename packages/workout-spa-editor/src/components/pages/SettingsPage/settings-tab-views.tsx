@@ -1,6 +1,7 @@
 import { CONNECTIONS_PATH } from "../../../routing/constants";
 import { AboutTab } from "../../organisms/SettingsPanel/AboutTab";
 import { AiTab } from "../../organisms/SettingsPanel/AiTab";
+import { CapabilitiesTab } from "../../organisms/SettingsPanel/CapabilitiesTab";
 import { DataTab } from "../../organisms/SettingsPanel/DataTab";
 import { GeneralTab } from "../../organisms/SettingsPanel/GeneralTab";
 import { PrivacyTab } from "../../organisms/SettingsPanel/PrivacyTab";
@@ -16,6 +17,7 @@ const TAB_ORDER: ReadonlyArray<SettingsTab> = [
 
 const TAB_VIEWS: Record<SettingsTab, React.FC> = {
   general: GeneralTab,
+  capabilities: CapabilitiesTab,
   ai: AiTab,
   sync: SyncTab,
   data: DataTab,

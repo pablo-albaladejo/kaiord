@@ -5,16 +5,13 @@ import { useTranslate } from "../../../i18n/use-translate";
 import { ROUTE_HEADING_ATTR } from "../../../routing/constants";
 import { Button } from "../../atoms/Button/Button";
 import { Icon, ICON_MAP } from "../../atoms/Icon";
-import {
-  isSettingsTab,
-  retiredSectionTarget,
-  SETTINGS_TAB_VIEWS,
-} from "./settings-tab-views";
+import { SETTINGS_TAB_VIEWS } from "./settings-tab-views";
 import { SettingsAttention } from "./SettingsAttention";
 import { SettingsGroupList } from "./SettingsGroupList";
 import { SettingsSectionRail } from "./SettingsSectionRail";
 import { useSectionScrollReset } from "./use-section-scroll-reset";
 import { useSettingsAttention } from "./use-settings-attention";
+import { useSettingsSection } from "./use-settings-section";
 
 /**
  * `section` is the path segment naming the open panel (`/settings/ai`). It is
@@ -38,14 +35,14 @@ export default function SettingsPage() {
   useFocusOnSectionChange();
   useSectionScrollReset(section);
 
-  const search = useSearch();
-  // `replace`: a retired path must not sit in history between the section
-  // the user landed on and wherever they came from, or Back re-bounces.
-  const retired = retiredSectionTarget(section, search);
-  if (retired !== undefined) return <Redirect to={retired} replace />;
-  const open = isSettingsTab(section) ? section : undefined;
-  if (section !== undefined && open === undefined)
-    return <Redirect to={SETTINGS_ROOT} />;
+  const resolved = useSettingsSection(section, useSearch());
+  if (resolved.kind === "wait") return null;
+  if (resolved.kind === "redirect") {
+    // `replace` for a retired path: it must not sit in history between the
+    // section the user landed on and wherever they came from.
+    return <Redirect to={resolved.to} replace={resolved.replace} />;
+  }
+  const { open } = resolved;
 
   const ActiveView = open === undefined ? null : SETTINGS_TAB_VIEWS[open];
   const heading =

@@ -342,7 +342,15 @@ describe("SettingsPage", () => {
 
     it("should render one rail entry per section", () => {
       // Arrange
-      const sections = ["general", "ai", "sync", "data", "privacy", "about"];
+      const sections = [
+        "general",
+        "capabilities",
+        "ai",
+        "sync",
+        "data",
+        "privacy",
+        "about",
+      ];
 
       // Act
       renderAtPath("/settings/ai");

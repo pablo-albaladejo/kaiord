@@ -29,6 +29,7 @@ const tools = buildChatTools({
     setDataRoute: vi.fn(),
   },
   getMatrixSignals: vi.fn(),
+  offersTool: () => true,
 });
 
 describe("chat tool provider-facing input schemas", () => {

@@ -24,6 +24,7 @@ const actionToolNames = () =>
       setDataRoute: vi.fn(),
     },
     getMatrixSignals: vi.fn(),
+    offersTool: () => true,
   })
     .filter((tool) => tool.requiresConfirmation)
     .map((tool) => tool.name);

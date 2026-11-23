@@ -40,12 +40,13 @@ const clearTables = async () => {
   for (const table of TABLES) await db.table(table).clear();
 };
 
-const renderCard = () => {
+const renderCard = (capabilities: readonly string[] = ["templates"]) => {
   const { hook } = memoryLocation({ path: "/daily", record: true });
   return renderWithProviders(
     <Router hook={hook}>
       <SetupChecklist />
-    </Router>
+    </Router>,
+    { capabilities }
   );
 };
 
@@ -89,5 +90,16 @@ describe("SetupChecklist without integrations", () => {
     });
     expect(await db.table("connections").count()).toBe(0);
     expect(await db.table("exportLedger").count()).toBe(0);
+  });
+
+  it("should count the manual steps out of three while Templates is off", async () => {
+    // Arrange
+    await db.table("healthDaily").clear();
+
+    // Act
+    renderCard([]);
+
+    // Assert
+    expect(await screen.findByText("2 of 3 done")).toBeInTheDocument();
   });
 });

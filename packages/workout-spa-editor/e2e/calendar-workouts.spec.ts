@@ -5,6 +5,7 @@
  */
 
 import { expect, test } from "./fixtures/base";
+import { activateTemplates } from "./helpers/seed-capabilities";
 import {
   clearDexie,
   getWeekDates,
@@ -230,7 +231,9 @@ test.describe("Calendar Workouts", () => {
     page,
   }) => {
     // The redesign's Create overlay "Template" tile routes to /library in
-    // template-picker mode, carrying the empty day's date.
+    // template-picker mode, carrying the empty day's date. It is offered
+    // once the athlete turned Templates on.
+    await activateTemplates(page);
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 

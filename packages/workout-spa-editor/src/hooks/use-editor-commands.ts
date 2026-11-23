@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { useCapabilities } from "../contexts/capabilities-context";
 import { hasClipboardContent } from "../store/clipboard-store";
 import { useContextMenuStore } from "../store/selectors";
 import type { Workout } from "../types/krd";
@@ -15,10 +16,13 @@ export type { EditorCommand } from "./editor-command.types";
 /**
  * The one enumerable source of editor commands. `run` always delegates to a
  * `buildKeyboardHandlers` thunk, so no surface re-implements a store action,
- * and `enabled` mirrors that thunk's own guard.
+ * and `enabled` mirrors that thunk's own guard. A command an off Capability
+ * owns is left out here, so the palette, the context menu and the coach
+ * marks never offer it.
  */
 export function useEditorCommands() {
   const store = useContextMenuStore();
+  const capabilities = useCapabilities();
   const workout = store.currentWorkout?.extensions?.structured_workout as
     Workout | undefined;
 
@@ -42,7 +46,7 @@ export function useEditorCommands() {
       }),
     }),
     ...buildLearnCommands(),
-  ];
+  ].filter((command) => capabilities.offers("command", command.id));
 
   return {
     commands,

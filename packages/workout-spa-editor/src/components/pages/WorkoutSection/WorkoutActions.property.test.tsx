@@ -34,7 +34,9 @@ describe("WorkoutActions - Property Tests", () => {
 
   it("should start every button label with a capital", () => {
     // Arrange
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />, {
+      capabilities: ["templates"],
+    });
 
     // Act
     const firstChars = screen
@@ -49,7 +51,9 @@ describe("WorkoutActions - Property Tests", () => {
 
   it("should keep every word after the first lowercase unless it is a proper noun", () => {
     // Arrange
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />, {
+      capabilities: ["templates"],
+    });
 
     // Act
     const tailWords = screen
@@ -68,7 +72,9 @@ describe("WorkoutActions - Property Tests", () => {
     { label: "Discard workout" },
   ])("should render $label verbatim", ({ label }) => {
     // Arrange
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />, {
+      capabilities: ["templates"],
+    });
 
     // Act
     const labels = screen
@@ -81,7 +87,9 @@ describe("WorkoutActions - Property Tests", () => {
 
   it("should wrap rather than overflow on a narrow viewport", () => {
     // Arrange
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />, {
+      capabilities: ["templates"],
+    });
 
     // Act
     const container = screen.getByTestId(

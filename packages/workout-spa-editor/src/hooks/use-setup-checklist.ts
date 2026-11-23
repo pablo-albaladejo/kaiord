@@ -12,6 +12,7 @@
 
 import { useCallback, useMemo } from "react";
 
+import { useCapabilities } from "../contexts/capabilities-context";
 import {
   buildSetupChecklistItems,
   hasAnyThreshold,
@@ -36,6 +37,7 @@ export function useSetupChecklist(): SetupChecklist {
   const profile = active?.profile ?? null;
   const facts = useSetupChecklistFacts(active?.id ?? null);
   const setPrefs = useSetUserPreferenceFields(active?.id ?? null);
+  const capabilities = useCapabilities();
 
   const items = useMemo(
     () =>
@@ -44,8 +46,11 @@ export function useSetupChecklist(): SetupChecklist {
         hasThreshold: hasAnyThreshold(profile),
         hasWellness: facts.wellnessCount > 0,
         hasTemplate: facts.templateCount > 0,
-      }),
-    [facts, profile]
+      }).filter(
+        (item) =>
+          item.capability === undefined || capabilities.isOn(item.capability)
+      ),
+    [facts, profile, capabilities]
   );
 
   const dismiss = useCallback(() => {

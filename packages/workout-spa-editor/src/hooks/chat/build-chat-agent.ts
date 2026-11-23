@@ -18,6 +18,7 @@ import type { ChatActionOps } from "../../application/chat/tools/chat-tool-deps"
 import type { DataHubMatrixSignals } from "../../application/data-hub/build-data-hub-matrix";
 import { traceReadTools } from "../../application/trace/trace-read-tools";
 import type { TraceRun } from "../../application/trace/trace-run";
+import type { ActiveCapabilities } from "../../lib/capabilities/resolve-capabilities";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { logger } from "../../utils/logger";
 
@@ -35,6 +36,8 @@ export type BuildChatAgentArgs = {
   /** The athlete lets this Provider read their health data. */
   healthShared: boolean;
   getMatrixSignals: () => Promise<DataHubMatrixSignals>;
+  /** The read API's answer: a Tool an off Capability owns is not offered. */
+  offers: ActiveCapabilities["offers"];
   onTextDelta: (delta: string) => void;
 };
 
@@ -48,6 +51,7 @@ export const buildChatAgent = async (
     actions: args.actions,
     healthShared: args.healthShared,
     getMatrixSignals: args.getMatrixSignals,
+    offersTool: (name) => args.offers("tool", name),
   });
   const tools = traceReadTools(built, args.trace, args.provider.type);
   const model = await createLanguageModel(args.provider, args.modelId, {

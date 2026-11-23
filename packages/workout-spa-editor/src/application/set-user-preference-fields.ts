@@ -24,6 +24,7 @@ export type UserPreferenceFieldsPatch = Partial<
     | "labDashboardParams"
     | "setupChecklistDismissed"
     | "dismissedCoachMarks"
+    | "capabilities"
   >
 >;
 
@@ -62,6 +63,7 @@ export async function setUserPreferenceFields(
     locale: existing?.locale,
     setupChecklistDismissed: existing?.setupChecklistDismissed,
     dismissedCoachMarks: existing?.dismissedCoachMarks,
+    capabilities: existing?.capabilities,
     ...input.patch,
     updatedAt: deps.clock(),
   };
