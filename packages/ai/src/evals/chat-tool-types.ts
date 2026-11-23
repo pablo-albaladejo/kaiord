@@ -1,6 +1,6 @@
 /**
  * Type definitions for the F6 Data Hub chat-tool evals: does the model
- * call `get_data_routes`/`set_data_route` correctly for the two hub
+ * call `get_data_routes`/`set_authority` correctly for the two hub
  * conversational scenarios from the spec?
  */
 export type ChatToolBenchmark = {

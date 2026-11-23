@@ -1,7 +1,7 @@
 /**
  * Resolves the chat-facing INTEGRATION_REGISTRY id (e.g. "whoop") to the
  * IntegrationPolicy/DataTypeSourcePolicy storage key (the bridge id, e.g.
- * "whoop-bridge") used by `set_data_route`.
+ * "whoop-bridge") used by `set_data_route` and `set_authority`.
  */
 import { INTEGRATION_REGISTRY } from "../../integrations/integration-registry";
 

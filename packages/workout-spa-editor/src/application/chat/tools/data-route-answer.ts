@@ -1,7 +1,6 @@
 /**
- * buildDataRouteAnswer — one managed-data-type's routing state, shared by
- * the `get_data_routes` read tool and the `set_data_route` confirmation
- * result. Reuses the exact cell derivation the retired routing matrix was built
+ * buildDataRouteAnswer — one managed-data-type's routing state, as the
+ * `get_data_routes` read tool answers it. Reuses the exact cell derivation the retired routing matrix was built
  * on (application/data-hub) plus the F3.2 multi-source resolver — the chat
  * answer is never a second source of truth against the Connections page.
  */

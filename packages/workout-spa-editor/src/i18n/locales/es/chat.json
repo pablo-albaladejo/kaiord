@@ -60,7 +60,8 @@
     "log_health_metric": "Registrar una métrica de salud",
     "log_intake": "Registrar una ingesta",
     "push_to_garmin": "Enviar a Garmin",
-    "set_data_route": "Cambiar el enrutado de datos"
+    "set_data_route": "Activar o desactivar una fuente",
+    "set_authority": "Elegir qué Plataforma decide"
   },
   "summary": {
     "unreadable": "El asistente envió datos que la app no puede leer. Recházalo y vuelve a pedirlo.",
@@ -93,7 +94,9 @@
       "disable": {
         "import": "Dejar de importar {{type}} desde {{integration}}",
         "export": "Dejar de enviar {{type}} a {{integration}}"
-      },
+      }
+    },
+    "authority": {
       "union": "{{type}}: combinar todas las fuentes activas",
       "priority": "{{type}}: leer de {{order}}, en ese orden"
     }
@@ -176,7 +179,8 @@
       "create_workout": "Crear y guardar un entreno en una fecha",
       "push_to_garmin": "Enviar un entreno a Garmin",
       "sync_coaching": "Sincronizar el plan del entrenador",
-      "set_data_route": "Cambiar de qué fuente viene un dato"
+      "set_data_route": "Activar o desactivar los datos de una fuente",
+      "set_authority": "Elegir qué Plataforma decide un tipo de dato"
     },
     "example": {
       "week": "¿Cómo fue mi semana?",
@@ -190,7 +194,8 @@
       "createWorkout": "Créame un rodaje Z2 de 45' para mañana",
       "pushGarmin": "Envía el entreno de mañana a Garmin",
       "syncCoaching": "Sincroniza mi plan de Train2Go",
-      "setRoute": "Usa WHOOP para el sueño"
+      "setRoute": "Usa WHOOP para el sueño",
+      "stopImport": "Deja de importar el peso desde TrainingPeaks"
     },
     "suggestions": "Sugerencias: {{group}}"
   },

@@ -76,7 +76,7 @@ export const CAPABILITY_CATALOGUE = [
       settings: ["authority"],
       commands: [],
       shortcuts: [],
-      tools: ["set_data_route"],
+      tools: ["set_authority"],
     },
     modules: [
       "components/organisms/AuthorityMatrix/",

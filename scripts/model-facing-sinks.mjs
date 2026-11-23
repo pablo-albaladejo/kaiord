@@ -27,7 +27,7 @@ export const FENCED_FIELD_NAMES = [
 
 /**
  * Every action tool (sync_coaching, create_workout, log_health_metric,
- * log_intake, push_to_garmin, set_data_route) also has a second path to the
+ * log_intake, push_to_garmin, set_data_route, set_authority) also has a second path to the
  * model: an approved call runs in hooks/chat/run-confirmed-tool.ts, and a
  * throw from its `execute` becomes `{ error: "invalid_input" |
  * "action_failed" }` there, never the exception's text (the text is logged,
@@ -109,6 +109,12 @@ export const SINKS = [
     tool: "set_data_route",
     status: "clean",
     provenance:
-      "returns the same route answer as get_data_routes; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
+      "hooks/chat/do-set-data-route.ts returns the stored IntegrationPolicy row's dataType, direction, enabled and mode (schema enums and a boolean) and echoes the integrationId the model itself sent; an id with no bridge answers the app literal integration_not_bridged. A throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
+  },
+  {
+    tool: "set_authority",
+    status: "clean",
+    provenance:
+      "hooks/chat/do-set-authority.ts returns the stored DataTypeSourcePolicy row's dataType, mode (schema enums) and sourceOrder, whose bridge ids are resolved at write time against INTEGRATION_REGISTRY; an order that does not resolve answers the app literal unresolvable_source_order with the ids the model itself sent. A throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
   },
 ];

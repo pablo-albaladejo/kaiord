@@ -1,7 +1,7 @@
 /**
  * DataTypeSourcePolicy — the athlete's own choice of Authority for one
  * (profile, dataType), made in the matrix Capability or through the
- * assistant's `set_data_route`.
+ * assistant's `set_authority`.
  *
  * Companion to IntegrationPolicy, not an extension of it: IntegrationPolicy
  * is keyed per-bridge ([profileId+dataType+direction+bridgeId]); this is

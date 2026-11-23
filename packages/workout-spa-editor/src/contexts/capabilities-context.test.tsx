@@ -122,7 +122,8 @@ describe("CapabilitiesProvider", () => {
     // Assert
     expect(result.current.isOn("authority-matrix")).toBe(false);
     expect(result.current.offers("settings", "authority")).toBe(false);
-    expect(result.current.offers("tool", "set_data_route")).toBe(false);
+    expect(result.current.offers("tool", "set_authority")).toBe(false);
+    expect(result.current.offers("tool", "set_data_route")).toBe(true);
   });
 
   it("should turn the Authority matrix on for an athlete who already chose an Authority", async () => {
@@ -140,7 +141,25 @@ describe("CapabilitiesProvider", () => {
 
     // Assert
     expect(result.current.isOn("authority-matrix")).toBe(true);
-    expect(result.current.offers("tool", "set_data_route")).toBe(true);
+    expect(result.current.offers("tool", "set_authority")).toBe(true);
+  });
+
+  it("should turn the Authority matrix on for an athlete who chose to keep every source", async () => {
+    // Arrange
+    await seedAthlete();
+    await db.table("dataTypeSourcePolicy").put({
+      profileId: PROFILE_ID,
+      dataType: "weight",
+      mode: "union",
+      sourceOrder: [],
+    });
+
+    // Act
+    const { result } = await renderReady();
+
+    // Assert
+    expect(result.current.isOn("authority-matrix")).toBe(true);
+    expect(result.current.offers("tool", "set_authority")).toBe(true);
   });
 
   it("should not turn the Authority matrix on from another athlete's choice", async () => {

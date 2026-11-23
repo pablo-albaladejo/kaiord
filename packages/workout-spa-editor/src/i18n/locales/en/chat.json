@@ -60,7 +60,8 @@
     "log_health_metric": "Log a health metric",
     "log_intake": "Log food intake",
     "push_to_garmin": "Send to Garmin",
-    "set_data_route": "Change data routing"
+    "set_data_route": "Switch a source on or off",
+    "set_authority": "Choose which Platform decides"
   },
   "summary": {
     "unreadable": "The assistant sent details the app could not read. Decline and ask again.",
@@ -93,7 +94,9 @@
       "disable": {
         "import": "Stop importing {{type}} from {{integration}}",
         "export": "Stop sending {{type}} to {{integration}}"
-      },
+      }
+    },
+    "authority": {
       "union": "{{type}}: merge every enabled source",
       "priority": "{{type}}: read from {{order}}, in that order"
     }
@@ -176,7 +179,8 @@
       "create_workout": "Create and save a workout on a date",
       "push_to_garmin": "Send a workout to Garmin",
       "sync_coaching": "Sync your coach's plan",
-      "set_data_route": "Change which source a data type comes from"
+      "set_data_route": "Turn a source's data on or off",
+      "set_authority": "Choose which Platform decides a kind of data"
     },
     "example": {
       "week": "How did my week go?",
@@ -190,7 +194,8 @@
       "createWorkout": "Create a 45-minute Z2 run for tomorrow",
       "pushGarmin": "Push tomorrow's workout to Garmin",
       "syncCoaching": "Sync my Train2Go plan",
-      "setRoute": "Use WHOOP for sleep"
+      "setRoute": "Use WHOOP for sleep",
+      "stopImport": "Stop importing weight from TrainingPeaks"
     },
     "suggestions": "{{group}} suggestions"
   },

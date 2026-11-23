@@ -22,6 +22,7 @@ const tools = () =>
       logIntake: vi.fn(),
       pushToGarmin: vi.fn(),
       setDataRoute: vi.fn(),
+      setAuthority: vi.fn(),
     },
     getMatrixSignals: vi.fn(),
     offersTool: () => true,

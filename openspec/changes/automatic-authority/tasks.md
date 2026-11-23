@@ -9,6 +9,7 @@
 - [x] 1.7 `use-zones-sync-orchestrator*.test.ts`: no dialog, the athlete's numbers stay, one offer, taking Train2Go's accepts every field, the same numbers are not offered twice
 - [x] 1.8 `data-route-answer.test.ts`: `get_data_routes` reports the automatic Authority
 - [x] 1.9 E2E `authority-automatic.spec.ts`: two Platforms never asked; the matrix on and off; English and Spanish, desktop and mobile
+- [x] 1.10 `build-chat-tools.test.ts`, `set-authority-tool.test.ts`: with the matrix off the assistant still switches a source on or off with confirmation and `set_authority` is absent; on, both; the `set_authority` description matches the rule for every kind
 
 ## 2. Kaiord App
 

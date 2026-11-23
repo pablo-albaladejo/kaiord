@@ -21,7 +21,7 @@ import { requireProfile } from "./use-create-workout-op";
 import { useCreateWorkoutOp } from "./use-create-workout-op";
 import { useLogOps } from "./use-log-ops";
 import { usePushToGarminOp } from "./use-push-to-garmin-op";
-import { useSetDataRouteOp } from "./use-set-data-route-op";
+import { useSetDataRouteOps } from "./use-set-data-route-op";
 import { useTrain2GoCoachingTransport } from "./use-train2go-coaching-transport";
 
 export type { ChatGenerationModel } from "./use-create-workout-op";
@@ -33,7 +33,7 @@ export const useChatActionOps = (
 ): ChatActionOps => {
   const persistence = usePersistence();
   const pushToGarmin = usePushToGarminOp(profileId);
-  const setDataRoute = useSetDataRouteOp(profileId);
+  const { setDataRoute, setAuthority } = useSetDataRouteOps(profileId);
   const { logHealthMetric, logIntake } = useLogOps(profileId);
   const transport = useTrain2GoCoachingTransport();
 
@@ -51,6 +51,7 @@ export const useChatActionOps = (
       logIntake,
       pushToGarmin,
       setDataRoute,
+      setAuthority,
     }),
     [
       syncCoaching,
@@ -59,6 +60,7 @@ export const useChatActionOps = (
       logIntake,
       pushToGarmin,
       setDataRoute,
+      setAuthority,
     ]
   );
 };

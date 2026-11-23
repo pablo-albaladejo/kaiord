@@ -122,7 +122,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -240,7 +240,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -361,7 +361,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -495,7 +495,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
@@ -609,7 +609,7 @@
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/build-chat-tools.test.ts",
-          "title": "should mark exactly the six action tools as requiring confirmation"
+          "title": "should mark exactly the action tools as requiring confirmation"
         },
         {
           "test": "packages/workout-spa-editor/src/application/chat/tools/action-tools.test.ts",
