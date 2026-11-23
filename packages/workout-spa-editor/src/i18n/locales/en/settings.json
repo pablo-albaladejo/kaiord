@@ -90,7 +90,7 @@
   "privacy": {
     "information": "Privacy Information",
     "infoNoServer": "Your records sit in this browser, unencrypted — deleting the site data deletes them. Kaiord runs no server that keeps a copy. The only things that leave are what you route to a connection, what you send to your AI provider, and the Drive snapshots if you turn cross-device sync on.",
-    "infoExtension": "Garmin, Train2Go, WHOOP, Tanita and TrainingPeaks connect through the Kaiord extension, which rides the session you already have open on each site. Your passwords never leave your browser.",
+    "infoExtension": "Garmin, Train2Go, WHOOP, Tanita and TrainingPeaks each connect through their own extension (Kaiord for Garmin, Kaiord for Train2Go…), which rides the session you already have open on each site. Your passwords never leave your browser.",
     "infoApiKey": "intervals.icu connects with an API key you paste. It is stored encrypted in this browser and sent only to intervals.icu.",
     "infoLlmKeys": "Your AI provider keys are stored in this browser's storage for kaiord.com, obfuscated with a fixed key that ships in Kaiord's public code, so they are not truly encrypted. Any script running on kaiord.com (including the third-party scripts it loads, such as analytics), any browser extension allowed on kaiord.com, and anyone with access to this browser profile can read them. Each key is sent only to its provider (Anthropic, OpenAI or Google), never to Kaiord. If you turn on Google Drive sync, a copy also goes to your own Google Drive.",
     "infoNotResponsible": "We are not responsible for credential security on your device.",

@@ -8,7 +8,7 @@ proves it, and `pnpm lint:claims` fails on any sentence that is not. See
 
 ## Extension Name
 
-Kaiord Tanita Bridge
+Kaiord for Tanita
 
 ## Short Description (132 chars max)
 
@@ -39,10 +39,39 @@ Your sign-in and your data:
 • Access through your own MyTANITA sign-in is unofficial: it is not a Tanita partner API, and it can stop working without notice.
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
+## Short Description, Spanish (132 chars max)
+
+Permite que Kaiord App importe tu peso y tu composición corporal de MyTANITA, con tu propio inicio de sesión de MyTANITA
+
+## Detailed Description, Spanish
+
+Kaiord for Tanita conecta Kaiord App (https://kaiord.com/app) con tu cuenta de MyTANITA en mytanita.eu. Inicias sesión en MyTANITA en Chrome como siempre; la extensión nunca ve tu contraseña y no puede leer tu cookie de inicio de sesión.
+
+Qué hace:
+
+• Descarga tu exportación de MyTANITA, que contiene todas las mediciones de tu historial, y se la entrega a Kaiord App tal como la envió MyTANITA. La extensión no interpreta las mediciones; lo hace Kaiord App.
+• Kaiord App pide la exportación cuando abres su calendario, si Tanita está activado para el peso o la composición corporal, y cuando pulsas Sincronizar ahora. Kaiord App la convierte en entradas de peso y de composición corporal que se guardan en tu navegador.
+• Cada vez que abres la ventana emergente de la extensión o pulsas Actualizar, pide a MyTANITA solo las cabeceras de la exportación, sin descargarla, para saber si sigues con la sesión iniciada. Solo muestra la respuesta.
+
+Cómo funciona:
+
+1. Inicia sesión en MyTANITA en https://mytanita.eu en Chrome.
+2. Abre Kaiord App y conecta Tanita.
+3. La extensión envía su petición con tu inicio de sesión de MyTANITA, así que no se introduce ni se guarda ninguna contraseña.
+
+Tu inicio de sesión y tus datos:
+
+• La extensión solo envía peticiones a https://mytanita.eu/en/user/export-csv, y solo responde a Kaiord App en https://kaiord.com.
+• En tu navegador solo guarda cuándo pudo y cuándo no pudo su ventana emergente llegar a tu exportación por última vez, y el tema de Kaiord App. Nunca guarda la exportación.
+• Sin analítica y sin rastreo.
+• Quitar la extensión de Chrome borra todo lo que guardó.
+• El acceso a través de tu propio inicio de sesión de MyTANITA no es oficial: no es una API de socio de Tanita, y puede dejar de funcionar sin aviso.
+• Código abierto: https://github.com/pablo-albaladejo/kaiord
+
 ## Metadata
 
 - **Category**: Productivity
-- **Language**: English
+- **Languages**: English and Spanish (`_locales/en` is the default; the store and Chrome pick the locale from the browser language)
 - **Publisher**: Pablo Albaladejo
 - **Privacy policy URL**: https://kaiord.com/docs/legal/privacy-policy
 - **Website**: https://kaiord.com
@@ -60,9 +89,12 @@ Not done yet: this extension has never been published.
 - [ ] Set privacy policy URL to `https://kaiord.com/docs/legal/privacy-policy`
 - [ ] Submit for review
 
-The Short Description reaches the store through `extDescription` in
-`_locales/en/messages.json`; the Detailed Description and the permission
-justifications are pasted into the CWS dashboard by hand.
+The name and the Short Description reach the store through `extName` and
+`extDescription` in `_locales/en/messages.json` and
+`_locales/es/messages.json`. The name is "Kaiord for Tanita" in both: it is
+the product name and is not translated. The Detailed Description (English
+and Spanish, one per store language) and the permission justifications are
+pasted into the CWS dashboard by hand.
 
 ## Screenshots
 

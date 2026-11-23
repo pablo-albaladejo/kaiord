@@ -12,7 +12,7 @@ listing can be filled in directly once created.
 
 ## Extension Name
 
-Kaiord WHOOP Bridge
+Kaiord for WHOOP
 
 ## Short Description (132 chars max)
 
@@ -20,7 +20,7 @@ Connects the Kaiord workout editor to your WHOOP recovery & sleep data via your 
 
 ## Detailed Description
 
-Kaiord WHOOP Bridge connects the Kaiord workout editor (https://kaiord.com/app) to your WHOOP account through your existing signed-in app.whoop.com session. No passwords, no developer app, and no API key — the extension rides your own WHOOP login.
+Kaiord for WHOOP connects the Kaiord workout editor (https://kaiord.com/app) to your WHOOP account through your existing signed-in app.whoop.com session. No passwords, no developer app, and no API key — the extension rides your own WHOOP login.
 
 Features:
 • Import recovery, HRV, sleep, vitals, strain, and stress data
@@ -32,22 +32,55 @@ How it works:
 
 1. Log into WHOOP in your browser (app.whoop.com)
 2. Open the Kaiord workout editor
-3. The editor imports your WHOOP data through the bridge
+3. The editor imports your WHOOP data through the extension
 
 Privacy:
 • No data collection, no analytics, no telemetry
 • No OAuth, no developer API key, no password stored — the extension captures the session bearer your own signed-in WHOOP tab already uses, and holds it only in memory (`chrome.storage.session`), never on disk
-• Read-only: the bridge exposes no path to write to WHOOP
+• Read-only: the extension exposes no path to write to WHOOP
 • Open source: https://github.com/pablo-albaladejo/kaiord
+
+## Short Description, Spanish (132 chars max)
+
+Conecta el editor de Kaiord con tus datos de recuperación y sueño de WHOOP a través de tu propia sesión del navegador
+
+## Detailed Description, Spanish
+
+Kaiord for WHOOP conecta el editor de Kaiord (https://kaiord.com/app) con tu cuenta de WHOOP a través de la sesión de app.whoop.com que ya tienes iniciada. Sin contraseñas, sin app de desarrollador y sin clave de API: la extensión aprovecha tu propio inicio de sesión de WHOOP.
+
+Funciones:
+• Importa datos de recuperación, VFC, sueño, constantes vitales, esfuerzo y estrés
+• Importa series de frecuencia cardiaca y entrenamientos como actividades
+• Importa los resultados de los análisis de biomarcadores de Advanced Labs como informes de laboratorio
+• Indicador del estado de la sesión en la ventana emergente
+
+Cómo funciona:
+
+1. Inicia sesión en WHOOP en tu navegador (app.whoop.com)
+2. Abre el editor de Kaiord
+3. El editor importa tus datos de WHOOP a través de la extensión
+
+Privacidad:
+• Sin recogida de datos, sin analítica, sin telemetría
+• Sin OAuth, sin clave de API de desarrollador y sin contraseña guardada: la extensión captura el token de sesión que ya usa tu propia pestaña de WHOOP con la sesión iniciada, y lo guarda solo en memoria (`chrome.storage.session`), nunca en disco
+• Solo lectura: la extensión no ofrece ninguna forma de escribir en WHOOP
+• Código abierto: https://github.com/pablo-albaladejo/kaiord
 
 ## Metadata
 
 - **Category**: Health & Fitness
-- **Language**: English
+- **Languages**: English and Spanish (`_locales/en` is the default; the store and Chrome pick the locale from the browser language)
 - **Publisher**: Pablo Albaladejo
 - **Privacy policy URL**: https://kaiord.com/docs/legal/privacy-policy
 - **Website**: https://kaiord.com
 - **Support URL**: https://github.com/pablo-albaladejo/kaiord/issues
+
+The name and the Short Description reach the store through `extName` and
+`extDescription` in `_locales/en/messages.json` and
+`_locales/es/messages.json`. The name is "Kaiord for WHOOP" in both: it is
+the product name and is not translated. The Detailed Description (English
+and Spanish, one per store language) and the permission justifications are
+pasted into the dashboard by hand.
 
 ## Submission Checklist (Initial Setup — NOT started)
 

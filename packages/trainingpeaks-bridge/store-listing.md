@@ -8,7 +8,7 @@ See [`claims/README.md`](../../claims/README.md).
 
 ## Extension Name
 
-Kaiord TrainingPeaks Bridge
+Kaiord for TrainingPeaks
 
 ## Short Description (132 chars max)
 
@@ -43,10 +43,43 @@ Your token and your data:
 • Access through your own TrainingPeaks sign-in is unofficial: it is not a TrainingPeaks partner API, and it can stop working without notice.
 • Open source: https://github.com/pablo-albaladejo/kaiord
 
+## Short Description, Spanish (132 chars max)
+
+Kaiord App envía entrenamientos a tu calendario de TrainingPeaks y lee tu peso, con tu propio inicio de sesión de TrainingPeaks
+
+## Detailed Description, Spanish
+
+Kaiord for TrainingPeaks conecta Kaiord App (https://kaiord.com/app) con tu cuenta de TrainingPeaks. Inicias sesión en TrainingPeaks en Chrome como siempre; la extensión nunca ve tu contraseña.
+
+Qué hace:
+
+• Envía los entrenamientos que creas en Kaiord App a tu calendario de TrainingPeaks, cada uno en su día.
+• Cada envío añade un entrenamiento nuevo en TrainingPeaks. Antes de volver a enviar un entrenamiento, Kaiord App comprueba si TrainingPeaks todavía tiene la copia que envió: si la tiene, un entrenamiento sin cambios no añade nada, y para uno que cambiaste Kaiord App te pregunta primero, porque TrainingPeaks tendría entonces dos copias. La extensión no puede borrar nada en TrainingPeaks ni cambiar un entrenamiento que ya esté allí.
+• En una cuenta Basic de TrainingPeaks, TrainingPeaks solo acepta entrenamientos para hoy y mañana, contados en la zona horaria de la cuenta; para cualquier día que allí pueda ser posterior, Kaiord App te lo dice antes de enviar, y dice lo mismo si TrainingPeaks lo rechaza.
+• Lee las métricas que registraste en TrainingPeaks en los últimos 30 días, de las que Kaiord App guarda solo tu peso.
+• Muestra en su ventana emergente si se puede usar tu inicio de sesión de TrainingPeaks.
+
+Cómo funciona:
+
+1. Inicia sesión en TrainingPeaks en Chrome.
+2. La extensión cambia ese inicio de sesión por un token de acceso de TrainingPeaks de corta duración. No se introduce ni se ve ninguna contraseña.
+3. Abre Kaiord App y envía un entrenamiento a TrainingPeaks.
+
+Tu token y tus datos:
+
+• El token de acceso se guarda en tu navegador (chrome.storage.local) y solo se envía a TrainingPeaks. Nunca viaja a Kaiord.
+• Comprobar tu inicio de sesión, desde Kaiord App o desde la ventana emergente, no pregunta nada a TrainingPeaks ni genera ningún token. La extensión pide un token a TrainingPeaks, y lo guarda, solo cuando Kaiord App está a punto de leer o enviar.
+• La extensión le da a Kaiord App tu número de atleta de TrainingPeaks justo antes de colocar un entrenamiento, porque TrainingPeaks lo necesita, y nunca el token.
+• La extensión solo envía peticiones a TrainingPeaks, y solo responde a Kaiord App en https://kaiord.com.
+• Sin analítica y sin rastreo.
+• Quitar la extensión de Chrome borra todo lo que guardó.
+• El acceso a través de tu propio inicio de sesión de TrainingPeaks no es oficial: no es una API de socio de TrainingPeaks, y puede dejar de funcionar sin aviso.
+• Código abierto: https://github.com/pablo-albaladejo/kaiord
+
 ## Metadata
 
 - **Category**: Productivity
-- **Language**: English
+- **Languages**: English and Spanish (`_locales/en` is the default; the store and Chrome pick the locale from the browser language)
 - **Publisher**: Pablo Albaladejo
 - **Privacy policy URL**: https://kaiord.com/docs/legal/privacy-policy
 - **Website**: https://kaiord.com
@@ -64,9 +97,12 @@ This extension has never been published. A maintainer completes these by hand:
 - [ ] Set privacy policy URL to `https://kaiord.com/docs/legal/privacy-policy`
 - [ ] Submit for review
 
-The Short Description reaches the store through `extDescription` in
-`_locales/en/messages.json`; the Detailed Description and the permission
-justifications are pasted into the dashboard by hand.
+The name and the Short Description reach the store through `extName` and
+`extDescription` in `_locales/en/messages.json` and
+`_locales/es/messages.json`. The name is "Kaiord for TrainingPeaks" in both: it is
+the product name and is not translated. The Detailed Description (English
+and Spanish, one per store language) and the permission justifications are
+pasted into the dashboard by hand.
 
 ## Automated Publishing (not wired yet)
 

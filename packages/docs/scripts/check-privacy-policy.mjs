@@ -60,7 +60,7 @@ const GARMIN_SECTION = "Kaiord for Garmin Extension";
 const TRAIN2GO_SECTION = "Kaiord for Train2Go Extension";
 const TANITA_SECTION = "Kaiord for Tanita Extension";
 const TRAININGPEAKS_SECTION = "Kaiord for TrainingPeaks Extension";
-const WHOOP_SECTION = "Kaiord WHOOP Bridge Extension";
+const WHOOP_SECTION = "Kaiord for WHOOP Extension";
 
 // Bridge package -> its policy section and the hosts the policy claims the
 // extension may contact.
@@ -689,7 +689,7 @@ export function checkPolicy(src, rules = REQUIRED_RULES) {
 // really have none.
 export const NO_ANALYTICS_CLAIM =
   /(?:\b(?:no|not|without|never)\b|n['’]t\b)[^.]*\banalytics\b/i;
-const BRIDGE_HEADING = /^## Kaiord (?:.+ Bridge|for .+) Extension$/;
+const BRIDGE_HEADING = /^## Kaiord for .+ Extension$/;
 
 export function checkNoAnalyticsClaim(src) {
   const violations = [];

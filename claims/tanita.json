@@ -5,8 +5,17 @@
       "keys": ["extDescription"]
     },
     {
+      "file": "packages/tanita-bridge/_locales/es/messages.json",
+      "keys": ["extDescription"]
+    },
+    {
       "file": "packages/tanita-bridge/store-listing.md",
-      "sections": ["Short Description (132 chars max)", "Detailed Description"]
+      "sections": [
+        "Short Description (132 chars max)",
+        "Detailed Description",
+        "Short Description, Spanish (132 chars max)",
+        "Detailed Description, Spanish"
+      ]
     },
     {
       "file": "packages/tanita-bridge/privacy-justification.md"
@@ -677,11 +686,11 @@
     },
     {
       "id": "tanita.pp.intro",
-      "text": "Kaiord for Tanita is the Chrome extension that connects the Kaiord App to your MyTANITA account at `mytanita.eu`; its extension name is currently Kaiord Tanita Bridge. Here is how it handles data:",
+      "text": "Kaiord for Tanita is the Chrome extension that connects the Kaiord App to your MyTANITA account at `mytanita.eu`. Here is how it handles data:",
       "proof": [
         {
           "file": "packages/tanita-bridge/_locales/en/messages.json",
-          "contains": "\"message\": \"Kaiord Tanita Bridge\""
+          "contains": "\"message\": \"Kaiord for Tanita\""
         },
         {
           "file": "packages/tanita-bridge/manifest.prod.json",
@@ -873,6 +882,291 @@
         {
           "test": "packages/tanita-bridge/test/export-confinement.test.js",
           "title": "should keep only the theme preference in chrome.storage.local, never the export"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.short",
+      "text": "Permite que Kaiord App importe tu peso y tu composición corporal de MyTANITA, con tu propio inicio de sesión de MyTANITA",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should hand the export to the Kaiord App exactly as MyTANITA sent it"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/tanita/sync-tanita-import.use-case.test.ts",
+          "title": "should persist both extensions of a single KRD when both routes are enabled"
+        },
+        {
+          "test": "packages/tanita-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/tanita-bridge/background.js",
+          "contains": "capabilities: [\"read:body\"],"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "tanita.es.listing.intro",
+      "text": "Kaiord for Tanita conecta Kaiord App (https://kaiord.com/app) con tu cuenta de MyTANITA en mytanita.eu. Inicias sesión en MyTANITA en Chrome como siempre; la extensión nunca ve tu contraseña y no puede leer tu cookie de inicio de sesión.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "file": "packages/tanita-bridge/manifest.prod.json",
+          "contains": "\"host_permissions\": [\"https://mytanita.eu/*\"]"
+        },
+        {
+          "test": "packages/tanita-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "file": "packages/tanita-bridge/manifest.prod.json",
+          "contains": "\"permissions\": [\"storage\"]"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.label-what",
+      "text": "Qué hace:",
+      "kind": "label"
+    },
+    {
+      "id": "tanita.es.listing.export",
+      "text": "Descarga tu exportación de MyTANITA, que contiene todas las mediciones de tu historial, y se la entrega a Kaiord App tal como la envió MyTANITA. La extensión no interpreta las mediciones; lo hace Kaiord App.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should hand the export to the Kaiord App exactly as MyTANITA sent it"
+        },
+        {
+          "file": "docs/connectors-research/tanita.md",
+          "contains": "Returns the **entire measurement history** as CSV"
+        },
+        {
+          "file": "packages/tanita-bridge/background.js",
+          "contains": "The raw CSV text is returned verbatim — never parsed here."
+        },
+        {
+          "file": "packages/workout-spa-editor/src/hooks/bridge-import/run-tanita-import.ts",
+          "contains": "const { tanitaCsvToKrd } = await import(\"@kaiord/tanita\");"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.app-asks",
+      "text": "Kaiord App pide la exportación cuando abres su calendario, si Tanita está activado para el peso o la composición corporal, y cuando pulsas Sincronizar ahora. Kaiord App la convierte en entradas de peso y de composición corporal que se guardan en tu navegador.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/use-tanita-import.test.tsx",
+          "title": "should fire the import once when the bridge is discovered"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/hooks/use-calendar-executed.ts",
+          "contains": "useTanitaImport(profileId);"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/tanita/sync-tanita-import.use-case.test.ts",
+          "title": "should be a no-op when neither tanita import route is enabled"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/connections/use-bridge-import.test.tsx",
+          "title": "should run the importer once and report completion"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/hooks/bridge-import/bridge-importers.ts",
+          "contains": "\"tanita-bridge\": runTanitaImport,"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/i18n/locales/en/connections.json",
+          "contains": "\"syncNow\": \"Sync now\""
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/tanita/sync-tanita-import.use-case.test.ts",
+          "title": "should persist both extensions of a single KRD when both routes are enabled"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/adapters/dexie/dexie-persistence-adapter.ts",
+          "contains": "importedRecords: createDexieImportedRecordRepository(database),"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.check-headers-only",
+      "text": "Cada vez que abres la ventana emergente de la extensión o pulsas Actualizar, pide a MyTANITA solo las cabeceras de la exportación, sin descargarla, para saber si sigues con la sesión iniciada. Solo muestra la respuesta.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/popup.test.js",
+          "title": "should ask the extension to check the session each time the popup opens and on Refresh"
+        },
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should check a session with one HEAD of the export, reading no body and answering only yes or no"
+        },
+        {
+          "test": "packages/tanita-bridge/test/popup.test.js",
+          "title": "should record only when the export was last reachable and unreachable"
+        },
+        {
+          "test": "packages/tanita-bridge/test/popup.test.js",
+          "title": "renders connected state with feed chips and the editor as primary CTA"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.label-how",
+      "text": "Cómo funciona:",
+      "kind": "label"
+    },
+    {
+      "id": "tanita.es.listing.step-sign-in",
+      "text": "Inicia sesión en MyTANITA en https://mytanita.eu en Chrome.",
+      "proof": [
+        {
+          "file": "packages/tanita-bridge/popup.js",
+          "contains": "const OPEN_TANITA_URL = \"https://mytanita.eu/en/user\";"
+        },
+        {
+          "test": "packages/tanita-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.step-connect",
+      "text": "Abre Kaiord App y conecta Tanita.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/hooks/use-connection-actions.ts",
+          "contains": "if (bridgeId) await seedBridgeRoutes(persistence, profileId, bridgeId);"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/tanita/sync-tanita-import.use-case.test.ts",
+          "title": "should be a no-op when neither tanita import route is enabled"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.step-no-password",
+      "text": "La extensión envía su petición con tu inicio de sesión de MyTANITA, así que no se introduce ni se guarda ninguna contraseña.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/session-fetch.test.js",
+          "title": "should send cookies and return the raw body on a 2xx response"
+        },
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should keep only the theme preference in chrome.storage.local, never the export"
+        },
+        {
+          "test": "packages/tanita-bridge/test/popup.test.js",
+          "title": "should record only when the export was last reachable and unreachable"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.label-data",
+      "text": "Tu inicio de sesión y tus datos:",
+      "kind": "label"
+    },
+    {
+      "id": "tanita.es.listing.requests-only",
+      "text": "La extensión solo envía peticiones a https://mytanita.eu/en/user/export-csv, y solo responde a Kaiord App en https://kaiord.com.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
+        },
+        {
+          "file": "packages/tanita-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/tanita-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        },
+        {
+          "test": "packages/tanita-bridge/test/bridge-envelope.test.js",
+          "title": "should reject foreign origins and other localhost ports"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.stored",
+      "text": "En tu navegador solo guarda cuándo pudo y cuándo no pudo su ventana emergente llegar a tu exportación por última vez, y el tema de Kaiord App. Nunca guarda la exportación.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should keep only the theme preference in chrome.storage.local, never the export"
+        },
+        {
+          "test": "packages/tanita-bridge/test/popup.test.js",
+          "title": "should record only when the export was last reachable and unreachable"
+        },
+        {
+          "test": "packages/tanita-bridge/test/bridge-popup-health.test.js",
+          "title": "should stamp the first observed failure"
+        },
+        {
+          "test": "packages/tanita-bridge/test/bridge-popup-health.test.js",
+          "title": "should clear the outage on a success"
+        },
+        {
+          "test": "packages/tanita-bridge/test/background.test.js",
+          "title": "should store a valid preference sent from a Kaiord origin"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.no-analytics",
+      "text": "Sin analítica y sin rastreo.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should send every request to the MyTANITA export as a GET or a HEAD, and nothing anywhere else"
+        },
+        {
+          "test": "packages/tanita-bridge/test/export-confinement.test.js",
+          "title": "should keep only the theme preference in chrome.storage.local, never the export"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.uninstall",
+      "text": "Quitar la extensión de Chrome borra todo lo que guardó.",
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
+    },
+    {
+      "id": "tanita.es.listing.unofficial",
+      "text": "El acceso a través de tu propio inicio de sesión de MyTANITA no es oficial: no es una API de socio de Tanita, y puede dejar de funcionar sin aviso.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "access is unofficial, can break without notice"
+        },
+        {
+          "file": "docs/connectors-research/tanita.md",
+          "contains": "No (undocumented/private)"
+        }
+      ]
+    },
+    {
+      "id": "tanita.es.listing.open-source",
+      "text": "Código abierto: https://github.com/pablo-albaladejo/kaiord",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     }

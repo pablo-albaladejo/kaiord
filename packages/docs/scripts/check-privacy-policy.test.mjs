@@ -51,7 +51,7 @@ const GARMIN = "Kaiord for Garmin Extension";
 const TRAIN2GO = "Kaiord for Train2Go Extension";
 const TANITA = "Kaiord for Tanita Extension";
 const TRAININGPEAKS = "Kaiord for TrainingPeaks Extension";
-const WHOOP = "Kaiord WHOOP Bridge Extension";
+const WHOOP = "Kaiord for WHOOP Extension";
 
 // Delete a whole `## <heading>` section (heading line included) up to the
 // next top-level heading. This is the mutation every section-anchored rule
@@ -835,14 +835,14 @@ for (const [heading, oneLiner] of GUTTED_CASES) {
 
 const SECTION_CASES = [
   { bridge: "Garmin", heading: GARMIN, intro: "Kaiord for Garmin" },
-  { bridge: "Train2Go", heading: TRAIN2GO, intro: "Kaiord Train2Go Bridge" },
+  { bridge: "Train2Go", heading: TRAIN2GO, intro: "Kaiord for Train2Go" },
   { bridge: "Tanita", heading: TANITA, intro: "Kaiord for Tanita" },
   {
     bridge: "TrainingPeaks",
     heading: TRAININGPEAKS,
     intro: "Kaiord for TrainingPeaks",
   },
-  { bridge: "WHOOP", heading: WHOOP, intro: "Kaiord WHOOP Bridge" },
+  { bridge: "WHOOP", heading: WHOOP, intro: "Kaiord for WHOOP" },
 ];
 
 for (const { bridge, heading, intro } of SECTION_CASES) {

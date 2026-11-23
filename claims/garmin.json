@@ -5,8 +5,17 @@
       "keys": ["extDescription"]
     },
     {
+      "file": "packages/garmin-bridge/_locales/es/messages.json",
+      "keys": ["extDescription"]
+    },
+    {
       "file": "packages/garmin-bridge/store-listing.md",
-      "sections": ["Short Description (132 chars max)", "Detailed Description"]
+      "sections": [
+        "Short Description (132 chars max)",
+        "Detailed Description",
+        "Short Description, Spanish (132 chars max)",
+        "Detailed Description, Spanish"
+      ]
     },
     {
       "file": "packages/garmin-bridge/privacy-justification.md"
@@ -696,11 +705,11 @@
     },
     {
       "id": "garmin.pp.intro",
-      "text": "Kaiord for Garmin is the Chrome extension that connects the Kaiord App to Garmin Connect; its Chrome Web Store name is currently Kaiord Garmin Bridge. Here is how it handles data:",
+      "text": "Kaiord for Garmin is the Chrome extension that connects the Kaiord App to Garmin Connect. Here is how it handles data:",
       "proof": [
         {
           "file": "packages/garmin-bridge/_locales/en/messages.json",
-          "contains": "\"message\": \"Kaiord Garmin Bridge\""
+          "contains": "\"message\": \"Kaiord for Garmin\""
         },
         {
           "test": "packages/garmin-bridge/test/background.test.js",
@@ -986,6 +995,267 @@
         {
           "test": "packages/garmin-bridge/test/token-confinement.test.js",
           "title": "should send requests to Garmin hosts only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.short",
+      "text": "Permite que Kaiord App envíe entrenamientos a Garmin Connect y lea tus actividades, con tu propio inicio de sesión de Garmin",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "runs ticket → preauthorized → exchange and returns both tokens"
+        }
+      ],
+      "count": 2
+    },
+    {
+      "id": "garmin.es.listing.intro",
+      "text": "Kaiord for Garmin conecta Kaiord App (https://kaiord.com/app) con tu cuenta de Garmin Connect. Inicias sesión en Garmin Connect en Chrome como siempre; la extensión nunca ve tu contraseña.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        },
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "runs ticket → preauthorized → exchange and returns both tokens"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.label-what",
+      "text": "Qué hace:",
+      "kind": "label"
+    },
+    {
+      "id": "garmin.es.listing.sends",
+      "text": "Envía los entrenamientos que creas en Kaiord App a tu biblioteca de entrenamientos de Garmin Connect.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.calendar",
+      "text": "Coloca esos entrenamientos en su día en tu calendario de Garmin Connect, y los mueve cuando cambia la fecha. Solo quita las entradas del calendario que puso el propio Kaiord, nunca una que añadieras tú, y nunca borra un entrenamiento de la biblioteca.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should place a first push on its date with 1 library push and 1 schedule"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/garmin-placement/push-workout-to-garmin-calendar.test.ts",
+          "title": "should move a date-only change with 0 library pushes, retiring before unschedule [S]"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "should request the 0-based month of the date and return only the workout's entries as strings"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "should allow POST and DELETE on a digits-only calendar schedule path"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/hooks/garmin-safe-writes-ownership.test.ts",
+          "title": "should never be moved or deleted when the Workout moves on"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.activities",
+      "text": "Lee tus 20 actividades más recientes de Garmin Connect para Kaiord App.",
+      "proof": [
+        {
+          "file": "packages/garmin-bridge/background.js",
+          "contains": "\"/activitylist-service/activities/search/activities?start=0&limit=20\""
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "returns the raw feed and stamps the throttle timestamp on the happy path"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.body",
+      "text": "Sube una medición de composición corporal (tu peso y los valores relacionados) a Garmin Connect cuando envías una desde Kaiord App.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "should upload a base64 FIT payload as multipart with a Bearer header and no cookies"
+        },
+        {
+          "file": "packages/workout-spa-editor/src/hooks/use-tanita-garmin-sync.ts",
+          "contains": "the two bridge transports for a MANUAL"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.popup",
+      "text": "Muestra en su ventana emergente si ahora mismo puede leer de Garmin Connect.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/popup.test.js",
+          "title": "renders connected state with athlete card and rollup"
+        },
+        {
+          "test": "packages/garmin-bridge/test/popup.test.js",
+          "title": "offers Try again, not a sign-in, when Garmin's read fails"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.label-how",
+      "text": "Cómo funciona:",
+      "kind": "label"
+    },
+    {
+      "id": "garmin.es.listing.step-sign-in",
+      "text": "Inicia sesión en Garmin Connect en Chrome.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "extracts the ticket from the SSO signin page"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.step-mint",
+      "text": "La extensión cambia ese inicio de sesión por tokens de acceso de Garmin. No se introduce ni se ve ninguna contraseña.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/garmin-oauth.test.js",
+          "title": "runs ticket → preauthorized → exchange and returns both tokens"
+        },
+        {
+          "file": "packages/garmin-bridge/garmin-oauth.js",
+          "contains": "const getTicketFromSession = async (fetchImpl) => {"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.step-send",
+      "text": "Abre Kaiord App y envía un entrenamiento.",
+      "proof": [
+        {
+          "endpoint": "https://kaiord.com/app",
+          "servedBy": "packages/workout-spa-editor/index.html"
+        },
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "handles push with gcn payload"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.label-tokens",
+      "text": "Tus tokens y tus datos:",
+      "kind": "label"
+    },
+    {
+      "id": "garmin.es.tokens.local-never-kaiord",
+      "text": "Los tokens de Garmin se guardan en tu navegador (chrome.storage.local) y solo se envían a Garmin. Nunca viajan a Kaiord.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should keep the tokens a real request minted in chrome.storage.local"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with a token, when Garmin answers"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should answer no external action with a token, when Garmin refuses the token"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.requests.garmin-only",
+      "text": "La extensión solo envía peticiones a Garmin, y solo responde a Kaiord App en https://kaiord.com.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
+        },
+        {
+          "file": "packages/garmin-bridge/manifest.prod.json",
+          "contains": "\"matches\": [\"https://kaiord.com/*\"]"
+        },
+        {
+          "test": "packages/garmin-bridge/test/bridge-envelope.test.js",
+          "title": "should reject every kaiord.com subdomain, www included"
+        },
+        {
+          "test": "packages/garmin-bridge/test/bridge-envelope.test.js",
+          "title": "should reject foreign origins and other localhost ports"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.no-analytics",
+      "text": "Sin analítica y sin rastreo. La extensión guarda en tu navegador un breve registro de sus propios errores y no lo envía a ningún sitio.",
+      "proof": [
+        {
+          "test": "packages/garmin-bridge/test/background.test.js",
+          "title": "caps the log to the most recent 25 entries"
+        },
+        {
+          "test": "packages/garmin-bridge/test/token-confinement.test.js",
+          "title": "should send requests to Garmin hosts only, and nothing anywhere else"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.uninstall",
+      "text": "Quitar la extensión de Chrome borra todo lo que guardó.",
+      "kind": "external",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+      "read_on": "2026-11-22"
+    },
+    {
+      "id": "garmin.es.listing.unofficial",
+      "text": "El acceso a través de tu propio inicio de sesión de Garmin no es oficial: no es una API de socio de Garmin, y puede dejar de funcionar sin aviso.",
+      "proof": [
+        {
+          "file": "docs/adr/0002-platform-access-through-the-athletes-session.md",
+          "contains": "access is unofficial, can break without notice"
+        },
+        {
+          "file": "packages/garmin-bridge/garmin-oauth.js",
+          "contains": "(same as garth / thegarth.s3.amazonaws.com/oauth_consumer.json)"
+        }
+      ]
+    },
+    {
+      "id": "garmin.es.listing.open-source",
+      "text": "Código abierto: https://github.com/pablo-albaladejo/kaiord",
+      "proof": [
+        {
+          "file": "LICENSE",
+          "contains": "Permission is hereby granted, free of charge, to any person obtaining a copy"
         }
       ]
     }
