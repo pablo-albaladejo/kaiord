@@ -317,6 +317,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
@@ -475,6 +479,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should report signed in from a token a real request minted while it is still valid, and hand over no athlete id"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
@@ -946,6 +954,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should hand the athlete id only to the read the Kaiord App makes just before a write"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
@@ -1426,6 +1438,10 @@
         {
           "test": "packages/trainingpeaks-bridge/test/token-confinement.test.js",
           "title": "should answer no external action with the token, when TrainingPeaks answers"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/adapters/trainingpeaks/connector/trainingpeaks-connector-contract.test.ts",
+          "title": "should read the metrics of a range on the path built for the athlete"
         }
       ]
     },
