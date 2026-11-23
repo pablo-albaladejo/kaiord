@@ -48,7 +48,9 @@ export type ToolResolution =
 /**
  * Outcome of one turn. `messages` is the full updated conversation in AI SDK
  * `ModelMessage` form (input history + this turn's response), ready to persist
- * or to pass straight back into `resume`.
+ * or to pass straight back into `resume`. `toolNames` lists the registered
+ * tools this call ran with a valid input, a stopped one included, though a
+ * stop drops their calls from `messages`.
  */
 export type ChatTurnResult =
   | {
@@ -56,11 +58,13 @@ export type ChatTurnResult =
       text: string;
       messages: ModelMessage[];
       usage?: ChatUsage;
+      toolNames: string[];
     }
   | {
       status: "pending_action";
       pendingAction: PendingAction;
       messages: ModelMessage[];
+      toolNames: string[];
     }
   | {
       /**
@@ -73,6 +77,7 @@ export type ChatTurnResult =
       text: string;
       messages: ModelMessage[];
       usage?: ChatUsage;
+      toolNames: string[];
     };
 
 /** Per-call controls for one turn. */

@@ -74,11 +74,13 @@ describe("auto-approved chat actions", () => {
     push.mockResolvedValueOnce(output);
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "pending_action",
+      toolNames: [],
       pendingAction: pendingFor("push_to_garmin"),
       messages: [],
     });
     fakeAgent.resume.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "Sent to Garmin.",
       messages: [],
     });
@@ -115,6 +117,7 @@ describe("auto-approved chat actions", () => {
     const pending = pendingFor("create_workout");
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "pending_action",
+      toolNames: [],
       pendingAction: pending,
       messages: [],
     });

@@ -67,7 +67,12 @@ describe("chat-turn-runner", () => {
       (_messages: unknown, options: { signal: AbortSignal }) =>
         new Promise((resolve) => {
           options.signal.addEventListener("abort", () =>
-            resolve({ status: "aborted", text: "Your last ride", messages: [] })
+            resolve({
+              status: "aborted",
+              toolNames: [],
+              text: "Your last ride",
+              messages: [],
+            })
           );
         })
     );
@@ -96,6 +101,7 @@ describe("chat-turn-runner", () => {
     const { ctx, states } = makeCtx(persistence);
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "timeout",
+      toolNames: [],
       text: "",
       messages: [],
     });
@@ -126,6 +132,7 @@ describe("chat-turn-runner", () => {
     const { ctx } = makeCtx(persistence, false);
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "ok",
       messages: [],
       usage: { promptTokens: 1, completionTokens: 1 },
@@ -146,6 +153,7 @@ describe("chat-turn-runner", () => {
     const { ctx } = makeCtx(persistence, true);
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "ok",
       messages: [],
       usage: { promptTokens: 1, completionTokens: 1 },
@@ -166,6 +174,7 @@ describe("chat-turn-runner", () => {
     const { ctx, states } = makeCtx(persistence);
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "your longest ride was 2h",
       messages: [],
       usage: { promptTokens: 10, completionTokens: 5 },
@@ -194,6 +203,7 @@ describe("chat-turn-runner", () => {
     };
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "pending_action",
+      toolNames: [],
       pendingAction: pending,
       messages: [],
     });
@@ -216,6 +226,7 @@ describe("chat-turn-runner", () => {
     ];
     fakeAgent.resume.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "synced 3",
       messages: [],
     });
@@ -249,6 +260,7 @@ describe("chat-turn-runner", () => {
     ];
     fakeAgent.resume.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "created your workout",
       messages: [],
     });
@@ -276,6 +288,7 @@ describe("chat-turn-runner", () => {
     const { ctx } = makeCtx(persistence);
     fakeAgent.resume.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "ok, skipped",
       messages: [],
     });
@@ -321,6 +334,7 @@ describe("chat-turn-runner", () => {
       .mockRejectedValueOnce(failure)
       .mockResolvedValueOnce({
         status: "complete",
+        toolNames: [],
         text: "hola!",
         messages: [],
       });
@@ -346,6 +360,7 @@ describe("chat-turn-runner", () => {
     const { ctx } = makeCtx(persistence);
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "hi",
       messages: [],
     });
@@ -368,7 +383,12 @@ describe("chat-turn-runner", () => {
     const { ctx } = makeCtx(persistence);
     fakeAgent.sendTurn
       .mockRejectedValueOnce(new Error("offline"))
-      .mockResolvedValueOnce({ status: "complete", text: "ok", messages: [] });
+      .mockResolvedValueOnce({
+        status: "complete",
+        toolNames: [],
+        text: "ok",
+        messages: [],
+      });
     await sendTurn(ctx, [], "first");
     const history = await persistence.chatMessages.listByProfile("p1");
 
@@ -395,6 +415,7 @@ describe("chat-turn-runner", () => {
     );
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "ok",
       messages: [],
     });
@@ -424,6 +445,7 @@ describe("chat-turn-runner", () => {
     healthRequest.mockResolvedValueOnce("withhold");
     fakeAgent.sendTurn.mockResolvedValueOnce({
       status: "complete",
+      toolNames: [],
       text: "ok",
       messages: [],
     });
@@ -453,6 +475,40 @@ describe("chat-turn-runner", () => {
     ]);
   });
 
+  it("should not replay a stopped reply that read health data once the athlete says don't send", async () => {
+    // Arrange
+    const persistence = createInMemoryPersistence();
+    const { ctx } = makeCtx(persistence);
+    healthRequest
+      .mockResolvedValueOnce("send")
+      .mockResolvedValueOnce("withhold");
+    fakeAgent.sendTurn
+      .mockResolvedValueOnce({
+        status: "aborted",
+        toolNames: ["query_health"],
+        text: "Your HRV was 48 ms",
+        messages: [{ role: "assistant", content: "Your HRV was 48 ms" }],
+      })
+      .mockResolvedValueOnce({
+        status: "complete",
+        toolNames: [],
+        text: "ok",
+        messages: [],
+      });
+    await sendTurn(ctx, [], "How is my HRV?");
+    const history = await persistence.chatMessages.listByProfile("p1");
+
+    // Act
+    await sendTurn(ctx, history, "Plan tomorrow");
+
+    // Assert
+    expect(history.find((r) => r.role === "assistant")?.readHealth).toBe(true);
+    expect(fakeAgent.sendTurn.mock.calls[1]?.[0]).toEqual([
+      { role: "user", content: "How is my HRV?" },
+      { role: "user", content: "Plan tomorrow" },
+    ]);
+  });
+
   describe("the Trace of a chat turn", () => {
     const tracesOf = async (
       persistence: ReturnType<typeof createInMemoryPersistence>,
@@ -470,6 +526,7 @@ describe("chat-turn-runner", () => {
       const { ctx } = makeCtx(persistence);
       fakeAgent.sendTurn.mockResolvedValueOnce({
         status: "complete",
+        toolNames: [],
         text: "hi",
         messages: [],
       });
@@ -503,11 +560,13 @@ describe("chat-turn-runner", () => {
       };
       fakeAgent.sendTurn.mockResolvedValueOnce({
         status: "pending_action",
+        toolNames: [],
         pendingAction: pending,
         messages: [],
       });
       fakeAgent.resume.mockResolvedValueOnce({
         status: "complete",
+        toolNames: [],
         text: "done",
         messages: [],
       });
@@ -539,11 +598,13 @@ describe("chat-turn-runner", () => {
       };
       fakeAgent.sendTurn.mockResolvedValueOnce({
         status: "pending_action",
+        toolNames: [],
         pendingAction: pending,
         messages: [],
       });
       fakeAgent.resume.mockResolvedValueOnce({
         status: "complete",
+        toolNames: [],
         text: "ok",
         messages: [],
       });

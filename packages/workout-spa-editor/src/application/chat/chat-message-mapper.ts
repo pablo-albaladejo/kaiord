@@ -18,6 +18,7 @@ import type {
   ChatStopReason,
 } from "../../types/chat/chat-message-record";
 import { stoppedTurnActionsNote } from "./stopped-turn-actions";
+import { firstHealthBearingReply } from "./turn-read-health";
 
 /** Model-facing only (never rendered): tells the model its earlier reply was
  * cut short, so it does not build on it as if finished. */
@@ -42,20 +43,23 @@ const modelContent = (
 };
 
 export type ReplayOptions = {
-  /** Leave out the replies that may quote stored health data. */
+  /** Leave out every reply that may quote stored health data: from the first
+   * one that read it (or may have) on, the athlete's own messages kept. */
   withholdHealth?: boolean;
 };
 
 export const recordsToModelMessages = (
   records: ChatMessageRecord[],
   options: ReplayOptions = {}
-): ModelMessage[] =>
-  records.flatMap((r, index) =>
-    (r.role === "user" || r.role === "assistant") &&
-    !(options.withholdHealth && r.readHealth)
+): ModelMessage[] => {
+  const first = options.withholdHealth ? firstHealthBearingReply(records) : -1;
+  return records.flatMap((r, index) =>
+    r.role === "user" ||
+    (r.role === "assistant" && (first === -1 || index < first))
       ? [{ role: r.role, content: modelContent(records, r, index) }]
       : []
   );
+};
 
 export type NewChatMessageInput = {
   id: string;
@@ -84,5 +88,5 @@ export const newChatMessage = (
   ...(input.toolResult !== undefined ? { toolResult: input.toolResult } : {}),
   ...(input.usage ? { usage: input.usage } : {}),
   ...(input.stopReason ? { stopReason: input.stopReason } : {}),
-  ...(input.readHealth ? { readHealth: true } : {}),
+  ...(input.readHealth !== undefined ? { readHealth: input.readHealth } : {}),
 });
