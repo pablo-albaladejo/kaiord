@@ -127,6 +127,63 @@ describe("check-connection-notices", () => {
     );
   });
 
+  it("should fail a reason that resolves by a fifth fix or is worded in one locale only", () => {
+    // Arrange
+    const api = clone(loadMaster(), (copy) => {
+      copy.REASONS["no-account-id"] = "reinstall";
+      delete copy.REASON_WORDING.es["no-account-id"];
+    });
+
+    // Act
+    const problems = masterProblems(api);
+
+    // Assert
+    assert.ok(problems.some((p) => p.includes('reason "no-account-id"')));
+    assert.ok(problems.some((p) => p.includes("REASON_WORDING es")));
+  });
+
+  it("should fail a not-checked wording missing in Spanish or naming no Platform", () => {
+    // Arrange
+    const api = clone(loadMaster(), (copy) => {
+      delete copy.NOT_CHECKED.es["would-mint-token"];
+      copy.NOT_CHECKED.en["no-token-captured"] = "Nothing was checked.";
+    });
+
+    // Act
+    const problems = masterProblems(api);
+
+    // Assert
+    assert.ok(problems.some((p) => p.includes("NOT_CHECKED es")));
+    assert.ok(
+      problems.some((p) =>
+        p.includes(
+          "NOT_CHECKED en.no-token-captured does not name the Platform"
+        )
+      )
+    );
+  });
+
+  it("should allow the no-tab notice as the one exception and fail a second one", () => {
+    // Arrange
+    const api = clone(loadMaster(), (copy) => {
+      copy.NO_TAB.en.hint = "Or reload.";
+      copy.EXTRA_EXCEPTION = { en: { message: "x" } };
+    });
+
+    // Act
+    const problems = masterProblems(api);
+    const clean = masterProblems(loadMaster());
+
+    // Assert
+    assert.deepEqual(clean, []);
+    assert.ok(
+      problems.some((p) =>
+        p.includes("NO_TAB en must hold exactly one message and one action")
+      )
+    );
+    assert.ok(problems.some((p) => p.includes("EXTRA_EXCEPTION")));
+  });
+
   it("should fail on a second wording of each fix, in English and in Spanish", () => {
     // Arrange
     const texts = [
