@@ -19,8 +19,6 @@ export type SyncEngine = {
   status: SyncStatus;
   /** ISO timestamp of the last successful sync, or null. */
   lastSyncedAt: string | null;
-  /** Last error message, or null when the last sync succeeded. */
-  error: string | null;
   /** True once a Google account is connected for sync. */
   connected: boolean;
   /** Run a full pull-merge-push cycle now. */

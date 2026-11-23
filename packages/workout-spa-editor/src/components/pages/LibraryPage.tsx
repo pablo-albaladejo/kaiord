@@ -33,6 +33,7 @@ import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live";
 import { useTranslate } from "../../i18n/use-translate";
+import { logFailure } from "../../lib/log-failure";
 import { withOrigin } from "../../routing/with-origin";
 import { useCurrentWorkout, useLoadWorkout } from "../../store/selectors";
 import type { WorkoutTemplate } from "../../types/workout-library";
@@ -62,11 +63,10 @@ export default function LibraryPage() {
     try {
       await deleteTemplate(persistence, id);
     } catch (err) {
-      showError(
-        t("toast.deleteFailed"),
-        err instanceof Error ? err.message : t("toast.deleteFailedDescription"),
-        { duration: 5000 }
-      );
+      logFailure("library-delete", err);
+      showError(t("toast.deleteFailed"), t("toast.deleteFailedDescription"), {
+        duration: 5000,
+      });
     }
   };
 

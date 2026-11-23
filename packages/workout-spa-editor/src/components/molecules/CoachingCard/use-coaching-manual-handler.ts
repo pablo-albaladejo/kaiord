@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useTranslate } from "../../../i18n/use-translate";
+import { logFailure } from "../../../lib/log-failure";
 import { withOrigin } from "../../../routing/with-origin";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { namespaceSourceId } from "../../../types/coaching-activity-record";
@@ -80,7 +81,8 @@ export const useCoachingManual = (
         )
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("hooks.manualFailed"));
+      logFailure("coaching-manual", err);
+      setError(t("hooks.manualFailed"));
     } finally {
       setCreating(false);
       inFlight.current = false;

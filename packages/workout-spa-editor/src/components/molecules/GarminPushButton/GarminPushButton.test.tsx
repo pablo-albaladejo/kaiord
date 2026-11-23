@@ -139,15 +139,32 @@ describe("GarminPushButton", () => {
     expect(screen.getByText("On your Garmin")).toBeInTheDocument();
   });
 
-  it("should surface the failure cause", () => {
+  it("should word a verified failure with its one fix", () => {
     // Arrange
-    mockState.pushing = { status: "error", message: "Push failed: 403" };
+    mockState.pushing = { status: "error", reason: "sign-in" };
 
     // Act
     render(<GarminPushButton notice={NO_NOTICE} />);
 
     // Assert
-    expect(screen.getByText("Push failed: 403")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Sign in to Garmin Connect in this browser, then try again."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("should say Garmin is not answering when no cause is known", () => {
+    // Arrange
+    mockState.pushing = { status: "error", reason: "not-answering" };
+
+    // Act
+    render(<GarminPushButton notice={NO_NOTICE} />);
+
+    // Assert
+    expect(
+      screen.getByText("Garmin is not answering. Try again.")
+    ).toBeInTheDocument();
   });
 
   it("should keep the send disabled until the workout record has loaded", () => {

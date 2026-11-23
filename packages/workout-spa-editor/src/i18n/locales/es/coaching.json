@@ -167,9 +167,15 @@
     "ariaLabel": "Emparejar con entreno",
     "empty": "No hay entrenos del mismo día y deporte disponibles para emparejar."
   },
+  "zonesSync": {
+    "fetchFailed": "Train2Go no responde, así que tus zonas no se han sincronizado. Inténtalo de nuevo.",
+    "shapeMismatch": "Train2Go ha enviado unas zonas que Kaiord no puede leer, así que no se han sincronizado.",
+    "unsupported": "Esta plataforma de entrenamiento no comparte zonas."
+  },
   "sync": {
     "defaultLabel": "Coach",
     "connectTo": "Conectar con {{label}}",
+    "updateExtension": "Actualiza la extensión de Kaiord para {{label}}.",
     "routeInactiveTitle": "{{label}} · ruta inactiva",
     "routeInactiveAria": "{{label}} — ruta inactiva",
     "syncAria": "Sincronizar {{label}}"

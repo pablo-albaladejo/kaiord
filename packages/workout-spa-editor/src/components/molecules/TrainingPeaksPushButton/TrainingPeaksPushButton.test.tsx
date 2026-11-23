@@ -45,8 +45,7 @@ const MOVED: TrainingPeaksPushOutcome = {
   block: { blocked: true, reason: "moved", recordedDate: "2026-10-20" },
 };
 
-const HORIZON_MESSAGE =
-  "TrainingPeaks refused the date: planning that far ahead needs a paid account";
+const HORIZON_REFUSAL = "footer.trainingPeaksHorizon.refused";
 
 describe("TrainingPeaksPushButton", () => {
   beforeEach(() => {
@@ -83,7 +82,7 @@ describe("TrainingPeaksPushButton", () => {
 
   it("should surface the planning-horizon refusal instead of going quiet", async () => {
     // Arrange
-    push.mockResolvedValue({ ok: false, message: HORIZON_MESSAGE });
+    push.mockResolvedValue({ ok: false, reason: "horizon" });
     render(<TrainingPeaksPushButton workout={workout} />);
 
     // Act
@@ -92,14 +91,14 @@ describe("TrainingPeaksPushButton", () => {
     // Assert
     expect(
       await screen.findByTestId("trainingpeaks-push-error")
-    ).toHaveTextContent(HORIZON_MESSAGE);
+    ).toHaveTextContent(HORIZON_REFUSAL);
     expect(screen.getByTestId("send-to-trainingpeaks-button")).toBeEnabled();
   });
 
   it("should notify the caller only when the push succeeded", async () => {
     // Arrange
     const onSent = vi.fn();
-    push.mockResolvedValue({ ok: false, message: HORIZON_MESSAGE });
+    push.mockResolvedValue({ ok: false, reason: "horizon" });
     render(<TrainingPeaksPushButton workout={workout} onSent={onSent} />);
 
     // Act

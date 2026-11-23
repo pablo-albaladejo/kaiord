@@ -27,6 +27,12 @@
     "send": "Enviar a Garmin",
     "sending": "Enviando…",
     "sent": "En tu Garmin",
+    "garminPushError": {
+      "updated": "Kaiord para Garmin se ha actualizado. Inténtalo de nuevo.",
+      "signIn": "Inicia sesión en Garmin Connect en este navegador y vuelve a intentarlo.",
+      "notPrepared": "Este entrenamiento no se pudo preparar para Garmin. Inténtalo de nuevo.",
+      "notAnswering": "Garmin no responde. Inténtalo de nuevo."
+    },
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
     "trainingPeaksRepush": {

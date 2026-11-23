@@ -1,17 +1,14 @@
-import {
-  TOAST_ZONES_FETCH_FAILED,
-  TOAST_ZONES_SHAPE_MISMATCH,
-  TOAST_ZONES_UNSUPPORTED,
-} from "../../application/coaching/sync-zones-toasts";
 import type { useToast } from "../../hooks/use-toast";
+import type { Translate } from "../../i18n/use-translate";
 
-/** The toast a failed zones sync shows, by failure reason. */
+/** The toast a failed zones sync shows, by failure reason, in the athlete's language. */
 export const handleFailure = (
   reason: string,
-  toasts: ReturnType<typeof useToast>
+  toasts: ReturnType<typeof useToast>,
+  t: Translate
 ): void => {
-  if (reason === "transport-error") toasts.error(TOAST_ZONES_FETCH_FAILED);
+  if (reason === "transport-error") toasts.error(t("zonesSync.fetchFailed"));
   else if (reason === "shape-mismatch")
-    toasts.warning(TOAST_ZONES_SHAPE_MISMATCH);
-  else if (reason === "unsupported") toasts.info(TOAST_ZONES_UNSUPPORTED);
+    toasts.warning(t("zonesSync.shapeMismatch"));
+  else if (reason === "unsupported") toasts.info(t("zonesSync.unsupported"));
 };

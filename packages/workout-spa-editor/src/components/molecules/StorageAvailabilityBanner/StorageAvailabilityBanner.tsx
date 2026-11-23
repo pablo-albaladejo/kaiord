@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 
+import { useTranslate } from "../../../i18n/use-translate";
 import type { StorageStatus } from "../../../store/storage-store";
 import { useStorageStore } from "../../../store/storage-store";
 
@@ -7,10 +8,8 @@ type Props = {
   status?: StorageStatus;
 };
 
-const STORAGE_UNAVAILABLE_MESSAGE =
-  "Storage unavailable — changes in this session won't be saved";
-
 export function StorageAvailabilityBanner({ status: injected }: Props = {}) {
+  const t = useTranslate("common");
   const storeStatus = useStorageStore((s) => s.status);
   const status = injected ?? storeStatus;
 
@@ -26,7 +25,7 @@ export function StorageAvailabilityBanner({ status: injected }: Props = {}) {
         aria-hidden="true"
         className="h-5 w-5 flex-shrink-0 text-danger-text"
       />
-      <span>{STORAGE_UNAVAILABLE_MESSAGE}</span>
+      <span>{t("storage.unavailable")}</span>
     </div>
   );
 }

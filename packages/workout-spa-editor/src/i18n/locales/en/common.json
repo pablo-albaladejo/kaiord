@@ -1,4 +1,7 @@
 {
+  "storage": {
+    "unavailable": "Storage unavailable — changes in this session won't be saved"
+  },
   "language": {
     "label": "Language",
     "auto": "Auto",

@@ -60,7 +60,7 @@ export const createDetectAction =
       set({
         extensionInstalled: true,
         sessionActive: false,
-        lastError: "Update your Kaiord Train2Go Bridge extension",
+        lastError: "outdated",
         lastDetectionTimestamp: now,
       });
       return;

@@ -286,9 +286,10 @@ describe("useGarminPush", () => {
     );
   });
 
-  it("should set error when exportGcnWorkout throws an Error", async () => {
+  it("should say the workout could not be prepared when the conversion throws, never its text", async () => {
     // Arrange
     mockExportGcnWorkout.mockRejectedValue(new Error("Conversion failed"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
     const workout = makeWorkout();
     const { result } = renderHook(() => useGarminPush(workout));
 
@@ -300,7 +301,7 @@ describe("useGarminPush", () => {
     // Assert
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
-      message: "Conversion failed",
+      reason: "not-prepared",
     });
   });
 
@@ -388,7 +389,7 @@ describe("useGarminPush", () => {
     expect(mockExportGcnWorkout).not.toHaveBeenCalled();
   });
 
-  it("should set fallback error message when non-Error is thrown", async () => {
+  it("should say the workout could not be prepared when a non-Error is thrown", async () => {
     // Arrange
     mockExportGcnWorkout.mockRejectedValue("string error");
     const workout = makeWorkout();
@@ -402,11 +403,11 @@ describe("useGarminPush", () => {
     // Assert
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
-      message: "Conversion failed",
+      reason: "not-prepared",
     });
   });
 
-  it("should set error when pushWorkout throws", async () => {
+  it("should say Garmin is not answering when pushWorkout throws", async () => {
     // Arrange
     mockPushWorkout.mockRejectedValue(new Error("Push rejected"));
     const workout = makeWorkout();
@@ -420,7 +421,7 @@ describe("useGarminPush", () => {
     // Assert
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
-      message: "Push rejected",
+      reason: "not-answering",
     });
   });
 

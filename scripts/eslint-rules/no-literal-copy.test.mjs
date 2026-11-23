@@ -139,3 +139,82 @@ test("should report a copy property that holds English instead of a key", () => 
   // Act + Assert
   ruleTester.run("no-literal-copy", rule, cases);
 });
+
+test("should report copy built with + and copy a local function or const returns", () => {
+  // Arrange
+  const cases = {
+    valid: [
+      { code: 'toast.error(t("a.b") + suffix);' },
+      { code: "setError(prefix + count);" },
+      { code: 'const key = () => "toast.saved"; toast.success(t(key()));' },
+      {
+        code: 'const o = { label: base + "-x" };',
+        options: [{ allow: ["-x"] }],
+      },
+    ],
+    invalid: [
+      { code: 'toast.error("Step " + n + " failed");', errors: literal },
+      { code: 'setMessage("Saved " + name);', errors: literal },
+      {
+        code: 'const text = () => "Could not save"; toast.error(text());',
+        errors: literal,
+      },
+      {
+        code: 'function why() { if (a) return "Offline"; return t("x.y"); } setError(why());',
+        errors: literal,
+      },
+      { code: 'const o = { label: "Week " + n };', errors: literal },
+    ],
+  };
+
+  // Act + Assert
+  ruleTester.run("no-literal-copy", rule, cases);
+});
+
+test("should report a bare toast call and the notice, warning and status setters", () => {
+  // Arrange
+  const cases = {
+    valid: [
+      { code: 'toast({ title: t("toast.saved") });' },
+      { code: 'setStatus("loading");' },
+      { code: 'setStatus("not-answering");' },
+      { code: "setNotice(null);" },
+      { code: 'setWarning(t("sync.stale"));' },
+    ],
+    invalid: [
+      { code: 'toast("Saved");', errors: literal },
+      { code: 'toast({ title: "Saved" });', errors: literal },
+      { code: 'setNotice("Garmin is not answering");', errors: literal },
+      { code: 'setWarning("Check your zones");', errors: literal },
+      { code: 'setStatus("Sending to Garmin");', errors: literal },
+      { code: 'setSyncStatus("Done");', errors: literal },
+    ],
+  };
+
+  // Act + Assert
+  ruleTester.run("no-literal-copy", rule, cases);
+});
+
+test("should report English in a names map and in text, tooltip and empty-text properties", () => {
+  // Arrange
+  const cases = {
+    valid: [
+      { code: 'const SPORT_NAMES = { cycling: "sport.cycling" };' },
+      { code: 'const FIELD_NAMES = { ftp: "ftp", hr: "max_hr" };' },
+      { code: 'const o = { tooltip: t("a.b"), emptyText: t("a.c") };' },
+    ],
+    invalid: [
+      { code: 'const SPORT_NAMES = { cycling: "Cycling" };', errors: literal },
+      {
+        code: 'const PROVIDER_NAMES = { a: "Road bike" };',
+        errors: literal,
+      },
+      { code: 'const o = { tooltip: "Drag to reorder" };', errors: literal },
+      { code: 'const o = { emptyText: "No workouts" };', errors: literal },
+      { code: 'const o = { text: "Try again" };', errors: literal },
+    ],
+  };
+
+  // Act + Assert
+  ruleTester.run("no-literal-copy", rule, cases);
+});

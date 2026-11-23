@@ -15,6 +15,8 @@
 import type { CoachingActivity } from "./coaching-activity";
 import type { ExpandDayResult } from "./coaching-expand-result";
 
+export type CoachingSourceError = "outdated";
+
 export type CoachingSource = {
   id: string;
   label: string;
@@ -28,7 +30,8 @@ export type CoachingSource = {
    */
   routeActive?: boolean;
   loading: boolean;
-  error: string | null;
+  /** A verified problem the UI words with its fix: the extension is outdated. */
+  error: CoachingSourceError | null;
   /** Activities for the supplied (profileId, days), live-queried. */
   activities: CoachingActivity[];
   /**

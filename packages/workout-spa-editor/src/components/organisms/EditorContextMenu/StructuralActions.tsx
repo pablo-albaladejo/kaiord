@@ -6,6 +6,7 @@ import {
   modifierSymbol,
   shiftSymbol,
 } from "../../../utils/platform";
+import { shortcutKey } from "../../../utils/shortcut-key";
 import type { ContextMenuContentProps } from "./context-menu-content.types";
 import { EditorMenuItem } from "./EditorMenuItem";
 
@@ -26,28 +27,28 @@ export const StructuralActions = (p: Props) => {
       {p.showSelectAll && (
         <EditorMenuItem
           onSelect={p.onSelectAll}
-          aria={`${ariaModifier}+A`}
+          aria={`${ariaModifier}+${shortcutKey("select-all")}`}
           icon={CheckSquare}
           label={t("contextMenu.selectAll")}
-          hint={`${modifierSymbol}A`}
+          hint={`${modifierSymbol}${shortcutKey("select-all")}`}
         />
       )}
       {p.showGroup && (
         <EditorMenuItem
           onSelect={p.onGroup}
-          aria={`${ariaModifier}+G`}
+          aria={`${ariaModifier}+${shortcutKey("create-block")}`}
           icon={Group}
           label={t("contextMenu.group")}
-          hint={`${modifierSymbol}G`}
+          hint={`${modifierSymbol}${shortcutKey("create-block")}`}
         />
       )}
       {p.showUngroup && (
         <EditorMenuItem
           onSelect={p.onUngroup}
-          aria={`Shift+${ariaModifier}+G`}
+          aria={`Shift+${ariaModifier}+${shortcutKey("ungroup-block")}`}
           icon={Ungroup}
           label={t("contextMenu.ungroup")}
-          hint={`${shiftSymbol}${modifierSymbol}G`}
+          hint={`${shiftSymbol}${modifierSymbol}${shortcutKey("ungroup-block")}`}
         />
       )}
     </>

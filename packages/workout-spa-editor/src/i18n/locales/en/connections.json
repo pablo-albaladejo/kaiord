@@ -90,7 +90,9 @@
     "cancel": "Cancel",
     "apiKey": "API key",
     "connecting": "Connecting…",
-    "connectFailed": "Could not connect"
+    "connectFailed": "Could not connect. Try again.",
+    "apiKeyMissing": "Enter an API key.",
+    "apiKeyRejected": "The provider did not accept this API key. Check it and try again."
   },
   "routing": {
     "title": "Where each data type comes from",
@@ -154,6 +156,7 @@
     "heart-rate-series": "Heart Rate Series"
   },
   "profileLink": {
+    "updateExtension": "Update the Kaiord extension for {{name}}.",
     "notLinked": "{{name}} is signed in on this browser but not linked to this athlete, so nothing syncs yet.",
     "link": "Link to this athlete",
     "signIn": "{{name}} is not linked to this athlete. Sign in to {{name}} in this browser first, then link it here.",
@@ -170,7 +173,6 @@
   "ext": {
     "requires": "Requires the Kaiord extension",
     "install": "Install Kaiord extension",
-    "garminUpdated": "Kaiord for Garmin was updated. Try again.",
     "bannerTitle": "The Kaiord extension is not installed",
     "bannerDetail": "Garmin, Train2Go, WHOOP, Tanita and TrainingPeaks connect through the Kaiord extension. Install it in this browser to connect them."
   },

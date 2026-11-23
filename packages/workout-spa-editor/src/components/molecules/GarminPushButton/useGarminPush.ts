@@ -3,9 +3,11 @@ import { useCallback } from "react";
 import { logGarminPushFailure } from "../../../application/garmin-placement/log-garmin-push-failure";
 import { pushWorkoutToGarminCalendar } from "../../../application/garmin-placement/push-workout-to-garmin-calendar";
 import { useAnalytics, useGarminBridge } from "../../../contexts";
+import type { GarminPushFailure } from "../../../contexts/garmin-bridge-types";
 import { buildPlacementDeps } from "../../../hooks/garmin-placement-deps";
 import { garminPlacementRequest } from "../../../hooks/garmin-placement-request";
 import { exportRecordGcn } from "../../../hooks/garmin-record-gcn";
+import { logFailure } from "../../../lib/log-failure";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import { isProfileRefusal } from "../../../types/profile-refusal";
 import { garminPushReports } from "./garmin-push-reports";
@@ -17,9 +19,6 @@ export type GarminPushOptions = {
   /** The athlete chose "Send anyway" on an `uncertain` result. */
   sendAnyway?: boolean;
 };
-
-const errorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : "Conversion failed";
 
 /**
  * Returns a function that pushes a persisted workout to Garmin Connect and
@@ -53,12 +52,15 @@ export const useGarminPushTo = (onSent?: (garminWorkoutId: string) => void) => {
     ) => {
       if (!workout?.krd || !sessionActive) return undefined;
       const { synced, failedEarly } = garminPushReports(analytics, Date.now());
-      const showError = (error: unknown) =>
-        setPushing({ status: "error", message: errorMessage(error) });
-      // Phase 1 folds a thrown push into `failed`; surface its message first.
+      // The athlete reads the reason; the failure's own text is logged.
+      const showError = (reason: GarminPushFailure, error: unknown) => {
+        logFailure("garmin-send", error);
+        setPushing({ status: "error", reason });
+      };
+      // Phase 1 folds a thrown push into `failed`; surface it first.
       const guardedPush = (gcn: unknown) =>
         pushWorkout(gcn).catch((error: unknown) => {
-          showError(error);
+          showError("not-answering", error);
           throw error;
         });
       try {
@@ -67,7 +69,7 @@ export const useGarminPushTo = (onSent?: (garminWorkoutId: string) => void) => {
         // Phase 1 folds a failed conversion into `failed`: surface it first.
         const buildGcn = () =>
           exportRecordGcn(krd, profileId).catch((error: unknown) => {
-            if (!explainedByResult(error)) showError(error);
+            if (!explainedByResult(error)) showError("not-prepared", error);
             throw error;
           });
         // A joiner's run is the owner's: only the owner reports it.
@@ -89,7 +91,7 @@ export const useGarminPushTo = (onSent?: (garminWorkoutId: string) => void) => {
         );
       } catch (error: unknown) {
         logGarminPushFailure(error);
-        showError(error);
+        setPushing({ status: "error", reason: "not-answering" });
         return failedEarly();
       }
     },

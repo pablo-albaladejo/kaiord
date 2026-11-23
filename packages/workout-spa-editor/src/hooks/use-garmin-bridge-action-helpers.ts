@@ -4,14 +4,12 @@
  * Extension IDs come from the bridge discovery singleton at call time.
  */
 
-import type { Locale } from "@kaiord/i18n";
-
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import type {
   GarminPushOutcome,
   PushState,
 } from "../contexts/garmin-bridge-types";
-import { getTranslate } from "../i18n/use-translate";
+import { logFailure } from "../lib/log-failure";
 import { ping } from "../store/garmin-extension-transport";
 import { evaluatePingResult, executePush } from "./garmin-bridge-operations";
 
@@ -57,22 +55,19 @@ export const runDetect = async ({
 export const runPush = async (
   gcn: unknown,
   setPushing: (s: PushState) => void,
-  redetect: () => Promise<void>,
-  locale: Locale
+  redetect: () => Promise<void>
 ): Promise<GarminPushOutcome> => {
   setPushing({ status: "loading" });
   const result = await executePush(getGarminExtensionId(), gcn);
   if (result.status === "invalidated") {
     await redetect();
-    setPushing({
-      status: "error",
-      message: getTranslate("connections", locale)("ext.garminUpdated"),
-    });
+    setPushing({ status: "error", reason: "updated" });
     return { success: false, garminWorkoutId: null };
   }
   if (result.status === "error") {
     if (result.redetect) await redetect();
-    setPushing({ status: "error", message: result.message });
+    logFailure("garmin-send", result.detail);
+    setPushing({ status: "error", reason: result.reason });
     return { success: false, garminWorkoutId: null };
   }
   setPushing({ status: "success" });

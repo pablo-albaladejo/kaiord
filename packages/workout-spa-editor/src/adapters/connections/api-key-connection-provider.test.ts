@@ -45,7 +45,7 @@ describe("createApiKeyConnectionProvider", () => {
     const attempt = provider.connect({ profileId: "p1", credential: "bad" });
 
     // Assert
-    await expect(attempt).rejects.toThrow(/rejected/i);
+    await expect(attempt).rejects.toMatchObject({ reason: "rejected" });
     expect(await repository.get("p1", "intervals")).toBeUndefined();
   });
 
@@ -57,7 +57,7 @@ describe("createApiKeyConnectionProvider", () => {
     const attempt = provider.connect({ profileId: "p1" });
 
     // Assert
-    await expect(attempt).rejects.toThrow(/required/i);
+    await expect(attempt).rejects.toMatchObject({ reason: "missing-key" });
     expect(validate).not.toHaveBeenCalled();
   });
 
