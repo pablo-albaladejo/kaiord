@@ -16,10 +16,8 @@ import {
   CALENDAR_FIND_FEATURE,
   CALENDAR_WRITE_FEATURE,
 } from "../application/garmin-placement/placement-timing";
-import {
-  type PlacementPipelineDeps,
-  pushWorkoutToGarminCalendar,
-} from "../application/garmin-placement/push-workout-to-garmin-calendar";
+import { pushWorkoutToGarminCalendar } from "../application/garmin-placement/push-workout-to-garmin-calendar";
+import type { PlacementPipelineDeps } from "../application/garmin-placement/placement-pipeline-deps";
 import type { RecordLockPort } from "../application/garmin-placement/record-lock-port";
 import { GARMIN_LEDGER_BRIDGE_ID } from "../types/export-ledger";
 import { parseGarminWorkoutId } from "../types/garmin-ledger";

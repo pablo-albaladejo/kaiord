@@ -13,8 +13,6 @@ import type { PlacementPipelineDeps } from "./placement-pipeline-deps";
 import { failed, type PlacementResult } from "./placement-result";
 import { placementLockName } from "./record-lock-port";
 
-export type { PlacementPipelineDeps, PlacementRequest };
-
 const lockedPlace = async (
   deps: PlacementPipelineDeps,
   request: PlacementRequest
