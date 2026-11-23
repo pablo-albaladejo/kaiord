@@ -182,7 +182,14 @@ Audit` job keeps its exact name, reports on every pull request and on push
   Spanish) and no file listed in `scripts/retired-terms.vocab.mjs` uses a term
   GLOSSARY.md retired or withdrew: framework, cockpit, lossless, zero data
   loss, round-trip safe, open standard, interchange format, platform for
-  Kaiord itself (`pnpm lint:retired-terms`).
+  Kaiord itself; and no athlete-facing text (the App's dictionaries and copy,
+  the extensions' `_locales` and popups, the store listings, the privacy
+  policy, the docs pages that address the athlete) says "bridge" or "the
+  Kaiord extension" (`pnpm lint:retired-terms`).
+- `check-bridge-locales-en-es.test.mjs` — every extension ships `_locales/en`
+  and `_locales/es` at parity (same keys and placeholders, none empty), is
+  named "Kaiord for <Platform>" in both, and takes every popup string from
+  `_locales` or the shared notices (R-BridgeLocalesEnglishSpanish).
 - `check-connection-notices.mjs` — a Connection that does not work shows one
   of four fixes (Install, Update, Sign in to the Platform, Try again), each
   worded once in English and Spanish by

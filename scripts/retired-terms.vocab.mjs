@@ -68,3 +68,77 @@ export const FILES = [
   "packages/mcp/src/server/instructions.ts",
   "packages/garmin-connect/package.json",
 ];
+
+// Words the athlete never reads (GLOSSARY.md, "Bridge"): each extension is
+// "Kaiord for" its Platform, and "extension" when a noun is needed. Checked on
+// every athlete-facing text: the App's dictionaries and UI copy, the
+// extensions' _locales and popups, every registered claims surface (store
+// listings, privacy policy, landing, docs intros, READMEs) and ATHLETE_FILES.
+// Code identifiers, package names, file names and developer docs keep
+// "bridge"; where a page shows one of them, ATHLETE_ALLOWED names it.
+const BRIDGE_WORD =
+  'GLOSSARY.md, "Bridge": the athlete reads "Kaiord for <Platform>", or "extension"';
+
+export const ATHLETE_TERMS = [
+  { term: "bridge", pattern: /\bbridges?\b/i, why: BRIDGE_WORD },
+  {
+    term: "the Kaiord extension",
+    pattern:
+      /\bKaiord extensions?\b|\bextensi[oó]n(?:es)? (?:de )?Kaiord\b(?! for)/i,
+    why: `${BRIDGE_WORD}; there are five extensions, so name its Platform`,
+  },
+];
+
+const PACKAGE_NAME = "the npm package name, shown where a page names the code";
+const STORE_ADDRESS =
+  "the published listing's address: the Chrome Web Store keeps the slug it gave at first publication, and the link must keep working";
+
+export const ATHLETE_ALLOWED = [
+  ...["garmin", "train2go", "tanita", "trainingpeaks", "whoop"].map((p) => ({
+    phrase: `@kaiord/${p}-bridge`,
+    why: PACKAGE_NAME,
+  })),
+  {
+    phrase:
+      "chromewebstore.google.com/detail/kaiord-garmin-bridge/innelncjhkdokailkinkchppgekennoe",
+    why: STORE_ADDRESS,
+  },
+  {
+    phrase: "github.com/pablo-albaladejo/kaiord/tree/main/packages/whoop-bridge",
+    why: "the source folder an unpublished extension is loaded from",
+  },
+];
+
+// Athlete-facing files read whole, or only in the named sections, beyond the
+// registered surfaces and the texts check-connection-notices.mjs collects (App
+// dictionaries and UI literals, the extensions' _locales and popup.js
+// strings). popup.html is not here: it holds no words of its own
+// (R-BridgeLocalesEnglishSpanish), so its text is its _locales. Each store
+// listing's name is read here; WHOOP's descriptions too, since its listing is
+// not yet a claims surface (it is unpublished).
+const LISTING = (p) => `packages/${p}-bridge/store-listing.md`;
+
+export const ATHLETE_FILES = [
+  ...["garmin", "train2go", "tanita", "trainingpeaks"].map((p) => ({
+    file: LISTING(p),
+    sections: ["Extension Name"],
+  })),
+  {
+    file: LISTING("whoop"),
+    sections: [
+      "Extension Name",
+      "Short Description (132 chars max)",
+      "Detailed Description",
+      "Short Description, Spanish (132 chars max)",
+      "Detailed Description, Spanish",
+    ],
+  },
+  "packages/docs/legal/privacy-policy.md",
+  "packages/docs/guide/whoop-recovery-in-plan.md",
+  "packages/docs/es/guide/whoop-recovery-in-plan.md",
+  "packages/docs/guide/kaiord-vs-trainingpeaks-intervals-garmin.md",
+  "packages/docs/es/guide/kaiord-vs-trainingpeaks-intervals-garmin.md",
+  "packages/docs/convert/fit-to-garmin.md",
+  "packages/docs/convert/tcx-to-garmin.md",
+  "packages/docs/convert/zwo-to-garmin.md",
+];
