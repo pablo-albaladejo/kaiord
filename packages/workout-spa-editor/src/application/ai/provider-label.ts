@@ -1,10 +1,9 @@
 import type { LlmProviderType } from "../../store/ai-store-types";
+import { DESTINATIONS } from "../data-flows/destinations";
 
-export const PROVIDER_TYPE_NAMES: Record<LlmProviderType, string> = {
-  anthropic: "Anthropic",
-  openai: "OpenAI",
-  google: "Google",
-};
+/** The Provider's proper name, the same in every language. */
+export const providerName = (type: LlmProviderType): string =>
+  DESTINATIONS[type].name;
 
 /**
  * An account's label, never one another account already carries: a repeat is
@@ -16,7 +15,7 @@ export const uniqueProviderLabel = (
   type: LlmProviderType,
   taken: ReadonlyArray<string>
 ): string => {
-  const name = wanted.trim() || PROVIDER_TYPE_NAMES[type];
+  const name = wanted.trim() || providerName(type);
   if (!taken.includes(name)) return name;
   let n = 2;
   while (taken.includes(`${name} ${n}`)) n += 1;

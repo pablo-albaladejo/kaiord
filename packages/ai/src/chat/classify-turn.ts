@@ -23,8 +23,10 @@ export const classifyTurn = (
   actionNames: Set<string>
 ): ChatTurnResult => {
   const messages = [...history, ...raw.messages];
+  const { toolNames } = raw;
   if (raw.stopped) {
-    return { status: raw.stopped, text: raw.text, messages, usage: raw.usage };
+    const { stopped: status, text, usage } = raw;
+    return { status, text, messages, usage, toolNames };
   }
   const actionCalls = raw.toolCalls.filter((c) => actionNames.has(c.toolName));
   const actionCall = actionCalls[0];
@@ -43,12 +45,12 @@ export const classifyTurn = (
         }),
       },
       messages,
+      toolNames,
     };
   }
 
-  if (raw.finishReason === "tool-calls") {
-    return { status: "step_limit", text: raw.text, messages, usage: raw.usage };
-  }
-
-  return { status: "complete", text: raw.text, messages, usage: raw.usage };
+  const { text, usage } = raw;
+  if (raw.finishReason === "tool-calls")
+    return { status: "step_limit", text, messages, usage, toolNames };
+  return { status: "complete", text, messages, usage, toolNames };
 };

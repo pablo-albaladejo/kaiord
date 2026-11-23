@@ -17,10 +17,13 @@ describe("HealthSharingNotice", () => {
 
     // Act
     act(() => {
-      void healthSharingGate.request({
-        flow: "assistant",
-        providerType: "anthropic",
-      });
+      // Left unanswered: the notice drops it on unmount.
+      healthSharingGate
+        .request({
+          flow: "assistant",
+          providerType: "anthropic",
+        })
+        .catch(() => undefined);
     });
 
     // Assert
@@ -87,10 +90,13 @@ describe("HealthSharingNotice", () => {
     // Arrange
     render(<HealthSharingNotice />);
     act(() => {
-      void healthSharingGate.request({
-        flow: "assistant",
-        providerType: "google",
-      });
+      // Left unanswered: the notice drops it on unmount.
+      healthSharingGate
+        .request({
+          flow: "assistant",
+          providerType: "google",
+        })
+        .catch(() => undefined);
     });
     const dialog = await screen.findByRole("dialog");
 
@@ -99,5 +105,27 @@ describe("HealthSharingNotice", () => {
 
     // Assert
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("should take the question off the screen when the run that asked is stopped", async () => {
+    // Arrange
+    render(<HealthSharingNotice />);
+    const stop = new AbortController();
+    let share: Promise<string> = Promise.resolve("");
+    act(() => {
+      share = healthSharingGate.request(
+        { flow: "assistant", providerType: "anthropic" },
+        { signal: stop.signal }
+      );
+    });
+    await screen.findByRole("dialog");
+
+    // Act
+    act(() => stop.abort());
+
+    // Assert
+    await expect(share).rejects.toThrow(/abort/i);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(healthSharingStore.read()).toEqual({});
   });
 });

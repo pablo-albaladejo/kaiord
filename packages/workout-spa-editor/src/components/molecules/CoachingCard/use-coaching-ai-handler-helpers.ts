@@ -12,7 +12,7 @@ import type { MutableRefObject } from "react";
 
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import { classifyAiFailure } from "../../../application/coaching/convert-coaching-activity-error-mapper";
-import type { PersistencePort } from "../../../ports/persistence-port";
+import type { GenerationDeps } from "../../../lib/generate-workout";
 import { withOrigin } from "../../../routing/with-origin";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { AiModelBinding } from "../../../types/ai-model-binding";
@@ -28,7 +28,7 @@ export type StartAiCtx = {
   expandActivity: (activity: CoachingActivity) => void;
   providers: LlmProviderConfig[] | undefined;
   bindings: AiModelBinding[] | undefined;
-  persistence: PersistencePort;
+  deps: GenerationDeps;
   analytics: Analytics;
   abortRef: MutableRefObject<AbortController | null>;
   setFailure: (f: { reason: Reason; error?: string } | null) => void;
@@ -71,7 +71,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
       modelId: resolved.modelId,
       abortSignal: controller.signal,
       onProgress,
-      persistence: ctx.persistence,
+      deps: ctx.deps,
       analytics: ctx.analytics,
     });
   } catch (error) {

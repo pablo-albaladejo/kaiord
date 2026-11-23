@@ -78,9 +78,3 @@ export const DESTINATIONS = {
 export type DestinationId = keyof typeof DESTINATIONS;
 
 export const DESTINATION_IDS = Object.keys(DESTINATIONS) as DestinationId[];
-
-export const PROVIDER_DESTINATION: Record<LlmProviderType, DestinationId> = {
-  anthropic: "anthropic",
-  openai: "openai",
-  google: "google",
-};

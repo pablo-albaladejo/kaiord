@@ -1,30 +1,12 @@
-import type { LlmProviderType } from "@kaiord/ai/providers";
-
+import { providerName } from "../../../application/ai/provider-label";
 import {
   healthKindsOf,
   providerHealthKinds,
 } from "../../../application/data-flows/data-flows";
-import type { DataKind } from "../../../application/data-flows/data-kinds";
-import {
-  DESTINATIONS,
-  PROVIDER_DESTINATION,
-} from "../../../application/data-flows/destinations";
+import { listKinds } from "../../../i18n/list-data-kinds";
 import type { HealthQuestion } from "../../../lib/health-sharing-gate";
 
 type Translate = (key: string, params?: Record<string, string>) => string;
-
-export const providerName = (type: LlmProviderType): string =>
-  DESTINATIONS[PROVIDER_DESTINATION[type]].name;
-
-/** "sleep, weight and HRV", in the reader's language. */
-export const listKinds = (
-  kinds: readonly DataKind[],
-  t: Translate,
-  locale: string
-): string =>
-  new Intl.ListFormat(locale, { type: "conjunction" }).format(
-    kinds.map((kind) => t(`kinds.${kind}`))
-  );
 
 export type HealthNoticeCopy = {
   title: string;

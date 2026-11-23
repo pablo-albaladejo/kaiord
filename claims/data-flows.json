@@ -8,11 +8,11 @@
     },
     {
       "file": "packages/workout-spa-editor/src/i18n/locales/en/errors.json",
-      "keys": ["labImport.withheld"]
+      "keys": ["labImport.withheld", "assistantWorkout.withheld"]
     },
     {
       "file": "packages/workout-spa-editor/src/i18n/locales/es/errors.json",
-      "keys": ["labImport.withheld"]
+      "keys": ["labImport.withheld", "assistantWorkout.withheld"]
     }
   ],
   "claims": [
@@ -1181,6 +1181,86 @@
         {
           "test": "packages/workout-spa-editor/src/application/usage/prune-usage-events.test.ts",
           "title": "should delete events older than the retention window, with no tombstone"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.flows.assistantWorkout",
+      "text": "When the assistant creates a workout after reading your health data",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.assistantWorkout",
+      "text": "The assistant wrote this workout's description after reading your health data, so it may quote it. To create the workout, Kaiord sends the description to {{provider}}, and it may hold: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.notice.neverResult.assistantWorkout",
+      "text": "The workout is not created.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.en.assistantWorkout.withheld",
+      "text": "The workout was not created: this conversation read your health data, and you chose not to send health data to {{provider}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.flows.assistantWorkout",
+      "text": "Cuando el asistente crea un entrenamiento después de leer tus datos de salud",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.assistantWorkout",
+      "text": "El asistente escribió la descripción de este entrenamiento después de leer tus datos de salud, así que puede citarlos. Para crear el entrenamiento, Kaiord envía la descripción a {{provider}}, y puede contener: {{kinds}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should ask a Provider never asked, and on yes record the health the description may carry"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.notice.neverResult.assistantWorkout",
+      "text": "El entrenamiento no se crea.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
+        }
+      ]
+    },
+    {
+      "id": "app.dataflows.es.assistantWorkout.withheld",
+      "text": "No se ha creado el entrenamiento: esta conversación leyó tus datos de salud y elegiste no enviar datos de salud a {{provider}}.",
+      "proof": [
+        {
+          "test": "packages/workout-spa-editor/src/hooks/chat/chat-create-workout.test.ts",
+          "title": "should refuse a description written after a health read when its Provider must not get health data"
         }
       ]
     }

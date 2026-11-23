@@ -287,4 +287,39 @@ describe("classifyTurn", () => {
     expect(result.status).toBe("timeout");
     expect("pendingAction" in result).toBe(false);
   });
+
+  it("should name the tools a stopped turn ran, though its messages drop them", () => {
+    // Arrange
+    const raw = rawTurn({
+      stopped: "aborted",
+      finishReason: "aborted",
+      messages: [{ role: "assistant", content: "Your HRV is" }],
+      toolNames: ["query_health"],
+    });
+
+    // Act
+    const result = classifyTurn(history, raw, new Set());
+
+    // Assert
+    expect(result.status).toBe("aborted");
+    expect(result.toolNames).toEqual(["query_health"]);
+  });
+
+  it("should name the tools a completed or paused turn ran", () => {
+    // Arrange
+    const done = rawTurn({ toolNames: ["query_energy_balance"] });
+    const paused = rawTurn({
+      finishReason: "tool-calls",
+      toolCalls: [{ toolName: "create_workout", toolCallId: "c1", input: {} }],
+      toolNames: ["query_health", "create_workout"],
+    });
+
+    // Act
+    const complete = classifyTurn(history, done, new Set());
+    const pending = classifyTurn(history, paused, new Set(["create_workout"]));
+
+    // Assert
+    expect(complete.toolNames).toEqual(["query_energy_balance"]);
+    expect(pending.toolNames).toEqual(["query_health", "create_workout"]);
+  });
 });

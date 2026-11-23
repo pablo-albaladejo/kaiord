@@ -5,6 +5,7 @@ import type { Page, Route } from "@playwright/test";
 import { expect, test } from "./fixtures/base";
 import { llmSseBody } from "./fixtures/llm-sse";
 import { answerHealthSharing } from "./helpers/health-sharing";
+import { countKaiordStore } from "./helpers/kaiord-idb";
 import { seedAiProvider } from "./helpers/seed-ai-provider";
 import { clearDexie } from "./helpers/seed-dexie";
 import { waitForDexieReady } from "./helpers/wait-for-dexie-ready";
@@ -35,7 +36,7 @@ const EN: Copy = {
   reply: "Rest today.",
   summary: /^Chat · .+ · Finished · /,
   model: `Anthropic ${MODEL}`,
-  sent: "To Anthropic: your messages, workouts, your coach's plan and comments, and which source feeds each kind of data",
+  sent: "To Anthropic: your messages",
   noTools: "No Tool was called.",
   export: "Export all (JSON)",
 };
@@ -46,7 +47,7 @@ const ES: Copy = {
   reply: "Descansa hoy.",
   summary: /^Chat · .+ · Terminada · /,
   model: `Anthropic ${MODEL}`,
-  sent: "A Anthropic: tus mensajes, entrenamientos, el plan y los comentarios de tu entrenador y de qué fuente llega cada tipo de dato",
+  sent: "A Anthropic: tus mensajes",
   noTools: "No se llamó a ninguna herramienta.",
   export: "Exportar todas (JSON)",
 };
@@ -77,7 +78,11 @@ async function runAndReadTrace(page: Page, copy: Copy, text: string) {
   const outbound = await openChat(page, copy.reply);
   await page.getByLabel(copy.message).fill(text);
   await page.getByRole("button", { name: copy.send, exact: true }).click();
-  await expect(page.getByText(copy.reply)).toBeVisible();
+  await expect(
+    page.getByTestId("chat-messages").getByText(copy.reply)
+  ).toBeVisible();
+  // The Trace is written as the turn settles; leave only once it is stored.
+  await expect.poll(() => countKaiordStore(page, "traces")).toBe(1);
 
   await page.goto("/settings/privacy");
   const section = page.getByTestId("traces-section");

@@ -10,7 +10,10 @@ import type { Analytics, Sport } from "@kaiord/core";
 import type { Locale } from "@kaiord/i18n";
 
 import { localizeAiError } from "../../../i18n/error-copy";
-import { generateWorkoutKrd } from "../../../lib/generate-workout";
+import {
+  generateWorkoutKrd,
+  type GenerationDeps,
+} from "../../../lib/generate-workout";
 import type { GenerationState } from "../../../store/ai-store-types";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { KRD } from "../../../types/krd";
@@ -27,6 +30,7 @@ export type GenerateRunArgs = {
   setGeneration: (state: GenerationState) => void;
   loadWorkout: (krd: KRD) => void;
   analytics: Analytics;
+  deps: GenerationDeps;
 };
 
 export const runAiGeneration = async ({
@@ -40,12 +44,14 @@ export const runAiGeneration = async ({
   setGeneration,
   loadWorkout,
   analytics,
+  deps,
 }: GenerateRunArgs): Promise<void> => {
   setGeneration({ status: "loading" });
 
   let krd;
   try {
     krd = await generateWorkoutKrd({
+      deps,
       text,
       provider,
       modelId,

@@ -3,7 +3,20 @@
  * code sends data some way that list does not declare.
  *
  * - Every source file that calls an outbound primitive is declared here
- *   against the flows it carries, and every flow has such a file.
+ *   against the flows it carries, and every flow has such a file. A direct
+ *   model call (`generateText`, `streamText`, `generateObject`,
+ *   `streamObject`) is an outbound primitive, in the App and in
+ *   `@kaiord/ai`, so a module handed an existing model is caught too.
+ * - What each health flow sends is built by one function per flow, whose
+ *   kinds are tested against the flow's (athlete-health-context.test.ts,
+ *   chat-tool-kinds.test.ts, description-health.test.ts).
+ *
+ * Not caught, and so declared by hand: a declared file that starts to send
+ * a new kind through a path its builder does not cover (the builders' tests
+ * catch it only for the content they build); a call through an alias or a
+ * computed name (`const f = fetch; f(url)`, `globalThis["fetch"]`); a request
+ * an extension makes on its own; and what a model writes into free text,
+ * which no code can see (hence `declared` in the Trace).
  * - Every remote origin of the App's content security policy (the complete
  *   list of what a page may reach) belongs to one destination, and back.
  * - Every write an extension declares and the App serves is a flow to that
@@ -31,14 +44,25 @@ import { DESTINATION_IDS, DESTINATIONS } from "./destinations";
 const SRC = resolve(__dirname, "../..");
 const REPO = resolve(SRC, "../../..");
 
-const OUTBOUND =
-  /createLanguageModel\(|verifyProviderKey|(^|[^.\w])fetch\(|= fetch\b|chrome\.runtime\.(sendMessage|connect)\(|\.track\(|accounts\.google\.com|new (WebSocket|EventSource|XMLHttpRequest)\b|sendBeacon\(/m;
+const MODEL_CALL =
+  /\b(generateText|streamText|generateObject|streamObject)\s*\(/;
+const OUTBOUND = new RegExp(
+  [
+    /createLanguageModel\(|verifyProviderKey/.source,
+    /(^|[^.\w])fetch\(|\b(window|globalThis|self)\.fetch\(|= fetch\b/.source,
+    /chrome\.runtime\.(sendMessage|connect)\(|\.track\(|accounts\.google\.com/
+      .source,
+    /new (WebSocket|EventSource|XMLHttpRequest)\b|sendBeacon\(/.source,
+    MODEL_CALL.source,
+  ].join("|"),
+  "m"
+);
 const NOT_SHIPPED =
   /\.(test|stories)\.tsx?$|\.d\.ts$|(^|\/)(test-utils|test-fixtures|__perf__|__regressions__)\//;
 
 const FLOW_SITES: Record<string, readonly DataFlowId[]> = {
   "hooks/chat/build-chat-agent.ts": ["assistant"],
-  "lib/generate-workout.ts": ["generation"],
+  "lib/generate-workout.ts": ["generation", "assistantWorkout"],
   "application/lab/extraction/run-lab-extraction.use-case.ts": ["labImport"],
   "components/organisms/SettingsPanel/save-with-key-check.ts": [
     "providerKeyCheck",
@@ -55,17 +79,27 @@ const FLOW_SITES: Record<string, readonly DataFlowId[]> = {
   "adapters/analytics/umami-analytics.ts": ["analytics"],
 };
 
+/** Every file of `@kaiord/ai` that calls a model, and the App flows that
+ * reach it (through `createChatAgent`, `createTextToWorkout`,
+ * `runGenerateAgent`). */
+const AI_MODEL_CALL_SITES: Record<string, readonly DataFlowId[]> = {
+  "chat/run-turn.ts": ["assistant"],
+  "agents/call-model.ts": ["generation", "assistantWorkout", "labImport"],
+  "agents/stream-model.ts": ["generation", "assistantWorkout", "labImport"],
+};
+const AI_SRC = join(REPO, "packages/ai/src");
+
 /** The kind of data each exported managed data type is, for a Platform. */
 const EXPORT_KIND: Partial<Record<string, DataKind>> = {
   workout: "workouts",
   "body-composition": "bodyComposition",
 };
 
-const walk = (dir: string): string[] =>
+const walk = (dir: string, root = SRC): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) return walk(path);
-    return /\.tsx?$/.test(entry.name) ? [relative(SRC, path)] : [];
+    if (entry.isDirectory()) return walk(path, root);
+    return /\.tsx?$/.test(entry.name) ? [relative(root, path)] : [];
   });
 
 const outboundFiles = () =>
@@ -106,6 +140,42 @@ describe("data-flows coverage", () => {
     expect(found.length).toBeGreaterThan(0);
     expect(undeclared).toEqual([]);
     expect(stale).toEqual([]);
+  });
+
+  it("should catch a fetch through window or globalThis and a direct model call", () => {
+    // Arrange
+    const sources = [
+      "await window.fetch(url)",
+      "globalThis.fetch(url, init)",
+      "const { text } = await generateText({ model, prompt })",
+      "streamText({ model, messages })",
+    ];
+
+    // Act
+    const missed = sources.filter((source) => !OUTBOUND.test(source));
+
+    // Assert
+    expect(missed).toEqual([]);
+    expect(OUTBOUND.test("persistence.cache.fetchAll()")).toBe(false);
+  });
+
+  it("should declare every file of @kaiord/ai that calls a model against the App flows that reach it", () => {
+    // Arrange
+    const declared = Object.keys(AI_MODEL_CALL_SITES);
+
+    // Act
+    const found = walk(AI_SRC, AI_SRC).filter(
+      (file) =>
+        !NOT_SHIPPED.test(file) &&
+        MODEL_CALL.test(readFileSync(join(AI_SRC, file), "utf8"))
+    );
+    const unknownFlows = Object.values(AI_MODEL_CALL_SITES)
+      .flat()
+      .filter((id) => !(id in DATA_FLOWS));
+
+    // Assert
+    expect(found.sort()).toEqual(declared.sort());
+    expect(unknownFlows).toEqual([]);
   });
 
   it("should carry every flow in the registry by some declared file, and no other", () => {

@@ -3,29 +3,43 @@
  * health data to a Provider. A standing answer decides at once; without one
  * the athlete is asked through the notice on screen, and the question counts
  * as unsaved work while it waits. With nothing on screen to ask (no notice
- * mounted), the request goes without the health data.
+ * mounted), the request goes without the health data. A run that stops while
+ * it waits gets an abort instead of an answer, and its question is taken off
+ * the screen once no other run waits on it; `onWait` tells the run it waits.
  */
 import type { LlmProviderType } from "@kaiord/ai/providers";
 
-import type { HealthFlowId } from "../application/data-flows/data-flows";
+import type {
+  HealthFlowId,
+  HealthShare,
+} from "../application/data-flows/data-flows";
+import { createHealthDecision } from "./health-decision";
+import { abortError, createHealthQuestionQueue } from "./health-question-queue";
 import {
   type HealthSharingStore,
   healthSharingStore,
 } from "./health-sharing-store";
-import { armUnsavedEdits } from "./unsaved-edits";
 
 export type HealthQuestion = {
   flow: HealthFlowId;
   providerType: LlmProviderType;
 };
 export type HealthShareAnswer = "once" | "always" | "never";
-export type HealthShare = "send" | "withhold";
+export type { HealthShare };
 export type HealthAsker = (
-  question: HealthQuestion
+  question: HealthQuestion,
+  cancelled: AbortSignal
 ) => Promise<HealthShareAnswer>;
+export type HealthRequestOptions = {
+  signal?: AbortSignal;
+  onWait?: () => void;
+};
 
 export type HealthSharingGate = {
-  request: (question: HealthQuestion) => Promise<HealthShare>;
+  request: (
+    question: HealthQuestion,
+    options?: HealthRequestOptions
+  ) => Promise<HealthShare>;
   /** Mounts the notice that asks; returns its unmount. */
   setAsker: (asker: HealthAsker) => () => void;
 };
@@ -36,28 +50,17 @@ export function createHealthSharingGate(
   store: HealthSharingStore
 ): HealthSharingGate {
   let asker: HealthAsker | null = null;
-  const waiting = new Map<string, Promise<HealthShare>>();
+  const queue = createHealthQuestionQueue();
+  const { standing, decide } = createHealthDecision(store, () => asker);
 
-  const ask = async (question: HealthQuestion, current: HealthAsker) => {
-    const disarm = armUnsavedEdits();
-    try {
-      const answer = await current(question);
-      if (answer !== "once") store.set(question.providerType, answer);
-      return answer === "never" ? "withhold" : "send";
-    } finally {
-      disarm();
-      waiting.delete(keyOf(question));
-    }
-  };
-
-  const request = async (question: HealthQuestion): Promise<HealthShare> => {
-    const standing = store.read()[question.providerType];
-    if (standing) return standing === "always" ? "send" : "withhold";
+  const request: HealthSharingGate["request"] = async (q, options = {}) => {
+    const known = standing(q);
+    if (known) return known;
     if (!asker) return "withhold";
-    const key = keyOf(question);
-    const pending = waiting.get(key) ?? ask(question, asker);
-    waiting.set(key, pending);
-    return pending;
+    if (options.signal?.aborted) throw abortError();
+    options.onWait?.();
+    const decideThis = (cancelled: AbortSignal) => decide(q, cancelled);
+    return queue.join(keyOf(q), q.providerType, decideThis, options.signal);
   };
 
   const setAsker = (next: HealthAsker) => {
@@ -81,6 +84,7 @@ export const askOnce = (
 };
 
 export const askGenerationHealth = (
-  providerType: LlmProviderType
+  providerType: LlmProviderType,
+  options?: HealthRequestOptions
 ): Promise<HealthShare> =>
-  healthSharingGate.request({ flow: "generation", providerType });
+  healthSharingGate.request({ flow: "generation", providerType }, options);

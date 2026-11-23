@@ -80,6 +80,7 @@ describe("ChatPage turn in flight across a conversation switch", () => {
             options.signal.addEventListener("abort", () =>
               resolve({
                 status: "aborted",
+                toolNames: [],
                 text: "Respuesta para c1",
                 messages: [],
               } as ChatTurnResult)
@@ -104,6 +105,7 @@ describe("ChatPage turn in flight across a conversation switch", () => {
         "c1",
         expect.objectContaining({
           status: "aborted",
+          toolNames: [],
           text: "Respuesta para c1",
         })
       )

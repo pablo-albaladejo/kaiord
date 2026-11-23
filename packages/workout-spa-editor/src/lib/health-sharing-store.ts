@@ -5,7 +5,7 @@
  * Drive snapshot or a backup; "delete all data" clears it with the rest of
  * Web Storage. When storage throws, the answers last the session.
  */
-import type { LlmProviderType } from "@kaiord/ai/providers";
+import { LLM_PROVIDER_TYPES, type LlmProviderType } from "@kaiord/ai/providers";
 import { z } from "zod";
 
 export const HEALTH_SHARING_KEY = "kaiord-health-sharing";
@@ -15,12 +15,11 @@ export type HealthSharingDecisions = Partial<
   Record<LlmProviderType, HealthSharingDecision>
 >;
 
+const decisionSchema = z.enum(["always", "never"]).optional();
 const decisionsSchema = z
-  .object({
-    anthropic: z.enum(["always", "never"]).optional(),
-    openai: z.enum(["always", "never"]).optional(),
-    google: z.enum(["always", "never"]).optional(),
-  })
+  .object(
+    Object.fromEntries(LLM_PROVIDER_TYPES.map((type) => [type, decisionSchema]))
+  )
   .strip();
 
 export type HealthSharingStore = {
@@ -33,7 +32,7 @@ const parse = (raw: string | null): HealthSharingDecisions => {
   if (raw === null) return {};
   try {
     const result = decisionsSchema.safeParse(JSON.parse(raw));
-    return result.success ? result.data : {};
+    return result.success ? (result.data as HealthSharingDecisions) : {};
   } catch {
     return {};
   }

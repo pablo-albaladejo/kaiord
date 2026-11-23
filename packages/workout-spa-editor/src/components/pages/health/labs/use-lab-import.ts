@@ -8,16 +8,15 @@ import {
   isModelNotFoundError,
   resolveModelForPurpose,
 } from "@kaiord/ai/providers";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
-import { createDexiePersistence } from "../../../../adapters/dexie/dexie-persistence-adapter";
-import { createDexieUsageTelemetrySink } from "../../../../adapters/telemetry/dexie-usage-telemetry-sink";
 import { runLabExtraction } from "../../../../application/lab/extraction/run-lab-extraction.use-case";
 import { startTraceRun } from "../../../../application/trace/trace-run";
 import { useToastContext } from "../../../../contexts/ToastContext";
 import { useActiveProfileLive } from "../../../../hooks/use-active-profile-live";
 import { useAiModelBindingsLive } from "../../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../../hooks/use-ai-providers-live";
+import { useGenerationDeps } from "../../../../hooks/use-generation-deps";
 import { useActiveLocale } from "../../../../i18n/LocaleProvider";
 import { useTranslate } from "../../../../i18n/use-translate";
 import { healthSharingGate } from "../../../../lib/health-sharing-gate";
@@ -35,11 +34,7 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
   const [isRunning, setIsRunning] = useState(false);
   useUnsavedWork(isRunning);
   const controllerRef = useRef<AbortController | null>(null);
-  const persistence = useMemo(() => createDexiePersistence(), []);
-  const telemetry = useMemo(
-    () => createDexieUsageTelemetrySink(persistence),
-    [persistence]
-  );
+  const { persistence, usage: telemetry } = useGenerationDeps();
 
   const canImport =
     resolveModelForPurpose("lab_extraction", providers, bindings) !== null;
@@ -52,6 +47,10 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
     const controller = new AbortController();
     controllerRef.current = controller;
     setIsRunning(true);
+    const trace = startTraceRun({
+      feature: "lab_import",
+      traces: persistence.traces,
+    });
     try {
       const data = new Uint8Array(await file.arrayBuffer());
       const result = await runLabExtraction({
@@ -60,12 +59,12 @@ export function useLabImport(onDraft: (draft: LabDraft) => void) {
         bindings,
         signal: controller.signal,
         telemetry,
-        trace: startTraceRun({
-          feature: "lab_import",
-          traces: persistence.traces,
-        }),
+        trace,
         askHealth: (providerType) =>
-          healthSharingGate.request({ flow: "labImport", providerType }),
+          healthSharingGate.request(
+            { flow: "labImport", providerType },
+            { signal: controller.signal, onWait: () => void trace.checkpoint() }
+          ),
       });
       if (result.ok)
         onDraft(mapExtractionToDraft(result.extraction, { locale }));

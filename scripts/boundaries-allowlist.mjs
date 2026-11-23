@@ -111,10 +111,6 @@ export const BOUNDARIES_ALLOWLIST = Object.freeze(
       "src/components/pages/health/labs/dashboard/use-lab-dashboard-params.ts",
       REASON.COMPOSITION_ROOT,
     ],
-    [
-      "src/components/pages/health/labs/use-lab-import.ts",
-      REASON.COMPOSITION_ROOT,
-    ],
 
     // --- D: adapter module that is really UI-adjacent ---
     [
@@ -139,7 +135,7 @@ export const ALLOWLIST_PACKAGE_ROOT = "packages/workout-spa-editor";
  * High-water mark. The allowlist may shrink below this, never grow past it.
  * Lower this number whenever entries are removed so the ratchet keeps tightening.
  */
-export const BOUNDARIES_ALLOWLIST_MAX = 21;
+export const BOUNDARIES_ALLOWLIST_MAX = 20;
 
 /** Repo-root-relative globs, for `ignores` in eslint.config.js. */
 export const boundariesAllowlistPaths = () =>

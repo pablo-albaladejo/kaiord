@@ -2,12 +2,17 @@
 
 ### Requirement: Every run of the assistant leaves one Trace on the device
 
-The Kaiord App SHALL write exactly one Trace per run of the assistant: a chat turn (from the athlete's message to the reply, across any action they confirm or refuse), a workout generation, a batch of generations, and a lab document read that reaches the Provider. A Trace SHALL hold when the run started and finished, its feature, its latency, its outcome (`ok`, `failed`, `stopped`), the number of requests and retries, the versioned prompt unit of each model call, each Tool called with its confirmation (`athlete`, `automatic`, `not_needed`) and result (`ok`, `refused`, `failed`, `unanswered`), `priceRun`'s `RunCost` for each model reached, the total cost or null when unknown, and the kinds of data from the data-flow registry that went to each Provider. It SHALL NOT hold a message, prompt, document or model answer, and its schema SHALL be strict.
+The Kaiord App SHALL write exactly one Trace per run of the assistant: a chat turn (from the athlete's message to the reply, across any action they confirm or refuse), a workout generation, a batch of generations, and a lab document read that reaches the Provider. A Trace SHALL hold when the run started and finished, its feature, its latency, its outcome (`ok`, `failed`, `stopped`), the number of requests and retries, the versioned prompt unit of each model call, each Tool called with its confirmation (`athlete`, `automatic`, `not_needed`) and result (`ok`, `refused`, `failed`, `unanswered`), `priceRun`'s `RunCost` for each model reached, the total cost or null when unknown, and, per Provider, the kinds of data from the data-flow registry the App put in the run's requests, with apart the kinds it may have carried but cannot count (health data replayed replies may quote, or a description the assistant wrote after reading it may hold). A run waiting on the athlete's health answer SHALL already be stored with outcome `stopped`, replaced when it finishes. It SHALL NOT hold a message, prompt, document or model answer, and its schema SHALL be strict.
 
 #### Scenario: A generation's Trace
 
 - **WHEN** a workout is generated with one invalid attempt and one valid one on a priced model
 - **THEN** one Trace SHALL be stored with two requests, one retry, the agent's prompt unit, the summed cost and the generation's kinds sent to the Provider
+
+#### Scenario: A page closed while the health notice waits
+
+- **WHEN** the page is reloaded while a run waits on the health notice
+- **THEN** that run's Trace SHALL be stored with outcome `stopped`
 
 #### Scenario: A batch is one run
 

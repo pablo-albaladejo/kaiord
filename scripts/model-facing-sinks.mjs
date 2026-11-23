@@ -85,7 +85,7 @@ export const SINKS = [
     tool: "create_workout",
     status: "clean",
     provenance:
-      "returns ids the app generated; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text.",
+      "returns ids the app generated; a throw from execute becomes an app error code in hooks/chat/run-confirmed-tool.ts, never its text. A description refused because the athlete keeps health data from the generation Provider answers health-withheld.ts's app-authored literal, whose only variable is the Provider's fixed name.",
   },
   {
     tool: "log_health_metric",

@@ -50,6 +50,7 @@ vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
   ),
 }));
 
+import { createInMemoryTraceRepository } from "../test-utils/in-memory-trace-repository";
 import type { Profile } from "../types/profile";
 import { garminPaceZonesFor } from "../utils/garmin-pace-zones";
 import { generateWorkoutKrd } from "./generate-workout";
@@ -60,6 +61,10 @@ describe("generateWorkoutKrd for a runner without pace zones", () => {
   it("should produce a workout the Garmin push accepts", async () => {
     // Arrange
     const options = {
+      deps: {
+        persistence: { traces: createInMemoryTraceRepository() } as never,
+        usage: { emit: () => undefined },
+      },
       text: "Rodaje 12' z1 + 30\" fuerte + R: 2'",
       provider: { type: "anthropic" } as never,
       modelId: "m",

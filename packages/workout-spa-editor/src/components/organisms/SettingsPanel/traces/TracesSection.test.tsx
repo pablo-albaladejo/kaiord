@@ -66,6 +66,27 @@ describe("TracesSection", () => {
     );
   });
 
+  it("should set apart the kinds a run may have carried but could not count", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    await renderWith([
+      buildTrace({
+        id: "t-2",
+        sent: [
+          { to: "openai", kinds: ["workoutDescription"], declared: ["hrv"] },
+        ],
+      }),
+    ]);
+
+    // Act
+    await user.click(await screen.findByText(/^Chat · /));
+
+    // Assert
+    expect(screen.getByTestId("trace-details")).toHaveTextContent(
+      "To OpenAI: the workout you describe; it may also have carried HRV, which Kaiord cannot count"
+    );
+  });
+
   it("should export every Trace as one JSON file", async () => {
     // Arrange
     const user = userEvent.setup();

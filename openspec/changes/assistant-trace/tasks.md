@@ -21,3 +21,8 @@
 - [x] 3.2 `claims/data-flows.json` entries for the new inventory sentence
 - [x] 3.3 GLOSSARY.md and the UX glossary name the Trace in both languages
 - [x] Review fix: the run's sink forwards events without the Trace's id; `usageEvents` device-local with no `traceId` (v39); the policy and the kept-on-device inventory list the usage log (`usage-stays-on-device.test.ts`, `trace-run.test.ts`, `check-privacy-policy.test.mjs`)
+
+## 4. Review fixes
+
+- [x] 4.1 `sent` counts the kinds each request carried, with the uncountable ones apart as `declared`, typed by destination and kind (tests red first)
+- [x] 4.2 A run waiting on the health notice keeps a stopped Trace; Stop then leaves a stopped Trace and sends nothing
