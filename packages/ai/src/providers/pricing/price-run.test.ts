@@ -16,7 +16,8 @@ const ARGON_ONE_MTOK_AFTER_USD = 4;
 
 describe("priceRun", () => {
   it("should price input, output and cache tokens at the model's own prices", () => {
-    // Arrange: claude-sonnet-5 is $2 in, $10 out, $0.20 cache read and $2.50
+    // Arrange
+    // Claude-sonnet-5 is $2 in, $10 out, $0.20 cache read and $2.50
     // cache write per 1M; 700 uncached + 200 read + 100 written = 1000 input.
     const requests = [
       {
@@ -38,7 +39,9 @@ describe("priceRun", () => {
       at: AT,
     });
 
-    // Assert: (700*2 + 200*0.2 + 100*2.5 + 500*10) / 1e6
+    // Assert
+
+    // (700*2 + 200*0.2 + 100*2.5 + 500*10) / 1e6
     expect(cost.usd).toBeCloseTo(SONNET_5_CACHED_USD, DIGITS);
     expect(cost.basis).toEqual({
       kind: "price_table",
@@ -70,7 +73,9 @@ describe("priceRun", () => {
       at: AT,
     });
 
-    // Assert: $1 + $5, and $0.25 + $2
+    // Assert
+
+    // $1 + $5, and $0.25 + $2
     expect(haiku.usd).toBeCloseTo(HAIKU_4_5_ONE_MTOK_EACH_USD, DIGITS);
     expect(gpt.usd).toBeCloseTo(GPT_5_MINI_ONE_MTOK_EACH_USD, DIGITS);
   });
@@ -95,14 +100,17 @@ describe("priceRun", () => {
     const clean = priceRun({ ...run, requests: [ok] });
     const retried = priceRun({ ...run, requests: [invalid, ok] });
 
-    // Assert: each attempt is 1000*2 + 500*10 = $0.007
+    // Assert
+
+    // Each attempt is 1000*2 + 500*10 = $0.007
     expect(clean.usd).toBeCloseTo(SONNET_5_ATTEMPT_USD, DIGITS);
     expect(retried.usd).toBeCloseTo(TWO_SONNET_5_ATTEMPTS_USD, DIGITS);
     expect(retried.failedRequests).toBe(1);
   });
 
   it("should price a request above the long-context threshold at the long-context prices", () => {
-    // Arrange: gpt-6.1-sol is $4 in, $15 out per 1M above 272K input tokens
+    // Arrange
+    // Gpt-6.1-sol is $4 in, $15 out per 1M above 272K input tokens
     const requests = [
       {
         outcome: "ok" as const,
@@ -118,12 +126,15 @@ describe("priceRun", () => {
       at: AT,
     });
 
-    // Assert: 300000*4 + 1000*15 = 1_215_000 micro-dollars
+    // Assert
+
+    // 300000*4 + 1000*15 = 1_215_000 micro-dollars
     expect(cost.usd).toBeCloseTo(GPT_6_1_SOL_LONG_USD, DIGITS);
   });
 
   it("should use the price in force on the day of the run", () => {
-    // Arrange: gemini-4-argon input goes from $2 to $4 on 2026-12-01
+    // Arrange
+    // Gemini-4-argon input goes from $2 to $4 on 2026-12-01
     const requests = [
       {
         outcome: "ok" as const,
