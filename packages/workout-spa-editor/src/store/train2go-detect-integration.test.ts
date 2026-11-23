@@ -13,11 +13,11 @@ import { createDetectAction } from "./train2go-detect";
 
 const CACHE_TTL_EXPIRED_OFFSET_MS = 30_001;
 
-vi.mock("./train2go-extension-transport", () => ({
+vi.mock("../adapters/train2go/connector/train2go-extension-transport", () => ({
   ping: vi.fn(),
 }));
 
-import { ping } from "./train2go-extension-transport";
+import { ping } from "../adapters/train2go/connector/train2go-extension-transport";
 
 describe("Train2Go detection cache — integration", () => {
   type State = {

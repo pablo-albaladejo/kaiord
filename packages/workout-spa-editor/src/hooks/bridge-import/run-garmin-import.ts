@@ -1,4 +1,4 @@
-import { readGarminActivities } from "../../adapters/garmin/garmin-activities-transport";
+import { readGarminActivities } from "../../adapters/garmin/connector/garmin-activities-transport";
 import { pullGarminActivities } from "../../application/import/pull-garmin-activities.use-case";
 import type { PersistencePort } from "../../ports/persistence-port";
 

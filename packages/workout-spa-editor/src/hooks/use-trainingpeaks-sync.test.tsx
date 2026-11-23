@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { checkTrainingPeaksSession } from "../adapters/trainingpeaks/trainingpeaks-transport";
+import { checkTrainingPeaksSession } from "../adapters/trainingpeaks/connector/trainingpeaks-transport";
 import { syncTrainingPeaksWeight } from "../application/trainingpeaks/sync-trainingpeaks-weight.use-case";
 import { PersistenceProvider } from "../contexts/persistence-context";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
@@ -14,12 +14,15 @@ import { useTrainingPeaksSync } from "./use-trainingpeaks-sync";
 vi.mock("../adapters/bridge/bridge-discovery", () => ({
   bridgeDiscovery: { getExtensionId: vi.fn() },
 }));
-vi.mock("../adapters/trainingpeaks/trainingpeaks-transport", () => ({
+vi.mock("../adapters/trainingpeaks/connector/trainingpeaks-transport", () => ({
   checkTrainingPeaksSession: vi.fn(),
 }));
-vi.mock("../adapters/trainingpeaks/trainingpeaks-metrics-transport", () => ({
-  readTrainingPeaksMetrics: vi.fn(),
-}));
+vi.mock(
+  "../adapters/trainingpeaks/connector/trainingpeaks-metrics-transport",
+  () => ({
+    readTrainingPeaksMetrics: vi.fn(),
+  })
+);
 vi.mock(
   "../application/trainingpeaks/sync-trainingpeaks-weight.use-case",
   () => ({

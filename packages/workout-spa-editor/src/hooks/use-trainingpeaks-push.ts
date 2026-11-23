@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
-import { readTrainingPeaksAthleteId } from "../adapters/trainingpeaks/trainingpeaks-athlete-transport";
+import { readTrainingPeaksAthleteId } from "../adapters/trainingpeaks/connector/trainingpeaks-athlete-transport";
 import { executeWorkoutPush } from "../application/export/execute-workout-push";
 import type { RepushVerdict } from "../application/trainingpeaks/trainingpeaks-repush-guard";
 import { useAnalytics } from "../contexts";

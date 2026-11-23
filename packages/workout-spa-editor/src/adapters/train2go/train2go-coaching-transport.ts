@@ -11,17 +11,17 @@ import type {
   CoachingPingResult,
   CoachingTransport,
 } from "../../application/coaching/coaching-transport-port";
+import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
 import type {
   Train2GoActivity,
   Train2GoComment,
-} from "../../store/train2go-extension-transport";
+} from "./connector/train2go-extension-transport";
 import {
   openTrain2Go,
   readDay,
   readWeek,
-} from "../../store/train2go-extension-transport";
-import { readProfile } from "../../store/train2go-read-profile";
-import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
+} from "./connector/train2go-extension-transport";
+import { readProfile } from "./connector/train2go-read-profile";
 import { fetchZones } from "./train2go-fetch-zones";
 import { toCoachingActivityRecord } from "./train2go-record.converter";
 

@@ -1,6 +1,6 @@
 import { checkAllowsUse } from "../../adapters/bridge/bridge-session-outcome";
-import { readTrainingPeaksMetrics } from "../../adapters/trainingpeaks/trainingpeaks-metrics-transport";
-import { checkTrainingPeaksSession } from "../../adapters/trainingpeaks/trainingpeaks-transport";
+import { readTrainingPeaksMetrics } from "../../adapters/trainingpeaks/connector/trainingpeaks-metrics-transport";
+import { checkTrainingPeaksSession } from "../../adapters/trainingpeaks/connector/trainingpeaks-transport";
 import { syncTrainingPeaksWeight } from "../../application/trainingpeaks/sync-trainingpeaks-weight.use-case";
 import type { PersistencePort } from "../../ports/persistence-port";
 

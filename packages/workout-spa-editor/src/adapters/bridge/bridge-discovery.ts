@@ -47,7 +47,8 @@ export function createBridgeDiscovery(
   async function handleAnnouncement(ann: BridgeAnnouncement): Promise<void> {
     if (ids.get(ann.bridgeId) === ann.extensionId) return;
     const manifest = await verify(ann);
-    if (manifest && register({ ids, caps, outdated, verified }, ann, manifest)) notify();
+    if (manifest && register({ ids, caps, outdated, verified }, ann, manifest))
+      notify();
   }
 
   function onMessage(event: MessageEvent): void {

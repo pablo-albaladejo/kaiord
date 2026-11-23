@@ -9,7 +9,7 @@
  */
 import { db } from "../adapters/dexie/dexie-database";
 import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-export-ledger-repository";
-import { pushTrainingPeaksWorkout } from "../adapters/trainingpeaks/trainingpeaks-workout-transport";
+import { pushTrainingPeaksWorkout } from "../adapters/trainingpeaks/connector/trainingpeaks-workout-transport";
 import type { ExecuteWorkoutPushInput } from "../application/export/execute-workout-push";
 import { TRAININGPEAKS_BRIDGE_ID } from "../application/trainingpeaks/trainingpeaks-weight-import";
 

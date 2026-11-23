@@ -6,11 +6,11 @@
  */
 import type { Analytics } from "@kaiord/core";
 
+import { createGarminCalendarPort } from "../adapters/garmin/connector/garmin-calendar-operations";
 import { createWebLocksRecordLock } from "../adapters/locks/web-locks-record-lock";
 import type { PlacementJoin } from "../application/garmin-placement/placement-join";
 import type { PlacementPipelineDeps } from "../application/garmin-placement/placement-pipeline-deps";
 import { SCHEDULE_IDS_IN_FIND } from "../application/garmin-placement/placement-timing";
-import { createGarminCalendarPort } from "./garmin-calendar-operations";
 import { ledgerRepo } from "./garmin-push-fn";
 import { getGarminExtensionId } from "./use-garmin-bridge-action-helpers";
 

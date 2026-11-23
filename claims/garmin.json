@@ -35,7 +35,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -81,7 +81,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -103,7 +103,7 @@
           "title": "should move a date-only change with 0 library pushes, retiring before unschedule [S]"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should read the 0-based month of the date and return only the workout's entries as strings"
         },
         {
@@ -111,7 +111,7 @@
           "title": "should place a workout on a date with the date as the only body"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should build every request so that the extension's list admits it"
         },
         {
@@ -143,7 +143,7 @@
           "title": "should send a FIT file as the multipart file field"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send a FIT file's bytes as the body of the upload"
         },
         {
@@ -208,7 +208,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -479,11 +479,11 @@
       "text": "**Calendar write and delete**: When you place workouts on your Garmin Connect calendar from the Kaiord App, the extension calls two calendar endpoints on this host. `POST /workout-service/schedule/{workoutId}` places a library workout on a date, sending only that date. `DELETE /workout-service/schedule/{workoutScheduleId}` removes one calendar entry. The allowlist accepts both paths only with a numeric id, and neither path can delete a library workout.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should place a workout on a date and return only the schedule id as a digit string"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should remove one calendar entry and map a 204 to success"
         },
         {
@@ -491,7 +491,7 @@
           "title": "should place a workout on a date with the date as the only body"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should build every request so that the extension's list admits it"
         },
         {
@@ -505,7 +505,7 @@
       "text": "**Calendar read**: To check one workout's calendar entries (before placing it on a date, when it is sent again unchanged, and around a move or a removal), the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of your calendar; the extension hands that answer to the Kaiord App unread, and the Kaiord App keeps only the entries of that one workout, each entry's id and date. Every other calendar item is dropped in the Kaiord App, in your browser, and is never stored or sent.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should read the 0-based month of the date and return only the workout's entries as strings"
         },
         {
@@ -730,7 +730,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]
@@ -835,7 +835,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -843,11 +843,11 @@
           "contains": "\"/workout-service/workouts?start=0&limit=20\""
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should list the athlete's workouts from Garmin's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should build every request so that the extension's list admits it"
         },
         {
@@ -873,7 +873,7 @@
           "title": "should declare a body schema for exactly the write entries"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should list the athlete's workouts from Garmin's raw answer"
         }
       ]
@@ -891,7 +891,7 @@
           "title": "should send a FIT file as the multipart file field"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send a FIT file's bytes as the body of the upload"
         },
         {
@@ -929,7 +929,7 @@
           "title": "should adopt the one match, keep a seen held id, and write an unseen one gone"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should read the 0-based month of the date and return only the workout's entries as strings"
         },
         {
@@ -937,7 +937,7 @@
           "title": "should place a workout on a date with the date as the only body"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should build every request so that the extension's list admits it"
         },
         {
@@ -979,7 +979,7 @@
           "title": "should write gone when the re-check finds an abandoned entry absent"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should read the 0-based month of the date and return only the workout's entries as strings"
         },
         {
@@ -1059,7 +1059,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -1105,7 +1105,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         },
         {
@@ -1127,7 +1127,7 @@
           "title": "should move a date-only change with 0 library pushes, retiring before unschedule [S]"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should read the 0-based month of the date and return only the workout's entries as strings"
         },
         {
@@ -1135,7 +1135,7 @@
           "title": "should place a workout on a date with the date as the only body"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should build every request so that the extension's list admits it"
         },
         {
@@ -1167,7 +1167,7 @@
           "title": "should send a FIT file as the multipart file field"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send a FIT file's bytes as the body of the upload"
         },
         {
@@ -1232,7 +1232,7 @@
           "title": "should send a workout that matches its declared shape as JSON"
         },
         {
-          "test": "packages/workout-spa-editor/src/hooks/garmin-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/garmin/connector/garmin-connector-contract.test.ts",
           "title": "should send the workout as the body of the one write and read Garmin's id"
         }
       ]

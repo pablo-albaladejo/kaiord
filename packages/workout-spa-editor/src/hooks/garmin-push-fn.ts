@@ -6,10 +6,10 @@
  */
 import { db } from "../adapters/dexie/dexie-database";
 import { createDexieExportLedgerRepository } from "../adapters/dexie/dexie-export-ledger-repository";
+import { executePush } from "../adapters/garmin/connector/garmin-workout-operations";
 import type { ExecuteWorkoutPushInput } from "../application/export/execute-workout-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 import { parseGarminWorkoutId } from "../types/garmin-ledger";
-import { executePush } from "./garmin-bridge-operations";
 import { getGarminExtensionId } from "./use-garmin-bridge-action-helpers";
 
 export { policyRepo } from "./integration-policy-repo";

@@ -6,14 +6,15 @@
 
 import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import { PREVIOUS_BRIDGE_PROTOCOL_VERSION } from "../adapters/bridge/thin-bridge-request";
+import { ping } from "../adapters/garmin/connector/garmin-ping";
+import { evaluatePingResult } from "../adapters/garmin/connector/garmin-ping-evaluation";
+import { executePush } from "../adapters/garmin/connector/garmin-workout-operations";
 import type { ConnectionState } from "../application/connections/connection-state";
 import type {
   GarminPushOutcome,
   PushState,
 } from "../contexts/garmin-bridge-types";
 import { logFailure } from "../lib/log-failure";
-import { ping } from "../store/garmin-extension-transport";
-import { evaluatePingResult, executePush } from "./garmin-bridge-operations";
 import { msUntilDiscoverySettled } from "./garmin-discovery-window";
 
 export const getGarminExtensionId = (): string =>

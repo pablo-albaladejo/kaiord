@@ -8,9 +8,12 @@ vi.mock("../adapters/dexie/dexie-export-ledger-repository", () => ({
   createDexieExportLedgerRepository: () => ({}),
 }));
 
-vi.mock("../adapters/trainingpeaks/trainingpeaks-workout-transport", () => ({
-  pushTrainingPeaksWorkout: mocks.push,
-}));
+vi.mock(
+  "../adapters/trainingpeaks/connector/trainingpeaks-workout-transport",
+  () => ({
+    pushTrainingPeaksWorkout: mocks.push,
+  })
+);
 
 vi.mock("./integration-policy-repo", () => ({ policyRepo: {} }));
 

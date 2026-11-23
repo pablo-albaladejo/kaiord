@@ -1,4 +1,4 @@
-import { readTanitaExportCsv } from "../../adapters/tanita/tanita-transport";
+import { readTanitaExportCsv } from "../../adapters/tanita/connector/tanita-transport";
 import { syncTanitaImport } from "../../application/tanita/sync-tanita-import.use-case";
 import type { PersistencePort } from "../../ports/persistence-port";
 

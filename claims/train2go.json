@@ -31,11 +31,11 @@
       "text": "Lets the Kaiord App read the plan your coach sets on Train2Go, your training zones and your weight, using your own Train2Go sign-in",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -73,11 +73,11 @@
       "text": "Fetches the week your coach planned on Train2Go when the Kaiord App asks, and the Kaiord App reads from it each coaching activity's date, sport, title, duration, workload and completion status.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
@@ -91,15 +91,15 @@
       "text": "Fetches one day in full when the Kaiord App asks, and the Kaiord App reads from it the coach's description of each session, and that day's comments with who wrote them.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should return the day's comment thread alongside its activities"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should backfill the date param onto every activity read from a day"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         }
       ]
@@ -113,7 +113,7 @@
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -251,11 +251,11 @@
           "servedBy": "packages/workout-spa-editor/index.html"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-read-zones.ts",
           "contains": "path: DETAILS_PATH,"
         }
       ]
@@ -404,11 +404,11 @@
       "text": "Lets the Kaiord App read the athlete's own Train2Go coaching plan, training zones and weight through the athlete's existing Train2Go sign-in.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -829,7 +829,7 @@
           "contains": "\"message\": \"Kaiord for Train2Go\""
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         }
       ]
@@ -912,7 +912,7 @@
           "title": "should refuse any path outside its closed list without sending a request"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         }
       ]
@@ -922,19 +922,19 @@
       "text": "**Coaching Plan**: When the Kaiord App asks, the extension fetches the week your coach planned and single days in full. The Kaiord App reads from them each coaching activity's date, sport, title, duration, workload and completion status, the coach's description of each coaching activity, and that day's comments with who wrote them.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should return the day's comment thread alongside its activities"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should backfill the date param onto every activity read from a day"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
@@ -952,7 +952,7 @@
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -960,7 +960,7 @@
           "title": "should redact forbidden fields recursively at any nesting depth"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-read-zones.ts",
           "contains": "path: DETAILS_PATH,"
         },
         {
@@ -1081,11 +1081,11 @@
       "text": "Permite que Kaiord App lea el plan de tu entrenador en Train2Go, tus zonas y tu peso, con tu propio inicio de sesión de Train2Go",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -1123,11 +1123,11 @@
       "text": "Pide a Train2Go la semana que tu entrenador planificó cuando Kaiord App lo solicita, y Kaiord App lee de ella la fecha, el deporte, el título, la duración, la carga y el estado de cada actividad de entrenamiento.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should read the week your coach planned from Train2Go's raw answer"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
@@ -1141,15 +1141,15 @@
       "text": "Pide un día completo cuando Kaiord App lo solicita, y Kaiord App lee de él la descripción que hace tu entrenador de cada sesión, y los comentarios de ese día con quién los escribió.",
       "proof": [
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should return the day's comment thread alongside its activities"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should backfill the date param onto every activity read from a day"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         }
       ]
@@ -1163,7 +1163,7 @@
           "title": "should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)"
         },
         {
-          "test": "packages/workout-spa-editor/src/store/train2go-connector-contract.test.ts",
+          "test": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-connector-contract.test.ts",
           "title": "should keep only zones and weight from the profile page, dropping everything else it holds"
         },
         {
@@ -1301,11 +1301,11 @@
           "servedBy": "packages/workout-spa-editor/index.html"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-transport.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-extension-transport.ts",
           "contains": "path: weeklyPath(date, externalUserId),"
         },
         {
-          "file": "packages/workout-spa-editor/src/store/train2go-extension-read-zones.ts",
+          "file": "packages/workout-spa-editor/src/adapters/train2go/connector/train2go-read-zones.ts",
           "contains": "path: DETAILS_PATH,"
         }
       ]

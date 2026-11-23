@@ -46,7 +46,10 @@ const probeBy =
     extensionId: string,
     protocolVersion?: number | null
   ): ReturnType<SessionProber> => {
-    if (costlyOnPrevious && protocolVersion === PREVIOUS_BRIDGE_PROTOCOL_VERSION)
+    if (
+      costlyOnPrevious &&
+      protocolVersion === PREVIOUS_BRIDGE_PROTOCOL_VERSION
+    )
       return notChecked();
     const res = await sendBridgeMessage(extensionId, { action }, timeoutMs);
     return classifyEnvelope(res, bridgeId, readSession);

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { executeList } from "../adapters/garmin/connector/garmin-workout-operations";
 import type { ConnectionState } from "../application/connections/connection-state";
 import type { PushState } from "../contexts/garmin-bridge-types";
-import { executeList, INITIAL_PUSH_STATE } from "./garmin-bridge-operations";
 import { msUntilDiscoverySettled } from "./garmin-discovery-window";
 import {
   getGarminExtensionId,
   runDetect,
   runPush,
 } from "./use-garmin-bridge-action-helpers";
+
+const INITIAL_PUSH_STATE: PushState = { status: "idle" };
 
 export const useGarminBridgeActions = () => {
   const [extensionInstalled, setExtensionInstalled] = useState(false);

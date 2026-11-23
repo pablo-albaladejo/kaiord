@@ -5,12 +5,10 @@
  * the expected shape is a failed read, never "found none": the App re-places
  * a workout only on a proven absence.
  */
+import { readJson } from "../../bridge/connector-call";
 import type { RawAnswer } from "../../bridge/thin-bridge-request";
 import { bridgeAnswerRefusal } from "../../bridge/thin-bridge-request";
 import { isIsoDate, toScheduleId } from "./garmin-ids";
-
-export const readJson = (answer: RawAnswer): unknown =>
-  answer.body === "" ? null : (JSON.parse(answer.body) as unknown);
 
 export const readNothing = (): null => null;
 

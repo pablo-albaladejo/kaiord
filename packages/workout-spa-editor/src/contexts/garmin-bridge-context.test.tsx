@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GarminBridgeProvider, useGarminBridge } from "./garmin-bridge-context";
 
-vi.mock("../store/garmin-extension-transport", () => ({
+vi.mock("../adapters/garmin/connector/garmin-ping", () => ({
   ping: vi.fn().mockResolvedValue({ ok: false }),
   sendMessage: vi.fn().mockResolvedValue({ ok: false }),
 }));
