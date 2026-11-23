@@ -38,6 +38,9 @@ const raw = (over: Partial<RawTurn>): RawTurn => ({
   messages: [{ role: "assistant", content: MODEL_TEXT }],
   steps: 2,
   toolNames: ["query_health"],
+  requests: [
+    { outcome: "ok", usage: { promptTokens: 120, completionTokens: 30 } },
+  ],
   ...over,
 });
 
@@ -48,6 +51,7 @@ const EVENT_KEYS = [
   "outputTokens",
   "promptVersion",
   "provider",
+  "requests",
   "status",
   "steps",
   "toolNames",
@@ -141,6 +145,7 @@ describe("createChatAgent telemetry", () => {
       steps: 1,
       toolNames: ["query_health"],
       usage: { promptTokens: 40, completionTokens: 9 },
+      requests: [],
     });
     mockRunTurn.mockRejectedValueOnce(failure);
     const sink = createRingBufferTelemetrySink();

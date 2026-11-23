@@ -7,11 +7,32 @@
  */
 import type { AiModelPurpose } from "../providers/types";
 
-/** Provider-reported token counts for one run. */
+/**
+ * Provider-reported token counts. `promptTokens` is every input token,
+ * cached ones included; the cache counts say how many of them were read from
+ * or written to the Provider's prompt cache.
+ */
 export type AiUsage = {
   promptTokens: number;
   completionTokens: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
 };
+
+/**
+ * How one request to the Provider ended: `ok`, an output that did not
+ * validate (`invalid`) or was cut at the token limit (`truncated`), a thrown
+ * Provider or transport failure (`error`), or a stop by abort or watchdog.
+ */
+export type AiRequestOutcome =
+  "ok" | "invalid" | "truncated" | "error" | "stopped";
+
+/**
+ * One request that reached the Provider. `usage` is what the Provider
+ * reported; it is absent when the Provider reported none (a failure before
+ * the final chunk), and then the request is unmeasured, never zero.
+ */
+export type AiRequest = { outcome: AiRequestOutcome; usage?: AiUsage };
 
 type RunIdentity = {
   traceId: string;
@@ -51,6 +72,8 @@ export type ChatTurnFinishedEvent = {
   inputTokens: number;
   outputTokens: number;
   latencyMs: number;
+  /** One per model step started: each finished step, plus one cut short. */
+  requests: AiRequest[];
 };
 
 /**
@@ -70,12 +93,15 @@ export type AiRunTimings = {
 export type AiTelemetryEvent =
   | ({
       type: "run_finished";
+      /** Summed over every request of the run, failed attempts included. */
       usage?: AiUsage;
       timings?: AiRunTimings;
+      requests: AiRequest[];
     } & RunIdentity)
   | ({
       type: "run_failed";
       timings?: AiRunTimings;
+      requests: AiRequest[];
       error: { name: string; retriable: boolean };
     } & RunIdentity)
   | ChatTurnFinishedEvent;

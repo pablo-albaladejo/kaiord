@@ -1,7 +1,8 @@
 import { streamText } from "ai";
+import type { AiUsage } from "../observability/telemetry-types";
+import { toUsage, withUsage } from "./attempt-usage";
 import {
   callSettings,
-  toUsage,
   validateOutput,
   type CallModelArgs,
   type GenerateOutcome,
@@ -47,8 +48,15 @@ export const streamModel = async <TOutput>(
   report: ReportPhase
 ): Promise<GenerateOutcome<TOutput>> => {
   let streamError: unknown;
+  // The finished step's usage, captured synchronously: an attempt that fails
+  // after it (truncated, invalid) was billed for it, and reading it here never
+  // waits on a result promise a failed stream may leave unsettled.
+  let billed: AiUsage | undefined;
   const result = streamText({
     ...callSettings(args, feedback),
+    onStepEnd: (step) => {
+      billed = toUsage(step.usage);
+    },
     onError: ({ error }) => {
       streamError ??= error;
     },
@@ -66,11 +74,15 @@ export const streamModel = async <TOutput>(
     return Promise.all([result.output, result.usage]);
   };
   const [raw, usage] = await settled().catch((e: unknown) => {
-    throw streamError ?? toOutputError(e);
+    throw withUsage(streamError ?? toOutputError(e), billed);
   });
-  if (streamError !== undefined) throw streamError;
-  return {
-    output: validateOutput(args.definition, raw),
-    usage: toUsage(usage),
-  };
+  if (streamError !== undefined) throw withUsage(streamError, billed);
+  try {
+    return {
+      output: validateOutput(args.definition, raw),
+      usage: toUsage(usage),
+    };
+  } catch (error) {
+    throw withUsage(error, billed ?? toUsage(usage));
+  }
 };

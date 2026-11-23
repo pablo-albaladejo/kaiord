@@ -1,4 +1,9 @@
 import type { StepResult, ToolSet } from "ai";
+import { toUsage } from "../agents/attempt-usage";
+import type {
+  AiRequest,
+  AiRequestOutcome,
+} from "../observability/telemetry-types";
 import type { ChatUsage } from "./chat-types";
 import type { RawTurn } from "./run-turn";
 import type { TurnStopCause } from "./turn-watchdog";
@@ -9,11 +14,17 @@ export type TurnMetrics = {
   toolNames: string[];
   /** Summed usage of the completed steps; `undefined` before the first. */
   usage?: ChatUsage;
+  /** One per step started: a finished step with its usage, a cut one without. */
+  requests: AiRequest[];
 };
 
+/** How a step still running when the turn ended is reported. */
+type CutOutcome = Extract<AiRequestOutcome, "error" | "stopped">;
+
 export type TurnStats = {
+  onStepStart: () => void;
   onStepEnd: (step: StepResult<ToolSet>) => void;
-  snapshot: () => TurnMetrics;
+  snapshot: (cut?: CutOutcome) => TurnMetrics;
 };
 
 const isInvalid = (call: object) => "invalid" in call && Boolean(call.invalid);
@@ -24,27 +35,41 @@ const isInvalid = (call: object) => "invalid" in call && Boolean(call.invalid);
  * a name it made up, and that string is model output, not a tool id.
  *
  * Usage is the provider-reported total of each FINISHED step. A step cut by
- * an abort or the watchdog never reports usage (providers send it with the
- * final chunk), so its tokens are not counted.
+ * an error, an abort or the watchdog never reports usage (providers send it
+ * with the final chunk): it is listed as a request with no usage, so the cost
+ * says it is unmeasured instead of counting it as zero.
  */
 export const createTurnStats = (registered: ToolSet): TurnStats => {
-  let steps = 0;
+  let started = 0;
   const toolNames: string[] = [];
+  const requests: AiRequest[] = [];
   const usage: ChatUsage = { promptTokens: 0, completionTokens: 0 };
   return {
+    onStepStart: () => {
+      started += 1;
+    },
     onStepEnd: (step) => {
-      steps += 1;
       for (const call of step.toolCalls)
         if (Object.hasOwn(registered, call.toolName) && !isInvalid(call))
           toolNames.push(call.toolName);
-      usage.promptTokens += step.usage.inputTokens ?? 0;
-      usage.completionTokens += step.usage.outputTokens ?? 0;
+      const billed = toUsage(step.usage);
+      requests.push({ outcome: "ok", usage: billed });
+      usage.promptTokens += billed.promptTokens;
+      usage.completionTokens += billed.completionTokens;
     },
-    snapshot: () => ({
-      steps,
-      toolNames: [...toolNames],
-      ...(steps > 0 ? { usage: { ...usage } } : {}),
-    }),
+    snapshot: (cut) => {
+      const steps = requests.length;
+      const inFlight = cut ? Math.max(0, started - steps) : 0;
+      return {
+        steps,
+        toolNames: [...toolNames],
+        ...(steps > 0 ? { usage: { ...usage } } : {}),
+        requests: [
+          ...requests,
+          ...Array.from({ length: inFlight }, () => ({ outcome: cut! })),
+        ],
+      };
+    },
   };
 };
 
@@ -79,6 +104,7 @@ export const stoppedTurn = (
   toolCalls: [],
   finishReason: cause,
   usage: metrics.usage,
+  requests: metrics.requests,
   messages: streamed ? [{ role: "assistant", content: streamed }] : [],
   stopped: cause,
   steps: metrics.steps,

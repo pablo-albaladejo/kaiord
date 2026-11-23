@@ -5,7 +5,11 @@ import type {
   GenerateAgentInput,
   GenerateAgentResult,
 } from "./definition-types";
-import type { AiTelemetrySink } from "../observability/telemetry-types";
+import type {
+  AiRequest,
+  AiTelemetrySink,
+} from "../observability/telemetry-types";
+import { sumUsage } from "./attempt-usage";
 import {
   emitBestEffort,
   warnBestEffort,
@@ -29,7 +33,9 @@ export type GenerateAgentConfig = {
 /**
  * Executes a generate-mode agent: resolves the system prompt, runs the
  * validate-and-retry loop, and emits exactly one telemetry event (finished or
- * failed) carrying ids, versions, and metrics only — never payloads.
+ * failed) carrying ids, versions, and metrics only — never payloads. The
+ * event lists every request that reached the Provider, failed attempts
+ * included, and `usage` sums all of them: that is what the run was billed.
  */
 export const runGenerateAgent = async <TOutput>(
   definition: AgentDefinition<TOutput>,
@@ -53,6 +59,7 @@ export const runGenerateAgent = async <TOutput>(
 
   const clock = config.onProgress && createPhaseClock(config.onProgress);
 
+  const requests: AiRequest[] = [];
   let run: GenerateOutcome<TOutput>;
   try {
     run = await runGenerateLoop({
@@ -62,6 +69,7 @@ export const runGenerateAgent = async <TOutput>(
       definition,
       signal: config.signal,
       onProgress: clock?.observe,
+      onRequest: (request) => requests.push(request),
       onAttemptError: (attempt, error) =>
         warnBestEffort(config.logger, "Agent attempt failed", {
           attempt,
@@ -77,13 +85,15 @@ export const runGenerateAgent = async <TOutput>(
         ...identity,
         latencyMs: Date.now() - start,
         timings: clock?.stop(),
+        requests,
         error: { name, retriable: error instanceof AiAgentError },
       },
       config.logger
     );
     throw error;
   }
-  const { output, usage } = run;
+  const { output } = run;
+  const usage = sumUsage(requests);
   emitBestEffort(
     telemetry,
     {
@@ -92,6 +102,7 @@ export const runGenerateAgent = async <TOutput>(
       latencyMs: Date.now() - start,
       usage,
       timings: clock?.stop(),
+      requests,
     },
     config.logger
   );

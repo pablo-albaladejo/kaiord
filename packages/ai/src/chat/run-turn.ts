@@ -1,5 +1,6 @@
 import { streamText, stepCountIs } from "ai";
 import type { LanguageModel, ModelMessage, ToolSet } from "ai";
+import type { AiRequest } from "../observability/telemetry-types";
 import type { ChatUsage } from "./chat-types";
 import { attachTurnMetrics, createTurnStats, stoppedTurn } from "./turn-stats";
 import {
@@ -21,6 +22,8 @@ export type RawTurn = {
   /** Completed model steps and the tool names they called, for telemetry. */
   steps: number;
   toolNames: string[];
+  /** Every model request of the turn, for its cost (see `TurnMetrics`). */
+  requests: AiRequest[];
 };
 
 export type RunTurnParams = {
@@ -82,6 +85,7 @@ const streamTurn = async (
     maxRetries: 0,
     abortSignal: watchdog.signal,
     onChunk: watchdog.touch,
+    onStepStart: stats.onStepStart,
     onStepEnd: (step) => {
       watchdog.touch();
       stats.onStepEnd(step);
@@ -105,7 +109,7 @@ const streamTurn = async (
     ]);
   };
   const fail = (error: unknown): never => {
-    attachTurnMetrics(error, stats.snapshot());
+    attachTurnMetrics(error, stats.snapshot("error"));
     throw error;
   };
   const outcome = await settled().catch((e: unknown) => {
@@ -116,11 +120,11 @@ const streamTurn = async (
     return stoppedTurn(
       watchdog.cause() ?? "aborted",
       streamed,
-      stats.snapshot()
+      stats.snapshot("stopped")
     );
   if (streamError !== undefined) fail(streamError);
   const [text, toolCalls, finishReason, usage, response] = outcome;
-  const { steps, toolNames } = stats.snapshot();
+  const { steps, toolNames, requests } = stats.snapshot();
 
   return {
     text,
@@ -144,5 +148,6 @@ const streamTurn = async (
     messages: response.messages,
     steps,
     toolNames,
+    requests,
   };
 };
