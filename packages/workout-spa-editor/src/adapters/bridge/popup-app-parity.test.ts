@@ -7,7 +7,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { connectionNotice, connectionReasonNotice } from "@kaiord/i18n";
+import {
+  connectionNoTabNotice,
+  connectionNotice,
+  connectionReasonNotice,
+} from "@kaiord/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -143,11 +147,12 @@ describe("popup and App parity", () => {
   );
 });
 
-// #1091: WHOOP holds a sign-in whose token carries no account id. The popup
-// reads its own `popup-status` (with `userId`) and, finding none, shows the
-// shared `no-account-id` notice; the App reads `status` and `read-user-id`,
-// and must show the same notice at the same moment.
-describe("popup and App parity, a WHOOP sign-in with no account id", () => {
+// #1091: WHOOP holds a sign-in whose token carries no account id, or no
+// WHOOP tab is open to read through. The popup reads its own `popup-status`
+// (with `userId`) and `tab-open`; the App reads the yes-or-no `hasAccountId`
+// and `tabOpen` of the same check, and must show the same notice at the same
+// moment, asking WHOOP nothing and the extension for no id.
+describe("popup and App parity, a WHOOP sign-in that cannot serve", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -165,40 +170,32 @@ describe("popup and App parity, a WHOOP sign-in with no account id", () => {
   const popupSrc = () =>
     readFileSync(join(process.cwd(), "..", "whoop-bridge", "popup.js"), "utf8");
 
+  const current = (data: Record<string, unknown>) => ({
+    ok: true,
+    delivered: true,
+    protocolVersion: 2,
+    data: { connected: true, session: "signed-in", ...data },
+  });
+
   it.each([
     [
-      "the current extension (status, then read-user-id refused)",
-      [
-        {
-          ok: true,
-          delivered: true,
-          protocolVersion: 2,
-          data: { connected: true, session: "signed-in" },
-        },
-        {
-          ok: false,
-          delivered: true,
-          protocolVersion: 2,
-          error: "no session token captured — open app.whoop.com and reload it",
-        },
-      ],
+      "the current extension (a check that names no account)",
+      current({ hasAccountId: false, tabOpen: true }),
     ],
     [
       "the extension one protocol behind (status with a null id)",
-      [
-        {
-          ok: true,
-          delivered: true,
-          protocolVersion: 1,
-          data: { connected: true, userId: null, capturedAt: 1 },
-        },
-      ],
+      {
+        ok: true,
+        delivered: true,
+        protocolVersion: 1,
+        data: { connected: true, userId: null, capturedAt: 1 },
+      },
     ],
   ])(
     "should show the popup's no-account-id notice in the App for %s",
-    async (_label, answers) => {
+    async (_label, answer) => {
       // Arrange
-      for (const answer of answers) mockedSend.mockResolvedValueOnce(answer);
+      mockedSend.mockResolvedValueOnce(answer);
       const popup = connectionReasonNotice("no-account-id", "WHOOP", "en");
 
       // Act
@@ -209,24 +206,32 @@ describe("popup and App parity, a WHOOP sign-in with no account id", () => {
       expect(popupSrc()).toMatch(/statusRes\.data\.userId != null/);
       expect(popupSrc()).toMatch(/noticeForReason\(\s*"no-account-id"/);
       expect(app).toEqual(popup);
+      expect(mockedSend).toHaveBeenCalledTimes(1);
     }
   );
 
-  it("should keep a WHOOP sign-in that names its account Connected, with no notice", async () => {
+  it("should show the popup's Open WHOOP notice in the App when no WHOOP tab is open", async () => {
     // Arrange
-    mockedSend
-      .mockResolvedValueOnce({
-        ok: true,
-        delivered: true,
-        protocolVersion: 2,
-        data: { connected: true, session: "signed-in" },
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        delivered: true,
-        protocolVersion: 2,
-        data: { userId: 7 },
-      });
+    mockedSend.mockResolvedValueOnce(
+      current({ hasAccountId: true, tabOpen: false })
+    );
+    const popup = connectionNoTabNotice("WHOOP", "en");
+
+    // Act
+    const probed = await probeWhoopSession("ext-1");
+    const app = appNoticeOf(probed);
+
+    // Assert
+    expect(popupSrc()).toMatch(/else if \(!tabOpen\) renderNoTab\(\)/);
+    expect(app).toEqual(popup);
+    expect(mockedSend).toHaveBeenCalledTimes(1);
+  });
+
+  it("should keep a WHOOP sign-in that names its account, with a tab open, Connected and with no notice", async () => {
+    // Arrange
+    mockedSend.mockResolvedValueOnce(
+      current({ hasAccountId: true, tabOpen: true })
+    );
 
     // Act
     const probed = await probeWhoopSession("ext-1");
@@ -234,5 +239,6 @@ describe("popup and App parity, a WHOOP sign-in with no account id", () => {
 
     // Assert
     expect(app).toBeNull();
+    expect(mockedSend).toHaveBeenCalledTimes(1);
   });
 });

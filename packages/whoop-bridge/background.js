@@ -167,12 +167,16 @@ const getSessionStatus = async () => {
 // bearer captured from WHOOP's own traffic is "signed-in"; none captured yet
 // is "not-checked" (the WHOOP tab has not sent a request since the service
 // worker started), never signed out. Only yes or no leaves: no id, no time.
+// `hasAccountId` and `tabOpen` say whether a held sign-in can serve a read,
+// so the Kaiord App shows the popup's notice at the same moment.
 const checkSession = async () => {
-  const { connected } = await getSessionStatus();
+  const { connected, userId } = await getSessionStatus();
   return {
     connected,
     session: connected ? "signed-in" : "not-checked",
     authenticated: connected,
+    hasAccountId: connected && userId !== null,
+    tabOpen: (await findWhoopTab()) !== null,
   };
 };
 
@@ -235,9 +239,8 @@ const openWhoop = async () => {
  * script's own-origin fetch). With the token held and no tab open, the popup
  * would otherwise report a healthy session over reads that all throw.
  *
- * Internal only — deliberately absent from EXTERNAL_ACTIONS. The SPA has no
- * use for it, and adding a field to the externally reachable `status` payload
- * would widen what this bridge discloses beyond privacy-justification.md.
+ * Internal only: the Kaiord App learns the same yes or no from the
+ * `tabOpen` of its Session check, never which tab it is.
  */
 const hasWhoopTab = async () => ({ open: (await findWhoopTab()) !== null });
 

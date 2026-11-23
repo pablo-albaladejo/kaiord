@@ -18,15 +18,23 @@ const makeJwt = (payload) => {
   return `${b64({ alg: "none" })}.${b64(payload)}.sig`;
 };
 
-const CHECK_KEYS = ["authenticated", "connected", "session"];
+const CHECK_KEYS = [
+  "authenticated",
+  "connected",
+  "hasAccountId",
+  "session",
+  "tabOpen",
+];
 const PING_KEYS = [
   "authenticated",
   "capabilities",
   "connected",
+  "hasAccountId",
   "id",
   "name",
   "protocolVersion",
   "session",
+  "tabOpen",
   "version",
 ];
 
@@ -71,6 +79,8 @@ describe("session confinement", () => {
       connected: false,
       session: "not-checked",
       authenticated: false,
+      hasAccountId: false,
+      tabOpen: false,
     });
   });
 

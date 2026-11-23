@@ -1,4 +1,4 @@
-import type { ConnectionFix } from "@kaiord/i18n";
+import type { ShownNotice } from "@kaiord/i18n";
 import { useCallback } from "react";
 
 import { connectionFixHref } from "../../../application/connections/connection-fix-target";
@@ -10,7 +10,7 @@ import { connectionFixHref } from "../../../application/connections/connection-f
 export const useConnectionFix = (
   bridgeId: string,
   retry: () => void
-): ((fix: ConnectionFix) => void) =>
+): ((fix: ShownNotice["fix"]) => void) =>
   useCallback(
     (fix) => {
       const href = connectionFixHref(fix, bridgeId);

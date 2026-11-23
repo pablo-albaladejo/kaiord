@@ -1,7 +1,7 @@
 import type {
-  ConnectionNotice,
   ConnectionReason,
   ConnectionState,
+  ShownNotice,
 } from "@kaiord/i18n";
 
 import { useActiveLocale } from "../../../i18n/LocaleProvider";
@@ -13,7 +13,7 @@ export const useConnectionNotice = (
   state: ConnectionState | null,
   platform: string,
   reason: ConnectionReason | null = null
-): ConnectionNotice | null => {
+): ShownNotice | null => {
   const locale = useActiveLocale();
   return connectionNoticeOf(state, reason, platform, locale);
 };

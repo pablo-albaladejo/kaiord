@@ -69,7 +69,9 @@ edit the master and run `pnpm bridge:sync` (guard:
 - External dispatch is origin-pinned and action-allowlisted via the vendored
   envelope (`EXTERNAL_ACTIONS`: ping/status/read-user-id/request/set-theme).
   `ping` / `status` are the Session check: no request, `{ connected, session,
-authenticated }` only; the WHOOP id travels only to `read-user-id`, the
+authenticated, hasAccountId, tabOpen }` only (the last two yes or no, so the
+  App shows the popup's no-account and no-tab notices); the WHOOP id travels
+  only to `read-user-id`, the
   capture time only to the internal `popup-status` (#1643).
 - Versioning: covered by `scripts/sync-extension-version.mjs` (package.json →
   both manifests → `BRIDGE_MANIFEST.version`). Still absent from the CWS

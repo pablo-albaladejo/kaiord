@@ -1,10 +1,10 @@
 import {
-  type ConnectionNotice,
   connectionNotice,
   type ConnectionReason,
   connectionReasonNotice,
   type ConnectionState,
   type Locale,
+  type ShownNotice,
 } from "@kaiord/i18n";
 
 /**
@@ -17,7 +17,7 @@ export const connectionNoticeOf = (
   reason: ConnectionReason | null,
   platform: string,
   locale: Locale
-): ConnectionNotice | null => {
+): ShownNotice | null => {
   if (reason !== null && state === "working") {
     return connectionReasonNotice(reason, platform, locale);
   }

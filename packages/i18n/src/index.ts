@@ -29,4 +29,5 @@ export {
   type NotCheckedReason,
   type NoTabNotice,
   type ReasonNotice,
+  type ShownNotice,
 } from "./connection-notice";

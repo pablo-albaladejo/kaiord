@@ -1,11 +1,13 @@
 /**
  * WHOOP's Session check: its `status` reads the extension's own storage and
- * asks WHOOP nothing. A held sign-in whose token names no account id
- * (`custom:user_id`) cannot serve an import, so the check also learns that,
- * still without a request to WHOOP: the extension one protocol behind says
- * it in `status` (`userId: null`); the current one answers no id there, and
- * its `read-user-id` refuses when it holds none.
+ * asks WHOOP nothing. A held sign-in may still be unable to serve: its token
+ * names no account id (`custom:user_id`), or no WHOOP tab is open to read
+ * through. The current extension says both as yes or no in the same answer
+ * (`hasAccountId`, `tabOpen`); the one a protocol behind says the first in
+ * `status` (`userId: null`) and cannot say the second. No id is asked for.
  */
+import type { ConnectionReason } from "@kaiord/i18n";
+
 import { classifyEnvelope } from "./bridge-envelope-classify";
 import { readWhoopSession } from "./bridge-legacy-session-readers";
 import type { SessionProber } from "./bridge-session-probe-types";
@@ -14,19 +16,19 @@ import { speaksPreviousProtocol } from "./thin-bridge-request";
 
 const STATUS_TIMEOUT_MS = 5_000;
 
-const namesNoAccount = async (
-  extensionId: string,
-  status: ExtensionResponse
-): Promise<boolean> => {
+type WhoopCheck = {
+  userId?: unknown;
+  hasAccountId?: unknown;
+  tabOpen?: unknown;
+};
+
+const reasonOf = (status: ExtensionResponse): ConnectionReason | null => {
+  const data = (status.data ?? {}) as WhoopCheck;
   if (speaksPreviousProtocol(status)) {
-    return (status.data as { userId?: unknown } | undefined)?.userId == null;
+    return data.userId == null ? "no-account-id" : null;
   }
-  const user = await sendBridgeMessage(
-    extensionId,
-    { action: "read-user-id" },
-    STATUS_TIMEOUT_MS
-  );
-  return !user.ok && user.delivered !== false;
+  if (data.hasAccountId === false) return "no-account-id";
+  return data.tabOpen === false ? "no-tab" : null;
 };
 
 export const probeWhoopSession: SessionProber = async (extensionId) => {
@@ -37,7 +39,6 @@ export const probeWhoopSession: SessionProber = async (extensionId) => {
   );
   const result = classifyEnvelope(status, "whoop-bridge", readWhoopSession);
   if (!result.sessionActive) return result;
-  return (await namesNoAccount(extensionId, status))
-    ? { ...result, reason: "no-account-id" }
-    : result;
+  const reason = reasonOf(status);
+  return reason === null ? result : { ...result, reason };
 };

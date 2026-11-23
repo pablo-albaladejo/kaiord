@@ -62,6 +62,70 @@ describe("ConnectionCardHeader", () => {
     expect(notice()).toBeNull();
   });
 
+  it("should say a Tanita extension one protocol behind was not checked because checking would download the athlete's data", () => {
+    // Arrange
+    const unchecked = source({
+      id: "tanita",
+      name: "Tanita",
+      mark: "Ta",
+      bridgeId: "tanita-bridge",
+      status: "installed",
+      connection: "not-checked",
+    });
+
+    // Act
+    render(<ConnectionCardHeader source={unchecked} />);
+
+    // Assert
+    expect(screen.getByTestId("connection-detail-tanita")).toHaveTextContent(
+      "Kaiord has not checked your Tanita sign-in yet: with this version of the extension, checking it would download your data, so the first import checks it."
+    );
+  });
+
+  it("should say an extension that announced itself was not checked since, without naming a cost it does not have", () => {
+    // Arrange
+    const announced = source({
+      id: "train2go",
+      name: "Train2Go",
+      mark: "T2",
+      bridgeId: "train2go-bridge",
+      status: "installed",
+      connection: "not-checked",
+    });
+
+    // Act
+    render(<ConnectionCardHeader source={announced} />);
+
+    // Assert
+    const detail = screen.getByTestId("connection-detail-train2go");
+    expect(detail).toHaveTextContent(
+      "This extension announced itself when the page loaded. Kaiord has not checked it since, so it may have been removed."
+    );
+    expect(detail).not.toHaveTextContent(/export/i);
+  });
+
+  it("should say a WHOOP tab must be open and offer Open WHOOP when the sign-in is held with no tab", () => {
+    // Arrange
+    const noTab = source({
+      status: "attention",
+      connection: "working",
+      reason: "no-tab",
+    });
+
+    // Act
+    render(<ConnectionCardHeader source={noTab} />);
+
+    // Assert
+    expect(notice()).toHaveTextContent(
+      "You cannot use WHOOP in Kaiord until a WHOOP tab is open in this browser."
+    );
+    expect(notice()).toHaveAttribute("data-fix", "open-platform");
+    expect(within(notice() as HTMLElement).getByRole("link")).toHaveAttribute(
+      "href",
+      "https://app.whoop.com/"
+    );
+  });
+
   it("should say imports cannot run and offer Sign in when the WHOOP sign-in names no account", () => {
     // Arrange
     const noAccount = source({

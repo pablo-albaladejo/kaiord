@@ -16,9 +16,9 @@ export const LOCALES = ["en", "es"];
 // map a Connection that looks signed in but cannot serve to one of the four
 // fixes; NOT_CHECKED words why a check asked nothing (no notice). NO_TAB is
 // the one exception to the four fixes: WHOOP (unpublished, experimental)
-// holds a working sign-in but reads only through an open WHOOP tab, which
-// the App cannot open for it, so its fix is "Open {platform}". A second
-// exception fails the guard.
+// holds a working sign-in but reads only through an open WHOOP tab, so its
+// fix is "Open {platform}"; the popup and the App show it at the same moment
+// (the check's `tabOpen`). A second exception fails the guard.
 export const EXCEPTION = "NO_TAB";
 export const SOURCE_TABLES = [
   "FIXES",
