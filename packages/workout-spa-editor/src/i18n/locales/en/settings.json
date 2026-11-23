@@ -287,6 +287,11 @@
     "sent": "Sent",
     "sentNothing": "Nothing was sent.",
     "sentLine": "To {{provider}}: {{kinds}}",
-    "sentDeclared": "To {{provider}}: {{kinds}}; it may also have carried {{declared}}, which Kaiord cannot count"
+    "sentDeclared": "To {{provider}}: {{kinds}}; it may also have carried {{declared}}, which Kaiord cannot count",
+    "includesEstimate": "includes an estimate",
+    "estimated_one": "{{count}} request was cut before its Provider reported the tokens used (a Stop, a timeout or a dropped connection); its cost is an estimate from the length of the request and of the text received.",
+    "estimated_other": "{{count}} requests were cut before their Provider reported the tokens used (a Stop, a timeout or a dropped connection); their cost is an estimate from the length of each request and of the text received.",
+    "unmeasured_one": "{{count}} request failed before its Provider reported the tokens used, so it is not counted in the cost.",
+    "unmeasured_other": "{{count}} requests failed before their Provider reported the tokens used, so they are not counted in the cost."
   }
 }

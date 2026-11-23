@@ -287,6 +287,11 @@
     "sent": "Enviado",
     "sentNothing": "No se envió nada.",
     "sentLine": "A {{provider}}: {{kinds}}",
-    "sentDeclared": "A {{provider}}: {{kinds}}; puede haber llevado también {{declared}}, que Kaiord no puede contar"
+    "sentDeclared": "A {{provider}}: {{kinds}}; puede haber llevado también {{declared}}, que Kaiord no puede contar",
+    "includesEstimate": "incluye una estimación",
+    "estimated_one": "{{count}} petición se cortó antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de la petición y del texto recibido.",
+    "estimated_other": "{{count}} peticiones se cortaron antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de cada petición y del texto recibido.",
+    "unmeasured_one": "{{count}} petición falló antes de que su proveedor informara de los tokens usados, así que no se cuenta en el coste.",
+    "unmeasured_other": "{{count}} peticiones fallaron antes de que su proveedor informara de los tokens usados, así que no se cuentan en el coste."
   }
 }

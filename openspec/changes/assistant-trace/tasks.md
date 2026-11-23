@@ -26,3 +26,4 @@
 
 - [x] 4.1 `sent` counts the kinds each request carried, with the uncountable ones apart as `declared`, typed by destination and kind (tests red first)
 - [x] 4.2 A run waiting on the health notice keeps a stopped Trace; Stop then leaves a stopped Trace and sends nothing
+- [x] 4.3 A Trace's cost says when it includes an estimate and which requests it leaves out, as the Usage tab does (`TracesSection.test.tsx`)

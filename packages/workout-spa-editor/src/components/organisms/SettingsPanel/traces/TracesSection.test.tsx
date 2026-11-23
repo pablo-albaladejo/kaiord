@@ -87,6 +87,43 @@ describe("TracesSection", () => {
     );
   });
 
+  it("should say a Trace's cost includes an estimate and which requests it leaves out", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    await renderWith([
+      buildTrace({
+        id: "t-3",
+        totalUsd: 0.0123,
+        cost: [
+          {
+            provider: "anthropic",
+            modelId: "claude-sonnet-5",
+            requests: [],
+            usage: { promptTokens: 1000, completionTokens: 100 },
+            usd: 0.0123,
+            failedRequests: 1,
+            unmeasuredRequests: 1,
+            estimatedRequests: 1,
+            basis: { kind: "price_table", source: "s", readOn: "2026-11-23" },
+          },
+        ],
+      }),
+    ]);
+
+    // Act
+    await user.click(await screen.findByText(/^Chat · /));
+
+    // Assert
+    const details = screen.getByTestId("trace-details");
+    expect(details).toHaveTextContent("includes an estimate");
+    expect(details).toHaveTextContent(
+      "1 request was cut before its Provider reported the tokens used"
+    );
+    expect(details).toHaveTextContent(
+      "1 request failed before its Provider reported the tokens used, so it is not counted in the cost."
+    );
+  });
+
   it("should export every Trace as one JSON file", async () => {
     // Arrange
     const user = userEvent.setup();

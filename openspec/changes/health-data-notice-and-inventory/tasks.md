@@ -30,6 +30,8 @@
 - [x] 6.3 Stop cancels a waiting question; a waiting run keeps a stopped Trace; questions for one Provider share one answer
 - [x] 6.4 The coverage guard catches `window.fetch` / `globalThis.fetch` and direct model calls in the App and `@kaiord/ai`; each health flow's content builder is tested against its kinds
 - [x] 6.5 Provider list from `LLM_PROVIDER_TYPES`; one `providerName`; the App reaches persistence and the usage sink through the persistence provider
+- [x] 6.6 A description counts as already sent only when every health kind it may hold already went to that Provider; the Trace records its kinds on every path
+- [x] 6.7 Stop or leaving the conversation cuts an approved `create_workout` waiting on the health question: nothing sent, no workout, Trace stopped (unit and end-to-end, red first)
 
 ## 7. Quality gates
 

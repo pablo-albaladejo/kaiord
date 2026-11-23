@@ -158,3 +158,7 @@ appears (`scripts/lib/model-price-entry.mjs`). The 39 entries read on
 cannot be read again offline, and a quote is never retyped from memory.
 Their `readOn` stays frozen; at 120 days they expire and renewing each one
 requires its quote. The check never fetches a page.
+
+## For the owner
+
+- Estimates run low: the batch estimate leaves out the athlete context and retries, and a cut chat step's estimate leaves out the tool results fed back to the model.
