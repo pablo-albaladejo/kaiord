@@ -35,11 +35,11 @@ The result SHALL be a `PlacementResult`: `scheduled | moved | unchanged | duplic
 
 ### Requirement: Calendar writes are decided from the live state
 
-The calendar entries Kaiord created are recorded in the ledger row (spa-persistence-port): the library workout id, each schedule id with its date and state, and the content hash. The pipeline SHALL send `unschedule` only for an id in that record, and SHALL never update or delete a library workout, so nothing Kaiord did not create is deleted or overwritten.
+The calendar entries Kaiord created are recorded in the ledger row (spa-persistence-port): the library workout id, each schedule id with its date and state, and the content hash. The pipeline SHALL send `unschedule` only for an id the record holds as created by Kaiord (an entry marked `created`, or never marked `recognized`), and SHALL never update or delete a library workout, so nothing Kaiord did not create is deleted or overwritten.
 
-Before it sends a `schedule` for a claimed placement, the pipeline SHALL read the calendar (`calendar-find` for the claimed workout at the claimed date) when the bridge reports `calendar-find-v1` and A3 holds, unless the athlete chose "Send anyway". An entry at that date whose id the record does not know (neither `previous` nor any id in the claim's `supersedes`) SHALL be adopted as the `Placed` (`keep`, with a `scheduled` `previous` written `retire`) and no `schedule` SHALL be sent; several such entries SHALL adopt the lowest id and report `duplicate-left` for the date. A read that fails SHALL restore the claim and return `failed{reason: "calendar-unreadable", retryable: true}` with no write sent, whose copy says Garmin is not answering and offers Try again, in English and Spanish.
+Before it sends a `schedule` for a claimed placement, the pipeline SHALL read the calendar (`calendar-find` for the claimed workout at the claimed date) when the bridge reports `calendar-find-v1` and A3 holds, unless the athlete chose "Send anyway". When the read shows an entry of Kaiord's own that the record holds `gone` and never saw deleted (a read had left it out), that entry SHALL be revived as the `Placed` and no `schedule` SHALL be sent; any other such entry on the date SHALL be revived as `retire` and drained. Otherwise an entry at that date whose id the record does not know (not `previous`, not in the claim's `supersedes`, not in the queue) SHALL be recognized as the `Placed` (`keep` and `recognized`, with a `scheduled` `previous` written `retire`) and no `schedule` SHALL be sent; with several, the lowest id is recognized. A `recognized` entry SHALL never be moved, unscheduled or deleted: when the Workout later moves, the pipeline SHALL post on the new date, leave that entry where it is, and report `foreign-left` with its date once (`noticed`), in English and Spanish. A read that fails SHALL restore the claim and return `failed{reason: "calendar-unreadable", retryable: true}` with no write sent, whose copy says Garmin is not answering and offers Try again, in English and Spanish.
 
-Before it reports `unchanged` for a `scheduled` `Placed` equal to the desired placement, the pipeline SHALL read the calendar under the same conditions. When two reads `SETTLE_MS` apart both prove the id absent (A3, every entry on the date carrying its id), it SHALL write that id `gone` and clear the placement in one guarded write, and claim the desired placement again in the same push, so an entry the athlete deleted in Garmin is placed again once. A failed read, an id-less entry on the date or an `unconfirmed` `Placed` proves nothing and the result stays `unchanged`.
+Before it reports `unchanged` for a `scheduled` `Placed` equal to the desired placement, the pipeline SHALL read the calendar under the same conditions. When two reads `SETTLE_MS` apart both prove the id absent (A3, every entry on the date carrying its id), it SHALL write that id `gone` and clear the placement in one guarded write, and claim the desired placement again in the same push, so an entry the athlete deleted in Garmin is placed again once. When the read shows the `Placed` and also an entry of Kaiord's own on the same date that the record holds `gone` and never saw deleted (a second entry was posted while a read left the first out), that entry SHALL be revived as `retire` and drained, so one entry remains. A failed read, an id-less entry on the date or an `unconfirmed` `Placed` proves nothing and the result stays `unchanged`.
 
 #### Scenario: Sending the same Workout twice leaves one entry
 
@@ -63,7 +63,21 @@ Before it reports `unchanged` for a `scheduled` `Placed` equal to the desired pl
 
 - **GIVEN** an entry of the Workout's library workout on D1 that the ledger does not know (an older snapshot restored)
 - **WHEN** the athlete sends it to D1
-- **THEN** that entry SHALL be adopted, no `schedule` SHALL be sent, and Garmin SHALL hold one entry on D1
+- **THEN** that entry SHALL be recognized, no `schedule` SHALL be sent, and Garmin SHALL hold one entry on D1
+
+#### Scenario: An entry the athlete placed is never moved or deleted
+
+- **GIVEN** a Workout Kaiord placed on D1, and the athlete placed the same library workout on D2 in Garmin Connect
+- **WHEN** the athlete moves the Workout to D2, then to D3, then sends it again
+- **THEN** the move to D2 SHALL recognize the athlete's entry with no `schedule` and remove Kaiord's D1 entry; the move to D3 SHALL post on D3, send no `unschedule` for the athlete's entry and return `foreign-left` for D2; the next send SHALL return `unchanged`; and Garmin SHALL hold the athlete's entry on D2 and Kaiord's on D3
+
+#### Scenario: A read that left out a live entry does not leave two
+
+- **GIVEN** a Workout Kaiord placed on D1 whose entry the month read leaves out
+- **WHEN** the entry is left out by the two settled reads only, and the athlete sends again
+- **THEN** the read before the POST SHALL revive the entry and no `schedule` SHALL be sent
+- **WHEN** it is also left out by the read before the POST, so a second entry is posted, and the athlete sends again once it reads again
+- **THEN** the first entry SHALL be revived as `retire` and removed, and Garmin SHALL hold one entry on D1
 
 #### Scenario: A calendar that cannot be read is not written
 

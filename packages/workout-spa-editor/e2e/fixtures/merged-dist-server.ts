@@ -73,15 +73,15 @@ export async function startMergedDist(
     ? ["--docs", builtDocs(repoRoot)]
     : ["--without", "docs"];
 
-  // The same assembly the deploy runs, so the served tree has its shape.
+  // The server reads the tree per request, so it listens first and the
+  // assembly (the deploy's own) knows the origin the App's worker-src names.
+  const server = await startStaticPagesServer(site);
   const assemble = (assembly?: AssembleOptions) =>
     assembleForE2e(
-      { site, landing, app: builtDist, docs, scratch: dir },
+      { site, origin: server.url, landing, app: builtDist, docs, scratch: dir },
       assembly
     );
   assemble();
-
-  const server = await startStaticPagesServer(site);
 
   return {
     server,

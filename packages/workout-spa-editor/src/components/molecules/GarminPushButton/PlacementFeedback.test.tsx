@@ -220,6 +220,35 @@ describe("PlacementFeedback", () => {
     );
   });
 
+  it("should say, with no fix asked, that an entry Kaiord has no record of creating stays", () => {
+    // Arrange
+    const result: PlacementResult = { kind: "foreign-left", dates: [OLD_DATE] };
+
+    // Act
+    renderFeedback(result);
+
+    // Assert
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent(
+      /An entry Kaiord has no record of creating is still on .*Kaiord leaves it as it is\./
+    );
+    expect(status).not.toHaveTextContent(/Remove it/);
+  });
+
+  it("should say in Spanish that an entry Kaiord has no record of creating stays", async () => {
+    // Arrange
+    await setActiveLocale("es");
+    locale.active = "es";
+
+    // Act
+    renderFeedback({ kind: "foreign-left", dates: [OLD_DATE] });
+
+    // Assert
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /Una entrada que Kaiord no tiene registrada como suya sigue el .*Kaiord la deja como está\./
+    );
+  });
+
   describe("an uncertain posted attempt before its gate", () => {
     afterEach(() => vi.useRealTimers());
 

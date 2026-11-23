@@ -1,7 +1,15 @@
+/**
+ * Why a send to Garmin stopped, worded by `PushFeedback`: the extension was
+ * updated, the Session is gone, the workout could not be converted, or no
+ * cause is known ("not answering").
+ */
+export type GarminPushFailure =
+  "updated" | "sign-in" | "not-prepared" | "not-answering";
+
 export type PushState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "error"; message: string }
+  | { status: "error"; reason: GarminPushFailure }
   | { status: "success" };
 
 export type GarminPushOutcome = {

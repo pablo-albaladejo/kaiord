@@ -1,4 +1,5 @@
 import { TRAININGPEAKS_HORIZON_STATUS } from "../application/trainingpeaks/trainingpeaks-planning-horizon";
+import { logFailure } from "../lib/log-failure";
 
 /**
  * Why a send stopped, worded by the App (`TrainingPeaksPushFeedback`):
@@ -8,23 +9,28 @@ import { TRAININGPEAKS_HORIZON_STATUS } from "../application/trainingpeaks/train
 export type TrainingPeaksPushRefusal =
   "horizon" | "not-answering" | "no-steps" | "install" | "sign-in";
 
-export type TrainingPeaksPushFailureOutcome =
-  /** An upstream error's own message, shown as is. */
-  | { ok: false; message: string }
-  | { ok: false; reason: TrainingPeaksPushRefusal };
+export type TrainingPeaksPushFailureOutcome = {
+  ok: false;
+  reason: TrainingPeaksPushRefusal;
+};
 
-const statusOf = (error: unknown): unknown =>
-  (error as { status?: unknown } | null)?.status;
+type BridgeFailure = { status?: unknown; needsReauth?: unknown } | null;
 
-/** A 402 is TrainingPeaks refusing the day; anything else keeps its text. */
+/**
+ * A 402 is TrainingPeaks refusing the day and `needsReauth` a gone Session;
+ * any other failure has no verified cause, so TrainingPeaks is "not
+ * answering". Its own text goes to the console, never to the athlete.
+ */
 export const toTrainingPeaksPushFailure = (
   error: unknown
 ): TrainingPeaksPushFailureOutcome => {
-  if (statusOf(error) === TRAININGPEAKS_HORIZON_STATUS) {
+  const failure = error as BridgeFailure;
+  if (failure?.status === TRAININGPEAKS_HORIZON_STATUS) {
     return { ok: false, reason: "horizon" };
   }
-  if (!(error instanceof Error)) return { ok: false, reason: "not-answering" };
-  return { ok: false, message: error.message };
+  logFailure("trainingpeaks-send", error);
+  if (failure?.needsReauth === true) return { ok: false, reason: "sign-in" };
+  return { ok: false, reason: "not-answering" };
 };
 
 type ProbedSession = {

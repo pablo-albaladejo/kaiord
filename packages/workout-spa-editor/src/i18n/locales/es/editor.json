@@ -84,7 +84,7 @@
     "savedTitle": "Archivo descargado",
     "savedDescription": "Descargado como {{filename}}",
     "exportFailedTitle": "Error de exportación",
-    "exportFailedFallback": "No se pudo exportar el entreno",
+    "exportFailedFallback": "El entrenamiento no se ha exportado. Inténtalo de nuevo.",
     "paceZones": {
       "missing-pace-zones": "Este entreno usa zonas de ritmo. Configura tu ritmo umbral en Atleta para exportarlo como GCN.",
       "incomplete-pace-zones": "Este entreno usa una zona de ritmo que el atleta no define. Completa tus zonas de ritmo en Atleta para exportarlo como GCN.",

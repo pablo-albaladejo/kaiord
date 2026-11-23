@@ -12,7 +12,9 @@ describe("lab parameter display map", () => {
     const catalogKeys = LAB_PARAMETER_CATALOG.map((p) => p.key);
 
     // Act
-    const missing = catalogKeys.filter((key) => !getLabParameterDisplay(key));
+    const missing = catalogKeys.filter(
+      (key) => !getLabParameterDisplay(key, "en")
+    );
 
     // Assert
     expect(missing).toEqual([]);
@@ -36,7 +38,7 @@ describe("lab parameter display map", () => {
     const key = "ferritin";
 
     // Act
-    const display = getLabParameterDisplay(key);
+    const display = getLabParameterDisplay(key, "en");
 
     // Assert
     expect(display).toEqual({ name: "Ferritin", abbrev: "FERR" });

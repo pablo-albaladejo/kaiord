@@ -1,4 +1,4 @@
-const PAD = 2;
+import { localIsoDate } from "../application/shared/date-utils";
 
 /**
  * Today's calendar date as `YYYY-MM-DD` in the user's LOCAL timezone.
@@ -11,8 +11,5 @@ const PAD = 2;
  * day the user actually sees.
  */
 export function todayIsoDate(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(PAD, "0");
-  const day = String(now.getDate()).padStart(PAD, "0");
-  return `${now.getFullYear()}-${month}-${day}`;
+  return localIsoDate(new Date());
 }

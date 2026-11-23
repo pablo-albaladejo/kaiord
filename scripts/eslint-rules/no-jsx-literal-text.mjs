@@ -10,49 +10,21 @@
  *   (`{open ? "Hide" : "Show"}`, `{name || "Untitled"}`, `` {`${n} steps`} ``);
  * - the same in a copy attribute (`aria-label`, `title`, `placeholder`,
  *   `alt`, `aria-description`, `aria-roledescription`, `aria-valuetext`);
- * - the same in a component's copy prop (`label`, `description`, `title`,
- *   `heading`, `message`, `subtitle`, `hint`, `confirmLabel`, `cancelLabel`)
- *   on a capitalized element (`<Input label="…" />`, `<Ui.Dialog title="…" />`),
- *   where the component renders it as text.
+ * - the same in a component's copy prop (`label`, `title`, `text`,
+ *   `tooltip`, `confirmLabel`, `emptyText`, … see `jsx-copy-attrs.mjs`) on a
+ *   capitalized element (`<Input label="…" />`, `<Ui.Dialog title="…" />`),
+ *   and in a button-like `<input>`'s `value`;
+ * - each of these built with `+` (`{"Step " + n}`), held in a `const`
+ *   (`{SAVED}`) or returned by a local function (`{statusText(s)}`).
  *
  * Text without a letter (`·`, `+`, `—`, `42`) and a dictionary key
  * (`pageHeader.newTitle`) are not copy. Proper nouns that stay in every
  * language are passed in the `allow` option.
  */
 
+import { resolverFor } from "./copy-resolve.mjs";
 import { ALLOW_SCHEMA, copyStrings, copyText } from "./copy-strings.mjs";
-
-const COPY_ATTRS = new Set([
-  "aria-label",
-  "aria-description",
-  "aria-roledescription",
-  "aria-valuetext",
-  "title",
-  "placeholder",
-  "alt",
-]);
-const COMPONENT_COPY_PROPS = new Set([
-  "label",
-  "description",
-  "title",
-  "heading",
-  "message",
-  "subtitle",
-  "hint",
-  "confirmLabel",
-  "cancelLabel",
-]);
-
-const isComponent = (name) => {
-  if (name.type === "JSXMemberExpression") return true;
-  return name.type === "JSXIdentifier" && /^[A-Z]/.test(name.name);
-};
-
-const isCopyAttribute = (node) => {
-  const prop = node.name.name;
-  if (COPY_ATTRS.has(prop)) return true;
-  return COMPONENT_COPY_PROPS.has(prop) && isComponent(node.parent.name);
-};
+import { isCopyAttribute } from "./jsx-copy-attrs.mjs";
 
 const noJsxLiteralText = {
   meta: {
@@ -66,8 +38,9 @@ const noJsxLiteralText = {
   },
   create(context) {
     const allow = new Set(context.options[0]?.allow ?? []);
-    const check = (node, strings) => {
-      for (const raw of strings) {
+    const resolve = resolverFor(context);
+    const check = (node, expression) => {
+      for (const raw of copyStrings(expression, resolve)) {
         const text = copyText(raw, allow);
         if (text)
           context.report({ node, messageId: "literal", data: { text } });
@@ -82,7 +55,7 @@ const noJsxLiteralText = {
       JSXExpressionContainer(node) {
         const parent = node.parent?.type;
         if (parent === "JSXElement" || parent === "JSXFragment")
-          check(node, copyStrings(node.expression));
+          check(node, node.expression);
       },
       JSXAttribute(node) {
         if (node.name.type !== "JSXIdentifier") return;
@@ -91,7 +64,7 @@ const noJsxLiteralText = {
           node.value?.type === "JSXExpressionContainer"
             ? node.value.expression
             : node.value;
-        check(node, copyStrings(value));
+        check(node, value);
       },
     };
   },

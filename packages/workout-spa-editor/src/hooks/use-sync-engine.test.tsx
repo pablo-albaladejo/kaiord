@@ -137,7 +137,7 @@ describe("useSyncEngine", () => {
 
     // Assert
     expect(result.current.status).toBe("error");
-    expect(result.current.error).not.toBeNull();
+    expect(result.current).not.toHaveProperty("error");
   });
 
   it("should mark connected after a successful connect", async () => {
@@ -293,7 +293,6 @@ describe("useSyncEngine", () => {
     // Assert
     expect(outcome).toBe("needsAuth");
     expect(result.current.status).toBe("needsAuth");
-    expect(result.current.error).toBeNull();
   });
 
   it("should not reconnect when disconnect is pressed while the sign-in is open", async () => {

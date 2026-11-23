@@ -11,6 +11,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { useAnalytics } from "../contexts/analytics-context";
 import { usePersistence } from "../contexts/persistence-context";
+import { useUnsavedWork } from "../lib/use-unsaved-work";
 import { type ChatTurnState, makeChatTurnCtx } from "./chat/chat-turn-types";
 import { useStopTurnOnLeave } from "./chat/use-stop-turn-on-leave";
 import { useChatActionOps } from "./use-chat-action-ops";
@@ -29,6 +30,7 @@ export const useChatTurn = (args: UseChatTurnArgs): UseChatTurn => {
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(
     null
   );
+  useUnsavedWork(state === "streaming" || pendingAction !== null);
   const [error, setError] = useState<string | null>(null);
   const agentRef = useRef<ChatAgent | null>(null);
   const toolsRef = useRef<ChatTool[]>([]);

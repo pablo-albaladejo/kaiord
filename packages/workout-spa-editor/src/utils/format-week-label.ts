@@ -7,7 +7,7 @@
  * handling redirects before reaching this function in production).
  */
 
-import { DEFAULT_LOCALE, type Locale } from "@kaiord/i18n";
+import type { Locale } from "@kaiord/i18n";
 
 import { getTranslate } from "../i18n/use-translate";
 import { parseWeekId } from "./week-utils";
@@ -20,10 +20,7 @@ const format = (date: string, locale: Locale, withYear: boolean): string =>
     timeZone: "UTC",
   }).format(new Date(`${date}T12:00:00Z`));
 
-export function formatWeekLabel(
-  weekId: string,
-  locale: Locale = DEFAULT_LOCALE
-): string {
+export function formatWeekLabel(weekId: string, locale: Locale): string {
   const range = parseWeekId(weekId);
   if (!range) return weekId;
   const crossesYear = range.start.slice(0, 4) !== range.end.slice(0, 4);

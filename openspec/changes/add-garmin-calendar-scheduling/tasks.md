@@ -189,3 +189,17 @@
 - [x] 10.5 Update the spec delta, the call-count tests, the N3 scenario and
       the 404 scenario; the merge laws and the placement-world simulator
       still pass.
+- [x] 10.6 An entry Kaiord did not create is recognized (no duplicate on its
+      date) but recorded `recognized`, never moved, unscheduled or
+      deleted; a move leaves it and reports `foreign-left` once (en and
+      es). The fake Garmin holds an athlete entry of the same library
+      workout id; `hooks/garmin-safe-writes-ownership.test.ts`.
+- [x] 10.7 A `gone` entry of Kaiord's that a read shows again is revived:
+      the read before the POST places nothing new, and a surplus entry of
+      Kaiord's own is drained so one remains. The fake Garmin can leave an
+      entry out of its next reads and fail one month only; double click,
+      two tabs, a month boundary and a partial read are covered.
+- [x] 10.8 The privacy policy, store listing, justification and claims say
+      what the code does: deletes only entries Kaiord's record holds as
+      placed by Kaiord, and reads the calendar before every placement and
+      on every unchanged re-send.

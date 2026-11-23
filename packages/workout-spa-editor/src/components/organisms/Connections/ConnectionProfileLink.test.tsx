@@ -11,7 +11,7 @@ const state = vi.hoisted(() => ({
   linkedSources: [] as string[],
   connected: true,
   loading: false,
-  error: null as string | null,
+  error: null as "outdated" | null,
   connect: vi.fn(async () => undefined),
   sourcesMounted: vi.fn(),
 }));
@@ -127,16 +127,16 @@ describe("ConnectionProfileLink", () => {
     expect(screen.getByRole("button", { name: "Linking…" })).toBeDisabled();
   });
 
-  it("should show the source's error", () => {
+  it("should word an outdated extension with its one fix", () => {
     // Arrange
-    state.error = "Update your Kaiord Train2Go Bridge extension";
+    state.error = "outdated";
 
     // Act
     renderLink();
 
     // Assert
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Update your Kaiord Train2Go Bridge extension"
+      "Update the Kaiord extension for Train2Go."
     );
   });
 

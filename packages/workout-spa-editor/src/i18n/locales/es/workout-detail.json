@@ -27,6 +27,12 @@
     "send": "Enviar a Garmin",
     "sending": "Enviando…",
     "sent": "En tu Garmin",
+    "garminPushError": {
+      "updated": "Kaiord para Garmin se ha actualizado. Inténtalo de nuevo.",
+      "signIn": "Inicia sesión en Garmin Connect en este navegador y vuelve a intentarlo.",
+      "notPrepared": "Este entrenamiento no se pudo preparar para Garmin. Inténtalo de nuevo.",
+      "notAnswering": "Garmin no responde. Inténtalo de nuevo."
+    },
     "sendToTrainingPeaks": "Enviar a TrainingPeaks",
     "sentToTrainingPeaks": "En TrainingPeaks",
     "trainingPeaksRepush": {
@@ -48,8 +54,8 @@
       "signedOut": "Inicia sesión en Garmin Connect en este navegador para enviar este entreno."
     },
     "trainingPeaksHorizon": {
-      "beforeSend": "En una cuenta Basic de TrainingPeaks solo se aceptan hoy y mañana, así que TrainingPeaks puede rechazar este día.",
-      "refused": "TrainingPeaks ha rechazado este día: una cuenta Basic solo acepta hoy y mañana. Programa el entrenamiento para uno de ellos."
+      "beforeSend": "Una cuenta Basic de TrainingPeaks solo acepta hoy y mañana, contados en la zona horaria de la cuenta, así que TrainingPeaks puede rechazar este día.",
+      "refused": "TrainingPeaks ha rechazado este día, así que el entreno no se ha enviado: una cuenta Basic solo acepta hoy y mañana, contados en la zona horaria de la cuenta de TrainingPeaks."
     },
     "trainingPeaksNotAnswering": "TrainingPeaks no responde. Inténtalo de nuevo."
   },
@@ -93,6 +99,7 @@
     "moved": "Movido en tu calendario de Garmin al {{date}}",
     "unchanged": "Ya está en tu calendario de Garmin el {{date}}",
     "duplicateLeft": "En tu calendario de Garmin el {{date}}, pero queda una entrada anterior el {{dates}}. Bórrala en Garmin Connect.",
+    "foreignLeft": "En tu calendario de Garmin el {{date}}. Una entrada que Kaiord no tiene registrada como suya sigue el {{dates}}: Kaiord la deja como está.",
     "uncertain": "Garmin no confirmó la entrada del {{date}}. Revisa tu calendario de Garmin antes de volver a enviar.",
     "confirm": "Está en Garmin",
     "sendAnyway": "Enviar igualmente",

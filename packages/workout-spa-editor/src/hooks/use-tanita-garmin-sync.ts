@@ -6,7 +6,8 @@
  * `@kaiord/tanita` (parser) + `@kaiord/fit` (encoder) so neither lands in the
  * main chunk (matching `export-workout-formats.ts`). The exposed `status`
  * reflects the `idle | reading | parsing | encoding | uploading | done |
- * needsReauth | error` state machine.
+ * needsReauth | error` state machine. A failure shows the dictionary's
+ * "Sync failed" wording; its own text goes to the console only.
  */
 import { useCallback, useState } from "react";
 
@@ -18,7 +19,7 @@ import { syncTanitaBodyComposition } from "../application/health/sync-tanita-bod
 import { usePersistence } from "../contexts/persistence-context";
 import { useActiveLocale } from "../i18n/LocaleProvider";
 import { getTranslate } from "../i18n/use-translate";
-import { errorMessage } from "../utils/error-message";
+import { logFailure } from "../lib/log-failure";
 import { ledgerRepo } from "./garmin-push-fn";
 import { useDiscoveredBridges } from "./use-discovered-bridges";
 
@@ -89,11 +90,11 @@ export const useTanitaGarminSync = (
         setStatus("needsReauth");
         return;
       }
-      setStatus("error");
-      setLastError(result.error ?? failed);
+      throw result.error ?? result.reason;
     } catch (err) {
+      logFailure("tanita-sync", err);
       setStatus("error");
-      setLastError(errorMessage(err));
+      setLastError(failed);
     }
   }, [persistence, profileId, failed]);
 

@@ -6,14 +6,12 @@
  * record a push the same way. A missing record is `record-deleted`.
  */
 import type { BulkItemResult } from "../application/garmin-bulk/send-week-to-garmin";
+import type { PlacementPipelineDeps } from "../application/garmin-placement/placement-pipeline-deps";
 import {
   type PlacementResult,
   recordDeleted,
 } from "../application/garmin-placement/placement-result";
-import {
-  type PlacementPipelineDeps,
-  pushWorkoutToGarminCalendar,
-} from "../application/garmin-placement/push-workout-to-garmin-calendar";
+import { pushWorkoutToGarminCalendar } from "../application/garmin-placement/push-workout-to-garmin-calendar";
 import { recordGarminPush } from "../application/record-garmin-push";
 import type { GarminPushOutcome } from "../contexts/garmin-bridge-types";
 import type { PersistencePort } from "../ports/persistence-port";

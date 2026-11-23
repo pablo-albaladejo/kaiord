@@ -9,6 +9,7 @@
  */
 
 import { useTranslate } from "../../../i18n/use-translate";
+import { CoachingSportIcon } from "../CoachingCard/CoachingSportIcon";
 import { deriveWorkoutLifecycle } from "../WorkoutCard/session-lifecycle";
 import { SessionLifecycleBadges } from "../WorkoutCard/SessionLifecycleBadges";
 import {
@@ -30,9 +31,7 @@ const lifecycleOf = (s: MatchedSession) =>
 
 export const renderTitleRow = (s: MatchedSession) => (
   <>
-    <span role="img" aria-label={s.activity.sport.label}>
-      {s.activity.sport.icon}
-    </span>
+    <CoachingSportIcon sport={s.activity.sport} />
     <span className="min-w-0 flex-1 line-clamp-2 wrap-anywhere">
       {actualTitle(s)}
     </span>

@@ -13,7 +13,7 @@ import {
 
 export const labParameterLabel = (
   parameterKey: string,
-  locale: Locale = "en"
+  locale: Locale
 ): string => {
   if (isCustomParameterKey(parameterKey)) {
     const slug = parameterKey.slice(CUSTOM_PARAMETER_PREFIX.length);

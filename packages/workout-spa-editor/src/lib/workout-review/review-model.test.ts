@@ -187,7 +187,7 @@ describe("workout-review", () => {
     // Arrange
 
     // Act
-    const items = toStepItems(WORKOUT, THRESHOLDS);
+    const items = toStepItems(WORKOUT, THRESHOLDS, reviewCopyFor("en"));
 
     // Assert
     expect(items).toHaveLength(TOTAL_ROWS);
@@ -196,7 +196,12 @@ describe("workout-review", () => {
 
   it("should build a review model from the KRD", () => {
     // Arrange
-    const model = buildReviewModel(krd(), THRESHOLDS, "Fallback");
+    const model = buildReviewModel(
+      krd(),
+      THRESHOLDS,
+      "Fallback",
+      reviewCopyFor("en")
+    );
 
     // Act
     const workout = getStructuredWorkout(krd());

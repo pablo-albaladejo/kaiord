@@ -31,9 +31,10 @@ describe("connection copy in Spanish", () => {
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeVisible();
   });
 
-  it("should fall back to a Spanish message when the key is rejected without detail", async () => {
+  it("should word an unrecognised connect failure in Spanish with no cause", async () => {
     // Arrange
     const onConnect = vi.fn().mockRejectedValue("nope");
+    vi.spyOn(console, "error").mockImplementation(() => {});
     render(<ApiKeyConnectForm onConnect={onConnect} onCancel={vi.fn()} />);
     fireEvent.change(screen.getByLabelText("Clave de API"), {
       target: { value: "k" },
@@ -43,7 +44,9 @@ describe("connection copy in Spanish", () => {
     fireEvent.click(screen.getByRole("button", { name: "Conectar" }));
 
     // Assert
-    expect(await screen.findByText("No se pudo conectar")).toBeVisible();
+    expect(
+      await screen.findByText("No se pudo conectar. Inténtalo de nuevo.")
+    ).toBeVisible();
   });
 
   it("should confirm a disconnect in Spanish", () => {

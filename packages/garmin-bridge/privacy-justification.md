@@ -26,7 +26,7 @@ Why Kaiord for Garmin asks for each permission in `manifest.prod.json`, for Chro
 
 **Calendar write and delete**: When you place workouts on your Garmin Connect calendar from the Kaiord App, the extension calls two calendar endpoints on this host. `POST /workout-service/schedule/{workoutId}` places a library workout on a date, sending only that date. `DELETE /workout-service/schedule/{workoutScheduleId}` removes one calendar entry. The allowlist accepts both paths only with a numeric id, and neither path can delete a library workout.
 
-**Calendar read**: To check one workout's calendar entries, the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of your calendar; the extension keeps only the entries of that one workout, and passes back only each entry's id and date. Every other calendar item is discarded inside the extension and never reaches the Kaiord App.
+**Calendar read**: To check one workout's calendar entries (before placing it on a date, when it is sent again unchanged, and around a move or a removal), the extension calls `GET /calendar-service/year/{year}/month/{month}`. Garmin answers the whole month of your calendar; the extension keeps only the entries of that one workout, and passes back only each entry's id and date. Every other calendar item is discarded inside the extension and never reaches the Kaiord App.
 
 ### `https://connect.garmin.com/*`
 

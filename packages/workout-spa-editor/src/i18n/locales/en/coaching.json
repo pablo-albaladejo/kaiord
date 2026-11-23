@@ -167,9 +167,15 @@
     "ariaLabel": "Match to workout",
     "empty": "No same-day, same-sport workouts available to match."
   },
+  "zonesSync": {
+    "fetchFailed": "Train2Go is not answering, so your zones were not synced. Try again.",
+    "shapeMismatch": "Train2Go sent zones Kaiord cannot read, so they were not synced.",
+    "unsupported": "This coaching platform does not share zones."
+  },
   "sync": {
     "defaultLabel": "Coach",
     "connectTo": "Connect to {{label}}",
+    "updateExtension": "Update the Kaiord extension for {{label}}.",
     "routeInactiveTitle": "{{label}} · route inactive",
     "routeInactiveAria": "{{label}} — route inactive",
     "syncAria": "Sync {{label}}"

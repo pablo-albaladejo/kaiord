@@ -1,3 +1,5 @@
+import { localIsoDate } from "../shared/date-utils";
+
 /**
  * The reader's calendar day for a stored timestamp.
  *
@@ -15,6 +17,5 @@ export const calendarDay = (
   if (timestamp === undefined) return undefined;
   const at = new Date(timestamp);
   if (Number.isNaN(at.getTime())) return undefined;
-  const month = String(at.getMonth() + 1).padStart(2, "0");
-  return `${at.getFullYear()}-${month}-${String(at.getDate()).padStart(2, "0")}`;
+  return localIsoDate(at);
 };

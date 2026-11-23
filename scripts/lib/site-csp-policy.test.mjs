@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { htmlUnits } from "./claims-html.mjs";
-import { SITE_CSP, serializePolicy } from "./site-csp-policy.mjs";
+import { appPolicyFor, SITE_CSP, serializePolicy } from "./site-csp-policy.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (path) => readFileSync(join(ROOT, path), "utf8");
@@ -53,15 +53,19 @@ describe("site-csp-policy", () => {
     });
   }
 
-  it("should let only the App start a worker, and only its own", () => {
+  it("should let only the App start a worker, and only its own by its exact URL", () => {
     // Arrange
     const { landing, docs, app } = SITE_CSP;
 
     // Act
     const workers = [landing, docs, app].map((d) => d["worker-src"]);
+    const served = appPolicyFor("https://kaiord.com")["worker-src"];
+    const local = appPolicyFor("http://127.0.0.1:4173/ignored")["worker-src"];
 
     // Assert
-    assert.deepEqual(workers, [["'none'"], ["'none'"], ["'self'"]]);
+    assert.deepEqual(workers, [["'none'"], ["'none'"], ["'none'"]]);
+    assert.deepEqual(served, ["https://kaiord.com/app/sw.js"]);
+    assert.deepEqual(local, ["http://127.0.0.1:4173/app/sw.js"]);
   });
 
   it("should name in the landing's data statement, English and Spanish, the destination of every remote origin the site allows", () => {

@@ -25,7 +25,14 @@ export type FetchActivities = (
 
 export type PushWorkoutResult =
   | { status: "success"; garminWorkoutId: string | null }
-  | { status: "error"; message: string; redetect: boolean }
+  | {
+      status: "error";
+      /** `sign-in` on a 401/403; no other cause is verified. */
+      reason: "sign-in" | "not-answering";
+      /** The bridge's own text, for diagnosis only, never shown. */
+      detail: string;
+      redetect: boolean;
+    }
   | { status: "invalidated" };
 
 /** Push a platform-shaped workout payload via an installed bridge. */

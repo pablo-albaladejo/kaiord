@@ -50,7 +50,7 @@ describe("CoachingSyncButton — not-connected state", () => {
     expect(screen.getByText("Connect to Train2Go")).toBeInTheDocument();
   });
 
-  it("should show error text alongside the connect CTA", () => {
+  it("should word an outdated extension with its one fix alongside the connect CTA", () => {
     // Arrange
 
     // Act
@@ -59,7 +59,8 @@ describe("CoachingSyncButton — not-connected state", () => {
       <CoachingSyncButton
         connected={false}
         loading={false}
-        error="Session expired"
+        error="outdated"
+        label="Train2Go"
         onSync={vi.fn()}
         onConnect={vi.fn()}
       />
@@ -67,7 +68,9 @@ describe("CoachingSyncButton — not-connected state", () => {
 
     // Assert
 
-    expect(screen.getByText("Session expired")).toBeInTheDocument();
+    expect(
+      screen.getByText("Update the Kaiord extension for Train2Go.")
+    ).toBeInTheDocument();
   });
 
   it("should invoke onConnect when the CTA is clicked", async () => {

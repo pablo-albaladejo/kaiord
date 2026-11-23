@@ -1,3 +1,4 @@
+import { useUnsavedWork } from "../../../lib/use-unsaved-work";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { useFileUploadActions } from "./use-file-upload-actions";
 import { useFileUploadState } from "./use-file-upload-state";
@@ -25,6 +26,7 @@ export const useFileUpload = ({
   onWarnings,
 }: UseFileUploadProps) => {
   const state = useFileUploadState();
+  useUnsavedWork(state.isLoading);
   const actions = useFileUploadActions({
     ...state,
     onFileLoad,

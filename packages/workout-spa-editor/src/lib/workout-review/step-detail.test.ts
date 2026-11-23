@@ -5,13 +5,15 @@ import { appI18n, setActiveLocale } from "../../i18n/i18n";
 import { type ReviewCopy, reviewCopyFor } from "./review-copy";
 import { stepDetail, stepKind } from "./step-detail";
 
+const EN = reviewCopyFor("en");
+
 describe("stepKind", () => {
   it("should use the explicit step name when present", () => {
     // Arrange
     const step = { name: "Sprint", intensity: "active" } as WorkoutStep;
 
     // Act
-    const kind = stepKind(step);
+    const kind = stepKind(step, EN);
 
     // Assert
     expect(kind).toBe("Sprint");
@@ -22,7 +24,7 @@ describe("stepKind", () => {
     const step = { intensity: "warmup" } as WorkoutStep;
 
     // Act
-    const kind = stepKind(step);
+    const kind = stepKind(step, EN);
 
     // Assert
     expect(kind).toBe("Warm up");
@@ -33,7 +35,7 @@ describe("stepKind", () => {
     const step = {} as WorkoutStep;
 
     // Act
-    const kind = stepKind(step);
+    const kind = stepKind(step, EN);
 
     // Assert
     expect(kind).toBe("Work");
@@ -49,7 +51,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 250 W");
@@ -63,7 +65,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 85% FTP");
@@ -77,7 +79,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 50–75% FTP");
@@ -88,7 +90,7 @@ describe("stepDetail", () => {
     const target: Target = { type: "power", value: { unit: "zone", value: 3 } };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ Z3");
@@ -102,7 +104,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 200–300 W");
@@ -116,7 +118,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 160 bpm");
@@ -130,7 +132,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 90% max");
@@ -144,7 +146,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 140–160 bpm");
@@ -155,7 +157,7 @@ describe("stepDetail", () => {
     const target: Target = { type: "pace", value: { unit: "mps", value: 4 } };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 4 m/s");
@@ -169,7 +171,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 3–5 m/s");
@@ -183,7 +185,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 90 rpm");
@@ -197,7 +199,7 @@ describe("stepDetail", () => {
     };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("@ 80–100 rpm");
@@ -208,7 +210,7 @@ describe("stepDetail", () => {
     const target = { type: "stroke_type" } as Target;
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("Stroke");
@@ -219,7 +221,7 @@ describe("stepDetail", () => {
     const target: Target = { type: "open" };
 
     // Act
-    const detail = stepDetail(target);
+    const detail = stepDetail(target, EN);
 
     // Assert
     expect(detail).toBe("Easy");

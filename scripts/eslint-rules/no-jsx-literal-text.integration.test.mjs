@@ -96,3 +96,36 @@ test("should skip test files inside the scope", async () => {
   // Assert
   assert.equal(messages.length, 0);
 });
+
+test("should allow a keyboard letter on the shortcut sheet only", async () => {
+  // Arrange
+  const code = component("<kbd>{`${mod}G`}</kbd>");
+  const sheet = `${SPA}/components/organisms/ShortcutSheet/ShortcutSheetGroup.tsx`;
+  const menu = `${SPA}/components/organisms/EditorContextMenu/EditActions.tsx`;
+
+  // Act
+  const onSheet = await literalsIn(code, sheet);
+  const onMenu = await literalsIn(code, menu);
+
+  // Assert
+  assert.equal(onSheet.length, 0);
+  assert.equal(onMenu.length, 1);
+});
+
+test("should allow KRD and GCN on import and export file-type surfaces only", async () => {
+  // Arrange
+  const code = 'export const LABELS = { krd: "KRD", gcn: "GCN" };\n';
+  const exportSurface = `${SPA}/components/molecules/ExportFormatSelector/format-options.ts`;
+
+  // Act
+  const onExport = await literalsIn(
+    code,
+    exportSurface,
+    "local/no-literal-copy"
+  );
+  const onOther = await literalsIn(code, HOOK, "local/no-literal-copy");
+
+  // Assert
+  assert.equal(onExport.length, 0);
+  assert.equal(onOther.length, 2);
+});

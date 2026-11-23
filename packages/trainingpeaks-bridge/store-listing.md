@@ -22,7 +22,7 @@ What it does:
 
 • Sends the workouts you create in the Kaiord App to your TrainingPeaks calendar, each on its day.
 • Each send adds a new workout in TrainingPeaks. Before sending a workout again, the Kaiord App checks whether TrainingPeaks still has the copy it sent: if it does, an unchanged workout adds nothing, and for one you changed the Kaiord App asks you first, because TrainingPeaks would then hold two copies. The extension cannot delete anything in TrainingPeaks or change a workout already there.
-• On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow; for a later day the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.
+• On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.
 • Reads the metrics you logged in TrainingPeaks over the last 30 days, from which the Kaiord App keeps only your weight.
 • Shows in its popup whether your TrainingPeaks sign-in can be used.
 

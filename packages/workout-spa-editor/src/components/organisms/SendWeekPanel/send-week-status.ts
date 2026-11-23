@@ -15,6 +15,7 @@ const STATUS: Record<BulkStatus, [SendWeekTone, SendWeekBucket]> = {
   moved: ["plain", "placed"],
   unchanged: ["plain", "placed"],
   "duplicate-left": ["warning", "placed"],
+  "foreign-left": ["warning", "placed"],
   uncertain: ["danger", "attention"],
   "library-only": ["warning", "libraryOnly"],
   "not-eligible": ["plain", "skipped"],

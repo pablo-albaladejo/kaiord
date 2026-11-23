@@ -12,11 +12,8 @@
  * invoking it ONLY from explicit user actions (connect, manual sync) —
  * mirroring the same invariant `attempt-link.ts` enforces.
  *
- * Toast/log copy lives in `sync-zones-toasts.ts` as SCREAMING_SNAKE_CASE
- * constants so the `check-no-pii-leakage.mjs` mechanical guard can prove
- * the strings are static (no template interpolation reaches a toast or
- * a `console.*` first-arg), and so the orchestrator can show them without
- * loading this use case eagerly.
+ * It returns a failure reason only; the orchestrator words it from the
+ * `coaching` dictionary (`zonesSync.*`).
  */
 import type { PersistencePort } from "../../ports/persistence-port";
 import type { SyncZonesResult, ZonesPayload } from "../../types/coaching-zones";
@@ -29,12 +26,6 @@ import {
   recordSyncedWeight,
   splitWeight,
 } from "./sync-zones-weight";
-
-export {
-  TOAST_ZONES_FETCH_FAILED,
-  TOAST_ZONES_SHAPE_MISMATCH,
-  TOAST_ZONES_UNSUPPORTED,
-} from "./sync-zones-toasts";
 
 const errorMessage = (e: unknown): string =>
   e instanceof Error ? e.message : String(e);

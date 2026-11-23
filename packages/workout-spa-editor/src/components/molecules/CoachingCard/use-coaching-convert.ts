@@ -5,6 +5,7 @@ import { convertCoachingActivity } from "../../../application/coaching/convert-c
 import { useAnalytics } from "../../../contexts";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useTranslate } from "../../../i18n/use-translate";
+import { logFailure } from "../../../lib/log-failure";
 import { withOrigin } from "../../../routing/with-origin";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 
@@ -66,9 +67,8 @@ export const useCoachingConvert = (
       onClose();
       navigate(withOrigin(`/workout/${result.workoutId}`, "coaching"));
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : t("hooks.conversionFailed")
-      );
+      logFailure("coaching-convert", err);
+      setError(t("hooks.conversionFailed"));
     } finally {
       setConverting(false);
     }

@@ -4,18 +4,18 @@
  * Garmin still shows its schedule id. Absent from two reads `SETTLE_MS`
  * apart (the athlete deleted it in Garmin), its id turns `gone` and the
  * placement is cleared in one guarded write, so the claim that follows
- * places the Workout again: one entry, never zero. A failed read, an
- * id-less entry on the date, A3 false or an `unconfirmed` `Placed` proves
- * nothing, and the placement stands.
+ * places the Workout again: one entry, never zero. Seen, any other entry
+ * of Kaiord's own on its date that the record holds `gone` (a read had left
+ * it out, and a second one was posted) is revived as a surplus to drain, so
+ * one entry remains. A read that proves nothing leaves the placement as is.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import { entryOf } from "../sync/merge-garmin-removal-queue";
+import type { CalendarEntry } from "./garmin-calendar-port";
 import type { PlacementRun } from "./placement-deps";
+import { readPlacedLive, type Scheduled } from "./placement-live-read";
+import { revivable, revived } from "./placement-revival";
 import { decide, holdsPlaced, type Row, withEntries } from "./placement-row";
-import { SETTLE_MS } from "./placement-timing";
-import { readPlaced } from "./placement-verify-placed";
-
-type Scheduled = GarminPlaced & { kind: "scheduled" };
 
 const clearDead = async (run: PlacementRun, placed: Scheduled) =>
   (
@@ -28,16 +28,28 @@ const clearDead = async (run: PlacementRun, placed: Scheduled) =>
     })
   ).verdict;
 
+const reviveSurplus = (
+  run: PlacementRun,
+  placed: Scheduled,
+  found: readonly CalendarEntry[]
+) =>
+  decide(run.deps, run.key, (row) => {
+    if (!row || !holdsPlaced(row, placed)) return { verdict: undefined };
+    const surplus = revivable(row, placed.workoutId, placed.date, found)
+      .filter((e) => e.workoutScheduleId !== placed.workoutScheduleId)
+      .map((e) => revived(e, "retire"));
+    if (surplus.length === 0) return { verdict: undefined };
+    return { write: withEntries(row, surplus), verdict: undefined };
+  });
+
 /** `gone`: the `Placed` was proven absent and cleared; place it again. */
 export const confirmUnchanged = async (
   run: PlacementRun,
   placed: GarminPlaced
 ): Promise<"live" | "gone"> => {
-  const { canFind, scheduleIdsInFind } = run.deps;
-  if (placed.kind !== "scheduled" || !canFind || !scheduleIdsInFind)
-    return "live";
-  if ((await readPlaced(run, placed)) !== "absent") return "live";
-  await run.deps.sleep(SETTLE_MS);
-  if ((await readPlaced(run, placed)) !== "absent") return "live";
-  return clearDead(run, placed);
+  if (placed.kind !== "scheduled") return "live";
+  const read = await readPlacedLive(run, placed);
+  if (read?.state === "absent") return clearDead(run, placed);
+  if (read?.state === "present") await reviveSurplus(run, placed, read.entries);
+  return "live";
 };

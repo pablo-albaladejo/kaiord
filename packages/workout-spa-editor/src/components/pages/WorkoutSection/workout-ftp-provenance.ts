@@ -7,6 +7,8 @@
  * the data cannot support would be a supposition dressed as a fact.
  */
 
+import type { Locale } from "@kaiord/i18n";
+
 import type { Translate } from "../../../i18n/use-translate";
 import { thresholdsForSport } from "../../../lib/athlete";
 import type { Profile } from "../../../types/profile";
@@ -18,7 +20,8 @@ export function buildFtpProvenance(
   sportLabel: string,
   editorT: Translate,
   commonT: Translate,
-  now: Date
+  now: Date,
+  locale: Locale
 ): string {
   // `thresholdsForSport` indexes `sportZones` directly, so a profile row
   // written before per-sport zones existed would throw rather than answer
@@ -35,7 +38,7 @@ export function buildFtpProvenance(
     return editorT("shape.zonesFromNoDate", { ftp });
   }
 
-  const relative = formatRelativeTime(new Date(updatedAt), now);
+  const relative = formatRelativeTime(new Date(updatedAt), now, locale);
   return editorT("shape.zonesFrom", {
     ftp,
     when: commonT(relative.key, relative.params),

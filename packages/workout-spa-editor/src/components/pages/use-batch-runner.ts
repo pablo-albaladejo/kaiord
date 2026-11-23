@@ -7,6 +7,7 @@ import type {
 import { processBatch } from "../../application/batch-processor";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useTranslate } from "../../i18n/use-translate";
+import { useUnsavedWork } from "../../lib/use-unsaved-work";
 import { createProcessOne } from "./batch-process-one";
 import type { BatchPending } from "./use-batch-state";
 
@@ -18,6 +19,7 @@ export function useBatchRunner(
   const persistence = usePersistence();
   const [progress, setProgress] = useState<BatchProgress | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  useUnsavedWork(isProcessing);
   const abortRef = useRef<AbortController | null>(null);
 
   const run = useCallback(

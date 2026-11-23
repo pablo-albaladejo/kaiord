@@ -29,7 +29,6 @@ import { useMemo } from "react";
 
 import type { MatchedSession } from "../components/molecules/MatchedSessionCard/MatchedSessionCard";
 import { usePersistence } from "../contexts/persistence-context";
-import { useActiveLocale } from "../i18n/LocaleProvider";
 import type { SessionMatch } from "../types/session-match";
 import {
   type CrossWeekMatches,
@@ -72,7 +71,6 @@ export function useMatchedSessions(
 ): MatchedWeek | undefined {
   const persistence = usePersistence();
   const { matchedSessionsReadModel } = persistence;
-  const locale = useActiveLocale();
   const result = useLiveQuery<HydrateResult>(async () => {
     markUseMatchedSessionsStart();
     try {
@@ -84,14 +82,13 @@ export function useMatchedSessions(
       if (matches.length === 0) return { ...EMPTY, crossWeek };
       const hydrated = await hydrateMatchedSessions(
         matches,
-        matchedSessionsReadModel,
-        locale
+        matchedSessionsReadModel
       );
       return { ...hydrated, crossWeek };
     } finally {
       markUseMatchedSessionsEnd();
     }
-  }, [profileId, days.join(","), persistence, locale]);
+  }, [profileId, days.join(","), persistence]);
 
   useMatchedSessionsHeal(result?.dangling ?? null);
 

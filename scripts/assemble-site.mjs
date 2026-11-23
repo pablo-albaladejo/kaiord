@@ -15,6 +15,7 @@ import { pathToFileURL } from "node:url";
 import { emitLegacyEditorPage } from "./emit-legacy-editor-page.mjs";
 import { emitServiceWorker } from "./emit-spa-service-worker.mjs";
 import { injectSpaFallback } from "./inject-spa-fallback.mjs";
+import { APP_ORIGIN } from "./lib/app-origins.mjs";
 import { applySiteCsp } from "./lib/site-csp.mjs";
 
 // The one place that turns the three site builds into the tree Pages serves.
@@ -84,6 +85,7 @@ export function assembleSite({
   sha,
   umamiWebsiteId,
   swKill = false,
+  origin = APP_ORIGIN,
 }) {
   if (!sha) throw new Error("assembleSite: a build sha is required");
   copyGlobContents(landing, out);
@@ -101,8 +103,9 @@ export function assembleSite({
   const analytics = substituteAnalyticsId(out, umamiWebsiteId);
   injectSpaFallback(out);
   emitLegacyEditorPage(out);
-  // The policy hashes the inline scripts the steps above wrote.
-  applySiteCsp(out);
+  // The policy hashes the inline scripts the steps above wrote, and names
+  // the App's worker at the origin the tree is served from.
+  applySiteCsp(out, { origin });
   // Last of all: the worker records the SHA-256 of every App file as it
   // ships, so no step may touch app/ after it.
   emitServiceWorker(join(out, "app"), { scope: APP_SCOPE, kill: swKill });
@@ -120,6 +123,7 @@ export function parseAssembleArgs(argv) {
       without: { type: "string", multiple: true, default: [] },
       sha: { type: "string" },
       "sw-kill": { type: "boolean", default: false },
+      origin: { type: "string", default: APP_ORIGIN },
     },
   });
   const withoutDocs = values.without.includes("docs");
@@ -136,6 +140,7 @@ export function parseAssembleArgs(argv) {
     docs: withoutDocs ? null : resolve(values.docs),
     sha: values.sha,
     swKill: values["sw-kill"],
+    origin: values.origin,
   };
 }
 

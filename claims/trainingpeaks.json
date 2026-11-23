@@ -117,7 +117,7 @@
     },
     {
       "id": "trainingpeaks.listing.basic",
-      "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow; for a later day the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.",
+      "text": "On a Basic TrainingPeaks account, TrainingPeaks accepts workouts only for today and tomorrow, counted in the account's time zone; for any day that may be later there, the Kaiord App tells you so before you send, and says the same if TrainingPeaks refuses it.",
       "proof": [
         {
           "test": "packages/trainingpeaks-bridge/test/background.test.js",
@@ -130,6 +130,14 @@
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",
           "title": "should say before sending that a day after tomorrow may be refused"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/application/trainingpeaks/trainingpeaks-planning-horizon.test.ts",
+          "title": "should flag the browser's tomorrow while an account at UTC-12 is still on yesterday"
+        },
+        {
+          "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksHorizonCopy.locale.test.tsx",
+          "title": "should name the consequence and the account's time zone when TrainingPeaks refuses the day"
         },
         {
           "test": "packages/workout-spa-editor/src/components/molecules/TrainingPeaksPushButton/TrainingPeaksPushButton.test.tsx",

@@ -27,6 +27,12 @@
     "send": "Send to Garmin",
     "sending": "Sending…",
     "sent": "On your Garmin",
+    "garminPushError": {
+      "updated": "Kaiord for Garmin was updated. Try again.",
+      "signIn": "Sign in to Garmin Connect in this browser, then try again.",
+      "notPrepared": "This workout could not be prepared for Garmin. Try again.",
+      "notAnswering": "Garmin is not answering. Try again."
+    },
     "sendToTrainingPeaks": "Send to TrainingPeaks",
     "sentToTrainingPeaks": "On TrainingPeaks",
     "trainingPeaksRepush": {
@@ -48,8 +54,8 @@
       "signedOut": "Sign in to Garmin Connect in this browser to send this workout."
     },
     "trainingPeaksHorizon": {
-      "beforeSend": "On a Basic TrainingPeaks account only today and tomorrow are accepted, so TrainingPeaks may refuse this day.",
-      "refused": "TrainingPeaks refused this day: a Basic account accepts only today and tomorrow. Schedule the workout for one of them."
+      "beforeSend": "A Basic TrainingPeaks account accepts only today and tomorrow, counted in the account's time zone, so TrainingPeaks may refuse this day.",
+      "refused": "TrainingPeaks refused this day, so the workout was not sent: a Basic account accepts only today and tomorrow, counted in the TrainingPeaks account's time zone."
     },
     "trainingPeaksNotAnswering": "TrainingPeaks is not answering. Try again."
   },
@@ -93,6 +99,7 @@
     "moved": "Moved on your Garmin calendar to {{date}}",
     "unchanged": "Already on your Garmin calendar on {{date}}",
     "duplicateLeft": "On your Garmin calendar on {{date}}, but an older entry is still on {{dates}}. Remove it in Garmin Connect.",
+    "foreignLeft": "On your Garmin calendar on {{date}}. An entry Kaiord has no record of creating is still on {{dates}}: Kaiord leaves it as it is.",
     "uncertain": "Garmin did not confirm the entry on {{date}}. Check your Garmin calendar before sending again.",
     "confirm": "It's in Garmin",
     "sendAnyway": "Send anyway",

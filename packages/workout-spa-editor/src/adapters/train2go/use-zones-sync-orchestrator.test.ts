@@ -2,11 +2,6 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CoachingTransport } from "../../application/coaching/coaching-transport-port";
-import {
-  TOAST_ZONES_FETCH_FAILED,
-  TOAST_ZONES_SHAPE_MISMATCH,
-  TOAST_ZONES_UNSUPPORTED,
-} from "../../application/coaching/sync-zones";
 import type { useToast } from "../../hooks/use-toast";
 import type { PersistencePort } from "../../ports/persistence-port";
 import type {
@@ -31,6 +26,12 @@ vi.mock("../../application/coaching/commit-conflict-resolution", () => ({
 }));
 
 import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
+
+const ZONES_FETCH_FAILED =
+  "Train2Go is not answering, so your zones were not synced. Try again.";
+const ZONES_SHAPE_MISMATCH =
+  "Train2Go sent zones Kaiord cannot read, so they were not synced.";
+const ZONES_UNSUPPORTED = "This coaching platform does not share zones.";
 
 type ToastSpy = ReturnType<typeof useToast>;
 
@@ -63,7 +64,7 @@ describe("useZonesSyncOrchestrator", () => {
     mockCommit.mockResolvedValue(undefined);
   });
 
-  it("should call toasts.error with TOAST_ZONES_FETCH_FAILED when syncZones returns transport-error", async () => {
+  it("should call toasts.error with ZONES_FETCH_FAILED when syncZones returns transport-error", async () => {
     // Arrange
     mockSyncZones.mockResolvedValue({ ok: false, reason: "transport-error" });
     const toasts = buildToasts();
@@ -77,11 +78,11 @@ describe("useZonesSyncOrchestrator", () => {
     });
 
     // Assert
-    expect(toasts.error).toHaveBeenCalledWith(TOAST_ZONES_FETCH_FAILED);
+    expect(toasts.error).toHaveBeenCalledWith(ZONES_FETCH_FAILED);
     expect(result.current.pending).toBeNull();
   });
 
-  it("should call toasts.warning with TOAST_ZONES_SHAPE_MISMATCH when reason is shape-mismatch", async () => {
+  it("should call toasts.warning with ZONES_SHAPE_MISMATCH when reason is shape-mismatch", async () => {
     // Arrange
     mockSyncZones.mockResolvedValue({ ok: false, reason: "shape-mismatch" });
     const toasts = buildToasts();
@@ -95,11 +96,11 @@ describe("useZonesSyncOrchestrator", () => {
     });
 
     // Assert
-    expect(toasts.warning).toHaveBeenCalledWith(TOAST_ZONES_SHAPE_MISMATCH);
+    expect(toasts.warning).toHaveBeenCalledWith(ZONES_SHAPE_MISMATCH);
     expect(result.current.pending).toBeNull();
   });
 
-  it("should call toasts.info with TOAST_ZONES_UNSUPPORTED when reason is unsupported", async () => {
+  it("should call toasts.info with ZONES_UNSUPPORTED when reason is unsupported", async () => {
     // Arrange
     mockSyncZones.mockResolvedValue({ ok: false, reason: "unsupported" });
     const toasts = buildToasts();
@@ -113,7 +114,7 @@ describe("useZonesSyncOrchestrator", () => {
     });
 
     // Assert
-    expect(toasts.info).toHaveBeenCalledWith(TOAST_ZONES_UNSUPPORTED);
+    expect(toasts.info).toHaveBeenCalledWith(ZONES_UNSUPPORTED);
     expect(result.current.pending).toBeNull();
   });
 

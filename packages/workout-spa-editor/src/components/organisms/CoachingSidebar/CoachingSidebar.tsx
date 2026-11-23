@@ -11,7 +11,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { toCoachingActivity } from "../../../adapters/train2go/coaching-record-to-activity.converter";
-import { useActiveLocale } from "../../../i18n/LocaleProvider";
+import { useCoachingSportLabel } from "../../../hooks/use-coaching-sport-label";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { CoachingActivityRecord } from "../../../types/coaching-activity-record";
 import { CoachingDescription } from "./CoachingDescription";
@@ -29,7 +29,8 @@ export type CoachingSidebarProps = {
 
 export function CoachingSidebar({ activity }: CoachingSidebarProps) {
   const t = useTranslate("chat");
-  const locale = useActiveLocale();
+  const sport = toCoachingActivity(activity).sport;
+  const sportLabel = useCoachingSportLabel(sport);
   const { collapsed, toggle } = useSidebarCollapse();
   if (collapsed) {
     return (
@@ -44,8 +45,6 @@ export function CoachingSidebar({ activity }: CoachingSidebarProps) {
       </button>
     );
   }
-  const view = toCoachingActivity(activity, locale);
-  const sport = view.sport;
   const statusKey = STATUS_LABEL_KEY[activity.status];
   const status = statusKey ? t(statusKey) : activity.status;
   return (
@@ -57,7 +56,7 @@ export function CoachingSidebar({ activity }: CoachingSidebarProps) {
         <div className="space-y-1">
           <h2 className="text-base font-semibold">{activity.title}</h2>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            {sport.icon} {sport.label} · {status}
+            {sport.icon} {sportLabel} · {status}
           </div>
         </div>
         <button

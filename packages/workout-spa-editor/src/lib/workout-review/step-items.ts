@@ -6,7 +6,7 @@ import { calculateStepDuration } from "../../utils/workout-stats-duration";
 import type { ZoneNumber } from "../zone-colors";
 import { classifyTargetZone } from "./classify-zone";
 import { formatClock } from "./format-duration";
-import { type ReviewCopy, reviewCopyFor } from "./review-copy";
+import type { ReviewCopy } from "./review-copy";
 import { stepDetail, stepKind } from "./step-detail";
 
 export type ReviewStepItem = {
@@ -65,7 +65,7 @@ function blockRow(
 export function toStepItems(
   workout: Workout,
   thresholds: SportThresholds,
-  copy: ReviewCopy = reviewCopyFor()
+  copy: ReviewCopy
 ): ReviewStepItem[] {
   return workout.steps.map((item) =>
     isRepetitionBlock(item)

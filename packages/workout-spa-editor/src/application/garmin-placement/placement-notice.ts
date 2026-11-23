@@ -25,7 +25,8 @@ const namesWorkoutDate = (result: PlacementResult): boolean =>
   result.kind === "scheduled" ||
   result.kind === "moved" ||
   result.kind === "unchanged" ||
-  result.kind === "duplicate-left";
+  result.kind === "duplicate-left" ||
+  result.kind === "foreign-left";
 
 /**
  * The last run, while it still describes the workout: a result naming the

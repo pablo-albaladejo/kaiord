@@ -10,35 +10,20 @@ import {
   type GarminPlaced,
   type GarminPlacement,
 } from "../../types/garmin-ledger";
-import {
-  GARMIN_REMOVAL_STATES,
-  type GarminRemovalEntry,
-  type GarminRemovalState,
+import type {
+  GarminRemovalEntry,
+  GarminRemovalState,
 } from "../../types/garmin-removal-entry";
+import { entryKey, joinEntries } from "./merge-garmin-removal-entry";
+
+export { isKaiords } from "./merge-garmin-removal-entry";
 
 export type Queue = Map<string, GarminRemovalEntry>;
-
-const rank = (e: GarminRemovalEntry) => GARMIN_REMOVAL_STATES.indexOf(e.state);
-
-const entryKey = (e: GarminRemovalEntry) =>
-  `${e.date}\u0000${e.workoutId}\u0000${e.workoutScheduleId}`;
-
-const joinEntries = (
-  x: GarminRemovalEntry,
-  y: GarminRemovalEntry
-): GarminRemovalEntry => {
-  const order = rank(x) - rank(y) || (entryKey(x) >= entryKey(y) ? 1 : -1);
-  return {
-    ...(order > 0 ? x : y),
-    attempts: Math.max(x.attempts, y.attempts),
-    abandoned: x.abandoned || y.abandoned,
-  };
-};
 
 /** Joins `entry` into `queue` by its id. */
 export const raise = (queue: Queue, entry: GarminRemovalEntry) => {
   const seen = queue.get(entry.workoutScheduleId);
-  queue.set(entry.workoutScheduleId, seen ? joinEntries(seen, entry) : entry);
+  queue.set(entry.workoutScheduleId, joinEntries(seen ?? entry, entry));
 };
 
 export const joinQueues = (

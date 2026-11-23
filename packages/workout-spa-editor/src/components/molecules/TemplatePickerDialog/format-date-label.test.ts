@@ -8,7 +8,7 @@ describe("formatDateLabel", () => {
     const date = "2026-05-04";
 
     // Act
-    const label = formatDateLabel(date);
+    const label = formatDateLabel(date, "en");
 
     // Assert
     expect(label).toBe("Monday, May 4");

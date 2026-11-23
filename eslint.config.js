@@ -14,6 +14,7 @@ import {
   JSX_LITERAL_IGNORES,
   LITERAL_COPY_FILES,
   LITERAL_COPY_IGNORES,
+  SCOPED_ALLOW,
 } from "./scripts/eslint-rules/jsx-literal-scope.mjs";
 import noJsxLiteralText from "./scripts/eslint-rules/no-jsx-literal-text.mjs";
 import noLiteralCopy from "./scripts/eslint-rules/no-literal-copy.mjs";
@@ -701,6 +702,31 @@ export default tseslint.config(
       "local/no-literal-copy": ["error", { allow: JSX_LITERAL_ALLOW }],
     },
   },
+  // A word allowed on one surface only (keyboard keys, file types).
+  ...SCOPED_ALLOW.flatMap(({ files, allow }) => [
+    {
+      files: files
+        .filter((glob) => glob.endsWith("/**"))
+        .map((glob) => `${glob}/*.tsx`),
+      ignores: JSX_LITERAL_IGNORES,
+      rules: {
+        "local/no-jsx-literal-text": [
+          "error",
+          { allow: [...JSX_LITERAL_ALLOW, ...allow] },
+        ],
+      },
+    },
+    {
+      files,
+      ignores: LITERAL_COPY_IGNORES,
+      rules: {
+        "local/no-literal-copy": [
+          "error",
+          { allow: [...JSX_LITERAL_ALLOW, ...allow] },
+        ],
+      },
+    },
+  ]),
   {
     // Held-out path: Dexie migration adapters document the immutable
     // forward-only migration contract (`// v8 —` changelog, legacy

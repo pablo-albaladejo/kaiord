@@ -1,7 +1,9 @@
 /**
  * One drain outcome, written as its own entry's state on the re-read row
  * (join by max: concurrent queue additions survive). After
- * `MAX_DELETE_ATTEMPTS` failed sends the entry is `abandoned`.
+ * `MAX_DELETE_ATTEMPTS` failed sends the entry is `abandoned`. A delete
+ * Garmin answered ok, or a 404 a read confirms, marks the entry `deleted`:
+ * a stale read that still shows it never revives it.
  */
 import type { GarminPlaced } from "../../types/garmin-ledger";
 import type { GarminRemovalEntry } from "../../types/garmin-removal-entry";
@@ -14,7 +16,7 @@ export const recordDrain = async (
   run: PlacementRun,
   guard: GarminPlaced,
   id: string,
-  outcome: "gone" | "count"
+  outcome: "deleted" | "gone" | "count"
 ) =>
   (
     await decide(run.deps, run.key, (row) => {
@@ -22,9 +24,13 @@ export const recordDrain = async (
       if (!row || !cur || !holdsPlaced(row, guard)) return { verdict: false };
       const attempts = cur.attempts + 1;
       const next: GarminRemovalEntry =
-        outcome === "gone"
-          ? { ...cur, state: "gone" }
-          : { ...cur, attempts, abandoned: attempts >= MAX_DELETE_ATTEMPTS };
+        outcome === "count"
+          ? { ...cur, attempts, abandoned: attempts >= MAX_DELETE_ATTEMPTS }
+          : {
+              ...cur,
+              state: "gone",
+              ...(outcome === "deleted" ? { deleted: true as const } : {}),
+            };
       return { write: withEntries(row, [next]), verdict: true };
     })
   ).verdict;

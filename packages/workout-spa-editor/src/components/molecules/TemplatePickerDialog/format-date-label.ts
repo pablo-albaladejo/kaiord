@@ -9,7 +9,7 @@
  */
 import type { Locale } from "@kaiord/i18n";
 
-export function formatDateLabel(date: string, locale: Locale = "en"): string {
+export function formatDateLabel(date: string, locale: Locale): string {
   if (!date) return "";
   const parsed = new Date(`${date}T12:00:00Z`);
   if (Number.isNaN(parsed.getTime())) return date;

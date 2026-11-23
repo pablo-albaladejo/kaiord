@@ -42,6 +42,8 @@ export type PlacementResult =
   | { kind: "unchanged" }
   /** `dates`: where the entries left behind sit, for the UI. */
   | { kind: "duplicate-left"; dates: string[] }
+  /** Placed; an entry Kaiord did not create stays on `dates` (told once). */
+  | { kind: "foreign-left"; dates: string[] }
   /** `canConfirm`: "It's in Garmin" is offered; `sendAfter`: the gate. */
   | { kind: "uncertain"; date: string; canConfirm: boolean; sendAfter?: number }
   | { kind: "library-only"; reason: LibraryOnlyReason }
