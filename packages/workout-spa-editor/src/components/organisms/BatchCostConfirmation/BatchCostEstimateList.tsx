@@ -43,7 +43,9 @@ export function BatchCostEstimateList({
       >
         {estimate.costUsd !== null
           ? t("batchCost.costValue", { amount: estimate.costUsd.toFixed(4) })
-          : "—"}
+          : estimate.priceUnknown
+            ? t("batchCost.priceUnknown")
+            : "—"}
       </dd>
     </dl>
   );

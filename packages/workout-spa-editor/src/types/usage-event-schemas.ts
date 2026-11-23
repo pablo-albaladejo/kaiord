@@ -8,9 +8,16 @@
  * `[yearMonth+purpose]` Dexie index drives that read.
  *
  * `providerType` and `modelId` are optional: a runtime event whose SDK provider
- * string maps to no `LlmProviderType` records usage with `cost: 0` rather than
- * dropping it, and the chat path has no model id at its layer. Neither field is
- * used by the fold.
+ * string maps to no `LlmProviderType` still records its usage.
+ *
+ * `cost` is priced per request at the model's own prices (`priceRun` from
+ * `@kaiord/ai/providers`), failed attempts included. `costBasis` says how:
+ * `price_table` (read on `priceReadOn`) or `unknown` (the model has no price;
+ * `cost` is then 0 and the App shows it as unknown). The request counts say
+ * how many requests reached the Provider, how many failed and how many
+ * reported no usage (unmeasured, not counted). A row written before these
+ * fields existed has none of them and was priced at a blended rate; the fold
+ * prices it again per model.
  */
 
 import { z } from "zod";
@@ -27,7 +34,14 @@ export const usageEventSchema = z
     promptTokens: z.number().int().nonnegative(),
     completionTokens: z.number().int().nonnegative(),
     tokens: z.number().int().nonnegative(),
+    cacheReadTokens: z.number().int().nonnegative().optional(),
+    cacheWriteTokens: z.number().int().nonnegative().optional(),
     cost: z.number().nonnegative(),
+    costBasis: z.enum(["price_table", "unknown"]).optional(),
+    priceReadOn: z.iso.date().optional(),
+    requestCount: z.number().int().nonnegative().optional(),
+    failedRequests: z.number().int().nonnegative().optional(),
+    unmeasuredRequests: z.number().int().nonnegative().optional(),
     createdAt: z.string(),
   })
   .strict()

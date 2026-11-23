@@ -10,7 +10,7 @@ const anthropic: LlmProviderConfig = {
   id: "p1",
   type: "anthropic",
   apiKey: "k",
-  model: "claude",
+  model: "claude-sonnet-5",
   label: "My Claude",
   isDefault: true,
   createdAt: 0,

@@ -151,7 +151,28 @@
       "chat": "Chat",
       "workout_generation": "Workout generation",
       "lab_extraction": "Lab extraction"
+    },
+    "unknownCost_one": "+ {{count}} run at an unknown price",
+    "unknownCost_other": "+ {{count}} runs at an unknown price",
+    "costBasis": "Each run is priced at its own model’s input, output and cache prices, and the cost includes every attempt the Provider billed: retries, failed attempts and each step of a chat turn.",
+    "unmeasured_one": "{{count}} request failed before its Provider reported the tokens used, so it is not counted in the cost.",
+    "unmeasured_other": "{{count}} requests failed before their Provider reported the tokens used, so they are not counted in the cost.",
+    "byModel": {
+      "heading": "Cost by model, last {{count}} months",
+      "model": "Model",
+      "runs": "Runs",
+      "failed": "Failed attempts",
+      "tokens": "Tokens",
+      "cost": "Cost (USD)",
+      "price": "Price",
+      "unknownModel": "Unknown model"
     }
+  },
+  "price": {
+    "priced": "{{input}} input · {{output}} output per million tokens, from the official price list read on {{date}}.",
+    "pricedCache": "{{input}} input · {{output}} output · {{cacheRead}} cached input per million tokens, from the official price list read on {{date}}.",
+    "unknown": "Price unknown: this model is not on its Provider’s price list, so its cost is not counted.",
+    "source": "Price list"
   },
   "preferences": {
     "units": "Units",
@@ -181,7 +202,9 @@
     "runsOn": "on {{account}}",
     "usage_one": "Total this month (all athletes): {{count}} request · {{tokens}} tokens · ~{{cost}}",
     "usage_other": "Total this month (all athletes): {{count}} requests · {{tokens}} tokens · ~{{cost}}",
-    "usageNone": "No AI use yet this month, by any athlete."
+    "usageNone": "No AI use yet this month, by any athlete.",
+    "usageUnknown_one": "{{count}} run at an unknown price is not included.",
+    "usageUnknown_other": "{{count}} runs at an unknown price are not included."
   },
   "keyStatus": {
     "verified": "Key verified",

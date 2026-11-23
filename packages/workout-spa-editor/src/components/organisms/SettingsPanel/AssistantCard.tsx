@@ -1,5 +1,6 @@
 import { modelDisplayName } from "@kaiord/ai/providers";
 
+import { priceBasisOf } from "../../../application/usage/price-basis";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useTranslate } from "../../../i18n/use-translate";
@@ -7,6 +8,7 @@ import { AssistantUsage } from "./AssistantUsage";
 import { keyStatusOf } from "./key-status";
 import { KeyStatusBadge } from "./KeyStatusBadge";
 import { ModelChoiceSelect } from "./ModelChoiceSelect";
+import { PriceBasisText } from "./PriceBasisText";
 import { useAiModelsHandlers } from "./use-ai-models-handlers";
 import { useEffectiveModels } from "./use-effective-models";
 
@@ -46,6 +48,9 @@ export function AssistantCard() {
           </span>
           <KeyStatusBadge status={keyStatusOf(account)} />
         </div>
+        <p data-testid="assistant-price" className="m-0 text-sm text-ink-muted">
+          <PriceBasisText basis={priceBasisOf(account.type, running.modelId)} />
+        </p>
         <AssistantUsage />
         <ModelChoiceSelect
           id="model-default"

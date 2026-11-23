@@ -7,7 +7,7 @@
  *  - duration-as-seconds literals used by `compute-compliance-score` and
  *    `parse-coaching-duration` tests
  *  - compliance / coaching expected outputs
- *  - cost-estimation token + USD-per-million-token rates
+ *  - cost-estimation token counts
  *  - HR / Power / Pace band tables and percent-FTP outputs used by the
  *    `sync-zones-bands` test suite
  *
@@ -51,14 +51,6 @@ export const EXPECTED_TOKENS_300_PLUS_150 = 650;
 export const EXPECTED_TOKENS_900_CHARS = 1300;
 export const EXPECTED_TOKENS_BASELINE_PLUS_10 = 504;
 export const EXPECTED_TOKENS_ZERO = 0;
-export const ONE_MILLION_TOKENS = 1_000_000;
-export const RATE_USD_PER_MTOK_3 = 3.0;
-export const RATE_USD_PER_MTOK_10 = 10.0;
-export const RATE_USD_PER_MTOK_5 = 5.0;
-export const EXPECTED_COST_USD_3 = 3.0;
-export const EXPECTED_COST_USD_FRACTIONAL = 0.005;
-export const TOKENS_500 = 500;
-export const TOKENS_ZERO = 0;
 
 // ---------------------------------------------------------------------------
 // (d) SYNC_ZONES_BANDS fixtures — HR / Power / Pace band tables.

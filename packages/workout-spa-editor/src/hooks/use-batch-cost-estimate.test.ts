@@ -5,6 +5,10 @@ import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { WorkoutRecord } from "../types/calendar-record";
 import { useBatchCostEstimate } from "./use-batch-cost-estimate";
 
+const DIGITS = 10;
+const EXPECTED_TOKENS_ONE_WORKOUT = 501;
+const SONNET_5_ESTIMATE_USD = 0.005002;
+
 const makeWorkout = (description: string): WorkoutRecord =>
   ({
     id: `w-${description.length}`,
@@ -17,7 +21,7 @@ const anthropic: LlmProviderConfig = {
   id: "p1",
   type: "anthropic",
   apiKey: "k",
-  model: "claude",
+  model: "claude-sonnet-5",
   label: "My Claude",
   isDefault: true,
   createdAt: 0,
@@ -35,6 +39,7 @@ describe("useBatchCostEstimate", () => {
       tokens: 0,
       costUsd: null,
       providerLabel: null,
+      priceUnknown: false,
     });
   });
 
@@ -52,7 +57,7 @@ describe("useBatchCostEstimate", () => {
     expect(result.current.providerLabel).toBeNull();
   });
 
-  it("should compute cost via the blended anthropic rate when a provider is given", () => {
+  it("should price the estimate at the model's own input and output prices", () => {
     // Arrange
     const workouts = [makeWorkout("abc")];
 
@@ -62,11 +67,29 @@ describe("useBatchCostEstimate", () => {
     );
 
     // Assert
-    // eslint-disable-next-line no-magic-numbers -- expected token count from chars/3 heuristic over single 'abc' fixture
-    expect(result.current.tokens).toBe(501);
-    // eslint-disable-next-line no-magic-numbers -- blended anthropic billing: 501 tokens * $3 input rate / 1_000_000 (per-million pricing denominator); rounded to 6 decimals
-    expect(result.current.costUsd).toBeCloseTo((501 * 3) / 1_000_000, 6);
+
+    // 1 input token at $2 and 500 output tokens at $10 per 1M
+    expect(result.current.tokens).toBe(EXPECTED_TOKENS_ONE_WORKOUT);
+    expect(result.current.costUsd).toBeCloseTo(SONNET_5_ESTIMATE_USD, DIGITS);
     expect(result.current.providerLabel).toBe("My Claude");
+    expect(result.current.priceUnknown).toBe(false);
+  });
+
+  it("should say the price is unknown, not zero, for a model with no price", () => {
+    // Arrange
+    const workouts = [makeWorkout("abc")];
+    const openai: LlmProviderConfig = {
+      ...anthropic,
+      type: "openai",
+      model: "o1",
+    };
+
+    // Act
+    const { result } = renderHook(() => useBatchCostEstimate(workouts, openai));
+
+    // Assert
+    expect(result.current.costUsd).toBeNull();
+    expect(result.current.priceUnknown).toBe(true);
   });
 
   it("should cache the result when inputs are referentially stable", () => {

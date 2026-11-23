@@ -74,7 +74,7 @@ export const BatchOfFive: Story = {
   args: { workouts: fiveWorkouts, provider: anthropicProvider },
 };
 
-/** A different provider changes the blended per-token rate, so the USD estimate differs too. */
+/** A different model has its own input and output prices, so the USD estimate differs too. */
 export const OpenAiProvider: Story = {
   args: { workouts: fiveWorkouts, provider: openAiProvider },
 };

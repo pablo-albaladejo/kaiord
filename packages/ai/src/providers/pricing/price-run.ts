@@ -37,7 +37,7 @@ export type PriceRunInput = {
   at: Date;
 };
 
-export const priceRequest = (period: PricePeriod, usage: AiUsage): number => {
+const priceRequest = (period: PricePeriod, usage: AiUsage): number => {
   const read = usage.cacheReadTokens ?? 0;
   const write = usage.cacheWriteTokens ?? 0;
   const long = period.longContext;

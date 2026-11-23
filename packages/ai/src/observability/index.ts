@@ -1,4 +1,6 @@
 export type {
+  AiRequest,
+  AiRequestOutcome,
   AiTelemetryEvent,
   AiRunTimings,
   AiTelemetrySink,

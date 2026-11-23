@@ -151,7 +151,28 @@
       "chat": "Chat",
       "workout_generation": "Generación de entrenamientos",
       "lab_extraction": "Extracción de laboratorio"
+    },
+    "unknownCost_one": "+ {{count}} ejecución con precio desconocido",
+    "unknownCost_other": "+ {{count}} ejecuciones con precio desconocido",
+    "costBasis": "Cada ejecución se calcula con los precios de entrada, salida y caché de su propio modelo, y el coste incluye cada intento que el proveedor facturó: reintentos, intentos fallidos y cada paso de un turno del chat.",
+    "unmeasured_one": "{{count}} petición falló antes de que su proveedor informara de los tokens usados, así que no se cuenta en el coste.",
+    "unmeasured_other": "{{count}} peticiones fallaron antes de que su proveedor informara de los tokens usados, así que no se cuentan en el coste.",
+    "byModel": {
+      "heading": "Coste por modelo, últimos {{count}} meses",
+      "model": "Modelo",
+      "runs": "Ejecuciones",
+      "failed": "Intentos fallidos",
+      "tokens": "Tokens",
+      "cost": "Coste (USD)",
+      "price": "Precio",
+      "unknownModel": "Modelo desconocido"
     }
+  },
+  "price": {
+    "priced": "{{input}} de entrada · {{output}} de salida por millón de tokens, según la lista oficial de precios leída el {{date}}.",
+    "pricedCache": "{{input}} de entrada · {{output}} de salida · {{cacheRead}} de entrada en caché por millón de tokens, según la lista oficial de precios leída el {{date}}.",
+    "unknown": "Precio desconocido: este modelo no está en la lista de precios de su proveedor, así que su coste no se cuenta.",
+    "source": "Lista de precios"
   },
   "preferences": {
     "units": "Unidades",
@@ -181,7 +202,9 @@
     "runsOn": "en {{account}}",
     "usage_one": "Total este mes (todos los atletas): {{count}} petición · {{tokens}} tokens · ~{{cost}}",
     "usage_other": "Total este mes (todos los atletas): {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
-    "usageNone": "Ningún atleta ha usado la IA este mes."
+    "usageNone": "Ningún atleta ha usado la IA este mes.",
+    "usageUnknown_one": "No incluye {{count}} ejecución con precio desconocido.",
+    "usageUnknown_other": "No incluye {{count}} ejecuciones con precio desconocido."
   },
   "keyStatus": {
     "verified": "Clave verificada",
