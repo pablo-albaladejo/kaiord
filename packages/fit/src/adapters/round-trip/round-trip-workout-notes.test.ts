@@ -10,6 +10,7 @@ import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,
 } from "../garmin-fitsdk";
+import { FIT_STRING_MAX_BYTES } from "../shared/fit-string";
 
 const logger = createMockLogger();
 const read = createGarminFitSdkReader(logger);
@@ -65,7 +66,6 @@ describe("Round-trip: workout-level notes", () => {
   });
 });
 
-const FIT_STRING_BYTES = 254;
 const KRD_NOTES_MAX = 256;
 const LONG_WORKOUT_NOTES = 600;
 
@@ -81,7 +81,7 @@ describe("Round-trip: notes longer than a FIT string", () => {
     const back = workoutOf(await read(await write(krd)));
 
     // Assert
-    expect(back.steps[0]?.notes).toBe(notes.substring(0, FIT_STRING_BYTES));
+    expect(back.steps[0]?.notes).toBe(notes.substring(0, FIT_STRING_MAX_BYTES));
   });
 
   it("should cut long workout notes on a character boundary within 254 bytes", async () => {
@@ -97,7 +97,7 @@ describe("Round-trip: notes longer than a FIT string", () => {
     const back = workoutOf(await read(await write(krd)));
 
     // Assert
-    expect(back.notes).toBe("é".repeat(FIT_STRING_BYTES / 2));
+    expect(back.notes).toBe("é".repeat(FIT_STRING_MAX_BYTES / 2));
     expect(back.steps[0]?.notes).toBeUndefined();
   });
 });

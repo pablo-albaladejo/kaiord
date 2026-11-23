@@ -16,8 +16,9 @@ vi.mock("@kaiord/core", () => ({
   })),
 }));
 
+// The schemas the App parses with stay real; only the model is stubbed.
 vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
-  ...(await importOriginal<object>()),
+  ...(await importOriginal<Record<string, unknown>>()),
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
 }));
 
@@ -121,7 +122,7 @@ describe("generateWorkoutKrd", () => {
     );
   });
 
-  it("should leave one Trace of its own and forward usage under its id", async () => {
+  it("should leave one Trace of its own and forward usage without its id", async () => {
     // Arrange
     await mockPersistence.traces.clear();
     const event = { type: "run_finished", requests: [] } as never;
@@ -140,9 +141,7 @@ describe("generateWorkoutKrd", () => {
     expect(traces[0]?.sent).toEqual([
       { to: "anthropic", kinds: ["workoutDescription"] },
     ]);
-    expect(mockSink.emit).toHaveBeenCalledWith(
-      expect.objectContaining({ traceId: traces[0]?.id })
-    );
+    expect(mockSink.emit).toHaveBeenCalledWith(event);
   });
 
   it("should report into the run it is given and leave no Trace of its own", async () => {

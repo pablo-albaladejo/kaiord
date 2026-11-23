@@ -11,6 +11,7 @@
  * (`declared`, read from the flow registry): earlier replies replayed, and
  * text the model wrote after reading health data.
  */
+import { runCostSchema } from "@kaiord/ai/providers";
 import { z } from "zod";
 
 import { DATA_KINDS } from "../application/data-flows/data-kinds";
@@ -18,7 +19,6 @@ import {
   DESTINATION_IDS,
   type DestinationId,
 } from "../application/data-flows/destinations";
-import { runCostSchema } from "./run-cost-schema";
 
 const unitSchema = z
   .object({

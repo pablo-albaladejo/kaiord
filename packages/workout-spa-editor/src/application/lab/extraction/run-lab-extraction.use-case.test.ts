@@ -9,8 +9,9 @@ vi.mock("@kaiord/ai/agents", () => ({
   runGenerateAgent: (...args: unknown[]) => mockRunGenerateAgent(...args),
 }));
 
+// The schemas the App parses with stay real; only the model is stubbed.
 vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
-  ...(await importOriginal<object>()),
+  ...(await importOriginal<Record<string, unknown>>()),
   resolveModelForPurpose: (...args: unknown[]) =>
     mockResolveModelForPurpose(...args),
   createLanguageModel: (...args: unknown[]) => mockCreateLanguageModel(...args),

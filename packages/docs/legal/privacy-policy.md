@@ -31,6 +31,8 @@ Settings, Privacy also lists every destination your data can leave your device f
 
 Each run of the Kaiord App's assistant (a chat turn, a workout generation, a batch of generations, a lab document read) leaves a Trace in your browser: when it ran, for which feature, with which provider and model and prompt version, each tool it called with whether you confirmed it and how it ended, its retries, how long it took, how it ended, its cost, and which kinds of data went to which provider: the kinds the Kaiord App put in its requests and, listed apart as not counted, the health data that earlier replies sent again or a text the assistant wrote after reading it may hold. A Trace holds no message, prompt, document or model answer. Traces are never sent anywhere: they are left out of the cross-device sync snapshot and out of a backup file. The newest 200 are kept, none older than 90 days. Settings, Privacy lists them, opens each one, exports them all as a JSON file and deletes them all.
 
+Each run also leaves a row in the assistant's usage log, which the cost shown under Settings, AI is read from: when it ran, for which feature, with which provider and model, how many tokens and requests it used, how many failed, and its cost. The usage log stays on this device: it is never sent anywhere, it is left out of the cross-device sync snapshot and out of a backup file, and it names no Trace, so each device shows its own usage. Runs older than 12 months are removed from it.
+
 ## Remote MCP and A2A Endpoints
 
 `https://kaiord.com/mcp` is a stateless Model Context Protocol endpoint, hosted on Cloudflare Workers, that converts and inspects workout definitions an AI agent sends to it. Here is how it handles data:

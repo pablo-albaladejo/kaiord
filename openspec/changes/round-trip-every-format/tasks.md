@@ -16,3 +16,10 @@
 - [x] 3.2 `claims-round-trip.mjs` in `pnpm lint:claims`, with `scripts/lib/round-trip-formats.vocab.mjs`
 - [x] 3.3 The converters page and the four format READMEs rewritten per format and registered
 - [x] 3.4 Changesets for core, fit, tcx, zwo and garmin
+
+## 4. Review fixes
+
+- [x] 4.1 First-read check per format over the workout fixtures (`firstReadReport`, `sourceValuesOf`), and the reader drops it found fixed, each with its test
+- [x] 4.2 Heart rate as a share of maximum held to ±0.5 %; distance and pace documented in AGENTS.md, CLAUDE.md and REVIEW.md; `tolerances` dropped from the contract, `format` a union
+- [x] 4.3 The claims rule reads formats in any case, by extension and common name, counts lossless-like words, holds a claim naming no format to every contract test, and refuses ERG, MRC, KRD JSON and unknown extensions
+- [x] 4.4 FIT: the copied workout notes are dropped by a converter; `FIT_STRING_MAX_BYTES` lives once in `adapters/shared`

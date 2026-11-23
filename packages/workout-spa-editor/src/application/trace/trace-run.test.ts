@@ -140,18 +140,18 @@ describe("startTraceRun", () => {
     expect(trace?.cost[0]?.unmeasuredRequests).toBe(1);
   });
 
-  it("should pass each event on under the Trace's id", () => {
+  it("should pass each event on as it came, never under the Trace's id", () => {
     // Arrange
     const { run } = start();
     const forward = { emit: vi.fn() };
+    const event = generation();
 
     // Act
-    run.sink(forward).emit(generation());
+    run.sink(forward).emit(event);
 
     // Assert
-    expect(forward.emit).toHaveBeenCalledWith(
-      expect.objectContaining({ traceId: "trace-1", modelId: "claude-fable-5" })
-    );
+    expect(forward.emit).toHaveBeenCalledWith(event);
+    expect(JSON.stringify(forward.emit.mock.calls)).not.toContain("trace-1");
   });
 
   it("should record each Tool with its confirmation and result, and the chat unit once", async () => {

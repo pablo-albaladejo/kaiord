@@ -33,14 +33,15 @@ export type UnsupportedTarget = {
 
 /**
  * What a format keeps when a workout goes through it and back to KRD. Every
- * number is compared within the tolerance of the first matching field, or
+ * number is compared within the first matching `DECLARED_TOLERANCES` rule, or
  * exactly; every other value exactly. A field the format cannot carry, or one
  * it fills in, is listed with its reason, never skipped silently.
  */
+export type RoundTripFormat = "fit" | "tcx" | "zwo" | "gcn";
+
 export type RoundTripContract = {
-  format: string;
+  format: RoundTripFormat;
   name: string;
-  tolerances: ReadonlyArray<FieldTolerance>;
   /** Fields the format cannot carry: their value after the trip is not compared. */
   notCarried: ReadonlyArray<DeclaredField>;
   /** Fields the format fills in when the KRD had none (a default, an extension). */

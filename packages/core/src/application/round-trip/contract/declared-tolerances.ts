@@ -5,8 +5,8 @@ const DURATION = "extensions.structured_workout.**.duration";
 
 /**
  * The Round-trip tolerances, declared once for every format: time ±1 s,
- * distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm, cadence ±1 rpm,
- * pace ±0.01 m/s. Any number not covered here must come back exactly: a
+ * distance ±1 m, power ±1 W or ±1 % FTP, heart rate ±1 bpm or ±0.5 % of
+ * maximum, cadence ±1 rpm, pace ±0.01 m/s. Any number not covered here must come back exactly: a
  * zone, a stroke, a repeat count, a calorie count, a pool length.
  */
 export const DECLARED_TOLERANCES: ReadonlyArray<FieldTolerance> = [
@@ -18,7 +18,8 @@ export const DECLARED_TOLERANCES: ReadonlyArray<FieldTolerance> = [
   {
     field: `${DURATION}.meters`,
     tolerance: 1,
-    reason: "distance ±1 m: formats hold distance in centimetres or metres",
+    reason:
+      "distance ±1 m: FIT holds distance in whole centimetres, the other formats in metres; ±1 m is the validator's default",
   },
   {
     field: `${DURATION}.bpm`,
@@ -40,9 +41,17 @@ export const DECLARED_TOLERANCES: ReadonlyArray<FieldTolerance> = [
   {
     field: TARGET,
     targetType: "heart_rate",
-    units: ["bpm", "range", "percent_max"],
+    units: ["bpm", "range"],
     tolerance: 1,
-    reason: "heart rate ±1 bpm or ±1 % of maximum",
+    reason: "heart rate ±1 bpm: formats hold whole beats per minute",
+  },
+  {
+    field: TARGET,
+    targetType: "heart_rate",
+    units: ["percent_max"],
+    tolerance: 0.5,
+    reason:
+      "heart rate as a share of maximum ±0.5 %: FIT holds whole percent, so rounding moves it at most half a percent, under 1 bpm for any maximum up to 200 bpm",
   },
   {
     field: TARGET,

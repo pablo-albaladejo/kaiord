@@ -14,6 +14,7 @@ const ZERO: UsageTotals = {
   unknownCostRuns: 0,
   failedRequests: 0,
   unmeasuredRequests: 0,
+  estimatedRequests: 0,
 };
 
 const totals = (over: Partial<UsageTotals>): UsageTotals => ({

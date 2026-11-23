@@ -16,7 +16,9 @@ repo rule.)
 - Does the code do what the PR says, for every input? Check null, empty
   input, swallowed errors, and races.
 - Conversions go through KRD. Round trips stay inside the tolerances:
-  time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm.
+  time ±1s, power ±1W or ±1%FTP, HR ±1bpm (±0.5% as a share of maximum),
+  cadence ±1rpm, distance ±1m, pace ±0.01m/s (`DECLARED_TOLERANCES` in
+  `@kaiord/core`, each with its reason).
 - Strict TypeScript: no `any` escape, `type` over `interface`, separate
   `import type`. The `*-bridge` packages are plain JavaScript by design.
 

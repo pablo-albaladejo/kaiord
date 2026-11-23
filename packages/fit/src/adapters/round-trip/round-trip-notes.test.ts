@@ -4,10 +4,10 @@ import { describe, expect, it } from "vitest";
 import {
   FIT_NOTES_MAX_LENGTH,
   FIT_NOTES_OVERSIZED_LENGTH,
-  FIT_STRING_MAX_BYTES,
 } from "../../test-utils/constants";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
+import { FIT_STRING_MAX_BYTES } from "../shared/fit-string";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 
 describe("Round-trip: Workout step - notes field", () => {

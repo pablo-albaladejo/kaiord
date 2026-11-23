@@ -14,8 +14,8 @@ import {
 } from "../adapters/dexie/stale-schema-guard";
 import { startApp, type StartAppDeps } from "./start-app";
 
-const NATIVE_STALE = 390;
-const NATIVE_FRESH = 380;
+const NATIVE_STALE = 400;
+const NATIVE_FRESH = 390;
 // Dexie stores `verno * 10` as the native version.
 const NATIVE_PER_VERNO = 10;
 

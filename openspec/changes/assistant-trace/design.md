@@ -77,10 +77,17 @@ UX glossary; never "log" or "registro".
 
 ### D6. What stays
 
-`usageEvents` stay as they are: synced, monthly, read by the Usage tab, the
-assistant card and the batch estimate. Each now carries the Trace's id as
-its `traceId`. The generation `console.debug` line is removed: its phase
-timings and retries are in the Trace.
+`usageEvents` stay the store the Usage tab, the assistant card and the batch
+estimate read, but no row names a Trace: the run's sink passes each event on
+as it came, never under the Trace's id. A per-run usage row describes what
+the athlete did as a Trace does, so the store became device-local too
+(cost-per-model D6, Dexie v39, which strips the `traceId` stored before).
+The generation `console.debug` line is removed: its phase timings and
+retries are in the Trace.
+
+Rejected: the first version of this decision, which kept `usageEvents`
+synced and stamped each row with its Trace's id. It sent a per-run record
+of the assistant to Drive and into backup files, against D3.
 
 ## Risks
 

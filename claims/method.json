@@ -113,6 +113,22 @@
         {
           "file": ".github/workflows/ci.yml",
           "contains": "node scripts/check-site-csp.mjs"
+        },
+        {
+          "test": "packages/fit/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every FIT workout within the declared tolerances"
+        },
+        {
+          "test": "packages/tcx/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every TCX workout within the declared tolerances"
+        },
+        {
+          "test": "packages/zwo/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every ZWO workout within the declared tolerances"
+        },
+        {
+          "test": "packages/garmin/src/adapters/round-trip/round-trip-contract.test.ts",
+          "title": "should keep every value of every GCN workout within the declared tolerances"
         }
       ]
     },

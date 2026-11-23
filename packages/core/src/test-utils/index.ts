@@ -111,3 +111,10 @@ export {
   unsupportedButCarried,
   unusedDeclarations,
 } from "./round-trip-report";
+export type {
+  FirstReadFixture,
+  SourceField,
+  SourceValue,
+} from "./first-read-report";
+export { firstReadReport } from "./first-read-report";
+export { sourceValuesOf } from "./source-values";

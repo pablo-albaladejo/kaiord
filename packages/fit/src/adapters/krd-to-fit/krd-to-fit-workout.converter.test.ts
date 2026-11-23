@@ -2,6 +2,7 @@ import type { Workout, WorkoutStep } from "@kaiord/core";
 import { createMockLogger } from "@kaiord/core/test-utils";
 import { describe, expect, it } from "vitest";
 
+import { FIT_STRING_MAX_BYTES } from "../shared/fit-string";
 import { convertWorkoutSteps } from "./krd-to-fit-workout.converter";
 
 const STEP_COUNT = 3;
@@ -77,7 +78,6 @@ describe("convertWorkoutSteps", () => {
   });
 });
 
-const FIT_NOTES_MAX = 254;
 const NOTES_OVERFLOW = 50;
 
 describe("convertWorkoutSteps workout-level notes", () => {
@@ -104,7 +104,7 @@ describe("convertWorkoutSteps workout-level notes", () => {
   it("should truncate workout-level notes over the 254 bytes of a FIT string without error", () => {
     // Arrange
     const logger = createMockLogger();
-    const longNotes = "x".repeat(FIT_NOTES_MAX + NOTES_OVERFLOW);
+    const longNotes = "x".repeat(FIT_STRING_MAX_BYTES + NOTES_OVERFLOW);
     const workout: Workout = {
       sport: "cycling",
       notes: longNotes,
@@ -117,8 +117,10 @@ describe("convertWorkoutSteps workout-level notes", () => {
     >;
 
     // Assert
-    expect((messages[0].notes as string).length).toBe(FIT_NOTES_MAX);
-    expect(messages[0].notes).toBe(longNotes.substring(0, FIT_NOTES_MAX));
+    expect((messages[0].notes as string).length).toBe(FIT_STRING_MAX_BYTES);
+    expect(messages[0].notes).toBe(
+      longNotes.substring(0, FIT_STRING_MAX_BYTES)
+    );
   });
 
   it("should not overwrite a first step that already has its own notes", () => {

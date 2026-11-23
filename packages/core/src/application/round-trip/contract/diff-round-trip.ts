@@ -15,11 +15,10 @@ const declaredBy = (
 const changed = (
   field: string,
   [before, after]: [unknown, unknown],
-  root: unknown,
-  contract: RoundTripContract
+  root: unknown
 ): RoundTripDifference | null => {
   if (typeof before === "number" && typeof after === "number") {
-    const tolerance = toleranceOf(field, root, contract);
+    const tolerance = toleranceOf(field, root);
     return Math.abs(before - after) <= tolerance
       ? null
       : { field, kind: "changed", before, after, tolerance };
@@ -53,7 +52,7 @@ export const diffRoundTrip = (
       continue;
     }
     const pair: [unknown, unknown] = [value, b.get(field)];
-    const difference = changed(field, pair, before, contract);
+    const difference = changed(field, pair, before);
     if (difference) differences.push(difference);
   }
   for (const [field, value] of b) {

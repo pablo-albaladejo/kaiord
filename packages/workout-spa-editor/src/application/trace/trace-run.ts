@@ -1,7 +1,7 @@
 /**
  * One run of the assistant, from its start to its one Trace. The run hands
  * out a telemetry sink (every model call it makes reports there, and is
- * passed on under the Trace's id, so the usage events name their Trace), and
+ * passed on as it came: nothing downstream learns the Trace's id), and
  * is told which Tools ran and what data went where. `finish` writes the Trace
  * once, whatever happens after, and applies the retention rule. While the run
  * waits for the athlete, `checkpoint` keeps it as stopped, so a page closed
@@ -51,7 +51,7 @@ export const startTraceRun = (input: StartTraceRunInput): TraceRun => {
     sink: (forward) => ({
       emit: (event) => {
         events.push(event);
-        forward?.emit({ ...event, traceId: id });
+        forward?.emit(event);
       },
     }),
     sent: sent.add,

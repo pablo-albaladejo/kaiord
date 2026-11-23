@@ -18,21 +18,37 @@ The telemetry events carry `requests: AiRequest[]`, where
 attempt; for a chat turn, one per model step (`onStepStart` counts the steps
 begun, `onStepEnd` closes them with their usage).
 
-### D2. A request with no usage is unmeasured, and labelled so
+### D2. A cut request is estimated; an error before any output is unmeasured
 
-A Provider reports usage with the final chunk or the response body. A request
-that fails before it (a 4xx/5xx answer, a dropped stream, an abort, the
-watchdog) reports none. Such a request is listed with no `usage`, counted in
-`unmeasuredRequests`, adds nothing to the cost, and the Usage tab says how
-many requests it could not count. It is not estimated: an HTTP error answered
-before generation is not billed by the Providers, and an estimate from the
-request size would overstate those, which are the common case. A request that
+A Provider reports usage with the final chunk or the response body. The
+installed AI SDK (ai 7.0.143, @ai-sdk/anthropic 4.0.82, openai 4.0.96, google
+4.0.99) exposes nothing earlier: `onStepEnd` and `onLanguageModelCallEnd`
+fire only on a step's `finish` part, `onAbort` hands back only the finished
+steps, and the Anthropic provider keeps the `message_start` input count to
+itself until `finish`. Provider-specific raw chunks (`includeRawChunks`) were
+not used: they differ per Provider and are not part of the SDK's contract.
+
+A request cut before its final chunk (a Stop, the chat watchdog, a stream
+dropped after output began) was billed all the same, so counting it as $0
+understated the cost. It is listed with `estimated: true` and a usage of
+`ceil(chars / 3)` tokens: input from the request's text (system prompt and
+messages; documents and images left out, since they are billed by their own
+rule), output from the text, reasoning and tool input streamed before the
+cut. Only the character counts reach the cost path, never the text. A Stop
+stays `stopped`; the watchdog and a dropped stream are `error`, a failure.
+A one-shot (non-streamed) attempt the athlete stops is estimated from its
+input alone.
+
+A request the Provider answered with an error before any output (a 4xx/5xx)
+reports no usage, is not billed, and stays unmeasured: listed with no
+`usage`, counted in `unmeasuredRequests`, adding nothing. A request that
 failed after the Provider returned usage (an output that did not validate, a
 reply cut at the token limit) is counted in full.
 
-Rejected: estimating input tokens from the request size. It would need the
-prompt text in the cost path, which the redaction rule keeps out of telemetry,
-and would charge for requests the Provider did not bill.
+Rejected: leaving every cut request unmeasured (the first version of this
+decision). The review showed a cut request reads as $0 while the Provider
+bills it. Rejected: estimating every failed request, HTTP errors included: it
+would charge for requests the Provider did not bill.
 
 ### D3. The price table is data, read from the official pages
 
@@ -75,6 +91,7 @@ type RunCost = {
   usd: number | null; // null when the model's price is unknown
   failedRequests: number; // invalid, truncated or error; a stop is not a failure
   unmeasuredRequests: number;
+  estimatedRequests: number;
   basis:
     | { kind: "price_table"; source: string; readOn: string }
     | {
@@ -84,10 +101,14 @@ type RunCost = {
 };
 ```
 
-#1652 stores it as is on each Trace, on the device. The synced `usageEvents`
-row keeps only the summary (`cost`, `costBasis`, `priceReadOn`,
-`requestCount`, `failedRequests`, `unmeasuredRequests`, cache token counts),
-all optional so rows written before this change still parse.
+`RunCost` is `runCostSchema` in `@kaiord/ai/providers`, which the App's
+Trace schema embeds rather than copying; its Provider and outcome enums come
+from `LLM_PROVIDER_TYPES` and `AI_REQUEST_OUTCOMES`. #1652 stores it as is on
+each Trace, on the device. The `usageEvents` row keeps only the summary
+(`cost`, `costBasis`, `priceReadOn`, `requestCount`, `failedRequests`,
+`unmeasuredRequests`, `estimatedRequests`, cache token counts), all optional
+so rows written before this change still parse. A row with an unknown price
+has no `cost`, rather than a `cost: 0` that reads as free.
 
 ### D5. Old rows are priced again on read
 
@@ -95,3 +116,45 @@ A row written before this change has no `costBasis` and a blended-rate cost.
 The fold prices it again from its own model and tokens, as one request on the
 day it was written; a row with no model id has an unknown price. Its failed attempts were never recorded and
 cannot be recovered.
+
+### D6. The usage log stays on the device
+
+`usageEvents` was synced and backed up, and each row carried its Trace's id
+(`trace.sink` forwarded every event under it). A row per run, with its time,
+model, cost and request counts, describes what the athlete did with the
+assistant as much as a Trace does, and the Traces are never sent. Since v39
+the log is device-local like `traces`: in `DEVICE_LOCAL_TABLES`
+(`application/sync/device-local-tables.ts`, which the snapshot port's
+`DEVICE_LOCAL` set is built from), `exclude` in the backup policy, and
+dropped, with its tombstones, from a remote snapshot or a backup file before
+the merge, so an earlier build's rows are neither imported nor pushed back.
+`trace.sink` forwards each event unchanged; no row names a Trace, and the
+v39 upgrade strips the `traceId` already stored. The prune writes no
+tombstone. The Usage tab and the assistant card say they show this device's
+usage, and the data-flow inventory lists the log as kept on this device.
+
+Rejected: syncing only a monthly aggregate. Two devices writing the same
+month need a merge rule (sum, or last write wins, both wrong for some case),
+and a monthly total of runs still describes the athlete's activity.
+
+### D7. The batch estimate is priced per request
+
+The batch sends one request per workout, each with the workout-parser system
+prompt. The estimate used to price the whole batch as one request without
+the system prompt: it left out a few thousand input tokens per workout and,
+on a model with a long-context tier (Claude Haiku 5.5 above 100K input
+tokens), priced a batch of small requests at the long-context price.
+`estimateWorkoutRequests` now returns one input/output split per workout,
+the system prompt's characters included, and `priceRun` prices each on its
+own.
+
+### D8. A renewed price quotes its page
+
+A guard on `readOn` alone passed a wrong price whose date was bumped. Each
+entry carries `quote`, the exact line(s) of the official page; a priced entry
+read after 2026-11-23 must carry one in which every number of its periods
+appears (`scripts/lib/model-price-entry.mjs`). The 39 entries read on
+2026-11-23 carry `quote: null`: the table kept no quotes then, the pages
+cannot be read again offline, and a quote is never retyped from memory.
+Their `readOn` stays frozen; at 120 days they expire and renewing each one
+requires its quote. The check never fetches a page.

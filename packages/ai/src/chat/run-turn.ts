@@ -1,5 +1,6 @@
 import { streamText, stepCountIs } from "ai";
 import type { LanguageModel, ModelMessage, ToolSet } from "ai";
+import { requestChars } from "../agents/cut-request";
 import type { AiRequest } from "../observability/telemetry-types";
 import type { ChatUsage } from "./chat-types";
 import { attachTurnMetrics, createTurnStats, stoppedTurn } from "./turn-stats";
@@ -73,7 +74,10 @@ const streamTurn = async (
 ): Promise<RawTurn> => {
   let streamError: unknown;
   let streamed = "";
-  const stats = createTurnStats(params.tools);
+  const stats = createTurnStats(
+    params.tools,
+    requestChars(params.system, params.messages)
+  );
   const result = streamText({
     model: params.model,
     system: params.system,
@@ -84,7 +88,10 @@ const streamTurn = async (
     // retryable error costs one HTTP call per turn, not N.
     maxRetries: 0,
     abortSignal: watchdog.signal,
-    onChunk: watchdog.touch,
+    onChunk: ({ chunk }) => {
+      watchdog.touch();
+      stats.onChunk(chunk);
+    },
     onStepStart: stats.onStepStart,
     onStepEnd: (step) => {
       watchdog.touch();
@@ -116,12 +123,11 @@ const streamTurn = async (
     if (watchdog.cause()) return undefined;
     return fail(streamError ?? e);
   });
-  if (!outcome)
-    return stoppedTurn(
-      watchdog.cause() ?? "aborted",
-      streamed,
-      stats.snapshot("stopped")
-    );
+  if (!outcome) {
+    const cause = watchdog.cause() ?? "aborted";
+    const cut = cause === "timeout" ? "timeout" : "stopped";
+    return stoppedTurn(cause, streamed, stats.snapshot(cut));
+  }
   if (streamError !== undefined) fail(streamError);
   const [text, toolCalls, finishReason, usage, response] = outcome;
   const { steps, toolNames, requests } = stats.snapshot();

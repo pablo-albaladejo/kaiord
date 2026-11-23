@@ -21,6 +21,14 @@ export const mapTargetType = (
   return targetTypeSchema.enum.open;
 };
 
+/** A TCX heart-rate bound: a HeartRateInBeatsPerMinute_t value, or a bare number. */
+const bpmOf = (bound: unknown): number | undefined => {
+  if (typeof bound === "number") return bound;
+  const value = bound as Record<string, unknown> | undefined;
+  if (value?.["@_xsi:type"] !== "HeartRateInBeatsPerMinute_t") return undefined;
+  return typeof value.Value === "number" ? value.Value : undefined;
+};
+
 const convertHeartRateTarget = (
   heartRateZone: Record<string, unknown> | undefined
 ): Target | null => {
@@ -39,8 +47,8 @@ const convertHeartRateTarget = (
   }
 
   if (zoneType === "CustomHeartRateZone_t") {
-    const low = heartRateZone.Low as number | undefined;
-    const high = heartRateZone.High as number | undefined;
+    const low = bpmOf(heartRateZone.Low);
+    const high = bpmOf(heartRateZone.High);
     if (typeof low === "number" && typeof high === "number") {
       return {
         type: "heart_rate",

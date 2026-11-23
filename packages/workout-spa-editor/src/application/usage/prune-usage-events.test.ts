@@ -25,7 +25,7 @@ const makeEvent = (over: Partial<UsageEventRecord>): UsageEventRecord => ({
 });
 
 describe("pruneUsageEvents", () => {
-  it("should delete and tombstone events older than the retention window", async () => {
+  it("should delete events older than the retention window, with no tombstone", async () => {
     // Arrange
     const persistence = withTombstones(createInMemoryPersistence());
     await persistence.usageEvents.append(
@@ -39,9 +39,8 @@ describe("pruneUsageEvents", () => {
     // Assert
     expect(await persistence.usageEvents.getById("old")).toBeUndefined();
     expect(await persistence.usageEvents.getById("recent")).toBeDefined();
-    expect(
-      await persistence.tombstones.get("usageEvents", "old")
-    ).toBeDefined();
+    // The log stays on this device: there is no delete to sync.
+    expect(await persistence.tombstones.list()).toHaveLength(0);
   });
 
   it("should keep events within the retention window untouched", async () => {

@@ -7,7 +7,9 @@ vi.mock("@kaiord/ai", () => ({
   createTextToWorkout: vi.fn(() => mockTextToWorkout),
 }));
 
-vi.mock("@kaiord/ai/providers", () => ({
+// The schemas the App parses with stay real; only the model is stubbed.
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
 }));
 

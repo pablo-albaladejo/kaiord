@@ -9,7 +9,9 @@ tolerances, `DECLARED_TOLERANCES` in `@kaiord/core`:
 - Time: ±1 second
 - Distance: ±1 meter
 - Power: ±1W or ±1% FTP
-- Heart rate: ±1 bpm or ±1% of maximum
+- Heart rate: ±1 bpm, or ±0.5% as a share of maximum (FIT stores whole
+  percent, so rounding moves it at most half a percent: under 1 bpm for any
+  maximum up to 200 bpm)
 - Cadence: ±1 rpm
 - Pace: ±0.01 m/s
 
@@ -19,13 +21,22 @@ reason, in that format's Round-trip contract; nothing else may differ. Each
 format SHALL have a Round-trip test, run by the CI `round-trip` job, over a
 case for every duration type, target type and unit, intensity and sport its
 contract does not declare unsupported, a structured workout with repeats,
-names and notes, and its workout fixtures.
+names and notes, and its workout fixtures. The test SHALL also check the
+first read of each fixture: every value an independent reader of the file
+finds (the Garmin FIT SDK Decoder for FIT, an XML or JSON parse of its own for
+TCX, ZWO and GCN) SHALL be in the KRD the format's reader makes of it, or be
+declared, with a reason, as a field KRD does not carry.
 
 #### Scenario: FIT to KRD round-trip
 
 - **GIVEN** a valid FIT file with a running workout
 - **WHEN** converted to KRD and back to FIT
 - **THEN** all field values are within round-trip tolerances
+
+#### Scenario: A field the reader drops on first read
+
+- **WHEN** a reader skips a step, a target or a value that a workout fixture holds and KRD can hold
+- **THEN** that format's first-read test SHALL fail and name the source field and its value
 
 #### Scenario: A value a format drops without a declaration
 

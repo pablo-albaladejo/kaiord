@@ -139,8 +139,8 @@
     "replayTipsHint": "Vuelve a mostrar los consejos que ya cerraste."
   },
   "usage": {
-    "title": "Uso de IA — todos los atletas",
-    "heading": "Uso de IA — todos los atletas, últimos {{count}} meses",
+    "title": "Uso de IA en este dispositivo — todos los atletas",
+    "heading": "Uso de IA en este dispositivo — todos los atletas, últimos {{count}} meses",
     "empty": "Aún no hay uso de IA registrado en los últimos {{count}} meses. Se rellena en cuanto uses el asistente de IA o crees un entreno con IA.",
     "month": "Mes",
     "input": "Entrada",
@@ -155,6 +155,10 @@
     "unknownCost_one": "+ {{count}} ejecución con precio desconocido",
     "unknownCost_other": "+ {{count}} ejecuciones con precio desconocido",
     "costBasis": "Cada ejecución se calcula con los precios de entrada, salida y caché de su propio modelo, y el coste incluye cada intento que el proveedor facturó: reintentos, intentos fallidos y cada paso de un turno del chat.",
+    "thisDevice": "Es el uso de este navegador solamente: el registro se queda en este dispositivo, no en la sincronización con Drive ni en una copia de seguridad, así que otro dispositivo muestra el suyo.",
+    "includesEstimate": "incluye una estimación",
+    "estimated_one": "{{count}} petición se cortó antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de la petición y del texto recibido.",
+    "estimated_other": "{{count}} peticiones se cortaron antes de que su proveedor informara de los tokens usados (un Detener, un tiempo de espera agotado o una conexión caída); su coste es una estimación a partir de la longitud de cada petición y del texto recibido.",
     "unmeasured_one": "{{count}} petición falló antes de que su proveedor informara de los tokens usados, así que no se cuenta en el coste.",
     "unmeasured_other": "{{count}} peticiones fallaron antes de que su proveedor informara de los tokens usados, así que no se cuentan en el coste.",
     "byModel": {
@@ -200,9 +204,10 @@
     "missingKey": "«{{account}}» no tiene clave de API: las copias de seguridad nunca incluyen claves. Introdúcela abajo con «Reemplazar clave» para elegir el modelo de tu asistente.",
     "noAthlete": "Elige un atleta para escoger el modelo de tu asistente.",
     "runsOn": "en {{account}}",
-    "usage_one": "Total este mes (todos los atletas): {{count}} petición · {{tokens}} tokens · ~{{cost}}",
-    "usage_other": "Total este mes (todos los atletas): {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
-    "usageNone": "Ningún atleta ha usado la IA este mes.",
+    "usage_one": "Total este mes en este dispositivo (todos los atletas): {{count}} petición · {{tokens}} tokens · ~{{cost}}",
+    "usage_other": "Total este mes en este dispositivo (todos los atletas): {{count}} peticiones · {{tokens}} tokens · ~{{cost}}",
+    "usageNone": "Ningún atleta ha usado la IA este mes en este dispositivo.",
+    "usageEstimate": "incluye una estimación",
     "usageUnknown_one": "No incluye {{count}} ejecución con precio desconocido.",
     "usageUnknown_other": "No incluye {{count}} ejecuciones con precio desconocido."
   },

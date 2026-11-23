@@ -1,4 +1,3 @@
-import { DECLARED_TOLERANCES } from "../declared-tolerances";
 import type { RoundTripContract } from "../round-trip-contract";
 
 const TIMED =
@@ -14,7 +13,6 @@ const NO_TARGET =
 export const ZWO_ROUND_TRIP: RoundTripContract = {
   format: "zwo",
   name: "ZWO",
-  tolerances: DECLARED_TOLERANCES,
   notCarried: [
     {
       field: "extensions.structured_workout.steps.**.notes",

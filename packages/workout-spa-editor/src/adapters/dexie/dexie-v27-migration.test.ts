@@ -14,7 +14,7 @@ import { describe, expect, it } from "vitest";
 import { sharedKaiordDatabase } from "../../test-utils/shared-kaiord-database";
 
 const SCHEMA_SEED = 26;
-const SCHEMA_HEAD = 38;
+const SCHEMA_HEAD = 39;
 const STORES_SEED = {
   profiles: "id",
   meta: "key",

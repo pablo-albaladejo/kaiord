@@ -3,13 +3,14 @@ export {
   type CreateLanguageModelOptions,
 } from "./create-language-model";
 export { listedModels, modelDisplayName } from "./model-names";
+export { CHARS_PER_TOKEN, estimateTokens } from "./pricing/estimate-tokens";
+export { priceRun, type PriceRunInput } from "./pricing/price-run";
 export {
   type CostBasis,
   type PricedRequest,
-  priceRun,
-  type PriceRunInput,
   type RunCost,
-} from "./pricing/price-run";
+  runCostSchema,
+} from "./pricing/run-cost-schema";
 export {
   findModelPrice,
   MODEL_PRICES,
