@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
+  ALLOWED,
   isAllowed,
   handleWhoopFetch,
   onWindowMessage,
@@ -13,14 +14,38 @@ const messageCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 
 const WHOOP_ORIGIN = "https://app.whoop.com";
 
-describe("content.js coarse check under the service worker's closed list", () => {
+// Paths exactly as the App's WHOOP Connector builds them.
+const CYCLES =
+  "/core-details-bff/v0/cycles/details?id=1&startTime=2026-01-01T00%3A00%3A00.000Z&endTime=2026-01-02T00%3A00%3A00.000Z";
+const BIOMARKERS = "/advanced-labs-service/v1/biomarker-tests";
+
+describe("content.js second closed list, equal to the service worker's", () => {
   beforeEach(() => {
     __resetChromeMock();
   });
 
-  it("should allow a GET under the cycles-details prefix", () => {
+  it("should hold the same entries as the service worker's ALLOWED", () => {
     // Arrange
-    const path = "/core-details-bff/v0/cycles/details?apiVersion=7&id=1";
+    const background = require("../background.js");
+    const entries = (list) =>
+      list.map((r) => [r.method, r.pattern.source, r.pattern.flags]);
+
+    // Act
+    const content = entries(ALLOWED);
+
+    // Assert
+    expect(content).toEqual(entries(background.ALLOWED));
+  });
+
+  it.each([
+    CYCLES,
+    "/metrics-service/v1/metrics/user/123?name=heart_rate&start=2026-01-01T00%3A00%3A00.000Z&end=2026-01-02T00%3A00%3A00.000Z&step=60",
+    "/activities-service/v1/sports/history?countryCode=ES",
+    BIOMARKERS,
+    "/advanced-labs-service/v1/biomarker-tests/abc-1/summary",
+    "/health-service/v2/stress-bff/2026-07-10",
+  ])("should allow the listed read %s", (path) => {
+    // Arrange
 
     // Act
     const allowed = isAllowed("GET", path);
@@ -30,45 +55,34 @@ describe("content.js coarse check under the service worker's closed list", () =>
   });
 
   it.each([
-    "/metrics-service/v1/metrics/user/123?name=heart_rate",
+    "/users-service/v2/bff/users/me",
+    "/core-details-bff/v0/cycles/details?apiVersion=7&id=1",
     "/activities-service/v1/sports/history?apiVersion=7",
-    "/advanced-labs-service/v1/biomarker-tests",
-    // Real stress-bff shape (live-probed): a date path segment, no query.
-    "/health-service/v2/stress-bff/2026-07-10",
-  ])("should allow the read-only path %s", (path) => {
+    "/advanced-labs-service/v1/biomarker-tests/../../users",
+    "https://evil.example/x",
+    "//evil.example/x",
+    "x/y",
+  ])("should refuse %s, which is not on the closed list", (path) => {
     // Arrange
 
     // Act
     const allowed = isAllowed("GET", path);
 
     // Assert
-    expect(allowed).toBe(true);
+    expect(allowed).toBe(false);
   });
-
-  it.each(["https://evil.example/x", "//evil.example/x", "x/y"])(
-    "should reject %s, which is not a path on the API host",
-    (path) => {
-      // Arrange
-
-      // Act
-      const allowed = isAllowed("GET", path);
-
-      // Assert
-      expect(allowed).toBe(false);
-    }
-  );
 
   it("should reject any non-GET method on an allowlisted path", () => {
     // Arrange
 
     // Act
-    const allowed = isAllowed("POST", "/core-details-bff/v0/cycles/details");
+    const allowed = isAllowed("POST", BIOMARKERS);
 
     // Assert
     expect(allowed).toBe(false);
   });
 
-  it("should reject a path that cannot be parsed as a URL", () => {
+  it("should reject a path that is not a string", () => {
     // Arrange
     const unparseable = Symbol("bad-path");
 
@@ -77,6 +91,25 @@ describe("content.js coarse check under the service worker's closed list", () =>
 
     // Assert
     expect(allowed).toBe(false);
+  });
+
+  it("should answer an unlisted WHOOP API read refused, with no request sent", async () => {
+    // Arrange
+    const msg = {
+      action: "whoop-fetch",
+      path: "/users-service/v2/bff/users/me",
+      token: "t",
+    };
+
+    // Act
+    const result = await handleWhoopFetch(msg);
+
+    // Assert
+    expect(result).toEqual({
+      ok: false,
+      error: "Blocked: disallowed path or method",
+    });
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
 
@@ -108,7 +141,7 @@ describe("content.js handleWhoopFetch", () => {
     // Arrange
     const msg = {
       action: "whoop-fetch",
-      path: "/core-details-bff/v0/cycles/details",
+      path: BIOMARKERS,
       method: "POST",
       token: "t",
     };
@@ -136,7 +169,7 @@ describe("content.js handleWhoopFetch", () => {
     // Act
     const result = await handleWhoopFetch({
       action: "whoop-fetch",
-      path: "/core-details-bff/v0/cycles/details?id=1",
+      path: CYCLES,
       token: "tok-123",
     });
 
@@ -148,7 +181,7 @@ describe("content.js handleWhoopFetch", () => {
       body: '{"records":[]}',
     });
     expect(fetch).toHaveBeenCalledWith(
-      "https://api.prod.whoop.com/core-details-bff/v0/cycles/details?id=1",
+      `https://api.prod.whoop.com${CYCLES}`,
       expect.objectContaining({
         credentials: "include",
         headers: expect.objectContaining({
@@ -170,7 +203,7 @@ describe("content.js handleWhoopFetch", () => {
     // Act
     const result = await handleWhoopFetch({
       action: "whoop-fetch",
-      path: "/core-details-bff/v0/cycles/details",
+      path: BIOMARKERS,
       token: "t",
     });
 
@@ -194,7 +227,7 @@ describe("content.js handleWhoopFetch", () => {
     // Act
     const result = await handleWhoopFetch({
       action: "whoop-fetch",
-      path: "/core-details-bff/v0/cycles/details",
+      path: BIOMARKERS,
       token: "t",
     });
 
@@ -224,7 +257,7 @@ describe("content.js handleWhoopFetch", () => {
     // Act
     const pending = handleWhoopFetch({
       action: "whoop-fetch",
-      path: "/core-details-bff/v0/cycles/details",
+      path: BIOMARKERS,
       token: "t",
     });
     await vi.advanceTimersByTimeAsync(30000);
@@ -242,7 +275,7 @@ describe("content.js handleWhoopFetch", () => {
     // Act
     const result = await handleWhoopFetch({
       action: "whoop-fetch",
-      path: "/core-details-bff/v0/cycles/details",
+      path: BIOMARKERS,
       token: "t",
     });
 
@@ -448,7 +481,7 @@ describe("content.js registered onMessage listener", () => {
     const kept = messageCb(
       {
         action: "whoop-fetch",
-        path: "/core-details-bff/v0/cycles/details",
+        path: BIOMARKERS,
         token: "t",
       },
       {},

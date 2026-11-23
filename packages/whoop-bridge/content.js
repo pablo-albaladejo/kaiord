@@ -10,8 +10,8 @@
  *      token in case the interceptor missed the live request.
  *   3. Execute the reads the service worker relays (`whoop-fetch`) against
  *      the internal API from this tab's origin, and hand the answer back
- *      unread. The closed list of paths is the service worker's `ALLOWED`;
- *      this script only refuses anything that is not a GET of an API path.
+ *      unread, and only a read on its own copy of the service worker's
+ *      closed list.
  */
 
 // Capture pristine fetch before page scripts can monkey-patch it.
@@ -21,17 +21,29 @@ const WHOOP_ORIGIN = "https://app.whoop.com";
 const API_BASE = "https://api.prod.whoop.com";
 const FETCH_TIMEOUT_MS = 30000;
 
-// A second, coarse check under the service worker's closed list: a GET of a
-// path on the API host, never another host or a scheme-relative URL.
-const isAllowed = (method, path) => {
-  if ((method || "GET").toUpperCase() !== "GET") return false;
-  if (typeof path !== "string" || !path.startsWith("/")) return false;
-  try {
-    return new URL(path, API_BASE).origin === API_BASE;
-  } catch {
-    return false;
-  }
-};
+// A second closed list, equal entry for entry to the service worker's
+// `ALLOWED` (pinned by test/content.test.js), so a read the worker did not
+// list never leaves this tab even if the relay were reached another way.
+// One entry per physical line, as in background.js.
+const ALLOWED = [
+  // prettier-ignore
+  { method: "GET", pattern: /^\/core-details-bff\/v0\/cycles\/details\?id=\d+&startTime=[\w%.-]+&endTime=[\w%.-]+$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/metrics-service\/v1\/metrics\/user\/\d+\?name=heart_rate&start=[\w%.-]+&end=[\w%.-]+&step=\d+$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/activities-service\/v1\/sports\/history\?countryCode=[A-Z]{2}$/ },
+  { method: "GET", pattern: /^\/advanced-labs-service\/v1\/biomarker-tests$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/advanced-labs-service\/v1\/biomarker-tests\/[\w-]+\/summary$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/health-service\/v2\/stress-bff\/\d{4}-\d{2}-\d{2}$/ },
+];
+
+const isAllowed = (method, path) =>
+  typeof path === "string" &&
+  ALLOWED.some(
+    (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
+  );
 
 const handleWhoopFetch = async (msg) => {
   const { path, method, token } = msg;
@@ -110,6 +122,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    ALLOWED,
     isAllowed,
     handleWhoopFetch,
     onWindowMessage,
