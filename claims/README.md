@@ -169,13 +169,19 @@ entries of their own (`landing.jsonld.*`).
 
 ## Round-trip claims
 
-A unit that says Round-trip and names a format (FIT, TCX, ZWO or Zwift, GCN
-or Garmin Connect) is a Round-trip claim for that format. Its entry must be
-proven by the format's contract test listed in
-`scripts/lib/round-trip-formats.vocab.mjs`, and that format's package must have a
-shard in the CI `round-trip` job. A format the Kaiord SDK reads but does not
-write (WHOOP, Tanita, TrainingPeaks, Train2Go) cannot carry the claim, and
-neither can a label (`lib/claims-round-trip.mjs`).
+A unit that says Round-trip, or lossless, or that every value is kept (in
+English or Spanish), is a Round-trip claim. Formats are read in any case, by
+name, common name or file extension: FIT or `.fit`; TCX or Training Center;
+ZWO or Zwift; GCN or Garmin Connect. A claim for a format must be proven by
+the format's contract test listed in `scripts/lib/round-trip-formats.vocab.mjs`,
+and that format's package must have a shard in the CI `round-trip` job. A
+claim that names no format speaks of every format, so it must cite a test of
+each format's contract. No claim may name a format no Round-trip test covers:
+one the Kaiord SDK reads but does not write (WHOOP, Tanita, TrainingPeaks,
+Train2Go), one it neither reads nor writes (ERG, MRC, any other file
+extension), or KRD JSON, which every Round-trip goes through but no contract
+test round-trips itself. A label cannot carry the claim
+(`lib/claims-round-trip.mjs`).
 
 Words GLOSSARY.md retired or withdrew are held off every registered surface,
 and off a few non-prose files, by `scripts/check-retired-terms.mjs`

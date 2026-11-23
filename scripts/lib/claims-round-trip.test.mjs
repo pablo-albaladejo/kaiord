@@ -58,17 +58,17 @@ describe("claims-round-trip", () => {
 
     // Assert
     assert.deepEqual(problems, [
-      'claim "w": WHOOP has no Round-trip test, so no sentence may claim a Round-trip for it',
+      'claim "w": WHOOP has no Round-trip test (the Kaiord SDK reads it but writes nothing back), so no sentence may claim a Round-trip for it',
       'claim "l": a label cannot carry a Round-trip claim',
       `claim "l": a Round-trip claim for FIT is proven by ${FIT.test} "${FIT.title}"`,
     ]);
   });
 
-  it("should leave alone a sentence that names no format, or that says no Round-trip", () => {
+  it("should leave alone a sentence that says no Round-trip and nothing lossless", () => {
     // Arrange
     const claims = [
-      { id: "a", text: "CI runs the round-trip checks." },
       { id: "b", text: "Converts FIT files in your browser." },
+      { id: "c", text: "Reads .fit, .tcx and .zwo files." },
     ];
 
     // Act
@@ -76,6 +76,106 @@ describe("claims-round-trip", () => {
 
     // Assert
     assert.deepEqual(problems, []);
+  });
+
+  it("should read a format in any case, by its extension or its common name", () => {
+    // Arrange
+    const texts = [
+      "Round-trip tested for .fit and .tcx files.",
+      "round trip tested: fit",
+      "Round-trip tested for Zwift workouts.",
+      "Round-trip tested for garmin connect workouts.",
+      "Ida y vuelta probada con archivos .ZWO.",
+    ];
+
+    // Act
+    const named = texts.map((text) =>
+      roundTripProblems({ id: "c", text, proof: [] }).map(
+        (p) => p.split("for ")[1].split(" is proven")[0]
+      )
+    );
+
+    // Assert
+    assert.deepEqual(named, [
+      ["FIT", "TCX"],
+      ["FIT"],
+      ["ZWO"],
+      ["GCN"],
+      ["ZWO"],
+    ]);
+  });
+
+  it("should read a lossless claim as a Round-trip claim", () => {
+    // Arrange
+    const texts = [
+      "Lossless FIT conversion.",
+      "Convert TCX with zero data loss.",
+      "FIT keeps every value.",
+      "Conversión de FIT sin pérdidas.",
+    ];
+
+    // Act
+    const problems = texts.flatMap((text) =>
+      roundTripProblems({ id: "c", text, proof: [] })
+    );
+
+    // Assert
+    assert.equal(problems.length, texts.length);
+    assert.ok(problems.every((p) => p.includes("Round-trip claim for")));
+  });
+
+  it("should refuse a format the SDK has no Round-trip test for, read-only or not written at all", () => {
+    // Arrange
+    const texts = [
+      "WHOOP data survives a round trip.",
+      "Round-trip tested for TrainingPeaks and Train2Go workouts.",
+      "Round-trip tested for Tanita readings.",
+      "Round-trip tested for ERG and MRC files.",
+      "Round-trip tested for KRD JSON.",
+      "Round-trip tested for .krd files.",
+      "Round-trip tested for .gpx files.",
+    ];
+
+    // Act
+    const refused = texts.map((text) =>
+      roundTripProblems({ id: "c", text, proof: [] }).map(
+        (p) => p.split(": ")[1].split(" has no")[0]
+      )
+    );
+
+    // Assert
+    assert.deepEqual(refused, [
+      ["WHOOP"],
+      ["TrainingPeaks", "Train2Go"],
+      ["Tanita"],
+      ["ERG", "MRC"],
+      ["KRD JSON"],
+      ["KRD JSON"],
+      [".gpx"],
+    ]);
+  });
+
+  it("should hold a Round-trip claim that names no format to the contract test of every format", () => {
+    // Arrange
+    const text = "Every format below has a Round-trip test in CI.";
+    const every = ROUND_TRIP_FORMATS.map((f) => ({
+      test: f.test,
+      title: "should x",
+    }));
+
+    // Act
+    const proven = roundTripProblems({ id: "a", text, proof: every });
+    const unproven = roundTripProblems({
+      id: "a",
+      text,
+      proof: every.slice(1),
+    });
+
+    // Assert
+    assert.deepEqual(proven, []);
+    assert.deepEqual(unproven, [
+      `claim "a": a Round-trip claim that names no format speaks of every format, so it is proven by a test of ${FIT.test}`,
+    ]);
   });
 
   it("should fail when a Round-trip format has no shard in the CI round-trip job", () => {
