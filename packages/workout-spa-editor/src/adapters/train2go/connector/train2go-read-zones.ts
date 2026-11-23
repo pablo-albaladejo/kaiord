@@ -14,7 +14,7 @@
 import type { ExtensionResponse } from "../../bridge/bridge-transport";
 import { callConnector } from "../../bridge/connector-call";
 import type { OperationQueue } from "../../bridge/operation-queue";
-import { readDetailsAnswer } from "./read-train2go-answers";
+import { loadTrain2GoAnswers } from "./load-train2go-answers";
 import { DETAILS_PATH } from "./train2go-paths";
 
 const ACTION_T = 35_000;
@@ -30,8 +30,9 @@ export const readZones = (
   }
   return queue.enqueue({
     bridgeId: extensionId,
-    execute: () =>
-      callConnector(
+    execute: async () => {
+      const { readDetailsAnswer } = await loadTrain2GoAnswers();
+      return callConnector(
         extensionId,
         {
           method: "GET",
@@ -40,6 +41,7 @@ export const readZones = (
           read: readDetailsAnswer,
         },
         ACTION_T
-      ),
+      );
+    },
   });
 };
