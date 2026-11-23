@@ -3,8 +3,8 @@
  * appends a tool-event message, and resumes the agent; `deny` resumes with a
  * declined result without running anything. The confirmed tool runs under
  * the turn's controller, so Stop and leaving the conversation cut it (a
- * health question it waits on, then its generation); a cut action resumes
- * nothing and closes the turn's Trace as stopped.
+ * health question it waits on, then its generation); an action cut before
+ * it ran resumes nothing and closes the turn's Trace as stopped.
  */
 import type { PendingAction } from "@kaiord/ai";
 
@@ -30,7 +30,9 @@ export const approveAction = async (
   ).finally(() => {
     if (ctx.abortRef.current === controller) ctx.abortRef.current = null;
   });
-  if (controller.signal.aborted) return stopAction(ctx);
+  // An action cut before it ran is not reported; one that ran is, even after
+  // a stop, so the conversation keeps what it did.
+  if (controller.signal.aborted && !ok) return stopAction(ctx);
   recordAction(ctx.traceRef, pending.toolName, "athlete", ok ? "ok" : "failed");
   ctx.set.pendingAction(null);
   await runAgent(ctx, (signal) =>
