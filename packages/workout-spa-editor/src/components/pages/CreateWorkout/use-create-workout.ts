@@ -11,6 +11,7 @@ import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
 import { useAiModelBindingsLive } from "../../../hooks/use-ai-model-bindings-live";
 import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useGenerationDeps } from "../../../hooks/use-generation-deps";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { ActiveSport } from "../../../lib/athlete";
 import { ATHLETE_SPORTS } from "../../../lib/athlete";
@@ -27,6 +28,7 @@ export function useCreateWorkout() {
   useUnsavedWork(phase !== "input" || promptText.trim() !== "");
 
   const active = useActiveProfileLive();
+  const deps = useGenerationDeps();
   const providers = useAiProvidersLive();
   const bindings = useAiModelBindingsLive(active?.id ?? null);
   const customPrompt = useAiCustomPromptLive();
@@ -52,6 +54,7 @@ export function useCreateWorkout() {
           ? undefined
           : { profile: active.profile, customPrompt };
       const krd = await generateWorkoutKrd({
+        deps,
         text: promptText,
         provider: resolved.provider,
         modelId: resolved.modelId,
@@ -65,7 +68,7 @@ export function useCreateWorkout() {
       if (isModelNotFoundError(error)) toast.error(t("toast.modelUnavailable"));
       else toast.error(t("toast.generationFailed"));
     }
-  }, [promptText, resolved, active, sport, customPrompt, toast, t]);
+  }, [promptText, resolved, active, sport, customPrompt, toast, t, deps]);
 
   return {
     phase,

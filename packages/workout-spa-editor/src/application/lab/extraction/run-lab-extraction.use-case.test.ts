@@ -9,7 +9,8 @@ vi.mock("@kaiord/ai/agents", () => ({
   runGenerateAgent: (...args: unknown[]) => mockRunGenerateAgent(...args),
 }));
 
-vi.mock("@kaiord/ai/providers", () => ({
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   resolveModelForPurpose: (...args: unknown[]) =>
     mockResolveModelForPurpose(...args),
   createLanguageModel: (...args: unknown[]) => mockCreateLanguageModel(...args),
@@ -199,5 +200,50 @@ describe("runLabExtraction", () => {
     // Assert
     await expect(run).rejects.toThrow("down");
     expect((await traces.list())[0]?.outcome).toBe("failed");
+  });
+
+  it("should leave no Trace when the athlete withholds the document after the question waited", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+
+    // Act
+    await runLabExtraction({
+      ...makeInput(),
+      trace,
+      askHealth: async () => {
+        await trace.checkpoint();
+        return "withhold";
+      },
+    });
+
+    // Assert
+    expect(await traces.list()).toHaveLength(0);
+  });
+
+  it("should leave a stopped Trace and send nothing when stopped while the athlete is asked", async () => {
+    // Arrange
+    const traces = createInMemoryTraceRepository();
+    const trace = startTraceRun({ feature: "lab_import", traces });
+    const stop = new AbortController();
+
+    // Act
+    const run = runLabExtraction({
+      ...makeInput(),
+      trace,
+      signal: stop.signal,
+      askHealth: async () => {
+        stop.abort();
+        throw new DOMException("Aborted", "AbortError");
+      },
+    });
+
+    // Assert
+    await expect(run).rejects.toThrow(/abort/i);
+    expect(mockCreateLanguageModel).not.toHaveBeenCalled();
+    expect((await traces.list())[0]).toMatchObject({
+      outcome: "stopped",
+      sent: [],
+    });
   });
 });

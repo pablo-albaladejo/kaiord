@@ -16,7 +16,8 @@ vi.mock("@kaiord/core", () => ({
   })),
 }));
 
-vi.mock("@kaiord/ai/providers", () => ({
+vi.mock("@kaiord/ai/providers", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   createLanguageModel: vi.fn().mockResolvedValue({ modelId: "test-model" }),
 }));
 
@@ -31,19 +32,10 @@ const mockPersistence = {
   aiProviders: { getCustomPrompt: vi.fn() },
 };
 
-vi.mock("../adapters/dexie/dexie-persistence-adapter", () => ({
-  createDexiePersistence: vi.fn(() => mockPersistence),
-}));
-
-vi.mock("../adapters/telemetry/dexie-usage-telemetry-sink", () => ({
-  createDexieUsageTelemetrySink: vi.fn(() => mockSink),
-}));
-
 import { createTextToWorkout } from "@kaiord/ai";
 import { createLanguageModel } from "@kaiord/ai/providers";
 import { createWorkoutKRD } from "@kaiord/core";
 
-import { createDexieUsageTelemetrySink } from "../adapters/telemetry/dexie-usage-telemetry-sink";
 import type { Profile } from "../types/profile";
 import type { GenerateWorkoutOptions } from "./generate-workout";
 import { generateWorkoutKrd } from "./generate-workout";
@@ -83,6 +75,7 @@ const sentOptions = (): SentOptions =>
   mockTextToWorkout.mock.calls[0]![1] as SentOptions;
 
 const baseOptions: GenerateWorkoutOptions = {
+  deps: { persistence: mockPersistence as never, usage: mockSink },
   text: "30 minute endurance ride",
   modelId: "claude-sonnet-4-5-20241022",
   provider: {
@@ -142,14 +135,10 @@ describe("generateWorkoutKrd", () => {
     const traces = await mockPersistence.traces.list();
 
     // Assert
-    expect(createDexieUsageTelemetrySink).toHaveBeenCalled();
     expect(traces).toHaveLength(1);
     expect(traces[0]).toMatchObject({ feature: "generation", outcome: "ok" });
     expect(traces[0]?.sent).toEqual([
-      {
-        to: "anthropic",
-        kinds: ["workoutDescription", "aiInstructions", "powerPaceZones"],
-      },
+      { to: "anthropic", kinds: ["workoutDescription"] },
     ]);
     expect(mockSink.emit).toHaveBeenCalledWith(
       expect.objectContaining({ traceId: traces[0]?.id })

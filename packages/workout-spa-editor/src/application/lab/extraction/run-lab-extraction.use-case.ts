@@ -7,8 +7,9 @@
  * Provider have it (`askHealth`), and not at all when they do not. Returns a
  * typed result instead of throwing for "no model configured" and for
  * "withheld"; a run failure propagates as a throw. A run that reaches the
- * Provider leaves one Trace (`trace`), finished here whatever the outcome;
- * one that never goes leaves none.
+ * Provider leaves one Trace (`trace`), finished here whatever the outcome; a
+ * run stopped while the athlete is asked leaves a stopped one; a withheld
+ * document leaves none.
  */
 import {
   type AgentFileInput,
@@ -52,10 +53,18 @@ export const runLabExtraction = async (
     input.bindings
   );
   if (!resolved) return { ok: false, reason: "no_provider" };
-  if ((await input.askHealth(resolved.provider.type)) === "withhold")
-    return { ok: false, reason: "withheld" };
-
   const { trace } = input;
+  const share = await input.askHealth(resolved.provider.type).catch(
+    async (error: unknown) => {
+      await trace?.finish("stopped");
+      throw error;
+    }
+  );
+  if (share === "withhold") {
+    await trace?.discard();
+    return { ok: false, reason: "withheld" };
+  }
+
   try {
     const model = await createLanguageModel(
       resolved.provider,

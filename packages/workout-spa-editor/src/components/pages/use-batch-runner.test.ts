@@ -174,7 +174,7 @@ describe("useBatchRunner", () => {
     // Assert
     expect(stored).toHaveLength(1);
     expect(stored[0]).toMatchObject({ feature: "batch", outcome: "failed" });
-    const trace = vi.mocked(createProcessOne).mock.calls.at(-1)?.[3];
+    const trace = vi.mocked(createProcessOne).mock.calls.at(-1)?.[3].trace;
     expect(trace?.id).toBe(stored[0]?.id);
   });
 });

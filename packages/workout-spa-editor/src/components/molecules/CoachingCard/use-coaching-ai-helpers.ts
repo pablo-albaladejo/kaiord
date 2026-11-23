@@ -10,8 +10,10 @@ import type { Analytics } from "@kaiord/core";
 
 import type { GenerateKrdPort } from "../../../application/coaching/convert-coaching-activity-with-ai";
 import { convertCoachingActivityWithAi } from "../../../application/coaching/convert-coaching-activity-with-ai";
-import { generateWorkoutKrd } from "../../../lib/generate-workout";
-import type { PersistencePort } from "../../../ports/persistence-port";
+import {
+  generateWorkoutKrd,
+  type GenerationDeps,
+} from "../../../lib/generate-workout";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { Sport } from "../../../types/schemas";
 import { sportSchema } from "../../../types/schemas";
@@ -20,6 +22,7 @@ const isKnownSport = (s: string): s is Sport =>
   sportSchema.safeParse(s).success;
 
 export const buildGenerateKrdPort = (
+  deps: GenerationDeps,
   provider: LlmProviderConfig,
   modelId: string,
   now: () => string,
@@ -27,6 +30,7 @@ export const buildGenerateKrdPort = (
 ): GenerateKrdPort => {
   return async ({ text, sport, abortSignal }) => {
     const krd = await generateWorkoutKrd({
+      deps,
       text,
       provider,
       modelId,
@@ -52,7 +56,7 @@ export type RunAiInput = {
   modelId: string;
   abortSignal: AbortSignal;
   onProgress?: OnGenerateProgress;
-  persistence: PersistencePort;
+  deps: GenerationDeps;
   analytics: Analytics;
 };
 
@@ -60,12 +64,13 @@ export const runConvertWithAi = (input: RunAiInput) =>
   convertCoachingActivityWithAi(
     { activityId: input.activityId, abortSignal: input.abortSignal },
     {
-      coaching: input.persistence.coaching,
-      workouts: input.persistence.workouts,
-      sessionMatches: input.persistence.sessionMatch,
-      transaction: input.persistence.transaction,
+      coaching: input.deps.persistence.coaching,
+      workouts: input.deps.persistence.workouts,
+      sessionMatches: input.deps.persistence.sessionMatch,
+      transaction: input.deps.persistence.transaction,
       analytics: input.analytics,
       generateKrd: buildGenerateKrdPort(
+        input.deps,
         input.provider,
         input.modelId,
         () => new Date().toISOString(),
