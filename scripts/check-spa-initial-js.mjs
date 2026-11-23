@@ -51,6 +51,9 @@ import { gzipSync } from "node:zlib";
 //   stale boot) and `src/components/organisms/StaleSchemaDialog/
 //   StaleSchemaMidSession.tsx` (behind `StaleSchemaGate`; it reads the
 //   editor store, which would otherwise join the entry graph)
+// - `src/adapters/train2go/connector/read-train2go-answers.ts` (Train2Go's
+//   HTML parsers, loaded by `loadTrain2GoAnswers` on the first read; the
+//   coaching transport built at boot would otherwise carry them)
 //
 // Usage: node scripts/check-spa-initial-js.mjs <spa-dist> [--report]
 // Exit 1 when <spa-dist>/index.html is missing, has no recognisable entry
@@ -74,6 +77,7 @@ export const FORBIDDEN_LAZY_SOURCES = [
   "src/lib/week-dominant-zone.ts",
   "src/boot/render-stale-boot.tsx",
   "src/components/organisms/StaleSchemaDialog/StaleSchemaMidSession.tsx",
+  "src/adapters/train2go/connector/read-train2go-answers.ts",
 ];
 
 // The entry chunk MUST have a sourcemap: a static import of a seam gets
