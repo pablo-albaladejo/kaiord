@@ -31,15 +31,16 @@ type WrapInput = {
   key: ImportErrorCopy["key"];
   label: string;
   detail: string;
-  message: string;
+  /** The Error's own message, for diagnostics; the athlete reads `key`. */
+  diagnostic: string;
   format: WorkoutFileFormat;
   cause: unknown;
 };
 
 type ImportErrorFacts = Omit<WrapInput, "format" | "cause">;
 
-const wrap = ({ key, label, detail, message, format, cause }: WrapInput) =>
-  new ImportError(message, format, cause, {
+const wrap = ({ key, label, detail, diagnostic, format, cause }: WrapInput) =>
+  new ImportError(diagnostic, format, cause, {
     key,
     params: { format: label, detail },
   });
@@ -49,8 +50,8 @@ const parseFailed = (
   detail: string,
   loc = ""
 ): ImportErrorFacts => {
-  const message = `Failed to parse ${label} file: ${detail}${loc}`;
-  return { key: "parseFailed", label, detail, message };
+  const diagnostic = `Failed to parse ${label} file: ${detail}${loc}`;
+  return { key: "parseFailed", label, detail, diagnostic };
 };
 
 const describeError = (error: unknown, label: string): ImportErrorFacts => {
@@ -63,20 +64,20 @@ const describeError = (error: unknown, label: string): ImportErrorFacts => {
   }
   if (error instanceof ValidationError || error instanceof KrdValidationError) {
     const detail = fmtValidation(error.errors);
-    const message = `Validation failed: ${detail}`;
-    return { key: "validationFailed", label, detail, message };
+    const diagnostic = `Validation failed: ${detail}`;
+    return { key: "validationFailed", label, detail, diagnostic };
   }
   if (error instanceof ConversionError) {
     const detail = error.message + (error.details ? ` (${error.details})` : "");
-    const message = `Conversion failed: ${detail}`;
-    return { key: "conversionFailed", label, detail, message };
+    const diagnostic = `Conversion failed: ${detail}`;
+    return { key: "conversionFailed", label, detail, diagnostic };
   }
   for (const [cls, name] of parsingErrors) {
     if (error instanceof cls) return parseFailed(name, error.message);
   }
   const detail = errorMessage(error);
-  const message = `Failed to import ${label} file: ${detail}`;
-  return { key: "importFailed", label, detail, message };
+  const diagnostic = `Failed to import ${label} file: ${detail}`;
+  return { key: "importFailed", label, detail, diagnostic };
 };
 
 export const transformError = (
