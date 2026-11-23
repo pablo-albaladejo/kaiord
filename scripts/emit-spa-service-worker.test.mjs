@@ -77,7 +77,10 @@ describe("emit-spa-service-worker", () => {
     const keyOf = (url) => manifest.find((entry) => entry.url === url).key;
 
     // Assert
-    assert.equal(keyOf("/app/assets/Daily-BBBB2222.js"), "/app/assets/Daily-BBBB2222.js");
+    assert.equal(
+      keyOf("/app/assets/Daily-BBBB2222.js"),
+      "/app/assets/Daily-BBBB2222.js"
+    );
     assert.equal(
       keyOf("/app/index.html"),
       `/app/index.html?__rev=${hex("<html>shell</html>")}`
@@ -114,7 +117,10 @@ describe("emit-spa-service-worker", () => {
     );
 
     // Assert
-    assert.equal(manifest.some(({ url }) => url.endsWith("sw.js")), false);
+    assert.equal(
+      manifest.some(({ url }) => url.endsWith("sw.js")),
+      false
+    );
   });
 
   it("should emit a kill worker with no fetch handler and no claim, that navigates only the clients it controls", () => {
