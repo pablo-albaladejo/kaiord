@@ -82,7 +82,7 @@ try {
 // When they do not load, `request` fails before anything is asked.
 let personalFields;
 try {
-  importScripts("personal-fields.js");
+  importScripts("personal-identity.js", "personal-fields.js");
   personalFields = globalThis.bridgePersonalFields;
 } catch {
   personalFields =

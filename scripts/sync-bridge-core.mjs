@@ -61,6 +61,13 @@ export const BRIDGE_CORE_MASTERS = [
     dest: "bridge-answer.js",
     bridges: ALL_BRIDGES,
   },
+  // The identity and contact fields every bridge's personal-fields.js
+  // starts from: one list, removed from every answer.
+  {
+    master: "personal-identity.js",
+    dest: "personal-identity.js",
+    bridges: ALL_BRIDGES,
+  },
   // Swallowed-error telemetry and the worker's script loader, for the two
   // service workers that keep an error log.
   {

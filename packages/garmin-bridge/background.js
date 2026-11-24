@@ -58,6 +58,7 @@ const bridgeTheme = loadScript("bridge-theme.js");
 loadScript("bearer-fetch.js");
 const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
 const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
+loadScript("personal-identity.js");
 const personalFields = loadScript("personal-fields.js", "bridgePersonalFields");
 const snapshotValidator = loadScript("profile-snapshot.js");
 

@@ -12,64 +12,39 @@
  *   - json: The profile ping's body figures (height, weight, heart rates) are read from the profile page instead, and the coach (`trainer`) and the coach's notes only by the popup's own read.
  *   - html: form controls by name. The profile page's physiological form keeps `weight`, `bpm_max` and `bpm_rest`, which the Connector reads; the rest of that form is personal and unread.
  *
- * The common part is identity and contact details.
+ * The common part, identity and contact details, is the vendored
+ * `personal-identity.js`.
  */
 
-const bridgePersonalFields = Object.freeze({
-  json: Object.freeze([
-    "first_name",
-    "last_name",
-    "surname",
-    "full_name",
-    "email",
-    "phone",
-    "phone_number",
-    "mobile",
-    "address",
-    "street",
-    "city",
-    "zip",
-    "postal_code",
-    "birthday",
-    "birth_date",
-    "date_of_birth",
-    "dob",
-    "gender",
-    "sex",
-    "height",
-    "weight",
-    "bpm_max",
-    "bpm_rest",
-    "trainer",
-    "user_notes",
-  ]),
-  html: Object.freeze([
-    "first_name",
-    "last_name",
-    "surname",
-    "full_name",
-    "email",
-    "phone",
-    "phone_number",
-    "mobile",
-    "address",
-    "street",
-    "city",
-    "zip",
-    "postal_code",
-    "birthday",
-    "birth_date",
-    "date_of_birth",
-    "dob",
-    "gender",
-    "sex",
-    "height",
-    "fat",
-    "imc",
-    "smoker",
-    "user_notes",
-  ]),
-});
+// Wrapped so its names never meet a worker's other top-level declarations:
+// importScripts shares one global lexical scope.
+const bridgePersonalFields = (() => {
+  // Identity and contact details: the vendored list every extension shares,
+  // loaded before this file (importScripts), or required under Node.
+  const identity =
+    typeof require !== "undefined"
+      ? require("./personal-identity.js")
+      : globalThis.bridgePersonalIdentity;
+  return Object.freeze({
+    json: Object.freeze([
+      ...identity,
+      "height",
+      "weight",
+      "bpm_max",
+      "bpm_rest",
+      "trainer",
+      "user_notes",
+    ]),
+    html: Object.freeze([
+      ...identity,
+      "height",
+      "fat",
+      "imc",
+      "smoker",
+      "user_notes",
+    ]),
+  });
+})();
 
 if (typeof module !== "undefined") {
   module.exports = bridgePersonalFields;

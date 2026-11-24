@@ -52,6 +52,7 @@ const bridgeTheme = loadScript("bridge-theme.js");
 const sessionFetch = loadScript("session-fetch.js");
 const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
 const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
+loadScript("personal-identity.js");
 const personalFields = loadScript("personal-fields.js", "bridgePersonalFields");
 
 // ── Train2Go call surface: the closed list ──
