@@ -78,6 +78,16 @@ try {
     typeof require !== "undefined" ? require("./bridge-answer.js") : {};
 }
 
+// ── The personal fields no Connector reads, removed from every answer ──
+let personalFields;
+try {
+  importScripts("personal-fields.js");
+  personalFields = globalThis.bridgePersonalFields;
+} catch {
+  personalFields =
+    typeof require !== "undefined" ? require("./personal-fields.js") : {};
+}
+
 // ── Tanita call surface: the closed list ──
 //
 // Method + path pattern, nothing else: every request, the App's included,
@@ -149,7 +159,7 @@ const request = async (message) => {
     fetchImpl: fetch,
   });
   if (!res.ok) throw answerCore.toBridgeError(res);
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 const handleAction = async (message) => {
@@ -182,6 +192,13 @@ const EXTERNAL_ACTIONS = new Set([
 // Only the extension's own pages are answered, never a content script, and
 // only the Session check the popup sends.
 const INTERNAL_ACTIONS = new Set(["checkSession"]);
+
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Platform data for the popup alone, and the scripts only they use. None
+// here: the popup shows only the Session check and state stored for it.
+// Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set([]);
+const POPUP_READ_SCRIPTS = [];
 
 // No credential handshake: this bridge mints nothing and exchanges nothing.
 // The MyTANITA session cookie rides along on the export fetch itself
@@ -221,6 +238,8 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onMessageExternal) {
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    POPUP_READS,
+    POPUP_READ_SCRIPTS,
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     TANITA_ORIGIN,

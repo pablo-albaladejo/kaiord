@@ -37,11 +37,9 @@ describe("the answer carries no Train2Go Session secret", () => {
   beforeEach(() => __resetChromeMock());
   afterEach(() => vi.restoreAllMocks());
 
-  it("should remove the anti-forgery token from the profile page and keep the rest", async () => {
+  it("should remove the anti-forgery token from the profile page and keep what the Connector reads", async () => {
     // Arrange
     const page = fixture("details-active.html");
-    const tokenInput =
-      '<input name="_token" type="hidden" value="TEST_CSRF" />';
     fetch.mockResolvedValueOnce(reply("text/html; charset=UTF-8", page));
 
     // Act
@@ -49,8 +47,14 @@ describe("the answer carries no Train2Go Session secret", () => {
 
     // Assert
     expect(res.ok).toBe(true);
-    expect(res.data.body).toBe(page.replace(tokenInput, ""));
     expect(res.data.body).not.toContain("TEST_CSRF");
+    for (const kept of [
+      '<input name="weight" type="number" value="83" id="weight" />',
+      '<input id="bpm_max" name="bpm_max" type="number" value="187" />',
+      '<input name="z4_upper" type="number" value="187" />',
+    ]) {
+      expect(res.data.body).toContain(kept);
+    }
     expect(res.data.contentType).toBe("text/html; charset=UTF-8");
   });
 
@@ -92,7 +96,10 @@ describe("the answer carries no Train2Go Session secret", () => {
 
   it("should hand an answer with no secret over byte for byte", async () => {
     // Arrange
-    const body = fixture("ping-active.json");
+    const body = JSON.stringify({
+      data: { replace: { "#workplan": fixture("weekly.html") } },
+      success: true,
+    });
     fetch.mockResolvedValueOnce(reply("application/json", body));
 
     // Act
@@ -119,5 +126,75 @@ describe("the answer carries no Train2Go Session secret", () => {
       '<head><script>window.Laravel = {"csrfToken":""};</script>' +
         "</head><body><p>zones</p></body>"
     );
+  });
+});
+
+describe("the answer carries no personal field the Connector does not read", () => {
+  beforeEach(() => __resetChromeMock());
+  afterEach(() => vi.restoreAllMocks());
+
+  it("should remove gender, height, body fat, BMI, smoking and the coach's notes from the profile page", async () => {
+    // Arrange
+    const page = fixture("details-active.html");
+    fetch.mockResolvedValueOnce(reply("text/html", page));
+
+    // Act
+    const res = await ask("/user/details");
+
+    // Assert
+    for (const name of [
+      "gender",
+      "height",
+      "fat",
+      "imc",
+      "smoker",
+      "user_notes",
+    ]) {
+      expect(page).toContain(`name="${name}"`);
+      expect(res.data.body).not.toContain(`name="${name}"`);
+    }
+    expect(res.data.body).toContain('name="bpm_rest"');
+  });
+
+  it("should remove birth date and contact details from the profile page", async () => {
+    // Arrange
+    const page =
+      '<form><input name="birthday" value="1990-01-01"><input name="email" value="a@b.c">' +
+      '<input name="phone" value="600"><textarea name="address">Calle 1</textarea>' +
+      '<input name="weight" value="83"></form>';
+    fetch.mockResolvedValueOnce(reply("text/html", page));
+
+    // Act
+    const res = await ask("/user/details");
+
+    // Assert
+    expect(res.data.body).toBe('<form><input name="weight" value="83"></form>');
+  });
+
+  it("should keep only the id and name the Connector reads from the profile ping's user", async () => {
+    // Arrange
+    const body = fixture("ping-active.json");
+    fetch.mockResolvedValueOnce(reply("application/json", body));
+
+    // Act
+    const res = await ask("/api/v2/profile/ping");
+
+    // Assert
+    expect(JSON.parse(res.data.body)).toEqual({
+      data: {
+        user: {
+          id: 99999,
+          role: 2,
+          name: "Test",
+          status: "validated",
+          trainer_id: 88888,
+        },
+      },
+      errors: [],
+      exception: null,
+      message: null,
+      redirect: null,
+      success: true,
+    });
   });
 });

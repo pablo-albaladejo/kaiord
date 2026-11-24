@@ -76,7 +76,6 @@ export const BRIDGE_REGISTRY = {
   "garmin-bridge": {
     section: GARMIN_SECTION,
     hosts: new Set([
-      "https://connect.garmin.com/*",
       "https://connectapi.garmin.com/*",
       "https://sso.garmin.com/*",
     ]),
@@ -109,11 +108,11 @@ export const BRIDGE_REGISTRY = {
 // its 13 rules with the guard silent — a floor with no regression power,
 // which is most of what a floor is for.
 export const SECTION_RULE_FLOOR = {
-  [GARMIN_SECTION]: 15,
-  [TRAIN2GO_SECTION]: 12,
-  [TANITA_SECTION]: 13,
-  [TRAININGPEAKS_SECTION]: 18,
-  [WHOOP_SECTION]: 9,
+  [GARMIN_SECTION]: 16,
+  [TRAIN2GO_SECTION]: 14,
+  [TANITA_SECTION]: 14,
+  [TRAININGPEAKS_SECTION]: 19,
+  [WHOOP_SECTION]: 10,
 };
 
 // A section with no recorded floor is a bridge being onboarded. It has to
@@ -273,6 +272,11 @@ export const REQUIRED_RULES = [
     section: GARMIN_SECTION,
     re: NO_TELEMETRY,
   },
+  {
+    label: "Garmin personal fields removed from answers",
+    section: GARMIN_SECTION,
+    re: /a workout's author \(your name and profile pictures\) and the people it is shared with, an activity's owner names and pictures and the places it started and ended/i,
+  },
 
   // --------------------------- Train2Go ---------------------------
   {
@@ -336,6 +340,16 @@ export const REQUIRED_RULES = [
     section: TRAIN2GO_SECTION,
     re: NO_TELEMETRY,
   },
+  {
+    label: "Train2Go popup reads kept to the open popup",
+    section: TRAIN2GO_SECTION,
+    re: /it keeps none of this once the popup closes and never hands it to the Kaiord App/i,
+  },
+  {
+    label: "Train2Go personal fields removed from answers",
+    section: TRAIN2GO_SECTION,
+    re: /the extension removes from it your gender, birthday, body fat, BMI, height and smoking/i,
+  },
 
   // ---------------------------- Tanita ----------------------------
   {
@@ -394,6 +408,11 @@ export const REQUIRED_RULES = [
     re: NO_TELEMETRY,
   },
   {
+    label: "Tanita personal fields removed from answers",
+    section: TANITA_SECTION,
+    re: /also removes each form field named as a first, last or full name, birth date, gender, email, phone or address/i,
+  },
+  {
     label: "Tanita session check by HEAD, downloading nothing, disclosed",
     section: TANITA_SECTION,
     re: /Checking the Connection Downloads Nothing\*\*: .*it sends a `HEAD` request for the export, which returns no measurement/,
@@ -443,7 +462,7 @@ export const REQUIRED_RULES = [
   {
     label: "TrainingPeaks body and workout scopes disclosed",
     section: TRAININGPEAKS_SECTION,
-    re: /`read:body`, `write:body` and `write:workouts` capabilities/,
+    re: /`read:body` and `write:workouts` capabilities/,
   },
   {
     label: "TrainingPeaks workout write disclosed (calendar)",
@@ -456,9 +475,9 @@ export const REQUIRED_RULES = [
     re: /cannot delete anything in TrainingPeaks or change a workout already there/i,
   },
   {
-    label: "TrainingPeaks unused weight write disclosed",
+    label: "TrainingPeaks metric write refused",
     section: TRAININGPEAKS_SECTION,
-    re: /accepts a request to add one weight measurement, but the Kaiord App does not send it today/i,
+    re: /writes no metric to TrainingPeaks: a request to add a measurement is refused before it is sent/i,
   },
   {
     label: "TrainingPeaks connection check minting no token disclosed",
@@ -495,6 +514,11 @@ export const REQUIRED_RULES = [
     section: TRAININGPEAKS_SECTION,
     re: NO_TELEMETRY,
   },
+  {
+    label: "TrainingPeaks personal fields removed from answers",
+    section: TRAININGPEAKS_SECTION,
+    re: /the personal details the Kaiord App does not read: a workout's comments \(your coach's and yours\)/i,
+  },
 
   // ----------------------------- WHOOP ----------------------------
   {
@@ -506,6 +530,11 @@ export const REQUIRED_RULES = [
     label: "WHOOP answers handed to the Kaiord App unread (thin Bridge)",
     section: WHOOP_SECTION,
     re: /WHOOP's answer is handed to the Kaiord App as it came, without being read/i,
+  },
+  {
+    label: "WHOOP personal fields removed from answers",
+    section: WHOOP_SECTION,
+    re: /the personal details the Kaiord App does not read: a lab test's patient name, height and weight/i,
   },
   {
     label: "WHOOP no-OAuth session-bearer nature disclosed",

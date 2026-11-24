@@ -5,7 +5,6 @@
         "storage"
       ],
       "host_permissions": [
-        "https://connect.garmin.com/*",
         "https://connectapi.garmin.com/*",
         "https://sso.garmin.com/*"
       ],
@@ -27,7 +26,6 @@
         "storage"
       ],
       "host_permissions": [
-        "https://connect.garmin.com/*",
         "https://connectapi.garmin.com/*",
         "https://sso.garmin.com/*"
       ],
@@ -194,10 +192,6 @@
       },
       {
         "method": "GET",
-        "pattern": "^\\/api\\/v2\\/workplan\\/tooltip\\/activity\\/\\d+$"
-      },
-      {
-        "method": "GET",
         "pattern": "^\\/user\\/details$"
       }
     ],
@@ -252,11 +246,6 @@
       {
         "method": "GET",
         "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetrics\\/\\d{4}-\\d{2}-\\d{2}\\/\\d{4}-\\d{2}-\\d{2}$"
-      },
-      {
-        "method": "POST",
-        "pattern": "^\\/metrics\\/v3\\/athletes\\/\\d+\\/consolidatedtimedmetric$",
-        "body": "weight"
       },
       {
         "method": "POST",

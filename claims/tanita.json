@@ -1217,6 +1217,62 @@
           "title": "should hand the export over byte for byte"
         }
       ]
+    },
+    {
+      "id": "tanita.pp.personal-fields",
+      "text": "**Personal Fields Removed**: From a page MyTANITA serves in place of the export, the extension also removes each form field named as a first, last or full name, birth date, gender, email, phone or address. The export itself holds only measurements and is passed on unchanged.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove a prefilled email from a page served in place of the export"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
+        }
+      ]
+    },
+    {
+      "id": "tanita.pj.personal-fields",
+      "text": "**Personal details removed from a page**: From a page MyTANITA serves in place of the export, the extension also removes each form field named as a first, last or full name, birth date, gender, email, phone or address. The export itself holds only measurements and is passed on unchanged.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove a prefilled email from a page served in place of the export"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
+        }
+      ]
+    },
+    {
+      "id": "tanita.listing.personal-fields",
+      "text": "From such a page it also removes any field named as your name, birth date, gender, email, phone or address. The export itself holds only measurements and is passed on unchanged.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove a prefilled email from a page served in place of the export"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
+        }
+      ]
+    },
+    {
+      "id": "tanita.listing.es.personal-fields",
+      "text": "De esa página también quita cualquier campo con nombre de tu nombre, fecha de nacimiento, género, email, teléfono o dirección. La exportación solo contiene mediciones y se entrega sin cambios.",
+      "proof": [
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should remove a prefilled email from a page served in place of the export"
+        },
+        {
+          "test": "packages/tanita-bridge/test/answer-secrets.test.js",
+          "title": "should hand the export over byte for byte"
+        }
+      ]
     }
   ]
 }

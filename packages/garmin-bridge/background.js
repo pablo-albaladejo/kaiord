@@ -58,6 +58,7 @@ const bridgeTheme = loadScript("bridge-theme.js");
 loadScript("bearer-fetch.js");
 const requestGate = loadScript("bridge-request-gate.js", "bridgeRequestGate");
 const answerCore = loadScript("bridge-answer.js", "bridgeAnswer");
+const personalFields = loadScript("personal-fields.js", "bridgePersonalFields");
 const snapshotValidator = loadScript("profile-snapshot.js");
 
 // Garmin's own: OAuth token minting + connectapi Bearer calls, the body
@@ -163,7 +164,7 @@ const request = async (message) => {
     toWireBody(path, body)
   );
   if (!res?.ok) throw answerCore.toBridgeError(res);
-  return answerCore.toAnswer(res);
+  return answerCore.toAnswer(res, personalFields);
 };
 
 const openGarmin = async () => {
@@ -246,6 +247,13 @@ chrome.runtime.onMessageExternal.addListener(handleExternalMessage);
 
 const INTERNAL_ACTIONS = new Set(["ping"]);
 
+// ADR 0004's bounded exception: the internal actions that read and interpret
+// Platform data for the popup alone, and the scripts only they use. None
+// here: the popup shows only the Session check and state stored for it.
+// Checked by scripts/check-bridge-popup-reads.mjs.
+const POPUP_READS = new Set([]);
+const POPUP_READ_SCRIPTS = [];
+
 chrome.runtime.onMessage.addListener(
   bridgeEnvelope.createInternalDispatch({
     dispatch,
@@ -257,6 +265,8 @@ chrome.runtime.onMessage.addListener(
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    POPUP_READS,
+    POPUP_READ_SCRIPTS,
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     BRIDGE_FEATURES,

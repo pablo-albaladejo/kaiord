@@ -40,7 +40,7 @@
 - [ ] From the SPA console:
       `chrome.runtime.sendMessage("EXTENSION_ID", { action: "ping" }, console.log)`
 - [ ] Verify: response includes
-      `{ ok: true, data: { authenticated: true, athleteId: <n>, capabilities: ["read:body", "write:body"] } }`
+      `{ ok: true, data: { authenticated: true, athleteId: <n>, capabilities: ["read:body", "write:workouts"] } }`
 
 ## Test: Origin Pinning
 

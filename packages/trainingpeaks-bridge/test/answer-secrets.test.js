@@ -70,3 +70,36 @@ describe("the answer carries no TrainingPeaks Session secret", () => {
     expect(JSON.parse(res.data.body)).toEqual({ ok: 1 });
   });
 });
+
+describe("the answer carries no personal field the Connector does not read", () => {
+  beforeEach(async () => {
+    __resetChromeMock();
+    await seedToken();
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  it("should remove a workout's comments and keep the id and day the Connector reads", async () => {
+    // Arrange
+    const workout = {
+      workoutId: 4242,
+      athleteId: 900123,
+      workoutDay: "2026-11-24T00:00:00",
+      title: "Tempo",
+      coachComments: "Felt heavy?",
+      workoutComments: [{ comment: "ok", commenterName: "Coach" }],
+      newComment: "draft",
+    };
+    fetch.mockResolvedValueOnce(reply(JSON.stringify(workout)));
+
+    // Act
+    const res = await ask("/fitness/v6/athletes/900123/workouts/4242");
+
+    // Assert
+    expect(JSON.parse(res.data.body)).toEqual({
+      workoutId: 4242,
+      athleteId: 900123,
+      workoutDay: "2026-11-24T00:00:00",
+      title: "Tempo",
+    });
+  });
+});
