@@ -6,12 +6,13 @@
  * so the R-PIIInterpolation guard finds the literal alongside its
  * caller; this helper only invokes the bound `onFailureToast` callback.
  */
-import { modelDisplayName, resolveModelForPurpose } from "@kaiord/ai/providers";
+import { resolveModelForPurpose } from "@kaiord/ai/providers";
 import type { Analytics } from "@kaiord/core";
 import type { MutableRefObject } from "react";
 
 import type { AiFailureReason } from "../../../application/coaching/convert-coaching-activity-error-mapper";
 import { classifyAiFailure } from "../../../application/coaching/convert-coaching-activity-error-mapper";
+import type { ModelNamer } from "../../../hooks/use-model-name";
 import type { GenerationDeps } from "../../../lib/generate-workout";
 import { withOrigin } from "../../../routing/with-origin";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
@@ -36,6 +37,7 @@ export type StartAiCtx = {
   onClose: () => void;
   navigate: (to: string) => void;
   onFailureToast: () => void;
+  nameModel: ModelNamer;
 };
 
 export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
@@ -56,7 +58,7 @@ export const runStartAi = async (ctx: StartAiCtx): Promise<void> => {
   ctx.setFailure(null);
   const { controller, onProgress } = beginAiRun(
     ctx,
-    modelDisplayName(resolved.modelId)
+    ctx.nameModel(resolved.provider.type, resolved.modelId)
   );
   // The view-model `activity.id` is `${source}:${sourceId}`; the
   // persistence record id (what `coaching.getById` keys on) is the

@@ -2,16 +2,20 @@
 // (`contains`, MIN_PIN characters or more) in a file that is not one of its
 // register's surfaces. A file merely existing, an endpoint, or the surface
 // itself proves nothing about what the sentence says. A label needs none;
-// an external claim's proofs, when it has any, must still hold.
+// an external claim's proofs, when it has any, must still hold. A claim that
+// cites an author statement rests on that declaration: it counts as
+// "statement", never as proven by test or code, whatever else it cites.
 
 import { kindOf, proofProblems } from "./claims-proof.mjs";
 import { kindOfClaim, shapeProblems } from "./claims-shape.mjs";
 
 export const MIN_PIN = 16;
 
-// "test", "pinned", or null when no proof says what the sentence says.
+// "statement", "test", "pinned", or null when no proof says what the
+// sentence says.
 export const proofStrength = (claim, ownFiles) => {
   const proofs = Array.isArray(claim.proof) ? claim.proof : [];
+  if (proofs.some((p) => kindOf(p) === "author-statement")) return "statement";
   if (proofs.some((p) => kindOf(p) === "test")) return "test";
   const pinned = (p) =>
     kindOf(p) === "file" &&
@@ -21,7 +25,7 @@ export const proofStrength = (claim, ownFiles) => {
   return proofs.some(pinned) ? "pinned" : null;
 };
 
-const WEAK = `is proven only by a file existing, an endpoint or its own surface; prove it with a running test or a pin of ${MIN_PIN}+ characters in code, or declare it kind "label" (it states nothing) or "external"`;
+const WEAK = `is proven only by a file existing, an endpoint or its own surface; prove it with a running test or a pin of ${MIN_PIN}+ characters in code, cite the owner's author statement, or declare it kind "label" (it states nothing) or "external"`;
 
 // `ownFiles`: the register's surface files; `today`: a timestamp.
 export const claimProblems = (claim, read, { ownFiles, today }) => {

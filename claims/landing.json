@@ -1997,7 +1997,12 @@
       "proof": [
         {
           "file": "packages/docs/project/how-kaiord-is-built.md",
-          "contains": "## What the history supports"
+          "contains": "## The owner's statement"
+        },
+        {
+          "author-statement": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+          "by": "the repository's owner",
+          "on": "2026-11-23"
         },
         {
           "test": "scripts/check-method-figures.test.mjs",
@@ -3368,7 +3373,12 @@
       "proof": [
         {
           "file": "packages/docs/project/how-kaiord-is-built.md",
-          "contains": "## What the history supports"
+          "contains": "## The owner's statement"
+        },
+        {
+          "author-statement": "Every commit in this repository, apart from the automation commits made by bots, was written by an AI agent. Before February 2026 the agent was Kiro, which left no co-author trailer.",
+          "by": "the repository's owner",
+          "on": "2026-11-23"
         },
         {
           "test": "scripts/check-method-figures.test.mjs",

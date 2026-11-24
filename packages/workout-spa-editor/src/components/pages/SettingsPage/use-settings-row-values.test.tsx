@@ -48,7 +48,7 @@ describe("useSettingsRowValues", () => {
     const { result } = renderHook(() => useSettingsRowValues());
 
     // Assert
-    expect(result.current.ai).toBe("Claude Opus 5");
+    expect(result.current.ai).toBe("Claude Opus 5 (not evaluated)");
   });
 
   it("should show no AI value without a provider", () => {

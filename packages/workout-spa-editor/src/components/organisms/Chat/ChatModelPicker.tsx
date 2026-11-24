@@ -1,6 +1,6 @@
-import { modelDisplayName } from "@kaiord/ai/providers";
 import { useLocation } from "wouter";
 
+import { useChoiceName } from "../../../hooks/use-model-name";
 import { useTranslate } from "../../../i18n/use-translate";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
@@ -34,6 +34,7 @@ export type ChatModelPickerProps = {
 export function ChatModelPicker(props: ChatModelPickerProps) {
   const { providers, running, chosen, chatDefault } = props;
   const t = useTranslate("chat");
+  const nameChoice = useChoiceName();
   const [, navigate] = useLocation();
   const choice = useModelChoice({
     effective: { ...chatDefault, running, inherited: !chosen },
@@ -43,9 +44,7 @@ export function ChatModelPicker(props: ChatModelPickerProps) {
   });
   if (providers.length === 0) return null;
   const follows = chatDefault.running;
-  const name = follows
-    ? `${modelDisplayName(follows.modelId)} · ${providers.find((p) => p.id === follows.providerId)?.label ?? ""}`
-    : "";
+  const name = follows ? nameChoice(follows, providers) : "";
   const followKey = chatDefault.inherited
     ? "model.followMain"
     : "model.followChat";

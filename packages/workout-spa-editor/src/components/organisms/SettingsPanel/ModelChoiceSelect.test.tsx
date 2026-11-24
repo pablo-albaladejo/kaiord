@@ -146,8 +146,10 @@ describe("ModelChoiceSelect", () => {
 
     // Assert
     const runs = screen.getByTestId("model-chat-follows");
-    expect(runs).toHaveTextContent("Runs GPT-5 mini · Mi GPT");
-    expect(select).toHaveAccessibleDescription("Runs GPT-5 mini · Mi GPT");
+    expect(runs).toHaveTextContent("Runs GPT-5 mini (not evaluated) · Mi GPT");
+    expect(select).toHaveAccessibleDescription(
+      "Runs GPT-5 mini (not evaluated) · Mi GPT"
+    );
   });
 
   it("should not name the main model under the select once the purpose has its own", () => {
@@ -222,7 +224,7 @@ describe("ModelChoiceSelect", () => {
 
     // Assert
     expect((select as HTMLSelectElement).selectedOptions[0]?.textContent).toBe(
-      "Claude Haiku 4.5 (2025-10-01) · Mi Claude"
+      "Claude Haiku 4.5 (2025-10-01) (not evaluated) · Mi Claude"
     );
   });
 });

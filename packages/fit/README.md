@@ -70,4 +70,8 @@ Creates a FIT file writer using the Garmin FIT SDK.
 
 ## License
 
-MIT
+The code of `@kaiord/fit` is licensed under the MIT license.
+
+It depends on Garmin's FIT SDK, `@garmin/fitsdk`, which Garmin licenses under its own [Flexible and Interoperable Data Transfer (FIT) Protocol License Agreement](https://github.com/garmin/fit-javascript-sdk/blob/main/LICENSE.txt), not under MIT.
+
+Installing `@kaiord/fit` installs `@garmin/fitsdk`, and that agreement says that using the SDK means agreeing to its terms.

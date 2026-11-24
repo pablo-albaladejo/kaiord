@@ -71,9 +71,9 @@ test.describe("AI settings truth", () => {
     ).toHaveCount(0);
 
     // One select picks account and model together; nothing stores a blank model.
-    await main.selectOption({ label: "GPT-5 mini · Mi GPT" });
+    await main.selectOption({ label: "GPT-5 mini (not evaluated) · Mi GPT" });
     await expect(settings.getByTestId("model-chat-follows")).toHaveText(
-      "Runs GPT-5 mini · Mi GPT"
+      "Runs GPT-5 mini (not evaluated) · Mi GPT"
     );
     await settings.getByText(/^Advanced: model per task/).click();
     await chat.selectOption({ label: "o3 · Mi GPT" });

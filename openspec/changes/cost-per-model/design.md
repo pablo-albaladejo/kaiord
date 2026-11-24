@@ -78,6 +78,15 @@ shows "Price unknown" for them rather than a guess:
   `gemini-3.5-flash`, `gemini-3.7-flash`, the three `*-latest` aliases (the
   page does not say what they point to), `aqa` and the Gemma 3 models.
 
+Google reroutes the App's Google default on 2026-12-01: from that date a
+call to `gemini-2.5-flash` is served and billed by Google as Gemini 3.5
+Flash-Lite (`gemini-3.5-flash-lite`), at the same price, so one price entry
+covers both ids (its `note` says so). The App keeps `gemini-2.5-flash` as
+the id it sends and stores, so a usage row names the id that was called;
+the model that answers it changes on Google's side, not in the App. No
+Google model has passed the evals, so the App labels this default "not
+evaluated" (change `claims-legal-and-eval-labels`).
+
 ### D4. The cost record a Trace carries
 
 `priceRun({ provider, modelId, requests, at })` returns

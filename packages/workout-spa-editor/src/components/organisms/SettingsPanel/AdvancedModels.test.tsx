@@ -71,7 +71,9 @@ describe("AdvancedModels", () => {
     // Assert
     const chat = screen.getByLabelText("Chat");
     expect(shown(chat)).toBe("Same as main model");
-    expect(chat).toHaveAccessibleDescription("Runs Claude Opus 5 · Mi Claude");
+    expect(chat).toHaveAccessibleDescription(
+      "Runs Claude Opus 5 (not evaluated) · Mi Claude"
+    );
   });
 
   it("should show a stored blank model as the model that actually runs", () => {

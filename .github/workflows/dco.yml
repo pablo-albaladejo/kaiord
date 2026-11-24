@@ -1,0 +1,41 @@
+name: DCO
+
+# Developer Certificate of Origin (CONTRIBUTING.md, "Sign off your
+# commits"). A pull request from an outside contributor (author_association
+# none of OWNER, MEMBER, COLLABORATOR; not a bot) fails unless every commit
+# it adds carries a Signed-off-by line with the commit author's email. The
+# owner's, the agents' and the bots' pull requests pass without one:
+# scripts/check-dco.mjs says why.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  dco:
+    name: DCO sign-off
+    runs-on: ubuntu-latest
+    # New job, no run history: a git log and one node script, well under a
+    # minute; capped at the lint-family ceiling 10.
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22.18.0"
+
+      - name: Check every commit is signed off
+        env:
+          DCO_AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          DCO_AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+          DCO_BASE: ${{ github.event.pull_request.base.sha }}
+          DCO_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/check-dco.mjs
