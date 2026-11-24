@@ -30,6 +30,7 @@ content script (`test/thin-bridge.test.js`).
 - `manifest.json` — Development manifest (MV3, service worker, `storage` permission, host permissions for `connectapi.garmin.com` and `sso.garmin.com` only; opening `connect.garmin.com` in a tab needs none).
 - `manifest.prod.json` — Production manifest for Chrome Web Store release (same surface, no localhost origins).
 - `background.js` — Service worker. The closed list with body schemas (`workout`, `fit-file`, `schedule`), `request` under one deadline and send cut-off, action routing for `ping`/`request`/`open-garmin`/`profile-snapshot(-clear)`/`set-theme`, swallowed-error telemetry.
+- `personal-fields.js` — The one declaration of the personal fields of the Platform's answers that no Connector reads; `bridge-answer.js` removes them by name from every answer.
 - `garmin-deadline.js` — The one deadline every request runs under (`boundedCall`: 25 s, no write after 15 s, `deadline-before-send` / `deadline-exceeded`).
 - `garmin-request-bodies.js` — The body schemas of the write entries: `workout` is the GCN @kaiord/garmin's writer emits (one segment; executable steps and repeat groups of executable steps; every key named, Garmin's own type keys; name ≤255, step notes ≤256, ≤100 steps, ≤50 per repeat), `fit-file` is `garmin-fit-check.js`, `schedule` is one date.
 - `garmin-fit-check.js` — Admits only the App's body-composition upload: a FIT file (≤4 KB, header and file CRC valid) of file type 9 "weight" holding one `file_id` then one `weight_scale` message, no other message, no developer field.

@@ -438,3 +438,18 @@ describe("thin Bridge: internal channel is the popup's only", () => {
     expect(res.data.session).toBe("not-checked");
   });
 });
+
+describe("popup reads (ADR 0004's bounded exception)", () => {
+  it("should answer every popup read on the popup's channel and none on the App's", () => {
+    // Arrange
+    const bg = require("../background.js");
+
+    // Act
+    const reads = [...bg.POPUP_READS];
+
+    // Assert
+    expect(reads.every((a) => bg.INTERNAL_ACTIONS.has(a))).toBe(true);
+    expect(reads.some((a) => bg.EXTERNAL_ACTIONS.has(a))).toBe(false);
+    expect(Array.isArray(bg.POPUP_READ_SCRIPTS)).toBe(true);
+  });
+});

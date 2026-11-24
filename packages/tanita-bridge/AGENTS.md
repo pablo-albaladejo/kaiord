@@ -26,13 +26,14 @@ Parsing lives in `@kaiord/tanita`, App-side.
 
 ## Key Files
 
-| File                                    | Description                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------ |
-| `background.js`                         | Service worker: closed list, `request`, HEAD Session check, popup gate.  |
-| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).            |
-| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.              |
-| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair. |
-| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://mytanita.eu/*`).            |
+| File                                    | Description                                                                                                                                                                                                    |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `background.js`                         | Service worker: closed list, `request`, HEAD Session check, popup gate.                                                                                                                                        |
+| `personal-fields.js`                    | The one declaration of the personal fields of the Platform's answers that no Connector reads; `bridge-answer.js` removes them by name from every answer (ADR 0004, `openspec/changes/bridges-owner-decisions`) |
+| `session-fetch.js`                      | Vendored identity-free cookie transport (bridge-core master).                                                                                                                                                  |
+| `bridge-identity.js`                    | Per-bridge identity consumed by the vendored announce core.                                                                                                                                                    |
+| `popup.js` / `popup.html` / `popup.css` | Shared bridge shell: status block, capability chips, fix-first CTA pair.                                                                                                                                       |
+| `manifest.json` / `manifest.prod.json`  | MV3 manifest (`storage` only; host: `https://mytanita.eu/*`).                                                                                                                                                  |
 
 ### Public texts
 

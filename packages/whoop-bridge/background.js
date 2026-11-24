@@ -422,6 +422,8 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onInstalled) {
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    POPUP_READS,
+    POPUP_READ_SCRIPTS,
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     APP_PATTERN,

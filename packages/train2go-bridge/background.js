@@ -342,6 +342,8 @@ chrome.runtime.onMessage.addListener(
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
+    POPUP_READS,
+    POPUP_READ_SCRIPTS,
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     TRAIN2GO_ORIGIN,
