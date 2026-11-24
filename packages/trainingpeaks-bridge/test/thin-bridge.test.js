@@ -147,6 +147,32 @@ describe("thin Bridge: closed path list", () => {
         path: "/metrics/v3/athletes/123/consolidatedtimedmetrics/a/b",
       },
     ],
+    [
+      "a workouts range longer than one day",
+      {
+        method: "GET",
+        path: "/fitness/v6/athletes/123/workouts/2026-11-24/2026-11-25",
+      },
+    ],
+    [
+      "a workouts day that is not a date",
+      { method: "GET", path: "/fitness/v6/athletes/123/workouts/today/today" },
+    ],
+    [
+      "a body on the day read",
+      {
+        method: "GET",
+        path: "/fitness/v6/athletes/123/workouts/2026-11-24/2026-11-24",
+        body: {},
+      },
+    ],
+    [
+      "a delete of the day",
+      {
+        method: "DELETE",
+        path: "/fitness/v6/athletes/123/workouts/2026-11-24/2026-11-24",
+      },
+    ],
     ["a header", { method: "GET", path: METRICS, headers: { Cookie: "x" } }],
     ["a body on a read", { method: "GET", path: METRICS, body: {} }],
     [
@@ -204,6 +230,27 @@ describe("thin Bridge: closed path list", () => {
       expect(fetch).not.toHaveBeenCalled();
     }
   );
+
+  it("should read the workouts of one day and hand them over unread", async () => {
+    // Arrange
+    seedToken();
+    const day = "/fitness/v6/athletes/123/workouts/2026-11-24/2026-11-24";
+    fetch.mockResolvedValueOnce(reply('[{"title":"Tempo"}]'));
+
+    // Act
+    const res = await answer(
+      externalCb,
+      { action: "request", method: "GET", path: day },
+      APP
+    );
+
+    // Assert
+    expect(res.data.body).toBe('[{"title":"Tempo"}]');
+    const [url, init] = fetch.mock.calls[0];
+    expect(url).toBe(`${TPAPI}${day}`);
+    expect(init.method ?? "GET").toBe("GET");
+    expect(init.body).toBeUndefined();
+  });
 
   it("should refuse a path outside its closed list without minting or sending anything", async () => {
     // Arrange

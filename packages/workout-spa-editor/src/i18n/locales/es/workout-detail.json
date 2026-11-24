@@ -41,6 +41,11 @@
       "confirmSend": "Enviar una copia",
       "cancel": "Cancelar"
     },
+    "trainingPeaksUnanswered": {
+      "mayBeThere": "Puede que este entrenamiento ya esté en TrainingPeaks el {{date}}: tu último envío no recibió respuesta, y ese día tiene un entrenamiento con este título. Enviarlo de nuevo puede añadir una segunda copia.",
+      "unchecked": "Kaiord no ha podido comprobar si este entrenamiento ya está en TrainingPeaks el {{date}}, donde tu último envío no recibió respuesta. Enviarlo de nuevo puede añadir una segunda copia.",
+      "sendAnyway": "Enviar de todos modos"
+    },
     "trainingPeaksPushError": {
       "noSteps": "Este entreno todavía no tiene pasos que enviar."
     },

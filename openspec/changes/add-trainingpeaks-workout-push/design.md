@@ -203,11 +203,8 @@ into a second copy. A by-id read was chosen over the measured range read
 (`GET …/workouts/{from}/{to}`) because it moves one workout Kaiord created
 instead of a day of the athlete's planned and completed workouts.
 
-Not covered: a push whose answer never arrived (the 20 s timeout fired after
-the extension got the message). The ledger row is rolled back, so the next
-send POSTs again and can add a second copy if the first one landed. Closing it
-would need the range read and a match on title and day, which can mistake an
-entry the athlete made for Kaiord's.
+Not covered here: a push whose answer never arrived (the 20 s timeout fired
+after the extension got the message). Settled on 2026-11-23, below.
 
 ### Status
 
@@ -226,3 +223,41 @@ behind `TrainingPeaksCopyPort`, over `readLiveState`
 uses: read live, only a confirmed absence counts (here TrainingPeaks' own
 404; Garmin also settles two reads apart), then a guarded record update.
 The vocabulary is one, `present | absent | unknown`. Behaviour is unchanged.
+
+## After a send that got no answer, read the day and ask (2026-11-23)
+
+The owner decided on 2026-11-23 (#1636) how to close the case above. A send
+whose answer never arrived (`delivered: false`, "Extension did not respond":
+the App's timer fired after the extension had the message) may have landed,
+and TrainingPeaks is create-only for Kaiord.
+
+- **Record.** The failed send is kept on the ledger row as `unansweredSend`
+  (its day and title): on a recorded copy as a field, on a first send as the
+  pending row the rollback had removed.
+- **Read.** The next send of that Workout reads that day first, before every
+  other check: `GET /fitness/v6/athletes/{id}/workouts/{day}/{day}`, the range
+  read measured on 2026-09-07, added to the closed list pinned to one day
+  (start and end the same date, a backreference). No existing path could do
+  it: the by-id read needs the id the lost answer carried. The Connector
+  keeps only the titles of that day's workouts. The previous protocol has no
+  such action, so there the read fails.
+- **Decide** (`application/trainingpeaks/unanswered-send.ts`, over
+  `readLiveState`): a workout of the same title (trimmed) on that day stops
+  the send, nothing is written, and the athlete reads that it may already be
+  on TrainingPeaks; a read that fails stops it too and says Kaiord could not
+  check; none lets it through and forgets the unanswered send. One choice in
+  both: "Send anyway", which sends without reading and forgets it. The
+  workout found is never changed or deleted (the closed list has no such
+  path).
+- **Wording** (GLOSSARY: the consequence, one choice, no unverified cause; the
+  missing answer is a fact, a cause for it is not named): "This workout may
+  already be on TrainingPeaks on {date}: your last send got no answer, and
+  that day holds a workout with this title. Sending it again can add a
+  second copy." / "Kaiord could not check whether this workout is already on
+  TrainingPeaks on {date}, where your last send got no answer. Sending it
+  again can add a second copy." In Spanish in the dictionaries.
+
+Rejected: adopting the found workout's id into the record (it may be the
+athlete's own of the same title); resending when the read fails (a second
+copy the athlete did not choose); a match on title and time (TrainingPeaks'
+day carries no time of creation).

@@ -109,6 +109,10 @@ const ALLOWED = [
   { method: "POST", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts$/, body: "workout" },
   // prettier-ignore
   { method: "GET", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts\/\d+$/ },
+  // One day of the athlete's workouts (start and end the same date): read
+  // only after a send got no answer, to ask before sending it again.
+  // prettier-ignore
+  { method: "GET", pattern: /^\/fitness\/v6\/athletes\/\d+\/workouts\/(\d{4}-\d{2}-\d{2})\/\1$/ },
 ];
 
 // ── Declared body schemas ──

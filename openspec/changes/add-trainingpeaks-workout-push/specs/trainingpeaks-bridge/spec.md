@@ -66,6 +66,20 @@ and declares no new capability.
 - **WHEN** `read-workout` arrives without a numeric `workoutId`
 - **THEN** the bridge SHALL throw `Missing workout id` and SHALL NOT issue a request
 
+### Requirement: One day of workouts can be read
+
+The closed list SHALL admit `GET /fitness/v6/athletes/<digits>/workouts/<date>/<date>` only when both dates are the same `YYYY-MM-DD`, with no body, and SHALL hand TrainingPeaks' answer to the Kaiord App unread. Any other range, a date that is not one, a body or another method on that path SHALL be refused without a request.
+
+#### Scenario: The day read is handed over unread
+
+- **WHEN** the App asks for `GET /fitness/v6/athletes/123/workouts/2026-11-24/2026-11-24`
+- **THEN** the extension SHALL send that one read and answer TrainingPeaks' answer as it came
+
+#### Scenario: A longer range is refused
+
+- **WHEN** the App asks for `GET /fitness/v6/athletes/123/workouts/2026-11-24/2026-11-25`
+- **THEN** the answer SHALL be `Request not allowed` and nothing SHALL be sent
+
 ### Requirement: A failed token exchange keeps its cause
 
 A token exchange SHALL set `needsReauth` only when the session-fetch master

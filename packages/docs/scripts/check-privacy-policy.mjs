@@ -112,7 +112,7 @@ export const SECTION_RULE_FLOOR = {
   [GARMIN_SECTION]: 16,
   [TRAIN2GO_SECTION]: 12,
   [TANITA_SECTION]: 13,
-  [TRAININGPEAKS_SECTION]: 18,
+  [TRAININGPEAKS_SECTION]: 19,
   [WHOOP_SECTION]: 9,
 };
 
@@ -480,6 +480,12 @@ export const REQUIRED_RULES = [
     label: "TrainingPeaks workout read kept by the App to its id and day",
     section: TRAININGPEAKS_SECTION,
     re: /to the Kaiord App, which keeps only that workout's id and day/i,
+  },
+  {
+    label:
+      "TrainingPeaks day read only after an unanswered send, kept to titles",
+    section: TRAININGPEAKS_SECTION,
+    re: /If a send gets no answer, then before that workout is sent again the extension reads the workouts of that day[\s\S]*?which keeps only their titles; if one has the same title, the Kaiord App sends nothing and asks you first/i,
   },
   {
     label: "TrainingPeaks metrics read endpoint disclosed (metrics/v3)",

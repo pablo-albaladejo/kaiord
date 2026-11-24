@@ -18,7 +18,11 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
 
     // Act
     render(
-      <TrainingPeaksPushFeedback failure={failure} onSendCopy={vi.fn()} />
+      <TrainingPeaksPushFeedback
+        failure={failure}
+        onSendCopy={vi.fn()}
+        onSendAnyway={vi.fn()}
+      />
     );
 
     // Assert
@@ -37,7 +41,11 @@ describe("TrainingPeaksPushFeedback in Spanish", () => {
 
     // Act
     render(
-      <TrainingPeaksPushFeedback failure={failure} onSendCopy={vi.fn()} />
+      <TrainingPeaksPushFeedback
+        failure={failure}
+        onSendCopy={vi.fn()}
+        onSendAnyway={vi.fn()}
+      />
     );
 
     // Assert

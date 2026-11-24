@@ -91,6 +91,7 @@ export const TrainingPeaksPushButton = forwardRef<
         <TrainingPeaksPushFeedback
           failure={failure}
           onSendCopy={() => handlePush({ allowCopy: true })}
+          onSendAnyway={() => handlePush({ sendAnyway: true })}
         />
       )}
     </div>

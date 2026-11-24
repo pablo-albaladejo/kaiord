@@ -9,6 +9,8 @@ import {
 import { garminLibraryVersionSchema } from "./garmin-library-version";
 import { garminRemovalEntrySchema } from "./garmin-removal-entry";
 
+const UNANSWERED_TITLE_MAX = 500;
+
 export const exportLedgerEntrySchema = z.object({
   id: z.string().uuid(),
   kaiordRecordId: z.string().uuid(),
@@ -31,6 +33,15 @@ export const exportLedgerEntrySchema = z.object({
   // confirmed copy sits on there (create-only destination, so a re-push of a
   // moved workout would leave a second copy — see trainingpeaks-repush-guard).
   destinationDate: calendarDate.optional(),
+  // TrainingPeaks workout rows only: a send whose answer never arrived (it
+  // may have landed), so the next send reads that day first.
+  unansweredSend: z
+    .object({
+      day: calendarDate,
+      title: z.string().max(UNANSWERED_TITLE_MAX),
+      at: z.iso.datetime(),
+    })
+    .optional(),
   placement: garminPlacementSchema.optional(),
   removalQueue: z.array(garminRemovalEntrySchema).optional(),
 });

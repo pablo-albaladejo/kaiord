@@ -549,6 +549,12 @@ const SOLO_CASES = [
     "TrainingPeaks workout read kept by the App to its id and day",
   ],
   [
+    TRAININGPEAKS,
+    "which keeps only their titles",
+    "which keeps all of them",
+    "TrainingPeaks day read only after an unanswered send, kept to titles",
+  ],
+  [
     WHOOP,
     "WHOOP's answer is handed to the Kaiord App as it came, without being read",
     "WHOOP's answer is read and handed on",

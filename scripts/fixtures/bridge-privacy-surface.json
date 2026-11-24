@@ -270,6 +270,10 @@
       {
         "method": "GET",
         "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts\\/\\d+$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/fitness\\/v6\\/athletes\\/\\d+\\/workouts\\/(\\d{4}-\\d{2}-\\d{2})\\/\\1$"
       }
     ],
     "external_actions": [
