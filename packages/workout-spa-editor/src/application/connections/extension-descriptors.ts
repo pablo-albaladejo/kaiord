@@ -7,7 +7,7 @@
  * listing where the address is known, and why its Session check may ask
  * nothing, worded by the shared notices.
  */
-import type { NotCheckedReason } from "@kaiord/i18n";
+import type { NotCheckedReason } from "@kaiord/i18n/connection-notices";
 
 export type ExtensionDescriptor = {
   readonly protocols: readonly number[];
