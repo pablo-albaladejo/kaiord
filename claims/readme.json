@@ -12,7 +12,7 @@
     {
       "file": "packages/fit/README.md",
       "intro": true,
-      "sections": ["Supported FIT Features"]
+      "sections": ["Supported FIT Features", "License"]
     },
     {
       "file": "packages/tcx/README.md",
@@ -1317,6 +1317,54 @@
         {
           "test": "packages/fit/src/adapters/round-trip/round-trip-workout-notes.test.ts",
           "title": "should write a 256-character step note cut to the 254 bytes a FIT string holds"
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.license.own",
+      "text": "The code of `@kaiord/fit` is licensed under the MIT license.",
+      "proof": [
+        {
+          "test": "packages/fit/src/package-license.test.ts",
+          "title": "should declare its own code MIT and depend on Garmin's FIT SDK"
+        },
+        {
+          "file": "LICENSE",
+          "contains": "MIT License"
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.license.garmin",
+      "text": "It depends on Garmin's FIT SDK, `@garmin/fitsdk`, which Garmin licenses under its own [Flexible and Interoperable Data Transfer (FIT) Protocol License Agreement](https://github.com/garmin/fit-javascript-sdk/blob/main/LICENSE.txt), not under MIT.",
+      "kind": "external",
+      "url": "https://github.com/garmin/fit-javascript-sdk/blob/main/LICENSE.txt",
+      "read_on": "2026-11-23",
+      "proof": [
+        {
+          "test": "packages/fit/src/package-license.test.ts",
+          "title": "should declare its own code MIT and depend on Garmin's FIT SDK"
+        },
+        {
+          "test": "packages/fit/src/package-license.test.ts",
+          "title": "should find Garmin's FIT SDK licensed under the FIT Protocol License Agreement, not MIT"
+        }
+      ]
+    },
+    {
+      "id": "readme.fit.license.users",
+      "text": "Installing `@kaiord/fit` installs `@garmin/fitsdk`, and that agreement says that using the SDK means agreeing to its terms.",
+      "kind": "external",
+      "url": "https://github.com/garmin/fit-javascript-sdk/blob/main/LICENSE.txt",
+      "read_on": "2026-11-23",
+      "proof": [
+        {
+          "test": "packages/fit/src/package-license.test.ts",
+          "title": "should declare its own code MIT and depend on Garmin's FIT SDK"
+        },
+        {
+          "test": "packages/fit/src/package-license.test.ts",
+          "title": "should find Garmin's FIT SDK licensed under the FIT Protocol License Agreement, not MIT"
         }
       ]
     },
